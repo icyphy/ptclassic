@@ -44,10 +44,6 @@ VHDLFiring :: VHDLFiring() {
   VHDLObj::initialize();
 }
 
-VHDLFiring :: VHDLFiring(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLFiring :: ~VHDLFiring() {}
 

@@ -46,13 +46,10 @@ class VHDLVariable : public VHDLObj
  public:
   // Constructors.
   VHDLVariable();
-  VHDLVariable(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLVariable();
 
-  // Name.
-//  StringList name;
   // Data type.
   StringList type;
   // Initial value.

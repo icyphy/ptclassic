@@ -44,10 +44,6 @@ VHDLVariable :: VHDLVariable() {
   VHDLObj::initialize();
 }
 
-VHDLVariable :: VHDLVariable(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLVariable :: ~VHDLVariable() {}
 

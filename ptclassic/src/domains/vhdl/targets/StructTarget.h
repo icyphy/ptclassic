@@ -110,8 +110,35 @@ protected:
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
 
+	// virtual function to add additional codeStreams.
+	/*virtual*/ void addCodeStreams();
+
+	// virtual function to initialize codeStreams.
+	/*virtual*/ void initCodeStreams();
+
+	// Initialize VHDLObjLists.
+	/*virtual*/ void initVHDLObjLists();
+
+	// virtual function to initialize firing lists.
+	virtual void initFiringLists();
+
 private:
-	// The following are for keeping track of components and signals.
+	CodeStream component_declarations;
+	CodeStream signal_declarations;
+	CodeStream component_mappings;
+	CodeStream configuration_declaration;
+	CodeStream firingAction;
+
+	// General VHDLObjLists.
+	VHDLPortList systemPortList;
+	VHDLCompDeclList compDeclList;
+	VHDLSignalList signalList;
+	VHDLCompMapList compMapList;
+	VHDLStateList stateList;
+	VHDLClusterList clusterList;
+
+	// The following are for keeping track of components and
+	// signals within one firing.
 	VHDLPortList firingPortList;
 	VHDLGenericList firingGenericList;
 	VHDLPortMapList firingPortMapList;
@@ -120,29 +147,6 @@ private:
 	VHDLVariableList firingVariableList;
 	VHDLPortVarList firingPortVarList;
 	VHDLPortVarList firingVarPortList;
-
-	VHDLPortList systemPortList;
-	VHDLCompDeclList compDeclList;
-	VHDLSignalList signalList;
-	VHDLCompMapList compMapList;
-	VHDLStateList stateList;
-
-	VHDLClusterList clusterList;
-
-	CodeStream component_declarations;
-	CodeStream signal_declarations;
-	CodeStream component_mappings;
-	CodeStream configuration_declaration;
-	CodeStream firingAction;
-
-	// virtual function to add additional codeStreams.
-	virtual void addCodeStreams();
-
-	// virtual function to initialize codeStreams.
-	virtual void initCodeStreams();
-
-	// Initialize firing lists.
-	void initFiringLists();
 
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);

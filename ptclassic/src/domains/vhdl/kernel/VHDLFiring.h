@@ -53,13 +53,10 @@ class VHDLFiring : public VHDLObj
  public:
   // Constructors.
   VHDLFiring();
-  VHDLFiring(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLFiring();
 
-  // Name.
-//  StringList name;
   // Star class name.
   StringList starClassName;
   // Generic list.

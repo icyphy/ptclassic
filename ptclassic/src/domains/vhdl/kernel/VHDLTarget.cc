@@ -62,7 +62,6 @@ HLLTarget(name, starclass, desc) {
   initCodeStreams();
 
   // Initialize lists.
-//  firingVariableList.initialize();
   variableList.initialize();
 
   // Make states defined in CGTarget settable.
@@ -90,32 +89,6 @@ void VHDLTarget :: prepend(StringList code, CodeStream& stream) {
   temp << code << stream;
   stream.initialize();
   stream << temp;
-}
-
-// Add additional codeStreams.
-void VHDLTarget :: addCodeStreams() {
-  addStream("entity_declaration", &entity_declaration);
-  addStream("architecture_body_opener", &architecture_body_opener);
-  addStream("variable_declarations", &variable_declarations);
-  addStream("architecture_body_closer", &architecture_body_closer);
-  addStream("mainDecls", &mainDecls);
-  addStream("loopOpener", &loopOpener);
-  addStream("loopCloser", &loopCloser);
-  addStream("useLibs", &useLibs);
-  addStream("sysWrapup", &sysWrapup);
-}
-
-// Initialize codeStreams.
-void VHDLTarget :: initCodeStreams() {
-  entity_declaration.initialize();
-  architecture_body_opener.initialize();
-  variable_declarations.initialize();
-  architecture_body_closer.initialize();
-  mainDecls.initialize();
-  loopOpener.initialize();
-  loopCloser.initialize();
-  useLibs.initialize();
-  sysWrapup.initialize();
 }
 
 // Register a read or write to an arc and the offset.
@@ -186,6 +159,7 @@ void VHDLTarget :: setup() {
   HLLTarget::setup();
 
   // Initialize codeStreams.
+  initVHDLObjLists();
   initCodeStreams();
 }
 
@@ -194,14 +168,9 @@ int VHDLTarget :: runIt(VHDLStar* s) {
   StringList code = "\n\t-- Star ";
   code << s->fullName() << " (class " << s->className() << ") \n";
   myCode << code;
-//  // Initialize lists for new firing.
-//  firingVariableList.initialize();
   // process action; running star modifies myCode.
   int status = ((CGStar*) s)->CGStar::run();
 
-//  VHDLVariableList* varList = firingVariableList.newCopy();
-//  mergeVariableList(varList);
-  
   if (!status) return status;
   if (s->isItFork()) {
     return status;
@@ -398,7 +367,6 @@ void VHDLTarget :: frameCode() {
   myCode = code;
   
   // Initialize lists.
-//  firingVariableList.initialize();
   variableList.initialize();
 }
 
@@ -533,32 +501,6 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
     }
   }
 }
-  
-//// Merge the Star's variable list with the Target's variable list.
-//void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
-//  VHDLVariableListIter starVariableNext(*starVariableList);
-//  VHDLVariable* nStarVariable;
-//  // Scan through the list of variables from the star firing.
-//  while ((nStarVariable = starVariableNext++) != 0) {
-///*
-//    // Search for a match from the existing list.
-//    int isNewVariable = 1;
-//
-//    if (variableList.inList(nStarVariable)) isNewVariable = 0;
-//    
-//    if (isNewVariable) {
-//      // Allocate memory for a new VHDLVariable and put it in the list.
-//      VHDLVariable* newVariable = new VHDLVariable;
-//      newVariable = nStarVariable->newCopy();
-//      variableList.put(*newVariable);
-//    }
-//    */
-//    // Allocate memory for a new VHDLVariable and put it in the list.
-//    VHDLVariable* newVariable = new VHDLVariable;
-//    newVariable = nStarVariable->newCopy();
-//    variableList.put(*newVariable);
-//  }
-//}
 
 // Clean up the code by wrapping around long lines as separate lines.
 void VHDLTarget :: wrapAround(StringList* codeList) {
@@ -651,14 +593,11 @@ void VHDLTarget :: registerState(State* state, const char* varName,
     initVal = state->currentValue();
   }
 
-//  if (firingVariableList.inList(ref)) return;
-  
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = hashstring(ref);
   newvar->type = stateType(state);
   newvar->initVal = initVal;
-//  firingVariableList.put(*newvar);
   variableList.put(*newvar);
 }
 
@@ -682,20 +621,16 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
   //FIXME: May want to do something different if it's a wormhole port.
   //Such as, what was done in StructTarget: make extra port to VHDL module.
 
-//  if (firingVariableList.inList(ref)) return;
-  
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = hashstring(ref);
   newvar->type = port->dataType();
-//  if (!strcmp(newvar->type,"INTEGER")) {
   if (hashstring(newvar->type) == hashstring("INTEGER")) {
     newvar->initVal = "0";
   }
   else {
     newvar->initVal = "0.0";
   }
-//  firingVariableList.put(*newvar);
   variableList.put(*newvar);
 }
 
@@ -703,20 +638,16 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   StringList ref = sanitize(temp);
 
-//  if (firingVariableList.inList(ref)) return;
-  
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = hashstring(ref);
   newvar->type = sanitizeType(type);
-//  if (!strcmp(newvar->type,"INTEGER")) {
   if (hashstring(newvar->type) == hashstring("INTEGER")) {
     newvar->initVal = "0";
   }
   else {
     newvar->initVal = "0.0";
   }
-//  firingVariableList.put(*newvar);
   variableList.put(*newvar);
 }
 
@@ -725,14 +656,11 @@ void VHDLTarget :: registerDefine(const char* define, const char* type,
 				  const char* init) {
   StringList ref = sanitize(define);
 
-//  if (firingVariableList.inList(ref)) return;
-  
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = hashstring(ref);
   newvar->type = sanitizeType(type);
   newvar->initVal = init;
-//  firingVariableList.put(*newvar);
   variableList.put(*newvar);
 }
 
@@ -781,3 +709,35 @@ StringList VHDLTarget :: sanitizeType(const char* ctyp) {
 }
 
 ISA_FUNC(VHDLTarget,HLLTarget);
+
+// Add additional codeStreams.
+void VHDLTarget :: addCodeStreams() {
+  addStream("entity_declaration", &entity_declaration);
+  addStream("architecture_body_opener", &architecture_body_opener);
+  addStream("variable_declarations", &variable_declarations);
+  addStream("architecture_body_closer", &architecture_body_closer);
+  addStream("mainDecls", &mainDecls);
+  addStream("loopOpener", &loopOpener);
+  addStream("loopCloser", &loopCloser);
+  addStream("useLibs", &useLibs);
+  addStream("sysWrapup", &sysWrapup);
+}
+
+// Initialize codeStreams.
+void VHDLTarget :: initCodeStreams() {
+  entity_declaration.initialize();
+  architecture_body_opener.initialize();
+  variable_declarations.initialize();
+  architecture_body_closer.initialize();
+  mainDecls.initialize();
+  loopOpener.initialize();
+  loopCloser.initialize();
+  useLibs.initialize();
+  sysWrapup.initialize();
+}
+
+// Initialize VHDLObjLists.
+void VHDLTarget :: initVHDLObjLists() {
+  arcList.initialize();
+  variableList.initialize();
+}

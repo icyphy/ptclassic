@@ -69,7 +69,13 @@ void StructTarget :: setup() {
     Error::warn("This galaxy is a wormhole!");
   }
   if (galaxy()) setStarIndices(*galaxy()); 
-  HLLTarget::setup();
+//  HLLTarget::setup();
+  
+  VHDLTarget::setup();
+
+  initCodeStreams();
+  initVHDLObjLists();
+  initFiringLists();
 }
 
 // Main routine.
@@ -748,42 +754,6 @@ const char* StructTarget :: portAssign() {
 
 ISA_FUNC(StructTarget,VHDLTarget);
 
-// Add additional codeStreams.
-void StructTarget :: addCodeStreams() {
-  addStream("entity_declaration", &entity_declaration);
-  addStream("architecture_body_opener", &architecture_body_opener);
-  addStream("component_declarations", &component_declarations);
-  addStream("signal_declarations", &signal_declarations);
-  addStream("component_mappings", &component_mappings);
-  addStream("architecture_body_closer", &architecture_body_closer);
-  addStream("configuration_declaration", &configuration_declaration);
-  addStream("firingAction", &firingAction);
-}
-
-// Initialize codeStreams.
-void StructTarget :: initCodeStreams() {
-  entity_declaration.initialize();
-  architecture_body_opener.initialize();
-  component_declarations.initialize();
-  signal_declarations.initialize();
-  component_mappings.initialize();
-  architecture_body_closer.initialize();
-  configuration_declaration.initialize();
-  firingAction.initialize();
-}
-
-// Initialize firing lists.
-void StructTarget :: initFiringLists() {
-  firingGenericList.initialize();
-  firingPortList.initialize();
-  firingGenericMapList.initialize();
-  firingPortMapList.initialize();
-  firingSignalList.initialize();
-  firingVariableList.initialize();
-  firingPortVarList.initialize();
-  firingVarPortList.initialize();
-}
-
 // Add in generic refs here from genericList.
 void StructTarget :: addGenericRefs(VHDLCluster* cl, int level) {
   if ((*(cl->firingList)).head()) {
@@ -1399,4 +1369,54 @@ StringList StructTarget :: sanitizedFullName (const NamedObj& obj) const {
     out = sanitizedName(obj);
   }
   return out;
+}
+
+// Add additional codeStreams.
+void StructTarget :: addCodeStreams() {
+  addStream("entity_declaration", &entity_declaration);
+  addStream("architecture_body_opener", &architecture_body_opener);
+  addStream("component_declarations", &component_declarations);
+  addStream("signal_declarations", &signal_declarations);
+  addStream("component_mappings", &component_mappings);
+  addStream("architecture_body_closer", &architecture_body_closer);
+  addStream("configuration_declaration", &configuration_declaration);
+  addStream("firingAction", &firingAction);
+}
+
+// Initialize codeStreams.
+void StructTarget :: initCodeStreams() {
+  entity_declaration.initialize();
+  architecture_body_opener.initialize();
+  component_declarations.initialize();
+  signal_declarations.initialize();
+  component_mappings.initialize();
+  architecture_body_closer.initialize();
+  configuration_declaration.initialize();
+  firingAction.initialize();
+
+  VHDLTarget::initCodeStreams();
+}
+
+// Initialize VHDLObjLists.
+void StructTarget :: initVHDLObjLists() {
+  systemPortList.initialize();
+  compDeclList.initialize();
+  signalList.initialize();
+  compMapList.initialize();
+  stateList.initialize();
+  clusterList.initialize();
+
+  VHDLTarget::initVHDLObjLists();
+}
+
+// Initialize firing lists.
+void StructTarget :: initFiringLists() {
+  firingGenericList.initialize();
+  firingPortList.initialize();
+  firingGenericMapList.initialize();
+  firingPortMapList.initialize();
+  firingSignalList.initialize();
+  firingVariableList.initialize();
+  firingPortVarList.initialize();
+  firingVarPortList.initialize();
 }

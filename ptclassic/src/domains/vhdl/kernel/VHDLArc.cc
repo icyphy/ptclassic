@@ -45,11 +45,6 @@ VHDLArc :: VHDLArc() {
   type = "";
 }
 
-VHDLArc :: VHDLArc(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-  type = "";
-}
-
 // Destructor.
 VHDLArc :: ~VHDLArc() {}
 

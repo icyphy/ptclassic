@@ -46,13 +46,10 @@ class VHDLArc : public VHDLObj
  public:
   // Constructors.
   VHDLArc();
-  VHDLArc(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLArc();
 
-  // Name.
-//  StringList name;
   // Data Type.
   StringList type;
   // Low write marker.

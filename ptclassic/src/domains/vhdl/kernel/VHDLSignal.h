@@ -46,13 +46,10 @@ class VHDLSignal : public VHDLObj
  public:
   // Constructors.
   VHDLSignal();
-  VHDLSignal(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLSignal();
 
-  // Name.
-//  StringList name;
   // Type.
   StringList type;
   // Name of port coming from.

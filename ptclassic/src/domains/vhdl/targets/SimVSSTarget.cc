@@ -55,12 +55,8 @@ VHDLTarget(name,starclass,desc) {
   addState(interactive.setState("interactive",this,"NO",
 			    "switch for simulating interactively."));
 
-  addStream("cli_models", &cli_models);
-  addStream("cli_comps", &cli_comps);
-  addStream("cli_configs", &cli_configs);
-  cli_models.initialize();
-  cli_comps.initialize();
-  cli_configs.initialize();
+  addCodeStreams();
+  initCodeStreams();
   
   // Set the default to not display the code.
   displayFlag.setInitValue("NO");
@@ -88,10 +84,29 @@ static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
 			  "VHDL code generation target for Synopsys simulation");
 static KnownTarget entry(proto,"SimVSS-VHDL");
 
+void SimVSSTarget :: begin() {
+//  printf("Begin Method of SimVSSTarget called\n");
+
+  // Init members here to avoid erasing code and items created
+  // during begin method of stars.
+  VHDLTarget::setup();
+
+  initVHDLObjLists();
+  initCodeStreams();
+
+  VHDLTarget::begin();
+}
+
 void SimVSSTarget :: setup() {
+//  printf("Setup Method of SimVSSTarget called\n");
+
   writeCom = 1;
 
-  VHDLTarget :: setup();
+// Don't init here because it clobbers VHDLCSend,Receive
+// stars' code generated in their begin methods.
+//  VHDLTarget::setup();
+//  initVHDLObjLists();
+//  initCodeStreams();
 }
 
 // Routines to construct CG wormholes, using the
@@ -464,6 +479,8 @@ void SimVSSTarget :: registerCompMap(StringList name, StringList type,
 
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
+//  printf("RegisterC2V Method of SimVSSTarget called\n");
+
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
@@ -517,6 +534,8 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
 // Method called by V2C star to place important code into structure.
 void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
+//  printf("RegisterV2C Method of SimVSSTarget called\n");
+
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
@@ -580,4 +599,40 @@ void SimVSSTarget :: writeComFile() {
   comCode << "run\n";
   comCode << "quit\n";
   writeFile(comCode, ".com", 0);
+}
+
+// Add additional codeStreams.
+void SimVSSTarget :: addCodeStreams() {
+  addStream("cli_models", &cli_models);
+  addStream("cli_comps", &cli_comps);
+  addStream("cli_configs", &cli_configs);
+  addStream("top_uses", &top_uses);
+  addStream("top_entity", &top_entity);
+  addStream("top_architecture", &top_architecture);
+  addStream("top_configuration", &top_configuration);
+}
+
+// Initialize codeStreams.
+void SimVSSTarget :: initCodeStreams() {
+  cli_models.initialize();
+  cli_comps.initialize();
+  cli_configs.initialize();
+  top_uses.initialize();
+  top_entity.initialize();
+  top_architecture.initialize();
+  top_configuration.initialize();
+
+  VHDLTarget::initCodeStreams();
+}
+
+// Initialize VHDLObjLists.
+void SimVSSTarget :: initVHDLObjLists() {
+  mainGenList.initialize();
+  mainPortList.initialize();
+  mainGenMapList.initialize();
+  mainPortMapList.initialize();
+  topSignalList.initialize();
+  topCompMapList.initialize();
+
+  VHDLTarget::initVHDLObjLists();
 }
