@@ -311,7 +311,7 @@ body ::tycho::Glimpse::updateTychoDatabase {} {
     file copy -force [file join $TYCHO .glimpse_exclude] \
 	    [file join $TYCHO glimpse_exclude]
 
-    file delete -force [glob [file join $TYCHO .glimpse*]]
+    eval file delete -force [glob [file join $TYCHO .glimpse*]]
     file copy -force [file join $TYCHO glimpse_exclude] \
 	    [file join $TYCHO .glimpse_exclude]
 
