@@ -62,6 +62,9 @@ class ::tycho::Exec {
     # Exec a process, if there is any output, bring up a window and display it.
     method execProcess {}
 
+    # Get the contents of the history window, if any.
+    method getHistory {start {end end}} {}
+
     # Read from the file descriptor, and close if we are at eof.
     method readOrClose {fd}
 
@@ -170,6 +173,18 @@ body ::tycho::Exec::execProcess {} {
     if { $dirToExecFrom != {} } {
         cd $saveDir
     }
+}
+
+#####################################################################
+#### getHistory
+# Return the contents of the history buffer, if any.
+# 
+body ::tycho::Exec::getHistory {start {end end}} {
+    if {![info exists itk_component(history)] || \
+            ![winfo exists $itk_component(history)]} {
+	return {}
+    }
+    return [$itk_component(history) get $start $end]
 }
 
 #####################################################################
