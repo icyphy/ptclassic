@@ -45,7 +45,7 @@ include $(ROOT)/mk/topdomain.mk
 # Subdirectories with star directories in them
 SUBDOMAINDIRS =
 
-DIRS = kernel stars targets $(SUBDOMAINDIRS) #test
+DIRS = kernel stars targets $(SUBDOMAINDIRS) utils #test
 
 include $(ROOT)/mk/domain.mk
 
