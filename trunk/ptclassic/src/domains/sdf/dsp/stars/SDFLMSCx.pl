@@ -28,7 +28,11 @@ The number of delays must be greater than zero or the dataflow
 graph will deadlock.
 The adaptation algorithm used is the well-known LMS, or stochastic-gradient
 algorithm, generalized to use complex signals and filter taps.
-.IE "stochastic gradient algorithm"
+.Id "adaptive filter, complex"
+.Id "filter, adaptive, complex"
+.Id "filter, LMS, complex"
+.Id "LMS adaptive filter, complex"
+.Ir "stochastic gradient algorithm"
 .lp
 If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values

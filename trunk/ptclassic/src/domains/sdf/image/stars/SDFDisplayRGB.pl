@@ -16,6 +16,12 @@ can choose whether or not the image file is saved or deleted.
 The frameId of the received image is appended to the root filename
 to produce the full filename of the displayed image.
 	}
+	explanation {
+.Id "image display, RGB"
+.Id "RGB image display"
+.Ir "PPM image format"
+.Ir "image format, PPM"
+	}
 
 	ccinclude {
 		"GrayImage.h" , <std.h> , <stdio.h>,  "Error.h"

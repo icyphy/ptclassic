@@ -9,6 +9,10 @@ defstar {
 This star takes GrayImage input and does discrete
 cosine transform (DCT) and outputs a DCTImage.
 	}
+	explanation {
+.Id "discrete cosine transform"
+.Id "image, discrete cosine transform"
+}
 
 	input {
 		name { input }

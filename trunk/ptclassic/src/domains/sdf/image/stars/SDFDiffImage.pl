@@ -10,6 +10,9 @@ Accept two black-and-white images from input packets, take
 their absolute difference, scale the absolute difference,
 and pass the result to the output.
 	}
+	explanation {
+.Id "image difference"
+}
 
 	ccinclude { "GrayImage.h", "Error.h" }
 

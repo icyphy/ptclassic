@@ -9,6 +9,9 @@ defstar {
 	explanation {
 This star computes arbitrary samples of the discrete-time Fourier
 transform of a finite length sequence.
+.Id "discrete time Fourier transform"
+.Id "Fourier transform, discrete time"
+.Ir "spectral estimation"
 The \fIsignal\fR input is the signal to be transformed.
 The number of input samples consumed is given by \fIlength\fR.
 Let these be written $a(0), ~ ... ~ ,~ a(L-1)$, where

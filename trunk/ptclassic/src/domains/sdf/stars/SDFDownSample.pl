@@ -12,6 +12,9 @@ Phase = 0 is the default.
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Ir "decimation"
+	}
 	input {
 		name{input}
 		type{ANYTYPE}
