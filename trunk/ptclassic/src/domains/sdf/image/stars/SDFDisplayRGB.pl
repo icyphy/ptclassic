@@ -12,8 +12,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	location	{ SDF image library }
 	desc {
 Accept three ColorImages (Red, Green, and Blue) from three input
-GrayImages and generate a PPM format color image file. Send the filename
-to a user-specified command (by default, "$PTOLEMY/bin.$ARCH/xv" is used).
+GrayImages and generate a PPM format color image file.
+Send the filename to a user-specified command 
+(by default,
+.EQ
+delim off
+.EN
+"$PTOLEMY/bin.$ARCH/xv"
+.EQ
+delim $$
+.EN
+is used).
 
 The user can set the root filename of the displayed image (which will
 probably be printed in the image display window titlebar) and
