@@ -4,7 +4,6 @@
 #pragma interface
 #endif
 
-// EWK
 #include "CalendarQueue.h"
 
 class Particle;
@@ -24,7 +23,6 @@ public:
 	Event() : next(0) {}
 };
 
-// EWK
 class EventQueue : public CalendarQueue
 {
 public:
