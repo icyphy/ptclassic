@@ -964,7 +964,8 @@ int CGRecurScheduler :: addDataReceive(Geodesic* gd, int invoc, int pix,
 
 int CGRecurScheduler :: addControlSend(Geodesic* gd, int invoc, int pix,
 					int pgId, CGTarget* t, int flag) {
-	for (int i = 1; i < optNum; i++) {
+        int i;
+	for (i = 1; i < optNum; i++) {
 		int temp = pix + i;
 		CGStar* snd = syncCommStar(dataSendStars, invoc, temp, 0);
 		if (!snd) return FALSE;
@@ -1044,15 +1045,16 @@ void CGRecurScheduler :: buildDataSyncs(Profile* pf) {
 
 	for (int i = 1; i <= pf->numInstance(); i++) {
 		// control syncs first
-		for (int k = 0; k < numSyn; k++) {
+                int k;
+		for (k = 0; k < numSyn; k++) {
 			int refP = k * optNum;
 			int syncP = pf->assignedTo(i, refP);
 			Target* t = mtarget->child(syncP);
-			int pgId;
+			int pgId, m;
 			if (!refP) pgId = 0;
 			else pgId = int (log(refP) / log(numSelf)) + 1;
 
-			for (int m = pgId; m < saveK; m++) {
+			for (m = pgId; m < saveK; m++) {
 			   int stride = int(pow(numSelf, m)) * optNum;
 			   for (int n = 1; n < numSelf; n++) {
 				int temp = refP + stride * n;

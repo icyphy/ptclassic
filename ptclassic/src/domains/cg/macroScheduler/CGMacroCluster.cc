@@ -87,9 +87,9 @@ ostream& operator<< (ostream& o, CGMacroClusterGal& g) {
 CGMacroClusterGal::CGMacroClusterGal(Galaxy* gal, ostream* log)
 : logstrm(log), myGal(gal), owner(0), bagNumber(1)
 {
-	int nports = setPortIndices(*gal);
+	int i, nports = setPortIndices(*gal);
 	LOG_NEW; CGMacroClustPort** ptable = new CGMacroClustPort*[nports];
-	for (int i = 0; i < nports; i++)
+	for (i = 0; i < nports; i++)
 		ptable[i] = 0;
 	DFGalStarIter nextStar(*gal);
 	CGStar* s;

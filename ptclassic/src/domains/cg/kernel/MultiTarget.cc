@@ -167,7 +167,8 @@ int MultiTarget :: reorderChildren(IntArray* a) {
 	}
  
 	// save old information
-	for (int i = 0; i < x; i++) {
+        int i;
+	for (i = 0; i < x; i++) {
 		restore[i] = reorder[i];
 	}
 	restore.truncate(x);

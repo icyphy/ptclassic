@@ -129,8 +129,8 @@ void Profile :: copyIt(Profile* dest, int offsetIndex,
 // currently insertion sort...
 
 void Profile :: sortWithFinishTime(int start) {
-
-	for (int i = 0; i < effP; i++)	procId[i] = i;
+        int i;
+	for (i = 0; i < effP; i++)	procId[i] = i;
 
 	// insertion sort
 	for (i = 1 + start; i < effP; i++) {
@@ -159,8 +159,8 @@ void Profile :: sortWithFinishTime(int start) {
 // It also updates procId[] arrays...
 
 void Profile :: sortWithStartTime(int start) {
-
-	for (int i = 0; i < effP; i++)	procId[i] = i;
+        int i;
+	for (i = 0; i < effP; i++)	procId[i] = i;
 
 	// insertion sort
 	for (i = 1 + start; i < effP; i++) {
@@ -216,8 +216,9 @@ int Profile :: totalIdleTime(IntArray& avail, int numProcs) {
 	// calculate the idle time.
 	// First, total space is ...
 	int idleSum = adj * numProcs;
+        int i;
 	// Substract the execution time of the profile ...
-	for (int i = 0; i < effP; i++) 
+	for (i = 0; i < effP; i++) 
 		idleSum = idleSum - (finishTime[i] - startTime[i]);
 	// and the processor available times ...
 	for (i = 0; i < numProcs; i++)
