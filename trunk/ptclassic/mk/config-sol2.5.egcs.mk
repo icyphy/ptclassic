@@ -34,5 +34,6 @@
 include $(ROOT)/mk/config-sol2.5.mk
 
 CC =		$(PTOLEMY)/gnu/egcs/sol2.5/bin/gcc
-CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ -I$(ROOT)/src/compat/cfront
+#-I$(ROOT)/src/compat/cfront
+CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ 
 
