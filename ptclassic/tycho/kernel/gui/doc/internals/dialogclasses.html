@@ -145,7 +145,9 @@ Notice that it was no longer necessary to specify a
 <CODE>-okcommand</CODE> option.
 <p>
 The list returned by the <code><a name="get method">get</a></code>
-method has the form {tag value tag value ...}. This form can be used to
+method has the form 
+<CODE>{<I>tag value tag value ...</I>}</CODE>
+. This form can be used to
 set the contents of an array using <code>array set</code>, providing a
 very simple way to access multiple responses.
 <p>
@@ -170,7 +172,7 @@ text edit boxes, as in the following example:
 </pre></tcl>
 <p>
 Now the query will have four lines.
-An <code>Edit</code> widget is used, providing
+An Edit widget is used, providing
 an Emacs-like text editor.
 Note that the <CODE>OK</CODE> button
 is no longer triggered by <CODE>Return</CODE>.  It can now be triggered by
@@ -207,10 +209,9 @@ widget.  For example,
 ::tycho::Dialog::wait .bb
 </pre></tcl>
 <p>
-Here, the query takes the form of a pushbutton.
-Pushing this button invokes another widget (in this case the
-<code>ColorBrowser</code> or
-<code>FontBrowser</code>), which mediates the selection of a value.
+Here, the query takes the form of a pushbutton.  Pushing this button
+invokes another widget (in this case the ColorBrowser or FontBrowser),
+which mediates the selection of a value.
 <p>
 It is also possible to present an option menu to the user.
 For example,
@@ -247,11 +248,11 @@ method:
 <li> <CODE>radio <I>tag label possibilities default</I></CODE>
 <li> <CODE>mediated <CODE>tag label default command</CODE></CODE>
 </menu>
-In addition, all except choice can accept any number of additional arguments.
-These arguments are passed to the widget that implements the query
-(a Tk entry, a Tycho Edit, a set of Tk radio buttons, or a single Tk
-button, respectively).  These additional arguments can be used to
-control the appearance of the query.  The command argument to the choice
+In addition, all except <CODE>choice</CODE> can accept any number of
+additional arguments. These arguments are passed to the widget that
+implements the query (a Tk entry, a Tycho Edit, a set of Tk radio buttons,
+or a single Tk button, respectively).  These additional arguments can be used 
+to control the appearance of the query.  The command argument to the choice
 query is optional.
 <p>
 The arguments above are explained below:
@@ -363,14 +364,16 @@ Consider the example:
 ::tycho::FileBrowser .f -command "::tycho::inform"
 wm deiconify .f
 </pre></tcl>
+
 The <a name="command option"><CODE>-command</CODE> option</a>
 specifies a command to execute once the user
 has selected a file name.  The file name is appended as an argument
 to the command before the command is executed.  Thus, in this example,
-if you select a file named "foo" in directory <CODE>/users/bar/</CODE>, then
-the command that is executed will be 
+if you select a file named <CODE>foo</CODE> in directory
+<CODE>/users/bar/</CODE>, then the command that is executed will be 
 <CODE>::tycho::inform /users/bar/foo</CODE>.
-Refer to the <a href="../usersGuides/FileBrowserHelp.html">user-level documentation</a>
+Refer to the
+<a href="../usersGuides/FileBrowserHelp.html">user-level documentation</a>
 for further information about the file browser.
 <p>
 As usual, you can get a modal file browser using <code>wait</code>:

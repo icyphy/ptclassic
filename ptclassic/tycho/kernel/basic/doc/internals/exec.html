@@ -30,12 +30,12 @@ in a command and view the output.
 </DL>
 <H2>Platform Exec Policies</H2>
 
- <P>Consult the tcl man pages for <CODE>open</CODE> and <CODE>exec</CODE>
+ <P>Consult the Tcl man pages for <CODE>open</CODE> and <CODE>exec</CODE>
 for descriptions of platform dependencies.
 
 <H3>Code that calls <CODE>exec</CODE> on the Macintosh</H3>
 
- <P>Neither <CODE>::tycho::tyexec</CODE> or the <CODE>Exec</CODE> class
+ <P>Neither <CODE>::tycho::tyexec</CODE> or the Exec class
 will work on the Macintosh, so all methods that call these two methods
 should check the <CODE>$tcl_platform</CODE> variable at the top of the
 method and call <CODE>error</CODE> with an informative error message.

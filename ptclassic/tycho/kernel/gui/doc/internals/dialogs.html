@@ -6,10 +6,10 @@
 <body bgcolor="#faf0e6">
 <h1><a name="dialog procedures">Dialog Procedures</a></h1>
 <p>
-Tycho provides a set of ordinary procedures, defined in the tycho
-namespace, that serve as simplified interfaces to the classes used
-to create messages for the user and ask the user questions.
-These are explained here.
+Tycho provides a set of ordinary procedures, defined in the
+<CODE>::tycho</CODE> namespace, that serve as simplified interfaces to
+the classes used to create messages for the user and ask the user
+questions.These are explained here.
 <p>
 <h2>Contents</h2>
 <ul>
@@ -160,7 +160,7 @@ For example:
 The <code>queryinfo</code> procedure opens a dialog box with an
 <a name="entry box queries">entry box</a>
 for the user to enter text.  It returns the string that the user
-enters, or a null string if the user clicks on the Cancel button
+enters, or a null string if the user clicks on the <CODE>Cancel</CODE> button
 (or enters a null string).  This procedure takes one required argument,
 a label, and two additional optional
 arguments, a default string, and a width (in characters) for the
@@ -199,7 +199,7 @@ generate the response.
 The first argument of <code>query</code> is the
 label for the entire query, and will appear at the top of the query
 window. The second argument is the queries, which is actually a
-collection of method invocations for the <code>Query</code> class.
+collection of method invocations for the Query class.
 There are currently five relevant methods, shown with their arguments below:
 <menu>
 <li> <CODE>choice</CODE> <CODE><I>tag label possibilities command</I></CODE>
