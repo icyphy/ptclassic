@@ -13,6 +13,10 @@ VPATH =		../../../../src/octtools/tkoct/top
 CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
+# Since top is for testing only, make it a non shared library
+USE_SHARED_LIBS=no
+LIBSUFFIX=a
+
 OBJS =   	dlAdd.o  memHeap.o tclDh.o  tkMisc.o topMisc.o \
 		dlList.o memMalloc.o tclEval.o topBuf.o topMsg.o \
 		dlPtrAdd.o memPool.o tclMain.o topCB.o  topMsgPkg.o \
