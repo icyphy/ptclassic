@@ -1,0 +1,65 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Tycho HTML Window Documentation</title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Key bindings </a>]
+<HR>
+<h1><a name="HTML viewer">User's Guide to the HTML Viewer</a></h1>
+<p>
+The HTML viewer in Tycho provides a top-level window that
+displays formatted HTML.  It is based on the
+<a href="../../../lib/html_library/html/help.html">HTML library</a>
+written by Stephen Uhler of Sun Microsystems, which supports all the
+features of HTML 2.0.
+There is currently no support in Tycho for
+<a name=HTTP>HTTP</a> hyperlink references, so you cannot
+within Tycho directly read documents on the internet, although
+this might come in the future.
+A <a href="../../../lib/html_library/html/sample.html">sample document</a>
+illustrates the HTML tags that are supported.
+<p>
+The HTML viewer is derived from the <a href=FileHelp.html>File class</a>, and
+therefore inherits all of its features.
+In addition, it provide a pull-down menu for adjusting the sizes
+of the fonts in the display plus a toolbar at the top for invoking
+commonly invoked functions. The "File" menu provides the following
+commands:
+<dl COMPACT>
+<b><dt>C-x C-f</b><dd>open a file
+<b><dt>C-x C-v</b><dd>switch to viewing another HTML file
+<b><dt>C-x s</b><dd>open HTML source using the
+<a href="../../../editors/textedit/doc/usersGuides/EditHTMLHelp.html">
+HTML editor</a>
+<b><dt>C-x p</b><dd>print the contents (not yet implemented)
+<b><dt>none</b><dd>reload the file from disk
+<b><dt>C-x k</b><dd>close the window
+<b><dt>C-x C-c</b><dd>exit the program
+</dl>
+<p>
+The
+<a href=../internals/documentation.html>
+Tycho documentation policy</a>
+explains Tycho-specific
+<a href="../internals/documentation.html#HTML extensions">
+HTML extensions</a>
+and how to write HTML
+so that an index can be generated automatically by the
+<a href="../internals/documentation.html#indexing documents">
+index generator</a>.
+Note that hypertext links can be to any type of file,
+and based on the file name extension, Tycho will open a context-specific
+editor.  Thus, you can have hypertext links to source code,
+or to graphical editors.
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>
