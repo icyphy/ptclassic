@@ -134,6 +134,13 @@ class ::tycho::EditDiff {
 		-foreground $itk_option(-variablecolor)
     }
 
+    # Adding the file lines here:
+    itk_option define -diff diff Diff {}
+
+
+
+
+
     ##########################################################################
     ####                         public methods                           ####
 
@@ -141,26 +148,33 @@ class ::tycho::EditDiff {
     # The attribute for each text could be either "common",
     # "new", or "old".
     method insertString {index str {status {common}}} {
-        #set start [$itk_component(text) index $index]
         set text $itk_component(text)
-        if $readOnly {bell; return}
-        #asdf
-        #prepareInsert $index
-        $text tag configure old -background red -foreground white
-        $text tag configure new -background blue -foreground white
+
+        # Tag the text to have different colors
+        foreach i {1 2} {
+            $text tag configure linecolor$i \
+                    -foreground [lindex [eval set linecolor$i] 0] \
+                    -background [lindex [eval set linecolor$i] 1]
+        }
         $text tag configure common
+
+        if $readOnly {bell; return}
+        #prepareInsert $index
 
         $text insert insert $str $status
         #parseRegion $start [$itk_component(text) index insert]
     }
 
     method insertFile {} {
-        set okayToCompare false
-        set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
-        set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
+        set text $itk_component(text)
+        global filename1 filename2
+        global linecolor1 linecolor2
+        #set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
+        #set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
         #set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
         #set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
-
+        
+        puts "The names are $filename1 and $filename2"
 
         set flag 1
         if {$filename1 != "" && $filename1 != "NoName" && \
@@ -182,7 +196,6 @@ class ::tycho::EditDiff {
                     set fd2 [open $filename2 r]
                     set fileLineCount1 1
                     set fileLineCount2 1
-
 
                     while {[set diffInfo [diffReport]] != "done"} {
                         set info [lindex $diffInfo 0]
@@ -208,23 +221,23 @@ class ::tycho::EditDiff {
                         if {$info=="c"} {
                             # Output differences
                             while {$fileLineCount1 <= $n2} {
-                                insertString insert [gets $fd1]\n new
+                                insertString insert [gets $fd1]\n linecolor1
                                 incr fileLineCount1
                             }
                             while {$fileLineCount2 <= $n4} {
-                                insertString insert [gets $fd2]\n old
+                                insertString insert [gets $fd2]\n linecolor2
                                 incr fileLineCount2
                             }
                             # Continue...
                         } elseif {$info=="d"} {
                             # Output the added lines
                             while {$fileLineCount1 <= $n2} {
-                                insertString insert [gets $fd1]\n old
+                                insertString insert [gets $fd1]\n linecolor2
                                 incr fileLineCount1
                             }
                         } elseif {$info=="a"} {
                             while {$fileLineCount2 <= $n4} {
-                                insertString insert [gets $fd2]\n new
+                                insertString insert [gets $fd2]\n linecolor1
                                 incr fileLineCount2
                             }
                         }
@@ -343,15 +356,75 @@ class ::tycho::EditDiff {
     # Generate documentation.  Not all derived classes can do this.
     protected method gendocBufferInternal { genDocFile genCommand}
 
-
     # Change this to 0 in derived classes if keywords are not case sensitive.
     protected variable caseSensitiveKeywords 1
+
+    # Color for old and new text
+    protected variable linecolor1 {{} {}}
+    protected variable linecolor2 {{} {}}
+
+    public variable filename1 {}
+    public variable filename2 {}
 }
+
+configbody ::tycho::EditDiff::diff {
+    # FIXME: Currently, we'd like to change the default colors
+    set linecolor1 [list white blue]
+    set linecolor2 [list white red]
+
+    if {$itk_option(-diff) == 0} {
+	# Delete the line1 if it exists
+        foreach i {1 2} {
+            if {[info exists itk_component(line$i)]} {
+                destroy $itk_component(line$i)
+            }
+        }
+    } {
+	# Add a diff line file name if it does not already exist.
+	#
+	# The line1bar is packed "-before" the text widget to prevent the
+	# line1bar from disappearing when the window is made smaller (see
+	# Welch page 126).
+	#
+        foreach i {1 2} {
+            if {![info exists itk_component(line$i)]} {
+                itk_component add line$i {
+                    uplevel #0 [list frame $itk_interior.line$i \
+                            -relief raised] 
+                } {
+                    #keep -activebackground -background -highlightcolor \
+                            #	-troughcolor -cursor
+                }
+                puts "New color [eval set linecolor$i]"
+                button $itk_interior.line$i.label -text "File $i: " \
+                        -foreground [lindex [eval set linecolor$i] 0] \
+                        -background [lindex [eval set linecolor$i] 1] \
+                        -command "set filename$i \
+                            \[::tycho::queryfilename \"File $i to compare:\"\]"
+                entry $itk_interior.line$i.entry -relief sunken -width 60 \
+                        -textvariable filename$i
+                pack $itk_interior.line$i.label $itk_interior.line$i.entry \
+                        -side left -expand y -fill y
+                pack $itk_component(line$i) -side top -fill y -expand y \
+                        -before $itk_component(text)
+            }
+        }
+	# Add line1bar packing to statusbar
+	#statusbar configure -line1barpad 1
+    }
+}
+
+
+
 
 ###################################################################
 #
 body ::tycho::EditDiff::constructor {args} {
-    
+
+    puts "menubar $myMenubar"
+    puts "status $myStatusbar"
+    puts "toolbar $myToolbar"
+
     eval itk_initialize $args
 
     # Subscribe to the preference set
@@ -411,6 +484,7 @@ body ::tycho::EditDiff::constructor {args} {
             "$this busy $this indentSelection"
     bind $itk_component(text) <Escape><Control-backslash> \
             "$this busy $this indentSelection"
+
 }
 
 #####################################################################
