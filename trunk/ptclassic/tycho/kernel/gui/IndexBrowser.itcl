@@ -78,10 +78,6 @@ class ::tycho::IndexBrowser {
     ##################################################################
     ####                     public methods                       ####
 
-    #### busy
-    # In order to be able to open indexes with File::openContext, need this.
-    method busy {} {}
-
     #### help
     # Open a help window.
     method help {}
@@ -156,7 +152,7 @@ body ::tycho::IndexBrowser::constructor {args} {
 # Open a help window.
 #
 body ::tycho::IndexBrowser::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/kernel/doc/usersGuides/IndexBrowserHelp.html
 }
@@ -184,7 +180,7 @@ body ::tycho::IndexBrowser::processItem {id} {
     set point [lindex $entry 2]
 
     # In case the filename starts with an environment variable, expand
-    set file [expandPath $filename]
+    set file [::tycho::expandPath $filename]
     
     set file [string trim $file]
     if {$file == ""} {return 0}
@@ -198,6 +194,6 @@ body ::tycho::IndexBrowser::processItem {id} {
 	set file $CWD/$file
     }
 
-    after idle [list ::tycho::File::hyperJump $file $point]
+    after idle [code [list ::tycho::File::hyperJump $file $point]]
     return 1
 }
