@@ -69,7 +69,9 @@ proc JRPCServer_CreateServer {port} {
 #
 proc _JRPCServer_RegisterClient {channel clientAddress clientPort} {
     if { "$clientAddress" != "127.0.0.1"} {
-	puts stderr "_JRPCServer_RegisterClient: Security Error! \
+	puts stderr "_JRPCServer_RegisterClient: Security Error! \n\
+		Someone is trying to connect from a machine other than the \
+		local machine.\n\
 		$clientAddress != 127.0.0.1"
 		exit
     }
@@ -83,13 +85,14 @@ proc _JRPCServer_RegisterClient {channel clientAddress clientPort} {
 # 
 proc _JRPCServer_ReadOrClose {fd} {
     set line [gets $fd]
+    # puts "_JRPCServer_ReadOrClose: $line"
     if [eof $fd] {
         if ![catch {close $fd} errMsg] {
 	    puts "_JRPCServer_ReadOrClose: close $fd failed: $errMsg "
 	}
 	return;
     }
-    if [catch {eval $line} result] {
+    if [catch {uplevel #0 $line} result] {
 	global errorInfo
 	puts $fd [list 1 $result $errorInfo]
 	flush $fd
