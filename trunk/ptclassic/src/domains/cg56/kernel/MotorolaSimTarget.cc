@@ -214,10 +214,11 @@ int MotorolaSimTarget::computeExecutionTime() {
 	return retval ? numCycles : -1;
 }
 
+// Report program size, data size, and execution time costs
 const char* MotorolaSimTarget::describeImplementationCost() {
 	costInfoString = MotorolaTarget::describeImplementationCost();
 	if ( softwareCost ) {
-	    costInfoString << "execution time = "
+	    costInfoString << ", execution time = "
 			   << softwareCost->executionTime()
 			   << " cycles";
 	}
