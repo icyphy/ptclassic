@@ -152,7 +152,7 @@ class iwidgets::Widgettree {
 #
 # Provide a lowercase access method for the Widgettree class
 #
-proc ::iwidgets::widgettree { args } {
+proc widgettree { args } {
     uplevel ::iwidgets::Widgettree $args
 }
 
