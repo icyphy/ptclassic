@@ -42,7 +42,7 @@
 
 #include "ansi.h"
 #include "general.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "st.h"
 #include "oct.h"
 #include "commands.h"
