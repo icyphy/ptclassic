@@ -248,7 +248,7 @@ body ::tycho::EditForest::redrawGraph {} {
     selectionClear
     catch {unset nametable}
 
-    set titleTypes [preference get titleTypes]
+    set titleTypes [stylesheet get graphics titleTypes]
     set ycoord [expr [eval bottomOf $titleTypes]+$itk_option(-starty)]
     set xcoord $itk_option(-startx)
     foreach root [lsort [$mygraph roots]] {
@@ -313,7 +313,7 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
                 $startx $ydest \
                 $x1 $ydest \
                 -width 2.0 -tags line -fill \
-                [preference get lineColor]
+                [stylesheet get graphics lineColor]
     }
     set newpntloc [list \
             [expr $x1+$xincr/2] \

@@ -346,27 +346,29 @@ body ::tycho::EditDAG::constructor {args} {
 
     # The following is done once in the constructor because it's fairly
     # expensive.
-    set boxcolor   [eval ::tycho::color [preference get nodeBoxColor]]
-    set linkcolor   [eval ::tycho::color [preference get linkColor]]
-    set linecolor   [eval ::tycho::color [preference get lineColor]]
+    set boxcolor  [eval ::tycho::color [stylesheet get graphics nodeBoxColor]]
+    set linkcolor [eval ::tycho::color [stylesheet get graphics linkColor]]
+    set linecolor [eval ::tycho::color [stylesheet get graphics lineColor]]
 
     eval itk_initialize $args
 
-    # Subscribe to the preferences
-    preference subscribeoptions $this \
-	    -spacingx spacingx \
-	    -spacingy spacingy \
-	    -startx startx \
-	    -starty starty
+    # Subscribe to additional style parameters
+    stylesheet subscribe \
+	    -spacingx graphics diagram.spacingx \
+	    -spacingy graphics diagram.spacingy \
+	    -startx   graphics diagram.startx \
+	    -starty   graphics diagram.starty
 
     # Now subscribe to the graphics font. What we are trying to do
     # here is avoid unnecessary graph redraws. We really have to look
     # into this issue more and come up with a good solution.
     # FIXME: this whole thing is very broken.
-    configure -defaultfont [preference get graphicsFont 1]
-    preference subscribe $this graphicsFont \
-	    "$this configure -defaultfont \
-	    \[::tycho::preference get fonts graphicsFont 1\]; $this reload"
+    configure -defaultfont [stylesheet get fonts graphicsFont]
+
+    # FIXME FIXME
+    # preference subscribe $this graphicsFont \
+#	    "$this configure -defaultfont \
+#	    \[::tycho::preference get fonts graphicsFont 1\]; $this reload"
 }
 
 
@@ -684,7 +686,7 @@ body ::tycho::EditDAG::redrawGraph {} {
     selectionClear
     catch {unset nametable}
 
-    set titleTypes [preference get titleTypes]
+    set titleTypes [stylesheet get graphics titleTypes]
 
     # The following sets the depth attribute of each node.
     set depthsort [$mygraph depthSort]
