@@ -36,6 +36,8 @@
 #### autoSaveInterval option
 # The auto-save interval in minutes.  A value of zero means no auto-save.
 option add *File.autoSaveInterval 5 widgetDefault
+# Class to use for revision control.
+option add *File.revclass "::tycho::RevControlSCCS" widgetDefault
 
 #######################################################################
 #### File
@@ -209,6 +211,10 @@ class ::tycho::File {
     # Remove a filename from the window menus of all open File objects.
     proc windowMenuRemoveAll {filename} {}
 
+    #### getOption
+    # Return the value of the option specified by the argument.
+    proc getOption {option} {}
+    
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -949,6 +955,18 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
     foreach fileobj [array names fileObjects] {
 	catch {$fileobj windowMenuRemove $filename}
     }
+}
+
+###################################################################
+#### getOption
+# Return the value of the option specified by the argument.
+# This hack is used because options are not inherited by 
+# subclasses (hence the object name .bogusOptionObject.)
+body ::tycho::File::getOption {option} {
+    if {[info object .bogusOptionObject] == ""} {
+	File .bogusOptionObject
+    }
+    return [option get .bogusOptionObject $option File]	    
 }
 
 #########################################################################
