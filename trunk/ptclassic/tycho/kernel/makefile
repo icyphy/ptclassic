@@ -124,6 +124,7 @@ ITCL_SRCS = \
 	RevControlRCS.itcl \
 	Scheduler.itcl \
 	Stack.itcl \
+	StarLibrary.itcl \
 	StatusBar.itcl \
 	Subpanel.itcl \
 	TclShell.itcl \
