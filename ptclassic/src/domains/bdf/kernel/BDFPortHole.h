@@ -18,7 +18,7 @@ This file contains definitions of BDF-specific PortHole classes.
 #pragma interface
 #endif
 
-#include "SDFPortHole.h"
+#include "DynDFPortHole.h"
 
 /*****************************************************************
 BDF: Synchronous Data Flow generalized to handle booleans
@@ -42,32 +42,24 @@ constructs such as Switch and Select are also permitted.
 //   synchronous dataflow (BDF)
 
 // see below for meanings of relation codes.
+
 enum BDFRelation {
-	BDF_NONE = -1,
-	BDF_FALSE = 0,
-	BDF_TRUE = 1,
-	BDF_SAME = 2,
-	BDF_COMPLEMENT = 3 };
+	BDF_NONE = DF_NONE,
+	BDF_FALSE = DF_FALSE,
+	BDF_TRUE = DF_TRUE,
+	BDF_SAME = DF_SAME,
+	BDF_COMPLEMENT = DF_COMPLEMENT };
 
 
-class BDFPortHole : public DFPortHole
+class BDFPortHole : public DynDFPortHole
 {
 public:
-	BDFPortHole() 
-	: pAssocPort(0), relation(BDF_NONE) {}
-
-	~BDFPortHole();
-
-	PortHole* assocPort() { return pAssocPort;}
-
 	// cast is safe because of restrictions on setting of assocPort
-	BDFPortHole* assoc() { return (BDFPortHole*)pAssocPort;}
+	BDFPortHole* assoc() { return (BDFPortHole*)assocPort();}
 
 	BDFRelation relType() const {
 		return (BDFRelation) assocRelation();
 	}
-
-	int assocRelation() const { return relation;}
 
 	// return true if port is dynamic (transfers variable # of tokens)
 	int isDynamic() const;
@@ -85,7 +77,9 @@ public:
 
 	// Function to set associations.  BDF_SAME and BDF_COMPLEMENT
 	// relations always form a loop.
-	void setRelation(BDFRelation rel, BDFPortHole* assocBool = 0);
+	void setRelation(BDFRelation rel, BDFPortHole* assocBool = 0) {
+		DynDFPortHole::setRelation(DFRelation(rel),assocBool);
+	}
 
 	// Function to alter BDF values.
 	PortHole& setBDFParams(unsigned numTokens = 1,
@@ -103,26 +97,6 @@ public:
 
 	// table for use of "reversals" function
 	static BDFRelation reversals[4];
-private:
-	// if given, points to an associated boolean signal;
-	// tokens are only produced/consumed when that signal is true
-	BDFPortHole* pAssocPort;
-
-	// "relation" specifies the relation of this porthole with the
-	// assocPort porthole (if it is non-null).  There are five
-	// possibilities for BDF ports:
-	// BDF_NONE - no relationship
-	// BDF_TRUE - produces/consumes data only when assocBoolean is true
-	// BDF_FALSE - produces/consumes data only when assocBoolean is false
-	// BDF_SAME - signal is logically the same as assocBoolean
-	// BDF_COMPLEMENT - signal is the logical complemnt of assocBoolean
-
-	// for the latter two cases data are always moved.
-
-	BDFRelation relation;
-
-	void removeRelation();
-
 };
 
 	///////////////////////////////////////////

@@ -61,57 +61,9 @@ PortHole& BDFPortHole :: setBDFParams(unsigned num,BDFPortHole* assoc,
 	return *this;
 }
 
-// setRelation sets up relationship arcs.  BDF_SAME and BDF_COMPLEMENT
-// arcs always form a circle.
-void BDFPortHole::setRelation(BDFRelation rel, BDFPortHole* assocBool) {
-	if (rel == relation && pAssocPort == assocBool)
-		return;
-	if (SorC(relation)) removeRelation();
-	relation = rel;
-	pAssocPort = assocBool;
-	if (!SorC(rel)) return;
-	// if my peer is not part of a loop yet, create a two-port loop
-	if (!SorC(assocBool->relation)) {
-		assocBool->relation = relation;
-		assocBool->pAssocPort = this;
-		return;
-	}
-	// it is already part of a loop.  Insert myself between
-	// assoc and assoc->pAssocPort.
-	pAssocPort = assocBool->pAssocPort;
-	relation = (assocBool->relation == rel) ? BDF_SAME : BDF_COMPLEMENT;
-	assocBool->pAssocPort = this;
-	assocBool->relation = rel;
-}
-
-BDFPortHole::~BDFPortHole() { removeRelation();}
-
-// change my relation to BDF_NONE, and delete me from any relationship
-// loop.
-void BDFPortHole::removeRelation() {
-	if (pAssocPort && SorC(relation)) {
-		if (pAssocPort->pAssocPort == this) {
-			pAssocPort->pAssocPort = 0;
-			pAssocPort->relation = BDF_NONE;
-		}
-		else {
-			BDFPortHole* p = pAssocPort;
-			// go around until we get to the one that points
-			// to me
-			while (p->pAssocPort != this) p = p->pAssocPort;
-			// make it point to the next in line instead.
-			p->pAssocPort = pAssocPort;
-			if (relation == BDF_COMPLEMENT)
-				p->relation = reverse(p->relation);
-		}
-	}
-	relation = BDF_NONE;
-	pAssocPort = 0;
-}
-	
 // return true if I am dynamic
 int BDFPortHole :: isDynamic() const {
-	return TorF((BDFRelation)relation);
+	return TorF(relType());
 }
 
 // mph functions.
