@@ -200,6 +200,10 @@ TREE:
     puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=ptcl\n"
     close $over
 
+    set over [open "$croot/obj.$ptarch/pitcl/override.mk" w]
+    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=pitcl\n"
+    close $over
+
     set over [open "$croot/obj.$ptarch/tysh/override.mk" w]
     puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=tysh\n"
     close $over
@@ -217,7 +221,7 @@ TREE:
 
     # We need to make sources to build any makefiles that are out of date
     # and to make install to compile any out-of-date object files
-    puts "Building ptcl, pigiRpc, and tycho in your customized Ptolemy tree."
+    puts "Building ptcl, pitcl, pigiRpc, and tycho in your customized Ptolemy tree."
     puts "Please wait for a few minutes ..."
     exec sh -c "cd $croot/obj.$ptarch ; make sources install"
     puts "Before using your new pigiRpc, be sure to set \$PTOLEMY to $croot" 
