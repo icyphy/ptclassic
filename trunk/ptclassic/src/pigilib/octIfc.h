@@ -35,10 +35,11 @@ $Id$
 #include "paramStructs.h"
 #include "oct.h"
 
-extern char *AkoName();
-
 #ifdef __cplusplus
+
+/* C function prototypes in ANSI C style */
 extern boolean GetStarName(octObject *instPtr, char** namePtr);
+extern char *AkoName(char *master);
 extern boolean SetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
 extern boolean GetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
 extern boolean SetSogParams(octObject *sog,ParamListType *plist);
@@ -105,7 +106,9 @@ extern boolean OpenFacet(octObject *t, char *c, char *v, char *f, char *m);
 
 #else
 
+/* C function prototypes in Kernighan & Richie style */
 extern boolean GetStarName();
+extern char *AkoName();
 extern boolean SetFormalParams();
 extern boolean GetFormalParams();
 extern boolean SetSogParams();
