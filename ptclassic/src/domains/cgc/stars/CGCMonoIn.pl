@@ -88,22 +88,25 @@ provisions.
     }
     /* Open file for reading data */
     addCode(openFileForReading);	
-    /* audio_setup : to set encodingType, sampleRate and channels */
-    StringList setupParameters = "$sharedSymbol(CGCAudioBase,audio_setup)";
-    setupParameters  << "($starSymbol(file), "
-		     << "\"" << encodingType << "\", "
-		     <<  sampleRate << ", " 
-		     <<  channels   << ");\n";
+    if(strcasecmp(fileName, "/dev/audio") == 0)
+      {
+	/* audio_setup : to set encodingType, sampleRate and channels */
+	StringList setupParameters = "$sharedSymbol(CGCAudioBase,audio_setup)";
+	setupParameters  << "($starSymbol(file), "
+			 << "\"" << encodingType << "\", "
+			 <<  sampleRate << ", " 
+			 <<  channels   << ");\n";
 
-    addCode(setupParameters);
-    /* audio_control : to set portType, volume and balance */
-    StringList controlParameters = "$sharedSymbol(CGCAudioBase,audio_control)";
-    controlParameters << "($starSymbol(file), "
-		      << "\"" << portType << "\", "
-		      <<  volume << ", " 
-		      <<  balance << ", "
-		      << "1);\n";
-    addCode(controlParameters);
+	addCode(setupParameters);
+	/* audio_control : to set portType, volume and balance */
+	StringList controlParameters = "$sharedSymbol(CGCAudioBase,audio_control)";
+	controlParameters << "($starSymbol(file), "
+			  << "\"" << portType << "\", "
+			  <<  volume << ", " 
+			  <<  balance << ", "
+			  << "1);\n";
+	addCode(controlParameters);
+      }
   }
 
   go {
