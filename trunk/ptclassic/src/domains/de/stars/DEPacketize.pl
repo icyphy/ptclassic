@@ -40,8 +40,8 @@ signal arrives and there is no data.
 		data.before(demand);
 	}
 	start {
-		delete saveData;
-		saveData = new float[int(maxLength)];
+		LOG_DEL; delete saveData;
+		LOG_NEW; saveData = new float[int(maxLength)];
 		idx = 0;
 	}
 	go {
@@ -50,7 +50,7 @@ signal arrives and there is no data.
 		if (demand.dataNew || idx == int(maxLength)) {
 			demand.dataNew = FALSE;
 			// create a FloatVecData and imbed it in a Packet
-			FloatVecData *p = new FloatVecData(idx,saveData);
+			LOG_NEW; FloatVecData *p = new FloatVecData(idx,saveData);
 			Packet pkt(*p);
 			// copy the Packet to the output
 			output.put(arrivalTime) << pkt;
@@ -58,6 +58,6 @@ signal arrives and there is no data.
 		}
 	}
 	destructor {
-		delete saveData;
+		LOG_DEL; delete saveData;
 	}
 }

@@ -67,7 +67,7 @@ will be delayed by more than the nominal service time.
 		// This token is ready to be output
 		output.put(completionTime) = *(t->pp);
 		tokensInService.getAndRemove();
-		delete t;
+		LOG_DEL; delete t;
 		numberInService--;
 		outputP = TRUE;
 	      } else {
@@ -101,7 +101,7 @@ will be delayed by more than the nominal service time.
 		// Create a token.
 		Particle& pp = input.get();
 		Particle* newp = pp.clone();
-		t = new token;
+		LOG_NEW; t = new token;
 		t->pp = newp;
 		t->serviceNeeded = double(nomServiceTime);
 		t->lastUpdate = arrivalTime;

@@ -48,10 +48,10 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 		random = NULL;
 	}
 	destructor {
-		if(random) delete random;
+		if(random) { LOG_DEL; delete random;}
 	}
 	start {
-		if(random) delete random;
+		if(random) { LOG_DEL; delete random;}
 
 		// decide which distribution.
 		const char* dist = distribution.getInitValue();
@@ -61,13 +61,13 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 
 		switch (c) {
 			case 'u' :
-			case 'U' : random = new Uniform(vOrl, mOru, gen);
+			case 'U' : LOG_NEW; random = new Uniform(vOrl, mOru, gen);
 			   	   break;
 			case 'e' :
-			case 'E' : random = new NegativeExpntl(mOru, gen);
+			case 'E' : LOG_NEW; random = new NegativeExpntl(mOru, gen);
 			   	   break;
 			case 'n' :
-			case 'N' : random = new Normal(mOru, vOrl, gen);
+			case 'N' : LOG_NEW; random = new Normal(mOru, vOrl, gen);
 			   	   break;
 			default :
 			  Error::abortRun(*this, "unknown distribution.");

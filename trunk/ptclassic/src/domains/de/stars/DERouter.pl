@@ -30,11 +30,11 @@ Probability is equal for each output. The time delay is zero.
 		random = NULL;
 	}
 	destructor {
-		if(random) delete random;
+		if(random) { LOG_DEL; delete random;}
 	}
 	start {
-		if(random) delete random;
-		random = new Uniform(0,double(output.numberPorts()),gen);
+		if(random) { LOG_DEL; delete random;}
+		LOG_NEW; random = new Uniform(0,double(output.numberPorts()),gen);
 	}
 
 	go {
