@@ -26,13 +26,13 @@ class AsmTarget : public CGTarget {
 private:
 	const char* starClass;
 protected:
-	ProcMemory& mem;
+	ProcMemory* mem;
 
 	// Request memory for all structures in a Star
 	int allocReq(AsmStar&);
 public:
 	AsmTarget(const char* nam, const char* desc,
-		  const char* stype, ProcMemory& m) :
+		  const char* stype, ProcMemory* m = 0) :
 		CGTarget(nam,stype,desc), mem(m) {}
 
 	Block* clone() const = 0;
