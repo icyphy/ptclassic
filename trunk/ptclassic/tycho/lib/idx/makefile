@@ -57,7 +57,7 @@ EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 KRUFT =		$(INDICES)
 
 # We need not have 'make checkjunk' report that these are junk
-OPTIONAL_FILES = 	$(INDICES)
+OPTIONAL_FILES = 	$(INDICES) doc
 
 all install: $(INDICES)
 

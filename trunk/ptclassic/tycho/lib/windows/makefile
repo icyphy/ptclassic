@@ -52,6 +52,9 @@ REALCLEAN_STUFF =	tclIndex *.html
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/lib/windows
 
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = doc
+
 DIRS =
 
 all install: $(MISC_SRCS)
