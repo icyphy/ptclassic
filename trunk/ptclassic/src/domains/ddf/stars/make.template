@@ -1,0 +1,56 @@
+
+# Makefile for Ptolemy DDF stars
+# $Id$
+# Copyright (c) 1990 The Regents of the University of California.
+#				All Rights Reserved.
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	make -f make.template makefile
+#
+# This will add the dependencies to the makefile.
+
+# SRCDIR is the directory containing the Ptolemy kernel source.
+SRCDIR = ../..
+DDFDIR = ..
+GPPFLAGS = -g -I$(SRCDIR) -I$(DDFDIR)
+GNU = g++
+GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include -I$(DDFDIR)
+
+# Where to install
+DESTDIR = .
+
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GPPFLAGS) -c  $<
+
+SRCS=LastOfN.cc Repeater.cc Select.cc Switch.cc DownCounter.cc 
+
+OBJS=LastOfN.o Repeater.o Select.o Switch.o DownCounter.o 
+
+HDRS=LastOfN.h Repeater.h Select.h Switch.h DownCounter.h 
+
+all:		makefile $(OBJS)
+
+install:	makefile $(OBJS)
+		mv -f $(OBJS) $(DESTDIR)
+
+sources:	$(SRCS) $(HDRS) make.template
+
+clean:
+		rm -f *.o core *~ *#
+depend:
+		makedepend $(GNUINCLUDE) $(SRCS)
+
+makefile:	make.template
+		rm -f makefile
+		cp make.template makefile
+		make -f make.template sources depend  # note: use new SRCS list
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+
+
