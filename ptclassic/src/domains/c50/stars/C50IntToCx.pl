@@ -23,14 +23,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	noInternalState();
     }
     codeblock(convert) {
-	lmmr	ar0,#$addr(input)
-	smmr	ar0,#$addr(output,0)
-	zap
-	samm	ar0
-	smmr	ar0,#$addr(output,1)
+	lar	ar0,#$addr(input)
+	lar	ar1,#$addr(output)
+	mar	*,ar0
+	lacc	*,0,ar1
+	sacl	*+,0
+	sach	*,0
     }
     go {
 	addCode(convert);
     }
-    exectime { return 5; }
+    exectime { return 6; }
 }
