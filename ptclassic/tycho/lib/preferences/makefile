@@ -52,6 +52,9 @@ REALCLEAN_STUFF =
 
 DIRS =		
 
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = doc
+
 all install: tclIndex $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
