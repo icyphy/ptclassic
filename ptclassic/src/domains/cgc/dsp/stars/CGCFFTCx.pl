@@ -4,8 +4,8 @@ defstar {
 	desc {
 Complex Fast Fourier transform.
 Parameter "order" (default 8) is the log, base 2, of the transform size.
-Parameter "size" (default 256) is the number of samples read (<= 2^order).
-Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
+Parameter "size" (default 256) is the number of samples read ie. size is less than or equal to 2 ^order.
+Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.]
 	}
 	version { $Id$ }
 	author { S. Ha }
@@ -35,7 +35,7 @@ For example, to compute just one FFT, only one iteration should be run.
 <b>Bugs</b>: the routine currently used (from Gabriel) recomputes trig
 <a name="Gabriel"></a>
 functions for each term, instead of using a table.  Instead,
-ComplexFFT::start() should compute a table of appropriate size to save
+<code>ComplexFFT::start()</code> should compute a table of appropriate size to save
 time.  This has no effect, obviously, if only one transform
 is performed.
 Code is modified from SDFComplexFFT star, which was originated from Gabriel.
