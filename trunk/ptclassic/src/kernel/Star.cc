@@ -96,7 +96,7 @@ int Star :: setTarget(Target* t) {
 	return TRUE;
     }
     else {
-	Error::abortRun (*this, "wrong star type for target ",name());
+	Error::abortRun (*this, "wrong star type for target ",t->name());
 	return FALSE;
     }
 }
