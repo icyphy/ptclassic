@@ -1250,75 +1250,75 @@ proc gantt_measureLabel {canvas value} {
 # 
 # 
 # 
-# #
-# # foreach*
-# #
-# # Multi-argument version of foreach. Stops when any one of the
-# # argument lists runs out of elements.
-# #
-# # As for loop{},. "body" cannot contain return commands. As
-# # for loop{}, this could be fixed later if necessary.
-# #
-# # Also as for loop{}, the "-counter" option introduces the name
-# # of a variable that counts from 0 to n-1, where n is the length
-# # of the shortest argument list.
-# #
-# # How does it work? I wish you hadn't asked.... For each variable
-# # name, it creates a local variable called i0, i1 etc, and binds
-# # the local variable to the passed variable with upvar{}. For each
-# # argument list, it creates local variable called l0, l1 etc.
-# #
-# # Then, in a frenzy of list heading and tailing, it sets each i(n)
-# # to the head element of the corresponding l(n), and evaluates the
-# # body in the caller's context (so that variable names passed to
-# # this procedure reference the appropriate i(n)). It takes the tail
-# # of the lists and, provided none are empty, does the same thing again.
-# #
-# # This is very inefficient, of course, and should be one of the
-# # first things recoded in C when things need speeding up.
-# #
-# proc foreach* {args} {
-#     set c 0
-# 
-#     set v [readopt counter args]
-#     if {$v != ""} {
-# 	upvar $v counter
-#     }
-# 
-#     while {[llength $args] > 2} {
-# 	upvar   [lindex $args 0] i$c
-# 	set l$c [lindex $args 1]
-# 
-# 	set args [ldrop $args 2]
-# 	incr c
-#     }
-# 
-#     if {[llength $args] != 1} {
-# 	ptkMessage "error: wrong number of args to foreach*"
-# 	return
-#     }
-# 
-#     set body [lindex $args 0]
-# 
-#     set done    0
-#     set counter 0
-#     while { ! $done } {
-# 	for {set i 0} {$i < $c} {incr i} {
-# 	    set i$i [lindex [set l$i] 0]
-# 	}
-# 
-# 	uplevel $body
-# 
-# 	for {set i 0} {$i < $c} {incr i} {
-# 	    set l$i [ltail [set l$i]]
-# 	    if {[lnull [set l$i]]} {
-# 		set done 1
-# 	    }
-# 	}
-# 
-# 	incr counter
-#     }
-# }
+#
+# foreach*
+#
+# Multi-argument version of foreach. Stops when any one of the
+# argument lists runs out of elements.
+#
+#As for loop{},. "body" cannot contain return commands. As
+# for loop{}, this could be fixed later if necessary.
+#
+# Also as for loop{}, the "-counter" option introduces the name
+# of a variable that counts from 0 to n-1, where n is the length
+# of the shortest argument list.
+#
+# How does it work? I wish you hadn't asked.... For each variable
+# name, it creates a local variable called i0, i1 etc, and binds
+# the local variable to the passed variable with upvar{}. For each
+# argument list, it creates local variable called l0, l1 etc.
+#
+# Then, in a frenzy of list heading and tailing, it sets each i(n)
+# to the head element of the corresponding l(n), and evaluates the
+# body in the caller's context (so that variable names passed to
+# this procedure reference the appropriate i(n)). It takes the tail
+# of the lists and, provided none are empty, does the same thing again.
+#
+# This is very inefficient, of course, and should be one of the
+# first things recoded in C when things need speeding up.
+#
+proc foreach* {args} {
+    set c 0
+
+    set v [readopt counter args]
+    if {$v != ""} {
+	upvar $v counter
+    }
+
+    while {[llength $args] > 2} {
+	upvar   [lindex $args 0] i$c
+	set l$c [lindex $args 1]
+
+	set args [ldrop $args 2]
+	incr c
+    }
+
+    if {[llength $args] != 1} {
+	ptkMessage "error: wrong number of args to foreach*"
+	return
+    }
+
+    set body [lindex $args 0]
+
+    set done    0
+    set counter 0
+    while { ! $done } {
+	for {set i 0} {$i < $c} {incr i} {
+	    set i$i [lindex [set l$i] 0]
+	}
+
+	uplevel $body
+
+	for {set i 0} {$i < $c} {incr i} {
+	    set l$i [ltail [set l$i]]
+	    if {[lnull [set l$i]]} {
+		set done 1
+	    }
+	}
+
+	incr counter
+    }
+}
 # 
 # 
 # #
