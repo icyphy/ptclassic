@@ -210,6 +210,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 #endif
 	}
 	initCode {
+		addCode(converttype, "global", "convert");
 		addGlobal("#define HARDPORT 61114\n", "hardPort");
 		addGlobal("double $starSymbol(RecvData);\n");
 		addInclude("<stdio.h>");
