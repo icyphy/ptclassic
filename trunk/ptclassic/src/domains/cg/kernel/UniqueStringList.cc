@@ -1,5 +1,7 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+$Id$
+  
+Copyright (c) 1992-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,11 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* Version $Id$
-   Copyright 1992 The Regents of the University of California
-   All Rights Reserved.
-
-   Author:      T. M. Parks
+/* Author:      T. M. Parks
    Date:        4 October 1992
 
 */
