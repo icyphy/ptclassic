@@ -40,7 +40,9 @@ SRCS= \
  CG56BlackHole.pl \
  CG56DC.pl \
  CG56Fork.pl \
- CG56Gain.pl
+ CG56Gain.pl \
+ CG56DummySource.pl \
+ CG56DummySink.pl
 
 # The .cc files
 CCSRCS=$(SRCS:.pl=.cc)
