@@ -40,6 +40,12 @@ for a complete explanation of the options.
 		default {""}
 		desc {Command line options for the xgraph program.}
 	}
+	defstate {
+		name {ignore}
+		type {int}
+		default { 0 }
+		desc { Number of initial values to ignore.}
+	}
 	protected {
 		XGraph graph;
 		int index;
@@ -48,7 +54,7 @@ for a complete explanation of the options.
 
 	start {
 		graph.initialize(this, input.numberPorts(),
-			options, title, saveFile);
+			options, title, saveFile, ignore);
 		index = 0;
 	}
 

@@ -39,13 +39,19 @@ for a complete explanation of the options.
 		default {""}
 		desc { Command line options for xgraph.}
 	}
+	defstate {
+		name {ignore}
+		type {int}
+		default { 0 }
+		desc { Number of initial values to ignore.}
+	}
 	hinclude { "Display.h" }
 	protected {
 		XGraph graph;
 	}
 
 	start {
-		graph.initialize(this, 1, options, title, saveFile);
+		graph.initialize(this, 1, options, title, saveFile, ignore);
 	}
 
 	go {
