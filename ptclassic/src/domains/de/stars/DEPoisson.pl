@@ -44,11 +44,11 @@ given as parameters.
 		random = NULL;
 	}
 	destructor {
-		if(random) delete random;
+		if(random) { LOG_DEL; delete random;}
 	}
 	start {
-		if(random) delete random;
-		random = new NegativeExpntl(double(meanTime),gen);
+		if(random) { LOG_DEL; delete random;}
+		LOG_NEW; random = new NegativeExpntl(double(meanTime),gen);
 		DERepeatStar :: start();
 	}
 	go {
