@@ -258,6 +258,8 @@ public:
 
 	SequentialList() {dimen=0;}
 
+	// need destructor since baseclass is private, so others can destroy
+	~SequentialList() {}
 private:
 	int dimen;	// Size of list
 };
@@ -294,6 +296,9 @@ public:
 	int size() const {return dimen;}
 
 	Stack() {dimen=0;}
+
+	// need destructor since baseclass is private, so others can destroy
+	~Stack() {}
 private:
 	int dimen;	// Number elements on the stack
 };
