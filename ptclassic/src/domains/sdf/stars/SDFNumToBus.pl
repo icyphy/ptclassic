@@ -2,9 +2,9 @@ defstar {
 	name { NumToBus }
 	domain { SDF }
 	desc {
-This will receive as its input, as an integer corresponding to the bus 
-contents and it converts it to a bus with the required no. of lines
-(which is read in as a parameter).
+Receive as its input an integer corresponding to the bus contents and it
+converts it to a bus with the required number of lines (which is read in
+as a parameter).
 	}
 	author { Asawaree Kalavade }
 	copyright { 1991 The Regents of the University of California }
