@@ -88,7 +88,8 @@ depend:
 	echo no dependencies to make in this directory
 
 checkjunk:
-	@checkextra -v ptlang.y ptlang.c ptlang.o ptlang makefile SCCS
+	@checkextra -v ptlang.y ptlang.c ptlang.o ptlang makefile SCCS \
+		makefile.vc
 
 sccsinfo:
 	@sccs check || true
