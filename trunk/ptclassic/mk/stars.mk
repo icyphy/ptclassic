@@ -122,6 +122,7 @@ ifneq ($(INCLUDE_PN_DOMAIN),yes)
 	PN =
 endif
 
+
 # Tcl/Tk stars can be used in pigiRpc but not ptcl, for this we define TK
 
 ifndef TK
@@ -815,6 +816,12 @@ ifdef SDF
 		STARS += $(LIBDIR)/sdfvisstars.o
 		LIBS += -lsdfvisstars
 		LIBS += $(VSDKHOME)/util/vis.il
+	endif
+	# Annapolis Wildforce FPGA board
+	ifdef SDFWILDFORCE
+		CUSTOM_DIRS += $(SDFDIR)/wildforce/stars
+		STARS += $(LIBDIR)/sdfwildforce.o
+		LIBS += -lsdfwildforce $(WILDFORCE_LIBSPEC)
 	endif
 	ifdef CG
 		# FIXME: The only thing in sdf/targets also depends on 
