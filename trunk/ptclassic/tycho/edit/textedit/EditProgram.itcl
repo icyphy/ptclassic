@@ -42,16 +42,16 @@ class ::tycho::EditProgram {
     ###################################################################
     ####                     public methods                        ####
 
-    #### reload
-    # Reload the previously saved version and recolorize.
-    method reload {}
-
     constructor {args} {}
     destructor {}
 
     #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
+
+    #### reload
+    # Reload the previously saved version and recolorize.
+    method reload {}
 
     ###################################################################
     ####                  protected methods                        ####
