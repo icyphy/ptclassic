@@ -55,29 +55,13 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
 
 void AsmTarget :: initStates() {
-	uname = 0;
-	StringList hostPrompt,hostDes,runPrompt,runDes;
-	hostPrompt << "Host for " << fullName();
-	hostDes    << "Host on which " << fullName() << " is installed";
-	runPrompt  << "Run " << fullName() << "?";
-	runDes     << "Download and run on " << fullName();
- 	addState(displayFlag.setState("Display code?",this,"YES",
-		"display code if YES."));
-	addState(runFlag.setState(hashstring(runPrompt),this,"NO",
-		hashstring(runDes), A_NONSETTABLE|A_NONCONSTANT));
-	addState(targetHost.setState(hashstring(hostPrompt),this, 
-		"localhost", hashstring(hostDes), 
-		A_NONSETTABLE|A_NONCONSTANT));
 	// change default value of destDirectory
 	destDirectory.setInitValue("~/DSPcode");
-}
 
-void AsmTarget :: setup() {
-	if (galaxy()) {
-		LOG_DEL; delete uname;
-		uname = makeLower(galaxy()->name());
-	}
-	CGTarget::setup();
+	targetHost.setAttributes(A_SETTABLE);
+	filePrefix.setAttributes(A_SETTABLE);
+	displayFlag.setAttributes(A_SETTABLE);
+	runFlag.setAttributes(A_SETTABLE);
 }
 
 void AsmTarget :: headerCode() {
@@ -262,9 +246,6 @@ int AsmTarget::modifyGalaxy() {
 	return status;
 }
 
-AsmTarget::~AsmTarget() {
-	LOG_DEL; delete uname; uname = 0;
-}
 /*
 void AsmTarget :: outputLineOrientedComment(const char* prefix,
 					    const char* msg,
@@ -366,21 +347,10 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
     myCode << comment(memMap);
 }
 
-void AsmTarget :: writeCode(const char* name) {
-	if (name==NULL) name=uname;
-	if (haltRequested()) return;
-        if (int(displayFlag)) {
-                if (!genDisFile(myCode,name,asmSuffix())) return;
-	}
-        else {
-                if (!genFile(myCode,name,asmSuffix())) return;
-	}
-}
-
-void AsmTarget :: wrapup() {
-	if ((!inWormHole()) && int(runFlag) && !haltRequested()) {
-		if (compileCode() && !haltRequested()) {
-			if (loadCode() && !haltRequested()) runCode();
-		}
-	}
+void AsmTarget :: writeCode(const char* name)
+{
+    if (name == NULL) name = filePrefix;
+    StringList fileName;
+    fileName << name << asmSuffix();
+    CGTarget::writeCode(fileName);
 }
