@@ -40,7 +40,7 @@ Suppose further that the replacement block has <i>B <sub>I</sub></i> input
 ports and <i>B <sub>O</sub></i> output ports.
 Then
 <pre>
-N ~=~ {M sub I} over {B sub I} ~=~ {M sub O} over {B sub O}
+N = M<sub>I</sub> / B<sub>I</sub> = M<sub>O</sub> / B<sub>O</sub>
 </pre>
 is the number of instances that will be created.
 It is an error for this second equality not to be satisfied.
