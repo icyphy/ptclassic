@@ -27,6 +27,7 @@ source DialogWindow.itcl
 source Message.itcl
 source ErrorMessage.itcl
 source YesNoQuery.itcl
+source EntryQuery.itcl
 source YesNoCancel.itcl
 source FileBrowser.itcl
 source File.itcl
@@ -82,11 +83,24 @@ after $duration .yesno invoke yes
 after [expr 2*$duration] .another invoke yes
 YesNoQuery .yesno \
 	-text "Either button should bring up another dialog" \
-	-yescommand "YesNoQuery .another -text {Another dialog}; \
-	         .another centerOnScreen" \
+	-yescommand {
+    	    namespace tycho {
+		YesNoQuery .another -text {Another dialog}
+		.another centerOnScreen
+	    }
+	} \
 	-nocommand "askuser {Are you sure not?}"
 .yesno centerOnScreen
 update
+
+############################################################################
+# Test EntryQuery
+# FIXME: fails
+EntryQuery .entry \
+	-text "Enter here:" \
+	-default "Default text"
+.entry centerOnScreen
+
 
 ############################################################################
 # Test YesNoCancel
