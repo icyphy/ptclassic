@@ -33,11 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "PNThread.h"
 #include "Scheduler.h"
-
-class PNThreadScheduler;
-class PNMonitor;
-class PNCondition;
 
 class PNScheduler : public Scheduler
 {
@@ -81,6 +78,9 @@ protected:
 
     // Enable locking.
     void enableLocking();
+
+    // Disable locking.
+    void disableLocking();
 
     // Stopping time.
     double stopTime;
