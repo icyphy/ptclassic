@@ -804,9 +804,17 @@ CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
 # Under some architectures, we need to use static libraries or we get
 # GateKeeper errors.
 ifdef USE_CORE_STATIC_LIBS
-	LIBPTCL = $(LIBDIR)/libptcl.a
+	ifdef PITCL
+		LIBPTCL = $(LIBDIR)/libpitcl.a
+	else
+		LIBPTCL = $(LIBDIR)/libptcl.a
+	endif
 else
-	LIBPTCL = $(LIBDIR)/libptcl.$(LIBSUFFIX)
+	ifdef PITCL
+		LIBPTCL = $(LIBDIR)/libpitcl.$(LIBSUFFIX)
+	else
+		LIBPTCL = $(LIBDIR)/libptcl.$(LIBSUFFIX)
+	endif
 endif
 
 PT_DEPEND += $(LIBPTCL) $(LIBDIR)/libptolemy.a \
