@@ -276,7 +276,8 @@ int Linker::multiLink (const char* args, int perm) {
 #endif
 
 char *
-Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
+Linker::generateSharedObject(int argc, char **argv, char* objName,
+			     int /*maxsize*/)
 {
   StringList command = SHARED_OBJECT_COMMAND;
   
