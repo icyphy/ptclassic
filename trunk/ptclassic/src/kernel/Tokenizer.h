@@ -163,6 +163,13 @@ public:
 		comment_char = n;
 		return o;
 	}
+
+	// change quote character, return old one.
+	char setQuoteChar(char n) {
+		char o = quote_char;
+		quote_char = n;
+		return o;
+	}
 };
 
 #endif
