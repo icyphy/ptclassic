@@ -68,8 +68,9 @@ void ParScheduler::setup() {
 
 int ParScheduler::dagNodes() const {
     if (exGraph == NULL) {
-      Error::warn("ParScheduler::dagNodes: The multirate dataflow graph has not been expanded into a precedence DAG");
-      return 0;
+      Error::warn("ParScheduler::dagNodes: The multirate dataflow "
+		  "graph has not been expanded into a precedence DAG.");
+      return FALSE;
     }
     return exGraph->numNodes();
 }
@@ -81,6 +82,7 @@ int ParScheduler::dagNodes() const {
 // main body of the parallel schedule
 
 ParScheduler :: ParScheduler(MultiTarget* t, const char* logName) {
+        parProcs=0;
 	mtarget = t;
 	logFile = logName;
 	logstrm = 0;
@@ -201,6 +203,13 @@ void ParScheduler :: setUpProcs(int num) {
 // sub-universe creation.
 
 int ParScheduler :: createSubGals(Galaxy& g) {
+        if (!parProcs) {
+	    Error::abortRun("The parallel scheduler could not "
+			    "generate the subgalaxies because the "
+			    "parallel processor class has "
+			    "not been initialized.");
+	    return FALSE;
+	}
 	// explicit set the OSOP request flag by looking at the schedule
 	// result if possible to avoid Spread/Collect stars as much as
 	// possible
@@ -277,6 +286,13 @@ int procIdOfFork(CGStar* s) {
 // just perform the list scheduling based on that assignment.
 
 int ParScheduler :: scheduleManually() {
+         if (!parProcs) {
+	    Error::abortRun("The parallel scheduler could not "
+			    "schedule the graph manually because the "
+			    "parallel processor class has "
+			    "not been initialized.");
+	    return FALSE;
+	}   
 	// Make sure all stars are assigned to processors.
 	GalStarIter iter(*galaxy());
 	CGStar* s;
@@ -353,6 +369,13 @@ void ParScheduler :: compileRun() {
 void ParScheduler :: prepareCodeGen() {
     // prepare code generation for each processing element:
     // galaxy initialize, copy schedule, and simulate the schedule.
+    if (!parProcs) {
+	Error::abortRun("The parallel scheduler could not "
+			"prepare for code generation because the "
+			"parallel processor class has "
+			"not been initialized.");
+	return;
+    }	
     parProcs->prepareCodeGen();
 }
 
@@ -363,7 +386,13 @@ void ParScheduler :: prepareCodeGen() {
 // copy the scheduling results to the argument "profile".
 // 
 void ParScheduler :: setProfile(Profile* profile) {
-
+        if (!parProcs) {
+	    Error::abortRun("The parallel scheduler could not "
+			    "set the profile because the "
+			    "parallel processor class has "
+			    "not been initialized.");
+	    return;
+	}
 	// special for numProcs == 1
 	if (numProcs == 1) {
 		profile->setEffP(1);
@@ -404,6 +433,13 @@ int ParScheduler :: finalSchedule() { return TRUE; }
 /////////////////////////////
 
 void ParScheduler::writeGantt(ostream& out) {
+        if (!parProcs) {
+	    Error::abortRun("The parallel scheduler could not "
+			    "generate the gantt chart because the "
+			    "parallel processor class has "
+			    "not been initialized.");
+	    return;
+	}
 	int span = parProcs->getMakespan();
 	const char* universe = this->exGraph->myGalaxy()->name();
 	InfString tmpbuf;
