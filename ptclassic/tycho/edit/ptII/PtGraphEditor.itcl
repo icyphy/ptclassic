@@ -713,7 +713,17 @@ body ::tycho::PtGraphEditor::insertData {data} {
 	    $vertexcontroller \
 	    $edgecontroller
     configure -isToplevel [$_simulation cget -isToplevel]
-    puts !!!!!$isToplevel
+
+    # We have to remember the URL somewhere
+    set url $itk_option(-file)
+    global env tcl_platform
+    if { $tcl_platform(platform) == "windows" } {
+        set url "file:/$url"
+    } else {
+        set url "file:$url"
+    }
+    puts "$_simulation configure -sourceURL $url"
+    $_simulation configure -sourceURL $url
 }
 
 #####################################################################

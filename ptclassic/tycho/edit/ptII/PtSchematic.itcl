@@ -52,6 +52,9 @@ class ::tycho::PtSchematic {
     method construct {simulation graph layout name \
 	    domainPanel vertexcontroller edgecontroller}
 
+    # Contruct a composite actor for execution only
+    method constructComposite {simulation name composite}
+
     # Get the text of the schematic
     method getText {}
 
@@ -60,6 +63,9 @@ class ::tycho::PtSchematic {
 
     # Parse from the given text data
     method parse {text}
+
+    # Parse from a URL
+    method parseURL {url}
 
     ###################################################################
     ####                   protected methods                       ####
@@ -145,6 +151,8 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
     set directorName [$simulation getDirectorName]
     set p [java::new ptolemy.schematic.SchematicParameter \
             "director" "CONTROLPARAMETER" $directorName]
+    # FIXME
+    $p setAttribute class [[$director getClass] getName]
     $_schematic addParameter $p
 
     # The director parameters are added directly as parameters
@@ -314,6 +322,20 @@ body ::tycho::PtSchematic::parse {text} {
 }
 
 ########################################################################
+#### parseURL
+#
+# Parse from the given URL
+#
+body ::tycho::PtSchematic::parseURL {url} {
+    puts "PtSimulation::parseURL $url"
+
+    set ptmlParser [java::new ptolemy.schematic.PTMLParser]
+    puts "Parsing $url with $ptmlParser"
+    set _schematic [$ptmlParser parse $url]
+    puts "Schematic is: [$_schematic toString]"
+}
+
+########################################################################
 ####
 #
 # Construct a new simulation
@@ -466,6 +488,118 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 		# Add to the simulation
 		$simulation addEdge $name $edgename
 	    }
+	}
+    }
+}
+
+
+########################################################################
+####
+#
+# Construct a new simulation for execution only
+#
+body ::tycho::PtSchematic::constructComposite {simulation name composite} {
+    puts "PtSimulation::constructComposite $simulation $name"
+
+    # Configure for top-level
+    set isToplevel [$_schematic getChildElement parameter isToplevel]
+    puts ####[$isToplevel toString]
+    #puts [$domain toString]
+    $simulation configure -isToplevel [$isToplevel getAttribute value]
+
+    # Get the domain
+    set domain [$_schematic getChildElement parameter domain]
+    puts "domain = [$domain toString]"
+    $simulation setDomain [$domain getAttribute value]
+
+    # Get the director
+    set xmlDirector [$_schematic getChildElement parameter director]
+    puts "xmlDirector = [$xmlDirector toString]"
+    set class [$xmlDirector getAttribute "class"]
+    set javaDirector [java::new $class]
+    $simulation setDirector $javaDirector
+    $simulation setDirectorName [$xmlDirector getAttribute name]
+
+    # Update the director's parameters
+    set iterator [$_schematic parameters]
+    while { [$iterator hasMoreElements] } {
+	set param [$iterator nextElement]
+	if { [$param getAttribute "type"] != "CONTROLPARAMETER" } {
+	    set name [$param getAttribute name]
+	    set value [$param getAttribute value]
+	    [$javaDirector getAttribute $name] setExpression $value
+	}
+    }
+
+    # Create the entities
+    set iterator [$_schematic entityNames]
+    while { [$iterator hasMoreElements] } {
+	set i [$iterator nextElement]
+	set xmlelt [$_schematic getChildElement "entity" $i]
+
+	#set icon [$xmlelt getAttribute "icon"]
+	#set iconlib [lindex [split $icon "."] 0]
+	#set iconname [lindex [split $icon "."] 1]
+	#set coords [$xmlelt getAttribute "coords"]
+
+	set type [$xmlelt getChildElement entitytype]
+	puts [$type toString]
+	set realname [$type getAttribute "name"]
+	set etype [$type getAttribute "type"]
+	set uniqueName [::tycho::autoName $realname]
+
+	switch -exact $etype {
+	    "actor" {
+		$simulation addActor $realname $uniqueName
+	    }
+	    "port" {
+		$simulation addPort $realname $uniqueName
+	    }
+	    "composite" {
+		$simulation addCompositeActor $realname $uniqueName
+		set actor [$simulation getActor $uniqueName]
+		
+		# Create ports
+		set iterator [$icon ports]
+		while { [$iterator hasMoreElements] } {
+		    set p [$iterator nextElement]
+		    set port [java::new ptolemy.actor.TypedIOPort \
+			    $actor \
+			    [$p getAttribute name]]
+		    puts "Created port [$port toString]"
+		    
+		    if { [$p getAttribute input] == "false" } {
+			$port setOutput 1
+		    }
+		}
+	    }
+	}
+    }
+
+    # Create the relations
+    set iterator [$_schematic relationNames]
+    while { [$iterator hasMoreElements] } {
+	set i [$iterator nextElement]
+
+	# The relation
+	set xmlelt [$_schematic getChildElement "relation" $i]
+	puts [$xmlelt toString]
+	set name [$xmlelt getAttribute name]
+	
+	# Create the relation
+	$simulation addRelation $name
+
+	# The links
+	#set ports {}
+	set links [$xmlelt childElements "link"]
+	while { [$links hasMoreElements] } {
+	    set l [$links nextElement]
+	    set port [$l getAttribute name]
+	    #lappend ports $port
+
+	    set a [lindex [split $port "."] 0]
+	    set p [lindex [split $port "."] 1]
+	    $simulation link $name $a $p
 	}
     }
 }
