@@ -7,6 +7,9 @@ Stabilization of IIR filters using the cepstrum
 .AL "Joseph T. Buck"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
+.Id "IIR filter stabilization"
+.Id "cepstral analysis"
+.Id "filter, IIR, stabilization"
 .pp
 Given a filter
 .EQ
