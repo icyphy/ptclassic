@@ -2302,7 +2302,7 @@ void PTcl::addResult(const char* value) {
 // Append a list of strings to the Tcl result as list elements.
 // 
 //
-void PTcl::addListResult(StringList& value) {
+void PTcl::addListResult(StringList value) {
     StringListIter next(value);
     char* p;
     // Cast to char* to communicate with Tcl.
