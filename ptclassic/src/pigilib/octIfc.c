@@ -656,7 +656,7 @@ int len;
 		(void)sprintf (buf, "%g", p->value.real);
 		return TRUE;
 	case OCT_STRING:
-		if (strlen (p->value.string) >= len) return FALSE;
+		if ((int)strlen (p->value.string) >= len) return FALSE;
 		(void)strcpy (buf, p->value.string);
 		return TRUE;
 	default:
