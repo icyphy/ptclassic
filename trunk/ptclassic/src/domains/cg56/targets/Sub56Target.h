@@ -23,20 +23,9 @@ $Id$
 #include "IntState.h"
 
 class Sub56Target : public CG56Target {
-private:
-	char* uname;
-	void initStates();
-protected:
-	StringState dirName;
-	IntState disCode;
 public:
-	Sub56Target(const char*,const char*);
-	Sub56Target(const Sub56Target&);
-	~Sub56Target();
 	void headerCode();
-	int setup(Galaxy&);
 	int run();
-	void wrapup();
 	Block* clone() const;
 	int isA(const char*) const;
 };
