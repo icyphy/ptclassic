@@ -229,6 +229,7 @@ void CompileTarget::wrapup() {
     cmd += "fi";
     if(system(cmd)) {
 	Error::abortRun("Failed to copy ", templName, " into make.template");
+	delete [] templName;
 	return;
     }
     // Invoke make depend
@@ -255,6 +256,7 @@ void CompileTarget::wrapup() {
     cmd += galaxy()->name();
     cmd += "; ";
     cmd += galaxy()->name();
+    delete [] templName;
     system(cmd);
 }
 
@@ -371,9 +373,7 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
     myCode +=
 "\n"
 "// Read pigi tcl initialization files to set key bindings, colors, etc.\n"
-"const char *expandeddirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
-"char *fulldirname = new char[strlen(expandeddirname) + 1];\n"
-"strcpy(fulldirname, expandeddirname);\n"
+"char *fulldirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
 "if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n"
 "    cerr << \"Tcl_EvalFile: Error in evaluating $PTOLEMY/lib/tcl/pigilib.tcl\";\n"
 "    exit(1);\n"
