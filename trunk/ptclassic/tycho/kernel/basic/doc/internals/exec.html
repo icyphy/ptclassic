@@ -10,7 +10,7 @@ Tycho includes a few different ways of
 <A NAME="running a subprocess">running</A> <A NAME="subprocesses, running">subprocesses</A>.  
 <DL>
 <DT> <CODE>::tycho::invoke</CODE> <I>args</I>
-<DD> The <A HREF="../codeDoc/Path.html">invoke procedure</A>
+<DD> The <A HREF="../codeDoc/Path.html#invoke Proc associated with Path(s)">invoke procedure</A>
  will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
 
 <DT> <CODE>::tycho::Exec</CODE>
@@ -43,13 +43,12 @@ body ::tycho::MyClass::myMethod {} {
 }
 </PRE>
 
- <P>In addition, any menu choice that calls a method that inturn eventually
-calls <CODE>exec</CODE> should be disabled on the Macintosh.  In the example
-below, from <A HREF="../../Edit.html"><CODE>$TYCHO/kernel/Edit.html</CODE></A>,
-we check the <CODE>tcl_platform</CODE> variable and disable the menu item
-if we are on the mac
-<PRE>
-body ::tycho::Edit::constructor {args} {
+ <P>In addition, any menu choice that calls a method that eventually
+calls <CODE>exec</CODE> should be disabled on the Macintosh.  In the
+example below, from <A
+HREF="../../Edit.itcl"><CODE>$TYCHO/kernel/Edit.itcl</CODE></A>, we
+check the <CODE>tcl_platform</CODE> variable and disable the menu item
+if we are on the mac <PRE> body ::tycho::Edit::constructor {args} {
     global tcl_platform
     # . . .
 
@@ -80,8 +79,9 @@ Instead, call <CODE>clock format [clock seconds]</CODE>.
 command has been extended with subcommands that <CODE>copy</CODE>,
 <CODE>delete</CODE>, and <CODE>rename</CODE> files.  In addition,
 there is a <CODE>file</CODE> subcommand that will make a directory.
- <P> The tycho procs <CODE>::tycho::rm</CODE> and ::tycho::mkdir
-can be uses with Itcl2.1 and Itcl2.2.  These commands are wrapper.
+ <P> The tycho procs <CODE>::tycho::rm</CODE> and <CODE>::tycho::mkdir</CODE>
+can be uses with Itcl2.1 and Itcl2.2.  These procs check the itcl
+version number and then act accordingly.
 
 <LI> Be sure to wrap <CODE>exec chmod</CODE> <I>...</I> calls with
 <CODE>catch</CODE> so that the command does not fail on non-unix
@@ -104,7 +104,7 @@ the command that failed to exec.
 Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 96/11/30,
-comments to: <author>eal@eecs.berkeley.edu</author>
+Last updated: $Date$,
+comments to: <author>cxh@eecs.berkeley.edu</author>
 </body>
 </html>
