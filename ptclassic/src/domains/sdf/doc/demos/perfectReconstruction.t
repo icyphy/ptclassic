@@ -51,7 +51,7 @@ Concerning the schematic layout,
 is the basic analysis filter block, and
 .c syn
 is the corresponding synthesis block.
-The source is a brief segment of speech, which is can be compared to the
+The source is a brief segment of speech, which is compared to the
 reconstructed one.
 .SA
 filterBankNonUniform
