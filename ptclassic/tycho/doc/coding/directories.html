@@ -9,17 +9,22 @@
 Tycho has a certain directory structure that you need to know about
 if you are planning on extending tycho.
 <p>
-<OL>
-	<LI> <A HREF="../../README.files">README.files</A>
+<MENU>
+	<LI> <A HREF="../../README.files">$TYCHO/README.files</A> contains
+	a description of the tycho directory structure.
 	<LI> <A HREF="#tylndir and private trees"><CODE>tylndir</CODE> and private trees</A>
-	<LI> <A HREF="#makefile rules"makefile rules</A>
-</OL>
-	
+	<LI> <A HREF="#makefile structure">makefile structure</A>
+	<LI> <A HREF="#makefile rules">makefile rules</A>
+</MENU>
+
+<HR>
 <H3><A NAME="tylndir and private trees"></A><CODE>tylndir</CODE></H3>
 
-The script <CODE>$TYCHO/bin/tylndir</CODE> will create a private
-directory tree with links to a common Tycho tree.  This allows tycho
-developers to maintain their own tree and edit it as they see fit.
+The script 
+<A HREF="../../bin/tylndir"><CODE>$TYCHO/bin/tylndir</CODE></A>
+ will create a private directory tree with links to a common Tycho
+tree.  This allows tycho developers to maintain their own tree and
+edit it as they see fit.
 
  <P>For example, to create your own private tree in <CODE>~/ty</CODE> from
 the sources in <CODE>~ptdesign/tycho</CODE>, do the following:
@@ -41,7 +46,8 @@ it is set each time you log in.
 </OL>
 
 
-<H3><A NAME="makefile rules">makefile rules</A></H3>
+<HR>
+<H3><A NAME="makefile structure">makefile structure</A></H3>
 
 The general structure of a tycho makefile is
 <OL>
@@ -50,10 +56,21 @@ The general structure of a tycho makefile is
 copyright information.
 
 <LI> A section that sets the makefile variables <CODE>ROOT</CODE> and
-<CODE>VPATH</CODE>.  <CODE>ROOT</CODE> is a relative path to the top
-of the tycho distribution, and <CODE>VPATH</CODE> is a pathname to the
-current directory that uses <CODE>$(ROOT)</CODE>.  For example,
-<CODE>$TYCHO/kernel/makefile</CODE> contains:
+<CODE>VPATH</CODE>.
+
+<DL> 
+
+<DT> <CODE>ROOT</CODE>
+<DD> is a relative path to the top of the tycho distribution
+
+<DT> <CODE>VPATH</CODE>
+<DD> is a pathname to the current directory that uses <CODE>$(ROOT)</CODE>.
+
+</DL>
+
+For example, <A
+HREF="../../kernel/makefile"><CODE>$TYCHO/kernel/makefile</CODE></A>
+ contains:
 
 <LISTING>
 # Root of Tycho directory
@@ -63,7 +80,8 @@ ROOT =		..
 VPATH =		$(ROOT)/kernel
 </LISTING>
 
-<LI> A section that includes <CODE>$TYCHO/mk/tycho.mk</CODE>, which is
+<LI> A section that includes <A
+HREF="../../mk/tycho.mk"><CODE>$TYCHO/mk/tycho.mk</CODE></A>, which is
 a makefile that sets common makefile variables.  For example:
 
 <LISTING>
@@ -118,15 +136,19 @@ all install: sources $(MISC_SRCS) tclIndex
 
 
 <LI> The final section includes the makefile that has rules that are
-common to all tycho makefiles.  This file is usually
-<CODE>$TYCHO/mk/no-compile.mk</CODE>
+common to all tycho makefiles.  This <A NAME="no-compile.mk">file</A>
+is usually <A
+HREF="../../mk/no-compile.mk"><CODE>$TYCHO/mk/no-compile.mk</CODE></A>
 
 </OL>
 
 
-The following makefile rules are defined in
-<CODE>$TYCHO/mk/no-compile.mk</CODE> These rules are useful when
-extending Tycho
+<HR>
+<H3><A NAME="makefile rules">makefile rules</A></H3>
+
+The following makefile rules are defined in <A
+HREF="../../mk/no-compile.mk"><CODE>$TYCHO/mk/no-compile.mk</CODE></A>
+These rules are useful when extending Tycho.
 
 
 <DL>
@@ -173,7 +195,8 @@ editing files.   The files removed include: <CODE>*.o core *~ *.bak ,*</CODE>
 
 <DD> This rule does everything <CODE>make clean</CODE> does, and it
 removed any files named in the <CODE>REALCLEAN_STUFF</CODE> makefile
-variable.  For example, in <CODE>$TYCHO/kernel/makefile</CODE>
+variable.  For example, in <A
+HREF="../../kernel/makefile"><CODE>$TYCHO/kernel/makefile</CODE></A>
 <CODE>REALCLEAN_STUFF</CODE> is set so that <CODE>tclIndex</CODE> is
 removed when <CODE>make realclean</CODE> is run
 
