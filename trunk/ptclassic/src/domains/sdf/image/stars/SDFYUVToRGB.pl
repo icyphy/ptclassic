@@ -5,15 +5,15 @@
 	version	{ $Id$ }
 	author	{ Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Read three GrayImages that describe a color image in YUV format and
-output three GrayImages that describe an image in RGB format.
+Read three float matrices that describe a color image in YUV format and
+output three float matrices that describe an image in RGB format.
 	}
 	explanation {
 The YUV format, which is an affine mapping (linear mapping plus offset)
@@ -54,15 +54,15 @@ W. Pratt, \fIDigital Image Processing\fR,
 Wiley & Sons: New York.  1991.  2nd ed.
 	}
 
-	ccinclude { "GrayImage.h", "Error.h" }
+	ccinclude { "Matrix.h", "Error.h" }
 
 //////// OUTPUTS AND STATES.
-	input { name { input1 } type { message } }
-	input { name { input2 } type { message } }
-	input { name { input3 } type { message } }
-	output { name { output1 } type { message } }
-	output { name { output2 } type { message } }
-	output { name { output3 } type { message } }
+	input { name { input1 } type { FLOAT_MATRIX_ENV } }
+	input { name { input2 } type { FLOAT_MATRIX_ENV } }
+	input { name { input3 } type { FLOAT_MATRIX_ENV } }
+	output { name { output1 } type { FLOAT_MATRIX_ENV } }
+	output { name { output2 } type { FLOAT_MATRIX_ENV } }
+	output { name { output3 } type { FLOAT_MATRIX_ENV } }
 
         defstate {
                 name    { CCIR_601 }
@@ -88,43 +88,34 @@ standards; otherwise, the usual YUV space is meant. }
 
 	go {
 		// Read inputs.
-		Envelope envp1, envp2, envp3;
-		(input1%0).getMessage(envp1);
-		(input2%0).getMessage(envp2);
-		(input3%0).getMessage(envp3);
-		TYPE_CHECK(envp1, "GrayImage");
-		TYPE_CHECK(envp2, "GrayImage");
-		TYPE_CHECK(envp3, "GrayImage");
+                Envelope ypkt,upkt,vpkt;
+                (input1%0).getMessage(ypkt);
+                (input2%0).getMessage(upkt);
+                (input3%0).getMessage(vpkt);
 
 		// Change into RGB format
-		GrayImage* redI = (GrayImage*) envp1.writableCopy();
-		GrayImage* greenI = (GrayImage*) envp2.writableCopy();
-		GrayImage* blueI = (GrayImage*) envp3.writableCopy();
-		if (redI->fragmented() || redI->processed() ||
-		    greenI->fragmented() || greenI->processed() ||
-		    blueI->fragmented() || blueI->processed()) {
-			LOG_DEL; delete redI; LOG_DEL; delete greenI;
-			LOG_DEL; delete blueI;
+                const FloatMatrix& yI = *(const FloatMatrix*)ypkt.myData();
+                const FloatMatrix& uI = *(const FloatMatrix*)upkt.myData();
+                const FloatMatrix& vI = *(const FloatMatrix*)vpkt.myData();
+
+		int height = yI.numRows();
+		int width  = yI.numCols();
+
+		if ((uI.numCols() != width) ||
+		    (uI.numRows() != height) ||
+		    (vI.numCols() != width) ||
+		    (vI.numRows() != height)) {
 			Error::abortRun(*this,
-					"Need unfragmented and unprocessed inputs.");
-			return;
-		}
-		const int width = redI->retWidth();
-		const int height = redI->retHeight();
-		if ((greenI->retWidth() != width) ||
-		    (greenI->retHeight() != height) ||
-		    (blueI->retWidth() != width) ||
-		    (blueI->retHeight() != height)) {
-			LOG_DEL; delete redI; LOG_DEL; delete greenI;
-			LOG_DEL; delete blueI;
-			Error::abortRun(*this,
-					"Not all input images are same size.");
+					"Input image sizes don't match.");
 			return;
 		}
 
-		unsigned char* rptr = redI->retData();
-		unsigned char* gptr = greenI->retData();
-		unsigned char* bptr = blueI->retData();
+		LOG_NEW;
+		FloatMatrix& rI = *(new FloatMatrix(yI));
+		LOG_NEW;
+		FloatMatrix& gI = *(new FloatMatrix(uI));
+		LOG_NEW;
+		FloatMatrix& bI = *(new FloatMatrix(vI));
 
 		int i, j, temp1, temp2;
 		double rvalue, gvalue, bvalue;
@@ -133,9 +124,9 @@ standards; otherwise, the usual YUV space is meant. }
 			temp1 = i * width;
 			for (j = 0; j < width; j++){
 				temp2 = j + temp1;
-				yvalue = rptr[temp2];
-				uvalue = gptr[temp2];
-				vvalue = bptr[temp2];
+				yvalue = rI.entry(temp2);
+				uvalue = gI.entry(temp2);
+				vvalue = bI.entry(temp2);
 				if ( int(CCIR_601) ) {
 				  yvalue = 255.0*(yvalue -  16)/219.0;
 				  uvalue = 255.0*(uvalue - 128)/224.0;
@@ -148,18 +139,15 @@ standards; otherwise, the usual YUV space is meant. }
 				rvalue = yvalue + 1.4020*vvalue;
 				gvalue = yvalue - 0.3441*uvalue - 0.7141*vvalue;
 				bvalue = yvalue + 1.7720*uvalue;
-				rptr[temp2] = quant(rvalue);
-				gptr[temp2] = quant(gvalue);
-				bptr[temp2] = quant(bvalue);
+				rI.entry(temp2) = quant(rvalue);
+				gI.entry(temp2) = quant(gvalue);
+				bI.entry(temp2) = quant(bvalue);
 			}
 		}
 
 		// Write whole frame to output here...
-		Envelope envpy(*redI);
-		Envelope envpu(*greenI);
-		Envelope envpv(*blueI);
-		output1%0 << envpy;
-		output2%0 << envpu;
-		output3%0 << envpv;
+		output1%0 << rI;
+		output2%0 << gI;
+		output3%0 << bI;
 	} // end go{}
 } // end defstar{ Yuv2Rgb }

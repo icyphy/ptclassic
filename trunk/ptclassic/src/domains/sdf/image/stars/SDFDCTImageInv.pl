@@ -4,15 +4,15 @@ defstar {
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih, Paul Haskell }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-This star takes a DCTImage input and does inverse
-discrete cosine transform (DCT) coding and outputs a GrayImage.
+This star takes a float matrix input and does inverse
+discrete cosine transform (DCT) coding and outputs a float matrix.
 	}
 	explanation {
 .Id "DCT inverse"
@@ -22,20 +22,41 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 .Id "inverse DCT"
 }
 
-	input { name { input } type { message } }
-	output { name { output } type { message } }
+	input { name { input } type { FLOAT_MATRIX_ENV } }
+	input { 
+	  name { originalW } 
+	  type { int }
+	  desc { The width of the image before DCT. }
+	}
+	input { 
+	  name { originalH } 
+	  type { int }
+	  desc { The height of the image before DCT. }
+	}
+	output { name { output } type { FLOAT_MATRIX_ENV } }
 
-	hinclude { <math.h>, "GrayImage.h", "DCTImage.h", "Error.h" }
+	defstate {
+		name	{ BlockSize }
+		type	{ int }
+		default { 8 }
+		desc	{ Block size of the inverse DCT transform. }
+	}
+
+	hinclude { <math.h>, "Matrix.h", "Error.h" }
 
 	protected {
-		int firstTime;
 		float* cosData;
 		int blocksize;
 	}
 
 	constructor { cosData = 0; }
 
-	setup { firstTime = 1; blocksize = 0; }
+	setup { 
+		blocksize = int(BlockSize);
+		delete [] cosData;
+		LOG_NEW; cosData = new float[blocksize*blocksize];
+		cosSet();
+	}
 
 	destructor { LOG_DEL; delete [] cosData; }
 
@@ -70,15 +91,18 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		name { doInvDCT }
 		type { void }
 		access { protected }
-		arglist {	// can't break string across lines in cfront
-"(unsigned char* outdata, float* indata, int outw, int outh, int inw, int inh)"
-		}
+		arglist { "(FloatMatrix& out, FloatMatrix& in)" }
 		code {
 	register int ndx, ndx2, cntr;
 	int ii, jj, i, j;
 
-	// Do the VERTICAL transform. DCTImage to tmpbuf and copy back...
-	LOG_NEW; float* tmpbuf = new float[(inw > inh ? inw : inh) + blocksize];
+	int outw = out.numCols();
+	int outh = out.numRows();
+	int inw = in.numCols();
+	int inh = in.numRows();
+
+	// Do the VERTICAL transform. image to tmpbuf and copy back...
+	LOG_NEW; float* tmpbuf = new float[(inw>inh ? inw : inh) + blocksize];
 	for(jj = 0; jj < inw; jj++) {
 		for(ii = 0; ii < inh; ii += blocksize) {
 			ndx = ii*inw + jj;
@@ -86,7 +110,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 				double sum = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
 					sum += invD(i, cntr) *
-					       indata[ndx + cntr*inw];
+					       in.entry(ndx + cntr*inw);
 				}
 				tmpbuf[ii+i] = sum;
 			}
@@ -94,7 +118,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 
 		// Copy data back to main buffer;
 		for(i = 0; i < inh; i++) {
-			indata[i*inw + jj] = tmpbuf[i];
+			in.entry(i*inw + jj) = tmpbuf[i];
 		}
 	} // end for(jj)
 
@@ -105,7 +129,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 			for(j = 0; j < blocksize; j++) {
 				double sum = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
-					sum += invD(j, cntr) * indata[ndx+cntr];
+				  sum += invD(j, cntr) * in.entry(ndx+cntr);
 				}
 				tmpbuf[jj+j] = sum;
 			}
@@ -114,15 +138,15 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		// Copy to "outdata".
 		ndx2 = ii*outw;
 		for(j = 0; j < outw; j++) {
-			if (tmpbuf[j] < 0.5) {
-				outdata[ndx2+j] = (unsigned char) 0;
-			}
-			else if (tmpbuf[j] > 254.5) {
-				outdata[ndx2+j] = (unsigned char) 255;
-			}
-			else {
-				outdata[ndx2+j] = (unsigned char) (tmpbuf[j] + 0.5);
-			}
+		  if (tmpbuf[j] < 0.5) {
+		    out.entry(ndx2+j) = (unsigned char) 0;
+		  }
+		  else if (tmpbuf[j] > 254.5) {
+		    out.entry(ndx2+j) = (unsigned char) 255;
+		  }
+		  else {
+		    out.entry(ndx2+j) = (unsigned char) (tmpbuf[j] + 0.5);
+		  }
 		}
 	} // end for(ii)
 
@@ -130,49 +154,37 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 	}
 	} // end doInvDCT()
 
-
-	method {
-		name { doFirst }
-		type { void }
-		arglist { "(DCTImage* di)" }
-		access { protected }
-		code {
-			blocksize = di->retBS();
-			LOG_DEL; delete [] cosData;
-			LOG_NEW; cosData = new float[blocksize*blocksize];
-			cosSet();
-		}
-	} // end doFirst()
-
-
 	go {
 // Read input image.
-		Envelope inEnvp;
-		(input%0).getMessage(inEnvp);
-		TYPE_CHECK(inEnvp, "DCTImage");
+                Envelope pkt;
+                (input%0).getMessage(pkt);
+                const FloatMatrix& inImage = *(const FloatMatrix*)pkt.myData();
 
-		// Need to call "writableCopy()" rather than "myData()"
-		// because the doInvDCT function modifies "dctimage"!!
-		DCTImage* dctimage = (DCTImage*) inEnvp.writableCopy();
-		if (dctimage->fragmented() || dctimage->processed()) {
-			LOG_DEL; delete dctimage;
-			Error::abortRun(*this,
-					"Can't decode a fragmented or processed image.");
-			return;
+		if (pkt.empty()) {
+		  Error::abortRun(*this, "Input is a dummyMessage.");
+		  return;
 		}
 
-		// Set the value of blocksize and initialize cosData array
-		if (firstTime) { doFirst(dctimage); firstTime = 0; }
+		int outw = int(originalW%0);
+		int outh = int(originalH%0);
 
+		//Allocate output image.
 		LOG_NEW;
-		GrayImage* grayout = new GrayImage((BaseImage&) *dctimage);
-		doInvDCT(grayout->retData(), dctimage->retData(),
-			 grayout->retWidth(), grayout->retHeight(),
-			 dctimage->fullWidth(), dctimage->fullHeight());
+		FloatMatrix& outImage = *(new FloatMatrix(outh,outw));
+
+		// Need to allocate a new matrix for inImage
+		// because the doInvDCT function modifies the matrix data!!
+		LOG_NEW;
+		FloatMatrix& tmpImage = *(new FloatMatrix(inImage));
+
+		// Do inverse transform.
+		doInvDCT(outImage, tmpImage);
+
+		LOG_DEL; delete &tmpImage;
 
 // Since we used writableCopy(), we own "dctimage".
-		LOG_DEL; delete dctimage;
-		Envelope temp(*grayout);
-		output%0 << temp;
+		output%0 << outImage;
 	}
 } // end defstar{ DctInv }
+
+

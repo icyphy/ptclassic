@@ -1,171 +1,156 @@
 defstar {
-	name		{ DCTImgCdeInv }
-	domain		{ SDF }
-	version		{ $Id$ }
-	author		{ Paul Haskell }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+  name { DCTImgCdeInv }
+  domain { SDF }
+  version { $Id$ }
+  author { Paul Haskell }
+  copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-	location	{ SDF image library }
-	desc {
-This star reads two coded DCTImages (one high priority and one low-priority),
-inverts the run-length encoding, and outputs the resulting DCTImage.
+  }
+  location { SDF image library }
+  desc {
+This star reads two coded DCT images (one high priority and one low-priority),
+which are represented by two input FloatMatrix particle. 
+inverts the run-length encoding, and outputs the resulting image.
 Protection is built in to avoid crashing even if some of the coded
 input data is affected by loss.
 
-Note: This star is different from the SDFRunLenInv star.
-This one works on DCTImages, not GrayImages.
-	}
-	seealso { DCTImageCode }
+  }
+  seealso { DCTImageCode }
+  
+  input	{ name	{ hiport }	type { FLOAT_MATRIX_ENV } }
+  input	{ name	{ loport }	type { FLOAT_MATRIX_ENV } }
 
-	input	{ name	{ hiport }	type { message } }
-	input	{ name	{ loport }	type { message } }
-	output	{ name	{ output }	type { message } }
+  input { 
+    name { originalW } 
+    type { int }
+    desc { The width of the original image before DCTImageCode. }
+  }
+  input { 
+    name { originalH } 
+    type { int }
+    desc { The height of the original image before DCTImageCode. }
+  }
 
-	defstate {
-		name	{ HiPri }
-		type	{ int }
-		default	{ 1 }
-		desc	{ Number of DCT coeffs per block to 'highport' input. }
-	}
+  output { name	{ output }	type { FLOAT_MATRIX_ENV } }
 
-//// CODE
-	hinclude { "DCTImage.h", "Error.h" }
+  defstate {
+    name { BlockSize }
+    type { int }
+    default { 8 }
+    desc { Block size of the DCT transformed image. }
+  }
 
-	code {
+  defstate {
+    name	{ HiPri }
+    type	{ int }
+    default	{ 1 }
+    desc	{ Number of DCT coeffs per block to 'highport' input. }
+  }
+
+  //// CODE
+  hinclude { "Matrix.h", "Error.h" }
+
+  code {
 // Numbers unlikely to come from a DCT...
-		const float StartOfBlock = 524288.0;
-		const float StartOfRun = 1048576.0;
+	  const float StartOfBlock = 524288.0;
+	  const float StartOfRun = 1048576.0;
+  }
+
+
+  method { // Do the run-length decoding.
+    name { invRunLen }
+    type { "FloatMatrix&" }
+    access { protected }
+    arglist { "(const FloatMatrix& hiImage, const FloatMatrix& loImage, int width, int height)" }
+    code {
+      // Initialize.
+      const int bSize = int(BlockSize);
+      const int fullFrame = width * height;
+
+      // Do DC image first.
+      int i, j, k, blk;
+
+      LOG_NEW; float* outPtr = new float[fullFrame];
+      for(k = 0; k < fullFrame; k++) { outPtr[k] = 0.0; }
+      
+      i = 0;
+      for(j = 0; j < fullFrame; j += bSize * bSize) {
+	for(k = 0; k < HiPri; k++) {
+	  outPtr[j + k] = hiImage.entry(i++);
 	}
+      }
+      
+      // While still low priority input data left...
+      const int size = loImage.numRows() * loImage.numCols();
+      
+      i = 0;
+      while (i < size) {
 
-
-	method { // Do the run-length decoding.
-		name { invRunLen }
-		type { "void" }
-		access { protected }
-		arglist { "(DCTImage& hiImage, const DCTImage& loImage)" }
-		code {
-// Initialize.
-			const int bSize = hiImage.retBS();
-			const int fullFrame = hiImage.fullWidth() *
-					hiImage.fullHeight();
-
-// Do DC image first.
-			int i, j, k, blk;
-			const float* inPtr = hiImage.constData();
-			LOG_NEW; float* outPtr = new float[fullFrame];
-			for(k = 0; k < fullFrame; k++) { outPtr[k] = 0.0; }
-
-			i = 0;
-			for(j = 0; j < fullFrame; j += bSize * bSize) {
-				for(k = 0; k < HiPri; k++) {
-					outPtr[j + k] = inPtr[i++];
-			}	}
-
-// While still low priority input data left...
-			const int size = loImage.retFullSize();
-			inPtr = loImage.constData();
-
-			i = 0;
-			while (i < size) {
-
-// Process each block, which starts with "StartOfBlock".
-				while ((i < size) && (inPtr[i] != StartOfBlock)) {
-					i++;
-				}
-				if (i < size-2) {
-					i++;
-					blk = int(inPtr[i++]);
-					blk *= bSize*bSize;
-					if ((blk >= 0) && (blk < fullFrame)) {
-						blk += HiPri;
-						k = 0;
-						while ((i < size) && (k < bSize*bSize - HiPri)
-								&& (inPtr[i] != StartOfBlock)) {
-							if (inPtr[i] == StartOfRun) {
-								i++;
-								if (i < size) {
-									int runLen = int(inPtr[i++]);
-									for(int l = 0; l < runLen; l++ ) {
-										outPtr[blk+k] = 0.0;
-										k++;
-								}	}
-							} else {
-								outPtr[blk+k] = inPtr[i++];
-								k++;
-						}	}
-					} // if (blk OK)
-				}
-			} // end while (indx < size)
-
-// Copy the data back.
-			hiImage.setSize(fullFrame);
-			copy(fullFrame, hiImage.retData(), outPtr);
-			LOG_DEL; delete [] outPtr;
-		}
-	} // end { invRunLen }
-
-
-	method {
-		name { copy }
-		type { "void" }
-		access { private }
-		arglist { "(const int c, float* to, const float* from)" }
-		code {
-			for(int i = 0; i < c % 5; i++) {
-				*to++ = *from++;
-			}
-			for(; i < c; i += 5) {
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-			}
-	}	}
-
-
-	go {
-// Read input images.
-		Envelope hiEnvp;
-		(hiport%0).getMessage(hiEnvp);
-		TYPE_CHECK(hiEnvp, "DCTImage");
-		DCTImage* hiImage = (DCTImage*) hiEnvp.writableCopy();
-
-		Envelope loEnvp;
-		(loport%0).getMessage(loEnvp);
-		TYPE_CHECK(loEnvp, "DCTImage");
-		const DCTImage* loImage = (const DCTImage*) loEnvp.myData();
-
-// Check some things.
-		if ((hiImage->retBS() != loImage->retBS()) ||
-				(hiImage->fullWidth() != loImage->fullWidth()) ||
-				(hiImage->fullHeight() != loImage->fullHeight())) {
-			LOG_DEL; delete hiImage;
-			Error::abortRun(*this, "Two input images don't match");
-			return;
-		}
-		if (hiImage->fragmented() || (hiImage->retFullSize() !=
-				int(HiPri) * (hiImage->fullWidth() * hiImage->fullHeight()) /
-				(hiImage->retBS() * hiImage->retBS()))) {
-			LOG_DEL; delete hiImage;
-			Error::abortRun(*this, "Hi-pri image wrong size.");
-			return;
-		}
-		if (loImage->fragmented()) {
-			LOG_DEL; delete hiImage;
-			Error::abortRun(*this, "Low-pri image fragmented.");
-			return;
-		}
-
-// Do the conversion.
-		invRunLen(*hiImage, *loImage);
-
-// Send output.
-		Envelope temp(*hiImage);
-		output%0 << temp;
+	// Process each block, which starts with "StartOfBlock".
+	while ((i < size) && (loImage.entry(i) != StartOfBlock)) {
+	  i++;
 	}
+	if (i < size-2) {
+	  i++;
+	  blk = int(loImage.entry(i++));
+	  blk *= bSize*bSize;
+	  if ((blk >= 0) && (blk < fullFrame)) {
+	    blk += HiPri;
+	    k = 0;
+	    while ((i < size) && (k < bSize*bSize - HiPri)
+		   && (loImage.entry(i) != StartOfBlock)) {
+	      if (loImage.entry(i) == StartOfRun) {
+		i++;
+		if (i < size) {
+		  int runLen = int(loImage.entry(i++));
+		  for(int l = 0; l < runLen; l++ ) {
+		    outPtr[blk+k] = 0.0;
+		    k++;
+		  }
+		}
+	      } else {
+		outPtr[blk+k] = loImage.entry(i++);
+		k++;
+	      }
+	    }
+	  } // if (blk OK)
+	}
+      } // end while (indx < size)
+      
+      // Copy the data to return.
+      LOG_NEW; FloatMatrix& outImage = *(new FloatMatrix(height,width));
+      for(i = 0; i < fullFrame; i++) {
+	outImage.entry(i) = outPtr[i];
+      }
+      LOG_DEL; delete [] outPtr;
+
+      return outImage;
+    }
+  } // end { invRunLen }
+  
+  go {
+    // Read input images.
+    Envelope hiEnvp;
+    (hiport%0).getMessage(hiEnvp);
+    const FloatMatrix& hiImage = *(const FloatMatrix *) hiEnvp.myData();
+
+    Envelope loEnvp;
+    (loport%0).getMessage(loEnvp);
+    const FloatMatrix& loImage = *(const FloatMatrix *) loEnvp.myData();
+
+    if ( hiEnvp.empty() || loEnvp.empty() ) {
+      Error::abortRun(*this, "Input is a dummyMessage.");
+      return;
+    }
+
+    // Do the conversion.
+    FloatMatrix& outImage = invRunLen(hiImage, loImage,
+                                      int(originalW%0),int(originalH%0));
+
+    // Send output.
+    output%0 << outImage;
+  }
 } // end defstar{ DctImgCdeInv }
