@@ -42,14 +42,14 @@
 # At link time, Ptolemy is linked against libexttools.a (MathematicaIfc class)
 # and either
 # (a) libptmathematica.a if Mathematica is not installed, or
-# (b) libMFelf.a if Mathematica is installed.
+# (b) libMLelf.a if Mathematica is installed.
 #
 MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
 ifeq ("$(MATHEMATICADIR)","")
 MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
 MATHEMATICAEXT_LIB = 	-lptmathematica
 else
-MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMFelf
+MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMLelf
 endif
 MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 
