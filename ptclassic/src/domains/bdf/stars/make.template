@@ -11,34 +11,39 @@
 
 ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/bdf/stars
-# KERNDIR is the directory containing the Ptolemy kernel source.
-KERNDIR = $(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# SDFDIR is the directory containing SDF domain support
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
 # BDFDIR is the directory containing BDF domain support
 BDFDIR = $(ROOT)/src/domains/bdf/kernel
 
-GPPFLAGS = -g
-GNU = g++
-INCL = -I$(BDFDIR) -I$(KERNDIR)
-GNUINCLUDE = /usr/gnu/lib/g++-include
+INCL = -I$(BDFDIR) -I$(SDFDIR) -I$(KERNDIR)
 
-.SUFFIXES: .o .cc .h .pl
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -I$(VPATH) -c  $<
+# no library
+LIB=dummy
 
-.pl.cc:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+# source files for all stars, using preprocessor
+PL_SRCS=\
+ BDFFork.pl \
+ BDFNot.pl \
+ BDFSelect.pl \
+ BDFSwitch.pl \
+ BDFTrue.pl
 
-.pl.h:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
 
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
 
-SRCS=BDFFork.pl BDFNot.pl BDFSelect.pl BDFSwitch.pl
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
 
-CCS=$(SRCS:.pl=.cc)
-
-OBJS=$(SRCS:.pl=.o)
-
-HDRS=$(SRCS:.pl=.h)
+EXTRA_SRCS=bdfstars.mk $(PL_SRCS)
 
 all:		makefile $(OBJS)
 
@@ -46,19 +51,14 @@ all:		makefile $(OBJS)
 install:	all
 		@echo Installation complete.
 
-sources:	$(CCS) $(HDRS) make.template bdfstars.mk
+# rule for making star list for makefile inclusion.
+# The definition is extracted from the PL_SRCS definition above.
+bdfstars.mk:	make.template
+		rm -f bdfstars.mk
+		genStarList BDF > bdfstars.mk
 
-clean:
-		rm -f *.o core *~ *#
-depend:		$(CCS)
-		makedepend $(INCL) -I$(GNUINCLUDE) $(CCS)
-
-makefile:	make.template
-		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
