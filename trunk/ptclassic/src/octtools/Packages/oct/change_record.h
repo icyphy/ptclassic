@@ -27,6 +27,7 @@
 #ifndef OCT_CHANGE_RECORD_H
 #define OCT_CHANGE_RECORD_H
 #include "ansi.h"
+#include "geo.h"		/* Pickup decl for struct change_record */
 void oct_change_record_desc_set
 	ARGS((struct object_desc *object_desc));
 
