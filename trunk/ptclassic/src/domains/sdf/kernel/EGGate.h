@@ -262,7 +262,7 @@ public:
 		DoubleLinkIter(l), refMaster(0) {}
 	EGGate *next() {return (EGGate*) DoubleLinkIter::next();}
  
-	EGGate *operator++ () {return next();}
+	EGGate *operator++ (POSTFIX_OP) {return next();}
 	void reset() { DoubleLinkIter :: reset(); refMaster = 0; }
 
 	// return the next gate connected to a new master that is not

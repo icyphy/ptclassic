@@ -255,14 +255,14 @@ class InDEMPHIter : public MPHIter {
 public:
 	InDEMPHIter(MultiInDEPort& mph) : MPHIter(mph) {}
 	InDEPort* next() { return (InDEPort*) MPHIter::next();}
-	InDEPort* operator++() { return next();}
+	InDEPort* operator++(POSTFIX_OP) { return next();}
 };
 
 class OutDEMPHIter : public MPHIter {
 public:
 	OutDEMPHIter(MultiOutDEPort& mph) : MPHIter(mph) {}
 	OutDEPort* next() { return (OutDEPort*) MPHIter::next();}
-	OutDEPort* operator++() { return next();}
+	OutDEPort* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif

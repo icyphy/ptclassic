@@ -102,7 +102,7 @@ public:
 
 	// get the next node referenced in the list
 	LSNode *next() {return (LSNode*)ListIter::next();}
-	LSNode *operator++ () {return next();}
+	LSNode *operator++ (POSTFIX_OP) {return next();}
 
 	// reset to the beginning of the list
 	void reset() {ListIter::reset();}

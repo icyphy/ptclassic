@@ -141,7 +141,7 @@ class LSIter : public EGIter {
 public:
 	LSIter(LSGraph& g) : EGIter(g) {}
 	LSNode* next() { return (LSNode*) EGIter :: next(); }
-	LSNode* operator++() { return next(); }
+	LSNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 #endif

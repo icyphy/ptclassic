@@ -152,7 +152,7 @@ class MergeListIter : public DoubleLinkIter
 public:
 	MergeListIter(const MergeList& l) : DoubleLinkIter(l) {}
 	MergeLink *next() {return (MergeLink*)DoubleLinkIter::nextLink();}
-	MergeLink* operator++ () { return next();}
+	MergeLink* operator++ (POSTFIX_OP) { return next();}
 };
 
 #endif
