@@ -108,6 +108,9 @@ public:
         // my domain
         const char* domain() const;
 
+	// copySchedule, not performing the SDF scheduling
+	void copySchedule(SDFSchedule& s);
+
 	// Generate code using the Target to produce the right language
 	void compileRun();
 
