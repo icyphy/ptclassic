@@ -8,6 +8,7 @@ $Id$
 #include <stdio.h>
 #include <sys/file.h>
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <pwd.h>
 #include "local.h"
 #include "rpc.h"
@@ -192,50 +193,25 @@ static dmTextItem items[] = {
 #undef ITEMS_N
 }
 
-/*
-Given a directory pathname, expand all the symlinks if any in the path
-and return it.
-This is a hack.  There should be a better way of doing this.
-Inputs: dirPath = directory pathname string
-Outputs: expanded = pointer to new string containing result, can UFree()
-    the string after use.
-*/
-boolean
-SymlinkExpand(dirPath, expanded)
-char *dirPath, **expanded;
-{
-    char *getwd(), *oldCwd, buf[MAXPATHLEN];
-
-    /* get cwd and save it */
-    ERR_IF2(getwd(buf) == 0, buf);
-    ERR_IF1(!StrDup(&oldCwd, buf));
-
-    /* do the expansion */
-    ERR_IF2(chdir(dirPath) != 0, "SymlinkExpand: cannot chdir()");
-    ERR_IF2(getwd(buf) == 0, buf);
-    ERR_IF1(!StrDup(expanded, buf));
-
-    /* change back to old cwd */
-    ERR_IF2(chdir(oldCwd) != 0, "SymlinkExpand: cannot chdir()");
-    UFree(oldCwd);
-    return (TRUE);
-}
-    
 
 /* 11/18/89
 Tries to convert the cell name of the facet into ~user format.
+It does this by comparing the absolute path of the facet with
+the path of the user home directory.  It also compares with the
+path of the ptolemy user's home directory, since this user typically
+contains many shared projects.
 Inputs: tPath = buffer for output.
 Outputs: tPath = filled with cell name in ~user/... format.
-Caveats: There is a hack in the code to handle a special case that
-    should be handled more generally but, I can't think of any good
-    ways of handling it right now.  (edg 5/27/90)
+Caveats: The code should support more "shared users" than just ~ptolemy.
+     In the extreme, it would search the entire /etc/passwd file.
+     But this if probably too costly.
 */
 static boolean
 GetTildePath(facetPtr, tPath)
 octObject *facetPtr;
 char *tPath;
 {
-    char *fullName, *dir, *edir;
+    char *fullName, expanded_path[MAXPATHLEN], *dir, *edir;
     int uid, n;
     struct passwd *pwent;
     char *kludge;
@@ -246,30 +222,43 @@ char *tPath;
     uid = getuid();
     ERR_IF2((pwent = getpwuid(uid)) == NULL,
 	"GetTildePath: Cannot get password entry");
-    dir = pwent->pw_dir;
-    ERR_IF1(!SymlinkExpand(dir, &edir));
-    n = strlen(edir);
-    if (strncmp(fullName, edir, n) == 0) {
-	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
-	return (TRUE);
-    }
-    UFree(edir);
 
-    /* check if in the tool's directory tree */
-    ERR_IF2((pwent = getpwnam(UToolName)) == NULL,
-	"GetTildePath: Cannot get password entry");
-    dir = pwent->pw_dir;
-    ERR_IF1(!SymlinkExpand(dir, &edir));
-    n = strlen(edir);
-    if (strncmp(fullName, edir, n) == 0) {
+    /* In case pw entry is not a real directory, but rather is connected
+       via symbolic links to a real directory, expand it.  */
+    ERR_IF2((AbsPath(pwent->pw_dir, expanded_path) < 0),
+        "GetTildePath: Path expansion failed on /etc/passwd entry.");
+
+    n = strlen(expanded_path);
+
+    /* If the fullName begins with the absolute path name of the user's
+       home directory, convert to ~user format. */
+    if (strncmp(fullName, expanded_path, n) == 0) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
 	return (TRUE);
     }
-    UFree(edir);
+
+    /* If the fullName begins with the absolute path name of ptolemy's
+       home directory, convert to ~ptolemy format. */
+    ERR_IF2((pwent = getpwnam(UToolName)) == NULL,
+        "GetTildePath: Cannot get password entry for 'ptolemy'");
+
+    /* In case entry is not a real directory, but rather is connected
+       via symbolic links to a real directory, expand it.  */
+    ERR_IF2((AbsPath(pwent->pw_dir, expanded_path) < 0),
+        "GetTildePath: Path expansion failed on /etc/passwd entry.");
+
+    n = strlen(expanded_path);
+
+    if (strncmp(fullName, expanded_path, n) == 0) {
+	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
+	return (TRUE);
+    }
 
     /***** Hack Alert  Hack Alert  Hack Alert  Hack Alert *****
     Handles the special case of ptolemy directory structure on ohm.
     Sorry, I don't know any other ways of fixing this problem right now.
+    NOTE: THIS CAN BE DELETED AS SOON AS WE GET AWAY FROM THIS FILE
+    ORGANIZATION AN HAVE EVERYTHING UNDER ~ptolemy.
     */
     kludge = "/home/ohm0/tools/share/ptolemy";
     n = strlen(kludge);
@@ -278,8 +267,55 @@ char *tPath;
 	return (TRUE);
     }
 
-    ErrAdd("GetTildePath: cannot convert absolute path to ~user");
-    return (FALSE);
+    /* Issue a warning that absolute path name is being used */
+    PrintErr("Warning: Can't convert absolute path to ~user. Icon master should not henceforth be moved.");
+    strcpy(tPath,fullName);
+    return (TRUE);
+}
+
+/*
+ * Return the expanded, absolute path corresponding to a directory.
+ * "path" should be a directory pathname; "abs_path" should be a
+ * buffer of MAXPATHLEN characters where the expanded path name will
+ * be put.  Returns 0 on success, and one of the following on error:
+ *
+ *	-1	Couldn't get current directory
+ *	-2	Couldn't stat new "path"
+ *	-3	"path" isn't a directory
+ *	-4	Couldn't cd to "path"
+ *	-5	Couldn't get pathname of "path".
+ */
+int
+AbsPath(path, abs_path)
+	char		*path;
+	char		*abs_path;
+{
+	char		oldpath[MAXPATHLEN];
+	struct stat	s;
+
+	if (getwd(oldpath) == NULL) {
+		return (-1);
+	}
+
+	if (stat(path, &s) < 0) {
+		return (-2);
+	}
+
+	if ((s.st_mode & S_IFMT) != S_IFDIR) {
+		return (-3);
+	}
+
+	if (chdir(path) < 0) {
+		return (-4);
+	}
+
+	if (getwd(abs_path) == NULL) {
+		return (-5);
+	}
+
+	(void) chdir(oldpath);
+
+	return (0);
 }
 
 int 
