@@ -124,6 +124,9 @@ tar -ztvf pt0.7.1.other.src.tar.gz
 </PRE>
 If you get a warning like <CODE>tar: Error exit delayed from previous errors</CODE>, you can ignore it.  The warning probably comes from files that 
 are included twice in the tar file because of symbolic links.
+ <br>(Note that there seems to be 
+<a href="ptntbugs.html#tar">problem with <CODE>$PTOLEMY/colors/ptolemy/con</CODE></a>, so you may want to use Winzip instead of GNU tar here).
+
 
 <li> Building Itcl, Octtools and Ptolemy will require about 400Mb of
 space for the sources, build directories and installation directories.
