@@ -9,7 +9,7 @@
 wm iconify .
 
 # Create the tycho namespace
-namespace ::tycho
+namespace eval ::tycho {}
 
 if [info exist env(PTOLEMY)] {
     set TYCHO $env(PTOLEMY)/tycho
