@@ -200,9 +200,14 @@ else
 	    fi
 	    if test ! -d "$JAVAHOME"; then
 	            AC_MSG_WARN(["$JAVAHOME" is not a directory, using the default /opt/jdk1.1.1])
-		    JAVAHOME=`cd /opt/jdk1.1.1; pwd`	
-		    if test ! -d "$JAVAHOME"; then
-			    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist. Try --with-java=DIR, or set the JAVA_HOME environment variable.)
+		    if test -d "/opt/jdk1.1.1"; then
+			    JAVAHOME=`cd /opt/jdk1.1.1; pwd`	
+		    else
+			    AC_MSG_ERROR([
+  Java directory /opt/jdk1.1.1 doesn't exist.
+  Try --with-java=DIR, or set the JAVA_HOME environment variable.
+  If you don't have java, try --without-java. If you are building within Tycho,
+  try 'make tclexts CONFIGURE_ARGS=--without-java'.] )
 		    fi	
 	    fi	
 	fi
@@ -219,11 +224,21 @@ else
 			
 		fi
 	else
-		AC_MSG_ERROR(Cannot find $JAVAHOME/bin/javac, try --with-java=DIR, or set the JAVA_HOME environment variable.)
+			    AC_MSG_ERROR([
+  Cannot find $JAVAHOME/bin/javac.
+  Try --with-java=DIR, or set the JAVA_HOME environment variable.
+  If you don't have java, try --without-java. If you are building within Tycho,
+  try 'make tclexts CONFIGURE_ARGS=--without-java'.] )
+		AC_MSG_ERROR(
 	fi
 
 	if test ! -f $JAVAHOME/include/StubPreamble.h; then
-	    AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK), or set the JAVA_HOME environment variable, or use --without-java if you don't have Java. )
+	    AC_MSG_ERROR([
+  There's no StubPreamble.h in $JAVAHOME/include.
+  Try --with-java=DIR, or set the JAVA_HOME environment variable.
+  If you don't have java, try --without-java. If you are building within Tycho,
+  try 'make tclexts CONFIGURE_ARGS=--without-java'.] )
+
 	fi
 
 
@@ -245,7 +260,10 @@ else
 	if test -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
 		AC_MSG_RESULT($JAVA_ARCH_INCLUDE/oobj_md.h)
 	else
-	    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
+
+	    AC_MSG_ERROR([There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;
+use the --with-javaarchinclude= configure flag to specify the location
+of the architecture dependent include files in the JDK.])
 	fi
 
 	case "`uname -s" in
@@ -272,7 +290,9 @@ else
 	if test -f $JAVA_ARCH_LIB/$JAVA_ARCH_LIB_CHK; then
 		AC_MSG_RESULT($JAVA_ARCH_LIB/$JAVA_ARCH_LIB_CHK)
 	else
-	    AC_MSG_ERROR(There's no $JAVA_ARCH_LIB_CHK in $JAVA_ARCH_LIB. Use the --with-javaarchlib= configure flag to specify the location of the architecture dependent library files in the JDK. )
+	    AC_MSG_ERROR([There's no $JAVA_ARCH_LIB_CHK in $JAVA_ARCH_LIB.
+Use the --with-javaarchlib= configure flag to specify the location of the
+architecture dependent library files in the JDK.])
 	fi
 
 
