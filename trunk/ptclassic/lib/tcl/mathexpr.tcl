@@ -37,7 +37,7 @@
 #
 # becomes
 #
-# sampleExpr {cos(2*{PI}*($i-1)/100)} 1 100
+# rangeApplyExpression {cos(2*{PI}*($i-1)/100)} 1 100
 #
 # Here, PI is a parameter of the Ptolemy system which is substituted
 # before the Tcl command is passed to the Tcl interpreter.
@@ -50,15 +50,15 @@ if { [info commands add_to_help] == "" } {
   proc add_to_help {cmd argl desc} {}
 }
 
-# Function: listSampleExpr
+# Function: listApplyExpression
 
-add_to_help listSampleExpr {<tclexpr> <list>} {
+add_to_help listApplyExpression {<tclexpr> <list>} {
 Produces a new list by applying each item in list to the tclexpr
 by substituting for the variable i in tclexpr.  The tclexpr should
 be in an unevaluated form, e.g. { cos($i) }.
 }
 
-proc listSampleExpr {tclexpr thelist} {
+proc listApplyExpression {tclexpr thelist} {
   foreach i $thelist {
     lappend newlist [expr $tclexpr]
   }
@@ -117,16 +117,16 @@ proc range {minindex maxindex {inc 1}} {
   return $rangelist
 }
 
-# Function: sampleExpr
+# Function: rangeApplyExpression
 
-add_to_help sampleExpr {<tclexpr> <min> <max> ?<increment>?} {
+add_to_help rangeApplyExpression {<tclexpr> <min> <max> ?<increment>?} {
 Evaluate tclexpr at values of i running from min to max at increments
 of increment to produce a list.  If the sequence of numbers will never
 reach max, then the routine will return an empty list.  The tclexpr should
 be in an unevaluated form, e.g. { cos($i) }. 
 }
 
-proc sampleExpr {tclexpr minindex maxindex {inc 1}} {
+proc rangeApplyExpression {tclexpr minindex maxindex {inc 1}} {
   if { [sign [expr "$maxindex - $minindex"]] == [sign $inc] } {
     for {set i $minindex} {$i <= $maxindex} {incr i $inc} {
       lappend rangelist [expr $tclexpr]
