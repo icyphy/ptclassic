@@ -156,7 +156,7 @@ int ArchTarget :: runIt(VHDLStar* s) {
     // Add to the declarations.
     existFiring->decls << mainDecls;
     // Add to the local variable declarations.
-    existFiring->decls << addVariableDecls(&localVariableList);
+    existFiring->decls << addVariableDecls(&localVariableList, 0, 1);
     // Add to the variable list.
     existFiring->variableList->addList(firingVariableList);
     // Add to the action list.
@@ -180,7 +180,7 @@ int ArchTarget :: runIt(VHDLStar* s) {
 
     // If there are local/temporary variables, put them into
     // mainDecls here.  Then clear the localVariableList.
-    fi->decls << addVariableDecls(&localVariableList);
+    fi->decls << addVariableDecls(&localVariableList, 0, 1);
     localVariableList.initialize();
 
     fi->variableList = firingVariableList.newCopy();
@@ -1210,7 +1210,6 @@ void ArchTarget :: frameCode() {
   configuration_declaration << addConfigurationDeclarations(&muxCompDeclList, level);
   configuration_declaration << addConfigurationDeclarations(&regCompDeclList, level);
 
-
   // Combine all sections of code.
   StringList code = headerComment();
 
@@ -1252,8 +1251,8 @@ void ArchTarget :: frameCode() {
   myCode << "\n" << component_mappings;
   myCode << "\n-- architecture_body_closer\n";
   myCode << "\n" << architecture_body_closer;
-  myCode << "\n-- configuration_declaration\n";
-  myCode << "\n" << configuration_declaration;
+  //  myCode << "\n-- configuration_declaration\n";
+  //  myCode << "\n" << configuration_declaration;
 
   // Prepend the header, declarations, and initialization.
   prepend(code, myCode);
@@ -2176,7 +2175,7 @@ StringList ArchTarget :: addWaitStatement(VHDLFiring* firing, int level) {
 // Add in variable refs here from variableList.
 StringList ArchTarget :: addVariableRefs(VHDLFiring* firing, int level) {
   StringList all;
-      all << addVariableDecls(firing->variableList,level);
+      all << addVariableDecls(firing->variableList, level, 1);
   return all;
 }
 
