@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSGeodesic.h"
 #include "PrecisionState.h"
 
-const bitWord PB_GLOBAL = 0x20;
+extern const bitWord PB_GLOBAL /* = 0x20 */;
 extern const Attribute P_GLOBAL;
 extern const Attribute P_LOCAL;
 
