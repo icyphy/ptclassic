@@ -66,20 +66,23 @@ be a parameter.
 	setup {
 		// check for required program.
 		if (progNotFound("ptplay",
-			"Sound files cannot be played without it."))
+				 "Sound files cannot be played without it."))
 			return;
-		const char* sf = saveFile;
+
 		// if name is empty, use a temp file.
+		const char* sf = saveFile;
+		delete [] fileName;
 		if (sf == NULL || *sf == 0) {
-			delete [] fileName;
 			fileName = tempFileName();
 			delFile = TRUE;
 		}
-		else fileName = savestring (expandPathName(sf));
+		else {
+			fileName = savestring(expandPathName(sf));
+		}
+
 		// should check if file already exists here
-		if ((strm = fopen (fileName, "w")) == NULL) {
-			Error::abortRun (*this, 
-				"Can't open file ", fileName);
+		if ((strm = fopen(fileName, "w")) == NULL) {
+			Error::abortRun (*this, "Can't open file ", fileName);
 		}
 	}
 // mulaw compression routine
