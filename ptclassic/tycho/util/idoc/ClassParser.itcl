@@ -89,7 +89,7 @@ class ::tycho::IDocSys {
     ###################################################################
     ####                   private methods                         ####
 
-    # Read the current file, return formatted data
+    # Read the current file, call parseData
     private method readFile {filename}
 
     # Parse the data for a single file, creating and modifying classes as needed
@@ -171,46 +171,10 @@ body ::tycho::IDocSys::constructor {args} {
 
 #####################################################################
 #### generateIDoc
-# Generate an IDoc (::tycho::Class) representation of the given Itcl
-# file. The classes are then written to disk.
+# Output an IDoc (::tycho::Class) representation of the given Itcl 
+# file (which must have been already read). 
 #
 body ::tycho::IDocSys::generateSingleFileIDoc {filename} {
-
-    if {[file type $filename] != "file"} {
-        error "generateSingleFileIDoc processes single files only"
-    }
-
-    # check extension (only tcl/tk, itk, itcl supported as yet)
-    set ext [file extension $filename]
-    switch $ext {
-        .tk {
-            set language Itcl
-        }
-        .tcl {
-            set language Itcl
-        }
-        .itcl {
-            set language Itcl
-        }
-        .itk {
-            set language Itcl
-        }
-        default {
-            error "::tycho::IDocSys does not support $ext files"
-        }
-    }
-
-    # setup related model for outside class information
-    set myClass(related) [::tycho::Class [::tycho::autoName class]]
-    set modifiedRelated 0
-
-    # open and format the file
-    set data [readFile $filename]
-
-    # distill class data from the file
-    parseData $data
-
-    cd doc/codeDoc
     # output class model data
     foreach class [array names myClass] {
         # puts $class
@@ -221,15 +185,16 @@ body ::tycho::IDocSys::generateSingleFileIDoc {filename} {
             close $fd
             delete object $myClass($class)
         } else {
-            if {$modifiedRelated} {
-                set fd [open $filename_rel.idoc "w"]
+            if {$relatedModified} {
+                # NOTE: goes by the filename, not the class name, for
+                # related documentation
+                set fd [open [file root $filename]_rel.idoc "w"]
                 $myClass(related) write $fd
                 close $fd
             }
             delete object $myClass(related)
         }
     }
-    cd ../..
 }
 
 #####################################################################
@@ -263,8 +228,14 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
         if ![file readable $filename] {
             set retval "$retval\nWarning: generateIDoc: $filename is not readable"
         } else {
-            if [catch {$IDocSys generateSingleFileIDoc $filename} errMsg] {
+            if [catch {$IDocSys readFile $filename} errMsg] {
                 set retval "$retval\nWarning: $errMsg"
+            } else {
+                cd doc/codeDoc
+                if [catch {$IDocSys generateSingleFileIDoc $filename} errMsg] {
+                    set retval "$retval\nWarning: $errMsg"
+                }
+                cd ../..
             }
         }
     }
@@ -273,6 +244,7 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
         if [catch {$IDocSys generateIDocIndex $title} errMsg] {
             set retval "$retval\nWarning: $errMsg"
         }
+        cd ../..
     }
     delete object $IDocSys
     return $retval
@@ -287,11 +259,41 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
 #### readFile 
 # Read in a file line by line, identify comments, merge multi-line comments
 # into one line, bracket protect the comment contents, and append to a 
-# variable. Returns that variable.
+# variable. Then parse that variable to distill class information.
 #
 body ::tycho::IDocSys::readFile {filename} {
-    
-    # NOTE: simplify the filename?
+    # Initialize single file data
+    set author ""
+    set contributor ""
+    set version ""
+    set copyright ""
+
+    catch {unset myClass}
+
+    # check extension (only tcl/tk, itk, itcl supported as yet)
+    set ext [file extension $filename]
+    switch $ext {
+        .tk {
+            set language Itcl
+        }
+        .tcl {
+            set language Itcl
+        }
+        .itcl {
+            set language Itcl
+        }
+        .itk {
+            set language Itcl
+        }
+        default {
+            error "::tycho::IDocSys does not support $ext files"
+        }
+    }
+
+    # setup related model for outside class information
+    set myClass(related) [::tycho::Class [::tycho::autoName class]]
+    set relatedModified 0
+
     set sourceFile $filename
     set inEscapedComments ""
     set currentComment {}
@@ -355,8 +357,8 @@ body ::tycho::IDocSys::readFile {filename} {
         append inEscapedComments "# " $currentComment "\n"
     }
     close $fd
-    
-    return "$inEscapedComments"
+
+    parseData $inEscapedComments
 }
 
 #####################################################################
@@ -698,7 +700,7 @@ body ::tycho::IDocSys::parseClass {class body} {
                 continue
             }
             # No more parents, parse this.
-            set $inInherit 0
+            set inInherit 0
         }
 
         # Below, parse keywords
@@ -999,7 +1001,7 @@ body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
     if {$expl != {}} {
         $classModel annotation $procName.explanation $expl
     }
-    set modifiedRelated 1
+    set relatedModified 1
 }
 
 #####################################################################
