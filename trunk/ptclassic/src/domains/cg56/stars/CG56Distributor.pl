@@ -17,7 +17,7 @@ Distributes an input signal among two outputs, alternating samples.
 	}
 	outmulti {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
         state {
                 name {blockSize}

@@ -16,11 +16,11 @@ default.
 	}
 	input {
 		name {input}
-		type {FIX}
+		type {anytype}
 	}
 	output {
 		name {output}
-		type {FIX}
+		type {=anytype}
 	}
 	state {
 		name {factor}
