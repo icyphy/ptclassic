@@ -43,7 +43,7 @@ DIRS = dumpexts libexttools libgslider libptdsp libptmatlab libptmathematica \
 MAKEVARS =	\
 		"PTARCH=$(PTARCH)" 
 
-all install clean realclean sources depend checkjunk sccsinfo:
+all install clean realclean extraclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
