@@ -171,6 +171,7 @@ int CGCTarget :: setup (Galaxy& g) {
     include = "";
     mainDeclarations = "";
     mainInitialization = "";
+    procedures = "";
     unique = 0;
 
     includeFiles.initialize();
@@ -195,6 +196,7 @@ void CGCTarget :: frameCode () {
     // Assemble all the code segments
     StringList runCode = include;
     runCode += staticDeclarations;
+    runCode += procedures;
     runCode += sectionComment("Main function");
     runCode += (const char*) funcName;
     runCode += "() {\n";
@@ -335,6 +337,10 @@ void CGCTarget :: addGlobal(const char* decl) {
 void CGCTarget :: addDeclaration(const char* decl) {
 	mainDeclarations += indent(1);
 	mainDeclarations += decl;
+}
+
+void CGCTarget :: addProcedure(const char* decl) {
+	procedures += decl;
 }
 
 void CGCTarget :: addMainInit(const char* decl) {
