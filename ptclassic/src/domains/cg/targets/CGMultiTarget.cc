@@ -4,7 +4,7 @@ static const char file_id[] = "CGMultiTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -351,8 +351,6 @@ void CGMultiTarget :: beginIteration(int num, int) {
 void CGMultiTarget :: endIteration(int, int) {}
 
 
-extern "C" int displayGanttChart(const char*);
-
 // Display Gantt chart if requested.
 void CGMultiTarget::writeSchedule() {
 	if (nChildrenAlloc == 1) return;
@@ -362,7 +360,6 @@ void CGMultiTarget::writeSchedule() {
 		pt_ofstream o(gname);
 		if (o) {
 			s->writeGantt(o);
-			displayGanttChart(gname);
 			unlink(gname);
 		}
 		LOG_DEL; delete [] gname;
