@@ -32,8 +32,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes Connectible] == "" } {
-	uplevel #0 {source $tychoslate/Connectible.itcl}
+    if { [::info classes Iconic] == "" } {
+	uplevel #0 {source $tychoslate/Iconic.itcl}
     }
     if { [::info classes LabeledFrame] == "" } {
 	uplevel #0 {source $tychoslate/LabeledFrame.itcl}
@@ -50,7 +50,7 @@ namespace ::tycho {
 # 
 # <p><b>Options</b>:
 # 
-# _IconFrame_ has all options of <a href="Connectible.html">Connectible</a>
+# _IconFrame_ has all options of <a href="Iconic.html">Iconic</a>
 # and <a href="LabeledFrame.html">LabeledFrame</a>. In addition, it
 # has the options:
 #
@@ -64,7 +64,7 @@ namespace ::tycho {
 # 
 # <p><b>Components</b>
 #
-# _IconFrame_ has all components of <a href="Connectible.html">Connectible</a>
+# _IconFrame_ has all components of <a href="Iconic.html">Iconic</a>
 # and <a href="LabeledFrame">LabeledFrame</a>.
 # 
 # <p><b>Bugs</b>: (none)
@@ -94,7 +94,7 @@ namespace ::tycho {
 # </ul>
 #
 class ::tycho::IconFrame {
-    inherit ::tycho::Connectible
+    inherit ::tycho::Iconic
 
     ###################################################################
     ####                         public procs                      ####
@@ -133,7 +133,7 @@ class ::tycho::IconFrame {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Connectible::methodtable]
+    array set methodtable [array get ::tycho::Iconic::methodtable]
     array set methodtable [@scope ::tycho::LabeledFrame array get methodtable]
 
     set methodtable(_height)   ::tycho::IconFrame::_height
@@ -144,7 +144,7 @@ class ::tycho::IconFrame {
     set methodtable(highlight)   ::tycho::IconFrame::highlight
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Connectible::optiondefault]
+    array set optiondefault [array get ::tycho::Iconic::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledFrame \
             array get optiondefault]
     set optiondefault(-height) 40
@@ -178,7 +178,7 @@ body ::tycho::IconFrame::_coords {id canvas slate x y} {
     eval ::tycho::Frame::coords $id $canvas $slate $coords
 
     # Move the inputs and outputs
-    eval ::tycho::Connectible::coords $id $canvas $slate $coords
+    eval ::tycho::Iconic::coords $id $canvas $slate $coords
 }
 
 ##########################################################################
@@ -199,8 +199,8 @@ body ::tycho::IconFrame::construct {id canvas slate tags x y args} {
 	    $id $canvas $slate [list $tags] $coords
 
     # Create the input and output ports
-    # ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
-    # ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
+    # ::tycho::Iconic::_inputs  $id $canvas $slate $option(inputs$id)
+    # ::tycho::Iconic::_outputs $id $canvas $slate $option(outputs$id)
 }
 
 ##########################################################################
