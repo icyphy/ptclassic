@@ -51,7 +51,9 @@
 # PIGI =	pigiRpc
 # SDFFULL =	1
 
-VERSION =	0.6devel.$(BASENAME)
+ifndef VERSION
+	VERSION =	0.6devel.$(BASENAME)
+endif
 
 ifdef ALLBINARIES
 ifndef PTRIM
