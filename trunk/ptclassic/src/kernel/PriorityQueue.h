@@ -19,7 +19,6 @@ A priority queue structure.
 #define _PriorityQueue_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -149,7 +148,7 @@ public:
 	PriorityQueue() : freeLinkHead(0), numberNodes(0), 
 			  lastNode(0), numFreeLinks(0) {}
 	PriorityQueue(Pointer a, float v, float fv) ;
-	~PriorityQueue();
+	virtual ~PriorityQueue();
 };
 
 
