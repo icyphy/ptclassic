@@ -231,26 +231,38 @@ body ::tycho::FileBrowser::mkdir {} {
 # method returns 0.
 #
 body ::tycho::FileBrowser::processItem {filename} {
-
+    global tcl_platform
     if {$filename == ""} {return 0}
    
-    set char [string index $filename 0]
-
-    # If the name is relative, prepend with current path.
-    if {$char != "/" && $char != "~" && $char != "\$"} {
-	set file $localCWD/$filename
-    } {
-        set file $filename
+    if { "$tcl_platform(platform)" == "windows" } {
+	if ![regexp {^[A-Za-z]:} $filename] {
+	    set file $localCWD/$filename
+	} {
+	    set file $filename
+	}
+    } else {
+	# If the name is relative, prepend with current path.
+	set char [string index $filename 0]
+	if {$char != "/" && $char != "~" && $char != "\$"} {
+	    set file $localCWD/$filename
+	} {
+	    set file $filename
+	}
     }
 
     # Expand to absolute path.
     set file [::tycho::expandPath $file]
 
     # If expansion failed, trigger an error
-    if {[string index $file 0] != "/"} {
-        error "Cannot expand $filename"
+    if { "$tcl_platform(platform)" == "windows" } {
+	if ![regexp {^[A-Za-z]:} $file] {
+	    error "Cannot expand $filename"
+	}
+    } else {
+	if {[string index $file 0] != "/"} {
+	    error "Cannot expand $filename"
+	}
     }
-    
     # If the file does not exist, check to see whether the
     # directory exists.  If it does, execute the command given by -command
     # (which will probably create the file).  Otherwise, trigger an error.
