@@ -56,10 +56,11 @@ void MotorolaSimTarget :: initStates(const char* dsp, const char* start,
 int MotorolaSimTarget::compileCode() {
 	StringList assembleCmds = "asm";
 	assembleCmds << dspType << " " << assemblerOptions << " " << filePrefix;
-	resetMemoryUsage();
+	resetImplementationCost();
 	int valid = !systemCall(assembleCmds, "Errors in assembly");
-	if (valid && computeMemoryUsage()) {
-	    if (int(reportMemoryUsage)) Error::message(memoryUsageString());
+	if (valid && int(reportMemoryUsage)) {
+	    computeImplementationCost();
+	    Error::message(*this, printImplementationCost());
 	}
 	return valid;
 }
