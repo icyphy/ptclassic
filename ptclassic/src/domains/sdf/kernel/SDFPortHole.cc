@@ -3,7 +3,7 @@ static const char file_id[] = "SDFPortHole.cc";
 #pragma implementation
 #endif
 
-#include "Block.h"
+#include "SDFStar.h"
 #include "SDFPortHole.h"
 #include "CircularBuffer.h"
 #include "Geodesic.h"
@@ -15,10 +15,8 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
+ Programmer:  E. A. Lee, J. Buck, D. G. Messerschmitt
  Date of creation: 5/29/90
- Revisions: 5/29/90: J. Buck split SDF-specific parts of Connect.cc
-		     into this file.
 
 Code for SDF-type portholes and multiportholes.
 
@@ -46,7 +44,13 @@ int MultiOutSDFPort :: isItOutput () const { return TRUE;}
 // constructor for DFPortHole ... default maxBackValue is 0
 DFPortHole :: DFPortHole() : maxBackValue(0) {}
 
-PortHole& SDFPortHole :: setPort (
+// number of repetitions of parent
+int DFPortHole :: parentReps() const {
+	DataFlowStar * parStar = (DataFlowStar*)parent();
+	return parStar->reps();
+}
+
+PortHole& DFPortHole :: setPort (
 			     const char* s,
                              Block* parent,
                              DataType t,
@@ -71,7 +75,7 @@ PortHole& SDFPortHole :: setPort (
 
 // Function to alter only numTokens and delay.
 // We re-do porthole initialization if bufferSize changes
-PortHole& SDFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
+PortHole& DFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
 	numberTokens = numTokens;
 	maxBackValue = delay;
 	if ( numberTokens > int(delay)) bufferSize = numberTokens;

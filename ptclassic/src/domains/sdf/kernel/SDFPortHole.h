@@ -49,6 +49,10 @@ protected:
 public:
 	DFPortHole();
 
+	// farSidePort is always DFPortHole or derived.  This
+	// overrides PortHole::far.
+	DFPortHole* far() const { return (DFPortHole*)farSidePort;}
+
 	// Tell whether port uses old values
 	int usesOldValues() const { return maxBackValue >= numberTokens;}
 
@@ -67,6 +71,26 @@ public:
 
 	// relation to associated port (default: none)
 	virtual int assocRelation() const;
+
+	// Function to alter only numTokens and delay.
+	// We re-do porthole initialization if bufferSize changes
+	virtual PortHole& setSDFParams(unsigned numTokens = 1,
+				       unsigned maxPctValue=0);
+
+        // The setPort function is redefined to take one more optional
+        // argument, the number of Particles consumed/generated
+        PortHole& setPort(const char* portName,
+                          Block* parent,
+                          DataType type = FLOAT,
+			  // Number Particles consumed/generated
+                          unsigned numTokens = 1,
+			  // Maximum delay the Particles are accessed
+			  unsigned maxPctValue = 0);
+
+	// The number of repetitions of the parent star, valid only
+	// after the schedule is computed.
+	int parentReps() const;
+
 };
 
         //////////////////////////////////////////
@@ -79,22 +103,6 @@ public:
 class SDFPortHole : public DFPortHole
 {
 public:
-
-
-        // The setPort function is redefined to take one more optional
-        // argument, the number of Particles consumed/generated
-        PortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,
-			  // Number Particles consumed/generated
-                          unsigned numTokens = 1,
-			  // Maximum delay the Particles are accessed
-			  unsigned maxPctValue = 0);
-
-	// Function to alter only numTokens and delay.
-	// We re-do porthole initialization if bufferSize changes
-	PortHole& setSDFParams(unsigned numTokens = 1, unsigned maxPctValue=0);
-
 
 	// class identification
 	int isA(const char*) const;
