@@ -61,6 +61,9 @@ class ::tycho::EditPtcl {
     constructor {args} {}
     destructor {}
 
+    # Open a retargetting window.
+    method retarget {}
+
     ###################################################################
     ####                  protected methods                        ####
 
@@ -106,7 +109,7 @@ body ::tycho::EditPtcl::constructor {args} {
     
     addMenu Special left Window -underline 0
     addMenuItem "Retarget" Special -underline 0 \
-	    -command {set w [::tycho::Retarget .retrg#auto]; $w centerOnScreen}
+	    -command "$this retarget"
 
     addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
@@ -120,4 +123,12 @@ body ::tycho::EditPtcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditPtclHelp.html
+}
+###################################################################
+#### retarget
+# Open a retarget window.
+#
+body ::tycho::EditPtcl::retarget {} {
+    set w [::tycho::Retarget .retrg#auto -edit [$this textWinName]]
+    $w centerOnScreen
 }
