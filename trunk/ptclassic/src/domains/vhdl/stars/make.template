@@ -44,17 +44,20 @@ PL_SRCS = \
  VHDLWaveFormCx.pl \
  VHDLFork.pl \
  VHDLGain.pl \
+ VHDLGainInt.pl \
  VHDLAdd.pl \
  VHDLAddInt.pl \
  VHDLSub.pl \
  VHDLSubInt.pl \
+ VHDLMpy.pl \
+ VHDLMpyInt.pl \
  VHDLRamp.pl \
  VHDLRampInt.pl \
+ VHDLIntegrator.pl \
  VHDLFIR.pl \
  VHDLFIRInt.pl \
  VHDLInhomogeneous.pl \
  VHDLLMS.pl \
- VHDLMpy.pl \
  VHDLCos.pl \
  VHDLSin.pl \
  VHDLExp.pl \
