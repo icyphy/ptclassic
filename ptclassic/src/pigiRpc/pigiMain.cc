@@ -28,5 +28,3 @@ main (int argc, char ** argv)
 	RPCMain (argc, argv);
 	return 0;
 }
-
-extern const char *pigiVersion = "Pigi Version: 0.2.1";
