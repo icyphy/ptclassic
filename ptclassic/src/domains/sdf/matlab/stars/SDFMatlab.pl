@@ -230,7 +230,7 @@ extern "C" {
 	  name { evaluateOneMatlabCommand }
 	  access { protected }
 	  type { int }
-	  arglist { "(const char *matlabCommand)" }
+	  arglist { "(char *matlabCommand)" }
 	  code {
 		// assert location of buffer to hold output of Matlab commands
 		engOutputBuffer(matlabEnginePtr,
@@ -245,7 +245,7 @@ extern "C" {
 		// kludge: engEvalString always returns 0 (success) even if
 		// there is an error.  Therefore, we must determine if there
 		// is an error.  An error occurs if when the output of the
-		// Matlab contains MATLAB_ERR_STR
+		// Matlab command contains MATLAB_ERR_STR
 		if ( merror == 0 ) {
 		  merror = ( strstr(matlabOutputBuffer, MATLAB_ERR_STR) != 0 );
 		}
@@ -295,7 +295,7 @@ extern "C" {
 	  name { evaluateMatlabCommand }
 	  access { protected }
 	  type { int }
-	  arglist { "(const char *matlabCommand)" }
+	  arglist { "(char *matlabCommand)" }
 	  code {
 		// change directories to one containing the Matlab command
 		changeMatlabDirectory( (const char *) ScriptDirectory );
@@ -386,7 +386,7 @@ extern "C" {
 		InfString command = "path(path, '";
 		command << expandPathName(PTOLEMY_MATLAB_DIRECTORY);
 		command << "');";
-		evaluateOneMatlabCommand( (const char *) command );
+		evaluateOneMatlabCommand(command);
 	  }
 	}
 
