@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Edward A. Lee, Michael C. Williamson
 
- Methods for VHDL CompDecls.
+ Methods for VHDL Firings.
 
 *******************************************************************/
 #ifdef __GNUG__
