@@ -59,7 +59,7 @@ void EGGate::allocateArc(EGGate* dest, int no_samples, int no_delays) {
 // deallocate this gate.  The far gate will be deallocated by the far EGNode
 EGGate::~EGGate() 
 {
-  myLink->removeMeFromList();
+  if (myLink) myLink->removeMeFromList();
   if (far) { 
     far->far = 0;
     far->arc = 0;
@@ -115,10 +115,9 @@ EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 	DataFlowStar* master = node->myMaster();
 	int invocation = node->invocationNumber();
 
+	// If no entries having this master, then return a null pointer
 	EGGate* p = findMaster(master);
-	if (p == 0) {   // no entries having this master
-		return 0;
-	}
+	if (p == 0) return 0;
 
 	EGGateLink* prev = 0;
 	EGGateLink* cur = p->getLink();
