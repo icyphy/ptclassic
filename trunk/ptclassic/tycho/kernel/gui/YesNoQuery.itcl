@@ -48,20 +48,20 @@ proc ::tycho::askuser {question} {
 #### YesNoQuery
 # Query the user for a yes/no response to a question. The command to
 # execute in response to the user's answer can be specified using the
-# options "yescommand" and "nocommand". The value returned by whichever
+# options "-yescommand" and "-nocommand". The value returned by whichever
 # command is executed can be obtained by creating the dialog box using
-# the procedure newModal rather than directly creating an instance.
+# the procedure <code>newModal</code> rather than directly creating an instance.
 # This functionality can be accessed more simply through the procedure
-# "::tycho::askuser".
+# <code>::tycho::askuser</code>.
 #
 class ::tycho::YesNoQuery {
     inherit ::tycho::DialogWindow
 
-    # The command to execute on a yes response.
+    # Specify the command to execute on a yes response.
     itk_option define -yescommand yescommand YesCommand \
 	    "::tycho::DialogWindow::answer 1"
 
-    # The command to execute on a no response
+    # Specify the command to execute on a no response
     itk_option define -nocommand nocommand NoCommand \
 	    "::tycho::DialogWindow::answer 0"
 
