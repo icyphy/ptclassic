@@ -42,6 +42,9 @@ static char SccsId[]="$Id$";
 #include "rpcApp.h"
 #include <X11/Xlib.h>
 
+rpcStatus RPCSendSpot
+	ARGS((RPCSpot *spot, STREAM stream));
+
 
 /*
  * send a message to the VEM console display
