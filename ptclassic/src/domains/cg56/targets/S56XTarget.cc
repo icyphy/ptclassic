@@ -37,8 +37,9 @@ void S56XTarget :: initStates() {
 	addState(monitorProg.setState("monitor",this,"","Loader/Monitor/Debugger"));
 	monitorProg.setAttributes(A_SETTABLE|A_NONCONSTANT);
 
+	// ROM tables in l:256-511, and p: external mem overlaps x:512-8191
 	xMemMap.setInitValue("0-255,8192-16383");
-	yMemMap.setInitValue("0-16383");
+	yMemMap.setInitValue("0-255,512-16383");
 	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
 	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
 	runFlag.setInitValue("YES");
