@@ -2,14 +2,10 @@
 #define _ComplexArrayState_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
 #include "State.h"
-#include "ComplexState.h"
-#include "KnownState.h"
-
 
 /**************************************************************************
 Version identification:
