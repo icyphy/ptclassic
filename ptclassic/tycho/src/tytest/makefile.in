@@ -64,7 +64,7 @@ INCLUDE = \
 SRCS = 		tyTest.c tyTimerTest.c
 HDRS =		tyTest.h
 
-EXTRA_SRCS =	makefile.in test.tcl
+EXTRA_SRCS =	makefile.in test.tcl index.html
 
 OBJS =		tyTest.o tyTimerTest.o
 
