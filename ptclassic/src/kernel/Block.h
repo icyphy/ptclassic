@@ -63,10 +63,10 @@ public:
 	virtual Block& setBlock(const char* s, Block* parent = NULL);
 
 	// Constructor
-	Block() {}
+	Block();
 
 	// Another constructor
-	Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {}
+	Block(const char* name, Block* parent, const char* desc);
 
 	// destructor
 	~Block();
