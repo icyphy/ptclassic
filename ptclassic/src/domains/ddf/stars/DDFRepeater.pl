@@ -23,7 +23,7 @@ times to repeat the "input" value on "output".
 		num { 0 }
 	}
 	method {
-		name { readClassName }
+		name { readTypeName }
 		access { public }
 		type { "const char *" }
 		code { return "UpSample"; }

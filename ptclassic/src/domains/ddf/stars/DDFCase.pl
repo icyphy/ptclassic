@@ -24,7 +24,7 @@ This star routes an "input" token to one "output" depending on the
 		num { 0 }
 	}
 	method {
-		name { readClassName }
+		name { readTypeName }
 		access { public }
 		type { "const char *" }
 		code { return "Case"; }
