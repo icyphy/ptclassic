@@ -450,8 +450,8 @@ ifdef CGC
 		LIBFILES += $(LIBDIR)/libcgcvisstars.$(LIBSUFFIX)
 
 		# CGC VIS target (no shared library version)
-		#CUSTOM_DIRS += $(CGCDIR)/vis/targets
-		#TARGETS += $(CGCVIST)/CGCVISSimTarget.o
+		CUSTOM_DIRS += $(CGCDIR)/vis/targets
+		TARGETS += $(CGCVIST)/CGCVISSimTarget.o
 	endif
 	# Tcl/Tk
 	ifdef CGCTK
