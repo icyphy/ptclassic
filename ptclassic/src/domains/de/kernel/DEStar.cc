@@ -34,7 +34,7 @@ void DEStar :: prepareForScheduling() {
 }
 
 void DEStar :: fire() {
-	go();
+	Star::fire();
 	BlockPortIter next(*this);
 	for (int k = numberPorts(); k > 0; k--) 
 		(next++)->sendData();
@@ -47,6 +47,4 @@ extern const char DEdomainName[];
 const char* DEStar :: domain() const {
 	return DEdomainName;
 }
-
-
 
