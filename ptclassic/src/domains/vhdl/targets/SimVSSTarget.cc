@@ -210,29 +210,31 @@ void SimVSSTarget :: frameCode() {
   top_entity << topName;
   top_entity << ";\n";
 
+  StringList label = galName;
+  label << "_proc";
+  //  topCompDeclList.put(label, &mainPortMapList, &mainGenMapList,
+  //		      galName, &mainPortMapList, &mainGenMapList);
+  topCompDeclList.put(label, &mainPortList, &mainGenList,
+		      galName, &mainPortList, &mainGenList);
+
   top_architecture << "-- top-level architecture\n";
   top_architecture << "architecture ";
   top_architecture << "structure";
   top_architecture << " of ";
   top_architecture << topName;
   top_architecture << " is\n";
-  top_architecture << cli_comps;
-  top_architecture << "component ";
-  top_architecture << galName;
-  top_architecture << "\n";
-  top_architecture << addGenericRefs(&mainGenList);
-  top_architecture << addPortRefs(&mainPortList);
-  top_architecture << "\n";
-  top_architecture << "end component;\n";
+  //  top_architecture << cli_comps;
+  top_architecture << addComponentDeclarations(&topCompDeclList);
+  //  top_architecture << "component ";
+  //  top_architecture << galName;
+  //  top_architecture << "\n";
+  //  top_architecture << addGenericRefs(&mainGenList);
+  //  top_architecture << addPortRefs(&mainPortList);
+  //  top_architecture << "end component;\n";
   top_architecture << "\n";
   top_architecture << addSignalDeclarations(&topSignalList);
   top_architecture << "\n";
   top_architecture << "begin\n";
-
-  StringList label = galName;
-  label << "_proc";
-  topCompDeclList.put(label, &mainPortMapList, &mainGenMapList,
-		      galName, &mainPortMapList, &mainGenMapList);
 
   //  top_architecture << addComponentMappings(&topCompMapList);
   top_architecture << addComponentMappings(&topCompDeclList);
@@ -280,7 +282,7 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
-  code << "\n" << cli_models;
+  //  code << "\n" << cli_models;
   code << "\n" << top_uses;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
@@ -367,7 +369,8 @@ int SimVSSTarget :: runCode() {
 ISA_FUNC(SimVSSTarget,VHDLTarget);
 
 // Method called by comm stars to place important code into structure.
-void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const char* dtype) {
+void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer,
+				  const char* dtype) {
   // direction == 0 --> C2V ; direction == 1 --> V2C.
   // Create a string with the right VHDL data type
   StringList vtype = "";
@@ -392,6 +395,7 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   }
   else {
     Error::abortRun(*this, dtype, ": type not supported");
+    return;
   }
   
   // Construct unique label and signal names and put comp map in main list
@@ -405,31 +409,32 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   dataName << rootName << "_data";
   doneName << rootName << "_done";
   
-  VHDLGenericList* genMapList = new VHDLGenericList;
-  VHDLPortList* portMapList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
 
-  genMapList->put("pairid", "INTEGER", "", pairid);
-  genMapList->put("numxfer", "INTEGER", "", numxfer);
+  genList->put("pairid", "INTEGER", "", pairid);
+  genList->put("numxfer", "INTEGER", "", numxfer);
+
+  portList->put("go", "STD_LOGIC", "IN", goName, NULL);
+  if (direction) {
+    mainPortList.put(dataName, vtype, "OUT", dataName, NULL);
+    topSignalList.put(dataName, vtype, NULL);
+    portList->put("data", vtype, "IN", dataName, NULL);
+  }
+  else {
+    portList->put("data", vtype, "OUT", dataName, NULL);
+    topSignalList.put(dataName, vtype, NULL);
+    mainPortList.put(dataName, vtype, "IN", dataName, NULL);
+  }
+  portList->put("done", "STD_LOGIC", "OUT", doneName, NULL);
+
+  topCompDeclList.put(label,  portList, genList, name, portList, genList);
 
   // Also add to port list of main.
   mainPortList.put(goName, "STD_LOGIC", "OUT", goName, NULL);
   topSignalList.put(goName, "STD_LOGIC", NULL);
-  portMapList->put("go", "STD_LOGIC", "IN", goName, NULL);
-  if (direction) {
-    mainPortList.put(dataName, vtype, "OUT", dataName, NULL);
-    topSignalList.put(dataName, vtype, NULL);
-    portMapList->put("data", "STD_LOGIC", "IN", dataName, NULL);
-  }
-  else {
-    portMapList->put("data", "STD_LOGIC", "OUT", dataName, NULL);
-    topSignalList.put(dataName, vtype, NULL);
-    mainPortList.put(dataName, vtype, "IN", dataName, NULL);
-  }
-  portMapList->put("done", "STD_LOGIC", "OUT", doneName, NULL);
   topSignalList.put(doneName, "STD_LOGIC", NULL);
   mainPortList.put(doneName, "STD_LOGIC", "IN", doneName, NULL);
-
-  topCompDeclList.put(label,  portMapList, genMapList, name, portMapList, genMapList);
 }
 
 // Method to write out com file for VSS if needed.
@@ -449,7 +454,7 @@ void SimVSSTarget :: writeComFile() {
 
 // Add additional codeStreams.
 void SimVSSTarget :: addCodeStreams() {
-  addStream("cli_models", &cli_models);
+  //  addStream("cli_models", &cli_models);
   addStream("cli_comps", &cli_comps);
   addStream("cli_configs", &cli_configs);
   addStream("top_uses", &top_uses);
@@ -462,7 +467,7 @@ void SimVSSTarget :: addCodeStreams() {
 
 // Initialize codeStreams.
 void SimVSSTarget :: initCodeStreams() {
-  cli_models.initialize();
+  //  cli_models.initialize();
   cli_comps.initialize();
   cli_configs.initialize();
   top_uses.initialize();
@@ -477,8 +482,8 @@ void SimVSSTarget :: initCodeStreams() {
 void SimVSSTarget :: initVHDLObjLists() {
   mainGenList.initialize();
   mainPortList.initialize();
-  mainGenMapList.initialize();
-  mainPortMapList.initialize();
+  //  mainGenMapList.initialize();
+  //  mainPortMapList.initialize();
   topSignalList.initialize();
   //  topCompMapList.initialize();
   topCompDeclList.initialize();
