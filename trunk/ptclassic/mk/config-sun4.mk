@@ -15,8 +15,9 @@ include $(ROOT)/mk/config-g++.mk
 # Programs to use
 #
 RANLIB =	ranlib
-# Use gcc everywhere _except_ in octtools
+# Use gcc everywhere including in octtools
 CC =		gcc
+
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
