@@ -1,8 +1,27 @@
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+ Definition of some methods in Particle.h
+
+**************************************************************************/
+
 #include "Particle.h"
 #include <stream.h>
 #include "Output.h"
 
 extern Error errorHandler;
+
+	///////////////////////////////////////
+	// class IntSample
+	///////////////////////////////////////
 
 Particle& IntSample :: operator = (const Particle& p)
 {
@@ -20,27 +39,68 @@ Particle& IntSample :: operator = (const Particle& p)
 IntSample :: operator char* ()
 	{ return form("%d",data);}
 
+	////////////////////////////////////////
+	// class FloatSample
+	////////////////////////////////////////
+
+Particle& FloatSample :: operator = (const Particle& p)
+{
+        if(compareType(p)) {
+                // Types are compatible, so we can copy
+                data = ((FloatSample&)p).data;
+                return *this;
+                }
+        else
+                errorHandler.error(
+                "Particle: attempt to assign incompatible Particle types"
+                        );
+}
+
+FloatSample :: operator char* ()
+        { return form("%g",data);}
+
+	////////////////////////////////////////
+	// class Plasma
+	////////////////////////////////////////
+
 Particle* Plasma :: get()
 {
 	Particle* p;
 
-	if(size() == 0) {
+	if(size() == 0) // A new Particle has to be created
 
-		// Create a new Particle
-		if(type == INT) p = new IntSample(0); 
+		switch (type) {
+
+			case INT:
+				p = new IntSample(0); 
+				break;
+
+			case FLOAT:
+				p = new FloatSample(0); 
+				break;
 		
-		// Add new Particle types here
+			/**********************************************
+			***********************************************
+			* NOTE: Add new Particle types here ***********
+			***********************************************
+			**********************************************/
 
-		else errorHandler.error(
-			"Plasma: Unsupported Particle type requested"
-			);
-        } else {
+			default:
+				errorHandler.error(
+				"Plasma: Unsupported Particle type requested"
+				);
+			}
+        else {
                 p = Stack::popTop();
 		p->initialize();
 	}
 
 	return p;
 }
+
+	/////////////////////////////////////////
+	// class PlasmaList
+	/////////////////////////////////////////
 
 Plasma* PlasmaList :: getPlasma(dataType t)
 {

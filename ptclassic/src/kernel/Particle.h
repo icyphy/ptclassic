@@ -103,6 +103,38 @@ private:
 	int data;
 };
 
+        /////////////////////////////////////
+        // class FloatSample
+        /////////////////////////////////////
+ 
+class FloatSample : public Particle
+{
+public:
+        // Tell this world this Particle contains an float
+        dataType readType() {return FLOAT;}
+ 
+        // Cast to an int, float, and char*
+        operator int () {return (int)data;}
+        operator float () {return data;}
+        operator char* ();
+ 
+        // Initialize
+        FloatSample(float f) {data=f;}
+        FloatSample() {data=0.0;}
+ 
+        // Initialize the Particle
+        void initialize() {data=0.0;}
+ 
+        // Load up with data
+        operator << (int i) {data=(float)i;}
+        operator << (float f) {data=f;}
+
+        // Copy the Particle
+        Particle& operator = (const Particle&);
+ private:
+        float data;
+};
+
 /****************************************************************
 * Plasma
 *
