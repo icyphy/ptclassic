@@ -111,7 +111,7 @@ CSHARED_LIBRARY_COMMAND =       cc -shared -o
 # List of libraries to search, obviating the need to set LD_LIBRARY_PATH
 # See the ld man page for more information.  These path names must
 # be absolute pathnames, not relative pathnames.
-SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib
 SHARED_LIBRARY_R_LIST = -Wl,-rpath,$(SHARED_LIBRARY_PATH)
 
 #endif

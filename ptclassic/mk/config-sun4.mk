@@ -38,10 +38,10 @@ include $(ROOT)/mk/config-default.mk
 # This is evil, but hey.
 
 # Start of text replicated in config-default.mk
-TCL_VERSION_NUM=76i
-TK_VERSION_NUM=42i
-ITCL_VERSION_NUM=22
-ITK_VERSION_NUM=22
+TCL_VERSION_NUM=	80
+TCL_MINOR_VERSION_NUM=	.3
+TK_VERSION_NUM=		80
+ITCL_VERSION_NUM=	30
 
 # Don't build with shared libraries under SunOS4.x, or incremental
 # linking of stars will fail because ld will be looking for -ldl
@@ -69,10 +69,10 @@ ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litk$(ITCL_VERSION_NUM)
 
 # Location of the ish binary (tcl + namespaces)
-ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
+ISH=$(ROOT)/tcltk/$(TCL_VERSION).$(PTARCH)/bin/ish
 
 # Location of the itcl library, needed for itcl_mkindex
-ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
+ITCL_LIBDIR=$(ROOT)/tcltk/tcl/lib/itcl
 
 # end of text replicated in config-default.mk
 
