@@ -71,12 +71,15 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 
 	// stream definition
 	addStream("globalDecls", &globalDecls);
+	addStream("galStruct", &galStruct);
 	addStream("include", &include);
 	addStream("mainDecls", &mainDecls);
 	addStream("mainInit", &mainInit);
+	addStream("commInit", &commInit);
+	addStream("mainClose", &mainClose);
 }
 
-StringList CGCTarget :: sectionComment(StringList s) {
+StringList CGCTarget :: sectionComment(const char* s) {
 	StringList out = "\n/****** ";
 	out << s << " ******/\n";
 	return out;
@@ -110,34 +113,42 @@ void CGCTarget :: starDataStruct(CGCStar* block, int) {
     CGCPortHole* p;
     while ((p = (CGCPortHole*) nextPort++) != 0) {
 	if (p->switched()) continue;
-	out += block->declarePortHole(p);	// declare porthole
-	out += block->declareOffset(p);	// declare offset
+	out += block->declarePortHole(p); // declare porthole
+	out += block->declareOffset(p);   // declare offset
     }
 
     // Continue with the referenced state variables
     StateListIter nextState(block->referencedStates);
     const State* s;
     while ((s = nextState++) != 0) {
-	out += block->declareState(s);	// declare and initialize state
+	out += block->declareState(s); // declare and initialize state
     }
 
-    if (block->emptyFlag == 0) globalDecls += out;
+    if (block->emptyFlag == 0) (*getStream("galStruct")) += out;
 }
 
 void CGCTarget :: setup() {
-    // member initialize
-    galId = 0; curId = 0;
+	// Note that code strings are not initialized here since
+	// parent target may want to put some code before calling
+	// setup() method.
+	// Instead, initCodeStrings() is called in frameCode() method
+	// after contructing the whole code.
 
-    if (galaxy()) setStarIndices(*galaxy()); 
-    CGTarget::setup();
+	// member initialize
+	galId = 0; curId = 0;
+
+	if (galaxy()) setStarIndices(*galaxy()); 
+	CGTarget::setup();
 }
 
 void CGCTarget :: initCodeStrings() {
 	globalDecls.initialize();
+	galStruct.initialize();
 	procedures.initialize();
 	include.initialize();
 	mainDecls.initialize();
 	mainInit.initialize();
+	commInit.initialize();
 	wormIn.initialize();
 	wormOut.initialize();
 	mainClose.initialize();
@@ -152,19 +163,21 @@ void CGCTarget :: frameCode () {
     Galaxy* gal = galaxy();
     // Data structure declaration
     StringList tmp = sectionComment("Data structure declations");
-    globalDecls += tmp;
+    galStruct += tmp;
     galDataStruct(*gal,1);
 
     // Assemble all the code segments
     StringList runCode = include;
     runCode += complexDecl;
     runCode += globalDecls;
+    runCode += galStruct;
     runCode += procedures;
     tmp = sectionComment("Main function");
     runCode += tmp;
     runCode += (const char*) funcName;
     runCode += "() {\n";
     runCode += mainDecls;
+    runCode += commInit;
     runCode += mainInit;
     runCode += myCode;
     runCode += mainClose;
@@ -238,8 +251,8 @@ int CGCTarget :: compileCode() {
 		cmd << "/bin/cat " << tempName;
 		cmd << " | rsh " << (const char*) hostMachine << " '";
 		cmd << "mkdir -p " << dirName << "; cd " << dirName;
-		cmd << "; rm -f " << fname;
-		cmd << "; /bin/cat - > " << fname << "; ";
+		cmd << "; /bin/cat - > " << fname << ".tmp ";
+		cmd << "; mv -f " << fname << ".tmp " << fname << "; ";
 	} else {
 		cmd << "cd " << (const char*)destDirectory << "; ";
 	}
@@ -255,6 +268,7 @@ int CGCTarget :: compileCode() {
 		Error::abortRun(err);
 		return FALSE;
 	}
+	LOG_DEL; delete tempName;
 	return TRUE;
 }
 
@@ -307,11 +321,11 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
         if (repetitions == -1)          // iterate infinitely
                 myCode += "while(1) {\n";
         else {
-	    mainDecls << indent(1)
+	    mainDecls << "    "
 		      << "int " << targetNestedSymbol.push("i") << ";\n";
 	    myCode << "for (" << targetNestedSymbol.get() << "=0; "
 		   << targetNestedSymbol.get() << " < " << repetitions << "; "
-		   << targetNestedSymbol.pop() << "++) {\n";
+	    	   << targetNestedSymbol.pop() << "++) {\n";
         }
 	myCode += wormIn;
         return;
@@ -428,7 +442,7 @@ int CGCTarget :: codeGenInit() {
 	setGeoNames(*galaxy());
 
 	// call initialization code.
-	switchCodeStream(galaxy(), &mainInit);
+	switchCodeStream(galaxy(), getStream("mainInit"));
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
 		if (s->isItFork()) continue;
@@ -457,10 +471,11 @@ StringList CGCTarget :: updateCopyOffset() {
 			CGCPortHole* f = (CGCPortHole*) p->far();
 			if ((f->embedded() && f->bufType() == OWNER) ||
 			    (f->embedding() && f->bufType() == COPIED)) {
+				StringList temp = appendedName(*p, "copy_ix");
 				out << "    ";
-				out << appendedName(*p, "copy_ix");
+				out << temp;
 				out << " = (" << f->numXfer() << " + ";
-				out << appendedName(*p, "copy_ix");
+				out << temp;
 				out << ") % " << p->bufSize() << ";\n";
 			}
 		}
@@ -472,7 +487,16 @@ StringList CGCTarget :: updateCopyOffset() {
 // incrementalAdd
 /////////////////////////////////////////
 
-int CGCTarget :: incrementalAdd(CGStar* s) {
+int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
+
+	CGCStar* cs = (CGCStar*) s;
+	if (!flag) {
+		// run the star
+		switchCodeStream(cs, getStream("code"));
+		writeFiring(*cs, 1);
+		return TRUE;
+	}
+
 	// initialize the star
 	s->initialize();
 
@@ -492,22 +516,21 @@ int CGCTarget :: incrementalAdd(CGStar* s) {
 	}
 
 	// initCode
-	CGCStar* cs = (CGCStar*) s;
-	switchCodeStream(cs, &mainInit);
+	switchCodeStream(cs, getStream("mainInit"));
 	cs->initBufPointer();
 	cs->initCode();
 
 	// run the star
-	switchCodeStream(cs, &myCode);
+	switchCodeStream(cs, getStream("code"));
 	writeFiring(*cs, 1);
 
-	switchCodeStream(cs, &mainClose);
+	switchCodeStream(cs, getStream("mainClose"));
 	cs->wrapup();
 
 	// data structure for the star
 	starDataStruct(cs);
 
-	switchCodeStream(cs, &myCode);
+	switchCodeStream(cs, getStream("code"));
 	return TRUE;
 }
 	
@@ -525,9 +548,9 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 
 // redefine compileRun to switch code stream of stars
 void CGCTarget :: compileRun(SDFScheduler* s) {
-	switchCodeStream(galaxy(), &myCode);
+	switchCodeStream(galaxy(), getStream("code"));
 	s->compileRun();
-	switchCodeStream(galaxy(), &mainClose);
+	switchCodeStream(galaxy(), getStream("mainClose"));
 }
 
 /////////////////////////////////////////
@@ -538,10 +561,9 @@ StringList CGCTarget :: sanitizedFullName (const NamedObj& obj) const {
 	StringList out;
 	out << 'g' << galId << '_';
 	Star* s = (Star*) obj.parent();
-	out += sanitizedName(*s);
-	out << '_';
+	out << sanitizedName(*s) << '_';
 	if (s->index() >= 0) out << s->index() << '_';
-	out += sanitizedName(obj);
+	out << sanitizedName(obj);
 	return out;
 }
 
@@ -553,7 +575,8 @@ StringList CGCTarget :: appendedName (const NamedObj& p, const char* s) {
 }
 
 StringList CGCTarget :: offsetName(const CGCPortHole* p) {
-	return appendedName(*p, "ix");
+	StringList temp = appendedName(*p, "ix");
+	return temp;
 }
 
 const char* whichType(DataType s) {
