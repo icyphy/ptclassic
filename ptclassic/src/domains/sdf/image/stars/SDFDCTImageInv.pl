@@ -9,6 +9,13 @@ defstar {
 This star takes a DCTImage input and does inverse
 discrete cosine transform (DCT) coding and outputs a GrayImage.
 	}
+	explanation {
+.Id "DCT inverse"
+.Id "discrete cosine transform inverse"
+.Id "image, discrete cosine transform inverse"
+.Id "inverse discrete cosine transform"
+.Id "inverse DCT"
+}
 
 	input {
 		name { input }

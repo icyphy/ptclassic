@@ -1,12 +1,16 @@
 defstar {
 	name {Compress}
 	domain {SDF}
-	desc { This star compresses its input as per the Mu Law . 
+	desc { This star compresses its input as per the Mu law. 
 		using the conversion formula
 	|v2| = log (1+ mu*|v1|) / log( 1+mu)  }
 	author { Asawaree Kalavade }
 	copyright { 1991 The Regents of the University of California }
 	version {$Id$}
+	explanation {
+.Id "Mu law compression"
+.Id "compression, Mu law"
+	}
 	input {
 		name{input}
 		type{float}

@@ -20,6 +20,10 @@ one for the phase.  It can produce two types of plots: a plot
 of the final tap values or a plot that traces the
 time evolution of each tap value: the time evolution is obtained
 if \fItrace\fP is YES.
+.Id "adaptive filter, complex"
+.Id "filter, adaptive, complex"
+.Id "LMS adaptive filter, complex"
+.Id "filter, LMS adaptive, complex"
 .lp
 \fIGraphTitleMag\fP is used for the title of the magnitude plot;
 \fIGraphTitlePhase\fP is used for the title of the phase plot;

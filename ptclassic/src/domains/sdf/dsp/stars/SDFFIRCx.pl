@@ -17,6 +17,8 @@ Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
 ComplexFIR implements a finite-impulse response filter with multirate
 capability.  The default coefficients correspond to a real eighth order,
 equiripple, linear-phase, lowpass filter.
+.Id "FIR filter, complex"
+.Id "filter, FIR, complex"
 The 3dB cutoff frequency at about 1/3
 of the Nyquist frequency.  To load filter coefficients from a file,
 simply replace the default coefficients with the string "<filename".
@@ -27,7 +29,7 @@ It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the filter to work as expected regardless of
 the directory in which the ptolemy process actually runs.
-It is best to use tilde's in the filename.
+It is best to use tildes in the filename.
 .pp
 When the \fIdecimation\fP (\fIinterpolation\fP)
 state is different from unity, the filter behaves exactly
@@ -43,6 +45,8 @@ To design a filter for a multirate system, simply assume the
 sample rate is the product of the interpolation parameter and
 the input sample rate, or equivalently, the product of the decimation
 parameter and the output sample rate.
+.Ir "multirate filter design"
+.Ir "filter, multirate"
 In particular, considerable care must be taken to avoid aliasing.
 Specifically, if the input sample rate is f,
 then the filter stopband should begin before f/2.

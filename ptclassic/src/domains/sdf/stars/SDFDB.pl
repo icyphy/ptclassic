@@ -13,6 +13,7 @@ converted to 'min' (default -100).
 For inputs that are greater than zero, the output either
 $N log sub 10 (input)$ or \fImin\fR, whichever is larger, where
 $N ~=~ 10$ if \fIinputIsPower\fR is TRUE, and $N ~=~ 20$ otherwise.
+.Id "decibel"
 The default is $N ~=~ 20$.
 For inputs that are zero or negative, the output is \fImin\fR.
 	}

@@ -15,6 +15,9 @@ Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
 A number of input samples given by the parameter \fIsize\fR will
 be consumed at the input, zero-padded if necessary to make $2 sup order$
 samples, and transformed using a fast Fourier transform algorithm.
+.Id "FFT, complex"
+.Id "fast Fourier transform, complex"
+.Id "Fourier transform, fast, complex"
 If \fIdirection\fR is 1, then the forward Fourier transform is computed.
 If \fIdirection\fR is -1, then the inverse Fourier transform is computed.
 .lp
@@ -25,6 +28,7 @@ to run a universe.
 For example, to compute just one FFT, only one iteration should be run.
 .lp
 \fBBugs\fR: the routine currently used (from Gabriel) recomputes trig
+.Ir "Gabriel"
 functions for each term, instead of using a table.  Instead,
 ComplexFFT::start() should compute a table of appropriate size to save
 time.  This has no effect, obviously, if only one transform

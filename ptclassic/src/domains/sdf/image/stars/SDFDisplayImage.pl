@@ -17,6 +17,11 @@ can choose whether or not the image file is saved or deleted.
 The image frame number is appended to the root filename to form the
 complete filename of the displayed image.
 	}
+	explanation {
+.Id "image display"
+.Ir "PGM image format"
+.Ir "image format, PGM"
+}
 
 	ccinclude {
 		"GrayImage.h" , <std.h> , <stdio.h>, "Error.h"
