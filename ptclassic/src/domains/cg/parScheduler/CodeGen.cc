@@ -230,6 +230,18 @@ PortHole* findPortHole(DataFlowStar* s, const char* n, int num) {
 	return p;
 }
 
+// This is a trap handler for catching "impossible" conditions.
+// It will bomb the program if the argument pointer is null.
+// It is added because the dataflow analysis of gcc says there
+// is no guarantee that sG and dG in the code below get set.
+
+static void checkNonNull(void *ptr,const char* msg) {
+	if (ptr == 0) {
+		Error::abortRun("FATAL: ", msg);
+		exit (1);
+	}
+}
+
 ///////////////////
 // makeConnection 
 ///////////////////
@@ -253,7 +265,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN,
 	
 	// temporaries.
 	ParNode* partner;
-	EGGate *sG, *dG;
+	EGGate *sG = 0, *dG = 0;
 
 	// STEP2:
 	// check whether Spread node and Collect node is necessary or not.
@@ -305,6 +317,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN,
 	if (numRecv > 0) {
 		if (numRecv + numCon > 1) collectReq = TRUE;
 		else {
+			checkNonNull(dG,"CodeGen.cc: dG");
 			partner = (ParNode*) dG->farEndNode();
 			makeReceive(partner->getProcId(),destP,numDelay,dG);
 		}
@@ -312,6 +325,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN,
 	if (numSend > 0) {
 		if (numSend + numCon > 1) spreadReq = TRUE;
 		else {
+			checkNonNull(sG,"CodeGen.cc: sG");
 			partner = (ParNode*) sG->farEndNode();
 			makeSend(partner->getProcId(),srcP,sG);
 		}
@@ -572,7 +586,7 @@ DataFlowStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN,int n) {
 // This porthole is connected to only Send stars.
 void UniProcessor :: makeBoundary(ParNode* sN, PortHole* ref) {
 	// check whether Spread is necessary or not.
-	EGGate* sG;
+	EGGate* sG = 0;
 	ParNode* n = sN;
 	ParNode* partner = 0;
 	int count = 0;
