@@ -73,6 +73,7 @@ extern const double __infinity;
 
 class MutableCalendarQueue : public BasePrioQueue
 {
+	friend PendingEventList;
 public:
 	// Add element to the tail of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
