@@ -38,6 +38,10 @@ $Id$
 // small virtual functions in baseclass
 const char* State :: type () const { return "STRING";}
 
+State :: ~State() {}
+
+const char* State :: readClassName() const {return "State";}
+
 int State :: size () const { return 1;}
 
 StringList State :: currentValue () const { return initValue;}
@@ -45,6 +49,27 @@ StringList State :: currentValue () const { return initValue;}
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
+}
+
+// setState -- two versions
+State& State :: setState(const char* stateName, 
+			 Block* parent ,
+			 const char* ivalue,
+			 const char* desc) {
+	descriptor = desc;
+	setNameParent(stateName, parent);
+	initValue = ivalue;
+	return *this;
+}
+
+
+State& State :: setState(const char* stateName, 
+			 Block* parent ,
+			 const char* ivalue,
+			 const char* desc,
+			 Attribute attr) {
+	attributeBits = attr.eval(AB_DEFAULT);
+	return setState(stateName,parent,ivalue,desc);
 }
 
 // Attributes

@@ -81,29 +81,21 @@ class State : public NamedObj
 {
 public:
 
-        // Constructor
         State() : initValue(0), attributeBits(AB_DEFAULT) {}
+	~State();
 
 	// Method setting internal data  in the State
         State& setState(const char* stateName, 
 			Block* parent ,
 			const char* ivalue,
-			const char* desc = NULL) {
-               		 	descriptor = desc;
-				setNameParent(stateName, parent);
-				initValue = ivalue;
-				return *this;
-        }
+			const char* desc = NULL);
 
 	// same, but this one also sets attributes.
         State& setState(const char* stateName, 
 			Block* parent ,
 			const char* ivalue,
 			const char* desc,
-			const Attribute& attr) {
-				attributeBits = attr.eval(AB_DEFAULT);
-				return setState(stateName,parent,ivalue,desc);
-        }
+			Attribute attr);
 
 	// set the initial value
 	void setValue(const char*  s) { initValue = s;}
@@ -148,7 +140,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "State";}
+	const char* readClassName() const;
 
 protected:
 	// string used to set initial value by initialize()
