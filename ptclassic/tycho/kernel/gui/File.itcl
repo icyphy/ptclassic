@@ -589,11 +589,12 @@ body ::tycho::File::constructor {args} {
 	    -command "$this help"
     
     addMenuItem "Concept Index" Help -underline 0 \
-	    -command {::tycho::File::openContext $TYCHO/tycho.idx}
+	    -command {::tycho::File::openContext $TYCHO/lib/idx/tycho.idx}
 
     set nm [::tycho::autoName .index]
     addMenuItem "Code Index" Help -underline 0 \
-	    -command "::tycho::IndexBrowser $nm -file \$TYCHO/codeDoc.idx \
+	    -command "::tycho::IndexBrowser $nm \
+	    -file \$TYCHO/lib/idx/codeDoc.idx \
             -width 80; $nm centerOnScreen"
     
     # Bindings
