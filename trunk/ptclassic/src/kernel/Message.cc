@@ -135,8 +135,12 @@ StringList PacketSample::print() const {
 	return data.print();
 }
 
-// get the PacketData from the PacketSample, and replace it with the
-// dummy particle.
+// get the PacketData from the PacketSample.
+void PacketSample::accessPacket (Packet& p) const {
+	p = data;
+}
+
+// get the PacketData and remove the reference (by setting data to dummy)
 void PacketSample::getPacket (Packet& p) {
 	p = data;
 	data = dummy;
@@ -159,6 +163,15 @@ Particle& PacketSample::operator = (const Particle& p) {
 	if (compareType(p))
 		data = ((PacketSample*)&p)->data;
 	return *this;
+}
+
+// particle compare: considered equal if packetdata addresses
+// are the same.
+int PacketSample :: operator == (const Particle& p) {
+	if (!typesEqual(p)) return 0;
+	Packet p;
+	accessPacket(p);
+	return data.myData() == p.myData();
 }
 
 // clone, useNew, die analogous to other particles.
@@ -191,8 +204,12 @@ void PacketSample::errorAssign(const char* argType) const {
 // Error catcher for attempts to retrieve a Packet from a different
 // type of particle
 
-void Particle::getPacket(Packet &) {
+void Particle::accessPacket(Packet &) const {
 	Error::abortRun ("Attempt to getPacket from a non-packet Particle");
+}
+
+void Particle::getPacket(Packet & p) {
+	Particle::accessPacket(p);
 }
 
 void Particle::operator<<(const Packet&) {

@@ -138,6 +138,7 @@ public:
 	StringList print() const;
 
 	void getPacket (Packet& p);
+	void accessPacket (Packet& p) const;
 
 	// fill in remaining functions for Particle classes
 
@@ -154,6 +155,9 @@ public:
 
 	// particle copy
 	Particle& operator = (const Particle& p);
+
+	// compare particles
+	int operator == (const Particle&);
 
 	// clone, useNew, die analogous to other particles.
 	// packetPlasma is of type Plasma.
