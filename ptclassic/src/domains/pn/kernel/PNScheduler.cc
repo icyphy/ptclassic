@@ -40,6 +40,9 @@ static const char file_id[] = "$RCSfile$";
 
 extern const char PNdomainName[];
 
+// Stack size for Wormhole threads.
+const unsigned int wormStackSize = 16 * defStackSize;
+
 // Constructor.
 PNScheduler::PNScheduler() : monitor()
 {
@@ -78,13 +81,13 @@ void PNScheduler::setup()
     galaxy()->initialize();
 
     // Enable locking on all portholes.
-    GalStarIter starIter(*galaxy());
+    GalStarIter nextStar(*galaxy());
     Star* star;
-    while ((star = starIter++) != NULL)
+    while ((star = nextStar++) != NULL)
     {
-        BlockPortIter portIter(*star);
+        BlockPortIter nextPort(*star);
         PortHole* port;
-        while ((port = portIter++) != NULL)
+        while ((port = nextPort++) != NULL)
         {
             // Any threads from the previous run that are blocked
             // will be deleted at this point.
@@ -93,7 +96,7 @@ void PNScheduler::setup()
         }
     }
 
-    PNThread::setup();
+    PNThread::initialize();
     createThreads();
     setCurrentTime(0.0);
 }
@@ -108,22 +111,18 @@ int PNScheduler::run()
     }
 
     // Allow threads to start.
-    PNThread::go();
+    PNThread::runAll();
 
     while((currentTime < stopTime) && !SimControl::haltRequested())
     {
-	PNThread::stop();
-	// Notify all source threads to start.
+	// Notify all threads to continue.
 	{
 	    CriticalSection region(start->monitor());
 	    start->notifyAll();
 	}
-	PNThread::go();
+	PNThread::runAll();
 	currentTime += schedulePeriod;
     }
-
-    // Prevent threads from running.
-    PNThread::stop();
 
     return !SimControl::haltRequested();
 }
@@ -131,21 +130,17 @@ int PNScheduler::run()
 // Create threads (Kahn Processes).
 void PNScheduler::createThreads()
 {
-    GalStarIter starIter(*galaxy());
+    GalStarIter nextStar(*galaxy());
     DataFlowStar* star;
-    PNThread* t;
+    PNThread* thread;
 
     // Create Threads for all the Stars.
-    while((star = (DataFlowStar*)starIter++) != NULL)
+    while((star = (DataFlowStar*)nextStar++) != NULL)
     {
-        if (star->isSource())
-	{
-	    LOG_NEW; t = new SyncDataFlowProcess(*star, *start);
-	}
-	else
-	{
-	    LOG_NEW; t = new DataFlowProcess(*star);
-	}
+	unsigned int stackSize = star->isItWormhole() ?
+	    wormStackSize : defStackSize;
+
+	LOG_NEW; thread = new SyncDataFlowProcess(*star, *start, stackSize);
     }
 }
 
