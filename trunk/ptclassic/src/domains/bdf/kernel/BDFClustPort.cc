@@ -47,7 +47,7 @@ const int UNKNOWN = 2;		// a value other than TRUE/FALSE.
 // constructor for BDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an BDFClusterBag.
 BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
-: pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0),
+: pPort(port), pOutPtr(0), bagPortFlag(bp), feedForwardFlag(0),
   ctlFlag(0), lastBoolValue(2), dupedFlag(0), moveupNeeded(UNKNOWN),
   ignoreFlag(0)
 {
