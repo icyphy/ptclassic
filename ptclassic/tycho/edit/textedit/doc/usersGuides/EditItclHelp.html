@@ -1,0 +1,55 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>User's Guide to the Itcl Editor</title>
+</head>
+<body>
+[<a href="../../../../kernel/doc/introduction.html">        Home     </a>]
+[<a href="../../../../kernel/doc/authors.html">             Authors  </a>]
+[<a href="../../../../tycho.idx">                           Index    </a>]
+[<a href=../../../../kernel/doc/abbreviations.html>         Abbreviations </a>]
+[<a href="../../../../kernel/doc/bindings.html">            Key bindings </a>]
+<HR>
+<h1><a name="Tcl editor">User's Guide to the Itcl Editor</a></h1>
+<p>
+This class provides a text editor specialized for editing
+Itcl source.
+It is automatically invoked whenever you open any file with an
+<a name=".itcl">".itcl" extension</a> or
+<a name=".itk">".itk" extension</a>.
+Itcl is an object-oriented extension to the Tcl language
+that was developed by Michael McLennan of AT&T Bell Labs.
+(Itk is the associated extension to Tk).
+The <a name="EditItcl class">EditItcl class</a> is derived from the
+<a href=EditTclHelp.html>EditTcl class</a>, and
+therefore inherits all of its features.
+It colors certain Itcl constructs, such as comments
+and class and method definitions.
+<p>
+This class inherits its hyperlink mechanism (the
+<a name="Show Links command">"Show Links" command</a> in the "Format" menu)
+from the Tcl editor.
+However, because of the namespaces in itcl, the references to
+procedures and methods are only identified if
+they are completely qualified.  For
+example, "::tycho::EditTcl" will be identified as a link,
+but "EditTclText" will not.  Unfortunately, since itcl-2.0 is
+dynamically scoped, it appears that there is no way around this.
+<p>
+For the
+<a name="Evaluate command">"Evaluate" command</a> in the "File" menu
+to work, the editor keeps track of
+classes that are defined within so that it can delete the class
+definitions and instances before evaluating the file. Note that for
+this to work, all derived classes must be accessible by auto-loading.
+This implies some formatting restrictions on the source code file.
+Specifically, class definitions must appear with the keyword "class"
+starting in column zero and the class name following it on the same
+line.
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>
