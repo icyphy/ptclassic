@@ -353,39 +353,24 @@ body ::tycho::RevControlSCCS::viewHistory {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    if {[info exists itk_component(history)] && \
-	    [winfo exists $itk_component(history)]} {
-	delete object $itk_component(history)
-	return
-    } {
-	set dir [file dirname $file]
-	set basefile [file tail $file]
-	set olddir [eval pwd]
-	
-	if {![file exists [format "%s/SCCS/s.$basefile" $dir]]} {
-	    error "The file \"$file\" is not under SCCS control."
-	}
-	cdDir $dir
-        # Read in from the SCCS execution
-	catch {exec sccs prs $basefile} history
 
-	itk_component add history {
-	    ::tycho::Edit $itk_component(hull).history -textheight 30
-	} {
-	    keep -readonly -textwidth -background \
-		    -highlightbackground -highlightcolor -selectforeground \
-		    -cursor -insertbackground -textforeground -textfont \
-		    -textbackground
-	}
-	pack $itk_component(history) -expand yes -fill both
-	$itk_component(history) configure -readonly 1
-
-	# Parse the history
-        parseHistory $history [$itk_component(history) textWinName]
-
-	# FIXME: Delay or the focus command is ignored.  Tk bug?
-	#after 500 "focus [$itk_component(history) textWinName]"
-
-	cd $olddir
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    
+    if {![file exists [format "%s/SCCS/s.$basefile" $dir]]} {
+        error "The file \"$file\" is not under SCCS control."
     }
+    cdDir $dir
+    # Read in from the SCCS execution
+    catch {exec sccs prs $basefile} history
+    
+    # Parse the history
+    $itk_component(history) clear
+    parseHistory $history [$itk_component(history) textWinName]
+    $itk_component(history) markUnmodified
+    
+    # FIXME: Delay or the focus command is ignored.  Tk bug?
+    #after 500 "focus [$itk_component(history) textWinName]"
+    cd $olddir
 }
