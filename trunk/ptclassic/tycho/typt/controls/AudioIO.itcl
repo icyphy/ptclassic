@@ -1,10 +1,10 @@
-# One line description of file.
+# A control sub-panel for audio I/O.
 #
 # @Author: John Reekie and Sunil Bhave
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -48,13 +48,6 @@ class ::tycho::AudioIO {
 
     # Request the widget to connect its controls
     method requestConnect {}
-
-    ###################################################################
-    ####                   protected methods                       ####
-
-    ###################################################################
-    ####                   protected variables                     ####
-
 
     ###################################################################
     ####                   private variables                       ####
@@ -175,28 +168,14 @@ body ::tycho::AudioIO::constructor {args} {
     eval itk_initialize $args
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
-
 ######################################################################
 #### requestConnect
 #
-# Connect all controls to the control panel. Subclasses must
-# override.
+# Connect all controls to the main control panel.
 #
-body ::tycho::ControlSubpanel::requestConnect {} {
+body ::tycho::AudioIO::requestConnect {} {
     # Register the controls so stars can access them
-    connect $itk_component(attenuate) input.volume
-    connect $itk_component(gain)      output.volume
-    connect $itk_component(balance)   output.balance
+    connect attenuate input.volume   10.0
+    connect gain      output.volume  10.0
+    connect balance   output.balance 5.0 50
 }
-
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####

@@ -48,7 +48,7 @@ class ::tycho::ToneControl {
     ####                            options                       ####
 
     # The stars to control
-    itk_option define -star stars Stars {left right}
+    itk_option define -stars stars Stars {left right}
 
     ###################################################################
     ####                         public methods                    ####
@@ -72,16 +72,17 @@ body ::tycho::ToneControl::constructor {args} {
     # Create the bank of sliders for low, mid, and high gain
     foreach {tag label} {low Low mid Mid high High} {
     	itk_component add $tag {
-        	::tycho::Slider $itk_interior.$tag \
+                ::tycho::Slider $itk_interior.$tag \
                 -label $label \
                 -from -10 -to 10 \
                 -resolution 1 \
                 -digits 0
-    	} {
-        	keep -cursor -background
+        } {
+                keep -cursor -background
     	}
-    	pack $itk_component($tag) -side left -in $itk_component(frame)
-	}
+        $itk_component($tag) set 0
+        pack $itk_component($tag) -side left -in $itk_component(frame)
+    }
 
     # Initialise options.
     eval itk_initialize $args
@@ -93,9 +94,9 @@ body ::tycho::ToneControl::constructor {args} {
 # Connect all controls to the control panel.
 #
 body ::tycho::ToneControl::requestConnect {} {
-	foreach star $itk_option(-stars) {
-		connect low  $star.low
-		connect mid  $star.mid
-		connect high $star.high
-	}
+    foreach star $itk_option(-stars) {
+        foreach band {low mid high} {
+            connect $band $star[::tycho::capitalize $band].gain 5.0 50
+        }
+    }
 }
