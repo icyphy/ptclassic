@@ -25,11 +25,20 @@ special routines to generate the sub universes.
 #include "SDFConnect.h"
 #include "ConstIters.h"
 
+static void copyActualStates(const Block& src, Block& dest) {
+	CBlockStateIter nexts(src);
+	BlockStateIter nextd(dest);
+	const State* srcStatePtr;
+	State *destStatePtr;
+	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
+		destStatePtr->setValue(
+			hashstring(srcStatePtr->currentValue()));
+}
+
 // clone a star
 SDFStar* cloneStar(SDFStar* org) {
 	SDFStar* newS = (SDFStar*) org->clone();
-	newS->copyStates(*org);
-	/* NOT DEFINED YET newS->copyStates(*org); */
+	copyActualStates(*org, *newS);
 	if (org->numberMPHs() <= 0) return newS;
 	
 	// clone the multi portholes.
