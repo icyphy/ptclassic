@@ -237,6 +237,7 @@ ifdef CGCFULL
 	CGC = 1
 	CGFULL = 1
 	NOWAM = 1
+	CGCCONTRIB = 1
 	ifdef TK
 		CGCTK = 1
 		CGCVISTK = 1
@@ -539,6 +540,14 @@ ifdef CGC
 			LIBS += -lcgcvistcltk
 			LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
 		endif
+	endif
+	# Contributed stars by third-party users
+	ifdef CGCCONTRIB
+		# stars and library for generated code
+		CUSTOM_DIRS += $(CGCDIR)/contrib/stars
+		STARS += $(LIBDIR)/cgccontribstars.o
+		LIBS += -lcgccontrib
+		LIBFILES += $(LIBDIR)/libcgccontrib.$(LIBSUFFIX)
 	endif
 	# Tcl/Tk
 	ifdef CGCTK
