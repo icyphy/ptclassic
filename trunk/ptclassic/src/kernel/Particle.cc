@@ -50,11 +50,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 static IntParticle iproto;
 static FloatParticle fproto;
 static ComplexParticle cproto;
+static FixParticle xproto;
 
 Plasma* Plasma :: plasmaList = 0;
 static Plasma intPlasma(iproto);
 static Plasma floatPlasma(fproto);
 static Plasma complexPlasma(cproto);
+static Plasma fixPlasma(xproto);
 
 	///////////////////////////////////////
 	// class Particle
@@ -109,6 +111,7 @@ IntParticle :: operator int () const {return data;}
 IntParticle :: operator double () const {return double(data);}
 IntParticle :: operator float () const {return float(data);}
 IntParticle :: operator Complex () const {return Complex(data);}
+IntParticle :: operator Fix () const {return Fix(double(data));}
 
 StringList IntParticle :: print () const { return StringList(data);}
 
@@ -119,6 +122,7 @@ void IntParticle :: initialize() {data=0;}
 void IntParticle :: operator << (int i) {data=i;}
 void IntParticle :: operator << (double f) {data=int(f);}
 void IntParticle :: operator << (const Complex& c) {data=int(abs(c));}
+void IntParticle :: operator << (const Fix& x) {data = int(x);}
 
 
 	////////////////////////////////////////
@@ -162,6 +166,7 @@ FloatParticle :: operator int () const {return int(data);}
 FloatParticle :: operator double () const {return data;}
 FloatParticle :: operator float () const {return float(data);}
 FloatParticle :: operator Complex () const {return Complex(data);}
+FloatParticle :: operator Fix () const {return Fix(data);}
 
 StringList FloatParticle :: print () const { return StringList(data);}
 
@@ -173,6 +178,7 @@ void FloatParticle :: initialize() {data=0.0;}
 void FloatParticle :: operator << (int i) {data=i;}
 void FloatParticle :: operator << (double f) {data=f;}
 void FloatParticle :: operator << (const Complex& c) {data=abs(c);}
+void FloatParticle :: operator << (const Fix& x) {data = double(x);}
 
         ////////////////////////////////////////
         // class ComplexParticle
@@ -207,7 +213,7 @@ Particle& ComplexParticle :: operator = (const Particle& p)
 
 int ComplexParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
-	return data == (Complex)p;
+	return data == Complex(p);
 }
 
 DataType ComplexParticle :: type() const {return COMPLEX;}
@@ -219,6 +225,7 @@ ComplexParticle :: operator int () const {return int(abs(data));}
 ComplexParticle :: operator double () const {return abs(data);}
 ComplexParticle :: operator float () const {return float(abs(data));}
 ComplexParticle :: operator Complex () const {return data;}
+ComplexParticle :: operator Fix () const {return Fix(abs(data));}
 
 StringList ComplexParticle :: print () const {
 	StringList out = "(";
@@ -236,6 +243,71 @@ void ComplexParticle :: initialize() {data=0.0;}
 void ComplexParticle :: operator << (int i) {data=Complex(i);}
 void ComplexParticle :: operator << (double f) {data=Complex(f);}
 void ComplexParticle :: operator << (const Complex& c) {data=c;}
+void ComplexParticle :: operator << (const Fix& x) 
+                                              {data = Complex(double(x));}
+
+
+        ///////////////////////////////////////
+        // class FixParticle
+        ///////////////////////////////////////
+
+extern const DataType FIX = "FIX";
+
+FixParticle :: FixParticle() {}
+FixParticle :: FixParticle(int len, int intBits) { data = Fix(len, intBits);}
+FixParticle :: FixParticle(double& d) { data = d;}
+FixParticle :: FixParticle(int len, int intBits, double& d)
+                                      { data = Fix(len, intBits, d); }
+FixParticle :: FixParticle(FixParticle& x) { data = x.data; }
+FixParticle :: FixParticle(int len, int intBits, FixParticle& x)
+                                      { data = Fix(len, intBits, x.data); }
+
+Particle* FixParticle :: clone () const {
+        Particle* p = fixPlasma.get();
+        ((FixParticle*)p)->data = data;
+        return p;
+}
+
+void FixParticle :: die () { fixPlasma.put(this);}
+
+Particle* FixParticle :: useNew () const { LOG_NEW; return new FixParticle;}
+
+Particle& FixParticle :: operator = (const Particle& p)
+{
+        if(compareType(p)) {
+                // Types are compatible, so we can copy
+                const FixParticle& fs = *(const FixParticle*)&p;
+                data = fs.data;
+        }
+        return *this;
+}
+
+int FixParticle :: operator == (const Particle& p) {
+         if (!typesEqual(p)) return 0;
+         Fix pdata = Fix(p);
+         return data == pdata;
+}
+
+DataType FixParticle :: type() const {return FIX;}
+FixParticle :: operator int () const {return int(data);}
+FixParticle :: operator double () const {return double(data);}
+FixParticle :: operator float () const {return float(data);}
+FixParticle :: operator Complex () const {return Complex(double(data));}
+FixParticle :: operator Fix () const {return data;}
+
+StringList FixParticle :: print () const
+{       double d = double(data);
+        return StringList(d);
+}
+
+        // Wash the Particle
+void FixParticle :: initialize() {data.initialize();}
+
+        // Load up with data
+void FixParticle :: operator << (int i) {data = double(i);}
+void FixParticle :: operator << (double f) {data = f;}
+void FixParticle :: operator << (const Complex& c) {data = double(abs(c));}
+void FixParticle :: operator << (const Fix& x) {data = x;}
 
 
 // ParticleStack methods
