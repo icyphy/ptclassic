@@ -85,6 +85,8 @@ non-zero integer (not necessarily 1).
 		else Error::abortRun(*this, "Unrecognized test.");
 	}
 
+	// Single-input cases
+
 	codeblock(inverter) {
 	clr	b	$ref(input#1),a		; set b = 0, read input to a
 	tst	a	#1,y1			; test a, set y1 = 1
@@ -92,37 +94,32 @@ non-zero integer (not necessarily 1).
 	move	b,$ref(output)			; output = b
 	}
 
-	codeblock(loadAccumulator,"int i") {
-	move	$ref(input#@i),a	; read input to accumulator a
+	codeblock(copyInput) {
+	move	$ref(input#1),a		; copy input to output by way of a
+	move	a,$ref(ouput)
 	}
 
-	codeblock(testAccumulator) {
-	tst	a			; test accumulator a
+	// Two-input cases
+
+	codeblock(twoInputAnd) {
+	move	$ref(input#1),x0	; read input i into register x0
+	move	$ref(input#2),x1	; read input i into register x0
+	mpy	x0,x1,a			; a = x0 * x1
+	asr	a			; a is integer mult, x0 = input
 	}
 
-	codeblock(testAndLoadAccumulator,"int i") {
-	tst	a	$ref(input#@i),a	; test a, read input into a
+	// General cases
+
+	codeblock(prepareAndLoop) {
+	move	#<$addr(input#2),r0	; r0 points to the address of input#2
+	move	$ref(input#1),x1	; load input #1 into x1 and wait for r0
+	mpy	x:(r0)+,x1,a		; a = x0 * x1, save previous a in x1
+	asr	a			; a is integer mult
 	}
 
-	codeblock(loadx0,"int i") {
-	move	$ref(input#@i),x0	; read input into register x0
-	}
-
-        codeblock(saveStatus) {
-	movec   sr,a    	; save status register (has condition codes)
-	}
-
-	codeblock(invert) {
-	and	#4,a		; returns true if zero (test the Z bit)
-	}
-
-	codeblock(branchIfZero) {
-	jeq	$label(_logic_end)	; branch if input is zero
-	}
-
-	codeblock(endAnd) {
-	move	#1,a		; return TRUE
-$label(_logic_end)
+	codeblock(logicAndOpAndLoad) {
+	mpy	x:(r0)+,x1,a	a,x1	; a = x0 * x1, save previous a in x1
+	asr	a			; a is integer mult
 	}
 
 	codeblock(logicOrOp) {
@@ -137,25 +134,51 @@ $label(_logic_end)
 	clr	b	$ref(input#1),a
 	}
 
+	// Reusable code blocks
+
+	codeblock(loadAccumulator,"int i") {
+	move	$ref(input#@i),a	; read input i to accumulator a
+	}
+
+	codeblock(loadx0,"int i") {
+	move	$ref(input#@i),x0	; read input i to accumulator a
+	}
+
+	codeblock(testAccumulator) {
+	tst	a			; test accumulator a
+	}
+
+	codeblock(testAndLoadAccumulator,"int i") {
+	tst	a	$ref(input#@i),a	; test a, read input into a
+	}
+
+        codeblock(saveStatus) {
+	movec   sr,a    	; save status register (has condition codes)
+	}
+
+	codeblock(invert) {
+	and	#4,a		; returns true if zero (test the Z bit)
+	}
+
         codeblock(saveResult) {
 	move    a,$ref(output)
 	}
 
 	go {
+		int numinputs = input.numberPorts();
 		const char* cn = logic;
 		StringList header = "; Boolean ";
 		header << cn << " for " << input.numberPorts() << " inputs";
 		addCode(header);
 
 		// The inverter (not) star is the simplest case
-		if ( input.numberPorts() == 1 ) {
+		if ( numinputs == 1 ) {
 			if ( test == NOTID || test == NANDID ||
 			     test == NORID || test == XNORID ) {
 				addCode(inverter);
 			}
 			else {
-				addCode(loadAccumulator(1));
-				addCode(saveResult);
+				addCode(copyInput);
 			}
 			return;
 		}
@@ -168,17 +191,17 @@ $label(_logic_end)
 		switch( test ) {
 		    case ANDID:
 		    case NANDID:
-			implementationComment << "positive logic";
+			implementationComment << "integer multiplication";
 			addCode(implementationComment);
-			addCode(loadAccumulator(1));
-			addCode(testAccumulator);
-			for (i = 2; i < input.numberPorts(); i++ ) {
-				addCode(branchIfZero);
-				addCode(testAndLoadAccumulator(i));
+			if ( numinputs == 2 ) {
+				addCode(twoInputAnd);
 			}
-			addCode(branchIfZero);
-			addCode(endAnd);
-			if ( test == NANDID ) addCode("\ttst	a");
+			else {
+				addCode(prepareAndLoop);
+				for (i = 3; i <= numinputs; i++ ) {
+					addCode(logicAndOpAndLoad);
+				}
+			}
 			break;
 		    case ORID:
 		    case NORID:
@@ -186,18 +209,8 @@ $label(_logic_end)
 			addCode(implementationComment);
 			addCode(loadAccumulator(1));
 			addCode(loadx0(2));
-			// Use the repeat instruction if input ports > 4
-			// because the logicOrOpAndLoad code is 1 instruction
-			if ( input.numberPorts() > 4 ) {
-				StringList repeat = "\t\trep\t#";
-				repeat << ( input.numberPorts() - 2 );
-				addCode(repeat);
+			for (i = 3; i < input.numberPorts(); i++ ) {
 				addCode(logicOrOpAndLoad(i));
-			}
-			else {
-				for (i = 3; i < input.numberPorts(); i++ ) {
-					addCode(logicOrOpAndLoad(i));
-				}
 			}
 			addCode(logicOrOp);
 			break;
@@ -228,33 +241,36 @@ $label(_logic_end)
 		addCode(saveResult);
 	}
 	exectime {
+                // The exectime is given in half oscillator cycles
+		// Why?  Because that's the way it was done in Gabriel.
+
 		// Time to read the input and write the output
-		int test = 4;
+		int test = 2;
 
 		switch( test ) {
 		  case NOTID:
-		    test += 4;
+		    test += 2;
 		    break;
 
 		  case NANDID:
-		    test += 4;
+		    test += 2;
 		    // fall through
 		  case ANDID:
-		    test += 4 + 6*input.numberPorts();
+		    test += 2*input.numberPorts();
 		    break;
 
 		  case NORID:
-		    test += 4;
+		    test += 2;
 		    // fall through
 		  case ORID:
-		    test += 2 + 2*input.numberPorts();
+		    test += 1 + input.numberPorts();
 		    break;
 
 		  case XORID:
-		    test += 4;
+		    test += 2;
 		    // fall through
 		  case XNORID:
-		    test += 4 + 8*input.numberPorts();
+		    test += 2 + 4*input.numberPorts();
 		    break;
 		}
 
