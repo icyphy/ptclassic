@@ -280,21 +280,6 @@ const char* CGCPortHole :: getGeoName() const {
 	return geo().getBufName();
 }
 
-// If type conversion between complex to float/int is required when
-// it is an output.
-int CGCPortHole :: isConverted(){
-	if (isItInput()) return converted;
-	else if (strcmp(type(),resolvedType()) == 0) converted = FALSE;
-	else if (strcmp(type(), ANYTYPE) == 0) converted = FALSE;
-	else if ((strcmp(type(),COMPLEX) == 0) || 
-	    (strcmp(type(),"COMPLEXARRAY") == 0)) converted = 1;
-	else if ((strcmp(resolvedType(),COMPLEX) == 0) || 
-	    (strcmp(resolvedType(),"COMPLEXARRAY") == 0)) converted = -1;
-	else converted = FALSE;
-
-	return converted;
-}
-
 // return the precision for a port of type FIX that was assigned
 // with the setPrecision() method
 Precision CGCPortHole::getAssignedPrecision() const

@@ -141,10 +141,6 @@ public:
 	// calculates. If this manual value is smaller, signal an error.
 	void requestBufSize(int i) { maxBuf = i; manualFlag = TRUE; }
 
-	// check whether automatic type conversion should be performed.
-	// Currently, Complex and float/int type data are converted.
-	int isConverted();
-	
 	// determine the property of the buffer associated with this port.
 	void setFlags();
 
