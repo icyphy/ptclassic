@@ -7,7 +7,9 @@
 
 DDFSTARS= \
  $(DDF)/DDFSelf.o \
+ $(DDF)/DDFCase.o \
  $(DDF)/DDFDownCounter.o \
+ $(DDF)/DDFEndCase.o \
  $(DDF)/DDFLastOfN.o \
  $(DDF)/DDFRepeater.o \
  $(DDF)/DDFSelect.o \
