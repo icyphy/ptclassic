@@ -1,22 +1,19 @@
+#
+# Config file to build on sun4 processor (SparcStation)
+#
 # $Id$
 
-include $(ROOT)/config-g++.mk
+# --------------------------------------------------------------------
+# |  Please see the file ``config-default.mk'' in this directory!    |
+# --------------------------------------------------------------------
+include $(ROOT)/mk/config-default.mk
 
-# If the X11 include directories are in /usr/include/X11, leave
-# the following symbol blank.  Otherwise define it as "-Idir" where
-# dir is the PARENT of the include directory, which must end in X11.
-X11INCL = -I/usr/X11/include
+include $(ROOT)/mk/config-g++.mk
 
-# If the X11 libraries are not on the standard library search path,
-# define the following symbol as "-Ldir" where dir is the directory
-# containing them.  Otherwise leave it blank.
-X11LIBDIR = -L/usr/X11/lib
-
-TCL_ROOT=$(ROOT)/tcl
-# Directory containing Tcl/Tk include files
-TCL_H_DIR=$(TCL_ROOT)/include
-
-# Directory containing Tcl/Tk libraries
-TCL_LIBDIR=$(TCL_ROOT)/lib.$(ARCH)
+#
+# Directories to use
+#
+X11_INCSPEC = -I/usr/X11/include
+X11_LIBSPEC = -L/usr/X11/lib -lX11
 
 S56DIR= $(ROOT)/vendors/s56dsp
