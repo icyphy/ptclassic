@@ -1,5 +1,5 @@
 defstar {
-    name 	{ Data_M }
+    name 	{ Toeplitz_M }
     domain 	{ SDF }
     version	{ $Id$ }
     author	{ Mike J. Chen }
