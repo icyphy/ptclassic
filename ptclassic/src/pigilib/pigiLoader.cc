@@ -63,6 +63,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <fcntl.h>		// For open().
 #endif /*hppa GNUG SOL2*/
 
+// If a makefile is present in the directory where the star source files
+// are located, then make is called, and many of the values in this file
+// are ignored.
+// Note that a user can create a makefile based on $PTOLEMY/mk/userstars.mk
+// that can override the defaults in this file.
+
 // choose compiler to use
 #ifdef __GNUG__
 #define CPLUSPLUS "g++"
