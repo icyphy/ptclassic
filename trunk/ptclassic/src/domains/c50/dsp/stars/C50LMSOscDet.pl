@@ -139,8 +139,12 @@ The initial guess at the angle being estimated in radians.
 		taps[1] = -cos(double(initialOmega));
 		taps[2] =  0.5;
 	
-		Fix temp("1.15",stepSize.asDouble());
-		intMu = int(temp);
+		double temp = stepSize.asDouble();
+		if (temp >= 0) {
+			intMu = int(32768*temp);
+		} else {
+			intMu = int(32768*(1-temp));
+		}
 
 		// call the LMS FIR filter setup method
 		C50FIR::setup();
