@@ -122,6 +122,22 @@ void CG56MultiSimTarget :: prepareCodeGen() {
 	}
 }
 
+void CG56MultiSimTarget :: writeCode() 
+{
+	// Note: this also writes the command file for the Motorola simulators;
+	for (int i = 0 ; i < nChildrenAlloc ; i++) 
+	{
+		((CGTarget*)child(i))->writeCode();
+		 //    create the .cmd file
+		StringList fName,cmd;
+		fName << "command" << i << ".cmd";
+		cmd << "load " << (const char*) filePrefix << i << "\n";
+		cmd << "go \n";
+		rcpWriteFile("localhost",destDirectory,fName,cmd);
+	}
+}
+
+
 // -----------------------------------------------------------------------------
 Block* CG56MultiSimTarget :: makeNew() const {
 	LOG_NEW; return new CG56MultiSimTarget(name(),starType(),descriptor());
