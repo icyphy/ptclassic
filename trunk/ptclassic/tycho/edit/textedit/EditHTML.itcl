@@ -42,9 +42,9 @@ class ::tycho::EditHTML {
     # Evaluate the HTML.
     method evaluate {}
 
-    #### revert
-    # Override the base-class revert to recolorize.
-    method revert {}
+    #### reload
+    # Override the base-class reload to recolorize.
+    method reload {}
 
     constructor {args} {}
     destructor {}
@@ -94,10 +94,10 @@ body ::tycho::EditHTML::evaluate {} {
 }
 
 #####################################################################
-#### revert
-# Override the base-class revert to recolorize.
+#### reload
+# Override the base-class reload to recolorize.
 #
-body ::tycho::EditHTML::revert {} {
-    Edit::revert
+body ::tycho::EditHTML::reload {} {
+    Edit::reload
     $itk_component(text) parse
 }
