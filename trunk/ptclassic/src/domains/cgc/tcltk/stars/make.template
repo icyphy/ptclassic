@@ -41,9 +41,13 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
+# extra source files: tcl/tk script files
+SCRIPTS= tkBall.tcl tkBallAsync.tcl tkKeyboard.tcl tkKeypad.tcl \
+ tkScript.tcl tkUniverse.tcl
+
 DOMAIN=CGC
 STAR_MK=cgctcltkstars
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
 LIB=libcgctcltk.a
 
 # Where star doc files go
