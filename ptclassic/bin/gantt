@@ -13,6 +13,6 @@
 #
 PTOLEMY=${PTOLEMY:-~/ptolemy}
 PTARCH=`$PTOLEMY/bin/ptarch`
-ganttscript=$PTOLEMY/lib/tcl/ptkGantt.tcl
+ganttscript=$PTOLEMY/lib/tcl/gantt.tcl
 ptolemywish=$PTOLEMY/bin.$PTARCH/wish4.0
-exec $ptolemywish $ganttscript $ganttscript "$@"
+exec $ptolemywish $ganttscript "$@"
