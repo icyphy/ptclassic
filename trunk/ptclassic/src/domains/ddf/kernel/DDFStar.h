@@ -42,8 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DynDFStar.h"
 #include "Particle.h"
 #include "DDFPortHole.h"
+#include "IntState.h"
 
-class DDFWormhole;
 
 	////////////////////////////////////
 	// class DDFStar
@@ -70,11 +70,6 @@ public:
 	// is it recursion star?
 	virtual int isItSelf();
 
-        // virtual method to return this pointer if it is a wormhole.
-        // Return NULL if not.
-        virtual DDFWormhole* myWorm();
-
-	virtual const char* readTypeName();
 protected:
 	void initWait() { clearWaitPort();}
 };

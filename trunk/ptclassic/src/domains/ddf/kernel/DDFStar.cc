@@ -39,14 +39,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DDFStar.h"
 #include "Scheduler.h"
-#include "DDFWormhole.h"
 
 /*******************************************************************
 
 	class DDFStar methods
 
 ********************************************************************/
-
 
 // initialize DDF specific members
 void DDFStar :: initialize() {
@@ -76,10 +74,5 @@ extern const char DDFdomainName[];
 const char* DDFStar :: domain () const { return DDFdomainName;}
 
 int DDFStar :: isItSelf() { return FALSE ;}
-
-// return NULL
-DDFWormhole* DDFStar :: myWorm() { return NULL; }
-
-const char* DDFStar :: readTypeName () { return "unspecified method";}
 
 ISA_FUNC(DDFStar,DynDFStar);
