@@ -52,7 +52,7 @@ physical	showProp	KEY ^P	MENU Props&Bags 0 ALIAS
 #physical	bagNew		MENU Props&Bags 4 ALIAS
 #physical	bagAttach	MENU Props&Bags 5 ALIAS
 #physical	bagDetach	MENU Props&Bags 6 ALIAS
-physical	undoCmd		MENU Undo 0 ALIAS
+physical	undoCmd		KEY U	MENU Undo 0 ALIAS
 symbolic	COPY	physical
 schematic	COPY	physical
 physical	phyCreateCmd	KEY c	MENU Edit 0	ALIAS
