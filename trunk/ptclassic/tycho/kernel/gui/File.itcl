@@ -534,7 +534,7 @@ body ::tycho::File::autoSave {} {
 	    set filename [::tycho::url join \
 		    [::tycho::url dirname $completeFilePath] $filename]
 	    if {[catch "saveFile $filename" message] != 0} {
-		statusbar putStatus "Auto-save failed: $message"
+		putStatus "Auto-save failed: $message"
 		# This is what we used to do:
 		# safeEval ::tycho::warn "Auto-save failed: $message"
 	    }
