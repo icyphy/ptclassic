@@ -352,12 +352,21 @@ int TclStarIfc::wrapup() {
 
 // Convert values on input to strings; works for all Ptolemy domains
 InfString TclStarIfc::getInputs () {
-	BlockPortIter nexti(*myStar);
-	PortHole *p;
+	// This used to use a BlockPortIter, which iterates over all
+	// inputs that the star has.  This isn't really what we want.
+	// In classes derived from TclStar, we need to be able to
+	// distinguish different types of inputs.
 	InfString result;
+	MultiPortHole* mph = myStar->multiPortWithName("input");
+	if (!mph) {
+	    result = "";
+	    return result;
+	}
+
+	MPHIter nexti(*mph);
+	PortHole *p;
 	while ((p = nexti++) != 0) {
 	    // return a quoted string for Tcl consumption
-	    if (p->isItOutput()) continue;
 	    result += "{";
 	    result += ((*p)%0).print();
 	    result += "} ";
