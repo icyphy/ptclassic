@@ -57,7 +57,7 @@ install:	ptplay $(BINDIR)/ptplay
 # We don't want to create a dummy ptplay script for architecture that
 # do not support ptplay because the stars look for the ptplay binary.
 
-ifneq "$(findstring sol, $(PTARCH))" ""
+ifneq (,$(findstring sol, $(PTARCH)))
 ptplay: ptplay.sol2
 	echo 
 	cp ptplay.sol2 ptplay
