@@ -29,6 +29,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "io_internal.h"
 #include "oct.h"
+#include "oct_utils.h"
 
 #define NIL(type) ((type *) 0)
 
@@ -93,10 +94,10 @@ int sub;
     switch(object->type) {
     case OCT_BOX:
 	(void) fprintf(outfile, "Box (%d,%d) (%d,%d)\n", 
-	    object->contents.box.lowerLeft.x,
-	    object->contents.box.lowerLeft.y,
-	    object->contents.box.upperRight.x,
-	    object->contents.box.upperRight.y);
+	    (int)object->contents.box.lowerLeft.x,
+	    (int)object->contents.box.lowerLeft.y,
+	    (int)object->contents.box.upperRight.x,
+	    (int)object->contents.box.upperRight.y);
 	break;
     case OCT_BAG:
 	(void) fprintf(outfile, "Bag with name %s\n",
@@ -119,17 +120,18 @@ int sub;
 	int retval,i;
 	
 	(void) fprintf(outfile, "Path with width %d\n",
-		 object->contents.path.width);
+		 (int)object->contents.path.width);
 	retval = octGetPoints(object, &num_points, pt_array);
 	if (retval == OCT_OK) {
-	    (void) fprintf(outfile, "\twith %d points: ", num_points);
+	    (void) fprintf(outfile, "\twith %d points: ", (int)num_points);
 	    for (i = 0; i < num_points; i++) {
-		(void) fprintf(outfile,"(%d,%d) ", pt_array[i]);
+		(void) fprintf(outfile,"(%d,%d) ", (int)pt_array[i].x,
+			       (int)pt_array[i].y);
 	    }
 	    (void) fprintf(outfile, "\n");
 	} else if (retval == OCT_TOO_SMALL) {
 	    (void) fprintf(outfile,"\twith %d points (too many to print)\n",
-					     num_points);
+					     (int)num_points);
 	} else {
 	    oct_prepend_error("octPrintObject: Getting the points on a path");
 	    return retval;
@@ -144,14 +146,15 @@ int sub;
 	(void) fprintf(outfile, "Polygon\n");
 	retval = octGetPoints(object, &num_points, pt_array);
 	if (retval == OCT_OK) {
-	    (void) fprintf(outfile, "\twith %d points: ", num_points);
+	    (void) fprintf(outfile, "\twith %d points: ", (int)num_points);
 	    for (i = 0; i < num_points; i++) {
-		(void) fprintf(outfile,"(%d,%d) ", pt_array[i]);
+		(void) fprintf(outfile,"(%d,%d) ", (int)pt_array[i].x,
+			       (int)pt_array[i].y);
 	    }
 	    (void) fprintf(outfile, "\n");
 	} else if (retval == OCT_TOO_SMALL) {
 	    (void) fprintf(outfile,"\twith %d points (too many to print)\n",
-					     num_points);
+					     (int)num_points);
 	} else {
 	  oct_prepend_error("octPrintObject: Getting the points on a polygon");
 	    return retval;
@@ -166,12 +169,12 @@ int sub;
 	    (void) fprintf(outfile, "Label labeled %s at (%d,%d) (%d,%d)\n",
 		    (object->contents.label.label == NIL(char) ?
 		     "<NO-NAME>" : object->contents.label.label),
-		    object->contents.label.region.lowerLeft.x,
-		    object->contents.label.region.lowerLeft.y,
-		    object->contents.label.region.upperRight.x,
-		    object->contents.label.region.upperRight.y);
+		    (int)object->contents.label.region.lowerLeft.x,
+		    (int)object->contents.label.region.lowerLeft.y,
+		    (int)object->contents.label.region.upperRight.x,
+		    (int)object->contents.label.region.upperRight.y);
 	    (void) fprintf(outfile, "\ttext is %d high, with each line %s-justified\n",
-		    object->contents.label.textHeight,
+		    (int)object->contents.label.textHeight,
 		    hjust[object->contents.label.lineJust]);
 	    (void) fprintf(outfile, "\tin a %s-%s-justified block\n",
 		    vjust[object->contents.label.vertJust],
@@ -180,29 +183,31 @@ int sub;
 	break;
     case OCT_POINT:
 	(void) fprintf(outfile, "Point at (%d,%d)\n",
-		object->contents.point.x,
-		object->contents.point.y);
+		(int)object->contents.point.x,
+		(int)object->contents.point.y);
 	break;
     case OCT_EDGE:
 	(void) fprintf(outfile, "Edge from (%d,%d) to (%d,%d)\n",
-		object->contents.edge.start.x, object->contents.edge.start.y,
-		object->contents.edge.end.x, object->contents.edge.end.y);
+		       (int)object->contents.edge.start.x,
+		       (int)object->contents.edge.start.y,
+		       (int)object->contents.edge.end.x,
+		       (int)object->contents.edge.end.y);
 	break;
     case OCT_CIRCLE:
 	(void) fprintf(outfile, "Circle centered at (%d,%d)\n",
-		object->contents.circle.center.x,
-		object->contents.circle.center.y);
+		       (int)object->contents.circle.center.x,
+		       (int)object->contents.circle.center.y);
 	(void) fprintf(outfile, "\tfrom angle %d to %d, and radius %d to %d\n",
-		object->contents.circle.startingAngle,
-		object->contents.circle.endingAngle,
-		object->contents.circle.innerRadius,
-		object->contents.circle.outerRadius);
+		       (int)object->contents.circle.startingAngle,
+		       (int)object->contents.circle.endingAngle,
+		       (int)object->contents.circle.innerRadius,
+		       (int)object->contents.circle.outerRadius);
 	break;
     case OCT_TERM:
 	(void) fprintf(outfile, "Term with name %s on instance %d\n",
-		(object->contents.term.name == NIL(char) ?
-		 "<NO-NAME>" : object->contents.term.name),
-		object->contents.term.instanceId);
+		       (object->contents.term.name == NIL(char) ?
+			"<NO-NAME>" : object->contents.term.name),
+		       (int)object->contents.term.instanceId);
 	break;
     case OCT_INSTANCE: 
 	(void) fprintf(outfile, "Instance named %s of (%s %s %s)\n",
@@ -213,8 +218,8 @@ int sub;
 		object->contents.instance.facet);
 	type = object->contents.instance.transform.transformType;
 	(void) fprintf(outfile, "\tat (%d,%d) with transform %s\n",
-	       object->contents.instance.transform.translation.x,
-	       object->contents.instance.transform.translation.y,
+	       (int)object->contents.instance.transform.translation.x,
+	       (int)object->contents.instance.transform.translation.y,
 		((int) type <= (int) OCT_FULL_TRANSFORM ? trans_name[(int)type] :
 		  "<NO VALID TRANSFORM>"));
 	if (type == OCT_FULL_TRANSFORM) {
@@ -227,14 +232,15 @@ int sub;
 	break;
     case OCT_CHANGE_LIST:
 	(void) fprintf(outfile, "Change list with object mask %x and function mask %x\n",
-		object->contents.changeList.objectMask,
-		object->contents.changeList.functionMask);
+		(int)object->contents.changeList.objectMask,
+		(int)object->contents.changeList.functionMask);
 	break;
  case OCT_CHANGE_RECORD:
-	(void) fprintf(outfile, "Change record with type %s, object xid %d, content xid %d\n",
-				   function_name[object->contents.changeRecord.changeType],
-				   object->contents.changeRecord.objectExternalId,
-				   object->contents.changeRecord.contentsExternalId);
+	(void) fprintf(outfile,
+		       "Change record with type %s, object xid %d,content xid %d\n", 
+		       function_name[object->contents.changeRecord.changeType],
+		       (int)object->contents.changeRecord.objectExternalId,
+		       (int)object->contents.changeRecord.contentsExternalId);
 	fflush(outfile);
 	retval = octBB(object, &bbox);
 	if (retval < OCT_OK && retval != OCT_NO_BB)
@@ -244,8 +250,8 @@ int sub;
 	else if (retval >= OCT_OK)
 	{
 	    (void) fprintf(outfile, "\t bounding box of (%d,%d) -> (%d,%d)\n",
-					   bbox.lowerLeft.x, bbox.lowerLeft.y,
-					   bbox.upperRight.x, bbox.upperRight.y);
+			   (int)bbox.lowerLeft.x, (int)bbox.lowerLeft.y,
+			   (int)bbox.upperRight.x, (int)bbox.upperRight.y);
 	}
 	retval = octGenFirstContent(object, OCT_ALL_MASK, &sub_object);
 	if (retval < 0)
@@ -265,17 +271,21 @@ int sub;
 	    retval = octGetPoints(object, &num_points, pt_array);
 	    if (retval == OCT_OK)
 		{
-			(void) fprintf(outfile, "\twith %d old points: ", num_points);
+			(void) fprintf(outfile, "\twith %d old points:",
+				       (int)num_points);
 			for (i = 0; i < num_points; i++)
 			{
-				(void) fprintf(outfile,"(%d,%d) ", pt_array[i]);
+				(void) fprintf(outfile,"(%d,%d) ",
+					       (int)pt_array[i].x,
+					       (int)pt_array[i].y);
 			}
 			(void) fprintf(outfile, "\n");
 	    }
 		else if (retval == OCT_TOO_SMALL)
 		{
-			(void) fprintf(outfile,"\twith %d points (too many to print)\n",
-						   num_points);
+			(void) fprintf(outfile,
+				       "\twith %d points (too many to print)\n",
+						   (int)num_points);
 	    }
 		else
 		{
@@ -289,7 +299,7 @@ int sub;
 	switch (object->contents.prop.type) {
 	case OCT_INTEGER :
 	    (void) fprintf(outfile,"Integer %d\n",
-		    object->contents.prop.value.integer);
+		    (int)object->contents.prop.value.integer);
 	    break;
 	case OCT_REAL :
 	    (void) fprintf(outfile,"Real %g\n", object->contents.prop.value.real);
@@ -302,7 +312,8 @@ int sub;
 		int32 length = object->contents.prop.value.stranger.length;
 		char *ptr = object->contents.prop.value.stranger.contents;
 	    
-		(void) fprintf(outfile,"%D bytes of stranger data:", length);
+		(void) fprintf(outfile,"%ld bytes of stranger data:",
+			       (long)length);
 		while (length-- > 0) {
 		    (void) fprintf(outfile,"%x ", *(ptr++));
 		}
@@ -314,7 +325,7 @@ int sub;
 		int32 length = object->contents.prop.value.real_array.length;
 		double *ptr = object->contents.prop.value.real_array.array;
 	    
-		(void) fprintf(outfile,"%D doubles in array:", length);
+		(void) fprintf(outfile,"%ld doubles in array:", (long)length);
 		while (length-- > 0) {
 		    (void) fprintf(outfile,"%g ", *(ptr++));
 		}
@@ -326,15 +337,19 @@ int sub;
 		int32 length = object->contents.prop.value.integer_array.length;
 		int32 *ptr = object->contents.prop.value.integer_array.array;
 	    
-		(void) fprintf(outfile,"%D ints in array:", length);
+		(void) fprintf(outfile,"%ld ints in array:", (long)length);
 		while (length-- > 0) {
-		    (void) fprintf(outfile,"%d ", *(ptr++));
+		    (void) fprintf(outfile,"%d ", (int)(*(ptr++)));
 		}
 		(void) fprintf(outfile,"\n");
 		break;
 	    }
 	case OCT_ID :
-	    (void) fprintf(outfile,"Object id %d\n", object->contents.prop.value.id);
+	    (void) fprintf(outfile,"Object id %d\n", 
+			   (int)object->contents.prop.value.id);
+	    break;
+        case OCT_NULL :
+	    (void) fprintf(outfile,"Object id is OCT_NULL\n"); 
 	    break;
 	}
 	break;
@@ -365,7 +380,8 @@ int sub;
 				do
 				{
 					octExternalId(&sub_object, &xid);
-					(void) fprintf(outfile, "%d ", xid);
+					(void) fprintf(outfile, "%d ",
+						       (int)xid);
 				} while ((status = octGenerate(&gen,&sub_object)) == OCT_OK);
 				(void) fprintf(outfile, "\n");
 			}
@@ -391,7 +407,8 @@ int sub;
 				do
 				{
 					octExternalId(&sub_object, &xid);
-					(void) fprintf(outfile, "%d ", xid);
+					(void) fprintf(outfile, "%d ",
+						       (int)xid);
 				} while ((status = octGenerate(&gen,&sub_object)) == OCT_OK);
 				(void) fprintf(outfile, "\n");
 			}
