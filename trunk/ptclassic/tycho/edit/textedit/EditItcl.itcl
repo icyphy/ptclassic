@@ -237,7 +237,7 @@ body ::tycho::EditItcl::fileTemplate {} {
     # to edit this file for their own use.
     # FIXME: The directory that contains the templates should be
     # a textedit preference.
-    set filename $TYCHO/editors/textedit/templates/ItclTemplate.html
+    set filename $TYCHO/editors/textedit/templates/ItclTemplate.itcl
 
     # Save the className before we insert the template, or getClassName
     # will return the class name in the template, which is incorrect.
