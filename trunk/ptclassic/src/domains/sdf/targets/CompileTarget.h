@@ -18,20 +18,20 @@ a universe.
 #pragma interface
 #endif
 
-#include "BaseCTarget.h"
+#include "HLLTarget.h"
 
-class CompileTarget : public BaseCTarget {
+class CompileTarget : public HLLTarget {
 public:
 	void setup();
 	int run();
 	void wrapup ();
 	CompileTarget(const char* nam,const char* stype,const char* desc) :
-		BaseCTarget(nam,stype,desc) {}
+		HLLTarget(nam,stype,desc) {}
 	Block* makeNew() const {
 		LOG_NEW; return new CompileTarget(name(),
 						  starType(), descriptor());
 	}
-	// FIXME: eliminate after BaseCTarget is fixed.
+	// FIXME: eliminate after HLLTarget is fixed.
 	Block* clone() const {
 		LOG_NEW; CompileTarget* t = new CompileTarget(name(),
 						  starType(), descriptor());
