@@ -1,5 +1,5 @@
 #! /bin/csh -f
-# usage: pigi [-bw] [-cp] [-debug] [-console]
+# usage: pigi [-bw] [-cp] [-debug] [-console] [-help]
 #	[-rpc rpcname] [-xres resname ] [cell_name]
 
 # pigi - Ptolemy Interactive Graphics Interface
@@ -36,6 +36,10 @@ set resfile = pigiXRes9
 
 while ($#argv)
 	switch ($argv[1])
+		case -help:
+			echo "usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
+			echo "	[-rpc rpcname] [-xres resname ] [cell_name]"
+			exit 0
 		case -rpc:
 			setenv PIGIRPC $argv[2]
 			shift
@@ -58,6 +62,8 @@ while ($#argv)
 			breaksw
 		case -*:
 			echo Bad option: $argv[1]
+			echo "usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
+			echo "	[-rpc rpcname] [-xres resname ] [cell_name]"
 			exit 1
 			breaksw
 		case *:
@@ -66,7 +72,6 @@ while ($#argv)
 	endsw
 	shift
 end
-
 
 if ($?pigidebug && -x $PIGIRPC.debug ) setenv PIGIRPC $PIGIRPC.debug
 
@@ -106,7 +111,7 @@ if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
 
-set path = ( $PTOLEMY/octtools/bin.$ARCH $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
+set path = ( $path $PTOLEMY/octtools/bin.$ARCH $PTOLEMY/bin.$ARCH $PTOLEMY/bin )
 
 set cmdfile = /tmp/pigiCmds.$USER
 /bin/rm -f $cmdfile
