@@ -1,23 +1,35 @@
 .\" $Id$
 .NA spread
 .SD
-Demonstrates the Spread and the Collect stars
+Demonstrates the
+.c Spread
+and the
+.c Collect
+stars.
 .DE
 .SV $Revision$	$Date$
 .AL "S. Ha"
-.LO "~ptolemy/src/domains/cgc/demo"
+.EQ
+delim off
+.EN
+.LO "$PTOLEMY/src/domains/cgc/demo"
+.EQ
+delim $$
+.EN
 .LD
 .pp
 .Se "Spread"
 .Se "Collect"
 This demo shows how multiple invocations of a star can be scheduled onto
-more than one processors (in this demo, 2). The number of invocation of the
+more than one processors (in this demo, 2).
+The number of invocation of the
 .c Gain
 star between the
 .c UpSample
 and the
 .c DownSample
-is 3. The automatic scheduler (Hu's level scheduler) schedules two instances
+is 3.
+The automatic scheduler (Hu's level scheduler) schedules two instances
 of the 
 .c Gain
 star to the first processor and the last invocation to the second processor.
@@ -31,7 +43,8 @@ star to the
 .c Gain
 star (the first two outputs) and a
 .c Send
-star (the third output). On the other hand, a
+star (the third output).
+On the other hand, a
 .c Collect
 star is automatically inserted before the
 .c DownSample 
@@ -46,11 +59,13 @@ Note that there is a delay between the
 .c Gain
 star and the
 .c DownSample
-star. That delay causes an addition copy of data between the 
+star.
+That delay causes an addition copy of data between the 
 .c Collect
 star and the 
 .c DownSample
-star. The copy operations are coded automatically.
+star.
+The copy operations are coded automatically.
 .pp
 Once codes are generated, they are shipped to the specified
 machines (

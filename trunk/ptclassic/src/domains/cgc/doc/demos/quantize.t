@@ -1,12 +1,22 @@
 .\" $Id$
 .NA quantize
 .SD
-Demonstrate the Quantizer star.
+Demonstrate the
+.c Quantizer
+star.
 .DE
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/cgc/demo"
+.EQ
+delim off
+.EN
+.LO "$PTOLEMY/src/domains/cgc/demo"
+.EQ
+delim $$
+.EN
 .LD
-This trivial system is identical to a demo by the same name in the SDF
-domain.  Please see the documentation there.
+This trivial system is identical to the
+.c quantize
+a demo in the SDF domain.
+Please see the documentation there.
 .ES
