@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  J. Buck
+ Programmers:  J. Buck, Christopher Hylands
  Date of creation: 7/30/90
 
  This file implements support for incremental linking.  It works both
@@ -34,11 +34,59 @@ ENHANCEMENTS, OR MODIFICATIONS.
  easily to other Unix ports of cfront; all the implementation-specific
  stuff is in Linker.sysdep.h.
 
- The code can deal with two object-file formats: BSD-ish (Sun-3, Sparc, Vax)
- and COFF (mips).
 
- It takes an .o file, does an incremental link with respect to the
- running binary, links it in and calls the constructors for any
+ There are two styles of incremental linking:
+
+ 1. Use a 4.3/Sun-style loader with the -A flag to load in .o files.
+ Usually, binaries that are to be dynamically linked must be built with
+ the -N option.  The code can deal with two object-file formats:
+ BSD-ish (Sun-3, Sparc, Vax) and COFF (mips).  
+
+
+ 2. Use the System V Release 4 dlopen() style call to load in shared
+ objects (.so files).  SunOS4.1.x, Solaris2.x and Irix5.x support this
+ style of dynamic linking.  In Ptolemy0.5.1, only the sol2 and irix5
+ ARCHs support dynamic linking of shared objects.
+
+
+ Shared Objects
+ --------------
+ There are several ways to specify the path to a shared object.
+
+ 1) Using just a file name 'link foo.so' will not work unless
+ LD_LIBRARY_PATH includes the directory where foo.so resides.
+ The man pages for dlopen() and ld discuss LD_LIBRARY_PATH
+
+ Interestingly, using putenv() to set LD_LIBRARY_PATH from within ptcl
+ has no effect on the runtime loader.
+	
+ 2) If the file name begins with './', then the current directory is
+ searched.  'link ./foo.so' should work, as will 'link ./mydir/foo.so'
+
+ 3) If the file name is an absolute pathname, then the shared object
+ will be loaded. 'link /tmp/foo.so' should work.
+
+ 4) Dynamic programs can have a run path specified at link time.  The
+ run path is the path searched at runtime for shared object.  (Under
+ Solaris2.3, the -R option to ld controls the run path.  Under Irix5.2,
+ the -rpath option to ld controls the run path).
+ If ptcl or pigiRpc has been compiled with a run path built in, and the
+ shared object is in that path, then the shared object will be found.
+
+ The Sun Linker Manual says:
+	To locate the shared object foo.so.1, the runtime linker will
+	use any LD_LIBRARY_PATH definition presently in effect,
+	followed by any runpath specified during the link-edit of prog
+	and finally, the default location /usr/lib.  If the file name
+	had been specified ./foo.so.1, then the runtime linker would
+	have searched for the file only in the present working
+	directory.
+
+
+ Non-Shared linking
+ ------------------
+ The code takes an .o file, does an incremental link with respect to
+ the running binary, links it in and calls the constructors for any 
  global or file-static objects in the file.
 
  There are some restrictions:
@@ -88,6 +136,8 @@ const char* Linker::ptolemyName = 0;
 const char* Linker::symTableName = 0;
 // by default, search math and C libraries
 const char* Linker::myDefaultOpts = "-lm -lc";
+
+// If USE_DLOPEN is defined, then we don't use these vars
 char* Linker::memBlock = 0;
 char* Linker::availMem = 0;
 
@@ -97,6 +147,12 @@ const size_t LINK_MEMORY = (size_t)(1024L * 1024L);
 // to a page boundary.
 
 void Linker::adjustMemory() {
+#ifdef USE_DLOPEN
+  char buf[1024];
+  sprintf(buf,
+    "Linker: adjustMemory() not used on architectures that support dlopen()");
+  Error::abortRun(buf);
+#else // USE_DLOPEN
 	if (!memBlock) {
 		memBlock = new char[LINK_MEMORY];
 		availMem = memBlock;
@@ -108,6 +164,7 @@ void Linker::adjustMemory() {
 	size_t ps = getpagesize();
 	size_t t2 = (t / ps) * ps;
 	if (t2 < t) availMem = (char *) (t2 + ps);
+#endif // USE_DLOPEN
 }
 
 void Linker::init (const char* myName) {
@@ -232,8 +289,10 @@ static char *generateSharedObject( char* objName, int maxsize)
 // link in multiple files.  Arglist is char** and not const char**
 // to permit easy interfacing with Tcl.
 
+static         void *dlhandle = (void *)NULL; 
+
 int Linker::multiLink (int argc, char** argv) {
-        void *dlhandle = (void *)NULL; 
+
 	if (linkingNotSupported) {
 		Error::abortRun ("Sorry, incremental linking is not yet ",
 				 "supported on this architecture");
@@ -258,7 +317,25 @@ int Linker::multiLink (int argc, char** argv) {
 	  if (generateSharedObject(objName, PATHNAME_LENGTH) == (char
 								 *)NULL)
 	    return FALSE;
-	if ( (dlhandle = dlopen(objName, RTLD_NOW)) == NULL) {
+	// Fix me!  This is a really gross hack to work around the
+	// problem of reloading a changed star.  If the star is
+	// dynamically loaded with dlopen, and then changed and reloaded,
+	// the changes will not be present in the running image.
+	// What we really need here is some way of keeping track of     
+	// dlhandles and objnames, so if we see that we are attempting
+	// to reload a star we have already seen, then we do a dlclose
+	// first.
+
+	if ( dlhandle )
+	  dlclose(dlhandle);
+
+	// Read in the object now, make the symbols available to all
+	// for access.  Without RTLD_GLOBAL, the symbols from one
+	// dlopen() would not be visible in a subsequent dlopen()
+	// The sgi uses sgidlopen() which does not need the
+	// RTLD_GLOBAL flag.
+	  
+	if ( (dlhandle = DLOPEN(objName, DLOPEN_FLAGS)) == NULL) {
 	  char buf[1024];
 	  sprintf(buf,"Error linking file: dlopen: %s", dlerror());
 	  Error::abortRun(buf);
@@ -268,8 +345,17 @@ int Linker::multiLink (int argc, char** argv) {
 // flag for permanent-link or not
 	int perm = (argv[0][0] == 'p');	// KLUDGE!
 
-	int nCalls = invokeConstructors(argv[1], dlhandle);
+// invoke constructors in the newly read in code
+
+	// activeFlag is checked by the KnownBlock constructors, and a flag
+	// inside KnownBlock is saved.  This is how we can later tell
+	// if a Block was dynamically linked in, or if it was compiled-in.
+	if (!perm) activeFlag = TRUE;	
+				// Call with objName, not tname
+	int nCalls = invokeConstructors(objName, dlhandle);
+
 #else //USE_DLOPEN
+
 // round up to be on a page boundary
 	adjustMemory();
 
@@ -313,9 +399,15 @@ int Linker::multiLink (int argc, char** argv) {
 	int perm = (argv[0][0] == 'p');	// KLUDGE!
 
 // invoke constructors in the newly read in code
-	if (!perm) activeFlag = TRUE;	// indicate dynamically linked objects
+	// activeFlag is checked by the KnownBlock constructors, and a flag
+	// inside KnownBlock is saved.  This is how we can later tell
+	// if a Block was dynamically linked in, or if it was compiled-in.
+	if (!perm) activeFlag = TRUE;	
+				// Call with tname, not objName
 	int nCalls = invokeConstructors(tname, dlhandle);
 #endif //USE_DLOPEN
+
+
 	int status = (nCalls >= 0);
 
 	if (nCalls == 0 && !perm) {
@@ -336,6 +428,7 @@ int Linker::multiLink (int argc, char** argv) {
 }
 
 void Linker::installTable(const char* newTable) {
+#ifndef USE_DLOPEN
 	if (ptolemyName == symTableName) {
 		symTableName = getenv("PTOLEMY_SYM_TABLE");
 		if (!symTableName) symTableName =
@@ -352,6 +445,7 @@ void Linker::installTable(const char* newTable) {
 		char ch;
 		while (in.get(ch)) out.put(ch);
 	}
+#endif // !USE_DLOPEN
 }
 
 // This function scans the symbol table of the code that is to be
@@ -441,9 +535,13 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #else
 	char symbol[256], type[20];
 #endif //USE_NM_GREP
+
+#ifndef USE_DLOPEN
 	size_t memoryEnd = (size_t)memBlock + LINK_MEMORY;
+#endif //!USE_DLOPEN
 
 #ifdef USE_NM_GREP
+
 	while (fscanf(fd, "%s%*s", line) == 1) {
 
           symbol = strtok( line, "|" );
@@ -464,43 +562,40 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 
 #else //USE_NM_GREP
 
-#ifdef USE_DLOPEN
-	// dlopen() does not seem to care about where the symbols are
-	// There could be bugs here.
-	availMem=0;
-	memoryEnd=0xffffffff;
-#endif //USE_DLOPEN
-
-	while( fgets(instring, BUFSIZ,fd) == instring ) {
+        while( fgets(instring, BUFSIZ,fd) == instring ) {
 	  D( printf("%s",instring); )
-	  /* Optionally skip a few characters */
-	  if (sscanf(instring + NM_ADDR_OFFSET,
-		     "%lx %s %s", &addr, type, symbol) == 3) {
-		if (addr >= (size_t)availMem && addr <= memoryEnd &&
-		    strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
-		  // it is a constructor, call it:
-		  D( debugInvokeConstructors(symbol, addr, objName);)
-#ifdef USE_DLSYM
-		  PointerToVoidFunction fn;
-		  if ((fn =
-		       (PointerToVoidFunction)dlsym(dlhandle,symbol))
-		      == NULL) {
-		    char buf[1024];
-		    sprintf(buf,"Error linking file: dlsym:%s", dlerror());
-		    Error::abortRun(buf);
-		    return 0;
-		  }
-		  D( printf("debug: InvokeConstructors: fn=0x%x\n",fn); )
-		  fn();
-		  nCalls++;
-#else // USE_DLSYM
-		  	PointerToVoidFunction fn = (PointerToVoidFunction)addr;
-			fn();
-			nCalls++;
-#endif // USE_DLSYM
+	    /* Optionally skip a few characters */
+	    if (sscanf(instring + NM_ADDR_OFFSET,
+		       "%lx %s %s", &addr, type, symbol) == 3) {
+#ifdef USE_DLOPEN
+	      if ( strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
+		// it is a constructor, call it:
+		D( debugInvokeConstructors(symbol, addr, objName);)
+		PointerToVoidFunction fn;
+		if ((fn =
+		     (PointerToVoidFunction)dlsym(dlhandle,symbol))
+		    == NULL) {
+		  char buf[1024];
+		  sprintf(buf,"Error linking file: dlsym:%s", dlerror());
+		  Error::abortRun(buf);
+		  return 0;
 		}
+		D( printf("debug: InvokeConstructors: fn=0x%x\n",fn); )
+		fn();
+		nCalls++;
+	      }
+#else // USE_DLOPEN
+	      if (addr >= (size_t)availMem && addr <= memoryEnd &&
+		  strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
+		// it is a constructor, call it:
+		D( debugInvokeConstructors(symbol, addr, objName);)
+		PointerToVoidFunction fn = (PointerToVoidFunction)addr;
+		fn();
+		nCalls++;
+	      }
+#endif // USE_DLOPEN
+	    }
 	}
-      }
 #endif //USE_NM_GREP
 	pclose (fd);
 	return nCalls;
@@ -582,3 +677,4 @@ public:
 };
 
 static Linker_Cleanup linkerCleanup;
+
