@@ -150,9 +150,9 @@ proc ::pakman::_create {template dir pkgname args} {
 	    continue
 	}
 
-	# Any occurrence of # has the package name tail
+	# Any occurrence of @ has the package name tail
 	# subsituted
-	regsub -all {#} $file $substs(-pkg) dest
+	regsub -all {@} $file $substs(-pkg) dest
 
 	# Process each file in the directory
 	if [file exists [file join $dir $dest]] {
