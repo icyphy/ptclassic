@@ -33,8 +33,7 @@ extern Error errorHandler;
 // { buildEventHorizons();}
 
 Wormhole::Wormhole(Star& s,Galaxy& g) : selfStar(s),
-	Runnable(&Domain::domainOf(g)->newSched(),
-		 Domain::domainOf(g)->domainName(),&g)
+	Runnable(&Domain::domainOf(g)->newSched(),g.domain(),&g)
 {
 	// set up the parent pointer of inner Galaxy
 	g.setNameParent(g.readName(), &s);
@@ -60,8 +59,9 @@ void Wormhole :: buildEventHorizons () {
 	Domain* outSideDomain = Domain::domainOf(selfStar);
 // Take each of the galaxy ports and make a pair of EventHorizons; connect
 // them together.
+	BlockPortIter next(gal);
 	for (int n = gal.numberPorts(); n>0; n--) {
-		PortHole& galp = gal.nextPort();
+		PortHole& galp = *next++;
 		PortHole& realGalp = (PortHole&) galp.realPort();
 		dataType type = realGalp.myType();
 		int numToken = realGalp.numberTokens;
@@ -102,10 +102,10 @@ Wormhole::~Wormhole () {
 }
 	
 // method for printing info on a wormhole
-StringList Wormhole :: print (int recursive) {
+StringList Wormhole :: print (int recursive) const {
 	StringList out;
 // title, eg SDF in DE Wormhole: myNameHere
-	out += Domain::domainOf(gal)->domainName();
+	out += gal.domain();
 	out += " in ";
 	out += selfStar.domain();
 	out += " Wormhole: ";
@@ -116,14 +116,15 @@ StringList Wormhole :: print (int recursive) {
 	out += selfStar.printPorts ("wormhole");
 	out += selfStar.printStates ("wormhole");
 	out += "Blocks in the inner galaxy: ";
+	GalTopBlockIter next(gal);
 	if (recursive) {
 		out += "------------------------\n";
 		for (int i = gal.numberBlocks(); i > 0; i--)
-			out += gal.nextBlock().printRecursive();
+			out += (next++)->printRecursive();
 	}
 	else {
 		for (int i = gal.numberBlocks(); i>0; i--) {
-			out += gal.nextBlock().readName();
+			out += (next++)->readName();
 			if (i > 1) out += ", ";
 		}
 		out += "\n";
@@ -132,12 +133,13 @@ StringList Wormhole :: print (int recursive) {
 }
 
 // check input EventHorizons.
-int Wormhole :: checkReady() {
+int Wormhole :: checkReady() const {
 	int flag = TRUE;
 
 	// check each porthole whether it is ready.
+	BlockPortIter next(selfStar);
 	for (int i = selfStar.numberPorts(); i > 0; i--) {
-		EventHorizon& p = (EventHorizon&) selfStar.nextPort();
+		EventHorizon& p = (EventHorizon&) *next++;
 		if (p.isItInput()) {
 			FromEventHorizon* fp = (FromEventHorizon*) p.ghostPort;
 			if (!(fp->ready())) { flag = FALSE;
