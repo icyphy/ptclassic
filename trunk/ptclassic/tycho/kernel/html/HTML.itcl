@@ -226,33 +226,28 @@ configbody ::tycho::HTML::size {
 body ::tycho::HTML::constructor {args} {
 
     # Add buttons to the toolbar, if it exists.
-    if {[llength $bars] > 2} {
-        # The "code" prevents triggering "unknown".
-        set myToolbar [lindex $bars 2]
-
-        # FIXME: need a forward command.
-        # FIXME: should the user be allowed to change the home window?
-
-        $myToolbar addButton back {Go back to the previously viewed page} \
-                -text Back -command "$this back"
-
-        global ::TYCHO
-
-        $myToolbar addButton home {Go to the Tycho home page} \
-                -text Home -command "$this hyperJump $TYCHO/doc/index.html"
-
-        $myToolbar addButton reload {Reload and reparse from the file} \
-                -text Reload -command "$this reload"
-
-        $myToolbar addButton open {Open a new file} \
-                -text Open -command "$this altFile"
-
-        $myToolbar addButton find {Find text or a pattern on this page} \
-                -text Find -command "$this search"
-
-        $myToolbar addButton stop {Abort rendering} \
-                -text Stop -command "$this stopRendering"
-    }
+    # FIXME: need a forward command.
+    # FIXME: should the user be allowed to change the home window?
+    
+    toolbar addButton back {Go back to the previously viewed page} \
+            -text Back -command "$this back"
+    
+    global ::TYCHO
+    
+    toolbar addButton home {Go to the Tycho home page} \
+            -text Home -command "$this hyperJump $TYCHO/doc/index.html"
+    
+    toolbar addButton reload {Reload and reparse from the file} \
+            -text Reload -command "$this reload"
+    
+    toolbar addButton open {Open a new file} \
+            -text Open -command "$this altFile"
+    
+    toolbar addButton find {Find text or a pattern on this page} \
+            -text Find -command "$this search"
+    
+    toolbar addButton stop {Abort rendering} \
+            -text Stop -command "$this stopRendering"
 
     set text $itk_component(text)
 
@@ -515,9 +510,7 @@ body ::tycho::HTML::openSource {} {
 	$sourcewin raiseWindow
 	return
     }
-    set win [::tycho::autoName .edit]
-    set obj [uplevel #0 ::tycho::EditHTML $win -file $file]
-    wm deiconify $win
+    set obj [::tycho::view EditHTML [list -file $file]]
     set sourcewin $obj
 }
 
