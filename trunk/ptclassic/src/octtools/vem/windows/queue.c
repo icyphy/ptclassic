@@ -65,8 +65,6 @@ static char SccsId[]="$Id$";
 
 /* Forward declarations for lint */
 
-static void updateTech();
-  /* Checks for layer updates */
 static int queueRedraw();
   /* Queues standard redraw event */
 static vemStatus normFlush();
@@ -314,6 +312,7 @@ struct octBox *theExtent;	/* Region of facet to redraw */
 #else
     wnQRedisplay(theFctId, theExtent);
 #endif
+    return VEM_OK;
 }
 
 vemStatus wnQRedisplay(theFctId, theExtent)
@@ -442,6 +441,7 @@ struct octBox *ext;		/* OCT extent to redraw        */
     rd_queue[rd_last].theWin = intWin;
     rd_queue[rd_last].extent = *ext;
     rd_last++;
+    return 1;
 }
 
 
@@ -539,6 +539,7 @@ void   setImportantChangeFlag( f )
     changes_should_be_processed = f;
 }
 
+#ifdef NEVER
 static int processChanges()
 /*
  * This function determines if there has been enough editing activity
@@ -549,7 +550,7 @@ static int processChanges()
 {
     return changes_should_be_processed;
 }
-
+#endif
 
 
 vemStatus wnQuickFlush()
