@@ -27,6 +27,10 @@ $Id$
 #include "Scheduler.h"
 #include "Error.h"
 
+// static flags
+int Scheduler::haltRequestFlag = 0;
+volatile int Scheduler::interrupt = 0;
+
 void Scheduler::resetStopTime(float limit) {
 	setStopTime(limit);
 }
