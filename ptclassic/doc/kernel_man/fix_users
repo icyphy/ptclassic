@@ -1,0 +1,68 @@
+$Id$
+Users Manual for the Fixed-point capabilities in Ptolemy
+
+Authors: Alireza Khazeni and Asawaree Kalavade
+
+Fixed-point notation
+--------------------
+In fixed-point notation the partition between the integer part and the 
+fractional part, the binary point, is constrained to lie at a fixed 
+position in the bit pattern. The binary point determines a trade-off 
+between precision and range.  When the binary point is defined
+at the right of the bit pattern there is no fractional part; only 
+integer values are allowed.
+
+Specifying precision for portholes and states
+---------------------------------------------
+The precision of fix-point variables is defined by specifying the 
+wordlength and the position of the binary point. 
+As a convention, the precision of a port of type fix is defined by 
+a state. The name of the state specifying the precision is the name
+of the porthole concatenated with the string "Precision". So, for
+a porthole with name "output", the precision is specified by the
+state "outputPrecision".
+The precision is specified in form of a dot notation.  For example, 
+a fixed-point variable with precision 3.5 
+would have a total word length of 8 bits with 3 bits to the left and 5 
+bits to the right of the binary point. By default the variables are
+represented in 2's compliment form. The number of bits to the left
+of the binary point includes the sign bit.
+ 
+Besides portholes, state variables can also be declared as fix or fixarray. 
+The value of the state variables and their precision in bits can
+currently be specified using two different notations:
+
+1. Specifying a value by itself in the dialog box creates a
+fixed-point number with the default precision which has a total word length
+of 24 bits with the number of range bits as required by the value.
+For example, the number 1.0 creates a fixed-point object with
+precision 2.22, and a value like 0.5 would create one with precision
+1.23 and etc.  
+
+2. An alternative way of specifying the value and the precision of
+this parameter is to use the parenthesis notation which is
+interpreted as (value, precision).  For example, filling the dialog
+box of this parameter by let's say (2.546, 3.5) creates a fixed-point
+object by casting the double 2.546 to the precision 3.5. 
+
+Overflow handling
+-----------------
+In case the result doesnt fit in the specified precision, an overflow
+handling mechanism needs to be defined. 
+Following overflow handling mechanisms are provided:
+"saturate"(default), "zero_saturate", "wrapped", "warning".
+The "Ramp" demo in the Fixed-point demos palette gives an example
+of how the overflow parameter is set.
+The overflow handling is usually specified as a state, usually called 
+"OverflowHandler", in the star. It is used in the star while 
+constructing the fixed point variable. See SDFSubFix as an example.
+
+Explicitly casting inputs
+-------------------------
+Another parameter that is found in some stars is "ArrivingPrecision".
+Look at SDFSubFix as an example. When set to NO,
+it implies that the input particles are cast to the precision specified
+in the corresponding state. When set to YES, the input particles are
+not explicitly cast; they are used as they are. This state is used
+in the star code to either explicitly cast inputs or not.
+
