@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Michael C. Williamson
 
- Methods defining VHDL Firings.
+ Methods defining VHDL firings.
 
 *******************************************************************/
 #ifdef __GNUG__
