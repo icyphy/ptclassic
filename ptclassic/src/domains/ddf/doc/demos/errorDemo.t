@@ -25,27 +25,27 @@ caused in many ways,
 one of which is illustrated in this demo.
 .IE consistency
 .pp
-Here, the trueOutput of the
-.c Switch
-star is connected the the falseInput of the
-.c Select 
+Here, the true output(output#2) of the
+.c Case
+star is connected the the false input(input#1) of the
+.c EndCase 
 star via the
 .c FloatGain
 star.  This is most likely an error, because
 unless the control boolean to the
-.c Switch 
+.c Case 
 and the
-.c Select
+.c EndCase
 stars is well balanced, one input arc of the
-.c Select
+.c EndCase
 star queues particles unboundedly.  The error can be simply
 detected by examining the number of particles stored in an arc.
 If the number is larger than the limit (which defaults to 1024), the
 error is signaled.  A lower or higher limit can be specified
 by setting the state called \fImaxBufferSize\fR in the universe.
 In this demo, the maxBufferSize is set to "5".  Since the control
-boolean is always FALSE, the \fItrueInput\fR arc of the
-.c Select
+boolean is always FALSE, the \fIinput#2\fR arc of the
+.c EndCase
 star will queue the particles
 consistently on each run.
 At the 6th iteration, the error is detected and signaled with a
@@ -56,7 +56,7 @@ E. A. Lee, "Consistency in Dataflow Graphs,"\fR
 revised from MEMO UCB/ERL M89/125, November 9, 1989,
 to appear in \fIIEEE Transactions on Parallel & Distributed Computing\fR, 1991.
 .SA
-Switch,
-Select,
+Case,
+EndCase,
 inconsistency.
 .ES
