@@ -39,18 +39,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "CGCTarget.h"
+#include "CGCMakefileTarget.h"
 
-class CGCTclTkTarget : public CGCTarget {
+class CGCTclTkTarget : public CGCMakefileTarget {
 public:
-	CGCTclTkTarget(const char* name, const char* starclass, const char* desc);
+	CGCTclTkTarget(const char* name, const char* starclass,
+		       const char* desc);
 	Block* makeNew() const;
 
 	void beginIteration(int repetitions, int depth);
 
-	/* virtual */ StringList compileLine(const char* fName);
-
-        // Combine all sections of code;
+	// Combine all sections of code;
 	/*virtual*/ void frameCode();
  
 protected:
