@@ -47,6 +47,7 @@ interpreter.
 #include "NamedObj.h"
 #include "SimControl.h"
 
+#undef setstate			/* work around bug in Linux headers */
 class InterpUniverse;
 class InterpGalaxy;
 class Target;
