@@ -9,7 +9,7 @@ These pages describe the Ptolemy port to Windows NT4.0.
  <P>
 The NT port works, but has not been tested extensively.
 Currently, under NT4.0 with
-<A HREF="http://www.cygnus.com/gnu-win32">Cygnus GNU-win32</A> (version b19.1), prebuilt Cygnwin32 X11R6 binaries and an X server, we can run 
+<A HREF="http://www.cygnus.com/gnu-win32">Cygwin</A> (version b20.1), prebuilt Cygnwin32 X11R6 binaries and an X server, we can run 
 <CODE>pigi</CODE>, the Ptolemy Interactive Graphical Interface.
 
  <P>
@@ -17,11 +17,11 @@ There are two NT ports: <CODE>nt4</CODE> and <CODE>nt4.vc</CODE>.
 
 <H2><CODE>nt4</CODE></H2>
 If the <CODE>PTARCH</CODE> environment variable is set to <CODE>nt4</CODE>,
-then we build with Cygnus GNU-win32, which is a port of the GNU tools 
-to Windows.  <CODE>nt4</CODE> is easier to port because Cygnus GNU-win32
+then we build with Cygwin, which is a port of the GNU tools 
+to Windows.  <CODE>nt4</CODE> is easier to port because Cygwin
 allows us to use the Unix GNU makefiles in the regular distribution.
- <P>The <CODE>nt4</CODE> port requires that Cygnus GNU-win32 be present.
-The port was done with version <CODE>b19</CODE> of GNU-win32.
+ <P>The <CODE>nt4</CODE> port requires that Cygwin be present.
+The port was done with version <CODE>b20.1</CODE> of Cygwin
 
 <H2><CODE>nt4.vc</CODE></H2>
 If <CODE>PTARCH</CODE> is set to <CODE>nt4.vc</CODE>, then we use
