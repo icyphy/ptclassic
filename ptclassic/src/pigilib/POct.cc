@@ -200,7 +200,7 @@ int POct::result(int value) {
 
 void POct::addResult(const char* value) {
 	// cast-away-const needed to interface with Tcl.
-	Tcl_AppendElement(interp,(char*)value,0);
+	Tcl_AppendElement(interp,(char*)value);
 }
 
 
@@ -437,13 +437,13 @@ int POct::ptkGetParams (int aC,char** aV) {
 		sprintf(title, "Edit Bus");
 	    }
 	    // Convert "property" into Result string
-	    Tcl_AppendElement (interp, title,0);
+	    Tcl_AppendElement (interp, title);
 	    Tcl_AppendResult(interp, " { {", NULL);
-	    Tcl_AppendElement(interp, property.contents.prop.name, 0);
+	    Tcl_AppendElement(interp, property.contents.prop.name);
 	    sprintf( tempStr, "INTEGER" );
-	    Tcl_AppendElement(interp, tempStr, 0);
+	    Tcl_AppendElement(interp, tempStr);
 	    sprintf(size, "%d", property.contents.prop.value.integer);
-	    Tcl_AppendElement(interp, size, 0);
+	    Tcl_AppendElement(interp, size);
 	    Tcl_AppendResult(interp, "} }", NULL);
 	    return TCL_OK;
 	} else if (IsGal(&instance) || IsStar(&instance)) {
@@ -464,16 +464,16 @@ int POct::ptkGetParams (int aC,char** aV) {
     }
 
     // Convert pList into a TCL list of Strings to return as result
-    Tcl_AppendElement (interp,  title, 0);
+    Tcl_AppendElement (interp,  title);
     if (pList.length > 0) {
         // There are some parameters here
         place = pList.array;
         Tcl_AppendResult(interp, " { ", NULL);
         for (i = 0; i < pList.length; i++) {
             Tcl_AppendResult(interp, " {", NULL);
-            Tcl_AppendElement(interp, (char*)place->name, 0);
-            Tcl_AppendElement(interp, (char*)place->type, 0);
-            Tcl_AppendElement(interp, (char*)place->value, 0);
+            Tcl_AppendElement(interp, (char*)place->name);
+            Tcl_AppendElement(interp, (char*)place->type);
+            Tcl_AppendElement(interp, (char*)place->value);
             Tcl_AppendResult(interp, "}", NULL);
             place++;
         }
