@@ -1406,6 +1406,20 @@ body ::tycho::File::winGetByRootName {rootname} {
 ####                          protected methods                      ####
 
 #####################################################################
+#### saveText
+# Return the text to save.  In this base class, trigger an error,
+# since we don't know how to save.  This should be redefined in derived
+# classes.
+#
+body ::tycho::File::saveText {} {
+    error "Tried to save to file: $file.\nSave not implemented yet."
+}
+
+#########################################################################
+#########################################################################
+####                          private methods                        ####
+
+#####################################################################
 #### initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
@@ -1555,20 +1569,6 @@ body ::tycho::File::initializeMenubar {} {
     $myMenubar command "Preferences..." Help -underline 0 \
 	    -command { ::tycho::preferencedialog }
 }
-
-#####################################################################
-#### saveText
-# Return the text to save.  In this base class, trigger an error,
-# since we don't know how to save.  This should be redefined in derived
-# classes.
-#
-body ::tycho::File::saveText {} {
-    error "Tried to save to file: $file.\nSave not implemented yet."
-}
-
-#########################################################################
-#########################################################################
-####                          private methods                        ####
 
 #####################################################################
 #### removeBackupFiles
