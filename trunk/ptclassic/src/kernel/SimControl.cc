@@ -301,6 +301,12 @@ SimHandlerFunction SimControl::setPollAction(SimHandlerFunction f) {
 	// To make this code as portable as possible, only "basic" system
 	// calls are used here.
 void SimControl::setPollTimer( int seconds, int micro_seconds ) {
+	// Define PT_NO_TIMER if you don't want the interval timer
+	// If PT_NO_TIMER is defined, then pigi could get really slow
+#if defined(PT_NO_TIMER)
+	/* no poll timer */
+	setPollFlag();
+#else
 	// reset the timer - this cancels any current timing in progress
         struct itimerval i;
 	// hppa.cfront: Can't set tv_sec and tv_usec to 0 on same line.
@@ -309,12 +315,6 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
 
-	// Define PT_NO_TIMER if you don't want the interval timer
-	// If PT_NO_TIMER is defined, then pigi could get really slow
-#if defined(PT_NO_TIMER)
-	/* no poll timer */
-	setPollFlag();
-#else
 	// Turn off the poll flag until the timer fires
 	pollflag = 0;
 	// Turn on the poll flag when the timer expires
