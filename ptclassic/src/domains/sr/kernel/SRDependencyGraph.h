@@ -41,6 +41,11 @@ class StringList;
   The edges represent dependencies, which are usually the communication
   channels.
 
+  <P> One twist: stars with no outputs are also given a vertex as if they
+  had an output so they appear in the generated schedule.
+
+  <P> Both forward and backward edges are stored.
+
  **********************************************************************/
 
 class SRDependencyGraph {
@@ -67,6 +72,10 @@ public:
   // Return the star of a vertex
   SRStar * star(int v) const { return stars[v]; }
 
+  // Return the output port of a vertex
+  // @Description This may be NULL, representing a star with no outputs!
+  OutSRPort * port(int v) const { return ports[v]; }
+
   StringList displayGraph() const;
 
 private:
@@ -84,6 +93,9 @@ private:
   SRStar ** stars;
 
   // Array of pointers to the port of each vertex
+  //
+  // @Description These pointers are NULL for the fictitious outputs
+  // associated with stars with no outputs.
   OutSRPort ** ports;
 
   // Number of forward edges on each vertex
