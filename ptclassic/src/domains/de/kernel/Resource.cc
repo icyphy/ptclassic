@@ -149,8 +149,8 @@ int Resource :: newEventFromEventQ(DERCEvent* e, double now) {
     SequentialList* sortList = getOtherEvents(e, now);
         
     // Move these events to an array for more efficent processing
-    int dimen = sortList->size();
-    DERCEvent* sortArray[dimen];
+    const int dimen = sortList->size();
+    DERCEvent** sortArray = new DERCEvent*[dimen];
     int i;
     for (i=0 ; i<dimen ; i++) {
         sortArray[i] = (DERCEvent*)sortList->getAndRemove();
