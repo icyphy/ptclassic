@@ -22,32 +22,58 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 .cc.o:
 	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -c  $<
 
-SRCS=BlackHole.cc ComplexDC.cc ComplexFIR.cc \
- ComplexFFT.cc ComplexPolar.cc ComplexProduct.cc ComplexSum.cc \
- ComplexPower.cc Cos.cc DB.cc \
- FloatDC.cc FloatGain.cc FloatProduct.cc FloatRamp.cc FloatSum.cc Fork.cc \
- FloatThresh.cc IIDUniform.cc IIDGaussian.cc IntRamp.cc \
- Printer.cc Sin.cc Xgraph.cc XYgraph.cc Sqrt.cc \
- AdaptFilter.cc FIR.cc IIR.cc FloatImpulse.cc FloatRect.cc BiQuad.cc \
- UpSample.cc DownSample.cc Commutator.cc Distributor.cc Cut.cc WaveForm.cc
+# .cc filenames for all stars
+SRCS= \
+ AdaptFilter.cc \
+ BiQuad.cc \
+ BlackHole.cc \
+ Commutator.cc \
+ ComplexDC.cc \
+ ComplexFFT.cc \
+ ComplexFIR.cc \
+ ComplexPolar.cc \
+ ComplexPower.cc \
+ ComplexProduct.cc \
+ ComplexSum.cc \
+ Cos.cc \
+ Cut.cc \
+ DB.cc \
+ Distributor.cc \
+ DownSample.cc \
+ FIR.cc \
+ FloatDC.cc \
+ FloatDiff.cc \
+ FloatGain.cc \
+ FloatImpulse.cc \
+ FloatProduct.cc \
+ FloatRamp.cc \
+ FloatRect.cc \
+ FloatSum.cc \
+ FloatThresh.cc \
+ Fork.cc \
+ IIDGaussian.cc \
+ IIDUniform.cc \
+ IIR.cc \
+ IntRamp.cc \
+ Integrator.cc \
+ PolarRect.cc \
+ Printer.cc \
+ Sin.cc \
+ Sqrt.cc \
+ UpSample.cc \
+ WaveForm.cc \
+ XMgraph.cc \
+ XYgraph.cc \
+ Xgraph.cc
 
-OBJS=BlackHole.o ComplexDC.o ComplexFIR.o \
- ComplexFFT.o ComplexPolar.o ComplexProduct.o ComplexSum.o \
- ComplexPower.o Cos.o DB.o \
- FloatDC.o FloatGain.o FloatProduct.o FloatRamp.o FloatSum.o Fork.o \
- FloatThresh.o IIDUniform.o IIDGaussian.o IntRamp.o \
- Printer.o Sin.o Xgraph.o XYgraph.o Sqrt.o \
- AdaptFilter.o FIR.o IIR.o FloatImpulse.o FloatRect.o BiQuad.o \
- UpSample.o DownSample.o Commutator.o Distributor.o Cut.o WaveForm.o
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
 
-HDRS=BlackHole.h ComplexDC.h ComplexFIR.h \
- ComplexFFT.h ComplexPolar.h ComplexProduct.h ComplexSum.h \
- ComplexPower.h Cos.h DB.h \
- FloatDC.h FloatGain.h FloatProduct.h FloatRamp.h FloatSum.h Fork.h \
- FloatThresh.h IIDUniform.h IIDGaussian.h IntRamp.h \
- Printer.h Sin.h Xgraph.h XYgraph.h Sqrt.h \
- AdaptFilter.h FIR.h IIR.h FloatImpulse.h FloatRect.h BiQuad.h \
- UpSample.h DownSample.h Commutator.h Distributor.h Cut.h WaveForm.h
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+printhdrs:
+	@echo $(HDRS)
 
 all:		makefile $(OBJS)
 
