@@ -783,8 +783,9 @@ static void ptkAction(Star* s, char *tclCommand)
 	    "error {null pre or post action requested}",0, (char **) NULL);
 	return;
     }
+    StringList temp = s->fullName();
     Tcl_VarEval(PTcl::activeInterp,tclCommand," \"",
-		(const char*)(s->fullName()), "\"",
+		(const char*)temp, "\"",
 		(char*)NULL);
 }
 
