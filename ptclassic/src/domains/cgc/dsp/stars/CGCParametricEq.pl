@@ -24,6 +24,7 @@ based on the procedure defined by Shpak.
 		type { int }
 		default { "1" }
 		desc { choices are Lowpass=0,Bandpass=1,and Hipass=2 }
+		attributes { A_GLOBAL }
 	}
 	defstate {
 		name {sampleFreq}
@@ -54,16 +55,20 @@ Not needed for bandpass types.
 		type { float }
 		default { "0" }
 		desc { given in dB and ranges from [-10,10]. }
+		attributes { A_GLOBAL }
 	}
+
 	defstate {
 		name {bandwidth}
 		type { float }
 		default { "1" }
 		desc {
-Given in Octave and ranges from [0,4]. 
-Not needed for Lowpass and Hipass types.
+Given in Octave and ranges from [0,4]. Not needed for Lowpass 
+and Hipass types.
 		}
+		attributes{ A_GLOBAL }
 	}
+
 	codeblock(setparams) {
 	  static void $sharedSymbol(CGCParamBiquad,setparams)(parametric_t *parametric){
 	    double gaintmp, t0, invf1prime;
@@ -72,16 +77,16 @@ Not needed for Lowpass and Hipass types.
 	    parametric->omegap = 2*PI*$val(passFreq)*parametric->T;
 	    parametric->omegac = 2*PI*$val(centerFreq)*parametric->T;
 	    t0 = log(2)/2;
-	    invf1prime = exp($val(bandwidth)*t0);
+	    invf1prime = exp($ref(bandwidth)*t0);
 	    parametric->omegabw = parametric->omegac*(invf1prime-1/invf1prime);
 
-	    if ($val(gain)>=0){
+	    if ($ref(gain)>=0){
 	      parametric->gainflag = 1;
-	      gaintmp=$val(gain)/20.0;
+	      gaintmp=$ref(gain)/20.0;
 	    }
 	    else{
 	      parametric->gainflag = 0;
-	      gaintmp=$val(gain)/-20.0;
+	      gaintmp=$ref(gain)/-20.0;
 	    }
 	    parametric->lineargain = pow(10.0,gaintmp);
 	  }
@@ -254,13 +259,13 @@ typedef struct parametric_band {
 	}
 	codeblock(findparams){
 	  $sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));
-	  if ($val(filtertype) == LOW){
+	  if ($ref(filtertype) == LOW){
 	    $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
 	  }
-	  else if ($val(filtertype) == HI){
+	  else if ($ref(filtertype) == HI){
 	    $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
 	  }
-	  else if ($val(filtertype) == BAND){
+	  else if ($ref(filtertype) == BAND){
 	    $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
           }
 	  /*else
@@ -270,13 +275,13 @@ typedef struct parametric_band {
 	initCode {
 	  CGCBiquad::initCode();
 	  addGlobal(globalDecl, "global");
+          addGlobal(mainDecl);
 	  addProcedure(setparams, "CGCParamBiquad_setparams");
           addProcedure(constbw, "CGCParamBiquad_constbw");
 	  addProcedure(lowpass, "CGCParamBiquad_lowpass");
 	  addProcedure(hipass, "CGCParamBiquad_hipass");
 	  addProcedure(bandpass, "CGCParamBiquad_bandpass");
 	  addProcedure(setfiltertaps, "CGCParamBiquad_setfiltertaps");
-          addDeclaration(mainDecl);
           addCode(findparams);
         }
 	go {
