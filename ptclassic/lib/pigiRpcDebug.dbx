@@ -7,9 +7,15 @@
 
 dbxcmdfile=/tmp/pigiRpcDebug.dbx$$
 
+
 cat > $dbxcmdfile <<EOF
 stop in main
 EOF
+
+# If the user has a .ptdbxinit file, then add it to the command file
+if [ -f $HOME/.ptdbxinit ]; then
+	cat $HOME/.ptdbxinit >> $dbxcmdfile
+fi
 
 echo "dbx command file is:"
 echo "------start----"
