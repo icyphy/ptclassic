@@ -21,3 +21,17 @@ clean:	$(CLEAN)
 
 userMan.dvi:	$(SRCS) userMan.toc userMan.cps
 userMan.info:	$(SRCS)
+
+# Update all of the Framemaker cross references.
+update_book: update.fmb
+	fmbatch update.fmb
+
+.PHONY:	update_book
+update.fmb:
+	echo "Open users_man.book" > $@
+	echo "Update users_man.book" >> $@
+	chmod g+w $@
+
+# Update all the cross references and then Create postscript files
+fm2ps: update_book
+	fmprint2ps *.doc
