@@ -2,7 +2,7 @@
 # $Id$
 
 # Command uses printer defined by environmental variable $PRINTER
-# User .cshrc file must contain "set PRINTER = whatever"
+# User .cshrc file must contain "setenv PRINTER whatever"
 
 # The argument(s) are the files to be printed.
 # An implicit header file, ~ptolemy/doc/headers/shared, is prepended.

@@ -4,7 +4,7 @@
 # Print documentation for a Ptolemy domain
 
 # Command uses printer defined by environmental variable $PRINTER
-# User .cshrc file must contain "set PRINTER = whatever"
+# User .cshrc file must contain "setenv PRINTER whatever"
 
 # The optional argument is the directory of the domain documentation
 # An implicit header file, ~ptolemy/doc/headers/shared, is prepended.

@@ -22,7 +22,7 @@ sort -f -u +1 /tmp/ptcc$$ > /tmp/ptin$$
 awk -f ${dircmds}awk.index /tmp/ptin$$ > /tmp/ptinf$$
 
 # Print it.
-ditroff -me -P${PRINTER} ${dirheader}index /tmp/ptinf$$
+ditroff -me -P$PRINTER ${dirheader}index /tmp/ptinf$$
 
 /bin/rm /tmp/ptc$$ /tmp/ptcc$$ /tmp/ptin$$ /tmp/ptinf$$
 exit 0
