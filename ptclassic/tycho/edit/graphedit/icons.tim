@@ -152,17 +152,25 @@ group sdf {
     icon Ramp IconFrame {
         -label {Ramp}
         -text Ramp
-        -color lightsteelblue
-
+        -color lightgreen
+	-graphics {
+		polygon 20 80 80 80 80 20 -fill orange -outline ""
+	}
         port output Terminal -anchor {100 50} -direction {1 0} \
-                -type output -fill green2
+                -type output -fill blue
     }
     icon Xgraph IconFrame {
         -label {Xgraph}
         -text Xgraph
-        -color lightsteelblue
-
+        -color lightgreen
+	-graphics {
+		oval 20 10 80 90 -outline red -width 2
+		line 26 60 34 40 34 60 42 40 42 60 50 40 50 60 58 40 58 60 \
+		     66 40 66 60 74 40 74 60 -fill red -width 2
+		oval 15 80 25 94 -outline red
+		oval 75 80 85 94 -outline red
+	}
         port input Terminal -anchor {0 50} -direction {-1 0} \
-                -type input -style blob
+                -type input -style blob -fill red
     }
 }
