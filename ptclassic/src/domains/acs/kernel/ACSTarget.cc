@@ -44,7 +44,10 @@ ACSTarget::ACSTarget(const char* name,const char* starclass, const char* desc,
         const char* assocDomain) :
     HLLTarget(name,starclass,desc,assocDomain) {
 
+	// This determines the core used in simulation.
 	addState(coreCategory.setState("Core Category", this, "FPSim", "Sets the core category."));
+
+	// These are from the SDF simulation Target.
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
 	addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
@@ -54,6 +57,7 @@ ACSTarget::ACSTarget(const char* name,const char* starclass, const char* desc,
 
 ACSTarget :: ~ACSTarget() {}
 
+// Copied directly from the SDF default target.
 void ACSTarget::setup() {
 	delSched();
 	SDFScheduler *s;
@@ -116,7 +120,7 @@ void ACSTarget::setup() {
 }
 
 
-void ACSTarget::wrapup() { Target::wrapup(); }  // FIXME
+void ACSTarget::wrapup() { Target::wrapup(); }  // FIXME: Code generation define something different here.
 
 Block* ACSTarget::makeNew() const {
     LOG_NEW; return new ACSTarget(name(),starType(),descriptor());
@@ -124,6 +128,7 @@ Block* ACSTarget::makeNew() const {
 
 ISA_FUNC(ACSTarget,HLLTarget);
 
+// Maps Plasma type from Float to Fix for Fixed-Point simulation.
 DataType ACSTarget::mapType(DataType type) {
 	if ( isFixedPoint() && (strcmp(type,FLOAT) == 0) ) {
 		return FIX;
