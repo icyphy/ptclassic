@@ -503,7 +503,7 @@ body ::tycho::Class::parameterin {context name args} {
 # Get the parameters of a method.
 #
 body ::tycho::Class::parameters {method} {
-    _children $method parameter
+    _children parameter $method
 }
 
 ########################################################################
