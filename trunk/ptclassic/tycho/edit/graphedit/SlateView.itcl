@@ -52,6 +52,9 @@ class ::tycho::SlateView {
     # Find items.
     method find {mode args}
 
+    # Get information about an item
+    method iteminfo {slateid args}
+
     # Get or changed the name of an item given its slate id
     method itemname {slateid {newname {}}}
 
@@ -196,6 +199,18 @@ body ::tycho::SlateView::find {mode tag} {
 	lappend result $_nameof($id)
     }
     return $result
+}
+
+#########################################################################
+#### iteminfo
+#
+# Get a printable string conaining information about the item. Subclasses
+# will usually override this to print more meaningful info.
+#
+body ::tycho::SlateView::iteminfo {slateid args} {
+    set string {}
+    append string [$_slate describe $slateid]
+    return $string
 }
 
 #########################################################################
