@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50  control library }
+	location { C50 main library }
 
         input  {
                 name { input }
@@ -58,24 +58,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	}        		      
         codeblock(one) {
 	mar 	*,AR0
-        lar	AR0,#$addr(delayBufStart)	;Adress Bufferstart =>AR0
-        splk    #$addr(input),BMAR		;Adress Input => BMAR
-	lar	AR7,#$addr(output)		;Adress Output => AR7
+        lar	AR0,#$addr(delayBufStart)	;Address Bufferstart =>AR0
+        splk    #$addr(input),BMAR		;Address Input => BMAR
+	lar	AR7,#$addr(output)		;Address Output => AR7
 	lar	AR1,*				;Buffervalue  => AR1
 	bldd	BMAR,*,AR7			;Input => Buffer
 	sar	AR1,*				;Buffervalue => Output
         }
         codeblock(std) {
 	mar	*,AR4
-        lar	AR4,#$addr(delayBufStart)	;Adress Bufferstart Poi. => AR4
-	lar	AR2,*,AR2			;Adress Buffer position  => AR2
-	splk	#$addr(delayBuf),CBSR1		;circ. buffer start adress
+        lar	AR4,#$addr(delayBufStart)	;Address Bufferstart Poi. => AR4
+	lar	AR2,*,AR2			;Address Buffer position  => AR2
+	splk	#$addr(delayBuf),CBSR1		;circ. buffer start address
 	splk	#$addr(delayBuf)+$val(totalDelay)-1,CBER1
 	splk	#0ah,CBCR			;enable circ buf with AR2
-        splk    #$addr(input),BMAR		;Adress Input => BMAR
+        splk    #$addr(input),BMAR		;Address Input => BMAR
 	bldd	*,#$addr(output)		;Output = oldest buffer value
 	bldd	BMAR,*+,AR4			;Input=>Buffer incr. Bufferadr.
-	sar	AR2,*				;new adress from oldest value
+	sar	AR2,*				;new address from oldest value
 	apl	#0fff7h,CBCR			;disable circ. buffer 1
         }
 	codeblock(zero) {

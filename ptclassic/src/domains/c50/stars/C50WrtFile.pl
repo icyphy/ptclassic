@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 io library }
+	location { C50 main library }
 	explanation {
 .Ir "simulator, TI DSK320C5x"
 .Ir "TI DSK320C5x simulator"
@@ -35,7 +35,6 @@ Writes data to a file, for use with the TI DSK320C5x simulator.
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
 		default { "0"}
 	}
-	// this codeblock produces code
 	codeblock (copy) {
 	mar	*,AR6
 	lar	AR6,#$addr(input)

@@ -2,8 +2,8 @@ defstar {
 	name { WaveForm }
 	domain { C50 }
 	desc {
-A value of values is repeated at the ouput with period period, zero-padding
-or tuncating to period if necessary.  Setting period to 0 (default) ouputs
+A value of values is repeated at the output with period period, zero-padding
+or truncating to period if necessary.  Setting period to 0 (default) output
 the value once.  The default value is 0.1 0.2 0.3 0.4.
         }
 	version { $Id$ }
@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
+	location { C50 main library }
         explanation {
 You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.  The following table summarizes the
@@ -113,7 +113,7 @@ limited to 20,000 samples.
 	lar 	AR7,#$addr(output)		;Address output		=> AR7
         lar     AR6,#$addr(value)		;Address value		=> AR6
 	lacc   	*,0,AR7				;Accu = value
-        sacl   	*,0,AR6				;ouput = value
+        sacl   	*,0,AR6				;output = value
 	zap					;clear P-Reg and Accu
         sacl    *				;value = 0
         }

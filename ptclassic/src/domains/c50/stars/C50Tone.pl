@@ -1,7 +1,7 @@
 defstar {
 	name { Tone }
 	domain { C50 }
-	desc { Sine or cosine function using second order oscilator } 
+	desc { Sine or cosine function using second order oscillator } 
 	version { $Id$ }
 	author { A. Baensch, ported from Gabriel }
 	acknowledge { Method from Motorola's "DSP News", Vol. 1., No. 3, 1988 }
@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
+	location { C50 main library }
 	output {
 		name { output }
 		type { fix }

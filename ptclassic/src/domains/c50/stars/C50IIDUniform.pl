@@ -13,7 +13,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
+	location { C50 main library }
 	explanation {
 .Id "uniform noise"
 .Id "noise, uniform"

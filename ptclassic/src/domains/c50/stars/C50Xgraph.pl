@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 TI Sim I/O library }
+	location { C50 main library }
 	explanation {
 The input signal is plotted using the \fIpxgraph\fR program.
 The \fItitle\fR parameter specifies a title for the plot.
