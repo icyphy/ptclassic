@@ -145,8 +145,7 @@ int usePattern;
     static char *pattern = "00010000 00010000 00010000 11111111 00010000 00010000 00010000 00010000";
 
     octObject facet = {OCT_UNDEFINED_OBJECT},
-	      inst = {OCT_UNDEFINED_OBJECT},
-	      backup = {OCT_UNDEFINED_OBJECT};
+	      inst = {OCT_UNDEFINED_OBJECT};
     char word[256];
     vemSelSet ss;
 
@@ -159,17 +158,19 @@ int usePattern;
 	if (ohGetByInstName(&facet, &inst, word) != OCT_NOT_FOUND) {
 	    if (usePattern)
 		ss = vemNewSelSet(facet.objectId, color->red,
-				  color->green, color->blue, 1, 1, 8, 8, 
-				  pattern);
+				  color->green, color->blue,
+				  1, 1, 8, 8, pattern);
 	    else
 		ss = vemNewSelSet(facet.objectId, color->red,
-				  color->green, color->blue, 2, 3, 1, 1, "0");
+				  color->green, color->blue,
+				  2, 3, 1, 1, "0");
 	    sets[(*depth)++] = ss;
 	    vemAddSelSet(ss, inst.objectId);
-	    backup = facet;
 	    if (!MyOpenMaster(&facet, &inst, "contents", "r")) {
 	        return FALSE;
 	    }
+	    FreeOctMembers(&facet);
+	    FreeOctMembers(&inst);
 	}
 	if ((name = incr(name)) == NULL) break;
     }
