@@ -30,18 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if ![info exists TYCHO] {
-    if [info exist env(PTOLEMY)] {
-	set TYCHO $env(PTOLEMY)/tycho
-    }
-    if [info exist env(TYCHO)] {
-	set TYCHO $env(TYCHO)
-    }
-}
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
-source [file join $TYCHO kernel basic Path.tcl]
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.basic
 
 
 test Path-1.1 { Check out files in the current dir vs. paths with env vars} {

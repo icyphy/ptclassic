@@ -30,24 +30,12 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if ![info exists TYCHO] {
-    if [info exist env(PTOLEMY)] {
-	set TYCHO $env(PTOLEMY)/tycho
-    }
-    if [info exist env(TYCHO)] {
-	set TYCHO $env(TYCHO)
-    }
-}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.basic
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
-
-# If necessary load up the definition
-if {[namespace tycho {info proc loadIfNotPresent}] == {} } {
-    namespace tycho
-    source ../Loader.tcl
-}
+# For some bizarre reason, the tests require the GUI package:
+package require tycho.kernel.gui
 
 test Loader-1.1 {load up the profile command} {
     if ![info exists env(PTARCH)] {
