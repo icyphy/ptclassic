@@ -34,6 +34,6 @@ include $(ROOT)/mk/config-$(PTARCH).mk
 INCL = -I$(ROOT)/src/domains/mdsdf/kernel \
 	-I$(ROOT)/src/domains/sdf/kernel \
 	-I$(KERNDIR)
-PL_SRCS = MDSDFPrinter.pl MDSDFTkText.pl
+PL_SRCS = MDSDFTkText.pl
 DOMAIN = MDSDF
 include $(ROOT)/mk/userstars.mk
