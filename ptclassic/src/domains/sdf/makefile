@@ -34,7 +34,7 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars loopScheduler dsp image targets tcltk matrix atm #contrib
+DIRS = kernel stars loopScheduler dsp image targets tcltk matrix atm contrib
 
 ME = sdf
 
