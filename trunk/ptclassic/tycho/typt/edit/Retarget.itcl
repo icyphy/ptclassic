@@ -114,14 +114,15 @@ configbody ::tycho::Retarget::edit {
 #### constructor
 #
 body ::tycho::Retarget::constructor {args} {
-    toolbar addButton newDomains -text {Compare Domains} -command "$this compareDomains"
-    toolbar addButton domainAButton -text "Change Domain A: $domainA" \
-            -command "$this changeDomainA"
-    toolbar addButton domainBButton -text "Change Domain B: $domainB" \
-            -command "$this changeDomainB"
+    toolbar button newDomains {Compare Domains} \
+            -text {Compare Domains} -command "$this compareDomains"
+    toolbar button domainAButton "Change Domain A: $domainA" \
+            -text "Change DomainA: $domain A" -command "$this changeDomainA"
+    toolbar button domainBButton "Change Domain B: $domainB" \
+            -text "Change Domain B: $domainB" -command "$this changeDomainB"
 
-    toolbar addButton checkUniverse -text {Check Universe} \
-	    -command "$this checkUniverse"
+    toolbar button checkUniverse {Check Universe} \
+	    -text {Check Universe} -command "$this checkUniverse"
 
     eval itk_initialize $args
     modifyAfterDomainChange
@@ -144,8 +145,8 @@ body ::tycho::Retarget::changeDomainA {} {
     }
     clear
     set dirtyCompareDomains 1
-    catch {delete object component graphics}
-    #toolbar addButton domainAButton -text "Change Domain A: $domainA" 
+    catch {delete object [graph]}
+    #toolbar button domainAButton -text "Change Domain A: $domainA" 
     #        -command "$this changeDomainA"
     modifyAfterDomainChange
 }
@@ -163,8 +164,8 @@ body ::tycho::Retarget::changeDomainB {} {
     }
     clear
     set dirtyCompareDomains 1
-    catch {delete object component graphics}
-    #toolbar addButton domainBButton -text "Change Domain B: $domainB" \
+    catch {delete object [graph]}
+    #toolbar button domainBButton -text "Change Domain B: $domainB" \
     #        -command "$this changeDomainB"
     modifyAfterDomainChange
 }
@@ -197,7 +198,7 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
     set clashList [::tycho::DomainInfo::diffDomains $domainA $domainB]
 
     clear
-    catch {delete object component graphics}
+    catch {delete object [graph]}
 
     set starList {}
     if { $domainStarList != {} } {
@@ -212,7 +213,7 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
             "${domainA} Only" "${domainB} Only"]
     set indexCount 0
     foreach header $headers {
-        component graphics add $header {} {}
+        [graph] add $header {} {}
         set header [list $header]
         foreach star [lindex $clashList $indexCount] {
             if { $starList != {} } {
@@ -220,13 +221,13 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
                     set contents [list tcl \
                             "::tycho::Retarget::printStars $star \"$header\" \
                             $domainA $domainB" ]
-                    component graphics add $star $contents $header
+                    [graph] add $star $contents $header
                 }
             } else {
                 set contents [list tcl \
                         "::tycho::Retarget::printStars $star \"$header\" \
                         $domainA $domainB" ]
-                component graphics add $star $contents $header
+                [graph] add $star $contents $header
             }
         }
         incr indexCount
@@ -250,12 +251,12 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
             if {$foundIt == 0} {
                 if {!$createdTop} {
                     set createdTop 1
-                    component graphics add "Not in $domainA or $domainB" {} {}
+                    [graph] add "Not in $domainA or $domainB" {} {}
                 }
                 set contents [list tcl \
                         "::tycho::Retarget::printStars $star \"$header\" \
                         $domainA $domainB" ]
-                component graphics add $star $contents \
+                [graph] add $star $contents \
                         [list "Not in $domainA or $domainB"]
             }
         }
@@ -271,7 +272,7 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
             [llength [knownlist $domainB]] \
             [llength [knownlist $domainA]]
 
-    component graphics redrawGraph
+    [graph] redrawGraph
     set dirtyCompareDomains 0
 }
 
@@ -394,10 +395,10 @@ body ::tycho::Retarget::modifyAfterDomainChange { {universeName {}} \
             "Total number of stars in $domainA."
 
     if {$universeName != {}} {
-        component graphics titleSet title \
+        $this modify titleSet title \
                 "Retargetting $universeName from $domainA domain to $domainB domain"
     } else {
-        component graphics titleSet title \
+        $this modify titleSet title \
                 "Comparison of $domainA and $domainB domains"
     }
     set dirtyCompareDomains 1
