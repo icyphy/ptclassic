@@ -64,8 +64,13 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 // is not changed.  A cast to get around this.
 	char* p = (char*) buffer;
 	LOG_NEW; strm = new istrstream(p, strlen(p));
+
+#ifdef __GNUG__
 // work around memory leak with libg++-2.2
+// FIXME: remove when library is fixed.
 	strm->unsetf(ios::dont_close);
+#endif
+
 	myStrm = 1;
 	init ();
 }
