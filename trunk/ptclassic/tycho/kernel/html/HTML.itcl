@@ -142,6 +142,9 @@ class ::tycho::HTML {
     # Raise the HTML browser window and the source window (if any).
     method raiseWindow {}
 
+    # Reload from the last saved version of the file.
+    method reload {}
+
     # Go to the specified hypertext reference, line, or range.
     method seeFragment {point}
 
@@ -284,11 +287,6 @@ body ::tycho::HTML::constructor {args} {
         configure -directory [file dirname $file]
     }
 
-    # Mark read-only to prevent modifications.
-    # This is deferred because "reload" is deferred, and that sets the
-    # readonly status based on whether the file is readable.
-    after idle [code evalIfExists $this configure -readonly 1]
-    
     bind $text <space> "$this scroll 1; break"
 
     # Double clicks normally select text, something we don't want here.
@@ -563,6 +561,22 @@ body ::tycho::HTML::raiseWindow {} {
 	$sourcewin raiseWindow
     }
     ::tycho::TWidget::raiseWindow
+}
+
+#####################################################################
+#### reload
+# Reload from the last saved version of the current file. This method
+# first disables read-only status (if it is set), then replaces the
+# current data with data from the current file, and then sets read-only
+# status. The data is marked unmodified after loading the file, and the
+# clipboard is restored to its form prior to the reload. The actual
+# replacement of the data occurs via the method
+# <code>insertData</code>.
+#
+body ::tycho::HTML::reload {} {
+    ::tycho::File::reload
+    # Mark read-only to prevent modifications.
+    configure -readonly 1
 }
 
 #####################################################################
