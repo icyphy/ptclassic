@@ -1,7 +1,6 @@
 defstar {
 	name { VISPackSh }
 	domain { CGC }
-	derivedFrom { VISBase }
 	version { $Id$ } 
 	author { William Chen }
 	copyright {
@@ -68,7 +67,6 @@ FALSE packs with most current sample at trailing position}
 	  union $sharedSymbol(CGCVISPackSh,outoverlay) $starSymbol(packedout);
 	}
 	initCode{
-	  CGCVISBase::initCode();
 	  addGlobal(globalDecl);
 	  addDeclaration(mainDecl);
 	  addInclude("<vis_types.h>");

@@ -1,7 +1,6 @@
 defstar {
 	name {VISStereoBiquad}
 	domain {CGC}
-	derivedFrom { VISBase }
 	version { $Id$ }
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
@@ -104,7 +103,6 @@ vis_f32 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	    vis_to_float($starSymbol(filtertaps)[4]<<16|$starSymbol(filtertaps)[4]&0xffff);
 	}
         initCode{
-	  CGCVISBase::initCode();
 	  addInclude("<vis_types.h>");
 	  addInclude("<vis_proto.h>");
 	  addProcedure(quadmult,"CGCVISStereoBiquad_mult2x2d");

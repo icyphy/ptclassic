@@ -94,9 +94,9 @@ provisions.
       /* Convert data in buffer to Output format */
       {
 	$starSymbol(packit).regvaluesh[0] = *$starSymbol(dataptr)++;
-	$starSymbol(packit).regvaluesh[1] = *$starSymbol(dataptr);
-	$starSymbol(packit).regvaluesh[2] = *$starSymbol(dataptr);
-	$starSymbol(packit).regvaluesh[3] = *$starSymbol(dataptr);
+	$starSymbol(packit).regvaluesh[1] = *$starSymbol(dataptr)++;
+	$starSymbol(packit).regvaluesh[2] = *$starSymbol(dataptr)++;
+	$starSymbol(packit).regvaluesh[3] = *$starSymbol(dataptr)++;
 	$ref(stereoOut) = $starSymbol(packit).regvaluedbl;
 	$starSymbol(numbytes) -= 8;
       }

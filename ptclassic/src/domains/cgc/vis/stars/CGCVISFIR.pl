@@ -1,7 +1,6 @@
 defstar {
 	name { VISFIR }
 	domain { CGC }
-	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen, John Reekie, and Edward Lee}
 	copyright {
@@ -129,7 +128,6 @@ into a single 64-bit float particle.
 	    $starSymbol(numloop) = $val(maxpast);
 	}
 	initCode {
-	  CGCVISBase::initCode();
           addInclude("<vis_proto.h>");
           addInclude("<vis_types.h>");
 	  addDeclaration(mainDecl);

@@ -1,7 +1,6 @@
 defstar {
 	name { VISMpySh }
 	domain { CGC }
-	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen }
 	copyright {
@@ -39,7 +38,6 @@ float particle.
 	  noInternalState();
 	}
 	initCode{
-	  CGCVISBase::initCode();
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	}

@@ -1,7 +1,6 @@
 defstar {
 	name { VISBiquad }
 	domain { CGC }
-	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen and John Reekie}
 	copyright {
@@ -187,7 +186,6 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
       	}
 
 	initCode {
-	  CGCVISBase::initCode();
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	  addDeclaration(mainDecl);
