@@ -28,14 +28,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Modified: John Davis
- Date: 5/19/97
-	Modifications were made to allow for mutability within
-	the DE domain. The primary modifications is the addition
-	of the member  
-	   Link * destinedLink
-	to the class CqLevelLink. This allows CqLevelLink to be
-	directly accessed by the DestinedEventList.
 
 **************************************************************************/
 #ifndef _CalendarQueue_h
@@ -58,7 +50,7 @@ extern const double __infinity;
 #define HUGE_VAL MAXDOUBLE
 #endif
 
-#include "LinkedList.h"
+#include "DataStruct.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
 
@@ -78,22 +70,19 @@ extern const double __infinity;
 	// class CqLevelLink
 	//////////////////////////////////////
 
-class CqLevelLink : public LevelLink {
+class CqLevelLink : public LevelLink
+{
 	friend class CalendarQueue;
 public:
-        Star* dest;                     // All the destinations are also stored
-                                        // contiguously to allow sequential
-                                        // popping off of same Star event;
-                                        // of an event. Finally, if events have
-        unsigned long absEventNum;      // all of the above the same, we still
-                                        // need to have events sorted by the
-                                        // order that they arrived
+	Star* dest;             // All the destinations are also stored
+				// contiguously to allow sequential
+				// popping off of same Star event;
+				// of an event. Finally, if events have
+	unsigned long absEventNum;   // all of the above the same, we still
+				     // need to have events sorted by the order 
+				     // that they arrived
+	CqLevelLink() {}
 
-        Link * destinedLink;            // This pointer allows the CqLevelLink
-                                        // to reference the corresponding
-                                        // Link within DestinedEventList
-        CqLevelLink() { destinedLink = 0; }
-                                        // destinedLink not set in setLink()
 	CqLevelLink* next;
 	CqLevelLink* before;
 
@@ -145,7 +134,6 @@ public:
 	// put the link into the pool of free links.
 	virtual void 	   putFreeLink(CqLevelLink*);
 
-	int resizeEnabled() { return cq_resizeEnabled; }
 	void EnableResize() { cq_resizeEnabled = 1; }
 	void DisableResize() { cq_resizeEnabled = 0; }
 
