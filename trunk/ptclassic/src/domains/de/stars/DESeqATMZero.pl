@@ -36,6 +36,8 @@ bits.
 
 	protected { int count; }
 
+	setup { count = 0; }
+
 	go {
 		if ( input.dataNew ) {
 			Envelope inPkt;
