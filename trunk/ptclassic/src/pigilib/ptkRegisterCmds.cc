@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkRegisterCommands.cc  aok
-    Version: $Id$
+    Version: @(#)ptkRegisterCmds.cc	1.2 6/29/93
 */
 
 
