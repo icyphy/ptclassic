@@ -185,6 +185,22 @@ long userOptionWord;
     ViDone();
 }
 
+
+int 
+RpcDisplaySchedule(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet;
+
+    ViInit("display-schedule");
+    ErrClear();
+    FindClear();
+    KcDisplaySchedule();
+    ViDone();
+}
+
 /* mark stars involved in errors detected by kernel */
 void
 PigiErrorMark(objName)

@@ -357,14 +357,14 @@ KcRun(int n) {
 }
 
 extern "C" boolean
-KcDisplaySched(int n) {
+KcDisplaySchedule() {
  	// LOG << "run " << n << "\nwrapup\n";
 	// LOG.flush();
 	if ( galTarget == NULL ) {
 	    cerr << "No current target";
 	    return FALSE;
 	}
-	cout << galTarget->displaySchedule();
+	cerr << galTarget->displaySchedule();
 	return TRUE;
 }
 
