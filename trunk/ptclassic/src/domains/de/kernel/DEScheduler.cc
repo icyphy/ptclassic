@@ -364,7 +364,7 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 			} else if (inp->triggerList) {
 				ListIter nextp(*(inp->triggerList));
 				const GenericPort* port;
-				while ((port = nextp++)) {
+				while ((port = (const GenericPort*)nextp++)) {
 				    if (port->isItMulti()) {
 					MultiPortHole* pp = 
 						(MultiPortHole*) port;
@@ -475,7 +475,7 @@ int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 			} else if (inp->triggerList) {
 				ListIter nextp(*(inp->triggerList));
 				const GenericPort* port;
-				while ((port = nextp++)) {
+				while ((port = (const GenericPort*)nextp++)) {
 				    if (port->isItMulti()) {
 					MultiPortHole* pp = 
 						(MultiPortHole*) port;
