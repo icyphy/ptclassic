@@ -46,6 +46,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CodeBlock.h"
 #include <ctype.h>
 
+// The following is defined in CGDomain.cc -- this forces that module
+// to be included if any CG stars are linked in.
+extern const char CGdomainName[];
+
 extern const Attribute A_GLOBAL = {AB_GLOBAL,0};
 extern const Attribute A_LOCAL  = {0,AB_GLOBAL};
 extern const Attribute A_SHARED = {AB_SHARED,0};
@@ -57,7 +61,7 @@ extern const Attribute A_PRIVATE = {0,AB_SHARED};
 
 ********************************************************************/
 
-//Constructor
+// Constructor
 CGStar :: CGStar() : dataParallel(0), profile(0), forkId(0) {
 	starSymbol.initialize();
         addState(procId.setState("procId", this, "-1",
@@ -573,13 +577,7 @@ Profile* CGStar :: getProfile(int) { return profile; }
 
 const char* CGStar :: readTypeName() { return "unspecfied"; }
 
-// The following is defined in CGDomain.cc -- this forces that module
-// to be included if any CG stars are linked in.
-extern const char CGdomainName[];
-
 const char* CGStar :: domain () const { return CGdomainName;}
-
-// isa
 
 ISA_FUNC(CGStar, DynDFStar);
 
