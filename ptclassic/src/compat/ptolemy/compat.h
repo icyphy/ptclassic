@@ -269,15 +269,15 @@ extern int vfprintf(FILE *, const char *, char *);
 /* Here we define common missing function prototypes */
 /* Alphabetical, please */
 
-#if !defined(PTIRIX5) && !defined(PTHPPA) && ! defined(PTALPHA)
+#if !defined(PTIRIX5) && !defined(PTHPPA) && ! defined(PTALPHA) && !defined(PTLINUX)
 				/* thor/kernel/rpc.c use bind2(), listen(). */
-#if defined(PTFREEBSD) || defined(PTLINUX)
+#if defined(PTFREEBSD)
 /* Under linux and libc-5.2.18, bind() takes a const second arg */
 extern int bind(int, const struct sockaddr *, int);
-#else /* PTFREEBSD || PTLINUX */
+#else /* PTFREEBSD */
 extern int bind(int, struct sockaddr *, int);
-#endif  /* PTFREEBSD || PTLINUX */
-#endif /* ! PTIRIX5 && ! PTHPPA && ! PTALPHA */
+#endif  /* PTFREEBSD */
+#endif /* ! PTIRIX5 && ! PTHPPA && ! PTALPHA && ! PTLINUX*/
 
 extern void endpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
