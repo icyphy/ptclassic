@@ -100,7 +100,18 @@ proc ::tycho::egrep {regexp args} {
             error "::tycho::egrep called with empty file arg.\
                     args were `$regexp' `$files'"
         }
-        return [split [eval exec egrep -n $greparg \"$regexp\" $files] "\n"] ;#"
+	if [catch {set retval [split \
+		[eval exec egrep -n $greparg \"$regexp\" $files] "\n"] ;#"} \
+		err] {
+	    global errorCode
+	    # If errorCode is 1, then no values were found.
+	    # See the Unix egrep man page for details about egrep return vals. 
+	    if {[lindex $errorCode 2] != 1} {
+		error "::tycho::egrep: exec of egrep caused an error:\
+			$errorCode\n$err"
+	    }
+	}
+        return $retval
     } else {
 
     # Only show the first 100 matches
