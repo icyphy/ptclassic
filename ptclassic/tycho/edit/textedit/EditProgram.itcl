@@ -109,6 +109,9 @@ class ::tycho::EditProgram {
     # Fill the set of lines identified by the selection, make comments.
     method fillSelection {}
 
+    # Generate documentation.  Not all derived classes can do this.
+    method gendoc { genDocFile genCommand}
+
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
@@ -243,6 +246,55 @@ body ::tycho::EditProgram::fillSelection {} {
     if $readOnly {bell; return}
     Edit::fillSelection
     parseRegion $fillStart insert
+}
+###################################################################
+#### gendoc
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+# This method takes two arguments, both of which are eval'd.
+# <MENU>
+# <LI> The <CODE>setdocCommand</CODE> argument should contain the tcl
+# command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
+# which contains the filename of the generated doc file.
+# <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
+# command(s) to evaluate to actually generate the doc file.  Usually
+# this command refers to <CODE>$tail</CODE>
+# </MENU>
+#
+# In the example below, we open the makefile and then sort it.
+# <TCL><PRE>
+# set w [::tycho::EditProgram [::tycho::autoName .ep] -file makefile]
+# $w gendoc {set docfile $root.sort} {exec sort $tail > $docfile}
+# </PRE></TCL>
+#
+body ::tycho::EditProgram::gendoc {setDocCommand genCommand} {
+    set filename [::tycho::expandPath $file]
+    set dir [file dirname $filename]
+    set tail [file tail $filename]
+    set root [file rootname $tail]
+    eval $setDocCommand
+    set fulldoc [file join $dir $docfile]
+    if {![file exists $fulldoc] || \
+            [file mtime $filename] > [file mtime $fulldoc] } {
+        # Need to regenerate the doc.  Check permissions first.
+        # It is sufficient for the directory to be writable.
+        if {[file writable $dir]} {
+            # If necessary, save the file
+            saveQuery
+            set savedir [pwd]
+            cd $dir
+            eval $genCommand
+            cd $savedir
+        } {
+            ::tycho::warn "The documentation file is out of date, \
+                    and you do not have permission to update it."
+        }
+    }
+    if [file exists $fulldoc] {
+        return [::tycho::File::openContext $fulldoc]
+    }
 }
 
 ###################################################################
