@@ -123,7 +123,8 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 	}
 	// -debug required to keep stdin open
 	rshCommand = "";
-	rshCommand << preCmd << "xon " << hname << " -debug sh" << postCmd;
+	// ptxon is a script based on the X11R5 xon script
+	rshCommand << preCmd << "ptxon " << hname << " -debug sh" << postCmd;
     }
     cout << "rshCommand: " << rshCommand << "\n";
     cout.flush();
