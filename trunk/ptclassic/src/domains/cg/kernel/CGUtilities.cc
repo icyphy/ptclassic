@@ -38,8 +38,8 @@ static const char file_id[] = "CGUtilities.cc";
 #pragma implementation
 #endif
 
-#include <stdio.h>		// Pick up decl for pclose
-#include <unistd.h>		// Pick up F_OK for access() under sun4 cfront.
+#include <stdio.h>		// Pick up prototype for pclose
+#include <unistd.h>		// Pick up prototype for access
 #include "pt_fstream.h"
 #include "type.h"
 #include "CGUtilities.h"
@@ -47,7 +47,7 @@ static const char file_id[] = "CGUtilities.cc";
 #include "miscFuncs.h"
 #include "Error.h"
 #include <sys/param.h>
-#include <ctype.h>
+#include <ctype.h>		// Pick up definition of isspace
 #include <string.h>
 #include "compat.h"
 
@@ -56,6 +56,47 @@ static const char file_id[] = "CGUtilities.cc";
 #endif /* hpux SYSV SVR4 */
 
 static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
+
+// Make a writeable local or remote directory.  Returns 0 on success
+// and -1 on failure.  If a writeable directory already exists, it
+// returns 0.
+static int makeDirectory(const char* hname, const char* directory) {
+    // For the mkdir Unix command, the -p flag is necessary to handle a
+    // nested directory where one of the parent directories does not exist
+    // The -p option works on the machines that Ptolemy runs on.
+    StringList command = "mkdir -p ";
+    int retval = 0;
+    command << directory;
+    if (onHostMachine(hname)) {
+	// Create a new directory if a writeable directory of the same
+	// name does not exist
+	if (access(directory, W_OK) == -1) retval = rshSystem(hname, command);
+    }
+    else {
+	retval = rshSystem(hname, command);
+    }
+    return retval;
+}
+
+// Copy one or more files to a directory on the same local network
+static int copyNetworkedFiles(const char* hname, const char* source,
+			      const char* directory, const char* fileName,
+			      const char* prolog, const char* epilog) {
+    StringList command;
+    if (prolog) command << prolog << "; ";
+    if (onHostMachine(hname)) {
+	command << "cp " << source << " " << directory;
+    }
+    else {
+	// From the man page for rcp: the -p option causes rcp to attempt
+	// to preserve (duplicate) in its copies the modification times and
+	// modes of the source files, ignoring the umask.
+	command << "rcp -p " << source << " " << hname << ":" << directory;
+    }
+    if (fileName) command << "/" << fileName;
+    if (epilog) command << "; " << epilog;
+    return (rshSystem("localhost", (const char*)command) == 0);
+}
 
 // Converts a string to lower case
 char* makeLower(const char* name) {
@@ -71,8 +112,8 @@ char* makeLower(const char* name) {
 }
 
 // Run command on hostname in specified directory.  If directory == 0
-// then the command will be executed in the home directory.  Returns
-// the status flag of the system call.
+// then the command will be executed in the home directory.  Returns the
+// status flag of the system call: 0 means success and -1 means error.
 int rshSystem(const char* hname, const char* cmd, const char* dir) {
     StringList rshCommand = cmd;
     if ( dir != NULL ) {
@@ -114,7 +155,7 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 	    if ( cmdfilename == 0 ) {
 	      Error::abortRun("rshSystem: the tempnam function",
 			      "cannot allocate memory");
-	      return FALSE;
+	      return -1;
 	    }
 	    pt_ofstream cmdfile(cmdfilename);
 	    cmdfile << rshCommand;
@@ -161,24 +202,13 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 
     fileName << directory << "/" << file;
 
-// create the directory if necessary (-p)
-    if (onHostMachine(hname)) {
-	if (access(directory, W_OK) == -1) {
-	    // -p flag is necessary because it might be a nested directory
-	    // where one of the parent directories does not exist
-	    mkdir << "mkdir -p " << directory;
-	    if (system(mkdir)) return FALSE;
-	}
-    }
-    else {
-	mkdir << "mkdir -p " << directory;
-	if (rshSystem(hname,mkdir)) return FALSE;
-    }
-	    
+    // create the directory if necessary
+    makeDirectory(hname, directory);
+
     cout << "rcpWriteFile: writing file " << file << "\n";
     cout.flush();
 
-//  write file to local machine 
+    //  write file to local machine 
     // cfront1.0 barfs because there is not StringList ? operand, so
     // don't use it.  However, this is a poor solution.
     if (tmpFile) {
@@ -191,7 +221,6 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 	if (tmpFile) {LOG_DEL; delete [] tmpFile;}
 		return FALSE;
       }
-
     } else {
       pt_ofstream o(fileName.chars());
       if (o) {
@@ -248,13 +277,14 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 
 // Copy a file to a directory.  This will either perform a link system
 // call or do a rcp to copy a file over the network. Returns TRUE if
-// successful
+// successful.  The old file will not be deleted if there is an error
+// in creating or accessing the directory.
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 		int deleteOld, const char* newFileName) {
     char* expandedName = expandPathName(filePath);
     StringList expandedFilePath = expandedName;
     delete [] expandedName;
-    if (access(expandedFilePath,R_OK) == -1) {
+    if (access(expandedFilePath, R_OK) == -1) {
 	Error::abortRun("rcpCopyFile: ", filePath, " does not exist");
 	return FALSE;
     }
@@ -274,27 +304,76 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
     char* expandedDirName = expandPathName(dir);
     StringList directory = expandedDirName;
     delete [] expandedDirName;
-    StringList command;
+
+    // Create the directory
+    if (makeDirectory(hname, directory) == -1) return FALSE;
+
+    // Conditionally delete the old file name
     StringList rmOldFile;
     if (deleteOld) {
-	rmOldFile << "/bin/rm -f " << directory << "/" << fileName << "; ";
+	rmOldFile << "/bin/rm -f " << directory << "/" << fileName;
     }
-    if (onHostMachine(hname)) {
-	if (access(directory, W_OK) == -1)
-	    command << "mkdir " << directory << "; ";
-	command << rmOldFile << "cp " << expandedFilePath << " " 
-		<< directory << "/" << fileName;
-    }
-    else {
-	command << "mkdir -p " << directory << "; " << rmOldFile;
-	rshSystem(hname,command);
-	command.initialize();
-	command << "rcp -p " << expandedFilePath << " " << hname << ":" 
-		<< directory << "/" << fileName;
-    }
-    return !rshSystem("localhost",(const char*)command);
+
+    return copyNetworkedFiles(hname, expandedFilePath, directory, fileName,
+			      0, rmOldFile);
 }
  
+// Copy multiple files given by filePathList to a directory.  The list of
+// files is separated by white space.  Returns TRUE if successful.
+// The old files will not be deleted if there is an error in creating
+// or accessing the directory.
+int rcpCopyMultipleFiles(const char* hname, const char* dir,
+	const char* filePathList, int deleteOld = TRUE) {
+
+    // Expand the environment variables in the remote directory name
+    char* expandedDirName = expandPathName(dir);
+    StringList directory = expandedDirName;
+    delete [] expandedDirName;
+
+    // Create the directory
+    if (makeDirectory(hname, directory) == -1) return FALSE;
+
+    // Walk through the list of files
+    char* fileList = expandPathName(filePathList);
+    char* lastString;
+    char* curString;
+    int notAtEndOfString;
+    int validFiles = TRUE;
+    lastString = fileList;
+    curString = lastString;
+    do {
+        while (*curString && !isspace(*curString)) curString++;
+        notAtEndOfString = *curString;
+        if (lastString != curString) {
+	    char oldChar = *curString; 
+            *curString = 0;
+	    // Check existence of the current file in lastString
+	    if (access(lastString, R_OK) == -1) {
+		Error::abortRun("rcpCopyMultipleFiles: ", lastString,
+				" does not exist");
+	        *curString = oldChar;
+		validFiles = FALSE;
+		break;
+	    }
+	    *curString = oldChar;
+            if (notAtEndOfString) curString++;
+            lastString = curString;
+        }
+    } while (notAtEndOfString);
+
+    if (validFiles) {
+	StringList rmOldFiles;
+	if (deleteOld) {
+	    rmOldFiles << "/bin/rm -f " << fileList;
+	}
+        validFiles = copyNetworkedFiles(hname, fileList, directory, 0,
+					0, rmOldFiles);
+    }
+
+    delete [] fileList;
+    return validFiles;
+}
+
 // Returns TRUE if hname is the machine Ptolemy is running on.  Open a pipe
 // to the Unix command "hostname" and read the result.  It returns TRUE if
 // hname is 0, "\0", or "localhost" as well.
@@ -326,8 +405,7 @@ int onHostMachine(const char* hname) {
 // the resulting string in an internal buffer maintained by this
 // function, and is only valid until the next invocation of this
 // function.
-const char* ptSanitize(const char* string)
-{
+const char* ptSanitize(const char* string) {
     // This pointer points to the dynamically allocated buffer that
     // holds the result string.  The pointer is static so that we can
     // remember the buffer allocated in the previous invocation of
