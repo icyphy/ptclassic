@@ -31,7 +31,7 @@ package MyPackageName;
 
 //////////////////////////////////////////////////////////////////////////
 //// ClassName
-/** 
+/**
 Description of the class
 @author yourname
 @version $Id$
@@ -45,7 +45,7 @@ public class ClassName {
      * @param parameter-name description
      * @return description
      * @exception full-classname description
-     */	
+     */
     public ClassName() {
     }
 
@@ -58,7 +58,7 @@ public class ClassName {
      * @param parameter-name description
      * @return description
      * @exception full-classname description
-     */	
+     */
     public int APublicMethod() {
         return 1;
     }
@@ -73,7 +73,7 @@ public class ClassName {
      * @param parameter-name description
      * @return description
      * @exception full-classname description
-     */	
+     */
     protected int _AProtectedMethod() {
         return 1;
     }
