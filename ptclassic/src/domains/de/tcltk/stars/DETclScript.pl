@@ -42,7 +42,7 @@ inputs, separated by spaces.
 The Tcl script is sourced in the begin method of the star execution,
 so it does not make sense at this time to read inputs.
 However, you might want to set outputs at this time.
-These outputs will have time stamp zero.
+These outputs will have timestamp zero.
 .pp
 The Tcl script can optionally define a Tcl procedure called "goTcl_$starID".
 If this procedure is defined in the script, then it will be invoked every
@@ -77,12 +77,14 @@ as many as there are inputs, indicating whether the corresponding input
 value is new.
 The Tcl script can write to the outputs either all at once using
 setOutputs_$starID, or one by one, using setOutput_$starID.
-The time stamp on the affected output ports will be the current time
-of the scheduler.  If writing to the outputs occurs in goTcl_$starID
-procedure, then the time stamp on the outputs will be the same as
-the invocation time of the star.  If it occurrs asynchronously, then
-the time stamp is somewhat arbitrary, in that the current time of the scheduler,
-whenever the procedure happens to be invoked, will be used.
+The timestamp on the affected output ports will be the current time
+of the scheduler.
+If writing to the outputs occurs in goTcl_$starID
+procedure, then the timestamp on the outputs will be the same as
+the invocation time of the star.
+If it occurs asynchronously, then the timestamp is somewhat arbitrary,
+in that the current time of the scheduler, whenever the procedure happens
+to be invoked, will be used.
 .EQ
 delim $$
 .EN
