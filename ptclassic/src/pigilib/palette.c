@@ -155,7 +155,7 @@ static struct octPoint defaultCursorPt = {500, -500};
 	cursorPt = defaultCursorPt;
     }
     ERR_IF1(!UGetFullTechDir(&techDir));
-    sprintf(buf, "%s/%s", techDir, "%cCursor");
+    sprintf(buf, "%s/%s", techDir, PT_PERCENT "cCursor");
     ERR_IF1(!StrDup(&cell, buf));
     CK_OCT(CreateInstance2(palFacetPtr, cursorPtr, "", cell, "schematic",
 	"interface", cursorPt.x, cursorPt.y, OCT_NO_TRANSFORM));
