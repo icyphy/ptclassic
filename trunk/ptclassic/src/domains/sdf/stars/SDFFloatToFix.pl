@@ -11,7 +11,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF conversion palette }
 	desc { Converts a float input to an fix type output. }
-	}
 	input {
 		name { input }
 		type { float }
