@@ -72,34 +72,39 @@ public:
 	virtual StringList displaySchedule();
 
 	// A Target may understand certain annotations in blocks
-	// called "Hints".  This method returns the list of
-	// hints that a particular target understands.
+	// called "Pragmas".  This method returns the list of
+	// pragmas that a particular target understands.
 	// In derived classes, each item in the list is a three
 	// part string, "name type value", separated by spaces.
 	// The default implementation returns a StringList
 	// with only a single zero-length string in it.
-	virtual StringList hint () { return ""; }
+	virtual StringList pragma () const { return ""; }
 
-	// To determine the value of all hints that have been
+	// To determine the value of all pragmas that have been
 	// specified for a particular block, call this method.
 	// In derived classes, it returns a list of "name value"
 	// pairs, separated by spaces.  In the base class, it
-	// returns an empty string.
-	virtual StringList hint (const char* blockname) {return "";}
+	// returns an empty string. The parentname is the name
+	// of the parent class (universe or galaxy master name).
+	virtual StringList pragma (const char* /*parentname*/,
+				   const char* /*blockname*/) const {return "";}
 
-	// To determine the value of a hint of a particular type
+	// To determine the value of a pragma of a particular type
 	// that has been specified for a particular block, call this
 	// method. In derived classes, it returns a value.
-	virtual StringList hint (const char* blockname, const char* hintname) {
+	virtual StringList pragma (const char* /*parentname*/,
+				   const char* /*blockname*/,
+				   const char* /*pragmaname*/) const {
 	    return "";
 	}
 
-	// To specify a hint to a target, call this method.
-	// The default implementation ignores all hints.
+	// To specify a pragma to a target, call this method.
+	// The default implementation ignores all pragmas.
 	// The return value is always a null string.
-	virtual StringList hint (const char* blockname,
-		   const char* name,
-		   const char* value) { return ""; }
+	virtual StringList pragma (const char* /*parentname*/,
+				   const char* /*blockname*/,
+				   const char* /*name*/,
+				   const char* /*value*/) { return ""; }
 
 	// return the nth child Target, null if no children.
 	virtual Target* child(int n);
