@@ -15,12 +15,21 @@ cat > /tmp/$$.hdr << EOF
 EOF
 
 pp=ZZZ
-if [ $# = 2 ]
+if [ $# > 1 ]
 then pp=$2
 fi
 
-sed -n	-e "s?$1?\$($1)/${1}?g" \
-	-e "s?$pp?\$($1)/${pp}?g" \
+d3=ZZZ
+if [ $# > 2 ]
+then d3=$3
+fi
+
+sed -n	-e "s?^[ ]*$1?\$($1)/${1}?g" \
+	-e "s?^[ ]*$pp?\$($1)/${pp}?g" \
+	-e "s?^[ ]*$d3?\$($1)/${d3}?g" \
+	-e "s?[ ]+$1?\$($1)/${1}?g" \
+	-e "s?[ ]+$pp?\$($1)/${pp}?g" \
+	-e "s?[ ]+$d3?\$($1)/${d3}?g" \
 	-e "s/PL_SRCS/${1}STARS/" \
 	-e "s/\.pl/.o/g" \
 	-e "/^${1}STARS/,/^\$/p" make.template | cat /tmp/$$.hdr -
