@@ -172,8 +172,7 @@ discuss some of the important changes.
 </UL>
  <P>Infrastructure changes
 <UL>
-<LI> A new Tcl-Java interface based on the Java Native Interface
-Standard (JNI).
+
 <LI> ...
 </UL>
 
@@ -182,15 +181,17 @@ Standard (JNI).
 
 <UL>
 
-<LI> Tycho 0.2.1 requires Itcl 3.0.
+<LI> The following features that were present in 0.2 were removed
+in 0.2.1
+<menu>
+<li> The TclJava interface -
+Tcl Blend, the new interface from Sun only runs under Tcl 8.
+TclJava is buggy and obsolete, so we have removed it.
 
-<LI> Changes in the Interchange and Model classes.
-  <ul>
-  <LI><CODE>_configure</CODE> -&gt; <CODE>_itemconfigure</CODE>
-  <LI><CODE>_cget</CODE> -&gt; <CODE>_itemcget</CODE>
-  <LI>Protected variables like <CODE>_info</CODE>, <CODE>_attrs</CODE>,
-  <CODE>_value</CODE> are now <I>private</I>.
-  </ul>
+<li> Profile - The Profile command used an out of date
+version of the TclX profiler.
+</menu>
+
 
 </UL>
 
@@ -203,10 +204,10 @@ Next: <A HREF="install.html">Install Tycho</A> -
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 1997, The Regents of the University of California.
+Copyright &#169 1998, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 06/09/97,
+Last updated: $Date$,
 comments to: <author>tycho@eecs.berkeley.edu</author>
 </body>
 </html>
