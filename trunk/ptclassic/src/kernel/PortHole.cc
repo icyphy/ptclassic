@@ -513,8 +513,9 @@ void PortHole :: initialize()
 		// restart they do not contain old data
 		(*p)->initialize();
 	}
-	// If this is an output PortHole or EventHorizon, initialize myGeodesic
-	if(myGeodesic && (isItOutput() || asEH()))
+	// If this is an output PortHole (or connected to an
+	// input porthole), initialize myGeodesic
+	if(myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
 		myGeodesic->initialize();
 }
 
