@@ -359,8 +359,13 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	// am I at wormhole boundary?
-	int atBoundary() const { return (isItInput() == far()->isItInput()); }
+	// am I at wormhole boundary?  Disconnected ports return true,
+	// since we implement clusters that way (disconnected ports
+	// represent the cluster boundary)
+
+	int atBoundary() const {
+		return (far() ? (isItInput() == far()->isItInput()) : TRUE);
+	}
 
 	// Return me as an eventHorizon
 	virtual EventHorizon* asEH();
