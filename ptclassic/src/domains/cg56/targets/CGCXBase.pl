@@ -73,7 +73,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	const char *s56path = getenv("S56DSP");
 	if (s56path == NULL)
 		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
-	addCode(downloadCode(myTarget()->stateWithName("file"),s56path);
+	addCode(downloadCode(myTarget()->stateWithName("file"),s56path));
     }
     
 }
