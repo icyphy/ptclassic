@@ -40,6 +40,8 @@ include $(CONFIG)
 
 EXTRA_SRCS = \
 	Cmakefile.mk \
+	CppTemplate.cc \
+	CppTemplate.h \
 	HTMLTemplate.html \
 	ItclTemplate.itcl \
 	JavaTemplate.java
