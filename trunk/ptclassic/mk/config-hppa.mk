@@ -54,6 +54,11 @@ CSHARED_LIBRARY_COMMAND = gcc -shared $(C_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG
 # Used by cgwork.mk
 INC_LINK_FLAGS =	-shared $(CC_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG)
 
+# List of libraries to search, obviating the need to set SHLIB_PATH
+# See the ld man page for more information.  These path names must
+# be absolute pathnames, not relative pathnames.
+SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
+
 # Note that hppa does support shl_load() style dynamic linking, see
 # $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
 # You may need to get the latest HP linker patch for shl_load to work.
