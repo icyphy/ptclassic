@@ -1,8 +1,8 @@
 .\" $Id$
 .\"
-.\" Use printsec in ~ptolemy/doc/bin or Makefiles in ~ptolemy/doc
+.\" Use Makefiles in ~ptolemy/doc
 .\" to print this out.  To get this section only, as a standalone document,
-.\"     % cd ~ptolemy/doc/sect1/pigi
+.\"     % cd ~ptolemy/doc/main/pigi
 .\"     % make print
 .\"
 .\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
