@@ -6,67 +6,61 @@ Thomas M. Parks}
 
 \node Installing the CP Domain
 \section{Installing the CP Domain}
-By default, the CP domain is not compiled in to Ptolemy.
-The CP domain relies on the thread library in the directory
-\file{$PTOLEMY/src/thread/lwp}.
-If you want the thread library to be automatically updated along with
-the rest of Ptolemy, then edit the file \file{makefile} in
-\file{$PTOLEMY/src} and include \samp{thread} in the \code{SDIRS}
-variable.  For example:
+By default, the CP domain is not compiled into the Ptolemy
+\code{pigiRpc} and \code{ptcl} programs.
+\pindex{pigiRpc}
+\pindex{ptcl}
+Only the necessary libraries
+are built.  Due to conflicts between Sun's lightweight process library
+and the SDF domain, you should not include any part of the dataflow
+domains (SDF, DDF, BDF, CG, CGC, etc.) in \code{pigiRpc} or
+\code{ptcl}.  If you do, then you will get a core dump every time you
+quit.  You may also get core dumps when running some systems.  If you
+must have both the CP domain and one or more of the dataflow domains
+and can accept this problem, then disregard the instructions below
+about excluding the dataflow domains from \code{pigiRpc}.
+
+To build a version of \code{pigiRpc} that includes the CP domain, you
+will have to edit the files \file{makefile} and \file{defpalettes.c} in
+\file{$PTOLEMY/src/pigiRpc}.  In \file{makefile}, modify the definition
+of \code{LIBS} to include \samp{$(CP_LIBS)} following
+\samp{$(STARLIBS)}, and \samp{$(LWP_LIBS)} after \samp{-lptolemy}.
+This change causes the proper libraries to be searched when pigiRpc is
+built.
 
 \begin{example}
-SDIRS = domains thread
+LIBS=     $(STAR_LIBS) $(CP_LIBS) -lsdftclstars \back
+          -lrpc -lpigi -lptk -lgantt -lptolemy \back
+          $(LWP_LIBS) $(OCTLIBS)
 \end{example}
 
-\noindent
-If you want the library files for the CP domain to be automatically updated,
-then edit \file{makefile} in \file{$PTOLEMY/src/domains} and include \samp{cp}
-in the \code{DOMAINS} variable.  For example:
+\begin{sloppypar}
+Modify the definition of \code{LIBFILES} to include
+\samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change sets up
+the proper dependencies so that \code{pigiRpc} will be considered
+out-of-date if any of the required library files are more recent.
+\end{sloppypar}
 
 \begin{example}
-DOMAINS = sdf de ddf bdf thor cp
+LIBFILES=  $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \back
+           $(LIBDIR)/libsdftclstars.a \back
+           $(LIBDIR)/libpigi.a $(LIBDIR)/libptolemy.a \back
+           $(LIBDIR)/libgantt.a $(LIBDIR)/libptk.a
 \end{example}
 
-\noindent
-Once these \file{makefile}s have been updated, then the thread and CP domain
-libraries will be updated whenever you type \samp{make install} in
-\file{$PTOLEMY/obj.$ARCH}.
-
-If you prefer to install the libraries manually then do not edit the
-\file{makefile}s.  Instead,
-go to the
-\file{$PTOLEMY/obj.$ARCH/thread/lwp} directory and type \samp{make
-install}.  For example:
+Modify the definition of \code{ALLSTARS} to include \samp{$(CPSTARS)}
+and exclude all dataflow and code generation stars.  Also eliminate the
+targets in \samp{ALLTARGETS}.  This causes the CP domain to be compiled
+in to \code{pigiRpc}, and prevents the other domains from being
+included.
 
 \begin{example}
-cd $PTOLEMY/obj.sun4/thread/lwp
-make install >& LOG &
+ALLSTARS=  $(THORSTARS) $(DESTARS) $(CPSTARS)
+ALLTARGETS= 
 \end{example}
 
-\noindent
-This will place the file \file{liblwpthread.a} in the \file{$PTOLEMY/lib.$ARCH}
-directory.
-Next go to the
-\file{$PTOLEMY/obj.$ARCH/domains/cp} directory and type \samp{make install}.
-For example:
-
-\begin{example}
-cd $PTOLEMY/obj.sun4/domains/cp
-make install >& LOG &
-\end{example}
-
-\noindent
-This will place the files \file{libcp.a}, \file{libcpstars.a}, and
-\file{libcp.o} in the \file{$PTOLEMY/lib.$ARCH} directory.
-
-Once the libraries have been installed, you can build a special version
-of \code{pigiRpc} that includes the CP domain.  Due to conflicts
-between Sun's lightweight process library and the SDF domain, you
-should not include any part of the dataflow domains (SDF, DDF, BDF, CG,
-CGC, etc.) in \code{pigiRpc}.  If you do, then you will get a core dump
-every time you quit.
-If you must have both the CP domain and one or
-more of the dataflow domains and can accept this problem, then
-disregard the instructions below about eliminating references to
-dataflow domains.
-
+In \file{defpalettes.c} add \samp{$PTOLEMY/src/domains/cp/icons/cp.pal}
+to the definition of \code{defaultPalettes}.  If you wish, you may also
+remove references to the palettes of unused domains, but this is not
+necessary.  Also modify the value of \code{DEFAULT_DOMAIN} to refer to
+a domain that will be included in  \code{pigiRpc}, such as CP.
