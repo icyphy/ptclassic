@@ -66,12 +66,6 @@ Domain* Domain::named(const char* nm) {
 	return 0;
 }
 
-// get the domain of a block.
-
-Domain* Domain::of (Block& b) {
-	return named(b.domain());
-}
-
 // default implementations provided for domains without wormhole
 // support.
 
