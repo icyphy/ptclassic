@@ -37,6 +37,13 @@ Before the first data are flushed, the file will not exist.
     desc { Output filename }
   }
 
+  defstate {
+      name { prefix }
+      type { string }
+      default { "" }
+      desc { Prefix to print before each line of output }
+  }
+
   hinclude { "pt_fstream.h" }
 
   protected {
@@ -56,6 +63,13 @@ Before the first data are flushed, the file will not exist.
 
   tick {
     pt_ofstream & output = *p_out;
+
+    // Print the prefix
+
+    output << (const char *)prefix;
+
+    // Print the value of each output
+
     MPHIter nexti(input);
     InSRPort * p;   
     while ( (p = (InSRPort *)(nexti++)) != NULL ) {
