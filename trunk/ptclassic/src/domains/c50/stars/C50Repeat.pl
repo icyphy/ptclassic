@@ -60,15 +60,17 @@ worst case.
 	}
 
 	codeblock(cbOnce) {
-	lamm	ar1,#$addr(input)
-	samm	ar1,#$addr(output)
+	lmmr	ar1,#$addr(input)
+	nop
+	nop
+	smmr	ar1,#$addr(output)
 	}
 
 	codeblock(cbOnceCx){
-	lamm	ar1,#$addr(input,0)
-	lamm	ar2,#$addr(input,1)
-	samm	ar1,#$addr(output,0)
-	samm	ar2,#$addr(output,1)
+	lmmr	ar1,#$addr(input,0)
+	lmmr	ar2,#$addr(input,1)
+	smmr	ar1,#$addr(output,0)
+	smmr	ar2,#$addr(output,1)
 	}
 
 	codeblock(initRepLoop,""){

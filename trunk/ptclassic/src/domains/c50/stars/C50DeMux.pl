@@ -75,7 +75,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	lar	ar1,#$addr(ptrarray)	; ar1 -> ptrarray
 	lmmr	indx,#$addr(control)	; index = control
 	mar	*,ar1
-	lar	ar3,#$addr(input)
+	nop
+	zap
 	mar	*0+			; ar1 -> ptrarray[control]
 	}
 	
@@ -87,24 +88,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	
 	codeblock(moveOne){
-	lacc	*+,0,ar3
-	samm	ar2			
-	lacc	*,0,ar2
-	sach	*,0,ar1		
+	lar	ar3,*+,ar3
+	bldd	#$addr(input),*
+	mar	*,ar1
 	}
 	
 	codeblock(moveZero,""){
-	lacc	*+,0,ar2
-	samm	ar2
+	lar	ar2,*+,ar2
 	rpt	#@iter
-	sach	*+,0	
+	sacl	*+
 	mar	*,ar1
 	}
 	
 	codeblock(moveOneZero){
-	lacc	*+,0,ar2
-	samm	ar2
-	sach	*,0,ar1
+	lar	ar2,*+,ar2
+	sacl	*
+	mar	*,ar1
 	}
 
 	codeblock(restore){

@@ -64,6 +64,8 @@ the next B particles from the next input, etc.
 
         codeblock (one) {
 	lmmr	ar1,#$addr(input#1)
+	nop	; required by pipeline
+	nop
 	smmr	ar1,#$addr(output)
         }
 

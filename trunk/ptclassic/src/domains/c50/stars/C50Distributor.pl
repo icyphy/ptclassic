@@ -62,6 +62,8 @@ Distributes an input signal among two outputs, alternating samples.
 
         codeblock (one) {
 	lmmr	ar1,#$addr(input)
+	nop
+	nop
 	smmr	ar1,#$addr(output#1)
         }
 
