@@ -200,17 +200,13 @@ proc ptkMakeButton {win name desc callback} {
 
 #######################################################################
 # Procedure to make a scale in a control panel
-# All scales in the control panel actually range from 0 to 100,
-# but from the user perspective can range from low to high, where low
-# and high are floating point numbers.
+# All scales in the control panel range from 0 to 100,
 # Arguments:
-#	win	window name into which to put the pane
-#	name	name of the pane
-#	desc	description of the scale slider
-#	low	the low end of the range from the user perspective (flt. pt.)
-#	high	the high end of the range from the user perspective (flt. pt.)
-#	position	the initial value between 0 and 100 (int)
-#	callback	the name of the callback procedure to register changes
+#       win     window name into which to put the pane
+#       name    name of the pane
+#       desc    description of the scale slider
+#       position        the initial value between 0 and 100 (int)
+#       callback        the name of the callback procedure to register changes
 proc ptkMakeScale {win name desc position callback} {
     set s $win.$name
     catch {destroy $s}
