@@ -51,7 +51,9 @@ static char SccsId[]="$Id$";
 #endif
 
 
+#ifndef MAXINT
 #define MAXINT 2147483647  /* Assuming 32 bit architecture */
+#endif
 /* MAXFLOAT defined in math.h, since floats are more machine dependent. */
 
 #ifndef MAX
