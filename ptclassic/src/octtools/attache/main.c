@@ -67,10 +67,10 @@ char *argv[];
 	}
     }
 
-    if (optind != argc-1) optUsage();
+    if (octoptind != argc-1) optUsage();
 
     ohUnpackDefaults(&facet, "r", "::contents");
-    if (ohUnpackFacetName(&facet, argv[optind]) != OCT_OK) {
+    if (ohUnpackFacetName(&facet, argv[octoptind]) != OCT_OK) {
 	optUsage();
     }
 

@@ -592,7 +592,7 @@ char **disp_name;		/* Returned display name */
     }
 
     /* Handle remaining arguments as attribute assignments */
-    for (i = optind;  i < argc;  i++) {
+    for (i = octoptind;  i < argc;  i++) {
 	if ( (p = strchr(argv[i], '=')) ) {
 	    char *name, *value;
 

@@ -136,7 +136,7 @@ char **argv;
     char* forceFacet = 0;
     int count = 0;		/* Used to prevent infinite looping in replace loop. */
     int subst = 0;		/* Number of substitutions. */
-    extern int optind;
+    extern int octoptind;
     extern char *optarg;
 
     /* parse command line options*/
@@ -205,10 +205,10 @@ char **argv;
     /*
      *  Finish the command line argument parsing 
      */
-    if (optind != argc-1) {
+    if (octoptind != argc-1) {
 	optUsage();
     } else {
-	input_name = argv[optind];
+	input_name = argv[octoptind];
     }
 
     octBegin();

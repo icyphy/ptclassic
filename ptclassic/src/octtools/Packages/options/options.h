@@ -48,7 +48,7 @@ extern char OPT_DESC[];		/* general description */
 extern char OPT_CONT[];		/* continues description */
 
 extern optionStruct optionList[];
-extern int optind;
+extern int octoptind;
 extern char *optarg;
 extern char *optProgName;
 

@@ -88,15 +88,16 @@ char *argv[];
 	display = argv[--argc];
     }
 
-    if (optind >= argc) {
+    if (octoptind >= argc) {
 	(void) fprintf(stderr, "%s: you must specify at least one file\n",
 			optProgName);
 	optUsage();
     }
 
-    while (optind < argc) {
-	processFile(argv[optind], xFlag, yFlag, framSize, debugType, display);
-	optind++;
+    while (octoptind < argc) {
+	processFile(argv[octoptind], xFlag, yFlag, framSize,
+		    debugType, display); 
+	octoptind++;
     }
 
     exit(0);

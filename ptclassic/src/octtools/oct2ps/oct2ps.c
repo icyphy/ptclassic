@@ -234,7 +234,7 @@ char **argv;
     double userscale = 1.0;
     int mode = AUTOMATIC;
     int option;
-    extern int optind;
+    extern int octoptind;
     extern char *optarg;
     int i, c;
     char *temp, *ptr;
@@ -329,9 +329,9 @@ char **argv;
 	}
     }
 
-    if (argc == optind+1) {
+    if (argc == octoptind+1) {
 	ohUnpackDefaults(&facet, "r", "::contents");
-	if (ohUnpackFacetName(&facet, argv[optind]) != OCT_OK) {
+	if (ohUnpackFacetName(&facet, argv[octoptind]) != OCT_OK) {
 	    optUsage();
 	}
     } else {
