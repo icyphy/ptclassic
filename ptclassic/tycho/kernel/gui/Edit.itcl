@@ -84,7 +84,6 @@ body tycho::Edit::constructor {args} {
 	# FIXME: add all pertinent options from EditText
 	keep -text -readonly -font
     }
-    # Frame for text window.
     pack $itk_component(text) -expand yes -fill both
     
     # Add an Edit menu
@@ -200,8 +199,11 @@ body tycho::Edit::constructor {args} {
 
     # Read contents from the specified file, unless the name is "NoName".
     if {$file != {NoName}} {
+	set savereadonly [$itk_component(text) cget -readonly]
+	$itk_component(text) configure -readonly 0
 	$itk_component(text) readFile $file
-	markUnModified
+	markUnmodified
+	$itk_component(text) configure -readonly $savereadonly
     }
 }
 
