@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "AsmForkNode.h"
 #include "CGGeodesic.h"
 #include "CGWormhole.h"
+#include "AsmTarget.h"
 
 // For the hacks below to avoid doing wormholes:
 
@@ -89,5 +90,9 @@ static CGDomain proto;
 // declare the default Target object
 
 static CGTarget defaultCGtarget("default-CG","CGStar","default CG target");
-static KnownTarget entry(defaultCGtarget,"default-CG");
+static KnownTarget entryDefault(defaultCGtarget,"default-CG");
+
+static AsmTarget defaultAsmTarget("default-Asm", "default Asm target",
+"CGStar");
+static KnownTarget entryAsm(defaultAsmTarget,"default-Asm");
 
