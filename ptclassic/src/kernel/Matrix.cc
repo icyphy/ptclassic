@@ -1966,6 +1966,7 @@ extern const DataType INT_MATRIX_ENV = "INT_MATRIX_ENV";
 // MatrixEnvParticle Base Class
 ///////////////////////////////
 
+Message Envelope::dummyMessage;
 static Envelope dummy;
 
 MatrixEnvParticle::operator int() const { return errorConvert("int");}
