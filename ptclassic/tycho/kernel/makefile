@@ -53,6 +53,7 @@ ITCL_SRCS = \
 	CircularList.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
+	DAG.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
 	Displayer.itcl \
