@@ -83,5 +83,8 @@ test_graphics: $(TCL_SRCS) $(ITCL_SRCS)
 	tycho -e testRevControl.itcl
 	tycho -e testWidgets.itcl
 
+test_exec_msg:
+	@echo "This message is used to test the Exec class"
+
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
