@@ -357,18 +357,23 @@ int PTcl::connect(int argc,char** argv) {
 // empty list if it is not connected. The full name of each port is
 // returned. If the given port is the alias of a galaxy port and the
 // -deep option is not given, then the galaxy port name is reported as
-// {*aliasUp* _portname_}. If the -deep option is given, then a star port
-// is always returned, never a galaxy port. That is, the star port to
+// {*aliasUp* _portname_}. It is possible for a multiport to have both
+// an upward alias and a connection, in which case, both are returned.
+// If the -deep option is given, then star ports
+// are always returned, never galaxy ports. That is, the star port to
 // which the given port is ultimately connected to is returned. If the
 // name of a multiport is given, this method returns a list of all the
 // ports connected to the multiport.
 //
 // NOTE: If the far side port is a multiport, then the specific port
 // within that multiport to which we are connected is returned.  This
-// is not exactly the information that would be needed to recreate the
-// topology (by issuing connect commands) since the connect command wants
-// to be given the multiport name, not the specific inside port name.
-// However, it is exactly the information needed to disconnect.
+// is probably not exactly the information originally used to create the
+// connection, since the connect command accepts a multiport name, and
+// creates ports within that multiport as needed.
+// However, the information returned here is exactly what is needed to
+// recreate the exact the topology, since if a multiport is given in a
+// connect command, there is no control over which specific port is used
+// for the connection.
 //
 int PTcl::connected(int argc,char** argv) {
     int deep=0;
@@ -393,26 +398,36 @@ int PTcl::connected(int argc,char** argv) {
         res << fullName(gp->aliasFrom());
         addResult(res);
     }
-    // Translate aliases downward, if any, to get the real port with
-    // a connection
-    while (gp->alias()) gp = gp->alias();
-
-    // FIXME: What does this do if we are connected to a node?
     if (gp->isItMulti()) {
         // The port is a multiport.  Iterate over its constituent ports.
         MPHIter next(*((MultiPortHole*) gp));
         PortHole* ph;
         while ((ph = next++) != 0) {
-            // FIXME: skip if there is an aliasFrom
-            if (getFarPorts(ph,deep) != TCL_OK) return TCL_ERROR;
+            // Skip the port if it was already reported above as an alias.
+            if (deep || !ph->aliasFrom()) {
+                // Translate aliases downward, if any, to get the real
+                // port with a connection.
+                // NOTE: The cast assumes that a PortHole is always aliased
+                // to a PortHole.
+                while (ph->alias()) ph = (PortHole*)ph->alias();
+
+                // FIXME: What does this do if we are connected to a node?
+                if (getFarPorts(ph,deep) != TCL_OK) return TCL_ERROR;
+            }
         }
-        return TCL_OK;
     } else {
         // The port is a simple port.
-        // NOTE: The following cast assumes that only PortHole and
-        // MultiPortHole are derived from GenericPort.
-        return getFarPorts((PortHole*)gp,deep);
+        // Skip the port if it was already reported above as an alias.
+        if (deep || !gp->aliasFrom()) {
+            // Translate aliases downward, if any, to get the real
+            // port with a connection.
+            while (gp->alias()) gp = gp->alias();
+            // NOTE: The following cast assumes that only PortHole and
+            // MultiPortHole are derived from GenericPort.
+            return getFarPorts((PortHole*)gp,deep);
+        }
     }
+    return TCL_OK;
 }
 
 /////////////////////////////////////////////////////////////////////////////
