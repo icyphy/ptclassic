@@ -74,6 +74,11 @@ Particle& IntSample :: operator = (const Particle& p)
 	return *this;
 }
 
+int IntSample :: operator == (const Particle& p) {
+	if (!typesEqual(p)) return 0;
+	return data == int(p);
+}
+
 DataType IntSample :: readType() const {return INT;}
 IntSample :: operator int () const {return data;}
 IntSample :: operator double () const {return double(data);}
@@ -116,6 +121,12 @@ Particle& FloatSample :: operator = (const Particle& p)
 	}
 	return *this;
 }
+
+int FloatSample :: operator == (const Particle& p) {
+	if (!typesEqual(p)) return 0;
+	return data == double(p);
+}
+
 
 
 DataType FloatSample :: readType() const {return FLOAT;}
@@ -161,6 +172,14 @@ Particle& ComplexSample :: operator = (const Particle& p)
 	}
         return *this;
 }
+
+int ComplexSample :: operator == (const Particle& p) {
+	if (!typesEqual(p)) return 0;
+	Complex pdata = Complex(data);
+	return data.real() == pdata.real() &&
+		data.imag() == pdata.imag();
+}
+
 
 DataType ComplexSample :: readType() const {return COMPLEX;}
  
