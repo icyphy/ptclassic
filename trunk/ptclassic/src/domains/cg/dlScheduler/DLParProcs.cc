@@ -27,19 +27,12 @@ Date of last revision:
 // candidate processors
 IntArray* candidate;
 
-DLParProcs :: DLParProcs(int pNum, BaseMultiTarget* t) : 
-			 ParProcessors(pNum, t) {
+DLParProcs :: DLParProcs(int pNum, BaseMultiTarget* t) :ParProcessors(pNum,t) {
 	 LOG_NEW; schedules = new UniProcessor[pNum];
 }
 
 DLParProcs :: ~DLParProcs() {
-
 	LOG_DEL; delete [] schedules;
-
-	EGNode* dn;
-	while ((dn = (EGNode*) commList.takeFromFront()) != 0) {
-		LOG_DEL; delete dn;
-	}
 }
 
 UniProcessor* DLParProcs :: getProc(int num) { return &(schedules[pId[num]]); }
@@ -47,7 +40,6 @@ UniProcessor* DLParProcs :: getProc(int num) { return &(schedules[pId[num]]); }
 void DLParProcs :: initialize(DLGraph* g) 
 {
 	ParProcessors :: initialize();
-	commList.initialize();
 
 	// member initialization
 	myGraph = g;
@@ -138,7 +130,7 @@ void DLParProcs :: scheduleIPC (DLNode* pd, int destP) {
 			int c = mtarget->commTime(srcP,destP,df->samples(),2);
 			cnode->setExTime(c);
 			mtarget->scheduleComm(cnode,when);
-			commList.append(cnode);
+			SCommNodes.append(cnode);
 		}
 	}
 
@@ -154,7 +146,13 @@ void DLParProcs :: scheduleIPC (DLNode* pd, int destP) {
 void DLParProcs :: scheduleSmall(DLNode* pd)
 {
 	// examine candidate processors
-	candidate = mtarget->candidateProcs(this);
+	if (OSOPreq() && pd->invocationNumber() > 1) {
+		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
+		candidate->elem(0) = firstN->getProcId();
+		candidate->truncate(1);
+	} else {
+		candidate = mtarget->candidateProcs(this);
+	}
 
 	// compare the earliest schedule time with candidate processors.
 	// Choose the processor index giving earliest firing time.
@@ -232,8 +230,10 @@ void DLParProcs :: assignNode(DLNode* pd, int destP, int tm) {
 		proc->schedAtEnd(pd,tm,leng);
 	} else {
 		// schedule in the middle (idle slot)
-		if (!(proc->schedInMiddle(pd,tm,leng)))
+		int when = proc->filledInIdleSlot(pd,tm); 
+		if (when < 0)
 			Error::abortRun("no enough idle slot!");
+		else proc->schedInMiddle(pd,when,leng);
 	}
 }
 	

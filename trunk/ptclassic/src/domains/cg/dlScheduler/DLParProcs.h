@@ -62,8 +62,6 @@ protected:
 
 private:
 
-	EGNodeList commList;
-
 //////////////////  schedule aids ///////////////////////
 
 	// sortest list of finish times of the ancestors
