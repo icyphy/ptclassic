@@ -4,21 +4,17 @@
 #pragma interface
 #endif
 
-#include "Scheduler.h"
-#include "Galaxy.h"
+#include "DynDFScheduler.h"
 #include "DDFStar.h"
-#include "DataStruct.h"
 #include "IntState.h"
 #include "RecurScheduler.h"
 #include "defConstructs.h"
-
-class DDFTarget;
 
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990,1991,1992,1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -55,13 +51,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	// DDFScheduler
 	////////////////////////////
 
-class DDFScheduler : public Scheduler {
+class DDFScheduler : public DynDFScheduler {
 public:
 	// set parameters for scheduler
 	void setParams(int numOver, double pd, int maxbsize, int restructure) {
-		numOverlapped = numOver;
-		schedulePeriod = pd;
-		maxToken = maxbsize;
+		DynDFScheduler::setParams(numOver,pd,maxbsize);
 		restructured = !restructure;
 		if (restructured) canDom = DDF;
 	}
@@ -72,61 +66,21 @@ public:
 	// and initializes all the blocks.
 	void setup();
 
-	// The run function resumes the run where it was left off.
-	int run();
-
-	StringList displaySchedule() ;
-
 	// Constructor sets default options
 	DDFScheduler ();
 	~DDFScheduler ();
-
-	// Timing control funcs
-	void setStopTime (double limit);
-	void resetStopTime (double v);
-	double getStopTime() { return double(stopTime);}
-
-	// scheduler Period : interface with timed domain.
-	double schedulePeriod;
 
 	// check whether the domain is predefined construct or not.
 	int isSDFType()	;
 
 	// reset "restructured" flag for DDFSelf star
-	void resetFlag();
+	void resetFlag() {
+		restructured = FALSE;
+		DynDFScheduler::resetFlags();
+	}
+protected:
+	void initStructures();
 private:
-	// explicit stopping condition
-	int stopTime;
-
-	// check whether a star is runnable. Also enable lazy evaluation.
-	int isRunnable(DataFlowStar&);
-
-	// lazy evaluation
-	int lazyEval(DataFlowStar*);
-	int checkLazyEval(DataFlowStar *);
-
-	// list of source blocks.
-	SequentialList sourceBlocks;
-
-	// the number of firing all sources so far
-	int numFiring;
-
-	// number of overlapped execution allowed.
-	int numOverlapped;
-
-	// capacity of arc
-	int maxToken;
-
-	// number of stars in the galaxy
-	int galSize;
-
-	// recursion depth for lazy evaluation
-	int lazyDepth;
-
-	// string for error msgs
-	StringList msg;
-
-// Advanced features ......................
 	// candidate domain
 	int canDom;
 
@@ -152,9 +106,6 @@ private:
 	// flag to be set when restructured.
 	short restructured;
 
-// End of Advanced features ..................
-	// flag for arc overflow
-	short overFlow;
 };
 
 #endif
