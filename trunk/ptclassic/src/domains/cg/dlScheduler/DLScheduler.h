@@ -59,18 +59,12 @@ public:
   	// main body of the schedule
   	int scheduleIt();
 
-	// Need to redefine this function for now.
-	// Will be removed later.
-	int createSubGals();
-
 protected:
    	// The aggregate firing that represents the
    	// schedule.
    	DLParProcs* parSched;
 
 private:
-	//temporal hack to prevent createSubGals it wormhole exists
-	int wormFlag;
 	int noOverlap;	// set if overlapComm. is disallowed.
 
 	DLGraph* myGraph;
