@@ -38,6 +38,9 @@ TCLTK_SRC=$(PTOLEMY)/src/tcltk
 # Location of the architecture specific build directory.
 TCLTK_OBJ=$(PTOLEMY)/obj.$(ARCH)/tcltk
 
+# where to install binaries
+BINDIR=$(PTOLEMY)/bin.$(ARCH)
+
 # No changes should be necessary below this line
 #---------------------------------------------------------
 
@@ -93,6 +96,9 @@ $(TCL_OBJ):
 $(TCLTK_OBJ):
 	mkdir $(TCLTK_OBJ)
 
+$(BINDIR)/tclsh:
+	ln -s $(TCL_DEST)/bin/tclsh $@ 
+
 # Build tcl
 tcl: $(TCL_OBJ)/libtcl.a
 $(TCL_OBJ)/libtcl.a: $(TCL_OBJ)
@@ -100,10 +106,10 @@ $(TCL_OBJ)/libtcl.a: $(TCL_OBJ)
 	(cd  $(TCL_OBJ); $(MAKE) all)
 
 # Install tcl
-install_tcl: $(TCL_DEST)/lib/libtcl.a
+install_tcl: $(TCL_DEST)/lib/libtcl.a $(BINDIR)/tclsh
 $(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
 	(cd  $(TCL_OBJ); $(MAKE) install)
-
+	
 $(TCLTK_DEST):
 	mkdir $(TCLTK_DEST)
 
