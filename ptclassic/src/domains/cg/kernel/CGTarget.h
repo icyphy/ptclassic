@@ -165,6 +165,9 @@ public:
     // set inheritFlag;
     void amInherited() { inheritFlag = TRUE; }
 
+    // do I support the given star type?
+    int support(Star* s); 
+
 protected:
     // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's

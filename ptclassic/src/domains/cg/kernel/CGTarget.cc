@@ -454,3 +454,9 @@ void CGTarget :: switchCodeStream(Block* b, CodeStream* cs) {
 			s->myCode = cs;
 	}
 }
+
+// do I support a given star
+int CGTarget :: support(Star* s) {
+	return (s->isA(starType()) || s->isA(auxStarClass()));
+}
+
