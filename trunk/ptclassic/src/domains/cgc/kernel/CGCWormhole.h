@@ -49,10 +49,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGCWormhole : public CGWormBase, public CGCStar {
 
 public:
-	void setup();
-	void go();
-	void wrapup() { /* target->wrapup(); */ }
-
 	// Constructor
 	CGCWormhole(Galaxy& g, Target* t = 0);
 	~CGCWormhole();
@@ -88,9 +84,6 @@ public:
 
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
-
-	// Redefine: return the profile when "pNum" processors are assigned.
-	Profile* getProfile(int pNum);
 };
 
         //////////////////////////////////////////
