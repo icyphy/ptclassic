@@ -62,6 +62,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "logNew.h"
+#include "Error.h"
 #include <string.h>
 
 extern "C" double pow(double,double);
@@ -87,7 +88,13 @@ char* subCharByString(const char *str, char target, const char *substr);
 // to dynamic storage which should be freed using delete [] when no
 // longer used.
 inline char* savestring (const char* txt) {
-	INC_LOG_NEW; return strcpy (new char[strlen(txt)+1], txt);
+  if (txt) {
+    INC_LOG_NEW; return strcpy (new char[strlen(txt)+1], txt);
+  }
+  else {
+    Error::warn("savestring() passed NULL instead of a string");
+    return strcpy (new char[strlen("")+1], "");
+  }
 }
 
 // Save the string in a systemwide hash table, if it is not there
