@@ -90,7 +90,7 @@ The editors provide capabilities similar to those of emacs modes,
 although the potential goes beyond what emacs can do because of
 the future inclusion of graphical elements.
 <p>
-The editors and shells included in release 0.1.1 are:
+The editors and shells included in release 0.2 are:
 <p>
 <ul>
 	<li> C and C++ editors.  These color and fill comments and
@@ -119,18 +119,14 @@ The editors and shells included in release 0.1.1 are:
 	<li> Ptlang editor.  This is an editor for designing universes in
 	Ptolemy.
 
-	<li> Java editor.  This editor is new in 0.1.1.  It includes a
-	menu choice that will run <CODE>appletviewer</CODE>.
+	<li> Java editor.  It includes a menu choice that will run
+	<CODE>appletviewer</CODE>.
 	
 	<li> Esterel editor. 
 	
 	<li> Matlab and Mathematica consoles.  These will only appear
 	if the appropriate Tcl extensions for interaction with Matlab
 	and Mathematica have been installed.
-	
-	<li> CommandShell console.  This tool allows the user to type
-	commands at their shell (sh, tcsh etc.).  The CommandShell is
-	new in 0.1.1 is a prototype and has serious bugs.
 	
 </ul>
 <H3>Graphical Editors</H3>
@@ -140,7 +136,7 @@ The editors and shells included in release 0.1.1 are:
 	<li> EditForest - Forest Editor (a forest is a collection of trees)
 	<li> EditPalette - Prototype of a Ptolemy Palette editor
 	<li> EditSTD - State Transition Diagram editor
-	<li> GanttView - Gantt Chart Viewer (Not included in Tycho0.1.1)
+	<li> GanttView - Gantt Chart Viewer (Not included in Tycho0.2)
 	<li> ProfileTcl - Tcl Profiler that uses the TclX profiler.
 	<li> SlateView - Slate viewer
 </ul>
@@ -204,6 +200,8 @@ itcl to html.
 <H2>Backward compatibility issues between 0.1.1 and 0.2</H2>
 
 <UL>
+
+<LI> Tycho0.2 requires Itcl2.2.
 <LI> Tycho0.2 uses the newer <CODE>pitcl</CODE> interface, which is not
 backward compatible with <CODE>ptcl</CODE>.  In Ptolemy0.6,
 <CODE>tycho -ptiny</CODE> under stood <CODE>ptcl</CODE> commands.
