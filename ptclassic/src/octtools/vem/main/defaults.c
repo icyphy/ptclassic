@@ -58,8 +58,8 @@ static char SccsId[]="$Id$";
 #include "defaults.h"		/* Self declaration           */
 #include <pwd.h>		/* Passwd file for tilde      */
 #include <ctype.h>		/* Character types            */
-#include "X11/Xutil.h"		/* X11 utilities              */
-#include "X11/Intrinsic.h"	/* X Toolkit definitions      */
+#include <X11/Xutil.h>		/* X11 utilities              */
+#include <X11/Intrinsic.h>	/* X Toolkit definitions      */
 #include "st.h"			/* Hash table package         */
 #include "message.h"		/* Message display system     */
 #include "windows.h"		/* For toWnOption             */
