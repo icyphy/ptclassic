@@ -3,7 +3,7 @@
 # Makefile for sect1 of the Almagest
 #
 
-PTOLEMY       = /usr/users/ptolemy
+PTOLEMY       = ../..
 PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
 HEADER        = $(PTOLEMY)/doc/headers/together
 MAINSEC	      = overall
