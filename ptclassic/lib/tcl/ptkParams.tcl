@@ -1,6 +1,6 @@
 # Ptolemy edit-parameters dialog box--tcl routines
 # Author: Wei-Jen Huang
-# Version: $Id$
+# $Id$
 #
 # Copyright (c) 1990-1993 The Regents of the University of California.
 # All rights reserved.
@@ -91,6 +91,8 @@ proc ed_MkEntryButton {frame label} {
 			-command ed_Dummy -relief flat] right \
 		[button $frame.left -bitmap @$ptolemy/tcl/lib/left.xbm \
 			-command ed_Dummy -relief flat] right
+    $frame.right config -fg [lindex [$frame.right config -bg] 4]
+    $frame.left config -fg [lindex [$frame.left config -bg] 4]
     bind $frame.left <Button-1> "tk_butDown %W
       $frame.entry view \[expr \[$frame.entry index @0\]-1\]
       after 200 ed_ShiftButtonViewLeft %W $frame.entry"
@@ -591,7 +593,6 @@ proc ptkEditParams {facet number} {
     $c create window 0 0 -anchor nw -window $f -tags frameWindow
     set mm [winfo fpixels $c 1m]
 #    bind $c <Configure> "ed_ConfigFrame $top"
-    bind $f.par <Configure> "ed_ConfigCanvas $top $facet $number"
 
     ptkRecursiveBind $top <Return> "ed_Apply $facet $number
                                 $u.close invoke"
@@ -614,6 +615,17 @@ proc ptkEditParams {facet number} {
 		ed_RemoveParam $facet $number $top $u
 		$u.remove config -relief raised"
     }
+
+
+    wm withdraw $top
+    update
+    ed_ConfigCanvas $top $facet $number
+    wm deiconify $top
+#    puts [winfo reqheight $u]
+#    puts [winfo reqheight $top.header]
+    update
+    bind $f.par <Configure> "ed_ConfigCanvas $top $facet $number"
+
 }
 
 proc ed_UpdateOnMReturn {facet number} {
@@ -798,8 +810,8 @@ proc ed_ConfigCanvas {top facet number} {
 #    set maxHeight [winfo fpixels $c 7.5i]
     set maxWidth [winfo fpixels $c 7.5i]
     set maxHeight [winfo fpixels $c 8.5i]
-    set scrollWidth [expr [winfo width $f]+2*$mm]
-    set scrollHeight [expr [winfo height $f]+2*$mm]
+    set scrollWidth [expr [winfo reqwidth $f]+2*$mm]
+    set scrollHeight [expr [winfo reqheight $f]+2*$mm]
     set canvWidth $scrollWidth
     set canvHeight $scrollHeight
     set existh [winfo exist $top.f.hscroll]
@@ -831,8 +843,19 @@ proc ed_ConfigCanvas {top facet number} {
     $c configure -width $canvWidth -height $canvHeight
     if {[string first . $canvWidth] != -1} {
 	    scan $canvWidth "%d." intWidth
+	    incr intWidth
     } else { set intWidth $canvWidth }
+#puts num
+   
+    set topHeight [expr $canvHeight+[winfo reqheight $top.header]+[
+	winfo reqheight $top.b]]
+    if {[string first . $topHeight] != -1} {
+	    scan $topHeight "%d." intHeight
+	    incr intHeight
+    } else { set intHeight $topHeight }
     wm minsize $top $intWidth 0
     wm maxsize $top $intWidth [winfo screenheight .]
+    wm geometry $top ${intWidth}x${intHeight}
+#puts "$intWidth $intHeight"
 }
 
