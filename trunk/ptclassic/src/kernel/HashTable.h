@@ -56,6 +56,11 @@ or copy constructor are used.  Finally, "const" is used where appropriate.
 
 #include "type.h"
 
+// Certain compilers need to have destructors protected
+#if defined(aix_xlC) || (defined(hpux) || defined(__hpux) && !defined(__GNUC__)
+#define NEED_PROTECT_HASHENTRY_DESTRUCTOR
+#endif
+
 // HashEntry is used for each entry in the table.
 
 class HashEntry {
@@ -95,7 +100,7 @@ public:
 protected:
 	// dummy default constructor so derived classes can be made.
 	HashEntry() {}
-#ifdef aix_xlC
+#ifdef NEED_PROTECT_HASHENTRY_DESTRUCTOR
 	// destructor frees the stringkey string.  Only HashTable
 	// may delete a HashEntry.
 	~HashEntry();
@@ -105,7 +110,7 @@ private:
 	// constructor can be invoked only by HashTable class
 	HashEntry(HashTable* t,HashEntry** b,const char* k);
 
-#ifndef aix_xlC
+#ifndef NEED_PROTECT_HASHENTRY_DESTRUCTOR
 	// destructor frees the stringkey string.  Only HashTable
 	// may delete a HashEntry.
 	~HashEntry();
