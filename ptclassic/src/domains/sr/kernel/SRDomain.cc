@@ -37,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "StringState.h"
 #include "SRScheduler.h"
-#include "SRStaticScheduler.h"
 #include "SRRecursiveScheduler.h"
 #include "SRWormhole.h"
 #include "SRGeodesic.h"
