@@ -801,6 +801,11 @@ genDef ()
 	fprintf (fp, "#ifndef _%s_h\n#define _%s_h 1\n", fullClass, fullClass);
 	fprintf (fp, "// header file generated from %s by %s\n",
 		 inputFile, progName);
+
+/* Special GNU pragmas for increased efficiency */
+	fprintf (fp, "\n#ifdef __GNUG__\n#pragma once\n");
+	fprintf (fp, "#pragma interface\n#endif\n\n");
+
 /* copyright */
 	if (objCopyright)
 		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
@@ -875,6 +880,9 @@ genDef ()
 /* copyright */
 	if (objCopyright)
 		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
+
+/* special GNU pragma for efficiency */
+	fprintf (fp, "\n#ifdef __GNUG__\n#pragma implementation\n#endif\n\n");
 
 /* ID block */
 	if (idBlock)
