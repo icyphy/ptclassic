@@ -239,3 +239,11 @@ PortHole& MultiOutDEPort :: newPort () {
 	LOG_NEW; OutDEPort& p = *new OutDEPort;
 	return installPort(p);
 }
+
+int MultiInDEPort :: removePort(PortHole * del_port_p) {
+       return ports.remove(del_port_p);
+}
+
+int MultiOutDEPort :: removePort(PortHole * del_port_p) {
+      return ports.remove(del_port_p);
+}

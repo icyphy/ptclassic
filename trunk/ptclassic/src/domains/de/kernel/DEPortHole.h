@@ -228,6 +228,11 @@ public:
 
 	// destructor
 	~MultiInDEPort();
+
+        // additional functions
+
+        // remove a port form the list
+        int removePort(PortHole*);
 };
  
  
@@ -243,6 +248,9 @@ public:
 
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
+
+        // Remove a port form the list
+        int removePort(PortHole*);
 };
 
 // Iterators for MultiDEPorts -- they aren't required but make coding
