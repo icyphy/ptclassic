@@ -28,12 +28,12 @@ should be processed using each set of coefficients.  The <i>order</i>
 parameter tells how many coefficients there are.
 The transfer function of the filter is
 <pre>
-H(z) ~=~ 1 over { 1 ~-~ z sup -1 D(z) }
+H(z) = 1/(1 - z<sup>-1</sup>D(z))
 </pre>
 where <i>D</i>(<i>z</i>) is specified by the externally supplied coefficients.
 Let
 <pre>
-D(z) ~=~ d sub 1 ~+~ d sub 2 z sup -1 ~+~ ... ~+~ d sub M z sup M-1 ~.
+D(z) = d<sub>1</sub> + d<sub>2</sub>z<sup>-1</sup> + ... + d<sub>M</sub>z<sup>M-1</sup>.
 </pre>
 Then <i>d <sub>i</sub></i> is the <i>i <sup>th</sup></i> coefficient supplied on the
 <i>coefs</i> input.
