@@ -39,8 +39,6 @@ This is a local include file for useful macros and definitions.
 #define RAW_PTR char *
 #endif
 
-/* boolean data type */
-typedef int boolean;
 #define TRUE	1
 #define FALSE	0
 
