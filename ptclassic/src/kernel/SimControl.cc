@@ -39,6 +39,12 @@ for example.
 #ifndef __GNUG__
 #define SignalHandler SIG_PF
 #define SignalIgnore SIG_IGN
+#else
+#ifdef hpux
+// on hp-ux, use pre-installed signal.h on gnu
+typedef void(*SignalHandler)(int);
+#define SignalIgnore SIG_IGN
+#endif
 #endif
 
 #include "SimAction.h"

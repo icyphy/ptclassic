@@ -81,8 +81,10 @@ static void openLog () {
 		perror (logFileName);
 		return;
 	}
+#ifndef USG
 	// buffer it by lines.
 	setlinebuf (logfd);
+#endif
 }
 
 // operator new -- allocate memory
