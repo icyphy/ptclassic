@@ -273,7 +273,7 @@ extern "C" {
 		  Error::warn(*this, "Error when terminating connection ",
 			      "to the Matlab kernel.");
 		}
-		free( matlabInputMatrices );
-		free( matlabOutputMatrices );
+		if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
+		if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
 	}
 }
