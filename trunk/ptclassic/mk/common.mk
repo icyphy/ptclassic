@@ -60,6 +60,29 @@ whatToBuild:	all
 .c.o:
 	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
+# The optimizer in g++-2.7.2 has a bug that we workaround by turning
+# off the optimizer.  The problem is that when the optimizer is turned on, 
+# certain files end up needing  operator= or a copy constructor from 
+# a parent class.  Unfortunately, the parent class does not define what
+# is needed
+#
+# The following files use these two rules:
+#  de/tcltk/stars/make.template
+#  de/stars/make.template
+#  cg56/stars/make.template
+#  cp/stars/make.template (cp domain is present only on sun4)
+#  cp/infopad/stars/make.template (cp domain is present only on sun4)
+#  sdf/matlab/stars/make.template
+#
+# We include this rule in common.mk rather than config-g++.mk so that
+# we can use any architecture specific variables in the
+# UNOPTIMIZED_COMPILE_RULE.  Having this rule in config-g++.mk means
+# that we don't see architecture dependent variables.
+#
+UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
+
+UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) -I$(VPATH) $(INCL) -c 
+
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
 # bin.$(PTARCH) directory, so we check to see if there is a ptlang in the

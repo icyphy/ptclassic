@@ -46,34 +46,32 @@ RANLIB = true
 # Use gcc everywhere including in octtools
 CC =		gcc
 
-# Using GNU make conditionals causes havoc while bootstrapping gcc,
-# so we don't use them here, however, this is what the code would look like
-
-# common.mk looks at this variable to decide how to build shared libraries
-#USE_SHARED_LIBS = no
-#
-#ifeq ($(USE_SHARED_LIBS),yes) 
-# Use Position Independent Code to build shared libraries
-# Not yet supported on Solaris2 with g++
-#C_SHAREDFLAGS =	-fPIC
-#CC_SHAREDFLAGS =	-fPIC
-# mk/userstars.mk uses these vars
-#USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
-#USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
-#LIBSUFFIX =		so
-#endif
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	
 #-Wsynth is new in g++-2.6.x
 WARNINGS =	-Wall -Wcast-qual -Wsynth
-MULTITHREAD =	-D_REENTRANT
-# Define PTSOL2_4 if you are on Solaris2_4
-LOCALFLAGS =    -DPTSOL2_4
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
+# Define PTSOL2_4 if you are on Solaris2_4.  config-sol2.5.mk defines ARCHFLAGS
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
+LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe -fno-for-scope 
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
-
+LOCALCFLAGS =	$(LOCALCCFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 #
 # Variables for the linker
 #

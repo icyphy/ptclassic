@@ -43,12 +43,32 @@ OCT_CC =	gcc -fwritable-strings
 # $CPLUSPLUS might be something like g++-2.7.2, which makes it hard to check
 USE_GPLUSPLUS = yes
 
-# Compiler flags
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
+
 # -Wsynth is new in g++-2.6.x
-# Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
+# Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-GPPFLAGS = -g -Wall -Wcast-qual -Wsynth $(MEMLOG)
-CFLAGS = -g
+WARNINGS =	-Wall -Wsynth #-Wcast-qual 
+LOCALCCFLAGS =	-g -fno-for-scope
+LOCALCFLAGS = 	$(LOCALCCFLAGS)
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 # Itcl-2.0 need -fwritable-strings, or tclsh will segv in ItclFollowNamespPath
 WRITABLE_STRINGS_CFLAGS = -fwritable-strings
 
@@ -92,19 +112,3 @@ OCTTOOLS_MM_LIB=
 # Used by cgwork.mk
 INC_LINK_FLAGS =	-fPIC
 
-# The optimizer in g++-2.7.2 has a bug that we workaround by turning
-# off the optimizer.  The problem is that when the optimizer is turned on, 
-# certain files end up needing  operator= or a copy constructor from 
-# a parent class.  Unfortunately, the parent class does not define what
-# is needed
-#
-# The following files use these two rules:
-#  de/tcltk/stars/make.template
-#  de/stars/make.template
-#  cg56/stars/make.template
-#  cp/stars/make.template (cp domain is present only on sun4)
-#  cp/infopad/stars/make.template (cp domain is present only on sun4)
-#  sdf/matlab/stars/make.template
-UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
-
-UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) -DUSG -g $(WARNINGS) -I$(VPATH) $(INCL) -c 

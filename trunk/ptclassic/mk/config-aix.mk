@@ -55,23 +55,40 @@ CC =      gcc
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC =        gcc -fwritable-strings
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 #OPTIMIZER =   -O2
 OPTIMIZER =
 WARNINGS =     -Wall -Wcast-qual
+
 # If you set debugging, the expect long link times ~10 hours and large binaries
 DEBUGFLAG =	#-g
 
-GPPFLAGS =     $(DEBUGFLAG) -DUSG -mminimal-toc $(CC_STATIC) \
-			$(MEMLOG) $(WARNINGS) $(OPTIMIZER)
-# If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	$(DEBUGFLAGS) -DPOSIX -DUSG -mminimal-toc \
-			$(CC_STATIC) $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+CC_STATIC = #  -static
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
+LOCALCCFLAGS = 	$(DEBUGFLAG) -DUSG -mminimal-toc -fno-for-scope $(CC_STATIC)
+GPPFLAGS =     	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) $(ARCHFLAGS) \
+			$(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-DPOSIX $(LOCALCCFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) $(ARCHFLAGS) \
+			$(LOCALCFLAGS) $(USERFLAGS)
 
 #
 # Variables for the linker
 #
 
-CC_STATIC = #  -static
 
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below

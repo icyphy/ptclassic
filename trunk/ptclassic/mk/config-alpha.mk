@@ -67,14 +67,31 @@ CC =		gcc
 # errors sys/types.h
 OCT_CC =	gcc -fwritable-strings
 
+
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER =	-O2
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
 # -pipe might not work under DEC Alpha 'as'
-LOCALFLAGS =	-fno-for-scope
+LOCALCCFLAGS =	-g -fno-for-scope
 WARNINGS =	-Wall -Wcast-qual
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCALFLAGS)
-# If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCALFLAGS)
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	$(LOCALCCFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
 # system libraries for linking .o files from C files only
 # -lots is needed to resolve _OtsDivide64Unsigned which is in the Matlab lib.

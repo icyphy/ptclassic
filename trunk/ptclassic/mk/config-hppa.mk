@@ -75,21 +75,39 @@ LEX =		flex
 HP_AS =		/usr/ccs/bin/as
 # Use gcc everywhere, including octtools
 CC =		gcc
+
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER =	-O2
 #-Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 
 # Misc. flags for OS version, if you are under HPUX9.x:
-#MISCCFLAGS =	-DUSE_SHLLOAD
+#ARCHFLAGS =	
 # If you are under HPUX10.x:
-MISCCFLAGS =	-DPTHPUX10 -DUSE_SHLLOAD
+ARCHFLAGS =	-DPTHPUX10 
+# Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
+LOCALCCFLAGS =	-g -DUSG -DUSE_SHLLOAD -fno-for-scope
 
-# Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
-GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope \
-		$(MISCCFLAGS)
-# If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MISCCFLAGS)
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-g -DUSG
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 
 
 #

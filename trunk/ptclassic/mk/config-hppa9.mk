@@ -50,7 +50,7 @@ include $(ROOT)/mk/config-hppa.mk
 # As of 4/95 the linker patch was PHSS_5083* for hpux9.x
 
 # Misc. flags for OS version, if you are under HPUX9.x:
-MISCCFLAGS =	-DUSE_SHLLOAD
+ARCHFLAGS =
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 # If you are running under HPUX9.x, you may want to 
