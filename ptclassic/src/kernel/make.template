@@ -115,6 +115,7 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  ParticleStack.h \
  SimAction.h \
  dataType.h \
+ ieee.h \
  isa.h \
  streamCompat.h \
  type.h
