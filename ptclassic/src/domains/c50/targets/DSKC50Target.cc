@@ -68,7 +68,7 @@ void DSKC50Target :: initStates() {
 	// TCR, PRD, TA, RA, TA', RA', TB, RB, AIC control reg.
 
 	bMemMap.setInitValue("768-1270");
-	uMemMap.setInitValue("2432-6848");
+	uMemMap.setInitValue("2432-6847");
 
 	// the u and b memory maps should be settable since
 	// u/b memory are the same as far as teh assembler is
