@@ -23,7 +23,62 @@ and a quote character for strings.
 #include "Tokenizer.h"
 #include <std.h>
 #include <stdio.h>
+#include <stream.h>
 
+// Constructors
+// for some reason, g++ has trouble when these are included in the
+// class definition: complains about stray \ characters.
+
+// Common part of constructors
+void
+Tokenizer::init() {
+	stack = NULL;
+	depth = 0;
+	ungot = 0;
+	line_num = 1;
+	whitespace = " \n\t";
+	comment_char = '#';
+	quote_char = '\"';
+	escape_char = '\\';
+}
+
+// This one reads from a file
+Tokenizer::Tokenizer(istream& input,char *spec="()") {
+	special = spec;
+	strm = &input;
+	curfile = "?";
+	init ();
+}
+
+// This one reads from a text buffer
+Tokenizer::Tokenizer(char* buffer,char* spec) {
+	special = spec;
+	strm = new istream(strlen(buffer), buffer);
+	curfile = "<mem>";
+	init ();
+}
+
+// This one reads from stdin (cin)
+Tokenizer::Tokenizer() {
+	special = "()";
+	strm = cin;
+	curfile = "<stdin>";
+	init ();
+}
+
+// This class saves contexts: the stream, and the name of the
+// file being read from
+
+struct TokenContext {
+	char* filename;
+	istream* savestrm;
+	int line_num;
+	TokenContext* link;
+	TokenContext(char* f,istream* s,int ln, TokenContext* l)
+		: filename(f), savestrm(s), line_num(ln), link(l) {}
+};
+
+// Function to interpret escaped characters in strings
 static slash_interp(char c) {
 	switch (c) {
 	case 'n':	return '\n';
@@ -36,35 +91,93 @@ static slash_interp(char c) {
 	}
 }
 
+void
+Tokenizer::push(istream* s,const char* f) {
+// save existing context on stack
+	stack = new TokenContext(curfile,strm,line_num,stack);
+// save filename in dynamic memory, and set curfile to it.
+	curfile = new char[strlen(f)+1];
+	strcpy (curfile,f);
+	strm = s;
+	line_num = 1;
+	depth++;
+}
+
+// close include file and return to old state
+void
+Tokenizer::pop() {
+	if (depth == 0) return;
+	TokenContext* t = stack;
+	delete strm;
+	delete curfile;
+	strm = t->savestrm;
+	curfile = t->filename;
+	line_num = t->line_num;
+	stack = t->link;
+	delete t;
+	depth--;
+}
+
 // Open a new file.
 // We use stdio to open the file to avoid error messages.  Return 1
 // for success, 0 for failure.
 Tokenizer::fromFile(const char *filename) {
-	if (savestrm) return 0;
 	FILE *stdstrm = fopen (filename, "r");
 	if (stdstrm == NULL) return 0;
-	savestrm = strm;
-	strm = new istream(stdstrm);
+	push (new istream(stdstrm),filename);
 	return 1;
 }
 
-// Get the next character from the tokenizer.
+// Get the next character from the tokenizer.  Return 0 on eof, else 1.
+int
 Tokenizer::get() {
 // Get next character into c.
-// On EOF, pop up if we were within a file.
-	if (strm->eof() && savestrm) {
-		strm = savestrm;
-		savestrm = 0;
-	}
-// We return \n on an EOF so the previous token will be terminated.
-	if (strm->eof()) {
-		c = '\n';
-		return 0;
-	}
-	else {
-		strm->get(c);
+	if (ungot) {
+		c = ungot;
+		ungot = 0;
 		return 1;
 	}
+// Attempt to read a character.
+	while (1) {
+		strm->get(c);
+		if (*strm) {
+			if (c == '\n') line_num++;
+			return 1;
+		}
+		if (depth == 0) break;
+		// Just the end of an include file: pop up a level
+		pop();
+	}
+// It's really EOF.
+// We return \n on an EOF so the previous token will be terminated.
+	c = '\n';
+	return 0;
+}
+
+// skipwhite -- skip past any whitespace in the stream.  If we hit
+// eof and are in an include file, this will have the effect of popping
+// out.  This is to allow the interpreter to print prompts at the right
+// time.
+void
+Tokenizer::skipwhite () {
+	if (depth == 0) return;
+	while (depth) {
+		get();
+// skip line if comment character
+		if (c == comment_char) {
+			do { get(); } while (c != '\n');
+		}
+		else if (strchr (whitespace, c) == NULL) break;
+	}
+// put back last character
+	ungot = c;
+	return;
+}
+
+// EOF check
+int
+Tokenizer::eof () const {
+	return (depth>0) ? 0 : strm->eof();
 }
 
 // get the next token.
@@ -111,7 +224,7 @@ top:
 		if (strchr(whitespace, c))
 			break;
 		if (strchr(special, c) || c == comment_char || c == quote_char) {
-			strm->unget(c);
+			ungot=c;
 			break;
 		}
 		*s++ = c;
@@ -127,10 +240,6 @@ top:
 // If we're in a subfile, we close it.
 void
 Tokenizer::flush() {
-	if (savestrm) {
-		delete strm;	// close file
-		strm = savestrm;
-		savestrm = 0;
-	}
+	while (depth) pop ();
 	while (c != '\n') get();
 }
