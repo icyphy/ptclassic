@@ -32,6 +32,7 @@ CCS_WITH_H_FILES=\
  AutoFork.cc \
  AutoForkNode.cc \
  Block.cc \
+ Clock.cc \
  Code.cc \
  ComplexArrayState.cc \
  ComplexState.cc \
@@ -77,6 +78,7 @@ CCS_WITH_H_FILES=\
  StringList.cc \
  StringState.cc \
  Target.cc \
+ TimeVal.cc \
  Tokenizer.cc \
  Universe.cc \
  WormConnect.cc \
