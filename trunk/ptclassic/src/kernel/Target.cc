@@ -181,6 +181,10 @@ void Target::begin() {
 	Star *s;
 	while ((s = nextStar++) != 0) s->begin();
 
+	// resetPortBuffers() in each Block, serving as a reinitialize (but
+	// still keep the data structure).
+	gal->resetPortBuffers();
+
 	// If we have child targets - invoke begin methods
 	if (!nChildren) return;
 
