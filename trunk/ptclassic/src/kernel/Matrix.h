@@ -290,8 +290,8 @@ class FixMatrix: public Matrix {
   friend FixMatrix operator + (const Fix&, const FixMatrix&);
   friend FixMatrix operator + (const FixMatrix&, const Fix&);
   friend FixMatrix operator - (const FixMatrix&, const FixMatrix&);
-  friend FixMatrix operator - (const Fix&, const FixMatrix&);
-  friend FixMatrix operator - (const FixMatrix&, const Fix&);
+  friend FixMatrix operator - (Fix, const FixMatrix&);
+  friend FixMatrix operator - (const FixMatrix&, Fix);
   friend FixMatrix operator * (const FixMatrix&, const FixMatrix&);
   friend FixMatrix operator * (const Fix&, const FixMatrix&);
   friend FixMatrix operator * (const FixMatrix&, const Fix&);
