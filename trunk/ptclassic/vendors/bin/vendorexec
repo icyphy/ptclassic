@@ -13,6 +13,6 @@ if [ ! -x $PROGRAM_PATH ] ; then
 fi
 
 # We may or may not want this...comment out if you dont want it
-echo "`basename $SELF`: Running `basename $RELPATH`"
+#echo "`basename $SELF`: Running `basename $RELPATH`"
 exec $PROGRAM_PATH $*
 exit
