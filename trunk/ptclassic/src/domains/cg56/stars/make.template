@@ -101,7 +101,6 @@ PL_SRCS= \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
  CG56WrtFile.pl \
- CG56WrtFileInt.pl \
  CG56Xgraph.pl \
  CG56Xor.pl
 
