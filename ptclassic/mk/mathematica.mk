@@ -45,6 +45,11 @@
 # (b) libMLelf.a if Mathematica is installed.
 #
 
+# Set the name of the Mathematica library to libML.a if it's not set
+ifndef MATHLINKLIBNAME
+	MATHLINKLIBNAME = ML
+endif
+
 # matlabRootDir traverses the user's path, so we only run it when
 # we really need it.
 ifdef NEED_MATHEMATICADIR
@@ -53,7 +58,8 @@ ifdef NEED_MATHEMATICADIR
 	MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
 	MATHEMATICAEXT_LIB = 	-lptmathematica
 	else
-	MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMLelf
+	MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
+				-l$(MATHLINKLIBNAME)
 	endif
 	MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 endif
