@@ -47,7 +47,10 @@ that polls the SSI and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the buffer size positive.
 The interrupt buffer holds at least \fIqueueSize\fP samples; the length
 of the queue will be adjusted upward according to the number of schedule
-repetitions of the star.
+repetitions of the star.  If \fIqueueSize\fP is negative, the negative
+of \fIqueueSize\fP is used directly without adjusting it for the
+number of star repetitions.  If stereo activity is occuring,
+the queue length will be doubled.
 .PP
 .Ir "real-time violation"
 If a real-time violation occurs and the parameter
@@ -67,17 +70,17 @@ The ISR transmits samples
 out of a xmit queue, and stores received samples in a recv queue.
 The syncronous star code transfers data between these queues
 and the star portholes.  The data words in each buffer are called
-"slots", and at any given moment in time, a is either full (has
-a valid sample) or is empty.
+"slots", and at any given moment in time, a slot is either full (has
+a valid sample) or is empty.  
+If a slot has valid data in it, bit #0 is cleared, otherwise it is set.
 There are two approaches to managing the
 memory and syncronization of these queues; these are described below.
 .SH INTERUPTS: DUAL-BUFFER QUEUEING
 Two buffers are maintained:
 .Id "dual-buffer queuing"
 .Id "queuing, dual-buffer"
-a recv buffer and an xmit buffer.  The data words in a buffer are called
-"slots".  If a slot has valid data in it, bit #0 is cleared, otherwise
-it is set.  The interrupt handler reads from the SSI port, placing
+a recv buffer and an xmit buffer.
+The interrupt handler reads from the SSI port, placing
 the word in the recv buffer and clears the bit; it then takes a word
 from the xmit buffer, sets bit #0 in the slot, and writes it to the SSI.
 .PP
@@ -96,7 +99,7 @@ because it is less efficient than symmetric queuing, described below.
 .Id "queuing, symmetric"
 Symetric buffer queueing may be used only when the recv and xmit samples rates
 are the same.  In this case, we can always access the recv and xmit samples
-in pairs.  We align the two differs symmetrically in X and Y memory.
+in pairs.  We align the two buffers symmetrically in X and Y memory.
 This has the advantage that a single pointer can be used to walk through
 the queues instead of two paraell pointers.  Semaphoring of slots
 filled/empty status is easier: only one slot of the (recv/xmit)
@@ -110,6 +113,14 @@ the recv and xmit buffers together with an xmit slot following each recv slot.
 The only difficulty would be holding off semaphoring the recv slot in
 the star code: this would require using an extra register to preserve
 the address until after the xmit had been taken care of.
+.SH BUGS
+The bulk of the this star should really be implemented as a
+real-time, memory mapped I/O port star,
+with this star just providing the specific information about the SSI port.
+This would be particularly useful when doing data acquisition via the Xylinx.
+.PP
+This star should be improved to support disabling (or hiding) or the
+various ports (in order to make input-only, output-only, or mono stars).
     }
     seealso { ProPortAD, ProPortDA, MagnavoxIn, MagnavoxOut }
     hinclude { <stream.h> }
@@ -483,7 +494,7 @@ $starSymbol(ssi)_intr
 	rti
     }        
 
-    codeblock(ihdlSingleBuffer) {
+    codeblock(ihdlSymmetricBuffer) {
         move    x:$starSymbol(ssi)_recv_iptr,r0	; recv pointer
         move    x:m_rx,y0
         jset    #0,x:(r0),$label(doRecv)	; make sure recv slot empty
@@ -567,8 +578,12 @@ $label(tx_done)
 	bufLen = 0;
 	if ( doIntr ) {
 	    bufLen = int(queueSize);
-	    if ( bufLen < reps() )
-		bufLen = reps();
+	    if ( bufLen>=0 ) {
+		if ( bufLen < reps() )
+		    bufLen = reps();
+	    } else {
+		bufLen = 0 - bufLen;
+	    }
 	    if ( (doRecv1||doXmit1) && (doRecv2||doXmit2) ) 
 		bufLen = int(bufLen) * 2;
 	}
@@ -576,23 +591,23 @@ $label(tx_done)
 	config_hardware();
     }
     initCode {
-	    if ( ! doIntr ) {
-	        addCode(ssiInit);
-            } else {
-		addProcedure(ihdlPreserveRegs);
-		if ( doSymmetric ) {
-		    addProcedure(ihdlSingleBuffer);
-		} else {
-		    addProcedure(ihdlDualBuffer);
-		}
-		addProcedure(ihdlRestoreRegs);
+	if ( ! doIntr ) {
+	    addCode(ssiInit);
+	} else {
+	    addProcedure(ihdlPreserveRegs);
+	    if ( doSymmetric ) {
+		addProcedure(ihdlSymmetricBuffer);
+	    } else {
+		addProcedure(ihdlDualBuffer);
+	    }
+	    addProcedure(ihdlRestoreRegs);
 
-		addCode(interruptInit);
-		genInterruptCode(interruptRecvDataVec);
-		genInterruptCode(interruptRecvExcptVec);
-		addCode(ssiInit);
-		addCode(enableInterupts);
-            }
+	    addCode(interruptInit);
+	    genInterruptCode(interruptRecvDataVec);
+	    genInterruptCode(interruptRecvExcptVec);
+	    addCode(ssiInit);
+	    addCode(enableInterupts);
+	}
     }	   
     go {
 	if ( ! doIntr ) {
