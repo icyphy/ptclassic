@@ -41,7 +41,7 @@ The tokenizer can also switch to reading files on request.
 There is an until-end-of-line comment character (default #)
 and a quote character for strings.
 *******************************************************************/
-#ifdef __GNUG_
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
