@@ -44,7 +44,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  name {scalefactor}
 	  type {int}
 	  default {"1"}
-	  desc { Power of Two reduction of coefficients. }
+	  desc { 2^scalefactor is used to scale down the magnitude
+		   of the numerator and denominator coefficients
+		   between 0 and 1. }
 	  attributes{ A_CONSTANT|A_SETTABLE }
 	}
       	defstate {
@@ -60,44 +62,36 @@ limitation of liability, and disclaimer of warranty provisions.
 #define LOWERBOUND (-32768)
 	}
 	protected {
-	  double *inarray;
-	  double *split_result;
+	  double *inarray,*split_result;
 	  float *result;
-	  short *dennum;
-	  short *state;
-	  short *outarray;
-	  short n0;
-	  short scaledown;
+	  short *dennum,*state,*outarray;
+	  short n0,scaledown;
 	}
 	constructor {
-	  dennum = 0;
-	  state = 0;
-	  outarray = 0;
-	  inarray = 0;
-	  result = 0;
-	  scaledown = 0;
-	  n0 = 0;
-	  split_result=0;
+	  inarray=split_result=0;
+	  result=0;
+	  dennum=state=outarray=0;
+	  scaledown=n0=0;
 	}
 	destructor {
+	  free(inarray);
+	  free(split_result);
+	  free(result);
 	  free(dennum);
 	  free(state);
 	  free(outarray);
-	  free(inarray);
-	  free(result);
-	  free(split_result);
 	}
 	begin {
 	  int i;
 	  short *indexcount;
 
   	  // allocate tap and state arrays
-	       free(dennum);
-	  free(state);
 	  free(inarray);
-	  free(outarray);
-	  free(result);
 	  free(split_result);
+	  free(result);
+	  free(dennum);
+	  free(state);
+	  free(outarray);
 	  inarray = (double *) memalign(sizeof(double),sizeof(double));
 	  split_result = (double *)
 	    memalign(sizeof(double),sizeof(short)*NUMPACK);
@@ -111,7 +105,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // initialize n0
 	       n0 = ((short) scale/scaledown*numtaps[0]);
 
-	  // initialize denominator array
+	  // initialize denominator/numerator array
 	       indexcount = dennum;
 	  for(i=0;i<2;i++){
 	    *indexcount++ = ((short) scale/scaledown*dentaps[i]);
@@ -119,10 +113,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 
 	  // initialize states
-	       state[0] = 0;
-	  state[1] = 0;
-	  state[2] = 0;
-	  state[3] = 0;
+	       for(i=0;i<4;i++){
+		 state[i]=0;
+	       }
 	}
 	go {	
 	  double *outvalue,*packedfilt;
