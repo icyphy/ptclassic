@@ -273,10 +273,23 @@ void Cluster::makeNonAtomic(){
 /**********************************************************************
 		      Cluster scheduler methods
  **********************************************************************/
-void Cluster::setScheduler(Scheduler* scheduler) {
+void Cluster::setClusterScheduler(Scheduler* scheduler) {
     delete sched;
     sched = scheduler;
 }
+
+Scheduler* Cluster :: scheduler() const {
+    // if clusterScheduler() returns NULL (meaning that sched is NULL),
+    // then we call Block::scheduler; this will call the parents scheduler()
+    // method if the parent is defined. In a cluster hierarchy, this will
+    // ensure that the first parent in the hierarchy for which the scheduler
+    // is defined will be the one returned.
+    Scheduler* sch = clusterScheduler();
+    if (sch) return sch;
+    else return Block::scheduler();
+}
+
+Scheduler* Cluster :: clusterScheduler() const { return sched; }
 
 int Cluster::setTarget(Target*t) {
     if (sched && t) sched->setTarget(*t);
