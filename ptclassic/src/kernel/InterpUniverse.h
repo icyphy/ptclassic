@@ -31,12 +31,16 @@ $Id$
 #include "KnownBlock.h"
 
 class InterpUniverse : public InterpGalaxy, public Runnable {
+private:
+	const char* targName;
 public:
         InterpUniverse (const char* name = "mainGalaxy") :
-		Runnable(KnownBlock::newSched(), KnownBlock::domain(),this)
+		Runnable(0, KnownBlock::domain(),this), targName(0)
         { setBlock(name,NULL);}
-        void newSched();
+        int newTarget(const char* newTargName = 0);
+	const char* targetName() const;
 	Scheduler* mySched() const;
+	Target* myTarget() const { return target;}
 
 	// class identification
 	int isA(const char*) const;

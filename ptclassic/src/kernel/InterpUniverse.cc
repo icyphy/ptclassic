@@ -20,15 +20,23 @@ $Id$
 #endif
 
 #include "InterpUniverse.h"
+#include "KnownTarget.h"
+#include "miscFuncs.h"
 
-void InterpUniverse :: newSched() {
-	delete scheduler;
-	scheduler = KnownBlock::newSched();
+const char* InterpUniverse :: targetName() const {
+	return targName ? targName : KnownTarget::defaultName(type);
+}
+
+int InterpUniverse :: newTarget(const char* newTargName) {
+	delete target;
 	type = KnownBlock::domain();
+	targName = newTargName;
+	target = KnownTarget::clone (targetName());
+	return target != 0;
 }
 
 Scheduler* InterpUniverse :: mySched() const {
-	return scheduler;
+	return target->mySched();
 }
 
 // isa
