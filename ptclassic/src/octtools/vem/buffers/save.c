@@ -47,7 +47,7 @@ static char SccsId[]="$Id$";
 
 /* Forward declarations for lint */
 static enum st_retval techFlsFunc();
-static enum st_retval free_layer();
+/*static enum st_retval free_layer();*/
 static void preserve();
 static vemStatus revert_info();
 
@@ -65,7 +65,7 @@ octId fctId;			/* Object id of facet */
     intern_buffer *realBuf;
     octObject bufFacet;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	bufFacet.objectId = fctId;
 	VEM_OCTCKRVAL(octGetById(&bufFacet), VEM_CORRUPT);
 	if (realBuf->bufBits & WRITE_PROTECT) {
@@ -283,7 +283,7 @@ octId *fctId;			/* Facet to revert */
     }
     oldFacet.objectId = *fctId;
     VEM_OCTCKRVAL(octGetById(&oldFacet), VEM_CORRUPT);
-    if (tapFlag = (tkIsTapFacet(&oldFacet) == VEM_OK)) {
+    if ( (tapFlag = (tkIsTapFacet(&oldFacet)  == VEM_OK))) {
 	/* Must flush tap's cache before re-read XXX - argument? */
 	tapFlushCache();
     }
@@ -514,7 +514,7 @@ octId fctId;			/* Object id of facet */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	return altSave(fctId, realBuf, AUTO_SAVE_VERSION);
     } else {
 	vemMsg(MSG_A, "Cannot autosave facet:\n  Facet not in buffer table\n");
@@ -547,7 +547,7 @@ char *version;			/* Version to recover from */
     }
     thisFacet.objectId = old_id;
     if (octGetById(&thisFacet) == OCT_OK) {
-	if (tapFlag = (tkIsTapFacet(&thisFacet) == VEM_OK)) {
+	if ( (tapFlag = (tkIsTapFacet(&thisFacet) == VEM_OK)) ) {
 	    tapFlushCache();
 	}
 	altFacet = thisFacet;
