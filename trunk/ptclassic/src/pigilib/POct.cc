@@ -1465,13 +1465,14 @@ int POct::ptkOpenFacet (int aC, char** aV) {
 	    Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
             return TCL_ERROR;
         } else if (status == OCT_NEW_FACET) {
-	    octObjectClass prop;
-            GetOrCreatePropStr(facet, prop, "TECHNOLOGY", UTechProp);
-            GetOrCreatePropStr(facet, prop, "VIEWTYPE", "SCHEMATIC");
+	    // Do not free prop; otherwise, get freeing non-heap memory
+	    octObject prop = {OCT_UNDEFINED_OBJECT};
+            GetOrCreatePropStr(facet, &prop, "TECHNOLOGY", UTechProp);
+            GetOrCreatePropStr(facet, &prop, "VIEWTYPE", "SCHEMATIC");
             // If facet is schematic:contents then use schematic editstyle,
             if ( (strcmp(facetType, "contents") == 0) && 
                  (strcmp(viewType, "schematic") == 0) ) {
-                GetOrCreatePropStr(facet, prop, "EDITSTYLE", "SCHEMATIC");
+                GetOrCreatePropStr(facet, &prop, "EDITSTYLE", "SCHEMATIC");
             }
         }
     } else if (status <= 0) {
