@@ -42,7 +42,7 @@ if ( "$PTARCH" =~ sol?* ) then
 	set path = ($path /usr/tools/bin)
 endif
 
-if ( "$PTARCH" =~ hppa?* ) then
+if ( "$PTARCH" =~ hppa* ) then
 	# HPPA needs these
 	setenv PT_DISPLAY "xterm -e vi %s"
 else
