@@ -378,7 +378,7 @@ can change the parameters of the ramp star as follows:
 .in +0.5i
 .LE
 Place the cursor over the ramp icon and execute
-\fIedit-params\fP in the Pigi menu.  A dialog box will appear
+\fIedit-params\fP in the Pigi menu (or type ``e'').  A dialog box will appear
 that shows the current parameters of the ramp.
 .IE edit-params
 .LE
@@ -453,7 +453,8 @@ In pigi, if you are using a color monitor, the color of the stem
 indicates the type of data that the porthole consumes or produces.
 A blue stem on an input
 or output of a star icon indicates type "float", a white stem
-indicates type "complex", and a red stem indicates "anytype".
+indicates type "complex", a green stem indicates "packet",
+and a red stem indicates "anytype".
 .pp
 Ptolemy usually make conversions between these types automatically.
 The float to complex conversion does the obvious thing,
