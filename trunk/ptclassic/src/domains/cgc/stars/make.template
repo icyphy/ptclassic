@@ -117,6 +117,7 @@ PL_SRCS= \
  CGCLMSOscDet.pl \
  CGCLastOfN.pl \
  CGCLimit.pl \
+ CGCLinQuantIdx.pl \
  CGCLog.pl \
  CGCLogic.pl \
  CGCMaxMin.pl \
