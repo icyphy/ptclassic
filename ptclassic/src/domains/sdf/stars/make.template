@@ -80,6 +80,7 @@ PL_SRCS= \
  SDFDeMux.pl \
  SDFDeScrambler.pl \
  SDFDistributor.pl \
+ SDFDivByInt.pl \
  SDFDownSample.pl \
  SDFExp.pl \
  SDFFixToCx.pl \
@@ -116,6 +117,7 @@ PL_SRCS= \
  SDFMultiple.pl \
  SDFMux.pl \
  SDFNumToBus.pl \
+ SDFOrderTwoInt.pl \
  SDFPcwzLinear.pl \
  SDFPlay.pl \
  SDFPolarToRect.pl \
