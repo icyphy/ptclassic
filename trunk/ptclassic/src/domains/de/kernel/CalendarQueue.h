@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DataStruct.h"
 #include "DEStar.h"
+#include <iostream.h>
 
 
 #define MAX_BUCKET     1024*4
@@ -50,10 +51,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // The basic container for priority queue...
 //
 	//////////////////////////////////////
-	// class LevelLink
+	// class CqLevelLink
 	//////////////////////////////////////
 
-class LevelLink 
+class CqLevelLink 
 {
 	friend class CalendarQueue;
 public:
@@ -65,16 +66,15 @@ public:
 				// contiguously to allow sequential
 				// popping off of same Star event;
 				// of an event.
-	LevelLink() {}
+	CqLevelLink() {}
 
-private:
-	LevelLink* next;
-	LevelLink* before;
+	CqLevelLink* next;
+	CqLevelLink* before;
 
 	// v sets the level, and fv sets the fineLevel of the entry.
 	// Numerically smaller number represents  the higher priority.
-	LevelLink* setLink(Pointer a, double v, double fv,
-			   Star* d, LevelLink* n, LevelLink* b);
+	CqLevelLink* setLink(Pointer a, double v, double fv,
+			   Star* d, CqLevelLink* n, CqLevelLink* b);
 };
 
 	//////////////////////////////////////
@@ -88,14 +88,20 @@ public:
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
 	// (i.e., highest level is at the tail)
-	LevelLink* levelput(Pointer a, double v, double fv = 1.0, Star* dest=0);
+	CqLevelLink* levelput(Pointer a, double v, double fv, Star* dest);
+
+	// The following takes care of the case where levelput is called
+	// directly without going thru pushHead. In that case it is called
+	// with three arguments and dest must be internallu calculated.
+	CqLevelLink* levelput(Pointer a, double v, double fv);
+
 
 	// Push back the link just gotten.
-	void pushBack(LevelLink*);
+	void pushBack(CqLevelLink*);
 
 	// Remove and return link from the head of the queue...
 	Pointer getFirstElem() {
-		LevelLink *f = get();
+		CqLevelLink *f = get();
 		putFreeLink(f);
 		return f->e;
 	}
@@ -103,7 +109,10 @@ public:
 	// Remove and return link from the head of the queue...
 	// WARNING -- Must call putFreeLink() after finishing with it.
 	// Use getFirstElem() to get and free in one step.
-	LevelLink* get() { return NextEvent(); }
+	CqLevelLink* get() {
+	     CqLevelLink *h = NextEvent(); 
+	     return h;
+	}
 
 	// Return number of elements currently in queue...
 	int length() {return cq_eventNum;}
@@ -112,12 +121,11 @@ public:
 	// move all Links into the free List.
 	void initialize();
 
-	// Fetch an event which matches the porthole and lies in
-	// the time interval [now, timeVal]
-	int fetchEvent(InDEPort* p, double timeVal);
-
 	// put the link into the pool of free links.
-	virtual void 	   putFreeLink(LevelLink*);
+	virtual void 	   putFreeLink(CqLevelLink*);
+
+	void EnableResize() { cq_resizeEnabled = 1; }
+	void DisableResize() { cq_resizeEnabled = 0; }
 
 	// Constructor
 	CalendarQueue() : freeLinkHead(0), cq_eventNum(0), numFreeLinks(0), 
@@ -127,9 +135,8 @@ public:
 
 protected:
 
-	LevelLink **cq_bucket;
+	CqLevelLink **cq_bucket;
 
-	int cq_resizeEnabled;  
 	int cq_lastBucket;      /* bucket number last event was dequeued */
 	double cq_bucketTop;    /* priority at the top of that bucket    */
 	double cq_lastTime;     /* priority of last dequeued event       */
@@ -139,16 +146,16 @@ protected:
 	int cq_eventNum;        /* number of events in calendar queue    */
 	double cq_interval;     /* size of intervals of each bucket      */
 	int cq_firstSub;
-	LevelLink* CalendarQ[QUEUE_SIZE];
+	CqLevelLink* CalendarQ[QUEUE_SIZE];
 
 	// To avoid memory (de)allocation overhead at each push/pop, we
 	// store the freeLinks once created.
-	LevelLink* getFreeLink();
+	CqLevelLink* getFreeLink();
 	virtual void 	   clearFreeList();
 
 	void LocalInit(int qbase, int nbuck, double startInterval, double lastTime);
-	void InsertEventInBucket(LevelLink **bucket, LevelLink *event);
-	LevelLink* NextEvent();
+	void InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *event);
+	CqLevelLink* NextEvent();
 	void Resize(int newSize);
 	double NewInterval();
 
@@ -156,8 +163,9 @@ private:
 	// These are for memory management scheme to minimize the dynamic
 	// memory (de)allocation. FreeLinks are managed in linked-list
 	// structure.
-	LevelLink* freeLinkHead;
+	CqLevelLink* freeLinkHead;
 	int  	   numFreeLinks;		// mainly for debugging.
+	int cq_resizeEnabled;  
 };
 
 
