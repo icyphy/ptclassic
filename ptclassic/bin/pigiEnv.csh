@@ -15,11 +15,6 @@
 # On interrupt, remove temporary files
 onintr catch
 
-if ( ! $?DISPLAY ) then
-    echo "${0}: Your DISPLAY environment variable must be set"
-    exit 1
-endif
-
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
 if ( ! $?ARCH ) then
@@ -38,7 +33,7 @@ while ($#argv)
 	switch ($argv[1])
 		case -help:
 			echo "usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
-			echo "	[-rpc rpcname] [-xres resname ] [cell_name]"
+			echo "	[-rpc rpcname] [-xres resname ] [-display display] [cell_name]"
 			exit 0
 		case -rpc:
 			setenv PIGIRPC $argv[2]
@@ -50,6 +45,10 @@ while ($#argv)
 			breaksw
 		case -debug:
 			set pigidebug
+			breaksw
+		case -display:
+			setenv DISPLAY $argv[2]
+			shift
 			breaksw
 		case -console:
 			set pigiconsole
@@ -72,6 +71,12 @@ while ($#argv)
 	endsw
 	shift
 end
+
+if ( ! $?DISPLAY ) then
+    echo "${0}: Your DISPLAY environment variable must be set or use the"
+    echo "    -display option"
+    exit 1
+endif
 
 if ($?pigidebug && -x $PIGIRPC.debug ) setenv PIGIRPC $PIGIRPC.debug
 
