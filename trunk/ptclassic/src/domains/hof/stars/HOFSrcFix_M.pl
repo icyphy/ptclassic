@@ -4,11 +4,12 @@ defstar {
 	derivedFrom { Map }
 	desc {
 Create one or more instances of the named block to produce the
-required number of output stream(s).  This is implemented by replacing
-the Src star with the named block at setup time.  The replacement
-block(s) are connected as specified by "input_map", using the existing
-connections to the Src star.  Their parameters are determined
-by "parameter_map".
+required number of output stream(s).
+This is implemented by replacing the Src star with the named block
+at setup time.
+The replacement block(s) are connected as specified by "input_map",
+using the existing connections to the Src star.
+Their parameters are determined by "parameter_map".
 	}
 	version { $Id$ }
 	author { Edward A. Lee }
@@ -20,10 +21,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { HOF main library }
 	explanation {
-See the explanation for Map star, from which this is derived.
+See the explanation for the
+.c Map
+star, from which this is derived.
 The only difference is that this star forces the number of inputs to zero
-and output datatype to fixed-point matrix.  It also hides the input ports and the
-\fIinput_map\fR parameter.
+and output datatype to fixed-point matrix.
+It also hides the input ports and the \fIinput_map\fR parameter.
 .Sr "Map"
 	}
 	ccinclude { "Matrix.h" } 

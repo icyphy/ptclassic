@@ -6,8 +6,8 @@ defstar {
 Bridge inputs to outputs and then self-destruct.
 This star interleaves two input busses onto a single bus.
 The two input busses must have the same width, which must
-be half the width of the output bus.  The input signals
-are connected to the output in an alternating fashion.
+be half the width of the output bus.
+The input signals are connected to the output in an alternating fashion.
 	}
 	version {$Id$ }
 	author { E. A. Lee }

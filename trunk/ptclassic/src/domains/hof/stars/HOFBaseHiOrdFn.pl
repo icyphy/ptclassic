@@ -7,22 +7,22 @@ This is a base class containing utility methods shared by HOF stars,
 and defining their common functionality.
 	}
 	explanation {
-This star provides the base class for a family of \fIhigher-order
-functions\fR in Ptolemy.
+This star provides the base class for a family of \fIhigher-order functions\fR
+in Ptolemy.
 .IE "higher-order functions"
 A higher-order function is a function that takes a function as
-an argument and/or returns a function.  Stars and galaxies in
-Ptolemy have two kinds of arguments: signals and parameters.
+an argument and/or returns a function.
+Stars and galaxies in Ptolemy have two kinds of arguments:
+signals and parameters.
 The higher-order functions supported by this base class
 take functions as parameters, not signals.
 The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
 .pp
-The name of the replacement block is given by the \fIblockname\fR
-parameter.  If the replacement block is a galaxy,
-then the \fIwhere_defined\fR parameter gives the full
-name (including the full path) of the definition of the galaxy.
+The name of the replacement block is given by the \fIblockname\fR parameter.
+If the replacement block is a galaxy, then the \fIwhere_defined\fR parameter
+gives the full name (including the full path) of the definition of the galaxy.
 This path name may (and probably should) begin with the environment
 .EQ
 delim off
@@ -31,17 +31,17 @@ variable $PTOLEMY or ~username.
 .EQ
 delim $$
 .EN
-Currently, this must be an oct facet, although in the
-future, other specifications (like ptcl files) may be allowed.
+Currently, this must be an oct facet, although in the future, other
+specifications (like ptcl files) may be allowed.
 The oct facet should contain the replacement galaxy,
 or it could simply be the facet that defines the replacement galaxy.
 If the replacement block is a built-in star, then there
 is no need to give a value to the \fIwhere_defined\fR parameter.
 .pp
-For all higher-order stars derived from this base class,
-the replacement blocks are substituted for the higher-order star
-at setup time.  Thus, the scheduler will never see the higher-order
-star.  For this reason, these stars can be used in any Ptolemy domain,
+For all higher-order stars derived from this base class, the replacement
+blocks are substituted for the higher-order star at setup time.
+Thus, the scheduler will never see the higher-order star.
+For this reason, these stars can be used in any Ptolemy domain,
 since their semantics are independent of the model of computation.
 .pp
 The stars derived from this base class differ mostly in the way
@@ -51,7 +51,8 @@ of parameters in the replacement block.
 .UH "Setting parameter values"
 .pp
 The \fIparameter_map\fR parameter can be used to set parameter values
-for the replacement blocks.  There are four acceptable forms:
+for the replacement blocks.
+There are four acceptable forms:
 .(c
 name value
 name(number) value
@@ -70,11 +71,13 @@ introduce an optional equal sign, for readability.
 If the "=" is used, there must be spaces around it.
 .pp
 The value can be any usual Ptolemy expression for giving the value
-of a parameter.  However, if the string "instance_number" appears
-anywhere in the expression, it will be replaced with the instance
-number of the replacement block.  Note that it need not be a
-separate token.  For example, the value "xxxinstance_numberyyy" will
-become "xxx9yyy" for instance number 9.
+of a parameter.
+However, if the string "instance_number" appears anywhere in the
+expression, it will be replaced with the instance number of the
+replacement block.
+Note that it need not be a separate token.
+For example, the value "xxxinstance_numberyyy" will become "xxx9yyy"
+for instance number 9.
 After this replacement, the value is evaluated using the usual
 Ptolemy expression evaluator for initializing states.
 	}

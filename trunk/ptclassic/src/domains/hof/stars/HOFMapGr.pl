@@ -4,9 +4,10 @@ defstar {
 	derivedFrom { Map }
 	desc {
 A variant of the Map star where the replacement block is specified
-by graphically connecting it.  There must be exactly one block
-connected in the position of the replacement block.  The HOFNop
-stars are the only exception: they may be used in addition to the
+by graphically connecting it.
+There must be exactly one block connected in the position of the
+replacement block.
+The HOFNop stars are the only exception: they may be used in addition to the
 one replacement block in order to control the order of connection.
 	}
 	explanation {
