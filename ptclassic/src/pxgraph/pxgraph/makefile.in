@@ -111,7 +111,7 @@ X11_LIB_SWITCHES =	@XLIBSW@
 
 # Libraries to use when linking.  This definition is determined by the
 # configure script.
-LIBS = @LIBS@ $(X11_LIB_SWITCHES) @MATH_LIBS@ -lc
+LIBS = @LIBS@ $(X11_LIB_SWITCHES) @MATH_LIBS@ #-lc
 
 # To change the compiler switches, for example to change from -O
 # to -g, change the following line:
