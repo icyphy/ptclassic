@@ -459,7 +459,7 @@ States:(.*)
     if {!$status} {
         set descriptor $rest
         # The object did not have a multiport, it could be a base?
-        puts "DomainInfo::starInfo{}: No multiport: $star, $rest"
+        #puts "DomainInfo::starInfo{}: No multiport: $star, $rest"
     }
 
 
