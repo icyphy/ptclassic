@@ -59,6 +59,14 @@ Compute the inner product of two vectors; one given by two angles in spherical c
 	}
 	ccinclude { <math.h> }
 	go {
-		x%0 << magnitude *(cos(site)*sin(gise)*Rx + sin(site)*Ry+ cos(site)*cos(gise)*Rz) ;
+	// Line originally was:
+	//	x%0 << magnitude *(cos(site)*sin(gise)*Rx + sin(site)*Ry+ cos(site)*cos(gise)*Rz) ;
+	// But sol2.cfront barfs with:
+	// line 63: Error: Overloading ambiguity between
+	// operator*(const Complex&, double) and FloatState::operator double().
+
+	x%0 << (double)magnitude* (cos(site)*sin(gise)*(double)Rx +
+                                   sin(site)*(double)Ry +
+ 				   cos(site)*cos(gise)*(double)Rz);
 	}
 }
