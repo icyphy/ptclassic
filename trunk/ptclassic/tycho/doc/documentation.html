@@ -84,11 +84,12 @@ in the status bar at the bottom of the window rather than in a dialog box.
 When creating embedded tcl scripts, you may find it necessary to use
 the <A HREF="http://www.sandia.gov/sci_compute/iso_symbol.html">HTML
 Code Character Set</A> for things like greater-than
-"<CODE>&gt;</CODE>" and less-than "<CODE>&lt;</CODE>".  Greater-than
-is coded <CODE>&amp;gt;</CODE>, less-than is coded
-<CODE>&amp;lt;</CODE>.  If you don't code characters that have meaning
-in HTML, then you might find that the output does not look the way you
-want it.
+"<CODE>&gt;</CODE>", less-than "<CODE>&lt;</CODE>" and backslash
+"<CODE>&#92</CODE>".  Greater-than is coded <CODE>&amp;gt;</CODE>,
+less-than is coded <CODE>&amp;lt;</CODE> and backslash is coded
+<CODE>&amp#92</CODE>.  If you don't code characters that have
+meaning in HTML, then you might find that the output does not look the
+way you want it.
 
 <p> In addition, Tycho expands hypertext references that begin with a
 dollar sign "<CODE>$</CODE>".  The characters up to the first slash
