@@ -25,7 +25,6 @@ include $(CONFIG)
 PTCLHDRS = $(ROOT)/src/ptcl
 
 HDRS	      = compile.h \
-		compat.h \
 		edit.h \
 		err.h \
 		exec.h \
@@ -34,6 +33,7 @@ HDRS	      = compile.h \
 		main.h \
 		local.h \
 		paramStructs.h \
+		sol2compat.h \
 		util.h \
 		utilities.h \
 		vemInterface.h \
