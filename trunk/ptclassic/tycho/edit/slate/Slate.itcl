@@ -544,14 +544,13 @@ body ::tycho::Slate::ghost {tag args} {
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has a ghost{} method,
 	# call that
-	if { [@scope ::tycho::$itemClass($tag) \
-		[list ::info exists methodtable(ghost)]] } {
-	    return [@scope ::tycho::$itemClass($tag) \
-		    [list eval \[set methodtable(ghost)\] \
+        set class ::tycho::$itemClass($tag)
+	if { [@scope $class ::info exists methodtable(ghost)] } {
+	    return [eval [@scope $class set methodtable(ghost)] \
 		    $tag $canvas $this \
-		    -tags [concat "ghost" "ghost.$tag" $args]]]]
+		    -tags [concat "ghost" "ghost.$tag" $args]]
     	} else {
-	    set primary [@scope ::tycho::ComplexItem [list set primary($tag)]]
+	    set primary [@scope ::tycho::ComplexItem set primary($tag)]
 	}
     } elseif { ! [string match {[_0-9]*} $tag] } {
     	# It's a tag, so do for each item
@@ -647,16 +646,15 @@ body ::tycho::Slate::highlight {tag args} {
 	# call that. Note that this method must deal with the
 	# situation in which the item is already highlighted
 	# by adjusting the highlight rather than recreating it.
-	if { [@scope ::tycho::$itemClass($tag) \
-		[list ::info exists methodtable(highlight)]] } {
-	    return [@scope ::tycho::$itemClass($tag) \
-		    [list eval \[set methodtable(highlight)\] \
+        set class ::tycho::$itemClass($tag)
+	if { [@scope $class ::info exists methodtable(highlight)] } {
+	    return [eval [@scope $class set methodtable(highlight)]
 		    $tag $canvas $this \
 		    [list -width $opts(-highlightwidth) \
 		    -outline $opts(-highlightcolor) \
 		    -fill $opts(-highlightfill)] \
 		    [list -tags [concat \
-		    "highlight" "highlight.$tag" $opts(-tags)]]]]
+		    "highlight" "highlight.$tag" $opts(-tags)]]]
     	}
     }
 
@@ -859,11 +857,10 @@ body ::tycho::Slate::region {tag args} {
     # If it's a complex item and it has a region{} method,
     # call that. FIXME: Need to rethink overriding mechanism.
     if { [string match {_*} $tag] } {
-        if { [@scope ::tycho::$itemClass($tag) \
-                [list ::info exists methodtable(region)]] } {
-            set region [@scope ::tycho::$itemClass($tag) \
-                    [list eval \[set methodtable(region)\] \
-                    $tag $canvas $this $args]]
+        set class ::tycho::$itemClass($tag)
+        if { [@scope $class ::info exists methodtable(region)] } {
+            set region [eval [@scope $class set methodtable(region)] \
+                    $tag $canvas $this $args]
             if { [llength $region] != 4 } {
                 set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
                 set rectangular 0
@@ -1212,22 +1209,24 @@ body ::tycho::Slate::shapecall {tag method x y args} {
 
     # Try for complex item overriding. Unfortunately, in this case
     # we can't use the "reuse" optimization
-    if { [string match {_[0-9]*} $tag] \
-            && [@scope ::tycho::$itemClass($tag) \
-            [list ::info exists methodtable($method)]] } {
-        # There's an overriding method
-        eval [@scope ::tycho::$itemClass($tag) \
-                [list set methodtable($method)]] $tag $canvas $this $args
+    if { [string match {_[0-9]*} $tag] } {
+	set class ::tycho::$itemClass($tag)
+	if { [@scope $class ::info exists methodtable($method)] } {
+	    # There's an overriding method
+	    return [eval \
+		    [@scope $class set methodtable($method)] \
+		    $tag $canvas $this $args]
+	}
+    }
+
+    if $opts(-reuse) {
+	eval $shapeClass($tag)::_$method $tag $canvas $this $x $y $args
     } else {
-        if $opts(-reuse) {
-            eval $shapeClass($tag)::_$method $tag $canvas $this $x $y $args
-        } else {
-            # Remember the Shape class
-            set shapeClass($tag) \
-                    ::tycho::[::tycho::capitalize [eval shape* $tag $args]]
-            # Call the procedure
-            eval $shapeClass($tag)::_$method $tag $canvas $this $x $y $args
-        }
+	# Remember the Shape class
+	set shapeClass($tag) \
+		::tycho::[::tycho::capitalize [eval shape* $tag $args]]
+	# Call the procedure
+	eval $shapeClass($tag)::_$method $tag $canvas $this $x $y $args
     }
 }
 
@@ -1240,12 +1239,10 @@ body ::tycho::Slate::unhighlight {tag} {
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has an unhighlight{} method,
 	# call that
-	if { [@scope ::tycho::$itemClass($tag) \
-		[list ::info exists methodtable(unhighlight)]] } {
-	    @scope ::tycho::$itemClass($tag) \
-		    [list eval \[set methodtable(unhighlight)\] \
-		    $tag $canvas $this]
-	    return
+        set class ::tycho::$itemClass($tag)
+        if { [@scope $class ::info exists methodtable(unhighlight)] } {
+            [@scope $class set methodtable(unhighlight)] $tag $canvas $this
+            return  ;# return empty string
     	}
     } elseif { ! [string match {[_0-9]*} $tag] } {
     	# It's a tag, so do for each item
