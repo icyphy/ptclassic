@@ -35,7 +35,7 @@ Sets up the signal handlers for Tycho.
 
 **************************************************************************/
 
-// SigHandle.h defines SIG_PF
+// SigHandle.h defines SIG_PT
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -76,13 +76,13 @@ int setSignalHandlers(void)
 
     if (isDevelop == 0 || isDevelop[0] == '0') {
         setCoreLimitRelease();
-        if (setHandlers((SIG_PF) signalHandlerRelease) != 0)
+        if (setHandlers((SIG_PT) signalHandlerRelease) != 0)
 	    returnValue = 1;
 	setReleaseStrings();
     }
     else {
         setCoreLimitDebug();
-        if (setHandlers((SIG_PF) signalHandlerDebug) != 0)
+        if (setHandlers((SIG_PT) signalHandlerDebug) != 0)
 	    returnValue = 2;
 	setDebugStrings();
     }

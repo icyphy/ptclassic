@@ -41,13 +41,16 @@ void ptReleaseSig (int SigNum);
 // Special support for libgthreads under SunOS and Solaris.
 #if defined(PTSUN4) || defined(PTSOL2)
 #if defined(PTSOL2)
-typedef void (*SIG_PF)(int);
+typedef void (*SIG_PT)(int);
 #else
-typedef void (*SIG_PF)();
+typedef void (*SIG_PT)();
 #endif
-extern "C" SIG_PF ptSignal(int, SIG_PF);
+extern "C" SIG_PT ptSignal(int, SIG_PT);
 #else
 #define ptSignal(sig, handler) signal(sig, handler)
 #endif
 
+#if defined(PTIRIX5) 
+typedef void (*SIG_PT)(int);
+#endif 
 

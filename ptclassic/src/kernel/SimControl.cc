@@ -60,13 +60,13 @@ Polling functions added by Alan Kamas, 1/95
 
 #include "compat.h"
 
-// Note, SIG_PF should be the same type as SIG_IGN and the same type
+// Note, SIG_PT should be the same type as SIG_IGN and the same type
 //       as the second parameter to signal()
 #if !defined(PTIRIX5) && !defined(PTSOL2) && !defined(PTSUN4)
-// PTIRIX5, PTSOL2 define SIG_PF in <signal.h>
-// PTSUN4 defines SIG_PF in ptsignals.h
+// PTIRIX5, PTSOL2 define SIG_PT in <signal.h>
+// PTSUN4 defines SIG_PT in ptsignals.h
 #if defined(__GNUG__) || defined(PTHPPA_CFRONT) || defined(PTAIX_XLC)
-typedef void (*SIG_PF)(int);
+typedef void (*SIG_PT)(int);
 #endif // __GNUG__ || PTHPPA_CFRONT || PTAIX_XLC
 #endif // !defined PTIRIX5
 
@@ -233,11 +233,11 @@ void SimControl::catchInt(int signo, int always) {
 	if (signo == -1) signo = SIGINT;
 	if (!always) {
 		// we don't catch signals if they are being ignored now
-		SIG_PF tmp = ptSignal(signo, SIG_IGN);
+		SIG_PT tmp = ptSignal(signo, SIG_IGN);
 		if (tmp == SIG_IGN) return;
 	}
 	flags &= ~interrupt;
-	ptSignal(signo, (SIG_PF)&SimControl::intCatcher);
+	ptSignal(signo, (SIG_PT)&SimControl::intCatcher);
 }
 
 	// register a function to be called if interrupt flag is set.
@@ -288,7 +288,7 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
 	// Turn off the poll flag until the timer fires
 	pollflag = 0;
 	// Turn on the poll flag when the timer expires
-	ptSignal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
+	ptSignal(SIGALRM, (SIG_PT)&SimControl::setPollFlag);
 	// Make the signal safe from interrupting system calls
         ptSafeSig(SIGALRM);
 	// Block the signal so that it will not interrupt system calls
