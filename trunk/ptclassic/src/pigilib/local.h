@@ -63,7 +63,9 @@ extern RAW_PTR malloc ARGS((size_t));
 #include <sys/param.h>
 
 #ifdef PTHPPA
+#ifndef PTHPUX10
 extern char *getcwd ARGS((char *,size_t));
+#endif /* PTHPUX10 */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else
 extern char *getwd ARGS((char *));
