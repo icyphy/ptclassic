@@ -98,11 +98,6 @@ The initial guess at the angle being estimated in radians.
 		decimationPhase.clearAttributes(A_SETTABLE);
 	}
 	setup {
-		if ( double(stepSize) < 0.0 ) {
-		    Error::abortRun(*this,
-				    "The step size must be positive");
-		    return;
-		}
 
 		// we don't support decimation: make sure that it's 1
 		decimation = 1;
@@ -141,6 +136,13 @@ The initial guess at the angle being estimated in radians.
 	move	a,$ref(cosOmega)		; save cos(w)
 	}
 	go {
+		// 0. Check the value of the parameters
+		if ( double(stepSize) <= 0.0 ) {
+		    Error::abortRun(*this,
+				    "The step size must be positive");
+		    return;
+		}
+
 		// 1. Since we don't support decimation,
 		//    index = int(errorDelay) + 1, a constant
 		int index = int(errorDelay)*int(decimation) + 
