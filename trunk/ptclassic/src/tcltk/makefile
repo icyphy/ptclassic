@@ -41,8 +41,7 @@ OBJDIR=..
 # VPATH points to the "real" source directory
 VPATH         = $(ROOT)/src/tcltk
 
-# Get configuration info
-# Need $(C_SHAREDFLAGS) and $(CSHARED_LIBRARY_COMMAND) below
+# Get configuration info, like X11_INCLUDES and X11_LIB_SWITCHES
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
@@ -98,13 +97,18 @@ REL_ITCL_BINDIR =	../tcltk/$(TCL8_DEST_BASE)/bin
 
 ITCL_DEST_LIB = $(TCL8_DEST)/lib
 
-# Itcl contains its own custom tcltk
-all: 		configure itcl
-configure:	configure_tcltk8 tcltk8 install_tcltk8 \
-			$(PTOLEMY)/src/tcltk/tcl_shared \
+
+all: 		configure tcltk8 itcl
+
+configure:	configure_tcltk8 $(PTOLEMY)/src/tcltk/tcl_shared \
 			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
-bin:		itcl
-install:	install_itcl
+
+#configure:	configure_tcltk8 tcltk8 install_tcltk8 \
+#			$(PTOLEMY)/src/tcltk/tcl_shared \
+#			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
+bin:		tcltk8 itcl
+install:	install_tcltk8 install_itcl
+
 clean:		clean_itcl
 realclean:	clean_itcl
 
@@ -162,9 +166,9 @@ FORCE:
 $(PTOLEMY)/src/tcltk/tcl_shared: FORCE
 	-chmod a+x $@
 
-$(ITCL_OBJ)/config.status: config_itcl
+$(ITCL_OBJ)/config.status: configure_itcl
 
-config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWIDGETS_OBJ)
+configure_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWIDGETS_OBJ)
 	@echo "Configuring itcl"
 	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; \
 	$(ITCL_SRC)/configure \
