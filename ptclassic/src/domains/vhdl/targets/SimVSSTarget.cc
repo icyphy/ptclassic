@@ -448,6 +448,7 @@ void SimVSSTarget :: writeComFile() {
   // Make sure to do the com file uniquely too!!!
   StringList comCode = "";
   comCode << "run\n";
+  comCode << simWrapup;
   comCode << "quit\n";
   writeFile(comCode, ".com", 0);
 }
@@ -461,6 +462,7 @@ void SimVSSTarget :: addCodeStreams() {
   addStream("top_entity", &top_entity);
   addStream("top_architecture", &top_architecture);
   addStream("top_configuration", &top_configuration);
+  addStream("simWrapup", &simWrapup);
 
   VHDLTarget::addCodeStreams();
 }
@@ -474,6 +476,7 @@ void SimVSSTarget :: initCodeStreams() {
   top_entity.initialize();
   top_architecture.initialize();
   top_configuration.initialize();
+  simWrapup.initialize();
 
   VHDLTarget::initCodeStreams();
 }

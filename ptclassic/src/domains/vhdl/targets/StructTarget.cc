@@ -1633,6 +1633,7 @@ void StructTarget :: writeComFile() {
   comCode << "cd " << (const char*) filePrefix << "\n";
   comCode << "assign 0.0 *'vhdl\n";
   comCode << "run\n";
+  comCode << simWrapup;
   comCode << "quit\n";
   writeFile(comCode, ".com", 0);
 }

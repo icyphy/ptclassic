@@ -46,12 +46,12 @@ variable $starSymbol(icount): integer := 0;
 $starSymbol(icount) := $starSymbol(icount) + 1;
 	}
 	codeblock (graph) {
-(pxgraph -t "$val(title)" $val(options) $starSymbol(xgraph).dat ; rm -f $starSymbol(xgraph).dat) &
+! (pxgraph -t "$val(title)" $val(options) $starSymbol(xgraph).dat ; rm -f $starSymbol(xgraph).dat) &
 	}
 	initCode {
 	  addCode(uses, "useLibs", "textio");
 	  StringList cmd = "";
-	  cmd << "/bin/rm -f ";
+	  cmd << "! /bin/rm -f ";
 	  cmd << "$starSymbol(xgraph)";
 	  cmd << ".dat";
 	  cmd << "; ";
@@ -72,8 +72,8 @@ $starSymbol(icount) := $starSymbol(icount) + 1;
 	    cmd << j << ").dat";
 	    cmd << "; ";
 	  }
-	  addCode(cmd, "sysWrapup");
-	  addCode(graph, "sysWrapup");
+	  addCode(cmd, "simWrapup");
+	  addCode(graph, "simWrapup");
 	}
 	go {
 	  StringList filedecl = "";
