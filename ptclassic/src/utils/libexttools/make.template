@@ -46,11 +46,13 @@ LIB=libexttools.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
 LIBPTMATLABDIR=$(ROOT)/src/utils/libptmatlab
-INCL=-I$(KERNDIR) $(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) -I$(LIBPTMATLABDIR)
+INCL = -I$(KERNDIR) $(PTCOMPAT_INCSPEC) \
+	$(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
+	$(MATHEMATICA_INCSPEC) $(MATHEMATICAIFC_INCSPEC)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
-CCS_WITH_H_FILES = MatlabIfc.cc
+CCS_WITH_H_FILES = MatlabIfc.cc MathematicaIfc.cc
 
 # The complete list of .cc files used in the library
 SRCS= $(CCS_WITH_H_FILES)
