@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/%metapkg%/pakman/doc
+VPATH =		$(ROOT)/util/pakman/doc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -51,7 +51,7 @@ ITCL_SRCS =
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	index.html
 
-MISC_FILES = 
+MISC_FILES = 	codeDoc img style.css
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
