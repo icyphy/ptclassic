@@ -32,7 +32,7 @@ int AutoForkNode::isItPersistent () {
 }
 
 // make a new source connection
-PortHole* AutoForkNode::setSourcePort (GenericPort &sp) {
+PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int delay) {
 	if (originatingPort) {
 		StringList msg = readFullName();
 		msg += " already has a source port";
@@ -61,6 +61,7 @@ PortHole* AutoForkNode::setSourcePort (GenericPort &sp) {
 // normal case, simple enough.
 	originatingPort = &sp.newConnection();
 	portHoleConnect();
+	numInitialParticles = delay;
 	return originatingPort;
 }
 
