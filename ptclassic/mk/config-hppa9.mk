@@ -43,10 +43,9 @@ include $(ROOT)/mk/config-g++.mk
 # Comment the next 2 lines out if you don't want shared libraries.
 # CAUTION: don't try to use shared libraries if you don't have a fairly
 # recent patch release of ld & dld.sl (as of 3/97, PHSS_8253 is current).
-ifndef BUILD_STATIC_BINARIES
 include $(ROOT)/mk/config-g++.shared.mk
 LIBSUFFIX =		sl
-endif
+
 
 # ptbin.mk uses this to decide whether to include the PN stars
 # If you are under HPUX10, then the PN domain requires DCE threads.
