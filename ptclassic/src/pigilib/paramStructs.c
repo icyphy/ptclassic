@@ -71,11 +71,13 @@ ParamListType *pListPtr;
 {
 	if (pListPtr) {
 	    if (pListPtr->array) {
-		if (pListPtr->array->name) {
+		if (pListPtr->length > 0 && pListPtr->array->name) {
 		    free((char *)pListPtr->array->name);
 		}
 		free(pListPtr->array);
+		pListPtr->array = 0;
 	    }
+	    pListPtr->length = 0;
 	}
 }
 
