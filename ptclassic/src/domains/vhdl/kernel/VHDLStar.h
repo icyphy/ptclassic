@@ -39,16 +39,39 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "VHDLPortHole.h"
+#include "VHDLPort.h"
+#include "VHDLGeneric.h"
+#include "VHDLVariable.h"
 
 class VHDLTarget;
 
 class VHDLStar : public CGStar {
 public:
+	// List of all states used in the code.
+	// This is public so that VHDLTarget and other targets can access it.
+	StateList referencedStates;
+
+	// Lists of all port and variable references in a firing.
+	// This is public so that VHDLTarget and other targets can access it.
+	StringList firingPortList;
+	StringList firingVarList;
+
+	// Lists of VHDL ports and variables referenced.
+	// This is public so that VHDLTarget and other targets can access it.
+	VHDLPortList firingPList;
+	VHDLVariableList firingVList;
+
+	// Add a State to the list of referenced States.
+	void registerState(State*);
+
 	// initialize method
 	void initialize();
 
 	// my domain
 	const char* domain() const;
+
+	// Sanitize a string so that it is usable as a VHDL identifier.
+	const char* sanitize(const char*);
 
 	// run this star
 	int run();
@@ -56,21 +79,42 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-protected:
-	// main routine.
-	int runIt();
+	// Generate declarations for all PortHoles and States.
+	StringList declarePortHoles();
+	StringList declareStates();
 
+	// Generate initialization code for all PortHoles and States.
+	StringList initCodePortHoles();
+	StringList initCodeStates();
+
+protected:
 	// access to target (cast is safe: always a VHDLTarget)
 	VHDLTarget* targ() {
 		return (VHDLTarget*)target();
 	}
 
-	// Virtual functions. Expand State or PortHole reference macros.
-	// If "name" is a state, add it to the list of referenced states.
-	StringList expandRef(const char* name);
-	StringList expandRef(const char* name, const char* offset);
+	// Expand macros that are defined for this star
+        /* virtual */ StringList expandMacro(const char*, const StringList&);
+
+	// Expand State or PortHole reference macros.
+	/* virtual */ StringList expandRef(const char*);
+	/* virtual */ StringList expandRef(const char*, const char*);
+	// Form expression interspersing operators within arg list.
+	StringList VHDLStar :: expandInterOp(const char*, const char*);
+
+	// Assignment operator, depending on variable or signal
+	StringList expandAssign(const char*);
 
 private:
+	// Generate declarations for individual PortHoles and States.
+	StringList declareBuffer(const VHDLPortHole*);
+	StringList declareOffset(const VHDLPortHole*);
+	StringList declareState(const State*);
+
+	// Generate initialization code for individual PortHoles and States.
+	StringList initCodeBuffer(VHDLPortHole*);
+	StringList initCodeOffset(const VHDLPortHole*);
+	StringList initCodeState(const State*);
 
 };
 
