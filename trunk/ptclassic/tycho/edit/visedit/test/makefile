@@ -51,7 +51,7 @@ GRAPHICAL_TESTS = \
 	testEditSTD.itcl \
 	testFiles.itcl
 
-ITCL_SRCS = $(GRAPHICAL_TESTS) \
+ITCL_SRCS = $(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
 	DirectedAcyclicGraph.itcl \
 	alltests.itcl all.itcl
 
