@@ -22,23 +22,25 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock(sendData,"int numXfer,const char* command") {
     char buffer[@(numXfer*3)];
     int status;
-    for (int i = 0; i < @numXfer; i++) {
+    int i;
+    for (i = 0; i < @numXfer; i++) {
 	int value;
+	char* cvalue;
 	@command;
-	if (value < int(0xff800000)) value = 0xff800000;
-	if (value > int(0x007FFFFF)) value = 0x007FFFFF;
-	char* cvalue = (char*)&value;
+	if (value < 0xff800000) value = 0xff800000;
+	if (value > 0x007FFFFF) value = 0x007FFFFF;
+	cvalue = (char*)&value;
 	buffer[3*i]   = cvalue[1];
 	buffer[3*i+1] = cvalue[2];
 	buffer[3*i+2] = cvalue[3];
     }
-    status = write(dsp->fd,buffer, size*3);
+    status = write(dsp->fd,buffer, @(numXfer*3));
     if (status == 0) {
-	fprintf(stderr,"send: DSP wormhole received premature EOF");
+	fprintf(stderr,"DSP write ioctl premature EOF\n");
 	exit(1);
     }
     if (status == -1) {
-	fprintf(stderr,"send: DSP wormhole receive timeout");
+	fprintf(stderr,"DSP write ioctl timeout\n");
 	exit(1);
     }
     }

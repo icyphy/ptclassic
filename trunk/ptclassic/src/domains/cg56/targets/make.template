@@ -41,7 +41,7 @@ ifdef S56DIR
 S56WHO= S56XTargetWH.o CGCS56XTarget.o
 S56WHI= -I$(S56DIR)/include  -I$(CGCDIR)
 S56PL_SRCS = CG56S56XCGCSend.pl CG56S56XCGCReceive.pl \
-	     CGCS56XSend.pl CGCS56XReceive.pl CGCS56XBase.pl
+	     CGCS56XBase.pl CGCS56XSend.pl CGCS56XReceive.pl 
 endif
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) \
@@ -52,7 +52,7 @@ PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
 
 # objects to make
 OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o \
- $(S56WHO) $(PL_SRCS:.pl=.o)
+        $(PL_SRCS:.pl=.o) $(S56WHO)
 
 SRCS=	$(OBJS:.o=.cc)
 
