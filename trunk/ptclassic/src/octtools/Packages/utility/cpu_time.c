@@ -60,6 +60,11 @@ static char SccsId[]="$Id$";
 #include <sys/resource.h>
 #endif
 
+#if defined(__sparc) && !defined(__svr4__) && defined(__GNUC__)
+/* SunOS4.1.3 under gcc */
+extern int getrusage(int who, struct rusage *rusage);
+#endif
+
 #ifdef hpux
 #include <sys/types.h>
 #include <sys/times.h>
