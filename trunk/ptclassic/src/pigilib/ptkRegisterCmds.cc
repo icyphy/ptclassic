@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern "C" {
 #include "ptkRegisterCmds.h"
+#include "ptkTclIfc.h"
 }
 
 /* global */ 
@@ -56,4 +57,7 @@ void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
 
    // Construct the global POct object.  This should be done once only.
    poct = new POct(ip);
+
+   // Register various commands used by pigi
+   registerTclFns(ip);
 }
