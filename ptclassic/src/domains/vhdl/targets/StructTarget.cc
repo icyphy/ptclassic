@@ -1239,10 +1239,21 @@ StringList StructTarget :: addActions(VHDLCluster* cl, int /*level*/) {
     VHDLFiring* nfiring;
     int actionCount = 0;
     while ((nfiring = nextFiring++) != 0) {
+      if (!actionCount) {
+	body << "-- if " << cl->name << "_SELECT" << " = " << nfiring->name
+	     << " then\n";
+      }
+      else {
+	body << "-- elsif " << cl->name << "_SELECT" << " = " << nfiring->name
+	     << " then\n";
+      }
       body << nfiring->action;
       actionCount++;
     }
-    
+    if (actionCount) {
+      body << "-- endif\n";
+    }
+
     if (actionCount) {
       all << body;
     }
