@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: Kennard White
+ Programmers: Kennard White, Christopher Hylands
 
     oct2ptcl.c :: oct2ptcl translator
 
@@ -67,9 +67,9 @@ static char SccsId[] = "$Id$";
 #define OCTPTCL_OH_WARN(fct, why, offending_object) \
 	    ((ohLastStatus = fct) >= OCT_OK) ? 0 : \
 		fprintf(stderr, \
-		"Oct assertion failed: file %s at line %d\n%s: %s\n%s",\
+		"Oct assertion failed: file %s at line %d\n%s\n:\t%s\n",\
  		__FILE__, __LINE__, \
-		why, ohFormatName(offending_object), octErrorString())
+		why, ohFormatName(offending_object))
 
 /****************************************************************************
  			oct2ptcl
@@ -277,7 +277,13 @@ _otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo, long *flags) {
 	*flags |= OTP_PifFormal;
     } else {
 	OCTPTCL_OH_WARN(ohFindFormal( &fterm, pTerm),
-	  "interface formal term from contents actual(2)", pTerm);
+	  "Warning, the following instance was probably completely
+	regenerated so the formalExternalIds of the instances's terminals
+	are bogus. oct2ptcl is unnecessarily picky up this, the solution is
+	to edit the facet, destroy the instance in question and place a new
+	instance of the same galaxy there. The original error message was:
+          'interface formal term from contents actual(2)'", pTerm);
+
     }
     if (ohLastStatus < OCT_OK)
       return ohLastStatus;
@@ -405,7 +411,8 @@ _otpGetNetInfo( OTPFacetInfo *pFInfo, octObject *pNet, OTPNetInfo *pNInfo) {
 		_otpNetErr(pNInfo,"has multiple delays (not allowed)\n");
 		return OCT_ERROR;
 	    }
-	    pNInfo->delayExpr = otpCvtPropToStrDelay( &prop);
+	    /* Even though this is a Delay2, we don't treat it like a Delay*/
+	    pNInfo->delayExpr = otpCvtPropToStr( &prop);
 	} else if ( strcmp(pMaster->facetName,"%dBus")==0 ) {
 	    OH_FAIL(ohGetByPropName(&theMarker,&prop,"buswidth"),
 	      "bus width property", &theMarker);
@@ -632,7 +639,7 @@ _otpProcessMarker( OTPFacetInfo *facetInfo, octObject *pFacet,
 octStatus
 _otpXlateInstBindings( char *instName, OTPFacetInfo *masterInfo,
   Tcl_DString *pStr) {
-    char	*bindPtr, *src, *tgt;
+    char	*bindPtr, *src, *tgt, *numericConversion;
     char	nameBuf[OTP_NAMELEN];
     char	valBuf[OTP_NAMELEN];
 
@@ -654,9 +661,16 @@ _otpXlateInstBindings( char *instName, OTPFacetInfo *masterInfo,
 	    *tgt++ = *src;
 	}
 	tgt[0] = '\0';
-	Tcl_DStringAppend(pStr,"\t",-1);
-	Tcl_DStringAppendEls(pStr,"numports",instName,nameBuf,valBuf,NULL);
-	Tcl_DStringAppend(pStr,"\n",-1);
+	/* Check to see that valBuf is actually a number, since the
+	   Logic stars can be of the form
+	   Logic.input=2.logic=AND1
+	 */
+	strtol(valBuf,&numericConversion,10);
+	if (valBuf != numericConversion) {
+	  Tcl_DStringAppend(pStr,"\t",-1);
+	  Tcl_DStringAppendEls(pStr,"numports",instName,nameBuf,valBuf,NULL);
+	  Tcl_DStringAppend(pStr,"\n",-1);
+	}
     }
     return OCT_OK;
 }
@@ -929,8 +943,14 @@ _otpXlateUnivGo( OTPFacetInfo *facetInfo, octObject *pConts, Tcl_DString *pStr){
     if ( flags & OTP_DsgnF_Verbose ) {
 	Tcl_DStringAppend(pStr, "puts stdout \"Running universe...\"\n",-1);
     }
+    if ( flags & OTP_DsgnF_Catch )
+	Tcl_DStringAppend(pStr, "if [catch {\n",-1);
     Tcl_DStringAppendEls(pStr, "run", iterCntPtr,NULL);
     Tcl_DStringAppend(pStr,"\n",-1);
+    if ( flags & OTP_DsgnF_Catch )
+	Tcl_DStringAppend(pStr,
+		  "} errMsg] then {\n   puts stderr \"Error while running: $errMsg\"\n}\n",
+			  -1);
     if ( flags & OTP_DsgnF_Verbose ) {
 	Tcl_DStringAppend(pStr, "puts stdout \"Wrapping up...\"\n", -1);
     }
@@ -1064,6 +1084,8 @@ otpXlateFacet( OTPFacetInfo *pFInfo, Tcl_DString *pStr) {
         Tcl_DStringAppends(pStr,"puts stdout \"Defining ",ftype,
 	  " ",pFInfo->facetName, "\"\n",NULL);
     }
+    if ( pFInfo->designInfo->flags & OTP_DsgnF_Catch )
+	Tcl_DStringAppend(pStr, "if [catch {\n",-1);
     if ( pFInfo->contentsId == oct_null_id ) {
 	errRaise(SPKG,-1,"Lost contents for facet ``%s''",
 	  pFInfo->facetName);
@@ -1073,6 +1095,10 @@ otpXlateFacet( OTPFacetInfo *pFInfo, Tcl_DString *pStr) {
     sts = _otpXlateFacetCore( pFInfo, &theFacet, pStr);
 
     pFInfo->state = sts==OCT_OK ? OTP_FcsDone : OTP_FcsError;
+    if ( pFInfo->designInfo->flags & OTP_DsgnF_Catch )
+	Tcl_DStringAppend(pStr,
+		  "} errMsg] then {\n     puts stderr \"Error while defining: $errMsg\"\n}\n",
+			  -1);
     if ( pFInfo->designInfo->flags & OTP_DsgnF_Verbose ) {
         fprintf(stderr,"... %s done.\n", pFInfo->facetName);
         Tcl_DStringAppends(pStr,"puts stdout \"",ftype," ",
@@ -1138,13 +1164,14 @@ otpXlateDesignByName( char *facetName, int flags) {
     return sts;
 }
 
-#define OTP_VERS "oct2ptcl v0.1"
+#define OTP_VERS "oct2ptcl v0.2"
 
 /*global*/ optionStruct optionList[] = {
     { "r",	"",		"recursive translation" },
     { "g",	"",		"append run/wrapup command (go)" },
     { "t",	"",		"don't xlate facets with tcltk stars" },
     { "v",	"",		"verbose" },
+    { "c",	"",		"wrap things with catch{}" },
     { OPT_RARG, "facet",	"facet to translate" },
     { OPT_DESC,0,OTP_VERS},
     { OPT_CONT,0," translates an OCT facet to ptcl.\n" },
@@ -1167,6 +1194,7 @@ main( int argc, char **argv)
 	case 'g':	designFlags |= OTP_DsgnF_Go;		break;
 	case 'v':	designFlags |= OTP_DsgnF_Verbose;	break;
 	case 't':	designFlags |= OTP_DsgnF_NoTcltk;	break;
+	case 'c':	designFlags |= OTP_DsgnF_Catch;	break;
 	default:	optUsage();
 	}
     }
