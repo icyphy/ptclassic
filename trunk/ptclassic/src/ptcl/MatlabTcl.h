@@ -90,6 +90,9 @@ protected:
 	// start a Matlab process if one is not running
 	int init();
 
+	// evaluate a Matlab command
+	int evaluate(char* command, int outputBufferFlag);
+
 	// the current Tcl interpeter
 	Tcl_Interp* tclinterp;
 
