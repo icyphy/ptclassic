@@ -251,7 +251,7 @@ The \fIstep\fR parameter of the ``FloatRamp'' should be very small,
 such as 0.0001.
 With this value, you will hear some aliasing if you create 5 seconds
 of sound.
-The ``Integrator'' can be found in the fourth row of
+The ``Integrator'' is the seventh star in the fourth row of
 ``main.pal'', on the right, and its default
 parameter values are OK.
 Use the ``profile'' command (``,'') to read about it.
