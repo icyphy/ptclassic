@@ -6,7 +6,12 @@ Generate pseudo-IID-Gaussian random variables.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright { 1990-%Q% The Regents of the University of California }
+        copyright {
+Copyright (c) 1992-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location { CGC main library }
 	explanation {
 Use two library functions drand48() and srand48(long) in Sun machines.
