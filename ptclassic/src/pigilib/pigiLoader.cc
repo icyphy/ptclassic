@@ -77,9 +77,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define CPLUSPLUS "CC"
 #endif
 
-// define the software architecture PTARCH
-#include "ptarch.h"
-
 // define extra compiler options EXTRAOPTS
 #ifdef PTSVR4
 #ifdef __GNUG__
@@ -293,7 +290,13 @@ static char* genObjDir (const char* srcDirStr) {
 	    *srcloc = 0;		// temporarily null terminate srcloc
 	    StringList temp = srccopy;
 	    *srcloc = tmpChar;
-	    temp << "/obj." << PTARCH;	// replace "/src" with "/obj.$PTARCH"
+ 	    const char* ptarch = getenv("PTARCH");
+	    if ( ptarch == (const char *)NULL ) {
+	      ErrAdd("PTARCH environment variable not set");
+	      return (char *)NULL;
+	    }
+ 	    temp << "/obj." << ptarch;	// replace "/src" with "/obj.$PTARCH"
+
 	    temp << &srcloc[4];		// copy rest of source directory
 	    if ( exists(temp) ) {
 		objDirStr = savestring(temp);
@@ -401,6 +404,11 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 	// Determine and save the source and object directory names
 	char* expandedSrcDir = expandPathName(srcDirStr);
 	char* expandedObjDir = genObjDir(expandedSrcDir);
+	if ( expandedObjDir == (char *)NULL) {
+	    ErrAdd("Cannot expand object directory name");
+	    return (FALSE);
+	}
+
 	StringList srcDir = expandedSrcDir;
 	StringList objDir = expandedObjDir;
 	delete [] expandedSrcDir;
