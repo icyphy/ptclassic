@@ -4,15 +4,54 @@
 <Title>User's Guide to the HTML Editor</title>
 </head>
 <body>
-[<a href="introduction.html">        Home     </a>]
-[<a href="authors.html">             Authors  </a>]
-[<a href="index.html">               Index    </a>]
-[<a href=abbreviations.html>         Abbreviations </a>]
-[<a href="bindings.html">            Key bindings </a>]
+[<a href="../../../../kernel/doc/introduction.html">        Home     </a>]
+[<a href="../../../../kernel/doc/authors.html">             Authors  </a>]
+[<a href="../../../../tycho.idx">                           Index    </a>]
+[<a href=../../../../kernel/doc/abbreviations.html>         Abbreviations </a>]
+[<a href="../../../../kernel/doc/bindings.html">            Key bindings </a>]
 <HR>
-<h1>User's Guide to the HTML Editor</h1>
+<h1><a name="HTML editor">User's Guide to the HTML Editor</a></h1>
 <p>
-FIXME
+This class provides a text editor specialized for editing
+HTML source.
+The <a name="EditHTML class">EditHTML class</a> is derived from the
+<a href=../../../../kernel/doc/usersGuides/EditHelp.html>Edit class</a>, and
+therefore inherits all of its features.
+It colors HTML commands and supports
+<a name="hypertext links">hypertext links</a>.
+That is, hypertext references in the HTML file are live.
+Note that after entering hypertext links,
+you will need to invoke the <a name=recolorize>"Recolorize"</a>
+command in the "Format"
+menu for the hypertext links to become live.
+<p>
+A special feature is the <a name="check links command">"check links"</a>
+command, available under the "Edit" menu.
+This command identifies all the hypertext links in the file
+and checks to see whether they are valid.
+It is currently limited to links of the forms:
+<pre>
+    &lt;a href="filename"&gt;
+    &lt;a href="#point"&gt;
+    &lt;a href="filename#point"&gt;
+</pre>
+The "point" is a name within the file identified by a
+<a name="name attribute">name attribute</a>.
+The quotation marks are optional, unless there are spaces in either
+the filename or the point.
+An invalid link is one where the referenced file does not exist
+or is not readable, or the named point within the file does not exist.
+When an invalid link is found, the user is queried for a substitute.
+<p>
+The
+<a href=../../../../kernel/doc/usersGuides/HTMLHelp.html>
+Tycho HTML browser</a>
+support some Tycho-specific
+<a href="../internals/documentation.html#HTML extensions">
+HTML extensions</a>.
+Moreover, there is an automatic 
+<a href="../../../../kernel/doc/internals/documentation.html#indexing documents">
+index generator</a>.
 <p>
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
