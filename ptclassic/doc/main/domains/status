@@ -8,9 +8,8 @@ system.  Any
 may contain other
 .c Wormhole s
 to make a hierarchical structure.
-Since they use nothing but the universal\**
-.c Particle s
-for now, no example of data-format conversion is apparent.
-.(f
-\**Sure, they may use other types of \fBParticles\fR.
-.)f
+A couple of domains are to be added in the near future : THOR, MQ.
+Currently, the DE domain only is timed.  After the THOR domain
+is incorporated, our scheme of timing management will be rigorously
+tested.  The timed nature of the SDF domain has proven to be
+well behaved with the DE domain.
