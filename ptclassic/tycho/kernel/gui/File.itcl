@@ -1127,7 +1127,7 @@ body ::tycho::File::makeTychoDir {} {
     set dotTycho [file join [glob ~] .Tycho]
 
     if {![file exists $dotTycho]} {
-        exec mkdir $dotTycho
+	::tycho::mkdir $dotTycho
     } {
         if {![file isdirectory $dotTycho]} {
             error "Cannot create $dotTycho directory because a file \
