@@ -72,16 +72,19 @@ produce only one window, and then outputs zero for all later samples.
 	}
 #define SDFWinType_Null		(0)
 #define SDFWinType_Rectangle	(1)
-#define SDFWinType_Hanning	(2)
-#define SDFWinType_Hamming	(3)
-#define SDFWinType_Blackman	(4)
-#define SDFWinType_SteepBlackman	(5)
+#define SDFWinType_Bartlett	(2)
+#define SDFWinType_Hanning	(3)
+#define SDFWinType_Hamming	(4)
+#define SDFWinType_Blackman	(5)
+#define SDFWinType_SteepBlackman	(6)
     }
     start {
 	char *wn = name;
 
 	/*IF*/ if ( strcasecmp( wn, "Rectangle")==0 ) {
 	    winType = SDFWinType_Rectangle;
+	} else if ( strcasecmp( wn, "Bartlett")==0 ) {
+	    winType = SDFWinType_Bartlett;
 	} else if ( strcasecmp( wn, "Hanning")==0 ) {
 	    winType = SDFWinType_Hanning;
 	} else if ( strcasecmp( wn, "Hamming")==0 ) {
@@ -118,6 +121,9 @@ produce only one window, and then outputs zero for all later samples.
 	case SDFWinType_Rectangle:
 	    scale0 = 1;
 	    break;
+	case SDFWinType_Bartlett:
+	    scale0 = 0;		scale1 = 2.0/realLen;
+	    break;
 	case SDFWinType_Hanning:
 	    scale0 = .5;	scale1 = -.5;	freq1 = 2*base_w;
 	    break;
@@ -143,12 +149,25 @@ produce only one window, and then outputs zero for all later samples.
 	int i;
 	double val;
 
-	for ( i=0; i < realLen; i++) {
-	    val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
-	    output%(realPeriod-i-1) << val;
+	switch ( winType ) {
+	case SDFWinType_Bartlett:
+	    for ( i=0; i < realLen/2; i++) {
+		val = scale1 * (i+1);
+		output%(realPeriod-(i+1)) << val;
+	    }
+	    for ( ; i < realLen; i++) {
+		val = scale1 * (realLen-(i+1));
+		output%(realPeriod-(i+1)) << val;
+	    }
+	    break;
+	default:
+	    for ( i=0; i < realLen; i++) {
+		val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
+		output%(realPeriod-(i+1)) << val;
+	    }
 	}
 	for ( ; i < realPeriod; i++) {
-	    output%(realPeriod-i-1) << double(0.0);
+	    output%(realPeriod-(i+1)) << double(0.0);
 	}
 	if ( int(period) < 0 )
 	    realLen = 0;
