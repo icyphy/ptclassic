@@ -138,7 +138,7 @@ ifdef FLUSH_CACHE
 	ln $(FLUSH_CACHE) $(LIBDIR)	
 endif
 
-EXTRA_SRCS=XDomain.ccP ArrayState.ccP ArrayState.hP ScalarState.ccP ScalarState.hP
+EXTRA_SRCS=XDomain.ccP ArrayState.ccP ArrayState.hP ScalarState.ccP ScalarState.hP flush_cache.s
 
 # Commands to make some sources from templates
 
