@@ -2,6 +2,7 @@ static const char file_id[] = "PriorityQueue.cc";
 /**************************************************************************
 Version identification:
 $Id$
+@(#)PriorityQueue.cc	1.21	1/28/94
 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -177,7 +178,8 @@ LevelLink* PriorityQueue :: leveltup(Pointer a, double v, double fv)
 	while (l != lastNode) {			// compare but last
 		if (v < l->level || (v == l->level && fv < l->fineLevel)) {
 		   LevelLink *tmp = newLink->setLink(a,v,fv,l,l->before);
-		   l->before->next = l->before = tmp;
+ 		   l->before->next = tmp;
+ 		   l->before = tmp;
 		   lastReference = lastNode;
 		   return newLink;
 		}
@@ -193,7 +195,8 @@ LevelLink* PriorityQueue :: leveltup(Pointer a, double v, double fv)
 		return newLink;
 	} 
 	LevelLink *tmp = newLink->setLink(a,v,fv,l,l->before);
-	l->before->next = l->before = tmp;
+ 	l->before->next = tmp;
+ 	l->before = tmp;
 	lastReference = lastNode;
 	return newLink;
 }
@@ -317,4 +320,3 @@ void PriorityQueue :: put (Pointer a, double v)
         }
         lastReference = lastNode;
 }
-
