@@ -118,11 +118,11 @@ public:
         // Determine whether the port is an input or output.
         // For class PortHole, it is unspecified, so both
         // functions return FALSE.
-        virtual int isItInput () {return FALSE; }
-        virtual int isItOutput () {return FALSE; }
+        virtual int isItInput ();
+        virtual int isItOutput ();
 
 	// Determine whether the port is a multiporthole.
-	virtual int isItMulti () { return FALSE;}
+	virtual int isItMulti ();
 
 	// print info on the PortHole
 	StringList printVerbose ();
@@ -130,10 +130,7 @@ public:
 	// virtual function used for new connections.
 	// PortHole uses this one unchanged; MultiPortHole has to create
 	// a new Port.
-	virtual PortHole& newConnection() {
-	// my apologies for this horrible cast
-		return *(PortHole *)&GenericPort::realPort();
-	}
+	virtual PortHole& newConnection();
 
 	GenericPort& realPort();
 
@@ -147,7 +144,7 @@ public:
 	void inheritTypeFrom(GenericPort& p) { typePort = &p;}
 
 	// function to initialize PortHole Plasmas
-	virtual Plasma* setPlasma() { return 0;}
+	virtual Plasma* setPlasma();
 
 
 	// function to connect two portholes
@@ -206,9 +203,9 @@ public:
 	// Methods that are called by the Star::beforeGo()
 	//  and Star::afterGo() before and after go()
 	// Can be used for things like inputing and output
-	//  Particles
-	virtual void beforeGo() {}
-	virtual void afterGo() {}
+	//  Particles.  These are currently do-nothing functions
+	virtual void beforeGo(); 
+	virtual void afterGo();
 
 	// Operator to return Particles previously input or output
 	// Argument is the delay in the past
@@ -279,7 +276,8 @@ private:
         //////////////////////////////////////////
 
 class InPortHole : public PortHole {
-	int isItInput() {return TRUE;}
+public:
+	int isItInput(); // return TRUE
 };
 
         //////////////////////////////////////////
@@ -287,7 +285,8 @@ class InPortHole : public PortHole {
         //////////////////////////////////////////
 
 class OutPortHole : public PortHole {
-	int isItOutput() {return TRUE;}
+public:
+	int isItOutput(); // {return TRUE;}
 };
 
         //////////////////////////////////////////
@@ -320,10 +319,10 @@ public:
 class MultiPortHole: public GenericPort
 {
 public:
-	void initialize() {ports.initialize();}
+	void initialize();
 
 	// virtual function to identify multi-ness
-	int isItMulti() {return TRUE;}
+	int isItMulti(); // {return TRUE;}
 
         // Every MultiPortHole must be initialized with the setPort function
         // Arguments are the name and type (see type.h for supported types).
@@ -364,6 +363,8 @@ public:
 	// function to set Plasma type of subportholes
 	Plasma* setPlasma();
 
+	// destructor
+	~MultiPortHole();
 protected:                           
         // List of ports allocated
         PortList ports;

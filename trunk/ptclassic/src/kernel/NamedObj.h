@@ -50,17 +50,17 @@ public:
 	}
 
 	// initialize the object
-	virtual void initialize() {}
+	virtual void initialize();
 
 	// method to dump all info, must be redefined
 	virtual StringList printVerbose () = 0;
 
 	// print all info at all levels.  Same as printVerbose
 	// unless redefined
-	virtual StringList printRecursive () { return printVerbose ();}
+	virtual StringList printRecursive ();
 
 	// make destructors for all NamedObjs virtual
-	virtual ~NamedObj() {}
+	virtual ~NamedObj();
 };
 
 #endif

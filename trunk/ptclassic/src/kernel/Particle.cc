@@ -36,7 +36,20 @@ Particle& IntSample :: operator = (const Particle& p)
 	return *this;
 }
 
+dataType IntSample :: readType() const {return INT;}
+IntSample :: operator int () const {return data;}
+IntSample :: operator float () const {return (float)data;}
+IntSample :: operator Complex () const {return Complex(data);}
+
 char* IntSample :: print () const { return form("%d",data);}
+
+	// Wash the Particle
+void IntSample :: initialize() {data=0;}
+
+	// Load up with data
+void IntSample :: operator << (int i) {data=i;}
+void IntSample :: operator << (float f) {data=(int)f;}
+void IntSample :: operator << (Complex& c) {data=(int)c.real();}
 
 
 	////////////////////////////////////////
@@ -56,7 +69,24 @@ Particle& FloatSample :: operator = (const Particle& p)
 	return *this;
 }
 
+
+dataType FloatSample :: readType() const {return FLOAT;}
+ 
+        // Cast to an int, float, and Complex
+FloatSample :: operator int () const {return (int)data;}
+FloatSample :: operator float () const {return data;}
+FloatSample :: operator Complex () const {return Complex(data);}
+
 char* FloatSample :: print () const { return form("%f",data);}
+ 
+ 
+        // Initialize the Particle
+void FloatSample :: initialize() {data=0.0;}
+ 
+        // Load up with data
+void FloatSample :: operator << (int i) {data=(float)i;}
+void FloatSample :: operator << (float f) {data=f;}
+void FloatSample :: operator << (Complex& c) {data=(float)c.real();}
 
         ////////////////////////////////////////
         // class ComplexSample
@@ -75,8 +105,24 @@ Particle& ComplexSample :: operator = (const Particle& p)
         return *this;
 }
 
+dataType ComplexSample :: readType() const {return COMPLEX;}
+ 
+        // Cast to an int, float, Complex
+ComplexSample :: operator int () const {return (int)data.real();}
+ComplexSample :: operator float () const {return (float)data.real();}
+ComplexSample :: operator Complex () const {return data;}
+
 char* ComplexSample :: print () const
         { return form("(%f,%f)",data.real(),data.imag());}
+
+ 
+        // Initialize the Particle
+void ComplexSample :: initialize() {data=0.0;}
+
+        // Load up with data
+void ComplexSample :: operator << (int i) {data=Complex(i);}
+void ComplexSample :: operator << (float f) {data=Complex(f);}
+void ComplexSample :: operator << (Complex& c) {data=c;}
 
 
 	////////////////////////////////////////

@@ -29,6 +29,13 @@ const int TOKSIZE = 80;
 
 **************************************************************************/
 
+// small virtual functions in baseclass
+char* State :: type () { return "STRING";}
+
+int State :: size () { return 1;}
+
+StringList State :: currentValue () { return initValue;}
+
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';

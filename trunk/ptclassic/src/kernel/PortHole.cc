@@ -75,6 +75,18 @@ Pointer* CircularBuffer :: previous(int i)
         return buffer + ((current - i) % dimen);
 }
 
+// Small virtual methods
+int GenericPort :: isItInput () { return FALSE;}
+int GenericPort :: isItOutput () { return FALSE;}
+int GenericPort :: isItMulti () { return FALSE;}
+
+PortHole& GenericPort :: newConnection () {
+	// my apologies for this horrible cast
+	return *(PortHole *)&GenericPort::realPort();
+}
+
+Plasma* GenericPort :: setPlasma() { return 0;}
+
 // The connect method
 // This method is virtual and may be overridden
 
@@ -104,6 +116,13 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 
 	return;
 }
+
+// small virtual functions for PortHole, InPortHole, OutPortHole
+
+int InPortHole :: isItInput() { return TRUE;}
+int OutPortHole :: isItOutput() { return FALSE;}
+void PortHole :: beforeGo () { return;}
+void PortHole :: afterGo () { return;}
 	
 void PortHole :: allocateBuffer()
 {
@@ -177,6 +196,13 @@ PortHole :: printVerbose () {
         }
         return out;
 }
+
+int MultiPortHole :: isItMulti() { return TRUE;}
+
+void MultiPortHole :: initialize() { ports.initialize();}
+
+// this is not really a do-nothing: it destroys its member object "ports".
+MultiPortHole :: ~MultiPortHole() {}
 
 StringList
 MultiPortHole :: printVerbose () {
