@@ -117,7 +117,8 @@ endif
 ifdef CG56
 	CUSTOM_DIRS += $(CG56DIR)/kernel $(CG56DIR)/stars \
 		$(CG56DIR)/targets $(CG56DIR)/dsp/stars
-	CG = 1
+	# must bring in the parallel schedulers for multi-cg56 targets
+	CGFULL = 1
 	PALETTES += PTOLEMY/src/domains/cg56/icons/main.pal
 	STARS += $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
 	LIBS += -lcg56dspstars -lcg56stars -lcg56
@@ -167,14 +168,6 @@ ifdef THOR
 		$(LIBDIR)/libthor.$(LIBSUFFIX)
 endif
 
-ifdef CGCFULL
-	CGC = 1
-	CM5 = 1
-	ifdef TK
-		CGCTK = 1
-	endif
-endif
-
 ifdef CGDDF
 	CUSTOM_DIRS += $(CGDDFDIR)/ddfScheduler
 	CGDDFLIB = 1
@@ -182,6 +175,15 @@ ifdef CGDDF
 	CGC = 1
 	CGFULL = 1
 	TARGETS += $(CGCT)/main/CGCDDFTarget.o
+endif
+
+ifdef CGCFULL
+	CGC = 1
+	CGFULL = 1
+	CM5 = 1
+	ifdef TK
+		CGCTK = 1
+	endif
 endif
 
 ifdef CGFULL
@@ -330,8 +332,7 @@ ifdef CM5
 endif
 
 ifdef CGC
-	CUSTOM_DIRS += $(CGCDIR)/targets/main $(CGCDIR)/stars \
-		$(CGCDIR)/kernel
+	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/kernel
 	ifdef CGCTK
 		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets
 		STARS += $(LIBDIR)/cgctcltkstars.o
@@ -342,19 +343,22 @@ ifdef CGC
 	CG = 1
 	SDFLIB = 1
 	BDFLIB = 1
-	ifeq ($(USE_SHARED_LIBS),yes) 
-		LIBS += -lcgctargets
-		LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
-	else
-		TARGETS += $(CGCT)/main/CGCUnixSend.o \
-			$(CGCT)/main/CGCUnixReceive.o \
-			$(CGCT)/main/CGCMultiTarget.o \
-			$(CGCT)/main/CGCMacroStar.o \
-			$(CGCT)/main/CGCDDFCode.o \
-			$(CGCT)/main/CGCSDFSend.o \
-			$(CGCT)/main/CGCSDFReceive.o \
-			$(CGCT)/main/CGCSDFBase.o \
-			$(CGCT)/main/CGCTargetWH.o
+	ifdef CGPAR
+		CUSTOM_DIRS += $(CGCDIR)/targets/main
+		ifeq ($(USE_SHARED_LIBS),yes) 
+			LIBS += -lcgctargets
+			LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
+		else
+			TARGETS += $(CGCT)/main/CGCUnixSend.o \
+				$(CGCT)/main/CGCUnixReceive.o \
+				$(CGCT)/main/CGCMultiTarget.o \
+				$(CGCT)/main/CGCMacroStar.o \
+				$(CGCT)/main/CGCDDFCode.o \
+				$(CGCT)/main/CGCSDFSend.o \
+				$(CGCT)/main/CGCSDFReceive.o \
+				$(CGCT)/main/CGCSDFBase.o \
+				$(CGCT)/main/CGCTargetWH.o
+		endif
 	endif
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
 	STARS += $(LIBDIR)/cgcstars.o
