@@ -37,7 +37,8 @@
 # acknowledged.  This is a procedure in the global scope that will
 # handle all background errors in Tk.  Therefore, within the tycho
 # namespace and within classes it should be sufficient to simply
-# call the Tcl command "error".
+# call the Tcl command <code>error</code>, rather than calling this
+# directly.
 #
 proc ::tkerror {msg} {
     # Handle the blank message case
@@ -52,7 +53,7 @@ proc ::tkerror {msg} {
 # This utility displays the stack in a window. Insert it in code for
 # debugging. The argument is displayed on the first line, and can be
 # used to give additional information or distinguish between distinct
-# instances of the procedure.
+# instances of the procedure call.
 #
 proc ::tycho::showStack {args} {
     # From Ousterhout
@@ -65,12 +66,14 @@ proc ::tycho::showStack {args} {
     ::tycho::post $trace
 }
 
-# COMPATIBILITY procedures.  The following procedures emulate the behavior
+# COMPATIBILITY procedure.  This procedure emulates the behavior
 # of similarly named procedures in pigi, the predecessor to Tycho.
-# The window names in these arguments are ignored (since they bring
+# The window name in the first argument is ignored (since they bring
 # up modal dialogs, the window names are not important anyway).
-#
 proc ::ptkImportantMessage {win msg} {::tkerror $msg}
+
+# COMPATIBILITY procedure.  This procedure emulates the behavior
+# of similarly named procedures in pigi, the predecessor to Tycho.
 proc ::ptkDisplayErrorInfo {} {
     global ::errorInfo
     # We have to return immediately, or the pigiRpc process gets into
@@ -81,8 +84,8 @@ proc ::ptkDisplayErrorInfo {} {
 ##########################################################################
 #### ErrorMessage
 # Issue an error message to the user. To issue an error message, simply call
-# the Tcl command "error". If the error occured in processing a
-# background Tk command, then "tkerror" will be invoked, which in turn
+# the Tcl command <code>error</code>. If the error occured in processing a
+# background Tk command, then <code>tkerror</code> will be invoked, which in turn
 # will create an instance of this class and pop up a modal dialog to
 # inform the user. "Modal" means that nothing further will happen until
 # the window is destroyed.  Here is an example:
@@ -90,6 +93,8 @@ proc ::ptkDisplayErrorInfo {} {
 # ::tycho::ErrorMessage .xx -text {An error message}
 # wm deiconify .xx
 # </pre></tcl>
+# The stack trace that you will get if you push the stack trace button on this
+# example is irrelevant, since no error occurred.
 #
 class ::tycho::ErrorMessage {
     inherit ::tycho::Message
@@ -127,6 +132,10 @@ body ::tycho::ErrorMessage::constructor {args} {
 ##########################################################################
 #### stackTrace
 # Show the stack trace in a window, if there is one.
+# Note that this stack trace is that associated with the most recent error.
+# That error may be one that was caught, and that therefore was never seen
+# by the user.  Normally, this method should only be invoked after an error
+# that the user should see.
 #
 body ::tycho::ErrorMessage::stackTrace {} {
     if {$localErrorInfo != ""} {
