@@ -67,6 +67,7 @@ public:
 
 const bitWord AB_CONST = 1;
 const bitWord AB_SETTABLE = 2;
+const bitWord AB_DYNAMIC = 4;
 const bitWord AB_DEFAULT = AB_CONST | AB_SETTABLE;
 
 // standard attributes for all domains.
@@ -74,7 +75,8 @@ extern const Attribute A_CONSTANT;	// value never changed by star exec.
 extern const Attribute A_SETTABLE;	// user may set this state
 extern const Attribute A_NONCONSTANT;	// value changed by star exec.
 extern const Attribute A_NONSETTABLE;	// user may not set this state
-
+extern const Attribute A_DYNAMIC;	// state may be modified externally
+					// during execution.
 class State : public NamedObj
 {
 public:
