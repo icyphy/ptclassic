@@ -1,7 +1,7 @@
-static const char file_id[] = "fft.cc";
+static const char file_id[] = "nb_fft.cc";
 
 #include <Complex.h>
-#include "fft.h"
+#include "nb_fft.h"
 
 const NEXTMX = 12;
 
