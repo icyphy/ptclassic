@@ -43,6 +43,6 @@ typedef const char* DataType;
 // ANYTYPE is provided for the benefit of Stars like Fork
 // and Printer that operate independently of Particle type
 
-extern const DataType INT, FLOAT, STRING, COMPLEX, ANYTYPE;
+extern const DataType INT, FLOAT, STRING, COMPLEX, FIX, ANYTYPE;
 
 #endif
