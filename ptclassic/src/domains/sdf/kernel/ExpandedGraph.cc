@@ -112,9 +112,7 @@ void ExpandedGraph::initialize_invocations()
   	DataFlowStar *s;
 
   	while ((s = (DataFlowStar*)nextStar++) != 0) {
-	        // Use a two casts because Fraction does not have
-	        // a direct cast to int.
-		nodecount += int( double(s->repetitions));
+		nodecount += int(s->repetitions);
 		createInvocations(s);
 	}
 }
