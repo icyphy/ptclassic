@@ -48,7 +48,7 @@ static char SccsId[]="$Id$";
 #include <pwd.h>
 #endif /* DNET */
 
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "xvals.h"
 #include "list.h"
 #include "bindings.h"

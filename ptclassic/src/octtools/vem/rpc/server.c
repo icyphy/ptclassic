@@ -34,7 +34,7 @@ static char SccsId[]="$Id$";
  *
  */
 
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "xvals.h"
 #include "general.h"
 #include "message.h"
