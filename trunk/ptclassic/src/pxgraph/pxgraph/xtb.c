@@ -70,11 +70,13 @@ static unsigned long back_pix;	/* Background color */
 
 static XFontStruct *norm_font;	/* Normal font      */
 
-extern char *malloc();
+
 /*#define STRDUP(str)	(strcpy(malloc((unsigned) (strlen(str)+1)), (str)))*/
 extern char *strcpy();
-extern void free();
-
+/* These are now included in xgraph.h which includes malloc.h
+ * extern char *malloc();
+ * extern void free();
+ */
 
 
 void xtb_init(disp, scrn, foreground, background, font)
