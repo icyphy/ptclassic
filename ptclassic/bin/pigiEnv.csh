@@ -136,6 +136,7 @@ if ($?pigidebug && ! $?PIGIRPC ) then
 	endif
 endif
 
+
 if ( ! $?PIGIRPC ) then
      setenv PIGIRPC $PTOLEMY/bin.$PTARCH/$PIGIBASE
 endif
@@ -154,6 +155,12 @@ if ( ! -x $PIGIRPC ) then
 			exit 4
 		endif
 	endif
+endif
+
+if ( -z $PIGIRPC ) then
+	echo "$PIGIRPC binary is zero length. Perhaps make install failed?"
+	ls -l $PIGIRPC
+	exit 4
 endif
 
 if ( "$1" =~ "-*" ) then
