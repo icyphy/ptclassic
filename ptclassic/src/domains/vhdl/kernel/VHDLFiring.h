@@ -81,6 +81,12 @@ class VHDLFiring : public VHDLObj
   int noOutclocking;
   // Firegroup serial number
   int groupNum;
+  // Starting time.
+  int startTime;
+  // Ending time.
+  int endTime;
+  // Latency (note: should be endTime - startTime).
+  int latency;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
