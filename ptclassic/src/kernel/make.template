@@ -41,11 +41,11 @@ LIB=libptolemy.a
 LIBCCSRCS=Architecture.cc AutoForkNode.cc \
  Block.cc Code.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  DataStruct.cc Display.cc Domain.cc Error.cc \
- Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc InterpGalaxy.cc \
+ Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc Histogram.cc InterpGalaxy.cc \
  InterpUniverse.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
  Packet.cc Particle.cc PriorityQueue.cc Scheduler.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
- checkConnect.cc expandPath.cc \
+ checkConnect.cc expandPath.cc int.Vec.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
  KnownState.cc State.cc StringState.cc
 LIBCSRCS=gnulib3a.c
@@ -55,15 +55,15 @@ LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
-HDRS= Architecture.h AutoForkNode.h \
+HDRS= Architecture.h Attribute.h AutoForkNode.h \
  Block.h CircularBuffer.h Code.h ComplexSubset.h Connect.h \
  DataStruct.h Display.h Domain.h Error.h Fraction.h Galaxy.h \
- GalIter.h Geodesic.h InterpGalaxy.h \
+ GalIter.h Geodesic.h Histogram.h InterpGalaxy.h \
  InterpUniverse.h Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h \
  NamedObj.h Output.h Packet.h Particle.h ParticleQueue.h ParticleStack.h \
  Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
  Universe.h UserOutput.h WormConnect.h Wormhole.h \
- dataType.h miscFuncs.h type.h \
+ dataType.h int.Vec.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h \
  FloatVecData.h IntVecData.h ImageData.h
@@ -144,6 +144,10 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	mv Int.int.ArrayState.h IntArrayState.h; \
 	sed 's/"IntARRAY/"INTARRAY/' Int.int.ArrayState.cc > IntArrayState.cc; \
 	rm Int.int.ArrayState.cc
+
+# For libg++ versions 1.39 and later, change /Vec to /gen/Vec in next line.
+int.Vec.h int.Vec.cc : $(GNUINCLUDE)/Vec.hP $(GNUINCLUDE)/Vec.ccP
+	genclass int val Vec
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
