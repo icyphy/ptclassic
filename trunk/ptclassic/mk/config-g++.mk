@@ -75,4 +75,10 @@ X11INCL=
 # containing them.  Otherwise leave it blank.
 X11LIBDIR=
 
+# LX11 is normally just -lX11, but some vendors (e.g. DEC) have put
+# this library somewhere else, e.g. -lX11-mit.
+LX11 = -lX11
 
+# LXEXT is normally just -lXext, but some vendors (e.g. DEC) have put
+# this library somewhere else, e.g. -lXext-mit.
+LXEXT = -lXext
