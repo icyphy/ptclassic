@@ -38,30 +38,27 @@ provisions.
     sampleRate.setInitValue(8000);
   }
 
-  codeblock (convert) {
-    {
-      /* select convert procedure depending on encoding type */
-      int i;
-      if (strcasecmp($ref(encodingType), "linear16") == 0) 
-	{
-	  for (i=0; i <($val(blockSize)/2); i++) {
-	    /* Convert the 16-bit sample to a floating point [-1.0,1.0] */
-	    $ref(output,i) = $starSymbol(buffer)[i] /32768.0;
-	  }
-	}
-      else
-	{
-	  for (i = 0; i < $val(blockSize); i++) {
-	    /* Read mu-law PCM sample from buffer */
-	    int ulawbyte = $starSymbol(buffer)[$val(blockSize)-1-i];
-	    /* Convert mu-law PCM sample to a 16-bit sample */
-	    int sample16 = Ptdsp_PCMMuLawToLinear(ulawbyte);
-	    /* Convert the 16-bit sample to a floating point [-1.0,1.0] */
-	    $ref(output,i) = ((double)sample16) / 32768.0;
-	  }
-	}
-    }
-  }
+  codeblock (convertLinear) {{
+     /* convert from linear16 to floating point */
+     int i;
+     for (i=0; i <($val(blockSize)/2); i++) {
+       /* Convert the 16-bit sample to a floating point [-1.0,1.0] */
+	$ref(output,i) = $starSymbol(buffer)[i] /32768.0;
+     }
+  }}
+
+  codeblock (convertUlaw) {{
+     /* convert from ulaw to floating point */
+     for (i = 0; i < $val(blockSize); i++) {
+       /* Read mu-law PCM sample from buffer */
+       int ulawbyte = $starSymbol(buffer)[$val(blockSize)-1-i];
+       /* Convert mu-law PCM sample to a 16-bit sample */
+       int sample16 = Ptdsp_PCMMuLawToLinear(ulawbyte);
+       /* Convert the 16-bit sample to a floating point [-1.0,1.0] */
+       $ref(output,i) = ((double)sample16) / 32768.0;
+     }
+  }}
+
 
   codeblock (setbufptr) {
     $starSymbol(bufferptr) = $starSymbol(buffer);
@@ -101,7 +98,11 @@ provisions.
   go {
     addCode(setbufptr);
     addCode(read);
-    addCode(convert);
+    if (strcasecmp(encodingType, "linear16") == 0) {
+	addCode(convertLinear);
+    } else {
+	addCode(convertUlaw);
+    }
   }
 
   wrapup {
