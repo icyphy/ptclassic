@@ -2,8 +2,10 @@
 .NA priority
 .SD
 Demonstrates the use of the PriorityQueue block together with a Server.
+The upper input to the PriorityQueue has priority over the lower input.
+Thus, when the queue overflows, data is lost from the lower input.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
+.LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

@@ -1,12 +1,12 @@
-.\" @(#)atmPattRecover 1.1 10/10/92
+.\" $Id$
 .NA "ATMPattRecover"
 .SD
  This demonstration implements a voice-cell recovery technique.
  Cells which have been dropped are replaced by samples determined
 through a complicated pattern matching technique.
 .SE
-.LO "~ptolemy/src/domains/de/demo"
-.SV 1.1 10/10/92
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "G. S. Walter"
 .LD
  This demonstration reads 8 kHz voice samples, converts them into 64 kbps

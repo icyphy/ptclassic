@@ -1,9 +1,13 @@
 .\" $Id$
 .NA qAndServer
 .SD
-Demonstrates the use of the FIFOQueue and Stack blocks together with Servers.
+Demonstrate the use of the FIFOQueue and Stack stars together with Servers.
+A regular counting process is enqueued on both stars.  The particles are
+dequeued whenever the server is free.
+The Stack is set with a larger capacity than the FIFOQueue,
+so it overflows second.  Overflow events are displayed.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
+.LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
@@ -33,11 +37,11 @@ The next 10 input events are stored, raising the sizes of the queue and
 stack to unity.
 The next 11 arrivals raise the sizes to 2,
 and the next 11 to 3.
-The arrival after this (the 34th) will be lost because it arrives when the queue
-is full.  This is evident in the queue and stack output plots, which are missing
-the particle with value 33.  The lost particles are also displayed
-in a separate trace.  It is also evident in the queue size plots,
-which show two successive values at the queue capacity.
+The capacity of the
+.c FIFOQueue
+star is set to 2, so it will overflow at this point, losing one data value.
+Lost particles are displayed
+in a separate trace.
 After this, for every 11 samples that are successfully served, one
 will be lost.
 .SA

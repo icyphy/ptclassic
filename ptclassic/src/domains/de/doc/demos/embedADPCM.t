@@ -1,12 +1,12 @@
-.\" @(#)embedADPCM 1.1 10/20/92
+.\" $Id$
 .NA "EmbedADPCM"
 .SD
  This demonstration shows how embedded-ADPCM with
  LSB dropping may be used in an ATM network to
 prevent mistracking between the coder and decoder.
 .SE
-.LO "~ptolemy/src/domains/de/demo"
-.SV 1.1 10/20/92
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "G. S. Walter."
 .LD
  This demonstration reads 8 kHz voice samples and converts

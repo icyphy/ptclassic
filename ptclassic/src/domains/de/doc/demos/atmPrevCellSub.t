@@ -1,4 +1,4 @@
-.\" @(#)atmPrevCellSub 1.1 10/1/92
+.\" $Id$
 .NA "ATMPrevCellSub"
 .SD
 This demonstration implements a voice-cell recovery
@@ -6,8 +6,8 @@ technique.  Cells which have been dropped during
 transmission are replaced with the cell which arrived
 at the receiver immediately prior to the dropped cell.
 .SE
-.LO "~ptolemy/src/domains/de/demo"
-.SV 1.1 10/1/92
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "G. S. Walter"
 .LD
  This demonstration reads 8 kHz voice samples, converts

@@ -1,10 +1,12 @@
 .\" $Id$
 .NA measureDelay
 .SD
-Demonstrates the use of the MeasureDelay block.
+Demonstrate the use of the MeasureDelay block to measure the
+sojourn time of particles in a simple queueing system with
+a single server with a random service time.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV 1.1 "October 23, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "S. Ha"
 .LD
 .IE MeasureDelay

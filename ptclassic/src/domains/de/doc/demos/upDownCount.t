@@ -1,10 +1,14 @@
 .\" $Id$
 .NA upDownCount
 .SD
-Demonstrates the usage of the up/down counter
+Demonstrate the UDCounter star, an up/down counter.
+Events are generated at two different rates to count
+up and down.  The up rate is faster than the down rate,
+so the trend is upwards.  The value of the count is displayed
+every time it changes.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV 1.1 "December 3, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "S. Ha"
 .LD
 .IE UDCounter
@@ -15,15 +19,7 @@ The \fIcountUp\fR input is fed by a clock signal (interval = 2),
 and the \fIcountDown\fR input is fed by another clock signal
 (interval = 3.33).  The count state of the
 .c UDCounter
-block is disclosed at the demand input.  
-We merge two input events to the demand input to display the
-count at every input.
-The count state is reset
-by the reset input.  In this demo, no event is delivered to the reset
-input, so connected to the
-.c Null
-block.  
+block is sent to an Xgraph star whenever it changes.
 .SA
-Null,
-UDCounter.
+UDCounter
 .ES

@@ -1,10 +1,13 @@
 .\" $Id$
 .NA router
 .SD
-Random delay and re-ordering demo.
+Randomly route an irregular but monotonic
+signal (a Poisson counting process) through
+two channels with random delay, and merge the
+channel outputs.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ "October 22, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
 A Poisson counting process is randomly routed through one

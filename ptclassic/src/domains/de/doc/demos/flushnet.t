@@ -2,9 +2,11 @@
 .NA FlushNet
 .SD
 Simulate a queue with "input flushing" during overflow.
+If the queue reaches capacity, all new arrivals are discarded
+until all items in the queue have been served.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ 11/9/92
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "Paul Haskell."
 .LD
 The
@@ -18,8 +20,6 @@ galaxy.
 The
 .c FlushQueue
 galaxy queues and services arriving inputs.
-If the queue reaches capacity, all new arrivals are discarded
-until \fBall\fR items in the queue have been served.
 Compared to the strict first-come, first-served (FIFO) queue
 service, this queue service discipline can increase the time
 between queue overflows, at the expense of the loss of more data

@@ -1,9 +1,15 @@
 .\" $Id$
 .NA queue
 .SD
-Demonstrates the use of the FIFOQueue and Stack blocks.
+Demonstrate the use of the FIFOQueue and Stack stars.
+A Poisson counting process is enqueued on both stars,
+and is dequeued at a regular rate, every 1.0 time units.
+The output of the FIFOQueue is always monotonically increasing,
+because of the FIFO policy, but the output of the Stack need not
+be.  The Stack is set with a smaller capacity than the FIFOQueue,
+so it overflows first.  Overflow events are displayed.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
+.LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
@@ -38,12 +44,13 @@ the FIFOQueue or Stack accumulates many demands that can later be used up
 when the interarrival times are small.
 .pp
 To keep the queue size from growing indefinitely it is constrained
-to a maximum size of 4.
-When the queue or stack reaches this size, it accepts no further inputs,
+to a maximum size of 4 (for the
+.c FIFOQueue )
+and 3 (for the
+.c Stack ).
+When the queue or stack reaches its capacity, it accepts no further inputs,
 and the input events are sent to the overflow output.
-This shows up in the Queue-size plot as multiple successive
-outputs with value 4.
-It shows up on the "Data queued" and "Data stacked" plots
+This shows up on the "Data queued" and "Data stacked" plots
 as a second trace.  Notice also the gaps in the queue and stack outputs.
 For instance, if value 29 is followed by value 32,
 then two input events, with values 30 and 31, were lost due

@@ -1,18 +1,17 @@
 .\" $Id$
 .NA distortionQ
 .SD
-Simulates the effect on a sinusoid of random delay and reordering of samples.
+This demo is very similar to the distortion demo.
+The only difference is in the reorderQ wormhole,
+which introduces queueing.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ "October 15, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD
-This demo is very similar to the
-.c distortion
-demo.
-The only difference is in the
+The
 .c reorderQ
-wormhole, which simulates a simple packet switched communication network.
+wormhole simulates a simple packet switched communication network.
 Unlike the
 .c distortion
 demo, this one has a
