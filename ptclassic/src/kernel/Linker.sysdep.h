@@ -83,7 +83,6 @@ const int linkingNotSupported =
 //#define NO_INVOKECONSTRUCTORS
 #endif
 
-
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
 #if defined(__sgi) || defined (sgi)
@@ -182,7 +181,7 @@ extern "C" size_t getpagesize(void);
 #endif/*SOL2*/
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
-#if defined(hpux)
+#if defined(hpux) || defined(SOL2)
 #define CONS_PREFIX "__sti"
 #define CONS_LENGTH 5
 #else
