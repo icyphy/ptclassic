@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: S. Ha, E. A. Lee
+ Programmer: S. Ha, E. A. Lee, and T. M. Parks
 
  Base target for C code generation.
 
@@ -37,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGCTarget.h"
-#include "CGDisplay.h"
 #include "CGUtilities.h"
 #include "CGCStar.h"
 #include "GalIter.h"
@@ -57,8 +56,6 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "Machine on which to compile/run the generated code"));
 	addState(funcName.setState("funcName",this,"main",
                         "function name to be created."));
-        addState(doCompile.setState("doCompile",this,"YES",
-                "disallow compiling during development stage"));
 	addState(compileCommand.setState("compileCommand",this,"cc",
                         "function name to be created."));
 	addState(compileOptions.setState("compileOptions",this,"",
@@ -81,17 +78,16 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("mainClose", &mainClose);
 }
 
-StringList CGCTarget :: sectionComment(const char* s) {
-	StringList out = "\n/****** ";
-	out << s << " ******/\n";
-	return out;
-}
-
-void CGCTarget :: headerCode () {
-	StringList code = "Generated C code for target ";
-	code += fullName();
-	StringList tmp = sectionComment(code);
-	globalDecls << tmp;
+StringList CGCTarget :: comment(const char* text, const char* b,
+    const char* e, const char* c)
+{
+    const char* begin = "/* ";
+    const char* end = " */";
+    const char* cont = "   ";
+    if (b != NULL) begin = b;
+    if (e != NULL) end = e;
+    if (c != NULL) cont = c;
+    return HLLTarget::comment(text, begin, end, cont);
 }
 
 // galaxy declaration
@@ -108,7 +104,7 @@ void CGCTarget :: starDataStruct(CGCStar* block, int) {
     StringList tmp = "Star: ";
     tmp += block->fullName();
 
-    StringList out = sectionComment(tmp);
+    StringList out = comment(tmp);
 
     // Start with the PortHoles
     BlockPortIter nextPort(*block);
@@ -140,7 +136,7 @@ void CGCTarget :: setup() {
 	galId = 0; curId = 0;
 
 	if (galaxy()) setStarIndices(*galaxy()); 
-	CGTarget::setup();
+	HLLTarget::setup();
 }
 
 void CGCTarget :: initCodeStrings() {
@@ -161,20 +157,28 @@ static char* complexDecl =
 "\n typedef struct complex_data { double real; double imag; } complex; \n"
 "#endif\n";
 
+// Initial stage of code generation.
+void CGCTarget::headerCode()
+{
+    // Do nothing.
+}
+
+// Combine all sections of code.
 void CGCTarget :: frameCode () {
     Galaxy* gal = galaxy();
     // Data structure declaration
-    StringList tmp = sectionComment("Data structure declations");
+    StringList tmp = comment("Data structure declations");
     galStruct += tmp;
     galDataStruct(*gal,1);
 
     // Assemble all the code segments
-    StringList runCode = include;
+    StringList runCode = headerComment();
+    runCode += include;
     runCode += complexDecl;
     runCode += globalDecls;
     runCode += galStruct;
     runCode += procedures;
-    tmp = sectionComment("Main function");
+    tmp = comment("Main function");
     runCode += tmp;
     runCode += (const char*) funcName;
     runCode += "() {\n";
@@ -196,24 +200,12 @@ void CGCTarget :: writeCode(const char* name) {
 	if (name == NULL) {
 		StringList fname;
 		fname << galaxy()->name() << ".c"; 
-		CGTarget :: writeCode(fname);
+		HLLTarget :: writeCode(fname);
 	} else {
-		CGTarget :: writeCode(name);
+		HLLTarget :: writeCode(name);
 	}
 }
 
-void CGCTarget :: wrapup () {
-	display(myCode);
-	if (galaxy() && inWormHole() == FALSE) wormLoadCode();
-}
-
-int CGCTarget :: wormLoadCode() {
-	if (int(doCompile) == 0) return TRUE;
-	if(compileCode()) runCode();
-	if(Scheduler::haltRequested()) return FALSE;
-	return TRUE;
-}
-	
 // check whether the hostMachine is the same as my hostname.
 void CGCTarget :: checkHostMachine() {
 	localHost = FALSE;
@@ -359,7 +351,7 @@ Block* CGCTarget :: makeNew () const {
 
 // note that we allow the C compiler to do the actual allocation;
 // this routine (1) determines the buffer sizes, and buffer properties.
-// (2) splice star for copying and type conversion.
+// (2) splice star for copying
 // (3) determine the type of buffers.
 // (4) naming buffers
 // (5) buffer offset initialization
@@ -385,7 +377,7 @@ int CGCTarget :: allocateMemory() {
 		}
 	}
 
-	// (2) splice copy stars and type conversion stars if necessary.
+	// splice copy stars
 	addSpliceStars();
 
 	nextStar.reset();
@@ -602,7 +594,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	if (!flag) {
 		// run the star
-		switchCodeStream(cs, getStream("code"));
+		switchCodeStream(cs, getStream(CODE));
 		writeFiring(*cs, 1);
 		return TRUE;
 	}
@@ -631,7 +623,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 	cs->initCode();
 
 	// run the star
-	switchCodeStream(cs, getStream("code"));
+	switchCodeStream(cs, getStream(CODE));
 	writeFiring(*cs, 1);
 
 	switchCodeStream(cs, getStream("mainClose"));
@@ -640,7 +632,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 	// data structure for the star
 	starDataStruct(cs);
 
-	switchCodeStream(cs, getStream("code"));
+	switchCodeStream(cs, getStream(CODE));
 	return TRUE;
 }
 	
@@ -650,7 +642,7 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 	curId++;
 	galId = curId;
 	setStarIndices(*g);
-	if (!CGTarget :: insertGalaxyCode(g, s)) return FALSE;
+	if (!HLLTarget :: insertGalaxyCode(g, s)) return FALSE;
 	galDataStruct(*g, 1);
 	galId = saveId;
 	return TRUE;
@@ -658,7 +650,7 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 
 // redefine compileRun to switch code stream of stars
 void CGCTarget :: compileRun(SDFScheduler* s) {
-	switchCodeStream(galaxy(), getStream("code"));
+	switchCodeStream(galaxy(), getStream(CODE));
 	s->compileRun();
 	switchCodeStream(galaxy(), getStream("mainClose"));
 }
