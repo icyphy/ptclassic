@@ -1,11 +1,11 @@
  defstar {
 	name { MaxMin }
 	domain { CG56 }
-	desc { Finds maximum or minimum value. }
-	version {@(#)CG56MaxMin.pl	1.10 2/7/96}
+	desc { Finds maximum or minimum value }
+	version { $Id$ }
 	author { Chih-Tsung Huang }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -44,83 +44,89 @@ Also, the index of the output is provided (count starts at 0).
 		type {int}
 		default {"YES"}
 		desc {output maximum value else minimum is the output}
-	}    
+	}
 	state {
 		name {compareMagnitude}
 		type {int}
 		default {"NO"}
 		desc {default is not to compare magnitude}
-	}    	
+	}
 	state {
 		name {outputMagnitude}
 		type {int}
 		default {"NO"}
 		desc {default is not to output magnitude}
-	}    
+	}
 
 	setup {
 		noInternalState();
 		input.setSDFParams(int(N),int(N)-1);
 	}		
 	
-        codeblock(main) {
+	codeblock(main) {
+; Register usage:
+; r0 = address of the input values
+; r1 = index of current input value
+; r2 = index of min/max value
+; a = current input value
 	clr	b
 	move	b,r1
-        move    #<$addr(input),r0
-        move 	b,r2
-        move    x:(r0)+,a
-        do      #$val(N)-1,$starSymbol(end)
-        move    x:(r0)+,x1
-        }
-        codeblock(cmpMagYes) {
-        cmpm   x1,a	(r1)+
-        }
-        codeblock(cmpMagNo) {
-        cmp    x1,a	(r1)+
-        }
-        codeblock(maxcont) {
+	move	#<$addr(input),r0
+	move	b,r2
+	move	x:(r0)+,a
+	do	#$val(N)-1,$starSymbol(end)
+	move	x:(r0)+,x1
+	}
+	codeblock(cmpMagYes) {
+	cmpm	x1,a	(r1)+
+	}
+	codeblock(cmpMagNo) {
+	cmp	x1,a	(r1)+
+	}
+	codeblock(maxcont) {
 	tlt	x1,a	r1,r2
 $starSymbol(end)
-        }
-        codeblock(mincont) {
+	}
+	codeblock(mincont) {
 	tgt	x1,a	r1,r2	; if x1 < a, move x1 into a and r1 into r2
 $starSymbol(end)
-        }
-        codeblock(one) {
-        move    $ref(input),a
-        }
-        codeblock(outMagYes) {  
-        abs	a
-        }
-        codeblock(out) {
-        move    a,$ref(output)
+	}
+	codeblock(one) {
+	move	$ref(input),a
+	}
+	codeblock(outMagYes) {
+	abs	a
+	}
+	codeblock(out) {
+	move	a,$ref(output)
 	move	r2,$ref(index)
-       }
+	}
  	go {
-		if(N>1) {
+		if (int(N) > 1) {
 			addCode(main);
-			if(int(compareMagnitude))
+			if (int(compareMagnitude))
 				addCode(cmpMagYes);
 			else
 				addCode(cmpMagNo);
-			if(int(MAX))
+			if (int(MAX))
 				addCode(maxcont);
 			else
 				addCode(mincont);				
 		}
-	        else
+		else
 			addCode(one);
-	        if(int(outputMagnitude))
+
+		if (int(outputMagnitude)) {
 			addCode(outMagYes);
+		}
 			
 		addCode(out);
 	}
 
 	exectime {
-                if(int(N)>10)
-			return ((int(N)-1)*6)+7;
+		if (int(N) > 10)
+			return (6*(int(N)-1))+7;
 		else
 			return 3;
  	}
 }
-
