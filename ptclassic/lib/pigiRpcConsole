@@ -1,5 +1,6 @@
 #! /bin/sh
 # usage: pigiRpcConsole <vem-rpc-args>
+# Version: $Id$
 #
 # This is typically invoked from wtih pigiRpcShell as the $COMMAND.
 # It brings up an xterm with pigiRpc running inside.

@@ -1,5 +1,6 @@
 #! /bin/sh
 # usage: pigiRpcDebug <vem-args>
+# Version: $Id$
 #
 # This is typically invoked from wtih pigiRpcShell as the $COMMAND.
 # It brings up the debugger running PIGIRPC.
