@@ -48,6 +48,11 @@ setup {
 }
 	
 go {
+	if (input.far()->parent()->isA("CG56Spread")) {
+		if (addCode("",NULL,input.far()->parent()->name())) {
+			((CGStar*)input.far()->parent())->go();
+		}
+	}
 	addCode(sendData(pairNumber,numXfer));
 	addCode(interruptHost(pairNumber));
 }

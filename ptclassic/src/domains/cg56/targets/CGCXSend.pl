@@ -22,7 +22,7 @@ input {
 	type {ANYTYPE}
 }
 
-codeblock(sendData,"int pairNumber, int numXfer, int semaphorePtr, int bufferPtr, const char* command") {
+codeblock(sendData,"const char* command,int numXfer") {
 	int i,semaphoreMask = 1<<@(pairNumber%24);
 	/* wait for dsp buffer to be empty */
 	while (s56xSemaphores[@(pairNumber/24)]&semaphoreMask);
@@ -47,9 +47,9 @@ go {
 	const char* intSend = "value = $ref(input,i)";
 	const char* fixSend = "value = $ref(input,i)*(1<<23)";
 	if (strcmp(input.resolvedType(),INT)==0)
-	    addCode(sendData(pairNumber,input.numXfer(),semaphorePtr,bufferPtr,intSend));
+	    addCode(sendData(intSend,input.numXfer()));
 	else
-	    addCode(sendData(pairNumber,input.numXfer(),semaphorePtr,bufferPtr,fixSend));
+	    addCode(sendData(fixSend,input.numXfer()));
 }
 
 }

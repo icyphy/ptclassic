@@ -83,7 +83,7 @@ codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
 }
 }
 
-codeblock(s56xInterrupt,"int currentBuffer,int semaphorePtr") {
+codeblock(s56xInterrupt,"int currentBuffer") {
 static void	s56xSignal() {
 	/* The memory location y:@currentBuffer contains the pairNumber 
 	   of send/receive buffer that just changed state, we store
@@ -127,7 +127,7 @@ initCode {
 	StringList s56xSemaphores;
 	s56xSemaphores << "	int s56xSemaphores[" << commCount/24 + 1 << "];";
 	addGlobal(s56xSemaphores,"s56xSemaphores");
-	addGlobal(s56xInterrupt(currentBuffer,semaphorePtr),"s56xInterrupt");
+	addGlobal(s56xInterrupt(currentBuffer),"s56xInterrupt");
 	addMainInit(s56xSemaphoresInit(commCount/24 + 1),"s56xSemaphoresInit");
 	const char *s56path = getenv("S56DSP");
 	if (s56path == NULL)
