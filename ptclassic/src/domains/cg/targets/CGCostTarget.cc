@@ -294,7 +294,7 @@ CGTarget* CGCostTarget::findCodeGenTarget(const char* userTargetName) {
 int CGCostTarget::convertGalaxyToPtcl(Galaxy* localGalaxy) {
     StringList ptclFileName;
     ptclFileName << destDirectory << "/" << localGalaxy->name() << ".pt";
-    ptclDescription(localGalaxy, TRUE, ptclFileName);
+    ptclDescription(localGalaxy, ptclFileName, TRUE);
     return TRUE;
 }
 
