@@ -62,7 +62,7 @@ HDRS= AutoForkNode.h \
  Universe.h WormConnect.h Wormhole.h dataType.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h \
- Architecture.cc Code.cc
+ Architecture.h Code.h
 
 # Library objects
 LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
