@@ -43,8 +43,8 @@ private:
 	// return a name that can be used as C++ identifiers, derived
 	// from the actual name.
 	StringList sanitize(const char* s) const;
-	StringList sanitizedName(NamedObj &b) const;
-	StringList sanitizedFullName(NamedObj &b) const;
+	StringList sanitizedName(const NamedObj &b) const;
+	StringList sanitizedFullName(const NamedObj &b) const;
 
 protected:
 	StringState destDirectory;
@@ -81,13 +81,13 @@ graphFileName(0), clusterFileName(0), schedFileName(0), id(0)
 void CompileTarget::start() {
 
     LOG_DEL; delete dirFullName;
-    dirFullName = writeDirectoryName((char*)destDirectory);
+    dirFullName = writeDirectoryName(destDirectory);
 
     if(int(loopScheduler)) {
 	char* schedFileName = writeFileName("schedule");
 	char* graphFileName = writeFileName("expanded-graph");
 	char* clusterFileName = writeFileName("cluster-graph");
-	setSched(new
+	LOG_NEW; setSched(new
 		LoopScheduler(schedFileName,graphFileName,clusterFileName));
     } else {
 	LOG_NEW; setSched(new SDFScheduler);
@@ -149,12 +149,11 @@ int CompileTarget::run() {
     // Generate the C++ code file
     StringList runCode = "// C++ code file generated from universe: ";
     runCode += gal->readFullName();
-    runCode += "\n";
 
-    runCode += "\n";
+    runCode += "\n\nstatic const char file_id[] = \"code.cc\";\n\n";
+
     runCode += "// INCLUDE FILES\n";
-    runCode += "#include \"CompiledUniverse.cc\"\n";
-    runCode += "#include \"CompiledError.cc\"\n";
+    runCode += "#include \"CompiledUniverse.h\"\n";
     runCode += galDef(gal, universeClassName, 0);
 
     runCode += "\n";
@@ -213,35 +212,35 @@ void CompileTarget::wrapup() {
     // Invoke the compiler
     StringList cmd;
     // Check to see whether makefile is present, and if not, copy it in.
-    // NOTE: Because sh doesn't support tilde-expansion (no wonder csh came
-    // along!) we are forced at assume ~ptolemy = /usr/users/ptolemy.
-    // Caveat hacker.
+
     cmd = "cd ";
-    cmd += (char*)destDirectory;
+    cmd += (const char*)destDirectory;
     cmd += "; if (test -r make.template) then ";
     cmd += "( echo make.template already exists) ";
     cmd += " else ";
-    cmd += "( cp /usr/users/ptolemy/lib/CompileMake.template make.template ) ";
+    cmd += "( cp ";
+    const char* template = expandPathName("~ptolemy/lib/CompileMake.template");
+    cmd += template;
+    cmd += " make.template ) ";
     cmd += "fi";
     if(system(cmd)) {
-	Error::abortRun("Failed to copy ",
-	   "/usr/users/ptolemy/lib/CompileMake.template into make.template");
+	Error::abortRun("Failed to copy ", template, " into make.template");
 	return;
     }
     // Invoke make depend
     cmd = "cd ";
-    cmd += (char*)destDirectory;
+    cmd += destDirectory;
     cmd += "; make -f make.template depend";
     system(cmd);
     cmd = "cd ";
-    cmd += (char*)destDirectory;
+    cmd += destDirectory;
     cmd += "; make";
     if(system(cmd)) {
 	Error::abortRun("Compilation errors in generated code.");
 	return;
     }
     cmd = "cd ";
-    cmd += (char*)destDirectory;
+    cmd += (const char*)destDirectory;
     cmd += "; mv -f code ";
     cmd += gal->readName();
     cmd += "; cp code.cc ";
@@ -275,7 +274,7 @@ StringList CompileTarget::beginIteration(int repetitions, int depth) {
 	return out;
 }
 
-StringList CompileTarget::endIteration(int repetitions, int depth) {
+StringList CompileTarget::endIteration(int, int depth) {
 	StringList out;
 	out = indent(depth);
 	out += "}\n";
@@ -488,7 +487,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	BlockPortIter nextPort(*b);
 	const PortHole* p;
 	PortHole* farPort;
-	const GenericPort *g, *gt;
+	const GenericPort *g;
 	while ((p = nextPort++) != 0) {
 	    // Make connections only for output ports.
 	    if (p->isItOutput()) {
@@ -538,7 +537,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 // changed to '_' so that the resulting name is a legitimate C++
 // identifier.  For all names that begin with a numeric character,
 // the character 'x' is prepended.
-StringList CompileTarget :: sanitizedName (NamedObj& obj) const {
+StringList CompileTarget :: sanitizedName (const NamedObj& obj) const {
         const char *s = obj.readName();
 	return sanitize(s);
 }
@@ -558,7 +557,7 @@ StringList CompileTarget :: sanitize(const char* s) const {
         return out;
 }
 
-StringList CompileTarget :: sanitizedFullName (NamedObj& obj) const {
+StringList CompileTarget :: sanitizedFullName (const NamedObj& obj) const {
         StringList out;
         if(obj.parent() != NULL) {
                 out = sanitizedFullName(*obj.parent());
