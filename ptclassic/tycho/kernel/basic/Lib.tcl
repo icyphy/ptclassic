@@ -93,7 +93,7 @@ namespace ::tycho {
     if !$ptolemypresent {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
-                {::tycho::view EditPalette {-file {%s}}} \
+                {::tycho::view EditPalette {-facet {%s}}} \
                 {Palette editor} "graphics"
     }
     # NOTE: Not ready for release
