@@ -22,7 +22,7 @@ $Id$
 
 #include "Block.h"
 class Galaxy;
-class Architecture;
+class Target;
 
 	////////////////////////////////////
 	// class Star
@@ -56,16 +56,16 @@ public:
 	// Return my indexValue.
 	int index() const { return indexValue;}
 
-	// set the Architecture
-	void setTarget(Architecture* t) { target = t;}
+	// set the Target
+	void setTarget(Target* t) { targetPtr = t;}
 
 	// constructor
-	Star() : target(0), indexValue(-1) {}
+	Star() : targetPtr(0), indexValue(-1) {}
 
 	// class identification
 	int isA(const char*) const;
 protected:
-	Architecture* target;
+	Target* targetPtr;
 private:
 	int indexValue;
 	friend setStarIndices(Galaxy&);
