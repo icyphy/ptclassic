@@ -28,22 +28,11 @@ $Id$
 
 
 void StringState  :: initialize() {
-	const char* specialChars = "*+-/()";
-	Tokenizer lexer(initValue,specialChars);
-
-	val = evalExpression(lexer, parent()->parent());
-}
-
-const char* StringState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
-
-	ParseToken t = getParseToken(lexer, blockIAmIn);
-	if(!strcmp(t.tok,"ID")) return ((StringState*)t.s)->val;
-	else if (!strcmp(t.tok,"STRING")) return t.sval;
-	else return 0;
-
+	val = initValue;
 }
 
 // make known state entry
 static StringState proto;
 static KnownState entry(proto,"string");
 	 
+
