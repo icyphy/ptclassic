@@ -43,6 +43,10 @@ Complex PacketData::asComplex() const {
 
 const char* PacketData::dataType() const { return "DUMMY";}
 
+int PacketData::isA(const char*) const {
+	return FALSE;
+}
+
 StringList PacketData::print() const {
 	StringList out = "<";
 	out += dataType();
@@ -79,7 +83,7 @@ void Packet::unlinkData() {
 		delete d;
 }
 
-extern const dataType PACKET = "PACKET";
+extern const DataType PACKET = "PACKET";
 
 // Packet error message generation.  The message is in a static buffer.
 const char* Packet::typeError(const char* expected) const {
@@ -109,7 +113,7 @@ static Plasma packetPlasma(pproto);
 
 // PacketSample methods
 
-dataType PacketSample::readType() const { return PACKET;}
+DataType PacketSample::readType() const { return PACKET;}
 
 PacketSample::operator int () const {
 	return data.asInt();
@@ -139,9 +143,9 @@ void PacketSample::initialize() { data = dummy;}
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
 
-void PacketSample::operator << (int i) { errorAssign("int");}
-void PacketSample::operator << (float f) { errorAssign("float");}
-void PacketSample::operator << (Complex& c) { errorAssign("complex");}
+void PacketSample::operator << (int) { errorAssign("int");}
+void PacketSample::operator << (float) { errorAssign("float");}
+void PacketSample::operator << (Complex&) { errorAssign("complex");}
 
 // only loader that works.
 void PacketSample::operator << (const Packet& p) { data = p;}
@@ -189,4 +193,13 @@ void Particle::getPacket(Packet &) {
 
 void Particle::operator<<(const Packet&) {
 	Error::abortRun ("Attempt to load a Packet into non-packet Particle");
+}
+
+// an error checker:
+int badType(NamedObj& where,Packet& pkt,const char* type) {
+	if (!pkt.typeCheck(type)) {
+		Error::abortRun(where, pkt.typeError(type));
+		return TRUE;
+	}
+	return FALSE;
 }
