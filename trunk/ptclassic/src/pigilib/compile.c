@@ -39,6 +39,9 @@ The xfered list keeps track of which nodes in the DAG have been
 transfered to the kernel so far.  Change lists in each facet keep track of
 any changes.  A facet (node in the DAG) is recompiled if it is not on
 the xfered list or if it has been changed since the last transfer.
+
+The difference is simply that traverse is re-initialized each time
+CompileFacet is called.  xfered never gets re-initialized.
 */
 
 /* Includes */
@@ -65,9 +68,12 @@ static boolean RunAll();
 
 #define TERMS_MAX 50  /* maximum number of actual terms allowed on a net */
 
-DupSheet traverse;  /* used to traverse design heriarchy which is a DAG */
+/* Scratch string for constructing error messages */
+static char msg[1024];
+
+static DupSheet traverse;  /* used to traverse design heriarchy which is a DAG */
     /* DAG = directed acyclic graph */
-DupSheet xfered;  /* list of galaxies that have been transfered to the kernel */
+static DupSheet xfered;  /* list of galaxies that have been transfered to the kernel */
 
 
 /***** Begin Ess routines (Error Select Set) */
@@ -337,7 +343,6 @@ octObject *aTermPtr;
 boolean *result;
 {
     octObject inst, master, fTerm, prop;
-    char buf[1000];
 
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
@@ -360,9 +365,9 @@ boolean *result;
 	return (TRUE);
     }
     *result = FALSE;
-    sprintf(buf, "IsInputTerm: terminal is of unknown type, '(%s %s)'",
+    sprintf(msg, "IsInputTerm: terminal is of unknown type, '(%s %s)'",
 	inst.contents.instance.name, aTermPtr->contents.term.name);
-    ErrAdd(buf);
+    ErrAdd(msg);
     EssAddObj(aTermPtr);
     FreeOctMembers(&inst);
     return (FALSE);
@@ -510,7 +515,6 @@ octObject *facetPtr;
 			    errMsg will be non-zero, since it will point
 			    to an error message.  Note that the error message
 			    could be the null string "". */
-    char msg[1024];      /* for constructing an error message */
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
@@ -731,6 +735,7 @@ octObject *galInstPtr, *parentFacetPtr;
 
     /* now do the compile */
     ERR_IF1(!MyOpenMaster(&galFacet, galInstPtr, "contents", "r"));
+    DupSheetClear(&traverse);
     return CompileGal(&galFacet);
 }
 
@@ -754,6 +759,7 @@ octObject *galFacetPtr;
         PrintErr("Domain error in galaxy or wormhole.");
         return (FALSE);
     }
+    DupSheetClear(&traverse);
     return CompileGal(galFacetPtr);
 }
 
@@ -770,10 +776,9 @@ boolean
 CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
-    char msg[1000], *name;
+    char *name;
     boolean xferedBool;
     char *oldDomain, *galDomain, *galTarget, *desc;
-    int known;
 
     name = BaseName(galFacetPtr->contents.facet.cell);
 
@@ -785,16 +790,28 @@ octObject *galFacetPtr;
         return (FALSE);
     }
 
-    /* quit if the galaxy is on the outer domain's known list
-     * and it is not modified.  Note that we will compile it
-     * again even if it is unmodified if a different type of
-     * wormhole must be generated.
+    /*
+     * quit if the galaxy has already been touched in this
+     * compilation process and it was in the same domain at the time.
      */
 
-    known = KcIsKnown(name);
-    if (known && DupSheetIsDup(&traverse, name)) {
-	return(TRUE);
+    if (DupSheetIsDup2(&traverse, name, oldDomain)) {
+      /*
+       * Detect recursion here by checking to see whether the
+       * objct is on the knownlist of the oldDomain.
+       */
+      if (!KcIsKnown(name)) {
+	PrintErr("Sorry, graphical recursion is not supported at this time");
+	return(FALSE);
+      }
+      return(TRUE);
     }
+    /*
+     * mark the galaxy touched right away, in case there is a recursive
+     * reference to it in the subgalaxies.
+     */
+    ERR_IF2(!DupSheetAdd2(&traverse, name, oldDomain),
+	    "DupSheetAdd2 failed! Out of memory?");
 
     /* Call Kernel function to set the current domain to the inner
      * domain.  It is important that we switch domains before processing
@@ -811,9 +828,16 @@ octObject *galFacetPtr;
         return (FALSE);
     }
 
-    ERR_IF2(!ProcessSubGals(galFacetPtr), msg);
-    xferedBool = DupSheetIsDup(&xfered, name);
-    if (known && xferedBool && !IsDirty(galFacetPtr)) {
+    ERR_IF2(!ProcessSubGals(galFacetPtr),
+	    "Failed to process subgalaxies");
+
+    /*
+     * quit if the galaxy has been transferred to the Ptolemy kernel
+     * at any time during this session, it has not been modified, and
+     * it was sitting in the domain context when it was transferred.
+     */
+    xferedBool = DupSheetIsDup2(&xfered, name, oldDomain);
+    if (xferedBool && !IsDirty(galFacetPtr)) {
 	/* galaxy already xfered to kernel and is unchanged */
 	/* restore old domain */
 	KcSetKBDomain(oldDomain);
@@ -836,17 +860,18 @@ octObject *galFacetPtr;
     ERR_IF1(!GetCommentProp(galFacetPtr,&desc));
     KcSetDesc(desc);
     ERR_IF1(!ProcessTargetParams(galTarget,galFacetPtr));
-    ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
+    ERR_IF2(!ProcessFormalParams(galFacetPtr),
+	    "Failed to process formal parameters");
     /* Initialize instance name generation of blocks and nodes
        within the galaxy. */
     ERR_IF1(!UniqNameInit());
-    ERR_IF2(!ProcessInsts(galFacetPtr), msg);
-    ERR_IF2(!ConnectPass(galFacetPtr), msg);
+    ERR_IF2(!ProcessInsts(galFacetPtr), "Failed to process instances");
+    ERR_IF2(!ConnectPass(galFacetPtr), "Connect pass failure");
     ERR_IF1(!KcEndDefgalaxy(oldDomain));
-    ERR_IF2(!DupSheetAdd(&traverse, name), msg);
-    ERR_IF2(!ClearDirty(galFacetPtr), msg);
+    ERR_IF2(!ClearDirty(galFacetPtr), "Failed to mark clean!");
     if (!xferedBool) {
-	ERR_IF2(!DupSheetAdd(&xfered, name), msg);
+	ERR_IF2(!DupSheetAdd2(&xfered, name, oldDomain),
+		"DupSheetAdd2 failure! Out of memory?");
     }
     recompileFlag = 1;
     KcFlushLog();
@@ -859,8 +884,6 @@ static boolean
 CompileUniv(facetPtr)
 octObject *facetPtr;
 {
-    char buf[512];   /* for assemblying a string that may be an error
-			message or a Tcl command. */
     char *name;
     boolean xferedBool;
     char *domain;
@@ -869,39 +892,39 @@ octObject *facetPtr;
     name = BaseName(facetPtr->contents.facet.cell);
     if (!GOCDomainProp(facetPtr, &domain, DEFAULT_DOMAIN)) {
 	PrintErr(ErrGet());
-	sprintf(buf, "Domain error in facet %s", name);
-	PrintErr(buf);
+	sprintf(msg, "Domain error in facet %s", name);
+	PrintErr(msg);
 	return FALSE;
     }
-    sprintf(buf, "reset\ndomain %s\n", domain);
-    KcLog(buf);
-    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
+    sprintf(msg, "reset\ndomain %s\n", domain);
+    KcLog(msg);
+    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, msg));
 
     recompileFlag = 0;
     ERR_IF1(!ProcessSubGals(facetPtr));
     xferedBool = DupSheetIsDup(&xfered, name);
     if (xferedBool && !IsDirtyOrGone(facetPtr) && !recompileFlag) {
 	/* universe already xfered to kernel and is unchanged */
-	sprintf(buf, "curuniverse %s\n", name);
-	KcLog(buf);
-	Tcl_VarEval(ptkInterp, buf, (char *) NULL);
+	sprintf(msg, "curuniverse %s\n", name);
+	KcLog(msg);
+	Tcl_VarEval(ptkInterp, msg, (char *) NULL);
 	return (TRUE);
     }
 
-    sprintf(buf, "CompileUniv: facet = %s, %s universe", name, domain);
-    PrintDebug(buf);
-    sprintf(buf, "newuniverse %s %s\n", name, domain);
-    KcLog(buf);
-    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
+    sprintf(msg, "CompileUniv: facet = %s, %s universe", name, domain);
+    PrintDebug(msg);
+    sprintf(msg, "newuniverse %s %s\n", name, domain);
+    KcLog(msg);
+    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, msg));
 
     /* get the target */
     if (!GOCTargetProp(facetPtr, &target, KcDefTarget(domain))) {
         PrintErr(ErrGet());
         return (FALSE);
     }
-    sprintf(buf, "target %s\n", target);
-    KcLog(buf);
-    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
+    sprintf(msg, "target %s\n", target);
+    KcLog(msg);
+    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, msg));
     ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessFormalParams(facetPtr));
     /* Initialize instance name generation of blocks and nodes
@@ -929,6 +952,7 @@ CompileFacet(facetPtr)
 octObject *facetPtr;
 {
     DupSheetClear(&traverse);
+    ErrClear();
     if (IsGalFacet(facetPtr)) {
 	if (!CompileGal(facetPtr)) {
 	    return (FALSE);
@@ -1051,7 +1075,6 @@ octObject *facetPtr;
 	}
 	else if (IsUnivFacet(&univFacet)) {
 	    char * name = BaseName(univFacet.contents.facet.cell);
-	    char msg[128];
 	    char octHandle[16];
 
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
