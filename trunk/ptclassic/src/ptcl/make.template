@@ -73,9 +73,9 @@ ifndef PIGI
 endif
 endif
 
-PT_DEPEND = ptclMain.o
+PT_DEPEND += ptclMain.o
 
-PIGI_OBJS = ptclMain.o -lptcl 
+PIGI_OBJS += ptclMain.o 
 
 INSTALL = $(LIBDIR)/$(LIB)
  
