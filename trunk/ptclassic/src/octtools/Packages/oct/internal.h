@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef OCT_INTERNAL_H
 #define OCT_INTERNAL_H
 
-#define NEED_SYS_ERRLIST	// compat.h uses this.
+#define NEED_SYS_ERRLIST	/* compat.h uses this. */
 #include "port.h"
 #include "errtrap.h"
 #include "oct.h"
