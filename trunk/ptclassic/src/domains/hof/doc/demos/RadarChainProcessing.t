@@ -15,7 +15,7 @@ delim off
 delim $$
 .EN
 .DM SDF Universe
-.SV $Revision$	($Date$)
+.SV $Revision$	$Date$
 .AL "Karim P. Khiar"
 .LD
 The universe (global) parameters for this demonstration are:
