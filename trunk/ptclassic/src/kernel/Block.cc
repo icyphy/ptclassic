@@ -137,6 +137,7 @@ Block* Block::clone() {
 int
 Block::portNames (const char** names, int* io, int nMax) {
 	int n = ports.size();
+	ports.reset();
 	if (n > nMax) n = nMax;
 	for (int i = n; i>0; i--) {
 		PortHole& p = ports++;
@@ -150,6 +151,7 @@ Block::portNames (const char** names, int* io, int nMax) {
 int
 Block::multiPortNames (const char** names, int* io, int nMax) {
 	int n = multiports.size();
+	multiports.reset();
 	if (n > nMax) n = nMax;
 	for (int i = n; i>0; i--) {
 		MultiPortHole& p = multiports++;
@@ -209,3 +211,6 @@ Scheduler* Block :: mySched() { return parent()->mySched() ;}
 Block::~Block () {}
 
 
+// return my domain.  Should this be an error (if noone has redefined
+// this?)
+const char* Block :: domain () const { return "UNKNOWN";}
