@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptk.h"
 #include "ptcl.h"
 #include "poct.h"
+#include "pvem.h"
 
 extern "C" {
 #include "ptkRegisterCmds.h"
@@ -48,6 +49,7 @@ extern "C" {
 /* global */ 
 PTcl *ptcl;
 POct *poct;
+PVem *pvem;
 
 void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
 {
@@ -57,6 +59,9 @@ void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
 
    // Construct the global POct object.  This should be done once only.
    poct = new POct(ip);
+
+   // Construct the global POct object.  This should be done once only.
+   pvem = new PVem(ip);
 
    // Register various commands used by pigi
    registerTclFns(ip);
