@@ -349,26 +349,53 @@ $(JARFILE): $(JSRCS) $(JCLASS)
 
 ##############
 # Rules to build Java and Itcl package distributions
-# This rule builds both a tar file and zip file of the sources
+
+
+# The distributions to build
 TYDISTS =	$(TYDIST).tar.gz $(TYDIST).zip 
 
-# Two names for the same thing
-tydist: $(TYDISTS)
-dist: $(TYDISTS)
+# The dists rule builds both a tar file and zip file of the sources
+dists: sources install $(TYDISTS)
+	@if [ "x$(SRCDIRS)" != "x" ]; then \
+		set $(SRCDIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 # List of files to exclude
 TYDIST_EX =	/tmp/$(TYDIST).ex
 $(TYDIST_EX): $(ROOT)/mk/tycommon.mk
-	/bin/echo "adm\nSCCS\nmakefile\n$(TYDIST).tar.gz\n$(TYDIST).zip\n$(JARFILE)" > $@ 
+	@if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
+		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a tar exclude file"; \
+	else \
+		/bin/echo "adm\nSCCS\nmakefile\n$(TYDIST).tar.gz\n$(TYDIST).zip\n$(JARFILE)" > $@ ; \
+	fi
 
+# Tar file distribution
 $(TYDIST).tar.gz:  $(TYDIST_EX)
-	(cd $(ROOT)/..; \
-		 gtar -zchf $(TYPACKAGE_DIR)/$@ -X $(TYDIST_EX) $(TYPACKAGE_DIR))
-	rm -f $(TYDIST_EX)
+	@if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
+		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a tar file"; \
+	else \
+		echo "Building $@"; \
+		(cd $(TYPACKAGE_ROOTDIR); \
+		 gtar -zchf $(TYPACKAGE_DIR)/$@ -X $(TYDIST_EX) $(TYPACKAGE_DIR)); \
+		rm -f $(TYDIST_EX); \
+	fi
 
+# Tar file distribution
 $(TYDIST).zip:
-	(cd $(ROOT)/..; zip -r $(TYPACKAGE_DIR)/$@ $(TYPACKAGE_DIR) -x \*/adm/\* -x \*/SCCS/\* -x \*/makefile -x \*/$(TYDIST).tar.gz -x \*/$(TYDIST).zip)
-
+	@if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
+		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a zip file"; \
+	else \
+		echo "Building $@"; \
+		(cd $(TYPACKAGE_ROOTDIR); zip -r $(TYPACKAGE_DIR)/$@ $(TYPACKAGE_DIR) -x \*/adm/\* -x \*/SCCS/\* -x \*/makefile -x \*/$(TYDIST).tar.gz -x \*/$(TYDIST).zip); \
+	fi
 
 # Build sources in a form suitable for releasing
 buildjdist:
