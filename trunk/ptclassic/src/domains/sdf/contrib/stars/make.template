@@ -74,6 +74,8 @@ Encoder.cc \
 Encoder.h \
 Interp.cc \
 Interp.h \
+Wireless.cc \
+Wireless.h \
 fft.cc \
 fft.h
 
