@@ -37,7 +37,7 @@ public:
 	StringList printVerbose ();
 
 	// Return myself as a Star.  Overrides Block::asStar.
-	Star& asStar() const { return *this;}A
+	Star& asStar() const { return *this;}
 
 	// Return my domain (e.g. SDF, DE, etc.)
 	virtual const char* domain() { return "";}
