@@ -11,8 +11,11 @@ of the X window system.
 .H2 "Printing Oct Facets"
 .pp
 A block diagram under pigi is stored as an Oct facet.
-To print it to a postscript printer,
-simply place the mouse anywhere in the facet and
+To print it to a postscript printer, 
+first save the facet.  Do this by moving the mouse to the 
+facet and press the "S" key to save.
+.IE "saving facets"
+Then, keeping the mouse in the facet, 
 .IE "printing facets"
 invoke the "print facet" command from the "Other" pigi menu.
 You must have the environment variable PRINTER set to point to
@@ -95,7 +98,8 @@ to run in its colorless mode.
 .IE "PIGIBW"
 The second command simply runs pigi.
 Now, the screen capture command can be used effectively.
-For example, under X11R4, the following command will print a window on a
+For example, under X11R4 or X11R5, 
+the following command will print a window on a
 postscript printer:
 .(c
 xwd | xpr -width 4 -portrait -device ps -gray 4 | lpr
