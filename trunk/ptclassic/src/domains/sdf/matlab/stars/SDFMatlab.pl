@@ -152,17 +152,17 @@ extern "C" {
 	  name { evaluateMatlabCommand }
 	  access { protected }
 	  type { int }
-	  arglist { "(char *matlabCommand)" }
+	  arglist { "(const char *matlabCommand)" }
 	  code {
 		// change directories to one containing the Matlab command
-		static InfString lastdirname = " ";
+		static InfString lastdirname;
 
-		// Matlab does not return an error if a change directory,
-		// directory, or path command fails, so we must check
-		// existence of the directory given in ScriptDirectory state
+		// expand the pathname and check its existence
 		const char *dirname = (const char *) ScriptDirectory;
 		if ( dirname[0] != 0 ) {
-		  char *fulldirname = savestring( expandPathName(dirname) );
+		  const char *expandeddirname = expandPathName(dirname);
+		  char *fulldirname = new char[strlen(expandeddirname) + 1];
+		  strcpy(fulldirname, expandeddirname);
 		  struct stat stbuf;
 		  if ( stat(fulldirname, &stbuf) == -1 ) {
 		    if ( strcmp((char *) lastdirname, fulldirname) != 0 ) {
@@ -198,7 +198,7 @@ extern "C" {
 
 		// report error if one occurred
 		if ( mstatus != 0 ) {
-		  StringList errstr;
+		  InfString errstr;
 		  errstr = "\nThe Matlab command `";
 		  errstr << matlabCommand;
 		  errstr << "'\ngave the following error message:\n";
