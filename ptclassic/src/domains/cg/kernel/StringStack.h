@@ -15,11 +15,11 @@ $Id$
 A StringStack is a stack of Strings.
 ***************************************************************/
 
-#include "DataStruct.h"
-
 #ifdef __GNUG__
 #pragma interface
 #endif
+
+#include "DataStruct.h"
 
 class StringStack : public Stack {
 public:
