@@ -49,6 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 void SDFWormhole :: setup() {
 	arrivalTime = 0;
+	space = 0;
 	Wormhole :: setup();
 	mark = 0;
 }
