@@ -1,10 +1,9 @@
 .\" $Id$
 .H1 "Using the preprocessor"
 .pp
-The language permits many star definitions to be written in one file;
+The preprocessor permits many star definitions to be written in one file;
 processing the file results in one .cc file and one .h file for each
-class.  This is not recommended.
-.pp
+class.  However, this is not recommended.
 The recommended procedure (the
 .i required
 procedure if you want Pigi's incremental linking and code viewing
@@ -13,8 +12,8 @@ domain XXX with name YYY in file XXXYYY.pl.  Then, running the command
 .(c
         ptlang XXXYYY.pl
 .)c
-will produce the files XXXYYY.cc and XXXYYY.h, and makefiles can contain
-the default rules
+will produce the files XXXYYY.cc, XXXYYY.h, and XXXYYY.t.
+With this policy, the makefiles can contain the default rules
 .(c
         .pt.cc:
                 ptlang $<
@@ -24,3 +23,13 @@ the default rules
 .)c     
 See the makefile in ~ptolemy/src/example or ~ptolemy/src/domains/sdf/stars
 for how this can be made to work ``in context''.
+.pp
+The documentation (
+.c .t)
+file can be printed out using the command ~ptolemy/doc/bin/printstar.
+This command assumes your PRINTER environment variable is set
+to the printer of choice.  The following line in your .cshrc file,
+for example, will ensure this:
+.(c
+setenv PRINTER printer_name
+.)c
