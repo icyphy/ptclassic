@@ -531,3 +531,276 @@ proc ::tycho::uniqueFileName { {stem {tyuniq}} {extension {}}} {
     }
     return $tmpname
 }
+
+#####################################################################
+#### url
+# Manipulate url-style filenames. This procedure is needed because
+# the Tcl file{} procedure does not correctly work with names like
+# <code>http://foo/bar</code>. Until file{} is fixed, it is recommended
+# that <code>::tycho::url</code> be used instead of file{} to
+# manipulate file names in any situation where a filename might
+# be a url-style name.
+#
+# The syntax of a url-style name is:
+# <br>
+# [<i>protocol</i><b>:</b>] [//<i>server</i>] <i>path</i>
+# <br>
+# Note that the protocol and server parts are optional, so regular
+# filenames are supported too. In this case, the name will be called
+# a <i>local name</i>; otherwise, it is called a <i>network name</i>.
+# The protocol is allowed to consist only of <i>lower-case alphabetic
+# characters</i>.
+#
+# This procedure supports platform-independence
+# in a similar way to file{}:
+# <ul>
+# <li>If the name is a network name, such as
+# <code>http://</code> or <code>file:/</code>, then URL-style
+# slashes are assumed for the file path. On Windows and the Mac,
+# backslashes and colons are treated as part of the path, not
+# as directory separators.
+# <li>Otherwise, the filename is manipulated however file{} does it,
+# so platform-dependent local names work properly when passed through
+# this procedure.
+# </ul>
+#
+# The *split* and *join* cases are treated specially.
+# In this case, a network name is represented as a list containing
+# two extra elements at the head of the list: the protocol name
+# and the server name (with an optional port number attached).
+# For example, the platform-independent equivalent of the
+# URL <code>http://ptolemy.eecs/foo/bar</code> is
+# <code>{http: ptolemy foo bar}</code>;  the platform-independent
+# equivalent of the URL <code>file:/users/johnr/</code> is
+# <code>{file: {} users johnr}</code> (note empty server name).
+# Note that, since all network-style names are absolute, the
+# list does not contains a "/" character, as it does for absolute
+# local names.
+# Local names are treated exactly as for Tcl file{},
+# so that the the platform-independent equivalent of
+# <code>/users/ptolemy</code> is <code>/ users ptolemy</code>.
+# In addition to the file-name manipulation options of Tcl
+# file{}, this procedure contains some additional options for
+# testing for and extracting the protocol option, and so on.
+#
+# The valid options are:
+# <ul>
+# <li><code>::tycho::url aslocal</code> _name_: Convert a
+# local name using url-style slashed into a platform
+# dependent name. This is useful for converting names
+# such as <code>file:/users/ptolemy</code> into the local
+# equivalent.
+# <li><code>::tycho::url dirname</code> _name_: Return the name
+# excluding the last component. Tilde substitution is performed
+# only on local names. If the name is a network name and the
+# path is empty, return the name unchanged.
+# <li><code>::tycho::url extension</code> _name_: Return the character
+# after the last period in the last component of the name.
+# <li><code>::tycho::url join</code> _name_ ?_name_ ...?: Return the
+# platform-dependent path name from the arguments. If the first
+# element of the list if a protocol name, then construct a network
+# name using slashes; if not, then construct a platform-dependent
+# local name.
+# <li><code>::tycho::url path</code> _name_: Return the
+# path component of the name. If it is a local name,
+# return the name. (In this case, the result is not
+# a platform-dependent name -- to get one, use the
+# *aslocal* option.) If a network name and no path is given,
+# return <code>/</code>.
+# <li><code>::tycho::url pathtype</code> _name_: Return the
+# "type" of a path -- aboslute, relative, or volumerelative.
+# If _name_ is a network name, always return
+# <code>absolute</code>. If it is a local name, return whatever
+# Tcl file{} returns. (To tell if a name is a network-style
+# name, use the *protocol* option and test for null. The
+# *pathtype* option is not used for this test in order that
+# existing code that uses Tcl <code>file pathtype</code> is
+# easy to update to use <code>::tycho::url</code>.)
+# <li><code>::tycho::url protocol</code> _name_: Return the
+# protocol component of the name. If it is a local name,
+# return null.
+# <li><code>::tycho::url rootname</code> _name_: Return all
+# characters up to the last period in the last component of
+# the name. (If the last component contains no period, return
+# the whole thing.)
+# <li><code>::tycho::url server</code> _name_: Return the
+# server component of the name. If it is a local name,
+# return null. Note also that network-style names may
+# contain a null server component, as in
+# <code>file:/users/ptolemy</code>.
+# <li><code>::tycho::url split</code> _name_: Return the
+# platform-independent path name from the platform-dependent name.
+# If the name is a network name -- that is, starts with a protocol
+# name, then the returned last contains the protocol name, server
+# name, and individual components of the path; otherwise, it returns
+# the same thing as Tcl <code>file split</code>.
+# <li><code>::tycho::url tail</code> _name_: Return all
+# characters after the last directory separator.
+# </ul>
+ensemble ::tycho::url {
+    # Convert a local name using url-style slashes into a platform
+    # dependent name.
+    option aslocal {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    error "Not a local name"
+	}
+        # FIXME: Will this work reliably on the Mac???
+	eval file join [file split $name]
+    }
+    # Return the name excluding the last component.
+    option dirname {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+	    if { $path == "" } {
+		# Empty path -- return name
+		return $name
+            } else {
+		set pt [split $path /]
+		set path [join [lreplace $pt end end] /]
+		return $protocol$server$path
+	    }
+	} else {
+	    # Local name
+	    file dirname $name
+	}
+    }
+    # Return the name extension.
+    option extension {name} {
+	if [regexp {^[a-z]+:/} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+	    if { $path == "" } {
+		return ""
+	    } else {
+		set nm [lindex [split $path /] end]
+		set nms [split $nm .]
+		if { [llength $nms] > 1 } {
+		    return .[lindex $nms end]
+		} else {
+		    return {}
+		}
+	    }
+	} else {
+	    # Local name
+	    file extension $name
+	}
+    }
+    # Return the platform-dependent path name from the arguments.
+    option join {name args} {
+	if [regexp {^[a-z]+:$} $name] {
+	    # Network name
+            set server [lindex $args 0]
+            set path [join [lreplace $args 0 0] /]
+            if { $path != "" } {
+                set path /$path
+            }
+            if { $server == "" } {
+                return $name$path
+            } else {
+                return $name//$server$path
+            }
+	} else {
+	    # Local name
+	    eval file join [list $name] $args
+	}
+    }
+    # Return the path component of the name.
+    option path {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+            if { $path == "" } {
+                return "/"
+            } else {
+                return $path
+            }
+	} else {
+	    # Local name
+	    return $name
+	}
+    }
+    # Return the "type" of a path
+    option pathtype {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    return "absolute"
+	} else {
+	    # Local name
+	    file pathtype $name
+	}
+    }
+    #  Return the protocol component of the name.
+    option protocol {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    regexp {^[a-z]+:} $name protocol
+	    return $protocol
+	} else {
+	    # Local name
+	    return {}
+	}
+    }
+    # Return the name up to the last period of the last component.
+    option rootname {name} {
+	if [regexp {^[a-z]+:/} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+	    if { $path == "" } {
+		return $protocol$server
+	    } else {
+		set pt [split $path /]
+		set path [join [lreplace $pt end end] /]
+                set tt [split [lindex $pt end] .]
+                if { [llength $tt] > 1 } {
+                    set tt [join [lreplace \
+                            [split [lindex $pt end] .] end end] .]
+                }
+                return $protocol$server$path/$tt
+	    }
+	} else {
+	    # Local name
+	    file rootname $name
+	}
+    }
+    # Return the server component of the name.
+    option server {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?} $name _ protocol server
+	    return [string trimleft $server /]
+	} else {
+	    # Local name
+	    return {}
+	}
+    }
+    # Split a platform-dependent local name or a network name into a list
+    option split {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//([^/]*))?(.*)$} $name \
+                    _ protocol _ server path
+	    if { $path == "" } {
+		list $protocol $server
+	    } else {
+		concat [list $protocol $server] \
+                        [lreplace [split $path /] 0 0]
+	    }
+	} else {
+	    # Local name
+	    file split $name
+	}
+    }
+    # Return the last component of the name
+    option tail {name} {
+	if [regexp {^[a-z]+:/+} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+	    lindex [split $path /] end
+	} else {
+	    # Local name
+	    file tail $name
+	}
+    }
+}
+
