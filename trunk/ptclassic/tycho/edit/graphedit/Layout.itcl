@@ -433,7 +433,7 @@ body ::tycho::Layout::reshape {item x y args} {
 #
 body ::tycho::Layout::reshapeclick {item x y args} {
     # puts "reshapeclick $item $x $y $args"
-    if ![exists $item] {
+    if ![exists $item] { 
         error "Cannot reshape \"$item\""
     }
     set _scratch($item.startx) $x
@@ -442,7 +442,7 @@ body ::tycho::Layout::reshapeclick {item x y args} {
     set _scratch($item.currenty) $y
     
     array set opts $args
-    set _scratch($item.aspects) $opts(-aspects)
+    set _scratch($item.features) $opts(-features)
 }
 
 ########################################################################
@@ -472,16 +472,16 @@ body ::tycho::Layout::reshaperelease {item} {
     }
     set deltax [expr $_scratch($item.currentx) - $_scratch($item.startx)]
     set deltay [expr $_scratch($item.currenty) - $_scratch($item.starty)]
-    set aspects $_scratch($item.aspects)
+    set features $_scratch($item.features)
     
     unset _scratch($item.startx)
     unset _scratch($item.starty)
     unset _scratch($item.currentx)
     unset _scratch($item.currenty)
-    unset _scratch($item.aspects)
+    unset _scratch($item.features)
     
     # Call the reshape method to construct history
-    eval reshape $item $deltax $deltay $aspects
+    eval reshape $item $deltax $deltay $features
 }
 
 ########################################################################
