@@ -63,76 +63,76 @@ uplevel #0 {
 # Register the standard context-sensitive editors
 namespace ::tycho {
     ::tycho::File::registerExtensions {} \
-            {::tycho::view Edit {-file {{%s}}}} \
+            {::tycho::view Edit {-file {%s}}} \
             {Plain text editor}
     ::tycho::File::registerExtensions {.sched .c .y} \
-            {::tycho::view EditC {-file {{%s}}}} \
+            {::tycho::view EditC {-file {%s}}} \
             {C editor}
     ::tycho::File::registerExtensions {.C .cc .h .H} \
-            {::tycho::view EditCpp {-file {{%s}}}} \
+            {::tycho::view EditCpp {-file {%s}}} \
             {C++ editor}
     ::tycho::File::registerExtensions {.dag} \
-            {::tycho::view EditDAG {-file {{%s}}}} \
+            {::tycho::view EditDAG {-file {%s}}} \
             {DAG editor}
     ::tycho::File::registerExtensions {.strl} \
-            {::tycho::view EditEsterel {-file {{%s}}}} \
+            {::tycho::view EditEsterel {-file {%s}}} \
             {Esterel editor}
     ::tycho::File::registerExtensions {.fst} \
-            {::tycho::view EditForest {-file {{%s}}}} \
+            {::tycho::view EditForest {-file {%s}}} \
             {Forest editor}
     ::tycho::File::registerExtensions {} \
-            {::tycho::view EditHTML {-file {{%s}}}} \
+            {::tycho::view EditHTML {-file {%s}}} \
             {HTML editor}
     ::tycho::File::registerExtensions {.itcl .itk} \
-            {::tycho::view EditItcl {-file {{%s}}}} \
+            {::tycho::view EditItcl {-file {%s}}} \
             {Itcl editor}
     ::tycho::File::registerExtensions .tcl \
-            {::tycho::view EditTcl {-file {{%s}}}} \
+            {::tycho::view EditTcl {-file {%s}}} \
             {Tcl editor}
     ::tycho::File::registerExtensions .pal \
-            {::tycho::view EditPalette {-file {{%s}}}} \
+            {::tycho::view EditPalette {-file {%s}}} \
             {Palette editor}
     ::tycho::File::registerExtensions .pl \
-            {::tycho::view EditPtlang {-file {{%s}}}} \
+            {::tycho::view EditPtlang {-file {%s}}} \
             {Ptlang editor}
     ::tycho::File::registerExtensions {.pt .ptcl} \
-            {::tycho::view EditPtcl {-file {{%s}}}} \
+            {::tycho::view EditPtcl {-file {%s}}} \
             {Ptcl editor}
     ::tycho::File::registerExtensions {} \
-            {::tycho::view TclShell  {-file {{%s}}}} \
+            {::tycho::view TclShell  {-file {%s}}} \
             {Tcl shell}
     ::tycho::File::registerExtensions {} \
-            {::tycho::view ProfileTcl {-file {{%s}}}} \
+            {::tycho::view ProfileTcl {-file {%s}}} \
             {Tcl profiler}
 
     if {[uplevel #0 info commands matlab] != {}} {
 	::tycho::File::registerExtensions {} \
-                {::tycho::view Matlab {-file {{%s}}}} \
+                {::tycho::view Matlab {-file {%s}}} \
                 {Matlab console}
     }
     if {[uplevel #0 info commands mathematica] != {}} {
 	::tycho::File::registerExtensions {} \
-                {::tycho::view Mathematica {-file {{%s}}}} \
+                {::tycho::view Mathematica {-file {%s}}} \
                 {Mathematica console}
     }
     ::tycho::File::registerExtensions {.html .htm .htl} \
-            {::tycho::view HTML {-file {{%s}}} Displayer {-toolbar 1}} \
+            {::tycho::view HTML {-file {%s}} Displayer {-toolbar 1}} \
             {}
     ::tycho::File::registerExtensions {.mk .template} \
-            {::tycho::view EditMake {-file {{%s}}}} \
+            {::tycho::view EditMake {-file {%s}}} \
 	    {Makefile editor}
     ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
-            {::tycho::view EditMake {-file {{%s}}}} \
+            {::tycho::view EditMake {-file {%s}}} \
 	    {} 
     # ::tycho::File::registerExtensions {.fsm} \
-    #       {::tycho::view EditFSM {-file {{%s}}}} \
+    #       {::tycho::view EditFSM {-file {%s}}} \
     #       {Finite state machine editor}
     ::tycho::File::registerExtensions {.std} \
-            {::tycho::view EditSTD {-file {{%s}}}} \
+            {::tycho::view EditSTD {-file {%s}}} \
             {State transition diagram editor}
     ::tycho::File::registerExtensions {.idx} \
             {::tycho::DialogWindow::new IndexBrowser [::tycho::autoName .idx] \
-            -file {{%s}}} \
+            -file {%s}} \
             {}
 }
 
