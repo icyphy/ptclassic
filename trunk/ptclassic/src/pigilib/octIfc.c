@@ -314,16 +314,55 @@ ParamListType *pListPtr;
 {
     octObject prop, galFacet;
     char *starName;
+    ParamListType tempList;
+    void MergeParams();
 
+    ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
     prop.type = OCT_PROP;
     prop.contents.prop.name = "params";
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
 	/* no parameters: use default list */
-	ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
 	ERR_IF1(!SetSogParams(instPtr, pListPtr));
 	return(TRUE);
     }
-    return(PStrToPList(prop.contents.prop.value.string, pListPtr));
+    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
+	return(FALSE);
+    MergeParams(pListPtr,tempList);
+    return(TRUE);
+}
+
+/* find a parameter name in a ParamListType. */
+ParamType*
+findParam(name, pList)
+char* name;
+ParamListType *pList;
+{
+    int i;
+    ParamType* curr = pList->array;
+    for (i = 0; i < pList->length; i++) {
+	if (strcmp (name, curr->name) == 0) return curr;
+	curr++;
+    }
+    return 0;
+}
+
+/* merge a set of instance parameters (2nd arg) with a set of default
+ * parameters.    return the "official" ones in the 1st argument (default
+ * parameters).
+ */
+void
+MergeParams(pListDef,pListInst)
+ParamListType *pListDef, *pListInst;
+{
+    int i;
+    ParamType* match;
+    ParamType* curr = pListDef->array;
+    for (i = 0; i < pListDef->length; i++) {
+	match = findParam (curr->name, pListInst);
+	if (match) curr->value = match->value;
+	curr++;
+    }
+    return;
 }
 
 /* GetDefaultParams
