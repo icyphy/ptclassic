@@ -37,8 +37,8 @@ class ::tycho::Frame {
 
     ## constructor
     #
-    constructor	{x0 y0 x1 y1 args} {
-    } {}
+    constructor	{s c x0 y0 x1 y1 args} {}
+
 
     ###################################################################
     ## Public methods
@@ -231,16 +231,12 @@ body ::tycho::Frame::_relief {args} {
 
 ## constructor
 #
-body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
+body ::tycho::Frame::constructor {s c x0 y0 x1 y1 args} {
     #
     # Set the slate and canvas variables.
     #
-    set t [lsearch -exact $args -slate]
-    if { $t != -1 } {
-	set slate [lindex $args [expr $t+1]]
-	set canvas [$slate _canvas]
-	set args [lreplace $args $t [expr $t+1]]
-    }
+    set slate  $s
+    set canvas $c
 
     #
     # Extract the -color option value if there is one.
@@ -260,7 +256,7 @@ body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
     #
     # Override defaults: shape is rectangular
     #
-    configure -shape "rectangular"
+    set shape "rectangular"
 
     #
     # Initialize the list used to create the components
@@ -280,7 +276,6 @@ body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
     # Add some answers.
     #
     lappend answers [info context]
-#    set answers [concat [list [code $this _answer]] $answers]
 
     #
     # Create the primary component for the outline coordinates.
@@ -290,7 +285,7 @@ body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
     # its inside (even though invisible), which makes see-through
     # frames impossible.
     #
-    lappend itemspecs [list "primary" rectangle $x0 $y0 $x1 $y1]
+    lappend itemspecs "primary" [list rectangle $x0 $y0 $x1 $y1]
 
     #
     # The way that the polygon co-ordinates is set up in the Tk
@@ -312,22 +307,22 @@ body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
     set	a1 [expr $x1 - $borderwidth]
     set	b1 [expr $y1 - $borderwidth]
 
-    lappend itemspecs [list "lit" polygon \
+    lappend itemspecs "lit" [list polygon \
 	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1 \
 	    -fill [$colorObject light]]
 
-    lappend itemspecs [list "shaded" polygon \
+    lappend itemspecs "shaded" [list polygon \
 	    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1 \
 	    -fill [$colorObject dark]]
 
-    lappend itemspecs [list "surface" rectangle \
+    lappend itemspecs "surface" [list rectangle \
 	    $a0 $b0 $a1 $b1 \
 	    -outline {} -fill [$colorObject matt]]
 
     #
-    # Create the items with the itemspces list.
+    # Create the items with the itemspecs list.
     #
-    $this component create* $itemspecs
+    eval $this create untagged $itemspecs
 
     #
     # Configure option variables

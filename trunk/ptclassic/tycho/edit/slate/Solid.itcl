@@ -49,6 +49,7 @@ class ::tycho::Solid {
     #
     constructor	{args} {}
 
+
     ###################################################################
     ## Public methods
     
@@ -183,7 +184,7 @@ body ::tycho::Solid::adjust {name shade coords} {
     #
     # Move the components to their new locations.
     #
-    foreach* p $component($name) c $coords {
+    foreach p $component($name) c $coords {
 	eval $canvas coords $p $c
     }
 
@@ -215,18 +216,14 @@ body ::tycho::Solid::adjust {name shade coords} {
 
 ## constructor
 #
-body ::tycho::Solid::constructor {args} {
+body ::tycho::Solid::constructor {{s {}} {c {}} args} {
     getalloptions options args
 
     #
     # Set the slate and canvas variables.
     #
-    set t [lsearch -exact $options -slate]
-    if { $t != -1 } {
-	set slate [lindex $options [expr $t+1]]
-	set canvas [$slate _canvas]
-	set options [lreplace $options $t [expr $t+1]]
-    }
+    set slate  $s
+    set canvas $c
 
     #
     # Extract the -color option value if there is one.

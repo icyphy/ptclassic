@@ -146,11 +146,12 @@ class ::tycho::Interactor {
     ##
 
 
-    ## slate
+    ## slate, canvas
     #
     # The slate on which this interactor resides and operates.
     #
-    public variable slate ""
+    protected variable slate  ""
+    protected variable canvas ""
 
 
     ## bind [-button button] [-modifier modifier] target
