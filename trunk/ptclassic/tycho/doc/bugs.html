@@ -76,30 +76,37 @@ as the user if we want to create it.
 </ul>
 
 <h3><a href="$TYCHO/kernel/HTML.itcl">HTML</a></h3>
+<H4>HTML Rendering bugs</H4>
+
 <ul>
-<li>If I create a new Java template and generate the
-doc the indenting is all wrong, because the file contains
-HTML like:
-<pre>
-  &lt;dl&gt;
-    &lt;dt&gt; &lt;b&gt;Parameters:&lt;/b&gt;
-    &lt;dd&gt; parameter-name - description
-    &lt;dd&gt; parameter-name - description
-    &lt;dt&gt; &lt;b&gt;Returns:&lt;/b&gt;
-    &lt;dd&gt; description
-  &lt;/dl&gt;
-</pre>
-Tycho's HTML viewer doesn't deal with the double &lt;dd&gt;
-(Netscape does, BTW).
-<li>The HTML parser is quite slow.
+
 <li>In "img" directives, align="right" causes an error and size
     directives (width and height) are ignored.
-<li>A construct like "&lt;center$gt; &lt;img ... &gt; &lt;/center&gt;"
+<li>A construct like "&lt;center&gt; &lt;img ... &gt; &lt;/center&gt;"
     results in an in-line image rather than a centered image.
 <li>A &lt;p&gt; after an image is ignored.
-<li>If you have the source code for an HTML file open, and you try to open
-    with HTML file with the "Back" command, you get an error message that
-    is basically wrong, since there is no problem.
+<li> 	The following two line html file causes an error:
+<PRE>
+&lt;/pre&gt;&lt;/tcl&gt;
+&lt;/pre&gt;&lt;/tcl&gt;
+</PRE>
+<li> 	The following one line html file causes an error because
+    the backslash precedes the <CODE>&lt;/CODE&gt;</CODE>.
+
+<PRE>
+&lt;CODE&gt;c:&#92;Program Files&#92;tycho0.1.1&#92;&lt;/CODE&gt;
+</PRE>
+The short term workaround is to add a space:
+<PRE>
+&lt;CODE&gt;c:&#92;Program Files&#92;tycho0.1.1&#92; &lt;/CODE&gt;
+</PRE>
+
+</ul>
+
+
+<H4>HTML Interface Bugs and Requests for Enhancement</H4>
+
+<ul>
 <li>    If I have two HTML viewers open and if in one of them I click on
     a link that references the file open in the other, the other
     one is brought to the font and the one I am looking at doesn't
@@ -111,21 +118,6 @@ Tycho's HTML viewer doesn't deal with the double &lt;dd&gt;
 <li>    The print command prints only a crude facsimile of the document.
 <li>	Need to support forms (most of the infrastructure is there already).
 <li> 	Need to support mailto, gif files, etc.
-<li> 	The following two line html file causes an error:
-<PRE>
-&lt;/pre&gt;&lt;/tcl&gt;
-&lt;/pre&gt;&lt;/tcl&gt;
-</PRE>
-<li> 	The following one line html file causes an error because
-the backslash precedes the <CODE>&lt;/CODE&gt;</CODE>.
-
-<PRE>
-&lt;CODE&gt;c:&#92;Program Files&#92;tycho0.1.1&#92;&lt;/CODE&gt;
-</PRE>
-The short term workaround is to add a space:
-<PRE>
-&lt;CODE&gt;c:&#92;Program Files&#92;tycho0.1.1&#92; &lt;/CODE&gt;
-</PRE>
 
 <li> If you Open Source and then do a Save As in the source file
 window to save the source as a different file, then executing
@@ -150,6 +142,12 @@ mouse goes.  If you have more than one hyperlink in a menu arranged
 vertically, then the status line is not updated as you move the mouse
 vertically.  See the menu at the top of <A
 HREF="tynt.html"><CODE>tynt.html</CODE></A>.
+
+
+<li> If you visit a file that has the background set to a color with
+<CODE>&lt;body bgcolor="lightgoldenrodyellow"&gt;</CODE>,
+and then visit a file that does not have the background color set, the
+color does not revert to the default grey.
 
 </ul>
 
