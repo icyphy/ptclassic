@@ -39,8 +39,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".high", "$starSymbol(scale1)",
 			   "$val(volume)");
       }
+    }
 
-  }
+    codeblock (tychoSetup) {
+	/* Call tycho to connect a control to the volume parameter */
+	connectControl(moduleName, "$val(starName)", "volume",
+		$starSymbol(setVolume));
+    }
 
     codeblock (setVolumeDef) {
       static int $starSymbol(setVolume)(dummy, interp, argc, argv)
@@ -70,6 +75,7 @@ limitation of liability, and disclaimer of warranty provisions.
     initCode {
 	CGCStereoIn :: initCode();
 	addCode(tkSetup, "tkSetup");
+        addCode(tychoSetup, "tychoSetup");
         addCode(setVolumeDef, "procedure");
     }
 }

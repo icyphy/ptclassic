@@ -43,11 +43,9 @@ limitation of liability, and disclaimer of warranty provisions.
     }    
 
     codeblock (tychoSetup) {
-      /* Call tycho to connect a control to the volume parameter */
-      {
+	/* Call tycho to connect a control to the volume parameter */
 	connectControl(moduleName, "$val(starName)", "volume",
 		$starSymbol(setVolume));
-      }
     }
 
     codeblock (setVolumeDef) {

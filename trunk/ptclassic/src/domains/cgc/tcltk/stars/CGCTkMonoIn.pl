@@ -41,6 +41,12 @@ limitation of liability, and disclaimer of warranty provisions.
       }
     }
 
+    codeblock (tychoSetup) {
+	/* Call tycho to connect a control to the volume parameter */
+	connectControl(moduleName, "$val(starName)", "volume",
+		$starSymbol(setVolume));
+    }
+
     codeblock (setVolumeDef) {
       static int $starSymbol(setVolume)(dummy, interp, argc, argv)
 	ClientData dummy;                   /* Not used. */
@@ -69,6 +75,7 @@ limitation of liability, and disclaimer of warranty provisions.
     initCode {
 	CGCMonoIn :: initCode();
 	addCode(tkSetup, "tkSetup");
+	addCode(tychoSetup, "tychoSetup");
         addCode(setVolumeDef, "procedure");
     }
 }
