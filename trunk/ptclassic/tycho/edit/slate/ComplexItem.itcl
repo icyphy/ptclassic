@@ -114,6 +114,7 @@
 # </ul>
 #
 class ::tycho::ComplexItem {
+    inherit ::tycho::Uninstantiable
 
     # Create a new complex item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
