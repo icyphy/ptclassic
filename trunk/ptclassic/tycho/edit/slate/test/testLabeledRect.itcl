@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.slate
+# Make sure that the test package is loaded
+package require slate.test
 
-# We also have to load this helper file
-source [file join $env(SLATE_LIBRARY) test defs.itcl]
-
-# This is used to make the tests watchable
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 100
-}
-#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single LabeledRect on the slate
@@ -138,7 +129,7 @@ set i 0
 # Test that internal graphics are being rescaled properly
 _emptyrect -graphics {rectangle 25 25 75 75}
 test LabeledRect-reshape-1 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -aspects se
+    _interactslate reshape $f 1 1 40 -features se
     set result {}
     # Need to remove rounding errors here
     foreach c [.s coords [.s find withtag graphics.$f]] {
@@ -150,7 +141,7 @@ test LabeledRect-reshape-1 {Reshape a corner} {
 # Test that text label is being moved correctly
 _rect -textanchor ne
 test LabeledRect-reshape-2 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -aspects e
+    _interactslate reshape $f 1 1 40 -features e
     .s component $f label coords
 } {120.0 40.0}
 

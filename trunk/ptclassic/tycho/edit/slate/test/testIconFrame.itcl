@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.slate
+# Make sure that the test package is loaded
+package require slate.test
 
-# We also have to load this helper file
-source [file join $env(SLATE_LIBRARY) test defs.itcl]
-
-# This is used to make the tests watchable
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 100
-}
-#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single IconFrame on the slate
@@ -223,7 +214,7 @@ foreach a {n s e w nw sw ne se c} {
     incr i
     .s itemconfigure $f -anchor $a
     test IconFrame-anchor-$i "Test -anchor $a" {
-        eval ::tycho::Rectangle::aspect [.s coords [.s primary $f]] $a
+        eval ::tycho::Rectangle::feature [.s coords [.s primary $f]] $a
     } {100.0 100.0}
     _update
 }
@@ -313,8 +304,8 @@ test IconFrame-terminal-2 "Create a terminal and get coordinates" {
             -style circle -fill blue
     # Test: get the two ends of both terminals
     list \
-            [.s aspect [.s component $f input-1] origin terminal] \
-            [.s aspect [.s component $f input-2] origin terminal]
+            [.s feature [.s component $f input-1] origin terminal] \
+            [.s feature [.s component $f input-2] origin terminal]
 } {{100.0 80.0 100.0 60.0} {70.0 100.0 40.0 100.0}}
 _update
 
@@ -322,8 +313,8 @@ test IconFrame-terminal-3 "Resize and check terminals have moved" {
     .s itemconfigure $f -hsize 100 -vsize 100
    # Test: get the two ends of both terminals
     list \
-            [.s aspect [.s component $f input-1] origin terminal] \
-            [.s aspect [.s component $f input-2] origin terminal]
+            [.s feature [.s component $f input-1] origin terminal] \
+            [.s feature [.s component $f input-2] origin terminal]
 } {{100.0 50.0 100.0 30.0} {50.0 100.0 20.0 100.0}}
 _update
 

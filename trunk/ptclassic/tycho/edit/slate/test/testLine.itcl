@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,18 +30,8 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.slate
-
-# We also have to load this helper file
-source [file join $env(SLATE_LIBRARY) test defs.itcl]
-
-# This is used to make the tests watchable
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 50
-}
-#set VERBOSE 1
+# Make sure that the test package is loaded
+package require slate.test
 
 
 #######################################################################
@@ -55,7 +45,7 @@ proc _line {} {
 }
 
 #######################################################################
-#### _aspect
+#### _feature
 
 #######################################################################
 #### _grapple
@@ -78,7 +68,7 @@ foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
     _line
     test Line-_reshapeclick.$i \
             "Reshape a simple item, no ghosting, $i" {
-        _interact ::tycho::Line::_reshape $l 1 1 $delta -aspects $a
+        _interact ::tycho::Line::_reshape $l 1 1 $delta -features $a
     } [_finally2 ::tycho::Line::reshape $l 1 1 $delta $a]
 }
 
@@ -88,27 +78,27 @@ foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
     test Line-_reshapeclick.$i \
             "Reshape a simple item by tag, with ghosting, $i" {
         _interact ::tycho::Line::_reshape foo 1 1 $delta \
-                -aspects $a -ghost 1
+                -features $a -ghost 1
     } [_finally2 ::tycho::Line::reshape $l 1 1 $delta $a]
 }
 
 incr i
 _line
-test Line-_reshapeclick.$i {Reshape multiple aspects, no ghosting} {
+test Line-_reshapeclick.$i {Reshape multiple features, no ghosting} {
     _interact ::tycho::Line::_reshape $l 1 1 $delta \
-            -aspects {vertex-0 vertex-2}
+            -features {vertex-0 vertex-2}
 } [_finally2 ::tycho::Line::reshape $l 1 1 $delta vertex-0 vertex-2]
 
 incr i
 _line
-test Line-_reshapeclick.$i {Reshape multiple aspects, with ghosting} {
+test Line-_reshapeclick.$i {Reshape multiple features, with ghosting} {
     _interact ::tycho::Line::_reshape $l 1 1 $delta \
-            -aspects {vertex-1 end} -ghost 1
+            -features {vertex-1 end} -ghost 1
 } [_finally2 ::tycho::Line::reshape $l 1 1 $delta vertex-1 end]
 
 
 ##########################################################################
-#### aspect
+#### feature
 
 #######################################################################
 #### center
