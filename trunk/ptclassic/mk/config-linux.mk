@@ -143,10 +143,10 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # Variables for the linker
 #
 # system libraries for linking .o files from C files only
-CSYSLIBS=-lieee -lm $(DLLIB)
+CSYSLIBS =	-lieee -lm $(DLLIB)
 
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ $(CSYSLIBS)
+SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 
 
 #LINKFLAGS=-L$(LIBDIR) Xlinker -S -Xlinker -x # -static
