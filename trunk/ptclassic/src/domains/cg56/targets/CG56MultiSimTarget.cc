@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56MultiSimSend.h"
 #include "CG56MultiSimReceive.h"
 #include "CG56Target.h"
+#include "Sim56Target.h"
 #include "KnownTarget.h"
 #include "FixState.h"
 #include "pt_fstream.h"
@@ -57,7 +58,7 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 
 	starTypes += "AnyAsmStar";
 	// make some states invisible
-	childType.setInitValue("default-CG56");
+	childType.setInitValue("sim-CG56");
 	childType.setAttributes(A_NONSETTABLE);
 
 	sharedMem = 0;
@@ -68,7 +69,7 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 
 // -----------------------------------------------------------------------------
 Target* CG56MultiSimTarget :: createChild(int) {
-	LOG_NEW; return new CG56Target("single-CG56",
+	LOG_NEW; return new Sim56Target("single-CG56",
 	"56000 code target for a Multiple-Simulator Target.");
 }
 
