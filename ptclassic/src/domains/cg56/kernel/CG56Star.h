@@ -26,12 +26,12 @@ $Id$
 // 56k - specific attributes.
 
 const bitWord AB_XMEM = 0x10000; // allocate in X memory bank
+const bitWord AB_YMEM = 0x20000; // allocate in Y memory bank
 
 // note that attributes may combine several attribute bits.
 
 extern const Attribute A_XMEM;
 extern const Attribute A_YMEM;
-extern const Attribute A_XMEM_BIT;
 
 class CG56Star : public AsmStar {
 protected:
