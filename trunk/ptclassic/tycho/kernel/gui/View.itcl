@@ -105,6 +105,9 @@ class ::tycho::View {
     # Invoke a command on the menu bar, if it exists.
     method menubar {args}
 
+    # Invoke a command on the context-sensitive popup menu.
+    method contextmenu {args}
+
     # Print a status message, if possible.
     method putStatus {string}
 
@@ -149,6 +152,9 @@ class ::tycho::View {
 
     # A local Tycho clipboard that is mirrored in the Tk clipboard.
     protected common clipboard {}
+
+    # Name of my context-sensitive popup menu
+    protected variable myContextmenu {}
 
     # Name of this view's Displayer
     protected variable myDisplayer {}
@@ -310,6 +316,21 @@ body ::tycho::View::busy {args} {
     }
     config -cursor $oldCursor
     return 1
+}
+
+#########################################################################
+#### contextmenu
+# If there is a context-sensitive popup menu associated with this view,
+# use the arguments as a command to issue to the PopupMenu widget,
+# Menubar, and return whatever is returned by the command.  Otherwise,
+# return an empty string.
+#
+body ::tycho::View::contextmenu {args} {
+    if {$myContextmenu != {}} {
+        return [eval $myContextmenu $args]
+    } {
+        return {}
+    }
 }
 
 #########################################################################

@@ -131,24 +131,24 @@ body ::tycho::EditPtlang::constructor {args} {
     global PTOLEMY
     eval itk_initialize $args
 
-    menubar addMenu Special left {} -underline 0
+    menubar addMenu Special -underline 0
 
     # Stuff for the special menu
-    menubar addMenuItem "Stars" Special -underline 0 \
+    menubar add "Stars" Special -underline 0 \
             -command "::tycho::File::openContext \
 	    [file join $PTOLEMY src domains starHTML.idx.fst]"
 
-    menubar addMenuItem "Universes" Special -underline 0 \
+    menubar add "Universes" Special -underline 0 \
             -command "::tycho::File::openContext \
 	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
 
-    menubar addMenuItem "Xref, stars/demos" Special -underline 0 \
+    menubar add "Xref, stars/demos" Special -underline 0 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
-    menubar addMenuSeparator Special
+    menubar addSeparator Special
 
-    menubar addMenuItem "Generate doc" Special -underline 0 \
+    menubar add "Generate doc" Special -underline 0 \
             -command "$this gendoc"
 
 }

@@ -289,14 +289,14 @@ body ::tycho::TclShell::constructor {args} {
     bind $itk_component(text) <Control-r> "%Q searchQuery 1 1; break"
 
     # Remove the unneeded menu items.
-    menubar disableMenuItem Reload File
-    menubar disableMenuItem "Switch File..." File
-    menubar disableMenuItem "Toggle Read-Only" File
-    menubar disableMenuItem "Revision Control..." File
-    menubar disableMenuItem "Goto Line..." Edit
+    menubar delete "Reload"
+    menubar delete "Switch File..."
+    menubar delete "Toggle Read-Only"
+    menubar delete "Revision Control..."
+    menubar delete "Goto Line..."
 
     # Remove the Format menu altogether
-    menubar removeMenu Format
+    menubar delete Format
     
     # Change some of the configuration made by default.
     # NOTE: The -title option of itk::Toplevel should probably
@@ -308,16 +308,16 @@ body ::tycho::TclShell::constructor {args} {
 #     wm iconname $tl "Tcl Shell"
     
     # Add a Special menu
-    menubar addMenu Special left {} -underline 0
+    menubar addMenu Special -underline 0
 
     # Since the Format menu is gone, we put the Font command here.
-    menubar addMenuItem "Font..." Special -underline 0 \
+    menubar add "Font..." Special -underline 0 \
 	    -command "$this setFont"
 
-    menubar addMenuItem "Edit history" Special -underline 0 \
+    menubar add "Edit history" Special -underline 0 \
 	    -command "$this displayHistory"
 
-    menubar addMenuItem "Clear history" Special -underline 0 \
+    menubar add "Clear history" Special -underline 0 \
 	    -command "$this clearHistory"
 
     printPrompt ""
@@ -473,7 +473,7 @@ body ::tycho::TclShell::deleteRange {first last} {
 #
 body ::tycho::TclShell::displayHistory {} {
     set history [join $commandList "\n"]
-    ::tycho::view EditTcl [list -text \"$history\"]
+    ::tycho::view EditTcl [list -text \"$history\"] ;#" (for highlighting...)
 }
  
 #########################################################################
@@ -559,13 +559,13 @@ body ::tycho::TclShell::indicateReadOnly {bool} {
     ::tycho::File::indicateReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disableMenuItem {Undo/Redo} Edit
-            menubar disableMenuItem Cut Edit
-            menubar disableMenuItem Paste Edit
+            menubar disable {Undo/Redo}
+            menubar disable Cut
+            menubar disable Paste
 	} {
-            menubar enableMenuItem {Undo/Redo} Edit
-            menubar enableMenuItem Cut Edit
-            menubar enableMenuItem Paste Edit
+            menubar enable {Undo/Redo}
+            menubar enable Cut
+            menubar enable Paste
 	}
     }
 }

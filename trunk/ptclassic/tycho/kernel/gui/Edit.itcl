@@ -590,58 +590,58 @@ body ::tycho::Edit::constructor {args} {
     # Insert items in the menu bar.
     # NOTE: For efficiency, avoid "menubar" method.
     if {$myMenubar != {}} {
-         $myMenubar insertMenuItem "Compile" "Evaluate" File -underline 2 \
+         $myMenubar insert "Compile" "Evaluate" -underline 2 \
                  -command "$this execProcess make 0"
           
-  # Add an Edit menu
-        $myMenubar addMenu Edit left Window -underline 0
+	# Add an Edit menu
+        $myMenubar addMenu Edit -before Window -underline 0
         
-        $myMenubar addMenuItem {Undo/Redo} Edit -accelerator "C-x u" \
+        $myMenubar add {Undo/Redo} Edit -accelerator "C-x u" \
                 -underline 0 -command "$this undo"
         
-        $myMenubar addMenuSeparator Edit
+        $myMenubar addSeparator Edit
         
-        $myMenubar addMenuItem Cut Edit -underline 0 -accelerator "C-w" \
+        $myMenubar add Cut Edit -underline 0 -accelerator "C-w" \
                 -command "$this cut"
         
-        $myMenubar addMenuItem Copy Edit -underline 1 -accelerator "M-w" \
+        $myMenubar add Copy Edit -underline 1 -accelerator "M-w" \
                 -command "$this copy"
         
-        $myMenubar addMenuItem Paste Edit -underline 0 -accelerator "C-y" \
+        $myMenubar add Paste Edit -underline 0 -accelerator "C-y" \
                 -command "$this paste"
         
-        $myMenubar addMenuSeparator Edit
+        $myMenubar addSeparator Edit
         
-        $myMenubar addMenuItem "Select All" Edit -underline 0 \
+        $myMenubar add "Select All" Edit -underline 0 \
                 -accelerator "C-/" -command "$this selectRange 1.0 end"
         
-        $myMenubar addMenuItem "Unselect" Edit -underline 0 \
+        $myMenubar add "Unselect" Edit -underline 0 \
                 -accelerator "C-\\" -command "$this unselectRange 1.0 end"
         
-        $myMenubar addMenuItem "Find/Change..." Edit -underline 0 \
+        $myMenubar add "Find/Change..." Edit -underline 0 \
                 -accelerator "C-s" -command "$this search"
         
-        $myMenubar addMenuItem "Spelling..." Edit -underline 2 \
+        $myMenubar add "Spelling..." Edit -underline 2 \
                 -accelerator "M-$" -command "$this spellCheck"
         
-        $myMenubar addMenuItem {Goto Line...} Edit -underline 0 \
+        $myMenubar add {Goto Line...} Edit -underline 0 \
                 -accelerator "C-c C-g" -command "$this gotoLine"
         
         # Add a Format menu
-        $myMenubar addMenu Format left {} -underline 1
+        $myMenubar addMenu Format -underline 1
         
-        $myMenubar addMenuItem "Font..." Format -underline 0 \
+        $myMenubar add "Font..." Format -underline 0 \
                 -command "$this setFont"
         
-        $myMenubar addMenuSeparator Format
+        $myMenubar addSeparator Format
         
-        $myMenubar addMenuItem "Fill Region" Format -underline 2 \
+        $myMenubar add "Fill Region" Format -underline 2 \
                 -accelerator "M-q" -command "$this busy fillSelection"
         
-        $myMenubar addMenuItem "Right Fill Column" Format -underline 2 \
+        $myMenubar add "Right Fill Column" Format -underline 2 \
                 -accelerator "C-x f" -command "$this queryFillColumn"
         
-        $myMenubar addMenuItem "Set Fill Prefix" Format -underline 1 \
+        $myMenubar add "Set Fill Prefix" Format -underline 1 \
                 -accelerator "C-x ." -command "$this queryFillPrefix"
     }
 
@@ -655,6 +655,15 @@ body ::tycho::Edit::constructor {args} {
 
     set maxLineLength \
             [option get $itk_component(hull) fillMaxLineLength Edit]
+
+    # FIXME: This is totally bogus!!!
+
+    # Create my context-sensitive popup menu
+    set myContextmenu [::tycho::PopupMenu .#auto]
+    # FIXME: Add better description.
+    $myContextmenu add {Describe this widget...} -command \
+	    "::tycho::post $itk_component(text)"
+    bind $itk_component(text) <Button-3> {%Q contextmenu post %X %Y}
 }
 
 ##########################################################################
@@ -1329,19 +1338,19 @@ body ::tycho::Edit::indicateReadOnly {bool} {
     ::tycho::File::indicateReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disableMenuItem {Undo/Redo} Edit
-            menubar disableMenuItem Cut Edit
-            menubar disableMenuItem Paste Edit
-            menubar disableMenuItem {Fill Region} Format
-            menubar disableMenuItem {Right Fill Column} Format
-            menubar disableMenuItem {Set Fill Prefix} Format
+            menubar disable {Undo/Redo}
+            menubar disable Cut
+            menubar disable Paste
+            menubar disable {Fill Region}
+            menubar disable {Right Fill Column}
+            menubar disable {Set Fill Prefix}
 	} {
-            menubar enableMenuItem {Undo/Redo} Edit
-            menubar enableMenuItem Cut Edit
-            menubar enableMenuItem Paste Edit
-            menubar enableMenuItem {Fill Region} Format
-            menubar enableMenuItem {Right Fill Column} Format
-            menubar enableMenuItem {Set Fill Prefix} Format
+            menubar enable {Undo/Redo}
+            menubar enable Cut
+            menubar enable Paste
+            menubar enable {Fill Region}
+            menubar enable {Right Fill Column}
+            menubar enable {Set Fill Prefix}
 	}
     }
 }

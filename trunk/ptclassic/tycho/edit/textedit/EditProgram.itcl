@@ -154,27 +154,27 @@ body ::tycho::EditProgram::constructor {args} {
     
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
-    menubar addMenuSeparator Format
+    menubar addSeparator Format
     
-    menubar addMenuItem "Comment Out Region" Format -underline 0 \
+    menubar add "Comment Out Region" Format -underline 0 \
 	    -command "$this commentSelection"
     
-    menubar addMenuItem "Uncomment Region" Format -underline 0 \
+    menubar add "Uncomment Region" Format -underline 0 \
 	    -command "$this uncommentSelection"
     
-    menubar addMenuSeparator Format
+    menubar addSeparator Format
     
-    menubar addMenuItem "Recolorize" Format -underline 0 -accelerator "S-C-l" \
+    menubar add "Recolorize" Format -underline 0 -accelerator "S-C-l" \
 	    -command "$this parseRegion 1.0 end"
     
-    menubar addMenuItem "Indent Line" Format -underline 0 -accelerator "Tab" \
+    menubar add "Indent Line" Format -underline 0 -accelerator "Tab" \
 	    -command "$this indentLine"
 
-    menubar addMenuItem "Indent Region" Format -underline 1 \
+    menubar add "Indent Region" Format -underline 1 \
             -accelerator "Esc C-\\" \
 	    -command "$this busy indentSelection"
     
-    menubar addMenuItem "Tab" Format -underline 0 -accelerator "C-q Tab" \
+    menubar add "Tab" Format -underline 0 -accelerator "C-q Tab" \
 	    -command "$this insertString insert {\t}"
 
     # The default fill prefix works for Tcl and shell scripts.
@@ -442,17 +442,17 @@ body ::tycho::EditProgram::indicateReadOnly {bool} {
     ::tycho::Edit::indicateReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disableMenuItem {Comment Out Region} Format
-            menubar disableMenuItem {Uncomment Region} Format
-            menubar disableMenuItem {Indent Line} Format
-            menubar disableMenuItem {Indent Region} Format
-            menubar disableMenuItem {Tab} Format
+            menubar disable {Comment Out Region}
+            menubar disable {Uncomment Region}
+            menubar disable {Indent Line}
+            menubar disable {Indent Region}
+            menubar disable {Tab}
 	} {
-            menubar enableMenuItem {Comment Out Region} Format
-            menubar enableMenuItem {Uncomment Region} Format
-            menubar enableMenuItem {Indent Line} Format
-            menubar enableMenuItem {Indent Region} Format
-            menubar enableMenuItem {Tab} Format
+            menubar enable {Comment Out Region}
+            menubar enable {Uncomment Region}
+            menubar enable {Indent Line}
+            menubar enable {Indent Region}
+            menubar enable {Tab}
 	}
     }
 }
