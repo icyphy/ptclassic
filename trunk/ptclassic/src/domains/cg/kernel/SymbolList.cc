@@ -19,7 +19,7 @@ $Id$
 #include "CGSymbol.h"
 #include "CGTarget.h"
 
-Symbol::Symbol (CGTarget* target=0) {
+Symbol::Symbol (CGTarget* target) {
 	initialize();
 	myTarget = target;
 }
@@ -45,12 +45,12 @@ StringList Symbol::lookup(const char* name) {
 }
 	
 
-NestedSymbol::NestedSymbol (CGTarget* target=0) {
+NestedSymbol::NestedSymbol (CGTarget* target) {
 	initialize();
 	myTarget = target;
 }
 	
-const char* NestedSymbol::push(const char* name="L") {
+const char* NestedSymbol::push(const char* name) {
 	StringList s;
    	s = name;
 	s += myTarget->separator;

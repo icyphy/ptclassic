@@ -30,7 +30,7 @@ private:
 	CGTarget* myTarget;
 public:
 	Symbol(CGTarget* t=0);
-	void initialize() { symbols.initialize(); };
+	void initialize() { symbols.initialize(); }
 	StringList lookup(const char*);
 	void setTarget(CGTarget* t) {myTarget = t;}
 };
@@ -43,10 +43,10 @@ private:
 	CGTarget* myTarget;
 public:
 	NestedSymbol(CGTarget* t=0);
-	void initialize() { symbols.initialize(); };
+	void initialize() { symbols.initialize(); }
 	const char* push(const char* tag="L");
 	const char* pop();
-	int depth() { return symbols.depth();};
-	void setTarget(CGTarget* t) {myTarget = t;};
+	int depth() { return symbols.depth();}
+	void setTarget(CGTarget* t) {myTarget = t;}
 };
 #endif

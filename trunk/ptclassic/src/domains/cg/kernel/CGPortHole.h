@@ -12,6 +12,11 @@ This file contains definitions of CG-specific PortHole classes.
 ******************************************************************/
 #ifndef _CGConnect_h
 #define _CGConnect_h 1
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "Connect.h"
 #include "SDFConnect.h"
 
@@ -33,7 +38,7 @@ These PortHoles are much like SDF PortHoles, from which they are derived.
 class CGPortHole : public SDFPortHole {
 	friend class CGGeodesic;
 public:
-	CGPortHole() : offset(0), forkSrc(0) {}
+	CGPortHole();
 	~CGPortHole();
 
 	// Services of SDFPortHole that are used often:
@@ -64,11 +69,7 @@ public:
 
         // Advance the offset by the number of tokens produced or
         // consumed in this PortHole when the Star fires.
-        virtual void advance() {
-                offset += numberTokens;
-                int sz = bufSize();
-                if (offset >= sz) offset -= sz;
-        }
+        virtual void advance();
 
 	// return true if I am a fork input
 	int fork() const { return forkDests.size();}
@@ -118,6 +119,7 @@ protected:
 	CGPortHole* forkSrc;
 public:
 	MultiCGPort() : forkSrc(0) {}
+	~MultiCGPort();
 
 	void setForkBuf(CGPortHole& p) { forkSrc = &p;}
 

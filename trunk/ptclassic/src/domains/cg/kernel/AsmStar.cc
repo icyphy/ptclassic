@@ -40,7 +40,7 @@ AsmStar::lookupAddress(const char* name) {
 	if (p) s = p->location();
 	// see if it's a state
 	else if (lookupEntry(name,a)) {
-	    s = int(a);
+	    s = a;
 	} else {
 	    if (stateWithName(name))
 		Error::abortRun(*this," state ",name,
@@ -144,13 +144,13 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		else {
 			s = lookupMem(id);
 			s += ":";
-			s += (int)addrWithOffset(id, arg2);
+			s += addrWithOffset(id, arg2);
 		}
 	}
 	else if (strcasecmp(func,"addr2") == 0) {
 		if (*arg2 == 0)
 			codeblockError("two arguments needed for addr2");
-		else s = (int)addrWithOffset(id, arg2);
+		else s = addrWithOffset(id, arg2);
 	}
 	// if more two-arg funcs are added, put them before here!
 	else if (*arg2 != 0) {
@@ -236,12 +236,12 @@ void AsmStar::prepareForScheduling() {
 	CGStar::prepareForScheduling();
 }
 
-void AsmStar::addRunCmd(const char* cmd,const char* cmd2 = NULL) {
+void AsmStar::addRunCmd(const char* cmd,const char* cmd2) {
 	((AsmTarget*)targetPtr)->addRunCmd(cmd);
 	if (cmd2 != NULL) ((AsmTarget*)targetPtr)->addRunCmd(cmd2);
 }
 
-void AsmStar::addMiscCmd(const char* cmd,const char* cmd2 = NULL) {
+void AsmStar::addMiscCmd(const char* cmd,const char* cmd2) {
 	((AsmTarget*)targetPtr)->addMiscCmd(cmd);
 	if (cmd2 != NULL) ((AsmTarget*)targetPtr)->addRunCmd(cmd2);
 }

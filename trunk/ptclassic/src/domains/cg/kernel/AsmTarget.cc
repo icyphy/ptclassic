@@ -18,11 +18,18 @@ $Id$
 #include "GalIter.h"
 #include "AsmStar.h"
 #include "ProcMemory.h"
-#include "UserOutput.h"
 #include "CGDisplay.h"
 #include "CGUtilities.h"
 #include "KnownBlock.h"
 #include "miscFuncs.h"
+#include "pt_fstream.h"
+
+
+// constructor
+AsmTarget :: AsmTarget(const char* nam, const char* desc,
+		  const char* stype, ProcMemory* m) :
+		CGTarget(nam,stype,desc), mem(m), interruptFlag(FALSE)
+{ initStates();}
 
 void AsmTarget :: initStates() {
 	uname = 0;
@@ -51,7 +58,7 @@ int AsmTarget :: setup(Galaxy& g) {
 	return CGTarget::setup(g);
 }
 
-int AsmTarget :: hostSystemCall(const char* cmd, const char* err=NULL) {
+int AsmTarget :: hostSystemCall(const char* cmd, const char* err) {
 	int val = rshSystem(targetHost,cmd,dirFullName);
 	if (err != NULL && val != 0) Error::abortRun(err);
 	return val;
@@ -144,7 +151,7 @@ inline int wormEdge(PortHole& p) {
 extern int warnIfNotConnected (Galaxy&);
 
 // Here's the main guy.
-AsmTarget::modifyGalaxy(Galaxy& g) {
+int AsmTarget::modifyGalaxy(Galaxy& g) {
 	if (!int(loopScheduler)) return TRUE;
 	// init and call start methods.  We must do this so that
 	// the numberTokens values will be correct.
@@ -184,7 +191,6 @@ AsmTarget::modifyGalaxy(Galaxy& g) {
 			else {
 				// nonintegral rate conversion, both need
 				// PB_CIRC
-				int code;
 				if (!hasCirc(p)) {
 					p = spliceStar(p, "CircToLin", 0);
 					if (!p) return FALSE;
@@ -285,21 +291,21 @@ void AsmTarget :: outputLineOrientedComment(const char* prefix,
 	LOG_DEL; delete line;
 }
 
-char* AsmTarget :: fullFileName(char* base, const char* suffix=NULL)
+char* AsmTarget :: fullFileName(const char* base, const char* suffix)
 {
 	StringList bname = fileName(base,suffix);
 	char* fullName = writeFileName(bname);
 	return fullName;
 }
 
-char* AsmTarget :: fileName(char* base, const char* suffix=NULL)
+char* AsmTarget :: fileName(const char* base, const char* suffix)
 {
 	StringList bname = base;
 	if (suffix != NULL) bname += suffix;
-	return bname;
+	return bname.newCopy();
 }
 
-int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix=NULL)
+int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix)
 {
 	char* name = fullFileName(base,suffix);
 	int status = display(stuff,name);
@@ -307,19 +313,14 @@ int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix=NULL)
 	return status;
 }
 
-int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix=NULL)
+int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix)
 {
 	int status;
 	char* fullName = fullFileName(base, suffix);
-	UserOutput o;
-	if (!o.fileName(fullName)) {
-		Error::abortRun(*this, "can't open file for writing: ",
-				fullName);
-		status = FALSE;
-	}
+	pt_ofstream o(fullName);
+	if (!o) status = FALSE;
 	else {
 		o << stuff;
-		o.flush();
 		status = TRUE;
 	}
 	LOG_DEL; delete fullName;

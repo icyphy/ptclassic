@@ -59,3 +59,7 @@ void StringStack :: deleteAllStrings() {
 		LOG_DEL; delete string;
 	}
 }
+
+StringStack :: ~StringStack() {
+	deleteAllStrings();
+}

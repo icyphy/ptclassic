@@ -16,6 +16,7 @@ a universe.
 
 #include "BaseCTarget.h"
 #include "KnownTarget.h"
+#include "pt_fstream.h"
 #include <ctype.h>
 
 // constructor
@@ -27,12 +28,8 @@ BaseCTarget::BaseCTarget(const char* nam, const char* startype,
 
 void BaseCTarget::wrapup() {
     char* codeFileName = writeFileName("code.output");
-    UserOutput codeFile;
-    if(Scheduler::haltRequested()) return;
-    if(!codeFile.fileName(codeFileName)) {
-	Error::abortRun("Can't open code file for writing: ",codeFileName);
-	return;
-    }
+    pt_ofstream codeFile(codeFileName);
+    if (!codeFile) return;
     writeCode(codeFile);
 }
 

@@ -20,7 +20,6 @@ $Id$
 #include "CGStar.h"
 #include "GalIter.h"
 #include "Error.h"
-#include "UserOutput.h"
 #include "SDFScheduler.h"
 #include "SDFCluster.h"
 #include "CGDisplay.h"
@@ -39,7 +38,7 @@ StringList CGTarget::indent(int depth) {
 
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
-		   const char* desc, char sep = '_')
+		   const char* desc, char sep)
 : Target(name,starclass,desc), schedFileName(0), noSchedule(0)
 {
 	separator = sep;
@@ -263,7 +262,7 @@ void CGTarget :: wrapup() {
 	display(myCode);
 }
 
-void CGTarget :: writeCode(UserOutput& o) {
+void CGTarget :: writeCode(ostream& o) {
 	o << myCode;
 	o.flush();
 }
@@ -277,7 +276,7 @@ void CGTarget :: outputComment (const char* msg) {
         addCode(code);
 }
 
-int CGTarget :: systemCall(const char* command, const char* error=NULL) {
+int CGTarget :: systemCall(const char* command, const char* error) {
 	StringList cmd = "cd ";
 	cmd += dirFullName;
 	cmd += ";";

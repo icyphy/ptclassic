@@ -24,14 +24,14 @@ A StringStack is a stack of Strings.
 class StringStack : public Stack {
 public:
 	//Constructors
-	StringStack(){};
+	StringStack(){}
 
 	void initialize() { deleteAllStrings(); }
 
-	~StringStack() { deleteAllStrings(); }
+	~StringStack();
 
 	//Return the depth of the stack
-	int depth() const {return size();};
+	int depth() const {return size();}
 
 	void push(const char* p);
 	void push(char c);

@@ -13,6 +13,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "Attribute.h"
 #include "AsmConnect.h"
 // FixSample is included so AsmStars can use FIX-type ports

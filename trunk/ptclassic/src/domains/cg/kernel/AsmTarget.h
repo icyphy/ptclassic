@@ -16,6 +16,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "CGTarget.h"
 #include "IntState.h"
 #include "StringState.h"
@@ -27,7 +31,6 @@ class AsmTargetPtr;
 
 class AsmTarget : public CGTarget {
 private:
-	const char* starClass;
 	SequentialList spliceList;
 	void initStates();
 protected:
@@ -88,8 +91,7 @@ protected:
 
 public:
 	AsmTarget(const char* nam, const char* desc,
-		  const char* stype, ProcMemory* m = 0) :
-		CGTarget(nam,stype,desc), mem(m) { initStates();}
+		  const char* stype, ProcMemory* m = 0);
 
 	~AsmTarget();
 
@@ -113,12 +115,12 @@ public:
   
 	// Return full file name including path.  
 	// NOTE: User must delete the char* returned after use.
-	char* fullFileName(char* base, const char* suffix=NULL);
+	char* fullFileName(const char* base, const char* suffix=NULL);
 
 	// Return file name w/o path.  If the char* returned is not
 	// for immediate use, the calling function must copy the string
 	// into another location.
-	char* fileName(char* base, const char* suffix=NULL);
+	char* fileName(const char* base, const char* suffix=NULL);
 
 	// output an "org" directive that switches to the specified
 	// memory and address
@@ -149,7 +151,7 @@ public:
 	virtual void enableInterrupts();
 
 	//Flag that is set to true when the target has generated interrupts
-	int	interruptFlag = FALSE;
+	int	interruptFlag;
 
 	//Save program counter
 	virtual void saveProgramCounter();

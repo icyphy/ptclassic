@@ -32,10 +32,10 @@ char* makeLower(const char* name) {
 }
 
 int rshSystem(const char* hname,const char* cmd,
-	      const char* dir = NULL) {
-	const char* hostname = savestring(hname);
-	const char* command = savestring(cmd);
-	const char* directory = NULL;
+	      const char* dir) {
+	char* hostname = savestring(hname);
+	char* command = savestring(cmd);
+	char* directory = NULL;
 	if (dir != NULL) directory = savestring(dir);
 	StringList rshCommand = "";
 	if (strcmp(hostname,"localhost") != 0 ) 

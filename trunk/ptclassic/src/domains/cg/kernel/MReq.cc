@@ -99,13 +99,12 @@ StringList MConsecStateReq::print() {
 	MReqListIter next(lis);
 	int first = 1;
 	MReq* m;
-	const char* sep;
+	const char* sep = "(";
 	while ((m = next++) != 0) {
 		const State* s = m->state();
 		if (!s) { out += "???"; return out;}
 		if (first) {
 			out += s->parent()->readFullName();
-			sep = "(";
 			first = 0;
 		}
 		out += sep;

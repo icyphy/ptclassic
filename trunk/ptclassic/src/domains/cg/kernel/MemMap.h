@@ -13,6 +13,10 @@ Version identification:
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "MReq.h"
 
 class ProcMemory;
