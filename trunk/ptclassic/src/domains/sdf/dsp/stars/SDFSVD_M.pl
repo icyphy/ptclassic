@@ -50,9 +50,8 @@ The vector of singular values is always generated.
 .ip [1]
 S. Haykin, \fIModern Filters\fR, pp. 333-335,
 Macmillan Publishing Company, New York, 1989.
-.SA
-Data_M
     }
+    seealso { Data_M }
     defstate {
 	name 	{ rows }
 	type 	{ int }
@@ -457,3 +456,4 @@ Data_M
       } // close code
     } // end method
 } // end defstar
+
