@@ -191,7 +191,7 @@ class ::tycho::Library {
     ####                   public variables                      ####
 
     # The types of entity defined by this library
-    public variable entities {}
+    public variable visibletypes {}
 
     #################################################################
     ####                     public methods                      ####
@@ -206,8 +206,10 @@ class ::tycho::Library {
     method instantiate {item datamodel args}
 
     # Create a menu with items in this library
-    method makemenu \
-            {type menubar menuname command {context {}} {prefix {}}}
+    method makemenu {menubar menuname args}
+
+    # Create a menu with items in this library
+    method _makemenu {types menubar menuname command context callback}
 
     #################################################################
     ####                   protected methods                     ####
@@ -373,20 +375,18 @@ body ::tycho::Library::instantiate {item datamodel args} {
 }
 
 ########################################################################
-#### makemenu
+#### _makemenu
 #
-# Add a menu to a menubar containing items in this library. Only
-# items that have a non-null <b>-label</b> attribute will be added.
-# The first argument is the types of item to be added to the menubar.
-# The second argument is the menubar. The third is the name
-# of the menu to place these items into. The fourth is the command
-# for each menu entry, to which will be appended the item
-# name. The fifth, if supplied and not null, is the group to add
-# items from. The sixth, if supplied and not null, is the prefix
-# of the name which will be appended to the menu command.
+# Low-level method to add a menu to a menubar. See the makemenu{}
+# method for documentation.
 #
-body ::tycho::Library::makemenu \
-        {types menubar menuname command {context {}} {prefix {}}} {
+body ::tycho::Library::_makemenu \
+        {types menubar menuname command context callback} {
+    # Call callback
+    if { $callback != "" } {
+        uplevel #0 $callback [list $menuname $context]
+    }
+
     # Add cascade menus
     foreach g [match group $context] {
         set item [concat $context $g]
@@ -395,8 +395,7 @@ body ::tycho::Library::makemenu \
             set label [attrget $item -label]
             if { $label != "" } {
                 $menubar add cascade $entry $menuname -label $label
-                makemenu $types $menubar $entry $command \
-                        $item [concat $prefix $g]
+                _makemenu $types $menubar $entry $command $item $callback
             }
         }
     }
@@ -415,6 +414,66 @@ body ::tycho::Library::makemenu \
             }
         }
     }
+}
+
+########################################################################
+#### makemenu
+#
+# Add a menu to a menubar containing items in this library. Only
+# items that have a non-null <b>-label</b> attribute will be added.
+# The first argument is the types of item to be added to the menubar.
+# The second argument is the menubar. The third is the name
+# of the menu to place these items into. The following optional
+# arguments are recognised:
+#
+# <dl>
+# <dt><b>-customizecommand</b> _script_
+# <dd>
+# Specify a command prefix to evaluate before any items are
+# added to a new menu. This can be used for placing menu
+# entries at the head of each menu. The menu name and the
+# group containing the items that will be added to that menu
+# are appended to the script. 
+#
+# <dt><b>-command</b> _script_
+# <dd>
+# Specify a command prefix to evaluate when a library item is
+# added. When a menu entry is selected, the menu name will be
+# appended to this command and evaluated at the global scope.
+#
+# <dt><b>-context</b> _context_
+# <dd>
+# The context to start getting items from. By default, it is null,
+# meaning that all items in the librray may be added to the library.
+#
+# <dt><b>-types</b> _typelist_
+# <dd>
+# Specify the types of entity that are added into the menu.
+# If not supplied, the types will be given by the <b>-entities<b>
+# configuration option of the library, if there is one. If not
+# supplied and the library has no <b>-entities<b> option, then
+# all types except <b>attribute</b>, <b>group</b>, and <b>xref</b>
+# will be added. 
+#
+# </dl>
+#
+body ::tycho::Library::makemenu {menubar menuname args} {
+    # Extract arguments
+    array set opts {-command "puts" -customizecommand "" \
+        -context "" -types ""}
+    array set opts $args
+ 
+    if { $opts(-types) == "" } {
+        set opts(-types) $visibletypes
+    }
+    if { $opts(-types) == "" } {
+        set opts(-types) [::tycho::lsubtract \
+                [type names] {attribute group xref}]
+    }
+
+    # Call the recursive lower-level method
+    _makemenu $opts(-types) $menubar $menuname $opts(-command) \
+            $opts(-context) $opts(-customizecommand)
 }
 
 ###################################################################
