@@ -52,10 +52,10 @@ else
 ISLANG =
 endif
 
-DIRS = kernel thread ptlang $(ISLANG) domains utils ptcl pigilib libgantt ptklib tycho pigiRpc pxgraph filters
+DIRS = kernel thread ptlang $(ISLANG) domains utils ptcl pigilib ptklib tycho pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
-MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib pigiRpc
+MTDIRS = kernel pigilib pxgraph ptcl ptklib pigiRpc
 
 # "leaf" directories with no make.template
 LDIRS = ptlang $(ISLANG) filters utils
@@ -123,5 +123,4 @@ ptcl/ptcl.ptiny:
 pigiRpc/ptinyRpc: ptcl/ptcl.ptiny
 	(cd pigilib; $(MAKE) install)
 	(cd ptklib; $(MAKE) install)
-	(cd libgantt; $(MAKE) install)
 	(cd pigiRpc; $(MAKE) ptinyRpc)
