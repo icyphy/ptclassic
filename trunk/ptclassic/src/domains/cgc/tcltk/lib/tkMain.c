@@ -39,9 +39,6 @@ Version: $Id$
 
 #include "tk.h"
 #include "tcl.h"
-#include "itk.h"
-#include "itcl.h"
-
 #define COMMANDSIZE 1024
 #define REPORT_TCL_ERRORS 1
 
@@ -571,21 +568,6 @@ int main(int argc, char *argv[]) {
     Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
     w = Tk_MainWindow(interp);
 #endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
-
-    /* Add [incr Tcl] and [incr Tk] */
-    if (Itcl_Init(interp) == TCL_ERROR) {
-	fprintf(stderr,
-		"%s: Error while trying to initialize [incr tcl]: %s\n",
-		argv[0], interp->result);
-	exit(1);
-      }
-    if (Itk_Init(interp) == TCL_ERROR)  {
-	fprintf(stderr,
-		"%s: Error while trying to initialize [incr Tk]: %s\n",
-		argv[0], interp->result);
-	exit(1);
-    }
-
     if (w == NULL) {
 	fprintf(stderr,
 		"%s: Error while trying to get main window: %s\n",
@@ -706,42 +688,4 @@ char *s;
 */
 
 
-/*
-Connect to a control by name.
-*/
-void connectControl (starname, ctrlname, callback)
-    char *starname, *ctrlname;
-    Tcl_CmdProc *callback;
-{
-    /* Register the callback function with Tcl */
-    sprintf(command, "%s.%s.Callback", starname, ctrlname);
-    Tcl_CreateCommand (interp, command, callback,
-	    (ClientData) 0, (void (*)()) NULL);
-
-    /* Call Tcl to make the connection */
-    sprintf(command,
-	"connectControl %s %s %s.%s.Callback",
-	starname, ctrlname, starname, ctrlname);
-    if(Tcl_Eval(interp, command) != TCL_OK) {
-	printf("Cannot connect control %s.%s\n", starname, ctrlname);
-    }
-}
-
-void connectControl2 (starname, ctrlname, callback)
-    char *starname, *ctrlname;
-    Tcl_CmdProc *callback;
-{
-    /* Register the callback function with Tcl */
-    sprintf(command, "%s.%s.Callback", starname, ctrlname);
-    Tcl_CreateCommand (interp, command, callback,
-	    (ClientData) 0, (void (*)()) NULL);
-
-    /* Call Tcl to make the connection */
-    sprintf(command,
-	"connectControl2 %s %s %s.%s.Callback",
-	starname, ctrlname, starname, ctrlname);
-    if(Tcl_Eval(interp, command) != TCL_OK) {
-	printf("Cannot connect control %s.%s\n", starname, ctrlname);
-    }
-}
 
