@@ -108,17 +108,17 @@ proc print_verbose {test_name test_description contents_of_test code answer {tes
 	} else {
 	    incr KNOWN_FAILED
 	    if {$code == 1} {
-		puts "==== Test generated known error:"
+		puts ".... Test generated KNOWN error:"
 		puts "$errorInfo"
 	    } elseif {$code == 2} {
-		puts "==== Test generated return exception;  result was:"
+		puts ".... Test generated KNOWN return exception;  result was:"
 		puts $answer
 	    } elseif {$code == 3} {
-		puts "==== Test generated break exception"
+		puts ".... Test generated KNOWN break exception"
 	    } elseif {$code == 4} {
-		puts "==== Test generated continue exception"
+		puts ".... Test generated KNOWN continue exception"
 	    } else {
-		puts "==== Test generated exception $code;  message was:"
+		puts ".... Test generated KNOWN exception $code;  message was:"
 		puts $answer
 	    }
 	}
@@ -175,9 +175,9 @@ proc test {test_name test_description contents_of_test passing_results {testtype
 	} else {
 	    print_verbose $test_name $test_description $contents_of_test \
 		    $code $answer $testtype
-	    puts "---- Known Failure, Result should have been:"
+	    puts "---- KNOWN Failure, Result should have been:"
 	    puts "$passing_results"
-	    puts "---- $test_name Failed, but this is a known failure" 
+	    puts "---- $test_name Failed, but this is a KNOWN failure" 
 	    incr KNOWN_FAILED
 	}
     }
