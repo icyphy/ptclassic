@@ -1,10 +1,10 @@
 ;
 ; This is header code for the S56X target of the CG56 domain
-; Authors: Kennard
+; Authors: Kennard White & Jose Pino
 ; Version: $Id$
 ;
 
-; It is indended that this should always be used in conjuction
+; It is intended that this should always be used in conjuction
 ; with the s56x qckMon (see ~ptolemy/vendors/s56dsp/qckMon).
 ; That mean that the program that runs this on the dsp (typically load_s56x)
 ; should first boot the dsp, then load qckMon, then load this code.
@@ -22,9 +22,9 @@
 	stop
 
 ;
-; qckMon reserves p-space below $90
+; qckMon reserves p-space below $B3
 ;
-	org	p:$90
+	org	p:$B3
 
 ERROR
 ;	move	(r5)+
@@ -39,6 +39,7 @@ WAIT	jmp	*			; spin forever
 ;
 ;  This is the entry point
 ;
+
 START
 ; Set device driver DMA ready flag
 	bset	#m_hf2,x:m_hcr
