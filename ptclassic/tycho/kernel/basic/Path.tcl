@@ -432,8 +432,8 @@ proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
 
 #####################################################################
 #### tychoDir
-# Return the (abbreviated) path to the Tycho directory. In UNIX,
-# this is ~/.Tycho. If the directory does not exist, make it. If
+# Return the (abbreviated) path to the Tycho directory. In Unix,
+# this is ~/.Tycho. If the directory does not exist, make it. Under Unix, if
 # there is a file by the name "~/.tycho" (the old name for the
 # Tycho initialization file), and no file named
 # ~/.Tycho/tychorc.tcl, then copy ~/.tycho into ~/.Tycho/tychorc.tcl.
@@ -446,6 +446,7 @@ proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
 # <b>FIXME</b>: Test for Mac and Windows and act accordingly.
 # 
 proc ::tycho::tychoDir {} {
+    global tcl_platform
     set dotTycho [file join [glob ~] .Tycho]
 
     if {![file exists $dotTycho]} {
@@ -457,8 +458,12 @@ proc ::tycho::tychoDir {} {
         }
     }
     set tychorc [file join $dotTycho tychorc.tcl]
+    # Don't try to copy .tycho under non-unix platforms, as
+    # all hell will break loose, as .tycho and .Tycho might not be different
+    # if the file system is case insensitive.
     if {![file exists $tychorc] && \
-            [file exists [file join [glob ~] .tycho]]} {
+            [file exists [file join [glob ~] .tycho]] && \
+	$tcl_platform(platform) == "unix"} {
 	# Don't call ::tycho::askuser here, as we might have
 	# called this function because we are trying to load the preferences
 	# and at this point the preferences are not fully operational
