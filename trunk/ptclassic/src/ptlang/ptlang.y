@@ -418,6 +418,16 @@ version:
 		  sprintf(b, "\"%s/%s/%s\"", $7, $9, $11);
 		  objDate = save(b);
 		}
+|
+	'@' '(' '#' ')' IDENTIFIER
+		IDENTIFIER
+		IDENTIFIER IDENTIFIER IDENTIFIER
+		{ char b[SMALLBUFSIZE];
+		  objVer = $6;
+		  sprintf(b, "\"%s %s %s\"", $7, $8, $9);
+		  objDate = save(b);
+		}
+
 |	IDENTIFIER IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
 		{ char b[SMALLBUFSIZE];
 		  objVer = $1;
