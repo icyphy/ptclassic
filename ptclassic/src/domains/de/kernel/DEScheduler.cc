@@ -422,7 +422,6 @@ int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 			// If "beforeP" member is set, the minimum depth
 			// is determined by the depth of "beforeP".
 			if (inp->beforeP) {
-				inp->depth = 2;	// temporal setting.
 				PortHole* bp;
 				if (inp->beforeP->isItMulti()) {
  				   MultiPortHole* pp = 
@@ -430,7 +429,11 @@ int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 				   MPHIter mp(*pp);
 				   bp = mp++;
 				} else { bp = (PortHole*) inp->beforeP; }
-			 	min = setDepth(bp, s);
+ 				if (bp) { // multiport might have no members
+ 				  inp->depth = 2; // temporal setting.
+ 				  min = setDepth(bp, s);
+ 				}
+
 			}
 				   
 			// if it is complete-type, meaning that this input
