@@ -40,7 +40,7 @@ number 2.546 to a fixed-point precision of 3.5.
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "4.14" }
+                default { "2.14" }
                 desc {
 Precision of the output in bits and precision of the accumulation.
 When the value of the accumulation extends outside of the precision,
