@@ -38,9 +38,10 @@ extern ACG* gen;
 	}
 	setup {
 	  LOG_DEL; delete random;
-	  LOG_NEW; random = new Normal(0.,double(variance),gen);
+	  LOG_NEW; random = new Normal(0., double(variance), gen);
 	}
         go {
-	  output%0 << (Complex)( (*random)(),(*random)() );
+	  Complex randomValue( (*random)(), (*random)() );
+	  output%0 << randomValue;
 	}
 }
