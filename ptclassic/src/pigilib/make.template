@@ -97,9 +97,14 @@ $(TARGET): makefile $(OBJS) $(PTOLEMY)/lib/libptolemy.a
 	    $(PTOLEMY)/lib/sdf/*.o \
 	    $(LIBS) -o $(TARGET)
 
-install: $(TARGET)
+INSTALLED     = $(PTOLEMY)/bin/$(TARGET)
+install: $(INSTALLED)
+
+$(INSTALLED):	$(TARGET)
 	@echo Installing $(TARGET) in $(PTOLEMY)/bin
-	mv $(TARGET) $(PTOLEMY)/bin
+	rm -f $(INSTALLED)
+	cp $(TARGET) $(INSTALLED)
+	strip $(INSTALLED)
 
 # "make clean" removes .o files and other cruft
 clean:
