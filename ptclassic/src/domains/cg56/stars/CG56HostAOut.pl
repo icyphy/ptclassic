@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     location { CG56 library }
     explanation {
-blah
+Output data from DSP to host via host port asynchronously.
     }
     input {
 	name { input }
