@@ -1,7 +1,7 @@
 # Ptolemy-style makefile to create a link for the Java pxgraph script
 #
 # $Id$
-# Copyright (c) 1997 The Regents of the University of California.
+# Copyright (c) 1997-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,20 +34,35 @@ VPATH = ../../src/pxgraph
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+MISC_FILES = README.txt
 all:
 	@echo "Nothing to be done in this directory,"
-	@echo " we now use tycho/java/ptplot/pxgraph."
-	@echo " For the old X11 version of pxgraph,"
-	@echo " see ftp://ptolemy.eecs.berkeley.edu/pub/misc/ptplot"
+	@echo " we now use the Java version of pxgraph"
+	@echo " If you want to use the X11 version,"
+	@echo " see $PTOLEMY/src/pxgraph/README.txt"
 
-install: $(BINDIR)/pxgraph
+install: $(BINDIR)/pxgraph $(BINDIR)/pxgraph.x11
 
 $(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptplot/pxgraph
 	rm -f $@
 	(cd $(BINDIR); ln -s ../tycho/java/ptplot/pxgraph .)
 
+FORCE:
+$(BINDIR)/pxgraph.x11: FORCE
+	rm -f $@
+	@if [ -f pxgraph/pxgraph ]; then \
+	       echo "Installing src/pxgraph/pxgraph as $(BINDIR)/pxgraph.x11";\
+		(cd $(BINDIR); cp ../src/pxgraph/pxgraph/pxgraph \
+			 pxgraph.x11); \
+	else \
+		echo "pxgraph/pxgraph does not exist, so we will use the";\
+		echo "Java version of pxgraph.  If you want to use the";\
+		echo "X11 version of pxgraph, see";\
+		echo "$$PTOLEMY/src/pxgraph/README.txt";\
+	fi;
+
 makefiles:
-sources: makefile
+sources: makefile 
 
 clean:
 depend:
