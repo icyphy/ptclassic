@@ -27,11 +27,11 @@ of raised cosine pulses in communications systems.
 			const double DELTA = 1.0e-7;
 			if (t == 0) return 1.0;
 			double x = (double)t/(double)T;
-			double s = sin (PI * x) / (PI * x);
+			double s = sin (M_PI * x) / (M_PI * x);
 			x *= excess;
 			double den = 1.0 - 4 * x * x;
-			if (den > -DELTA && den < DELTA) return s * PI/4.0;
-			return s * cos (PI * x) / den;
+			if (den > -DELTA && den < DELTA) return s * M_PI/4.0;
+			return s * cos (M_PI * x) / den;
 		}
 	}
 	defstate {

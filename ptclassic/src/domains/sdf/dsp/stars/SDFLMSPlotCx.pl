@@ -108,8 +108,8 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 				// handle phase wrapping for continuous plot
 
 				double phaseChange = phase - prevPhase[i];
-				if (phaseChange < -PI) phaseChange += 2*PI;
-				if (phaseChange > PI) phaseChange -= 2*PI;
+				if (phaseChange < -M_PI) phaseChange += 2*M_PI;
+				if (phaseChange > M_PI) phaseChange -= 2*M_PI;
 				outPhase[i] += phaseChange;
 				prevPhase[i] = phase;
 				magGraph.addPoint(i+1, index, mag);
