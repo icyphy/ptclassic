@@ -8,9 +8,15 @@ $Id$
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
 
+ Class DERepeatStar's member functions, formerly here, now have
+ their own file DERepeatStar.cc
+
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "DEStar.h"
-#include "DERepeatStar.h"
 #include "StringList.h"
 #include "Output.h"
 #include "PriorityQueue.h"
@@ -48,31 +54,6 @@ void DEStar :: fire() {
 		(next++)->sendData();
 }
 
-// DERepeatStar constructor
-
-// we need a method (or constructor) to link the feedback connection.
-// something like, feedbackIn.connect(feedbackOut, ..)
-
-DERepeatStar :: DERepeatStar() {
-	addPort(feedbackIn.setPort("feedbackIn", this));
-	addPort(feedbackOut.setPort("feedbackOut", this));
-
-	// make a feedback connection
-	feedbackOut.connect(feedbackIn, 0);
-	feedbackIn.triggers();
-}
-
-void DERepeatStar :: refireAtTime(float when) {
-	feedbackOut.put(when) << 0.0 ;
-}
-
-int DERepeatStar :: canGetFired() {
-	int i = feedbackIn.dataNew;
-	if (i == TRUE)
-		feedbackIn.dataNew = FALSE;	// reset the flag.
-	return i;
-}
-
 // The following is defined in DEDomain.cc -- this forces that module
 // to be included if any DE stars are linked in.
 extern const char DEdomainName[];
@@ -81,11 +62,5 @@ const char* DEStar :: domain() const {
 	return DEdomainName;
 }
 
-// start method for DERepeatStar
-
-void DERepeatStar :: start() {
-	feedbackOut.put(completionTime) << 0.0;
-	feedbackOut.sendData();
-}
 
 
