@@ -265,6 +265,11 @@ package require tycho.edit.visedit
 package require tycho.edit.graphedit
 
 # For now, check for the existence of these new packages
+if [file exists [file join $TYCHO edit ptII]] {
+    package require tycho.edit.ptII
+}
+
+# These are obsolete and will be removed soon [johnr 10/13/98]
 if [file exists [file join $TYCHO edit cts]] {
     package require tycho.edit.cts
 }
