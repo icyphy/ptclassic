@@ -213,7 +213,8 @@ dirs="cg/targets sdf/image sdf/targets \
 	cgc/contrib cgc/dsp cgc/rtlib \
 	acs/targets \
 	vhdl/targets vhdl/tcltk \
-	mdsdf/tcltk de/atm de/contrib de/java cg/hierScheduler $EXPEXTRAS "
+	mdsdf/tcltk de/atm de/contrib de/java de/sip \
+	cg/hierScheduler $EXPEXTRAS "
 for x in $dirs
 do
 	optmkdir $x
