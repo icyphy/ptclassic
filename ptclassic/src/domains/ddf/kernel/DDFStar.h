@@ -1,5 +1,9 @@
 #ifndef _DDFStar_h
 #define _DDFStar_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 /******************************************************************
 Version identification:
 $Id$

@@ -1,5 +1,9 @@
 #ifndef _DDFScheduler_h
 #define _DDFScheduler_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 
 #include "Scheduler.h"
 #include "Galaxy.h"

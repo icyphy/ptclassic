@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "type.h"
 #include "SDFStar.h"
 #include "DDFScheduler.h"
