@@ -41,6 +41,8 @@ PL_SRCS= \
  CG56HostASrc.pl \
  CG56HostOut.pl \
  CG56HostSlider.pl \
+ CG56HostButton.pl \
+ CG56HostSliderGX.pl \
  CG56IIDGaussian.pl \
  CG56IIDUniform.pl \
  CG56Impulse.pl \
