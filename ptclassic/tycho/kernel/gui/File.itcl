@@ -322,6 +322,9 @@ class ::tycho::File {
     # Add a separator to the specified menu.
     protected method addMenuSeparator {menu args}
 
+    # Insert a separator to the specified menu.
+    protected method insertMenuSeparator {before inMenu args}
+
     # Insert a menu item to the specified menu before the specified item.
     protected method insertMenuItem {itemName before inMenu args}
 
@@ -1382,6 +1385,19 @@ body ::tycho::File::addMenuItem {itemName inMenu args} {
 #
 body ::tycho::File::addMenuSeparator {menu args} {
     eval $itk_component(menu$menu) add separator $args
+}
+
+#####################################################################
+#### insertMenuSeparator
+# Insert a separator to the specified menu. The first argument is the 
+# label of an existing menu item before which the new separator should 
+# be inserted. The second arguments is the name of a menu created with 
+# <code>addMenu</code>. The remaining arguments are passed unchanged 
+# to the Tk <i>menu</i> <code>insert separator</code> command.
+#
+body ::tycho::File::insertMenuSeparator {before inMenu args} {
+    eval $itk_component(menu$inMenu) insert \
+                [list $before] separator $args
 }
 
 #####################################################################
