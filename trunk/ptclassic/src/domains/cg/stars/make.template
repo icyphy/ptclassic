@@ -21,7 +21,7 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
-LIB = libcgstars.a
+LIB = libcgstars.$(LIBSUFFIX)
 DOMAIN_2 = AnyAsm
 DOMAIN=CG
 STAR_MK=cgstars

@@ -26,7 +26,7 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libddf.a
+LIB=libddf.$(LIBSUFFIX)
 
 # .h files with corresponding .cc files
 HDRS = \

@@ -26,7 +26,7 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 INCL=-I$(KERNDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libbdf.a
+LIB=libbdf.$(LIBSUFFIX)
 
 # Header files
 HDRS= \

@@ -91,7 +91,7 @@ DEXMgraph.pl \
 DEXgraph.pl \
 DEXhistogram.pl
 
-LIB  =  libdestars.a
+LIB  =  libdestars.$(LIBSUFFIX)
 
 SRCS =	$(PL_SRCS:.pl=.cc)
 

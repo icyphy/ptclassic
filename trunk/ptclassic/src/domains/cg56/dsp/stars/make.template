@@ -52,7 +52,7 @@ STAR_MK=cg56dspstars
 DOMAIN=CG56DSP
 DOMAIN_2=CG56
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
-LIB=libcg56dspstars.a
+LIB=libcg56dspstars.$(LIBSUFFIX)
 
 all:		makefile stars_all
 

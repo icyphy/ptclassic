@@ -22,7 +22,7 @@ ATM = $(ROOT)/src/domains/sdf/atm/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ATM)
 
 # Library name
-LIB=libsdfatmstars.a
+LIB=libsdfatmstars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../doc/stars

@@ -26,7 +26,7 @@ SDFKERNDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
 #Library name
-LIB = libatm.a
+LIB = libatm.$(LIBSUFFIX)
 
 HDRS= VoiceData.h NewQueue.h Converse.h Tree.h
 

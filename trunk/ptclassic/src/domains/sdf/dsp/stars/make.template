@@ -20,7 +20,7 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/sdf/stars
 
 # Library name
-LIB=libsdfdspstars.a
+LIB=libsdfdspstars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars

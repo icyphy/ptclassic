@@ -20,7 +20,7 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libsdfstars.a
+LIB=libsdfstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

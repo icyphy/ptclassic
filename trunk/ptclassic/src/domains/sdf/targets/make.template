@@ -23,7 +23,7 @@ CGKERNEL = $(ROOT)/src/domains/cg/kernel
 INCL =-I$(SDFKERNEL) -I$(LOOPKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 
 OBJS = $(LIBSRCS:.cc=.o)
-LIB = libcompileSDF.a
+LIB = libcompileSDF.$(LIBSUFFIX)
 EXTRA_DESTS = CompileTarget.o
 
 all:	makefile $(LIB) $(EXTRA_DESTS)

@@ -41,7 +41,7 @@ include $(CONFIG)
 INCL = -I$(KERNDIR)
 
 # Library name
-LIB=libxxx.a
+LIB=libxxx.$(LIBSUFFIX)
 
 # Library sources
 SRCS= \

@@ -25,7 +25,7 @@ INCL = -I$(SDFDIR) -I$(MDSDFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKDIR) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libmdsdftclstars.a
+LIB=libmdsdftclstars.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
