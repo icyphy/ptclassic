@@ -1383,26 +1383,26 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
             puts "$filename"
         }
 	if ![file readable $filename] {
-	    set retval "$retval\ngenerateHTML: $filename is not readable"
+	    set retval "$retval\nWarning: generateHTML: $filename is not readable"
 	} else {
 	    $HTMLDocSys readFile $filename
 	    cd doc/codeDoc
 	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
-		set retval "$retval\n$errMsg"
+		set retval "$retval\nWarning: $errMsg"
 	    }
 	    if [catch {$HTMLDocSys generateOutsideClassHTML} errMsg] {
-		set retval "$retval\n$errMsg"
+		set retval "$retval\nWarning: $errMsg"
 	    }
 	    cd ../..
 	    if [catch {$HTMLDocSys resetOutsideClassComment} errMsg] {
-		set retval "$retval\n$errMsg"
+		set retval "$retval\nWarning: $errMsg"
 	    }
 	}
     }
     if {$generateIndex == 1} {
 	cd doc/codeDoc
 	if [catch {$HTMLDocSys generateHTMLIndex $title} errMsg] {
-	    set retval "$retval\n$errMsg"
+	    set retval "$retval\nWarning: $errMsg"
 	}
     }
     delete object $HTMLDocSys
