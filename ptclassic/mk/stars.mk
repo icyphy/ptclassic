@@ -51,6 +51,11 @@
 # CGC tcl stars are included because they don't pull in tk.
 # SDF tcl stars are omitted because they do.
 
+# Note that you must explicitly include any target .o files in TARGETS
+# for architectures that don't use shared libraries.  If you don't, then
+# you won't see these targets in non-shared library architectures.  For
+# an example, see the CG56 target section below
+
 # Stub files that pull in the stars.
 
 #STARS =
@@ -191,10 +196,25 @@ ifdef VHDL
 	CGCLIB = 1
 	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
 	STARS += $(LIBDIR)/vhdlstars.o
-	LIBS += -lvhdlstars -lvhdl -lvhdltargets
+	LIBS += -lvhdlstars -lvhdl
 	LIBFILES += $(LIBDIR)/libvhdlstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdl.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
+		$(LIBDIR)/libvhdl.$(LIBSUFFIX)\
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		LIBS += -lvhdltargets
+		LIBFILES += $(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
+	else
+		TARGETS += $(VHDLT)/CGCVReceive.o \
+			$(VHDLT)/CGCVSend.o \
+			$(VHDLT)/CGCVSynchComm.o \
+			$(VHDLT)/SimMTTarget.o \
+			$(VHDLT)/SimVSSTarget.o \
+			$(VHDLT)/StructTarget.o \
+			$(VHDLT)/SynthTarget.o \
+			$(VHDLT)/VHDLCReceive.o \
+			$(VHDLT)/VHDLCSend.o \
+			$(VHDLT)/VHDLCSynchComm.o
+	endif
+
 	# Window star in vhdl/stars needs the Cephes Library
 	CEPHESLIB = 1
 endif
@@ -288,13 +308,6 @@ ifdef DE
 		LIBS += -ldetclstars
 		LIBFILES += $(LIBDIR)/libdetclstars.$(LIBSUFFIX)
 	endif
-endif
-
-ifdef CM5
-	CUSTOM_DIRS += $(CGCDIR)/targets/cm5
-	CGC = 1
-	TARGETS += $(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
-		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
 endif
 
 # Networks Of Workstations Active Messages
