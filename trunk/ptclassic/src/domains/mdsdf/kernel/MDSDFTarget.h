@@ -55,9 +55,6 @@ public:
 	// return a copy of itself
 	/*virtual*/ Block* makeNew() const;
 
-	// return the domain of the galaxy if it exists or "MDSDF" otherwise
-	/*virtual*/ const char* domain();
-
 	void setup();
 
 protected:
