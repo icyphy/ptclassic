@@ -38,6 +38,7 @@ SRCS= \
  CG56Add.pl \
  CG56BiQuad.pl \
  CG56BlackHole.pl \
+ CG56Cos.pl \
  CG56DC.pl \
  CG56Fork.pl \
  CG56Gain.pl \
