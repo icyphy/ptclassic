@@ -55,10 +55,10 @@ endif
 DIRS = kernel thread ptlang $(ISLANG) domains utils ptcl pigilib libgantt ptklib tycho pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
-MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib
+MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib pigiRpc
 
 # "leaf" directories with no make.template
-LDIRS = ptlang $(ISLANG) pigiRpc filters utils
+LDIRS = ptlang $(ISLANG) filters utils
 
 # directories with subtrees
 SDIRS = thread domains
