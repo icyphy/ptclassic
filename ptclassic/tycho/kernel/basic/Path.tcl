@@ -109,12 +109,12 @@ proc ::tycho::expandPath { path } {
         }
         if [info exists env($envvar)] {
             set envval $env($envvar)
-        } elseif [uplevel #0 info exists $envvar] {
+        } elseif {"$envvar" != "" && [uplevel #0 info exists $envvar]} {
             global $envvar
             set envval [set $envvar]
         } else {
             # No such variable.
-            error "No such variable: $envvar"
+            error "No such variable: `$envvar' in the path `$path'."
         }
         if {$slash > 0} {
             set path [format "%s%s" $envval [string range $path $slash end]]
