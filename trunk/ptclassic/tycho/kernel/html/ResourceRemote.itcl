@@ -101,19 +101,19 @@ class ::tycho::ResourceRemote {
     ####                      public procedures                    ####
 
     # Change the permissions of a resource
-    proc chmod {permissions path} {error "Should be redefined"}
+    #proc chmod {permissions path} {error "Should be redefined"}
 
     # Return the content type of the current file
-    proc contenttype {path}
+    #proc contenttype {path} {error "Should be redefined"}
 
     # Delete a resource
-    proc delete {path} {error "Should be redefined"}
+    #proc delete {path} {error "Should be redefined"}
 
     # Return a directory listing
-    proc dirlist {path} {error "Should be redefined"}
+    #proc dirlist {path} {error "Should be redefined"}
 
     # Test if a given resource exists
-    proc exists {path} {error "Should be redefined"}
+    #proc exists {path} {} {error "Should be redefined"}
 
     # Get a file name, and forward automatically.
     proc forward {url}
@@ -123,16 +123,16 @@ class ::tycho::ResourceRemote {
     proc initialize {}
 
     # Create a new directory
-    proc mkdir {path} {error "Should be redefined"}
+    #proc mkdir {path} {error "Should be redefined"}
 
     # Create a new resource object
-    proc new {path args} {error "Should be redefined"}
+    #proc new {path args} {error "Should be redefined"}
 
     # Query properties of a file
-    proc query {path option} {error "Should be redefined"}
+    #proc query {path option} {error "Should be redefined"}
 
     # Get the status of a resource
-    proc stat {path varName} {error "Should be redefined"}
+    #proc stat {path varName} {error "Should be redefined"}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -141,10 +141,10 @@ class ::tycho::ResourceRemote {
     protected method debugputs {string}
 
     # Set or read the http status. If newvalue is {}, then just return
-    protected method remotestatus {newvalue}
+    method remotestatus {newvalue}
 
     # Wait until an HTTP GET completes.
-    protected method remotewait {}
+    method remotewait {}
 
     ###################################################################
     ####                        protected commons                  ####
@@ -215,6 +215,7 @@ body ::tycho::ResourceRemote::cachefile {} {
 	    close
 	} else {
 	    read
+            close
 	}
     }
 
@@ -326,26 +327,7 @@ body ::tycho::ResourceRemote::streamable {} {
 #########################################################################
 ####                          public procedures                      ####
 
-#####################################################################
-#### chmod
-body ::tycho::ResourceRemote::chmod {permissions path} {
-    error "Cannot change status of $path"
-}
 
-#####################################################################
-#### contenttype
-# Return the content type of the open file.
-body ::tycho::ResourceRemote::contenttype {url} {
-    # In order to speed up, check the cache manager
-    set URLexists [exists $url]
-    set url [forward $url]
-
-    if {[::tycho::cache exists $url] && $URLexists} {
-        return [::tycho::cache getcontenttype $url]
-    } else {
-        error "URL $url does not exist"
-    }
-}
 
 #########################################################################
 #########################################################################
@@ -382,15 +364,16 @@ body ::tycho::ResourceRemote::remotestatus {{value {}}} {
 #### remotewait
 # Wait until the current GET completes
 body ::tycho::ResourceRemote::remotewait {} {
+    #debugputs "Waiting for $currentURL ([remotestatus])"
     # Wait until the status becomes "done"
     #::puts -nonewline ">Waiting (($socketid) $currentURL?" ; flush stdout
     while { [remotestatus] != "done" } {
         uplevel #0 "tkwait variable _remotestatus($currentURL)"
     }
-    #::puts "([::tycho::url tail $currentURL]) ok<" ; flush stdout
+    #debugputs "Waiting for $currentURL DONE!!! ([remotestatus])"
     return
 }
 
-
+::tycho::ResourceRemote::initialize
 
 
