@@ -44,7 +44,11 @@ static char SccsId[]="$Id$";
 #include <time.h>   
 #endif
 
+#ifndef SYS_SOCKET_H
+#define SYS_SOCKET_H		/* mips Ultrix4.3A requires this
+				   otherwise we get conflicts with compat.h */
 #include <sys/socket.h>
+#endif
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
