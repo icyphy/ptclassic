@@ -62,14 +62,14 @@ Polling functions added by Alan Kamas, 1/95
 //       as the second parameter to signal()
 #if !defined(PTIRIX5) 
 // PTIRIX5 defines SIG_PF in <signal.h>
-#if defined(__GNUG__) 
+#if defined(__GNUG__) || defined(PTHPPA_CFRONT)
 #if defined (PTSUN4) || defined(PTSOL2)
 // sun4, sol2
 typedef void (*SIG_PF)();
 #else
 typedef void (*SIG_PF)(int);
 #endif // defined sun4, sol2
-#endif // __GNUG__
+#endif // __GNUG__ || PTHPPA_CFRONT
 #endif // !defined PTIRIX5
 
 #if !defined (__GNUG__)
@@ -85,8 +85,8 @@ typedef void (*SIG_PF)(int);
 // declare action list stuff.
 SimActionList* SimControl::preList = 0;
 SimActionList* SimControl::postList = 0;
-volatile unsigned int SimControl::flags = 0;
-volatile int SimControl::pollflag = 0;
+VOLATILE unsigned int SimControl::flags = 0;
+VOLATILE int SimControl::pollflag = 0;
 int SimControl::nPre = 0, SimControl::nPost = 0;
 SimHandlerFunction SimControl::onInt = 0;
 SimHandlerFunction SimControl::onPoll = 0;
@@ -238,7 +238,7 @@ void SimControl::catchInt(int signo, int always) {
 		if (tmp == SIG_IGN) return;
 	}
 	flags &= ~interrupt;
-	signal(signo, (SIG_PF)SimControl::intCatcher);
+	signal(signo, (SIG_PF)&SimControl::intCatcher);
 }
 
 	// register a function to be called if interrupt flag is set.
@@ -277,7 +277,7 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
 	// Turn on the poll flag when the timer expires
-	signal(SIGALRM, (SIG_PF)SimControl::setPollFlag);
+	signal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
 	// Turn off the poll flag until the timer fires
 	pollflag = 0;
 	// Start the timer
