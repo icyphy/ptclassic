@@ -55,31 +55,6 @@ option add *FileBrowser.entryfont \
 option add *FileBrowser.width 30 widgetDefault
 option add *FileBrowser.height 12 widgetDefault
 
-########################################################################
-#### expandPath
-# Expand a filename that might begin with
-# an environment variable.  For example, if the value of
-# of the environment variable TYCHO is /usr/tools/tycho, then
-# <pre>
-#     ::tycho::expandPath \$TYCHO/tmp
-# </pre>
-# returns /usr/tools/tycho/tmp.
-#
-proc ::tycho::expandPath { path } {
-    if {[string first \$ $path] == 0} {
-        global ::env
-        set slash [string first / $path]
-        set envvar [string range $path 1 [expr {$slash-1}]]
-        set envval $env($envvar)
-        return "$envval[string range $path $slash end]"
-    } else {
-        return $path
-    }
-}
-
-# COMPATIBILITY procedure.  Use <code>::tycho::expandPath</code>.
-proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
-
 ##########################################################################
 #### filename
 # Query the user for a filename and return it.  This procedure brings up
@@ -236,11 +211,11 @@ body ::tycho::FileBrowser::mkdir {} {
 
 ######################################################################
 #### processItem
-# Check and process the user selection. If the user has selected a
+# Check and process the user selection. If the argument is the name of a
 # file, then the command specified with the -command option is invoked
-# with that filename as an argument, and a 1 is returned. If the user
-# specified a directory, then the listbox is updated with the contents
-# of the directory and a 0 is returned. If the specified filename is an
+# with that filename as an argument, and a 1 is returned. If the argument
+# is a directory name, then the listbox is updated with the contents
+# of the directory and a 0 is returned. If the argument is an
 # empty string, then nothing is done and a zero is returned. If the
 # specified filename exists but is not readable, an error is triggered.
 # If the filename does not exist as either a file or a directory, then
@@ -250,18 +225,22 @@ body ::tycho::FileBrowser::mkdir {} {
 #
 body ::tycho::FileBrowser::processItem {filename} {
 
-    # In case the filename starts with an environment variable, expand
+    if {$filename == ""} {return 0}
+   
+    # Expand environment variables and user home directory references.
     set file [::tycho::expandPath $filename]
-    
-    set file [string trim $file]
-    if {$file == ""} {return 0}
+
+    # If expansion failed, trigger an error
+    set char [string index $file 0]
+    if {$char == "~" || $char == "\$"} {
+        error "Cannot expand $filename"
+    }
     
     # Name of the file before calculating the absolute path.
     set relPath $file
     
     # If the name is relative, calculate the absolute path.
-    set char [string index $file 0]
-    if {$char != "/" && $char != "~"} {
+    if {$char != "/"} {
 	set file $localCWD/$file
     }
 
@@ -285,20 +264,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	if {[file readable $file] && [file executable $file]} {
 	    
 	    # Non-relative path
-	    if {$char == "~"} {
-		set dir [glob -nocomplain $relPath]
-		if {! [file exist $dir]} {
-		    ::tycho::warn "\"$dir\" does not exist!"
-		    return 0
-		} else {
-		    set CWD $dir
-		    $itk_component(dir) config -text $CWD
-		    set localCWD $CWD
-		    set fileLastOpened ""
-		    updateListbox
-		    return 0
-		}
-	    } elseif {$char == "/"} {
+	    if {$char == "/"} {
 		set CWD $relPath
 		$itk_component(dir) config -text $CWD
 		set localCWD $CWD
