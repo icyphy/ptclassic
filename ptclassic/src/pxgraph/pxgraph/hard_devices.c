@@ -19,7 +19,7 @@ struct hard_dev hard_devices[] = {
     { "HPGL", hpglInit, "lpr -P%s", "xgraph.hpgl", "paper",
 	27.5, "1", 14.0, "1", 12.0, NONE },
     { "MIF", mifInit,
-	"setenv FMPRINTER %s; fmprint", "~/xgraph.mif", "lw",
+	"(cat > /tmp/ptxgraphpr$; export FMPRINTER; FMPRINTER=%s; fmprint /tmp/ptxgraphpr$; /bin/rm /tmp/ptxgraphpr$)", "~/xgraph.mif", "lw",
 	16.0, "Helvetica", 12.0,
 	"Helvetica", 10.0, NONE },
     { "Postscript", psInit, "lpr -P%s", "xgraph.ps", "lw",
