@@ -31,7 +31,7 @@ ROOT = ../../..
 VPATH = $(ROOT)/src/compat/X11R5
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS = 	X.h Xfuncproto.h Xlib.h Xos.h Xosdefs.h Xutil.h cursorfont.h

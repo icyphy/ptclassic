@@ -40,8 +40,8 @@
 #   or directories.
 
 # You should not need to edit this file, merely set the
-# ARCH and PTOLEMY environment variables, for example:
-#	setenv ARCH sun4
+# PTARCH and PTOLEMY environment variables, for example:
+#	setenv PTARCH sun4
 #	setenv PTOLEMY /users/ptolemy
 
 # root of source tree

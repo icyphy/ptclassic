@@ -28,7 +28,7 @@
 # 						COPYRIGHTENDKEY
 
 # Important!  Do not run this makefile while in ~ptolemy/src/utils.  Instead
-# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
@@ -40,7 +40,7 @@ DIRS = libcephes libexttools libgslider libptmatlab libptmathematica \
 #PTOLEMY = ../..
 
 MAKEVARS =	\
-		"ARCH=$(ARCH)" 
+		"ARCH=$(PTARCH)" 
 
 all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \

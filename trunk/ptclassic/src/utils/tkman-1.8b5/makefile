@@ -28,10 +28,10 @@
 TKMAN_VERSION = 1.7.3
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/tkman-$(TKMAN_VERSION)
-BINDIR = $(ROOT)/bin.$(ARCH)
+BINDIR = $(ROOT)/bin.$(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SRCS =

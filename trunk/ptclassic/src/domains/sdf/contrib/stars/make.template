@@ -78,7 +78,7 @@ install:	stars_install
 include $(ROOT)/mk/common.mk
 
 # This is a GNU make conditional
-ifeq ($(ARCH),hppa)
+ifeq ($(PTARCH),hppa)
 SDFWirelessChannel.o: SDFWirelessChannel.cc
 	@echo "  On the hppa, gcc-2.7.0/libg++-2.7.0 fails to compile"
 	@echo "  SDFWirelessChannel.o with optimization, so"

@@ -42,7 +42,7 @@ VPATH = $(ROOT)/src/domains/vhdl/kernel
 ARCH = $(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # SDF directory

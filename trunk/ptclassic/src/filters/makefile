@@ -29,7 +29,7 @@ DIRS = wfir optfir
 PTOLEMY = ../..
 
 MAKEVARS =	\
-		"ARCH=$(ARCH)" 
+		"ARCH=$(PTARCH)" 
 
 all install clean realclean sources depend checkjunk sccsinfo:
 	 @for x in $(DIRS); do \

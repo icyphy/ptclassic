@@ -33,7 +33,7 @@ ROOT=../..
 # Where we are
 VPATH = ../../src/pxgraph
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
