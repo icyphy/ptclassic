@@ -23,12 +23,9 @@ as a parameter).
 		default {"7"}
 		desc {number of bits to output}
 	}
-	start {
-	      }
-	
 	go {
 		int i =0 ;
-		int binary[bits+1];
+		LOG_NEW; int *binary = new int[bits+1];
 	
 	    	int in = int (input%0);
 
@@ -59,5 +56,6 @@ as a parameter).
 			(*p)%0  << binary[i];
 			i++;
 					}
+		LOG_DEL; delete [] binary;
 	    }
 }

@@ -60,7 +60,7 @@ the Thor stars that need an integer input.
 			thresholds[i]=thresholds[i-1]+height;
 		}
 
-		number= (-1)*(levels)* (0.5);
+		number= int( (-1)*(int(levels))* (0.5));
 		}
 	
 	go {
@@ -69,7 +69,7 @@ the Thor stars that need an integer input.
 	    float in = input%0;
 
 	    if( in >= high) {
-		    amplitude%0 << high;
+		    amplitude%0 << double(high);
                     stepNumber%0 << (-1*number) -1 ;
 		    return;
 		}
