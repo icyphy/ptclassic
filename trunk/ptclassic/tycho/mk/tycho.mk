@@ -107,7 +107,7 @@ LIBDIR =	$(ROOT)/lib.$(PTARCH)
 LIBR_DEBUG =	libdummy_g
 
 # Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
-#ITCLSH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/itclsh
+#ITCLSH =	$(PTOLEMY)/tcltk/tcl.$(PTARCH)/bin/itclsh
 ITCLSH =	itclsh
 
 # Tcl script that generates html from itcl files
