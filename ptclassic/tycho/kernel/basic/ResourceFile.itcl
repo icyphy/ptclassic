@@ -67,7 +67,7 @@ class ::tycho::ResourceFile {
     method flush {}
 
     # Read a string from a streamable resource 
-    method gets {}
+    method gets {{varName {}}}
 
     # Open the resource
     method open {path {mode "r"}}
@@ -93,11 +93,11 @@ class ::tycho::ResourceFile {
     # Delete a resource
     proc delete {path}
 
+    # Return a directory listing
+    proc dirlist {path}
+
     # Test if a given resource exists
     proc exists {path}
-
-    # Return files at a given path
-    proc glob {pattern}
 
     # Create a new directory
     proc mkdir {path}
@@ -194,11 +194,16 @@ body ::tycho::ResourceFile::eof {} {
 
 #####################################################################
 #### gets
-body ::tycho::ResourceFile::gets {} {
+body ::tycho::ResourceFile::gets {{varName {}}} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    ::gets $fileid
+    if { $varName == "" } {
+	    ::gets $fileid
+	} else {
+	   upvar $varName v
+	   uplevel ::get $fileid v
+	}
 }
 
 #####################################################################
@@ -228,13 +233,9 @@ body ::tycho::ResourceFile::puts {string} {
 #### read
 body ::tycho::ResourceFile::read {} {
     if !$fileIsOpen {
-	$this open
-	set data [::read $fileid]
-	$this close
-	return $data
-    } else {
-	::read $fileid
+	error "File \"$this\" is not open"
     }
+	::read $fileid
 }
 
 #####################################################################
@@ -274,17 +275,31 @@ body ::tycho::ResourceFile::delete {path} {
 }
 
 #####################################################################
+#### dirlist
+# Get a "listing" of files in a "directory." This parses
+# the received index text to extract names from it. The
+# list is sorted, with directory names ending in "/",
+# in a similar fashion to ls -F.
+#
+body ::tycho::ResourceFile::dirlist {path} {
+    regsub {^file:} $path {} path
+    set result {}
+    foreach f [::glob $path] {
+	if [::file isdirectory $f] {
+	    lappend result $f/
+	} else {
+	    lappend result $f
+	}
+    }
+    # Sort and return
+    lsort $result
+}
+
+#####################################################################
 #### exists
 body ::tycho::ResourceFile::exists {path} {
     regsub {^file:} $path {} path
     ::file exists $path
-}
-
-#####################################################################
-#### glob
-body ::tycho::ResourceFile::glob {path} {
-    regsub {^file:} $path {} path
-    ::glob $path
 }
 
 #####################################################################
