@@ -77,7 +77,7 @@ State* <T>State :: clone () const {
 }
 
 void <T>State  :: initialize() {
-	const  char* specialChars =  "*+-/^()";
+	const char* specialChars = "*+-/^()!";
 	Tokenizer lexer(initValue(),specialChars);
 
 	ParseToken t = eval<T>Expression(lexer);
