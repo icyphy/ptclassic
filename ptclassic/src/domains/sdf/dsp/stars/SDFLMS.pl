@@ -94,7 +94,7 @@ will be stored there after the run has completed.
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			const char* saveFileName = savestring (expandPathName(sf));
+			char* saveFileName = savestring (expandPathName(sf));
 			// open the file for writing
 			FILE* fp;
 			if (!(fp = fopen(saveFileName,"w"))) {
