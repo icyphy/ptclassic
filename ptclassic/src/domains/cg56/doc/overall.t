@@ -55,7 +55,7 @@ to the maximum fix point number in the range of \fI[-1,1)\fR).
 .H3 "Type"
 .Ir "type, CG56/CG96 state"
 .pp
-In the last example we should the use of only one of the valid
+In the last example we demonstrated the use of only one of the valid
 CG56 data types, the others are:
 .(c
 int
@@ -94,6 +94,7 @@ The state value is changed by the star's execution.
 The user may not set the value of this state from a user interface 
 (e.g. edit-parameters doesn't show it).
 .pp
+.pp
 Applying an attribute to an object implies that some bits are to be
 ``turned on'', and others are to be ``turned off''.  The underlying attribute
 bits have names beginning with AB_ for states, and PB_ for portholes.
@@ -102,23 +103,8 @@ By default, they are on for states, which means that the default state
 works like a parameter (you can set it from the user interface, and
 the star's execution does not change it).
 .pp
-All portholes have a single attribute bit defined, PB_HIDDEN, and two
-attributes:
-.UH "P_HIDDEN"
-.Ir "attribute, P_HIDDEN"
-The porthole is ``invisible'' -- not drawn by user interfaces.
-.UH "P_VISIBLE"
-.Ir "attribute, P_HIDDEN"
-The normal case -- the porthole is visible.
-.pp
-This attribute is used by DE source stars (such as DEPoisson and DEClock)
-to hide the feedback porthole (all such stars have a porthole that
-connects from the object back to itself, and we don't want to display
-these under pigi).
-.pp
 For code generation, a whole new set of attributes are defined.
-.pp
-First, I will display the bits:
+First, the attribute bits are:
 .UH AB_CIRC
 .Id "AB_CIRC attribute"
 If set, the memory for this state is allocated as a circular buffer, whose 
@@ -145,6 +131,7 @@ If set, write out the values for this state in reverse order.
 If set, and if the target has dual data memory banks (e.g. M56000, Analog 
 Devices 2100, etc), allocate a buffer for this object in BOTH memories.
 .pp
+.pp
 Given these bits, attributes correspond to requests to turn some bits
 off and to turn other bits on.  For example:
 .UH "A_ROM"
@@ -155,11 +142,11 @@ AB_MEMORY and AB_CONSTANT on.
 .Id "attribute, A_RAM"
 AB_MEMORY on, AB_CONST off.
 .pp
+.pp
 In addition, for each attribute bit AB_xxx, A_xxx is an attribute that
 turns AB_xxx on.
 .pp
-For portholes in code generation stars, we have
-.pp
+For portholes in code generation stars, we have:
 .UH "PB_CIRC"
 .Id "attribute, PB_CIRC"
 If set, then allocate the buffer for this porthole as a circular buffer, 
@@ -176,6 +163,7 @@ Allocate this state in X memory
 .UH A_YMEM
 .Id "attribute, A_YMEM"
 Allocate this state in Y memory
+.pp
 .pp
 The underlying bits are AB_XMEM, and AB_YMEM.  Each attribute above turns
 one off and turns the other on.
