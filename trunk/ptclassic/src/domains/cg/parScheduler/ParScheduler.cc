@@ -91,7 +91,12 @@ int ParScheduler::dagNodes() const {
 ParScheduler :: ParScheduler(MultiTarget* t, const char* logName) {
         parProcs=0;
 	mtarget = t;
-	logFile = logName;
+	if (logName) {
+	  logFile = hashstring(logName);
+	}
+	else {
+	  logFile = 0;
+	}
 	logstrm = 0;
 	exGraph = 0;
 	inUniv = TRUE;
