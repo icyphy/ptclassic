@@ -70,15 +70,14 @@ The precision of this state is the precision of the accumulation.
                 name { StepPrecision }
                 type { precision }
                 default { 2.14 }
-                desc {
-Precision of the step in bits.
-         defstate {
+                desc { Precision of the step in bits. }
+        }
+        defstate {
                 name { ValuePrecision }
                 type { precision }
                 default { 2.14 }
-                desc {
-Precision of the value in bits.
-                }
+                desc { Precision of the value in bits. }
+        }
 
         setup {
 		CGCFix::setup();
