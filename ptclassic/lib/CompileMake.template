@@ -11,7 +11,7 @@
 # Root of source tree
 ROOT = /usr/users/ptolemy
 # Path (absolute or relative) to the object directory root
-OBJDIR=/usr/users/ptolemy/obj.$(ARCH)
+OBJDIR=$(ROOT)/obj.$(ARCH)
 
 # get configuration info
 CONFIG=$(ROOT)/config-$(ARCH).mk
@@ -24,21 +24,15 @@ SDFSRC=$(ROOT)/src/domains/sdf/stars
 SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
 
 # libraries
-LIBS=-lsdfstars -lddf -ldycon -lPG -lLS -lEG -lcg -lsdf -lde -lthor -lptolemy -lImage \
+LIBS=-lsdfstars -lPG -lLS -lEG -lsdf -lImage -lcompileSDF -lptolemy \
 	$(SYSLIBS)
 
 LIBFILES=\
- $(LIBDIR)/libcg.a $(LIBDIR)/libPG.a \
+ $(LIBDIR)/libPG.a \
  $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
  $(LIBDIR)/libImage.a \
- $(LIBDIR)/libdycon.a $(LIBDIR)/libddf.a \
- $(LIBDIR)/libde.a \
- $(LIBDIR)/libthor.a \
+ $(LIBDIR)/libcompileSDF.a \
  $(LIBDIR)/libptolemy.a
-
-# .c sources used in the library.
-# (depending on particular configuration, CONSTRUCTOR_HACK may be empty)
-LIBCSRCS=$(CONSTRUCTOR_HACK)
 
 OBJS=code.o
 SRCS=code.cc
@@ -50,8 +44,13 @@ SRCS=code.cc
 
 all:		makefile code
 
+# This version makes code with global symbols only
 code:	$(OBJS) $(LIBFILES) $(STARS)
-		$(LINKER) $(LINKFLAGS_D) $(OBJS) $(STARS) $(LIBS) -o code
+		$(LINKER) $(LINKFLAGS) $(OBJS) $(STARS) $(LIBS) -o code
+
+# This version makes code.debug with full debug symbols
+code.debug:	$(OBJS) $(LIBFILES) $(STARS)
+		$(LINKER) $(LINKFLAGS_D) $(OBJS) $(STARS) $(LIBS) -o code.debug
 
 # "make install" puts things in their place
 # for now leave them here.
