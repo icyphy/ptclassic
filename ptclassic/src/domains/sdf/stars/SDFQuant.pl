@@ -24,11 +24,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	htmldoc {
-Assume that the <i>thresholds</i> parameter is set to (8<i>.</i>1<i>, </i>9<i>.</i>2<i>, </i>10<i>.</i>3),
+Assume that the <i>thresholds</i> parameter is set to (8.1, 9.2, 10.3),
 and that the <i>levels</i> parameter is not set so that the default values
-of (0<i>.</i>0<i>, </i>1<i>.</i>0<i>, </i>2<i>.</i>0<i>, </i>3<i>.</i>0) are used.  Then, an input of <i>-</i>1<i>.</i>5 would give
-an output of 0<i>.</i>0, an input of 8<i>.</i>2 would give an output of 1<i>.</i>0, and
-an input of 15<i>.</i>5 would give an output of 3<i>.</i>0.
+of (0.0, 1.0, 2.0, 3.0) are used.  Then, an input of -1.5 would give
+an output of 0.0, an input of 8.2 would give an output of 1.0, and
+an input of 15.5 would give an output of 3.0.
 	}
 	location { SDF main library }
 	input {
