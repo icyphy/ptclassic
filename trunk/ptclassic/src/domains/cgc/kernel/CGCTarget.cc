@@ -511,7 +511,7 @@ void CGCTarget :: addSpliceStars() {
 					news->setTarget(this);
 					setupBuffer(news, p->numXfer(), 0);
 					s->addSpliceStar(news, 0);
-					if (flag) farP->setPlasma();
+					if (flag) farP->initialize();
 				}
 
 			// output
