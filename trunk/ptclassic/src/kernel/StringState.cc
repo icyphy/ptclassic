@@ -1,11 +1,4 @@
 static const char file_id[] = "StringState.cc";
-#ifdef __GNUG__
-#pragma implementation
-#endif
-
-#include <std.h>
-#include "StringState.h"
-#include "miscFuncs.h"
 
 /**************************************************************************
 Version identification:
@@ -48,6 +41,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include <std.h>
+#include "miscFuncs.h"
+#include "StringState.h"
+#include "Tokenizer.h"
 
 /*************************************************************************
 
@@ -57,56 +58,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 StringState :: StringState() : val(0) {}
 
-const char* StringState :: className() const {return "StringState";}
+const char* StringState :: className() const { return "StringState"; }
 
-const char* StringState :: type() const { return "STRING";}
+const char* StringState :: type() const { return "STRING"; }
 
-void StringState  :: initialize() {
-	char buf[2048];
-	LOG_DEL; delete []val;
-	const char* p = initValue();
-	char *q = buf;
-	while (*p) {
-		if (*p == '{') {
-			p++;
-			// a statename: {name}
-			// blanks inside are allowed: { name }, say.
-			char statename[128], *s = statename;
-			while (*p && *p != '}') {
-				if (*p == ' ') p++;
-				else *s++ = *p++;
-			}
-			if (*p == 0) {
-				parseError ("missing '}' character");
-				return;
-			}
-			*s = 0;
-			p++;	// skip the '}' character
-			const State* st = lookup(statename, parent()->parent());
-			if (!st) {
-				parseError ("undefined symbol: ", statename);
-				return;
-			}
-			StringList sl = st->currentValue();
-			const char* sltext = sl;
-			if (sltext) {	// check if non-null string
-				int l = strlen (sltext);
-				strcpy (q, sltext);
-				q += l;
-			}
-		}
-		else if (*p == '\\') {
-			p++;	// skip the backslash
-			if (*p) *q++ = *p++;
-		}
-		else *q++ = *p++;
+void StringState :: initialize() {
+	// Delete the previously parsed value (set to zero in case of error)
+	delete [] val;
+	val = 0;
+
+	// Make sure that the initial string is not null;
+	const char* initString = initValue();
+	if (initString == 0 || *initString == 0) return;
+
+	// Parse the initial string
+	// -- Substitute parameters that fall in between curly braces {}
+	// -- Zero out the white space characters so string info is unaltered
+	const char* specialChars = "{}";
+	Tokenizer lexer(initString, specialChars, whiteSpace);
+	lexer.clearwhite();
+	StringList parsedString = "";
+	while (TRUE) {
+        	ParseToken t = getParseToken(lexer, T_STRING);
+		if (t.tok == T_EOF) break;
+		parsedString << t.sval;
+		delete [] t.sval;
 	}
-	*q = 0;
-	val = savestring (buf);
+	val = savestring(parsedString);
 }
 
 StringState& StringState :: operator=(const char* newStr) {
-	LOG_DEL; delete []val;
+	LOG_DEL; delete [] val;
 	val = savestring(newStr);
 	return *this;
 }
@@ -115,7 +97,7 @@ StringState& StringState :: operator=(StringList& newStrList) {
 	// Strictly speaking this is not required, but I dont
 	// really trust two much automatic type conversion.
 	// Note that we might modify newStrList in the call below
-	const char *newStr = newStrList;
+	const char* newStr = newStrList;
 	return (*this = newStr);
 }
 
@@ -137,7 +119,7 @@ State* StringState :: clone() const {
 }
 
 StringState :: ~StringState() {
-	LOG_DEL; delete []val;
+	LOG_DEL; delete [] val;
 }
 
 // make known state entry
