@@ -97,8 +97,9 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		Ptolemy.xbm back.xbm ptolemySmall.gif \
+MISC_FILES =		back.xbm ptolemySmall.gif \
 			ptolemyWelcome.gif ptolemyXmas.gif \
+			tychologo.gif \
 			doc test tclIndex 
 
 # 'make realclean' should remove tclIndex
@@ -107,14 +108,12 @@ REALCLEAN_STUFF =			tclIndex
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
-all: tclIndex
+all install: tclIndex $(MISC_SRCS)
 
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
 	rm -f $@
 	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
-
-install: tclIndex
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
