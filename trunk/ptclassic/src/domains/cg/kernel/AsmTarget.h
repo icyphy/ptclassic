@@ -28,8 +28,8 @@ private:
 protected:
 	ProcMemory& mem;
 
-	// Allocate memory for all structures in a Star
-	int allocMem(AsmStar&);
+	// Request memory for all structures in a Star
+	int allocReq(AsmStar&);
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory& m) :
