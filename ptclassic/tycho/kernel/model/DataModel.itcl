@@ -156,9 +156,6 @@ class ::tycho::DataModel {
     # Return a description of the children of an item
     protected method _describechildren {name {prefix {}}}
     
-    # Create a header string
-    protected method _header {}
-
     # Update the cache if it's out of date
     protected method _update
 
@@ -386,7 +383,7 @@ body ::tycho::DataModel::attrget {name {attr {}}} {
     } else {
 	# Return a single attribute
 	if { ! [::info exists attrs($attr)] } {
-	    error "Unknown attribute $attr in $modelname"
+	    error "Unknown attribute $attr of $type \"$name\"" in $modelname"
 	}
 	return $attrs($attr)
     }
@@ -573,7 +570,7 @@ body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
     } else {
 	# Print header string
 	# FIXME
-        set string "# -*- [_header] -*-\n"
+        set string [header]
 
 	# Print public variables
         foreach {opt dflt val} [eval concat [configure]] {
@@ -1143,24 +1140,6 @@ body ::tycho::DataModel::_describechildren {name {prefix {}}} {
         }
     }
     return $string
-}
-
-########################################################################
-#### _header
-#
-# Return a header string for this model. The returned string contains
-# only the field name-value pairs, so that subclasses can chain
-# and add additional fields. This method
-# returns a string containing the current values of the mode, version,
-# and class attributes, and the current time as the mtime field.
-#
-body ::tycho::DataModel::_header {} {
-    set header ""
-    # append header "mode: [cget -mode]; "
-    # append header "class: [cget -class]; "
-    # append header "version: [cget -version] "
-    append header "mtime: [clock format [clock seconds]] "
-    return $header
 }
 
 ########################################################################
