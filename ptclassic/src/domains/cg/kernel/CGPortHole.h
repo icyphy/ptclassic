@@ -56,7 +56,7 @@ baseclass DFPortHole.
 	//////////////////////////////////////////
 
 // Contains all the special features required for
-//   synchronous dataflow and boolean dataflow (CG)
+// synchronous dataflow and boolean dataflow (CG)
 
 class CGPortHole : public DynDFPortHole {
 	friend class CGGeodesic;
@@ -120,8 +120,8 @@ public:
 	int fork() const { return forkDests.size();}
 
 	// Manage fork destinations
-	int removeForkDest(CGPortHole* p) { return forkDests.remove(p); }
-	void putForkDest(CGPortHole* p) { forkDests.put(p); }
+	inline int removeForkDest(CGPortHole* p) { return forkDests.remove(p); }
+	inline void putForkDest(CGPortHole* p) { forkDests.put(p); }
 
 	// set a fork source
 	void setForkSource(CGPortHole* p);
