@@ -122,6 +122,7 @@ endif
 
 realclean:
 	rm -f $(CRUD) $(REALCLEAN_STUFF)
+	rm -rf doc/codeDoc/*
 ifdef DIRS
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
