@@ -299,7 +299,8 @@ body ::tycho::Compile::compileFiles {{args {}}} {
     # If modal, then we wait until monitorWidget (a type of monitor)
     # exits.
     if {$option(-modal)==1} {
-        ::tycho::Dialog::wait $monitorWidget
+        #::tycho::Dialog::wait $monitorWidget
+        $monitorWidget getStatusWait
     }
 }
 
