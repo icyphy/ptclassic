@@ -33,9 +33,16 @@ void fireSource(Star&, int);
 int isSource(const Star& s) {
 	BlockPortIter nextp(s);
 	PortHole* p;
+	int flag = 0;
+
 	while ((p = nextp++) != 0) {
-		if (p->isItInput()) return FALSE;
+		if (p->isItInput()) {
+			if ((p->myGeodesic->numInitialParticles))
+				return TRUE;
+			else flag = 1;
+		}
 	}
+	if (flag) return FALSE;
 	return TRUE;
 }
 
@@ -218,8 +225,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 	BlockPortIter nextp(s);
 	PortHole *p;
 	while ((p = nextp++) != 0) {
-		if (p->isItInput() && p->numTokens() != 
-				     p->myGeodesic->numInitialParticles)
+		if (p->isItInput() && p->numTokens() > 0)
 			count++;
 	}
 	if (count == 0)		
@@ -269,8 +275,7 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 		// look at the next port
 		PortHole& p = *nextp++;
 		if (p.isItInput()) {
-			int req = p.numberTokens - p.numTokens() +
-				  p.myGeodesic->numInitialParticles;
+			int req = p.numberTokens - p.numTokens();
 			if ((req > 0) && 
 				// check wormhole, recursive star
 				(p.far()->isItInput()))
@@ -299,6 +304,7 @@ void fireSource(Star& s, int k) {
 			
 	// check how many unused tokens are on output arcs.
 	int min = 10000;		// large enough number
+	int minIn = 1000;
 	BlockPortIter nextp(s);
 	for (int j = s.numberPorts(); j > 0; j--) {
 		PortHole& port = *nextp++;
@@ -309,12 +315,18 @@ void fireSource(Star& s, int k) {
 			      ": output port has undefined number of tokens");
 			return;
 		}
-		int r = (g->size() - g->numInitialParticles)/port.numberTokens;
-		if (r < min) min = r;
+		if (port.isItOutput()) {
+			int r = (g->size())/port.numberTokens;
+			if (r < min) min = r;
+		} else {
+			int k = port.numTokens() / port.numberTokens;
+			if (minIn > k) minIn = k;
+		}
+			
 	}
 
 	// fire sources "k-min" times.
-
+	if (minIn < min) min = minIn;
 	for (int i = min; i < k; i++) 
 		s.fire();
 }
