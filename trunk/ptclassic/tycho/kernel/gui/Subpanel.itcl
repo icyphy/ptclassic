@@ -246,7 +246,9 @@ configbody ::tycho::Subpanel::text {
 # Place subpanel in closed or open state.
 # ------------------------------------------------------------------
 configbody ::tycho::Subpanel::state {
-
+    # Need the following to use bitmaps
+    global TYCHO
+    
     # The meaning of open and closed here is a bit tricky.  When the 
     # Subpanel is in the closed state then pressing the button places
     # places the Subpanel in the open state and similarly for the open
