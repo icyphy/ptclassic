@@ -53,7 +53,7 @@ void DLGraph :: resetGraph() {
 	resetNodes();
 
 	// reset the appropriate members for schedule.
-	unschedNodes = nodeCount;
+	unschedNodes = numNodes();
 	unschedWork  = ExecTotal;
 }
 
