@@ -566,7 +566,11 @@ main() {
             (ClientData) NULL);
     Tk_DoWhenIdle(DelayedMap, (ClientData) NULL);
     Tk_GeometryRequest(w, 200, 200);
+#if TK_MAJOR_VERSION < 4
     border = Tk_Get3DBorder(interp, w, None, "#ffe4c4");
+#else
+    border = Tk_Get3DBorder(interp, w, "#ffe4c4");
+#endif
     if (border == NULL) {
         Tcl_SetResult(interp, (char *) NULL, TCL_STATIC);
         Tk_SetWindowBackground(w, WhitePixelOfScreen(Tk_Screen(w)));
