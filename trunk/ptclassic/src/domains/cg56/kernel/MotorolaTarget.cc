@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "MotorolaTarget.h"
 #include "MotorolaAttributes.h"
+#include "CGUtilities.h"
 
 const Attribute ANY = {0,0};
 
@@ -65,8 +66,25 @@ void MotorolaTarget :: initStates() {
 }
 
 void MotorolaTarget :: setup() {
+	int haltFlag = SimControl::haltRequested();
+	if (haltFlag || ! galaxy()) {
+	    Error::abortRun("Motorola Target has no galaxy defined.");
+	    return;
+	}
+
 	LOG_DEL; delete mem;
-	LOG_NEW; mem = new MotorolaMemory(xMemMap,yMemMap);
+	LOG_NEW; mem = new MotorolaMemory(xMemMap, yMemMap);
+
+	// The Motorola 56000 assembler (Version 3.04) does not allow '.' in
+	// the base file name, so we call ptSanitize to replace them with '_'
+	// The Motorola 56000 simulator (Version 3.4) does not allow upper
+	// case letters in file names, so we call makeLower
+	if (filePrefix.null()) {
+	    char* sanitizedFileName = makeLower(ptSanitize(galaxy()->name()));
+	    filePrefix = sanitizedFileName;
+	    delete [] sanitizedFileName;
+	}
+
 	AsmTarget::setup();
 }
 
