@@ -33,10 +33,13 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = Maxport Table Tgl dds fb iv rpc ts xg xpa
+# OCTTOOLS_IV_DIR is usually set to iv in $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile iv because of signal issues.
+DIRS = Maxport Table Tgl dds fb $(OCTTOOLS_IV_DIR) rpc ts xg xpa
 
 # "leaf" directories with a make.template
-MTDIRS = Maxport Table Tgl dds fb iv rpc ts xg xpa
+MTDIRS = Maxport Table Tgl dds fb $(OCTTOOLS_IV_DIR) rpc ts xg xpa
 
 # "leaf" directories with no make.template
 LDIRS = 
