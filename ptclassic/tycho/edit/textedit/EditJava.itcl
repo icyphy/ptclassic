@@ -264,6 +264,13 @@ body ::tycho::EditJava::gendocBuffer {} {
                 doc codeDoc [getClassName].html]
     }
 
+    # Everytime we run javadoc, it wants to write AllNames.html,
+    # packages.html and tree.html.  We remove these incase they are
+    # links to files that we can't write.
+    file delete -f [file join $docDir AllNames.html] \
+	    [file join $docDir packages.html] \
+	    [file join $docDir tree.html]
+
     putStatus "Running javadoc"
     # If the gendocBufferInteral fails, clear up the status bar
     after 1000 $this putStatus \"\"
