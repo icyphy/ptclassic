@@ -43,6 +43,11 @@ MISC_FILES =
 
 INDICES = 	tycho.idx codeDoc.idx
 
+# make clean will remove the indices.
+KRUFT =		$(INDICES)
+
+all install: $(INDICES)
+
 # Create all the indexes
 indices: $(INDICES)
 
@@ -77,3 +82,6 @@ codeDoc.idx: FORCE
 		echo "Running $(ITCLSH)"; \
 		echo "set TYCHO $(TYCHO); source ../../kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
 	fi
+
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
