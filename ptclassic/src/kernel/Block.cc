@@ -112,12 +112,17 @@ void Block::setScope(Scope* s) { scp = s; }
 
 /*virtual*/ StringList Block :: fullName () const
 {
-	StringList out;
-	if(scope() != NULL)
-		out << scope()->fullName() << "." << name();
-	else 
-	        out << NamedObj::fullName();
-	return out;
+    StringList out;
+    if(scope() != NULL) {
+        if (isA("InterpUniverse") || isA("Universe")) {
+            out << name();
+        } else {
+            out << scope()->fullName() << "." << name();
+        }
+    } else {
+        out << NamedObj::fullName();
+    }
+    return out;
 }
 
 StringList
