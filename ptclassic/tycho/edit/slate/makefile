@@ -50,7 +50,7 @@ ITCL_SRCS = \
 	DragDropper.itcl \
 	Follower.itcl \
 	Frame.itcl \
-	Iconic.itcl \
+	IconItem.itcl \
 	IconFrame.itcl \
 	IconOval.itcl \
 	Interactor.itcl \

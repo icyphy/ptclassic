@@ -39,9 +39,9 @@ namespace ::tycho {
 
 
 ########################################################################
-## Iconic
+## IconItem
 #
-# <i>Iconic</i> is an abstract class for items that can have
+# <i>IconItem</i> is an abstract class for items that can have
 # things connected to them with terminals.
 # The appearance of its terminals if given by configuration options. 
 # For a specific application, you may prefer to write a subclass
@@ -85,7 +85,7 @@ namespace ::tycho {
 # </ul>
 #
 # <p><b>Enhancements</b>: In an earlier version of the Slate,
-# Iconic items had primary and secondary "directions," so that
+# IconItem items had primary and secondary "directions," so that
 # you could flip the node about the vertical and horizontal axes.
 # 
 # <p><b>Caveats</b>: (none)
@@ -99,7 +99,7 @@ namespace ::tycho {
 # by the *-anchor* option of the Terminal class. We need to figure
 # out whether any of this is still needed at all...
 #
-class ::tycho::Iconic {
+class ::tycho::IconItem {
     inherit ::tycho::ComplexItem
 
     ###################################################################
@@ -153,14 +153,14 @@ class ::tycho::Iconic {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_inputs)     ::tycho::Iconic::_inputs
-    set methodtable(_intype)     ::tycho::Iconic::_intype
-    set methodtable(_outputs)    ::tycho::Iconic::_outputs
-    set methodtable(_outtype)    ::tycho::Iconic::_outtype
+    set methodtable(_inputs)     ::tycho::IconItem::_inputs
+    set methodtable(_intype)     ::tycho::IconItem::_intype
+    set methodtable(_outputs)    ::tycho::IconItem::_outputs
+    set methodtable(_outtype)    ::tycho::IconItem::_outtype
 
-    set methodtable(aspect)      ::tycho::Iconic::aspect
-    set methodtable(component)   ::tycho::Iconic::component
-    set methodtable(region)      ::tycho::Iconic::region
+    set methodtable(aspect)      ::tycho::IconItem::aspect
+    set methodtable(component)   ::tycho::IconItem::component
+    set methodtable(region)      ::tycho::IconItem::region
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
@@ -191,7 +191,7 @@ class ::tycho::Iconic {
 # the option *-inputs 2* to the constructor will result in
 # the -inputs variable being set to *{0 25 0 75}*.
 #
-body ::tycho::Iconic::_inputs {id canvas slate inputs} {
+body ::tycho::IconItem::_inputs {id canvas slate inputs} {
     # Set up coordinates
     ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set xscale [expr ($x1-$x0)/100.0]
@@ -247,7 +247,7 @@ body ::tycho::Iconic::_inputs {id canvas slate inputs} {
 ##########################################################################
 #### -intype option configuration
 #
-body ::tycho::Iconic::_intype {id canvas slate intype} {
+body ::tycho::IconItem::_intype {id canvas slate intype} {
     set option(intype$id) $intype
     foreach p $component(inports$id) {
 	$slate delete $p
@@ -262,7 +262,7 @@ body ::tycho::Iconic::_intype {id canvas slate intype} {
 #
 # See _inputs{} for comments.
 #
-body ::tycho::Iconic::_outputs {id canvas slate outputs} {
+body ::tycho::IconItem::_outputs {id canvas slate outputs} {
     # Set up coordinates
     ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set xscale [expr ($x1-$x0)/100.0]
@@ -318,7 +318,7 @@ body ::tycho::Iconic::_outputs {id canvas slate outputs} {
 ##########################################################################
 #### -outtype option configuration
 #
-body ::tycho::Iconic::_outtype {id canvas slate outtype} {
+body ::tycho::IconItem::_outtype {id canvas slate outtype} {
     set option(outtype$id) $outtype
     foreach p $component(outports$id) {
 	$slate delete $p
@@ -340,7 +340,7 @@ body ::tycho::Iconic::_outtype {id canvas slate outtype} {
 # Plus it doesn't assume that the ports have an aspect called
 # "terminal."
 #
-body ::tycho::Iconic::aspect {id canvas slate args} {
+body ::tycho::IconItem::aspect {id canvas slate args} {
     set result {}
 
     # If there are no args, return a list of aspect names
@@ -382,7 +382,7 @@ body ::tycho::Iconic::aspect {id canvas slate args} {
 # Return a component of a node. Component names are of the form *input-*_n_
 # or $output-*_n_.
 #
-body ::tycho::Iconic::component {id canvas slate {name {}}} {
+body ::tycho::IconItem::component {id canvas slate {name {}}} {
     # If there is no component argument, return a list of components
     if { $name == "" } {
 	return [aspect $id $canvas]
@@ -409,7 +409,7 @@ body ::tycho::Iconic::component {id canvas slate {name {}}} {
 # Move the inputs and outputs to match the coordinates of the
 # primary component
 #
-body ::tycho::Iconic::coords {id canvas slate x0 y0 x1 y1} {
+body ::tycho::IconItem::coords {id canvas slate x0 y0 x1 y1} {
     set xscale [expr ($x1-$x0)/100.0]
     set yscale [expr ($y1-$y0)/100.0]
 
@@ -449,14 +449,14 @@ body ::tycho::Iconic::coords {id canvas slate x0 y0 x1 y1} {
 #
 # Get the region of the primary.
 #
-body ::tycho::Iconic::region {id canvas slate args} {
+body ::tycho::IconItem::region {id canvas slate args} {
     eval $slate region $primary($id) $args
 }
 
 ##########################################################################
 #### redrawinputs
 #
-body ::tycho::Iconic::redrawinputs {id canvas slate positions} {
+body ::tycho::IconItem::redrawinputs {id canvas slate positions} {
     if { ! [::info exists component(inports$id)] } {
 	set component(inports$id) {}
     }
@@ -483,7 +483,7 @@ body ::tycho::Iconic::redrawinputs {id canvas slate positions} {
 ##########################################################################
 #### redrawoutputs
 #
-body ::tycho::Iconic::redrawoutputs {id canvas slate positions} {
+body ::tycho::IconItem::redrawoutputs {id canvas slate positions} {
     if { ! [::info exists component(outports$id)] } {
 	set component(outports$id) {}
     }
