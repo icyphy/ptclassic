@@ -57,7 +57,7 @@ InvokeInterp :: interpreter (const char* expression) {
     Error::error("The Tcl interpreter is not initialized");
   }
   else {
-    if ( Tcl_Eval(PTcl::activeInterp, expression) == TCL_OK ) {
+    if ( Tcl_Eval(PTcl::activeInterp, (char *) expression) == TCL_OK ) {
       result = PTcl::activeInterp->result;
     }
     else {
