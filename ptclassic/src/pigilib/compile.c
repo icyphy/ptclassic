@@ -545,6 +545,8 @@ octObject *galFacetPtr;
     xferedBool = DupSheetIsDup(&xfered, name);
     if (xferedBool && !IsDirty(galFacetPtr)) {
 	/* galaxy already xfered to kernel and is unchanged */
+	/* restore old domain */
+	KcSetKBDomain(oldDomain);
 	return (TRUE);
     }
     sprintf(msg, "CompileGal: facet = %s", name);
