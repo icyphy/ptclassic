@@ -12,6 +12,12 @@ group source -label {Source Stars} {
         attribute value -default 0.0 -type number -label value
         port out -datatype float
     }
+    star const \
+            -label {Const} \
+            -icon {edit/cts/icons.tim#source.const} {
+        attribute value -default 1.0 -type number -label value
+        port out -datatype float
+    }
 }
 
 group sink -label {Sink Stars} {
@@ -24,10 +30,10 @@ group sink -label {Sink Stars} {
     }
 }
 
-group filter -label {Filter Stars} {
+group dynamic -label {Dynamic Stars} {
     star integral \
             -label {Integral} \
-            -icon {edit/cts/icons.tim#filter.integral} {
+            -icon {edit/cts/icons.tim#dynamic.integral} {
         port in -datatype float
         port out -datatype float
     }
@@ -50,6 +56,13 @@ group arithmetic -label {Basic Arithmetic} {
             -label Subtract \
             -icon {edit/graphedit/icons.tim#arithmetic.subtract} {
         port in -composite 1
+        port out -composite 0
+    }
+    star gain \
+            -label Gain \
+            -icon {edit/cts/icons.tim#arithmetic.gain} {
+        attribute gain -default 1.0 -type number -label gain
+        port in -composite 0
         port out -composite 0
     }
 }
