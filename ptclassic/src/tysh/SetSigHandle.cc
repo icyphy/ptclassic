@@ -112,6 +112,7 @@ int setCoreLimitDebug(void)
     // Set RLIMIT to max allowable value to insure that core file is generated.
     // If this were set to zero, it would prevent a core file from being made.
     coreLimit.rlim_cur = coreLimit.rlim_max;
+    coreLimit.rlim_max = coreLimit.rlim_max;
 
     // setrlimit sets system values to the information in rlimit struct
     if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) {
@@ -142,6 +143,7 @@ int setCoreLimitRelease(void)
     // any signals that could cause a core dump are intercepted so 
     // that a core file would never be generated.
     coreLimit.rlim_cur = 0;
+    coreLimit.rlim_max = 0;
 
     // setrlimit sets system values to the information in rlimit struct
     if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) {
