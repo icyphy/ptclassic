@@ -58,12 +58,13 @@ include $(ROOT)/mk/stars.mk
 # libraries
 PTINY_LIBS =		$(PTINY_STAR_LIBS) -lptolemy $(TCL_LIBSPEC) \
 			$(SYSLIBS) $(LIB_FLUSH_CACHE)
-LIBS = $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS)\
+LIBS = $(STAR_LIBS) -lptolemy $(THREAD_LIBS) $(TCL_LIBSPEC) $(SYSLIBS)\
 			$(LIB_FLUSH_CACHE)
 
 PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
 				$(LIBDIR)/libptolemy.$(LIBSUFFIX)
-LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.$(LIBSUFFIX)
+LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+			$(THREAD_LIBFILES)
 
 # first star determines default domain as a rule
 PTINY_STARS =		$(PTINY_SDFSTARS) $(DESTARS)
@@ -71,7 +72,7 @@ ALLSTARS = 		$(OPTIONAL_STARS) $(SDFSTARS) \
 			$(CGCSTARS) $(CG96STARS) $(CG56STARS) $(SilageSTARS) \
 			$(VHDLFSTARS) $(VHDLBSTARS) $(CGSTARS) \
 			$(DDFSTARS) $(THORSTARS) $(DESTARS) $(BDFSTARS) \
-			$(MDSDFSTARS)
+			$(MDSDFSTARS) $(THREAD_STARS)
 
 PTINY_TARGETS =		$(SDFTARGETS) 
 ALLTARGETS =		$(SDFTARGETS) $(CGTARGETS) $(CGCTARGETS) \
@@ -89,6 +90,11 @@ HDRS =			PTcl.h ganttChart.h
 
 # Objects
 OBJS =			$(SRCS:.cc=.o)
+
+# Allow for user specified overriding definitions.  Do not declare
+# any variables after this command.  GNU make's earlier that 3.71 may
+# print a warning message.
+-include override.mk
 
 all:	makefile ptcl
 
