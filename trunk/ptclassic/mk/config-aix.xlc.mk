@@ -1,7 +1,7 @@
 # Config file to build on IBM RS6000 computers running AIX 3.2 with
 # IBM's xlc and xlC compilers
 
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without

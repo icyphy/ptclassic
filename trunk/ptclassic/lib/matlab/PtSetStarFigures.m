@@ -12,7 +12,8 @@ function PtSetStarFigures(handle)
 %
 
 %       Author: B. L. Evans
-%       (c) Copyright 1994 by the Regents of the University of California
+%       (c) Copyright 1994-%Q% The Regents of the University of California
+%	All rights reserved.
 
 set(0, 'DefaultFigureUserData', handle);
 end
