@@ -57,8 +57,10 @@ proc ptkTychoLoadFSM { file } {
     # Get the class name which is the rootname.
     set classname [file tail [file rootname $file]]
 
-    set winName [::tycho::File::isFileOpen $file]
-    if {$winName == ""} {
+    if [::tycho::registry isopen $file] {
+	set winName [lindex [::tycho::registry windows $filename] 0]
+
+    } else {
       	# File is not open yet , then open a new window.
 	# Look ::tycho::view in "Displayer.itcl" to see how to
 	# create a window for a file name.
