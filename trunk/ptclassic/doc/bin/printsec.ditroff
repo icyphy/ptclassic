@@ -88,7 +88,7 @@ else
 	# otherwise just print it out
 	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
 	$contentscmd /tmp/index$$
-	$printcommand $printoptions $dirheader/shared title
+	if (-r title) $printcommand $printoptions $dirheader/shared title
 else
 endif
 
