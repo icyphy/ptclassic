@@ -43,8 +43,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    static struct timeval delay;
 	    delay.tv_sec = $val(interval)/1000;
 	    delay.tv_usec = ($val(interval)%1000)*1000;
-	    (void) select(0, (SELECT_MASK *) 0, (SELECT_MASK *) 0,
-        	    (SELECT_MASK *) 0, &delay);
+	    (void) select(0, (fd_set *) 0, (fd_set *) 0,
+        	    (fd_set *) 0, &delay);
 	    }
 	    $ref(output) = $ref(input);
 	}
