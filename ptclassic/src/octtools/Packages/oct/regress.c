@@ -33,6 +33,10 @@ static char SccsId[]="$Id$";
 #include "region.h"
 #endif
 
+#ifdef SYSV
+#include <unistd.h>
+#endif
+
 #if defined(MCC_DMS)
  /* Some changes were required in this regression test because of DMS. */
  /* Most of them to remove the references to directories and replace them */
@@ -1431,8 +1435,10 @@ tstFacets()
     octObject facet, facet1;
     struct octFacetInfo info;
     struct octBox bb;
-    char buffer[1024], cwd[256], *getwd();
-    
+    char buffer[1024], cwd[256];
+#ifndef SYSV
+    char *getwd();
+#endif    
     OKLOG("checking open facet return codes");
     
     facet.type = OCT_FACET;
@@ -1493,7 +1499,11 @@ tstFacets()
 
     /* reopen, with a different name */
 #if !defined(MCC_DMS)
+#ifdef SYSV
+    if (getcwd(cwd, 256) == NULL) {
+#else
     if (getwd(cwd) == NULL) {
+#endif
 	perror(cwd);
 	exit(-1);
     }
@@ -1697,7 +1707,10 @@ tstMasters()
      * test masters
      */
     octObject facet, facet1, master1, master3, inst, term;
-    char buffer[1024], cwd[256], *getwd();
+    char buffer[1024], cwd[256];
+#ifndef SYSV
+    char *getwd();
+#endif
 
     OKLOG("checking master/facet");
 
@@ -1726,7 +1739,11 @@ tstMasters()
     TEST_OLD_FACET(octOpenMaster(&inst, &master1));
 
 #if !defined(MCC_DMS)
+#ifdef SYSV
+    if (getcwd(cwd, 256) == NULL) {
+#else
     if (getwd(cwd) == NULL) {
+#endif
 	perror(cwd);
 	exit(-1);
     }
