@@ -81,9 +81,6 @@ class ::tycho::ItclClassList {
     ###################################################################
     ####                   private variables                       ####
 
-    # File containing List of classes to be diagrammed
-    private variable classListFile {classList.cll}
-
     # File containing the class diagram
     private variable classDiagramFile {classDiagram.dag}
 }
@@ -93,13 +90,13 @@ class ::tycho::ItclClassList {
 #
 body ::tycho::ItclClassList::constructor {args} {
     toolbar button includeTychoClasses  \
-            {Insert all Tycho classes into the current file} \
+            {Insert all Tycho classes into the current file.} \
             -text {Include Tycho} \
             -command "$this includeTychoClasses"
 
     toolbar button includeDirectoryClasses \
             {Choose a file in a directory, and then insert all the *.itcl \
-            files into the current file} \
+	    and *.itk files into the current file.} \
             -text {Include Directory} \
             -command "$this includeDirectoryClasses"
     toolbar button clearClassList \
@@ -108,18 +105,22 @@ body ::tycho::ItclClassList::constructor {args} {
             -command "$this deleteRange 0.0 end"
 
     toolbar button browseClassDiagram \
-            {Choose a filename for the class diagram output to go into} \
+            {Choose a filename for the class diagram output to go into.} \
             -text {Diagram File Name} \
         -command "$this browseClassDiagram"
 
     toolbar button updateClassDiagram \
-            {Generate a class diagram from the files listed in the \
-            current file} \
+            {Generate a class diagram from the files listed in the\
+            current file.} \
             -text {Update Class Diagram}\
             -command "$this updateClassDiagram"
 
     eval itk_initialize $args
     eval preference exclude $this $args
+
+    if {$classDiagramFile == "classDiagram.dag"} {
+	set classDiagramFile [file join [file dirname $file] classDiagram.dag]
+    }
 
     focusin
 
@@ -165,10 +166,13 @@ body ::tycho::ItclClassList::help {} {
 
 #####################################################################
 #### includeDirectoryClasses
-# Add all the itcl files in a directory that the user chooses
+# Add all the *.itcl and *.itk files in a directory that the user chooses.
 # 
 body ::tycho::ItclClassList::includeDirectoryClasses {} {
-    set itclFileList [glob -nocomplain *.itcl]
+    set olddir [pwd]
+    cd [file dirname $file]
+
+    set itclFileList [glob -nocomplain {{*.itcl,*.itk}}]
     if { [llength $itclFileList] > 0 } {
 	set firstItclFile [lindex $itclFileList 0]
     } else {
@@ -176,18 +180,21 @@ body ::tycho::ItclClassList::includeDirectoryClasses {} {
     }
 
     set includeDirectory [::tycho::queryfilename \
-            "Choose a File from the directory you want\n\
-            to include all *.itcl files from" \
+            "Choose a file from the directory you want\n\
+            to include all *.itcl and *.itk files from." \
 	    $firstItclFile]
+    cd $olddir
+
     if {$includeDirectory != {} } {
         if ![file isdirectory $includeDirectory] {
             set includeDirectory [file dirname $includeDirectory]
         }
         if ![file isdirectory $includeDirectory] {
-            error "Sorry, $includDirectory is not a directory, try again."
+            error "Sorry, $includeDirectory is not a directory, try again."
         }
-        eval lappend files [glob [file join $includeDirectory {*.itcl}]]
-        updateClassListFile $files
+        eval lappend files [glob \
+		[file join $includeDirectory {{*.itcl,*.itk}}]]
+	updateClassListFile $files
     }
 }
 
@@ -223,8 +230,12 @@ body ::tycho::ItclClassList::includeTychoClasses {} {
 # Update the class diagram using the classes in the classFileList
 #
 body ::tycho::ItclClassList::updateClassDiagram {} {
-    eval tychoMkClassGraph {{Tycho Class Hierarchy}} $classDiagramFile \
-            [split [get 0.0 end]]
+    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} \
+	    $classDiagramFile \
+            [split [get 0.0 end]]]
+    if {$retval != {} } {
+	::tycho::warn $retval
+    }
     ::tycho::File::openContext $classDiagramFile
 }
 
