@@ -191,7 +191,8 @@ proc ::tycho::evalIfNewer {sourceFile targetFile args} {
 # the end of the given path are removed. Moreover, filenames are
 # normalized before being returned. Symbolic links are followed, as are
 # fields in the path like "/../". Thus, any two references to the same
-# path should return the same string.
+# path should return the same string. If _path_ is a null string,
+# return a null string.
 #
 # Formerly, this procedure was in File.itcl, but it was moved so that it
 # could be used in scripts that use itclsh, which does not have windows.#
@@ -199,6 +200,9 @@ proc ::tycho::evalIfNewer {sourceFile targetFile args} {
 proc ::tycho::expandPath { path } {
     global tcl_platform
     set path [string trim $path]
+    if { $path == "" } {
+        return ""
+    }
     
     switch $tcl_platform(platform) {
 	macintosh {
