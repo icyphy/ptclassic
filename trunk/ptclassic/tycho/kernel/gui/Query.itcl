@@ -1180,12 +1180,14 @@ body ::tycho::Query::separator {args} {
 
     # Add an empty frame looks like a separator.
     set tag [::tycho::autoName separator_]
+    # FIXME: If -borderwidth is 1.5, then under Itk3.0 and Windows the
+    # separator appears to be transparent
     itk_component add $tag {
 	frame $itk_component(querysite).$tag \
 		-relief sunken \
 		-width 3 \
 		-height 3 \
-		-borderwidth 1.5
+		-borderwidth 1
     } {
 	keep -background
     }

@@ -227,12 +227,14 @@ body ::tycho::Dialog::constructor {args} {
     pack $itk_component(top) -side top
     
     # Create a separator
+    # FIXME: If -borderwidth is 1.5, then under Itk3.0 and Windows the
+    # separator appears to be transparent
     itk_component add separator {
 	frame $itk_component(hull).separator \
 		-relief sunken \
 		-width 3 \
 		-height 3 \
-		-borderwidth 1.5
+		-borderwidth 1
     } {
 	keep -background
     }
