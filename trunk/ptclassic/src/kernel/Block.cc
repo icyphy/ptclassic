@@ -19,20 +19,6 @@ $Id$
 
 **************************************************************************/
 
-char* Block :: readFullName ()
-{
-	StringList out;
-	if(blockIamIn != NULL) {
-	   out = blockIamIn->readFullName();
-	   out += ".";
-	   out += name;
-	   return out;
-	} else {
-	   return name;
-	}
-}
-
-
 Block :: operator char* ()
 {
 	StringList out;
@@ -45,8 +31,12 @@ Block :: operator char* ()
 
 	out += "Ports in the block:\n";
 	for(int i = numberPorts(); i>0; i--)
-		out += nextPort().operator char* ();
-
+		out += nextPort();
+// This will change when we have multiple MultiPortHoles supported better
+	if (saveMPH) {
+		out += "MultiPortHoles in the block:\n";
+		out += *saveMPH;
+	}
 	return out;
 }
 
