@@ -3,7 +3,8 @@ static const char file_id[] = "dist_debug.cc";
 #include "distributions.h"
 #include "Error.h"
 #include "type.h"
-#include "streamCompat.h"
+#include <fcntl.h>
+#include <fstream.h>
 #include <std.h>
 
 /**************************************************************************
