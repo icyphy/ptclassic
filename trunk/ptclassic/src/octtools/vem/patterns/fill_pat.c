@@ -345,7 +345,7 @@ int m, n;
     if (m < n) {
 	r = m; m = n; n = r;
     }
-    while (r = m % n) {
+    while ( (r = m % n) ) {
 	m = n;
 	n = r;
     }
