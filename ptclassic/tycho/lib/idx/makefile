@@ -40,6 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
+	HTMLMap2DAG.tcl \
 	tychoMakeIndex.tcl
 
 MISC_FILES =	
