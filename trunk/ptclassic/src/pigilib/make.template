@@ -24,6 +24,11 @@ OCTTOOLS      = $(ROOT)/octtools
 # C compiler variables
 CFLAGS        = -g -I$(OCTTOOLS)/include
 
+# Rule for making .o file from .c file (the Gnu-make default rule breaks
+# on Vaxes running older versions of Ultrix)
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
 # C++ compiler variables
 GXX	      = g++
 GPPFLAGS      = -g -fminimal-debug -I$(ROOT)/src/kernel
