@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "compat.h"		/* Pickup PTSOL2 etc. */
 #include <sys/stat.h>		/* Pickup chmod for hppa */
 
-#ifdef PTNT
+#ifdef PT_NT4VC
 #define LINKING_NOT_SUPPORTED
 #endif
 
@@ -61,7 +61,7 @@ const int linkingNotSupported =
 // dlopen() style linking works under sun4, but if you try and load a
 // star that has undefined symbols, pigiRpc or ptcl will exit.
 
-#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF) || defined(PTSVR4)
+#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF) || defined(PTSVR4) || defined(PTNT) && !defined(PT_NT4VC)
 #define PTSVR4_STYLE_LINKING
 #include <dlfcn.h>
 #include <sys/stat.h>
@@ -95,7 +95,7 @@ const int linkingNotSupported =
 #endif // PTSVR4_STYLE_LINKING
 
 #ifdef __GNUG__
-#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX_ELF) || defined (PTSVR4)
+#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX_ELF) || defined (PTSVR4) || defined(PTNT)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
 #else
 #ifdef PTSUN4
