@@ -271,7 +271,7 @@ body ::tycho::ResourceFile::write {data} {
 body ::tycho::ResourceFile::chmod {path permissions} {
     # NOTE: Unix-dependent implementation
     regsub {^file:} $path {} path
-    exec chmod $permission $path
+    exec chmod $permissions $path
 }
 
 #####################################################################
