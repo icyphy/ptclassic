@@ -29,8 +29,8 @@ the same line, separated by tabs.
 		int fileOutput;
 	}
 	initCode {
-	    fileOutput = strcmp((char*)fileName, "cout") &&
-			 strcmp((char*)fileName, "stdout");
+	    fileOutput = strcmp(fileName, "cout") &&
+			 strcmp(fileName, "stdout");
 	    if(fileOutput) {
 		StringList s =
 			processCode(CodeBlock("FILE *$starSymbol(fp);\n"));
