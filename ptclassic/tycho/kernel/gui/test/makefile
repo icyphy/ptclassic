@@ -57,9 +57,7 @@ GRAPHICAL_TESTS = \
 
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	DirectedAcyclicGraph.itcl \
-	RCS.itcl
-
+	DirectedAcyclicGraph.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -67,7 +65,8 @@ MISC_FILES =
 
 # Sources that may or may not be present, but if they are present, we don't
 # want make checkjunk to barf on them.
-OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b alltests.itcl
+OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b alltests.itcl \
+		RCS.itcl
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
