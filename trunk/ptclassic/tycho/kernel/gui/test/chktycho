@@ -37,11 +37,12 @@ set -x
 tycho -debug -nowelcome -noconsole -ptiny -e $tclscript /tmp/a.tcl /tmp/b.c
 set +x
 
+
 echo "---"
-echo "Exhaustive search of all option combinations"
-for binary in -ptiny "" -ptiny -ptrim -pigi -java
+echo "Exhaustive search of all option combinations:"
+for binary in -ptiny "" -ptrim -pigi -java
 do
-for debug in -debug "" 
+for debug in "" -debug
 do
 for tclscript in "" "-e $tclscript"
 do
