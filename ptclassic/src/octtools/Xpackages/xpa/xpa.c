@@ -453,6 +453,7 @@ int indent;
     }
 }
 
+#ifdef NEED_OUT_DETAIL
 static void out_detail(evt, str)
 XEvent *evt;
 char *str;
@@ -477,6 +478,7 @@ char *str;
 	break;
     }
 }
+#endif /* NEED_OUT_DETAIL */
 
 
 /*
@@ -797,7 +799,7 @@ xpa_data *data;			/* Specific instance data   */
  * selected item.
  */
 {
-    int rv;
+    int rv = 0;
 
     if (data->any.type != PANE_T) xpa_raise(XPA_TYPE);
     switch (evt->type) {
