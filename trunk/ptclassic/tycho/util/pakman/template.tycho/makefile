@@ -53,7 +53,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	_pkgIndex.tcl \
 	copyright
 
-MISC_FILES = adm bin demos doc test
+MISC_FILES = adm bin demo doc test
 
 REALCLEAN_STUFF =
 
