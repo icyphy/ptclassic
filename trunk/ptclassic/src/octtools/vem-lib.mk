@@ -33,7 +33,7 @@
 # overflow when linking a full blown pigiRpc.  See the Irix dso man page for
 # more information
 
-ifeq ($(ARCH),irix5)
+ifeq ($(PTARCH),irix5)
 ifeq ($(USE_OCTTOOLS_SHARED_LIBS),yes)
 IRIX5_SHL_MK=$(ROOT)/mk/octtools-irix5-shl.mk
 include $(IRIX5_SHL_MK)
@@ -71,12 +71,12 @@ lint:	$(LIBCSRCS)
 	lint -C$(basename $(LIB) ) -u -I$(OCTTOOLS)/include $^ > lint
 	lint -u -I$(OCTTOOLS)/include $^ > lint
 
-LINTDIR=$(OCTTOOLS)/lib.$(ARCH)/lint
+LINTDIR=$(OCTTOOLS)/lib.$(PTARCH)/lint
 
-$(OCTTOOLS)/lib.$(ARCH)/lint:
+$(OCTTOOLS)/lib.$(PTARCH)/lint:
 	mkdir $@
 
-install_lint: $(OCTTOOLS)/lib.$(ARCH)/lint
+install_lint: $(OCTTOOLS)/lib.$(PTARCH)/lint
 	cp llib-l$(basename $(LIB) ).ln $(LINTDIR)
 
 $(DRIVER): $(DRVROBJ) $(OBJS) 
