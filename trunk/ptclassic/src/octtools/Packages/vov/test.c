@@ -25,7 +25,11 @@ static char SccsId[]="$Id$";
  * 
  */
 #include "vov.h"
+#include "errtrap.h"
 
+int otherTest();
+
+int
 main(argc, argv)
     int argc;
     char** argv;
@@ -55,6 +59,7 @@ main(argc, argv)
     otherTest();
 
     VOVend( 0 );
+    return 0;
 }
 
 
