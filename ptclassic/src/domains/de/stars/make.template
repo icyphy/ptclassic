@@ -25,6 +25,7 @@ DEAnd.pl \
 DEArbitrate.pl \
 DEBeep.pl \
 DEBlackHole.pl \
+DECellToImage.pl \
 DEClock.pl \
 DEDelay.pl \
 DEDiscard.pl \
@@ -35,6 +36,7 @@ DEFloatRamp.pl \
 DEFork.pl \
 DEge.pl \
 DEHandShake.pl \
+DEImageToCell.pl \
 DEImpulse.pl \
 DEIntPacketize.pl \
 DEIntUnPacketize.pl \
@@ -48,8 +50,10 @@ DEPSServer.pl \
 DEPacketize.pl \
 DEPoisson.pl \
 DEPrQueue.pl \
+DEPriorityCheck.pl \
 DEPriorityQueue.pl \
 DEPrinter.pl \
+DEPseudoCell.pl \
 DEQueue.pl \
 DEQueueBase.pl \
 DERanGen.pl \
