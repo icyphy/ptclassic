@@ -1,31 +1,36 @@
-/*
- * management.c:  Active Messages over UDP (UDPAM) Endpoint/Bundle API
- *
- * "Copyright (c) 1995 by Brent N. Chun and The Regents of the University 
- * of California.  All rights reserved."
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
- * hereby granted, provided that the above copyright notice and the following
- * two paragraphs appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
- *
- * Author:              Brent N. Chun
- * Version:             $Revision$
- * Creation Date:       Sat Nov  4 17:25:01 PST 1995
- * Filename:            management.c
- */
-static char rcsid[] = "@(#)$Id$";
+/* Misc. stuff to manage locks, FIFOS, lists) */
+/******************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1995-%Q%  The Regents of the University of California.
+All Rights Reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: Brent Chun 
+ Creation Date: Sat Nov  4 17:25:01 PST 1995
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,6 +52,7 @@ static char rcsid[] = "@(#)$Id$";
 #ifdef SOLARIS 
 #include <thread.h>
 #include <sys/filio.h>  
+#include <sys/systeminfo.h>	/* sysinfo() */
 #endif /* SOLARIS */
 
 static
@@ -75,11 +81,17 @@ void BindAndSetSocket(int sd)
     perror("malloc error\n");
     exit(-1);
   }
+#ifdef SOLARIS
+  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
+    perror("sysinfo(SI_HOSTNAME,...) error\n");
+    exit(-1);
+  }
+#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
-
+#endif
 /* 
  * If we're using Myrinet, fiddle w/ the hostname so UDPAM chooses the
  * right interface.
@@ -922,7 +934,6 @@ int AM_SetEventMask(eb_t eb, int mask)
 
 int AM_Wait(eb_t eb)
 {
-  fd_set temp_fdset;
 
   if (eb == NULL)
     return(AM_ERR_BAD_ARG);
@@ -973,11 +984,17 @@ void BindAndSetKnownSocket(int sd, int port)
     perror("malloc error\n");
     exit(-1);
   }
+#ifdef SOLARIS
+  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
+    perror("sysinfo(SI_HOSTNAME,...) error\n");
+    exit(-1);
+  }
+#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
-
+#endif
 /* 
  * If we're using Myrinet, fiddle w/ the hostname so UDPAM chooses the
  * right interface.
