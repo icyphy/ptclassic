@@ -293,7 +293,7 @@ vol. 20:4, Sept. 1990.
 // Handle inputs: for each input...
 		InDEMPHIter nextInp(input);
 		InDEPort* p;
-		while (p = nextInp++) {
+		while ( (p = nextInp++) ) {
 			while (p->dataNew) {
 
 // Get the input Message.
