@@ -178,8 +178,10 @@ proc ptkStop { name } {
 	# Assume the window has been deleted already and ignore command
 	return
     }
-    # Ignore if the named system is not running
-    if {$ptkRunFlag($name) != {ACTIVE}} return
+    # Ignore if the named system is not running or paused
+    if {$ptkRunFlag($name) != {ACTIVE} && \
+	$ptkRunFlag($name) != {PAUSED}} return
+    # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) STOP_PENDING
     halt
     # Finish processing the run command
@@ -187,68 +189,64 @@ proc ptkStop { name } {
     set cntrWindow .run_$name
     catch {$cntrWindow.panel.go configure -relief raised}
     catch {$cntrWindow.panel.pause configure -relief raised}
-    wrapup
+    if {[catch {wrapup} msg] == 1} {
+	ptkClearRunFlag $name
+	error $msg
+    }
     ptkClearRunFlag $name
 }
 
 #######################################################################
 # procedure to pause a run
 proc ptkPause { name } {
-    ptkImportantMessage .error {Pause not implemented yet}
-#   global ptkRunFlag
-#   #Ignore the command if the system is not running
-#   if {$ptkRunFlag($name) != {ACTIVE}} return
-#   set olduniv [curuniverse]
-#   curuniverse $name
-#   halt
-#   curuniverse $olduniv
-#   # Finish processing the run command
-#   update
-#   set cntrWindow .run_$name
-#   catch {$cntrWindow.panel.go configure -relief raised}
-#   catch {$cntrWindow.panel.pause configure -relief sunken}
-#   set ptkRunFlag($name) PAUSED
+    global ptkRunFlag
+    #Ignore the command if the system is not running
+    if {![info exists ptkRunFlag($name)] || \
+    	$ptkRunFlag($name) != {ACTIVE}} return
+    set cntrWindow .run_$name
+    catch {$cntrWindow.panel.go configure -relief raised}
+    catch {$cntrWindow.panel.pause configure -relief sunken}
+    set ptkRunFlag($name) PAUSED
+    tkwait variable ptkRunFlag($name)
 }
 
 #######################################################################
 #procedure to go
 proc ptkGo {name octHandle} {
-    set  cntrWindow .run_$name
-    set w .run_$name
-    set numIter [$w.iter.entry get]
     global ptkRunFlag
-    set univ [curuniverse]
     # For now, we allow only one run at a time.
+    set univ [curuniverse]
     if {[info exists ptkRunFlag($univ)] && \
         ($ptkRunFlag($univ) == {ACTIVE} || \
+	 ($univ != $name && $ptkRunFlag($univ) == {PAUSED} ) || \
 	 $ptkRunFlag($univ) == {STOP_PENDING})} {
         ptkImportantMessage .error \
 		"Sorry.  Only one run at time. "
 	return
     }
-    if {[info exists ptkRunFlag($name)]} {
-    	set prevRunFlag $ptkRunFlag($name)
-    } { set prevRunFlag IDLE }
-    set ptkRunFlag($name) ACTIVE
+    set  cntrWindow .run_$name
     catch {$cntrWindow.panel.go configure -relief sunken}
     catch {$cntrWindow.panel.pause configure -relief raised}
-    if {$prevRunFlag != {PAUSED}} {
-	# catch errors and reset the run flag.
-	if {[catch {
-        	curuniverse $name
-        	ptkCompile $octHandle
-        	run $numIter
-	   } msg] == 1} {
-		ptkClearRunFlag $name
-		error $msg
-	   }
-    } { if {[catch { cont } msg] == 1} {
-		ptkClearRunFlag $name
-		error $msg
-	   }
+    if {[info exists ptkRunFlag($name)] && \
+    	$ptkRunFlag($name) == {PAUSED}} {
+	    # Setting of ptkRunFlag should
+	    # trigger the tkwait in the ptkPause proc,
+	    # thus allowing the run to continue.
+    	    set ptkRunFlag($name) ACTIVE
+	    return
     }
-    if {$ptkRunFlag($name) != {PAUSED}} {
+    set ptkRunFlag($name) ACTIVE
+    # catch errors and reset the run flag.
+    if {[catch {
+        curuniverse $name
+        ptkCompile $octHandle
+        set w .run_$name
+        set numIter [$w.iter.entry get]
+        run $numIter
 	wrapup
 	ptkClearRunFlag $name
+    } msg] == 1} {
+	ptkClearRunFlag $name
+	error $msg
     }
 }
