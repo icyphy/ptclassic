@@ -81,7 +81,14 @@ proc tychoMkClassGraph {name filename args} {
         # FIXME: This should be encoded to show up somehow.
         set sname $nm
         regexp "::(\[^: \t\]*)\$" $nm match sname
-        puts $fd "\{add $nm \{label \{$sname\} link \{$classfile($nm) \{$rxp\}\}\} \{$pnt\}\}"
+
+	set path [file split $classfile($nm)]
+	set htmlfile [join [lreplace [split [lindex $path end] .] \
+		end end "html"] .]
+	set htmlfile [eval file join \
+		[lreplace $path end end doc codeDoc $htmlfile]]
+
+        puts $fd "\{add $nm \{label \{$sname\} link \{$classfile($nm) \{$rxp\}\} altlink \{$htmlfile \{\}\}\} \{$pnt\}\}"
     }
     close $fd
 }
