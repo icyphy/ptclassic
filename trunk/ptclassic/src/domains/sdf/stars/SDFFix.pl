@@ -32,9 +32,9 @@ The "warning" option will generate a warning message whenever overflow occurs.
                 type { int }
                 default { "YES" }
                 desc {
-If non-zero, i.e. YES or TRUE, then report any errors (if any) that
-occurred during the fixed-point computations in this star, after
-the simulation is over.
+If non-zero, e.g. YES or TRUE, then after a simulation has finished,
+the star will report the number of overflow errors if any occurred
+during the simulation.
                 }
         }
         protected {
@@ -70,7 +70,7 @@ the simulation is over.
 	wrapup {
 		if ( int(ReportOverflow) && ( overflows > 0 ) ) {
 		  StringList msg;
-		  double percentage = 0;
+		  double percentage = 0.0;
 		  if ( totalChecks > 0 )
 		    percentage = (100.0*overflows)/totalChecks;
 		  msg << " experienced overflow in " << overflows 
