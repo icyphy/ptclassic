@@ -195,11 +195,11 @@ protected:
 	// to derived targets that want to use it.
 	VHDLVariableList localVariableList;
 
-private:
-	VHDLVariableList variableList;
-
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);
+
+private:
+	VHDLVariableList variableList;
 
 	// Return the VHDL type corresponding to the given const char*.
 	const char* sanitizeType(const char*);
