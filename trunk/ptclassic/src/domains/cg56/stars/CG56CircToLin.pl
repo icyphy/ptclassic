@@ -86,7 +86,7 @@ Data movement is repeated inline so may not be efficient for large N.
     }
 
     codeblock(oneReal,"int i, char* xmemLoc") {
-	move	@xmemLoc,x0
+	move	x:@xmemLoc,x0
 	move	x0,$ref(output,@i)
     }
 	
