@@ -249,3 +249,19 @@ ostream& operator << (ostream&o, const StringList& sl) {
 		o << s;
 	return o;
 }
+
+// The following function is used for debugging.
+// Call them within your debugger using "call" or equivalent.
+// If the second argument is nonzero, then it is used as a delimitter
+// between elements of the string.
+
+void printStringList(const StringList *s, char* delimitter = 0) {
+  StringListIter nexts(*s);
+  const char* p;
+  while ((p = nexts++) != 0) {
+    cout << p;
+    if (delimitter) cout << delimitter;
+  }
+  cout << "\n";
+  fflush(stdout);
+}
