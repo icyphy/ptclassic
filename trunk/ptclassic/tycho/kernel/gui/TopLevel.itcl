@@ -987,7 +987,9 @@ body ::tycho::TopLevel::whenConstructed {command} {
 # to the component for the &lt;Map&gt; event and the pending commands
 # executed within the caller's scope when the binding is triggered.
 # The purpose of this method is to support code that depends on the
-# screen appearance or size of the component.
+# screen appearance or size of the component. The first argument is
+# the symbolic name of the component (not the Tk window name), and the
+# second argument is the command to be executed.
 #
 # Note that it is necessary to specify the deferred commands
 # on a component basis (rather than just for the whole mega-widget),
@@ -1027,10 +1029,16 @@ body ::tycho::TopLevel::_notifymapped {component} {
         return
     } else {
         # Mapped: evaluate commands and then remove the binding
-        foreach {scope cmd} $_whenMapped($component) {
+        # Regrettably, we have to unset before evaluating in case
+        # there is an update in the commands evaluated.  Otherwise,
+        # That update may process another <Map> event and invoke this
+        # same command a second time.  Make a local copy of the command
+        # first.
+        set local_copy $_whenMapped($component)
+        unset _whenMapped($component)
+        foreach {scope cmd} $local_copy {
             @scope $scope $cmd
         }
-        catch {unset _whenMapped($component)}
         if { [::info which -command $w] != "" } {
             bind $w <Map> {}
         }
