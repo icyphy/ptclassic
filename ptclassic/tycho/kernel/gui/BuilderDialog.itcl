@@ -133,9 +133,8 @@ body ::tycho::BuilderDialog::runBuilder {args} {
 # Stop the Builder by setting a global variable
 #
 body ::tycho::BuilderDialog::stopBuilder {} {
-    global gStop
-    set gStop 1
-    putStatus "Set gStop to $gStop"
+    uplevel #0 set ::gStop 1
+    putStatus "Stop Scheduled, please wait"
 }
 
 
