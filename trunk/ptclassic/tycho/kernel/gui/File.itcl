@@ -731,16 +731,11 @@ body ::tycho::File::reload {} {
     if {$file == "NoName" || $file == ""} {
 	return 
     }
-    if {$modified} {
-	if {![::tycho::askuser \
-		"The data has been modified. Proceed anyway?"]} {
-	    return 
-	}
-    }
+    saveQuery 1
     set saveclipboard [getClipboard]
     if [file exists $file] {
         if [file readable $file] {
-            configure -readonly 0
+	    setReadOnly 0
             set point [currentPoint]
             clear
             set fd [open $file r]
@@ -759,7 +754,7 @@ body ::tycho::File::reload {} {
         }
     } {
         # File does not exist.  Simply clear current data.
-        configure -readonly 0
+	setReadOnly 0
         clear
     }
     setClipboard $saveclipboard
@@ -949,7 +944,7 @@ body ::tycho::File::toggleReadOnly {} {
         # NOTE: Unix-only implementation here.
         if {![file writable [filename]]} {
             exec chmod +w [filename]
-            configure -readonly 0
+	    setReadOnly 0
         } {
             if {$modified} {
                 if [::tycho::askuser \
@@ -959,7 +954,7 @@ body ::tycho::File::toggleReadOnly {} {
                 }
             }
             exec chmod -w [filename]
-            configure -readonly 1
+	    setReadOnly 1
         }
     }
     focusin
