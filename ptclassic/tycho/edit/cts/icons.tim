@@ -235,6 +235,20 @@ group arithmetic -label {Arithmetic Icons} {
          line 10 50 30 50 -width 1 -fill black
          line 70 50 90 50 -width 1 -fill black
      }
+     icon add -label Add \
+            -slatetype IconOval \
+            -fill white \
+            -text "" \
+            -termstyles {
+            	2-1-north-east
+            	2-1-north-west
+            	1_multi-1-east 
+            	1_multi-1-west
+            } \
+            -graphics {
+        line 20 50 80 50 -width 4
+        line 50 20 50 80 -width 4
+    }
      icon add_3 \
             -slatetype IconOval \
             -label Add \
