@@ -35,18 +35,18 @@
 # create a makefile in the same directory where the stars are
 # defined.  This should be called "make.template".  I minimal
 # version of this is as shown below (the stars are assumed to
-# be in the DE domain):
+# be in the DE domain, of course, you would need to remove the 
+# leading comment symbols '#' first):
 #
-#	make.template:
-#	---------------------------------------------------------
-#	| ROOT = $(PTOLEMY)					|
-#	| VPATH = .						|
-#	| include $(ROOT)/mk/config-$(PTARCH).mk			|
-#	| INCL = -I$(ROOT)/src/domains/de/kernel -I$(KERNDIR)	|
-#	| PL_SRCS = DEMyFirstStar.pl DEMySecondStar.pl		|
-#	| DOMAIN = DE						|
-#	| include $(ROOT)/mk/userstars.mk			|
-#	---------------------------------------------------------
+#--start--
+# ROOT = $(PTOLEMY)
+# VPATH = .
+# include $(ROOT)/mk/config-$(PTARCH).mk
+# INCL = -I$(ROOT)/src/domains/de/kernel -I$(KERNDIR)
+# PL_SRCS = DEMyFirstStar.pl DEMySecondStar.pl
+# DOMAIN = DE
+# include $(ROOT)/mk/userstars.mk
+#--end--
 #	
 # The above file assumes the PTOLEMY environment variable is set to point
 # to the home directory of the Ptolemy installation (e.g. /users/ptolemy).
@@ -70,6 +70,11 @@
 # Also, very few Ptolemy stars will get by without the ptolemy kernel
 # directory, specified by -I$(KERNDIR).
 #
+# PL_SRCS is the list of .pl files that you want to generate .o files for
+# If you are using GNU make, then you could use the following line 
+# to include all the .pl files in a directory:
+# PL_SRCS = $(wildcard *.pl)
+# 
 # The DOMAIN variable gives the domain name.
 #
 # To automatically generate all dependencies, the above makefile should
