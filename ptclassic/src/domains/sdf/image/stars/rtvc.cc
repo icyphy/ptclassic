@@ -81,7 +81,7 @@ RTVCGrabber::RTVCGrabber(int devno)
 		return;
 	}
 	close(cd);
-#ifdef __svr4__
+#if defined(__svr4__) || defined(SYSV)  
 	pagesize_ = sysconf(_SC_PAGESIZE);
 #else
 	pagesize_ = NBPG;
