@@ -80,7 +80,7 @@ all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 # First we substitute 'pal:' for 'pal '
 # Then we substitute \$$PTOLEMY for PTOLEMY
 palettes.$(PIGI).c: $(PT_DEPEND)
-	echo "char* defaultPalettes(){ return \"$(subst PTOLEMY,\$$PTOLEMY,$(subst pal ,pal:,$(PALETTES))):./user.pal:./init.pal\";}" > palettes.$(PIGI).c
+	echo "char* defaultPalettes(){ return \"$(subst PTOLEMY,\$$PTOLEMY,$(subst pal ,pal:,$(sort $(PALETTES)))):./user.pal:./init.pal\";}" > palettes.$(PIGI).c
 	$(CC) -c palettes.$(PIGI).c	
 
 include $(ROOT)/mk/common.mk
