@@ -38,10 +38,11 @@ OPTIMIZER =
 # These two variables are shorthand for what is necessary to
 # compile and link a tk application.
 TKCFLAGS = $(X11_INCSPEC) -I$(TK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
+	-I$(ITCL_INCDIR) -I$(ITK_INCDIR) \
 	-I$(PTOLEMY)/src/domains/cgc/tcltk/lib
 TKLOADLIBES = $(SHARED_LIBRARY_R_LIST) \
-	-L$(PTOLEMY)/lib.$(PTARCH) $(TK_LIBSPEC) \
-	$(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+	-L$(PTOLEMY)/lib.$(PTARCH) $(TK_LIBSPEC) $(ITK_LIBSPEC) \
+	$(TCL_LIBSPEC) $(ITCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 # We are not assuming GNU make, so we can't include common.mk,
 # so we have to set up our own .c.o rule
