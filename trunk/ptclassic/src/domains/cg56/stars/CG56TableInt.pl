@@ -43,16 +43,16 @@ limitation of liability, and disclaimer of warranty provisions.
 		noInternalState();
 	}
 	codeblock(readIdx) {
-		move	#<$addr(input),a	; a = index into table
+	move	#$addr(values),r0		; table address in y memory
+	move    $ref(input),n0			; table index
+	nop				; account for pipelining delay
 	}
 	codeblock(check) {
 ; There is no check to make sure that the index is in bounds
 	}
 	codeblock(lookup) {
-		move	$ref(values),x0
-		add	x0,a
-		move	a,r0
-		move	y:(r0),$ref(output)
+	move	y:(r0)+n0,x0		; read table value
+	move	x0,$ref(output)		; write table value to output
 	}
 	go {
 		addCode(readIdx);
