@@ -393,8 +393,10 @@ Data_M
               }
               break; // break out of test splitting 
             }
+
             if( its == (int)max_iterations - 1) {
-              Error::abortRun(*this,"no convergence in SVD routine");
+	      delete [] temp;
+              Error::abortRun(*this, "no convergence in SVD routine");
               return;
             }
     
