@@ -325,12 +325,12 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
         } elseif {$info=="d"} {
             # Output the added lines
             while {$fileLineCount1 <= $n2} {
-                insertString insert [gets $fd1]\n linecolor2
+                insertString insert [gets $fd1]\n linecolor1
                 incr fileLineCount1
             }
         } elseif {$info=="a"} {
             while {$fileLineCount2 <= $n4} {
-                insertString insert [gets $fd2]\n linecolor1
+                insertString insert [gets $fd2]\n linecolor2
                 incr fileLineCount2
             }
         }
