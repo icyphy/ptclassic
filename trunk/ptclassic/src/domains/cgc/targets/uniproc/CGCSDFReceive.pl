@@ -42,15 +42,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock(complexBlockXfr,"") {
 	  for (int $label(i) = 0; $label(i) < @numXfer ; $label(i)++) {
-	    cxTemp = @(sdfPortName)%$label(i);
-	    $ref(output,$label(i)).real = cxTemp.real();
-	    $ref(output,$label(i)).imag = cxTemp.imag();
+	    @(cxName) = @(sdfPortName)%$label(i);
+	    $ref(output,$label(i)).real = @(cxName).real();
+	    $ref(output,$label(i)).imag = @(cxName).imag();
 	  }
 	}
 	codeblock(complexTokenXfr,"") {
-	  cxTemp = @(sdfPortName)%0;
-	  $ref(output).real = cxTemp.real();
-	  $ref(output).imag = cxTemp.imag();
+	  @(cxName) = @(sdfPortName)%0;
+	  $ref(output).real = @(cxName).real();
+	  $ref(output).imag = @(cxName).imag();
 	}
 	codeblock(fixBlockXfr,"") {
 	    for (int $label(i) = 0; $label(i) < @numXfer ; $label(i)++) {
@@ -75,7 +75,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		if (numXfer > 1) addCode(fixBlockXfr()); 
 		else addCode(fixTokenXfr());
 	    }
-	    if (sdfPortType == COMPLEX) {
+	    else if (sdfPortType == COMPLEX) {
 		if (numXfer > 1) addCode(complexBlockXfr()); 
 		else addCode(complexTokenXfr());
 	    }

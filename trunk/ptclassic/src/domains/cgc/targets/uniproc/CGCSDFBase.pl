@@ -33,6 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	protected {
 	    StringList fixName;
+	    StringList cxName;
 	    Precision portPrecision;
 	}
 
@@ -53,8 +54,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		@ @fixName.set_rounding(1);
 	    }
 	    else if (sdfPortType == COMPLEX) {
+	      cxName << sdfPortName << "Cx";
+
 	      StringList declare;
-	      declare << "Complex " << "cxTemp" << ";";
+	      declare << "Complex " << cxName << ";";
 	      addCode(declare,"mainDecls");
 	    }
 	}
