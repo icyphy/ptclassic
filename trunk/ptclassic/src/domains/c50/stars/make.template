@@ -108,7 +108,6 @@ PL_SRCS= \
  C50Mux.pl \
  C50Neg.pl \
  C50OrderTwoInt.pl \
- C50Pad.pl \
  C50Pulse.pl \
  C50QntBtsInt.pl \
  C50QntBtsLin.pl \
