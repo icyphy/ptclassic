@@ -79,10 +79,10 @@ protected :
 
 	StringList print (int recursive) const;
 
-private :
 	// reference to myself as a Star
 	Star& selfStar;
 
+private :
 	// flag saying whether to zap event horizons in destructor
 	int dynamicHorizons;
 
