@@ -113,9 +113,15 @@ namespace ::tycho {
 
     ########### tools (alphabetical)
 
+    #::tycho::File::registerExtensions {} \
+    #        {::tycho::view CommandShell  {-file {%s}}} \
+    #        {Command shell} "tools"
+
     ::tycho::File::registerExtensions {} \
-            {::tycho::view CommandShell  {-file {%s}}} \
-            {Command shell} "tools"
+            {set w [::tycho::autoName .glimpse]; \
+                ::tycho::Glimpse $w -geometry +0+0;\
+                wm deiconify $w} \
+            {Glimpse} "tools"
 
     ::tycho::File::registerExtensions {.icl} \
             {::tycho::view ItclClassList {-file {%s}} Displayer {-toolbar 1}} \
