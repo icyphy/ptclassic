@@ -686,10 +686,22 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 	// star to.
 	Galaxy* addTo;
 
-	if (p->atBoundary() && p->isItOutput())
+	if (p->atBoundary() && p->isItOutput()) {
 	    addTo = (Galaxy*) pfar->parent()->parent();
-	else
+	    if (pfar->aliasFrom()) {
+		GenericPort* galPort = pfar->aliasFrom();
+		pfar->clearAliases();
+		galPort->setAlias(*op);
+	    }
+	}
+	else {
 	    addTo = (Galaxy*) p->parent()->parent();
+	    if (p->aliasFrom()) {
+		GenericPort* galPort = p->aliasFrom();
+		p->clearAliases();
+		galPort->setAlias(*ip);
+	    }
+	}
 	
 	addTo->addBlock(*newb,hashstring(newname));
 	newb->setParent(addTo);
@@ -703,21 +715,6 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 
 	newb->initialize();
 
-// 	// If stars have cluster parents, must add to a cluster
-// 	DataFlowStar* dfnewb = (DataFlowStar*)newb;
-// 	DataFlowStar* pfarStar = (DataFlowStar*)pfar->parent();
-// 	DataFlowStar* pStar = (DataFlowStar*)p->parent();
-// 	if (pfarStar->parentCluster() && pfar->numXfer() == ip->numXfer()) {
-// 	    pfarStar->parentCluster()->addSplicedStar(*dfnewb);
-// 	}
-// 	else if (pStar->parentCluster() && p->numXfer() == op->numXfer()) {
-// 	    pStar->parentCluster()->addSplicedStar(*dfnewb);
-// 	}
-// 	else if (pStar->parentCluster() || pfarStar->parentCluster()) {
-// 	    Error::abortRun(*this,"Could not place into a cluster:",
-// 			    newb->name());
-// 	}
-	
 	// save in the list of spliced stars
 	spliceList.put(newb);
 
