@@ -30,7 +30,10 @@
 #######################################################################
 #### Shape
 #
-# The abstract superclass of the shape class hierarchy.
+# The superclass of the shape class hierarchy. The Shape
+# classes are, like the Picture class, really just collections
+# of procedures with shared data that use item IDs to "simulate"
+# real objects.
 #
 class ::tycho::Shape {
     inherit ::tycho::Uninstantiable
@@ -41,19 +44,53 @@ class ::tycho::Shape {
     # Get one or more aspects of an item
     proc aspect {id canvas slate args}
 
-    # Deform one or more aspects of an item
-    proc deform {id canvas slate x y args}
+    # Get a compass point transformed in some way
+    proc compass {compass transformation}
 
     # Attach a set of grapples to an item
     proc grapple {id canvas slate interactor args}
 
-    # Process a phase of an interaction sequence to deform an item
-    proc interact {id canvas slate mode x y args}
+    # Reshape one or more aspects of an item
+    proc reshape {id canvas slate x y args}
 
-    # Deform an aspect of a picture to absolute coordinates
-    proc reshape {id canvas slate x y aspect}
+    # Start a reshape interaction sequence
+    proc reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc reshaperelease {id canvas slate x y}
+
+    # Start a move interaction sequence
+    proc moveclick {id canvas slate x y args}
+
+    # Continue a move interaction sequence
+    proc movedrag {id canvas slate x y}
+
+    # Terminate a move interaction sequence
+    proc moverelease {id canvas slate x y}
+
+    ###################################################################
+    ####                  protected variables                      ####
+
+    # Storage for temporary variables
+    protected common scratch
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # Compass rotation
+    private common compassTransformation
+    array set compassTransformation {
+    	 cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
+    	ccw,n s ccw,ne sw ccw,e w ccw,se sw ccw,s n ccw,sw ne ccw,w e ccw,nw se
+    	rev,n w rev,ne nw rev,e n rev,se ne rev,s e rev,sw se rev,w s rev,nw sw
+    	 lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
+    	 ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
+    	   ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
+    }
 }
-
 
 #######################################################################
 #### aspect
@@ -78,37 +115,142 @@ body ::tycho::Shape::aspect {id canvas slate args} {
 }
 
 #######################################################################
-#### deform
+#### compass
 #
-# Flag an error.
+# Change a compass coordinate into a related one. Valid values
+# of the second argument are:
 #
-body ::tycho::Shape::deform {id canvas slate x y args} {
-    error "Abstract procedure"
+# <ul>
+# <li><b>cw</b>: Rotate the point 90 degrees clockwise
+# <li><b>ccw</b>: Rotate the point 90 degrees counter-clockwise
+# <li><b>rev</b>: Rotate the point 180 degrees
+# <li><b>lr</b>: Reflect the point about the vertical axis
+# <li><b>ud</b>: Reflect the point about the horizontal axis
+# <li>blank string: Return the point.
+# </ul>
+# 
+body ::tycho::Shape::compass {compass transformation} {
+    return $compassTransformation($transformation,$compass)
 }
 
 #######################################################################
 #### grapple
 #
-# Flag an error
+# This procedure must be implemented by Shape subclasses.
 #
 body ::tycho::Shape::grapple {id canvas slate interactor args} {
     error "Abstract procedure"
 }
 
 #######################################################################
-#### interact
+#### moveclick
 #
-# Flag an error
+body ::tycho::Shape::moveclick {id canvas slate x y args} {
+	getflag ghost args
+	
+    # Remember where we started
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
+
+    # If the -ghost option is specified, create the ghost
+    if { [lsearch -exact $args -ghost] != -1 } {
+		set scratch($id.ghost) [$slate call $id ghost]
+		set scratch($id.start) [$slate coords $scratch($id.ghost)]
+    }
+}
+
+#######################################################################
+#### movedrag
 #
-body ::tycho::Shape::interact {id canvas slate mode x y args} {
-    error "Abstract procedure"
+body ::tycho::Shape::movedrag {id canvas slate x y} {
+    # If there's a ghost, move it. else move the complex item.
+    if { [::info exists scratch($id.ghost)] } {
+		set movethis $scratch($id.ghost)
+    } else {
+		set movethis $id
+    }
+
+    # Move is a delta operation.
+    $slate move $movethis \
+	    [expr $x - $scratch($id.prevX)] \
+	    [expr $y - $scratch($id.prevY)]
+
+    # Remember the new position
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
+}
+	
+#######################################################################
+#### moverelease
+#
+body ::tycho::Shape::moverelease {id canvas slate x y} {
+    # If there's a ghost, move the complex item to its
+    # position and then delete it
+    if { [::info exists scratch($id.ghost)] } {
+		assign x y $scratch($id.start)
+		assign a b [$this coords $scratch($id.ghost)]
+
+		$slate move $id [expr $a - $x] [expr $b - $y]
+		$slate delete $scratch($id.ghost)
+
+		unset scratch($id.ghost)
+		unset scratch($id.start)
+	}
+
+    # Clean up
+    unset scratch($id.prevX)
+    unset scratch($id.prevY)
 }
 
 #######################################################################
 #### reshape
 #
-# Flag an error
+# This procedure must be implemented by Shape subclasses.
 #
-body ::tycho::Shape::reshape {id canvas slate x y aspect} {
+body ::tycho::Shape::reshape {id canvas slate x y args} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### reshapeclick
+#
+# Start a click-drag-release sequence for reshaping an item. This
+# assumes that a release action has been called since previous
+# drag actions. The optional -ghost flag indicates that the picture
+# is to be reshaped by dragging a ``ghost'' of the picture. One or
+# more aspects can be specified.
+#
+# This procedure must be implemented by Shape subclasses.
+#
+body ::tycho::Shape::reshapeclick {id canvas slate x y args} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### reshapedrag
+#
+# Reshape the aspects previously specified by click{}
+# to the specified value. Aspects are modified by the relevent
+# x or y coordinate only.
+# Drag assumes that click has already been called on the picture,
+# and will function unpredictably if not.
+#
+# This procedure must be implemented by Shape subclasses.
+#
+body ::tycho::Shape::reshapedrag {id canvas slate x y} {
+    error "Abstract procedure"
+}
+
+#######################################################################
+#### reshaperelease
+#
+# Terminate a click-drag-release sequence. If a ghost is
+# being reshaped, then the picture is reshaped to the shape of the ghost
+# and the ghost is deleted. Note: A release must be used to terminate
+# the click-drag-release sequence, even if not ghosting the picture.
+#
+# This procedure must be implemented by Shape subclasses.
+#
+body ::tycho::Shape::reshaperelease {id canvas slate x y} {
     error "Abstract procedure"
 }
