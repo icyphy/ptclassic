@@ -357,12 +357,14 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	    ports << sanitize(ph->name()) << " => ";
 
 	    // Eliminate '@' chars due to delays; we ignore delays for now
-	    StringList dirtyList = ph->getGeoReference();
-	    dirtyList << '\0';
-	    const char* dirty = (const char*) dirtyList;
-	    while(*dirty && (*dirty != '@')) {
-	      ports << *dirty;
-	      dirty++;
+	    StringList delayName = ph->getGeoReference();
+	    // Add a null terminating character catch end of character scan.
+	    delayName << '\0';
+	    const char* delayStr = (const char*) delayName;
+	    // Stopy copying if hit '@' or end of string.
+	    while(*delayStr && (*delayStr != '@')) {
+	      ports << *delayStr;
+	      delayStr++;
 	    }
 	  }
 	}
