@@ -91,7 +91,7 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 		earliest = costAssignedTo(pd, pix, targetTime);
                 if (earliest == targetTime) canProc = pix;
         } else {
-                candidate = mtarget->candidateProcs(this);
+                candidate = mtarget->candidateProcs(this, node->myMaster());
 		// get the canProc or the earliest available time
 		int pix = pd->getPreferredProc();
 		earliest = costAssignedTo(pd, pix, targetTime);
@@ -139,7 +139,7 @@ int HuParProcs :: determinePPA(DLNode* node, IntArray& avail) {
 	HuNode* pd = (HuNode*) node;
 
 	// examine candidate processors
-	candidate = mtarget->candidateProcs(this);
+	candidate = mtarget->candidateProcs(this, node->myMaster());
 
 	// decide the starting processor assigned to the construct.
 	int earliest;
