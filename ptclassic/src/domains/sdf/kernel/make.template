@@ -49,7 +49,7 @@ LIB=libsdf.$(LIBSUFFIX)
 # Header files
 HDRS= DynDFScheduler.h EGGate.h EGNode.h ExpandedGraph.h \
  SDFPortHole.h SDFScheduler.h SDFStar.h SDFWormhole.h \
- SDFCluster.h SDFTarget.h
+ SDFCluster.h SDFTarget.h SDFPTclTarget.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) SDFDomain.cc
