@@ -92,12 +92,11 @@ for a complete explanation of the options.
 	}
 
 	initCode {
-		StringList sym = processCode("$starSymbol(fp)");
                 StringList s;
-		s << "FILE* " << sym << '[';
+		s << "    FILE* $starSymbol(fp)[";
 		s += input.numberPorts();
-		s += "];\n";
-                addDeclaration(s, sym);
+		s += "];";
+                addDeclaration(processCode(s));
                 addInclude("<stdio.h>");
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";

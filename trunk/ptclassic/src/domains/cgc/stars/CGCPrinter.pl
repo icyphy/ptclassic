@@ -41,10 +41,9 @@ the same line, separated by tabs.
 	      || strcmp(fn, "cout")==0 || strcmp(fn, "stdout")==0
 	      || strcmp(fn, "<cout>")==0 || strcmp(fn, "<stdout>")==0);
 	    if(fileOutput) {
-		StringList sym = processCode("$starSymbol(fp)");
 		StringList s;
-		s << "FILE* " << sym << ";\n";
-		addDeclaration(s, sym);
+		s << "    FILE* $starSymbol(fp);";
+		addDeclaration(processCode(s));
 		addInclude("<stdio.h>");
 		addCode(openfile);
 	    }
