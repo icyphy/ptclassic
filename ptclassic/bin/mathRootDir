@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/sh
 #
 # Script to find the root (installation) Mathematica directory.  Used by
 # makefiles to determine the location of the MathLink external interface
@@ -23,66 +23,77 @@
 #
 #  Look for the Mathematica kernel startup script "math"
 #
-set searchfile = "math"
+searchfile=math
+mmapath=""
 #
 #  Search the path
 #
-foreach i ( $path )
-  if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
-    set mmapath = $i/$searchfile
+for i in `echo $PATH | sed -e 's/:/ /g'`
+do
+  if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+  then
+    mmapath=$i/$searchfile
     break
-  endif
-end
+  fi
+done
 #
 #  Search an alternate path:  all bin sub-directories of /usr
 #
-if ( ! $?mmapath ) then
-  if ( -x /usr/bin && -r /usr/bin && -d /usr/bin ) then
-    set altpath = /usr/{bin,*/bin}
-    foreach i ( $altpath )
-      if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
-        set mmapath = $i/$searchfile
+if [ -z $mmapath ]
+then
+  if [ -x /usr/bin -a -r /usr/bin -a -d /usr/bin ]
+  then
+    altpath=/usr/{bin,*/bin}
+    for i in $altpath
+    do
+      if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+      then
+        mmapath=$i/$searchfile
         break
-      endif
-    end
-  endif
-endif
+      fi
+    done
+  fi
+fi
 #
 #  If the math script is found, then
 #  1. extract the mathdir setting from the "math" script
 #  2. make sure that the mathdir setting is valid:  the mathdir should
 #     have Source/Includes and Bin/MathLink sub-directories
 #
-if ( ! $?mmapath ) then
+if [ -z $mmapath ]
+then
   echo ""
 else
   # The following command to set newpath takes the following steps:
   # 1. eliminate all comments:           sed -e 's/#\(.*\)//g' 
   # 2. find the expression for mathdir:  grep "mathdir="
   # 3. extract the value of mathdir:     sed -e 's/mathdir=//g'
-  set newpath = `sed -e 's/#\(.*\)//g' $mmapath | grep 'mathdir=' | sed -e 's/mathdir=//g'`
+  newpath=`sed -e 's/#\(.*\)//g' $mmapath | grep 'mathdir=' | sed -e 's/mathdir=//g'`
   # If the newpath is not an absolute path name, then append
   # newpath to the mmapath (mmapath is always guaranteed to be correct)
-  if ( ! -e $newpath ) then
-    set newdir = "$mmapath:h"
-    set newpath = "$newdir/$newpath"
-  endif
-  set mathlinksource = $newpath/Source
-  set mathlinkincdir = $mathlinksource/Includes
-  if ( -x $mathlinksource && -r $mathlinksource && -d $mathlinksource && \
-       -x $mathlinkincdir && -r $mathlinkincdir && -d $mathlinkincdir ) then
-    set mathlinkbin = $newpath/Bin
-    set mathlinklib = $mathlinkbin/MathLink
-    if ( -x $mathlinkbin && -r $mathlinkbin && -d $mathlinkbin && \
-         -x $mathlinklib && -r $mathlinklib && -d $mathlinklib ) then
+  if [ ! -x $newpath ]
+  then
+    newdir=`dirname $mmapath`
+    newpath="$newdir/$newpath"
+  fi
+  mathlinksource=$newpath/Source
+  mathlinkincdir=$mathlinksource/Includes
+  if [ -x $mathlinksource -a -r $mathlinksource -a -d $mathlinksource -a \
+       -x $mathlinkincdir -a -r $mathlinkincdir -a -d $mathlinkincdir ]
+  then
+    mathlinkbin=$newpath/Bin
+    mathlinklib=$mathlinkbin/MathLink
+    if [ -x $mathlinkbin -a -r $mathlinkbin -a -d $mathlinkbin -a \
+         -x $mathlinklib -a -r $mathlinklib -a -d $mathlinklib ]
+    then
         echo $newpath
     else
 	echo ""
 	# Installation error: no Bin/MathLink sub-directory
-	ptErrorMessage "Found the Mathematica installation directory '$newpath', but it did not contain a Bin/MathLink sub-directory."
+	echo "Found the Mathematica installation directory '$newpath', but it did not contain a Bin/MathLink sub-directory." >&2
 	exit 1
-    endif
+    fi
   else
     echo ""
-  endif
-endif
+  fi
+fi
