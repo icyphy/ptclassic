@@ -144,6 +144,7 @@ user to do this.
 		receivers.insert(recName, rec);
 		return TRUE;
 	    }
+
 	    DEEtherRec* Medium::findReceiver(const char* recName) {
 		return (DEEtherRec*)(receivers.lookup(recName));
 	    }
@@ -157,6 +158,9 @@ user to do this.
 	    static HashTable medList;
 	    Medium* med;
 	}
+	constructor {
+	    med = 0;
+	}
 	method {
 	    name { registerReceiver }
 	    access { protected }
@@ -165,27 +169,11 @@ user to do this.
 	    code {
 		if (med) {
 		    return med->registerReceiver(name, receiver);
-		} else {
+		}
+		else {
 		    Error::abortRun(*this,"No medium!");
 		    return 0;
 		}
-	    }
-	}
-	begin {
-	    if (medList.hasKey(medium)) {
-		// Medium already exists
-		med = (Medium*)medList.lookup(medium);
-	    } else {
-		// Need to create a new medium
-		LOG_NEW; med = new Medium;
-		medList.insert(medium, med);
-	    }
-	    (med->starCount)++;
-
-	    if(!(med->receiversInitialized)) {
-		med->initialize();
-		med->occupyUntil(0.0);
-		med->receiversInitialized = 1;
 	    }
 	}
 	setup {
@@ -194,15 +182,33 @@ user to do this.
 	    // This initialization is required by the base class RepeatStar
 	    completionTime = 0;
 	}
+	begin {
+	    DERepeatStar :: begin ();
+
+	    if (medList.hasKey(medium)) {	// Medium already exists
+		med = (Medium*)medList.lookup(medium);
+	    }
+	    else {				// Create a new medium
+		LOG_NEW; med = new Medium;
+		medList.insert(medium, med);
+	    }
+
+	    (med->starCount)++;
+
+	    if(!(med->receiversInitialized)) {
+		med->initialize();
+		med->occupyUntil(0.0);
+		med->receiversInitialized = 1;
+	    }
+	}
 	wrapup {
-	    // Indicate that receivers should be reinitialized on the
-	    // next run.
+	    // Indicate that receivers should be reinitialized on next run.
 	    // Note that this does not get invoked if an error occurs.
 	    // Thus, if an error occurs, the star should be destroyed
 	    // and recreated.  Pigi takes care of this automatically,
 	    // but if the star is run under ptcl, then it is up to the
 	    // user to do this.
-	    med->receiversInitialized = 0;
+	    med->receiversInitialized = FALSE;
 	}
 	destructor {
 	    if (med) {
