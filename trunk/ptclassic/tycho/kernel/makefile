@@ -61,6 +61,8 @@ ITCL_SRCS = \
 	File.itcl \
 	FileBrowser.itcl \
 	Font.itcl \
+	HTMLTcl.itcl \
+	HTMLTclText.itcl \
 	Message.itcl \
 	Preferences.itcl \
 	TopLevel.itcl \
