@@ -52,7 +52,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/unistd.h>
 extern void *sbrk(int);
 #else
+#if defined(PTFREEBSD)
+/* sbrk is not POSIX, but it is in unistd.h as long as _POSIX_SOURCE
+ * isn't defined.
+ */
+#include <unistd.h>
+#else
+/* BTW: This looks odd - you're using caddr_t here in this "fixup"
+ * file yet sys/types.h isn't included until below.
+ */
 extern caddr_t sbrk();
+#endif /* PTFREEBSD */
 #endif
 
 #if defined(mips)
