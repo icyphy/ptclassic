@@ -164,9 +164,6 @@ class ::tycho::Slate {
     # Animate movement of an item
     method animate {mode {tagOrID {}} {x {}} {y {}} args}
 
-    # Align and distribute items
-    method align {where args}
-
     # Get aspects of an item
     method aspect {id args}
 
@@ -831,92 +828,97 @@ body ::tycho::Slate::recreate {description args} {
 #######################################################################
 #### region
 #
-# Set or get the "region" of an item or set of items. The first
-# argument is an item id or a tag. If an id or if the tag denotes
-# a single item, then the coordinates of that item are tested: if
-# there are four of them, then that is treated as the its
-# region; if there are not four, then the bounding box of the
-# item less 2 in each direction is its region. If the first
+# Set or get the "region" of an item or set of items. If the _tag_
+# argument is an item ID or if it is a tag that denotes a single
+# item, then that item is used to determine the region: if the
+# simple item or the primary component of a complex item is
+# an oval or a rectangle, the coordinates of that item is
+# the region. If not, the bounding box of the item less
+# less 2 in each direction is its region. If the first
 # argument is a tag that denotes more than one item, the bounding
-# box less 2 is the region; if it denotes no items, the method return
-# with null.
+# box less 2 is the region; if it denotes no items, the method
+# returns null.
 #
 # If no additional arguments are given, return the region. If
 # additional arguments are given, scale the item or items so that
-# its region become the given arguments.
-#
-# FIXME: Figure out how to allow complex items to sensibly
-# override.
+# its region become the given arguments. In the latter case,
+# if the single item denoted is a complex item and contains
+# a "region" entry in its method table, then that procedure
+# is called instead. Complex items in which the number of
+# coordinates does not match the number of coodinates of their
+# primary (IconFrame, for example), will need to do this.
 #
 body ::tycho::Slate::region {tag args} {
-    set rectangular 1
-
-    # If it's a complex item and it has a region{} method,
-    # call that. FIXME: Need to rethink overriding mechanism.
-    if { [string match {_*} $tag] } {
+    set rectangular 0
+    set single 1
+    if { [string match {[0-9]*} $tag] } {
+	# Simple item
+	set item $tag
+	set prim $tag
+    } elseif { [string match {_*} $tag] } {
+	# Complex item
         set class ::tycho::$itemClass($tag)
-        if { [@scope $class ::info exists methodtable(region)] } {
-            set region [eval [@scope $class set methodtable(region)] \
+	if { [@scope $class ::info exists methodtable(region)] } {
+            return [eval [@scope $class set methodtable(region)] \
                     $tag $canvas $this $args]
-            if { [llength $region] != 4 } {
-                set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
-                set rectangular 0
-            }
-        } else {
-            set region [coords $tag]
-            if { [llength $region] != 4 } {
-                set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
-                set rectangular 0
-            }
-        }
-    } elseif { [string match {_[0-9]*} $tag] } {
-        # For an item, use the coords if it's a 4-list, else
-        # use the bounding box shrunk by 2 in each direction
-	set region [coords $tag]
-	if { [llength $region] != 4 } {
-	    set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
-	    set rectangular 0
-    	}
+	} else {
+	    set item $tag
+	    set prim [primary $tag]
+	}
     } else {
-	# It's a tag, so first find matching items
-	set match [find withtag $tag]
+	# It's a tag, so find matching items
+	set match [findwithtag $tag]
 	
 	# If there are none, return
-	if { [llength $match] == 0 } {
+	if { $match == "" } {
 	    return
 	} elseif { [llength $match] == 1 } {
-	    # If there's one item, process that
-	    set region [coords $tag]
-	    if { [llength $region] != 4 } {
-		set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
-		set rectangular 0
+	    # One item
+	    set item [lindex $match 0]
+	    if { [string match {[0-9]*} $item] } {
+		# Simple item
+		set prim $item
+	    } elseif { [string match {_*} $item] } {
+		# Complex item
+		set prim [primary $item]
 	    }
-	    set tag [lindex $match 0]
 	} else {
-	    # There are many items, so get the bounding box less 2
-	    set region [eval ::tycho::Rectangle::shrink [$canvas bbox $tag] 2]
-	    set rectangular 0
+	    set item $match
+	    set single 0
+	    set region [eval ::tycho::Rectangle::shrink \
+		    [$canvas bbox $tag] 2]
 	}
     }
-
-    # If no arguments are given, return the region
+    # Get the region of a single item
+    if $single {
+	if [regexp {^(oval|rectangle)$} [$canvas type $prim]] {
+	    set region [$canvas coords $prim]
+	    set rectangular 1
+	} else {
+	    set region [eval ::tycho::Rectangle::shrink [$canvas bbox $prim] 2]
+	}
+    }
+    # No args? Just return
     if { $args == "" } {
 	return $region
+    }
+    # Change the region of the item
+    if { $rectangular } {
+	# If there's one rectangular item, call coords{}
+	eval coords $tag $args
     } else {
-	# Change the region to the newly-specified coordinates.
-	if { $rectangular } {
-	    # If there's one rectangular item, call coords{}
-	    eval coords $tag $args
-	} else {
-	    # Otherwise figure out the scaling factors and call scale{}
-	    ::tycho::assign x0 y0 x1 y1 $region
-	    ::tycho::assign a0 b0 a1 b1 $args
-
-	    set xscale [expr double($a1-$a0)/($x1-$x0)]
-	    set yscale [expr double($b1-$b0)/($y1-$y0)]
-
-	    scale $tag $a0 $b0 $xscale $yscale
+	# Otherwise figure out the scaling factors and call scale{}
+	if { $single } {
+	    set tag $item ;# to prevent another call to find{}
 	}
+	::tycho::assign x0 y0 x1 y1 $region
+	::tycho::assign a0 b0 a1 b1 $args
+
+	set xscale [expr double($a1-$a0)/($x1-$x0)]
+	set yscale [expr double($b1-$b0)/($y1-$y0)]
+
+        move $tag [expr $a0-$x0] [expr $b0-$y0]
+	scale $tag $a0 $b0 $xscale $yscale
     }
 }
 
