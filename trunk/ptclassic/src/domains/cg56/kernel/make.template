@@ -32,10 +32,10 @@ INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 LIB=libcg56.a
 
 # Header files
-HDRS= CG56Connect.h CG56Star.h CG56Target.h
+HDRS= CG56Connect.h CG56Star.h CG56Target.h MotorolaAttributes.h
 
 # Library objects
-OBJS= CG56Connect.o CG56Star.o CG56Domain.o CG56Target.o
+OBJS= CG56Connect.o CG56Star.o CG56Domain.o CG56Target.o MotorolaAttributes.o
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)

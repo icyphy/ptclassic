@@ -18,9 +18,6 @@ $Id$
 
 #include "CG56Star.h"
 
-extern const Attribute A_XMEM = {AB_MEMORY|AB_XMEM,AB_YMEM};
-extern const Attribute A_YMEM = {AB_MEMORY|AB_YMEM,AB_XMEM};
-
 // const char* CG56Star::format(unsigned addr) {
 	// static char* tmp = "ADDRESS";
 	// return tmp;
