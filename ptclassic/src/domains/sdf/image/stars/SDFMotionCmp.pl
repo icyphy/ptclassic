@@ -169,19 +169,48 @@ can be added or reduced-search motion compensation can be performed.
 		name	{ inputsOk }
 		access	{ private }
 		type	{ "int" }
-		arglist	{ "(const GrayImage& one, const GrayImage& two)" }
+		arglist	{ "(const GrayImage& one, const GrayImage& two,
+			char* buf)" }
 		code {
-			const int w = one.retWidth();
-			const int h = one.retHeight();
-			int retval = (w == two.retWidth());
-			retval &= (h == two.retHeight());
-			retval &= (w == (blocksize * (w / blocksize)));
-			retval &= (h == (blocksize * (h / blocksize)));
-			retval &= !one.fragmented();
-			retval &= !one.processed();
-			retval &= !two.fragmented();
-			retval &= !two.processed();
-			return(retval);
+			if (one.retWidth() != two.retWidth()) {
+				sprintf(buf, "Widths differ: %d %d", one.retWidth(),
+						two.retWidth());
+				return 0;
+			}
+			if (one.retHeight() != two.retHeight()) {
+				sprintf(buf, "Heights differ: %d %d", one.retHeight(),
+						two.retHeight());
+				return 0;
+			}
+			if (one.retWidth() !=
+					(blocksize * (one.retWidth() / blocksize))) {
+				sprintf(buf, "Blocksize-width prob: %d %d",
+						blocksize, one.retWidth());
+				return 0;
+			}
+			if (one.retHeight() !=
+					(blocksize * (one.retHeight() / blocksize))) {
+				sprintf(buf, "Blocksize-height prob: %d %d",
+						blocksize, one.retHeight());
+				return 0;
+			}
+			if (one.fragmented()) {
+				sprintf(buf, "image 1 fragmented");
+				return 0;
+			}
+			if (one.processed()) {
+				sprintf(buf, "image 1 processed");
+				return 0;
+			}
+			if (two.fragmented()) {
+				sprintf(buf, "image 2 fragmented");
+				return 0;
+			}
+			if (two.processed()) {
+				sprintf(buf, "image 2 processed");
+				return 0;
+			}
+			return 1;
 		}
 	} // end inputsOk()
 
@@ -202,8 +231,10 @@ can be added or reduced-search motion compensation can be performed.
 
 		const GrayImage* prvImage =
 				(const GrayImage*) pastEnvp.myData();
-		if (!inputsOk(*inImage, *prvImage)) {
-			Error::abortRun(*this, "Problem with input images.");
+
+		char buf[200];
+		if (!inputsOk(*inImage, *prvImage, buf)) {
+			Error::abortRun(*this, buf);
 			return;
 		}
 
