@@ -1,10 +1,56 @@
-<!-- $Id$ -->
+<!-- 
+$Id$ -->
 <html>
 <head>
 <title>Ptolemy NT Hints</title>
 </head>
 <body bgcolor=#faf0e6>
 <H1>Ptolemy NT Hints</H1>
+
+<h2>Startup</h2>
+If you need to install Ptolemy under NT, see
+<a href="ptntinstall.html">Ptolemy NT Installation</a>.
+
+<ol>
+
+<li> You will need to have your environment set as follows:
+<menu>
+
+<li> <CODE>PTOLEMY</CODE> should be set to the directory that contains
+the Ptolemy distribution.
+
+<li> <CODE>PTARCH</CODE> should be set to <CODE>nt4</CODE>
+
+<li> <CODE>PATH</CODE> should contain
+	<menu>
+	<li> <CODE>c:\usr\X11R6.3\bin</CODE> - The location of the X11
+		 distribution  
+
+	<li> <CODE>%PTOLEMY%/bin;%PTOLEMY%/bin.nt4</CODE>
+
+	<li> If you are using the Java pxgraph, then you path should
+	include the directory that contains the <CODE>java.exe</CODE>
+	binary.
+	</menu>
+
+</menu>
+
+<li> Start up Exceed by mousing on
+<CODE>Start Menu</CODE>-&gt;<CODE>Programs</CODE>-&gt;<CODE>eXceed</CODE>-&gt;<CODE>eXceed</CODE>
+
+<li> Start up <CODE>bash</CODE> by mousing on the icon in
+<CODE>Start Menu</CODE>-&gt;<CODE>Programs</CODE>-&gt;<CODE>Cygwin32 B19</CODE>
+
+<li> In bash, do
+<pre>
+DISPLAY=localhost:0
+export DISPLAY
+cd $PTOLEMY
+pigi
+</pre>
+
+</ol>
+
 
 <h2>NT Hints</h2>
 
