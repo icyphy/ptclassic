@@ -106,9 +106,17 @@ int setHandlers(SIG_PT sigHandler)
     if (ptSignal(SIGILL, sigHandler) != 0) {
         return 4;
     }
+    // Under Cygwin32, SIGIOT is not defined
+#ifdef SIGIOT
     if (ptSignal(SIGIOT, sigHandler) != 0) {
         return 5;
     }
+#else
+    if (ptSignal(SIGABRT, sigHandler) != 0) {
+        return 5;
+    }
+#endif
+
     if (ptSignal(SIGQUIT, sigHandler) != 0) {
         return 6;
     }
