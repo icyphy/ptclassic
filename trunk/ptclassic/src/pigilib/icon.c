@@ -129,15 +129,7 @@ int background;
 
 /* Start Tycho, if it has not already been started. */
 static void startTycho() {
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
-	"uplevel #0 {if {![info exists TYCHO]} {",
-	"   set tychoConsoleWindow 0\n",
-	"   set tychoWelcomeWindow 0\n",
-	"   set tychoExitWhenNoMoreWindows 0\n",
-	"   set tychoShouldWeDoRegularExit 0\n",
-	"   source $ptolemy/tycho/kernel/Tycho.tcl",
-	"}}\n",
-	(char *)NULL) );
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkStartTycho", (char*)NULL));
 }
 
 /* 8/3/90
