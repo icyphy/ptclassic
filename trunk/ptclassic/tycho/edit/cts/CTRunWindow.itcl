@@ -87,9 +87,9 @@ body ::tycho::CTRunWindow::start {} {
     set timestep [$itk_component(time) get main.step]
 
     # FIXME: call through parameter est method of Simulation
-    $_simulation send "\$exec setStartTime $starttime"
-    $_simulation send "\$exec setStopTime $stoptime"
-    $_simulation send "\$exec setStepSize $timestep"
+    $_simulation send "\$exec setParam startTime $starttime"
+    $_simulation send "\$exec setParam stopTime $stoptime"
+    $_simulation send "\$exec setParam stepSize $timestep"
 
     # Do main start method
     chain
