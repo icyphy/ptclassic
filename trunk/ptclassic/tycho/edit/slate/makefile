@@ -62,6 +62,7 @@ ITCL_SRCS = \
 	Shape.itcl \
 	Slate.itcl \
 	Slider.itcl \
+	SmartLine.itcl \
 	Solid.itcl \
 	Stepper.itcl \
 	Terminal.itcl
