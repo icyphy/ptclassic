@@ -83,6 +83,11 @@ void LinkedList::directRemove( Link * a ) {
     return;
 }
 
+/*
+In this method we want to remove Link _after_ having previously 
+removed the item, e, to which Link points. We receive a reference 
+to the Link. 
+*/
 Link* LinkedList::removeLink(Link& a) {
     Link* previous = a.previous;
     if (lastNode == &a) lastNode = a.previous;

@@ -62,10 +62,11 @@ deallocating memory for the objects, etc.
 class Link {
 	friend class LinkedList;
 	friend class LinkedListIter;
+public:
+	Link(Pointer,Link*); 
 protected:
 	Link *next,*previous; 
 	Pointer e; 
-	Link(Pointer,Link*); 
 	void remove();
 };
 
@@ -106,6 +107,9 @@ public:
 	// Return TRUE if link is found; return false otherwise
 	void directRemove(Link * a);	
 
+	// Remove a link from the list
+        Link* removeLink(Link&);
+
 	// Remove pointer by searching; return TRUE if removed
 	int searchAndRemove(Pointer a);  
 
@@ -139,9 +143,6 @@ public:
 	int member(Pointer arg) const;
 
 private:
-	// Remove a link from the list
-        Link* removeLink(Link&);
-
         // Store head of list, so that there is a notion of 
         // first node on the list, lastNode->next is head of list 
         Link *lastNode;
