@@ -567,6 +567,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay,
 	}	
 	// create target specific Receive star
 	DataFlowStar* newR = mtarget->createReceive(pindex,myId(),numSample);
+	newR->setName("CGReceive_");
 	newR->setTarget(targetPtr);
 	subGal->addBlock(*newR,newName(2));
 
@@ -597,6 +598,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 	}		
 	// create target specific Send star
 	DataFlowStar* newS = mtarget->createSend(myId(), pindex, numSample);
+	newS->setName("CGSend_");
 	newS->setTarget(targetPtr);
 	subGal->addBlock(*newS,newName(3));
 
