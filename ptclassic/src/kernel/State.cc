@@ -93,7 +93,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
         }
 	
 // handle all special characters
-	if(strchr (",[]+*-/()", *token)) {
+	if(strchr (",[]+*-/()^", *token)) {
 		t.tok = t.cval = *token;
 		return t;
 	}
@@ -106,7 +106,7 @@ reparse:
 // special if so, and append to token.  Ugly hack.
 		int l = strlen(token);
 		if (token[l-1] == 'e' || token[l-1] == 'E') {
-			const char* tc = lexer.setSpecial("*()/[],");
+			const char* tc = lexer.setSpecial("*()/[],^");
 			lexer >> token + l;
 			lexer.setSpecial(tc);
 		}
@@ -124,7 +124,7 @@ reparse:
 	if (is_idchar(*token)) {
                 const State* s = lookup(token,parent()->parent());
 		if (!s) {
-			parseError ("undefined symbol ", token);
+			parseError ("undefined symbol", token);
 			t.tok = T_ERROR;
 			return t;
 		}
@@ -147,8 +147,9 @@ reparse:
 }
 
 const State* State :: lookup (char* name, const Block* blockIAmIn) const {
-	if (blockIAmIn->isItWormhole()) blockIAmIn = blockIAmIn->parent();
         while (blockIAmIn) {
+		if (blockIAmIn->isItWormhole())
+			blockIAmIn = blockIAmIn->parent();
                 State* p = blockIAmIn->stateWithName(name);
                 if (p) return p;
                 blockIAmIn = blockIAmIn->parent();
