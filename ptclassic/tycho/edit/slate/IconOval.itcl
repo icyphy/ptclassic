@@ -195,8 +195,8 @@ body ::tycho::IconOval::construct {id canvas slate tags x y args} {
 	    $id $canvas $slate [list $tags] $coords
 
     # Create the input and output ports
-    ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
-    ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
+    # ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
+    # ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
 }
 
 ##########################################################################
