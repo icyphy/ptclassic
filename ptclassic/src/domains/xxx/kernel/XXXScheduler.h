@@ -3,7 +3,7 @@
 
 /*  Version $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,8 +25,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks
-    Date of creation:	6 January 1992
+    Author:	T.M. Parks
+    Created:	6 January 1992
 
 */
 
@@ -35,23 +35,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Scheduler.h"
-class Galaxy;
 
 class XXXScheduler : public Scheduler
 {
 public:
+    // Constructor.
+    XXXScheduler();
+
     // Domain identification.
-    virtual const char* domain() const;
+    /*virtual*/ const char* domain() const;
 
-    // Set up the schedule and initialize all Blocks.
-    // Return TRUE on success.
-    virtual void setup();
+    // Initialization.
+    /*virtual*/ void setup();
 
-    // Run the simulation.
-    virtual int run();
+    // Run (or continue) the simulation.
+    /*virtual*/ int run();
+
+    // Get the stopping time.
+    /*virtual*/ double getStopTime();
 
     // Set the stopping time.
-    virtual void setStopTime(double limit);
+    /*virtual*/ void setStopTime(double);
+
+    // Set the stopping time when inside a Wormhole.
+    /*virtual*/ void resetStopTime(double);
 };
 
 #endif
