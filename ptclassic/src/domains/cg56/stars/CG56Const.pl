@@ -21,7 +21,6 @@ output buffer is initialized with the specified DC value.
 		descriptor { Constant value to go to the output. }
 	}
 	codeblock (org) {
-; initialization code for star $fullname() - class CG56DC	
 	org	$ref(output)
 	}
 	codeblock (dc) {
