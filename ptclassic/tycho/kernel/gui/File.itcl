@@ -186,14 +186,11 @@ class ::tycho::File {
     # Toggle the read-only status of a file (maybe invoking revision control).
     method toggleReadOnly {}
 
-    # Add me to the window menus of all open File objects.
-    method windowMenuAddAll {label}
-
     # Append a file editor to the window menu.
     method windowMenuAppend {obj label {type {}}}
 
-    # Remove a filename from the window menus of all open File objects.
-    method windowMenuRemoveAll {filename}
+    # Add me to the window menus of all open File objects.
+    method windowMenuAddAll {label}
 
     ##########################################################################
     ####                         public procedures                        ####
@@ -228,6 +225,9 @@ class ::tycho::File {
 
     # Return the registered viewing commands for a file or directory name.
     proc registeredCommands {name} {}
+
+    # Remove a filename from the window menus of all open File objects.
+    proc windowMenuRemoveAll {filename}
 
     # Get the window name by the rootname of a file.
     proc winGetByRootName {rootname}
@@ -1079,35 +1079,6 @@ body ::tycho::File::windowMenuAppend {obj label {type {}}} {
     }
 }
 
-#####################################################################
-#### windowMenuRemoveAll
-# Remove the specified filename from the Window menu of all open
-# <code>File</code> objects.  The specified filename must match
-# exactly the label given in the call to <code>windowMenuAddAll</code>
-# that created the entry in the first place, and the object referenced
-# by the menu must be this one.
-#
-body ::tycho::File::windowMenuRemoveAll {filename} {
-    if {[info exists filesOpen] && \
-            [info exists filesOpen($filename)] && \
-            $filesOpen($filename) == $this} {
-	unset filesOpen($filename)
-	unset filesOpenTypes($filename)
-	foreach fileobj [array names fileObjects] {
-	    # NOTE: the catch is in case due to an error $fileobj
-            # doesn't exist.
-	    catch {
-		set menuname [$fileobj menubar menuname $filename]
-		$fileobj menubar delete $filename
-		# Disable the submenu if it's empty
-		if { [$fileobj menubar empty $menuname] } {
-		    $fileobj menubar disable $menuname
-		}
-	    }
-	}
-    }
-}
-
 #########################################################################
 #########################################################################
 ####                          public procedures                      ####
@@ -1217,7 +1188,12 @@ body ::tycho::File::openContext {filename} {
 
     if {[info exists filesOpen] && \
 	    [info exists filesOpen($filename)]} {
-	$filesOpen($filename) raiseWindow
+	if [catch {$filesOpen($filename) raiseWindow} msg] {
+            windowMenuRemoveAll $filename
+            global ::errorInfo
+            set saveInfo $errorInfo
+            error "Registered command failed on $filename:\n$msg" $saveInfo
+        }
 	return $filesOpen($filename)
     } {
 	#check for existing autosave files
@@ -1392,6 +1368,36 @@ body ::tycho::File::registeredCommands {name} {
 	} else {
             return {}
         }
+    }
+}
+
+#####################################################################
+#### windowMenuRemoveAll
+# Remove the specified filename from the Window menu of all open
+# <code>File</code> objects.  The specified filename must match
+# exactly the label given in the call to <code>windowMenuAddAll</code>
+# that created the entry in the first place. NOTE: Used to require that 
+# the object referenced by the menu must be this one, however, that
+# precluded removing bogus ones, which must be done from procs such as
+# openContext.
+#
+body ::tycho::File::windowMenuRemoveAll {filename} {
+    if {[info exists filesOpen] && \
+            [info exists filesOpen($filename)]} {
+	unset filesOpen($filename)
+	unset filesOpenTypes($filename)
+	foreach fileobj [array names fileObjects] {
+	    # NOTE: the catch is in case due to an error $fileobj
+            # doesn't exist.
+	    catch {
+		set menuname [$fileobj menubar menuname $filename]
+		$fileobj menubar delete $filename
+		# Disable the submenu if it's empty
+		if { [$fileobj menubar empty $menuname] } {
+		    $fileobj menubar disable $menuname
+		}
+	    }
+	}
     }
 }
 
