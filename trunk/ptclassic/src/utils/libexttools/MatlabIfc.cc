@@ -51,11 +51,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MatlabIfc.h"
 #include "MatlabIfcFuns.h"
 
+#define MATLAB_BUFFER_LEN        4096
+
 // counts how many instances of this class have been created
 static int matlabStarsCount = 0;
 
 // keeps track of the lone Ptolemy-controlled Matlab process running
 static Engine* matlabEnginePtr = 0;
+
+// default buffer to store return strings from Matlab
+static char defaultMatlabBuffer[MATLAB_BUFFER_LEN];
 
 // constructor
 MatlabIfc :: MatlabIfc() {
@@ -65,6 +70,8 @@ MatlabIfc :: MatlabIfc() {
     matlabOutputBuffer[0] = 0;
     matlabFigureHandle = "PtolemyMatlabIfc";
     matlabFigureHandle << matlabStarsCount;
+    matlabOutputBuffer = defaultMatlabBuffer;
+    matlabOutputBufferLen = MATLAB_BUFFER_LEN;
 }
 
 // destructor
@@ -104,6 +111,12 @@ const char* MatlabIfc :: SetMatlabCommand(const char* command) {
     return (const char*) commandString;
 }
 
+char* MatlabIfc :: SetOutputBuffer(char *buffer, int bufferlen) {
+    matlabOutputBuffer = buffer;
+    matlabOutputBufferLen = bufferlen;
+    return matlabOutputBuffer;
+}
+
 // get data members
 int MatlabIfc :: GetDeleteFigures() {
     return deleteFigures;
@@ -119,6 +132,22 @@ const char* MatlabIfc :: GetFigureHandle() {
 
 const char* MatlabIfc :: GetMatlabCommand() {
     return (const char*) commandString;
+}
+
+char* MatlabIfc :: GetOutputBuffer() {
+    return matlabOutputBuffer;
+}
+
+int MatlabIfc :: GetOutputBufferLength() {
+    return matlabOutputBufferLen;
+}
+
+Engine* MatlabIfc :: GetCurrentEngine() {
+    return matlabEnginePtr;
+}
+
+int MatlabIfc :: GetMatlabIfcInstanceCount() {
+    return matlabStarsCount;
 }
 
 // setup methods
@@ -230,12 +259,12 @@ int MatlabIfc :: MatlabEngineClose() {
 int MatlabIfc :: EvaluateOneCommand(char* command) {
     if ( MatlabIsRunning() ) {
 	// assert location of buffer to hold output of Matlab commands
-	MatlabEngineOutputBuffer(matlabOutputBuffer, MATLAB_BUFFER_LEN);
+	MatlabEngineOutputBuffer(matlabOutputBuffer, matlabOutputBufferLen - 1);
 
 	// MatlabEngineSend returns 0 on success and non-zero on failure
 	matlabOutputBuffer[0] = 0;
 	int merror = MatlabEngineSend(command);
-	matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
+	matlabOutputBuffer[matlabOutputBufferLen - 1] = 0;
 
 	// kludge: MatlabEngineSend always returns 0 (success) even if
 	// there is an error.  Therefore, we must determine if there
@@ -345,14 +374,186 @@ int MatlabIfc :: CloseMatlabFigures() {
 }
 
 int MatlabIfc :: KillMatlab() {
-     int retval = TRUE;
-     if ( MatlabIsRunning() ) {
-	  if ( MatlabEngineClose() ) {
-		Error::warn("Error when terminating connection ",
-			    "to the Matlab kernel.");
-		retval = FALSE;
-	  }
-     }
-     matlabEnginePtr = 0;
-     return retval;
+    int retval = TRUE;
+    if ( MatlabIsRunning() ) {
+	if ( MatlabEngineClose() ) {
+	    Error::warn("Error when terminating connection ",
+			"to the Matlab kernel.");
+	    retval = FALSE;
+	}
+    }
+    matlabEnginePtr = 0;
+    return retval;
+}
+
+Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
+				     int *errflag) {
+    // can't use a switch because enumerated data types
+    // are assigned to strings and not to integers
+    double *realp = 0;
+    double *imagp = 0;
+    Matrix *matlabMatrix = 0;
+    if ( portType == INT || portType == FLOAT || portType == FIX ) {
+	matlabMatrix = mxCreateFull(1, 1, MXREAL);
+	realp = mxGetPr(matlabMatrix);
+	*realp = double(particle);
+    }
+    else if ( portType == COMPLEX ) {
+	matlabMatrix = mxCreateFull(1, 1, MXCOMPLEX);
+	realp = mxGetPr(matlabMatrix);
+	imagp = mxGetPi(matlabMatrix);
+	Complex temp = particle;
+	*realp = real(temp);
+	*imagp = imag(temp);
+    }
+    else if ( portType == COMPLEX_MATRIX_ENV ) {
+	Envelope Apkt;
+	particle.getMessage(Apkt);
+	const ComplexMatrix& Amatrix = *(const ComplexMatrix *)Apkt.myData();
+
+	// allocate a Matlab matrix and name it
+	int rows = Amatrix.numRows();
+	int cols = Amatrix.numCols();
+	matlabMatrix = mxCreateFull(rows, cols, MXCOMPLEX);
+
+	// copy values in the Ptolemy matrix to the Matlab matrix
+	// Matlab stores values in column-major order like Fortran
+	double *realp = mxGetPr(matlabMatrix);
+	double *imagp = mxGetPi(matlabMatrix);
+	for ( int icol = 0; icol < cols; icol++ ) {
+	    for ( int irow = 0; irow < rows; irow++ ) {
+		Complex temp = Amatrix[irow][icol];
+		*realp++ = real(temp);
+		*imagp++ = imag(temp);
+	    }
+	}
+    }
+    else if ( portType == FIX_MATRIX_ENV ) {
+	Envelope Apkt;
+	particle.getMessage(Apkt);
+	const FixMatrix& Amatrix = *(const FixMatrix *)Apkt.myData();
+
+	// allocate a Matlab matrix and name it
+	int rows = Amatrix.numRows();
+	int cols = Amatrix.numCols();
+	matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+
+	// copy values in the Ptolemy matrix to the Matlab matrix
+	// Matlab stores values in column-major order like Fortran
+	double *realp = mxGetPr(matlabMatrix);
+	for ( int icol = 0; icol < cols; icol++ ) {
+	    for ( int irow = 0; irow < rows; irow++ ) {
+		*realp++ = double(Amatrix[irow][icol]);
+	    }
+	}
+    }
+    else if ( portType == FLOAT_MATRIX_ENV ) {
+	Envelope Apkt;
+	particle.getMessage(Apkt);
+	const FloatMatrix& Amatrix = *(const FloatMatrix *)Apkt.myData();
+
+	// allocate a Matlab matrix and name it
+	int rows = Amatrix.numRows();
+	int cols = Amatrix.numCols();
+	matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+
+	// copy values in the Ptolemy matrix to the Matlab matrix
+	// Matlab stores values in column-major order like Fortran
+	double *realp = mxGetPr(matlabMatrix);
+	for ( int icol = 0; icol < cols; icol++ ) {
+	    for ( int irow = 0; irow < rows; irow++ ) {
+		*realp++ = Amatrix[irow][icol];
+	    }
+	}
+    }
+    else if ( portType == INT_MATRIX_ENV ) {
+	Envelope Apkt;
+	particle.getMessage(Apkt);
+	const IntMatrix& Amatrix = *(const IntMatrix *)Apkt.myData();
+
+	// allocate a Matlab matrix and name it
+	int rows = Amatrix.numRows();
+	int cols = Amatrix.numCols();
+	matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+
+	// copy values in the Ptolemy matrix to the Matlab matrix
+	// Matlab stores values in column-major order like Fortran
+	double *realp = mxGetPr(matlabMatrix);
+	for ( int icol = 0; icol < cols; icol++ ) {
+	    for ( int irow = 0; irow < rows; irow++ ) {
+		*realp++ = double(Amatrix[irow][icol]);
+	    }
+	}
+    }
+    else {
+	*errflag = TRUE;
+	matlabMatrix = mxCreateFull(1, 1, MXREAL);
+	double *realp = mxGetPr(matlabMatrix);
+	*realp = 0.0;
+    }
+
+    return matlabMatrix;
+}
+
+// Returns 1 for Failure and 0 for Success
+// copy a Matlab output matrix to a Ptolemy matrix
+int MatlabIfc :: MatlabToPtolemy(
+		Particle &particle, DataType portType,
+		Matrix* matlabMatrix, const char* matrixId, int *errflag) {
+    // error flags
+    *errflag = FALSE;
+    int incompatibleOutportPort = FALSE;
+
+    // allocate a Ptolemy matrix
+    int rows = mxGetM(matlabMatrix);
+    int cols = mxGetN(matlabMatrix);
+
+    if ( mxIsFull(matlabMatrix) ) {
+
+	// for real matrices, imagp will be null
+	double *realp = mxGetPr(matlabMatrix);
+	double *imagp = mxGetPi(matlabMatrix);
+
+	// copy Matlab matrices (in column-major order) to Ptolemy
+	if ( portType == COMPLEX_MATRIX_ENV ) {
+	    ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
+	    for ( int jcol = 0; jcol < cols; jcol++ ) {
+		for ( int jrow = 0; jrow < rows; jrow++ ) {
+		    double realValue = *realp++;
+		    double imagValue = ( imagp ) ? *imagp++ : 0.0;
+		    Amatrix[jrow][jcol] = Complex(realValue, imagValue);
+		}
+	    }
+	    // write the matrix to output port j
+	    // do not delete Amatrix: particle class handles that
+	    particle << Amatrix;
+	}
+	else if ( portType == FLOAT_MATRIX_ENV ) {
+	    FloatMatrix& Amatrix = *(new FloatMatrix(rows, cols));
+	    if ( mxIsComplex(matlabMatrix) ) {
+		StringList myerrstr;
+		myerrstr = "\nImaginary components ignored for the ";
+		myerrstr << "Matlab matrix " << matrixId;
+		Error::warn(myerrstr);
+	    }
+	    for ( int jcol = 0; jcol < cols; jcol++ ) {
+		for ( int jrow = 0; jrow < rows; jrow++ ) {
+		    Amatrix[jrow][jcol] = *realp++;
+		}
+	    }
+	    // write the matrix to output port j
+	    // do not delete Amatrix: particle class handles that
+	    particle << Amatrix;
+	}
+	// this situation should never be encountered since the
+	// setup method should have checked for output data type
+	else {
+	    incompatibleOutportPort = TRUE;
+	}
+    }
+    else {
+	*errflag = TRUE;
+    }
+
+    return incompatibleOutportPort;
 }
