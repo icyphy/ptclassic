@@ -55,8 +55,10 @@ extern boolean IsCursor(octObject *instPtr);
 
 extern int GetIterateProp(octObject *facetPtr, int *pIterate);
 extern void SetIterateProp(octObject *facetPtr, int iterate);
-extern boolean GetCommentProp(octObject *objPtr, char **commentPtr);
-extern boolean SetCommentProp(octObject *objPtr, char *comment);
+extern boolean GetStringProp(octObject *objPtr, char *propName, 
+                             char **valuePtr);
+extern boolean SetStringProp(octObject *objPtr, char *propName, char *value);
+
 extern boolean GOCDomainProp(octObject *facetPtr, char **domainPtr, char *defaultDomain);
 extern boolean MyOpenMaster( octObject *t, octObject *i, char *f, char *m);
 extern boolean IsPal(octObject *instPtr);
