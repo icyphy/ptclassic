@@ -65,6 +65,9 @@ class ::tycho::ColorManager {
     # Look up a color name
     proc getColor {name {alternate {}}}
 
+    # Get a list of available colors matching an optional pattern
+    proc colorList {{pattern *}}
+
     ##########################################################################
     ####                      private common variables                    ####
 
@@ -726,6 +729,16 @@ set tyMonochrome 0
 
 proc ptkColor {name {alternate {}}} {
     ::tycho::color $name $alternate
+}
+
+###########################################################################
+#### colorList
+# Get a list of available colors. If an argument is given, it is
+# a glob-style pattern that selects a subset of the available
+# colors; if no argument is given, all available colors are returned.
+#
+body ::tycho::ColorManager::colorList {{pattern *}} {
+    return [array names colorlist $pattern]
 }
 
 ###########################################################################
