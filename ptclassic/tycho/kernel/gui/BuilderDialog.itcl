@@ -303,16 +303,16 @@ body ::tycho::BuilderDialog::_initializeMenubar {menubar} {
     $menubar separator testsep1 test
 
     initializeTestSubmenu $menubar {Kernel Tests} \
-            [file join $TYCHO kernel test]
+            [file join $TYCHO kernel gui test]
 
     initializeTestSubmenu $menubar {Text Editor Tests} \
-            [file join $TYCHO editors textedit test]
+            [file join $TYCHO edit textedit test]
 
     initializeTestSubmenu $menubar {Slate Tests} \
-            [file join $TYCHO editors slate test]
+            [file join $TYCHO edit slate test]
 
     initializeTestSubmenu $menubar {Visual Editor Tests} \
-            [file join $TYCHO editors visedit test]
+            [file join $TYCHO edit visedit test]
 
     # If Ptolemy is present, then we can run some tests.
     global ptolemyfeature
