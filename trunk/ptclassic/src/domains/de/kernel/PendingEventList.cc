@@ -43,14 +43,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "PendingEventList.h"
+#include <assert.h>
 
 
 PendingEventList::PendingEventList() {}
 
 PendingEventList::~PendingEventList() {
-	if( size() != 0 ) {
-	    // FIXME: Clear list
-	}
+	assert( size() != 0 ); 
 }
 
 Link * PendingEventList::appendGet( CqLevelLink * obj ) 
