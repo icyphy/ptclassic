@@ -225,9 +225,7 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors slate ] ]
 
-    set ::auto_path [linsert $auto_path 0 [file join $tycholib widgets ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tycholib util ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
