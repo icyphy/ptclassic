@@ -239,5 +239,8 @@ $(BINDIR)/$(PIGI): $(PIGI)
 
 install: $(INSTALL)
 
-everything: $(REALCLEAN_STUFF)
+# Build three binaries
+all: makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
+# Build as many as 12 binaries
+everything: $(REALCLEAN_STUFF)
