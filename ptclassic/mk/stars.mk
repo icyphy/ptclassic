@@ -501,6 +501,11 @@ ifdef DE
 		LIBS += -lsip -lptsip
 		LIBFILES + =$(LIBDIR)/libsip.$(LIBSUFFIX) \
 			$(LIBDIR)/libptsip.$(LIBSUFFIX)
+	else 
+		# CQScheduler includes a call to wraupUpPML() which
+		# is part of SiP.  If SiP is not present, then link
+		# with sipdummy.o. 
+		LIBS += $(OBJDIR)/domains/de/kernel/sipdummy.o
 	endif
 	# Tcl/Tk stars
 	ifdef TK
