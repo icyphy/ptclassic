@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "StructTarget.h"
 #include "KnownTarget.h"
+#include "HashTable.h"
 
 // Constructor.
 StructTarget :: StructTarget(const char* name,const char* starclass,
@@ -133,47 +134,43 @@ int StructTarget :: runIt(VHDLStar* s) {
   // We're trying to find repeated firings of the same send/receive stars
   // so that they can be handled specially.
   int foundFiring = 0;
-  //  VHDLClusterListIter nextCl(clusterList);
   VHDLCluster* ncl;
-  //  while ((ncl = nextCl++) != 0) {
-  //    if (!strcmp(ncl->name,fiName)) {
-    if ((ncl = clusterList.vhdlClusterWithName(fiName)) != 0) {
-      foundFiring = 1;
-      VHDLFiring* nfi = ncl->firingList->head();
-      // We found a cluster (firing) with the same name.
-      // Presume it to be a send/receive star, since only those
-      // have non-unique names from firing to firing.
-      // Add to the generic list.
-      nfi->genericList->addList(firingGenericList);
-      // Add to the port list.
-      nfi->portList->addList(firingPortList);
-      // Add to the generic map list.
-      nfi->genericMapList->addList(firingGenericMapList);
-      // Add to the port map list.
-      nfi->portMapList->addList(firingPortMapList);
-      // Add to the signal list.
-      nfi->signalList->addList(firingSignalList);
-      // Add to the declarations.
-      nfi->decls << mainDecls;
-      // Add to the local variable declarations.
-      nfi->decls << addVariableDecls(&localVariableList);
-      // Add to the variable list.
-      nfi->variableList->addList(firingVariableList);
-      // Add to the PortVar list.
-      nfi->portVarList->addList(firingPortVarList);
-      // Add to the action list.
-      StringList naction = "";
-      naction << preSynch;
-      naction << firingAction;
-      naction << postSynch;
-      nfi->action << naction;
-      preSynch.initialize();
-      firingAction.initialize();
-      postSynch.initialize();
-      // Add to the VarPort list.
-      nfi->varPortList->addList(firingVarPortList);
-    }
-    //  }
+  if ((ncl = clusterList.vhdlClusterWithName(fiName)) != 0) {
+    foundFiring = 1;
+    VHDLFiring* nfi = ncl->firingList->head();
+    // We found a cluster (firing) with the same name.
+    // Presume it to be a send/receive star, since only those
+    // have non-unique names from firing to firing.
+    // Add to the generic list.
+    nfi->genericList->addList(firingGenericList);
+    // Add to the port list.
+    nfi->portList->addList(firingPortList);
+    // Add to the generic map list.
+    nfi->genericMapList->addList(firingGenericMapList);
+    // Add to the port map list.
+    nfi->portMapList->addList(firingPortMapList);
+    // Add to the signal list.
+    nfi->signalList->addList(firingSignalList);
+    // Add to the declarations.
+    nfi->decls << mainDecls;
+    // Add to the local variable declarations.
+    nfi->decls << addVariableDecls(&localVariableList);
+    // Add to the variable list.
+    nfi->variableList->addList(firingVariableList);
+    // Add to the PortVar list.
+    nfi->portVarList->addList(firingPortVarList);
+    // Add to the action list.
+    StringList naction = "";
+    naction << preSynch;
+    naction << firingAction;
+    naction << postSynch;
+    nfi->action << naction;
+    preSynch.initialize();
+    firingAction.initialize();
+    postSynch.initialize();
+    // Add to the VarPort list.
+    nfi->varPortList->addList(firingVarPortList);
+  }
 
   if (!foundFiring) {
     fi->setName(fiName);
@@ -630,16 +627,9 @@ void StructTarget :: registerState(State* state, const char* varName,
   }
 
   int stateLastFiring = -1;
-  VHDLStateListIter nextState(stateList);
-  VHDLState* nState;
   VHDLState* listState = new VHDLState;
-  while ((nState = nextState++) != 0) {
-    StringList tempRoot = root;
-    StringList tempName = nState->name;
-    if (!strcmp(tempRoot,tempName)) {
-      stateLastFiring = nState->lastFiring;
-      listState = nState;
-    }
+  if ((listState = stateList.vhdlStateWithName(root)) != 0) {
+    stateLastFiring = listState->lastFiring;
   }
   
   int isFirstStateRef = (stateLastFiring == -1);
@@ -677,6 +667,7 @@ void StructTarget :: registerState(State* state, const char* varName,
     StringList temp_out_reg = refOut;
     temp_out_reg << "_sink";
 
+    /*
     // If it's the first firing to refer to this state,
     if (isFirstStateRef) {
       if (constState) {
@@ -702,13 +693,33 @@ void StructTarget :: registerState(State* state, const char* varName,
 	firingPortMapList.put(refOut, "", "", temp_out);
       }
     }
+    */
 
     if (constState) {
+      if (isFirstStateRef) {
+	firingSignalList.put(root, stType, "", root);
+	firingPortMapList.put(refIn, "", "", root);
+      }
+      if (!isFirstStateRef) {
+	firingSignalList.put(root, stType, root, root);
+	firingPortMapList.put(refIn, "", "", root);
+      }
       firingVariableList.put(ref, stType, "");
       firingPortVarList.put(refIn, ref);
       firingPortList.put(refIn, "IN", stType);
     }
+
     if (!(constState)) {
+      if (isFirstStateRef) {
+	firingSignalList.put(refIn, stType, "", refIn);
+	firingPortMapList.put(refIn, "", "", refIn);
+	firingPortMapList.put(refOut, "", "", temp_out);
+      }
+      if (!isFirstStateRef) {
+	firingSignalList.put(temp_state, stType, temp_state, refIn);
+	firingPortMapList.put(refIn, "", "", temp_state);
+	firingPortMapList.put(refOut, "", "", temp_out);
+      }
       firingSignalList.put(temp_out, stType, temp_out, "");
       firingVariableList.put(ref, stType, "");
       firingPortVarList.put(refIn, ref);
@@ -1413,62 +1424,70 @@ void StructTarget :: buildArchitectureBodyOpener(int /*level*/) {
 void StructTarget :: buildComponentDeclarations(int level) {
   component_declarations << cli_comps;
 
+  // HashTable to keep track of which components already declared.
+  HashTable myTable;
+  myTable.clear();
+
   VHDLCompDeclListIter nextCompDecl(mainCompDeclList);
   VHDLCompDecl* compDecl;
   while ((compDecl = nextCompDecl++) != 0) {
-    level++;
-    component_declarations << indent(level) << "component " << compDecl->name
-			   << "\n";
+    if (!(myTable.hasKey(compDecl->name))) {
+      myTable.insert(compDecl->name, compDecl);
 
-    // Add in generic refs here from genList.
-    if (compDecl->genList->head()) {
       level++;
-      component_declarations << indent(level) << "generic(\n";
-      VHDLGenericListIter nextGen(*(compDecl->genList));
-      VHDLGeneric* ngen;
-      int genCount = 0;
-      while ((ngen = nextGen++) != 0) {
+      component_declarations << indent(level) << "component " << compDecl->name
+			     << "\n";
+
+      // Add in generic refs here from genList.
+      if (compDecl->genList->head()) {
 	level++;
-	if (genCount) {
-	  component_declarations << ";\n";
+	component_declarations << indent(level) << "generic(\n";
+	VHDLGenericListIter nextGen(*(compDecl->genList));
+	VHDLGeneric* ngen;
+	int genCount = 0;
+	while ((ngen = nextGen++) != 0) {
+	  level++;
+	  if (genCount) {
+	    component_declarations << ";\n";
+	  }
+	  component_declarations << indent(level) << ngen->name << ": "
+				 << ngen->type;
+	  if (ngen->defaultVal.length() > 0) {
+	    component_declarations << " := " << ngen->defaultVal;
+	  }
+	  genCount++;
+	  level--;
 	}
-	component_declarations << indent(level) << ngen->name << ": "
-			       << ngen->type;
-	if (ngen->defaultVal.length() > 0) {
-	  component_declarations << " := " << ngen->defaultVal;
-	}
-	genCount++;
+	component_declarations << "\n";
+	component_declarations << indent(level) << ");\n";
 	level--;
       }
-      component_declarations << "\n";
-      component_declarations << indent(level) << ");\n";
-      level--;
-    }
     
-    // Add in port refs here from portList.
-    if (compDecl->portList->head()) {
-      level++;
-      component_declarations << indent(level) << "port(\n";
-      VHDLPortListIter nextPort(*(compDecl->portList));
-      VHDLPort* nport;
-      int portCount = 0;
-      while ((nport = nextPort++) != 0) {
+      // Add in port refs here from portList.
+      if (compDecl->portList->head()) {
 	level++;
-	if (portCount) {
-	  component_declarations << ";\n";
+	component_declarations << indent(level) << "port(\n";
+	VHDLPortListIter nextPort(*(compDecl->portList));
+	VHDLPort* nport;
+	int portCount = 0;
+	while ((nport = nextPort++) != 0) {
+	  level++;
+	  if (portCount) {
+	    component_declarations << ";\n";
+	  }
+	  component_declarations << indent(level) << nport->name << ": "
+				 << nport->direction << " " << nport->type;
+	  portCount++;
+	  level--;
 	}
-	component_declarations << indent(level) << nport->name << ": "
-			       << nport->direction << " " << nport->type;
-	portCount++;
+	component_declarations << "\n";
+	component_declarations << indent(level) << ");\n";
 	level--;
       }
-      component_declarations << "\n";
-      component_declarations << indent(level) << ");\n";
+    
+      component_declarations << indent(level) << "end component;\n";
       level--;
     }
-    
-    component_declarations << indent(level) << "end component;\n";
-    level--;
   }
 }
 
