@@ -49,10 +49,6 @@ extern "C" {
 #include "vemInterface.h"
 #include "octMacros.h"
 #include "rpc.h"
-extern vemStatus vemCommand(char *vemCmd, RPCSpot *spot,
-			     lsList cmdList, long userOptionWord);
-extern Window vemOpenWindow(octObject *facet, char *geo);
-int ptkHandle2OctObj( char *stringValue, octObject *objPtr );
 #undef Pointer
 }
 
