@@ -59,7 +59,7 @@ defstar
 	    }
 	    else
 	    {
-		elapsedTime.put(arrivalTime) << (double)now / timeScale;
+		elapsedTime.put(arrivalTime) << (now / timeScale);
 	    }
 	}
 	if (reset.dataNew)
