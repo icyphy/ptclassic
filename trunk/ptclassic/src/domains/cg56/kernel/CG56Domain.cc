@@ -20,7 +20,6 @@ $Id$
 #include "SDFScheduler.h"
 #include "CG56Connect.h"
 #include "AsmForkNode.h"
-#include "ProcMemory.h"
 
 // for error messages (temporary, until wormholes exist):
 #include "Error.h"
@@ -75,6 +74,6 @@ static CG56Domain proto;
 
 // declare the default Target object
 
-static CG56Target defaultCG56target("default-CG56","vanilla Mot 56k proc",
-				    0,4096,0,4096);
+static CG56Target defaultCG56target("default-CG56","vanilla Motorola 56000 processor");
+
 static KnownTarget entry(defaultCG56target,"default-CG56");

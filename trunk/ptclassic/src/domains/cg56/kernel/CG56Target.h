@@ -19,26 +19,28 @@ $Id$
 
 #include "AsmTarget.h"
 #include "ProcMemory.h"
+#include "StringState.h"
 
 class CG56Memory : public DualMemory {
 public:
-	CG56Memory(unsigned x_addr,	// start of x memory
-		   unsigned x_len,	// length of x memory
-		   unsigned y_addr,	// start of y memory
-		   unsigned y_len	// length of y memory
-		   );
+	CG56Memory(const char* x_map, const char* y_map);
+	CG56Memory(const CG56Memory& arg) : DualMemory(arg) {}
 };
 
 class CG56Target : public AsmTarget {
+private:
+	void initStates();
+protected:
+	StringState xMemMap;
+	StringState yMemMap;
 public:
-	CG56Target (const char* nam, const char* desc,
-		    unsigned x_addr, unsigned x_len,
-		    unsigned y_addr, unsigned y_len);
+	CG56Target (const char* nam, const char* desc);
 	// copy constructor
 	CG56Target(const CG56Target&);
 	Block* clone() const;
 	void headerCode();
 	void wrapup();
+	int setup(Galaxy&);
 	StringList beginIteration(int repetitions, int depth);
 	StringList endIteration(int repetitions, int depth);
 	~CG56Target();
@@ -48,9 +50,8 @@ protected:
 	void writeInt(int);
 	void writeFix(double);
 	void writeFloat(double);
+
 	int inProgSection;
-private:
-	unsigned xa, xl, ya, yl;
 };
 
 #endif
