@@ -617,7 +617,6 @@ body ::tycho::HTML::back {} {
 #
 body ::tycho::HTML::clear {} {
     HMreset_win [textWinName]
-    deleteRange 1.0 end
 }
 
 #####################################################################
