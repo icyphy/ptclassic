@@ -69,7 +69,6 @@ int CGTarget :: codeGenInit() { return TRUE; }
 // behave the same way.
 
 void CGTarget::setup() {
-	//noSchedule = 0;
 	myCode.initialize();
 	writeDirectoryName(destDirectory);
 	if (!scheduler()) {
@@ -93,6 +92,7 @@ void CGTarget::setup() {
 		Target::setup();
 		if (Scheduler::haltRequested()) return;
 	}
+	noSchedule = 0;		// reset for next setup.
 
 	// choose sizes for buffers and allocate memory, if needed
 	if(!allocateMemory() || !codeGenInit()) return;
@@ -178,8 +178,10 @@ void CGTarget :: copySchedule(SDFSchedule& s) {
 
 StringList CGTarget :: generateCode() {
 	setup();
-	run();
-	Target::wrapup();
+	if (galaxy()->parent() == 0) {
+		run();
+		Target::wrapup();
+	}
 	return myCode;
 }
 
