@@ -99,7 +99,7 @@ defstar {
     StringList command = "";
     command << "cd " << (const char*) destDir;
     command << " ; ";
-    command << "vhdlsim -nc -i " << filePre << ".com " << "parts";
+    command << "ptvhdlsim -nc -i " << filePre << ".com " << "parts";
 
     StringList startvss = "";
     startvss << "
