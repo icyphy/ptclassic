@@ -4,7 +4,7 @@ static const char file_id[] = "MathematicaIfcFuns.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -81,7 +81,7 @@ extern "C" void MLEnd
 	PT_MMA_VOID_STUB((MLEnvironment));
 
 extern "C" int   MLStringToArgv
-	PT_MMA_STUB((ml_charp, ml_charp, ml_charpp, int));
+	PT_MMA_STUB((kcharp_ct, ml_charp, ml_charpp, int));
 extern "C" MLINK MLOpen
 	PT_MMA_STUB((int, ml_charpp));
 extern "C" MLINK MLOpenInEnv
@@ -100,7 +100,7 @@ extern "C" void  MLSetUserData
 extern "C" MLPointer MLUserData
 	PT_MMA_STUB((MLINK , MLUserFunctionType *));
 
-extern "C" ml_charp MLName
+extern "C" kcharp_ct MLName
 	PT_MMA_STUB((MLINK));
 
 extern "C" int   MLGetNext
@@ -119,7 +119,7 @@ extern "C" int   MLPutNext
 extern "C" int   MLPutSize
 	PT_MMA_STUB((MLINK, long));
 extern "C" int   MLPutData
-	PT_MMA_STUB((MLINK, ml_charp, long));
+	PT_MMA_STUB((MLINK, kcharp_ct, long));
 extern "C" int   MLPutArgCount
 	PT_MMA_STUB((MLINK, long));
 extern "C" int   MLBytesToPut
@@ -137,20 +137,20 @@ extern "C" int   MLGetDouble
 	PT_MMA_STUB((MLINK, ml_doublep));
 
 extern "C" int   MLGetString    
-	PT_MMA_STUB((MLINK, ml_charpp));
+	PT_MMA_STUB((MLINK, kcharpp_ct));
 extern "C" void  MLDisownString 
-	PT_MMA_VOID_STUB((MLINK, ml_charp));
+	PT_MMA_VOID_STUB((MLINK, kcharp_ct));
 extern "C" int   MLGetSymbol    
-	PT_MMA_STUB((MLINK, ml_charpp));
+	PT_MMA_STUB((MLINK, kcharpp_ct));
 extern "C" int   MLGetFunction  
-	PT_MMA_STUB((MLINK, ml_charpp, ml_longp));
+	PT_MMA_STUB((MLINK, kcharpp_ct, ml_longp));
 extern "C" void  MLDisownSymbol 
-	PT_MMA_VOID_STUB((MLINK, ml_charp));
+	PT_MMA_VOID_STUB((MLINK, kcharp_ct));
 
 extern "C" int   MLCheckFunction  
-	PT_MMA_STUB((MLINK, ml_charp, ml_longp));
+	PT_MMA_STUB((MLINK, kcharp_ct, ml_longp));
 extern "C" int   MLCheckFunctionWithArgCount
-	PT_MMA_STUB(( MLINK, ml_charp, ml_longp));
+	PT_MMA_STUB(( MLINK, kcharp_ct, ml_longp));
 
 extern "C" int   MLGetIntegerList   
 	PT_MMA_STUB((MLINK, ml_intpp, ml_longp));
@@ -174,14 +174,14 @@ extern "C" int   MLPutDouble
 	PT_MMA_STUB((MLINK, double));
 
 extern "C" int   MLPutString 
-	PT_MMA_STUB((MLINK, ml_charp));
+	PT_MMA_STUB((MLINK, kcharp_ct));
 extern "C" int   MLPutSymbol 
-	PT_MMA_STUB((MLINK, ml_charp));
+	PT_MMA_STUB((MLINK, kcharp_ct));
 
 extern "C" int   MLPutComposite
 	PT_MMA_STUB((MLINK, long));
 extern "C" int   MLPutFunction
-	PT_MMA_STUB((MLINK, ml_charp, long));
+	PT_MMA_STUB((MLINK, kcharp_ct, long));
 
 extern "C" int   MLPutIntegerList
 	PT_MMA_STUB((MLINK, ml_intp, long));
@@ -209,7 +209,7 @@ extern "C" int	MLEvaluate
 	PT_MMA_STUB((MLINK, ml_charp));
 extern "C" void MLDefaultHandler
 	PT_MMA_VOID_STUB((MLINK, unsigned long, unsigned long));
-extern "C" int  MLDefaultYielder
+extern "C" long int  MLDefaultYielder
 	PT_MMA_STUB((MLINK, MLYieldParameters));
 
 extern "C" int	MLMainStep
@@ -293,7 +293,7 @@ extern "C" MLYieldFunctionObject MLCreateYieldFunction
 	PT_MMA_STUB((MLEnvironment, MLYieldFunctionType, MLPointer));
 extern "C" MLYieldFunctionType MLDestroyYieldFunction
 	PT_MMA_STUB((MLYieldFunctionObject));
-extern "C" int MLCallYieldFunction
+extern "C" long int MLCallYieldFunction
 	PT_MMA_STUB((MLYieldFunctionObject, MLINK, MLYieldParameters));
 
 extern "C" MLYieldFunctionObject MLYieldFunction
@@ -306,31 +306,31 @@ extern "C" MLYieldFunctionObject MLDefaultYieldFunction
 extern "C" int MLSetDefaultYieldFunction
 	PT_MMA_STUB((MLEnvironment, MLYieldFunctionObject));
 
-extern "C" int   MLError
+extern "C" long int MLError
 	PT_MMA_STUB((MLINK));
 extern "C" int   MLClearError
 	PT_MMA_STUB((MLINK));
 extern "C" int   MLSetError
-	PT_MMA_STUB((MLINK, int));
-extern "C" ml_charp MLErrorMessage
+	PT_MMA_STUB((MLINK, long int));
+extern "C" kcharp_ct MLErrorMessage
 	PT_MMA_STUB((MLINK));
 
-extern "C" void MLAlert
-	PT_MMA_VOID_STUB((MLEnvironment, ml_charp));
+extern "C" long int MLAlert
+	PT_MMA_STUB((MLEnvironment, kcharp_ct));
 
-extern "C" ml_charp MLRequest
-	PT_MMA_STUB((MLEnvironment, ml_charp, ml_charp, long));
-extern "C" int MLConfirm
-	PT_MMA_STUB((MLEnvironment, ml_charp, int));
+extern "C" long int MLRequest
+	PT_MMA_STUB((MLEnvironment, kcharp_ct, ml_charp, long));
+extern "C" long int MLConfirm
+	PT_MMA_STUB((MLEnvironment, kcharp_ct, long int));
 
-extern "C" int MLRequestArgv
+extern "C" long int MLRequestArgv
 	PT_MMA_STUB((MLEnvironment, ml_charpp, long, ml_charp, long));
 
-extern "C" int MLRequestToInteract
-	PT_MMA_STUB((MLEnvironment, int));
+extern "C" long int MLRequestToInteract
+	PT_MMA_STUB((MLEnvironment, long int));
 
 extern "C" int MLSetDialogFunction
-	PT_MMA_STUB((MLEnvironment, int, MLDialogFunctionType));
+	PT_MMA_STUB((MLEnvironment, long int, MLDialogFunctionType));
 
 extern "C" MLINKMark  MLCreateMark
 	PT_MMA_STUB((MLINK));
@@ -341,15 +341,15 @@ extern "C" void       MLDestroyMark
 
 extern "C" int  MLNewExpression
 	PT_MMA_STUB((MLINK));
-extern "C" MLINK MLDuplicateLink
+extern MLINK MLDuplicateLink
 	PT_MMA_STUB((MLINK, ml_charp, ml_longp));
 
-extern "C" int MLPutCharToString
-	PT_MMA_STUB((int, ml_charpp));
+extern "C" long int MLPutCharToString
+	PT_MMA_STUB((ulong_ct, ml_charpp));
 
 extern "C" ml_ucharp MLStringNextPosFun
 	PT_MMA_STUB((MLStringPositionPointer));
-extern "C" ml_ucharp MLStringFirstPosFun
-	PT_MMA_STUB((ml_charp, MLStringPositionPointer));
+extern "C" kcharp_ct MLStringFirstPosFun
+	PT_MMA_STUB((kcharp_ct, MLStringPositionPointer));
 extern "C" int MLStringCharFun
 	PT_MMA_STUB((MLStringPositionPointer));
