@@ -180,7 +180,8 @@ protected:
 class DualMemory : public LinProcMemory {
 public:
 	// Constructor
-	DualMemory(const char* n_x,	// name of the first memory space
+	DualMemory(const char* nm,		// name
+		   const char* n_x,	// name of the first memory space
 		   const Attribute& st_x,	// attribute for states
 		   const Attribute& p_x,	// attribute for portholes
 		   const char* x_map,		// map of x memory

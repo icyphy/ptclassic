@@ -228,7 +228,8 @@ StringList DualMemory::printMemMap(const char* startString, const char* endStrin
 	return l;
 }
 
-DualMemory:: DualMemory(const char* n_x,       // name of first memory space
+DualMemory:: DualMemory(const char* nm,		// name
+			const char* n_x,       // name of first memory space
 			const Attribute& st_x, // attribute for states
 			const Attribute& p_x,  // attribute for portholes
 			const char* x_map,     // X memory map
@@ -236,12 +237,11 @@ DualMemory:: DualMemory(const char* n_x,       // name of first memory space
 			const Attribute& st_y, // attribute for states
 			const Attribute& p_y,  // attribute for portholes
 			const char* y_map      // Y memory map
-	) : 
+		       ) : 
 	// set up the symmetric memory part
-	LinProcMemory("symmetric",
-		      (st_x&st_y)|A_SYMMETRIC, (p_x&p_y)|A_SYMMETRIC, "<>"
-		      ),
-		      x(n_x,st_x,p_x,"<>"), y(n_y,st_y,p_y,"<>")
+	LinProcMemory(nm, (st_x&st_y)|A_SYMMETRIC, (p_x&p_y)|A_SYMMETRIC, "<>"),
+	x(n_x,st_x,p_x,"<>"),
+	y(n_y,st_y,p_y,"<>")
 {
 	IntervalList tmpx(x_map);
 	IntervalList tmpy(y_map);
