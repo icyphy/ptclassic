@@ -13,6 +13,7 @@ $Id$
 #include "octMacros.h"
 #include "err.h"
 #include "main.h"
+#include "list.h"
 
 #define dmWidth 40
 
@@ -146,6 +147,9 @@ long userOptionWord;
 #define ITEMS_N sizeof(items) / sizeof(dmTextItem)
     octObject facet, prop;
     octStatus status;
+    Window newWindow;  /* the vem window looking at facet */
+    octBox bbox;  /*  an argument to octBB, return value not used */
+    void AdjustScalePan(); /* this function is right after RpcOpenFacet */
 
     ViInit("open-facet");
     ErrClear();
@@ -176,9 +180,57 @@ long userOptionWord;
 	PrintErr(octErrorString());
 	ViDone();
     }
-    vemOpenWindow(&facet, NULL);
+    newWindow = vemOpenWindow(&facet, NULL);
+    /* if the facet has no bounding box, that means it has no geometry
+       to define a bounding box, then we zoom-out to the appropriate scale
+       and pan to let the X-Y axes disappearing from the window. */
+    if (octBB(&facet, &bbox) == OCT_NO_BB) {
+        AdjustScalePan(newWindow, facet.objectId);
+    }
     ViDone();
 #undef ITEMS_N
+}
+
+/* this function is only used in RpcOpenFacet.  Since vem opens a window 
+on a facet having no geometry with a very inconvenient scale and annoying 
+cross-hair(X-Y axes), we do an automatic zoom-out  to an appropriate scale
+and pan to a point far from the origin so that the cross hair won't be seen
+in the window.  */
+static void
+AdjustScalePan(window, facetId)
+Window window;
+octId facetId;
+{
+    RPCSpot spot;
+    lsList argList;
+    RPCArg boxArg;
+    RPCPointArg bbPoints[2];
+    char *command;
+
+    spot.theWin = window;
+    spot.facet = facetId;
+    /* center point of window after panning, should be far from origin. */
+    spot.thePoint.x = 1000;
+    spot.thePoint.y = 1000;
+    argList= lsCreate();
+    boxArg.argType = VEM_BOX_ARG;
+    boxArg.length = 1;
+    bbPoints[0].theWin = window;  bbPoints[1].theWin = window;
+    bbPoints[0].facet = facetId;  bbPoints[1].facet = facetId;
+    /* zoom-out to box (-1,-1)(1,1).  Since vem opens a window on a empty facet
+       with corner points at (-22,22)(22,22),  the zoom-out factor is about
+       22 times and is appropriate for constructing ptolemy schematic 
+       diagrams.  */
+    bbPoints[0].thePoint.x = -1;  bbPoints[1].thePoint.x = 1;
+    bbPoints[0].thePoint.y = -1;  bbPoints[1].thePoint.y = 1;
+    boxArg.argData.points = bbPoints;
+    lsNewEnd(argList, (lsGeneric) &boxArg, LS_NH);
+    command = "zoom-out";
+    vemCommand(command, &spot, argList, (long) 0);
+    command = "pan";
+    vemCommand(command, &spot, argList, (long) 0);
+    lsDestroy(argList, NULL);
+    return;
 }
 
 int 
