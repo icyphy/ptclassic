@@ -92,7 +92,7 @@ provisions.
     }
 
     codeblock (outDeclarations) {
-      short $starSymbol(buffer)[$val(blockSize)/2];
+      short $starSymbol(buf)[$val(blockSize)/2];
       int $starSymbol(counter);
     }
 
@@ -163,9 +163,9 @@ provisions.
       for ($starSymbol(counter)=0; $starSymbol(counter) <($val(blockSize)/2); 
 	   $starSymbol(counter) = $starSymbol(counter)+2) {
 
-	$starSymbol(buffer)[$starSymbol(counter)] = 
+	$starSymbol(buf)[$starSymbol(counter)] = 
 	  ceil($ref(left,$starSymbol(counter)/2)*32768.0);
-	$starSymbol(buffer)[$starSymbol(counter)+1] = 
+	$starSymbol(buf)[$starSymbol(counter)+1] = 
 	  ceil($ref(right,$starSymbol(counter)/2)*32768.0);
 
       }
