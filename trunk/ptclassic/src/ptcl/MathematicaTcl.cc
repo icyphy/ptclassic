@@ -39,7 +39,7 @@ static const char file_id[] = "MathematicaTcl.cc";
 #endif
 
 #include <string.h>
-#include "tcl.h"
+#include <tcl.h>
 #include "miscFuncs.h"
 #include "StringList.h"
 #include "InfString.h"
