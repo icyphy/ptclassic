@@ -127,7 +127,7 @@ class ::tycho::File {
     method evaluate {}
 
     # Return the name of the file associated with the object.
-    method filename {} {return $file}
+    method filename {} {return $completeFilePath}
 
     # Open a help window.  Redefine in derived classes.
     method help {}
@@ -247,15 +247,12 @@ class ::tycho::File {
     # FIXME: This should be removed when Itk is fixed to understand
     # public variables.
 
-    # The current file name.
-    # FIXME: This variable should be renamed to "completeFilePath"
-    # or something similar. As it is, the name "file" is too easy
-    # to use somewhere in a subclass and then spend three hours
-    # chasing a very bizarre bug (don't ask me how I know this! -- hjr).
-    protected variable file "NoName"
+    # The expanded path to the current file.
+    private variable completeFilePath "NoName"
 
     # This array stores object names indexed by file names so that
-    # if the same file is opened a second time, we can just raise the window.
+    # if the same file is opened a second time, we can just raise
+    # the window.
     protected common filesOpen
 
     # This array stores the "type" of a file, indexed by file names,
@@ -336,8 +333,8 @@ configbody ::tycho::File::data {
 #########################################################################
 #### -file configuration
 # Set or change the name of the file being edited.
-# Set the window title and icon name to match, and set the
-# protected "file" variable equal to the file name.  The filename
+# Set the window title and icon name to match, and set the protected
+# "completeFilePath" variable equal to file name.  The filename
 # is expanded into an absolute filename, resolving any references
 # environment variables, user home directories, etc.  See
 # <code>::tycho::expandPath</code> for details about how this is done.
@@ -346,17 +343,17 @@ configbody ::tycho::File::data {
 # this automatically)
 #
 configbody ::tycho::File::file {
-    set file $itk_option(-file)
-    if {$file != $previousfile} {
+    set completeFilePath $itk_option(-file)
+    if {$completeFilePath != $previousfile} {
         if {$itk_option(-file) != {NoName}} {
-            set file [::tycho::expandPath $file]
+            set completeFilePath [::tycho::expandPath $completeFilePath]
         }
-        if {[info exists filesOpen($file)] \
-                && ![$filesOpen($file) getReadOnly] \
+        if {[info exists filesOpen($completeFilePath)] \
+                && ![$filesOpen($completeFilePath) getReadOnly] \
                 && !$readOnly} {
-            $filesOpen($file) raiseWindow
+            $filesOpen($completeFilePath) raiseWindow
             if {![safeEval ::tycho::askuser \
-                    "File $file is already open for writing. \
+                    "File $completeFilePath is already open for writing. \
                     Proceed anyway?"]} {
                 # Exit by triggering an error.
                 ::tycho::silentError
@@ -364,7 +361,7 @@ configbody ::tycho::File::file {
         }
         # Following used to be conditional using:
         # if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" }
-        displayer configure -title "$file"
+        displayer configure -title "$itk_option(-file)"
         
         # Keep track of which files are open by name.
         # This is used to avoid opening the same file twice.
@@ -385,10 +382,10 @@ configbody ::tycho::File::file {
                 wm withdraw $topwin.spell
             }
         }
-        if {$file != "NoName"} {
+        if {$completeFilePath != "NoName"} {
             # Add the current object to the menu entries in all open editors.
-            windowMenuAddAll $file
-            set previousfile $file
+            windowMenuAddAll $completeFilePath
+            set previousfile $completeFilePath
         }
 	# Remove Control-X from the <<Cut>> event 
 	# In Itcl2.2, we have virtual events, so Control-Key-x is bound to
@@ -451,7 +448,7 @@ body ::tycho::File::constructor {args} {
     # FIXME: Because of some Itcl bogosity, filesOpen finds itself
     # not settable as an array.  Here we force it to be an array
     # and hope nobody uses the file name here.
-    set filesOpen(junktychofileforitclbogosity) junk
+    # set filesOpen(junktychofileforitclbogosity) junk
 }
 
 #####################################################################
@@ -467,7 +464,7 @@ body ::tycho::File::destructor {} {
 	    # This is a temporary file, if it is modified, as the user
 	    # if they want to save it.  If they do, call saveAs
 	    set useSaveAs 1
-            set copyFilename $file
+            set copyFilename $completeFilePath
 	    saveQuery $useSaveAs
             file delete $copyFilename
 	} else {
@@ -475,7 +472,7 @@ body ::tycho::File::destructor {} {
 	}
     }
 
-    windowMenuRemoveAll $file
+    windowMenuRemoveAll $completeFilePath
 
     # If an error occurred in construction, this may not exist.
     if [info exists fileObjects($this)] {
@@ -501,7 +498,7 @@ body ::tycho::File::compareTo {} {
         set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
         puts "Created $diffWidget"
     }
-    $diffWidget configure -filename1 $file
+    $diffWidget configure -filename1 $completeFilePath
     $diffWidget configureUpdate
     
     $diffWidget configure -filename2 \
@@ -552,10 +549,10 @@ body ::tycho::File::altFile {} {
 #
 body ::tycho::File::autoSave {} {
     if !$itk_option(-save) {return}
-    if {$modified && $file != ""} {
-	set filename [file tail $file]
+    if {$modified && $completeFilePath != ""} {
+	set filename [file tail $completeFilePath]
         set filename "#auto#$filename"
-	set filename [file join [file dirname $file] $filename]
+	set filename [file join [file dirname $completeFilePath] $filename]
 	if {[catch "save $filename" message] != 0} {
 	    safeEval ::tycho::warn "Auto-save failed: $message"
 	}
@@ -619,7 +616,8 @@ body ::tycho::File::help {} {
 body ::tycho::File::hyperJump {filename {point {}}} {
     if {$filename != {}} {
 	if [::tycho::isRelative $filename] {
-            set filename [file join [file dirname $file] $filename]
+            set filename [file join \
+                    [file dirname $completeFilePath] $filename]
         }
     }
     ::tycho::TWidget::hyperJump $filename $point
@@ -731,7 +729,7 @@ body ::tycho::File::openWinMethod {} {
     ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
 	    -command "::tycho::File::openContext " \
 	    -text "Open File:" \
-            -default $file
+            -default $completeFilePath
 }
 #####################################################################
 #### print
@@ -758,7 +756,7 @@ body ::tycho::File::print {} {
 # reload{}.
 #
 body ::tycho::File::reload {} {
-    if {$file == "NoName" || $file == ""} {
+    if {$completeFilePath == "NoName" || $completeFilePath == ""} {
 	return 
     }
     # This call to saveQuery has been commented out because it
@@ -767,22 +765,22 @@ body ::tycho::File::reload {} {
     # it won't break anything else. See the method comment.
     # saveQuery
     set saveclipboard [getClipboard]
-    if [file exists $file] {
-        if [file readable $file] {
+    if [file exists $completeFilePath] {
+        if [file readable $completeFilePath] {
 	    configure -readonly 0
             set point [currentPoint]
             clear
-            set fd [open $file r]
+            set fd [open $completeFilePath r]
             configure -data [read $fd]
             close $fd
             seeFragment $point
-            if {[file writable $file]} {
+            if {[file writable $completeFilePath]} {
 		configure -readonly 0
             } else {
 		configure -readonly 1
             }
         } {
-            error "File $file exists but is not readable"
+            error "File $completeFilePath exists but is not readable"
         }
     } {
         # File does not exist.  Simply clear current data.
@@ -816,7 +814,7 @@ body ::tycho::File::revisionControl {} {
 #
 body ::tycho::File::save {{name ""}} {
     if {$name == {}} {
-	set filename $file
+	set filename $completeFilePath
     } {
 	set filename $name
     }
@@ -829,7 +827,7 @@ body ::tycho::File::save {{name ""}} {
         regsub {(#auto#)|(#crash#)} $ft {} prefname
         ::tycho::FileBrowser::setLastFile $prefname
 	if {[saveAs] == 0} {return 0}
-        set filename $file
+        set filename $completeFilePath
     } elseif {$filename != {} && $filename != "NoName"} {
         set txt [saveText]
 	set fd [open $filename w+]
@@ -838,7 +836,7 @@ body ::tycho::File::save {{name ""}} {
     } {	
 	# The file has not been specified.  Invoke saveAs
 	if {[saveAs] == 0} {return 0}
-        set filename $file
+        set filename $completeFilePath
     }
     if {$name == ""} {
 	removeBackupFiles
@@ -907,10 +905,10 @@ body ::tycho::File::saveAsFile {filename} {
 # by prepending the prefix "#crash#".
 #
 body ::tycho::File::saveCrash {} {
-    if {$modified && $file != ""} {
-	set filename [file tail $file]
+    if {$modified && $completeFilePath != ""} {
+	set filename [file tail $completeFilePath]
         set filename "#crash#$filename"
-	set filename [file join [file dirname $file] $filename]
+	set filename [file join [file dirname $completeFilePath] $filename]
 	save $filename
     }    
 }
@@ -934,7 +932,7 @@ body ::tycho::File::saveCrash {} {
 #
 body ::tycho::File::saveQuery { {useSaveAs 0}} {
     if {$modified == 1 && $itk_option(-save)} {
-	set title [file tail $file]
+	set title [file tail $completeFilePath]
         set nm [::tycho::autoName .filedestr]
         uplevel #0 [list ::tycho::YesNoCancel $nm \
 		-text "Save changes to $title?"]
@@ -1024,7 +1022,7 @@ body ::tycho::File::toggleReadOnly {} {
 # Displayer.
 #
 body ::tycho::File::windowMenuAddAll {label} {
-    if {![info exists filesOpen($file)] && [displayer] != {}} {
+    if {![info exists filesOpen($completeFilePath)] && [displayer] != {}} {
         set filesOpen($label) $this
 	set filesOpenTypes($label) $viewType
         foreach fileobj [array names fileObjects] {
@@ -1436,10 +1434,10 @@ body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
         # method because Itcl (2.2) has virtual private methods!
         ::tycho::File::initializeMenubar $menubar
     }
-    displayer configure -title "$file"
+    displayer configure -title $itk_option(-file)
 
-    if {$file != "NoName"} {
-        windowMenuAddAll $file
+    if {$completeFilePath != "NoName"} {
+        windowMenuAddAll $completeFilePath
     }
 }
 
@@ -1450,7 +1448,7 @@ body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 # classes.
 #
 body ::tycho::File::saveText {} {
-    error "Tried to save to file: $file.\nSave not implemented yet."
+    error "Tried to save to file: $completeFilePath.\nSave not implemented yet."
 }
 
 #########################################################################
@@ -1626,9 +1624,11 @@ body ::tycho::File::initializeMenubar {menubar} {
 # if it exists.  Also remove the crash-recovery file, if it exists.
 #
 body ::tycho::File::removeBackupFiles {} {
-    set savefile [file join [file dirname $file] "#auto#[file tail $file]"]
+    set savefile [file join [file dirname $completeFilePath] \
+            "#auto#[file tail $completeFilePath]"]
     file delete -force $savefile
-    set savefile [file join [file dirname $file] "#crash#[file tail $file]"]
+    set savefile [file join [file dirname $completeFilePath] \
+            "#crash#[file tail $completeFilePath]"]
     file delete -force $savefile
 }
 
