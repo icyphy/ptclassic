@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "CGStar.h"
 #include "MultiTarget.h"
 #include "SDFScheduler.h"
 #include "Error.h"
@@ -89,6 +90,56 @@ void MultiTarget :: pairSendReceive(DataFlowStar* send, DataFlowStar* receive) {
 		return;
 	}	
 	if (output->type() == ANYTYPE) output->inheritTypeFrom(*input);
+}
+
+int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
+				   CGStar*& peek, CGStar*& poke) {
+    if (peek == NULL || poke == NULL) {
+	Error::abortRun(*this,"this target does not support peek/poke actors");
+	return FALSE;
+    }
+
+    PortHole* input = poke->portWithName("input");
+    if (!input) {
+	Error::abortRun(*this,poke->name(),
+			": Peek star does not have a porthole named 'input'");
+	return FALSE;
+    }	
+
+    PortHole* output = peek->portWithName("output");
+    if (!output) {
+	Error::abortRun(*this,peek->name(),
+			": Peek star does not have a porthole named 'output'");
+	return FALSE;
+    }	
+
+    if (output->type() == ANYTYPE) input->inheritTypeFrom(*output);
+
+    int numInitDelays;
+    Galaxy* parentGal;
+    StringList starName;
+
+    numInitDelays = peekPort.numInitDelays();
+    peekPort.disconnect();
+    output->connect(peekPort,numInitDelays);
+    parentGal = (Galaxy*) peekPort.parent()->parent();
+    starName.initialize();
+    starName << symbol("Peek");
+    if (peekPort.parent()->target()) 
+	peek->setTarget(peekPort.parent()->target());
+    parentGal->addBlock(*peek,hashstring(starName));
+
+    numInitDelays = pokePort.numInitDelays();
+    pokePort.disconnect();
+    pokePort.connect(*input,numInitDelays);
+    parentGal = (Galaxy*) pokePort.parent()->parent();
+    starName.initialize();
+    starName << symbol("Poke");
+    if (pokePort.parent()->target()) 
+	poke->setTarget(pokePort.parent()->target());
+    parentGal->addBlock(*poke,hashstring(starName));
+
+    return TRUE;
 }
 
 void MultiTarget :: setProfile(Profile*) {}
