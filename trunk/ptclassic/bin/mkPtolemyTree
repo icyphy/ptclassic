@@ -33,9 +33,10 @@
 #
 PTOLEMY=${PTOLEMY:-~/ptolemy}
 if [ ! -f $PTOLEMY/bin/ptarch ]; then
-    echo "mkPtolemyTree: $PTOLEMY/bin/ptarch does not exist"
-    echo " Perhaps you need to set $PTOLEMY to the master Ptolemy tree,"
-    echo " which might be located at /users/ptolemy or /users/ptdesign"
+    echo 'mkPtolemyTree: $PTOLEMY/bin/ptarch does not exist,'
+    echo "(\$PTOLEMY = $PTOLEMY)"
+    echo ' Perhaps you need to set $PTOLEMY to the master Ptolemy tree,'
+    echo ' which might be located at /users/ptolemy or /users/ptdesign'
     exit 3
 fi
 PTARCH=`$PTOLEMY/bin/ptarch`
