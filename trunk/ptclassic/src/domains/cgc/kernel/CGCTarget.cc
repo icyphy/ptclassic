@@ -109,6 +109,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("compileOptions", &compileOptionsStream);
 	addStream("linkOptions", &linkOptionsStream);	
 	addStream("mainClose", &mainClose);
+	addStream("mainLoop",&mainLoop);
 
 	// Initialize type conversion table
 	typeConversionTable = cgcCnvTable;
@@ -177,6 +178,7 @@ void CGCTarget :: setup() {
 }
 
 void CGCTarget :: initCodeStrings() {
+	mainLoop.initialize();
 	globalDecls.initialize();
 	procedures.initialize();
 	include.initialize();
@@ -268,41 +270,57 @@ void CGCTarget::headerCode()
     // Do nothing.
 }
 
+CodeStream CGCTarget::mainLoopBody() {
+    CodeStream body;
+    defaultStream = &body;
+    int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+    beginIteration(iterations,0);
+    body << mainLoop;
+    endIteration(iterations,0);
+    defaultStream = &myCode;
+    return body;
+}    
+   
+void CGCTarget::mainLoopCode() {
+    defaultStream = &mainLoop;
+    // It is possible that the star writer has specified items that go
+    // in the main loop already to the myCode stream
+    if (inWormHole()) allWormInputCode();
+    *defaultStream << wormIn;
+    compileRun((SDFScheduler*) scheduler());
+    if (inWormHole()) allWormInputCode();
+    *defaultStream << wormOut;
+    defaultStream = &mainClose;
+}
+
 // Combine all sections of code.
-void CGCTarget :: frameCode ()
-{
+void CGCTarget :: frameCode () {
     // Construct the header.  Include directives appear before any other
     // code.  All global variable declarations must appear before any code
     // (such as procedures) which may use those variables.  Within the
     // main function, declarations must appear before any code.
 
-    StringList code = headerComment();
-    code << include << globalDecls << procedures;
+    myCode << headerComment() << include << globalDecls << procedures;
 
     // If there are command-line settable states in the target,
     // add the supporting code.
     if ((cmdargStruct.length() != 0)) {				
-      code << "\nstruct {\n" << cmdargStruct			
-    	   << "} arg_store = {" << cmdargStructInit		
+      myCode << "\nstruct {\n" << cmdargStruct			
+	     << "} arg_store = {" << cmdargStructInit		
     	   << "};\n\n"						
-								
     	   << setargHead << setargFuncHelp			
     	   << "\");\n\t\t\texit(0);\n\t\t}\n"			
     	   << setargFunc << "\t}\n}\n\n";			
     }								
 
-    code << comment("main function")				
+
+    myCode << comment("main function")				
 	 << (const char*)funcName << "(int argc, char *argv[]) {\n"
 	 << mainDecls;							
     if ((cmdargStruct.length() != 0))					
-      code << "set_arg_val(argv);\n";					
-    code << commInit << mainInit;					
+      myCode << "set_arg_val(argv);\n";					
 
-    // Prepend the header.
-    prepend(code, myCode);
-
-    // Append the trailer.
-    myCode << mainClose << "\n}\n";
+    myCode << commInit << mainInit << mainLoopBody() << mainClose << "\n}\n";
 
     // after generating code, initialize code strings again.
     initCodeStrings();
@@ -359,19 +377,16 @@ int CGCTarget :: runCode()
 
 // Routines for writing code: schedulers may call these
 void CGCTarget::beginIteration(int repetitions, int depth) {
-	myCode << indent(depth);
-        if (repetitions == -1)          // iterate infinitely
-                myCode += "while(1) {\n";
-        else {
-	    mainDecls << "    "
-		      << "int " << targetNestedSymbol.push("i") << ";\n";
-	    myCode << "for (" << targetNestedSymbol.get() << "=0; "
-		   << targetNestedSymbol.get() << " < " << repetitions << "; "
-	    	   << targetNestedSymbol.get() << "++) {\n";
- 	    targetNestedSymbol.pop();
-        }
-	myCode += wormIn;
-        return;
+    *defaultStream << indent(depth);
+    if (repetitions == -1)          // iterate infinitely
+	*defaultStream <<  "while(1) {\n";
+    else {
+	StringList iterator = symbol("sdfLoopCounter");
+        *defaultStream << "{ int " << iterator << ";" << "for ("
+		       << iterator << "=0; " << iterator << " < "
+		       << repetitions << "; " << iterator << "++) {\n";
+    }
+    return;
 }
 
 void CGCTarget :: wormInputCode(PortHole& p) {
@@ -385,8 +400,7 @@ void CGCTarget :: wormOutputCode(PortHole& p) {
 }
 
 void CGCTarget :: endIteration(int /*reps*/, int depth) {
-	myCode << wormOut;
-	myCode << "} /* end repeat, depth " << depth << "*/\n";
+	*defaultStream << "}} /* end repeat, depth " << depth << "*/\n";
 }
 
 // clone
@@ -668,7 +682,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	if (!flag) {
 		// run the star
-		defaultStream = &MYCODE;
+		defaultStream = &mainLoop;
 		writeFiring(*cs, 1);
 		return TRUE;
 	}
@@ -701,7 +715,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 	cs->initCode();
 
 	// run the star
-	defaultStream = &MYCODE;
+	defaultStream = &mainLoop;
 	writeFiring(*cs, 1);
 
 	defaultStream = &MAINCLOSE;
@@ -727,7 +741,7 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 
 // redefine compileRun to switch code stream of stars
 void CGCTarget :: compileRun(SDFScheduler* s) {
-	defaultStream = &MYCODE;
+	defaultStream = &mainLoop;
 	s->compileRun();
 	defaultStream = &MAINCLOSE;
 }
@@ -737,3 +751,10 @@ void CGCTarget :: compileRun(SDFScheduler* s) {
 /////////////////////////////////////////
 
 ISA_FUNC(CGCTarget,HLLTarget);
+
+
+
+
+
+
+
