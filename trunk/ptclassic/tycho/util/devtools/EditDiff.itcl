@@ -77,6 +77,7 @@ class ::tycho::EditDiff {
 
     method test {} 
 
+    # Put in the file name in the list entry
     method insertFileName {num nameAndPath} {
         $this toolbar clear filename$num
         $this toolbar insert filename$num $nameAndPath
@@ -93,8 +94,41 @@ class ::tycho::EditDiff {
     }
 
     method configureUpdate {} {
+        # Sort the file names. This is to ensure that in SCCS, the
+        # most recent file is always on top.
+        set files [lsort [list $filename1 $filename2]]
+        set filename1 [lindex $files 0]
+        set filename2 [lindex $files 1]
         insertFileName 1 $filename1
         insertFileName 2 $filename2
+    }
+
+    # Jump to the next difference
+    method jumpDifference {{incrdecr 1}} {
+        # No error, return
+        if {[llength $differenceList]==0} {return}
+
+        incr differenceListCount $incrdecr
+        # Overflow! Warning:
+        if {$differenceListCount==[llength $differenceList]} {
+            incr differenceListCount -1
+        }
+        if {$differenceListCount==-1} {
+            incr differenceListCount 1
+        }
+
+        # Extract begin and ending block numbers
+        set differenceBlock [lindex $differenceList $differenceListCount]
+        regexp {([0-9]+).0 ([0-9]+).0} $differenceBlock match \
+                differenceBegin differenceEnd
+        puts "Current line= $differenceListCount, block=$differenceBlock"
+
+        # Highlight from end to beginning to be sure that we always see
+        # the beginning of a difference block.
+        for {set i $differenceBegin} {$i != $differenceEnd} {incr i} {
+            # Indexing is different for seeFragment
+            $this seeFragment "line $i"
+        }
     }
 
     ####################################################################
@@ -114,6 +148,13 @@ class ::tycho::EditDiff {
     public variable diffResult {}
     public variable diffResultLineCount 0
     
+    # Keep track of where exactly error occured.
+    public variable differenceList {}
+
+    # Keep track of where in the error we are now.
+    public variable differenceListCount -1
+
+    # File names that are being diffed.
     public variable filename1
     public variable filename2
 }
@@ -130,6 +171,11 @@ body ::tycho::EditDiff::constructor {args} {
 
     set execDiff ""
     configure -readonly 1
+
+    toolbar button preverror {Jump to the previous error} \
+            -text {Prev Difference} -command "$this jumpDifference -1"
+    toolbar button nexterror {Jump to the next error} \
+            -text {Next Difference} -command "$this jumpDifference 1"
 
     toolbar button compare {Read in both files, and start parsing} \
             -text Compare -command "$this compareFile"
@@ -334,6 +380,10 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
         }
         
         # If changed (character c), delete (d), or added (a)
+        set differenceBlock {}
+        if {$info=="c" || $info=="d" || $info=="a"} {
+            lappend differenceBlock [$text index insert]
+        }
         if {$info=="c"} {
             # Output differences
             while {$fileLineCount1 <= $n2} {
@@ -357,6 +407,10 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
                 incr fileLineCount2
             }
         }
+        if {$info=="c" || $info=="d" || $info=="a"} {
+            lappend differenceBlock [$text index insert]
+            lappend differenceList $differenceBlock
+        }
     }
 
     # Read and output the rest of the common lines until EOF
@@ -368,6 +422,9 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
 
     configure -readonly 1
     markUnmodified
+
+    puts "Difference list: $differenceList"
+
     return
 
     #set data [read $fd]
