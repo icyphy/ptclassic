@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	
+DIRS =	adm bin demo doc test
 
 TCL_SRCS = \
 	DataModel.itcl \
