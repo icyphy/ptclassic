@@ -2,13 +2,13 @@ defstar {
 	name { Printer }
 	domain { DE }
 	desc {
-Prints out one sample from each input port per line
-If "fileName" is not equal to "<stdout>" (the default), it
-specifies the filename to write to.  <stderr> prints on the
-standard error stream.
+Prints out one sample from each input port per line.  The "fileName"
+state specifies the file to be written; the special names <stdout>
+and <cout> (specifying the standard output stream), and <stderr> and <cerr>
+specifying the standard error stream, are also supported.
 	}
 	version { $Id$}
-	author { Soonhoi Ha }
+	author { Soonhoi Ha and J. Buck}
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -19,6 +19,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 The input may be a particle of any type.  The print() method
 of the particle is used to generate the output.
+.pp
+If output is directed to a file, flushing does not occur until the
+wrapup method is called.  Before the first data are flushed, the file
+will not even exist.  This is normal.
 	}
 	inmulti {
 		name { input }
@@ -32,14 +36,17 @@ of the particle is used to generate the output.
 	}
 	hinclude { "pt_fstream.h" }
 	protected {
-		pt_ofstream output;
+		pt_ofstream *p_out;
 	}
+	constructor { p_out = 0;}
+	destructor { LOG_DEL; delete p_out;}
 	setup {
-		// abortRun is called on open failure
-		output.open(fileName);
+		// in case file was open from previous run w/o wrapup call
+		LOG_DEL; delete p_out;
+		LOG_NEW; p_out = new pt_ofstream(fileName);
 	}
-
 	go {
+		pt_ofstream& output = *p_out;
 		// detect which input has an event and print out the
 		// value and arrivalTime.
 		InDEMPHIter nextp(input);
@@ -54,7 +61,8 @@ of the particle is used to generate the output.
 		}
 	}
 	wrapup {
-		output.close();
+		LOG_DEL; delete p_out;
+		p_out = 0;
 	}
 }
 
