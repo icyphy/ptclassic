@@ -56,6 +56,9 @@ VHDLTarget(name,starclass,desc) {
 			    "switch for generating reports."));
   addState(interactive.setState("interactive",this,"NO",
 			    "switch for simulating interactively."));
+
+  // Set the default to not display the code.
+  displayFlag.setInitValue("NO");
 }
 
 // Clone the Target.
