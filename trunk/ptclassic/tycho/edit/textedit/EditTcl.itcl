@@ -218,7 +218,7 @@ body ::tycho::EditTcl::selectConstruct {} {
     set idx [$itk_component(text) index insert]
     set start [findOne 1 1 1 1 {^(proc|body|configbody)} $idx 0.0 {}]
     if {$start == ""} {
-	set stop 0.0
+	set start 0.0
     }
     set stop [findOne 1 0 1 1 {^\}} $idx end {} ]
     if {$stop == ""} {
