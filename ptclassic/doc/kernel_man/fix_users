@@ -20,8 +20,8 @@ As a convention, the precision of a port of type fix is defined by
 a state. The name of the state specifying the precision is the name
 of the porthole concatenated with the string "Precision". So, for
 a porthole with name "output", the precision is specified by the
-state "outputPrecision".
-The precision is specified in form of a dot notation.  For example, 
+state "outputPrecision". See for example, FixAdd.pl.
+The precision is specified in the form of a dot notation.  For example, 
 a fixed-point variable with precision 3.5 
 would have a total word length of 8 bits with 3 bits to the left and 5 
 bits to the right of the binary point. By default the variables are
@@ -42,20 +42,20 @@ precision 2.22, and a value like 0.5 would create one with precision
 2. An alternative way of specifying the value and the precision of
 this parameter is to use the parenthesis notation which is
 interpreted as (value, precision).  For example, filling the dialog
-box of this parameter by let's say (2.546, 3.5) creates a fixed-point
+box of this parameter by (2.546, 3.5) creates a fixed-point
 object by casting the double 2.546 to the precision 3.5. 
 
 Overflow handling
 -----------------
-In case the result doesnt fit in the specified precision, an overflow
-handling mechanism needs to be defined. 
-Following overflow handling mechanisms are provided:
-"saturate"(default), "zero_saturate", "wrapped", "warning".
-The "Ramp" demo in the Fixed-point demos palette gives an example
-of how the overflow parameter is set.
+In case the result does not fit in the specified precision, an overflow
+handling mechanism must to be defined. 
+The following overflow handling mechanisms are provided:
+"saturate"(default), "zero_saturate", "wrapped", and "warning".
 The overflow handling is usually specified as a state, usually called 
 "OverflowHandler", in the star. It is used in the star while 
 constructing the fixed point variable. See SDFSubFix as an example.
+The "Ramp" demo in the Fixed-point demos palette gives an example
+of how the overflow parameter is set.
 
 Explicitly casting inputs
 -------------------------
@@ -64,5 +64,6 @@ Look at SDFSubFix as an example. When set to NO,
 it implies that the input particles are cast to the precision specified
 in the corresponding state. When set to YES, the input particles are
 not explicitly cast; they are used as they are. This state is used
-in the star code to either explicitly cast inputs or not.
+in the star code to either propogate the precision or explicitly
+define a new precision.
 
