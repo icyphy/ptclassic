@@ -216,9 +216,10 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	rm Int.int.ArrayState.cc
 
 # For dynamic linking on the hppa
+ifdef FLUSH_CACHE
 $(FLUSH_CACHE):
 	$(HP_AS) $(VPATH)/`basename $(FLUSH_CACHE) .o`.s
-
+endif
 include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
