@@ -35,6 +35,12 @@ private:
         // The previous available time.
         int prevTime;
 
+	// scheduled finished time of the last fired star.
+	int lastFiringTime;
+	int nextFiringTime;
+	NodeSchedule* lastFired;
+	NodeSchedule* nextFired;
+
 public:
 	// constructor
 	QSUniProc();
@@ -43,6 +49,14 @@ public:
 	EGNode* getCurrentNode() 
 		{ return curSchedule ? curSchedule->getNode() : 0; }
 	NodeSchedule* getCurrentSchedule() { return curSchedule; }
+
+	// set last firing information
+	void setFiringInfo(NodeSchedule* n, int t) {
+		lastFired = n; lastFiringTime = t; nextFiringTime = 0;
+		nextFired = 0;
+	}
+	int getNextFiringTime();
+	NodeSchedule* nextNodeToBeFired() { return nextFired; }
 
 	// remove the currently executed node
 	void removeLastSchedule()
