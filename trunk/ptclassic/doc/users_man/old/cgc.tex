@@ -28,11 +28,11 @@ for the \code{C} programming language.
 \cindex{C code generation}
 \cindex{CGC domain}
 This domain supports both synchronous dataflow
-(SDF, \pxref{SDF Domain})
+(SDF, see chapter\tie\ref{SDF Domain})
 \cindex{synchronous dataflow}
 \cindex{dataflow, synchronous}
 and Boolean-controlled dataflow
-(BDF, \pxref{BDF Domain})
+(BDF, see chapter\tie\ref{BDF Domain})
 \cindex{Boolean-controlled dataflow}
 \cindex{dataflow, Boolean-controlled}
 models of computation.  The model 
@@ -152,7 +152,7 @@ The \code{bdf-CGC} target has the same parameters as the
 \code{default-CGC} target with the exception that
 the \var{Looping Level} parameter is absent.  This is because a
 loop-generating algorithm is always used for scheduling.
-\xref{BDF Domain} for details.
+See chapter\tie\ref{BDF Domain} for details.
 
 \node CGC Multi-Processor Targets
 \subsection{Multi-Processor Targets}
@@ -632,7 +632,8 @@ actually run faster on a single processor, but they do serve as a
 
 \begin{figure}
 \begin{center}
-\ \psfig{figure=\CGC/demo/multiproc.pal.ps}
+\comment fix the bogus bounding box provided by oct2ps
+\ \psfig{figure=\CGC/demo/multiproc.pal.ps,bbllx=0.75in,bblly=0bp,bburx=3.25in,bbury=95bp,width=4in}
 \end{center}
 \caption{Multi-processor demos in the CGC domain.}
 \label{figure CGC multiprocessor demos}
@@ -687,8 +688,13 @@ be used with the \code{TclTk_Target} target.
 to control input parameters and to produce animation.  Many of these
 demos also produce sound on the workstation speaker with the
 \code{TkSunSound} star (\pxref{CGC Tcl/Tk Stars}).
-\tindex{TkSunSound (CGC Block)} Figure\tie\ref{figure CGC tcltk demos}
-shows the demos that are available.
+\tindex{TkSunSound (CGC Block)}
+Due to the overhead of processing Tk events, you must have a fast
+workstation ({\sf SPARCstation 10} or better) in order to have
+continuous sound output.  You may be able to get continuous sound
+output on slower workstations if you avoid moving your mouse.
+Figure\tie\ref{figure CGC tcltk demos} shows the demos that are
+available.
 
 \begin{figure}
 \centering
