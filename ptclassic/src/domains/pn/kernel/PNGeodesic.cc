@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,7 +20,6 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
     Author:	T.M. Parks
@@ -36,6 +35,7 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "MTDFGeodesic.h"
+#include "Error.h"
 
 // Class identification.
 ISA_FUNC(MTDFGeodesic, Geodesic);
@@ -49,7 +49,14 @@ void MTDFGeodesic::makeLock(const PtGate& master)
     LOG_DEL; delete notEmpty;
     notEmpty = 0;
     Geodesic::makeLock(master);
-    LOG_NEW; notEmpty = new LwpCondition((LwpMonitor*)gate);
+    if (!gate)
+    {
+	Error::abortRun(*this, "makeLock failed!");
+    }
+    else
+    {
+	LOG_NEW; notEmpty = new LwpCondition((LwpMonitor*)gate);
+    }
 }
 
 void MTDFGeodesic::delLock()
@@ -64,14 +71,14 @@ void MTDFGeodesic::slowPut(Particle* p)
 {
     CriticalSection region(gate);
     Geodesic::slowPut(p);
-    notEmpty->notifyAll();
+    if (notEmpty) notEmpty->notifyAll();
 }
 
 // Block util not empty.
 Particle* MTDFGeodesic::slowGet()
 {
     CriticalSection region(gate);
-    if (size() < 1) notEmpty->wait();
+    if (size() < 1 && notEmpty) notEmpty->wait();
     Particle* p = Geodesic::slowGet();
     return p;
 }
@@ -81,5 +88,5 @@ void MTDFGeodesic::pushBack(Particle* p)
 {
     CriticalSection region(gate);
     Geodesic::pushBack(p);
-    if (gate) notEmpty->notifyAll();
+    if (gate && notEmpty) notEmpty->notifyAll();
 }
