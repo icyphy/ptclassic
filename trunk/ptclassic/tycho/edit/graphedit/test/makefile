@@ -39,10 +39,12 @@ VPATH =		$(ROOT)/editors/graphedit/test
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 	
+TCL_SRCS =
 
-GRAPHICAL_TESTS = \
+SIMPLE_TESTS = \
 	testDigraph.itcl
+
+GRAPHICAL_TESTS =
 
 ITCL_SRCS = $(GRAPHICAL_TESTS) \
 	alltests.itcl all.itcl
@@ -58,10 +60,15 @@ OPTIONAL_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: test_graphics
+tests:: test_simple
 
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	tytestsh $(SIMPLE_TESTS)
+
+# These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -noconsole -e alltests.itcl
+	tytest $(GRAPHICAL_TESTS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
