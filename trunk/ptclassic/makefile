@@ -43,7 +43,7 @@ clean realclean:
 sources depend:
 	cd src; $(MAKE) $(MFLAGS) makefiles $@
 
-obj.$(ARCH):		MAKEARCH
+obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
 	csh -f MAKEARCH
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
