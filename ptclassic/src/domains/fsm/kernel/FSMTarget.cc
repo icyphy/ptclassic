@@ -42,7 +42,6 @@ static const char file_id[] = "FSMTarget.cc";
 #include "Galaxy.h"
 #include "FSMTarget.h"
 #include "FSMScheduler.h"
-#include "MixedScheduler.h"
 
 FSMTarget::FSMTarget() :
 Target("default-FSM", "FSMStar", "default FSM target")
@@ -68,9 +67,7 @@ FSMTarget::~FSMTarget() { delSched(); }
 void FSMTarget::setup() {
   FSMScheduler* fsmSched;
   if (!strcmp(machineType,"Mixed")) {
-    fsmSched = new MixedScheduler;
-  } else if (!strcmp(machineType,"Moore") || !strcmp(machineType,"Mealy")) {
-    fsmSched = new BasicScheduler;
+    fsmSched = new FSMScheduler;
   } else {
       Error::abortRun("FSMTarget: ", 
 		      "Unregconized machine type!");
@@ -94,6 +91,12 @@ void FSMTarget::setup() {
 
   Target::setup();
   if (Scheduler::haltRequested()) return;
+}
+
+void FSMTarget::begin() {
+  Target::begin();
+
+  ((FSMScheduler *)scheduler())->resetInitState();
 }
 
 const char* FSMTarget::domain() {

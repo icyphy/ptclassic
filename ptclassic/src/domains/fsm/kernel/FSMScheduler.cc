@@ -54,6 +54,10 @@ FSMScheduler::FSMScheduler() {
 
     myInPorts = NULL;
     myOutPorts = NULL;
+
+    initialState = NULL;
+    curState = NULL;
+    nextState = NULL;
 }
 
 // Destructor.
@@ -72,6 +76,53 @@ void FSMScheduler::setStopTime(double) {
 // Set the stopping time when inside a Wormhole. */
 void FSMScheduler::resetStopTime(double) {
     // reactive system takes no time to output.
+}
+
+extern int warnIfNotConnected (Galaxy&);
+
+// Initialization.
+void FSMScheduler::setup() {
+    clearHalt();
+    currentTime = 0;
+
+    if (!galaxy()) {
+	Error::abortRun("FSMScheduler has no galaxy.");
+	return;
+    }
+
+    if (warnIfNotConnected(*galaxy())) return;
+
+    // Create the Tcl interpreter for evaluting the conditions in each state.
+    // "myInterp" will be passed to each state, so it should be created
+    // before galaxy()->initialize()
+    if (!(myInterp = Tcl_CreateInterp())) {
+      Error::abortRun("FSMScheduler:"," Couldn't create a Tcl interpreter!");
+      return; 
+    }
+
+    // Setup InPorts/OutPorts. These information will be used in each state
+    // setup method, so it should be before galaxy()->initialize().
+    if (!setupIOPorts())  return;
+
+    // Setup the internal event list. This list will be used in each state 
+    // setup method, so it should be before galaxy()->initialize().
+    if (!setupInternalEvent())  return;
+
+    galaxy()->initialize();
+
+    if (!checkStars()) return;
+
+    // Set current state to be the initial state.
+    curState = initialState;
+    curEntryType = 1;
+
+    // After checkStars(), myInPorts/myOutPorts are setup.
+    // Now get the outer parent.
+//    MPHIter nexti(*(myInPorts));
+//    PortHole *p = nexti++;
+//    EventHorizon * eh = p->far()->asEH();
+//    myOuterParent = eh->ghostAsPort()->parent()->parent();
+//    if (!myOuterParent) return;
 }
 
 int FSMScheduler::setupIOPorts() {
@@ -102,6 +153,13 @@ int FSMScheduler::setupIOPorts() {
     // Set the name of each PortHole in the input/output MultiPortHole.
     if (!setNameMap(*myInPorts,inputNameMap))    return FALSE;
     if (!setNameMap(*myOutPorts,outputNameMap))  return FALSE;
+
+    MPHIter nextp(*myOutPorts);
+    PortHole* p;
+    while ( (p = nextp++) != NULL ) {
+      // Register each output name into Tcl.
+      Tcl_SetVar(myInterp,(char*)p->name(),"0",TCL_GLOBAL_ONLY);
+    }
 
     return TRUE;
 }
@@ -135,97 +193,53 @@ int FSMScheduler::setNameMap(MultiPortHole& mph, const char* Name_Map) {
     return TRUE;
 }
 
-// isA
-ISA_FUNC(FSMScheduler,Scheduler);
+int FSMScheduler::setupInternalEvent() {
+    // Parse the names specified in "internalNameMap", and store 
+    // all parsed names in a StringList "internalEventNm".
+    int numNm = 0;
+    char** tmpNmList = strParser(internalNameMap, numNm, "double-quote");
+    if (!tmpNmList)  return FALSE;
 
-
-	//////////////////////////////////////////
-	// Methods for BasicScheduler
-	//////////////////////////////////////////
-
-// Constructor.
-BasicScheduler::BasicScheduler() {
-    curState = NULL;
-    nextState = NULL;
-}
-
-extern int warnIfNotConnected (Galaxy&);
-
-// Initialization.
-void BasicScheduler::setup() {
-    clearHalt();
-    currentTime = 0;
-
-    if (!galaxy()) {
-	Error::abortRun("BasicScheduler has no galaxy.");
-	return;
+    for (int i=0; i<numNm; i++) {
+      internalEventNm << tmpNmList[i];
+      
+      // Register internal event name into Tcl.
+      Tcl_SetVar(myInterp,tmpNmList[i],"0",TCL_GLOBAL_ONLY);
     }
 
-    if (warnIfNotConnected(*galaxy())) return;
+    delete [] tmpNmList;
 
-    // Create the Tcl interpreter for evaluting the conditions in each state.
-    // "myInterp" will be passed to each state, so it should be created
-    // before galaxy()->initialize()
-    if (!(myInterp = Tcl_CreateInterp())) {
-      Error::abortRun("BasicScheduler: ", 
-		      "Couldn't create a Tcl interpreter!");
-      return; 
-    }
-
-    // Setup InPorts/OutPorts. These information will be used in each state
-    // setup method, so it should be before galaxy()->initialize().
-    if (!setupIOPorts()) return;
-
-    galaxy()->initialize();
-
-    if (!checkStars()) return;
-
-    // After checkStars(), myInPorts/myOutPorts are setup.
-    // Now get the outer parent.
-//    MPHIter nexti(*(myInPorts));
-//    PortHole *p = nexti++;
-//    EventHorizon * eh = p->far()->asEH();
-//    myOuterParent = eh->ghostAsPort()->parent()->parent();
-//    if (!myOuterParent) return;
+    return TRUE;  
 }
 
-int BasicScheduler::checkStars() {
+int FSMScheduler::checkStars() {
     int check = 0; // To check if only one initial state exists.
     GalTopBlockIter next(*galaxy());
     Block *bl;
     FSMStateStar *s;
     while ((bl = next++) != 0) {
       if (bl->isA("FSMStateStar")) {
-	if (!strcmp(machineType,"Moore")) {
-	  if (!bl->isA("FSMMoore")) {
-	    Error::abortRun("BasicScheduler: ",
-			    "Non-supported state star found in your state ",
-			    "transition diagram. Should be FSMMoore.");
-	    return FALSE;  
-	  }
-	} else {
-	  if (!bl->isA("FSMMealy")) {
-	    Error::abortRun("BasicScheduler: ",
-			    "Non-supported state star found in your state ",
-			    "transition diagram. Should be FSMMealy.");
-	    return FALSE;  
-	  }
+	if (!bl->isA("FSMMixed")) {
+	  Error::abortRun("FSMScheduler: ",
+			  "Non-supported state star found in your state ",
+			  "transition diagram. Should be FSMMixed.");
+	  return FALSE;  
 	}
 	s = (FSMStateStar *)bl;
 	if (s->isInit()) {
-	  curState = s;
+	  initialState = s;
 	  check++;
 	}
       } // end of if isA("FSMStateStar")
     }   // end of while ((bl = next++) != 0) 
 
     if (check > 1) {
-      Error::abortRun("BasicScheduler: ",
+      Error::abortRun("FSMScheduler: ",
 		      "Can't have more than one initial state.");
       return FALSE;  
     }
     else if (check == 0) {
-      Error::abortRun("BasicScheduler: ",
+      Error::abortRun("FSMScheduler: ",
 		      "No initial state. At least one is necessary.");
       return FALSE;  
     }
@@ -233,11 +247,10 @@ int BasicScheduler::checkStars() {
     return TRUE;
 }
 
-
 // Run (or continue) the simulation.
-int BasicScheduler::run() {
+int FSMScheduler::run() {
     if (SimControl::haltRequested() || !galaxy()) {
-	Error::abortRun("BasicScheduler has no galaxy to run");
+	Error::abortRun("FSMScheduler has no galaxy to run");
 	return FALSE;
     }
 
@@ -249,7 +262,8 @@ int BasicScheduler::run() {
       // Get data from Geodesic to PortHole.
       p->receiveData(); 
 
-      //register the input data into Tcl interpreter.
+      // Register the input data into Tcl interpreter.
+      // FIXME: Only the first Particle will be registered.
       InfString buf = double((*p)%0);
       Tcl_SetVar(myInterp,(char *)p->name(),(char *)buf,TCL_GLOBAL_ONLY);
     }
@@ -262,21 +276,27 @@ int BasicScheduler::run() {
     }
 
     int condNum;
-    if (!(nextState = curState->nextState(condNum)))  return FALSE;
 
-    if (!strcmp(machineType,"Moore")) {
-      // Moore machine. It's the entry action.
-      if (!nextState->doAction()) return FALSE;
-    }
-    else {
-      // Mealy machine
+    // Find the next state by examining the preemptive arcs.
+    if (!(nextState = curState->nextState(condNum,1)))  return FALSE;
+    if (condNum == -1) {
+      // If not found, then execute the internal machine if it exists.
+      if (!curState->doInMach(curEntryType)) return FALSE;
+
+      // Find the next state by examining the NOT preemptive arcs.
+      if (!(nextState = curState->nextState(condNum,0)))  return FALSE;
       if (condNum == -1) {
-	Error::abortRun("BasicScheduler: ",
-			"No IMPLICIT reflexive transition is allowed",
-			"in Mealy machine.");
+	InfString buf = "FSMScheduler: No transition is triggered ";
+	buf << "at state \"";
+	buf << curState->name();
+	buf << "\".";
+	Error::abortRun(buf);
 	return FALSE;
-      } else if (!curState->doAction(condNum)) return FALSE;
+      }
     }
+
+    // Do the action for the next transition corresponding to "actNum".
+    if (!curState->doAction(condNum))      return FALSE;
 
     // For output portholes.
     nexto.reset();
@@ -293,11 +313,22 @@ int BasicScheduler::run() {
       p->sendData();
     }
 
+    // Update the entry type of last transition.
+    if ( (curEntryType = curState->getEntryType(condNum)) == -1 )
+      return FALSE;
+
     // Set current state to be next state.
     curState = nextState;
 
     return !SimControl::haltRequested();
 }
 
+void FSMScheduler::resetInitState() {
+    // Reset current state to be the initial state.
+    // This needs to be invoked while hierarchical entry is initial entry. 
+    curState = initialState;
+    curEntryType = 1; // By "Initial" entry.
+}
+
 // isA
-ISA_FUNC(BasicScheduler,FSMScheduler);
+ISA_FUNC(FSMScheduler,Scheduler);

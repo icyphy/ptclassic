@@ -57,6 +57,12 @@ public:
     // Domain identification.
     /*virtual*/ const char* domain() const { return FSMdomainName; }
 
+    // Initialization.
+    /*virtual*/ void setup();
+
+    // Run (or continue) the simulation.
+    /*virtual*/ int run();
+
     // Get the stopping time.
     /*virtual*/ double getStopTime() { return double(0); }
 
@@ -82,10 +88,23 @@ public:
     // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
 
+    // Return the name list of the internal events.
+    const StringList* getInternalEventNm() { return &internalEventNm; } 
+
+    // Reset current state to be the initial state.
+    // This needs to be invoked while hierarchical entry is initial entry.
+    void resetInitState();
+
 protected:
     // Setup InPorts/OutPorts.
     int setupIOPorts();
     int setNameMap(MultiPortHole& mph, const char* Name_Map);
+
+    // Set up the list of the internal events.
+    int setupInternalEvent();
+
+    // Check if the stars in galaxy match the specific machine.
+    int checkStars();
 
     // The input multiport of this FSM.
     MultiPortHole* myInPorts;
@@ -95,36 +114,18 @@ protected:
 
     // my own Tcl interpreter
     Tcl_Interp* myInterp;
-};
 
-	//////////////////////////////////////////
-	// class BasicScheduler
-	//////////////////////////////////////////
+    // The list of names of internal events. 
+    StringList internalEventNm; 
 
-// This is the scheduler for basic FSM model. (Moore or Mealy machine.)
+    // Initial state of this FSM.
+    FSMStateStar* initialState;
 
-class BasicScheduler : public FSMScheduler
-{
-public:
-    // Constructor.
-    BasicScheduler();
-
-    // class identification
-    int isA(const char*) const;
-
-    // Initialization.
-    /*virtual*/ void setup();
-
-    // Run (or continue) the simulation.
-    /*virtual*/ int run();
-
-protected:
-    // Check if the stars in galaxy match the specific machine.
-    int checkStars();
-
-private:
     // Current state of this FSM.
     FSMStateStar* curState;
+    
+    // Keep the entry type of last transition that enters current state.
+    int curEntryType;
 
     // Next transition state.
     FSMStateStar* nextState;
