@@ -1,8 +1,8 @@
 .\" $Id$
 .NA SVD_MUSIC_2
 .SD
- This demo shows the use of the Multiple-Signal Characterization (MUSIC)
-algorithm to identify three sinusoids in noise which have frequencies very
+This demo shows the use of the Multiple-Signal Characterization (MUSIC)
+algorithm to identify three sinusoids in noise that have frequencies very
 close to each other.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/matrix/demo"
@@ -16,7 +16,7 @@ close to each other.
 .Ir "Multiple-Signal Characterization"
 .Ir "MUSIC"
 .LD
- The MUSIC algorithm takes advantage of the singular-value decomposition (SVD)
+The MUSIC algorithm takes advantage of the singular-value decomposition (SVD)
 of a given data matrix to provide estimates of the frequencies of sinusoids
 in the input.  Multiple sinusoids that are close in frequency can be very
 difficult to distinguish.  The frequency resolving power of the MUSIC
@@ -28,7 +28,7 @@ greater resolving power is that the system becomes much slower.  The
 frequency scale and does not directly correspond to the resolving
 accuracy of the MUSIC algorithm.
 .pp
- The demo plots the eigenspectrum \fIS(w)\fR output of the
+The demo plots the eigenspectrum \fIS(w)\fR output of the
 .c
 MUSIC_M
 star which represents the sinusoids as peaks at their respective frequencies.
