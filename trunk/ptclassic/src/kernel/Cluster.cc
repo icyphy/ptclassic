@@ -92,7 +92,7 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
     }
     master = m;
     if (master->isItAtomic()) {
-	star().setNameParent(master->name(),star().parent());
+	star().setName(master->name());
 	// Add the star's ports to the internal galaxy,
 	// but do not change their parents.
 	BlockPortIter starPorts(*master);
@@ -112,7 +112,7 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 		clonedPort->setNameParent(port->name(),
 					  &star());
 		if(newPorts)
-		    newPorts[nebulaPort(clonedPort)->
+		    newPorts[clonedPort.asNebulaPort()->
 			     real().index()] = clonedPort;
 	    }
 	}
@@ -122,7 +122,7 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	StringList name;
 	name << master->name() << "_Nebula";
 	const char* pname = hashstring(name);
-	star().setNameParent(pname,star().parent());
+	star().setName(pname);
 	
 	Galaxy* g = (Galaxy*) m;
 	int isTopNebula = ! (int) newPorts;
@@ -141,7 +141,7 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	if (isTopNebula) {
 	    for (int i = 0; i < nports; i++) {
 		PortHole* out = newPorts[i];
-		NebulaPort* outNeb = nebulaPort(out);
+		NebulaPort* outNeb = out.asNebulaPort();
 		const PortHole& outReal = outNeb->real();
 		if (!out || out->isItInput()) continue;
 		PortHole* in = newPorts[outReal.far()->index()];
@@ -169,10 +169,11 @@ void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
 	    BlockPortIter galaxyPorts(*b);
 	    PortHole* port;
 	    while((port = galaxyPorts++) != NULL) {
-		PortHole* clonedPort = newPorts[((PortHole*)port->alias())->index()];
+		PortHole* clonedPort = newPorts[((PortHole&)port->realPort()).index()];
 		if (clonedPort) {
 		    clonedPort->parent()->removePort(*clonedPort);
-		    c->star().addPort(*clonedPort);    
+		    c->star().addPort(*clonedPort);
+		    clonedPort->setParent(&c->star());
 		}
 	    }
 	    addNebula(c);
@@ -185,7 +186,7 @@ void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
 
 void Nebula::addNebula(Nebula* c) {
     gal.addBlock(c->star(),c->star().name());
-    c->star().setNameParent(c->star().name(),&star());
+    c->star().setParent(&star());
 }
 
 
@@ -220,8 +221,8 @@ int Nebula::generateSchedule() {
     }
 }
 
-NebulaPort::NebulaPort(PortHole& self, const PortHole& master,Nebula* parentN)
-:selfPort(self),pPort(master) {
+NebulaPort::NebulaPort(PortHole& self, const PortHole& myMaster,Nebula* parentN)
+:selfPort(self),master(myMaster),nebAliasedTo(0) {
     selfPort.setPort(real().name(),&(parentN->star()),INT);
     selfPort.myPlasma = Plasma::getPlasma(INT);
     selfPort.numberTokens = real().numXfer();

@@ -50,11 +50,6 @@ DFNebulaPort::DFNebulaPort(const PortHole* master, Nebula* parentN)
     DFPortHole::maxBackValue = dfmaster.maxDelay();
 }
 
-/*virtual*/ void DFNebula::initialize(){
-    Nebula::initMaster();
-    DataFlowStar::initialize();
-}
-
 PortHole* DFNebula::clonePort(const PortHole* master) {
     return new DFNebulaPort(master,this);
 }
@@ -75,6 +70,11 @@ int DFNebula::isSDFinContext() const {
     return TRUE;
 }
 
+/*virtual*/ void DFNebula::setMasterBlock(Block*master,PortHole**newPorts) {
+    Nebula::setMasterBlock(master,newPorts);
+    if (master->isItAtomic())
+	this->repetitions = ((DataFlowStar*)master)->repetitions;
+}
 
 
 

@@ -42,37 +42,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DFNebulaPort : public DFPortHole, public NebulaPort{
 public:
-	DFNebulaPort(const PortHole* master,Nebula* parent);
-	/*virtual*/ int isItInput() const {
-		return NebulaPort::isItInput();
-	}
-	/*virtual*/ int isItOutput() const {
-		return NebulaPort::isItOutput();
-	}
-
+    DFNebulaPort(const PortHole* master,Nebula* parent);
+    /*virtual*/ int isItInput() const {
+	return NebulaPort::isItInput();
+    }
+    /*virtual*/ int isItOutput() const {
+	return NebulaPort::isItOutput();
+    }
+    /*virtual*/ NebulaPort* asNebulaPort() { return this; }
 };
 
 class DFNebula : public DataFlowStar, public Nebula{
 public:
-	/*virtual*/ int run();
 
-	// Constructors
-	DFNebula();
+    /*virtual*/ void setMasterBlock(Block*,PortHole**);
+    /*virtual*/ int run();
 
-	/*virtual*/ PortHole* clonePort(const PortHole* master);
-	
-	/*virtual*/ Nebula* newNebula(Block* master) const;
-	/*virtual*/ NebulaPort* nebulaPort(PortHole* port) const {
-		return (DFNebulaPort*) port;
-	}
-	
-	/*virtual*/ Nebula* asNebula(Block* b) const {
-		return (DFNebula*) b;
-	}
-	
-	/*virtual*/ void initialize();
-	
-	/*virtual*/ int isSDFinContext() const;
+    // Constructors
+    DFNebula();
+
+    /*virtual*/ PortHole* clonePort(const PortHole* master);
+    
+    /*virtual*/ Nebula* newNebula(Block* master) const;
+
+    /*virtual*/ Nebula* asNebula() { return this; }
+    
+    /*virtual*/ int isSDFinContext() const;
 };
 #endif
 
