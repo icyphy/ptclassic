@@ -1,10 +1,10 @@
 /*  Version $Id$
 
-    Copyright 1991 The Regents of the University of California.
+    Copyright 1992 The Regents of the University of California.
 			All Rights Reserved.
 
     Programmer:		T.M. Parks
-    Date of creation:	5 January 1991
+    Date of creation:	5 January 1992
 
 */
 
@@ -17,7 +17,6 @@
 #endif
 
 #include "Star.h"
-#include "XXXConnect.h"
 
 class XXXStar : public Star
 {
@@ -30,9 +29,6 @@ public:
 
     // Domain-specific initialization.
     virtual void prepareForScheduling();
-
-    // Firing definition.
-    virtual void fire();
 };
 
 #endif
