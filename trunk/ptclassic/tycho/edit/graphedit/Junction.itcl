@@ -28,17 +28,15 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
-# Explicitly load the superclass. I don't really know why this is
-# needed, but the common arrays get upset otherwise.
-::tycho::slateLoadSuper ComplexItem
+# auto_mkindex \
+proc ::tycho::Junction {} {}
 
 ##########################################################################
 ## Junction
 #
 # A Junction is a small item that represents a junction between
 # nets in a graph. A Junction has two coordinates, which are located
-# at its center. It has four aspects, <b>n</b>, <b>s</b>, <b>e</b>, 
+# at its center. It has four features, <b>n</b>, <b>s</b>, <b>e</b>, 
 # <b>w</b>, which are the points at which nets can be attached.
 #
 # <p><b>Options</b>
@@ -99,8 +97,8 @@ class ::tycho::Junction {
     # Update the *-width* option
     proc _width {id canvas slate width}
 
-    # Get an aspect  of the junction
-    proc aspect {id canvas slate args}
+    # Get an feature  of the junction
+    proc feature {id canvas slate args}
 
     # Create a new item
     proc construct {id canvas slate tags x y args}
@@ -116,10 +114,12 @@ class ::tycho::Junction {
 
     # Default values of this item's options
     private common optiondefault
+}
 
-    ###################################################################
-    ####                       class initialization                ####
+###################################################################
+####                       class initialization                ####
 
+namespace eval ::tycho::Junction {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
@@ -130,7 +130,7 @@ class ::tycho::Junction {
     set methodtable(_sticky)   ::tycho::Junction::_sticky
     set methodtable(_width)    ::tycho::Junction::_width
 
-    set methodtable(aspect)    ::tycho::Junction::aspect
+    set methodtable(feature)    ::tycho::Junction::feature
     set methodtable(construct) ::tycho::Junction::construct
     set methodtable(coords)    ::tycho::Junction::coords
 
@@ -143,6 +143,7 @@ class ::tycho::Junction {
     set optiondefault(-size)    5
     set optiondefault(-width)   1
 }
+
 
 ##########################################################################
 ## -fill option configuration
@@ -177,18 +178,18 @@ body ::tycho::Junction::_width {id canvas slate width} {
 }
 
 ##########################################################################
-#### aspect
+#### feature
 #
-body ::tycho::Junction::aspect {id canvas slate args} {
-    array set opts {-aspects {}}
+body ::tycho::Junction::feature {id canvas slate args} {
+    array set opts {-features {}}
     array set opts $args
 
-    if { $opts(-aspects) == "" } {
+    if { $opts(-features) == "" } {
         return {n s e w}
     }
     set coords [$canvas coords $primary($id)]
     set result {}
-    foreach a $opts(-aspects) {
+    foreach a $opts(-features) {
         switch -exact -- $a {
             w {
                 lappend result [lrange $coords 0 1]
@@ -203,7 +204,7 @@ body ::tycho::Junction::aspect {id canvas slate args} {
                 lappend result [lrange $coords 6 7]
             }
             default {
-                error "Unknown aspect \"$a\""
+                error "Unknown feature \"$a\""
             }
         }
     }
