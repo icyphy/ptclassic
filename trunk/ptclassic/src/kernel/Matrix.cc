@@ -275,7 +275,11 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
 
 // Prints matrices in standard row column form.
 StringList ComplexMatrix::print() const {
-  StringList out = "ComplexMatrix:\n";
+  StringList out = "ComplexMatrix: (";
+  out += nRows;
+  out += ",";
+  out += nCols;
+  out += ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       out += real((*this)[row][col]);
@@ -543,7 +547,11 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matrices in standard row column form.
 StringList FixMatrix::print() const {
-  StringList out = "FixMatrix:\n";
+  StringList out = "FixMatrix: (";
+  out += nRows;
+  out += ",";
+  out += nCols;
+  out += ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       out += (*this)[row][col];
@@ -798,7 +806,11 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
 
 // Prints matrices in standard row column form.
 StringList FloatMatrix::print() const {
-  StringList out = "FloatMatrix:\n";
+  StringList out = "FloatMatrix: (";
+  out += nRows;
+  out += ",";
+  out += nCols;
+  out += ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       out += (*this)[row][col];
@@ -1054,7 +1066,11 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matrices in standard row column form.
 StringList IntMatrix::print() const {
-  StringList out = "IntMatrix:\n";
+  StringList out = "IntMatrix: (";
+  out += nRows;
+  out += ",";
+  out += nCols;
+  out += ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       out += (*this)[row][col];
@@ -1278,13 +1294,13 @@ void MatrixEnvParticle::operator << (double d) { errorAssign("double"); }
 void MatrixEnvParticle::operator << (const Fix& c) { errorAssign("Fix"); }
 void MatrixEnvParticle::operator << (float f) { errorAssign("float"); }
 void MatrixEnvParticle::operator << (int i) { errorAssign("int"); }
-void MatrixEnvParticle::operator << (const ComplexMatrix& m) {
+void MatrixEnvParticle::operator << (ComplexMatrix& m) {
   errorAssign("ComplexMatrix"); }
-void MatrixEnvParticle::operator << (const FixMatrix& m) { 
+void MatrixEnvParticle::operator << (FixMatrix& m) { 
   errorAssign("FixMatrix"); }
-void MatrixEnvParticle::operator << (const FloatMatrix& m) { 
+void MatrixEnvParticle::operator << (FloatMatrix& m) { 
   errorAssign("FloatMatrix"); }
-void MatrixEnvParticle::operator << (const IntMatrix& m) { 
+void MatrixEnvParticle::operator << (IntMatrix& m) { 
   errorAssign("IntMatrix"); }
 
 // particle compare: considered equal if Matrix addresses are the same.
@@ -1319,7 +1335,7 @@ void ComplexMatrixEnvParticle::operator << (const Envelope& p) {
   else data = p;
 }
 
-void ComplexMatrixEnvParticle::operator << (const ComplexMatrix& m) { 
+void ComplexMatrixEnvParticle::operator << (ComplexMatrix& m) { 
   Envelope p(m);
   data = p;
 }
@@ -1384,7 +1400,7 @@ void FixMatrixEnvParticle::operator << (const Envelope& p) {
   else data = p;
 }
 
-void FixMatrixEnvParticle::operator << (const FixMatrix& m) { 
+void FixMatrixEnvParticle::operator << (FixMatrix& m) { 
   Envelope p(m);
   data = p;
 }
@@ -1449,7 +1465,7 @@ void FloatMatrixEnvParticle::operator << (const Envelope& p) {
   else data = p;
 }
 
-void FloatMatrixEnvParticle::operator << (const FloatMatrix& m) { 
+void FloatMatrixEnvParticle::operator << (FloatMatrix& m) { 
   Envelope p(m);
   data = p;
 }
@@ -1514,7 +1530,7 @@ void IntMatrixEnvParticle::operator << (const Envelope& p) {
   else data = p;
 }
 
-void IntMatrixEnvParticle::operator << (const IntMatrix& m) { 
+void IntMatrixEnvParticle::operator << (IntMatrix& m) { 
   Envelope p(m);
   data = p;
 }
