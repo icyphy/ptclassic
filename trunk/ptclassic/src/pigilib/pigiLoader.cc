@@ -233,12 +233,12 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 
 	//    -- stars in code generation domains rely on includes in CG kernel
 	if ( strcmp(domain, "cg") != 0 ) {
-	  cmd << "-I" << ptSrcDir << "/cg/kernel ";
+	  cmd << "-I" << ptSrcDir << "/domains/cg/kernel ";
 	}
 
 	//    -- stars in dataflow domains rely on includes in SDF kernel
 	if ( strcmp(domain, "sdf") != 0 ) {
-	  cmd << "-I" << ptSrcDir << "/sdf/kernel ";
+	  cmd << "-I" << ptSrcDir << "/domains/sdf/kernel ";
 	}
 
 	cmd << "-I" << ptSrcDir << "/kernel ";
