@@ -1,5 +1,5 @@
-#ifndef _DEPolis_h
-#define _DEPolis_h 1
+#ifndef _DERCStar_h
+#define _DERCStar_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -8,20 +8,20 @@
 #include "Particle.h"
 #include "DERepeatStar.h"
 #include "Resource.h"
-#include "PolisScheduler.h"
-#include "PolisEventQ.h"
+#include "DERCScheduler.h"
+#include "DERCEventQ.h"
 class Resource;
 
-class DEPolis : public DERepeatStar
+class DERCStar : public DERepeatStar
 {
 public:
-	DEPolis();
+	DERCStar();
 	/* virtual */ virtual Block* makeNew() const;
 	/* virtual */ virtual const char* className() const;
 	/* virtual */ virtual int isA(const char*) const;
 	/* virtual */ virtual double getDelay();
 	/* virtual */ virtual SequentialList* getEvents ();
-        /* virtual */ virtual void emitEvent(PolisEvent*, double ) {};
+        /* virtual */ virtual void emitEvent(DERCEvent*, double ) {};
 	Resource* resourcePointer;
 	char resource[1024];
 	double timeOfArrival;
@@ -34,7 +34,7 @@ public:
 	void Closeflow ();
         int needsSharedResource;
         int schedPolicy;
-	PolisEventQ* interruptQ;
+	DERCEventQ* interruptQ;
 
 protected:
 	static FILE *fpoverflow;
