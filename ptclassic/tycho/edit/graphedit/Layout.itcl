@@ -209,9 +209,10 @@ body ::tycho::Layout::attrget {item {attribute {}}} {
 # <b>-coords</b> attributes.
 #
 body ::tycho::Layout::attrset {item args} {
-    if { [lsearch -exact $args -slatetype] != -1 } {
-        error "Attribute \"-slatetype\" is read-only"
-    }
+    # This is commented out because it's too tedious to deal with
+    # if { [lsearch -exact $args -slatetype] != -1 } {
+    #     error "Attribute \"-slatetype\" is read-only"
+    # }
     #if { [lsearch -exact $args -coords] != -1 } {
     #    catch {unset _dirty($item)}
     #}
