@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -146,7 +146,11 @@ static int channelAlreadyOpen()
 
 static SIGNAL_FN trapChildHandler( ) /* All args are ignored */
 {
+#ifdef SYSV
+    int	status;
+#else
     union wait status;
+#endif
     int pid = wait3( &status, 0, 0 );
     
     if ( pid == channelPid ) {
@@ -477,7 +481,11 @@ void  VOVend( status )
      * Ends the current transition.
      */
 {
+#ifdef SYSV
+    int s;
+#else
     union wait s;
+#endif
     int w;
 
     if ( libActive( 0 ) ) {
