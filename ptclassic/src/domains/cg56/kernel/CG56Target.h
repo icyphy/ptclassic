@@ -40,9 +40,15 @@ public:
 	StringList beginIteration(int repetitions, int depth);
 	StringList endIteration(int repetitions, int depth);
 	~CG56Target();
-
+protected:
+	void codeSection();
+	void orgDirective(const char* memName, unsigned addr);
+	void writeInt(int);
+	void writeFix(double);
+	void writeFloat(double);
 private:
 	unsigned xa, xl, ya, yl;
+	int inProgSection;
 };
 
 #endif
