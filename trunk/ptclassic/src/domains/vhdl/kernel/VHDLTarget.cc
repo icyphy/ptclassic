@@ -897,10 +897,10 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompDeclList* compDeclList,
 }
 
 // Return variable declarations based on variableList.
-StringList VHDLTarget :: addVariableDecls(VHDLVariableList* variableList,
+StringList VHDLTarget :: addVariableDecls(VHDLVariableList* varList,
 					  int level/*=0*/) {
   StringList all;
-  VHDLVariableListIter nextVariable(*variableList);
+  VHDLVariableListIter nextVariable(*varList);
   VHDLVariable* variable;
   while ((variable = nextVariable++) != 0) {
     level++;
