@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, slate directory.
+# Makefile for Ptolemy Tycho system, editors/slate directory.
 #
 # @Author: Christopher Hylands
 #
@@ -30,18 +30,51 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS =  kernel pictures interactors doc
-
 # Root of Tycho directory
-ROOT =		..
+ROOT =		../..
 
-ME = 		slate
 # True source directory
-VPATH =		$(ROOT)/$(ME)
+VPATH =		$(ROOT)/editors/slate
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+TCL_SRCS = 
+  
+ITCL_SRCS = \
+	Alonger.itcl \
+	Axis.itcl \
+	Bounder.itcl \
+	Diagonal.itcl \
+	Editor.itcl \
+	Follower.itcl \
+	Frame.itcl \
+	Gridder.itcl \
+	Interactor.itcl \
+	LabelledOval.itcl \
+	Node.itcl \
+	Picture.itcl \
+	Repeater.itcl \
+	Selector.itcl \
+	Shades.itcl \
+	Slate.itcl \
+	Solid.itcl \
+	Stepper.itcl \
+	Strip.itcl \
+	Terminal.itcl
+
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+
+MISC_FILES =		tclIndex doc
+
+# Sub directories to run make in.
+DIRS =			# doc
+
+# 'make realclean' should remove tclIndex
+REALCLEAN_STUFF =	tclIndex
+
+all install: $(MISC_SRCS) tclIndex
+
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
