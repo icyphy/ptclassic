@@ -209,10 +209,11 @@ protected:
 
 class WormMultiPort : public MultiPortHole {
 	Wormhole* worm;
+	GalMultiPort* myGMPH;
 public:
-	WormMultiPort(Wormhole* w, GenericPort& a): worm(w) {
-		GenericPort::setAlias(a);
-	}
+	WormMultiPort(Wormhole* w, GalMultiPort& g): worm(w), myGMPH(&g)
+	{  }
+
 	int isItInput() const;
 	int isItOutput() const;
 
