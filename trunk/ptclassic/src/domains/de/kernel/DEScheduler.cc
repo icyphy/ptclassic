@@ -47,6 +47,7 @@ extern int warnIfNotConnected (Galaxy&);
 
 int DEScheduler :: setup (Block& b) {
 	haltRequestFlag = 0;
+	currentTime = 0;
 
 	Galaxy& galaxy = b.asGalaxy();
 	
@@ -55,7 +56,6 @@ int DEScheduler :: setup (Block& b) {
 
 	// initialize the global event queue and process queue.
 	eventQ.initialize();
-	processQ.initialize();
 
 	// check connectivity
 	if (warnIfNotConnected (galaxy)) return FALSE;
@@ -76,8 +76,6 @@ int DEScheduler :: setup (Block& b) {
 		p->prepareForScheduling();
 	}
 
-	galaxy.initialize();
-	
 	// set the depth of the stars...
 	alanShepard.setupSpaceWalk(galaxy);
 	for (i = alanShepard.totalSize(galaxy); i>0; i--) {
@@ -86,10 +84,17 @@ int DEScheduler :: setup (Block& b) {
 		setDepth(ds);
 	}
 
+	galaxy.initialize();
+	
 	// set the relative time scale.
 	FloatState* st = (FloatState*) galaxy.stateWithName("timeScale");
 	if (st)	relTimeScale = float ((double) (*st));
 	else	relTimeScale = 1.0;
+	
+	// set the synchronization flag
+	IntState* ist = (IntState*) galaxy.stateWithName("sycnMode");
+	if (ist)	syncMode = int(ist);	
+	else		syncMode = TRUE;
 	
 	if (!relTimeScale) {
 		errorHandler.error("zero timeScale is not allowed in DE.");
@@ -105,7 +110,7 @@ int DEScheduler :: setup (Block& b) {
 
 // pop the top element (earliest event) from the global queue
 // and fire the destination star. Check all simultaneous events to the star.
-// Run until StopTime
+// Run until StopTime.
 int
 DEScheduler :: run (Block& galaxy) {
 	if (haltRequestFlag) {
@@ -117,30 +122,51 @@ DEScheduler :: run (Block& galaxy) {
 		// fetch the earliest event.
 		LevelLink* f   = eventQ.get();
 		float level      = f->level;
-		DEPortHole* terminal = (DEPortHole*) f->e;
 
 		// if level > stopTime, RETURN...
 		if (level > stopTime)	{
 			eventQ.pushBack(f);		// push back
-			currentTime = stopTime;
+			// set currentTime = next event time.
+			currentTime = level/relTimeScale;
 			stopBeforeDeadlocked = TRUE;  // there is extra events.
 			return 0;
+		// If the event time is less than the global clock,
+		// it is an error...
+		} else if (level < currentTime - 0.1) {
+			errorHandler.error("global clock is screwed up in DE");
+			return FALSE;
 		}
 
 		// set currentTime
 		currentTime = level;
 
-		DEStar* s = (DEStar*) &terminal->parent()->asStar();
+		// check if the normal event is fetched
+		//
+		// For normal events, the fineLevel of the LevelLink
+		// class is negative (which is the minus of the depth of
+		// the destination star)
+		// But, we also put the process-star in the event queue
+		// with zeroed fineLevel --> which will put the process-stars
+		// at the end among simultaneous events as a side-effect.
+		DEStar* s;
+		DEPortHole* terminal = 0;
+		if (f->fineLevel != 0) {
+			terminal = (DEPortHole*) f->e;
+			s = (DEStar*) &terminal->parent()->asStar();
 
-		// Grab the Particle from the geodesic to the terminal.
-		// Record the arrival time, and flag existence of data.
-		// We may require more than one events on an arc such as
-		// SDFinDEWormholes. Then, wait...
-		if (terminal->numTokens() < terminal->numberTokens)
-			continue;
+			// Grab the Particle from the geodesic to the terminal.
+			// Record the arrival time, and flag existence of data.
+			// We may need more than one events on an arc such as
+			// SDFinDEWormholes. Then, wait...
+			if (terminal->numTokens() < terminal->numberTokens)
+				continue;
+			terminal->grabData();
+		} else {
+		// process star is fetched
+			s = (DEStar*) f->e;
+		}
 		s->arrivalTime = level;
-		terminal->grabData();
-	
+				
 		// Check if there is another event launching onto the
 		// same star with the same time stamp (not the same port)...
 		int l;
@@ -150,44 +176,31 @@ DEScheduler :: run (Block& galaxy) {
 		while (l > 0) {
 			l--;
 			LevelLink* h = eventQ.next();
-			DEPortHole* tl = (DEPortHole*) h->e;
-			dest = (DEStar *) &tl->parent()->asStar();
+			if (h->level > level)	goto L1;
+			DEPortHole* tl = 0;
+			if (h->fineLevel != 0) {
+				tl = (DEPortHole*) h->e;
+				dest = (DEStar *) &tl->parent()->asStar();
+			} else {
+				dest = (DEStar*) h->e;
+			}
 
 			// if same destination star with same time stamp..
-			if (level == h->level && dest == s && tl != terminal) {
-				eventQ.extract(h);
-				if (tl->numTokens() >= tl->numberTokens)
+			if (dest == s) {
+				if (tl && tl != terminal) {
+				     eventQ.extract(h);
+				     if (tl->numTokens() >= tl->numberTokens)
 					tl->grabData();
-			} else if (h->level > level)
-				goto L1;
-
+				} else if (!tl) {
+				     eventQ.extract(h);
+				}
+			} 
 		} // end of inside while
 
  		// fire the star.
  L1 :		s->fire();
 
 		if (haltRequestFlag) return FALSE;
-
-		// If the nextTime is greater than the currentTime,
-		// execute the processes stored in the processQ.
-		if (processQ.length() > 0 && nextTime() > currentTime) {
-		   int temp = 1;
-		   do {
-			// fetch the earliest process.
-			LevelLink* pf   = processQ.get();
-			float stamp      = pf->level;
-			DEStar* sr = (DEStar*) f->e;
-			// enforce that fire the process star at last at
-			// the currentTime.
-			if (nextTime() > stamp) {
-				currentTime = stamp;
-				sr->fire();
-			} else {
-				processQ.pushBack(pf);	// push back
-				temp = 0;
-			}
-		    } while ( temp && processQ.length() > 0);
-		}
 
 	} // end of while
 
@@ -199,17 +212,6 @@ DEScheduler :: run (Block& galaxy) {
 	////////////////////////////
 	// Miscellanies
 	////////////////////////////
-
-int DEScheduler :: amITimed() {return TRUE ;}
-
-float DEScheduler :: nextTime() {
-        float val = stopTime;
-        eventQ.reset();
-        if (eventQ.length() > 0) {
-                val = eventQ.next()->level;
-        }
-        return (val < stopTime)? val : stopTime ; // return min(val, stopTime)
-}
 
 // calculate the depth of a DEStar.
 int DEScheduler :: setDepth(DEStar* s) {

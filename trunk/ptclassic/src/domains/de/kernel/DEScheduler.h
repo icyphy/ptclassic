@@ -17,9 +17,6 @@ $Id$
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
- Revisions: 1. add a set of properties related to the "timed" nature of
-	       the domain (amITimed(), nextTime(), stopAfterOutput,
-	       stopBeforeDeadlock, processQ) (10/24/90).
 
  DE Scheduler for single computer is implemented.
 
@@ -38,19 +35,24 @@ class DEScheduler : public Scheduler {
 
 	// set the depth of the DEStars.
 	int setDepth(DEStar*);
+
 public:
 	// The global event queue is implemented as a priority queue
 	// in DE scheduler.
 	PriorityQueue eventQ;
 
-	// process queue 
-	PriorityQueue processQ; // If a timed domain is in the DEWormhole,
-				// the wormhole is regarded as a process.
-				// Then, without input events, it will be
-				// fired at the specified time.
-
 	// Set up the stopping condition.
 	void setStopTime(float limit) {stopTime = limit ;}
+
+	// redefine the wormhole stopping condition
+	void resetStopTime(float limit) {
+		setStopTime(limit * relTimeScale) ;
+	}
+
+	// Set the current time
+	void setCurrentTime(float val) {
+		currentTime = val * relTimeScale ;
+	}
 
 	// The setup function initialize the global event queue
 	// and notify the blockes of the queue name.
@@ -63,9 +65,7 @@ public:
 	StringList displaySchedule(); 
 
 	// Constructor sets default options
-	DEScheduler () { stopTime = 100.0;
-			 stopAfterOutput = FALSE;
-			 stopBeforeDeadlocked = FALSE ;}
+	DEScheduler () { stopTime = 100.0; }
 
 	// output the stopTime
 	float whenStop() { return stopTime ;}
@@ -73,15 +73,10 @@ public:
 	// relative time scale to the outer domain when it is a inner domain.
 	float relTimeScale;
 
-	// special methods since DE is a "timed" domain
-	int amITimed();
-	float nextTime();	// return when the next event is scheduled.
-	int stopAfterOutput;	// flag, if set, stop when it generates an
-				// output inside a Wormhole even before
-				// the stopTime. 
-				// (for timed-timed domain interface).
-	int stopBeforeDeadlocked; // flag, set if the scheduler stops while
-				// events are stored in the eventQ.
+	// synchronization mode. It is set by default.
+	// If reset, the execution of the process star can be optimized.
+	// Only knowledgeable user may reset this flag!
+	int syncMode;
 };
 
 #endif
