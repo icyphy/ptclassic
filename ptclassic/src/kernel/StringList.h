@@ -109,6 +109,11 @@ public:
 		return (const char*)SequentialList::head();
 	}
 
+	// Return last string on list
+	inline const char* tail() const {
+		return (const char*)SequentialList::tail();
+	}
+
 	// Return the length in characters.
 	inline int length() const { return totalSize;}
 	// Return the number of pieces
