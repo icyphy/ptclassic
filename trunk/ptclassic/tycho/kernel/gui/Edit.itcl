@@ -2032,10 +2032,7 @@ body ::tycho::Edit::initializeMenubar {} {
 #    $myMenubar insert "Compile" "Evaluate" -underline 2 \
 #	    -command "$this execProcess make"
     
-    # This causes us to require that Exec.itcl be read in at startup
-    # FIXME: Exec is a subclass, and we shouldn't be referring
-    # to it here!
-    if ![::tycho::Exec::execWidgetIsSupported] {
+    if {$tcl_platform(platform) == "macintosh"} {
 	$myMenubar disable Compile
     }
 
