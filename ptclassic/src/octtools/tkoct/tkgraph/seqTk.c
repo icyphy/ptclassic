@@ -984,7 +984,7 @@ _xpSeqDataVarsTraceCB( ClientData cld, Tcl_Interp *ip,
     }
 
     /*IF*/ if ( strcmp(n2,"color")==0 ) {
-	if ( (pColor = Tk_GetColor( ip, pSeqWdg->tkwin, None, Tk_GetUid(val)))
+	if ( (pColor = Tk_GetColor( ip, pSeqWdg->tkwin, Tk_GetUid(val)))
 	  == NULL )
 	    goto error;
 	if ( pColor == pSeqData->fgColor ) {
