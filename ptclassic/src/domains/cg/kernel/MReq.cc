@@ -63,3 +63,8 @@ void MConsecStateReq::assign(ProcMemory& proc, unsigned addr) {
 		addr += m->size();
 	}
 }
+
+void MConsecStateReq::zero() {
+	lis.zero();
+	sz = 0;
+}

@@ -76,7 +76,7 @@ public:
 		sz += s.size();
 	}
 	int size() { return sz;}
-	void zero() { lis.zero(); sz = 0;}
+	void zero();
 	~MConsecStateReq() { zero();}
 	void assign(ProcMemory&,unsigned);
 };
