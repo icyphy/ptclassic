@@ -270,12 +270,12 @@ void CGTarget::setup() {
 
 void CGTarget :: chooseScheduler() {
 
-    const char* sname = loopingLevel;
+    const char* tmpname = loopingLevel;
 
     // Full path name of the log file
     StringList logPath = logFilePathName(destDirectory, "schedule.log");
 
-    if (strcasecmp(sname,"ACYLOOP") == 0) {
+    if (strcasecmp(tmpname,"ACYLOOP") == 0) {
 	// Determine if the graph is acyclic.  It not, use
 	// another loop scheduler.
 	// FIXME:
@@ -298,6 +298,8 @@ void CGTarget :: chooseScheduler() {
 	    }
 	}
     }
+    const char* sname = loopingLevel;
+
     if (strcasecmp(sname,"DEF")==0 || strcmp(sname,"0")==0 ||
 		strcasecmp(sname,"NO") == 0) {
 	setSched(new SDFScheduler);
