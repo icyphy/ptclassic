@@ -6,8 +6,8 @@ Demonstrates the simulation of a blocking strategy in the queueing network.
 .SV 1.1 "October 23, 1990"
 .AL "S. Ha"
 .LD
-.IE BlockingAsk
-.IE BlockingAccept
+.IE Threshold
+.IE Gate
 The
 .c Queue
 block in the library is a generic one without any special feature.
@@ -18,39 +18,43 @@ blocking strategies, we isolate the blocking strategy into
 a separate module from the generic queueing network. We may
 change the module if want to use another blocking starategy.
 .pp
-The implementation of a blocking function is done by a pair of
+The implementation of a simple blocking function is done by a pair of
 blocks :
-.c BlockingAsk
+.c Threshold
 block and
-.c BlockingAccept
+.c Gate
 block.
 The
-.c BlockingAsk 
+.c Threshold 
 block monitors the size of the Queue. If the Queue is saturated,
 the
-.c BlockingAsk
-block generates a block-request output to the
-.c BlockingAccept
+.c Threshold
+block generates a block-request(TRUE) output to the control input of the
+.c Gate
 block, which is connected to the Queue
 (\fIthreshold\fR state of the
-.c BlockingAsk
+.c Threshold
 block should be matched to the \fIcapacity\fR of the second Queue.)
-Without block-request from the
-.c BlockingAsk 
-block, the
-.c BlockingAccept
+The
+.c Gate
+block has a \fIcontrol\fR input and a \fIdiscard\fR state.  In this particular
+demo, the \fIdiscard\fR is set FALSE (refer to the manual for the
+.c Gate
+block.)  As long as the control input has FALSE value, the
+.c Gate
+.c Gate
 block is a trivial buffer without any latency. If the block-request
-input arrives, it does not send any output (it is blocked).
+input arrives at the control input, it sends no more output (it is blocked).
 Look at the demand input of the first Queue. If the
-.c BlockingAccept
+.c Gate
 block is blocked, then the first server is also blocked since
 no data can be fetched from the first Queue. Therefore, the
 size of the first Queue keeps growing during the blocking period.
 Once the Queue is freed from the saturation, the 
-.c BlockingAsk
-block generates a block-release
+.c Threshold
+block generates a block-release (FALSE)
 output to the
-.c BlockingAccept
+.c Gate
 block, which then resumes the normal operation.
 .pp
 Note that if we want to realize the chain of blockage, we have to
@@ -65,7 +69,9 @@ between 3 and 4. It is because once the second Queue is freed from
 saturation, the first server send the data to the Queue which makes
 it again saturated right away.
 .SA
-queue,
 ExpServer,
-Queue.
+Gate,
+queue,
+Queue,
+Threshold.
 .ES
