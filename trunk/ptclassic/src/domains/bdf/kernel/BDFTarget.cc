@@ -46,6 +46,9 @@ static const char file_id[] = "BDFTarget.cc";
 #include "BDFCluster.h"
 #include "pt_fstream.h"
 
+// Defined in BDFDomain.cc
+extern const char BDFdomainName[];
+
 BDFTarget::BDFTarget() :
 Target("simulate-BDF","DataFlowStar",
 "Runs BDF systems on the local workstation using either the default\n"
@@ -83,5 +86,5 @@ void BDFTarget::setup() {
 }
 
 const char* BDFTarget::domain() {
-	return galaxy() ? galaxy()->domain() : "BDF";
+	return galaxy() ? galaxy()->domain() : BDFdomainName;
 }
