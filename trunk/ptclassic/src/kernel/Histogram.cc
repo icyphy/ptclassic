@@ -117,12 +117,12 @@ void XHistogram :: terminate() {
 	display->terminate();
 	LOG_DEL; delete hist;
 	hist = 0;
-	LOG_DEL; delete optstring;
+	LOG_DEL; delete [] optstring;
 	optstring = 0;
 }
 
 XHistogram :: ~XHistogram() {
 	LOG_DEL; delete display;
 	LOG_DEL; delete hist;
-	LOG_DEL; delete optstring;
+	LOG_DEL; delete [] optstring;
 }

@@ -64,7 +64,7 @@ void XGraph :: zapFiles () {
 		char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
-			LOG_DEL; delete name;
+			LOG_DEL; delete [] name;
 		}
 	}
 	LOG_DEL; delete [] strm;
