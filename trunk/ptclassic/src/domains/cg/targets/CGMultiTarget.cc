@@ -133,7 +133,7 @@ void CGMultiTarget::setup() {
 	if (!inherited()) {
 		writeSchedule();
 		if (inWormHole()) {
-		   adjustSampleRates();
+		   	adjustSampleRates();
 			generateCode();
 			wormLoadCode();
 		}
@@ -364,8 +364,11 @@ int CGMultiTarget :: run() {
 }
 
 int CGMultiTarget :: sendWormData() {
-	if (nChildrenAlloc == 1) 
-		return CGTarget :: sendWormData();
+	if (nChildrenAlloc == 1) {
+		CGTarget* t = (CGTarget*) child(0);
+		return t->receiveWormData();
+	}
+
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -387,8 +390,10 @@ int CGMultiTarget :: sendWormData() {
 }
 
 int CGMultiTarget :: receiveWormData() {
-	if (nChildrenAlloc == 1) 
-		return CGTarget :: receiveWormData();
+	if (nChildrenAlloc == 1) {
+		CGTarget* t = (CGTarget*) child(0);
+		return t->receiveWormData();
+	}
 
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
@@ -418,7 +423,9 @@ int CGMultiTarget :: receiveWormData() {
 
 void CGMultiTarget :: generateCode() {
 	if (nChildrenAlloc == 1) {
-		CGTarget :: generateCode();
+		CGTarget* t = (CGTarget*) child(0);
+		t->generateCode();
+		addProcessorCode(0,(*t->getStream("code")));
 		return;
 	}
 
@@ -521,6 +528,9 @@ IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched,
 	int flag = 0;
 	int temp = -1;
 
+	// heterogeneous case
+	int hetero = (childType.size() > 1) || (relTimeScales.size() > 1);
+
 	// Scan the processors. By default, include only one
 	// unused processor and all used processors which satisfy
 	// resource constraints.
@@ -529,13 +539,13 @@ IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched,
 		CGTarget* t = uni->target();
 		if (s && t && !t->support(s)) continue;
 		else if (s && t && !childHasResources(*s, i)) continue;
-		else if (uni->getAvailTime()) {
+		else if (uni->getAvailTime() || hetero) {
 			canProcs[k] = i;
 			k++;
 		} else if (!flag) {
 			temp = i;
 			flag = 1;
-		}
+		} 
 	}
 	if (temp >= 0) { canProcs[k] = temp; k++; }
 	canProcs.truncate(k);
@@ -574,14 +584,14 @@ DataFlowStar* CGMultiTarget :: createCollect() {
 // return the execution of a star if scheduled on the given target.
 // If the target does not support the star, return -1.
 int CGMultiTarget :: execTime(DataFlowStar* s, CGTarget* t) {
-	if ((!t) || (childType.size() <= 1)) return s->myExecTime();
+	if ((!t) || (relTimeScales.size() <= 1)) return s->myExecTime();
 	else if (!t->support(s)) return -1;
 
 	// for heterogeneous case, we need to consider relative time
 	// scale
 	for (int i = 0; i < nChildrenAlloc; i++) 
 		if (child(i) == t) break;
-	int mx = childType.size() - 1;
+	int mx = relTimeScales.size() - 1;
 	if (i > mx) i = mx;
 	return relTimeScales[i] * t->execTime(s);
 }
