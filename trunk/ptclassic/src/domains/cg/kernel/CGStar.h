@@ -173,29 +173,15 @@ protected:
 	virtual void forkInit(CGPortHole& input,MultiCGPort& output);
 	virtual void forkInit(CGPortHole& input,CGPortHole& output);
 
-	// lookup a shared symbol by list name & symbol name, if it is 
-	// not found Error::abortRun is called.
-	const char* lookupSharedSymbol(const char* list,const char* name);	
-
-	// add a SymbolList to the list of symbol lists.  For a SymbolList
-	// to be shared it should be declared static.  If a SymbolList
-	// is found with the same name but different pointer Error::abortRun
-	// is called.  If a SymbolList is found with the same name and
-	// same pointer, it is ignored.  This command should be called in 
-	// the defining star's constructor.
-	void addSharedSymbolList(SymbolList* list, const char* name);
+	// Lookup a shared symbol by scope name & symbol name.
+	// Return NULL on error.
+	const char* lookupSharedSymbol(const char* scope, const char* name);	
 
 	// modify "deferrable": always defer stars that feed into forks,
 	// to keep minimum possible size for fork buffers.
 	int deferrable();
 
 private:
-
-	// List of all shared symbol lists.  To add a shared symbol list
-	// use the addSharedSymbolList(name) method.  To lookup a shared
-	// symbol use the lookupSharedSymbol(list_name,symbol_name) method.
-	SymbolListList sharedSymbolLists;
-
 	// Reset local codeblock labels
 	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
 

@@ -73,41 +73,11 @@ CodeStream* CGStar::getStream(const char* name) {
 	return slist;
 }
 
-// lookup a shared symbol by list name & symbol name, if it is
-// not found Error::abortRun is called.
-const char* CGStar::lookupSharedSymbol(const char* list,const char* name) {
-	if (list==NULL || name==NULL) return NULL;
-	SymbolList* pList = sharedSymbolLists.get(list);
-	if (pList == NULL) {
-		StringList message;
-		message << "sharedSymbol: SymbolList " << list
-		        << " does not exist.";
-		Error::abortRun(*this,message);
-		return NULL;
-	}
-	const char* pSymbol=pList->lookup(name);
-	if (pSymbol == NULL) {
-		StringList message;
-		message << "sharedSymbol: symbol " << name
-			<< " was not found is SymbolList "<< list;
-	}
-	return pSymbol;
-}
-
-// add a SymbolList to the list of symbol lists.  For a SymbolList
-// to be shared it should be declared static.  If a SymbolList
-// is found with the same name but different pointer Error::abortRun
-// is called.  If a SymbolList is found with the same name and
-// same pointer, it is ignored.  This command should be called in 
-// the defining star's constructor.
-void CGStar :: addSharedSymbolList(SymbolList* list, const char* name){
-	if (list==NULL || name==NULL) return;
-	if(!sharedSymbolLists.add(name,list)) {
-		StringList message;
-		message << "addSharedSymbolList: A SymbolList named " << name
-			<< " already exists"; 
-		Error::abortRun(*this,message);
-	}
+// Lookup a shared symbol by scope name & symbol name.
+// Return NULL on error.
+const char* CGStar::lookupSharedSymbol(const char* scope, const char* name)
+{
+    return myTarget()->lookupSharedSymbol(scope, name);
 }
 
 // Set the Target pointer, initialize the symbols to point to the target
@@ -116,12 +86,15 @@ void CGStar :: setTarget(Target* t)
 {
 	Star::setTarget(t);
 	codeblockSymbol.setSeparator(myTarget()->separator);
+	codeblockSymbol.setCounter(&(myTarget()->symbolCounter));
 	starSymbol.setSeparator(myTarget()->separator);
+	starSymbol.setCounter(&(myTarget()->symbolCounter));
 	myCode = getStream(CODE);
 	procedures = getStream(PROCEDURE);
 }
 
 // Add a string to the Target code.
+// Expand macros in code and name.
 int CGStar::addCode (const char* string,const char* stream, const char* name)
 {
 	CodeStream* cs;
@@ -130,7 +103,12 @@ int CGStar::addCode (const char* string,const char* stream, const char* name)
 	if (cs != NULL)
 	{
 	    StringList code = processCode(string);
-	    return cs->put(code, name);
+	    if (name != NULL)
+	    {
+		StringList nm = processCode(name);
+		return cs->put(code, nm);
+	    }
+	    else return cs->put(code);
 	}
 	else
 	{
@@ -143,7 +121,12 @@ int CGStar::addCode (const char* string,const char* stream, const char* name)
 int CGStar::addProcedure(const char* string, const char* name)
 {
     StringList code = processCode(string);
-    return procedures->put(code, name);
+    if (name != NULL)
+    {
+	StringList nm = processCode(name);
+	return procedures->put(code,nm);
+    }
+    else return procedures->put(code);
 }
 
 // Add a comment to a target stream.
