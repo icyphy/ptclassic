@@ -66,7 +66,7 @@ proc ::tycho::xfont {family {size 12} {weight medium} {style r} {shift 0}} {
 # scans through a list of similar font families trying to find
 # something.
 # <li>If that fails, it trys different weights and sizes.
-# <li>As a last resoty, it returns the "fixed" font.
+# <li>As a last resort, it returns the "fixed" font.
 # </ul>
 # <p>
 # Unfortunately, fonts are a major weak point in the X window system,
