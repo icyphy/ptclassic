@@ -131,7 +131,7 @@ Example of a connection to the replacement block
 	    name { createBlock }
 	    type { "Block*" }
 	    access { protected }
-	    arglist { "(Galaxy& mom)" }
+	    arglist { "(Galaxy& mom, const char* blockname, const char* where_defined)" }
 	    code {
               Block *block = myblock->clone();
 	      if (!block) {
