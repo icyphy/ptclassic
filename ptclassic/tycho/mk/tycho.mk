@@ -45,6 +45,15 @@ JAVAHOME = 	/opt/jdk1.1.4
 # JAVAHTMLDIR = 	/opt/SUNWjws/JWS/lib/html/java/api
 JAVAHTMLDIR = 	$(JAVAHOME)/docs/api
 
+# The variables below are for the SunTest JavaScope code coverage tool
+# See http://www.suntest.com/JavaScope
+# The 'jsinstr' command, which instruments Java code.
+JSINSTR = 	jsinstr
+# The 'jsrestore' command which uninstruments Java code.
+JSRESTORE =	jsrestore
+# The pathname to the JavaScope.zip file
+JSCLASSPATH = 	/users/ptdesign/vendors/JavaScope/JavaScope.zip
+
 ########## You should not have to change anything below this line ######
 
 
