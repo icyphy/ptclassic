@@ -355,7 +355,7 @@ Width,  in pixels,  of the zero grid line.
 .TP
 .B ZeroStyle
 Line style pattern of the zero grid line.
-.H1 BUGS
+.H1 Bugs
 .br
 - Zooming in on bar graphs doesn't work right.
 .br
