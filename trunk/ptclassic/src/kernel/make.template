@@ -76,6 +76,7 @@ CCS_WITH_H_FILES=\
  Fix.cc \
  FixArrayState.cc \
  FixState.cc \
+ FlagArray.cc \
  FloatArrayState.cc \
  FloatState.cc \
  FloatVecData.cc \
