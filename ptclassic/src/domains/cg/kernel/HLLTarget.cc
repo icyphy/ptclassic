@@ -15,34 +15,14 @@ a universe.
 *******************************************************************/
 
 #include "BaseCTarget.h"
-#include "SDFCluster.h"
 #include "KnownTarget.h"
 #include <ctype.h>
 
 // constructor
 BaseCTarget::BaseCTarget(const char* nam, const char* startype,
 	const char* desc) : CGTarget(nam, startype, desc),
-	schedFileName(0), unique(0)
+	unique(0)
 {
-	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
-			"Directory to write to"));
-	addState(loopScheduler.setState("loopScheduler",this,"NO",
-			"Specify whether to use loop scheduler."));
-}
-
-void BaseCTarget::start() {
-
-    LOG_DEL; delete dirFullName;
-    dirFullName = writeDirectoryName(destDirectory);
-
-    if(int(loopScheduler)) {
-	char* schedFileName = writeFileName("schedule.log");
-	LOG_NEW; setSched(new SDFClustSched(schedFileName));
-    } else {
-	LOG_NEW; setSched(new SDFScheduler);
-    }
-
-    headerCode();
 }
 
 void BaseCTarget::wrapup() {
@@ -57,33 +37,19 @@ void BaseCTarget::wrapup() {
 }
 
 // Routines for writing code: schedulers may call these
-StringList BaseCTarget::beginIteration(int repetitions, int depth) {
-	StringList out;
-	out = indent(depth);
+void BaseCTarget::beginIteration(int repetitions, int depth) {
+	myCode << indent(depth);
 	if (repetitions == -1)          // iterate infinitely
-		out += "while(1) {\n";
+		myCode << "while(1) {\n";
 	else {
-		out += "int i";
-		out += unique;
-		out += "; ";
-		out += "for (i";
-		out += unique;
-		out += "=0; i";
-		out += unique;
-		out += " < ";
-		out += repetitions;
-		out += "; i";
-		out += unique++;
-		out += "++) {\n";
+		myCode << "int i" << unique << "; ";
+		myCode << "for (i" << unique << "=0; i" << unique <<
+		    " < " << repetitions << "; i" << unique++ << "++) {\n";
 	}
-	return out;
 }
 
-StringList BaseCTarget::endIteration(int, int depth) {
-	StringList out;
-	out = indent(depth);
-	out += "}\n";
-	return out;
+void BaseCTarget::endIteration(int, int depth) {
+	myCode << indent(depth) << "}\n";
 }
 
 // This method creates a name derived from the name of the object
