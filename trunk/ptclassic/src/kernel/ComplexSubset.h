@@ -31,7 +31,9 @@ and this notice must be preserved on all copies.
 */
 
 #ifndef _Complex_h
+#ifdef __GNUG__
 #pragma once
+#endif
 #define _Complex_h 1
 
 
