@@ -621,3 +621,9 @@ test IncrCanvas-type.2 {Any tag} {
     set result
 } {foo is not a valid item ID}
 
+############################################################################
+####
+# Delete the last canvas and iconify main window
+_update
+catch {delete object .c}
+wm iconify .
