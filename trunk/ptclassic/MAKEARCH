@@ -203,7 +203,9 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
-	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets \
+	cgc/targets/main cgc/targets/cm5 \
+	cgc/targets/NOWam cgc/targets/libudpam \
+	cgc/tcltk/stars cgc/tcltk/targets \
 	$EXPSUBEXTRAS )
 	optmkdir $x
 	cd $x
