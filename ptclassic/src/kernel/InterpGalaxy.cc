@@ -453,7 +453,8 @@ InterpGalaxy::setDomain (const char* name) {
 	// if we're already in the given domain, do nothing and return true
 	if (strcmp (name, domain()) != 0) {
 		if (numberBlocks() > 0) {
-			Error::error ("Can't change domain, non-empty galaxy");
+			Error::error (*this,
+				      "Can't change domain, non-empty galaxy");
 			return FALSE;
 		}
 		else if (!KnownBlock::validDomain(name)) {
@@ -601,7 +602,8 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			break;
 			
 		default: // impossible (?)
-			Error::abortRun ("Internal error in InterpGalaxy");
+			Error::abortRun (*this,
+					 "Internal error in InterpGalaxy");
 		}
 	}
 
