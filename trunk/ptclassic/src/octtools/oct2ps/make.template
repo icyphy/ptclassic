@@ -52,6 +52,8 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
+MISC_FILES =	oct2ps.1 oct2ps.pro sample sample.ps sample2 sample2.ps
+
 all::	 makefile oct2ps
 
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \

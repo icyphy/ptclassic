@@ -48,6 +48,8 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
+MISC_FILES =	README doc
+
 all::	 makefile masters
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
