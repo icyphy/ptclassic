@@ -50,6 +50,7 @@ extern "C" {
 #define Pointer screwed_Pointer
 #include "oct.h"  /* Oct Pointer Structure */
 #include "paramStructs.h"
+#include "ganttIfc.h"
 #undef Pointer
 }
 
