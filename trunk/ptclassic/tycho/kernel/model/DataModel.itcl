@@ -58,8 +58,7 @@
 #
 # The data of an item is a list of named attributes. By convention,
 # attribute names begine with a leading dash, although there is
-# no requirement that this be so. This data can be accessed
-# individually, with the <b>assign</b> method, or collectively,
+# no requirement that this be so. Attributes can be set individually
 # with the <b>attrset</b> method. The names and number of attributes
 # is arbitrary, so attributes can be added and deleted dynamically.
 # A number of other methods add and delete data: <b>add</b>,
@@ -69,7 +68,7 @@
 # <b>publish</b> methods of the _Model_ superclass.
 #
 # There are several methods that provide ways of accessing the
-# data in a model. <b>assign</b> and <b>attrset</b> can be used
+# data in a model. <b>attrset</b> and <b>attrget</b> can be used
 # to query data from a single item, while <b>names</b> and
 # <b>get</b> perform glob-style matching on item names, in the same
 # way as the Tcl <b>array</b> command. The <b>match</b> method
@@ -105,11 +104,14 @@ class ::tycho::DataModel {
     # Add a new item
     method add {name args}
 
-    # Set or get the value of an item
-    method assign {name args}
+    # Delete attributes of an item
+    method attrdel {name args}
 
-    # Set or get individual attributes of an item
-    method attrset {name {attr {}} args}
+    # Get an attribute or attributes of an item
+    method attrget {name {attr {}}}
+
+    # Set attributes of an item
+    method attrset {name args}
 
     # Remove all data
     method clear {}
@@ -141,7 +143,7 @@ class ::tycho::DataModel {
     # Re-order items in a given context
     method reorder {type {context {}} list}
 
-    # Search for items with regexp or glob-syle matching
+    # Search for items with regexp or glob-style matching
     method search {args}
 
     # Define or configure item types
@@ -272,8 +274,13 @@ body ::tycho::DataModel::destructor {} {
 #### add
 #
 # Add a new item. _name_ is the full name of the item. Following
-# arguments are attribute-value pairs. If the item already exists,
-# raise an error. Append to the history if recording.
+# arguments are attribute-value pairs, which are the initial value
+# of the item's attribute list. If the attribute list is followed
+# by a single list argument, that argument is taken to be a
+# description of child items of this item, which will be parsed
+# in the context of the newly-added item. Raise an error if the
+# the item already exists, if its parent context does not exist,
+# or if _name_ is incorrectly formed. Append to the history if recording.
 #
 body ::tycho::DataModel::add {name args} {
     if [@scope $scope ::info exists [set _dataname]($name)] {
@@ -324,96 +331,116 @@ body ::tycho::DataModel::add {name args} {
 }
 
 ########################################################################
-#### assign
+#### attrdel
 #
-# Set or get the data of the item named _name_. If only the _name_
-# argument is supplied, return the attribute list of that item,
-# _without_ any defaults defined for its type. (Note the difference
-# in behaviour to <b>attrset</b>.) If additional arguments are supplied,
-# they specify an attribute list which replaces the existing attribute
-# list. If _args_ contains just one value, this is taken to be the new
-# attribute list; otherwise, _args_ is taken to be the new attribute list.
-# Note that any existing attributes that are not present in the new
-# list will be removed. Append to the history if recording.
-# if the item does not exist, raise an error.
+# Delete individual attributes of the item given by _name_.
+# Each given attribute is deleted from the attribute list.
+# If an attribute does not exist, then ignore it. Append to
+# the command history if recording. Raise an error if the item
+# does not exist.
 #
-body ::tycho::DataModel::assign {name args} {
+body ::tycho::DataModel::attrdel {name args} {
     _verify $name
 
-    # Remember the old data
-    set old [@scope $scope set [set _dataname]($name)]
+    # Get attributes
+    array set attrs [@scope $scope set [set _dataname]($name)]
+    
+    # Delete each
+    if { $recording } {
+	set set {}
+	foreach a $args {
+	    if [::info exists attrs($a)] {
+		lappend set $a $attrs($a)
+		unset attrs($a)
+	    }
+	}
+	history append "attrdel [list $name] $args" "attrset [list $name] $set"
 
-    if { $args == "" } {
-        # Return old value
-        return $old
-    } elseif { [llength $args] == 1 } {
-        # Got a single list
-        set data [lindex $args 0]
     } else {
-        set data $args
+	foreach a $args {
+	    if [::info exists attrs($a)] {
+		unset attrs($a)
+	    }
+	}
     }
+    @scope $scope set [set _dataname]($name) [array get attrs]
+}
 
-    # Append to the history
-    if $recording {
-        history append [list assign $name $data] [list assign $name $old]
+########################################################################
+#### attrget
+#
+# Get individual attributes of the item given by _name_.
+# If only _name_ is given, return the attribute list of the item,
+# _including_ type defaults. If _attr_ is given, return the 
+# value of that attribute, returning the default if this attribute
+# has nopt been set and there is a type default. Raise an error if the
+# item does not exist, or if _attr_ does not exist.
+#
+body ::tycho::DataModel::attrget {name {attr {}}} {
+    _verify $name
+
+    # Get defaults
+    regexp {^[^:]+} [lindex $name end] type
+    array set attrs $_defaults($type)
+    array set attrs [@scope $scope set [set _dataname]($name)]
+
+    if { $attr == "" } {
+        # Return all attributes
+        array get attrs
+    } else {
+	# Return a single attribute
+	if { ! [::info exists attrs($attr)] } {
+	    error "Unknown attribute $attr in $modelname"
+	}
+	return $attrs($attr)
     }
-
-    # Invalidate cache
-    @scope $scope set [set _dataname].cachevalid 0
-        
-    # Write the new data
-    @scope $scope set [set _dataname]($name) $data
 }
 
 ########################################################################
 #### attrset
 #
-# Set or get individual attributes of the item given by _name_.
+# Set individual attributes of the item given by _name_.
 # If only _name_ is given, return the attribute list of the item,
-# including type defaults. If _attr_ is given, return its value,
-# or the default value if the attribute hasn't had a value set
-# to it.  If further arguments are supplied, the complete argument
-# list is an attribute-value list, and the given attributes are changed
-# to the corresponding value. Note that attributes are merged, not
-# replaced (as in <b>assign</b>). Append to the history if recording.
-# Raise an error if the item does not exist.
+# _not including_ type defaults. If additional arguments are given,
+# change each attribute to the corresponding value, and append to
+# the command history if recording. Raise an error if the item
+# does not exist.
 #
-body ::tycho::DataModel::attrset {name {attr {}} args} {
+body ::tycho::DataModel::attrset {name args} {
     _verify $name
 
-    if { $attr == "" } {
-        # Return attributes including defaults
-        regexp {^[^:]+} [lindex $name end] type
-        array set attrs $_defaults($type)
-        array set attrs [@scope $scope set [set _dataname]($name)]
-        array get attrs
-
-    } elseif { $args == "" } {
-	# Return a single attribute
-	regexp {^[^:]+} [lindex $name end] type
-	array set data $_defaults($type)
-	array set data [@scope $scope set [set _dataname]($name)]
-
-	if { ! [::info exists data($attr)] } {
-	    error "Unknown attribute $attr in $modelname"
-	}
-	return $data($attr)
-	
-    } else {
-        # Invalidate cache
-        @scope $scope set [set _dataname].cachevalid 0
-
-        # Append to the history
-        if { $recording } {
-            history append \
-                    "attrset $name $attr $args" \
-                    "assign $name [@scope $scope set [set _dataname]($name)]"
-        }
-        # Merge the new data and return result
-        array set attrs [@scope $scope set [set _dataname]($name)]
-        array set attrs [concat $attr $args]
-        @scope $scope set [set _dataname]($name) [array get attrs]
+    # If no arguments, return data without defaults
+    if { $args == "" } {
+        return [@scope $scope set [set _dataname]($name)]
     }
+
+    # Invalidate cache
+    @scope $scope set [set _dataname].cachevalid 0
+    
+    # Get current data
+    array set attrs [@scope $scope set [set _dataname]($name)]
+    
+    # Add to history
+    if { $recording } {
+	set set {}
+	set del {}
+	foreach {a v} $args {
+	    if [::info exists attrs($a)] {
+		lappend set $a $attrs($a)
+	    } else {
+		lappend del $a
+	    }
+	}
+	history append \
+		"attrset [list $name] $args" \
+		[list _compound \
+		    "attrset [list $name] $set" \
+		    "attrdel [list $name] $del"]
+    }
+
+    # Merge the new data and return result
+    array set attrs $args
+    @scope $scope set [set _dataname]($name) [array get attrs]
 }
 
 ########################################################################
@@ -490,9 +517,13 @@ body ::tycho::DataModel::delete {name} {
     if $recording {
         set cd [_describechildren $name]
         if { $cd != "" } {
-            history append "delete $name" "add $name [assign $name] \{\n$cd\}"
+            history append \
+                    [list delete $name] \
+                    "add [list $name] [attrset $name] \{\n$cd\}"
         } else {
-            history append "delete $name" "add $name [assign $name]"
+            history append \
+                    [list delete $name] \
+                    "add [list $name] [attrset $name]"
         }
     }
     # Delete children, making sure that commands are not recorded
@@ -504,7 +535,7 @@ body ::tycho::DataModel::delete {name} {
                 delete [concat $name $t:$child]
             }
         }
-        set recording $saved    
+        set recording $saved
     }
 
     # Remove from the parent list
@@ -702,6 +733,7 @@ body ::tycho::DataModel::parse {data {context {}}} {
     set _object_ $this
     $safeinterp eval [list @scope $scope $data]
     set _context_ $saved
+    return
 }
 
 ########################################################################
@@ -910,9 +942,10 @@ body ::tycho::DataModel::search {mode defaults args} {
 # This command has several forms, depending on the _mode_ argument:
 #
 # <dl>
-# <dt><b>configure</b> _type_ ?_name_? ?_value_? ?_name_ _value_ ...? 
+# <dt><b>configure</b> ?_type_? ?_name_? ?_value_? ?_name_ _value_ ...? 
 # <dd>
-# Set or get a type property or a type default. If only the _type_
+# Set or get a type property or a type default. If no arguemnts
+# are supplied, return a list of defined types. If only the _type_
 # argument is supplied, return a list of type properties and
 # type defaults. If a single _name_ is supplied, return
 # the value of that type property or type default. If additional
@@ -938,18 +971,19 @@ body ::tycho::DataModel::search {mode defaults args} {
 # leaf item. In addition, any item of type <b>foo</b> will have
 # an attribute <b>-bar</b> with the default value "hello."
 #
-# <dt><b>exists</b> ?_type_?
+# <dt><b>exists</b> _type_
 # <dd>
-# Test if a given type exists. If no argument is supplied,
-# return a list of all types defined for this class. If _tyoe_
-# is given, return one if the type has been defined, and zero
-# if it hasn't.
+# Test if a given type exists. Return one if _type_ has been
+# defined, and zero if it hasn't.
 #
 # </dl>
 #
 body ::tycho::DataModel::type {mode {type {}} args} {
     switch -exact $mode {
 	"configure" {
+	    if { $type == "" } {
+		return $_types($scope)
+	    }
             if ![::info exists _defaults($type)] {
                 error "Unknown type: \"$type\""
             }
@@ -1030,13 +1064,11 @@ body ::tycho::DataModel::type {mode {type {}} args} {
 	    }
 	}
 	"exists" {
-	    if { $args == "" } {
-		# Return type list
-		return $_types($scope)
-	    } else {
-		# Test for single type
-		::tycho::lmember $_types($scope) $type
+	    if { $type == "" } {
+		return 0
 	    }
+	    # Test for single type
+	    ::tycho::lmember $_types($scope) $type
 	}
 	default {
 	    error "unknown option: must be one of \
