@@ -35,25 +35,6 @@ namespace ::tycho {
     }
 }
 
-
-#
-# uplevel #0 {
-#     if { [::info classes ::tycho::Picture] == "" } {
-# 	source $tychoslate/kernel/Picture.itcl
-#     }
-
-#     array set Terminal [array get Picture]
-
-#     set Terminal(construct)   ::tycho::Terminal::construct
-#     set Terminal(coords)      ::tycho::Terminal::coords
-#     set Terminal(direction)   ::tycho::Terminal::direction
-#     set Terminal(fill)        ::tycho::Terminal::fill
-#     set Terminal(length)      ::tycho::Terminal::length
-#     set Terminal(style)       ::tycho::Terminal::style
-#     set Terminal(type)        ::tycho::Terminal::type
-# }
-
-
 ## Terminal
 #
 # A "terminal" for making connections to dataflow nodes and
@@ -88,6 +69,7 @@ class ::tycho::Terminal {
     ###################################################################
     ####                         public procs                      ####
 
+    proc aspect    {id canvas args}
     proc coords    {id canvas args}
     proc direction {id canvas di}
     proc fill      {id canvas fi}
@@ -98,8 +80,17 @@ class ::tycho::Terminal {
     ###################################################################
     ####                         protected variables               ####
 
+    # All methods are looked up through a table
+    common methodtable
+
+    # All options have a default value
+    common optiondefault
+
     # The additional item used to draw the terminal: blob or extra arrow
     common blobitem
+
+    # The terminal is a "point" shape
+    common shape "point"
 
     ###################################################################
     ####                       class initialization                ####
@@ -107,6 +98,7 @@ class ::tycho::Terminal {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
+    set methodtable(aspect)      ::tycho::Terminal::aspect
     set methodtable(construct)   ::tycho::Terminal::construct
     set methodtable(coords)      ::tycho::Terminal::coords
     set methodtable(direction)   ::tycho::Terminal::direction
@@ -123,6 +115,32 @@ class ::tycho::Terminal {
     set optiondefault(-type)      input
     set optiondefault(-style)     arrow
     set optiondefault(-fill)      black
+}
+
+
+##########################################################################
+#### aspect
+#
+body ::tycho::Terminal::aspect {id canvas args} {
+    if { $args == "" } {
+	return {origin terminal}
+    }
+
+    set result {}
+    set coords [$canvas coords $primary($id)]
+    foreach aspect $args {
+	switch -exact $aspect {
+	    "origin" {
+		lappend result [lindex $coords 0]
+		lappend result [lindex $coords 1]
+	    }
+	    "terminal" {
+		lappend result [lindex $coords 2]
+		lappend result [lindex $coords 3]
+	    }
+	}
+    }
+    return $result
 }
 
 
@@ -156,7 +174,7 @@ body ::tycho::Terminal::construct {id tags canvas x0 y0 args} {
 body ::tycho::Terminal::coords {id canvas args} {
     # No args: just return coordinates
     if { $args == "" } {
-	return [$canvas coords $primary($id)]
+	return [lrange [$canvas coords $primary($id)] 0 1]
     }
 
     # Move the primary
