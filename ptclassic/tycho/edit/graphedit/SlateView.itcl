@@ -204,10 +204,12 @@ body ::tycho::SlateView::dtag {tag} {
 # tag.
 #
 body ::tycho::SlateView::id {name} {
-    if ![::info exists _itemID($name)] {
+    if [::info exists _itemID($name)] {
         return $_itemID($name)
     } else {
         return $name
+	# Hm... maybe we should do this:
+	# error "Unknown item \"$name\" ([array get names _itemID])"
     }
 }
 
@@ -219,6 +221,7 @@ body ::tycho::SlateView::id {name} {
 body ::tycho::SlateView::item {name spec args} {
     # puts "::tycho::SlateView::item $name $spec $args"
     set id [eval $slate create $spec $args]
+puts "$name -> $id"
     set _itemID($name) $id
     set _nameof($id) $name
 }
