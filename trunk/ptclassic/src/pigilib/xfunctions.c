@@ -149,6 +149,15 @@ void PrintVersion ()
     sprintf(buf, "Running %s, %d", pigiFilename, (int)getpid());
     PrintCon(buf);
 
-    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "} {",
-    		pigiFilename, "}", NULL);
+    /* If ptkStartupMessage fails, then print an error message.
+     * Don't rely on Tycho being there, so don't expect to bring up
+     * a stack backtrace
+     */
+    if (Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "} {",
+		    pigiFilename, "}", NULL) != TCL_OK) {
+        ErrAdd("Unable to bring up ptkStartupMessage: ");
+        ErrAdd(ptkInterp->result);
+	PrintErr(ErrGet());
+	exit(1);
+    } 
 }
