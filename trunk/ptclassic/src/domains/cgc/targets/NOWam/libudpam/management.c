@@ -59,6 +59,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <thread.h>
 #include <sys/filio.h>  
 
+#ifdef SOLARIS2_6
+#define	SB_MAX		(64*1024)	/* max chars in sockbuf */
+#endif
+
 /* FIXME: Replace with a standard Unix function */
 extern int gethostname(char* name, int namelen);
 
