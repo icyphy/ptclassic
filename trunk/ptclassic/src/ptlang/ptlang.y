@@ -42,6 +42,7 @@ Programmer: J. T. Buck and E. A. Lee
 #include <sys/types.h>
 #include <time.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 /* Symbols for special characters*/
 #define LPAR '('
@@ -130,6 +131,7 @@ char ccCode[BIGBUFSIZE];
 char hCode[BIGBUFSIZE];
 char miscCode[BIGBUFSIZE];
 char consCalls[BIGBUFSIZE];
+
 
 /* state classes */
 #define T_INT 0
@@ -1442,6 +1444,8 @@ void genDef ()
 	char descriptString[MEDBUFSIZE];
         char *derivedSimple;
 	char *startp, *copyrightStart; 
+	char *srcDirectory;
+		
 
 /* temp, until we implement this */
 	if (galDef) {
@@ -1456,7 +1460,9 @@ void genDef ()
 		yyerror ("No domain name defined");
 		return;
 	}
+/* All cores must define a core category. */
 	if ( coreDef == 1 ) {
+/* Core category determines base-class of core and full Classname */
 		if ( coreCategory != (char *)NULL )
 			sprintf( fullClass, "%s%s%s", galDef ? "" : domain, objName, coreCategory );
 		else
@@ -1500,6 +1506,7 @@ void genDef ()
 	if (derivedFrom) {
 		if (domain &&
 		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
+			/* Core category determines base class of cores */
 			if ( coreDef == 1 ) {
 				if ( coreCategory != (char *)NULL )
 					sprintf( baseClass, "%s%s%s", galDef ? 
@@ -1511,7 +1518,8 @@ void genDef ()
 				sprintf (baseClass, "%s%s", galDef ? "" : 
 				domain, derivedFrom);
 		}
-		else
+		else {
+			/* Core category determines base class of cores */
 			if ( coreDef == 1 ) {
 				if ( coreCategory != (char *)NULL )
 					sprintf( baseClass, "%s%s", galDef ? 
@@ -1521,19 +1529,23 @@ void genDef ()
 						" a coreCategory directive");
 			} else
 				(void) strcpy (baseClass, derivedFrom);
+		}
 	}
 /* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef)
 		(void)strcpy (baseClass, "Galaxy");
 	else if ( coreDef == 1 ) {
+			/* Core category determines base class of cores */
 				if ( coreCategory != (char *)NULL )
 					sprintf( baseClass, "%s%sCore", galDef ? 
 					"" : domain, coreCategory );
 				else
 					yyerror("All cores must have"
 						" a coreCategory directive");
-	} else
+	} else {
+/* Base class of corona is a corona */
 		sprintf (baseClass, coronaDef ? "%sCorona" : "%sStar", domain);
+	}
 
 /* Include files */
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
@@ -1560,10 +1572,26 @@ void genDef ()
 	fprintf( fp, "\n{\n" );
 
 	sprintf (destNameBuf, "~%s", fullClass);
-	fprintf (fp, "public:\n\t%s();\n", fullClass);
+/* Core constructor takes Corona as argument */
+	if ( coreDef == 1 ) {
+		fprintf (fp, "public:\n\t%s();\n\n\t%s(%sCorona & );\n", fullClass, fullClass, domain);
+/* Corona constructor takes Core init flag are argument ( 0 = don't construct cores which is the default ). */
+	} else if ( coronaDef == 1 ) {
+		fprintf (fp, "public:\n\t%s( int doCoreInitFlag = 0);\n", fullClass);
+	} else {
+		fprintf (fp, "public:\n\t%s();\n", fullClass);
+	}
 /* The makeNew function: only if the class isn't a pure virtual */
-	if (!pureFlag)
-		fprintf (fp, "\t/* virtual */ Block* makeNew() const;\n");
+	if (!pureFlag) {
+/* makeNew() for cores takes a Corona as argument. */
+		if ( coreDef == 1 )
+			fprintf (fp, "\t/* virtual */ %sCore* makeNew( %sCorona & ) const;\n", domain, domain);
+		else
+			fprintf (fp, "\t/* virtual */ Block* makeNew() const;\n");
+	}
+/* Corona keeps source directory for loading cores from same directory. */
+	if ( coronaDef == 1 )
+		fprintf (fp, "\t/* virtual*/ const char* getSrcDirectory() const;\n");
         fprintf (fp, "\t/* virtual*/ const char* className() const;\n");
         fprintf (fp, "\t/* virtual*/ int isA(const char*) const;\n");
 /* The code blocks */
@@ -1624,12 +1652,33 @@ void genDef ()
 /* also generate a global identifier with name star_nm_DDDNNN, where DDD is
    the domain and NNN is the name */
 	fprintf (fp, "\nconst char *star_nm_%s = \"%s\";\n", fullClass, fullClass);
+/* Corona keeps source directory for loading cores. */
+	if ( coronaDef == 1 ) { 
+		srcDirectory = getenv("PWD");
+		fprintf (fp, "\nconst char *src_dir_%s = \"%s\";\n", fullClass, srcDirectory);
+		fprintf (fp, "\nconst char* %s :: getSrcDirectory() const { return src_dir_%s; }\n", fullClass, fullClass);
+	}
+/* FIXME: Corona uses className virtual method as secondary init. */
+	if ( coronaDef == 1 ) 
+        	fprintf (fp, "\nconst char* %s :: className() const { %sCorona* ptr = this; if ( initCoreFlag == 0 ) ptr->addCores(); return star_nm_%s;}\n",
+		fullClass, domain, fullClass);
+	else
         fprintf (fp, "\nconst char* %s :: className() const {return star_nm_%s;}\n",
 		fullClass, fullClass);
 	fprintf (fp, "\nISA_FUNC(%s,%s);\n",fullClass,baseClass);
 	if (!pureFlag) {
-		fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s;}\n",
+/* makeNew() for cores takes a corona as argument. */
+		if ( coreDef ) {
+			fprintf (fp, "\n%sCore* %s :: makeNew( %sCorona & corona_) const { LOG_NEW; return new %s(corona_); }\n",
+			 domain, fullClass, domain, fullClass);
+/* Corona constructor takes do core init argument. */
+		} else if ( coronaDef == 1 ) {
+			fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s(1);}\n",
 			 fullClass, fullClass);
+		} else {
+			fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s;}\n",
+			 fullClass, fullClass);
+		}
 	}
 /* generate the CodeBlock constructor calls */
 	for (i=0; i<numBlocks; i++) {
@@ -1648,15 +1697,31 @@ void genDef ()
 	    }
 	}
 /* prefix code and constructor */
-	fprintf (fp, "\n%s%s::%s ()", ccCode, fullClass, fullClass);
-	if (consCalls[0])
-		fprintf (fp, " :\n\t%s", consCalls);
+/* Core constructor takes corona as argument. */
+	if ( coreDef == 1 ) {
+		fprintf (fp, "\n%s::%s() { }\n\n%s%s::%s ( %sCorona & corona_) : %s(corona_)", fullClass, fullClass, ccCode, fullClass, fullClass, domain, baseClass);
+/* Corona takes do core init flag and calls parent constructor. */
+	} else if ( coronaDef == 1 ) {
+		fprintf (fp, "\n%s%s::%s (int doCoreInitFlag) : %sCorona(0)", ccCode, fullClass, fullClass, domain);
+	} else {
+		fprintf (fp, "\n%s%s::%s ()", ccCode, fullClass, fullClass);
+	}
+	if (consCalls[0]) {
+/* Core constructor has initializer for corona reference. */
+		if ( coreDef == 1 )
+			fprintf (fp, ",\n\t%s", consCalls);
+		else
+			fprintf (fp, " :\n\t%s", consCalls);
+	}
 	fprintf (fp, "\n{\n");
 	if (objDesc)
 		fprintf (fp, "\tsetDescriptor(\"%s\");\n", objDesc);
 	/* define the class name */
 	if (!consCode) consCode = "";
 	fprintf (fp, "%s\n%s\n", consStuff, consCode);
+/* Corona conditionally constructs coreList */
+	if ( coronaDef == 1 )
+		fprintf (fp, "\n\tif (doCoreInitFlag == 1 ) addCores();\n");
 	fprintf (fp, "}\n");
 	for (i = 1; i < N_FORMS; i++) {
 		if (codeBody[i] && !inlineFlag[i]) {
@@ -1679,8 +1744,8 @@ void genDef ()
 			"\n// Core prototype instance for known block list\n");
 		fprintf (fp, "static %s proto;\n", fullClass);
 		fprintf (fp, 
-			"static RegisterBlock registerBlock(proto,\"%s\");\n",
-			objName);
+			"static RegisterBlock registerBlock(proto,\"%s%s\");\n",
+			objName, coreCategory);
 	} else if (coronaDef) {
 		fprintf (fp, "\n// Corona prototype instance for known block list\n");
 		fprintf (fp, "static %s proto;\n", fullClass);
@@ -1692,7 +1757,7 @@ void genDef ()
 		fprintf (fp, "static %s proto;\n", fullClass);
 		fprintf (fp, 
 			"static RegisterBlock registerBlock(proto,\"%s\");\n",
-			objName);
+			objName );
 	}
 	(void) fclose(fp);
     }  /* htmlOnly */
