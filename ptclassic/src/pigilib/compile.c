@@ -30,20 +30,50 @@ Version identification:
 $Id$
 
 There are two representations of a design: the Oct one and the internal
-kernel one.  The compile routines keep these representations
-consistent.  There are two lists: traverse and xfered.  The traverse
-list is used to traverse the hierarchical design in Oct which can be
-represented as a directed acyclic graph (DAG), with each node in the
-DAG corresponding to a facet in the design.  (traverse prevents
-visiting a node twice.)
+kernel one.  The compile routines keep these representations consistent.
+The name we give to a kernel object is just the base name of its facet,
+so it is possible for more than one facet to map to the same kernel object.
+To avoid confusion, we use the kernel's "definition source" information
+to store the full pathname of the source facet for any compiled galaxy
+or universe.  A facet must be recompiled if it is not known to the kernel,
+or if the definition source does not match, or if the Oct facet has been
+changed since the last transfer.  (Oct change lists in each facet keep
+track of the latter condition.)
 
-The xfered list keeps track of which nodes in the DAG have been
-transferred to the kernel so far.  Change lists in each facet keep track of
-any changes.  A facet (node in the DAG) is recompiled if it is not on
-the xfered list or if it has been changed since the last transfer.
+We also keep a "traverse list" of galaxy facets visited during the current
+scan of the hierarchical Oct design.  (The Oct design can be represented as
+a directed acyclic graph (DAG), with each node in the DAG corresponding to
+an Oct facet.)  traverse prevents visiting a node twice.  This saves duplicate
+compilations when a subgalaxy occurs multiple times, and allows us to detect
+two kinds of error conditions:
+ 1. Recursive references (cycles in the DAG), which would otherwise cause
+    infinite recursion and coredump.
+ 2. Two different facets used in the same design that map to the same
+    kernel object name.  This cannot be supported without using more
+    complicated kernel object names (ie, the full path instead of only
+    the base facet name); the feature is not deemed worth the extra
+    verbosity that would ensue.
+Case 1 is detected when a facet is visited that is already in the traverse
+list, but the kernel does not have a matching object (hence we have not
+finished traversing the facet).
+Case 2 is detected when a facet is visited that is already in the traverse
+list, and the kernel has a matching object, but the kernel object has
+the wrong definition source.
+Note: it is possible to generate the wrong error message, if a recursive
+loop occurs in a facet for which a conflicting definition was previously
+compiled.  Then we will detect case 2 although it's really case 1.
+It's still an error, so this is not very critical.
 
-The difference is simply that traverse is re-initialized each time
-CompileFacet is called.  xfered never gets re-initialized.
+At first glance it might seem sufficient to store full facet pathnames
+in the traverse list.  But the same galaxy facet can map to multiple
+kernel objects depending on the domain of the referencing facet, because
+we compile a wormhole belonging to the outer domain if it's different.
+So the traverse list is indexed by pathname and outer domain.
+ 
+Universes need not be entered in the traverse list at all, since a
+universe facet cannot be visited recursively.  If we did not maintain
+a strict distinction between universes and galaxies in the Oct representation,
+this would not be so.
 */
 
 /* Standard includes */
@@ -79,9 +109,6 @@ static char msg[1024];
 
 /* used to traverse design hierarchy which is a DAG (directed acyclic graph) */
 static DupSheet traverse;
-
-/* list of galaxies that have been transferred to the kernel */
-static DupSheet xfered; 
 
 
 /***** Begin Error Select Set (Ess) routines */
@@ -805,9 +832,10 @@ octObject *facetPtr;
 }
 
 /*
-Checks to see whether a universe facet has been changed since the last run, or
-if the Ptolemy kernel image of the facet has been deleted.  The latter
-occurs whenever the run control window is dismissed.
+Checks to see whether a universe facet has been changed since the last run,
+or if an error occured in the last run; if the prior run failed then
+the kernel image may be corrupted, and should be rebuilt.  (For example,
+the user might have aborted the run partway through HOF star expansion.)
 Outputs: return = true if facet has been changed or if not sure.
 */
 static boolean
@@ -818,7 +846,7 @@ octObject *facetPtr;
 	      cr = {OCT_UNDEFINED_OBJECT, 0};
     char* name;
 
-    /* First check to see whether the Ptolemy image exists */
+    /* First check to see whether the last run was completed */
     name = BaseName(facetPtr->contents.facet.cell);
     TCL_CATCH_ERR2(
 	Tcl_VarEval(ptkInterp, "ptkHasRun ", name, (char*) NULL),
@@ -924,44 +952,50 @@ CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
     char *name;
-    boolean xferedBool;
+    char *pathName;
+    const char* defSource;
     const char *galDomain;
     const char *desc;
     const char *oldDomain;
     const char *galTarget;
 
-    name = BaseName(galFacetPtr->contents.facet.cell);
+    pathName = galFacetPtr->contents.facet.cell;
+    name = BaseName(pathName);
 
+    /* We will compile a block belonging to the outer domain. */
     oldDomain = curDomainName();
 
-    /* get the galaxy domain */
+    /* get the definition source for any existing compilation */
+    defSource = KcGalaxyDefSource(name, oldDomain);
+
+    /* get the galaxy's own domain */
     if (!GOCDomainProp(galFacetPtr, &galDomain, oldDomain)) {
         PrintErr(ErrGet());
         return (FALSE);
     }
 
-    /*
-     * quit if the galaxy has already been touched in this
-     * compilation process and it was in the same domain at the time.
-     */
-
-    if (DupSheetIsDup2(&traverse, name, oldDomain)) {
-      /*
-       * Detect recursion here by checking to see whether the
-       * object is on the knownlist of the oldDomain.
-       */
-      if (!KcIsKnown(name)) {
+    /* Check to see if the galaxy has already been touched in this scan. */
+    if (DupSheetIsDup(&traverse, pathName, oldDomain)) {
+      /* Check for recursion or conflicting definitions. */
+      if (defSource == NULL) {
+	/* Must be a recursive reference. */
 	PrintErr("Sorry, graphical recursion is not supported at this time");
 	return(FALSE);
       }
+      if (strcmp(defSource, pathName) != 0) {
+	/* Conflicting definitions for same kernel object. */
+	PrintErr("Multiple facets with same base name are not supported");
+	return(FALSE);
+      }
+      /* OK, the galaxy has already been processed. */
       return(TRUE);
     }
     /*
      * mark the galaxy touched right away, in case there is a recursive
      * reference to it in the subgalaxies.
      */
-    ERR_IF2(!DupSheetAdd2(&traverse, name, oldDomain),
-	    "DupSheetAdd2 failed! Out of memory?");
+    ERR_IF2(!DupSheetAdd(&traverse, pathName, oldDomain),
+	    "DupSheetAdd failed! Out of memory?");
 
     /* Call Kernel function to set the current domain to the inner
      * domain.  It is important that we switch domains before processing
@@ -981,18 +1015,19 @@ octObject *galFacetPtr;
     ERR_IF2(!ProcessSubGals(galFacetPtr),
 	    "Failed to process subgalaxies");
 
-    /*
-     * quit if the galaxy has been transferred to the Ptolemy kernel
-     * at any time during this session, it has not been modified, and
-     * it was sitting in the domain context when it was transferred.
+    /* Done if the galaxy has previously been compiled and
+     * has not been modified since then.
      */
-    xferedBool = DupSheetIsDup2(&xfered, name, oldDomain);
-    if (xferedBool && !IsDirty(galFacetPtr)) {
-	/* galaxy already xfered to kernel and is unchanged */
-	/* restore old domain */
-	KcSetKBDomain(oldDomain);
-	return (TRUE);
+    if (defSource != NULL &&
+	strcmp(defSource, pathName) == 0 &&
+	!IsDirty(galFacetPtr)) {
+      /* galaxy already xfered to kernel and is unchanged */
+      /* restore old domain */
+      KcSetKBDomain(oldDomain);
+      return (TRUE);
     }
+
+    /* We have to compile, so log it */
     if (strcmp(oldDomain,galDomain) != 0)
 	sprintf(msg, "CompileGal: facet = %s, %s inside %s wormhole",
 		name, galDomain, oldDomain);
@@ -1017,12 +1052,10 @@ octObject *galFacetPtr;
     ERR_IF1(!UniqNameInit());
     ERR_IF2(!ProcessInsts(galFacetPtr), "Failed to process instances");
     ERR_IF2(!ConnectPass(galFacetPtr), "Connect pass failure");
-    ERR_IF1(!KcEndDefgalaxy(galFacetPtr->contents.facet.cell, oldDomain));
+    ERR_IF1(!KcEndDefgalaxy(pathName, oldDomain));
+    /* After successful compilation, clear the Oct facet-modified flags */
     ERR_IF2(!ClearDirty(galFacetPtr), "Failed to mark clean!");
-    if (!xferedBool) {
-	ERR_IF2(!DupSheetAdd2(&xfered, name, oldDomain),
-		"DupSheetAdd2 failure! Out of memory?");
-    }
+    /* Mark a subgalaxy has been recompiled, need to compile universe too */
     recompileFlag = TRUE;
     KcFlushLog();
     return (TRUE);
@@ -1033,11 +1066,17 @@ CompileUniv(facetPtr)
 octObject *facetPtr;
 {
     char *name;
-    boolean xferedBool;
+    char *pathName;
+    const char* defSource;
     const char *domain;
     const char *target;
 
-    name = BaseName(facetPtr->contents.facet.cell);
+    pathName = facetPtr->contents.facet.cell;
+    name = BaseName(pathName);
+
+    /* get the definition source for any existing compilation */
+    defSource = KcUniverseDefSource(name);
+
     if (!GOCDomainProp(facetPtr, &domain, DEFAULT_DOMAIN)) {
 	PrintErr(ErrGet());
 	sprintf(msg, "Domain error in facet %s", name);
@@ -1048,10 +1087,17 @@ octObject *facetPtr;
     KcLog(msg);
     TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, msg));
 
+    /* Process the subgalaxies */
     recompileFlag = 0;
     ERR_IF1(!ProcessSubGals(facetPtr));
-    xferedBool = DupSheetIsDup(&xfered, name);
-    if (xferedBool && !IsDirtyOrGone(facetPtr) && !recompileFlag) {
+
+    /* We need to recompile the universe if any subgalaxy changed,
+     * or if the universe itself is unknown to the kernel or changed.
+     */
+    if (!recompileFlag &&
+	defSource != NULL &&
+	strcmp(defSource, pathName) == 0 &&
+	!IsDirtyOrGone(facetPtr)) {
 	/* universe already xfered to kernel and is unchanged */
 	sprintf(msg, "curuniverse %s\n", name);
 	KcLog(msg);
@@ -1080,10 +1126,10 @@ octObject *facetPtr;
     ERR_IF1(!UniqNameInit());
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
+    /* Mark the finished universe with its definition source. */
+    KcSetUniverseDefSource(pathName);
+    /* After successful compilation, clear the Oct facet-modified flags */
     ERR_IF1(!ClearDirty(facetPtr));
-    if (!xferedBool) {
-	ERR_IF1(!DupSheetAdd(&xfered, name));
-    }
     KcFlushLog();
     return (TRUE);
 }
@@ -1150,7 +1196,6 @@ void
 CompileInit()
 {
     DupSheetInit(&traverse);
-    DupSheetInit(&xfered);
 }
 
 void
