@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Thu Jan  7 09:01:29 1999 by cxh]-
+-*-Mode:text-*- -[Wed Aug 11 11:25:57 1999 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -37,6 +37,15 @@ Versions
 
 	Ptolemy is not very sensitive to the version of GNU make.  Any
 	recent version of GNU make should work.  
+
+GCC-2.95
+--------
+	We had to modify gcc-2.95/gcc/gcc/Makefile.in so 
+	that gcc_tooldir was not set to the crazy sed
+	statement that configure produced if
+	exec_prefix is not a subdirectory of prefix
+	    prefix = /users/cxh/pt/gnu/common
+	    exec_prefix = /users/cxh/pt/gnu/sol2.5
 
 GNU make
 --------
