@@ -255,7 +255,4 @@ proc makeScale {win name desc position callback} {
     pack append $win $s {top fill}
 }
 
-### Commented out: Now specified as the default value of the
-### "startCommand" parameter of the CGCTkTarget.
-###
-### makeRunWindow
+makeRunWindow
