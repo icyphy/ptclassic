@@ -27,7 +27,7 @@ random variables.
 The parameters \fIseed\fR and \fImultiplier\fR control the generation of the
 random number. 
 .UH BUGS:
-.pp
+.LP
 This needs to be filled in.  For now, there is no seed and multiplier
 parameter; the default seed parameter from Gabriel is always used.
 We'd really need to use a 48-bit integer to get the same functionality.

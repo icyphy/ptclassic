@@ -20,14 +20,14 @@ You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.  The following table summarizes the
 capabilities:
 .TS
-center, box
+center, box;
 l l l l.
 haltAtEnd	periodic	period	operation
 _
-NO          YES        0         The period is the length of the waveform
-NO          YES        N>0       The period is N
-NO          NO         anything  Output the waveform once, then zeros
-YES         anything   anything  Stop after outputing the waveform once
+NO	YES	0	Period is the length of the waveform.
+NO	YES	N > 0	Period is N.
+NO	NO	anything	Output the waveform once, then zeros.
+YES	anything	anything	Stop after outputing the waveform once.
 .TE
 The first line of the table gives the default settings.
 .PP
