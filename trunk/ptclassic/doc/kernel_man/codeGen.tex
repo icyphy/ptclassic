@@ -31,7 +31,7 @@ is assumed.
 @vskip 0pt plus 1filll
 @end iftex
 
-Copyright @copyright{} 1990, 1991, 1992 The Regents of the University of
+Copyright @copyright{} 1990, 1991, 1992, 1993, 1994 The Regents of the University of
 California.  All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -64,7 +64,6 @@ TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 * Target::          		Target Definition
 * Heterogeneous Support::	Focus on heterogeneous code generation.
 * CGC Domain::			C-code generation domain for example
-* CGdsp3 Domain::		CGdsp3 domain in Ptolemy
 * Status::			Comments on the current status
 * References::			references
 @end menu
@@ -1169,7 +1168,7 @@ If scheduling of wormholes succeeds, return TRUE. Otherwise, return FALSE.
 * other ParScheduler public members::	  other ParScheduler public members
 @end menu
 
-@node compileRun, other ParScheduler protected members, class ParScheduler, class ParScheduler
+@node compileRun, ,other ParScheduler protected members, class ParScheduler, class ParScheduler
 @subsection compileRun method
 
 @example
@@ -3658,7 +3657,7 @@ The public method
 
 @example
 Stringlist symbol(const char*)
-@example
+@end example
 
 makes a unique symbol from the supplied argument by adding the seperator and
 a unique number to the argument string.
@@ -6048,7 +6047,7 @@ int makingFunc();
 Returns TRUE if we are defining a function.
 
 @menu
-* buffer initialization::		initialize buffers and offset pointers
+* Buffer Initialization::		initialize buffers and offset pointers
 @end menu
 
 @node buffer initialization, , data structure, data structure
