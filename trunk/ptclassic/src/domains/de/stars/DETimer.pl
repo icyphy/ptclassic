@@ -4,9 +4,10 @@ defstar
     domain { DE }
     descriptor {
 Upon receiving a trigger input, output the
-elapsed time in seconds since the last reset input.
-The time in seconds is related to the scheduler time
-through the scaling factor "timeScale".
+elapsed time in seconds since the last reset input,
+or since the start of the simulation if no reset has
+been received.  The time in seconds is related to the
+scheduler time through the scaling factor "timeScale".
     }
     version { $Id$ }
     author { T.M. Parks }
