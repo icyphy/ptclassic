@@ -36,7 +36,8 @@ class XGraph
 {
 public:
 	// destructor
-	~XGraph();
+	~XGraph() { zapFiles();}
+
 	// constructor
 	XGraph();
 
@@ -44,7 +45,11 @@ public:
 			int noGraphs,
 			const char* options,
 			const char* title,
-			const char* saveFile);
+			const char* saveFile = 0,
+			int ignore = 0);
+
+	// Modify the "ignore count"
+	void setIgnore(int n) { nIgnore = n;}
 
 	// Add a point to the data set to be plotted.
 	// When there is only one data set, and the x axis simply increments
@@ -54,7 +59,9 @@ public:
 
 	// Add a point to the data set to be plotted.
 	// Again, this can only be used when there is only one data set.
-	void addPoint(float x, float y);
+	void addPoint(float x, float y) {
+		addPoint(1,x,y);
+	}
 
 	// add a point to one of several data sets, numbered 1 through N,
 	// where N <= MAX_NO_GRAPHS
@@ -65,9 +72,11 @@ public:
 
 	// complete and draw the graph
         void terminate();
-
+protected:
+	// close and remove all temporary files.
+	void zapFiles();
 private:
-	void fcheck(double);
+	void fcheck(double v,int set = 1);
 	Block* blockIamIn;
 	const char* opt;
 	const char* sf;
@@ -75,6 +84,8 @@ private:
 	int ng, index;
 	FILE *strm[MAX_NO_GRAPHS];
 	const char* tmpFileNames[MAX_NO_GRAPHS];
+	int nIgnore;
+	int count[MAX_NO_GRAPHS];
 };
 
 #endif
