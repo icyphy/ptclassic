@@ -1,77 +1,40 @@
-<!-- @(#)HTMLHelp.html	$Id$ -->
+<!-- $Id$ -->
 <html>
 <head>
-<Title>Tycho HTML Window Documentation</title>
+<Title>User's Guide to the Tycho Revision Control</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="HTML viewer">User's Guide to the HTML Viewer</a></h1>
-<p>
-The HTML viewer in Tycho provides a top-level window that
-displays formatted HTML.  It is based on the
-<a href="../../../lib/html_library/html/help.html">HTML library</a>
-written by Stephen Uhler of Sun Microsystems, which supports all the
-features of HTML 2.0.
-There is currently no support in Tycho for
-<a name=HTTP>HTTP</a> hyperlink references, so you cannot
-within Tycho directly read documents on the internet, although
-this might come in the future.  If Tycho encounters a HTML reference
-that it does not understand, then Tycho with ask the user if they want 
-to start up <CODE>Netscape</CODE>. (The Macintosh does not support
-<CODE>exec</CODE>, so this will not work on the Mac).
-
-A <a href="../../../lib/html_library/html/sample.html">sample document</a>
-illustrates the HTML tags that are supported.
-<p>
-The HTML viewer is derived from the <a href="FileHelp.html">File class</a>, and
-therefore inherits all of its features.
-In addition, it provide a pull-down menu for adjusting the sizes
-of the fonts in the display plus a toolbar at the top for invoking
-commonly invoked functions. The "File" menu provides the following
-commands:
-<dl COMPACT>
-<dt><CODE>C-x C-f</CODE><dd>open a file
-<dt><CODE>C-x C-v</CODE><dd>switch to viewing another HTML file
-<dt><CODE>C-x s</CODE><dd>open HTML source using the
-<a href="../../../editors/textedit/doc/usersGuides/EditHTMLHelp.html">
-HTML editor</a>
-<dt><CODE>C-x p</CODE><dd>print the contents (not yet implemented)
-<dt><CODE>none</CODE><dd>reload the file from disk
-<dt><CODE>C-x k</CODE><dd>close the window
-<dt><CODE>C-x C-c</CODE><dd>exit the program
-</dl>
-<p>
-
-The "Special" Menu includes an <CODE>Appletviewer</CODE> choice that
-will bring up a <A HREF="ExecHelp.html">Exec Dialog</A> with the
-command to run the <CODE>appletviewer</CODE> on the current file.
-The <CODE>appletviewer</CODE> is a windowized application that displays
-Java applets.
-Note that not all tcl ports support the Exec Dialog, so the Appletviewer
- choice might be greyed out.
+<h1><a name="revcontrol">User's Guide to the Tycho Revision Control</a></h1>
 
 <p>
-The
-<a href="../../../doc/documentation.html">
-Tycho documentation policy</a>
-explains Tycho-specific
-<a href="../../../doc/documentation.html#HTML extensions">
-HTML extensions</a>
-and how to write HTML
-so that an index can be generated automatically by the
-<a href="../../../doc/documentation.html#indexing documents">
-index generator</a>.
-Note that hypertext links can be to any type of file,
-and based on the file name extension, Tycho will open a context-specific
-editor.  Thus, you can have hypertext links to source code,
-or to graphical editors.
+The RevControl class in Tycho provides a user friendly interface
+for revision control for RCS and SCCS.
 <p>
-<a href="../../../doc/index.html">Tycho Home Page</a><br>
+The Edit class provides the following features:
+<ul>
+<li><em>Checkin/Checkout</em>These are the most commonly used commands.
+<li><em>Unedit</em>This is used to undo the file that has been checked out.
+<li><em>View History</em>This will open up all of the history associated
+	with the file, and provide hyperlinks to the older revisions.
+<li><em>Diff Checked Files</em>The user can check the different revisions
+	to compare using this command. A diff editor will pop up and
+	color the differences between the files, while leaving the common
+	text in default color. When View History is first invoked, by
+	default, the two most current files will be checked.
+<li><em>Undo Last Checkin</em>When this is invoked, the most recent check-in
+	will be undo. In another word, the user will check out the most
+	recent file, and delete the log from history so that he/she can
+	continue editing. Beware that the combination of <em>Diff Checked 
+	Files</em> followed by an <em>Undo</em> implies erasing the most 
+	recent revision.
+<p>
+<a href="../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 1996-1997, The Regents of the University of California.
+Copyright &#169 %Q%, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 04/07/97,
-comments to: <author>eal@eecs.berkeley.edu</author>
+Last updated: $Date$,
+comments to: kchang@eecs.berkeley.edu</author>
 </body>
 </html>
