@@ -39,3 +39,15 @@
 \let\ps@plain\ps@headings
 
 \pagestyle{headings}
+
+%
+% Change indentation of "description" lists.
+%
+\renewenvironment{description}%
+{\begin{list}{}{%
+    \setlength{\leftmargin}{2in}%
+    \setlength{\labelsep}{0.25in}%
+    \setlength{\labelwidth}{1.75in}%
+    \renewcommand{\makelabel}[1]{\descriptionlabel{##1}}}}%
+{\end{list}}
+
