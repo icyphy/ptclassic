@@ -79,7 +79,7 @@ int Linker::linkObj (const char* objName) {
 
 // first, read the object file
 	int fd;
-	if ((fd = open (objName, 2, 0)) < 0) {
+	if ((fd = open (objName, 0, 0)) < 0) {
 		errorHandler.error("Can't open file ", objName);
 		return FALSE;
 	}
