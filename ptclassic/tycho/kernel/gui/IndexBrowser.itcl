@@ -50,12 +50,33 @@ option add *IndexBrowser.height 20 widgetDefault
 
 ##########################################################################
 #### IndexBrowser
-# A browser for an index. This is implemented as a list browser where
-# the items in the list are each a list of three strings. The first
-# string in each item is what is displayed in the list box. The second
-# string is a file name and the third string is a point within the
-# file. When the user selects an item, we make a hyperjump to the file
-# and to the position given by the point.
+# A browser for an index.  An index consists of a two element list:
+# <ul>
+# <li> A title.
+# <li> An index list.
+# </ul>
+# An index list is a list of entries, where each entry is a list
+# with two or three items.  If the entry has three items, they should be
+# <ul>
+# <li> The string to display in the list box.
+# <li> The name of a file to jump to when the user clicks on the item.
+# <li> The point within the file to jump to.
+# </ul>
+# The third item has any syntax supported by the <code>seePoint</code>
+# method of the target editor.  It may be a null string, {}, in which case
+# the file is simply opened.
+# In an HTML file, it can be the name associated with any named anchor.
+# In a text file it could be a string of the form {line linenumber}
+# or {range start end}, where start and end are of the form line.character.
+# <p>
+# If an entry in the index has only two items, then they are:
+# <ul>
+# <li> A title.
+# <li> An index list.
+# </ul>
+# This allows for recursive indexes in a single file. When the user
+# clicks on one of these two-item entries, the contents of the list box
+# are replaced by the new index list.
 # <p>
 # If a hyperjump is taken into an index file, and a point is specified,
 # then the index is searched for a matching entry.  If a single matching
@@ -67,14 +88,9 @@ option add *IndexBrowser.height 20 widgetDefault
 # filenames referenced by the index.  Otherwise, the current working directory
 # is used for relative file names.
 # <p>
-# The format of the file is as follows:
-# name { items }, where each item is a list of three elements.
-# The name at the beginning of the list identifies the index, and is used
-# to set the -text option.  Each three element entry contains
-# a label (displayed by the index browser), a file name
-# (which can be relative to the index file), and a point within
-# the file (in any syntax supported by the <code>seePoint</code>
-# method of the target editor).
+# The format of the file is that of an index, a list of two items.
+# It can contain comment lines, which begin with a pound sign (#).
+# These are ignored.
 #
 class ::tycho::IndexBrowser {
     inherit ::tycho::ListBrowser
@@ -107,6 +123,9 @@ class ::tycho::IndexBrowser {
     # Process a file or directory selection.
     protected method processItem {filename}
 
+    # Set the contents of the index.
+    protected method setContents {contents}
+
     ##################################################################
     ####                   protected variables                    ####
 
@@ -132,32 +151,10 @@ configbody ::tycho::IndexBrowser::file {
     set fd [open $itk_option(-file) r]
     set contents [read $fd]
     close $fd
+    # Remove comments.
+    regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $contents {} stripped
     set CWD [file dirname $itk_option(-file)]
-    if {[llength $contents] != 2} {
-	error "Syntax error in index file $itk_option(-file) \
-		Should contain the form: name { items }"
-    }
-    configure -text [lindex $contents 0]
-    set items {}
-    set count 1
-    foreach item [lindex $contents 1] {
-	if {[llength $item] != 3} {
-	    error "Syntax error in index item: $item \n\
-		    Should contain the form { id filename point }"
-	}
-	set name [lindex $item 0]
-	# Special action to deal with duplicate entries.
-	if [info exists entries($name)] {
-	    incr count
-	    set name "$name $count"
-	} {
-	    set count 1
-	}
-	set entries($name) $item
-	lappend items $name
-    }
-    # We assume the items are already sorted alphabetically.
-    configure -items $items
+    setContents $stripped
 }
 
 ######################################################################
@@ -255,9 +252,48 @@ body ::tycho::IndexBrowser::processItem {id} {
     }
 
     set entry $entries($id)
-    set filename [lindex $entry 1]
-    set point [lindex $entry 2]
-
-    hyperJump $filename $point
+    if {[llength $entry] == 2} {
+        # Entry is another index.
+        setContents [lindex $entry 1]
+        return 0
+    } {
+        set filename [lindex $entry 1]
+        set point [lindex $entry 2]
+        hyperJump $filename $point
+    }
     return 1
+}
+
+######################################################################
+#### setContents
+# Given a list, use it to construct the index contents.
+#
+body ::tycho::IndexBrowser::setContents {contents} {
+    if {[llength $contents] != 2} {
+	error "Syntax error in index file $itk_option(-file) \
+		Should contain the form: name { items }"
+    }
+    configure -text [lindex $contents 0]
+    set items {}
+    set count 1
+    foreach item [lindex $contents 1] {
+	set len [llength $item]
+	if {$len != 3 && $len != 2} {
+	    error "Syntax error in index item: $item \n\
+		    Should contain the form { id filename point } \
+                    or { id indexlist }"
+	}
+	set name [lindex $item 0]
+	# Special action to deal with duplicate entries.
+	if [info exists entries($name)] {
+	    incr count
+	    set name "$name $count"
+	} {
+	    set count 1
+	}
+	set entries($name) $item
+	lappend items $name
+    }
+    # We assume the items are already sorted alphabetically.
+    configure -items $items
 }
