@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces the cosine of the input, that is assumed to be in radians
 	}
-	version {$Id$
+	version {$Id$}
 	author { P. Fiore }
 	copyright {
 Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
