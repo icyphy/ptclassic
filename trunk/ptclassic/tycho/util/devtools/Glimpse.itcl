@@ -177,7 +177,7 @@ body ::tycho::Glimpse::destructor {} {
 # Use the glimpse command to generate an index.
 
 #
-body tycho::Glimpse::glimpseSearch {} {
+body ::tycho::Glimpse::glimpseSearch {} {
     global TYCHO
     set pattern [get pattern]
     set glimpse_index [list [get glimpse_index]]
