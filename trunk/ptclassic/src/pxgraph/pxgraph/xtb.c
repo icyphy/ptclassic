@@ -1,3 +1,31 @@
+/*******************************************************************
+SCCS version identification
+$Id$
+
+Copyright (c) 1989-1994 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+*/
+
 /*LINTLIBRARY*/
 /*
  * Mini-Toolbox
@@ -12,14 +40,12 @@
  * want to use any of the standards yet -- they are too unstable).
  */
 
-#include <X11/Xos.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+#include "xgraph.h"
 #include "xtb.h"
 
 extern void abort();
 
-#define MAXKEYS		10
+/*#define MAXKEYS		10*/
 
 #ifdef __STDC__
 #define FNPTR(fname, rtn, args)	rtn (*fname)args
@@ -45,7 +71,7 @@ static unsigned long back_pix;	/* Background color */
 static XFontStruct *norm_font;	/* Normal font      */
 
 extern char *malloc();
-#define STRDUP(str)	(strcpy(malloc((unsigned) (strlen(str)+1)), (str)))
+/*#define STRDUP(str)	(strcpy(malloc((unsigned) (strlen(str)+1)), (str)))*/
 extern char *strcpy();
 extern void free();
 
@@ -311,7 +337,7 @@ xtb_data info;
 {
     Window win = evt->xany.window;
     struct b_info *ri = (struct b_info *) info;
-    xtb_hret rtn;
+    xtb_hret rtn = (xtb_hret)0;
 
     switch (evt->type) {
     case Expose:
@@ -768,7 +794,7 @@ unsigned long pix;
 }
 
 /* For debugging */
-focus_evt(evt)
+void focus_evt(evt)
 XEvent *evt;
 {
     switch (evt->xfocus.mode) {
@@ -824,7 +850,7 @@ xtb_data info;
     Window win = evt->xany.window;
     struct ti_info *ri = (struct ti_info *) info;
     char keys[MAXKEYS], textcopy[MAXCHBUF];
-    xtb_hret rtn;
+    xtb_hret rtn = (xtb_hret)0;
     int nbytes, i;
 
     switch (evt->type) {
