@@ -60,6 +60,18 @@ class ::tycho::EditItcl {
 ###################################################################
 #
 body ::tycho::EditItcl::constructor {args} {
+    addMenu Special left Window -underline 0
+
+
+    addMenuItem "Method Template" Special -underline 0 \
+	    -command "\[$this component text\] methodTemplate"
+
+    addMenuItem "File Template" Special -underline 0 \
+	    -command "\[$this component text\] fileTemplate"
+
+    addMenuItem "Generate HTML" Special -underline 0 \
+	    -command "\[$this component text\] tydoc"
+
     eval itk_initialize $args
 }
 
