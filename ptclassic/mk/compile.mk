@@ -160,6 +160,9 @@ realclean:
 		$(PL_SRCS:.pl=.htm) \
 		$(REALCLEAN_STUFF)
 
+# The depend, makefile and makefiles rules are duplicated in
+# src/pitcl/make.template, so if you make changes below, please
+# change that file too.
 DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 
 depend:		$(SRCS) $(HDRS)
