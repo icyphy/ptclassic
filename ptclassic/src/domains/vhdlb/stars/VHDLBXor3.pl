@@ -1,5 +1,5 @@
 defstar {
-	name { Xor }
+	name { Xor3 }
 	domain {VHDLB}
 	desc {
 Output the logical xor of the three inputs with the given delay.
