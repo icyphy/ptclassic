@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee
+ Programmer: Edward A. Lee
 
  Geodesic for VHDLB code generation.
  In addition to fork management provide by VHDLBGeodesics,

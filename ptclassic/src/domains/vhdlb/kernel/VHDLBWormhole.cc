@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee, Michael C. Williamson
+ Programmer:  Edward A. Lee, Michael C. Williamson
 
 Code for functions declared in VHDLBWormhole.h
 

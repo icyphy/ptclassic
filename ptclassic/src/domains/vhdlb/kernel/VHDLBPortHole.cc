@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee and Soonhoi Ha
+ Programmer: Edward A. Lee and Soonhoi Ha
 
  These classes are portholes for stars that generate VHDLB code.  
 

@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee, Michael C. Williamson
+ Programmer: Edward A. Lee, Michael C. Williamson
 
  This produces and compiles a standalone VHDLB program for a universe.
  Base target for VHDLB code generation.
@@ -37,8 +37,6 @@ $Id$
 #include <time.h>
 #include "Fix.h"
 #include "StringList.h"
-#include <istream.h>
-#include <ostream.h>
 
 /////////////////////////////////////////
 // constructor

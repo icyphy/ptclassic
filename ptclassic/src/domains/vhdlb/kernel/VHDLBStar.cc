@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee, Asawaree Kalavade
+ Programmer: Edward A. Lee, Asawaree Kalavade
 
  This is the baseclass for stars that generate VHDLB language code
 
@@ -55,11 +55,13 @@ StringList VHDLBStar::expandRef(const char* name)
 
 }
 
+/*
 StringList VHDLBStar::expandRef(const char* name, const char* offset) 
 {
         codeblockError("Use @ operator instead of expandRef(,) syntax.");
         return "ERROR";
 }
+*/
 
 void VHDLBStar::registerState(const char* name) {
 	State* state;
