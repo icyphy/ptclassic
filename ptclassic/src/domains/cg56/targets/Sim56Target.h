@@ -20,6 +20,7 @@ $Id$
 
 #include "CG56Target.h"
 #include "StringState.h"
+#include "IntState.h"
 
 class Sim56Target : public CG56Target {
 private:
@@ -31,11 +32,10 @@ protected:
 	StringState plotFile;
 	StringState plotTitle;
 	StringState plotOptions;
-	StringState disCode;
-	StringState simCode;
+	IntState disCode;
+	IntState simCode;
 public:
-	Sim56Target(const char*,const char*,
-		    unsigned,unsigned,unsigned,unsigned);
+	Sim56Target(const char*,const char*);
 	Sim56Target(const Sim56Target&);
 	~Sim56Target();
 	void headerCode();
