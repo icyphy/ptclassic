@@ -48,7 +48,9 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	sample.graph \
+	sample2.graph
 
 MISC_FILES = 
 
