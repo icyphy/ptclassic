@@ -28,6 +28,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "utility.h"
 #include "cp_internal.h"
+#include "cp_procs.h"
 #include "tr.h"
 
 #define TEXT_BUFFER_INIT_SIZE 120        /* (power of two) - SLOP */
@@ -36,6 +37,31 @@ static char SccsId[]="$Id$";
 static boolean in_definition = FALSE;
 tr_stack *cp_stack;
 
+/* Who knows what this function does, it has lots of undefined calls
+ * in it, which we declare below
+ */ 
+extern void cp_call
+	ARGS((int cell_num, double (*array)[2], int 32 x, int32 y, int type));
+extern void cp_defdelete
+	ARGS((int cell_num));
+extern void cp_deffinish();
+extern void cp_defstart
+        ARGS((int cell_num, int a, int b));
+extern void cp_layer
+	ARGS((char *name));
+extern void cp_userextension
+	ARGS((int user_num, char *result));
+extern void cp_end();
+extern void cp_polygon
+	ARGS((int number, struct cp_path *path));
+extern void cp_box
+	ARGS((int length, int width, cp_point center, cp_point dir));
+extern void cp_roundflash
+	ARGS((int diameter, cp_point center));
+extern void cp_wire
+	ARGS((int width, cp_path number, int path));
+
+void
 cp_parse(input_file)
 FILE * input_file;
 {
