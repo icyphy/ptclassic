@@ -171,6 +171,7 @@ body ::tycho::RevControlSCCS::checkOut {object} {
 # 
 body ::tycho::RevControlSCCS::initializeRevControl {} {
     ::tycho::RevControl::initializeRevControl
+    #set file [$object filename]
     set dir [file dirname $file]
     set revdir [format "%s/SCCS" $dir]
     set basefile [file tail $file]
@@ -220,6 +221,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 # Get the specified version and open the file.
 # 
 body ::tycho::RevControlSCCS::retrieveVersion {version} {
+    set file [$object filename]
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
@@ -232,7 +234,6 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
             [file extension $basefile]]
 
 
-    puts "Version $version"
     # In sccs get, -s means silent, -p means to stdout.
     if [catch {exec sccs get -p -s -r$version $basefile > $tmpFile} output ] {
         error "Problem executing:\n\
@@ -250,40 +251,55 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
 #
 body ::tycho::RevControlSCCS::compareVersion {} {
     if {[llength $difflist]!=2} {
-        error "You need to select exactly TWO files to compare!"
+        error "You need to select exactly two files to compare."
     }
 
+    set file [$object filename]
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
     cdDir $dir
+
     # Generate a temporary file name that has the same extension as the file
     # we are working on.
     set tmpFile [::tycho::tmpFileName \
             [file rootname $basefile] \
             [file extension $basefile]]
-
+    # We originally have the formal UNIQUEID+12345_678
+    # Now parser into 12345.678
     regexp {.*\+(.*)} [lindex $difflist 0] match version1
     regexp {.*\+(.*)} [lindex $difflist 1] match version2
     set version1 [join [split $version1 _] .]
     set version2 [join [split $version2 _] .]
+    set tmpFile1 $tmpFile.$version1
+    set tmpFile2 $tmpFile.$version2
 
-    # In sccs get, -s means silent, -p means to stdout.
-    if [catch \
-            {exec sccs get -p -s -r$version1 $basefile > $tmpFile.1} output] {
-        error "Problem executing:\n\
-             `sccs get -p -s -r$version1 $basefile > $tmpFile.1':\n\ $output"
-    }
-    if [catch \
-            {exec sccs get -p -s -r$version2 $basefile > $tmpFile.2} output] {
-        error "Problem executing:\n\
-             `sccs get -p -s -r$version2 $basefile > $tmpFile.2':\n\ $output"
+    # Now make sure that version 0.0 is the original file
+    if {$version1==0.0} {
+        set tmpFile1 $file
+    } else {
+        # In sccs get, -s means silent, -p means to stdout.
+        if [catch {exec sccs get -p -s -r$version1 $basefile > $tmpFile1} output] {
+            error "Problem executing:\n\
+                    `sccs get -p -s -r$version1 $basefile > \
+                    $tmpFile1':\n\ $output"
+        }
     }
 
+    if {$version2==0.0} {
+        set tmpFile2 $file
+    } else {
+        if [catch {exec sccs get -p -s -r$version2 $basefile > $tmpFile2} output] {
+            error "Problem executing:\n\
+                    `sccs get -p -s -r$version2 $basefile > \
+                    $tmpFile2':\n\ $output"
+        }
+    }
+
+    puts "$tmpFile1   $tmpFile2"
     # We have the files! Now safely invoke diffWidget
-    set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
-    $diffWidget configure -filename1 $tmpFile.1
-    $diffWidget configure -filename2 $tmpFile.2
+    set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32 \
+            -filename1 $tmpFile1 -filename2 $tmpFile2]
     $diffWidget configureUpdate
     $diffWidget compareFile
 
@@ -298,6 +314,7 @@ body ::tycho::RevControlSCCS::compareVersion {} {
 # 
 body ::tycho::RevControlSCCS::unedit {} {
     ::tycho::RevControl::unedit
+    set file [$object filename]
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
@@ -373,6 +390,7 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 # return a 1 if it is or a 0 otherwise.
 # 
 body ::tycho::RevControlSCCS::isUnderRevControl {file} {
+    #set file [$object filename]
     set dir [file dirname $file]
     set revdir [format "%s/SCCS" $dir]
     set basefile [file tail $file]
@@ -419,7 +437,7 @@ body ::tycho::RevControlSCCS::updateHistory {} {
 # Parse the history information and insert a synopsis into the text window.
 # 
 body ::tycho::RevControlSCCS::parseHistory {history text} {
-    set file [file tail [$object filename]]
+    set file [$object filename]
     set lines [split $history "\n"]
 
     # FIXME:Error recovery scheme should be more complicated!
@@ -448,7 +466,6 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
     # Create the START DIFF button
     set version STARTDIFFNOW
     set buttonName $uniqueID$version
-    puts $buttonName
     button $text.$buttonName -text "Start Diff" -command "$this compareVersion"
     $text window create end -window $text.$buttonName
     $text insert insert " to compare the two files.\n\n"
