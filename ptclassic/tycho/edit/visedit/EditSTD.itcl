@@ -813,25 +813,26 @@ body  ::tycho::EditSTD::transAction {arc action} {
 	    }
 	}
 
+	# Check if the string is finished
+	if {$start==$length} { break }
+
 	# Set end point.
 	set end $start
 	while {$end<$length} {
 	    set char [string index $action $end]
-	    if {$char==" " || $char==","} {
+	    if {$char==","} {
 		break
 	    } else {
 		incr end
 	    }
 	}
 
-	if {$start==$length} { break }
-
 	# Found one element.
 	set element [string range $action $start [expr $end-1]]
 	
 	# Split event and expression in element
 	set leftIndx [string first {(} $element]
-	set rightIndx [string first {)} $element]
+	set rightIndx [string last {)} $element]
 	if {$leftIndx == -1} {
 	    set event $element
 	    set expression ""
