@@ -191,10 +191,9 @@ TREE:
 
     # If the .glimpse files exist, then create links for them
     if [file exists $root/src/.glimpse_exclude] {
-	puts "Creating $croot/src/.glimpse_exclude"
+	puts "Creating $croot/src/.glimpse_*"
 	eval file delete -force [glob $croot/src/.glimpse*]
-	exec ln -s $root/src/.glimpse_exclude $croot/src/.glimpse_exclude
-	exec ln -s $root/src/.glimpse_index $croot/src/.glimpse_index
+	eval exec ln -s [glob /users/ptdesign/src/.glimpse*] $croot/src
     }
 
 
