@@ -276,7 +276,7 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
 	// Turn on the poll flag when the timer expires
-	signal(SIGALRM, setPollFlag);
+	signal(SIGALRM, (void (*)(int))setPollFlag);
 	// Turn off the poll flag until the timer fires
 	flags &= ~poll;
 	// Start the timer
