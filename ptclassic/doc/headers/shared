@@ -108,13 +108,13 @@ delim off
 
 .\" Index entry for reference to a star.  .Sr star domain
 .de Sr
-.if \\n(.$>1 .tm index_star_ref \\n(AS-\\n% \\$1 ($2 star)
+.if \\n(.$>1 .tm index_star_ref \\n(AS-\\n% \\$1 (\\$2 star)
 .if !\\n(.$>1 .tm index_star_ref \\n(AS-\\n% \\$1 (\\*(DO star)
 ..
 
 .\" Index entry for example of a star.  .Se star domain
 .de Se
-.if \\n(.$>1 .tm index_star_exp \\n(AS-\\n% \\$1 ($2 star)
+.if \\n(.$>1 .tm index_star_exp \\n(AS-\\n% \\$1 (\\$2 star)
 .if !\\n(.$>1 .tm index_star_exp \\n(AS-\\n% \\$1 (\\*(DO star)
 ..
 
