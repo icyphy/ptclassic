@@ -299,6 +299,79 @@ definitions of this method in the kernel, pigilib and ptcl.
 <a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/reimer0898/pt0.7.1p1.ptclInvokeInterp.patch.gz"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/reimer0898/pt0.7.1p1.ptclInvokeInterp.patch.gz</CODE></a>
 
 
+<li> Loading a star fails
+Currently, dynamically loading a star is not supported under NT,
+but Ptolemy 0.7.1 was not even getting that far, pigi was
+failing to run <CODE>ptlang</CODE>
+
+ <p>To replicate the bug:
+<ol>
+
+<li>  I have a .pl file, but no .cc or .h file
+
+<li> I hit '*'
+
+<li> The Make Star window comes up.
+
+<li> I fill in the Star name and Star src dir,
+
+<li> I hit ok.
+
+<li> I get a message:
+<pre>
+   Loader: cd //d/users/cxh/c++/pt; ptlang SDFMyRamp.pl >&
+   /tmp/pt2af3001
+   Can't open error file
+</pre>
+
+</ol>
+
+
+I looked in
+<CODE>pigilib/pigiLoader.cc</CODE> and found that the ptlang call
+actually was calling <CODE>util_cystem()</CODE>.
+
+<CODE>util_csystem()</CODE>
+ is defined in
+<CODE>src/octtools/Packages/utility/csystem.c</CODE>
+
+The bug is that util_cystem() execs /bin/csh, which does not
+exist under Cygwin
+
+As a hack, I modified util_cystem so that we call /bin/bash:
+<pre>
+#ifdef PTNT
+        /* /bin/sh needs to actually be /bin/bash */
+	(void) execl("/bin/bash", "bash", "-c", s, 0);
+#else
+	(void) execl("/bin/csh", "csh", "-f", "-c", s, 0);
+#endif
+</pre>
+
+
+ <p>I then rebuilt the octtools libutility and pigi
+I then copied bash.exe from the Cygwin directory to /bin
+
+ <p>I'll see if I can figure out a better solution than my hack above.
+
+ <p><CODE>util_csystem()</CODE>
+ is also used to compile the star by hand from within
+<CODE>pigiLoader.cc</CODE>
+ or to run make if a makefile is present.
+
+ <p>Sascha Schwarz
+<CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE> reported
+the following workaround for this problem
+<BLOCKQUOTE>
+The clue is to create the .pl file, and then copy some schematic from
+somewhere in the same directory, and name it in the same way. E.g., DEFoo.pl
+would require schematics foo, contents don't seem to matter. Then you can
+compile your own pigiRPC as described in the Programmer's Guide, p.1-7. Then
+run this pigi-version, and you will be able to make the star using the '*'
+command, though you might have some error messages. But the second or third
+try usually works. 
+</BLOCKQUOTE>
+
 </MENU>
 
 <HR>
