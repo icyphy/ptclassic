@@ -53,6 +53,8 @@ OBJS = $(SRCS:.c=.o)
 
 C_INCL= -I../include $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
+MISC_FILES =	README
+
 all::	 makefile installColors
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
