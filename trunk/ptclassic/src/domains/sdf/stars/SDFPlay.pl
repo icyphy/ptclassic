@@ -43,9 +43,9 @@ be a parameter.
 		desc {File to save the output mu-law samples.}
 	}
 	protected {
-		FILE *strm;
-		int delFile;
-		char* fileName;
+		FILE *strm;	// for writing the file
+		int delFile;	// if true, file needs deletion at end
+		char* fileName;	// name of file to use (on heap)
 	}
 	hinclude { <stdio.h> }
 	ccinclude { "miscFuncs.h" , "UserOutput.h", <std.h> }
@@ -54,12 +54,13 @@ be a parameter.
 		delFile = FALSE;
 	}
 	start {
-		fileName = savestring(saveFile);
-		if (fileName == NULL || *fileName == 0) {
+		const char* sf = saveFile;
+		// if name is empty, use a temp file.
+		if (sf == NULL || *sf == 0) {
 			fileName = tempFileName();
 			delFile = TRUE;
 		}
-		else fileName = savestring (expandPathName(fileName));
+		else fileName = savestring (expandPathName(sf));
 		// should check if file already exists here
 		if ((strm = fopen (fileName, "w")) == NULL) {
 			Error::abortRun (*this, 

@@ -63,13 +63,17 @@ No decimation or interpolation is supported.
 	constructor {
 	    taps = 0;
 	    M = 0;
+	    fdbkDelayLine = 0;
 	}
 	destructor {
 	    LOG_DEL; delete taps;
+	    LOG_DEL; delete fdbkDelayLine;
 	}
 	start {
+	// delete and remake arrays if a different size is being used.
 	    if (int(order) != M) {
 		LOG_DEL; delete taps;
+		LOG_DEL; delete fdbkDelayLine;
 		M = int(order);
 		LOG_NEW; taps = new double[M];
 		LOG_NEW; fdbkDelayLine = new double[M];

@@ -71,6 +71,8 @@ Turns on or off display of the plane where y=0.
 		double* highestValue;
 		int inBreak;
 	}
+	constructor { highestValue = 0;}
+	destructor { LOG_DEL; delete highestValue;}
 	start {
 		graph.initialize(this, 2, options, title, saveFile, ignore);
 		// allow access to one past sample
@@ -79,6 +81,7 @@ Turns on or off display of the plane where y=0.
 		nTracesSoFar = 0;
 		graph.setIgnore(0);
 		xval = double(xInit);
+		LOG_DEL; delete highestValue;
 		LOG_NEW; highestValue = new double [int(traceLength)];
 		inBreak = FALSE;
 	}
