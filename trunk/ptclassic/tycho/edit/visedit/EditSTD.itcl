@@ -88,7 +88,7 @@ class ::tycho::EditSTD {
     method setInitialState {tag} 
 
     # Set the machine type.
-    method setMachineType {type}
+#    method setMachineType {type}
 
     # Set the in, out and internal port names.
     method setPortNames {in out internal}
@@ -163,15 +163,21 @@ body ::tycho::EditSTD::constructor {args} {
     eval itk_initialize $args 
 
     # If no machine type is specified yet, initialize it.
-    if {![info exists machineType]} {
-	set w $prefix.editMachineType
-	::tycho::Dialog $w -title "Edit the Machine Type"\
-		-text "Press button to choose the machine type:"
-	$w addButton mixed -text "Mixed"\
-		-command "$this setMachineType Mixed; destroy $w"
-	$w centerOnScreen
-	tkwait window $w
-    }
+#    if {![info exists machineType]} {
+#	set w $prefix.editMachineType
+#	::tycho::Dialog $w -title "Edit the Machine Type"\
+#		-text "Press button to choose the machine type:"
+#	$w addButton mixed -text "Mixed"\
+#		-command "$this setMachineType Mixed; destroy $w"
+#	$w centerOnScreen
+#	tkwait window $w
+#    }
+
+    # FIXME: Need to find a way to let users specify the machine type
+    # when this is a new file. Currently, the data of the file is read
+    # after this constructor, so we can't initialize the machine type
+    # like it used to be. (See the few lines above FIXME.)
+    set machineType "Mixed"
 
     interactiveEnable 1
 }
@@ -718,9 +724,9 @@ body ::tycho::EditSTD::setInitialState {tag} {
 #######################################################################
 #### setMachineType
 #
-body ::tycho::EditSTD::setMachineType {type} {
-    set machineType $type
-}
+#body ::tycho::EditSTD::setMachineType {type} {
+#    set machineType $type
+#}
 
 #######################################################################
 #### setPortNames
