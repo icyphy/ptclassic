@@ -79,6 +79,7 @@ COLLECTOR =
 PURELINK =	
 PURIFY = 	purify -cache-dir=/var/pure/cache
 QUANTIFY = 	quantify	
+PURECOV =	purecov -cache-dir=/var/pure/cache
 
 # Variable for the Ariel DSP56000 board
 S56DIR =
