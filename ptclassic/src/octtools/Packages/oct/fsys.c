@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -245,11 +245,11 @@ char *c_b;
     struct fct *b = (struct fct *) c_b;
     int retval;
 
-    (retval = (a->parent_desc != b->parent_desc)) ||
+    (void) ((retval = (a->parent_desc != b->parent_desc)) ||
               (retval = SAFE_CMP(a->cell, b->cell)) ||
               (retval = SAFE_CMP(a->view, b->view)) ||
               (retval = SAFE_CMP(a->facet, b->facet)) ||
-              (retval = SAFE_CMP(a->version, b->version));
+              (retval = SAFE_CMP(a->version, b->version)));
 
     return retval;
 }
@@ -273,6 +273,7 @@ int max;
     return retval%max;
 }
 
+void
 oct_init_facet_key_table()
 {
     facet_key_table = st_init_table(facet_key_compare, facet_key_hash);
