@@ -101,7 +101,7 @@ test SCCS-1.1 {test out sccs} {
 } {}
 
 test RCS-1.1 {test out sccs} {
-    testRevControl RCS
+   testRevControl RCS
 } {}
 
-#doneTests
+doneTests
