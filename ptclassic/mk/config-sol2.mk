@@ -77,8 +77,8 @@ X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 COLLECTOR = 	
 
 PURELINK =	
-PURIFY =	
-QUANTIFY =	
+PURIFY = 	purify -cache-dir=/var/pure/cache
+QUANTIFY = 	quantify	
 
 # Variable for the Ariel DSP56000 board
 S56DIR =
