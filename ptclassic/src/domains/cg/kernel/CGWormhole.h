@@ -116,6 +116,9 @@ public:
 
 	// as Eventhorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return ToEventHorizon::allocateGeodesic(); }
 };
 
         //////////////////////////////////////////
@@ -136,6 +139,9 @@ public:
 
 	// as Eventhorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return FromEventHorizon::allocateGeodesic(); }
 };
 
 #endif
