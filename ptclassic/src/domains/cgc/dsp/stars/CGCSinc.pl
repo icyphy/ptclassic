@@ -48,21 +48,12 @@ McGraw-Hill: New York, 1986.
 		desc{The output of the sinc function.}
 	}
 	initCode {
-	        addInclude("<math.h>");
+	        addModuleFromLibrary("ptdspSinc", "src/utils/libptdsp", "ptdsp");
 	}
 	go {
 		addCode(sinc);
 	}
 	codeblock(sinc) {
-	  const double DELTA = 1.0e-9;	// Approximately zero
-	  double x = $ref(input);
-	  double sincValue;
-
-	  if ( ( -DELTA < x ) && ( x < DELTA ) )
-	    sincValue = 1.0;
-	  else
-	    sincValue = sin(x) / x;
-
-	  $ref(output) = sincValue;
+	        $ref(output) = Ptdsp_Sinc((double)$ref(input));
 	}
 }
