@@ -57,3 +57,8 @@ MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 endif
 MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
 
+# Ptolemy interface directories
+EXTTOOLSLIB = $(ROOT)/src/utils/libexttools
+PTMATLABLIB = $(ROOT)/src/utils/libptmatlab
+MATLABIFC_INCSPEC = -I$(EXTTOOLSLIB) -I$(PTMATLABLIB)
+
