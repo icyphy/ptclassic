@@ -46,24 +46,36 @@ limitation of liability, and disclaimer of warranty provisions.
 		noInternalState();
 	}
 	setup {
+                if ( int(blockSize) < 1 ) {
+			Error::abortRun(*this, "blockSize must be positive");
+			return;
+		}
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
+        codeblock(init) {
+	int n = $ref(control);
+	int j = $val(blockSize);
+	}
+	codeblock(copyData, "int i, int portnum") {
+		/* Output port #@portnum */
+		if (n != @i) $ref(output#@portnum,j) = 0;
+		else $ref(output#@portnum,j) = $ref(input,j);
+	}
+	codeblock(blockIterator) {
+	while (j--)
+	}
 	go {
-	    StringList out;
-	    out << "\tint n,j;\n\tn = $ref(control);\n";
-	    out << "\tfor(j = $val(blockSize)-1; j >= 0; j--) {\n";
-
-	    for (int i = 0; i < output.numberPorts(); i++) {
-		out << "\t\tif (n == " << i << ")\n";
-		out << "\t\t\t$ref(output#" << i+1 << ",j) = $ref(input,j);\n";
-		out << "\t\t else\n";
-		out << "\t\t\t$ref(output#" << i+1 << ",j) = 0;\n";
-	    }
-	    out << "\t}\n";
-	    addCode(out);
+		addCode(init);
+		addCode(blockIterator);
+		addCode("\t{\n");
+		// control value i means port number i+1
+		for (int i = 0; i < output.numberPorts(); i++) {
+			copyData(i,i+1);
+		}
+		addCode("\t}\n");
 	}
 	exectime {
-		return (output.numberPorts()+1) * int(blockSize) + 1;
+		return 1 + (output.numberPorts() + 1) * int(blockSize);
 	}
 }
