@@ -1699,7 +1699,7 @@ body ::tycho::Graphics::paste {} {
 # "graphics" preferences.
 #
 body ::tycho::Graphics::preference {mode args} {
-    eval ::preference $mode "graphics" $args
+    eval ::tycho::preference $mode "graphics" $args
 }
 
 #######################################################################
