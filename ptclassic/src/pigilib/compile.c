@@ -518,7 +518,7 @@ octObject *galFacetPtr;
 {
     char msg[1000], *name;
     boolean xferedBool;
-    char *oldDomain, *galDomain;
+    char *oldDomain, *galDomain, *galTarget;
 
     oldDomain = curDomainName();
 
@@ -527,6 +527,13 @@ octObject *galFacetPtr;
         PrintErr(ErrGet());
         return (FALSE);
     }
+
+    /* get the galaxy target */
+    if (!GOCTargetProp(galFacetPtr, &galTarget, "<parent>")) {
+        PrintErr(ErrGet());
+        return (FALSE);
+    }
+
     /* Call Kernel function to set KnownBlock current domain */
     if (! KcSetKBDomain(galDomain)) {
         PrintErr("Domain error in galaxy or wormhole.");
@@ -556,7 +563,7 @@ octObject *galFacetPtr;
     /*
      * The following sets the new domain again.
      */
-    ERR_IF1(!KcDefgalaxy(name,galDomain));
+    ERR_IF1(!KcDefgalaxy(name,galDomain,galTarget));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
     ERR_IF2(!ConnectPass(galFacetPtr), msg);
@@ -570,6 +577,8 @@ octObject *galFacetPtr;
     return (TRUE);
 }
 
+char* KcDefTarget();
+
 static boolean
 CompileUniv(facetPtr)
 octObject *facetPtr;
@@ -577,10 +586,17 @@ octObject *facetPtr;
     char *name;
     boolean xferedBool;
     char* oldDomain;
-
+    char* target;
+    
     if((oldDomain = setCurDomainF(facetPtr)) == NULL) {
         PrintErr("Domain error in facet.");
         KcSetKBDomain(oldDomain);
+        return (FALSE);
+    }
+
+    /* get the target */
+    if (!GOCTargetProp(facetPtr, &target, KcDefTarget())) {
+        PrintErr(ErrGet());
         return (FALSE);
     }
 
@@ -594,6 +610,7 @@ octObject *facetPtr;
     }
     PrintDebug("CompileUniv");
     KcClearUniverse(name);
+    ERR_IF1(!KcSetTarget(target));
     ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
