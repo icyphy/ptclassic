@@ -6,9 +6,10 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  J. T. Buck
+ Programmer:  J. T. Buck and E. A. Lee
  Date of creation: 3/19/90
  Revised 10/2/90 to work under the preprocessor.
+ Revised 10/21/90 to use XGraph class
 
  Draws a graph with the xgraph function.  It is assumed that "xgraph"
  is on your path, or this will not work!!!
@@ -43,83 +44,22 @@ defstar {
 		default {""}
 		desc {"command line options for xgraph"}
 	}
+	hinclude { "Display.h" }
 	protected {
-		FILE *strm;
-		int delFile;
-		const char* fileName;
-	}
-	ccinclude { "miscFuncs.h" }
-	constructor {
-		strm = NULL;
-		delFile = FALSE;
+		XGraph graph;
 	}
 	start {
-		fileName = saveFile;
-		if (fileName == NULL || *fileName == 0) {
-			fileName = tempFileName();
-			delFile = TRUE;
-		}
-		else fileName = savestring (expandPathName(fileName));
-		// should check if file already exists here
-		if ((strm = fopen (fileName, "w")) == NULL)
-			errorHandler.error ("Can't open file ", fileName);
+		graph.initialize(1, (const char*) options,
+				    (const char*) title,
+				    (const char*) saveFile);
 	}
-// go.  Does nothing if open failed.
+
 	go {
-		if (!strm) return;
 		float data = input.get();
-		fprintf (strm, "%g %g\n", arrivalTime, data);
+		graph.addPoint(arrivalTime, data);
 	}
-// wrapup.  Does nothing if open failed, or 2nd wrapup call.
+
 	wrapup {
-		if (!strm) return;
-		fclose (strm);
-		exec("");
-		strm = NULL;
-	}
-	destructor {
-		if (strm) fclose (strm);
-		if (delFile) unlink (fileName);
-		delete fileName;
-	}
-// execute the program
-// extraOpts is mainly for derived stars.
-	method {
-		name { exec }
-		access { protected }
-		arglist { "(const char* extraOpts)" }
-		type { void }
-		code {
-			StringList cmd;
-
-			if (delFile) cmd += "( ";
-			cmd += "xgraph ";
-
-			const char* t = title;
-			if (t && *t) {
-				cmd += "-t '";
-				cmd += t;
-				cmd += "' ";
-			}
-			const char* o = options;
-			if (o && *o) {
-				cmd += o;
-				cmd += " ";
-			}
-			if (extraOpts && *extraOpts) {
-				cmd += extraOpts;
-				cmd += " ";
-			}
-			cmd += fileName;
-			if (delFile) {
-				cmd += "; /bin/rm -f ";
-				cmd += fileName;
-				cmd += ")";
-			}
-			cmd += "&";
-			system (cmd);
-			// no longer need to clean up
-			delFile = FALSE;
-		}
+		graph.terminate();
 	}
 }
