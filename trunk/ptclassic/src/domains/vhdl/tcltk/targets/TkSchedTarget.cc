@@ -185,11 +185,11 @@ void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
 
   // Enter the custom event loop.
   exitRequest = 0;
-  fprintf(stderr, "Entering main event loop\n");
+  //  fprintf(stderr, "Entering main event loop\n");
   while (!exitRequest) {
     Tk_DoOneEvent(TK_ALL_EVENTS);
   }
-  fprintf(stderr, "Exiting main event loop\n");
+  //  fprintf(stderr, "Exiting main event loop\n");
   // Exit the custom event loop.
 
   // Close the Tk window.
@@ -276,7 +276,7 @@ int SetProcCmd(ClientData clientData,
       return error;
     }
   }
-  printf("Setting procNum for %s to %d\n", firingName, procNum);
+  //  printf("Setting procNum for %s to %d\n", firingName, procNum);
 
   VHDLFiring* firing = new VHDLFiring;
   firing = ourFiringList->vhdlFiringWithName(firingName);

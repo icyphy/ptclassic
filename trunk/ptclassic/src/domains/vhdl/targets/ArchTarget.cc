@@ -329,7 +329,9 @@ void ArchTarget :: trailerCode() {
       }
     }
     else {
+      /*
       cout << "Token:  " << token->getName() << ": has no sourceFiring\n";
+      */
     }
     // Finally, put the reg in the list AFTER its members have been set.
     regList.put(*newReg);
@@ -378,7 +380,9 @@ void ArchTarget :: trailerCode() {
       }
     }
     else {
+      /*
       cout << "Token:  " << token->getName() << ": has no destFirings\n";
+      */
     }
   }
 
@@ -811,8 +815,10 @@ void ArchTarget :: trailerCode() {
     VHDLFiringListIter nextFiring(masterFiringList);
     VHDLFiring* firing;
     while ((firing = nextFiring++) != 0) {
+      /*
       cout << "Firing:  " << firing->getName() << "\t\t";
       cout << "GroupNum:  " << firing->groupNum << "\n";
+      */
     }
   }
 
@@ -1139,8 +1145,10 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
+  /*
   cout << "registerPortHole:  dataName: " << dataName;
   cout << "                   portName: " << port->name() << "\n";
+  */
   /*
   cout << "  tokenNum:  " << tokenNum << "\n";
   */
