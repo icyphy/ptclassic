@@ -1,65 +1,118 @@
 defstar{
-    name { DynBlockBase }
+    name { DynMapBase }
     domain { DE }
     author { J. Voigt }
-    version { $Id$
-    }   
-    copyright { copyright (c) 1997 Dresden University of Technology
-                WiNeS-Project  }
-    desc { Creates and deletes blocks dynamically. It has to be connected 
-    to a DynMerge-Star and/or a DynFork-Star in order to get and release all 
-    the PortHoles needed for the dynamically created blocks.
-    }
-    explanation {
-This is the base star for all stars which support a mutable system 
-configuration. It is an abstract class, so it can't be instantiated. See the 
-descriptions of its childs for further explanation.
-
-The current limitations are:
-A block which is to instantiate must not have multiportholes.
-
-Creating a block dynamically is as follows:
-
-Using some source code from "HOFBase::createBlock" I get a pointer to a newly created block. This block is instantiated and put in a list. The input 
-and output portholes of that newly created block are looked for and  
-approriate farsides for these portholes are created in "DEDynMerge" and 
-"DEDynFork" using their "createPortHole()"-method. These portholes are 
-connected afterwards. Once they are connected, the newly created portholes
-are initialized. If "parameter_map" is not empty, the parameters in the new 
-block are set. If it is empty, the "initialization()"-method sets the default 
-values. The entire galaxy's connectivity is checked. The next actions here 
-are checking for delayfreeloops and updating the porthole priorities. We have 
-to take special care of source-stars in the dynamically created blocks. If 
-there are any, we have to give them an inital event at the current time. That 
-means, all source-stars derived from DERepeatStar give now out an initial event at the time of their creation (instead of time zero, when they don't exist).
-Otherwise these source-stars would never give out any event. See the description
-of DERepeatStar for details.
-
-Deleting a block dynamically is as follows:
-
-I get a unique identifier for a block to be deleted. This block is looked for 
-in my list of currently existing blocks. I get a pointer to my deleteBlock from the list and remove that block from the list. Then, the eventqueue is checked 
-for any events pointing to deleteblock. If any events are found, they are 
-deleted from the eventqueue. Then I look for input and output of the 
-deleteblock. I again check the eventqueue for any events which are scheduled 
-to the farside of the deleteblock's output. Then I disconnect the portholes 
-from their farside and delete their farside using "removePortHole()" in 
-"DEDynMerge" and "DEDynFork", respectively. Next, I remove deleteblock from 
-the galaxy's blocklist, where it was added to by "createBlock". 
-Once removed there, I can delete it. The entire galaxy's connectivity is 
-checked. The last actions here are checking for delayfreeloops and updating 
-the porthole priorities.
-
-Scanning the eventqueue is as follows:
-
-Using "scanEventList()" and "scanGalaxyForContents()" I go down the block's 
-hierarchy until I only deal with atomic elements ("stars"). For each star I 
-check the current eventQueue for any pending pointer to it (CQScheduler) or for any pending pointer to any of its input-portholes (DEScheduler) using 
-"deletePendingEventsOfStar", which should be self-exploratory.
+    version { @(#)DEDynMapBase.pl	1.3 12/9/97    }   
+    copyright {
+copyright (c) 1997 Dresden University of Technology, WiNeS-Project              All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.  
 }
-	acknowledge { I use some code from Edward A. Lee's older version of HOFBase.pl. Former versions of that star called that code directly. But, is was removed there by Tom Lane. So, I copied the older code directly into this file. }
+    desc { This is the base star for a family of stars which supports a mutable 
+system configuration in the DE-domain. This star family implements the 
+functionality of a dynamic map-function for the discrete-event domain. A dynamic
+ map-function works like the map-function in the HOF-domain, but we can change 
+the number of blocks it multiplies during runtime of the simulation. Thus, we 
+support a mutable system configuration. Note, that this star family only works with the two standard DE schedulers.
+<p>
+This class is an abstract class, so it can't be instantiated and can not be used on its own. It contains methods which are used by its childs.
+    }
+    htmldoc { This star contains methods which are used by <tt>DEDynMap</tt> and <tt>DEDynMapGr</tt> for an instantiation of other blocks during runtime of the simulation. The descriptions of these stars explain their application. We here just
+ explain the single methods. 
+<p>        
+<h3>Creating a block dynamically is as follows (<i>createDynBlock</i>):</h3>
+<p>
+We create blocks using code from <tt>HOFBase::createBlock</tt> in 
+<i>createBlock</i>. 
+This method returns a pointer to a newly created block. 
+This block is instantiated, gets a unique name, and is added to the galaxy's 
+blocklist. 
+Furthermore, we put it into an internal list, so that we can find it back 
+lateron when we want to delete it. 
+<p>
+Then we look for input and output portholes of that newly created block and 
+create approriate farsides for these portholes in <tt>DEDynMerge</tt> and 
+<tt>DEDynFork</tt> using their <i>createPortHole()</i>-method. These portholes 
+are connected afterwards. We here just have pure virtual methods <i>
+connectXXXports</i>, because these portholes can 
+be of different datatypes and are members of our childs only. Once they are 
+connected, the newly created portholes are initialized. 
+<p>
+If <i>parameter_map</i> is not empty, the parameters in the new block are set in <i>setParameter</i>. If it is empty, the <i>initialization()</i>-method sets 
+the default values. 
+<p>
+The entire galaxy's connectivity is checked. Then we check for delayfreeloops 
+and update the porthole priorities.
+<p>
+We have to take special care of source-stars in the dynamically created blocks. 
+We look for them in <i>scanGalaxyForSources</i>. If there are any, we have to 
+give them an initial event at the current time. That means, all source-stars 
+derived from <tt>DERepeat</tt>-star give now out an initial event at the time of their creation (instead of time zero, when they probably don't exist). Otherwise these source-stars would never give out any event. See the description of the <tt>DERepeat</tt>-star for details.
+<p>
+<h3>Deletion of a block dynamically is as follows (<i>deleteDynBlock</i>):</h3>
+<p>
+I get a unique identifier for a block to be deleted as parameter. 
+This block is looked for in my internal list of currently existing blocks. I get a pointer to my deleteBlock from this list and remove that block from the list.
+<p>
+Then, the eventqueue is checked for any events pointing to deleteblock using 
+<i>scanEventList</i>. If any events are found, they are deleted from the 
+eventqueue.
+<p> 
+Then I look for input and output of the deleteblock. Again, the
+<i>disconnectXXXPorts</i> are here just pure virtual, because the portholes are 
+members of our childs and of a specila datatype. Inside 
+<i>disconnectXXXPorts</i> we check the eventqueue for any events which are 
+scheduled to the farside of the deleteblock's outputs. These farside are inputs, so events might be sent to them.Since we delete these farside, we better also 
+delete the events. Then I disconnect the portholes from their farside and delete
+ their farside using <i>removePortHole()</i> in <tt>DEDynMerge</tt> and 
+<tt>DEDynFork</tt>, respectively. 
+<p>
+Next, I remove deleteblock from the galaxy's blocklist, where it was added to by the code from <i>createDynBlock</i>. Once removed there, it can be recycled into our blockpool. 
+<p>
+The entire galaxy's connectivity it checked again. Then I check for 
+delayfreeloops again and update the porthole priorities.
+<p>
+<h3>Scanning the eventqueue is as follows (<i>scanEventList</i>):</h3>
+<p>
+Using <i>scanEventList()</i> and <i>scanGalaxyForContents()</i> I go down the 
+block's hierarchy until I only deal with atomic elements (<tt>stars</tt>). 
+For each star I check the current eventQueue for any pending pointer to it 
+(CQScheduler) or for any pending pointer to any of its input-portholes 
+(DEScheduler) using <i>deletePendingEventsOfStar</i> or <i>deletePendingEventsOfPortHole</i>, which should be self-exploratory both.
+<p>
+<h3>Setting parameter values:</h3>
+<p>
+All parameters are used in the derived class <tt>DEDynMap</tt>.
+<p>
+<h4>blockname:</h4> Name of the block, which is to multiply. The masterinstance. 
+This block can be any galaxy or star. However, it must not have multiportholes.
+<p>
+<h4>where_defined:</h4> The full path and facet name for the definition of 
+blockname.
+<p>
+<h4>output_map:</h4> The names of the block's outputs for mapping. The names of 
+the outputs from the masterinstance should be listed in the order in which they 
+should be connected.
+<p>
+<h4>input_map:</h4> The names of the block's inputs for mapping. The names of 
+the inputs to the masterblock should be listed in the order in which they should
+be connected.
+<p>
+<h4>parameter_map:</h4> The mapping of parameters like in HOF::Map.
+<p>
+<h3>The current limitations are:</h3>
+<p>
+A block which is to instantiate must not have multiportholes.
+<p>
+FIXME: The eventlist is to re-sort after the configuration changed. Thanks to Tom Lane for pointing this out.
+}
+    acknowledge { I use some code from Edward A. Lee's older version of 
+<tt>HOFBase</tt>. Former versions of <tt>DEDynMapBase</tt> called that code 
+directly. But, Tom Lane changed the HOF-stars. So, I copied the older code 
+directly into this file, having the advantage of being independent of further 
+changes in HOF now. }
     location { $PTOLEMY/src/domains/de/contrib/stars }
-    hinclude { "checkConnect.h", "CQScheduler.h", "DEScheduler.h", "DERepeatStar.h", "DEDynMerge.h", "KnownBlock.h", "InfString.h" }
+    hinclude { "checkConnect.h", "CQScheduler.h", "DEScheduler.h", "DERepeatStar.h", "DEDynMerge.h", "KnownBlock.h", "InfString.h", <list.h>, <stack.h> }
     ccinclude { "ptk.h" }
     defstate {
         name { blockname }
@@ -79,16 +132,14 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
         name { output_map }
         type { stringarray }
         default { "" }
-        desc { The names of the block's output
-               FIXME: multiports are not supported 
+        desc { The names of the block's outputs for mapping.
         }
     }
     defstate {
         name { input_map }
         type { stringarray }
         default { "" }
-        desc { The names of the block's input
-               FIXME: multiports are not supported 
+        desc { The names of the block's inputs for mapping.
         }
     }
     defstate {
@@ -119,12 +170,11 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
         };
     }
     code {
-        int DEDynBlockBase::nameCounter = 0;
+        int DEDynMapBase::nameCounter = 0;
     }
     constructor { 
-        list_h = list_t =  blockCounter_p = NULL;
+        list_h = list_t = blockCounter_p = NULL;
         delBlock_p = NULL;
-        
     }
     // The following two methods are copied from an older version of HOFBase.
     // They have been removed in the HOF-stars, at least in that form. So,
@@ -202,6 +252,26 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
         arglist { "(Block*)" }
         access { protected }
     }
+    // The start- and stop-methods are very specific.
+    // The default implementations do nothing.
+    virtual method {
+        name { callStartMethods }
+        type { void }
+        arglist { "(Block*)" }
+        access { protected }
+        code {
+            return;
+        }
+    }
+    virtual method {
+        name { callStopMethods }
+        type { void }
+        arglist { "(Block*, double)" }
+        access { protected }
+        code {
+            return;
+        }
+    }
     method {
         name { myParent }
         type { "Galaxy*" }
@@ -232,12 +302,10 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
             // bottomline: I think that dealing with aliases isn't 
             // necessary here.
 
-            // GenericPort *genPort_p = myBase.aliasPointingAtThis(source);
             int numdelays = dest->numInitDelays();
             const char* initDelayVals = dest->initDelayValues();
             source->connect(*dest, numdelays, initDelayVals);
 
-            // myBase.fixAllAliases(genPort_p, dest, (GenericPort *) source);
             return;
         }
     } 
@@ -250,8 +318,8 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
             // get the block from the list and remove it from the list
             // first check whether or not the list exists
             if (!list_t) {
-                Error::abortRun(*this,
-			"No DynBlock exists, so I can't delete one");
+                Error::abortRun(*this,"No DynBlock exists, so I can't 
+                delete one");
                 return;
             }
             else {
@@ -326,7 +394,7 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
                     return;
                 }
   
-                // once removed, it can be recycled
+                // once removed, it can be deleted
                 delete delBlock_p;
       
                 // check connectivity
@@ -415,7 +483,7 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
             return block_p;
         }
     }
-    method {
+  method {
         name { createDynBlock }
         type { void }
         access { protected }
