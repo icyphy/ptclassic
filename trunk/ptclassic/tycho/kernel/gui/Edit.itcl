@@ -560,8 +560,7 @@ body ::tycho::Edit::constructor {args} {
     bind $text <<SelectAll>> "$this selectRange 1.0 end; break"
 
     # The following bindings are basically the same as in the Text
-    # widget, but here they set up the undo and save data to our
-    # clipboard.
+    # widget, but here they set up the undo.
     bind $text <<ClearToEnd>> "$this killToEndOfLine ; break"
     bind $text <<ClearToStart>> "$this killToStartOfLine ; break"
     # Tab character alternate C-i (overridden by OpenLine)
@@ -936,9 +935,8 @@ body ::tycho::Edit::del {type} {
 # Delete the specified range and record the deletion for undoing. If
 # either the beginning or the end of the range align with the contents
 # of the previous deletion or insertion, then the deleted range is
-# appended to undo buffer rather than replacing it. The deleted string
-# is copied to the clipboard. The arguments are indices in any form
-# understood by the Tk text widget.
+# appended to undo buffer rather than replacing it. The arguments are
+# indices in any form understood by the Tk text widget.
 #
 body ::tycho::Edit::deleteRange {first last} {
     
@@ -960,8 +958,10 @@ body ::tycho::Edit::deleteRange {first last} {
     }
     # NOTE:  Some users find it counterintuitive that even
     # single character deletions go into the clipboard.  However,
-    # if the single character is a newline, then it is intuitive.
-    setClipboard $lastDelString
+    # if the single character is a newline, then it is intuitive
+    # to emacs users.  However, everyone else finds this behavior
+    # annoying, since it results in lost data in the clipboard.
+    # setClipboard $lastDelString
     
     set lastUndo [$itk_component(text) index $first]
     set lastDelPosition [$itk_component(text) index $first]
