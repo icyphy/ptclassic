@@ -247,7 +247,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
 		myData = $ref(input,pos);
-                check = AM_Request4($starSymbol(endpoint), $val(hostAddr), 2, myData, 0, 0, 0);      
+                check = AM_RequestMedium4($starSymbol(endpoint), $val(hostAddr), 2, (void *)&myData, sizeof(double), 0, 0, 0, 0);      
 		if (check == -1) {
 			printf("Error in sending data\n");
 		}

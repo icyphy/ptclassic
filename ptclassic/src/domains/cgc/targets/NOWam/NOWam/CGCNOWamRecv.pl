@@ -65,9 +65,11 @@ Produce code for inter-process communication (receive-side).
 #endif
 	}
 	codeblock (ipcHandler) {
-void $starSymbol(ipc_handler)(void *source_token, int d1, int d2, int d3, int d4)
+void $starSymbol(ipc_handler)(void *source_token, void *buf, int nbytes, int d1, int d2, int d3, int d4)
 {
-        $starSymbol(RecvData) = d1;
+	double *temp;
+	temp = (double *)buf;
+        $starSymbol(RecvData) = *temp;
 }
 	}
         codeblock (errorHandler) {
