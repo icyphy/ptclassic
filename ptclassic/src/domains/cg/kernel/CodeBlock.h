@@ -25,13 +25,13 @@ $Id$
 class CodeBlock {
 public:
 	// Constructor for the default case just stores the code
-	CodeBlock(char* b) { text = b; }
+	CodeBlock(const char* b) { text = b; }
 	// Is the following needed also?
 	void setText(char* line) {text = line;}
-	char* getText() {return text;}
+	const char* getText() {return text;}
 	void printCode ();
 private:
-	char* text;
+	const char* text;
 };
 
 
@@ -56,7 +56,7 @@ public:
 // For now, this is identical with ListIter, except for a cast
 class CodeBlockIter : private ListIter {
 public:
-	CodeBlockIter(const CodeBlockList& c) : ListIter (c) {}
+	CodeBlockIter(CodeBlockList& c) : ListIter (c) {}
 	CodeBlock* next() { return (CodeBlock*)ListIter::next();}
 	CodeBlock* operator++() { return next();}
 	ListIter::reset;
