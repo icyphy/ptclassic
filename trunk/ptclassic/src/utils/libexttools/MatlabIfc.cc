@@ -585,9 +585,9 @@ int MatlabIfc :: MatlabToPtolemy(
 }
 
 void MatlabIfc :: FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices) {
-    if ( matlabMatrices != 0 ) {
+    if ( matlabMatrices ) {
 	for ( int k = 0; k < numMatrices; k++ ) {
-	    if ( matlabMatrices[k] != 0 ) {
+	    if ( matlabMatrices[k] ) {
 		mxFreeMatrix(matlabMatrices[k]);
 		matlabMatrices[k] = 0;
 	    }
@@ -636,8 +636,8 @@ Matrix* MatlabIfc :: SetVariable(const char* name,
 
 Matrix* MatlabIfc :: SetVariable(const char* name,
 				 int numrows, int numcols,
-				 const char** realPartStrings,
-				 const char** imagPartStrings) {
+				 char** realPartStrings,
+				 char** imagPartStrings) {
     int realOrComplex = (imagPartStrings) ? MXCOMPLEX : MXREAL;
     Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
 
@@ -693,8 +693,8 @@ Matrix* MatlabIfc :: GetVariable(char* name,
 
 Matrix* MatlabIfc :: GetVariable(char* name,
 				 int* numrows, int* numcols,
-				 char** realPartStrings,
-				 char** imagPartStrings) {
+				 char*** realPartStrings,
+				 char*** imagPartStrings) {
 
     Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
 
@@ -703,22 +703,28 @@ Matrix* MatlabIfc :: GetVariable(char* name,
 	*numcols = mxGetN(matlabMatrix);
 	Real* realp = mxGetPr(matlabMatrix);
 	Real* imagp = mxGetPi(matlabMatrix);
+	int numelements = (*numrows) * (*numcols);
+	*realPartStrings = new (char*) [numelements];
+	if ( imagp ) *imagPartStrings = new (char*) [numelements];
+	else *imagPartStrings = 0;
+	int element = 0;
 	for ( int jcol = 0; jcol < *numcols; jcol++ ) {
 	    for ( int jrow = 0; jrow < *numrows; jrow++ ) {
 		StringList realstring = *realp++;
-		*realPartStrings++ = savestring(realstring);
+		(*realPartStrings)[element] = savestring(realstring);
 		if ( imagp ) {
 		    StringList imagstring = *imagp++;
-		    *imagPartStrings = savestring(imagstring);
+		    (*imagPartStrings)[element] = savestring(imagstring);
 		}
+		element++;
 	    }
 	}
     }
     else {
 	*numrows = 0;
 	*numcols = 0;
-	*realPartStrings = 0;
-	*imagPartStrings = 0;
+	***realPartStrings = 0;
+	***imagPartStrings = 0;
     }
 
     return matlabMatrix;
