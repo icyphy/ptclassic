@@ -70,7 +70,7 @@ static int loadStartup(Tcl_Interp* interp) {
 }
 
 // Delete a PTcl object.
-static void PTclDeleteProc(ClientData clientData, Tcl_Interp *interp)
+static void PTclDeleteProc(ClientData clientData, Tcl_Interp */* interp */)
 {
     PTcl *ptcl = (PTcl *) clientData;
     delete ptcl;
