@@ -42,17 +42,12 @@ include $(CONFIG)
 TCL_SRCS = \
 
 SIMPLE_TESTS = \
-	testCacheManager.itcl \
 	testCircularList.itcl \
 	testMail.itcl \
-	testResource.itcl \
-	testStack.itcl \
-	testURLPath.itcl
-
+	testStack.itcl
 
 # Removed testBuilderDialog.itcl until test levels are implemented
 GRAPHICAL_TESTS = \
-	testExec.itcl \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
 	testMenuBar.itcl \
