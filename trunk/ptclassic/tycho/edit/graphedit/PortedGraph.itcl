@@ -46,21 +46,19 @@
 # <a href="Digraph.html">Digraph</a> classes for more information
 # about graphs and directed graphs, and the <a href="Model.html">Model</a> 
 # class for more information about the facilities inherited by this
-# class from Model. Create a graph and give keys and edges some attributes:
-# <tcl><pre>
-#     catch {delete object $graph}
-#     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
-#     $graph configureLinkType edge -initialdelay {}
-#     $graph configureEntityType key -tokencount 1 -type input
-# </tcl></pre>
-#
-# Load data into the graph:
+# class from Model. Create a graph, give keys and edges some
+# attributes, load data into it, and display it:
+# Load data into the graph and display it again:
 # <pre>
 #   a---->c--->
 #         ^
 #   b-----+--->d
 # </pre>
 # <tcl><pre>
+#     catch {delete object $graph}
+#     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
+#     $graph configureLinkType edge -initialdelay {}
+#     $graph configureEntityType key -tokencount 1 -type input
 #     $graph read string {
 #         vertex a {
 #             key out -tokencount 2 -type output
@@ -80,10 +78,6 @@
 #         edge b out c in-1
 #         edge b out d in
 #     }
-# </tcl></pre>
-#
-# Let's just make sure we have what we think we have:
-# <pre><tcl>
 #     $graph describe
 # </tcl></pre>
 #
@@ -177,7 +171,10 @@ class ::tycho::KeyedDigraph {
     # Return edges matching a vertex and key patterns
     method edges {{vertex1 *} {key1 *} {vertex2 *} {key2 *}}
 
-	# Return all attributes of a key
+    # Add a key to a vertex
+    method key {vertex key args}
+
+    # Return all attributes of a key
     method keyattrs {vertex key}
 
     # Get an attribute or attributes of a key
@@ -188,9 +185,6 @@ class ::tycho::KeyedDigraph {
 
     # Remove a key from the graph
     method keydelete {vertex key}
-
-    # Add a key and attributes to a vertex
-    method keyin {vertex key args}
 
     # Return keys of a vertex that match a pattern
     method keys {vertex {key *}}
@@ -213,11 +207,9 @@ class ::tycho::KeyedDigraph {
     #################################################################
     ####                   protected methods                     ####
 
-    # Keys cannot be created at the top level
-    protected method key {key args} {
-    	_toplevelerror key $context [list $vertex $key]
-    }
-    
+    # Add a key -- parser call
+    method _key {vertex key args}
+
     # Evaluate code in this object's context
     protected method evalInSpecificContext {args} {eval $args}
 }
@@ -226,11 +218,12 @@ class ::tycho::KeyedDigraph {
 #### constructor
 #
 body ::tycho::KeyedDigraph::constructor {args} {
-    # Key names are a list 
-    configure -separator " "
-    
     # Define the "key" entity: no value, no default attributes
-    defineEntityType key
+    defineEntityType key -leaf 1
+
+    # Turn off the -leaf option of vertices, so that
+    # they can contain keys
+    configureEntityType vertex -leaf 0
 
     # Evaluate options
     eval configure $args
@@ -253,17 +246,17 @@ body ::tycho::KeyedDigraph::adjacent {vertex key {select all}} {
     # The "in" direction
     if { $select == "in" || $select == "all" } {
 	foreach quad [array names _info \
-		[list edge * * [list * * $vertex $key]]] {
-	    lappend result [lindex [lindex $quad 3] 0]
-	    lappend result [lindex [lindex $quad 3] 1]
+		[list edge {} [list * * $vertex $key]]] {
+	    lappend result [lindex [lindex $quad 2] 0]
+	    lappend result [lindex [lindex $quad 2] 1]
 	}
     }
     # The "out" direction
     if { $select == "out" || $select == "all" } {
 	foreach quad [array names _info \
-		[list edge * * [list $vertex $key * *]]] {
-	    lappend result [lindex [lindex $quad 3] 2]
-	    lappend result [lindex [lindex $quad 3] 3]
+		[list edge {} [list $vertex $key * *]]] {
+	    lappend result [lindex [lindex $quad 2] 2]
+	    lappend result [lindex [lindex $quad 2] 3]
 	}
     }
     return $result
@@ -276,21 +269,21 @@ body ::tycho::KeyedDigraph::adjacent {vertex key {select all}} {
 # return the inverse command.
 #
 body ::tycho::KeyedDigraph::delete {vertex} {
-    _verify vertex $vertex
+    _verify vertex {} $vertex
 
     # Start inverse command
     set inverse [list sequence]
 
     # Delete outward edges
     foreach {v1 k1 v2 k2} [edges $vertex * * *] {
-		lappend inverse [edgedelete $v1 $k1 $v2 $k2]
+	lappend inverse [edgedelete $v1 $k1 $v2 $k2]
     }
     # Delete inward edges
     foreach {v1 k1 v2 k2} [edges * * $vertex *] {
-		lappend inverse [edgedelete $v1 $k1 $v2 $k2]
+	lappend inverse [edgedelete $v1 $k1 $v2 $k2]
     }
     # Delete the vertex. (NB: This must follow the edge deletion.)
-    	lappend inverse [vertexdelete $vertex]
+    lappend inverse [vertexdelete $vertex]
 
     # Return the inverse command
     return $inverse
@@ -302,13 +295,12 @@ body ::tycho::KeyedDigraph::delete {vertex} {
 # Add a new edge to the graph, and return the inverse command.
 #
 body ::tycho::KeyedDigraph::edge {vertex1 key1 vertex2 key2 args} {
-    _verifynot edge [list $vertex1 $key1 $vertex2 $key2]
+    set name [list $vertex1 $key1 $vertex2 $key2]
+
+    _verifynot edge {} $name $name
     
     # Record the edge
-    set inverse [_link edge {} [list $vertex1 $key1 $vertex2 $key2] $args]
-
-    # FIXME FIXME FIXME FIXME
-    set inverse [list edgedelete $vertex1 $key1 $vertex2 $key2]
+    _addlink edge {} $name $name $args
 
     # Add links to the adjacency matrix
     _adjacencyadd $vertex1 $vertex2
@@ -317,7 +309,7 @@ body ::tycho::KeyedDigraph::edge {vertex1 key1 vertex2 key2 args} {
     catch {unset _cache}
 
     # Return the inverse command
-    return $inverse
+    list edgedelete $vertex1 $key1 $vertex2 $key2
 }
 
 ########################################################################
@@ -328,8 +320,9 @@ body ::tycho::KeyedDigraph::edge {vertex1 key1 vertex2 key2 args} {
 # not exist.
 #
 body ::tycho::KeyedDigraph::edgeattrs {vertex1 key1 vertex2 key2} {
-    _verify     edge [list $vertex1 $key1 $vertex2 $key2]
-    _attributes edge [list $vertex1 $key1 $vertex2 $key2]
+    set name [list $vertex1 $key1 $vertex2 $key2]
+    _verify     edge {} $name
+    _attributes edge {} $name
 }
 
 ########################################################################
@@ -339,8 +332,9 @@ body ::tycho::KeyedDigraph::edgeattrs {vertex1 key1 vertex2 key2} {
 # exist or the attribute does not exist.
 #
 body ::tycho::KeyedDigraph::edgecget {vertex1 key1 vertex2 key2 attribute} {
-    _verify edge [list $vertex1 $key1 $vertex2 $key2]
-    _cget   edge [list $vertex1 $key1 $vertex2 $key2] $attribute
+    set name [list $vertex1 $key1 $vertex2 $key2]
+    _verify edge {} $name
+    _cget   edge {} $name
 }
 
 ########################################################################
@@ -350,8 +344,9 @@ body ::tycho::KeyedDigraph::edgecget {vertex1 key1 vertex2 key2 attribute} {
 # is a flat list of attribute-value pairs.
 #
 body ::tycho::KeyedDigraph::edgeconfigure {vertex1 key1 vertex2 key2 args} {
-    _verify    edge [list $vertex1 $key1 $vertex2 $key2]
-    _configure edge [list $vertex1 $key1 $vertex2 $key2] $args
+    set name [list $vertex1 $key1 $vertex2 $key2]
+    _verify    edge {} $name
+    _configure edge {} $name
 }
 
 ########################################################################
@@ -360,7 +355,8 @@ body ::tycho::KeyedDigraph::edgeconfigure {vertex1 key1 vertex2 key2 args} {
 # Remove an edge from the graph, and return the inverse command.
 #
 body ::tycho::KeyedDigraph::edgedelete {vertex1 key1 vertex2 key2} {
-    _verify edge [list $vertex1 $key1 $vertex2 $key2]
+    set name [list $vertex1 $key1 $vertex2 $key2]
+    _verify edge {} $name
 
     # Delete it from the adjacency list
     _adjacencydelete $vertex1 $vertex2
@@ -369,12 +365,12 @@ body ::tycho::KeyedDigraph::edgedelete {vertex1 key1 vertex2 key2} {
     catch {unset _cache}
 
     # Delete the data and get the inverse command
-    set inverse [_delete edge [list $vertex1 $key1 $vertex2 $key2]]
+    set inverse [concat edge $name [_delete edge {} $name]]
     
     # If there are still edges between the same vertices, add an edge
     # back to the adjacency list
     if { [array names _info \
-	    [list edge * * [list $vertex1 * $vertex2 *]]] != "" } {
+	    [list edge {} [list $vertex1 * $vertex2 *]]] != "" } {
     	_adjacencyadd $vertex1 $vertex2
     }
     return $inverse
@@ -390,10 +386,25 @@ body ::tycho::KeyedDigraph::edgedelete {vertex1 key1 vertex2 key2} {
 body ::tycho::KeyedDigraph::edges {{vertex1 *} {key1 *} {vertex2 *} {key2 *}} {
     set result {}
     foreach quad [array names _info \
-	    [list edge * * [list $vertex1 $key1 $vertex2 $key2]]] {
-	eval lappend result [lindex $quad 3]
+	    [list edge {} [list $vertex1 $key1 $vertex2 $key2]]] {
+	eval lappend result [lindex $quad 2]
     }
     return $result
+}
+
+########################################################################
+#### key
+#
+# Add a key to a vertex. This method is provided for
+# convenience -- it is not used by the TIM file parser.
+# Additional arguments are a flat attribute-value list for the
+# parameter. Flag an error if the key already exists. Return
+# the inverse command.
+#
+body ::tycho::KeyedDigraph::key {vertex key args} {
+    _verifynot key $vertex $key [list $vertex $key]
+    _addentity key $vertex $key [list $vertex $key] {} $args
+    list keydelete $vertex $key
 }
 
 ########################################################################
@@ -404,8 +415,8 @@ body ::tycho::KeyedDigraph::edges {{vertex1 *} {key1 *} {vertex2 *} {key2 *}} {
 # not exist.
 #
 body ::tycho::KeyedDigraph::keyattrs {vertex key} {
-    _verify     key [list $vertex $key]
-    _attributes key [list $vertex $key]
+    _verify     key $vertex $key
+    _attributes key $vertex $key
 }
 
 ########################################################################
@@ -415,8 +426,8 @@ body ::tycho::KeyedDigraph::keyattrs {vertex key} {
 # exist or the attribute does not exist.
 #
 body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
-    _verify key [list $vertex $key]
-    _cget   key [list $vertex $key] $attribute
+    _verify key $vertex $key
+    _cget   key $vertex $key $attribute
 }
 
 ########################################################################
@@ -426,8 +437,8 @@ body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
 # is a flat list of attribute-value pairs.
 #
 body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
-    _verify    key [list $vertex $key]
-    _configure key [list $vertex $key] $args
+    _verify    key $vertex $key
+    _configure key $vertex $key $args
 }
 
 ########################################################################
@@ -436,24 +447,12 @@ body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
 # Remove a key from the graph, and return the inverse command.
 #
 body ::tycho::KeyedDigraph::keydelete {vertex key} {
-    _verify key [list $vertex $key]
+    _verify key $vertex $key
 
     # Delete the key and return the inverse command
-    _delete key [list $vertex $key]
+    concat key $vertex $key [_delete key $vertex $key]
 
-    # Are there any other things to be taken care of???
-}
-
-########################################################################
-#### keyin
-#
-# Add a new key to a vertex, and return the inverse command.
-#
-body ::tycho::KeyedDigraph::keyin {vertex key args} {
-    _verifynot key [list $vertex $key]
-    
-    # Record the key and return the inverse
-    _entity key $vertex $key {} $args
+    # FIXME: Are there any other things to be taken care of?
 }
 
 ########################################################################
@@ -465,8 +464,7 @@ body ::tycho::KeyedDigraph::keyin {vertex key args} {
 #
 body ::tycho::KeyedDigraph::keys {vertex {key *}} {
     set result {}
-    foreach quad [array names _info \
-	    [list key $vertex $key *]] {
+    foreach quad [array names _info [list key $vertex $key]] {
 	eval lappend result [lindex $quad 2]
     }
     return $result
@@ -509,11 +507,11 @@ body ::tycho::KeyedDigraph::subgraphEdges {args} {
     set result {}
     foreach u $args {
         foreach v $args {
-            foreach quad [array names _info [list edge * * [list $u * $v *]]] {
-                lappend result [lindex $quad 3]
+            foreach quad [array names _info [list edge {} [list $u * $v *]]] {
+                lappend result [lindex $quad 2]
             }
-            foreach quad [array names _info [list edge * * [list $v * $u *]]] {
-                lappend result [lindex $quad 3]
+            foreach quad [array names _info [list edge {} [list $v * $u *]]] {
+                lappend result [lindex $quad 2]
             }
         }
     }
@@ -531,8 +529,8 @@ body ::tycho::KeyedDigraph::subgraphEdges {args} {
 body ::tycho::KeyedDigraph::subgraphInputs {args} {
     set result {}
     foreach v $args {
-        foreach quad [array names _info [list edge * * [list * * $v *]]] {
-            set edge [lindex $quad 3]
+        foreach quad [array names _info [list edge {} [list * * $v *]]] {
+            set edge [lindex $quad 2]
             if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
                 lappend result $edge
             }
@@ -552,8 +550,8 @@ body ::tycho::KeyedDigraph::subgraphInputs {args} {
 body ::tycho::KeyedDigraph::subgraphOutputs {args} {
     set result {}
     foreach v $args {
-        foreach quad [array names _info [list edge * * [list $v * * *]]] {
-            set edge [lindex $quad 3]
+        foreach quad [array names _info [list edge {} [list $v * * *]]] {
+            set edge [lindex $quad 2]
             if { [lsearch -exact $args [lindex $edge 2]] < 0 } {
                 lappend result $edge
             }
@@ -580,5 +578,23 @@ body ::tycho::KeyedDigraph::verify {} {
 	}
     }
     return 1
+}
+
+
+########################################################################
+########################################################################
+####                       protected methods                        ####
+
+
+########################################################################
+#### _key
+#
+# Add a new key to a vertex.
+#
+body ::tycho::KeyedDigraph::_key {vertex key args} {
+    _verifynot key $vertex $key [list $vertex $key]
+    
+    # Record the key
+    _addentity key $vertex $key [list $vertex $key] {} $args
 }
 
