@@ -77,10 +77,10 @@ typedef struct MLParameters {
 typedef MLParameters *MLParametersPointer;
 
 extern MLEnvironment MLInitialize ARGS((MLParametersPointer));
-extern void MLDeinitialize ARGS((MLEnvironment env));
+extern void MLDeinitialize ARGS((MLEnvironment));
 
 extern MLEnvironment MLBegin ARGS((MLParametersPointer));
-extern void MLEnd ARGS((MLEnvironment env));
+extern void MLEnd ARGS((MLEnvironment));
 
 
 /*************** Connection interface ***************/
@@ -248,7 +248,7 @@ extern void  MLDisownIntegerArray
 	     ARGS((MLINK, ml_intp, ml_longp, ml_charpp, long));
 
 extern int   MLGetShortIntegerArray
-	     ARGS((MLINK, ml_shortpp, ml_longpp, ml_charppp, ml_longp depth));
+	     ARGS((MLINK, ml_shortpp, ml_longpp, ml_charppp, ml_longp));
 extern void  MLDisownShortIntegerArray
 	     ARGS((MLINK, ml_shortp, ml_longp, ml_charpp, long));
 
@@ -267,8 +267,8 @@ extern int   MLGetFloatArray
 extern void  MLDisownFloatArray
 	     ARGS((MLINK, ml_floatp, ml_longp, ml_charpp, long));
 
-extern int   MLGetLongDouble  ARGS((MLINK mlp, ml_extendedp));
-extern int   MLPutLongDouble  ARGS((MLINK mlp, ml_extended));
+extern int   MLGetLongDouble  ARGS((MLINK, ml_extendedp));
+extern int   MLPutLongDouble  ARGS((MLINK, ml_extended));
 extern int   MLPutLongDoubleArray
 	     ARGS((MLINK, ml_extendedp, ml_longp, ml_charpp, long));
 extern int   MLGetLongDoubleArray
@@ -280,7 +280,7 @@ extern void  MLDisownLongDoubleArray
 #define MLEchoExpression MLTransferExpression
 #endif
 
-extern int MLTransferExpression ARGS(( MLINK dmlp, MLINK smlp));
+extern int MLTransferExpression ARGS((MLINK, MLINK));
 
 /*************** Message interface ***************/
 typedef void (*MLMessageHandlerType) ARGS((MLINK, unsigned long, unsigned long));
