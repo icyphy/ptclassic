@@ -402,7 +402,7 @@ body ::tycho::Query::check {tag label default args} {
 		[list -variable [scope $itk_component(hull)_[set tag]sw]] \
 		$args
     } {
-        keep -background -cursor -background
+        keep -background -cursor
     }
     grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky w
     set [scope $itk_component(hull)_[set tag]sw] $default
@@ -465,7 +465,7 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
 		-textvariable [scope $itk_component(hull)_[set tag]sw] \
 		-relief raised -bd 2 -highlightthickness 2 -anchor c
     } {
-        keep -background -cursor -background -font
+        keep -background -cursor -font
         rename -width -entrywidth entryWidth EntryWidth
     }
     grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky e
@@ -474,7 +474,7 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
     itk_component add menu_$tag {
 	menu $itk_component(tag_$tag).menu -tearoff 0 -takefocus 1
     } {
-	keep -background -cursor -background -font
+	keep -background -cursor -font
     }
     foreach e $entries {
 	$itk_component(menu_$tag) add command -label $e \
@@ -860,7 +860,7 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
     itk_component add tag_$tag {
         frame $itk_component(querysite).tag_$tag
     } {
-        keep -background -cursor -background
+        keep -background -cursor
     }
     grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky w
     
