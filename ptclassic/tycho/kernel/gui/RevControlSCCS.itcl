@@ -274,6 +274,23 @@ body ::tycho::RevControlSCCS::compareVersion {} {
     regexp {.*\+(.*)} [lindex $difflist 1] match version2
     set version1 [join [split $version1 _] .]
     set version2 [join [split $version2 _] .]
+
+    # Note: VERSION 0.0 indicates the latest original file.
+    # Now, sort the version number. The first file should be the higher
+    # version number so that EditDiff will place it on top. However, if it
+    # is verison 0.0, then it has precedence.
+    set versions [lsort -real [list $version1 $version2]]
+    if {$version1==0.0} {
+        # Do nothing, version 0.0 has precedence (top)
+    } elseif {$version2==0.0} {
+        set version1 [lindex $versions 0]  ;# version1 is the original, top
+        set version2 [lindex $versions 1]
+    } else {
+        # We're comparing two old versions
+        set version1 [lindex $versions 1]  ;# version1 is the highest number
+        set version2 [lindex $versions 0]
+    }
+
     set tmpFile1 $tmpFile.$version1
     set tmpFile2 $tmpFile.$version2
 
@@ -306,7 +323,6 @@ body ::tycho::RevControlSCCS::compareVersion {} {
     $diffWidget compareFile
 
     cd $olddir
-
 }
 
 
