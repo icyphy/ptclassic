@@ -40,43 +40,6 @@ DCNode::DCNode(int type) : ParNode(type) {
 	finishTime = -1;	// Initialize to something invalid
 }
 
-                        /////////////////////
-                        ///  copyAncDesc  ///
-                        /////////////////////
-// This function copies the ancestors and descendants of the node
-//	into temporary variables tempAncs and tempDescs.
-// If flag = 0, copy normally
-// If flag = 1, copy ancestors into tempDescs and descendants into tempAncs
-
-void DCNode::copyAncDesc(DCGraph* g, int flag) {
-
-	resetWaitNum();
-
-	EGGateLinkIter dfiter1(ancestors);
-	EGGateLinkIter dfiter2(descendants);
-	EGGate *dfl;
-
-	// Clear tempAncs and tempDescs completely
-	tempAncs.initialize();
-	tempDescs.initialize();
-
-	// Restore tempAncs (sorted smallest SL first)
-	while ((dfl = dfiter1++) != 0) {
-	   if (flag == 0)
-		g->sortedInsert(tempAncs, (ParNode*)(dfl->farEndNode()), 0);
-	   else
-		g->sortedInsert(tempDescs, (ParNode*)(dfl->farEndNode()), 0);
-	}
-
-	// Restore tempDescs (sorted largest SL first)
-	while ((dfl = dfiter2++) != 0) {
-	   if (flag == 0)
-		g->sortedInsert(tempDescs, (ParNode*)(dfl->farEndNode()), 1);
-	   else
-		g->sortedInsert(tempAncs, (ParNode*)(dfl->farEndNode()), 1);
-	}
-}
-
                         ////////////////////
                         ///  getSamples  ///
                         ////////////////////
