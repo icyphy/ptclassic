@@ -38,7 +38,7 @@ Code for functions declared in DEConnect.h
 PortHole& DEPortHole :: setPort (
 			     const char* s,
                              Block* parent,
-                             dataType t = FLOAT)
+                             DataType t)
 {
 	// Initialize PortHole
         PortHole::setPort(s,parent,t);
