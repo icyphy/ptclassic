@@ -4,9 +4,9 @@ defstar {
 	desc { This star compresses its input as per the Mu Law . 
 		using the conversion formula
 	|v2| = log (1+ mu*|v1|) / log( 1+mu)  }
-	author { Asawaree}
+	author { Asawaree Kalavade }
 	copyright { 1991 The Regents of the University of California }
-	version {%W %G}
+	version {$Id$}
 	input {
 		name{input}
 		type{float}
