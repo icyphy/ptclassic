@@ -26,8 +26,7 @@ state {
 	}
 }
 
-protected {
-	friend class CGCS56XTarget;
+public {
 	CG56S56XCGCBase* s56xSide;
 	int pairNumber;
 	int commCount;
