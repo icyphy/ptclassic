@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -63,9 +63,9 @@ TYDOC_DESC =	Index of classes in tycho/lib/iwidgets/demos
 
 DIRS =		
 
-all install: $(MISC_SRCS)
+all:  $(MISC_SRCS) html/widgettree.n.html
 
-sources:: $(MISC_FILES) html/widgettree.n.html
+install: all
 
 html/widgettree.n.html: widgettree.n
 	csh -fx mkhtml

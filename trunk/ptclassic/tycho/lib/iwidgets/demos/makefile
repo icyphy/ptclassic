@@ -60,10 +60,10 @@ DIRS =
 
 MISC_FILES = 	arrowclose.xbm arrowopen.xbm
 
-all install: $(MISC_SRCS)
-
-sources:: $(DEMO_SRCS)
+all:  $(MISC_SRCS)
 	chmod a+x $(DEMO_SRCS)
+
+install: all
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
