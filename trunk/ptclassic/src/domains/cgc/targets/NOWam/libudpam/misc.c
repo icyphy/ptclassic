@@ -742,14 +742,14 @@ void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint,
  */
 void *TimeoutThread(void *voidbundle)
 {
-  int              num_eps, err, n;
-  int flag = 0;
+  int              num_eps, err, n, flag = 0;
   struct ep_elem   *ep_elem_ptr;
   eb_t             bundle;
   fd_set           temp_fdset;
   timestruc_t      ts_quanta;
   struct timeval   tv_quanta;
   
+  flag = 0;
   bundle = (eb_t)voidbundle;
   ts_quanta.tv_nsec = 0;
   tv_quanta.tv_sec = QUANTA;
