@@ -68,26 +68,6 @@ void Link::remove() {
     previous->next = next;
 }
 
-void LinkedList::directRemove( Link * a ) {
-    Link* previous = a->previous;
-    if( lastNode == a ) {
-	 lastNode = a->previous;
-    }
-    a->remove();
-    delete a;
-    dimen--;
-    if( dimen == 0 ) {
-	 lastNode = 0;
-	 previous = 0;
-    }
-    return;
-}
-
-/*
-In this method we want to remove Link _after_ having previously 
-removed the item, e, to which Link points. We receive a reference 
-to the Link. 
-*/
 Link* LinkedList::removeLink(Link& a) {
     Link* previous = a.previous;
     if (lastNode == &a) lastNode = a.previous;
@@ -99,6 +79,14 @@ Link* LinkedList::removeLink(Link& a) {
 	previous = 0;
     }
     return previous;
+}
+
+// Erase a link from the list. Note: This method returns
+// the element to which this Link points.
+Pointer LinkedList::eraseLinkNotElement(Link& a) {
+    Pointer element = a.e; 
+    removeLink(a);
+    return element;
 }
 
 // constructor with argument
