@@ -1,6 +1,7 @@
+# Octtools dds - Dialog Definition System using the Athena Widget Set
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -69,9 +70,20 @@ LIB = 		libdds.$(LIBSUFFIX)
 
 EXPHDR =	dds.h
 
+DRIVER =	dds_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	tst.o
+
+DRVRLIBS =	-lMaxport -lutility -lst -lTable -lerrtrap -luprintf -lport $(X11_LIBSPEC)  $(X11EXT_LIBSPEC) -lXt -lXaw -lXmu -lX11 
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) 
+	$(DRIVER) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
