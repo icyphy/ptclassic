@@ -104,6 +104,7 @@ ITCL_SRCS = \
 	PopupMenu.itcl \
 	Query.itcl \
 	Resource.itcl \
+	ResourceHTTP.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
