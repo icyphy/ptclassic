@@ -96,11 +96,11 @@ proc ::tycho::egrep {regexp args} {
     if {[ ::tycho::pathEnvSearch egrep] != {}} {
         # We have an egrep binary, use it.
         set files [eval glob -nocomplain $filelist]
-        if { "$files" == ""} {
+        if { $files == ""} {
             error "::tycho::egrep called with empty file arg.\
                     args were `$regexp' `$files'"
         }
-        return [split [eval exec egrep -n $greparg \"$regexp\" $files] "\n"]
+        return [split [eval exec egrep -n $greparg \"$regexp\" $files] "\n"] ;#"
     } else {
 
     # Only show the first 100 matches
@@ -247,15 +247,11 @@ proc ::tycho::expandPath { path } {
             set path $envval
         }
     } elseif {[string first ~ $path] == 0} {
-        if [catch {set path [glob $path]}] {
-            # glob failed. Possibly the file does not exist.
-            set dir [file dirname $path]
-            if [catch {set dir [glob $dir]}] {
-                error "Directory does not exist: $dir"
-            }
-            set tail [file tail $path]
-            set path [file join $dir $tail]
-        }
+        set splat [file split $path]
+        # Test for non-existent user
+        set user [lindex $splat 0]
+        set relpath [lrange $splat 1 end]
+	set path [eval file join [concat [file split [glob $user]] $relpath]]
     }
     # Get a consistent filename using "cd".  Note that this may not work
     # on non-Unix machines.  The catch is in case the directory does not
