@@ -50,12 +50,11 @@ Pointer SingleLinkList :: getAndRemove()
 	return r;
 }
 
-Pointer SingleLinkList :: elem(int i)
+Pointer SingleLinkList :: elem(int i) const
 {
 	SingleLink *f = lastNode->next;	// Head of list
 	for( int t = i; t > 0; t-- )
 		f = f->next;
-	lastReference = f;
 	return f->e;
 }
 
@@ -78,4 +77,34 @@ void SingleLinkList :: initialize()
 
 	// and mark the list empty
 	lastNode = 0;
+}
+
+// This function searches for an element in a SingleLinkList matching
+// the argument, removing it if found.
+int SingleLinkList::remove (Pointer x) {
+	// case of empty list
+	if (!lastNode) return 0;
+	// case of 1-element list
+	if (lastNode->next == lastNode) {
+		if (lastNode->e != x) return 0;
+		// only element matches, zero the list
+		delete lastNode;
+		lastNode = lastReference = 0;
+		return 1;
+	}
+	// general case
+	SingleLink* f = lastNode->next;
+	SingleLink* g = lastNode;
+	do {
+		if (f->e == x) {
+			g->next = f->next;
+			if (f == lastNode) lastNode = g;
+			if (f == lastReference) lastReference = g;
+			delete f;
+			return 1;
+		}
+		f = f->next;
+		g = g->next;
+	} while (f != lastNode->next);
+	return 0;
 }
