@@ -267,7 +267,7 @@ body ::tycho::View::menubar {args} {
 # Print a status message to the view's status bar.
 #
 body ::tycho::View::putStatus {string} {
-    statusbar puts $string
+    statusbar putMessage $string
 }
 
 #########################################################################

@@ -2229,7 +2229,7 @@ body ::tycho::Edit::incSearch {key} {
 
     # End the search
     if {$key == "end"} {
-        statusbar puts {}
+        statusbar putMessage {}
         focus $textWidget
         return 
     }

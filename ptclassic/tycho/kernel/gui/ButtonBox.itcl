@@ -559,6 +559,6 @@ body ::tycho::ButtonBox::reset {{row 0} {column 0}} {
 #
 body ::tycho::ButtonBox::putStatus {string} {
     if {$itk_option(-statusbar) != {}} {
-        $itk_option(-statusbar) puts $string
+        $itk_option(-statusbar) putMessage $string
     }
 }
