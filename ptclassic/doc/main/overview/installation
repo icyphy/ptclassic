@@ -16,9 +16,9 @@ First note that the
 approximate disk space requirements are (for the Sun-4 distribution;
 other distributions are roughly the same size):
 .(b
-	\*(PT: 30 Mbytes
+	\*(PT: 40 Mbytes
 	\*(PT (after you optionally remake): 57 Mbytes
-	Gnu subset: 14 Mbytes
+	Gnu subset: 7 Mbytes
 .)b
 Steps to install \*(PT on a Sun-3 or Sun-4:
 .ip 1.
@@ -106,6 +106,14 @@ cd /usr
 mkdir gnu (Unless there is such a directory there, in which case, you
 probably don't want to load the version from this tape).
 .ip 3.
+If you just installed Ptolemy from tape and used the
+"tar xf /dev/nrst8" command as specified in Step 6 of
+the installation procedures above, your tape should already
+be positioned at the gnu software subset, so go on to the next
+step.
+Otherwise, type the following command to skip over the
+Ptolemy portion of the tape:
+.br
 mt -f /dev/nrst8 fsf 1
 .ip 4.
 tar xf /dev/rst8
@@ -126,7 +134,8 @@ cd demo
 .ip 4.
 pigi
 .ip 5.
-Follow instructions in the Pigi manual, section 2 of the Almagest.
+Follow instructions in section 2 of the Almagest 
+titled, ``Running the Ptolemy Demos'' (section 2.3.1).
 .pp
 Note that the ptolemy user provides a model of a user properly
 configured to run ptolemy.  All the .files in the home directory
@@ -161,5 +170,5 @@ your path is set incorrectly.  Because pigi uses
 to start up \*(PT, your path
 must be defined in your .cshrc file, not just in your .login file.
 The path must be defined even when ``prompt'' is not set, since
-your .cshrc file will b read in non-interactive mode.
+your .cshrc file will be read in non-interactive mode.
 
