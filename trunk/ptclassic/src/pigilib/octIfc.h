@@ -74,7 +74,7 @@ extern boolean SetTargetParams ARGS((octObject *sog,ParamListType *plist));
 extern boolean AutoLoadCk ARGS((octObject *instPtr));
 extern boolean LoadTheStar ARGS((octObject* instPtr, int permB,
 				 char* linkArgs));
-extern ParamType* findParam ARGS((char* name, ParamListType *pList));
+extern ParamType* findParam ARGS((const char* name, ParamListType *pList));
 extern boolean GetTargetParams ARGS((char* targName, octObject *facetPtr,
 			       ParamListType *pListPtr));
 extern boolean GetDefaultParams ARGS((octObject *instPtr,
