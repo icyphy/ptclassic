@@ -193,7 +193,7 @@ proc ::tycho::isRelative {pathname} {
 # Create a directory
 #
 proc ::tycho::mkdir { args } {
-    global ::itcl::version
+    global ::itcl::version tcl_platform
     if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
 	eval file mkdir $args
     } else {
@@ -282,7 +282,7 @@ proc ::tycho::relativePath {srcFile dstFile} {
 # FIXME: In tcl7.6, this should go away
 #
 proc ::tycho::rm { args } {
-    global itcl::version
+    global itcl::version tcl_platform
     if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
 	if {[lindex $args 0] == "-f"} {
 	    eval file delete -force -- $args
