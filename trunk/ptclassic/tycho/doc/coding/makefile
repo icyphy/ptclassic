@@ -1,7 +1,8 @@
 # Makefile for Ptolemy Tycho system, tycho/doc/coding directory.
 #
-# $Id$
 # Author: Christopher Hylands
+#
+# Version: # $Id$
 #
 # Copyright (c) 1991-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -46,9 +47,11 @@ VPATH =		$(ROOT)/tycho/doc/coding
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS =	index.html \
-		scope.html
-
+EXTRA_SRCS =	fileheader.html \
+		index.html \
+		scope.html \
+		template.html \
+		update.html
 MISC_FILES =
 
 # 'make realclean' should remove tclIndex
