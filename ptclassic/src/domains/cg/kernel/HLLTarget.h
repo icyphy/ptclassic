@@ -54,6 +54,9 @@ public:
 	/*virtual*/ void beginIteration(int repetitions, int depth);
 	/*virtual*/ void endIteration(int repetitions, int depth);
 
+	// Class identification.
+	/*virtual*/ int isA(const char*) const;
+
 protected:
 
 	// return a name that can be used as C++ identifiers, derived

@@ -4,7 +4,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -44,7 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern StringList CG56ONE;
 
-class Galaxy;
 class CG56Target : public virtual MotorolaTarget {
 protected:
 	void writeFloat(double);
@@ -55,13 +54,11 @@ public:
 	CG56Target(const CG56Target& src) : 
 	  MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {}
 	Block* makeNew() const;
+	/*virtual*/ int isA(const char*) const;
 	void headerCode();
 	const char* className() const;
 	void setup();
 	int compileCode();
 };
 
-// Adds the galaxy parameter ONE.  This should be called by any multiprocessor
-// target that contains a CG56 child target.
-void addCG56One(Target *target, Galaxy *g);
 #endif

@@ -101,3 +101,5 @@ StringList HLLTarget :: sanitizedFullName (const NamedObj& obj) const {
         }
         return out;
 }
+
+ISA_FUNC(HLLTarget,CGTarget);

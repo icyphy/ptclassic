@@ -60,7 +60,6 @@ void AsmTarget :: initStates() {
 	targetHost.setAttributes(A_SETTABLE);
 	filePrefix.setAttributes(A_SETTABLE);
 	displayFlag.setAttributes(A_SETTABLE);
-	compileFlag.setAttributes(A_SETTABLE);
 	runFlag.setAttributes(A_SETTABLE);
 }
 
@@ -178,12 +177,6 @@ void AsmTarget :: mainLoopCode() {
 
 inline int hasCirc(PortHole* p) {
 	return (p->attributes() & PB_CIRC) != 0;
-}
-
-inline int wormEdge(PortHole& p) {
-	PortHole* f = p.far();
-	if (!f) return TRUE;
-	else return p.atBoundary();
 }
 
 extern int warnIfNotConnected (Galaxy&);
@@ -346,3 +339,5 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 /*virtual*/ void AsmTarget :: writeCode() {
     writeFile(myCode,".asm",displayFlag);
 }
+
+ISA_FUNC(AsmTarget,CGTarget);
