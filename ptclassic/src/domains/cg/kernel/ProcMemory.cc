@@ -309,6 +309,8 @@ DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
 	yAddr(y_addr),yLen(y_len)
 {}
 
+DualMemory::~DualMemory() { reset(); }
+
 int DualMemory::allocReq(AsmPortHole& p) {
 	if (!LinProcMemory::allocReq(p))
 	    if (!x.allocReq(p))
