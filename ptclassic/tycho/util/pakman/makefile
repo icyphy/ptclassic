@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	 bin demos doc test template.tycho template.simple
+DIRS =	 bin demo doc test template.tycho template.simple
 
 TCL_SRCS = \
 	create.tcl \
