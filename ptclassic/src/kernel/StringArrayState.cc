@@ -131,7 +131,6 @@ void StringArrayState  :: initialize() {
 	lexer.clearwhite();
 
 	int i = 0, err = FALSE;
-	char* saveValue = 0;
 	char* buf[MAXLEN];
 	while(!lexer.eof() && i < MAXLEN && !err) {
 		char tokbuf[MAXSTRINGLEN];
@@ -160,6 +159,10 @@ void StringArrayState  :: initialize() {
 
 		  case '[':
 		      {
+			char* saveValue = 0;
+			if ( i > 0 ) {
+			  saveValue = buf[i-1];
+			}
 			if ( saveValue == 0 ) {
 				parseError ("no string to repeat ",
 				   "([ must appear after a string).");
@@ -250,7 +253,6 @@ void StringArrayState  :: initialize() {
 		  default:
 		      buf[i++] = savestring(tokbuf);
 		}
-		saveValue = buf[i-1];
 		lexer.clearwhite();
 	}
 
