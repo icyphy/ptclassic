@@ -15,7 +15,7 @@ Xvax
 #endif
 #ifdef mips
 #ifdef sgi
-Xirix4
+Xirix5
 #else
 Xmips
 #endif
