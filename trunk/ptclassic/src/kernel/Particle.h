@@ -170,7 +170,7 @@ public:
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
         virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-			      Plasma* myPlasma, const char* delay = 0) = 0;
+			      Plasma* myPlasma, const char* delay = 0);
 	// Load up with data
 	void operator << (int i);
 	void operator << (double f);
