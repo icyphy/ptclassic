@@ -25,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	ccinclude { <math.h> }
 	go {
-		const double DELTA 1.0e-9;	// Approximately zero
+		const double DELTA = 1.0e-9;	// Approximately zero
 		double x = input%0;
 		double sincValue;
 
