@@ -22,6 +22,12 @@ is more than one. Its role is just opposite to that of Scatter star.
 		name {output}
 		type {=input}
 	}
+	start {
+		MPHIter iter(input);
+		CGPortHole* p;
+		while ((p = (CGPortHole*) iter++) != 0)
+			output.embed(*p);
+	}
 	go {
 	}
 }

@@ -23,6 +23,12 @@ one Send star, more than one Send stars, and so on.)
 		name {output}
 		type {=input}
 	}
+	start {
+		MPHIter iter(output);
+		CGPortHole* p;
+		while ((p = (CGPortHole*) iter++) != 0)
+			input.embed(*p);
+	}
 	go {
 	}
 }
