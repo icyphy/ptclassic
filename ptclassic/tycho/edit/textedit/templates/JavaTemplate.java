@@ -85,23 +85,16 @@ public class ClassName {
     //////////////////////////////////////////////////////////////////////////
     ////                         private methods                          ////
 
-    /* Private methods should not have doc comments, they should
-     * have regular comments.
-     * @see full-classname#method-name()
-     * @param parameter-name description
-     * @param parameter-name description
-     * @return description
-     * @exception full-classname description
-     */	
-    private int __APrivateMethod() {
+    // Private methods should not have doc comments, they should
+    // have regular C++ comments.
+    private int _APrivateMethod() {
         return 1;
     }
 
     //////////////////////////////////////////////////////////////////////////
     ////                         private variables                        ////
 
-    /* Private variables should not have doc comments, they should
-       have regular comments.
-     */
+    // Private variables should not have doc comments, they should
+    // have regular C++ comments.
     private int __aprivatevariable;
 }
