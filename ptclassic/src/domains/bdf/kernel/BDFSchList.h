@@ -80,7 +80,7 @@ public:
 class BDFSListIter {
 public:
 	BDFSListIter(const BDFSList& bl) : ref(bl) {
-		reset();
+		nxt = ref.first;
 	}
 	BDFSNode* next() {
 		BDFSNode* r = nxt;
@@ -88,7 +88,7 @@ public:
 		return r;
 	}
 	BDFSNode* operator++(POSTFIX_OP) { return next();}
-	void reset(int /*back*/ = 0) { nxt = ref.first;}
+	void reset() { nxt = ref.first;}
 private:
 	const BDFSList& ref;
 	BDFSNode* nxt;
