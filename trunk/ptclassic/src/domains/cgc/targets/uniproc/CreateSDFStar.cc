@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stdio.h>
 #include "CGUtilities.h"
 #include "Domain.h"
 #include "CGCPortHole.h"
