@@ -206,26 +206,31 @@ TREE:
     puts "Copying $override to $croot/mk/override.mk"
     file copy $override $croot/mk/override.mk
     
+    set pigimsg "# We set PIGI so that we can build an image with\n# just\
+	    the domains we are interested in.  If PIGI is not set\n# then\
+	    make will fail because a we attempt to full binary with\n# all \
+	    the domains, and not all the domains are present in lib.\$PTARCH"
+
     # Copy override.mk to the directories that create binaries 
     set over [open "$croot/obj.$ptarch/pigiRpc/override.mk" w]
     puts $over \
-	    "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=pigiRpc\n"
+	    "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=pigiRpc\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/ptcl/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=ptcl\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=ptcl\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/pitcl/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=pitcl\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=pitcl\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/tysh/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=tysh\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=tysh\n"
     close $over
 
     set over [open "$croot/obj.$ptarch/pigiExample/override.mk" w]
-    puts $over "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=tysh\n"
+    puts $over "include \$(ROOT)/mk/override.mk\n$pigimsg\nPIGI=pigi\n"
     close $over
 
     # Remove the symbolic links for bin, bin.$ptarch, and lib.$ptarch,
