@@ -435,6 +435,8 @@ configbody ::tycho::File::file {
     # now, so in case the file is still marked modified,
     markUnmodified
     reload
+    # In case the reloading marks the buffer modified as a side effect.
+    markUnmodified
 
     # Keep track of which files are open by name.
     # This is used to avoid opening the same file twice.
