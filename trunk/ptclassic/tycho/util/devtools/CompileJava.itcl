@@ -213,7 +213,11 @@ body ::tycho::CompileJava::classpath {} {
         {macintosh} { error "Internal error: CompileJava::classPath, \
 		macintosh not supported"}
     }
-    return [uplevel #0 subst $classpath]
+    if {"$classpath" != ""} { 
+        return [uplevel #0 subst $classpath]
+    } else {
+        return ""
+    }
 }
 
 #######################################################################
@@ -246,8 +250,14 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
  #             set compileString "javac $shortFilenameList"
  #         }
  #    }
-    set compileString \
-                 "[::tycho::stylesheet get java javaCompileCommand] -classpath [classpath] $shortFilenameList"
+    set classpath [classpath]
+    if {"$classpath" != ""} {
+        set compileString \
+                 "[::tycho::stylesheet get java javaCompileCommand] -classpath $classpath $shortFilenameList"
+     } else {
+         set compileString \
+                 "[::tycho::stylesheet get java javaCompileCommand] $shortFilenameList"
+     }
     if [checkSourceFiles] {
         # We have a main(), so we don't run appletviewer
         set runAppletViewer 0
