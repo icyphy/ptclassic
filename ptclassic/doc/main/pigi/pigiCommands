@@ -35,9 +35,15 @@ _
 edit-params	e	T{
 To edit the actual parameters of a star, galaxy, or
 delay, place the cursor over the icon of the desired object.  To
-edit the formal parameters of a galaxy, place the cursor in a
+edit the formal parameters of a galaxy or universe, place the cursor in a
 window that contains the galaxy schematic and make sure the cursor
 is not over any instance.
+T}
+.sp 0.5
+define-params	+	T{
+This command allows you to
+change the list of formal parameters of a galaxy or universe,
+as well as the type and value.  You can add or remove parameters from the list.
 T}
 .sp 0.5
 edit-domain	d	T{
@@ -158,6 +164,18 @@ It designs FIR filters using the windowing technique.
 More complete documentation is in the filter section of the Almagest.
 Note that this program starts in your home directory, so filenames
 should be given relative to the home directory.
+T}
+=
+\fBUtilities Menu:\fP
+_
+.sp 0.5
+plot signal	~	T{
+Plot a signal.
+T}
+.sp 0.5
+DFT	~	T{
+Plot the discrete-time Fourier transform (magnitude and phase) of a signal,
+as a function of normalized frequency.
 T}
 =
 \fBOther Menu:\fP
