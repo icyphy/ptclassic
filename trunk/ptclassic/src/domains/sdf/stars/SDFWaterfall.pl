@@ -65,7 +65,7 @@ Flag that turns on or off the display of the plane where y=0.
 		int inBreak;
 	}
 	constructor { highestValue = 0;}
-	destructor { LOG_DEL; delete highestValue;}
+	destructor { LOG_DEL; delete [] highestValue;}
 	setup {
 		graph.initialize(this, 2, options, title, saveFile, ignore);
 		// allow access to one past sample
@@ -74,7 +74,7 @@ Flag that turns on or off the display of the plane where y=0.
 		nTracesSoFar = 0;
 		graph.setIgnore(0);
 		xval = double(xInit);
-		LOG_DEL; delete highestValue;
+		LOG_DEL; delete [] highestValue;
 		LOG_NEW; highestValue = new double [int(traceLength)];
 		inBreak = FALSE;
 	}
