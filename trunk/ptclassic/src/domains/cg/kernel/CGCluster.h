@@ -64,7 +64,7 @@ public:
 	return ! (int)galaxy->stateWithName("Scheduler");
     }
 
-    /*virtual*/ void setMasterBlock(Block*,PortHole**);
+    /*virtual*/ void setMasterBlock(Block*,PortHole** = NULL);
 
     /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
     
