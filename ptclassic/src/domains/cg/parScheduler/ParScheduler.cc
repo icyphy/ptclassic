@@ -86,6 +86,11 @@ int isaOSOPschedule(Galaxy& g) {
 
 int ParScheduler :: computeSchedule(Galaxy& g)
 {
+	// make parallel target intervene here to do something necessary
+	// before scheduling stars: e.g. setting machine_Information.
+	// by default, do nothing
+	if (mtarget->prepareSchedule() == FALSE) return FALSE;
+
 	// if numProcs == 1, use simple SDF scheduling
 	if (numProcs == 1) {
 		int flag =  SDFScheduler :: computeSchedule(g);
