@@ -1,0 +1,257 @@
+% $Id$
+%
+% 1996 ICASSP Paper Summary Cover Sheet Style File
+%
+% 
+%
+% modified from prior versions by:
+% Stan Reeves       5-31-95
+% R.E.Donovan       8-16-94
+% H. Lucke          7- 9-93
+% R. Isotani        7- 9-93
+% J. Murakami       7- 8-93
+% Stan Reeves       7-15-92
+% Dong-Wook Lee     7-29-91
+% Kurt Baudendistel 6-26-89
+%
+%
+%
+%       available commands:
+%
+%       \Ctitle
+%       \Cauthor
+%       \Ccorrespond
+%       \Cfirstchoice
+%       \Csecondchoice
+%       \Cdescribe
+%       \Ccontrib
+%       \CothersubmissionsYES
+%       \CothersubmissionsNO
+%
+%  Example of usage:
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  \documentstyle[11pt,icasspcover]{article}
+%  \begin{document}
+%
+%       \Ctitle{Title of submission}
+%       \Cauthor{Surname & Name & Institution & Tel/Fax  & email \\[1mm]
+%                2nd author & Name &...&...&...}
+%       \Ccorrespond{Name\\address\\city}
+%       \Cfirstchoice{1.0}
+%       \Csecondchoice{2.0}
+%       \Cdescribe{Your description goes here}
+%       \Ccontrib{Your contribution next}
+%       \CothersubmissionsYES{Other submissions}
+%       %\CothersubmissionsNO
+%
+%  \end{document}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\renewcommand{\baselinestretch}{0.8}
+\setlength{\topmargin}{-.625in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\oddsidemargin}{-.8in}
+\setlength{\textwidth}{7.625in}
+\setlength{\textheight}{10.1in}
+\flushbottom
+
+
+\def\@Cothersubmissions{\relax}
+\newcommand{\Ctitle}[1]{\def\@Ctitle{#1}}
+\newcommand{\Cauthor}[1]{\def\@Cauthor{#1}}
+\newcommand{\Ccorrespond}[1]{\def\@Ccorrespond{#1}}
+\newcommand{\Cdescribe}[1]{\def\@Cdescribe{#1}}
+\newcommand{\Ccontrib}[1]{\def\@Ccontrib{#1}}
+\newcommand{\CothersubmissionsYES}[1]{\def\@Cothersubmissions{
+	\put(479,103){\circle{20}}
+	\put(10,74){\begin{minipage}[t]{7in} \small #1 \end{minipage}}}}
+\newcommand{\CothersubmissionsNO}{\def\@Cothersubmissions{
+	\put(507,103){\circle{20}}}}
+\newcommand{\Cfirstchoice}[1]{\def\@Cfirstchoice{#1}}
+\newcommand{\Csecondchoice}[1]{\def\@Csecondchoice{#1}}
+%
+\newcommand{\makecover}{
+\thispagestyle{empty}
+\begin{picture}(540,710)
+%
+\put(0,711){
+\begin{minipage}[t]{6.6in}
+\large\bf
+ICASSP-96 PAPER SUMMARY COVER SHEET: Type or Print Clearly \\
+\end{minipage}
+}
+
+\footnotesize
+
+\put(0,693){
+\begin{minipage}[t]{6.6in}
+Please answer all questions clearly and concisely.
+Reviewers will reject papers for lack of adequate information.
+Attach this form to a 2-3 page summary of your paper,
+and submit copies as indicated on the Call for Papers. \\
+
+\noindent
+{\bf SUMMARY INSTRUCTIONS:}
+Authors should prepare a 2-3 page summary of their paper, 
+including figures and references.  Be complete, but concise. 
+The 3-page limit is a MAXIMUM.  The summary should clearly 
+state what is new or novel about the work and give
+sufficient details to enable reviewers to 
+make an informed judgement about the merit of your work. 
+All pertinent results that 
+demonstrate the utility of the work should be included.%\\
+%\end{minipage}
+%}
+%\put(0,631){
+%\begin{minipage}[t]{7.4in}
+For example, in the case of an algorithm, the summary should 
+explain what problem the algorithm addresses, give details of 
+the algorithm, point out what is new, and compare the new 
+algorithm with existing algorithms in terms of quality of 
+output, computational complexity, speed of convergence, 
+robustness, or other relevant criteria.
+\end{minipage}
+}
+\thicklines
+%\put(486,720){\line(1,0){54}}
+%\put(486,719.5){\line(1,0){54}}
+%\put(486,719){\line(1,0){54}}
+%\put(486,718.5){\line(1,0){54}}
+%\put(486,612){\line(0,0){108}}
+%\put(486.5,612){\line(0,0){108}}
+%\put(487,612){\line(0,0){108}}
+%\put(487.5,612){\line(0,0){108}}
+%\put(486,612){\line(1,0){54}}
+%\put(486,612.5){\line(1,0){54}}
+%\put(486,613){\line(1,0){54}}
+%\put(486,613.5){\line(1,0){54}}
+%\put(540,612){\line(0,0){108}}
+%\put(539.5,612){\line(0,0){108}}
+%\put(539,612){\line(0,0){108}}
+%\put(538.5,612){\line(0,0){108}}
+
+
+\put(486,720){\line(1,0){54}}
+\put(486,720){\line(0,-1){112}}
+%\put(486,642){\line(1,0){54}}
+%\put(540,642){\line(0,0){78}}
+\put(494,695){\normalsize \# }
+\put(494,665){\normalsize CAT}
+
+
+\thicklines
+\put(0,608){\line(1,0){540}}
+\put(0,600){\makebox(0,0)[tl]{\bf Title of Paper: }}
+
+\put(0,555){\line(1,0){540}}
+\put(0,539){\begin{minipage}[t]{7.4in}
+{\bf Name of Author(s) } Provide the requested information for each author.  
+This information will be used for the Advance and Final
+Programs. In particular, the authors' names will be listed 
+as shown here, and the ordering will be used to determine compliance with 
+the limits defined in the Call for Papers.
+
+\vspace*{0.05in}
+
+\noindent
+\begin{tabular}{@{}p{20mm}@{\hspace{4mm}}p{18mm}@{\hspace{4mm}}p{68mm}@{\hspace{4mm}}p{36mm}@{\hspace{4mm}}p{32mm}}
+{\bf Last name} & {\bf First name } & {\bf Organization } & {\bf Telephone/Fax } & {\bf Email} \\[1mm]
+\@Cauthor
+\end{tabular}
+\end{minipage}
+}
+
+\put(0,436){\line(1,0){540}}
+\put(0,420){
+\begin{minipage}[t]{7.4in}
+{\bf Name and address of author with whom correspondence
+regarding this paper should be conducted.}  Provide complete name and
+street address; no post office boxes, please.
+\end{minipage}
+}
+
+\put(0,365){\line(1,0){540}}
+\put(0,349){
+\begin{minipage}[t]{7.4in}
+{\bf Into which distinct subcategories (listed in 
+the Call for Papers) does the paper fit? } Give the two-digit 
+classification (for example, 8.3) for each category.
+NOTE: Your submission will be reviewed primarily by the 
+Technical Committee covering the area of your first choice.
+\end{minipage}
+}
+
+\put(100,317){\makebox(0,0)[tl]{\bf First Choice: }}
+\put(300,317){\makebox(0,0)[tl]{\bf Second Choice: }}
+
+\put(0,300){\line(1,0){540}}
+\put(0,284){
+\begin{minipage}[t]{7.4in}
+{\bf Describe the problem that you have addressed.}  Why is the problem
+important?
+\end{minipage}
+}
+
+\put(0,208){\line(1,0){540}}
+\put(0,192){
+\begin{minipage}[t]{7.4in}
+{\bf What is the original contribution of this work? } Be explicit. 
+How does this contribution compare to those of other authors?
+(Comment here, cite the previous work, and give references at the end of 
+your paper summary.)
+\end{minipage}
+}
+
+\put(0,116){\line(1,0){540}}
+\put(470,100){YES}
+\put(500,100){NO}
+\put(0,100){
+\begin{minipage}[t]{7.4in}
+{\bf Are the authors of this paper also authors or co-authors on other submissions?} 
+(Circle answer.) \\
+(If yes, provide complete title(s) and the author list(s) in the space below.)
+\end{minipage}
+}
+
+\put(252,41){\makebox(0,0){\small DO NOT WRITE BELOW THIS LINE }}
+\put(0,34){\line(1,0){540}}
+\put(0,19){\line(1,0){478}}
+\put(0,4){\line(1,0){478}}
+\put(0,-11){\line(1,0){478}}
+\put(0,-26){\line(1,0){478}}
+%\put(0,-41){\line(1,0){478}}
+%\put(478,-41){\line(0,1){75}}
+%\put(0,-41){\line(0,1){75}}
+\put(478.5,-26){\line(0,1){60}}
+\put(0,-26){\line(0,1){60}}
+\put(484,24){\makebox(0,0)[tl]{\begin{minipage}[t]{.77in}
+\raggedright
+\normalsize
+1. $\hrulefill$ \\
+\vspace{1mm}
+2. $\hrulefill$ \\
+\vspace{1mm}
+3. $\hrulefill$ \\
+\vspace{1mm}
+4. $\hrulefill$ \\
+\end{minipage} }}
+
+
+\put(10,579){\begin{minipage}[t]{6in} \small \@Ctitle \end{minipage} }
+\put(10,396){\begin{minipage}[t]{7in} \small \@Ccorrespond \end{minipage} }
+\put(10,270){\begin{minipage}[t]{7in} \small \@Cdescribe \end{minipage} }
+\put(10,168){\begin{minipage}[t]{7in} \small \@Ccontrib \end{minipage} }
+\@Cothersubmissions
+\put(172,311){\begin{minipage}[t]{6in} \small \@Cfirstchoice \end{minipage} }
+\put(382,311){\begin{minipage}[t]{6in} \small \@Csecondchoice \end{minipage} }
+
+\end{picture}
+
+}
+
+\let\oldenddocument=\enddocument
+\def\enddocument{\makecover\oldenddocument}
