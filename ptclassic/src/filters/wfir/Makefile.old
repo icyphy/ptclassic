@@ -3,8 +3,6 @@
 # Ptolemy program Makefile.
 #
 
-ARCH          = sun4
-
 PTOLEMY       = /usr/users/ptolemy
 
 VPATH         = ../../../src/filters/wfir
