@@ -37,10 +37,11 @@ times to repeat the "input" value on "output".
 		input.grabData();
 
 		// read control value, and repeat input tokens to output 
-		output%0 = input%0;
 		int num = int (control%0);
-		for (int i = num ; i > 0; i--)
+		for (int i = num ; i > 0; i--) {
+			output%0 = input%0;
 			output.sendData();
+		}
 	}
 }
 
