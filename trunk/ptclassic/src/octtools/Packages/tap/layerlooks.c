@@ -421,7 +421,10 @@ struct tapLayerLooks *looksPtr;
     }
 }
 
+
+#ifndef PI
 #define PI	3.14159265358979
+#endif
 
 static int walkPattern(bmPtr, walkerPtr, strokePtr)
 struct bitmap *bmPtr;
