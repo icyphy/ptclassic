@@ -76,32 +76,32 @@ class ::tycho::ClassName {
     ####                   protected methods                       ####
 
     # One line description of the method; listed in alphabetical order
-    protected method protectedMethodA {}
+    protected method _protectedMethodA {}
 
     ###################################################################
     ####                   protected variables                     ####
 
     # Comments come before the variable declaration; variables listed
     # in alphabetical order
-    protected variable protectedVariableA
+    protected variable _protectedVariableA
 
-    protected common protectedCommonA
+    protected common _protectedCommonA
 
     ###################################################################
     ####                   private methods                         ####
 
     # One line description; listed in alphabetical order
-    private method privateMethodA {}
+    private method __privateMethodA {}
 
     ###################################################################
     ####                   private variables                       ####
 
     # A comment before one or a group of private variables;
     # alphabetical order unimportant
-    private variable privateVariableA
-    private variable privateVariableB
+    private variable __privateVariableA
+    private variable __privateVariableB
 
-    private common privateCommonA
+    private common __privateCommonA
 }
 
 #######################################################################
@@ -164,7 +164,7 @@ body ::tycho::ClassName::publicProcA {anyargs} {
 #### MethodName
 # Description.
 #
-body ::tycho::ClassName::protectedMethodA {} {
+body ::tycho::ClassName::_protectedMethodA {} {
 }
 
     ###################################################################
@@ -175,5 +175,5 @@ body ::tycho::ClassName::protectedMethodA {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::privateMethodA {} {
+body ::tycho::ClassName::__privateMethodA {} {
 }
