@@ -46,11 +46,19 @@ public:
 	// make destructor virtual
 	virtual ~Scheduler() {}
 
+	// allow errorhandler to ask for a halt
+	static void requestHalt() { haltRequestFlag++;}
+
+	// read the halt flag
+	static int haltRequested() { return haltRequestFlag;}
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
 	// It must be initialized in the setup() method.
 	SpaceWalk alanShepard;
+
+	// request flag for halting -- schedulers must poll and reset
+	static int haltRequestFlag;
 };
 
 #endif
