@@ -33,7 +33,7 @@
 
 #include "ansi.h"
 #include "general.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "errtrap.h"
 
 extern int vemFail

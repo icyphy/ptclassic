@@ -38,7 +38,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "cursors.h"		/* Self declaration        */
-#include "X11/Xutil.h"		/* X utility functions     */
+#include <X11/Xutil.h>		/* X utility functions     */
 #include "xvals.h"		/* X values                */
 #include "vemUtil.h"		/* General VEM utilities   */
 #include "defaults.h"		/* Default package         */

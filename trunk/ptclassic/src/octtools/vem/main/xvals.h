@@ -39,8 +39,8 @@
 
 #include "ansi.h"
 #include "port.h"
-#include "X11/Xlib.h"
-#include "X11/Intrinsic.h"
+#include <X11/Xlib.h>
+#include <X11/Intrinsic.h>
 
 extern char *xv_pkg_name;
 
