@@ -187,7 +187,7 @@ static int pipeOpen()
      */
 {
     int pipes[4][2];
-#ifndef PTHPPA
+#ifdef NEED_ENVIRON_DECL	/* hppa and linux already have this */
     extern char* environ;	/* Declared in unistd.h on hppa*/
 #endif
     char* channelBin;
