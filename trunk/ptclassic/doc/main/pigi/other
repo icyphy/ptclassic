@@ -32,8 +32,8 @@ discrete-time Fourier transform of the signal.
 .IE "Fourier transform"
 .IE "spectrum plot"
 These are plotted as a function of frequency normalized
-to the sampling rate, from $- pi$ to $pi$.
-The sampling frequency is assumed to be $2 pi$.
+to the sampling rate, from -(PI) to PI.
+The sampling frequency is assumed to be 2 PI.
 A simple phase unwrapping algorithm is used to give more meaningful
 phase plots.
 A radix-2 FFT is used, so the order of the Fourier transform
@@ -283,7 +283,7 @@ The
 and
 .c Fork
 stars are defined this way, for instance.
-Take a close look at the third star in the second row
+Take a close look at the third star in the third row
 of the SDF main.pal palette.
 It is an adder with only one input terminal.
 However, the input terminal is unusual in that it has
@@ -294,7 +294,7 @@ each of those outputs will be added.
 .pp
 Sometimes, such terminals are not convenient.
 It is better to have a set of icons for the commonly used numbers
-of terminals.  The icon immediately to the left of the multi-input
+of terminals.  The icon two to the left of the multi-input
 .c FloatAdd
 is also a
 .c FloatAdd,
