@@ -38,6 +38,7 @@ StringList DEScheduler :: displaySchedule () {
 }
 
 
+extern StringList checkConnect (Galaxy&);
 
 	////////////////////////////
 	// setup
@@ -51,6 +52,13 @@ int DEScheduler :: setup (Block& b) {
 
 	// initialize the global event queue...
 	eventQ.initialize();
+
+	// check connectivity
+	StringList msg = checkConnect (galaxy);
+	if (msg.size() > 0) {
+		errorHandler.error (msg);
+		return FALSE;
+	}
 
 	// Notify each star of the global event queue, and fire source
 	// stars to initialize the global event queue.
@@ -70,17 +78,6 @@ int DEScheduler :: setup (Block& b) {
 		p->arrivalTime = 0.0;
 		p->completionTime = 0.0;
 
-		// detect if any porthole is not connected.
-		
-		for (int j = s.numberPorts(); j > 0; j--) {
-			PortHole& port = s.nextPort();
-			if (port.far() == NULL) {
-				StringList msg = port.readFullName();
-				msg += " is not Connected!";
-				errorHandler.error(msg);
-				return FALSE;
-			}
-		}
 	}
 
 	galaxy.initialize();
