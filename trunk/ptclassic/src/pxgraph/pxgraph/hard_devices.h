@@ -21,7 +21,7 @@ typedef struct hard_dev {
     char dev_axis_font[MFNAME];	/* Default name of axis font         */
     double dev_axis_size;	/* Default size of axis font (pnts)  */
     hard_dev_docu dev_docu;	/* Document predicate                */
-};
+} hard_dev;
 
 extern int hard_count;
 extern struct hard_dev hard_devices[];
