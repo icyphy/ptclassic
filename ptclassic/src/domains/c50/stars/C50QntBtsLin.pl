@@ -61,7 +61,7 @@ an optional offset can be added to shift the output levels up or down.
 	lacc	*,0,ar1
 	and	#65535,@(16-int(noBits))
 	add	#@off,0
-	sach	*,0
+	sacl	*,0
 	}
         go { 
  		addCode(std());
