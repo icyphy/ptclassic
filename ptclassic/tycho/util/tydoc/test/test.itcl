@@ -46,6 +46,13 @@ proc ::tycho::methodOutsideAClass {} {
 # This class is a test class for the tycho doc system.
 #
 # The line above intentionally left blank
+#
+# Here's a sample embedded tcl section that has empty curly brackets 
+# <tcl><pre>
+# puts stdout {}
+# puts "Here are empty curlies: {}"
+# </pre></tcl>
+#
 class ::tycho::DocSysTest {
     ##
     # A generic constructor
