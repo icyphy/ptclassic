@@ -178,7 +178,7 @@ void CompileTarget::wrapup() {
     // Check to see whether makefile is present, and if not, copy it in.
 
     cmd = "cd ";
-    cmd += (const char*)destDirectory;
+    cmd += destDirectory;
     cmd += "; if (test -r make.template) then ";
     cmd += "( echo make.template already exists) ";
     cmd += " else ";
@@ -204,7 +204,7 @@ void CompileTarget::wrapup() {
 	return;
     }
     cmd = "cd ";
-    cmd += (const char*)destDirectory;
+    cmd += destDirectory;
     cmd += "; mv -f code ";
     cmd += gal->readName();
     cmd += "; cp code.cc ";
