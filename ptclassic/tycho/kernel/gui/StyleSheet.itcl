@@ -160,19 +160,19 @@ body ::tycho::StyleSheet::constructor {args} {
     eval configure $args
 
     # Define the stylesheet type
-    definetype stylesheet \
+    type define stylesheet \
             -label {} \
             -description {} \
             -rootonly 1
     
     # Define the group type
-    definetype group \
+    type define group \
             -label {} \
             -description {} \
             -nonroot 1
 
     # Define the preference type
-    definetype preference \
+    type define preference \
             -valued 1 \
             -leaf 1 \
             -nonroot 1 \

@@ -11,7 +11,7 @@
 # above copyright notice and the following two paragraphs appear in all
 # copies of this software.
 # 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABL TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
 # ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
 # THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
@@ -140,7 +140,7 @@ class ::tycho::IconLibrary {
     method port {icon name value args}
     
     # Get the Slate type of an icon
-    method type {name}
+    method slatetype {name}
 }
 
 ########################################################################
@@ -150,11 +150,11 @@ body ::tycho::IconLibrary::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # The icon entity type
-    definetype icon -label ""
+    # The icon type
+    type define icon -label ""
 
-    # The port entity type
-    definetype port -leafonly 1 -type input
+    # The port type
+    type define port -leafonly 1 -type input
 }
 
 ########################################################################
@@ -164,13 +164,13 @@ body ::tycho::IconLibrary::constructor {args} {
 # argument are given to the icon item when created
 #
 body ::tycho::IconLibrary::draw {icon slate x y args} {
-    set type  [type $icon]
+    set type  [slatetype $icon]
     set attrs [attributes icon $icon]
     set iconid [eval $slate create $type $x $y \
             $attrs $args -name $icon]
 
     foreach port [names port $icon] {
-        set type  [type $icon.$port]
+        set type  [slatetype $icon.$port]
         set attrs [attributes port $icon.$port]
         eval $slate call $iconid terminal \
                 $icon $type 0 0 $attrs \
@@ -224,7 +224,7 @@ body ::tycho::IconLibrary::port {icon port value args} {
 # Get the slate type of an icon. Flag an error if the icon does
 # not exist.
 #
-body ::tycho::IconLibrary::type {name} {
+body ::tycho::IconLibrary::slatetype {name} {
     set splut [split $name $separator]
     set cntxt [join [lreplace $splut end end] "."]
     set local [lindex $splut end]
