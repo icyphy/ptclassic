@@ -51,10 +51,17 @@ variable.  Variables are expanded only at the beginning of the string.
 #define MAXSTRINGLEN 4096
 
 const char* expandPathName(const char* name) {
-    const char* specialChars = "~/$";
-    Tokenizer lexer(name,specialChars);
+    // Allow file name to expand to an arbitrary length
     StringList expandedPath;
     expandedPath.initialize();
+
+    // Parse file name using Tokenizer class
+    // '#' is default Tokenizer comment char which is a valid file name char
+    const char* specialChars = "~/$";	// separators
+    const char* whitespace = "\r";	// allow TABS and SPACES in file name
+    Tokenizer lexer(name, specialChars, whitespace);
+    lexer.setCommentChar('\n');		// override default comment char '#'
+
     while(!lexer.eof()) {
 	char tokbuf[MAXSTRINGLEN];
 	lexer >> tokbuf;
