@@ -10,7 +10,7 @@
 <HR>
 
  <P>TyTest is a Tycho package that contains C code for testing other
-Tycho packages.
+Tycho C packages.
 
  <P><B>Contents</B>
 <ul>
@@ -30,18 +30,18 @@ comparison of the relative execution speed of C and Tcl! It has three
 argument formats:
 
 <dl>
- <P><dt><b>::tycho::testtask setup</b> <I>countername</I>
+ <P><dt><code>::tycho::testtask setup <I>countername</I></code>
 
 <dd>Initialize the task: The counter is set to
-zero. <I>countername</I> is the name of the Tcl variable that will be
-updated at the end of its time slice.
+zero. <CODE><I>countername</I></CODE> is the name of the Tcl variable
+that will be updated at the end of its time slice.
 
- <P><dt><b>::tycho::testtask execute</b>
+ <P><dt><code>::tycho::testtask execute</code>
 
 <dd>Count for one timeslice -- the time is as set by the Tycho
 scheduler, and defaults to 20 ms.
 
- <P><dt><b>::tycho::testtask wrapup</b>
+ <P><dt><code>::tycho::testtask wrapup</code> 
 
 <dd>Stop and clean up the task. In this case, nothing needs to be done.
 
