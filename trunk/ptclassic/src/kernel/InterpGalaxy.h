@@ -50,12 +50,33 @@ class InterpGalaxy: public Galaxy {
 
 private:
 	StringList actionList;	// saves actions used in building galaxy
-	PortHole* findPortHole(const char* star,const char* port);
-	GenericPort* findGenericPort(const char* star,const char* port);
 	NodeList nodes;
+
+protected:
+	// find a star porthole
+	PortHole* findPortHole(const char* star,const char* port);
+
+	// find a star porthole or multiporthole
+	GenericPort* findGenericPort(const char* star,const char* port);
+
+	// body of destructor
+	void zero();
+
+	// body of copy constructor
+	void copy(const InterpGalaxy&);
 public:
 // constructor: makes an empty galaxy
 	InterpGalaxy() { descriptor = "An interpreted galaxy";}
+
+// copy constructor: duplicates an existing galaxy
+	InterpGalaxy(const InterpGalaxy& g) { copy(g);}
+
+// assignment operator: change this galaxy to look like another one
+	InterpGalaxy& operator=(const InterpGalaxy& g) {
+		zero();
+		copy(g);
+		return *this;
+	}
 
 // set the descriptor
 	void
@@ -127,6 +148,6 @@ public:
 	int isA(const char*) const;
 
 // Destructor
-	~InterpGalaxy();
+	~InterpGalaxy() { zero();}
 };
 #endif
