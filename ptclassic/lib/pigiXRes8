@@ -13,6 +13,7 @@ vem*technology:	~ptolemy/lib/technology
 vem*font: 9x15
 vem*wrap: word
 vem*grid*zero*size: 0
+vem.label.boundbox: 10
 #ifdef COLOR
 vem*background: white
 vem*background*color: grey
@@ -22,6 +23,9 @@ vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
 vem*button*foreground: IndianRed
 vem*title*foreground: black
+#else
+*Background:    white
+*Foreground:    black
 #endif
 
 ! Ptolemy resources for xterm windows
