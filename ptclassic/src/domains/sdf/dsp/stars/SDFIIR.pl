@@ -106,8 +106,9 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     setup {
 	int numNumer = numerator.size();
 	int numDenom = denominator.size();
-	numState = max(numNumer,numDenom); 
 	double b0, scaleDenom, scaleNumer;
+
+	numState = max(numNumer,numDenom); 
 
 	// Set up scaling to distribute the gain through the numerator,
 	// and scale both numer and denom to make b0=1
@@ -115,10 +116,10 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	    b0 = 1.0;
 	} else {
 	    if ( (b0 = denominator[0]) == 0.0 ) {
-		// XXX: should sanity-check b0 more thoroughly
+		// FIXME: should sanity-check b0 more thoroughly
 		// (e.g., shouldn't even be close to zero)
 		Error::abortRun(*this, 
-		  "Must have non-zero leading denominator");
+		  "Must have non-zero leading coefficient in the denominator");
 		return;
 	    }
 	}
@@ -139,15 +140,14 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	stateEnd = ((double*)state) + 3*numState;
     }
     go {
-	register double s0 = signalIn%0;
+	double s0 = signalIn%0;
 
 	if ( numState == 1 ) {
 	    // actually, this means no state; just feed through
 	    signalOut%0 << state[1] * s0;
 	} else {
-	    register double *v = & state[3];
-	    register double y;
-	    double s;
+	    double* v = &state[3];
+	    double y, s;
 
 	    s = *v++;
 	    y = s * *v++;
