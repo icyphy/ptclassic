@@ -303,10 +303,12 @@ _xpSeqDataLegendPixmapDestroy( XPSeqData *pSeqData) {
     Pixmap		pix = pSeqData->legendPixmap; 
 
     if ( pix != None ) {
+#if TK_MAJOR_VERSION < 4
 	if ( Tk_UndefinePixmap( pSeqWdg->ip, Tk_NameOfPixmap(pSeqWdg->dpy,pix),
 	  pSeqData->legendPixmapWin) != TCL_OK ) {
 	    return TCL_ERROR;
 	}
+#endif
 	Tk_FreePixmap( pSeqWdg->dpy, pix);
 	pSeqData->legendPixmap = None;
     }
@@ -343,14 +345,16 @@ _xpSeqDataLegendCalc( XPSeqData *pSeqData) {
     pSeqData->legendLblPt.y = wantY/2;
     pSeqData->legendLblSkew = (lblBB.ascent - lblBB.descent)/2;
 
+#if TK_MAJOR_VERSION < 4
     if ( Tk_DefinePixmap( pSeqWdg->ip, pSeqData->fullName, pSeqWdg->tkwin,
       None, None, NULL, wantX, wantY, 0, NULL) != TCL_OK )
 	return TCL_ERROR;
+#endif
     pSeqData->legendPixmapWin = pSeqWdg->tkwin;
 #if TK_MAJOR_VERSION == 4
     /* TK4.0b2 has Tk_GetPixmap */
-    if ( (pSeqData->legendPixmap = Tk_GetPixmap( pSeqWdg->ip, pSeqWdg->tkwin,
-      wantX, wantY, 0)) == None )
+    if ( (pSeqData->legendPixmap = Tk_GetPixmap( pSeqWdg->dpy,
+      Tk_WindowId(pSeqWdg->tkwin), wantX, wantY, 0)) == None )
 	return TCL_ERROR;
 #else
     if ( (pSeqData->legendPixmap = Tk_GetPixmap( pSeqWdg->ip, pSeqWdg->tkwin,
