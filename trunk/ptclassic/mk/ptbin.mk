@@ -86,6 +86,8 @@ ifdef FULL
 	SILAGE =	1
 	THOR =		1
 	VHDL =		1
+	VHDLF =		1
+	VHDLB =		1
 endif
 
 ifdef PTINY
