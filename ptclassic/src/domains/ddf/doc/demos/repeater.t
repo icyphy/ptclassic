@@ -1,10 +1,11 @@
 .\" $Id$
 .NA repeater
 .SD
-This is a simple illustration of the Repeater star, used
-in an SDF wormhole.
+This is a simple illustration of the
+.c Repeater
+star, used in an SDF wormhole.
 .DE
-.LO "~ptolemy/src/domains/ddf/demo"
+.LO "$PTOLEMY/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
@@ -16,17 +17,18 @@ The
 .c Repeater
 star consumes one data input and one control input.
 The value of the control input determines how many copies
-of the input data are to be produced.  The
+of the input data are to be produced.
+The
 .c Repeater
-star may be used to represent a data-dependent iteration 
-construct.   In this demo, since the
+star may be used to represent a data-dependent iteration construct.
+In this demo, since the
 .c Repeater 
-star is not a SDF star, the SDF domain has a wormhole which internally
-uses the DDF domain.  The inputs to the
+star is not an SDF star, the SDF domain has a wormhole which internally
+uses the DDF domain.
+The inputs to the
 .c Repeater
-star are given with two ramp generators. The display
-shows a staircase with growing flat length.
+star are given with two ramp generators.
+The display shows a staircase with growing flat length.
 .SA
 Repeater
 .ES
-

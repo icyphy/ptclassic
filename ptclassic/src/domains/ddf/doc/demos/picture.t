@@ -3,10 +3,11 @@
 .SD
 Construct a two-dimensional random walk using a hierarchy of nested wormholes.
 The outermost SDF domain has a wormhole called "drawline" which internally
-uses the DDF domain.  That wormhole, in turn, has a wormhole called "display"
+uses the DDF domain.
+That wormhole, in turn, has a wormhole called "display"
 which internally uses the SDF domain.
 .DE
-.LO "~ptolemy/src/domains/ddf/demo"
+.LO "$PTOLEMY/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
@@ -17,7 +18,7 @@ A two-dimensional random vector is generated using two
 .c IIDUniform
 stars, one for each coordinate.
 The
-.c RectPolar
+.c RectToPolar
 star converts the rectangular coordinates of this random vector
 to polar coordinates.
 The angle is used to generate a normalized vector of length one
@@ -41,8 +42,8 @@ The wormhole in the DDF domain
 illustrates data-dependent iteration where the body of the iteration
 is the wormhole of SDF domain.
 .SA
-RectPolar,
-Repeater,
 Integrator,
+RectToPolar,
+Repeater,
 XYgraph.
 .ES
