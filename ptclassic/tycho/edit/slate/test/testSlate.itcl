@@ -136,7 +136,7 @@ test Slate-ghost.21 {Multiple items by tag} {
 #
 _twoitems
 test Slate-highlight.1 {Pass simple item by ID} {
-    set h [.s highlight $r blah]
+    set h [.s highlight $r -tags blah]
     string compare  [list \
 	    [.s.canvas find withtag highlight] \
 	    [.s.canvas find withtag highlight.$r] \
@@ -145,7 +145,7 @@ test Slate-highlight.1 {Pass simple item by ID} {
 } {0}
 
 test Slate-highlight.2 {Pass complex item by ID} {
-    set j [.s highlight $f blab]
+    set j [.s highlight $f -tags blab]
     string compare  [list \
 	    [lsort [.s.canvas find withtag highlight]] \
 	    [.s.canvas find withtag highlight.$f] \
@@ -155,7 +155,7 @@ test Slate-highlight.2 {Pass complex item by ID} {
 
 _twoitems
 test Slate-highlight.11 {Pass simple item by tag} {
-    set h [.s highlight foo blah]
+    set h [.s highlight foo -tags blah]
     string compare  [list \
 	    [.s.canvas find withtag highlight] \
 	    [.s.canvas find withtag highlight.$r] \
@@ -165,7 +165,7 @@ test Slate-highlight.11 {Pass simple item by tag} {
 } {0}
 
 test Slate-highlight.12 {Pass complex item by tag} {
-    set j [.s highlight bar blab]
+    set j [.s highlight bar -tags blab]
     string compare  [list \
 	    [lsort [.s.canvas find withtag highlight]] \
 	    [.s.canvas find withtag highlight.$f] \
