@@ -54,7 +54,7 @@ if ( ! $?S56DSP ) then
 endif
 
 if ( ! $?LD_LIBRARY_PATH ) then
-    setenv LD_LIBRARY_PATH /usr/lib:${PTX11DIR}/lib
+    setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
 endif
 
 # If the user has set PIGIRPC, check to see if it exists

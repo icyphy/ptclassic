@@ -20,6 +20,10 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
+if ( ! $?LD_LIBRARY_PATH ) then
+    setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
+endif
+
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
 
