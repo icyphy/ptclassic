@@ -55,9 +55,11 @@ time estimates will be reported.
 #include "ProfileTimer.h"
 #include "KnownBlock.h"
 
+// Include files from ptcl library
+#include "ptclDescription.h"
+
 // Include files from Ptolemy domains
 #include "SDFScheduler.h"
-#include "SDFPTclTarget.h"
 
 #include "CGUtilities.h"
 #include "CGCostTarget.h"
