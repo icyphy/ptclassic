@@ -38,8 +38,8 @@
 #"../../../../kernel/doc/codeDoc/Class.javaclass">::tycho::Class</a>
 # models for each class found, and outputs those to the proper
 # files. The most convenient interface
-# is from ::tycho::IDocSys::generateIDoc which will also generate Java
-# documentation if necessary.
+# is from <code>::tycho::ClassParser::generateIDoc</code>
+# which will also generate Java documentation.
 #
 # The parsing is done in three main procedures. <code>readFile</code>
 # reads in a file line by line, deletes irrelevant comments, and formats the
@@ -67,7 +67,7 @@
 # Finally, the classes are output as files by calling their write methods.
 #
 class ::tycho::JavaParser {
-    inherit ::tycho::IDocSys
+    inherit ::tycho::ClassParser
 
     constructor {args} {}
     destructor {}
@@ -156,18 +156,18 @@ body ::tycho::JavaParser::constructor {args} {
 #
 body ::tycho::JavaParser::readFile {filename} {
     # Initialize single file data
-    set author ""
-    set contributor ""
-    set version ""
-    set copyright ""
+    set _author ""
+    set _contributor ""
+    set _version ""
+    set _copyright ""
 
-    catch {unset myClass}
+    catch {unset _classmodels}
 
     # check extension (only java supported here)
     set ext [file extension $filename]
     switch $ext {
         .java {
-            set language Java
+            set _language Java
         }
         default {
             error "::tycho::JavaParser does not support $ext files"
@@ -176,7 +176,7 @@ body ::tycho::JavaParser::readFile {filename} {
 
     set inDocComment 0
     set inComment 0
-    set sourceFile $filename
+    set _sourceFile $filename
     set currentComment ""
     set inEscapedComments ""
     set fd [open $filename]
@@ -275,21 +275,21 @@ body ::tycho::JavaParser::readFile {filename} {
 #
 body ::tycho::JavaParser::generateSingleFileIDoc {filename} {
     # output class model data
-    foreach class [array names myClass] {
+    foreach class [array names _classmodels] {
         # puts $class
-        # puts [$myClass($class) describe]
+        # puts [$_classmodels($class) describe]
         if {$class != "related"} {
             set docFile [info namespace tail $class].javaclass
             ::tycho::rmIfNotWritable $docFile
             set fd [open $docFile "w"]
-            $myClass($class) write $fd
+            $_classmodels($class) write $fd
             close $fd
-            delete object $myClass($class)
+            delete object $_classmodels($class)
         } else {
-            if {$relatedModified} {
+            if {$_relatedModified} {
                 # NOTE: goes by the filename, not the class name, for
                 # related documentation
-                if {[array size myClass] == 1} {
+                if {[array size _classmodels] == 1} {
                     # Not related, ONLY docs
                     set relFile [file root $filename].javaclass
                 } else {
@@ -298,10 +298,10 @@ body ::tycho::JavaParser::generateSingleFileIDoc {filename} {
                 }
                 ::tycho::rmIfNotWritable $relFile
                 set fd [open $relFile "w"]
-                $myClass(related) write $fd
+                $_classmodels(related) write $fd
                 close $fd
             }
-            delete object $myClass(related)
+            delete object $_classmodels(related)
         }
     }
 }
@@ -339,7 +339,7 @@ body ::tycho::JavaParser::modCheck {filename} {
 
     # Check to see if the generator itself has been changed.
     set javaGenTime [file mtime [file join $TYCHO lib tydoc JavaParser.itcl]]
-    set idocGenTime [file mtime [file join $TYCHO lib tydoc IDocSys.itcl]]
+    set idocGenTime [file mtime [file join $TYCHO lib tydoc ClassParser.itcl]]
     if {$javaGenTime > $idocGenTime} {
         set genTime $javaGenTime
     } {
@@ -427,7 +427,7 @@ body ::tycho::JavaParser::parseData {data} {
         if {$inPackage} {
             # This is part of a package statement.
             # package packagename;
-            set package [string trimright $construct " \t;"]
+            set _package [string trimright $construct " \t;"]
             set inPackage 0
             continue
         }
@@ -510,11 +510,11 @@ body ::tycho::JavaParser::parseData {data} {
 # NOTE: Actually, this does not yet support Java 1.1 Inner classes.
 #
 body ::tycho::JavaParser::parseClass {class body} {
-    set myClass($class) [::tycho::Class [::tycho::autoName class]]
-    $myClass($class) modelconfigure -language $language
-    $myClass($class) modelconfigure -name $class
-    $myClass($class) modelconfigure -source [file join .. .. $sourceFile]
-    $myClass($class) modelconfigure -package $package
+    set _classmodels($class) [::tycho::Class [::tycho::autoName class]]
+    $_classmodels($class) modelconfigure -language $_language
+    $_classmodels($class) modelconfigure -name $class
+    $_classmodels($class) modelconfigure -source [file join .. .. $_sourceFile]
+    $_classmodels($class) modelconfigure -package $_package
 
     set lastComment {}
     set lastProtection {}
@@ -708,7 +708,7 @@ body ::tycho::JavaParser::parseVarMeth {class protection modifiers\
 # denotes parents which supply an interface.
 #
 body ::tycho::JavaParser::parseExtends {class extends} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
 
     if [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ ]+(.*)$} \
             $extends dmy parent other] {
@@ -775,7 +775,7 @@ body ::tycho::JavaParser::parseExtends {class extends} {
 # not support other types of classes (inner classes in Java 1.1). 
 #
 body ::tycho::JavaParser::parseModifiers {class modifiers} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     if [regexp {^(.*)[	 ]*public[ 	]*(.*)$} $modifiers dmy other other2] {
         $classModel modelconfigure -protection public
         set modifiers [string trimleft "$other $other2" " \t"]
@@ -792,7 +792,7 @@ body ::tycho::JavaParser::parseModifiers {class modifiers} {
 # NOTE: What to do about see tags here?
 #
 body ::tycho::JavaParser::addClassComment {class expl} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     set expl [formatClassComment $expl]
     $classModel annotation explanation "$expl"
 }
@@ -805,7 +805,7 @@ body ::tycho::JavaParser::addClassComment {class expl} {
 # format: <code>parameter num1 -type int; parameter ding -type String</code>
 #
 body ::tycho::JavaParser::addArgs {class entityName arguments} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     set istype 1
     set type ""
     set name ""
@@ -899,7 +899,7 @@ body ::tycho::JavaParser::addVariable {class protection modifiers\
             }
         }
     }
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     
     # Create the variable entry
     $classModel variable $varName -modifiers $modifiers -scope $scope \
@@ -975,10 +975,10 @@ body ::tycho::JavaParser::addMethod {class protection modifiers others comment} 
         }
     }
     
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     set methodName [uniqueName $methodName $arguments]
 
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     set desc [shortDesc $comment]
     set expl [formatExpl $comment]
 
