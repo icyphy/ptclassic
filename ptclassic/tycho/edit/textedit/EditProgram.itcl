@@ -84,7 +84,7 @@ body ::tycho::EditProgram::constructor {args} {
 	    -label "Recolorize" \
 	    -accelerator "S-C-l" \
 	    -underline 0 \
-"$this component text	    -command "$this component text parseRegion 1.0 end"
+	    -command "$this component text parseRegion 1.0 end"
     
     $itk_component(formatMenu) add command \
 	    -label "Indent Line" \
