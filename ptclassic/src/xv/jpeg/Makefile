@@ -41,7 +41,7 @@ RM= rm -f
 # library (.a) file creation command
 AR= ar
 # second step in .a creation (use "touch" if not needed)
-AR2= ranlib
+AR2= $(RANLIB)
 
 
 # source files (independently compilable files)
