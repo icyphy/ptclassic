@@ -87,7 +87,7 @@ void PTcl::removeEntry() {
 
 // constructor
 PTcl::PTcl(Tcl_Interp* i) : interp(i), universe(0), currentGalaxy(0),
-currentTarget(0), definingGal(0)
+currentTarget(0), definingGal(0), stopTime(0.0), lastTime(1.0)
 {
 	// perhaps default domain should be obtained some other way.
 	curDomain = KnownBlock::defaultDomain();
