@@ -729,7 +729,7 @@ proc ptkGo {name octHandle} {
 	    ptkSetStringProp $octHandle script \
 	        [$ptkControlPanel.tclScript.tframe.text get 0.0 end]
 	    ptkCondTime \
-		"eval [$ptkControlPanel.tclScript.tframe.text get 0.0 end]"
+		[$ptkControlPanel.tclScript.tframe.text get 0.0 end]
 	} {
 	    # default run: just run through the specified number
 	    # of iterations, finishing by invoking
