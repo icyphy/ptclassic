@@ -210,6 +210,20 @@ flag to generate an author listing in the HTML file.
 <DT> <CODE>@exception <I>full-classname description</I></CODE>
 <DD> May only be used before a method definition.
 
+
+<DT> <CODE>@deprecated <I>description</I></CODE> 
+<DD> This tag marks a method as being deprecated (not to be used).
+This tag is in JDK1.1 and later.  Note that the <CODE>@deprecated</CODE>
+tag is noticed by the Java compiler.  If it is present, then the
+compiler will not warn about a method that overrides a deprecated 
+parent method.  See
+<A HREF="http://www.javasoft.com/products/jdk/1.1/docs/guide/misc/deprecation/index.html">The jdk1.1 deprecation page</A> for more information.
+
+
+<DT> <CODE>@since <I>text</I></CODE> 
+<DD> Adds a Since tag.  The <CODE><I>text</I></CODE> need not have
+any particular structure.
+
 </DL>
 
 <p>
