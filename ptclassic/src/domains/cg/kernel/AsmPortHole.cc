@@ -16,6 +16,7 @@ $Id$
 #endif
 #include "AsmConnect.h"
 #include "AsmGeodesic.h"
+#include "Error.h"
 #include "miscFuncs.h"
 
 // attributes
@@ -54,17 +55,32 @@ Geodesic* AsmPortHole::allocateGeodesic() {
 	return g;
 }
 
-// initialize the offset member.
-void AsmPortHole::initOffset() {
+// initialize the offset member.  If there is no fork involved, input
+// portholes start reading from offset 0, and output portholes start
+// writing just after any delay tokens.
+
+// if there are forks, outputs are done the same way, and input pointers
+// are backed up to handle the "forkDelay".
+int AsmPortHole::initOffset() {
 	int bsiz = bufSize();
 	if (isItOutput()) {
 		offset = numTokens();
-		while (offset > bsiz) offset -= bsiz;
+		// the following error is already reported by bufSize()
+	        if (offset > bsiz) return FALSE;
+		if (offset == bsiz) offset = 0;
 	}
 	else {
 		offset = -geo().forkDelay();
-		while (offset < 0) offset += bsiz;
+		if (offset < 0) offset += bsiz;
+		// if still < 0, forkDelay is larger than we can handle
+		if (offset < 0) {
+			Error::abortRun(*this,
+				" sorry, forkDelay is larger\n",
+				"than the current implementation can handle");
+			return FALSE;
+		}
 	}
+	return TRUE;
 }
 
 int AsmPortHole::bufSize() const {
