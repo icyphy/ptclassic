@@ -49,18 +49,18 @@ option add *File.autoSaveInterval 5 widgetDefault
 # used (for example, running it with Ptolemy), then crash recovery files
 # are also automatically created if the program crashes.
 # <p>
-# Three menu buttons are put at the top of the window.
-# The File menu contains commands to open a file, insert a file,
-# save data to a file, save as some other file name, print,
-# evaluate the data, reload the last saved version,
-# close the window, and exit the application.
-# The Window menu contains commands to open new (blank) top-level
-# windows of all types that have been registered with the File class
-# using its registerEditor procedure.  It also contains commands to
-# bring to the foreground all open top-level editors that have a file
-# name associated with them.  Note that editors with the default name
-# "NoName" do not appear on this list.
-# A Help menu contains pointers to key Tycho documentation.
+# Three menu buttons are put at the top of the window. The "File" menu
+# contains commands to open a file, insert a file, save data to a file,
+# save as some other file name, print, evaluate the data, reload the
+# last saved version, toggle read-only, version control, close the
+# window, and exit the application. The "Window" menu contains commands
+# to open new (blank) top-level windows of all types that have been
+# registered with the <code>File</code> class using its
+# <code>registerEditor</code> procedure. It also contains commands to
+# bring to the foreground any currently open top-level editor that haa
+# a file name associated with it. Note that editors with the default
+# name "NoName" do not appear on this list. A Help menu contains
+# pointers to key Tycho documentation.
 # <p>
 # Here is an example:
 # <tcl><pre>
@@ -71,24 +71,25 @@ option add *File.autoSaveInterval 5 widgetDefault
 class ::tycho::File {
     inherit ::tycho::Dismiss
 
-    # Defines the interval (in minutes) between auto-save operations.
+    # Specify the interval (in minutes) between auto-save operations.
     itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
 
-    # Specifies initial data to display.
+    # Specify initial data to display (ignored in this base class).
     itk_option define -data data Data {}
 
+    # NOTE: The following should really be a public variable, not an
+    # Itk option. But the Itk implementation does not recognize public
+    # variables as options. When this is fixed, change this to a public
+    # variable and remove the protected variable "file".
+
     # Specify the name of the file associated with the data being edited.
-    # NOTE: This should really be a public variable, not an Itk option.
-    # But the Itk implementation does not recognize public variables as
-    # options.  When this is fixed, change this to a public variable
-    # and remove the protected variable "file".
     itk_option define -file file File "NoName"
 
-    # If readOnly is 0, then modifications will be permitted on
-    # the file.
     # NOTE: This should really be a public variable, not an Itk option.
     # But the Itk implementation does not recognize public variables as
     # options.  When this is fixed, change this to a public variable.
+
+    # Specify whether modifications will be permitted on the data.
     itk_option define -readonly readonly ReadOnly 0
 
     constructor {args} {}
@@ -97,7 +98,7 @@ class ::tycho::File {
     ##########################################################################
     ####                         public methods                           ####
 
-    # Query the user for a filename, insert it into the current editor.
+    # Query the user for another file to edit in the same window.
     method altFile {}
 
     # Query the user for a filename, then evaluate its contents as Tcl commands
@@ -106,7 +107,7 @@ class ::tycho::File {
     # Return the name of the file associated with the object.
     method filename {} {return $file}
 
-    # Return the value of the readonly option.
+    # Return 1 if the data is read-only, 0 otherwise.
     method getReadonly {} 
 
     # Open a help window.  This should be redefined in derived classes.
@@ -133,11 +134,10 @@ class ::tycho::File {
     # Create a revision control object for the current file.  
     method revisionControl {}
 
-    # Save to a given filename, or if none is given, to the name given by
-    # the file variable.
+    # Save to a given filename or if none is given, to the current file.
     method save {{name ""}}
 
-    # Open the file browser to save to some other file.
+    # Open the file browser to save to some other file name.
     method saveAs {}
 
     # Change the associated file to the specified file name and then save.
@@ -146,8 +146,7 @@ class ::tycho::File {
     # Save data to a crash recovery file.
     method saveCrash {}
 
-    # Find the point in the file identified by "name". The default
-    # implementation is an error.
+    # Find the point in the file identified by "name".
     method seeName {name}
 
     # Toggle the read-only status of a file (maybe invoking revision control).
@@ -180,8 +179,7 @@ class ::tycho::File {
     # Open a file browser, and then open an editor for the file.
     proc openWin {} {}
 
-    # Open an editor to edit the file.
-    # Which editor is determined by the file extension.
+    # Edit a file using the file extension to select an editor.
     proc openContext {file} {}
 
     # Register file extensions and an associated editor class.
@@ -199,17 +197,19 @@ class ::tycho::File {
 
     # FIXME: This should be removed when Itk is fixed to understand
     # public variables.
+
+    # The current file name.
     protected variable file "NoName"
 
     # This array stores object names indexed by file names so that
     # if the same file is opened a second time, we can just raise the window.
     protected common filesOpen
 
-    # Indicates whether or not the file has been modified since it was
+    # Indicate whether or not the file has been modified since it was
     # last saved.
     protected variable modified 0    
 
-    # This is used to recall the previous filename associated with
+    # Recall the previous filename associated with
     # the window in case the name is changed.
     protected variable previousfile {}
 
@@ -312,7 +312,8 @@ configbody ::tycho::File::file {
 
 #########################################################################
 #### -readonly option configuration
-# Change the window header to indicate that the file is read only.
+# Set whether the data can be modified.  A value of 1 means "no", whereas
+# a value of 0 means "yes".
 # 
 configbody ::tycho::File::readonly {
     set bool $itk_option(-readonly)
@@ -609,7 +610,8 @@ body ::tycho::File::destructor {} {
 
 #####################################################################
 #### altFile
-# Query the user for a filename, insert it into the current editor.
+# Query the user for a filename, and edit its contents
+# using the current editor.
 #
 body ::tycho::File::altFile {} {
     if {$modified} {
@@ -646,7 +648,7 @@ body ::tycho::File::evaluate {} {
 
 #####################################################################
 #### getReadonly
-# Return the value of the readonly option.
+# Return 1 if the data is read-only, 0 otherwise.
 #
 body ::tycho::File::getReadonly {} {
     return $itk_option(-readonly)
@@ -665,6 +667,7 @@ body ::tycho::File::help {} {
 #####################################################################
 #### insertData
 # Insert the specified data.
+# In this base class, trigger an error.
 #
 body ::tycho::File::insertData {data} {
     error "Sorry, insert data not implemented yet."
@@ -675,6 +678,7 @@ body ::tycho::File::insertData {data} {
 # Insert the contents of a file.
 # Open a file browser to query the user for a filename, and then
 # insert the contents of that file at the insertion cursor.
+# In this base class, trigger an error.
 #
 body ::tycho::File::insertFile {} {
     error "Sorry, insert file not implemented yet."
@@ -725,24 +729,28 @@ body ::tycho::File::reload {} {
 
 ###################################################################
 #### revisionControl
-# Check in a file using the selected revision control program command
-# if the file is writable. Otherwise check the file out using the
-# specified revision control program command. 
+# Invoke revision control.  If the file is under the control of a
+# recognized revision control system (such as SCCS and RCS), then use
+# that system.  Otherwise, query the user about putting the file under
+# revision control.  A control panel is opened that permits the user
+# to check in or check out the file, examine its revision history, etc.
+#
 body ::tycho::File::revisionControl {} {
     ::tycho::RevControl::setup $itk_component(hull) $this
 }
 
 #####################################################################
-# save
+#### save
 # Save to a file, with an optional filename specified.  If no filename
 # is specified, then the name given in the -file option is used.
 # The default behavior does not actually save anything, since there is
 # no data to save. In derived classes, this method should return 1 if
 # it successfully saves, and 0 (or an error) otherwise.  Derived classes
-# should also call removeBackupFiles after successfully saving the
+# should also call <code>removeBackupFiles</code> after successfully saving the
 # file, but only if the name argument is not given.  This is because the
 # auto-save mechanism uses this same procedure, but passes a name to
-# use to save the file.  Derived classes should also call "markUnmodified".
+# use to save the file.  Derived classes should also call 
+# <code>markUnmodified</code>.
 #
 body ::tycho::File::save {{name ""}} {
     # If the argument is present, this is probably a request to save
@@ -768,8 +776,8 @@ body ::tycho::File::save {{name ""}} {
 #### saveAs
 # Invoke the file browser to prompt the user for a file name,
 # and then, if the file is writable or creatable, save the contents
-# of the text window to that file.  Note that in the base class, this
-# will eventually fail because we don't know how to save.
+# of the editor to that file.  Note that in the base class, this
+# will eventually fail because we do not know how to save.
 #
 body ::tycho::File::saveAs {} {
     set filename [::tycho::DialogWindow::newModal FileBrowser \
@@ -872,7 +880,7 @@ body ::tycho::File::toggleReadOnly {} {
 
 #####################################################################
 #### windowMenuAppend
-# Append the name of an open file editor to the Window menu.
+# Append the name of an open file editor to the "Window" menu.
 # The second argument, normally a filename, gives the menu label.
 #
 body ::tycho::File::windowMenuAppend {obj label} {
@@ -886,7 +894,7 @@ body ::tycho::File::windowMenuAppend {obj label} {
 
 #####################################################################
 #### windowMenuRemove
-# Remove the name of an open file from the Window menu.
+# Remove the name of an open file from the "Window" menu.
 #
 body ::tycho::File::windowMenuRemove {filename} {
     $itk_component(windowMenu) delete $filename
@@ -973,7 +981,7 @@ body ::tycho::File::newEditor {editor} {
 #### openWin
 # Open a file browser, and then open an editor for the file.
 # The editor is chosen based on the file extension, if the extension
-# is recognized.  Otherwise, the Edit class is used to open an
+# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
 #
 body ::tycho::File::openWin {} {
@@ -1021,14 +1029,15 @@ body ::tycho::File::openContext {filename} {
 #### registerEditor
 # Register a context-sensitive editor by file extension(s), or base
 # filename. This means means that an open-file command (via the
-# openContext procedure in this class) will recognize the file
-# extension, or base filename and open the specified editor. The editor
-# is assumed to be a class derived from File, or at least to have a
-# -file option. Note that the leading period is considered part of the
-# extension, as in ".itcl". If a third argument is given, then the
-# editor will be added to the Window menu of all File objects opened in
-# the future using the value of the third argument as the menu label.
-# This permits the user to open a new blank editor of the given class.
+# <code>openContext</code> procedure in this class) will recognize the
+# file extension, or base filename and open the specified editor. The
+# editor is assumed to be a class derived from File, or at least to
+# have a -file option. Note that the leading period is considered part
+# of the extension, as in ".itcl". If a third argument is given, then
+# the editor will be added to the "Window" menu of all
+# <code>File</code> objects opened in the future using the value of the
+# third argument as the menu label. This permits the user to open a new
+# blank editor of the given class.
 #
 body ::tycho::File::registerEditor {extensions editorClass {description {}} \
 	{baseFilename {}}  } {
@@ -1045,8 +1054,8 @@ body ::tycho::File::registerEditor {extensions editorClass {description {}} \
 
 #####################################################################
 #### windowMenuAddAll
-# If the argument is the name of a current File object, then that
-# object is added to all Window menus of all current file objects.
+# If the argument is the name of a current <code>File</code> object, then that
+# object is added to all "Window" menus of all current file objects.
 # The second argument, normally a file name, gives the menu label.
 #
 body ::tycho::File::windowMenuAddAll {obj label} {
@@ -1059,7 +1068,9 @@ body ::tycho::File::windowMenuAddAll {obj label} {
 #####################################################################
 #### windowMenuRemoveAll
 # Remove the specified filename from the Window menu of all open
-# File objects.
+# <code>File</code> objects.  The specified filename must match
+# exactly the label given in the call to <code>windowMenuAddAll</code>
+# that created the entry in the first place.
 #
 body ::tycho::File::windowMenuRemoveAll {filename} {
     if {[info exists filesOpen] && [info exists filesOpen($filename)]} {
@@ -1076,7 +1087,7 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
 
 #####################################################################
 #### addWindowMenuEditor
-# Add the specified file to the window menu entry.
+# Add the specified file to the "Window" menu entry.
 #
 body ::tycho::File::addWindowMenuEditor {desc command} {
     $itk_component(windowMenu) add command \
@@ -1087,7 +1098,7 @@ body ::tycho::File::addWindowMenuEditor {desc command} {
 #####################################################################
 #### autoSave
 # If the data has been modified, save the data to a file with the name
-# given in the -file option, but with the prefix #auto#. Then arrange
+# given in the -file option, but with the prefix "#auto#". Then arrange
 # to be called later again, with the time interval given by the option
 # -autosaveinterval.  A value of zero for this option disables auto-saving.
 #
@@ -1148,7 +1159,8 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 
 #####################################################################
 #### removeBackupFiles
-# Remove the backup file that gets automatically created periodically.
+# Remove the backup file that gets automatically created periodically,
+# if it exists.  Also remove the crash-recovery file, if it exists.
 #
 body ::tycho::File::removeBackupFiles {} {
     set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
