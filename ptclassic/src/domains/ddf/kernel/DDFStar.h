@@ -37,9 +37,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-#include "SDFStar.h"
+#include "DynDFStar.h"
 #include "Particle.h"
-#include "Fraction.h"
 #include "DDFPortHole.h"
 
 class DDFWormhole;
