@@ -1,6 +1,6 @@
  /*************************************************************************
 
-  Copyright   [Copyright (c) 1994-1996 The Regents of the Univ. of California.
+  Copyright   [Copyright (c) 1994-1998 The Regents of the Univ. of California.
   All rights reserved.
 
   Permission is hereby granted, without written agreement and without license
@@ -22,10 +22,13 @@
 ******************************************************************************/
 /*
  * Revision Control Information
- *
+Version identification:
+@(#)DERCScheduler.h     $Id$
+
+Author: Luciano, Neil Smyth, Mudit Goel
+
  * $Source$
- * $Author$
- * $Revision$ * $Date$
+ 
  *
  */
 
@@ -436,7 +439,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     
     /* added stuff */
     fprintf( fp, "      double emitTime; \n\n");
-    fprintf( fp, "      RCEvent *newEvent = new RCEvent(); \n");
+    fprintf( fp, "      DERCEvent *newEvent = new DERCEvent(); \n");
     fprintf( fp, "      newEvent->src = this; \n");
     fprintf( fp, "      newEvent->isDummy = isDummy; \n");
     fprintf( fp, "      switch( outputPort ) {\n" );
@@ -464,7 +467,7 @@ static void pl_print_method( fp, node, autotick, unittime )
                 }
             }
             fprintf( fp, "                     tl->sendData();\n");
-            fprintf( fp, "                     newEvent->~RCEvent();\n");
+            fprintf( fp, "                     newEvent->~DERCEvent();\n");
             fprintf( fp, "                }\n");
             fprintf( fp, "                else newEvent->outputPort = ");
             fprintf( fp, "c%s;\n", pvarst);
@@ -490,7 +493,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    name { emitEvent }\n");
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    type { void }\n" );
-    fprintf( fp, "    arglist { \"(RCEvent* event, double emitTime)\" }\n" );
+    fprintf( fp, "    arglist { \"(DERCEvent* event, double emitTime)\" }\n" );
     fprintf( fp, "    code {\n" );
 
     output_event_count = 1;
@@ -533,7 +536,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "            default:\n               break;\n" );
     fprintf( fp, "      }\n" );
     fprintf( fp, "      tl->sendData();\n");    
-    fprintf( fp, "      event->~RCEvent();\n");
+    fprintf( fp, "      event->~DERCEvent();\n");
     fprintf( fp, "    }\n  }\n");
 
 
