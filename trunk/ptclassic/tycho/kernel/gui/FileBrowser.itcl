@@ -148,12 +148,6 @@ class ::tycho::FileBrowser {
     method mkdir {}
 
     ##################################################################
-    ####                     public procs                         ####
-
-    # Set the global current working directory.
-    proc setCWD {cwd} {set CWD $cwd}
-
-    ##################################################################
     ####                   protected methods                      ####
 
     # Process a file or directory selection.
