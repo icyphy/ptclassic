@@ -100,7 +100,8 @@ public:
 
 	// Add block and call setBlock for it
 	void addBlock(Block& b,const char* bname) {
-		addBlock(b.setBlock(bname,this));
+		b.setBlock(bname,this);
+		blocks.put(b);
 	}
 
 	// Remove a block from the list

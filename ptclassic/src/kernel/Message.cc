@@ -78,17 +78,23 @@ Message* Message::clone() const {
 // The following is a permanent Envelope with contents "dummyMessage".
 static Envelope dummy;
 
-// bookkeeping function to zap the Message when done
-// have to handle dummyMessage specially (it cannot be deleted)
-void Envelope::unlinkData() {
-	if (d == &dummyMessage) return;
-	decCount();
-	if (refCount() == 0) {
-		LOG_DEL; delete d;
-	}
+extern const DataType MESSAGE = "MESSAGE";
+
+// assignment operator.  Adjust reference counts.
+
+Envelope& Envelope::operator=(const Envelope& p) {
+	p.incCount();
+	unlinkData();
+	d = p.d;
+	return *this;
 }
 
-extern const DataType MESSAGE = "MESSAGE";
+// destructor.  Wipe out the Message when the last
+// link is removed.
+
+Envelope::~Envelope() {
+	unlinkData();
+}
 
 // Envelope error message generation.  The message is in a static buffer.
 const char* Envelope::typeError(const char* expected) const {

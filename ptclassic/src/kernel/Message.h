@@ -77,6 +77,15 @@ private:
 // multiple objects.
 
 class Envelope {
+private:
+	// fns to manipulate the reference count.  These MUST be used
+	// properly.  They are first so they can be included
+	// by other inline functions and still be inlined correctly.
+	void incCount() const { (*d->refCount)++;}
+
+	// decCount returns the new count as its value.
+	int decCount() const { return --(*d->refCount);}
+
 public:
 	// constructor: by default, point to dummyMessage.
 	// dummyMessage is special, doesn't bother with ref counts.
@@ -91,19 +100,17 @@ public:
 		d = p.d;
 		incCount();
 	}
-	// assignment operator
-	Envelope& operator=(const Envelope& p) {
-		p.incCount();
-		unlinkData();
-		d = p.d;
-		return *this;
-	}
 
-	// destructor.  Wipe out the Message when the last
+	// assignment operator.  Adjusts reference counts; possibly
+	// deletes the old Message I pointed to.
+	Envelope& operator=(const Envelope& p);
+
+	// destructor.  Wipes out the Message when the last
 	// link is removed.
-	~Envelope() {
-		unlinkData();
-	}
+	~Envelope();
+
+	// an envelope is "empty" if it has the dummy message.
+	int empty() const { return (d == &dummyMessage);}
 
 	// dataType() : pass through
 	const char* dataType() const { return d->dataType();}
@@ -131,21 +138,23 @@ public:
 	// produce a writable copy of the Message.  side effect --
 	// contents of Envelope are changed to dummyMessage.
 	Message* writableCopy();
+protected:
+	// return the reference count of the Message.
+	int refCount() const { return *d->refCount;}
 private:
+	// bookkeeping function to zap the Message when done
+	void unlinkData() {
+		if (!empty() && decCount() == 0) {
+			INC_LOG_DEL; delete d;
+		}
+	}
+
+	// the special "null message".
 	static Message dummyMessage;
 
 	// a pointer to my real data
 	Message* d;
 
-	// manipulate the reference count.  These MUST be used
-	// properly.
-	void incCount() const { (*d->refCount)++;}
-	void decCount() const { (*d->refCount)--;}
-
-	int refCount() const { return *d->refCount;}
-
-	// bookkeeping function to zap the Message when done
-	void unlinkData();
 };
 
 // A Particle class to transmit Messages (which are enclosed in Envelopes)
