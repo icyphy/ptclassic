@@ -46,6 +46,7 @@ PIGIDIR =	$(ROOT)/src/pigilib
 PTKLIB = 	$(ROOT)/src/ptklib
 INCL =		-I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 			-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) \
+			-I$(ROOT)/src/domains/de/tcltk/stars \
 			-I$(ROOT)/src/domains/de/java/stars
 
 # Library name
@@ -53,6 +54,8 @@ LIB =		libdejavastars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+DEJNITest.pl \
+DEJavaIfc.pl
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -66,7 +69,7 @@ HDRS =		$(SRCS:.cc=.h)
 STAR_MK =	dejavastars
 DOMAIN =	DE_JAVA
 DOMAIN_2 =	DE
-MISC_FILES =
+MISC_FILES =	jni.tcl
 
 EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES)
 
