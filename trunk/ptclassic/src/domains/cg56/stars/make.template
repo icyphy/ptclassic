@@ -102,6 +102,7 @@ PL_SRCS= \
  CG56WaveForm.pl \
  CG56WriteFile.pl \
  CG56WriteFileInt.pl \
+ CG56Xgraph.pl \
  CG56Xor.pl
 
 
