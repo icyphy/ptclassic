@@ -85,6 +85,7 @@ PL_SRCS= \
  SDFPolarToRect.pl \
  SDFPrinter.pl \
  SDFQuant.pl \
+ SDFQuantizer.pl \
  SDFRamp.pl \
  SDFRampFix.pl \
  SDFRampInt.pl \
