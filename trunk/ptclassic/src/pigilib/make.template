@@ -1,8 +1,8 @@
-# Makefile for Ptolemy graphical interface edg 5/23/90
+# Makefile for Ptolemy graphical interface library
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1989 The Regents of the University of California.
+# Copyright (c) 1989,1990,1991 The Regents of the University of California.
 #			All Rights Reserved.
 # Originally written by: E. Goei
 # Date of creation: 5/23/90
@@ -17,7 +17,7 @@
 # root of source tree
 ROOT	      = ../..
 # VPATH points to the "real" source directory
-VPATH         = $(ROOT)/src/pigiRpc
+VPATH         = $(ROOT)/src/pigilib
 # Octtools root directory
 OCTTOOLS      = $(ROOT)/octtools
 
@@ -34,16 +34,6 @@ GXX	      = g++
 GPPFLAGS      = -g -I$(ROOT)/src/kernel
 GNULIB	      = /usr/gnu/lib
 GNUINCLUDE    = $(GNULIB)/g++-include
-
-# Linker variables
-LINKER        = $(GNULIB)/gcc-ld
-LINKOPTS      = -S
-LDIR          = $(ROOT)/lib.$(ARCH)
-LDFLAGS	      = $(LINKOPTS) -e start -dc -dp -Bstatic /lib/crt0.o \
-		-L$(OCTTOOLS)/lib.$(ARCH) -L$(LDIR) -u_UserMain
-LIBS	      = -lsdf -lddf -lde -lthor -lptolemy \
-		-lg++ -loh -lrpc -llist -ltr -lutility -lst -lerrtrap \
-		-luprintf -lport -lX11 -lm $(GNULIB)/gcc-gnulib -lc
 
 HDRS	      = compile.h \
 		edit.h \
@@ -83,50 +73,20 @@ LIBCSRCS      = main.c \
 		xfunctions.c \
 		options.c
 
-
 LIBCPPSRCS    = kernelCalls.cc XError.cc pigiLoader.cc
 
+SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
-LIBSRCS = $(LIBCSRCS) $(LIBCPPSRCS)
-
-SRCS = 	$(LIBSRCS) defpalettes.c
 LIBOBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
-# Star definitions
-SDF=../domains/sdf/stars
-DDF=../domains/ddf/stars
-DE =../domains/de/stars
-Thor=../domains/thor/stars
-
-SDFSRC=$(ROOT)/src/domains/sdf/stars
-DDFSRC=$(ROOT)/src/domains/ddf/stars
-DESRC =$(ROOT)/src/domains/de/stars
-ThorSRC=$(ROOT)/src/domains/thor/stars
-
-# include files for star names.  These define the symbols SDFSTARS, DESTARS,
-# DDFSTARS, and ThorSTARS.
-
-include $(SDFSRC)/sdfstars.mk
-include $(DESRC)/destars.mk
-include $(DDFSRC)/ddfstars.mk
-include $(ThorSRC)/thorstars.mk
-
-all:	makefile libpigi.a pigiRpc
+all:	makefile libpigi.a
 
 libpigi.a:	$(LIBOBJS)
 	rm -f libpigi.a
 	ar cq libpigi.a $(LIBOBJS)
 	ranlib libpigi.a
 
-ALLSTARS=$(SDFSTARS) $(DESTARS) $(DDFSTARS) $(ThorSTARS)
-
-pigiRpc:	defpalettes.o libpigi.a $(LDIR)/libptolemy.a \
-		$(LDIR)/libsdf.a $(LDIR)/libddf.a $(LDIR)/libde.a \
-		$(ALLSTARS)
-	$(LINKER) $(LDFLAGS) defpalettes.o $(ALLSTARS) libpigi.a $(LIBS) -o pigiRpc
-
 DESTLIB = $(ROOT)/lib.$(ARCH)/libpigi.a
-DESTBIN = $(ROOT)/bin.$(ARCH)/pigiRpc
 
 $(DESTLIB):	libpigi.a
 		@echo Installing pigi library
@@ -134,12 +94,7 @@ $(DESTLIB):	libpigi.a
 		cp libpigi.a $(DESTLIB)
 		ranlib $(DESTLIB)
 
-$(DESTBIN):	pigiRpc
-		@echo Installing pigiRpc
-		rm -f $(DESTBIN)
-		cp pigiRpc $(DESTBIN)
-
-install: makefile $(DESTLIB) $(DESTBIN)
+install: makefile $(DESTLIB)
 
 # "make clean" removes .o files and other cruft
 clean:
