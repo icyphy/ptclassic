@@ -87,7 +87,7 @@ void ClusterPort::update() {
     }
 }
 
-ClusterPort::ClusterPort(GenericPort&p):GalPort(p) {
+ClusterPort::ClusterPort(PortHole& p) : GalPort(p) {
     setName(p.name());
 }
 
