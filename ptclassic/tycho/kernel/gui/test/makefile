@@ -44,7 +44,6 @@ TCL_SRCS = \
 
 SIMPLE_TESTS = \
 	testCircularList.itcl \
-	testExec.itcl \
 	testForest.itcl \
 	testLoader.itcl \
 	testGraph.itcl \
@@ -52,6 +51,7 @@ SIMPLE_TESTS = \
 	testStack.itcl
 
 GRAPHICAL_TESTS = \
+	testExec.itcl \
 	testRevControl.itcl \
 	testWidgets.itcl \
 
@@ -72,7 +72,7 @@ OPTIONAL_FILES =	rcstst sccstst
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: test_simple test_graphics
+tests:: test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
@@ -80,9 +80,21 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 		$(ITCLSH)
 
 # These tests require a graphics terminal
-test_graphics: $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -e testRevControl.itcl
-	tycho -e testWidgets.itcl
+test_graphics: all.itcl
+	tycho -e all.itcl
+
+FORCE:
+
+all.itcl: FORCE
+	rm -f $@
+	echo "set reallyExit 0" > $@
+	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" >> $@
+	for x in $(GRAPHICAL_TESTS); do \
+		echo "puts $$x" >> $@; \
+		echo "source $$x" >> $@; \
+	done
+	echo "set reallyExit 1" >> $@
+	echo "doneTests" >> $@
 
 test_exec_msg:
 	@echo "This message is used to test the Exec class"
