@@ -35,7 +35,7 @@ util_csystem(s)
 char *s;
 {
     register SIGNAL_FN (*istat)(), (*qstat)();
-#if defined(_IBMR2) || defined(SYSV)
+#ifdef WAIT_RETURNS_INT
     int status;    
 #else
     union wait status;
@@ -56,7 +56,7 @@ char *s;
     if (w == -1) {		/* check for no children ?? */
 	retval = -1;
     } else {
-#if defined(_IBMR2) || defined(SYSV)
+#ifdef WAIT_RETURNS_INT 
 	retval = status;
 #else
 	retval = status.w_status;
