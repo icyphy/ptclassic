@@ -23,6 +23,8 @@ $Id$
 
 extern Error errorHandler;
 
+static void bombIfNotConnected(PortHole*);
+
 /************************************************************************
 
 	Synchronous dataflow (SDF) Scheduler
@@ -104,6 +106,23 @@ int SDFScheduler :: setup (Block& galaxy) {
 
    int i;
 
+
+   // Run the initialize routines of all the atomic stars.
+   // This must happen first because the number of tokens generated
+   // by a star execution may depend on a State (e.g. a downsample star)
+   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
+	{
+	SDFStar& s = (SDFStar&)alanShepard.nextBlock();
+
+	// Call system initialization
+	s.initialize();
+
+	// Call user-provided initialization
+	s.start();
+	}
+
+   alanShepard.setupSpaceWalk((Galaxy&)galaxy);
+
    // Begin by setting the repetitions member of each component star
    // to zero, to force it to be recomputed.
    for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--) {
@@ -182,17 +201,6 @@ int SDFScheduler :: setup (Block& galaxy) {
 	errorHandler.error("DEADLOCK! Not enough delay in a loop containing:",
                                    dead->readFullName());
 
-   // Run the initialize routines of all the atomic stars.
-   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-	{
-	SDFStar& s = (SDFStar&)alanShepard.nextBlock();
-
-	// Call system initialization
-	s.initialize();
-
-	// Call user-provided initialization
-	s.start();
-	}
 }
 
 /*******************************************************************
@@ -275,11 +283,14 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 	// Step through each portHole
 	for(int i = block.numberPorts(); i>0; i--) {
 	   currentPort = &block.nextPort();
+
+	   bombIfNotConnected (currentPort);
+
 	   if(reptArc(*(SDFPortHole*)currentPort,
-			*(SDFPortHole*)currentPort->farSidePort))
+			*(SDFPortHole*)currentPort->far()))
 	      // recursively call this function on the farSideBlock,
 	      // having determined that it has not previously been done.
-	      reptConnectedSubgraph (*(*currentPort->farSidePort).parent());
+	      reptConnectedSubgraph (*(*currentPort->far()).parent());
 	}
 }
 
@@ -367,12 +378,14 @@ int SDFScheduler :: simRunStar (Block& atom,
 	   for(i = atom.numberPorts(); i>0; i--) {
 		// Look at the next port in the list
 		port = (SDFPortHole*)&atom.nextPort();
+		bombIfNotConnected(port);
 
 		// Is the port an output port?
 		if(port->isItOutput()) {
 
 		   // Is the destination star runnable?
-		   if(notRunnable(*(SDFStar*)port->farSidePort->parent())
+
+		   if(notRunnable(*(SDFStar*)port->far()->parent())
 			== 0) {
 
 			// It is runnable.
@@ -403,7 +416,7 @@ int SDFScheduler :: simRunStar (Block& atom,
 	   for(i = atom.numberPorts(); i>0; i--) {
 
 		// Look at the farSidePort of the next port in the list
-		port = (SDFPortHole*)(atom.nextPort().farSidePort);
+		port = (SDFPortHole*)(atom.nextPort().far());
 
 		if(port->isItInput()) {
 
@@ -488,4 +501,21 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 	// If we get to this point without returning, then the star
 	// can be run.
 	return 0;
+}
+
+// We should handle this error better, but the alternative is a core dump.
+
+extern "C" void exit (int);
+
+static void
+bombIfNotConnected (PortHole *p) {
+	if (p->far() == NULL) {
+
+		StringList msg;
+		msg = "Port ";
+		msg += p->readFullName();
+		msg += " is not connected.  Exiting.";
+		errorHandler.error (msg);
+		exit (1);
+	}
 }
