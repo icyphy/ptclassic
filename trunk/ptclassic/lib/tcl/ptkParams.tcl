@@ -5,6 +5,8 @@
 # Copyright (c) 1990-1993 The Regents of the University of California.
 # All rights reserved.
 #
+# Numerous suggestions from Prof. Edward Lee and Alan Kamas
+#
 # For storage, there exist two global array--one which stores lists of
 # current parameter-type-value triplets and the other which (upon
 # invocation of an edit-parameters command) stores the original triplet
@@ -203,14 +205,18 @@ proc ed_AddParamDialog {facet number} {
     bind $ask.fvalue.entry <Control-p> "focus $ask.ftype.entry"
 
     pack append [frame $ask.b] \
-	[button $ask.b.dismiss -text "  OK  " -command \
+	[frame $ask.b.okfr -relief sunken -bd 2] {left expand fill} \
+	[button $ask.b.cancel -text "Cancel" \
+		-command "destroy $ask"] {left expand fill}
+
+    pack append $ask.b.okfr \
+	[button $ask.b.okfr.f -text "  OK  " -command \
 		"ed_AddParam $facet $number \
 		\[$ask.fname.entry get\] \
 		\[$ask.ftype.entry get\] \
 		\[$ask.fvalue.entry get\]
-		destroy $ask"] {left expand fill} \
-	[button $ask.b.cancel -text "Cancel" \
-		-command "destroy $ask"] {left expand fill}
+		destroy $ask"] {expand fill}
+
     pack append $ask $ask.m {top fillx} $ask.fname {top fillx} \
 	$ask.ftype {top fillx} $ask.fvalue {top fillx} $ask.b {top fillx}
     ptkRecursiveBind $ask <Return> \
@@ -515,7 +521,7 @@ proc ptkEditParams {facet number} {
 		-command "ed_Apply $facet $number
 				$u.close invoke"] {expand fill}
 
-#    {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])}
+# Joe Buck's fix
     if {$number == "NIL"} {
 	pack append $u \
 	   [button $u.add -text " Add parameter " -command \
