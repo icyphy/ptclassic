@@ -106,9 +106,6 @@ class ::tycho::EditProgram {
     # Insert the fill prefix at the beginning of every line in the selection.
     method commentSelection {}
 
-    # Exec a subprocess.
-    method execProcess {command {waitForOk 1}}
-
     # Fill the set of lines identified by the selection, make comments.
     method fillSelection {}
 
@@ -154,9 +151,6 @@ class ::tycho::EditProgram {
 body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
-
-    menubar insertMenuItem "Compile" "Evaluate" File -underline 2 \
-            -command "$this execProcess make 0"
     
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
@@ -242,23 +236,6 @@ body ::tycho::EditProgram::commentSelection {} {
 	markModified
 	parseRegion sel.first sel.last
     }
-}
-
-#### execProcess
-# Exec a subprocess.  The optional arg `waitForOk' determines whether
-# the process is started immediately, or if we wait for the user to
-# hit ok.
-#
-body ::tycho::EditProgram::execProcess {command {waitForOk 1}} {
-    set saveDir [pwd]
-    cd [file dirname $file]
-    set w [::tycho::autoName .exec]
-    ::tycho::Exec $w -command $command
-    $w centerOnScreen
-    if {$waitForOk != 1} {
-        $w invoke ok 
-    }
-    cd $saveDir
 }
 
 #####################################################################
