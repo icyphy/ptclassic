@@ -1252,8 +1252,7 @@ body ::tycho::File::openContext {filename} {
         if {![file exists $filename]} {
             if {![::tycho::askuser \
                     "File $filename does not exist.  Open a blank editor?"]} {
-                focusin
-                return
+                return {}
             }
         }
 	set ext [file extension $filename]
