@@ -96,12 +96,12 @@ namespace ::tycho {
         # Ptolemy is present.  Use it.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {ptkOpenFacet {%s} schematic contents} \
-                {Vem facet} "graphics"
+                {Vem facet}
     } {
         # Ptolemy is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::tycho::view EditPalette {-file {%s}}} \
-                {Palette editor} "graphics"
+                {Palette editor}
     }
     ::tycho::File::registerExtensions .pl \
             {::tycho::view EditPtlang {-file {%s}}} \
