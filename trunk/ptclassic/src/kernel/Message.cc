@@ -16,7 +16,7 @@ $Id$
 #include "Packet.h"
 #include "Particle.h"
 #include "Plasma.h"
-#include "Output.h"
+#include "Error.h"
 
 PacketData Packet::dummyPacket;
 

@@ -15,8 +15,9 @@ $Id$
 #include "Wormhole.h"
 #include "Scheduler.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include "Domain.h"
+#include <std.h>
 
 extern Error errorHandler;
 

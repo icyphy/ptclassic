@@ -15,7 +15,7 @@ $Id$
 
 #include "Particle.h"
 #include "Plasma.h"
-#include "Output.h"
+#include "Error.h"
 #include <builtin.h>		// for gnu form(...) function
 
 // Here are the plasmas!

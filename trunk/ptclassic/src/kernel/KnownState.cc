@@ -13,11 +13,10 @@ description.
 
 *******************************************************************/
 #include "KnownState.h"
-#include "Output.h"
+#include "Error.h"
 #include "string.h"
 #include "std.h"
 #include <ctype.h>
-extern Error errorHandler;
 
 StateList *KnownState::allStates;       // the list of state types
 StateList *KnownState::allGlobals;	// the list of global state values
@@ -72,7 +71,7 @@ KnownState::clone(const char* type) {
         const State *p = find(type);
         if (p) return p->clone();
 // If we get here, we don't know the state.  Report error, return NULL.
-        errorHandler.error("KnownState::clone: unknown state name: ",type)
+        Error::error("KnownState::clone: unknown state name: ",type)
 ;
         return 0;
 }

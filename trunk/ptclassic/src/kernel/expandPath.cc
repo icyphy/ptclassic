@@ -18,10 +18,8 @@ This is almost plain C except for calling Error::abortRun
 
 #include <pwd.h>
 #include <std.h>
-#include "Output.h"
+#include "Error.h"
 #define MAXLEN 256
-
-extern Error errorHandler;
 
 const char*
 expandPathName(const char* name) {
