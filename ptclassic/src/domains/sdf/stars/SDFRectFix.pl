@@ -3,34 +3,40 @@ defstar {
 	domain { SDF }
 	desc {
 Generate a fixed-point rectangular pulse of height "height" 
-(default 1.0) and width "width" (default 8).  If "period" is 
-greater than zero, then the pulse is repeated with the given period. 
-The precision of "height" can be specified in bits.
+(default 1.0) and width "width" (default 8).
+If "period" is greater than zero, then the pulse is repeated with the
+given period.
+The precision of "height" is specified by the precision of "outputPrecision".
 	}
         author { A. Khazeni }
 	version { $Id$ }
 	location { SDF main library }
         explanation {
-The value of the "height" parameter and its precision in bits can 
-currently be specified using two different notations.
-Specifying only a value by itself in the dialog box would create a
-fixed-point number with the default precision which has a total length
-of 24 bits with the number of range bits as required by the value.
-For example, the default value 1.0 creates a fixed-point object with
-precision 2.22, and a value like 0.5 would create one with precision
-1.23 and etc.  The alternative way of specifying the value and the
-precision of this parameter is to use the parenthesis notation of
-(value, precision).  For example, filling the dialog
-box of this parameter by (2.546, 3.5) would create a fixed-point
-object by casting the double-precision floating-point number 2.546
-to a fixed-point precision of 3.5. }
+The "outputPrecision" is specified using an l.r format, where
+l is the number of bits to the left of the decimal place
+(including the sign bit) and r is the number of bits to the
+right of the sign bit.
+For example, the precision "2.22" would represent a 24-bit fixed-point
+number with 1 sign bit, 1 integer bit, and 22 fractional bits.
+	}
 	output {
 		name { output }
 		type { fix }
 	}
+        defstate {
+                name { outputPrecision }
+                type { string }
+                default { "4.14" }
+                desc {
+Precision of the output, in bits.
+The complex number is cast to a double and then converted to this precision.
+If the value of the double cannot be represented by the number of bits
+specified in the precision parameter, then a error message is given.
+                }
+        }
 	defstate {
 		name { height }
-		type { fix }
+		type { float }
 		default { "1.0" }
                 desc { Height of the rectangular pulse. }
 	}
@@ -53,11 +59,38 @@ to a fixed-point precision of 3.5. }
 		desc { Internal counting state. }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
+        defstate {
+                name { masking }
+                type { string }
+                default { "truncate" }
+                desc {
+Masking method.
+This parameter is used to specify the way the complex number converted to
+a double is masked for casting to the fixed-point notation.
+The keywords are: "truncate" (the default) and "round".
+                }
+        }
+	protected {
+		Fix out;
+	}
+        setup {
+                const char* Masking = masking;
+                const char* OutputPrecision = outputPrecision;
+                int outIntBits = Fix::get_intBits(OutputPrecision);
+                int outLen = Fix::get_length(OutputPrecision);
+                out = Fix(outLen, outIntBits);
+                if ( strcasecmp(Masking, "truncate") == 0)
+                  out.Set_MASK(Fix::mask_truncate);
+                else if ( strcasecmp(Masking, "round") == 0)
+                  out.Set_MASK(Fix::mask_truncate_round);
+                else
+                  Error::abortRun(*this, ": not a valid function for masking");
+        }
 	go {
-                Fix t;
-		if (int(count) < int(width)) t = Fix(height);
-		output%0 << t;
+		out = 0.0;
+		if ( int(count) < int(width) ) out = height;
+		output%0 << out;
 		count = int(count) + 1;
-		if (int(period) > 0 && int(count) >= int(period)) count = 0;
+		if ( int(period) > 0 && int(count) >= int(period) ) count = 0;
 	}
 }
