@@ -1,7 +1,8 @@
 .\" $Id$
 .NA multirate
 .SD
-A universe that upsamples a signal by a ratio of 5/2.
+Upsample a sinusoidal signal by a ratio of 5/2 using a
+polyphase lowpass interpolating FIR filter.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

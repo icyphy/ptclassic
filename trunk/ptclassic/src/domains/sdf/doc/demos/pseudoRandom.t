@@ -1,7 +1,7 @@
 .\" $Id$
 .NA pseudoRandom
 .SD
-Generate a pseudoRandom sequence of zeros and ones
+Generate a pseudoRandom sequence of zeros and ones using a maximal-length shift register.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -10,8 +10,13 @@ Generate a pseudoRandom sequence of zeros and ones
 .AL "E. A. Lee"
 .LD
 .Ir "Pseudo-random sequences"
-This universe generates a psuedo-random sequence using a maximal-length
-shift register.  The
+A maximal-length shift register is a delay line whose input is computed as the
+exclusive or of a set of taps from the delay line [1].
+The
 .c WaveForm
 star feeds an initial sequence into the delay line.
+.UH Reference
+.ip [1]
+E. A. Lee and D. G. Messerschmitt, \fIDigital Communication\fR, Second Edition,
+Kluwer Academic Publishers, Norwood, MA, 1994.
 .ES

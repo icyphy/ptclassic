@@ -1,7 +1,8 @@
 .\" $Id$
 .NA broken
 .SD
-An example of an inconsistent SDF system
+This is an example of an inconsistent SDF system.
+It fails to run, generating an error message instead.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

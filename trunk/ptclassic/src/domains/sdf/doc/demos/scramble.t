@@ -1,7 +1,9 @@
 .\" $Id$
 .NA scramble
 .SD
-Simple commutator-distributor demo
+This system rearranges the order of samples of signal using
+the Commutator and Distributor stars. Note that because these
+are multirate stars, one iteration involves more than one sample.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -10,8 +12,11 @@ Simple commutator-distributor demo
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .LD
-This system is a simple demonstration of the Commutator and
-Distributor stars.
+This system is a simple demonstration of the
+.c Commutator
+and
+.c Distributor
+stars.
 .SA
 Commutator, Distributor
 .ES

@@ -1,7 +1,9 @@
 .\" $Id$
 .NA qam
 .SD
-A demo that produces a QAM signal
+This universe produces a 16-point quadrature amplitude modulated (QAM) signal
+and displays the eye diagram for the in-phase part, the constellation,
+and the modulated transmit signal.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -9,20 +11,18 @@ A demo that produces a QAM signal
 .AL "Joseph T. Buck"
 .LD
 .pp
-This universe produces a 16-point quadrature amplitude modulated signal
-and displays the eye diagram for the in-phase part, the constellation,
-and the modulated transmit signal.
 .Ie "modulation, quadrature amplitude"
 .Ie "quadrature amplitude modulation"
 .Se RaisedCos
 .Ie "raised cosine pulse"
-The excess bandwidth is 100% and the carrier frequency is
+A raised cosine pulse is used, where
+the excess bandwidth is 100% and the carrier frequency is
 twice the symbol rate.
 Run it for about 100 iterations.
 .pp
 This is a port of the ``transmitter'' demo from Gabriel version 0.7.
 .Ir "Gabriel"
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 E. A. Lee and D. G. Messerschmitt,
 .i "Digital Communication" ,

@@ -1,7 +1,7 @@
 .\" $Id$
 .NA quantize
 .SD
-Demonstrate the Quantizer star.
+Demonstrate the use of the Quantizer star.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

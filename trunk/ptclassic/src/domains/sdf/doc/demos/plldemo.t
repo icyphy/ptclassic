@@ -1,7 +1,9 @@
 .\" $Id$
 .NA plldemo
 .SD
-Simulation of an optical phase-locked loop.
+Simulate a fourth-power optical phase-locked loop
+with laser phase noise and additive Gaussian white noise
+operating on a complex baseband envelope model of the signal.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

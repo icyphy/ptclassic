@@ -1,7 +1,8 @@
 .\" $Id$
 .NA lattice
 .SD
-Demonstrate the use of lattice filters.
+Demonstrate the use of lattice filters to synthesize an
+auto-regressive (AR) random process.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

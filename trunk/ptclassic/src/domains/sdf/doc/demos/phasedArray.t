@@ -1,7 +1,10 @@
 .\" $Id$
 .NA phasedArray
 .SD
-Phased array antenna simulation.
+This demo simulates a plane wave approaching a phased array with four sensors.
+The plane wave approaches from angles starting from head on and slowly rotating
+360 degrees. The response of the antenna is plotted as a function of direction
+of arrival in polar form.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -10,10 +13,7 @@ Phased array antenna simulation.
 .LD
 .Ie "phased array antenna"
 .Ie "antenna, phased array"
-This demo simulates a plane wave approaching an array of four antennas
-from angles starting from head on and slowly rotating 360 degrees.
-The response of the antenna is plotted as a function of direction
-of arrival in polar form.  The outputs of the four antennas are
+The outputs of the four antennas are
 simply added together, so the maximal response occurs when the excitation
 is incident to the plane of the antennas.  A more elaborate system
 would introduce programmable delays after each antenna element in

@@ -1,14 +1,14 @@
 .\" $Id$
 .NA freqsample
 .SD
-Filter design via frequency sampling.
+This system designs FIR filters using the frequency sampling method.
+Samples of the frequency response are converted into FIR filter coefficients.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ "October 20, 1990"
 .AL "J. Buck and E. A. Lee"
 .LD
-This system designs filters using the frequency sampling method.
 The frequency domain specification is given using the
 .c WaveForm
 star, and using some of the more elaborate features of the parameter

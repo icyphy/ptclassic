@@ -1,7 +1,9 @@
 .\" $Id$
 .NA pulses
 .SD
-Generate raised cosine and square-root raised cosine pulses.
+Generate raised cosine and square-root raised cosine pulses
+and demonstrates matched filtering with the square-root raised
+cosine pulse.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

@@ -1,7 +1,9 @@
 .\" $Id$
 .NA butterfly
 .SD
-The butterfly curves.
+This system uses sines and cosines to compute a curve
+known as the butterfly curve, invented by T. Fay.
+The curve is plotted in polar form.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
@@ -9,7 +11,7 @@ The butterfly curves.
 .AL "E. A. Lee"
 .LD
 .Ir "butterfly curve"
-This system computes and plots a curve known as the butterfly curve [1].
+The butterfly curve was described in [1].
 In polar form, the magnitude $r$ is given as a function of the phase
 $theta$ by the equation
 .EQ
@@ -17,7 +19,7 @@ r ~=~ e sup { cos ( theta ) } ~-~ 2 cos ( 4 theta ) ~+~
 sin sup 5 ( theta / 12) ~.
 .EN
 .Se XYgraph
-.UH REFERENCE
+.UH Reference
 .ip [1]
 T. Fay, "The Butterfly Curve," \fIAmerican Math. Monthly,\fR 96(5), pp. 442-443.
 .SA

@@ -1,7 +1,7 @@
 .\" $Id$
 .NA levinsonDurbin
 .SD
-Use the Levinson Durbin algorithm to estimate the parameters of an AR process.
+Use the Levinson-Durbin algorithm to estimate the parameters of an AR process.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

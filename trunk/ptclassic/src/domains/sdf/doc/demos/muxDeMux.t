@@ -1,7 +1,7 @@
 .\" $Id$
 .NA muxDeMux
 .SD
-Demonstrate the Mux and DeMux stars
+Demonstrate the Mux and DeMux stars, which perform multiplexing and demultiplexing.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe

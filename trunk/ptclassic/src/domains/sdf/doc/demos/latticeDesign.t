@@ -1,7 +1,7 @@
 .\" $Id$
 .NA latticeDesign
 .SD
-Use of Levinson-Durbin algorithm to design a lattice filter with a known
+Use of Levinson-Durbin algorithm to design a lattice filter with a specified
 transfer function.
 .DE
 .LO "~ptolemy/src/domains/sdf/demo"
