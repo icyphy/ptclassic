@@ -346,7 +346,7 @@ long userOptionWord;
     ViInit("open-facet");
     ErrClear();
     TCL_CATCH_ERR( 
-	Tcl_VarEval( ptkInterp, "dialog.openFacet", (char *) NULL) );
+	Tcl_VarEval( ptkInterp, "::tycho::File::openWin", (char *) NULL) );
     ViDone();
 }
 
