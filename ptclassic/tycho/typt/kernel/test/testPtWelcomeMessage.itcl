@@ -31,9 +31,15 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-#set VERBOSE 1
+# Uncomment this to get a full report, or set in your Tcl shell window.
+# set VERBOSE 1
 
-doneTests
+# If necessary load up the class definitions
+if {[namespace ptolemy {info classes Block}] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
+    }
+}
