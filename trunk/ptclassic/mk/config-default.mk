@@ -165,8 +165,11 @@ CFLAGS =
 
 # Archive tool to use
 AR = ar
-# command to use when getting files from SCCS (Gnu make)
+# Command to use when getting files from SCCS (Gnu make)
 GET=safe-get
+
+# yacc is used by ptlang and islang
+YACC = yacc
 
 # command to generate dependencies (cfront users can try CC -M)
 DEPEND=g++ -MM

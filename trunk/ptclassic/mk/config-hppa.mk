@@ -1,4 +1,4 @@
-# Configuration makefile to make on an HP-PA machine (7xx or 8xx)
+# Configuration makefile to make on an HP-PA machine (7xx or 8xx) and HPUX10.x
 # using GNU gcc and g++
 #
 # $Id$
@@ -45,6 +45,8 @@ include $(ROOT)/mk/config-g++.mk
 # Programs to use
 #
 RANLIB =	ranlib
+# ptlang and islang use yacc, which is not necessarily part of hpux10.x
+YACC =		bison -y
 # Use gcc everywhere, including octtools
 CC =		gcc
 OPTIMIZER =	-O2
