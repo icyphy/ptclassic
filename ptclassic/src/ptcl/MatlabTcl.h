@@ -45,6 +45,7 @@ a Tcl interpreter.
 
 #include "tcl.h"
 #include "MatlabIfc.h"
+#include "DataStruct.h"
 #include "StringList.h"
 
 
@@ -99,6 +100,23 @@ protected:
 	// the interface to the Matlab engine
 	MatlabIfc* matlabInterface;
 
+	// create a unique instance name
+	const char* makeInstanceName(char* name);
+
+	// list of handle names
+	SequentialList instanceList;
+
+	// add an instance
+	int addInstance(char* name);
+
+	// delete an instance
+	int deleteInstance(char* name);
+
+	// does a particular instance exist
+	int instanceExists(char* name);
+
+	// returns TRUE if there are no more instances
+	int noMoreInstances();
 };
 
 #endif
