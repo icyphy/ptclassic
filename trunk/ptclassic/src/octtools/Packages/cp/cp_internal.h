@@ -27,8 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
- * 
- */
+
 #include "stdio.h"		/* for __filbuf */
 #include "port.h"
 #include "cp.h"
