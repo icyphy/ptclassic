@@ -172,7 +172,7 @@ class TreeNode
 
 {
 public:
-       TreeNode() : left(0), right(0), vpiOne(0), vpiTwo(0)  { }
+       TreeNode() :  vpiOne(0), vpiTwo(0), left(0), right(0) {}
 
        ~TreeNode() 
        { LOG_DEL;  delete left;  LOG_DEL;  delete right; }
