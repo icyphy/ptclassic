@@ -110,6 +110,12 @@ install_tcltk:
 clean_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_clean
 
+# Not all architectures support shared libraries.  sol2 w/ gcc-2.7.0 does.
+install_tcltk_shared:
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all_shared
+clean_tcltk_shared:
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_clean_shared
+
 # Usually rebuilding vem and the octtools library is not done everytime.
 # Note that the octtools source is distributed as a separate tar file.
 
