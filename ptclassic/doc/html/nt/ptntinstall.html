@@ -7,7 +7,8 @@
 <H1>Ptolemy NT Installation</H1>
 The Ptolemy NT Installation is more tricky than it should be,
 we hope to fix this soon.  
-<H2><CODE>nt4</CODE> installation instructions</H2>
+
+<H2>nt4 Installation Instructions</H2>
 
 <OL>
 <LI> Download Cygnus GNU-win32 from
@@ -21,143 +22,157 @@ and
 icon.  Be sure to update your path and the other variables mentioned
 in the Cygnus <CODE>README.txt</CODE>.
 
- <HR>
-<LI> Obtain and Install Tcl8.0.  You have two choices, patch 
-	yourself, or download a patched version
-	<br> <B>Download patched sources</B>
-	<OL>
-	<LI> Download the <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/tcl8.0.cygwin.tar.gz">tcl8.0.cygwin.tar.gz</A>
-	<LI> Untar it with:
-	<PRE>
-	tar -zxf tcl8.0.cygwin.tar.gz
-	</PRE>
+<li> Download <a href="http://dao.gsfc.nasa.gov/software/grads/win32/X11R6.3">Pre-compiled X11R6.3 Libraries/Clients For GNU Win32 B19 </a>.
 
+<li> Install X11R6.3:
+<pre>
+mkdir /usr
+cd /usr
+tar -zxf b19_X11R6_3.tar.gz
+</pre>
 
-	<LI> Fix the internal paths:
-	<PRE>
-	cd tcl8.0.cygwin/unix
-	sed 's+//d/temp/tcl8.0/+/tmp/tcl8.0.cygwin+' Makefile &gt; Makefile.tmp
-	mv Makefile.tmp Makefile 
-	</PRE>
+<li> Add <CODE>c:\usr\X11R6.3\bin</CODE> to your path by using the
+<CODE>System</CODE> control panel.
 
-	<LI> Build and install
-	<PRE>
-	cd tcl8.0.cygwin/unix
-	make
-	mkdir -p /usr/local
-	make install
-	</PRE>
+<li> Verify that the X installation is working by starting up an X server
+setting your DISPLAY:
+<pre>
+DISPLAY=localhost:0.0
+</pre>
+and then running <CODE>/usr/X11R6.3/bin/xclock</CODE>.
+</ol>
 
-	</OL>
+<h3>Building Ptolemy</h3>
 
-	<br> <B>Patch the sources yourself </B>
- <OL>
-	<LI> Download The Tcl
-	8.0 source from
+<ol>
 
-	<A HREF="ftp://ftp.sunlabs.com/pub/tcl/tcl8.0.tar.gz"><CODE>ftp://ftp.sunlabs.com/pub/tcl/tcl8.0.tar.gz</CODE></A>
-	 <br>
-	(<A HREF="http://sunscript.sun.com/TclTkCore/">SunScript Homepage</A>)
-
-
-	<LI> Untar the sources.
-	<LI> Start up bash, cd to the <CODE>tcl8.0/unix</CODE> directory
-	in the <CODE>tcl8.0</CODE> directory and run: 
-	<CODE>configure --enable-gcc --disable-load</CODE>
-	
-	<LI> Download the <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/tcl8.0.cygwin.patch">tcl8.0.cygwin.patch</A>
-	<LI> Unfortunately, the Cygwin b18 patch seems to corrupt files,
-	but if it worked, one would: 
-<CODE>cd</CODE> up one level to the <CODE>tcl8.0</CODE>
-	directory and run patch:
-	<PRE>
-	patch -p1 tcl8.0.cygwin.patch
-	</PRE>
-
-	The patch makes the following changes.  Note that this
-	is not the right way to do things, these changes should
-	be in the configure script.  Adding platform dependent
-	ifdefs to the .c files is a bad idea, but I did it
-	for expediency.
-	<OL>
-	<LI>  edit <CODE>generic/TclPort.h</CODE>
-	and comment out the <CODE>_WIN32_</CODE> body
-	
-	<LI>  <CODE>generic/tclInt.h</CODE>:
-	 include <CODE>tclUnixPort.h</CODE> after <CODE>tcl.h</CODE>
-	
-	<LI>  <CODE>generic/tclIOSock.h</CODE>:
-
+<LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
+tar file and ungzip and untar the file
 <PRE>
-#define SO_SNDBUF 0x1001
-b#define SO_RCVBUF 0x1002
-</PRE>
-	including <CODE>mywinsock.h</CODE> results in lots of duplicate symbols
-	and definitions.
-
-	
-	<LI> <CODE>unix/tclUnixSock.c</CODE>:
-	<CODE>Tcl_GetHostName()</CODE>:
-
-	<CODE>#define NO_UNAME</CODE>
-	
-	<LI>  <CODE>tclUnixFCmd.c</CODE> <CODE>mkfifo()</CODE>
-	not found at link time:
-	return <CODE>TCL_ERROR</CODE>
-	if that code is called.
-	
-	<LI>  Makefile: comment out -lc n LIBS rule
-	
-	<LI> <CODE>tcl8.0b2/unix/tclUnixChan.c</CODE>:
-	<CODE>TclGetDefaultStdChannel()</CODE>:
-	comment out lseek calls that lseek on stdin, stdout and stderr.
-
-	<LI> <CODE>unix/Makefile</CODE>:
-	Remove <CODE>-DHAVE_TIMEZONE_VAR=1</CODE> from AC_FLAGS
-	</OL>
-
-<LI> Build and install
-<PRE>
-cd tcl8.0/unix
-make
-make install
+tar -ztvf pt0.7.1.src.tar.gz
 </PRE>
 
-</OL>
- <HR>
-<LI> After installing tcl8.0, download the 
-<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/pt0.7.1devel.ptcl.src.tar.gz"><CODE>pt0.7.1devel.ptcl.src.tar.gz</CODE></A>
-Ptolemy ptcl sources
+<li> Set up your environment by setting the variables below.  In the
+<CODE>Start</CODE> menu, select <CODE>Settings</CODE>, then
+<CODE>Control Panels</CODE>, then <CODE>System</CODE>, then select the
+<CODE>Environment</CODE> tab
+
+<pre>
+PTARCH nt4
+PTOLEMY /users/ptolemy
+CC gcc
+</pre>
 
 
-<LI> Ungzip and untar the file
-<PRE>
-tar -ztvf pt0.7.1devel.ptcl.src.tar.gz
-</PRE>
+<li> If you have Samba setup, then start up <CODE>bash</CODE> and cd
+to the tree with something like:
 
-<LI> Set your <CODE>PTOLEMY</CODE> variable to the location
-where you installed the Ptolemy NT sources.  Set <CODE>PTARCH</CODE>
-to <CODE>nt4</CODE>.  
+<pre>
+mkdir /users/ptolemy
+mount -b //<I>UnixHost</I>/ptolemy /users/ptolemy
+cd $PTOLEMY
+</pre>
+(The <CODE>-b</CODE> option says that text files are equivalent to binary
+files)
 
-<LI> Download the <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/pt0.7.1/buildnt4"><CODE>buildnt4</CODE></A> bash script
+<p>Now you have three ways to get to the sources using Samba:
+<ol>
+<li> Mount a Ptolemy tree located on Unix machine with the <CODE>Run</CODE> Start menu choice. T
 
-<LI> Run the <CODE>buildnt</CODE> script from a <CODE>bash</CODE>
-window by starting up <CODE>bash</CODE>, and then typing
-<PRE>
-source buildnt4
-</PRE>
+<li> <CODE>cd</CODE> to the UNC, such as <CODE>cd //carson/ptdesign</CODE>
 
+<li> <CODE>cd</CODE> to the Cygwin mount point: <CODE>cd /users/ptolemy</CODE>
+</ol>
+
+
+ <p>Note that you can set PTOLEMY to the raw UNC format 
+<CODE>//<I>UnixHost</I>/ptolemy</CODE>, but if you do, you will
+have problems with configuring Itcl. Instead use the <CODE>mount</CODE>
+command as above.
+
+<li> Building Itcl2.2:
+
+<menu>
+ <li> The Itcl2.2 sources included in the Ptolemy <CODE>other.src</CODE>
+ file have a few modifications necessary for building under NT
+ with Cygwin32.  Download that tar file and untar it.
+
+ <li> In the System control panel, set the <CODE>CC</CODE>
+ environment variable to <CODE>gcc</CODE>.  If you don't then
+ you will get errors while configuring.  
+ <li> Run
+ <pre>
+ cd $PTOLEMY/src/tcltk/itcl2.2
+ configure --enable-gcc --disable-load --host=i586-CYGWIN32-NT40
+ make
+ make install
+ </pre>
+ Below are the changes that were made for Itcl2.2:
+ <menu>
+ <li> If <CODE>tclEnv.c</CODE> fails to compile with messages about
+ <CODE>environ</CODE>, then edit <CODE>tcl7.6/generic/tclPort.h</CODE>.
+ Change:
+ <pre>
+#if defined(__WIN32__) || defined(_WIN32)
+ </pre>
+ to
+ <pre>
+#if (defined(__WIN32__) || defined(_WIN32)) &amp;&amp; !defined(__CYGWIN32__)
+ </pre>
+ The above change also needs to be made to 
+ <CODE>tk4.2/generic/tkPort.h</CODE> and <CODE>tk4.2/generic/default.h</CODE>
+
+ <li> <CODE>tclUnixTime.c</CODE> fails to compile with messages about
+ <CODE>timezone</CODE>.
+  <br>My fix was to edit <CODE>tcl7.6/unix/Makefile</CODE>
+ and change <CODE>-DHAVE_TIMEZONE_VAR</CODE> to
+ <CODE>-DHAVE_GETTIMEOFDAY</CODE>.
+ The real fix was to modify <CODE>configure.in</CODE> so that we
+ run the timezone code instead of just compiling it.
+
+ <li> Messages at link time about multiple definitions of <CODE>-lc</CODE>
+  <br>Fixed by editing <CODE>tcl7.6/unix/Makefile</CODE> and commenting
+ out <CODE>-lc</CODE>
+
+ <li> <CODE>unix/tclUnixFCmd.c</CODE>: <CODE>mkinfo()</CODE>
+ does not exist.
+ <pre>
+    if (/*mkfifo(dst, srcStatBuf.st_mode)*/ -1 &lt; 0) {
+ </pre>
+ </menu>
+ </menu>
+</ol>
+
+
+<h3>Running Ptolemy</h3>
+
+<ol>
+
+<li> If you are mounting the Ptolemy sources via Samba, then mount the <CODE>-b</CODE> option.  If you do not mount with <CODE>-b</CODE>, you 
+may see:
+<pre>
+Cannot find technology for cell init.pal:schematic:contents:
+ Unexpected internal error in function tapGetFacetIdFromObj:
+Cannot open $PTOLEMY/lib/colors/ptolemy/tap.views</CODE>
+Either technology "ptolemy" does not exist or viewtype "schematic" is wrong.
+</pre>
+
+<li> If you see the following message, then you may need to 
+upgrade to Cygwinb19.1.
+<pre>
+RPC Error: can not fdopen for write in application
+RPC Error: cannot connect to the server
+</pre>
+This error comes from <CODE>Xpackages/rpc/appNet.c</CODE>:
+<pre>
 </OL>
 
 
 <HR>
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
 <A HREF="ptntbugs.html">Back to Ptolemy NT Installation</A>
-
 <HR>
-<A HREF="index.html">Back to the Ptolemy under NT page</A>
-<HR>
-Copyright &#169 1997, The Regents of the University of California.
+Copyright &#169 1997-%Q%, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,
