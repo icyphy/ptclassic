@@ -188,7 +188,7 @@ protected:
 	int numIters;
 	int numItersSoFar;
 
-private:
+protected:
 	/******************************************************
 		Members used in computing the repetitions
 	*******************************************************/
@@ -210,7 +210,7 @@ protected:
 	// member of a connected subgraph
 	int lcmOfDenoms;
 
-private:
+protected:
 	/******************************************************
 		Members used in computing the schedule
 	*******************************************************/
@@ -227,7 +227,7 @@ private:
 
 	// The next function runs simRunStar and adds the star to
 	// the schedule if appropriate
-	int addIfWeCan(DataFlowStar& atom, int deferFiring = FALSE);
+	virtual int addIfWeCan(DataFlowStar& atom, int deferFiring = FALSE);
 
 	// If deferredFiring is TRUE, then we will need a list to store
 	// pointers to blocks whose firing is deferred until the end of
