@@ -79,6 +79,8 @@ HLLTarget(name, starclass, desc) {
   // Make states defined in CGTarget settable.
   displayFlag.setAttributes(A_SETTABLE);
 
+  // Set the destination directory.
+  destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/VHDL");
   // Set the default to display the code.
   displayFlag.setInitValue("YES");
   // Set the default to not use loop scheduling.
