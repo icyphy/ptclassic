@@ -170,6 +170,51 @@ proc ::tycho::mkdir { args } {
 }
 
 ##############################################################################
+#### relativePath 
+# Given two pathnames srcFile and dstFile, return a relative pathname
+# that goes from the srcFile to the dstFile.  This is useful for
+# creating HTML links that are relative, thus avoiding the non-portable 
+# use of $TYCHO.
+#
+proc ::tycho::relativePath {srcFile dstFile} {
+    if { [file pathtype $dstFile] != "absolute" } {
+	return $dstFile
+    }
+    set srcList [file split [::tycho::expandPath $srcFile]]
+    set dstList [file split [::tycho::expandPath $dstFile]]
+
+    set equalCount 0
+    foreach srcElement $srcList dstElement $dstList {
+	if {$srcElement != $dstElement} {
+	    break
+	}
+	incr equalCount
+    }
+    set results {}
+    puts "$srcFile $dstFile $equalCount [llength $srcList] [llength $dstList]"
+    if {$equalCount < [llength $srcList]} {
+	set srcLength [llength $srcList]
+	set dstLength [llength $dstList]
+
+	# Number of directories to go up:
+	if {$srcLength > $dstLength} {
+	    set upDirs [expr {[llength $srcList] - $equalCount}]
+	} else {
+	    set upDirs [expr {[llength $dstList] - $equalCount}]
+	}
+
+	for {set i 0} {$i < $upDirs} {incr i} {
+	    lappend results ..
+	}
+    }
+    set results [concat $results [lrange $dstList $equalCount end]]
+    if {"$results" == {}} {
+	return [file tail $dstFile]
+    }
+    return [eval file join $results]
+}
+
+##############################################################################
 #### rm
 # Remove a file
 # FIXME: In tcl7.6, this should go away
