@@ -39,6 +39,25 @@ defstar {
 		default {"1.0"}
 		desc { "The magnitude of samples generated" }
 	}
+	hinclude { <NegativeExpntl.h> }
+	ccinclude { <ACG.h> }
+	protected {
+		NegativeExpntl *random;
+	}
+// declare the static random-number generator in the .cc file
+	code {
+		extern ACG gen;
+	}
+	constructor {
+		random = new NegativeExpntl(double(meanTime),&gen);
+	}
+	destructor {
+		delete random;
+	}
+	start {
+		DERepeatStar :: start();
+		random->mean(double(meanTime));
+	}
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
@@ -48,10 +67,10 @@ defstar {
 	   // and schedule the next firing
 	   refireAtTime(completionTime);
 
-	   // Generate a uniform random variable.
-	   double p = drand48();
+	   // Generate an exponential random variable.
+	   double p = (*random)();
 
 	   // Turn it into an exponential, and add to completionTime
-	   completionTime -= log(p) * double(meanTime);
+	   completionTime += p;
 	}
 }
