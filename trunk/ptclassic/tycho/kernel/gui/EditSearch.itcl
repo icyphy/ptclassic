@@ -316,19 +316,12 @@ body ::tycho::EditSearch::find {{start {}}} {
     }
     set myLastSearchPattern $pattern
     
-    if {$backwardssw} {
-        set direction -backwards
-        set stop 1.0
-    } {
-        set direction -forwards
-        set stop end
-    }
-    if {$regexpsw} \
-	    {set regexp -regexp} \
-	    {set regexp -exact}
+    if {$backwardssw} \
+            {set stop 1.0} \
+            {set stop end}
 
-    set result [$tw findOne $casesw $direction $regexp $wordsw $pattern \
-            $start $stop {}]
+    set result [$tw findOne $casesw $backwardssw $regexpsw $wordsw \
+            $pattern $start $stop {}]
 
     if {$result == {}} {
 	if {$backwardssw} {
@@ -357,7 +350,7 @@ body ::tycho::EditSearch::find {{start {}}} {
             $text tag add sel $firstind "$firstind + $numchars chars"
         }
         # Mark the rest of the matches.
-        $tw findAll findmatch $casesw $regexp $wordsw $pattern 1.0 end {}
+        $tw findAll findmatch $casesw $regexpsw $wordsw $pattern 1.0 end {}
 
         # Set up reverse video for the found text. First lower the
         # priority of the tag so selection is still visible as normal.
