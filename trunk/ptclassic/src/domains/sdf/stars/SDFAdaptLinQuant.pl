@@ -17,7 +17,7 @@ The quantization levels are uniformly spaced at the step size given by
 the \fIinStep\fR input value and are odd symmetric about zero.
 Therefore, the "high" threshold is (2^\fIbits\fR - 1)*\fIinStep\fR/2, and
 the "low" threshold is the negative of the "high" threshold.
-Rounding down is performed, so that output level will equal "high" only
+Rounding to nearest level is performed. Output level will equal "high" only
 if the input level equals or exceeds "high".
 If the input is below "low", then the quantized output will equal "low".
 The quantized value is output on the \fIamplitude\fR port as a floating-point
