@@ -165,8 +165,11 @@ The input particles are only cast to this precision if the parameter
 	    LOG_DEL; delete [] state;
 	    LOG_NEW; state = new Fix[numState];
     
-	    Fix coef( ((const char *) CoefPrecision));
-	    Fix st( ((const char *) StatePrecision));
+	    Fix coef( CoefPrecision );
+	    Fix st( StatePrecision );
+
+	    coef.set_rounding(TRUE);
+	    st.set_rounding(TRUE);
 
 	    // Set up the state and coefficient vectors
 	    // The first location in state and fdbckCoefs is wasted.
@@ -180,10 +183,15 @@ The input particles are only cast to this precision if the parameter
 	    }
 
 	    // Set the precision of various variables
-	    fixIn = Fix( ((const char *) InputPrecision) );
-	    fdbckAccum = Fix ( ((const char *) AccumPrecision) );
-	    fwdAccum = Fix ( ((const char *) AccumPrecision) );
-	    out = Fix ( ((const char *) OutputPrecision) );
+	    fixIn = Fix( (const char*) InputPrecision );
+	    fdbckAccum = Fix ( (const char*) AccumPrecision );
+	    fwdAccum = Fix ( (const char*) AccumPrecision );
+	    out = Fix ( (const char*) OutputPrecision );
+
+            fixIn.set_rounding(TRUE);
+	    fdbckAccum.set_rounding(TRUE);
+	    fwdAccum.set_rounding(TRUE);
+	    out.set_rounding(TRUE);
 	}
         go {
             if ( numState == 1 ) {
