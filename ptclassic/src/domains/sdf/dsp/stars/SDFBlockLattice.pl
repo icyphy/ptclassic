@@ -86,10 +86,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Iterate for each block
 	    for (int j = int(blockSize)-1; j >= 0; j--) {
 		double k;
-		
+		int i; 
+
 		// Forward prediction error
 		f[0] = double (signalIn%j);   // f(0)=x(n)
-		for (int i=1; i <= lastM; i++) {
+		for (i = 1; i <= lastM; i++) {
 			k = - reflectionCoefs[i-1];
 			f[i] = k * b[i-1] + f[i-1];
 		}

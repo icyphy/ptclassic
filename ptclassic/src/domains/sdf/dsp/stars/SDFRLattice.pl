@@ -121,10 +121,10 @@ New York, 1989.
 	}
 	go {
 		double k;
-		
+		int i;
 		// Forward:  Compute each of the Y values
 		y[0] = double (signalIn%0);   // y(0)=x(n)
-		for (int i=1; i <= M; i++) {
+		for (i = 1; i <= M; i++) {
 			k = reflectionCoefs[M-i];
 			y[i] = k * w[i] + y[i-1];
 		}

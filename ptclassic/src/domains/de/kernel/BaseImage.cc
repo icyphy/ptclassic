@@ -50,7 +50,8 @@ Message* BaseImage::clone(int a) const
 
 void BaseImage::copy(int len, float* into, const float* from) const
 {
-	for(int travel = 0; travel < len%5; travel++) {
+        int travel;
+	for(travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];
 	}
 	for(travel = len%5; travel < len; travel+=5) {
@@ -64,7 +65,8 @@ void BaseImage::copy(int len, float* into, const float* from) const
 
 void BaseImage::copy(int len, char* into, const char* from) const
 {
-	for(int travel = 0; travel < len%5; travel++) {
+        int travel;
+	for(travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];
 	}
 	for(travel = len%5; travel < len; travel+=5) {
@@ -79,7 +81,8 @@ void BaseImage::copy(int len, char* into, const char* from) const
 void BaseImage::copy(int len, unsigned char* into,
 		unsigned const char* from) const
 {
-	for(int travel = 0; travel < len%5; travel++) {
+        int travel;
+	for(travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];
 	}
 	for(travel = len%5; travel < len; travel+=5) {

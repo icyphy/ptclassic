@@ -100,9 +100,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
     go
     {
+	int m;
 	// update forward errors
         f[0] = input%0;
-        for(int m = 1; m <= order; m++)
+        for(m = 1; m <= order; m++)
         {
             f[m] = f[m-1] - k[m]*b[m-1];
         }

@@ -235,6 +235,7 @@ The input particles are only cast to this precision if the parameter
         go {
 	    // We use a temporary variable to avoid gcc2.7.2/2.8 problems
 	    Fix tmpA = (signalIn%0);
+	    int i;
             if ( numState == 1 ) {
                 // Actually, this means no state; just feed through
 		if ( int(ArrivingPrecision) )
@@ -248,7 +249,7 @@ The input particles are only cast to this precision if the parameter
             } else {
 		fdbckAccum = 0.0;
 		fwdAccum = 0.0;
-		for ( int i=1; i < numState; i++) {
+		for (i=1; i < numState; i++) {
 		    fdbckAccum += state[i] * fdbckCoefs[i];
 		    checkOverflow(fdbckAccum);
 		    fwdAccum += state[i] * fwdCoefs[i];

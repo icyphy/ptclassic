@@ -54,8 +54,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}	
 	go {
 		MPHIter nexti(input);
+		int i;
 
-		for (int i = 0; i < bits; i++) {
+		for (i = 0; i < bits; i++) {
 			binary[i]= (*nexti++)%0;
 		}
 

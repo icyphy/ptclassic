@@ -147,9 +147,9 @@ TreeData :: makeTrees (int swSrc, int swDest)
 //     to do this, need the numbers of the other two switches besides
 //     the source and dest switch 
 
-       int  sw1 = 0, sw2 = 0, hold;
+       int  sw1 = 0, sw2 = 0, hold, i;
 
-       for (int i = 1; i<=4; i++)
+       for (i = 1; i<=4; i++)
          if (i != swSrc && i != swDest)  { sw1 = i;  break; }
        for (i = 1; i<=4; i++)
          if (i != swSrc && i != swDest && i != sw1)  { sw2 = i;  break; }

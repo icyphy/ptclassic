@@ -174,8 +174,9 @@ Whether or not to put the matrix into Smith canonical form. }
 	  IntMatrix& d = *(new IntMatrix(m, n));
 	  IntMatrix& u = *(new IntMatrix(m, m));
 	  IntMatrix& v = *(new IntMatrix(n, n));
-
-	  for (int i = 0; i < m*n; i++)
+		
+	  int i;     
+	  for ( i = 0; i < m*n; i++)
 	    d.entry(i) = dOutput[i];
 	  for ( i = 0; i < m*m; i++)
 	    u.entry(i) = uOutput[i];

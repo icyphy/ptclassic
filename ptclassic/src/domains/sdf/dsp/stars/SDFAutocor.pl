@@ -91,7 +91,8 @@ autocorrelation estimate may have negative components.
 	    output.setSDFParams(2*int(noLags), 2*int(noLags));
 	}
 	go {
-	    for(int i = int(noLags); i>=0; i--) {
+	    int i;
+	    for(i = int(noLags); i>=0; i--) {
 		double sum = 0.0;
 		for(int j = 0; j < (int(noInputsToAvg)-i); j++)
 		   sum += double(input%j) * double(input%(j+i));

@@ -105,10 +105,10 @@ New York, 1989.
 	}
 	go {
 		double k;
-		
+		int i;
 		// Forward prediction error
 		f[0] = double (signalIn%0);   // f(0)=x(n)
-		for (int i=1; i <= M; i++) {
+		for (i = 1; i <= M; i++) {
 			k = - reflectionCoefs[i-1];
 			f[i] = k * b[i-1] + f[i-1];
 		}

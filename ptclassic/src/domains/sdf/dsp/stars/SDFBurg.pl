@@ -158,7 +158,8 @@ New York, 1989.
 	    // and the prediction error power estimate
 	    int count = 0;
 	    double ep = 0.0;	// error power estimate
-	    for (int i = N-1; i >= 0; i--) {
+	    int i, m;
+	    for (i = N-1; i >= 0; i--) {
 		double x = input%i;
 		f[count] = x;
 		b[count++] = x;
@@ -170,7 +171,7 @@ New York, 1989.
 	    errPower%M << ep;
 
 	    // Iterate on the predictor order
-	    for (int m = 1; m <= M; m++ ) {
+	    for (m = 1; m <= M; m++ ) {
 	        // Compute the reflection coefficients, and output them
 		nsum = 0.0;
 		dsum = 0.0;
