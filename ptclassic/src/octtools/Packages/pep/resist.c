@@ -33,6 +33,8 @@ static char SccsId[]="$Id$";
 #include "harpoon.h"
 #include "tap.h"
 #include "th.h"
+#include "errtrap.h"
+#include "ansi.h"
 #include "pepint.h"
 
 #define MIN_TERM_NUM 10
@@ -42,12 +44,15 @@ static char SccsId[]="$Id$";
       if(octGenFirstContent(t, OCT_TERM_MASK, &ttt) == OCT_OK) \
 	*t = ttt; }
 
+int isTermAbutted
+    ARGS((octObject *termP));
+
 static octId *idPath;             /*  Stack with the objects already met */
 static int pathSize = 0;          /*  Its size.  */
 static octId *visitedIdPath;      /*  Stack with the paths already met */
 static int visitedSize = 0;       /*  Its size.  */
 static octStatus nextNewTermInPath();
-static octStatus chooseTermCouple();
+/*static octStatus chooseTermCouple();*/
 static octId *scanNetBranches();
 
 static double
@@ -65,7 +70,6 @@ pepPathFollow(obj, foll)
 {
     octGenerator  Gener;
     int           i;
-    octStatus status;
 
     if (obj == NULL)
       return OCT_NOT_FOUND;
@@ -241,6 +245,7 @@ pepSingleResistance(t1, obj, t2)
     default:
 	errRaise(PEP_PKG_NAME, 1, "Cannot measure res on non-geometric objects");
     }
+    return 0.0;
 }
 
 static double
@@ -426,9 +431,6 @@ int
 isTermAbutted(termP)
     octObject *termP;
 {
-    int a = 0;
-    int b = 0;
-    int c = 0;
     octObject fProp;
 
     if ( (ohGetByPropName(termP, &fProp, "TERMAUTO") == OCT_OK) &&
@@ -440,7 +442,7 @@ isTermAbutted(termP)
     }
 }
 
-
+#ifdef NEED_CHOOSETERMCOUPLE
 /* chooses a couple of terms in termIdArray wich is not abutted */
 
 static octStatus
@@ -451,7 +453,6 @@ chooseTermCouple(f, e, termIdArray, termNumber)
     int termNumber;
 {
     int i;
-    int objFound = 0;
     octObject fProp, eProp;
     octId fPropId, ePropId;
 
@@ -483,7 +484,7 @@ chooseTermCouple(f, e, termIdArray, termNumber)
     return OCT_NOT_FOUND;
 
 }
-
+#endif
 
 /* follows the net to find the next term in the path */
 
@@ -495,7 +496,6 @@ nextNewTermInPath(obj, follTerm)
     octGenerator  pathGen, termGen;
     octObject     follPath;
     int           i, objFound;
-    octStatus status;
 
     if (obj == NULL)
       return OCT_NOT_FOUND;
@@ -549,7 +549,6 @@ pepRes
 { 
 
     double coordSize = 20.0;    /* REMEMBER TO ADD th processing here */
-    octGenerator netGen;
     octObject branch, previousTerm, nextTerm, inst, finalTerm;
     octId *branchIdArray;
     int branchNumber = 0;
@@ -560,7 +559,7 @@ pepRes
     octStatus test;
 
     int i, j;
-    int flagNext, flagBranch;
+    int flagNext = 0, flagBranch;
     int treeDepth;
     char *tmp1, *tmp2;
 
@@ -595,8 +594,9 @@ pepRes
 		centerNew = pepCenterTerm(&nextTerm, coordSize);
 		flagNext = strcmp(nextTerm.contents.term.name, "t");
 		if (nextBranchNum <= 0) {
-		    fprintf (stderr, "terminal (%d,%d) attached to no path\n", 
-			     centerNew.x, centerNew.y);
+		    fprintf (stderr,
+			     "terminal (%ld,%ld) attached to no path\n", 
+			     (long)centerNew.x, (long)centerNew.y);
 		    exit(0);
 		} else if (nextBranchNum == 1) {
 		    /* final terminal. must be connected to a subcell */
@@ -624,7 +624,8 @@ pepRes
 		    sprintf(node1Name, "%s", finalTerm.contents.term.name);
 		} else {	                  
 		    /* it doesn't */
-		    sprintf(node1Name, "%d_%d",centerBranch.x, centerBranch.y);
+		    sprintf(node1Name, "%ld_%ld",
+			    (long)centerBranch.x, (long)centerBranch.y);
 		}
 	    } else {
 		OH_ASSERT(octGenFirstContainer(&branch, OCT_INSTANCE_MASK, &inst));
@@ -640,7 +641,8 @@ pepRes
 		    sprintf(node2Name, "%s", finalTerm.contents.term.name);
 		} else {	                  
 		    /* it doesn't */
-		    sprintf(node2Name, "%d_%d",centerNew.x, centerNew.y);
+		    sprintf(node2Name, "%ld_%ld",
+			    (long)centerNew.x, (long)centerNew.y);
 		}
 	    } else {
 		OH_ASSERT(octGenFirstContainer(&nextTerm, OCT_INSTANCE_MASK, &inst));
