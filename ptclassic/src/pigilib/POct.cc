@@ -1565,6 +1565,25 @@ int POct::ptkSetRunLength (int aC,char** aV) {
 }
 
 
+// Sets the Tk Event Loop checking to be on or off.  
+// If the passed value is "on" or can be converted to 1, or yes, then on
+// else "off" "0" or "no" turns it off.
+int POct::ptkSetEventLoop (int aC,char** aV) {
+
+    int boolarg;
+
+    if (aC != 2) {
+        return usage ("ptkSetEventLoop <on|off>");
+    }
+
+    Tcl_GetBoolean( interp, aV[1], &boolarg);
+
+    KcSetEventLoop( boolarg );
+
+    return TCL_OK;
+}
+
+
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -1613,6 +1632,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkIsDelay),
 	ENTRY(ptkGetRunLength),
 	ENTRY(ptkSetRunLength),
+	ENTRY(ptkSetEventLoop),
 	{ 0, 0 }
 };
 
