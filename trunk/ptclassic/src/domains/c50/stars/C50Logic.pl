@@ -270,7 +270,6 @@ non-zero integer (not necessarily 1).
 			if (test == XORID) addCode(endXor);
 			else addCode(endXnor);
 			return;
-			break;
 		}
 
 		// Compute final result, adjusting for positive/negative logic
