@@ -10,7 +10,7 @@ tk appname tySend
 
 set tclProgs [winfo interps]
 if { [expr ![regexp {tycho} $tclProgs]] } {
-    exec tycho -pigi &
+    exec tycho -ptrim &
     while { [expr ![regexp {tycho} $tclProgs]] } {
 	set tclProgs [winfo interps]
     }
