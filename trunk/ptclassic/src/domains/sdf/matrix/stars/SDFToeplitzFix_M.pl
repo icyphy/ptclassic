@@ -46,7 +46,7 @@ among others.
 	for(i = 0; i < int(numRows); i++) {
             k = int(numCols) - i - 1;
 	    for(j = 0; j < int(numCols); j++,k++)
-		X[i][j] = input%k;
+		X[i][j] = Fix(input%k);
         }
 
 	// Output X
