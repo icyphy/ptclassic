@@ -19,10 +19,11 @@ special routines to generate the sub universes.
 
 #include "UniProcessor.h"
 #include "ParProcessors.h"
-#include "CGCollect.h"
 #include "CGSpread.h"
+#include "CGCollect.h"
 #include "KnownBlock.h"
 #include "SDFConnect.h"
+#include "Geodesic.h"
 #include "ConstIters.h"
 
 static void copyActualStates(const Block& src, Block& dest) {
@@ -50,6 +51,12 @@ SDFStar* cloneStar(SDFStar* org) {
 			cP->newPort();
 	}
 	return newS;
+}
+
+PortHole* clonedPort(SDFStar* s, PortHole* p) {
+	ParNode* n = (ParNode*) s->myMaster();
+	SDFStar* copyS = n->getCopyStar();
+	return copyS->portWithName(p->readName());
 }
 
 			//////////////////////
@@ -120,6 +127,19 @@ void UniProcessor :: createSubGal() {
 		BlockPortIter piter(*org);
 		PortHole* p;
 		while ((p = piter++) != 0) {
+			// wormhole boundary
+			if (p->atBoundary()) {
+				PortHole* cp = clonedPort(org, p);
+				PortHole* evep = p->far();
+				p->myGeodesic->disconnect(*evep);
+				if (p->isItInput()) {
+					evep->connect(*cp,p->numTokens());
+				} else {
+					cp->connect(*evep,p->numTokens());
+				}
+				continue;
+			}
+
 			SDFStar* farS = (SDFStar*) p->far()->parent();
 			
 			// depending on OSOPreq()
@@ -130,12 +150,6 @@ void UniProcessor :: createSubGal() {
 			}
 		}
 	}
-}
-
-PortHole* clonedPort(SDFStar* s, PortHole* p) {
-	ParNode* n = (ParNode*) s->myMaster();
-	SDFStar* copyS = n->getCopyStar();
-	return copyS->portWithName(p->readName());
 }
 
 			////////////////////////////
@@ -156,9 +170,9 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* farS,
 		ParNode* n = (ParNode*) farS->myMaster();
 		PortHole* cp = clonedPort(org, p);
 		if (p->isItInput()) {
-			makeReceive(n->getProcId(), cp, p->numTokens(), sn, 0);
+			makeReceive(n->getProcId(),cp,p->numTokens(),sn,0,p);
 		} else {
-			makeSend(n->getProcId(), cp, sn, 0);
+			makeSend(n->getProcId(), cp, sn, 0, p);
 		}
 	}
 }
@@ -544,7 +558,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
  
 void 
 UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
-			    EGGate* g) {
+			    EGGate* g, PortHole* orgP) {
 	int numSample = rP->numXfer();
 	
 	// create target specific Receive star
@@ -558,14 +572,15 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
 
 	// set the cloned star pointer of the receive nodes
 	int comp = myId() - pindex;
-	ParNode* pn = parent->matchCommNodes(newR, g, rP);
+	ParNode* pn = parent->matchCommNodes(newR, g, orgP);
 	// pair Send and Receive star
 	if ((comp > 0) && (pn != 0)) 
 	    mtarget->pairSendReceive(pn->getPartner()->getCopyStar(), newR);
 }
 
 // Note that the delay is attached in the receiver part if any.
-void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
+void UniProcessor :: makeSend(int pindex, PortHole* sP, 
+			      ParNode* n, EGGate* g, PortHole* orgP) {
 	int numSample = sP->numXfer();
 	
 	// create target specific Send star
@@ -579,7 +594,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 
 	// set the cloned star pointer of the Send node
 	int comp = myId() - pindex;
-	ParNode* pn = parent->matchCommNodes(newS, g, sP);
+	ParNode* pn = parent->matchCommNodes(newS, g, orgP);
 	// pair Send and Receive star
 	if ((comp > 0)  && (pn != 0))
 	    mtarget->pairSendReceive(newS,pn->getPartner()->getCopyStar());
@@ -592,7 +607,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 // create a Spread star and connect it to the source porthole.
 
 SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
-	SDFStar* newSpread =  mtarget->createSpread();
+	LOG_NEW; SDFStar* newSpread = new CGSpread; 
 	newSpread->setTarget(targetPtr);
 	subGal->addBlock(*newSpread,newName(1));
 	int numTok;
@@ -608,7 +623,7 @@ SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 // create a Collect star and connect it to the destination porthole.
 
 SDFStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
-	SDFStar* newCollect = mtarget->createCollect();
+	LOG_NEW; SDFStar* newCollect = new CGCollect;
 	newCollect->setTarget(targetPtr);
 	subGal->addBlock(*newCollect,newName(0));
 	int numTok;
@@ -681,26 +696,3 @@ M:
 	} while(n);
 }
 
-			//////////////////////
-			// SimRunSchedule
-			//////////////////////
-
-// trace the schedule to obtain the right buffer size
-void UniProcessor :: simRunSchedule() {
-	ProcessorIter iter(*this);
-	ParNode* n;
-	
-	while ((n = iter.nextNode()) != 0) {
-		if (n->getType() != 0) continue;
-		SDFStar* copyS = n->getCopyStar();
-
-		SDFStarPortIter piter(*copyS);
-		SDFPortHole* p;
-		while ((p = piter++) != 0) {
-			if (p->isItInput()) 
-				p->decCount(p->numXfer());
-			else
-				p->incCount(p->numXfer());
-		}
-	}
-}
