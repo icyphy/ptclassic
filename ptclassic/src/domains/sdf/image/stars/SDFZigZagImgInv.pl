@@ -4,7 +4,7 @@ defstar {
   version { $Id$ }
   author { Paul Haskell }
   copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -24,9 +24,7 @@ This star inverse zig-zag scans a Float Matrix.
     default { 8 }
     desc { Block size of each inverse zig-zag scan. }
   }
-
   hinclude { "Matrix.h", "Error.h" }
-
 
   method {		// invert zig-zag scan. "imData" holds output.
     name { ziginv }
@@ -85,18 +83,16 @@ This star inverse zig-zag scans a Float Matrix.
       int height = inImg.numRows();
 
       // Allocate space and go.
-      LOG_NEW; float* outArr = new float[width*height];
-      LOG_NEW; float* tmpPtr = new float[width*height];
+      float* outArr = new float[width*height];
+      float* tmpPtr = new float[width*height];
 
       // Copy the data from the inImg.
-      int i;
-      for(i = 0; i < width*height; i++) {
+      for(int i = 0; i < width*height; i++) {
 	tmpPtr[i] = inImg.entry(i);
       }
 
-      int row, col;
-      for(row = 0; row < height; row += bSize) {
-	for(col = 0; col < width; col += bSize) {
+      for(int row = 0; row < height; row += bSize) {
+	for(int col = 0; col < width; col += bSize) {
 	  ziginv(outArr, tmpPtr, row, col, width, bSize);
 	  tmpPtr += bSize*bSize;
 	}
@@ -106,7 +102,10 @@ This star inverse zig-zag scans a Float Matrix.
       for(i = 0; i < width*height; i++) {
 	outImg.entry(i) = outArr[i];
       }
-      LOG_DEL; delete [] outArr;
+
+      // Deallocate memory
+      delete [] tmpPtr;
+      delete [] outArr;
     }
   } // end { invZigZag }
 
@@ -139,12 +138,11 @@ This star inverse zig-zag scans a Float Matrix.
       return;
     }
 
-    //Allocate output image.
-    LOG_NEW;
+    // Allocate output image.
     FloatMatrix& outImg = *(new FloatMatrix(inImg));
 
     // Do processing and send out.
-    invZigZag(inImg,outImg);
+    invZigZag(inImg, outImg);
     outport%0 << outImg;
   }
-} // end defstar{ ZigZagImgInv }
+}
