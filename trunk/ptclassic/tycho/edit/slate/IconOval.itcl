@@ -32,8 +32,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes Connectible] == "" } {
-	uplevel #0 {source $tychoslate/Connectible.itcl}
+    if { [::info classes Iconic] == "" } {
+	uplevel #0 {source $tychoslate/Iconic.itcl}
     }
     if { [::info classes LabeledOval] == "" } {
 	uplevel #0 {source $tychoslate/LabeledOval.itcl}
@@ -49,7 +49,7 @@ namespace ::tycho {
 # 
 # <p><b>Options</b>:
 # 
-# _IconOval_ has all options of <a href="Connectible.html">Connectible</a>
+# _IconOval_ has all options of <a href="Iconic.html">Iconic</a>
 # and <a href="LabeledOval">LabeledOval</a>. In addition, it has the options:
 #
 # <ul>
@@ -62,7 +62,7 @@ namespace ::tycho {
 # 
 # <p><b>Components</b>
 #
-# _IconOval_ has all components of <a href="Connectible.html">Connectible</a>
+# _IconOval_ has all components of <a href="Iconic.html">Iconic</a>
 # and <a href="LabeledOval">LabeledOval</a>.
 # 
 # <p><b>Bugs</b>: If the input and output terminals are not positioned
@@ -102,7 +102,7 @@ namespace ::tycho {
 # </ul>
 #
 class ::tycho::IconOval {
-    inherit ::tycho::Connectible
+    inherit ::tycho::Iconic
 
     ###################################################################
     ####                         public procs                      ####
@@ -141,7 +141,7 @@ class ::tycho::IconOval {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Connectible::methodtable]
+    array set methodtable [array get ::tycho::Iconic::methodtable]
     array set methodtable [@scope ::tycho::LabeledOval array get methodtable]
 
     set methodtable(_vsize)   ::tycho::IconOval::_vsize
@@ -152,7 +152,7 @@ class ::tycho::IconOval {
     set methodtable(highlight)   ::tycho::IconOval::highlight
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Connectible::optiondefault]
+    array set optiondefault [array get ::tycho::Iconic::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledOval \
             array get optiondefault]
     set optiondefault(-vsize) 50
@@ -186,7 +186,7 @@ body ::tycho::IconOval::_coords {id canvas slate x y} {
     eval ::tycho::Oval::coords $id $canvas $slate $coords
 
     # Move the inputs and outputs
-    eval ::tycho::Connectible::coords $id $canvas $slate $coords
+    eval ::tycho::Iconic::coords $id $canvas $slate $coords
 }
 
 ##########################################################################
@@ -207,8 +207,8 @@ body ::tycho::IconOval::construct {id canvas slate tags x y args} {
 	    $id $canvas $slate [list $tags] $coords
 
     # Create the input and output ports
-    # ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
-    # ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
+    # ::tycho::Iconic::_inputs  $id $canvas $slate $option(inputs$id)
+    # ::tycho::Iconic::_outputs $id $canvas $slate $option(outputs$id)
 }
 
 ##########################################################################
