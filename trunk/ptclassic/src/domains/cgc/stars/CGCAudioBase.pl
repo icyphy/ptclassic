@@ -43,8 +43,11 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     codeblock(declarations, "const char* datatype, int size") {
-	int $starSymbol(file);
 	@datatype $starSymbol(buf)[@size];
+    }
+
+    codeblock(globals) {
+        int $starSymbol(file);
     }
 
     codeblock(noOpen) {
@@ -56,7 +59,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	/* Open file for reading */
 	if (($starSymbol(file) = open("$val(fileName)",O_RDONLY,0666)) == -1)
 	{
-		perror("$val(fileName)");
+		perror("$val(fileName): Error opening read-file");
 		exit(1);
 	}
     }
@@ -65,7 +68,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	/* Open file for writing */
 	if (($starSymbol(file) = open("$val(fileName)",O_WRONLY|O_CREAT,0666)) == -1)
 	{
-		perror("$val(fileName)");
+		perror("$val(fileName): Error opening write-file");
 		exit(1);
 	}
     }
@@ -74,7 +77,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	/* Read blockSize bytes of data from the file */
 	if (read($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(blockSize))
 	{
-	    perror("$val(fileName)");
+	    perror("$val(fileName): Error reading from file.");
 	    exit(1);
 	}
     }
@@ -84,7 +87,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (write($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(
 blockSize))
 	{
-	    perror("$val(fileName)");
+	    perror("$val(fileName): Error writing to file.");
 	    exit(1);
 	}
     }
@@ -92,7 +95,7 @@ blockSize))
     codeblock(closeFile) {
 	/* Close file */
 	if (close($starSymbol(file)) != 0) {
-	    perror("$val(fileName)");
+	    perror("$val(fileName): Error closing file");
 	    exit(1);
 	}
     }
@@ -101,3 +104,4 @@ blockSize))
 	if (!standardIO) addCode(closeFile);
     }
 }
+
