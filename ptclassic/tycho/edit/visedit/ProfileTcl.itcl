@@ -184,7 +184,7 @@ body ::tycho::ProfileTcl::profileDisplay {} {
         set count 0
         set resultssize [array size results]
         set id [array startsearch results]
-        statusbar puts \
+        putStatus \
                 "depth= $depth of $maxdepth, array is $resultssize elements"
         while {[set entry [array nextelement results $id]] != {}} {
 	    if { $cancel == 1 } {
