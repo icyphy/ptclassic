@@ -502,7 +502,7 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Control-r> "%Q searchQuery 1 0; break"
     bind $itk_component(text) <Find> "%Q searchQuery 1 0; break"
 
-    if {$tcl_platform(platform) != unix} {
+    if {$tcl_platform(platform) != "windows"} {
 	# Spelling command
 	bind $itk_component(text) <Meta-dollar> "%Q spellCheck; break"
 	bind $itk_component(text) <Escape><dollar> "%Q spellCheck; break"
@@ -651,7 +651,7 @@ body ::tycho::Edit::constructor {args} {
         
         $myMenubar add "Spelling..." Edit -underline 2 \
                 -accelerator "M-$" -command "$this spellCheck"
-	if {$tcl_platform(platform) != unix} {
+	if {$tcl_platform(platform) == "macintosh"} {
 	    $myMenubar disable "Spelling..."
 	}
 
