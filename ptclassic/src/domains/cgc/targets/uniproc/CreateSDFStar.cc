@@ -96,11 +96,13 @@ inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
 }
 
 void CreateSDFStar::wormPrepare() {
+    if (! galaxy()) return;
     StringList plPrefix;
     plPrefix << "SDF" << galaxy()->name(); 
     filePrefix = hashstring(plPrefix);    
     convertWormholePorts(*galaxy());
 }
+
 int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
     // FIXME - Won't work unless CGC is at top level
     if(!gal.parent()->isItWormhole()) return FALSE;
