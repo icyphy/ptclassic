@@ -48,12 +48,10 @@
 # is prepended to the classname. Thus, classes in the tycho namespace
 # can be specified without specifying the namespace. All other classes
 # must be fully specified. Classes in the global namespace should have
-# a simple "::" prefix.  The name of the top-level window that is created
+# a simple "::" prefix.  The name of the view subwindow that is created
 # is returned.
 #
-# FIXME: Using the -data option to the view to load data does not
-# really work.  The data has to be a well-formed Tcl list!
-#
+
 proc ::tycho::view {view {viewoptions {}} \
         {displayer {Displayer}} {dispoptions {}}} {
     if ![string match {::*} $view] {
@@ -66,69 +64,7 @@ proc ::tycho::view {view {viewoptions {}} \
     uplevel #0 eval $displayer $wname $dispoptions
     uplevel #0 eval $view $wname.v $viewoptions
     wm deiconify $wname
-    return $wname
-}
-
-# FIXME: Remove the following and replace their users with the above.
-
-#######################################################################
-#### viewFile
-# This is a shortcut procedure for viewing a file. If only the file
-# name is given, then a plain text editor is opened. If a <i>view</i>
-# argument is given, the it specifies the name of a class derived from
-# <code>View</code> for displaying the file. That view is inserted in a
-# standard <code>Displayer</code> object unless the <i>displayer</i>
-# argument is given, in which case it specifies the name of a class
-# derived from <code>Displayer</code>. If either the <i>view</i> or
-# <i>displayer</i> argument does not begin with "::", then "::tycho::"
-# is prepended to the classname. Thus, classes in the tycho namespace
-# can be specified without specifying the namespace. All other classes
-# must be fully specified. Classes in the global namespace should have
-# a simple "::" prefix.  The name of the top-level window that is created
-# is returned.
-#
-proc ::tycho::viewFile {filename {view {Edit}} {displayer {Displayer}}} {
-    if ![string match {::*} $view] {
-        set view "::tycho::$view"
-    }
-    if ![string match {::*} $displayer] {
-        set displayer "::tycho::$displayer"
-    }
-    set wname [::tycho::autoName .view]
-    $displayer $wname
-    $view $wname.v -file $filename
-    $wname centerOnScreen
-    return $wname
-}
-
-#######################################################################
-#### viewData
-# This is a shortcut procedure for viewing string data. If only the data
-# is given, then a plain text editor is opened. If a <i>view</i>
-# argument is given, the it specifies the name of a class derived from
-# <code>View</code> for displaying the data. That view is inserted in a
-# standard <code>Displayer</code> object unless the <i>displayer</i>
-# argument is given, in which case it specifies the name of a class
-# derived from <code>Displayer</code>. If either the <i>view</i> or
-# <i>displayer</i> argument does not begin with "::", then "::tycho::"
-# is prepended to the classname. Thus, classes in the tycho namespace
-# can be specified without specifying the namespace. All other classes
-# must be fully specified. Classes in the global namespace should have
-# a simple "::" prefix.  The name of the top-level window that is created
-# is returned.
-#
-proc ::tycho::viewData {data {view {Edit}} {displayer {Displayer}}} {
-    if ![string match {::*} $view] {
-        set view "::tycho::$view"
-    }
-    if ![string match {::*} $displayer] {
-        set displayer "::tycho::$displayer"
-    }
-    set wname [::tycho::autoName .view]
-    $displayer $wname
-    $view $wname.v -data $data
-    $wname centerOnScreen
-    return $wname
+    return $wname.v
 }
 
 # For debugging.
