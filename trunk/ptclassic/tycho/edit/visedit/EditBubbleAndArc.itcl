@@ -38,10 +38,6 @@
 class ::tycho::EditBubbleAndArc {
     inherit ::tycho::Graphics
 
-    #### create_item array
-    # This is needed for creating new node/arc.
-    public common create_item
-
     ##########################################################################
     ####                      constructor & destructor                    ####
     constructor {args} {}
@@ -133,6 +129,9 @@ class ::tycho::EditBubbleAndArc {
     ##########################################################################
     ####                         protected variables                      ####
 
+    # This is needed for creating new node/arc.
+    protected variable create_item
+
     # The name of the Tk canvas as a variable, for convenience.
     protected variable canvas
 
@@ -190,8 +189,8 @@ body ::tycho::EditBubbleAndArc::constructor {args} {
 	    -command "$this newArc"
 
     # Initialize the variables.
+    set create_item {}
     set canvas [component graphics canvasName]
-    set create_item($this) {}
 
     # Set up bindings for the canvas.
     $this setUpCanvasBindings
@@ -357,7 +356,7 @@ body ::tycho::EditBubbleAndArc::newNode {} {
     $this unselect
     # In item creation mode, cursor is crosshair.
     $canvas configure -cursor crosshair
-    set create_item($this) node
+    set create_item node
 }
 
 ################################################################
@@ -368,7 +367,7 @@ body ::tycho::EditBubbleAndArc::newArc {} {
     set point_to_draw first
     # In item creation mode, cursor is crosshair.
     $canvas configure -cursor crosshair
-    set create_item($this) arc
+    set create_item arc
 }
 
 ################################################################
@@ -383,7 +382,7 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
     
     set button1_down 1
     
-    switch $create_item($this) {
+    switch $create_item {
 	node {
 	    $this mkNode $x $y
 	}
@@ -400,7 +399,7 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
 body ::tycho::EditBubbleAndArc::bind_B1_Motion {x y} {
     set x [$canvas canvasx $x]
     set y [$canvas canvasy $y]
-    if {$create_item($this) == "node"} {
+    if {$create_item == "node"} {
 	$canvas coords $node_id $oldx $oldy $x $y
     }
 }
@@ -409,7 +408,7 @@ body ::tycho::EditBubbleAndArc::bind_BR1 {x y} {
     set x [$canvas canvasx $x]
     set y [$canvas canvasy $y]
     set button1_down 0
-    if {$create_item($this) == "node"} {
+    if {$create_item == "node"} {
 	if [close_enough $oldx $oldy $x $y] {
 	    # too small! abort and retry
 	    set node_create_state first
@@ -428,10 +427,10 @@ body ::tycho::EditBubbleAndArc::bind_BR1 {x y} {
 	    set nodeInfo($node_id,label) [$canvas create text \
 		    [expr ($oldx+$x)*0.5] [expr ($oldy+$y)*0.5]]
 	    # new node has been created
-	    set create_item($this) {}
+	    set create_item {}
 	    $this markModified
 	}
-    } elseif {$create_item($this) == "arc"} {
+    } elseif {$create_item == "arc"} {
 	$this mkArc $x $y
     }
 }
@@ -439,7 +438,7 @@ body ::tycho::EditBubbleAndArc::bind_BR1 {x y} {
 body ::tycho::EditBubbleAndArc::bind_Motion {x y} {
     set x [$canvas canvasx $x]
     set y [$canvas canvasy $y]
-    if {[string compare $create_item($this) arc] == 0 && \
+    if {[string compare $create_item arc] == 0 && \
 	    [string compare $point_to_draw nonfirst] == 0} {
 	eval $canvas coords $arc_id $arc_coords $x $y
     }
@@ -459,7 +458,7 @@ body ::tycho::EditBubbleAndArc::bind_node_B1 {x y} {
     set y [$canvas canvasy $y]
     
     # return immediately if we are in item-creating state
-    if {$create_item($this) != {}} return
+    if {$create_item != {}} return
 
     if {[$canvas find withtag current] != [$canvas find withtag selected]} {
 	$this unselect
@@ -481,7 +480,7 @@ body ::tycho::EditBubbleAndArc::bind_arc_B1 {x y} {
     set x [$canvas canvasx $x]
     set y [$canvas canvasy $y]
     
-    if {$create_item($this) == {}} {
+    if {$create_item == {}} {
 	# not creating an item: unselect and select
 	set arc [$canvas find withtag current]
 	if {$arc != [$canvas find withtag selected]} {
@@ -948,7 +947,7 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 		$canvas itemconfigure $arc_id -smooth 1
 	    }
 	    # arc has been created
-	    set create_item($this) {}
+	    set create_item {}
 	    # change cursor back to normal
 	    $canvas configure -cursor {top_left_arrow black white}
 	    lappend nodeInfo($close_node,inEdges) $arc_id
