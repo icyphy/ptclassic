@@ -75,7 +75,7 @@ body ::tycho::EditMake::constructor {args} {
 # Open a window with help on the current widget.
 #
 body ::tycho::EditMake::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditMakeHelp.html
 }

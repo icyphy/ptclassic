@@ -76,7 +76,7 @@ body ::tycho::EditCpp::constructor {args} {
 # Open a window with help on the current widget.
 #
 body ::tycho::EditCpp::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditCppHelp.html
 }

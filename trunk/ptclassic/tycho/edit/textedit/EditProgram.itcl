@@ -49,10 +49,6 @@ class ::tycho::EditProgram {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
-    #### reload
-    # Reload the previously saved version and recolorize.
-    method reload {}
-
     ###################################################################
     ####                  protected methods                        ####
 
@@ -74,12 +70,12 @@ body ::tycho::EditProgram::constructor {args} {
     $itk_component(formatMenu) add command \
 	    -label "Comment Out Region" \
 	    -underline 0 \
-	    -command "$itk_component(text) commentSelection"
+	    -command [code "$itk_component(text) commentSelection"]
     
     $itk_component(formatMenu) add command \
 	    -label "Uncomment Region" \
 	    -underline 0 \
-	    -command "$itk_component(text) uncommentSelection"
+	    -command [code "$itk_component(text) uncommentSelection"]
     
     # Add to the format menu a command to recolorize.
     $itk_component(formatMenu) add separator
@@ -88,25 +84,25 @@ body ::tycho::EditProgram::constructor {args} {
 	    -label "Recolorize" \
 	    -accelerator "S-C-l" \
 	    -underline 0 \
-	    -command "$itk_component(text) parse"
+	    -command [code "$itk_component(text) parseRegion 1.0 end"]
     
     $itk_component(formatMenu) add command \
 	    -label "Indent Line" \
 	    -accelerator "Tab" \
 	    -underline 0 \
-	    -command "$itk_component(text) indentLine"
-    
+	    -command [code "$itk_component(text) indentLine"]
+
     $itk_component(formatMenu) add command \
 	    -label "Indent Region" \
 	    -accelerator "Esc C-\\" \
 	    -underline 1 \
-	    -command "$itk_component(text) indentSelection"
+	    -command [code "$itk_component(text) indentSelection"]
     
     $itk_component(formatMenu) add command \
 	    -label "Tab" \
 	    -accelerator "C-q Tab" \
 	    -underline 0 \
-	    -command "$itk_component(text) insertString insert {\t}"
+	    -command [code "$itk_component(text) insertString insert {\t}"]
 
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file
@@ -123,17 +119,7 @@ body ::tycho::EditProgram::constructor {args} {
 # Open a window with help on the current widget.
 #
 body ::tycho::EditProgram::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditProgramHelp.html
 }
-
-#####################################################################
-#### reload
-# Override the base-class reload to recolorize.
-#
-body ::tycho::EditProgram::reload {} {
-    Edit::reload
-    $itk_component(text) parse
-}
-
