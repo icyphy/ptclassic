@@ -1,7 +1,7 @@
 defstar {
 	name {Biquad}
 	domain {CGC}
-	version {$Id$ %G}
+	version {$Id$}
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
