@@ -60,6 +60,7 @@ ITCL_SRCS = \
 	CircularList.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
+	ColorPicker.itcl \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	CompileJava.itcl \
