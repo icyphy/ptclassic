@@ -376,10 +376,11 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 
 void AsmTarget :: writeCode(const char* name) {
 	if (name==NULL) name=uname;
-        if (int(displayFlag) && !haltRequested()) {
+	if (haltRequested()) return;
+        if (int(displayFlag)) {
                 if (!genDisFile(myCode,name,asmSuffix())) return;
 	}
-        else  {
+        else {
                 if (!genFile(myCode,name,asmSuffix())) return;
 	}
 }
