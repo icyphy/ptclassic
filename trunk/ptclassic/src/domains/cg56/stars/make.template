@@ -28,7 +28,6 @@ PL_SRCS= \
  CG56ASin.pl \
  CG56Abs.pl \
  CG56Add.pl \
- CG56BlockReverse.pl \
  CG56CircToLin.pl \
  CG56Commutator.pl \
  CG56Const.pl \
@@ -75,6 +74,7 @@ PL_SRCS= \
  CG56Rect.pl \
  CG56Repeat.pl \
  CG56Reverse.pl \
+ CG56Rotate.pl \
  CG56SSI.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
