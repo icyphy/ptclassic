@@ -47,14 +47,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 	  int taplength,tappadlength,maxpast;
+	  int allocflag, prevlength;
 	  short *shift_taparray;
 	  float *result;
 	  double *accumpair;
-	  int prevlength;
 	}
 	constructor {
 	  shift_taparray = 0;
+	  result = 0;
+	  accumpair = 0;
 	  prevlength = 0;
+	  allocflag = 0;
 	}
 	destructor {
 	  free(shift_taparray);
@@ -74,9 +77,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	       if (taplength == 0)
 		 maxpast = 1;
 	       else if ((taplength-1)%NumPack==0)
-		 maxpast = int((taplength-1)/NumPack)+1;
+		 maxpast = (int)(taplength-1)/NumPack+1;
 	       else
-		 maxpast = int((taplength-1)/NumPack)+2;
+		 maxpast = (int)(taplength-1)/NumPack+2;
 	  tappadlength = NumPack*maxpast;
 	  signalIn.setSDFParams(NumIn,maxpast);
 
@@ -86,12 +89,15 @@ limitation of liability, and disclaimer of warranty provisions.
 		 prevlength = taplength;
 		 shift_taparray = (short *)
 		   memalign(sizeof(double),sizeof(double)*NumPack*tappadlength);
-		 accumpair = (double *)
-		   memalign(sizeof(double),sizeof(double)*NumPack);
-		 result = (float *)
-		   memalign(sizeof(double),sizeof(float)*NumPack);
-	       }
-
+	       }	
+	  if (allocflag == 0){
+	    accumpair = (double *)
+	      memalign(sizeof(double),sizeof(double)*NumPack);
+	    result = (float *)
+	      memalign(sizeof(double),sizeof(float)*NumPack);
+	    allocflag = 1;
+	  }
+	  
 	  // initialize shifted taparrays to zero
 	       indexcount = shift_taparray;
 	       for(taprowindex=0;taprowindex<NumPack;taprowindex++){
@@ -106,14 +112,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		 for(tapcolindex=0;tapcolindex<taplength;tapcolindex++){
 		   // scale taps, check for under/overflow, and cast to short
 		   intmp = scale*taps[tapcolindex];
-		   if (intmp <= double(LowerBound)){
-		     *indexcount++ = short(LowerBound);
+		   if (intmp <= (double)(LowerBound)){
+		     *indexcount++ = (short)(LowerBound);
 		   }
-		   else if (intmp >= double(UpperBound)){
-		     *indexcount++ = short(UpperBound);
+		   else if (intmp >= (double)(UpperBound)){
+		     *indexcount++ = (short)(UpperBound);
 		   }
 		   else{ 
-		     *indexcount++ = short(intmp);
+		     *indexcount++ = (short)(intmp);
 		   }
 		 }
 	       }
@@ -188,6 +194,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			accumpair[innerloop] = vis_fpadd32(accumpair[innerloop],pair);
 		      }  
 	       }
+
 	  // sum accumulators and pack outputs into a double
 	       for(genindex=0;genindex<NumPack;genindex++){
 		 splithi = vis_read_hi(accumpair[genindex]);

@@ -29,38 +29,46 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 	        name { scale }
 		type { float }
-		default { "1.0" }
+		default { "1.0/32767.0" }
 		desc { Output scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code {
                 #define NumOut (4)
 	}
-        setup {
-                Out.setSDFParams(NumOut,NumOut);
+	protected{
+	  short *packedin;
+      	  int allocflag;
+	}
+	constructor{
+	  packedin = 0;
+      	  allocflag = 0;
+	}
+	destructor{
+	  free(packedin);
+	  allocflag = 0;
+       	}
+	setup {
+	  if (allocflag == 0){
+	    packedin = (short *)
+	      memalign(sizeof(double),sizeof(double));
+	    allocflag = 1;
+	  }
+	  Out.setSDFParams(NumOut,NumOut);
         }
 	go {
-
-	  int i;
-
-	  union vis_dreg {
-	    double dreg64;
-	    short  sreg16[NumOut];
-	  };
-
-	  union vis_dreg packedin; 
-	  double outtmp[4];
-
-	  packedin.dreg64 = In%0;
-
-	  /*scale output*/
-	  for (i=NumOut;i>0;i--){
-	  outtmp[i-1] = double(scale)*double(packedin.sreg16[i-1]);
-	  }
 	  
-	  /*output unpacked values*/
-	  for (i=NumOut;i>0;i--){
-	  Out%(i-1) << double(outtmp[i-1]);
-	  }
+	  int index;
+	  double outvalue;
+	  double invalue;
+	  
+	  invalue = double(In%0);
+	  packedin = (short *) &invalue;
+	  
+	  //scale input and unpack output
+	      for (index=0;index<NumOut;index++){
+		outvalue = (double) scale* (double) packedin[index];
+		Out%(index) << outvalue;
+	      }
       	}
 }

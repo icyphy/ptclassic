@@ -35,14 +35,33 @@ limitation of liability, and disclaimer of warranty provisions.
         ccinclude {<vis_proto.h>}
 	go {
 
-	  double resultu, resultl, result;
+	  double resulthihi, resulthilo, resulthi;
+	  double resultlohi, resultlolo, resultlo;
+	  double result;
+	  float  dataAlo, dataAhi, dataBlo, dataBhi;
+	  float  resultu, resultl;
 
-	  /*calculate the partial products*/
-	  resultu = vis_fmul8sux16(double(InA%0),double(InB%0));
-	  resultl = vis_fmul8ulx16(double(InA%0),double(InB%0));
+	  vis_write_gsr(8);
 
-	  /*calculate the final product*/
-	  result = vis_fpadd16(resultu,resultl);
+	  // setup the data
+	    dataAhi=vis_read_hi(double(InA%0));
+	  dataAlo=vis_read_lo(double(InA%0));
+	  dataBhi=vis_read_hi(double(InB%0));
+	  dataBlo=vis_read_lo(double(InB%0));
+	  
+	  //calculate the partial products
+	    resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
+	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
+	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
+	  
+	  resultlohi = vis_fmuld8sux16(dataAlo,dataBlo);
+	  resultlolo = vis_fmuld8ulx16(dataAlo,dataBlo);
+	  resultlo   = vis_fpadd32(resultlohi,resultlolo);
+	  
+	  //pack and concat the final product*/
+	      resultu = vis_fpackfix(resulthi);
+	  resultl = vis_fpackfix(resultlo);
+	  result = vis_freg_pair(resultu,resultl);
 
           Out%0 << result;
       	}
