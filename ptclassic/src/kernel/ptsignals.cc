@@ -91,7 +91,7 @@ as a blank function and define ptBlockSig and ptReleaseSig as below.
 #include <signal.h>
 #include "compat.h" 
 
-#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX)
+#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTALPHA)
 void ptSafeSig( int SigNum ) {
 	struct sigaction pt_alarm_action;
 	sigaction( SigNum, NULL, &pt_alarm_action);
@@ -128,4 +128,4 @@ void ptSafeSig( int SigNum ) {};
 
 #endif /* PTSUN4 */
 #endif /* PTHPPA */
-#endif /* PTSOL2  PTIRIX5  PTLINUX */
+#endif /* PTSOL2  PTIRIX5  PTLINUX PTALPHA */
