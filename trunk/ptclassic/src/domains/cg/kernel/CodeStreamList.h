@@ -22,18 +22,18 @@ typedef StringList CodeStream;
 class StringListList : private NamedList
 {
 public:
-	// For temporary backward compatibility.
-	int add(const char* name, CodeStream* stream)
-	{
-	    return append(stream, name);
-	}
-
 	// adds a new StringList called name to the list.  If a StringList
 	// called name already exists in the list with a different
 	// StringList* return FALSE else return TRUE
 	int append(CodeStream* stream, const char* name)
 	{
         	return NamedList::append(stream, name);
+	}
+
+	// For temporary backward compatibility.
+	int add(const char* name, CodeStream* stream)
+	{
+	    return append(stream, name);
 	}
 
 	// return the pointer for the object of the specified name.

@@ -25,10 +25,7 @@ $Id$
 class BaseSymbolList : private NamedList
 {
 public:
-	BaseSymbolList(char sep='_')
-	{
-	    setSeparator(sep);
-	}
+	BaseSymbolList(char sep='_') : separator(sep) {}
 
 	~BaseSymbolList()
 	{
@@ -102,12 +99,6 @@ public:
 	SymbolListList() {}
 	~SymbolListList() {}
 
-	// For temporary backward compatibility.
-	int add(const char* name, SymbolList* list)
-	{
-	    return append(list, name);
-	}
-
         // put a new SymbolList called name to the list.
 	// Return FALSE if a different SymbolList with the same name
 	// is already in the list.
@@ -116,6 +107,12 @@ public:
 	    return NamedList::append(list, name);
         }
          
+	// For temporary backward compatibility.
+	int add(const char* name, SymbolList* list)
+	{
+	    return append(list, name);
+	}
+
         // return the pointer for the object of the specified name.  if the
         // SymbolList does not exist, return NULL
         SymbolList* get(const char* name) const
