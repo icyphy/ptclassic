@@ -1,6 +1,10 @@
 #! /bin/sh
 # Command-line program for the tycho.util.tytest utility \
-    exec itclsh "$0" "$@"
+    exec itkwish "$0" "$@"
+
+# Unfortunately, we have to run itkwish because our
+# installation barfs if you try and load Itk into
+# itclsh
 
 # $Id$
 # Author: Christopher Hylands
@@ -59,8 +63,17 @@ if !$ok {
     exit
 }
 
-# Print startup sig
-puts "tycho.util.tytest, version 1.0"
+
+# Check if we are running with a GUI, and if so, require the
+# tycho.kernel.gui package.
+#if { [package provide Tk] != "" } {
+#    package require tycho.kernel.gui
+#}
+
+# Helpfully, tycho does some really weird things like shutting
+# up shop and going home when there are no more top-level
+# windows. To prevent this, utter the following magic incantation:
+#::tycho::TopLevel::exitWhenNoMoreWindows 0
 
 # Source each of the files passed on the command line
 # FIXME: Need options?
@@ -74,4 +87,10 @@ foreach file $argv {
 }
 
 # Done
+catch {doneTests}
+
+# Do this, again because Tycho does weird stuff with Tcl
+# built-ins
+catch {::tclexit}
+exit
 
