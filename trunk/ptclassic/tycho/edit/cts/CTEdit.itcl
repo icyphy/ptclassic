@@ -102,8 +102,12 @@ body ::tycho::CTEdit::openControlPanel {graph} {
 	# Create a simulation run control panel
 	set rw [::tycho::view CTRunWindow -name $tl -debug 1]
 
-	# Create a simulation object
+	# Create a simulation
 	set sim [$rw simulation create -debug 1 -portnum $portnum]
+
+        # Give the graph to the simulation so it can initialize
+        # the simulation run-time
+        $sim perform $_graph
     }
 }
 
