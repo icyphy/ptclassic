@@ -59,6 +59,7 @@ ITCL_SRCS = \
 	Selector.itcl \
 	Shades.itcl \
 	Slate.itcl \
+	Slider.itcl \
 	Solid.itcl \
 	Stepper.itcl \
 	Strip.itcl \
