@@ -487,6 +487,26 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    code {\n" );
     fprintf( fp, "      return emittedEvents;\n" );
     fprintf( fp, "    }\n}\n\n");
+
+    /*
+    * Clean up input events
+    */
+    fprintf( fp, "  method {\n" );
+    fprintf( fp, "    name { CleanUp }\n" );
+    fprintf( fp, "    access { public }\n" );
+    fprintf( fp, "    type { void }\n" );
+    fprintf( fp, "    arglist { \"( int emitted )\" }\n" );
+    fprintf( fp, "    code {\n" );
+    fprintf( fp, "      if ( emitted ) {\n" );
+    /* Clear input event flags */
+    foreach_net_node_fanin( node, var ) {
+        if ( pvar = isInputEvent( var, node )) {
+            fprintf( fp, "        %s_flag = 0;\n", util_make_valid_name( pvar ));
+        }
+    } end_foreach_net_node_fanin;
+    fprintf( fp, "      }\n" );  
+    fprintf( fp, "    }\n" );
+    fprintf( fp, "  }\n" );
 }
 
 static void pl_print_code( fp, root_node, node, option, trace, autotick, unittime )
@@ -549,10 +569,10 @@ static void pl_print_code( fp, root_node, node, option, trace, autotick, unittim
     } end_foreach_net_node_fanout; 
     
     fprintf( fp, "#define startup( p )\n" );
-    fprintf( fp, "#define cleanup( p, e )\n " );
-    /*    fprintf( fp, "%s%s_Star->CleanUp( e )\n", model_name, option ); */
-    fprintf( fp, "#define always_cleanup( p )\n " );
-    /*    fprintf( fp, "%s%s_Star->CleanUp( 1 )\n", model_name, option ); */
+    fprintf( fp, "#define cleanup( p, e ) " );
+    fprintf( fp, "%s%s_Star->CleanUp( e )\n", model_name, option ); 
+    fprintf( fp, "#define always_cleanup( p ) " );
+    fprintf( fp, "%s%s_Star->CleanUp( 1 )\n", model_name, option ); 
     fprintf( fp, "#define cpu %s%s_Star->resourceId\n", model_name, option );
     
     /*
@@ -919,7 +939,7 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
             if ( strcmp( st, "e__selftrigger" ) || !autotick ) {
                 fprintf( fp, "    if ( %s.dataNew ) {\n", st );
                 fprintf( fp, "        if ( fpover ) {\n" );
-                fprintf( fp, "          if ( %s.numSimulEvents() > 0 || %s_flag ) {\n", st, st );
+                fprintf( fp, "          if ( %s.numSimulEvents() > 0) {\n",st);
                 fprintf( fp, "            sprintf( stemp, \"%%s: %%f %s\\n\", ", st );
                 fprintf( fp, "(const char*) name, now);\n" );       
                 fprintf( fp, "            Printoverflow( stemp );\n" );
