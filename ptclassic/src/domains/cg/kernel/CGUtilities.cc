@@ -40,6 +40,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <ctype.h>
 #include <string.h>
 
+#ifdef hpux
+#ifndef __GNUG__
+#include <sys/stat.h>
+#endif /* __GNUG__ */
+#endif /* hpux */
 static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
 
 char* makeLower(const char* name) {
