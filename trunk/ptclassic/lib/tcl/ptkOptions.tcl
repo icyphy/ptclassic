@@ -50,34 +50,34 @@
 # For small fonts, we just accept the Tk defaults.
 
 # Font for titles.  It is larger than the usual default Tk font.
-option add Pigi.mediumfont *-times-medium-r-normal--*-180-*
-option add CGC.mediumfont *-times-medium-r-normal--*-180*
+option add Pigi.mediumfont *-times-medium-r-normal--*-180-* startupFile
+option add CGC.mediumfont *-times-medium-r-normal--*-180* startupFile
 
 # Font for major titles.  It is very large.
-option add Pigi.bigfont  *-Helvetica-Bold-R-Normal-*-240-*
-option add CGC.bigfont  *-Helvetica-Bold-R-Normal-*-240-*
+option add Pigi.bigfont  *-Helvetica-Bold-R-Normal-*-240-* startupFile
+option add CGC.bigfont  *-Helvetica-Bold-R-Normal-*-240-* startupFile
 
 #Define Special Colors
-option add Pigi.positiveColor [ptkColor blue]
-option add Pigi.negativeColor [ptkColor red]
+option add Pigi.positiveColor [ptkColor blue] startupFile
+option add Pigi.negativeColor [ptkColor red] startupFile
 
 #Colors used for plots with multiple traces
-option add Pigi.plotColor1 [ptkColor red3]
-option add Pigi.plotColor2 [ptkColor SkyBlue3]
-option add Pigi.plotColor3 [ptkColor DarkOliveGreen3]
-option add Pigi.plotColor4 [ptkColor ivory]
-option add Pigi.plotColor5 [ptkColor gray40]
-option add Pigi.plotColor6 [ptkColor gold]
-option add Pigi.plotColor7 [ptkColor BlueViolet]
-option add Pigi.plotColor8 [ptkColor CadetBlue]
-option add Pigi.plotColor9 [ptkColor chocolate]
-option add Pigi.plotColor10 [ptkColor DarkSlateGray]
-option add Pigi.plotColor11 [ptkColor ForestGreen]
-option add Pigi.plotColor12 [ptkColor LightYellow]
+option add Pigi.plotColor1 [ptkColor red3] startupFile
+option add Pigi.plotColor2 [ptkColor SkyBlue3] startupFile
+option add Pigi.plotColor3 [ptkColor DarkOliveGreen3] startupFile
+option add Pigi.plotColor4 [ptkColor ivory] startupFile
+option add Pigi.plotColor5 [ptkColor gray40] startupFile
+option add Pigi.plotColor6 [ptkColor gold] startupFile
+option add Pigi.plotColor7 [ptkColor BlueViolet] startupFile
+option add Pigi.plotColor8 [ptkColor CadetBlue] startupFile
+option add Pigi.plotColor9 [ptkColor chocolate] startupFile
+option add Pigi.plotColor10 [ptkColor DarkSlateGray] startupFile
+option add Pigi.plotColor11 [ptkColor ForestGreen] startupFile
+option add Pigi.plotColor12 [ptkColor LightYellow] startupFile
 
 #Default parameters for certain widgets
-option add Pigi.meterWidthInC 8.0
-option add Pigi.scaleWidthInC 7.0
+option add Pigi.meterWidthInC 8.0 startupFile
+option add Pigi.scaleWidthInC 7.0 startupFile
 
 ############################################################################
 # The following section defines options (like X resources) associated with
@@ -88,39 +88,40 @@ option add Pigi.scaleWidthInC 7.0
 ############################################################################
 
 # Standard default colors for standard Tk widgets
-option add Pigi*Text.Background [ptkColor antiqueWhite]
-option add Pigi*Entry.Background [ptkColor wheat3]
-option add Pigi*Canvas.background [ptkColor antiqueWhite3]
-option add Pigi*Button.foreground [ptkColor firebrick]
-option add Pigi*Scale.Foreground [ptkColor bisque1]
-option add Pigi*Scale.background [ptkColor tan4]
-option add Pigi*Scale.sliderForeground [ptkColor bisque]
-option add Pigi*Scale.activeForeground [ptkColor bisque2]
+option add Pigi*Text.Background [ptkColor antiqueWhite] startupFile
+option add Pigi*Entry.Background [ptkColor wheat3] startupFile
+option add Pigi*selectForeground [ptkColor midnightblue] startupFile
+option add Pigi*Canvas.background [ptkColor antiqueWhite3] startupFile
+option add Pigi*Button.foreground [ptkColor firebrick] startupFile
+option add Pigi*Scale.Foreground [ptkColor bisque1] startupFile
+option add Pigi*Scale.background [ptkColor tan4] startupFile
+option add Pigi*Scale.sliderForeground [ptkColor bisque] startupFile
+option add Pigi*Scale.activeForeground [ptkColor bisque2] startupFile
 
 # Default font for all message windows used in Pigi
-option add Pigi*Message*Font [option get . mediumfont Pigi]
+option add Pigi*Message*Font [option get . mediumfont Pigi] startupFile
 
 # The following class is used to particularly highlight a widget,
 # for example to call attention to a button that must be pushed
 # in order to be able to continue with the program.
-option add Pigi*Attention*Button.foreground [ptkColor firebrick]
-option add Pigi*Attention*Button.activeForeground [ptkColor black]
-option add Pigi*Attention*Button.background [ptkColor burlywood1]
-option add Pigi*Attention*Button.activeBackground [ptkColor burlywood3]
-option add Pigi*Attention*Button.disabledForeground [ptkColor black]
+option add Pigi*Attention*Button.foreground [ptkColor firebrick] startupFile
+option add Pigi*Attention*Button.activeForeground [ptkColor black] startupFile
+option add Pigi*Attention*Button.background [ptkColor burlywood1] startupFile
+option add Pigi*Attention*Button.activeBackground [ptkColor burlywood3] startupFile
+option add Pigi*Attention*Button.disabledForeground [ptkColor black] startupFile
 
 # Set up defaults for the Windows generated by CGC programs
 # #########################################################
 
-option add *CGC*Message*Font [option get . mediumfont Pigi]
+option add *CGC*Message*Font [option get . mediumfont Pigi] startupFile
 
 # set the specific interations entry window color
-option add CGC.numberIters.entry.background [ptkColor wheat3]
+option add CGC.numberIters.entry.background [ptkColor wheat3] startupFile
 
 # set general options for all CGC windows
-option add *CGC*Button*Foreground [ptkColor blue3]
-option add *CGC*Scale*Foreground [ptkColor bisque1]
-option add *CGC*Scale*SliderForeground [ptkColor bisque1]
-option add *CGC*Scale*Background [ptkColor tan4]
-option add *CGC*Entry*Background [ptkColor burlywood1]
+option add *CGC*Button*Foreground [ptkColor blue3] startupFile
+option add *CGC*Scale*Foreground [ptkColor bisque1] startupFile
+option add *CGC*Scale*SliderForeground [ptkColor bisque1] startupFile
+option add *CGC*Scale*Background [ptkColor tan4] startupFile
+option add *CGC*Entry*Background [ptkColor burlywood1] startupFile
 
