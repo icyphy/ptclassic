@@ -123,7 +123,24 @@ group source -label {Source Icons} {
             -graphics {
         polygon 20 80 80 80 80 20 -fill orange -outline ""
     }
+
+    icon const \
+            -slatetype IconFrame \
+            -label {Const} \
+            -text Const \
+            -color lightgreen \
+            -termstyles {
+                0-1-east
+                0-1-west
+               } \
+            -graphics {
+        polygon 30 30 30 80 80 80 80 30 -fill orange -outline ""
+        line 10 80 80 80 -width 1 -fill black
+        line 30 80 30 30 -width 1 -fill black
+        line 30 30 80 30 -width 1 -fill black
+    }
 }
+
 
 group sink -label {Sink Icons} {
     icon plotter \
@@ -132,20 +149,45 @@ group sink -label {Sink Icons} {
             -text Plotter \
             -color lightblue \
             -graphics {
-        polygon 20 50 20 90 80 90 80 50 50 50 45 45 30 45 25 50 \
-                -fill red -outline red
-        line 50 10 50 45 -width 10 -arrow last
+        polygon 20 20 20 80 80 80 80 20 -fill gray -outline black
+        line 21 39 79 39 -fill green -stipple gray25
+        line 21 59 79 59 -fill green -stipple gray25
+        line 30 22 30 79 -fill green
+        line 50 22 50 79 -fill green 
+        line 70 23 70 79 -fill green
+	line 21 79 40 40 70 60 79 31 -smooth true -fill red
+
     } {
         terminal input -coords {0 50} -direction w \
                 -style circle -fill red
     }
 }
-
-group filter -label {Filter Icons} {
+#polygon 20 50 20 90 80 90 80 50 50 50 45 45 30 45 25 50 \
+        #        -fill red -outline red
+        #line 50 10 50 45 -width 10 -arrow last
+group dynamic -label {Dynamic Icons} {
     icon integral \
             -slatetype IconFrame \
             -label {Integral} \
             -text Integral \
+            -color orange \
+            -termstyles {1-1-east} \
+            -graphics {
+         polygon 40 25 40 70 35 75 30 70 25 80 35 85 45 75 45 30 \
+                 50 25 55 30 60 25 50 15 -fill black -outline black
+     }
+}
+
+group arithmetic -label {Arithmetic Icons} {
+    icon gain \
+            -slatetype IconFrame \
+            -label {Gain} \
+            -text Gain \
             -color lightsteelblue \
-            -termstyles {1-1-east}
+            -termstyles {1-1-east} \
+            -graphics {
+         polygon 30 20 30 80 70 50 -fill red -outline black
+         line 10 50 30 50 -width 1 -fill black
+         line 70 50 90 50 -width 1 -fill black
+     }
 }
