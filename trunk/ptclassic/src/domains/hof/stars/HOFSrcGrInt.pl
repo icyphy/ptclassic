@@ -1,11 +1,11 @@
 defstar {
-	name { ParSrcGrInt }
+	name { SrcGrInt }
 	domain { HOF }
 	derivedFrom { MapGr }
 	desc {
 Create one or more instances of the named block to produce the
 required number of output stream(s).  This is implemented by replacing
-the ParSrcGrInt star with the named block at setup time.  The replacement
+the SrcGrInt star with the named block at setup time.  The replacement
 block(s) are connected as illustrated by the example block that is connected.
 Their parameters are determined by "parameter_map".
 	}

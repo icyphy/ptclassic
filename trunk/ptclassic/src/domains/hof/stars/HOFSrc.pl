@@ -1,13 +1,13 @@
 defstar {
-	name { ParSrc }
+	name { Src }
 	domain { HOF }
 	derivedFrom { Map }
 	desc {
 Create one or more instances of the named block to produce the
 required number of output stream(s).  This is implemented by replacing
-the ParSrc star with the named block at setup time.  The replacement
+the Src star with the named block at setup time.  The replacement
 block(s) are connected as specified by "input_map", using the existing
-connections to the ParSrc star.  Their parameters are determined
+connections to the Src star.  Their parameters are determined
 by "parameter_map".
 	}
 	version { $Id$ }
