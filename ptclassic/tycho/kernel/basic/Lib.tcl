@@ -97,9 +97,11 @@ namespace ::tycho {
                 {Palette editor} "graphics"
     }
     # NOTE: Not ready for release
-    #     ::tycho::File::registerExtensions {.std} \
-    #             {::tycho::view EditSTD {-file {%s}}} \
-    #             {State transition diagram editor} "graphics"
+    # NOTE: Put back in after release 1.1.2 -- hjr
+    ::tycho::File::registerExtensions {.std} \
+	    {::tycho::view EditSTD {-file {%s}}} \
+	    {State transition diagram editor} "graphics"
+
     ::tycho::File::registerExtensions {.idx} \
             {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
             -file {%s}} \
