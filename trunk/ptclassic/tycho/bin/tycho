@@ -109,7 +109,7 @@ if ( ! $?TYCHO ) then
 		if ( -d $TYCHO ) then
 			echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
 		else
-		    echo "You must set $TYCHO or $PTOLEMY for tycho to work"
+		    echo 'You must set $TYCHO or $PTOLEMY for tycho to work'
 		    echo " See tycho/doc/running.html for further information"
 		endif
 	endif
