@@ -192,7 +192,7 @@ void DSKC50Target :: trailerCode () {
 int DSKC50Target :: compileCode() {
 
  	StringList assembleCmds;
-  	assembleCmds << "assembl " << filePrefix << "DSK.asm";
+  	assembleCmds << "asmc50 " << filePrefix << "DSK.asm";
   	if (systemCall(assembleCmds,"Errors in assembly")!=0)
   		return FALSE;
 	return TRUE;
@@ -218,7 +218,7 @@ void DSKC50Target :: writeCode() {
 
 int DSKC50Target :: runCode() {
 	StringList runCmd;
-	runCmd << "loader " << filePrefix << "DSK.dsk";
+	runCmd << "loadc50 " << filePrefix << "DSK.dsk";
 	return ( systemCall(runCmd,
 			    "Problems running code onto TMS320C5x",
 			    targetHost) == 0 );
