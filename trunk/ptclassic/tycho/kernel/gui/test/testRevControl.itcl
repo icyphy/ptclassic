@@ -61,7 +61,7 @@ proc testRevControl {versionControlSystem} {
     set myEditView [::tycho::view Edit -file $testfile]
     #$wname centerOnScreen
     set myRevControl [::tycho::RevControl::setup $myEditView $myEditView]
-    puts "$myEditView $myRevControl"
+    #puts "myEditView: $myEditView myRevControl$myRevControl"
     ::tycho::safeUpdate $myEditView
 
     if {"$versionControlSystem" == "SCCS" } {
@@ -75,6 +75,18 @@ proc testRevControl {versionControlSystem} {
     # Press the 'Checkout' button
     $myEditView.revcontrol invoke checkout
     ::tycho::safeUpdate $myEditView.revcontrol
+
+    # This is a proc, not a test body, so it is not executed in the global
+    # scope, so we need to declare TY_TEST_SCRIPT as global
+    global TY_TEST_SCRIPT
+    # This script is executed inside Dialog::wait by getComment
+    set TY_TEST_SCRIPT {
+	%0 insert body "This is a message"
+	update idletasks
+	after 500
+        %0 ok
+        unset TY_TEST_SCRIPT
+    }
 
     # Press the 'Checkin' button
     $myEditView.revcontrol invoke checkin
