@@ -79,7 +79,7 @@ PL_SRCS= \
   ACSShift.pl ACSShiftCGFPGA.pl ACSShiftFPSim.pl ACSShiftFixSim.pl \
   ACSSin.pl ACSSinCGFPGA.pl ACSSinFPCGC.pl ACSSinFPSim.pl ACSSinFixSim.pl \
   ACSSink.pl ACSSinkCGFPGA.pl ACSSinkFPCGC.pl ACSSinkFPSim.pl ACSSinkFixSim.pl \
-  ACSSource.pl ACSSourceCGFPGA.pl \
+  ACSSource.pl ACSSourceCGFPGA.pl ACSSourceFPSim.pl ACSSourceCGC.pl ACSSourceFPCGC.pl ACSSourceFixSim.pl \
   ACSSqrt.pl ACSSqrtCGFPGA.pl ACSSqrtFPCGC.pl ACSSqrtFPSim.pl ACSSqrtFixSim.pl \
   ACSSub.pl ACSSubCGFPGA.pl ACSSubFPCGC.pl ACSSubFPSim.pl ACSSubFixSim.pl \
   ACSUniSeq.pl ACSUniSeqCGFPGA.pl \
