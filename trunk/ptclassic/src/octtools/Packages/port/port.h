@@ -312,7 +312,7 @@ extern VOID_HACK clearerr();
 #ifndef _IBMR2
 #ifndef rewind
 #ifndef sgi
-#ifndef SOL2
+#if !defined(SOL2) && !defined(__GNUC__)
 extern VOID_HACK rewind();
 #endif /* SOL2*/
 #endif /*sgi*/
