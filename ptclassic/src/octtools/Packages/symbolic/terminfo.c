@@ -152,10 +152,8 @@ segTermInfo info[2];		/* Segment terminal info (RETURN) */
     octGenerator gen;
     octObject dummy_term, lyr, geo;
     struct seg_term_info temp;
-    struct octPoint center;
     symTermGen t_gen;
     int count, i, layers;
-    char **lyr_names;
 
     /* Initialize information */
     for (i = 0;  i < 2;  i++) {
