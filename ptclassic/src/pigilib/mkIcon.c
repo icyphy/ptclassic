@@ -202,46 +202,46 @@ TermList *termsPtr;
     case 0:
 	break;
     case 1:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l0));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0));
 	break;
     case 2:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1d));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d));
 	break;
     case 3:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1d));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d));
 	break;
     case 4:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1d));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d));
 	break;
     case 5:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2d));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2d));
 	break;
     case 6:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l3u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2d));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l3u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2d));
 	break;
     case 7:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l3u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l1d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l2d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->multiple, l3d));
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l3u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2d)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l3d));
 	break;
     default:
 	ErrAdd("Too many input terminals");
@@ -253,46 +253,46 @@ TermList *termsPtr;
     case 0:
 	break;
     case 1:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r0));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0));
 	break;
     case 2:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1d));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d));
 	break;
     case 3:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1d));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d));
 	break;
     case 4:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1d));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d));
 	break;
     case 5:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2d));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2d));
 	break;
     case 6:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r3u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2d));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r3u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2d));
 	break;
     case 7:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r3u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r1d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r2d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->multiple, r3d));
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r3u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2d)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r3d));
 	break;
     default:
 	ErrAdd("Too many output terminals");
