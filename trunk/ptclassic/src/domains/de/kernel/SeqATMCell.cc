@@ -96,3 +96,12 @@ StringList SeqATMCell::print() const {
 	}
 	return out;
 }
+
+// class identification
+ISA_FUNC(SeqATMCell,Message);
+
+Message* SeqATMCell::clone() const {
+	LOG_NEW; return new SeqATMCell( *this );
+}
+
+const char* SeqATMCell::dataType() const { return "SeqATMCell"; }

@@ -29,11 +29,9 @@ public:
 	void setSeq( int num ) { seqNo = num; }
 	int readSeq() const { return( seqNo ); }
 
-	const char* dataType() const { return "SeqATMCell"; }
-	ISA_INLINE( SeqATMCell, Message ); // is_A() function;
-	Message* clone() const {
-		INC_LOG_NEW; return new SeqATMCell( *this );
-	}
+	const char* dataType() const;
+	int isA(const char*) const;
+	Message* clone() const;
 	double asFloat() const { return( double( seqNo ) ); }
 	StringList print() const;
 
