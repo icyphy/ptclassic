@@ -241,7 +241,7 @@ body ::tycho::EditC::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $TYCHO edit textedit doc usersGuides \
-	    EditCHelp.html]
+	    EditCHelp.html] html
 }
 
 #####################################################################

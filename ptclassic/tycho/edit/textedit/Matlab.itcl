@@ -162,7 +162,7 @@ body ::tycho::Matlab::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO edit textedit doc usersGuides \
-	    EditMatlabHelp.html]
+	    EditMatlabHelp.html] html
 }
 
     ###################################################################

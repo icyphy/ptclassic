@@ -101,7 +101,7 @@ body ::tycho::EditEsterel::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $TYCHO edit textedit doc usersGuides \
-	    EditEsterelHelp.html]
+	    EditEsterelHelp.html] html
 }
 
 ####################################################################

@@ -315,7 +315,7 @@ body ::tycho::EditProgram::help {} {
 
     ::tycho::File::openContext \
         [file join $TYCHO edit textedit doc usersGuides \
-	    EditProgramHelp.html]
+	    EditProgramHelp.html] html
 }
 
 #####################################################################

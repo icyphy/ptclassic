@@ -164,7 +164,7 @@ body ::tycho::Mathematica::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO edit textedit doc usersGuides \
-	    EditMathematicaHelp.html]
+	    EditMathematicaHelp.html] html
 }
 
     ###################################################################
