@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Edward A. Lee
  Date of creation: 1/13/96
 
- This file defines the implementation of the FileMessage class and
+ This file defines the implementation of the FileMessage class.
 
 **************************************************************************/
 #ifdef __GNUG__
@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 #include "miscFuncs.h"
 #include "InfString.h"
+#include <unistd.h>
 
 /////////////////////////////////////////////////////////////
 // FileMessage method bodies
@@ -72,9 +73,7 @@ FileMessage::FileMessage(const FileMessage& src) {
 FileMessage::~FileMessage() {
     if (filename) {
 	if (transientFileFlag) {
-	    InfString cmd = "rm -f ";
-	    cmd << filename;
-	    system(cmd);
+	    unlink(filename);
 	}
 	if (dynamicFilename) {
 	    delete [] dynamicFilename;
