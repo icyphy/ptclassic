@@ -24,6 +24,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+#include "sort.h"
 static scan_point *and_scan(outgeo, pointer, vertex, l_delta, intersect_flag,
 			    intersect)
 fa_geometry *outgeo;
@@ -80,7 +81,7 @@ int *intersect;
     return ptr;
 }
 
-static and_check_emit(geo, x, y, l_delta, l_new, r_delta, r_new, intersect_flag)
+static int and_check_emit(geo, x, y, l_delta, l_new, r_delta, r_new, intersect_flag)
 fa_geometry *geo;
 fa_coord x,y;
 int l_delta, l_new;
@@ -183,7 +184,7 @@ fa_vertex **ptr1, **ptr2;
 
 static fa_vertex *sum_ptr = NIL(fa_vertex);
 
-static init_vertex_sum()
+static int init_vertex_sum()
 {
     sum_ptr = NIL(fa_vertex);
 }
