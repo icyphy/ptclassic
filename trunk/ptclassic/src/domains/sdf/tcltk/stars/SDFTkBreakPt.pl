@@ -3,8 +3,8 @@ defstar {
 	domain {SDF}
 	derivedFrom { TclScript }
 	desc {
-This star is a conditional break point.  If it's condition is true,
-it causes the run to pause.
+A conditional break point.  Each time this star is executes its conditional 
+expression.  If the expression evaluates to true, it causes the run to pause.
 	}
 	version { $Id$ }
 	author { Alan Kamas }
@@ -15,6 +15,41 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF tcltk library }
+	explanation {
+.EQ
+delim off
+.EN
+This star evaluates a tcl expression each time it is fired.  If the expression
+returns a value of "true" then the run is paused.
+The expression can be any valid tcl expression.  For details of valid tcl
+expressions, see the tcl command "expr."
+.pp
+This star takes multiple inputs.  To make it easier to write a conditional
+expression, the inputs are numbered: input(1), input(2), input(3), etc.
+Thus if you only had one input connected to a TkBreakPt star, you would
+use input(1) to refer to it.
+.pp
+Remember that Tcl uses a dollar sign ($) to reference the value of a 
+variable.  Thus, the expression
+.br
+$input(1) < 0
+.br
+will be true if the value
+of the first input is negative.  Similarly, the expression
+.br
+$input(1) < $input(2)
+.br
+will be true whenever the value of the first input is less than the value 
+of the second input.
+.pp
+It may be difficult to distinguish which input is which if they are
+all connected directly to the multiport input.  One solution is to
+use the "Bus create" icons in the HOF functions palette.  Connect
+the bus create icon of your choice to the input of the TkBreakPt star.
+Then connect the inputs to the bus create icon.  The top input is 
+input(1), the next is input(2), etc.
+} 
+
 	hinclude { "ptk.h" }
 	defstate {
 	        name {condition}
