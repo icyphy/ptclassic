@@ -364,6 +364,6 @@ Block::~Block () {
 const char* Block :: domain () const { return "UNKNOWN";}
 
 RegisterBlock:: RegisterBlock(Block& prototype, const char* classname) {
-        KnownBlock::addEntry (prototype, classname, 0);
+        KnownBlock::addEntry (prototype, classname, 0, NULL);
 }
 
