@@ -63,10 +63,7 @@ class ::tycho::WelcomeMessage {
     constructor {args} {}
 
     ##########################################################################
-    ####                       protected methods                          ####
-
-    # Access the "stacktrace" preferences
-    #protected method preference {mode args}
+    ####                       private variable                           ####
 
     # Indicator of whether the gif image has been created.
     private variable tychogifexists 0
@@ -134,19 +131,3 @@ body ::tycho::WelcomeMessage::constructor {args} {
     configure -data $html
     configure -scrollbar 0
 }
-
-#####################################################################
-#####################################################################
-####                     protected methods                       ####
-
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "misc" preferences.
-#
-#body ::tycho::WelcomeMessage::preference {mode args} {
-#    eval ::tycho::preference $mode "misc" $args
-#}
-
