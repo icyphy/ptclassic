@@ -29,7 +29,7 @@ necessary.
 The formating is with ditroff (device independent troff)
 .IE ditroff
 with the -me macros, eqn, and tbl.  In addition, some custom macros
-.IE "-me macros"
+.IE "me macros"
 have been supplied in order to enforce a consistent look
 across all \*(PT documents.
 These macros and their use are explained here.
@@ -41,7 +41,7 @@ documented elsewhere.
 First, all scripts for printing the manual use the c shell,
 and require that the printer you wish to use be defined.
 To do this, place the following line in the file .cshrc in
-.IE ".cshrc"
+.IE "cshrc"
 your home directory:
 .(c
 setenv PRINTER lw
@@ -87,9 +87,10 @@ If you are printing the entire manual, an index will be generated
 after the entire manual has been printed.
 If you have printed a new version of a subsection,
 and wish to update the index, then:
+.IE "index, printing"
 .(c
 % cd ~ptolemy/doc
-% make index
+% make prindex
 .)c
 .pp
 When only a subsection is printed, every attempt is made to format
@@ -145,7 +146,7 @@ This is interpreted by troff as a comment, and hence has no
 affect on the output.
 The version number that will appear on the output
 is specified by the .VR macro.
-.IE ".VR macro"
+.IE "VR macro"
 It takes two arguments, a version number and a date, in the form
 of a string.
 These two arguments will be printed in the lower left and right
@@ -158,7 +159,7 @@ left corner), with a prepended number
 corresponding to major releases of \*(PT.
 .pp
 The ``.TI'' macro gives the section title.
-.IE ".TI macro"
+.IE "TI macro"
 When the document is printed standalone, this title will be put
 on a separate title page.
 Otherwise, it will be a level-one header.
@@ -191,6 +192,7 @@ in ~ptolemy/doc/main/documents should work fine.
 .pp
 In any documentation directory, when the documentation is printed,
 a file named ``index'' will be created.
+.IE "index, file"
 If there already is such a file, and you have write permission,
 it will be clobbered.
 Hence, you should not store document sections in a file called ``index''.
@@ -200,12 +202,13 @@ The documentation scripts for \*(PT will automatically
 generate an index.
 Entries in the index must be defined in the document source
 using the macro:
+.IE "index, entries"
 .(c
 	.IE "entry"
 .)c
 The entries will be sorted alphabetically.
-.IE "index"
-.IE ".IE macro"
+.IE "index entries"
+.IE "IE macro"
 If you look at the index printed with this document,
 you will find an entry ``index'' pointing right here.
 If you wish for a two word entry to appear twice,
