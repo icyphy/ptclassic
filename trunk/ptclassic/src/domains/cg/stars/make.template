@@ -28,27 +28,27 @@ DOMAIN=CG
 STAR_MK=cgstars
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
+ CGVarTime.pl \
  AnyAsmBlackHole.pl \
  AnyAsmFork.pl \
  AnyAsmGround.pl \
  AnyCGPeekPoke.pl \
- CGRateChange.pl \
+ CGCollect.pl \
+ CGFork.pl \
  CGMultiIn.pl \
  CGMultiInOut.pl \
  CGMultiOut.pl \
- CGSource.pl \
- CGThrough.pl \
- CGSink.pl \
- CGVarTime.pl \
- CGSend.pl \
+ CGRateChange.pl \
  CGReceive.pl \
+ CGSelect.pl \
+ CGSend.pl \
+ CGSink.pl \
+ CGSource.pl \
  CGSpread.pl \
- CGCollect.pl \
- CGFork.pl \
  CGSwitch.pl \
- CGSelect.pl
+ CGThrough.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
