@@ -534,8 +534,7 @@ lsList cmdList;			/* List of arguments        */
     lsGen argGen;
     octObject spotFacet, createFacet, createLayer, newCircle;
     struct octPoint allpnts[4];
-    struct octBox bb;
-    int len, idx, filledCircle, count, num;
+    int len, idx, filledCircle = 0, count, num;
 
     /* First,  all kinds of validity checking */
     len = lsLength(cmdList);
@@ -748,7 +747,6 @@ lsList cmdList;
 {
     vemOneArg *firstArg, *lastArg;
     octObject newInstance, instFacet, spotFacet;
-    struct octBox bb;
     int len, i;
     char *str;
 
