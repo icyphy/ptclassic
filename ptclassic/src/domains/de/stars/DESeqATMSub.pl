@@ -18,11 +18,11 @@ SeqATMCell are unloaded and sent to the output port.
 
 	protected { int* reserve; }
 
-	start {
+	setup {
 		LOG_NEW; reserve = new int[ int( numInfoBits ) ];
 		for ( int i = 0; i < numInfoBits; i++ )
 			reserve[ i ] = 0;
-		DESeqATMZero :: setup();
+		DESeqATMZero::setup();
 	}
 
 	go {
