@@ -230,6 +230,11 @@ public:
 	PTcl(Tcl_Interp* interp = 0);
 	~PTcl();
 
+	// If there is a universe by the given name in this PTcl object,
+	// return it.  Else return NULL.
+	InterpUniverse* univWithName(const char* name)
+	  { return univs.univWithName(name); }
+
 	// dispatcher is called by Tcl to handle all extension commands.
 	static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
 
