@@ -395,25 +395,30 @@ long userOptionWord;
 	    mFacet.contents.facet.cell = fullName;
 	    vemOpenWindow(&mFacet, NULL);
 	} else {
-	    if (!MyOpenMaster(&mFacet, &inst, "interface", "r")) {
-		PrintErr(ErrGet());
+	    if (IsStar(&inst)) {
+	    	if (!MyOpenMaster(&mFacet, &inst, "interface", "r")) {
+		    PrintErr(ErrGet());
+		    ViDone();
+	        }
+	        octFullName(&mFacet, &fullName);
+
+	        /* Figure out file names */
+	        strcpy(dir, fullName);
+	        DirName(dir);
+	        base = BaseName(fullName);
+
+	        /* First the .h file */
+	        sprintf(codeFile, "%s/../src/%s.h", dir, base);
+	        ERR_IF1(!LookAtFile(codeFile));
+
+	        /* Then the .cc file */
+	        sprintf(codeFile, "%s/../src/%s.cc", dir, base);
+	        ERR_IF1(!LookAtFile(codeFile));
 		ViDone();
-	    }
-	    octFullName(&mFacet, &fullName);
-
-	    /* Figure out file names */
-	    strcpy(dir, fullName);
-	    DirName(dir);
-	    base = BaseName(fullName);
-
-	    /* First the .h file */
-	    sprintf(codeFile, "%s/../src/%s.h", dir, base);
-	    ERR_IF1(!LookAtFile(codeFile));
-
-	    /* Then the .cc file */
-	    sprintf(codeFile, "%s/../src/%s.cc", dir, base);
-	    ERR_IF1(!LookAtFile(codeFile));
-	    ViDone();
+	    } else {
+		PrintErr("The icon instance is not a universe, galaxy, palette, or star.");
+                Vidone();
+            }
 	}
     }
     ViDone();
