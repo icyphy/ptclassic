@@ -4,7 +4,7 @@
 <title>Tycho under Unix</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="running Tycho">Running Tycho</a></h1>
+<h1><a name="running Tycho">Tycho under Unix</a></h1>
 <OL>
 <LI><a href="#setup">Setup</a>
 <LI><a href="#standalone execution">Stand-alone Execution</a>
@@ -13,19 +13,26 @@
 <LI><a href="#customizing Tycho on startup">Customizing Tycho on Startup</a>
 </OL>
 <p>
-Tycho is designed to be used as a stand-alone program or on conjunction
-with the Ptolemy system.  The Ptolemy system is a heterogeneous
-design environment developed at U.C. Berkeley.
 
-<h2><a name="setup">Setup</a></h2>
+Tycho is designed to be used as a stand-alone program or on
+conjunction with the Ptolemy system.  The Ptolemy system is a
+heterogeneous design environment developed at U.C. Berkeley.  We do
+most of our development under Solaris2.5, so Tycho will probably work
+best under that operating system.
+
+
+<h2><a name="setup under Unix">Setup</a></h2>
+<LI> The Tycho home page at <A
+HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has a
+link to the downloads page that contains Tycho sources and Itcl
+binaries for certain Unix platforms.
+
 <p>
 Tycho0.1.1 will not work with Itcl2.0, which is the version shipped with
 Ptolemy0.6.  To use Tycho0.1.1, you must have Itcl2.1 or Itcl2.2 installed
 <P>
 
-You can obtain the latest tycho release from 
-<A HREF="http://ptolemy.eecs.berkeley.edu">http://ptolemy.eecs.berkeley.edu</A>
-To check the version number of tycho, look at the startup screen
+ <P>To check the version number of Tycho, look at the startup screen
 that has the 'Mr. Tycho' bitmap.  The startup screen can be brought up by 
 selecting the <CODE>Help</CODE> menu in the upper right side and then selecting
 <CODE>About</CODE>.  You can also type
@@ -38,15 +45,16 @@ into a Tycho console.
 above and the version information will be printed in the Console
 window).
 
- <P>You will also need to have the tycho/bin directory in your path.
-In addition, you will need to set an
-<a name="environment variables">environment variable</a>
-<a name="TYCHO environment variable">TYCHO</a>
-to point to the installation directory for Tycho.
-For example, if Tycho is installed in /usr/tools/tycho and
-Itcl is installed in /usr/tools/itcl/bin,
-then you could put the following lines in your .cshrc file (assuming you
-use csh):
+ <P>You will also need to have the <CODE>tycho/bin</CODE> directory in
+your path.  In addition, you will need to set an <a name="environment
+variables">environment variable</a> <a name="TYCHO environment
+variable">TYCHO</a> to point to the installation directory for Tycho.
+
+ <P>For example, if Tycho is installed in
+<CODE>/usr/tools/tycho</CODE> and Itcl is installed in
+<CODE>/usr/tools/itcl/bin</CODE>, then you could put the following
+lines in your <CODE>.cshrc</CODE> file (assuming you use csh):
+
 <pre>
     set path = (/usr/tools/tycho/bin /usr/tools/itcl/bin $path)
     setenv TYCHO /usr/tools/tycho
@@ -146,15 +154,16 @@ it does, give the user the option of opening it.
 
 <h2><a name="customizing Tycho on startup">Customizing Tycho on Startup
 </a></h2>
-<p>
-You can configure Tycho to execute some Tcl code on startup.
-Simply create a <a name=".Tycho directory">directory called ".Tycho"</a>
-in your home directory and a file called
-<a name="tychorc.tcl file">"tychorc.tcl"</a> in that directory.
-That file will automatically be sourced on startup.
-Note that the .Tycho directory is used to store other state
+
+<p> You can configure Tycho to execute some Tcl code on startup.
+Simply create a <a name=".Tycho directory">directory called
+<CODE>.Tycho</CODE></a>in your home directory and a file called <a
+name="tychorc.tcl file"><CODE>tychorc.tcl</CODE> </a> in that
+directory.  That file will automatically be sourced on startup.  Note
+that the <CODE>.Tycho</CODE> directory is used to store other state
 information for Tycho, such as your personal dictionary for spelling
 checks.
+
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
 Previous: <A HREF="releasenotes.html">Release Notes</A> -
