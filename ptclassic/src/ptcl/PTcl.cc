@@ -154,6 +154,33 @@ PTcl::~PTcl() {
 	}
 }
 
+
+#ifdef PT_PTCL_WITH_TK
+
+extern int& tkUpdate();
+
+// tk-interactivity for ptcl: turn on tk-update with every star::run() call
+int PTcl::updateTk (int argc,char** argv) {
+	const char* t = "";
+	int c = 1;
+	if (argc == 2) t = argv[1];
+	if (argc > 2 ||
+	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
+		return usage ("updateTk ?on|off?");
+	if (argc != 2) {
+		Tcl_SetResult(interp,
+			tkUpdate() ? "on" : "off",
+			TCL_STATIC);
+	}
+	else if (c == 0)
+		tkUpdate() = 1;
+	else
+		tkUpdate() = 0;
+	return TCL_OK;
+}
+
+#endif // PT_PTCL_WITH_TK
+
 // Create a new universe with name name and domain dom and make it the
 // current universe.  Whatever universe was previously the current universe
 // is not affected, unless it was named <name>.
@@ -1305,6 +1332,9 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(targets),
 	ENTRY(topblocks),
 	ENTRY(univlist),
+#ifdef PT_PTCL_WITH_TK
+	ENTRY(updateTk),
+#endif
 	ENTRY(wrapup),
 	{ 0, 0 }
 };

@@ -56,19 +56,36 @@ the [incr Tcl] (itcl) extension and the Ptolemy/PTcl facilities.
 #ifndef PT_NO_ITCL
 #include <itcl.h>
 #endif
+#ifdef PT_PTCL_WITH_TK
+#include <tk.h>
+#include <locale.h>
+#endif
 #include "Linker.h"
 
 EXTERN int		Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
+#ifdef PT_PTCL_WITH_TK
+#include "ptk.h"
+// Functions to initialize TK
+EXTERN void		TkConsoleCreate(void);
+EXTERN int		TkConsoleInit(Tcl_Interp *interp);
+
+Tk_Window ptkW;
+#else
 // We need this so we can include HOF in ptcl
 Tcl_Interp *ptkInterp;
+#endif
 
 /*
  * The following variable is a special hack that is needed in order for
  * Sun shared libraries to be used for Tcl.
  */
+#ifdef PT_NT4VC
+#define matherr _matherr
+#endif
 
 EXTERN int matherr();
+
 /* This line produces a warning under hppa.cfront:
  *  warning: pointer to function cast to pointer to non-function (149)
  */
@@ -101,8 +118,47 @@ EXTERN int		TclTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
  *----------------------------------------------------------------------
  */
 
+#ifdef PT_NT4VC
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
+
+static void		setargv _ANSI_ARGS_((int *argcPtr, char ***argvPtr));
+
+#endif
+
+#if defined(PT_NT4VC) && defined(PT_PTCL_WITH_TK)
+int APIENTRY
+WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
+#else
 int main(int argc, char **argv)
+#endif
 {
+#ifdef PT_PTCL_WITH_TK
+    TkConsoleCreate();
+    
+#ifdef PT_NT4VC
+    // Parse command line arguments
+    char **argv, *p;
+    int argc;
+    char buffer[MAX_PATH];
+
+    setlocale(LC_ALL, "C");
+    SetMessageQueue(64);
+ 
+    setargv(&argc, &argv);
+    GetModuleFileName(NULL, buffer, sizeof(buffer));
+    argv[0] = buffer;
+    for (p = buffer; *p != '\0'; p++) {
+			if (*p == '\\') {
+	  	  *p = '/';
+			}
+    }
+#endif
+    
+#endif
+ 
     // Initialize the Ptolemy incremental linker module.
     // Note: this initialization routine must be invoked here in the
     // main() function rather than in Ptcl_Init() because it needs to
@@ -110,7 +166,12 @@ int main(int argc, char **argv)
     // (Ptcl_Init() does not have access to argv.)
     Linker::init(argv[0]);
 
+#ifdef PT_PTCL_WITH_TK
+    Tk_Main(argc, argv, Tcl_AppInit);
+#else
     Tcl_Main(argc, argv, Tcl_AppInit);
+#endif
+    
     return 0;			/* Needed only to prevent compiler warning. */
 }
 
@@ -143,6 +204,29 @@ int Tcl_AppInit(Tcl_Interp *interp)
     if (Tcl_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
+
+#ifdef PT_PTCL_WITH_TK
+    if (Tk_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
+    ptkW = Tk_MainWindow(ptkInterp);
+
+    /*
+     * Initialize the console only if we are running as an interactive
+     * application.
+     */
+
+    if (TkConsoleInit(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+
+	// Set name and class
+    char *appName = "pigi";
+    char *appClass = "Pigi";
+    Tk_SetClass(ptkW, appClass);
+    Tk_SetAppName(ptkW, appName);
+#endif
 
 #if TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION >= 5
 #ifdef TCL_TEST
@@ -193,3 +277,124 @@ int Tcl_AppInit(Tcl_Interp *interp)
 #endif /* TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION >= 5 */
     return TCL_OK;
 }
+
+
+
+
+#ifdef PT_NT4VC 
+
+/*
+ *-------------------------------------------------------------------------
+ *
+ * setargv --
+ *
+ *	Parse the Windows command line string into argc/argv.  Done here
+ *	because we don't trust the builtin argument parser in crt0.  
+ *	Windows applications are responsible for breaking their command
+ *	line into arguments.
+ *
+ *	2N backslashes + quote -> N backslashes + begin quoted string
+ *	2N + 1 backslashes + quote -> literal
+ *	N backslashes + non-quote -> literal
+ *	quote + quote in a quoted string -> single quote
+ *	quote + quote not in quoted string -> empty string
+ *	quote -> begin quoted string
+ *
+ * Results:
+ *	Fills argcPtr with the number of arguments and argvPtr with the
+ *	array of arguments.
+ *
+ * Side effects:
+ *	Memory allocated.
+ *
+ *--------------------------------------------------------------------------
+ */
+
+static void
+setargv(int *argcPtr, char ***argvPtr)
+{
+    char *cmdLine, *p, *arg, *argSpace;
+    char **argv;
+    int argc, size, inquote, copy, slashes;
+    
+    cmdLine = GetCommandLine();
+
+    /*
+     * Precompute an overly pessimistic guess at the number of arguments
+     * in the command line by counting non-space spans.
+     */
+
+    size = 2;
+    for (p = cmdLine; *p != '\0'; p++) {
+	if (isspace(*p)) {
+	    size++;
+	    while (isspace(*p)) {
+		p++;
+	    }
+	    if (*p == '\0') {
+		break;
+	    }
+	}
+    }
+    argSpace = (char *) ckalloc((unsigned) (size * sizeof(char *) 
+	    + strlen(cmdLine) + 1));
+    argv = (char **) argSpace;
+    argSpace += size * sizeof(char *);
+    size--;
+
+    p = cmdLine;
+    for (argc = 0; argc < size; argc++) {
+	argv[argc] = arg = argSpace;
+	while (isspace(*p)) {
+	    p++;
+	}
+	if (*p == '\0') {
+	    break;
+	}
+
+	inquote = 0;
+	slashes = 0;
+	while (1) {
+	    copy = 1;
+	    while (*p == '\\') {
+		slashes++;
+		p++;
+	    }
+	    if (*p == '"') {
+		if ((slashes & 1) == 0) {
+		    copy = 0;
+		    if ((inquote) && (p[1] == '"')) {
+			p++;
+			copy = 1;
+		    } else {
+			inquote = !inquote;
+		    }
+                }
+                slashes >>= 1;
+            }
+
+            while (slashes) {
+		*arg = '\\';
+		arg++;
+		slashes--;
+	    }
+
+	    if ((*p == '\0') || (!inquote && isspace(*p))) {
+		break;
+	    }
+	    if (copy != 0) {
+		*arg = *p;
+		arg++;
+	    }
+	    p++;
+        }
+	*arg = '\0';
+	argSpace = arg + 1;
+    }
+    argv[argc] = NULL;
+
+    *argcPtr = argc;
+    *argvPtr = argv;
+}
+
+#endif

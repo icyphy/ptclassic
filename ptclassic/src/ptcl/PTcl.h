@@ -302,6 +302,9 @@ public:
 	int targets(int argc,char** argv);
 	int topblocks(int argc,char** argv);
 	int univlist(int argc,char** argv);
+#ifdef PT_PTCL_WITH_TK
+	int updateTk(int argc, char **argv);
+#endif
 	int wrapup(int argc,char** argv);
 };
 
