@@ -240,8 +240,8 @@ int FromEventHorizon :: ready() { return TRUE ;}
 
 **************************************************************************/
 
-int WormMultiPort :: isItInput() const { return myGMPH()->isItInput(); }
-int WormMultiPort :: isItOutput() const { return myGMPH()->isItOutput(); }
+int WormMultiPort :: isItInput() const { return myGMPH->isItInput(); }
+int WormMultiPort :: isItOutput() const { return myGMPH->isItOutput(); }
 
 extern const char* ghostName(const GenericPort&);
 
