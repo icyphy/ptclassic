@@ -93,7 +93,7 @@ XtPointer client;		/* Closure          */
 {
     ddsInternal *top = _dds_find_top(item);
     ddsFocus *info = top->composite.top_info->focus;
-    Widget tw = top->composite.top_info->top_shell;
+    /*Widget tw = top->composite.top_info->top_shell;*/
 
     add_widget(info, widget, cb, client);
 }
