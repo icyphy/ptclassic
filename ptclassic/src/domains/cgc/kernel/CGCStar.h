@@ -143,11 +143,9 @@ private:
 	// initially put myself in spliceClust.
 	SequentialList spliceClust;
 
-	void addSpliceStar(CGCStar* s, int flag) {
-		if (spliceClust.member(s)) return;
-		if (flag) spliceClust.append(s);
-		else spliceClust.prepend(s);
-	}
+	// add a splice star to the spliceClust list.  If atEnd
+	// is true, append it to the end, otherwise prepend it.
+	void addSpliceStar(CGCStar* s, int atEnd);
 };
 
 #endif

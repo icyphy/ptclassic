@@ -178,6 +178,14 @@ void CGCStar :: initBufPointer() {
 	}
 }
 
+// add a splice star to the spliceClust list.  If atEnd
+// is true, append it to the end, otherwise prepend it.
+void CGCStar :: addSpliceStar(CGCStar* s, int atEnd) {
+	if (spliceClust.member(s)) return;
+	if (atEnd) spliceClust.append(s);
+	else spliceClust.prepend(s);
+}
+
 void CGCStar::registerState(const char* name) {
 	State* state;
 	if(state = stateWithName(name)) {
@@ -338,7 +346,7 @@ void CGCStar :: updateOffsets() {
 }
 
 // Convert from PortHole type to C data type.
-const char* ctype(PortHole& p)
+static const char* ctype(const PortHole& p)
 {
     DataType t = p.resolvedType();
 
@@ -348,7 +356,7 @@ const char* ctype(PortHole& p)
 }
 
 // Convert from State type to C data type.
-const char* ctype(State& state)
+static const char* ctype(const State& state)
 {
     const char* t = state.type();
 
