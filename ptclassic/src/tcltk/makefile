@@ -203,8 +203,8 @@ fixlinks:
 		rm -f libtcl.$$LIBSUFFIX libtk.$$LIBSUFFIX libitcl.$$LIBSUFFIX libitk.$$LIBSUFFIX; \
 		ln -s libtcl$(TCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libtcl.$$LIBSUFFIX; \
 		ln -s libtk$(TK_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libtk.$$LIBSUFFIX; \
-		ln -s libitcl$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitcl.$$LIBVERSION; \
-		ln -s libitk$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitk.$$LIBVERSION; \
+		ln -s libitcl$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitcl.$$LIBSUFFIX; \
+		ln -s libitk$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitk.$$LIBSUFFIX; \
 	)
 	@echo "Create a links for itclsh to ish"
 	-(cd $(ITCL_DEST)/bin; rm -f ish tclsh itkwish itclsh)
