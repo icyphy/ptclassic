@@ -73,6 +73,27 @@ delim off
 .tm index \\n(AS-\\n% \\$1
 ..
 
+.\" The following are included for partial compatibility
+.\" with some standard Unix manual pages
+.de TP
+..
+
+.de PP
+.pp
+..
+
+.de I
+.i \\$1
+..
+
+.de B
+.ip "\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7             " 0.5i
+..
+
+.de IP
+.ip "\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7             " 0.5i
+..
+
 .\" end of macros
 
 .\" $
