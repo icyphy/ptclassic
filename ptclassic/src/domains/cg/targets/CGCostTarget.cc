@@ -107,6 +107,7 @@ int CGCostTarget::run() {
 	}
 	else if (userTarget->canComputeMemoryUsage() ||
 		 userTarget->canComputeExecutionTime() ) {
+	    // FIXME: Should we close the target before using it?
 	    costInfoForOneTarget(userTarget);
 	}
 	else {
