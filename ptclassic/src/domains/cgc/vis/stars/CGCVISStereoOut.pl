@@ -57,13 +57,12 @@ provisions.
     codeblock (convert) {
 	/* Take data from Input and put it in buffer */
 	/* Data in buffer is alternate left and right channels */
-	for ($starSymbol(counter) = 0; $starSymbol(counter) <
-	       ($val(blockSize)/8); $starSymbol(counter) ++) {
-	  $starSymbol(unpackit).regvaluedbl = $ref(leftright,$starSymbol(counter));
-	  $starSymbol(buf)[4*$starSymbol(counter)] = $starSymbol(unpackit).regvaluesh[0];
-	  $starSymbol(buf)[4*$starSymbol(counter)+1] = $starSymbol(unpackit).regvaluesh[1];
-	  $starSymbol(buf)[4*$starSymbol(counter)+2] = $starSymbol(unpackit).regvaluesh[2];
-	  $starSymbol(buf)[4*$starSymbol(counter)+3] = $starSymbol(unpackit).regvaluesh[3];
+	for (i = 0; i < ($val(blockSize)/8); i ++) {
+	  $starSymbol(unpackit).regvaluedbl = $ref(leftright,i);
+	  $starSymbol(buf)[4*i] = $starSymbol(unpackit).regvaluesh[0];
+	  $starSymbol(buf)[4*i+1] = $starSymbol(unpackit).regvaluesh[1];
+	  $starSymbol(buf)[4*i+2] = $starSymbol(unpackit).regvaluesh[2];
+	  $starSymbol(buf)[4*i+3] = $starSymbol(unpackit).regvaluesh[3];
 	}
     }
 
@@ -97,6 +96,7 @@ provisions.
     }
 
     go {
+      addDeclaration("int i;");
       addCode(convert);
       addCode(write);
     }
