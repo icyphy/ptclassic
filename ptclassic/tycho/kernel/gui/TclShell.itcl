@@ -47,7 +47,7 @@
 # editor. The -text option, inherited from the base class, specifies
 # a welcome message. For example,
 # <tcl><pre>
-# ::tycho::view TclShell [list -text "A fresh Tcl Shell\n"]
+# ::tycho::view TclShell -text "A fresh Tcl Shell\n"
 # </pre></tcl>
 # <p>
 #
@@ -489,7 +489,7 @@ body ::tycho::TclShell::deleteRange {first last} {
 #
 body ::tycho::TclShell::displayHistory {} {
     set history [join $commandList "\n"]
-    ::tycho::view EditItcl [list -text $history] ;#" (for highlighting...)
+    ::tycho::view EditItcl -text $history
 }
  
 #########################################################################
