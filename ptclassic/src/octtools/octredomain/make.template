@@ -51,29 +51,28 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
-all::	 makefile octredomain
+BINARY =	masters(BINARY_EXT)
+
+all::	 makefile $(BINARY)
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-loptions$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lst$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
-octredomain:	$(OBJS)
+$(BINARY): $(OBJS)
 	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
-octredomain.debug:	$(OBJS)
-	$(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
-DEST = $(OCTTOOLS)/bin.$(PTARCH)/octredomain
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-$(DEST):	octredomain
-		@echo Installing octredomain
-		rm -f $(DEST)
-		ln octredomain $(DEST)
+$(DEST): $(BINARY)
+		@echo Installing $(BINARY)
+		rm -f $(DEST);  ln $^ $@
 
-install: makefile $(DEST) $(BINDIR)/octredomain
+install: makefile $(DEST) $(BINDIR)/$(BINARY)
 
-$(BINDIR)/octredomain:
-	(cd $(BINDIR); rm -f octredomain; ln -s ../octtools/bin.$(PTARCH)/octredomain .)
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
