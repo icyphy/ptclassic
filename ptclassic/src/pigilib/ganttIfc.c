@@ -47,6 +47,19 @@ galaxy in a universe has depth 3.
 */
 #define MAX_DEPTH 64
 
+/* Gantt chart support, from ~gabriel/src/ggirpc/ganttIfc.c */
+
+static vemSelSet (*sets)[MAX_DEPTH];  /* stores vemSelSets until freed */
+static int *procDepth;  /* number of vemSelSets used for each processor */
+extern octObject lastFacet;  /* root facet for name lookup */
+static RgbValue *procColors;  /* points to array of processor color values */
+static int procN;  /* number of processors in Gantt chart */
+
+/* The next 2 vars store vemSelSets for FindNameSet() */
+static vemSelSet findSets[MAX_DEPTH];
+static int findDepth = 0;
+
+
 /* 
  * Function to detect a name that is extended with a modifier like
  * name.ext1=num.ext2=num.  It returns true if there is at least one
@@ -96,7 +109,7 @@ int buflen;
 Advance s to point after the next '.' character in the string or
 else return NULL if there are no more such characters.
 */
-static
+extern
 char *
 incr(s)
 char *s;
@@ -162,9 +175,14 @@ int usePattern;
     return TRUE;
 }
 
-/* The next 2 vars store vemSelSets for FindNameSet() */
-static vemSelSet findSets[MAX_DEPTH];
-static int findDepth = 0;
+/* extern created to call FrameStar w/o losing static declaration */
+extern boolean
+FrameStarCall(char *name, RgbValue color, int usePattern) {
+
+  return FrameStar(&lastFacet, name, &color, findSets, &findDepth, usePattern);
+
+}
+
 
 /*
 Erases highlighting after a find command (below).
@@ -248,14 +266,6 @@ int pattern;
     if (!name) return;
     FrameStar(facetP, name, &color, findSets, &findDepth, pattern);
 }
-
-/* Gantt chart support, from ~gabriel/src/ggirpc/ganttIfc.c */
-
-static vemSelSet (*sets)[MAX_DEPTH];  /* stores vemSelSets until freed */
-static int *procDepth;  /* number of vemSelSets used for each processor */
-extern octObject lastFacet;  /* root facet for name lookup */
-static RgbValue *procColors;  /* points to array of processor color values */
-static int procN;  /* number of processors in Gantt chart */
 
 /* CreateFrames  2/26/90 7/6/88
 Call this first, before any other Gantt routine.
