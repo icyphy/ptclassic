@@ -67,11 +67,31 @@ class ::tycho::JRPC {
     destructor {}
     
     ###################################################################
+    ####                       public variables                    ####
+
+    # The port number to use
+    public variable portnum 19876
+
+    # Debug flag
+    public variable debug 0
+
+    ###################################################################
     ####                         public methods                    ####
 
     # Send a tcl command to the remote process
     method send {args}
 
+    ###################################################################
+    ####                     protected  methods                    ####
+
+    # Print a debug message
+    protected method debug {msg} {
+        if $debug {
+            puts "DEBUG: $msg"
+            update
+        }
+    }
+    
     ###################################################################
     ####                   private variables                       ####
 
@@ -89,20 +109,28 @@ class ::tycho::JRPC {
 body ::tycho::JRPC::constructor {args} {
     global tycho
 
-    # FIXME: we can only have one Tcl Blend server running on a machine
-    # because we hardwire the port number
-    set port 19876
+    debug "Creating JRPC object with $args"
+    eval configure $args
+
     # FIXME: this will probably only work under Unix right now.
     # FIXME: we need to save the output
-    set _subprocpid [exec jtclsh [file join $tycho kernel JRPCServer.tcl] &]
+    set _subprocpid [exec tyjtclsh \
+            [file join $tycho util devtools JRPCServer.tcl] \
+            $portnum &]
+
+    debug "Created sub-process $_subprocpid"
 
     # FIXME: this is lame too.
+    debug "Falling asleep for five seconds..."
     exec sleep 5
 
-    set _clientSocket [socket localhost 19876]
+    debug "About to get socket at port $portnum"    
+    set _clientSocket [socket localhost $portnum]
+    debug "Got socket $_clientSocket"
     fconfigure $_clientSocket -blocking 0
 
-    .j send set env(TCL_CLASSPATH) $tycho/java
+    debug "Sending \"set env(TCL_CLASSPATH) $tycho/java\""
+    send set env(TCL_CLASSPATH) $tycho/java
 }
 
 #######################################################################
@@ -125,8 +153,10 @@ body ::tycho::JRPC::destructor {} {
 # Run a remote command on channel.  Wait for the results
 #
 body ::tycho::JRPC::send {args} {
-    eval [puts $_clientSocket $args]
+    puts $_clientSocket $args
+    puts $_clientSocket _JRPC_EndCommand_Cookie_
     flush $_clientSocket
+
     # FIXME: this is a busy loop, and it sucks.
     set rl {}
     while {[llength $rl] < 2} {
