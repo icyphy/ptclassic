@@ -56,9 +56,6 @@ public:
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new DDFtoUniversal;}
 
-	// new Geodesic (Node)
-	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
-
 	// Make all galaxies wormholes.
 	// This is removed for now.  It is needed for restructuring,
 	// but restructuring is not working properly, and neither are
