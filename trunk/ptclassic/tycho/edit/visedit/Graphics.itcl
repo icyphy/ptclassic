@@ -478,10 +478,10 @@ body ::tycho::Graphics::constructor {args} {
     menubar disable Redo
 
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preferences
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -canvasheight canvasHeight \
 	    -canvaswidth  canvasWidth \
 	    -canvascolor  canvasColor
