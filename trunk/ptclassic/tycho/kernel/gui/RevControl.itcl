@@ -267,16 +267,17 @@ body ::tycho::RevControl::constructor {args} {
     $itk_component(historyinstruction) configure -readonly 1
     $itk_component(historyinstruction) markUnmodified
     
-
     pack $itk_component(historybutton) $itk_component(historyinstruction) \
             $itk_component(history)
 
     #pack $itk_component(history) -expand yes -fill both
-    ::tycho::Subpanel $itk_component(hull).pan -text "View History" \
-            -childwidget $itk_component(historyframe) \
-            -execute "$this viewHistory"
-    pack $itk_component(hull).pan -anchor nw
-
+    itk_component add historypanel {
+	::tycho::Subpanel $itk_component(hull).pan \
+		-text "View History" \
+		-childwidget $itk_component(historyframe) \
+		-execute "$this viewHistory"
+    } {}
+    pack $itk_component(historypanel) -anchor nw
 
     bind $itk_component(hull) <i> "$this invoke checkin"
     bind $itk_component(hull) <o> "$this invoke checkout"
