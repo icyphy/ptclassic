@@ -100,7 +100,7 @@
 #define DEF_BAR_FLAG		"off"
 #define DEF_BAR_BASE		"0.0"
 #define DEF_BAR_WIDTH		"-1.0"
-#define DEF_LINE_WIDTH		"0"
+#define DEF_LINE_WIDTH		"2"
 #define DEF_GRID_SIZE		"0"
 #define DEF_GRID_STYLE		"10"
 #define DEF_LABEL_FONT		"helvetica-12"
@@ -145,7 +145,7 @@ static char *defStyle[MAXATTR] = {
 
 /* Default color names */
 static char *defColors[MAXATTR] = {
-    "red", "#22a422", "blue", "yellow",
+    "red", "#a4ffa4", "blue", "yellow",
     "cyan", "sienna", "orange", "coral"
 };
 
