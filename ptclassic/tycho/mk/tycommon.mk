@@ -50,7 +50,9 @@
 # JSRCS		.java files
 # JCLASS	.class files
 # OBJS		.o files
-# LIB		The name of the library being created.
+# LIBR		The name of the library being created.  We can't just call
+#		this LIB because of problems with the LIB environment variable
+#		under NT
 # EXP		???
 # MISC_FILES	Non-source files such as README files.
 # OPTIONAL_FILES Files that are derived from other files, but we don't
@@ -202,14 +204,14 @@ tclIndex: $(TCL_SRCS) $(ITCL_SRCS) makefile
 # Rules for compiling
 
 # Rule for installing a C++ library
-$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
+$(LIBDIR)/$(LIBR):	$(LIBR) $(EXP)
 	rm -f $@
-	ln $(LIB) $(LIBDIR)
+	ln $(LIBR) $(LIBDIR)
 
 # Install debug versions, currently we just do a hard link
-$(LIBDIR)/$(LIB_DEBUG):	$(LIBDIR)/$(LIB)
+$(LIBDIR)/$(LIBR_DEBUG):	$(LIBDIR)/$(LIBR)
 	rm -f $@
-	(cd $(LIBDIR); ln $(LIB) $(LIB_DEBUG))
+	(cd $(LIBDIR); ln $(LIBR) $(LIBR_DEBUG))
 
 
 # Rule for compiling C++ files
@@ -483,7 +485,7 @@ htmlchek:
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) \
 		$(OPTIONAL_FILES) $(JSRCS) makefile SCCS \
-		$(JCLASS) $(OBJS) $(LIB) 
+		$(JCLASS) $(OBJS) $(LIBR) 
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
