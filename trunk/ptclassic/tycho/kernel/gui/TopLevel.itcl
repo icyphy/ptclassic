@@ -487,17 +487,19 @@ body ::tycho::TopLevel::centerOnScreen {} {
 # *itk_initialize{} method, and the same methods in ::tycho::TWidget.
 #
 body ::tycho::TopLevel::configure {args} {
-    # If any options are subscribed, unsubscribe them
-    foreach {option _} $args {
-	if [::info exists _subscribedOptions($option)] {
-	    ::tycho::stylesheet unsubscribe $this \
-		    $_subscribedOptions($option) $option
-	    unset _subscribedOptions($option)
-	}
+    # As long as there are two or more args...
+    if { [llength $args] >= 2 } {
+        # If any options are subscribed, unsubscribe them
+        foreach {option _} $args {
+            if [::info exists _subscribedOptions($option)] {
+                ::tycho::stylesheet unsubscribe $this \
+                        $_subscribedOptions($option) $option
+                unset _subscribedOptions($option)
+            }
+        }
+        # Remember the over-ridden options
+        array set _overriddenOptions $args
     }
-    # Remember the over-ridden options
-    array set _overriddenOptions $args
-
     # Configure the options
     eval ::itk::Archetype::configure $args
 }
