@@ -89,6 +89,9 @@ private:
 	// append a value to the result, using Tcl_AppendElement.
 	void addResult(const char*);
 
+	// State functions to remind users of past input vaules
+        int OldRandomSeed;
+
 	// Helper Functions that are not TCL callable directly
 
 	// Sets Bus Parameters in the Oct data base
@@ -131,6 +134,8 @@ public:
 	int ptkSetParams (int argc,char** argv);
 	int ptkGetComment (int argc,char** argv);
 	int ptkSetComment (int argc,char** argv);
+	int ptkGetSeed (int argc,char** argv);
+	int ptkSetSeed (int argc,char** argv);
 	int ptkGetDomainNames (int argc,char** argv);
 	int ptkSetDomain (int argc,char** argv);
 	int ptkGetTargetNames (int argc,char** argv);

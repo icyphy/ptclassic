@@ -66,6 +66,8 @@ char* KcDefTarget();
 /* Declare the functions in kernelCalls used by ptkGetDomainNames */
 int numberOfDomains();
 char* nthDomainName();
+/* Declare the functions in kernelCalls used by ptkSetSeed */
+KcEditSeed();
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -153,6 +155,8 @@ POct::POct(Tcl_Interp* i) : interp(i)
         myInterp = FALSE;
         makeEntry();
 	registerFuncs();
+	// Initialize Seed State
+        OldRandomSeed = 1;
 }
 
 // destructor
@@ -702,6 +706,91 @@ int POct::ptkSetComment (int aC,char** aV) {
 
     return TCL_OK;
 
+}
+
+
+
+
+// ptkGetSeed 
+// returns the Past value of the Random Number Seed
+//
+// Written by Alan Kamas  1/94
+// 
+// FIXME: Ideally, GetSeed and SetSeed should be PTcl funtions
+//        There is already a "seed" command there.
+int POct::ptkGetSeed (int aC,char** aV) {
+
+    StringList buf;
+
+    if (aC != 1) return  
+            usage ("ptkGetSeed");
+    
+    buf = OldRandomSeed;
+
+    Tcl_AppendResult(interp, (char *)buf , (char *) NULL);
+
+    return TCL_OK;
+}
+
+// ptkSetSeed <SeedList> 
+//
+// saves the random number seed into ptolemy.
+// The Seed List is of the form {SeedName SeedValue}
+//   it is the SeedValue that is stored into ptolemy
+// This procedure was written to work with ptkEditValues
+//
+// Written by Alan Kamas  1/94
+//
+int POct::ptkSetSeed (int aC,char** aV) {
+    char* seedList;
+    char* seedString;
+    int seed;
+    int seedC;
+    char **seedV;
+
+    if (aC != 2) return 
+        usage ("ptkSetSeed <SeedList>");
+    seedList = aV[1];
+
+    // Get the Seed String out of the Seed List
+    if (Tcl_SplitList( interp, seedList, &seedC, &seedV ) != TCL_OK){
+        Error::error("Cannot parse comment list: ", seedList);
+        return 0;
+    }
+
+    if (seedC != 2) {
+        Tcl_AppendResult(interp, "Seed list does not have 2 elements.", 
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    seedString = seedV[1];
+
+    // Convert the string into an integer
+    if (Tcl_GetInt (interp, seedString, &seed) != TCL_OK) { 
+        Tcl_AppendResult(interp, "Seed must be an integer", 
+                         (char *) NULL);
+        // Free the memory used by seedV as it is no longer needed
+        free((char *) seedV);
+        return TCL_ERROR;
+    }
+
+    // Free the memory used by seedV as it is no longer needed
+    free((char *) seedV);
+
+    if (seed <= 0) {
+        Tcl_AppendResult(interp, "Seed must be greater than zero", 
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    KcEditSeed(seed);
+
+    // Set the value of the seed to be used again
+    OldRandomSeed = seed;
+    
+    return TCL_OK;
+KcEditSeed();
 }
 
 // ptkGetDomainNames <facet-id>
@@ -1320,6 +1409,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkSetParams),
 	ENTRY(ptkGetComment),
 	ENTRY(ptkSetComment),
+	ENTRY(ptkGetSeed),
+	ENTRY(ptkSetSeed),
 	ENTRY(ptkGetDomainNames),
 	ENTRY(ptkSetDomain),
 	ENTRY(ptkGetTargetNames),
