@@ -61,9 +61,6 @@ class ::tycho::Picture {
     # The "shape" of pictures of this class -- rectangle by default
     common shape "rectangle"
 
-    # The list of valid components
-    common components {}
-    
     ###################################################################
     ####                       class initialization                ####
 
