@@ -155,7 +155,7 @@ body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
 
-    menubar insertMenuItem "Run Make" "Evaluate" File -underline 4 \
+    menubar insertMenuItem "Compile" "Evaluate" File -underline 2 \
             -command "$this execProcess make 0"
     
     # Add to the format menu commands to comment and uncomment
