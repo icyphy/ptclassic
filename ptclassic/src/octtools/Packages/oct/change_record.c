@@ -28,7 +28,11 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "geo.h"
+#include "attach.h"
 #include "io.h"
+#include "oct_utils.h"
+
+#include "change_record.h"
 
 extern octStatus oct_illegal_op();
 extern struct object_desc oct_geo_points_desc;
@@ -38,6 +42,7 @@ static octStatus change_record_free(), change_record_delete();
 static octStatus change_record_gen_contents(), change_record_gen_first_content();
 static struct object_desc *super = &oct_geo_points_desc;
 
+void
 oct_change_record_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -62,6 +67,7 @@ struct object_desc *object_desc;
  * Does this operation on this object have a change list registered 
  * for it?
  */
+int
 oct_must_record(obj, operation)
 generic *obj;
 int operation;
@@ -129,7 +135,7 @@ oct_make_change_record_marker(clid)
 octId clid;
 {
 	octObject cl;
-	octObject facet,obj,rec;
+	octObject obj,rec;
 	generic *ptr,*gnew;
 	struct chain *my_chain;
 	struct change_record *new;
@@ -142,18 +148,18 @@ octId clid;
 	{
 		/* obviously, there's no changeList anymore, for some reason,
 		   and the best action is no action! */
-		return;
+		return OCT_OK;
 	}
 
 	/* get the internal changelist structure */
 	ptr = oct_id_to_ptr(cl.objectId);
 	my_chain = ptr->contents;
 	if( !my_chain )
-		return; /* no real need for a trailing mark (inverted list-wise)*/
+		return OCT_OK; /* no real need for a trailing mark (inverted list-wise)*/
 	oct_fill_object(&obj,my_chain->next->object);
 
 	if( obj.contents.changeRecord.changeType == OCT_MARKER )
-		return; /* Never two in a row */
+		return OCT_OK; /* Never two in a row */
 
 	/* build the object. Make sure the fields get inititialized right. */
 	desc = ptr->facet;
@@ -163,7 +169,7 @@ octId clid;
 	rec.contents.changeRecord.contentsExternalId = 0;
 	retval = (*super->create_func)(desc,&rec,&gnew);
 	if( retval < OCT_OK )
-		return;
+		return retval;
 	new = (struct change_record *)gnew;
 	new->old_value = 0;
 	new->num_points = 0;
@@ -262,6 +268,7 @@ octObject *copy;
     return OCT_OK;
 }
 
+octStatus
 oct_do_record_delete(rec)
 struct change_record *rec;
 {
