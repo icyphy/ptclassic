@@ -135,6 +135,8 @@ AcyLoopScheduler :: AcyLoopScheduler(const char* log) : logFile(log)
     nodelist = 0;
     RPMCTopSort = 0;
     APGANTopSort = 0;
+    // flag to indicate whether schedule was successfully computed.
+    schedSuccess = 0;
 }
 
 // Destroy a bunch of matrices and arrays used by the scheduler
@@ -591,7 +593,12 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     if (logstrm) logstrm->flush();
 
     delete logstrm;
-    // FIXME: Should we check something here before returning?
+    // Temporary hack to let other methods know that schedule was
+    // successfully computed.  This info. is needed under the present
+    // architecture by the displaySchedule routine since that can be
+    // called even though a schedule wasn't computed.
+    schedSuccess = 1;
+
     return TRUE;
 }
 
@@ -1578,7 +1585,11 @@ StringList AcyLoopScheduler::displaySchedule()
     StringList out;
     out << "{\n";
     out << "{ scheduler \"Murthy and Bhattacharyya's SDF Loop scheduler\" }\n";
-    out << dispNestedSchedules(0,0,graphSize-1,1);
+    if (schedSuccess) {
+	out << dispNestedSchedules(0,0,graphSize-1,1);
+    } else {
+	out << "Error: schedule hasn't been computed.\n";
+    }
     out << "}\n";
     return out;
 }
