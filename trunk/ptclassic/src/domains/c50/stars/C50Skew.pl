@@ -83,13 +83,13 @@ and when underflow occurs, \fIunderVal\fP is output.
 		if (temp >= 0){
 			iunderflw = int(32768*temp + 0.5);
 		} else {
-			iunderflw = int(32768*(1-temp) + 0.5);
+			iunderflw = int(32768*(2+temp) + 0.5);
 		}
 		temp = overflowVal.asDouble();
 		if (temp >= 0){
 			ioverflw = int(32768*temp + 0.5 );
 		} else {
-			iunderflw = int(32768*(1-temp) + 0.5 );
+			iunderflw = int(32768*(2+temp) + 0.5 );
 		}
 	}
  
