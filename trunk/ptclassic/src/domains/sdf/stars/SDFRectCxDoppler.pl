@@ -103,7 +103,7 @@ simulations.
 		type { int }
 		default { 0 }
 		desc { Internal state }
-		attributes { A_SETTABLE|A_NONCONSTANT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	hinclude { <math.h> }
 	constructor {
