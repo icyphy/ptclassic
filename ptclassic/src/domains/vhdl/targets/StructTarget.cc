@@ -679,6 +679,25 @@ void StructTarget :: registerSource(StringList /*type*/) {
 // Connect a multiplexor between the given input and output signals.
 void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
 				     StringList initVal, StringList /*type*/) {
+  // Add the clock to the list of clocks to be triggered.
+  const char* clock = "control";
+  if (clockList.tail()) {
+    if (strcmp(clockList.tail(),clock)) {
+      clockList << clock;
+      ctlerAction << "     -- Assert " << clock << "\n";
+      ctlerAction << "wait until "
+		  << "system_clock'event and system_clock = TRUE;\n";
+      ctlerAction << clock << " <= TRUE;\n";
+    }
+  }
+  else {
+    clockList << clock;
+    ctlerAction << "     -- Assert " << clock << "\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clock << " <= TRUE;\n";
+  }
+
   registerMultiplexor("INTEGER");
   StringList label = outName;
   label << "_MUX";
