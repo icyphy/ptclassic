@@ -47,9 +47,7 @@ PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
 
 # Variable for the Ariel DSP56000 board
-# Commented out temporarily until we get gcc-2.6.2 sorted out
-#S56DIR =	$(ROOT)/vendors/s56dsp
-S56DIR =
+S56DIR =	$(ROOT)/vendors/s56dsp
 
 # Variables for local Matlab installation
 # -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
