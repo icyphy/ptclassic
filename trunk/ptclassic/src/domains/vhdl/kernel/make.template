@@ -61,6 +61,7 @@ HDRS= \
 	VHDLArc.h \
 	VHDLCluster.h \
 	VHDLCompDecl.h \
+	VHDLDependency.h \
 	VHDLFiring.h \
 	VHDLForkNode.h \
 	VHDLGeneric.h \
