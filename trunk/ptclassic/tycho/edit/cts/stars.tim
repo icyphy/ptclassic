@@ -6,6 +6,7 @@
 
 group source -label {Source Stars} {
     star ramp \
+            -class {Ramp} \
             -label {Ramp} \
             -icon {edit/cts/icons.tim#source.ramp} {
         attribute InitValue -default 0.0 -type number -label step
@@ -40,7 +41,7 @@ group source -label {Source Stars} {
 }
 
 group sink -label {Sink Stars} {
-    star plot \
+    star plotter \
             -class {Plot} \
             -label {Plotter} \
             -icon {edit/cts/icons.tim#sink.plotter} {
@@ -65,7 +66,7 @@ group arithmetic -label {Basic Arithmetic} {
     star add \
             -class {Add} \
             -label Add_2 \
-            -icon {edit/graphedit/icons.tim#arithmetic.add} {
+            -icon {edit/cts/icons.tim#arithmetic.add} {
         port input -composite 1
         port output -composite 0
     }
