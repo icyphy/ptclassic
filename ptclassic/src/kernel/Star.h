@@ -46,19 +46,6 @@ public:
 	// Perform functions at wrapup, such as collecting stats
         virtual void wrapup() {};
 
-// The following methods are provided by the system and accessed
-// by the Scheduler
-
-	// Methods called by the Scheduler before go() and
-	//  after go(); they call methods of the same name for each
-	//  input or output PortHole
-	// They can be used to do things like get Particles from
-	//  input Geodesics, put Particles onto output Geodesics, etc.
-	// In general behavior can be different for different types
-	//  of PortHoles
-	void beforeGo();
-	void afterGo();
-
 	// Method to print out description
 	operator StringList ();
 };
@@ -82,6 +69,19 @@ public:
 	// many times it has scheduled a star.  This is a convenient
 	// place to do that.
 	unsigned noTimes;
+
+// The following methods are provided by the system and accessed
+// by the Scheduler
+
+	// Methods called by the Scheduler before go() and
+	//  after go(); they call methods of the same name for each
+	//  input or output PortHole
+	// They can be used to do things like get Particles from
+	//  input Geodesics, put Particles onto output Geodesics, etc.
+	// In general behavior can be different for different types
+	//  of PortHoles
+	void beforeGo();
+	void afterGo();
 
 	// Redefine method setting internal data in the Block
 	// so that various SDF-specific initilizations can be performed.
