@@ -108,10 +108,10 @@ public:
 	// wormhole ports.
 	// When nChildrenAlloc = 1, we call the corresponding
 	// methods of the child target.
-	void wormInputCode();
-	void wormInputCode(PortHole&);
-	void wormOutputCode();
-	void wormOutputCode(PortHole&);
+	/*virtual*/ void allWormInputCode();
+	/*virtual*/ void wormInputCode(PortHole&);
+	/*virtual*/ void allWormOutputCode();
+	/*virtual*/ void wormOutputCode(PortHole&);
 
 	// redefine the execution time of a star
 	/* virtual */ int execTime(DataFlowStar*, CGTarget*);

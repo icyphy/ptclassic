@@ -375,10 +375,10 @@ int CGMultiTarget :: run() {
 }
 
 int CGMultiTarget :: allSendWormData() {
-	if (nChildrenAlloc == 1) {
+/*	if (nChildrenAlloc == 1) {
 		CGTarget* t = (CGTarget*) child(0);
-		return t->allReceiveWormData();
-	}
+		return t->allSendWormData();
+	} */
 
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
@@ -401,10 +401,10 @@ int CGMultiTarget :: allSendWormData() {
 }
 
 int CGMultiTarget :: allReceiveWormData() {
-	if (nChildrenAlloc == 1) {
+/*	if (nChildrenAlloc == 1) {
 		CGTarget* t = (CGTarget*) child(0);
 		return t->allReceiveWormData();
-	}
+	} */
 
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
@@ -444,9 +444,10 @@ void CGMultiTarget :: generateCode() {
 
 	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
         beginIteration(iterations,0);
+// THIS IS NOT CORRECT FIXME!!!  compileRun needs to be called before wormInputCode
 	if (inWormHole()) {
-		wormInputCode();
-		wormOutputCode();	// note the change of calling order.
+		allWormInputCode();
+		allWormOutputCode();	// note the change of calling order.
 	}
 	scheduler()->compileRun();
         endIteration(iterations,0);
@@ -456,7 +457,7 @@ void CGMultiTarget :: generateCode() {
 // Since more than one ParNodes are correspond to one star in a subGal,
 // we are careful in searching the stars at the wormhole boundary!
 
-void CGMultiTarget :: wormInputCode() {
+void CGMultiTarget :: allWormInputCode() {
 	LOG_NEW; int* iprocs = new int[nChildrenAlloc];
 	for (int i = 0; i < nChildrenAlloc; i++)
 		iprocs[i] = 0;
@@ -484,7 +485,7 @@ void CGMultiTarget :: wormInputCode() {
 	LOG_DEL; delete [] iprocs;
 }
 
-void CGMultiTarget :: wormOutputCode() {
+void CGMultiTarget :: allWormOutputCode() {
 	LOG_NEW; int* iprocs = new int[nChildrenAlloc];
 	for (int i = 0; i < nChildrenAlloc; i++)
 		iprocs[i] = 0;
