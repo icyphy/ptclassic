@@ -38,7 +38,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ACSTarget::ACSTarget(const char* name,const char* starclass, const char* desc,
         const char* assocDomain) :
-    HLLTarget(name,starclass,desc,assocDomain) {}
+    HLLTarget(name,starclass,desc,assocDomain) {
+
+	addState(coreCategory.setState("Core Category", this, "FPSim", "Sets the core category."));
+
+    }
 
 ACSTarget :: ~ACSTarget() {}
 

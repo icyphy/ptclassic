@@ -46,7 +46,7 @@ class ACSCore : public ACSStar {
 public:
 
         // constructor takes a reference to a Corona
-        ACSCore(ACSCorona &, const char*);
+        // ACSCore(ACSCorona &, const char*);
 
 	// constructor without Corona reference for use by
 	// derrived core class default constructors.
@@ -74,6 +74,7 @@ public:
 	// the cast to ACSStar& ( addState actually
 	// defined in Block.h ).
 	inline void addState(State& s) {
+		ACSCorona& corona = getCorona();
 		((ACSStar&)corona).addState(s);
 		ACSStar::addState(s);
 	}
@@ -81,16 +82,13 @@ public:
 protected:
 
 	// returns reference to the core's corona
-	inline ACSCorona & getCorona() const { return corona; };
+	virtual ACSCorona & getCorona() const = 0;
 
 	// category string determines core base class, implementation, etc..
 	const char *category;
 
-
-private:
-
 	// Corona interfaces core to galaxy, contains ports, parameters.
-       	ACSCorona & corona;
+       	// ACSCorona & corona;
 
 };
 #endif //_ACSCore_h

@@ -37,8 +37,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSCore.h"
 
 // constructor takes a reference to a Corona
-ACSCore::ACSCore(ACSCorona & corona_, const char* category_) : corona(corona_) { category = category_;
- }
+// ACSCore::ACSCore(ACSCorona & corona_, const char* category_) : { category = // category_;
+// }
 
 // category only constructor is used for base core class.
 ACSCore::ACSCore(const char* category_) {
