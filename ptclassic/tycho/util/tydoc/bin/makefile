@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1998 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -59,11 +59,9 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
-
-# Make the shell script/s executable
-sources::
+all:  sources $(MISC_SRCS) tclIndex
 	chmod a+x tydoc
+install: all
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
