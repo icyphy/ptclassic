@@ -8,7 +8,8 @@ Chirp generator that plays on the workstation speaker.
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
-.Id "chrip generator"
+.Id "chirp generator"
+.Ir "chirp signal"
 .Ir "audio, Sparcstation"
 .Ir "Sparcstation audio"
 This universe generates a chirp (a sinusoid with slowly increasing
