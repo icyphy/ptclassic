@@ -76,7 +76,7 @@ int S56XTarget :: compileCode() {
 }
 
 void S56XTarget :: writeCode(const char* name) {
-	if (name==NULL) {
+	if (name!=NULL) {
 		LOG_DEL; delete uname;
 		uname = savestring(name);
 	}
