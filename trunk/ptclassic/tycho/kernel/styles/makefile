@@ -44,6 +44,7 @@ TCL_SRCS =
 ITCL_SRCS =
 
 EXTRA_SRCS = \
+	console.style \
 	colors.style \
 	fonts.style \
 	interaction.style \
