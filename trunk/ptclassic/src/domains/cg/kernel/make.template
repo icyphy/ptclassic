@@ -41,6 +41,7 @@ CGConnect.h \
 CGDisplay.h \
 CGGeodesic.h \
 CGStar.h \
+CGSymbol.h \
 CGTarget.h \
 CGWormhole.h \
 IntArray.h \
