@@ -48,19 +48,21 @@ SYSLIBS =	-lm /usr/lib/end.o
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
-# The SunOS4.1.3 ld man page says:
-# pigiRpc images produced with the -x ld flag will segv upon startup
-# pigiRpc images produced with '-qoption ld -S' are still 69Mb
-#
 #      +A   Cause the linker ld(1) to use only archive libraries for all
 #           occurrences of the -l option.  Also inform the C++ runtime
 #           environment that no shared libraries will be used by the program.
+# Note that the +A option seems to cause warnings about:
+# c++patch: could not find __head symbol. Did you link in libcxx.a?
+# We use the +A flag to produce statically linked binaries so that we can
+# more easily distribute the binaries.  If you don't need statically linked
+# binaries, then don't use +A.  (The chatr command will tell you about
+# whether a binary is dynamically or statically linked)
 
 # link flags
-LINKFLAGS =	+A -L$(LIBDIR)
+LINKFLAGS =	-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
-LINKFLAGS_D =	+A -L$(LIBDIR)
+LINKFLAGS_D =	-L$(LIBDIR)
 
 #
 # Directories to use
