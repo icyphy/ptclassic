@@ -36,11 +36,11 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT =		../../../..
+ROOT =		../../..
 # Path (absolute or relative) to the object directory root
-OBJDIR =	../../../..
+OBJDIR =	../../..
 # True source directory
-VPATH =		$(ROOT)/tycho/editors/slate/doc
+VPATH =		$(ROOT)/tycho/slate/doc
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
@@ -50,15 +50,14 @@ EXTRA_SRCS = \
 	tute.html \
 	tute-pictures.html \
 	tute-shapes.html \
-	tute-interactors.html
+	tute-interactors.html \
+	tute-behavior.html \
+	tute-constraints.html
 
 MISC_FILES =
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
-
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
