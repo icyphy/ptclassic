@@ -69,8 +69,10 @@ body ::tycho::AudioIO::constructor {args} {
     itk_component add select {
         frame $itk_interior.select
     } {}
-    pack $itk_component(select) -side left -anchor nw
-    
+    # FIXME: For now, these are not packed because the
+    # Tycho-CGC interface does not yet support controls
+    # other than simple scales.
+    # pack $itk_component(select) -side left -anchor nw
     
     itk_component add source {
         label $itk_component(select).source \
