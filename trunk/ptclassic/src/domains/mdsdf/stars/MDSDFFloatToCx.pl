@@ -46,7 +46,7 @@ I.e. ComplexMatrix.entry(i) = FloatMatrix.entry(i).
     // do conversion using copy constructor
     for(int row = 0; row < int(numRows); row++)
       for(int col = 0; col < int(numCols); col++)
-        (*result)[row][col] = Complex((*data)[row][col]);
+        (*result)[row][col] = (Complex)((*data)[row][col]);
  
     // delete i/o access structures
     delete data;
