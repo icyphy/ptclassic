@@ -148,7 +148,7 @@ The initial guess at the angle being estimated in radians.
 	move	$ref(error),x1			; e[n - @index] error value
 	mpyr	x1,y0,a		$ref(input,@index),x0	; x0 = x[n-@index] input value
 	move	a,y0			; x0 = tap value to update
-	mpyr	-y0,x0,a	y:$addr(taps)+1,b	; a = -mu e[n-@index] x[n-@index]
+	mpyr	-y0,x0,a	$ref(taps)+1,b	; a = -mu e[n-@index] x[n-@index]
 	asl	a			; a = -2 mu e[n-@index] x[n-@index]
 	addl	b,a			; a = tap - 4 mu e[n-@index] x[n-@index]
 	move	a,y:$addr(taps)+1		; save updated tap
@@ -161,8 +161,8 @@ The initial guess at the angle being estimated in radians.
 
 		// 1. Since we don't support decimation,
 		//    index = int(errorDelay) + 1, a constant
-		int index = int(errorDelay)*int(decimation) + 
-			    int(decimationPhase) + 1;
+		int index = int(errorDelay)*int(decimation) +
+			    int(decimationPhase);
 
 		// 2. Update the middle tap and compute the estimate
 		//    of cos(w) = -tap/2
