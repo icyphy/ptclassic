@@ -49,7 +49,7 @@ class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
 	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), bufName(0),
-			hasStaticBuf(1), myType(NA), converted(-1) {}
+			hasStaticBuf(1), myType(NA), converted(0) {}
 	~CGCPortHole();
 
 	void initialize();
