@@ -27,6 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* kernelCalls.h  edg
 Version identification:
 $Id$
@@ -38,9 +39,9 @@ This is a C include file, and NOT a C++ include file.
  * first so sys/types.h is included correctly.  See octtools/include/port.h
  */
 #include "sol2compat.h"
+#include "compat.h"
 
 #include "paramStructs.h"
-#include "mkIcon.h"
 
 extern boolean KcInitLog ARGS((const char* file));
 extern void KcLog ARGS((const char* str));
@@ -63,19 +64,24 @@ extern boolean KcDisplaySchedule();
 extern void KcEditSeed ARGS((int n));
 extern boolean KcIsKnown ARGS((const char* className));
 extern boolean KcIsCompiledInStar ARGS((const char* className));
-extern boolean KcGetTerms ARGS((const char* name, TermList* terms));
+extern boolean KcCheckTerms ARGS((const char* name, char** newNames,
+				  const char** newTypes, int* newIsOut,
+				  int* numOrdPortsPtr, int* newNameCountPtr));
 extern boolean KcIsMulti ARGS((char* blockname, char* portname));
 extern boolean KcGetParams ARGS((char* name, ParamListType* pListPtr));
 extern boolean KcGetTargetParams ARGS((char* name, ParamListType* pListPtr));
 extern boolean KcModTargetParams ARGS((ParamListType* pListPtr));
 extern boolean KcInfo ARGS((const char* name, char** info));
+extern void KcPrintTerms ARGS((const char* name));
 extern int KcProfile ARGS((const char* name));
 extern boolean KcNumPorts ARGS((char* starname, char* portname, int numP));
 extern int numberOfDomains();
 extern const char* nthDomainName ARGS((int n));
 extern int KcNode ARGS((const char* name));
-extern int KcNodeConnect ARGS((const char* inst, const char* term, const char* node));
-extern int KcDomainTargets ARGS((const char* domain, const char** names, int nMax));
+extern int KcNodeConnect ARGS((const char* inst, const char* term,
+			       const char* node));
+extern int KcDomainTargets ARGS((const char* domain, const char** names,
+				 int nMax));
 extern int KcSetTarget ARGS((const char* targetName));
 extern const char* KcDefTarget ARGS((const char* domain));
 extern void TildeExpand ARGS((const char *input, char* buffer));
