@@ -1431,6 +1431,7 @@ FILE *stream;
 	    }
 	    return (size * count - len) / size;
 	}
+ 	ptr += num_read;
 	len -= num_read;
     } while (len);
 
