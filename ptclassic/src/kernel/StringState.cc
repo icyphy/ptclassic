@@ -50,6 +50,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "Tokenizer.h"
 
+#define ASCII_CONTROL_B_CHAR 2
+
 /*************************************************************************
 
 	class StringState methods
@@ -74,11 +76,15 @@ void StringState :: initialize() {
 	// Parse the initial string
 	// -- Substitute parameters that fall in between curly braces {}
 	// -- Zero out the white space characters so string info is unaltered
+	// -- Do not treat double quotes as the quotation character:
+	//    we reset the quotation character to be an unprintable character
 	const char* specialChars = "!{}";
 	const char* whiteSpace = "";
 	Tokenizer lexer(initString, specialChars, whiteSpace);
+	char unprintableChar = ASCII_CONTROL_B_CHAR;
 	StringList parsedString;
 	int saveString = FALSE;
+	lexer.setQuoteChar(unprintableChar);
 	while (TRUE) {
         	ParseToken t = getParseToken(lexer, T_STRING);
 		if (t.tok == T_EOF || t.tok == T_ERROR) break;
