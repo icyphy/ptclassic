@@ -49,7 +49,8 @@ include $(CONFIG)
 TCL_SRCS = \
 	Color.tcl \
 	Lib.tcl \
-	Options.tcl
+	Options.tcl \
+	tychoMakeIndex.tcl
   
 ITCL_SRCS = \
 	CircularList.itcl \
@@ -68,6 +69,8 @@ ITCL_SRCS = \
 	Graphics.itcl \
 	HTML.itcl \
 	HTMLText.itcl \
+	IndexBrowser.itcl \
+	ListBrowser.itcl \
 	Message.itcl \
 	Preferences.itcl \
 	RevControl.itcl \
