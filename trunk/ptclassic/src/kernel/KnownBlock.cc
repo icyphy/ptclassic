@@ -136,9 +136,18 @@ inline int KnownBlock::domainIndex (Block& block) {
 
 // Add a block to the appropriate known list
 
-void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
+static const char dynLinkedStar[] = "dynamically linked star";
+
+void KnownBlock::addEntry (Block& block, const char* name, int onHeap,
+			   const char* definitionSource) {
 	// set my name
 	block.setBlock (name, NULL);
+
+	// For a star definition, check to see if it's coming from
+	// dynamically linked code.  We do NOT use Linker::isActive()
+	// because it lies about permlinks.
+	if (definitionSource == NULL && Linker::doingDynLink())
+		definitionSource = dynLinkedStar;
 
 	// get domain index.  If undefined use lastDomain
 	int idx = domainIndex (block);
@@ -146,22 +155,48 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 	// see if defined; if so, replace
 	KnownListEntry* kb = findEntry (block.name(), allBlocks[idx]);
 	if (kb) {
-		// delete the block if it was on the heap
+		// Issue a warning message if it seems appropriate
+		const char* oldDef = kb->definitionSource;
+		if (oldDef == NULL && definitionSource == NULL) {
+		  StringList msg = "Multiple built-in definitions for block named '";
+		  msg << name << "' in domain '" << domainNames[idx] << "'";
+		  Error::warn (msg);
+		  // note: above message appears on stderr during startup
+		}
+		else if (oldDef == NULL) {
+		  StringList msg = "Built-in star named '";
+		  msg << name << "' in domain '" << domainNames[idx] << "'";
+		  msg << " is being overridden by " << definitionSource;
+		  Error::warn (msg);
+		}
+		// needn't use strcmp since variable strings will be hashed
+		else if (oldDef != definitionSource) {
+		  StringList msg = "Star/galaxy named '";
+		  msg << name << "' in domain '" << domainNames[idx] << "'";
+		  msg << " was defined by " << oldDef;
+		  msg << " but is being overridden by ";
+		  msg << (definitionSource ? definitionSource : "built-in star");
+		  Error::warn (msg);
+		}
+		// Delete the old block if it was on the heap
 		if (kb->onHeap) { LOG_DEL; delete kb->b;}
+		// and install the new data
 		kb->b = &block;
-		kb->onHeap = isOnHeap;
+		kb->onHeap = onHeap;
 		kb->dynLinked = Linker::isActive();
+		kb->definitionSource = definitionSource;
 	}
 
 	// otherwise create a new entry
 	else {
 		LOG_NEW; KnownListEntry* nkb =
-			new KnownListEntry(&block,isOnHeap,allBlocks[idx]);
+			new KnownListEntry(&block,onHeap,definitionSource,
+					   allBlocks[idx]);
 		allBlocks[idx] = nkb;
 	}
 }
 
-// Find a known list entry
+// Find a known list entry within a single search chain
 KnownListEntry*
 KnownBlock::findEntry (const char* name, KnownListEntry* l) {
 	while (l) {
@@ -172,28 +207,35 @@ KnownBlock::findEntry (const char* name, KnownListEntry* l) {
 	return l;
 }
 
-const Block*
-KnownBlock::find(const char* type, const char* dom) {
+// Find a known list entry among all blocks valid for named domain
+KnownListEntry*
+KnownBlock::findEntry (const char* name, const char* dom) {
 	int domidx = domainIndex(dom);
-// if no such domain, return 0.
+	// if no such domain, return 0.
 	if (domidx < 0) return 0;
 	// search the list for this domain
-	KnownListEntry* e = findEntry (type, allBlocks[domidx]);
-	if (!e) {
-		// try the lists for any subdomains
-		Domain* dp = Domain::named(domainNames[domidx]);
-		StringListIter next(dp->subDomains);
-		const char* sub;
-		while ((sub = next++) != 0) {
-			int ix = domainIndex(sub);
-			KnownListEntry* en = findEntry(type, allBlocks[ix]);
-			if (en) return en->b;
-		}
+	KnownListEntry* e = findEntry (name, allBlocks[domidx]);
+	if (e) return e;
+	// try the lists for any subdomains
+	Domain* dp = Domain::named(domainNames[domidx]);
+	StringListIter next(dp->subDomains);
+	const char* sub;
+	while ((sub = next++) != 0) {
+	  int ix = domainIndex(sub);
+	  e = findEntry(name, allBlocks[ix]);
+	  if (e) return e;
 	}
+	return 0;
+}
+
+const Block*
+KnownBlock::find(const char* type, const char* dom) {
+	KnownListEntry* e = findEntry (type, dom);
 	return e ? e->b : (Block*)NULL;
 }
 
 // return TRUE if indicated name refers to a dynamically linked block.
+// note we do NOT consider blocks in subdomains.
 int
 KnownBlock::isDynamic(const char* type, const char* dom) {
 	int domidx = domainIndex(dom);
@@ -205,13 +247,24 @@ KnownBlock::isDynamic(const char* type, const char* dom) {
 
 // The main cloner.  This method gives us a new block of the named
 // type, by asking the matching block on the list to clone itself.
+// Guard against infinite recursion due to circular galaxy definitions.
 
 Block*
 KnownBlock::clone(const char* type, const char* dom) {
 	if (numDomains == 0) bombNoDomains();
-	const Block* p = find(type,dom);
-	if (p) return p->clone();
-	noMatch(type,dom);
+	KnownListEntry* e = findEntry (type, dom);
+	if (e) {
+		if (e->cloneInProgress)
+			recursiveClone(type,dom);
+		else {
+			e->cloneInProgress = 1;
+			Block* p = e->b->clone();
+			e->cloneInProgress = 0;
+			return p;
+		}
+	}
+	else
+		noMatch(type,dom);
 	return 0;
 }
 
@@ -227,12 +280,30 @@ void KnownBlock::noMatch(const char* type,const char* dom) {
 	}
 }
 
+void KnownBlock::recursiveClone(const char* type,const char* dom) {
+	StringList msg = "Recursive definition of star/galaxy named '";
+	msg << type << "' in domain '" << dom << "'";
+	Error::abortRun (msg);
+}
+
+// Like clone except states are not duplicated, we just get default values
+
 Block*
 KnownBlock::makeNew(const char* type, const char* dom) {
 	if (numDomains == 0) bombNoDomains();
-	const Block* p = find(type,dom);
-	if (p) return p->makeNew();
-	noMatch(type,dom);
+	KnownListEntry* e = findEntry (type, dom);
+	if (e) {
+		if (e->cloneInProgress)
+			recursiveClone(type,dom);
+		else {
+			e->cloneInProgress = 1;
+			Block* p = e->b->makeNew();
+			e->cloneInProgress = 0;
+			return p;
+		}
+	}
+	else
+		noMatch(type,dom);
 	return 0;
 }
 
