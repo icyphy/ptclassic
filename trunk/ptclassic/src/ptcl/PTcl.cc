@@ -27,6 +27,8 @@ static const char file_id[] = "PTcl.cc";
 #include <ACG.h>
 #include "Linker.h"
 #include "textAnimate.h"
+#include "SimControl.h"
+#include "ConstIters.h"
 
 // we want to be able to map Tcl_interp pointers to PTcl objects.
 // this is done with a mapping table.
@@ -125,6 +127,11 @@ int PTcl::result(StringList& value) {
 	return TCL_OK;
 }
 
+void PTcl::addResult(const char* value) {
+	// cast-away-const needed to interface with Tcl.
+	Tcl_AppendElement(interp,(char*)value,0);
+}
+
 const Block* PTcl::getBlock(const char* name) {
 // if name is blank or "this", return current galaxy.  "target"
 // matches current target.  Otherwise, first search top-blocks,
@@ -151,14 +158,14 @@ int PTcl::descriptor(int argc,char** argv) {
 	if (argc > 2) return usage("descriptor [<block-or-classname]");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
-	return staticResult(b->readDescriptor());
+	return staticResult(b->descriptor());
 }
 
-int PTcl::printVerbose(int argc,char** argv) {
-	if (argc > 2) return usage("printVerbose [<block-or-classname>]");
+int PTcl::print(int argc,char** argv) {
+	if (argc > 2) return usage("print [<block-or-classname>]");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
-	return result(b->printVerbose());
+	return result(b->print(0));
 }
 
 // star: create a new instance of star within galaxy
@@ -284,7 +291,7 @@ int PTcl::statevalue(int argc,char ** argv) {
 	}
 	// return initial value if asked.
 	if (argc == 4 && argv[3][0] == 'i')
-		return staticResult(s->getInitValue());
+		return staticResult(s->initValue());
 	else
 		return result(s->currentValue());
 }
@@ -313,12 +320,13 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	return TCL_OK;
 }
 
-int PTcl::schedule(int argc,char ** argv) {
+int PTcl::schedule(int argc,char **) {
 	if (argc > 1)
 		return usage("schedule");
 	// should arrange so that previously computed schedule can
 	// be returned
-	if (!universe->initSched()) {
+	universe->initTarget();
+	if (SimControl::haltRequested()) {
 		Tcl_SetResult(interp, "Error setting up the schedule.", 
 			      TCL_STATIC);
 		return TCL_ERROR;
@@ -330,7 +338,8 @@ int PTcl::run(int argc,char ** argv) {
 	if (argc > 2)
 		return usage("run <stoptime>");
 
-	if (!universe->initSched()) {
+	universe->initTarget();
+	if (SimControl::haltRequested()) {
 		Tcl_SetResult(interp, "Error setting up the schedule.", 
 			      TCL_STATIC);
 		return TCL_ERROR;
@@ -348,22 +357,23 @@ int PTcl::cont(int argc,char ** argv) {
 	stopTime += lastTime;
 	universe->setStopTime(stopTime);
 	universe->run();
-	return TCL_OK;
+	return SimControl::haltRequested() ? TCL_ERROR : TCL_OK;
 }
 
-int PTcl::wrapup(int argc,char ** argv) {
+int PTcl::wrapup(int argc,char **) {
 	if (argc > 1)
 		return usage("wrapup");
-	universe->endSimulation();
-	return TCL_OK;
+	universe->wrapup();
+	return SimControl::haltRequested() ? TCL_ERROR : TCL_OK;
 }
 
 // domains: list domains
-int PTcl::domains(int argc,char ** argv) {
-	int n = Domain::numberOfDomains();
+int PTcl::domains(int argc,char **) {
+	if (argc > 1)
+		return usage("domains");
+	int n = Domain::number();
 	for (int i = 0; i < n; i++) {
-		// cast needed because of lack of "const" in tcl.h
-		Tcl_AppendElement(interp,(char*)Domain::nthDomainName(i),0);
+		addResult(Domain::nthName(i));
 	}
 	return TCL_OK;
 }
@@ -406,23 +416,25 @@ int PTcl::knownlist (int argc,char** argv) {
 	KnownBlockIter nextB(argv[1]);
 	const Block* b;
 	while ((b = nextB++) != 0)
-		// cast needed because no const in tcl.h
-		Tcl_AppendElement(interp,(char*)b->readName(),0);
+		addResult(b->name());
 	return TCL_OK;
 }
 
 int PTcl::topblocks (int argc,char ** argv) {
-	if (argc > 1)
-		return usage ("topblocks");
-	GalTopBlockIter nextb(*currentGalaxy);
-	Block* b;
-	while ((b = nextb++) != 0)
-		// cast needed because no const in tcl.h
-		Tcl_AppendElement(interp,(char*)b->readName(),0);
+	if (argc > 2)
+		return usage ("topblocks [<block-or-classname>]");
+	const Block* b = getBlock(argv[1]);
+	if (!b->isItAtomic()) {
+		CGalTopBlockIter nextb(b->asGalaxy());
+		const Block* b;
+		while ((b = nextb++) != 0)
+			addResult(b->name());
+	}
+	// empty value returned for atomic blocks
 	return TCL_OK;
 }
 
-int PTcl::reset(int argc,char** argv) {
+int PTcl::reset(int argc,char**) {
 	if (argc > 1)
 		return usage ("reset");
 	resetUniverse();
@@ -449,7 +461,7 @@ int PTcl::domain(int argc,char ** argv) {
 int PTcl::target(int argc,char ** argv) {
 	if (argc == 1) {
 		Target* tp = definingGal ? currentTarget : universe->myTarget();
-		return staticResult(tp->readName());
+		return staticResult(tp->name());
 	}
 	else if (argc > 2) {
 		return usage("target [<targetname>]");
@@ -478,7 +490,7 @@ int PTcl::targets(int argc,char** argv) {
 	const char *names[MAX_NAMES];
 	int n = KnownTarget::getList (KnownBlock::domain(), names, MAX_NAMES);
 	for (int i = 0; i < n; i++)
-		Tcl_AppendElement(interp,(char*)names[i],0);
+		addResult(names[i]);
 	return TCL_OK;
 }
 
@@ -495,7 +507,7 @@ int PTcl::targetparam(int argc,char ** argv) {
 		return TCL_ERROR;
 	}
 	if (argc == 1) {
-		return staticResult(s->getInitValue());
+		return staticResult(s->initValue());
 	}
 	s->setValue(hashstring(argv[2]));
 	return TCL_OK;
@@ -570,7 +582,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(nodeconnect),
 	ENTRY(numports),
 	ENTRY2(permlink,multilink),
-	ENTRY(printVerbose),
+	ENTRY(print),
 	ENTRY(reset),
 	ENTRY(run),
 	ENTRY(schedule),
