@@ -231,8 +231,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		char **argv;			/* Argument strings. */
 	    {
 		int position;
-		/* FIX ME: Is the following buffer big enough always? */
-		static char* buf[20];
+		static char buf[20];
 
 		if(sscanf(argv[1], "%d", &position) != 1) {
 		    errorReport("Invalid value for step size");
