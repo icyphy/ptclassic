@@ -146,9 +146,7 @@ namespace ::tycho {
 
     if {$tcl_platform(platform) != "macintosh"} {
 	::tycho::File::registerExtensions {} \
-		{set w [::tycho::autoName .exec]; \
-                ::tycho::Monitor $w;\
-                $w centerOnScreen} \
+		{::tycho::view Monitor -toolbar 1} \
 		{Exec} "tools"
     }
 
