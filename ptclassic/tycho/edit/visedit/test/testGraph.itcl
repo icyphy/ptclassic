@@ -30,17 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# $Id$
-
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
-
-# If necessary load up the class definitions
-if {[namespace tycho {info classes Graph}] == {} } {
-    namespace tycho
-    source ../Graph.itcl
-}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.edit.visedit
 
 # 
 test Graph-1.1 {The graph below has a cycle in it} {
