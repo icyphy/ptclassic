@@ -584,7 +584,8 @@ body ::tycho::Query::lines {tag label default lines args} {
     
     # If <Return> is enabled to dismiss the window, disable it.
     if {$returnDismisses} {
-        $itk_component(bbox) buttonconfigure ok -defaultring no
+        # FIXME: No longer works with new ButtonBox.
+        # $itk_component(bbox) buttonconfigure ok -defaultring no
         $itk_component(bbox) buttonconfigure ok -text "OK <M-Ret>"
         bind $itk_component(hull) <Return> { }
         set returnDismisses 0
