@@ -47,7 +47,7 @@ Date of last revision:
 void IntArray::create(int n) {
 	
 	if (n > memSz) {
-		LOG_DEL; delete data;
+		LOG_DEL; delete [] data;
 		LOG_NEW; data = new int[n];
 		memSz = n;
 	}
@@ -69,6 +69,6 @@ int& IntArray :: elem (int index) {
 
 // destructor
 IntArray::~IntArray() { 
-	LOG_DEL; delete data;
+	LOG_DEL; delete [] data;
 	data = 0;
 }
