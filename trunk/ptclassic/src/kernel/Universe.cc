@@ -58,18 +58,22 @@ type(dom), galP(g), pTarget(tar) {
 }
 
 void Runnable :: initTarget() {
-	myTarget()->setGalaxy(*galP);
-	myTarget()->initialize();
+	if (myTarget()) {
+		if (galP) myTarget()->setGalaxy(*galP);
+		myTarget()->initialize();
+	}
 }
 
-int Runnable :: run() { return myTarget()->run(); }
+int Runnable :: run() {
+	return (myTarget() ? myTarget()->run() : FALSE);
+}
 
 StringList Runnable :: displaySchedule() {
 	return myTarget()->displaySchedule();
 }
 
 Scheduler* Universe :: scheduler() const {
-	return myTarget()->scheduler();
+	return (myTarget() ? myTarget()->scheduler() : 0);
 }
 
 StringList Universe :: print (int recursive) const {
@@ -88,20 +92,17 @@ StringList Universe :: print (int recursive) const {
 
 // setting the stopping condition
 void Runnable :: setStopTime (double stamp) {
-	myTarget()->setStopTime(stamp) ;
+	if (myTarget()) myTarget()->setStopTime(stamp) ;
 }
 
 // Modify initTarget to invoke begin methods
 void Universe :: initTarget() {
 	// The following invokes the scheduler
 	Runnable::initTarget();
+
 	// The following invokes the begin methods of the stars
-	myTarget()->begin();
+	if (myTarget()) myTarget()->begin();
 }
 
 // isa
 ISA_FUNC(Universe,Galaxy);
-
-
-
-
