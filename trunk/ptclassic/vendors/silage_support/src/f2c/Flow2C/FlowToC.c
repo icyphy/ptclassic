@@ -660,12 +660,13 @@ bool tmp_thor;
     if(!pl_flag) GenFuncOpenFile();
     if(!pl_flag) GenFuncCreateFile ();
     if(!bittrue) GenReadInput(pl_flag);
+    if(pl_flag) GenReadConstInput();
 
     if(pl_flag)
     {
     	GenFunctions(pl_flag,bittrue);  /*  Process all hierarchy  */
 	fprintf(CFD,"} // end code \n");
-	GenPtSetup(bittrue);
+	GenPtSetup(bittrue,pl_flag);
 	GenPtGo(bittrue,tmp_thor);
 	fprintf(CFD,"} // end defstar \n");
     }
@@ -770,6 +771,7 @@ bool tmp_thor;
 if(strcmp(typ,"bool") == 0);
 else fscanf(fp,"%s",prec);
 if(strcmp(typ,"fixArray")==0) fscanf(fp,"%s",arrSz);
+if(strcmp(typ,"constArray")==0) fscanf(fp,"%s",arrSz);
    fprintf (CFD, "\tinput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",inputName);
@@ -836,6 +838,7 @@ bool tmp_thor;
 if( strcmp(typ,"bool") == 0);
 else fscanf(fq,"%s",prec);
 if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
+if( strcmp(typ,"constArray") == 0) fscanf(fq,"%s",arrSz);
    fprintf (CFD, "\toutput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",outputName);
@@ -876,14 +879,19 @@ GenPtProtectedVars()
 
    while( (fscanf(fq,"%s",portName) == 1 ) )
    {
-   fscanf(fq,"%s",typ);
-   if( strcmp(typ,"bool") == 0);
-   else fscanf(fq,"%s",prec);
-if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
+   	fscanf(fq,"%s",typ);
+   	if( strcmp(typ,"bool") == 0);
+   	else fscanf(fq,"%s",prec);
+	if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
+	if( strcmp(typ,"constArray") == 0) fscanf(fq,"%s",arrSz);
+if( (strcmp(typ,"constArray") == 0) || (strcmp(typ,"bool") == 0));
+else
+{
    fprintf (CFD, "\t\tconst char* %s_P; \n",portName); 	/* precision read in */
    fprintf (CFD, "\t\tint %s_IntBits; \n",portName); 	/* int part */
    fprintf (CFD, "\t\tint %s_Len; \n",portName); 	/* word length */
    fprintf (CFD, "\t\tint %s_FracBits; \n",portName); 	/* fractional length */
+}
    }
    fclose(fq);
 /* inputs */
@@ -901,14 +909,19 @@ if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
 
    while( (fscanf(fq,"%s",portName) == 1 ) )
    {
-   fscanf(fq,"%s",typ);
-   if( strcmp(typ,"bool") == 0);
-   else fscanf(fq,"%s",prec);
-if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
+   	fscanf(fq,"%s",typ);
+   	if( strcmp(typ,"bool") == 0);
+   	else fscanf(fq,"%s",prec);
+	if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
+	if( strcmp(typ,"constArray") == 0) fscanf(fq,"%s",arrSz);
+if( (strcmp(typ,"constArray") == 0) || (strcmp(typ,"bool") == 0));
+else
+{
    fprintf (CFD, "\t\tconst char* %s_P; \n",portName); 	/* precision read in */
    fprintf (CFD, "\t\tint %s_IntBits; \n",portName); 	/* int part */
    fprintf (CFD, "\t\tint %s_Len; \n",portName); 	/* word length */
    fprintf (CFD, "\t\tint %s_FracBits; \n",portName); 	/* fractional length */
+}
    }
    fclose(fq);
    fprintf (CFD, "\t} \n");
@@ -1140,6 +1153,48 @@ bool pl_flag;
     }
 }
 
+/* to read in constant inputs from files in ptolemy, ONLY ARRAYS  */
+GenReadConstInput()
+{
+    register ListPointer ptr;
+    register EdgePointer edge;
+    register char *file;
+
+    	fprintf(CFD, "/* Routines to read in constant inputs */\n");
+
+	for (ptr = ListOfInputs; ptr != NULL; ptr = ptr->Next) 
+	{
+        edge = EP(ptr);
+        if ((int)GetAttribute(edge->Attributes, "IsConstant")) 
+	{
+	if (IsArray(edge) ) 
+	{
+	    fprintf(CFD,"void ReadConstArray_");
+            GenEdgeName(edge);
+	    fprintf(CFD,"(char* FileName)\n{\n");
+	    fprintf(CFD,"\tFILE *fp;\n");
+	    fprintf(CFD,"\tfloat v;\n");
+	    fprintf(CFD,"\tint i=0;\n\n");
+	    fprintf(CFD,"\tfp = fopen(FileName,\"r\");\n");
+	    fprintf(CFD,"\tif(fp == NULL) fprintf(stderr,");
+	    fprintf(CFD,"\"Cant open file %%s\\n\",FileName);\n\n");
+
+	    fprintf(CFD,"\twhile(fscanf(fp,\"%%f\",&v) == 1)\n\t{\n");
+	    fprintf(CFD,"\t\tFloat2Fix(v,");
+            GenEdgeName(edge);
+	    fprintf(CFD,"[i]");
+	    GenFixedType(edge);
+	    fprintf(CFD,");\n\t\ti++;\n\t}\n\n");
+
+	    fprintf(CFD,"\tfclose(fp);\n");
+	    fprintf(CFD,"}\n\n");
+	}
+	else
+	fprintf(stderr,"can read only arrays of constant inputs so far \n");
+	}
+    	} /* for */
+}
+
 GenReadInputControl(edge,pl_flag)
 EdgePointer edge;
 bool pl_flag;
@@ -1328,8 +1383,9 @@ bool pl_flag;
     fprintf(CFD, "}\n\n");
 }
 
-GenPtSetup(bittrue)
+GenPtSetup(bittrue,pl_flag)
 bool bittrue;
+bool pl_flag;
 {
    FILE *fq; 	char in_fileName[100]; 		char portName[100];
    FILE *fp; 	char out_fileName[100]; 
@@ -1347,14 +1403,15 @@ bool bittrue;
 
     fprintf(CFD, "\tsetup { \n");
     fprintf(CFD, "\t\tInitFixedLeafs ();");
-    fprintf(CFD, "/*  Reading Inputs that are constant */\n");
+    fprintf(CFD, "/*  Initializing Fixed quantities */\n");
+/* read constant inputs - into array */
+    GenConstInputs(pl_flag); 
+
 	if (GE(Root)->HasDelay == true) 
         {
         fprintf(CFD, "\n\t\t/*  Delay Initialization goes here... */\n");
         fprintf(CFD, "\t\tInit_%s (&SigTab);\n", Root->Name);
         }
-/*  Reading Inputs that are constant  case isnt handled - does it happen so? */
-/* in case of the bittrue simulation, need to use th SDF Fixed functions */
 
 	fprintf(CFD, "\n\t\t/* FixedPoint Precision Initialization */\n");
 	while( (fscanf(fq,"%s",portName) == 1 ) )
@@ -1362,16 +1419,21 @@ bool bittrue;
    	fscanf(fq,"%s",typ);
 	if(strcmp(typ,"bool") == 0);
 	else fscanf(fq,"%s",prec);
-	if(strcmp(typ,"fixArray")==0) fscanf(fq,"%d",&arrSz);
+	if( (strcmp(typ,"fixArray")==0) || (strcmp(typ,"constArray")==0) )
+		 fscanf(fq,"%d",&arrSz);
 	else arrSz =1;
 if(bittrue)
+{
+if( (strcmp(typ,"constArray")==0) || (strcmp(typ,"bool")==0) );
+else
 {
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
     	fprintf(CFD,"\t\t%s_IntBits = get_intbits (%s_P);\n",portName,portName);
     	fprintf(CFD,"\t\t%s_Len = get_len (%s_P);\n",portName,portName);
     	fprintf(CFD,"\t\t%s_FracBits = %s_Len - %s_IntBits;\n",portName,portName,portName);
 }
-	if(arrSz >1)
+}
+	if( (strcmp(typ,"fixArray")==0) && arrSz >1)
 	{
 	fprintf(CFD,"\t\t// set parameters to store past samples\n");
 	fprintf(CFD,"\t\t%s.setSDFParams(%d,%d);\n\n",portName,arrSz,arrSz);
@@ -1383,16 +1445,21 @@ if(bittrue)
    	fscanf(fp,"%s",typ);
 	if(strcmp(typ,"bool") == 0);
 	else fscanf(fp,"%s",prec);
-	if(strcmp(typ,"fixArray")==0) fscanf(fp,"%d",&arrSz);
+	if( (strcmp(typ,"fixArray")==0) || (strcmp(typ,"constArray")==0) )
+			 fscanf(fp,"%d",&arrSz);
 	else arrSz =1;
 if(bittrue)
+{
+if( (strcmp(typ,"constArray")==0) || (strcmp(typ,"bool")==0) );
+else
 {
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
     	fprintf(CFD,"\t\t%s_IntBits = get_intbits (%s_P);\n",portName,portName);
     	fprintf(CFD,"\t\t%s_Len = get_len (%s_P);\n",portName,portName);
     	fprintf(CFD,"\t\t%s_FracBits = %s_Len - %s_IntBits;\n",portName,portName,portName);
 }
-	if(arrSz >1)
+}
+	if( (strcmp(typ,"fixArray")==0) && (arrSz >1))
 	{
 	fprintf(CFD,"\t\t// set parameters to store past samples\n");
 	fprintf(CFD,"\t\t%s.setSDFParams(%d,%d);\n\n",portName,arrSz,arrSz);
@@ -1400,7 +1467,6 @@ if(bittrue)
 
 	}
     fprintf(CFD, "\n \t } // setup \n\n");
-
    fclose(fq);
    fclose(fp);
 }
@@ -1443,14 +1509,19 @@ bool tmp_thor;
    fscanf(fp,"%s",inputTyp);
    if(strcmp(inputTyp,"bool") == 0) strcpy(inputPrec,"2.0");
    else fscanf(fp,"%s",inputPrec);
-   if(strcmp(inputTyp,"fixArray")==0) fscanf(fp,"%d",&inArrSz);
+   if( (strcmp(inputTyp,"fixArray")==0) || (strcmp(inputTyp,"constArray")==0) )
+			fscanf(fp,"%d",&inArrSz);
    else inArrSz=1;
 
+if( strcmp(inputTyp,"constArray")==0);
+else
+{
    strcpy(inputList[numIn].name,inputName);
    strcpy(inputList[numIn].typ,inputTyp);
    strcpy(inputList[numIn].prec,inputPrec);
    inputList[numIn].arrSz=inArrSz;
    numIn++;
+}
    } /* while */
    numberIn = numIn; 
 
@@ -1564,14 +1635,19 @@ for(cnt=0;cnt<numberIn;cnt++)
    fscanf(fq,"%s",outputTyp);
    if(strcmp(outputTyp,"bool") == 0) strcpy(outputPrec,"2.0");
    else fscanf(fq,"%s",outputPrec);
-   if(strcmp(outputTyp,"fixArray") == 0) fscanf(fq,"%d",&outArrSz);
+   if((strcmp(outputTyp,"fixArray")==0) || (strcmp(outputTyp,"constArray")==0) )
+			 fscanf(fq,"%d",&outArrSz);
    else outArrSz=1;
    
+if(strcmp(outputTyp,"constArray")==0);
+else
+{
    strcpy(outputList[numOut].name,outputName);
    strcpy(outputList[numOut].typ,outputTyp);
    strcpy(outputList[numOut].prec,outputPrec);
    outputList[numOut].arrSz = outArrSz;
    numOut++;
+}
    } /* while */
    numberOut = numOut; 
 
@@ -1946,7 +2022,8 @@ ListPointer List;
 GenConstInputs(pl_flag)
 bool pl_flag;
 {
-    fprintf(CFD, "\n/* Reading Inputs that are constant*/\n");
+    if(pl_flag) fprintf(CFD, "\n\t\t/* Reading Inputs that are constant*/\n");
+    else fprintf(CFD, "\n/* Reading Inputs that are constant*/\n");
     GenConstInputsOfEdge(ListOfInputs,pl_flag);
 }
 
@@ -1962,7 +2039,10 @@ bool pl_flag;
         edge = EP(ptr);
         if ((int)GetAttribute(edge->Attributes, "IsConstant")) {
             if(IsArray(edge))
-                fprintf(CFD,"    ReadArray_");
+		{
+	    	if(pl_flag) fprintf(CFD,"\t\tReadConstArray_");
+                else fprintf(CFD,"    ReadArray_");
+		}
 	    else
                 fprintf(CFD,"    Read_");
             GenEdgeName(edge);
@@ -1970,13 +2050,10 @@ bool pl_flag;
                 fprintf(CFD,"(");
 	    else
                 fprintf(CFD,"(&");
+
+	    if(pl_flag) fprintf(CFD,"\"%s.",Root->Name);
             GenEdgeName(edge);
-	    if(pl_flag) 
-	    {
- 		fprintf(CFD,", %s_",Root->Name);
-/* NEED & HERE?  we actually dont get this situation in ptolemy */
-                GenEdgeName(edge);
-            } 
+	    if(pl_flag) fprintf(CFD,"\"");
             fprintf(CFD, ");\n");
         }
     }

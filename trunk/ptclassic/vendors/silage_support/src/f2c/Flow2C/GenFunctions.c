@@ -89,47 +89,63 @@ if( pl_flag && (Graph == Root) )
 
    while( fscanf(fp,"%s",inputName) == 1)
    { 
-	strcpy(inputList[numIn].name,inputName); 
 	fscanf(fp,"%s",inputTyp);		
    	if(strcmp(inputTyp,"bool") == 0) 
 	{
+		strcpy(inputList[numIn].name,inputName); 
 		strcpy(inputList[numIn].prec,"2.0"); 
 		strcpy(inputList[numIn].typ,inputTyp); 
 		inputList[numIn].arrSz = 1;
+		numIn++; 
 	}
    	else 
 	{
 		fscanf(fp,"%s",inputPrec);
-		strcpy(inputList[numIn].typ,inputTyp); 
-		strcpy(inputList[numIn].prec,inputPrec); 
-		if(strcmp(inputTyp,"fixArray") == 0) fscanf(fp,"%d",&inArrSz);
+		if( (strcmp(inputTyp,"fixArray") == 0) || 
+					(strcmp(inputTyp,"constArray")==0) ) 
+		fscanf(fp,"%d",&inArrSz);
 		else inArrSz = 1;
-		inputList[numIn].arrSz = inArrSz; 
+		if( strcmp(inputTyp,"constArray")==0);
+		else
+		{
+			strcpy(inputList[numIn].name,inputName); 
+			strcpy(inputList[numIn].typ,inputTyp); 
+			strcpy(inputList[numIn].prec,inputPrec); 
+			inputList[numIn].arrSz = inArrSz; 
+			numIn++; 
+		}
 	}
-	numIn++; 
    }
    numberIn = numIn;
 
    while( fscanf(fq,"%s",outputName) == 1)
    {
-	strcpy(outputList[numOut].name,outputName); 
 	fscanf(fq,"%s",outputTyp);		
    	if(strcmp(outputTyp,"bool") == 0) 
 	{
+		strcpy(outputList[numOut].name,outputName); 
 		strcpy(outputList[numOut].prec,"2.0"); 
 		strcpy(outputList[numOut].typ,outputTyp); 
 		outputList[numOut].arrSz = 1; 
+		numOut++; 
 	}
    	else 
 	{
 		fscanf(fq,"%s",outputPrec);
-		strcpy(outputList[numOut].typ,outputTyp); 
-		strcpy(outputList[numOut].prec,outputPrec); 
-		if(strcmp(outputTyp,"fixArray") == 0) fscanf(fq,"%d",&outArrSz);
+		if( (strcmp(outputTyp,"fixArray") == 0) ||
+			(strcmp(outputTyp,"constArray") == 0) )
+		fscanf(fq,"%d",&outArrSz);
 		else outArrSz = 1;
-		outputList[numOut].arrSz = outArrSz; 
+		if(strcmp(outputTyp,"constArray") == 0);
+		else
+		{
+			strcpy(outputList[numOut].name,outputName); 
+			strcpy(outputList[numOut].typ,outputTyp); 
+			strcpy(outputList[numOut].prec,outputPrec); 
+			outputList[numOut].arrSz = outArrSz; 
+			numOut++; 
+		}
 	}
-	numOut++; 
    }
    numberOut = numOut;
 } /* if */
