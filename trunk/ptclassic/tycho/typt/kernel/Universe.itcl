@@ -132,7 +132,7 @@ body ::ptolemy::Universe::destructor {} {
 # separate setStopTime method.
 #
 body ::ptolemy::Universe::run {stoptime}  {
-    localEval ::pitcl::run $stoptime
+    localEval ::pitcl::run $fullname $stoptime
 }
 
 #####################################################################
