@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 This star computes 1<i>/x</i>, where <i>x</i> is the input.
 If the <i>magLimit</i> parameter is not 0.0, then the output is
-<i>+-   </i>max<i> </i>(<i> magLimit,   </i>1<i>/x </i>).  In this case, <i>x</i> can be zero
+&#177;max(<i>magLimit, </i>1<i>/x </i>).  In this case, <i>x</i> can be zero
 without causing an floating exception.
 The sign of the output is determined by the sign of the input.
 	}
