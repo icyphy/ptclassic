@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	desc {
 This star has the same functionality as the Chop star except that the
-\fIoffset\fR parameter is determined at run time by a control input and that
-the \fIuse_past_inputs\fR parameter is set to FALSE and not accessible.
+<i>offset</i> parameter is determined at run time by a control input and that
+the <i>use_past_inputs</i> parameter is set to FALSE and not accessible.
 	}
 
 	input { name { offsetCntrl } type { int } }
