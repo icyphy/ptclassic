@@ -1,7 +1,7 @@
 #!/bin/sh
 # ----------------------------------------------------------------------
 #  DEMO: Widget tree in [incr Widgets]
-# $Id$
+# @(#)widgettree	1.1 07/30/97
 # ----------------------------------------------------------------------
 #\
 exec itkwish -f "$0" ${1+"$@"}
@@ -25,7 +25,7 @@ iwidgets::scrolledframe .f \
         -hscrollmode dynamic -vscrollmode dynamic \
         -height 200 -width 150
 
-set w [.f childsite].
+set w [.f childsite].w
 iwidgets::widgettree $w -createcommand "expand $w"
 $w add node foo -text foo
 $w add node bar -text bar
@@ -39,34 +39,28 @@ pack .f -fill both -expand on
 # setting panel.
 
 proc mkPref {win tag} {
-    set path [$win path $tag]
-
     switch -exact $tag {
 	"size" {
-	    radiobox $path
+	    $win create radiobox size -options {
+		rename -labelfont -font font Font
+	    }
+	    set r [$win component $tag]
 
-	    $path add small -text "Small"
-	    $path add med -text "Medium"
-	    $path add large -text "Large"
-	    $path add xlarge -text "Biggie"
-
-	    $path select med
-	    
-	    $win place size $path
+	    $r add small -text "Small"
+	    $r add med -text "Medium"
+	    $r add large -text "Large"
+	    $r add xlarge -text "Biggie"
+	    $r select med
 	}
 	"address" {
-	    frame $path
+	    set f [$win create frame address]
 
-	    entryfield $path.name -labeltext "Name"
-	    grid $path.name -sticky e
-	    entryfield $path.addr -labeltext "Street"
-	    grid $path.addr -sticky e
-	    entryfield $path.addr2 -labeltext "City, State"
-	    grid $path.addr2 -sticky e
-	    entryfield $path.email -labeltext "E-mail"
-	    grid $path.email -sticky e
-
-	    $win place address $path
+	    foreach {name text} {
+		name "Name" addr "Street" city "City, State" email "E-mail"
+	    } {
+		entryfield $f.$name -labeltext $text
+		grid $f.$name -sticky e
+	    }
 	}
     }
 }
@@ -76,10 +70,10 @@ iwidgets::scrolledframe .g \
         -hscrollmode dynamic -vscrollmode dynamic \
         -height 200 -width 150
 
-set v [.g childsite].
+set v [.g childsite].w
 iwidgets::widgettree $v -createcommand "mkPref $v"
-$v add node size -text Size:
-$v add node address -text Address:
+$v add node size -text Size
+$v add node address -text Address
 grid $v -sticky nw
 
 pack .g -fill both -expand on
