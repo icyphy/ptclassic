@@ -197,6 +197,7 @@ DEScheduler :: run (Block& galaxy) {
 		// process star is fetched
 			ds = (DEStar*) f->e;
 			ds->arrivalTime = level;
+			s = ds;
 		}
 		// put the LinkList into the free pool for memory management.
 		eventQ.putFreeLink(f);
@@ -212,7 +213,7 @@ DEScheduler :: run (Block& galaxy) {
 			LevelLink* h = eventQ.next();
 			if (h->level > level)	goto L1;
 			PortHole* tl = 0;
-			Event* ee; 
+			Event* ee = 0; 
 			if (h->fineLevel != 0) {
 				ee = (Event*) h->e;
 				tl = ee->dest;
