@@ -661,10 +661,14 @@ proc assocAppend {list name value} {
 proc assocReplace {list name value} {
     upvar $list l
 
-    assign names values [ltranspose $l]
-    set index [lsearch -exact $names $name]
-    if { $index != -1 } {
-	set l [lreplace $l $index $index [list $name $value]]
+    if { $l != "" } {
+	assign names values [ltranspose $l]
+	set index [lsearch -exact $names $name]
+	if { $index != -1 } {
+	    set l [lreplace $l $index $index [list $name $value]]
+	} else {
+	    lappend l [list $name $value]
+	}
     } else {
 	lappend l [list $name $value]
     }
