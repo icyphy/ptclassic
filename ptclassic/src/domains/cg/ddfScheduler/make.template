@@ -57,7 +57,7 @@ MACRODIR = 	$(ROOT)/src/domains/cg/macroScheduler
 INCL = -I$(KERNDIR) -I$(SDFDIR) -I$(CGDIR) -I$(PARDIR) -I$(DLDIR) -I$(MACRODIR)
 
 # Library name
-LIB = 	libcgddf.$(LIBSUFFIX)
+PTLIB = 	libcgddf.$(LIBSUFFIX)
 
 # Header files
 HDRS = 	CGDDFScheduler.h CGDDFCluster.h CGConScheduler.h \
@@ -76,10 +76,10 @@ OBJS =	CGDDFScheduler.o CGDDFCluster.o CGConScheduler.o \
 # Library sources
 SRCS =	$(OBJS:.o=.cc)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

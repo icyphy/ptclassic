@@ -67,7 +67,7 @@ HDRS= $(SRCS:.cc=.h)
 DOMAIN=CGC
 STAR_MK=cgcvistcltkstars
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
-LIB=libcgcvistcltk.$(LIBSUFFIX)
+PTLIB=libcgcvistcltk.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars

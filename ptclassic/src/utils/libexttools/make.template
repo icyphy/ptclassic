@@ -42,7 +42,7 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
-LIB=libexttools.$(LIBSUFFIX)
+PTLIB=libexttools.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS = ..\..\kernel\libptolemy.lib \
@@ -69,10 +69,10 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) MatlabIfcFuns.h
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # matlab.mk and mathematica.mk check these vars before traversing the path
 NEED_MATLABDIR = 	1

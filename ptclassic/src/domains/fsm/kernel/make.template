@@ -47,7 +47,7 @@ INCL = -I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(PTKLIB) \
        -I$(PTCL_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) 
 
 # Library name
-LIB=libfsm.$(LIBSUFFIX)
+PTLIB=libfsm.$(LIBSUFFIX)
 
 # Header files
 HDRS= FSMPortHole.h FSMTarget.h FSMScheduler.h FSMStar.h FSMWormhole.h \
@@ -59,10 +59,10 @@ SRCS= $(HDRS:.h=.cc) FSMDomain.cc
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

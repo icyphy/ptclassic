@@ -51,7 +51,7 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 INCL=-I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libcgc.$(LIBSUFFIX)
+PTLIB=libcgc.$(LIBSUFFIX)
 
 # Header files
 HDRS= CGCPortHole.h CGCStar.h CGCTarget.h CGCGeodesic.h CGCForkNode.h \
@@ -63,10 +63,10 @@ OBJS= $(HDRS:.h=.o) CGCDomain.o
 # Library sources
 SRCS= $(OBJS:.o=.cc)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -51,8 +51,8 @@ EXTRA_SRCS = CLISocket.c CLISocket.h \
 
 OBJS = 	V2Cinteger.o C2Vinteger.o V2Creal.o C2Vreal.o
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = foo
 
 # .cli* files seem to be some sort of cache for the cli program
 KRUFT = 	.cli* *.mra *.sim *.a ptvhdlsim vhdlsim \

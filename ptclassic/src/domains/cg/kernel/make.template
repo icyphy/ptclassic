@@ -51,7 +51,7 @@ INCL= $(PTCOMPAT_INCSPEC) -I$(PTCL_INCDIR) \
 	-I$(KERNDIR) -I$(SDFDIR) -I$(LOOPDIR)
 
 # Library name
-LIB=libcg.$(LIBSUFFIX)
+PTLIB=libcg.$(LIBSUFFIX)
 
 # .h files with matching cc files
 H_WITH_MATCH= \
@@ -96,10 +96,10 @@ OBJS= $(H_WITH_MATCH:.h=.o) CGDomain.o AsmTargetInit.o
 # Library sources
 SRCS= $(OBJS:.o=.cc)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 
 # include common definitions, rules

@@ -47,12 +47,12 @@ HDRS =  ParNode.h ParGraph.h ParScheduler.h \
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libPar.$(LIBSUFFIX)
+PTLIB = libPar.$(LIBSUFFIX)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

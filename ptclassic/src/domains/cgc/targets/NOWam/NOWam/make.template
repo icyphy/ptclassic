@@ -73,13 +73,13 @@ ifeq ($(USE_SHARED_LIBS),yes)
 
 # If we are building shared libraries, then we can put all the targets in
 # a shared library.
-LIB = 		libNOWam.$(LIBSUFFIX)
-all:		$(SRCS) makefile $(OBJS) $(LIB)
-install:	all $(LIBDIR)/$(LIB)
+PTLIB = 		libNOWam.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(PTLIB)
+install:	all $(LIBDIR)/$(PTLIB)
 
 else	#USE_SHARED_LIBS
 
-LIB=none	# required by common.mk
+PTLIB=none	# required by common.mk
 all:		makefile $(OBJS)
 # "make install" puts things in the official place
 install:	all
@@ -90,7 +90,7 @@ endif 	#USE_SHARED_LIBS
 else	#sol2 or sol2.cfront
 
 
-LIB=none	# required by common.mk
+PTLIB=none	# required by common.mk
 # Non solaris platforms
 all: makefile
 	@echo "NOW active message target supported only on Solaris platforms"
