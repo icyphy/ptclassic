@@ -34,13 +34,13 @@
 #### options
 
 # Default height of the HTML and text widgets in lines
-option add *Idoc.height 50 widgetDefault
+#option add *Idoc.height 50 widgetDefault
 
 # Default width of the HTML widget in characters
-option add *Idoc.htmlWidth 80 widgetDefault
+#option add *Idoc.htmlWidth 80 widgetDefault
 
 # Default width of the text widget in characters
-option add *Idoc.textWidth 32 widgetDefault
+#option add *Idoc.textWidth 32 widgetDefault
 
 #######################################################################
 #### Idoc
