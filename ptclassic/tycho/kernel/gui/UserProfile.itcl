@@ -46,15 +46,13 @@
 # error will be raised if this is called more than once,
 # although later on we will allow a user profile to be changed.
 #
-# <dt><b>registerstyle</b> _stylesheet_ _style_ _type_ ?_key_?
+# <dt><b>registerstyle</b> _stylesheet_ _style_ ?_type_? ?_key_?
 # <dd>
-# Register a style for a given stylesheet. _type_ is the
-# type of preference, and can be <b>global</b>, <b>class</b>, or
-# <b>title</b>. _style_ is the preferred style for this
-# type and style-sheet. If it is <b>global</b>, then _key_ is not
-# required, and is in fact ignored. Otherwise _key_ is the
-# widget class or the title of a widget. If a preference already
-# exists, overwrite it, else create a new one.
+# Register a style for a given stylesheet. If _type_ is not
+# provided, register a global preference. Otherwise, _type_
+# can be either <b>class</b> or <b>title</b>. In this case,
+# _key_ is the widget class or title respectively. If a preference
+# already exists, overwrite it, else create a new one.
 #
 # <dt><b>getstyle</b> _stylesheet_ ?_widget_? ?_title_?
 # <dd>
@@ -93,7 +91,7 @@ ensemble ::tycho::profile {
     }
 
     # Register a style preference
-    option registerstyle {stylesheet style type {key {}}} {
+    option registerstyle {stylesheet style {type {}} {key {}}} {
 	[@scope ::tycho::UserProfile set _profile] \
 		registerstyle $stylesheet $style $type $key
     }
@@ -160,7 +158,7 @@ class ::tycho::UserProfile {
     method getstyle {stylesheet {widget {}} {title {}}}
 
     # Register a style preference
-    method registerstyle {stylesheet style type {key {}}}
+    method registerstyle {stylesheet style {type {}} {key {}}}
 
     #################################################################
     ####                   protected methods                     ####
@@ -255,6 +253,7 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
         }
         # See if the widget's class matches anything, going up the hierarchy
         foreach class [$widget info heritage] {
+            set class [info which -command $class]
             set id [_map class $class]
             if { $id != "" } {
                 if [exists preference:class.$id -$stylesheet] {
@@ -276,8 +275,9 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
 #
 # Register a style for a given stylesheet.
 #
-body ::tycho::UserProfile::registerstyle {stylesheet style type {key {}}} {
-    if { $type == "global" } {
+body ::tycho::UserProfile::registerstyle \
+	{stylesheet style {type {}} {key {}}} {
+    if { $type == {} } {
 	set name preference:global
     } else {
 	set id [_map $type $key]
@@ -289,12 +289,10 @@ body ::tycho::UserProfile::registerstyle {stylesheet style type {key {}}} {
 	# Get the item name
 	set name preference:$type.$id
     }
-
     # Create the item if it doesn't exist
     if ![exists $name] {
 	add $name
     }
-
     # Add the preference
     itemconfigure $name -$stylesheet $style
 }
