@@ -149,7 +149,6 @@ test UpSample-default-SDF-2 \
 #
 test UpSample-default-SDF-4 \
 	{Run the default-SDF scheduler with ACYLOOP loopScheduler} {
-    puts "UpSample-default-SDF-4 test: Expect 3 warnings"
     sdfTestScheduler default-SDF {targetparam loopScheduler ACYLOOP}
 } {{{0.0	
 0.0	
