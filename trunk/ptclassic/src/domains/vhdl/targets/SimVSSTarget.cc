@@ -637,7 +637,6 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
-  printf("registerC2V is called\n");
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
@@ -693,7 +692,6 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
 // Method called by V2C star to place important code into structure.
 void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
-  printf("registerV2C is called\n");
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
