@@ -2,10 +2,16 @@ defstar {
 	name { DownSample }
 	domain { C50 }
 	desc { 
-A decimator by "factor" (default 2).  The "phase" tells which sample to
-output.  If phase = 0, the most recent sample is the output, while if
-phase = factor-1 the oldest sample is the output.  Phase = 0 is the
-default.
+A decimator by a given "factor" (default 2).
+The "phase" tells which sample to output.
+If phase = 0, the most recent sample is the output,
+while if phase = factor-1 the oldest sample is the output.
+Phase = 0 is the default.  Note that "phase" has the opposite
+sense of the phase parameter in the UpSample star, but the
+same sense as the phase parameter in the FIR star.
+	}
+	explanation {
+.Ir "decimation"
 	}
 	version { $Id$ }
 	author { A. Baensch, ported from Gabriel }
@@ -28,20 +34,20 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {factor}
 		type {int}
 		default {2}
-		desc { Downsample factor. }
+		desc { Downsample factor }
 		attributes { A_SETTABLE }
 	}
 	state {
 		name {phase}
 		type {int}
 		default {0}
-		desc { Downsample phase. }
+		desc { Downsample phase }
 		attributes { A_SETTABLE }
 	}
- setup {
+	setup {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
-			Error::abortRun(*this, ": phase must be < factor");
+			Error::abortRun(*this, "phase must be < than factor");
 	}
 	codeblock (sendsample) {
 	splk	#$addr(input,phase),BMAR	;Address needed input Sample
@@ -54,5 +60,3 @@ limitation of liability, and disclaimer of warranty provisions.
 		return 3;
 	}
 }
-
-
