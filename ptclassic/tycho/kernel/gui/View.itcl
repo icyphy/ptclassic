@@ -155,9 +155,8 @@ class ::tycho::View {
 # 
 configbody ::tycho::View::readonly {
     set readOnly $itk_option(-readonly)
-    # Delay to ensure that all constructors (including derived class
-    # constructors) have completed.
-    after idle [code catch "$this indicateReadOnly $itk_option(-readonly)"]
+    # Defer this call until the widget has been mapped to the screen
+    whenMapped hull "$this indicateReadOnly $itk_option(-readonly)"
 }
 
 #######################################################################

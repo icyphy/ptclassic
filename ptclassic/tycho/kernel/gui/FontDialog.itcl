@@ -55,7 +55,6 @@
 proc ::tycho::queryfont {args} {
     set name [autoName .font]
     uplevel #0 ::tycho::FontDialog $name [list -initialfont $args]
-    after idle [list catch [list $name freeze]]
     set fontname [::tycho::Dialog::wait $name 0]
     if { $fontname != "" } {
 	return [list [lindex $fontname 1] \
@@ -194,6 +193,10 @@ abcdefghijklmnopqrstuvwxyz
     if {$itk_option(-okcommand) == {}} {
 	configure -okcommand "$this get"
     }
+
+    # Wait until the window is mapped (thus allowing it to be
+    # the right size for the initial font), then freeze its size
+    whenMapped sampler "$this freeze"
 }
 
 #########################################################################

@@ -475,6 +475,7 @@ body ::tycho::HTML::altFile {} {
 	hyperJump $filename
     }
 }
+
 #####################################################################
 #### appletViewer
 # Start up appletviewer on the current file
@@ -718,7 +719,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 $itk_component(text) mark set insert 1.0
 
                 if {$point != {}} {
-                    after idle [list $this seeFragment $point]
+		    $this seeFragment $point
                 }
 		insertDirectoryContents $filename
 		return
@@ -789,7 +790,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             reload
 
             if {$point != {}} {
-                after 200 [list $this seeFragment $point]
+		$this seeFragment $point
             }
             configure -readonly 1
             return
@@ -834,9 +835,7 @@ body ::tycho::HTML::insertData {data} {
     set currentHTMLLength [string length $data]
 
     # This is done in the background so that construction completes.
-    # The time delays seems to be necessary to ensure that the window
-    # gets mapped immediately.
-    after 100 [list ::tycho::HTML::render $this $data]
+    whenMapped text [list ::tycho::HTML::render $this $data]
 }
 
 #####################################################################
@@ -984,7 +983,9 @@ body ::tycho::HTML::openNewBrowser {win x y} {
     if {$point!={}} {
         # Need to catch in case the new browser is not HTML browser (ie.
         # text editor) and we are forced to hyperJump with wrong # of args.
-        after idle "catch \"$newbrowser hyperJump $filename [list $point] 1\""
+        # after idle "catch \"$newbrowser hyperJump $filename [list $point] 1\""
+
+	$newbrowser hyperJump $filename $point
     }
 }
 

@@ -502,6 +502,8 @@ body ::tycho::Dialog::new {class instance args} {
         }
     }
     # NOTE: Not sure why this needs to be deferred.
-    after idle [list catch "$instance focusin"]
+    # after idle [list catch "$instance focusin"]
+    # The delay appears to be unnecessary now -- hjr, Dec 97
+    $instance focusin
     return $instance
 }
