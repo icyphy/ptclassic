@@ -1,11 +1,17 @@
 #! /bin/csh -f
 # safe-get: arg is the name of the SCCS file
 # always does cd to proper place before doing the get.
+# This is invoked by Gnu make because the makefiles
+# set the variable $GET to equal "safe-get".
+# Note that Gnu make adds a "-G filename" option
+# to the end, so typical usage is:
+# 	safe-get SCCS/s.filename -G filename
+#
+# CAVEAT: This assumes the filename to be got is the first
+# argument.  This may not be the case.  The first argument
+# may be an option to pass to get.
+#
 # $Id$
-if ($#argv != 1) then
-	echo Usage: safe-get filename
-	exit 1
-endif
 
 set fullname = $1
 # get is in /usr/sccs on some systems
@@ -16,7 +22,10 @@ if (! -r $fullname) then
 	exit 1
 endif
 
+# remove the trailing pathname component, leaving the head
 set sccsdir = $fullname:h
+
+# use the tail of the pathname only, I.e., the filename
 set root = $fullname:t
 
 if ("$sccsdir" == "SCCS") then
@@ -27,5 +36,5 @@ else
 	cd $dir
 endif
 
-get SCCS/$root
+get $*
 
