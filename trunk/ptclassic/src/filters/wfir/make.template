@@ -63,12 +63,12 @@ all:	makefile $(LIB) wfir
 
 install: makefile $(BINDIR)/wfir
 
-# Use the $(LINKER) so the binary is statically linked for distribution.
+# Use the $(CLINKER) so the binary is statically linked for distribution.
 # On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
 # here.
 wfir:	wfir.o 
 	rm -f wfir
-	$(LINKER) $(LINKFLAGS) wfir.o -lm -o $@ 
+	$(CLINKER) $(LINKFLAGS) wfir.o -lm -o $@ 
 
 $(BINDIR)/wfir:	wfir
 	rm -f $(BINDIR)/wfir

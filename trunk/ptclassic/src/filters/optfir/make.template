@@ -63,12 +63,12 @@ all:	makefile $(LIB) optfir
 
 install: makefile $(BINDIR)/optfir
 
-# Use the $(LINKER) so the binary is statically linked for distribution.
+# Use the $(CLINKER) so the binary is statically linked for distribution.
 # On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
 # here.
 optfir:	optfir.o 
 	rm -f optfir
-	$(LINKER) $(LINKFLAGS) optfir.o -lm -o optfir
+	$(CLINKER) $(LINKFLAGS) optfir.o -lm -o optfir
 
 $(BINDIR)/optfir:	optfir
 	rm -f $(BINDIR)/optfir
