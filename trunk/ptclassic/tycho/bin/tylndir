@@ -82,7 +82,7 @@ do
 	then
 		ln -s $DIRFROM/$file .
 	else
-		if [ $file != RCS -a $file != SCCS -a $file != junk -a $file != adm -a $file != "itclhtml" -a file != "javahtml" ]
+		if [ $file != RCS -a $file != SCCS -a $file != junk -a $file != adm -a $file != itclhtml -a file != javahtml -a $file != devel -a $file != jsdatabase ]
 		then
 			echo `pwd`/$file:
 			if [ ! -d $file ]
