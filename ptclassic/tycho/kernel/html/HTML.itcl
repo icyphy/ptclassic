@@ -1795,7 +1795,15 @@ proc HMtag_dl {win param text} {
 proc HMtag_/dl {win param text} {
     global gHMtag_dlflag
     if {$gHMtag_dlflag == 1} {
-        HMtag_dt {win param text}
+	upvar #0 HM$win var
+	upvar $text data
+        # The depth of the indent is determined by depth of the "indent" stack.
+        HMstack $win {/} "indent {}"
+	incr var(level) -1
+	set level $var(level)
+	$win insert $var(S_insert) "$data" \
+		"hi [lindex $var(list) end] indent$level $var(font)"
+	set data {}
     }
 }
 
