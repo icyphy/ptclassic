@@ -63,6 +63,12 @@ class ::tycho::MenuSupport {
     constructor {args} {}
     destructor {}
 
+    ##########################################################################
+    ####                            options                               ####
+
+    # The font to use for displaying menus
+    itk_option define -font font Font 8x13
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -129,12 +135,9 @@ class ::tycho::MenuSupport {
 body ::tycho::MenuSupport::constructor {args} {
     eval itk_initialize $args
     eval preference exclude $this $args
-}
 
-#######################################################################
-#### destructor
-#
-body ::tycho::MenuSupport::destructor {} {
+    eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
 ###################################################################
