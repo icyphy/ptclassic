@@ -45,10 +45,6 @@ extern const char CGCdomainName[] = "CGC";
 
 class CGCDomain : public Domain {
 public:
-	Star& newWorm(Galaxy& innerGal, Target* tg)  {
-		LOG_NEW; return *new CGCWormhole(innerGal, tg);
-	}
-
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
 		LOG_NEW; return *(new CGCfromUniversal);
