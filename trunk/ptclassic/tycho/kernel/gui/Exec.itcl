@@ -34,6 +34,9 @@
 #######################################################################
 #### Exec
 # Exec a process, and if there is output, display the output.
+# See
+# <a href="../internals/exec.html">$TYCHO/kernel/doc/internals/exec.html</a>
+# for further documentation.
 #
 # <p>
 # Here is an example of how to use the Exec:
