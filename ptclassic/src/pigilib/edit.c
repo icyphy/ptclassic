@@ -59,6 +59,129 @@ $Id$
 #define dmWidth 40
 #define dmIncrement 20
 
+/* for DMM and manual partitioning 11/22/95 A. Kalavade */
+
+/* ### */
+#define LENGTH 100
+char *selectedObjName[LENGTH];
+int numObjSelected = 0;
+
+/***** Begin GetStarNames 8/26/93 Asawaree Kalavade *****/
+int
+RpcGetObjectNames(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+        octObject inst;
+        vemStatus status;
+        Pointer pointer;
+        RPCArg *arg;
+        int length;
+
+        ViInit("get-object-names");
+        ErrClear();
+        numObjSelected = 0;
+
+    if ((length = lsLength(cmdList)) != 0) {
+        octObject bag, inst;
+        octGenerator genInst;
+        lsFirstItem(cmdList, &pointer, (lsHandle *) 0);
+        arg = (RPCArg *) pointer;
+        bag.objectId = arg->argData.objArg.theBag;
+        if (octGetById(&bag) != OCT_OK) {
+            PrintErr(octErrorString());
+            ViDone();
+        }
+
+        octInitGenContents(&bag, OCT_INSTANCE_MASK, &genInst);
+        while (octGenerate(&genInst, &inst) == OCT_OK) {
+            if (IsGal(&inst) || IsStar(&inst)) {
+               /*fprintf(stderr,"name: %s\n",inst.contents.instance.name); */
+                selectedObjName[numObjSelected] = inst.contents.instance.name;
+                numObjSelected++;
+            }
+        }
+    } else {
+        status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
+        if (status == VEM_NOSELECT) {
+            PrintCon("Aborted");
+            ViDone();
+        } else if (status != VEM_OK) {
+            PrintErr("Cursor must be over a star instance");
+            ViDone();
+        }
+
+        if (!IsStar(&inst) && !IsGal(&inst) ) {
+            PrintErr("Cursor must be over a star or galaxy instance");
+            ViDone();
+        }
+        else
+        {
+        /*      fprintf(stderr,"name: %s\n",inst.contents.instance.name); */
+                selectedObjName[numObjSelected] = inst.contents.instance.name;
+                numObjSelected++;
+        }
+    }
+    ViDone();
+}
+
+void getSelectedObjNames(numObjs,nameList)
+int* numObjs;
+char *nameList[LENGTH];
+{
+        int i;
+        *numObjs = numObjSelected;
+        for(i=0; i<numObjSelected; i++)
+        {
+                nameList[i] = selectedObjName[i];
+        }
+}
+
+void clearSelectedObjNames()
+{
+        numObjSelected = 0;
+}
+
+int getFacetContents(facetName,numObjs,fname)
+char* facetName;
+int* numObjs;
+char* fname;
+{
+	FILE* fp;
+	octObject facet;
+        octObject inst;
+        octGenerator genInst;
+	int num = 0;
+
+	fp = fopen(fname,"w");
+	if(fp == NULL)
+	{
+		fprintf(stderr,"Can't open file to write names.\n");
+		return 0;
+	}
+        if(ohOpenFacet(&facet,facetName,"schematic", "contents", "r") <= 0) 
+	{
+                PrintErr(octErrorString());
+                return 0;
+        }
+        octInitGenContents(&facet, OCT_INSTANCE_MASK, &genInst);
+        while (octGenerate(&genInst, &inst) == OCT_OK) 
+	{
+            	if (IsGal(&inst) || IsStar(&inst)) 
+		{
+                	fprintf(fp,"%s\n",inst.contents.instance.name);
+                	fprintf(stderr,"%s\n",inst.contents.instance.name);
+                	num++;
+		}
+	}
+        *numObjs = num;
+	fclose(fp);
+	return 1;
+}
+
+/* ### */
+
 /* body of parameter-edit code.
 Returns 0 if there is an error.
 Returns 1 if the parameters were changed or if the user clicked OK.
