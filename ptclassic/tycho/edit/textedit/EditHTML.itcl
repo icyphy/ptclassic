@@ -98,6 +98,9 @@ class ::tycho::EditHTML {
     # Returns a list of tags to use when checking the spelling.
     method spellCheckTags {} {return {text}}
 
+    # View the HTML in the HTML viewer.
+    method viewHTML {}
+
     ####################################################################
     ####                  protected methods and variables           ####
 
@@ -244,7 +247,7 @@ body ::tycho::EditHTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $TYCHO edit textedit doc usersGuides \
-	    EditHTMLHelp.html]
+	    EditHTMLHelp.html] html
 }
 
 #####################################################################
@@ -383,6 +386,19 @@ body ::tycho::EditHTML::seeFragment {point} {
 }
 
 #####################################################################
+#### viewHTML 
+# View the HTML in a separate HTML viewer.
+# The EditHTML class is used to view the HTML source.  The viewHTML method
+# brings up a HTML viewer as a separate window and displays this file
+# 
+body ::tycho::EditHTML::viewHTML {} {
+    saveQuery
+    # Pass openContext the "html" mode to make it open the
+    # same file in another mode
+    ::tycho::openContext [filename] html
+}
+
+#####################################################################
 #####################################################################
 #####################################################################
 ####                    protected methods                        ####
@@ -466,6 +482,10 @@ body ::tycho::EditHTML::_initializeBars {menubar statusbar toolbar} {
         menubar command filetemplate special \
 		-label "File Template" -underline 5 \
                 -command "$this fileTemplate"
+
+        menubar command viewhtml special \
+		-label "View HTML" -underline 0 \
+                -command "$this viewHTML"
 
         menubar add separator formatsep4 special
 
