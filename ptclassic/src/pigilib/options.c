@@ -13,9 +13,12 @@ $Id$
 #include "util.h"
 #include "icon.h"
 #include "misc.h"
+#include "err.h"
+
+void KcSetAnimationState();
 
 int 
-Options(spot, cmdList, userOptionWord)
+Options(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
