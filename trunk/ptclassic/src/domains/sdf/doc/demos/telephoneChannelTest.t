@@ -20,10 +20,14 @@ The time domain plot of the output clearly shows the phase jitter
 and the noise, but only the most discerning eye can see the nonlinear
 distortion.  A periodogram power spectrum estimate, however, clearly
 shows the second harmonic distortion, plus a DC offset.
-.Se TelephoneChannel
-.Ir "phase jitter"
-.Ir "additive Gaussian noise"
-.Ir "nonlinear distortion"
+.SE TelephoneChannel
+.IR "phase jitter"
+.IR "additive Gaussian noise"
+.IR "nonlinear distortion"
+.IP [1]
+E. A. Lee and D. G. Messerschmitt,
+.i "Digital Communication" ,
+2nd ed., Kluwer Academic Publishers, Boston, MA, 1994, pp. 160-167.
 .SA
 TelephoneChannel
 .ES
