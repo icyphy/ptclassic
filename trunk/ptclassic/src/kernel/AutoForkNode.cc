@@ -14,6 +14,7 @@ $Id$
 *************************************************************************/
 #include "AutoForkNode.h"
 #include "KnownBlock.h"
+#include "Galaxy.h"
 #include "miscFuncs.h"
 
 // variable used for generating names
