@@ -530,6 +530,7 @@ body ::tycho::IDocSys::parseData {data} {
     set inConfigBody 0
     set inEnsemble 0
     set inClass 0
+    set firstComment {}
     set lastComment {}
     foreach construct $data {
         if {$construct == "\n"} {
@@ -538,7 +539,12 @@ body ::tycho::IDocSys::parseData {data} {
         }
         if {$inComment} {
             # This is a comment. Save it.
-            set lastComment "$construct"
+            # The first comment in a file contains tags that need to be saved.
+            if {$firstComment == {}} {
+                set firstComment "$construct"
+            } else {
+                set lastComment "$construct"
+            }
             set inComment 0
             continue
         }
@@ -615,7 +621,7 @@ body ::tycho::IDocSys::parseData {data} {
             } else {
                 # puts "CLASS: $className BODY: $construct"
                 parseClass $className $construct
-                addClassComment $className $lastComment
+                addClassComment $className "$firstComment \n $lastComment"
                 set inClass 0
                 set lastComment {}
                 set className {}
