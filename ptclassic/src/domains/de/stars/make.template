@@ -67,6 +67,7 @@ DEConst.pl \
 DEDiscard.pl \
 DEEndCase.pl \
 DEEtherRec.pl \
+DEEtherRecMes.pl \
 DEEtherSend.pl \
 DEFIFOQueue.pl \
 DEFilter.pl \
@@ -140,6 +141,9 @@ include $(ROOT)/mk/common.mk
 # Workaround bug in gcc-2.7.2 optimizer
 ifeq ($(USE_GPLUSPLUS),yes)
 DEEtherRec.o: DEEtherRec.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+DEEtherRecMes.o: DEEtherRecMes.cc
 	$(UNOPTIMIZED_WARNING_MESSAGE)
 	$(UNOPTIMIZED_COMPILE_RULE) $<
 DEEtherSend.o: DEEtherSend.cc
