@@ -9,6 +9,13 @@
 <h2>Compilation bugs</h2>
 <MENU>
 
+<li> The Microsoft Visual C++ port (<CODE>PTARCH == nt4.vc</CODE>)
+is unlikely to build and has not been tested.
+
+<li> Compiling with Cygwin32 is slow.  This is because Cygwin32
+adds a layer to file access and other operations.
+
+
 <li> <CODE>make</CODE> failed with
 <pre>
 c:/tycho0.3.devel/mk/tycommon.mk:276: *** target pattern contains no `%'.
@@ -31,10 +38,10 @@ MAKE_MODE=unix
 export MAKE_MODE
 </pre>
 
-<li> Compiling with GNU-win32 is slow.
+<li> Some of the tests in
+<a href="../../src/octtools/Packages/oct"><CODE>$PTOLEMY/src/octtools/Packages/oct</CODE></a> fail.
 
-<li> The Microsoft Visual C++ port (<CODE>PTARCH == nt4.vc</CODE>)
-is unlikely to build and has not been tested.
+
 </MENU>
 
 
