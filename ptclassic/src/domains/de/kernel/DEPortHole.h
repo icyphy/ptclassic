@@ -3,7 +3,7 @@
 
 #include "NamedObj.h"
 #include "DataStruct.h"
-#include "Particle.h"
+#include "dataType.h"
 #include "type.h"
 #include "Connect.h"
 
@@ -26,6 +26,8 @@ $Id$
 This file contains definitions of DE PortHoles.
 
 ******************************************************************/
+
+class Particle;
 
         //////////////////////////////////////////
         // class DEPortHole
