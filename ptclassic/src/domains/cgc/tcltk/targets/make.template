@@ -42,9 +42,10 @@ CGCSTARS = $(ROOT)/src/domains/cgc/stars
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
+CGCTARGMAINDIR = $(ROOT)/src/domains/cgc/targets/main
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
-	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
+	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCTARGMAINDIR) -I$(CGCSTARS)
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
