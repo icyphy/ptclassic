@@ -112,8 +112,8 @@ scheduling with
 <h3>Reference</h3>
 <p>[1]  
 Lixia Zhang, "VirtualClock: A New Traffic Control Algorithm for
-Packet Switching Networks," \fISIGCOMM'90 Symposium\fR,
-Sept. 1990, Philadelphia, \fIComputer Communications Review\fR,
+Packet Switching Networks," <i>SIGCOMM'90 Symposium</i>
+Sept. 1990, Philadelphia, <i>Computer Communications Review</i>,
 vol. 20:4, Sept. 1990.
 	} // end explanation
 
