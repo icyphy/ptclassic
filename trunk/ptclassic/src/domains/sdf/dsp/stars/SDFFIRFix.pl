@@ -75,7 +75,7 @@ the decimation ratio.
 For more information about polyphase filters, see [1-2].
 .Id "Harris, F. J."
 .Id "Vaidyanathan, P. P."
-.UH REFERENCES
+.UH "REFERENCES"
 .ip [1]
 F. J. Harris,
 ``Multirate FIR Filters for Interpolating and Desampling'', in
@@ -86,8 +86,7 @@ P. P. Vaidyanathan,
 Networks, and Applications: A Tutorial'',
 \fIProc. of the IEEE\fR, vol. 78, no. 1, pp. 56-93, Jan. 1990.
         }
-        seealso { FIRCx, Biquad, UpSample, DownSample,
-                  firDemo, interp, multirate }
+        seealso { FIRCx, Biquad, UpSample, DownSample, firDemo, interp, multirate }
         input {
                 name {signalIn}
                 type {fix}
@@ -100,16 +99,16 @@ Networks, and Applications: A Tutorial'',
                 name {taps}
                 type {fixarray}
                 default {
-        "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
+"-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
                 }
                 desc {
 Filter tap values.
-The default precision on these numbers is 1.23
-(i.e., 1 sign bit and 23 fractional bits).
+The default precision on these numbers is 1.23;
+i.e., 1 sign bit and 23 fractional bits.
 You can override the default precision by adding a precision specification
 surrounded by curly braces at the beginning of the string of array values.
 During computation of filter outputs, the precision of the filter taps
-is converted to the precision contained in the "TapsPrecision" parameter.
+is converted to the precision contained in the TapsPrecision parameter.
 		}
         }
         defstate {
@@ -173,10 +172,10 @@ The input particles are only cast to this precision if the parameter
                 type { string }
                 default { "saturate" }
                 desc {
-Overflow characteristic for the accumulator.
+Overflow characteristic for the accumulatoXX
 If the result of the sum cannot be fit into the precision of the accumulator,
 then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
+specified by this parameteXX
 The keywords for overflow handling methods are:
 "saturate" (the default), "zero_saturate", "wrapped", and "warning".
 The "warning" option will generate a warning message whenever overflow occurs.
