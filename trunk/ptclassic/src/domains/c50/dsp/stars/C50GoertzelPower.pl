@@ -17,14 +17,31 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
 	htmldoc {
+<a name="goertzelPower"> </a>
 <p>
-This one-pole IIR filter has a transfer function of
+This two-pole, one-zero IIR filter has a transfer function of
 <pre>
-{1} over
-{1 ~-~ {W sub N} sup {-k} z sup -1} ~.
+(1 &#43 z<sup>-1</sup>)
+ ----------------------------------
+(1 - 2&#183(cos( 2&#183<i>pi</i>&#183k/N ))&#183z<sup>-1</sup> &#43 z<sup>-2</sup>)
 </pre>
+This filter is a biquad filter with
+<p>
+<ul>
+<li> n<sub>0</sub> = 1
+<li> n<sub>1</sub> = -(W<sub>N</sub>) <sup>k</sup> = exp(j &#183 2 &#183 <i>pi</i> &#183 k / N )
+<li> n<sub>2</sub> = 0
+<li> d<sub>1</sub> = - 2 &#183 cos( 2 &#183 <i>pi</i> &#183 k / N )
+<li> d<sub>2</sub> = 1
+</ul>
+<p>
+This implementation efficiently implements the biquad section based
+on the values of these coefficients, and computes d<sub>1</sub> from the
+parameters k and N.
+It is implemented in direct form II, and requires three additions,
+one multiply,
 <h3>References</h3>
-<p>[1]  
+<p>[1]
 A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
