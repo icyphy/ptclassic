@@ -1,7 +1,8 @@
 .\" $Id$
 .H1 "EventHorizons
 .pp
-A
+Like a 
+.c Star, a
 .c Wormhole
 may have input and output
 .c PortHole s.
@@ -10,8 +11,8 @@ The
 of the
 .c Wormhole
 are called
-.c EventHorizon s
-that are derived from 
+.c EventHorizon s,
+which are derived from 
 .c class\ PortHole .
 Precisely speaking, one
 .c PortHole
@@ -22,8 +23,7 @@ consists of a pair of
 : one corresponds to the outer domain, and the other corresponds to
 the inner domain.  For example, suppose a SDF domain has a 
 .c Wormhole
-(
-.c SDF\ Wormhole )
+.c (SDF\ Wormhole)
 which contains a DE domain.
 Then, an input port of the
 .c Wormhole
@@ -52,87 +52,73 @@ and
 .c (domain-name)fromUniversal .
 The
 .c (domain-name)toUniversal\ class
-receives data packets from its domain and converts them
-to a format compatible with the universal
-.c EventHorizon .
+receives data packets from its domain and transfers them to the
+counterpart.
 The
 .c (domain-name)fromUniversal\ class
-converts the universally-formatted data packets to a format
-compatible to its domain.
-Note that the universal
-.c EventHorizon
-is not a physical but a logical object. 
-.pp
-Currently, the universal format of
-data packets are 
-.c Particle s
-of 
-.c int ,
-.c float ,
-and
-.c complex
-type.  For domains using these universal formats, the data conversion
-is not necessary.  Further research is in progress on the data format
-conversion. Now, let's look at what actions are performed in the
+receives data packets from the counterpart and transfers them to its domain.
+Thus, the data transfer between two domains is the basic functionality
+of the 
 .c EventHorizon s.
-.sp
-.H2 "ToEventHorizon Class
 .pp
-The
-.c ToEventHorizon\ class
-is the base class of all
-.c (domain-name)toUniversal s.
-The main action of this class
-is to get data packets from its domain and send them
-to the
-.c (domain-name)fromUniversal
-of another domain, with data format conversion if necessary.
-Another responsibility of this class is to maintain the timing
-relations between two domains.  If it belongs to an
-input port of a
-.c Wormhole ,
-it copies the global time of the outer domain into the inner
-domain (the timing information of a domain is recorded in the
-.c Scheduler\ class
-of the domain). If it belongs to an output port of a
-.c Wormhole ,
-it gets the time from the inner domain. The time may be referenced
-by the outer domain to check when the data packets from the
-.c Wormhole
-are available.
-.sp
-.H2 "FromEventHorizon Class
+It is worth pointing out that data-format conversion is not a task
+of 
+.c EventHorizon s
+, opposed to what seems to be.
+By the virtue of C++ as an object oriented language,
+data-format conversion takes place whenever necessary 
+by overloaded operator.  In other words, conversion between 
+.c int\ Particle
+and a special type 
+.c Particle
+is automatically performed by defining the
+appropriate assignment operator in the definition of the special type 
+.c Particle
+,to and from the 
+.c int
+.c Particle .
+Also, some
+.c Star s
+can be defined to perform data-conversion functions. 
 .pp
-The
-.c FromEventHorizon\ class
-is the base class of all
-.c (domain-name)fromUniversal s.
-The main function of this class is reciprocal to the
-.c ToEventHorizon\ class.
-It gets data packets from 
-.c (domain-name)toUniversal
-of another domain and send them to its own domain.
-Data format conversion will take place here if necessary.
-If this class is a part of an input port of the
-.c Wormhole ,
-it takes another responsibility to set up the stopping condition
-of the inner
-.c Scheduler .
-For example, a
-.c DEfromUniversal\ EventHorizon
-has to decide until when the internal
-.c DEScheduler 
-is running.
+If data transfer is the sole purpose of the
+.c EventHorizon s,
+we may have only one
+.c EventHorizon\ class .
+Unfortunately, there are some domain-specific operations we need to
+do in the
+.c EventHorizon s
+for domain interface.  There are two alternatives to
+perform the domain-specific operations.  First, We may optimize each domain
+interface by defining a 
+.c EventHorizon
+class for each pair of domain.  This approach is not feasible
+for the highly modularized and easily expandable design like \*(PT.
+If we have $N$ domains, we need to define $N sup 2$ 
+.c EventHorizon s.
+To make matters worse, if a user wants to add a new domain into \*(PT,
+he should know the details of the existing domains to design the
+.c EventHorizon s.
+Therefore, we choose the second approach where a domain interface
+has a pair of
+.c EventHorizon s,
+one for each domain.  Now, we have only $2N$
+.c EventHorizon s
+for $N$ domains, and each domain is totally independent of each other.
+Among domain-specific operations, timing-management is most
+complicated, which will be discussed in the next section.
 .pp
-Besides the main functionality, 
-some domains may require more additional functions from this class.
-In the DE domain, this class puts the data packets into the
-global 
-.c Event\ Queue
-(refer to the "\fBDE Domain\fR in \*(PT" document).
-Also, we had better have a mechanism to check
-whether this port is ready for the inner domain to be fired (\fIready()\fR).
-For example, if the inner domain is SDF and the outer
+One example of domain-specific operation can be found in
+.c DEfromUniversal\ class .
+The class should not only receives the data packets from the
+counterpart but also put them into the global event queue in the
+DE domain (refer to the \fBDE Domain\fR chapter in the \fBAlmagest\fR).
+Another example is the \fIready()\fR method in the
+.c FromEventHorizon\ class .
+This method is to check whether the port is ready for the inner domain
+to be fired.  For the SDF domain, it returns \fBTRUE\fR only when
+it has sufficient data.  Suppose that
+the inner domain is SDF and the outer
 domain is DE, the inner domain may not be executed until
 all input ports of the
 .c DEWormhole
@@ -141,9 +127,6 @@ of the
 .c Wormhole
 checks up all 
 .c FromEventHorizon s
-of the input ports whether they are ready.
+(\fIready()\fR method) of the input ports whether they are ready.
 For other domains, the \fIready()\fR method can be redefined for
-more elaborate synchronization. It is worth noting that it
-is always possible to define a new domain-specific method
-in the
-.c EventHorizon\ class es.
+more elaborate synchronization. 

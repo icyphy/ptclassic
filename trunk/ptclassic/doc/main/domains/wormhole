@@ -7,11 +7,15 @@ is derived from
 .c class\ Runnable 
 that is also the base class of 
 .c class\ Universe .
-.c class\ Runnable
+The 
+.c Runnable\ class
 is characterized by pointers to a component
 .c Galaxy
 and a
 .c Scheduler .
+How to create a
+.c Wormhole
+is already discussed in the introduction.
 Like a
 .c Universe ,
 a 
@@ -22,8 +26,8 @@ A
 .c Wormhole
 is different from a
 .c Universe
-in that it is not a self-contained object. Instead, it is triggered
-by other block to initiate the scheduling.
+in that it is not a stand-alone object. Instead, it is triggered
+from the outer domain to initiate the scheduling.
 .pp
 Each domain has a derived 
 .c Wormhole\ class .
@@ -35,7 +39,7 @@ is derived from not only the base
 .c Wormhole\ class
 but also the domain-specific star class,
 .c SDFStar .
-The multiple inheritance realizes the inherent nature of the
+This multiple inheritance realizes the inherent nature of the
 .c Wormhole .
 First, the
 .c Wormhole
@@ -51,12 +55,86 @@ and a separate
 since it is derived from the
 .c Wormhole
 base class.
-From the user point of view, a 
+.pp
+Here is an example\** of the 
 .c Wormhole
-is merely a 
-.c Galaxy
-which contains 
-.c Star s
-of another domain ( refer to the manual, "\*(PT \fBPrimer\fR"
-for more information on programs with
-.c Wormhole s).
+definition (
+.c SDF\ Wormhole
+).
+.(f
+\** We merged a \fI.h\fR file and a \fI.cc\fR file together for brevity.
+.)f
+.(c
+#include "Wormhole.h"
+#include "SDFStar.h"
+
+	//////////////////////////////
+	// SDFWormhole
+	//////////////////////////////
+
+class SDFWormhole : public Wormhole, public SDFStar {
+
+public:
+	void start() {Wormhole :: setup() ;}
+	void go()    {run() ;}
+	void wrapup() { endSimulation();}
+
+	// Constructor
+	SDFWormhole(Galaxy& g) : Wormhole(*this,g)
+	{
+        	buildEventHorizons ();
+	}
+
+
+	// return my scheduler
+	Scheduler* mySched() { return scheduler ;}
+
+	// print methods
+	StringList printVerbose() { return Wormhole :: print(0);}
+	StringList printRecursive() { return Wormhole :: print(1);}
+
+	// clone -- allows interpreter to make copies
+	Block* clone() {return new SDFWormhole(gal.clone()->asGalaxy());}
+};
+.)c
+Note that it redefines the three basic methods of the
+.c Star\ class
+: \fIstart(), go()\fR, and \fIwrapup()\fR. 
+In the initialization stage of the outer
+.c Galaxy ,
+the \fIstart()\fR method is called.  Then, the component
+.c Galaxy 
+is initialized.
+At runtime, the outer 
+.c Scheduler
+execute the 
+.c Wormhole 
+when it is runnable\**. 
+.(f
+\**The decision of runnability of a \fBWormhole\fR is indistinguishable
+from those of other \fBstars\fR.  For example, a \fBSDFWormhole\fR is
+runnable when all input ports have sufficient data packets.
+.)f
+If the
+.c Wormhole
+is runnable, the data packets are delivered from the outer domain
+into the inner domain through the input
+.c PortHole s.
+The
+.c PortHole s
+of a
+.c Wormhole
+is called
+.c EventHorizon s,
+which will be discussed in the next section.
+Then, the \fIgo()\fR method is called to invoke the inner
+.c Scheduler
+until the specified stopping condition is met.  
+Since the decision of the stopping condition is a fairly complicated
+topic, we dedicate a whole section for it in this document.
+The execution of the
+.c Wormhole
+is completed by transferring the appropriate data packets from
+the inner domain to the outer domain.
+The \fIwrapup()\fR method is called in the "wrapup" stage of the outer
+domain. 
