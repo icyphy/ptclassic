@@ -144,6 +144,7 @@ CSYSLIBS =	-lm -lc -lcompat
 SYSLIBS =	-lg++ -lstdc++  $(CSYSLIBS)
 
 LINKFLAGS =	-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
+#LINKFLAGS =	-L$(LIBDIR) -Xlinker -S -Xlinker -x
 LINKFLAGS_D =	-L$(LIBDIR) -g -static
 
 # octtools/attache uses this
