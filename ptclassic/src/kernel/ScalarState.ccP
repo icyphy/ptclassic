@@ -1,3 +1,5 @@
+#include "logNew.h"
+REGISTER_FILE;
 
 #ifdef __GNUG__
 #pragma implementation
@@ -36,7 +38,7 @@ const char* <T>State :: type() const { return "<T>";}
 StringList <T>State :: currentValue() const { StringList s; s = val; return s;}
 
 // clone
-State* <T>State :: clone () const { return new <T>State;}
+State* <T>State :: clone () const { LOG_NEW; return new <T>State;}
 
 void <T>State  :: initialize() {
 	const  char* specialChars =  "*+-/^()";

@@ -1,3 +1,4 @@
+static const char file_id[] = "GalIter.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -32,7 +33,7 @@ class IterContext {
 // Constructor.  Clear stack, create an iterator for this level.
 GalAllBlockIter::GalAllBlockIter(Galaxy& g) {
 	stack = 0;
-	thisLevelIter = new GalTopBlockIter(g);
+	LOG_NEW; thisLevelIter = new GalTopBlockIter(g);
 }
 
 GalStarIter::GalStarIter(Galaxy& g) : GalAllBlockIter(g) {}
@@ -46,23 +47,23 @@ void GalAllBlockIter::reset() {
 // Destructor.
 GalAllBlockIter::~GalAllBlockIter() {
 	reset();
-	delete thisLevelIter;
+	LOG_DEL; delete thisLevelIter;
 }
 
 // push current iterator onto stack, enter a new galaxy g.
 inline void GalAllBlockIter::push(Galaxy& g) {
-	stack = new IterContext(thisLevelIter, stack);
-	thisLevelIter = new GalTopBlockIter(g);
+	LOG_NEW; stack = new IterContext(thisLevelIter, stack);
+	LOG_NEW; thisLevelIter = new GalTopBlockIter(g);
 }
 
 // pop an iterator off of the stack.
 void GalAllBlockIter::pop() {
 	if (stack == 0) return;
 	IterContext* t = stack;
-	delete thisLevelIter;
+	LOG_DEL; delete thisLevelIter;
 	thisLevelIter = t->iter;
 	stack = t->link;
-	delete t;
+	LOG_DEL; delete t;
 }
 
 // This method returns the next block.

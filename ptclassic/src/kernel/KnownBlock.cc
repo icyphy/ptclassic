@@ -1,3 +1,4 @@
+static const char file_id[] = "KnownBlock.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -82,7 +83,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 	KnownListEntry* kb = findEntry (block.readName(), allBlocks[idx]);
 	if (kb) {
 		// delete the block if it was on the heap
-		if (kb->onHeap) delete kb->b;
+		if (kb->onHeap) { LOG_DEL; delete kb->b;}
 		kb->b = &block;
 		kb->onHeap = isOnHeap;
 		kb->dynLinked = Linker::isActive();
@@ -90,7 +91,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 
 	// otherwise create a new entry
 	else {
-		KnownListEntry* nkb = new KnownListEntry;
+		LOG_NEW; KnownListEntry* nkb = new KnownListEntry;
 		nkb->b = &block;
 		nkb->next = allBlocks[idx];
 		nkb->onHeap = isOnHeap;
@@ -184,7 +185,7 @@ KnownBlock::nameListForDomain (int idx) {
 		n++;
 		l = l->next;
 	}
-	const char** table = new const char*[n];
+	LOG_NEW; const char** table = new const char*[n];
 	l = allBlocks[idx];
 	for (int i = 0; i < n; i++) {
 		table[i] = l->b->readName();
@@ -195,7 +196,7 @@ KnownBlock::nameListForDomain (int idx) {
 		s += table[i];
 		s += "\n";
 	}
-	delete table;
+	LOG_DEL; delete table;
 	return s;
 }
 

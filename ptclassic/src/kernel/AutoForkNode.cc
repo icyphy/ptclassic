@@ -1,3 +1,4 @@
+static const char file_id[] = "AutoForkNode.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -93,7 +94,7 @@ PortHole* AutoForkNode::setDestPort (GenericPort &gp) {
 		    || (forkInput = forkStar->portWithName("input")) == 0) {
 			Error::abortRun (*this, "can't create Fork star");
 			if (forkStar) {
-				delete forkStar;
+				LOG_DEL; delete forkStar;
 				forkStar = 0;
 			}
 			return 0;

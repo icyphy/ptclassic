@@ -1,3 +1,4 @@
+static const char file_id[] = "ComplexArrayState.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -32,12 +33,12 @@ $Id$
 
 // alternate constructor: size
 ComplexArrayState :: ComplexArrayState (int size) {
-	val = new Complex [nElements = size];
+	LOG_NEW; val = new Complex [nElements = size];
 }
 
 // alternate constructor: size and fill value.
 ComplexArrayState :: ComplexArrayState (int size, const Complex& fill_value) {
-	val = new Complex [nElements = size];
+	LOG_NEW; val = new Complex [nElements = size];
 	Complex * top = &(val[nElements]);
 	Complex * t = val;
 	while (t < top) *t++ = fill_value;
@@ -47,12 +48,12 @@ const char* ComplexArrayState :: type() const { return "COMPLEXARRAY";}
 
 int ComplexArrayState :: size() const { return nElements;}
 
-State *ComplexArrayState :: clone() const { return new ComplexArrayState;}
+State *ComplexArrayState :: clone() const { LOG_NEW; return new ComplexArrayState;}
 
 ComplexArrayState :: ~ComplexArrayState () {
 	// ? no Complex destructor: do we want delete [] val, or delete val?
 	// g++ seems to want delete val
-	delete val;
+	LOG_DEL; delete val;
 }
 
 void ComplexArrayState  :: initialize() {
@@ -66,7 +67,7 @@ void ComplexArrayState  :: initialize() {
 
 	// ? no Complex destructor: do we want delete [] val, or delete val?
 	// g++ seems to want delete val
-	delete val;
+	LOG_DEL; delete val;
 	val = 0;
 	nElements = 0;
 
@@ -135,7 +136,7 @@ void ComplexArrayState  :: initialize() {
 		}
 	}
 	nElements  = i;
-	val = new Complex [nElements];	
+	LOG_NEW; val = new Complex [nElements];	
 	for(i = 0; i < nElements; i++)
 		val[i] = buf[i];
 	return;
@@ -183,12 +184,12 @@ void ComplexArrayState :: resize (int newSize) {
 	Complex * oldVal = val;
 	int oldSize = nElements;
 	// constructor initializes elements to (0,0)
-	val = new Complex [nElements = newSize];
+	LOG_NEW; val = new Complex [nElements = newSize];
 	int nCopy = oldSize;
 	if (newSize < nCopy) nCopy = newSize;
 	for (int i = 0; i < nCopy; i++)
 		val[i] = oldVal[i];
-	delete oldVal;
+	LOG_DEL; delete oldVal;
 }
 
 // make knownstate entry

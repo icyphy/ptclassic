@@ -1,3 +1,4 @@
+static const char file_id[] = "hashstring.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -11,6 +12,7 @@ This module keeps a hash table of strings.
 
 **************************************************************************/
 const int HASH_TABLE_SIZE = 601;
+#include "logNew.h"
 
 extern "C" int strcmp(const char*,const char*);
 extern "C" char *strcpy(char*,const char*);
@@ -24,8 +26,8 @@ struct hent {
 
 // destructor: recursive
 hent::~hent() {
-	delete txt;
-	delete link;
+	LOG_DEL; delete txt;
+	LOG_DEL; delete link;
 }
 
 static struct hent htable[HASH_TABLE_SIZE];
@@ -58,9 +60,9 @@ const char * hashstring (const char* text) {
 	if (p->txt == 0) {
 /* Allocate a new string */
 		len = s - text;
-		p->txt = new char[len+1];
+		LOG_NEW; p->txt = new char[len+1];
 		strcpy (p->txt, text);
-		p->link = new hent;
+		LOG_NEW; p->link = new hent;
 		hs_entries++;
 	}
 	return p->txt;

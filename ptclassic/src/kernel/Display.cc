@@ -1,3 +1,4 @@
+static const char file_id[] = "Display.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -45,7 +46,7 @@ void XGraph :: zapFiles () {
 		char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
-			delete name;
+			LOG_DEL; delete name;
 		}
 	}
 	ng = 0;
@@ -219,7 +220,7 @@ void XGraph :: terminate () {
 		cmd += "; /bin/rm -f ";
 		cmd += name;
 		// remove the filenames so we won't zap them later.
-		delete name;
+		LOG_DEL; delete name;
 		tmpFileNames[i] = 0;
         }
 	ng = 0;

@@ -1,3 +1,5 @@
+#include "logNew.h"
+REGISTER_FILE;
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -31,7 +33,7 @@ $Id$
 
 // constructor
 <T>ArrayState :: <T>ArrayState (int size, <C>& fill_value) {
-	val = new <C> [nElements = size];
+	LOG_NEW; val = new <C> [nElements = size];
 	<C> * top = &(val[nElements]);
 	<C> * t = val;
 	while (t < top)
@@ -39,13 +41,13 @@ $Id$
 }
 
 // destructor
-<T>ArrayState :: ~<T>ArrayState () {delete val;}
+<T>ArrayState :: ~<T>ArrayState () {LOG_DEL; delete val;}
 
 // assignment operator
 <T>ArrayState &	<T>ArrayState :: operator = (const <T>ArrayState & v) {
 	if (this != &v) {
-		delete val;
-		val  = new <C> [nElements = v.nElements];
+		LOG_DEL; delete val;
+		LOG_NEW; val  = new <C> [nElements = v.nElements];
 		<C>* top = &(val[nElements]);
 		<C>* t = val;
 		<C>* u = v.val;
@@ -72,12 +74,12 @@ StringList <T>ArrayState :: currentValue() const {
 }
 
 // clone
-State* <T>ArrayState :: clone() const { return new <T>ArrayState;}
+State* <T>ArrayState :: clone() const { LOG_NEW; return new <T>ArrayState;}
 
 // Parse initValue to set value
 void <T>ArrayState  :: initialize() {
 // free any old memory
-	delete val;
+	LOG_DEL; delete val;
 	val = 0;
 	nElements = 0;
 
@@ -159,7 +161,7 @@ void <T>ArrayState  :: initialize() {
 	}
 	if (!err) {
 		nElements  = i;
-		val  = new <C> [nElements];
+		LOG_NEW; val  = new <C> [nElements];
 		for(i = 0; i < nElements; i++)
 			val[i] = buf[i];
 	}
@@ -186,7 +188,7 @@ void <T>ArrayState :: resize (int newSize) {
 	if (newSize == nElements) return;
 	<C> * oldVal = val;
 	int oldSize = nElements;
-	val = new <C> [nElements = newSize];
+	LOG_NEW; val = new <C> [nElements = newSize];
 	int nCopy = oldSize;
 	if (newSize < nCopy) nCopy = newSize;
 	for (int i = 0; i < nCopy; i++)
@@ -196,7 +198,7 @@ void <T>ArrayState :: resize (int newSize) {
 	// if nZero is negative
 	for (i = 0; i < nZero; i++)
 		val[oldSize+i] = 0;
-	delete oldVal;
+	LOG_DEL; delete oldVal;
 }
 
 // isA
