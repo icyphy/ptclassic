@@ -100,7 +100,7 @@ doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
 starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
 	@echo "Updating $@:"
 	rm -f $@
-	@if [ "$(SUBDOMAINDIRS)" != "" ]; then \
+	@if [ "$(SUBDOMAINDIRS)" != "." ]; then \
 		subdirs="$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS))"; \
 		echo "Merging doc/stars/starHTML.idx $$subdirs ";\
 		echo "set TYCHO $(PTOLEMY)/tycho; \
@@ -116,7 +116,7 @@ starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
 				doc/stars/starHTML.idx" | itclsh; \
 	fi
 
-SUBDOMAINDIRS = . 
+SUBDOMAINDIRS = .
 subdomainstarHTML:
 	@for x in $(SUBDOMAINDIRS); do \
 	    if [ -w $$x/ ] ; then \
