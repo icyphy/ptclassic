@@ -31,7 +31,7 @@ limitation of liability, and disclaimer	of warranty provisions.
 
 // Called only once, after the scheduler is done
   begin {
-    printf("VHDLCSend.pl begin method called!!\n");
+//    printf("VHDLCSend.pl begin method called!!\n");
     // Call method to wire up a V2C VHDL entity
     targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
   }
