@@ -70,12 +70,12 @@ Target("default-DE", "DEStar", "default DE target", DEdomainName) {
 	    "Use the CalendarQueue scheduler."));
 
         addState(mutableQ.setState("mutable calendar queue scheduler?", this,
-            "NO", "Setting the Mutable CalendarQueue will override the
-	    regular CalendarQueue setting."));
+                "NO", 
+                "Setting the Mutable CalendarQueue will override the regular CalendarQueue setting."));
 
         addState(dercQ.setState("Resource Contention scheduler?", this,
-            "NO", "Setting the Resource Contention scheduler will override the
-	    regular CalendarQueue settings."));
+                "NO", 
+                "Setting the Resource Contention scheduler will override the regular CalendarQueue settings."));
 }
 
 void DETarget :: setup() {
