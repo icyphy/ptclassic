@@ -6,7 +6,7 @@ defstar {
   author { Mike J. Chen }
   copyright {
 1993  The Regents of the University of California.  All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
   location { MDSDF main library }
