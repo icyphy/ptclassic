@@ -212,7 +212,7 @@ codeblock(closeFile) {
 		const char* sf = saveFile;
 		if (sf != NULL && *sf != 0) {
 			for (int i = 0; i<int(numIn); i++) {
-				cmd << "; /bin/cat ";
+				cmd << "/bin/cat ";
 				cmd << target()->name(); 
 				cmd << "_$starSymbol(temp)" << i << " >> ";
 				cmd << sf << "; /bin/echo \"\" >> " << sf;
