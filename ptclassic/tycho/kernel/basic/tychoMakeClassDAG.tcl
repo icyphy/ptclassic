@@ -237,7 +237,10 @@ proc tychoStandardDAG {} {
     ]
 
     foreach dir $dirs {
-        eval lappend files [glob [file join $dir {{*.itcl,*.tcl,*.tk,*.itk}}]]
+	if [file isdirectory "$dir"] {
+	    eval lappend files [glob \
+		    [file join $dir {{*.itcl,*.tcl,*.tk,*.itk}}]]
+	}
     }
     foreach file $files {
         lappend filesenv [file join "\$TYCHO" $file]
