@@ -517,9 +517,13 @@ static ostream& operator<<(ostream& o, SDFClustPort& p) {
 		o << "=>";
 	else
 		o << "<=";
-	if (!pFar) o << "0";
-	else o << pFar->parent()->name() << "." << pFar->name();
-	if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
+	if (pFar==0) {
+		o << "0";
+	} else {
+		o << pFar->parent()->name() << "." << pFar->name();
+		// we prob. wont have a geodisic unless we have a far side
+		if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
+	}
 	return o;
 }
 
