@@ -525,18 +525,7 @@ body ::tycho::EditSTD::popUpFile {name} {
     set name [::tycho::expandPath $name]
 
     if [file exists $name] {
-	if [file isdirectory $name] {
-	    # name is a directory, then consider it as a Oct facet.
-	    if [catch {ptkOpenFacet $name}] {
-		error "Can't open a Oct file for the machine.\
-			This needs Ptolemy to exist. "
-	    }
-	    
-	    pvOpenWindow [ptkOpenFacet $name]
-	} else {
-	    # name is a file, pass it to ::tycho::File::openContext
-	    ::tycho::File::openContext $name
-	}
+	::tycho::File::openContext $name
     } else {
 	error "Specified galaxy for the machine does not exist."
     }
