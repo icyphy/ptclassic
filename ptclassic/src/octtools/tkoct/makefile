@@ -41,7 +41,7 @@ DIRS = 		tkgraph top tkoct oct2ptcl
 PTOLEMY = 	../../..
 
 MAKEVARS =	\
-		"ARCH=$(PTARCH)" 
+		"PTARCH=$(PTARCH)" 
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	 @for x in $(DIRS); do \

@@ -51,7 +51,7 @@ OTHERDIRS = tkoct $(MTDIRS)
 # directories with subtrees
 SDIRS = Packages Xpackages vem tkoct
 
-MAKEVARS = "ARCH=$(PTARCH)"
+MAKEVARS = "PTARCH=$(PTARCH)"
 
 OCTTOOLS=$(PTOLEMY)/octtools
 

@@ -58,7 +58,7 @@ SDIRS = thread domains
 # directories to build TAGS tables in
 TDIRS = kernel domains
 
-MAKEVARS = "ARCH=$(PTARCH)"
+MAKEVARS = "PTARCH=$(PTARCH)"
 
 # This target makes sure all the makefiles are current
 makefiles:
