@@ -42,10 +42,6 @@ void Target::delSched() {
 	sched = 0;
 }
 
-// default commTime method: only one processor, no time
-
-int Target::commTime(int,int,int,int) { return 0;}
-
 // display the schedule
 StringList Target::displaySchedule() {
 	if (sched) {
@@ -97,6 +93,8 @@ void Target::addCode (const char* code) {
 	fputs (code, stdout);
 }
 		
+int Target :: commTime(int,int,int,int) { return 0;}
+
 // by default, pass these on through
 void Target::setStopTime(float f) { sched->setStopTime(f);}
 void Target::resetStopTime(float f) { sched->resetStopTime(f);}
@@ -139,23 +137,6 @@ Target& Target::copyStates(const Target& src) {
 	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
 		destStatePtr->setValue(srcStatePtr->getInitValue());
 	return *this;
-}
-
-// Dummy parallel scheduling funcs.
-void Target :: clearCommPattern() {}
-void Target :: saveCommPattern() {}
-void Target :: restoreCommPattern() {}
-
-PGNode* Target :: backComm(PGNode*) { return 0;}
-
-	// this function schedules a node
-int Target :: scheduleComm(PGNode*, int earliestStart) {
-	return earliestStart;
-}
-
-// this function returns a list of alternative candidate processors
-IntList* Target :: whichProcs(Cluster*, PGParSchedule*) {
-	return 0;
 }
 
 // return the nth child.
