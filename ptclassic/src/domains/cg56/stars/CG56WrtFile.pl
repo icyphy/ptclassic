@@ -5,7 +5,7 @@ defstar {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
 	version { $Id$ }
-	author { J. Buck, Chih-Tsung Huang }
+	author { J. Buck, Chih-Tsung Huang, Jose L. Pino }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -24,13 +24,13 @@ Writes data to a file, for use with the Motorola DSP56000 simulator.
 	}
 	input {
 		name {input}
-		type {FIX}
+		type {ANYTYPE}
 	}
 	state {
 		name { fileName }
 		type { STRING }
-		default { "outfile" }
-		desc { 'Root' of filename that gets the data. '.sim' is appended.}
+		default { "" }
+		desc { 'Root' of filename that gets the data.}
 	}
 	state {
 		name { outVal}
@@ -38,16 +38,18 @@ Writes data to a file, for use with the Motorola DSP56000 simulator.
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
 	}
-
-	codeblock (logOut) {
-output $ref(outVal) $val(fileName).sim -RF
-}
 	// this codeblock produces code
 	codeblock (copy) {
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
         initCode {
+		StringList logOut = "output $ref(outVal) ";
+		if (fileName.null()) 
+			logOut << "$starSymbol(/tmp/cgwritefile) ";
+		else
+			logOut << "$val(fileName) ";
+		logOut << (strcmp(input.resolvedType(),INT)?"-RF":"-RD");
 		addCode(logOut,"simulatorCmds");
 	}
 	go {
