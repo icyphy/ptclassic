@@ -41,7 +41,7 @@ include $(CONFIG)
 CLASSPATH = .
 
 JSRCS = \
-	JNITest.java
+
 
 EXTRA_SRCS =	$(JSRCS) README
 
