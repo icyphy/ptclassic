@@ -16,6 +16,12 @@ include $(ROOT)/mk/config-g++.mk
 X11_INCSPEC = -I/usr/X11/include
 X11_LIBSPEC = -L/usr/X11/lib -lX11
 
+# Use gcc everywhere _except_ in octtools
+CC=		gcc
+OPTIMIZER=	-O2
+GPPFLAGS =	-g $(MEMLOG) $(OPTIMIZER)
+CFLAGS =	-g $(OPTIMIZER)
+
 # Flag that cc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
 # Note that currently vem is built with cc, not gcc, so vem uses
