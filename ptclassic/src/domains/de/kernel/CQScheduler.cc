@@ -1,6 +1,9 @@
+
 /* 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
+
+$Id$ $Revision$
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
@@ -24,7 +27,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 static const char file_id[] = "$RCSfile$";
 
-// copyright
 
 #ifdef __GNUG__
 #pragma implementation
