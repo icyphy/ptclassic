@@ -38,6 +38,11 @@
 # - hotlist support
 
 #######################################################################
+#### options
+#
+option add *HTML.fontSize medium widgetDefault
+
+#######################################################################
 #### HTML
 # A window containing a text widget that displays HTML using the
 # HTML library by Stephen Uhler.  The HTML may be specified directly
@@ -182,17 +187,19 @@ body ::tycho::HTML::constructor {args} {
     # Configure the reference directory of the widget
     component text configure -directory [file dirname $file]
 
-    foreach size {{tiny -2} {small 0} {medium 2} {large 4} {huge 8}} {
+    array set sizes {tiny -2 small 0 medium 2 large 4 huge 8}
+    foreach size {tiny small medium large huge} {
         # Note that the File base class has no method for adding radio
         # buttons to menus.
 	$itk_component(menuFormat) add radio \
 		-label [lindex $size 0] \
 		-variable [scope sizeName($this)] \
 		-command \
-		"$this configure -size [lindex $size 1]; \
+		"$this configure -size $sizes($size); \
 		::tycho::HTMLText::render [winfo command $itk_component(text)]"
     }
-    set sizeName($this) medium
+    set sizeName($this) [option get $itk_component(hull) fontSize HTML]
+    configure -size $sizes($sizeName($this))
 
     # Modify the menu commands appropriately.
     insertMenuItem "Open Source" "Switch File..." File \
