@@ -47,7 +47,7 @@ GNU_OBJ=$(OBJ_DIR)/gnu
 # Machine independent files
 GNU_PREFIX=$(GNU_DEST)/common
 
-GCC_VERSION=2.6.3
+GCC_VERSION=2.7.0
 
 # Machine dependent files
 GNU_EXEC_PREFIX=$(GNU_DEST)/$(PTARCH)
