@@ -50,8 +50,11 @@ static char SccsId[]="$Id$";
 #include <errno.h>
 #include <sys/types.h>
 
+#if defined(__sparc) && !defined(__svr4__) && defined(__GNUC__)
+/* SunOS4.1.3 under gcc */
+extern int connect(int, struct sockaddr *, int);
+#endif
 extern int errno;
-
 /* #include "list.h"    */
 /* #include "message.h" */
 #include "rpcApp.h"
