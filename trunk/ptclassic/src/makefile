@@ -20,7 +20,7 @@ MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib
 LDIRS = ptlang pigiRpc filters utils
 
 # directories with subtrees
-SDIRS = thread domains
+SDIRS = tkvem thread domains
 
 # directories to build TAGS tables in
 TDIRS = kernel domains
