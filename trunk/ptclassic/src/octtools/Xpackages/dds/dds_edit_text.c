@@ -181,6 +181,7 @@ ddsData data;			/* Should be (ddsEditText *)          */
 		 "The parent of DDS_EDIT_TEXT components must be of type DDS_TOP or DDS_COMPOSITE"); 
 	/*NOTREACHED*/
     }
+    return(ddsHandle)NULL;
 }
 
 
@@ -287,6 +288,7 @@ ddsInternal *child;		/* New child   */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_EDIT_TEXT components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
@@ -317,9 +319,6 @@ ddsFullEditText *item;
  * will be required.
  */
 {
-    int depth;
-    Pixel bg;
-
     if (!focus_init) {
 	XtAppAddActions(XtWidgetToApplicationContext(item->text),
 			newActions, newActionsCount);
@@ -429,6 +428,7 @@ Widget w;			/* Widget */
 		 "Failed to locate edit text component from widget");
 	/*NOTREACHED*/
     }
+    return (ddsInternal*)NULL;
 }
 
 static void rel(w)
