@@ -236,8 +236,19 @@ body ::tycho::PNSimulation::_construct {} {
             \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"
         set result [_send "set $e \[ \
-            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
+		\$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"]
         debug " -> $result"
+
+	
     }
+    
+    # Create the MutationListener for the simulation
+
+    set view [_send "set view \[java::call gui.DynamicGraphView makeView \"Sieve of Eratosthenes\" 800 600\]
+    \$view loadPtolemyGraph \$univ;
+    set director \[\$univ getDirector\]
+    \$director addMutationListener \$view; "]
+
+    debug " -> $view"
 }
