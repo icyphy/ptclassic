@@ -52,7 +52,7 @@ defstar {
 	start {
 		// maximum fixed point value
 		const double maxFix = 1.0 - 1.0/double(1 << 23);
-		double twoPiF = 2.0 * PI * double(frequency);
+		double twoPiF = 2.0 * M_PI * double(frequency);
 		X = cos(twoPiF);
 		if (double(X) > maxFix) X = maxFix;
 		const char* p = calcType;
