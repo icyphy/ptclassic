@@ -74,4 +74,5 @@ namespace ::tycho {
     tycho::File::registerEditor {.cir .sp} EditSpice {Spice editor}
     tycho::File::registerEditor {.mk .template} EditMake {Makefile editor} \
 	    {Makefile makefile GNUmakefile}
+    tycho::File::registerEditor {.vhdl .VHDL} EditVHDL {VHDL editor}
 }
