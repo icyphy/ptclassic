@@ -21,6 +21,10 @@ $Id$
 
 class Scheduler;
 class Galaxy;
+class PGNode;
+class Cluster;
+class PGParSchedule;
+class IntList;
 
 class Target : public Block {
 private:
@@ -80,6 +84,9 @@ public:
 		else return child(n);
 	}
 
+	// return number of processors
+	int nProcs() const { return ptrToChildren ? nChildren : 1;}
+
 	// initialize the target, given a galaxy.
 	virtual int setup(Galaxy&);
 
@@ -104,5 +111,24 @@ public:
 	// wrapup
 	virtual void wrapup();
 
+	// methods for use in parallel scheduling -- the baseclass
+	// takes appropriate actions for a single processor, which
+	// is usually almost nothing.
+
+	// these functions manipulate the saved communication pattern
+	// (which doesn't exist in the baseclass)
+	virtual void clearCommPattern();
+	virtual void saveCommPattern();
+	virtual void restoreCommPattern();
+
+	virtual PGNode* backComm(PGNode*);
+
+	// this function schedules a node
+	virtual int scheduleComm(PGNode*, int earliestStart);
+
+	// this function returns a list of alternative candidate processors
+	virtual IntList* whichProcs(Cluster*, PGParSchedule*);
+
 };
 #endif
+
