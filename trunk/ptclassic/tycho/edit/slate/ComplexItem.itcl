@@ -65,8 +65,8 @@ class ::tycho::Picture {
     # Create a new complex item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
     
-    # Delete a complex item
-    proc destruct {id canvas slate}
+    # Delete a complex item (NOT USED)
+    # proc destruct {id canvas slate}
 
     ###################################################################
     ####                         public procs                      ####
@@ -124,7 +124,6 @@ class ::tycho::Picture {
 
     #### Set method table
     set methodtable(construct)     ::tycho::Picture::construct
-    set methodtable(destruct)      ::tycho::Picture::destruct
     set methodtable(coords)        ::tycho::Picture::coords
     set methodtable(itemcget)      ::tycho::Picture::itemcget
     set methodtable(itemconfigure) ::tycho::Picture::itemconfigure
@@ -164,9 +163,8 @@ body ::tycho::Picture::construct {id canvas slate tags x0 y0 x1 y1 args} {
 # This procedure does not need to delete component items, as
 # that is done automatically by the Slate.
 #
-body ::tycho::Picture::destruct {id canvas slate} {
-    ;# Do nothing
-}
+# body ::tycho::Picture::destruct {id canvas slate} {}
+#
 
 ##########################################################################
 #### coords
