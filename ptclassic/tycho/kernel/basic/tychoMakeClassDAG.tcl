@@ -228,9 +228,9 @@ proc tychoStandardDAG {} {
             [file join editors slate] \
             [file join typt editors ] \
             [file join typt kernel ] \
+            [file join typt controls ] \
             [file join lib idx ] \
-            [file join lib tydoc ] \
-            [file join lib util ]
+            [file join lib tydoc ]
     ]
 
     foreach dir $dirs {
