@@ -30,7 +30,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 
-ARCHFLAGS =	-DPTSOL2_6
+ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6
 
 include $(ROOT)/mk/config-sol2.mk
 
