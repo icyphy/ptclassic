@@ -124,9 +124,8 @@ public:
     double ECT;     // Expected Completion Time
     int priority;
 
-    ResLLCell( DERCEvent* e, double time, int prio) 
-         : event(e), ECT(time), priority(prio) {}
-
+    // For some reason, under Cygwin32, we need to the body in the .cc file
+    ResLLCell( DERCEvent* e, double time, int prio); 
 };
 
 #endif
