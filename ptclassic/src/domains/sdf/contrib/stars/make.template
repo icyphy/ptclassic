@@ -60,7 +60,7 @@ Wireless.cc \
 fft.cc
 
 # The .cc files
-SRCS =		$(PL_SRCS:.pl=.cc) $(LIB_SRCS)
+SRCS =		$(LIB_SRCS) $(PL_SRCS:.pl=.cc)
 
 # object files for all stars
 OBJS =		$(SRCS:.cc=.o)
