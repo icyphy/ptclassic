@@ -1,18 +1,26 @@
 #!/bin/sh
-# usage: vendorexec.s56dsp relpath args
+# usage: vendorexec.s56dsp relpath [-nocheck] args
 # Checks to make sure the s56dsp is installed, and then executes the
 # command as though vendorexec had been called instead.  An error message
 # is issued no 56dsp is installed.
 #
 # $Id$
 
-S56DSP=${S56DSP-`dirname $0`/../s56dsp}
+SELF_DIR=`dirname $0`
+S56DSP=${S56DSP-$SELF_DIR/../s56dsp}
+#QDM_LIBRARY=${QDM_LIBRARY-$SELF_DIR/../qdm/lib}
+#export S56DSP QDM_LIBRARY
 export S56DSP
-if [ `/usr/etc/modstat | grep -s s56dsp` ] ; then
-    exec `dirname $0`/vendorexec $*
+if [ "$2" = "-nocheck" ] ; then
+    relpath=$1; shift; shift
+    exec $SELF_DIR/vendorexec $relpath $*
+    exit
+fi
+if [ -n "`/usr/etc/modstat | grep s56dsp`" ] ; then
+    exec $SELF_DIR/vendorexec $*
 else
     SELF=`basename $1`
-    USEHOSTS="bennett carson gammow"
+    USEHOSTS="foucault maury gammow"
     echo "$SELF: s56dsp driver not loaded on `hostname`"
-    echo "$SELF: Try using one of the following: $USEHOSTS"
+    echo "$SELF: ... Try using one of the following: $USEHOSTS"
 fi
