@@ -82,15 +82,17 @@ makefiles:
 
 
 #skip bitmaps, doc, lib
-LIBS=bags/libbags.a buffers/libbuffers.a \
-	dialogs/libdialogs.a dispatch/libdispatch.a \
-	drawing/libdrawing.a drs/libdrs.a main/libmain.a \
-	options/liboptions.a patterns/libpatterns.a \
-	physical/libphysical.a properties/libproperties.a rpc/librpc.a \
-	rpc/librpcserver.a \
-	schematic/libschematic.a select/libselect.a \
-	strings/libstrings.a symbolic/libsymbolic.a \
-	utility/libutility.a windows/libwindows.a 
+LIBS=bags/libbags.$(LIBSUFFIX)  buffers/libbuffers.$(LIBSUFFIX) \
+	dialogs/libdialogs.$(LIBSUFFIX) dispatch/libdispatch.$(LIBSUFFIX) \
+	drawing/libdrawing.$(LIBSUFFIX) drs/libdrs.$(LIBSUFFIX) \
+	main/libmain.$(LIBSUFFIX) \
+	options/liboptions.$(LIBSUFFIX) patterns/libpatterns.$(LIBSUFFIX) \
+	physical/libphysical.$(LIBSUFFIX) \
+	properties/libproperties.$(LIBSUFFIX) rpc/librpc.$(LIBSUFFIX) \
+	rpc/librpcserver.$(LIBSUFFIX) \
+	schematic/libschematic.$(LIBSUFFIX) select/libselect.$(LIBSUFFIX) \
+	strings/libstrings.$(LIBSUFFIX) symbolic/libsymbolic.$(LIBSUFFIX) \
+	utility/libutility.$(LIBSUFFIX) windows/libwindows.$(LIBSUFFIX) 
 
 # All the .o files in the LIBS above.
 OBJECTS=bags/bags.o buffers/bufinternal.o \
@@ -119,8 +121,9 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	windows/queue.o windows/table.o windows/titlebar.o \
 	windows/trans.o windows/wininternal.o
 
-# Objects (*.o and *.a files) that are locally produced
-VEMOBJECTS =	$(OBJECTS) dialogs/libdialogs.a rpc/librpcserver.a
+# Objects (*.o and *.$(LIBSUFFIX) files) that are locally produced
+VEMOBJECTS =	$(OBJECTS) dialogs/libdialogs.$(LIBSUFFIX) \
+	rpc/librpcserver$(LIBSUFFIX)
 
 # This rule uses GNU make specific directives $(@D) $(@F) 
 $(VEMOBJECTS):
@@ -129,7 +132,7 @@ $(VEMOBJECTS):
 		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
 	)
 
-VEMLIBS = rpc/librpcserver.a dialogs/libdialogs.a \
+VEMLIBS = rpc/librpcserver$(LIBSUFFIX) dialogs/libdialogs$(LIBSUFFIX) \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
