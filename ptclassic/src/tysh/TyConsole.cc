@@ -62,25 +62,13 @@ TyConsole::TyConsole(int argc, char **argv) {
   // Define Tcl and Tk extensions
   tytcl = new TyTcl(interp, ptkw);
 
-  // Process command line arguments.
-  // Main function is to just make them available in the Tcl variables "argc"
-  // and "argv".  However, in addition, if the first argument does not start
-  // with a "-", then strip it off and use it as the name of a script file to
-  // process.
-  char *fileName = NULL;
-  if ((argc > 1) && (argv[1][0] != '-')) {
-    fileName = argv[1];
-    argc--;
-    argv++;
-  }
-
+  // Command line arguments are made available in the Tcl variables "argc"
+  // and "argv".
+  InfString argcstring = argc-1;
+  Tcl_SetVar(interp, "argc", (char*)argcstring, TCL_GLOBAL_ONLY);
   char *args = Tcl_Merge(argc-1, argv+1);
   Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
   ckfree(args);
-  InfString buf = argc-1;
-  Tcl_SetVar(interp, "argc", (char*)buf, TCL_GLOBAL_ONLY);
-  Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv[0],
-	     TCL_GLOBAL_ONLY);
 
   // Set the "tcl_interactive" variable.
   int tty = isatty(0);
@@ -89,7 +77,7 @@ TyConsole::TyConsole(int argc, char **argv) {
     // I removed this to allow for killing of Tycho with ^C. - jking -
   }
   Tcl_SetVar(interp, "tcl_interactive",
-	     ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+	     (tty) ? "1" : "0", TCL_GLOBAL_ONLY);
 
   // our vers of Tk_AppInit
   if (appInit(interp, ptkw) != TCL_OK) {
@@ -100,46 +88,22 @@ TyConsole::TyConsole(int argc, char **argv) {
   }
 
   // Load the startup file Tycho.tcl
+  char *ty = getenv("TYCHO");
   char *pt = getenv("PTOLEMY");
-  InfString command = pt ? pt : "~ptolemy";
-  command << "/tycho/kernel/Tycho.tcl";
+  InfString command;
+  if (ty) {
+    command << ty << "/kernel/Tycho.tcl";
+  } else {
+    if (pt) {
+      command << pt << "/tycho/kernel/Tycho.tcl";
+    } else {
+      command << "~ptolemy/tycho/kernel/Tycho.tcl";
+    }
+  }	
   if (Tcl_EvalFile(interp, (char*)command) != TCL_OK) {
     fprintf(stderr,
 	"Unable to load Tycho.tcl startup file: %s\n ", interp->result);
     tyExit(1);
-  }
-
-// FIXME: tcl7.5a1 does not support tcl_RcFileName, see the changes file
-#if TCL_MINOR_VERSION < 5
-  // Source a user-specific startup file if Tcl_AppInit specified
-  // one and if the file exists.
-  if (tcl_RcFileName != NULL) {
-    Tcl_DString buffer;
-
-    char *fullName = Tcl_TildeSubst(interp, tcl_RcFileName, &buffer);
-    if (fullName == NULL) {
-      fprintf(stderr,
-	"Tilde substitution failed in ~/.tycho: %s\n", interp->result);
-    } else {
-      if (access(fullName, R_OK) == 0) {
-	if (Tcl_EvalFile(interp, fullName) != TCL_OK) {
-	  fprintf(stderr,
-		"Failed to source ~/.tycho: %s\n", interp->result);
-	}
-      }
-    }
-    Tcl_DStringFree(&buffer);
-  }
-#endif
-
-  // If a script file was specified then just source that file and quit.
-  if (fileName != NULL) {
-    if (Tcl_EvalFile(interp, fileName) != TCL_OK) {
-      fprintf(stderr, "Script file fails: %s\n", interp->result);
-      tyExit(1);
-    } else {
-      tyExit(0);
-    }
   }
 }
 
@@ -178,9 +142,6 @@ int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
     return TCL_ERROR;
   if (Tk_Init(ip) == TCL_ERROR)
     return TCL_ERROR;
-#if TCL_MINOR_VERSION < 5
-  tcl_RcFileName = "~/.tycho";
-#endif  
   // Add [incr Tcl] (itcl) facilities
   if (Itcl_Init(ip) == TCL_ERROR) {
     return TCL_ERROR;
