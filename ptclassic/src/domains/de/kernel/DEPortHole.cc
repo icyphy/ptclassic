@@ -134,7 +134,10 @@ void InDEPort :: triggers (GenericPort& op)
 InDEPort :: ~InDEPort () {
 	cleanIt();
 	LOG_DEL; delete inQue;
-	LOG_DEL; delete triggerList;
+	// don't kill the triggerlist if I belong to an MPH!
+	if (!getMyMultiPortHole()) {
+		LOG_DEL; delete triggerList;
+	}
 }
 
 Particle& OutDEPort :: put(float stamp)
