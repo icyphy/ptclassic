@@ -40,8 +40,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "DynamicGalaxy.h"
-#include "KnownBlock.h"
-#include "KnownState.h"
 #include "StringList.h"
 
 class Target;
@@ -72,36 +70,9 @@ public:
 };
 
 class InterpGalaxy: public DynamicGalaxy {
-
-private:
-	StringList actionList;	// saves actions used in building galaxy
-	StringList initList;	// actions to be done by initialize()
-	NodeList nodes;
-	const char* myClassName;
-
-protected:
-	// find a star porthole
-	PortHole* findPortHole(const char* star,const char* port);
-
-	// find a star porthole or multiporthole
-	// The second of these resolves aliases
-	GenericPort* findGenPort(const char* star,const char* port);
-	GenericPort* findGenericPort(const char* star,const char* port);
-
-	// find a star multiporthole
-	MultiPortHole* findMPH(const char* star, const char* port);
-
-	// routine to reset all structures (like body of destructor)
-	void zero();
-
-	// body of copy constructor
-	void copy(const InterpGalaxy&);
 public:
-// constructor: makes an empty galaxy
-	InterpGalaxy();
-
-// constructor: sets the class name
-	InterpGalaxy(const char* c);
+// constructor: first arg sets the class name.  Second specifies the domain.
+	InterpGalaxy(const char* c, const char* dom);
 
 // copy constructor: duplicates an existing galaxy
 	InterpGalaxy(const InterpGalaxy& g) { copy(g);}
@@ -197,5 +168,30 @@ public:
 
 // Destructor
 	~InterpGalaxy();
+
+protected:
+	// find a star porthole
+	PortHole* findPortHole(const char* star,const char* port);
+
+	// find a star porthole or multiporthole
+	// The second of these resolves aliases
+	GenericPort* findGenPort(const char* star,const char* port);
+	GenericPort* findGenericPort(const char* star,const char* port);
+
+	// find a star multiporthole
+	MultiPortHole* findMPH(const char* star, const char* port);
+
+	// routine to reset all structures (like body of destructor)
+	void zero();
+
+	// body of copy constructor
+	void copy(const InterpGalaxy&);
+
+private:
+	StringList actionList;	// saves actions used in building galaxy
+	StringList initList;	// actions to be done by initialize()
+	NodeList nodes;
+	const char* myClassName;
+	const char* innerDomain;
 };
 #endif
