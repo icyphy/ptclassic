@@ -117,6 +117,7 @@ ifndef TK
 
 	CGCTK=
 	CODESIGN=
+	FSM=
 	HOF=
 	SDFTK=
 	SDFDFM=
