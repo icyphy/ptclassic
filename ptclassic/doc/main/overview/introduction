@@ -32,7 +32,8 @@ and simulation of complex systems.
 .pp
 This work is an outgrowth of
 two previous generations of design environments,
-Blosim and Gabriel, that were aimed at digital signal processing applications.
+Blosim [Mes84a,b] and Gabriel [Bie90][Lee89b], that were
+aimed at digital signal processing applications.
 .IE Blosim
 .IE Gabriel
 Both environments used a block-diagram data-flow paradigm for the
@@ -57,6 +58,7 @@ Our goal is to make the system non-dogmatic, in the sense that the
 environment itself does not impose any particular computational
 model, and it is extensible to new models by simply adding to the
 system and not modifying what is already there.
+The overall software architecture is described in [Buc92b].
 Further goals are to incorporate features
 that have been successful in Blosim or Gabriel,
 such as achieving modularity and reusability of
@@ -68,23 +70,29 @@ Each model of computation in \*(PT is called a
 .c Domain.
 .IE domain
 The system currently has a synchronous
-data-flow (SDF) domain (like Gabriel), a dynamic dataflow (DDF) domain 
-(like Blosim), a discrete-event (DE) domain, and some others that
-are either more specialized or still under development.
-The system is thus already capable of simulating
+data-flow (SDF) domain [Bha92] [Buc91] [Lee87a] [Lee87b] [Lee91b]
+(like Gabriel), a dynamic dataflow (DDF) domain [Ha91] [Ha92]
+(like Blosim), a discrete-event (DE) domain, a Thor domain [Tho86] (for circuit
+simulation) and various code generation domains using dataflow
+semantics [Pin92].
+We are working on several more domains that have not reached sufficient
+maturity to be included in this release [Buc92a] [Lee91a] [Lee92a] [Lee93].
+The system is, however, already capable of simulating
 combinations of signal processing and communication networks
 (such as in packet speech and packet video) and combinations
-of behavioral and hardware simulation.
+of behavioral and hardware simulation [Kal91] [Kal92],
+and is capable of synthesizing
+real-time implementations in assembly code for Motorola DSPs,
+as well as accelerated simulation code in C [Pin92].
 .pp
-The same graphical interface used by Gabriel, based on
-Vem, can be used with at least some domains in \*(PT.
-Oct serves as the design database for the system,
-just as with Gabriel, enabling future assimilation
-of many Berkeley design tools.
+The graphical interface (pigi) is based on
+VEM [Har86], a graphical editor for the
+OCT design database [Har86], both developed in the CAD group at Berkeley.
 .pp
 A word about notation:
 In this and other \*(PT documentation, keywords from C++,
 or an abstract data type defined as a
 .c class
 in C++, or fragments of C++ code, are printed in the special font
-just used for "class".
+just used for "class".  However, since the documentation is written
+by many people, we cannot promise perfect consistency.

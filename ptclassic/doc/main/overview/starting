@@ -1,7 +1,7 @@
 .\" $Id$
 .\" Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
-.H1 "Getting Started"
+.H1 "Terminology"
 .pp
 \*(PT relies on a basic very flexible computational model of a
 simulation.
@@ -60,8 +60,9 @@ Data passes between blocks in discrete units called
 .c Particle s.
 .IE particle
 For example,
-a particle in a signal processing system is a signal sample, usually
+a particle in a signal processing system is often a signal sample, usually
 a floating-point value.
+But it can also be an image, for example, in a video sequence.
 In a communication system, it may be a packet consisting of multiple
 fields.
 In domains using dataflow principles, a particle may be called a \fItoken\fR.
@@ -72,13 +73,19 @@ through an
 .IE "event horizon"
 The event horizon manages any format translations that may be required
 to stitch together two models of computation.
+User-defined particles are supported.
 .pp
 To get started, you can use the \*(PT interactive
 graphical interface (pigi), described below, or the \*(PT
 interpreter.
+The interpreter is based on a language called Tcl, invented at Berkeley
+[Ous90].
 Thus, both a graphical and textual specification language are available.
 It is unlikely that these two user interfaces will the only
 ones developed for \*(PT.
 They are, in fact, quite distinct from the \*(PT kernel,
 precisely so that other types of user interfaces can be readily
 accepted.
+Future versions of the graphical interface will also
+use Tcl and its associated X11 toolkit, Tk [Ous91], which will
+lend it much more flexibility.

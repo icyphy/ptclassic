@@ -1,11 +1,13 @@
 .\" $Id$
 .\" Be sure you have properly checked
-.\" out this file with SCCS (the version number should not be a number below):
+.\" out this file with SCCS (the version number should not be a number above):
 .H1 "Acknowledgements"
 .pp
 Ptolemy has had a number of contributors.
 The overall coordinators are Prof. Edward A. Lee and Prof.
-David G. Messerschmitt of the EECS department at UC Berkeley.
+David G. Messerschmitt of the EECS department at UC Berkeley, although
+there has also been involvement by the groups of Profs. Rabaey, Brodersen,
+Linnartz, and Kahn.
 Joseph Buck has been responsible for
 key management of the development of the kernel,
 and hence has impacted every aspect of Ptolemy.
@@ -13,9 +15,21 @@ He also coordinated virtually all contributions, and
 authored both the interpreter and the ptlang preprocessor.
 Other key contributors to the kernel include Soonhoi Ha
 and Ichiro Kuroda.
-Soonhoi Ha authored both the DDF and DE domains, including
-many of the basic stars and the basic domain interface,
-while Ichiro Kuroda contributed
+Soonhoi Ha authored the DDF, DE, and CGC domains, including
+many of the basic stars and the basic domain interface, and
+also made extensive contributions to the CG domain, the kernel,
+and parallel schedulers of all types.
+Philip Bitar had a major impact on the design of the DE domain.
+Jose Pino has been pimarily responsible for the code generation
+domains, although extensive contributions have been made by Soonhoi Ha,
+Preveen Murthy, Tom Parks, and Kennard White.
+Chih-Tsung Huang, with some help from Jose Pino, singlehandedly ported
+all the assembly code generation stars from Gabriel.
+Shuvra Bhattacharyya and Joe Buck wrote the loop scheduling mechanism,
+and Shuvra Bhattacharyya contributed the Gantt chart display tool.
+Seungjun Lee wrote the Thor domain, although some contributions
+to it have been made by Asawaree Kalavade.
+Ichiro Kuroda from NEC contributed
 to the development of the state handling mechanism.
 The graphical interface
 was written by Edwin Goei, and has been enhanced by several
@@ -30,6 +44,16 @@ project management, documentation, and code generation efforts in Ptolemy.
 The first version of the graphical interface
 was written by Holly Heine.
 .pp
+Many people have had an impact on the current release by contributing stars
+and/or demo programs.  These include, in addition to all the
+people mentioned above, Rachel Bowers, Rolando Diesta, Alireza Khazeni,
+Erick Hamilton, Gregory Walter, and Chris Yu (from the Naval
+Research Laboratories).  Others had an indirect impact by contributing
+stars or demo programs to the predecessor program, Gabriel.
+These include Jeff Bier, Martha Fratt, Eric Guntvedt, Mike Grimwood,
+Wai-Hung Ho, Steve How, Jonathan Lee, Brian Mountford, Maureen O'Reilly,
+Andria Wong, and Anthony Wong.
+.pp
 Ptolemy is very much an ongoing project, with current efforts
 expected to be included in future releases.
 Participants in those efforts will be acknowledged when their
@@ -39,26 +63,31 @@ work is included in a release.
 The Ptolemy project started in late 1989.
 A variety of sponsors have directly or indirectly supported
 the effort.  Most notably, these include:
-DARPA,
-the Semiconductor Research Corporation (SRC),
-the National Science Foundation,
-the State of California MICRO Program,
-Motorola,
-Hughes Network Systems,
-Sony,
-Bell Northern Research,
-Hitachi,
-Star Semiconductor,
-Hughes Research Laboratories,
-NEC,
-GTE Government Systems,
+AT&T,
+Bell Northern Research (BNR),
 Comdisco Systems,
-and Dolby Laboratories.
-In kind contributions have also been received from 
-Ariel,
+DARPA,
+Dolby Laboratories,
+GTE Government Systems,
+Hitachi America,
+Hitachi Ltd.,
+Hughes Network Systems,
+Hughes Research Laboratories,
+Motorola,
+the National Science Foundation (NSF),
+the Naval Research Laboratories (NRL),
+NEC,
+Philips,
+Rockwell,
+the Semiconductor Research Corporation (SRC),
+the State of California MICRO Program,
+Sony,
+and Star Semiconductor.
+In kind contributions have also been received from Ariel,
+Berkeley Camera Engineering,
+Texas Instruments,
 Spectrum Signal Processing,
 Signal Technology Inc. (STI),
-Xilinx,
-and Berkeley Camera Engineering.
-Many other sponsors have contributed indirectly by supporting
+and Xilinx.
+Other sponsors have contributed indirectly by supporting
 Gabriel, the predecessor.
