@@ -145,6 +145,7 @@ protected:
 	CodeStream localLinkOptionsStream;
 	CodeStream remoteLinkOptionsStream;
 	CodeStream remoteFilesStream;
+	CodeStream remoteCFilesStream;
 	
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
@@ -185,9 +186,17 @@ protected:
 	StringState linkOptions;
 	StringArrayState resources;
 
-	// combined link options
+	// combined linked options
 	StringList getLinkOptions(int expandEnvironmentVars);
+
+	// combined compile options
 	StringList getCompileOptions(int expandEnvironmentVars);
+
+	// complete list of C files on which the compilation depends
+	StringList getDependentCFiles(int expandEnvironmentVars);
+
+	// complete list of extra source files
+	StringList getDependentSourceFiles(int expandEnvironmentVars);
 
 	// if a remote compilation, then copy over dependent files
 	// to the remote machine

@@ -124,6 +124,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("localLinkOptions", &localLinkOptionsStream);	
 	addStream("remoteLinkOptions", &remoteLinkOptionsStream);	
 	addStream("remoteFiles", &remoteFilesStream);	
+	addStream("remoteCFiles", &remoteCFilesStream);	
 	addStream("mainClose", &mainClose);
 	addStream("mainLoop",&mainLoop);
 
@@ -179,36 +180,36 @@ void CGCTarget::declareStar(CGCStar* star)
 }
 
 void CGCTarget :: setup() {
-	// Note that code strings are not initialized here since
-	// parent target may want to put some code before calling
-	// setup() method.
-	// Instead, initCodeStrings() is called in frameCode() method
-	// after contructing the whole code.
+    // Note that code strings are not initialized here since
+    // parent target may want to put some code before calling
+    // setup() method.
+    // Instead, initCodeStrings() is called in frameCode() method
+    // after contructing the whole code.
 
-	// member initialize
-	galId = 0;
-	curId = 0;
+    // member initialize
+    galId = 0;
+    curId = 0;
 
-	if (galaxy()) setStarIndices(*galaxy()); 
-	HLLTarget::setup();
+    if (galaxy()) setStarIndices(*galaxy()); 
+    HLLTarget::setup();
 }
 
 void CGCTarget :: initCodeStrings() {
-	mainLoop.initialize();
-	globalDecls.initialize();
-	procedures.initialize();
-	include.initialize();
-	mainDecls.initialize();
-	mainInit.initialize();
-	commInit.initialize();
-	wormIn.initialize();
-	wormOut.initialize();
-	mainClose.initialize();
-	cmdargStruct.initialize();	
-	cmdargStructInit.initialize();	
-	setargFunc.initialize();	
-	setargFuncHelp.initialize();	
-      }
+    mainLoop.initialize();
+    globalDecls.initialize();
+    procedures.initialize();
+    include.initialize();
+    mainDecls.initialize();
+    mainInit.initialize();
+    commInit.initialize();
+    wormIn.initialize();
+    wormOut.initialize();
+    mainClose.initialize();
+    cmdargStruct.initialize();	
+    cmdargStructInit.initialize();	
+    setargFunc.initialize();	
+    setargFuncHelp.initialize();	
+}
 
 StringList CGCTarget::pragma(const char* parentname,
 			     const char* blockname) const {
@@ -227,26 +228,26 @@ StringList CGCTarget::pragma(const char* parentname,
 StringList CGCTarget::pragma (const char* parentname,		
 			      const char* blockname,
 			      const char* pragmaname) const {
-  const char* value = "";
-  InfString compoundname;
-  compoundname << parentname << "." << blockname;
-  if (strcmp(pragmaname, "state_name_mapping") == 0) {
-    const char* lookupValue = mappings.lookup(compoundname);
-    if (lookupValue) value = lookupValue;
-  }
-  return value;
+    const char* value = "";
+    InfString compoundname;
+    compoundname << parentname << "." << blockname;
+    if (strcmp(pragmaname, "state_name_mapping") == 0) {
+      const char* lookupValue = mappings.lookup(compoundname);
+      if (lookupValue) value = lookupValue;
+    }
+    return value;
 }
 
 StringList CGCTarget::pragma (const char* parentname,		
 			      const char* blockname,
 			      const char* pragmaname,
 			      const char* value) {
-  InfString compoundname;
-  compoundname << parentname << "." << blockname;
-  if (strcmp(pragmaname, "state_name_mapping") == 0) {
-    mappings.insert(compoundname, value);
-  }
-  return "";
+    InfString compoundname;
+    compoundname << parentname << "." << blockname;
+    if (strcmp(pragmaname, "state_name_mapping") == 0) {
+      mappings.insert(compoundname, value);
+    }
+    return "";
 }
 
 static char* complexDecl =
@@ -366,9 +367,10 @@ void CGCTarget :: frameCode () {
 int CGCTarget :: processDependentFiles() {
     int retval = TRUE;
     if (!onHostMachine(targetHost)) {
-	if (remoteFilesStream.length() > 0) {
+	StringList sourceFiles = getDependentSourceFiles(TRUE);
+	if (sourceFiles.length() > 0) {
 	    retval = rcpCopyMultipleFiles(targetHost, destDirectory,
-					  remoteFilesStream, FALSE);
+					  sourceFiles, FALSE);
 	}
     }
     return retval;
@@ -393,66 +395,108 @@ int CGCTarget::compileCode() {
 
 // return compile command
 StringList CGCTarget :: compileLine(const char* fName) {
-	// Get the compiler and linker arguments with environment
-	// variables expanded
-	StringList compileArgs = getCompileOptions(TRUE);
-	StringList linkArgs = getLinkOptions(TRUE);
-	StringList cmd = (const char*) compileCommand;
-	cmd << " " << compileArgs << " " << fName << " " << linkArgs;
-	return cmd;
+    // Get the compiler and linker arguments with environment
+    // variables expanded
+    StringList compileArgs = getCompileOptions(TRUE);
+    StringList linkArgs = getLinkOptions(TRUE);
+    StringList srcFiles = getDependentCFiles(TRUE);
+    StringList cmd = (const char*) compileCommand;
+    if (compileArgs.length > 0) cmd << " " << compileArgs;
+    cmd << " " << fName;
+    if (srcFiles.length() > 0) cmd << " " << srcFiles;
+    if (linkArgs.length() > 0) cmd << " " << linkArgs;
+    cmd << " ";
+    return cmd;
 }
 
 // Return a concatenation of all applicable link options, and expand
 // the environment variables if expandEnvironmentVars is TRUE.
 StringList CGCTarget :: getLinkOptions(int expandEnvironmentVars) {
-	StringList retLinkOptions;
+    StringList retLinkOptions = "";
 
-	// Link options requested by stars if we're on a local machine
-	// such as the ptdsp or CGCrtlib libraries
-	if (onHostMachine(targetHost)) {
-		retLinkOptions << localLinkOptionsStream << " ";
-	}
-	else {
-		retLinkOptions << remoteLinkOptionsStream << " ";
-	}
+    // Link options requested by stars if we're on a local machine
+    // such as the ptdsp or CGCrtlib libraries
+    if (onHostMachine(targetHost)) {
+	if (localLinkOptionsStream.length() > 0)
+	    retLinkOptions << localLinkOptionsStream << " ";
+    }
+    else {
+	if (remoteLinkOptionsStream.length() > 0)
+	    retLinkOptions << remoteLinkOptionsStream << " ";
+    }
 
-	// Link options requested by the user as a target parameter
-	// such as what math library to use
-	retLinkOptions << (const char*) linkOptions << " ";
+    // Link options requested by the user as a target parameter
+    // such as what math library to use
+    const char* opts = (const char*) linkOptions;
+    if (opts && *opts) retLinkOptions << opts << " ";
 
-	// Link options requested by stars
+    // Link options requested by stars
+    if (linkOptionsStream.length() > 0)
 	retLinkOptions << linkOptionsStream << " ";
 
-	// Conditionally expand environment variables in the link options
-	if (expandEnvironmentVars) {
-	    char* allLinkOptions = expandPathName(retLinkOptions);
-	    retLinkOptions = allLinkOptions;
-	    delete [] allLinkOptions;
-	}
+    // Conditionally expand environment variables in the link options
+    if (expandEnvironmentVars && retLinkOptions.length() > 0) {
+	char* allLinkOptions = expandPathName(retLinkOptions);
+	retLinkOptions = allLinkOptions;
+	delete [] allLinkOptions;
+    }
 
-	return retLinkOptions;
+    return retLinkOptions;
 }
 
 // Return a concatenation of all applicable compile options, and expand
 // the environment variables if expandEnvironmentVars is TRUE.
 StringList CGCTarget :: getCompileOptions(int expandEnvironmentVars) {
-	StringList retCompileOptions;
-	retCompileOptions << (const char*) compileOptions << " "
-			  << compileOptionsStream << " ";
+    StringList retCompileOptions = "";
+    const char* opts = (const char*) compileOptions;
+    if (opts && *opts) retCompileOptions << opts << " ";
+    if (compileOptionsStream.length() > 0)
+	retCompileOptions << compileOptionsStream << " ";
 
-	// Conditionally expand environment variables in the compile options
-	if (expandEnvironmentVars) {
-	    char* allCompileOptions = expandPathName(retCompileOptions);
-	    retCompileOptions = allCompileOptions;
-	    delete [] allCompileOptions;
-	}
+    // Conditionally expand environment variables in the compile options
+    if (expandEnvironmentVars && retCompileOptions.length() > 0) {
+	char* allCompileOptions = expandPathName(retCompileOptions);
+	retCompileOptions = allCompileOptions;
+	delete [] allCompileOptions;
+    }
 
-	return retCompileOptions;
+    return retCompileOptions;
+}
+
+// Return a concatenation of all dependent C files, and expand
+// the environment variables if expandEnvironmentVars is TRUE.
+StringList CGCTarget :: getDependentCFiles(int expandEnvironmentVars) {
+    StringList sourceFileList = "";
+    sourceFileList << remoteCFilesStream;
+
+    // Conditionally expand environment variables in the compile options
+    if (expandEnvironmentVars && sourceFileList.length() > 0) {
+	char* allSourceFiles = expandPathName(sourceFileList);
+	sourceFileList = allSourceFiles;
+	delete [] allSourceFiles;
+   }
+
+   return sourceFileList;
+}
+
+// Return a concatenation of all dependent C files, and expand
+// the environment variables if expandEnvironmentVars is TRUE.
+StringList CGCTarget :: getDependentSourceFiles(int expandEnvironmentVars) {
+    StringList sourceFileList = "";
+    sourceFileList << remoteFilesStream;
+
+    // Conditionally expand environment variables in the compile options
+    if (expandEnvironmentVars && sourceFileList.length() > 0) {
+	char* allSourceFiles = expandPathName(sourceFileList);
+	sourceFileList = allSourceFiles;
+	delete [] allSourceFiles;
+    }
+
+    return sourceFileList;
 }
 
 // Run the code.
-int CGCTarget :: runCode()
-{
+int CGCTarget :: runCode() {
     StringList cmd, error;
     cmd << "./" << filePrefix << "&";
     error << "Could not run " << filePrefix;
@@ -840,10 +884,3 @@ void CGCTarget :: compileRun(SDFScheduler* s) {
 /////////////////////////////////////////
 
 ISA_FUNC(CGCTarget,HLLTarget);
-
-
-
-
-
-
-
