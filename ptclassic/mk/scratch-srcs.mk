@@ -194,7 +194,7 @@ xv_configure: $(OBJARCH)/xv \
 	(cd $(OBJARCH)/xv; $(XMKMF) )
 
 $(OBJARCH)/xv: $(OBJARCH)
-	mkdir $(OBJARCH)/xv
+	if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
 $(OBJARCH)/xv/Imakefile:
 	-(cd $(OBJARCH)/xv; ln -s ../../src/xv/* .)	
