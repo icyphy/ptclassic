@@ -24,15 +24,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* $Id$
-   Copyright 1992 The Regents of the University of California
-   All rights reserved.
-
+/*
    Author:	T. M. Parks
    Date:	8 October 1992
+   Version:	$Id$
 */
 
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "CodeStream.cc";
 
 #ifdef __GNUG__
 #pragma implementation
@@ -40,20 +38,15 @@ static const char file_id[] = "$RCSfile$";
 
 #include "CodeStream.h"
 
-int CodeStream::put(const char* string, const char* name)
-{
-    if (name == NULL)
-    {
-	*this << string;
-	return TRUE;
-    }
-    else
-    {
+int CodeStream::put(const char* string, const char* name) {
+    if (name) {
 	int unique = sharedNames.isUnique(name);
 	if (unique) *this << string;
 	return unique;
     }
-    return FALSE;
+
+    *this << string;
+    return TRUE;
 }
 
 void CodeStream::initialize() {
