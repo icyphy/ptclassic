@@ -1,4 +1,4 @@
-# Pathname utilities
+# Pathname utilities that don't use the window system
 #
 # @Author: Edward A. Lee
 # @Contributors: Joel King, Farhana Sheikh
@@ -31,8 +31,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#### Options
-
 ########################################################################
 #### expandPath
 # Expand a filename, returning an absolute filename with the complete path.
@@ -59,6 +57,9 @@
 # normalized before being returned. Symbolic links are followed, as are
 # fields in the path like "/../". Thus, any two references to the same
 # path should return the same string.
+#
+# Formerly, this procedure was in File.itcl, but it was moved so that it
+# could be used in scripts that use itclsh, which does not have windows.#
 #
 proc ::tycho::expandPath { path } {
     set path [string trim $path]
