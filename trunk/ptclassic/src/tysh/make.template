@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, kernel directory.
+# Makefile for Ptolemy Tycho system, used to produce a tysh binary
 #
 # $Id$
 # Authors: E. A. Lee, Christopher Hylands, Jose Luis Pino
@@ -40,7 +40,7 @@ ROOT =		../../..
 # Path (absolute or relative) to the object directory root
 OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/src/tycho/kernel
+VPATH =		$(ROOT)/src/tycho/tysh
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
@@ -93,7 +93,7 @@ OTHERSRCS = \
 # Objects
 OBJS =		$(SRCS:.cc=.o)
 
-LIB =		libtycho.$(LIBSUFFIX)
+LIB =		libtysh.$(LIBSUFFIX)
 
 ifndef BASENAME
 ifndef PIGI
@@ -108,7 +108,7 @@ TK = 		1
 
 PT_DEPEND += 	$(LIBDIR)/$(LIB)
 
-PIGI_OBJS += 	-ltycho
+PIGI_OBJS += 	-ltysh
 
 INSTALL += 	$(LIBDIR)/$(LIB)
  
