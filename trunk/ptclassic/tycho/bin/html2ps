@@ -201,6 +201,19 @@ proc htmlGetTitle {htmlfile} {
     return {}
 }
 
+##############################################################################
+#### rm
+# Remove a file
+# FIXME: In tcl7.6, this should go away
+#
+proc ::tycho::rm { args } {
+    global tcl_platform
+    if { $tcl_platform(platform) != "windows" } { 
+	# Unix-ism
+	eval exec rm $args
+    }
+}
+
 #####################################################################
 #### html2ps
 # Use netscape to convert html to PostScript
@@ -324,11 +337,14 @@ proc htmlDir2ps {indexfile psfile} {
     flush stdout
     update
 
+    # Insert the index file
+    set filesSeen [linsert $filesSeen 0 $indexfile]
     cd [file dirname $indexfile]
     htmlLinks $indexfile
 
-    #set filesSeen [linsert $filesSeen 0 $indexfile]
+
     puts "  Done ([llength $filesSeen] files seen)"
+    #puts "$filesSeen"
     flush stdout
     update
 
@@ -341,8 +357,11 @@ proc htmlDir2ps {indexfile psfile} {
     flush stdout
     update
 
-    eval file delete -force $pslist
-    
+    if { $pslist != {} } {
+	eval ::tycho::rm -f $pslist
+	#eval file delete -force $pslist
+    }
+
     puts "About to generate PostScript"
     flush stdout
     update
@@ -353,8 +372,12 @@ proc htmlDir2ps {indexfile psfile} {
     update
     psConcat $psfile $pslist
 
-    eval file delete -force $pslist
+    if { $pslist != {} } {
+	eval ::tycho::rm -f $pslist
+	#eval file delete -force $pslist
+    }
 }
+
 
 #####################################################################
 #### addToDAG
