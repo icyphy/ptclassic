@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c)	%Q% The Regents of the University of California.
+# @Copyright (c)	1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is	hereby granted,	without	written	agreement and without
@@ -35,6 +35,7 @@ namespace ::tycho {
     }
 }
 
+##########################################################################
 ## Solid
 #
 # A 3D polygon. This accepts all "standard" relief options: flat,
@@ -46,7 +47,8 @@ namespace ::tycho {
 class ::tycho::Solid {
     inherit ::tycho::Picture
 
-    proc construct {id tags canvas args}
+    # Create a new Solid item
+    proc construct {id canvas slate tags args}
 
     ###################################################################
     ####                            options                        ####
@@ -63,20 +65,37 @@ class ::tycho::Solid {
     ###################################################################
     ####                         public procs                      ####
 
-    proc borderwidth {id canvas bw}
-    proc color       {id canvas co}
-    proc coords      {id canvas args}
-    proc ghost       {id canvas}
-    proc relief      {id canvas re}
+    # Update the -borderwidth option
+    proc borderwidth {id canvas slate bw}
+    
+    # Update the -color option
+    proc color {id canvas slate co}
+    
+    # Set or get the Solid's coordinates
+    proc coords {id canvas slate args}
+
+    # Create a ghost of the polygon
+    proc ghost {id canvas slate}
+
+    # Update the -relief option
+    proc relief {id canvas slate re}
 
     ###################################################################
     ####                         protected variables               ####
 
-    # Components of the picture
+    # The polygons that are "lit"
     common lit
+    
+    # The polygons in the inside shadow (ridge and groove reliefs only)
     common notlit
+    
+    # The polygons that are "shaded"
     common shaded
+    
+    # The polygons in the inside lit region (ridge and groove reliefs only)   
     common notshaded
+    
+    # The polygonal surface of the Solid
     common surface
 
     # The object used to get shades of color
@@ -88,12 +107,13 @@ class ::tycho::Solid {
     # All options have a default value
     common optiondefault
 
-    # The "shape" of pictures of this class
+    # The "shape" of items of this class
     common shape "polygon"
 
     ###################################################################
     ####                        private procs                      ####
 
+    # Adjust the border polygons to new coordinates
     private proc adjust {id canvas name shade coords} {}
 
     ###################################################################
@@ -136,7 +156,7 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
     # If there weren't enough polygons, create some more. Lower the
     # new components to the same level as the primary component.
     if { [llength $coords] > $count } {
-	set tags [[canvasslate $canvas] gettags $id]
+	set tags [$canvas gettags $id]
 	set moreneeded [ldrop $coords $count]
 	foreach c $moreneeded {
 	    set p [eval $canvas create polygon $c \
@@ -159,12 +179,12 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
 ##########################################################################
 ## borderwidth
 #
-# Update the -borderwidth configuration option. Just cause a redraw
+# Update the *-borderwidth* configuration option. Just cause a redraw
 # by calling the coords{} method with the current coordinates.
 #
 # This could be made a lot faster by duplicating code.
 #
-body ::tycho::Solid::borderwidth {id canvas bw} {
+body ::tycho::Solid::borderwidth {id canvas slate bw} {
     eval $this coords [$canvas coords primary($id)]
 }
 
@@ -172,9 +192,9 @@ body ::tycho::Solid::borderwidth {id canvas bw} {
 ##########################################################################
 ## color
 #
-# Set the color configuration option.
+# Update the *-color* configuration option.
 #
-body ::tycho::Solid::color {id canvas co} {
+body ::tycho::Solid::color {id canvas slate co} {
     set color($id) $co
     set colorShadesObject($id) [::tycho::Shades::new $color($id)]
 
@@ -187,7 +207,7 @@ body ::tycho::Solid::color {id canvas co} {
 ##########################################################################
 ## construct
 #
-body ::tycho::Solid::construct {id tags canvas args} {
+body ::tycho::Solid::construct {id canvas slate tags args} {
     getalloptions options args
 
     # Initialize the options
@@ -197,7 +217,7 @@ body ::tycho::Solid::construct {id tags canvas args} {
 
     # This object is used to get the shades of color
     set colorShadesObject($id) [::tycho::Shades::new $color($id)]
- 
+    
     # Create the primary component for the outline coordinates
     set primary($id) [eval $canvas create polygon $args \
 	    [list -tags $tags -fill ""]]
@@ -211,7 +231,7 @@ body ::tycho::Solid::construct {id tags canvas args} {
     set lit($id)    {}
     set shaded($id) {}
 
-    eval coords $id $canvas $args
+    eval coords $id $canvas $slate $args
 }
 
 
@@ -222,9 +242,9 @@ body ::tycho::Solid::construct {id tags canvas args} {
 # Query or set the coordinates of the object. This procedure ensures
 # that the last two points are the same as the first two.
 #
-body ::tycho::Solid::coords {id canvas args} {
+body ::tycho::Solid::coords {id canvas slate args} {
     # No args: just return coordinates
-     if { $args == "" } {
+    if { $args == "" } {
 	set coords [$canvas coords $primary($id)]
 	return $coords
     }
@@ -265,26 +285,15 @@ body ::tycho::Solid::coords {id canvas args} {
     }
 }
 
-
-##########################################################################
-## fill
-#
-# Update the fill configuration option. Just cause a redraw
-# by calling the coords{} method with the current coordinates.
-#
-# This could be made a lot faster by duplicating code.
-#
-#body ::tycho::Solid::fill {args} {
-#    eval $this coords [$canvas coords $component(primary)]
-#}
-
-
 ##########################################################################
 ## ghost
 #
-# Create and return a "ghost" of the picture.
+# Create and return a "ghost" of the item.
 #
-body ::tycho::Solid::ghost {id canvas} {
+# FIXME: Why do we need to provide this -- the Slate should do the
+# right thing from the shape variable?
+#
+body ::tycho::Solid::ghost {id canvas slate} {
     eval $canvas create polygon [$canvas coords $primary($id)] \
 	    -outline grey {-fill {}}
 }
@@ -292,12 +301,10 @@ body ::tycho::Solid::ghost {id canvas} {
 ##########################################################################
 ## relief
 #
-# Update the -relief configuration option.
+# Update the *-relief* configuration option.
 #
-body ::tycho::Solid::relief {id canvas re} {
+body ::tycho::Solid::relief {id canvas slate re} {
     set relief($id) $re
-    set slate [join [linit [split $canvas .]] .]
-
     if { $relief($id) == "ridge" || $relief($id) == "groove" } {
 
 	set light [$colorShadesObject($id) light]
@@ -368,7 +375,7 @@ body ::tycho::Solid::relief {id canvas re} {
 	# If the relief has changed _from_ ridge or groove, then we
 	# delete the inside border polygons and move the surface.
 	if { [::info exists notlit($id)] } {
-	
+	    
 	    eval $canvas delete $notlit($id) $notshaded($id)
 	    unset notlit($id)
 	    unset notshaded($id)

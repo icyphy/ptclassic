@@ -42,8 +42,8 @@ namespace ::tycho {
 class ::tycho::Frame {
     inherit ::tycho::Picture
 
-    proc construct {id tags canvas x0 y0 x1 y1 args}
-
+    # Create a new Frame item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     ###################################################################
     ####                            options                        ####
@@ -60,32 +60,46 @@ class ::tycho::Frame {
     ###################################################################
     ####                         public procs                      ####
 
-    proc borderwidth {id canvas bw}
-    proc color       {id canvas co}
-    proc coords      {id canvas args}
-    proc relief      {id canvas re}
+    # Update the -borderwidth option
+    proc borderwidth {id canvas slate bw}
+    
+    # Update the -color option
+    proc color {id canvas slate co}
+    
+    # Set or get the Frame's coordinates
+    proc coords {id canvas slate args}
 
+    # Update the -relief option
+    proc relief {id canvas slate re}
 
     ###################################################################
     ####                         protected variables               ####
 
-    # Components of the picture
+    # The polygon that is "lit"
     common lit
+    
+    # The polygon in the inside shadow (ridge and groove reliefs only)
     common notlit
+    
+    # The polygon that is "shaded"
     common shaded
+    
+    # The polygon in the inside lit region (ridge and groove reliefs only)   
     common notshaded
+    
+    # The rectangular surface of the Frame
     common surface
 
     # The object used to get shades of color
     common colorShadesObject
 
-    # All methods are looked up through a table
+    # The virtual "method" table
     common methodtable
 
-    # All options have a default value
+    # Default values of this item's options
     common optiondefault
 
-    # The "shape" of pictures of this class
+    # Frames are rectangular in shape
     common shape "rectangle"
 
     ###################################################################
@@ -106,16 +120,15 @@ class ::tycho::Frame {
     set optiondefault(-color)       background
     set optiondefault(-borderwidth) 2
     set optiondefault(-relief)      raised
-
 }
 
 
 ##########################################################################
 ## borderwidth
 #
-# Set the borderwidth configuration option.
+# Set the *-borderwidth* configuration option.
 #
-body ::tycho::Frame::borderwidth {id canvas bw} {
+body ::tycho::Frame::borderwidth {id canvas slate bw} {
     set borderwidth($id) $bw
 
     set coords [$canvas	coords $primary($id)]
@@ -161,9 +174,11 @@ body ::tycho::Frame::borderwidth {id canvas bw} {
 ##########################################################################
 ## color
 #
-# Set the color configuration option.
+# Set the *-color* configuration option.
 #
-body ::tycho::Frame::color {id canvas co} {
+# FIXME: Use a new procedural color manager instead of color objects.
+#
+body ::tycho::Frame::color {id canvas slate co} {
     set color($id) $co
     set colorShadesObject($id) [::tycho::Shades::new $color($id)]
 
@@ -176,7 +191,7 @@ body ::tycho::Frame::color {id canvas co} {
 ##########################################################################
 #### construct
 #
-body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
+body ::tycho::Frame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $args] {
 	set [string trimleft $option -]($id) $value
@@ -184,8 +199,7 @@ body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
 
     # This object is used to get the shades of color
     set colorShadesObject($id) [::tycho::Shades::new $color($id)]
- 
-
+    
     # Create the primary component for the outline coordinates.
     # Note that this has an outline, but it will be obscured
     # by other components. DO NOT give this rectangle a blank
@@ -217,12 +231,13 @@ body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
  	    -fill [$colorShadesObject($id) dark] -tags $tags]
 
     set surface($id) [$canvas create rectangle \
- 	    $a0 $b0 $a1 $b1 \
- 	    -fill [$colorShadesObject($id) matt] \
- 	    -outline {} -tags $tags]
+            $a0 $b0 $a1 $b1 \
+            -fill [$colorShadesObject($id) matt] \
+            -outline {} -tags $tags]
 
+    # Adjust the relief if not the default
     if { $relief($id) != "raised" } {
-	relief $id $canvas $relief($id)
+	relief $id $canvas $slate $relief($id)
     }
 }
 
@@ -230,9 +245,9 @@ body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
 ##########################################################################
 #### coords
 #
-# Set or read the frame's coordinates
+# Set or read the Frame's coordinates
 #
-body ::tycho::Frame::coords {id canvas args} {
+body ::tycho::Frame::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
 	return [$canvas coords $primary($id)]
@@ -289,16 +304,14 @@ body ::tycho::Frame::coords {id canvas args} {
 ##########################################################################
 ## relief
 #
-# The relief of the ThreeD object. Can be one of: flat, raised,
+# Update the relief of the ThreeD object. Can be one of: flat, raised,
 # sunken. ridge, or groove. The coloring for the raised and ridge
 # options is the same: the coloring for the sunken and grovved options
 # is the same -- the difference is only in whether the notlit and
 # notshaded components exist.
 #
-body ::tycho::Frame::relief {id canvas re} {
+body ::tycho::Frame::relief {id canvas slate re} {
     set relief($id) $re
-    set slate [join [linit [split $canvas .]] .]
-
     if { $relief($id) == "ridge" || $relief($id) == "groove" } {
 	
 	set light [$colorShadesObject($id) light]
@@ -319,7 +332,7 @@ body ::tycho::Frame::relief {id canvas re} {
 	if { ! [info exists notlit($id)] } {
 
 	    set coords [$canvas coords $primary($id)]
-	    set tags [[canvasslate $canvas] gettags $id]
+	    set tags [$slate gettags $id]
 
 	    set x0 [expr [lindex $coords 0] + $borderwidth($id)]
 	    set y0 [expr [lindex $coords 1] + $borderwidth($id)]

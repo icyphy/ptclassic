@@ -43,8 +43,8 @@ namespace ::tycho {
 class ::tycho::Terminal {
     inherit ::tycho::Picture
 
-    proc construct {id tags canvas x0 y0 args}
-
+    # Create a new Terminal item
+    proc construct {id canvas slate tags x0 y0 args}
 
     ###################################################################
     ####                            options                        ####
@@ -65,17 +65,29 @@ class ::tycho::Terminal {
     # The type of the terminal: "input" or "output"
     common type
 
-
     ###################################################################
     ####                         public procs                      ####
 
-    proc aspect    {id canvas args}
-    proc coords    {id canvas args}
-    proc direction {id canvas di}
-    proc fill      {id canvas fi}
-    proc length    {id canvas le}
-    proc style     {id canvas ty}
-    proc type      {id canvas ty}
+    # Get an aspect
+    proc aspect {id canvas slate args}
+
+    # Set or get the Terminal's coordinates
+    proc coords {id canvas slate args}
+    
+    # Update the *-direction* option
+    proc direction {id canvas slate di}
+    
+    # Update the *-fill* option
+    proc fill {id canvas slate fi}
+    
+    # Update the *-length* option
+    proc length {id canvas slate le}
+    
+    # Update the *-style* option
+    proc style {id canvas slate ty}
+    
+    # Update the *-type* option
+    proc type {id canvas slate ty}
 
     ###################################################################
     ####                         protected variables               ####
@@ -83,11 +95,11 @@ class ::tycho::Terminal {
     # All methods are looked up through a table
     common methodtable
 
-    # All options have a default value
-    common optiondefault
+    # The virtual "method" table
+    common methodtable
 
-    # The additional item used to draw the terminal: blob or extra arrow
-    common blobitem
+    # Default values of this item's options
+    common optiondefault
 
     # The terminal is a "point" shape
     common shape "point"
@@ -121,7 +133,7 @@ class ::tycho::Terminal {
 ##########################################################################
 #### aspect
 #
-body ::tycho::Terminal::aspect {id canvas args} {
+body ::tycho::Terminal::aspect {id canvas slate args} {
     if { $args == "" } {
 	return {origin terminal}
     }
@@ -147,7 +159,7 @@ body ::tycho::Terminal::aspect {id canvas args} {
 ##########################################################################
 #### construct
 #
-body ::tycho::Terminal::construct {id tags canvas x0 y0 args} {
+body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $args] {
 	set [string trimleft $option -]($id) $value
@@ -171,7 +183,7 @@ body ::tycho::Terminal::construct {id tags canvas x0 y0 args} {
 ##########################################################################
 #### coords
 #
-body ::tycho::Terminal::coords {id canvas args} {
+body ::tycho::Terminal::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
 	return [lrange [$canvas coords $primary($id)] 0 1]
@@ -188,7 +200,7 @@ body ::tycho::Terminal::coords {id canvas args} {
 ##########################################################################
 #### direction
 #
-body ::tycho::Terminal::direction {id canvas di} {
+body ::tycho::Terminal::direction {id canvas slate di} {
     set direction($id) $di
     set coords [$canvas coords $primary($id)]
 
@@ -211,7 +223,7 @@ body ::tycho::Terminal::direction {id canvas di} {
 ##########################################################################
 #### fill
 #
-body ::tycho::Terminal::fill {id canvas fi} {
+body ::tycho::Terminal::fill {id canvas slate fi} {
     set fill($id) $fi
 
     $canvas itemconfigure $primary($id) -fill $fill($id)
@@ -223,7 +235,7 @@ body ::tycho::Terminal::fill {id canvas fi} {
 ##########################################################################
 #### length
 #
-body ::tycho::Terminal::length {id canvas le} {
+body ::tycho::Terminal::length {id canvas slate le} {
     set length($id) $le
     set coords [$canvas coords $primary($id)]
 
@@ -246,7 +258,7 @@ body ::tycho::Terminal::length {id canvas le} {
 ##########################################################################
 #### style
 #
-body ::tycho::Terminal::style {id canvas st} {
+body ::tycho::Terminal::style {id canvas slate st} {
     # Check direction of arrow
     if { $st == "arrow" } {
 	if { $type($id) == "input" } {
@@ -297,9 +309,9 @@ body ::tycho::Terminal::style {id canvas st} {
 	set coords [$canvas coords $primary($id)]
 	set blobitem($id) [eval $canvas create oval \
 		[rectStretch [list \
-		    [lindex $coords 2] [lindex $coords 3] \
-		    [lindex $coords 2] [lindex $coords 3]] \
-		    3] \
+		[lindex $coords 2] [lindex $coords 3] \
+		[lindex $coords 2] [lindex $coords 3]] \
+		3] \
 		-fill $fill($id) -outline $fill($id) \
 		-tags [list [$canvas gettags $id]]]
     }
@@ -309,7 +321,7 @@ body ::tycho::Terminal::style {id canvas st} {
 ##########################################################################
 #### type
 #
-body ::tycho::Terminal::type {id canvas ty} {
+body ::tycho::Terminal::type {id canvas slate ty} {
     set type($id) $ty
 
     # Get the right appearance by setting the style option. Force
