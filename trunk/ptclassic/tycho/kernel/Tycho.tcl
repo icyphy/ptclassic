@@ -185,6 +185,58 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
+}
+
+# auto-loading
+# Set up the directories to be searched in order of priority.
+#
+global ::tychokernel
+set ::auto_path [linsert $auto_path 0 $tychokernel ]
+
+# Create the tycho namespace
+namespace ::tycho
+
+# Make the tycho namespace visible at the current scope
+# Note that this greatly weakens namespace protection, but
+# itcl makes it rather awkward without it.  In the body of
+# a procedure for a class within namespace ::tycho, for example,
+# the namespace ::tycho is not visible.  Apparently, only the local
+# namespace of the class and the global namespace are visible.
+# import add ::tycho
+
+# Files that we are going to need right away, so there is no
+# point in deferring them to auto-loading.
+uplevel #0 {
+    source [file join $tychokernel Color.tcl]
+    source [file join $tychokernel CircularList.itcl]
+    source [file join $tychokernel TopLevel.itcl]
+    source [file join $tychokernel DialogWindow.itcl]
+    source [file join $tychokernel FontManager.itcl]
+    source [file join $tychokernel Message.itcl]
+    source [file join $tychokernel ErrorMessage.itcl]
+}
+
+# Create the global font manager
+namespace ::tycho {
+    ::tycho::FontManager .tychoFonts
+
+    # The following code has been disabled because it breaks the
+    # layout of existing Ptolemy windows by changing the default
+    # widget fonts. (hjr 2/29/96)
+
+    # The overall default font is fixed
+    #    set defaultFont [.tychoFonts defaultFont fixed]
+    #    option add *Font $defaultFont widgetDefault
+    #    option add *TextFont $defaultFont widgetDefault
+    #    option add *font $defaultFont widgetDefault
+}
+
+
+uplevel #0 {
+    # Load the default preference settings
+    source [file join $tychokernel Defaults.tcl]
+
+    # Load the library file
     source [file join $tychokernel Lib.tcl]
 }
 
@@ -197,21 +249,6 @@ if {![info exists tychoConsoleWindow]} {
     set tychoConsoleWindow 1
 }
 set tychoOpenFiles 0
-
-# Create the global preference set and some global preferences
-preference create global
-preference add global textfont [.tychoFonts defaultFont fixed]
-preference add global textForeground [ptkColor black black] 
-preference add global textBackground [ptkColor antiqueWhite white]
-
-# Create some more preference sets. This must be done here rather than
-# in the classes that subscribe to them because of an
-# auto-loading/inheritance chicken-and-egg.
-# FIXME: want to say "-parent global"
-preference create textedit -parent globalPreferences
-preference create console  -parent texteditPreferences
-preference create command  -parent consolePreferences
-preference create htmlview -parent texteditPreferences
 
 
 # Source ~/.Tycho/tychorc.tcl if it exists.
