@@ -40,7 +40,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+#if !defined(freebsd)
 #define NEED_SYS_ERRLIST	// compat.h uses this.
+#endif
 
 // Include standard include files to prevent conflict with
 // the type definition Pointer used by "rpc.h". BLE
