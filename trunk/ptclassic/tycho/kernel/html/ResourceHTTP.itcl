@@ -253,10 +253,12 @@ body ::tycho::ResourceHTTP::constructor {args} {
 #
 body ::tycho::ResourceHTTP::destructor {} {
     # If we're still loading, forget it
-    #if [httpbusy] {
-#	::puts httpabort
-#    	httpabort
-#    }
+    set brokencode {
+	if [httpbusy] {
+	    ::puts httpabort
+	    httpabort
+	}
+    }
 }
 
 #########################################################################
@@ -289,7 +291,7 @@ body ::tycho::ResourceHTTP::eof {} {
     if !$fileIsOpen {
 	openerror "File \"$this\" is not open (eof)"
     }
-   ::eof $fileid
+    ::eof $fileid
 }
 
 #####################################################################
@@ -314,7 +316,7 @@ body ::tycho::ResourceHTTP::gets {{varName {}}} {
 #
 body ::tycho::ResourceHTTP::open {url {mode "r"}} {
     if { $mode != "r" } {
-        error "File $url is not writable"
+	error "File $url is not writable"
     }
     if { ! [exists $url] } {
 	error "File $url does not exist"
@@ -537,7 +539,7 @@ body ::tycho::ResourceHTTP::query {url option} {
 	}
     }
 }
-	    
+
 #####################################################################
 #### stat
 # Set the array referenced by _varName_ in the calling
@@ -550,11 +552,11 @@ body ::tycho::ResourceHTTP::query {url option} {
 #
 body ::tycho::ResourceHTTP::stat {url varName} {
     if [exists $url] {
-    	upvar $varName v
-    	while { [::info exists _forwarding($url)] } {
+	upvar $varName v
+	while { [::info exists _forwarding($url)] } {
 	    set url $_forwarding($url)
-    	}
-    	array set v $_statinfo($url)
+	}
+	array set v $_statinfo($url)
     }
 }
 
@@ -614,7 +616,7 @@ body ::tycho::ResourceHTTP::httpcached {url} {
 	set url $_forwarding($url)
     }
     expr { [::info exists _cachefile($url)] \
-    	&& [::file exists $_cachefile($url)] }
+	    && [::file exists $_cachefile($url)] }
 }
 
 #########################################################################
@@ -640,33 +642,34 @@ body ::tycho::ResourceHTTP::httpdone {} {
     # Copy some local data to common arrays if the file exists
     if {$status>=400 && $status<500} {
 	# The request failed -- remember that the file doesn't exist
-    	set _exists($currentURL) 0
+	set _exists($currentURL) 0
     } else {
 	set _exists($currentURL) 1
 	if { $requestMode == "file" } {
 	    set _cachefile($currentURL) $filename
 	}
 	# Set status info
-        set _statinfo($currentURL) [list \
-                -mtime $lastmodified \
-                -size $contentlength \
-                -type $contenttype]
-        debugputs "Status = [array get _statinfo]"
+	set _statinfo($currentURL) [list \
+		-mtime $lastmodified \
+		-size $contentlength \
+		-type $contenttype]
+	debugputs "Status = [array get _statinfo]"
     }
     # To be picky, let's check that the content size is the
     # same as what we actually got...
     # Unfortunately, this is bogus, since our httpread{}
     # is putting an additional end-of-line at the end of the file.
-#     if { $_httpstatus != "abort" && $requestMode == "file" } {
-# 	if { [::file size $filename] != $contentlength } {
-# 	    if $debug {
-# 		# debugputs "Received HTTP file size ([::file size \
-# 			$filename]) \
-# 			is not the same as content length ($contentlength)"
-# 	    }
-# 	}
-#     }
-    
+    set junkcode {
+	if { $_httpstatus != "abort" && $requestMode == "file" } {
+	    if { [::file size $filename] != $contentlength } {
+		if $debug {
+		    # debugputs "Received HTTP file size ([::file size \
+			    $filename]) \
+			    is not the same as content length ($contentlength)"
+		}
+	    }
+	}
+    }
     # Set the status
     uplevel #0 "set _httpstatus done"
     
@@ -690,8 +693,8 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} socketid]} {
-        catch {unset $socketid}
-        error "Can't open $host, $port"
+	catch {unset $socketid}
+	error "Can't open $host, $port"
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     debugputs "Connect $hostname:$port on $socketid"
@@ -717,8 +720,8 @@ body ::tycho::ResourceHTTP::httpget {url type} {
     # FIXME: Need to figure out how to set the Accept-Encoding field
     ::fconfigure $socketid -blocking no -translation crlf
     ::puts $socketid "GET $path HTTP/1.0\n\
-            User-Agent: Tycho Jr. Beta\n\
-            Accept-Encoding: $accept"
+	    User-Agent: Tycho Jr. Beta\n\
+	    Accept-Encoding: $accept"
     ::puts $socketid ""
     ::flush $socketid
     ::fconfigure $socketid -translation auto
@@ -838,22 +841,22 @@ body ::tycho::ResourceHTTP::splitURL {url} {
     # The following parses the url into hostname, port, and path
     # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
-            hosttmp optport porttmp pathtmp]} {
-        if {$hosttmp!={}} {set _hostname $hosttmp} ;# Supply reasonable default
-        if {$porttmp!={}} {set _port $porttmp}     ;# HTTP default service
-        if {$pathtmp!={}} {set _path $pathtmp}
+	    hosttmp optport porttmp pathtmp]} {
+	if {$hosttmp!={}} {set _hostname $hosttmp} ;# Supply reasonable default
+	if {$porttmp!={}} {set _port $porttmp}     ;# HTTP default service
+	if {$pathtmp!={}} {set _path $pathtmp}
     } else {
-        # Recover from malformed URL
-        if {![string match */* $url]} {
-            # Assume only the hostname:port has been given
-            regexp {([^:]*)(:(.*))?} $url match \
-                    hosttmp optport porttmp
-            if {$hosttmp != {}} {set _hostname $hosttmp}
-            if {$porttmp != {}} {set _port $porttmp}
-            set _path /
-        } else {
-            error "no hostname given in URL \"$url\""
-        }
+	# Recover from malformed URL
+	if {![string match */* $url]} {
+	    # Assume only the hostname:port has been given
+	    regexp {([^:]*)(:(.*))?} $url match \
+		    hosttmp optport porttmp
+	    if {$hosttmp != {}} {set _hostname $hosttmp}
+	    if {$porttmp != {}} {set _port $porttmp}
+	    set _path /
+	} else {
+	    error "no hostname given in URL \"$url\""
+	}
     }
     return [list $_hostname $_port $_path]
 }
@@ -864,7 +867,9 @@ body ::tycho::ResourceHTTP::splitURL {url} {
 body ::tycho::ResourceHTTP::httpwait {} {
     # Wait until the status becomes "done"
     while { [uplevel #0 "set _httpstatus"] != "done" } {
-        uplevel #0 "tkwait variable _httpstatus"
+	uplevel #0 "tkwait variable _httpstatus"
     }
     return
 }
+
+
