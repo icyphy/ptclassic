@@ -103,7 +103,7 @@ name ``modulation''.
 In the ``modulation:schematic'' window, create a universe which
 takes two ``singen'' galaxies, multiplies their outputs together,
 and then outputs the result using ``Xgraph''.
-Unless the ``sdf'' palette is already open, you'll probably
+Unless the main ``sdf'' palette is already open, you'll probably
 need to open it to create instances of the ``Xgraph'' and
 ``FloatProduct'' stars (the latter star is in the second row,
 sixth from the left).

@@ -188,12 +188,14 @@ Pigi menu (shift-middle-button).
 Alternatively, type an ``O''.
 .IP \-
 Pigi will present a palette menu.
-Select the ``sdf'' palette by clicking
+Select the main ``sdf'' palette by clicking
 any button in the circle next to the
-``~ptolemy/src/domains/sdf/icons/sdf.pal'' entry
+``~ptolemy/src/domains/sdf/icons/main.pal'' entry
 and then click on ``OK''.
 This palette shows the basic synchronous dataflow stars that are available.
 (You may have to wait a while before the palette appears.)
+The companion palette, ``~ptolemy/src/domains/sdf/icons/dsp.pal'',
+has more advanced signal processing stars in it.
 .in -0.5i
 .BU
 Select a star:
