@@ -35,12 +35,7 @@ thing:
 #include "Domain.h"
 
 class Scheduler;
-
-class KnownListEntry {
-	friend class KnownBlock;
-	Block* b;
-	KnownListEntry *next;
-};
+class KnownListEntry;
 
 class KnownBlock {
 private:
@@ -59,7 +54,14 @@ private:
 public:
 // The constructor takes a block and a name, and adds a corresponding
 // entry to the known list.
-	KnownBlock (Block &block, const char* name);
+	KnownBlock (Block &block, const char* name) {
+		addEntry (block, name, 0);
+	}
+
+// This function actually adds the block to the list.  If onHeap is true,
+// the block will be destroyed when the entry is removed or replaced from
+// the list.
+	static void addEntry (Block &block, const char* name, int onHeap);
 
 // The find method returns a pointer the appropriate block in
 // the current domain.
