@@ -36,7 +36,7 @@ include $(CONFIG)
 
 EXTRA_SRCS = CompileMake.template README \
 	oct2ps.pro pigiDebugRpc pigiRpcConsole \
-	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.xdb \
+	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.ddd pigiRpcDebug.xdb \
 	pigiRpcShell \
 	pigiXRes7 pigiXRes8 pigiXRes8.bw pigiXRes8.cp \
 	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
