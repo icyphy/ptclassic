@@ -71,14 +71,23 @@ class ::tycho::EditDFG {
     # Edit parameters of the given vertices
     method editparameters {args}
 
-    # Start creating a new edge
-    method newclick {item x y}
+    # Create the line
+    method connectbegin {x y}
 
-    # Continue move the end of the new edge
-    method newdrag {item x y}
+    # Start creating a new connection
+    method connectclick {id x y}
 
-    # Stop moving a new edge
-    method newrelease {ignore}
+    # Continue move the end of the new connection
+    method connectdrag {id x y}
+
+    # Stop moving a new connection
+    method connectrelease {ignore}
+
+    # Test if an item can start a new connection
+    method connectsource {id}
+
+    # Test if an item is a suitable target for a connection
+    method connecttarget {id}
 
     # Place a star
     method newstar {libname starname}
@@ -184,9 +193,14 @@ body ::tycho::EditDFG::constructor {args} {
     # Make a more pronounced highlight
     $_slate configure -highlightcolor azure2 -highlightwidth 4
 
-    # Enable selection with button 1; shift-click toggles
+    # Enable vertex selection with button 1; shift-click toggles
     $_slate selector bind vertex -button 1
     $_slate selector bind vertex -button 1 \
+            -modifiers shift -toggle 1
+
+    # Enable edge selection with button 1; shift-click toggles
+    $_slate selector bind edge -button 1
+    $_slate selector bind edge -button 1 \
             -modifiers shift -toggle 1
 
     # Create the interactor to move selected items
@@ -212,13 +226,17 @@ body ::tycho::EditDFG::constructor {args} {
 
     # Create a DragDropper to join terminals
     set dropper [$_slate interactor DragDropper]
+    $dropper bind input
     $dropper bind output
     $dropper configure \
-	    -halo 6 \
-	    -targettags input \
-	    -activatecommand "$this newclick" \
-	    -dragcommand "$this newdrag" \
-	    -deactivatecommand "$this newrelease"
+	    -sourcehalo 2 \
+	    -targethalo 6 \
+	    -targettags {input output} \
+            -sourcepredicate "$this connectsource" \
+            -targetpredicate "$this connecttarget" \
+	    -activatecommand "$this connectclick" \
+	    -dragcommand "$this connectdrag" \
+	    -deactivatecommand "$this connectrelease"
 
     # Is this needed?
     $_slate configure -exportselection 0
@@ -248,98 +266,176 @@ body ::tycho::EditDFG::editparameters {args} {
 }
 
 ########################################################################
-#### newclick
+#### connectbegin
 #
-# Start creating a new edge. Create the edge item and remember
-# it.
+# Start creating a new edge. This creates the edge item.
 #
-body ::tycho::EditDFG::newclick {item x y} {
-    # First we make sure that we clear the selection, since the
-    # DragDropper is too dumb to do this...
+body ::tycho::EditDFG::connectbegin {x y} {
+    set id $_scratch(source)
+
+    # The "direction" of the terminal
+    set dir [eval ::tycho::Shape::compassFromVector \
+            [$_slate itemcget $id -direction]]
+
+    # Figure out whether we are connecting from an output or input,
+    # and act accordingly
+    if { [lsearch -exact [$_slate gettags $id] output] >= 0 } {
+        set _scratch(outtoin) 1
+        set _scratch(aspect) end
+        set _scratch(targettag) input
+        set coords [concat [$_slate aspect $id terminal] $x $y]       
+    } else {
+        set _scratch(outtoin) 0
+        set _scratch(aspect) start
+        set _scratch(targettag) output
+        set coords [concat $x $y [$_slate aspect $id terminal]]
+        set dir [::tycho::Shape::compass $dir "rev"]
+    }
+    # Create the line
+    set _scratch(line) \
+            [eval $_slate create SmartLine $coords $x $y \
+            -start $dir \
+            -end $dir]
+    
+    # Remember the line direction
+    set _scratch(targetdirection) $dir
+}
+
+########################################################################
+#### connectclick
+#
+# Process the click that may create a new edge.
+#
+body ::tycho::EditDFG::connectclick {id x y} {
+    # First we make sure that we clear the selection
     # FIXME: Should this be an event?
     $_layout notify data selection clear
 
-    # Create the connection line
-    set coords [$_slate aspect $item terminal]
-    set _scratch(line) [eval $_slate create SmartLine $coords $x $y]
-
-    # Set the directions of the line
-    set dir [eval ::tycho::Shape::compassFromVector \
-	    [$_slate itemcget $item -direction]]
-    $_slate itemconfigure $_scratch(line) -start $dir -end $dir
-    set _scratch(dir) $dir
-
     # Remember the source item
-    set _scratch(source) $item
+    set _scratch(source) $id
+    set _scratch(line) ""
 }
 
 ########################################################################
-#### newdrag
+#### connectdrag
 #
-# Move the end of the new edge. If the _item_ argument is null,
-# then we are not over a suitable terminal item, so just move the
-# end of the line. If _item_ is not null, then we are over
-# an input terminal, so move the end of the line to the right
-# connection point.
+# Move the end of the new edge. If the line item does not exist, then
+# this is the first drag call, so call connectbegin to create the line.
+# If the _item_ argument is null, then we are not over a suitable
+# terminal item, so just move the end of the line. If _item_ is not
+# null, then we are over an input terminal, so move the end of the
+# line to the right connection point.
 #
-body ::tycho::EditDFG::newdrag {item x y} {
-    if { $item == "" } {
-	# Just move end point
-	$_slate reshapeto $_scratch(line) $x $y end
+body ::tycho::EditDFG::connectdrag {id x y} {
+    if { $_scratch(line) == "" } {
+        connectbegin $x $y
+    }
+
+    if { $id == "" } {
+	# Just move start or end point
+	$_slate reshapeto $_scratch(line) $x $y $_scratch(aspect)
     } else {
 	# Move end point to terminal connection point
-	set coords [$_slate aspect $item terminal]
-	eval $_slate reshapeto $_scratch(line) $coords end
+	set coords [$_slate aspect $id terminal]
+	eval $_slate reshapeto $_scratch(line) $coords $_scratch(aspect)
 
 	# If the line direction does not match the terminal
 	# direction, change the line
-	set dir [eval ::tycho::Shape::compassFromVector \
-	    [$_slate itemcget $item -direction]]
-	set dir [::tycho::Shape::compass $dir rev]
+        set dir [eval ::tycho::Shape::compassFromVector \
+                [$_slate itemcget $id -direction]]
+        if $_scratch(outtoin) {
+            set dir [::tycho::Shape::compass $dir "rev"]
+        }
 
-	if { $dir != $_scratch(dir) } {
-	    $_slate itemconfigure $_scratch(line) -end $dir
-	    set _scratch(dir) $dir
+	if { $dir != $_scratch(targetdirection) } {
+	    $_slate itemconfigure $_scratch(line) -$_scratch(aspect) $dir
+	    set _scratch(targetdirection) $dir
 	}
     }
-    # Remember the target item for newrelease{}
-    set _scratch(dest) $item
+    # Remember the target item for connectrelease{}
+    set _scratch(target) $id
 }
 
 ########################################################################
-#### newrelease
+#### connectrelease
 #
 # Release the item. If we are currently over a target input terminal,
 # make a connection in the graph. If not, just delete the line,
 # since connection failed.
 #
-body ::tycho::EditDFG::newrelease {ignore} {
+body ::tycho::EditDFG::connectrelease {ignore} {
     set line $_scratch(line)
-    if { $_scratch(dest) == "" } {
+    if { $_scratch(target) == "" } {
 	$_slate delete $line
     } else {
 	# Get the vertices and ports being connected
 	set source [itemname $_scratch(source)]
-	set target [itemname $_scratch(dest)]
+	set target [itemname $_scratch(target)]
 
 	# Add an edge to the graph
-        set edgename [join $source .]^[join $target .]
+        if $_scratch(outtoin) {
+            set edgename [join $source .]^[join $target .]
+        } else {
+             set edgename [join $target .]^[join $source .]
+         }
 	$_graph publish add edge $edgename
 
-	# Add an edge to the layout model.
+	# Add an edge to the layout model. Give it the tag "edge."
 	$_layout publish add item $edgename \
                 -slatetype [$_slate type $line] \
                 -coords [$_slate coords $line] \
 		-start [$_slate itemcget $line -start] \
-		-end [$_slate itemcget $line -end]
+		-end [$_slate itemcget $line -end] \
+                -tags "edge"
 	
-        # Now delete the edge I originally
-        # created so I don't end up with two of them
+        # Now delete the original edge so we don't end up with two...
         $_slate delete $line
 
 	# Update the layout model's coordinates
         # ???
 	# eval $_layout coords $name [$_slate coords $line]
+    }
+    unset _scratch
+}
+
+########################################################################
+#### connectsource
+#
+# Test if an item is a valid candidate for starting a new connection.
+# This method looks at the connectivity of the item.
+#
+body ::tycho::EditDFG::connectsource {id} {
+    # Get connections from the graph model
+    # FIXME: won't work with multiports...
+    set name [itemname $id]
+    if { [$_graph names [join $name .]^*.*] == "" \
+            && [$_graph names *.*^[join $name .]] == "" } {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+########################################################################
+#### connecttarget
+#
+# Test if an item is a valid candidate for terminating a new connection.
+# This method looks at the tags and the connectivity of the item.
+#
+body ::tycho::EditDFG::connecttarget {id} {
+    if ![::info exists _scratch(targettag)] {
+        return 0
+    }
+    if { [lsearch -exact [$_slate gettags $id] $_scratch(targettag)] >= 0 } {
+        set name [itemname $id]
+        if { [$_graph names [join $name .]^*.*] == "" \
+                && [$_graph names *.*^[join $name .]] == "" } {
+            return 1
+        } else {
+            return 0
+        }
+    } else {
+        return 0
     }
 }
 
@@ -618,8 +714,6 @@ body ::tycho::EditDFG::clear {} {
 # be cleared too.
 #
 body ::tycho::EditDFG::insertData {data} {
-puts [list insertData $data]
-
     # Delete all data
     clear
 
