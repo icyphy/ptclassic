@@ -71,10 +71,14 @@ void  SDFPTclTarget::writeFiring(Star& s, int) {
 // in the simulation mode the stop time should be set to the number of
 // iterations.  For now, code duplication is done FIXME.
 void SDFPTclTarget::setStopTime (double limit) {
-	numIters = int(floor(limit + 0.001));
+    numIters = int(floor(limit + 0.001));
 }
 
 int SDFPTclTarget::run() {
+    if ( ! galaxy() ) {
+	Error::abortRun("No galaxy to run");
+	return FALSE;
+    }
     starProfiles.set(*galaxy());
     int numItersSoFar=0;
     while (numItersSoFar++ < numIters && !SimControl::haltRequested())
