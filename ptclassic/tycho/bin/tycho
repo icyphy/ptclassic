@@ -6,12 +6,13 @@
 #
 # Copyright (c) 1994-%Q% The Regents of the University of California.
 # All rights reserved.
-# See the file $PTOLEMY/copyright for copyright notice,
+# See the file $TYCHO/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
-set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-bak] [scriptfile]"
+set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-bak] [file...]"
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?TYCHO ) setenv TYCHO $PTOLEMY/tycho
 
 # Set the commonly used environment variables
 source $PTOLEMY/bin/ptsetup.csh
@@ -28,7 +29,6 @@ if ( ! $?DISPLAY ) then
     echo "${0}: Your DISPLAY environment variable must be set"
     exit 1
 endif
-
 
 # FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
@@ -57,7 +57,7 @@ while ($#argv)
 			echo " -pigi         Big version, many domains"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -bak           Run a .bak binary"
-			echo " scriptfile     Exec itcl(?) script"
+			echo " file           File to open"
 			exit 0
 		case -debug:
 			set tychodebug
@@ -104,7 +104,11 @@ while ($#argv)
 			exit 1
 			breaksw
 		case *:
-			set script=$1
+			if (! $?filename) then
+			    set filename=$1
+			else
+			    set filename="$filename $1"
+			endif
 			breaksw
 	endsw
 	shift
@@ -124,7 +128,7 @@ if ( ! $?prog ) then
 			    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
 			else
 			    set tychoedit
-			    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho.tcl)
+			    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
 			endif
 		endif
 
@@ -163,11 +167,12 @@ if ( "$1" =~ "-*" ) then
     exit 1
 endif
 
-# FIXME: Should check starting palette/facet for validity.
-# FIXME: Should make the starting facet if needed.
-
 if (! -x $prog[1] ) then
     echo "Program does not exist: $prog"
 else
-    $prog
+    if (! $?filename) then
+	$prog
+    else
+	$prog $filename
+    endif
 endif
