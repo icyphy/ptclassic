@@ -64,7 +64,8 @@ ITCL_SRCS = \
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	editcolors.style \
-	edithtml.style
+	edithtml.style \
+	makefile.style
 
 MISC_FILES =		doc img templates test tclIndex 
 
