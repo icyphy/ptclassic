@@ -41,7 +41,7 @@ especially if you are using the graphical interface.
 This will allow the FIR filter to work as expected regardless of
 the directory in which the ptolemy process actually runs.
 It is best to use tilde characters in the filename to reference them to
-the user's home directory.
+the home directory of the user.
 This way, future file system reorganizations will have minimal effect.
 .pp
 When the \fIdecimation\fP (\fIinterpolation\fP)
@@ -224,49 +224,52 @@ The input particles are only cast to this precision if the parameter
         // An initCode method is inherited from CGCFix
         // If you define your own, you should call CGCFix::initCode()
 
-   codeblock(bodyDecl) {
-	int phase, tapsIndex, inC, i;
-	int outCount = $val(interpolation) - 1;
-	int inPos;
-   }
+        codeblock(bodyDecl) {
+                int phase, tapsIndex, inC, i;
+                int outCount = $val(interpolation) - 1;
+	        int inPos;
+        }
 
-   codeblock(body) {
-	/* phase keeps track of which phase of the filter coefficients is used.
-	   Starting phase depends on the decimationPhase state. */
-	phase = $val(decimation) - $val(decimationPhase) - 1;   
+        go {
+                addCode(bodyDecl);
+                CGCFix::clearOverflow();
+ 
+@	/* phase keeps track of which phase of the filter coefficients is used.
+@	   Starting phase depends on the decimationPhase state. */
+@	phase = $val(decimation) - $val(decimationPhase) - 1;   
 	
-	/* Iterate once for each input consumed */
-	for (inC = 1; inC <= $val(decimation) ; inC++) {
+@	/* Iterate once for each input consumed */
+@	for (inC = 1; inC <= $val(decimation) ; inC++) {
 
-		/* Produce however many outputs are required for each 
-		   input consumed */
-		while (phase < $val(interpolation)) {
+@		/* Produce however many outputs are required for each 
+@		   input consumed */
+@		while (phase < $val(interpolation)) {
 
-			FIX_SetToZero($ref(Accum));
+@			FIX_SetToZero($ref(Accum));
 
-			/* Compute the inner product. */
-			for (i = 0; i < $val(phaseLength); i++) {
-				tapsIndex = i * $val(interpolation) + phase;
-				if (tapsIndex >= $val(tapSize))
-			    		FIX_SetToZero($ref(tap));
-				else
-			 		FIX_Assign($ref(tap),$ref(taps,tapsIndex));
+@			/* Compute the inner product. */
+@			for (i = 0; i < $val(phaseLength); i++) {
+@				tapsIndex = i * $val(interpolation) + phase;
+@				if (tapsIndex >= $val(tapSize))
+@			    		FIX_SetToZero($ref(tap));
+@				else
+@			 		FIX_Assign($ref(tap),$ref(taps,tapsIndex));
 
-				inPos = $val(decimation) - inC + i;
-				FIX_MulAdd($ref(Accum), $ref(tap),$ref(signalIn,inPos));
-			}
-			FIX_Assign($ref(signalOut,outCount),$ref(Accum));
-			outCount--;;
-			phase += $val(decimation);
-		}
-		phase -= $val(interpolation);
-	}
+@				inPos = $val(decimation) - inC + i;
+                                CGCFix::clearOverflow();
+@				FIX_MulAdd($ref(Accum), $ref(tap),$ref(signalIn,inPos));
+                                CGCFix::checkOverflow();
+@			}
+                        CGCFix::clearOverflow();
+@			FIX_Assign($ref(signalOut,outCount),$ref(Accum));
+                        CGCFix::checkOverflow();
+@			outCount--;;
+@			phase += $val(decimation);
+@		}
+@		phase -= $val(interpolation);
+@	}
    }
 
-	go {
-		addCode(bodyDecl);
-		addCode(body);
-	}
-        // A wrap-up method is inherited from CGCFix
-        // If you defined your own, you should call CGCFix::wrapup()
+   // A wrap-up method is inherited from CGCFix
+   // If you defined your own, you should call CGCFix::wrapup()
 }
