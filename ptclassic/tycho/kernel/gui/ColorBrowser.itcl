@@ -95,11 +95,11 @@ class ::tycho::ColorBrowser {
     ##################################################################
     ####                   protected methods                      ####
 
-    # Set the contents of the index.
-    protected method setContents {}
-
     # Set the contents of the entry box and display the color.
     protected method setEntry {string}
+
+    # Update the listbox with colors.
+    protected method updateListbox {}
 
     ##################################################################
     ####                   protected variables                    ####
@@ -132,7 +132,8 @@ body ::tycho::ColorBrowser::constructor {args} {
 	    -width  indexBrowserWidth \
 	    -height indexBrowserHeight
 
-    setContents
+    # Load the colors
+    updateListbox
 }
 
 
@@ -155,12 +156,13 @@ body ::tycho::ColorBrowser::help {} {
     ####                   protected methods                      ####
 
 ######################################################################
-#### setContents
+#### updateListbox
 # Construct the list box contents from the color manager.
 #
-body ::tycho::ColorBrowser::setContents {} {
+body ::tycho::ColorBrowser::updateListbox {} {
     set colors [lsort [::tycho::ColorManager::colorList]]
-    configure -items $colors
+    clearListbox
+    appendItems $colors
 }
 
 ######################################################################
@@ -170,6 +172,6 @@ body ::tycho::ColorBrowser::setContents {} {
 # the color named in the entry box.
 #
 body ::tycho::ColorBrowser::setEntry {string} {
-    ::tycho::ListBrowser::setEntry $string
+    chain $string
     $itk_component(color) configure -background [::tycho::color $string]
 }
