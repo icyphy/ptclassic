@@ -12,6 +12,7 @@ $Id$
  when attempts are made to connect multiple outputs to it.  It forbids
  the specification of multiple inputs.
 *************************************************************************/
+#include <std.h>
 #include "AutoForkNode.h"
 #include "KnownBlock.h"
 #include "Galaxy.h"
@@ -35,9 +36,8 @@ int AutoForkNode::isItPersistent () const {
 // make a new source connection
 PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int delay) {
 	if (originatingPort) {
-		StringList msg = readFullName();
-		msg += ": multiple output ports found on the same node.";
-		Error::abortRun (msg);
+		Error::abortRun(*this, 
+			"multiple output ports found on the same node");
 		return 0;
 	}
 // MultiPortHole: in this case the Geodesic is really not used, we
@@ -45,9 +45,8 @@ PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int delay) {
 // forkOutput to be equal to it.
 	if (sp.isItMulti()) {
 		if (forkOutput) {
-			StringList msg = readFullName();
-			msg += ": Multiport input must be first";
-			Error::abortRun(msg);
+			Error::abortRun(*this, 
+					"Multiport input must be first");
 			return 0;
 		}
 		forkOutput = (MultiPortHole *)&sp;
@@ -88,9 +87,7 @@ PortHole* AutoForkNode::setDestPort (GenericPort &gp) {
 		if ((forkStar = KnownBlock::clone("Fork")) == 0 ||
 		    (forkOutput = forkStar->multiPortWithName("output")) == 0
 		    || (forkInput = forkStar->portWithName("input")) == 0) {
-			StringList msg = readFullName();
-			msg += ": can't create Fork star";
-			Error::abortRun (msg);
+			Error::abortRun (*this, "can't create Fork star");
 			if (forkStar) {
 				delete forkStar;
 				forkStar = 0;
