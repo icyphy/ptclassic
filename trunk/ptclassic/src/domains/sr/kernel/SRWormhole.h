@@ -204,9 +204,11 @@ public:
 
   ~SRWormhole();
 
+  // Call Wormhole::begin
   void begin() { Wormhole::begin(); }
   void wrapup();
 
+  // Return my target's scheduler
   Scheduler * scheduler() const { return myTarget()->scheduler(); }
 
   Block * clone() const;
@@ -232,7 +234,6 @@ protected:
   void setup();
   void go();
 
-  // return stopTime
   double getStopTime();
 };
 
