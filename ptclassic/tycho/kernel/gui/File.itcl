@@ -458,7 +458,7 @@ body ::tycho::File::constructor {args} {
 	    -accelerator "C-x k" \
 	    -command "$this nextWindow; delete object $this"
  
-    if {$tychoNoRegExit == 0} {
+    if {$normalExit == 1} {
 	$itk_component(fileMenu) add command \
 		-label Quit \
 		-underline 0 \
