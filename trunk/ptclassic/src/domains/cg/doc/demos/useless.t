@@ -12,3 +12,4 @@ domain.  Each star, when executed, adds code to the target.
 On completion of execution, the accumulated code is displayed
 in a popup window, showing the sequence of code produced by
 the three stars, repeated twice.
+.ES
