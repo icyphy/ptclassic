@@ -913,6 +913,7 @@ ensemble ::tycho::url {
     option tail {name} {
 	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
+            set name [string trimright $name /]
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    lindex [split $path /] end
 	} else {
