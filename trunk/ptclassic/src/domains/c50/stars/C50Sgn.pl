@@ -1,7 +1,10 @@
 defstar {
 	name { Sgn }
 	domain { C50 }
-	desc { Signum. }
+	desc {
+This star computes the signum of its input.
+The output is +/- 1.  Note that 0.0 maps to 1.
+	}
 	version { $Id$ }
 	acknowledge { Gabriel version by E. A. Lee }
 	author { A. Baensch, ported from Gabriel }
@@ -13,12 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
        	location { C50 nonlinear functions library }
 	explanation { 
-This star outputs the signum of its input.
 .Id "signum"
-The output is either -1.0 or 1.0. 
-	}
-	execTime {
-		return 12;
 	}
 	input {
 		name{input}
@@ -42,9 +40,11 @@ The output is either -1.0 or 1.0.
 	 nop					;
         sar    	AR0,*				;ouput = AR0
 	}	
-
 	go {
 		addCode(sgnblock);
  
+	}
+	execTime {
+		return 12;
 	}
 }
