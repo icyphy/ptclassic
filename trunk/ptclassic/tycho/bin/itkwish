@@ -1,7 +1,7 @@
 #! /bin/csh -f
 # This script is used to run itkwish from prebuilt binaries
 # Author: Christopher Hylands
-# Version: @(#)itkwish	1.2 8/14/96
+# Version: $Id$
 # Copyright (c) 1996 The Regents of the University of California.
 # 	All Rights Reserved.
 
@@ -60,7 +60,8 @@ else
 		# a recursive loop
 		#exec itkwish $*
 
-		# Find the next itkwish by traversing the path
+		# Find the next itkwish by traversing the path, looking
+		# for an itkwish that is not a script
 		# Is this a big mistake?
 		set binary=$0
 		set bindir=`dirname $binary`
@@ -68,7 +69,12 @@ else
 		foreach dir ($path)
 			if ( $dir != $bindir ) then
 				if ( -e $dir/itkwish ) then
-					exec $dir/itkwish $*
+					file $dir/itkwish | \
+					 egrep -s 'csh|c-shell|script'
+					if ($status != 0) then
+						echo $dir/itkwish
+						exec $dir/itkwish $*
+					endif	
 				endif
 			endif	
 		end
