@@ -64,6 +64,13 @@ class ::tycho::Retarget {
     public proc printStars { starName relation domainA domainB}
 
     ###################################################################
+    ####                         private methods                   ####
+
+    # Initialize the counters at the bottom of the window
+    private method modifyAfterDomainChange { {ports 0} {multiports 0} \
+        {states 0} {aOnly 0} {bOnly 0} {bothAandB 0} {bTotal 0} {aTotal 0}} {}
+
+    ###################################################################
     ####                         private variables                 ####
     private variable domainA {CG56}
     private variable domainB {C50}
@@ -80,15 +87,7 @@ body ::tycho::Retarget::constructor {args} {
             -command "$this changeDomainB"
 
     eval itk_initialize $args
-
-    addInfo domainACount {Domain A stars} 0 3
-    addInfo domainBCount {Domain B stars} 0 3
-    addInfo commonStars {Common Stars} 0 3
-    addInfo diffPorts {Different Ports} 0 3
-    addInfo diffMultiports {Different MultiPorts} 0 3
-    addInfo diffStates {Different States} 0 3
-    addInfo domainAOnly {Domain A only} 0 3
-    addInfo domainBOnly {Domain B only} 0 3
+    modifyAfterDomainChange
 }
 
     ###################################################################
@@ -106,22 +105,24 @@ body ::tycho::Retarget::changeDomainA {} {
     foreach arg $arglist {
         set [lindex $arg 0] [lindex $arg 1]
     }
-    addTool domainAButton -text "Change Domain A: $domainA" \
-            -command "$this changeDomainA"
+    #addTool domainAButton -text "Change Domain A: $domainA" 
+    #        -command "$this changeDomainA"
+    modifyAfterDomainChange
 }
 #######################################################################
 #### changeDomainB
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainB {} {
-   set arglist [DialogWindow::newModal EntryQuery .e2 -queries "
+    set arglist [DialogWindow::newModal EntryQuery .e2 -queries "
        {domainB {Domain B:} $domainB}" ]
 
     foreach arg $arglist {
         set [lindex $arg 0] [lindex $arg 1]
     }
-    addTool domainBButton -text "Change Domain B: $domainB" \
-            -command "$this changeDomainB"
+    #addTool domainBButton -text "Change Domain B: $domainB" \
+    #        -command "$this changeDomainB"
+    modifyAfterDomainChange
 }
 #######################################################################
 #### compareDomains
@@ -135,31 +136,32 @@ body ::tycho::Retarget::compareDomains {} {
     catch {delete object component graphics}
 
     # Cycle through the different types of clashes
-    set headers [list commonStars commonButPorts commonButMultiPorts \
-            commonButStates ${domainA}Only ${domainB}Only]
+    set headers [list {Common Stars} {Different Ports} \
+            {Different MultiPorts} {Different States} \
+            "${domainA} Only" "${domainB} Only"]
     set indexCount 0
     foreach header $headers {
-        component graphics add $header {}
+        component graphics add $header {} {}
+        set header [list $header]
         foreach star [lindex $clashList $indexCount] {
             set contents [list tcl \
-                    "::tycho::Retarget::printStars $star $header \
+                    "::tycho::Retarget::printStars $star foo \
                     $domainA $domainB" ]
             component graphics add $star $contents $header
         }
         incr indexCount
     }
-    domain $domainA
-    addInfo domainACount {Domain A stars} [llength [knownlist]] 3
-    domain $domainB
-    addInfo domainBCount {Domain B stars} [llength [knownlist]] 3
 
-    addInfo commonStars {Common stars} [llength [lindex $clashList 0]] 3
-    addInfo diffPorts {Different Ports} [llength [lindex $clashList 1]] 3
-    addInfo diffMultiports {Different MultiPorts} [llength \
-            [lindex $clashList 2]] 3
-    addInfo diffStates {Different States} [llength [lindex $clashList 3]] 3
-    addInfo domainAOnly {Domain A only} [llength [lindex $clashList 4]] 3
-    addInfo domainBOnly {Domain B only} [llength [lindex $clashList 5]] 3
+    # ports multiports states aOnly bOnly bothAandB bTotal0 aTotal0
+    modifyAfterDomainChange \
+            [llength [lindex $clashList 1]] \
+            [llength [lindex $clashList 2]] \
+            [llength [lindex $clashList 3]] \
+            [llength [lindex $clashList 4]] \
+            [llength [lindex $clashList 5]] \
+            [llength [lindex $clashList 0]] \
+            [llength [knownlist $domainB]] \
+            [llength [knownlist $domainA]]
 
     component graphics redrawGraph
 }
@@ -247,4 +249,36 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
     "]
 
     $retargWin centerOnScreen
+}
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### modifyAfterDomainChange
+# Initialize the counters at the bottom of the window
+body ::tycho::Retarget::modifyAfterDomainChange { {ports 0} {multiports 0} \
+        {states 0} {aOnly 0} {bOnly 0} {bothAandB 0} {bTotal 0} {aTotal 0}} {
+    addInfo diffPorts {Ports} $ports 3 \
+            "Number of stars that have the same name, but different ports."
+    addInfo diffMultiports {MultiPorts} $multiports 3 \
+            "Number of stars that have the same name, but different multiports."
+    addInfo diffStates {States} $states 3 \
+            "Number of stars that have the same name, but different states."
+    addInfo domainBOnly "$domainB Only" $aOnly 3 \
+            "Number of stars that are only in $domainA."
+    addInfo domainAOnly "$domainA Only" $bOnly 3 \
+            "Number of stars that are only in $domainB."
+
+    addInfo commonStars {Common} $bothAandB 3 \
+            "Number of stars that are in both domains and have the same ports, multiports and states."
+
+    addInfo domainBCount "$domainB" $aTotal 3 \
+            "Total number of stars in $domainB."
+    addInfo domainACount "$domainA" $bTotal 3 \
+            "Total number of stars in $domainA."
+
+    component graphics titleSet title \
+            "Comparison of $domainA and $domainB domains"
+
 }
