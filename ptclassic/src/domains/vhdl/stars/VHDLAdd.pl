@@ -28,7 +28,4 @@ $ref(output) $assign(output) $interOp(+, input);
 	go {
 	  addCode(std);
 	}
-	exectime {
-		return input.numberPorts();
-	}
 }
