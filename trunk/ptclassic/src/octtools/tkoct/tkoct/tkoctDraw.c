@@ -121,8 +121,17 @@ _xpGedAllocLayerGC( XPGed *pGed, XPGedLayer *pLI) {
 
     if ( nColors >= 1 ) {
         tapGetDisplayColor( &layer, 0, &fgc.red, &fgc.green, &fgc.blue);
+#if TK_MAJOR_VERSION == 4
+	/* tk4.0b2/changes says:
+	12/6/94 (cleanup) Eliminated "interp" argument to Tk_GetColorByValue,
+	since it is no longer needed.
+	*** POTENTIAL INCOMPATIBILITY ***
+	*/
+	pLI->fgColor = Tk_GetColorByValue( pGed->tkwin, None, &fgc);
+#else
 	pLI->fgColor = Tk_GetColorByValue( pGed->ip, pGed->tkwin, None,
 	  &fgc);
+#endif
 	gcMask |= GCFunction | GCForeground;
 	gcValues.function = GXcopy;
 	gcValues.foreground = pLI->fgColor->pixel;
