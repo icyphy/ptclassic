@@ -1,5 +1,5 @@
 # Makefile for Ptolemy library and main module for interpreter
-# $Id$
+# @(#)make.template	1.8	5/22/90
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -32,16 +32,18 @@ LIB=libptolemy.a
 LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc Scheduler.cc SpaceWalk.cc \
 	Output.cc Fraction.cc Universe.cc StringList.cc Particle.cc Help.cc \
 	Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc \
-	NamedObj.cc
+	NamedObj.cc State.cc KnownState.cc FloatState.cc IntState.cc \
+	StringState.cc
 
-SRCS=$(LIBSRCS) interpmain.cc pigiIfc.cc
+SRCS=$(LIBSRCS) interpmain.cc 
 
 LIBOBJS=Star.o Connect.o Block.o Galaxy.o Scheduler.o SpaceWalk.o  Output.o \
 	Fraction.o Universe.o StringList.o Particle.o Help.o Command.o \
-	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o NamedObj.o
+	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o NamedObj.o \
+	State.o KnownState.o FloatState.o IntState.o StringState.o
 
 # Things to make
-TOMAKE=$(LIB) interpmain.o pigiIfc.o
+TOMAKE=$(LIB) interpmain.o 
 
 all:	makefile $(TOMAKE)
 
