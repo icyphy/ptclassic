@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -189,13 +189,13 @@ int SDFClusterGal::mergePass() {
 	do {
 		while ((c1 = nextClust++) != 0) {
 			c2 = c1->mergeCandidate();
-			if (c2) break;
+			if (c2 && canMerge(c1,c2)) break;
 		}
 		if (c2) {
 			c1 = merge(c1, c2);
 			// keep expanding the result as much as possible.
 			SDFCluster* c3;
-			while ((c3 = c1->mergeCandidate()) != 0)
+			while ((c3 = c1->mergeCandidate()) && canMerge(c1,c3))
 				c1 = merge(c1, c3);
 			changes = TRUE;
 			nextClust.reset();
@@ -233,6 +233,7 @@ SDFCluster* SDFClusterGal::fullSearchMerge() {
 			if (!p->fbDelay() &&
 			    p->numIO() == p->far()->numIO()) {
 				SDFCluster *peer = p->far()->parentClust();
+				if (!canMerge(peer,c)) continue;
 				SDFCluster *src, *dest;
 				// sort them so src is the source.
 				if (p->isItOutput()) {
@@ -605,8 +606,7 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 	}
 	else {
 		// make a new bag and put both atoms into it.
-		LOG_NEW; SDFClusterBag* bag = new SDFClusterBag;
-		addBlock(bag->setBlock(genBagName(),this));
+		SDFClusterBag* bag = createBag();
 		bag->absorb(c1,this);
 		bag->absorb(c2,this);
 		c1Bag = bag;
@@ -619,6 +619,12 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 		c1Bag->loopBy(fac);
 	}
 	return c1Bag;
+}
+
+SDFClusterBag* SDFClusterGal :: createBag() {
+	LOG_NEW; SDFClusterBag* temp = new SDFClusterBag;
+	addBlock(temp->setBlock(genBagName(),this));
+	return temp;
 }
 
 // constructor: make empty bag.
@@ -1012,6 +1018,8 @@ int SDFAtomCluster::run() {
 	return TRUE;
 }
 
+int SDFAtomCluster :: isSDF() const { return pStar.isSDF(); }
+ 
 // set the buffer sizes of the actual buffers -- we can pass down all
 // but the self-loops.
 // A self-loop buffer size is just numInitDelays * numXfer.
