@@ -42,36 +42,11 @@ include $(CONFIG)
 
 MISC_FILES =	README README.files copyright .glimpse_exclude
 
-makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
-	tests extraclean weblint:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-
-# We make itcldocs twice because they use the codeDoc.idx index, which
-# is created from the itcldocs
-install: subinstall itcldocs indices itcldocs
-subinstall:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making install in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) install ;\
-		) \
-	    fi ; \
-	done
-
-TAGS:
-	echo "Making tags makes no sense in the tycho directory"
-
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 # You probably don't want to add $(SRCS) to this, rather, change
 # the makefile that includes this one to use $(EXTRA_SRCS)
+# This rule should be the first rule in this makefile so that 'make'
+# will run 'make sources'.
 sources:: subsources indices makefile README.files
 
 # We use a subtarget here so that we do make sources in the subdirs
@@ -88,6 +63,46 @@ subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 
 indices:
 	(cd lib/idx; $(MAKE))
+
+makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
+	tests extraclean weblint:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+
+# We make itcldocs twice because they use the codeDoc.idx index, which
+# is created from the itcldocs
+install: subinstall itcldocs indices itcldocs_again
+subinstall:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making install in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) install ;\
+		) \
+	    fi ; \
+	done
+
+# We have to have a itcldocs and a itcldocs_again rule, 'make install'
+# will not run 'make itcldocs' twice.
+itcldocs_again:
+	@echo "Running make itcldocs again so we pick up the codeDoc index"
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making itcldocs in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) itcldocs ;\
+		) \
+	    fi ; \
+	done
+
+TAGS:
+	echo "Making tags makes no sense in the tycho directory"
 
 
 # This rule should contains things that might take a little while
