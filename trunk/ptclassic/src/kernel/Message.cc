@@ -55,9 +55,16 @@ int PacketData::errorConvert(const char* arg) const {
 	return 0;
 }
 
-// having the following prevents removal of last reference to
-// dummyPacket.
+// The following is a permanent packet with contents "dummyPacket".
 static Packet dummy;
+
+// bookkeeping function to zap the PacketData when done
+// have to handle dummyPacket specially (it cannot be deleted)
+void Packet::unlinkData() {
+	d->refCount--;
+	if (d != &dummyPacket && d->refCount == 0)
+		delete d;
+}
 
 extern const dataType PACKET = "PACKET";
 
