@@ -71,8 +71,8 @@ clipboard.
 <li>Glimpse should not freeze Tycho while running. Searching
 through say the Ptolemy tree can take a very long time.
 <li>Glimpse.itcl should probably not be in the kernel.
-<li>If $TYCHO/.glimpse_exclude is not present, then we should
-as the user if we want to create it.
+<li>If <CODE>$TYCHO/.glimpse_exclude</Code> is not present, then we should
+ask the user if we want to create it.
 </ul>
 
 <h3><a href="../kernel/HTML.itcl">HTML</a></h3>
@@ -85,7 +85,7 @@ as the user if we want to create it.
 <li>A construct like "&lt;center&gt; &lt;img ... &gt; &lt;/center&gt;"
     results in an in-line image rather than a centered image.
 <li>A &lt;p&gt; after an image is ignored.
-<li> 	The following two line html file causes an error:
+<li> 	The following two line HTML file causes an error:
 <PRE>
 &lt;/pre&gt;&lt;/tcl&gt;
 &lt;/pre&gt;&lt;/tcl&gt;
@@ -109,7 +109,7 @@ The short term workaround is to add a space:
 <ul>
 <li>    If I have two HTML viewers open and if in one of them I click on
     a link that references the file open in the other, the other
-    one is brought to the font and the one I am looking at doesn't
+    one is brought to the front and the one I am looking at doesn't
     change. This isn't what some people would expect.
 <li>    HTTP is not supported, so hyperlinks can only be to local files.
 <li>    There should be a menu entry to hide the toolbar and location.
@@ -133,7 +133,7 @@ up from behind it.
 
 <li>It would be nice if there was a simple way of opening
 an HTML editor on a file. Perhaps we need a way of registering
-_multiple_ editors for a file extension and have a popup
+_multiple_ editors for a file extension and have a pop-up
 menu in the file browser that selects the type of editor.
 
 </ul>
@@ -219,7 +219,7 @@ There are lots of bugs to be fixed in the visual editors, here are
 some of the biggies.
 <h3><a href="../editors/visedit/Graphics.itcl">Graphics</a></h3>
 <ul>
-<li> Cut and past does not work in the Graphics widget.
+<li> Cut and paste does not work in the Graphics widget.
 <li> Moved titles new position is not saved.
 <li> Moving or adding titles does not mark the buffer modified.
 <li> Most bindings in the File menu do not work.
