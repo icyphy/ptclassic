@@ -21,8 +21,8 @@ README		This file.
 asmc50		A bash script that will assemble c50 assembler. 
 c50_prog.ps	C50 domain programmer's manual in PostScript.
 c50_prog.txt	C50 domain programmer's manual in ascii.
-c50_prog.ps	C50 domain users's manual in PostScript.
-c50_prog.txt	C50 domain users's manual in ascii.
+c50_user.ps	C50 domain users's manual in PostScript.
+c50_user.txt	C50 domain users's manual in ascii.
 loadc50		A bash script that loads the c50.
 pt-0.6.c50.patch A patch for Ptolemy0.6 that installs the c50 domain.
 
