@@ -86,6 +86,8 @@ ITCL_SRCS = \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	IndexBrowser.itcl \
+	JRPC.itcl \
+	JRPCServer.itcl \
 	Library.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
