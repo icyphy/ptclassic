@@ -498,8 +498,10 @@ body ::tycho::Edit::constructor {args} {
 
     # Don't break on Alt-key combinations: the top-level window needs
     # it for menu traversal
-    bind $text <Alt-Key> { }
-    
+    #bind $text <Alt-Key> { }
+    # FIXME: should this be here, or in TopLevel or in Displayer?
+    bind all <Alt-Key> {tkTraverseToMenu %W %A;	 tkMenuUnpost {}}   
+
     # Bindings to highlight parenthesized regions
     bind $text <Key-parenright> \
 	    "if \[$this recordCharForUndo %A\] {bell; break}; \
