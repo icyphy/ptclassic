@@ -60,7 +60,7 @@ proc ::tycho::autoName {stem} {
 # Simple implementation of the Unix egrep command.
 #
 # If a grep binary is in the user's path, then use it
-
+#
 # The code below returns all the lines that have a # as the first character
 # in two files.
 # <tcl><pre>
@@ -73,7 +73,7 @@ proc ::tycho::autoName {stem} {
 # argument.  egrep will expand any glob style pathnames:
 # <tcl><pre>
 # ::tycho::egrep -i author *
-# </pre></tcl
+# </pre></tcl>
 #
 proc ::tycho::egrep {regexp args} {
     set retval {}
