@@ -40,16 +40,7 @@ provisions.
     channels.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
     channels.setInitValue(1);
   }
-  
-  codeblock (sync) {
-    {
-      /* Wait for samples to drain */
-      audio_info_t info;
-      ioctl($starSymbol(file), AUDIO_DRAIN, &info);
-    }
-  }
-
-	
+  	
   codeblock (setbufptr) {
     $starSymbol(bufferptr) = $starSymbol(buffer);
   }  
