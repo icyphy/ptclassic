@@ -56,6 +56,14 @@ update
 set v [package require java]
 puts "JDK [java::call System getProperty java.version], Tcl Blend $v, "
 
+# Set up this stupid flag to deal with stupid casting change
+# in Tcl Blend 1.1
+if { $v >= 1.1 } {
+    set tcl_platform(javaCastNeeded) 1
+} else {
+    set tcl_platform(javaCastNeeded) 0
+} 
+
 # Java is too stupid to understand environment variables
 # We would like to do this but it doesn't work in 1.1:
 # java::call System setProperty "PTII" $env(PTII)
@@ -78,8 +86,8 @@ if [info exists tk_version] {
 
     # Basic graph viewer
     ::tycho::register mode "ptII" \
-	    -command {::tycho::view PtEdit -file {%s}} \
-	    -viewclass ::tycho::PtEdit \
+	    -command {::tycho::view PtGraphEditor -file {%s}} \
+	    -viewclass ::tycho::PtGraphEditor \
 	    -label {Ptolemy II}  \
 	    -category "graphics" \
 	    -underline 0
