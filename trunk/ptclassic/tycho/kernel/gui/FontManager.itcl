@@ -529,7 +529,7 @@ body ::tycho::FontManager::getValidSize {proposed} {
 #
 body ::tycho::FontManager::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/FontManager.html
+    ::tycho::File::openContext $TYCHO/kernel/doc/internals/FontManager.html
 }
 
 #########################################################################
