@@ -305,8 +305,10 @@ static char* genObjDir (const char* src) {
 extern "C" void
 KcLoadInit (const char* argv0) {
 	ptolemyRoot = getenv ("PTOLEMY");
-	if (ptolemyRoot == 0)
+	// FIXME: Memory Leak
+	if (ptolemyRoot == 0) {
 		ptolemyRoot = hashstring(expandPathName("~ptolemy"));
+	}
 	tmpFileName = tempFileName();
 	Linker::init (argv0);
 	// look for a file specifying modules to be permanently linked in
@@ -361,6 +363,7 @@ static const char *preprocProg[] = { "", "ptlang", "pepp", "islang" };
 static int
 compileAndLink (const char* name, const char* idomain, const char* srcDir,
 		  int preproc, int permB, const char* linkArgs) {
+	// FIXME: Memory Leak
 	srcDir = expandPathName (srcDir);
 	char* objDir = genObjDir (srcDir);
 	char plName[512], oName[512], ccName[512], cmd[512];
@@ -454,6 +457,7 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
 		return FALSE;
 	}
 // form the source file name
+	// FIXME: Memory Leak
 	const char* eDir = expandPathName (srcDir);
 	char fName[512];
 	int preproc = FindStarSourceFile(eDir, idomain, name, fName);
@@ -481,6 +485,7 @@ KcLoad (const char* iconName, int permB, const char* linkArgs) {
 	}
 	char codeName[512], base[128], domain[64], dir[512];
 
+	// FIXME: Memory Leak
 	iconName = expandPathName (iconName);
 	if (!IconFileToSourceFile (iconName, codeName, domain))
 		return FALSE;
