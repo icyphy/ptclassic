@@ -157,7 +157,7 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 # </ol>
 class ::tycho::Exec {
     inherit ::tycho::Object
-    constructor {command dir maxline} {}
+    constructor {{cmd make} {dir {}} {maxline {}}} {}
     destructor {}
     
     ###################################################################
@@ -181,7 +181,7 @@ class ::tycho::Exec {
     method doWhenDone {action} {set doWhenDone $action}
 
     # Exec a process, if there is any output, save it to history.
-    method execProcess {command dir maxline}
+    method execProcess {{cmd {}} {dir {}} {maxline {999999}}}
 
     # Get the contents of the history window, if any.
     method getHistory {} {}
@@ -198,7 +198,7 @@ class ::tycho::Exec {
     method getStatusNow {} 
 
     # Stop a process now.
-    method killProcess {parent}
+    method killProcess {{parent {}}}
 
     # Read from the file descriptor, and close if we are at eof.
     method readOrClose {fd}

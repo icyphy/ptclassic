@@ -119,10 +119,10 @@ class ::tycho::Monitor {
     ####                      public methods                       ####
     
     # Count down before closing window
-    public method autoDestroy {time} {}
+    public method autoDestroy {{time 0}} {}
 
     # similar to execProcess, except execute in the monitor.
-    public method execProcess {type line} {}
+    public method execProcess {{type {}} {line {}}} {}
 
     # We want to make sure that only private function can write
     public method insertLine {line} {}
@@ -131,7 +131,7 @@ class ::tycho::Monitor {
     public method jumpToLine {monitorLine editorLine fname} {}
     
     # Uses jumpToLine to jump to the next reported error.
-    public method jumpNextError {direction} {}
+    public method jumpNextError {{direction 1}} {}
 
     # Set the error count so that jumpNextError will jump correctly.
     public method setErrorCount {num}
