@@ -16,6 +16,7 @@ $Id$
 #define _Star_h 1
 
 #include "Block.h"
+class Galaxy;
 
 	////////////////////////////////////
 	// class Star
@@ -44,6 +45,13 @@ public:
 
 	// Return myself as a Star.  Overrides Block::asStar.
 	Star& asStar() const;
+
+	// Return my indexValue.
+	int index() const { return indexValue;}
+private:
+	int indexValue;
+	friend setStarIndices(Galaxy&);
 };
 
+int setStarIndices(Galaxy&);
 #endif
