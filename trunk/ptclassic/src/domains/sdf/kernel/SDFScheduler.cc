@@ -131,7 +131,7 @@ int SDFScheduler :: setup (Block& block) {
 	// set schedulePeriod if user gives it.
 	FloatState* st = (FloatState*) galaxy.stateWithName("schedulePeriod");
 	if (st) schedulePeriod = float ((double) (*st));
-	currentTime = schedulePeriod;
+	currentTime = 0;
 
 	if (haltRequestFlag) {
 		invalid = TRUE;
