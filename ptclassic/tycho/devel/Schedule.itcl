@@ -1,0 +1,295 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie
+#
+# Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### DFSchedule
+#
+# The _DFSchedule_ class implements a schedule model with the
+# same information as described for the Ptolemy schedule
+# output. This is an experimental class to test the utility
+# of Models. It will have to be moved out of the kernel
+# sooner or later.
+#
+# Two problems have shown up right away: i) Models do not order their
+# data! There must be a way of specifying that some data is ordered.
+# ii) Models do not allow duplicate names, which means that a
+# star cannot appear more than once in the schedule. Both of these
+# problems can probably be solved by introducing the notion of
+# a list into TIM.
+#
+class ::tycho::DFSchedule {
+    inherit ::tycho::Model
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+
+
+    #################################################################
+    ####                     public methods                      ####
+
+    
+    # Delete a schedule 
+    method deleteschedule {name}
+
+    # Delete a schedulefiring 
+    method deletefiring {name}
+
+    # Test if a schedule or firing is present
+    method exists {name}
+
+    # Add a firing to the array
+    method firing {name value args}
+    
+    # Get the attributes of a firing
+    method firingattrs {name}
+
+    # Get an option or options of a firing
+    method firingcget {name option}
+
+    # Configure the firing with one or more options
+    method firingconfigure {name args}
+
+    # Return the firings and sub-schedules in a schedule
+    method get {name}
+
+    # Add a schedule to the array
+    method schedule {name args}
+    
+    # Get the attributes of an schedule
+    method scheduleattrs {name}
+
+    # Get an option or options of an schedule
+    method schedulecget {name option}
+
+    # Configure the schedule with one or more options
+    method scheduleconfigure {name args}
+
+    # Return the type of a schedule or firing
+    method type {name}
+
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args} {eval $args}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::DFSchedule::constructor {args} {
+    # Evaluate options
+    eval configure $args
+
+    # I have two entity types
+    entity schedule 0 \
+	    -scheduler          "" \
+	    -numberOfProcessors 1 \
+	    -totalIdleTime      0 \
+	    -makespan           0 \
+	    -utilization        0 \
+	    -processor          0 \
+	    -target             Tycho \
+	    -repeat             1  \
+	    -description        "" \
+	    -label              ""
+
+    entity firing 1 \
+            -exec_time   0  \
+            -label       "" \
+            -description ""
+}
+
+########################################################################
+#### deletefiring
+#
+# Delete an firing. Flag an error if the firing does not exist.
+# Return the inverse command.
+#
+body ::tycho::DFSchedule::deletefiring {name} {
+    _verify firing $name
+    _delete firing $name
+}
+
+########################################################################
+#### deleteschedule
+#
+# Delete an schedule. Flag an error if the schedule does not exist.
+# Return the inverse command.
+#
+body ::tycho::DFSchedule::deleteschedule {name} {
+    _verify schedule $name
+    _delete schedule $name
+}
+
+########################################################################
+#### exists
+#
+# Returns true if the firing or schedule is in the model, else false.
+#
+body ::tycho::DFSchedule::exists {name} {
+    expr [_exists schedule $name] || [_exists firing $name]
+}
+
+########################################################################
+#### firing
+#
+# Add a new firing to the array. Flag an error if the firing
+# already exists. Additional arguments are the initial values
+# of firing options. Return the inverse command.
+#
+body ::tycho::DFSchedule::firing {name value args} {
+    if { [::info exists _type($name)] } {
+	error "Firing $name already exists in [_dataname]"
+    }
+    eval [list _entity firing $name $value] $args
+    return [list delete $name]
+}
+
+########################################################################
+#### firingattrs
+#
+# Return a list containing the attributes of the firing as a flat
+# option-value list.
+#
+body ::tycho::DFSchedule::firingattrs {name} {
+    _attributes firing $name
+}
+
+########################################################################
+#### firingcget
+#
+# Get an option of a data firing. Flag an error if the firing
+# does not exist or the option does not.
+#
+body ::tycho::DFSchedule::firingcget {name option} {
+    _verify firing $name
+    _cget firing $name $option
+}
+
+########################################################################
+#### firingconfigure
+#
+# Configure the given firing.
+# Flag an error if the firing does not exist, or if an
+# option is invalid.
+# 
+body ::tycho::DFSchedule::firingconfigure {name args} {
+    _verify firing $name
+    eval _configure firing $name $args
+}
+
+########################################################################
+#### get
+#
+# Get the names of the firings and sub-schedules within a schedule.
+# The sub-schedules appears simply as "sub-schedule".
+#
+body ::tycho::DFSchedule::get {name} {
+    set result {}
+    foreach i [lsort -integer [_children $name]] {
+        # If the item has a label, use that.
+	if { [_type $name$_separator$i] == "schedule" } {
+            set label [_cget schedule $name$_separator$i -label]
+            if { $label != "" } {
+                lappend result [list $label]
+            } else {
+                lappend result "sub-schedule"
+            }
+	} else {
+            set label [_cget firing $name$_separator$i -label]
+            if { $label != "" } {
+                lappend result [list $label]
+            } else {
+                lappend result [_get firing $name$_separator$i]
+            }
+	}
+    }
+    return $result
+}
+
+#########################################################################
+#### schedule
+#
+# Add a new schedule to the array. Flag an error if the schedule
+# already exists. Additional arguments are the initial values
+# of schedule options. Return the inverse command.
+#
+body ::tycho::DFSchedule::schedule {name args} {
+    if { [::info exists _type($name)] } {
+	error "Schedule $name already exists in [_dataname]"
+    }
+    eval [list _entity schedule $name] $args
+}
+
+########################################################################
+#### scheduleattrs
+#
+# Return a list containing the attributes of the schedule as a flat
+# option-value list.
+#
+body ::tycho::DFSchedule::scheduleattrs {name} {
+    _attributes schedule $name
+}
+
+########################################################################
+#### schedulecget
+#
+# Get an option of a data schedule. Flag an error if the schedule
+# does not exist or the option does not.
+#
+body ::tycho::DFSchedule::schedulecget {name option} {
+    _verify schedule $name
+    _cget schedule $name $option
+}
+
+########################################################################
+#### scheduleconfigure
+#
+# Configure the given schedule. 
+# Flag an error if the schedule does not exist, or if an
+# option is invalid.
+# 
+body ::tycho::DFSchedule::scheduleconfigure {name args} {
+    _verify schedule $name
+    eval _configure schedule $name $args
+}
+
+#########################################################################
+#### type
+#
+# Return the type: either "schedule" or "firing".
+#
+body ::tycho::DFSchedule::type {name} {
+    _type $name
+}
+
