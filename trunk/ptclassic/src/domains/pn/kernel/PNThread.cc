@@ -39,44 +39,26 @@ static const char file_id[] = "$RCSfile$";
 #ifdef __GNUG__
 extern "C"
 {
-    int lwp_setpri(thread_t, int);
     int lwp_sleep(timeval*);
-    int pod_getmaxpri();
-    int pod_setmaxpri(int);
 }
 #endif
 
 // Constructor.
 MTDFThread::MTDFThread(int priority, void (*thread)(MTDFStar*), MTDFStar* star)
-    : Thread(priority, (void(*)(void*))thread, star)
-{}
-
-// Change the Thread's priority.
-int MTDFThread::setPriority(int priority)
-{
-    return lwp_setpri(*this, priority);
-}
-
-// Set system-wide maximum priority.
-int MTDFThread::setMaxPriority(int priority)
-{
-    return pod_setmaxpri(priority);
-}
-
-// System-wide maximum priority.
-int MTDFThread::maxPriority()
-{
-    return pod_getmaxpri();
-}
-
-// System-wide minimum priority.
-int MTDFThread::minPriority()
-{
-    return MINPRIO;
-}
+    : LwpThread(priority, (void(*)(void*))thread, star)
+{ }
 
 // Disable Thread for the specified time.
 int MTDFThread::sleep(TimeVal delay)
 {
-    return lwp_sleep((timeval*)&delay);
+    if (delay > 0.0)
+	return lwp_sleep((timeval*)&delay);
+    else
+	return 0;
+}
+
+// New MTDFThread object corresponding to the current thread.
+MTDFThread* MTDFThread::currentThread()
+{
+    return (MTDFThread*)LwpThread::currentThread();
 }
