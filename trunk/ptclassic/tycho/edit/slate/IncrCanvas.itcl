@@ -1407,8 +1407,10 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 body ::tycho::IncrCanvas::type {id} {
     if { [string match {[0-9]*} $id] } {
 	$canvas type $id
-    } else {
+    } elseif { [string match {_[0-9]*} $id] } {
 	return $itemClass($id)
+    } else {
+	error "$id is not a valid item ID"
     }
 }
 
