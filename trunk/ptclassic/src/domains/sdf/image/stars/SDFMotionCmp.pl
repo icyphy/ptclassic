@@ -65,15 +65,16 @@ can be added or reduced-search motion compensation can be performed.
 		access { private }
 		arglist { "(unsigned char* diff, unsigned const char* cur, unsigned const char* prev, char* horz, char* vert, const int width, const int height)" }
 		code {
-			int ii, jj, xvec, yvec;
-
-			for(ii = 0; ii < height; ii += blocksize) {
-				for(jj = 0; jj < width; jj += blocksize) {
-					FindMatch(cur, prev, ii, jj, xvec, yvec, width,
-							height);
-					DoOneBlock(*horz, *vert, diff, cur, prev, ii, jj,
-							xvec, yvec, width);
-					horz++; vert++;
+			for(int ii = 0; ii < height; ii += blocksize) {
+				for(int jj = 0; jj < width; jj += blocksize) {
+					int xvec, yvec;
+					FindMatch(cur, prev, ii, jj, xvec,
+						  yvec, width, height);
+					DoOneBlock(*horz, *vert, diff, cur,
+						   prev, ii, jj, xvec, yvec,
+						   width);
+					horz++;
+					vert++;
 				}
 			} // end middle rows
 		} // end code{}
@@ -86,36 +87,37 @@ can be added or reduced-search motion compensation can be performed.
 		arglist { "(unsigned const char* cur, unsigned const char* prev, const int ii, const int jj, int& xvec, int& yvec, const int width, const int height)" }
 		access { protected }
 		code {
-// If we're near the border, don't do motion comp.
-			if ((ii == 0) || (jj == 0) || (ii == height-blocksize) ||
-					(jj == width-blocksize)) {
+			// If we're near the border, don't do motion comp.
+			if ((ii == 0) || (jj == 0) ||
+			    (ii == height-blocksize) ||
+			    (jj == width-blocksize)) {
 				xvec = yvec = 0;
 				return;
 			}
 
-			int i, j, deli, delj, *diffArr, bs2 = 2 * blocksize;
+			int bs2 = 2 * blocksize;
 			register int tmp1, tmp2, tmp3;
-			LOG_NEW; diffArr = new int[bs2*bs2];
+			LOG_NEW; int *diffArr = new int[bs2*bs2];
 
-// Set difference values for each offset
-			for(deli = 0; deli < bs2; deli++) {
-				for(delj = 0; delj < bs2; delj++) {
+			// Set difference values for each offset
+			for(int deli = 0; deli < bs2; deli++) {
+				for(int delj = 0; delj < bs2; delj++) {
 					tmp3 = deli*bs2 + delj;
 					diffArr[tmp3] = 0;
-					for(i = 0; i < blocksize; i++) {
+					for(int i = 0; i < blocksize; i++) {
 						tmp1 = (ii+i)*width + jj;
 						tmp2 = (ii+i+deli-blocksize)*width +
 								jj+delj-blocksize;
-						for(j = 0; j < blocksize; j++) {
+						for(int j = 0; j < blocksize; j++) {
 							diffArr[tmp3] += abs(int(cur[tmp1+j]) -
 									int(prev[tmp2+j]));
 			}	}	}	}
 
 // Find min difference
-			int mini, minj;
-			mini = minj = blocksize;
-			for(i = 0; i < bs2; i++) {
-				for(j = 0; j < bs2; j++) {
+			int mini = blocksize;
+			int minj = blocksize;
+			for(int i = 0; i < bs2; i++) {
+				for(int j = 0; j < bs2; j++) {
 					if (diffArr[bs2*i+j] < diffArr[bs2*mini+minj]) {
 						mini = i; minj = j;
 			}	}	}
@@ -130,18 +132,21 @@ can be added or reduced-search motion compensation can be performed.
 		access { protected }
 		type { "void" }
 		arglist { "(char& horz, char& vert, unsigned char* diff, unsigned const char* cur, unsigned const char* prev, const int ii, const int jj, const int xvec, const int yvec, const int width)" }
-		code { // Set diff frame and mvects.
-			int i, j, tmp1, tmp2;
-			for(i = 0; i < blocksize; i++) {
+		code {
+			// Set diff frame and mvects.
+			int tmp1, tmp2;
+			for(int i = 0; i < blocksize; i++) {
 				tmp1 = (ii+i+yvec)*width + jj+xvec;
 				tmp2 = (ii+i)*width + jj;
-				for(j = 0; j < blocksize; j++) {
+				for(int j = 0; j < blocksize; j++) {
 					diff[tmp2+j] = quant(cur[tmp2+j], prev[tmp1+j]);
-			}	}
+				}
+			}	
+		
 // NOTE THE -1's!! These are so the motion vector points FROM the past
 // block TO the current block, rather than the other way around!
-			horz = char(-1*xvec); vert = char(-1*yvec);
-
+			horz = char(-1*xvec);
+			vert = char(-1*yvec);
 		}
 	} // end DoOneBlock{}
 
@@ -166,42 +171,42 @@ can be added or reduced-search motion compensation can be performed.
 			if (one.retWidth() != two.retWidth()) {
 				sprintf(buf, "Widths differ: %d %d", one.retWidth(),
 						two.retWidth());
-				return 0;
+				return FALSE;
 			}
 			if (one.retHeight() != two.retHeight()) {
 				sprintf(buf, "Heights differ: %d %d", one.retHeight(),
 						two.retHeight());
-				return 0;
+				return FALSE;
 			}
 			if (one.retWidth() !=
 					(blocksize * (one.retWidth() / blocksize))) {
 				sprintf(buf, "Blocksize-width prob: %d %d",
 						blocksize, one.retWidth());
-				return 0;
+				return FALSE;
 			}
 			if (one.retHeight() !=
 					(blocksize * (one.retHeight() / blocksize))) {
 				sprintf(buf, "Blocksize-height prob: %d %d",
 						blocksize, one.retHeight());
-				return 0;
+				return FALSE;
 			}
 			if (one.fragmented()) {
 				sprintf(buf, "image 1 fragmented");
-				return 0;
+				return FALSE;
 			}
 			if (one.processed()) {
 				sprintf(buf, "image 1 processed");
-				return 0;
+				return FALSE;
 			}
 			if (two.fragmented()) {
 				sprintf(buf, "image 2 fragmented");
-				return 0;
+				return FALSE;
 			}
 			if (two.processed()) {
 				sprintf(buf, "image 2 processed");
-				return 0;
+				return FALSE;
 			}
-			return 1;
+			return TRUE;
 		}
 	} // end inputsOk()
 
@@ -223,7 +228,7 @@ can be added or reduced-search motion compensation can be performed.
 		const GrayImage* prvImage =
 				(const GrayImage*) pastEnvp.myData();
 
-		char buf[200];
+		char buf[512];
 		if (!inputsOk(*inImage, *prvImage, buf)) {
 			Error::abortRun(*this, buf);
 			return;
