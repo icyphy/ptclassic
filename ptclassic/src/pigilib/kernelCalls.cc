@@ -59,6 +59,7 @@ extern "C" {
 #include "err.h"
 #include "ptk.h"
 #include "xfunctions.h"
+#include "icon.h"			/* define LookAtFile */
 #undef Pointer
 }
 
@@ -288,7 +289,7 @@ static void logDomain() {
 // Return the domain of an object: note, it may not be the current
 // domain (e.g. SDF in DDF)
 extern "C" const char *
-KcDomainOf(char* name) {
+KcDomainOf(const char* name) {
 	const Block* b = findClass (name);
 	if (!b) {
 		ErrAdd("Unknown block");
@@ -469,8 +470,6 @@ KcSetDesc(const char* desc) {
 	else ptcl->currentGalaxy->setDescriptor(dummyDesc);
 }
 
-extern "C" boolean LookAtFile(const char*);
-
 ///////////////////////////////////////////////////////////////////////
 // Display the schedule.  Must run the universe first.
 extern "C" boolean
@@ -481,8 +480,8 @@ KcDisplaySchedule() {
 	    Error::error("No current target");
 	    return FALSE;
 	}
-	StringList name;
-	name << "~/schedule." << ptcl->universe->name();
+	StringList name = "~/schedule.";
+	name << ptcl->universe->name();
 	pt_ofstream str(name);
 	if (str) {
 		str << ptcl->currentTarget->displaySchedule();
@@ -505,7 +504,7 @@ Inputs: name = name of star or galaxy (sog)
 Outputs: return = whether name is known
 */
 extern "C" boolean
-KcIsKnown(char *className) {
+KcIsKnown(const char *className) {
 	return findClass(className) ? TRUE : FALSE;
 }
 
@@ -515,7 +514,7 @@ FALSE if unknown, derived from InterpGalaxy (meaning it is legal
 legal to replace it), or dynamic.
 */
 extern "C" boolean
-KcIsCompiledInStar(char *className) {
+KcIsCompiledInStar(const char *className) {
 	const Block* b = findClass(className);
 	if (b == 0 || b->isA("InterpGalaxy")) return FALSE;
 
@@ -549,7 +548,7 @@ isStringInList(const char* string, const char* list[],
 // Inputs: name = name of sog
 // Outputs: terms = list of info about each porthole
 extern "C" boolean
-KcGetTerms(char* name, TermList* terms)
+KcGetTerms(const char* name, TermList* terms)
 {
 	const Block *block = (const Block *)NULL;
 	char* mphname[MAX_NUM_FIELDS];
@@ -767,7 +766,7 @@ KcModTargetParams(ParamListType* pListPtr) {
 //     info = adr of (char *) for return value
 // Outputs: info = points to info string, free string when done
 extern "C" boolean
-KcInfo(char* name, char** info)
+KcInfo(const char* name, char** info)
 {
 	const Block* b = findClass(name);
 	if (!b) {
@@ -786,7 +785,7 @@ static void displayStates(const Block *b,char** names,int n_names);
 // Pops up a window displaying the profile and returns true if all goes well,
 // otherwise returns false.
 extern "C" int
-KcProfile (char* name) {
+KcProfile (const char* name) {
 	char* fieldnames[MAX_NUM_FIELDS];
 	int n_fields = 0;
 	const Block* b = findClass (name);
@@ -979,7 +978,7 @@ KcCatchSignals() {
 
 ///////////////////////////////////////////////////////////////////////
 // functions for enabling and disabling the run-time Tk event loop
-extern int runEventsOnTimer();
+extern int runEventsOnTimer();		// from ptklib/ptkRunEvents.cc
 
 static int EventLoopState = FALSE;
 
