@@ -99,7 +99,8 @@ private :
 class EGGate {
 public:
 	EGGate(EGNode* n, PortHole* p = 0) : 
-		parent(n), arc(0), far(0), myLink(0), pPort(p), index(0) {}
+		parent(n), arc(0), dynarc(0), far(0), myLink(0),
+		pPort(p), index(0) {}
  
 	virtual ~EGGate();
 
@@ -156,6 +157,7 @@ private:
 
 	// the arc which connects this gate to a gate in another node
 	EGArc* arc;
+	EGArc* dynarc;
 
 	// a pointer to the far end gate, accross the arc
 	EGGate* far;
