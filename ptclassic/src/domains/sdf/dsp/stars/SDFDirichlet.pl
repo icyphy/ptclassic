@@ -5,7 +5,7 @@ defstar {
 This star computes the normalized Dirichlet kernel (also called the aliased
 sinc function):
 
-d(x) = sin(Nx/2)/(N sin(x/2))
+d(x) = sin(N x / 2) / (N sin(x/2))
 
 The value of the normalized Dirichlet kernel at x = 0 is always 1, and the
 normalized Dirichlet kernel oscillates between -1 and +1.
@@ -21,6 +21,17 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
+	explanation {
+The Dirichlet kernel (a.k.a. the aliased sinc function) is the
+discrete-time Fourier transform (DTFT) of a sampled pulse function.
+The parameter $N$ is the length of the pulse [1].
+.ID "Oppenheim, A. V."
+.ID "Schafer, R. W."
+.UH REFERENCES
+.ip [1]
+A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+Prentice-Hall: Englewood Cliffs, NJ, 1989.
+}
 	seealso { Sinc }
 	input {
 		name{ input }
