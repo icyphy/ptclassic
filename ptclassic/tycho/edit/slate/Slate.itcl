@@ -752,12 +752,33 @@ body ::tycho::Slate::delete {args} {
 	    # Delete a canvas item
 	    $canvas delete $id
 	} elseif { [string match {_*} $id] } {
-	    # Delete a picture. First call its destruct method
+	    # Delete a picture. First remember its tags.
+	    set tags [$canvas gettags \
+		    [@scope ::tycho::$picttype($id) \
+		    [list set primary($id)]]]
+
+	    # Filter out hierarchy tags. Boy, this is kludgy...
+	    set temp $tags
+	    set tags {}
+	    foreach t $temp {
+		if { ! [string match {[!_]*} $t] } {
+		    lappend tags $t
+		}
+	    }
+	    
+	    # First call its destruct method
 	    @scope ::tycho::$picttype($id) [list \
 		    eval \[set methodtable(destruct)\] $id $canvas]
 
 	    # Then remove all items
 	    $canvas delete $id
+
+	    # Then forget it
+	    unset picttype($id)
+	    unset parent($id)
+	    foreach t $tags {
+		set tagged($t) [ldelete $tagged($t) $id]
+	    }
 	} else {
 	    # Delete by tag: call myself again for simplicity
 	    eval $this delete [$this find withtag $id]
