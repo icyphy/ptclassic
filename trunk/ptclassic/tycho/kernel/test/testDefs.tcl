@@ -246,3 +246,7 @@ proc getJavaInfo {obj} {
     superclass:    [java::info superclass $obj]\n"
 }
 
+# If there is no update command, define a dummy proc.  Jacl needs this
+if {[info command update] == ""} then { 
+    proc update {} {}
+}
