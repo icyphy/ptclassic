@@ -33,10 +33,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  A. Khazeni, J. Buck, B. Evans
  Date of creation: 2/24/93 
  Revisions:
-	1/17/94  BLE	cleaned up multiplication by zero
-		 BLE	added constant definitions for types of overflow
-		 BLE	added print out of overflow method in print method 
-        1/23/94  jbuck  Major reworking!
+	1/17/94  BLE	 cleaned up multiplication by zero
+		 BLE	 added constant definitions for types of overflow
+		 BLE	 added print out of overflow method in print method 
+        1/23/94  jbuck   Major reworking!
+	6/2/94   J.Weiss invented alternative format for precision strings:
+			 "n/m" with n = number of fraction bits
+				    m = total number of bits (word size)
 
 This file contains the definitions of the functions declared in  
 header file Fix.h. 
@@ -50,6 +53,7 @@ variable.
 #include "Fix.h"
 #include "Error.h"
 #include "type.h"
+#include "PrecisionState.h"
 #include <stream.h>
 #include <std.h>
 #include <string.h>
@@ -356,11 +360,26 @@ Fix::Fix(int ln, int ib)
     roundFlag = FALSE;
 }
 
-// same but use precision string.
+// same but use precision string/precision structure.
+
 Fix::Fix(const char* precision)
 {
     setToZero();
     if (!setPrecision(precision)) errors = err_invalid;
+    ovf_type = ovf_saturate;
+    roundFlag = FALSE;
+}
+
+Fix::Fix(const Precision& p)
+{
+    setToZero();
+    if (p.len() <= 0 || p.len() > FIX_MAX_LENGTH || p.intb() < 0 || p.intb() > p.len()) {
+	errors = err_invalid;
+    }
+    else {
+	length  = p.len();
+	intBits = p.intb();  
+    }
     ovf_type = ovf_saturate;
     roundFlag = FALSE;
 }
@@ -418,7 +437,7 @@ Fix::Fix(int ln, int ib, double d)
     roundFlag = FALSE;
 }
 
-// same, but use precision string.
+// same but use precision string/precision structure.
 
 Fix::Fix(const char* precision, double d)
 {
@@ -431,6 +450,21 @@ Fix::Fix(const char* precision, double d)
 	ovf_type = ovf_saturate;
 	roundFlag = FALSE;
     }
+}
+
+Fix::Fix(const Precision& p, double d)
+{  
+    if (p.len() <= 0 || p.len() > FIX_MAX_LENGTH || p.intb() < 0 || p.intb() > p.len()) {
+	initialize();
+	errors = err_invalid;
+    }
+    else {
+	length  = p.len();
+	intBits = p.intb();  
+	makeBits(d, TRUE);
+	ovf_type = ovf_saturate;
+    }
+    roundFlag = FALSE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -661,12 +695,12 @@ Fix operator * (int n, const Fix& x) { return (x * n); }
 
 Fix operator /  (const Fix& x, const Fix& y) 
 { 
-  double temp = 0;
+  double temp;
   int new_length  = x.length;
   int new_intBits = x.intBits;
   int dbz = FALSE;
-  if (y.value() != 0) {
-    temp = x.value()/y.value();
+  if ((temp = y.value()) != 0) {
+    temp = x.value()/temp;
     new_intBits = find_intBits(int(temp));
   }
   else {
@@ -869,18 +903,37 @@ void Fix:: overflow_handler (int rsign)
 
 int Fix::setPrecision(const char * prec_spec)
 {
+    // JW: undefine precision if empty string is given
+    if (!*prec_spec) {
+	length = intBits = 0;
+	return TRUE;
+    }
+
     if (!isdigit(*prec_spec))
 	return FALSE;
-    intBits = atoi(prec_spec);
+
+    int first = atoi(prec_spec);
+
     while (*prec_spec && isdigit(*prec_spec))
 	prec_spec++;
-    if (*prec_spec != '.' || !isdigit(prec_spec[1]))
+    if ((*prec_spec != '.' && *prec_spec != '/') || !isdigit(prec_spec[1]))
 	return FALSE;
+
+    int flag = (*prec_spec == '.');
+
     prec_spec++;
-    int after = atoi(prec_spec);
+    int second = atoi(prec_spec);
+
     // note that we do not check for extra garbage at the end of prec_spec.
-    length = after + intBits;
-    if (intBits <= 0 || after < 0 || length > FIX_MAX_LENGTH)
+
+    if (flag)  // "intBits.fracBits"
+	intBits = first,
+	length  = second + intBits;
+    else       // "fracBits/length"
+	length  = second,
+	intBits = length - first;
+
+    if ((intBits <= 0) || (length < intBits) || (length > FIX_MAX_LENGTH))
 	return FALSE;
     else return TRUE;
 }
