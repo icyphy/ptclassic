@@ -79,6 +79,9 @@ class ::tycho::Edit {
     ##########################################################################
     ####                            options                               ####
 
+    # Current base font. Text font is base font + fontOffset
+    itk_option define -basefont baseFont BaseFont {} 
+
     # Specify whether the widget should have a scrollbar (0 or 1).
     itk_option define -scrollbar scrollbar Scrollbar 1
 
@@ -126,6 +129,9 @@ class ::tycho::Edit {
 
     # If the selection is owned by this window and is visible, delete it.
     method deleteSelection {}
+
+    # Decrease the size offset of the current textfont
+    method downSize {}
 
     # Do nothing.
     method evaluate {}
@@ -247,6 +253,9 @@ class ::tycho::Edit {
     # Convert the selection or the current word to upper case.
     method upperCase {}
 
+    # Increase the size offset of the current textfont
+    method upSize {}
+
     # Write to the specified file any text that should be spell checked.
     method writeSpellText {filename}
 
@@ -309,6 +318,9 @@ class ::tycho::Edit {
     # Keep track of the maximum line length for filling text.
     private variable maxLineLength 70
 
+    # Add fontOffset to -basefont size to get current -textfont
+    private variable fontOffset 0
+
     # To support undo and redo, we keep information about the latest
     # insertions and deletions. For now, we implement just a one-level
     # undo command. An infinite undo is possible, but is it wise?
@@ -325,6 +337,19 @@ class ::tycho::Edit {
 
     private variable xMousePosition
     private variable yMousePosition
+}
+
+#########################################################################
+#### -basefont option configuration
+# Change the current basefont. (textfont = basefont + fontOffset)
+#
+configbody ::tycho::Edit::basefont {
+    set bf [::tycho::FontManager::parseFont "$itk_option(-basefont)"]
+    set sz [lindex $bf 1]
+    set sz [expr $sz + $fontOffset]
+    set tf [lreplace $bf 1 1 $sz]
+    $this configure -textfont \
+            [::tycho::font [lindex $tf 0] [lindex $tf 1] [lindex $tf 2]]
 }
 
 #########################################################################
@@ -635,7 +660,7 @@ body ::tycho::Edit::constructor {args} {
 
     # Subscribe to the preference set
     preference subscribeoptions $this \
-	    -textfont textFont \
+	    -basefont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \
 	    -relief textRelief \
@@ -909,6 +934,28 @@ body ::tycho::Edit::deleteSelection {} {
 	return 1
     }
     return 0
+}
+
+#####################################################################
+#### downSize
+# Decrease the size of the offset added to -basefont to get the
+# current -textfont. -basefont is set by preference and the 
+# offset is reset to 0 for every new editor.
+#
+body ::tycho::Edit::downSize {} {
+    set bf [::tycho::FontManager::parseFont $itk_option(-basefont)]
+    set sz [lindex $bf 1]
+    set sz [expr $sz + $fontOffset]
+    
+    # heuristic to get good relative size changes
+    set decr [expr $sz / 6 + 1]
+
+    # increase offset
+    set fontOffset [expr $fontOffset - $decr]
+    set sz [expr $sz - $decr]
+    
+    $this configure -textfont \
+            [::tycho::font [lindex $bf 0] $sz [lindex $bf 2]]
 }
 
 #### execProcess
@@ -1904,6 +1951,28 @@ body ::tycho::Edit::unselectRange {start stop} {
 }
 
 #####################################################################
+#### upSize
+# Increase the size of the offset added to -basefont to get the
+# current -textfont. -basefont is set by preference and the 
+# offset is reset to 0 for every new editor.
+#
+body ::tycho::Edit::upSize {} {
+    set bf [::tycho::FontManager::parseFont $itk_option(-basefont)]
+    set sz [lindex $bf 1]
+    set sz [expr $sz + $fontOffset]
+    
+    # heuristic to get good relative size changes
+    set incr [expr $sz / 6 + 1]
+
+    # increase offset
+    set fontOffset [expr $fontOffset + $incr]
+    set sz [expr $sz + $incr]
+
+    $this configure -textfont \
+            [::tycho::font [lindex $bf 0] $sz [lindex $bf 2]]
+}
+
+#####################################################################
 #### upperCase
 # Convert the selection or the current word to upper case.
 #
@@ -2079,7 +2148,7 @@ body ::tycho::Edit::initializeMenubar {} {
     $myMenubar addMenu Format -underline 1
     
     $myMenubar addSeparator Format
-    
+
     $myMenubar command "Fill Region" Format -underline 2 \
 	    -accelerator "M-q" -command "$this busy $this fillSelection"
     
@@ -2099,6 +2168,16 @@ body ::tycho::Edit::initializeMenubar {} {
 
     $myMenubar command "Upper Case" Format -underline 0 \
 	    -accelerator "M-u" -command "$this upperCase"
+
+    $myMenubar addSeparator Format
+    
+    # Add size control
+    $myMenubar command {Increase Size} Format \
+            -command "$this upSize"
+
+    $myMenubar command {Decrease Size} Format \
+            -command "$this downSize"
+
 }
 
 #####################################################################
