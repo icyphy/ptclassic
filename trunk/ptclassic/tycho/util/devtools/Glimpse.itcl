@@ -61,7 +61,7 @@ class ::tycho::Glimpse {
     ###################################################################
     ####                            options                        ####
 
-    # One line description of findcommand option; listed in alphabetical order
+    # The command to execute on a find command.
     itk_option define -findcommand findcommand Findcommand ""
 
     ###################################################################
@@ -80,14 +80,6 @@ class ::tycho::Glimpse {
     ####                         private variables                 ####
     private variable glimpseOutputFile {}
 }
-
-#######################################################################
-#### -findcommand configuration
-# Description of findcommand option.
-#
-configbody ::tycho::Glimpse::findcommand {
-}
-
 
 #######################################################################
 #### constructor
