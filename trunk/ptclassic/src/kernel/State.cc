@@ -26,7 +26,7 @@ $Id$
 #include "Error.h"
 #include "KnownState.h"
 
-const int TOKSIZE = 256;
+#define TOKSIZE 256
 
 /*************************************************************************
 
@@ -220,3 +220,10 @@ void State::parseError (const char* text, const char* text2) {
 
 // isa
 ISA_FUNC(State,NamedObj);
+
+// power function for use in int state expressions
+int pow(int base,int exp) {
+	int r = 1;
+	while (exp > 0) { r *= base; exp--;}
+	return r;
+}
