@@ -39,10 +39,10 @@ TCLTK_DEST=$(PTOLEMY)/tcltk
 TCLTK_SRC=$(PTOLEMY)/src/tcltk
 
 # Location of the architecture specific build directory.
-TCLTK_OBJ=$(PTOLEMY)/obj.$(ARCH)/tcltk
+TCLTK_OBJ=$(PTOLEMY)/obj.$(PTARCH)/tcltk
 
 # where to install binaries
-BINDIR=$(PTOLEMY)/bin.$(ARCH)
+BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
 # No changes should be necessary below this line
 #---------------------------------------------------------
@@ -78,21 +78,21 @@ ITCL_OBJ =	$(TCLTK_OBJ)/itcl
 
 
 # Destination of tcl only machine dependent files
-#TCL_DEST =	$(TCLTK_DEST)/tcl.$(ARCH)
-TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(ARCH)
+#TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
+TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(PTARCH)
 # Destination of the machine independent tcl files
 #TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
 TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
 
 # Destination of tk only machine dependent files
-#TK_DEST =	$(TCLTK_DEST)/tk.$(ARCH)
-TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(ARCH)
+#TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
+TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
 # Destination of the machine independent tk files
 #TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
 TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
-ITCL_DEST =	$(TCLTK_DEST)/itcl.$(ARCH)
+ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
 # Destination of the machine independent itcl files
 ITCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/itcl
 
@@ -206,7 +206,7 @@ XPM_DEFINES=-DZPIPE -DNEED_STRDUP $(X11_INCSPEC)
 # If necessary override values for each independent architecture
 # This line needs to be after the XPM_DEFINES line
 ROOT =	../..
-include $(ROOT)/mk/config-$(ARCH).mk
+include $(ROOT)/mk/config-$(PTARCH).mk
 
 all_xpm: $(TK_OBJ)/xpm/libxpm.a
 $(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
