@@ -67,9 +67,7 @@ public:
 	Block& nextBlock() {return blocks++;}
 
 	// Print a description of the galaxy
-	virtual void profile();
-	// TO BE DONE:
-	// Change profile to operator (char*), a cast to char*.
+	operator char* ();
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.

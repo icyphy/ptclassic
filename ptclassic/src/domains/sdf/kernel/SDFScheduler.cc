@@ -5,10 +5,8 @@
 #include "type.h"
 #include "Scheduler.h"
 #include "Fraction.h"
-#include "Error.h"
-
-#include <stream.h>
-
+#include "Output.h"
+#include <String.h>
 
 extern Error errorHandler;
 
@@ -17,17 +15,20 @@ extern Error errorHandler;
 *******************************************************************/
 
 	////////////////////////////
-	// print
+	// operator char*
 	////////////////////////////
 
 // Display a schedule
 
-void SDFSchedule :: print () {
-   cout << "SDF SCHEDULE:\n";
-   reset();
-   for (int i = size(); i>0; i--) {
-	cout << nextBlock().readFullName() << "\n";
-   }
+SDFSchedule :: operator char* () {
+	String out;
+	out = "SDF SCHEDULE:\n";
+	reset();
+	for (int i = size(); i>0; i--) {
+		out += nextBlock().readFullName();
+		out += "\n";
+		}
+	return out;
 }
 
 /*******************************************************************

@@ -1,30 +1,31 @@
 #include "Block.h"
-#include <stream.h>
-
-// TO BE DONE:  
-// Look for a better way to do this.  Right now, memory is
-// re-used by each call to readFullName().
-
-static char fullName[200];
+#include <String.h>
 
 char* Block :: readFullName () {
+	String out;
 	if(blockIamIn != NULL) {
-	   blockIamIn->readFullName();
-	   strcat(fullName,".");
-	   strcat(fullName,name);
-	   return(fullName);
+	   out = blockIamIn->readFullName();
+	   out += ".";
+	   out += name;
+	   return out;
 	} else {
-	   strcpy(fullName, name);
-	   return(fullName);
+	   return name;
 	}
 }
 
 
-void Block :: profile() {
-	cout << "Block: " << readFullName() << "\n";
-	cout << "Descriptor: " << readDescriptor() << "\n";
+Block :: operator char* () {
+	String out;
+	out = "Block: ";
+	out += readFullName();
+	out += "\n";
+	out += "Descriptor: ";
+	out += readDescriptor();
+	out += "\n";
 
-	cout << "Ports in the block:\n";
+	out += "Ports in the block:\n";
 	for(int i = numberPorts(); i>0; i--)
-		nextPort().profile();
+		out += nextPort().operator char* ();
+
+	return out;
 }

@@ -8,8 +8,8 @@
 #include "type.h"
 #include "Galaxy.h"
 #include "SpaceWalk.h"
-#include "SDFStar.h"
-#include "SeqList.h"
+#include "Star.h"
+#include "DataStruct.h"
 
 	////////////////////////////
 	// Scheduler
@@ -39,13 +39,13 @@ protected:
 // Later, we will want it to be a list of lists, where each list
 // has an entry specifying the number of repetitions of its components.
 
-class SDFSchedule : SingleLinkList {
+class SDFSchedule : SequentialList {
 public:
 	// Add an element to the end of the list
-	void append(Block* b) { SingleLinkList::append(b); ++dimen;}
+	void append(Block* b) { SequentialList::put(b);}
 
 	// Return the number of elements on the list
-	int size() {return dimen;}
+	int size() {SequentialList::size();}
 
 	// Return the next block on the list
 	Block& operator ++ () {return *(Block*) next(); }
@@ -55,16 +55,10 @@ public:
 
 	// Reset the last reference pointer so that accesses start
 	// at the head of the list
-	void reset() { lastReference = lastNode; }
-
-	// Constructor
-	SDFSchedule() {dimen = 0;}
+	void reset() {SequentialList::reset();}
 
 	// Display the schedule
-	void print();
-
-private:
-	int dimen;	// size of the list
+	operator char* ();
 };
 
 
@@ -113,7 +107,7 @@ public:
 	// execution time of the scheduler.
 	int deferredFiring;
 
-	void displaySchedule() {mySchedule.print();}
+	char* displaySchedule() {return mySchedule.operator char* ();}
 
 	// Constructor sets default options
 	SDFScheduler () {
