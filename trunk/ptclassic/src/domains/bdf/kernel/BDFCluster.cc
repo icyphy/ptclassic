@@ -156,15 +156,7 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 // The clusters may be of derived classes, but the virtual
 // destructor of the BDFCluster class will do the right thing
 BDFClusterGal::~BDFClusterGal() {
-fprintf(stderr, "Number of dynamic clusters = %d\n", dynamicClusterList.size());
-	BDFCluster* c;
-	int i = 0;
-	while ((c = (BDFCluster *)dynamicClusterList.getAndRemove()) != 0) {
-		// It is possible that the BDFCluster was moved into another
-		// galaxy and not deleted from the dynamicClusterList
-		if ( DynamicGalaxy::removeBlock(*c) ) { i++; delete c; }
-	}
-fprintf(stderr, "Number deleted = %d\n", i);
+	deleteAllBlocks();
 }
 
 // remove blocks from this galaxy without deallocating the blocks.
@@ -340,9 +332,11 @@ int BDFClusterGal::mergePass() {
 }
 
 void BDFClusterGal::makeWhile(BDFClustPort* ctl, BDFRelation rel) {
+	// Create a new while loop c_new and add it to the block list
 	BDFCluster* c_in = ctl->parentClust();
-	BDFCluster* c_new = new BDFWhileLoop(rel,ctl,c_in);
-	addBlock(c_new->setBlock(genBagName(),this));
+	BDFCluster* c_new = new BDFWhileLoop(rel, ctl, c_in);
+	addBlock(c_new->setBlock(genBagName(), this));
+
 	if (logstrm) {
 		*logstrm << "Created while loop around " << c_in->name()
 			 << ": " << *c_new << "\n";
@@ -540,11 +534,15 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 		if (condSrc->parentClust() == b) {
 			BDFCluster* t = a; a = b; b = t;
 		}
-		if (logstrm)
+		if (logstrm) {
 			*logstrm << a->name() << " and " << b->name()
 				 << ": doing loop merge, result:\n";
+		}
+
+		// Create a new while loop c_new and add it to the block list
 		BDFCluster* c = new BDFWhileLoop(desrel,condSrc,a,b);
 		addBlock(c->setBlock(genBagName(),this));
+
 		if (logstrm) *logstrm << *c << "\n";
 		return c;
 	}
@@ -573,7 +571,7 @@ int BDFCluster::sameLoopCondition(const BDFCluster& b) const
 	else return FALSE;
 	return sameSignal(pCond,b.pCond) == desrel;
 #else
-	else return FALSE;
+	return FALSE;
 #endif
 }
 
@@ -644,7 +642,7 @@ int BDFClusterGal::parallelLoopMergePass() {
 int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst,
 			int ignoreDelayArcs) {
 	stopList.initialize();
-	stopList.put(src);
+	stopList.append(src);
 	BDFClustPortIter nextP(*src);
 	BDFClustPort* p;
 	while ((p = nextP++) != 0) {
@@ -673,7 +671,7 @@ int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst,
 
 int BDFClusterGal::findPath(BDFCluster* start, BDFCluster* dst,
 		    int ignoreDelayArcs) {
-	stopList.put(start);
+	stopList.append(start);
 	BDFClustPortIter nextP(*start);
 	BDFClustPort* p;
 	while ((p = nextP++) != 0) {
@@ -1146,9 +1144,10 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 		c2->unloop(fac,lcond);
 	}
 
-	if (logstrm)
+	if (logstrm) {
 		*logstrm << "merging " << c1->name() << " and " <<
 			c2->name() << "\n";
+	}
 
 	BDFClusterBag* c1Bag = c1->looped() ? 0 : c1->asBag();
 	BDFClusterBag* c2Bag = c2->looped() ? 0 : c2->asBag();
@@ -1245,7 +1244,14 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 			// zap it and connect directly.
 			BDFClustPort* p = pFar->inPtr();
 			int numDelays = cp->numInitDelays();
+
+			// PortHole destructor disconnects porthole,
+			// deletes plasma/buffer, removes from parent list
+			cp->disconnect();
+			p->disconnect();
 			delete pFar;
+
+			// FIXME: Memory leak
 			cp->connect(*p, numDelays);
 			cp->initGeo();
 		}
@@ -1265,6 +1271,7 @@ void BDFClusterBag::merge(BDFClusterBag* b, BDFClusterGal* par) {
 	if (b == 0 || par == 0) return;
 	if (b->size() == 0) return;
 	if (!gal) createInnerGal();
+
 	// get a list of all "bagports" that connect the two clusters.
 	// we accumulate them on one pass and delete on the next to avoid
 	// problems with iterators.
@@ -1276,10 +1283,10 @@ void BDFClusterBag::merge(BDFClusterBag* b, BDFClusterGal* par) {
 	// of external pointers.  Exceptions: as for absorb
 	SequentialList zap;
 	while ((p = nextbp++) != 0) {
-		BDFClustPort *pFar = p->far();
-		assert(pFar);
+		BDFClustPort* pFar = p->far();
+		assert(pFar);		// make sure pointer is not null
 		if (pFar->parent() == b && !leaveSelfLoop(p,pFar))
-			zap.put(p);
+			zap.append(p);
 	}
 
 	// now zap those that become internal
@@ -1289,12 +1296,18 @@ void BDFClusterBag::merge(BDFClusterBag* b, BDFClusterGal* par) {
 		BDFClustPort* near = p->inPtr();
 		BDFClustPort* far = pFar->inPtr();
 		int numDelays = p->numInitDelays();
+
+		// PortHole destructor disconnects porthole,
+		// deletes plasma/buffer, removes from parent list
+		near->disconnect();
 		delete pFar;
 		delete p;
+
 		// FIXME: Memory leak
 		near->connect(*far, numDelays);
 		near->initGeo();
 	}
+
 	// now we simply combine the remaining bagports and clusters into this.
 	BDFClusterBagIter nextC(*b);
 	BDFCluster* c;
@@ -1308,6 +1321,7 @@ void BDFClusterBag::merge(BDFClusterBag* b, BDFClusterGal* par) {
 		addPort(*p);
 		nextP.remove();
 	}
+
 	// get rid of b.
 	par->removeBlock(*b);	// remove from parent galaxy
 	delete b;		// zap the shell
@@ -1513,7 +1527,6 @@ int BDFClusterBag::genSched() {
 	return TRUE;
 }
 
-
 // indent by depth tabs.
 static const char* tab(int depth) {
     // this fails for depth > 20, so:
@@ -1521,7 +1534,7 @@ static const char* tab(int depth) {
 
     // For more compact schedule displays, we use two spaces
     // rather than tabs.
-    static const char *tabs = "                                        ";
+    static const char* tabs = "                                        ";
     return (tabs + 40 - depth*2);
 }
 
@@ -1620,8 +1633,7 @@ static BDFClustPort *remapAfterMerge(BDFClustPort* ctlP, BDFRelation& rel,
 		if (afar == 0) continue;
 		BDFCluster *ap = a->parentClust();
 		if (ap != me && ap != you) {
-//			cerr << "skipping " << a->fullName()
-//			     << ": wrong parent\n";
+			// a is the wrong parent
 			continue;
 		}
 		BDFCluster *cl = afar->parentClust();
@@ -1971,8 +1983,13 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	if (file && *file)
 		logstrm = new pt_ofstream(file);
 
-	// do the clustering.
+	// initialize the dynamic data members
 	delete cgal;
+	cgal = 0;
+	delete dynSched;
+	dynSched = 0;
+
+	// do the clustering.
 	cgal = new BDFTopGal(gal,logstrm);
 	cgal->cluster();
 	if (logstrm) {
@@ -1996,8 +2013,10 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 		SDFScheduler::repetitions();
 		status = SDFScheduler::computeSchedule(*cgal);
 		if (status) {
-			if (logstrm)
-				*logstrm << "Generate subschedules, propagate buffer sizes\n";
+			if (logstrm) {
+				*logstrm << "Generate subschedules "
+					 << "propagate buffer sizes\n";
+			}
 			cgal->genSubScheds();
 			if (logstrm)
 				*logstrm << "Schedule:\n" << displaySchedule();
