@@ -83,7 +83,7 @@ cp_point *point;
 
     if (!cp_get_sinteger(&temp))
 	error ("missing second coordinate in point");
-    point->y=temp
+    point->y=temp;
 
     return 1;
 }
