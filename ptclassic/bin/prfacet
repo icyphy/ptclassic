@@ -1,15 +1,48 @@
 #!/bin/csh -f
 # prfacet
-# $Id$
+# SCCS info: $Id$
 #
-# Print a facet using oct2ps to the printer specified by the environment
-# variable PRINTER.
+# Using oct2ps, send a PostScript view of a facet to a printer or file.
 #
+# usage: prfacet [-TOFILE file] [oct2ps options] facet-name
+#
+#	Generate a PostScript view of the specified facet.
+#	If the first argument to prfacet is "-TOFILE", the PostScript
+#	is saved to the specified file.	If "-TOFILE" is not the first
+#	argument to prfacet, the PostScript is sent directly to the
+#	printer. The printer name must be specified	by the environment
+#	variable PRINTER.
+#
+#	The last option must be the pathname of the facet to be printed.
+#	All other options are passed to "oct2ps".
 
-if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
+##
+## Set shell and environment variables.
+##
+if (!($?PTOLEMY)) setenv PTOLEMY ~ptolemy
+if (!($?OCTTOOLS)) setenv OCTTOOLS $PTOLEMY
 set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
-if (!($?OCTTOOLS)) then
-	setenv OCTTOOLS $PTOLEMY
-endif
-oct2ps -=T $PTOLEMY/lib/bw_patterns -f interface $*\:schematic | lpr -P$PRINTER
+set fixedArgs = ( -=T $PTOLEMY/lib/bw_patterns -f interface )
+
+
+##
+## Need two separate "if" lines below because we can't
+## check $argv[1] whenever $#argv == 0.
+##
+## Need `expr` below because the simpler expression
+##		if ($argv[1] != "-TOFILE)
+## fails whenever $argv[1] is "-x", "-f", etc.
+##
+if ($#argv == 0) goto ToPrint
+if (`expr $argv[1] != "-TOFILE"`) goto ToPrint
+goto ToFile
+
+
+ToFile:
+	oct2ps $fixedArgs $argv[3-]\:schematic > $argv[2]
+	exit
+
+ToPrint:
+	oct2ps $fixedArgs $argv[*]\:schematic | lpr -P$PRINTER
+	exit
