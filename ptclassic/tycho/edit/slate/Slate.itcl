@@ -263,7 +263,6 @@ body ::tycho::Slate::bbox {args} {
 	    }
 	}
     }
-    puts $tags
     return [eval $itk_component(canvas) bbox $tags]
 }
 
