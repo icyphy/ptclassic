@@ -246,11 +246,6 @@ int AsmTarget::modifyGalaxy() {
 		    Star* newb = (Star*) spliceStar(p, "CircToLin",0,dom);
 		    if (!newb) return FALSE;
 		    newb->setTarget(this);
-		    PortHole* newP = 
-			newb->portWithName("input");
-		    if (boundaryFlag) {
-			p->aliasFrom()->setAlias(*newP);
-		    }
 		}
 	    }
 	    else if (nread > nwrite && nread%nwrite == 0) {
@@ -261,11 +256,6 @@ int AsmTarget::modifyGalaxy() {
 			spliceStar(p, "LinToCirc",1,dom);
 		    if (!newb) return FALSE;
 		    newb->setTarget(this);
-		    PortHole* newP = 
-			newb->portWithName("output");
-		    if (boundaryFlag) {
-			p->aliasFrom()->setAlias(*newP);
-		    }
 		}
 	    }
 	    else {
