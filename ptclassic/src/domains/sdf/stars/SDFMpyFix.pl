@@ -18,15 +18,16 @@ defstar {
                 type {int}
                 default {"YES"}
                 desc {
-Use the arriving particles as they are if YES.  Cast them to the
-precision specified by the parameter "InputPrecision" otherwise. }
+Indicates whether or not to keep the precision of the arriving particles
+as they are:  YES keeps the same precision, and NO casts the inputs
+to the precision specified by the parameter "InputPrecision". }
         }
         defstate {
                 name { InputPrecision }
                 type { string }
                 default { "2.14" }
                 desc {
-Precision of the input in bits.  The input particles are only casted
+Sets the precision of the input in bits.  The input particles are only cast
 to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
         defstate {
@@ -34,7 +35,7 @@ to this precision if the parameter "ArrivingPrecision" is set to NO.}
                 type { string }
                 default { "2.14" }
                 desc {
-Precision of the output in bits.  This is the precision that will hold
+Sets the precision of the output in bits.  This is the precision that will hold
 the result of the product of the inputs.}
         }
         defstate {
@@ -42,8 +43,8 @@ the result of the product of the inputs.}
                 type { string }
                 default { "saturate" }
                 desc {
-Set the overflow characteristic for the output.  If the result
-of the product can not be fit into the precision of the output, overflow
+Sets the overflow characteristic for the output.  If the result
+of the product cannot be fit into the precision of the output, overflow
 occurs and the overflow is taken care of by the method specified by this
 parameter.  The keywords for overflow handling methods are :
 "saturate"(default), "zero_saturate", "wrapped", "warning". }
