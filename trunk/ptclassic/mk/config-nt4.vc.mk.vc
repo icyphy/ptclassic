@@ -6,7 +6,7 @@
 # This file is present only as a starting point for others.
 # See http:\\ptolemy.eecs.berkeley.edu\~cxh\nt-ptolemy.html
 
-# Version: $Id$
+# Version: @(#)config-nt4.vc.mk.vc	1.1 08/16/97
 
 # Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -33,6 +33,13 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
+# This file is based on the Tcl8.0 win/makefile.vc, which is 
+
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# Copyright (c) 1995-1996 Sun Microsystems, Inc.p
+
 # Programmer:  Christopher Hylands
 
 # --------------------------- -----------------------------------------
@@ -40,14 +47,41 @@
 # --------------------------------------------------------------------
 !include <ntwin32.mak>
 !include  $(ROOT)\mk\config-default.mk.vc
-CPU		= i386
+PTOLEMY=d:\temp\ptolemy
+
+# TMPDIR  = location where .obj files should be stored during build
+#
+# TOOLS32 = location of VC++ 32-bit development tools. Note that the
+#	    VC++ 2.0 header files are broken, so you need to use the
+#	    ones that come with the developer network CD's, or later
+#	    versions of VC++.
+#
+# TOOLS16 = location of VC++ 1.5 16-bit tools, needed to build thunking
+#	    library.  This information is optional; if the 16-bit compiler
+#	    is not available, then the 16-bit code will not be built.  
+#	    Tcl will still run without the 16-bit code, but...
+#		A. Under Windows 3.X you will any calls to the exec command
+#	           will return an error.
+#		B. A 16-bit program to test the behavior of the exec
+#		   command under NT and 95 will not be built.
+#
+TMPDIR		= .
 TOOLS32		= d:\Progra~1\DevStudio\Vc
+TOOLS16		= d:\Progra~1\DevStudio\Vc
+
+# Set this to the appropriate value of /MACHINE: for your platform
+MACHINE	= IX86
+
+# Comment the following line to compile with symbols
+#NODEBUG=1
+
+
 INCLUDE		= $(TOOLS32)\include
 
 LIBSUFFIX 	= dll
-# Get the g++ definitions; we override some below.
-#!include  $(ROOT)\mk\config-g++.mk.vc
-CPLUSPLUS = cl -I$(ROOT)\src\compat\nt.vc -I$(ROOT)\src\compat\cfront
+LIBNONSHAREDSUFFIX = lib
+
+
 
 # Under NT, build a static ptcl first
 
@@ -60,11 +94,101 @@ CPLUSPLUS = cl -I$(ROOT)\src\compat\nt.vc -I$(ROOT)\src\compat\cfront
 #
 RANLIB = true
 # Use gcc everywhere including in octtools
+cc32		= $(TOOLS32)\bin\cl.exe
+link32		= $(TOOLS32)\bin\link.exe
+rc32		= $(TOOLS32)\bin\rc.exe
+include32	= -I$(TOOLS32)\include
+
+cc16		= $(TOOLS16)\bin\cl.exe
+link16		= $(TOOLS16)\bin\link.exe
+rc16		= $(TOOLS16)\bin\rc.exe
+include16	= -I$(TOOLS16)\include
+
+CPLUSPLUS = $(cc32) -I$(ROOT)\src\compat\nt.vc -I$(ROOT)\src\compat\cfront -I$(TCL_INCDIR)
 CC =		$(CPLUSPLUS)
+
+#TCL_CFLAGS	= $(cdebug) $(cflags) $(cvarsdll) $(include32) \
+#			$(TCL_INCLUDES) $(TCL_DEFINES)
+CON_CFLAGS	= $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
+DOS_CFLAGS	= $(cdebug) $(cflags) $(include16) -AL 
+DLL16_CFLAGS	= $(cdebug) $(cflags) $(include16) -ALw
+
+######################################################################
+# Link flags
+######################################################################
+
+!IFDEF NODEBUG
+ldebug = /RELEASE
+!ELSE
+ldebug = -debug:full -debugtype:cv
+!ENDIF
+
+# declarations common to all linker options
+lcommon = /NODEFAULTLIB /RELEASE /NOLOGO
+
+# declarations for use on Intel i386, i486, and Pentium systems
+!IF "$(MACHINE)" == "IX86"
+DLLENTRY = @12
+lflags   = $(lcommon) -align:0x1000 /MACHINE:$(MACHINE)
+!ELSE
+lflags   = $(lcommon) /MACHINE:$(MACHINE)
+!ENDIF
+
+conlflags = $(lflags) -subsystem:console #-entry:mainCRTStartup
+guilflags = $(lflags) -subsystem:windows -entry:WinMainCRTStartup
+dlllflags = $(lflags) -entry:_DllMainCRTStartup$(DLLENTRY) -dll
+
+!IF "$(MACHINE)" == "PPC"
+libc = libc.lib
+libcdll = crtdll.lib
+!ELSE
+libc = libci.lib oldnames.lib
+libcdll = msvcrt.lib oldnames.lib
+!ENDIF
+
+baselibs   = kernel32.lib $(optlibs) advapi32.lib user32.lib
+winlibs    = $(baselibs) gdi32.lib comdlg32.lib winspool.lib
+
+guilibs	   = $(libc) $(winlibs)
+conlibs	   = $(libc) $(baselibs)
+guilibsdll = $(libcdll) $(winlibs)
+conlibsdll = $(libcdll) $(baselibs)
+
+######################################################################
+# Compile flags
+######################################################################
+
+!IFDEF NODEBUG
+OPTIMIZER = -Ox
+!ELSE
+OPTIMIZER = -Z7 -Od -WX
+!ENDIF
+
+# declarations common to all compiler options
+ccommon = -c -W3 -nologo -YX -Dtry=__try -Dexcept=__except
+
+!IF "$(MACHINE)" == "IX86"
+cflags = $(ccommon) -D_X86_=1
+!ELSE
+!IF "$(MACHINE)" == "MIPS"
+cflags = $(ccommon) -D_MIPS_=1
+!ELSE
+!IF "$(MACHINE)" == "PPC"
+cflags = $(ccommon) -D_PPC_=1
+!ELSE
+!IF "$(MACHINE)" == "ALPHA"
+cflags = $(ccommon) -D_ALPHA_=1
+!ENDIF
+!ENDIF
+!ENDIF
+!ENDIF
+
+cvars      = -DWIN32 -D_WIN32
+cvarsmt    = $(cvars) -D_MT
+cvarsdll   = $(cvarsmt) -D_DLL
+
+
 PTLANG = ptlang
-# Under Cygwinb18, environment variables are not handled well by
-# make.
-PTOLEMY = \src\ptolemy
 
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
@@ -84,7 +208,11 @@ OPTIMIZER =	#-O2
 # -Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	#-Wall -Wsynth #-Wcast-qual 
-LOCALCCFLAGS =	/DPTNT /DPT_NT4VC /DPT_NO_TIMER $(GCC_270_OPTIONS) /DPT_NO_ITCL /Dfar=ptfar /nologo
+LOCALCCFLAGS =	/DPTNT /DPT_NT4VC /DPT_NO_TIMER $(GCC_270_OPTIONS)\
+		/DPT_NO_ITCL /Dfar=ptfar -Dstrcasecmp=stricmp \
+		/nologo /D__WIN32__ \
+		$(cflags) $(cvarsdll) $(include32)
+
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
@@ -92,17 +220,26 @@ LOCALCFLAGS =	$(LOCALCCFLAGS)
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
-TCL_VERSION_NUM=76i
+#TCL_VERSION_NUM=76i
+#TK_VERSION_NUM=42i
+#ITCL_VERSION_NUM=22
+
+TCL_ROOT=d:\Progra~1\Tcl
+
+TCL_VERSION_NUM=80
 TK_VERSION_NUM=42i
 ITCL_VERSION_NUM=22
 
 # Combined -L and -l options to link with tcl library.
 #TCL_LIBSPEC= c:\Itcl2.2\tcl7.6\win\Tcl76i.lib
-TCL_LIBSPEC=d:\Progra~1\Tcl\lib\tcl80vc.lib
-TCL_LIBSPEC=-L\usr\local\lib -ltcl8.0
 #TCL_LIBSPEC=-L$(TCL_ROOT)\Bin -ltcl$(TCL_VERSION_NUM)
+#TCL_LIBSPEC=-L\usr\local\lib -ltcl8.0
+TCL_LIBSPEC=$(TCL_ROOT)/lib/tcl80vc.lib
+TCL_LIBSPEC=$(PTOLEMY)\tcltk\bin.$(PTARCH)\tcl80.lib
+TCL_LIBDEP= $(TCL_ROOT)/lib/tcl80vc.lib
 
-TCL_ROOT=d:\Progra~1\Tcl
+TCL_INCDIR=$(TCL_ROOT)\include
+
 # Directory containing Tk include files
 #TK_INCDIR=$(TCL_ROOT)\itk\include
 TK_INCDIR=$(TCL_ROOT)\include
@@ -114,17 +251,19 @@ TK_LIBSPEC=-L$(TCL_ROOT)\lib -ltk8.0vc.lib
 
 # Directory containing itcl include files
 #ITCL_INCDIR=$(TCL_ROOT)\$(ITCL_VERSION)\include
-ITCL_INCDIR=$(TCL_ROOT)\include
+#ITCL_INCDIR=$(TCL_ROOT)\include
 #ITCL_LIBSPEC= c:\Itcl2.2\itcl\win\Itcl22.lib 
 ITCL_LIBSPEC=
+
+ITCL_INCDIR=
 #
 # Variables for the linker
 #
 # system libraries (libraries from the environment) for c++ files
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lg++ $(SHARED_SYSLIBS) -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(SHARED_SYSLIBS)
 
 # system libraries for linking .o files from C files only
-CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm
+CSYSLIBS=$(SHARED_COMPILERDIR_FLAG)
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
 # -s conflicts with purelink, so if you are using purelink comment this out.
@@ -192,6 +331,7 @@ INCLUDE_GTHREADS =	no
 
 # Include the PN domain.
 INCLUDE_PN_DOMAIN =	no
+INCLUDE_IPUS_DOMAIN = no
 
 INCLUDE_MATLAB = no
 INCLUDE_MATHEMATICA=no
