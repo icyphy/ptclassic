@@ -1,12 +1,15 @@
 #! /bin/csh -f
-# usage: tycho [-debug] [-ptiny] [script_file]
-
 # tycho - Ptolemy Tycho Brahe Graphical Interface
 #
+# Author: Edward Lee
 # Version: $Id$
-# Copyright (c) 1995 The Regents of the University of California.
-# 	All Rights Reserved.
 #
+# Copyright (c) %Q% The Regents of the University of California.
+# All rights reserved.
+# See the file $PTOLEMY/copyright for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+
+# usage: tycho [-debug] [-ptiny] [script_file]
 
 # If 'tycho.ptiny' is a link to this script, then we just use tycho.ptiny
 set progname = `basename $0`
@@ -20,9 +23,10 @@ if ( ! $?USER ) then
 endif
 
 # FIXME: Hardwired in the beta version of Tcl/Tk
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4b3/lib/tcl
-setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0b3/lib/tk
-setenv PTPWD `pwd`
+# See also $PTOLEMY/src/tycho/kernel/make.template
+#	   $PTOLEMY/tycho/kernel/Lib.tcl
+setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4/lib/tcl7.4
+setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0/lib/tk4.0
 
 # To get tcl/tk man pages before corresponding unix man pages
 setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$MANPATH
