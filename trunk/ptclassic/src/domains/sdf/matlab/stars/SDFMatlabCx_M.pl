@@ -20,8 +20,7 @@ See the explanation for SDFMatlab_M star.
 The only difference is that this star forces the outputs to be complex matrices.
 .Ir "Matlab interface"
 	}
-	outmulti {
-		name { output }
-		type { COMPLEX_MATRIX_ENV }
+	constructor {
+output.setPort("output", this, COMPLEX_MATRIX_ENV);
 	}
 }
