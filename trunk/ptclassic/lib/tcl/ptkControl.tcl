@@ -448,7 +448,6 @@ proc ptkTxAnimation { on } {
 	    message $win.msg -width 12c -text "Executing stars:"
 	    frame $win.text
 	    text $win.text.t -relief raised -bd 2 -width 60 -height 20 \
-                -bg [ptkColor AntiqueWhite] \
                 -yscrollcommand "$win.text.s set" -setgrid true
             scrollbar $win.text.s -relief flat -command "$win.text.t yview"
             pack append $win.text $win.text.s {right filly} \
