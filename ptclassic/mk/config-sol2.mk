@@ -82,7 +82,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 #
 # system libraries (libraries from the environment) for c++ files
 # No need to include -lg++ under egcs
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl  $(SHARED_SYSLIBS) -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lstdc++ -lsocket -lnsl -ldl  $(SHARED_SYSLIBS) -lm
 
 # system libraries for linking .o files from C files only
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lm
@@ -111,7 +111,10 @@ CC_STATIC =
 #
 # Directories to use
 #
-X11_INCSPEC =	-I/usr/openwin/include
+# -isystem is necessary for gcc-2.95.1 and Openwindows, otherwise we get:
+# /usr/openwin/include/X11/Xlib.h:1894: ANSI C++ forbids declaration
+#       `XSetTransientForHint' with no type
+X11_INCSPEC =	-isystem /usr/openwin/include
 X11_LIBDIR =	/usr/openwin/lib
 X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 
