@@ -53,6 +53,9 @@ void SDFStar :: fire() {
 		(next++)->sendData();
 }
 
+// return execution time: define a default time of 5.
+int SDFStar :: myExecTime() { return 5;}
+
 // The following is defined in SDFDomain.cc -- this forces that module
 // to be included if any SDF stars are linked in.
 extern const char SDFdomainName[];
