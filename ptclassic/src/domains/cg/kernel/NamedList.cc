@@ -41,7 +41,7 @@ Programmer: J. Pino, T. M. Parks
 NamedNode::NamedNode(Pointer objt, const char* name) 
 {
     obj = objt;
-    nm = savestring(name);
+    nm = savestring(name);		// FIXME: Memory leak
 }
 
 // Destructor
@@ -74,8 +74,8 @@ int NamedList::append(Pointer object, const char* name)
     return TRUE;
 }
 
-
 // Put a named object at the beginning of the list.
+// Multiple appearances of an object are allowed
 void NamedList::prepend(Pointer object, const char* name)
 {
     LOG_NEW; NamedNode* node = new NamedNode(object, name);
@@ -108,9 +108,9 @@ int NamedList::remove(const char* name)
 // Modeled after NamedObjList::deleteAll
 void NamedList::deleteNodes()
 {
-    NamedNode* n;
-    while ((n = (NamedNode*)SequentialList::getAndRemove()) != 0) {
-	LOG_DEL; delete n;
+    NamedNode* node;
+    while ((node = (NamedNode*)getAndRemove()) != 0) {
+	LOG_DEL; delete node;
     }
 }
 
@@ -118,16 +118,15 @@ void NamedList::deleteNodes()
 // Return a null pointer on error.
 NamedNode* NamedList::getNamedNode(const char* name) const
 {
-    NamedNode* n = 0;
+    NamedNode* node = 0;
     if (name == 0) {
-	n = (NamedNode*)SequentialList::head();
+	node = (NamedNode*)SequentialList::head();
     }
     else {
-	ListIter node(*this);
-	while ((n = (NamedNode*)node++) != 0)
-	{
-	    if (strcmp(name, n->name()) == 0) break;
+	ListIter nodeList(*this);
+	while ((node = (NamedNode*)nodeList++) != 0) {
+	    if (strcmp(name, node->name()) == 0) break;
 	}
     }
-    return n;
+    return node;
 }
