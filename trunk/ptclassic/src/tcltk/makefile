@@ -40,7 +40,7 @@ OBJDIR=..
 VPATH         = $(ROOT)/src/pigiRpc
 
 # Get configuration info
-# Need $(C_SHAREDFLAGS) and $(SHARED_LIBRARY_COMMAND) below
+# Need $(C_SHAREDFLAGS) and $(CSHARED_LIBRARY_COMMAND) below
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
@@ -388,7 +388,7 @@ $(ITCL_SHARED_OBJ)/tcl/libtcl.so:
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
-	(cd  $(ITCL_SHARED_OBJ)/tcl; $(SHARED_LIBRARY_COMMAND) libtcl.so *.o)
+	(cd  $(ITCL_SHARED_OBJ)/tcl; $(CSHARED_LIBRARY_COMMAND) libtcl.so *.o)
 
 $(ITCL_SHARED_OBJ)/tk/libtk.so: 
 	(cd  $(ITCL_SHARED_OBJ)/tk; $(MAKE) \
@@ -396,7 +396,7 @@ $(ITCL_SHARED_OBJ)/tk/libtk.so:
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
-	(cd  $(ITCL_SHARED_OBJ)/tk; $(SHARED_LIBRARY_COMMAND) libtk.so *.o)
+	(cd  $(ITCL_SHARED_OBJ)/tk; $(CSHARED_LIBRARY_COMMAND) libtk.so *.o)
 
 $(ITCL_SHARED_OBJ)/itcl/libitcl.so: 
 	(cd  $(ITCL_SHARED_OBJ)/itcl; $(MAKE) \
