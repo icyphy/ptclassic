@@ -2,6 +2,7 @@
 #include "DEScheduler.h"
 #include "Output.h"
 #include "StringList.h"
+#include "FloatState.h"
 
 /**************************************************************************
 Version identification:
@@ -90,6 +91,16 @@ int DEScheduler :: setup (Block& b) {
 		Star& s = alanShepard.nextStar();
 		DEStar* ds = (DEStar*) &s;
 		setDepth(ds);
+	}
+
+	// set the relative time scale.
+	FloatState* st = (FloatState*) galaxy.stateWithName("timeScale");
+	if (st)	relTimeScale = float ((double) (*st));
+	else	relTimeScale = 1.0;
+	
+	if (!relTimeScale) {
+		errorHandler.error("zero timeScale is not allowed in DE.");
+		return FALSE;
 	}
 
 	return !haltRequestFlag;
