@@ -62,44 +62,53 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock(mainDecl) {
 	  const int $starSymbol(NUMPACK)=4;
-	  double* $starSymbol(inarray) = (double*)
+	  double *$starSymbol(inarray) = (double*)
 	    memalign(sizeof(double),sizeof(double));
-	  double* $starSymbol(split_result) = (double*)
+	  double *$starSymbol(split_result) = (double*)
 	    memalign(sizeof(double),sizeof(short)*$starSymbol(NUMPACK));
-	  float* $starSymbol(result) = (float *)
+	  float *$starSymbol(result) = (float *)
 	    memalign(sizeof(float),sizeof(float));
-	  short* $starSymbol(dennum) = (short *)
+	  short *$starSymbol(dennum) = (short *)
 	    memalign(sizeof(double),sizeof(short)*$starSymbol(NUMPACK));
-	  short* $starSymbol(state) = (short *)
+	  short *$starSymbol(state) = (short *)
 	    memalign(sizeof(float),sizeof(short)*$starSymbol(NUMPACK));
-	  short* $starSymbol(outarray) = (short *)
+	  short *$starSymbol(outarray) = (short *)
 	    memalign(sizeof(double),sizeof(short)*$starSymbol(NUMPACK));
+	  int $starSymbol(i);
+	  short *$starSymbol(indexcount),$starSymbol(n0),$starSymbol(scaledown);
+	}
+	codeblock(initialize) {
+	  $starSymbol(scaledown) = (short) 1 << $val(scalefactor);
+	  /* initialize n0 */
+	  $starSymbol(n0) = ((short) $val(scale)/$starSymbol(scaledown)*(double)$ref2(numtaps,0));
+	  /*initialize denominator/numerator array*/
+	  $starSymbol(indexcount) = $starSymbol(dennum);
+	  for($starSymbol(i)=0;$starSymbol(i)<2;$starSymbol(i)++){
+	    *$starSymbol(indexcount)++ = (short)
+	      $val(scale)/$starSymbol(scaledown)*(double)$ref2(dentaps,$starSymbol(i));
+	    *$starSymbol(indexcount)++ = (short)
+	      $val(scale)/$starSymbol(scaledown)*(double)$ref2(numtaps,$starSymbol(i)+1);
+	  }
+	  /*initialize state array*/
+	  $starSymbol(indexcount) = $starSymbol(state);
+	  for($starSymbol(i)=0;$starSymbol(i)<4;$starSymbol(i)++){
+	    *$starSymbol(indexcount)++ = (short) 0;
+	  }
 	}
 	initCode {
 	  addInclude("<vis_proto.h>");
 	  addDeclaration(mainDecl);
+	  addCode(initialize);
 	}
 	codeblock(localDecl) {
 	  double *outvalue,*packedfilt;
 	  double upper, lower;
 	  double *allstates,*alltaps;
 	  float *statemem,*result_ptr;
-	  int outerloop,innerloop,i;
+	  int outerloop,innerloop;
 	  short *statetap_prod,*invalue,*result_den;
-	  short *indexcount,n0,scaledown;
 	}
 	codeblock(filter){
-	  scaledown = (short) 1 << $val(scalefactor);
-	  /* initialize n0 */
-	  n0 = ((short) $val(scale)/scaledown*(double)$ref2(numtaps,0));
-	  /*initialize denominator/numerator array*/
-	  indexcount = $starSymbol(dennum);
-	  for(i=0;i<2;i++){
-	    *indexcount++ = (short)
-	      $val(scale)/scaledown*(double)$ref2(dentaps,i);
-	    *indexcount++ = (short)
-	      $val(scale)/scaledown*(double)$ref2(numtaps,i+1);
-	  }
 	  *$starSymbol(inarray) = (double)$ref(signalIn);
        	  invalue = (short *) $starSymbol(inarray);
 	  statemem = (float *) $starSymbol(state);
@@ -121,7 +130,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $starSymbol(state)[1] = $starSymbol(state)[0];
 	    /* find output */
 	    $starSymbol(outarray)[outerloop] =
-	      (n0*$starSymbol(state)[0]>>15)+(statetap_prod[1]<<1);
+	      ($starSymbol(n0)*$starSymbol(state)[0]>>15)+(statetap_prod[1]<<1);
 	  }
 	  outvalue = (double *) $starSymbol(outarray);
 	  $ref(signalOut)= *outvalue;
