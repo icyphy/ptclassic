@@ -26,51 +26,7 @@ This is useful before quantizing a DCT transformed image.
   }
 
   hinclude { "Matrix.h", "Error.h" }
-
-
-  method { // zig-zag scan one block. "fData" holds output.
-    name { zigzag }
-    type { "void" }
-    access { protected }
-    arglist { "(float* fData, const FloatMatrix& imData, const int i, const int j, const int width, const int blockSize)" }
-    code {
-      int k, l, indx;
-
-      // Do zig-zag scan.
-      indx = 0;
-      // K is length of current (semi)diagonal; L is iteration along diag.
-      for(k = 1; k < blockSize; k++) { // Top triangle
-	for(l = 0; l < k; l++) { // down
-	  fData[indx++] = imData.entry(j + (i+l)*width + (k-l-1));
-	}
-	k++; // NOTE THIS!
-	for(l = 0; l < k; l++) { // back up
-	  fData[indx++] = imData.entry(j + (i+k-l-1)*width + l);
-	}
-      }
-
-      // If blockSize an odd number, start with diagonal, else one down.
-      if (blockSize % 2) { k = blockSize; }
-      else { k = blockSize-1; }
-
-      for(; k > 1; k--) { // Bottom triangle
-	for(l = 0; l < k; l++) { // down
-	  fData[indx++] = imData.entry(j + (i+blockSize-k+l)*width +
-				 (blockSize-l-1));
-	}
-	k--; // NOTE THIS!
-	for(l = 0; l < k; l++) { // back up
-	  fData[indx++] = imData.entry(j + (i+blockSize-l-1)*width +
-				 blockSize-k+l);
-	}
-      }
-
-      // Have to do last element.
-      fData[indx] = imData.entry(j + (i + blockSize - 1) * width +
-			   blockSize - 1);
-    } // end code {}
-  } // end zigzag {}
-
+  ccinclude { "ptdspZigZag.h" }
 
   method {
     name { doZigZag }
@@ -78,25 +34,19 @@ This is useful before quantizing a DCT transformed image.
     access { protected }
     arglist { "(const FloatMatrix& inImg, FloatMatrix& outImg)" }
     code {
-      // Initialize.
-      const int bSize = int(BlockSize);
-      const int width = inImg.numCols();
-      const int height = inImg.numRows();
+      // initialize
+      double * outArr = new double[inImg.numCols() * inImg.numRows()];
 
-      float* outArr = new float[width*height];
+      // set outArr to the array representing inImage
+      // inImage[0] returns address of 1st row, which is also address of the array
+      // since array is contiguously stored in memory
+      const double* inImagePtr = inImg[0];
 
-      // For each row and col...
-      int row, col;
-      float* tmpPtr = outArr;
-      for(row = 0; row < height; row += bSize) {
-	for(col = 0; col < width; col += bSize) {
-	  zigzag(tmpPtr, inImg, row, col, width, bSize);
-	  tmpPtr += bSize*bSize;
-	}
-      } // end for(each row and column)
+      Ptdsp_ZigZagScan ( inImagePtr, outArr, inImg.numCols(), inImg.numRows(), 
+			 int(BlockSize));
 
       // Copy the data to the outImg.
-      for(int i = 0; i < width*height; i++) {
+      for(int i = 0; i < inImg.numCols() * inImg.numRows(); i++) {
 	outImg.entry(i) = outArr[i];
       }
       LOG_DEL; delete [] outArr;
