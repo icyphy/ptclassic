@@ -33,12 +33,24 @@
 
 PTOLEMY=\users\ptolemy
 LIBDIR=$(PTOLEMY)\lib.$(PTARCH)
+BINDIR = $(PTOLEMY)\bin.$(PTARCH)
 
+PTCL_PTINY=$(PTOLEMY)\src\ptcl\ptcl.ptiny.exe
+all: $(BINDIR) $(PTCL_PTINY) 
+
+$(BINDIR):
+	-mkdir $@
+
+# Tcl script that converts Unix makefiles to MSVC++ nmake files
+MAKEVCGEN=$(PTOLEMY)\bin\makevcgen
 
 KERNEL_LIB=$(PTOLEMY)\src\kernel\libptolemy.lib
-$(KERNEL_LIB):
+$(KERNEL_LIB): $(PTOLEMY)\src\kernel\makefile.vc
 	cd $(PTOLEMY)\src\kernel
 	nmake -f makefile.vc install
+
+$(PTOLEMY)\src\kernel\makefile.vc: $(PTOLEMY)\src\kernel\makefile
+	\bin\sh -c PTOLEMY=/users/ptolemy; export PTOLEMY $(MAKEVCGEN) $@ $<
 
 PTCL_DESCRIPTION_OBJ=$(PTOLEMY)\src\ptcl\ptclDescription.obj
   
@@ -80,12 +92,12 @@ $(PTCL_LIB): $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
 	cd $(PTOLEMY)/src/ptcl
 	nmake -f makefile.vc install
 
-PTCL_PTINY=$(PTOLEMY)\src\ptcl\ptcl.ptiny.exe
+
 $(PTCL_PTINY):  $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
 	cd $(PTOLEMY)/src/ptcl
 	nmake -f makefile.vc ptcl.ptiny
 
-all: $(PTCL_PTINY)
+
 
 clean:
 	cd $(PTOLEMY)\src\kernel
