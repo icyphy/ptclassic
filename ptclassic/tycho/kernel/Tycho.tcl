@@ -113,12 +113,6 @@ uplevel #0 {
     source $tychokernel/Lib.tcl
 }
 
-# To disable the welcome message, set the global variable
-# tychoWelcomeMessage to zero before sourcing this file.
-if {![info exists tychoWelcomeMessage] || $tychoWelcomeMessage != 0} {
-    ::tycho::welcomeMessage
-}
-
 set tychostartfile [glob -nocomplain ~/.tycho]
 if {$tychostartfile != {} && \
 	[file exists $tychostartfile] && \
@@ -129,6 +123,16 @@ unset tychostartfile
 
 foreach file $argv {
     File::openContext $file
+}
+
+# To disable the welcome message, set the global variable
+# tychoWelcomeMessage to zero before sourcing this file.
+# This can be done in your .tycho file.
+# FIXME: This should be implemented as a command-line option
+# rather than a global variable.
+#
+if {![info exists tychoWelcomeMessage] || $tychoWelcomeMessage != 0} {
+    ::tycho::welcomeMessage
 }
 
 # If there are no command-line arguments, open a console window
