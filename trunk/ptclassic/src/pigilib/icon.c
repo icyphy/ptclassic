@@ -417,7 +417,7 @@ long userOptionWord;
 		ViDone();
 	    } else {
 		PrintErr("The icon instance is not a universe, galaxy, palette, or star.");
-                Vidone();
+                ViDone();
             }
 	}
     }
