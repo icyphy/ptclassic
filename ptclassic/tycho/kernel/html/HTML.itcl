@@ -1401,26 +1401,36 @@ body ::tycho::HTML::_initializeMenubar {menubar} {
 #
 body ::tycho::HTML::_initializeToolbar {toolbar} {
     # Add buttons to the toolbar, if it exists.
-    # FIXME: should the user be allowed to change the home window?
+    # Also add bindings to the text window.
+    set text $itk_component(text)
     
     $toolbar button back \
 	    -description {Go back to the previously-viewed page} \
+            -underline 0 \
             -text Back -command "$this back" -state disabled
+    bind $text <Key-b> "$this back; break"
     
     $toolbar button forward \
 	    -description {Go forward to the next previously-viewed page} \
+            -underline 3 \
             -text Forward -command "$this forward" -state disabled
+    bind $text <Key-w> "$this forward; break"
     
     global ::TYCHO
     
     $toolbar button home \
 	    -description {Go to the Tycho home page} \
+            -underline 0 \
             -text Home -command "$this hyperJump \
 	    [::tycho::url join \$TYCHO doc index.html]"
+    bind $text <Key-h> "$this hyperJump \
+	    [::tycho::url join \$TYCHO doc index.html]; break"
     
     $toolbar button reload \
             -description {Reload and reparse from the file} \
+            -underline 0 \
             -text Reload -command "$this reload"
+    bind $text <Key-r> "$this reload; break"
 
     # FIXME: The following is a hack into the toolbar because it doesn't
     # support the SHIFT-B1 binding... just simple button.
@@ -1433,15 +1443,21 @@ body ::tycho::HTML::_initializeToolbar {toolbar} {
     
     $toolbar button open \
 	    -description {Open a new file} \
+            -underline 0 \
             -text Open -command "$this altFile"
+    bind $text <Key-o> "$this altFile; break"
     
     $toolbar button find \
 	    -description {Find text or a pattern on this page} \
+            -underline 0 \
             -text Find -command "$this search"
+    bind $text <Key-f> "$this search; break"
     
     $toolbar button stop \
 	    -description {Abort rendering} \
+            -underline 0 \
             -text Stop -command "$this stopRendering"
+    bind $text <Key-s> "$this stopRendering; break"
 
     # Add the entry widget displaying the current page
     $toolbar entry location Location [filename] "$this hyperJumpUser"
