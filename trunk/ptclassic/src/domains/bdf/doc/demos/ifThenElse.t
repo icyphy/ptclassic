@@ -6,7 +6,6 @@ This simple system uses
 and
 .c Select
 stars to construct an if-then-else statement.
-.DE
 .EQ
 delim off
 .EN

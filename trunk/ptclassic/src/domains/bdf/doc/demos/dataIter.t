@@ -5,7 +5,6 @@ This simple system, which does nothing interesting, is
 surprisingly difficult to schedule statically.
 It requires nesting an if-then within a do-while
 within a manifest iteration.
-.DE
 .EQ
 delim off
 .EN

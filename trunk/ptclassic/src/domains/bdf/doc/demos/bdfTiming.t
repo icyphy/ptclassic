@@ -13,7 +13,6 @@ and
 stars.
 The static schedule has some simple if-then constructs to
 implement conditional firing.
-.DE
 .EQ
 delim off
 .EN
