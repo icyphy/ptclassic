@@ -1382,7 +1382,7 @@ body ::tycho::Edit::get {args} {
 #
 body ::tycho::Edit::getSelection {} {
     if {[$itk_component(text) tag nextrange sel 1.0 end] != {}} {
-	return [selection get -displayof $itk_component(text)]
+	return [$itk_component(text) get sel.first sel.last]
     } {
 	return {}
     }
