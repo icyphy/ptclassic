@@ -137,6 +137,10 @@ after processing all inputs is sent to the "size" output.
 		inData.triggers(size);
 		demand.triggers(size);
 
+		// simultaneous inData events should be available in the
+		// same firing with demand events
+		inData.before(demand);
+
 		demand.triggers(outData);
 		// Note that although demand triggers outData if the Queue
 		// has data, it does not trigger an immediate output if the
