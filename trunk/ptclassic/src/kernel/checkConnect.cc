@@ -8,13 +8,19 @@ $Id$
  Programmer:  J. T. Buck
  Date of creation: 8/6/90
 
- check a Galaxy to see if it's all connected.  Return a StringList
+ checkConnect checks a Galaxy to see if it is completely connected.
+ The function returns a StringList containing all the names
  of disconnected stars or stars with no ports.
+
+ warnIfNotConnected prints the result of checkConnect out onto
+ errorHandler if if contains any messages; it returns 1 if an
+ error has occurred, otherwise 0.
 
 *************************************************************************/
 #include "Galaxy.h"
 #include "StringList.h"
 #include "Block.h"
+#include "Output.h"
 
 StringList checkConnect (Galaxy& g) {
 	StringList msg;
@@ -41,3 +47,13 @@ StringList checkConnect (Galaxy& g) {
 	}
 	return msg;
 }
+
+int warnIfNotConnected (Galaxy& g) {
+	StringList msg = checkConnect (g);
+	if (msg.size() > 0) {
+		errorHandler.error (msg);
+		return 1;
+	}
+	else return 0;
+}
+
