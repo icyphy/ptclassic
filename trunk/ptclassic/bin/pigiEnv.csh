@@ -1,5 +1,6 @@
 #! /bin/csh -f
-# usage: pigi [-debug] [-console] [cell_name]
+# usage: pigi [-bw] [-cp] [-debug] [-console]
+#	[-rpc rpcname] [-xres resname ] [cell_name]
 
 # pigi - Ptolemy Interactive Graphics Interface
 # This version uses Vem version 8-1
@@ -18,9 +19,11 @@ endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
-if ( ! $?USER ) setenv USER $LOGNAME
 if ( ! $?ARCH ) then
     setenv ARCH `$PTOLEMY/bin/arch`
+endif
+if ( ! $?USER ) then
+    setenv USER $LOGNAME
 endif
 
 if ( ! $?PIGIRPC ) setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
@@ -86,6 +89,12 @@ if ( ! -d $cell ) then
 endif
 
 set dbfile = /tmp/pigiXR$$
+
+# Check to see whether xrdb is in the path
+(xrdb -help) >& /dev/null
+if ($status != 0) then
+	set path = ( $path /usr/X11/bin /usr/bin/X11 )
+endif
 xrdb -query > $dbfile
 xrdb -merge $PTOLEMY/lib/$resfile
 
