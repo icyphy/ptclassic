@@ -122,6 +122,7 @@ Example of a connection to the replacement block
 	  // Set the parameter values after all the clones have been created
 	  // so that cloning takes the right default values.
 	  if(!setParams(myblock, 1)) return;
+	  myblock->setTarget(target());
 	  myblock->initialize();
 
 	  mom->deleteBlockAfterInit(*this);

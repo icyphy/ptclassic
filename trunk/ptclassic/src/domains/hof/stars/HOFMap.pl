@@ -224,6 +224,7 @@ to the named block outputs according to output_map.
 		if(!connectOutput(po,source)) return 0;
 	      }
 	      if(!setParams(block, instanceno++)) return 0;
+	      block->setTarget(target());
 	      block->initialize();
 	    }
 	    return 1;
