@@ -46,6 +46,14 @@ PL_SRCS=\
  VHDLQuant.pl \
  VHDLSub.pl \
  VHDLFork.pl \
+ VHDLCos.pl \
+ VHDLSin.pl \
+ VHDLExp.pl \
+ VHDLMpy.pl \
+ VHDLGain.pl \
+ VHDLPolarToRect.pl \
+ VHDLXgraph.pl \
+ VHDLXYgraph.pl \
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

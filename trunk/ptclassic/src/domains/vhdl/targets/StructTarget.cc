@@ -37,11 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StructTarget.h"
-#include "VHDLStar.h"
-#include "VHDLState.h"
-#include "FloatArrayState.h"
-#include "IntArrayState.h"
-#include "ComplexArrayState.h"
 #include "KnownTarget.h"
 #include <ostream.h>
 
@@ -287,7 +282,7 @@ void StructTarget :: trailerCode() {
 //      cout << "Connecting " << sourceName << " and " << destName << "\n";
 
       // Must also create signals for those lines which are neither read nor
-      // written by a $ref() - eg if more delays than tokens read.
+      // written by a $ref() - e.g. if more delays than tokens read.
       // However, do not create a signal if it's a wormhole input.
       // Will have created a system port input instead.
 
@@ -583,7 +578,7 @@ void StructTarget :: connectSource(StringList initVal, StringList initName) {
 }
 
 // Add a source component declaration.
-void StructTarget :: registerSource(StringList type) {
+void StructTarget :: registerSource(StringList /*type*/) {
   // Set the flag indicating sources are needed.
   setSources();
 
@@ -606,7 +601,7 @@ void StructTarget :: registerSource(StringList type) {
 
 // Connect a selector between the given input and output signals.
 void StructTarget :: connectSelector(StringList inName, StringList outName,
-				     StringList initVal, StringList type) {
+				     StringList initVal, StringList /*type*/) {
       registerSelector("INTEGER");
       StringList label = outName;
       label << "_SEL";
@@ -628,7 +623,7 @@ void StructTarget :: connectSelector(StringList inName, StringList outName,
 }
 
 // Add a selector component declaration.
-void StructTarget :: registerSelector(StringList type) {
+void StructTarget :: registerSelector(StringList /*type*/) {
   // Set the flag indicating selectors and sources are needed.
   setSelectors();
 
@@ -654,7 +649,7 @@ void StructTarget :: registerSelector(StringList type) {
 
 // Connect a register between the given input and output signals.
 void StructTarget :: connectRegister(StringList inName, StringList outName,
-				     StringList type) {
+				     StringList /*type*/) {
       registerRegister("INTEGER");
       StringList label = outName;
       label << "_REG";
@@ -675,7 +670,7 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
 }
 
 // Add a register component declaration.
-void StructTarget :: registerRegister(StringList type) {
+void StructTarget :: registerRegister(StringList /*type*/) {
   // Set the flag indicating registers are needed.
   setRegisters();
 
@@ -783,56 +778,6 @@ void StructTarget :: initFiringLists() {
   firingVarPortList.initialize();
 }
 
-// Register a read or write to an arc and the offset.
-void StructTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
-  StringList direction = port->direction();
-  StringList name = port->getGeoName();
-  int noSuchArc = 1;
-  
-  // Search through the arc list for an arc with the given name.
-  // If one is found, update it's low/high write/read markers.
-  VHDLArcListIter nextArc(arcList);
-  VHDLArc* arc;
-  while ((arc = nextArc++) != 0) {
-    if (!strcmp(arc->name, name)) {
-      noSuchArc = 0;
-      if (!strcmp(port->direction(),"OUT")) {
-	if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
-	if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
-      }
-      else if (!strcmp(port->direction(),"IN")) {
-	if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
-	if (tokenNum > arc->highRead) arc->highRead = tokenNum;
-      }
-      else {
-	Error::error(*port, " is neither IN nor OUT");
-      }
-    }
-  } 
-
-  // If no arc with the given name is in the list, then create one.
-  if (noSuchArc) {
-    VHDLArc* newArc = new VHDLArc;
-    newArc->name = name;
-    if (!strcmp(port->direction(),"OUT")) {
-      newArc->lowWrite = tokenNum;
-      newArc->highWrite = tokenNum;
-      newArc->lowRead = 0;
-      newArc->highRead = 0;
-    }
-    else if (!strcmp(port->direction(),"IN")) {
-      newArc->lowWrite = port->geo().numInit();
-      newArc->highWrite = port->geo().numInit();
-      newArc->lowRead = tokenNum;
-      newArc->highRead = tokenNum;
-    }
-    else {
-      Error::error(*port, " is neither IN nor OUT");
-    }
-    arcList.put(*newArc);
-  }
-}
-
 // Add in generic refs here from genericList.
 void StructTarget :: addGenericRefs(VHDLCluster* cl, int level) {
   if ((*(cl->firingList)).head()) {
@@ -854,7 +799,8 @@ void StructTarget :: addGenericRefs(VHDLCluster* cl, int level) {
 	    body << ";\n";
 	  }
 	  body << indent(level) << ngen->name << ": " << ngen->type;
-	  if ((ngen->defaultVal).numPieces() > 0) {
+//	  if ((ngen->defaultVal).numPieces() > 0) {
+	  if (strlen(ngen->defaultVal) > 0) {
 	    body << " := " << ngen->defaultVal;
 	  }
 	  genCount++;
@@ -982,7 +928,7 @@ void StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
 }
 
 // Add in port to variable transfers here from portVarList.
-void StructTarget :: addPortVarTransfers(VHDLCluster* cl, int level) {
+void StructTarget :: addPortVarTransfers(VHDLCluster* cl, int /*level*/) {
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1005,7 +951,7 @@ void StructTarget :: addPortVarTransfers(VHDLCluster* cl, int level) {
 }
 
 // Add in firing actions here.
-void StructTarget :: addActions(VHDLCluster* cl, int level) {
+void StructTarget :: addActions(VHDLCluster* cl, int /*level*/) {
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1024,7 +970,7 @@ void StructTarget :: addActions(VHDLCluster* cl, int level) {
 }
 
 // Add in variable to port transfers here from varPortList.
-void StructTarget :: addVarPortTransfers(VHDLCluster* cl, int level) {
+void StructTarget :: addVarPortTransfers(VHDLCluster* cl, int /*level*/) {
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1132,7 +1078,7 @@ void StructTarget :: buildEntityDeclaration(int level) {
 }
 
 // Generate the architecture_body_opener.
-void StructTarget :: buildArchitectureBodyOpener(int level) {
+void StructTarget :: buildArchitectureBodyOpener(int /*level*/) {
   architecture_body_opener << "architecture " << "structure" << " of "
 			   << galaxy()->name() << " is\n";
 }
@@ -1160,7 +1106,8 @@ void StructTarget :: buildComponentDeclarations(int level) {
 	}
 	component_declarations << indent(level) << ngen->name << ": "
 			       << ngen->type;
-	if ((ngen->defaultVal).numPieces() > 0) {
+//	if ((ngen->defaultVal).numPieces() > 0) {
+	if (strlen(ngen->defaultVal) > 0) {
 	  component_declarations << " := " << ngen->defaultVal;
 	}
 	genCount++;
@@ -1271,7 +1218,7 @@ void StructTarget :: buildComponentMappings(int level) {
 }
 
 // Generate the architecture_body_closer.
-void StructTarget :: buildArchitectureBodyCloser(int level) {
+void StructTarget :: buildArchitectureBodyCloser(int /*level*/) {
   architecture_body_closer << "end structure;\n";
 }
 
@@ -1380,11 +1327,11 @@ StringList StructTarget :: comment(const char* text, const char* b,
 }
 
 // Generate code to begin an iterative procedure
-void StructTarget :: beginIteration(int repetitions, int depth) {
+void StructTarget :: beginIteration(int /*repetitions*/, int /*depth*/) {
 }
 
 // Generate code to end an iterative procedure
-void StructTarget :: endIteration(int /*reps*/, int depth) {
+void StructTarget :: endIteration(int /*reps*/, int /*depth*/) {
 }
 
 int StructTarget :: codeGenInit() {
