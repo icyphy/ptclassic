@@ -16,10 +16,10 @@ limitation of liability, and disclaimer of warranty provisions.
 Output data from DSP to host via host port synchronously.
 .SH IMPLEMENTATION
 We distiguish between single word transfers and multiword transfers.
-The single word case is much simple in that we can use $ref() to
+The single word case is much simple in that we can use the \fIref\fP macro to
 access the value.  The multiword case requires a loop.  Currently
-we distinguish the two cases by samplesConsumed, but I think it should
-be samplesOuput.
+we distinguish the two cases by \fIsamplesConsumed\fP, but I think it should
+be \fIsamplesOuput\fP.
 .LP
 In blocking mode we wait until the host is ready to read our samples.
 In non-blocking mode, we completely skip the transfer if the host
