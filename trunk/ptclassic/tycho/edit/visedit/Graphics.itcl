@@ -172,7 +172,7 @@ class ::tycho::Graphics {
     method select {{append 0}}
 
     # Return a list of the ids of selected objects.
-    method selected {} {return [$slate selector selection]}
+    method selected {} {return [$slate select item]}
 
     # Clear the selection.
     method selectionClear {}
@@ -338,7 +338,7 @@ body ::tycho::Graphics::constructor {args} {
     $slate selector bind drag "#background" -button 1 -modifiers shift -toggle
 
     # Create the interactor to move selected items
-    set follower [$slate control interactor Follower]
+    set follower [$slate interactor Follower]
     $slate selector delegate immediate selected $follower moveable \
 	    -button 1 
     $slate selector delegate immediate selected $follower moveable \
@@ -867,8 +867,8 @@ body ::tycho::Graphics::select {{append 0}} {
     }
     set objs [findAll current selectable]
     foreach obj $objs {
-	if { ! [$slate selector selected $obj] } {
-	    $slate selector select $obj
+	if { ! [$slate select exists $obj] } {
+	    $slate select add $obj
 	}
         # FIXME: Put into the Tk clipboard?
     }
@@ -879,7 +879,7 @@ body ::tycho::Graphics::select {{append 0}} {
 # Clear the selection.
 #
 body ::tycho::Graphics::selectionClear {} {
-    $slate selector clear
+    $slate select clear
 }
 
 #####################################################################
