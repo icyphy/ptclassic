@@ -64,9 +64,11 @@ after processing the input is sent to the \fIsize\fR output.
 	ccinclude {
 		"ParticleQueue.h"
 	}
+	header {
+		const int NUMINPUTS = 10; // max # of inputs
+	}
 	protected {
 		class ParticleQueue;
-		const int NUMINPUTS = 10; // max # of inputs
 		ParticleQueue* queue[NUMINPUTS];
 	}
 	defstate {
