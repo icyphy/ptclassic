@@ -33,7 +33,7 @@ const int TOKSIZE = 256;
 **************************************************************************/
 
 // small virtual functions in baseclass
-char* State :: type () { return "STRING";}
+const char* State :: type () { return "STRING";}
 
 int State :: size () { return 1;}
 

@@ -34,7 +34,7 @@ public:
         void initialize();
 
         // the type
-        char* type(); // { return "<T>";}
+	const char* type(); // { return "<T>";}
 
         // the value as a string
 	StringList currentValue();

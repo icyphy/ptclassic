@@ -55,7 +55,7 @@ public:
 			}
 
 	// The type
-	char* type() ;
+	const char* type();
 
         // the value as a string
         StringList currentValue();
