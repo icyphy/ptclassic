@@ -34,13 +34,13 @@ makefiles:		obj.$(ARCH)
 	@echo the top-level makefile will make sure it is done right.
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) makefiles
 
-all install:	sources obj.$(ARCH)
+all install:	obj.$(ARCH) sources 
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
 
 clean realclean:
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
 
-sources depend:
+sources depend: obj.$(ARCH)
 	cd src; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
