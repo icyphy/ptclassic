@@ -155,7 +155,15 @@ void pt_ofstream::open(const char* name, int mode, int prot) {
 		setf(ios::dont_close);
 #endif
 	}
+#ifdef PTIRIX6
+	else {
+	  const char *tmpexp = expand(name);
+
+	  ofstream::open(tmpexp,mode,prot);
+	}
+#else
 	else ofstream::open(expand(name),mode,prot);
+#endif // PTIRIX6
 	if (!*this) reportError("writing");
 	if (nobufB) setf(unitbuf);
 }
