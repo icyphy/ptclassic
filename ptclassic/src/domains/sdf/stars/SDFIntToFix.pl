@@ -55,9 +55,9 @@ keywords are: "truncate" (default), "round". }
 	go {
                 Fix out(outLen, outIntBits, (double)((int)(input%0)));
                 if(strcmp(Masking, "truncate") == 0)
-                  out::Set_MASK(Fix::mask_truncate);
+                  out.Set_MASK(Fix::mask_truncate);
                 else if (strcmp(Masking, "round") == 0)
-                  out::Set_MASK(Fix::mask_truncate_round);
+                  out.Set_MASK(Fix::mask_truncate_round);
                 else {
                   Error::abortRun(*this, ": not a valid function for masking");
                 }
