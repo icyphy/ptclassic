@@ -84,7 +84,7 @@ are set up according to the tastes of the \*(PT authors,
 and according the standard use of windowing software in the \*(PT
 development group.
 .H2 "Troubleshooting"
-.ip "\fBPermission denied.\fR
+.pp
 If when you start pigi you get the message "permission denied"
 and the \*(PT greeting window fails to pop up, then Vem was
 unable to start pigiRpc, the associated \*(PT process.
