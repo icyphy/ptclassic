@@ -51,43 +51,37 @@ static const char file_id[] = "PTcl.cc";
 #include "ConstIters.h"
 
 // we want to be able to map Tcl_interp pointers to PTcl objects.
-// this is done with a mapping table.
+// this is done with a table storing all the PTcl objects.
 
 // for now, we allow up to MAX_PTCL PTcl objects at a time.
 const int MAX_PTCL = 10;
 
-struct PMap {
-	Tcl_Interp* interp;
-	PTcl* pobj;
-};
-
-static PMap ptable[MAX_PTCL];
+static PTcl* ptable[MAX_PTCL];
 
 /////////////////////////////////////////////////////////////////////
 
 // this is a static function.
 PTcl* PTcl::findPTcl(Tcl_Interp* arg) {
 	for (int i = 0; i < MAX_PTCL; i++)
-		if (ptable[i].interp == arg) return ptable[i].pobj;
+		if (ptable[i]->interp == arg) return ptable[i];
 	return 0;
 }
 
 void PTcl::makeEntry() {
 	int i = 0;
-	while (ptable[i].interp != 0 && i < MAX_PTCL) i++;
+	while (ptable[i] != 0 && i < MAX_PTCL) i++;
 	if (i >= MAX_PTCL) return;
-	ptable[i].interp = interp;
-	ptable[i].pobj = this;
+	ptable[i] = this;
 }
 
 void PTcl::removeEntry() {
 	for (int i = 0; i < MAX_PTCL; i++) {
-		if (ptable[i].pobj == this) {
-			ptable[i].interp = 0;
-			ptable[i].pobj = 0;
+		if (ptable[i] == this) {
+			ptable[i] = 0;
 		}
 	}
 }
+
 /////////////////////////////////////////////////////////////////////
 
 // constructor
@@ -159,7 +153,7 @@ void PTcl::addResult(const char* value) {
 
 const Block* PTcl::getBlock(const char* name) {
 // if name is blank or "this", return current galaxy.  "target"
-// matches current target.  Otherwise, first search top-blocks,
+// matches current target.  Otherwise, first search the current galaxy,
 // then the known list, finally known targets.
 
 	if (!name || *name == 0 || strcmp(name,"this") == 0)
@@ -180,14 +174,14 @@ const Block* PTcl::getBlock(const char* name) {
 // a block in the galaxy or on the known list.
 
 int PTcl::descriptor(int argc,char** argv) {
-	if (argc > 2) return usage("descriptor [<block-or-classname]");
+	if (argc > 2) return usage("descriptor ?<block-or-classname>?");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
 	return staticResult(b->descriptor());
 }
 
 int PTcl::print(int argc,char** argv) {
-	if (argc > 2) return usage("print [<block-or-classname>]");
+	if (argc > 2) return usage("print ?<block-or-classname>?");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
 	return result(b->print(0));
@@ -212,7 +206,7 @@ int PTcl::delstar(int argc,char** argv) {
 // connect:
 int PTcl::connect(int argc,char** argv) {
 	if (argc != 5 && argc != 6)
-		return usage("connect <src> <port> <dst> <port> [<delay>]");
+		return usage("connect <src> <port> <dst> <port> ?<delay>?");
 	if (!currentGalaxy->connect(argv[1],argv[2],argv[3],argv[4],argv[5]))
 		return TCL_ERROR;
 	return TCL_OK;
@@ -221,7 +215,7 @@ int PTcl::connect(int argc,char** argv) {
 // busconnect
 int PTcl::busconnect(int argc,char** argv) {
 	if (argc != 6 && argc != 7)
-		return usage("busconnect <src> <port> <dst> <port> <width> [<delay>]");
+		return usage("busconnect <src> <port> <dst> <port> <width> ?<delay>?");
 	if (!currentGalaxy->busConnect(argv[1],argv[2],argv[3],
 				       argv[4],argv[5],argv[6]))
 		return TCL_ERROR;
@@ -239,7 +233,9 @@ int PTcl::alias(int argc,char** argv) {
 int PTcl::numports(int argc,char** argv) {
 	if (argc != 4)
 		return usage("numports <star> <multiport> <how-many>");
-	int num = atoi(argv[3]);
+	int num;
+	if (Tcl_GetInt(interp, argv[3], &num) != TCL_OK)
+		return TCL_ERROR;
 	if (!currentGalaxy->numPorts (argv[1], argv[2], num))
 		return TCL_ERROR;
 	return TCL_OK;
@@ -266,7 +262,7 @@ int PTcl::delnode(int argc,char ** argv) {
 // nodeconnect: connect a porthole to a node
 int PTcl::nodeconnect(int argc,char ** argv) {
 	if (argc != 4 && argc != 5)
-		return usage("nodeconnect <star> <port> <node> [<delay>]");
+		return usage("nodeconnect <star> <port> <node> ?<delay>?");
 	if (!currentGalaxy->nodeConnect(argv[1],argv[2],argv[3],argv[4]))
 		return TCL_ERROR;
 	return TCL_OK;
@@ -281,7 +277,7 @@ int PTcl::disconnect(int argc,char ** argv) {
 	return TCL_OK;
 }
 
-// state: create a new instance of state within galaxy
+// newstate: create a new instance of state within galaxy
 int PTcl::newstate(int argc,char ** argv) {
 	if (argc != 4)
 		return usage("newstate <name> <type> <defvalue>");
@@ -293,19 +289,19 @@ int PTcl::newstate(int argc,char ** argv) {
 // setstate: set (change) a state within galaxy
 int PTcl::setstate(int argc,char ** argv) {
 	if (argc != 4)
-		return usage("state <star> <name> <value>\nor state this <name> <value>");
+		return usage("setstate <star> <name> <value>\nor setstate this <name> <value>");
 	if (!currentGalaxy->setState(argv[1],argv[2],argv[3]))
 		return TCL_ERROR;
 	return TCL_OK;
 }
 
 // statevalue: return a state value
-// syntax: statevalue block state [current/initial]
+// syntax: statevalue <block> <state> ?current/initial?
 // default is current value
 int PTcl::statevalue(int argc,char ** argv) {
 	if (argc < 3 || argc > 4 ||
 	    (argc == 4 &&argv[3][0] != 'c' && argv[3][0] != 'i'))
-		return usage ("statevalue block state [current/initial]");
+		return usage ("statevalue <block> <state> ?current/initial?");
 	Block* b = (Block*)getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
 	const State* s = b->stateWithName(argv[2]);
@@ -322,10 +318,9 @@ int PTcl::statevalue(int argc,char ** argv) {
 }
 
 // defgalaxy: define a galaxy
-// syntax: defgalaxy <galname> { <galaxy-building-commands> }
 int PTcl::defgalaxy(int argc,char ** argv) {
 	if (argc != 3)
-		return usage("defgalaxy <galname> {galaxy-building-stuff}");
+		return usage("defgalaxy <galname> {<galaxy-building-commands>}");
 	if (definingGal) {
 		Tcl_SetResult(interp, "already defining a galaxy!", TCL_STATIC);
 		return TCL_ERROR;
@@ -334,15 +329,17 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	const char* outerDomain = curDomain;
 	definingGal = TRUE;	// prevent recursive defgalaxy
 	LOG_NEW; currentGalaxy = new InterpGalaxy(galname,curDomain);
-	currentGalaxy->setBlock (galname, universe);
+	currentGalaxy->setBlock (galname, 0);
 	currentTarget = 0;
-	if (Tcl_Eval(interp, argv[2], 0, 0) != TCL_OK) {
+	int status;  // return value
+	if ((status = Tcl_Eval(interp, argv[2], 0, 0)) != TCL_OK) {
 		LOG_DEL; delete currentGalaxy;
+		Error::error("Error in defining galaxy ", galname);
 	}
 	else currentGalaxy->addToKnownList(outerDomain,currentTarget);
 	currentGalaxy = universe;
 	definingGal = FALSE;
-	return TCL_OK;
+	return status;
 }
 
 int PTcl::computeSchedule() {
@@ -368,7 +365,7 @@ int PTcl::schedule(int argc,char **) {
 
 int PTcl::run(int argc,char ** argv) {
 	if (argc > 2)
-		return usage("run <stoptime>");
+		return usage("run ?<stoptime>?");
 	if (!computeSchedule())
 		return TCL_ERROR;
 	stopTime = 0.0;
@@ -378,9 +375,13 @@ int PTcl::run(int argc,char ** argv) {
 
 int PTcl::cont(int argc,char ** argv) {
 	if (argc > 2)
-		return usage("cont <stoptime>");
-	if (argc == 2)
-		lastTime = atof (argv[1]);
+		return usage("cont ?<lasttime>?");
+	if (argc == 2) {
+		double d;
+		if (Tcl_GetDouble(interp, argv[1], &d) != TCL_OK)
+			return TCL_ERROR;
+		lastTime = d;
+	}
 	stopTime += lastTime;
 	universe->setStopTime(stopTime);
 	universe->run();
@@ -405,13 +406,15 @@ int PTcl::domains(int argc,char **) {
 	return TCL_OK;
 }
 
-// read the seed of the random number generation
+// set (change) the seed of the random number generation
 int PTcl::seed(int argc,char ** argv) {
 	extern ACG* gen;
 	if (argc > 2)
-		return usage ("seed [<seed>]");
-	int val = 1;
-	if (argc == 2) val = atoi(argv[1]);
+		return usage ("seed ?<seed>?");
+	int val = 1;  // default seed
+	if (argc == 2 && Tcl_GetInt(interp, argv[1], &val) != TCL_OK) {
+		return TCL_ERROR;
+	}
 	LOG_DEL; delete gen;
 	LOG_NEW; gen = new ACG(val);
 	return TCL_OK;
@@ -426,7 +429,7 @@ int PTcl::animation (int argc,char** argv) {
 	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
 		return usage ("animation ?on/off?");
 	if (argc != 2) {
-		strcpy(interp->result, (c==0) ? "on" : "off");
+		strcpy(interp->result, textAnimationState() ? "on" : "off");
 	}
 	else if (c == 0)
 		textAnimationOn();
@@ -439,7 +442,7 @@ int PTcl::animation (int argc,char** argv) {
 // argument is given) the supplied domain.
 int PTcl::knownlist (int argc,char** argv) {
 	if (argc > 2)
-		return usage ("knownlist [<domain>]");
+		return usage ("knownlist ?<domain>?");
 	const char* dom = curDomain;
 	if (argc == 2) dom = argv[1];
 	KnownBlockIter nextB(dom);
@@ -451,7 +454,7 @@ int PTcl::knownlist (int argc,char** argv) {
 
 int PTcl::topblocks (int argc,char ** argv) {
 	if (argc > 2)
-		return usage ("topblocks [<block-or-classname>]");
+		return usage ("topblocks ?<block-or-classname>?");
 	const Block* b = getBlock(argv[1]);
 	if (!b->isItAtomic()) {
 		CGalTopBlockIter nextb(b->asGalaxy());
@@ -475,7 +478,7 @@ int PTcl::reset(int argc,char**) {
 // are specified, domain must be first.
 int PTcl::domain(int argc,char ** argv) {
 	if (argc > 2)
-		return usage ("domain [newdomain]");
+		return usage ("domain ?<newdomain>?");
 	if (argc == 1) {
 		strcpy(interp->result,curDomain);
 		return TCL_OK;
@@ -494,7 +497,7 @@ int PTcl::target(int argc,char ** argv) {
 		return staticResult(tp->name());
 	}
 	else if (argc > 2) {
-		return usage("target [<targetname>]");
+		return usage("target ?<targetname>?");
 	}
 	else {
 		const char* tname = hashstring(argv[1]);
@@ -512,7 +515,7 @@ int PTcl::target(int argc,char ** argv) {
 }
 
 int PTcl::targets(int argc,char** argv) {
-	if (argc > 2) return usage("targets [<domain>]");
+	if (argc > 2) return usage("targets ?<domain>?");
 	const char* domain;
 	if (argc == 2) domain = argv[1];
 	else domain = curDomain;
@@ -524,10 +527,10 @@ int PTcl::targets(int argc,char** argv) {
 	return TCL_OK;
 }
 
-// change target states
+// set (change) or return value of target parameter
 int PTcl::targetparam(int argc,char ** argv) {
 	if (argc != 2 && argc != 3)
-		return usage("targetparam <name> [<value>]");
+		return usage("targetparam <name> ?<value>?");
 	Target* t = universe->myTarget();
 	if (definingGal && currentTarget) t = currentTarget;
 	State* s = t->stateWithName(argv[1]);
@@ -554,15 +557,15 @@ int PTcl::link(int argc,char ** argv) {
 // be permanent.
 
 int PTcl::multilink(int argc,char ** argv) {
-	if (argc == 1) return usage("multilink <file1> [<file2>...]");
+	if (argc == 1) return usage("multilink <file1> ?<file2> ...?");
 	return Linker::multiLink(argc,argv) ? TCL_OK : TCL_ERROR;
 }
 
 // Override tcl exit function with one that does cleanup of the universe.
 int PTcl::exit(int argc,char ** argv) {
 	int estatus = 0;
-	if (argc > 2) return usage("exit ?returnCode?");
-	if (argc == 2 && Tcl_GetInt(interp,argv[1], &estatus) != TCL_OK) {
+	if (argc > 2) return usage("exit ?<returnCode>?");
+	if (argc == 2 && Tcl_GetInt(interp, argv[1], &estatus) != TCL_OK) {
 		return TCL_ERROR;
 	}
 	LOG_DEL; delete universe;
