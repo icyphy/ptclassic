@@ -21,9 +21,25 @@ galaxy in a universe has depth 3.
 */
 #define MAX_DEPTH 64
 
+/* hack function to detect an instance corresponding to a multiport
+   star with specified number of ports: name.port=num .  It returns
+   true if there is exactly one "." character and exactly one "="
+   character.
+ */
+
+static boolean
+specialInstance(s)
+char *s;
+{
+    char *p = strchr(s, '.');
+    if (!p) return 0;
+    if (strchr(p+1,'.')) return 0;
+    return strchr(p+1,'=') ? 1 : 0;
+}
+
 /*
 Copy the first component of s into buf.  Components are separated by
-'%' characters or '\0'.
+'.' characters or '\0'.  Handle "special instance names" (see above).
 Caveats: assumes enough room in buf.
 */
 static void
@@ -33,8 +49,8 @@ char *buf;
 {
     char *end;
 
-    end = strchr(s, '%');
-    if (end == NULL) {
+    end = strchr(s, '.');
+    if (end == NULL || specialInstance(s)) {
 	strcpy(buf, s);
     } else {
 	while (s != end) {
@@ -46,7 +62,7 @@ char *buf;
 
 /*
 Advance s to point after the next '%' character in the string or
-else return NULL.
+else return NULL.    Handle "special instance names" (see above).
 */
 static
 char *
@@ -55,7 +71,8 @@ char *s;
 {
     char *end;
 
-    end = strchr(s, '%');
+    end = strchr(s, '.');
+    if (end && specialInstance(s)) end = NULL;
     return (end == NULL) ? NULL : ++end;
 }
 
@@ -64,7 +81,7 @@ Highlight a star with a color and keep track of allocated vemSelSets.
 You can call this with out using Gantt, see RpcFindStar().
 Inputs:
     rootFacetPtr = facet to start looking for name in
-    name = name of star, components are separated by '%'
+    name = name of star, components are separated by '.'
     color = frame color
     sets = array of unused vemSelSets, normally all elements empty
     depth = index to first unused slot in sets[], normally 0
@@ -80,7 +97,6 @@ RgbValue *color;
 vemSelSet sets[];
 int *depth;
 {
-    static char *pattern = "00010000 00010000 00010000 11111111 00010000 00010000 00010000 00010000";
     octObject facet, inst;
     char word[256];
     vemSelSet ss;
@@ -93,7 +109,7 @@ int *depth;
 	    return FALSE;
 	}
 	ss = vemNewSelSet(facet.objectId, color->red,
-	    color->green, color->blue, 1, 1, 8, 8, pattern);
+	    color->green, color->blue, 2, 3, 1, 1, "0");
 	sets[(*depth)++] = ss;
 	vemAddSelSet(ss, inst.objectId);
 	if ((name = incr(name)) == NULL) break;
@@ -122,9 +138,9 @@ FindClear()
     }
     findDepth = 0;
 }
-    
+
 /* 3/28/90
-Find a name starting at facet under cursor.  Name can have '%' between
+Find a name starting at facet under cursor.  Name can have '.' between
 components and all components in heirarchy will be marked.
 */
 int 
@@ -133,7 +149,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static RgbValue color = {65535, 42495, 0};
+    static RgbValue color = {65535, 0, 0};
     static dmTextItem item = {"Name", 1, 100, NULL, NULL};
     octObject facet;
     vemStatus status;
@@ -158,4 +174,15 @@ long userOptionWord;
         ViDone();
     }
     ViDone();
+}
+
+FindAndMarkError(facetP, name)
+octObject *facetP;
+char *name;
+{
+    static RgbValue color = {65535, 0, 0};
+/* name contains the universe name as well, which must be stripped */
+    name = incr(name);
+    if (!name) return;
+    FrameStar(facetP, name, &color, findSets, &findDepth);
 }
