@@ -694,7 +694,6 @@ body ::tycho::Selector::_clear {} {
 #
 body ::tycho::Selector::_delegate {mode id x y args} {
     $slate dtag "subsel"
-    $slate dtag "highlight.subsel"
     switch -exact $mode {
 	"0" -
 	"1" {
@@ -722,10 +721,8 @@ body ::tycho::Selector::_delegate {mode id x y args} {
 		if { $args == $options } {
 		    foreach item [$slate find withtag "sel"] {
                         if { ![::tycho::ldisjoint $tags [$slate gettags $item]] } {
-                            # Add the "subsel" tag and also tag its highlight
+                            # Add the "subsel" tag
                             $slate addtag "subsel" withtag $item
-                            $slate addtag "highlight.subsel" \
-                                    withtag highlight.$item
                         }
                     }
                     # Activate it
