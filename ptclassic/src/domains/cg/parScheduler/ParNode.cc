@@ -67,7 +67,7 @@ ParNode::ParNode(DataFlowStar* s, int invoc_no)
 // If type = 1, it is an idle node.
 // If type = -1, it is a send node, type = -2 indicates a receive node
 
-ParNode::ParNode(int t) : EGNode(0,0) {
+ParNode::ParNode(int t) : EGNode(0,0), clonedStar(0) {
 	
 	type = t;
 	StaticLevel = 0;	// Initialize to something invalid
