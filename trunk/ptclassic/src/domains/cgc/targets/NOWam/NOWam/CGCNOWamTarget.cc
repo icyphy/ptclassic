@@ -1,9 +1,9 @@
 static const char file_id[] = "CGCNOWamTarget.cc";
 /******************************************************************
 Version identification:
-@(#)CGCNOWamTarget.cc   1.2 1/30/96
+$Id$
  
-Copyright (c) 1991-1996  The Regents of the University of California.
+Copyright (c) 1995-%Q%  The Regents of the University of California.
 All Rights Reserved.
  
 Permission is hereby granted, without written agreement and without
@@ -51,6 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>		// Sol2 needs this for inet_addr()
 
 // stream for logging information.  It is opened by the setup method.
 
@@ -109,10 +110,6 @@ void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 		<< "\n"; feedback.flush();
 	CGCNOWamSend* cs = (CGCNOWamSend*) s;
 	CGCNOWamRecv* cr = (CGCNOWamRecv*) r;
-
-	// for each child_target
-	CGCTarget* ts = (CGCTarget*) cs->cgTarget();
-	CGCTarget* tr = (CGCTarget*) cr->cgTarget();
 
 	// set the IPC handler names
 	// for sender
