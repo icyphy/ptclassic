@@ -31,8 +31,6 @@ Programmer: Paul Haskell
 Version: $Id$
 */
 
-#include "Ptdsp_FloatMatrix.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
