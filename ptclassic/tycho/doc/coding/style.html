@@ -13,6 +13,7 @@ Please submit comments or suggestions to eal@eecs.berkeley.edu.
 <li><a href="#comment conventions">Comment conventions</a>
 <li><a href="#naming conventions">Naming conventions</a>
 <li><a href="#global variables">Global variables</a>
+<li><a href="#java exceptions conventions">Java exceptions conventions</a>
 <li><a href="#documentation conventions">Documentation conventions</a>
 <li><a href="#copyright conventions">Copyright and acknowledgements</a>
 <li><a href="#proofreading">Proofreading </a>
@@ -139,6 +140,34 @@ If you need a global variable, use a "common" variable in a class.
 
 The Tycho documentation layout and conventions are discussed in 
 <A HREF="../documentation.html"><CODE>$TYCHO/doc/documentation.html</CODE></A>
+
+<h2><a name="java exceptions conventions">Java exceptions conventions</a></h2>
+Java exception classes that are part of the <CODE>pt</CODE> package
+in <A HREF="../../java/pt"><CODE>$TYCHO/java/pt</CODE></A> should
+follow these conventions.
+<MENU>
+<LI> All <CODE>pt</CODE> package exceptions should implement
+<A HREF="../../java/pt/kernel/PtolemyException.java">PtolemyException</A>
+so that we can catch these exceptions at runtime.  By having a hierarchy
+of exceptions, we can differentiate between generic Java exceptions and
+exceptions that the pt package has thrown.
+
+<LI> Exceptions should be defined in the same package as the classes that throw them.  The exceptions in java.lang follow this convention.
+
+<LI> Each exception should have two methods, one with no detail
+message, one with a detail message.
+
+
+<LI> When throwing an exception, it is best if the detail message is
+a complete sentence that includes a string that describes to object
+that caused the exception.  For example
+<PRE>
+throw MyException("The list already contains an element named `" + 
+	getName() +"'.");
+</PRE>
+
+</MENU>
+
 
 <h2><a name="copyright conventions">Copyright and Acknowledgements</a></h2>
 
