@@ -120,6 +120,7 @@ char* portNum;			/* expr giving # of tokens */
 char* portDesc;			/* port descriptor */
 int   portOut;			/* true if porthole is output */
 int   portMulti;		/* true if porthole is multiporthole */
+char* portAttrib;		/* attributes for porthole */
 char* stateName;		/* name of state */
 char* stateClass;		/* class of state */
 char* stateDef;			/* default value of state */
@@ -139,6 +140,7 @@ char* destCode;			/* destructor */
 char* startCode;		/* start method */
 char* goCode;			/* go method */
 char* wrapupCode;		/* wrapup method */
+char* exectimeCode;		/* myExecTime method */
 char* hInclude[NINC];		/* include files in .h file */
 int   nHInclude;		/* number of such files */
 char* ccInclude[NINC];		/* include files in .cc file */
@@ -162,6 +164,7 @@ typedef char * STRINGVAL;
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION CODEBLOCK
+%token EXECTIME
 %%
 /* a file consists of a series of definitions. */
 file:
@@ -222,6 +225,7 @@ sgitem:
 |	destructor BODY			{ destCode = $2; bodyMode = 0;}
 |	start BODY			{ startCode = $2; bodyMode = 0;}
 |	wrapup BODY			{ wrapupCode = $2; bodyMode = 0;}
+|	exectime BODY			{ exectimeCode = $2; bodyMode = 0;}
 |	members BODY			{ addMembers ($1, $2); bodyMode = 0;}
 |	code BODY			{ strcat (ccCode, $2); 
 					  strcat (ccCode, "\n\n");
@@ -327,6 +331,9 @@ wrapup:
 	WRAPUP optp '{'			{ bodyMode = 1;}
 ;
 
+exectime:
+	EXECTIME optp '{'		{ bodyMode = 1;}
+
 methlist:
 	methitem
 |	methlist methitem
@@ -391,6 +398,7 @@ portitem:
 |	TYPE '{' ident '}'		{ portType = portDataType($3);}
 |	TYPE '{' '=' ident '}'		{ portInherit = $4;} 
 |	NUM '{' expval '}'		{ portNum = $3;}
+|	attrib BODY			{ portAttrib = $2; bodyMode = 0;}
 |	DESC '{' 			{ descMode = 1; docMode = 1;}
 		BODY			{ portDesc = $4;
 					  docMode = 0;
@@ -490,7 +498,7 @@ ident:	IDENTIFIER|DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
 |DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
-|SEEALSO|LOCATION|CODEBLOCK
+|SEEALSO|LOCATION|CODEBLOCK|EXECTIME
 /* also allow strings; strip quotation marks */
 |STRING					{ $$ = stripQuotes ($1);}
 ;
@@ -512,6 +520,7 @@ int g;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 	inputDescriptions[0] = outputDescriptions[0] = stateDescriptions[0] = 0;
 	nCcInclude = nHInclude = nSeeAlso = 0;
+	startCode = goCode = wrapupCode = exectimeCode = 0;
 }
 
 /* Generate a state definition */
@@ -635,7 +644,7 @@ int out, multi;
 {
 	portOut = out;
 	portMulti = multi;
-	portName = portNum = portInherit = portDesc = NULL;
+	portName = portNum = portInherit = portDesc = portAttrib = NULL;
 	portType = "ANYTYPE";
 }
 
@@ -663,6 +672,11 @@ genPort ()
 			portName, portName, cvtToUpper(portType));
 	strcat (publicMembers, str1);
 	strcat (consStuff, str2);
+	if (portAttrib) {
+		sprintf (str2, "\t%s.setAttributes(\n%s);\n", portName,
+			portAttrib);
+		strcat (consStuff, str2);
+	}
 	if (portInherit) {
 		sprintf (str2, "\t%s.inheritTypeFrom(%s);\n", portName,
 			 portInherit);
@@ -861,6 +875,8 @@ genDef ()
 		fprintf (fp, "\tvoid go();\n");
 	if (wrapupCode)
 		fprintf (fp, "\tvoid wrapup();\n");
+	if (exectimeCode)
+		fprintf (fp, "\tint myExecTime();\n");
 	if (destCode)
 		fprintf (fp, "\t~%s();\n", fullClass);
 	if (publicMembers[0])
@@ -913,6 +929,9 @@ genDef ()
 		fprintf (fp, "\nvoid %s::go() {\n%s\n}\n", fullClass, goCode);
 	if (wrapupCode)
 		fprintf (fp, "\nvoid %s::wrapup() {\n%s\n}\n", fullClass, wrapupCode);
+	if (exectimeCode)
+		fprintf (fp, "\nint %s::myExecTime() {\n%s\n}\n", fullClass,
+				exectimeCode);
 	if (destCode)
 		fprintf (fp, "\n%s::~%s() {\n%s\n}\n", fullClass, fullClass, destCode);
 	if (miscCode[0])
@@ -1057,6 +1076,8 @@ struct tentry keyTable[] = {
 	"descriptor", DESC,
 	"destructor", DESTRUCTOR,
 	"domain", DOMAIN,
+	"execTime", EXECTIME,
+	"exectime", EXECTIME,
 	"explanation", EXPLANATION,
 	"galaxy", GALAXY,
 	"go", GO,
