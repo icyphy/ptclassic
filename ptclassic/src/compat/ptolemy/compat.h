@@ -55,13 +55,16 @@ extern "C" {
 #define PTLINUX
 #endif
 
-#if defined(__sparc) && defined(__svr4__)
+#if defined(__sparc) && (defined(__svr4__) || defined(__SVR4))
 /* Sun SPARC running Solaris2.x, SunC++ or g++ */
+#ifndef SOL2
 #define SOL2
+#endif
+
 #define PTSOL2
 #endif
 
-#if defined(__sparc) && defined(__svr4__) && !defined(__GNUC__)
+#if defined(__sparc) && (defined(__svr4__) || defined(__SVR4)) && !defined(__GNUC__)
 /* Sun SPARC running Solaris2.x, with something other than gcc/g++ */
 #define PTSOL2_CFRONT
 #endif
@@ -202,6 +205,7 @@ extern void setpwent();		/* octtools/Packages/fc/fc.c and
 
 extern int sscanf (const char *, const char *, ...);
 extern int socket(int, int, int); /* thor/kernel/rpc.c uses socket() */
+extern int symlink(const char *, const char *);	/* CGCTarget.cc */
 extern int unlink(const char *);
 #endif /* __GNUC__ */
 
