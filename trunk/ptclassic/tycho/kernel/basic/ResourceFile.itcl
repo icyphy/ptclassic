@@ -294,7 +294,7 @@ body ::tycho::ResourceFile::delete {path} {
 body ::tycho::ResourceFile::dirlist {path} {
     regsub {^file:} $path {} path
     set result {}
-    foreach f [::glob [file join $path *]] {
+    foreach f [::glob -nocomplain [file join $path *]] {
 	if [::file isdirectory $f] {
 	    lappend result [file tail $f]/
 	} else {
