@@ -108,22 +108,9 @@ all:	makefile $(OBJS)
 .c.o:
 	$(CC) $(USER_C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
-# Note that forcing the installation of ptlang might not be the best
-# thing to do, it would be best if 'make sources' did not touch the
-# bin.$(PTARCH) directory, so we check to see if there is a ptlang in the
-# obj.$(PTARCH)/ptlang directory and use it.  This is awkward, but the
-# GNU tools do something similar
-
-# ptlang binary in the obj directory
-PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/ptlang/ptlang
-
-# Use either the ptlang binary in the obj directory or just use ptlang
-PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
-	then echo $(PTLANG_IN_OBJ) ; \
-	else echo ptlang; fi`
-
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
+PTLANG=	$(PTOLEMY)/bin.$(PTARCH)/ptlang
 .pl.cc:
 	cd $(VPATH); $(PTLANG) $< 
 
