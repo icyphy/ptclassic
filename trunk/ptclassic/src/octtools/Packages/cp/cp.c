@@ -34,7 +34,6 @@ static char SccsId[]="$Id$";
 #define TEXT_BUFFER_INIT_SIZE 120        /* (power of two) - SLOP */
 #define SLOP 8
 
-static boolean in_definition = FALSE;
 tr_stack *cp_stack;
 
 /* Who knows what this function does, it has lots of undefined calls
@@ -60,6 +59,10 @@ extern void cp_roundflash
 	ARGS((int diameter, cp_point center));
 extern void cp_wire
 	ARGS((int width, cp_path number, int path));
+
+#ifdef NEED_CP_PARSE
+/* This seems to be unused because cp_wire is undefined */
+static boolean in_definition = FALSE;
 
 void
 cp_parse(input_file)
@@ -339,3 +342,4 @@ FILE * input_file;
 
     }				/* for */
 }				/* parse */
+#endif
