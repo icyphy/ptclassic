@@ -59,6 +59,14 @@ extern char *strchr();
  * extern void free();
  * extern void abort();
  */
+/* Apparently in linux Slackware 2.1, "extern double atof()" fails
+   because Linux stdlib.h makes atof a macro.  Easiest solution: Add
+   #undef atof to the xgraph.h file anywhere before atof mention.
+ */
+#ifdef atof
+#undef atof
+#endif
+
 extern double atof();
 
 
