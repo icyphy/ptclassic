@@ -43,23 +43,24 @@
 # as we have for file suffixes and the like.
 #
 proc ::tycho::resourceClass {path {procname {}} args} {
-    # ::puts $path
-    # ::puts [regexp {^([a-z]+:/+)} $path protocol]
-    if { ! [regexp {^([a-z]+:/+)} $path protocol] } {
-	# puts $path
+    set protocol [::tycho::url protocol $path]
+    if {$protocol=={}} {
 	set rclass ::tycho::ResourceFile
     } else {
 	switch -exact -- $protocol {
-	    http:// {
+            mailto {
+                set rclass ::tycho::ResourceMail
+            }
+	    http {
 		set rclass ::tycho::ResourceHTTP
 	    }
-	    ftp:// {
+	    ftp {
 		error "Ftp access not supported yet"
 	    }
-	    file:/ {
+	    file {
 		set rclass ::tycho::ResourceFile
 	    }
-	    weld:// {
+	    weld {
 		set rclass ::tycho::ResourceWELD
 	    }
 	    default {
