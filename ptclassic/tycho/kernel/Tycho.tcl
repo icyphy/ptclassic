@@ -121,8 +121,6 @@ if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
 	source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
 	source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
 	source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
-	set ::auto_path [linsert $auto_path 0 \
-		$PTOLEMY/src/tcltk/itcl2.0/iwidgets2.0.0 ]
     }
 }
 uplevel #0 {
