@@ -91,7 +91,7 @@ endif
 
 ifdef ACS
 	PIGI=		$(BASENAME).acs
-	VERSION_DESC =	'With Adaptive Computing System (ACS) Domain only'
+	VERSION_DESC =	'With Adaptive Computing Systems (ACS) Domain only'
 	ACS =		1
 endif
 
