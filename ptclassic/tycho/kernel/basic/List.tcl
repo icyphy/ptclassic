@@ -49,9 +49,10 @@ proc ltail {list} {
     return [lreplace $list 0 0]
 }
 
+
 ## linit, llast list
 #
-# Take the last element of a list, end everything by the last
+# Take the last element of a list, end everything but the last
 # element.
 #
 proc linit {list} {
@@ -59,8 +60,9 @@ proc linit {list} {
 }
 
 proc llast {list} {
-    return [lindex $list [expr [llength $list] - 1]]
+    return [lindex $list end]
 }
+
 
 ## lnull list
 #
@@ -97,7 +99,12 @@ proc ldrop {list n} {
 ## ldropUntil list item
 #
 # Drop list elements until the given value, _item_ is found. The
-# returned list starts with _item_.
+# returned list starts with _item_. For example,
+#
+#    ldropUntil {1 2 3 4} 3
+#
+# returns {3 4}. If the item is not in the list, the empty
+# list is returned.
 #
 proc ldropUntil {list item} {
     set index [lsearch -exact $list $item]
@@ -107,6 +114,7 @@ proc ldropUntil {list item} {
 	return [ldrop $list $index]
     }
 }
+
 
 ## lcopy n item
 #
@@ -160,6 +168,7 @@ proc ldistl {item list} {
     return $result
 }
 
+
 ## ldistr list item
 #
 # A right list distribution, as in Backus' FP. Note carefully
@@ -179,9 +188,10 @@ proc ldistr {list item} {
     return $result
 }
 
+
 ## lmember list item
 #
-# Test whether an element is in a list
+# Test whether an item is in a list
 #
 proc lmember {list item} {
     return [expr [lsearch -exact $list $item] != -1]
@@ -237,6 +247,7 @@ proc lnub {list} {
     return $result
 }
 
+
 ## subsets list
 #
 # Generate all non-empty subsets of a list. Subsets are not in
@@ -265,6 +276,7 @@ proc subsets {list} {
 }
 
 
+## ldelete list item
 #
 # Remove an item from a list
 #
@@ -416,6 +428,23 @@ proc lreject {cmd list} {
 	if { ! [eval $cmd [list $x]] } {
 	    lappend result $x
 	}
+    }
+    return $result
+}
+
+
+## lreduce cmd list
+#
+# Reduce or ``fold'' a list into a single value. The list must
+# contain at least one element.
+#
+proc lreduce {cmd list} {
+    set result [lhead $list]
+    set list   [ltail $list]
+
+    while { ! [lnull $list] } {
+	set result [eval $cmd $result [list [lhead $list]]]
+	set list   [ltail $list]
     }
     return $result
 }
