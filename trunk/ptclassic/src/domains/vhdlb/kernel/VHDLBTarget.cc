@@ -575,7 +575,9 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
 	  gn = p;
 	  while(gp = gn->aliasFrom()) gn = gp;
 	  StringList s = sanitizedShortName(*gn);
-	  p->setGeoName(savestring(s));
+	  const char *cs = (const char*) s; /* new struct keeps separate */
+//	  p->setGeoName(savestring(s));
+	  p->setGeoName(savestring(cs));
 	}
       }
     }
@@ -588,7 +590,9 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
 	  gn = p;
 	  while(gp = gn->aliasFrom()) gn = gp;
 	  StringList s = sanitizedShortName(*gn);
-	  p->setGeoName(savestring(s));
+	  const char *cs = (const char*) s; /* new struct keeps separate */
+//	  p->setGeoName(savestring(s));
+	  p->setGeoName(savestring(cs));
 	}
       }
     }
