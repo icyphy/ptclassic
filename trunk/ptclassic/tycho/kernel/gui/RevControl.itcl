@@ -62,11 +62,11 @@ class ::tycho::RevControl {
     ###################################################################
     ####                      public methods                       ####
 
-    # Check in the file associated with this class.
-    method checkIn {} 
+    # Check in the file and update revision control information.
+    method checkInAndUpdate {}
 
-    # Check out the file associated with this class.
-    method checkOut {} 
+    # Check out the file and update revision control information.
+    method checkOutAndUpdate {}
 
     # Put the file under revision control.
     method initializeRevControl {} 
@@ -80,6 +80,12 @@ class ::tycho::RevControl {
     ###################################################################
     ####                      public procs                         ####
 
+    # Check in the file associated with a File object.
+    proc checkIn {object} {}
+
+    # Check out the file associated with a File object.
+    proc checkOut {object} {}
+
     # Return 1 if the given file is under revision control, 0 otherwise.
     proc isUnderRevControl {file} {return 0}
 
@@ -89,17 +95,29 @@ class ::tycho::RevControl {
     # Setup revision control for an editor.
     proc setup {editorWin editorObj} {}
 
+    # Return the revision control class controlling a File object.
+    proc whichRevClass {obj} {}
+
     ###################################################################
     ####                   protected methods                       ####
 
     # Enable one of "checkin" or "checkout" buttons and make it the default.
-    method enableButton {button}
+    protected method enableButton {button}
 
     # Return 1 if the file is checked out, 0 otherwise.
-    method isCheckedOut {} {return 0}
+    protected method isCheckedOut {} {return 0}
+
+    # Update the history information, if it is on display.
+    protected method updateHistory {}
+
+    ###################################################################
+    ####                  protected procs                          ####
 
     # Change to the given directory with appropriate error checks.
-    protected method cdDir {dir}
+    protected proc cdDir {dir} {}
+
+    # Query the user for comments (to be used on checkin).
+    protected proc getComments {} {}
 
     ###################################################################
     ####                  protected variables                      ####
@@ -112,7 +130,6 @@ class ::tycho::RevControl {
 
     # The file that we are associated with.
     protected variable file {}
-
 }
 
 #########################################################################
@@ -144,8 +161,8 @@ configbody ::tycho::RevControl::object {
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
 
-    addButton checkin -text "Checkin" -command "$this checkIn"
-    addButton checkout -text "Checkout" -command "$this checkOut"
+    addButton checkin -text "Checkin" -command "$this checkInAndUpdate"
+    addButton checkout -text "Checkout" -command "$this checkOutAndUpdate"
     addButton history -text "History" -command "$this viewHistory"
     addButton unedit -text "Unedit" -command "$this unedit"
     addButton cancel -text "Close <Esc>" -command \
@@ -155,25 +172,34 @@ body ::tycho::RevControl::constructor {args} {
 }
 
 ###################################################################
-#### checkIn
-# Check in the file associated with this class.
+#### checkInAndUpdate
+# Check in the file, update the state of the control buttons,
+# and update the history information, if it is being viewed.
 #
-body ::tycho::RevControl::checkIn {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
-    if [$object isModified] {
-	if [::tycho::askuser "Save modifications before checking in?"] {
-	    $object save 
-	}
-    }
+body ::tycho::RevControl::checkInAndUpdate {} {
+    # Procs are not virtual. Itcl bug?
+    [info class]::checkIn $object
+    enableButton checkout
+    updateHistory
 }
 
 ###################################################################
-#### checkOut
-# Check out the file associated with this class.
+#### checkOutAndUpdate
+# Check out the file, update the state of the control buttons,
+# and update the history information, if it is being viewed.
 #
-body ::tycho::RevControl::checkOut {} {
+body ::tycho::RevControl::checkOutAndUpdate {} {
+    # Procs are not virtual. Itcl bug?
+    [info class]::checkOut $object
+    enableButton checkin
+    updateHistory
+}
+
+###################################################################
+#### initializeRevControl 
+# Put the file under revision control.
+#
+body ::tycho::RevControl::initializeRevControl {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
@@ -196,6 +222,50 @@ body ::tycho::RevControl::unedit {} {
     }
 }
 
+
+###################################################################
+###################################################################
+####                     public procs                          ####
+
+###################################################################
+#### checkIn
+# Check in the file associated with a File object.
+#
+body ::tycho::RevControl::checkIn {object} {
+    if {$object == {}} {
+        error "No object specified for check in"
+    }
+    if {![$object isa ::tycho::File]} {
+        error "Cannot check in object $object: Not a ::tycho::File."
+    }
+    set file [$object filename]
+    if {$file == {}} {
+	error "checkIn: no file associated with the object $object"
+    }
+    if [$object isModified] {
+	if [::tycho::askuser "Save modifications before checking in?"] {
+	    $object save 
+	}
+    }
+}
+
+###################################################################
+#### checkOut
+# Check out the file associated with a File object.
+#
+body ::tycho::RevControl::checkOut {object} {
+    if {$object == {}} {
+        error "No object specified for check out"
+    }
+    if {![$object isa ::tycho::File]} {
+        error "Cannot check out object $object: Not a ::tycho::File."
+    }
+    set file [$object filename]
+    if {$file == {}} {
+	error "checkOut: no file associated with the object $object"
+    }
+}
+
 ###################################################################
 #### makeRev
 # Make a revision control object of the specified type.
@@ -206,7 +276,7 @@ body ::tycho::RevControl::unedit {} {
 body ::tycho::RevControl::makeRev {type editorWin editorObj} {
     # Create a revision control window
     uplevel #0 " \
-	    ::tycho::RevControl$type $editorWin.revcontrol \
+	    $type $editorWin.revcontrol \
 	    -object $editorObj \
 	    -geometry +0+0 \
 	    -before $editorWin"
@@ -229,17 +299,8 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
     }
 
     set pref [option get . revisionControlTypes Tycho]
-    set currentFile [$editorObj filename]
-    set revclass {}
+    set revclass [whichRevClass $editorObj]
 
-    # Step through possible revision control systems and determine
-    # whether they control the file.
-    foreach type $pref {
-	if [::tycho::RevControl$type::isUnderRevControl $currentFile] {
-	    set revclass "$type"
-	    break
-	}
-    }
     # If the file is not under revision control, query the user
     # for permission to put it under revision control.
     if {$revclass == {}} {
@@ -251,7 +312,8 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	set default {}
 	foreach type $pref {
 	    $dlg addButton $type -text "Yes ($type)" -command \
-		    [code "::tycho::RevControl::makeRev $type $editorWin \
+		    [code "::tycho::RevControl::makeRev \
+                    ::tycho::RevControl$type $editorWin \
 		    $editorObj; delete object $dlg"]
 	    if {$default == {}} {
 		$dlg default $type
@@ -265,6 +327,35 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	::tycho::RevControl::makeRev $revclass $editorWin $editorObj
     }
 }
+
+###################################################################
+#### whichRevClass
+# Return the name of a suitable revision control class if the object is
+# under revision control. Otherwise, return an empty string.  The
+# object must be a ::tycho::File object.
+#
+body ::tycho::RevControl::whichRevClass {obj} {
+    if {![$obj isa ::tycho::File]} {
+        error "Cannot check revision control for $obj: Not a ::tycho::File."
+    }
+    set pref [option get . revisionControlTypes Tycho]
+    set filename [$obj filename]
+    set revclass {}
+
+    # Step through possible revision control systems and determine
+    # whether they control the file.
+    foreach type $pref {
+	if [::tycho::RevControl$type::isUnderRevControl $filename] {
+	    set revclass "::tycho::RevControl$type"
+	    break
+	}
+    }
+    return $revclass
+}
+
+###################################################################
+###################################################################
+####                     protected methods                     ####
 
 ###################################################################
 #### enableButton
@@ -284,18 +375,17 @@ body ::tycho::RevControl::enableButton {button} {
     }
 }
 
-###################################################################
-#### initializeRevControl 
-# Put the file under revision control.
-#
-body ::tycho::RevControl::initializeRevControl {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
+#####################################################################
+#### updateHistory
+# Update the history information, if it is on display.
+# This does nothing in the base class.
+# 
+body ::tycho::RevControl::updateHistory {} {
 }
 
-    ###################################################################
-    ####                   protected methods                       ####
+###################################################################
+###################################################################
+####                     protected procs                       ####
 
 #####################################################################
 #### cdDir
@@ -307,5 +397,18 @@ body ::tycho::RevControl::cdDir {dir} {
     } else {
 	error "The directory \"$dir\" is not writable."
     }
+}
+
+#####################################################################
+#### 
+# Open a dialog box to query the user for comments.
+# 
+body ::tycho::RevControl::getComments {} {
+    set list [::tycho::DialogWindow::newModal EntryQuery \
+	    [::tycho::autoName .getcomment] \
+	    -queries {{body {Comment:} {} 5}}  \
+	    -entrywidth 60]
+    set comments [lindex [lindex $list 0] 1]
+    return [join [split $comments "\n"] "\\\n"]
 }
 
