@@ -54,10 +54,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
                 inverse discrete Fourier transform ]
   Description [ Replace data by its discrete Fourier transform, if
                 isign is input as 1, or by its inverse discrete
-		Fourier transform, if "isign" is input as -1. "data'"
+		Fourier transform, if "isign" is input as -1. "data"
 		is a complex array of length "nn", input as a real
-		array data[0..2*nn-1]. "nn" MUST be an integer power
-		of 2 (this is not checked for!?)
+		array data[0..2*nn-1\]. "nn" MUST be an integer power
+		of 2 (this is not checked for!?) ]
   SideEffects []
 ******************************************************************************/
 /*
