@@ -377,7 +377,7 @@ StringList MathematicaIfc::ReadPacketContents(MLINK linkp) {
 //
 int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
     int returnType = ILLEGALPKT;
-    InfString completeReturnString, outputString;
+    InfString completeReturnString = "", outputString = "";
 
     // Set the output buffer to an empty string
     SetOutputBuffer("");
