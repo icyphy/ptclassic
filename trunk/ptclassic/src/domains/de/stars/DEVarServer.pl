@@ -47,7 +47,7 @@ service any events waiting in its queue.
     constructor
     {
 	// state is no longer constant
-	serviceTime.clearAttributes(A_CONSTANT);
+	serviceTime.clearAttributes(A_CONSTANT|A_SETTABLE);
     }
 
     go
