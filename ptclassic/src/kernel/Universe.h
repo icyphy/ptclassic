@@ -65,9 +65,6 @@ public:
 	// initialize and/or generate schedule
 	virtual void initTarget();
 
-	// run, until stopping condition
-	int run();
-
 	// set the stopping condition.  A hack.
 	virtual void setStopTime(double stamp);
 
@@ -84,6 +81,9 @@ public:
 	Target* myTarget() const { return pTarget; }
 
 protected:
+	// run, until stopping condition
+	int run();
+
 	const char* type;
 	Galaxy* galP;
 
@@ -91,7 +91,6 @@ protected:
 	void setMyTarget(Target* t) { pTarget = t; }
 private:
 	Target* pTarget;
-	void wrapupGal (Galaxy& g);
 };
 
 	//////////////////////////////
