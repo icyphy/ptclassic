@@ -603,6 +603,7 @@ body ::tycho::Query::lines {tag label default lines args} {
 
     # Correct for the fact that the text widget grabs the focus.
     after 1000 [list catch "$this focusin"]
+    return {}
 }
 
 #####################################################################
