@@ -103,7 +103,7 @@ public:
 	virtual void registerTemp(const char*, const char*);
 
 	// Register the State reference.
-	virtual void registerState(State*, int=-1, int=-1);
+	virtual void registerState(State*, const char*, int=-1, int=-1);
 
 	// Register PortHole reference.
 	virtual void registerPortHole(VHDLPortHole*, int=-1);

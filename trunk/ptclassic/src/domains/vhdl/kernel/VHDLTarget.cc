@@ -446,7 +446,7 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
       if (p->isItInput()) {
 	// Create temporary StringLists so as to allow
 	// safe (const char*) casts.
-	StringList sym,sl = sanitizedFullName(*p);
+	StringList sym,sl = sanitize(p->name());
 	sym << symbol(sl);
 	p->setGeoName(sym);
       }
@@ -460,8 +460,8 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
       if (p->isItOutput()) {
 	// Create temporary StringLists so as to allow
 	// safe (const char*) casts.
-	StringList sl = sanitizedFullName(*p);
-	p->setGeoName(savestring(sl));
+	StringList sl = sanitize(p->name());
+	p->setGeoName(symbol(sl));
       }
     }
   }
@@ -542,10 +542,9 @@ void VHDLTarget :: wrapAround(StringList* codeList) {
 }
 
 // Register the State reference.
-void VHDLTarget :: registerState(State* state, int /*thisFiring =-1*/,
-				 int pos/*=-1*/) {
-  StringList temp = sanitizedFullName(*state);
-  StringList ref = sanitize(temp);
+void VHDLTarget :: registerState(State* state, const char* varName,
+				 int /*thisFiring =-1*/, int pos/*=-1*/) {
+  StringList ref = varName;
   StringList initVal;
 
   if (pos >= 0) {
