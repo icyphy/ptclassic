@@ -18,6 +18,10 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
 		name { neg }
 		type { fix }
  	}
+	output {
+		name { output }
+		type { fix }
+	}
         state  {
                 name { inputNum }
                 type { int }
@@ -25,10 +29,6 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
                 desc { input#() }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
-	output {
-		name { output }
-		type { fix }
-	}
         codeblock(main) {
         move    $ref(pos),a
         }
@@ -41,14 +41,14 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
         }
 
 	go {
-                gencode(main);
-                for (int i = 1; i <= neg.numberPorts(); i++) {
-                        inputNum=i;
-                        gencode(loop);
-                }
-                gencode(done);
+		gencode(main);
+		for (int i = 1; i <= neg.numberPorts(); i++) {
+			inputNum = i;
+			gencode(loop);
+		}
+		gencode(done);
 	}
 	execTime {
-                return 2*int(neg.numberPorts()) +2;
-       }
+		return 2 * int  (neg.numberPorts()) + 2;
+	}
 }
