@@ -123,6 +123,19 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
 
+# Matlab settings
+# Matlab is installed if the matlabRootDir script returns an non-empty string
+# -- If Matlab is not installed, then set MATLABDIR to
+#    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
+# -- If Matlab is installed, then set MATLABDIR accordingly
+#    and set MATLABEXT_LIB to the external library directory
+MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+ifeq ($MATLABDIR,)
+MATLABDIR= $(ROOT)/src/compat/matlab
+else
+MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+endif
 
 # Library switches reqd by stars for a ptiny ptolemy. Note that we don't
 # include the sdf image stars.  Need -lImage for the de ATM stars
@@ -218,19 +231,5 @@ CP_LIBFILES= $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libcpipstars.$(LIBSUFFIX) $(LIBDIR)/libcp.$(LIBSUFFIX)
 LWP_LIBS= -llwpthread -llwp
 LWP_LIBFILES= $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
-endif
-
-# Matlab settings
-# Matlab is installed if the matlabRootDir script returns an non-empty string
-# -- If Matlab is not installed, then set MATLABDIR to
-#    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
-# -- If Matlab is installed, then set MATLABDIR accordingly
-#    and set MATLABEXT_LIB to the external library directory
-MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-ifeq ($MATLABDIR,)
-MATLABDIR= $(ROOT)/src/compat/matlab
-else
-MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
-MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 endif
 
