@@ -1,5 +1,5 @@
 defstar {
-	name { RaisedCos }
+	name { RaisedCosine }
 	domain { CG56 }
 	derivedFrom { FIR }
 	desc {
