@@ -55,6 +55,7 @@ SRCS= \
  SDFComplexReal.pl \
  SDFComplexSum.pl \
  SDFCompress.pl \
+ SDFConvolve.pl \
  SDFCos.pl \
  SDFCut.pl \
  SDFCxDiff.pl \
