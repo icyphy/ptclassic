@@ -2,12 +2,11 @@ defstar {
   name { CxToFloat_M }
   domain { SDF }
   desc {
-    Takes an input ComplexMatrix and converts it to an FloatMatrix.  This
-    is done by using the cast conversion method of the ComplexMatrix class.
-    The conversion results in an FloatMatrix that has entries which are the
-    absolute value of each corresponding entry of the 
-    ComplexMatrix being converted.  
-    I.e. FloatMatrix.entry(i) = abs(ComplexMatrix.entry(i))
+Take an input ComplexMatrix and convert it to an FloatMatrix.  This
+is done by using the cast conversion method of the ComplexMatrix class.
+The conversion results in an FloatMatrix that has entries which are the
+absolute value of each corresponding entry of the ComplexMatrix being converted,
+i.e. FloatMatrix.entry(i) = abs(ComplexMatrix.entry(i)).
   }
   version { $Id$ }
   author { Mike J. Chen }

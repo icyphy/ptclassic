@@ -2,12 +2,12 @@ defstar {
   name { FixToCx_M }
   domain { SDF }
   desc {
-    Takes an input FixMatrix and converts it to an ComplexMatrix.  This
-    is done by using the cast conversion method of the FixMatrix class.
-    The conversion results in a ComplexMatrix that has entries which have
-    real values which are the double of each corresponding entry of the
-    FixMatrix and 0 imaginary values.
-    I.e. ComplexMatrix.entry(i) = double(FixMatrix.entry(i))
+Take an input FixMatrix and convert it to an ComplexMatrix.  This
+is done by using the cast conversion method of the FixMatrix class.
+The conversion results in a ComplexMatrix that has entries which have
+real values which are the double-precision representation of each
+corresponding entry of the FixMatrix, with 0 imaginary values.
+I.e. ComplexMatrix.entry(i) = double(FixMatrix.entry(i)).
   }
   version { $Id$ }
   author { Mike J. Chen }

@@ -2,11 +2,11 @@ defstar {
   name { FixToFloat_M }
   domain { SDF }
   desc {
-    Takes an input FixMatrix and converts it to an FloatMatrix.  This
-    is done by using the cast conversion method of the FixMatrix class.
-    The conversion results in a FloatMatrix that has entries which are
-    the double of each corresponding entry of the FixMatrix.
-    I.e. FloatMatrix.entry(i) = double(FixMatrix.entry(i))
+Takes an input FixMatrix and converts it to an FloatMatrix.  This
+is done by using the cast conversion method of the FixMatrix class.
+The conversion results in a FloatMatrix that has entries which are
+the double-precision representation of each corresponding entry of
+the FixMatrix.  I.e. FloatMatrix.entry(i) = double(FixMatrix.entry(i)).
   }
   version { $Id$ }
   author { Mike J. Chen }

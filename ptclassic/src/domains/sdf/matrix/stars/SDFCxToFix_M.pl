@@ -2,10 +2,10 @@ defstar {
   name { CxToFix_M }
   domain { SDF }
   desc {
-    Takes an input ComplexMatrix and converts it to an FixMatrix.  This
-    is done by constructing a new FixMatrix with the given precision.
-    Each entry of the ComplexMatrix is cast using the given masking function
-    and then copied to the new matrix.
+Take an input ComplexMatrix and convert it to an FixMatrix.  This
+is done by constructing a new FixMatrix with the given precision.
+Each entry of the ComplexMatrix is cast using the given masking function
+and then copied to the new matrix.
   }
   version { $Id$ }
   author { Mike J. Chen }

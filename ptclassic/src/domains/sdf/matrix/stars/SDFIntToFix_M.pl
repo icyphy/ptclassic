@@ -2,10 +2,10 @@ defstar {
   name { IntToFix_M }
   domain { SDF }
   desc {
-    Takes an input IntMatrix and converts it to an FixMatrix.  This
-    is done by constructing a new FixMatrix with the given precision.
-    Each entry of the IntMatrix is cast using the given masking function
-    and then copied to the new matrix.
+Take an input IntMatrix and convert it to an FixMatrix.  This
+is done by constructing a new FixMatrix with the given precision.
+Each entry of the IntMatrix is cast using the given masking function
+and then copied to the new matrix.
   }
   version { $Id$ }
   author { Mike J. Chen }

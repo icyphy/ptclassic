@@ -2,12 +2,12 @@ defstar {
   name { CxToInt_M }
   domain { SDF }
   desc {
-    Takes an input ComplexMatrix and converts it to an IntMatrix.  This
-    is done by using the cast conversion method of the ComplexMatrix class.
-    The conversion results in an IntMatrix that has entries which are the
-    int of the absolute value of each corresponding entry of the 
-    ComplexMatrix being converted.  
-    I.e. IntMatrix.entry(i) = (int)abs(ComplexMatrix.entry(i))
+Take an input ComplexMatrix and convert it to an IntMatrix.  This
+is done by using the cast conversion method of the ComplexMatrix class.
+The conversion results in an IntMatrix that has entries which are the
+int of the absolute value of each corresponding entry of the 
+ComplexMatrix being converted.  
+I.e. IntMatrix.entry(i) = (int)abs(ComplexMatrix.entry(i))
   }
   version { $Id$ }
   author { Mike J. Chen }
