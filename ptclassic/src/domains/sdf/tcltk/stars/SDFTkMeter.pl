@@ -36,6 +36,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { "1.0" }
 		desc {High end of the scale}
 	}
+	defstate {
+		name {put_in_control_panel}
+		type {int}
+		default { "YES" }
+		desc {Specify to put bars in the control panel (vs. their own window)}
+	}
 	setup {
 	    if (output.numberPorts() > 0) {
 		Error::abortRun(*this, "Outputs not supported");
@@ -54,6 +60,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 Error::abortRun(*this,"Failed to set parameter values for tcl");
                 return;
             }
+	    if(int(put_in_control_panel)) {
+	       Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
+	    } else {
+	       Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
+	    }
 	    SDFTclScript::setup();
 	}
 	constructor {
