@@ -20,6 +20,10 @@ $Id$
 // next is included so SDFStar defns don't have to.
 #include "SDFConnect.h"
 
+// The following is defined in SDFScheduler.cc -- this forces that module
+// to be included if any SDF stars are linked in.
+extern const char SDFdomainName[];
+
 	////////////////////////////////////
 	// class SDFStar
 	////////////////////////////////////
@@ -28,7 +32,7 @@ class SDFStar : public Star  {
 
 public:
 	// my domain
-	const char* domain() { return "SDF";}
+	const char* domain() { return SDFdomainName;}
 
 	// The number of repetitions of the star in a periodic
 	// schedule.  Initialized to 1 by setBlock.  Set to correct
@@ -40,19 +44,6 @@ public:
 	// many times it has scheduled a star.  This is a convenient
 	// place to do that.
 	unsigned noTimes;
-
-// The following methods are provided by the system and accessed
-// by the Scheduler
-
-	// Methods called by the Scheduler before go() and
-	//  after go(); they call methods of the same name for each
-	//  input or output PortHole
-	// They can be used to do things like get Particles from
-	//  input Geodesics, put Particles onto output Geodesics, etc.
-	// In general behavior can be different for different types
-	//  of PortHoles
-	void beforeGo();
-	void afterGo();
 
 	// Redefine method setting internal data in the Block
 	// so that various SDF-specific initilizations can be performed.
