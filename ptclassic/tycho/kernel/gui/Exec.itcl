@@ -96,7 +96,7 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
     if {$dir != {} } {
 	$execWidget configure -dir $dir
     }
-    $execWidget centerOnScreen
+    $execWidget raiseWindow
     $execWidget execProcess
     #::tycho::Dialog::wait $win
     uplevel #0 [tkwait variable $statusVariableName]
@@ -231,11 +231,11 @@ configbody ::tycho::Exec::dir {
 #### constructor
 #
 body ::tycho::Exec::constructor {args} {
+    # Create queries with an entrywidth of 60
     configure -queries [list \
-            {line commandToExec {Command to Exec:} make} \
+            {line commandToExec {Command to Exec:} make } \
             {line dirToExecFrom {Directory to Exec from:} {}} \
-            {radio autoDestroy {Close window automatically:} {Yes No} No} \
-    ]
+            {radio autoDestroy {Close window automatically:} {Yes No} No}]
 
     eval itk_initialize $args
 
@@ -264,12 +264,12 @@ body ::tycho::Exec::constructor {args} {
         } {
             keep -readonly -textwidth -background \
                     -highlightbackground -highlightcolor -selectforeground \
-                \
-                -cursor -insertbackground -textforeground -textfont \
-                -textbackground
+                    -cursor -insertbackground -textforeground -textfont \
+                    -textbackground
         }
-        pack $itk_component(history) -expand yes -fill both
-        $itk_component(history) configure -readonly 1
+        pack $itk_component(history) -expand yes -fill both \
+                -after $itk_component(querysite)
+        $itk_component(history) configure -readonly 1 -save 0
     }
 
     set statusVariableName [::tycho::autoName gExecStatus]
@@ -281,6 +281,12 @@ body ::tycho::Exec::constructor {args} {
     if {$itk_option(-autostart) != 0} {
         $this execProcess
     }
+    wm resizable $prefix 1 1
+    # NOTE: There seems to be no way to find out the actual window size at this
+    # point.  The commands "wm reqwidth" and "wm width" return 1, even after
+    # a "tkwait visibility" and an "update".  So we just set some reasonable
+    # minimum size.
+    wm minsize $prefix 10 10
 }
 
 #######################################################################
@@ -312,14 +318,6 @@ body ::tycho::Exec::destructor {} {
 # Execute a process.  If there is any output, display it.
 #
 body ::tycho::Exec::execProcess {} {
-    # Clear the history if it is present
-    if {[info exists itk_component(history)] && \
-        [winfo exists $itk_component(history)]} {
-        $itk_component(history) configure -readonly 0
-        $itk_component(history) clear
-        $itk_component(history) configure -readonly 1
-    }
-
     # If necessary, cd to the proper directory.
     set dirToExecFrom [get dirToExecFrom]
     if { $dirToExecFrom != {} } {
@@ -409,6 +407,10 @@ body ::tycho::Exec::readOrClose {fd} {
             $itk_component(history) configure -readonly 1
         }
     }
+    # Mark this unmodified when we are done so that if we destroy a
+    # parent object, we can just destroy this without being asked if we
+    # want to save.
+    $itk_component(history) markUnmodified
 }
 
     ###################################################################
