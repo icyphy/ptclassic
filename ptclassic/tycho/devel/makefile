@@ -43,12 +43,9 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
-	GanttView.itcl \
-	GanttVSM.itcl \
 	Options.tcl \
 	Preferences.itcl \
 	Runcontrol.itcl \
-	SlateView.itcl \
 	VSM.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
