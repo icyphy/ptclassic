@@ -35,8 +35,8 @@ but written from scratch.
 #pragma implementation
 #endif
 
+#include <stream.h>             // gcc-3.0: This include should be first
 #include "ComplexSubset.h"
-#include <stream.h>
 
 Complex& Complex::operator /= (const Complex& arg) {
 	// multiply by the conjugate of arg
