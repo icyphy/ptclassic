@@ -36,7 +36,7 @@ You may use tilde characters and environment variables in the directory name.
 }
 	}
 
-	hinclude { <sys/types.h>, <sys/stat.h>, "miscFuncs.h" }
+	hinclude { <sys/types.h>, <sys/stat.h>, "miscFuncs.h", "InfString.h" }
 
 	header{
 // Matlab interface library and Matlab data types (clash with COMPLEX)
@@ -85,7 +85,7 @@ extern "C" {
 	  name { nameMatlabMatrices }
 	  access { protected }
 	  type { void }
-	  arglist { "(StringList matNames[], int numMatrices, char *baseName)" }
+	  arglist { "(InfString matNames[], int numMatrices, char *baseName)" }
 	  code {
 		// generate names for Matlab versions of input matrix names
 		for ( int i = 0; i < numMatrices; i++ ) {
@@ -101,7 +101,7 @@ extern "C" {
 	  name { buildMatlabCommand }
 	  access { protected }
 	  type { void }
-	  arglist { "(StringList& commandString, StringList matlabInputNames[], int numInputs, char *matlabFunction, StringList matlabOutputNames[], int numOutputs)" }
+	  arglist { "(InfString& commandString, InfString matlabInputNames[], int numInputs, char *matlabFunction, InfString matlabOutputNames[], int numOutputs)" }
 	  code {
 		// create the command to be sent to the Matlab interpreter
 		commandString = "";
@@ -130,7 +130,7 @@ extern "C" {
 	  arglist { "(char *matlabCommand, int abortOnError)" }
 	  code {
 		// change directories to one containing the Matlab command
-		static StringList lastdirname = " ";
+		static InfString lastdirname = " ";
 
 		// Matlab does not return an error if a change directory,
 		// directory, or path command fails, so we must check
@@ -198,7 +198,7 @@ extern "C" {
 	  code {
 		killMatlab();
 
-		StringList shellCommand = "matlab "; 
+		InfString shellCommand = "matlab "; 
 		shellCommand << ((char *) options);
 		matlabEnginePtr = engOpen( ((char *) shellCommand) );
 		if ( matlabEnginePtr == 0 ) {

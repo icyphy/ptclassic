@@ -70,7 +70,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	}
 
 	// Matrix.h is from the Ptolemy kernel
-	hinclude { "Matrix.h" }
+	hinclude { "Matrix.h", "InfString.h" }
 
 	protected {
 		// Matlab (C) structures
@@ -78,8 +78,8 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		Matrix **matlabOutputMatrices;
 
 		// Ptolemy (C++) structures for Matlab calls
-		StringList *matlabInputNames;	    // array of variable names
-		StringList *matlabOutputNames;	    // array of variable names
+		InfString *matlabInputNames;	    // array of variable names
+		InfString *matlabOutputNames;	    // array of variable names
 		char *matlabCommand;
 
 		// Variables for number of inputs and outputs to this star
@@ -112,7 +112,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  if ( matlabInputNames != 0 ) {
 		    LOG_DEL; delete [] matlabInputNames;
 		  }
-		  LOG_NEW; matlabInputNames = new StringList[numInputs];
+		  LOG_NEW; matlabInputNames = new InfString[numInputs];
 		  nameMatlabMatrices( matlabInputNames,
 		  		      numInputs,
 				      (char *) MatlabInputVarName );
@@ -131,18 +131,18 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  if ( matlabOutputNames != 0 ) {
 		    LOG_DEL; delete [] matlabOutputNames;
 		  }
-		  LOG_NEW; matlabOutputNames = new StringList[numOutputs];
+		  LOG_NEW; matlabOutputNames = new InfString[numOutputs];
 		  nameMatlabMatrices( matlabOutputNames,
 		  		      numOutputs,
 				      (char *) MatlabOutputVarName );
 		}
 
 		// create the command to be sent to the Matlab interpreter
-		StringList commandString;
+		InfString commandString;
 		buildMatlabCommand(commandString, matlabInputNames, numInputs,
 				   (char *) MatlabFunction, matlabOutputNames,
 				   numOutputs);
-		LOG_NEW; matlabCommand = new char[commandString.length()];
+		LOG_NEW; matlabCommand = new char[commandString.length() + 1];
 		strcpy(matlabCommand, (char *) commandString);
 	}
 
@@ -187,7 +187,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
-		StringList errstr;
+		InfString errstr;
 		char *verbstr;
 		int fatalErrorFlag = FALSE;
 		for ( int j = 0; j < numOutputs; j++ ) {
