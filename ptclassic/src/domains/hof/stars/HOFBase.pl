@@ -18,7 +18,7 @@ The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
 	}
-	version { $Id$    %Q% }
+	version { $Id$ }
 	author { E. A. Lee  }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
