@@ -1,7 +1,7 @@
 # Makefile for Ptolemy/Tcl interpreter
 # Version identification:
 # $Id$
-# Copyright (c) 1992 The Regents of the University of California.
+# Copyright (c) 1992-1994 The Regents of the University of California.
 #                       All Rights Reserved.
 # Date of creation: 3/4/92
 # Written by: J. Buck
@@ -30,7 +30,7 @@ INCL=-I$(KERNDIR) -I$(TCL_INCDIR)
 include $(ROOT)/mk/stars.mk
 
 # libraries
-LIBS= $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS)
+LIBS= $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS) $(FLUSH_CACHE)
 
 LIBFILES=$(STAR_LIBFILES) $(LIBDIR)/libptolemy.a
 
