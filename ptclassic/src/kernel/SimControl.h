@@ -5,7 +5,8 @@
 #endif
 
 // Needed as "volatile" not defined for all compilers
-#include "compat.h" 
+// took this out as it has not yet been integrated into Ptolemy for builds
+// #include "compat.h" 
 /**************************************************************************
 Version identification:
 $Id$
@@ -56,6 +57,14 @@ and when the flag bits are checked.  It can be used as an X event loop,
 for example.  Polling functionality completed by Alan Kamas.  1/95
 
 **************************************************************************/
+#if ! defined(VOLATILE)
+#if (defined(hpux) || defined(__hpux)) && ! defined(__GNUC__)
+#define VOLATILE
+#else
+#define VOLATILE volatile
+#endif /* PTHPPA_CFRONT */
+#endif /* ! VOLATILE */
+
 
 class Star;
 class SimAction;
