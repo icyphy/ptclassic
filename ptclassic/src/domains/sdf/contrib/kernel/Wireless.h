@@ -45,7 +45,6 @@ Programmer: John S. Davis, II
 #include <ACG.h>
 #include <Uniform.h>
 
-#define PI 3.141592654
 #define LIGHT 3e8
 
 class ChannelParameters
