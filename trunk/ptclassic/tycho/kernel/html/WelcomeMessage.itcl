@@ -102,7 +102,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
     # but it is better to restrict it in the source.
     if {!$ptolemygifexists} {
 	image create photo ptolemygif \
-		-file $TYCHO/tycho/kernel/ptolemyWelcome.gif
+		-file $TYCHO/kernel/ptolemyWelcome.gif
     }
     configure -image ptolemygif
 
@@ -112,7 +112,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
 
     # Pack the introduction button.
     addButton intro -text "Introduction" -command \
-	    "::File::openContext $TYCHO/tycho/kernel/doc/introduction.html"
+	    "::File::openContext $TYCHO/kernel/doc/introduction.html"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
@@ -141,7 +141,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
 	    {limitation of liability,<br>} \
 	    {and disclaimer of warranty provisions</a>}
 
-    append html "<h1><a href=$TYCHO/tycho/kernel/doc/introduction.html>" \
+    append html "<h1><a href=$TYCHO/kernel/doc/introduction.html>" \
 	    {Introduction to Tycho</a></h1>}
 
     configure -html $html

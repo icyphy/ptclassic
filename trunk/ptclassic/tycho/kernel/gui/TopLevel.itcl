@@ -238,25 +238,30 @@ body ::tycho::TopLevel::constructor {args} {
 # remaining open windows even if the user tries to cancel the close.
 #
 body ::tycho::TopLevel::destructor {} {
-    # NOTE: It would be nice to call nextWindow here, rather than
-    # having to call it each time before invoking the destructor.
-    # However, this produces very erratic behavior.  Often, the
-    # application has lost the focus by the time the destructor
-    # gets invoked. Tk gets into a weird state.
-    $topLevelWindows remove $prefix
 
-    # Check to see whether this is the last open window.
-    # If so, exit the program.
-    if $exitflag {
-	set noMore 1
-	foreach win [$topLevelWindows elements] {
-	    if {[winfo exists $win] && [winfo ismapped $win]} {
-		set noMore 0
-		break
+    if {[info exists topLevelWindows] && \
+	    [info exists prefix] && \
+	    [info exists exitflag]} {
+	# NOTE: It would be nice to call nextWindow here, rather than
+	# having to call it each time before invoking the destructor.
+	# However, this produces very erratic behavior.  Often, the
+	# application has lost the focus by the time the destructor
+	# gets invoked. Tk gets into a weird state.
+	$topLevelWindows remove $prefix
+	
+	# Check to see whether this is the last open window.
+	# If so, exit the program.
+	if $exitflag {
+	    set noMore 1
+	    foreach win [$topLevelWindows elements] {
+		if {[winfo exists $win] && [winfo ismapped $win]} {
+		    set noMore 0
+		    break
+		}
 	    }
-	}
-	if $noMore {
-	    after 100 {::tclexit}
+	    if $noMore {
+		after 100 {::tclexit}
+	    }
 	}
     }
 }

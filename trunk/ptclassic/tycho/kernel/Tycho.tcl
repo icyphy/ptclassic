@@ -54,8 +54,8 @@ if [info exist env(PTOLEMY)] {
     set ptolemy $env(PTOLEMY)
     set PTOLEMY $env(PTOLEMY)
     if {![info exists tycho]} {
-	set tycho $ptolemy
-	set TYCHO $ptolemy
+	set tycho $ptolemy/tycho
+	set TYCHO $ptolemy/tycho
     }
 }
 
@@ -64,11 +64,11 @@ if {![info exists tycho]} {
     # See whether there is a ~ptolemy or ~ptdesign user, in that order,
     # that has tycho installed.
     if [file exists [glob ~ptolemy/tycho]] {
-	set tycho [glob ~ptolemy]
+	set tycho [glob ~ptolemy/tycho]
 	set TYCHO $tycho
     } {
 	if [file exists [glob ~ptdesign/tycho]] {
-	    set tycho [glob ~ptdesign]
+	    set tycho [glob ~ptdesign/tycho]
 	    set TYCHO $tycho
 	}
     }
@@ -79,36 +79,55 @@ if {![info exists tycho]} {
     error {To run tycho, set your environment variable TYCHO to the tycho home}
 }
 
-global tychokernel
-set tychokernel $tycho/tycho/kernel
-
-# Note that it is NOT acceptable to rely on the TCL_LIBRARY
-# and TK_LIBRARY environment variables, because most other tcl
-# apps rely on them.  We have to set them here.
-
-set env(TCL_LIBRARY) $TYCHO/tcltk/itcl/lib/tcl
-set env(TK_LIBRARY) $TYCHO/tcltk/itcl/lib/tk
-set tk_library $env(TK_LIBRARY)
-
-uplevel #0 {
-    source $TYCHO/tcltk/itcl/lib/tcl/init.tcl
-    source $TYCHO/tcltk/itcl/lib/tk/tk.tcl
-    source $TYCHO/tcltk/itcl/lib/itcl/init.itcl
-    source $TYCHO/tcltk/itcl/lib/itk/init.itk
+# If the ptolemy variables are not yet set, set them relative to tycho.
+if {![info exists ptolemy]} {
+    set ptolemy $tycho/..
+    set PTOLEMY $ptolemy
 }
 
+global tychokernel
+set tychokernel $tycho/kernel
+
+# Note that it is NOT normally acceptable to rely on the TCL_LIBRARY
+# and TK_LIBRARY environment variables, because most other tcl
+# apps rely on them.  We have to set them here.  However, if Tycho
+# is distributed without Ptolemy, we don't know where the libraries
+# are, so we have no choice but to rely on the previously set values
+# of these variables.  In this case, we assume that we are running
+# under itkwish, and therefore the initialization files have already
+# been sourced.
+
+if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
+    set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
+    set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
+    set tk_library $env(TK_LIBRARY)
+    
+    uplevel #0 {
+	source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
+	source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
+	source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
+	source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+    }
+}
 uplevel #0 {
     source $tychokernel/Lib.tcl
 }
 
-# FIXME: The following should be handled by auto-loading.
-uplevel #0 {
-    source $TYCHO/tycho/html_library/html_library.tcl
+# FIXME: We need a way to disable this for loading from within Ptolemy,
+# where this welcome window would be redundant.
+::tycho::welcomeMessage
+
+if [file readable [glob ~/.tycho]] {
+    source [glob ~/.tycho]
 }
 
-# FIXME: The following should be optional, depending on command-line args.
-uplevel #0 {::tycho::Console .mainConsole \
-	-master 1 -text "Welcome to Tycho\n" -geometry +0+0}
-wm deiconify .mainConsole
+foreach file $argv {
+    File::openContext $file
+}
 
-::tycho::welcomeMessage
+# If there are no command-line arguments, open a console window
+if {$argv == {}} {
+    uplevel #0 {::tycho::Console .mainConsole \
+	    -master 1 -text "Welcome to Tycho\n" -geometry +0+0}
+    wm deiconify .mainConsole
+}
