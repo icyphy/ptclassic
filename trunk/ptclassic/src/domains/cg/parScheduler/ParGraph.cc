@@ -173,12 +173,12 @@ int ParGraph::SetNodeSL(ParNode* aNodep) {
 				level = temp;
 		}
 		desciter.reset();
-		level += aNodep->myExecTime();	   // Add runtime of node
+		level += aNodep->getExTime();	   // Add runtime of node
 		aNodep->assignSL(level);  // Assign StaticLevel
 
 		// update global parameter.
 		nodeCount++;
-		ExecTotal += aNodep->myExecTime();
+		ExecTotal += aNodep->getExTime();
 	}
 	aNodep->resetVisit();
 	return level;
@@ -290,7 +290,7 @@ int ParGraph :: pairDistance() {
   in the graph. It is tricky how to implement IPC across the delay
 
 		int temp = p->getStart()->getScheduledTime() +
-               p->getStart()->myExecTime() - p->getDest()->getScheduledTime();
+               p->getStart()->getExTime() - p->getDest()->getScheduledTime();
 		if (temp > distance) distance = temp;
 */
 	}

@@ -113,7 +113,7 @@ StringList ParNode::print() {
 	out += " (level = ";
 	out += StaticLevel;
 	out += ", execution time = ";
-	out += myMaster()->myExecTime();
+	out += exTime;
 	out += ")\n";
 	return out;
 }
