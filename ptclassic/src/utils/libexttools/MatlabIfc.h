@@ -43,13 +43,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "StringList.h"
 #include "InfString.h"
+#include "Particle.h"
+#include "Matrix.h"
 #include "MatlabIfcFuns.h"
 
-#define MATLAB_BUFFER_LEN        1023
 #define MATLAB_ERR_STR           "\x07???"
-
-#define MXCOMPLEX 1
-#define MXREAL 0
 
 // Matlab limits filenames to 20 characters (base name + ".m")
 // Therefore, Matlab functions must have 18 or fewer characters
@@ -71,12 +69,19 @@ public:
 	const char* SetScriptDirectory(const char* dir);
 	const char* SetFigureHandle(const char* handle);
 	const char* SetMatlabCommand(const char* command);
+	char* SetOutputBuffer(char *buffer, int bufferlen);
 
 	// get data members
 	int GetDeleteFigures();
 	const char* GetScriptDirectory();
 	const char* GetFigureHandle();
 	const char* GetMatlabCommand();
+	char* GetOutputBuffer();
+	int GetOutputBufferLength();
+
+	// get static members
+	Engine* GetCurrentEngine();
+	int GetMatlabIfcInstanceCount();
 
 	// setup functions
 	void NameMatlabMatrices(char *matNames[],
@@ -109,6 +114,15 @@ public:
 	int CloseMatlabFigures();
 	int KillMatlab();
 
+	// convert Ptolemy particles to Matlab matrices
+	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
+				int *errflag);
+
+	// convert Matlab matrices to Ptolemy particles
+	int MatlabToPtolemy(Particle &particle, DataType portType,
+			    Matrix* matlabMatrix, const char* matrixId,
+			    int *errflag);
+
 private:
 	// indicate whether or not to delete created figures upon destruction
 	int deleteFigures;
@@ -117,7 +131,8 @@ private:
 	char* scriptDirectory;
 
 	// place to put the first N output characters from Matlab
-	char matlabOutputBuffer[MATLAB_BUFFER_LEN + 1];
+	char* matlabOutputBuffer;
+	int matlabOutputBufferLen;
 
 	// name attached to Matlab figures
 	StringList matlabFigureHandle;
