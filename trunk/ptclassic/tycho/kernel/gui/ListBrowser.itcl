@@ -68,6 +68,7 @@ option add *ListBrowser.entryfont \
 # The ListBrowser object performs automatic completion of partial entries
 # and pattern matching on entries.  See the
 # <a href="doc/ListBrowserHelp.html">help page</a>.
+# It is not case sensitive in its matching.
 #
 class ::tycho::ListBrowser {
     inherit ::tycho::EntryQuery
@@ -313,14 +314,15 @@ body ::tycho::ListBrowser::complete {} {
 	scroll 1 selection
 	return
     }
-    set pattern "[get entry]*"
+    set pattern [string tolower "[get entry]*"]
     set index 0
     set foundone 0
     set firstone -1
     set foundtwo 0
     $itk_component(listbox) selection clear 0 end
     foreach name [$itk_component(listbox) get 0 end] {
-	if [string match $pattern $name] {
+	set nm [string tolower $name]
+	if [string match $pattern $nm] {
 	    if $foundone {
 		set foundtwo 1
 	    }
@@ -344,12 +346,15 @@ body ::tycho::ListBrowser::complete {} {
 	set uselastpattern 1
 	bell
     }
+    # The two commands below attempt to put the entire range in view,
+    # but if this is not possible, preference is given to the first match.
+    $itk_component(listbox) see $index
     $itk_component(listbox) see $firstone
     if {$firstone > 0} {
 	set scrollposition [expr $firstone-1]
     } {
 	set scrollposition 0
-    }	
+    }
 }
 
 ######################################################################
@@ -398,6 +403,7 @@ body ::tycho::ListBrowser::select {name} {
 	delete object $this
 	return
     }
+
     set closing 0
 }
 
@@ -456,7 +462,9 @@ body ::tycho::ListBrowser::scroll {num what} {
 #### processItem
 # This procedure checks and processes the user selection. If it return 1,
 # then the ListBrowser is destroyed.  If it returns 0, then it is not
-# destroyed.
+# destroyed.  Note that if processItem aborts with an error, then
+# the list browser is disabled.  Thus, unless the error is fatal,
+# processItem should just issue a message and return 0.
 #
 body ::tycho::ListBrowser::processItem {item} {
     execCommand -command $item
