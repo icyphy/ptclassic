@@ -36,22 +36,21 @@ LIB=libvhdlstars.$(LIBSUFFIX)
 PL_SRCS=\
  VHDLAdd.pl \
  VHDLBlackHole.pl \
- VHDLRamp.pl \
- VHDLRampInt.pl \
- VHDLInhomogeneous.pl \
+ VHDLCos.pl \
+ VHDLExp.pl \
  VHDLFIR.pl \
  VHDLFIRInt.pl \
- VHDLFIR4.pl \
- VHDLLMS.pl \
- VHDLQuant.pl \
- VHDLSub.pl \
  VHDLFork.pl \
- VHDLCos.pl \
- VHDLSin.pl \
- VHDLExp.pl \
- VHDLMpy.pl \
  VHDLGain.pl \
+ VHDLInhomogeneous.pl \
+ VHDLLMS.pl \
+ VHDLMpy.pl \
  VHDLPolarToRect.pl \
+ VHDLQuant.pl \
+ VHDLRamp.pl \
+ VHDLRampInt.pl \
+ VHDLSin.pl \
+ VHDLSub.pl \
  VHDLXgraph.pl \
  VHDLXYgraph.pl \
 
