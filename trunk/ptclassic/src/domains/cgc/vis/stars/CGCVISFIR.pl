@@ -4,7 +4,7 @@ defstar {
 	version { $Id$ }
 	author { William Chen, John Reekie, and Edward Lee}
 	copyright {
-Copyright (c) 1996-1996 The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
