@@ -230,8 +230,7 @@ proc tychoStandardDAG {} {
             [file join typt kernel ] \
             [file join lib idx ] \
             [file join lib tydoc ] \
-            [file join lib util ] \
-            [file join lib widgets ] \
+            [file join lib util ]
     ]
 
     foreach dir $dirs {
