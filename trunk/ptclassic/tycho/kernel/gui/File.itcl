@@ -584,7 +584,8 @@ body ::tycho::File::evaluate {} {
 # This should be redefined in derived classes.
 #
 body ::tycho::File::help {} {
-    ::tycho::File::openContext doc/FileHelp.html
+    global TYCHO
+    ::tycho::File::openContext $TYCHO/doc/FileHelp.html
 }
 
 #####################################################################
