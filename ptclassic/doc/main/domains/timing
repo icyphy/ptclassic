@@ -3,9 +3,9 @@
 .pp
 \*(PT can support an effectively unlimited number of different
 domains since adding a new domain does not affect any existing
-implementation of other domains as well as kernels.
+implementation of other domains as well as the kernel.
 The domain interface should take care of timing relations between
-the outer and inner domains. Timing management is the most 
+the outer and  the inner domains. Timing management is the most 
 .IE "timing management"
 challenging task in the design of
 .c Wormhole s
@@ -43,7 +43,7 @@ does not have the concept of time.  If an untimed domain resides in a
 then the \fIcurrentTime\fR of the domain is simply the copy of the
 \fIcurrentTime\fR of the outer domain.
 There are four combinations of timed and untimed domains.  For each
-combination, we will show how to do timing management with \fIcurrentTime\fR.
+combination, we will show how to do timing management.
 .H2 "Untimed Domain in Untimed Domain
 .pp
 The first combination is the simplest in timing management : 
@@ -51,30 +51,34 @@ an untimed domain contains another untimed domain.
 For example, a DDF domain may contain a SDF domain.  If a system has only
 a small part of non-deterministic behavior and others of
 deterministic behaviour, the entire application is a DDF domain.
-But by defining the deterministic parts as
+But, by defining the deterministic parts as
 SDF domains and applying the compile-time scheduling for them, 
 we can improve the runtime performance of the system.
 Since the outer domain does not care the \fIcurrentTime\fR 
 of the inner domain,
-we are free to manage the \fIcurrentTIme\fR of the inner domain.
+we are free to manage the \fIcurrentTime\fR of the inner domain.
 In this case, the \fIcurrentTime\fR of the inner domain is just
 copied from that of the outer domain.  
 During the execution of the
-wormhole, the \fIcurrentTime\fR is not changed at all.  
+wormhole, the \fIcurrentTime\fR remains unchanged.  
 The stopping condition of the inner domain is given by the number of
-"iteration" of the schedule.  Refer to the individual domain 
+"iteration" of the schedule.  
+Refer to the individual domain 
 documentation (e.g. \fBSDF Domain, DDF Domain\fR, etc) to see
-what is the definition of one "iteration".  The meaning of one
+the definition of one "iteration".  The meaning of one
 .IE "iteration, scheduling"
 "iteration" is very domain specific.
 Then, the stopping condition of the inner domain is "one iteration".
+In other words, the \fIresetStopTime()\fR method of the scheduler sets the
+stopping condition with "one iteration" regardless of the actual argument of
+the method.
 .H2 "Untimed Domain in Timed Domain
 .pp
 The second possibility is that a timed domain contains an untimed domain.
 If a DE domain contains a SDF domain, it falls into this category.
 In this case, the \fIcurrentTime\fR of the inner untimed domain
 is synchronized with the \fIcurrentTime\fR of the outer timed domain
-which is the global time of the outer domain, at the beginning of the
+at the beginning of the
 execution of the 
 .c Wormhole .  
 Like the first case, the \fIcurrentTime\fR
@@ -106,7 +110,7 @@ the \fItimeScale\fR is $1.0$ by default (no scaling).
 At the beginning of the execution of the 
 .c Wormhole ,
 the \fIcurrentTime\fR of the outer domain is scaled by the \fItimeScale\fR
-of the inner domain and copied to the \fIcurrentTime\fR of the
+and copied to the \fIcurrentTime\fR of the
 inner domain.  The \fIcurrentTime\fR of the inner domain
 proceeds as the
 .c Wormhole
@@ -117,7 +121,7 @@ packets.
 A user can change the value of the
 scale factor by defining a 
 .c FloatState
-(\fItimeScale\fR) in the outermost galaxy of the timed domain.
+(\fItimeScale\fR) in the outermost galaxy of the inner timed domain.
 In the interpreter command, the following line does it :
 .(c
 (state timeScale float "10.0")
@@ -137,7 +141,8 @@ affect the previous execution.  For example, if
 $input sub 2$ is a reset input of a system, the reset event will
 affect the previous execution if it is not completed.
 Therefore, we can process the inner system at a given event
-until the next event arrives.  Unfortunately it is generally
+until the next event arrives at the other input.  
+Unfortunately it is generally
 not possible to predict when the next event will arrive.
 One possible solution is to process the
 .c Wormhole
@@ -158,13 +163,13 @@ Another approach is to process the
 until the next earliest event in the outer domain. 
 When the
 .c Wormhole
-is to be executed, we check the expected next global time by examining
+is to be executed, we check the \fIexpected\fR next global time by examining
 the next earliest event in the outer domain.  The stopping condition
 of the inner timed domain is set with the stop time equal to the
 expected next global time.  As long as the
 .c Wormhole
 does not generate any event during execution, the expected next global
-time becomes the actual next global time.  If the inner domain generates
+time becomes the \fIactual\fR next global time.  If the inner domain generates
 any output events, however, 
 they will be the next earliest events
 in the outer domain.  There is a pathological example which
@@ -179,7 +184,16 @@ output event through $output sub 2$ of the previous execution.
 Since the output event through $output sub 2$ is already produced in the
 previous execution, there is no way to correct the event.
 .pp
-Therefore, we propose the following solution.
+We can improve the previous approach as follows. 
+This approach turns out to be correct as long as the 
+.c Wormhole
+is the unique 
+.c Wormhole
+whose inner domain is timed (called timed 
+.c Wormhole ).
+Suppose that We have a  
+unique timed 
+.c Wormhole .
 At the beginning of the execution,
 we set the stop time of the
 .c Wormhole
@@ -195,24 +209,72 @@ process the
 .c Wormhole
 until the actual (not expected) next global time in the outer domain.
 This proves the correctness of our solution.
+But, if there are more than one, say two, timed
+.c Wormhole s,
+this approach also fails to work.  We have to compare the
+time stamps of the output events from the
+.c Wormhole s
+to detect the actual next global time. 
+While we are executing a 
+.c Wormhole ,
+it is not possible to determine the actual next global
+time since it is unknown before executing the other
+.c Wormhole . 
+.pp
+Finally, we have developed the following solution.  At the beginning of
+the execution, we set the stop time of the
+.c Wormhole
+with the current global time of the outer domain.
+It forces the inner domain is scheduled only at the current global time.
+The 
+.c Wormhole
+acts exactly like a functional star without delay.
 According to the scheme, the
 .c Wormhole
 may finish the execution even before the current event is completely
-processed.  The 
+processed (the domain is not deadlocked).  
+Then, the 
 .c Wormhole
-should be invoked again right before the global clock of the
-outer domain is increased as long as the
+should be invoked again to finish the previous execution. 
+The trick is to decide when we invoke the
 .c Wormhole
-contains any events.  In other words, once the
+again.
+At the end of the execution of the
+.c Wormhole,
+we find out the next event time of the inner domain and copies it to
+\fIcurrentTime\fR of the inner
+.c Scheduler .
+We also set the flag, \fIstopBeforeDeadlocked\FR, if the inner domain
+is not deadlocked.
+Then, the outer 
+.c Scheduler
+checks the flag and
+invokes the
 .c Wormhole
-is invoked, the global clocks of the inner and the outer domain
-march in parallel.  The 
+at the next event time of the inner domain, or at the arrival time
+of a new event to the
+.c Wormhole .
+Even though a new event arrives before the next event time of the inner
+domain, the inner 
+.c Scheduler
+can process the incoming event without hazards since
+the actual current time of the inner domain is less than the arrival time
+of the new event.  When the outer global clock indicates the
+next event time of the inner domain, the 
+.c Wormhole 
+is executed again at the current global time, and repeat
+this operation.
+In this approach, the inner domain can never overtake the the
+outer domain in time, which proves the correctness of the approach
+regardless of the number of timed
+.c Wormhole s
+involved.  The timed
 .c Wormhole
 forms a special class of
 .c Star s
-in a timed domain, called "process star".  The first invocation
-.IE "process star"
-of a process star is triggered by external events to the star.
+in a timed domain, called "process-star".  The first invocation
+.IE "process-star"
+of a process-star is triggered by external events to the star.
 But the further invocations are without external events until the
 star completes the execution.
 .H2 "Timed Domain in Untimed Domain
@@ -239,7 +301,7 @@ since the untimed domain contains no meaning of time.  The sole
 purpose of the state is to define the stopping condition of the
 timed domain.  A user should make sure that the 
 .c Wormhole
-does the necessary task before it reaches the stopping condition.
+does all necessary tasks before it reaches the stopping condition.
 The common approach is to set the stop time large enough so that
 the timed domain is deadlocked (meaning that there is no
 active events in the timed system) before the stop time.  Then, the

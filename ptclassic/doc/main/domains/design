@@ -34,6 +34,12 @@ For that purpose, the
 .c Scheduler\ class
 provides two methods : \fIsetup()\fR (for compile-time scheduling),
 \fIrun()\fR (for runtime scheduling).
+It also provides two different methods to specify the stopping condition for
+the domain.  If the domain is that of a
+.c Universe ,
+we call the \fIsetStopTime()\fR method.  If the domain resides in a
+.c Wormhole ,
+we call the \fIresetStopTime()\fR method, instead.
 .pp
 It may be also necessary to define domain specific
 .c Star\ class 
@@ -74,29 +80,12 @@ and the
 are two basic tools for domain interface in \*(PT.
 It is worth noting that a domain may do without the
 .c Wormhole\ class
-in the domain if the domain won't contain other domains inside and
-only be contained in them instead.
+in the domain if the domain won't contain other domains inside.
 However, the
 .c EventHorizon\ class
 is still necessary for the domain to be an inner domain of a
 .c Wormhole .
-In the kernel, the
-.c EventHorizon\ class
-has a couple of derived class. One is the
-.c ToEventHorizon\ class
-and the other is the
-.c FromEventHorizon\ class .
-.IE "ToEventHorizon"
-.IE "FromEventHorizon"
-The
-.c ToEventHorizon\ class 
-is the base class of all
-.c (domain-name)toUniversal s
-while the
-.c FromEventHorizon\ class
-is the base class of all
-.c (domain-name)fromUniversal s.
-Therefore, we have to define a pair of
+We have to define a pair of
 .c EventHorizon s
 for the new domain :
 .c (domain-name)toUniversal
@@ -109,50 +98,8 @@ can be placed in the input or output port of a
 depending on whether the domain is the inner domain of the
 .c Wormhole
 or the outer.
-.pp
-As discussed earlier in this document, the main function of
-the
-.c EventHorizon\ class
-is to transfer data packets and do timing management between two domains.  
-The
-.c (domain-name)toUniversal
-should define two basic methods : \fIgrabData()\fR, and \fIgetNextStamp()\fR.
-The \fIgrabData()\fR is in charge of data movement and
-synchronization  of two domains.  It may set the flag,
-\fIoutputBeforeDeadlocked\fR if the domain is inside the
-.c Wormhole
-and timed.  At the end of the execution of the inner domain,
-the \fIoutputBeforeDeadlocked\fR is set TRUE if the inner
-domain still has some runnable
-.c Star s
-(when the 
-.c Scheduler
-is blocked by stopping condition before the system is deadlocked).
-The \fIgetNextStamp()\fR provides the stopping condition for the
-inner timed domain.
-The
-.c (domain-name)fromUniversal
-should define again two basic methods : \fIsendData()\fR, and \fIready()\fR.
-The role of \fIsendData()\fR is similar to that of \fIgrabData()\fR.
-We may need some domain-specific features for the method.
-If the domain is the outer domain of a
-.c Wormhole
-and timed, we check the flag, \fIoutputBeforeDeadlocked\fR, of the
-counterpart
-.c (domain-name)toUniversal .
-If the flag is set TRUE, we have to regard the
-.c Wormhole
-as a process star in the outer domain.
-The ready() method provides a way to synchronize all input ports of a
-.c Wormhole .
-The more important role of this method is to define the stopping
-condition of the inner domain of a 
-.c Wormhole .
-If the inner domain is timed, it uses the \fIgetNextStamp()\fR
-method of its counterpart.
-Besides those basic methods, each
-.c EventHorizon\ class
-can provides other methods and properties if necessary.
+Look at the section three for details on
+.c EventHorizon\ class .
 .pp
 If a domain is to contain other domains, the domain must have
 .c Wormhole\ class .
