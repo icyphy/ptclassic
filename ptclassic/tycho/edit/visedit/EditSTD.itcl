@@ -1052,11 +1052,16 @@ body  ::tycho::EditSTD::transPort {option} {
     set ports($option,names)  ""
     set ports($option,types)  ""
     foreach port $ports($option) {
-	set port [string trimright $port ")"]
 	set parenIndx [string first "(" $port]
-	set portName [string range $port 0 [expr $parenIndx-1]]
-	set portType [string range $port [expr $parenIndx+1] end]
-	set portType [string toupper $portType]
+	if {$parenIndx == -1} {
+	    set portName $port
+	    set portType INT
+	} else {
+	    set port [string trimright $port ")"]
+	    set portName [string range $port 0 [expr $parenIndx-1]]
+	    set portType [string range $port [expr $parenIndx+1] end]
+	    set portType [string toupper $portType]
+	}
 	if {$portType != "INT" && $portType != "FLOAT" } {
 	    error "EditSTD: Unsupported port type $portType for $portName! "
 	}
