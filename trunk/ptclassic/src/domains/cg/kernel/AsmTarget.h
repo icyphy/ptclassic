@@ -83,6 +83,11 @@ protected:
 	StringList runCmds;
 	StringList miscCmds;
 
+	// procedure code independent of the "main" loop code.  Stars
+	// can add to this via addProcCode().  Code in this is added
+	// to myCode in the wrapup() func.
+	StringList procCode;
+
 	// methods for generating code for reading and writing
 	// wormhole ports.  Argument is the "real port" of the interior
 	// star that is attached to an event horizon.
@@ -166,6 +171,9 @@ public:
 	// commands to augment the runCmds & miscCmds StringLists
 	void  addRunCmd(const char* cmd) { runCmds += cmd;}
 	void addMiscCmd(const char* cmd) {miscCmds += cmd;}
+
+	// Add onto the procedure code
+	void addProcCode(const char* cmd) {procCode += cmd;}
 };
 
 #endif

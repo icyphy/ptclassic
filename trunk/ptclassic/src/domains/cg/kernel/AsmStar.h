@@ -134,6 +134,10 @@ protected:
 	void genRunCmd(CodeBlock&);
 	void genMiscCmd(CodeBlock&);
 
+	// Pass procedure code onto the target
+	void addProcCode(const char*);
+	void genProcCode(CodeBlock&);
+
 private:
 	// State entry list.  This stores the addresses allocated to each
 	// State.
