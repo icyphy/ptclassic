@@ -39,14 +39,22 @@ VPATH =		$(ROOT)/kernel/test
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS =
+TCL_SRCS = \
+	testDefs.tcl
+
+SIMPLE_TESTS = \
+	testCircularList.itcl \
+	testForest.itcl \
+	testGraph.itcl
+
+GRAPHICAL_TESTS = \
+	testWidgets.itcl
 
 ITCL_SRCS =	\
-  DirectedAcyclicGraph.itcl \
-  Graph.itcl \
-  Forest.itcl \
-  RCS.itcl \
-  test.tcl
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	DirectedAcyclicGraph.itcl \
+	RCS.itcl
+
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
@@ -55,7 +63,16 @@ MISC_FILES =	#rcsdir sccsdir
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-test:: $(ITCL_SRCS)
+test:: test_simple test_graphics
+
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
+		$(ITCLSH)
+
+# These tests require a graphics terminal
+test_graphics: $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -e testWidgets.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
