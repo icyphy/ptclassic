@@ -129,6 +129,9 @@ class ::tycho::Forest {
 # A leaf node is simply one with no children.
 #
 body ::tycho::Forest::add {nodename contents {parent {}}} {
+    if [info exists contentsstring($nodename)] {
+        error "Duplicate node name in forest: $nodename"
+    }
     if {$parent == {}} {
         lappend rootnames $nodename
     } {
