@@ -156,6 +156,9 @@ class ::tycho::IDoc {
     # Place a ghost handle a certain number of pixels from the actual one.
     public method ghostHandle {horizontal pixels}
 
+    # Bring up the User's Guide
+    public method help {} 
+
     # Import the main class' parents, the parents' parents, etc.
     public method inheritAll {{redisplay 1}}
 
@@ -609,6 +612,16 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
         
     }
 
+}
+
+#########################################################################
+#### help
+# Open a window with help on the IDoc widget.
+#
+body ::tycho::IDoc::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO lib tydoc doc usersGuides IDocHelp.html]
 }
 
 #######################################################################
