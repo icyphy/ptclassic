@@ -111,15 +111,15 @@ class ::tycho::EditSTD {
     protected variable portNames
 
     # Store the value used in makeIcon last time.
-    protected common makeIconSrcDir
-    protected common makeIconPaletteName
+    protected common makeIconSrcDir {$PTOLEMY/src/domains/fsm/demo}
+    protected common makeIconPaletteName "./user.pal"
 }
 
 ##########################################################################
 ####  constructor & destructor
 #
 body ::tycho::EditSTD::constructor {args} {
-    component graphics undoEnable 0
+    component graphics interactiveEnable 0
 
     # Enable items in Edit menu
     enableMenuItem "Edit Item" Edit
@@ -129,13 +129,13 @@ body ::tycho::EditSTD::constructor {args} {
 	    -command "$this editItem selected"
 
     # Add items into Special menu
-    insertMenuItem "I/O Port Names" "Smooth Toggle" Special -underline 0 \
+    insertMenuItem "I/O Port Names..." "Smooth Toggle" Special -underline 0 \
             -command "$this ioPortNames"
     insertMenuItem "Set Initial State" "Smooth Toggle" Special -underline 0 \
             -command "$this setInitialState selected"
     insertMenuSeparator "Smooth Toggle" Special
 
-    insertMenuItem "Make Icon" "Get Info" Special -underline 0 \
+    insertMenuItem "Make Icon..." "Get Info" Special -underline 0 \
             -command "$this makeIcon"
 
     # Initialize the variables.
@@ -144,12 +144,6 @@ body ::tycho::EditSTD::constructor {args} {
     # Initialize the io portNames array elements.
     set portNames(in)  ""
     set portNames(out) ""
-
-    #FIXME : makeIconSrcDir needs to be initialized to "~users/"
-    if {![info exists makeIconSrcDir]} {
-	set makeIconSrcDir {$PTOLEMY/src/domains/fsm/demo}
-	set makeIconPaletteName "./user.pal"
-    }
 
     # Setup menu hot key and mouse binding
     bind $canvas <Key-e> "$this editItem selected"
@@ -177,7 +171,7 @@ body ::tycho::EditSTD::constructor {args} {
 	tkwait window $w
     }
 
-    component graphics undoEnable 1
+    component graphics interactiveEnable 1
 }
 
 #######################################################################
@@ -241,7 +235,7 @@ body ::tycho::EditSTD::setReadOnly {bool} {
 body ::tycho::EditSTD::insertData {data} {
     if [getReadOnly] {bell; return}
     if {[catch {eval $data} msg]} {
-	error $msg
+	error "$msg "
     }
 }
 
@@ -277,9 +271,9 @@ body ::tycho::EditSTD::saveText {} {
     # Set member variables
     append text "\n### Member variables\n"
     # I/O port names
-    append text "\n### InPort names\n"
+    append text "# InPort names\n"
     append text "set portNames(in) \"$portNames(in)\"\n"
-    append text "### OutPort names\n"
+    append text "# OutPort names\n"
     append text "set portNames(out) \"$portNames(out)\"\n"
 
     # Step through all the nodes in the canvas.
@@ -335,7 +329,7 @@ body ::tycho::EditSTD::saveText {} {
     # code to set the initial state.
     set init_state_id [$canvas find withtag init_state]
     if {[llength $init_state_id] > 1} {
-	error "Internel error: more than one initial state!!!"
+	error "Internel error: more than one initial state!!! "
     } elseif {$init_state_id != ""} {
 	append text "### Initial state\n"
 	append text "\$canvas addtag init_state withtag \$node$init_state_id\n"
@@ -660,7 +654,7 @@ body ::tycho::EditSTD::insideAction {typeInfo nodeOrArc w} {
 	    # filename is a directory, then consider it as a Oct facet.
 	    if [catch {ptkOpenFacet $filename}] {
 		error "Can't open action file.\
-			This needs Ptolemy to exist."
+			This needs Ptolemy to exist. "
 	    }
 	    
 	    pvOpenWindow [ptkOpenFacet $filename]
@@ -813,7 +807,7 @@ body ::tycho::EditSTD::getInfo {} {
 body ::tycho::EditSTD::ptkCompile {} {
 
     if "![file exists $file]" {
-	error "The specified STD file doesn't exist."
+	error "The specified STD file doesn't exist. "
     }
 
     # set the name for the FSM galaxy.
@@ -864,9 +858,9 @@ body ::tycho::EditSTD::ptkCompile {} {
 	# Set initial state
 	set init_state_id [$canvas find withtag init_state]
 	if {$init_state_id == ""} {
-	    error "No initial state is specified."
+	    error "No initial state is specified. "
 	} elseif {[llength $init_state_id] > 1} {
-	    error "Only one initial state is allowed."
+	    error "Only one initial state is allowed. "
 	} else {
 	    # Setup one initial state :
 	    setstate [set star$init_state_id] isInitState YES
@@ -878,7 +872,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    set conditions ""
 	    foreach arc $nodeInfo($node,outEdges) {
 		if {![info exists edgeInfo($arc,guard)]} {
-		    error "A guard is required in each arc."
+		    error "A guard is required in each arc. "
 		} else {
 		    append conditions \"$edgeInfo($arc,guard)\"
 		}
@@ -904,7 +898,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 		    # Output by an action
 		    if { ![info exists nodeInfo($node,action)] ||\
 			    $nodeInfo($node,action) == "" } {
-			error "Output is by Action. An action is required."
+			error "Output is by Action. An action is required. "
 		    } else {
 			set action [file tail $nodeInfo($node,action)]
 			setstate [set star$node] actionOrValue $action
@@ -941,7 +935,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 			# Output by an action
 			if { ![info exists edgeInfo($arc,action)] ||\
 			    $edgeInfo($arc,action) == "" } {
-			    error "Output is by Action. An action is required."
+			    error "Output is by Action. An action is required. "
 		        } else {
 			    set action [file tail $edgeInfo($arc,action)]
 			    append actionOrValue \"$action\"
