@@ -43,6 +43,18 @@ and
 as described above for SDF stars.
 
 
+LAST RESORT
+-----------
+If the above proceedure fails for some reason, you have two choices:
+  1. You can use the "masters" program, which is documented in "The Almegest".
+     This program allows you to modify which icons are used on an
+     icon-by-icon basis.  Thus, you can identify which icon is
+     causing problems and fix it.
+  2. You can rebuild your universe or galaxy from scratch.  While
+     tedious, this may be quicker than attempting to identify and fix
+     the problem.
+
+
 PTOLEMY HOME CONVERSION
 -----------------------
 Ptolemy version 0.4 has eliminated use of the '~ptolemy' dependencies
