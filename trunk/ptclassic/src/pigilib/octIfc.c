@@ -287,14 +287,12 @@ octObject *instPtr;
     return (FALSE);
 }
 
-/* GetOrInitSogParams  1/31/89 7/11/88
+/* GetOrInitSogParams
 Get sog params if it exists or else init them first then return params.
 Inputs:
     instPtr = adr of instance object to define params for
     pListPtr = adr of an empty ParamList 
 Outputs: return = TRUE if successful, else FALSE.
-Updates: 7/7/88 = combined 2 previous functions into this one.
-Updates: 1/31/89 = handle both stars and galaxies, name change
 */
 boolean
 GetOrInitSogParams(instPtr, pListPtr)
@@ -307,21 +305,38 @@ ParamListType *pListPtr;
     prop.type = OCT_PROP;
     prop.contents.prop.name = "params";
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
-	if (IsGal(instPtr)) {
-	    ERR_IF1(!MyOpenMaster(&galFacet, instPtr, "contents", "r"));
-	    ERR_IF1(!GetFormalParams(&galFacet, pListPtr));
-	    ERR_IF1(!SetSogParams(instPtr, pListPtr));
-	    return(TRUE);
-	} else {
-	    ERR_IF1(!AutoLoadCk(instPtr));
-	    starName = AkoName(instPtr->contents.instance.master);
-	    ERR_IF1(!KcGetParams(starName, pListPtr));
-	    ERR_IF1(!SetSogParams(instPtr, pListPtr));
-	    return(TRUE);
-	}
+	/* no parameters: use default list */
+	ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
+	ERR_IF1(!SetSogParams(instPtr, pListPtr));
+	return(TRUE);
     }
     return(PStrToPList(prop.contents.prop.value.string, pListPtr));
 }
+
+/* GetDefaultParams
+Get default values of parameters.
+Inputs, Outputs: same as for GetOrInitSogParams
+*/
+boolean
+GetDefaultParams(instPtr, pListPtr)
+octObject *instPtr;
+ParamListType *pListPtr;
+{
+    if (IsGal(instPtr)) {
+	octObject galFacet;
+	ERR_IF1(!MyOpenMaster(&galFacet, instPtr, "contents", "r"));
+	ERR_IF1(!GetFormalParams(&galFacet, pListPtr));
+    }
+    else {
+	char *starName;
+	ERR_IF1(!AutoLoadCk(instPtr));
+	starName = AkoName(instPtr->contents.instance.master);
+	ERR_IF1(!KcGetParams(starName, pListPtr));
+    }
+    return TRUE;
+}
+
+
 
 /* GetOrInitDelayProp  7/11/88 5/28/88 5/27/88
 Get delay prop or if not exist, create default prop and return it.
