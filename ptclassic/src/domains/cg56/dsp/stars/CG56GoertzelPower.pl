@@ -54,14 +54,13 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	codeblock(result) {
 ; compute the power of the last Goertzel filter output z z*, where
 ; z z* = state1*state1 - state1*state2*2*cos(theta) + state2*state2
-		clr	a		b,y1	; a = 0, y1 = b = d1*state2
-		mac	x0,x0,a			; a += state1*state1
-		mac	x1,x1,a			; a += state2*state2
-		mac	-x1,y1,b		; b = -d1*state2*state1
-		add	b,a			; a += b
+; where d1 = 2 cos(theta)
+	mpyr	x0,x0,a		x1,y0	; a = state1^2, y0 = x1 = state1
+	macr	y0,y0,a		b,y1	; a += state2^2, y1 = b = d1*state2
+	macr	-x0,y1,a		; b = -d1*state2*state1
 	}
 	codeblock(saveResult) {
-		move	a,$ref(output)
+	move	a,$ref(output)
 	}
 	go {
 		// Run the Goertzel second-order IIR filter
@@ -77,6 +76,6 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		// oscillator cycles because that's the way it was done in
 		// Gabriel: they simply counted the number of instructions.
 
-		return 5 + CG56GoertzelBase::myExecTime();
+		return (4 + CG56GoertzelBase::myExecTime());
 	}
 }
