@@ -36,7 +36,7 @@
 # This class is an interface between Tycho and Octtools.  
 #
 # The Ptolemy environment uses this interface.  Eventually, this file will
-# go away, but in the meantime, we use it as a placeholder for communcation
+# go away, but in the meantime, we use it as a placeholder for communication
 # with Octtools
 #
 class ::tycho::Oct {
