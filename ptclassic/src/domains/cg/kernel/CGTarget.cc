@@ -153,7 +153,16 @@ void CGTarget::generateCode() {
 	}
 	if (SimControl::haltRequested()) return;
 	headerCode();
-	if(!allocateMemory() || !codeGenInit()) return;
+	if(!allocateMemory()) 
+	{
+		Error::abortRun(*this,"Memory allocation error");
+		return;
+	}
+	if (!codeGenInit())
+	{
+		Error::abortRun(*this,"codeGenInit error");
+		return;
+	}
 	mainLoopCode();
 	Target :: wrapup();
 	trailerCode();
