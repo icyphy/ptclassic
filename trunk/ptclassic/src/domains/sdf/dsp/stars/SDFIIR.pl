@@ -15,6 +15,9 @@ filter (XXX: or they will, when I get around to it).
     explanation {
 .PP
 This star implements a infinite-impulse response filter of arbirary order.
+The parameters of the star specify H(z), the Z-transform of an
+impulse response h(n).  The output of the star is the convolution
+of the input with h(n).
 The default coefficients give XXX.  The star does not yet have multirate
 functionality.
 .PP
