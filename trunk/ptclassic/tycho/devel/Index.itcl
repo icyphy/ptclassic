@@ -38,49 +38,28 @@
 # array can have options as well as a value. For example, you
 # can add an entry to an array and give it some options with:
 # <pre>
-#     $dataarray add Fred "You rang?" -ingratiating never
+#     $dataarray add Foo "Hello" -bar 1
 # </pre>
 #
 # To change an option, use the entryconfigure{} method:
 # <pre>
-#     $dataarray entryconfigure Fred -ingratiating sometimes
+#     $dataarray entryconfigure Foo -bar 0
 # </pre>
 #
 # By default, a NamedData will accept any options. To limit
 # the options that will be accepted and to set the default values,
 # set the *-entryoptions* option (of the NamedData, not of an entry):
 # <pre>
-#     $dataarray configure -entryoptions {-ingratiating always -glib usually}
+#     $dataarray configure -entryoptions {-bar 0 -tar 99}
 # </pre>
 #
-# Because this class supports glob-style pattern matching in
-# many of its functions, it can be used to implement hierarchical
-# arrays (i.e. forests) with barely any extra effort. For example,
-# <pre>
-#     $dataarray add Fred.greeting "Hello!"
-#     $dataarray add Fred.farewell "See ya!"
-# </pre>
+# There are a number of methods to access the data. The 
+# simplest is get{}, which returns the value of an entry. The
+# names{} method returns the entry names that match a given 
+# glob-style pattern or regular expression. The match{} method
+# returns a list of names and patterns, and supports various
+# options to select the format of the returned list.
 #
-# Then you can find the "nested" components with, say,
-# <pre>
-#     $dataarray match Fred.*
-# </pre>
-#
-# which will return the list <code>{Fred.greeting Hello! Fred.farewell {See 
-# ya!}}</code>. To delete all the entries related to Fred, use 
-# <code>$dataarray match Fred*</code> to find the entries and use
-# *foreach* to iterate through and delete each.
-# (Note the pattern: <code>Fred*</code> not <code>Fred.*</code>. If using
-# this idea in a general setting, you should probably use an index like
-# <code>Fred._</code> instead of <code>Fred</code> for the node entry.)
-#
-# This idea is not intended to be "bullet-proof": the hierarchy
-# mechanism is quite exposed to clients. For example, a node
-# of a tree can have values and options as well as its leaves. Whether
-# and how this is used is entirely up to the client. It may be a good
-# idea to provide a more restrictive interface to an instance
-# of this class used in this way -- see the _WidgetPreferences_ class for
-# an example.
 #
 class ::tycho::NamedData {
     inherit ::tycho::Model
@@ -100,18 +79,18 @@ class ::tycho::NamedData {
     #################################################################
     ####                     public methods                      ####
 
-    # Add an entry to the array
-    method add {index data args}
-    
     # Assign new data to en existing entry
     method assign {index data}
     
     # Delete an entry
     method delete {index}
 
-    # Describe the entries matched by a pattern
-    method describe {{pattern *} args}
+    # Describe the data in the model, in the same format as write{}
+    method describe {{prefix {}}}
 
+    # Add an entry to the array
+    method entry {index data args}
+    
     # Get an option or options of an entry
     method entrycget {index option}
 
@@ -121,20 +100,20 @@ class ::tycho::NamedData {
     # Return all options of an entry
     method entryoptions {index}
     
+    # Externalize the model into a state file
+    method externalize {fd {nohistory {}}}
+    
     # Return an entry in the array
     method get {index}
-
-    # Return a list of indexes that match a pattern
-    method indexes {{pattern *} {regexpflag {}}}
 
     # Return a list of entries and values based on a pattern
     method match {pattern args}
 
+    # Return a list of indexes that match a pattern
+    method names {{pattern *} {regexpflag {}}}
+
     #################################################################
     ####                  protected methods                      ####
-
-    # Internalize a description
-    method internalize {description}
 
     # Write data to a data file and image file.
     protected method writeData {fd id}
@@ -147,6 +126,15 @@ class ::tycho::NamedData {
     
     # The options of the data values
     protected variable _optns
+    
+    #################################################################
+    ####                   private methods                       ####
+   
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args}  {
+	puts [info class]
+	eval $args
+    }
 }
 
 ########################################################################
@@ -155,43 +143,6 @@ class ::tycho::NamedData {
 body ::tycho::NamedData::constructor {args} {
     # Evaluate options
     eval configure $args
-}
-
-########################################################################
-#### add
-#
-# Add a new entry to the array. Flag an error if the entry
-# already exists. Additional arguments are the initial values
-# of entry options. Return the inverse command.
-#
-body ::tycho::NamedData::add {index data args} {
-    if { [::info exists _value($index)] } {
-	error "Data $index already exists in $dataname"
-    }
-
-    # Set options
-    if { ! $checkoptions } {
-	# If this is turned off, don't even remove duplicates
-	# from the option list. It won't matter, since the
-	# option handling code all works anyway.
-	set _optns($index) [concat $entryoptions $args]
-    } else {
-     	# Set default options then given options. Flag an error
-     	# if a given option is not in the defaults
- 	array set temp $entryoptions
- 	foreach {option value} $args {
- 	    if { ! [::info exists temp($option)] } {
- 		error "Unknown option $option in $dataname"
- 	    }
- 	    set temp($option) $value
- 	}
- 	set _optns($index) [array get temp]
-    }
-    # set value
-    set _value($index) $data
-
-    # Return the undo command
-    return [list delete $index]
 }
 
 ########################################################################
@@ -219,7 +170,7 @@ body ::tycho::NamedData::delete {index} {
     if { ! [::info exists _value($index)] } {
 	error "Unknown entry $index in $dataname"
     }
-    set inverse [list add $index $_value($index)]
+    set inverse [list entry $index $_value($index)]
     eval lappend inverse $_optns($index)
     unset _value($index)
     
@@ -229,47 +180,64 @@ body ::tycho::NamedData::delete {index} {
 ########################################################################
 #### describe
 #
-# Return a low-level "description" of the entries matching the
-# given pattern. All options are included in the result. If no
-# arguments are given, then the pattern "*" is used.
+# Return a string that describes the model. The data format is exectly
+# that generated by the write{} method -- note that it is 
+# _not_ a well-formed Tcl list. The argument, if present,
+# is a string to place at the start of each line.
 #
-# Additional flags recognized by this routine are *-regexp*, which
-# selects regular-expression matching instead of glob-style matching,
-# and *-nohistory*, which prevents the undo history from being
-# generated. Note that flags can be given only if the _pattern_
-# argument is specified too.
+body ::tycho::NamedData::describe {{prefix {}}} {
+    set result ""
+    array set default $entryoptions
+
+    foreach {entry value} [array get _value] {
+        append result $prefix "entry"
+        lappend result $entry $value
+        foreach {opt val} $_optns($entry) {
+            if { ! [::info exists default($opt)] \
+                    || $default($opt) != $val } {
+                lappend result $opt $val
+            }
+        }
+        append result "\n"
+    }
+    return $result
+}
+
+########################################################################
+#### entry
 #
-body ::tycho::NamedData::describe {{pattern *} args} {
-    set description ""
-    
-    # Add the undo history if not inhibited
-    if { [lsearch -exact $args "-nohistory"] == -1 } {
-	append description [::tycho::Model::describe $pattern]
+# Add a new entry to the array. Flag an error if the entry
+# already exists. Additional arguments are the initial values
+# of entry options. Return the inverse command.
+#
+body ::tycho::NamedData::entry {index data args} {
+    if { [::info exists _value($index)] } {
+	error "Data $index already exists in $dataname"
     }
 
-    # If the pattern is *, then do the most efficient thing
-    if { $pattern == "*" } {
-	append description "\n\n# Values of data $dataname\n\n"
-	append description "array set _value \{[array get _value]\}\n"
-	append description "\n\n# Options of data $dataname\n\n"
-	append description "array set _optns \{[array get _optns]\}\n"
-	return $description
+    # Set options
+    if { ! $checkoptions } {
+	# If this is turned off, don't even remove duplicates
+	# from the option list. It won't matter, since the
+	# option handling code all works anyway.
+	set _optns($index) [concat $entryoptions $args]
     } else {
-	# Get matching indexes.
-	if { [lsearch -exact $args "-regexp"] != -1 } {
-	    set indexes [indexes $pattern -regexp]
-	} else {
-	    set indexes [indexes $pattern]
-	}
-
-	# Add the data regeneration commands
-	append description "\n\n# Data of $dataname matching \"$pattern\"\n\n"
-	foreach index $indexes {
-	    append description "set _value($index) $_value($index)\n"
-	    append description "set _optns($index) $_optns($index)\n"
-	}
+     	# Set default options then given options. Flag an error
+     	# if a given option is not in the defaults
+ 	array set temp $entryoptions
+ 	foreach {option value} $args {
+ 	    if { ! [::info exists temp($option)] } {
+ 		error "Unknown option $option in $dataname"
+ 	    }
+ 	    set temp($option) $value
+ 	}
+ 	set _optns($index) [array get temp]
     }
-    return $description
+    # set value
+    set _value($index) $data
+
+    # Return the undo command
+    return [list delete $index]
 }
 
 ########################################################################
@@ -348,6 +316,26 @@ body ::tycho::NamedData::entryoptions {index} {
 }
 
 ########################################################################
+#### externalize
+#
+# Write the class-dependent description of the data to a file.
+# The file doesn't contain the command history only if the second
+# argument is suppliedand true.
+#
+body ::tycho::NamedData::externalize {fd {nohistory {}}} {
+    # Chain the superclass' method
+    eval chain $fd $nohistory
+
+    # Write this model's data to the file
+    puts $fd "\n\n# Values of data $dataname\n\n"
+    puts $fd "array set _value \{[array get _value]\}\n"
+    puts $fd "\n\n# Options of data $dataname\n\n"
+    puts $fd "array set _optns \{[array get _optns]\}\n"
+
+    return ""
+}
+
+########################################################################
 #### get
 #
 # Get the value of an entry. Flag an error if the entry does
@@ -361,13 +349,147 @@ body ::tycho::NamedData::get {index} {
 }
 
 ########################################################################
-#### indexes
+#### match
+#
+# Return a list of index-value pairs based on the given pattern. By
+# default, the entries in the model are matched against _pattern_
+# using glob-style matching and the returned list is a flat list of
+# name-value pairs. For example, it might return
+# <code>{first This second That}</code>. The
+# following flags can follow the pattern argument:
+# <ul>
+# <li>*-regexp*: Use regular expression matching instead of glob-style
+# matching.
+# <li>*-options*: Return a list of lists, where each sub-list is the
+# entry name, its value, and following elements are option-value
+# pairs, where options are included in the list only if they differ
+# from the defaults. If an entry has an options that has no
+# default (possible if *-checkoptions* is zero) then include it in
+# the result.
+# <li>*-alloptions*: Return a list of lists, where each sub-list is the
+# entry name, its value, and following elements are option-value
+# pairs, where all options are included in the result.
+# <li>*-withoptions* _option_ ... _option_: 
+# Return a list of lists, where each sub-list is the
+# entry name, its value, and following elements are option-value
+# pairs, where only options in the argument list are included in
+# the result. If *-alloptions* is specified, include all of the
+# options in the argument list; if not, include only those that
+# differ from the defaults. This must be the last option flag
+# in the argument list.
+# </ul>
+#
+body ::tycho::NamedData::match {pattern args} {
+    set regexp 0
+    set options "none"
+
+    # Get the option flags
+    while { $args != "" } {
+	set test [lindex $args 0]
+	set args [lreplace $args 0 0]
+	if { $test == "-regexp" } {
+	    set regexp 1
+	} elseif { $test == "-options" } {
+	    set options "different"
+	} elseif { $test == "-alloptions" } {
+	    set options "all"
+	} elseif { $test == "-withoptions" } {
+	    if { $options == "all" } {
+		set options "withalloptions"
+	    } else {
+		set options "withdifferentoptions"
+	    }
+            set requested $args
+	    set args ""
+	}
+    }
+
+    # Get the matching indexes
+    if { $regexp } {
+	set matching [names $pattern -regexp]
+    } else {
+	# Glob-style matching. Optimize for the default case
+	if { $options == "none" } {
+	    return [array get _value $pattern]
+	} else {
+	    set matching [array names _value $pattern]
+	}
+    }
+    
+    # Return the found entries with option values
+    array set default $entryoptions
+    set result {}
+    switch -exact $options {
+	"none" {
+	    # Return names and values
+	    foreach index $matching {
+		lappend result $index $_value($index)
+		append result "\n"
+	    }
+	}
+	"all" {
+	    # Return list of lists with all options
+	    foreach index $matching {
+		set partial [list $index $_value($index)]
+		eval lappend partial $_optns($index)
+                lappend result $partial
+		append result "\n"
+	    }
+	}
+	"different" {
+	    # Include options only if they differ from the default
+	    foreach index $matching {
+		set partial [list $index $_value($index)]
+		foreach {opt val} $_optns($index) {
+		    if { ! [::info exists default($opt)] \
+			    || $default($opt) != $val } {
+			lappend partial $opt $val
+		    }
+		}
+		lappend result $partial
+                append result "\n"
+	    }
+	}
+	"withalloptions" {
+	    # Include options only if they are requested
+	    foreach index $matching {
+		lappend result $index $_value($index)
+		array set temp $_optns($index)
+		foreach opt $requested {
+		    lappend partial $opt $temp($opt)
+		}
+		lappend result $partial
+		append result "\n"
+	    }
+	}
+	"withdifferentoptions" {
+	    # Include options only if they are requested and they
+	    # are different from the default
+	    foreach index $matching {
+		set partial [list $index $_value($index)]
+		array set temp $_optns($index)
+		foreach opt $requested {
+		    if { ! [::info exists default($opt)] \
+			    || $default($opt) != $temp($opt) } {
+			lappend partial $opt $temp($opt)
+		    }
+		}
+		lappend result $partial
+		append result "\n"
+	    }
+	}
+    }
+    return $result
+}
+
+########################################################################
+#### names
 #
 # Return a list of indexes based on the given pattern. The
 # *-regexp* flag following the pattern selects regular expression
 # matching instead of glob-style matching.
 #
-body ::tycho::NamedData::indexes {{pattern *} {regexpflag {}}} {
+body ::tycho::NamedData::names {{pattern *} {regexpflag {}}} {
     if { $regexpflag != "" } {
 	# Get indexes using regular expression matching
 	set result {}
@@ -381,145 +503,4 @@ body ::tycho::NamedData::indexes {{pattern *} {regexpflag {}}} {
 	# Glob-style matching
 	return [array names _value $pattern]
     }
-}
-
-########################################################################
-#### internalize
-#
-body ::tycho::NamedData::internalize {description} {
-    eval $description
-}
-
-########################################################################
-#### match
-#
-# Return a list of index-value pairs based on the given pattern. The
-# following flags can follow the pattern argument:
-# <ul>
-# <li>*-regexp*: Use regular expression matching instead of glob-style
-# matching.
-# <li>*-arrayset*: The returned list is in a form that can be given to 
-# "array set".
-# <li>*-alloptions*: If *-arrayset* is not specified, return a flat
-# list of index-value-options 
-# triples, where the third element is a flat list of option-value pairs.
-# For example, <pre>match "*" -alloptions</pre> might return
-# <pre>{first This {-x 0 -y 1} second That {-x 7 -y 4}}</pre>. If
-# *-arrayset* is specified, this would return
-# <pre>{first {This {-x 0 -y 1}} second {That {-x 7 -y 4}}}</pre>.
-# <li>*-withoptions* _option_ ... _option_: If *-arrayset* is not 
-# specified, return a flat list 
-# containing the index, value, and then the value of each of the 
-# specified options (without the option name). This must be the last
-# option specified.
-# For example, <pre>match "*" -withoptions -x</pre> would return
-# <pre>{first This 0 second That 7}</pre>. If
-# *-arrayset* is specified, this would return
-# <pre>{first {This 0} second {That 7}}</pre>.
-# </ul>
-#
-# The option testing and matching is not super-efficient, but since
-# this method is likely to be returning a large result, it probably
-# doesn't matter.
-#
-body ::tycho::NamedData::match {pattern args} {
-    set regexp 0
-    set arrayset 0
-    set alloptions 0
-    set withoptions {}
-    
-    # Get the option flags
-    while { $args != "" } {
-	set test [lindex $args 0]
-	set args [lreplace $args 0 0]
-	if { $test == "-regexp" } {
-	    set regexp 1
-	} elseif { $test == "-alloptions" } {
-	    set alloptions 1
-	} elseif { $test == "-arrayset" } {
-	    set arrayset 1
-	} elseif { $test == "-withoptions" } {
-	    set withoptions $args
-	    set args ""
-	}
-    }
-
-    # Get the matching indexes
-    if { $regexp } {
-	set matching [indexes $pattern -regexp]
-	# Might as well do the default case here
-	if { ! $alloptions && $withoptions == 0 } {
-	    set result {}
-	    foreach index $matching {
-		lappend result $index $_value($index)
-		append result "\n"
-	    }
-	    return $result
-	}
-    } else {
-	# Glob-style matching. Optimize for the default case
-	if { ! $alloptions && $withoptions == 0 } {
-	    return [array get _value $pattern]
-	}
-	set matching [array names _value $pattern]
-    }
-    
-    # Return the found indexes according to the other flags
-    set result {}
-    if { $alloptions } {
-	# Get all options with the values
-	if { $arrayset } {
-	    foreach index $matching {
-		lappend result $index [concat [list $_value($index)] \
-			[array get _optns $index@*]]
-		append result "\n"
-	    }		
-	} else {
-	    foreach index $matching {
-		lappend result $index $_value($index) \
-			[array get _optns $index@*]
-		append result "\n"
-	    }
-	}
-    } else {
-	# Return specified options only
-	if { $arrayset } {
-	    foreach index $matching {
-		lappend result $index
-		set r [list $_value($index)]
-		foreach opt $withoptions {
-		    lappend r $_optns($index@$opt)
-		}
-		lappend result $r
-		append result "\n"
-	    }		
-	} else {
-	    foreach index $matching {
-		lappend result $index $_value($index)
-		foreach opt $withoptions {
-		    lappend result $_optns($index@$opt)
-		}
-		append result "\n"
-	    }
-	}
-    }
-    return $result
-}
-
-
-########################################################################
-########################################################################
-####                     protected methods
-
-########################################################################
-#### writeData
-#
-# Write data to a data file and an image file. This extends the default
-# method to write the default options to the image file.
-#
-body ::tycho::NamedData::writeData {fd id} {
-    if { $id != "" } {
-	puts $id "set entryoptions [list $entryoptions]"
-    }
-    chain $fd $id
 }
