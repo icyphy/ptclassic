@@ -77,11 +77,11 @@ User-defined particles are supported.
 .pp
 To get started, you can use the \*(PT interactive
 graphical interface (pigi), described below, or the \*(PT
-interpreter.
+interpreter (ptcl).
 The interpreter is based on a language called Tcl, invented at Berkeley
 [Ous90].
 Thus, both a graphical and textual specification language are available.
-It is unlikely that these two user interfaces will the only
+It is unlikely that these two user interfaces will be the only
 ones developed for \*(PT.
 They are, in fact, quite distinct from the \*(PT kernel,
 precisely so that other types of user interfaces can be readily
