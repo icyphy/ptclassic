@@ -633,7 +633,6 @@ body ::tycho::SlateView::model {mode args} {
             }
 	    if [info exists _modelref($name)] {
 		uplevel #0 $_modelref($name) $object
-		puts "uplevel #0 $_modelref($name) $object"
 	    }
             set _model($name) $object
         }

@@ -105,7 +105,6 @@ body ::tycho::CTEdit::openControlPanel {graph} {
 	# Create a simulation
 	set file [filename]
 	set name [file tail [file root $file]]
-	puts "!$file $name"
 
 	# FIXME: need to be able to bring up the runwindow
 	# immediately
