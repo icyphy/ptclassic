@@ -18,7 +18,7 @@ before edge detection.  It removes inter-field flicker quite well
 when displaying single frames from a moving sequence.
 	}
 
-	ccinclude { "GrayImage.h", "UserOutput.h" }
+	ccinclude { "GrayImage.h", "UserOutput.h", <std.h> }
 
 // INPUT AND STATES.
 	input {
@@ -44,8 +44,8 @@ when displaying single frames from a moving sequence.
 	// ridiculously strict rules.
 	extern "C" {
 	static int sortUC(const void* aV,const void* bV) {
-		unsigned const char* a = aV;
-		unsigned const char* b = bV;
+		unsigned const char* a = (unsigned const char*)aV;
+		unsigned const char* b = (unsigned const char*)bV;
 		if (*a < *b) return -1;
 		else if (*a == *b) return 0;
 		else return 1;
