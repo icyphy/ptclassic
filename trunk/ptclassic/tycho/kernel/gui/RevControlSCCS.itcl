@@ -91,6 +91,9 @@ class ::tycho::RevControlSCCS {
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {}
 
+    # Return the name of the person who checked this file out
+    protected method isCheckedOutBy {}
+
     # Update the history information, if it is on display.
     protected method updateHistory {}
 
@@ -361,7 +364,6 @@ body ::tycho::RevControlSCCS::viewHistory {} {
         # Read in from the SCCS execution
 	catch {exec sccs prs $basefile} history
 
-	# Create the display
 	itk_component add history {
 	    ::tycho::Edit $itk_component(hull).history -textheight 30
 	} {
@@ -411,10 +413,41 @@ body ::tycho::RevControlSCCS::isUnderRevControl {file} {
 # Here we assume that if the file is read-only, then it is not checked out.
 # 
 body ::tycho::RevControlSCCS::isCheckedOut {} {
-    if [file writable [$object filename]] {
-	return 1
+    if {[isCheckedOutBy]=={}} {
+        return 0
     } {
-	return 0
+        return 1
+    }
+}
+
+#####################################################################
+#### isCheckedOutBy
+# Later we will get rid of isCheckedOut, and replace it with this function
+#
+body ::tycho::RevControlSCCS::isCheckedOutBy {} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    cdDir $dir
+    # Read in information list (who checked this file?)
+    catch {exec sccs info} infolist
+    set info {}
+    foreach i [split $infolist \n] {
+        if [string match "$basefile: *" $i] {
+            # Format is:
+            # ToolBar.itcl: being edited: 1.19 1.20 kchang 97/04/15 14:12:17
+            set info $i
+        }
+    }
+    cdDir $olddir
+
+    if {$info!={}} {
+        return "[lindex $info 6] [lindex $info 7], <checked out by\
+                [lindex $info 5]>"
+    } else {
+        return {}
     }
 }
 
@@ -437,12 +470,13 @@ body ::tycho::RevControlSCCS::updateHistory {} {
 #####################################################################
 #### parseHistory
 # Parse the history information and insert a synopsis into the text window.
-# 
+# History contains the entire "sccs prs" history list.
+# Info contains the status of the current file (empty means not checked out).
 body ::tycho::RevControlSCCS::parseHistory {history text} {
     set file [$object filename]
     set lines [split $history "\n"]
 
-    # FIXME:Error recovery scheme should be more complicated!
+    # FIXME: Error recovery scheme should be more complicated!
     if {[llength $lines] < 2} {
 	$text insert insert $lines
 	return
@@ -452,8 +486,6 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
     set versionColor [preference get versionColor]
 
     $text insert insert "Double click the underlined text to view versions.\n" 
-
-
 
     # Diff
     set filelist {}
@@ -482,9 +514,9 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
             -background $background -foreground $background \
             -relief flat -padx 0 -pady 0
     $text window create end -window $text.$buttonName -padx 0 -pady 0
-    $text insert insert "Current file in directory"
+    $text insert insert "Current file"
     if [isCheckedOut] {
-	$text insert insert ", <checked out>\n"
+	$text insert insert ", [isCheckedOutBy]\n"
     } else {
         $text insert insert ".\n"
     }
@@ -522,7 +554,7 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
             $text window create end -window $text.$buttonName -padx 0 -pady 0
             
             # Insert Name, Version number, etc...
-	    $text insert insert "$version $date, checked in by $user\n"
+	    $text insert insert "$version $date $time, checked in by $user\n"
 	    $text tag add v$version $start insert
 	    $text tag configure v$version -foreground $versionColor -underline 1
 	    $text tag bind v$version <Double-Button-1> \
