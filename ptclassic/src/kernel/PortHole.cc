@@ -168,9 +168,9 @@ PortHole :: printVerbose () {
 	StringList out;
 	out = GenericPort::printVerbose();
 	if (alias == NULL) {
-           if (farSidePort != NULL) {
+           if (far() != NULL) {
               out += "    Connected to port: ";
-              out += farSidePort->readFullName();
+              out += far()->readFullName();
               out += "\n";
               }
            else
@@ -203,8 +203,8 @@ PortHole :: setPlasma () {
 	// output porthole.
 	// fourth case: I'm an output, and the connected input
 	// specifies a type
-	if (farSidePort && (isItInput() || farSidePort->myPlasma))
-		myPlasma = farSidePort->setPlasma();
+	if (far() && (isItInput() || far()->myPlasma))
+		myPlasma = far()->setPlasma();
 	if (myPlasma) return myPlasma;
 	errorHandler.error ("Can't determine type of ",readFullName());
 	return 0;
@@ -240,7 +240,7 @@ void PortHole :: initialize()
 		((Particle*)*p)->initialize();
 		}
 	// If this is an output PortHole, initialize myGeodesic
-	if( isItOutput() ) myGeodesic->initialize();
+	if( isItOutput() && myGeodesic) myGeodesic->initialize();
 }
 
 void PortHole :: setMaxDelay(int delay)
