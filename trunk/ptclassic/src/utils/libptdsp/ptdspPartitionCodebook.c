@@ -1,4 +1,15 @@
-/*
+/**CFile***********************************************************************
+
+  FileName    [ ptdspPartitionCodebook.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Function definition for Ptdsp_PartitionCodebook ]
+
+  Author      [ Biling Lee and Brian Evans ]
+
+  Copyright   [ 
+
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
@@ -23,70 +34,79 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
+ ]
 
-Programmer: Biling Lee and Brian Evans
-Version: $Id$
-*/
+ Version       [ $Id$ ]
+
+******************************************************************************/
 
 #include "ptdspPartitionCodebook.h"
 
-/*
+/*---------------------------------------------------------------------------*/
+/* Definition of exported functions                                          */
+/*---------------------------------------------------------------------------*/
+
+/**Function*******************************************************************
+  Synopsis    [ Find optimum partition for fixed gain and shape codebooks ]
+  Description [ 
 Find the optimum partition of the training vector for fixed gain
 and shape codebooks, and find the squared error (squared distance)
 of this training vector. 
 
-Let X=input vector, and Si=i_th shape codeword:
+Let X=input vector, and Si=i_th shape codeword: 
 1. First find shape codeword Si to maximize X'*Si (' means transpose )
 2. Then find the j_th gain codeword gj to minimize (gj-X'*Si)^2
 3. Squared error (squared distance) is ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. 
- */
+ ]
+  SideEffects []
+******************************************************************************/
+void 
+Ptdsp_PartitionCodebook(int* theindexShape, int* theindexGain, 
+			double* thedistance, const double* trnVector, 
+			const double* shapeCodebook, int sizeShapeCodebook,
+			int dimension, const double* gainCodebook,
+			int sizeGainCodebook) {
 
-void Ptdsp_PartitionCodebook(int* theindexShape, int* theindexGain, 
-	double* thedistance, const double* trnVector, 
-	const double* shapeCodebook, int sizeShapeCodebook,
-	int dimension, const double* gainCodebook,
-	int sizeGainCodebook) {
+  int indexShape = 0;
+  int indexGain = 0;
+  int distance = 0;
+  int dim, index;
+  double shapeDistance = 0;
 
-	int indexShape = 0;
-	int indexGain = 0;
-	int distance = 0;
-	int dim, index;
-	double shapeDistance = 0;
+  for ( dim = 0; dim < dimension; dim++ )
+    shapeDistance += trnVector[dim] * shapeCodebook[dim];
 
-	for ( dim = 0; dim < dimension; dim++ )
-	    shapeDistance += trnVector[dim] * shapeCodebook[dim];
+  for ( index = 1; index < sizeShapeCodebook; index++ ) {
+    double sum = 0.0;
+    for ( dim = 0; dim < dimension; dim++ )
+      sum += trnVector[dim] * shapeCodebook[index*dimension+dim];
+    if ( sum > shapeDistance ) {
+      shapeDistance = sum;
+      indexShape = index;
+    }
+    sum = 0.0;
+  }
 
-	for ( index = 1; index < sizeShapeCodebook; index++ ) {
-	    double sum = 0.0;
-	    for ( dim = 0; dim < dimension; dim++ )
-	        sum += trnVector[dim] * shapeCodebook[index*dimension+dim];
-	    if ( sum > shapeDistance ) {
-	       shapeDistance = sum;
-	       indexShape = index;
-	    }
-	    sum = 0.0;
-	}
+  distance = gainCodebook[0] - shapeDistance;
+  distance *= distance;
+  
+  /* Now shapeDistance stores the maximum X'*Si */
+  for (index = 1; index < sizeGainCodebook; index++) {
+    double sum = gainCodebook[index] - shapeDistance;
+    sum *= sum;
+    if ( sum < distance ) {
+      distance = sum;
+      indexGain = index;
+    }
+  }
 
-	distance = gainCodebook[0] - shapeDistance;
-	distance *= distance;
-
-	/* Now shapeDistance stores the maximum X'*Si */
-	for (index = 1; index < sizeGainCodebook; index++) {
-	    double sum = gainCodebook[index] - shapeDistance;
-	    sum *= sum;
-	    if ( sum < distance ) {
-		distance = sum;
-		indexGain = index;
-	    }
-	}
-
-	/* Now distance stores the minimum (gj-X'*Si)^2 */
-	distance -= shapeDistance * shapeDistance;
-	for (dim = 0; dim < dimension; dim++) {
-	    distance += trnVector[dim] * trnVector[dim];
-	}
-
-	*theindexShape = indexShape;
-	*theindexGain = indexGain;
-	*thedistance = distance;
+  /* Now distance stores the minimum (gj-X'*Si)^2 */
+  distance -= shapeDistance * shapeDistance;
+  for (dim = 0; dim < dimension; dim++) {
+    distance += trnVector[dim] * trnVector[dim];
+  }
+  
+  *theindexShape = indexShape;
+  *theindexGain = indexGain;
+  *thedistance = distance;
 }
