@@ -2,7 +2,6 @@ defstar {
 name { XAsynchComm }
 domain { CGC }
 desc { Base star for Asynchronous CGC <-> S56X IPC }
-ccinclude { "CGCS56XTarget.h" }
 derivedFrom { XBase }
 version { $Id$ }
 author { Jose Luis Pino }
@@ -77,12 +76,6 @@ initCode {
     CGCXBase::initCode();
 }
 
-
-setup {
-    CGCS56XTarget* parent = (CGCS56XTarget*)(cgTarget()->parent());
-    if(parent) S56XFilePrefix = parent->s56xFilePrefix();
-    CGCXBase::setup();
-}
 
 wrapup {
     CGCXBase::wrapup();
