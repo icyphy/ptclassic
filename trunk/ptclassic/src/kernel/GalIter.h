@@ -46,7 +46,7 @@ public:
 	GalStarIter(Galaxy& g);
 	Star* next();
 	Star* operator++() { return next();}
-	GalAllBlockIter::reset;
+	void reset() {	GalAllBlockIter::reset();}
 
 	// need a public destructor because of private derivation
 	~GalStarIter() {}
