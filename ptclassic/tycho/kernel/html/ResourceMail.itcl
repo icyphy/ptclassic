@@ -198,6 +198,9 @@ body ::tycho::ResourceMail::close {} {
     # Initiate sending to the server
     mailinitiate
 
+    # FIXME: This should return a status of sending mail!
+    # Do a tkwait on a global variable.
+    return 0
 }
 
 #####################################################################
