@@ -34,7 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "BasePrioQueue.h"
+#include "PriorityQueue.h"
 #include "DataStruct.h"
 #include "DEStar.h"
 
