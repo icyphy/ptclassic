@@ -38,10 +38,10 @@
 # <p>
 # Here is an example of how to use the Compile:
 # <tcl><pre>
-    set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
-    $compiler configure -view foo.c
-    $compiler compileAndLoad [list foo.c]
-    delete object $compiler
+#    set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+#    $compiler configure -view foo.c
+#    $compiler compileAndLoad [list foo.c]
+#    delete object $compiler
 # </pre></tcl>
 #
 class ::tycho::CompileCTcl {
