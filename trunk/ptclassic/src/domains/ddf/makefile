@@ -25,16 +25,27 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# $Id$
+# Version: $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/ddf.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/ddf (through the symbolic
-# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
+# link) -- that way a separate directory containing, say, Solaris and HPUX
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
-
-DIRS = kernel stars
-
 ME = ddf
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
 
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+
+include $(ROOT)/mk/topdomain.mk
+
+# Subdirectories with star directories in them
+SUBDOMAINDIRS =
+
+DIRS = kernel stars $(SUBDOMAINDIRS)
+
+include $(ROOT)/mk/domain.mk

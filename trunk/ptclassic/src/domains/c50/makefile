@@ -1,5 +1,5 @@
 # Makefile for C50 domain support
-# @Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,14 +28,25 @@
 # Created: 14 April 1995
 # Version: $Id$
 #
-# Important!  Do not run this makefile while in $PTOLEMY/src/domains/cg32.
-# Instead run in from $PTOLEMY/obj.$ARCH/domains/cg32 (through the symbolic
-# link) -- that way a separate directory containing, say, sun4 or mips
+# Important!  Do not run this makefile while in $PTOLEMY/src/domains/c50.
+# Instead run in from $PTOLEMY/obj.$ARCH/domains/c50 (through the symbolic
+# link) -- that way a separate directory containing, say, Solaris and HPUX
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
-
-DIRS = kernel stars dsp targets
-
 ME = c50
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+include $(ROOT)/mk/topdomain.mk
+
+# Subdirectories with star directories in them
+SUBDOMAINDIRS =
+
+DIRS = kernel stars dsp targets $(SUBDOMAINDIRS)
+
+include $(ROOT)/mk/domain.mk
 

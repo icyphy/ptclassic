@@ -24,17 +24,25 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# $Id$
+# Version: $Id$
 #
-# Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
-# Instead run in from ~ptolemy/obj.$PTARCH/domains/cg (through the symbolic
-# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
+# Important!  Do not run this makefile while in ~ptolemy/src/domains/cg56.
+# Instead run in from ~ptolemy/obj.$PTARCH/domains/cg56 (through the symbolic
+# link) -- that way a separate directory containing, say, Solaris and HPUX
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
+ME = cg56
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+include $(ROOT)/mk/topdomain.mk
 
 SUBDOMAINDIRS = dsp
 DIRS = kernel stars $(SUBDOMAINDIRS) targets 
 
-ME = cg56
+include $(ROOT)/mk/domain.mk
 

@@ -25,17 +25,28 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  J. T. Buck
-# $Id$
+# Version: $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/cg (through the symbolic
-# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
+# link) -- that way a separate directory containing, say, Solaris and HPUX
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
+ME = cg
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+include $(ROOT)/mk/topdomain.mk
+
+# Subdirectories with star directories in them
+SUBDOMAINDIRS =
 
 DIRS = kernel stars parScheduler dlScheduler HuScheduler dcScheduler targets \
-	hierScheduler macroScheduler ddfScheduler
+	hierScheduler macroScheduler ddfScheduler $(SUBDOMAINDIRS)
 
-ME = cg
+include $(ROOT)/mk/domain.mk
 

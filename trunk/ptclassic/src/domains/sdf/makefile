@@ -29,16 +29,23 @@
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/sdf.
 # Instead run in from ~ptolemy/obj.$PTARCH/domains/sdf (through the symbolic
-# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
+# link) -- that way a separate directory containing, say, Solaris and HPUX
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
+ME = sdf
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+include $(ROOT)/mk/topdomain.mk
 
 # Subdirectories with star directories in them
 SUBDOMAINDIRS = dfm dsp image tcltk matrix matlab atm contrib
 
 DIRS = kernel stars loopScheduler targets $(SUBDOMAINDIRS)
-
 
 # We only build the VIS subdomain under the cfront compiler on Solaris
 # 2.5 and higher.  We test for sol2 and cfront in the architecture name
@@ -52,4 +59,5 @@ endif
 endif
 endif
 
-ME = sdf
+include $(ROOT)/mk/domain.mk
+
