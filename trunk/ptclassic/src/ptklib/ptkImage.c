@@ -51,6 +51,7 @@ The global variables tkPtimageImageType and tkPtImgFmtPPM are
 defined below, and are also declared in ptkImage.h.
  */
 
+#include <unistd.h>
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
