@@ -84,17 +84,32 @@ class ::tycho::Interactor {
     ###################################################################
     ####                         public methods                    ####
 
-    ## ``Bind'' an interactor to a picture
+    # Set up bindings to intercept events that I need from now on
+    method activate {t x y args}
+
+    # ``Bind'' an interactor to a picture
     method bind {tagOrID args}
 
     # Forward actions to a proxy interactor
     method cascade {that}
 
+    # Start the interaction sequence on the target
+    method click {x y args}
+
+    # Remove my bindings
+    method deactivate {args}
+
     # Completely disable an interactor
     method disable {}
 
+    # Continue the interaction sequence: move the mouse
+    method drag {x y}
+
     # Re-enable an interactor
     method enable {}
+
+    # Terminate the interaction sequence
+    method release {x y}
 
     # Set or get the target object
     method target {args}
@@ -112,24 +127,8 @@ class ::tycho::Interactor {
     # Generate a Tk event code from parameters
     proc event {type args}
 
-
     ###################################################################
     ####                   protected methods                       ####
-
-    # Set up bindings to intercept events that I need from now on
-    protected method activate {t x y args}
-
-    # Start the interaction sequence on the target
-    protected method click {x y args}
-
-    # Continue the interaction sequence: start a new phase
-    protected method continue {}
-
-    # Remove my bindings
-    protected method deactivate {args}
-
-    # Continue the interaction sequence: move the mouse
-    protected method drag {x y}
 
     # Execute a script
     protected method execute {script {x {}} {y {}} {options {}}}
@@ -137,15 +136,12 @@ class ::tycho::Interactor {
     # Set or get the proxy object
     protected method proxy {args}
 
-    # Terminate the interaction sequence
-    protected method release {}
-
 
     ###################################################################
     ####                   protected variables                     ####
 
     # The tags or pictures to which this picture has been bound and arguments
-    protected variable bindings
+    protected variable _bindings
 
     # The canvas on which this interactor resides.
     protected variable canvas ""
@@ -173,7 +169,6 @@ body ::tycho::Interactor::activate {t x y args} {
     abstractMethod Interactor activate
 }
 
-
 #######################################################################
 #### bind target
 #
@@ -189,21 +184,20 @@ body ::tycho::Interactor::activate {t x y args} {
 #
 body ::tycho::Interactor::bind {t args} {
     # Remember the target and bindings
-    if { ! [::info exists bindings($t)] } {
-	set bindings($t) [list $args]
+    if { ! [::info exists _bindings($t)] } {
+	set _bindings($t) [list $args]
     } else {
-	lappend bindings($t) $args
+	lappend _bindings($t) $args
     }
 
     # Create the default activation binding
     $slate bind $t \
 	    [eval ::tycho::Interactor::event Click $args] \
-	    [list @scope [info class] "$this activate $t %x %y $args"]
+	    "$this activate \[$slate find withtag current\] %x %y $args"
 
     # Return the script
-    return [list @scope [info class] "$this activate $t %x %y $args"]
+    return "$this activate $t %x %y $args"
 }
-
 
 #######################################################################
 #### cascade proxy
@@ -232,7 +226,6 @@ body ::tycho::Interactor::cascade {args} {
     }
 }
 
-
 #######################################################################
 #### click
 #
@@ -245,28 +238,11 @@ body ::tycho::Interactor::cascade {args} {
 #
 body ::tycho::Interactor::click {x y args} {
     if { $proxy != "" } {
-	@scope [$proxy info class] "eval $proxy click $x $y $args"
+	eval $proxy click $x $y $args
     } else {
-	eval $slate interact click $target $x $y $args
+	eval $slate manipulate $target click $x $y $args
     }
 }
-
-
-#######################################################################
-#### continue
-#
-# Continue an interaction sequence. This method is intended for a few
-# special kinds of interaction that use different buttons to mark
-# different ``phases'' of the interation. It is still very experimental.
-#
-body ::tycho::Interactor::continue {} {
-    if { $proxy != "" } {
-	@scope [$proxy info class] "$proxy continue"
-    } else {
-	$slate continue $target
-    }
-}
-
 
 #######################################################################
 #### deactivate
@@ -278,7 +254,6 @@ body ::tycho::Interactor::deactivate {args} {
     abstractMethod Interactor deactivate
 }
 
-
 #######################################################################
 #### disable
 #
@@ -287,15 +262,14 @@ body ::tycho::Interactor::deactivate {args} {
 # enabled again.
 #
 body ::tycho::Interactor::disable {} {
-    set temp [array get bindings]
+    set temp [array get _bindings]
     foreach {name options} $temp {
 	foreach o $options {
 	    eval $this unbind $name $o
 	}
     }
-    array set bindings [array get temp]
+    array set _bindings [array get temp]
 }
-
 
 #######################################################################
 #### drag
@@ -309,9 +283,9 @@ body ::tycho::Interactor::disable {} {
 #
 body ::tycho::Interactor::drag {x y} {
     if { $proxy != "" } {
-	@scope [$proxy info class] "$proxy drag $x $y"
+	$proxy drag $x $y
     } else {
-	$slate interact drag $target $x $y
+	$slate manipulate $target drag $x $y
     }
     execute $dragcommand $x $y
 }
@@ -323,8 +297,8 @@ body ::tycho::Interactor::drag {x y} {
 # re-enable events.
 #
 body ::tycho::Interactor::enable {} {
-    set temp [array get bindings]
-    unset bindings
+    set temp [array get _bindings]
+    unset _bindings
     foreach {tag options} $temp {
 	foreach o $options {
 	    eval $this bind $tag $o
@@ -357,24 +331,26 @@ body ::tycho::Interactor::proxy {args} {
     }
 }
 
-
 #######################################################################
 #### release
 #
 # Terminate an interaction sequence. By default, this method
-# simply forwards a *release*
-# action to the target, or to the proxy interactor if there
-# is one. Sub-classes that over-ride this method should always call
-# this implementation to forward the release action.
+# simply forwards a *release* action to the target, or to the
+# proxy interactor if there is one. Sub-classes that over-ride
+# this method should always call this implementation to forward
+# the release action.
 #
-body ::tycho::Interactor::release {} {
+# The _x_ and _y arguments to this method should be the coordinates
+# of the cursor when it is release -- they will usually (always?)
+# be the same as the coordinates given to the last call to drag{}.
+#
+body ::tycho::Interactor::release {x y} {
     if { $proxy != "" } {
-	@scope [$proxy info class] "$proxy release"
+	$proxy release $x $y
     } else {
-	$slate interact release $target
+	$slate manipulate $target release $x $y
     }
 }
-
 
 #######################################################################
 #### target
@@ -400,7 +376,6 @@ body ::tycho::Interactor::target {args} {
     }
 }
 
-
 #######################################################################
 #### unbind
 #
@@ -409,16 +384,20 @@ body ::tycho::Interactor::target {args} {
 # corresponding call to bind{}.
 #
 body ::tycho::Interactor::unbind {t args} {
+    # Make sure that the interactor is deactivated first
+    if { $target != "" } {
+	deactivate $t
+    }
+
     # Forget the target
-    if { $bindings($t) == $args } {
-	unset bindings($t)
+    if { $_bindings($t) == $args } {
+		unset _bindings($t)
     }
 
     # Remove the bindings
     $slate bind $t \
 	    [eval ::tycho::Interactor::event Press $args] {}
 }
-
 
 #######################################################################
 #### uncascade
@@ -428,8 +407,6 @@ body ::tycho::Interactor::unbind {t args} {
 body ::tycho::Interactor::uncascade {} {
     $this proxy {}
 }
-
-
 
 #######################################################################
 #### event
