@@ -170,15 +170,16 @@ void CG56Target::saveProgramCounter() {
 	codeSection();
 	StringList spc;
 	spc = targetNestedSymbol.push("SAVEPC");
-	spc += "\tequ	*";
+	spc += "\tequ	*\n";
 	addCode(spc);
 }
 
 void CG56Target::restoreProgramCounter() {
 	codeSection();
 	StringList spc;
-	spc = targetNestedSymbol.pop();
-	spc += "\tequ	*";
+	spc = "\torg	p:";
+	spc += targetNestedSymbol.pop();
+	spc += "\n";
 	addCode(spc);
 }
 
