@@ -53,7 +53,6 @@ TCL_SRCS = \
 	Path.tcl \
 	Startup.tcl \
 	String.tcl \
-	Tycho.tcl \
 	URLPath.tcl\
 	tychoMakeClassDAG.tcl
 
@@ -63,7 +62,6 @@ ITCL_SRCS = \
 	Object.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
-	Tycho.tcl \
 	Uninstantiable.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
