@@ -155,6 +155,7 @@ void LinProcMemory::reset() {
 
 int LinProcMemory::allocReq(AsmPortHole& p) {
 	if (!match(p)) return FALSE;
+	if (p.bufSize() == 0) return TRUE;
 	LOG_NEW; MPortReq* r = new MPortReq(p);
 	if (p.circAccess()) circ.appendSorted(*r);
 	else lin.appendSorted(*r);
