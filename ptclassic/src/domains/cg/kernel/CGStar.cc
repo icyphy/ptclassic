@@ -56,7 +56,7 @@ extern const Attribute A_PRIVATE = {0,AB_SHARED};
 ********************************************************************/
 
 //Constructor
-CGStar :: CGStar() : forkId(0), dataParallel(0), profile(0) {
+CGStar :: CGStar() : dataParallel(0), profile(0), forkId(0) {
 	starSymbol.initialize();
         addState(procId.setState("procId", this, "-1",
                 "assigned processor id. If -1, not assigned manually."));
