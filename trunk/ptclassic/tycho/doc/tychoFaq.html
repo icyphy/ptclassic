@@ -21,6 +21,49 @@ HREF="http://ptolemy.eecs.berkeley.edu"><CODE>http://ptolemy.eecs.berkeley.edu</
  <P>The two primary features that Itcl developers will find interesting
 are the Itcl profiler and the graphical class browser.
 
+<MENU>
+<LI> Integrated HTML-based documentation system, including automatic
+	generation of HTML documentation from Itcl files.
+
+<LI> A canvas interface with grouped objects.
+
+<LI> An emacs-like syntax-sensitive text editors (with considerably more
+         than the Tk text widget).
+
+<LI> Tcl/Itcl interactive shell.
+
+<LI> Widget library, including:
+    	<MENU>
+	<LI> file browser
+	<LI> spell checker (Unix only)
+	<LI> font selector
+	<LI> preference system (partially constructed)
+	<LI> index browser
+	<LI> configurable dialog widgets
+	<LI> interface to RCS and SCCS version control (Unix only)
+	<LI> simple color browser
+	<LI> HTML formatted message widgets
+	<LI> error handler with stack trace display
+	<LI> graph display with auto-layout for directed acyclic graphs
+	<LI> tree structure display with collapsible subtrees
+	<LI> bubble and arc graph editor
+	<LI> interface to glimpse (Unix only)
+	</MENU>
+
+
+<LI> Base classes and widgets for construction of other applications:
+	<MENU>
+	<LI> view/displayer architecture
+	<LI> font manager
+	<LI> menu bar
+	<LI> status bar
+	<LI> tool bar
+	<LI> subpanel
+	<LI> file system interface
+	<LI> text editor widget
+	</MENU>
+</MENU>
+
 <DT> <B>What Is Itcl?</B>
 
 <DD> Itcl is short hand for <CODE>[incr tcl]</CODE> which is an object
@@ -42,11 +85,20 @@ broken.
 <DL>
 <DT> <B>Why didn't you just use emacs?</B>
 <DD> FSF Emacs is not particularly graphical, though xemacs is better.
-We want to be able to have active graphical widgets embedded in text.
-
+We want to be able to have active graphical widgets intermingled with text.
 
 <DT> <B>Why didn't you use the Iwidgets widgets everywhere?</B>
-<DD> This was a design decision made by the Tycho authors.  In some
+<DD> 
+
+Tycho uses a different model for mapping widgets to the screen.  In
+particular, widgets are completely constructed, and then actively
+mapped to the screen.  Unlike iwidgets, which map partially
+constructed widgets, Tycho widgets can be centered on the screen and
+sized according to screen dimensions.  We could not find a way to use
+iwidgets without sacrificing these features.
+
+<P>
+This was a design decision made by the Tycho authors.  In some
 cases, we decided to use a simpler widget.  In other cases the
 functionality we needed was missing.  We also wanted the widget we
 wrote to use some of the features of Tycho, such as automatically
@@ -57,6 +109,11 @@ generated documentation and active tcl examples.
 don't know of a good canvas like Java class like the tk canvas.  We'd
 rather not reinvent the wheel here and write our own Java canvas.  We
 are looking into integrating Java and Tycho.
+
+ <P> Also, we wanted to be able to provide an easily extensible
+environment for non-programmers, which makes an interpreted language
+such as Tcl a stronger candidate than a compiled language such as
+Java.
 
 </DL>
 
