@@ -39,23 +39,15 @@ void EGGate::allocateArc(EGGate *dest, int no_samples, int no_delays)
 
 // disconnect this node & it's far end node, and deallocate
 // them.
-void EGGate::removeMyArc() 
+EGGate::~EGGate() 
 {
-#if ARCTRACE
-  printf("Removing arc between ");
-  parent->print();
-  printf(" and ");
-  print();
-  printf(".\n");
-#endif
-	LOG_DEL; delete arc; 
-	far->removeMe(); 
-	removeMe();
-}
-
-void EGGate::removeMe() {
 	myLink->removeMeFromList();
-	LOG_DEL; delete this;
+	if (far) { 
+		far->far = 0;
+		LOG_DEL; delete arc; 
+		LOG_DEL; delete far;
+		far = 0;
+	}
 }
 
 void EGGate::hideMe(int flag) {
@@ -202,8 +194,9 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 			// because it is redundant. If we're updating now,
 			// save the arc -- we'll use it to insert the other
 			// endpoint (this is our convention).
-			if (update) p->myNode()->addSamples(pgate->samples());
-			else pgate->removeMyArc();
+			if (update) {
+				p->myNode()->addSamples(pgate->samples());
+			} else { LOG_DEL; delete pgate; }
 			return;
 		}
 	}  
@@ -213,7 +206,10 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 void EGGateList::initialize() {
 	EGGateLinkIter iter(*this);
 	EGGate *p;
-	while ((p=iter++)!=0) p->removeMyArc();
+	while ((p=iter++)!=0) {
+		LOG_DEL; delete p;
+	}
+	DoubleLinkList :: initialize();
 }
 
 EGGate* EGGateLinkIter :: nextMaster(SDFStar* m) {
