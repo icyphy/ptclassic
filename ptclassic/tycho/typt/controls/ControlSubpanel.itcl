@@ -34,10 +34,7 @@
 #######################################################################
 #### ControlSubpanel
 # A superclass for control panels that can be packed into
-# in instance of ControlPanel. By default, this class
-# assume that its immediate parent is an instance of
-# ControlPanel -- if not, then set the *-controlpanel*
-# option when creating the widget.
+# in instance of ControlPanel.
 #
 class ::tycho::ControlSubpanel {
     inherit ::tycho::TWidget
@@ -60,8 +57,8 @@ class ::tycho::ControlSubpanel {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Connect a widget to a control
-    protected method connect {widget control}
+    # Connect a component to a control
+    protected method connect {component control {scale {}} {offset {}}}
 }
 
 #######################################################################
@@ -70,17 +67,23 @@ class ::tycho::ControlSubpanel {
 body ::tycho::ControlSubpanel::constructor {args} {
     # Initialize options
     eval itk_initialize $args
-
-    # If there's no control panel set, set it to the parent
-    if { $itk_option(-controlpanel) == "" } {
-        configure -controlpanel [winfo parent $this]
-    }
 }
 
 
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#######################################################################
+#### connect
+#
+# Connect a component to a control in the main control panel
+#
+body ::tycho::ControlSubpanel::connect \
+	{component control {scale {}} {offset {}}} {
+    $itk_option(-controlpanel) connect \
+            $itk_component($component) $control $scale $offset
+}
 
 #######################################################################
 #### requestConnect
@@ -90,17 +93,4 @@ body ::tycho::ControlSubpanel::constructor {args} {
 #
 body ::tycho::ControlSubpanel::requestConnect {} {
     ;# By default, do nothing
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### connect
-#
-# Connect a widget to a control in the main control panel
-#
-body ::tycho::ControlSubpanel::connect {widget control} {
-    $itk_option(-controlpanel) connect $widget $control
 }
