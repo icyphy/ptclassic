@@ -5,7 +5,7 @@ defstar {
 Compute the discrete Fourier transform of a complex input using the
 fast Fourier transform (FFT) algorithm.  The star reads "size" (default
 256) complex samples, zero pads the data if necessary, and then takes an
-FFT of length 2 ^ "order", where "size" <= 2 ^ "order".  (The default
+FFT of length 2 ^ "order", where "size" &lt;= 2 ^ "order".  (The default
 value of "order" is 8.)  The parameter "direction" (default 1) is 1 for
 the forward and -1 for the inverse FFT.
 	}
