@@ -70,19 +70,23 @@ EXPHDR =	rpc.h
 header:: $(OCTTOOLS)/include/rpcApp.h $(OCTTOOLS)/include/rpcInternal.h \
 	../../include/rpcApp.h 	../../include/rpcInternal.h
 
-../../include/rpcApp.h: rpcApp.h $(OCTTOOLS) $(OCTTOOLS)/include
+../../include/rpcApp.h: rpcApp.h 
 	rm -f $@ 
 	cp $< $@ 
 
-../../include/rpcInternal.h: rpcInternal.h $(OCTTOOLS) $(OCTTOOLS)/include
+../../include/rpcInternal.h: rpcInternal.h
 	rm -f $@ 
 	cp $< $@ 
 
-$(OCTTOOLS)/include/rpcApp.h: rpcApp.h $(OCTTOOLS) $(OCTTOOLS)/include
+$(OCTTOOLS)/include/rpcApp.h: rpcApp.h
+	if [ ! -d $(OCTTOOLS) ]; then mkdir $(OCTTOOLS) ; fi
+	if [ ! -d $(OCTTOOLS)/include ]; then mkdir $(OCTTOOLS)/include ; fi
 	rm -f $@
 	cp $< $@
 
-$(OCTTOOLS)/include/rpcInternal.h: rpcInternal.h $(OCTTOOLS) $(OCTTOOLS)/include
+$(OCTTOOLS)/include/rpcInternal.h: rpcInternal.h
+	if [ ! -d $(OCTTOOLS) ]; then mkdir $(OCTTOOLS) ; fi
+	if [ ! -d $(OCTTOOLS)/include ]; then mkdir $(OCTTOOLS)/include ; fi
 	rm -f $@
 	cp $< $@
 
