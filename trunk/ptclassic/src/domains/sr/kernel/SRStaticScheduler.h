@@ -78,48 +78,47 @@ public:
   // Return the number of clusters
   SequentialList::size;
 
-  // Return a printable version of the schedule
   StringList printVerbose() const;
 
 };
 
+/**********************************************************************
+
+ The static scheduler
+
+ @Description This decomposes the galaxy into strongly-connected
+ components, uses a heuristic to break all the feedback arcs in each
+ component, and fires each component in topological order as many
+ times as there were edges.
+
+ **********************************************************************/
 class SRStaticScheduler : public Scheduler
 {
   friend class SRSchedIter;
 public:
   SRStaticScheduler();
 
-  // Domain identification.
-  /*virtual*/ const char* domain() const;
+  const char* domain() const;
 
-  // Initialization.
-  /*virtual*/ void setup();
+  void setup();
 
+  void setStopTime(double);
 
-  // Set the stopping time
-  /*virtual*/ void setStopTime(double);
+  void resetStopTime(double);
 
-  // Set the stopping time when inside a Wormhole.
-  /*virtual*/ void resetStopTime(double);
+  // Return the stopping time of the simulation
+  double getStopTime() { return double(numInstants); }
 
-  // Return the stopping time.
-  /*virtual*/ double getStopTime() { return double(numInstants); }
+  int run();
 
-
-  // Run (or continue) the simulation
-  /*virtual*/ int run();
-
-  // Run the simulation for an instant
   virtual void runOneInstant();
 
   // The "time" of each instant, used when interfacing with a timed domain
   double schedulePeriod;
 
-  // Return a printed representation of the schedule
   StringList displaySchedule();
 
   // Indices for the flags used during scheduling
-
   enum flags {
     sccDepth = 0,	// Used within the SCC decomposition routine
     cutIndex = 0	// Used within the feedback arc cut routine
@@ -132,7 +131,6 @@ protected:
   // Number of instants already executed
   int numInstantsSoFar;
 
-  // Schedule the galaxy
   virtual int computeSchedule( Galaxy & );
 
   // The schedule for this galaxy
@@ -140,11 +138,8 @@ protected:
 
 private:
 
-  // Decompose the graph into strongly-connected components
-  // (stored as the schedule)
   void SCCDecompose( Galaxy & );
 
-  // Routine for building strongly-connected components
   int SCCVisit( SRStar *, Stack &, int & index );
 
   // Reorder the stars in each cluster to minimize the number of feedback arcs

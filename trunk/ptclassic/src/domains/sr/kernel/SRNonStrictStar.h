@@ -42,15 +42,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SRStar.h"
 
+/**********************************************************************
+
+  Non-strict "template" star for the SR domain
+
+  @Description A non-strict star can fire if some of its inputs are unknown.
+
+  @SeeAlso SRStrictStar
+
+ **********************************************************************/
 class SRNonStrictStar : public SRStar {
 public:
-  // Class identification.
-  /*virtual*/ int isA(const char*) const;
+  // Identify the class
+  int isA(const char*) const;
 
-  // Domain identification.
-  /*virtual*/ const char* domain() const;
+  // Identify the domain
+  const char* domain() const;
 
-  /*virtual*/ int run();
+  int run();
 };
 
 #endif

@@ -42,7 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern const char SRdomainName[];
 
-// Constructor
 SRScheduler::SRScheduler()
 {
   numInstantsSoFar = 0;
@@ -50,13 +49,13 @@ SRScheduler::SRScheduler()
   schedulePeriod = 10000.0;
 }
 
-// Domain identification.
+// Return the name of the SR domain
 const char* SRScheduler::domain() const
 {
     return SRdomainName;
 }
 
-// Initialization.
+// Initialize the galaxy
 void SRScheduler::setup()
 {
     if (!galaxy()) {
@@ -68,6 +67,11 @@ void SRScheduler::setup()
 }
 
 // Run (or continue) the simulation
+//
+// @Description Call runOneInstant until numInstants equals
+// numInstantsSoFar, checking SimControl::haltRequested() before each
+// instant.
+
 int SRScheduler::run()
 {
     if (SimControl::haltRequested() || !galaxy()) {
@@ -86,11 +90,11 @@ int SRScheduler::run()
 
 // Execute the galaxy for an instant
 //
-// This is a very simple scheduler--in each instant, it initializes
-// all the stars, runs each, and checks to see if any more outputs
+// @Description This is a very simple scheduler--in each instant, it
+// initializes all the stars, runs each, and checks to see if any more outputs
 // have become defined.  If any have, it runs them all again.
 // Finally, it calls tick() to advance the stars' states.
-//
+
 void SRScheduler::runOneInstant()
 {
   GalStarIter nextStar( *galaxy() );
@@ -140,8 +144,8 @@ void SRScheduler::runOneInstant()
 
 // Set the stopping time, for compatibility with the DE scheduler
 //
-// Roundoff errors makes this non-trivial
-//
+// @Description Roundoff errors makes this non-trivial.
+
 void SRScheduler::setStopTime(double limit)
 {
   numInstants = int( floor(limit + 0.001) );
@@ -149,8 +153,9 @@ void SRScheduler::setStopTime(double limit)
 
 // Set the stoppping time for a wormhole
 //
-// A wormhole invocation is always one instant--the time given is ignored.
-//
+// @Desciption A wormhole invocation is always one instant--the time
+// given is ignored.
+
 void SRScheduler::resetStopTime(double)
 {
   numInstants = 1;

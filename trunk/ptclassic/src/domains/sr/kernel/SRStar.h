@@ -42,47 +42,67 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // but any star for this domain will need it, so we include it here.
 #include "SRPortHole.h"
 
+/**********************************************************************
+
+ The star for the SR domain
+
+  @Description The inputs to this star are wires whose values may be
+  unknown, absent, or present with some value.  The go() method should
+  return a function of these wires (i.e., the star should not change
+  its state), but the tick() method, called at the end of each
+  instant, should update the state of the star based on inputs and
+  outputs.  The go() method of stars derived from this class is only
+  called when none of the inputs are unknown.  SRNonStrictStar
+  overrides this, allowing some inputs to be unknown.
+
+**********************************************************************/
 class SRStar : public Star {
 
 private:
 
-  // flag indicating whether the star has fired in the instant
-  // Used by strict stars to ensure they fire at most once in an instant
+  // Flag indicating whether the star has fired in the instant
+  //
+  // @Description Used by strict stars to ensure they fire at most
+  // once in an instant
+
   int hasFired;
 
-  // flag indicating whether the star is reactive--only producing
-  // present outputs when at least one input is present
+  // Flag indicating whether the star is reactive
+  //
+  // @Description A reactive star only produces present outputs and
+  // updates its statewhen at least one input is present
+
   int isReactive;
 
 protected:
 
-  // Mark this star as reactive--usually done within a star's setup() method
+  // Mark this star as reactive
+  //
+  // @Description A reactive star will not produce any present inputs
+  // nor change its state if none of its inputs are present.
+  // 
+  // <P> Usually done within a star's setup() method
+
   void reactive() { isReactive = 1; }
 
 public:
-  // Class identification.
-  /*virtual*/ int isA(const char*) const;
+  // Identify the class
+  int isA(const char*) const;
 
-  // Domain identification.
-  /*virtual*/ const char* domain() const;
+  // Identify the domain
+  const char* domain() const;
 
-  // Inter-instant time advancement
-  // Default is to do nothing; derived non-strict stars should override this
   virtual void tick();
 
-  // Beginning-of-instant initialization
   virtual void initializeInstant();
 
-  // Intra-instant time advancement
-  /*virtual*/ int run();  
+  int run();  
 
   // Return the status of the reactive flag
   int isItReactive() const { return isReactive; }
 
-  // Return the count of known outputs
   int knownOutputs();
 
-  // Initialize all default values
   void initialize();
 
 };
