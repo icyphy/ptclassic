@@ -54,7 +54,7 @@ if {[info class ::tycho::Subpanel] != ""} {
 # open state displays the entire panel.  
 #
 # <p>
-# Here is an example:
+# Here is an example of how to use the Subpanel:
 # <tcl><pre>
 # tycho::Dismiss .w
 # frame .w.options
@@ -66,8 +66,9 @@ if {[info class ::tycho::Subpanel] != ""} {
 # checkbutton .w.options.right.script -text "Use Script" -relief flat
 # pack .w.options.left.debug -side top -anchor nw
 # pack .w.options.right.script -side top -anchor nw
-# tycho::Subpanel .w.s -text "Subpanel" -childwidget .w.options
+# tycho::Subpanel .w.s -text "Options" -childwidget .w.options
 # pack .w.s -side top -anchor nw
+# wm deiconify .w
 # </pre></tcl>
 
 #
@@ -100,7 +101,7 @@ class ::tycho::Subpanel {
 
 
     #####################################################################
-    ####                       private variables                   ####
+    ####                       private variables                     ####
      
     private variable previousChildwidget ""
 }
@@ -253,13 +254,13 @@ configbody ::tycho::Subpanel::state {
     switch $itk_option(-state) {
 	closed {
 	    $itk_component(arrow) configure \
-		    -bitmap @arrowclose.xbm \
+		    -bitmap @img/arrowclose.xbm \
 		    -justify center \
 		    -command "$this open"
 	}
 	open {
 	    $itk_component(arrow) configure \
-		    -bitmap @arrowopen.xbm \
+		    -bitmap @img/arrowopen.xbm \
 		    -justify center \
 		    -command "$this close"
 
