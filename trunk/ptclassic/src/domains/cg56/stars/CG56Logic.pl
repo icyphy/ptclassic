@@ -89,8 +89,8 @@ non-zero integer (not necessarily 1).
 
 	codeblock(inverter) {
 	clr	b	$ref(input#1),a		; set b = 0, read input to a
-	tst	a	#1,y1			; test a, set y1 = 1
-	teq	y1,b				; if a = 0, then b = y1 = 1
+	tst	a	#$$01,y1	; test a, set y1 = 1
+	teq	y1,b			; if a = 0, then b = y1 = 1
 	move	b,$ref(output)			; output = b
 	}
 
@@ -131,25 +131,29 @@ non-zero integer (not necessarily 1).
 	}
 
 	codeblock(beginXor) {
-	clr	b	$ref(input#1),a
+	clr	a	$ref(input#1),b		; a contains result
+	}
+
+	codeblock(XorAccumulator,"int i") {
+	not	a	a,y0	; save a in y0 and invert a
+	tst	b	$ref(input#@i),b	; test input and read next input
+	teq	y0,a		; restore a if input != 0
+	}
+
+	codeblock(endXor) {
+	not	a	a,y0	; save a in y0 and invert a
+	tst	b		; test input and read next input
+	teq	y0,a		; restore a if input != 0
 	}
 
 	// Reusable code blocks
 
 	codeblock(loadAccumulator,"int i") {
-	move	$ref(input#@i),a	; read input i to accumulator a
+	move	$ref(input#@i),a		; read input i to accumulator a
 	}
 
 	codeblock(loadx0,"int i") {
-	move	$ref(input#@i),x0	; read input i to accumulator a
-	}
-
-	codeblock(testAccumulator) {
-	tst	a			; test accumulator a
-	}
-
-	codeblock(testAndLoadAccumulator,"int i") {
-	tst	a	$ref(input#@i),a	; test a, read input into a
+	move	$ref(input#@i),x0		; read input i to accumulator a
 	}
 
         codeblock(saveStatus) {
@@ -157,7 +161,7 @@ non-zero integer (not necessarily 1).
 	}
 
 	codeblock(invert) {
-	and	#4,a		; returns true if zero (test the Z bit)
+	and	x1,a		; returns true if zero (test the Z bit)
 	}
 
         codeblock(saveResult) {
@@ -169,10 +173,10 @@ non-zero integer (not necessarily 1).
 		const char* cn = logic;
 		StringList header = "; Boolean ";
 		header << cn << " for " << input.numberPorts() << " inputs";
-		addCode(header);
 
 		// The inverter (not) star is the simplest case
 		if ( numinputs == 1 ) {
+			addCode(header);
 			if ( test == NOTID || test == NANDID ||
 			     test == NORID || test == XNORID ) {
 				addCode(inverter);
@@ -185,14 +189,13 @@ non-zero integer (not necessarily 1).
 
 		// For the other stars, we loop through the inputs
 		int i = 1;
-		StringList implementationComment = "; Boolean ";
-		implementationComment << cn << " operation using ";
+		header << " using ";
 
 		switch( test ) {
 		    case ANDID:
 		    case NANDID:
-			implementationComment << "integer multiplication";
-			addCode(implementationComment);
+			header << "integer multiplication";
+			addCode(header);
 			if ( numinputs == 2 ) {
 				addCode(twoInputAnd);
 			}
@@ -205,8 +208,8 @@ non-zero integer (not necessarily 1).
 			break;
 		    case ORID:
 		    case NORID:
-			implementationComment << "positive logic";
-			addCode(implementationComment);
+			header << "positive logic";
+			addCode(header);
 			addCode(loadAccumulator(1));
 			addCode(loadx0(2));
 			for (i = 3; i < input.numberPorts(); i++ ) {
@@ -216,20 +219,13 @@ non-zero integer (not necessarily 1).
 			break;
 		    case XORID:
 		    case XNORID:
-			// FIXME: Broken
-			implementationComment << "negative logic";
-			addCode(implementationComment);
+			header << "negative logic";
+			addCode(header);
 			addCode(beginXor);
 			for (i = 2; i < input.numberPorts(); i++ ) {
-				addCode(testAndLoadAccumulator(i));
-				addCode(saveStatus);
-				addCode(invert);
-				addCode(logicOrOp);
+				addCode(XorAccumulator(i));
 			}
-			addCode(testAccumulator);
-			addCode(saveStatus);
-			addCode(invert);
-			addCode(logicOrOp);
+			addCode(endXor);
 			break;
 		}
 
@@ -241,39 +237,40 @@ non-zero integer (not necessarily 1).
 		addCode(saveResult);
 	}
 	exectime {
-                // The exectime is given in half oscillator cycles
-		// Why?  Because that's the way it was done in Gabriel.
+                // FIXME. Estimates of execution time are given in pairs of
+		// oscillator cycles because that's the way it was done in
+		// Gabriel: they simply counted the number of instructions.
 
-		// Time to read the input and write the output
-		int test = 2;
+		// Time to read one input and write one output
+		int pairsOfCycles = 2;
 
-		switch( test ) {
+		switch( pairsOfCycles ) {
 		  case NOTID:
-		    test += 2;
+		    pairsOfCycles += 2;
 		    break;
 
 		  case NANDID:
-		    test += 2;
+		    pairsOfCycles += 2;
 		    // fall through
 		  case ANDID:
-		    test += 2*input.numberPorts();
+		    pairsOfCycles += 2*input.numberPorts();
 		    break;
 
 		  case NORID:
-		    test += 2;
+		    pairsOfCycles += 2;
 		    // fall through
 		  case ORID:
-		    test += 1 + input.numberPorts();
+		    pairsOfCycles += input.numberPorts();
 		    break;
 
 		  case XORID:
-		    test += 2;
+		    pairsOfCycles += 2;
 		    // fall through
 		  case XNORID:
-		    test += 2 + 4*input.numberPorts();
+		    pairsOfCycles += 3*input.numberPorts();
 		    break;
 		}
 
-		return test;
+		return pairsOfCycles;
 	}
 }
