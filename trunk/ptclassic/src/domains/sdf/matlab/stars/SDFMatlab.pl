@@ -232,6 +232,7 @@ extern "C" {
 	  type { int }
 	  arglist { "(char *matlabCommand)" }
 	  code {
+	      if (matlabIsRunning() ) {
 		// assert location of buffer to hold output of Matlab commands
 		engOutputBuffer(matlabEnginePtr,
 				matlabOutputBuffer,
@@ -251,6 +252,10 @@ extern "C" {
 		}
 
 		return( merror );
+              } else {
+ 	        strcpy(matlabOutputBuffer, "Matlab is not running!");
+ 	        return 1;
+              }
 	  }
 	}
 
@@ -380,6 +385,7 @@ extern "C" {
 		if ( matlabEnginePtr == 0 ) {
 		  Error::abortRun( *this, "Could not start Matlab using ",
 				   MATLAB_UNIX_COMMAND );
+                  return;
 		}
 
 		// add the PTOLEMY_MATLAB_DIRECTORY to the Matlab path
