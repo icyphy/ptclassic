@@ -98,7 +98,7 @@ initCode {
 	addGlobal("    QckMon* dsp;","dsp");
 	// We do this here so that all the stars can do there initialization
 	// before starting the DSP
-       	const char *s56path = getenv("S56DSP");
+       	char *s56path = getenv("S56DSP");
 	int newmemory = FALSE;
 	if (s56path == NULL) {
 	    s56path = expandPathName("$PTOLEMY/vendors/s56dsp");

@@ -324,7 +324,7 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
   wrapup {
     const char* sf = saveFile;
     if (sf != 0 && *sf != 0) {
-      const char* saveFileName = expandPathName(sf);
+      char* saveFileName = expandPathName(sf);
       // open the file for writing
       FILE* fp = fopen(saveFileName, "w");
       if ( fp ) {

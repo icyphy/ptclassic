@@ -129,7 +129,7 @@ int SDFPTclTarget::run() {
 	}
     }
     StringList ptclFileName;
-    const char* path = expandPathName("~/PTOLEMY_SYSTEMS/ptcl/");
+    char* path = expandPathName("~/PTOLEMY_SYSTEMS/ptcl/");
     ptclFileName << path << galaxy()->name() << ".pt";
     delete [] path;
     pt_ofstream ptclFile(ptclFileName);

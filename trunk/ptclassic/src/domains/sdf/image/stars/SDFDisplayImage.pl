@@ -70,7 +70,7 @@ complete filename of the displayed image.
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
 		const char* iname = imageName;
-		const char *nm;
+		char *nm;
 		if (iname && iname[0]) {
 		  nm = expandPathName(iname);
 		}

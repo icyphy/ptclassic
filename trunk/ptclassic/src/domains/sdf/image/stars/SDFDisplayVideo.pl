@@ -135,7 +135,7 @@ may have changed.
 
 		// Set rootName
 		const char* t = ImageName;
-		const char *nm = 0;
+		char *nm = 0;
 		if (t && t[0]) {
 			nm = expandPathName(t);
 		}

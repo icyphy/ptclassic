@@ -289,7 +289,7 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
 #if defined (USE_SHLLOAD) || defined (__linux__) && defined  (USE_DLOPEN)
   // I  don't think we need all this (neal@ctd.comsat.com)
   for (int i = 1; i < argc; i++) {
-    const char* fullObjName = expandPathName(argv[i]);
+    char* fullObjName = expandPathName(argv[i]);
     command << " " << fullObjName;
     delete [] fullObjName;
   }
@@ -523,7 +523,7 @@ int Linker::multiLink (int argc, char** argv) {
 	StringList cmd = command;
 	cmd << tname;
 	for (int i = 1; i < argc; i++) {
-		const char* objName = expandPathName(argv[i]);
+		char* objName = expandPathName(argv[i]);
 		cmd << " " << objName;
 		delete [] objName;
 	}
@@ -586,8 +586,7 @@ void Linker::installTable(const char* newTable) {
 	if (ptolemyName == symTableName) {
 		symTableName = getenv("PTOLEMY_SYM_TABLE");
 		if (!symTableName) {
-			const char *symtablefile =
-				expandPathName("~/.pt_symtable");
+			char *symtablefile = expandPathName("~/.pt_symtable");
 			symTableName = hashstring(symtablefile);
 			delete [] symtablefile;
 		}
