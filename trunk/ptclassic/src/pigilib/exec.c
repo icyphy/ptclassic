@@ -19,7 +19,7 @@ $Id$
 
 /* The vars below store the state of the last run command for re-runs */
 static int lastIterate;
-static octObject lastFacet = {OCT_UNDEFINED_OBJECT};
+octObject lastFacet = {OCT_UNDEFINED_OBJECT};
 
 static boolean
 AskIterate(facetPtr, nPtr)
