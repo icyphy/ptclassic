@@ -20,12 +20,14 @@ RANLIB =	true
 # C++ compiler to use.
 CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
 
-
 # common.mk looks at this variable to decide how to build shared libraries
 USE_SHARED_LIBS = yes
 #USE_SHARED_LIBS = no
 
-ifeq ($(USE_SHARED_LIBS),yes) 
+# Using GNU make conditionals causes havoc while bootstrapping gcc,
+# so we don't use them here, however, this is what the code would look like
+
+#ifeq ($(USE_SHARED_LIBS),yes) 
 # Use Position Independent Code to build shared libraries
 # Octtools/Xpackages/rpc requires PIC instead of pic
 C_SHAREDFLAGS =		-K PIC
@@ -33,7 +35,7 @@ C_SHAREDFLAGS =		-K PIC
 CC_SHAREDFLAGS =	-PIC
 LIBSUFFIX =		so
 SHARED_LIBRARY_COMMAND =	CC -G -o
-endif
+#endif
 
 # If you turn on debugging (-g) with cfront, ptcl and pigiRpc could be
 # about 70Mb each.  Also, with -g you will need at least 250Mb for the .o
