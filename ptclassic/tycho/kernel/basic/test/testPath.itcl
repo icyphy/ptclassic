@@ -229,4 +229,15 @@ test Path-6.1 {Test out simplifyPath} {
     list $r1 $r2 $r3 $r4
 } {{$TYCHO/README.files} 1 {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
 
+test Path-7.1 {Test out isRelative} {
+    list \
+	    [::tycho::isRelative .] \
+	    [::tycho::isRelative ..] \
+	    [::tycho::isRelative /] \
+	    [::tycho::isRelative ~cxh] \
+	    [::tycho::isRelative \$TYCHO] \
+	    [::tycho::isRelative \$notavar/foo/../bar] \
+	    [::tycho::isRelative [file join .. a b]] \
+	    [::tycho::isRelative [file join / a b .. ..]]
+} {1 1 0 0 0 0 1 0}
 doneTests
