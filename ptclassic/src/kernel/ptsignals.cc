@@ -58,6 +58,33 @@ ptReleaseSig:
 
 */
 
+/*
+
+How to add a new architecture to this file
+------------------------------------------
+First check if signals calls on your architecture will interrupt and
+stop system calls.  One way to test this is to build Ptolemy with the
+default (do nothing) functions below.  If Ptolemy runs without problems,
+then you're done.  If you get errors like: 
+     RPC Error: fread of long failed
+     RPC Error: application: ../../../../src/octtools/Xpackages/rpc/rpc.c 
+                (line 76): function_and_args: Interrupted system call
+Then you sould do one of the following below.
+
+If you are running a POSIX machine, then it is quite likely that the
+default will not work for you.  And if you get errors like the above
+then the default is definitely not working for you.  If this is the
+case, check the man page for sigaction.  If the flag SA_RESTART is
+defined, then define ptSafeSig as below, and define ptBlockSig
+and ptReleaseSig as blank funcitons.
+
+If SA_RESTART is not defined on your system, then define ptSafeSig
+as a blank function and define ptBlockSig and ptReleaseSig as below.
+
+    - Alan Kamas 3/95
+ 
+*/
+
 
 #include <signal.h>
 #include "compat.h" 
