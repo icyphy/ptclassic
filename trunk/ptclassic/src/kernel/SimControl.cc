@@ -55,16 +55,10 @@ for example.
 #pragma implementation "SimAction.h"
 #endif
 
-// the following should really, I suppose, be #ifdef cfront
-#ifndef __GNUG__
-#define SignalHandler SIG_PF
-#define SignalIgnore SIG_IGN
+#ifdef __GNUG__
+typedef void (*SIG_PF)(int);
 #else
-#ifdef hpux
-// on hp-ux, use pre-installed signal.h on gnu
-typedef void(*SignalHandler)(int);
-#define SignalIgnore SIG_IGN
-#endif
+#include <std.h>
 #endif
 
 #include "SimAction.h"
@@ -176,10 +170,10 @@ void SimControl::catchInt(int signo, int always) {
 	if (signo == -1) signo = SIGINT;
 	if (!always) {
 		// we don't catch signals if they are being ignored now
-		SignalHandler tmp = signal(signo, SignalIgnore);
-		if (tmp == SignalIgnore) return;
+		SIG_PF tmp = signal(signo, SIG_IGN);
+		if (tmp == SIG_IGN) return;
 	}
 	flags &= ~interrupt;
-	signal(signo, (SignalHandler)SimControl::intCatcher);
+	signal(signo, (SIG_PF)SimControl::intCatcher);
 }
 
