@@ -203,6 +203,43 @@ error:;
     return OCT_ERROR;
 }
 
+static octStatus
+_otpXlatePragmas( octObject *pInst, char* parentName, char *instName, 
+		 Tcl_DString *pStr)
+{
+    octObject	paramProp;
+    char 	*pstr, *pstrOrig, *pstrBase;
+    char	*pragmaName, *pragmaType, *pragmaValue;
+    char	sep[10];
+
+    if ( ohGetByPropName( pInst, &paramProp, "Pragmas") != OCT_OK
+	 || (pstr=paramProp.contents.prop.value.string) == NULL
+	 || pstr[0] == '\0' )
+      return OCT_OK;
+
+    /* Break out the name, type and value */
+    strncpy(sep, "{ 	}", 10);
+    pstrOrig = pstr; pstrBase = memStrSave(pstr);
+    pragmaName = strtok(pstrBase, sep);
+    while (pragmaName) {
+      pragmaType = strtok((char *) NULL, sep);
+      pragmaValue = strtok((char *) NULL, sep);
+      if (!pragmaName || !pragmaType || !pragmaValue)
+	goto error;
+      Tcl_DStringAppends(pStr,"\tpragma ", parentName, " ", instName, " ",
+			 pragmaName," ", pragmaValue, "\n", NULL);
+      pragmaName = strtok((char *) NULL, sep);
+    }
+    memFree(pstrBase);
+    return OCT_OK;
+
+error:;
+    errRaise(SPKG,-1,"Bogus Pragmas property in %s: ``%s''",
+      ohFormatName(pInst), pstrOrig);
+    memFree(pstrBase);
+    return OCT_ERROR;
+}
+
 /****************************************************************************
  *
  *		Net Translation
@@ -716,6 +753,9 @@ otpXlateInsts( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr) {
 	    return OCT_ERROR;
 	if ( otpXlateParams( &theInst, instName, OTP_FtStar, pStr) != OCT_OK )
 	    return OCT_ERROR;
+	if ( _otpXlatePragmas( &theInst, pFInfo->facetName, instName,
+			      pStr) != OCT_OK )
+	    return OCT_ERROR;
     } POH_LOOP_CONTENTS_END();
     return sts;
 }
@@ -776,6 +816,7 @@ _otpFacetTypeToStr( OTPFacetType type) {
     case OTP_FtTarget:		return "target";
     case OTP_FtMarker:		return "marker";
     case OTP_FtContact:		return "contact";
+    case OTP_FtPragma:		return "Pragmas";
     default:;
     }
     return "Unknown facet type";
