@@ -30,12 +30,15 @@
 # Root of Ptolemy directory
 ROOT=../../../../..
 
-EXTRA_SRCS = tkMain.c
+EXTRA_SRCS = tkMain.c \
+	ptolemy-cgc.tcl \
+	README
 
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
 MISC_FILES = \
-	README \
 	compat.h \
-	ptolemy-cgc.tcl 
+	make.template
 #	init.tcl
 
 include $(ROOT)/mk/no-compile.mk
