@@ -481,6 +481,9 @@ body ::tycho::TopLevel::centerOnScreen {} {
 # statements. To speed it up, we should keep a record of which
 # options have been subscribed and which haven't...
 #
+# If this method is modified, be sure to also update the
+# *itk_initialize{} method, and the same methods in ::tycho::TWidget.
+#
 body ::tycho::TopLevel::configure {args} {
     # FIXME: Delete this obsolete stuff
     set temp {}
@@ -648,6 +651,14 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 		    # Make lists of options per sheet
 		    lappend lists($sheet) $option $param
 
+		    # If an option is already subscribed, then
+		    # remove that subscription so the new one will work
+		    if [::info exists _subscribedOptions($option)] {
+			regexp {^([^\.]+)\.(.+)$} \
+				$_subscribedOptions($option) _ s p 
+			::tycho::stylesheet unsubscribe $this $s $option
+		    }
+
 		    # Remember the subscribed options
 		    set _subscribedOptions($option) $parameter
 		}
@@ -793,6 +804,9 @@ body ::tycho::TopLevel::confirmDestruct {} {
 # remember the options that have been explicitly set by the
 # user. This is used by the preferences manager so that these
 # options "override" any option subscriptions.
+#
+# If this method is modified, be sure to also update the
+# *configure{} method, and the same methods in ::tycho::TWidget.
 #
 body ::tycho::TopLevel::itk_initialize {args} {
     # FIXME: Delete this obsolete stuff
