@@ -42,6 +42,7 @@ Date of last revision:
 #include "Profile.h"
 #include "DLNode.h"
 #include "PriorityQueue.h"
+#include "Error.h"
 
 DLParProcs :: DLParProcs(int pNum, MultiTarget* t) :ParProcessors(pNum,t) {
 	LOG_NEW; schedules = new UniProcessor[pNum];
@@ -173,6 +174,12 @@ void DLParProcs :: scheduleSmall(DLNode* pd)
 		candidate->elem(0) = firstN->getProcId();
 	} else {
 		candidate = mtarget->candidateProcs(this, pd->myMaster());
+	}
+
+	if (candidate->size() == 0) {
+		Error::abortRun(*pd->myMaster(), " is not supported.",
+			" please check resource constraints.");
+		return;
 	}
 
 	// compare the earliest schedule time with candidate processors.
