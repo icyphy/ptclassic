@@ -610,8 +610,9 @@ body ::tycho::File::destructor {} {
 	unset fileObjects($this)
     }
     
-    # Get rid of the backup file.
-    removeBackupFiles
+    # Do not get rid of the backup files.  This should be done
+    # only on a successful save.
+    # removeBackupFiles
 }
 
 #########################################################################
@@ -915,10 +916,10 @@ body ::tycho::File::emergencySave {} {
 # the corresponding file, and call "seeName $point".
 #
 body ::tycho::File::hyperJump {filename point} {
-    set obj [uplevel #0 File::openContext $filename]
+    set obj [uplevel #0 [list File::openContext $filename]]
     tkwait visibility [$obj windowName]
     if {$point != {}} {
-	uplevel #0 $obj seeName $point
+	uplevel #0 [list $obj seeName $point]
     }
 }
 
