@@ -84,7 +84,6 @@ DCNode* DCNode :: adjacentNode(DCNodeList& nlist, int direction) {
 StringList DCNode::print() {
 
 	StringList out;
-	DCNode *node;
 
 	if (getType() < 0) { // Communication node
 		if (getType() == -1) {
