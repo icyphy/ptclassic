@@ -68,12 +68,13 @@ clean:
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(SRCS) $(HDRS) make.template
 
-depend:	
-		makedepend -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
+depend:
+		cd $(VPATH); \
+		g++ -MM -I$(KERNDIR) $(SRCS)|cat make.template - > makefile.n;\
+		mv -f makefile.n makefile
 
 makefile:	make.template
-		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		make -f make.template sources depend
+		cd $(VPATH); make -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
