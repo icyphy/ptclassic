@@ -27,8 +27,6 @@ $Id$
 const double CG56_ONE = 1.0 - 1.0/double(1<<23);
 
 class CG56Star : public AsmStar {
-protected:
-	static StringList ONE;
 public:
 	// my domain
 	const char* domain() const;

@@ -27,8 +27,6 @@ extern const char CG56domainName[];
 
 const char* CG56Star :: domain () const { return CG56domainName;}
 
-StringList CG56Star :: ONE(CG56_ONE);
-
 // isa
 
 ISA_FUNC(CG56Star, CGStar);
