@@ -67,9 +67,9 @@ ADS	= Vem
 
 #-------------------------------------------------------------------------
 all:
-install:  makefile $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) $(OCTTOOLS)/lib/$(ADS)
+install:  makefile $(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) $(OCTTOOLS)/lib/$(ADS)
 
-$(OCTTOOLS)/lib/vem.bindings.$(VERSION):	$(OCTTOOLS)/lib/vem vem.bindings
+$(OCTTOOLS)/lib/vem.bindings.$(VERSION):	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem vem.bindings
 	cp vem.bindings $(OCTTOOLS)/lib/vem/vem.bindings.$(VERSION)
 
 $(OCTTOOLS)/lib/$(ADS): $(ADS)
@@ -78,37 +78,38 @@ $(OCTTOOLS)/lib/$(ADS): $(ADS)
 $(XAPP)/$(ADS):	$(ADS)
 	-cp $(ADS) $(XAPP)/$(ADS)
 
-$(OCTTOOLS)/lib/vem/checkoff.bm:	$(OCTTOOLS)/lib/vem checkoff.bm
+$(OCTTOOLS)/lib/vem/checkoff.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkoff.bm
 	cp checkoff.bm $(OCTTOOLS)/lib/vem/checkoff.bm
 
-$(OCTTOOLS)/lib/vem/checkon.bm:	$(OCTTOOLS)/lib/vem checkon.bm
+$(OCTTOOLS)/lib/vem/checkon.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkon.bm
 	cp checkon.bm $(OCTTOOLS)/lib/vem/checkon.bm
 
-$(OCTTOOLS)/lib/vem/checkoffhi.bm:	$(OCTTOOLS)/lib/vem checkoffhi.bm
+$(OCTTOOLS)/lib/vem/checkoffhi.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkoffhi.bm
 	cp checkoffhi.bm $(OCTTOOLS)/lib/vem/checkoffhi.bm
 
-$(OCTTOOLS)/lib/vem/checkonhi.bm:	$(OCTTOOLS)/lib/vem checkonhi.bm
+$(OCTTOOLS)/lib/vem/checkonhi.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkonhi.bm
 	cp checkonhi.bm $(OCTTOOLS)/lib/vem/checkonhi.bm
 
-$(OCTTOOLS)/lib/vem/folder.bm:	$(OCTTOOLS)/lib/vem folder.bm
+$(OCTTOOLS)/lib/vem/folder.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem folder.bm
 	cp folder.bm $(OCTTOOLS)/lib/vem/folder.bm
 
-$(OCTTOOLS)/lib/vem/newcell.bm:	$(OCTTOOLS)/lib/vem newcell.bm
+$(OCTTOOLS)/lib/vem/newcell.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem newcell.bm
 	cp newcell.bm $(OCTTOOLS)/lib/vem/newcell.bm
 
-$(OCTTOOLS)/lib/vem/other.bm:	$(OCTTOOLS)/lib/vem other.bm
+$(OCTTOOLS)/lib/vem/other.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem other.bm
 	cp other.bm $(OCTTOOLS)/lib/vem/other.bm
 
-$(OCTTOOLS)/lib/vem/physical.bm:	$(OCTTOOLS)/lib/vem physical.bm
+$(OCTTOOLS)/lib/vem/physical.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem physical.bm
 	cp physical.bm $(OCTTOOLS)/lib/vem/physical.bm
 
-$(OCTTOOLS)/lib/vem/schematic.bm:	$(OCTTOOLS)/lib/vem schematic.bm
+$(OCTTOOLS)/lib/vem/schematic.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem schematic.bm
 	cp schematic.bm $(OCTTOOLS)/lib/vem/schematic.bm
 
-$(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib/vem symbolic.bm
+$(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem symbolic.bm
 	cp symbolic.bm $(OCTTOOLS)/lib/vem/symbolic.bm
 
-$(OCTTOOLS)/lib/vem:;	-mkdir $(OCTTOOLS)/lib/vem
+$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem:
+	-mkdir $@ 
 
 # Some versions of make require us to set LIB if we are going to
 # include common.mk
