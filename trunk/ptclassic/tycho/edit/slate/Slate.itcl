@@ -336,14 +336,23 @@ body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
 # <li><b>done</b>: This is for use by the animation code itself.
 # _Do not use_.
 # </ul>
-# To move an object, just execute:
+# To move an object 50 pixels south-east, just execute:
 # <pre>
-#   $slate animate move $id 50 50
+#   $slate animate move $id 50 50 -duration 2000
 # </pre>
-# To reshape an object, execute something like:
+# The -duration argument is the approximate time to complete
+# the animation, in "Tcl time." To reshape an object, execute
+# something like: 
 # <pre>
 #   $slate animate reshape $id 50 50 -aspects vertex-1
 # </pre>
+# Animation is asynchronous, so multiple animation calls
+# overlap in effect. To synchronize a series of animation
+# sequences, inserts calls like this:
+# <pre>
+#  $slate animate wait
+# </pre>
+# to wait for all executing animations to complete.
 # Here is a more complex example:
 #
 # <pre><tcl quiet>
@@ -411,6 +420,7 @@ body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
                 puts "Uh-oh... bogus animator $tagOrID"
             }
             set animators [lreplace $animators $t $t]
+	    uplevel #0 delete object $tagOrID
         }
         default {
             error "Invalid option \"$mode\""
