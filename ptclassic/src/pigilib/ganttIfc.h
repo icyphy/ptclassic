@@ -1,3 +1,5 @@
+#ifndef GANTTIFC_H
+#define GANTTIFC_H 1
 /* 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -27,6 +29,25 @@ Version identification:
 $Id$
 */
 
+#ifdef __cplusplus
+extern int CreateFrames();
+extern int Frame(char *stars[]);
+extern int ClearFrames();
+extern int DestroyFrames();
+extern void FindAndMarkError(octObject *facetP, char *name);
+
+extern boolean FindNameSet(octObject *facetPtr, char *name);
+/* FIXME:  These functions are not in ganttIfc.h */
+extern void FrameSetFacet();
+extern int GanttMan();
+extern void GanttErr();
+
+/* Functions below should only be called by GGI */
+extern boolean GanttRun();  /* FIXME: Not in ganttIfc.h */
+extern boolean GanttInit(); /* FIXME: Not in ganttIfc.h */
+extern void FindClear();
+extern int RpcFindName(RPCSpot *spot, lsList cmdList, long userOptionWord);
+#else
 extern void FrameSetFacet();
 extern int CreateFrames();
 extern int Frame();
@@ -43,9 +64,11 @@ extern boolean GanttRun();
 extern boolean GanttInit();
 extern void FindClear();
 extern int RpcFindName();
+#endif /* __cplusplus */
 
 typedef struct RgbValue_s {
     unsigned short red;
     unsigned short green;
     unsigned short blue;
 } RgbValue;
+#endif /* GANTTIFC_H */
