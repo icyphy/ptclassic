@@ -76,10 +76,10 @@ DSP56000 - An input star for the Ariel digital microphone
         codeblock (pollingInit) {
 ; SSI Control Register A
 ; 16 bits per word, two words per frame
-        movep   #$4100,x:m_cra
+        movep   #$$4100,x:m_cra
 ; SSI Control Register B
 ; Enable receiver in network mode
-        movep   #$2A00,x:m_crb
+        movep   #$$2A00,x:m_crb
 ; Configure PC pins 7, 6, 5 (SRD, SCK, SC2) as SSI pins
         bset    #7,x:m_pcc
         bset    #6,x:m_pcc
@@ -160,10 +160,10 @@ $label(two)
                 default:	    
         	      Error::abortRun(*this, "abortRealtimeError must be yes or no.");
                 }
-                if (sampleRate!=88200 || sampleRate!=44100 || sampleRate!=22050 || sampleRate!=11025 || sampleRate!=5512)
-        	      Error::abortRun(*this, "SampleRate must be 88200, 44100,22050, 11025, or 5512.");                		      
+                if (sampleRate!=88200 && sampleRate!=44100 && sampleRate!=22050 && sampleRate!=11025 && sampleRate!=5512)
+        	      Error::abortRun(*this, "sampleRate must be 88200, 44100, 22050, 11025, or 5512.");                		      
+         }    
  
-        }    
         initCode { 
         const char* p = forceInterrupts;
              if (p[0]=='n' || p[0]=='N') {
