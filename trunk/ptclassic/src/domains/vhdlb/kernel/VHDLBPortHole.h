@@ -123,7 +123,7 @@ class VHDLBForkDestIter : private ListIter {
 public:
 	VHDLBForkDestIter(VHDLBPortHole* p) : ListIter(p->myDest()) {}
 	VHDLBPortHole* next() { return (VHDLBPortHole*) ListIter::next(); }
-	VHDLBPortHole* operator++ () { return next(); }
+	VHDLBPortHole* operator++ (POSTFIX_OP) { return next(); }
 	ListIter::reset;
 };
 #endif
