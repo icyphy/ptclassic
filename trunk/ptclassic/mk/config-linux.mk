@@ -60,7 +60,9 @@ include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
+ifndef BUILD_STATIC_BINARIES
 include $(ROOT)/mk/config-g++.shared.mk
+endif
 
 #
 # Programs to use
