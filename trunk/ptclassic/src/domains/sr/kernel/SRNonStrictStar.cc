@@ -1,6 +1,6 @@
 static const char file_id[] = "SRNonStrictStar.cc";
 
-/*  Version @(#)SRNonStrictStar.cc	1.1 4/16/96
+/*  Version $Id$
 
 @Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char SRdomainName[];
 
 // Class identification.
-ISA_FUNC(SRNonStrictStar, Star);
+ISA_FUNC(SRNonStrictStar, SRStar);
 
 // Domain identification.
 const char * SRNonStrictStar::domain() const
