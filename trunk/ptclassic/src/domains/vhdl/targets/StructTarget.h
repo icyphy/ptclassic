@@ -107,19 +107,13 @@ public:
 			      VHDLPortList* portList,
 			      VHDLGenericList* genList);
 
-	// Register each signal in the star signal list.
-	void registerSignalList(VHDLSignalList* starSignalList);
+	// Merge the Star's signal list with the Target's signal list.
+	void mergeSignalList(VHDLSignalList* starSignalList);
 
 	// Register component mapping.
 	void registerCompMap(StringList label, StringList name,
 			     VHDLPortMapList* portMapList,
 			     VHDLGenericMapList* genMapList);
-
-	// Return the VHDL type corresponding to the State type.
-	/*virtual*/ StringList stateType(const State* st);
-
-	// Register the temporary storage reference.
-	/*virtual*/ void registerTemp(const char*, const char*);
 
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, int=-1, int=-1);
@@ -134,6 +128,24 @@ public:
  	// is to change the separator from "." to "_".
  	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
 
+	// Allocate memory for a new VHDLSignal and put it in the list.
+	void signalListPut(VHDLSignalList*, StringList, StringList, StringList,
+			   StringList);
+
+	// Allocate memory for a new VHDLPort and put it in the list.
+	void portListPut(VHDLPortList*, StringList, StringList, StringList);
+
+	// Allocate memory for a new VHDLPortMap and put it in the list.
+	void portMapListPut(VHDLPortMapList*, StringList, StringList);
+
+	// Allocate memory for a new VHDLVariable and put it in the list.
+	void variableListPut(VHDLVariableList*, StringList, StringList,
+			     StringList);
+
+	// Allocate memory for a new VHDLPortVar and put it in the list.
+	void portVarListPut(VHDLPortVarList*, StringList, StringList);
+
+
 protected:
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
@@ -147,6 +159,9 @@ protected:
 
 	// virtual function to initialize codeStreams.
 	virtual void initCodeStreams();
+
+	// Initialize firing lists.
+	void initFiringLists();
 
 	/*virtual*/ void setup();
 
