@@ -189,6 +189,18 @@ IconType type;
     return (TRUE);
 }
 
+/* Propagate the domain to the schematic icon for the galaxy. -BLE 1/26/95 */
+static void
+propagateDomain(galFacetPtr, iconFacetPtr)
+octObject *galFacetPtr, *iconFacetPtr;
+{
+    const char* domain = 0;
+    if ( GetStringProp(galFacetPtr, "domain", &domain) ) {
+	if ( domain ) SetStringProp(iconFacetPtr, "domain", (char*)domain);
+    }
+    return;
+}
+
 /* 8/24/89
 Makes an icon contents facet for stars.  It simply puts formal terminals
 in the contents facet.
@@ -335,9 +347,11 @@ octObject *facetPtr, *iconFacetPtr;
     ERR_IF1(!MkBaseIcon(iconFacetPtr, facetPtr->contents.facet.cell, pal));
     ERR_IF1(!MkLabel(iconFacetPtr, BaseName(facetPtr->contents.facet.cell)));
     CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "palette", ""));
+    propagateDomain(facetPtr, iconFacetPtr);
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
+
 
 /* 8/1/89
 */
@@ -354,6 +368,7 @@ octObject *facetPtr, *iconFacetPtr;
     ERR_IF1(!MkBaseIcon(iconFacetPtr, facetPtr->contents.facet.cell, univ));
     ERR_IF1(!MkLabel(iconFacetPtr, BaseName(facetPtr->contents.facet.cell)));
     CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "universe", ""));
+    propagateDomain(facetPtr, iconFacetPtr);
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
@@ -365,7 +380,7 @@ octObject *galFacetPtr, *iconFacetPtr;
     TermList terms;
     char buf[MSG_BUF_MAX];
     octObject prop = {OCT_UNDEFINED_OBJECT, 0};
-    char *name = BaseName(galFacetPtr->contents.facet.cell);
+    char* name = BaseName(galFacetPtr->contents.facet.cell);
     int maxNumTerms, size;
 
     sprintf(buf, "Making galaxy icon for '%s'", name);
@@ -374,9 +389,9 @@ octObject *galFacetPtr, *iconFacetPtr;
     ERR_IF1(!AskAboutIcon(galFacetPtr->contents.facet.cell));
     ERR_IF1(!CompileGalStandalone(galFacetPtr));
     ERR_IF1(!KcGetTerms(name, &terms));
-    if(terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
+    if (terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
     else maxNumTerms = terms.in_n;
-    if(maxNumTerms <= 5) size = 4;
+    if (maxNumTerms <= 5) size = 4;
     else size = maxNumTerms-1;
     ERR_IF1(!MkBaseIcon(iconFacetPtr, galFacetPtr->contents.facet.cell, gal));
     /* make the box */
@@ -389,6 +404,7 @@ octObject *galFacetPtr, *iconFacetPtr;
 	ERR_IF1(!MkBox(&iconBackgrLayer, size));
     }
     CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
+    propagateDomain(galFacetPtr, iconFacetPtr);
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
@@ -398,8 +414,8 @@ Updates:
 3/6/89 = return iconFacetPtr, name change
 */
 boolean
-MkStarIcon(nameplus, dir, iconFacetPtr)
-char *nameplus, *dir;
+MkStarIcon(nameplus, dir, domain, iconFacetPtr)
+char *nameplus, *dir, *domain;
 octObject *iconFacetPtr;
 {
     TermList terms;
@@ -422,9 +438,9 @@ octObject *iconFacetPtr;
     ERR_IF1(!AskAboutIcon(fileName));
     ERR_IF1(!KcGetTerms(nameplus, &terms));
     ERR_IF1(!MkStarConFacet(&iconConFacet, fileName, &terms));
-    if(terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
+    if (terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
     else maxNumTerms = terms.in_n;
-    if(maxNumTerms <= 5) size = 4;
+    if (maxNumTerms <= 5) size = 4;
     else size = maxNumTerms-1;
     ERR_IF1(!MkBaseIcon(iconFacetPtr, fileName, star));
     /* make the box */
@@ -443,6 +459,7 @@ octObject *iconFacetPtr;
 */
     }
     CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "star", ""));
+    SetStringProp(iconFacetPtr, "domain", domain);
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
