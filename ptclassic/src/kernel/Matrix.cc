@@ -64,10 +64,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  results is too expensive.
 **************************************************************************/
 
-// Add two matricies
+// Add two matrices
 ComplexMatrix operator+ (const ComplexMatrix& src1,const ComplexMatrix& src2) {
   if((src1.nRows != src2.nRows) || (src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matricies of different dimensions\n");
+    Error::abortRun("addition used on matrices of different dimensions\n");
     return src1;
   }
   ComplexMatrix result(src1.nRows,src1.nCols);
@@ -89,10 +89,10 @@ ComplexMatrix operator+ (const ComplexMatrix& matrix,const Complex& scalar) {
   return (scalar + matrix);
 }
 
-// Subtract two matricies
+// Subtract two matrices
 ComplexMatrix operator- (const ComplexMatrix& src1,const ComplexMatrix& src2) {
   if((src1.nRows != src2.nRows) || (src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matricies of different dimensions\n");
+    Error::abortRun("subtraction used on matrices of different dimensions\n");
     return src1;
   }
   ComplexMatrix result(src1.nRows,src1.nCols);
@@ -111,13 +111,13 @@ ComplexMatrix operator- (const ComplexMatrix& matrix,const Complex& scalar) {
   return ((-scalar) + matrix);
 }
 
-// Multiply two matricies, true matrix multiply, this is a fairly fast
+// Multiply two matrices, true matrix multiply, this is a fairly fast
 // algorithm, especially when optimized by the compiler.
 ComplexMatrix operator* (const ComplexMatrix& src1,const ComplexMatrix& src2) {
   ComplexMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
     return result;
   }
   
@@ -145,14 +145,14 @@ ComplexMatrix operator* (const ComplexMatrix& matrix,const Complex& scalar) {
   return (scalar * matrix);
 }
 
-// Multiply two matricies, and put result in the third.  This is similar to
+// Multiply two matrices, and put result in the third.  This is similar to
 // the binary operator * but faster because by passing the reference to the
 // result, we avoid an extra copy constructor step.
 ComplexMatrix& multiply (const ComplexMatrix& left,const ComplexMatrix& right,
                          ComplexMatrix& result) {
   if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
      (right.nCols != result.nCols)) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
     return result;
   }
   
@@ -167,10 +167,10 @@ ComplexMatrix& multiply (const ComplexMatrix& left,const ComplexMatrix& right,
   return result;
 }
 
-// Add two matricies
+// Add two matrices
 FixMatrix operator + (const FixMatrix& src1, const FixMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matricies of different dimensions.\n"); 
+    Error::abortRun("addition used on matrices of different dimensions.\n"); 
     return src1;
   }
   FixMatrix result(src1.nRows,src1.nCols);
@@ -192,10 +192,10 @@ FixMatrix operator+ (const FixMatrix& matrix,const Fix& scalar) {
   return (scalar + matrix);
 }
 
-// Subtract two matricies
+// Subtract two matrices
 FixMatrix operator - (const FixMatrix& src1, const FixMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matricies of different dimensions\n");
+    Error::abortRun("subtraction used on matrices of different dimensions\n");
     return src1;
   }
   FixMatrix result(src1.nRows,src1.nCols);
@@ -218,13 +218,13 @@ FixMatrix operator- (const FixMatrix& matrix,const Fix& scalar) {
   return ((-scalar) + matrix);
 }
 
-// Multiply two matricies, true matrix multiply, this is a fairly fast
+// Multiply two matrices, true matrix multiply, this is a fairly fast
 // algorithm, especially when optimized by the compiler.
 FixMatrix operator * (const FixMatrix& src1, const FixMatrix& src2) {
   FixMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n"); 
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n"); 
     return result;
   }
   
@@ -252,14 +252,14 @@ FixMatrix operator* (const FixMatrix& matrix,const Fix& scalar) {
   return (scalar * matrix);
 }
 
-// Multiply two matricies, and put result in the third.  This is similar to
+// Multiply two matrices, and put result in the third.  This is similar to
 // the binary operator * but faster because by passing the reference to the
 // result, we avoid an extra copy constructor step.
 FixMatrix& multiply (const FixMatrix& left,const FixMatrix& right,
                      FixMatrix& result) {
   if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
      (right.nCols != result.nCols)) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
     return result;
   }
   
@@ -274,10 +274,10 @@ FixMatrix& multiply (const FixMatrix& left,const FixMatrix& right,
   return result;
 }
 
-// Add two matricies
+// Add two matrices
 FloatMatrix operator + (const FloatMatrix& src1, const FloatMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matricies of different dimensions.\n"); 
+    Error::abortRun("addition used on matrices of different dimensions.\n"); 
     return src1;
   }
   FloatMatrix result(src1.nRows,src1.nCols);
@@ -299,10 +299,10 @@ FloatMatrix operator+ (const FloatMatrix& matrix,double scalar) {
   return (scalar + matrix);
 }
 
-// Subtract two matricies
+// Subtract two matrices
 FloatMatrix operator - (const FloatMatrix& src1, const FloatMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matricies of different dimensions\n");
+    Error::abortRun("subtraction used on matrices of different dimensions\n");
     return src1;
   }
   FloatMatrix result(src1.nRows,src1.nCols);
@@ -321,13 +321,13 @@ FloatMatrix operator- (const FloatMatrix& matrix,double scalar) {
   return ((-scalar) + matrix);
 }
 
-// Multiply two matricies, true matrix multiply, this is a fairly fast
+// Multiply two matrices, true matrix multiply, this is a fairly fast
 // algorithm, especially when optimized by the compiler.
 FloatMatrix operator * (const FloatMatrix& src1, const FloatMatrix& src2) {
   FloatMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
     return result;
   }
   
@@ -355,14 +355,14 @@ FloatMatrix operator* (const FloatMatrix& matrix,double scalar) {
   return (scalar * matrix);
 }
 
-// Multiply two matricies, and put result in the third.  This is similar to
+// Multiply two matrices, and put result in the third.  This is similar to
 // the binary operator * but faster because by passing the reference to the
 // result, we avoid an extra copy constructor step.
 FloatMatrix& multiply (const FloatMatrix& left,const FloatMatrix& right,
                        FloatMatrix& result) {
   if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
      (right.nCols != result.nCols)) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
     return result;
   }
   
@@ -377,10 +377,10 @@ FloatMatrix& multiply (const FloatMatrix& left,const FloatMatrix& right,
   return result;
 }
 
-// Add two matricies
+// Add two matrices
 IntMatrix operator + (const IntMatrix& src1, const IntMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matricies of different dimensions.\n"); 
+    Error::abortRun("addition used on matrices of different dimensions.\n"); 
     return src1;
   }
   IntMatrix result(src1.nRows,src1.nCols);
@@ -402,10 +402,10 @@ IntMatrix operator+ (const IntMatrix& matrix,int scalar) {
   return (scalar + matrix);
 }
 
-// Subtract two matricies
+// Subtract two matrices
 IntMatrix operator - (const IntMatrix& src1, const IntMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matricies of different dimensions\n");
+    Error::abortRun("subtraction used on matrices of different dimensions\n");
     return src1;
   }
   IntMatrix result(src1.nRows,src1.nCols);
@@ -424,13 +424,13 @@ IntMatrix operator- (const IntMatrix& matrix,int scalar) {
   return ((-scalar) + matrix);
 }
 
-// Multiply two matricies, true matrix multiply, this is a fairly fast
+// Multiply two matrices, true matrix multiply, this is a fairly fast
 // algorithm, especially when optimized by the compiler.
 IntMatrix operator * (const IntMatrix& src1, const IntMatrix& src2) {
   IntMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n"); 
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n"); 
     return result;
   }
   
@@ -458,14 +458,14 @@ IntMatrix operator* (const IntMatrix& matrix,int scalar) {
   return (scalar * matrix);
 }
 
-// Multiply two matricies, and put result in the third.  This is similar to
+// Multiply two matrices, and put result in the third.  This is similar to
 // the binary operator * but faster because by passing the reference to the
 // result, we avoid an extra copy constructor step.
 IntMatrix& multiply (const IntMatrix& left,const IntMatrix& right,
                      IntMatrix& result) {
   if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
      (right.nCols != result.nCols)) {
-    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
     return result;
   }
   
@@ -499,13 +499,13 @@ int PtMatrix::compareType(const PtMatrix & m) const {
 // Complex Matrix Message Class - holds data of type Complex
 /////////////////////////////////////////////////////////////
 
-// Constructor: make an unitialized matrix with no data
+// Constructor: make an uninitialized matrix with no data
 ComplexMatrix::ComplexMatrix() {
   nRows = nCols = totalDataSize = 0;
   data = 0;
 }
 
-// Constructor: make an unitialized matrix with the given dimensions
+// Constructor: make an uninitialized matrix with the given dimensions
 ComplexMatrix::ComplexMatrix(int numRow, int numCol) {
   nRows = numRow;
   nCols = numCol;
@@ -579,7 +579,7 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
       (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
-// Prints matricies in standard row column form.
+// Prints matrices in standard row column form.
 StringList ComplexMatrix::print() const {
   char buf[SMALL_STRING];
   StringList strm;
@@ -637,7 +637,7 @@ ComplexMatrix::operator IntMatrix () const {
 
 // destructive replacement operators
 PtMatrix& ComplexMatrix::operator = (const PtMatrix& m) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
     const ComplexMatrix& src = *((const ComplexMatrix*)&m);
@@ -655,7 +655,7 @@ PtMatrix& ComplexMatrix::operator = (const PtMatrix& m) {
 }
 
 ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& src) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(src)) {
     if(totalDataSize != src.totalDataSize) {
@@ -679,7 +679,7 @@ ComplexMatrix& ComplexMatrix::operator = (const Complex& value) {
 
 ComplexMatrix& ComplexMatrix::operator += (const ComplexMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matricies of different dimensions\n");
+    Error::abortRun("+= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -695,7 +695,7 @@ ComplexMatrix& ComplexMatrix::operator += (const Complex& value) {
 
 ComplexMatrix& ComplexMatrix::operator -= (const ComplexMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matricies of different dimensions\n");
+    Error::abortRun("-= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -712,7 +712,7 @@ ComplexMatrix& ComplexMatrix::operator -= (const Complex& value) {
 // Note: this is element-wise multiplication and not regular matrix multiply
 ComplexMatrix& ComplexMatrix::operator *= (const ComplexMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("*= used on matricies of different dimensions\n");
+    Error::abortRun("*= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -728,7 +728,7 @@ ComplexMatrix& ComplexMatrix::operator *= (const Complex& value) {
 
 ComplexMatrix& ComplexMatrix::operator /= (const ComplexMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("/= used on matricies of different dimensions\n");
+    Error::abortRun("/= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -878,13 +878,13 @@ ComplexMatrix::~ComplexMatrix() {
 // FixMatrix Message Class - holds data of type Fix
 ///////////////////////////////////////////////////
 
-// Constructor: make an unitialized matrix with no data
+// Constructor: make an uninitialized matrix with no data
 FixMatrix::FixMatrix() {
   nRows = nCols = totalDataSize = 0;
   data = 0;
 }
 
-// Constructor: make an unitialized matrix with the given dimensions,
+// Constructor: make an uninitialized matrix with the given dimensions,
 // using Fix elements of the default size as defined in the Fix class
 FixMatrix::FixMatrix(int numRow, int numCol) {
   nRows = numRow;
@@ -893,7 +893,7 @@ FixMatrix::FixMatrix(int numRow, int numCol) {
   LOG_NEW; data = new Fix[totalDataSize];
 }
 
-// Constructor: make an unitialized matrix with the given dimensions,
+// Constructor: make an uninitialized matrix with the given dimensions,
 // using Fix elements of the given length "ln" and number of integer
 // bits "ib"
 FixMatrix::FixMatrix(int numRow, int numCol, int ln, int ib) {
@@ -1050,7 +1050,7 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
       (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
-// Prints matricies in standard row column form.
+// Prints matrices in standard row column form.
 StringList FixMatrix::print() const {
   char buf[SMALL_STRING];
   StringList strm;
@@ -1105,7 +1105,7 @@ FixMatrix::operator IntMatrix () const {
 
 // destructive replacement operators
 PtMatrix& FixMatrix::operator = (const PtMatrix& m) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
     const FixMatrix& src = *((const FixMatrix*)&m);
@@ -1123,7 +1123,7 @@ PtMatrix& FixMatrix::operator = (const PtMatrix& m) {
 }
 
 FixMatrix& FixMatrix::operator = (const FixMatrix& src) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(src)) {
     if(totalDataSize != src.totalDataSize) {
@@ -1147,7 +1147,7 @@ FixMatrix& FixMatrix::operator = (const Fix& value) {
 
 FixMatrix& FixMatrix::operator += (const FixMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matricies of different dimensions\n");
+    Error::abortRun("+= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1163,7 +1163,7 @@ FixMatrix& FixMatrix::operator += (const Fix& value) {
 
 FixMatrix& FixMatrix::operator -= (const FixMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matricies of different dimensions\n");
+    Error::abortRun("-= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1180,7 +1180,7 @@ FixMatrix& FixMatrix::operator -= (const Fix& value) {
 // Note: this is element-wise multiplication and not regular matrix multiply
 FixMatrix& FixMatrix::operator *= (const FixMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("*= used on matricies of different dimensions\n");
+    Error::abortRun("*= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1196,7 +1196,7 @@ FixMatrix& FixMatrix::operator *= (const Fix& value) {
 
 FixMatrix& FixMatrix::operator /= (const FixMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("/= used on matricies of different dimensions\n");
+    Error::abortRun("/= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1326,13 +1326,13 @@ FixMatrix::~FixMatrix() {
 // Float Matrix Message Class - holds data of type double
 /////////////////////////////////////////////////////////
 
-// Constructor: make an unitialized matrix with no data
+// Constructor: make an uninitialized matrix with no data
 FloatMatrix::FloatMatrix() {
   nRows = nCols = totalDataSize = 0;
   data = 0;
 }
 
-// Constructor: make an unitialized matrix with the given dimensions
+// Constructor: make an uninitialized matrix with the given dimensions
 FloatMatrix::FloatMatrix(int numRow, int numCol) {
   nRows = numRow;
   nCols = numCol;
@@ -1406,7 +1406,7 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
       (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
-// Prints matricies in standard row column form.
+// Prints matrices in standard row column form.
 StringList FloatMatrix::print() const {
   char buf[SMALL_STRING];
   StringList strm;
@@ -1461,7 +1461,7 @@ FloatMatrix::operator IntMatrix () const {
 
 // destructive replacement operators
 PtMatrix& FloatMatrix::operator = (const PtMatrix& m) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
     const FloatMatrix& src = *((const FloatMatrix*)&m);
@@ -1479,7 +1479,7 @@ PtMatrix& FloatMatrix::operator = (const PtMatrix& m) {
 }
 
 FloatMatrix& FloatMatrix::operator = (const FloatMatrix& src) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(src)) {
     if(totalDataSize != src.totalDataSize) {
@@ -1503,7 +1503,7 @@ FloatMatrix& FloatMatrix::operator = (double value) {
 
 FloatMatrix& FloatMatrix::operator += (const FloatMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matricies of different dimensions\n");
+    Error::abortRun("+= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1519,7 +1519,7 @@ FloatMatrix& FloatMatrix::operator += (double value) {
 
 FloatMatrix& FloatMatrix::operator -= (const FloatMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matricies of different dimensions\n");
+    Error::abortRun("-= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1536,7 +1536,7 @@ FloatMatrix& FloatMatrix::operator -= (double value) {
 // Note: this is element-wise multiplication and not regular matrix multiply
 FloatMatrix& FloatMatrix::operator *= (const FloatMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("*= used on matricies of different dimensions\n");
+    Error::abortRun("*= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1552,7 +1552,7 @@ FloatMatrix& FloatMatrix::operator *= (double value) {
 
 FloatMatrix& FloatMatrix::operator /= (const FloatMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("/= used on matricies of different dimensions\n");
+    Error::abortRun("/= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1682,13 +1682,13 @@ FloatMatrix::~FloatMatrix() {
 // IntMatrix Message Class - holds data of type int
 ///////////////////////////////////////////////////
 
-// Constructor: make an unitialized matrix with no data
+// Constructor: make an uninitialized matrix with no data
 IntMatrix::IntMatrix() {
   nRows = nCols = totalDataSize = 0;
   data = 0;
 }
 
-// Constructor: make an unitialized matrix with the given dimensions
+// Constructor: make an uninitialized matrix with the given dimensions
 IntMatrix::IntMatrix(int numRow, int numCol) {
   nRows = numRow;
   nCols = numCol;
@@ -1763,7 +1763,7 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
       (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
-// Prints matricies in standard row column form.
+// Prints matrices in standard row column form.
 StringList IntMatrix::print() const {
   char buf[SMALL_STRING];
   StringList strm;
@@ -1818,7 +1818,7 @@ IntMatrix::operator FloatMatrix () const {
 
 // destructive replacement operators
 PtMatrix& IntMatrix::operator = (const PtMatrix& m) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
     const IntMatrix& src = *((const IntMatrix*)&m);
@@ -1836,7 +1836,7 @@ PtMatrix& IntMatrix::operator = (const PtMatrix& m) {
 }
 
 IntMatrix& IntMatrix::operator = (const IntMatrix& src) {
-// WARNING: any SubMatricies refering to the data in this matrix 
+// WARNING: any SubMatricies referring to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(src)) {
     if(totalDataSize != src.totalDataSize) {
@@ -1860,7 +1860,7 @@ IntMatrix& IntMatrix::operator = (int value) {
 
 IntMatrix& IntMatrix::operator += (const IntMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matricies of different dimensions\n");
+    Error::abortRun("+= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1876,7 +1876,7 @@ IntMatrix& IntMatrix::operator += (int value) {
 
 IntMatrix& IntMatrix::operator -= (const IntMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matricies of different dimensions\n");
+    Error::abortRun("-= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1893,7 +1893,7 @@ IntMatrix& IntMatrix::operator -= (int value) {
 // Note: this is element-wise multiplication and not regular matrix multiply
 IntMatrix& IntMatrix::operator *= (const IntMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("*= used on matricies of different dimensions\n");
+    Error::abortRun("*= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1909,7 +1909,7 @@ IntMatrix& IntMatrix::operator *= (int value) {
 
 IntMatrix& IntMatrix::operator /= (const IntMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("/= used on matricies of different dimensions\n");
+    Error::abortRun("/= used on matrices of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -2039,7 +2039,7 @@ IntMatrix::~IntMatrix() {
 }
 
 /****************************************************************************
- MatrixEnvParticles, used to hold envelopes which hold the actual matricies.
+ MatrixEnvParticles, used to hold envelopes which hold the actual matrices.
 *****************************************************************************/
 extern const DataType COMPLEX_MATRIX_ENV = "COMPLEX_MATRIX_ENV";
 extern const DataType FIX_MATRIX_ENV = "FIX_MATRIX_ENV";
@@ -2145,7 +2145,7 @@ int ComplexMatrixEnvParticle::initParticleStack(Block* parent,
   Envelope p(*matrix);
   data = p;
 
-  // create new matricies, initialize them, stuff them into Envelopes, put
+  // create new matrices, initialize them, stuff them into Envelopes, put
   // the envelopes into MatrixEnvParticles obtained from the plasma
   for(int i = 1; i < numInitialParticles; i++) {
     ComplexMatrix *matrix = new ComplexMatrix(numRows,numCols);
@@ -2271,7 +2271,7 @@ int FixMatrixEnvParticle::initParticleStack(Block* parent,
   Envelope p(*matrix);
   data = p;
 
-  // create new matricies, initialize them, stuff them into Envelopes, put
+  // create new matrices, initialize them, stuff them into Envelopes, put
   // the envelopes into MatrixEnvParticles obtained from the plasma
   for(int i = 1; i < numInitialParticles; i++) {
     FixMatrix *matrix = new FixMatrix(numRows,numCols);
@@ -2398,7 +2398,7 @@ int FloatMatrixEnvParticle::initParticleStack(Block* parent,
   Envelope p(*matrix);
   data = p;
 
-  // create new matricies, initialize them, stuff them into Envelopes, put
+  // create new matrices, initialize them, stuff them into Envelopes, put
   // the envelopes into MatrixEnvParticles obtained from the plasma
   for(int i = 1; i < numInitialParticles; i++) {
     FloatMatrix *matrix = new FloatMatrix(numRows,numCols);
@@ -2524,7 +2524,7 @@ int IntMatrixEnvParticle::initParticleStack(Block* parent,
   Envelope p(*matrix);
   data = p;
 
-  // create new matricies, initialize them, stuff them into Envelopes, put
+  // create new matrices, initialize them, stuff them into Envelopes, put
   // the envelopes into MatrixEnvParticles obtained from the plasma
   for(int i = 1; i < numInitialParticles; i++) {
     IntMatrix *matrix = new IntMatrix(numRows,numCols);
