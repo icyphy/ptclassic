@@ -9,7 +9,7 @@
 # $Id$
 # Author: Christopher Hylands
 
-wm deiconify .
+wm iconify .
 
 # If the TYTEST_LIBRARY variable is set, add it to the auto_path
 if [info exists env(TYTEST_LIBRARY)] {
