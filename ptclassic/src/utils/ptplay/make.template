@@ -47,7 +47,7 @@ ptplay: ptplay.$(ARCH)
 
 install:	$(BINDIR)/ptplay
 
-ptplay.cfront ptplay.sol2: ptplay.sun4
+ptplay.cfront ptplay.sol2 ptplay.sol2.sunc: ptplay.sun4
 	ln -s $^ $@ 
 ptplay.irix4: ptplay.irix5
 	ln -s $^ $@ 
