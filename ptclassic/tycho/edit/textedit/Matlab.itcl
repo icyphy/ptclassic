@@ -48,7 +48,7 @@ class ::tycho::Matlab {
 
 ###################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 #
 body ::tycho::Matlab::help {} {
     global ::TYCHO

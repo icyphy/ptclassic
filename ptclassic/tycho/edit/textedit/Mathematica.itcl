@@ -48,7 +48,7 @@ class ::tycho::Mathematica {
 
 ###################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 #
 body ::tycho::Mathematica::help {} {
     global ::TYCHO
