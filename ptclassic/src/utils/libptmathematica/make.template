@@ -44,6 +44,9 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
+# We only link against libptmathematica if mathematica cannot be found at
+# link time.
+# See $PTOLEMY/mk/mathematica.mk and $PTOLEMY/bin/mathRootDir.
 LIB = 		libptmathematica.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
