@@ -211,8 +211,6 @@ proc ptkMakeButton {win name desc callback} {
     catch {destroy $s}
     button $s -text "$desc" -command $callback
     pack $s -fill x -expand yes -anchor e -pady 5
-    bind $s <ButtonPress-1> "$s configure -relief sunken; $s invoke"
-    bind $s <ButtonRelease-1> "$s configure -relief raised"
 }
 
 #######################################################################
