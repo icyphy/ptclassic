@@ -87,7 +87,7 @@ public:
 		if (nxt) nxt = nxt->next;
 		return r;
 	}
-	BDFSNode* operator++() { return next();}
+	BDFSNode* operator++(POSTFIX_OP) { return next();}
 	void reset(int /*back*/ = 0) { nxt = ref.first;}
 private:
 	const BDFSList& ref;
