@@ -53,7 +53,6 @@ ptkOptions.tcl \
 ptkParams.tcl \
 ptkPrfacet.tcl \
 ptkRunAllDemos.tcl \
-ptkRunDesignMaker.tcl \
 ptkStarIndex.tcl \
 tkMathematica.tcl \
 tkoct.tcl \
