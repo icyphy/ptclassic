@@ -57,9 +57,6 @@ command, the
 .i "current galaxy"
 is reset to be the
 .c mainGalaxy .
-.pp
-This description of commands is current for version 2.11 of
-the interpreter \(em commands are being added all the time.
 .H2 "Commands for Defining the Simulation"
 .pp
 This section describes commands that build the
@@ -905,6 +902,14 @@ example, try
 .(c
 (load "~ptolemy/demo/interp/sdf/liss.pt")
 .)c
+.pp
+It is also possible to specify a file to be loaded by the interpreter
+on the command line.  If, when you start the interpreter you type
+.(c
+interpreter myCommands.pt
+.)c
+the interpreter will load the named file, execute its commands, and
+then quit.  No commands will be prompted for.
 .H3 "Changing the seed of random number generation
 The
 .c seed
