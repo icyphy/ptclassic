@@ -91,6 +91,7 @@ char protectedMembers[MEDBUFSIZE];
 char privateMembers[MEDBUFSIZE];
 char inputDescriptions[MEDBUFSIZE];
 char outputDescriptions[MEDBUFSIZE];
+char inoutDescriptions[MEDBUFSIZE];
 char stateDescriptions[MEDBUFSIZE];
 char ccCode[BIGBUFSIZE];
 char hCode[BIGBUFSIZE];
@@ -160,7 +161,7 @@ char* portType;			/* dataType of porthole */
 char* portInherit;		/* porthole for inheritTypeFrom */
 char* portNum;			/* expr giving # of tokens */
 char* portDesc;			/* port descriptor */
-int   portOut;			/* true if porthole is output */
+int   portDir;			/* 0=input, 1=output, 2=inout */
 int   portMulti;		/* true if porthole is multiporthole */
 char* portAttrib;		/* attributes for porthole */
 char* stateName;		/* name of state */
@@ -223,8 +224,9 @@ typedef char * STRINGVAL;
 %}
 
 %token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
-%token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS OUTPUT INPUT ACCESS
-%token OUTMULTI INMULTI TYPE DEFAULT CLASS SETUP GO WRAPUP CONNECT ID
+%token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT INOUT ACCESS
+%token INMULTI OUTMULTI INOUTMULTI
+%token TYPE DEFAULT CLASS SETUP GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
@@ -507,10 +509,13 @@ galitem:
 ;
 
 /* porthole info */
-portkey:OUTPUT				{ initPort(1,0);}
-|	INPUT				{ initPort(0,0);}
-|	OUTMULTI			{ initPort(1,1);}
+portkey:
+	INPUT				{ initPort(0,0);}
+|	OUTPUT				{ initPort(1,0);}
+|	INOUT				{ initPort(2,0);}
 |	INMULTI				{ initPort(0,1);}
+|	OUTMULTI			{ initPort(1,1);}
+|	INOUTMULTI			{ initPort(2,1);}
 ;
 
 portlist:
@@ -626,7 +631,9 @@ ident:	keyword
 
 /* keyword in identifier position */
 keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
-|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
+|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
+|INPUT|OUTPUT|INOUT|INMULTI|OUTMULTI|INOUTMULTI
+|TYPE
 |DEFAULT|SETUP|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
 |EXPLANATION|START
@@ -662,7 +669,8 @@ int g;
 		objAuthor = objCopyright = objExpl = objLocation = NULL;
 	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
-	inputDescriptions[0] = outputDescriptions[0] = stateDescriptions[0] = 0;
+	inputDescriptions[0] = outputDescriptions[0] = inoutDescriptions[0] = 0;
+	stateDescriptions[0] = 0;
 	nCcInclude = nHInclude = nSeeAlso = 0;
 	pureFlag = 0;
 	for (i = 0; i < N_FORMS; i++) {
@@ -822,10 +830,10 @@ describeState ()
 }
 
 /* set up for port definition */
-initPort (out, multi)
-int out, multi;
+initPort (dir, multi)
+int dir, multi;
 {
-	portOut = out;
+	portDir = dir;
 	portMulti = multi;
 	portName = portNum = portInherit = portDesc = portAttrib = NULL;
 	portType = "ANYTYPE";
@@ -841,7 +849,7 @@ char* name;
 genPort ()
 {
 	/* test that all fields are known */
-	char* dir = portOut ? "Out" : "In";
+	char* dir = portDir==2 ? "InOut" : (portDir==1?"Out" : "In");
 	char* m = portMulti ? "Multi" : "";
 	char* d = galDef ? "" : domain;
 	char* port = galDef ? "PortHole" : "Port";
@@ -871,16 +879,13 @@ describePort ()
 {
 	char *dest;
 	char descriptString[MEDBUFSIZE];
-	if(portOut)
-	    /* describe an output port */
-	    dest = outputDescriptions;
-	else
-	    /* describe an input port */
-	    dest = inputDescriptions;
-	if (portMulti)
+	dest = portDir==2 ? inoutDescriptions 
+	  : (portDir==1 ? outputDescriptions : inputDescriptions);
+	if (portMulti) {
 	    sprintf(str1,".NE\n\\fI%s\\fR (multiple), (%s)",portName,portType);
-	else
+	} else {
 	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
+	}
 	strcat(dest,str1);
 
 	if (portDesc) {
@@ -1448,6 +1453,10 @@ genDef ()
 	if (strlen(outputDescriptions) > 0)
 		fprintf (fp, ".OH\n%s.PE\n", outputDescriptions);
 
+/* inouts */
+	if (strlen(inoutDescriptions) > 0)
+		fprintf (fp, ".OH\n%s.PE\n", inoutDescriptions);
+
 /* states */
 	if (strlen(stateDescriptions) > 0)
 		fprintf (fp, ".SH\n%s.ET\n", stateDescriptions);
@@ -1519,6 +1528,8 @@ struct tentry keyTable[] = {
 	"initcode", INITCODE,
 	"inmulti", INMULTI,
 	"inline", INLINE,
+	"inout", INOUT,
+	"inoutmulti", INOUTMULTI,
 	"input", INPUT,
 	"location", LOCATION,
 	"method", METHOD,
