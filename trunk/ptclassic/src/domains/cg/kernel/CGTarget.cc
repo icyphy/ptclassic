@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J. Pino
 
  Baseclass for all single-processor code generation targets.
 
@@ -39,7 +39,9 @@ int CGTarget :: codeGenInit(Galaxy& g) { return TRUE; }
 
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
-		   const char* desc) : Target(name,starclass,desc) {}
+		   const char* desc, char sep = '_') : Target(name,starclass,desc) {
+	separator = sep;
+}
 
 void CGTarget :: initialize() {
 	myCode.initialize();
@@ -49,7 +51,12 @@ void CGTarget :: initialize() {
 int CGTarget::setup(Galaxy& g) {
 	// reset the label counter
 	numLabels = 0 ;
-
+	CGStar* s;
+	GalStarIter next(g);
+	while ((s = (CGStar*)next++) != 0 ) {
+		s->codeblockSymbol.setTarget(this);
+		s->starSymbol.setTarget(this);
+	}
 	if (!Target::setup(g)) return FALSE;
 
 	// decide the buffer size
@@ -113,3 +120,30 @@ void CGTarget :: outputComment (const char* msg) {
         code += " */\n";
         addCode(code);
 }
+
+Symbol::Symbol (CGTarget* target=0) {
+	initialize();
+	myTarget = target;
+}
+	
+// Lookup unique symbol, if one doesn't exist, create new symbol.
+// Symbols are stored in pairs: key, symbol.
+StringList Symbol::lookup(const char* name) {
+	StringListIter next(symbols);
+	const char* p;
+    	StringList s;
+    	while ((p = next++) != 0) {
+		s = next++;
+		if(!strcmp(name,p)) return s;
+   	}
+   	// name is not on the list.  add it.
+  	symbols += name;
+  	s = name;
+	s += myTarget->separator;
+    	s += myTarget->numLabels++;
+    	// add the new symbol as well
+   	symbols += s;
+    	return s;
+}
+	
+

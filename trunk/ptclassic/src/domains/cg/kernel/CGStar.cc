@@ -26,15 +26,15 @@ $Id$
 
 ********************************************************************/
 
-
+//Constructor
+CGStar :: CGStar() {
+	starSymbol.initialize();
+}
 
 // firing CG star : generate code.
 int CGStar :: fire() {
 	// No need to grab data, so just use Star::fire, not SDFStar::fire.
 	int status = Star::fire();
-
-	// Advance the offset in the PortHoles
-	advance();
 	return status;
 }
 
@@ -190,9 +190,9 @@ CGStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s = lookupVal(id);
 	} else if ((strcasecmp(func, "label") == 0) ||
 		   (strcasecmp(func, "codeblockSymbol") == 0)) {
-		s = codeblockSymbol(id);
+		s = codeblockSymbol.lookup(id);
 	} else if (strcasecmp(func, "starSymbol") == 0) {
-		s = starSymbol(id);
+		s = starSymbol.lookup(id);
 	} else {
 		s = "ERROR: UNKNOWN MACRO ";
 		s += func;
@@ -235,45 +235,6 @@ CGStar::lookupVal(const char* name) {
 	codeblockError(name, " is not defined as a state");
 	return "ERROR";
 }
-
-// Lookup unique codeblockSymbol, if one doesn't exist, create new symbol.
-// Symbols are stored in pairs: key, symbol.
-StringList CGStar::codeblockSymbol(const char* name) {
-    StringListIter next(codeblockSymbols);
-    const char* p;
-    StringList s;
-    while ((p = next++) != 0) {
-	s = next++;
-	if(!strcmp(name,p)) return s;
-    }
-    // name is not on the list.  add it.
-    codeblockSymbols += name;
-    s = name;
-    s += myTarget()->numLabels++;
-    // add the new symbol as well
-    codeblockSymbols += s;
-    return s;
-}
-	
-// Lookup unique starSymbol, if one doesn't exist, create new symbol.
-// Symbols are stored in pairs: key, symbol.
-StringList CGStar::starSymbol(const char* name) {
-    StringListIter next(starSymbols);
-    const char* p;
-    StringList s;
-    while ((p = next++) != 0) {
-	s = next++;
-	if(!strcmp(name,p)) return s;
-    }
-    // name is not on the list.  add it.
-    starSymbols += name;
-    s = name;
-    s += myTarget()->numLabels++;
-    // add the new symbol as well
-    starSymbols += s;
-    return s;
-}
-
 
 // max Comm. time.
 int CGStar :: maxComm() {

@@ -5,7 +5,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J. Pino
 
  Baseclass for all single-processor code generation targets.
 
@@ -19,6 +19,7 @@ $Id$
 #endif
 
 #include "Target.h"
+#include "StringState.h"
 
 class CGStar;
 
@@ -40,7 +41,8 @@ protected:
 	virtual int codeGenInit(Galaxy&);
 
 public:
-	CGTarget(const char* name, const char* starclass, const char* desc);
+	CGTarget(const char* name, const char* starclass, const char* desc,
+		 char sep = '_');
 	void initialize();
 	// The setup method should not be invoked if the stars are not
 	// CGStars or their portHoles are not CGPortHoles.
@@ -54,13 +56,30 @@ public:
 	virtual void writeCode(UserOutput&);
 	int isA(const char*) const;
 
-	// output a comment.  Default form uses C-style comments.
-	virtual void outputComment (const char*);
-
 	// Total Number of Labels generated.
 	int numLabels;
+	// Label Separator
+	char separator;
+
+	// output a comment.  Default form uses C-style comments.
+	virtual void outputComment (const char*);
 
 	// destructor
 	~CGTarget();
 };
+
+// Class for unique symbol generation.  The symbol is guaranteed
+// to be unique with respect to all other symbols in the target.
+class Symbol {
+	private:
+		// List of all symbols
+		StringList symbols;
+		CGTarget* myTarget;
+	public:
+		Symbol(CGTarget* t = 0);
+		void initialize() { symbols.initialize(); };
+		StringList lookup(const char* name);
+		void setTarget(CGTarget* t) {myTarget = t;}
+};
+
 #endif
