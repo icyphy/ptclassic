@@ -32,6 +32,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type{float}
 		default {"0.0"}
 		desc {The value to send to the output.}
+		attributes {A_GLOBAL}
 	}
 	defstate {
 		name {identifier}
