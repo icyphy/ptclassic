@@ -563,6 +563,10 @@ PortHole& MultiPortHole :: newConnection() {
 	PortHole* p;
 	while ((p = next++) != 0) {
 		// work right even for GalMultiPortHole
+		// note that newConnection, when applied to a
+		// PortHole, returns what that PortHole is aliased
+		// to.  We cannot just check far() on p since, if
+		// it has an alias, its far will be null.
 		if (p->newConnection().far() == NULL) return *p;
 	}
 
