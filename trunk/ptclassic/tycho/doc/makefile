@@ -39,6 +39,9 @@ VPATH =		$(ROOT)/doc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# Sub directories to run make in.
+DIRS =			coding demo packages
+
 EXTRA_SRCS =	\
 		abbreviations.html \
 		authors.html \
@@ -72,7 +75,7 @@ EXTRA_SRCS =	\
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
-MISC_FILES =		img itclhtml tychoClasses.dag 
+MISC_FILES =		$(DIRS) img itclhtml tychoClasses.dag 
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
@@ -80,9 +83,6 @@ OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tychoClasses.dag
-
-# Sub directories to run make in.
-DIRS =			coding demo packages
 
 all: sources tychoClasses.dag
 
