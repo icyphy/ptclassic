@@ -75,8 +75,8 @@ set ptkGantt_Parms(labelOffset) 0.25
 # star labels
 
 set ptkGantt_Parms(labelWidth)  3
-set ptkGantt_Parms(smallFont)  \
-	-adobe-helvetica-medium-r-normal-*-10-*-*-*-*-*-*-*
+# set ptkGantt_Parms(smallFont)  \
+# 	-adobe-helvetica-medium-r-normal-*-10-*-*-*-*-*-*-*
 
 # -adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1
 
@@ -759,12 +759,15 @@ proc ptkGantt_Bindings {universe num_procs} {
 
 proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
 
-    global env ptkGantt_Data ptkGantt_Layout
+    global env ptkGantt_Data ptkGantt_Layout ptkGantt_Parms
     global tychoWelcomeWindow tychoConsoleWindow
     global tychoExitWhenNoMoreWindows tychoShouldWeDoRegularExit
 
     # make sure that tycho is running
     ptkStartTycho
+    # set font using tycho font manager
+    set ptkGantt_Parms(smallFont) [.tychoFonts findFont  \
+	{helvetica 10 medium r}]
 
     set chart .gantt_${universe}
 
