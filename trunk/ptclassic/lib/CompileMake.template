@@ -1,0 +1,81 @@
+# Makefile for Ptolemy standalone systems
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+
+# Root of source tree
+ROOT = /usr/users/ptolemy
+# Path (absolute or relative) to the object directory root
+OBJDIR=/usr/users/ptolemy/obj.$(ARCH)
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+SDF=$(OBJDIR)/domains/sdf/stars
+
+SDFSRC=$(ROOT)/src/domains/sdf/stars
+
+SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
+
+# libraries
+LIBS=-lsdfstars -lddf -ldycon -lPG -lLS -lEG -lcg -lsdf -lde -lthor -lptolemy -lImage \
+	$(SYSLIBS)
+
+LIBFILES=\
+ $(LIBDIR)/libcg.a $(LIBDIR)/libPG.a \
+ $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
+ $(LIBDIR)/libImage.a \
+ $(LIBDIR)/libdycon.a $(LIBDIR)/libddf.a \
+ $(LIBDIR)/libde.a \
+ $(LIBDIR)/libthor.a \
+ $(LIBDIR)/libptolemy.a
+
+# .c sources used in the library.
+# (depending on particular configuration, CONSTRUCTOR_HACK may be empty)
+LIBCSRCS=$(CONSTRUCTOR_HACK)
+
+OBJS=code.o
+SRCS=code.cc
+
+# Rule for compiling with C++ programs
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDFKERSRC) -c  $<
+
+all:		makefile code
+
+code:	$(OBJS) $(LIBFILES) $(STARS)
+		$(LINKER) $(LINKFLAGS_D) $(OBJS) $(STARS) $(LIBS) -o code
+
+# "make install" puts things in their place
+# for now leave them here.
+install:	all
+		@echo installation complete.
+
+# "make clean" removes .o files and other cruft
+clean:
+		rm -f *.o core *~ code
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+sources:	
+		@echo no sources to be made
+
+depend:	
+		$(DEPEND) -I$(KERNDIR) -I$(SDFSRC) -I$(SDFKERSRC) $(SRCS) | \
+		cat make.template - > makefile.n; \
+		mv -f makefile.n makefile
+
+makefile:	make.template
+		make -f make.template sources depend
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
