@@ -36,7 +36,9 @@ extern int sprintf();
 #ifndef sgi
 #ifndef SOL2
 #ifndef ultrix
+#if !(defined(sun) && defined (__GNUC__))
 extern char *sprintf();
+#endif /*sun && __GNUC__*/
 #endif /*ultrix*/
 #endif /*SOL2*/
 #endif /*sgi*/
@@ -44,11 +46,14 @@ extern char *sprintf();
 
 #ifdef __GNUC__
 /* Alphabetical, please */
+#if !defined(NULL) || defined(_STDIO_H)
 #include <stdio.h>		/* Get the decl for FILE.  sigh. */
+#endif
 extern int fclose (FILE *);
 extern int fflush (FILE *);
 extern int fprintf (FILE *, const char *, ...);
 extern int fscanf (FILE *, const char *, ...);
+extern int pclose(FILE *);
 extern void perror (const char *);
 extern int printf (const char *, ...);
 extern int putenv (char *);
