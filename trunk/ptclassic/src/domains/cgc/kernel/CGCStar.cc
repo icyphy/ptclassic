@@ -165,21 +165,21 @@ void CGCStar::start() {
 
 // fire: prefix the code with a comment
 
-void CGCStar::fire() {
+int CGCStar::fire() {
 	StringList code = "\t{  /* star ";
 	code += readFullName();
 	code += " (class ";
 	code += readClassName();
 	code += ") */\n";
 	addCode(code);
-	CGStar::fire();
+	int status = CGStar::fire();
 	
 	StringList code2;
 
 	if (amIFork()) {
 		code2 += "\t}\n";
 		addCode(code2);
-		return;
+		return status;
 	} 
 
 	// update the offset member
@@ -204,4 +204,5 @@ void CGCStar::fire() {
 	}
 	code2 += "\t}\n";
 	addCode(code2);
+	return status;
 }

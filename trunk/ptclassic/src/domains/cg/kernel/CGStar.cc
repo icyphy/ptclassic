@@ -29,12 +29,13 @@ $Id$
 
 
 // firing CG star : generate code.
-void CGStar :: fire() {
-	// No need to grab data, so just go.
-	go();
+int CGStar :: fire() {
+	// No need to grab data, so just use Star::fire, not SDFStar::fire.
+	int status = Star::fire();
 
 	// Advance the offset in the PortHoles
 	advance();
+	return status;
 }
 
 // Update all PortHoles so that the offset is incremented by the
