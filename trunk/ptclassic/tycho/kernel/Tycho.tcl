@@ -430,7 +430,10 @@ if {$tychoOpenFiles == 0} {
 }
 
 if {$tclscripttosource!={} } {
-    uplevel #0 {source $tclscripttosource}
+    if [catch {uplevel #0 {source $tclscripttosource}} errmsg] {
+	# We can't just call error here, or we will get a Segmentation Fault
+	::tycho::showStack "Sourcing $tclscripttosource failed:\n$errmsg"
+    }
 }
 ::tycho::_announce "About to unset"
 unset tclscripttosource sawDashE
