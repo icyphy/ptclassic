@@ -25,7 +25,7 @@ for a complete explanation of the options.
 .Ir "xgraph program, CG56"
 .Id "graph, X window, CG56"
 	}
-	derivedFrom { WriteFile }
+	derivedFrom { WrtFile }
 	defstate {
 		name {title}
 		type {string}
@@ -83,7 +83,7 @@ initCode {
 	else
 		outfile << expandPathName(saveFile);
 	addCode(xgraph(outfile),"shellCmds");
-	CG56WriteFile::initCode();
+	CG56WrtFile::initCode();
 }
 
 
