@@ -142,7 +142,7 @@ MultiPortHole* Block::multiPortWithName(const char* name) {
 // method.  It would be nice if that could be caught at compile time.
 Block* Block::makeNew() const {
 	Error::abortRun ("The star or galaxy \"", name(),
-		      "doesn't implement the makeNew method");
+		      "\" doesn't implement the makeNew method");
 	return 0;
 }
 
