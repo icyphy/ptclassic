@@ -602,7 +602,7 @@ void Linker::installTable(const char* newTable) {
 	if (ptolemyName == symTableName) {
 		symTableName = getenv("PTOLEMY_SYM_TABLE");
 		if (!symTableName) {
-			char *symtablefile = expandPathName("~/.pt_symtable");
+			char *symtablefile = expandPathName("$HOME/.pt_symtable");
 			symTableName = hashstring(symtablefile);
 			delete [] symtablefile;
 		}
