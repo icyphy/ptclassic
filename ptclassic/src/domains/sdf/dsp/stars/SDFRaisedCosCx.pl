@@ -60,7 +60,7 @@ of raised cosine pulses in communications systems.
 		// taps are no longer constant or settable
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
 		// fix interpolation default
-		interpolation.setValue("16");
+		interpolation.setInitValue("16");
 		// make decimation parameters invisible
 		decimation.clearAttributes(A_SETTABLE);
 		decimationPhase.clearAttributes(A_SETTABLE);
