@@ -63,8 +63,7 @@ public:
   // Identify the class
   int			isA(const char* className) const;
 
-  // Set the geodesic of this port
-  void 			setGeodesic(Geodesic * g) { myGeodesic = g; }
+  void 			setGeodesic(Geodesic *);
 
   PortHole * 		far() const;
   void 			connect(GenericPort &, int, const char* = 0);
