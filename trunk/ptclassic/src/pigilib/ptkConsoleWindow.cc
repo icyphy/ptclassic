@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkConsoleWindow.cc  aok
-    Version: @(#)ptkConsoleWindow.cc	1.1 5/27/93
+    Version: $Id$
 */
 
 // Sets up the standard input to feed from the xterm that
