@@ -252,7 +252,7 @@ octObject *facetPtr;
     octObject inst;
     char *name;
     ParamListType pList;
-    char *akoName;
+    char *akoName, *oldInstName;
     
     DetachDelaysFromNets(facetPtr);
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
@@ -280,11 +280,17 @@ octObject *facetPtr;
 		octFreeGenerator(&genInst);
 		return FALSE;
 	    }
-	    inst.contents.instance.name = name;
-	    if (octModify(&inst) != OCT_OK) {
-		octFreeGenerator(&genInst);
-		ErrAdd(octErrorString());
-		return FALSE;
+	    /* put the unique instance name back in the facet,
+	     * unless it is there already
+	     */
+	    oldInstName = inst.contents.instance.name;
+	    if (!oldInstName || strcmp(name, oldInstName) != 0) {
+		inst.contents.instance.name = name;
+		if (octModify(&inst) != OCT_OK) {
+		    octFreeGenerator(&genInst);
+		    ErrAdd(octErrorString());
+		    return FALSE;
+		}
 	    }
 	    if (!KcInstance(name, akoName, &pList)) {
 		octFreeGenerator(&genInst);
