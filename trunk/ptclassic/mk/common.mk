@@ -167,16 +167,16 @@ $(LIBDIR)/$(LIB):	$(LIB) $(EXP)
 		ln $(LIB) $(LIBDIR)
 
 # Rule for making a star list for inclusion by make
-$(STAR_MK).mk:	make.template
-		rm -f $(STAR_MK).mk
-		genStarList $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3)> $(STAR_MK).mk
+$(VPATH)/$(STAR_MK).mk:	make.template
+		cd $(VPATH); rm -f $(STAR_MK).mk
+		cd $(VPATH); genStarList $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3) > $(STAR_MK).mk
 
 # Rule for making a star list module for pulling stars out of libraries
-$(STAR_MK).c:	make.template
-		rm -f $(STAR_MK).c
+$(VPATH)/$(STAR_MK).c:	make.template
+		cd $(VPATH); rm -f $(STAR_MK).c
 		cd $(VPATH); genStarTable $(GENSTARVARS) $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3) > $(STAR_MK).c
 
-$(STAR_MK).o:	$(STAR_MK).c
+$(STAR_MK).o:	$(VPATH)/$(STAR_MK).c
 
 # Standard "all" for stars directories
 stars_all:	$(SRCS) $(LIB) $(STAR_MK).o
