@@ -138,165 +138,22 @@ class ::tycho::EditDiff {
     itk_option define -diff diff Diff {}
 
 
-
-
-
     ##########################################################################
     ####                         public methods                           ####
 
     # This insertString will add attribute to all of the test.
     # The attribute for each text could be either "common",
     # "new", or "old".
-    method insertString {index str {status {common}}} {
-        set text $itk_component(text)
+    method insertString {index str status} {}
 
-        # Tag the text to have different colors
-        foreach i {1 2} {
-            $text tag configure linecolor$i \
-                    -foreground [lindex [eval set linecolor$i] 0] \
-                    -background [lindex [eval set linecolor$i] 1]
-        }
-        $text tag configure common
-
-        if $readOnly {bell; return}
-        #prepareInsert $index
-
-        $text insert insert $str $status
-        #parseRegion $start [$itk_component(text) index insert]
-    }
-
-    method insertFile {} {
-        set text $itk_component(text)
-        global filename1 filename2
-        global linecolor1 linecolor2
-        #set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
-        #set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
-        #set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
-        #set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
-        
-        puts "The names are $filename1 and $filename2"
-
-        set flag 1
-        if {$filename1 != "" && $filename1 != "NoName" && \
-            $filename2 != "" && $filename2 != "NoName"} {
-            if {[file exists $filename1] && [file exists $filename2]} {
-                if {[file readable $filename1] && [file readable $filename2]} {
-                    # Create an exec instance
-                    set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
-                    $execDiff execProcess "diff $filename1 $filename2"
-                    # Wait until execution is done
-                    $execDiff getStatusWait
-                    set diffResult [$execDiff getHistory]
-                    set diffResult [split $diffResult \n]
-                    # Reset the line to read from beginning
-                    set diffResuleLineCount 0
-                    
-                    # Open up files 
-                    set fd1 [open $filename1 r]
-                    set fd2 [open $filename2 r]
-                    set fileLineCount1 1
-                    set fileLineCount2 1
-
-                    while {[set diffInfo [diffReport]] != "done"} {
-                        set info [lindex $diffInfo 0]
-                        set n1 [lindex $diffInfo 1]
-                        set n2 [lindex $diffInfo 2]
-                        set n3 [lindex $diffInfo 3]
-                        set n4 [lindex $diffInfo 4]
-
-                        # Output common lines. Also increment
-                        # file1 and file2 pointer
-                        while {$fileLineCount1 < $n1} {
-                            # Increment file1 until difference seen.
-                            insertString insert [gets $fd1]\n common
-                            incr fileLineCount1
-                        }
-                        while {$fileLineCount2 < $n3} {
-                            # Increment file2 until difference seen.
-                            gets $fd2
-                            incr fileLineCount2
-                        }
-
-                        # If changed (character c), delete (d), or added (a)
-                        if {$info=="c"} {
-                            # Output differences
-                            while {$fileLineCount1 <= $n2} {
-                                insertString insert [gets $fd1]\n linecolor1
-                                incr fileLineCount1
-                            }
-                            while {$fileLineCount2 <= $n4} {
-                                insertString insert [gets $fd2]\n linecolor2
-                                incr fileLineCount2
-                            }
-                            # Continue...
-                        } elseif {$info=="d"} {
-                            # Output the added lines
-                            while {$fileLineCount1 <= $n2} {
-                                insertString insert [gets $fd1]\n linecolor2
-                                incr fileLineCount1
-                            }
-                        } elseif {$info=="a"} {
-                            while {$fileLineCount2 <= $n4} {
-                                insertString insert [gets $fd2]\n linecolor1
-                                incr fileLineCount2
-                            }
-                        }
-
-
-                    }
-                    # Read and output the rest of the common lines until EOF
-                    while {![eof $fd1]} {
-                        insertString insert [gets $fd1]\n common
-                    }
-                    close $fd1
-                    close $fd2
-                    return
-                    #set data [read $fd]
-                    #markModified
-                } {
-                    safeEval ::tycho::warn "File is not readable: $filename"
-                }
-            } {
-                safeEval ::tycho::warn "File does not exist: $filename"
-            }
-        }
-    }
+    # Modified for our own purpose. FIXME: Change the name.
+    method insertFile {} {}
 
     # This keeps a list of diffs
     public variable diffResult {}
     public variable diffResultLineCount 0
-    public method diffReport {} {
-        #The normal output contains lines of these forms:
-        #n1 a n3,n4
-        #n1,n2 d n3
-        #n1,n2 c n3,n4
 
-        # Reinitialize n1 through n4 to 0
-        foreach i {1 2 3 4} {
-            set n$i 0
-        }
-        # Keep going until we hit the end of line
-        while {$diffResultLineCount != [llength $diffResult]} {
-            set line [lindex $diffResult $diffResultLineCount]
-            if {[regexp \
-                    {([0-9]+)(,[0-9]+)?(c|a|d)([0-9]+)(,[0-9]+)?} $line match \
-                    n1 n2 command n3 n4]} {
-                # Get rid of leading comma for n2 and n4
-                regexp {,([0-9]+)} $n2 match n2
-                regexp {,([0-9]+)} $n4 match n4
-
-                # If it's a single line, make sure the second line (now 0)
-                # corresponds to the first line (with a value)
-                if {$n2<$n1} {set n2 $n1}
-                if {$n4<$n3} {set n4 $n3}
-
-                incr diffResultLineCount
-                return "$command $n1 $n2 $n3 $n4"
-            }        
-            incr diffResultLineCount
-        }
-        return done
-    }
+    public method diffReport {} {}
 
 
     # Match an open paranthesis and also indent the line, if appropriate.
@@ -366,54 +223,6 @@ class ::tycho::EditDiff {
     public variable filename1 {}
     public variable filename2 {}
 }
-
-configbody ::tycho::EditDiff::diff {
-    # FIXME: Currently, we'd like to change the default colors
-    set linecolor1 [list white blue]
-    set linecolor2 [list white red]
-
-    if {$itk_option(-diff) == 0} {
-	# Delete the line1 if it exists
-        foreach i {1 2} {
-            if {[info exists itk_component(line$i)]} {
-                destroy $itk_component(line$i)
-            }
-        }
-    } {
-	# Add a diff line file name if it does not already exist.
-	#
-	# The line1bar is packed "-before" the text widget to prevent the
-	# line1bar from disappearing when the window is made smaller (see
-	# Welch page 126).
-	#
-        foreach i {1 2} {
-            if {![info exists itk_component(line$i)]} {
-                itk_component add line$i {
-                    uplevel #0 [list frame $itk_interior.line$i \
-                            -relief raised] 
-                } {
-                    #keep -activebackground -background -highlightcolor \
-                            #	-troughcolor -cursor
-                }
-                puts "New color [eval set linecolor$i]"
-                button $itk_interior.line$i.label -text "File $i: " \
-                        -foreground [lindex [eval set linecolor$i] 0] \
-                        -background [lindex [eval set linecolor$i] 1] \
-                        -command "set filename$i \
-                            \[::tycho::queryfilename \"File $i to compare:\"\]"
-                entry $itk_interior.line$i.entry -relief sunken -width 60 \
-                        -textvariable filename$i
-                pack $itk_interior.line$i.label $itk_interior.line$i.entry \
-                        -side left -expand y -fill y
-                pack $itk_component(line$i) -side top -fill y -expand y \
-                        -before $itk_component(text)
-            }
-        }
-	# Add line1bar packing to statusbar
-	#statusbar configure -line1barpad 1
-    }
-}
-
 
 
 
@@ -485,6 +294,214 @@ body ::tycho::EditDiff::constructor {args} {
     bind $itk_component(text) <Escape><Control-backslash> \
             "$this busy $this indentSelection"
 
+}
+
+
+configbody ::tycho::EditDiff::diff {
+    # FIXME: Currently, we'd like to change the default colors
+    set linecolor1 [list blue {}]
+    set linecolor2 [list red {}]
+
+    if {$itk_option(-diff) == 0} {
+	# Delete the line1 if it exists
+        foreach i {1 2} {
+            if {[info exists itk_component(line$i)]} {
+                destroy $itk_component(line$i)
+            }
+        }
+    } {
+	# Add a diff line file name if it does not already exist.
+	#
+	# The line1bar is packed "-before" the text widget to prevent the
+	# line1bar from disappearing when the window is made smaller (see
+	# Welch page 126).
+	#
+        foreach i {1 2} {
+            if {![info exists itk_component(line$i)]} {
+                itk_component add line$i {
+                    uplevel #0 [list frame $itk_interior.line$i \
+                            -relief raised] 
+                } {
+                    #keep -activebackground -background -highlightcolor \
+                            #	-troughcolor -cursor
+                }
+                puts "New color [eval set linecolor$i]"
+                #-background [lindex [eval set linecolor$i] 1] 
+                button $itk_interior.line$i.label -text "File $i: " \
+                        -foreground [lindex [eval set linecolor$i] 0] \
+                        -command "set filename$i \
+                    \[::tycho::queryfilename \"File $i to compare:\"\]"
+                entry $itk_interior.line$i.entry -relief sunken -width 60 \
+                        -textvariable filename$i
+                pack $itk_interior.line$i.label $itk_interior.line$i.entry \
+                        -side left -expand y -fill y
+                pack $itk_component(line$i) -side top -fill y -expand y \
+                        -before $itk_component(text)
+            }
+        }
+	# Add line1bar packing to statusbar
+	#statusbar configure -line1barpad 1
+    }
+}
+
+body ::tycho::EditDiff::insertString {index str {status {common}}} {
+    set text $itk_component(text)
+    
+    # Tag the text to have different colors
+    foreach i {1 2} {
+        $text tag configure linecolor$i \
+                -foreground [lindex [eval set linecolor$i] 0] \
+                -background [lindex [eval set linecolor$i] 1]
+    }
+    $text tag configure common
+    
+    if $readOnly {bell; return}
+    #prepareInsert $index
+    
+    $text insert insert $str $status
+    #parseRegion $start [$itk_component(text) index insert]
+}
+
+
+###################################################################
+#
+body ::tycho::EditDiff::insertFile {} {
+    set text $itk_component(text)
+    global filename1 filename2
+    global linecolor1 linecolor2
+    #set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
+    #set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
+    #set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
+    #set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
+    
+    puts "The names are $filename1 and $filename2"
+    
+    set flag 1
+    foreach i {1 2} {
+        if {[eval set filename$i]=="" || [eval set filename$i]=="NoName"} {
+            safeEval ::tycho::warn "File name invalid: [eval set filename$i]"
+            return
+        }
+
+        if {![file exists [eval set filename$i]]} {
+            safeEval ::tycho::warn "File does not exist: [eval set filename$i]"
+            return
+        }
+        
+        if {![file readable $filename1]} {
+            safeEval ::tycho::warn "File is not readable: $filename"
+            return
+        }
+    }
+
+    # Create an exec instance
+    set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
+    $execDiff execProcess "diff $filename1 $filename2"
+    # Wait until execution is done
+    $execDiff getStatusWait
+    set diffResult [$execDiff getHistory]
+    set diffResult [split $diffResult \n]
+    # Reset the line to read from beginning
+    set diffResuleLineCount 0
+    
+    # Open up files 
+    set fd1 [open $filename1 r]
+    set fd2 [open $filename2 r]
+    set fileLineCount1 1
+    set fileLineCount2 1
+    
+    while {[set diffInfo [diffReport]] != "done"} {
+        set info [lindex $diffInfo 0]
+        set n1 [lindex $diffInfo 1]
+        set n2 [lindex $diffInfo 2]
+        set n3 [lindex $diffInfo 3]
+        set n4 [lindex $diffInfo 4]
+        
+        # Output common lines. Also increment
+        # file1 and file2 pointer
+        while {$fileLineCount1 < $n1} {
+            # Increment file1 until difference seen.
+            insertString insert [gets $fd1]\n common
+            incr fileLineCount1
+        }
+        while {$fileLineCount2 < $n3} {
+            # Increment file2 until difference seen.
+            gets $fd2
+            incr fileLineCount2
+        }
+        
+        # If changed (character c), delete (d), or added (a)
+        if {$info=="c"} {
+            # Output differences
+            while {$fileLineCount1 <= $n2} {
+                insertString insert [gets $fd1]\n linecolor1
+                incr fileLineCount1
+            }
+            while {$fileLineCount2 <= $n4} {
+                insertString insert [gets $fd2]\n linecolor2
+                incr fileLineCount2
+            }
+            # Continue...
+        } elseif {$info=="d"} {
+            # Output the added lines
+            while {$fileLineCount1 <= $n2} {
+                insertString insert [gets $fd1]\n linecolor2
+                incr fileLineCount1
+            }
+        } elseif {$info=="a"} {
+            while {$fileLineCount2 <= $n4} {
+                insertString insert [gets $fd2]\n linecolor1
+                incr fileLineCount2
+            }
+        }
+        
+        
+    }
+    # Read and output the rest of the common lines until EOF
+    while {![eof $fd1]} {
+        insertString insert [gets $fd1]\n common
+    }
+    close $fd1
+    close $fd2
+    return
+    #set data [read $fd]
+    #markModified
+}
+
+#####################################################################
+#### diffReport
+# parse the output of the UNIX's diff utility
+body ::tycho::EditDiff::diffReport {} {
+    #The normal output contains lines of these forms:
+    #n1 a n3,n4
+    #n1,n2 d n3
+    #n1,n2 c n3,n4
+    
+    # Reinitialize n1 through n4 to 0
+    foreach i {1 2 3 4} {
+        set n$i 0
+    }
+    # Keep going until we hit the end of line
+    while {$diffResultLineCount != [llength $diffResult]} {
+        set line [lindex $diffResult $diffResultLineCount]
+        if {[regexp \
+                {([0-9]+)(,[0-9]+)?(c|a|d)([0-9]+)(,[0-9]+)?} $line match \
+                n1 n2 command n3 n4]} {
+            # Get rid of leading comma for n2 and n4
+            regexp {,([0-9]+)} $n2 match n2
+            regexp {,([0-9]+)} $n4 match n4
+            
+            # If it's a single line, make sure the second line (now 0)
+            # corresponds to the first line (with a value)
+            if {$n2<$n1} {set n2 $n1}
+            if {$n4<$n3} {set n4 $n3}
+            
+            incr diffResultLineCount
+            return "$command $n1 $n2 $n3 $n4"
+        }        
+        incr diffResultLineCount
+    }
+    return done
 }
 
 #####################################################################
