@@ -154,6 +154,10 @@ void DDFScheduler :: setup () {
 	currentTime = schedulePeriod;
 	overFlow = FALSE;
 
+	// If an error occured while initializing the galaxy,
+	// then it is not safe to continue.
+	if (SimControl::haltRequested()) return;
+
 	if (restructured == FALSE) {
 		// fancy stuff...
 		// auto-creation of SDF wormholes, decide the most efficient
