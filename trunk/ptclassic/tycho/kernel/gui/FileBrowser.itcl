@@ -346,7 +346,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 # Files are listed next, also alphabetically.
 #
 body ::tycho::FileBrowser::updateListbox {} {
-    
+    global tcl_platform
     # clear the list box
     $itk_component(listbox) delete 0 end
     
@@ -369,9 +369,27 @@ body ::tycho::FileBrowser::updateListbox {} {
     set fileList [lsort $fileList]
     
     # Insert directories, then files into the listbox
-    foreach dir $dirList {
-	$itk_component(listbox) insert end "$dir/"
+    switch $tcl_platform(platform) {
+	macintosh {
+	    foreach dir $dirList {
+		$itk_component(listbox) insert end "$dir:"
+	    }
+	    set updir "::"
+	}
+	unix {
+	    foreach dir $dirList {
+		$itk_component(listbox) insert end "$dir/"
+	    }
+	    set updir "../"
+	}
+	windows {
+	    foreach dir $dirList {
+		$itk_component(listbox) insert end "$dir\\"
+	    }
+	    set updir "..\\"
+	}
     }
+
     foreach fname $fileList {
 	$itk_component(listbox) insert end "$fname"
     }
@@ -382,7 +400,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     set fileLength [llength $fileList]
     
     if {$localCWD != "/"} {
-	$itk_component(listbox) insert 0 "../"
+	$itk_component(listbox) insert 0 $updir
     }
     
     # Choose intelligently which default file or directory
@@ -392,8 +410,9 @@ body ::tycho::FileBrowser::updateListbox {} {
     } elseif {($dirLength == 0) && ($fileLength == 1)} {
 	insert entry [lindex $fileList 0]
     } elseif {($dirLength == 0) && ($fileLength == 0)} {
+	# FIXME: Unixism - What about root on macs and windows?
 	if {$localCWD != "/"} {
-	    insert entry "../"
+	    insert entry "updir"
 	}
     }
 }
