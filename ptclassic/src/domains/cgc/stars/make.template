@@ -43,11 +43,20 @@ CGCDIR = $(ROOT)/src/domains/cgc/kernel
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC)
+INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) \
+ -I$(ROOT)/src/utils/libcephes
 
 # source files for all stars, using preprocessor
-# put base stars first
+# put base stars first, i.e., those that other stars are derived from
 PL_SRCS= \
+ CGCChop.pl \
+ CGCFIR.pl \
+ CGCFix.pl \
+ CGCGoertzelBase.pl \
+ CGCLMS.pl \
+ CGCQuant.pl \
+ CGCSGIAudio.pl \
+ CGCXgraph.pl \
  CGCAbs.pl \
  CGCAdd.pl \
  CGCAddCx.pl \
@@ -57,7 +66,6 @@ PL_SRCS= \
  CGCBlackHole.pl \
  CGCBusFork.pl \
  CGCCase.pl \
- CGCChop.pl \
  CGCChopVarOffset.pl \
  CGCCollect.pl  \
  CGCCommutator.pl \
@@ -83,9 +91,7 @@ PL_SRCS= \
  CGCExp.pl \
  CGCExpr.pl \
  CGCFFTCx.pl \
- CGCFIR.pl \
  CGCFIRFix.pl \
- CGCFix.pl \
  CGCFixToCx.pl \
  CGCFixToFix.pl \
  CGCFixToFloat.pl \
@@ -100,7 +106,6 @@ PL_SRCS= \
  CGCGainFix.pl \
  CGCGainInt.pl \
  CGCGoertzel.pl \
- CGCGoertzelBase.pl \
  CGCGoertzelPower.pl \
  CGCImpulse.pl \
  CGCIntegrator.pl \
@@ -108,7 +113,6 @@ PL_SRCS= \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
  CGCIntToBits.pl \
- CGCLMS.pl \
  CGCLMSOscDet.pl \
  CGCLastOfN.pl \
  CGCLimit.pl \
@@ -130,11 +134,11 @@ PL_SRCS= \
  CGCPcwzLinear.pl \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
- CGCQuant.pl \
  CGCQuantIdx.pl \
  CGCRamp.pl \
  CGCRampFix.pl \
  CGCRampInt.pl \
+ CGCRaisedCosine.pl \
  CGCReciprocal.pl \
  CGCRect.pl \
  CGCRectFix.pl \
@@ -145,7 +149,6 @@ PL_SRCS= \
  CGCReverse.pl \
  CGCTrainer.pl \
  CGCScrambler.pl \
- CGCSGIAudio.pl \
  CGCSGIAudioIn.pl \
  CGCSGIAudioOut.pl \
  CGCSelect.pl \
@@ -172,7 +175,6 @@ PL_SRCS= \
  CGCWaveForm.pl \
  CGCXMgraph.pl \
  CGCXYgraph.pl \
- CGCXgraph.pl \
  CGCXscope.pl
 
 # The .cc files
