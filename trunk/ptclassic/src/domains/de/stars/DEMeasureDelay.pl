@@ -22,10 +22,10 @@ When the first particle with a particular data value
 arrives, it is stored.
 When the second particle with a particular data value arrives,
 it is matched to the first arrival in storage, and
-a <i>timeDiff</i></b>
+a <i>timeDiff</i>
 output is generated with value equal to the arrival time difference.
 The data value itself is also
-sent to the <i>output</i></b> port upon the second arrival.
+sent to the <i>output</i> port upon the second arrival.
 <p>
 Packets are only considered to have the "same value" if they are copied
 from a common source (so that each packet shares the same common PacketData
