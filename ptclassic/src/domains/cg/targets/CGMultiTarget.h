@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MultiTarget.h"
 #include "IntState.h"
 #include "StringState.h"
+#include "StringArrayState.h"
 #include "Profile.h"
 #include "ParProcessors.h"
 #include "ParNode.h"
@@ -81,7 +82,7 @@ public:
 	int commTime(int,int,int,int);
 
 	// return the array of candidate processors.
-	IntArray* candidateProcs(ParProcessors*);
+	IntArray* candidateProcs(ParProcessors*, DataFlowStar*);
 
 	// resource management
 	int scheduleComm(ParNode* /*comm*/, int when, int /*limit*/ = 0) 
@@ -112,17 +113,28 @@ public:
 protected:
 	void setup();
 
-	StringState childType;
-	StringState filePrefix;
+	// parameters to set the child targets
+	StringArrayState childType;
+	StringArrayState resources;
+
+	// parameters to set the scheduling option
 	IntState useCluster;
 	IntState overlapComm;
 	IntState ignoreIPC;
+
+	// other parameters
+	StringState filePrefix;
 	IntState ganttChart;
 	StringState logFile;
 
 	// prepare child targets: create and initialize.
 	virtual void prepareChildren();
 
+	// pass resource infomation to the child target.
+	// and append the "resources" state of the child target.
+	// If no "resources" in the child target, create one.
+	virtual void resourceInfo();
+	
 	// reset resources
 	virtual void resetResources();
 
@@ -131,8 +143,11 @@ protected:
 
 	// create child targets
 	// By default, it clones from KnownTarget list with "chile-type" state.
-	virtual Target* createChild();
+	virtual Target* createChild(int);
  
+	// flatten wormholes if heterogeneous targets
+	void flattenWorm();
+
 	// redefine the top-level iterations to do nothing
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
@@ -156,7 +171,8 @@ protected:
 	IntArray canProcs;
 
 private:
-	char oldChildType[40];
+	// state list added dynamically
+	StateList addedStates;
 };
 
 #endif
