@@ -106,9 +106,7 @@ Next we have to define the C code which will be used to generate the
 run-time code.  For this we use a codeblock.  A codeblock is a
 pseudo-language specification of a code segment.  By pseudo-language we
 mean that the block of code is written in the target language with
-interspersed macros.  Macros will be explained in the following section
-and the exact function of C code generation macros will be described in
-the CGC chapter.  
+interspersed macros.  Macros will be explained in the following section.
 .pp
 Codeblocks are implemented as protected static class members (e.g. there
 is one instance of a codeblock for the entire class).  Since they are
