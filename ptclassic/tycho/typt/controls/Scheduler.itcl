@@ -70,6 +70,7 @@
 # that contains a <a href="../../../src/tytest/index.html">Tycho
 # task written in C</a>:
 # <tcl quiet><pre>
+#   ::tycho::loadIfNotPresent ::tycho::timer tytimer
 #   ::tycho::loadIfNotPresent ::tycho::testtask tytest
 # </pre></tcl>
 #
