@@ -143,6 +143,8 @@ int allInside;			/* If set, only those enclosed */
 	    REG_RETURN( REG_NOMORE );
 	}
     }
+    /* NOTREACHED */
+    REG_RETURN( REG_OK );
 }
 
 
