@@ -76,7 +76,7 @@ extern boolean MkUnivIcon ARGS((octObject *facetPtr,
 				octObject *iconFacetPtr));
 extern boolean MkGalIcon ARGS((octObject *galFacetPtr,
 			       octObject *iconFacetPtr));
-extern boolean MkStarIcon ARGS((char *name, char *dir,
+extern boolean MkStarIcon ARGS((char *name, char *dir, char* domain,
 				octObject *iconFacetPtr));
 
 #endif  /* _MKICON_H */
