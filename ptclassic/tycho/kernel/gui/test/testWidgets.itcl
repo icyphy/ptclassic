@@ -54,7 +54,7 @@ if {[string compare test [info procs test]] == 1} then {
 # Test DialogWindow
 test DialogWindow-1.1 {Test DialogWindow} {
     global globalReturn
-    ::tycho::DialogWindow .dialog -text "I am a very senstitive widget"
+    ::tycho::Dialog .dialog -text "I am a very senstitive widget"
     .dialog addButton pushme -text "Push Me" -command "set globalReturn ouch"
     .dialog default pushme
     .dialog centerOnScreen
@@ -88,31 +88,34 @@ test ErrorMessage-1.1 {Test ErrorMessage} {
 
 
 ############################################################################
-# Test EntryQuery
-test EntryQuery-1.1 {Test EntryQuery} {
+# Test Query
+test Query-1.1 {Test Query} {
     after $duration .entry invoke cancel
-    ::tycho::EntryQuery .entry \
-	    -queries {{entry {Enter here:} {Default text}}}
+    ::tycho::Query .entry \
+	    -queries {{line qline {Enter here:} {Default text}}}
     .entry centerOnScreen
 #    ::tycho::safeUpdate .entry
     list {Done}
 } {Done}
 
-test EntryQuery-1.2 {Test EntryQuery: addQuery method} {
-    after $duration .entry2 invoke cancel
-    ::tycho::EntryQuery .entry2 \
-	    -queries {{entry {Enter here:} {Default text}}}
-    .entry2 addQuery body {My Entry} {
-	Here we have some default text
-	line 2
-	line 3
-	line 4
-	line 5
-    } 4
-    .entry2 centerOnScreen
-#    ::tycho::safeUpdate .entry
-    list {Done}
-} {Done}
+#
+# addQuery was removed
+#
+#test Query-1.2 {Test Query: addQuery method} {
+#    after $duration .entry2 invoke cancel
+#    ::tycho::Query .entry2 \
+#	    -queries {{lines qlines {Enter here:} {Default text} 3}}
+#    .entry2 addQuery body {My Entry} {
+#	Here we have some default text
+#	line 2
+#	line 3
+#	line 4
+#	line 5
+#    } 4
+#    .entry2 centerOnScreen
+##    ::tycho::safeUpdate .entry
+#    list {Done}
+#} {Done}
 
 
 ############################################################################
