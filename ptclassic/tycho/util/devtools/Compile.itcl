@@ -33,11 +33,21 @@
 ##############################################################################
 #### compileC
 # Invoke an external program using compileCTcl.
-# The format of the command is exactly that of the Tcl "exec" command.
+# The format of the command is similar that of the Tcl "exec" command, 
+# except it takes in the following command: <br>
+# ::tycho::compileC filename args <br>
+# Where args can be any of the following: -autodestroy, -autostart, and -modal.
 #
 set compiler {}
-proc ::tycho::compileC {filename {autostart {}}} {
+proc ::tycho::compileC {filename args} {
     global tcl_platform compiler
+
+    # Initialize array names
+    array set option {-autodestroy 0}
+    array set option {-autostart 0}
+    array set option {-modal 0}
+    array set option $args
+
     if {$tcl_platform(platform) == "macintosh"} {
 	error "Sorry, the tcl \"exec\" command is not supported on the\
 		Macintosh.\nThe command:\n$filename\ncannot be executed"
@@ -48,13 +58,9 @@ proc ::tycho::compileC {filename {autostart {}}} {
     # Now always creating a new widget
     if {$compiler=={}} {
         set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
-        if {$autostart==1} {
-            # When invoked the first time, this will just pop up window
-            $compiler compile $filename
-        }
     }
 
-    if [catch {eval $compiler compile $filename} msg] {
+    if [catch {eval $compiler compile $filename $args} msg] {
         # The command failed.  It would be nice to check to see
         # whether the program exists, and generate a suitable message,
         # but it's not clear how to do this.
@@ -92,18 +98,20 @@ class ::tycho::Compile {
     ####                         public methods                    ####
 
     # Compile each file in the list of filenames.
-    public method compile { filenames}
+    public method compile {filenames args}
 
     # Compile and load in each file in the list of filenames.
-    public method compileAndLoad { filenames}
+    public method compileAndLoad {filenames args}
 
     # Compile and run in each file in the list of filenames.
-    public method compileAndRun { filenames}
+    public method compileAndRun {filenames}
+
+    # FIXME: Comment me!
+    public variable view {}
 
     # Compile the file.
-    method compileFiles {}
+    method compileFiles {args}
 
-    public variable view {}
     ###################################################################
     ####                   protected methods                       ####
 
@@ -147,7 +155,7 @@ class ::tycho::Compile {
     protected variable makefile makefile
 
     # Name of the Exec widget used to compile
-    protected variable compileWidget {}
+    protected variable monitorWidget {}
 
     ###################################################################
     ####                     private variables                     ####
@@ -160,7 +168,7 @@ class ::tycho::Compile {
 #### constructor
 #
 body ::tycho::Compile::constructor {args} {
-    # compileWidget is the execModal widget
+    # monitorWidget is the execModal widget
     # NOTE: editor name is $editorName"
     set editorName [$this cget -view]
     set editorWidget $editorName.history.text
@@ -180,22 +188,25 @@ body ::tycho::Compile::destructor {} {
 
 #######################################################################
 #### compile
-# Compile each file in the list of filenames.
+# Compile each file in the list of filenames. This will initialize
+# makefile name, sources, etc, then invoke compileFiles. Args takes
+# in the following forms: -autostart, -autodestroy, -modal.
 #
-body ::tycho::Compile::compile {filenames} {
+body ::tycho::Compile::compile {filenames {args {}}} {
     initialize $filenames
     # Should we check that the files exist here?
     checkSourceFiles
     set makefile [makefileName]
     createMakefile
-    compileFiles
+    # Make sure we pass on arguments down to compileFiles
+    compileFiles $args
 }
 #######################################################################
 #### compileAndLoad
 # Compile and load in each file in the list of filenames.
 #
-body ::tycho::Compile::compileAndLoad {filenames} {
-    compile $filenames
+body ::tycho::Compile::compileAndLoad {filenames {args {}}} {
+    compile $filenames $args
     loadFiles
 }
 #######################################################################
@@ -224,56 +235,67 @@ body ::tycho::Compile::checkSourceFiles {} {
 
 #######################################################################
 #### compileFiles
-# Compile the files
+# Quickly compile the files. This takes in arguments, which could be
+# any of the following: -autodestroy, -autostart, and -modal.
 #
-body ::tycho::Compile::compileFiles {} {
+body ::tycho::Compile::compileFiles {{args {}}} {
     # FIXME: compileString should be a preference.
     # FIXME: dirname should be a preference.
     
+    # get rid of braces {}
+    set args [lindex $args 0]
+
+    # Our basic functions:
+    array set option {-autodestroy 0}
+    array set option {-autostart 0}
+    array set option {-modal 0}
+    array set option $args
+
     #putStatus "About to make shared object, when complete, be sure to \
     #        close the Exec window to continue."
 
-    # Compile.  If we already have a compileWidget, reuse it. 
-    if {![winfo exists $compileWidget]} {
-        #set compileWidget [$this cget -view].compile
-        #set retList [::tycho::execModal $compileString $dirname]
-
-        set autostart 0
-        set autodestroy 0
-
+    # Compile.  If we already have a monitorWidget, reuse it. 
+    if {![winfo exists $monitorWidget]} {
         if [regexp {[Mm]akefile} $makefile] {
             set compileString "make"
         } {
             set compileString "make -f $makefile"
         }
-        set compileWidget \
-                [::tycho::Monitor [::tycho::autoName .makeExec] \
-                -autostart $autostart -autodestroy $autodestroy \
+
+        set monitorWidget \
+                [::tycho::Monitor [::tycho::autoName .monitor] \
+                -autostart $option(-autostart) \
+                -autodestroy $option(-autodestroy) \
                 -command $compileString -dir $dirname]
 
         # Basic initialization here
         if {$compileString != {} } {
-            $compileWidget configure -command $compileString
+            $monitorWidget configure -command $compileString
         }
         if {$dirname != {} } {
-            $compileWidget configure -dir $dirname
+            $monitorWidget configure -dir $dirname
         }
 
-        $compileWidget raiseWindow
+        $monitorWidget raiseWindow
 
-        if {$autostart} {
-            #$compileWidget execProcessInMonitor
-            $compileWidget getStatusWait
+        if {$option(-autostart)} {
+            $monitorWidget getStatusWait
         } else {
             # Raise current window back, since default is not autostart
             set editorName [$this cget -view]
             if {$editorName!={}} {$editorName raiseWindow}
         }
    } else {
-        #set retList [::tycho::execModal {} {} $compileWidget]
-        $compileWidget raiseWindow
-        $compileWidget execProcessInMonitor
-        $compileWidget getStatusWait
+        #set retList [::tycho::execModal {} {} $monitorWidget]
+        $monitorWidget raiseWindow
+        $monitorWidget execProcessInMonitor
+        $monitorWidget getStatusWait
+    }
+
+    # If modal, then we wait until monitorWidget (a type of monitor)
+    # exits.
+    if {$option(-modal)==1} {
+        ::tycho::Dialog::wait $monitorWidget
     }
 }
 
