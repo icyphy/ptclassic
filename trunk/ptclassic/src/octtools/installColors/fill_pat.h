@@ -42,4 +42,7 @@ extern flPattern flChangeSize();
 extern vemStatus flEqual();
   /* Compares two fill patterns to see if they are equal */
 
+extern vemStatus flOutput
+	ARGS((flPattern pat, char *out_buf));
+
 #endif
