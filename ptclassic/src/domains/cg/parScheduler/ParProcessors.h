@@ -48,6 +48,9 @@ public:
 	// numProcs-1. Should be redefined.
 	virtual UniProcessor* getProc(int num);
 
+	// map targets to each processor
+	void mapTargets();
+
 	// get makespan
 	int getMakespan(); 
 
@@ -64,6 +67,9 @@ public:
 	// create sub galaxies for each processor: code generation.
 	void createSubGals();
 	StringList displaySubUnivs();
+
+	// code generation
+	void generateCode();
 
 protected:
 	// number of processors.
