@@ -120,7 +120,8 @@ cd ..
 if ( -d $PTOLEMY/src/tkvem ) then
 	optmkdir tkvem
 	cd tkvem
-	foreach x (tkvem tkgraph top)
+	optlink ../../src/tkvem makefile
+	foreach x (oct2ptcl tkgraph tkvem top)
 		optmkdir $x
 		cd $x
 		optlink ../../../src/tkvem/$x make.template
