@@ -170,7 +170,7 @@ body ::tycho::TCanvas::constructor {args} {
     # scrollbar and a bottom frame to hold the horizontal scrollbar and 
     # some filler.
     itk_component add top {
-	frame $itk_component(childsite).top
+	frame $itk_interior.top
     } {
 	keep -background -cursor
     }
@@ -204,7 +204,7 @@ body ::tycho::TCanvas::constructor {args} {
     
     # Frame to hold the horizontal scrollbar and filler.
     itk_component add bottom {
-	frame $itk_component(childsite).bottom
+	frame $itk_interior.bottom
     } {
 	keep -background -cursor
     }

@@ -260,7 +260,7 @@ body ::tycho::Graphics::constructor {args} {
 
     # Add a widget at the bottom for displaying info
     itk_component add info {
-	frame $itk_component(childsite).info -relief sunken
+	frame $itk_interior.info -relief sunken
     } {
 	keep -background -cursor
     }
