@@ -547,11 +547,15 @@ body ::tycho::View::focusin {} {
 #
 body ::tycho::SlateView::insertInDisplay {} {
     
+    # Initialize my displayer and menus, and register with the
+    # displayer.
+    $this setup
+
     # set up menus
-    addMyMenus
+    #    addMyMenus
 
     # insert the view into the displayer
-    $myDisplayer setView $viewLabel
+    $myDisplayer setView $viewLabel bottom
 
     # grab focus each time we enter the slate widget
     ::bind $itk_component(slateview) <Enter> \
