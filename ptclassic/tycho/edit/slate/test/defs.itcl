@@ -196,20 +196,25 @@ proc _interaction {tag id x y xinc yinc n args} {
 
     # Now repeatedly "drag" mouse. Note: get the script from
     # the item id not the tag.
+    # Note also: the -modifiers option needs to be removed
+    array set temp $args
+    catch {unset temp(-modifiers)}
+    set nomodifiers [array get temp]
     set i 0
     while { $i < $n } {
 	incr i
 	set x [expr $x + $xinc]
 	set y [expr $y + $yinc]
 	set script [.s bind $id \
-		[eval ::tycho::Interactor::event Motion $args]]
+		[eval ::tycho::Interactor::event Motion $nomodifiers]]
 	regsub -all %x $script $x script
 	regsub -all %y $script $y script
 	uplevel #0 $script
     }
 
     # Eval the release event
-    set script [.s bind $id [eval ::tycho::Interactor::event Release $args]]
+    set script [.s bind $id \
+	    [eval ::tycho::Interactor::event Release $nomodifiers]]
     regsub -all %x $script $x script
     regsub -all %y $script $y script
     uplevel #0 $script
