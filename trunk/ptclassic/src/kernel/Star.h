@@ -47,6 +47,8 @@ public:
 	// Method to print out description
 	StringList printVerbose ();
 
+	// Return myself as a Star.  Overrides Block::asStar.
+	Star& asStar() const { return *this;}
 };
 
 #endif
