@@ -19,11 +19,14 @@ pigi &
 .)c
 .IE "starting pigi"
 .pp
-You have started two processes: the graphic editor, vem, and
-a process named
-.c pigiRpc
+You have started two processes: the graphic editor,
+.i vem ,
+and a process named
+.i pigiRpc
 that contains the pigi code and the Ptolemy kernel.
-A vem console window will open in the upper left corner, and a
+A
+.i vem
+console window will open in the upper left corner, and a
 palette of demo directories directly below it.
 Ptolemy (which runs in the pigiRpc process) will automatically start and open
 a greeting window.
@@ -122,7 +125,7 @@ The action is all in the FIR filter.
 To understand its function, place the mouse cursor on it,
 and execute the Other:profile command.
 Here ``Other'' refers to the command category and ``profile''
-to the command in the submenu.
+to the command in the submenu (you may also type ``,'').
 .IE "profile"
 This command summarizes the behavior of a star.
 Further information can be obtained with the Other:man command,
