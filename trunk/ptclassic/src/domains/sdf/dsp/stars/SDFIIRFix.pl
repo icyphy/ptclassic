@@ -92,8 +92,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
         defstate {
                 name { CoefPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc { Precision of the coefficients in bits. }
         }
 	defstate {
@@ -108,8 +108,8 @@ by the parameter "InputPrecision".
 	}
         defstate {
                 name { InputPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc {
 Precision of the input in bits.
 The input particles are only cast to this precision if the parameter
@@ -118,20 +118,20 @@ The input particles are only cast to this precision if the parameter
         }
         defstate {
                 name { AccumPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc { Precision of the accumulation in bits. }
         }
         defstate {
                 name { StatePrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc { Precision of the state in bits. }
         }
         defstate {
                 name { OutputPrecision }
-                type { string }
-                default { "2.14" }
+                type { precision }
+                default { 2.14 }
                 desc { Precision of the output in bits. } 
         }
 	ccinclude {
@@ -182,11 +182,11 @@ The input particles are only cast to this precision if the parameter
 	    LOG_NEW; state = new Fix[numState];
 
 	    // Local variables
-	    Fix coef( CoefPrecision );
+	    Fix coef( (const char*) CoefPrecision );
 	    if ( coef.invalid() )
 	      Error::abortRun( *this, "Invalid CoefPrecision" );
 
-	    Fix st( StatePrecision );
+	    Fix st( (const char*) StatePrecision );
 	    if ( st.invalid() )
 	      Error::abortRun( *this, "Invalid StatePrecision" );
 
