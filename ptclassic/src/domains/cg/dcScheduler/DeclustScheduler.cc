@@ -8,7 +8,7 @@ Copyright (c) 1991 The Regents of the University of California.
 
 Programmer: Soonhoi Ha based on G.C. Sih's code
 Date of last revision: 5/92
-
+'
 *****************************************************************/
 #ifdef __GNUG__
 #pragma implementation
@@ -321,8 +321,8 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 	int bMspan = bestM;
 
 	// amount of IPC.
-	int incomms[numProcs];
-	int outcomms[numProcs];
+	LOG_NEW; int *incomms = new int [numProcs];
+	LOG_DEL; int *outcomms = new int [numProcs];
 
 	DCNodeList bestList;		// temporary storage for the best 
 	bestList.initialize();		// break path.
@@ -417,6 +417,8 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 		}
 	}
 	copyNodes(bestList, slpsect);
+	LOG_DEL; delete [] incomms;
+	LOG_DEL; delete [] outcomms;
 	return bMspan;
 }
 
@@ -506,7 +508,7 @@ int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
 
 	// Categorize each processor as being heavily(1) or lightly(-1) loaded
 	// We include at most one idle processor in lightly loaded procs.
-	int procs[numProcs];
+	LOG_NEW; int *procs = new int [numProcs];
 	for (int i = 0; i < numProcs; i++) procs[i] = 0;
 	bestSchedule->categorizeLoads(procs);
 
@@ -575,6 +577,7 @@ int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
 			}
 		}
 	}
+	LOG_DEL; delete [] procs;
 	return changeFlag;
 }
 
@@ -657,7 +660,7 @@ int DeclustScheduler::commReduction(ClusterList &remC, ClusterList *slpC) {
 
 	ClusterListIter iter(highestSLP);
 	Cluster* cls;
-	int canProcs[numProcs];
+	LOG_NEW; int *canProcs = new int [numProcs];
 
 	// Iterate through the 3 slp clusters with highest scores
 	while ((cls = iter++) != 0) {
@@ -717,6 +720,7 @@ int DeclustScheduler::commReduction(ClusterList &remC, ClusterList *slpC) {
 			}
 		}
 	}
+	LOG_DEL; delete [] canProcs;
 	return changeflag;	// Return 1 if accepted a better schedule
 }
 
