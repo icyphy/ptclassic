@@ -50,13 +50,18 @@
 #
 # CGC tcl stars are included because they don't pull in tk.
 # SDF tcl stars are omitted because they do.
-
+#
 # Note that you must explicitly include any target .o files in TARGETS
 # for architectures that don't use shared libraries.  If you don't, then
 # you won't see these targets in non-shared library architectures.  For
-# an example, see the CG56 target section below
-
+# an example, see the CG56 target section below.
+#
 # Stub files that pull in the stars.
+#
+# This file depends on make variables defined by the config.$(PTARCH).mk
+# and config.default makefiles, e.g. ITCL_LIBSPEC, ITK_LIBSPEC,
+# LIB_FLUSH_CACHE, LIBSUFFIX, SYSLIBS, TCL_LIBSPEC, TK_LIBSPEC,
+# USE_SHARED_LIBS, and X11_LIBSPEC.
 
 #STARS =
 #TARGETS =
