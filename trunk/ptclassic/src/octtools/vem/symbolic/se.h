@@ -45,6 +45,7 @@
 #include "commands.h"
 #include "symbolic.h"
 #include "list.h"
+#include "opts.h"		/* Pick up vemExpert() decl. */
 
 extern void seInit();
   /* Symbolic policy library initialization */
