@@ -1,22 +1,7 @@
 defstar {
   name { GainFix_M }
   domain { SDF }
-  desc {
-    Takes an input FixMatrix and multiplies it by a scalar gain value.
-    The value of the "gain" parameter and its precision in bits can currently 
-    be specified using two different notations.
-    Specifying only a value by itself in the dialog box would create a
-    fixed-point number with the default precision which has a total length
-    of 24 bits with the number of range bits as required by the value.
-    For example, the default value 1.0 creates a fixed-point object with
-    precision 2.22, and a value like 0.5 would create one with precision
-    1.23.  An alternative way of specifying the value and the
-    precision of this parameter is to use the parenthesis notation
-    of (value, precision).  For example, filling the dialog
-    box for the gain parameter with (2.546, 3.5) would create a fixed-point
-    object formed by casting the double-precision floating-point number
-    2.546 to a fixed-point number with a precision of 3.5.
-  }
+  desc { Multiply a fixed-point matrix by a fixed-point scalar gain value. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

@@ -1,11 +1,7 @@
 defstar {
   name { InverseFix_M }
   domain { SDF }
-  desc {
-Invert a square matrix using the Matrix class function.
-The input matrix has dimensions (rowsCols,rowsCols).
-The output matrix has dimensions (rowsCols,rowsCols).
-  }
+  desc { Invert a square fixed-point matrix. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

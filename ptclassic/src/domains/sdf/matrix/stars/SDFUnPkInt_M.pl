@@ -1,7 +1,7 @@
 defstar {
   name      { UnPkInt_M }
   domain    { SDF }
-  desc      { Takes IntMatrix messages and produces integers. }
+  desc      { Read an integer matrix and output its elements, row by row. }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

@@ -1,9 +1,7 @@
 defstar {
   name { GainInt_M }
   domain { SDF }
-  desc {
-    Takes an input IntMatrix and multiplies it by a scalar gain value.
-  }
+  desc { Multiply an integer matrix by an integer scalar gain value. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

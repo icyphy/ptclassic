@@ -2,15 +2,11 @@ defstar {
 	name { MpyFix_M }
 	domain { SDF }
 	desc {
-Does a matrix multiplication of two input Fix Matricies A and B to
-produce matrix C.
-Matrix A has dimensions (numRows,X).
-Matrix B has dimensions (X,numCols).
-Matrix C has dimensions (numRows,numCols).
-
-The user need only specify numRows and numCols.  An error will be generated
-automatically if the number of columns in A does not match the number of
-columns in B.
+Multiply two fixed-point matrices A and B to produce matrix C.
+Matrix A has dimensions (numRows,X). Matrix B has dimensions (X,numCols).
+Matrix C has dimensions (numRows,numCols). The user need only specify
+numRows and numCols. An error will be generated automatically if the
+number of columns in A does not match the number of rows in B.
 	}
 	version { $Id$ }
 	author { Mike J. Chen }

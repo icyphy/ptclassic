@@ -1,9 +1,7 @@
 defstar {
   name { Gain_M }
   domain { SDF }
-  desc {
-    Takes an input FloatMatrix and multiplies it by a scalar gain value.
-  }
+  desc { Multiply a floating-point matrix by a scalar gain value. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

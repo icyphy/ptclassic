@@ -1,7 +1,10 @@
 defstar {
   name      { PackInt_M }
   domain    { SDF }
-  desc      { Takes integer inputs and produces IntMatrix messages. }
+  desc      { 
+This star reads a sequence of integer particles and
+fills a integer matrix with their values, row by row.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

@@ -5,7 +5,8 @@ defstar {
     author	{ Mike J. Chen }
     location    { SDF matrix library }
     descriptor	{
-Generates a data matrix X from a stream of input particles as below:
+Generate an integer data matrix X from a stream of input particles
+organized as shown below:
 
         X = [   [ x(M-1)      x(M-1)  ...     x(0)    ]
                 [ x(M)        x(M)    ...     x(1)    ]
@@ -14,11 +15,9 @@ Generates a data matrix X from a stream of input particles as below:
                 .
                 [ x(N-1)      x(N-2)  ...     x(N-M)] ]
 
-This matrix is the type of input for stars like SVD_M.
-
-This star uses the Matrix class.
-
-} 
+This Toeplitz matrix is the form of the matrix that is required by the SVD_M star,
+among others.
+	} 
     defstate {
 	name 	{ numRows }
 	type 	{ int }

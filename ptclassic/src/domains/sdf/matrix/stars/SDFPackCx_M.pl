@@ -1,7 +1,10 @@
 defstar {
   name      { PackCx_M }
   domain    { SDF }
-  desc      { Takes complex inputs and produces ComplexMatrix messages. }
+  desc      { 
+This star reads a sequence of complex particles and
+fills a complex matrix with their values, row by row.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

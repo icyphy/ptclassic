@@ -1,13 +1,7 @@
 defstar {
 	name { SubCx_M }
 	domain { SDF }
-	desc {
-Does a matrix subtraction of two input Complex Matricies A and B to 
-produce matrix C.
-Matrix A has dimensions (numRows,numCols).
-Matrix B has dimensions (numRows,numCols).
-Matrix C has dimensions (numRows,numCols).
-	}
+	desc { Subtract complex matrix B from A. }
 	version { $Id$ }
 	author { Mike J. Chen }
 	copyright { 1993 The Regents of the University of California }

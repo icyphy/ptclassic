@@ -1,7 +1,7 @@
 defstar {
   name      { UnPkCx_M }
   domain    { SDF }
-  desc      { Takes ComplexMatrix messages and produces complex particles. }
+  desc      { Read a complex matrix and output its elements, row by row. }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

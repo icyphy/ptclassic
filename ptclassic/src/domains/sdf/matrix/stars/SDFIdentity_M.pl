@@ -1,11 +1,7 @@
 defstar {
   name { Identity_M }
   domain { SDF }
-  desc {
-Make and identity matrix of the given size.  An indentity matrix is square
-with all diagonal entries equal to 1 and the rest equal to 0.
-The output matrix has dimensions (rowsCols,rowsCols).
-  }
+  desc { Output a floating-point identity matrix. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
@@ -18,7 +14,7 @@ The output matrix has dimensions (rowsCols,rowsCols).
     name { rowsCols }
     type { int }
     default { 8 }
-    desc { Number of rows/columns of the output square matrix. }
+    desc { Number of rows and columns of the output square matrix. }
   }
 
   ccinclude { "Matrix.h" }
