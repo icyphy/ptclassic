@@ -1,6 +1,7 @@
 defstar {
 	name { Tone }
 	domain { CG56 }
+	acknowledge { Method from Motorola's "DSP News", Vol. 1., No. 3, 1988 }
 	desc { Sine or cosine function using second order oscillator }
 	version { $Id$ }
 	author { J. Buck, ported from Gabriel }
