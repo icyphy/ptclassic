@@ -498,24 +498,33 @@ KcLoad (const char* iconName, int permB, const char* linkArgs) {
 		return FALSE;
 	}
 	*p = 0;
-// see if the star is already loaded on a different domain list
 	const char* curdom = curDomainName();
+// If the star's domain is different from the current domain, set the
+// current domain to the star's domain in order for the KcIsCompiledInStar
+// and KcIsKnown calls below to work.
 	if (strcmp(curdom, domain) != 0) {
 		KcSetKBDomain(domain);
-		if (KcIsCompiledInStar(base)) {
-			StringList msg = "star '";
-			msg += base;
-			msg += "' belongs to an incompatible domain.";
-			msg += "\nCheck the galaxy's domain using edit-domain";
-			ErrAdd (msg);
-			return FALSE;
-		}
 	}
-	if (!compileAndLink (base, domain, dir, preproc, permB, linkArgs))
+	if (KcIsCompiledInStar(base)) {
+		StringList msg = "star '";
+		msg += base;
+		msg += "' is a compiled-in star of domain ";
+		msg += domain;
+		msg += ".\nCannot dynamically load a compiled-in star class.";
+		ErrAdd(msg);
+		// restore the original current domain
+		KcSetKBDomain(curdom);
 		return FALSE;
+	}
+	if (!compileAndLink (base, domain, dir, preproc, permB, linkArgs)) {
+		// restore the original current domain
+		KcSetKBDomain(curdom);
+		return FALSE;
+	}
 	int status = KcIsKnown(base);
 	if (!status)
 		ErrAdd("loader ran successfully, but star is not defined!");
+// restore the original current domain
 	KcSetKBDomain(curdom);
 	return status;
 }
