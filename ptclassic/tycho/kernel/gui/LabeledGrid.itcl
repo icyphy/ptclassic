@@ -556,6 +556,9 @@ class ::tycho::LabeledGrid {
     # The children of each group
     protected variable _children
 
+    # The namespace tail of this object
+    protected variable scope
+
     ###################################################################
     ####                         private methods                   ####
 
@@ -735,6 +738,9 @@ body ::tycho::LabeledGrid::constructor {args} {
     # Unique counter to distinguish widget instances
     set unique [incr widgetCounter]
     
+    # Cache the class scope
+    set scope [info class]
+
     # It's nice to have relief and borderwidth options
     itk_option add hull.borderwidth hull.relief
 
@@ -798,17 +804,17 @@ body ::tycho::LabeledGrid::add {type id args} {
     set args [array get opts]
 
     # Use the shared variable if there is one, otherwise a local one
-    if ![::info exists [scope $par$unique]] {
-	set var [scope $id$unique]
+    if ![::info exists ${scope}::$par$unique] {
+	set var ${scope}::$id$unique
     } else {
-	set var [scope $par$unique]
+	set var ${scope}::$par$unique
     }
     # Create the widget and add as a component
     eval $_create($type)
     itk_component add $id {set path} $_options($type)
 
     # Set its initial value if not in a shared group and the value is supplied
-    if { ![::info exists [scope $par$unique]] && $value != "" } {
+    if { ![::info exists ${scope}::$par$unique] && $value != "" } {
         eval $_assign($type)
     }
     # Draw the item according to its style
@@ -839,9 +845,9 @@ body ::tycho::LabeledGrid::assign {id args} {
 	error "Unknown id: \"$id\""
     }
     if { $_type($id) == "group" } {
-	if [::info exists [scope $id$unique]] {
+	if [::info exists ${scope}::$id$unique] {
 	    # Shared group
-	    set [scope $id$unique] $value
+	    set ${scope}::$id$unique $value
 	} else {
 	    # Not a shared group
 	    foreach {t v} $value {
@@ -975,16 +981,16 @@ body ::tycho::LabeledGrid::get {{id {}}} {
 	error "Unknown id: \"$id\""
     }
     if { $_type($id) == "group" } {
-	if [::info exists [scope $id$unique]] {
+	if [::info exists ${scope}::$id$unique] {
 	    # Shared group
-	    set [scope $id$unique]
+	    set ${scope}::$id$unique
 	} else {
 	    # Not a shared group.
 	    set result {}
 	    foreach t $_children($id) {
 		regsub ^[list $id]\.? $t {} nm
-		if [::info exists [scope $t$unique]] {
-		    lappend result $nm [set [scope $t$unique]]
+		if [::info exists ${scope}::$t$unique] {
+		    lappend result $nm [set ${scope}::$t$unique]
 		} elseif { $_type($t) != "group" } {
 		    lappend result $nm [_do get $t]
 		}
@@ -1030,7 +1036,7 @@ body ::tycho::LabeledGrid::group {id args} {
     # If the initial value is not null, create the shared variable and
     # assign it -- that way we know it's a shared group later
     if { $opts(-initial) != "" } {
-        set [scope $id$unique] $opts(-initial)
+        set ${scope}::$id$unique $opts(-initial)
     }
 
     # Set up parameters of this group
@@ -1134,10 +1140,10 @@ body ::tycho::LabeledGrid::_do {cmdtype id {value {}}} {
     set command [set _[set cmdtype]($_type($id))]
 
     regexp {^((.*)\.)?[^\.]+$} $id _ _ par
-    if [::info exists [scope $par$unique]] {
-        set var [scope $par$unique]
+    if [::info exists ${scope}::$par$unique] {
+        set var ${scope}::$par$unique
     } else {
-        set var [scope $id$unique]
+        set var ${scope}::$id$unique
     }
     set path $itk_component($id)
     
