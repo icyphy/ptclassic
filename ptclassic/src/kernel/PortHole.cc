@@ -320,12 +320,12 @@ int PortHole :: numTokens() const { return myGeodesic->size();}
 
 // return the number of initial delays on the Geodesic
 int PortHole :: numInitDelays() const {
-	return myGeodesic->numInit();
+	return myGeodesic?myGeodesic->numInit():-1;
 }
 
 // 3/2/94 added to support initDelayValues
 const char* PortHole::initDelayValues() const {
-	return myGeodesic->initDelayValues();
+	return myGeodesic?myGeodesic->initDelayValues():NULL;
 }
 
 void PortHole :: allocateBuffer()
