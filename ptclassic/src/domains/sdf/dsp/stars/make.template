@@ -69,6 +69,7 @@ PL_SRCS= \
  SDFConvolCx.pl \
  SDFDirichlet.pl \
  SDFDTFT.pl \
+ SDFDTMFPostTest.pl \
  SDFFFTCx.pl \
  SDFFIRFix.pl \
  SDFGGAL.pl \
