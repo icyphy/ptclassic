@@ -74,6 +74,9 @@ class Set;
    <LI> repCount: the number of repetitions for the head
    </UL>
 
+   partSize = parSize implies this is a simple parallel block. <BR>
+   headsize > 0 implies this is a non-separable partition with a head <BR>
+
 **********************************************************************/
 class SRRecursiveSchedule {
 public:
@@ -84,6 +87,8 @@ public:
   StringList print() const;
 
   //  StringList printSchedule() const;
+
+  StringList printVerbose() const;
 
   int addSingleVertex( int, int );
 
@@ -97,9 +102,13 @@ public:
 
   int mergeVertex( int );
 
+  void splitParallelBlocks();
+
   int deleteIndex( int );
 
   int insertVertexAtIndex( int, int );
+
+  void runSchedule() const;
 
 private:
   // The dependency graph for which this schedule is computed
@@ -123,6 +132,14 @@ private:
   void printOnePartition(int &, StringList & ) const;
 
   void printOneBlock( int &, StringList & ) const;
+
+  void printVerbosePartition( int &, int, StringList & ) const;
+
+  void printVerboseBlock( int &, int, StringList & ) const;
+
+  void runOnePartition( int & ) const;
+
+  void runOneBlock( int & ) const;
 
   int partitionCost( int & ) const;
 
