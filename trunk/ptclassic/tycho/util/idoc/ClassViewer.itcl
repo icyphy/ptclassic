@@ -622,7 +622,8 @@ body ::tycho::IDoc::putHtml {class data {top 1}} {
                <title>Class [$myClass($class) modelcget -name]</title>
                </head>
                <body bgcolor=\"$itk_option(-background)\">
-               <h1>Class [$myClass($class) modelcget -name]</h1>
+               <h1><a href = \"[$myClass($class) modelcget -source]\">
+               Class [$myClass($class) modelcget -name]</a></h1>
                $data
                </body>
                </html>"
