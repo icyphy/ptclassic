@@ -109,20 +109,23 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	}
 
 	setup {
+		// run the setup method of the base star (start Matlab, etc.)
+		SDFMatlab::setup();
+
 		// free any existing memory
-		matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
-						   numInputs);
+		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
+						    numInputs);
 		delete [] matlabInputMatrices;
 		matlabInputMatrices = 0;
-		matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
-						   numOutputs);
+		matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
+						    numOutputs);
 		delete [] matlabOutputMatrices;
 		matlabOutputMatrices = 0;
 
-		matlabInterface.FreeStringArray(matlabInputNames, numInputs);
+		matlabInterface->FreeStringArray(matlabInputNames, numInputs);
 		delete [] matlabInputNames;
 		matlabInputNames = 0;
-		matlabInterface.FreeStringArray(matlabOutputNames, numOutputs);
+		matlabInterface->FreeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
 		matlabOutputNames = 0;
 
@@ -142,9 +145,6 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		  }
 		}
 
-		// run the setup method of the base star (start Matlab, etc.)
-		SDFMatlab::setup();
-
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
 		  matlabInputMatrices = new MatrixPtr[numInputs];
@@ -152,8 +152,8 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		    matlabInputMatrices[k] = 0;
 		  }
 		  matlabInputNames = new char*[numInputs];
-		  matlabInterface.NameMatlabMatrices(matlabInputNames,
-		  				     numInputs, "input");
+		  matlabInterface->NameMatlabMatrices(matlabInputNames,
+		  				      numInputs, "input");
 		}
 
 		// allocate Matlab output matrices and generate their names
@@ -163,12 +163,12 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		    matlabOutputMatrices[k] = 0;
 		  }
 		  matlabOutputNames = new char*[numOutputs];
-		  matlabInterface.NameMatlabMatrices(matlabOutputNames,
-		  				     numOutputs, "output");
+		  matlabInterface->NameMatlabMatrices(matlabOutputNames,
+		  				      numOutputs, "output");
 		}
 
 		// create the command to be sent to the Matlab interpreter
-		matlabInterface.BuildMatlabCommand(
+		matlabInterface->BuildMatlabCommand(
 			matlabInputNames, numInputs,
 			(const char *) MatlabFunction,
 			matlabOutputNames, numOutputs);
@@ -178,9 +178,9 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		const char* setupCommand = (const char*) MatlabSetUp;
 		if ( setupCommand && *setupCommand ) {
 		  InfString matlabCommand = setupCommand;
-		  int err = matlabInterface.EvaluateUserCommand(matlabCommand);
+		  int err = matlabInterface->EvaluateUserCommand(matlabCommand);
 		  if ( err ) {
-		    Error::abortRun( *this, matlabInterface.GetErrorString() );
+		    Error::abortRun( *this, matlabInterface->GetErrorString() );
 		  }
 		}
 	}
@@ -190,20 +190,20 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		processInputMatrices();
 
 		// evaluate the Matlab command (non-zero means error)
-		int merror = matlabInterface.EvaluateUserCommand();
+		int merror = matlabInterface->EvaluateUserCommand();
 		if ( merror ) {
-		  matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+		  matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
 						     numInputs);
-		  matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+		  matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
 						     numOutputs);
-		  Error::abortRun( *this, matlabInterface.GetErrorString() );
+		  Error::abortRun( *this, matlabInterface->GetErrorString() );
 		}
 		else {
 		  // convert Matlab matrices to Ptolemy matrices
 		  int oerror = processOutputMatrices();
-		  matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+		  matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
 						     numInputs);
-		  matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+		  matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
 						     numOutputs);
 		  if ( oerror ) {			// non-zero means error
 		    Error::abortRun( *this, "Could not convert the Matlab ",
@@ -216,24 +216,24 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		const char* wrapupCommand = (const char*) MatlabWrapUp;
 		if ( wrapupCommand && *wrapupCommand ) {
 		  InfString matlabCommand = wrapupCommand;
-		  int err = matlabInterface.EvaluateUserCommand(matlabCommand);
+		  int err = matlabInterface->EvaluateUserCommand(matlabCommand);
 		  if ( err ) {
-		    Error::abortRun( *this, matlabInterface.GetErrorString() );
+		    Error::abortRun( *this, matlabInterface->GetErrorString() );
 		  }
 		}
 	}
 
 	destructor {
-		matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
 						   numInputs);
 		delete [] matlabInputMatrices;
-		matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+		matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
 						   numOutputs);
 		delete [] matlabOutputMatrices;
 
-		matlabInterface.FreeStringArray(matlabInputNames, numInputs);
+		matlabInterface->FreeStringArray(matlabInputNames, numInputs);
 		delete [] matlabInputNames;
-		matlabInterface.FreeStringArray(matlabOutputNames, numOutputs);
+		matlabInterface->FreeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
 	}
 
@@ -254,7 +254,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		  PortHole *iportp = nexti++;
 		  DataType portType = iportp->resolvedType();
 		  Matrix *matlabMatrix =
-		  	matlabInterface.PtolemyToMatlab(
+		  	matlabInterface->PtolemyToMatlab(
 				(*iportp)%0, portType, &errflag);
 
 		  // check for error in the call to PtolemyToMatlab
@@ -267,12 +267,12 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		  }
 
 		  // Give the current matrix a name
-		  matlabInterface.NameMatlabMatrix(matlabMatrix,
+		  matlabInterface->NameMatlabMatrix(matlabMatrix,
 		  				   matlabInputNames[i]);
 
 		  // let Matlab know about the new Matlab matrix we've defined
 		  // FIXME: Memory Leak
-		  matlabInterface.MatlabEnginePutMatrix(matlabMatrix);
+		  matlabInterface->MatlabEnginePutMatrix(matlabMatrix);
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabInputMatrices[i] = matlabMatrix;
@@ -305,7 +305,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		  // create a new Matlab matrix for deallocation and save ref.
 		  // FIXME: Memory leak
 		  Matrix *matlabMatrix =
-		  matlabInterface.MatlabEngineGetMatrix(matlabOutputNames[j]);
+		  matlabInterface->MatlabEngineGetMatrix(matlabOutputNames[j]);
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabOutputMatrices[j] = matlabMatrix;
@@ -315,7 +315,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		    if ( ! nullMatlabMatrix ) {
 		      nullMatlabMatrix = TRUE;
 		      nerrstr = "For the Matlab command ";
-		      nerrstr << matlabInterface.GetMatlabCommand() << ", ";
+		      nerrstr << matlabInterface->GetMatlabCommand() << ", ";
 		      nverbstr = " is not defined.";
 		    }
 		    else {
@@ -330,20 +330,20 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		  matrixId << " on output port " << j;
 		  int errflag = FALSE;
 		  int warnflag = FALSE;
-		  int badport = matlabInterface.MatlabToPtolemy(
+		  int badport = matlabInterface->MatlabToPtolemy(
 		  			(*oportp)%0, portType, matlabMatrix,
 					&warnflag, &errflag);
 		  incompatibleOutportPort = incompatibleOutportPort || badport;
 
 		  if ( warnflag ) {
-		    Error::warn(*this, matlabInterface.GetWarningString() );
+		    Error::warn(*this, matlabInterface->GetWarningString() );
 		  }
 
 		  if ( errflag ) {
 		    if ( ! matlabFatalError ) {
 		      matlabFatalError = TRUE;
 		      merrstr = "For the Matlab command ";
-		      merrstr << matlabInterface.GetMatlabCommand() << ", ";
+		      merrstr << matlabInterface->GetMatlabCommand() << ", ";
 		      mverbstr = " is not a full matrix.";
 		    }
 		    else {
