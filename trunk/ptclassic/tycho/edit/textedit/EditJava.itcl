@@ -163,8 +163,7 @@ body ::tycho::EditJava::evaluate {} {
 #
 body ::tycho::EditJava::gendoc {} {
     return [::tycho::EditProgram::gendoc {set docfile $root.htm} \
-            { ::tycho::rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"; \
-            exec javadoc $tail}] 
+            { exec javadoc $tail}] 
 
 }
 
@@ -201,13 +200,11 @@ body ::tycho::EditJava::parseNow {start stop} {
     set endc $stop
     set spaces "\[ \t\]"
     set procregexp "^$spaces*(public$spaces+|protected$spaces+|private$spaces+)\[^()]*$spaces+(\[^ \t()\]+)$spaces*\(.*\)\[^;\]$spaces*$"
-    puts $procregexp
     while {[set ind [$text search -count len -regexp $procregexp \
 	    $ind $stop]] != {}} {
 
 	set endc [$text index "$ind + $len chars"]
 	set line [$text get $ind $endc]
-        puts $line
 	if [regexp -indices "$spaces*\(public|private|protected\)$spaces+class$spaces\(\[^ \t\]*\)" \
 		$line match access classNameIndices] {
 	    # Class definitions. Tag and save the class name.
