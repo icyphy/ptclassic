@@ -879,6 +879,10 @@ void CGCTarget :: compileRun(SDFScheduler* s) {
 	defaultStream = &MAINCLOSE;
 }
 
+const char* CGCTarget :: domain() {
+	return galaxy() ? galaxy()->domain() : "CGC";
+}
+
 /////////////////////////////////////////
 // Utilities
 /////////////////////////////////////////
