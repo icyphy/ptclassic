@@ -1,25 +1,12 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/9/90
-
- This star generates a single event at the time origin.
-
-**************************************************************************/
-}
 defstar {
 	name {Impulse}
 	derivedFrom { RepeatStar }
 	domain {DE}
-	desc {
-	   "Generates a single event at time zero."
-	}
+	desc { Generates a single event at time zero. }
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	output {
 		name {output}
 		type {float}
@@ -28,7 +15,7 @@ defstar {
 		name {magnitude}
 		type {float}
 		default {"1.0"}
-		desc { "The magnitude of sample generated" }
+		desc { The value of sample generated. }
 	}
 	go {
 	   // Generate the output event
