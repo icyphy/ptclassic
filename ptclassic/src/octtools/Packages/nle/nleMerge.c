@@ -57,20 +57,6 @@ static char SccsId[]="$Id$";
 #include "nleMisc.h"
 #include "vulcan.h"
 
-/* Forward declarations */
-static int doMacroNets
-	ARGS((int type));
-void att_freeList
-	ARGS((struct s_attach **list));
-void addFloorplanBag
-	ARGS((octObject *FacetP));
-int promoteInstanceTerm
-	ARGS((octObject *InstTermP, octObject *FTermP));
-void att_add
-	ARGS((struct s_attach **list, char *name, octId id, int type));
-void checkArgumentsForMakeMacro
-	ARGS((octObject *NewFacetP,octObject *ArgBagP,octObject *NewInstanceP,int type));
-
 static int    debug = 0;        /* Debug flag for this file */
 
 #define ATT_CONTAINER 0
@@ -90,6 +76,21 @@ static st_table *stTerm;        /* Hash table for terminals */
 
 static int    gFormalTermCounter = 0;        /* counter of formal terminals */
 static int    gNetCounter = 0;        /* counter of nets */
+
+/* Forward declarations */
+static int doMacroNets
+	ARGS((int type));
+void att_freeList
+	ARGS((struct s_attach **list));
+void addFloorplanBag
+	ARGS((octObject *FacetP));
+int promoteInstanceTerm
+	ARGS((octObject *InstTermP, octObject *FTermP));
+void att_add
+	ARGS((struct s_attach **list, char *name, octId id, int type));
+void checkArgumentsForMakeMacro
+	ARGS((octObject *NewFacetP,octObject *ArgBagP,octObject *NewInstanceP,int type));
+
 
 /* To record all the attachments that must be done. Filled in pass1 (doMacroNet()) */
 struct s_attach *attachmentsToDo = 0;
