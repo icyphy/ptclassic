@@ -523,7 +523,7 @@ body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
 # widget, however, we might have to reload if it contains inherited data,
 # which we do not document in the HTML (yet). 
 #
-# It may be desireable to generate "flattened" documentation, listing all
+# It may be desirable to generate "flattened" documentation, listing all
 # methods/variables available to a class. This is a FIXME for future versions.
 #
 body ::tycho::ItclViewer::_generateHtmlBody {} {
