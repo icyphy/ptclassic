@@ -97,6 +97,22 @@ test EntryQuery-1.1 {Test EntryQuery} {
     list {Done}
 } {Done}
 
+test EntryQuery-1.2 {Test EntryQuery: addQuery method} {
+    after $duration .entry2 invoke cancel
+    ::tycho::EntryQuery .entry2 \
+	    -queries {{entry {Enter here:} {Default text}}}
+    .entry2 addQuery body {My Entry} {
+	Here we have some default text
+	line 2
+	line 3
+	line 4
+	line 5
+    } 4
+    .entry2 centerOnScreen
+#    ::tycho::safeUpdate .entry
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test File
