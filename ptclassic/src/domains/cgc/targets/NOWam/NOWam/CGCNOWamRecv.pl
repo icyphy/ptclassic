@@ -8,10 +8,13 @@ Receive star between NOW processors.
 	author { Patrick Warner }
 	copyright {
 Copyright(c) 1995-%Q% The Regents of the University of California
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 }
 	location { CGC NOW Active Message target library }
 	explanation {
-Produce code for inter-process communication (receive-side)
+Produce code for inter-process communication (receive-side).
 	}
 	private {
 		friend class CGCNOWamTarget;
@@ -20,7 +23,6 @@ Produce code for inter-process communication (receive-side)
 		name {output}
 		type {FLOAT}
 	}
-	ccinclude { "StringList.h" }
 
 	state {
 		name { numData }
@@ -108,14 +110,14 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	int i, pos;
 
 
-	#ifdef TIME_INFO
+#ifdef TIME_INFO
         if (fd == -1) {
                 printf("couldn't open proc\n");
         }
         else if (ioctl(fd, PIOCUSAGE, &$starSymbol(beginRecv)) == -1) {
                 printf("error getting time\n");
         }
-	#endif
+#endif
 
 	for (i = 0; i < $val(numData); i++) {
 		while ($starSymbol(RecvData) == -0.001) {
@@ -126,7 +128,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                 $starSymbol(RecvData) = -0.001;
 	}
 
-	#ifdef TIME_INFO
+#ifdef TIME_INFO
         if (fd == -1) {
                 printf("couldn't open proc\n");
         }
@@ -139,8 +141,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                              $starSymbol(beginRecv).pr_rtime.tv_nsec)) /
                              1000000000.0;
         printf("Cumulative time to receive %lf seconds\n", $starSymbol(timeRecv));
-	#endif
-
+#endif
 	}
 
 	go {
@@ -149,14 +150,14 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	}
 	codeblock (runtime) {
 #ifdef TIME_INFO
-if (fd == -1)
-       printf("couldn't open proc\n");
-else if (ioctl(fd, PIOCUSAGE, &endRun) == -1)
-       printf("error getting time\n");
-timeRun = (double)(endRun.pr_rtime.tv_sec - beginRun.pr_rtime.tv_sec) +
-           ((double)(endRun.pr_rtime.tv_nsec -
-                     beginRun.pr_rtime.tv_nsec)) / 1000000000.0;
-printf("Time to run %lf seconds\n", timeRun);
+	if (fd == -1)
+		printf("couldn't open proc\n");
+	else if (ioctl(fd, PIOCUSAGE, &endRun) == -1)
+		printf("error getting time\n");
+	timeRun = (double)(endRun.pr_rtime.tv_sec - beginRun.pr_rtime.tv_sec) +
+		  ((double)(endRun.pr_rtime.tv_nsec -
+			    beginRun.pr_rtime.tv_nsec)) / 1000000000.0;
+	printf("Time to run %lf seconds\n", timeRun);
 #endif
 	}
 	wrapup {
