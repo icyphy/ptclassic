@@ -34,6 +34,8 @@ will be delayed by more than the nominal service time.
 		   Particle* pp;
 		   float serviceNeeded;
 		   float lastUpdate;
+		    token() : pp(0) {}
+		   ~token() { if (pp) pp->die();}
 		};
 	}
 	protected {
@@ -77,7 +79,8 @@ will be delayed by more than the nominal service time.
 	   if((!input.dataNew) & (!outputP)) return;
 
 	   // Modify the serviceNeeded for all tokensInService.
-	   ListIter nextTok((SequentialList&)tokensInService);
+	   // I sincerely apologize for this cast!
+	   ListIter nextTok(*(SequentialList*)&tokensInService);
 	   for(int i = numberInService; i > 0; i--) {
 		t = (token*) nextTok++;
 		t->serviceNeeded = t->serviceNeeded -
