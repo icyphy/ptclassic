@@ -76,20 +76,21 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
-	HierarchicalData.itcl \
 	History.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	HyperGraph.itcl \
+	Index.itcl \
 	IndexBrowser.itcl \
+	Interchange.itcl \
 	KeyedGraph.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
 	Model.itcl \
+	ModelDebug.itcl \
 	MultiGraph.itcl \
-	NamedData.itcl \
 	Object.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
