@@ -245,6 +245,10 @@ body ::tycho::MenuSupport::clear {menu} {
     if { ! [::info exists _menupath($menu)] } {
 	error "Menu $menu does not exist"
     }
+    # Check that the menu has something in it
+    if ![info exists _menuentries($_menupath($menu))] {
+        return
+    }
 
     # Delete the menu entries. Note: Do in reverse
     # order so indexes don't get mixed up
