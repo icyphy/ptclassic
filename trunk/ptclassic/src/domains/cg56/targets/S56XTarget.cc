@@ -155,7 +155,7 @@ void S56XTarget::configureCommPair(CommPair& pair) {
     s56xSide->pairNumber = cgcSide->pairNumber = pairNumber++;
 
     cgcSide->S56XFilePrefix.
-	setInitValue(savestring(filePrefix.currentValue()));
+	setInitValue(hashstring(filePrefix.currentValue()));
     cgcSide->S56XFilePrefix.initialize();
 
 }
