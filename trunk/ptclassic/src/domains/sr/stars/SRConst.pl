@@ -2,10 +2,11 @@ defstar {
     name { Const }
     domain { SR }
     desc {
-In each instant, output a signal with value given by the ``level'' parameter.
-}
+In every "interval" instant, output a signal with value given by the "level"
+parameter.
+    }
     version { $Id$ }
-    author { S. A. Edwards }
+    author { S. A. Edwards, Bilung Lee }
     copyright {
 Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
@@ -22,10 +23,26 @@ limitation of liability, and disclaimer of warranty provisions.
 	default { "0" }
 	desc { The constant value }
     }
+    defstate {
+	name { interval }
+	type { int }
+	default { "1" }
+	desc { The interval of instants for constant emission }
+    }
+    protected {
+        int numInstants;
+    }
     setup {
-	noInternalState();
+        numInstants = 0;
     }
     go {
-	output.emit() << int(level);
+        if ((numInstants % int(interval)) == 0) {
+            output.emit() << int(level);
+        } else {
+            output.makeAbsent();
+        }
+    }
+    tick {
+        numInstants++;
     }
 }
