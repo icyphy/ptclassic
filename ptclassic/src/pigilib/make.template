@@ -59,7 +59,6 @@ HDRS	      = compile.h \
 		util.h \
 		utilities.h \
 		vemInterface.h \
-		ganttChart.h \
 		ganttIfc.h \
 		octIfc.h \
 		icon.h \
@@ -123,8 +122,7 @@ LIBCPPSRCS    = kernelCalls.cc \
 		PVem.cc \
 		TclStarIfc.cc \
 		BarGraph.cc \
-		XYPlot.cc \
-		ganttChart.cc
+		XYPlot.cc
 
 
 
