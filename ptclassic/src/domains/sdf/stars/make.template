@@ -121,6 +121,7 @@ PL_SRCS= \
  SDFMux.pl \
  SDFNumToBus.pl \
  SDFOrderTwoInt.pl \
+ SDFPack.pl \
  SDFPCMReadInt.pl \
  SDFPcwzLinear.pl \
  SDFPlay.pl \
@@ -158,6 +159,8 @@ PL_SRCS= \
  SDFTestMultirate.pl \
  SDFTrainer.pl \
  SDFTranspose.pl \
+ SDFUnpackFloat.pl \
+ SDFUnpackInt.pl \
  SDFUpSample.pl \
  SDFWaterfall.pl \
  SDFWaveForm.pl \
