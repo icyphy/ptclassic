@@ -60,9 +60,6 @@ MISC_FILES = \
 	CppTestFile.cc \
 	DrawTest.java \
 	PtclTestFile.pt \
-	SDFMyRamp.cc \
-	SDFMyRamp.h \
-	SDFMyRamp.htm \
 	SDFMyRamp.pl \
 	myTclCmd.c \
 	wristwatch.strl \
@@ -73,10 +70,13 @@ MISC_FILES = \
 
 # Sources that may or may not be present, but if they are present, we don't
 # want make checkjunk to barf on them.
-OPTIONAL_FILES =
+OPTIONAL_FILES = \
+	SDFMyRamp.cc \
+	SDFMyRamp.h \
+	SDFMyRamp.htm \
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = $(OPTIONAL_FILES)
 
 tests:: test_graphics
 
