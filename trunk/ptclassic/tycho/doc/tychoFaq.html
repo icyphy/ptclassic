@@ -1,0 +1,72 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Tycho FAQ</title>
+</head>
+<body bgcolor="#faf0e6">
+<H1><A NAME="FAQ">Tycho FAQ</A></H1>
+
+The information below is convered in the Tycho documentation, we
+present it here in a slightly different format.
+
+<H2>General</H2>
+
+<DL>
+<DT> <B>What Is Tycho?</B>
+
+<DD> At first glance, Tycho is a extensible Itcl development
+environment.  We plan to use Tycho in the Ptolemy project (see <A
+HREF="http://ptolemy.eecs.berkeley.edu"><CODE>http://ptolemy.eecs.berkeley.edu</CODE></A>.
+
+ <P>The two primary features that Itcl developers will find interesting
+are the Itcl profiler and the graphical class browser.
+
+<DT> <B>What Is Itcl?</B>
+
+<DD> Itcl is short hand for <CODE>[incr tcl]</CODE> which is an object
+oriented version of the Tool Command Language (tcl).  Tcl was written
+by John Ousterhout, Itcl was written by Michael McLennan.
+
+<DT> <B>How do I download Tycho?</B>
+<DD> <A HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has instructions and Itcl binaries.
+
+<DT> <B>What platforms does Tycho run under?</B>
+<DD> We do our development work under Solaris2.5.1.  Tycho has been run
+under WindowsNT, but some of the features that use <CODE>exec</CODE> are
+broken.  
+
+</DL>
+
+<H2>Why didn't you . . .</H2>
+
+<DL>
+<DT> <B>Why didn't you just use emacs?</B>
+<DD> FSF Emacs is not particularly graphical, though xemacs is better.
+We want to be able to have active graphical widgets embedded in text.
+
+
+<DT> <B>Why didn't you use the Iwidgets widgets everywhere?</B>
+<DD> This was a design decision made by the Tycho authors.  In some
+cases, we decided to use a simpler widget.  In other cases the
+functionality we needed was missing.  We also wanted the widget we
+wrote to use some of the features of Tycho, such as automatically
+generated documentation and active tcl examples.
+
+<DT> <B>Why didn't you use Java?</B>
+<DD> When we started Tycho, Java was still very new.  Currently, we
+don't know of a good canvas like Java class like the tk canvas.  We'd
+rather not reinvent the wheel here and write our own Java canvas.  We
+are looking into integrating Java and Tycho.
+
+</DL>
+
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<HR>
+Copyright &#169 1996, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
