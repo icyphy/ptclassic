@@ -412,6 +412,7 @@ public:
 	void compileRun();
 };
 
+// standard iterators
 class BDFClustPortIter : public BlockPortIter {
 public:
 	BDFClustPortIter(BDFCluster& s) : BlockPortIter(s) {}
@@ -435,4 +436,25 @@ public:
 	GalTopBlockIter::reset;
 };
 
+// special iterator that steps through ports related by BDF_SAME or
+// BDF_COMPLEMENT arcs to the original arc.  The interface is different
+// because as we return each port, we return the relation of that port
+// to the original port (BDF_SAME or BDF_COMPLEMENT).
+
+class BDFClustPortRelIter {
+public:
+	BDFClustPortRelIter(BDFClustPort& p) 
+	: start(&p), pos(&p), justDidFar(0), rev(0) {}
+	BDFClustPort* next(BDFRelation&);
+	void reset() {
+		pos = start;
+		justDidFar = rev = 0;
+	}
+private:
+	BDFClustPort* start;
+	BDFClustPort* pos;
+	// only a bit is needed for the following flags
+	unsigned char justDidFar;
+	unsigned char rev;
+};
 #endif
