@@ -115,7 +115,7 @@ proc ::tycho::controlpanel {filename {widgetname {}}} {
     # of an already loaded script. We might have to do some
     # horrible messing about with the library name...)
     #
-    if { [::infoWhich -command ::tycho::$name] == "" } {
+    if { [::infoWhichCommand ::tycho::$name] == "" } {
 	puts "loading $filename"
 	update idletasks
 	load $filename
