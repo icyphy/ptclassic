@@ -8,18 +8,54 @@
 
 The information below is convered in the Tycho documentation, we
 present it here in a slightly different format.
+<H2>Table of Contents</H2>
+<MENU>
+<LI> <A HREF="faq: general questions">General</A>
+	<MENU>
+	<LI> <A HREF="#Tycho description (short)"><B>1.1 What Is Tycho?</B></A>
 
-<H2>General</H2>
+	<LI> <A HREF="#Tycho feature list"><B>1.2 What features does Tycho
+	have?</B></A>
+
+	<LI> <A HREF="#downloading Tycho"><B>1.3 How do I download
+	Tycho?</B></A>
+
+	<LI> <A HREF="#platforms that Tycho runs under"><B>1.4 What
+	platforms does Tycho run under?</B></A>
+
+	<LI> <A HREF="#troubleshooting overview"><B>1.5
+	Troubleshooting</B></A>
+
+	<LI> <A HREF="#itcl description"><B>1.6 What Is Itcl?</B></A>
+
+	<LI> <A HREF="#ptolemy description"><B>1.7 What is
+	Ptolemy?</B></A>
+
+	<LI> <A HREF="#astronomy"><B>1.8 Who was Tycho Brahe?</B></A>
+
+	</MENU>
+
+<LI> <A HREF="#faq: why didn't you . . . ">2. Why didn't you . . .</A>
+	<MENU>
+	<LI> <A HREF="#emacs"><B>2.1 Why didn't you just use emacs?</B></A>
+	<LI> <A HREF="#iwidgets"><B>2.2 Why didn't you use the
+	Iwidgets widgets?</B></A>
+	</MENU>
+
+</MENU>
+<HR>
+
+<H2><A NAME="faq: general questions">1. General</A></H2>
 
 <DL>
-<DT> <A NAME="Tycho description (short)"><B>What Is Tycho?</B></A>
+<DT> <A NAME="Tycho description (short)"><B>1.1 What Is Tycho?</B></A>
 
 <DD> At first glance, Tycho is a extensible Itcl development
 environment.  We are developing Tycho to use it as a GUI for the
 Ptolemy Project.  Tycho0.1.1 is a work in progress, but others my find
 it useful as is.
 
-<DT> <A NAME="Tycho feature list"><B>What features does Tycho have?</B></A>
+<DT> <A NAME="Tycho feature list"><B>1.2 What features does Tycho have?</B></A>
 <DD> 
 
 <P>The two primary features that Itcl developers will find interesting
@@ -69,16 +105,31 @@ include:
 	</MENU>
 </MENU>
 
-<DT> <B>How do I download Tycho?</B>
+<DT> <A NAME="downloading Tycho"><B>1.3 How do I download Tycho?</B></A>
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has instructions and Itcl binaries.
 
-<DT> <B>What platforms does Tycho run under?</B>
+<DT> <A NAME="platforms that Tycho runs under"><B>1.4 What platforms does Tycho run under?</B></A>
 <DD> We do our development work under Solaris2.5.1.  Tycho has been run
 under WindowsNT, but some of the features that use <CODE>exec</CODE> are
 broken.  The Macintosh port is substantially broken, but we are working
 on improving it.
 
-<DT> <B>What Is Itcl?</B>
+<DT> <A NAME="troubleshooting overview"><B>1.5 Troubleshooting</B></A>
+<DD> The <A HREF="troubleshooting.html">Tycho Troubleshooting</A> guide
+has a few hints.
+
+ <P>If you are really stumped, you can send mail to <A
+HREF="mailto:tycho@eecs.berkeley.edu"><CODE>tycho@eecs.berkeley.edu</CODE></A>.
+Your mail should include:
+<OL>
+<LI> What version of Tycho you are running.
+<LI> What platform you are running under (Solaris, Windows etc.)
+<LI> Exactly how to reproduce the bug.
+</OL>
+
+
+
+<DT> <A NAME="itcl description"><B>1.6 What Is Itcl?</B></A>
 <DD> Itcl is short hand for <CODE>[incr tcl]</CODE> which is an object
 oriented version of the Tool Command Language (tcl).  Tcl was written
 by John Ousterhout of U.C. Berkeley and Sun Labs, Itcl was written by
@@ -86,7 +137,7 @@ Michael McLennan of Lucent.  For more information about Itcl,
 including a PostScript tutorial, see the Itcl homepage at <A
 HREF="http://www.tcltk.com"><CODE>http://www.tcltk.com</CODE></A>.
 
-<DT> <A NAME="ptolemy description"><B>What is Ptolemy?</B></A>
+<DT> <A NAME="ptolemy description"><B>1.7 What is Ptolemy?</B></A>
 <DD> Ptolemy is a software package that is used to design signal
 processing and communications systems, ranging from designing and
 simulating algorithms to synthesizing hardware and software,
@@ -99,20 +150,21 @@ HREF="http://ptolemy.eecs.berkeley.edu"><CODE>http://ptolemy.eecs.berkeley.edu</
  <P>Tycho0.1.1 does not include some of the Ptolemy features we have been
 working on, as they require changes to Ptolemy0.6
 
-<DT> <A NAME="astronomy"><B>Who was Tycho Brahe?</B></A>
+<DT> <A NAME="astronomy"><B>1.8 Who was Tycho Brahe?</B></A>
 <DD> Tycho Brahe was an astronomer, the Tycho documentation includes a
 brief <A HREF="brahe.html">biography</A>.
 
 </DL>
 
-<H2>Why didn't you . . .</H2>
+<H2><A NAME="faq: why didn't you . . . ">2. Why didn't you . . .</A>
+</H2>
 
 <DL>
-<DT> <A NAME="emacs"><B>Why didn't you just use emacs?</B></A>
+<DT> <A NAME="emacs"><B>2.1 Why didn't you just use emacs?</B></A>
 <DD> FSF Emacs is not particularly graphical, though xemacs is better.
 We want to be able to have active graphical widgets intermingled with text.
 
-<DT> <A NAME="iwidgets"><B>Why didn't you use the Iwidgets widgets
+<DT> <A NAME="iwidgets"><B>2.2 Why didn't you use the Iwidgets widgets
 everywhere?</B></A>
 
 <DD> 
