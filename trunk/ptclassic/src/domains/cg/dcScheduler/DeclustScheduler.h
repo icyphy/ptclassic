@@ -68,7 +68,7 @@ public:
 	~DeclustScheduler();
 
 	// redefine
-	void setUpProcs(int);
+	ParProcessors* setUpProcs(int);
 
 	// display schedule
 	StringList displaySchedule();

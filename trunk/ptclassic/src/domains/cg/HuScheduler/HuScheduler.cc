@@ -43,11 +43,12 @@ Date of last revision:
 // setUpProcs
 /////////////////////////////
 
-void HuScheduler :: setUpProcs(int num) {
+ParProcessors* HuScheduler :: setUpProcs(int num) {
 	ParScheduler :: setUpProcs(num);
 	LOG_DEL; if (parSched) delete parSched;
 	LOG_NEW; parSched = new HuParProcs(numProcs, mtarget);
 	parProcs = parSched;
+	return parProcs;
 }
 
 HuScheduler :: ~HuScheduler() {
