@@ -125,13 +125,15 @@ extern "C" {
 #endif
 #endif
 
-/* Volatile produces warnings under some cfront versions */
+/* Volatile produces warnings under some cfront versions, and under
+ * non-ansi cc compilers, such as SunOS4.1 cc
+ */
 #if !defined(VOLATILE)
-#if defined(PTHPPA_CFRONT) || defined(PTSUN4_CFRONT)
+#if defined(PTHPPA_CFRONT) || defined(PTSUN4_CFRONT) || !(defined(__STDC__) || defined(__cplusplus))
 #define VOLATILE
 #else
 #define VOLATILE volatile
-#endif /* PTSUN4_CFRONT or PTHPPA_CFRONT */
+#endif /* PTSUN4_CFRONT or PTHPPA_CFRONT or non-ansi cc*/
 #endif /* ! VOLATILE */
 
 #if !defined(PTLINUX) && !defined(PTNBSD_386)
