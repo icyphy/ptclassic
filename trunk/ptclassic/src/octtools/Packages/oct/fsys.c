@@ -320,9 +320,18 @@ int location;
     struct desc *parent_desc = (struct desc *) c_parent_desc;
     char *ptr;
     char *resolvedPath;		/* With env vars substituted in (AC) */
+    char *pkgName, *message;
+    int code;
 
-    resolvedPath = util_logical_expand( user_facet->cell );
-    
+    ERR_IGNORE(resolvedPath = util_logical_expand( user_facet->cell ));
+    if (errStatus(&pkgName, &code, &message)) {
+      (void) sprintf(fsys_error_buf, "Problem expanding `%s':\n %s",
+		     user_facet->cell,
+		     message);
+      return 0;
+    }
+
+
     if (ABSOLUTE_PATH(resolvedPath)) {
 	if (!canonicalize(desc_buffer, user_facet->cell, "/")) {
 	    (void) sprintf(fsys_error_buf, "Can't expand the file name %s",
@@ -978,9 +987,18 @@ char *path;
 char *cwd;
 {
     char *ptr = buffer;
+    char *pkgName, *message;
+    int code;
 
     /* Resolve environment variables */
-    path  = util_logical_expand( path );
+    ERR_IGNORE( path  = util_logical_expand( path ));
+    if (errStatus(&pkgName, &code, &message)) {
+      (void) sprintf(fsys_error_buf,
+		     "Problem expanding `%s' for canonicalization:\n %s",
+		     path,
+		     message);
+      return 0;
+    }
 
     switch (path[0]) {
     case '~':
