@@ -59,9 +59,6 @@ public:
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
 
-protected:
-	IntState includeTclTkFlag;
-
 private:
 	// Method to return a pointer to the MultiPortHole that spawned a
 	// given PortHole, if there is such a thing.  If not, the pointer
