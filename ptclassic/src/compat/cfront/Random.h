@@ -4,7 +4,7 @@
 // This version substitutes for libg++ random-number classes.
 // This is the abstract base class for other random-number types.
 
-#ifdef hppa
+#if defined(hppa) || defined(SVR4) || defined(SYSV)
 #ifndef __GNUG__
 
 extern "C" long int lrand48();
