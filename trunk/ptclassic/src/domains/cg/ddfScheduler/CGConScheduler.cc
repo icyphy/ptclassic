@@ -215,6 +215,8 @@ void CGConScheduler :: fixProfile(int nP, int resWork, IntArray* pAvail) {
 
 static int _compareType (CGStar& s, const char* t) {
 	const char* nm = s.className();
+	// Pointer arithmetic that means &nm[ strlen(s.domain()) ]
+	// For example, if nm = "SDFRamp" than p = "Ramp"
 	const char* p = nm + strlen(s.domain());
 	int flag = strcmp(p,t);
 	if (!flag) return TRUE;

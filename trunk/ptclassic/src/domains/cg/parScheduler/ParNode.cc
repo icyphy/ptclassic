@@ -181,8 +181,9 @@ DataFlowStar* ParNode :: copyStar(CGTarget* t, int /*pid*/, int) {
 		strcpy(temp, foo);
 		int len = strlen(foo);
 		temp[len-4] = 0;
-		const char* sname = org->className() +
-			strlen(org->domain());
+		// Pointer arithmetic to strip off domain name in a star name
+		// if org->className = "SDFRamp" than sname = "Ramp"
+		const char* sname = org->className() + strlen(org->domain());
 		newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
 	} else {
 		newS = (DataFlowStar*) org->clone();
