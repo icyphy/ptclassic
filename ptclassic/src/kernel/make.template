@@ -30,19 +30,19 @@ LIB=libptolemy.a
 
 # Library sources
 LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
- Fraction.cc Galaxy.cc \
+ Fraction.cc Galaxy.cc Domain.cc \
  InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc expandPath.cc Wormhole.cc WormConnect.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
  KnownState.cc State.cc StringState.cc \
  SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFWormhole.cc SDFWormConnect.cc \
- DEConnect.cc DEScheduler.cc DEStar.cc DEWormhole.cc DEWormConnect.cc
+ SDFDomain.cc \
+ DEConnect.cc DEScheduler.cc DEStar.cc DEWormhole.cc DEWormConnect.cc \
+ DEDomain.cc
 
 # All sources.
-# (do not try to put SDFDomain and DEDomain in the library -- they
-# conflict with each other and you can only link in one)
-SRCS=$(LIBSRCS) interpmain.cc SDFDomain.cc DEDomain.cc
+SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
 HDRS=Block.h Connect.h \
@@ -61,14 +61,15 @@ HDRS=Block.h Connect.h \
 LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o \
  InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
  PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
- expandPath.o Wormhole.o WormConnect.o \
+ expandPath.o Wormhole.o WormConnect.o Domain.o \
  FloatState.o IntState.o KnownState.o State.o StringState.o \
  FloatArrayState.o IntArrayState.o \
  SDFConnect.o SDFScheduler.o SDFStar.o SDFWormhole.o SDFWormConnect.o \
- DEConnect.o DEScheduler.o DEStar.o DEWormhole.o DEWormConnect.o
+ SDFDomain.o\
+ DEConnect.o DEScheduler.o DEStar.o DEWormhole.o DEWormConnect.o DEDomain.o
 
 # Things to make
-TOMAKE=$(LIB) interpmain.o SDFDomain.o DEDomain.o
+TOMAKE=$(LIB) interpmain.o
 
 all:	makefile $(TOMAKE)
 
@@ -108,6 +109,8 @@ makefile:	make.template
 Interpreter.o:	Interpreter.cc
 		$(GNU) $(GPPFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
 
+# Commands to make some sources from templates
+
 FloatState.h FloatState.cc : ScalarState.hP ScalarState.ccP
 	genclass -2 Float val double val ScalarState;
 	sed 's/"Float"/"FLOAT"/' Float.double.ScalarState.h > FloatState.h;
@@ -134,6 +137,14 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	mv Int.int.ArrayState.h IntArrayState.h;
 	sed 's/"Int"/"INT"/' Int.int.ArrayState.cc > IntArrayState.cc;
 	rm Int.int.ArrayState.cc;
+
+SDFDomain.cc :	XDomain.ccP
+	rm -f SDFDomain.cc
+	sed 's/<T>/SDF/g' XDomain.ccP > SDFDomain.cc
+
+DEDomain.cc :	XDomain.ccP
+	rm -f DEDomain.cc
+	sed 's/<T>/DE/g' XDomain.ccP > DEDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
