@@ -19,6 +19,7 @@ $Id$
 #endif
 
 #include "BaseMultiTarget.h"
+#include "SDFScheduler.h"
 #include "Error.h"
 #include "Profile.h"
 #include <std.h>
