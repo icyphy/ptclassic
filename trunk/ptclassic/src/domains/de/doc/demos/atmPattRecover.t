@@ -6,6 +6,7 @@ technique.  Cells which have been dropped are replaced
 by samples determined through a complicated
 pattern matching technique.
 .SE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 10/10/92
 .AL "GSWalter."
 .LD

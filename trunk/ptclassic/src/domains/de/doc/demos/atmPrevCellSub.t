@@ -6,6 +6,7 @@ technique.  Cells which have been dropped during
 transmission are replaced with the cell which arrived
 at the receiver immediately prior to the dropped cell.
 .SE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 10/1/92
 .AL "GSWalter."
 .LD

@@ -3,9 +3,9 @@
 .SD
 A simulation of the ALOHA multiple access protocol
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "Rolando Diesta"
-.LO "~ptolemy/src/domains/de/demo"
 .LD
 This is a simulation of the (pure) ALOHA multiple access protocol. The protocol
 assumes a composite of independent Poisson sources transmitting on a common channel.

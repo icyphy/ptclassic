@@ -3,6 +3,7 @@
 .SD
 Generates a shot noise process.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ "October 22, 1990"
 .AL "E. A. Lee"
 .LD

@@ -3,6 +3,7 @@
 .SD
 Demonstrates the simulation of a blocking strategy in the queueing network.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "S. Ha and E. A. Lee"
 .LD

@@ -3,6 +3,7 @@
 .SD
 Demonstrates the use of the MeasureDelay block.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 "October 23, 1990"
 .AL "S. Ha"
 .LD

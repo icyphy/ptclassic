@@ -3,6 +3,7 @@
 .SD
 Demonstrates how to obtain the statistics of the input data
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .LD

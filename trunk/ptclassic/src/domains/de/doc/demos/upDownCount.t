@@ -3,6 +3,7 @@
 .SD
 Demonstrates the usage of the up/down counter
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 "December 3, 1990"
 .AL "S. Ha"
 .LD

@@ -3,6 +3,7 @@
 .SD
 Simulate a queue with "input flushing" during overflow.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ 11/9/92
 .AL "Paul Haskell."
 .LD

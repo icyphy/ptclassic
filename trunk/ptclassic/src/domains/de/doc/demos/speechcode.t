@@ -3,6 +3,7 @@
 .SD
 Speech compression and packetization
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "Rachel Bowers, Erick Hamilton."
 .LD

@@ -3,6 +3,7 @@
 .SD
 Simulate leaky bucket network rate monitors.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ 11/9/92
 .AL "Paul Haskell."
 .LD
