@@ -84,7 +84,7 @@ makefiles: makefile
 # Generate html files from itcl files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
-itcldocs:
+itcldocs: $(ITCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
 		echo "$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS)"; \
 	 	$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS); \
@@ -146,9 +146,10 @@ realclean:
 # Remove the sources too, so that we can get them back from sccs
 extraclean:
 	rm -f $(CRUD) $(REALCLEAN_STUFF) $(EXTRA_SRCS)
+	rm -rf doc/codeDoc/*
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
-		for x; do \
+		for x do \
 		    if [ -w $$x ] ; then \
 			( cd $$x ; \
 			echo making $@ in $$x ; \
@@ -156,7 +157,7 @@ extraclean:
 			) \
 		    fi ; \
 		done ; \
-	if
+	fi
 
 # Create tclIndex from .tcl and .itcl files
 # This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
