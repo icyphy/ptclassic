@@ -1,4 +1,4 @@
-# Master initialization file for the Tycho tcl/tk Ptolemy interface.
+# Setup file for the Tycho.
 # This depends on a variable TYCHO having been set pointing to the
 # Tycho installation directory.
 #
@@ -191,13 +191,16 @@ bind text <Control-t> "break"
 ::tycho::register category new "html" -label "HTML Viewers" -underline 5
 ::tycho::register category new "graphics" -label "Graphics Editors" -underline 0
 ::tycho::register category new "tool" -label "Tools" -underline 3
-::tycho::register category new "ptolemy" -label "Ptolemy Tools" -underline 6
 
 ::tycho::register category open "text" -label "Open Text Editors"
 ::tycho::register category open "html" -label "Open HTML Viewers"
 ::tycho::register category open "graphics" -label "Open Graphics Editors"
 ::tycho::register category open "tool" -label "Open Tools"
-::tycho::register category open "ptolemy" -label "Open Ptolemy Tools"
+global ::ptolemyfeature
+if $ptolemyfeature(ptolemyinstalled) {
+    ::tycho::register category new "ptolemy" -label "Ptolemy Tools" -underline 6
+    ::tycho::register category open "ptolemy" -label "Open Ptolemy Tools"
+}
 
 ### MODE MAPPINGS
 
@@ -515,47 +518,48 @@ if {[uplevel #0 info commands mathematica] != {}} {
 }
 
 ########### Ptolemy bits
-
-# Ptcl -- Ptolemy's Tcl interface language
-::tycho::register mode "ptcl" \
-	-command {::tycho::view EditPtcl -file {%s}} \
-	-viewclass ::tycho::EditPtcl \
-	-label {Ptcl Editor}  \
-	-category "ptolemy" \
-	-underline 1
-
-# Ptlang -- Ptolemy's star definition language
-::tycho::register mode "ptlang" \
-	-command {::tycho::view EditPtlang -file {%s}} \
-	-viewclass ::tycho::EditPtlang \
-	-label {Ptlang Editor}  \
-	-category "ptolemy" \
-	-underline 2
-
-# The VEM facet mode behaves differently if we are inside Ptolemy
-if $ptolemyfeature(octtools) {
-    # Ptolemy and vem are present.  Use them.
-    ::tycho::register mode "vemfacet" \
-	    -command {::pvOpenWindow \
-	    [::ptkOpenFacet {%s} schematic contents]} \
-	    -label {Vem Facet} \
-	    -category "ptolemy"
-} else {
-    # Vem is not present.
-    ::tycho::register mode "vemfacet" \
-	    -command {::tycho::view EditPalette -facet {%s}} \
-	    -viewclass ::tycho::EditPalette \
-	    -label {Palette Editor} \
-	    -category "ptolemy" \
-	    -underline 0
-}
-# Retargetting editor
-if { $ptolemyfeature(ptolemy)} {
-    ::tycho::register mode "retarget" \
-	    -command {::tycho::view Retarget -file {%s} -toolbar 1} \
-	    -viewclass ::tycho::Retarget \
-	    -label {Ptolemy Retargeter}  \
-	    -category "ptolemy"
+if $ptolemyfeature(ptolemyinstalled) {
+    # Ptcl -- Ptolemy's Tcl interface language
+    ::tycho::register mode "ptcl" \
+            -command {::tycho::view EditPtcl -file {%s}} \
+            -viewclass ::tycho::EditPtcl \
+            -label {Ptcl Editor}  \
+            -category "ptolemy" \
+            -underline 1
+    
+    # Ptlang -- Ptolemy's star definition language
+    ::tycho::register mode "ptlang" \
+            -command {::tycho::view EditPtlang -file {%s}} \
+            -viewclass ::tycho::EditPtlang \
+            -label {Ptlang Editor}  \
+            -category "ptolemy" \
+            -underline 2
+    
+    # The VEM facet mode behaves differently if we are inside Ptolemy
+    if $ptolemyfeature(octtools) {
+        # Ptolemy and vem are present.  Use them.
+        ::tycho::register mode "vemfacet" \
+                -command {::pvOpenWindow \
+                [::ptkOpenFacet {%s} schematic contents]} \
+                -label {Vem Facet} \
+                -category "ptolemy"
+    } else {
+        # Vem is not present.
+        ::tycho::register mode "vemfacet" \
+                -command {::tycho::view EditPalette -facet {%s}} \
+                -viewclass ::tycho::EditPalette \
+                -label {Palette Editor} \
+                -category "ptolemy" \
+                -underline 0
+    }
+    # Retargetting editor
+    if { $ptolemyfeature(ptolemy)} {
+        ::tycho::register mode "retarget" \
+                -command {::tycho::view Retarget -file {%s} -toolbar 1} \
+                -viewclass ::tycho::Retarget \
+                -label {Ptolemy Retargeter}  \
+                -category "ptolemy"
+    }
 }
 
 
@@ -615,7 +619,7 @@ if { $ptolemyfeature(ptolemy)} {
 	-command { ::tycho::stylechooser }
 
 # Ptolemy-only help entries
-if $ptolemyfeature(ptolemy) {
+if $ptolemyfeature(ptolemyinstalled) {
     # About Ptolemy
     ::tycho::register help ptabout \
 	    -label "About Ptolemy" \
