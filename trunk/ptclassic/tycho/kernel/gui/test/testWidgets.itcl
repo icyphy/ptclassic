@@ -1,7 +1,35 @@
 # Test suite for widgets in tycho.
 #
-# Author: Edward A. Lee
+# @Authors: Edward A. Lee, Christopher Hylands
 #
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
 # A number of windows will be created, and then some time after, destroyed.
 # You should just watch.  Do not push any buttons, or you could trigger
 # spurious errors.  If no errors occur during the test, there will be no
@@ -15,113 +43,139 @@
 #
 # The modal dialogs are adequately tested by the demo script.
 
-############################################################################
-#### removeobj
-# This procedure removes an object if it exists.
-proc removeobj {name} {
-    if {[info object $name] != ""} {
-	delete object $name
-    }
-}
 
-# How long windows are kept around, in milliseconds
-set duration 4000
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
 
 ############################################################################
 # Test TopLevel
-set win [::tycho::TopLevel [::tycho::autoName .toplevel] -geometry 100x100+0+0]
-wm deiconify $win
-after $duration removeobj $win
+test TopLevel-1.1 {Test TopLevel} { 
+    set win [::tycho::TopLevel \
+	    [::tycho::autoName .toplevel] -geometry 100x100+0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    list {Done.}
+} {Done.}
 
 ############################################################################
 # Test DialogWindow
-::tycho::DialogWindow .dialog -text "I am a very senstitive widget"
-.dialog addButton pushme -text "Push Me" -command "puts ouch"
-.dialog default pushme
-.dialog centerOnScreen
-.dialog freezeWindowSize
-.dialog invoke pushme
-after $duration removeobj .dialog
+test DialogWindow-1.1 {Test DialogWindow} {
+    global globalReturn
+    ::tycho::DialogWindow .dialog -text "I am a very senstitive widget"
+    .dialog addButton pushme -text "Push Me" -command "set globalReturn ouch"
+    .dialog default pushme
+    .dialog centerOnScreen
+    .dialog freezeWindowSize
+    .dialog invoke pushme
+    after $duration removeobj .dialog
+    list $globalReturn
+} {ouch}
 
 ############################################################################
 # Test Message
-::tycho::Message .msg1 -text \
-	"This is a plain message"
-.msg1 centerOnScreen
-after $duration removeobj .msg1
-update
+test Message-1.1 {Test Message} {
+    ::tycho::Message .msg1 -text \
+	    "This is a plain message"
+    .msg1 centerOnScreen
+    after $duration removeobj .msg1
+    update
+} {}
 
 ############################################################################
 # Test ErrorMessage
-::tycho::ErrorMessage .msg2 -text \
-	"This is not really an error, but just a test of the messenger"
-after $duration removeobj .msg2
-update
+test ErrorMessage-1.1 {Test ErrorMessage} {
+    ::tycho::ErrorMessage .msg2 -text \
+	    "This is not really an error, but just a test of the messenger"
+    after $duration removeobj .msg2
+    update
+} {}
 
 ############################################################################
 # Test YesNoQuery
-after $duration .yesno invoke yes
-after [expr 2*$duration] .another invoke yes
-::tycho::YesNoQuery .yesno \
-	-text "Either button should bring up another dialog" \
-	-yescommand {
-	    ::tycho::YesNoQuery .another -text {Another dialog}
-	    .another centerOnScreen
-	} \
+test YesNoQuery-1.1 {Test YesNoQuery} {
+    after $duration .yesno invoke yes
+    after [expr 2*$duration] .another invoke yes
+    ::tycho::YesNoQuery .yesno \
+	    -text "Either button should bring up another dialog" \
+	    -yescommand {
+	::tycho::YesNoQuery .another -text {Another dialog}
+	.another centerOnScreen
+        } \
 	-nocommand "askuser {Are you sure not?}"
-.yesno centerOnScreen
-update
+    .yesno centerOnScreen
+    update
+} {}
 
 ############################################################################
 # Test EntryQuery
-after $duration .entry invoke cancel
-::tycho::EntryQuery .entry \
-	-queries {{entry {Enter here:} {Default text}}}
-.entry centerOnScreen
-update
+test EntryQuery-1.1 {Test EntryQuery} {
+    after $duration .entry invoke cancel
+    ::tycho::EntryQuery .entry \
+	    -queries {{entry {Enter here:} {Default text}}}
+    .entry centerOnScreen
+    update
+} {}
 
 ############################################################################
 # Test YesNoCancel
-after $duration .yesnocancel invoke cancel
-::tycho::YesNoCancel .yesnocancel \
-	-text "Yes, No, or Cancel" \
-	-yescommand "puts yes" \
-	-nocommand "puts no" \
-	-cancelcommand "puts cancel"
-.yesnocancel centerOnScreen
-update
-
-###########################################################################
-# Test FileBrowser
-after $duration .file invoke cancel
-::tycho::FileBrowser .file
-.file centerOnScreen
-update
+test YesNoCancel-1.1 {Test YesNoCancel} {
+    global globalReturn
+    after $duration .yesnocancel invoke cancel
+    ::tycho::YesNoCancel .yesnocancel \
+	    -text "Yes, No, or Cancel" \
+	    -yescommand "set globalReturn yes" \
+	    -nocommand "set globalreturn no" \
+	    -cancelcommand "set globalReturn cancel"
+    .yesnocancel centerOnScreen
+    update
+    list $globalReturn
+} {}
 
 ############################################################################
 # Test Dismiss
-set win [::tycho::Dismiss [::tycho::autoName .dismiss] -geometry +0+0]
-wm deiconify $win
-after $duration removeobj $win
-update
-
-############################################################################
-# Test File
-set win [::tycho::File [::tycho::autoName .file] -geometry +0+0]
-wm deiconify $win
-after $duration removeobj $win
-update
+test Dismiss-1.1 {Test Dismiss} {
+    set win [::tycho::Dismiss [::tycho::autoName .dismiss] -geometry +0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
 
 ############################################################################
 # Test Edit
-set win [::tycho::Edit [::tycho::autoName .file] -geometry +0+0]
-wm deiconify $win
-after $duration removeobj $win
-update
+test Edit-1.1 {Test Edit} {
+    set win [::tycho::Edit [::tycho::autoName .file] -geometry +0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+
+############################################################################
+# Test File
+test File-1.1 {Test File} {
+    set win [::tycho::File [::tycho::autoName .file] -geometry +0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+###########################################################################
+# Test FileBrowser
+test FileBrowser-1.1 {Test FileBrowser} {
+    after $duration .file invoke cancel
+    ::tycho::FileBrowser .file
+    .file centerOnScreen
+    update
+} {}
 
 ############################################################################
 # Test HTML
-set win [::tycho::HTML [::tycho::autoName .file] -geometry +0+0]
-wm deiconify $win
-after $duration removeobj $win
-update
+test HTML-1.1 {Test HTML} {
+    set win [::tycho::HTML [::tycho::autoName .file] -geometry +0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+doneTests
