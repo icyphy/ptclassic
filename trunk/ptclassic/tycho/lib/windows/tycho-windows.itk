@@ -46,5 +46,19 @@
 if ![info exists env(TYCHO)] {
 	set env(TYCHO) "c:/tycho0.1.1"
 }
+# If you are having problems, uncomment the next line
+# setTyDebug 1
+
 source $env(TYCHO)/kernel/Tycho.tcl
+
+# Bring up the A Tcl shell
+::tycho::_announce "About to create a TclShell"
+uplevel #0 {
+    ::tycho::view TclShell \
+	    -geometry +0+0 \
+	    -master 1 \
+	    -name   .mainConsole \
+	    -stdout 1 \
+	    -text "Welcome to Tycho\n"
+}
 
