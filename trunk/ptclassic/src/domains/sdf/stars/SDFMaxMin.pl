@@ -103,7 +103,10 @@ This star is based on the MaxMin star in the CG56 domain.
 		    value = FABS(value);
 		}
 
+		// Send the maximum/minimum value to the output port
 		output%0 << value;
-		index%0 << valueIndex;
+
+		// Adjust the index due to the LIFO nature of input data
+		index%0 << ( int(N) - valueIndex - 1);
 	}
 }
