@@ -12,6 +12,7 @@ lpr -P$PRINTER install.ps
 lpr -P$PRINTER xgraph.ps
 lpr -P$PRINTER vem.ps
 lpr -P$PRINTER documents.ps
+lpr -P$PRINTER acs.ps
 lpr -P$PRINTER vhdl.ps
 lpr -P$PRINTER c50.ps
 lpr -P$PRINTER cg56.ps
