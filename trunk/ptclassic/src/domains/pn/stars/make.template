@@ -11,11 +11,14 @@ include $(CONFIG)
 DOMAIN= PN
 STAR_MK= pnstars
 
-SDFDIR= $(ROOT)/src/domains/sdf/kernel
-PNDIR= $(ROOT)/src/domains/pn/kernel
-THREADDIR= $(ROOT)/src/thread/awe
-AWESIME= $(ROOT)/src/thread/Awesime/include.$(ARCH)
-INCL= -I$(PNDIR) -I$(SDFDIR) -I$(THREADDIR) -I$(AWESIME) -I$(KERNDIR) -I$(VPATH)
+INCL_THREADS=-I$(ROOT)/thread/include.$(ARCH) -I$(ROOT)/src/thread/posix
+
+SDFDIR=	$(ROOT)/src/domains/sdf/kernel
+PNDIR=	$(ROOT)/src/domains/pn/kernel
+COMPAT=	$(ROOT)/src/compat/ptolemy
+
+INCL=	-I$(COMPAT) -I$(PNDIR) -I$(SDFDIR) -I$(KERNDIR) \
+	-I$(VPATH) $(INCL_THREADS)
 
 # Library name
 LIB= lib$(STAR_MK).a
