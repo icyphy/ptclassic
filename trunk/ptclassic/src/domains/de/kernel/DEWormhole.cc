@@ -71,10 +71,10 @@ LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
 // sumUp();  If the inner domain is timed and stopBeforeDeadlocked,
 // put the wormhole into the process queue.
 void DEWormhole :: sumUp() {
-	if (scheduler()->stopBeforeDeadlocked) {
+	if (scheduler()->stopBeforeDeadlocked()) {
 		DEScheduler* sched = (DEScheduler*) parent()->scheduler();
 		DEStar* me = this;
-		sched->eventQ.levelput(me, scheduler()->currentTime, 0);
+		sched->eventQ.levelput(me, sched->now(), 0);
 	}
 }
 		
@@ -87,7 +87,7 @@ void DEWormhole :: sumUp() {
 double DEWormhole :: getStopTime() {
 	DEScheduler* sched = (DEScheduler*) parent()->scheduler();
 	if (sched->syncMode) {
-		return sched->currentTime;
+		return sched->now();
 	} else {
 		return sched->whenStop();
 	}
@@ -171,7 +171,7 @@ void DEfromUniversal :: sendData ()
 			timeMark = ghostPort->getTimeMark() * s->relTimeScale;
 		} else {
 			s = (DEScheduler*) parent()->parent()->scheduler();
-			timeMark = s->currentTime;
+			timeMark = s->now();
 		}
 
 		// 3. Find out the fineLevel of the event

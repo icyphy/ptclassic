@@ -61,7 +61,7 @@ double SDFWormhole :: getArrivalTime() {
 	// At the very first call, we initialize "arrivalTime".
 	if (!mark) {
 		SDFScheduler* sched = (SDFScheduler*) parent()->scheduler();
-		arrivalTime = sched->currentTime;
+		arrivalTime = sched->now();
 		space = sched->schedulePeriod / double(repetitions) ;
 		mark = 1;
 	}
@@ -117,7 +117,7 @@ void SDFtoUniversal :: receiveData ()
 	} else {
 		// 2. annul increment of currentTime at the end of run.
 		SDFScheduler* sched = (SDFScheduler*) parent()->scheduler();
-		timeMark = sched->currentTime - sched->schedulePeriod;
+		timeMark = sched->now() - sched->schedulePeriod;
 	}
 
 	// transfer Data
