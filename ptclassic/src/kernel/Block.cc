@@ -114,11 +114,7 @@ void Block::setScope(Scope* s) { scp = s; }
 {
     StringList out;
     if(scope() != NULL) {
-        if (isA("InterpUniverse") || isA("Universe")) {
-            out << name();
-        } else {
-            out << scope()->fullName() << "." << name();
-        }
+        out << scope()->fullName() << "." << name();
     } else {
         out << NamedObj::fullName();
     }
@@ -166,9 +162,15 @@ void Block :: initialize()
 }
 
 // This method returns a GenericPort corresponding to the given name.
-GenericPort *
-Block::genPortWithName (const char* name) {
+GenericPort* Block::genPortWithName (const char* name) {
 	GenericPort* g = ports.portWithName(name);
+	if (!g) g = multiports.multiPortWithName(name);
+	return g;
+}
+
+// Const version
+const GenericPort* Block::genPortWithName (const char* name) const {
+	const GenericPort* g = ports.portWithName(name);
 	if (!g) g = multiports.multiPortWithName(name);
 	return g;
 }
@@ -176,8 +178,9 @@ Block::genPortWithName (const char* name) {
 // This method returns a PortHole corresponding to the given name.
 // If the name refers to a MultiPortHole, a new PortHole is created.
 // The real port is always returned (no need to check for aliases).
-PortHole *
-Block::portWithName (const char* name) {
+// This one can't have a const version because if the name specifies
+// a multiporthole, then a new port is created.
+PortHole* Block::portWithName (const char* name) {
 	GenericPort* g = genPortWithName(name);
 	if (!g) return 0;
 	return &(g->newConnection());
