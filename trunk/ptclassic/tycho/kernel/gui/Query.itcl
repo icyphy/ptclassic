@@ -210,6 +210,9 @@ class ::tycho::Query {
     # Add a checkbutton query.
     method check {tag label default args}
 
+    # Add an option menu query
+    method choice {tag label entries default {command {}}}
+
     # Clear all or one entry.
     method clear {{tag {}}}
 
@@ -391,6 +394,82 @@ body ::tycho::Query::check {tag label default args} {
     lappend tags $tag
     set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
             $default]
+    set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+
+    focusin
+}
+
+#####################################################################
+#### choice
+# Add an option menu query. The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query,
+# <li> the label to put on the query,
+# <li> the list of menu entries (by label),
+# <li> the default entry item (the one initially selected), and
+# <li> (optional) the command to execute when a new item is selected
+# </menu>
+# Typical usage is:
+# <tcl><pre>
+# ::tycho::Query .e
+# .e choice foo {My Foo:} {a b c} a
+# .e centerOnScreen
+# </pre></tcl>
+#
+# FIXME: The width of the button depends on the current selection.
+# FIXME: Are there any useful options to pass to the button or menu?
+#
+body ::tycho::Query::choice {tag label entries default {command {}}} {
+
+    # The label
+    itk_component add label_$tag {
+        eval [list label $itk_component(querysite).label_$tag \
+                -text $label]
+    } {
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
+    }
+    grid $itk_component(label_$tag) -row $numentries -column 0 -sticky w
+
+    # Create the option menu button
+    itk_component add tag_$tag {
+        menubutton $itk_component(querysite).tag_$tag \
+		-indicatoron 1 \
+		-menu $itk_component(querysite).tag_$tag.menu \
+		-textvariable [scope $itk_component(hull)_[set tag]sw] \
+		-relief raised -bd 2 -highlightthickness 2 -anchor c
+    } {
+        keep -background -cursor -background -font
+    }
+    grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky e
+    
+    # Create the menu that goes with it
+    itk_component add menu_$tag {
+	menu $itk_component(tag_$tag).menu -tearoff 0
+    } {
+	keep -background -cursor -background -font
+    }
+    foreach e $entries {
+	$itk_component(menu_$tag) add command -label $e \
+		-command [list set [scope $itk_component(hull)_[set tag]sw] $e]
+	if { $command != "" } {
+	    $itk_component(menu_$tag) entryconfigure $e -command \
+		"[$itk_component(menu_$tag) entrycget $e -command]; $command"
+	}
+    }
+    set [scope $itk_component(hull)_[set tag]sw] $default
+    
+    # Do not grab the focus for a menu query, since it generally
+    # requires the mouse anyway.
+    # set focuswindow $itk_component($tag)
+
+    incr numentries
+
+    # Record the tag, its get method, and its clear method.
+    lappend tags $tag
+    set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
+            $default]
+    set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
     set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
 
     focusin
@@ -775,7 +854,7 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
 #####################################################################
 #### remove
 # Remove the query identified by the specified tag.
-# 
+#
 body ::tycho::Query::remove {tag} {
     if [info exists itk_component(tag_$tag)] {
         if {$focuswindow == $itk_component(tag_$tag)} {
