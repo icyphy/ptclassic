@@ -34,16 +34,20 @@ bin.ARCH/
 		Ptolemy interpreter
 	pigiRpc
 		"RPC application" run by vem in the "pigi" script
+	play
+		Play sounds to the workstation speaker (sun-4 only)
 	ptlang
 		Ptolemy language preprocessor
 	xgraph
 		Program for drawing graphs under X11
+	xv
+		Program for displaying bitmaps under X11
 	optfir, wfir
 		Filter design programs
 demo/
 	Directory containing pigi and interpreter demos.
 doc/
-	Documentation for the Ptolemy system
+	Documentation for the Ptolemy system (troff sources)
 lib/
 	interpreter.help
 		Interpreter help file
@@ -112,8 +116,10 @@ makefile
 	Makefile to build everything
 pigiExample/
 	How to build your own private pigiRpc (not done yet)
+pigilib/
+	Sources for pigi support library
 pigiRpc/
-	Sources for pigi (actually, for the pigiRpc program)
+	makefile and main modules for pigiRpc program
 preproc/
 	The Ptolemy language preprocessor
 xgraph/
