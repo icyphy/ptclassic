@@ -98,7 +98,11 @@ void
 PrintErr(s)
 char *s;
 {
+#ifdef OLDNEVER
     char buf[MSG_BUF_MAX];
+#else
+    char buf[1024];
+#endif //OLDNEVER
     char *msg;
     if (*s == 0) return;        /* ignore blank message */
     if (!VemReady()) {
@@ -131,8 +135,11 @@ void
 PrintDebug(s)
 char *s;
 {
+#ifdef OLDNEVER
     char buf[MSG_BUF_MAX];
-
+#else
+    char buf[1024];
+#endif //OLDNEVER
     if (printDebugState) {
 	(void) sprintf(buf, "\0062Debug: %s\n\0060", s);
 	(void) vemMessage(buf, MSG_DISP);
