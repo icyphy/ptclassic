@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -50,7 +50,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	_@ \
 	_makefile
 
-MISC_FILES = 
+MISC_FILES = $(DIRS) _README.txt
 
 REALCLEAN_STUFF =
 
