@@ -419,17 +419,42 @@ char *arg;
 }
 
 int st_strhash(string, modulus)
-register char *string;
-int modulus;
+     register char *string;
+     int modulus;
 {
-    register int val = 0;
-    register int c;
-    
-    while ((c = *string++) != '\0') {
-	val = val*997 + c;
-    }
+  register long val = 0;
+  register int c;
 
+  while ((c = *string++) != '\0') {
+    val = val*997 + c;
+  }
+  printf("val: %d\n", val);
+
+  /* shachind@cadence.com writes:
+
+       ".. will have a problem when the value variable "val" is equal
+       to the maximum negative integer value (for the particular OS its being
+       run on say if its 32 bit OS the value would be -2^31 = -2147483648)
+       val < 0 ? -val : val will still be -val for such a case due to the
+       property of maximum negative integer that -val == val.
+
+       As an example if we have a input string to this function like
+       the one given below:
+
+       "TRDTOP_HIP_UHIF1_HPDMA_UHPDREG1_HPDRCH3E1MCUADDR[20]"
+
+       the value of the variable "val" would be -2147483648 resulting
+       in a negative value being returned by the function which could result
+       in problems for the user is OS was 32 bit. The hash function otherwise
+       for any values of "val" larger or smaller than this value would work
+       fine so the probabilty of such a situation is rather low.
+  */
+  if (val == -val) {
+    unsigned int newhash = -val;
+    return (newhash%modulus);
+  } else {
     return ((val < 0) ? -val : val)%modulus;
+  }
 }
 
 int st_numhash(x, size)
