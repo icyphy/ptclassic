@@ -15,10 +15,24 @@
 
 optionStruct optionList[] = {
     {"c",       0,              "check masters"},
+    {"f",       0,              "full master name"},
     {0, 0, 0}
 };
 
 int	checkmasters = 0;
+int	printfull = 0;
+
+
+printFacetPath( pntname, kid)
+char *pntname;
+struct octInstance *kid;
+{
+	if ( printfull ) {
+		printf("%s:%s:%s\n", kid->master, kid->view, kid->facet);
+	} else {
+		printf("%s %s\n", pntname, kid->master);
+	}
+}
 
 main(argc, argv)
 int argc;
@@ -45,7 +59,7 @@ char **argv;
     /*
      *  Get the input and output facet names
      */
-    ohUnpackDefaults(&facet, "r", "::contents");
+    ohUnpackDefaults(&facet, "r", ":schematic:contents");
     OH_ASSERT(ohUnpackFacetName(&facet, input_name));
 
     /* 
@@ -63,12 +77,12 @@ char **argv;
     while (octGenerate(&gen, &instance) == OCT_OK) {
 	if ( count-- == 0 ) break;
 	if (checkmasters) {
-		if (bad_master(instance.contents.instance.master))
-			printf("%s %s\n", input_name,
-				instance.contents.instance.master);
-	} else
-		printf("%s %s\n",
-			input_name, instance.contents.instance.master);
+		if (bad_master(instance.contents.instance.master)) {
+			printFacetPath(input_name,&instance.contents.instance);
+		}
+	} else {
+		printFacetPath(input_name,&instance.contents.instance);
+	}
     }
     octFreeGenerator(&gen);
     OH_ASSERT(octCloseFacet(&facet));
@@ -104,6 +118,9 @@ options(argc, argv)
 		switch(option) {
 		case 'c':
 			checkmasters = 1;
+			break;
+		case 'f':
+			printfull = 1;
 			break;
 		}
 	}
