@@ -272,8 +272,9 @@ CqLevelLink* MutableCalendarQueue :: NextEvent()
     register int i;
     int year;
     CqLevelLink *result;
-    Link * starPendingEventRef;
+    Link * starPendingEventRef = 0;
     DEStar * starPtr = 0;
+
 
     
     if (cq_eventNum == 0) return(NULL);
@@ -488,7 +489,35 @@ void MutableCalendarQueue :: pushBack(CqLevelLink* a) {
 
     int i = (int)(a->level / cq_interval);	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
-    InsertEventInBucket(&cq_bucket[i], a);
+    InsertEventInBucket(&cq_bucket[i], a); 
+    
+    if ((cq_resizeEnabled) &&
+	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
+	    Resize(2 * cq_bucketNum);
+}
+
+void MutableCalendarQueue :: pushBackPendingEvent(CqLevelLink* a) {
+  
+
+    int i = (int)(a->level / cq_interval);	// find virtual bucket
+    i = i % cq_bucketNum;	// find actual bucket
+    InsertEventInBucket(&cq_bucket[i], a); 
+    
+    /* 
+     This method is used when putting events back in the 
+     queue _after_ a get. Examples include DEPortHole::getSimulEvent() 
+     We must make sure that a PendingEvent reference is properly 
+     created.
+     */
+    Star *dest = a->dest;
+    if( dest->isA("DEStar") ) { 
+	DEStar* deStarDestination = (DEStar *)dest; 
+	if( deStarDestination->isMutable() ) { 
+	    a->destinationRef = 
+		    deStarDestination->addToPendingEventList(a);
+        }
+    }
+
     if ((cq_resizeEnabled) &&
 	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
 	    Resize(2 * cq_bucketNum);
