@@ -40,20 +40,21 @@ class ::tycho::Interactor {
     ###################################################################
     ####                            options                        ####
 
-    # The button number to switch on events. DO NOT change after
-    # the interactor has been bound.
-    #
-    # FIXME: Check that the interactor is not bound (how?).
+    # The button number used for mouse events. If a list, then bindings
+    # are created for all buttons in the list. <i>This option cannot
+    # be changed once the interactor has been bound.</i>
     public variable button 1
 
-    # A list of event modifiers. DO NOT change after
-    # the interactor has been bound.
-    #
-    # FIXME: Check that the interactor is not bound (how?).
+    # A list of event modifiers for mouse events. <i>This option cannot
+    # be changed once the interactor has been bound.</i>
     public variable modifiers {}
 
     # A script executed at the beginning of the interaction sequence. It
     # is typically used to set target parameters or to chain interactors.
+    # As with all interactor scripts, this script takes four arguments:
+    # this interactor, the target picture, and the <i>x</i> and <i>y</i>
+    # co-ordinates. See the <a href="../../../../lib/util/syntax.tcl#apply">
+    # <i>apply</i></a> procedure for the format of the script.
     public variable activatecommand {}
 
     # A script executed at the end of the interaction sequence. It is
@@ -87,15 +88,21 @@ class ::tycho::Interactor {
 
 
     ###################################################################
+    ####                      public procs                         ####
+
+    # Generate a Tk event code from parameters
+    proc event {type args} {}
+
+    ###################################################################
     ####                   protected methods                       ####
 
     # Set up bindings to intercept events that I need from now on.
     protected method activate {args} {}
 
-    # Start the interaction sequence on the target
+    # Start the interaction sequence on the target.
     protected method click {x y} {}
 
-    # Continue the interaction sequence: start a new phase
+    # Continue the interaction sequence: start a new phase.
     protected method continue {} {}
 
     # Get the current picture on the slate.
@@ -104,16 +111,16 @@ class ::tycho::Interactor {
     # Remove my bindings
     protected method deactivate {args} {}
 
-    # Continue the interaction sequence: move the mouse
+    # Continue the interaction sequence: move the mouse.
     protected method drag {x y} {}
 
-    # Terminate the interaction sequence
+    # Terminate the interaction sequence.
     protected method release {} {}
 
-    # Execute a script
+    # Execute a script.
     protected method execute {script x y} {}
 
-    # Set or get the proxy object
+    # Set or get the proxy object.
     protected method proxy {args} {}
 
 
@@ -143,9 +150,10 @@ class ::tycho::Interactor {
 #######################################################################
 #### activate
 #
-# Make myself active. In other words, set up bindings to intercept
+# <i>Abstract method</i>.
+# Make myself active. That is, set up bindings to intercept
 # events that I need from now on. One of the bindings is obliged to
-# call deactivate to remove the bindings.
+# call <code>deactivate</code> to remove the bindings.
 #
 body ::tycho::Interactor::activate {args} {
     abstractMethod Interactor activate
@@ -155,10 +163,10 @@ body ::tycho::Interactor::activate {args} {
 #######################################################################
 #### bind target
 #
-# ``Bind'' an interactor to a picture.
-# This creates a binding on the specified picture so that,
-# when the appropriate event occurs, the interactor is
-# is ``activated'' on the target.
+# <i>Abstract method</i>.
+# ``Bind'' an interactor to a picture. This creates a binding on
+# the specified picture so that, when the appropriate event occurs,
+# the interactor is ``activated'' on the target.
 #
 body ::tycho::Interactor::bind {t args} {
     abstractMethod Interactor bind
@@ -168,7 +176,12 @@ body ::tycho::Interactor::bind {t args} {
 #######################################################################
 #### cascade proxy
 #
-# Forward interaction commands to a proxy.
+# Forward interaction commands to a proxy interactor instead of directly
+# to the target object. This used when further modification of the
+# interaction can be provided by another interaactor -- for example,
+# a <a href="Stepper.html><i>Stepper</i></a> interactor can be used
+# to quantize movement within a bounded rectangular region provided by the
+# <a href="Bounder.html><i>Bounder</i></a> interactor.
 #
 body ::tycho::Interactor::cascade {that} {
     $this proxy  $that
@@ -178,6 +191,13 @@ body ::tycho::Interactor::cascade {that} {
 
 #######################################################################
 #### click
+#
+# Start an interaction sequence. The co-ordinates <i>x</i> and <i>y</i>
+# are the current mouse coordinates relative to the slate.
+# By default, this method simply forwards
+# a <code>click</code> to the target, or to the proxy interactor if there
+# is one. Sub-classes that over-ride this method should always call
+# this implementation to forward the click event.
 #
 body ::tycho::Interactor::click {x y} {
     if { $proxy != "" } {
@@ -191,6 +211,10 @@ body ::tycho::Interactor::click {x y} {
 #######################################################################
 #### continue
 #
+# Continue an interaction sequence. This method is intended for a few
+# special kinds of interaction that use different buttons to mark
+# different ``phases'' of the interation. It is still very experimental.
+#
 body ::tycho::Interactor::continue {} {
     if { $proxy != "" } {
 	@scope [$proxy info class] "$proxy continue"
@@ -203,6 +227,7 @@ body ::tycho::Interactor::continue {} {
 #######################################################################
 #### deactivate
 #
+# <i>Abstract method</i>.
 # Make myself inactive. In other words, remove my bindings.
 #
 body ::tycho::Interactor::deactivate {args} {
@@ -212,6 +237,13 @@ body ::tycho::Interactor::deactivate {args} {
 
 #######################################################################
 #### drag
+#
+# Continue an interaction sequence with a mouse move. The co-ordinates
+# <i>x</i> and <i>y</i> are the current mouse coordinates relative to
+# the slate. By default, this method simply forwards a <code>drag</code>
+# event to the target, or to the proxy interactor if there
+# is one. Sub-classes that over-ride this method should always call
+# this implementation to forward the drag event.
 #
 body ::tycho::Interactor::drag {x y} {
     if { $proxy != "" } {
@@ -253,6 +285,12 @@ body ::tycho::Interactor::proxy {args} {
 #######################################################################
 #### release
 #
+# Terminate an interaction sequence. By default, this method
+# simply forwards a <code>release</code>
+# event to the target, or to the proxy interactor if there
+# is one. Sub-classes that over-ride this method should always call
+# this implementation to forward the release event.
+#
 body ::tycho::Interactor::release {} {
     if { $proxy != "" } {
 	@scope [$proxy info class] "$proxy release"
@@ -261,11 +299,15 @@ body ::tycho::Interactor::release {} {
     }
 }
 
+
 #######################################################################
 #### target
 #
 # Set or get the picture that this interactor is currently
-# operating on.
+# operating on. With no argument, returns the current target;
+# with an argument, sets the target picture to that value. This
+# method is for use only within activation commands -- the target
+# is not valid until the interactor has been activated.
 #
 body ::tycho::Interactor::target {args} {
     if { $args == "" } {
@@ -282,10 +324,10 @@ body ::tycho::Interactor::target {args} {
 #######################################################################
 #### unbind target
 #
-# Remove a binding from the interactor to the target. In other
-# disable potential interactions. This is partciularly needed
-# when using interactors that bind to a slate rather to an
-# individual picture: all picture-specific interactions should be
+# <i>Abstract method</i>.
+# Remove a binding from the interactor to the target. This is useful
+# when using interactors that bind to a slate rather to an individual
+# picture: all picture-specific interactions should be
 # unbound to prevent bizarre interactions in case of clicks that
 # match both a picture and the slate.
 #
@@ -297,7 +339,7 @@ body ::tycho::Interactor::unbind {t} {
 #######################################################################
 #### uncascade
 #
-# Stop cascading interaction commands to a delegate object.
+# Stop forwarding interaction commands to a proxy interactor.
 #
 body ::tycho::Interactor::uncascade {} {
     $this proxy {}
@@ -306,11 +348,20 @@ body ::tycho::Interactor::uncascade {} {
 
 
 #######################################################################
-#### eventcode type [-button button] [-key key] [-modifiers modifiers]
+#### event
 #
-# Translate an event specification into a Tk event code
+# Translate an event specification into a Tk event code. The arguments
+# take the form
+# <p>
+# <code>type</code>: specifies which button to use.
+# <p>
+# <code>-button button</code>: specifies which button to use.
+# <p>
+# <code>-key key</code>: specifies which key to use.
+# <p>
+# <code>-modifiers modifiers</code>: specifies any modifiers.
 #
-proc eventcode {type args} {
+body ::tycho::Interactor::event {type args} {
     set button ""
     set modifiers {}
 
