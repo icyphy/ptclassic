@@ -122,7 +122,7 @@ ptkTkSetup(funcArray, size)
     /* pop up the welcome window */
     PrintVersion();
 
-    /* arrange for "processEvents" to be called between stars */
+    /* arrange events to be called during a Ptolemy run*/
     KcSetEventLoop(1);
 
     return (RPC_OK);
@@ -133,16 +133,6 @@ ptkMainLoop ()
 {
     Tk_MainLoop ();
 }
-
-
-void
-processEvents (s,c)
-struct Star* s;
-char *c;
-{
-	Tk_DoOneEvent(TK_DONT_WAIT|TK_ALL_EVENTS);
-}
-
 
 static void
 ptkRPCFileProc ( clientdata, mask )

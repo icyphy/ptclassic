@@ -87,7 +87,7 @@ LIBCSRCS      = main.c \
 		ptkNet.c \
 		ptkTemplate.c \
 		ptkTclIfc.c \
-		ptkTkSetup.c
+		ptkTkSetup.c 
 
 
 LIBCPPSRCS    = kernelCalls.cc \
@@ -95,6 +95,7 @@ LIBCPPSRCS    = kernelCalls.cc \
 		pigiLoader.cc \
 		ptkConsoleWindow.cc \
 		ptkRegisterCmds.cc \
+		ptkRunEvents.cc \
 		TclObj.cc \
 		POct.cc \
 		PVem.cc \
