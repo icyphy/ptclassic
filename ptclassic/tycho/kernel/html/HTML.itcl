@@ -233,25 +233,25 @@ body ::tycho::HTML::constructor {args} {
     # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
     
-    toolbar addButton back {Go back to the previously viewed page} \
+    toolbar button back {Go back to the previously viewed page} \
             -text Back -command "$this back"
     
     global ::TYCHO
     
-    toolbar addButton home {Go to the Tycho home page} \
+    toolbar button home {Go to the Tycho home page} \
             -text Home -command "$this hyperJump \
 	    [file join \$TYCHO doc index.html]"
     
-    toolbar addButton reload {Reload and reparse from the file} \
+    toolbar button reload {Reload and reparse from the file} \
             -text Reload -command "$this reload"
     
-    toolbar addButton open {Open a new file} \
+    toolbar button open {Open a new file} \
             -text Open -command "$this altFile"
     
-    toolbar addButton find {Find text or a pattern on this page} \
+    toolbar button find {Find text or a pattern on this page} \
             -text Find -command "$this search"
     
-    toolbar addButton stop {Abort rendering} \
+    toolbar button stop {Abort rendering} \
             -text Stop -command "$this stopRendering"
 
     set text $itk_component(text)
@@ -359,6 +359,8 @@ body ::tycho::HTML::constructor {args} {
     # Make the insertion cursor invisible.
     $text configure -insertofftime 0
     $text configure -insertbackground [$text cget -background]
+
+    toolbar entry location Location $file "$this hyperJump"
 }
 
 ###################################################################
@@ -474,6 +476,9 @@ body ::tycho::HTML::help {} {
 # have the form <i>linenumber.characternumber</i>. If the third
 # argument, which is optional, has value 0, then the jump is not
 # recorded for backtracking.
+#
+# NOTE: This method really should support the syntax "filename#fragment"
+# in the filename argument.  Someday.
 #
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
