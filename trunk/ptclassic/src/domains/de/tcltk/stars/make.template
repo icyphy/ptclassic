@@ -67,7 +67,7 @@ SCRIPTS=
 STAR_MK=detclstars
 DOMAIN=DE_TCL
 DOMAIN_2=DE
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
 
 all:		makefile stars_all
 
