@@ -26,14 +26,16 @@ class SDFWormhole : public Wormhole, public SDFStar {
 
 protected:
 	// Wormhole specific.
-	FloatState iterationPeriod;
-	FloatState samplingPeriod;
+	FloatState samplingTime;
 public:
 	void start() {Wormhole :: setup() ;}
 	void go();
 
 	// Constructor
 	SDFWormhole(Galaxy& g);
+
+	// return my scheduler
+	Scheduler* mySched() { return scheduler ;}
 
 	// print methods
 	StringList printVerbose() { return Wormhole :: print(0);}
