@@ -85,9 +85,8 @@ OCT_CC =	gcc -fwritable-strings
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	-O2
-# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
 # -pipe might not work under DEC Alpha 'as'
-LOCALCCFLAGS =	-g $(GCC_270_OPTIONS)
+LOCALCCFLAGS =	-g
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)

@@ -69,8 +69,7 @@ ARCHFLAGS =	-DIRIX5
 #  see /usr/include/sys/signals.h for more info.
 # Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
 # Under gcc-2.5.8 on Irix5.2, -g is not supported unless you have gas-2.5
-# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-G 0 -D_BSD_SIGNALS -D_BSD_TIME $(GCC_270_OPTIONS)
+LOCALCCFLAGS =	-G 0 -D_BSD_SIGNALS -D_BSD_TIME
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 LOCALCFLAGS =	-G 0 -cckr
