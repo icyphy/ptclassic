@@ -19,11 +19,11 @@ A two-pole, two-zero IIR filter.
 	}
 	input {
 	  name{input}
-	  type{float}
+	  type{ float }
 	}
 	output {
 	  name{output}
-	  type{float}
+	  type{ float }
 	}
         state {
                 name {d1}
@@ -66,15 +66,14 @@ denominator coefficients between 0 and 1.
 	  attributes{ A_CONSTANT|A_SETTABLE }
 	}
 	codeblock(quadmult) {
-vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) { 
+vis_f32 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) { 
 	vis_d64 prodhi, prodlo, product;
-	vis_f32 pack;
 
 	prodhi = vis_fmuld8sux16(mult1,mult2);
 	prodlo = vis_fmuld8ulx16(mult1,mult2);
 
 	product = vis_fpadd32(prodhi,prodlo);
-	return pack = vis_fpackfix(product);
+	return vis_fpackfix(product);
 }
 	}
 
@@ -94,15 +93,15 @@ vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	  $starSymbol(filtertaps)[4]=$val(scale)/$starSymbol(scaledown)*$val(n2);
 
 	  $starSymbol(repeatd1) =
-	    vis_to_float($starSymbol(filtertaps)[0]<<16|$starSymbol(filtertaps)[0]);
+	    vis_to_float($starSymbol(filtertaps)[0]<<16|$starSymbol(filtertaps)[0]&0xffff);
 	  $starSymbol(repeatd2) =
-	    vis_to_float($starSymbol(filtertaps)[1]<<16|$starSymbol(filtertaps)[1]);
+	    vis_to_float($starSymbol(filtertaps)[1]<<16|$starSymbol(filtertaps)[1]&0xffff);
 	  $starSymbol(repeatn0) =
-	    vis_to_float($starSymbol(filtertaps)[2]<<16|$starSymbol(filtertaps)[2]);
+	    vis_to_float($starSymbol(filtertaps)[2]<<16|$starSymbol(filtertaps)[2]&0xffff);
 	  $starSymbol(repeatn1) =
-	    vis_to_float($starSymbol(filtertaps)[3]<<16|$starSymbol(filtertaps)[3]);
+	    vis_to_float($starSymbol(filtertaps)[3]<<16|$starSymbol(filtertaps)[3]&0xffff);
 	  $starSymbol(repeatn2) =
-	    vis_to_float($starSymbol(filtertaps)[4]<<16|$starSymbol(filtertaps)[4]);
+	    vis_to_float($starSymbol(filtertaps)[4]<<16|$starSymbol(filtertaps)[4]&0xffff);
 	}
         initCode{
 	  CGCVISBase::initCode();
