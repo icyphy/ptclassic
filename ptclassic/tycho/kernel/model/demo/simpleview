@@ -49,7 +49,7 @@ pack $view1 -fill both -expand on
 pack $view2 -fill both -expand on
 
 # Tell each instance which model it is viewing. This will cause the view
-# to intialize itself with the data in the model.
+# to initialize itself with the data in the model.
 
 $view1 configure -model $model
 $view2 configure -model $model

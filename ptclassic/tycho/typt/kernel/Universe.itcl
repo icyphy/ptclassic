@@ -78,7 +78,7 @@ class ::ptolemy::Universe {
     ###################################################################
     ####                         public methods                    ####
 
-    # Run the current system until the designated stop time or interations.
+    # Run the current system until the designated stop time or iterations.
     method run {stoptime} 
 
     # Invoke the wrapup method of the target associated with this universe.

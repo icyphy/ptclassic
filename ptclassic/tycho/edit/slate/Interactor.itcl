@@ -500,7 +500,7 @@ body ::tycho::Interactor::target {args} {
 # optional arguments _must_ be the same as they were for the
 # corresponding call to bind{}. If the interactor is currently
 # activated, deactivate it -- this makes some kinds of
-# complex interactior sequences easier to write.
+# complex interactor sequences easier to write.
 #
 body ::tycho::Interactor::unbind {t args} {
     # Make sure that the interactor is deactivated first

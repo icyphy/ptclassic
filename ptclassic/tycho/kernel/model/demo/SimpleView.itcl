@@ -71,7 +71,7 @@
 # </tcl></pre>
 # 
 # Tell each instance which model it is viewing. This will cause
-# the view to intialize itself with the data in the model.
+# the view to initialize itself with the data in the model.
 # <pre><tcl>
 #     $view1 configure -model $model
 #     $view2 configure -model $model
