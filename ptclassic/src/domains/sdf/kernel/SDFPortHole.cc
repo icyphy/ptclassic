@@ -5,6 +5,7 @@
 #include "Block.h"
 #include "SDFConnect.h"
 #include "CircularBuffer.h"
+#include "Geodesic.h"
 
 /**************************************************************************
 Version identification:
@@ -88,3 +89,8 @@ PortHole& MultiOutSDFPort :: newPort () {
 	return installPort(p);
 }
 
+void SDFPortHole :: incCount(int n) { myGeodesic->incCount(n);}
+void SDFPortHole :: decCount(int n) { myGeodesic->decCount(n);}
+
+// isA
+ISA_FUNC(SDFPortHole,PortHole);
