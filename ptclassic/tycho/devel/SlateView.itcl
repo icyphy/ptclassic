@@ -537,7 +537,7 @@ body ::tycho::SlateView::childsite {} {
 #### focusin
 # Grab the focus.
 #
-body ::tycho::View::focusin {} {
+body ::tycho::SlateView::focusin {} {
     focus $itk_component(slateview)
 }
 
