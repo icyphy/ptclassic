@@ -60,6 +60,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 		"Specify whether to use loop scheduler and in what level."));
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
+	symbolCounter = 0;
 }
 
 // destructor
@@ -104,8 +105,11 @@ void CGTarget::setup() {
 	targetNestedSymbol.initialize();
 	sharedSymbol.initialize();
 
+	// be sure that this routine does not initialize the galaxy if it
+	// is a child target. It is already initialized, and done more!
+	if (!modifyGalaxy()) return;
+
 	if (!noSchedule) {
-		if (!modifyGalaxy()) return;
 		Target::setup();
 		if (haltRequested()) return;
 	}
