@@ -1,4 +1,7 @@
 .\" $Id$
+.EQ
+delim off
+.EN
 .H1 "Using the preprocessor"
 .pp
 The preprocessor permits many star definitions to be written in one file;
@@ -35,3 +38,6 @@ for example, will ensure this:
 .(c
 setenv PRINTER printer_name
 .)c
+.EQ
+delim $$
+.EN
