@@ -236,7 +236,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                         }
                     }
                     if (nextTry == -1) {
-                        Error::abortRun("Event never got rescheduled in NewEventFromEventQ()");
+                        Error::abortRun(" SW Event never got rescheduled in NewEventFromEventQ()");
                         return;
                     }
                     // getAppECT->~ListIter();
@@ -319,7 +319,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                         p = (ResLLCell*)getAppECT++;
                     }
                     if (nextTry == -1) {
-                        Error::abortRun("Event never got rescheduled in NewEventFromEventQ()");
+                        Error::abortRun("HW Event never got rescheduled in NewEventFromEventQ()");
                         return;
                     }
                     //getAppECT->~ListIter();
@@ -337,7 +337,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
             // Resource is not free
             // Reschedule the Events. Remember all such Events use Star
             // for same time (same freq)
-            
+            printf("HW resource not free, timeWhenFree %f, now %f\n", timeWhenFree, now);fflush(0);
             for (i=0 ; i<dimen ; i++) {
                 DEPortHole* destPort = (DEPortHole*)sortArray[i]->dest;
                 eventQ->levelput(sortArray[i], timeWhenFree, destPort->depth); 
