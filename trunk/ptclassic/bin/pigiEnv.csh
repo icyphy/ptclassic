@@ -78,6 +78,7 @@ set cmdfile = /tmp/pigiCmds.$USER
 /bin/rm -f $cmdfile
 if ( ! $?nocmdfile ) then
     echo "PTOLEMY=$PTOLEMY"				>! $cmdfile
+    echo "HOME=$HOME"					>> $cmdfile
     echo "ARCH=$ARCH"					>> $cmdfile
     echo "PIGIRPC=$PIGIRPC"				>> $cmdfile
     echo "DISPLAY=$DISPLAY"				>> $cmdfile
