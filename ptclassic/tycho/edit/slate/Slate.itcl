@@ -177,6 +177,9 @@ class ::tycho::Slate {
     # Create a "ghost" of one or more items
     method ghost {tag args}
 
+    # Grapple an item
+    method grapple {id args}
+
     # Add a highlight to an item
     method highlight {tag args}
 
@@ -228,6 +231,9 @@ class ::tycho::Slate {
     # Return the shape represented by a tag or ID
     method shape* {tag args}
 
+    # Ungrapple an item
+    method ungrapple {id}
+
     # Remove a highlight from an item
     method unhighlight {tag}
 
@@ -264,11 +270,8 @@ class ::tycho::Slate {
     # A list of active Animator objects
     private variable animators ""
 
-    # An array of current shapes used during interaction
-    private variable shapeClass
-
-    # An array of current shape arguments used during interaction
-    private variable shapeArgs
+    # The reshaping interactor
+    private variable _reshaper ""
 }
 
 #######################################################################
@@ -561,6 +564,83 @@ body ::tycho::Slate::ghost {tag args} {
 }
 
 #######################################################################
+#### grapple
+#
+# Attach grapples to an item. This method uses the <b>aspect</b>
+# method to get the names of aspects of the item, and then creates
+# a grapple object for each, and binds an interactor to each. New
+# grapples will not be created for aspects that already have one.
+# The following optional arguments are recognized:
+#
+# <dl>
+# <dt><b>-button</b>
+# <dd>
+# The button to bind the interactor with. The default is button 1.
+#
+# <dt><b>-class</b>
+# <dd>
+# The class of item to create as the grapples. The default is
+# Grapple.
+#
+# <dt><b>-interactor</b>
+# <dd>
+# The interactor to bind to each grapple. If not supplied, an
+# instance of the Reshaper interactor will be created, which
+# will reshape the item to which the grapples are attached.
+#
+# <dt><b>-modifiers</b>
+# <dd>
+# The modifiers to bind the interactor with. The default is null.
+#
+# <dt><b>-options</b>
+# <dd>
+# Additional options to give to the grapples. The default is null.
+#
+# <dt><b>-tags</b>
+# <dd>
+# Tags to add to each grapple. In addition to any tags given here,
+# the tags <b>grapple</b>, <b>grapple.</b>_id_, and _aspect_<b>.</b>_id_ \
+# are added to the grapple. These can be used to make additional
+# interactor bindings if needed.
+#
+# </dl>
+#
+body ::tycho::Slate::grapple {id args} {
+    # Extract options
+    array set opts {-interactor {} -tags {} -button 1 -modifiers {} \
+            -class Grapple -options {}}
+    array set opts $args
+	
+    if { $opts(-interactor) == "" } {
+        if { $_reshaper == "" } {
+            set _reshaper [interactor Reshaper]
+        }
+        set opts(-interactor) $_reshaper
+    }
+    set tags $opts(-tags)
+    unset opts(-tags)
+    
+    # Create the grapples
+    foreach a [aspect $id] {
+puts "$a: [find withtag $a.$id]"
+        if { [find withtag $a.$id] == "" } {
+            set g [eval create $opts(-class) [aspect $id $a] \
+                    [list \
+                    -tags [concat $tags grapple grapple.$id $a.$id] \
+                    -item $id \
+                    -aspect $a] \
+                    $opts(-options)]
+        }
+    }
+    raise grapple.$id $id
+    
+    # Bind the interactor to the whole lot
+    $opts(-interactor) bind grapple.$id \
+            -button $opts(-button) \
+            -modifiers $opts(-modifiers)
+}
+
+#######################################################################
 #### highlight
 #
 # Create a highlight around an item. This is a colored outline 
@@ -568,7 +648,7 @@ body ::tycho::Slate::ghost {tag args} {
 # own style of highlighting by providing a highlight{} procedure.
 # Each created highlight item is tagged with "highlight" and
 # "highlight._id_", where _id_ is the item it highlights. If the
-# first argument is tag, then each highlighted item is also tagged
+# first argument is a tag, then each highlighted item is also tagged
 # with "highlight._tag_". Additional options can be:
 # <ul>
 # <li><b>-tags</b> _tags_: Also add these tags to the highlight item.
@@ -608,9 +688,7 @@ body ::tycho::Slate::highlight {tag args} {
 
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has a highlight{} method,
-	# call that. Note that this method must deal with the
-	# situation in which the item is already highlighted
-	# by adjusting the highlight rather than recreating it.
+	# call that.
         set class ::tycho::$itemClass($tag)
 	if { [@scope $class ::info exists methodtable(highlight)] } {
 	    return [eval [@scope $class set methodtable(highlight)] \
@@ -743,7 +821,7 @@ body ::tycho::Slate::moverelease {tag} {
 #
 # Move the given _aspect_ of one or more items to the absolute location
 # given by _x_ and _y_. If the arguments contain the *-shape* option,
-# the this shape is used instead of the default. If a tag is specified
+# then that shape is used instead of the default. If a tag is specified
 # and the tag denotes more than one item, then the items are treated
 # as a rectangle.
 #
@@ -963,6 +1041,12 @@ body ::tycho::Slate::reshapeclick {tag x y args} {
 #
 body ::tycho::Slate::reshapedrag {tag x y} {
     eval shapecall $tag reshapedrag $x $y
+
+    # If the item has a highlight, then rehighlight it so
+    # it changes shape too
+    if { [find withtag highlight.$tag] != "" } {
+        highlight $tag
+    }
 }
 
 #######################################################################
@@ -1169,13 +1253,11 @@ body ::tycho::Slate::shape {id} {
 #######################################################################
 #### shape*
 #
-# Return the "shape" represented by a tag or ID.
-# If the tag represents one item, the
-# shape is that item's shape; if it represents more than one
-# item, the shape is always "rectangle"; if it represents
-# no items, the result is null. If the argument list
-# contains the *-shape* option, then its value overrides
-# the default shape if the tag represents one item only.
+# Return the "shape" represented by a tag or ID. If the tag represents
+# one item, the shape is that item's shape; if it represents more than one
+# item, the shape is always "rectangle"; if it represents no items, the
+# result is null. If the argument list contains the *-shape* option, then
+# its value overrides the default shape if the tag represents one item only.
 #
 body ::tycho::Slate::shape* {tag args} {
     array set opts [concat {-shape {}} $args]
@@ -1245,6 +1327,20 @@ body ::tycho::Slate::shapecall {tag method args} {
     set class ::tycho::[::tycho::capitalize [eval [list shape* $tag] $args]]
     # Call the procedure
     eval $class::_$method $tag $canvas $this $args
+}
+
+#######################################################################
+#### ungrapple
+#
+# Remove grapples from an item. Grapples that are attached to the
+# given item are deleted, unless they have the <b>-sticky</b> option set.
+#
+body ::tycho::Slate::ungrapple {id} {
+    foreach g [find withtag grapple.$id] {
+        if ![itemcget $g -sticky] {
+            delete $g
+        }
+    }
 }
 
 #######################################################################
