@@ -3,6 +3,13 @@
 #define _builtin_h 1
 #include <stream.h>
 
+// abs functions
+// with templates we will need only
+// template<class T> inline T abs(T a) { return (a >= 0) ? a : -a;}
+
+inline double abs(double a) { return (a >= 0) ? a : -a;}
+inline int abs(int a) { return (a >= 0) ? a : -a;}
+
 // min and max functions, to match those defined in the libg++ builtin.h.
 
 // with templates we will need only
