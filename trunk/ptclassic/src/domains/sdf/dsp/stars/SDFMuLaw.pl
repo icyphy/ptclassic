@@ -24,8 +24,7 @@ defstar {
 		name{ compress}
 		type{ int}
 		default{ 1}
-		desc{ if you dont want compression, type 0 else by default
-	it will get compressed by the Mu law-code. }
+		desc{ 0 to turn off compression, otherwises compresses with Mu law. }
 		}
 
 	defstate{

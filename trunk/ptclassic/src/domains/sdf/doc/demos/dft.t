@@ -37,7 +37,7 @@ the FloatRamp star to generate the X input of the XYgraph stars.
 Note that the conversion from the FLOAT output of the FIR filter
 to the COMPLEX input of the ComplexFFT is implicit.
 The default time-domain signal is an impulse response of an
-equirriple lowpass filter designed using the optfir
+equiripple lowpass filter designed using the optfir
 command.
 .Ir "optfir program"
 .Ie "FFT"

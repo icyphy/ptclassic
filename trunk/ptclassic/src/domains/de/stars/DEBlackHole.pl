@@ -7,7 +7,7 @@ defstar {
 	location { DE main library }
 	desc { Discards all input particles. }
 	explanation {
-A BlackHole accepts input Particles, but doesnt do anything with
+A BlackHole accepts input Particles, but doesn't do anything with
 them \(em it is
 typically used to discard unwanted signals from other blocks.
 	}

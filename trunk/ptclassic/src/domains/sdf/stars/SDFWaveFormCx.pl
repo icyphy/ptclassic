@@ -4,7 +4,7 @@ defstar {
 	desc {
 Output a complex waveform as specified by the array state "value"
 (default "(1,0) (-1,0)").
-To halt the simulation after exhausing the data, set "haltAtEnd" to YES.
+To halt the simulation after exhausting the data, set "haltAtEnd" to YES.
 Otherwise, to get a periodic waveform, set "periodic" to YES.
 Then the value list will be cyclically repeated.
 If "periodic" is not YES, and "haltAtEnd" is NO, then the value list is
