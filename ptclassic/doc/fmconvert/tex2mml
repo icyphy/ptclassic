@@ -22,23 +22,32 @@ set temp3=c.$$	# yet another temporary file
 # toc entry format:
 # \contentsline {<entry-type>}{\numberline <item>}{<chapter>-<page>}
 
+# Remove "\numberline {...}"
+set numberline="s/\\numberline {[^}]*}//"
+
 # Process "\contentsline {...}"
 set contentsline="s/^\\contentsline {\([^}]*\)}/\1 /"
 
-# Process "\numberline "
-set numberline="s/\\numberline //"
+# Process other remaining commands: "\...{...}"
+set command="s/\\[^{]*{\([^}]*\)}/\1/"
 
 # Process section number, section name, chapter, and page number
-set extract="s/{{\([^}]*\)}\([^}]*\)}{\($chap\)-\([^}]*\)}/\4 \2/p"
+set extract="s/{\([^}]*\)}{\($chap\)-\([^}]*\)}/\3 \1/p"
 
 set ext=toc
 
 onintr clean1
 
 if (-r $file.$ext) then
-	sed -n -e "$contentsline" -e "$numberline" -e "$extract" $file.$ext \
+	sed -n -e "$contentsline" -e "$numberline" -e "$command" -e "$extract" $file.$ext \
 		> $temp1
 endif
+
+# Fix under-score characters.
+set under="s/{\\ptt \\char '137}/_/"
+
+# Replace ! by : for sub-items.
+set sub="s/\!/:/"
 
 # Find entries with bold page numbers.  Extract entry and page number.
 set findBold="s/^\\entry{\([^}]*\)}{[^0-9][^0-9]*\(${chap}\)-\([^}]*\)}.*/"
@@ -50,13 +59,14 @@ set replace="_ref \3 \1/p"
 
 onintr clean2
 
-set ext=(cp tp fn)
-set idx=(concept type function)
+set ext=(cp pg fn vr tp ky)
+set idx=(concept program function variable type key)
 @ i = 1
 rm -f $temp2
 while ($i <= $#ext)
 	if (-r $file.$ext[$i]) then
-	sed -n -e "$findBold$idx[$i]$replaceBold" \
+	sed -n	-e "$under" -e "$sub" \
+		-e "$findBold$idx[$i]$replaceBold" \
 		-e "$find$idx[$i]$replace" \
 		$file.$ext[$i] >> $temp2
 	endif
@@ -113,12 +123,18 @@ BEGIN { OFS=""; ORS=""; page=1; }
 \$1 ~ /chapter/ || \$1 ~ /section/ || \$1 ~ /paragraph/ { print \$3;
 	for ( i = 4; i <= NF; i++ ) { print " ", \$i; } print "\n"; }
 # Process index entries.
-/^concept_def/ { print "<Marker <MType 13>"; }
 /^concept_ref/ { print "<Marker <MType 11>"; }
-/^type_def/ { print "<Marker <MType 16>"; }
-/^type_ref/ { print "<Marker <MType 14>"; }
-/^function_def/ { print "<Marker <MType 13>"; }
+/^concept_def/ { print "<Marker <MType 13>"; }
+/^program_ref/ { print "<Marker <MType 11>"; }
+/^program_def/ { print "<Marker <MType 13>"; }
 /^function_ref/ { print "<Marker <MType 11>"; }
+/^function_def/ { print "<Marker <MType 13>"; }
+/^variable_ref/ { print "<Marker <MType 11>"; }
+/^variable_def/ { print "<Marker <MType 13>"; }
+/^type_ref/ { print "<Marker <MType 14>"; }
+/^type_def/ { print "<Marker <MType 16>"; }
+/^key_ref/ { print "<Marker <MType 11>"; }
+/^key_def/ { print "<Marker <MType 13>"; }
 \$1 ~ /_def/ || \$1 ~ /_ref/ { print " <MText \`", \$3;
 	for ( i = 4; i <= NF; i++ ) { print " ", \$i; } print "'> >\n"; }
 END { print "<EndOfInput>\n"; }
