@@ -53,7 +53,7 @@
 # </pre></tcl>
 #
 class ::tycho::EditForest {
-    inherit ::tycho::File
+    inherit ::tycho::Graphics
 
     constructor {args} {}
     destructor {}
@@ -64,18 +64,12 @@ class ::tycho::EditForest {
     # Clear the display, discarding the current forest.
     method clear {}
 
-    # Give the canvas the focus.
-    method focusin {}
- 
     # Open a help window.
     method help {}
 
-    # Append the specified data to the existing forest.
-    method insertData {data}
-
     # Find the node in the forest identified by "name".
     # FIXME: Implement this.
-    method  {name}
+    # method seePoint {name}
 
     # Specify whether or not modifications are allowed in the displayed text.
     method setReadOnly {bool}
@@ -83,46 +77,23 @@ class ::tycho::EditForest {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Return the text to be saved.
-    protected method saveText {}
+    # Return the name of the class of graphics widget to use.
+    protected method graphicsWidget {} {return ::tycho::EditForestWidget}
 }
 
 #######################################################################
 #### constructor
 #
 body ::tycho::EditForest::constructor {args} {
-    # The Forest
-    itk_component add forest {
-        ::tycho::EditForestWidget $itk_component(childsite).forest \
-                -top $this
-    } {
-        keep -forest -readonly
-        # FIXME: keep and rename
-    }
-
-    pack $itk_component(forest) -expand yes -fill both
-
-    addMenu Edit left Window -underline 0
-
-    addMenuItem Cut Edit -underline 0 -accelerator "C-w" \
-	    -command "$this component forest cut"
-    
-    addMenuItem Copy Edit -underline 1 -accelerator "M-w" \
-	    -command "$this component forest copy"
-    
-    addMenuItem Paste Edit -underline 0 -accelerator "C-y" \
-	    -command "$this component forest paste"
-    
-    addMenuSeparator Edit
 
     addMenuItem {Edit Node} Edit -underline 0 -accelerator "e" \
-	    -command "$this component forest edit"
+	    -command "$this component graphics edit"
 
     addMenuItem {New Root} Edit -underline 4 -accelerator "r" \
-	    -command "$this component forest addRoot"
+	    -command "$this component graphics addRoot"
 
     addMenuItem {New Child} Edit -underline 4 -accelerator "c" \
-	    -command "$this component forest addChild"
+	    -command "$this component graphics addChild"
 
     eval itk_initialize $args
 }
@@ -137,41 +108,16 @@ body ::tycho::EditForest::constructor {args} {
 #
 body ::tycho::EditForest::clear {} {
     if [getReadOnly] {bell; return}
-    [component forest forest] clear
-    component forest redraw
+    [component graphics forest] clear
+    component graphics redraw
 }
 
-###################################################################
-#### focusin
-# Hand the focus to the canvas window.
-#
-body ::tycho::EditForest::focusin {} {
-    $itk_component(forest) focusin
-}
- 
 #######################################################################
 #### help
 # Open a help window.
 #
 body ::tycho::EditForest::help {} {
     hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditForestHelp.html" {}
-}
-
-#######################################################################
-#### insertData
-# Append the specified data to the existing forest.
-# The data should have the format of the <code>describe</code> method
-# of the <code>::tycho::Forest</code> class.
-#
-body ::tycho::EditForest::insertData {data} {
-    if [getReadOnly] {bell; return}
-    set fst [component forest forest]
-    foreach tree $data {
-        foreach node $tree {
-            eval $fst add $node
-        }
-    }
-    component forest redraw
 }
 
 #####################################################################
@@ -182,33 +128,16 @@ body ::tycho::EditForest::insertData {data} {
 # file can be modified.  To control the file, use <code>toggleReadOnly</code>.
 #
 body ::tycho::EditForest::setReadOnly {bool} {
-    ::tycho::File::setReadOnly $bool
+    ::tycho::Graphics::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            disableMenuItem {Cut} Edit
-            disableMenuItem {Paste} Edit
             disableMenuItem {Edit Node} Edit
             disableMenuItem {New Root} Edit
             disableMenuItem {New Child} Edit
 	} {
-            enableMenuItem {Cut} Edit
-            enableMenuItem {Paste} Edit
             enableMenuItem {Edit Node} Edit
             enableMenuItem {New Root} Edit
             enableMenuItem {New Child} Edit
 	}
     }
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### saveText
-# Return the text to be saved.
-#
-body ::tycho::EditForest::saveText {} {
-    set fst [component forest forest]
-    return [$fst describe]
 }
