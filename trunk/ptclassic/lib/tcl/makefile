@@ -34,6 +34,9 @@ VPATH = $(ROOT)/lib/tcl
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# Avoid messages from tycommon.mk
+LIBR = dummylib
+
 EXTRA_SRCS = \
 esterel2pl.tcl \
 gantt.tcl \
