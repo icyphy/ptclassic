@@ -54,6 +54,7 @@ LIB=libsdfdfmstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
+ SDFConstString.pl \
  SDFFileEval.pl \
  SDFFileEvalControl.pl \
  SDFFileEvalString.pl \
