@@ -72,7 +72,7 @@ This star inverse zig-zag scans a DCTImage.
 
 // Allocate space and go.
 			int row, col;
-			float* outArr = new float[img.retFullSize()];
+			LOG_NEW; float* outArr = new float[img.retFullSize()];
 			float* tmpPtr = img.retData();
 			for(row = 0; row < height; row += bSize) {
 				for(col = 0; col < width; col += bSize) {
@@ -83,7 +83,7 @@ This star inverse zig-zag scans a DCTImage.
 
 // Copy the data back.
 			copy(img.retFullSize(), img.retData(), outArr);
-			LOG_DEL; delete outArr;
+			LOG_DEL; delete [] outArr;
 		}
 	} // end { invZigZag }
 
@@ -113,7 +113,7 @@ This star inverse zig-zag scans a DCTImage.
 		DCTImage* image = (DCTImage*) inPkt.writableCopy();
 
 		if(image->fragmented() || image->processed()) {
-			delete image;
+			LOG_DEL; delete image;
 			Error::abortRun(*this, "Processed or fragmented.");
 			return;
 		}
