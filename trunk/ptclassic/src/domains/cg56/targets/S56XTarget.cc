@@ -53,8 +53,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56XCPeek.h"
 #include "CG56XCPoke.h"
 
-S56XTarget :: S56XTarget(const char* nam, const char* desc) :
-CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star","CG56"),pairNumber(0) {
+S56XTarget :: S56XTarget(const char* nam, const char* desc,
+			 const char* assocDomain) :
+CG56Target(nam, desc, assocDomain),
+MotorolaTarget(nam, desc, "CG56Star", assocDomain),
+pairNumber(0) {
 	initStates();
 }
 

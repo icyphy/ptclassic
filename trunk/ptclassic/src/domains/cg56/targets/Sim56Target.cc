@@ -43,8 +43,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "MotorolaTarget.h"
 
-Sim56Target :: Sim56Target(const char* nam, const char* desc) :
-	MotorolaTarget(nam,desc,"CG56Star","CG56"),CG56Target(nam,desc),MotorolaSimTarget(nam,desc,"CG56Star","CG56")
+Sim56Target :: Sim56Target(const char* nam, const char* desc,
+			   const char* assocDomain) :
+MotorolaTarget(nam, desc, "CG56Star", assocDomain),
+CG56Target(nam, desc, assocDomain),
+MotorolaSimTarget(nam, desc, "CG56Star", assocDomain)
 {
 	initStates();
 }

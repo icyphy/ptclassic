@@ -45,11 +45,20 @@ Target for Ariel S-56X DSP board.
 
 class S56XTarget : public CG56Target {
 public:
-    S56XTarget(const char*,const char*);
+    // Constructor
+    S56XTarget(const char* name, const char* desc,
+	       const char* assocDomain = CG56domainName);
+
+    // Copy Constructori
     S56XTarget(const S56XTarget&);
+
     /*virtual*/ void writeCode();
     /*virtual*/ int runCode();
+
+    // Return a copy of itself
     /*virtual*/ Block* makeNew() const;
+
+    // Type checking
     /*virtual*/ int isA(const char*) const;
     
     // Routines to construct CG wormholes, using the
@@ -64,6 +73,7 @@ protected:
     /*virtual*/ void headerCode();
     /*virtual*/ void trailerCode();
     /*virtual*/ void setup();
+
 private:
     int pairNumber;
     inline void configureCommPair(CommPair&);
