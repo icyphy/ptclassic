@@ -37,11 +37,11 @@ void S56XTarget :: initStates() {
 	addState(monitorProg.setState("monitor",this,"","Loader/Monitor/Debugger"));
 	monitorProg.setAttributes(A_SETTABLE|A_NONCONSTANT);
 
-	xMemMap.setValue("0-255,8192-16383");
-	yMemMap.setValue("0-16383");
+	xMemMap.setInitValue("0-255,8192-16383");
+	yMemMap.setInitValue("0-16383");
 	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
 	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
-	runFlag.setValue("YES");
+	runFlag.setInitValue("YES");
 	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
 	targetHost.setAttributes(A_SETTABLE|A_NONCONSTANT);
 	addStream("aioCmds",&aioCmds);
