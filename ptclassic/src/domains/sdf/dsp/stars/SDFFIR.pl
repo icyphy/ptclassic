@@ -2,12 +2,12 @@ defstar {
 	name {FIR}
 	domain {SDF}
 	desc {
-A finite impulse response (FIR) filter.
-Coefficients are specified by the "taps" parameter.
-The default coefficients give an 8th order, linear phase lowpass
-filter. To read coefficients from a file, replace the default
+A finite impulse response (FIR) filter.  Coefficients are specified by
+the "taps" parameter.  The default coefficients give an 8th-order, linear
+phase lowpass filter. To read coefficients from a file, replace the default
 coefficients with "< fileName", preferably specifying a complete path.
-Polyphase multirate filtering is also supported.
+Rational sampling rate changes, implemented by polyphase multirate filters,
+is also supported.
 	}
 	version {$Id$}
 	author { E. A. Lee }
