@@ -58,6 +58,7 @@ myDomain(domain),selfStar(self),master(NULL),sched(0),scheduled(0) {};
     }
     selfStar.deleteAllGenPorts();
     LOG_DEL; delete sched;
+    dummyPorts.deleteAll();
 }
 
 StringList Cluster::displaySchedule() {
@@ -212,7 +213,9 @@ void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
 		       The atBoundary test will return true for these
 		       connections. */
 		    
-		    PortHole* dummyPort = clonePort(&clusterPort->asClusterPort()->real());
+		    PortHole* dummyPort
+			= clonePort(&clusterPort->asClusterPort()->real());
+		    dummyPorts.put(*dummyPort);
 		    dummyPort->asClusterPort()->setClusterAlias(clusterPort);
 		    if (clusterPort->isItInput()) {
 			connect(dummyPort,clusterPort);

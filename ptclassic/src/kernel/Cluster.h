@@ -139,6 +139,8 @@ protected:
 private:
     // Connect two Cluster PortHoles together
     void connect(PortHole* source, PortHole* destination);
+
+    PortList dummyPorts;
 };
 
 // An iterator for ClusterList.
