@@ -50,7 +50,7 @@ ITCL_SRCS =	\
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	rcsdir sccsdir
+MISC_FILES =	#rcsdir sccsdir
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
