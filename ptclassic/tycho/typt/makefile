@@ -1,4 +1,4 @@
-# Makefile for Tycho/Ptolemy directory
+# Makefile for tycho.typt package directory
 #
 # @Author: Christopher Hylands
 #
@@ -35,13 +35,16 @@ DIRS = kernel lib editors doc demo controls
 # Root of Tycho directory
 ROOT =		..
 
-ME = 		editors
+ME = 		typt
+
 # True source directory
 VPATH =		$(ROOT)/$(ME)
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
+
+EXTRA_SRCS = pkgIndex.tcl
 
 # Include rules for directories that contain only subdirectories.
 include $(ROOT)/mk/tydir.mk
