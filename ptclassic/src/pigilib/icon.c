@@ -84,61 +84,22 @@ Inputs:
     dir = src directory of star, which contains .cc (and .pt ?) file
 */
 static boolean
-MkStar(name, dir)
-char *name, *dir;
+MkStar(name, domain, dir)
+char *name, *domain, *dir;
 {
 static dmTextItem item = {"Palette", 1, 80, "./user.pal", NULL};
 static dmTextItem itTemplate = {"Template", 1, 80, NULL, NULL};
 static char *q1 = "Cannot find star definition.  Define a new star?";
     char *iconDir;
     
+    if (!KcSetKBDomain(domain)) {
+	ErrAdd("Unknown domain: ");
+	ErrAdd(domain);
+	return FALSE;
+    }
     if (!KcIsKnown(name)) {
-	ErrAdd("Unknown star in current domain");
+	ErrAdd("No such star in the given domain");
 	return (FALSE);
-/*
-The following code is excluded until Ptolemy kernel issues have been
-defined.  It's not useful until dynamic loading at least is implemented.
-It also needs to be modified for Ptolemy.
-*/
-#if 0
-	char file[512], *expFile;
-	sprintf(file, "%s/%s.l", dir, name);
-	expFile = util_tilde_expand(file);
-	if (access(expFile, F_OK)) {
-	    char buf[512], *def;
-	    if (itTemplate.value == NULL) {
-		sprintf(buf, "%s.StarTemplateFile", UAppName);
-		if ((def = RPCXGetDefault("vem", buf)) == NULL) {
-		    def = "~ptolemy/lib/starTemplate";
-		}
-		itTemplate.value = def;
-	    }
-	    ERR_IF2(dmMultiText(q1, 1, &itTemplate) != VEM_OK,
-		"Aborted entry");
-	    ERR_IF2(access(util_tilde_expand(dir), W_OK),
-		"You do not have write permission in directory.");
-	    if (strlen(itTemplate.value) > 0) {
-		/* template specified, copy it... */
-		ERR_IF2(access(util_tilde_expand(itTemplate.value), F_OK),
-		    "Cannot find template file");
-		sprintf(buf, "\cp %s %s", itTemplate.value, file);
-		PrintDebug(buf);
-		ERR_IF2(util_csystem(buf), "Copy failed");
-		sprintf(buf, "\chmod u+w %s", file);
-		PrintDebug(buf);
-		ERR_IF2(util_csystem(buf), "chmod failed");
-	    }
-	    EditFile(file);
-	    PrintDebug(buf);
-	    ERR_IF2(util_csystem(buf), "Cannot edit file");
-	}
-	PrintCon("Loading star definition...");
-	/* leave off file suffix so that lisp will load .o before .l */
-	sprintf(file, "%s/%s", dir, name);
-	ERR_IF1(!KcLoad(file));
-	ERR_IF2(!KcIsKnown(name),
-	    "MkStar: Load failed.  Load star manually.");
-#endif
     }
     ERR_IF2(dmMultiText("Enter pathname of palette", 1, &item) != VEM_OK,
 	"Aborted entry");
@@ -157,6 +118,7 @@ long userOptionWord;
 {
 static dmTextItem items[] = {
     {"Star name", 1, dmWidth, NULL, NULL},
+    {"Domain", 1, 80, DEFAULT_DOMAIN, NULL},
     {"Star src directory", 1, dmWidth, NULL, NULL}
 };
 #define ITEMS_N sizeof(items) / sizeof(dmTextItem)
@@ -171,22 +133,22 @@ static dmTextItem items[] = {
 	ViDone();
     }
 
-    if (items[1].value == NULL) {
+    if (items[2].value == NULL) {
 	if ((pwent = getpwuid(getuid())) == NULL) {
 	    PrintErr("Cannot get password entry");
 	    ViDone();
 	}
-	items[1].value = sprintf(buf, "~%s/", pwent->pw_name);
+	items[2].value = sprintf(buf, "~%s/", pwent->pw_name);
     }
     if (dmMultiText(ViGetName(), ITEMS_N, items) != VEM_OK) {
 	PrintCon("Aborted entry");
 	ViDone();
     }
-    if (*items[1].value != '~' || !isalpha(items[1].value[1])) {
+    if (*items[2].value != '~' || !isalpha(items[1].value[1])) {
 	PrintErr("Star src directory must begin with '~user'");
 	ViDone();
     }
-    if (!MkStar(items[0].value, items[1].value)) {
+    if (!MkStar(items[0].value, items[1].value, items[2].value)) {
 	PrintErr(ErrGet());
 	ViDone();
     }
@@ -370,6 +332,7 @@ static dmTextItem item = {"Palette", 1, dmWidth, "./user.pal", NULL};
 }
 
 char* callParseClass();
+char* KcDomainOf();
 
 int 
 RpcLookInside(spot, cmdList, userOptionWord)
@@ -377,12 +340,20 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject mFacet, inst;
+    octObject mFacet, inst, facet;
     vemStatus status;
-    char *fullName, dir[512], codeFile[512], *base;
+    char *fullName, dir[512], codeFile[512], *base, *domain;
 
     ViInit("look-inside");
     ErrClear();
+
+/* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+    	ViDone();
+    }
+
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
@@ -415,14 +386,14 @@ long userOptionWord;
 		/* The following supports names like Fork.output=2
 		   using only the "Fork" part.  */
 	        base = callParseClass(BaseName(fullName));
+		/* determine the domain */
+		setCurDomainF(&facet);
+		domain = KcDomainOf(base);
 
-	        /* First the .h file */
-	        sprintf(codeFile, "%s/../stars/%s.h", dir, base);
+	        /* Form the filename */
+	        sprintf(codeFile, "%s/../stars/%s%s.pl", dir, domain, base);
 	        ERR_IF1(!LookAtFile(codeFile));
 
-	        /* Then the .cc file */
-	        sprintf(codeFile, "%s/../stars/%s.cc", dir, base);
-	        ERR_IF1(!LookAtFile(codeFile));
 		ViDone();
 	    } else {
 		PrintErr("The icon instance is not a universe, galaxy, palette, or star.");
