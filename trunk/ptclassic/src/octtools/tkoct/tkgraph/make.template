@@ -13,14 +13,18 @@ VPATH = 	../../../../src/octtools/tkoct/tkgraph
 CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-OBJS = 		axisCore.o rubberTk.o seqTk.o xfaDraw.o axisTk.o \
-		seqSdh.o xfa.o
+# Don't use shared libraries here, because otherwise we need a whole raft
+# of functions from eem.
+USE_SHARED_LIBS=no
+LIBSUFFIX=a
+
+OBJS = 		axisTk.o axisCore.o rubberTk.o seqTk.o xfaDraw.o seqSdh.o xfa.o
 
 SRCS = 		$(OBJS:.o=.c)
 
 # sol2.cfront: If planeTk.o is included in tkgraph.so, the we must include
 # lots of eem functions
-OTHERSRCS =	planeTk.c planeSdh.c
+OTHERSRCS =	planeTk.c planeSdh.c 
 
 HDRS = 		axisInt.h xpAxis.h xpPlane.h xpSeq.h copyright.h xpDefaults.h \
 		xpRubber.h xpXfa.h
