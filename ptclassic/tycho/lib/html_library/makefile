@@ -51,6 +51,9 @@ MISC_FILES =	README html license.terms sample.tcl
 
 REALCLEAN_STUFF =
 
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = doc
+
 all install: $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
