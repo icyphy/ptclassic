@@ -94,8 +94,11 @@ body ::tycho::BuilderDialog::constructor {args} {
     $myMenubar add {Glimpse} Build -underline 0 \
 	    -command "$this busy ::tycho::Builder::glimpse"
 
-    $myMenubar add {Itcl HTML Only (4 Minutes)} Build -underline 6 \
+    $myMenubar add {Itcl HTML Only (4 Minutes)} Build -underline 5 \
 	    -command "$this busy ::tycho::Builder::itcldocs"
+
+    $myMenubar add {Itcl IDocs Only} Build -underline 6 \
+            -command "$this busy ::tycho::Builder::idocs"
 
     $myMenubar add {Indices Only} Build -underline 0 \
 	    -command "$this busy ::tycho::Builder::indices"
