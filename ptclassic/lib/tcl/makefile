@@ -38,7 +38,6 @@ EXTRA_SRCS = \
 esterel2pl.tcl \
 gantt.tcl \
 message.tcl \
-starindex.tcl \
 pigilib.tcl \
 ptcl.tcl \
 ptcl_help.tcl \
