@@ -1,4 +1,5 @@
 #!/bin/sh -x
+# $Id$
 # Script to make a cgddf pigiRpc.ptrim.debug
 
 # The cgddf changes in PortHole.cc and hof are incompatible, the
@@ -7,9 +8,6 @@
 # The changes to parScheduler.cc are a fairly radical shift in how
 # Ptolemy handles disconnected graphs.  These changes could break
 # other parallel schedulers.
-
-cd $PTOLEMY/obj.$PTARCH/kernel; rm -f PortHole.o
-make USERFLAGS=-DCGDDF_PORTHOLE_CC_WORKAROUND install
 
 cd $PTOLEMY/obj.$PTARCH/domains/cg/parScheduler; rm -f CodeGen.o
 make USERFLAGS=-DCGDDF_CODEGEN_CC_WORKAROUND install
