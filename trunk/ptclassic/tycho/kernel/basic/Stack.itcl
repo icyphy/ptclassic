@@ -49,6 +49,9 @@ class ::tycho::Stack {
     # Push a value onto the stack.
     method push {value}
 
+    # Return the contents of the stack (used for debugging)
+    method contents {} {return $data}
+
     # The list used to implement the stack.
     protected variable data {}
 }
