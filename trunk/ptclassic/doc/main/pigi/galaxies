@@ -149,6 +149,7 @@ i.e., in the grey background of the facet.
 Execute \fIedit-params\fR and fill in the dialog as follows:
 .(c
 New name:  freq
+New type:  float
 New value:  PI/50
 .)c
 Then click on ``OK''.
@@ -178,20 +179,12 @@ value:  0.0
 This allows the ``freq'' parameter of a singen instance to control
 the increment of the internal ramp star, thus controlling the
 output frequency.
-.BU
-Re-instantiate (create new instances of) the ``singen'' icons:
 .LE
-Go back to ``modulation:schematic'' and delete all instances of
-``singen''.
-.LE
-Delete all wires that were connected to a ``singen'' instance.
-.LE
-Create new instances of ``singen'' to replace the ones we
-just deleted and replace all wiring.
-.LE
-It is necessary to re-instantiate a galaxy whenever the
-terminals or formal parameters of a galaxy change in order to
-be sure that consistency is maintained.
+In earlier versions of Pigi, it was necessary, when adding a formal
+parameter to a galaxy, to delete and recreate all instances of that
+galaxy.  This is no longer required: all instances of the galaxy
+that already existed will immediately ``know'' about the new parameter,
+and will use the default value.
 .BU
 Change the frequency of one of the ``singen'' instances to
 ``PI/5'' by using \fIedit-params\fP.  This ``singen'' will be
@@ -217,7 +210,4 @@ of the old icon in any open window (regardless of whether the window
 is iconified).  Hence, you must either close those windows with
 ``control-d'' or delete the offending icon before replacing
 it with a new icon.
-Furthermore, whenever you update the
-formal parameters of a galaxy or create a new icon for a galaxy, you
-must also re-instantiate the icon in all facets that refer to it.  This
-ensures that data will be consistent.
+
