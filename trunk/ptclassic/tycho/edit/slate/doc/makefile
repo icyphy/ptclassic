@@ -46,7 +46,11 @@ VPATH =		$(ROOT)/tycho/editors/slate/doc
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS =
+EXTRA_SRCS = \
+	tute.html \
+	tute-pictures.html \
+	tute-shapes.html \
+	tute-interactors.html
 
 MISC_FILES =
 
