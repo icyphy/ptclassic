@@ -47,34 +47,15 @@ test Loader-1.1 {load up the profile command} {
 	error "env(PTARCH) does not exist, perhaps the PTARCH environment\
 		variable is not set?"
     }
-    set profiledir [file join $TYCHO lib profile]
-    set profileobjdir [file join $profiledir  obj.$env(PTARCH)]
+    set profileobjdir [file join $TYCHO obj.$env(PTARCH) profile]
     set profileobj [file join $profileobjdir \
 	    tclXprofile[info sharedlibextension]]
     if ![file exists $profileobj] {
-	puts "About to run make in $profiledir"
-	set savedir [pwd]
-	cd $profiledir
-	exec make all
-
-	cd $savedir
-	#	set endtime [expr [clock seconds] +20]
-	#	while {[clock seconds] < $endtime} {
-	#	    puts -nonewline .
-	#	}
-
-	#    ::tycho::Exec .x -command {make all} -dir $profiledir
-	#   .x centerOnScreen
-	#    .x invoke ok
+	puts "About to run make tclexts"
+	::tycho::execModal {make tclexts} $TYCHO
     }
     ::tycho::loadIfNotPresent profile tclx [list \
 	    [list tclXprofile $profileobjdir]]
 } {}
-
-#test Loader-1.2 {load up the profile command} {
-#    puts "$profileobjdir"
-#    rename ::tycho::profile ::tycho::profile-loader-1.2
-#    ::tycho::loadIfNotPresent profile tclx	    
-#} {}
 
 doneTests
