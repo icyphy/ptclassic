@@ -52,7 +52,7 @@ include $(ROOT)/mk/config-g++.mk
 #
 # Programs to use
 #
-RANLIB = true
+RANLIB = touch
 YACC= byacc
 # Use gcc everywhere including in octtools
 CC =		gcc -I$(ROOT)/src/compat/nt
@@ -78,8 +78,12 @@ WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual
 
 # PT_NO_ITCL  : Used by ptcl to avoid including Itcl
 # PT_NO_TIMER : Used in ProfileTimer.cc and SimControl.cc
+# PT_ERRNO_IS_A_FUNCTION: Used by src/octtools/internal.h
+# USE_SIGACTION: Used by src/octtools/Xpackages/iv/timer.c
+# HAS_TERMIOS: Used by src/octtools/Packages/iv/ivGetLine.c
 
-LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER -DPT_NO_ITCL $(GCC_270_OPTIONS)
+LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER -DUSE_DIRENT_H \
+		-DNO_SYS_SIGLIST -DPT_ERRNO_IS_A_FUNCTION $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
@@ -87,25 +91,32 @@ LOCALCFLAGS =	$(LOCALCCFLAGS)
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
-TCL_VERSION_NUM=76i
-TK_VERSION_NUM=42i
-ITCL_VERSION_NUM=22
+TCL_VERSION_NUM=7.6i
+TK_VERSION_NUM=4.2i
+ITCL_VERSION_NUM=2.2
 
-CYGNUS=/Cygnus/B19
-TCL_ROOT=$(CYGNUS)/H-i386-cygwin32
+#CYGNUS=/Cygnus/B19
+#TCL_ROOT=$(CYGNUS)/H-i386-cygwin32
+#TCL_ROOT=/usr/local
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/lib -ltcl80
+#TCL_LIBSPEC=-L$(TCL_ROOT)/lib -ltcl80
+#TCL_LIBSPEC=-L$(TCL_ROOT)/lib/itcl -ltcl7.6i
 
 # Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/include
+#TK_INCDIR=$(TCL_ROOT)/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # additional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/lib -ltk8.0vc.lib
+#TK_LIBSPEC=-L$(TCL_ROOT)/lib -ltk8.0vc.lib
+#TCL_LIBSPEC=-L$(TCL_ROOT)/lib/tcl -ltcl7.6i
 
 # Directory containing itcl include files
-ITCL_INCDIR=$(CYGNUS)/include
-ITCL_LIBSPEC=
+#ITCL_INCDIR=$(CYGNUS)/include
+#ITCL_INCDIR=$(TCL_ROOT)/include/itcl
+#ITCL_LIBSPEC=-L$(TCL_ROOT)/lib/tcl -litcl2.2.a
+
+#ITK_INCDIR=$(TCL_ROOT)/itcl/include
+#ITK_LIBSPEC=-L$(TCL_ROOT)/lib/itcl -litk2.2
 
 #
 # Variables for the linker
@@ -126,68 +137,27 @@ LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 
-# These are the additional flags that we need when we are compiling code
-# which is to be dynamically linked into Ptolemy.  -shared is necessary
-# with gcc-2.7.0
-INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
-
-
-# Flag that gcc expects to create statically linked binaries.
-# Binaries that are shipped should be statically linked.
-# Note that cc uses -Bstatic
-CC_STATIC =
-
 # Binaries end with this extension
 BINARY_EXT = .exe
 
 #
 # Directories to use
 #
-X11_INCSPEC =	-I/usr/openwin/include
-X11_LIBDIR =	/usr/openwin/lib
-X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
+X11_DIR =	/usr/X11R6.3
+X11_INCSPEC =	-I$(X11_DIR)/include
+X11_LIBDIR =	$(X11_DIR)/lib
+X11EXT_LIBSPEC=	-lXext -lSM -lICE
+X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
 
-# Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR =
+# Don't include Mathematica
+INCLUDE_MATHEMATICA = no
 
-PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	#purify -automount-prefix=/tmp_mnt:/vol -best-effort
-QUANTIFY =	#quantify
+# Don't includ Matlab
+INCLUDE_MATLAB = no
 
+# Don't include gthreads
+INCLUDE_GTHREADS =	no
 
-PURECOV = 	#purecov
-
-#
-# Variables for miscellaneous programs
-#
-# Used by xv
-#XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-XV_INSTALL =
-
-# -DATT is needed so we don't try and include sys/dir.h
-# -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
-#	otherwise, we will need to set LD_LIBRARY_PATH
-XV_CC =		gcc -traditional $(X11_INCSPEC) \
-		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
-		$(X11_LIBSPEC) -R$(X11_LIBDIR)
-
-XV_RAND = 	-DNO_RANDOM
-
-# Under sol2, xmkmf is not compatible with gcc, so we don't use it
-XMKMF =		rm -f Makefile; cp Makefile.std Makefile
-
-# Used by tcltk to build the X pixmap extension
-XPM_DEFINES =	#-DZPIPE $(X11_INCSPEC)
-
-# Matlab architecture
-MATARCH = unknown
-
-# Mathematica MathLink library
-MATHLINKLIBNAME = MLelf
-
-# Build gthreads
-INCLUDE_GTHREADS =	yes
-
-# Include the PN domain.
-INCLUDE_PN_DOMAIN =	yes
+# Don't include the PN domain
+INCLUDE_PN_DOMAIN =	no
 
