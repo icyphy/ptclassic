@@ -68,18 +68,24 @@ to the table's data.
       Envelope dumEnv(*new VoiceData());
       nEnv = dumEnv;
 
-      LOG_NEW; srttable = new int* [int(numcpes)];
+      if ( srttable ) {
+         for (int i = 0; i < int(numcpes); i++) {
+	   LOG_DEL; delete [] srttable[i];
+         }
+         LOG_DEL; delete [] srttable;
+      }
 
+      LOG_NEW; srttable = new int* [int(numcpes)];
       for (int i = 0; i < int(numcpes); i++) {
-	  LOG_NEW; srttable[i] = new int [indata.numberPorts()];
+	 LOG_NEW; srttable[i] = new int [indata.numberPorts()];
       }
       
       for (i = 0; i < int(numcpes); i++)
-	  for (int j = 0; j < indata.numberPorts(); j++)
-	      srttable [i][j] = 0;
+	 for (int j = 0; j < indata.numberPorts(); j++)
+	     srttable[i][j] = 0;
     }
 
-    wrapup {
+    destructor {
       for (int i = 0; i < int(numcpes); i++) {
 	  LOG_DEL; delete [] srttable[i];
       }
