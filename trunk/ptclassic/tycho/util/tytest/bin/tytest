@@ -9,6 +9,8 @@
 # $Id$
 # Author: Christopher Hylands
 
+wm deiconify .
+
 # If the TYTEST_LIBRARY variable is set, add it to the auto_path
 if [info exists env(TYTEST_LIBRARY)] {
     if { [lsearch -exact $auto_path $env(TYTEST_LIBRARY)] }  {
@@ -64,16 +66,13 @@ if !$ok {
 }
 
 
-# Check if we are running with a GUI, and if so, require the
-# tycho.kernel.gui package.
-#if { [package provide Tk] != "" } {
-#    package require tycho.kernel.gui
-#}
-
 # Helpfully, tycho does some really weird things like shutting
 # up shop and going home when there are no more top-level
-# windows. To prevent this, utter the following magic incantation:
-#::tycho::TopLevel::exitWhenNoMoreWindows 0
+# windows. To prevent this, just load the gui package (on the
+# assumption that we are going to require it anyway) and then
+# utter the following magic incantation:
+package require tycho.kernel.gui
+::tycho::TopLevel::exitWhenNoMoreWindows 0
 
 # Source each of the files passed on the command line
 # FIXME: Need options?
@@ -82,7 +81,12 @@ if { $argv == "" } {
     exit
 }
 
+set cwd [pwd]
 foreach file $argv {
+    # Reset the directory in case anyone messes with it
+    cd $cwd
+	
+    # Source the file
     uplevel #0 "source $file"
 }
 
