@@ -62,7 +62,7 @@ class ::tycho::Edit {
     # Call this to give the text subwindow the focus.
     method focusin {}
 
-    #### help
+   #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
@@ -175,6 +175,12 @@ body ::tycho::Edit::constructor {args} {
 	    -accelerator "C-s" \
 	    -command "$itk_component(text) search"
     
+    $itk_component(editMenu) add command \
+	    -label Goto\
+	    -underline 0 \
+	    -accelerator "C-c C-g" \
+	    -command "$itk_component(text) gotoLine"
+
     # Add a Format menu
     itk_component add formatMenuButton {
 	menubutton $itk_component(menuFrame).format \
