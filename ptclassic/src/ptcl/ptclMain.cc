@@ -19,7 +19,7 @@ class.
 static const char file_id[] = "ptclMain.cc";
 #include "PTcl.h"
 #include "Linker.h"
-#include "Scheduler.h"
+#include "SimControl.h"
 #include "Error.h"
 #include <stdio.h>
 
@@ -40,7 +40,7 @@ main (int argc, char** argv) {
 	Linker::init(argv[0]);	// initialize incremental link module
 	int tty = isatty(0);
 	if (tty) {		// set up interrupt handler
-		Scheduler::catchInt();
+		SimControl::catchInt();
 	}
 	// all this stuff should be moved into the PTcl class.
 	// streams would be better than stdio.
