@@ -5,7 +5,7 @@ defstar {
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Read an image in Portable Pixmap (PPM) format from a file and
 separate the colors into three different images\(em
 a red, green, and blue image.
-Each image is of type GrayImage.
+Each image is represented in a float matrix.
 
 If present, the character '#' in the 'fileName' state is replaced with
 the frame number to be read next.
@@ -29,11 +29,12 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 .Ir "image format, portable pixmap (PPM)"
 	}
 
-	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h", "StringList.h", "miscFuncs.h" }
+	ccinclude { "Matrix.h", <std.h>, <stdio.h>, "Error.h", "StringList.h", "miscFuncs.h" }
 
-	output { name { output1 } type { message } desc { Red image. } }
-	output { name { output2 } type { message } desc { Green image. } }
-	output { name { output3 } type { message } desc { Blue image. } }
+	output { name {output1} type {FLOAT_MATRIX_ENV} desc { Red image. } }
+	output { name {output2} type {FLOAT_MATRIX_ENV} desc { Green image. } }
+	output { name {output3} type {FLOAT_MATRIX_ENV} desc { Blue image. } }
+        output { name {frameIdOut} type { int } }
 
 	defstate {
 		name	{ fileName }
@@ -111,16 +112,11 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 		fclose(fp);
 
 		LOG_NEW;
-		GrayImage* rColor = new GrayImage(width, height, int(frameId));
+		FloatMatrix& rColor = *(new FloatMatrix(height,width));
 		LOG_NEW;
-		GrayImage* gColor = new GrayImage(width, height, int(frameId));
+		FloatMatrix& gColor = *(new FloatMatrix(height,width));
 		LOG_NEW;
-		GrayImage* bColor = new GrayImage(width, height, int(frameId));
-
-
-		unsigned char* rfp = rColor->retData();
-		unsigned char* gfp = gColor->retData();
-		unsigned char* bfp = bColor->retData();
+		FloatMatrix& bColor = *(new FloatMatrix(height,width));
 
 		int i, j, temp1, temp2, temp3;
 		for (i = 0; i < height; i++) {
@@ -128,19 +124,18 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 			for (j = 0; j < width; j++){
 				temp2 = j + temp1;
 				temp3 = 3*temp2;
-				rfp[temp2] = rgbfp[temp3];
-				gfp[temp2] = rgbfp[temp3+1];
-				bfp[temp2] = rgbfp[temp3+2];
+				rColor.entry(temp2) = rgbfp[temp3];
+				gColor.entry(temp2) = rgbfp[temp3+1];
+				bColor.entry(temp2) = rgbfp[temp3+2];
 		}	}
 		LOG_DEL; delete [] rgbfp;
 
 // Write whole frame to output here...
-		Envelope envpr(*rColor);
-		Envelope envpg(*gColor);
-		Envelope envpb(*bColor);
-		output1%0 << envpr;
-		output2%0 << envpg;
-		output3%0 << envpb;
+		output1%0 << rColor;
+		output2%0 << gColor;
+		output3%0 << bColor;
+		frameIdOut%0 << int(frameId);
+
 		frameId = int(frameId) + 1; //increment frame id
 	} // end go{}
 } // end defstar{ ReadRgb }

@@ -1,11 +1,11 @@
 defstar {
 	name		{ MedianImage }
 	domain		{ SDF }
-	derivedFrom	{ RankImage }
+	derivedFrom	{ RankImage_M }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -42,7 +42,7 @@ Pixels at the image boundaries are copied and not median filtered.
 		RankOrder = (fwidth*fwidth - 1)/2;
 
 		// Initialize data members
-		SDFRankImage::setup();
+		SDFRankImage_M::setup();
 	}
 
 } // end defstar { MedianImage }

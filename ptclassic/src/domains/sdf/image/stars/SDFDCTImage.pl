@@ -4,24 +4,35 @@ defstar {
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih, Paul Haskell }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-This star takes a GrayImage input particle,
+This star takes a float matrix input particle,
 computes the discrete cosine transform (DCT),
-and outputs a DCTImage particle.
+and outputs a float matrix.
 	}
 	explanation {
 .Id "discrete cosine transform"
 .Id "image, discrete cosine transform"
 }
 
-	input { name { input } type { message } }
-	output { name { output } type { message } }
+	input { name { input } type { FLOAT_MATRIX_ENV } }
+	output { name { output } type { FLOAT_MATRIX_ENV } }
+	output { 
+	  name { originalW } 
+	  type { int }
+	  desc { The width of the original (input) image. }
+	}
+	output { 
+	  name { originalH } 
+	  type { int }
+	  desc { The height of the original (input) image. }
+	}
+
 
 	defstate {
 		name	{ BlockSize }
@@ -30,7 +41,7 @@ and outputs a DCTImage particle.
 		desc	{ Block size of the DCT transform. }
 	}
 
-	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h", "Error.h" }
+	hinclude { <math.h>, "Matrix.h" , "Error.h" }
 
 	protected {
 		float* cosData;
@@ -81,66 +92,70 @@ method {
 	name { doDCT }
 	type { void }
 	arglist {	// can't break string across lines in cfront
-"(float* out, unsigned const char* in, int outw, int outh, int inw, int inh)"
+"(FloatMatrix& outImage, const FloatMatrix& inImage)"
 	}
 	code {
 	register int ndx, ndx2, cntr;
 	int ii, jj, i, j;
 
+	int outw = outImage.numCols();
+	int outh = outImage.numRows();
+	int inw = inImage.numCols();
+	int inh = inImage.numRows();
+
 	// Do the HORIZONTAL transform. From input to out...
 	for(ii = 0; ii < inh; ii++) {
-		for(jj = 0; jj < outw-blocksize; jj += blocksize) {
-			ndx = ii*outw + jj;
-			ndx2 = ii*inw + jj;
-			for(j = 0; j < blocksize; j++) {
-				double sum = 0.0;
-				for(cntr = 0; cntr < blocksize; cntr++) {
-					sum += fwdD(j, cntr) * in[ndx2+cntr];
-				}
-				out[ndx+j] = sum;
-			}
-		}
+	  for(jj = 0; jj < outw-blocksize; jj += blocksize) {
+	    ndx = ii*outw + jj;
+	    ndx2 = ii*inw + jj;
+	    for(j = 0; j < blocksize; j++) {
+	      double sum = 0.0;
+	      for(cntr = 0; cntr < blocksize; cntr++) {
+		sum += fwdD(j, cntr) * inImage.entry(ndx2+cntr);
+	      }
+	      outImage.entry(ndx+j) = sum;
+            }
+	  }
 
 	// Handle last (maybe partial) block at end of each row (i.e. zero-pad).
-		ndx = ii*outw + jj;
-		ndx2 = ii*inw + jj;
-		for(j = 0; j < blocksize; j++) {
-			double sum = 0.0;
-			for(cntr = 0; cntr < 1 + ((inw-1)%blocksize); cntr++) {
-				sum += fwdD(j, cntr) * in[ndx2+cntr];
-			}
-			out[ndx+j] = sum;
-		}
+	  ndx = ii*outw + jj;
+	  ndx2 = ii*inw + jj;
+	  for(j = 0; j < blocksize; j++) {
+	    double sum = 0.0;
+	    for(cntr = 0; cntr < 1 + ((inw-1)%blocksize); cntr++) {
+	      sum += fwdD(j, cntr) * inImage.entry(ndx2+cntr);
+	    }
+	    outImage.entry(ndx+j) = sum;
+	  }
 	}
 
 // Handle rows at the bottom of the array.
 	for(ii = inh; ii < outh; ii++) {
-		ndx = ii*outw;
-		for(j = 0; j < outw; j++) {
-			out[ndx+j] = 0.0;
-		}
+	  ndx = ii*outw;
+	  for(j = 0; j < outw; j++) {
+	    outImage.entry(ndx+j) = 0.0;
+	  }
 	} // end for(ii)
 
 
 // Do the VERTICAL transform. From out to tmpbuf and copy back...
 	LOG_NEW; float* tmpbuf = new float[outh + blocksize];
 	for(jj = 0; jj < outw; jj++) {
-		for(ii = 0; ii < outh; ii += blocksize) {
-			ndx = ii*outw + jj;
-			for(i = 0; i < blocksize; i++) {
-				double sum = 0.0;
-				for(cntr = 0; cntr < blocksize; cntr++) {
-					sum += fwdD(i, cntr) *
-					       out[ndx + cntr*outw];
-				}
-				tmpbuf[ii+i] = sum;
-			}
-		}
+	  for(ii = 0; ii < outh; ii += blocksize) {
+	    ndx = ii*outw + jj;
+	    for(i = 0; i < blocksize; i++) {
+	      double sum = 0.0;
+	      for(cntr = 0; cntr < blocksize; cntr++) {
+		sum += fwdD(i, cntr) * outImage.entry(ndx + cntr*outw);
+	      }
+	      tmpbuf[ii+i] = sum;
+	    }
+	  }
 
 // Copy data back to main buffer;
-		for(i = 0; i < outh; i++) {
-			out[i*outw+jj] = tmpbuf[i];
-		}
+	  for(i = 0; i < outh; i++) {
+	    outImage.entry(i*outw+jj) = tmpbuf[i];
+	  }
 	} // end for(jj)
 
 	LOG_DEL; delete [] tmpbuf;
@@ -150,24 +165,40 @@ method {
 
 	go {
 		// Read input image.
-		Envelope inEnvp;
-		(input%0).getMessage(inEnvp);
-		TYPE_CHECK(inEnvp,"GrayImage");
-		const GrayImage* image = (const GrayImage*) inEnvp.myData();
-		if (image->fragmented() || image->processed()) {
-			Error::abortRun(*this,
-					"Can't DCT fragmented or processed image.");
-			return;
+                Envelope pkt;
+                (input%0).getMessage(pkt);
+                const FloatMatrix& inImage = *(const FloatMatrix*)pkt.myData();
+
+		if (pkt.empty()) {
+		  Error::abortRun(*this, "Input is a dummyMessage.");
+		  return;
 		}
 
+		int inw = inImage.numCols();
+		int inh = inImage.numRows();
+
+		//Round output width and height to be multiples of "blocksize"
+		int outw;
+		int outh;
+		if ((inw%blocksize) != 0)
+		  outw = blocksize * (inw/blocksize +1);
+		else 
+		  outw = inw;
+		if ((inh%blocksize) != 0)
+		  outh = blocksize * (inh/blocksize +1);
+		else 
+		  outh = inh;
+
+		//Allocate output image.
+		LOG_NEW;
+		FloatMatrix& outImage = *(new FloatMatrix(outh,outw));
+
 		// Do transform.
-		LOG_NEW; DCTImage* DCT = new DCTImage(*image, blocksize);
-		doDCT(DCT->retData(), image->constData(), DCT->fullWidth(),
-		      DCT->fullHeight(), image->retWidth(),
-		      image->retHeight());
+		doDCT(outImage, inImage);
 
 		// Send output.
-		Envelope outEnvp(*DCT);
-		output%0 << outEnvp;
+		output%0 << outImage;
+		originalW%0 << inw;
+		originalH%0 << inh;
 	}
 } // end defstar{ Dct }

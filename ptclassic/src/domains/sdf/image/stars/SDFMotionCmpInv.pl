@@ -1,139 +1,131 @@
 defstar {
-	name		{ MotionCmpInv }
-	domain		{ SDF }
-	version		{ $Id$ }
-	author		{ Paul Haskell }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+  name { MotionCmpInv }
+  domain { SDF }
+  version { $Id$ }
+  author { Paul Haskell }
+  copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-	location	{ SDF image library }
-	desc {
-For NULL inputs on 'mvIn' (motion-vector-in), copy the 'diffIn' input
-unchanged to the output and discard the 'pastIn' input.
-(A NULL input usually indicates the first frame of a sequence.)
+  }
+  location { SDF image library }
+  desc {
+For NULL inputs (zero size matrices) on 'mvHorzIn' and/or 'mvVertIn' 
+(motion-vector-in), copy the 'diffIn' input unchanged to the output 
+and discard the 'pastIn' input. (A NULL input usually indicates the 
+first frame of a sequence.)
 
-For non-NULL 'mvIn' inputs, perform inverse motion compensation and
-write the result to 'output'.
-}
-	explanation {
+For non-NULL 'mvHorzIn' and 'mvVertIn' inputs, perform inverse motion
+compensation and write the result to 'output'.
+  }
+  explanation {
 .Id "motion compensation, inverse"
 .Id "inverse motion compensation"
+  }
+
+  //////// I/O AND STATES.
+  input { name { diffIn } type { FLOAT_MATRIX_ENV } }
+
+  input { name { mvHorzIn } type { FLOAT_MATRIX_ENV } }
+  input { name { mvVertIn } type { FLOAT_MATRIX_ENV } }
+
+  input { name { pastIn } type { FLOAT_MATRIX_ENV } }
+
+  output { name { output } type { FLOAT_MATRIX_ENV } }
+
+  defstate {
+    name { BlockSize }
+    type { int }
+    default { 8 }
+    desc { Size of blocks on which to do inverse motion comp. }
+  }
+
+  ////// CODE.
+  hinclude { "Matrix.h", "Error.h" }
+
+  method {
+    name { doInvMC }
+    type { "void" }
+    access { private }
+    arglist { "(FloatMatrix& out, const FloatMatrix& prev, const FloatMatrix& diff, const FloatMatrix& horzImg, const FloatMatrix& vertImg, const int width, const int height, const int blocksize)" }
+    code {
+      int ii, jj;
+      int count = 0;
+      for(ii = 0; ii < height; ii += blocksize) {
+	for(jj = 0; jj < width; jj += blocksize) {
+	  char horz = (char)horzImg.entry(count);
+	  char vert = (char)vertImg.entry(count);
+	  if(BlockIsLost(diff, ii, jj, blocksize, width)) {
+	    DoLostBlock(out, prev, horz, vert, 
+			ii, jj, blocksize, width);
+	  } else {
+	    DoOneBlock(out, prev, diff, horz, vert, 
+		       ii, jj, blocksize, width);
+	  }
+	  count++;
 	}
+      }
+    }
+  } // end doInvMC()
 
-
-//////// I/O AND STATES.
-	input {		name { diffIn }	type { message } }
-	input {		name { pastIn }	type { message } }
-	input {		name { mvIn }	type { message } }
-	output {	name { output }	type { message } }
-
-
-////// CODE.
-	hinclude { "GrayImage.h", "MVImage.h", "Error.h" }
-
-	method {
-		// Return 1 if all inputs are read ok. Return 0 if this is an
-		// intraframe-coded input, i.e. size of mvImage is 0 OR
-		// pastImage is a NULL Message. Handle the ERROR if diffImage or
-		// mvImage is of incorrect type.
-		name { otherInputs }
-		type { "int" }
-		arglist { "(const GrayImage** pi, const MVImage** mi, Envelope& pEnvp, Envelope& mEnvp)" }
-		access { private }
-		code {
-			(pastIn%0).getMessage(pEnvp);
-			(mvIn%0).getMessage(mEnvp);
-
-			if (badType(*this, mEnvp, "MVImage")) { return 0; }
-			*mi = (const MVImage*) mEnvp.myData();
-			if (!(**mi).retSize()) { return 0; }
-
-			if (pEnvp.typeCheck("GrayImage")) {
-				*pi = (const GrayImage*) pEnvp.myData();
-				return 1;
-			}
-			return 0;
-		}
-	} // end otherInputs()
-
-
-	method {
-		name { doInvMC }
-		type { "void" }
-		access { private }
-		arglist { "(unsigned char* out, unsigned const char* prev, unsigned const char* diff, const char* horz, const char* vert, const int width, const int height, const int blocksize)" }
-		code {
-			int ii, jj;
-			for(ii = 0; ii < height; ii += blocksize) {
-				for(jj = 0; jj < width; jj += blocksize) {
-					if(BlockIsLost(diff, ii, jj, blocksize, width)) {
-						DoLostBlock(out, prev, *horz, *vert, ii,
-								jj, blocksize, width);
-					} else {
-						DoOneBlock(out, prev, diff, *horz, *vert, ii,
-								jj, blocksize, width);
-					}
-					horz++; vert++;
-			}	}
-		}
-	} // end doInvMC()
-
-	virtual method {
-		name { BlockIsLost }
-		access { protected }
-		arglist{ "(unsigned const char* ptr, const int ii, const int jj, const int blocksize, const int width)" }
-		type { "int" }
-		code {
-			int i, j, indx;
-			for(i = 0; i < blocksize; i++) {
-				indx = jj + (i+ii)*width;
-				for(j = 0; j < blocksize; j++) {
-					if (ptr[indx + j] != (unsigned char) 0) {
-						return 0;
-			}	}	}
-			return 1;
-		}
+  virtual method {
+    name { BlockIsLost }
+    access { protected }
+    arglist{ "(const FloatMatrix& ptr, const int ii, const int jj, const int blocksize, const int width)" }
+    type { "int" }
+    code {
+      int i, j, indx;
+      for(i = 0; i < blocksize; i++) {
+	indx = jj + (i+ii)*width;
+	for(j = 0; j < blocksize; j++) {
+	  if (ptr.entry(indx + j) != 0) {
+	    return 0;
+	  }
 	}
+      }
+      return 1;
+    }
+  }
 
-	virtual method {
-		name { DoOneBlock }
-		type { "void" }
-		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, unsigned const char* diff, const char horz, const char vert, const int ii, const int jj, const int blocksize, const int width)" }
-		code {
-			int i, j, index, mcindex;
-			for(i = 0; i < blocksize; i++) {
-				index = jj + (i+ii)*width;
-// NOTE THE MINUS '-' SIGNS BELOW. These are because the
-// motion vector points FROM the old block TO the current.
-				mcindex = index - int(horz) - (width * int(vert));
-				for(j = 0; j < blocksize; j++) {
-					out[index+j] =
-							quant(diff[index+j], prev[mcindex+j]);
-			}	}
-		}
-	} // end DoOneBlock{}
+  virtual method {
+    name { DoOneBlock }
+    type { "void" }
+    access { protected }
+    arglist { "(FloatMatrix& out, const FloatMatrix& prev, const FloatMatrix& diff, const char horz, const char vert, const int ii, const int jj, const int blocksize, const int width)" }
+    code {
+      int i, j, index, mcindex;
+      for(i = 0; i < blocksize; i++) {
+	index = jj + (i+ii)*width;
+	// NOTE THE MINUS '-' SIGNS BELOW. These are because the
+	// motion vector points FROM the old block TO the current.
+	mcindex = index - int(horz) - (width * int(vert));
+	for(j = 0; j < blocksize; j++) {
+	  out.entry(index+j) = 
+	        quant(int(diff.entry(index+j)), int(prev.entry(mcindex+j)));
+	}
+      }
+    }
+  } // end DoOneBlock{}
 
-	virtual method {
-		name { DoLostBlock }
-		type { "void" }
-		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, const char horz, const char vert, const int ii, const int jj, const int blocksize, const int width)" }
-		code {
-			int i, j, index, mcindex;
-			for(i = 0; i < blocksize; i++) {
-				index = jj + (i+ii)*width;
-// NOTE THE MINUS '-' SIGNS BELOW. These are because the
-// motion vector points FROM the old block TO the current.
-				mcindex = index - int(horz) - (width * int(vert));
-				for(j = 0; j < blocksize; j++) {
-					out[index+j] = prev[mcindex+j];
-			}	}
-		}
-	} // end DoLostBlock{}
+  virtual method {
+    name { DoLostBlock }
+    type { "void" }
+    access { protected }
+    arglist { "(FloatMatrix& out, const FloatMatrix& prev, const char horz, const char vert, const int ii, const int jj, const int blocksize, const int width)" }
+    code {
+      int i, j, index, mcindex;
+      for(i = 0; i < blocksize; i++) {
+	index = jj + (i+ii)*width;
+	// NOTE THE MINUS '-' SIGNS BELOW. These are because the
+	// motion vector points FROM the old block TO the current.
+	mcindex = index - int(horz) - (width * int(vert));
+	for(j = 0; j < blocksize; j++) {
+	  out.entry(index+j) = prev.entry(mcindex+j);
+	}
+      }
+    }
+  } // end DoLostBlock{}
 
 // See SDFMotionCmp::quant()
 // That function divides the true difference by 2 so it will fit into
@@ -150,57 +142,65 @@ write the result to 'output'.
 			else { return((unsigned char) f); }
 	}	}
 
-	method {
-		name { sizesMatch }
-		type { "int" }
-		access { private }
-		arglist { "(const GrayImage* im1, const GrayImage* im2, const MVImage* imm)" }
-		code {
-			int w = im1->retWidth();
-			int h = im1->retHeight();
-			int retval = (w == im2->retWidth());
-			retval &= (h == im2->retHeight());
-			int bs = imm->retBlockSize();
-			retval &= (w == bs*(w/bs));
-			retval &= (h == bs*(h/bs));
-			return(retval);
-		}
-	}
+  method {
+    name { sizesMatch }
+    type { "int" }
+    access { private }
+    arglist { "(const FloatMatrix& im1, const FloatMatrix& im2, const FloatMatrix& mvH, const FloatMatrix& mvV)" }
+    code {
+      int w = im1.numCols();
+      int h = im1.numRows();
+      int retval = (w == im2.numCols());
+      retval &= (h == im2.numRows());
 
-	go {
-// Read data from inputs and initialize if this is the a resync.
-		Envelope difEnvp, pastEnvp, mvEnvp;
-		const GrayImage* diffImg;
-		const GrayImage* pastImg;
-		const MVImage* mvImg;
+      int bs = int(BlockSize);
+      retval &= (w == bs*mvH.numCols());
+      retval &= (h == bs*mvH.numRows());
+      retval &= (w == bs*mvV.numCols());
+      retval &= (h == bs*mvV.numRows());
 
-		(diffIn%0).getMessage(difEnvp);
-		TYPE_CHECK(difEnvp, "GrayImage");
-		diffImg = (const GrayImage*) difEnvp.myData();
+      return(retval);
+    }
+  }
 
-// Handle resynchronization inputs.
-		if (!otherInputs(&pastImg, &mvImg, pastEnvp, mvEnvp)) {
-			output%0 << difEnvp;
-			return;
-		}
+  go {
+  // Read data from inputs and initialize
+    Envelope difEnvp, pastEnvp;
+    (diffIn%0).getMessage(difEnvp);
+    (pastIn%0).getMessage(pastEnvp);
+    const FloatMatrix& diffImg = *(const FloatMatrix *)difEnvp.myData();
+    const FloatMatrix& pastImg = *(const FloatMatrix *)pastEnvp.myData();
 
-		if(!sizesMatch(diffImg, pastImg, mvImg)) {
-			Error::abortRun(*this, "Size mismatch");
-			return;
-		}
+    Envelope mvHorzEnvp,mvVertEnvp;
+    (mvHorzIn%0).getMessage(mvHorzEnvp);
+    (mvVertIn%0).getMessage(mvVertEnvp);
+    const FloatMatrix& mvHorzImg = *(const FloatMatrix *)mvHorzEnvp.myData();
+    const FloatMatrix& mvVertImg = *(const FloatMatrix *)mvVertEnvp.myData();
+     
+    // Handle the first input image.
+    if ( pastEnvp.empty()  ||
+	 mvHorzImg.numRows()*mvHorzImg.numCols() == 0  ||
+	 mvVertImg.numRows()*mvVertImg.numCols() == 0  ) {
+      output%0 << difEnvp;
+      return;
+    }
 
-// If we reached here, we have a motion-compensated image.
-// Create output image. Call clone(), which is virtual, so we preserve
-// type and state info from the input difference image.
-// Use clone(int) rather than clone() to avoid copying data.
-		GrayImage* outImage = (GrayImage*) diffImg->clone(1);
+    if(!sizesMatch(diffImg, pastImg, mvHorzImg, mvVertImg)) {
+      Error::abortRun(*this, "Size mismatch");
+      return;
+    }
 
-// Do the inverse motion compensation and send output.
-		doInvMC(outImage->retData(), pastImg->constData(),
-				diffImg->constData(), mvImg->constHorz(),
-				mvImg->constVert(), diffImg->retWidth(),
-				diffImg->retHeight(), mvImg->retBlockSize());
+    // If we reached here, we have a motion-compensated image.
+    // Create output image. 
+    int height = diffImg.numRows();
+    int width  = diffImg.numCols();
+    LOG_NEW;
+    FloatMatrix& outImage = *(new FloatMatrix(height,width));
 
-		Envelope outEnvp(*outImage); output%0 << outEnvp;
-	} // end go{}
+    // Do the inverse motion compensation and send output.
+    doInvMC(outImage, pastImg, diffImg, mvHorzImg,
+	    mvVertImg, width, height, int(BlockSize));
+
+    output%0 << outImage;
+  } // end go{}
 } // end defstar { MotionCmpInv }

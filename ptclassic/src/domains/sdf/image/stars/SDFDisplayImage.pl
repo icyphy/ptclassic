@@ -4,14 +4,15 @@ defstar {
 	version		{ $Id$ }
 	author		{ Joe Buck, Paul Haskell, and Brian Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Accept a black-and-white input GrayImage and generate output in PGM format.
+Accept a black-and-white input grayimage represented by a float matrix 
+and generate output in PGM format.
 Send the output to a user-specified command (by default, "xv" is used).
 
 The user can set the root filename of the displayed image (which will
@@ -27,10 +28,11 @@ complete filename of the displayed image.
 }
 
 	ccinclude {
-		"GrayImage.h" , <std.h> , <stdio.h>, "Error.h", "StringList.h"
+		"Matrix.h" , <std.h> , <stdio.h>, "Error.h", "StringList.h"
 	}
 
-	input { name { inData } type { message } }
+	input { name { dataInput } type { FLOAT_MATRIX_ENV } }
+        input { name { frameIdInput } type {int} }
 
 	defstate {
 		name { command }
@@ -52,17 +54,24 @@ complete filename of the displayed image.
 		default { "n" }
 		desc { If 'y' or 'Y', then save the file }
 	}
-
 	go {
 		// Read data from input.
-		Envelope env;
-		(inData%0).getMessage(env);
-		TYPE_CHECK(env, "GrayImage");
-		const GrayImage* image = (const GrayImage*) env.myData();
-		if (image->fragmented() || image->processed()) {
-		  Error::abortRun(*this,
-			"Cannot display fragmented or processed image.");
-		  return;
+                Envelope pkt;
+                (dataInput%0).getMessage(pkt);
+                const FloatMatrix& matrix = *(const FloatMatrix*)pkt.myData();
+
+		int height = matrix.numRows();
+		int width  = matrix.numCols();
+
+		// Create an array to read into image data.
+		unsigned char* data = (unsigned char*) new char[height*width];
+
+		for (int i=0; i<height*width ; i++) {
+			if (matrix.entry(i) < 0)
+				data[i] = 0;
+			else if(matrix.entry(i) > 255)
+				data[i] = 255;
+			else data[i] = int(matrix.entry(i)); // convert to int
 		}
 
 		// Set filename and save values.
@@ -78,7 +87,7 @@ complete filename of the displayed image.
 		  nm = tempFileName();
 		}
 		StringList fileName = nm;
-		fileName << "." << image->retId();
+		fileName << "." << int(frameIdInput%0);
 		delete [] nm;
 
 		FILE* fptr = fopen(fileName, "w");
@@ -88,14 +97,16 @@ complete filename of the displayed image.
 		}
 
 		// Write PGM header and image data (row by row)
-		fprintf(fptr,
-			"P5\n %d %d 255\n",
-			image->retWidth(),
-			image->retHeight());
-		fwrite( image->constData(),
-			image->retWidth() * sizeof(unsigned char),
-			image->retHeight(),
+		fprintf( fptr,
+			 "P5\n %d %d 255\n",
+			 width,
+			 height );
+		fwrite( data,
+			width * sizeof(unsigned char),
+			height,
 			fptr );
+
+		delete [] data;
 		fclose(fptr);
 
 		// Display the image using an external viewer

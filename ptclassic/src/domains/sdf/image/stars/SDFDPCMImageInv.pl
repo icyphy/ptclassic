@@ -1,86 +1,99 @@
 defstar {
-	name		{ DPCMImageInv }
-	domain		{ SDF }
-	version		{ $Id$ }
-	author		{ Paul Haskell }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+  name { DPCMImageInv }
+  domain { SDF }
+  version { $Id$ }
+  author { Paul Haskell }
+  copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-	location	{ SDF image library }
-	desc {
+  }
+  location { SDF image library }
+  desc {
 This star inverts differential pulse code modulation of an image.
 If the "past" input is not a GrayImage or has size 0, pass the "diff"
 directly to the "output". Otherwise, add the "past" to the "diff"
 (with leakage factor alpha) and send the result to "output".
-	}
-	explanation {
+  }
+  explanation {
 .Id "image decompression"
 .Id "image DPCM, inverse"
 .Id "DPCM, inverse"
 .Id "inverse DPCM"
 .Id "decompression, image"
-	}
-	seealso { DPCMImage }
+  }
+  seealso { DPCMImage }
 
-	hinclude { "GrayImage.h", "Error.h" }
+  hinclude { "Matrix.h", "Error.h" }
 
 //////// I/O AND STATES.
-	input { name { diff } type { message } }
-	input { name { past } type { message } }
-	output { name { output } type { message } }
+  input { name { diff } type { FLOAT_MATRIX_ENV } }
+  input { name { past } type { FLOAT_MATRIX_ENV } }
+  output { name { output } type { FLOAT_MATRIX_ENV } }
 
-	defstate {
-		name { alpha }
-		type { float }
-		default { 1.0 }
-		desc { Leak value to aid error recovery. }
-	}
+  defstate {
+    name { alpha }
+    type { float }
+    default { 1.0 }
+    desc { Leak value to aid error recovery. }
+  }
 
-	protected { float leak; }
-	setup { leak = float(double(alpha)); }
+  protected { float leak; }
+  setup { leak = float(double(alpha)); }
 
-	inline method {
-		name { quant }
-		type { "unsigned char" }
-		access { protected }
-		arglist { "(const float dif, const float prv)" }
-		code {
-			return ((unsigned char) (dif + 0.5 + leak * (prv-128.0)));
-	}	}
+  inline method {
+    name { quant }
+    type { "unsigned char" }
+    access { protected }
+    arglist { "(const float dif, const float prv)" }
+    code {
+      return ((unsigned char) (dif + 0.5 + leak * (prv-128.0)));
+    }
+  }
 
-	go {
-// Read data from input.
-		Envelope diffEnvp, pastEnvp;
-		(diff%0).getMessage(diffEnvp);
-		(past%0).getMessage(pastEnvp);
-		TYPE_CHECK(diffEnvp, "GrayImage");
-		GrayImage* inImage = (GrayImage*) diffEnvp.writableCopy();
+  method {
+    name { inputsOk }
+    type { "int" }
+    access { private }
+    arglist { "(const FloatMatrix& one, const FloatMatrix& two)" }
+    code {
+      int retval = (one.numRows() == two.numRows());
+      retval &= (one.numCols() == two.numCols());
+      return(retval);
+    }
+  }
 
-// Resynchronize if 'past' of wrong type.
-		if(!pastEnvp.typeCheck("GrayImage")) {
-			Envelope tmp(*inImage); output%0 << tmp;
-			return;
-		}
-		const GrayImage* pastImage =
-				(const GrayImage*) pastEnvp.myData();
+  go {
+    // Read data from input.
+    Envelope diffEnvp, pastEnvp;
+    (diff%0).getMessage(diffEnvp);
+    (past%0).getMessage(pastEnvp);
+    const FloatMatrix& diffImage = *(const FloatMatrix *) diffEnvp.myData();
+    const FloatMatrix& pastImage = *(const FloatMatrix *) pastEnvp.myData();
 
-// Resynchronize because past.size() = 0
-		if (!pastImage->retSize()) {
-			Envelope tmp(*inImage); output%0 << tmp;
-			return;
-		}
+    // Resynchronize if 'past' of wrong type.
+    if (pastEnvp.empty()) {
+      output%0 << diffEnvp;
+      return;
+    }
+    
+    if(!inputsOk(diffImage, pastImage)) {
+      Error::abortRun(*this, "Problem with input images.");
+      return;
+    }
 
-		unsigned char* dif = inImage->retData();
-		unsigned const char* prev = pastImage->constData();
-		for(int travel = inImage->retWidth() * inImage->retHeight() - 1;
-				travel >= 0; travel--) {
-			dif[travel] = quant(dif[travel], prev[travel]);
-		}
+    int width = diffImage.numCols();
+    int height = diffImage.numRows();
 
-// Send the outputs on their way.
-		Envelope outEnvp(*inImage); output%0 << outEnvp;
-	}
+    LOG_NEW; FloatMatrix& outImage = *(new FloatMatrix(height,width));
+
+    for(int travel = width*height - 1; travel >= 0; travel--) {
+      outImage.entry(travel) = 
+	quant(diffImage.entry(travel), pastImage.entry(travel));
+    }
+
+    // Send the outputs on their way.
+    output%0 << outImage;
+  }
 } // end defstar { DpcmInv }
