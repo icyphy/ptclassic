@@ -110,7 +110,7 @@ body ::tycho::BuilderDialog::constructor {args} {
 	    -command "$this busy ::tycho::Builder::testDir \
             [file join $TYCHO editors visedit test]"
 
-    # If Ptolemy is present, the we can run some tests.
+    # If Ptolemy is present, then we can run some tests.
     global ptolemyfeature
     if { $ptolemyfeature(pitcl) || $ptolemyfeature(ptcl) } {
         $myMenubar addSeparator Test
@@ -125,7 +125,7 @@ body ::tycho::BuilderDialog::constructor {args} {
     }
 
     # FIXME: Should this be a preference?
-    if [file isdirectory [ file join $TYCHO adm ]] {
+    if [file writable [::tycho::Builder::getDistBuildDir]] {
         $myMenubar addMenu Distribute -underline 0
 
         $myMenubar add {Full Distribution} Distribute -underline 0 \
