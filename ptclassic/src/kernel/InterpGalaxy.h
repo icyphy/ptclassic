@@ -163,6 +163,23 @@ public:
 // This method lets us get at lower-level galaxies
 	Block* blockWithDottedName(const char* s);
 
+// Register a connection that needs to be reinitialized each time
+// initialize() is called.  Note that this is needed only if the
+// connection is created in some way that bypasses the connect
+// method here. The tag indicates what type of connection it is.
+// Use "B" for bus, "C" for ordinary, and "c" for node.
+// For "c", only the first four arguments and the 7th are needed
+// (set the 5th and 6th to zero).
+// For "C", the first 6 are needed.  For "B", all are needed.
+        void registerInit(const char* tag,
+			  const char* srcStar,
+			  const char* srcPort,
+			  const char* initDelayValues,
+			  const char* dstStar = 0,
+			  const char* dstPort = 0,
+			  const char* node = 0,
+			  const char* busWidth = 0);
+
 // class identification
 	int isA(const char*) const;
 
@@ -170,16 +187,18 @@ public:
 	~InterpGalaxy();
 
 protected:
-	// find a star porthole
+	// find a star porthole, with and without error reporting
 	PortHole* findPortHole(const char* star,const char* port);
+        PortHole* findPortHoleNE(const char* star, const char* port);
 
 	// find a star porthole or multiporthole
 	// The second of these resolves aliases
 	GenericPort* findGenPort(const char* star,const char* port);
 	GenericPort* findGenericPort(const char* star,const char* port);
 
-	// find a star multiporthole
+	// find a star multiporthole, with and without error reporting
 	MultiPortHole* findMPH(const char* star, const char* port);
+	MultiPortHole* findMPHNE(const char* star, const char* port);
 
 	// routine to reset all structures (like body of destructor)
 	void zero();
