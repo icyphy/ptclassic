@@ -58,9 +58,6 @@ public:
 	// call the begin method on the galaxy
 	/* virtual */ void begin();
 
-	// return the domain of the galaxy if it exists and "DE" otherwise
-	/* virtual */ const char* domain();
-
 protected:
 	void setup();
 
