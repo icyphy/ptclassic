@@ -40,4 +40,4 @@ powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
 panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
 
 # Temporarily notify allenh about changes to php:
-php/.* /home/allenh/bin/cvs-log $CVSROOT/CVSROOT/commitlog $USER \"%s\" \"{sVv}\"
+php/.* /home/allenh/bin/cvs-log $CVSROOT/CVSROOT/commitlog $USER \"%s\" \"%{sVv}\"
