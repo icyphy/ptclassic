@@ -47,7 +47,7 @@
 	-label "File Transfer Protocol (FTP)"
 
 ::tycho::register protocol "mailto" \
-	-class ::tycho::ResourceMailto \
+	-class ::tycho::ResourceMail \
 	-label "Mail Protocol"
 
 # FIXME: Make conditional upon presence of Java
