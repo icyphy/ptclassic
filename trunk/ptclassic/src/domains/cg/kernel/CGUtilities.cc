@@ -37,6 +37,7 @@ static const char file_id[] = "CGUtilities.cc";
 #endif
 
 #include <stdio.h>		// Pick up decl for pclose().
+#include <unistd.h>		// Pick up F_OK for access() under sun4 cfront.
 #include "pt_fstream.h"
 #include "CGUtilities.h"
 #include "StringList.h"
