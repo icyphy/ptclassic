@@ -70,6 +70,7 @@ ITCL_SRCS = \
 	HTMLText.itcl \
 	IndexBrowser.itcl \
 	ListBrowser.itcl \
+	Loader.itcl \
 	Message.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
