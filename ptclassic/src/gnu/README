@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Tue Feb 10 10:10:19 1998 by cxh]-
+-*-Mode:text-*- -[Thu May 14 15:37:30 1998 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,21 +17,13 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	gcc-2.8.0       
-	libstdc++-2.8.0
-	libg++-2.8.0
+	egcs-1.0.2
 	make-3.76.1
 
 If you obtained the hp GNU tar file, then you should also have:
         binutils-2.8.1
 	bison-1.25
 	flex-2.5.4
-
-makeinfo, the GNU documentation program is not currently part of the
-Ptolemy GNU binary distribution.
-
-makeinfo is part of the texinfo package.  texinfo is available via
-anonymous ftp at ftp.uu.net in packages/gnu.
 
 The makefile in this directory has only been tested with Solaris2.5.1
 and HPUX10.20.  It may work on other platforms, but we have
@@ -40,7 +32,8 @@ not tried.
 Versions
 --------
 	In general, you are better off using the versions above.
-	Ealier versions might work.
+	gcc-2.8.0 has problems, see $PTOLEMY/doc/release.html
+	gcc-2.7.2.2 should work, but has not been tested extensively.
 
 	Ptolemy is not very sensitive to the version of GNU make.  Any
 	recent version of GNU make should work.  
@@ -72,7 +65,7 @@ GNU make
 	
 HP
 --
-	gcc-2.8.0 needs the GNU assembler, gas, for the gcc -g option.
+	egcs needs the GNU assembler, gas, for the gcc -g option.
 	See gcc/INSTALL for details.
 
 	HPUX10.20 comes with a broken version of cc that is sufficient
@@ -118,21 +111,6 @@ HP
 	ptuser@hewlett 19% sed -V
 	GNU sed version 2.05
 
-	* The gcc-2.7.2.2 sources were patched with
-	libg++-2.7.2-hppa-gcc-fix which fixes a problem with 
-	building shared versions of libg++ and libstdc++ on the HP.
-	The patch came from
-	 ftp://ftp.cygnus.com/pub/g++/libg++-2.7.2-hppa-gcc-fix
-	
-	Without this error, you will see an error while linking
-	libstdc++.sl:
-
-	gcc -fPIC -shared -o libstdc++.sl `cat piclist` 
-	collect2: ld returned 1 exit status
-	/usr/bin/ld: Procedure labels require the P' selector - use
-		the P' selector on code symbol "L$0010" in file
-		pic/exceptioni.o
-
 Solaris
 -------
 	Solaris2.x does not come with a working compiler.  The
@@ -148,22 +126,16 @@ Solaris
 	'gcc -v' to see what version of the OS the compiler was built
 	with.
 
-	In this case, the compiler was built with solaris2.4
-	cxh@watson 80% gcc -v
-	Reading specs from /users/ptdesign/gnu/sol2/lib/gcc-lib/sparc-sun-solaris2.4/2.7.2/specs
-	gcc version 2.7.2
-	cxh@watson 81% 
+	In this case, the compiler was built with solaris2.5.1:
+cxh@carson 57% gcc -v
+Reading specs from /users/ptdesign/gnu/sol2.5/lib/gcc-lib/sparc-sun-solaris2.5.1/egcs-2.90.27/specs
+gcc version egcs-2.90.27 980315 (egcs-1.0.2 release)
+cxh@carson 58% 
 
-	Under solaris libg++-2.8.0 has a bug where /usr/ucb/ln will
-	fail:
-
-	/users/cxh/pt/obj.sol2.5/gnu/gcc/xgcc -h libg++.so.2.8.0 -shared -o libg++.so.2.8.0 `cat piclist` -lm
-	ln -s -f libg++.so.2.8.0 libg++.so
+	If you see messages like:
 	Usage: ln [-f] [-s] f1
 	       ln [-f] [-s] f1 f2
 	       ln [-f] [-s] f1 ... fn d1
-	make[2]: *** [libg++.so] Error 1
-        make[2]: Leaving directory `/export/carson/carson2/cxh/pt/obj.sol2.5/gnu/libg++/libraries/libg++'
 
 	The fix is to place /bin in your path before /usr/ucb, and 
 	then run:
@@ -180,24 +152,6 @@ checking whether setvbuf arguments are reversed... configure: error: can not run
 	If you don't have gcc, then you can try getting a prebuilt binary
 	from ftp://ptolemy.eecs.berkeley.edu/pub/gnu.  You can then rebuild
 	if necessary.
-
-SunOS4.1.3
-----------
-	While trying to install libg++-2.7.2:
-		gcc -fpic -shared -o libstdc++.so.2.7.2 `cat piclist` 
-		collect2: ld returned 4 exit status
-		ld: ../libiberty/pic/strtoul.o: can't mix pic and PIC .o
-	The fix we did in the sources was to edit libg++/config/mt-sparcpic
-	and change -fpic to -fPIC.
-
-	libg++/config/ChangeLog says:
-	> Thu Feb 15 13:07:43 1996  Ian Lance Taylor  <ian@cygnus.com>
-	> [...]
-	> * mh-sparcpic (PICFLAG): Set to -fPIC, not -fpic.
-
-	This problem is new in libg++-2.7.2.  Ptolemy0.6 was shipped with
-	libg++-2.7.1
-
 
 Linux
 -----
@@ -266,8 +220,8 @@ How to Install
 
 	2. Set your path:
 		set path = ($PTOLEMY/bin.sol2 $PTOLEMY/bin $path)
-	Note that if you are running Solaris2.x and compiling libg++-2.7.1
-	then you will need to have /bin in your path before /usr/ucb
+	Note that if you are running Solaris2.x	then you will need to
+ 	have /bin in your path before /usr/ucb 
 	(See the Solaris section above).
 	
 	3. Do the build:
