@@ -111,14 +111,13 @@ void DEScheduler :: setup () {
 	// Notify each star of the global event queue, 
 	Star* s;
 	while ((s = next++) != 0) {
-		if (strcmp (s->domain(), DEdomainName) != 0) {
-			Error::abortRun (*s, " is not a DE star");
-			return;
-		}
-		// set up the block event queue.
-		DEStar* p = (DEStar*) s;
-		p->eventQ = &eventQ;
-
+	  // The Target has already checked that all stars are allowable.
+	  // We need to initialize only those that are DE stars.
+	  if (s->isA("DEStar")) {
+	    // set up the block event queue.
+	    DEStar* p = (DEStar*) s;
+	    p->eventQ = &eventQ;
+	  }
 	}
 
 	galaxy()->initialize();
