@@ -173,6 +173,8 @@ public:
 
 	// cast to a bag (return null if not a bag)
 	virtual SDFClusterBag* asBag() { return 0;}
+	// cast to a special bag (return null even in the base bag class)
+	virtual SDFClusterBag* asSpecialBag() { return 0;}
 
 	// return some other cluster that can merge with me
 	SDFCluster* mergeCandidate();
