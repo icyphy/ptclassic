@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Wed Sep  1 08:39:39 1999 by cxh]-
+-*-Mode:text-*- -[Fri Jul 27 13:56:28 2001 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,8 +17,8 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	gcc-2.95.1
-	make-3.77
+	gcc-3.0
+	make-3.79.1
 
 If you obtained the hp GNU tar file, then you should also have:
         binutils-2.9.1
@@ -73,6 +73,41 @@ GNU make
 	all have a makefile conditional that checks the value of
 	$(USE_SHARED_LIBS).
 	
+	We had to modify make-3.79.1/Makefile.in:n
+
+
+
+
+ptuser@maury 65% diff -c Makefile.in Makefile.in.dist
+*** Makefile.in	Fri Jul 27 13:55:27 2001
+--- Makefile.in.dist	Fri Jun 23 09:35:23 2000
+***************
+*** 721,734 ****
+  maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+  
+  
+! #all-local: $(srcdir)/stamp-pot
+! #
+! #$(srcdir)/stamp-pot: $(POTFILES)
+! #	@echo "$(POTFILES)" > $@
+  
+! all-local: stamp-pot
+! 
+! stamp-pot: $(POTFILES)
+  	@echo "$(POTFILES)" > $@
+  
+  install-exec-local:
+--- 721,729 ----
+  maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+  
+  
+! all-local: $(srcdir)/stamp-pot
+  
+! $(srcdir)/stamp-pot: $(POTFILES)
+  	@echo "$(POTFILES)" > $@
+  
+  install-exec-local:
+
 HP
 --
 	egcs needs the GNU assembler, gas, for the gcc -g option.
