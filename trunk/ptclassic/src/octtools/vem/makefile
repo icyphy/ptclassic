@@ -120,13 +120,20 @@ vem: include $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/main version.o)
-	$(CLINKER) $(LINKFLAGS) -o vem main/version.o $(OBJECTS) $(VEMLIBS)
+	$(CLINKER) $(LINKFLAGS) -o $@ main/version.o $(OBJECTS) $(VEMLIBS)
 
 vem.debug: include $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/main version.o)
-	$(CLINKER) $(LINKFLAGS_D) -o vem.debug main/version.o \
+	$(CLINKER) $(LINKFLAGS_D) -o $@ main/version.o \
+		$(OBJECTS) $(VEMLIBS)
+
+vem.debug.purify: include $(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+		VPATH=../../../../src/octtools/vem/main version.o)
+	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) -o $@ main/version.o \
 		$(OBJECTS) $(VEMLIBS)
 
 # This target makes sure all the makefiles are current
