@@ -308,3 +308,6 @@ sccsinfo:
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
+
+# Mathematica settings
+include $(ROOT)/mk/mathematica.mk
