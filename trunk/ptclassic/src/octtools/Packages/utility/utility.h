@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-+ 
+ 
 #ifdef PTSVR4
 /* 
 * Yeah, this is ugly, but it's the only way to keep
