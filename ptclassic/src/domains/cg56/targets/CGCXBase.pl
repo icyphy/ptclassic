@@ -63,6 +63,7 @@ codeblock(startDSP) {
 }
 
 initCode {
+	addInclude("<unistd.h>");
         addCompileOption("-I$S56DSP/include");
         addLinkOption("-L$S56DSP/lib -l$QCKMON");
 	addInclude("<sys/types.h>");
@@ -72,7 +73,7 @@ initCode {
 	addInclude("<qckMon.h>");
 	addInclude("<stdio.h>");
 	addGlobal("    QckMon* $val(S56XFilePrefix)_dsp;","dsp");
-	// We do this here so that all the stars can do there initialization
+	// We do this here so that all the stars can do their initialization
 	// before starting the DSP
        	char *s56path = getenv("S56DSP");
 	int newmemory = FALSE;
