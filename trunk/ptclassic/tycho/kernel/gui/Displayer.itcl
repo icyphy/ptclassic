@@ -284,6 +284,7 @@ body ::tycho::Displayer::constructor {args} {
             -underline 0
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     if $itk_option(-master) {
         set closetxt "Quit"

@@ -159,6 +159,29 @@ configbody ::tycho::PreferenceEditor::preferences {
 		    pack $itk_interior.$entry.button -side left
 		    grid $itk_component($entry) -column 1 -row $i -sticky ew
 		}
+		"data" {
+		    itk_component add $entry {
+			frame $itk_interior.$entry
+		    } {
+			keep -background -cursor
+		    }
+		    itk_component add $entry.button {
+			button $itk_interior.$entry.button -text "Open" \
+				-command "::tycho::PreferenceEditor .$entry \
+				-preferences \
+				  [preference get $group $preference]" \
+				  -pady 0
+		    } {
+			keep -background -cursor
+		    }
+		    pack $itk_interior.$entry.button -side left
+		    grid $itk_component($entry) -column 1 -row $i -sticky ew
+		}
+		default {
+		    # FIXME
+		    puts "Unknown entry type \
+			    \"[preference cget $group $preference -type]\""
+		}
 	    }
 	    incr i
 	}
@@ -181,6 +204,7 @@ body ::tycho::PreferenceEditor::constructor {args} {
 
     # Initialise options
     eval itk_initialize $args
+#    eval preference exclude $this $args
 }
 
 

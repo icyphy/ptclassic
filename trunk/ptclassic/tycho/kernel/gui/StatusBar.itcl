@@ -206,6 +206,7 @@ body ::tycho::StatusBar::constructor {args} {
 
     # Initialise options
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # EXPERIMENTAL
     bind $itk_component(packing) <B1-Motion> {puts "%X %Y"}

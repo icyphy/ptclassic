@@ -275,6 +275,9 @@ class ::tycho::Edit {
     # the "current" mark sits.
     protected method getTaggedText {tag}
 
+    # Access the "edittext" preferences
+    protected method preference {mode args}
+
     # Reset the undo buffer.
     protected method resetUndo {} {}
 
@@ -642,9 +645,10 @@ body ::tycho::Edit::constructor {args} {
     insertInDisplay
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Subscribe to the preference set
-    preference subscribe textedit $this \
+    preference subscribe $this \
 	    -textfont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \
@@ -654,7 +658,7 @@ body ::tycho::Edit::constructor {args} {
 	    -selectcolor selectColor
 
     set maxLineLength \
-            [preference get textedit fillColumn]
+            [preference get fillColumn]
 
     # Create and configure the context-sensitive popup menu
     # FIXME: Is this the right place for this code?
@@ -672,14 +676,6 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Button-3> {%Q contextmenu post %X %Y}
 }
 
-###################################################################
-#### destructor
-# Unsubscribe from all preferences
-#
-body ::tycho::Edit::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe textedit $this
-}
 
 ##########################################################################
 ##########################################################################
@@ -748,7 +744,7 @@ body ::tycho::Edit::closeParen {closeparen} {
     if {$start != ""} {
 	$itk_component(text) tag add paren $start $end
 	$itk_component(text) tag configure paren \
-		-background [preference get textedit parenColor]
+		-background [preference get parenColor]
 	after 1000 "catch {$itk_component(text) tag delete paren}"
     }
 }
@@ -1490,7 +1486,7 @@ body ::tycho::Edit::paste {} {
 body ::tycho::Edit::queryFillColumn {} {
     set maxLineLength \
             [safeEval ::tycho::queryinfo "Right column for text fill:" \
-            [preference get textedit fillColumn] \
+            [preference get fillColumn] \
             15]
 }
 
@@ -1655,7 +1651,7 @@ body ::tycho::Edit::seeFragment {point} {
     if {$sidx != {} && $eidx != {}} {
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget -background \
-                [preference get textedit targetColor]
+                [preference get targetColor]
 	$text tag configure hypertarget -foreground black
 
         # The moving of the insertion index is also delayed in case the
@@ -1975,6 +1971,16 @@ body ::tycho::Edit::getTaggedText {tag} {
     } {
 	return {}
     }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "edittext" preferences.
+#
+body ::tycho::Edit::preference {mode args} {
+    eval ::preference $mode "edittext" $args
 }
 
 #####################################################################

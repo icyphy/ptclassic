@@ -168,6 +168,12 @@ class ::tycho::HTML {
     proc render {obj {html {}}} {}
 
     ###################################################################
+    ####                     protected methods                     ####
+
+    # Access the "viewhtml" preferences
+    protected method preference {mode args}
+
+    ###################################################################
     ####                      protected variables                  ####
 
     # Indicate whether a rendering operation is in progress.
@@ -252,9 +258,10 @@ body ::tycho::HTML::constructor {args} {
     set stateArrayName HM$text
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Subscribe to the preference set
-    preference subscribe htmlview $this \
+    preference subscribe $this \
 	    -textfont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \
@@ -292,7 +299,7 @@ body ::tycho::HTML::constructor {args} {
         }
     }
 
-    set sizeName($this) [preference get htmlview fontSize]
+    set sizeName($this) [preference get fontSize]
     configure -size $sizes($sizeName($this))
 
     # Modify the menu commands appropriately.
@@ -335,9 +342,6 @@ body ::tycho::HTML::constructor {args} {
 ###################################################################
 #
 body ::tycho::HTML::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe htmlview $this
-
     stopRendering
     if [sourcewinIsMine] {
 	# Schedule this for after destruction is complete because the
@@ -585,7 +589,7 @@ body ::tycho::HTML::seeFragment {point} {
     if {$sidx != {} && $eidx != {}} {
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget \
-		-background [preference get htmlview targetColor]
+		-background [preference get targetColor]
 	$text tag configure hypertarget \
 		-foreground black
         # A delay seems to be needed here to ensure that the target is seen.
@@ -721,6 +725,20 @@ body ::tycho::HTML::render {obj {html {}}} {
     # $tktext configure -state disabled
 }
 
+
+#########################################################################
+#########################################################################
+####                    protected methods                            ####
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "viewhtml" preferences.
+#
+body ::tycho::HTML::preference {mode args} {
+    eval ::preference $mode "viewhtml" $args
+}
 
 #########################################################################
 #########################################################################
@@ -1177,7 +1195,7 @@ proc HMtag_tcl {win param text} {
     set HTMLcommand [winfo command $HTML]
 
     # Set the color
-    set color [preference get htmlview tclColor]
+    set color [::preference get viewhtml tclColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
 	    "uplevel #0 $HTMLcommand execTcl; break"
@@ -1298,7 +1316,7 @@ proc HMwent_to {win where {count 0} {color {}}} {
     }
 
     if {$color == {}} {
-        set color [preference get htmlview targetColor]
+        set color [::preference get viewhtml targetColor]
     }
 
     # Temporarily change the background color

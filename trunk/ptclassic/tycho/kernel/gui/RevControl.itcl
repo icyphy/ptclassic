@@ -102,6 +102,9 @@ class ::tycho::RevControl {
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {} {return 0}
 
+    # Access the "revcontrol" preferences
+    protected method preference {mode args}
+
     # Update the history information, if it is on display.
     protected method updateHistory {}
 
@@ -158,6 +161,7 @@ configbody ::tycho::RevControl::object {
 #
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
     addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"
@@ -303,7 +307,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	return
     }
 
-    set pref [preference get revcontrol revisionControlTypes]
+    set pref [::preference get revcontrol revisionControlTypes]
     set revclass [whichRevClass $editorObj]
 
     # If the file is not under revision control, query the user
@@ -345,7 +349,7 @@ body ::tycho::RevControl::whichRevClass {obj} {
     if {![$obj isa ::tycho::File]} {
         error "Cannot check revision control for $obj: Not a ::tycho::File."
     }
-    set pref [preference get revcontrol revisionControlTypes]
+    set pref [::preference get revcontrol revisionControlTypes]
     set filename [$obj filename]
     set revclass {}
 
@@ -380,6 +384,16 @@ body ::tycho::RevControl::enableButton {button} {
 	default checkout
 	$itk_component(bbox) buttonconfigure checkin -state disabled
     }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "revcontrol" preferences.
+#
+body ::tycho::RevControl::preference {mode args} {
+    eval ::preference $mode "revcontrol" $args
 }
 
 #####################################################################

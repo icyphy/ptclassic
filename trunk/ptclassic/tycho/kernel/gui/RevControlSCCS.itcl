@@ -97,6 +97,8 @@ class ::tycho::RevControlSCCS {
 #
 body ::tycho::RevControlSCCS::constructor {args} {
     eval itk_initialize $args 
+    eval preference exclude $this $args
+
     configure -text "SCCS revision control for: $file"
 }
 
@@ -191,7 +193,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
     }   
 
     # Run sccs admin
-    set opts [preference get sccs adminOptions]
+    set opts [preference get sccsAdminOptions]
     if [catch {eval exec sccs admin $opts $basefile} output] {
 	error "Failed to run 'sccs admin $opts $basefile:\
 		$output."
@@ -375,10 +377,8 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
     }
     $text insert insert "\n\n"
 
-    set commentColor \
-	    [preference get sccs commentColor]
-    set versionColor \
-	    [preference get sccs versionColor]
+    set commentColor [preference get commentColor]
+    set versionColor [preference get versionColor]
 
     # Skip first two lines
     foreach line [lrange $lines 2 end] {

@@ -118,23 +118,16 @@ body ::tycho::ColorBrowser::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 
-    # Subscribe to the same preference set as an index browser
-    preference subscribe indexbrowser $this \
-	    -width width \
-	    -height height
+    # Subscribe to the same preferences as an index browser
+    preference subscribe $this \
+	    -width  indexBrowserWidth \
+	    -height indexBrowserHeight
 
     setContents
 }
 
-###################################################################
-#### destructor
-# Unsubscribe from all preferences
-#
-body ::tycho::ColorBrowser::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe indexbrowser $this
-}
 
     ##################################################################
     ##################################################################

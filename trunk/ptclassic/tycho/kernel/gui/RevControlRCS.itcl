@@ -94,6 +94,8 @@ class ::tycho::RevControlRCS {
 #
 body ::tycho::RevControlRCS::constructor {args} {
     eval itk_initialize $args 
+    eval preference exclude $this $args
+
     configure -text "RCS revision control for: $file"
 }
 
@@ -385,10 +387,8 @@ body ::tycho::RevControlRCS::parseHistory {history text} {
 	$text insert insert "The file is currently checked out\n\n"
     }
 
-    set commentColor \
-	    [preference get revcontrol commentColor]
-    set versionColor \
-	    [preference get revcontrol versionColor]
+    set commentColor [preference get commentColor]
+    set versionColor [preference get versionColor]
 
     foreach line [lrange $lines 0 end] {
 	if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
