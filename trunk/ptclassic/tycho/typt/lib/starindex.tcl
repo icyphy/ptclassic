@@ -161,6 +161,7 @@ proc starindex_SwapPairsInList { facetpairs } {
 # use "catch" in case the exec command causes an error
 proc starindex_FindOctFacetDirs { pathname } {
   puts -nonewline "Finding Oct Facet Directories . . . "
+  flush stdout
   # recursively find all schematic sub-directories (success if retval is 0)
   set retval [catch "exec find $pathname -follow -name \"schematic\" -print" \
                     schematicFiles]
