@@ -10,18 +10,16 @@ $Id$
  Date of creation: 10/17/91
  Revisions:
 
- Implementation for FixState and FixArrayState classes.
+ Implementation for FixState class.
 
 **************************************************************************/
 
 
-#include "FixState.h"
-#include "FixArrayState.h"
-
 #ifdef __GNUG__
 #pragma implementation
-#pragma implementation "FixArrayState.h"
 #endif
+
+#include "FixState.h"
 
 void FixState :: initialize() {
 	FloatState :: initialize();
@@ -33,7 +31,7 @@ void FixState :: initialize() {
 ISA_FUNC(FixState,FloatState);
 
 
-static long scaleUpArgument(double val, int nBits) {
+long scaleUpArgument(double val, int nBits) {
 	// clip argument
 	if (val > 1.0) val = 1.0;
 	if (val < -1.0) val = 1.0;
@@ -56,24 +54,14 @@ long FixState::bitVal(int nBits) {
 	return scaleUpArgument(*this,nBits);
 }
 
-static FixState proto_1;
-static KnownState entry_1(proto_1,"FIX");
-
-void FixArrayState :: initialize() {
-	FloatArrayState :: initialize();
-	for (int i = 0; i < size(); i++) {
-		if (val[i] < -1.0 || val[i] > 1.0) {
-			parseError ("value(s) out of range for a fixed-point State");
-			return;
-		}
-	}
+const char* FixState :: type() const {
+	return "FIX";
 }
 
-long FixArrayState :: bitVal(int el, int nBits) {
-	return scaleUpArgument(val[el], nBits);
+State* FixState :: clone() const {
+	return new FixState;
 }
 
-ISA_FUNC(FixArrayState,FloatArrayState);
+static FixState proto;
+static KnownState entry(proto,"FIX");
 
-static FixArrayState proto_2;
-static KnownState entry_2(proto_2,"FIXARRAY");
