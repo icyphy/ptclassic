@@ -89,6 +89,9 @@ public:
 
 	// as EventHorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return ToEventHorizon::allocateGeodesic(); }
 };
 
 class XXXfromUniversal : public FromEventHorizon, public OutXXXPort
@@ -107,6 +110,9 @@ public:
 
 	// as EventHorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return FromEventHorizon::allocateGeodesic(); }
 };
 
 #endif
