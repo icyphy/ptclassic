@@ -12,6 +12,7 @@
 #include "type.h"
 #include "NamedObj.h"
 #include "ComplexSubset.h"
+#include "Attribute.h"
 
 /**************************************************************************
 Version identification:
@@ -34,6 +35,7 @@ class State;
 
 class Tokenizer;
 
+// token types: from state parser
 const int T_EOF = 257;
 const int T_ERROR = 258;
 const int T_Float = 259;
@@ -41,6 +43,7 @@ const int T_Int = 260;
 const int T_ID = 261;
 const int T_STRING = 262;
 
+// token, from state parser.
 class ParseToken {
 public:
 	int tok;
@@ -59,31 +62,46 @@ public:
 // class State
 ////////////////////////////////////////////
 
-// attribute bit definitions
-const unsigned int A_CONSTANT = 1;
-const unsigned int A_SETTABLE = 2;
-const unsigned int A_NONCONSTANT = 0;
-const unsigned int A_NONSETTABLE = 0;
-const unsigned int A_DEFAULT = A_CONSTANT | A_SETTABLE;
+// attribute bit definitions.  The kernel reserves the next three bits
+// (4, 8, 16) for future expansion; domains may use higher-order bits
+// for their own purposes (example: code generation domains do this).
+
+const bitWord AB_CONST = 1;
+const bitWord AB_SETTABLE = 2;
+const bitWord AB_DEFAULT = AB_CONST | AB_SETTABLE;
+
+// standard attributes for all domains.
+extern const Attribute A_CONSTANT;	// value never changed by star exec.
+extern const Attribute A_SETTABLE;	// user may set this state
+extern const Attribute A_NONCONSTANT;	// value changed by star exec.
+extern const Attribute A_NONSETTABLE;	// user may not set this state
 
 class State : public NamedObj
 {
 public:
 
         // Constructor
-        State()  {initValue = 0;}
+        State() : initValue(0), attributeBits(AB_DEFAULT) {}
 
 	// Method setting internal data  in the State
         State& setState(const char* stateName, 
 			Block* parent ,
 			const char* ivalue,
-			const char* desc = NULL,
-			unsigned int attr = A_DEFAULT) {
+			const char* desc = NULL) {
                		 	descriptor = desc;
 				setNameParent(stateName, parent);
 				initValue = ivalue;
-				attributeBits = attr;
 				return *this;
+        }
+
+	// same, but this one also sets attributes.
+        State& setState(const char* stateName, 
+			Block* parent ,
+			const char* ivalue,
+			const char* desc,
+			const Attribute& attr) {
+				attributeBits = attr.eval(AB_DEFAULT);
+				return setState(stateName,parent,ivalue,desc);
         }
 
 	// set the initial value
@@ -117,15 +135,16 @@ public:
 	StringList printVerbose() const;
 
 	// attributes
-	unsigned int attributes() const { return attributeBits;}
+	bitWord attributes() const { return attributeBits;}
 
-	unsigned int setAttributes(unsigned int newBits) {
-		return attributeBits |= newBits;
+	bitWord setAttributes(const Attribute& attr) {
+		return attributeBits = attr.eval(attributeBits);
 	}
 
-	unsigned int clearAttributes(unsigned int newBits) {
-		return attributeBits &= ~newBits;
+	bitWord clearAttributes(const Attribute& attr) {
+		return attributeBits = attr.clearAttribs(attributeBits);
 	}
+
 protected:
 	// string used to set initial value by initialize()
 	const char* initValue;
@@ -152,7 +171,7 @@ protected:
 	ParseToken evalFloatFactor(Tokenizer& lexer);
 
 private:
-	unsigned int attributeBits;
+	bitWord attributeBits;
 };
 
 ///////////////////////////////////////////

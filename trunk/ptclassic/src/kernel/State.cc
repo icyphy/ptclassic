@@ -47,6 +47,13 @@ inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
 }
 
+// Attributes
+// standard attributes.
+extern const Attribute A_CONSTANT(AB_CONST,0);
+extern const Attribute A_SETTABLE(AB_SETTABLE,0);
+extern const Attribute A_NONCONSTANT(0,AB_CONST);
+extern const Attribute A_NONSETTABLE(0,AB_SETTABLE);
+
 ParseToken State :: pushback;
 
 // The state tokenizer: return next token when parsing a state
