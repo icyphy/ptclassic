@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Cluster.h"
 #include "CGTarget.h"
 #include "CGStar.h"
 #include "CGPortHole.h"
