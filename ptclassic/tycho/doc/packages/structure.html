@@ -2,16 +2,6 @@
 <html>
 <head>
 <title>Package structure</title>
-
-<STYLE type="text/css">
-	P.expl {
-	font-size: small
-	}
-	P.file {
-	font-weight: bold;
-	font-size: small
-	}
-</STYLE>
 </head>
 <body bgcolor="#faf0e6">
 <h1>Package structure</a></h1>
@@ -19,172 +9,110 @@
 
 The standard Tycho package structure is as follows.  The installation
 and configuration scripts assume this structure. A package called 
-<b>pakman</b> is being developed that will make construction of
+<code>pakman</code> is being developed that will make construction of
 a new package with this structure automatic.
 
-<table valign=top cellpadding=4>
-<tr valign=top>
-<td><P class="file">
-<I>package</I>/
+<dl>
 
-<td><P class="file">
-makefile
-<br>
-README.txt
-<br>
-<I>package</I>.tcl
-<br>
-pkgIndex.tcl
-<br>
-....tcl
-<br>
-....itcl
+<dt> <CODE><I>package</I>/</CODE>
+<dd> <dl>
+     <dt> <CODE>makefile</CODE>
+	<br>
+	<CODE>README.txt</CODE>
+	<br>
+	<CODE><I>package</I>.tcl</CODE>
+	<br>
+	<CODE>pkgIndex.tcl</CODE>
+	<br>
+	<CODE>*.tcl</CODE>
+	<br>
+	<CODE>*.itcl</CODE>
 
-<td>
-<td>
- <P class="expl">Makefile, package index and load files, and Tcl and
-[incr Tcl] source files
+	<dd>  Makefile, package index and load files, and Tcl and
+	      [incr Tcl] source files
+	<dl>
+	<dt> <CODE>adm/</CODE>
+	<dd> The admin directory, containing release
+	notes, announcements, and so on. This directory is not
+	included in the distribution itself.
 
-<tr valign=top>
-<td>
-<td><P class="file">
-adm/
+		<dl>
+		<dt> <CODE>dist/</CODE>
+		<dd> The distribution directory. The contents of this
+		directory are automatically generated.
+		</dl>
+	<dt> <CODE>bin/</CODE>
+	<dd> Shell scripts that start <code>tclsh</code>, <code>itclsh</code>,
+	<code>wish</code>, or <code>itkwish</code>, load the package, and
+	do something useful.
 
-<td><P class="file">
-....
+	<dt> <CODE>demo/</CODE>
+	<dd> Demo directory, consisting of a collection of scripts
+	that each run a demo of the package.
 
-<td>
+	<dl>
+	<dt> <CODE>makefile</CODE>
+	<dd> 
+	</dl>
 
- <P class="expl">The admin directory, containing release
-notes, announcements, and so on. This directory is not
-put into the distribution.
 
-<tr valign=top>
-<td>
-<td><P class="file">
+	<dt> <CODE>doc/</CODE>
+	<dd> 
+		<dl>
+		<dt> <CODE>makefile</CODE>
+		<br>
+		<CODE>index.html</CODE>
+		<br>
+		<CODE>*.html</CODE>
+		<dd> Package documentation.  Documentation can be split
+		into subdirectories
+	
+		<dt> <CODE>codeDoc/</CODE>
+		<dd> Automatically-generated documentation.
 
-<td><P class="file">
-dist/
+		<dt> <CODE>internals/</CODE>
+		<dd> Programmer's guides (optional).
 
-<td>
+		<dt> usersGuides/
+		<dd> User's guides, for packages that supply
+		user interfaces (optional).
 
- <P class="expl">The distribution directory. The contents of this
-directory are automatically generated.
 
-<tr valign=top>
-<td>
-<td><P class="file">
-bin/
-<td><P class="file">
-makefile
-<br>
-....
+		</dl>
 
-<td>
- <P class="expl">Shell scripts that start <B>tclsh</B>, <B>itclsh</B>,
-<B>wish</B>, or <B>itkwish</B>, load the package, and
-do something useful.
+	<dt> <CODE>img/</CODE>
+	<dd> Image files used in the documentation
+	<dl>
+	<dt> <CODE>*.gif</CODE>
+	<br> <CODE>makefile</CODE>
+	</dl>
 
-<tr valign=top>
-<td>
-<td><P class="file">
-demo/
 
-<td><P class="file">
-makefile
-<br>
-....
+	<dt> <CODE>src/</CODE>
+	<dd> Source files used for building binary extensions.
+	The structure of this directory hasn't been decided.
+	<dl>
+	<dt> <CODE>makefile</CODE>
+	</dl>
 
-<td>
+	<dt> <CODE>test/</CODE>
+	<dd> 
+	<dl>
+	<dt> <CODE>all.itcl</CODE>
+	 <br><CODE>alltests.itcl</CODE>
+	<dd> Files automatically generated from <CODE>makefile</CODE> rules.
 
- <P class="expl">Demo directory, consisting of a collection of scripts
-that each run a demo of the package.
+	<dt> <CODE>makefile</CODE>
+	<br> <CODE>*.tcl</CODE>
+	<br> <CODE>*.itcl</CODE> <p>
 
-<tr valign=top>
-<td>
-<td><P class="file">
-doc/
-<td><P class="file">
-makefile
-<br>
-index.html
-<br>
-....html
 
-<td>
- <P class="expl">Package documentation. Documentation can be
-split into sub-directories.
+	</dl>
 
-<tr>
-<td>
-<td>
-<td><P class="file">
-codeDoc/
-<td>
- <P class="expl">Automatically-generated documentation.
-
-<tr>
-<td>
-<td>
-<td><P class="file">
-internals/
-<td>
- <P class="expl">Programmer's guides (optional).
-
-<tr>
-<td>
-<td>
-<td><P class="file">
-usersGuides/
-<td>
- <P class="expl">User's guides, for packages that supply
-user interfaces (optional).
-
-<tr>
-<td>
-<td>
-<td><P class="file">
-img/
-<td>
- <P class="expl">Image files used in the documentation
-
-<tr valign=top>
-<td>
-<td><P class="file">
-img/
-<td><P class="file">
-....gif
-
-<td>
- <P class="expl">Image files used by the package.
-
-<tr valign=top>
-<td>
-<td><P class="file">
-src/
-<td><P class="file">
-makefile
-<br>
-...
-
-<td>
- <P class="expl">Source files used for building binary extensions.
-The structure of this directory hasn't been decided.
-
-<tr valign=top>
-<td>
-<td><P class="file">
-test/
-<td><P class="file">
-makefile
-<br>
-....tcl
-
-<td>
- <P class="expl">Test scripts.
-
-</table>
-
+	</dl>
+     </dl>
+</menu>
+</dl>
  <P>
 <HR>
 Copyright &#169 1998, The Regents of the University of California.
