@@ -105,6 +105,8 @@ int SRScheduler::run()
 	  numKnown += ((SRStar *) s)->knownOutputs();
 	}
 
+	cout << "Completed iteration, " << numKnown << " outputs known\n";
+
       } while ( numKnown != lastNumKnown );     
 
       // Finish the instant by calling each star's tick() method
@@ -114,6 +116,8 @@ int SRScheduler::run()
       while ( ( s = nextStar++ ) != 0 ) {
 	((SRStar *) s)->tick();
       }
+
+      cout << "Completed instant\n";
 
       // Advance to the next tick
 
