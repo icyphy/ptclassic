@@ -330,7 +330,7 @@ if ( ! $?selectPtolemy && $?selectJava) then
 	else
 		set javabinary = java
 	endif
-	set prog = (jdb -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho Tycho)
+	set prog = ($javabinary -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho Tycho)
 
 	echo "Starting: $prog"
 endif
