@@ -699,7 +699,7 @@ GenHeading ()
    fprintf (CFD, "#include <sys/types.h>\n");
    fprintf (CFD, "#include <sys/times.h>\n\n");
    fprintf (CFD, "#ifdef HIGHLEVEL\n");
-   fprintf (CFD, "#include \"highlevel.h\"\n");
+   fprintf (CFD, "#include \"/users/ptdesign/vendors/silage_support/include/highlevel.h\"\n");
    fprintf (CFD, "#endif\n");
    fprintf (CFD, "#ifdef BITTRUE\n");
    fprintf (CFD, "#include \"bittrue.h\"\n");
@@ -737,7 +737,7 @@ else
    GenPtInputHeaders(bittrue,tmp_thor);
    GenPtOutputHeaders(bittrue,tmp_thor);
    fprintf (CFD, "\tccinclude { <stdio.h>, <math.h>, <sys/types.h>, <sys/times.h>, \"Fix.h\" } \n");
-   fprintf (CFD, "\thinclude { \"bittrue.h\" } \n");
+   fprintf (CFD, "\thinclude { \"/users/ptdesign/vendors/silage_support/include/bittrue.h\" } \n");
    if(bittrue) GenPtProtectedVars();
    fprintf (CFD, "\tcode { \n");
    fprintf (CFD, "#define at(d, i, m)  ((i+d)%%m)\n");
