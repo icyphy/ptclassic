@@ -5,6 +5,7 @@ static const char file_id[] = "<T>State.cc";
 
 #include <std.h>
 #include <math.h>
+#include <stdio.h>        // Needed for FILE below
 #include "<T>State.h"
 #include "Tokenizer.h"
 #include "miscFuncs.h"
