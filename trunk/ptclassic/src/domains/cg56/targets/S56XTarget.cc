@@ -96,12 +96,11 @@ int S56XTarget :: compileCode() {
 	return TRUE;
 }
 
-void S56XTarget :: writeCode(const char* name) {
-	if (name == NULL) name = filePrefix;
+void S56XTarget :: writeCode() {
 	/*
 	 * generate .aio data file
 	 */
-	if (!genFile(aioCmds, name, ".aio")) {
+	if (!writeFile(aioCmds,".aio")) {
 	    Error::abortRun(*this,"Aio data file write failed");
 	    return;
 	}
@@ -113,22 +112,19 @@ void S56XTarget :: writeCode(const char* name) {
 	StringList realcmds = "#!/bin/sh\n";
 	realcmds << headerComment("# ");
 	if ( monprog==NULL || *monprog=='\0' ) {
-	    realcmds << "load_s56x" << " '" << name << ".lod'\n" << shellCmds;
+	    realcmds << "load_s56x" << " '" << filePrefix << ".lod'\n" << shellCmds;
 	} else {
-	    realcmds << monprog << " '" << name << ".lod'\n" << shellCmds;
+	    realcmds << monprog << " '" << filePrefix << ".lod'\n" << shellCmds;
 	}
-	if (!genFile(realcmds,name)) {
+	if (!writeFile(realcmds,"",FALSE,0755)) {
 	    Error::abortRun(*this,"Shell command file write failed");
 	    return;
 	}
-	// make script executable
-	// The chmod is bogus.  Should pass a mode to genFile when creating
-	chmod(fullFileName(name),0755);
 
 	/*
 	 * generate the .asm file (and optionally display it)
 	 */
-	CG56Target :: writeCode(name);
+	CG56Target :: writeCode();
 }
 
 int S56XTarget :: runCode() {

@@ -63,8 +63,7 @@ public:
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 	// allocate the shared memory
-	/* virtual */ 
-	void prepareCodeGen();
+	/*virtual*/ void prepareCodeGen();
 
 protected:
 	/*virtual*/ void setup();
@@ -83,8 +82,6 @@ protected:
 	ProcMemory* sharedMem;
 
 private:
-	// state to disallow compiling code.
-	IntState doCompile;
 	StringState sMemMap;
 };
 
