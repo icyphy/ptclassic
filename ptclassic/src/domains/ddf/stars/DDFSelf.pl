@@ -144,7 +144,7 @@ At compile time, this star appears to just be an atomic star.
 		}
 
 		// delete all
-		delete myGal;
+		LOG_DEL; delete myGal;
 	}
 }
 
