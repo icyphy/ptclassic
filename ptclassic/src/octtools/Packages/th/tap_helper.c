@@ -179,7 +179,9 @@ int  thGetLayerLayerPropInt( layer1, layer2, name )
 	errRaise( TH_PKG_NAME, 1, "wrong type for prop %s of layer %s",
 		 name, layer1->contents.layer.name );
     }
-    if ( verbose ) printf( "%s %s %g\n", ohFormatName(layer1), name, prop.value.integer );
+    if ( verbose )
+      printf( "%s %s %g\n", ohFormatName(layer1), name,
+	     (double)prop.value.integer );
     return prop.value.integer;
 }
 
@@ -288,7 +290,7 @@ static char* nextWord( fp )
 #define MAX_LAYERS 8
 
 
-int thReadFile( filename )
+void thReadFile( filename )
     char* filename;
 {
     FILE *fp;
