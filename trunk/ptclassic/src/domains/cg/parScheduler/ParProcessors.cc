@@ -397,10 +397,15 @@ StringList ParProcessors :: displaySubUnivs() {
 		generate code
  ****************************************************************/
 
-void ParProcessors :: generateCode() {
-	// step 1. targetPtr assignement
+void ParProcessors :: prepareCodeGen() {
 	for (int i = 0; i < numProcs; i++) {
-		mtarget->addProcessorCode(i,
-			(const char*) getProc(i)->generateCode());
+		getProc(i)->prepareCodeGen();
+	}
+}		
+
+void ParProcessors :: generateCode() {
+	for (int i = 0; i < numProcs; i++) {
+		StringList& foo = getProc(i)->generateCode();
+		mtarget->addProcessorCode(i, (const char*) foo);
 	}
 }		

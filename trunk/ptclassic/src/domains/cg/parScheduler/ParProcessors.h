@@ -31,7 +31,6 @@ class ParGraph;
 // A class for managing the parallel processor schedules.
 
 class ParProcessors {
-
 public:
 	// constructor
 	ParProcessors(int, MultiTarget*);
@@ -67,6 +66,9 @@ public:
 	// create sub galaxies for each processor: code generation.
 	void createSubGals();
 	StringList displaySubUnivs();
+
+	// prepare code generation
+	void prepareCodeGen();
 
 	// code generation
 	void generateCode();
