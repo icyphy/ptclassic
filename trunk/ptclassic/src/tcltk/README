@@ -1,0 +1,37 @@
+-*-Mode: text-*- -[Sun Jan 23 11:29:40 1994 by cxh]-
+
+src/tcl/README
+
+This directory contains the source to tcl/tk for the Ptolemy
+release. If you have the Ptolemy binary release, you need not install
+tcl/tk from this directory.
+
+Probably the only time you would want to build from this directory is
+if you were doing a Ptolemy port to a new platform.
+
+Most of the sources in this directory are available via anonymous ftp from
+ftp.cs.berkeley.edu in ucb/tcl/.  The TkPixmap is available via
+anonymous ftp from harbor.ecn.purdue.edu in pub/tcl/extensions
+
+Versions
+--------
+	Ptolemy 0.5 uses tcl7.3 and tk3.6.
+	tk3.6 has had the following patches applied:
+		tk3.6p1 patch
+	TkPixmap3.6a is necessary for xpole, and to get the Mr Ptolemy
+	face in the welcome window.
+
+GNU make
+--------
+	If you are compiling from scratch, make sure that you are
+	using GNU make.  Not all versions of make can deal with VPATH.
+	You should install the GNU tools first, then make sure that
+	$PTOLEMY/bin.$ARCH is in your path.
+
+DEC
+---
+	If you are compiling on a DEC mips, then you might not have
+	strdup().  xpm requires strdup.
+	If your system does not have strdup(), use the following:
+	make XPM_DEFINES="-DZPIPE -DNEED_STRDUP"
+	
