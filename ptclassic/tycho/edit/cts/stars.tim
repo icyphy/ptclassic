@@ -54,7 +54,7 @@ group sink -label {Sink Stars} {
 group dynamic -label {Dynamic Stars} {
     star integral \
             -class {IntegraRK4} \
-            -label {Integral} \
+            -label {Integrator} \
             -icon {edit/cts/icons.tim#dynamic.integral} {
         attribute InitState -default "0.0" -label "Initial State" -type number
         port input -datatype float
