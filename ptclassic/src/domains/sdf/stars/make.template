@@ -101,6 +101,7 @@ PL_SRCS= \
  SDFSub.pl \
  SDFSubCx.pl \
  SDFSubFix.pl \
+ SDFSubInt.pl \
  SDFTable.pl \
  SDFTableCx.pl \
  SDFTableInt.pl \
