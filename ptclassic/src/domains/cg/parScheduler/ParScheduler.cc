@@ -2,7 +2,7 @@ static const char file_id[] = "ParScheduler.cc";
 
 /*****************************************************************
 Version identification:
-@(#)ParScheduler.cc	1.3	7/15/92
+$Id$
 
 Copyright (c) 1991 The Regents of the University of California.
                         All Rights Reserved.
