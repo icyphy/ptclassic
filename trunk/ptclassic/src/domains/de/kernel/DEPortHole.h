@@ -226,14 +226,14 @@ public:
 
 class InDEMPHIter : public MPHIter {
 public:
-	InDEMPHIter(const MultiInDEPort& mph) : MPHIter(mph) {}
+	InDEMPHIter(MultiInDEPort& mph) : MPHIter(mph) {}
 	InDEPort* next() { return (InDEPort*) MPHIter::next();}
 	InDEPort* operator++() { return next();}
 };
 
 class OutDEMPHIter : public MPHIter {
 public:
-	OutDEMPHIter(const MultiOutDEPort& mph) : MPHIter(mph) {}
+	OutDEMPHIter(MultiOutDEPort& mph) : MPHIter(mph) {}
 	OutDEPort* next() { return (OutDEPort*) MPHIter::next();}
 	OutDEPort* operator++() { return next();}
 };
