@@ -142,8 +142,8 @@ int PTcl::delUniv (const char* nm) {
 
 // Return a "usage" error
 int PTcl::usage(const char* msg) {
-	Tcl_AppendResult(interp,"incorrect usage: should be \"",msg,"\"",
-			(char*)NULL);
+	Tcl_AppendResult(interp, "incorrect usage: should be \"",msg,"\"",
+			 (char*)NULL);
 	return TCL_ERROR;
 }
 
@@ -153,19 +153,19 @@ int PTcl::staticResult(const char* value) {
 	return TCL_OK;
 }
 
-// Return a StringList result.
-// We arrange for Tcl to copy the value.
-int PTcl::result(StringList& value) {
-	const char* str = value;
+// Return a const char* or StringList result to Tcl.
+// We arrange for Tcl to copy the value in case a literal string or a
+// StringList is passed (because the StringList might be deleted afterwards)
+int PTcl::result(const char *str) {
 	// VOLATILE will tell Tcl to copy the value, so it is safe
 	// if the StringList is deleted soon.
-	Tcl_SetResult(interp, (char*)str,TCL_VOLATILE);
+	Tcl_SetResult(interp, (char*)str, TCL_VOLATILE);
 	return TCL_OK;
 }
 
 void PTcl::addResult(const char* value) {
 	// cast-away-const needed to interface with Tcl.
-	Tcl_AppendElement(interp,(char*)value);
+	Tcl_AppendElement(interp, (char*)value);
 }
 
 // If name is blank or "this", return current galaxy.  "target"
