@@ -6,48 +6,34 @@
 <body bgcolor=#faf0e6>
 <H1>Ptolemy NT Bugs</H1>
 
-<H2>Tcl bugs</H2>
+<h2>Compilation bugs</h2>
 <MENU>
-<LI> Under Cygnus GNU-win32, the Tcl core source code must be modified.
-
-<LI> The port currently does not work with Itcl
-</MENU>
-
-<H2>Build Bugs</H2>
-<MENU>
-<LI> If you see lines like:
-<PRE>
-common.mk (80) no %
-</PRE>
-Then try calling <CODE>make</CODE> with
-<PRE>
-make PTLANG=$PTOLEMY/bin.nt4/ptlang
-</PRE>
-
-
-<LI> While compiling, there are lots of warnings about
-<PRE>
-src/kernel/PortHole.h:221: warning base class `class NamedObjList'
-has a non-virtual destructor.
-</PRE>
-The fix is to use the <CODE>-Wno-non-virtual-dtor</CODE> option.
-
-
 <LI> Compiling with GNU-win32 is slow.  This is because there is
 a layer of indirection between the 
+
+<li> The Microsoft Visual C++ port (<CODE>PTARCH == nt4.vc</CODE>)
+is unlikely to build and has not been tested.
 </MENU>
 
 <H2>Ptcl bugs</H2>
 <MENU>
-<LI> The Matlab and Mathematica stars do not work
+<LI> The Matlab and Mathematica stars do not work.
 </MENU>
+
+<h2>Vem bugs</h2>
+<menu>
+
+<li> The tests in <CODE>$PTOLEMY/src/octtools/Packages/oct</CODE> fail.
+<li> <CODE>pigi</CODE> starts up, but fails to run simulations.
+</menu>
+
 
  <HR>
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
 <A HREF="ptnt.html">Back to Ptolemy NT Overview</A> -
 <A HREF="ptntinstall.html">Forward to Ptolemy NT Installation</A>
 <HR>
-Copyright &#169 1997, The Regents of the University of California.
+Copyright &#169 1997-%Q%, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,
