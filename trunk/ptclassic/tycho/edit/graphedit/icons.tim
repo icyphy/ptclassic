@@ -46,7 +46,7 @@ group arithmetic {
         port in1 Terminal -anchor {50 0} -direction {0 -1} \
                 -type input -style blob -fill red
         port out Terminal -anchor {100 50} -direction {1 0} \
-                -type output -style arrow -fill blue
+                -type output -style arrow -fill green
     }
 }
  
@@ -129,5 +129,21 @@ group miscellaneous {
         port out1 Terminal -anchor {50 100} -direction {0 1} \
                 -type output -style doublearrow -fill blue
     }
-}
 
+    icon Bar IconFrame {
+        -label {The Bar Icon}
+        -height 60
+        -width 60
+        -text Bar
+        -anchor nw
+        -graphics {
+            oval 10 10 90 90 -fill yellow
+        }
+        -color blue
+        
+        port in Terminal -anchor {100 50} -direction {1 0} \
+                -type input -style blob
+        port out Terminal -anchor {0 50} -direction {-1 0} \
+                -type output -style arrow -fill blue
+    }
+}
