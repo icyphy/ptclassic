@@ -330,6 +330,12 @@ MultiPortHole& MultiPortHole :: setPort(const char* s,
         return *this;
 }
 
+// Expand aliases.  This isn't inlinable by G++ since it's recursive
+GenericPort& GenericPort :: realPort() {
+	if (alias == NULL) return *this;
+	return alias->realPort();
+}
+
 PortHole& MultiPortHole :: newPort() {
         PortHole* newport = new PortHole;
         ports.put(*newport);
