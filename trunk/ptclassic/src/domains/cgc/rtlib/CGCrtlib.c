@@ -63,6 +63,101 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* global flag for overflow detection */
 int fix_overflow = 0;
 
+/* shift the fix right by n bits (or left if n < 0) with sign preservation.
+   returns 1 if overflow occurs, but does not assign a maximum value then */
+int _pFIX_ArithmeticShiftRight(ref, n)
+FIX_WORD *ref;
+int n;
+{
+    fix t;
+    register FIX_WORD lsbs, msbs;
+    register int i, sign = FIX_Sign(ref);
+
+    /* this routine is the central part of all fixed point operations
+       so it is attempted to make this routine as fast as possible */
+
+
+    if (n > 0) {	    /* shift right */
+
+	if (n >= FIX_BITS_PER_WORD) {
+
+	    register int offset = (n + FIX_BITS_PER_WORD-1) / FIX_BITS_PER_WORD - 1;
+
+	    /* set highest bits in order to preserve sign */
+	    register FIX_WORD mask = sign ? ~0 : 0;
+
+	    for (i=FIX_WORDS_PER_FIX; i--;)
+		t[i] = (i < offset) ? mask : ref[i-offset];
+
+	    n    -= offset * FIX_BITS_PER_WORD;
+	    msbs  = sign ? ~((1 << (FIX_BITS_PER_WORD-n))-1) : 0;
+
+	    for (i=offset; i<FIX_WORDS_PER_FIX; i++) {
+		lsbs = t[i] >> n;
+		ref[i] = lsbs + msbs;
+		msbs = t[i] << (FIX_BITS_PER_WORD-n);
+	    }
+
+	} else {
+
+	    /* acceleration for 0 offsets */
+	    msbs = sign ? ~((1 << (FIX_BITS_PER_WORD-n))-1) : 0;
+
+	    for (i=0; i<FIX_WORDS_PER_FIX; i++) {
+		lsbs = msbs + (ref[i] >> n);
+		msbs = ref[i] << (FIX_BITS_PER_WORD-n);
+		ref[i] = lsbs;
+	    }
+	}
+    }
+
+    else if (n < 0) {	    /* shift left */
+
+	if ((n = -n) >= FIX_BITS_PER_WORD) {
+
+	    register int offset = (n + FIX_BITS_PER_WORD-1) / FIX_BITS_PER_WORD - 1;
+
+	    /* set highest bits in order to preserve sign */
+	    register FIX_WORD mask = sign ? ~0 : 0;
+
+	    /* check for overflow */
+	    for (i=offset; i--;)
+		if (ref[i] != mask)  return 1;
+
+	    for (i=FIX_WORDS_PER_FIX; i--;)
+		t[i] = (i < (FIX_WORDS_PER_FIX-offset)) ? ref[i+offset] : 0;
+
+	    n   -= offset * FIX_BITS_PER_WORD;
+	    lsbs = 0;
+
+	    for (i=FIX_WORDS_PER_FIX; i--;) {
+		msbs = t[i] << n;
+		ref[i] = lsbs + msbs;
+		lsbs = t[i] >> (FIX_BITS_PER_WORD - n);
+	    }
+
+	} else {
+
+	    /* acceleration for 0 offsets */
+	    lsbs = 0;
+
+	    for (i=FIX_WORDS_PER_FIX; i--;) {
+		msbs = lsbs + (ref[i] << n);
+		lsbs = ref[i] >> (FIX_BITS_PER_WORD - n);
+		ref[i] = msbs;
+	    }
+	}
+
+	/* return 1 on overflow;
+	   note that no maximum value is assigned to the fix */
+
+	return (lsbs != (sign ? ((1 << n)-1) : 0)) ||
+		     (FIX_Sign(ref) != sign);
+    }
+
+    /* no overflow */
+    return 0;
+}
 
 /* assign src to dst; return 1 on overflow, else 0 */
 int FIX_Assign(dst_l,dst_i,dst_r, src_l,src_i,src_r)
@@ -111,7 +206,7 @@ register double value;
 	    pFIX_TwoRaisedTo(FIX_BITS_PER_WORD-dst_l-1);
 
     /* check for overflows */
-    if (overflow = (value >= word_scale/2)) {
+    if ((overflow = (value >= word_scale/2))) {
 
 	/* set dst to maximum value */
 	FIX_AssignMaxValue(dst_l,dst_i,dst_r, sign);
@@ -144,14 +239,14 @@ int sign;
 {
     if (sign) {		/* assign (negative) minimum value */
 	int i;
-	*dst_r++ = (FIX_WORD) (1 << FIX_BITS_PER_WORD-1);
+	*dst_r++ = (FIX_WORD) (1 << (FIX_BITS_PER_WORD-1));
 
 	for (i = FIX_WORDS_PER_FIX; --i;)
 	    *dst_r++ = (FIX_WORD) 0;
 
     } else {		/* assign (positive) maxmimum value */
 	int i,j;
-	*dst_r++ = (FIX_WORD)((1 << FIX_BITS_PER_WORD-1)-1);
+	*dst_r++ = (FIX_WORD)((1 << (FIX_BITS_PER_WORD-1))-1);
 	i = FIX_Words(dst_l);
 	j = FIX_WORDS_PER_FIX - i;
 
@@ -179,7 +274,7 @@ register FIX_WORD *src_r;
 
 	register double word_scale = (double) (1L << FIX_BITS_PER_WORD);
 
-	if (sign = FIX_Sign(src_r))
+	if ((sign = FIX_Sign(src_r)))
 	    pFIX_Complement(tp=t,src_r);
        else tp = src_r;
 
@@ -209,7 +304,6 @@ int src_l,src_i;
 FIX_WORD *src_r;
 {
     register int i = 0;
-    register FIX_WORD *tp;
 
     /* Sign extend if negative */
     if (FIX_Sign(src_r)) {
@@ -221,7 +315,7 @@ FIX_WORD *src_r;
 	src_i -= FIX_BITS_PER_WORD;
     }
 
-    return (i << src_i) + (*src_r >> FIX_BITS_PER_WORD-src_i);
+    return (i << src_i) + (*src_r >> (FIX_BITS_PER_WORD-src_i));
 }
 
 /* compute `dst = op1 + op2' */
@@ -268,7 +362,7 @@ FIX_WORD *dst_r,*op1_r,*op2_r;
 	}
 
 	/* apply rounding */
-	mask = 1 << FIX_BITS_PER_WORD - (dst_l % FIX_BITS_PER_WORD);
+	mask = 1 << (FIX_BITS_PER_WORD - (dst_l % FIX_BITS_PER_WORD));
 
 	sum   = carry + (FIX_DWORD)op1_bits[i] + (FIX_DWORD)op2_bits[i] + (mask >> 1);
 	carry = sum >> FIX_BITS_PER_WORD;
@@ -345,7 +439,7 @@ FIX_WORD *dst_r,*op1_r,*op2_r;
 	}
 
 	/* apply rounding */
-	mask = 1 << FIX_BITS_PER_WORD - (dst_l % FIX_BITS_PER_WORD);
+	mask = 1 << (FIX_BITS_PER_WORD - (dst_l % FIX_BITS_PER_WORD));
 
 	sum   = carry + (FIX_DWORD)op1_bits[i] - (FIX_DWORD)op2_bits[i] + (mask >> 1);
 	carry = sum >> FIX_BITS_PER_WORD;
@@ -392,11 +486,11 @@ FIX_WORD *dst_r,*op1_r,*op2_r;
     if (pFIX_IsZero(op1_r) || pFIX_IsZero(op2_r))
 	return FIX_SetToZero(dst_l,dst_i,dst_r), 0;
 
-    if (sign1 = FIX_Sign(op1_r))
+    if ((sign1 = FIX_Sign(op1_r)))
 	pFIX_Complement(op1_bits,op1_r);
    else FIX_Copy(op1_bits, op1_r);
 
-    if (sign2 = FIX_Sign(op2_r))
+    if ((sign2 = FIX_Sign(op2_r)))
 	pFIX_Complement(op2_bits,op2_r);
    else FIX_Copy(op2_bits, op2_r);
 
@@ -438,7 +532,7 @@ FIX_WORD *dst_r,*op1_r,*op2_r;
 
 		if (k < FIX_WORDS_PER_FIX)
 		    dst_r[k] = (FIX_WORD)(b += dst_r[k]);
-		carry = (a >> FIX_BITS_PER_WORD-1) + (b >> FIX_BITS_PER_WORD);
+		carry = (a >> (FIX_BITS_PER_WORD-1)) + (b >> FIX_BITS_PER_WORD);
 	    }
 	}
 
@@ -616,11 +710,11 @@ FIX_WORD *op1_r,*op2_r;
 /* shift the fix right by n bits (or left if n < 0) with sign preservation.
    returns 1 if overflow occurs */
 
+
 int FIX_ArithmeticShiftRight(dst_l,dst_i,dst_r, src_l,src_i,src_r, n)
-int dst_l,dst_i, src_l,src_i;
+int dst_l,dst_i, src_l,src_i,n;
 FIX_WORD *dst_r, *src_r;
 {
-    fix t_bits;
     int sign = FIX_Sign(src_r);
 
     FIX_Copy(dst_r,src_r);
@@ -632,103 +726,6 @@ FIX_WORD *dst_r, *src_r;
     pFIX_ApplyMask(dst_l,dst_i,dst_r);
     return 0;
 }
-
-/* shift the fix right by n bits (or left if n < 0) with sign preservation.
-   returns 1 if overflow occurs, but does not assign a maximum value then */
-int _pFIX_ArithmeticShiftRight(ref, n)
-FIX_WORD *ref;
-int n;
-{
-    fix t;
-    register FIX_WORD lsbs, msbs;
-    register int i, sign = FIX_Sign(ref);
-
-    /* this routine is the central part of all fixed point operations
-       so it is attempted to make this routine as fast as possible */
-
-
-    if (n > 0) {	    /* shift right */
-
-	if (n >= FIX_BITS_PER_WORD) {
-
-	    register int offset = (n + FIX_BITS_PER_WORD-1) / FIX_BITS_PER_WORD - 1;
-
-	    /* set highest bits in order to preserve sign */
-	    register FIX_WORD mask = sign ? ~0 : 0;
-
-	    for (i=FIX_WORDS_PER_FIX; i--;)
-		t[i] = (i < offset) ? mask : ref[i-offset];
-
-	    n    -= offset * FIX_BITS_PER_WORD;
-	    msbs  = sign ? ~((1 << FIX_BITS_PER_WORD-n)-1) : 0;
-
-	    for (i=offset; i<FIX_WORDS_PER_FIX; i++) {
-		lsbs = t[i] >> n;
-		ref[i] = lsbs + msbs;
-		msbs = t[i] << FIX_BITS_PER_WORD-n;
-	    }
-
-	} else {
-
-	    /* acceleration for 0 offsets */
-	    msbs = sign ? ~((1 << FIX_BITS_PER_WORD-n)-1) : 0;
-
-	    for (i=0; i<FIX_WORDS_PER_FIX; i++) {
-		lsbs = msbs + (ref[i] >> n);
-		msbs = ref[i] << FIX_BITS_PER_WORD-n;
-		ref[i] = lsbs;
-	    }
-	}
-    }
-
-    else if (n < 0) {	    /* shift left */
-
-	if ((n = -n) >= FIX_BITS_PER_WORD) {
-
-	    register int offset = (n + FIX_BITS_PER_WORD-1) / FIX_BITS_PER_WORD - 1;
-
-	    /* set highest bits in order to preserve sign */
-	    register FIX_WORD mask = sign ? ~0 : 0;
-
-	    /* check for overflow */
-	    for (i=offset; i--;)
-		if (ref[i] != mask)  return 1;
-
-	    for (i=FIX_WORDS_PER_FIX; i--;)
-		t[i] = (i < (FIX_WORDS_PER_FIX-offset)) ? ref[i+offset] : 0;
-
-	    n   -= offset * FIX_BITS_PER_WORD;
-	    lsbs = 0;
-
-	    for (i=FIX_WORDS_PER_FIX; i--;) {
-		msbs = t[i] << n;
-		ref[i] = lsbs + msbs;
-		lsbs = t[i] >> (FIX_BITS_PER_WORD - n);
-	    }
-
-	} else {
-
-	    /* acceleration for 0 offsets */
-	    lsbs = 0;
-
-	    for (i=FIX_WORDS_PER_FIX; i--;) {
-		msbs = lsbs + (ref[i] << n);
-		lsbs = ref[i] >> (FIX_BITS_PER_WORD - n);
-		ref[i] = msbs;
-	    }
-	}
-
-	/* return 1 on overflow;
-	   note that no maximum value is assigned to the fix */
-
-	return (lsbs != (sign ? ((1 << n)-1) : 0)) ||
-		     (FIX_Sign(ref) != sign);
-    }
-
-    /* no overflow */
-    return 0;
-}
-
 
 /* store the complement of the bit pattern referenced through src_r
    in dst_r;  len is the total word length of the pattern */
@@ -762,14 +759,15 @@ FIX_WORD *var_r;
 	    return;
 
     /* clear unoccupied words */
-    memset(&var_r[nwords], 0, (FIX_WORDS_PER_FIX-nwords) * sizeof(*var_r));
+    memset((char*)&var_r[nwords], 0, 
+	   (FIX_WORDS_PER_FIX-nwords) * sizeof(*var_r));
 
     m = var_l % FIX_BITS_PER_WORD;
     var_r += nwords-1;
 
     /* apply rounding */
     {
-	register FIX_DWORD mask = 1 << FIX_BITS_PER_WORD-m;
+	register FIX_DWORD mask = 1 << (FIX_BITS_PER_WORD-m);
 	register FIX_DWORD sum  = *var_r + (mask >> 1);
 	register FIX_WORD  carry;
 
@@ -777,7 +775,7 @@ FIX_WORD *var_r;
 	*var_r = (FIX_WORD)(sum & ~(mask-1));
 
 	while (--nwords) {
-	    if (carry = (FIX_WORD)(sum >> FIX_BITS_PER_WORD)) {
+	    if ((carry = (FIX_WORD)(sum >> FIX_BITS_PER_WORD))) {
 		sum = carry + (FIX_DWORD)*--var_r;
 		*var_r = (FIX_WORD)sum;
 	    } else
