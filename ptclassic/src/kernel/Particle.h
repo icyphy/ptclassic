@@ -71,7 +71,7 @@ public:
 	virtual StringList print () const = 0;
 
 	// Zero or initialize this Particle
-	virtual void initialize() = 0;
+	virtual Particle& initialize() = 0;
 
 	// Load the Particle with data
 	virtual void operator << (int) = 0;
@@ -152,7 +152,7 @@ public:
 	IntParticle() {data=0;}
 
 	// Wash the Particle
-	void initialize();
+	Particle& initialize();
 
 	// Load up with data
 	void operator << (int i);
@@ -199,7 +199,7 @@ public:
         FloatParticle() {data=0.0;}
  
         // Initialize the Particle
-        void initialize();
+        Particle& initialize();
  
         // Load up with data
         void operator << (int i);
@@ -248,7 +248,7 @@ public:
         ComplexParticle();
 
         // Initialize the Particle
-        void initialize();
+        Particle& initialize();
 
         // Load up with data
         void operator << (int i);
@@ -299,7 +299,7 @@ public:
         FixParticle(int len, int intBits, FixParticle& x);
 
         // Wash the Particle
-        void initialize();
+        Particle& initialize();
 
         // Load up with data
         void operator << (int i);
