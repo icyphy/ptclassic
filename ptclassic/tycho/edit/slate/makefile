@@ -57,6 +57,7 @@ ITCL_SRCS = \
 	IncrCanvas.itcl \
 	LabelledFrame.itcl \
 	LabelledItem.itcl \
+	LabelledLine.itcl \
 	LabelledOval.itcl \
 	LabelledRect.itcl \
 	Node.itcl \
