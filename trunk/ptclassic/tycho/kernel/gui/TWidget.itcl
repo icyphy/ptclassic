@@ -299,11 +299,14 @@ body ::tycho::TWidget::setClipboard {text} {
 #
 body ::tycho::TWidget::configureContextMenu {} {
     # Clear the menu
-    contextmenu clear {Open documentation}
+    contextmenu clear
+
+    contextmenu add [list Guide to the [info class] widget] \
+	    -command "$this help"
 
     # Entries for developer information
     # FIXME: could be much more useful
-    contextmenu add {Name of this widget...} -command \
+    contextmenu add [list Name of this [info class] widget...] -command \
 	    "::tycho::post $this"
 }
 
