@@ -75,6 +75,9 @@ class ::tycho::JavaDocSys {
     # Parse the data within a class definition
     private method parseClass {class body}
 
+    # Parse the data relating to a method or variable declaration
+    private method parseVarMeth {class protection modifiers others comment}
+
     # Parse the extends/implements portion of the class definition
     private method parseExtends {class extends}
 
@@ -492,10 +495,7 @@ body ::tycho::JavaDocSys::parseClass {class body} {
     set modifiers {}
     set others {}
     set inComment 0
-    set inVariable 0
-    set willVariable 0
-    set inMethod 0
-    set willMethod 0
+    set inVarMeth 0
     set inStatic 0
     set inSynchronized 0
 
@@ -542,26 +542,13 @@ body ::tycho::JavaDocSys::parseClass {class body} {
                 continue
             }
         }
-        if {$inVariable} {
+        if {$inVarMeth} {
             # Default protection is package
             if {$lastProtection == {}} {
                 set lastProtection package
             }
-            addVariable $class $lastProtection $modifiers $others $lastComment
-            set inVariable 0
-            set lastProtection {}
-            set modifiers {}
-            set others {}
-            set lastComment {}
-            # present construct is valid, continue
-        }
-        if {$inMethod} {
-            # Default protection is package
-            if {$lastProtection == {}} {
-                set lastProtection package
-            }
-            addMethod $class $lastProtection $modifiers $others $lastComment
-            set inMethod 0
+            parseVarMeth $class $lastProtection $modifiers $others $lastComment
+            set inVarMeth 0
             set lastProtection {}
             set modifiers {}
             set others {}
@@ -590,14 +577,12 @@ body ::tycho::JavaDocSys::parseClass {class body} {
             }
             "abstract" {
                 lappend modifiers "abstract"
-                set willMethod 2
             }
             "final" {
                 lappend modifiers "final"
             }
             "native" {
                 lappend modifiers "native"
-                set willMethod 2
             }
             "transient" {
                 lappend modifiers "transient"
@@ -606,55 +591,90 @@ body ::tycho::JavaDocSys::parseClass {class body} {
                 lappend modifiers "volatile"
             }
             default {
-                # Check if it is an end of command (;) or equals = or arglist )
+                # Check if it is an end of command (;) or block {}
                 set construct [string trimright $construct " \t\n"]
                 set lastchar [string range $construct end end]
-                if {$lastchar == "="} {
-                    set willVariable 1
-                    lappend others $construct
-                } elseif {$lastchar == "\}"} {
-                    set inMethod 1
-                } elseif {$lastchar == ")"} {
-                    if !{$willVariable} {
-                        # Could be an initializing function call.
-                        set willMethod 1
-                    }
-                    lappend others $construct
+                if {$lastchar == "\}"} {
+                    set inVarMeth 1
+                    # Don't save the extra block, it's useless
                 } elseif {$lastchar == ";"} {
-                    if {$willMethod} {
-                        if {$willMethod == 2} {
-                            # The current method has an empty body. Save this.
-                            lappend others $construct
-                        }
-                        # Otherwise, it's a regular body, ignore it.
-                        set willMethod 0
-                        set willVariable 0
-                        set inMethod 1
-                    } else {
-                        # It must be a variable
-                        set willVariable 0
-                        set willMethod 0
-                        set inVariable 1
-                        # Save the current construct, it may be initialization
-                        lappend others $construct
-                    } 
-                } elseif {$construct == {}} {
-                    # Could be empty method or variable intialized to ""
-                    if {$willMethod} {
-                        set willMethod 0
-                        set willVariable 0
-                        set inMethod 1
-                        # Ignore the current construct, it's a method body
-                    } else {
-                        set willVariable 1
-                        lappend others {\"\"}
-                        # The current construct is a null string initializer
-                    } 
+                    set inVarMeth 1
+                    # We might need the last block
+                    lappend others $construct
                 } else {
                     # Just a word, figure out what it is at the end.
                     lappend others $construct
                 }
             }
+        }
+    }
+}
+
+#####################################################################
+#### parseVarMeth
+# Parse what may be a variable or method passed from parseClass. Decide
+# which it is, then call addVariable or addMethod
+#
+body ::tycho::JavaDocSys::parseVarMeth {class protection modifiers\
+        others comment} {
+    set isMethod 0
+
+    # Only methods may be native
+    if {[lsearch -exact $modifiers "native"] != -1} {
+        addMethod $class $protection $modifiers $others $comment
+        return
+    }
+    # Or abstract
+    if {[lsearch -exact $modifiers "abstract"] != -1} {
+        addMethod $class $protection $modifiers $others $comment
+        return
+    }
+
+    # Place spaces around interesting items
+    if [ regexp {^([^(]+)[(](.*)$} $others dmy first last ] {
+        set others "$first ( $last"
+    }
+    if [ regexp {^([^=]+)[=](.*)$} $others dmy first last ] {
+        set others "$first = $last"
+    }
+
+    # Look for a "(" or an "="
+    foreach token $others {
+        if {$token == "("} {
+            set isMethod 1
+            break
+        }
+        if {$token == "="} {
+            break
+        }
+    }
+
+    if {$isMethod} {
+        # Remove the method body, it is unneeded
+        regexp "^(\[^)\]+\[)\]\[^\{\]*)\[\{\]" $others dmy others
+        addMethod $class $protection $modifiers $others $comment
+        return
+    }
+
+    # It's a variable if isMethod is unset
+    
+    # Break into tokens
+    set others [tokenize $others]
+    
+    # Check for multiple declarations (int x=2,y,z=3;)
+    set c_others {}
+    set initIndex end
+    foreach token $others {
+        if {$token == "="} {
+            # In multiple declarations, remove everything but the type
+            set initIndex [expr [llength $c_others] -1]
+        }
+        if {$token == "," || $token == ";"} {
+            addVariable $class $protection $modifiers $c_others $comment
+            set c_others [lreplace $c_others $initIndex end]
+            set initIndex end
+        } else {
+            lappend c_others $token
         }
     }
 }
@@ -819,8 +839,7 @@ body ::tycho::JavaDocSys::addVariable {class protection modifiers\
         set scope "instance"
     }
 
-    # Break into tokens, pull out known information
-    set others [tokenize $others]
+    # Break into tokens, pull out known information (tokenizing done in caller)
 
     set type [lindex $others 0]
     set others [lreplace $others 0 0]
@@ -918,7 +937,8 @@ body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} 
         set arguments [lrange $others 0 $endparen]
         set others [lreplace $others 0 $endparen]
     } else {
-        error "::tycho::JavaDocSys::addMethod: no end parenthesis found."
+        error "::tycho::JavaDocSys::addMethod: no end parenthesis\
+                found in $methodName."
     }
     
     if {$others != {}} {
@@ -988,18 +1008,24 @@ body ::tycho::JavaDocSys::tokenize {list} {
     set list $tlist
 
     while {$list != {}} {
-        # Pull of a token that's white space delimited
+        # Pull off a token that's white space delimited
         set ltoken [lindex $list 0]
         set list [lreplace $list 0 0]
         
         while {$ltoken != {}} {
-            # Either identifier-something
+            # Either identifier-something 
+            # NOTE: added numbers too, not complete
             if [regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)(.*)$} \
                     $ltoken dmy id remain] {
                 lappend retval $id
                 set ltoken $remain
                 # Or token-something
             } elseif [regexp {^([][,()=;])(.*)$} \
+                    $ltoken dmy token remain] {
+                lappend retval $token
+                set ltoken $remain
+                # Or a number constant-something
+            } elseif [regexp {^([-]?[0-9]*[.]?[0-9]+[fFlL]?)(.*)$} \
                     $ltoken dmy token remain] {
                 lappend retval $token
                 set ltoken $remain
