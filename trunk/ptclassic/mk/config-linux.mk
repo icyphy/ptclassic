@@ -192,4 +192,4 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 CC_STATIC = #-static
 
 # Matlab architecture
-MATARCH = i486
+MATARCH = lnx86 #i486
