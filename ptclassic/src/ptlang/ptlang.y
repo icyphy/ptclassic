@@ -976,7 +976,7 @@ genDef ()
 		fprintf (fp, "\tstatic %sCodeBlock %s;\n",domain,blockNames[i]);
 /* The clone function: only if the class isn't a pure virtual */
 	if (!pureFlag)
-		fprintf (fp, "\tBlock* clone() const { return new %s;}\n",
+		fprintf (fp, "\tBlock* clone() const { LOG_NEW; return new %s;}\n",
 			 fullClass);
 /* that's all, end the class def and put out an #endif */
 	fprintf (fp, "};\n#endif\n");
