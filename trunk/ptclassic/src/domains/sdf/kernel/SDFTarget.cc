@@ -48,6 +48,9 @@ static const char file_id[] = "SDFTarget.cc";
 #include "pt_fstream.h"
 #include "AcyLoopScheduler.h"
 
+// Defined in SDFDomain.cc
+extern const char SDFdomainName[];
+
 SDFTarget::SDFTarget(const char* nam, const char* desc) :
 Target(nam,"SDFStar",desc)
 {
@@ -123,5 +126,5 @@ void SDFTarget::setup() {
 }
 
 const char* SDFTarget::domain() {
-	return galaxy() ? galaxy()->domain() : "SDF";
+	return galaxy() ? galaxy()->domain() : SDFdomainName;
 }
