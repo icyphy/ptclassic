@@ -81,14 +81,14 @@ Geodesic* MDSDFPortHole::allocateGeodesic() {
   return (Geodesic*)g;
 }
 
-Matrix* MDSDFPortHole::getInput(int, int) {
+PtMatrix* MDSDFPortHole::getInput(int, int) {
   Error::abortRun("getInput() called on a porthole which is not an InMDSDFPort");
-  return (Matrix*)0;
+  return (PtMatrix*)0;
 }
 
-Matrix* MDSDFPortHole::getOutput() {
+PtMatrix* MDSDFPortHole::getOutput() {
   Error::abortRun("getOutput() called on a porthole which is not an OutMDSDFPort");
-  return (Matrix*)0;
+  return (PtMatrix*)0;
 }
 
 double MDSDFPortHole::getFloatInput(int rowDelay, int colDelay) {
@@ -139,7 +139,7 @@ Particle& MDSDFPortHole::operator % (int) {
 
 int InMDSDFPort::isItInput() const { return TRUE; }
 
-inline Matrix* InMDSDFPort::getInput(int rowDelay, int colDelay) { 
+inline PtMatrix* InMDSDFPort::getInput(int rowDelay, int colDelay) { 
   int rowIndex = ((MDSDFStar*)parent())->rowIndex;
   int colIndex = ((MDSDFStar*)parent())->colIndex;
   return ((MDSDFGeodesic*)myGeodesic)->getInput(rowIndex, colIndex,
@@ -159,7 +159,7 @@ inline double InMDSDFPort::getFloatInput(int rowDelay, int colDelay) {
 
 int OutMDSDFPort::isItOutput() const { return TRUE; }
 
-inline Matrix* OutMDSDFPort::getOutput() { 
+inline PtMatrix* OutMDSDFPort::getOutput() { 
   int rowIndex = ((MDSDFStar*)parent())->rowIndex;
   int colIndex = ((MDSDFStar*)parent())->colIndex;
   return ((MDSDFGeodesic*)myGeodesic)->getOutput(rowIndex, colIndex);
