@@ -47,9 +47,9 @@ static Plasma fixPlasma(fixproto);
 
 extern const DataType FIX = "FIX";
 
-Particle* FixParticle :: useNew () { LOG_NEW; return new FixParticle;}
+Particle* FixParticle :: useNew () const { LOG_NEW; return new FixParticle;}
 
-Particle* FixParticle :: clone () {
+Particle* FixParticle :: clone () const {
 	Particle* p = fixPlasma.get();
 	*p << double(*this);
 	return p;

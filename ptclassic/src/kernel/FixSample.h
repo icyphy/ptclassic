@@ -1,3 +1,5 @@
+#ifndef _FixParticle_h
+#define _FixParticle_h 1
 /**************************************************************************
 Version identification:
 $Id$
@@ -29,12 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of creation: 10/17/91
  Revisions:
 
- A FixSample is like a FloatSample, but its legal values range from -1
+ A FixParticle is like a FloatParticle, but its legal values range from -1
  to 1.  Thus it is not REALLY fixed point.
 
 **************************************************************************/
-#ifndef _FixSample_h
-#define _FixSample_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -51,8 +51,8 @@ protected:
 	}
 public:
 	DataType type() const;
-	Particle* useNew();
-	Particle* clone();
+	Particle* useNew() const;
+	Particle* clone() const;
 	void die();
 	void operator<<(int);
 	void operator<<(double);
