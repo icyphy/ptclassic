@@ -2,17 +2,35 @@
 Version identification:
 $Id$
 
- Copyright (c) 1992 The Regents of the University of California.
+ Copyright (c) 1992, 1993 The Regents of the University of California.
                        All Rights Reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+
 
  Programmer:  J. Buck
  Date of creation: 9/10/92
 
 This file defines a special type of BDF PortHole for use with the
 BDFCluster class.
-
-There is also a special iterator that finds all BDFClustPorts that
-have a SAME or COMPLEMENT relationship to the original.
 
 **************************************************************************/
 #ifndef _BDFClustPort_h
@@ -152,27 +170,5 @@ int condMatch(BDFClustPort* p1, BDFClustPort *p2);
 
 // fn to print a single port of a cluster
 ostream& operator<<(ostream& o, BDFClustPort& p);
-
-// special iterator that steps through ports related by BDF_SAME or
-// BDF_COMPLEMENT arcs to the original arc.  The interface is different
-// because as we return each port, we return the relation of that port
-// to the original port (BDF_SAME or BDF_COMPLEMENT).
-
-class BDFClustPortRelIter {
-public:
-	BDFClustPortRelIter(BDFClustPort& p);
-	BDFClustPort* next(BDFRelation&);
-	void reset();
-	int debug() const { return count < 0;}
-	void setDebug() { count = -1;}
-private:
-	BDFClustPort* start;
-	BDFClustPort* pos;
-	// only a bit is needed for the following flags
-	unsigned char justDidFar;
-	unsigned char rev;
-	// for error checking
-	short count;
-};
 
 #endif

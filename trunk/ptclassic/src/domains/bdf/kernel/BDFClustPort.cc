@@ -2,23 +2,41 @@
 Version identification:
 $Id$
 
- Copyright (c) 1992 The Regents of the University of California.
+ Copyright (c) 1992, 1993 The Regents of the University of California.
                        All Rights Reserved.
 
  Programmer:  J. Buck
  Date of creation: 9/10/92
 
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+
 This file defines a special type of BDF PortHole for use with the
 BDFCluster class.
-
-There is also a special iterator that finds all BDFClustPorts that
-have a SAME or COMPLEMENT relationship to the original.
 
 **************************************************************************/
 static const char file_id[] = "BDFClustPort.cc";
 
 #include "BDFClustPort.h"
 #include "BDFCluster.h"
+#include "BDFRelIter.h"
 #include "Plasma.h"
 #include "Geodesic.h"
 #include <iostream.h>
@@ -99,77 +117,6 @@ BDFClustPort* BDFClustPort :: realFarPort(BDFCluster* outsideCluster) {
 	return pOutPtr->realFarPort(outsideCluster);
 }
 
-// methods for BDFClustPortRelIter.  This iterator steps through
-// all ports that are "the same" or "the complement" of the original
-// port.  The far() port is included in this iteration if there is
-// no delay and neither side is a conditional port.  Q: should we
-// generalize this to admit conditional ports controlled by the same
-// conditions?
-
-BDFClustPortRelIter::BDFClustPortRelIter(BDFClustPort& p)
-: start(&p), pos(&p), justDidFar(0), rev(0), count(0) {}
-
-void BDFClustPortRelIter::reset() {
-	pos = start;
-	justDidFar = rev = 0;
-	count = 0;
-}
-
-const int DEBUG_LIMIT = 30;
-
-BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
-	if (pos == 0) return 0;
-	// error check
-	if (!debug()) count++;
-	if (count > DEBUG_LIMIT) {
-		BDFRelation r;
-		reset();
-		setDebug();
-		cerr << "BDFClustPortRelIter error: starting at "
-		     << start->fullName() << ":\n";
-		for (int i = 0; i < DEBUG_LIMIT; i++)
-			next(r);
-		return 0;
-	}
-	BDFRelation posrel = pos->relType();
-	BDFClustPort* pfar = pos->far();
-	// we see if we should jump over to the farSidePort.
-	// it must be connected, have the same rate and no delay.
-	// the "noFar" flag avoids crossing the same arc twice in
-	// a row.
-	if (!justDidFar && pfar && pos->numTokens() == 0 &&
-	    pos->numXfer() == pfar->numXfer() &&
-	    !TorF(posrel) && !TorF(pfar->relType())) {
-		pos = pos->far();
-		justDidFar = 1;
-		rel = BDF_SAME;
-		if (pos == start) return 0;
-		if (debug())
-			cerr << pos->fullName() << ":S\n";
-		return pos;
-	}
-	// if we hopped over but there are no links on this side,
-	// hop back and proceed from there.
-	if (justDidFar && !SorC(posrel)) {
-		pos = pfar;
-		posrel = pfar->relType();
-	}
-	if (!SorC(posrel)) pos = 0;
-	else {
-		if (posrel == BDF_COMPLEMENT) rev = !rev;
-		pos = pos->assoc();
-		rel = (rev ? BDF_COMPLEMENT : BDF_SAME);
-		justDidFar = 0;
-	}
-	if (pos == start) return 0;
-	else {
-		if (debug())
-			cerr << pos->fullName() <<
-				(rel == BDF_SAME ? ":S\n" : "C\n");
-		return pos;
-	}
-}
-
 // get the control port.  We don\'t care here about "same data" relations.
 BDFClustPort* controlPort(BDFClustPort* p,BDFRelation& relation) {
 	BDFClustPort* a = p->assoc();
@@ -186,12 +133,25 @@ BDFClustPort* controlPort(BDFClustPort* p,BDFRelation& relation) {
 
 BDFRelation sameSignal(BDFClustPort* a1, BDFClustPort* a2)
 {
-	if (a1 == a2 || &a1->real() == &a2->real()) return BDF_SAME;
+	if (a1 == a2) return BDF_SAME;
 	BDFRelation rel;
 	BDFClustPortRelIter iter(*a1);
 	BDFClustPort* p;
 	while ((p = iter.next(rel)) != 0) {
 		if (p == a2) return rel;
+	}
+	// no match, see if there is an outptr for either and see if
+	// they match.
+	BDFClustPort* up;
+	if ((up = a1->outPtr()) != 0) {
+//		cerr << "No match, going up from "
+//		     << a1->fullName() << " to " << up->fullName() << "\n";
+		return sameSignal(up,a2);
+	}
+	if ((up = a2->outPtr()) != 0) {
+//		cerr << "No match, going up from "
+//		     << a2->fullName() << " to " << up->fullName() << "\n";
+		return sameSignal(a1,up);
 	}
 	return BDF_NONE;
 }
