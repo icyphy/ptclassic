@@ -119,48 +119,6 @@ proc interval {x y} {
 
 
 #
-# Return list of n numbers in the range x to y
-#
-proc range {n x y} {
-    set result {}
-    set i      0
-    set delta  [expr (double($y) - $x) / ($n - 1)]
-
-    while { $i < $n } {
-	lappend result [expr $x + $i * $delta]
-
-	incr i +1
-    }
-
-    return $result
-}
-
-
-#
-# Return list of n numbers in the range x to y, but with
-# half the interval before the first and last numbers.
-#
-# This is useful for spacing graphical elements "evenly" along
-# a given distance.
-#
-proc spread {n x y} {
-    set result {}
-    set i      0
-    set delta  [expr (double($y) - $x) / $n]
-
-    set x [expr $x + $delta / 2]
-    while { $i < $n } {
-	lappend result [expr $x + $i * $delta]
-
-	incr i +1
-    }
-
-    return $result
-}
-
-
-
-#
 # List distributions: like in Backus' FP
 #
 proc ldistl {item list} {
@@ -276,6 +234,20 @@ proc ldelete {list item} {
 
     if { $i != -1 } {
 	return [lreplace $list $i $i]
+    }
+
+    return $list
+}
+
+
+#
+# Replace an element of a list with another
+#
+proc lsubst {list item value} {
+    set i [lsearch -exact $list $item]
+
+    if { $i != -1 } {
+	return [lreplace $list $i $i $value]
     }
 
     return $list
