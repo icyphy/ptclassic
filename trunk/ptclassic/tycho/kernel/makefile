@@ -41,7 +41,6 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
-	Color.tcl \
 	Defaults.tcl \
 	Loader.tcl \
 	Lib.tcl \
@@ -52,6 +51,7 @@ ITCL_SRCS = \
 	ButtonBox.itcl \
 	CircularList.itcl \
 	ColorBrowser.itcl \
+	ColorManager.itcl \
 	Dialog.itcl \
 	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
