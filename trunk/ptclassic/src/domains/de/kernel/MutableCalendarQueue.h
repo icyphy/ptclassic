@@ -1,12 +1,9 @@
-#ifndef _MutableCalendarQueue_h
-#define _MutableCalendarQueue_h 1
 /**************************************************************************
 Version identification:
-@(#)MutableCalendarQueue.h	
 $Id$
 
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,20 +28,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: John Davis
- Extended From CalendarQueue.h
- Date: 5/19/97
-        This class is extended from CalendarQueue and includes
-	extensions that allow for mutability. We make this
-        extension rather than adding the functionality directly
-        to the CalendarQueue class so that the user can easily
-        switch between the "regular" CalendarQueue and the
-        MutableCalendarQueue. The primary modifications include:
-
-	   CqLevelLink Class 
-	      Link * starPendingEventRef
 
 **************************************************************************/
+#ifndef _MutableCalendarQueue_h
+#define _MutableCalendarQueue_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -64,9 +51,9 @@ extern const double __infinity;
 #endif
 
 #include "LinkedList.h"
+#include "DataStruct.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
-#include "CalendarQueue.h"
 
 
 #define MAX_BUCKET     1024*4
@@ -75,11 +62,9 @@ extern const double __infinity;
 #define MINI_CQ_INTERVAL  0.2
 
 
-
-//
-// Note: See $PTOLEMY/src/domains/de/kernel/CalendarQueue.h
-// 	 for CqLevelLink class.
-//
+///////////////////////////////////////////////////////
+// Note that CqLevelLink is found in CalendarQueue.h
+///////////////////////////////////////////////////////
 
 
 	//////////////////////////////////////
@@ -123,10 +108,6 @@ public:
 	// put the link into the pool of free links.
 	virtual void 	   putFreeLink(CqLevelLink*);
 
-        // Remove a CqLevelLink from the MutableCalendarQueue
-        int removeEvent( CqLevelLink * cqLevelLink );
-
-	int resizeEnabled() { return cq_resizeEnabled; }
 	void EnableResize() { cq_resizeEnabled = 1; }
 	void DisableResize() { cq_resizeEnabled = 0; }
 
