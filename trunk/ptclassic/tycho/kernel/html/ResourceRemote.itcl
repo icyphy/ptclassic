@@ -108,7 +108,7 @@ class ::tycho::ResourceRemote {
     protected method debugputs {string}
 
     # Set or read the http status. If newvalue is {}, then just return
-    protected method remotestatus {newvalue}
+    protected method remotestatus {{value {}}}
 
     # Wait until an HTTP GET completes.
     protected method remotewait {}

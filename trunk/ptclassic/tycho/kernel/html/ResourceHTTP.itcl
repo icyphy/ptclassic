@@ -290,7 +290,7 @@ body ::tycho::ResourceHTTP::open {{mode "r"}} {
 
     # Check again in case something went wrong
     if { ! [::tycho::cache exists $url] } {
-	error "URL $url (cache: [::tycho::cache getcachefile $url)\
+	error "URL $url (cache: [::tycho::cache getcachefile $url]) \
                 is not accessible"
     }
     # Open the cache file

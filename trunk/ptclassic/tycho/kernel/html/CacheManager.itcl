@@ -445,7 +445,7 @@ body ::tycho::CacheManager::tmpCacheName {filename} {
 body ::tycho::CacheManager::update {url date size contenttype newfile} {
     # Make sure that the filename is inside the cache's url
     if {![regexp "\^$CACHEDIR" $newfile]} {
-        error "Cache file is not located in the right directory: $CACHEDIR
+        error "Cache file is not located in the right directory: $CACHEDIR"
         return
     }
 
