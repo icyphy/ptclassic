@@ -130,7 +130,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  LOG_NEW; matlabInputNames = new InfString[numInputs];
 		  nameMatlabMatrices( matlabInputNames,
 		  		      numInputs,
-				      (char *) MatlabInputVarName );
+				      (const char *) MatlabInputVarName );
 		}
 
 		// allocate Matlab output matrices and generate their names
@@ -141,14 +141,15 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  LOG_NEW; matlabOutputNames = new InfString[numOutputs];
 		  nameMatlabMatrices( matlabOutputNames,
 		  		      numOutputs,
-				      (char *) MatlabOutputVarName );
+				      (const char *) MatlabOutputVarName );
 		}
 
 		// create the command to be sent to the Matlab interpreter
 		InfString commandString;
-		buildMatlabCommand(commandString, matlabInputNames, numInputs,
-				   (char *) MatlabFunction, matlabOutputNames,
-				   numOutputs);
+		buildMatlabCommand(commandString,
+				   matlabInputNames, numInputs,
+				   (const char *) MatlabFunction,
+				   matlabOutputNames, numOutputs);
 		LOG_DEL; delete [] matlabCommand;
 		LOG_NEW; matlabCommand = new char[commandString.length() + 1];
 		strcpy(matlabCommand, (char *) commandString);
