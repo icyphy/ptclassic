@@ -35,14 +35,14 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/%metapkg%/pakman
+VPATH =		$(ROOT)/utils/pakman
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	demos doc bin test adm
+DIRS =	adm bin demos doc test template.tycho template.simple
 
 TCL_SRCS = \
 	create.tcl \
@@ -60,7 +60,7 @@ MISC_FILES = demos doc bin test adm tclIndex
 REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/%metapkg%/pakman
+TYDOC_DESC =	Index of classes in tycho/utils/pakman
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS) tclIndex
