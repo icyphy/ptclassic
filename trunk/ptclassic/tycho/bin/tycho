@@ -11,8 +11,12 @@
 
 set usagestring = "usage: tycho [-debug] [-ptiny] [-bin tychobin] [-bak] [scriptfile]"
 
-# If 'tycho.ptiny' is a link to this script, then we just use tycho.ptiny
-set progname = `basename $0`
+# If 'tycho.ptiny' is a link to this script, then we just use tysh.ptiny
+set base = `basename $0`
+set progname = tysh
+if ( $base == "tycho.ptiny") then
+	set progname = tysh.ptiny
+endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
@@ -78,10 +82,10 @@ end
 set bindir = $PTOLEMY/obj.$PTARCH
 
 if ( ! $?prog ) then
-	if ( "$progname" == "tycho.ptiny" || $?tychoptiny ) then
-	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho.ptiny
+	if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
+	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
 	else
-	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho
+	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
 	endif
 	if ( $?tychodebug ) then
 	    set prog = $prog.debug
