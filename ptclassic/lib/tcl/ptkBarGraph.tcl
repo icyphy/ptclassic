@@ -41,8 +41,7 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
     wm title $w "$desc"
     wm iconname $w "$desc"
 
-    message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 5i \
-            -text "$desc"
+    message $w.msg -width 5i -text "$desc"
     frame $w.cntr -bd 10
     label $w.cntr.label -text "Full scale:"
     set startScale [${w}verticalScale 1.0]
@@ -56,7 +55,7 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
 	$w.cntr.dbl left
 
     frame $w.pf -bd 10
-    canvas $w.pf.plot -relief sunken -bd 3 -bg AntiqueWhite3 \
+    canvas $w.pf.plot -relief sunken -bd 3 -bg [ptkColor AntiqueWhite3] \
 	    -height ${barGraphHeight}c -width ${barGraphWidth}c
     pack append $w.pf $w.pf.plot {top fill expand}
 
