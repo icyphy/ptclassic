@@ -35,8 +35,9 @@ Wormhole::Wormhole(Star& s,Galaxy& g) : selfStar(s),
 	Runnable(&Domain::domainOf(g)->newSched(),
 		 Domain::domainOf(g)->domainName(),&g)
 {
-	messageProcessingTime = 10.0; // default delay
-	currentTime = 0.0;	      // default
+	// set up the parent pointer of inner Galaxy
+	g.setNameParent("innerGal", &s);
+
 	dynamicHorizons = FALSE;
 }
 
@@ -54,14 +55,15 @@ void Wormhole :: buildEventHorizons () {
 		PortHole& galp = gal.nextPort();
 		PortHole& realGalp = (PortHole&) galp.realPort();
 		dataType type = realGalp.myType();
+		int numToken = realGalp.numberTokens;
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
 			to.setPort(in, galp.readName(), this, &selfStar,
-				   type);
+				   type, numToken);
 			selfStar.addPort(to);
 			from.setPort(in, galp.readName(), this, &selfStar,
-				     type);
+				     type, numToken);
 			to.ghostConnect (from);
 			if (type == ANYTYPE) {
 				realGalp.inheritTypeFrom (from);
@@ -76,14 +78,14 @@ void Wormhole :: buildEventHorizons () {
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
 			from.setPort(out, galp.readName(), this, &selfStar,
-				     type);
+				     type, numToken);
 			selfStar.addPort(from);
 			to.setPort(out, galp.readName(), this, &selfStar,
-				   type);
+				   type, numToken);
 			to.ghostConnect (from);
 			if (type == ANYTYPE) {
-				to.inheritTypeFrom (from);
 				from.inheritTypeFrom (realGalp);
+				to.inheritTypeFrom (from);
 			} else {
 				to.inheritTypeFrom (from);
 				realGalp.inheritTypeFrom (to);
@@ -129,3 +131,15 @@ StringList Wormhole :: print (int recursive) {
 	return out;
 }
 
+// check input EventHorizons.
+int Wormhole :: checkReady() {
+	int flag = TRUE;
+	for (int i = selfStar.numberPorts(); i > 0; i--) {
+		EventHorizon& p = (EventHorizon&) selfStar.nextPort();
+		if (p.isItInput()) {
+			FromEventHorizon* fp = (FromEventHorizon*) p.ghostPort;
+			if (!(fp->ready())) flag = FALSE;
+		}
+	}
+	return flag;
+}
