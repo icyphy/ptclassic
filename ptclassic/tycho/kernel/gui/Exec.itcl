@@ -1,6 +1,6 @@
 # Ptolemy Tycho class that exec's a process and displays the output
 #
-# @Author: Christopher Hylands and Kevin Chang
+# @Authors: Christopher Hylands and Kevin Chang
 #
 # @Version: $Id$
 #
@@ -11,7 +11,7 @@
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that the above
 # copyright notice and the following two paragraphs appear in all copies
-# of this software.
+# o f this software.
 #
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -308,7 +308,7 @@ body ::tycho::Exec::destructor {} {
 #
 body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     clearHistory
-    global $statusVariableName
+    global $statusVariableName tcl_platform tyjavapresent
     if {[uplevel #0 "set $statusVariableName"] == "running"} {
         error "Sorry, process is already running"
     }
@@ -333,25 +333,63 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     #tkwait variable continue
     ::tycho::safeUpdate $this
 
-    # Open a non-blocking pipe from the command
-    # FIXME: Unixism - Brent Welch says to use '|& cat' here to get standard
-    # error.  However, this presupposes that 'cat' is a command, which might
-    # not be true under Windows or Macintosh.
-    if [catch {set fd [open \
-	    [concat "|$commandToExec |& cat"] {RDONLY NONBLOCK}]} errMsg] {
-        addHistory "$errMsg\n"
-	error "$errMsg"   ;#This exits this procedure
+    # If we are running under Unix, and Java is not present, then
+    # we can use nonblocking I/O. 
+    switch $tcl_platform(platform) {
+	macintosh { error "Sorry exec is not supported on the mac" }
+	unix { set useNonBlockingIO 1 }
+	windows { set useNonBlockingIO 0}
+    }     
+    if {[info exists tyjavapresent] && $tyjavapresent == 1} {
+	set useNonBlockingIO 0
     }
 
-    # Register our file event handler
-    fileevent $fd readable "$this readOrClose $fd"
+    if { $useNonBlockingIO == 1 } {
+	# Open a non-blocking pipe from the command
+	# FIXME: Unixism - Brent Welch says to use '|& cat' here to get
+	# standard error.  However, this presupposes that 'cat' is a
+	# command, which might not be true under Windows or Macintosh.
+	#
+	# Under tycho -java, this code hangs 
+	if [catch {set fd [open \
+		[concat "|$commandToExec |& cat"] {RDONLY NONBLOCK}]} \
+		errMsg] {
+	    addHistory "$errMsg\n"
+	    error "$errMsg"   ;#This exits this procedure
+	}
+
+	# Register our file event handler
+	fileevent $fd readable "$this readOrClose $fd"
+    } else {
+	# There is no NONBLOCK I/O under windows, so we just
+	# run the process and hang the UI while it is running and then
+	# return. 
+	if [ catch {eval exec $commandToExec} errMsg] {
+	    set $statusVariableName "abnormal"
+	} else {
+            set $statusVariableName "normal"
+        }
+	#config -cursor $oldCursor
+
+        # This might not be an error message, it might just be whatever
+        # exec returned
+        addHistory "$errMsg\n"
+	if {$statusVariableName == "abnormal"} {
+            addHistory "<<Process exited Abnormally.>>\n"
+	}
+	# Go back to our original directory before the execution
+	if { $dirToExecFrom != {} } {
+	    cd "$saveDir"
+	}
+
+	return $statusVariableName
+    }
 
     # Go back to our original directory before the execution
     if { $dirToExecFrom != {} } {
         cd "$saveDir"
     }
 
-    global $statusVariableName
     set $statusVariableName "running"
     return $statusVariableName
 }
