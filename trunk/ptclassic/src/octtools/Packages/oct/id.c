@@ -353,7 +353,7 @@ int
 octIdCmp(a, b)
 CONST char *a, *b;
 {
-    return *((octId *) a) - *((octId *) b);
+    return *((CONST octId *) a) - *((CONST octId *) b);
 }
 
 
