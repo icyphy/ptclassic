@@ -26,10 +26,10 @@ $Id$
 **************************************************************************/
 
 // the type
-const char* ComplexState :: type() { return "COMPLEX";}
+const char* ComplexState :: type() const { return "COMPLEX";}
 
 // the value as a string
-StringList ComplexState :: currentValue() {
+StringList ComplexState :: currentValue() const {
 	StringList s; 
 	s = "(";
 	s += val.real();
@@ -40,7 +40,7 @@ StringList ComplexState :: currentValue() {
 }
 
 // clone
-State* ComplexState :: clone () { return new ComplexState;}
+State* ComplexState :: clone () const { return new ComplexState;}
 
 void ComplexState  :: initialize() {
 	const  char* specialChars =  "*+-/(),";
