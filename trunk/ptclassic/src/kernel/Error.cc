@@ -54,6 +54,18 @@ Error :: warn (NamedObj& o, cc* m1, cc* m2, cc* m3) {
 }
 
 void
+Error :: message(cc* m1, cc* m2, cc* m3) {
+	p3(m1,m2,m3);
+}
+
+void
+Error :: message (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+	StringList n = o.readFullName();
+	cerr << n << ": ";
+	p3(m1,m2,m3);
+}
+
+void
 Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 	error (m1, m2, m3);
 	Scheduler::requestHalt();

@@ -32,6 +32,12 @@ public:
 	static void warn (const char*, const char* = 0, const char* = 0);
 	static void warn (NamedObj&, const char*, const char* = 0,
 			  const char* = 0);
+// this pair has no prefix at all.
+	static void message (const char*, const char* = 0, const char* = 0);
+
+	static void message (NamedObj&, const char*, const char* = 0,
+			     const char* = 0);
+
 	static int canMark();
 	static void mark (NamedObj&);
 };
