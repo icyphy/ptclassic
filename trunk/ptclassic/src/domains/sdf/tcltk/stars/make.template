@@ -31,6 +31,7 @@ STARDOCDIR = ../../doc/stars
 PL_SRCS= \
  SDFTclScript.pl \
  SDFTkMeter.pl \
+ SDFTkText.pl \
  SDFTkShowValues.pl
 
 # The .cc files
