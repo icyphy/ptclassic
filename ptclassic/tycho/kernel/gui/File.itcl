@@ -113,6 +113,11 @@ class ::tycho::File {
     # Return the name of the file associated with the object.
     method filename {} {return $file}
 
+    #### focusin
+    # Redefined in base classes to focus on right widget. It is 
+    # defined here as well because nextRevAction needs it.
+    method focusin {} 
+
     #### getReadonly
     # Return the value of the readonly option.
     method getReadonly {} 
@@ -629,6 +634,14 @@ body ::tycho::File::evaluate {} {
     }
 }
 
+###################################################################
+#### focusin
+# This will be redefined in derived classes to hand the focus to the 
+# right widget.
+#
+body ::tycho::File::focusin {} {
+}
+
 #####################################################################
 #### getReadonly
 # Return the value of the readonly option.
@@ -1021,10 +1034,10 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
 # This hack is used because options are not inherited by 
 # subclasses (hence the object name .bogusOptionObject.)
 body ::tycho::File::getOption {option} {
-    if {[info object .bogusOptionObject] == ""} {
-	File .bogusOptionObject
+    if {[info object .fileBogusOptionObject] == ""} {
+	File .fileBogusOptionObject
     }
-    return [option get .bogusOptionObject $option File]	    
+    return [option get .fileBogusOptionObject $option File]	    
 }
 
 #########################################################################
