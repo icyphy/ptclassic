@@ -186,7 +186,8 @@ body ::tycho::MenuSupport::add {name inMenu args} {
     # Create a sub-menu
     if { $type == "cascade" } {
 	set entrypath($name) $menupath($inMenu)
-	set menupath($name) [menu $menupath($inMenu). [join $name "-"] \
+	set menupath($name) [menu $menupath($inMenu).[string tolower \
+		[join $name ""]] \
 		-tearoff 0]
 	set itemtype($name) "cascade"
 
@@ -373,7 +374,8 @@ body ::tycho::MenuSupport::insert {name before args} {
     # Create a sub-menu
     if { $type == "cascade" } {
 	set entrypath($name) $entrypath($before)
-	set menupath($name) [menu $entrypath($before).[join $name "-"] \
+	set menupath($name) [menu $entrypath($before).[string tolower \
+		[join $name ""]] \
 		-tearoff 0]
 	set itemtype($name) "cascade"
 
