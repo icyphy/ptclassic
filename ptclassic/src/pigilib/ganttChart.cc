@@ -43,26 +43,31 @@ Routines for talking to the Gantt chart display
 #include "PTcl.h"
 #include "ganttChart.h"
 
+#define TCL_CATCH_ERR(tcl_call) \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(PTcl::activeInterp,"ptkDisplayErrorInfo"); \
+    }
+
 // functions added to handle PTcl and pigi compatability
 // needed to avoid interp calls in cg domain
 
 void
 GanttChart::beginGantt(ostream& /*out*/, char *argstring) {
 
-	Tcl_Eval(PTcl::activeInterp, argstring);
+	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 
 }
 
 void
 GanttChart::writeGanttLabel(ostream& /*out*/, char *argstring) {
 
-	Tcl_Eval(PTcl::activeInterp, argstring);
+	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 }
 
 void
 GanttChart::writeGanttBindings(ostream& /*out*/, char *argstring) {
 
-	Tcl_Eval(PTcl::activeInterp, argstring);
+	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 }
 
 void
@@ -72,5 +77,5 @@ GanttChart::endGantt(ostream& /*out*/) {
 void
 GanttChart::writeGanttProc(ostream& /*out*/, char *argstring) {
   
-  	Tcl_Eval(PTcl::activeInterp, argstring);
+  	TCL_CATCH_ERR(Tcl_Eval(PTcl::activeInterp, argstring));
 }
