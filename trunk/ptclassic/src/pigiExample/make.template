@@ -62,7 +62,7 @@
 # stars to LOCAL_OBJS and PL_SRCS
 #
 # 3) cd to $PTOLEMY/obj.$PTARCH/pigiExample and type 'make depend' to update
-# the makefile from the make.templaten
+# the makefile from the make.template
 #
 # 4) While still in in $PTOLEMY/obj.$PTARCH/pigiExample, type 'make'
 #
@@ -106,7 +106,7 @@ PL_SRCS =	SDFMyStar.pl
 # Name of the domain that your star(s) goes in
 DOMAIN  = SDF
 
-# Include files neede to build your star(s)
+# Include files needed to build your star(s)
 INCL =	-I$(ROOT)/src/domains/sdf/kernel -I$(KERNDIR)
 
 #############################################################################
