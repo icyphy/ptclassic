@@ -821,7 +821,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 	// been created during the previous firing's first reference to the state.
 	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(root);
 	if (!inSignal) {
-	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
+	  Error::abortRun(root, ": Not first state ref, but can't find any signal created for it");
 	  return;
 	}
 
@@ -862,9 +862,9 @@ void StructTarget :: registerState(State* state, const char* varName,
       if (!isFirstStateRef) {
 	// Need to find the previous signal to connect to
 	// FIXME: Still don't like this, depends on knowing the name already!!
-	VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(state_in);
+	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(state_in);
 	if (!inSignal) {
-	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
+	  Error::abortRun(state_in, ": Not first state ref, but can't find any signal created for it");
 	  return;
 	}
 
