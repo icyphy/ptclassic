@@ -1,7 +1,7 @@
 static const char file_id[] = "CGCDDFTarget.cc";
 /******************************************************************
 Version identification:
-@(#)CGCDDFTarget.cc	1.6	12/10/92
+$Id$
 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
