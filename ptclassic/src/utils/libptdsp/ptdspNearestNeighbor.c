@@ -1,4 +1,15 @@
-/*
+/**CFile***********************************************************************
+
+  FileName    [ ptdspNearestNeighbor.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Function definition for Ptdsp_NearestNeighbor ]
+
+  Author      [ Biling Lee and Brian Evans ]
+
+  Copyright   [ 
+
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
@@ -23,14 +34,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
+]
 
-Programmer: Biling Lee and Brian Evans
-Version: $Id$
-*/
+   Version [ $Id$ ]
+
+******************************************************************************/
 
 #include "ptdspNearestNeighbor.h"
 
-/*
+/*---------------------------------------------------------------------------*/
+/* Definition of exported functions                                          */
+/*---------------------------------------------------------------------------*/
+
+/**Function*******************************************************************
+  Synopsis    [ Find nearest neighbor in codebook and return squared error ]
+  Description [ 
 Find the index of nearest neighbor in the codebook for the training
 vector, and find the squared error (squared distance) between the
 training vector and its nearest neighbor.
@@ -38,44 +56,47 @@ training vector and its nearest neighbor.
 Let X=input vector and Yi=i_th codeword.  Find the nearest neighbor
 codeword Yi to maximize X'*Yi-Ai (' means transpose ), where
 Ai=||Yi||^2/2 and should have already been stored in the array
-halfCodewordPower[numCodewords].
- */
+halfCodewordPower[numCodewords]. 
+]
+   SideEffects []
+******************************************************************************/
 
-void Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
-	const double* trnVector, const double* codebook,
-	const double* halfCodewordPower, int sizeCodebook,
-	int dimension) {
+void 
+Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
+		      const double* trnVector, const double* codebook,
+		      const double* halfCodewordPower, int sizeCodebook,
+		      int dimension) {
 
-	int index = 0;
-	int distance = 0;
-	int i, j;
-	for (j = 0; j < dimension; j++ ) {
-	    distance += trnVector[j]*codebook[j];
-	}
-	distance -= halfCodewordPower[0];
+  int index = 0;
+  int distance = 0;
+  int i, j;
+  for (j = 0; j < dimension; j++ ) {
+    distance += trnVector[j]*codebook[j];
+  }
+  distance -= halfCodewordPower[0];
 
-	for (i = 1; i < sizeCodebook; i++ ) {
-	    double sum = 0.0;
-	    for (j = 0; j < dimension; j++ )
-		sum += trnVector[j]*codebook[i*dimension+j];
-	    sum -= halfCodewordPower[i];
-	    if ( sum > distance ) {
-	       distance = sum;
-	       index = i;
-	    }
-	}
-
-	/*
-	   Distance we compute here is the X'*Yi-||Yi||^2/2, but actually the 
-	   squared distance is ||X-Yi||^2 = ||X||^2+||Yi||^2-2*X'*Yi. So, we
-	   need to calculate the true squared distance before return. 
-	 */
-	distance *= -2;
-	for (i = 0; i < dimension; i++) {
-	    distance += trnVector[i] * trnVector[i];
-	}
-
-	/* Return the compute values of codebook index and distance */
-	*theindex = index;
-	*thedistance = distance;
-}
+  for (i = 1; i < sizeCodebook; i++ ) {
+    double sum = 0.0;
+    for (j = 0; j < dimension; j++ )
+      sum += trnVector[j]*codebook[i*dimension+j];
+    sum -= halfCodewordPower[i];
+    if ( sum > distance ) {
+      distance = sum;
+      index = i;
+    }
+  }
+  
+  /*
+    Distance we compute here is the X'*Yi-||Yi||^2/2, but actually the 
+    squared distance is ||X-Yi||^2 = ||X||^2+||Yi||^2-2*X'*Yi. So, we
+    need to calculate the true squared distance before return. 
+    */
+  distance *= -2;
+  for (i = 0; i < dimension; i++) {
+    distance += trnVector[i] * trnVector[i];
+  }
+  
+  /* Return the compute values of codebook index and distance */
+  *theindex = index;
+  *thedistance = distance;
+}	
