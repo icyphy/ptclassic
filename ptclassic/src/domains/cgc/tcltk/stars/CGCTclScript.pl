@@ -136,7 +136,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		// " is escaped so that we can embed the entire string
 	        // in "" in CGCTclScript::exportState
 
-                StringList& currentValue = state->currentValue();
+                StringList currentValue = state->currentValue();
 		const char* p = currentValue;
 		StringList escapedCurrentValue;
 		while (*p) {
