@@ -29,8 +29,17 @@ INCL=-I$(KERNDIR) -I$(SDFDIR)
 LIB=libbdf.a
 
 # Header files
-HDRS= BDFBool.h BDFClustPort.h BDFCluster.h BDFPortHole.h BDFScheduler.h \
- BDFStar.h BDFTarget.h BDFWormhole.h BDFSchList.h
+HDRS= \
+BDFBool.h \
+BDFClustPort.h \
+BDFCluster.h \
+BDFPortHole.h \
+BDFRelIter.h \
+BDFSchList.h \
+BDFScheduler.h \
+BDFStar.h \
+BDFTarget.h \
+BDFWormhole.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) BDFDomain.cc
