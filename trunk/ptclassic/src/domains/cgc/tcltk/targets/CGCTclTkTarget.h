@@ -50,7 +50,13 @@ public:
 
 	/* virtual */ StringList compileLine(const char* fName);
 
+        // Combine all sections of code;
+	/*virtual*/ void frameCode();
+ 
 protected:
+
+	// generate the code for the main loop.
+	/*virtual*/ CodeStream mainLoopBody();
 
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit();
@@ -59,11 +65,8 @@ protected:
         CodeStream mainLoopTerm;
         CodeStream tkSetup;
 
-	// generate the code for the main loop.
-	virtual void mainLoopCode();
-
         // virtual function to initialize strings
-        virtual void initCodeStrings();
+        /*virtual*/ void initCodeStrings();
 };
 
 #endif

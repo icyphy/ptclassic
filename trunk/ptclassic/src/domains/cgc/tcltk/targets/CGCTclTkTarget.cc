@@ -42,8 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCStar.h"
 #include "KnownTarget.h"
 
-// #define PTOLEMY04
-
 // constructor
 CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
@@ -100,69 +98,51 @@ Block* CGCTclTkTarget :: makeNew () const {
 /////////////////////////////////////////
 
 int CGCTclTkTarget :: codeGenInit() {
+    // Define variables needed by the tcl init file.
+    globalDecls << "char *name = \"" << galaxy()->name() << "\";\n"
+		<< "int numIterations = "
+		<< (int)scheduler()->getStopTime() << ";\n"
+		<< "#include \"tkMain.c\"\n\n";
 
-	// Define variables needed by the tcl init file.
-	globalDecls += "char *name = \"";
-	globalDecls += galaxy()->name();
-	globalDecls += "\";\n";
-	globalDecls += "int numIterations = ";
-	globalDecls += (int)scheduler()->getStopTime();
-	globalDecls += ";\n";
-	globalDecls += "#include \"tkMain.c\"\n\n";
+    // If the system is paused, wait until Go is hit again
+    mainLoopInit << "if ( getPollFlag() ) processFlags();\n"
+		 << "while (runFlag == -1) Tk_DoOneEvent(0);\n"
+		 << "if (runFlag == 0) break;\n";
 
-	mainLoopInit += "if ( getPollFlag() ) processFlags();\n";
-	// If the system is paused, wait until Go is hit again
-	mainLoopInit += "while (runFlag == -1) Tk_DoOneEvent(0);\n";
-	mainLoopInit += "if (runFlag == 0) break;\n";
+    mainLoopTerm << "runFlag = 0;\n";
 
-	mainLoopTerm += "runFlag = 0;\n";
-
-	return CGCTarget::codeGenInit();
+    return CGCTarget::codeGenInit();
 }
 
 void CGCTclTkTarget :: beginIteration(int repetitions, int depth) {
-	CGCTarget::beginIteration(repetitions, depth);
-	// Note, unlike SimControl, the following does not support threaded computation
-	myCode += "if ( getPollFlag() ) processFlags();\n";
+    CGCTarget::beginIteration(repetitions, depth);
+    // Note, unlike SimControl, the following does not support
+    // threaded computation
+    *defaultStream <<  "if ( getPollFlag() ) processFlags();\n";
 }
 
-void CGCTclTkTarget :: mainLoopCode() {
-        // Generate Code.  Iterate an infinite number of times if
-        // target is inside a wormhole
-        int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+CodeStream CGCTclTkTarget::mainLoopBody() {
+    CodeStream body;
+    defaultStream = &body;
 
-	// Need specialized code instead of the beginIterations method
-	// so that the value can be changed each time the function is run.
-	// and infinite iterations can be supported
-	myCode << indent(1);
-	mainDecls << indent(1)
-		  << "int " << targetNestedSymbol.push("i") << ";\n";
-	StringList tmp1;
-	tmp1 = targetNestedSymbol.pop();
-	myCode << tmp1 << "=0; " << "while ("
-	       << tmp1 << "++ != " << "numIterations"
-	       << ") {\n";
-	myCode += wormIn;
+    // Need specialized code instead of the beginIterations method
+    // so that the value can be changed each time the function is run.
+    // and infinite iterations can be supported
+    StringList iterator= symbol("sdfIterationCounter");
+    body << "{\n\tint " << iterator<< ";\n"
+	 << iterator << "=0;\n"
+	 << "while (" << iterator << "++ != numIterations) {\n"
+	 << mainLoopInit << mainLoop <<  mainLoopTerm
+	 << "}} /* MAIN LOOP END */\n";
 
-        if (inWormHole()) allWormInputCode();
-	myCode += mainLoopInit;
-#ifndef PTOLEMY04
-	compileRun((SDFScheduler*) scheduler());
-#endif
-#ifdef PTOLEMY04
-        scheduler()->compileRun();
-#endif
-        if (inWormHole()) allWormOutputCode();
-        endIteration(iterations,0);
-	myCode += mainLoopTerm;
-
-	// After all stars have run, define a procedure called tkSetup()
-	// that contains tkSetup code, if any
-	procedures += "void tkSetup() {\n";
-	procedures += tkSetup;
-	procedures += "}\n";
+    defaultStream = &myCode;
+    return body;
 }
 
+void CGCTclTkTarget :: frameCode() {
+    procedures << "void tkSetup() {\n" << tkSetup << "}\n";
+    CGCTarget::frameCode();
+}
 
 static CGCTclTkTarget targ("TclTk_Target","CGCStar",
 "Target for Tcl/Tk C code generation");
