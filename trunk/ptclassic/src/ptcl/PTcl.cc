@@ -892,8 +892,11 @@ int PTcl::domain(int argc,char ** argv) {
 	// check to see if existing target is legal for the new domain,
 	// if not, revert to default target.
 	if (!definingGal) {
-	    if (!legalTarget(curDomain, universe->myTarget()->name())) {
-		universe->newTarget ();
+	    // The target associated with a universe is undefined if
+	    // there was an error during setup of the universe
+	    Target* target = universe->myTarget();
+	    if (target && !legalTarget(curDomain, target->name())) {
+		universe->newTarget();
 		currentTarget = universe->myTarget();
 	    }
 	}
