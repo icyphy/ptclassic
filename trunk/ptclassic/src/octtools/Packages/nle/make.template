@@ -42,7 +42,8 @@ CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS		= nle.h \
-		nleCommon.h
+		nleCommon.h \
+		nleMisc.h
 
 LIBCSRCS	= nleErrors.c \
 		nleFlat.c \
