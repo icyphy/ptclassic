@@ -94,6 +94,7 @@ int SDFScheduler :: run () {
 	    return FALSE;
 	}
 	if (SimControl::haltRequested()) {
+	    invalid = TRUE;
             Error::abortRun("Cannot continue after run-time error");
 	    return FALSE;
 	}
@@ -133,8 +134,7 @@ extern int warnIfNotConnected (Galaxy&);
 	////////////////////////////
 
 void SDFScheduler :: setup () {
-	// These initializations must go before the error checking
-	// since there is no constructor for this class
+	// These initializations should go before the error checking
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
@@ -524,13 +524,13 @@ SDFScheduler::SDFScheduler () {
 	deferredFiring = TRUE;
 	numItersSoFar = 0;
 	numIters = 1;
-	invalid = 1;
+	invalid = TRUE;
 	schedulePeriod = 10000.0;
 }
 
 // destructor
 SDFScheduler::~SDFScheduler () {
-	invalid = 1;		// dummy for breakpoint.
+	invalid = TRUE;		// dummy for breakpoint.
 }
 
 // setStopTime, for compatibility with DE scheduler.
