@@ -94,16 +94,6 @@ DataFlowStar* UniProcessor :: cloneStar(ParNode* n) {
 	}
 
 	copyActualStates(*org, *newS);
-	if (org->numberMPHs() <= 0) return newS;
-	
-	// clone the multi portholes.
-	BlockMPHIter piter(*org);
-	MultiPortHole* p;
-	while ((p = piter++) != 0) {
-		MultiPortHole* cP = newS->multiPortWithName(p->name());
-		for (int i = p->numberPorts(); i > 0; i--)
-			cP->newPort();
-	}
 	return newS;
 }
 
