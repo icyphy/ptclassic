@@ -41,8 +41,7 @@
 #### HTML
 # A window containing a text widget that displays HTML using the
 # HTML library by Stephen Uhler.  The HTML may be specified directly
-# using the -data option or indirectly using the -file option, or
-# may be inserted using any of a number of methods.
+# using the -data option or indirectly using the -file option.
 # An interface to an HTML editor is provided through the "Open Source"
 # menu command.  Buttons are provided for frequently executed commands.
 # <p>
@@ -73,6 +72,12 @@ class ::tycho::HTML {
     # Prompt the user for a file name and load in place of the current file.
     method altFile {}
 
+    # Go back to the previous view.
+    method back {}
+
+    # Clear the window.
+    method clear {}
+
     # Return the current insertion point in a form usable by seePoint.
     method currentPoint {}
 
@@ -81,6 +86,9 @@ class ::tycho::HTML {
 
     # Open a help window.
     method help {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {filename point {push 1}}
 
     # Insert the specified data.
     method insertData {data}
@@ -91,14 +99,14 @@ class ::tycho::HTML {
     # Raise the HTML browser window and the source window (if any).
     method raiseWindow {}
 
-    # Clear the current text and reload from the source file.
-    method reload {}
-
     # Go to a specified point within the file.
     method seePoint {point}
 
-    # Switch to a different HTML file.
-    method switchFile {filename}
+    # Add a file editor object to the window menus of all open File objects.
+    method windowMenuAddAll {label}
+
+    # Remove a filename from the window menus of all open File objects.
+    method windowMenuRemoveAll {filename}
 
     #########################################################################
     ####                   protected methods                             ####
@@ -120,6 +128,9 @@ class ::tycho::HTML {
 
     # Return 1 if the sourcewin window is a valid source window.
     private method sourcewinIsMine {}
+
+    # Store the name of our stack object
+    private variable stack {}
 }
 
 #########################################################################
@@ -170,12 +181,12 @@ body ::tycho::HTML::constructor {args} {
     #     }
 
     # A toolbar for frequently used functions.
-    addTool back Back "$this component text back"
+    addTool back Back "$this back"
     # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
     global ::TYCHO
     addTool home Home \
-	    "$this component text switchFile $TYCHO/doc/index.html"
+	    "$this hyperJump $TYCHO/doc/index.html {}"
     addTool reload Reload "$this reload"
     addTool open Open "$this altFile"
     addTool find Find "$itk_component(text) search"
@@ -203,6 +214,9 @@ body ::tycho::HTML::constructor {args} {
 
     eval itk_initialize $args
 
+    # Configure the reference directory of the widget
+    component text configure -directory [file dirname $file]
+
     foreach size {{tiny -2} {small 0} {medium 2} {large 4} {huge 8}} {
 	$itk_component(formatMenu) add radio \
 		-label [lindex $size 0] \
@@ -224,14 +238,7 @@ body ::tycho::HTML::constructor {args} {
     $itk_component(fileMenu) delete "SaveAs..."
     $itk_component(fileMenu) delete "Evaluate"
     $itk_component(fileMenu) delete "Revision Control..."
-
-    if {$itk_option(-file) != "NoName"} {
-	# In order to get reasonably interactive response, this is delayed.
-	# Not doing this seems to send the program into an infinite wait.
-	# Note also that "after idle" doesn't work here.  The window
-	# does not get mapped until parsing is complete.
-	after 1 "$this component text readFile $itk_option(-file)"
-    }
+    $itk_component(fileMenu) delete "Toggle Read-Only"
 
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
@@ -239,9 +246,13 @@ body ::tycho::HTML::constructor {args} {
     bind $prefix <Control-x><Control-w> { }
     bind $prefix <Control-x><Key-v> { }
     bind $prefix <Control-x><Key-i> { }
+    bind $prefix <Control-x><Control-q> { }
 
     $itk_component(text) configure -readonly 1
     focusin
+
+    # Create a stack to store where we've been.
+    set stack [::tycho::Stack #auto]
 }
 
 ###################################################################
@@ -253,9 +264,12 @@ body ::tycho::HTML::destructor {} {
     if [sourcewinIsMine] {
 	# Schedule this for after destruction is complete because the
 	# base class destructor removes the menu entry.
-	after idle [code windowMenuAddAll $sourcewin $file]
+	after idle "$sourcewin windowMenuAddAll $file"
     }
     catch {unset sizeName($this)}
+    if {[info exists stack] && [info objects $stack] != {}} {
+	delete object $stack
+    }
 }
 
     ###################################################################
@@ -264,15 +278,39 @@ body ::tycho::HTML::destructor {} {
 
 ###################################################################
 #### altFile
-# Query the user for a filename, insert its contents in place of the
-# currently displayed HTML.
+# Query the user for a filename, and if the selected file has the
+# extension ".html", ".htm", or "htl", insert its contents in place of the
+# currently displayed HTML.  Otherwise, view its contents in a new window.
 #
 body ::tycho::HTML::altFile {} {
     set filename [::tycho::DialogWindow::newModal FileBrowser \
 	    [::tycho::autoName .fileBrowser] -text "Alternate file to load:"]
     if {$filename != {}} {
-	switchFile $filename
+	hyperJump $filename {}
     }
+}
+
+#####################################################################
+#### back
+# Go back to the previous view, popping it off the stack.
+#
+body ::tycho::HTML::back {} {
+    set ref [$stack pop]
+    if {$ref == {}} {return}
+    set filename [lindex $ref 0]
+    set point [lindex $ref 1]
+    # Use the optional third argument to avoid being recorded for
+    # backtracking.
+    hyperJump $filename $point 0
+}
+
+#####################################################################
+#### clear
+# Clear the current text.
+#
+body ::tycho::HTML::clear {} {
+    HMreset_win [$itk_component(text) textWinName]
+    $itk_component(text) deleteRange 1.0 end
 }
 
 ###################################################################
@@ -280,8 +318,8 @@ body ::tycho::HTML::altFile {} {
 # Return the current insertion point in a form usable by seePoint.
 #
 body ::tycho::HTML::currentPoint {} {
-    set idx [[component text textWinName] index insert]
-    return [list range $idx $idx]
+    set idx [[component text textWinName] yview]
+    return [list yview [lindex $idx 0]]
 }
 
 ###################################################################
@@ -299,6 +337,78 @@ body ::tycho::HTML::focusin {} {
 body ::tycho::HTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/HTMLHelp.html
+}
+
+#####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename has the extension ".html", ".htm", or "htl", then open it in
+# this same window. If the filename is the empty string, then move the
+# view to a location within the same file. If filename is relative
+# (does not begin with "/", "~", or "$"), then prepend the directory of
+# the file currently being viewed. Then, expand the filename using
+# <code>::tycho::expandPath</code> and open the resulting file with
+# <code>::tycho::File::openContext</code>, which will choose an editor
+# based on the filename extension. Finally, invoke
+# <code>seePoint</code> to view the specified point within the file.
+# The format for the <i>point</i> argument depends on the type of file
+# being opened. For HTML files, it will normally be the name of an
+# anchor in the file or specified "yview" location within the file. For
+# text files, it will normally be either "{line <i>linenumber</i>}" or
+# "{range <i>start</i> <i>end</i>}", where <i>start</i> and <i>end</i>
+# have the form <i>linenumber.characternumber</i>. If the third
+# argument, which is optional, has value 0, then the jump is not
+# recorded for backtracking.
+#
+body ::tycho::HTML::hyperJump {filename point {push 1}} {
+    if {$filename != {}} {
+        set char [string index $filename 0]
+        if {$char != "/" && $char != "~" && $char != "\$"} {
+            set filename [format "%s/%s" [file dirname $file] $filename]
+        }
+        set filename [::tycho::expandPath $filename]
+
+        # If the filename has the ".html", ".htm", or ".htl" extension, open it
+        # in this window (unless it is already open in another window).
+        set ext [file extension $filename]
+        if {$ext == ".html" || $ext == ".htm" || $ext == ".htl"} {
+
+            # Special care is required here because there might be a
+            # source file open for either the old or the new file. If
+            # there is a source file for the old HTML file, it will now
+            # appear in the "Window" menu. If there is one for the new
+            # file, it should now be removed from the Window menu (the
+            # HTML browser widget will take its place).
+
+            # If the destination file is already open, raise it.
+            if {[info exists filesOpen($filename)] && \
+                    [eval $filesOpen($filename) isa ::tycho::HTML]} {
+                ::tycho::File::hyperJump $filename $point
+                return
+            }
+
+            # For backtracking
+            if $push {
+                $stack push [list $file [currentPoint]]
+            }
+
+            component text configure -directory [file dirname $filename]
+            configure -file $filename
+            if {$point != {}} {
+                after 200 [list $this seePoint $point]
+            }
+            return
+        }
+    } {
+        # For backtracking
+        if $push {
+            $stack push [list {} [currentPoint]]
+        }
+    }
+
+    # The file is not an HTML file, or is not specified,
+    # so defer to File.
+    ::tycho::File::hyperJump $filename $point
 }
 
 #####################################################################
@@ -337,16 +447,6 @@ body ::tycho::HTML::raiseWindow {} {
 }
 
 #####################################################################
-#### reload
-# Clear the current text and reload from the source file.
-#
-body ::tycho::HTML::reload {} {
-    HMreset_win [$itk_component(text) textWinName]
-    $itk_component(text) deleteRange 1.0 end
-    $itk_component(text) readFile $file
-}
-
-#####################################################################
 #### seePoint
 # Go to a specified point within the file.
 #
@@ -355,48 +455,34 @@ body ::tycho::HTML::seePoint {point} {
 }
 
 #####################################################################
-#### switchFile
-# Switch to a different HTML file. Special care is required
-# here because there might be a source file open for either the old
-# or the new file. If there is a source file for the old HTML file,
-# it will now appear in the "Window" menu.  If there is one for the
-# new file, it should now be removed from the Window menu (the HTML
-# browser widget will take its place).  This method essentially
-# accomplishes the same functions as configuring the -file option,
-# but specialized to this circumstance.
+#### windowMenuAddAll
+# Add me to the window menus of all open File objects.
+# This is redefined in order to coordinate the source window, which
+# may be open.
 #
-body ::tycho::HTML::switchFile {filename} {
-
-    # If the destination file is already open, raise it.
-    if {[info exists filesOpen($filename)] && \
-	    [eval $filesOpen($filename) isa ::tycho::HTML]} {
-	eval $filesOpen($filename) raiseWindow
-	return
-    }
-
-    # Remove the old file from the list of open files, and
-    # add its source file, if open, to the Window menu.
-    windowMenuRemoveAll $file
-    if [sourcewinIsMine] {
-	windowMenuAddAll $sourcewin $file
-    }
-
+body ::tycho::HTML::windowMenuAddAll {label} {
     # Reclaim the source window, if it is open.
-    if {[info exists filesOpen($filename)]} {
-	set sourcewin $filesOpen($filename)
-	windowMenuRemoveAll $filename
+    if {[info exists filesOpen($label)]} {
+        set sourcewin $filesOpen($label)
+        $sourcewin windowMenuRemoveAll $label
     } {
-	set sourcewin {}
+        set sourcewin {}
     }
+    ::tycho::File::windowMenuAddAll $label
+}
 
-    # Record the new filename in various places.
-    set file $filename
-    set previousfile $file
-    wm iconname $prefix [file tail $file]
-    windowMenuAddAll $this $filename
-
-    # Render the HTML file.
-    $itk_component(text) readFile $file
+#####################################################################
+#### windowMenuRemoveAll
+# Remove a filename from the window menus of all open File objects.
+# This is redefined in order to coordinate the source window, which
+# may be open.
+#
+body ::tycho::HTML::windowMenuRemoveAll {filename} {
+    ::tycho::File::windowMenuRemoveAll $filename
+    if [sourcewinIsMine] {
+        $sourcewin windowMenuAddAll $filename
+        set sourcewin {}
+    }
 }
 
 #########################################################################
@@ -438,10 +524,12 @@ body ::tycho::HTML::addTool {name label command} {
 # currently open HTML text. Otherwise, return 0.
 #
 body ::tycho::HTML::sourcewinIsMine {} {
-    if {$sourcewin != {} && \
-	    [uplevel #0 info objects $sourcewin] != {} && \
-	    [$sourcewin isa ::tycho::File] && \
-	    [$sourcewin filename] == $file} {
+    if {$sourcewin != {}} {
+        # Test to see whether the window still exists.
+        # We use catch here because other Itcl methods seem to be too tricky.
+        if [catch {$sourcewin isModified}] {
+            return 0
+        }
 	return 1
     } {
 	return 0
