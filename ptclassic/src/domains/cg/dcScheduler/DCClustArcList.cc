@@ -1,4 +1,4 @@
-static const char file_id[] = "ClustArcList.cc";
+static const char file_id[] = "DCClustArcList.cc";
 /*****************************************************************
 Version identification:
 $Id$
@@ -14,12 +14,12 @@ Date of last revision: 5/92
 #pragma implementation
 #endif
 
-#include "ClustArcList.h"
-#include "Cluster.h"
+#include "DCClustArcList.h"
+#include "DCCluster.h"
 
-StringList ClustArc::print() {
+StringList DCClustArc::print() {
 	StringList out;
-	out += "(Cluster ";
+	out += "(DCCluster ";
 	out += getNeighbor()->readName();
 	out += ", ";
 	out += getSamples();
@@ -35,13 +35,13 @@ StringList ClustArc::print() {
 // Changes the neighbor pointer to a new cluster.  
 // after a remove() call, so we re-scan the loop from the beginning.
 
-void ClustArcList::changeArc(Cluster *oldname, Cluster *newname) {
+void DCClustArcList::changeArc(DCCluster *oldname, DCCluster *newname) {
 
 	// check whether there is an arc connected to the newname.
-	ClustArc* ref = contain(newname);
+	DCClustArc* ref = contain(newname);
 
-	ClustArcListIter iter(*this);
-	ClustArc *arc;
+	DCClustArcListIter iter(*this);
+	DCClustArc *arc;
 	int change;
 	do {
 		iter.reset();
@@ -64,9 +64,9 @@ void ClustArcList::changeArc(Cluster *oldname, Cluster *newname) {
 }
 
 // check whether the given cluster is already known as a neighbor or not.
-ClustArc* ClustArcList :: contain(Cluster* c) {
-	ClustArcListIter citer(*this);
-	ClustArc* carc;
+DCClustArc* DCClustArcList :: contain(DCCluster* c) {
+	DCClustArcListIter citer(*this);
+	DCClustArc* carc;
 
 	while ((carc = citer++) != 0) {
 		if (carc->getNeighbor() == c) return carc;
@@ -74,10 +74,10 @@ ClustArc* ClustArcList :: contain(Cluster* c) {
 	return 0;
 }
 
-StringList ClustArcList::print() {
+StringList DCClustArcList::print() {
 	StringList out;
-	ClustArcListIter iter(*this);
-	ClustArc *arc;
+	DCClustArcListIter iter(*this);
+	DCClustArc *arc;
 
 	while ((arc = iter++) != 0) {
 		out += arc->print();
@@ -86,10 +86,10 @@ StringList ClustArcList::print() {
 }
 
 // remove arcs
-void ClustArcList :: removeArcs() {
-	ClustArcListIter iter(*this);
-	ClustArc* arc;
-	ClustArc* prev = 0;
+void DCClustArcList :: removeArcs() {
+	DCClustArcListIter iter(*this);
+	DCClustArc* arc;
+	DCClustArc* prev = 0;
 	
 	while ((arc = iter++) != 0) {
 		LOG_DEL; delete prev;

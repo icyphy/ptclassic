@@ -1,4 +1,4 @@
-static const char file_id[] = "Cluster.cc";
+static const char file_id[] = "DCCluster.cc";
 /*****************************************************************
 Version identification:
 $Id$
@@ -14,10 +14,10 @@ Date of last revision: 5/92
 #pragma implementation
 #endif
 
-#include "Cluster.h"
+#include "DCCluster.h"
 
 // Constructor for elementary cluster
-Cluster::Cluster(DCNodeList* nds) : name("") {
+DCCluster::DCCluster(DCNodeList* nds) : name("") {
 
 	// InOutArcs are set in DeclustScheduler
 	InOutArcs.initialize();
@@ -34,8 +34,8 @@ Cluster::Cluster(DCNodeList* nds) : name("") {
 	while ((n = iter++) != 0) {
 		total += n->getExTime();
 
-		// Set the elemCluster data member of each node
-  		n->elemCluster = this;
+		// Set the elemDCCluster data member of each node
+  		n->elemDCCluster = this;
 	}
 	nodes = nds;
 	ExecTime = total;
@@ -43,7 +43,7 @@ Cluster::Cluster(DCNodeList* nds) : name("") {
 
 
 // Constructor for higher level cluster which is union of two sub-clusters
-Cluster::Cluster(Cluster *clus1, Cluster *clus2) : name("") {
+DCCluster::DCCluster(DCCluster *clus1, DCCluster *clus2) : name("") {
 	intact = 1;	// Initialize to unbroken cluster
 	score = 0;
 	nodes = 0;
@@ -58,7 +58,7 @@ Cluster::Cluster(Cluster *clus1, Cluster *clus2) : name("") {
 }
 
 // destructor
-Cluster :: ~Cluster() {
+DCCluster :: ~DCCluster() {
 	if (nodes) {
 		// delete nodes
 		LOG_DEL; delete nodes;
@@ -70,23 +70,23 @@ Cluster :: ~Cluster() {
 				////////////////
 				///  addArc  ///
 				////////////////
-void Cluster :: addArc(Cluster* adj, int numSample) {
+void DCCluster :: addArc(DCCluster* adj, int numSample) {
 
-	ClustArc* carc;
+	DCClustArc* carc;
 
 	if ((carc = InOutArcs.contain(adj))) {
 		carc->addSamples(numSample);
 	} else {
-		LOG_NEW; carc = new ClustArc(adj, numSample);
+		LOG_NEW; carc = new DCClustArc(adj, numSample);
 		InOutArcs.prepend(carc);
 	}
 }
 
 				////////////////////
-				///  setCluster  ///
+				///  setDCCluster  ///
 				////////////////////
 // Sets the node cluster property to point to the cluster
-void Cluster::setCluster(Cluster* par) {
+void DCCluster::setDCCluster(DCCluster* par) {
 	if (par == 0) par = this;
 	if (nodes) {
         	DCNodeListIter iter(*nodes);
@@ -95,8 +95,8 @@ void Cluster::setCluster(Cluster* par) {
                 	n->cluster = par;
         	}
 	} else {
-		component1->setCluster(par);
-		component2->setCluster(par);
+		component1->setDCCluster(par);
+		component2->setDCCluster(par);
 	}
 }
 
@@ -106,24 +106,24 @@ void Cluster::setCluster(Cluster* par) {
 // Returns the best cluster to combine it with, looking at communication cost.
 // It checks InOutArcs to find which cluster passes the most samples and 
 // breaks ties by returning the smallest ExecTime cluster.
-Cluster *Cluster::findCombiner() {
+DCCluster *DCCluster::findCombiner() {
 
-	ClustArc *bestArc = 0;
+	DCClustArc *bestArc = 0;
 	int mostSamps = 0, smallestExec = 999999;
-	ClustArcListIter iter(InOutArcs);
-	ClustArc *carc;
+	DCClustArcListIter iter(InOutArcs);
+	DCClustArc *carc;
 
 	while ((carc = iter++) != 0) {
-		Cluster* Clust = carc->getNeighbor();   // The cluster
+		DCCluster* DCClust = carc->getNeighbor();   // The cluster
 
 		if (carc->getSamples() > mostSamps) {
 			mostSamps = carc->getSamples();
 			bestArc = carc;
-			smallestExec = Clust->getExecTime();
+			smallestExec = DCClust->getExecTime();
 		} else if ((carc->getSamples() == mostSamps) &&
-			(Clust->getExecTime() < smallestExec)) {
+			(DCClust->getExecTime() < smallestExec)) {
 			bestArc = carc;
-			smallestExec = Clust->getExecTime();
+			smallestExec = DCClust->getExecTime();
 		}
 	}
 
@@ -136,11 +136,11 @@ Cluster *Cluster::findCombiner() {
 				/////////////////
 				///  fixArcs  ///
 				/////////////////
-void Cluster::fixArcs(Cluster *c1, Cluster *c2) {
+void DCCluster::fixArcs(DCCluster *c1, DCCluster *c2) {
 
-	ClustArcListIter iter(c1->InOutArcs);
-	ClustArc *arc;
-	Cluster *cl;
+	DCClustArcListIter iter(c1->InOutArcs);
+	DCClustArc *arc;
+	DCCluster *cl;
 
 	while ((arc = iter++) != 0) {
 		if ((cl = arc->getNeighbor()) != c2) {
@@ -157,7 +157,7 @@ void Cluster::fixArcs(Cluster *c1, Cluster *c2) {
 				///  assignP  ///
 				/////////////////
 // Assigns every node in the cluster to the given processor
-void Cluster::assignP(int procNum) {
+void DCCluster::assignP(int procNum) {
 	// Assign the cluster to this processor
 	Proc = procNum;
 
@@ -176,7 +176,7 @@ void Cluster::assignP(int procNum) {
 				///////////////
 				///  print  ///
 				///////////////
-StringList Cluster::print() {
+StringList DCCluster::print() {
 	StringList out;
 	out += "name:  ";
 	out += name;

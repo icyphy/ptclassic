@@ -1,5 +1,5 @@
-#ifndef _ClustArcList_h
-#define _ClustArcList_h
+#ifndef _DCClustArcList_h
+#define _DCClustArcList_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -13,65 +13,65 @@ Copyright (c) 1991 The Regents of the University of California.
 
 Programmer: G.C. Sih
 
-ClustArc is used for intercluster arcs by the parallel scheduler
+DCClustArc is used for intercluster arcs by the parallel scheduler
 
 *****************************************************************/
 
 #include "DataStruct.h"
 #include "StringList.h"
-class Cluster;
+class DCCluster;
 
 			//////////////////////
-			//  class ClustArc  //
+			//  class DCClustArc  //
 			//////////////////////
 // For representing arcs between clusters.
-class ClustArc {
+class DCClustArc {
 public:
-	ClustArc(Cluster *n, int samps): neighbor(n), samples(samps) {}
-	Cluster *getNeighbor() { return neighbor; }
-	void changeNeighbor(Cluster *name) { neighbor = name; }
+	DCClustArc(DCCluster *n, int samps): neighbor(n), samples(samps) {}
+	DCCluster *getNeighbor() { return neighbor; }
+	void changeNeighbor(DCCluster *name) { neighbor = name; }
 	void changeSamples(int newsamps) { samples = newsamps; }
 	void addSamples(int delta) { samples += delta; }
 	int getSamples() { return samples; }
 	StringList print();
 private:
-	Cluster *neighbor;
+	DCCluster *neighbor;
 	int samples;
 };
 
 			//////////////////////////
-			//  class ClustArcList  //
+			//  class DCClustArcList  //
 			//////////////////////////
 // For handling lists of intercluster arcs.
-class ClustArcList : public SequentialList
+class DCClustArcList : public SequentialList
 {
 public:
 	// void initialize(); (inherited from SequentialList)
 	StringList print();
-	void changeArc(Cluster *oldname, Cluster *newname);
+	void changeArc(DCCluster *oldname, DCCluster *newname);
 	
-	// check whether the given Cluster is already registered as a
+	// check whether the given DCCluster is already registered as a
 	// neighbor.
-	ClustArc* contain(Cluster*);
+	DCClustArc* contain(DCCluster*);
 
 	// remove arcs
 	void removeArcs();
 };
 
 			//////////////////////////////
-			//  class ClustArcListIter  //
+			//  class DCClustArcListIter  //
 			//////////////////////////////
-// For iterating through ClustArcLists
+// For iterating through DCClustArcLists
 
-class ClustArcListIter : private ListIter {
+class DCClustArcListIter : private ListIter {
 public:
-	ClustArcListIter(const ClustArcList& l) : ListIter(l) {}
+	DCClustArcListIter(const DCClustArcList& l) : ListIter(l) {}
 
-	ClustArc *next() {return (ClustArc*)ListIter::next();}
-	ClustArc *operator++() {return next();}
+	DCClustArc *next() {return (DCClustArc*)ListIter::next();}
+	DCClustArc *operator++() {return next();}
 
 	ListIter::reset;
 
-	void reconnect(ClustArcList& l) {ListIter::reconnect(l);}
+	void reconnect(DCClustArcList& l) {ListIter::reconnect(l);}
 };
 #endif
