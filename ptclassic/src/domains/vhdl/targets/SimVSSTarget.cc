@@ -245,7 +245,8 @@ void SimVSSTarget :: frameCode() {
   // Generate the top-level configuration.
   top_configuration << "-- top-level configuration\n";
   top_configuration << "configuration ";
-  top_configuration << "parts";
+  top_configuration << galName;
+  top_configuration << "_parts";
   top_configuration << " of ";
   top_configuration << topName;
   top_configuration << " is\n";
@@ -255,7 +256,9 @@ void SimVSSTarget :: frameCode() {
   top_configuration << "(behavior); end for;\n";
   top_configuration << cli_configs;
   top_configuration << "end for;\n";
-  top_configuration << "end parts;\n";
+  top_configuration << "end ";
+  top_configuration << galName;
+  top_configuration << "_parts;\n";
 
   // Generate the entity_declaration.
   entity_declaration << "-- entity_declaration\n";
@@ -347,13 +350,15 @@ int SimVSSTarget :: runCode() {
     }
     else {
       if (progNotFound("ptvhdlsim")) return FALSE;
-      command << "ptvhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
+      command << "ptvhdlsim -nc -i " << filePrefix << ".com "
+	      << filePrefix << "_parts";
       StringList error = "";
       error << "Could not simulate " << filePrefix << ".vhdl";
       if (systemCall(command, error, targetHost)) return FALSE;
     }
     sysCommand << "cd " << (const char*) destDirectory;
     sysCommand << " ; ";
+
     sysCommand << sysWrapup;
     (void) system(sysCommand);
   }  
@@ -496,6 +501,8 @@ void SimVSSTarget :: addCodeStreams() {
   addStream("top_entity", &top_entity);
   addStream("top_architecture", &top_architecture);
   addStream("top_configuration", &top_configuration);
+
+  VHDLTarget::addCodeStreams();
 }
 
 // Initialize codeStreams.
