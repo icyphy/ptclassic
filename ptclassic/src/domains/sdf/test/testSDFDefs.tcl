@@ -83,47 +83,64 @@ proc readTmpFile {tmpfile} {
 }
 
 ######################################################################
+#### sdfInitUniverse
+# Initialize a universe by resetting, setting the name and the target.
+# This would be a good place to test schedulers.
+#
+proc sdfInitUniverse {{name {SDF_Init_Universe}} {target loop-SDF}} {
+    reset __empty__
+    domain SDF
+    newuniverse ${name}Test SDF
+    seed 100
+    target default-SDF
+    #target loop-SDF
+    #targetparam loopScheduler "DEF #choices: DEF, CLUST,ACYLOOP"
+}
+
+######################################################################
 #### sdfTest1In1Out
 # Test out one input one output star
 #
 proc sdfTest1In1Out {star {rampStep 1.0} {rampType "Float"} } {
-	reset __empty__
-	domain SDF
-    newuniverse ${star}Test SDF
-	target loop-SDF
-	star "$star.a" $star
-        if [regexp {Fix$} $star] {
-	    catch {
-		setstate "$star.a" ArrivingPrecision NO
-		setstate "$star.a" InputPrecision 15.1
-	    }
-	    setstate "$star.a" OutputPrecision 15.1
+    sdfInitUniverse $star
+    star "$star.a" $star
+    if [regexp {Fix$} $star] {
+	catch {
+	    setstate "$star.a" ArrivingPrecision NO
+	    setstate "$star.a" InputPrecision 15.1
 	}
-	switch $rampType {
-	    Float {
-		star Rampa Ramp
-	    }
-	    Fix {
-		star Rampa RampFix
-	    }
-	    Int {
-		star Rampa RampFloat
-	    }
-	    default {
-		error "rampType `$rampType' not supported"
-	    }
+	setstate "$star.a" OutputPrecision 15.1
+    }
+    switch $rampType {
+	Float {
+	    star Rampa Ramp
+	    setstate Rampa step $rampStep
+    	}
+	Fix {
+	    star Rampa RampFix
+	    setstate Rampa step $rampStep
+	}
+	Int {
+	    star Rampa RampFloat
+	    setstate Rampa step $rampStep
+	}
+	Complex {
+	    sdfTestRampCx Rampa $rampStep
 	}
 
-	setstate Rampa step $rampStep
+	default {
+	    error "rampType `$rampType' not supported"
+	}
+    }
 
-	set tmpfile [sdfSetupPrinter]
+    set tmpfile [sdfSetupPrinter]
+    
+    connect "$star.a" output Printa input
+    connect Rampa output "$star.a" input
+    run 10 
+    wrapup
 
-	connect "$star.a" output Printa input
-	connect Rampa output "$star.a" input
-	run 10 
-	wrapup
-
-	return [readTmpFile $tmpfile]
+    return [readTmpFile $tmpfile]
 }
 
 ######################################################################
@@ -177,16 +194,37 @@ proc sdfTest1In1OutFork {star {rampStep 1.0} {rampType "Float"} } {
 }
 
 ######################################################################
-#### sdfTestArithmetic2input
+#### sdfTestAr
 # Test out two input arithmetic stars
 #
-proc sdfTestArithmetic2input {star} {
+proc sdfTestArithmetic2input {star {rampType Float}} {
     reset __empty__
     domain SDF
     newuniverse ${star}Test SDF
     target loop-SDF
-    star Rampa Ramp
-    star Rampb Ramp
+    switch $rampType {
+	Float {
+	    star Rampa Ramp
+	    star Rampb Ramp
+	}
+	Fix {
+	    star Rampa RampFix
+	    star Rampb RampFix
+	    setstate Rampa step 0.0625
+	    setstate Rampb step -0.125
+	}
+	Int {
+	    star Rampa RampInt
+	    star Rampb RampInt 
+	    setstate Rampb step 2.1
+	}
+
+	Complex {
+	    sdfTestRampCx Rampa
+	    sdfTestRampCx Rampb 2 0.25
+	}
+    }
+
     set tmpfile [sdfSetupPrinter]
 
     if [regexp {^Sub} $star] {
