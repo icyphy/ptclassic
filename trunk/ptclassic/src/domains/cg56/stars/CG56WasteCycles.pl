@@ -43,6 +43,9 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 	nop
 	move    x1,$ref(output)
 	} 
+	constructor {
+		noInternalState();
+	}
 	go {
 		X = int(cyclesToWaste) - 4;
 		addCode(std);
