@@ -61,6 +61,10 @@ PL_SRCS= \
  AnyCGPeekPoke.pl \
  CGCircToLin.pl \
  CGCollect.pl \
+ CGDummySrc.pl \
+ CGDummySrcCx.pl \
+ CGDummySrcFix.pl \
+ CGDummySrcInt.pl \
  CGFork.pl \
  CGLinToCirc.pl \
  CGMultiIn.pl \
