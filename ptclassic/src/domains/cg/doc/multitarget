@@ -52,7 +52,8 @@ targets of arbitrary type, connected in either a fully
 connected or shared-bus topology, with parametrized communication 
 costs. 	 
 We are also working on models for actual 
-multiple-processor systems such as the CM-5, the AT&T DSP-3, 
+multiple-processor systems such as the CM-5, the Sproc chip from
+Star Semiconductor, the AT&T DSP-3, 
 the ordered transaction architecture [3], the Ariel Hydra board, 
 and the Spectrum VASP. Refer to the CG56 domain documentation for
 .c CG56MultiSim 
