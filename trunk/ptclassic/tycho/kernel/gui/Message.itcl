@@ -111,7 +111,7 @@ body ::tycho::Message::constructor {args} {
     # window never returns.  Perhaps "delete object" does not fully
     # inform tk that the window is gone?
     addButton ok -text "OK <Ret>" -command \
-	    "$this nextWindow; delete object $this"
+	    "catch [list $this nextWindow] ; delete object $this"
     default ok
 
     # Explicitly handle configs that may have been ignored earlier.
