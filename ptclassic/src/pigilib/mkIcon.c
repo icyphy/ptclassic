@@ -25,7 +25,7 @@ Copyright (c) 1989 The Regents of the University of California.
 
 #define ERRBUF_MAX 1000
 
-static octObject starBoxLayer, galBoxLayer;
+static octObject starBoxLayer, galBoxLayer, iconBackgrLayer, iconShadowLayer;
 
 /* 8/24/89
 Check to see if icon already exists.
@@ -196,6 +196,29 @@ int size;
 }
 
 static boolean
+MkShadow(layerPtr, size)
+octObject *layerPtr;
+int size;
+{
+    Shape box;
+    struct octPoint corners[2];
+    static struct octPoint noTranslate = {0, 0};
+    octObject dummy;
+
+    box.type = OCT_BOX;
+    box.points = corners;
+    box.points_n = 2;
+
+    corners[0].x = -60;
+    corners[0].y = 40;
+    corners[1].x = 40;
+    corners[1].y = 40-size*25;
+
+    ERR_IF1(!PutShape(layerPtr, &dummy, &box, &noTranslate));
+    return TRUE;
+}
+
+static boolean
 MkLabel(facetPtr, name)
 octObject *facetPtr;
 char *name;
@@ -334,6 +357,14 @@ octObject *galFacetPtr, *iconFacetPtr;
     ERR_IF1(!MkBox(&galBoxLayer, size));
     ERR_IF1(!MkLabel(iconFacetPtr, name));
     ERR_IF1(!MkTerms(iconFacetPtr, &terms));
+    if (ohGetOrCreateLayer(iconFacetPtr, &iconBackgrLayer, "iconBackground")
+	== OCT_OK) {
+	ERR_IF1(!MkBox(&iconBackgrLayer, size));
+	if (ohGetOrCreateLayer(iconFacetPtr, &iconShadowLayer, "iconShadow")
+	    == OCT_OK) {
+	    ERR_IF1(!MkShadow(&iconShadowLayer, size));
+	}
+    }
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
@@ -373,6 +404,14 @@ octObject *iconFacetPtr;
     ERR_IF1(!MkBox(&starBoxLayer, size));
     ERR_IF1(!MkLabel(iconFacetPtr, name));
     ERR_IF1(!MkTerms(iconFacetPtr, &terms));
+    if (ohGetOrCreateLayer(iconFacetPtr, &iconBackgrLayer, "iconBackground")
+	== OCT_OK) {
+	ERR_IF1(!MkBox(&iconBackgrLayer, size));
+	if (ohGetOrCreateLayer(iconFacetPtr, &iconShadowLayer, "iconShadow")
+	    == OCT_OK) {
+	    ERR_IF1(!MkShadow(&iconShadowLayer, size));
+	}
+    }
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "star", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
