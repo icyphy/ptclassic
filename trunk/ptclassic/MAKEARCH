@@ -26,7 +26,7 @@ optmkdir obj.$ARCH
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp kernel pigiRpc pigilib libgantt preproc xgraph)
+foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt preproc xgraph)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -55,7 +55,8 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=cg-ddf cg56
+set EXPDOMAINS=(cg-ddf cg56)
+set EXPEXTRAS=(cg56/targets cg-ddf/constructs)
 
 cd domains
 foreach x (sdf ddf de thor cg $EXPDOMAINS)
@@ -79,7 +80,7 @@ end
 
 foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
 	ddf/constructs sdf/loopScheduler cg/gilsScheduler thor/analyzerX11 \
-	cg-ddf/constructs cg/dlScheduler cg/quasiScheduler)
+	cg/dlScheduler cg/quasiScheduler $EXPEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
