@@ -27,8 +27,27 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "bb.h"
+#include "chain.h"
+#include "default.h"
 #include "io_internal.h"
+#include "io_procs.h"
+#include "master.h"
+#include "mark.h"
+#include "translate.h"
+#include "oct_utils.h"
+
 #include "io.h"
+
+/* Forward references */
+int oct_get_terms
+	ARGS((struct facet *desc));
+int oct_put_terms
+	ARGS((struct facet *desc));
+int oct_get_rest_of_terms
+	ARGS((struct facet *desc));
+int oct_put_rest_of_terms
+	ARGS((struct facet *desc));
 
   /* The top level io operations: dump, restore and free */
 
@@ -45,6 +64,7 @@ extern void oct_mark_ptr();
 #define BB_INIT 1
 #define BB_VALID 2
 
+int
 oct_dump(desc, file)
 struct facet *desc;
 char *file;
@@ -126,6 +146,7 @@ octId oct_id_offset;
  * Restore only the first part of the facet: the timestamps, bounding 
  * box and formal terminals
  */
+int
 oct_restore_info(file, desc)
 char *file;
 struct facet *desc;
@@ -186,6 +207,7 @@ struct facet *desc;
     return 1;
 }
 
+int
 oct_restore(file, desc)
 char *file;
 struct facet *desc;
@@ -229,6 +251,7 @@ struct facet *desc;
     return 1;
 }
 
+int
 oct_put_terms(desc)
 struct facet *desc;
 {
@@ -250,7 +273,8 @@ struct facet *desc;
     }
     return 1;
 }
-    
+
+int    
 oct_get_terms(desc)
 struct facet *desc;
 {
@@ -281,6 +305,7 @@ struct facet *desc;
  * so there are stored later in the file and only read in during a 
  * full restore
  */
+int
 oct_get_rest_of_terms(desc)
 struct facet *desc;
 {
@@ -301,7 +326,7 @@ struct facet *desc;
     }
     return 1;
 }
-    
+int    
 oct_put_rest_of_terms(desc)
 struct facet *desc;
 {
