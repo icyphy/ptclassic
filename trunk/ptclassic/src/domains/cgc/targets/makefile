@@ -13,7 +13,7 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = main cm5 NOWam
+DIRS = main NOWam
 
 ME = cgc/targets
 
