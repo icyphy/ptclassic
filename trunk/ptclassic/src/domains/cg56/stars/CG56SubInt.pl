@@ -40,7 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	move	(r0)+,x0
     }
     codeblock(repeat,"int n") {
-	rept	#@n
+	rep	#@n
     }
     codeblock(doOp) {
 	sub	x0,a	(r0)+,x0
