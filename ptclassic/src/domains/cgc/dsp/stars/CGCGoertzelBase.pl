@@ -21,7 +21,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { k }
 		type { int }
 		default { 0 }
-		desc { the DFT coefficient to compute (k < N) }
+		desc { the DFT coefficient to compute (k less than N) }
 	}
 	defstate {
 		name { N }
@@ -33,7 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { size }
 		type { int }
 		default { 32 }
-		desc { amount of data to read (N <= size) }
+		desc { amount of data to read (N less than or equal to size) }
 	}
 	defstate {
 		name { d1 }
