@@ -66,8 +66,8 @@ DCTImage::DCTImage(const BaseImage& bi, int a):
 
 
 DCTImage::DCTImage(const DCTImage& di, int a):
-		blocksize(di.blocksize), upWidth(di.upWidth),
-		upHeight(di.upHeight), BaseImage(di)
+	upWidth(di.upWidth), upHeight(di.upHeight),
+  	blocksize(di.blocksize), BaseImage(di)
 {
 	LOG_NEW; DCTData = new float[size];
 	if (!a) { copy(size, DCTData, di.DCTData); }
