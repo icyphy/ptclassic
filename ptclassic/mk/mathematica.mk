@@ -50,6 +50,10 @@ ifndef MATHLINKLIBNAME
 	MATHLINKLIBNAME = ML
 endif
 
+ifndef MATHLINK2LIBNAME
+	MATHLINK2LIBNAME = ML
+endif
+
 # MATHEMATICAARCH is set in the config makefiles.
 
 # matlabRootDir traverses the user's path, so we only run it when
@@ -70,7 +74,7 @@ ifdef NEED_MATHEMATICADIR
 	else
 		# Mathematica2.x
 		MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
-					-l$(MATHLINKLIBNAME)
+					-l$(MATHLINK2LIBNAME)
 	endif
 	endif
 endif

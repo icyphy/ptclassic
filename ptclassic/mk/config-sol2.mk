@@ -153,6 +153,9 @@ MATARCH = sol2
 # Mathematica architecture
 MATHEMATICAARCH = Solaris
 
+# Mathematica 2.x library name
+MATHLINK2LIBNAME = MLelf
+
 # Build gthreads
 INCLUDE_GTHREADS =	yes
 
