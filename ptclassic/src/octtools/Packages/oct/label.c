@@ -33,12 +33,14 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "geo.h"
 #include "io.h"
-
+#include "io_procs.h"
+#include "label.h"
 static octStatus label_read_fields(), label_write_fields();
 static octStatus label_copy_fields(), label_free_fields();
 extern struct object_desc oct_geo_desc;
 static struct object_desc *super = &oct_geo_desc;
 
+void
 oct_label_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -69,6 +71,8 @@ int size;
     if (new->label != NIL(char)) {
 	new->label = oct_str_intern(new->label);
     }
+    return OCT_OK;		/* Return OCT_OK because we take the
+				   pointer of this func */
 }
 
 
@@ -81,6 +85,9 @@ generic *ptr;
     if (label->user_label.label != NIL(char)) {
 	oct_str_free(label->user_label.label);
     }
+    return OCT_OK;		/* Return OCT_OK because we take the
+				   pointer of this func */
+
 }
     
 static octStatus
