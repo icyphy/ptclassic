@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSTarget.h"
 #include "ACSGeodesic.h"
 #include "Plasma.h"
+#include "CircularBuffer.h"
 
 // Class identification.
 //ISA_FUNC(ACSPortHole,PortHole);
@@ -105,7 +106,28 @@ ACSPortHole :: ~ACSPortHole() {
 }
 
 void ACSPortHole :: initialize() {
-	CGPortHole :: initialize();
+	if (!setResolvedType ()) {
+		Error::abortRun (*this, "can't determine DataType");
+		return;
+	}
+	if (!allocatePlasma()) return;
+	// allocate buffer
+	allocateBuffer ();
+
+	// initialize buffer
+	for(int i = myBuffer->size(); i>0; i--) {
+		Particle** p = myBuffer->next();
+		// Initialize particles on the buffer, so when we
+		// restart they do not contain old data
+		// fill in any empty holes (which could be caused by
+		// errors of some kinds in previous runs).
+		if (*p)	(*p)->initialize();
+		else *p = myPlasma->get();
+	}
+	// If this is an output PortHole (or connected to an
+	// input porthole), reset myGeodesic
+	if (far() && myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
+		myGeodesic->initialize();
 
 	// member initialize. same values as constructor.
 	maxBuf = 1;
