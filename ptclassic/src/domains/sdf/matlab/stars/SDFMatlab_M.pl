@@ -249,10 +249,10 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	}
 
 	wrapup {
-		int i, ret;
-
-		ret = engClose(matlabEnginePtr);
-
+		if ( ! engClose(matlabEnginePtr) ) {
+		  Error::warn(*this, "Error when terminating connection ",
+			      "to the Matlab kernel.");
+		}
 		free( matlabInputMatrices );
 		free( matlabOutputMatrices );
 	}
