@@ -32,12 +32,8 @@
 #include <stdlib.h>
 #include <sys/unistd.h>
 #include "../../kernel/miscFuncs.h"
-//extern void srand48(long int);
-//extern long int lrand48(void);
-#define random() lrand48()
-#define srandom(a) srand48(a)
-//#define random() ((long)(rand()))
-//#define srandom(seed) (srand( (unsigned int)(seed))
+inline long random() { return lrand48();}
+inline void srandom(int seed) { srandom(seed);}
 #else
 // Sun
 #include <stdlib.h>
