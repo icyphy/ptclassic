@@ -57,6 +57,8 @@ public:
 // attribute bit definitions
 const unsigned int A_CONSTANT = 1;
 const unsigned int A_SETTABLE = 2;
+const unsigned int A_NONCONSTANT = 0;
+const unsigned int A_NONSETTABLE = 0;
 const unsigned int A_DEFAULT = A_CONSTANT | A_SETTABLE;
 
 class State : public NamedObj
