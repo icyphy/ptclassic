@@ -350,15 +350,6 @@ void CGMultiTarget::writeSchedule() {
         }
 }
 
-// This is not used *yet*
-void CGMultiTarget::writeCode() {
-	for (int i = 0; i < nProcs(); i++) {
-		// write out generated code.
-		CGTarget* nextChild = (CGTarget*)child(i);
-		nextChild->writeCode();
-	}
-}
-
 	/////////////////////
 	// Wormhole support
 	/////////////////////
@@ -439,13 +430,6 @@ int CGMultiTarget :: allReceiveWormData() {
 // all child targets will finish generating code.
 
 void CGMultiTarget :: generateCode() {
-	if (nChildrenAlloc == 1) {
-		CGTarget* t = (CGTarget*) child(0);
-		t->generateCode();
-		addProcessorCode(0,(*t->getStream("code")));
-		return;
-	}
-
 	if (parent()) setup();		// check later whether this is right.
 
 	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
@@ -456,7 +440,55 @@ void CGMultiTarget :: generateCode() {
 		allWormOutputCode();	// note the change of calling order.
 	}
 	scheduler()->compileRun();
+	for (int i = 0 ; i < nChildrenAlloc ; i++) {
+		if (child(i)->isA("CGTarget")) {
+			((CGTarget*)child(i))->generateCode();
+		}
+	}
         endIteration(iterations,0);
+}
+
+void CGMultiTarget::wrapup() {
+	if (!inWormHole()&&!parent()) writeCode();
+	MultiTarget::wrapup();
+}
+
+/*virtual*/ void CGMultiTarget :: writeCode() {
+        for (int i = 0 ; i < nChildrenAlloc ; i++) {
+                if (child(i)->isA("CGTarget")) {
+                        ((CGTarget*)child(i))->writeCode();
+                }
+        }
+}
+
+/*virtual*/ int CGMultiTarget :: compileCode() {
+        int status = TRUE;
+        for (int i = 0 ; i < nChildrenAlloc ; i++) {
+                if (child(i)->isA("CGTarget")) {
+                        status &= ((CGTarget*)child(i))->compileCode();
+                }
+        }
+	return status;
+}
+
+/*virtual*/ int CGMultiTarget :: runCode() {
+        int status = TRUE;
+        for (int i = 0 ; i < nChildrenAlloc ; i++) {
+                if (child(i)->isA("CGTarget")) {
+                        status &= ((CGTarget*)child(i))->runCode();
+                }
+        }
+	return status;
+}
+
+/*virtual*/ int CGMultiTarget :: loadCode() {   
+        int status = TRUE;
+        for (int i = 0 ; i < nChildrenAlloc ; i++) {
+                if (child(i)->isA("CGTarget")) {
+                        status &= ((CGTarget*)child(i))->loadCode();
+                }
+        }
+        return status;
 }
 	
 // Trickiness again for wormholes. 
