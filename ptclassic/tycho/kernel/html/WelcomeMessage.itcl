@@ -75,9 +75,7 @@ class ::tycho::WelcomeMessage {
 body ::tycho::WelcomeMessage::constructor {args} {
 
     global ::TYCHO
-    set slowNetwork [stylesheet get system slowNetwork]
-
-    if {$slowNetwork == 0} {  
+    if {[stylesheet get system slowNetwork] == 0} {  
 	# An option -palette 3/3/2 below restricts the palette,
 	# but it is better to restrict it in the source.
 	if {!$tychogifexists} {
@@ -133,5 +131,6 @@ body ::tycho::WelcomeMessage::constructor {args} {
     configure -textwidth 60
     configure -textheight 17
     configure -scrollbar 0
+    configure -title "Welcome to Tycho"
     insertData $html
 }
