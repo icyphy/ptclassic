@@ -48,7 +48,7 @@ static char SccsId[]="$Id$";
 
 #define MAX_ARGS	10
 
-static XContext BrowserContext = (XContext) 0;
+/*static XContext BrowserContext = (XContext) 0;*/
 static void Select();
 static void set_items();
 static void destroy();
@@ -93,8 +93,8 @@ caddr_t data;			/* User data                         */
  * is the `data' parameter to this function.
  */
 {
-    Widget vport, one;
-    int arg_len, i;
+    Widget vport;
+    int arg_len;
     Arg arg_list[MAX_ARGS];
     context_info *info;
 
@@ -134,7 +134,7 @@ fb_item items[];		/* New array       */
     caddr_t *spot;
     context_info *info;
 
-    if (spot = fb_find(fb)) {
+    if ( (spot = fb_find(fb)) ) {
 	info = (context_info *) *spot;
 	set_items(info, num_items, items);
     } else {
@@ -218,7 +218,7 @@ caddr_t call_data;
     context_info *info;
     caddr_t *spot;
 
-    if (spot = fb_find(XtParent(w))) {
+    if ( (spot = fb_find(XtParent(w))) ) {
 	info = (context_info *) *spot;
 	arg_len = 0;
 	XtSetArg(arg_list[arg_len], XtNselect, &select_flag);  arg_len++;
@@ -262,9 +262,9 @@ XtPointer call;			/* Call data         */
 {
     context_info *info = (context_info *) fb_unassoc(w);
 
-    XtFree(info->sub_items);
-    XtFree(info->udl);
-    XtFree(info);
+    XtFree((char *)info->sub_items);
+    XtFree((char *)info->udl);
+    XtFree((char *)info);
 }
 
 
@@ -311,14 +311,14 @@ caddr_t data;			/* Data itself                   */
     if (!fb_tbl) {
 	fb_tbl = (fb_tbl_type *) XtCalloc(fb_tbl_alloc, sizeof(fb_tbl_type));
     }
-    if (spot = fb_find(widget)) {
+    if ( (spot = fb_find(widget)) ) {
 	*spot = data;
     } else {
 	if (fb_tbl_last >= fb_tbl_alloc) {
 	    /* Make bigger */
 	    fb_tbl_alloc *= 2;
 	    fb_tbl = (fb_tbl_type *)
-	      XtRealloc(fb_tbl, fb_tbl_alloc*sizeof(fb_tbl_type));
+	      XtRealloc((char *)fb_tbl, fb_tbl_alloc*sizeof(fb_tbl_type));
 	}
 	fb_tbl[fb_tbl_last].w = widget;
 	fb_tbl[fb_tbl_last].data = data;
