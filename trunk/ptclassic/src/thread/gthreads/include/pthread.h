@@ -33,10 +33,11 @@ Report problems and direct all questions to:
  * Pthreads interface definition
  */
 
-/* Solaris 2.5 pretends to have posix threads. */
-#if !defined(_POSIX_THREADS) || defined(PTSOL2_5)
-
 #include <pthread/config.h>
+
+/* Solaris 2.5 pretends to have posix threads. */
+#if !defined(_POSIX_THREADS) || defined(SOLARIS_NP)
+
 #include <pthread/unistd.h>
 #include <pthread/signal.h>
 #include <stdio.h>
