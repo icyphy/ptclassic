@@ -25,10 +25,10 @@ whatToBuild:	all
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
 .pl.cc:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+	cd $(VPATH); ptlang $< ; mv $*.t $(STARDOCDIR)
 
 .pl.h:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+	cd $(VPATH); ptlang $< ; mv $*.t $(STARDOCDIR)
 
 # Rule for the thor preprocessor
 # Make sure we always run the preprocessor in the source directory
