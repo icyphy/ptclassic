@@ -1,7 +1,7 @@
 static const char file_id[] = "MutableCalendarQueue.cc";
 /**************************************************************************
 Version identification:
-$Id$
+@(#)MutableCalendarQueue.cc	1.4 12/18/97
 
 WARNING experimental version
 Copyright (c) 1990-1997 The Regents of the University of California.
@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
         of the member  
            Link * starPendingEventRef
         to the class CqLevelLink. This allows CqLevelLink to be
-        directly accessed by the DestinedEventList.
+        directly accessed by the PendingEventList.
 
 **************************************************************************/
 
@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "EventQueue.h"
+#include "LinkedList.h"
 #include "MutableCalendarQueue.h"
 #include <assert.h>
 #include <limits.h>		// We use INT_MAX below
@@ -271,6 +272,8 @@ CqLevelLink* MutableCalendarQueue :: NextEvent()
     register int i;
     int year;
     CqLevelLink *result;
+    Link * starPendingEventRef;
+    DEStar * starPtr = 0;
 
     
     if (cq_eventNum == 0) return(NULL);
@@ -296,6 +299,22 @@ CqLevelLink* MutableCalendarQueue :: NextEvent()
 		Resize(cq_bucketNum/2);
 	    if (cq_debug) printf("REMOVE: ev # %ld, time %f, fine level %f\n",
 	 		result->absEventNum, result->level, result->fineLevel);
+
+            // ************************************************ //
+            // An event is expiring. Remove the corresponding
+            // element within the PendingEventList if the 
+	    // destination star is mutable.
+            // ************************************************ //
+	    if( result->destinationRef != 0 ) {
+                starPendingEventRef = result->destinationRef; 
+		result->destinationRef = 0; 
+		starPtr = (DEStar *)result->dest; 
+		starPtr->removePendingEvent( starPendingEventRef );
+		// FIXME: Should we delete starPtr??
+	    }
+
+            // ************************************************ //
+
 	    return(result);
 	} else {
 	    if ( ++i == cq_bucketNum) 
