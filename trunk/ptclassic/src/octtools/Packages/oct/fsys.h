@@ -40,6 +40,8 @@ extern char *fsys_error_message;
 #define FSYS_CHILD	0x01
 #define FSYS_SIBLING	0x02
 
+void oct_init_facet_key_table();
+
 extern int fsys_commit();
 extern int fsys_lock();
 extern int fsys_unlock();
