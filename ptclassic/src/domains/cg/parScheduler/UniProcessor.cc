@@ -41,6 +41,8 @@ Date of last revision:
 #include "UniProcessor.h"
 #include "SDFScheduler.h"
 #include <iostream.h>
+#include "../../../pigilib/ptk.h"
+#include <tcl.h>
 
 StringList UniProcessor :: display(int makespan)
 {
@@ -84,18 +86,18 @@ StringList UniProcessor :: display(int makespan)
 }
 
 // write Gantt chart.
-int UniProcessor :: writeGantt(ostream& o) {
+int UniProcessor :: writeGantt(const char* universe, int numProcs, int span) {
 
 	int total = 0;
 	int start = 0;
 	int fin = 0;
+	int proc_num = 0;
 
 	ProcessorIter iter(*this);
 	NodeSchedule* obj;
 
-	// we must write lines in reverse order: revList is
-	// used for order reversal
-	SequentialList revList;
+	proc_num = ++(this->index);
+
 	while ((obj = iter++) != 0) {
 		ParNode* node = (ParNode*) obj->getNode();
 		int nType = node->getType();
@@ -103,32 +105,24 @@ int UniProcessor :: writeGantt(ostream& o) {
 			total += obj->getDuration();
 			fin = start + obj->getDuration();
 
-			char tmpbuf[160];
+			char tmpbuf[160] = "";
 			const char* starName;
-			if (!nType) 
-				starName = node->readRealName();
-			else if (nType == -1)
+			if (!nType) {
+				starName = node->myStar()->name();
+			} else if (nType == -1) {
 				starName = "snd";
-			else
+			} else {
 				starName = "rcv";
-			sprintf (tmpbuf, "\t%s {%d} (%d %d)\n",
-                                         starName,
-                                         node->invocationNumber(),
-                                         start, fin);
-			revList.prepend(savestring(tmpbuf));
+			}
+			sprintf(tmpbuf,"ptkGantt_DrawProc %s %d %d %d %s %d %d",
+				universe, numProcs, span,
+				proc_num, starName, start, fin);
+			Tcl_Eval(ptkInterp, tmpbuf);
 			start = fin;
 		} else { // Idle node
 			start += obj->getDuration();
 		}
 	}
-	// go through revList and write elements in reverse
-	ListIter nextl(revList);
-	char* p;
-	while ((p = (char*)nextl++) != 0) {
-		o << p;
-		LOG_DEL; delete p;
-	}
-	o << "$end proc$\n";
 	return total;
 }
 
