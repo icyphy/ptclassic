@@ -162,8 +162,9 @@ $label(Xor)
 	}
 
         codeblock(invertAccumulator) {
-	movec   sr,a	#$$04,x1	; save status register (condition codes)
-	and	x1,a			; returns true if zero (test Z bit)
+	tst	a	#$$04,y1	; mask for Z bit in status register
+	movec   sr,a			; save status register (condition codes)
+	and	y1,a			; returns true if zero (test Z bit)
 	}
 
         codeblock(saveResult) {
@@ -249,7 +250,7 @@ $label(Xor)
 		    break;
 
 		  case NANDID:
-		    pairsOfCycles += 2;
+		    pairsOfCycles += 3;
 		    // fall through
 		  case ANDID:
 		    if (numinputs == 2) pairsOfCycles += 3;
@@ -257,14 +258,14 @@ $label(Xor)
 		    break;
 
 		  case NORID:
-		    pairsOfCycles += 2;
+		    pairsOfCycles += 3;
 		    // fall through
 		  case ORID:
 		    pairsOfCycles += numinputs;
 		    break;
 
 		  case XORID:
-		    pairsOfCycles += 2;
+		    pairsOfCycles += 3;
 		    // fall through
 		  case XNORID:
 		    pairsOfCycles += 3*numinputs;
