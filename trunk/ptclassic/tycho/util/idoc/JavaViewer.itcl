@@ -122,7 +122,7 @@ body ::tycho::JavaViewer::docFile {classname} {
 
     # Get the CLASSPATH, turn into a list
     set classPath [::tycho::expandPathSplit \
-	    [::tycho::preference get java classPath]]
+	    [stylesheet get java classPath]]
     set classPathList [split $classPath [::tycho::pathSeparator]]
 
     # Can't read .zip files (Assume at most one.)

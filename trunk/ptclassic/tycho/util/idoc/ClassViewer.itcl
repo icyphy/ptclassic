@@ -256,9 +256,6 @@ class ::tycho::ClassViewer {
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
-    # Access the widget preferences
-    protected method preference {mode args}
-
     ###################################################################
     ####                      private methods                      ####
 
@@ -1088,32 +1085,24 @@ body ::tycho::ClassViewer::initialize {{menubar {}} {statusbar {}} {toolbar {}}}
         $itk_component(html2) forgetDisplayer
     }
 
-    # Subscribe to the preference set
+    # Subscribe to the stylesheets
     # FIXME: This has been put into this method,
     # when it really should be in the constructor. For some
     # reason, moving it to the constructor doesn't get the
     # the correct height and width
-    preference subscribeoptions $this \
-            -headfont displayFont \
-            -bodyfont entryFont \
-            -background bgColor \
-            -height height \
-            -width width \
-            -publiccolor publicColor \
-            -protectedcolor protectedColor \
-            -packagecolor packageColor \
-            -privatecolor privateColor \
-            -optioncolor optionColor  \
-            -inheritcolor inheritColor \
-            -verbose verboseHtml
-}
-
-#####################################################################
-#### preference
-# preference function for ClassViewer
-#
-body ::tycho::ClassViewer::preference {mode args} {
-    eval ::tycho::preference $mode "idoc" $args
+    stylesheet subscribe \
+            -headfont fonts displayFont \
+            -bodyfont fonts entryFont \
+            -background tydoc bgColor \
+            -height     tydoc height \
+            -width      tydoc width \
+            -publiccolor tydoc publicColor \
+            -protectedcolor tydoc protectedColor \
+            -packagecolor tydoc packageColor \
+            -privatecolor tydoc privateColor \
+            -optioncolor tydoc optionColor  \
+            -inheritcolor tydoc inheritColor \
+            -verbose tydoc verboseHtml
 }
 
     ###################################################################
