@@ -38,6 +38,11 @@ extern "C" {
 /***************************************************************************/
 /* Define #defines for each Ptolemy architecture. (Alphabetical, please) */
 
+#if defined(_AIX)
+/* IBM rs6000 and powerpc running AIX */
+#define PTAIX
+#endif
+
 #if defined(__alpha)
 /* DEC Alpha */
 #define PTALPHA
@@ -120,13 +125,14 @@ extern "C" {
 #endif /* ! VOLATILE */
 
 #if !defined(PTLINUX) && !defined(PTNBSD_386)
-#if defined(USG) && ! defined(PTHPPA)
+#if defined(USG) && ! defined(PTHPPA) && ! defined(PTAIX)
 extern int sprintf();
 #else
 #ifndef PTIRIX5
 #ifndef PTSOL2
 #ifndef PTULTRIX
 #ifndef PTHPPA
+#ifndef PTAIX
 #if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
 #if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2)
 /* SunOS4.1.3 Sun Cfront */	
@@ -134,6 +140,7 @@ extern int sprintf();
 extern char *sprintf();
 #endif
 #endif /*sun && __GNUC__*/
+#endif /* PTAIX */
 #endif /* PTHPPA */
 #endif /* PTULTRIX */
 #endif /* PTSOL2 */
@@ -201,6 +208,12 @@ extern int vfprintf(FILE *, const char *, char *);
 
 #endif /* SUN4 */
 
+/* IBM RS6000 running AIX */
+#ifdef PTAIX
+ extern "C" int select(unsigned long, void*, void*, void*, timeval*);
+#endif
+
+
 /* Here we define common missing function prototypes */
 /* Alphabetical, please */
 
@@ -251,7 +264,10 @@ extern void setpwent();		/* octtools/Packages/fc/fc.c and
 
 extern int sscanf (const char *, const char *, ...);
 extern int socket(int, int, int); /* thor/kernel/rpc.c uses socket() */
+
+#if ! defined(PTAIX)
 extern int symlink(const char *, const char *);	/* CGCTarget.cc */
+#endif
 
 extern int unlink(const char *);
 
@@ -337,7 +353,7 @@ extern int errno;
 
 /* Do we need to defined stricmp()?  See octtools/installColors/installColors.c
  */
-#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386)
+#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386) || defined(PTAIX)
 #define NEED_STRICMP
 #endif
 
