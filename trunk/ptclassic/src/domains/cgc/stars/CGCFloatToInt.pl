@@ -35,12 +35,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		}
 	}
 	initCode {
+		addInclude("<math.h>");
 		numSample = output.numXfer();
 	}
 	codeblock (body) {
 	int i = 0;
 	for (; i < $val(numSample); i++) {
-		$ref(output, i) = (int) $ref(input, i);
+		$ref(output, i) = (int) floor($ref(input, i) + 0.5);
 	}
 	}
 	go {
