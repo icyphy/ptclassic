@@ -87,7 +87,7 @@ PL_SRCS= \
  CGCRepeat.pl \
  CGCReverse.pl \
  CGCTrainer.pl \
- CGCScramble.pl \
+ CGCScrambler.pl \
  CGCSGIAudio.pl CGCSGIAudioIn.pl CGCSGIAudioOut.pl \
  CGCSgn.pl \
  CGCSin.pl \
