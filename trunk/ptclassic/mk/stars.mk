@@ -134,8 +134,8 @@ $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
-$(LIBDIR)/libicp.$(LIBSUFFIX) \
 $(LIBDIR)/libipusstars.$(LIBSUFFIX) $(LIBDIR)/libipus.$(LIBSUFFIX) \
+$(LIBDIR)/libicp.$(LIBSUFFIX) \
 $(THREAD_STAR_LIBFILES) \
 $(MATLABSTARS_LIBFILE)
 
@@ -157,14 +157,16 @@ TCLSTARS =	$(PTINY_TCLSTARS) $(LIBDIR)/mdsdftclstars.o \
 
 PTINY_TCL_STAR_LIBS = -lsdftclstars -ldetclstars
 PTRIM_TCL_STAR_LIBS = $(PTINY_TCL_STAR_LIBS)
-TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars -lipustclstars
+TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars \
+		-lipustclstars -lipustcltk
 
 PTINY_TCL_STAR_LIBFILES =	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
 				$(LIBDIR)/libdetclstars.$(LIBSUFFIX)
 PTRIM_TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES)
 TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES) \
 			$(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libipustclstars.$(LIBSUFFIX)
+			$(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
@@ -205,7 +207,7 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
--licp -lipusstars -lipus \
+-lipusstars -lipus -licp \
 $(THREAD_STAR_LIBS)
 
 # Extra targets
