@@ -30,7 +30,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS =  kernel shapes pictures interactors combinators doc
+DIRS =  kernel pictures interactors doc
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
 itcldocs extraclean:
