@@ -187,7 +187,7 @@ class ::tycho::Picture {
 	    $slate deregisterTag $t $this
 	}
 
-	# Delete the shape object if there is on
+	# Delete the shape object if there is one
 	if { $shapeobject != "" } {
 	    delete object $shapeobject
 	}
@@ -197,7 +197,7 @@ class ::tycho::Picture {
     ###################################################################
     ## Public methods
 
-    method annotation {mode name args} {}
+    method annotation {mode name {value {}}} {}
     method aspect     {aspect}         {}
     method aspects    {args}           {}
     method bbox       {}               {}
@@ -456,13 +456,13 @@ body ::tycho::Picture::_answer {option} {
 # Read the value of an annotation, or set the value. This
 # is easier to use than cget{} and configure{}.
 #
-body ::tycho::Picture::annotation {mode name args} {
+body ::tycho::Picture::annotation {mode name {value {}}} {
     switch -exact $mode {
 	"get" {
 	    return [assocLookup $annotations $name]
 	}
 	"add" {
-	    assocReplace annotations $name [lindex $args 0]
+	    assocReplace annotations $name $value
 	}
 	"delete" {
 	    assocRemove annotations $name
