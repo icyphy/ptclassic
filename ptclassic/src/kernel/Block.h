@@ -36,6 +36,10 @@ class Block : public NamedObj
 	friend class BlockStateIter;
 	friend class BlockMPHIter;
 	friend class BlockGenPortIter;
+	friend class CBlockPortIter;
+	friend class CBlockStateIter;
+	friend class CBlockMPHIter;
+	friend class CBlockGenPortIter;
 public:
 	// Initialize the data structures
 	void initialize();
@@ -100,16 +104,18 @@ public:
 	void addPort(MultiPortHole& p) {multiports.put(p);}
 
 	// Retrieve the PortHole with the given name
-	PortHole *portWithName(const char* name) const;
+	PortHole *portWithName(const char* name);
 
 	// Retrieve the MultiPortHole with the given name
-	MultiPortHole *multiPortWithName(const char* name) const;
+	MultiPortHole *multiPortWithName(const char* name);
 
 	// Get a list of contained PortHole names
-	int portNames (const char** names, int* io, int nMax) const;
+	int portNames (const char** names, const char** types,
+		       int* io, int nMax) const;
 
 	// Get a list of contained MultiPortHole names
-	int multiPortNames (const char** names, int* io, int nMax) const;
+	int multiPortNames (const char** names, const char** types,
+			    int* io, int nMax) const;
 
 	// print portholes as part of the info-printing method
 	StringList printPorts(const char* type) const;
@@ -130,7 +136,7 @@ public:
         StringList printStates(const char* type) const;
 
         // Retrieve the State with the given name
-        virtual State *stateWithName(const char* name) const;
+        virtual State *stateWithName(const char* name);
 
         // Re-Define State
         void setState(const char* stateName, const char* expression) {
@@ -165,20 +171,19 @@ private:
 };
 
 // Iterator classes associated with Block
-
 class BlockPortIter : public PortListIter {
 public:
-	BlockPortIter(const Block& b) : PortListIter (b.ports) {}
+	BlockPortIter(Block& b) : PortListIter (b.ports) {}
 };
 
 class BlockStateIter : public StateListIter {
 public:
-	BlockStateIter(const Block& b) : StateListIter (b.states) {}
+	BlockStateIter(Block& b) : StateListIter (b.states) {}
 };
 
 class BlockMPHIter : private ListIter {
 public:
-	BlockMPHIter(const Block& b) : ListIter (b.multiports) {}
+	BlockMPHIter(Block& b) : ListIter (b.multiports) {}
 	MultiPortHole* next() { return (MultiPortHole*)ListIter::next();}
 	MultiPortHole* operator++() { return next();}
 	ListIter::reset;
@@ -186,7 +191,7 @@ public:
 
 class BlockGenPortIter : private ListIter {
 public:
-	BlockGenPortIter(const Block& b) : ListIter(b.ports), usedP(0),
+	BlockGenPortIter(Block& b) : ListIter(b.ports), usedP(0),
 			myBlock(b) {}
 	GenericPort* next();
 	GenericPort* operator++() { return next();}
@@ -195,5 +200,5 @@ private:
 	const Block& myBlock;
 	int usedP;
 };
-	
+
 #endif
