@@ -46,3 +46,4 @@ PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
 
 S56DIR =	$(ROOT)/vendors/s56dsp
+MATLABDIR=	/usr/sww/matlab
