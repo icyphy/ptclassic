@@ -1,0 +1,6 @@
+Awesime (A Widely Extensible SIMulation Environment) is an
+object-oriented library for process-oriented simulation.  It can be
+configured for MIPS R2000/R3000, Sun SPARC, Motorola 68k and 88k, Intel
+i386, National Semiconductor NS32K, and DEC Alpha.  It is written in
+C++ and is available via anonymous FTP from the University of Colorado,
+Boulder: ftp.cs.colorado.edu in the directory /pub/cs/distribs/Awesime.
