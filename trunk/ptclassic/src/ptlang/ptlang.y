@@ -41,6 +41,7 @@ Programmer: J. T. Buck and E. A. Lee
 #include <ctype.h>
 #include <sys/types.h>
 #include <time.h>
+#include <malloc.h>
 
 /* Symbols for special characters*/
 #define LPAR '('
@@ -1545,72 +1546,72 @@ struct tentry {
 
 /* keyword table */
 struct tentry keyTable[] = {
-	"access", ACCESS,
-	"acknowledge", ACKNOWLEDGE,
-	"alias", ALIAS,
-	"arglist", ARGLIST,
-	"attrib", ATTRIB,
-	"attributes", ATTRIB,
-	"author", AUTHOR,
-	"begin", BEGIN,
-	"ccinclude", CCINCLUDE,
-	"class", CLASS,
-	"code", CODE,
-	"codeblock", CODEBLOCK,
-	"conscalls", CONSCALLS,
-	"consCalls", CONSCALLS,
-	"constructor", CONSTRUCTOR,
-	"copyright", COPYRIGHT,
-	"default", DEFAULT,
-	"defstar", DEFSTAR,
-	"defstate", DEFSTATE,
-	"derived", DERIVED,
-	"derivedFrom", DERIVED,
-	"derivedfrom", DERIVED,
-	"desc", DESC,
-	"descriptor", DESC,
-	"destructor", DESTRUCTOR,
-	"domain", DOMAIN,
-	"execTime", EXECTIME,
-	"exectime", EXECTIME,
-	"explanation", EXPLANATION,
-	"galaxy", GALAXY,
-	"go", GO,
-	"header", HEADER,
-	"hinclude", HINCLUDE,
-	"ident", ID,
-	"initCode", INITCODE,
-	"initcode", INITCODE,
-	"inmulti", INMULTI,
-	"inline", INLINE,
-	"inout", INOUT,
-	"inoutmulti", INOUTMULTI,
-	"input", INPUT,
-	"location", LOCATION,
-	"method", METHOD,
-	"name", NAME,
-	"num", NUM,
-	"numports", NUMPORTS,
-	"numTokens", NUM,
-	"numtokens", NUM,
-	"outmulti", OUTMULTI,
-	"output", OUTPUT,
-	"private", PRIVATE,
-	"programmer", AUTHOR,
-	"protected", PROTECTED,
-	"public", PUBLIC,
-	"pure", PURE,
-	"seealso", SEEALSO,
-	"setup", SETUP,
-	"star", STAR,
-	"start", START,
-	"state", DEFSTATE,
-	"static", STATIC,
-	"type", TYPE,
-	"version", VERSION,
-	"virtual", VIRTUAL,
-	"wrapup", WRAPUP,
-	0, 0,
+	{"access", ACCESS},
+	{"acknowledge", ACKNOWLEDGE},
+	{"alias", ALIAS},
+	{"arglist", ARGLIST},
+	{"attrib", ATTRIB},
+	{"attributes", ATTRIB},
+	{"author", AUTHOR},
+	{"begin", BEGIN},
+	{"ccinclude", CCINCLUDE},
+	{"class", CLASS},
+	{"code", CODE},
+	{"codeblock", CODEBLOCK},
+	{"conscalls", CONSCALLS},
+	{"consCalls", CONSCALLS},
+	{"constructor", CONSTRUCTOR},
+	{"copyright", COPYRIGHT},
+	{"default", DEFAULT},
+	{"defstar", DEFSTAR},
+	{"defstate", DEFSTATE},
+	{"derived", DERIVED},
+	{"derivedFrom", DERIVED},
+	{"derivedfrom", DERIVED},
+	{"desc", DESC},
+	{"descriptor", DESC},
+	{"destructor", DESTRUCTOR},
+	{"domain", DOMAIN},
+	{"execTime", EXECTIME},
+	{"exectime", EXECTIME},
+	{"explanation", EXPLANATION},
+	{"galaxy", GALAXY},
+	{"go", GO},
+	{"header", HEADER},
+	{"hinclude", HINCLUDE},
+	{"ident", ID},
+	{"initCode", INITCODE},
+	{"initcode", INITCODE},
+	{"inmulti", INMULTI},
+	{"inline", INLINE},
+	{"inout", INOUT},
+	{"inoutmulti", INOUTMULTI},
+	{"input", INPUT},
+	{"location", LOCATION},
+	{"method", METHOD},
+	{"name", NAME},
+	{"num", NUM},
+	{"numports", NUMPORTS},
+	{"numTokens", NUM},
+	{"numtokens", NUM},
+	{"outmulti", OUTMULTI},
+	{"output", OUTPUT},
+	{"private", PRIVATE},
+	{"programmer", AUTHOR},
+	{"protected", PROTECTED},
+	{"public", PUBLIC},
+	{"pure", PURE},
+	{"seealso", SEEALSO},
+	{"setup", SETUP},
+	{"star", STAR},
+	{"start", START},
+	{"state", DEFSTATE},
+	{"static", STATIC},
+	{"type", TYPE},
+	{"version", VERSION},
+	{"virtual", VIRTUAL},
+	{"wrapup", WRAPUP},
+	{0, 0},
 };
 
 int
@@ -2153,7 +2154,7 @@ int dsize;
 	char* d = destination;
 	char* s = source;
 	int i = 1;
-	while (*s != NULL) {
+	while (*s != (char)NULL) {
 	    if (*s == ESC) {
 		switch (*(s+1)) {
 		    case 'n':
@@ -2169,11 +2170,11 @@ int dsize;
 	    } else
 		*d++ = *s++;
 	    if(i++ >= dsize) {
-		*d = NULL; /* terminate the string */
+		*d = (char)NULL; /* terminate the string */
 		return(1);
 	    }
 	}
-	*d = NULL; /* terminate the string */
+	*d = (char)NULL; /* terminate the string */
 	return(0);
 }
 
