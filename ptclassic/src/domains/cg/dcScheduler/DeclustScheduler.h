@@ -22,11 +22,11 @@ The multiprocessor scheduling routines.
 #include "DCGraph.h"
 #include "DCNode.h"
 #include "DCParProcs.h"
-#include "Cluster.h"
-#include "ClusterList.h"
+#include "DCCluster.h"
+#include "DCClusterList.h"
 #include "ParScheduler.h"
 #include "StringList.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 
 
 		//////////////////////////////
@@ -39,6 +39,26 @@ The multiprocessor scheduling routines.
 //	UCB/ERL Memo M90/119 (December, 1990)   
 
 class DeclustScheduler : public ParScheduler {
+public:
+	DeclustScheduler(MultiTarget *t, const char* logFile = 0) :
+		ParScheduler(t,logFile), schedA(0), schedB(0) {
+		INC_LOG_NEW; myGraph = new DCGraph; exGraph = myGraph; }
+	~DeclustScheduler();
+
+	// redefine
+	void setUpProcs(int);
+
+	// display schedule
+	StringList displaySchedule();
+
+	// main body of the schedule.
+	int scheduleIt();
+
+protected:
+	// redefine preSchedule(): clustering and hierarchical cluster
+	// grouping.
+	int preSchedule();
+
 private:
 	DCGraph* myGraph;
 
@@ -48,10 +68,10 @@ private:
 	DCParProcs* workSchedule;	// point the work schedule btw A & B.
 
 	// The elementary clusters
-	ClusterList EClusts;
+	DCClusterList EClusts;
 
 	// cluster hierarchy
-	ClusterList combinations;
+	DCClusterList combinations;
 
 	// Returns the communication cost from the topology dependent section
 	int CommCost(int sP, int dP, int smps, int ty);
@@ -59,7 +79,7 @@ private:
 // **************  ELEMENTARY CLUSTER FORMATION FUNCTIONS  ***************
 
 	// Finds cutArcs and makes elementary clusters 
-	void FindElemClusters();
+	void FindElemDCClusters();
 
 	// parallelism detection
 	int ParallelismDetection(DCNode *bnode, int direction);
@@ -82,23 +102,23 @@ private:
 // **************  HIERARCHICAL CLUSTER GROUPING FUNCTIONS  **************
 
 	// Does hierarchical clustering to establish hierarchy
-	int ClusterUp(ClusterList&);
+	int DCClusterUp(DCClusterList&);
 
 // **************  CLUSTER HIERARCHY DECOMPOSITION FUNCTIONS  **************
 
 	// Start breaking cluster hierarchy
-	int pulldown(ClusterList *combClusts, ClusterList *Cleft);
+	int pulldown(DCClusterList *combDCClusts, DCClusterList *Cleft);
 
 // ******************  SCHEDULE ANALYSIS FUNCTIONS  ******************
 
 	// Does schedule analysis on BestSchedule
-	void scheduleAnalysis(ClusterList &remClusts);
+	void scheduleAnalysis(DCClusterList &remDCClusts);
 
 	// Communication reduction cluster shifting routines
-	int commReduction(ClusterList &remC, ClusterList *slpC);
+	int commReduction(DCClusterList &remC, DCClusterList *slpC);
 
 	// Tries shifting clusters from heavily loaded to lightly loaded procs
-	int loadShift(ClusterList &remC, ClusterList *slpC);
+	int loadShift(DCClusterList &remC, DCClusterList *slpC);
 
 // ******************  CLUSTER BREAKDOWN FUNCTIONS  ******************
 
@@ -107,29 +127,6 @@ private:
 
 	// Handles SLP section on a single processor
 	int findBreakpaths(DCNodeList &slpsect, int &Proc);
-
-protected:
-	// redefine preSchedule(): clustering and hierarchical cluster
-	// grouping.
-	int preSchedule();
-
-public:
-	// Constructor
-	DeclustScheduler(BaseMultiTarget *t, const char* logFile = 0) :
-		ParScheduler(t,logFile), schedA(0), schedB(0) {
-		INC_LOG_NEW; myGraph = new DCGraph; exGraph = myGraph; }
-
-	// Destructor
-	~DeclustScheduler();
-
-	// redefine
-	void setUpProcs(int);
-
-	// display schedule
-	StringList displaySchedule();
-
-	// main body of the schedule.
-	int scheduleIt();
 };
 
 #endif

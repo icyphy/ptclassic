@@ -20,11 +20,11 @@ PARKERNEL = $(ROOT)/src/domains/cg/parScheduler
 
 INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
 
-SRCS =	 Cluster.cc ClusterList.cc ClustArcList.cc \
+SRCS =	 DCCluster.cc DCClusterList.cc DCClustArcList.cc \
 		DCArcList.cc DCUniProc.cc \
 		DCNode.cc DCGraph.cc DeclustScheduler.cc DCParProcs.cc
 
-HDRS =   Cluster.h ClusterList.h ClustArcList.h \
+HDRS =   DCCluster.h DCClusterList.h DCClustArcList.h \
 		DCParProcs.h DCArcList.h DCUniProc.h \
 		DCNode.h DCGraph.h DeclustScheduler.h
 
