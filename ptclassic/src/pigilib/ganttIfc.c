@@ -318,6 +318,6 @@ int
 GanttMan(name)
 char *name;
 {
-    win_msg("Gantt chart help not yet implemented\nFor more information, read ~gabriel/doc/man/man2/display_sched.2");
+    win_msg("Gantt chart help not yet implemented\nFor more information, see the file ~ptolemy/lib/gantt.help");
     return 0;
 }
