@@ -153,10 +153,8 @@ ptkTkSetup(funcArray, size)
 {
     static RPCClientData RPCdata;
     static char buf[256];
-#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
     char *appName = "pigi";
     char *appClass = "Pigi";
-#endif
     char *pt;
 
     RPCdata.funcArray = funcArray;
@@ -189,18 +187,44 @@ ptkTkSetup(funcArray, size)
 	exit(1);
     }
 			 
-#if TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1
+#if (TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION >= 8
     ptkW = Tk_MainWindow(ptkInterp);
+    if (ptkW == NULL) {
+	ErrAdd("FATAL ERROR");
+	ErrAdd(ptkInterp->result);
+	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
+	PrintErr(ErrGet());
+        exit(1);
+    }
     Tk_SetClass(ptkW, appClass);
     Tk_SetAppName(ptkW, appName);
+
+#if TK_MAJOR_VERSION >= 8
+    {
+        /* See the following post:
+         * Subject:      Re: transition from obsolete Tcl_File
+         * From:         Marc Graham <marc@neovision.com>
+         * Newsgroups:   comp.lang.tcl 
+         */
+
+        Tcl_Channel pipe_channel;
+
+        pipe_channel = Tcl_MakeFileChannel(
+                (ClientData) fileno (RPCReceiveStream),   
+                TCL_READABLE | TCL_EXCEPTION);
+        Tcl_CreateChannelHandler (pipe_channel, TCL_READABLE, ptkRPCFileProc,
+                            (ClientData) &RPCdata);
+    }
+#else
     Tcl_CreateFileHandler(Tcl_GetFile((ClientData)
 				      ((int)fileno(RPCReceiveStream)),
 				      TCL_UNIX_FD),
 			  TCL_READABLE, ptkRPCFileProc, (ClientData) &RPCdata);
+#endif /* TK_MAJOR_VERSION >= 8 */
 #else
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
     			 ptkRPCFileProc, (ClientData) &RPCdata);
-#endif /* TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1 */
+#endif /* (TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION >= 8 */
 
     pt = getenv("PTOLEMY");
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
