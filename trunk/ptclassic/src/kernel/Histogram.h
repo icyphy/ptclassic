@@ -49,7 +49,7 @@ private:
 	int* data;
 	int xsize;
 public:
-	intVec() : xsize(0), data(0) {}
+	intVec() : data(0), xsize(0) {}
 	~intVec() { INC_LOG_DEL; delete [] data; }
 	int& elem(int i) { return data[i];}
 	int& operator[](int i) { return elem(i);}
@@ -64,7 +64,7 @@ class Histogram {
 public:
 	Histogram(double width = 1.0, int maxBins = HISTO_MAX_BINS)
 		: centerRef(0), nSamples(0), minBin(0),
-	maxBin(0), sum(0), sumsq(0), binWidth(width), maxNoBins(maxBins) {}
+	maxBin(0), maxNoBins(maxBins), sum(0), sumsq(0), binWidth(width) {} 
 
 	// translate value to bin number
 	int valueToBin(double x) const;
