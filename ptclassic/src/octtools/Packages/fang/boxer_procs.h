@@ -36,7 +36,7 @@ register fa_coord x;
     return(pointer);
 }
 
-static boxer_check_emit(outbox, pointer, vertex)
+static void boxer_check_emit(outbox, pointer, vertex)
 fa_box **outbox;
 scan_point *pointer;
 fa_vertex *vertex;
@@ -79,10 +79,19 @@ fa_vertex *vertex;
 		    pointer->last->y = pointer->y = vertex->y;
 	    }
 	    break;
+	  case NO_VERTEX:
+	  case LOWER_RIGHT_POS:
+	  case UPPER_RIGHT_POS:
+	  case LOWER_LEFT_POS:
+	  case RIGHT_DIAGONAL:
+	    break;
+	  default:
+	    break;
+
     }
 }
 
-static put_box( outbox, left, bottom, right, top)
+static void put_box( outbox, left, bottom, right, top)
 fa_box **outbox;
 fa_coord left;
 fa_coord bottom;
