@@ -130,10 +130,10 @@ I. Korn, <i>Digital Communications</i>, Van Nostrand Reinhold, New York, 1985.
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
 			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
-					int(symbol_interval), int(excessBW));
+					int(symbol_interval), excessBW);
 		    else
 			taps[i] = Ptdsp_RaisedCosine(i - center,
-					int(symbol_interval), int(excessBW));
+					int(symbol_interval), excessBW);
 		}
 		SDFFIR :: setup();
 	}
