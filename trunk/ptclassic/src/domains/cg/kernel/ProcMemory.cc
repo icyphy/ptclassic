@@ -26,21 +26,31 @@ $Id$
 #include "dataType.h"
 #include <builtin.h>
 
+MemInterval::~MemInterval() {
+	LOG_DEL; delete link;;
+}
+
 int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 	MemInterval* p = l;
+	// skip through the list of blocks until we find one that is
+	// big enough.  Fail if none are big enough.
 	while (p && p->len < reqSize) p = p->link;
 	if (p == 0) return FALSE;
 	reqAddr = p->addr;
-	if (p->len < reqSize) {
+	// if block size exceeds requested size, scoop out a chunk of it.
+	if (p->len > reqSize) {
 		p->addr += reqSize;
 		p->len -= reqSize;
 	}
+	// if size matches exactly, remove it from the list (unless it is
+	// the last block)
 	else if (p->link) {
 		// delete this chunk
 		MemInterval* q = p->link;
 		*p = *q;
 		LOG_DEL; delete q;
 	}
+	// if current block is the last block, set its length to zero.p
 	else p->len = 0;
 	return TRUE;
 }
@@ -93,10 +103,7 @@ void MemoryList::copy(const MemoryList& src) {
 }
 
 void MemoryList::zero() {
-	MemInterval* p;
-	while (l->link) {
-		p = l; l = l->link; LOG_DEL; delete p;
-	}
+	LOG_DEL; delete l; l = 0;
 }
 
 int MemoryList::addChunk(unsigned addr,unsigned len) {
@@ -117,7 +124,6 @@ int MemoryList::addChunk(unsigned addr,unsigned len) {
 
 void MemoryList::reset() {
 	zero();
-	if(l) { LOG_DEL; delete l; }
 	LOG_NEW; l = new MemInterval(min, max-min+1);
 }
 
@@ -126,23 +132,17 @@ void MemoryList::reset() {
 
 void LinProcMemory::record(MReq* request, unsigned addr) {
 	AsmPortHole* p = request->port();
-
+	const State* s = request->state();
 	// Determine the type
 	DataType type;
 	if(p) type = p->myType();
-	else type = FLOAT;	// Temporary HACK.  The type of a state
-				// seems to need work for code generation.
-
-	// Determine whether the access is circular
-	int circular;
-	if(p) circular = p->circAccess();
-	else circular = FALSE;	// Temporary HACK.  Want to be able to allow
-				// circular buffers for state.
+	else if (s) type = s->type();
+	else type = "UNKNOWN";
 
 	// Append the allocation to the memory map
 	map.appendSorted(addr,request->size(),
 			 request->state(), p,
-			 circular, type);
+			 request->circ(), type);
 }
 
 void LinProcMemory::reset() {
@@ -156,8 +156,7 @@ void LinProcMemory::reset() {
 int LinProcMemory::allocReq(AsmPortHole& p) {
 	if (!match(p)) return FALSE;
 	LOG_NEW; MPortReq* r = new MPortReq(p);
-	if (p.circAccess())
-		circ.appendSorted(*r);
+	if (p.circAccess()) circ.appendSorted(*r);
 	else lin.appendSorted(*r);
 	return TRUE;
 }
