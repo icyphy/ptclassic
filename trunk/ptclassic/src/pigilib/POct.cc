@@ -90,6 +90,8 @@ extern void KcSetEventLoop(int on);
 #include "isa.h"
 
 
+#define PIGI_DEFAULT_ITERATIONS	10
+
 /////////////////////////////////////////////////////////////////
 // "C" callable functions.  These functions are used to convert
 // oct objects to strings and back again.  This is because TCL
@@ -275,20 +277,18 @@ void POct::DeletePList(ParamListType* pList) {
 // be freed once the pList is no longer needed.  DeletePList
 // does this.
 int POct::MakePList(char* parameterList, ParamListType* pList) {
-    int aC, Element_aC;
-    char **aV, **Element_aV;
-    int i;
-    ParamType *pElement;
-    int ErrorFound;
 
-    if (strcmp(parameterList,"NIL")==0) {
+    // Error checking
+    if (strcmp(parameterList, "NIL") == 0) {
         // Create a "NIL" pList with 0 elements
         pList->length = 0;
         pList->array = 0;
         return 1;
     }
-       
-    if (Tcl_SplitList( interp, parameterList, &aC, &aV ) != TCL_OK){
+
+    int aC;
+    char **aV;
+    if (Tcl_SplitList(interp, parameterList, &aC, &aV) != TCL_OK) {
 	Error::error("Cannot parse parameter list: ", parameterList); 
 	return 0;
     }
@@ -296,21 +296,23 @@ int POct::MakePList(char* parameterList, ParamListType* pList) {
     pList->length = aC;
     pList->array = new ParamType[aC];
 
-    ErrorFound = 0;
-    for (i=0; i< pList->length; i++) {
+    int ErrorFound = FALSE;
+    ParamType *pElement;
+    for (int i=0; i< pList->length; i++) {
 
-        pElement = &pList->array[i];
-
-        if (Tcl_SplitList(interp,aV[i], &Element_aC, &Element_aV)!=TCL_OK){
+        int Element_aC;
+        char **Element_aV;
+        if (Tcl_SplitList(interp, aV[i], &Element_aC, &Element_aV) != TCL_OK) {
             Error::error("Error in parsing parameter list element: ", aV[i]);
             // Keep going, and then clear it all out of memory when done.
-            ErrorFound = 1;
+            ErrorFound = TRUE;
         }
 
+        pElement = &pList->array[i];
         if (Element_aC != 3 ){
             Error::error("Parameter list element ", aV[i], 
                          " does not have 3 elements.");
-           ErrorFound = 1;
+           ErrorFound = TRUE;
            pElement->name = NULL;
            pElement->type = NULL;
            pElement->value = NULL;
@@ -319,19 +321,23 @@ int POct::MakePList(char* parameterList, ParamListType* pList) {
            pElement->type = savestring(Element_aV[1]);
            pElement->value = savestring(Element_aV[2]);
         }
+
         // Free the memory used by Element_aV as it is no longer needed
+	// Only a single call to free is needed (see Ousterhout, p. 317)
         free ((char *) Element_aV);
     }
 
     // Free the memory used by aV as it is no longer needed
+    // Only a single call to free is needed (see Ousterhout, p. 317)
     free((char *) aV);
 
-    if (ErrorFound == 1) {
-        // An error was encountered while parsing the list
-        DeletePList( pList);
-        return 0;
+    // If an error was encountered while parsing the list, free pList
+    // and return FALSE
+    if (ErrorFound) {
+        DeletePList(pList);
+        return FALSE;
     } else {
-        return 1;
+        return TRUE;
     }
 }
 
@@ -343,24 +349,25 @@ int POct::MakePList(char* parameterList, ParamListType* pList) {
 // FIXME:  If a non-universe facet is passed to this function,
 //         it churns ahead anyway and then crashes.  - aok
 //         fix it by added an IsUniv check.
-int POct::ptkCompile (int aC,char** aV) {
+int POct::ptkCompile (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 2) return usage ("ptkCompile <OctObjectHandle>");
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
 	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0], 
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    // Compile the facet
     if (CompileFacet(&facet)){
 	return TCL_OK;
-    } else {
+    }
+    else {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
-
 }
 
 // Returns a list of lists of the parameters of a facet (if any).
@@ -376,22 +383,17 @@ int POct::ptkCompile (int aC,char** aV) {
 // where parameter list is of the form:
 //    {name1 type1 value1} {name2 type2 value2} ...
 //
-int POct::ptkGetParams (int aC,char** aV) {
-    octObject facet,instance;
-    octObject property;
-    ParamType *place;
-    ParamListType pList;
-    char title [64], size[5], tempStr[64];
-    int i;
+int POct::ptkGetParams (int aC, char** aV) {
+    octObject facet;
 
 //  FIXME:  The current pList and the strings it points to are
 //  allocated in subfunctions, but never freed.  This needs to
 //  be systematically fixed in pigilib, and KernelCalls. - aok
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 3) {
         return usage ("ptkGetParams <OctFacetHandle> <OctInstanceHandle>");
     }
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -399,7 +401,9 @@ int POct::ptkGetParams (int aC,char** aV) {
     }
 
     // Check to see if a valid instance was passed
-    if (strcmp(aV[2],"NIL")==0) {
+    ParamListType pList;
+    char title[64];
+    if (strcmp(aV[2], "NIL") == 0) {
         // If there is no instance, then this must be a Galaxy or Universe
         if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
             if (!GetFormalParams(&facet, &pList)) {
@@ -407,7 +411,7 @@ int POct::ptkGetParams (int aC,char** aV) {
 		                  ErrGet(), (char *)NULL );
                 return TCL_ERROR;
             }
-            sprintf(title, "Edit Formal Parameters");
+            strcpy(title, "Edit Formal Parameters");
             // Result string will be built below
         } else {
 	    win_msg ("Not a Star, Galaxy, or Universe");
@@ -415,6 +419,7 @@ int POct::ptkGetParams (int aC,char** aV) {
         }
     } else {
         // There was an instance passed
+        octObject instance;
         if (ptkHandle2OctObj(aV[2], &instance) == 0) {
             Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
 		aV[0], (char *) NULL);
@@ -424,30 +429,32 @@ int POct::ptkGetParams (int aC,char** aV) {
 	if ( IsDelay(&instance) || IsBus(&instance) || IsDelay2(&instance)) {
 	    // Parameters are stored differently for delays and buses.
 	    // can't use the "plist" form as for Stars, Gals, and Formals
+	    octObject property;
 	    if (IsDelay(&instance) ) {
 		GetOrInitDelayProp(&instance, &property);
-		sprintf(title, "Edit Delay");
+		strcpy(title, "Edit Delay");
 	    } else if (IsDelay2(&instance)) {
 		GetOrInitDelayProp(&instance, &property);
-		sprintf(title, "Edit Delay With Initial Values");
+		strcpy(title, "Edit Delay With Initial Values");
 	    } else {
 		GetOrInitBusProp(&instance, &property);
-		sprintf(title, "Edit Bus");
+		strcpy(title, "Edit Bus");
 	    }
             // Convert "property" into Result string
             Tcl_AppendElement (interp, title);
             Tcl_AppendResult(interp, " { {", NULL);
             Tcl_AppendElement(interp, property.contents.prop.name);
+	    char dataTypeStr[16], size[32];
             switch(property.contents.prop.type) {
               case OCT_INTEGER:
-                sprintf( tempStr, "INTEGER" );
-                Tcl_AppendElement(interp, tempStr);
+                strcpy(dataTypeStr, "INTEGER");
+                Tcl_AppendElement(interp, dataTypeStr);
                 sprintf(size, "%ld", property.contents.prop.value.integer);
                 Tcl_AppendElement(interp, size);
                 break;
               case OCT_STRING:
-                sprintf( tempStr, "STRING" );
-                Tcl_AppendElement(interp, tempStr);
+                strcpy(dataTypeStr, "STRING");
+                Tcl_AppendElement(interp, dataTypeStr);
                 Tcl_AppendElement(interp, property.contents.prop.value.string);
                 break;
               default:
@@ -469,7 +476,7 @@ int POct::ptkGetParams (int aC,char** aV) {
                                   ErrGet(), (char *) NULL);
                 return TCL_ERROR;
             }
-            sprintf(title, "Edit Actual Parameters");
+            strcpy(title, "Edit Actual Parameters");
             // Build results string below.
         } else {
 	    win_msg("Not a star, galaxy, bus, or delay instance");
@@ -481,9 +488,9 @@ int POct::ptkGetParams (int aC,char** aV) {
     Tcl_AppendElement (interp,  title);
     if (pList.length > 0) {
         // There are some parameters here
-        place = pList.array;
+        ParamType *place = pList.array;
         Tcl_AppendResult(interp, " { ", NULL);
-        for (i = 0; i < pList.length; i++) {
+        for (int i = 0; i < pList.length; i++) {
             Tcl_AppendResult(interp, " {", NULL);
             Tcl_AppendElement(interp, (char*)place->name);
             Tcl_AppendElement(interp, (char*)place->type);
@@ -509,14 +516,12 @@ int POct::ptkGetParams (int aC,char** aV) {
 //    {name1 type1 value1} {name2 type2 value2} ...
 // No return string.
 //
-int POct::ptkSetParams (int aC,char** aV) {
-    ParamListType pList;
-    int ErrorFound = 0;
-    octObject facet, instance;
+int POct::ptkSetParams (int aC, char** aV) {
+    octObject facet;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 4) return usage (
-          "ptkSetParams <OctFacetHandle> <OctInstnceHandle> <Parameter_List>");
-
+        "ptkSetParams <OctFacetHandle> <OctInstnceHandle> <Parameter_List>");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -524,34 +529,35 @@ int POct::ptkSetParams (int aC,char** aV) {
     }
 
     // Covert the parameter List string in the pList structure.
+    // Be sure to free pList before returning
+    ParamListType pList;
     if (MakePList(aV[3], &pList) == 0) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
         return TCL_ERROR;
     }
 
-    // Now that the pList has been made, it should be freed before
-    // returning.
-
     // Check to see if a valid instance was passed
-    if (strcmp(aV[2],"NIL")==0) {
+    int ErrorFound = FALSE;
+    if (strcmp(aV[2],"NIL") == 0) {
         // If there is no instance, then this must be a Galaxy or Universe
         if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
             // Set Formal Parameters
             if (SetFormalParams(&facet, &pList) == 0) {
-                ErrorFound = 1;
+                ErrorFound = TRUE;
                 Tcl_AppendResult(interp, aV[0],
                                  " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
             }
         } else {
-            ErrorFound = 1;
+            ErrorFound = TRUE;
             Tcl_AppendResult(interp,
                              "Not a Star, Galaxy, Universe.",
                              (char *) NULL);
         }
     } else {
         // There was a valid instance passed
+        octObject instance;
         if (ptkHandle2OctObj(aV[2], &instance) == 0) {
             // No way to go on if the handle is bad.  Clean up and exit.
             DeletePList(&pList);
@@ -563,7 +569,7 @@ int POct::ptkSetParams (int aC,char** aV) {
         if ( IsDelay(&instance) || IsDelay2(&instance)) {
             // Set Delay Parameters from the pList
             if (SetDelayParams(&instance,&pList) == 0) {
-                ErrorFound = 1;
+                ErrorFound = TRUE;
 		Tcl_AppendResult(interp, aV[0], 
 				 " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
@@ -571,7 +577,7 @@ int POct::ptkSetParams (int aC,char** aV) {
         } else if (IsBus(&instance)) {
             // Set Bus Parameters from the pList
             if (SetBusParams(&instance, &pList) == 0) {
-                ErrorFound = 1;
+                ErrorFound = TRUE;
 		Tcl_AppendResult(interp, aV[0], 
                                  " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
@@ -586,14 +592,14 @@ int POct::ptkSetParams (int aC,char** aV) {
             }
             // Set Star or Galaxy params from the pList
             if (SetSogParams(&instance, &pList) == 0) {
-                ErrorFound = 1;
+                ErrorFound = TRUE;
 		Tcl_AppendResult(interp, aV[0],
                                  " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
             }
 
         } else {
-            ErrorFound = 1;
+            ErrorFound = TRUE;
             Tcl_AppendResult(interp, 
                              "Not a star, galaxy, bus, or delay instance.",
                              (char *) NULL);
@@ -602,7 +608,7 @@ int POct::ptkSetParams (int aC,char** aV) {
 
     DeletePList (&pList);
 
-    if (ErrorFound == 1) return TCL_ERROR;
+    if (ErrorFound) return TCL_ERROR;
     else return TCL_OK;
 
 }
@@ -615,15 +621,12 @@ int POct::ptkSetParams (int aC,char** aV) {
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
 //
-int POct::ptkSetFindName (int aC,char** aV) {
+int POct::ptkSetFindName (int aC, char** aV) {
     octObject facet;
-    char* name;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 3) return 
         usage ("ptkSetFindName <OctObjectHandle> <Name>");
-
-    name= aV[2];
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -631,6 +634,7 @@ int POct::ptkSetFindName (int aC,char** aV) {
     }
 
     // Perform the Find Name function:
+    char* name = aV[2];
     if (!FindNameSet(&facet, name)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -647,21 +651,17 @@ int POct::ptkSetFindName (int aC,char** aV) {
 //
 // Written by Alan Kamas  1/94
 //
-int POct::ptkSetRunUniverse (int aC,char** aV) {
-
+int POct::ptkSetRunUniverse (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, oct facet file, facet is universe
     if (aC != 3) return 
         usage ("ptkSetRunUniverse <OctObjectHandle> <ParameterList>");
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
-
-    // Redo facet checks to make sure this facet is still okay
-    // before proceeding
     if (!IsUnivFacet(&facet)){
         Tcl_AppendResult(interp, "Schematic is not a universe.",
                          (char *) NULL);
@@ -697,24 +697,22 @@ int POct::ptkSetRunUniverse (int aC,char** aV) {
 // modified by Edward Lee and Douglas Niehaus 8/94
 // to generalize for string properties rather than 
 // just comments
-int POct::ptkGetStringProp (int aC,char** aV) {
+int POct::ptkGetStringProp (int aC, char** aV) {
     octObject facet;
-    char *value;
 
-    // always takes arguments: object and property name
-    //
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 3) {
       return usage ("ptkGetStringProp <OctObjectHandle> propName");
     }
-
-    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
-
+    if (strcmp(aV[1], "NIL") == 0)  return result("NIL");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    // Get value of property
+    char *value;
     if (!GetStringProp(&facet, aV[2], &value)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -742,22 +740,20 @@ int POct::ptkGetStringProp (int aC,char** aV) {
 // to generalize for string properties rather than 
 // just comments
 //
-int POct::ptkSetStringProp (int aC,char** aV) {
+int POct::ptkSetStringProp (int aC, char** aV) {
     octObject facet;
-    char* value;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 4) return 
         usage ("ptkSetStringProp <OctObjectHandle> <propName> <value>");
-
-    value = aV[3];
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
-    // Set the value into the passed facet
+    // Set the property value in the passed facet
+    char *value = aV[3];
     if (!SetStringProp(&facet, aV[2], value)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -774,6 +770,7 @@ int POct::ptkSetStringProp (int aC,char** aV) {
 //
 int POct::ptkGetMkSchemIcon (int aC, char** /*aV*/)
 {
+    // Error checking: number of arguments
     if (aC != 1) return  usage ("ptkGetMkSchemIcon");
 
     // FIXME:  Add following line back for MkSchemIcon state
@@ -794,23 +791,22 @@ int POct::ptkGetMkSchemIcon (int aC, char** /*aV*/)
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
 //
-int POct::ptkSetMkSchemIcon (int aC,char** aV) {
+int POct::ptkSetMkSchemIcon (int aC, char** aV) {
     octObject facet;
-    char* palette;
-    char buf[512];
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 3) return 
         usage ("ptkSetMkSchemIcon <OctObjectHandle> <Palette>");
-   
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
+
     // FIXME:  Add following line back for MkSchemIcon state
     // MkSchemPalette = aV[2];
-    palette = aV[2];
-
+    char *palette = aV[2];
+    char buf[512];
     if (!GetTildePath(&facet, buf)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -821,12 +817,14 @@ int POct::ptkSetMkSchemIcon (int aC,char** aV) {
             Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
             return TCL_ERROR;
         }
-    } else if (IsPalFacet(&facet)) {
+    }
+    else if (IsPalFacet(&facet)) {
         if (!MkPalIconInPal(&facet, buf, palette)) {
             Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
             return TCL_ERROR;
         }
-    } else {
+    }
+    else {
         if (!MkUnivIconInPal(&facet, buf, palette)) {
             Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
             return TCL_ERROR;
@@ -846,13 +844,11 @@ int POct::ptkSetMkSchemIcon (int aC,char** aV) {
 // 
 int POct::ptkGetMkStar (int aC, char** /*aV*/)
 {
-
-    char buf[64];
-    struct passwd *pwent;
-
+    // Error checking: number of arguments
     if (aC != 1) return  usage ("ptkGetMkStar");
     
     // Initialize star src directory to the home directory of the user
+    struct passwd *pwent;
     const char* directory = MkStarDir;
     if (strcmp( directory, "NIL" ) == 0) {
         if ((pwent = getpwuid(getuid())) == NULL) {
@@ -860,8 +856,8 @@ int POct::ptkGetMkStar (int aC, char** /*aV*/)
                          (char *) NULL);
             return TCL_ERROR;
         }
-        sprintf(buf, "~%s/", pwent->pw_name);
-        MkStarDir = buf;
+        MkStarDir = "~";
+	MkStarDir << pwent->pw_name << "/";
     }
 
     // Note: if any of the titles (ie "Star name") change, that
@@ -885,8 +881,9 @@ int POct::ptkGetMkStar (int aC, char** /*aV*/)
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
 //
-int POct::ptkSetMkStar (int aC,char** aV) {
+int POct::ptkSetMkStar (int aC, char** aV) {
 
+    // Error checking: number of arguments
     if (aC != 5) return 
         usage ("ptkSetMkStar <StarName> <Domain> <SrcDir> <PaleteDir>");
     
@@ -896,12 +893,10 @@ int POct::ptkSetMkStar (int aC,char** aV) {
     MkStarDir = aV[3];
     MkStarPalette = aV[4];
 
-    /* Note that only need to test if MkStarDir starts with '~'
-       so that the user may enter something like "~/work/stars" where
-       '~' stands for user's own home directory.  -wtc
-       allow $PTOLEMY (kennard, Oct92)
-    */
-
+    // Note that only need to test if MkStarDir starts with '~'
+    // so that the user may enter something like "~/work/stars" where
+    // '~' stands for user's own home directory.  -wtc
+    // allow $PTOLEMY (kennard, Oct92)
     if (aV[3][0] != '~' && aV[3][0] != '$') {
         Tcl_AppendResult(interp, 
                  "Star src directory must begin with '~user' or '$variable'",
@@ -925,16 +920,15 @@ int POct::ptkSetMkStar (int aC,char** aV) {
 // 
 // FIXME: Ideally, GetSeed and SetSeed should be PTcl funtions
 //        There is already a "seed" command there.
-int POct::ptkGetSeed (int aC,char** /*aV*/) {
+int POct::ptkGetSeed (int aC, char** /*aV*/) {
 
-    StringList buf;
-
+    // Error checking: number of arguments
     if (aC != 1) return  
-            usage ("ptkGetSeed");
+        usage ("ptkGetSeed");
     
-    buf = OldRandomSeed;
-
-    Tcl_AppendResult(interp, (const char *)buf , (char *) NULL);
+    // Convert OldRandomSeed to a string and send it to Tcl
+    StringList buf = OldRandomSeed;
+    Tcl_AppendResult(interp, (const char *)buf, (char *) NULL);
 
     return TCL_OK;
 }
@@ -946,16 +940,15 @@ int POct::ptkGetSeed (int aC,char** /*aV*/) {
 //
 // Written by Alan Kamas  1/94
 //
-int POct::ptkSetSeed (int aC,char** aV) {
-    char* seedString;
-    int seed;
+int POct::ptkSetSeed (int aC, char** aV) {
 
+    // Error checking: number of arguments
     if (aC != 2) return 
         usage ("ptkSetSeed <Seed>");
 
-    seedString = aV[1];
-
-    // Convert the string into an integer
+    // Convert the seed string into an integer
+    char *seedString = aV[1];
+    int seed;
     if (Tcl_GetInt (interp, seedString, &seed) != TCL_OK) { 
         Tcl_AppendResult(interp, "Seed must be an integer", 
                          (char *) NULL);
@@ -972,7 +965,7 @@ int POct::ptkSetSeed (int aC,char** aV) {
 
     // Set the value of the seed to be used again
     OldRandomSeed = seed;
-    
+
     return TCL_OK;
 }
 
@@ -981,30 +974,28 @@ int POct::ptkSetSeed (int aC,char** aV) {
 //
 // Written by Alan Kamas  12/93
 // 
-int POct::ptkGetDomainNames (int aC,char** aV) {
+int POct::ptkGetDomainNames (int aC, char** aV) {
     octObject facet;
-    char *domain;
-    int nDomains, i;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return  
-            usage ("ptkGetDomainNames <OctObjectHandle>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
-
+        usage ("ptkGetDomainNames <OctObjectHandle>");
+    if (strcmp(aV[1], "NIL") == 0)  return result("NIL");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    // Read domain from facet
+    char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
+
     // "domain" is now set to be the default domain
-
-    nDomains = numberOfDomains();
-
+    int nDomains = numberOfDomains();
     if(nDomains == 0) {
         Tcl_AppendResult(interp, 
 			 "No domains supported by for this facet.",
@@ -1021,8 +1012,9 @@ int POct::ptkGetDomainNames (int aC,char** aV) {
     }
 
     // If the default domain matches any of our domain choices, put it first
+    int i;
     for (i = 0; i < nDomains; i++) {
-	if (strcmp(nthDomainName(i), domain)==0) {
+	if (strcmp(nthDomainName(i), domain) == 0) {
 	    // The current domain has been found
             Tcl_AppendElement(interp, domain);
 	}
@@ -1044,15 +1036,12 @@ int POct::ptkGetDomainNames (int aC,char** aV) {
 // Written by Alan Kamas  12/93
 // based on original code by Edwin Goei
 //
-int POct::ptkSetDomain (int aC,char** aV) {
+int POct::ptkSetDomain (int aC, char** aV) {
     octObject facet;
-    char *domain;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 3) return
       usage ("ptkSetDomain <OctObjectHandle> <DomainName>");
-
-    domain = aV[2];
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1060,6 +1049,7 @@ int POct::ptkSetDomain (int aC,char** aV) {
     }
 
     // Set the domain to be that of the passed name
+    char *domain = aV[2];
     if (!SetDomainProp(&facet, domain)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1074,45 +1064,45 @@ int POct::ptkSetDomain (int aC,char** aV) {
 //
 // Written by Alan Kamas  12/93
 // 
-int POct::ptkGetTargetNames (int aC,char** aV) {
+int POct::ptkGetTargetNames (int aC, char** aV) {
     octObject facet;
-    char *defaultTarget, *target ;
-    char *domain;
-    const char *targetNames[MAX_NUM_TARGETS];
-    int nTargets, nChoices, i;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return  
-            usage ("ptkGetTargetNames <OctObjectHandle>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
-
+        usage ("ptkGetTargetNames <OctObjectHandle>");
+    if (strcmp(aV[1],"NIL") == 0)  return result("NIL");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    // Read the domain from the facet
+    char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
-    nTargets = KcDomainTargets(domain, targetNames, MAX_NUM_TARGETS);
 
-    if(nTargets == 0) {
+    // Initialize the names and number of the targets
+    const char *targetNames[MAX_NUM_TARGETS];
+    int nTargets = KcDomainTargets(domain, targetNames, MAX_NUM_TARGETS);
+    if (nTargets == 0) {
         Tcl_AppendResult(interp, 
 			 "No targets supported by current domain.",
                          (char *) NULL);
         return TCL_ERROR;
     }
 
-    /* for a galaxy, add "<parent>" as an option */
+    // For a galaxy, add "<parent>" as an option
+    int nChoices = nTargets;
+    char *defaultTarget;
     if (IsGalFacet(&facet)) {
             targetNames[nTargets] = defaultTarget = "<parent>";
-	    nChoices = nTargets + 1;
+	    nChoices++;
     }
     else {
             defaultTarget = (char *)KcDefTarget(domain);
-	    nChoices = nTargets;
     }
 
     // Return the list with the current target first
@@ -1124,13 +1114,16 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
     }
 
     // Get Current Target name
+    char *target ;
     if (!GOCTargetProp(&facet, &target, defaultTarget)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
+
     // If the Current Target matches any of our target choices, put it first
+    int i;
     for (i = 0; i < nChoices; i++) {
-	if (strcmp(targetNames[i],target)==0) {
+	if (strcmp(targetNames[i],target) == 0) {
 	    // The current target has been found
             Tcl_AppendElement(interp, target);
 	    // mark it as having been used
@@ -1158,25 +1151,24 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
 // Written by Alan Kamas  12/93
 // based on original code by Edwin Goei
 //
-int POct::ptkGetTargetParams (int aC,char** aV) {
+int POct::ptkGetTargetParams (int aC, char** aV) {
     octObject facet;
-    char *domain;
-    char *target ;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 3) return
-            usage ("ptkGetTargetParams <OctObjectHandle> <TargetName>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
-
-    target = aV[2];
-
+        usage ("ptkGetTargetParams <OctObjectHandle> <TargetName>");
+    if (strcmp(aV[1], "NIL") == 0)  return result("NIL");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    // Set the target to be the second argument
+    char* target = aV[2];
+
     // Set the domain to be that of the passed facet
+    char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1191,7 +1183,7 @@ int POct::ptkGetTargetParams (int aC,char** aV) {
     // Now (finally) get the Target Parameters
 
     // No target parameters to get if the target is "<parent>"
-    if (strcmp(target,"<parent>")==0)  return result("NIL");
+    if (strcmp(target,"<parent>") == 0)  return result("NIL");
 
     // Get the pList form
     ParamListType pList;
@@ -1224,23 +1216,23 @@ int POct::ptkGetTargetParams (int aC,char** aV) {
 // Written by Alan Kamas  12/93
 // based on original code by Edwin Goei
 //
-int POct::ptkSetTargetParams (int aC,char** aV) {
+int POct::ptkSetTargetParams (int aC, char** aV) {
     octObject facet;
-    char *domain;
-    char *target ;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 4) return
-      usage ("ptkSetTargetParams <OctObjectHandle> <TargetName> <parameterList>");
-
-    target = aV[2];
-
+        usage ("ptkSetTargetParams <OctObjectHandle> <TargetName> <parameterList>");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    // Set the target to be the second argument
+    char* target = aV[2];
+
     // Set the domain to be that of the passed facet
+    char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1253,13 +1245,13 @@ int POct::ptkSetTargetParams (int aC,char** aV) {
     }
 
     // Covert the parameter List string into the pList structure.
+    // Now that the pList has been made, it should be freed before returning.
     ParamListType pList;
     if (MakePList(aV[3], &pList) == 0) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
         return TCL_ERROR;
     }
-    // Now that the pList has been made, it should be freed before returning.
 
     // Now (finally) set the Target Parameters
     if (pList.length > 0 ) {
@@ -1295,14 +1287,13 @@ int POct::ptkSetTargetParams (int aC,char** aV) {
 //
 // Written by Alan Kamas  9/93
 // 
-int POct::ptkFacetContents (int aC,char** aV) {
+int POct::ptkFacetContents (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 3) return  
             usage ("ptkFacetContents <OctObjectHandle> <List_of_Types>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
-
+    if (strcmp(aV[1], "NIL") == 0)  return result("NIL");
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1338,6 +1329,7 @@ int POct::ptkFacetContents (int aC,char** aV) {
 	else if (strcasecmp(typeV[i],"CHANGE_RECORD")==0)  mask |= OCT_CHANGE_RECORD_MASK;
     }
     // Free the memory used by typeV as it was allocated by SplitList
+    // Only a single call to free is needed (see Ousterhout, p. 317)
     free ((char *) typeV);
 
     // Use created mask to generate the desired oct object and return them
@@ -1360,17 +1352,15 @@ int POct::ptkFacetContents (int aC,char** aV) {
 // Returns the Oct ID of the master facet of the passed instance
 // by default it returns the contents facet, but if the third
 // arguement is "contents" or "interface" it returns that facet.
-int POct::ptkOpenMaster (int aC,char** aV) {
+int POct::ptkOpenMaster (int aC, char** aV) {
     octObject instance;
     octObject facet;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
+    // "NIL" instances have "NIL" masters.  Hope this is what the user expects
     if ( (aC != 2) && (aC != 3) ) return 
           usage ("ptkOpenMaster <OctInstanceHandle> [contents|interface]");
-
-    // "NIL" instances have "NIL" masters.  Hope this is what the
-    // user expects
-    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
-
+    if (strcmp(aV[1], "NIL") == 0) return result("NIL");
     if (ptkHandle2OctObj(aV[1], &instance) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1379,7 +1369,7 @@ int POct::ptkOpenMaster (int aC,char** aV) {
 
     // Contents is the default master facet
     char facetType[32];
-    if (aC==2) strcpy(facetType, "contents");
+    if (aC == 2) strcpy(facetType, "contents");
     else if ( strcmp(aV[2],"interface") == 0) strcpy(facetType,"interface");
          else strcpy(facetType, "contents");
 
@@ -1406,8 +1396,9 @@ int POct::ptkOpenMaster (int aC,char** aV) {
 // - Alan Kamas 9/93
 //   based on original code by Edwin Goei
 //
-int POct::ptkOpenFacet (int aC,char** aV) {
+int POct::ptkOpenFacet (int aC, char** aV) {
 
+    // Error checking: number of arguments
     if ( (aC != 2) && (aC != 3) && (aC != 4) ) return
           usage ("ptkOpenFacet <file_name_of_cell> [view] [facet]");
 
@@ -1461,12 +1452,14 @@ int POct::ptkOpenFacet (int aC,char** aV) {
 int POct::ptkCloseFacet(int argc, char **argv) {
     octObject facet;
 
+    // Error checking: number of arguments, oct facet file
     if (argc != 2) return usage("ptkCloseFacet <octObjectHandle>");
     if (!ptkHandle2OctObj(argv[1], &facet)) {
 	Tcl_AppendResult(interp, "Can't convert Oct handle to facet",
 	  (char *) NULL);
 	return TCL_ERROR;
     }
+
     if (octCloseFacet(&facet) == OCT_OK) {
 	return TCL_OK;
     } else {
@@ -1476,13 +1469,12 @@ int POct::ptkCloseFacet(int argc, char **argv) {
 }
 
 // Basic Oct Facet Type checking command
-int POct::ptkIsStar (int aC,char** aV) {
+int POct::ptkIsStar (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsStar <OctObjectHandle>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result(0);
-
+    if (strcmp(aV[1],"NIL") == 0)  return result(0);
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1494,13 +1486,12 @@ int POct::ptkIsStar (int aC,char** aV) {
 }
 
 // Basic Vem Facet Type checking command
-int POct::ptkIsGalaxy (int aC,char** aV) {
+int POct::ptkIsGalaxy (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsGalaxy <OctObjectHandle>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result(0);
-
+    if (strcmp(aV[1], "NIL") == 0)  return result(0);
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1512,13 +1503,12 @@ int POct::ptkIsGalaxy (int aC,char** aV) {
 }
 
 // Basic Vem Facet Type checking command
-int POct::ptkIsBus (int aC,char** aV) {
+int POct::ptkIsBus (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsBus <OctObjectHandle>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result(0);
-
+    if (strcmp(aV[1], "NIL") == 0) return result(0);
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1530,13 +1520,12 @@ int POct::ptkIsBus (int aC,char** aV) {
 }
 
 // Basic Vem Facet Type checking command
-int POct::ptkIsDelay (int aC,char** aV) {
+int POct::ptkIsDelay (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsDelay <OctObjectHandle>");
-
-    if (strcmp(aV[1],"NIL")==0)  return result(0);
-
+    if (strcmp(aV[1],"NIL") == 0)  return result(0);
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
@@ -1548,40 +1537,44 @@ int POct::ptkIsDelay (int aC,char** aV) {
 }
 
 // Gets the current Iteration Number from the passed Oct Facet
-int POct::ptkGetRunLength (int aC,char** aV) {
-    int oldN;
-    char value[64];
+int POct::ptkGetRunLength (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 2) return usage ("ptkGetRunLength <OctObjectHandle>");
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
-    /* Set Interate value to 10 if none had been specified */
-    if (GetIterateProp(&facet, &oldN) == -1) { oldN = 10; }
+    // Read number-of-iterations from the Oct facet and convert to a string
+    // If no number-of-iterations has been specified, use a default value
+    int IterationNumber;
+    char value[64];
+    if (GetIterateProp(&facet, &IterationNumber) == -1) {
+      IterationNumber = PIGI_DEFAULT_ITERATIONS;
+    }
+    sprintf(value, "%d", IterationNumber);
 
-    sprintf(value, "%d", oldN);
     return result ( value );
 }
 
-int POct::ptkSetRunLength (int aC,char** aV) {
-    int IterationNumber;
+// Sets the current Iteration Number in the passed Oct Facet
+int POct::ptkSetRunLength (int aC, char** aV) {
     octObject facet;
 
+    // Error checking: number of arguments, oct facet file
     if (aC != 3) {
         return usage ("ptkSetRunLength <OctObjectHandle> <IterationValue>");
     }
-
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
+    int IterationNumber;
     Tcl_GetInt(interp, aV[2], &IterationNumber);
     SetIterateProp(&facet, IterationNumber);
     return TCL_OK;
@@ -1591,49 +1584,45 @@ int POct::ptkSetRunLength (int aC,char** aV) {
 // Sets the Tk Event Loop checking to be on or off.  
 // If the passed value is "on" or can be converted to 1, or yes, then on
 // else "off" "0" or "no" turns it off.
-int POct::ptkSetEventLoop (int aC,char** aV) {
+int POct::ptkSetEventLoop (int aC, char** aV) {
 
-    int boolarg;
-
+    // Error checking: number of arguments
     if (aC != 2) {
         return usage ("ptkSetEventLoop <on|off>");
     }
 
+    int boolarg;
     Tcl_GetBoolean( interp, aV[1], &boolarg);
-
     KcSetEventLoop( boolarg );
-
     return TCL_OK;
 }
 
 // returns the name associated with the passed facet handle
 // written by Xavier Warzee 12/94
 // installed into Ptolemy by Alan Kamas 3/95
-int POct::ptkGetStarName(int aC,char** aV) {
-     octObject facet;
-     char *starName;
+int POct::ptkGetStarName(int aC, char** aV) {
+    octObject facet;
 
-     if (aC != 2) return
-          usage("ptkGetStarName <octObjectHandle>");
+    // Error checking: number of arguments, value of arguments, oct facet file
+    if (aC != 2) return
+         usage("ptkGetStarName <octObjectHandle>");
+    if(strcmp(aV[1],"NIL") == 0) return result("NIL");
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+         Tcl_AppendResult(interp, "Bad or Stale facet Handle passed to ", 
+                          aV[0], (char *) NULL);
+         return TCL_ERROR;
+    }
 
-     if(strcmp(aV[1],"NIL")==0) return result("NIL");
-
-     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-          Tcl_AppendResult(interp, "Bad or Stale facet Handle passed to ", 
-                           aV[0], (char *) NULL);
-          return TCL_ERROR;
-     }
-
-     // get the name from the oct object:
-     GetStarName( &facet, &starName);
-
-     // Make sure that the starName is defined
-     if (starName == NULL) {
-	  return result("NIL");
-     } else {
-          Tcl_AppendResult(interp, starName, (char *) NULL);
-     }
-     return TCL_OK;
+    // get the star name from the oct object and make sure it is defined
+    char *starName;
+    GetStarName(&facet, &starName);
+    if (starName == NULL) {
+        return result("NIL");
+    }
+    else {
+        Tcl_AppendResult(interp, starName, (char *) NULL);
+    }
+    return TCL_OK;
 }
 
 
