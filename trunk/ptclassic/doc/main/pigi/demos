@@ -191,7 +191,7 @@ To change the current field to a different one, click the left
 mouse button on the new one,
 or use the ``Tab'' key to move to the next one.
 .pp
-Since you started Pigi in a directory in which you do not have write
+Since you started pigi in a directory in which you do not have write
 permission, it is not possible here to create new universes, nor
 to modify the demos.  There is currently no convenient way
 to change to a new directory, so you should exit Ptolemy

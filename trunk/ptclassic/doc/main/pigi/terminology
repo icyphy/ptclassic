@@ -1,10 +1,10 @@
 .\" $Id$
 .H1 "Terminology
 .pp
-The \*(PT interactive graphical interface (Pigi) is a design editor
+The \*(PT interactive graphical interface (pigi) is a design editor
 based on tools from the Berkeley CAD framework.
-.IE Pigi
-Using Pigi, \*(PT applications are constructed graphically,
+.IE pigi
+Using pigi, \*(PT applications are constructed graphically,
 by interconnecting icons.
 Hierarchy is used to manage complexity, to abstract subsystem designs,
 and to mix domains.
@@ -14,7 +14,7 @@ version \*(PV.
 In \*(PT, applications are constructed by connecting
 .c Block s.
 .IE Block
-In Pigi, a block is represented by an icon with \fIterminals\fR,
+In pigi, a block is represented by an icon with \fIterminals\fR,
 corresponding to its
 .c Porthole s
 in \*(PT.
@@ -55,13 +55,13 @@ Unlike a galaxy, however, the model of computation
 .c Domain )
 .IE Domain
 is not the same on the inside as on the outside.
-In Pigi, wormholes are almost indistinguishable from galaxies.
+In pigi, wormholes are almost indistinguishable from galaxies.
 They are created automatically when two different domains interact.
-Domains that are currently supported in Pigi include synchronous
+Domains that are currently supported in pigi include synchronous
 dataflow (SDF), dynamic dataflow (DDF), and discrete events (DE).
 See the manual sections for these domains for an explanation
 of their operation.
-Knowledgeable users can define new domains and link them into Pigi.
+Knowledgeable users can define new domains and link them into pigi.
 .pp
 A
 .c State
@@ -94,7 +94,7 @@ section of the Almagest.
 A third component of this system, called \fBRPC\fR, is
 .IE RPC
 a link between applications and VEM.
-In Pigi, the \*(PT kernel runs as an RPC application.
+In pigi, the \*(PT kernel runs as an RPC application.
 .IE kernel
 Users edit designs using VEM, store their designs using Oct,
 and execute their application through the RPC link to the \*(PT
@@ -131,7 +131,7 @@ A \*(PT graphical interface.
 .ip \fBOct\fP 1i
 The design manager and database.
 .ip \fBVEM\fP 1i
-A graphical editor for Oct, upon which Pigi is built.
+A graphical editor for Oct, upon which pigi is built.
 .ip \fBRPC\fP 1i
 The link between VEM and the \*(PT kernel.
 .ip \fBfacet\fP 1i

@@ -44,7 +44,7 @@ edit-domain	d	T{
 To specify the domain of a galaxy.
 If the domain is different from the domain where the galaxy is used,
 a wormhole will be automatically created.
-All domains currently linked to Pigi will be offered as options.
+All domains currently linked to pigi will be offered as options.
 T}
 .sp 0.5
 edit-architecture	a	T{
@@ -179,7 +179,7 @@ options		Edit various Pigi options.
 version		Displays Ptolemy version.
 .sp 0.5
 exit-pigi		T{
-Clean exit from Pigi application program.  VEM continues
+Clean exit from pigi application program.  VEM continues
 to run.
 T}
 .TE

@@ -3,6 +3,56 @@
 .pp
 In this section we cover additional information which may be useful.
 More advanced topics will be covered in following sections.
+.H2 "Particle Types"
+.pp
+The packets of data that pass from one star to another
+in \*(PT are called \fIparticles\fR.
+.IE "particle type"
+.IE "types"
+So far, all particles have been simply floating point numbers representing
+samples of signals.  However, several other data types are supported.
+Each star icon has a protrusion for each porthole.
+.IE "porthole type"
+In pigi, if you are using a color monitor, the color of the stem
+indicates the type of data that the porthole consumes or produces.
+A blue stem on an input
+or output of a star icon indicates type "float", a white stem
+indicates type "complex", a green stem indicates "packet",
+and a red stem indicates "anytype".
+.pp
+Ptolemy usually make conversions between these types automatically.
+The float to complex conversion does the obvious thing,
+putting the float value into the real part of the complex,
+and setting the imaginary part to zero.  The complex to float
+conversion computes the magnitude of the complex number.
+The XGraph star, and most other stars that generate output,
+accept "anytype" of input.  If the input is complex, the magnitude
+will be plotted, because it will be cast to a float internally.
+If you want to plot both the real and imaginary parts, you
+should use the ComplexReal conversion star first.
+.pp
+For technical reasons too involved to explain here, automatic type conversions
+cannot always be made.  In particular, Ptolemy can only do one
+type conversion for any given output of a star.  So if a single
+output is connected to multiple inputs of different types,
+Ptolemy may complain.  For example, suppose you connect a "float" output
+to both a "complex" input and a "float" input.  Ptolemy will complain.
+A simple solution is to insert a unit gain (use the FloatGain star)
+between the "float" output and the "complex" input.
+Then the type conversion occurs on the output of the FloatGain star,
+which goes only to a "complex" input.
+.pp
+Automatic type conversions have one potentially serious pitfall.
+Suppose you connect a "float" output to a "complex" and "anytype" input.
+This is legal, because Ptolemy can satisfy the constraints with just
+one type conversion, float to complex.  However, suppose the "anytype"
+input belongs to an XGraph star.  As explained above, the XGgraph
+star plots the magnitude of a complex number, unless you have
+an explicit ComplexReal conversion star.  Hence, instead of plotting
+the "float" output, XGraph will plot the magnitude, converting
+all negative numbers to positive.  Inserting a ComplexReal is one
+way to correct the problem.  Another way is to use the FloatGain star
+with unity gain to postpone the conversion to complex on the other fork.
 .H2 "Moving objects"
 .pp
 .IE "moving objects"
@@ -163,7 +213,7 @@ A delay in these domains is not a star, but rather is a property
 of the arc connecting two stars.
 The interpretation of the delay is as an initial particle on the arc.
 To use these delays in
-Pigi, the user places a delay icon on top of the wire connecting two
+pigi, the user places a delay icon on top of the wire connecting two
 instances.
 The delay icon is a green diamond in the SDF and system palettes.
 You can specify the number of delays by executing
@@ -213,18 +263,18 @@ Both of the above restrictions may be eliminated in future versions.
 .H2 "Dealing with errors"
 .pp
 .IE errors
-Ptolemy is composed of several components of which Pigi is one.  When
+Ptolemy is composed of several components of which pigi is one.  When
 errors occur, it helps to know which component detected the error so
 that it can be corrected.
 .pp
 There are three main components involved in processing a schematic:
-VEM, Pigi, and the Ptolemy kernel.  Each component corresponds to one
+VEM, pigi, and the Ptolemy kernel.  Each component corresponds to one
 phase of processing:
 .ip \fBVEM\fP 1.5i
 .IE VEM
 Handles schematic entry and maintains net list information
 for the design.  VEM also handles all accesses to Oct.
-.ip \fBPigi\fP 1.5i
+.ip \fBpigi\fP 1.5i
 Translates schematic information that VEM produces
 into the textual language which the Ptolemy kernel expects.
 .ip "\fBPtolemy kernel\fP" 1.5i
@@ -241,8 +291,8 @@ when the cursor is not over an instance, then VEM displays the message
 ``Cannot place contact''.  Usually, VEM errors are easy to fix.  In
 this case, VEM expects the user to specify the instance to be created.
 .pp
-Pigi errors can occur when any of the Pigi commands are invoked.  When
-errors occur during compilation, Pigi usually highlights in red the
+Pigi errors can occur when any of the pigi commands are invoked.  When
+errors occur during compilation, pigi usually highlights in red the
 object in the schematic associated with the error.  When this happens,
 you can execute the \fIclear-marks\fP command to clear the
 .IE clear-marks
