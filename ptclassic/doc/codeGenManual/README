@@ -1,0 +1,16 @@
+$Id$
+
+This directory contains the multiprocessor code generation manual, 
+describing the kernels from a programmer's point of view.  
+mcg.texi is the source.  The info files may be used by the 
+Emacs "info" interactive help system.
+
+mcg.dvi is a TeX DVI file containing the output, and mcg.ps.Z is
+a compressed PostScript version of the document.  The document is
+122 pages long.
+
+If you have the xdvi previewer, we recommend
+
+"xdvi -s 3 ptk.dvi"
+
+for previewing.
