@@ -80,7 +80,7 @@ protected:
 public:
 	// constructors
 	IntArray(): data(0), memSz(0) {}
-	IntArray(int n) { create(n); }
+	IntArray(int n): data(0), memSz(0) { create(n); }
 	~IntArray();
 
 	// data access
