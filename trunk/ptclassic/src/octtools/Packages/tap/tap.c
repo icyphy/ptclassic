@@ -24,6 +24,7 @@ static char SccsId[]="$Id$";
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+#include <ctype.h>
 #include "copyright.h"
 #include "port.h"
 #include "utility.h"
@@ -31,6 +32,7 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "oh.h"
 #include "st.h"
+#include "desrule.h"
 #include "tap_int.h"
 
 int tapPassedStatus;
@@ -507,6 +509,7 @@ octObject *layerPtr;
 		"internal error -- layer ``%s'' not put into table",
 		protoLayer.contents.layer.name);
     /*NOTREACHED*/
+    return((struct tapLayer *) NULL);
 }
 
 void tapForEachTech(fnPtr)
