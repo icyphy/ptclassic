@@ -48,8 +48,8 @@ class DoubleLink
 
 public:
 	DoubleLink(Pointer a, DoubleLink* n, DoubleLink* p): 
-		e(a), next(n), prev(p) {}
-	DoubleLink(Pointer a): e(a), next(0), prev(0) {}
+		next(n), prev(p), e(a) {}
+	DoubleLink(Pointer a): next(0), prev(0), e(a) {}
 
 	Pointer content() { return e; }
 
