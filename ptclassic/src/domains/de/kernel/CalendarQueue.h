@@ -36,6 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <math.h>
+#ifdef sgi
+extern const double __infinity;
+#define HUGE_VAL __infinity	
+#endif
 #include "DataStruct.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
