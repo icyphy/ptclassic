@@ -97,7 +97,7 @@ int FSMStateStar::compOneWriterCk() {
 		if (parsedAct[i][j] == slave->outGeoIndx[k]) {
 		    InfString buf = "The output \"";
 		    StringListIter nextNm(slave->outNmList);
-		    const char* str;
+		    const char* str = NULL;
 		    for (int l=0; l<=k; l++)   str = nextNm++;
 		    buf << str;
 		    buf << "\" in the action of the non-preemptive ";
@@ -105,7 +105,7 @@ int FSMStateStar::compOneWriterCk() {
 		    buf << this->name();
 		    buf << "\" to state \"";
 		    MPHIter nextp(stateOut);
-		    PortHole *p;
+		    PortHole* p = NULL;
 		    for (l=0; l<=i; l++)   p = nextp++;
 		    str = p->far()->parent()->name();
 		    buf << str;
