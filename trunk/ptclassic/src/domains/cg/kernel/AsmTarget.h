@@ -129,6 +129,8 @@ public:
 	// NOTE: User must delete the char* returned after use.
 	char* fullFileName(const char* base, const char* suffix=NULL);
 
+	char* baseName() { return uname; }
+
 	/*virtual*/ void writeCode(const char* name = NULL);
 
 	// output an "org" directive that switches to the specified
