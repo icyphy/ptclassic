@@ -48,7 +48,11 @@ TCL_SRCS =
 
 SIMPLE_TESTS = \
 	testCacheManager.itcl \
-	testMail.itcl \
+	testMail.itcl
+
+# These tests are "graphical" only because ResourceRemote uses
+# tkwait{}. Too bad....
+GRAPHICAL_TESTS = \
 	testResourceFTP.itcl \
 	testResourceHTTP.itcl \
 	testResourceRemote.itcl
@@ -63,20 +67,17 @@ MISC_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: test_graphics
+tests:: test_simple test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
-		$(ITCLSH)
+	tytestsh $(SIMPLE_TESTS)
 
 # These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -noconsole -e alltests.itcl
+	tytest $(GRAPHICAL_TESTS)
 
 FORCE:
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-
