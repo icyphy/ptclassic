@@ -22,9 +22,10 @@ some host-specific interface to this star.
 The \fIlabel\fR parameter is not directly used by the star; it is for the
 convenience of derived stars.
 .UH IMPLEMENTATION
+.pp
 Since we may be followed by an up sampling operation, there may be
 an arbitrary number of memory locations corresponding to our output.
-Since we can't expect the host to update all of these values, we
+Since we cannot expect the host to update all of these values, we
 cannot apply the trick used by the
 .c Const
 star to eliminate runtime code in all cases.

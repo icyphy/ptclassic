@@ -17,7 +17,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
 	explanation {
-See the SDFRaisedCos star.
+See the
+.c SDFRaisedCos
+star.
 	}
 	seealso {FIR}
 	hinclude { <stream.h> }

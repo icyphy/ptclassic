@@ -15,8 +15,6 @@ most significant bit first.
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 demo library }
-    explanation {
-    }
     input {
 	name {input}
 	type {int}
