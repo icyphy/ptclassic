@@ -38,8 +38,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DataStruct.h"
 
 
-// Constructor for new threads.
-PosixThread::PosixThread(ThreadScheduler& s) : PtThread(s)
+// Create a thread.
+void PosixThread::initialize()
 {
     // Initialize attributes.
     pthread_attr_t attributes;
@@ -65,8 +65,8 @@ PosixThread::PosixThread(ThreadScheduler& s) : PtThread(s)
 }
 
 
-// Destructor.
-PosixThread::~PosixThread()
+// Terminate the thread
+void PosixThread::terminate()
 {
     // Force the thread to terminate if it has not already done so.
     // Is it safe to do this to a thread that has already terminated?
@@ -92,21 +92,6 @@ void* PosixThread::runThis(PosixThread* thisThread)
     // Run the thread.
     thisThread->run();
     return NULL;
-}
-
-
-// Set the thread's priority.
-// Return the previous priority.
-static int setPriority(pthread_t& thread, int p)
-{
-    // This code is based on Draft 6 and will have to change.
-    pthread_attr_t attributes;
-    pthread_getschedattr(thread, &attributes);
-    int oldPrio = pthread_attr_getprio(&attributes);
-    pthread_attr_setprio(&attributes, p);
-    pthread_setschedattr(thread, attributes);
-
-    return oldPrio;
 }
 
 
@@ -137,6 +122,7 @@ ThreadList::~ThreadList()
     for ( int i = size(); i > 0; i--)
     {
 	PosixThread* t = (PosixThread*)getAndRemove();
+	t->terminate();
 	LOG_DEL; delete t;
     }
 }
@@ -149,25 +135,32 @@ PosixScheduler::PosixScheduler()
     LOG_NEW; threads = new ThreadList;
 
     // Initialize the thread library.
-    pthread_init();
+    // This is done automatically in Solaris and SunOS.
+    // pthread_init();
 
     // Configure the main thread.
     mainThread = pthread_self();
+    pthread_attr_t attributes;
+    pthread_attr_init(&attributes);
 
     // Use FIFO scheduling policy (as opposed to round-robin)
     policy = SCHED_FIFO;
-    pthread_attr_t attributes;
     pthread_getschedattr(mainThread, &attributes);
     pthread_attr_setsched(&attributes, policy);
     pthread_setschedattr(mainThread, attributes);
 
-    // Record the minimum and maximum possible priorities for the
-    // chosen policy.
+    // Record the minimum and maximum possible priorities
+    // for the chosen policy.
     minPriority =  sched_get_priority_min(policy);
     maxPriority =  sched_get_priority_max(policy);
 
     // Set the priority to maximum.
-    setPriority(mainThread, maxPriority);
+    pthread_getschedattr(mainThread, &attributes);
+    pthread_attr_setprio(&attributes, maxPriority);
+    pthread_setschedattr(mainThread, attributes);
+
+    // Discard temporary attribute object.
+    pthread_attr_destroy(&attributes);
 }
 
 
@@ -186,10 +179,21 @@ void PosixScheduler::add(PtThread* t)
 // Start or continue the running of all threads.
 void PosixScheduler::run()
 {
-    setPriority(mainThread, minPriority);
-    
-    // When control returns, restore the priority of this thread to
-    // prevent others from running.
+    // Initialize attributes.
+    pthread_attr_t attributes;
+    pthread_attr_init(&attributes);
 
-    setPriority(mainThread, maxPriority);
+    // Lower the priority to let other threads run.
+    pthread_getschedattr(mainThread, &attributes);
+    pthread_attr_setprio(&attributes, minPriority);
+    pthread_setschedattr(mainThread, attributes);
+
+    // When control returns, restore the priority of this thread
+    // to prevent others from running.
+    pthread_getschedattr(mainThread, &attributes);
+    pthread_attr_setprio(&attributes, maxPriority);
+    pthread_setschedattr(mainThread, attributes);
+
+    // Discard temporary attribute object.
+    pthread_attr_destroy(&attributes);
 }
