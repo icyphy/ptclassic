@@ -73,7 +73,7 @@ static void (*messageHandler)() = defaultMessageHandler;
 
 static vulcanMessageType worstMessage;	/* this'll be returned to the user */
 
-typedef enum { VUL_FALSE, VUL_TRUE } boolean;
+/*typedef enum { VUL_FALSE, VUL_TRUE } boolean;*/
 
 extern int octIdCmp(), octIdHash();
 
@@ -283,7 +283,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
         octId *id = ALLOC(octId, 1);
 	transPtr = ALLOC(instTrans, 1);
 	transPtr->transform = instPtr->contents.instance.transform;
-	transPtr->includedUngrown = VUL_FALSE;
+	transPtr->includedUngrown = FALSE;
         *id = instPtr->objectId;
 	if (st_insert(framePtr->instances, (char *) id, (char *) transPtr)) {
 	    message(VULCAN_SEVERE,
@@ -306,7 +306,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
 				&transPtr->transform, &framePtr->frameGeos);
 	    addTransformedGeoList(&masterEntPtr->master->cutGeos,
 				&transPtr->transform, &framePtr->frameGeos);
-	    transPtr->includedUngrown = VUL_TRUE;
+	    transPtr->includedUngrown = TRUE;
 	}
 	transPtr->masterEntPtr = masterEntPtr;
 	transPtr->next = masterEntPtr->transList;
@@ -641,7 +641,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
 							&framePtr->frameGeos);
 	addTransformedGeoList(&masterFramePtr->cutGeos, &transPtr->transform,
 							&framePtr->frameGeos);
-	transPtr->includedUngrown = VUL_TRUE;
+	transPtr->includedUngrown = TRUE;
     }
 }
 
