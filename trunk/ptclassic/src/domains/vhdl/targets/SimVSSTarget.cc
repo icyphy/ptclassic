@@ -130,7 +130,7 @@ void SimVSSTarget :: frameCode() {
   code << headerComment();
 
 //  StringList galName = galaxy()->name();
-  StringList galName = filePrefix;
+  StringList galName = (const char *)filePrefix;
   StringList topName = galName;
   topName << "_top";
 
