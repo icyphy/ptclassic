@@ -272,14 +272,15 @@ private:
     // # of words in internal representation
     int words() const {
 	return (length <= FIX_BITS_PER_WORD ? 1 :
-		(length + FIX_BITS_PER_WORD - 1) / FIX_BITS_PER_WORD);
+		(int)(length + FIX_BITS_PER_WORD - 1) / FIX_BITS_PER_WORD);
     }
 
     // # words in internal representation, possibly including an extra
     // bit for use before rounding
     int wordsIncludingRound(int round) const {
-	return (length+round<= FIX_BITS_PER_WORD ? 1 :
-		(length+round + FIX_BITS_PER_WORD - 1) / FIX_BITS_PER_WORD);
+	int lpr = length + round;
+	return (lpr <= FIX_BITS_PER_WORD ? 1 :
+		(lpr + FIX_BITS_PER_WORD - 1) / FIX_BITS_PER_WORD);
     }
 
 };
