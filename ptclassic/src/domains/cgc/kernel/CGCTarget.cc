@@ -192,9 +192,9 @@ StringList CGCTarget::pragma(const char* parentname,
 StringList CGCTarget::pragma (const char* parentname,		
 			      const char* blockname,
 			      const char* pragmaname) const {
-  const char* c;
   InfString compoundname;
   compoundname << parentname << "." << blockname;
+  const char* c = "";
   if (strcmp(pragmaname,"state_name_mapping") != 0 ||
       !(c = mappings->lookup(compoundname))) {
     c = "";
@@ -422,7 +422,7 @@ int CGCTarget :: allocateMemory() {
 				StringList sym, sName;
 				sName << sanitizedName(*p);
 				sym << symbol(sName);
-				p->setGeoName(savestring(sym));
+				p->setGeoName(sym);
 	    		}
 
 			// (5) initialize offset pointer.
@@ -788,7 +788,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 			StringList sym, sName;
 			sName << sanitizedName(*p);
 			sym << symbol(sName);
-			p->setGeoName(savestring(sym));
+			p->setGeoName(sym);
 	    }
 	}
 
