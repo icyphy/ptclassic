@@ -115,6 +115,7 @@ class ::tycho::Interactor {
     # Generate a Tk event code from parameters
     proc event {type args} {}
 
+
     ###################################################################
     ####                   protected methods                       ####
 
@@ -199,9 +200,9 @@ body ::tycho::Interactor::bind {t args} {
 # Forward actions to a proxy interactor instead of directly
 # to the target object. This used when further modification of the
 # interaction can be provided by another interaactor -- for example,
-# a <a href="Stepper.html><i>Stepper</i></a> interactor can be used
+# a <a href="Stepper.html"><i>Stepper</i></a> interactor can be used
 # to quantize movement within a bounded rectangular region provided by the
-# <a href="Bounder.html><i>Bounder</i></a> interactor.
+# <a href="Bounder.html"><i>Bounder</i></a> interactor.
 #
 body ::tycho::Interactor::cascade {that} {
     $this proxy  $that
@@ -378,13 +379,13 @@ body ::tycho::Interactor::uncascade {} {
 # Translate an event specification into a Tk event code. The arguments
 # take the form
 # <p>
-# <code>type</code>: specifies which button to use.
-# <p>
-# <code>-button button</code>: specifies which button to use.
-# <p>
-# <code>-key key</code>: specifies which key to use.
-# <p>
-# <code>-modifiers modifiers</code>: specifies any modifiers.
+# <i>type</i>: specifies which button to use.
+# <br>
+# <i>-button button</i>: specifies which button to use.
+# <br>
+# <i>-key key</i>: specifies which key to use.
+# <br>
+# <i>-modifiers modifiers</i>: specifies any modifiers.
 #
 body ::tycho::Interactor::event {type args} {
     set button ""
@@ -394,83 +395,83 @@ body ::tycho::Interactor::event {type args} {
     getopt key args
     getoption modifiers args
 
-    set code ""
+    set i ""
     switch -exact [string tolower $type] {
 
 	"button" -
 	"press" -
 	"click" -
 	"buttonpress" {
-	    set code "ButtonPress"
+	    set i "ButtonPress"
 	    if { $button != "" } {
-		append code "-$button"
+		append i "-$button"
 	    }
 	}
 
 	"double" -
 	"doubleclick" {
-	    set code "Double-ButtonPress"
+	    set i "Double-ButtonPress"
 	    if { $button != "" } {
-		append code "-$button"
+		append i "-$button"
 	    }
 	}
 
 	"triple" -
 	"tripleclick" {
-	    set code "Triple-ButtonPress"
+	    set i "Triple-ButtonPress"
 	    if { $button != "" } {
-		append code "-$button"
+		append i "-$button"
 	    }
 	}
 
 	"release" -
 	"buttonrelease" {
-	    set code "ButtonRelease"
+	    set i "ButtonRelease"
 	    if { $button != "" } {
-		append code "-$button"
+		append i "-$button"
 	    }
 	}
 
 	"drag"   -
 	"move"   -
 	"motion" {
-	    set code "Motion"
+	    set i "Motion"
 	    if { $button != "" } {
-		set code [join [list "B" $button "-" $code] ""]
+		set i [join [list "B" $button "-" $i] ""]
 	    }
 	}
 
 	"enter" {
-	    set code "Enter"
+	    set i "Enter"
 	}
 
 	"leave" {
-	    set code "Leave"
+	    set i "Leave"
 	}
 
 	"key" -
 	"keypress" -
 	"keydown" {
 	    if { [info exists key] } {
-		set code "KeyPress-$key"
+		set i "KeyPress-$key"
 	    } else {
-		set code "KeyPress"
+		set i "KeyPress"
 	    }
 	}
 
 	"keyup" -
 	"keyrelease" {
 	    if { [info exists key] } {
-		set code "KeyRelease-$key"
+		set i "KeyRelease-$key"
 	    } else {
-		set code "KeyRelease"
+		set i "KeyRelease"
 	    }
 	}
     }
 
     foreach m $modifiers {
-	set code [join [list [capitalize $m] $code] "-"]
+	set i [join [list [capitalize $m] $i] "-"]
     }
 
-    return <$code>
+    return <$i>
 }
