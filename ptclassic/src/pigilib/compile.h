@@ -1,3 +1,5 @@
+#ifndef COMPILE_H
+#define COMPILE_H 1
 /* 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -33,3 +35,5 @@ extern int RpcCompileFacet();
 extern void CompileInit();
 extern void CompileEnd();
 extern int RpcRunAllDemos();
+
+#endif /* COMPILE_H */
