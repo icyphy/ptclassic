@@ -30,6 +30,7 @@ PL_SRCS= \
  CGCTkBarGraph.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
+ CGCTkPlot.pl \
  CGCTkSlider.pl \
  CGCTkSunSound.pl \
  CGCTkXYPlot.pl
