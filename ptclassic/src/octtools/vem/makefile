@@ -209,7 +209,8 @@ $(DESTBIN_D):	vem.debug $(OCTBINDIR)
 		rm -f $(DESTBIN_D)
 		ln vem.debug $(DESTBIN_D)
 
-install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
+install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem \
+		$(BINDIR)/../octtools/bin.sol2/debug/vem
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making install in $$x ; \
@@ -221,10 +222,11 @@ install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 # difficult.
 $(BINDIR)/vem:
 	(cd $(BINDIR); rm -f vem; ln -s ../octtools/bin.$(PTARCH)/vem .)
-$(BINDIR)/vem.debug:
-	(cd $(BINDIR); rm -f vem.debug; \
-		ln -s ../octtools/bin.$(PTARCH)/vem.debug .)
 
+$(BINDIR)/../octtools/bin.$(PTARCH)/debug/vem:
+	if [ ! -d $(BINDIR)/../octtools/bin.$(PTARCH)/debug ]; then \
+		mkdir $(BINDIR)/../octtools/bin.$(PTARCH)/debug; fi
+	(cd $(BINDIR)/../octtools/bin.$(PTARCH)/debug; ln -s ../vem.debug vem)
 
 clean::
 	rm -f vem vem.debug
