@@ -268,7 +268,7 @@ void StructTarget :: trailerCode() {
     // If its a constant source, need to do things a bit differently:
     // only have a source with a signal, and no mux or reg.
     if (state->constant) {
-      mainSignalList.put(state->name, state->type, "", "");
+      mainSignalList.put(state->name, state->type);
       connectSource(state->initVal, state->name, state->type);
     }
     // If firings change state, need to connect a reg and a mux
@@ -276,11 +276,11 @@ void StructTarget :: trailerCode() {
     if (!(state->constant)) {
       StringList tempName = state->name;
       tempName << "_Temp";
-      mainSignalList.put(tempName, state->type, "", "");
+      mainSignalList.put(tempName, state->type);
       StringList initName = state->name;
       initName << "_Init";
 
-      mainSignalList.put(initName, state->type, "", "");
+      mainSignalList.put(initName, state->type);
       connectMultiplexor(state->lastRef, state->firstRef, initName,
 			 state->type);
       connectSource(state->initVal, initName, state->type);
@@ -328,10 +328,10 @@ void StructTarget :: trailerCode() {
 
       // If no system port by the given name, go ahead and make the signal.
       if (sx < arc->lowWrite) {
-	mainSignalList.put(sourceName, arc->type, "", "");
+	mainSignalList.put(sourceName, arc->type);
       }
       if (ix < arc->lowWrite) {
-	mainSignalList.put(destName, arc->type, "", "");
+	mainSignalList.put(destName, arc->type);
       }
     }
   }
@@ -380,7 +380,7 @@ void StructTarget :: trailerCode() {
 	  newMapping = oldMapping;
 	  newMapping << "_new";
 	  poMap->mapping = newMapping;
-	  fi->signalList->put(newMapping, po->type, newMapping, oldMapping);
+	  fi->signalList->put(newMapping, po->type);
 	  connectRegister(newMapping, oldMapping, clkName, po->type);
 	}
       }
@@ -637,6 +637,8 @@ void StructTarget :: registerState(State* state, const char* varName,
   // If this is the first reference to this state in this firing
   // need to put it in the proper lists and make connections.
   if (listState->lastFiring != thisFiring) {
+    // Inside this if clause, this state is being referenced
+    // for the first time in this firing, perhaps the first time ever.
 
     int constState = 0;
     
@@ -668,64 +670,101 @@ void StructTarget :: registerState(State* state, const char* varName,
     temp_out_reg << "_sink";
 
     /*
-    // If it's the first firing to refer to this state,
-    if (isFirstStateRef) {
-      if (constState) {
-	firingSignalList.put(root, stType, "", root);
-	firingPortMapList.put(refIn, "", "", root);
-      }
-      if (!(constState)) {
-	firingSignalList.put(refIn, stType, "", refIn);
-	firingPortMapList.put(refIn, "", "", refIn);
-	firingPortMapList.put(refOut, "", "", temp_out);
-      }
-    }
-    
-    // If this isn't the first firing to refer to this state,
-    if (!isFirstStateRef) {
-      if (constState) {
-	firingSignalList.put(root, stType, root, root);
-	firingPortMapList.put(refIn, "", "", root);
-      }
-      if (!(constState)) {
-	firingSignalList.put(temp_state, stType, temp_state, refIn);
-	firingPortMapList.put(refIn, "", "", temp_state);
-	firingPortMapList.put(refOut, "", "", temp_out);
-      }
-    }
+    VHDLPort* inPort = new VHDLPort;
+    inPort->setName(refIn);
+    inPort->setType(stType);
+    inPort->setDirec("IN");
     */
+
+    firingPortList.put(refIn, "IN", stType);
+
+    firingVariableList.put(ref, stType, "");
+    firingPortVarList.put(refIn, ref);
 
     if (constState) {
       if (isFirstStateRef) {
-	firingSignalList.put(root, stType, "", root);
+	/*
+	// Create a new signal.
+	VHDLSignal* inSignal = new VHDLSignal;
+	inSignal->setName(root);
+	inSignal->setType(stType);
+
+	inPort->connect(inSignal);
+	*/
+
+	firingSignalList.put(root, stType);
 	firingPortMapList.put(refIn, "", "", root);
       }
       if (!isFirstStateRef) {
-	firingSignalList.put(root, stType, root, root);
+	/*
+	// Need to find the previous signal to connect to
+	// That signal should have been created during the previous firing's
+	// first reference to the state.
+	VHDLSignal* inSignal =  mainSignalList.vhdlSignalWithName(root);
+	if (!inSignal) {
+	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
+	  return;
+	}
+
+	inPort->connect(inSignal);
+	*/
+
+	firingSignalList.put(root, stType);
 	firingPortMapList.put(refIn, "", "", root);
       }
-      firingVariableList.put(ref, stType, "");
-      firingPortVarList.put(refIn, ref);
-      firingPortList.put(refIn, "IN", stType);
+
     }
 
     if (!(constState)) {
+      /*
+      // Create an output signal to propagate the updated state value.
+      VHDLPort* outPort = new VHDLPort;
+      outPort->setName(refOut);
+      outPort->setType(stType);
+      outPort->setDirec("OUT");
+
+      VHDLSignal* outSignal = new VHDLSignal;
+      outSignal->setName(temp_out);
+      outSignal->stType(stType);
+
+      outPort->connect(outSignal);
+      */
+
       if (isFirstStateRef) {
-	firingSignalList.put(refIn, stType, "", refIn);
+	/*
+	  // Create a new signal.
+	  VHDLSignal* inSignal = new VHDLSignal;
+	  inSignal->setName(refIn);
+	  inSignal->stType(stType);
+
+	  inPort->connect(inSignal);
+	 */
+
+	firingSignalList.put(refIn, stType);
 	firingPortMapList.put(refIn, "", "", refIn);
 	firingPortMapList.put(refOut, "", "", temp_out);
       }
       if (!isFirstStateRef) {
-	firingSignalList.put(temp_state, stType, temp_state, refIn);
+	/*
+	  // Need to find the previous signal to connect to
+	  // FIXME: Still don't like this, depends on knowing the name already!!
+	  VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(temp_state);
+	  if (!inSignal) {
+	    Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
+	    return;
+	  }
+
+	  inPort->connect(inSignal);
+	 */
+
+	firingSignalList.put(temp_state, stType);
 	firingPortMapList.put(refIn, "", "", temp_state);
 	firingPortMapList.put(refOut, "", "", temp_out);
       }
-      firingSignalList.put(temp_out, stType, temp_out, "");
-      firingVariableList.put(ref, stType, "");
-      firingPortVarList.put(refIn, ref);
-      firingVarPortList.put(refOut, ref);
-      firingPortList.put(refIn, "IN", stType);
+      firingSignalList.put(temp_out, stType);
       firingPortList.put(refOut, "OUT", stType);
+
+      firingVarPortList.put(refOut, ref);
 
       // Data clock name.  Needs to be the name of the firing, not the star.
       StringList clockName = sanitize(state->parent()->fullName());
@@ -810,12 +849,12 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
   //  systemPortList.put("control", "IN", "boolean");
   ctlerPortList.put("control", "OUT", "boolean");
   ctlerPortMapList.put("control", "", "", "control");
-  ctlerSignalList.put("control", "boolean", "", "");
+  ctlerSignalList.put("control", "boolean");
   ctlerPortList.put("system_clock", "IN", "boolean");
   ctlerPortMapList.put("system_clock", "", "", "system_clock");
   // If using a system clock generator, then need a signal.
   if (systemClock()) {
-    mainSignalList.put("system_clock", "boolean", "", "");
+    mainSignalList.put("system_clock", "boolean");
     connectClockGen("system_clock");
   }
   else {
@@ -870,12 +909,12 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
   //  systemPortList.put(clkName, "IN", "boolean");
   ctlerPortList.put(clkName, "OUT", "boolean");
   ctlerPortMapList.put(clkName, "", "", clkName);
-  ctlerSignalList.put(clkName, "boolean", "", "");
+  ctlerSignalList.put(clkName, "boolean");
   ctlerPortList.put("system_clock", "IN", "boolean");
   ctlerPortMapList.put("system_clock", "", "", "system_clock");
   // If using a system clock generator, then need a signal.
   if (systemClock()) {
-    mainSignalList.put("system_clock", "boolean", "", "");
+    mainSignalList.put("system_clock", "boolean");
     connectClockGen("system_clock");
   }
   else {
@@ -972,6 +1011,16 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   clockName << "_clk";
 
   // Create a port and a port mapping for this firing entity.
+  /*
+  // (What if this isn't the first reference?)
+  VHDLPort* newPort = new VHDLPort;
+  newPort->setName(ref);
+  newPort->setType(port->dataType());
+  newPort->setDirec(port->direction());
+
+  newPort->connect(mySignal);
+  */
+
   firingPortList.put(ref, port->direction(), port->dataType());
   firingPortMapList.put(ref, "", "", sinkName);
 
@@ -990,7 +1039,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     //    systemPortList.put(ref, port->direction(), port->dataType());
   }
   else {
-    firingSignalList.put(sinkName, port->dataType(), ref, ref);
+    firingSignalList.put(sinkName, port->dataType());
   }
 }
 
@@ -1036,6 +1085,7 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer, const 
   }
   else {
     Error::abortRun(*this, dtype, ": type not supported");
+    return;
   }
   
   // Construct unique label and signal names and put comp map in main list
@@ -1084,13 +1134,13 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer, const 
   firingPortMapList.put(endName, "", "", endName);
   ctlerPortMapList.put(endName, "", "", endName);
 
-  ctlerSignalList.put(startName, "STD_LOGIC", startName, startName);
-  firingSignalList.put(startName, "STD_LOGIC", startName, startName);
-  firingSignalList.put(goName, "STD_LOGIC", goName, goName);
-  firingSignalList.put(dataName, vtype, dataName, dataName);
-  firingSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
-  firingSignalList.put(endName, "STD_LOGIC", endName, endName);
-  ctlerSignalList.put(endName, "STD_LOGIC", endName, endName);
+  ctlerSignalList.put(startName, "STD_LOGIC");
+  firingSignalList.put(startName, "STD_LOGIC");
+  firingSignalList.put(goName, "STD_LOGIC");
+  firingSignalList.put(dataName, vtype);
+  firingSignalList.put(doneName, "STD_LOGIC");
+  firingSignalList.put(endName, "STD_LOGIC");
+  ctlerSignalList.put(endName, "STD_LOGIC");
 
   ctlerAction << startName << " <= '0';\n";
   preSynch << "wait on " << startName << "'transaction;\n";
@@ -1669,7 +1719,7 @@ void StructTarget :: toggleClock(const char* clock) {
     ctlerAction << clock << " <= FALSE;\n";
     ctlerPortList.put(clock, "OUT", "boolean");
     ctlerPortMapList.put(clock, "", "", clock);
-    ctlerSignalList.put(clock, "boolean", "", "");
+    ctlerSignalList.put(clock, "boolean");
   }
 }
 
@@ -1684,7 +1734,7 @@ void StructTarget :: assertClock(const char* clock) {
     ctlerAction << clock << " <= TRUE;\n";
     ctlerPortList.put(clock, "OUT", "boolean");
     ctlerPortMapList.put(clock, "", "", clock);
-    ctlerSignalList.put(clock, "boolean", "", "");
+    ctlerSignalList.put(clock, "boolean");
   }
 }
 
