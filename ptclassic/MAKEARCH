@@ -181,7 +181,7 @@ foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk cgc/vis \
 	c50/dsp cg56/dsp \
 	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
-	sdf/matrix sdf/matlab \
+	sdf/matrix sdf/matlab sdf/vis \
 	cgc/dsp cgc/rtlib \
 	mdsdf/tcltk de/atm cg/hierScheduler $EXPEXTRAS )
 	optmkdir $x
@@ -197,12 +197,12 @@ optlink ../../../../src/domains/thor/analyzerX11 Bitmaps
 cd ../..
 
 # create extra subsub dirs in each domain
-# everything must have two slashs (be three levels down)
+# everything must have two slashes (be three levels down)
 
 foreach x ( c50/dsp/stars cg56/dsp/stars \
 	sdf/atm/kernel sdf/atm/stars sdf/contrib/kernel sdf/contrib/stars \
 	sdf/dsp/stars sdf/image/stars sdf/tcltk/stars \
-	sdf/dfm/stars sdf/matrix/stars sdf/matlab/stars \
+	sdf/dfm/stars sdf/matrix/stars sdf/matlab/stars sdf/vis/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
