@@ -118,6 +118,7 @@ class ::tycho::DocSysTest {
 # Also, here is a separate paragraph, there should be a white space above this
 #
 body ::tycho::DocSysTest::privateProcNoArgs {} {
+    set fcatch [foo {bar}]
     puts "privateProcNoArgs"
 }
 
@@ -200,6 +201,10 @@ proc testHTMLDocSysKernelFiles {} {
     delete object .HTMLDocSys
 }
 
+# This always worked
+curlybracket-followed-by-squarebracket-1 [list {foo new zoo} ]
+# This caused problems
+curlybracket-followed-by-squarebracket-2 [list {foo new zoo}]
 
 
 source ../TyDoc.itcl
