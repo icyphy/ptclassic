@@ -64,6 +64,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 typedef FIX_WORD fix[FIX_WORDS_PER_FIX];
 typedef struct { int len,intb; } fix_prec;
 
+#ifdef __cplusplus
+#define EXIT_CGC(a) {if (a) Error::abortRun(*this,a); else SimControl::requestHalt(); return;}
+#else
+#define EXIT_CGC(a) {if (a) fprintf(stderr,"%s\n",a); exit(1);}
+#endif
 
 /* Implementation notes for the Fix Library routines:
 
