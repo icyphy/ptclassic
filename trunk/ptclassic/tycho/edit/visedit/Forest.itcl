@@ -208,9 +208,10 @@ body ::tycho::Forest::delete {nodename} {
 #### describe
 # Return a list that describes the forest. The list contains one
 # element for each tree in the forest. Each tree is described by a list
-# with one element for each node. Each node is described itself as a
-# list, with its name first, then its parent (or a null string), then a
-# list of its children, and finally its contents.
+# of nodes. Each node is described itself as a list with three
+# elements: the node name, the contents, and the parent (or a null
+# string). The nodes are described in such an order that parents are
+# always described before their children.
 #
 body ::tycho::Forest::describe {} {
     set result {}
@@ -222,8 +223,8 @@ body ::tycho::Forest::describe {} {
 
 #######################################################################
 #### init
-# Initialize the forest from a description.
-# The format of the description should be that produced by the
+# Initialize the forest from a description. The format of the
+# description should be compatible with that produced by the
 # <code>describe</code> method.
 #
 body ::tycho::Forest::init {description} {
@@ -231,11 +232,16 @@ body ::tycho::Forest::init {description} {
     foreach tree $description {
         foreach node $tree {
             set nodename [lindex $node 0]
-            set parentname($nodename) [lindex $node 1]
-            set childrennames($nodename) [lindex $node 2]
-            set contentsstring($nodename) [lindex $node 3]
-            if {$parentname($nodename) == {}} {
+            set contentsstring($nodename) [lindex $node 1]
+            set parent [lindex $node 2]
+            set parentname($nodename) $parent
+            set childrennames($nodename) {}
+            if {$parent == {}} {
                 lappend rootnames $nodename
+            } {
+                # A parent is specified
+                verify $parent
+                lappend childrennames($parent) $nodename
             }
         }
     }
@@ -283,20 +289,19 @@ body ::tycho::Forest::verify {nodename} {
 
 #######################################################################
 #### describetree
-# Returns a list describing the subtree with the given root.
-# The root need not be a root of a tree (it may have parents, although
-# its parents will be ignored).  The list returned has one element for
-# each node in the tree.  Each element is described itself as a list,
-# with its name first, then its parent (or a null string), then a list
-# of its children, and finally its contents.
+# Returns a list describing the subtree with the given root. The root
+# need not be a root of a tree (it may have parents, although its
+# parents will be ignored). The list returned has one element for each
+# node in the tree. Each element is described itself as a list, with
+# its name first, then its parent (or a null string), and finally its
+# contents.
 #
 body ::tycho::Forest::describetree {root} {
     verify $root
     set result [list [list \
             $root \
-            $parentname($root) \
-            $childrennames($root) \
-            $contentsstring($root)]]
+            $contentsstring($root) \
+            $parentname($root)]]
     foreach child $childrennames($root) {
         set result [concat $result [describetree $child]]
     }
