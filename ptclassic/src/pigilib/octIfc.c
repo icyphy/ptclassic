@@ -31,26 +31,31 @@ Useful higher level OCT interface functions.
 */
 
 /* Includes */
-#include "local.h"
+
+/* Standard include files */
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "compat.h"
+
+/* Octtools include files */
+#include "oct.h"
 #include "rpc.h"
+#include "oh.h"
+#include "region.h"
+
+/* Pigilib include files */
+#include "octIfc.h"
 #include "paramStructs.h"
 #include "err.h"
 #include "util.h"
 #include "octMacros.h"
 #include "mkIcon.h"
-#include "oh.h"
-#include "region.h"
-#include "oct.h"
 #include "mkTerm.h"
 #include "vemInterface.h"
 #include "pigiLoader.h"
 #include "kernelCalls.h"
 
-#include "octIfc.h"
 
 /* 
 returns a pointer to the name of the passed Oct Object in "namePtr"

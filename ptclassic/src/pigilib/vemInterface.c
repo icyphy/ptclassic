@@ -32,18 +32,22 @@ Note: all print functions append \n to string before printing.
 */
 
 /* Includes */
-#include "local.h"
+
+/* Standard includes */
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
-#include "compat.h"
 
-/* Pull in oct.h and rpc.h to define octObject and remote procedure calls */
+/* Octtools includes */
+#include "oct.h"
+#include "list.h"			/* define prototype for lsCreate */
+#include "rpc.h"
+#include "rpcApp.h"
+
+/* Pigilib includes */
 #include "vemInterface.h"
-
 #include "ptk.h"
 #include "err.h"
 #include "octMacros.h"
-#include "list.h"
-#include "rpcApp.h"
 #include "xfunctions.h"
 
 #define VemReady() (RPCSendStream != 0)
