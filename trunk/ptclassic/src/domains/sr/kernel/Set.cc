@@ -41,7 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // are 0,1,...,i-1.  The size must be equal to or greater than one.
 
 Set::Set(int s /* number of elements in the set */,
-	 int f = 0 /* zero = empty set, non-zero = full set */ )
+	 int f /* zero = empty set, non-zero = full set */ )
 {
   mysize = s;
 
