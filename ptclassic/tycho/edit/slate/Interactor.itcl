@@ -158,7 +158,10 @@ class ::tycho::Interactor {
     # Remove my bindings
     method deactivate {x y args}
 
-    # Completely disable an interactor
+    # Unbind a single item from the interactor
+    method debind {id}
+
+    # Disable this interactor
     method disable {}
 
     # Continue the interaction sequence: move the mouse
@@ -166,6 +169,9 @@ class ::tycho::Interactor {
 
     # Re-enable an interactor
     method enable {}
+
+    # Rebind a single item to the interactor
+    method rebind {id}
 
     # Terminate the interaction sequence
     method release {x y}
@@ -190,6 +196,9 @@ class ::tycho::Interactor {
 
     # The tags or items to which this item has been bound and arguments
     protected variable _bindings
+
+    # The tags unbound from items
+    protected variable _debound
 
     # The canvas on which this interactor resides.
     protected variable canvas ""
@@ -370,6 +379,32 @@ body ::tycho::Interactor::deactivate {x y args} {
 }
 
 #######################################################################
+#### debind target
+#
+# Sometimes it is necessary to disable bindings on a single
+# item. This method does just that.
+#
+body ::tycho::Interactor::debind {id} {
+    # Get the item's tags. Any tags to which this interactor is bound
+    # will be removed.
+    set tags [$slate gettags $id]
+
+    # For each binding tag, test if it's in the tags.
+    # If so, remove it and remember for rebinding.
+    set _debound($id) {}
+    foreach b [array names _bindings] {
+	set t [lindex $b 0]
+	if [::tycho::lmember $tags $t] {
+	    set tags [::tycho::ldelete $tags $t]
+	    lappend _debound($id) $t
+	}
+    }
+
+    # The new tags is the difference
+    $slate itemconfigure $id -tags $tags
+}
+
+#######################################################################
 #### disable
 #
 # Disable an interactor. This calls unbind{} on all bindings to
@@ -379,8 +414,8 @@ body ::tycho::Interactor::deactivate {x y args} {
 body ::tycho::Interactor::disable {} {
     set temp [array get _bindings]
     foreach {ix options} $temp {
-	    eval $this unbind [lindex $ix 0] $options
-	}
+        eval $this unbind [lindex $ix 0] $options
+    }
     array set _bindings [array get temp]
 }
 
@@ -424,6 +459,24 @@ body ::tycho::Interactor::enable {} {
     foreach {ix options} $temp {
     	eval $this bind [lindex $ix 0] $options
     }
+}
+
+#######################################################################
+#### rebind
+#
+# Return a debound item to its original happy state... This
+# method will fail if the item wasn't previously passed
+# to the debind{} method.
+#
+body ::tycho::Interactor::rebind {id} {
+    # Get the item's tags.
+    set tags [$slate gettags $id]
+
+    # Add the debound tags back
+    set tags [concat $tags $_debound($id)]
+    $slate itemconfigure $id -tags $tags
+
+    unset _debound($id)
 }
 
 #######################################################################
