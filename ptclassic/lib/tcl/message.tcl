@@ -229,7 +229,7 @@ proc ptkDisplayProfile {} {
 
     global unique
     set w .profileWindow$unique
-    set unique [expr $unique+1]
+    incr unique
 
     ptkSafeDestroy $w
     toplevel $w
