@@ -56,7 +56,7 @@ $Id$
 #include "handle.h"
 
 /* The vars below store the state of the last run command for re-runs */
-octObject lastFacet = {OCT_UNDEFINED_OBJECT};
+octObject lastFacet = {OCT_UNDEFINED_OBJECT, 0};
 
 /* Run a universe given only the full name of the facet.
    The number of iterations is gotten from the oct facet.  */
@@ -64,7 +64,7 @@ int
 RunUniverse(name)
 char* name;
 {
-	octObject facet = {OCT_UNDEFINED_OBJECT};
+	octObject facet = {OCT_UNDEFINED_OBJECT, 0};
 	char facetHandle[POCT_FACET_HANDLE_LEN];
 
 	ViInit(name);
@@ -131,7 +131,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
 
     ViInit("open run window");
     ErrClear();
@@ -202,7 +202,7 @@ lsList cmdList;
 long userOptionWord;
 {
 	/* modeled after RpcRun in exec.c */
-	octObject facet = {OCT_UNDEFINED_OBJECT};
+	octObject facet = {OCT_UNDEFINED_OBJECT, 0};
 	char* name;
 	const char* domainName;
 	char octHandle[POCT_FACET_HANDLE_LEN];

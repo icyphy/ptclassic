@@ -368,7 +368,7 @@ const char *
 getDomainS(spot)
 RPCSpot *spot;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
     const char *domain;
     const char *oldDomain;
 
@@ -450,7 +450,7 @@ const char *
 getDomainInst(instPtr)
 octObject *instPtr;
 {
-    octObject mFacet = {OCT_UNDEFINED_OBJECT};
+    octObject mFacet = {OCT_UNDEFINED_OBJECT, 0};
     static char domain[32];
     char srcName[512], *fullName;
     char* retval = 0;

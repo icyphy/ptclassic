@@ -54,9 +54,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define ERRBUF_MAX 1000
 
-static octObject starBoxLayer = {OCT_UNDEFINED_OBJECT},
-	         galBoxLayer = {OCT_UNDEFINED_OBJECT},
-		 iconBackgrLayer = {OCT_UNDEFINED_OBJECT};
+static octObject starBoxLayer = {OCT_UNDEFINED_OBJECT, 0},
+	         galBoxLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 iconBackgrLayer = {OCT_UNDEFINED_OBJECT, 0};
 
 /* 8/24/89
 Check to see if icon already exists.
@@ -65,7 +65,7 @@ static boolean
 AskAboutIcon(iconCellName)
 char *iconCellName;
 {
-    octObject iconFacet = {OCT_UNDEFINED_OBJECT};
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT, 0};
 
     iconFacet.type = OCT_FACET;
     iconFacet.contents.facet.cell = iconCellName;
@@ -93,8 +93,8 @@ DeepCopyObjs(destPtr, srcPtr)
 octObject *destPtr, *srcPtr;
 {
     octGenerator gen;
-    octObject srcItem = {OCT_UNDEFINED_OBJECT},
-	      destItem = {OCT_UNDEFINED_OBJECT};
+    octObject srcItem = {OCT_UNDEFINED_OBJECT, 0},
+	      destItem = {OCT_UNDEFINED_OBJECT, 0};
     octStatus status;
     int32 num;
 
@@ -161,7 +161,7 @@ octObject *iconFacetPtr;
 char *iconCellName;
 IconType type;
 {
-    octObject srcFacet = {OCT_UNDEFINED_OBJECT};
+    octObject srcFacet = {OCT_UNDEFINED_OBJECT, 0};
     char buf[MAXPATHLEN];
     char *techDir;
 
@@ -199,7 +199,7 @@ octObject *conFacetPtr;
 char *cellName;
 TermList *termsPtr;
 {
-    octObject term = {OCT_UNDEFINED_OBJECT};
+    octObject term = {OCT_UNDEFINED_OBJECT, 0};
     int i;
 
     conFacetPtr->type = OCT_FACET;
@@ -228,7 +228,7 @@ int size;
     Shape box;
     struct octPoint corners[2];
     static struct octPoint noTranslate = {0, 0};
-    octObject dummy = {OCT_UNDEFINED_OBJECT};
+    octObject dummy = {OCT_UNDEFINED_OBJECT, 0};
 
     box.type = OCT_BOX;
     box.points = corners;
@@ -249,8 +249,8 @@ MkLabel(facetPtr, name)
 octObject *facetPtr;
 char *name;
 {
-    octObject label = {OCT_UNDEFINED_OBJECT},
-	      labelLayer = {OCT_UNDEFINED_OBJECT};
+    octObject label = {OCT_UNDEFINED_OBJECT, 0},
+	      labelLayer = {OCT_UNDEFINED_OBJECT, 0};
     static struct octBox labelBox = {
 	{(octCoord) -50, (octCoord) -50},
 	{(octCoord) 50, (octCoord) -30}
@@ -327,7 +327,7 @@ MkPalIcon(facetPtr, iconFacetPtr)
 octObject *facetPtr, *iconFacetPtr;
 {
     char buf[MSG_BUF_MAX];
-    octObject prop = {OCT_UNDEFINED_OBJECT};
+    octObject prop = {OCT_UNDEFINED_OBJECT, 0};
 
     sprintf(buf,"Making palette icon for '%s'", facetPtr->contents.facet.cell);
     PrintDebug(buf);
@@ -346,7 +346,7 @@ MkUnivIcon(facetPtr, iconFacetPtr)
 octObject *facetPtr, *iconFacetPtr;
 {
     char buf[MSG_BUF_MAX];
-    octObject prop = {OCT_UNDEFINED_OBJECT};
+    octObject prop = {OCT_UNDEFINED_OBJECT, 0};
 
     sprintf(buf,"Making universe icon for '%s'",facetPtr->contents.facet.cell);
     PrintDebug(buf);
@@ -364,7 +364,7 @@ octObject *galFacetPtr, *iconFacetPtr;
 {
     TermList terms;
     char buf[MSG_BUF_MAX];
-    octObject prop = {OCT_UNDEFINED_OBJECT};
+    octObject prop = {OCT_UNDEFINED_OBJECT, 0};
     char *name = BaseName(galFacetPtr->contents.facet.cell);
     int maxNumTerms, size;
 
@@ -406,8 +406,8 @@ octObject *iconFacetPtr;
     char buf[MSG_BUF_MAX];
     char *fileName;
     const char *name;
-    octObject iconConFacet = {OCT_UNDEFINED_OBJECT},
-	      prop = {OCT_UNDEFINED_OBJECT};
+    octObject iconConFacet = {OCT_UNDEFINED_OBJECT, 0},
+	      prop = {OCT_UNDEFINED_OBJECT, 0};
     int maxNumTerms, size;
 
     /* nameplus may have extensions for the number of ports, etc. */

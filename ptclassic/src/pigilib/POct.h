@@ -43,7 +43,7 @@ This is a C++ include file.
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
  */
-#include "sol2compat.h"
+#include "local.h"
 
 extern "C" {
 #include "tcl.h"
