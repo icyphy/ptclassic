@@ -40,8 +40,8 @@ void Linker::init (const char* myName) {
 		ptolemyName = savestring (tmpname);
 		return;
 	}
-	errorHandler.error ("Cannot locate the running binary!");
-	exit (1);
+//	errorHandler.error ("Cannot locate the running binary!");
+//	exit (1);
 }
 
 typedef void (*PointerToVoidFunction) ();
