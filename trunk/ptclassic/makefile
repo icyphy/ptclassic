@@ -68,11 +68,22 @@ bootstrap_clean: clean_gnu clean_tcltk clean_octtools clean_xv clean
 # building gcc/main.c may fail
 #GNU_BUILD_CC=/usr/tools/gnu/bin/gcc
 GNU_BUILD_CC=cc
+
+# Special CC for irix5.  If you are using gcc to recompile, use this:
+#IRIX5_GNU_BUILD_CC=/users/ptolemy/gnu/irix5/bin/gcc
+# If you are using cc to compile gnu under irix5, use this:
+IRIX5_GNU_BUILD_CC=cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1
+
 install_gnu:
-	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) gnu_all
-# For hppa, run install_hpgnu, not install_gnu
-install_hpgnu:
-	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) hpgnu_all
+	@echo "Building gnu for $(ARCH);
+	case $(ARCH) in \
+	hppa) 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
+		$(MFLAGS) hpgnu_all;; \
+	irix5)	$(MAKE) -f mk/scratch-srcs.mk CC="$(IRIX5_GNU_BUILD_CC)" \
+		$(MFLAGS) gnu_all;; \
+	*)	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
+		$(MFLAGS) gnu_all;; \
+	esac
 
 install_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
