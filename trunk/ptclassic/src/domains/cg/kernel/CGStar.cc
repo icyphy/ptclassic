@@ -38,13 +38,12 @@ void CGStar :: gencode (CGCodeBlock& block) {
 	target->addCode(block.getText());
 }
 
-void CGStar :: setTarget (Architecture* t) {
-	target = t;
-}
-
 // The following is defined in CGDomain.cc -- this forces that module
 // to be included if any CG stars are linked in.
 extern const char CGdomainName[];
 
 const char* CGStar :: domain () const { return CGdomainName;}
 
+// isa
+
+ISA_FUNC(CGStar, SDFStar);
