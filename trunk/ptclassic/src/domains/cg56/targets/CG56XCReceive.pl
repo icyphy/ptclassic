@@ -6,7 +6,7 @@ defstar {
 	author { Jose L. Pino }
 	derivedFrom {XCSynchComm}
 	copyright {
-Copyright (c) 1994,1993 The Regents of the University of California.
+Copyright (c) 1993-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -30,22 +30,18 @@ $label(bufferEmpty)
 	move	#$addr(output),r0	;read starting input geodesic address
 	move	#$addr(buffer),r1	;read starting buffer address
 	do		#@numXfer,$label(XFR)
-			move	$mem(buffer):(r1)+,x0
-			move	x0,$mem(output):(r0)+
+			move	$mem(buffer):(r1)+,a
+			move	a,$mem(output):(r0)+
 $label(XFR)
 }
 
 setup {
-	numXfer = output.numXfer();     
-	CG56XCSynchComm::setup();      
+    resolvedType = output.setResolvedType();
+    numXfer = output.numXfer();     
+    CG56XCSynchComm::setup();      
 }
 
 go {
-/*	if (output.far()->parent()->isA("CG56Collect")) {
-		if (addCode("",NULL,output.far()->parent()->name())) {
-			((CGStar*)output.far()->parent())->go();
-		}
-	} */
 	addCode(receiveData(pairNumber,numXfer));
 	addCode(processPendingInterrupts(pairNumber));
 @	bclr	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
