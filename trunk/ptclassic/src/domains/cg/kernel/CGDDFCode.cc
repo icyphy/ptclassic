@@ -42,76 +42,63 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MultiTarget.h"
 #include "Error.h"
 
-        //////////////////////////////
-        // Case contruct
-        //////////////////////////////
-
-void CGDDFCode :: startCode_Case(CGStar*, Geodesic*, CGTarget*) { 
-	Error::abortRun(*owner, ": startCode_Case() method is not defined.");
+// Start a case construct, e.g. switch(c)
+void CGDDFCode :: startCode_Case(CGStar*, Geodesic*, CGTarget*) {
+	Error::abortRun(*owner, "startCode_Case() method is not defined.");
 }
 
+// Continue a case construct, e.g. code like } else if (..) {
 void CGDDFCode :: middleCode_Case(int, CGTarget*)  {
-	Error::abortRun(*owner, ": middleCode_Case() method is not defined.");
-	// add some code like } else if (..) {
+	Error::abortRun(*owner, "middleCode_Case() method is not defined.");
 }
 
+// End a case construct, e.g. close brace
 void CGDDFCode :: endCode_Case(CGTarget*) {
-	Error::abortRun(*owner, ": endCode_Case() method is not defined.");
-	// add final code(e.g. close bracket)
+	Error::abortRun(*owner, "endCode_Case() method is not defined.");
 }
 
-        //////////////////////////////
-        // DoWhile contruct
-        //////////////////////////////
-
+// Start a do-while construct
 void CGDDFCode :: startCode_DoWhile(Geodesic*, Geodesic*, CGTarget*) { 
-     Error::abortRun(*owner, ": startCode_DoWhile() method is not defined.");
+	Error::abortRun(*owner, "startCode_DoWhile() method is not defined.");
 }
 
+// End a do-while construct
 void CGDDFCode :: endCode_DoWhile(CGStar*, Geodesic*, CGTarget*) {
-	Error::abortRun(*owner, ": endCode_DoWhile() method is not defined.");
+	Error::abortRun(*owner, "endCode_DoWhile() method is not defined.");
 	// add final code(e.g. close bracket)
 }
 
-        //////////////////////////////
-        // For contruct
-        //////////////////////////////
-
+// Start a for-loop
 void CGDDFCode :: startCode_For(CGStar*, Geodesic*, CGTarget*) { 
-	Error::abortRun(*owner, ": startCode_For() method is not defined.");
+	Error::abortRun(*owner, "startCode_For() method is not defined.");
 }
 
+// Continue a for-loop: add some code like } else if (..) {
 void CGDDFCode :: middleCode_For(CGStar*, CGStar*, int, int, CGTarget*) {
-	Error::abortRun(*owner, ": middleCode_For() method is not defined.");
-	// add some code like } else if (..) {
+	Error::abortRun(*owner, "middleCode_For() method is not defined.");
 }
 
+// End a for-loop: add final code(e.g. close bracket)
 void CGDDFCode :: endCode_For(CGTarget*) {
-	Error::abortRun(*owner, ": endCode_For() method is not defined.");
-	// add final code(e.g. close bracket)
+	Error::abortRun(*owner, "endCode_For() method is not defined.");
 }
 
-        //////////////////////////////
-        // Recur contruct
-        //////////////////////////////
-
+// Start recursion: define the recursive function
 void CGDDFCode :: startCode_Recur(Geodesic*, PortHole*,
 					const char*, CGTarget*) { 
-	Error::abortRun(*owner, ": startCode_Recur() method is not defined.");
-	// function definition....
+	Error::abortRun(*owner, "startCode_Recur() method is not defined.");
 }
 
+// Continue recursion: function calls...
 void CGDDFCode :: middleCode_Recur(Geodesic*,Geodesic*,
 					const char*,CGTarget*) {
-	Error::abortRun(*owner, ": middleCode_Recur() method is not defined.");
-	// function calls...
+	Error::abortRun(*owner, "middleCode_Recur() method is not defined.");
 }
 
+// End recursion: final code (e.g. close bracket) and final result copy
 void CGDDFCode :: endCode_Recur(Geodesic*, const char*, CGTarget*) {
-	Error::abortRun(*owner, ": endCode_Recur() method is not defined.");
-	// add final code(e.g. close bracket) and final result copy.
+	Error::abortRun(*owner, "endCode_Recur() method is not defined.");
 }
 
 void CGDDFCode :: prepCode(MultiTarget*, Profile*, int, int) {}
 void CGDDFCode :: signalCopy(int) {}
-
