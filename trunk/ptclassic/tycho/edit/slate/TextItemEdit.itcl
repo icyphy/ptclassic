@@ -123,9 +123,8 @@ body ::tycho::Editor::activate {t x y args} {
 	target [$slate find withtag current]
     }
 
-    # Set the focus to the canvas (NB not the slate) so
-    # we can intercept key events
-    focus $canvas
+    # Set the focus to the slate
+    $slate focusin
 
     # Focus on the target
     $slate focus $target
@@ -216,7 +215,6 @@ body ::tycho::Editor::dbclick {} {
 # 
 body ::tycho::Editor::deactivate {args} {
     # Remove the focus
-    focus {}
     $slate focus ""
     ::bind $slate <Key> {}
 
