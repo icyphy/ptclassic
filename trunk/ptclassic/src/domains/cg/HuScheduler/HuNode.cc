@@ -1,4 +1,4 @@
-static const char file_id[] = "QSNode.cc";
+static const char file_id[] = "HuNode.cc";
 
 /*****************************************************************
 Version identification:
@@ -16,12 +16,12 @@ Date of last revision:
 #pragma implementation
 #endif
 
-#include "QSNode.h"
+#include "HuNode.h"
                         ///////////////////////
                         ///  *Constructor*  ///
                         ///////////////////////
 
-QSNode::QSNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
+HuNode::HuNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
 {
 	assignedFlag = 0;
 	preferredProc = 0;
@@ -31,7 +31,7 @@ QSNode::QSNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
 // If type = 1, it is an idle node.
 // If type = -1, it is a send node, type = -2 indicates a receive node
 
-QSNode::QSNode(int t) : ParNode(t) {
+HuNode::HuNode(int t) : ParNode(t) {
 	assignedFlag = 0;
 	preferredProc = 0;
 }

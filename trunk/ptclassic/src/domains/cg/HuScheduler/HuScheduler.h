@@ -1,5 +1,5 @@
-#ifndef _QuasiScheduler_h
-#define _QuasiScheduler_h
+#ifndef _HuScheduler_h
+#define _HuScheduler_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -18,33 +18,21 @@ Date of last revision:
 *****************************************************************/
 
 #include "ParScheduler.h"
-#include "QSParProcs.h"
+#include "HuParProcs.h"
 
 
 ///////////////////////////
-// class QuasiScheduler //
+// class HuScheduler //
 ///////////////////////////
 
-class QuasiScheduler : public ParScheduler {
-	// temporal hack to prevent createSubGals if wormhole exists
-	int wormFlag;
-
-	QSGraph* myGraph;
-
-protected:
-   	// The aggregate firing that represents the
-   	// schedule.
-   	QSParProcs* parSched;
-
-	// makespan
-	int getMakespan();
+class HuScheduler : public ParScheduler {
 
 public:
   	// Constructor
-  	QuasiScheduler(BaseMultiTarget* t, const char* log) : 
+  	HuScheduler(MultiTarget* t, const char* log) : 
 		ParScheduler(t, log), parSched(0) {
-		INC_LOG_NEW; myGraph = new QSGraph; exGraph = myGraph; }
-	~QuasiScheduler();
+		INC_LOG_NEW; myGraph = new HuGraph; exGraph = myGraph; }
+	~HuScheduler();
 
   	// set-up Processors
   	void setUpProcs(int num);
@@ -57,6 +45,20 @@ public:
 
 	// temporal hack
 	int createSubGals();
+
+protected:
+   	// The aggregate firing that represents the
+   	// schedule.
+   	HuParProcs* parSched;
+
+	// makespan
+	int getMakespan();
+
+private:
+	// temporal hack to prevent createSubGals if wormhole exists
+	int wormFlag;
+
+	HuGraph* myGraph;
 };
 
 #endif

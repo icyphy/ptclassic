@@ -1,4 +1,4 @@
-static const char file_id[] = "QSGraph.cc";
+static const char file_id[] = "HuGraph.cc";
 
 /*****************************************************************
 Version identification:
@@ -16,14 +16,14 @@ Date of last revision:
 #pragma implementation
 #endif
 
-#include "QSGraph.h"
-#include "QSNode.h"
+#include "HuGraph.h"
+#include "HuNode.h"
 
 // redefine the virtual methods
-EGNode *QSGraph :: newNode(DataFlowStar* s, int i)
-	{ LOG_NEW; return new QSNode(s,i); }
+EGNode *HuGraph :: newNode(DataFlowStar* s, int i)
+	{ LOG_NEW; return new HuNode(s,i); }
 
-void QSGraph :: resetGraph() {
+void HuGraph :: resetGraph() {
 
 	// reset the runnable node list.
 	findRunnableNodes();
@@ -31,8 +31,8 @@ void QSGraph :: resetGraph() {
 	// update the minimum execution time if necessary
 	minWork = 0;
 	EGSourceIter nxtSrc(*this);
-	QSNode* src;
-	while ((src = (QSNode*) nxtSrc++) != 0) {
+	HuNode* src;
+	while ((src = (HuNode*) nxtSrc++) != 0) {
 		if (src->myExecTime() < minWork) minWork = src->myExecTime();
 		src->resetAssignedFlag(0);
 	}
@@ -51,20 +51,20 @@ void QSGraph :: resetGraph() {
 // find a runnable block whose execution time is closest to the
 // given limit.
 
-QSNode* QSGraph :: findTinyBlock(int limit)
+HuNode* HuGraph :: findTinyBlock(int limit)
 {
 	// If the geven limit is smaller than the minWork, return 0;
-	if (limit < minWork) return (QSNode*) 0;
+	if (limit < minWork) return (HuNode*) 0;
 
 	// Attach a link iterator to the runnable nodes
 	EGNodeListIter NodeIter(runnableNodes);
-	QSNode* pd;
-	QSNode *obj = 0;
+	HuNode* pd;
+	HuNode *obj = 0;
 	int closest = limit;
 
 	// go through the runnable node list
-	while ((pd = (QSNode*) NodeIter++) != 0) {
-                // The QSNode associated with dlnk
+	while ((pd = (HuNode*) NodeIter++) != 0) {
+                // The HuNode associated with dlnk
 		int temp = limit - pd->myExecTime();
 		if (temp >= 0 && temp < closest) {
 			temp = closest;
@@ -79,15 +79,15 @@ QSNode* QSGraph :: findTinyBlock(int limit)
 }
 
 // Return the smallest execution time among the runnable nodes.
-int QSGraph :: smallestExTime()
+int HuGraph :: smallestExTime()
 {
 	// Attach a link iterator to the DLNodeList
 	EGNodeListIter NodeIter(runnableNodes);
-	QSNode *pd;
+	HuNode *pd;
 	int small = unschedWork;
 
 	// Iterate for all runnable nodes.
-	while ((pd = (QSNode*) NodeIter++) != 0) 
+	while ((pd = (HuNode*) NodeIter++) != 0) 
 		if (pd->myExecTime() < small) small = pd->myExecTime();
 	
 	minWork = small;

@@ -1,5 +1,5 @@
-#ifndef _QSUniProc_h
-#define _QSUniProc_h
+#ifndef _HuUniProc_h
+#define _HuUniProc_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -16,34 +16,20 @@ Date of last revision:
 
 *****************************************************************/
 
-#include "QSGraph.h"
+#include "HuGraph.h"
 #include "UniProcessor.h"
 
 ////////////////////////
-// class QSUniProc //
+// class HuUniProc //
 ////////////////////////
 
 // This class simulates a single processor.
 
-class QSUniProc : public UniProcessor {
-
-private:
-	// The scheduled time marched with the global clock, including
-	// the idle time at the end.
-	int timeFree;
-
-        // The previous available time.
-        int prevTime;
-
-	// scheduled finished time of the last fired star.
-	int lastFiringTime;
-	int nextFiringTime;
-	NodeSchedule* lastFired;
-	NodeSchedule* nextFired;
+class HuUniProc : public UniProcessor {
 
 public:
 	// constructor
-	QSUniProc();
+	HuUniProc();
 
 	// get the currently executed node and schedule
 	EGNode* getCurrentNode() 
@@ -79,6 +65,19 @@ public:
 			    nextFiringTime = 0; lastFiringTime = 0;
 			    timeFree = 0; }
 
+private:
+	// The scheduled time marched with the global clock, including
+	// the idle time at the end.
+	int timeFree;
+
+        // The previous available time.
+        int prevTime;
+
+	// scheduled finished time of the last fired star.
+	int lastFiringTime;
+	int nextFiringTime;
+	NodeSchedule* lastFired;
+	NodeSchedule* nextFired;
 };
 
 #endif

@@ -1,4 +1,4 @@
-static const char file_id[] = "QSParProcs.cc";
+static const char file_id[] = "HuParProcs.cc";
 
 /*****************************************************************
 Version identification:
@@ -16,29 +16,29 @@ Date of last revision:
 #pragma implementation
 #endif
 
-#include "QSParProcs.h"
-#include "EGConnect.h"
+#include "HuParProcs.h"
+#include "EGGate.h"
 #include "StringList.h"
 #include "CGWormhole.h"
 #include "Profile.h"
-#include "QSNode.h"
+#include "HuNode.h"
 
 // common reference of the idle node
-static QSNode idleNode(1);
+static HuNode idleNode(1);
 
 // constructor
-QSParProcs :: QSParProcs(int pNum, BaseMultiTarget* t) : ParProcessors(pNum,t)
+HuParProcs :: HuParProcs(int pNum, MultiTarget* t) : ParProcessors(pNum,t)
 {
-	LOG_NEW; schedules = new QSUniProc[pNum];
+	LOG_NEW; schedules = new HuUniProc[pNum];
 }
 
-QSParProcs :: ~QSParProcs() {
+HuParProcs :: ~HuParProcs() {
 	LOG_DEL; delete [] schedules;
 }
 
-UniProcessor* QSParProcs :: getProc(int num) { return getSchedule(num); }
+UniProcessor* HuParProcs :: getProc(int num) { return getSchedule(num); }
 
-void QSParProcs :: initialize(QSGraph* g) 
+void HuParProcs :: initialize(HuGraph* g) 
 {
 	ParProcessors :: initialize();
 
@@ -51,10 +51,10 @@ void QSParProcs :: initialize(QSGraph* g)
 		SCHEDULE AIDS
  ****************************************************************/
 
-void QSParProcs :: assignNode(QSNode* pd, int leng, int pNum)
+void HuParProcs :: assignNode(HuNode* pd, int leng, int pNum)
 {
 	// assign the node to the processor
-	QSUniProc* proc = getSchedule(pNum);
+	HuUniProc* proc = getSchedule(pNum);
 
 	// check whether to insert idle time or not.
 	int idle = proc->getIdleTime();
@@ -71,15 +71,15 @@ void QSParProcs :: assignNode(QSNode* pd, int leng, int pNum)
 	pd->setFinishTime(ck);
 }
 
-void QSParProcs :: setIndex(int v)
+void HuParProcs :: setIndex(int v)
 {
-	QSUniProc* proc = getSchedule(pIndex[v]);
+	HuUniProc* proc = getSchedule(pIndex[v]);
 	proc->setIndex(v);
 }
 
 // determine the pattern of processor availability and store it
 // sorted.  Processor index is also stored for random reference.
-void QSParProcs :: determinePPA(IntArray& avail)
+void HuParProcs :: determinePPA(IntArray& avail)
 {
 	// fill out the array initially
 	int base = getSchedule(pIndex[0])->getTimeFree();
@@ -90,7 +90,7 @@ void QSParProcs :: determinePPA(IntArray& avail)
 
 // When a processor is assigned a task, the pattern of processor
 // availability is changed. Keep track of this change.
-void QSParProcs :: renewPatternIndex(int spot)
+void HuParProcs :: renewPatternIndex(int spot)
 {
 	int temp = pIndex[spot];
 	int v = getSchedule(temp)->getTimeFree();
@@ -119,14 +119,14 @@ void reSortArray(IntArray& avail, int ix)
 // Advance the clock until the free time of processor of pIndex[ix].
 // The nodes to be finished during the clock-advancement may make
 // some descendents runnable; put them into the runnable list.
-void QSParProcs :: advanceClock(int ix)
+void HuParProcs :: advanceClock(int ix)
 {
 	// If clock is not advanced, just return.
 	if (clock >= getSchedule(pIndex[ix])->getTimeFree()) return;
 
 	// Advance the clock
 	int k = ix;
-	QSUniProc* proc = getSchedule(pIndex[k]);
+	HuUniProc* proc = getSchedule(pIndex[k]);
 	clock = proc->getTimeFree();
 
 	// Update the runnable node list to include all descendents
@@ -136,7 +136,7 @@ void QSParProcs :: advanceClock(int ix)
 		int t = proc->getNextFiringTime();
 		while ((clock >= t) && (t > 0)) {
 			NodeSchedule* ns = proc->nextNodeToBeFired();
-			QSNode* temp = (QSNode*) ns->getNode();
+			HuNode* temp = (HuNode*) ns->getNode();
 			if (temp) {
 				if (ns->getDuration()) {
 					temp->setAssignedFlag();
@@ -155,11 +155,11 @@ void QSParProcs :: advanceClock(int ix)
 }
 			
 // fire a node and add runnable descendants into the list.
-void QSParProcs :: fireNode(QSNode* n, int preferredProc) {
+void HuParProcs :: fireNode(HuNode* n, int preferredProc) {
 	EGGateLinkIter nextKid(n->descendants);
 	EGGate* d;
 	while ((d = nextKid++) != 0) {
-		QSNode* pd = (QSNode*) d->farEndNode();
+		HuNode* pd = (HuNode*) d->farEndNode();
 		if (pd->fireable()) {
 			pd->setAssignedFlag();
 			myGraph->sortedInsert(myGraph->runnableNodes,pd,1);
@@ -168,9 +168,9 @@ void QSParProcs :: fireNode(QSNode* n, int preferredProc) {
 	}
 }
 
-void QSParProcs :: checkPreferredProc(int pNum) 
+void HuParProcs :: checkPreferredProc(int pNum) 
 {
-	QSUniProc* proc = getSchedule(pNum);
+	HuUniProc* proc = getSchedule(pNum);
 	if (proc->getTimeFree() <= clock) {
 		// yes, available
 		int temp = 0;
@@ -180,8 +180,8 @@ void QSParProcs :: checkPreferredProc(int pNum)
 	} else {
 		// no, check whether we may exchange the nodes or not.
 		if (proc->getPrevTime() == clock) {
-			QSNode* qn = (QSNode*) proc->getCurrentNode();
-			QSNode* q = (QSNode*) getSchedule(pIndex[0])->getCurrentNode();
+			HuNode* qn = (HuNode*) proc->getCurrentNode();
+			HuNode* q = (HuNode*) getSchedule(pIndex[0])->getCurrentNode();
 			if ((qn->getPreferredProc() != pNum) && (qn != q)) {
 				// exchange the nodes.
 				int length = proc->getAvailTime() - clock;
@@ -207,7 +207,7 @@ void QSParProcs :: checkPreferredProc(int pNum)
  ****************************************************************/
 
 // schedule a normal atomic block.
-void QSParProcs :: scheduleSmall(QSNode* pd)
+void HuParProcs :: scheduleSmall(HuNode* pd)
 {
 	// advance the global clock if necessary
 	advanceClock(0);
@@ -240,7 +240,7 @@ void QSParProcs :: scheduleSmall(QSNode* pd)
 // mismatched pattern of processor availability.
 // We try to minimise this slot by scheduling other runnable nodes
 // into this idle time slot if possible.
-void QSParProcs :: scheduleBig(QSNode* node, int opt, IntArray& avail)
+void HuParProcs :: scheduleBig(HuNode* node, int opt, IntArray& avail)
 {
 	CGStar* wormStar = (CGStar*) node->myStar();
 	CGWormhole* worm = wormStar->myWormhole();
@@ -265,7 +265,7 @@ void QSParProcs :: scheduleBig(QSNode* node, int opt, IntArray& avail)
 		advanceClock(i);	
 
 		// scan the runnable nodes for best-fit.
-		QSNode* tiny;
+		HuNode* tiny;
 		while ((tiny = myGraph->findTinyBlock(idle)) != 0) {
 			// schedule it.
 			assignNode(tiny, tiny->myExecTime(), pIndex[i]);
@@ -307,7 +307,7 @@ void QSParProcs :: scheduleBig(QSNode* node, int opt, IntArray& avail)
 }
 
 // schedule idle time.
-int QSParProcs :: scheduleIdle() {
+int HuParProcs :: scheduleIdle() {
 	
 	// Determine the amount of idle time
 	int i = 0;
@@ -340,7 +340,7 @@ int QSParProcs :: scheduleIdle() {
 		// The smallest idle time, the smallest index.
         	for (i = 1; i < pN; i++) {
                 	int j = i - 1;
-			QSUniProc* up = getSchedule(pIndex[i]);
+			HuUniProc* up = getSchedule(pIndex[i]);
                 	int x = up->getIdleTime();
                 	int temp = pIndex[i];
                 	while (j >= 0 && 
