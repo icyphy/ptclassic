@@ -37,7 +37,7 @@
 #
 # becomes
 #
-# rangeapplyexpr {cos(2*{PI}*($i-1)/{NumFilterTaps})} 1 {NumFilterTaps}
+# sampleExpr {cos(2*{PI}*($i-1)/{NumFilterTaps})} 1 {NumFilterTaps}
 #
 # Author: Brian L. Evans
 # $Id$
@@ -46,14 +46,14 @@ if { [info commands add_to_help] == "" } {
   proc add_to_help {cmd argl desc} {}
 }
 
-# Function: listapplyexpr
+# Function: listSampleExpr
 
-add_to_help listapplyexpr {<tclexpr> <list>} {
+add_to_help listSampleExpr {<tclexpr> <list>} {
 Produces a new list by applying each item in list to the tclexpr
 by substituting for the variable i in tclexpr.
 }
 
-proc listapplyexpr {tclexpr thelist} {
+proc listSampleExpr {tclexpr thelist} {
   foreach i $thelist {
     lappend newlist [expr $tclexpr]
   }
@@ -112,15 +112,15 @@ proc range {minindex maxindex {inc 1}} {
   return $rangelist
 }
 
-# Function: rangeapplyexpr
+# Function: sampleExpr
 
-add_to_help rangeapplyexpr {<tclexpr> <min> <max> ?<increment>?} {
-Evaluate tclexpr for values of i running from min to max at increments
+add_to_help sampleExpr {<tclexpr> <min> <max> ?<increment>?} {
+Evaluate tclexpr at values of i running from min to max at increments
 of increment to produce a list.  If the sequence of numbers will never
 reach max, then the routine will return an empty list.
 }
 
-proc rangeapplyexpr {tclexpr minindex maxindex {inc 1}} {
+proc sampleExpr {tclexpr minindex maxindex {inc 1}} {
   if { [sign [expr "$maxindex - $minindex"]] == [sign $inc] } {
     for {set i $minindex} {$i <= $maxindex} {incr i $inc} {
       lappend rangelist [expr $tclexpr]
