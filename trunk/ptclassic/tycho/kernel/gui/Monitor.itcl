@@ -106,6 +106,16 @@ class ::tycho::Monitor {
     # so that we'll remember the setting next time we start up
     public method saveSetting {} {}
 
+
+    # If a monitor has error line reported, jump to the editor and its line
+    public method jumpToLine {monitorLine editorLine fname} {}
+    
+    # Uses jumpToLine to jump to the next reported error.
+    public method jumpNextError {} {}
+
+    # Set the error count so that jumpNextError will jump correctly.
+    public method setErrorCount {num}
+    
     ###################################################################
     ####                            options                        ####
 
@@ -120,6 +130,13 @@ class ::tycho::Monitor {
 
     # Directory to execute the command in.
     itk_option define -dir dir Dir {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    public variable errorCount 0
+    public variable errorList {}
+    private variable previousErrorLine -1
 }
 
 #######################################################################
@@ -152,7 +169,7 @@ body ::tycho::Monitor::constructor {args} {
 
     $itk_component(hull) addButton next \
             -text {Next Error} \
-            -command {}
+            -command "$this jumpNextError"
 
     $itk_component(hull) addButton stop \
             -text {Stop} \
@@ -238,17 +255,102 @@ body ::tycho::Monitor::saveSetting {} {
     }
 }
 
+#######################################################################
+#### jumpNextError
+# Make sure we don't jump too far. errorList has the following format:
+# { {cLineNum eLineNum} {cLineNum eLineNum} ... }
+# Where cLinNum is the compiler's line number, along with
+# eLineNum, which is the editor's line number.
+#
+body ::tycho::Monitor::jumpNextError {} {
+    # NOTE: errorCount=$errorCount   errorList=$errorList
+    if {$errorCount!=-1 && $errorCount<[llength $errorList]} {
+        # Find out where in the list my information is located.
+        # This has the format {{1 2 asdf.cc} {5 10 fdsa.cc} ...}
+        set entry [lindex $errorList $errorCount]
+        set monitorLine [lindex $entry 0]
+        set editorLine [lindex $entry 1]
+        set fname [lindex $entry 2]
+        jumpToLine $monitorLine $editorLine $fname
+        incr errorCount
+    } else {
+        error "No more error!"
+    }
+}
+
+# This will open file context, and jump to entry number.
+# eLineNum = editor's line number (where error occured)
+# cLineNum = compiler's line number (where error reported)
+# fname = filename of the error source code.
+body ::tycho::Monitor::jumpToLine {monitorLine editorLine fname} {
+    # FIXME: directory could potentially be anywhere, specified in Makefile.
+    # Name of our editor/viewer
+    set fileToOpen [file join [get dirToExecFrom] $fname]
+    set editorName [::tycho::File::openContext $fileToOpen]
+    set editorName [string trim $editorName :]
+
+    # Jump to the line in editor
+    $editorName seeFragment "line $editorLine"
+
+    # Jump to the line in the compile/exec widget
+    set history $itk_component(history)
+    if {[winfo exists $history]} {
+        $history seeFragment "line $monitorLine"
+    }
+}
+
 
 body ::tycho::Monitor::insertLine {line} {
+    set text $itk_component(history).text
+    set monitorLine [lindex [split [$text index insert] .] 0]
+
     # Need to lock up the output of the executable
     $itk_component(history) configure -readonly 0
-    $itk_component(history) insertData "$line"
+    # Just insert a regular line
+    #$itk_component(history) insertData "$line"
+    $text insert insert $line
+
+    # Now, if we have to, modify the line.
+    if {[regexp {([^:]+):([0-9]+): (.+)} $line tmp fname editorLine msg] \
+            && $previousErrorLine!=$editorLine} {
+        set previousErrorLine $editorLine
+
+        incr errorCount
+        # This ensures only one line per many lines of error output
+        if {[regexp {(warning): (.+)} $msg]} {
+            #FIXME: Change me to preference
+            set color {purple}
+        } else {
+            #FIXME: Change me to preference
+            set color {red}
+            lappend errorList [list $monitorLine $editorLine $fname]
+        }
+        $text tag add error$errorCount $monitorLine.0 $monitorLine.end
+        $text tag configure error$errorCount -foreground $color -underline 0
+        # Two actions to the error binding:
+        # 1) jump to the lines (and highlight)
+        # 2) update internal count, so Next button will know where to jump
+        $text tag bind error$errorCount <Double-Button-1> \
+                "$this jumpToLine $monitorLine $editorLine $fname;\
+                $this setErrorCount $errorCount"
+    }
+
+
     $itk_component(history) center
     $itk_component(history) configure -readonly 1
 }
+body ::tycho::Monitor::setErrorCount {count} {
+    set errorCount $count
+}
+
+
     
 
 body ::tycho::Monitor::execProcessInMonitor {} {
+    # Initially we don't have error
+    set errorCount 0
+    set errorList {}
+
     # Clear both history logs before executing
     $itk_component(history) configure -readonly 0
     $itk_component(history) clear
