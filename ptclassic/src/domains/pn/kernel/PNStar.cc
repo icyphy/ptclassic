@@ -27,20 +27,8 @@ const char* MTDFStar::domain() const
     return MTDFdomainName;
 }
 
-// Domain-specific initialization.
-void MTDFStar::prepareForScheduling()
+// Execute the Star.
+int MTDFStar::run()
 {
-}
-
-// Identify Star as a source.
-int MTDFStar::isItSource() const
-{
-    CBlockPortIter port(*this);
-    const PortHole* p;
-
-    while ((p = port++) != NULL)
-    {
-	if (p->isItInput()) return FALSE;
-    }
-    return TRUE;
+    return Star::run();
 }
