@@ -47,12 +47,14 @@ PL_SRCS= \
  CG56Interpolator.pl \
  CG56IntMult.pl \
  CG56Limit.pl \
+ CG56LocateMax.pl \
  CG56Log.pl \
  CG56Mult.pl \
  CG56Neg.pl \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
+ CG56Reciprocal.pl \
  CG56Quantizer.pl \
  CG56QuantizerInt.pl \
  CG56Sgn.pl \
