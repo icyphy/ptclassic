@@ -111,9 +111,9 @@ struct timestruct *timer;
 #ifdef PTSOL2
     prusage_t       rst;
 #else
-#else 
     prstatus_t      rst;
 #endif /* PTSOL2 */
+#else
     struct rusage rst;
 #endif
     extern int ftime();
