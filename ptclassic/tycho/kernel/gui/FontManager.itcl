@@ -122,7 +122,8 @@ class ::tycho::FontManager {
 
     # A widget to test fonts on
     private common fontScratch \
-	    [label .[::tycho::autoName fontScratch] -text Fred]
+	    [uplevel #0 \
+	    label .[::tycho::autoName fontScratch] -text Fred]
 
     # The foundries to scan through
     private common foundries {adobe b&h *}
