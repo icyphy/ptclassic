@@ -8,7 +8,7 @@ In each instant, print the value of the input to the filename in the
 also be used.
   }
 
-  version { $Id$ }
+  version { @(#)SRPrinter.pl	1.3 4/19/96 }
   author { S. A. Edwards }
 
   copyright {

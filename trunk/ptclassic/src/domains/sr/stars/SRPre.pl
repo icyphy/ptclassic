@@ -6,7 +6,7 @@ defstar {
 Delay a present input until the instant in which the next present instant
 occurs.
 }
-    version { $Id$ }
+    version { @(#)SRPre.pl	1.1 4/25/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
