@@ -21,6 +21,10 @@ Date of last revision:
 #include "streamCompat.h"
 #include "Error.h"
 
+// redefine the virtual methods
+EGNode *ParGraph :: newNode(SDFStar* s, int i)
+	{ LOG_NEW; return new ParNode(s,i); }
+
 			//////////////////
 			///  CreateMe  ///
 			//////////////////
@@ -52,7 +56,35 @@ int ParGraph::createMe(Galaxy& galaxy, int selfLoopFlag) {
 	return TRUE;
 }
 
-int ParGraph :: initializeGraph() { return TRUE; }
+			/////////////////////////
+			///  initializeGraph  ///
+			/////////////////////////
+
+// This function sets the following properties of the graph:
+// 1) nodeCount : The number of nodes (star invocations) in the graph
+// 2) runnableNodes : A list of the initially runnable DLNodes
+//
+// and the following property for each node in the graph:
+// StaticLevel : The longest path in execution time from the node
+//              to the end of the graph (over all the endnodes).
+
+int ParGraph :: initializeGraph() { 
+	EGSourceIter nxtSrc(*this);
+	ParNode *src;
+
+	// Remove the arcs with delay from the ancestors and descendants
+	removeArcsWithDelay();
+
+	// initialize members
+	nodeCount = 0;
+	ExecTotal = 0;
+
+	// Set the levels for each node
+	while ((src = (ParNode*)nxtSrc++) != 0) {
+		if (SetNodeSL(src) < 0) return FALSE;
+	}
+	return TRUE;
+}
 
 			//////////////////////
 			///  findRunnable  ///

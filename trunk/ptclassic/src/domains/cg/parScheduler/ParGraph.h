@@ -51,6 +51,9 @@ protected:
 	// Find and set the static level of the given node
 	int SetNodeSL(ParNode*);
 
+	// redefine these virtual allocator to allocate DL Nodes.
+	EGNode *newNode(SDFStar*, int);
+
 	// for logging information
 	ostream* logstrm;
 
