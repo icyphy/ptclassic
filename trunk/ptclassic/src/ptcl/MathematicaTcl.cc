@@ -187,7 +187,7 @@ int MathematicaTcl::send(int argc, char** argv) {
 int MathematicaTcl::start(int argc, char** /*argv*/){
     if (argc != 2) return usage("mathematica start");
     if (init()) return TCL_OK;
-    return error(MATHEMATICATCL_NOT_START);
+    return error(mathematicaInterface->GetErrorString());
 }
 
 // Return the status of the Tcl/Mathematica interface
