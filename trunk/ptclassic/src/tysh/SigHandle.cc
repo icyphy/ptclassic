@@ -61,57 +61,51 @@ extern "C" char **environ;/* An array of pointers to strings containing the */
 int setHandlers(SIG_PF sigHandler);
 void signalHandlerRelease(int);
 void signalHandlerDebug(int);
-void abortHandling(int at);
+void abortHandling();
 static void DoTychoSave(void);
 
 /****************************************************************************/
 
 /***** This function sets the signal handler function for each of the   *****/
-/***** signals that we want to intercept to the signalHandlerRelease    *****/
-/***** function.                                                        *****/
+/***** signals that we want to intercept.                               *****/
 
 int 
 setHandlers(SIG_PF sigHandler)
 {
-/***** The following function calls to ptsignal relate a certain signal  *****/
-/***** to a function, called sigHandler.                                 *****/
-
-    if (sigaction(SIGBUS, sigHandler) != 0) {
+    if (ptSignal(SIGBUS, sigHandler) != 0) {
         return 1;
     }
-    if (sigaction(SIGEMT, sigHandler) != 0) {
+    if (ptSignal(SIGEMT, sigHandler) != 0) {
         return 2;
     }
-    if (sigaction(SIGFPE, sigHandler) != 0) {
+    if (ptSignal(SIGFPE, sigHandler) != 0) {
         return 3;
     }
-    if (sigaction(SIGILL, sigHandler) != 0) {
+    if (ptSignal(SIGILL, sigHandler) != 0) {
         return 4;
     }
-    if (sigaction(SIGIOT, sigHandler) != 0) {
+    if (ptSignal(SIGIOT, sigHandler) != 0) {
         return 5;
     }
-    if (sigaction(SIGQUIT, sigHandler) != 0) {
+    if (ptSignal(SIGQUIT, sigHandler) != 0) {
         return 6;
     }
-    if (sigaction(SIGSEGV, sigHandler) != 0) {
+    if (ptSignal(SIGSEGV, sigHandler) != 0) {
         return 7;
     }
-    if (sigaction(SIGSYS, sigHandler) != 0) {
+    if (ptSignal(SIGSYS, sigHandler) != 0) {
         return 8;
     }
-    if (sigaction(SIGTRAP, sigHandler) != 0) {
+    if (ptSignal(SIGTRAP, sigHandler) != 0) {
         return 9;
     }
-    if (sigaction(SIGXCPU, sigHandler) != 0) {
+    if (ptSignal(SIGXCPU, sigHandler) != 0) {
         return 10;
     }
-    if (sigaction(SIGXFSZ, sigHandler) != 0) {
+    if (ptSignal(SIGXFSZ, sigHandler) != 0) {
         return 11;
     }
-
     return 0;
-
 }
 
 /****************************************************************************/
@@ -125,14 +119,12 @@ void
 signalHandlerRelease(int signo)
 {
 
-    struct sigaction newSignal, oldSignal;
-    sigset_t sigmask;
     /*** FIX ME - Should not guess at size of path. ***/
     char *ptolemy, *arch, path[200], file[200];
     static int times = 0;
 
-    if (times == 0) /* We check this in case the call to DoTychoSave bombs */
-    { /* out and generates another signal. */
+    if (times == 0) // We check this in case the call to DoTychoSave bombs 
+    {               // out and generates another signal. 
         times++;
 	DoTychoSave();
     }
@@ -147,33 +139,21 @@ signalHandlerRelease(int signo)
     strcat(path, "/itcl_wish");
     strcat(file, ptolemy);
     strcat(file, "/tycho/kernel/TyCoreRelease.itcl");
-
+    
     switch(fork()) 
     {
-        case -1: /* fork() return value for error. */
-	    abortHandling(1);
+        case -1: // fork() return value for error. 
+	    abortHandling();
       
-	case 0: /* fork() return value for child. */
-	    sleep(1); /* Allow core file to be generated. */   
-	    execle(path, "itcl_wish", file, "-name Tycho", (char *)0, environ);
-	    abortHandling(2); /*If you make it this far something went wrong.*/
+	case 0: // fork() return value for child. 
+	    sleep(1); // Allow core file to be generated.   
+	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
+		   environ);
+	    abortHandling(); // If you make it this far something went wrong.
     }
     /*************************** In parent ******************************/
 
-    newSignal.sa_handler = SIG_DFL; /* Sets signal handler to default. */
-    sigfillset(&sigmask);
-    sigdelset(&sigmask, signo); /* So the process will receive kill      */
-                                /* signal that it sends to itself.       */
-    newSignal.sa_mask = sigmask;
-
-    if (sigaction(signo, &newSignal, &oldSignal) != 0) 
-        abortHandling(3); /* Could not set signal handler back to default. */
-
-    if (kill(getpid(), signo) != 0)  /* Commit suicide in manner that       */
-        abortHandling(4);             /* generates core file for child, if   */
-                                     /* suicide fails abort.                */
-
-    /* Program should never get to this point. */
+    exit(0); // Kill off parent.
 
 }
 
@@ -189,14 +169,12 @@ void
 signalHandlerDebug(int signo)
 {
 
-    struct sigaction newSignal, oldSignal;
-    sigset_t sigmask;
     /*** FIX ME - Should not guess at size of path. ***/
     char *ptolemy, *arch, path[200], file[200];
     static int times = 0;
 
-    if (times == 0) /* We check this in case the call to DoTychoSave bombs */
-    { /* out and generates another signal. */
+    if (times == 0) // We check this in case the call to DoTychoSave bombs 
+    {               // out and generates another signal. 
         times++;
 	DoTychoSave();
     }
@@ -214,31 +192,25 @@ signalHandlerDebug(int signo)
 
     switch(fork()) 
     {
-        case -1: /* fork() return value for error. */
-	    abortHandling(1);
+        case -1: // fork() return value for error. 
+	    abortHandling();
       
-	case 0: /* fork() return value for child. */
-	    sleep(1); /* Allow core file to be generated. */    
-	    execle(path, "itcl_wish", file, "-name Tycho", (char *)0, environ);
-	    abortHandling(2); /*If you make it this far something went wrong.*/
+	case 0: // fork() return value for child. 
+	    sleep(1); // Allow core file to be generated.  
+	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
+		   environ);
+	    abortHandling(); // If you make it this far something went wrong.
     }
 
     /************************ In parent **********************************/
 
-    newSignal.sa_handler = SIG_DFL; /* Sets signal handler to default. */
-    sigfillset(&sigmask);
-    sigdelset(&sigmask, signo); /* So the process will receive kill      */
-                                /* signal that it sends to itself.       */
-    newSignal.sa_mask = sigmask;
+    ptSignal(signo, (SIG_PF) SIG_DFL);
 
-    if (sigaction(signo, &newSignal, &oldSignal) != 0) 
-        abortHandling(3); /* Could not set signal handler back to default. */
+    if (kill(getpid(), signo) != 0)  // Commit suicide in manner that      
+        abortHandling();            // generates core file for child, if  
+                                     // suicide fails abort.               
 
-    if (kill(getpid(), signo) != 0)  /* Commit suicide in manner that       */
-        abortHandling(4);            /* generates core file for child, if   */
-                                     /* suicide fails abort.                */
-
-    /* Program should never get to this point. */
+    // Program should never get to this point. 
 
 }
 
@@ -248,12 +220,12 @@ signalHandlerDebug(int signo)
 /**** program has no choice but to bomb out in an ungraceful manner.     ****/
 
 void
-abortHandling(int at) 
+abortHandling() 
 {
 
     static char msg[400]="\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
-    write(1, msg, sizeof(msg));  /* Used instead of printf,      */
-                                 /* because it is reentrant.     */
+    write(1, msg, sizeof(msg));  // Used instead of printf,      
+                                 // because it is reentrant.     
     exit(1);
 
 }
