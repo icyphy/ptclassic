@@ -15,7 +15,7 @@ endif
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
 # File structure information:
-set dirheader = $PRINTER/doc/headers
+set dirheader = $PTOLEMY/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 
