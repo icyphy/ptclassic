@@ -491,13 +491,19 @@ body ::tycho::Displayer::destroyView {view} {
     set view [::info namespace tail $view]
     verifyView $view detachView
 
-    # Destroy the view, its menubar, status bar, and toolbar
-    # The view is destroyed first because the destruction might be
-    # cancelled by triggering an error. Note that the destruction
-    # of the view is inside a catch in case this view has somehow
-    # already been deleted.
+    # Destroy the view. Before doing so, check that the view
+    # still exists. Note that this call to delete may in fact
+    # trigger a silent error if the user cancels in response
+    # to a dialog querying confirmation. In that case,
+    # execution will jump back up to the top level and none
+    # of the following code will be executed.
     set tag $_viewtag($view)
-    catch {delete object [winfo command $view]}
+    if { [::info which -command $view] != "" } {
+        delete object [winfo command $view]
+    }
+
+    # As long as the view destroyed successfully (it could have
+    # been cancelled), delete its menubar, status bar, and toolbar
     delete object $itk_component(menubar$tag)
     delete object $itk_component(status$tag)
     catch {delete object $itk_component(toolbar$tag)}
