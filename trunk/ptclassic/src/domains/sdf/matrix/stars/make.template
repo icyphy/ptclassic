@@ -61,6 +61,7 @@ PL_SRCS= \
   SDFPackFix_M.pl \
   SDFPackFloat_M.pl \
   SDFPackInt_M.pl \
+  SDFSmithForm.pl \
   SDFSubCx_M.pl \
   SDFSubFix_M.pl \
   SDFSubInt_M.pl \
