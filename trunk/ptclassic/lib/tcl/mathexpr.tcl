@@ -99,7 +99,7 @@ proc makeOrderedPairs {args} {
     for {set i 0} {$i < $numx} {incr i} {
       set xvalue [lindex $xvector $i]
       set yvalue [lindex $yvector $i]
-      lappend orderedpairs "($xvalue, $yvalue)"
+      lappend orderedpairs "($xvalue,$yvalue)"
     }
     return [join $orderedpairs]
   } else {
@@ -108,6 +108,17 @@ proc makeOrderedPairs {args} {
     return -code error
   }
 }
+
+# Function: matlabToOrderedPairs
+
+add_to_help matlabToOrderedPairs { <name> } {
+Converts a Matlab matrix called <name> to a list of ordered pairs.
+}
+
+proc matlabToOrderedPairs { name } {
+  eval makeOrderedPairs [lrange [matlab get $name] 2 end]
+}
+
 
 # Function: max
 
