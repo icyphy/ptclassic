@@ -98,7 +98,7 @@ global ::tychoeditors
 set tychoeditors [file join $tycho editors]
 
 global ::tychopt
-set tychoeditors [file join $tycho typt]
+set tychopt [file join $tycho typt]
 
 # Check to see whether the usual exit mechanism (where we exit
 # if there are no more windows) is enabled.
