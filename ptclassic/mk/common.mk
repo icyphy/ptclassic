@@ -159,7 +159,8 @@ TAGS:		$(SRCS)
 
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(LIB) \
-		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) makefile make.template SCCS
+		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) \
+		$(MISC_FILES) makefile make.template SCCS
 
 # "check" does not print anything if nothing is being edited.
 sccsinfo:
