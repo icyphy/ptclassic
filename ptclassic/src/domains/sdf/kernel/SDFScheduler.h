@@ -127,6 +127,12 @@ public:
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
 
+protected:
+	// This method checks to see whether a domain name is supported
+	// by the scheduler.  When a new domain is created that uses
+	// this scheduler, simply redefine this function
+	virtual int isDomainSupported(const char* domainName);
+
 private:
 	// This is a kludge to help integrate SDFScheduler and
 	// DEScheduler together.  numIters says how many times

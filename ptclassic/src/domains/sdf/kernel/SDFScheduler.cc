@@ -140,7 +140,7 @@ int SDFScheduler :: setup (Block& block) {
 	// sure all stars are SDF.
 
 	while ((s = nextStar++) != 0) {
-		if (strcmp (s->domain(), SDFdomainName) != 0) {
+		if (!isDomainSupported(s->domain())) {
 			Error::abortRun(*s, " is not an SDF star");
 			invalid = TRUE;
 			return FALSE;
@@ -212,6 +212,17 @@ int SDFScheduler::addIfWeCan (SDFStar& star, int defer = FALSE) {
 		dead = &star;
 	}
 	return runRes;
+}
+
+// This method checks to see whether the domain is supported.
+// It is included so that domains that are not called SDF can
+// use the SDF scheduler.  They have to redefine this method.
+
+int SDFScheduler::isDomainSupported(const char* dom) {
+	if(strcmp (dom, SDFdomainName) == 0)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 /*******************************************************************
