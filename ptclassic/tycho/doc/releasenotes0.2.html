@@ -23,8 +23,8 @@ from U.C. Berkeley, but it is also useful on its own.
 <p>
 Version 0.2 is the third public release of Tycho as a stand-alone system.
 It runs under the vanilla Itcl 2.2 with no changes to the executable.
-(Note that Ptolemy0.6 was shipped with Itcl2.0.  Tycho0.1.1 will not
-work with Itcl2.0)
+(Note that Ptolemy0.6 was shipped with Itcl2.0.  Tycho0.2 will not
+work with Itcl2.0 or Itcl2.1)
 <p>
 Tycho0.2 includes both textual and graphical editors, though the
 textual editors are more developed.
@@ -153,7 +153,7 @@ itcl to html.
 <H2>Changes between Tycho0.1.1 and Tycho0.2</H2>
 <UL>
 
-<LI> Java
+<LI> Tycho0.2 includes Sun <CODE>tcljava</CODE> interface.
 </UL>
 
 <H2>Changes between Tycho0.1 and Tycho0.1.1</H2>
@@ -204,7 +204,17 @@ itcl to html.
 <H2>Backward compatibility issues between 0.1.1 and 0.2</H2>
 
 <UL>
+<LI> Tycho0.2 uses the newer <CODE>pitcl</CODE> interface, which is not
+backward compatible with <CODE>ptcl</CODE>.  In Ptolemy0.6,
+<CODE>tycho -ptiny</CODE> under stood <CODE>ptcl</CODE> commands.
+In Ptolemy0.7, <CODE>tycho -ptiny</CODE> does not understand <CODE>ptcl</CODE> 
+commands.
 
+<LI> In Tycho0.1.1, we used the <CODE>~/.Tycho</CODE> directory to
+hold things like preferences.  In Tycho0.2, we use the <CODE>~/.tycho</CODE>
+directory.
+If you ran Tycho under Ptolemy0.6, then you will have a <CODE>~/.tycho</CODE>  
+<B>file</B>, which you should probably remove before starting Tycho0.2
 </UL>
 
 <p>
