@@ -358,9 +358,6 @@ body ::tycho::TopLevel::destructor {} {
 # Be sure you are not just returning to another method.
 # If the method is invoked at the top-level, for example in response to
 # a key binding, then there is no need to test its return value.
-# <p>
-# Note that a significant disadvantage of using the "busy" method
-# is that stack traces after errors are significantly more obscure.
 #
 body ::tycho::TopLevel::busy {args} {
     set oldCursor [lindex [$itk_component(childsite) config -cursor] end]
@@ -370,7 +367,9 @@ body ::tycho::TopLevel::busy {args} {
     # Catch errors so that we can reset the cursor
     if {[catch [code [concat $this $args]] msg] != 0} {
 	$itk_component(childsite) config -cursor $oldCursor
-	error $msg
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error $msg $saveInfo
     }
     $itk_component(childsite) config -cursor $oldCursor
     return 1
