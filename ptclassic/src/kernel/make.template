@@ -119,6 +119,8 @@ CCS_WITH_H_FILES=\
  State.cc \
  StringArrayState.cc \
  StringList.cc \
+ StringMessage.cc \
+ StringParticle.cc \
  StringState.cc \
  SubMatrix.cc \
  Target.cc \
