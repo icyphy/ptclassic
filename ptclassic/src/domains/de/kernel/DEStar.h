@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Star.h"
 
 enum FiringMode {SIMPLE, PHASE};
-class EventQueue;
+class BasePrioQueue;
 
 	////////////////////////////////////
 	// class DEStar
@@ -85,7 +85,7 @@ public:
 	// Pointer to the event queue of the universe or warmhole
 	// in which the DEstar is. It is set by the Scheduler :
 	// initialize().
-	EventQueue *eventQ;
+	BasePrioQueue *eventQ;
 
         // Flag to indicate whether it is a delay-type star or not.
         // If a star simulates the latency, it is called delay-type.
