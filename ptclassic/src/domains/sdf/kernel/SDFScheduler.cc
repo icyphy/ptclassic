@@ -115,9 +115,6 @@ int SDFScheduler :: setup (Galaxy& galaxy) {
 
         prepareGalaxy(galaxy);
 
-	// set schedulePeriod if user gives it.
-	FloatState* st = (FloatState*) galaxy.stateWithName("schedulePeriod");
-	if (st) schedulePeriod = float ((double) (*st));
 	currentTime = 0;
 
 	if (haltRequested()) {

@@ -34,6 +34,8 @@ Target("simulate-SDF","SDFStar",
 			"Log file to write to (none if empty)"));
 	addState(loopScheduler.setState("loopScheduler",this,"NO",
 			"Specify whether to use loop scheduler."));
+	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
+		"schedulePeriod for interface with a timed domain."));
 }
 
 Block* SDFTarget::clone() const {
@@ -51,6 +53,8 @@ void SDFTarget::start() {
 	} else {
 		LOG_NEW; setSched (new SDFScheduler);
 	}
+	SDFScheduler* s = (SDFScheduler*) mySched();
+	s->schedulePeriod = float(double(schedulePeriod));
 }
 
 int SDFTarget::setup(Galaxy& g) {
