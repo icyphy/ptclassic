@@ -122,6 +122,9 @@ void CGMultiTarget::setup() {
     // We only want to modify the galaxy once.  See the comment in
     // CGMultiTarget.h for protected member modifiedGalaxy for details.
     if (!modifiedGalaxy) {
+	if (!galaxy() || haltRequested()) return;
+	galaxy()->setTarget(this);
+	galaxy()->initialize();
 	modifiedGalaxy = 1;
 	if (!modifyGalaxy()) return;
     }
