@@ -389,7 +389,7 @@ class ::tycho::Resource {
     proc chmod {path permissions}
 
     # Return the content type of the resource
-    proc contenttype {}
+    proc contenttype {path}
 
     # Delete a resource
     proc delete {path}
@@ -485,13 +485,6 @@ body ::tycho::Resource::connect {path} {
 }
 
 #####################################################################
-#### contenttype
-# Return the content type of the open file.
-body ::tycho::Resource::contenttype {} {
-    ::tycho::abstractMethod contenttype
-}
-
-#####################################################################
 #### isopen
 # Test if the resource is currently open.
 #
@@ -551,6 +544,26 @@ body ::tycho::Resource::streamable {} {
 #### chmod
 body ::tycho::Resource::chmod {permissions path} {
     ::tycho::abstractProc mkdir
+}
+
+#####################################################################
+#### contenttype
+# Return the content type of the open file.
+# In the very base class, look at the file extension only
+#
+body ::tycho::Resource::contenttype {path} {
+    set ext [file extension $path]
+    puts "ext: $ext, path:$path"
+    if       {[regexp -nocase {.html|.htm} $ext]} {
+        return "text/html"
+    } elseif {[regexp -nocase {.gif} $ext]} {
+        return "image/gif"
+    } elseif {[regexp -nocase {.jpg} $ext]} {
+        return "image/jpg"
+    } else {
+        return "text/text"
+    }
+    #::tycho::abstractMethod contenttype
 }
 
 #####################################################################
