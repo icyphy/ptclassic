@@ -8,7 +8,7 @@ state specifies the file to be written; the special names
 &lt;stdout&gt; and &lt;cout&gt;, which specify the standard output
 stream, and &lt;stderr&gt; and &lt;cerr&gt;, which specify the
 standard error stream, are also supported. }
-    version { $Id$
+    version { $Id$}
     author { James Lundblad, Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

@@ -2,7 +2,7 @@ defcorona {
     name { UniSeq }
     domain { ACS }
     desc { Dummy corona for unirate sequencer }
-    version { $Id$
+    version { $Id$}
     author { Ken Smith }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

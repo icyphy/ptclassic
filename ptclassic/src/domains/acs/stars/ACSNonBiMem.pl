@@ -5,7 +5,7 @@ defcorona {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {$Id$
+	version {$Id$}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

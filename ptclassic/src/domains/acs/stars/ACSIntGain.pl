@@ -2,7 +2,7 @@ defcorona {
     name { IntGain }
     domain { ACS }
     desc { This is an amplifier; the output is the input multiplied by the integer "gain" (default 1). }
-    version { $Id$
+    version { $Id$}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company

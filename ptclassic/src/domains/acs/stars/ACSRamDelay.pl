@@ -4,7 +4,7 @@ defcorona {
 	desc {
 	    Generates a pipelined delay element using FPGA RAM
 	}
-	version {$Id$
+	version {$Id$}
 	author { K. Smith }
 	copyright {
 	}

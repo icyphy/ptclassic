@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { Delay } 
     desc { Provides explicit pipeline delay (default 1). }
-    version { $Id$
+    version { $Id$}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999, Sanders, a Lockheed Martin Company

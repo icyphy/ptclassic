@@ -4,7 +4,7 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { Compare }
 	desc {Compare two inputs}
-	version {$Id$
+	version {$Id$}
 	author { P. Fiore }
 	copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company

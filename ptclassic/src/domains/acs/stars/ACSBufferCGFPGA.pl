@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Buffer a line
 	}
-	version {$Id$
+	version {$Id$}
 	author { K. Smith}
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FixSim }
 	corona { Nop }
 	desc { Does nothing }
-	version {$Id$
+	version {$Id$}
         author { Eric K. Pauer }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

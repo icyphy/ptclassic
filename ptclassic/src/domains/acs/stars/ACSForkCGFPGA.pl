@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Fork for CG dummy domain
 	}
-	version {$Id$
+	version {$Id$}
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

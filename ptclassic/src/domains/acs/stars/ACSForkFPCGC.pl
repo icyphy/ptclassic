@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Fork } 
     desc { Copy input to all outputs }
-    version { $Id$
+    version { $Id$}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

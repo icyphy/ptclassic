@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { RamDelay } 
     desc { Provides explicit pipeline delay (default 1). }
-    version { $Id$
+    version { $Id$}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 The Regents of the University of California
