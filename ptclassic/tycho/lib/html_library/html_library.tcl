@@ -1404,24 +1404,27 @@ proc HMcgiMap {data} {
 # version of the library routine, until the bug is fixed, make sure we
 # over-ride the library version, and not the otherway around
 
-auto_load tkFocusOK
-proc tkFocusOK w {
-    set code [catch {$w cget -takefocus} value]
-    if {($code == 0) && ($value != "")} {
-    if {$value == 0} {
-        return 0
-    } elseif {$value == 1} {
-        return 1
-    } else {
-        set value [uplevel #0 $value $w]
-        if {$value != ""} {
-        return $value
-        }
-    }
-    }
-    set code [catch {$w cget -state} value]
-    if {($code == 0) && ($value == "disabled")} {
-    return 0
-    }
-    regexp Key|Focus "[bind $w] [bind [winfo class $w]]"
-}
+* NOTE: commented out by hjr Dec 5, 1997, in response to a
+# report from Tom Lane. See the ptdesign logs for Dec5 1997.
+
+# auto_load tkFocusOK
+# proc tkFocusOK w {
+#     set code [catch {$w cget -takefocus} value]
+#     if {($code == 0) && ($value != "")} {
+#     if {$value == 0} {
+#         return 0
+#     } elseif {$value == 1} {
+#         return 1
+#     } else {
+#         set value [uplevel #0 $value $w]
+#         if {$value != ""} {
+#         return $value
+#         }
+#     }
+#     }
+#     set code [catch {$w cget -state} value]
+#     if {($code == 0) && ($value == "disabled")} {
+#     return 0
+#     }
+#     regexp Key|Focus "[bind $w] [bind [winfo class $w]]"
+# }
