@@ -43,18 +43,30 @@ VHDLSTARS = $(ROOT)/src/domains/vhdl/stars
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
+VHDLSIM = $(ROOT)/src/utils/ptvhdlsim
 
 INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(SDFKERNEL) \
-	-I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL)
+ -I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL) -I$(VHDLSIM)
 
-PL_SRCS = CGCVSynchComm.pl CGCVSend.pl CGCVReceive.pl \
-	VHDLCSynchComm.pl VHDLCSend.pl VHDLCReceive.pl
+PL_SRCS = \
+ CGCVSynchComm.pl \
+ CGCVSend.pl \
+ CGCVReceive.pl \
+ VHDLCSynchComm.pl \
+ VHDLCSend.pl \
+ VHDLCReceive.pl
+
 EXTRA_SRCS = $(PL_SRCS)
 
-SRCS = StructTarget.cc SynthTarget.cc SimVSSTarget.cc SimMTTarget.cc \
-	$(PL_SRCS:.pl=.cc)
+SRCS = \
+ StructTarget.cc \
+ SynthTarget.cc \
+ SimVSSTarget.cc \
+ SimMTTarget.cc \
+ $(PL_SRCS:.pl=.cc)
 
 HDRS = $(SRCS:.cc=.h)
+
 OBJS = $(SRCS:.cc=.o) $(LIBSRCS:.cc=.o) 
 
 LIB = libvhdltargets.$(LIBSUFFIX)
