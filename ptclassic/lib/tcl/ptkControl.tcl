@@ -143,10 +143,10 @@ proc ptkRunControl { name octHandle } {
 
     # Animation is off by default
     # Note that since pre and post actions are global, there is no point
-    # in associating the universe name with the ptkAnimation flag.
-    global ptkAnimationFlag
-    set ptkAnimationFlag 0
-    ptkAnimation 0
+    # in associating the universe name with the ptkGrAnimation flag.
+    global ptkGrAnimationFlag
+    set ptkGrAnimationFlag 0
+    ptkGrAnimation 0
 
     button $ptkControlPanel.dismiss -text "DISMISS" -command \
 	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
@@ -189,21 +189,31 @@ proc ptkSetOrClearDebug { name octHandle } {
     global ptkDebug
     set w .run_$octHandle
     if {$ptkDebug($name)} {
-	# Turning debug on.  Create control panel
+	# Turning debug on.  Enable verbose Tcl messages.
+	set ptkVerboseErrors 1
+	# Create control panel
 	frame $w.debug.eph
 	button $w.debug.eph.step -text "STEP" \
-		-command "ptkStep $name $octHandle" -width 14
+		-command "ptkStep $name $octHandle" -width 10
 	button $w.debug.eph.abort -text "ABORT" -command "ptkAbort $name" \
-		-width 14
+		-width 10
 	# Animation is off by default
 	# Note that since pre and post actions are global, there is no point
-	# in associating the universe name with the ptkAnimation flag.
-	global ptkAnimationFlag
-	set ptkAnimationFlag 0
-	ptkAnimation 0
-	checkbutton $w.debug.eph.anim -text "Animation" \
-	    -variable ptkAnimationFlag -relief flat -width 12 \
-	    -command {ptkAnimation $ptkAnimationFlag}
+	# in associating the universe name with the Animation flags.
+	global ptkGrAnimationFlag ptkTxAnimationFlag
+	set ptkGrAnimationFlag 0
+	ptkGrAnimation 0
+	set ptkTxAnimationFlag 0
+	ptkTxAnimation 0
+	frame $w.debug.eph.anim
+	checkbutton $w.debug.eph.anim.gr -text "Graphical Animation" \
+	    -variable ptkGrAnimationFlag -relief flat \
+	    -command {ptkGrAnimation $ptkGrAnimationFlag}
+	checkbutton $w.debug.eph.anim.tx -text "Textual Animation" \
+	    -variable ptkTxAnimationFlag -relief flat \
+	    -command {ptkTxAnimation $ptkTxAnimationFlag}
+	pack append $w.debug.eph.anim $w.debug.eph.anim.tx {top frame w} \
+	    $w.debug.eph.anim.gr {top frame w}
 	pack append $w.debug.eph \
 	    $w.debug.eph.step {left fill expand} \
 	    $w.debug.eph.abort {left fill expand} \
@@ -212,21 +222,23 @@ proc ptkSetOrClearDebug { name octHandle } {
     } {
 	# Turning debug off.  Destroy control panel.
 	catch {destroy $w.debug.eph}
+	# Disable verbose Tcl errors
+	set ptkVerboseErrors 0
     }
 }
 
 
 #######################################################################
-# Procedure to turn on or off animation
+# Procedure to turn on or off graphical animation
 #
-proc ptkAnimation { on} {
-    global ptkAnimationAction
-    if [info exists ptkAnimationAction] {
- 	cancelAction $ptkAnimationAction
- 	unset ptkAnimationAction
+proc ptkGrAnimation { on} {
+    global ptkGrAnimationAction
+    if [info exists ptkGrAnimationAction] {
+ 	cancelAction $ptkGrAnimationAction
+ 	unset ptkGrAnimationAction
     }
     if {$on} {
-	set ptkAnimationAction \
+	set ptkGrAnimationAction \
 	    [registerAction pre "ptkHighlightStar"]
     } {
 	ptkClearHighlights
@@ -241,7 +253,55 @@ proc ptkAnimation { on} {
 proc ptkHighlightStar { star } {
     ptkClearHighlights
     ptkHighlight $star
-    after 250
+    after 150
+}
+
+#######################################################################
+# Procedure to turn on or off textual animation
+#
+proc ptkTxAnimation { on} {
+    global ptkTxAnimationAction
+    if [info exists ptkTxAnimationAction] {
+ 	cancelAction $ptkTxAnimationAction
+ 	unset ptkTxAnimationAction
+    }
+    set win .ptkTxAnimationWindow
+    if {$on} {
+	if {![winfo exists $win]} {
+	    toplevel $win
+	    wm title $win "Textual Animation"
+	    wm iconname $win "Textual Animation"
+	    message $win.msg -font -Adobe-times-medium-r-normal--*-180* \
+		-width 12c -text "Executing stars:"
+	    frame $win.text
+	    text $win.text.t -relief raised -bd 2 -width 60 -height 20 \
+                -bg AntiqueWhite \
+                -yscrollcommand "$win.text.s set" -setgrid true
+            scrollbar $win.text.s -relief flat -command "$win.text.t yview"
+            pack append $win.text $win.text.s {right filly} \
+                $win.text.t {expand fill}
+	    button $win.ok -text "DISMISS" -command "ptkTxAnimation off"
+            pack append $win $win.msg {top fill} $win.text {top fill expand} \
+		$win.ok {bottom fillx}
+	}
+	set ptkTxAnimationAction \
+	    [registerAction pre "ptkPrintStarName"]
+    } {
+	set ptkTxAnmiationFlag 0
+	catch {destroy $win}
+    }
+}
+
+#######################################################################
+# Procedure to print a star name to the text animation window
+#
+proc ptkPrintStarName { star } {
+    set win .ptkTxAnimationWindow
+    if [winfo exists $win] {
+	$win.text.t yview -pickplace end
+	$win.text.t insert end $star
+	$win.text.t insert end "\n"
+    }
 }
 
 #######################################################################
