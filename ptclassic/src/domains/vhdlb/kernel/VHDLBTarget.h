@@ -58,7 +58,6 @@ public:
 	Block* makeNew() const;
 	void headerCode();
 	void setup();
-	char* writeFileName(const char* fileName);
 	int run();
 	void wrapup();
 
