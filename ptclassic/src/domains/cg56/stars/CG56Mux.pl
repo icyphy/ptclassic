@@ -11,8 +11,8 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 control library }
-	htmldoc {
+    location { CG56 main library }
+    htmldoc {
 <a name="multiplex"></a>
 <i>blockSize</i> particles are consumed on each input.
 But only one of these blocks of particles is copied to the output.

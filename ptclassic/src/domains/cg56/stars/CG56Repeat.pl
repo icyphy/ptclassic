@@ -10,8 +10,8 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 control library }
-	htmldoc {
+    location { CG56 main library }
+    htmldoc {
 Repeat repeats each input the specified number of times
 (<i>numTimes</i>) on the output.
 Note that this is a sample rate change, and hence affects the number

@@ -16,7 +16,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 signal sources library }
+	location { CG56 main library }
 	htmldoc {
 The star produces at its output an impulse train with height given by the 
 parameter <i>level</i> and period given by <i>period</i> which is 0 for

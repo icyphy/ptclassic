@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 signal sources library }
+	location { CG56 main library }
 	htmldoc {
 <p>
 <a name="Gaussian noise"></a>

@@ -5,14 +5,14 @@ defstar {
     desc { Graphical two-valued input source. }
     version { $Id$ }
     author { Kennard White }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-    location { CG56 io library }
-	htmldoc {
+    }
+    location { CG56 main library }
+    htmldoc {
 <a name="button"></a>
 This is an asynchronous source star (like the Const star) with a particular
 graphical user interface.

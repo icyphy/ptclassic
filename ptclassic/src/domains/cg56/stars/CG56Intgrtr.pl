@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	htmldoc {
 <a name="filter, integrator"></a>
 Leakage is controlled by the <i>feedbackGain</i> state (default 1.0).

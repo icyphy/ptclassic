@@ -5,13 +5,13 @@ defstar {
     version { $Id$ }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1990-%Q% The Regents of the University of California.
-	All rights reserved.
-	See the file $PTOLEMY/copyright for copyright notice,
-	limitation of liability, and disclaimer of warranty provisions.
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 demo library }
-	htmldoc {
+    location { CG56 main library }
+    htmldoc {
 The integer input sequence is interpreted as a bit stream in which any nonzero
 value is interpreted as to mean a "one" bit.
 This star consumes <i>nBits</i> successive bits from the input,

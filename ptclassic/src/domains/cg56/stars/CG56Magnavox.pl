@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 io library }
+	location { CG56 main library }
 	htmldoc {
 This star is a combined input/output interface to a modified
 Magnavox CD player.

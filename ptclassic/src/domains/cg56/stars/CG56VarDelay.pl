@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 control library }
+	location { CG56 main library }
 	htmldoc {
 Delay will vary between 0 and <i>maxDelay</i> as the control varies
 between -1.0 and 1.0.

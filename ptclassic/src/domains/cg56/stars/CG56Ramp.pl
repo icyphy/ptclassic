@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 signal sources library }
+	location { CG56 main library }
 	htmldoc {
 Generates a ramp signal, starting at <i>value</i> (default 0.0)
 with step size <i>step</i> (default 0.001).

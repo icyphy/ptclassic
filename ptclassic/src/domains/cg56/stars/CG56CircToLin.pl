@@ -15,8 +15,8 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 demo library }
-	htmldoc {
+    location { CG56 main library }
+    htmldoc {
 <a name="circular to linear buffer copy"></a>
 <a name="buffer, circular"></a>
 <a name="buffer, linear"></a>
