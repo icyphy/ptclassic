@@ -54,11 +54,17 @@ int DEScheduler :: setup (Block& b) {
 	// Notify each star of the global event queue, and fire source
 	// stars to initialize the global event queue.
 	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
-		// Get the next atomic block
-		// and set its global event queue name.
-		DEStar& star = (DEStar&)alanShepard.nextStar();
+		Star& s = alanShepard.nextStar();
+		if (strcmp (s.domain(), "DE") != 0) {
+			StringList msg = s.readFullName();
+			msg += " is not a DE star: domain = ";
+			msg += s.domain();
+			return FALSE;
+		}
+		// set up the block's event queue.
+		DEStar* p = (DEStar*) &s;
+		p->eventQ = &eventQ;
 
-		star.eventQ = &eventQ;
 	}
 	galaxy.initialize();
 	return TRUE;
