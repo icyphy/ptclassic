@@ -608,8 +608,8 @@ proc ptkEditParams {facet number args} {
 
   # Raise the window if it exists.
   if {[info exists ed_ToplevelNumbers($facet,$number)] && \
-      [winfo exists .o$ed_ToplevelNumbers($facet,$number)]} {
-    raise .o$ed_ToplevelNumbers($facet,$number)
+      [winfo exists .o$args$ed_ToplevelNumbers($facet,$number)]} {
+    raise .o$args$ed_ToplevelNumbers($facet,$number)
     return
   }
   set ed_ToplevelNumbers($facet,$number,count) 0
@@ -618,7 +618,7 @@ proc ptkEditParams {facet number args} {
   incr ed_ToplevelNumbers(WindowNumber)
   set ed_ToplevelNumbers($facet,$number) $num
   global ed_Parameters ed_ParametersCopy
-  set top .o$num
+  set top .o$args$num
 
   # Retrieve parameter settings 
   set params [ed_GetParam $facet $number $args]
@@ -790,7 +790,7 @@ proc ptkEditParams {facet number args} {
 proc ed_Apply {facet number args} {
   global ed_ToplevelNumbers ed_Parameters
   set changeFlag 0
-  set top .o$ed_ToplevelNumbers($facet,$number)
+  set top .o$args$ed_ToplevelNumbers($facet,$number)
   set w $top.f.c.f.par
 
   set paramdata $ed_Parameters($facet,$number)
