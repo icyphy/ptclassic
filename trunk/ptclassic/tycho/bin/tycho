@@ -53,6 +53,7 @@ while ($#argv)
 			echo " -ptiny         Smaller version, fewer domains"
 			echo " -ptrim         Small version, more domains"
 			echo " -pigi          Big version, many domains"
+			echo " -tty 	      Non-graphical version"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -java          Run with the Tcl/Java interface"
 			echo " -nowelcome     No welcome window"
@@ -64,7 +65,7 @@ while ($#argv)
 			set tychodebug
 			breaksw
 		case -ptiny:
-			if ( $?selectPtolemy || $?selectJava) then
+			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
 				echo $argError
 				exit 2
 			endif
@@ -72,23 +73,29 @@ while ($#argv)
 			set tychoptiny
 			breaksw
 		case -ptrim:
-			if ( $?selectPtolemy || $?selectJava) then
-				echo $argError
+			if ( $?selectPtolemy || $?selectJava || $?selectTty) then				echo $argError
 				exit 2
 			endif
 			set selectPtolemy
 			set tychoptrim
 			breaksw
 		case -pigi:
-			if ( $?selectPtolemy || $?selectJava) then
+			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
 				echo $argError
 				exit 2
 			endif
 			set selectPtolemy
 			set tychopigi
 			breaksw
+		case -tty:
+			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
+				echo $argError
+				exit 2
+			endif
+			set selectTty
+			breaksw
 		case -bin:
-			if ( $?selectPtolemy || $?selectJava) then
+			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
 				echo $argError
 				exit 2
 			endif
@@ -97,7 +104,7 @@ while ($#argv)
 			shift
 			breaksw
 		case -java:
-			if ( $?selectPtolemy || $?selectJava) then
+			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
 				echo $argError
 				exit 2
 			endif
@@ -170,7 +177,7 @@ endif
 
 ##################################################################
 # itkwish
-if (! $?selectPtolemy && ! $?selectJava) then
+if (! $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
 	# We did not select Ptolemy, so we just assume that itkwish
 	# is in the users path.  Bad idea?  One alternative would be
 	# to see if $PTOLEMY is set and then check for 
@@ -193,8 +200,28 @@ if (! $?selectPtolemy && ! $?selectJava) then
 endif 
 
 ##################################################################
+# itclsh - non graphical version
+if (! $?selectPtolemy && ! $?selectJava && $?selectTty) then
+	if ( $?tychodebug ) then
+		if ( $?PT_DEBUG) then
+			set debugger = $PT_DEBUG
+		else
+			set debugger = gdb
+		endif
+		set debugcmdfile = /tmp/tychodbg.$$
+		echo "break main" > $debugcmdfile
+		echo run \"$TYCHO/kernel/Tycho.tcl\" $runargs >> $debugcmdfile
+		set prog = ($debugger -x $debugcmdfile itclsh)
+
+		#set prog = (itclsh.purify $TYCHO/kernel/Tycho.tcl)
+	else
+		set prog = (itclsh \"\$TYCHO/kernel/Tycho.tcl\")
+	endif
+endif
+
+##################################################################
 # Ptolemy, no Java
-if ( $?selectPtolemy && ! $?selectJava) then
+if ( $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
 	# We selected Ptolemy
 	if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
@@ -275,7 +302,7 @@ endif # ?selectPtolemy
 
 ##################################################################
 # Java
-if ( ! $?selectPtolemy && $?selectJava) then
+if (! $?selectPtolemy && $?selectJava && ! $?selectTty) then
 	# We selected java
 
 	if ($PTARCH !~ sol?* && $PTARCH !~ hppa*) then
