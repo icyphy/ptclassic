@@ -48,17 +48,31 @@ class Set;
   the dependency graph where the beginning of each parenthesized group
   may have zero or more vertices that are to be evaluated directly.
 
-  <P> For example, the schedule
-  <PRE>
-    (1 2 . 3 (4 . 5 6) 7 (8 . 9))
-  </PRE>
-  corresponds to the sequence
+  <P> The syntax is as follows:
+<PRE>
+  s ->  i                 Single output
+     |  [i1 i2 ... ik ]   Outputs to be evaluated in parallel
+     |  s1 s2             Schedules to be evaluated in series
+     |  ( s1 . s2 )^n     To be evaluated s2 s1 s2 ... s1 s2 (n times)
+</PRE>
 
-  <PRE>
-  (3 (5 6) 4 (5 6) 7 9 8 9) 1 2
-  (3 (5 6) 4 (5 6) 7 9 8 9) 1 2
-  (3 (5 6) 4 (5 6) 7 9 8 9)
-  </PRE>
+  <P> Four arrays represent this structure.  For example:
+<PRE>
+ ([1   2]. 3 ( 4.  5 [ 6   7 ] 8) (9.(10. 11) 12 ))     Schedule
+   1   2   3   4   5   6   7   8   9  10  11  12        vertex
+  12       1   5   1   2       1   4   2   1   1        partSize
+   2       0   1   0   0       0   1   1   0   0        headSize
+   2       1   1   1   2       1   1   1   1   1        parSize
+   2       0   1   0   0       0   1   1   0   0        repCount
+</PRE>
+
+   <UL>
+   <LI> vertex: the vertex to evaluate
+   <LI> partSize: the size of the whole partition
+   <LI> headSize: the size of the head of the partition
+   <LI> parSize: the size of the parallel block
+   <LI> repCount: the number of repetitions for the head
+   </UL>
 
 **********************************************************************/
 class SRRecursiveSchedule {
@@ -79,6 +93,10 @@ public:
 
   int cost() const;
 
+  int findPushRange( int, int &, int &, int & );
+
+  int mergeVertex( int );
+
 private:
   // The dependency graph for which this schedule is computed
   SRDependencyGraph * mygraph;
@@ -89,15 +107,22 @@ private:
   // The array of partition sizes for each vertex
   int * partSize;
 
-  // The array of things to be directly evaluated for each vertex
-  int * directSize;
+  // The size of the head of the partition
+  int * headSize;
 
-  int printOnePartition(int, StringList & ) const;
+  // The size of the parallel block
+  int * parSize;
+
+  // The number of repetitions for this block
+  int * repCount;
+
+  void printOnePartition(int &, StringList & ) const;
+
+  void printOneBlock( int &, StringList & ) const;
 
   int partitionCost( int & ) const;
 
-  //  void scheduleOnePartition(int, StringList & ) const;
-  
+  int findRange( int, int &, int &, int &, int );
 };
 
 #endif
