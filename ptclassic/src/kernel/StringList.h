@@ -51,12 +51,13 @@ public:
 	StringList(int i);
 
 	StringList(double d);
+	StringList(unsigned u);
 
 	// Copy constructor
 	StringList(const StringList& s);
 
 	// initialize
-	void initialize() { deleteAllStrings();}
+	void initialize();
 
 	// Assignment operator
 	StringList& operator = (const StringList& sl);
@@ -64,14 +65,16 @@ public:
 	StringList& operator = (char c);
 	StringList& operator = (int i) { initialize(); return *this += i;}
 	StringList& operator = (double d) { initialize(); return *this += d;}
+	StringList& operator = (unsigned u) {initialize(); return *this += u;}
 
 	// Destructor
-	~StringList() { deleteAllStrings();}
+	~StringList();
 
         // Add a thing to list
         StringList& operator += (const char*);
 	StringList& operator += (char);
 	StringList& operator += (int);
+	StringList& operator += (unsigned int);
 	StringList& operator += (double);
 	StringList& operator += (const StringList&);
 
@@ -89,10 +92,6 @@ public:
 	// the user is responsible for deletion.
 	char* newCopy() const;
 private:
-	// delete everything currently on the list.  Doesn't zap the
-	// underlying SequentialList nodes.
-	void deleteAllStrings();
-
 	const char* consolidate();
 	int totalSize;
 };
@@ -106,10 +105,6 @@ public:
 	const char* operator++() { return next();}
 	ListIter::reset;
 };
-
-// print a StringList on a UserOutput
-class UserOutput;
-UserOutput& operator << (UserOutput& o, const StringList& sl);
 
 // print a StringList on a stream (don't give function here so we
 // don't have to include stream.h)

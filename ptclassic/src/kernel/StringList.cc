@@ -17,11 +17,10 @@ $Id$
 #pragma implementation
 #endif
 
-#include <std.h>
 #include <stream.h>
 #include "StringList.h"
-#include "UserOutput.h"
-#include <string.h>
+#include "miscFuncs.h"
+
 
 #define SMALL_STRING 20
 
@@ -74,6 +73,7 @@ StringList::StringList(int i) {totalSize=0; *this += i;}
 
 StringList::StringList(double d) {totalSize=0; *this += d;}
 
+StringList::StringList(unsigned u) {totalSize=0; *this += u;}
 
 // Copy constructor
 StringList::StringList (const StringList& s) {
@@ -117,6 +117,15 @@ StringList :: operator += (int i)
 {
 	char buf[SMALL_STRING];
         sprintf(buf,"%d",i); 
+	return *this += buf;
+}
+
+// Add in an unsigned int
+StringList&
+StringList :: operator += (unsigned int i)
+{
+	char buf[SMALL_STRING];
+        sprintf(buf,"%u",i); 
 	return *this += buf;
 }
 
@@ -167,10 +176,8 @@ StringList :: consolidate () {
 	return s;
 }
 
-// for use in destructor: delete all substrings
-// this is also "initialize", in effect.
-
-void StringList::deleteAllStrings() {
+// make the stringlist empty
+void StringList::initialize() {
 	totalSize = 0;
 	// note use of ListIter, not StringListIter, so we can delete
 	// the result
@@ -182,14 +189,16 @@ void StringList::deleteAllStrings() {
 	SequentialList::initialize();
 }
 
-// print a StringList on a UserOutput
-
-UserOutput& operator << (UserOutput& o, const StringList& sl) {
-	StringListIter next(sl);
-	const char* s;
-	while ((s = next++) != 0)
-		o << s;
-	return o;
+// destructor -- a subset of initialize since baseclass will do the
+// rest.
+StringList::~StringList() {
+	// note use of ListIter, not StringListIter, so we can delete
+	// the result
+	ListIter next(*this);
+	for (int i=size(); i > 0; i--) {
+		char* p = (char*)next++;
+		LOG_DEL; delete p;
+	}
 }
 
 // print a StringList on a stream
