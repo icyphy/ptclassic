@@ -2,7 +2,7 @@
 # Copyright (c) 1990 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# Programmer:  E. A. Lee
+# Programmer:  Edward A. Lee
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/vhdlb.

@@ -2,26 +2,28 @@
 .TI "VHDLB Domain"
 .ds DO "VHDLB
 .AU
-E. A. Lee
-M. C. Williamson
-A. P. Kalavade 
+Edward A. Lee
+Michael C. Williamson
+Asawaree P. Kalavade 
 .AE
 .H1 "Introduction"
 .pp
 
 The VHDLB domain is one of two branch domains which support the VHDL
 language in Ptolemy, the other being the VHDLF domain.  The VHDLF
-domain is limited to stars and applications consisting of purely
-"functional" VHDL actors, i.e. actors whose outputs are a function of
-their inputs only and do not have any time- or data-dependent
-behavior.  The semantics of the VHDLF domain are akin to those of the
-SDF domain in that the behavior of actors is static from one firing to
-the next, although the firings of actors are dependent on the changes
-in input values.  The VHDLB domain is devoted to stars and
-applications consisting of "behavioral" actors whose behavior is time-
-or data-dependent.  The semantics of the VHDLB domain are akin to
-those of the DE domain in that the behavior of actors can be both
-time-dependent and/or data dependent.
+domain is limited to stars and applications consisting of functional
+VHDL actors, i.e. actors which specify only abstract operations on
+data, and not implementation issues.  These actors depend only on the
+simulation step number and do not have any real-time- or
+clock-dependent behavior.  The semantics of the VHDLF domain are akin
+to those of the SDF domain in that the behavior of actors depends only
+on their inputs, parameters, and state, and firings occur at discrete
+integer simulation step times.  The VHDLB domain is devoted to stars
+and applications consisting of models of components which respond to
+discrete events at arbitrary times, simulating real hardware elements.
+The semantics of the VHDLB domain are akin to those of the DE domain
+in that star firings are not constrained to discrete integer step
+times, and all events are time-stamped.
 
 .pp
 .Id "VHDL"
@@ -33,7 +35,7 @@ VHDL is a timed, event-driven language with pre-emptive scheduling.
 While primarily suited for specification and simulation of digital
 electronic systems, the range of simulation levels allowed in VHDL
 makes it possible to simulate systems at a wide range of levels of
-abstraction, from system block level down to the individual gate
+abstraction, from the system block level down to the individual gate
 level.  The pre-emptive nature of event scheduling allows multiple
 outputs being driven onto a single signal line to have priority over
 one another, although this is not supported in the current release.
@@ -52,12 +54,13 @@ The VHDLB domain in Ptolemy currently supports only code generation,
 without any support for simulation of the code or co-simulation with
 other domains.  In future releases, enhancements will be made to
 support interaction with VHDL simulators, as well as to support
-co-simulation with the VHDLF domain and with simulation domains through
-wormholes.  With the code generation capabilities included in this
-release, the user can build up the library of VHDL stars and VHDL code
-modules in order to manage structure and hierarchy in VHDL code
+co-simulation with the VHDLF domain and with simulation domains
+through wormholes.  With the code generation capabilities included in
+this release, the user can build up the library of VHDL stars and VHDL
+code modules in order to manage structure and hierarchy in VHDL code
 generation.  For a detailed specification of the VHDL language, the
-user is referred to [1].
+user is referred to [1].  For a discussion of using VHDL in high-level
+design, the user is referred to [2].
 
 .pp
 .H1 "Code Generation"
@@ -94,6 +97,19 @@ contents are displayed in a pop up window which allows the user to
 examine and edit the code which has been generated.
 
 .pp
+.H1 "Delays"
+
+While there is no concise delay operator in VHDL, delays can be
+represented by registers or delay elements.  In the VHDLB domain,
+delays are still necessary in feedback loops in order to satisfy the
+scheduler which passes over the flowgraph prior to execution.  A delay
+icon should be placed on feedback arcs in order to preclude delay-free
+feedback loops.  The delay icon will not be reflected in the generated
+code, therefore the user must take care to include components with
+delay in the feedback loop in order to have VHDL code generated which
+will not result in deadlock or infinite loops in execution.
+
+.pp
 .H1 "Wormholes"
 
 Wormholes are not currently supported in the VHDLB domain.  Currently,
@@ -115,9 +131,9 @@ comments.  Future targets will include targets which generate code but
 also optionally compile and optionally simulate the generated code.
 Other target options will determine which vendor VHDL simulators the
 code is run on.  The next parameter is the "directory", which is the
-name of the destination directory where the VHDL files are written.
-The "Looping Level" is a parameter for schedulers and is not used by
-this domain.
+name of the destination directory where the generated VHDL code files
+are written.  The "Looping Level" is a parameter for schedulers and is
+not used by this domain.
 
 .pp
 
@@ -129,8 +145,26 @@ used in multiprocessor domains, but not in the VHDLB domain.
 Additional parameters, if any, can be modified and will be reflected
 in the "generic" clauses of the generated VHDL code.
 
+.pp
+.H1 "Bugs"
+
+Because of the way the scheduler interprets signal flow graphs,
+multiple signals forking directly after a galaxy input arrow are not
+allowed.  This situation would be correctable by inserting an explicit
+Fork star between the galaxy input arrow and the forking signal arcs,
+but due to a problem with the way forks are parsed by the target, this
+results in the signals being named incorrectly.  The current
+workaround is to put an explicit Through star between the galaxy input
+arrow and the forking signal arcs.  An example of this situation is in
+the FIR4 galaxy in the firFilter demo in
+$PTOLEMY/src/domains/vhdlf/demo/init.pal.
+
 .UH "References"
 .ip [1]
 "IEEE Standard VHDL Language Reference Manual",
 \fIIEEE Std 1076-1987, Published by the Institute of Electrical and Electronics Engineers, Inc., New York, NY, USA, \fR
 1988.
+
+.ip [2]
+J. R. Armstrong and F. G. Gray, "Structured Logic Design with VHDL", \fIPTR Prentice Hall, Englewood Cliffs, NJ, \fR
+1993.
