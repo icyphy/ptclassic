@@ -5,6 +5,7 @@
 J. T. Buck
 E. A. Lee
 D. G. Messerschmitt
+S. Ha
 .AE
 .H1 "Introduction"
 .pp
@@ -131,12 +132,12 @@ with the declaration of the input.  For example,
 input {
 	name { signalIn }
 	type { complex }
-	numtokens { 2 }
+	numTokens { 2 }
 	desc { A complex input that consumes 2 input particles. }
 }
 .)c
 declares an input that consumes two particles.
-.Ie "numtokens"
+.Ie "numTokens"
 .H1 "Accessing Inputs and Outputs"
 .pp
 The mechanism for accessing inputs and outputs is explained in the
@@ -149,7 +150,57 @@ in a system at start time.
 .Id "SDF scheduler"
 .Id "scheduler, SDF"
 It performs most of its computation during its setup() phase.
-It exactly implements the method described in [1] for sequential schedules.
+The default scheduler
+exactly implements the method described in [1] for sequential schedules.
+If there are sample rate changes in a program graph, some parts of the
+graph are executed multiple times, which may be looped. 
+The default scheduler does not consider the looping possibility and
+generates a list of blocks to be executed. For example, if star A is
+executed 100 times, the generated schedule includes 100 instances of A.
+.Id "loop scheduler, SDF"
+.Id "SDF loop scheduler"
+A loop scheduler will include only one instance on A and indicate 
+the repetition count of A somehow, say 100(A).
+For simulation, it might be tolerable, but not in the code generation
+(The SDF schedulers are also used in the code generation for a 
+single processor target). 
+.pp
+By setting the
+.c loopScheduler
+.Ir "loopScheduler, parameter"
+.Id "Joe's scheduling"
+target parameter, we can select a scheduler developed by J. Buck.
+Before applying the default scheduling algorithm, J. Buck clusters
+blocks as long as the program graph is dead-locked. 
+This clustering algorithm consists of 
+the "merging" step and the "looping" step repeatedly. 
+In the merging step, blocks connected together 
+are merged into a cluster if there is no sample rate change between
+them. In the looping step, a cluster is looped to make it possible to 
+be merged with the neighbor blocks or clusters.
+Since this looping algorithm is conservative, some complicated looping
+possibilities, if rare,  are not disclosed.
+.pp
+The more complicated looping algorithm was developed by three colleagues,
+called "SJS" (Shuvra-Joe-Soonhoi) scheduling.
+.Id "SJS scheduling"
+We apply Joe's scheduling as the first pass. In the
+second pass, we decompose the graph (S. Bhattacharyya's contribution) so
+that the graph becomes acyclic. The decomposed graphs are
+expanded to acyclic precedence graphs in which looping structures are
+extracted (S. Ha's contribution). This scheduling option is selected
+when the
+.c loopTarget
+.Ir "loopTarget, class"
+is chosen instead of the default SDF target.
+.pp
+The looping result can be seen by setting the
+.c logFile
+target parameter. That file will contain all the intermediate 
+procedures of looping and the final scheduling result.
+The loop scheduling algorithms are usually used in code generation domain
+not in the simulation SDF domain. Refer to the CG domain documentation
+for detailed discussion.
 .UH "References"
 .ip [1]
 E. A. Lee and
