@@ -213,7 +213,7 @@ limitation of liability, and disclaimer of warranty provisions.
                 char **argv;                        /* Argument strings. */
             {
 		/* FIX ME: Is 32 always enough? */
-		static char* temp[32];
+		static char temp[32];
 		int i;
 		for(i=0; i<$val(numInputs); i++) {
                     sprintf(temp, "%f", $starSymbol(ins)[i]);
