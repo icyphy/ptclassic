@@ -53,6 +53,8 @@ ITCL_VERSION =	itcl-1.5
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
 
+SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl-1.5.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/
+
 # itk is part of itcl-2.0b
 #ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 #ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
