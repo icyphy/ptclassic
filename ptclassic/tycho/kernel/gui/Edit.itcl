@@ -352,9 +352,9 @@ configbody ::tycho::Edit::scrollbar {
 	#
 	if {![info exists itk_component(scroll)]} {
 	    itk_component add scroll {
-		scrollbar $itk_interior.scroll \
+		uplevel #0 [list scrollbar $itk_interior.scroll \
 			-relief sunken \
-			-command "$itk_component(text) yview"
+			-command "$itk_component(text) yview"]
 	    } {
 		keep -activebackground -background -highlightcolor \
 			-troughcolor -cursor
