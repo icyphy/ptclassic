@@ -304,16 +304,20 @@ if [info exists tk_version] {
 	source [file join $tychokernel TopLevel.itcl]
 	source [file join $tychokernel TWidget.itcl]
 	source [file join $tychokernel View.itcl]
-	source [file join $tychokernel Dialog.itcl]
-	source [file join $tychokernel Message.itcl]
+	# source [file join $tychokernel Dialog.itcl]
+	# source [file join $tychokernel Message.itcl]
+	# Note: ErrorMessage MUST be sourced at startup in
+	# order to override the default error-handling procs
 	source [file join $tychokernel ErrorMessage.itcl]
 	source [file join $tychokernel File.itcl]
 
 	source [file join $tychokernel Edit.itcl]
-	source [file join $tychokernel HTML.itcl]
-	source [file join $tychokernel HTMLMessage.itcl]
-	source [file join $tychokernel WelcomeMessage.itcl]
+	# source [file join $tychokernel HTML.itcl]
+	# source [file join $tychokernel HTMLMessage.itcl]
+	# source [file join $tychokernel WelcomeMessage.itcl]
 	source [file join $tychokernel MenuSupport.itcl]
+	# This has already been sourced -- why???
+	# source [file join $tychokernel MenuBar.itcl]
 	source [file join $tychokernel PopupMenu.itcl]
 	::tycho::_announce "Sourced File.itcl"
 	# Load the library file
