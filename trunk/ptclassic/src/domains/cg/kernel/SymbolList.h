@@ -10,81 +10,124 @@ $Id$
  SymbolList stuff.
 
 *******************************************************************/
-#ifndef _CGSymbol_h
-#define _CGSymbol_h 1
+#ifndef _SymbolList_h
+#define _SymbolList_h 1
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "DataStruct.h"
-#include "NameList.h"
-
-// A symbol consists of a key and a unique symbol defined to the key.
-class Symbol {
-public:
-    Symbol(const char* key, const char* symbol);
-    ~Symbol();
-    const char* key;
-    const char* symbol;
-};
+#include "NamedList.h"
+#include "StringList.h"
 
 // All SymbolList classes must be derived from BaseSymbolList.  This
 // class contains the count numSymbols that makes each symbol unique.
-class BaseSymbolList : private SequentialList {
+class BaseSymbolList : private NamedList
+{
 public:
-    	BaseSymbolList(char sep= '_') {separator = sep;};
-	~BaseSymbolList();
-    	void initialize();
-	void setSeparator(char sep= '_') {separator = sep;};
-    	// Reset the unique symbol generator counter.
-    	static void reset();
-	const char* lookup(const char* name);
-protected:
-	const char* add(const char* name);
-	Symbol* top() { return (Symbol*)head(); } ;
-	int remove(Symbol* s);
+	BaseSymbolList(char sep='_')
+	{
+	    setSeparator(sep);
+	}
+
+	~BaseSymbolList()
+	{
+	    deleteSymbols();
+	}
+
+	void setSeparator(char sep= '_')
+	{
+	    separator = sep;
+	}
+
+    	void initialize()
+	{
+	    deleteSymbols();
+	    NamedList::initialize();
+	}
+
+    	static void reset()
+	{
+	    numSymbols = 0;
+	}
+
+	const char* get(const char* name = NULL) const
+	{
+	    return (const char*)NamedList::get(name);
+	}
+
+	const char* prepend(const char* name);
+	const char* append(const char* name);
+	int remove(const char* name = NULL);
 private:
+	// Make a unique symbol.
+	StringList symbol(const char*);
+
+	void deleteSymbols();
     	static int numSymbols;
     	char separator;
 };
 
 class SymbolList : private BaseSymbolList {
 public:
-	SymbolList(char sep='_'):BaseSymbolList(sep) {};
+	SymbolList(char sep='_') : BaseSymbolList(sep) {}
+	~SymbolList() {}
 	const char* lookup(const char* name);
-	const char* BaseSymbolList::initialize();
-	void BaseSymbolList::setSeparator(char sep='_');
+	BaseSymbolList::setSeparator;
+	BaseSymbolList::initialize;
 };
 
 // Class for unique nested symbol generation.
-class NestedSymbolList:private BaseSymbolList {
+class SymbolStack : private BaseSymbolList {
 public:
-	NestedSymbolList(char sep='_'):BaseSymbolList(sep) {};
-	const char* push(const char* tag="L");
-	const char* pop();
-	const char* lookup(const char* name=NULL);
-	const char* BaseSymbolList::initialize();
-	void BaseSymbolList::setSeparator(char sep = '_');
+	SymbolStack(char sep='_') : BaseSymbolList(sep) {}
+	~SymbolStack() {}
+
+	const char* push(const char* tag="L")
+	{
+	    return prepend(tag);
+	}
+
+	StringList pop();
+	BaseSymbolList::get;
+	BaseSymbolList::setSeparator;
+	BaseSymbolList::initialize;
 };
 
-class SymbolListList : private NameList {
+// For temporary backward compatibility.
+typedef SymbolStack NestedSymbolList;
+
+class SymbolListList : private NamedList {
 public:
-        // adds a new SymbolList called name to the list.  If a SymbolList
-        // called name already exists in the list and it is SymbolList* is
-	// different return FALSE else return TRUE
-        int add(const char* name, SymbolList* slist) { 
-		return NameList::add(name,slist);
+	SymbolListList() {}
+	~SymbolListList() {}
+
+	// For temporary backward compatibility.
+	int add(const char* name, SymbolList* list)
+	{
+	    return append(list, name);
+	}
+
+        // put a new SymbolList called name to the list.
+	// Return FALSE if a different SymbolList with the same name
+	// is already in the list.
+        int append(SymbolList* list, const char* name)
+	{ 
+	    return NamedList::append(list, name);
         }
          
         // return the pointer for the object of the specified name.  if the
         // SymbolList does not exist, return NULL
-        SymbolList* get(const char* name) {
-                return (SymbolList*)NameList::get(name);
+        SymbolList* get(const char* name) const
+	{
+	    return (SymbolList*)NamedList::get(name);
         }
          
         // remove a SymbolList from the list.  if the StringList
         // does not exist, return FALSE.
-        int NameList::remove(const char* name);
+	int remove(const char* name)
+	{
+            return NamedList::remove(name);
+	}
 };
 #endif
