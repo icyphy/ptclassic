@@ -1,5 +1,5 @@
 ##########################################################################
-# Version: @(#)ModelSchema.itcl	1.1 02/19/97
+# Version: $Id$
 # Author: John Reekie
 #
 # Copyright (c) 1997 The Regents of the University of California.
@@ -74,6 +74,8 @@
 # (<b>FIXME</b>: The attributes of a model should be modified so
 # that they are distinct from Itcl public variables. This
 # would be very useful in making nested models possible.)
+#
+# </ul>
 #
 # Examples. Create a schema model:
 # <pre><tcl quiet>
@@ -215,12 +217,12 @@ class ::tycho::ModelSchema {
     ####                  protected methods                      ####
     
     # Entities cannot be nested
-    method entityin {context name args} {
+    protected method entityin {context name args} {
     	_nesterror entity $context $name
     }
 
     # Links cannot be nested
-    method linkin {context name args} {
+    protected method linkin {context name args} {
     	_nesterror link $context $name
     }
 
@@ -242,20 +244,20 @@ body ::tycho::ModelSchema::constructor {args} {
     defineEntity attribute \
 	    -valued 1 \
 	    -toplevel 1 \
-	    -nestable 1 \
+	    -nestable 1
 
     # Define the "entity" entity
     defineEntity entity \
 	    -valued 0 \
 	    -toplevel 1 \
-	    -nestable 0 \
+	    -nestable 0
 
     # Define the "link" entity
     defineEntity link \
 	    -valued 0 \
 	    -toplevel 1 \
-	    -nestable 0 \
-	}
+	    -nestable 0
+}
 
 ########################################################################
 #### attribute
@@ -327,7 +329,7 @@ body ::tycho::ModelSchema::attributes {context} {
 #
 body ::tycho::ModelSchema::entity {name args} {
     _verifynot entity $name
-    _link entity $name $args
+    _link entity {} $name $args
 }
 
 ########################################################################
