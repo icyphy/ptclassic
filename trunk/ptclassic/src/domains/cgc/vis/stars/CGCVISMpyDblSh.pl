@@ -1,7 +1,7 @@
 defstar {
-	name { QuadMult16x16 }
+	name { VISMpyDblSh }
 	domain { CGC }
-	version { $Date$ $Id$ }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

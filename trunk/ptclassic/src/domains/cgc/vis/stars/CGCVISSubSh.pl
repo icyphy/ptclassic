@@ -1,5 +1,5 @@
 defstar {
-	name { QuadSub16 }
+	name { VISSubSh }
 	domain { CGC }
 	version { $Id$ }
 	author { William Chen }
