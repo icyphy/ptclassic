@@ -68,7 +68,7 @@ public:
 
 	// packet interface: these funcs return errors unless
 	// redefined
-	virtual void getPacket (Packet&) const;
+	virtual void getPacket (Packet&);
 	virtual void operator << (const Packet&);
 
 protected:
