@@ -1,0 +1,26 @@
+#
+# $Id$
+#
+# The "edithtml" master style-sheet
+#
+modelconfigure -label "HTML editor colors"
+modelconfigure -description {
+    Additional color settings for HTML editors.
+}
+
+style default \
+	-label "Default"  {
+    
+    # FIXME: provide labels
+    parameter commandColor maroon \
+	    -type color \
+	    -label "?commandColor?"
+
+    parameter pointerColor blue \
+	    -type color \
+	    -label "?pointerColor?"
+
+    parameter destColor forestGreen \
+	    -type color \
+	    -label "?destColor?"
+}
