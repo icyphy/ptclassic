@@ -48,8 +48,7 @@ proc ptolemyMkFacetGraph {name filename args} {
     # Put in titles and a reasonable default size.
     puts $outfd "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
     puts $outfd "\{centeredText \{$name\} title \{\} black \{\{helvetica 24 bold i\} \{times 24 bold i\}\}\}"
-    # NOTE: Unix-only implementation:
-    puts $outfd "\{centeredText \{created: [exec date]\} subtitle title firebrick \{\{helvetica 16 bold i\} \{times 16 bold i\}\}\}"
+    puts $outfd "\{centeredText \{created: [clock format [clock seconds]]\} subtitle title firebrick \{\{helvetica 16 bold i\} \{times 16 bold i\}\}\}"
 
     puts $outfd {{add src/domains/cgc/demo/init.pal {}}}
     ptolemyMkFacet [lindex $args 0] $outfd $args
