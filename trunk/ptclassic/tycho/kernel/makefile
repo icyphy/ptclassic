@@ -71,6 +71,7 @@ ITCL_SRCS = \
 	File.itcl \
 	FileBrowser.itcl \
 	Font.itcl \
+	Graphics.itcl \
 	HTML.itcl \
 	HTMLText.itcl \
 	Matlab.itcl \
