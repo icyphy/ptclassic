@@ -2,9 +2,9 @@
 #define _CGCStar_h 1
 /******************************************************************
 Version identification:
-$Id$
+$Id$ %G$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -91,6 +91,14 @@ public:
 	// Generate declarations and initialization code for States
 	StringList declareStates(Attribute a=ANY);
 	StringList initCodeStates(Attribute a=ANY);
+	
+	// Generate declaration, initialization and function codes for
+	// command-line arguments
+	StringList cmdargStates(Attribute a=ANY);
+	StringList cmdargStatesInits(Attribute a=ANY);
+	StringList setargStates(Attribute a=ANY);	
+	StringList setargStatesHelps(Attribute a=ANY);	
+
 
 	// add a splice star to the spliceClust list.  If atEnd
 	// is true, append it to the end, otherwise prepend it.
@@ -129,6 +137,11 @@ protected:
 	// If "name" is a state, add it to the list of referenced states.
 	StringList expandRef(const char* name);
 	StringList expandRef(const char* name, const char* offset);
+
+	// Expand State value macros. If "name" state takes a command-
+	// line argumanent, add it to the list of referenced states.
+	// Else return its value.
+        StringList expandVal(const char* name);
 
 	// Add a State to the list of referenced States.
 	void registerState(State*);
@@ -171,6 +184,13 @@ private:
 	StringList declareBuffer(const CGCPortHole*);
 	StringList declareOffset(const CGCPortHole*);
 	StringList declareState(const State*);
+
+	// Generate declaration, initilization and function
+	// codes for command-line settable states.
+        StringList cmdargState(const State*);
+        StringList cmdargStatesInit(const State*);
+        StringList setargState(const State*);
+        StringList setargStatesHelp(const State*);
 
 	// Generate initialization code for PortHoles and States.
 	StringList initCodeBuffer(CGCPortHole*);
