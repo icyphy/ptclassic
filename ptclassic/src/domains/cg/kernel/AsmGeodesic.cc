@@ -19,7 +19,7 @@ $Id$
 #endif
 
 #include "AsmGeodesic.h"
-#include "miscFuncs.h"
+#include <builtin.h>
 
 void AsmGeodesic :: initialize() {
 	maxNumParticles = size();
