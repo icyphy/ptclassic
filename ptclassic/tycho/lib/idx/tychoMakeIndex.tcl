@@ -29,6 +29,15 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+## BOGOSITY alert! This file now generates TIM format files,
+# so we have to load a bunch of needed files:
+namespace ::tycho
+source ../../kernel/Object.itcl
+source ../../kernel/Interchange.itcl
+source ../../kernel/Model.itcl
+source ../../kernel/HyperlinkIndex.itcl
+source ../../kernel/Path.tcl
+
 #### tychoCompareFirst
 # Given two lists, return -1, 0, or 1 depending on whether the first
 # element of this first list is alphabetically less than, equal, or greater
@@ -37,6 +46,12 @@
 proc tychoCompareFirst {first second} {
     set stfirst [string tolower [lindex $first 0]]
     set stsecond [string tolower [lindex $second 0]]
+    string compare $stfirst $stsecond
+}
+
+proc tychoCompareNocase {first second} {
+    set stfirst [string tolower $first]
+    set stsecond [string tolower $second]
     string compare $stfirst $stsecond
 }
 
@@ -101,6 +116,45 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
     puts $fd \}
     puts $fd "# >"
     close $fd
+}
+
+#### tychoMkTIMIndex
+# Make an index file in TIM format. This can also be read by the
+# Tycho IndexBrowser class.
+# The first argument is the name of the index.
+# The second argument is the name of the index file to create.
+# The third argument causes "$TYCHO/" to be prepended to the file name.
+# The fourth argument generates a one-level hierarchy if true.
+# The rest of the arguments are any number of file names
+# from which the index should be created.  If any of these files
+# is missing or is not readable, then that file is ignored.
+#
+proc tychoMkTIMIndex {name filename prependTYCHO nested args } {
+    set index [::tycho::HyperlinkIndex [::tycho::autoName index] \
+	    -datafile $filename \
+	    -statefile [file rootname $filename].snapshot]
+    $index modelconfigure -title $name
+    $index modelconfigure -directory [file dirname $filename]
+
+    foreach file $args {
+	if $prependTYCHO {
+	    $index parseFile [file join \$TYCHO $file]
+	} else {
+	    $index parseFile $file
+	}
+    }
+    # Sort the index, case-insensitive
+    $index sort -command tychoCompareNocase
+
+    # Make it nested if asked to
+    if { $nested } {
+        $index nest
+    }
+
+    # Write to its files
+    $index save
+
+    delete object $index
 }
 
 #### tychoFindAllHTML
@@ -252,7 +306,8 @@ proc tychoStandardIndex {} {
     set files [tychoFindAllHTML $TYCHO]
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
-    eval tychoMkIndex {{Tycho index}} \
+    # The standard index is not nested
+    eval tychoMkTIMIndex {{Tycho index}} \
     	    [list [file join $TYCHO lib idx tycho.idx]] 1 0 $files 
     cd $olddir
 }
@@ -271,7 +326,8 @@ proc tychoCodeDocIndex {} {
     set files [tychoFindCodeDocHTML $TYCHO]
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
-    eval tychoMkIndex {{Tycho Itcl Code Index}} \
+    # The code index is nested
+    eval tychoMkTIMIndex {{Tycho Itcl Code Index}} \
 	    [list [file join $TYCHO lib idx codeDoc.idx]] 1 0 $files
     cd $olddir
 }
