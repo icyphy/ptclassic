@@ -69,7 +69,6 @@ int bodyMode = 0;		/* special lexan mode flag to read bodies  */
 int docMode = 0;		/* flag document bodies  */
 int descMode = 0;		/* flag descriptor bodies  */
 int codeMode = 0;		/* flag code block bodies  */
-int codeModeBraceCount;		/* brace count in codeMode */
 FILE* yyin;			/* stream to read from */
 
 char* progName = "ptlang";	/* program name */
@@ -81,7 +80,6 @@ char* codeBlocks[NUMCODEBLOCKS];
 char* codeBlockNames[NUMCODEBLOCKS];
 char* codeBlockLines[NUMCODEBLOCKS];
 char* codeBlockArgs[NUMCODEBLOCKS];
-char* codeBlockTmp;
 int numBlocks = 0;
 
 /* scratch buffers */
@@ -97,7 +95,6 @@ char stateDescriptions[MEDBUFSIZE];
 char ccCode[BIGBUFSIZE];
 char hCode[BIGBUFSIZE];
 char miscCode[BIGBUFSIZE];
-char codeBlock[MEDBUFSIZE];
 char consCalls[BIGBUFSIZE];
 
 /* state classes */
@@ -184,7 +181,8 @@ char* galPortName;		/* name of galaxy port */
 
 /* codes for "standard methods".  To add more, add them at the end,
  * modify N_FORMS, and put types in the codeType array and names in
- * the codeFuncName array.
+ * the codeFuncName array.  The C_CONS is processed special.
+ * C_SETUP and after are protected; rest are public.
  */
 #define C_CONS 0
 #define C_EXECTIME 1
@@ -316,7 +314,7 @@ sgitem:
 					  strcat (hCode, "\n");
 					  bodyMode = 0;
 					}
-|	method '{' methlist '}'		{ genMethod();}
+|	method '{' methlist '}'		{ wrapMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
 |	CCINCLUDE '{' error '}'		{ yyerror("Error in ccinclude list");}
@@ -443,9 +441,8 @@ staritem:
 					  codeBlockLines[numBlocks]=
 					    savelineref();
 					  codeMode = 1;
-					  codeModeBraceCount = 1;
 					}
-		BODY	 		{ codeBlocks[numBlocks++]=save($8);
+		BODY	 		{ codeBlocks[numBlocks++]=$8;
 					  codeMode = 0;
 					}
 ;
@@ -663,7 +660,7 @@ int g;
 	galDef = g;
 	objName = objVer = objDesc = domain = derivedFrom =
 		objAuthor = objCopyright = objExpl = objLocation = NULL;
-	consStuff[0] = ccCode[0] = hCode[0] = codeBlock[0] = consCalls[0] = 0;
+	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 	inputDescriptions[0] = outputDescriptions[0] = stateDescriptions[0] = 0;
 	nCcInclude = nHInclude = nSeeAlso = 0;
@@ -908,7 +905,7 @@ int mode;
 }
 
 /* generate code for user-defined method */
-genMethod ()
+wrapMethod ()
 {
 	char * p = whichMembers (methodAccess);
 	char * mkey = "";
@@ -1016,7 +1013,7 @@ cvtCodeBlockExpr( src, src_len, pDst)
         @anything_else is passed through unchanged (including the @).
     If extendB is FALSE, then none of the ``@'' process occurs.
 **/
-cvtCodeBlockFunc( src_in, dst_in, extendB)
+cvtCodeBlock( src_in, dst_in, extendB)
     char *src_in, *dst_in;
     int extendB;
 {
@@ -1081,13 +1078,78 @@ cvtCodeBlockFunc( src_in, dst_in, extendB)
     *dst = '\0';
 }
 
+
 genCodeBlock( fp, src, extendB)
     FILE *fp;
     char *src;
     int extendB;
 {
     char *dst = malloc(strlen(src)*2+MEDBUFSIZE);
-    cvtCodeBlockFunc( src, dst, extendB);
+    cvtCodeBlock( src, dst, extendB);
+    fputs( dst, fp);
+    free(dst);
+}
+
+
+/**
+    Convert a method body (standard (e.g., go) or custom).  Primarily
+    involves processing for in-line codeblocks.
+    Lines starting with a "." will have the leading white-space striped,
+    and the remainder of the line processed by cvtCodeBlock(),
+    with the result added to the default code stream.
+    To avoid processing as a codeblock, use two "..".
+**/
+cvtMethod( src_in, dst_in)
+    char *src_in, *dst_in;
+{
+    char	*src = src_in, *dst = dst_in;
+    char	*src_line, *src_start, *src_end;
+    int		c, c_end;
+    int		codeblockB = 0;
+
+    for (; *src!='\0' || codeblockB; ) {
+	src_line = src;
+	for ( ; (c=*src++) != '\0' && isspace(c) && c!=NEWLINE; )
+	    ;
+	src_start = --src;
+	for ( ; (c=*src++) != '\0' && c!=NEWLINE; )
+	    ;
+	src_end = c==NEWLINE ? src : --src;
+	c_end = *src_end; *src_end = '\0';
+	if ( src_start[0] == '.' && src_start[1]!='.' ) {
+	    src = src_start+1;
+	    if ( !codeblockB ) {
+		codeblockB = 1;
+	        strcpy(dst, "\t{ StringList _str_; _str_ << \n");
+		dst+=strlen(dst);
+	    }
+	    cvtCodeBlock( src, dst, 1);		dst+=strlen(dst);
+	    *dst++ = NEWLINE;
+	} else {
+	    if ( codeblockB ) {
+	        strcpy(dst, ";\n\t addCode(_str_); }\n"); dst+=strlen(dst);
+		codeblockB = 0;
+	    }
+	    if ( src_start[0]=='.' && src_start[1]=='.' ) {
+		int n = src_start+1-src_line;
+		strncpy( dst, src_line, n);	dst += n;
+		strcpy( dst, src_start+2);	dst += strlen(dst);
+	    } else {
+	        strcpy( dst, src_line); dst += strlen(dst);
+	    }
+	}
+	*src_end = c_end;
+	src = src_end;
+    }
+    *dst = '\0';
+}
+
+genMethod( fp, src)
+    FILE *fp;
+    char *src;
+{
+    char *dst = malloc(strlen(src)*2+MEDBUFSIZE);
+    cvtMethod( src, dst);
     fputs( dst, fp);
     free(dst);
 }
@@ -1199,7 +1261,7 @@ genDef ()
 	if (publicMembers[0])
 		fprintf (fp, "%s\n", publicMembers);
 	fprintf (fp, "protected:\n");
-	for (i = C_SETUP; i <= C_GO; i++)
+	for (i = C_SETUP; i < N_FORMS; i++)
 		genStdProto(fp,i);
 	if (protectedMembers[0])
 		fprintf (fp, "%s\n", protectedMembers);
@@ -1277,10 +1339,14 @@ genDef ()
 	if (!consCode) consCode = "";
 	fprintf (fp, "%s\n%s\n", consStuff, consCode);
 	fprintf (fp, "}\n");
-	for (i = C_EXECTIME; i <= C_GO; i++) {
-		if (codeBody[i] && !inlineFlag[i])
-			fprintf (fp, "\n%s%s::%s() {\n%s\n}\n",
-			codeType[i], fullClass, codeFuncName[i], codeBody[i]);
+	for (i = 1; i < N_FORMS; i++) {
+		if (codeBody[i] && !inlineFlag[i]) {
+		    char *dst = malloc(2*strlen(codeBody[i])+MEDBUFSIZE);
+		    cvtMethod( codeBody[i], dst);
+		    fprintf (fp, "\n%s%s::%s() {\n%s\n}\n",
+		      codeType[i], fullClass, codeFuncName[i], dst);
+		    free(dst);
+		}
 	}
 	if (miscCode[0])
 		fprintf (fp, "%s\n", miscCode);
