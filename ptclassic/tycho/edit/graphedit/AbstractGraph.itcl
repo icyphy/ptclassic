@@ -74,8 +74,8 @@
 # call load{} (see <a href="Model.html">Model</a>):
 # <pre><tcl>
 #     $graph read string {
-#         vertex a -label "First vertex"
 #         vertex b -label "Second vertex"
+#         vertex a -label "First vertex"
 #         vertex c
 #         edge a b
 #         edge b c
@@ -159,13 +159,13 @@ class ::tycho::AbstractGraph {
     method depthSort {}
 
     # Alternative depth-sort
-    method depthSort2 {{roots {}}}
+    method depthSortNotWorking {{roots {}}}
 
     # Layout the vertices on a grid
-    method gridLayout {}
+    method gridLayoutNotWorking {}
 
     # Layout the vertices on a grid, better for tree-like graphs
-    method gridLayoutLeft {}
+    method gridLayout {}
 
     # Return the number of edges in the graph
     method numberofedges {}
@@ -224,9 +224,6 @@ class ::tycho::AbstractGraph {
     # Get the roots of the graph
     protected method _graphroots {}
 
-    # Grid layout auxiliary method
-    protected method _gridleft {roots ymin}
-
     # Vertices cannot be nested
     protected method _vertex {context vertex args} {
 	_nesterror vertex $context $vertex
@@ -239,17 +236,23 @@ class ::tycho::AbstractGraph {
     # the adjacency matrix clear this array.
     protected variable _cache
 
-    # Array of available positions, used by grid layout
-    protected variable _firstfree
-
-    # Array of used positions, used by grid layout
-    protected variable _taken
-
     # The adjacency "matrix." See the comment with _adjacencyadd{}.
     protected variable _adjacency
 
     # Keep a copy of vertex names for efficiency.
     protected variable _vertices
+
+    #################################################################
+    ####                     private methods                     ####
+
+    # Grid layout auxiliary method
+    private method _gridlayout {roots ymin}
+
+    # Array of available positions, used by grid layout
+    private variable _firstfree
+
+    # Array of used positions, used by grid layout
+    private variable _taken
 }
 
 
@@ -432,7 +435,7 @@ body ::tycho::AbstractGraph::depthSort {} {
     while { $stack != "" } {
 	# Read the vertex on the top of the stack
 	set current [lindex $stack end]
-	
+
 	# Switch on the "visited" flag
 	if { $_cache($current,visited) == 0 } {
 	    # The vertex has not been seen, so mark it but leave
@@ -482,7 +485,7 @@ body ::tycho::AbstractGraph::depthSort {} {
 }
 
 ########################################################################
-#### depthSort2
+#### depthSortNotWorking
 #
 # An alternative depth sort that might possibly be faster. 
 # (but doesn't work correctly yet).
@@ -505,7 +508,7 @@ body ::tycho::AbstractGraph::depthSort {} {
 # broken). If the second argument is supplied, it is a list of starting
 # vertices -- this may be needed for cyclic graphs.
 # 
-body ::tycho::AbstractGraph::depthSort2 {{roots {}}} {
+body ::tycho::AbstractGraph::depthSortNotWorking {{roots {}}} {
     # If we already have it, just return it
     set cacheindex depthsort,[join $roots -]
     if { [::info exists _cache($cacheindex)] } {
@@ -597,7 +600,7 @@ body ::tycho::AbstractGraph::depthSort2 {{roots {}}} {
 }
 
 ########################################################################
-#### gridLayout
+#### gridLayoutNotWorking
 #
 # Lay-out the graph in a grid form. The returned result is a list
 # of sub-lists, where each sub-list is a list of pairs being
@@ -608,7 +611,7 @@ body ::tycho::AbstractGraph::depthSort2 {{roots {}}} {
 # This data would have to be placed into a different array, though,
 # since the cache is cleared when a new vertex is added.
 #
-body ::tycho::AbstractGraph::gridLayout {} {
+body ::tycho::AbstractGraph::gridLayoutNotWorking {} {
     # If we already have it, just return it
     if { [::info exists _cache(gridlayout)] } {
 	return $_cache(gridlayout)
@@ -772,7 +775,7 @@ body ::tycho::AbstractGraph::gridLayout {} {
 }
 
 ########################################################################
-#### gridLayoutLeft
+#### gridLayout
 #
 # Lay-out the graph in a grid form. The returned result is a list
 # of sub-lists, where each sub-list is a list of pairs being
@@ -783,11 +786,11 @@ body ::tycho::AbstractGraph::gridLayout {} {
 # This data would have to be placed into a different array, though,
 # since the cache is cleared when a new vertex is added.
 #
-body ::tycho::AbstractGraph::gridLayoutLeft {} {
+body ::tycho::AbstractGraph::gridLayout {} {
     # If we already have it, just return it
-    #if { [::info exists _cache(gridlayoutleft)] } {
-#	return $_cache(gridlayoutleft)
-    #}
+    if { [::info exists _cache(gridlayout)] } {
+        return $_cache(gridlayout)
+    }
     # Make sure we have a depth-sort
     set depthsort [depthSort]
 
@@ -796,8 +799,6 @@ body ::tycho::AbstractGraph::gridLayoutLeft {} {
 	set _cache($v,widthpos) -1
         set _cache($v,visited) 0
     }
-puts [array get _cache]
-
     # Initialize the "firstfree" array
     foreach {d _} $depthsort {
         set _firstfree($d) 0
@@ -806,26 +807,27 @@ puts [array get _cache]
     # Initialize the "taken" array
     catch {unset _taken}
 
-    # Call _gridleft with the roots of the graph
-    _gridleft [_graphroots] 0
+    # Call _gridlayout with the roots of the graph
+    # FIXME: What if the graph has no roots?
+    _gridlayout [_graphroots] 0
 
     # Assemble the result
-    set _cache(gridlayoutleft) {}
+    set _cache(gridlayout) {}
     foreach {depth vertices} $depthsort {
 	set r {}
 	foreach v $vertices {
-	    lappend r $v $_cache($v,widthpos)
+            lappend r $v $_cache($v,widthpos)
 	}
-	lappend _cache(gridlayoutleft) $r
+        lappend _cache(gridlayout) $r
     }
-    return $_cache(gridlayoutleft)
+    return $_cache(gridlayout)
 }
 
 ########################################################################
-#### _gridleft
+#### _gridlayout
 #
-body ::tycho::AbstractGraph::_gridleft {roots ymin} {
-puts "_gridleft: $roots $ymin"
+body ::tycho::AbstractGraph::_gridlayout {roots ymin} {
+    set result {}
     # NOTE: Assume no graph with more than a million nodes.
     set firstpos 1000000
     set lastpos 0
@@ -833,7 +835,6 @@ puts "_gridleft: $roots $ymin"
     foreach v $roots {
         # If it's already visited, we're in a cycle, so forget it
         if { $_cache($v,visited) } {
-puts !$v=$_cache($v,visited)
             continue
         }
         set _cache($v,visited) 1
@@ -856,16 +857,23 @@ puts !$v=$_cache($v,visited)
             set children $_adjacency($v,children)
             if {$children != {}} {
                 # Get the top and bottom positions of the children
-                set range [_gridleft $children $ff]
-                # Choose the average as the preferred position
-                set desired [expr ([lindex $range 0]+[lindex $range 1])/2]
-                # If desired position is greater than minimum, use it.
-                if {$desired > $ymin} {
-                    set wpos $desired
-                } {
-                    set wpos $ymin
+                set range [_gridlayout $children $ff]
+                # Only make this choice here if the children
+                # were not all visited nodes
+                if { $range != "" } {
+                    # Choose the average as the preferred position
+                    set desired [expr \
+                            ([lindex $range 0]+[lindex $range 1])/2]
+                    # If desired position is greater than minimum, use it.
+                    if {$desired > $ymin} {
+                        set wpos $desired
+                    } else {
+                        set wpos $ymin
+                    }
+                } else {
+                    set wpos $ff
                 }
-            } {
+            } else {
                 set wpos $ff
             }
             # Avoid levels that are already taken.
@@ -879,8 +887,9 @@ puts !$v=$_cache($v,visited)
         }
         if {$wpos < $firstpos} {set firstpos $wpos}
         if {$wpos > $lastpos} {set lastpos $wpos}
+        set result [list $firstpos $lastpos]
     }
-    return [list $firstpos $lastpos]
+    return $result
 }
 
 ########################################################################
@@ -1188,7 +1197,6 @@ body ::tycho::AbstractGraph::traverse3 {} {
 # it doesn't work with the subclass, or to perform additional tests.
 #
 body ::tycho::AbstractGraph::verify {} {
-puts [array names _vertices]
     foreach {src tgt} [adjacency] {
         if { ! [::info exists _vertices($src)] \
                 || ! [::info exists _vertices($tgt)] } {
