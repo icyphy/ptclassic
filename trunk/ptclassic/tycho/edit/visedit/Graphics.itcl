@@ -478,7 +478,6 @@ body ::tycho::Graphics::constructor {args} {
     menubar disable Redo
 
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preferences
     preference subscribeoptions $this \
