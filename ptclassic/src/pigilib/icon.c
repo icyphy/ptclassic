@@ -275,7 +275,7 @@ GetTildePath(facetPtr, tPath)
     }
     else {
 	/* Issue a warning that absolute path name is being used */
-	PrintErr("Warning: Can't convert absolute path to ~user. Icon master should not henceforth be moved.");
+	PrintErr("Warning: Can't convert absolute path to ~user. The icon will point to its master using the full Unix path.");
 	strcpy(tPath,fullName);
     }
     free(fullName);
