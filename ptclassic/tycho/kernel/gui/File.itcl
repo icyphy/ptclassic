@@ -1155,14 +1155,14 @@ body ::tycho::File::openContext {filename {mode {}}} {
     # If a mode is not supplied, get the default mode and
     # override with the mode from the file header
     if { $mode == "" } {
-	set mode [::tycho::readFileHeader $filename junk]
-	if { $mode == "" } {
-	    set mode [::tycho::registry filemode $filename]
-            # Finally, if there's no registered mode, use "text"
-            if { $mode == "" } {
-                set mode "text"
-            }
-	}
+        #  Read the header only if not a directory
+        if ![::tycho::resource isdirectory $filename] {
+            set mode [::tycho::readFileHeader $filename junk]
+        }
+        # If there was no header, get the default mode
+        if { $mode == "" } {
+            set mode [::tycho::registry filemode $filename]
+        }
     }
 
     # Get the command for this mode and execute it
