@@ -107,7 +107,7 @@ void OutDDFPort :: moveData()
 	// get data from imageGeo
 	for (int i = numberTokens; i > 0; i--) {
 		Particle** p = myBuffer->next();
-		myPlasma->put(*p);
+		(*p)->die();
 		*p = imageGeo->get();
 	}
 }
