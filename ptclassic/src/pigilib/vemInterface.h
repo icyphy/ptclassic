@@ -48,6 +48,7 @@ extern boolean ViGetErrWindows();
 extern void PrintCon ARGS((const char *s));
 extern void PrintConLog ARGS((const char *s));
 extern void PrintErr ARGS((const char *s));
+extern void PrintErrNoTag ARGS((const char *s));
 extern void PrintDebug ARGS((const char *s));
 extern void PrintDebugSet ARGS((boolean state));
 extern boolean PrintDebugGet();
