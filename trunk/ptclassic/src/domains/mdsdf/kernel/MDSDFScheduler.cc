@@ -355,11 +355,12 @@ int MDSDFScheduler::computeSchedule(Galaxy& g) {
 	  endRow = ms.rowIndex;
 	  endCol = ms.colIndex;
 	  // update the index for the next firing
-	  if(++ms.colIndex >= (int)((double)ms.startColIndex + 
-				    (double)ms.colRepetitions)) {
+          // Need (int) cast on lhs to eliminate gcc warning
+	  if((int)(++ms.colIndex) >= (int)((double)ms.startColIndex + 
+					   (double)ms.colRepetitions)) {
 	    // end of column repetitions, goto next row
-	    if(++ms.rowIndex >= (int)((double)ms.startRowIndex + 
-				      (double)ms.rowRepetitions)) {
+	    if((int)(++ms.rowIndex) >= (int)((double)ms.startRowIndex + 
+					     (double)ms.rowRepetitions)) {
 	      // end of row repetitions, finished all reps for this iteration
 	      ms.startColIndex += (int)((double)ms.colRepetitions);
 	      ms.startRowIndex = 0;  // is this always zero?!
