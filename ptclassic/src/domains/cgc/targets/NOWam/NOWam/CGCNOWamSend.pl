@@ -174,7 +174,7 @@ if (AM_SetHandler($starSymbol(endpoint), 0, error_handler) != AM_OK) {
         fprintf(stderr, "error: AM_SetHandler failed\n");
         exit(1);
 }
-if (AM_SetHandler(endpoint, 1, reply_handler) != AM_OK) {
+if (AM_SetHandler($starSymbol(endpoint), 1, reply_handler) != AM_OK) {
         fprintf(stderr, "error: AM_SetHandler failed\n");
         exit(1);
 }
@@ -209,6 +209,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		hostAddr.initialize();
 
 		// code generation.
+		addGlobal("#define HARDPORT 61114\n");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
 		addInclude("<udpam.h>");
