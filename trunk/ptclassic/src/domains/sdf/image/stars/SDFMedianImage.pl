@@ -72,7 +72,7 @@ when displaying single frames from a moving sequence.
 		LOG_NEW; buf = new unsigned char[size*size];
 	}
 
-	wrapup { LOG_DEL; delete buf; buf = (unsigned char*) NULL; }
+	wrapup { LOG_DEL; delete [] buf; buf = (unsigned char*) NULL; }
 
 	destructor { wrapup(); }
 

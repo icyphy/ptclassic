@@ -95,7 +95,7 @@ separate pieces.
 			for(indx1 = 0; indx1 < indx2; indx1++) {
 				ptr1[indx1] = ptr2[indx1];
 			}
-			LOG_DEL; delete ptr2;
+			LOG_DEL; delete [] ptr2;
 		} // end { doRunLen }
 	}
 
@@ -106,7 +106,7 @@ separate pieces.
 		TYPE_CHECK(inEnvp, "GrayImage");
 		GrayImage* inImage = (GrayImage*) inEnvp.writableCopy();
 		if (inImage->fragmented() || inImage->processed()) {
-			delete inImage;
+			LOG_DEL; delete inImage;
 			Error::abortRun(*this,
 					"Need unfragmented and unprocessed input image.");
 			return;
