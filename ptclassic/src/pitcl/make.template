@@ -23,7 +23,7 @@ VPATH =		$(ROOT)/src/ptcl
 CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-INCL =		-I$(KERNDIR) -I$(TCL_INCDIR)
+INCL = 		-I$(KERNDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC)
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
