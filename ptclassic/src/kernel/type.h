@@ -64,11 +64,11 @@ typedef void* Pointer;
 // g++, since newer g++'s accept the prefix form for backward compatibility.
 
 #ifndef POSTFIX_OP
-#ifdef __GNUG__
-#define POSTFIX_OP
-#else
+//#ifdef __GNUG__
+//#define POSTFIX_OP
+//#else
 #define POSTFIX_OP int
-#endif
+//#endif
 #endif
 
 #endif
