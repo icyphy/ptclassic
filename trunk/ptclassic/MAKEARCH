@@ -114,11 +114,8 @@ cd ..
 # EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
 # Experimental domains not included: capsim cgdsp3
 
-set EXPDOMAINS=(c50 cg56 cgc fsm vhdlb vhdl mdsdf hof ipus sr)
-set EXPEXTRAS=(c50/targets cg56/targets vhdl/targets ipus/cat ipus/icp \
-		ipus/tcltk)
-set EXPSUBEXTRAS=(ipus/cat/stars ipus/icp/islang ipus/icp/kernel \
-		ipus/tcltk/stars)
+set EXPDOMAINS=(c50 cg56 cgc fsm vhdlb vhdl mdsdf hof sr)
+set EXPEXTRAS=(c50/targets cg56/targets vhdl/targets )
 
 set ALLDOMAINS=(sdf ddf de thor bdf cg $EXPDOMAINS)
 
@@ -211,7 +208,7 @@ foreach x ( c50/dsp/stars cg56/dsp/stars \
 	cgc/targets/uniproc cgc/targets/multiproc cgc/targets/NOWam \
 	cgc/tcltk/stars cgc/tcltk/targets cgc/vis/stars cgc/vis/targets \
 	cgc/vis/tcltk cgc/vis/devel \
-	$EXPSUBEXTRAS )
+	)
 	optmkdir $x
 	cd $x
 	optlink ../../../../../src/domains/$x make.template
