@@ -23,18 +23,16 @@ OCTTOOLS      = $(ROOT)/octtools
 # Ptolemy kernel directory
 KERNDIR	      = $(ROOT)/src/kernel
 # C compiler variables
-CFLAGS        = -g -I$(OCTTOOLS)/include
+CFLAGS        = -g
 
 # Rule for making .o file from .c file (the Gnu-make default rule breaks
 # on Vaxes running older versions of Ultrix)
 .c.o:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -I$(OCTTOOLS)/include -c $<
 
 # C++ compiler variables
 GXX	      = g++
-GPPFLAGS      = -g -I$(ROOT)/src/kernel
-GNULIB	      = /usr/gnu/lib
-GNUINCLUDE    = $(GNULIB)/g++-include
+GPPFLAGS      = -g
 
 HDRS	      = compile.h \
 		edit.h \
@@ -128,7 +126,7 @@ TAGS:	$(SRCS)
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GXX) $(GPPFLAGS) -c  $<
+	$(GXX) $(GPPFLAGS) -I$(KERNDIR) -c  $<
 
 # print out source file names
 printsrcs:;	@echo "$(SRCS)"
