@@ -69,4 +69,6 @@ int setStarIndices(Galaxy& g) {
 	return cnt;
 }
 
+const char* Star::readClassName() const {return "Star";}
+
 ISA_FUNC(Star,Block);

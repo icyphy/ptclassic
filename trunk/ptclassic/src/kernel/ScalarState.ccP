@@ -30,6 +30,9 @@ $Id$
 
 **************************************************************************/
 
+// constructor
+<T>State::<T>State() { val = 0;}
+
 // return the type
 const char* <T>State :: type() const { return "<T>";}
 

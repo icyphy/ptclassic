@@ -35,7 +35,7 @@ public:
 	NamedObj (const char* n,Block* p,const char* d) :
 		name(n), blockIamIn(p), descriptor(d) {}
 
-	virtual const char* readClassName() const {return "NamedObj";}
+	virtual const char* readClassName() const;
 
 	// return just the end name
 	const char* readName() const { return name;}

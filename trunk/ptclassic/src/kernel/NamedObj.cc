@@ -44,6 +44,8 @@ int NamedObj::isA(const char* cname) const {
 // is more efficient spacewise (and no time penalty) to put them here.
 void NamedObj::initialize() {}
 
+const char* NamedObj::readClassName() const {return "NamedObj";}
+
 // printing methods.  printVerbose() must always be redefined.
 // by default, printRecursive is the same as printVerbose
 
