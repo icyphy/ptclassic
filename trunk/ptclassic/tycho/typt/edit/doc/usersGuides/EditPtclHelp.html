@@ -7,17 +7,30 @@
 <h1><a name="Ptcl editor">User's Guide to the Ptcl Editor</a></h1>
 
 <p> This class provides a text editor specialized for editing Ptcl
-source.  Ptcl is the Ptolemy extension to Tcl.  It is automatically
-invoked whenever you open any file with an <a
-name=".ptcl"><CODE>.ptcl</CODE> extension</a> or <a
-name=".pt"><CODE>.pt</CODE> extension</a> or if a directory is opened
-and it contains a <CODE>schematic/contents;</CODE> subfile, and the
-directory is not named <CODE>*.pal</CODE>.
-
-<P> Ptolemy is a software environment that provides simulation an code
+source.  Ptcl is the Ptolemy extension to Tcl.  
+Ptolemy is a software environment that provides simulation an code
 generation capabilities.
 <A HREF="http://ptolemy.eecs.berkeley.edu"><CODE>http://ptolemy.eecs.berkeley.edu</CODE></A>
-describes the Ptolemy project in detail.  The <a name="EditPtcl
+describes the Ptolemy project in detail.  
+See the <A HREF="../../../../typt/doc/internals/pitcl.html">pitcl</A>
+page for a description of pitcl, a different interface to the Ptolemy
+kernel.
+
+ <P>The Ptcl Editor is automatically
+invoked whenever you open any file with an <a
+name=".ptcl"><CODE>.ptcl</CODE> extension</a> or <a
+name=".pt"><CODE>.pt</CODE> extension</a>.
+
+ <P>If you are running Tycho outside of Ptolemy, and Octtools
+is not present in the binary and a directory is opened
+that contains a <CODE>schematic/contents;</CODE> subfile, and the
+directory is not named <CODE>*.pal</CODE>, then this editor will attempt
+to run <CODE>oct2ptcl</CODE> to convert the Octtools facet to ptcl and
+then display the results.  If you are running Tycho with a binary
+that has Octtools, then Vem will open up the Octtools facet in the usual
+way.
+
+ <P>The <a name="EditPtcl
 class">EditPtcl class</a> is derived from the <a
 href="EditItclHelp.html">EditItcl class</a>, and therefore inherits
 all of its features.  It colors certain Ptcl constructs, such as
