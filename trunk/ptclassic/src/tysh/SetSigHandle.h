@@ -37,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Function prototypes
 int setSignalHandlers(void);
-int setCoreLimitDebug(void);
-int setCoreLimitRelease(void);
+int setCoreLimit(void);
 
 #endif
