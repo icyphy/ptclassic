@@ -238,7 +238,7 @@ KcGetTerms(char* name, TermList* terms)
 		if (p) types[i] = p->myType();
 	}
 	int nm = block->multiPortNames(names+n, isOut+n, TERM_ARR_MAX-n);
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < nm; i++) {
 		MultiPortHole* p = block->multiPortWithName (names[n+i]);
 		if (p) types[n+i] = p->myType();
 	}
@@ -346,12 +346,17 @@ KcInfo(char* name, char** info)
 	return TRUE;
 }
 
-/* 10/5/90 */
+/* 10/5/90 
+ Input: the name of a star in the current domain
+ Pops up a window displaying the profile and returns true if all goes well,
+ otherwise returns false.
+*/
 extern "C" int
 KcProfile (char* name) {
 	Block* b = findClass (name);
 	if (!b) {
-		ErrAdd ("Unknown block");
+		ErrAdd ("Unknown block: ");
+		ErrAdd (name);
 		return FALSE;
 	}
 	clr_accum_string ();
@@ -379,6 +384,7 @@ KcProfile (char* name) {
 	KcGetTerms (name, &terms);
 	if (terms.in_n) accum_string ("Inputs:\n");
 	for (int i = 0; i < terms.in_n; i++) {
+		accum_string ("   ");
 		accum_string (terms.in[i].name);
 		if (terms.in[i].multiple) accum_string (" (multiple)");
 		accum_string (": ");
@@ -387,6 +393,7 @@ KcProfile (char* name) {
 	}
 	if (terms.out_n) accum_string ("Outputs:\n");
 	for (i = 0; i < terms.out_n; i++) {
+		accum_string ("   ");
 		accum_string (terms.out[i].name);
 		if (terms.out[i].multiple) accum_string (" (multiple)");
 		accum_string (": ");
@@ -394,9 +401,10 @@ KcProfile (char* name) {
 		accum_string ("\n");
 	}
 // now do states
-	accum_string ("States:\n");
+	if (b->numberStates()) accum_string ("States:\n");
 	for (i = b->numberStates(); i>0; i--) {
 		State& s = b->nextState();
+		accum_string ("   ");
 		accum_string (s.readName());
 		accum_string (" (");
 		accum_string (s.type());
