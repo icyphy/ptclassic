@@ -83,8 +83,7 @@ ITCL_SRCS =	\
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 	chktycho \
-	dltest.html \
-	IndexBrowser.idx 
+	dltest.htm
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
@@ -92,7 +91,13 @@ MISC_FILES = 		chktycho
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b RCS.itcl
+OPTIONAL_FILES = \
+	IndexBrowser.idx \
+	rcstst \
+	sccstst \
+	Path-5.1a \
+	Path-5.1b \
+	RCS.itcl l \
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF = Path-5.1a Path-5.1b  RCS.itcl
