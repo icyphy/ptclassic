@@ -126,10 +126,17 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 
 int AutoFork::nF = 0;
 
-// generate a name for the auto-fork, and hash and return it.
+// Generate a name for the auto-fork, and hash and return it.
+// If the geodesic is named, its name is appended to "auto-fork-"
+// to form the auto-fork name.  Otherwise, a unique integer is
+// appended.
 const char* AutoFork::autoForkName() {
 	StringList buf = "auto-fork-";
-	buf << ++nF;
+	const char* geoName = geo.name();
+	if (geoName && *geoName)
+		buf << geoName;		// geodesic is named
+	else
+		buf << ++nF;		// geodesic is unnamed
 	return hashstring (buf);
 }
 
