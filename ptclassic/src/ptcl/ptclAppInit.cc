@@ -1,8 +1,7 @@
-/* 
- * tclAppInit.c --
- *
- *	Provides a default version of the Tcl_AppInit procedure.
- *
+/**************************************************************************
+Version identification:
+$Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,8 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-
-#include "tcl.h"
+*/
 
 /*
  *----------------------------------------------------------------------
@@ -48,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  *----------------------------------------------------------------------
  */
+#include "tcl.h"
 
 int
 Tcl_AppInit(Tcl_Interp *interp) {
