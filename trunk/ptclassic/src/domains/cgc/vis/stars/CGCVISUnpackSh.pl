@@ -38,27 +38,32 @@ limitation of liability, and disclaimer of warranty provisions.
 	setup {
 	  out.setSDFParams(PACKOUT,PACKOUT-1);
 	}
-	go {
-	  addDeclaration(mainDecl);
-	  addCode(unpackit);
-	}
 	codeblock(mainDecl){
-	  const int NUMOUT = 4;
-	  int $starSymbol(index);
-	  double $starSymbol(outvalue);
-	  short *$starSymbol(invalue);
+	  const int $starSymbol(NUMOUT) = 4;
           double *$starSymbol(packedin) = (double *)memalign(sizeof(double),sizeof(double));
+	}
+	initCode{
+	  addDeclaration(mainDecl);
+	}
+	codeblock(localDecl){
+	  int index;
+	  double outvalue;
+	  short *invalue;
 	}
 	codeblock(unpackit){
 	  *$starSymbol(packedin) = (double) $ref(in);
-	  $starSymbol(invalue) = (short *) $starSymbol(packedin);
+	  invalue = (short *) $starSymbol(packedin);
 	  
 	  /*scale input and unpack output*/
-	      for ($starSymbol(index)=0;$starSymbol(index)<NUMOUT;$starSymbol(index)++){
-		$starSymbol(outvalue) = (double) $val(scale)* (double) $starSymbol(invalue)[$starSymbol(index)];
-		$ref2(out,$starSymbol(index)) = $starSymbol(outvalue);
+	      for (index=0;index<$starSymbol(NUMOUT);index++){
+		outvalue = (double) $val(scale)* (double) invalue[index];
+		$ref2(out,index) = outvalue;
 	      }	
       	}
+	go {
+	  addCode(localDecl);
+	  addCode(unpackit);
+	}
 	wrapup{
 	  addCode("free($starSymbol(packedin));\n");
        	}

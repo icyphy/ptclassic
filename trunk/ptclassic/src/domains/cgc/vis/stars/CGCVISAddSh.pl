@@ -1,7 +1,7 @@
 defstar {
 	name { QuadAdd16 }
-	domain { SDF }
-	version { @(#)SDFQuadAdd16.pl	1.6 3/14/96 }
+	domain { CGC }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC vis library }
 	desc { 
 	  Add the shorts in a 16bit partitioned float to the
 	  corresponding shorts in a 16bit partitioned float.
@@ -32,14 +32,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
+        constructor {
+                noInternalState();
+	}
+	initCode{
+	  addInclude("<vis_proto.h>");
+	}
+	codeblock(localDecl){
+          double sum=0.0;
+        }
+	codeblock(addfour){
+	  sum = vis_fpadd16((double)$ref(inA),(double)$ref(inB));
+	  $ref(out) = sum;
+	}
 	go {
-	  
-	  double sum=0.0;
-	  
-	  /*calculate the sum*/
-	  sum = vis_fpadd16(double(inA%0),double(inB%0));
-	  
-          out%0 << (double) sum;
+	  addCode(localDecl);
+	  addCode(addfour);
       	}
 }
