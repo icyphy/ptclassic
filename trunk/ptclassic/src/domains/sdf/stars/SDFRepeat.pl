@@ -31,11 +31,21 @@ stars.
 		default {2}
 		desc { Repetition factor. }
 	}
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
+	}
 	setup {
-		output.setSDFParams(int(numTimes),int(numTimes)-1);
+		input.setSDFParams(int(blockSize), int(blockSize)-1);
+		output.setSDFParams(int(numTimes)*int(blockSize),
+			int(numTimes)*int(blockSize)-1);
 	}
 	go {
-		for (int i = 0; i < int(numTimes); i++)
-			output%i = input%0;
+	    for (int i = 0; i < int(numTimes); i++) {
+		for (int j = int(blockSize)-1; j >= 0; j--)
+		    output%(j+i*int(blockSize)) = input%j;
+	    }
 	}
 }
