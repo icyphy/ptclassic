@@ -131,4 +131,3 @@ ifdef DIRS
 	done
 endif
 
-depend:
