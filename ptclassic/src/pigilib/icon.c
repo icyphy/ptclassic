@@ -37,28 +37,23 @@ static boolean
 CodeDirToIconDir(codeDir, iconDir)
 char *codeDir, **iconDir;
 {
-    char dir[DM_WIDTH]; /* intermediate string var for icon directory name */
-    int len;            /* length of the string codeDir*/
+    char dir[DM_WIDTH];  /* intermediate string var for icon directory name */
+    char dirSave[DM_WIDTH]; /* a copy of dir */
+    int len;            /* length of the string dir*/
     struct stat stbuf;  /* used by system call stat */
-    char *charPtr;      /* points to "/stars" in dir */
     char fullName[DM_WIDTH]; /* full name of the default icon directory */
 
-    len = strlen(codeDir);
-
-    /* remove trailing '/' from codeDir if there is any */
-    if (*(codeDir+len-1) == '/') {
-	*(codeDir+(--len)) = '\0';  
-    }
-
     strcpy(dir, codeDir);
-	
+    len = strlen(dir);
+
+    /* remove trailing '/' from dir if there is any */
+    if (*(dir+len-1) == '/')
+	*(dir+(--len)) = '\0';  
+
     /* Test if the star source directory name ends in "/stars" */
-    /* We first test if dir contains "/stars" at all, if it does, */
-    /* then test if the occurence of "/stars" is at the end of dir. */
-    /* Note that 6 is the length of the string "/stars".*/
-    if ((charPtr = strstr(dir, "/stars")) != NULL  
-	&& charPtr - dir == len - 6)  {
-	*charPtr = '\0';  /* delete "/stars" from dir */
+    if (!strcmp(BaseName(dir), "stars")) {
+	strcpy(dirSave, dir);  /* Save a copy of dir */
+	DirName(dir); /* Delete "/stars" from dir */
 
         /* concatenate "/icons" to dir, this is the default icon directory */
 	strcat(dir, "/icons");
@@ -66,22 +61,12 @@ char *codeDir, **iconDir;
 	/* Must expand ~ before calling system call stat */
 	TildeExpand(dir, fullName);
 
-	/* Test if fullName exists and is a directory
-	 * If yes, means the default icon directory exists,
-	 * then store icon there.
-         */
-	if (stat(fullName, &stbuf) != -1 && (stbuf.st_mode & S_IFMT) == S_IFDIR)
-	{
-	    ERR_IF1(!StrDup(iconDir, dir));
-	    return(TRUE);
-        }
+	/* If fullName does not exist or is not a directory then restore dir */
+	if (stat(fullName, &stbuf) == -1 || (stbuf.st_mode & S_IFMT) != S_IFDIR)
+	    strcpy(dir, dirSave);  
     }
 
-    /* Now either codeDir does not end in "/stars",  or the
-     * directory ".../icons" does not exist.  So we store the icon
-     * in the same directory where the star source code is.
-     */
-    ERR_IF1(!StrDup(iconDir, codeDir));
+    ERR_IF1(!StrDup(iconDir, dir));
     return(TRUE);
 }
 
@@ -129,17 +114,21 @@ char *fileName;
 /*
 Inputs:
     name = name of star
-    dir = src directory of star, which contains .cc (and .pt ?) file
+    domain = domain of star
+    dir = src directory of star, which contains .cc (and .pl ?) file
 */
 static boolean
 MkStar(name, domain, dir)
 char *name, *domain, *dir;
 {
 static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
+
+/* the next two static vars are not used, so I (wtc) comment them out. 
 static dmTextItem itTemplate = {"Template", 1, DM_WIDTH, NULL, NULL};
 static char *q1 = "Cannot find star definition.  Define a new star?";
+*/
     char *iconDir;
-    
+
     if (!KcSetKBDomain(domain)) {
 	ErrAdd("Unknown domain: ");
 	ErrAdd(domain);
@@ -181,6 +170,7 @@ static dmTextItem items[] = {
 	ViDone();
     }
 
+    /* Initialize star src directory to the home directory of the user */
     if (items[2].value == NULL) {
 	if ((pwent = getpwuid(getuid())) == NULL) {
 	    PrintErr("Cannot get password entry");
@@ -192,7 +182,12 @@ static dmTextItem items[] = {
 	PrintCon("Aborted entry");
 	ViDone();
     }
-    if (*items[2].value != '~' || !isalpha(items[1].value[1])) {
+    /* Note that only need to test if item[2].value starts with '~'
+       so that the user may enter something like "~/work/stars" where
+       '~' stands for user's own home directory.  Comment out the 
+       test for items[2].value[1]. (wtc, 12/12/90)
+    */
+    if (*items[2].value != '~' /* || !isalpha(items[2].value[1]) */ ) {
 	PrintErr("Star src directory must begin with '~user'");
 	ViDone();
     }
@@ -438,8 +433,14 @@ long userOptionWord;
 		setCurDomainF(&facet);
 		domain = KcDomainOf(base);
 
+		/* See if dir ends in "/icons" */
+		if (!strcmp(BaseName(dir), "icons")) {
+		    DirName(dir); /* Remove "/icons" from dir */
+		    strcat(dir, "/stars");
+		}
+
 	        /* Form the filename */
-	        sprintf(codeFile, "%s/../stars/%s%s.pl", dir, domain, base);
+	        sprintf(codeFile, "%s/%s%s.pl", dir, domain, base);
 	        ERR_IF1(!LookAtFile(codeFile));
 
 		ViDone();
