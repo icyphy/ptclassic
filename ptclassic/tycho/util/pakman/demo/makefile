@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/util/pakman/demos
+VPATH =		$(ROOT)/util/pakman/demo
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
