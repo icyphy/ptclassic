@@ -115,7 +115,7 @@ configbody ::tycho::StatusBar::filestatus {
 	# Delete the file status if there is one
 	if { [::info exists itk_component(fileStatus)] } {
 	    destroy $itk_component(fileStatus)
-	    unset itk_component(fileStatus
+	    unset itk_component(fileStatus)
 	}
     } else {
 	# Create the file status if there isn't one
