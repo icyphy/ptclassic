@@ -399,7 +399,8 @@ endif
 ifdef CGC
 	CUSTOM_DIRS += $(CGCDIR)/stars
 	ifdef CGCTK
-		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets
+		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets \
+			$(CGCDIR)/tcltk/lib
 		STARS += $(LIBDIR)/cgctcltkstars.o
 		LIBS += -lcgctcltk
 		LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
