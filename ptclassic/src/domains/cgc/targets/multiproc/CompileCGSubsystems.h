@@ -39,6 +39,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGSharedBus.h"
 #include "StringState.h"
 
+class CGCTargetWH;
+
 class CGWormTarget: public CGSharedBus {
 public:	
     CGWormTarget(const char* name,const char* starType,const char* desc);
@@ -54,9 +56,13 @@ public:
     /*virtual*/ DataFlowStar* createReceive(int from, int to, int num);
     /*virtual*/ void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
     /*virtual*/ int runCode();
+
+protected:
+    /*virtual*/ void prepareChildren();
 private:
-    int replaceCommBlock
-    (DataFlowStar& /*newStar*/, DataFlowStar& /*oldStar*/);
+    int replaceCommBlock(DataFlowStar& /*newStar*/,
+			 DataFlowStar& /*oldStar*/);
+    CGCTargetWH *cgcWorm;
 };
 
 #endif
