@@ -44,9 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class MotorolaSimTarget : public virtual MotorolaTarget {
 protected:
-	StringState plotFile;
-	StringState plotTitle;
-	StringState plotOptions;
 	IntState interactiveFlag;
 	StringList dspType;	//either 56000 or 96000
 	StringList startAddress;
@@ -59,12 +56,14 @@ public:
 	MotorolaSimTarget(const MotorolaSimTarget& arg) 
 	: MotorolaTarget(arg) {}
 	void initStates(const char* dsp,const char* start, const char* end);
-	int compileCode();
-	int loadCode();
-	int runCode();
+	/*virtual*/ int compileCode();
+	/*virtual*/ int loadCode();
+	/*virtual*/ int runCode();
+	/*virtual*/ void writeCode();
 private:
 	// stream for writeFile stars
 	CodeStream simulatorCmds;
+	CodeStream shellCmds;
 };
 
 #endif

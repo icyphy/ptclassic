@@ -44,15 +44,10 @@ void MotorolaSimTarget :: initStates(const char* dsp,const char* start,
 	dspType = dsp;
 	startAddress = start;
 	endAddress = end;
-	addState(plotFile.setState("Plot file name",this,"outfile.sim",
-		"file to plot with xgraph after run"));
-	addState(plotTitle.setState("Plot title",this,"Simulator output",
-		"graph title (if any)"));
-	addState(plotOptions.setState("Plot options",this,"",
-		"xgraph options"));
 	addState(interactiveFlag.setState(
 		"Interactive Simulation",this,"YES",""));
 	addStream("simulatorCmds",&simulatorCmds);
+	addStream("shellCmds",&shellCmds);
 }
 
 int MotorolaSimTarget::compileCode() {
@@ -62,12 +57,6 @@ int MotorolaSimTarget::compileCode() {
 }
 
 int MotorolaSimTarget::loadCode() {
-	const char* file = plotFile;
-	if (*file != 0) {
-		StringList deleteFile;
-		deleteFile << expandPathName(destDirectory) << "/" << file;
-		unlink((const char*)deleteFile);
-	}
 	StringList cmdFile;
 	cmdFile << "load " << filePrefix << ".lod\n" << simulatorCmds
 		<< "break pc>=$" << endAddress << "\ngo $" << startAddress
@@ -76,30 +65,45 @@ int MotorolaSimTarget::loadCode() {
 	return writeFile(cmdFile,".cmd");
 }
 
-int MotorolaSimTarget::runCode() {
-	const char* file = plotFile;
-	StringList downloadCmds;
+void MotorolaSimTarget::writeCode() {
+    /*
+     * generate shell-cmd file (/bin/sh)
+     */
+    if (!parent()) {
+	StringList realcmds = "#!/bin/sh\n";
+	realcmds << headerComment("# ");
+	realcmds << "# Remove all of the CG56WriteFile outputs\n";
+	realcmds << "/bin/rm -f /tmp/cgwritefile*\n";
+	realcmds << "# Run the simulator\n";
 	if (interactiveFlag) 
-		downloadCmds << "(xterm -e sim";
+		realcmds << "(xterm -e sim";
 	else 
-		downloadCmds << "(sim";
-	downloadCmds << dspType << " " << filePrefix << ".cmd" << " > /dev/null)";
-	if (systemCall(downloadCmds,"Errors in starting up the simulator")) 
-		return FALSE;
-	StringList fullPlotFile;
-	fullPlotFile << expandPathName(destDirectory) << "/" << file;
-	if (*file != 0 && access((const char*)fullPlotFile,0)==0) {
-		StringList plotCmds;
- 		plotCmds << "awk '{print ++n, $1}' " << file
-		  << " | xgraph -t '" << (const char*)plotTitle << "' "
-		  << (const char*)plotOptions << "&\n";
-		return !systemCall(plotCmds,"Plot unsuccessful");
+		realcmds << "(sim";
+	realcmds << dspType << " " << filePrefix << ".cmd" << ">/dev/null)\n";
+	realcmds << "\n# Display the results\n";
+	realcmds << shellCmds;
+	if (!writeFile(realcmds,"",FALSE,0755)) {
+	    Error::abortRun(*this,"Shell command file write failed");
+	    return;
 	}
+    }
+    /*
+     * generate the .asm file (and optionally display it)
+     */
+    MotorolaTarget:: writeCode();
+}
+
+int MotorolaSimTarget::runCode() {
+	StringList runCmd;
+	runCmd << "./" << filePrefix << " &";
+	if (systemCall(runCmd,"Problems running code onto simulator")!=0)
+	    return FALSE;
 	return TRUE;
 }
 
 void MotorolaSimTarget :: headerCode () {
 	simulatorCmds.initialize();
+	shellCmds.initialize();
 	myCode << "	org	p:$" << startAddress << "\nSTART\n";
 };
 
