@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)ACSCGFPGACore.h	1.2 09/08/99
+ Version: $Id$
 ***********************************************************************/
 #ifndef _ACSCGFPGACore_h
 #define _ACSCGFPGACore_h

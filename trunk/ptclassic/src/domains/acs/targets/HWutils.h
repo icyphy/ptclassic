@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 10/20/99
- Version: @(#)HWutils.h      1.0     10/20/99
+ Version: $Id$
 
  -- Needed for make-depend
 ***********************************************************************/

@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: @(#)ACSCGCTarget.h	1.5 04/22/98
+ Version: $Id$
 
 ***********************************************************************/
 

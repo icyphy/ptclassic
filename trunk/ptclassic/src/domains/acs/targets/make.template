@@ -1,5 +1,5 @@
 # Makefile for Ptolemy Adaptive Computing Systems Targets
-# @(#)make.template	1.4 04/22/98
+# $Id$
 # Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 

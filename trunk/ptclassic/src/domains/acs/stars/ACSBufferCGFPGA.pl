@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Buffer a line
 	}
-	version {@(#)ACSBufferCGFPGA.pl	1.4 09/08/99}
+	version {$Id$
 	author { K. Smith}
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generic code generator source star.
 	}
-        version {@(#)ACSExpCGFPGA.pl	1.2 09/08/99}
+        version {$Id$
         author { Ken Smith }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

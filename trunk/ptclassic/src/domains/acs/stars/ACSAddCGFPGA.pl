@@ -7,7 +7,7 @@ defcore {
 	    Sums two inputs
 	    Only the first two connections are used for hardware
 	    }
-	version {@(#)ACSAddCGFPGA.pl	1.7 09/13/99}
+	version {$Id$
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

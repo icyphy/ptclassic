@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces the cosine of the input, that is assumed to be in radians
 	}
-	version {@(#)ACSAbsCGFPGA.pl	1.5 09/10/99}
+	version {$Id$
 	author { P. Fiore }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

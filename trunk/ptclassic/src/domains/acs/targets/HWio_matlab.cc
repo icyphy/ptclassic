@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 10/25/99
- Version: @(#)HWio_matlab.cc      1.0     10/25/99
+ Version: $Id$
 ***********************************************************************/
 #include "HWio_matlab.h"
 
