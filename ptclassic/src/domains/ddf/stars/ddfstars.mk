@@ -11,8 +11,6 @@ DDFSTARS= \
  $(DDF)/DDFDownCounter.o \
  $(DDF)/DDFEndCase.o \
  $(DDF)/DDFLastOfN.o \
- $(DDF)/DDFRepeater.o \
- $(DDF)/DDFSelect.o \
- $(DDF)/DDFSwitch.o
+ $(DDF)/DDFRepeater.o 
 
 
