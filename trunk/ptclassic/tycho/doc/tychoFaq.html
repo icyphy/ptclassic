@@ -109,7 +109,7 @@ include:
 
 
 <DT> <A NAME="itcl description"><B>1.6 What Is Itcl?</B></A>
-<DD> Itcl is short hand for <CODE>[Incr Tcl]</CODE> which is an object
+<DD> Itcl is short hand for [incr Tcl]which is an object
 oriented version of the Tool Command Language (tcl).  Tcl was written
 by John Ousterhout of U.C. Berkeley and Sun Labs, Itcl was written by
 Michael McLennan of Lucent.  For more information about Itcl,
@@ -138,7 +138,11 @@ brief <A HREF="brahe.html">biography</A>.
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has instructions and Itcl binaries.
 
 <DT> <A NAME="platforms that Tycho runs under"><B>2.2 What platforms does Tycho run under?</B></A>
-<DD> We do our development work under Solaris2.5.1.  Tycho has been run
+<DD> We do our development work under Solaris2.5.1, and we've tested Tycho
+under HPUX10.20 and SunOS4.x.  Tycho should work under any Unix platform
+that Itcl runs under.
+
+ <P>Tycho has been run
 under WindowsNT, but some of the features that use <CODE>exec</CODE> are
 broken.  The Macintosh port requires Itcl2.2p2, which, as of 5/97 has not
 yet been released by Lucent.
@@ -195,17 +199,17 @@ Your mail should include:
 <DD> FSF Emacs is not particularly graphical, though Xemacs is better.
 We want to be able to have active graphical widgets intermingled with text.
 
-<DT> <A NAME="iwidgets"><B>3.2 Why didn't you use the iwidgets widgets
+<DT> <A NAME="iwidgets"><B>3.2 Why didn't you use the Iwidgets widgets
 everywhere?</B></A>
 
 <DD> 
 
 Tycho uses a different model for mapping widgets to the screen.  In
 particular, widgets are completely constructed, and then actively
-mapped to the screen.  Unlike iwidgets, which map partially
+mapped to the screen.  Unlike Iwidgets, which map partially
 constructed widgets, Tycho widgets can be centered on the screen and
 sized according to screen dimensions.  We could not find a way to use
-iwidgets without sacrificing these features.
+Iwidgets without sacrificing these features.
 
 <P>
 This was a design decision made by the Tycho authors.  In some
