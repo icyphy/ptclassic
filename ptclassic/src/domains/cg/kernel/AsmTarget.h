@@ -59,7 +59,7 @@ protected:
 	// named "input" and one output named "output".
 	PortHole* spliceStar(PortHole*, const char*, int delayBefore);
        
-	void doInitialization(CGStar&);
+	virtual void doInitialization(CGStar&);
 
 	// host through which the target should be accessed.
 	StringState targetHost;
@@ -129,16 +129,16 @@ public:
 
 	// output an "org" directive that switches to the specified
 	// memory and address
-	virtual void orgDirective(const char* mem, unsigned addr) = 0;
+	virtual void orgDirective(const char* mem, unsigned addr) {};
 
 	// output an integer
-	virtual void writeInt (int) = 0;
+	virtual void writeInt (int) {};
 
 	// output a fixed-point value, passed as a double argument.
-	virtual void writeFix (double) = 0;
+	virtual void writeFix (double) {};
 
 	// output a floating-point value.
-	virtual void writeFloat (double) = 0;
+	virtual void writeFloat (double) {};
 
 	// output a comment.  Default form uses "outputLineOrientedComment"
 	// to make comments beginning with semicolons.
