@@ -310,10 +310,10 @@ body ::tycho::RevControlSCCS::isUnderRevControl {file} {
 # Here we assume that if the file is read-only, then it is not checked out.
 # 
 body ::tycho::RevControlSCCS::isCheckedOut {} {
-    if [$object getReadonly] {
-	return 0
-    } {
+    if [file writable [$object filename]] {
 	return 1
+    } {
+	return 0
     }
 }
 
