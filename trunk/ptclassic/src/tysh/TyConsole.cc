@@ -109,6 +109,8 @@ TyConsole::TyConsole(int argc, char **argv) {
     tyExit(1);
   }
 
+// FIXME: tcl7.5a1 does not support tcl_RcFileName, see the changes file
+#if TCL_MINOR_VERSION < 5
   // Source a user-specific startup file if Tcl_AppInit specified
   // one and if the file exists.
   if (tcl_RcFileName != NULL) {
@@ -128,6 +130,7 @@ TyConsole::TyConsole(int argc, char **argv) {
     }
     Tcl_DStringFree(&buffer);
   }
+#endif
 
   // If a script file was specified then just source that file and quit.
   if (fileName != NULL) {
@@ -175,8 +178,9 @@ int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
     return TCL_ERROR;
   if (Tk_Init(ip) == TCL_ERROR)
     return TCL_ERROR;
+#if TCL_MINOR_VERSION < 5
   tcl_RcFileName = "~/.tycho";
-  
+#endif  
   // Add [incr Tcl] (itcl) facilities
   if (Itcl_Init(ip) == TCL_ERROR) {
     return TCL_ERROR;
