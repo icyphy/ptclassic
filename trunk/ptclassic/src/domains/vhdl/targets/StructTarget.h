@@ -114,14 +114,20 @@ public:
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, int=-1, int=-1);
 
+	// Connect a source of the given value to the given signal.
+	void connectSource(StringList, StringList);
+
+	// Add a source component declaration.
+	void registerSource(StringList);
+
 	// Connect a selector between the given input and output signals.
-	void connectSelect(StringList, StringList, StringList, StringList);
+	void connectSelector(StringList, StringList, StringList, StringList);
 
 	// Add a selector component declaration.
 	void registerSelector(StringList type);
 
 	// Connect a register between the given input and output signals.
-	void connectReg(StringList, StringList,	StringList type);
+	void connectRegister(StringList, StringList, StringList);
 
 	// Add a register component declaration.
 	void registerRegister(StringList);
@@ -136,30 +142,11 @@ public:
 	// Register a read or write to an arc and the offset.
 	void registerArcRef(VHDLPortHole*, int);
 
-//	// Allocate memory for a new VHDLSignal and put it in the list.
-//	void signalListPut(VHDLSignalList*, StringList, StringList, StringList,
-//			   StringList);
-
-//	// Allocate memory for a new VHDLPort and put it in the list.
-//	void portListPut(VHDLPortList*, StringList, StringList, StringList);
-
-//	// Allocate memory for a new VHDLPortMap and put it in the list.
-//	void portMapListPut(VHDLPortMapList*, StringList, StringList);
-
-//	// Allocate memory for a new VHDLVariable and put it in the list.
-//	void variableListPut(VHDLVariableList*, StringList, StringList,
-//			     StringList);
-
-//	// Allocate memory for a new VHDLPortVar and put it in the list.
-//	void portVarListPut(VHDLPortVarList*, StringList, StringList);
-
-
 protected:
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
 	CodeStream component_mappings;
-	CodeStream starDecls;
-	CodeStream starInit;
+	CodeStream configuration_declaration;
 	CodeStream firingAction;
 
 	// virtual function to add additional codeStreams.
@@ -201,6 +188,15 @@ private:
 
 	// Return the condition indicating if selectors are needed.
         int selectors() { return selsUsed; }
+
+	// Flag indicating if sources are needed.
+        int sorsUsed;
+
+	// Set the condition indicating sources are needed.
+	void setSources() { sorsUsed = 1; }
+
+	// Return the condition indicating if sources are needed.
+        int sources() { return sorsUsed; }
 };
 
 #endif

@@ -78,3 +78,12 @@ VHDLGenericList* VHDLGenericList :: newCopy() {
 
   return newGenericList;
 }
+
+// Allocate memory for a new VHDLGeneric and put it in the list.
+void VHDLGenericList :: put(StringList name, StringList type) {
+  if (this->inList(name)) return;
+  VHDLGeneric* newGeneric = new VHDLGeneric;
+  newGeneric->name = name;
+  newGeneric->type = type;
+  this->put(*newGeneric);
+}

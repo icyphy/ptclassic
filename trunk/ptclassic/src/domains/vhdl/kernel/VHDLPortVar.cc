@@ -77,3 +77,12 @@ VHDLPortVarList* VHDLPortVarList :: newCopy() {
 
   return newPortVarList;
 }
+
+// Allocate memory for a new VHDLPortVar and put it in the list.
+void VHDLPortVarList :: put(StringList name, StringList variable) {
+  if (this->inList(name)) return;
+  VHDLPortVar* portVar = new VHDLPortVar;
+  portVar->name = name;
+  portVar->variable = variable;
+  this->put(*portVar);
+}

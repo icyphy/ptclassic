@@ -78,3 +78,14 @@ VHDLPortList* VHDLPortList :: newCopy() {
 
   return newPortList;
 }
+
+// Allocate memory for a new VHDLPort and put it in the list.
+void VHDLPortList :: put(StringList name, StringList direction,
+			 StringList type) {
+  if (this->inList(name)) return;
+  VHDLPort* newPort = new VHDLPort;
+  newPort->name = name;
+  newPort->direction = direction;
+  newPort->type = type;
+  this->put(*newPort);
+}

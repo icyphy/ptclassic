@@ -97,6 +97,8 @@ class VHDLVariableList : public VHDLObjList
   // Return a pointer to a new copy of the list.
   VHDLVariableList* newCopy();
 
+  // Allocate memory for a new VHDLVariable and put it in the list.
+  void put(StringList, StringList, StringList);
 };
 
 class VHDLVariableListIter : public VHDLObjListIter {

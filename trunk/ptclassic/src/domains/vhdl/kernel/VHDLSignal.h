@@ -99,6 +99,8 @@ class VHDLSignalList : public VHDLObjList
   // Return a pointer to a new copy of the list.
   VHDLSignalList* newCopy();
 
+  // Allocate memory for a new VHDLSignal and put it in the list.
+  void put(StringList, StringList, StringList, StringList);
 };
 
 class VHDLSignalListIter : public VHDLObjListIter {

@@ -79,3 +79,15 @@ VHDLSignalList* VHDLSignalList :: newCopy() {
 
   return newSignalList;
 }
+
+// Allocate memory for a new VHDLSignal and put it in the list.
+void VHDLSignalList :: put(StringList nname, StringList ntype,
+			   StringList nfrom, StringList nto) {
+  if (this->inList(nname)) return;
+  VHDLSignal* newSignal = new VHDLSignal;
+  newSignal->name = nname;
+  newSignal->type = ntype;
+  newSignal->from = nfrom;
+  newSignal->to = nto;
+  this->put(*newSignal);
+}
