@@ -38,17 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StructTarget.h"
-#include "VHDLStar.h"
-#include "VHDLCompDecl.h"
-#include "VHDLCompMap.h"
-#include "VHDLSignal.h"
-#include "VHDLArc.h"
-#include "VHDLState.h"
-#include "VHDLPortVar.h"
-#include "VHDLCluster.h"
-#include "VHDLFiring.h"
-#include "Attribute.h"
-#include "IntState.h"
 
 class SynthTarget : public StructTarget {
 public:

@@ -13,11 +13,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	input {
 		name { input }
-		type { int }
+		type { ANYTYPE }
 	}
 	output {
 		name { output }
-		type { int }
+		type { =input }
 	}
 	defstate {
 	        name { transfer }

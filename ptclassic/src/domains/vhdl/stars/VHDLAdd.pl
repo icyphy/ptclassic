@@ -13,11 +13,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	inmulti {
 		name { input }
-		type { int }
+		type { float }
 	}
 	output {
 		name { output }
-		type { int }
+		type { float }
 	}
 	constructor {
 		noInternalState();

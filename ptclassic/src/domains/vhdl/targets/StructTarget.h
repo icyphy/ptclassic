@@ -42,7 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLCompDecl.h"
 #include "VHDLCompMap.h"
 #include "VHDLSignal.h"
-#include "VHDLArc.h"
 #include "VHDLState.h"
 #include "VHDLPortVar.h"
 #include "VHDLCluster.h"
@@ -124,7 +123,6 @@ private:
 	VHDLSignalList signalList;
 	VHDLCompMapList compMapList;
 	VHDLStateList stateList;
-	VHDLArcList arcList;
 
 	VHDLClusterList clusterList;
 
@@ -200,9 +198,6 @@ private:
 
 	// Return the condition indicating if sources are needed.
         int sources() { return sorsUsed; }
-
-	// Register a read or write to an arc and the offset.
-	void registerArcRef(VHDLPortHole*, int);
 
 	// Add in generic refs here from genericList.
 	void addGenericRefs(VHDLCluster*, int);
