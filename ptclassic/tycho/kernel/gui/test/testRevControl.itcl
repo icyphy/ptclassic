@@ -50,8 +50,11 @@ proc testRevControl {versionControlSystem} {
     exec mkdir $testdir
     set fd [open $testfile w]
     puts $fd "# This is a test file for the Tycho $versionControlSystem system"
-    puts $fd "# Version: $Id$"
-    puts $fd "# copyright %Q%"
+    # Generate percentWpercent so that SCCS does not munge this for us
+    # when we check in the file.
+    puts $fd [format "# Version: %sW%s %sG%s" % % % %]
+    puts $fd [format "# Copyright: %sQ%s" % %]
+
     close $fd
 
     set wname [::tycho::autoName .view]
@@ -101,4 +104,4 @@ test RCS-1.1 {test out sccs} {
     testRevControl RCS
 } {}
 
-doneTests
+#doneTests
