@@ -90,7 +90,7 @@ body ::tycho::PreferenceDialog::constructor {args} {
 			-command "$this edit $tag" \
 			-highlightthickness 0
 	    } {
-		keep -background -cursor
+		keep -background -cursor -font
 	    }
 	    pack $itk_component(childsite).$tag -fill x -expand on
 	}
