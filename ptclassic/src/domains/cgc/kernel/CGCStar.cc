@@ -1515,9 +1515,8 @@ int CGCStar :: addInclude(const char* decl) {
 // Add options to be used when compiling a C program
 // We don't run process code on this - it would add a \n
 int CGCStar::addCompileOption(const char* decl) {
-    CodeStream *compileOptions;
-    if ((compileOptions = getStream("compileOptions")) == FALSE)
-	return FALSE;
+    CodeStream* compileOptions;
+    if ((compileOptions = getStream("compileOptions")) == 0) return FALSE;
     StringList temp;
     temp << " " << decl << " ";
     return compileOptions->put(temp,decl);
@@ -1526,8 +1525,8 @@ int CGCStar::addCompileOption(const char* decl) {
 // Add options to be used when linking a C program
 // We don't run process code on this - it would add a \n
 int CGCStar::addLinkOption(const char* decl) {
-    CodeStream *linkOptions;
-    if ((linkOptions = getStream("linkOptions")) == FALSE) return FALSE;
+    CodeStream* linkOptions;
+    if ((linkOptions = getStream("linkOptions")) == 0) return FALSE;
     StringList temp;
     temp << " " << decl << " ";
     return linkOptions->put(temp,decl);
@@ -1536,8 +1535,8 @@ int CGCStar::addLinkOption(const char* decl) {
 // Add options to be used when linking a C program on the local machine.
 // We don't run process code on this - it would add a \n
 int CGCStar::addLocalLinkOption(const char* decl) {
-    CodeStream *linkOptions;
-    if ((linkOptions = getStream("localLinkOptions")) == FALSE) return FALSE;
+    CodeStream* linkOptions;
+    if ((linkOptions = getStream("localLinkOptions")) == 0) return FALSE;
     StringList temp;
     temp << " " << decl << " ";
     return linkOptions->put(temp,decl);
@@ -1546,20 +1545,27 @@ int CGCStar::addLocalLinkOption(const char* decl) {
 // Add options to be used when linking a C program on a remote machine.
 // We don't run process code on this - it would add a \n
 int CGCStar::addRemoteLinkOption(const char* decl) {
-    CodeStream *linkOptions;
-    if ((linkOptions = getStream("remoteLinkOptions")) == FALSE) return FALSE;
+    CodeStream* linkOptions;
+    if ((linkOptions = getStream("remoteLinkOptions")) == 0) return FALSE;
     StringList temp;
     temp << " " << decl << " ";
     return linkOptions->put(temp,decl);
 }
 
 // Add a file that will be copied over to a remote machine
-int CGCStar::addRemoteFile(const char* filename) {
-    CodeStream *remoteFiles;
-    if ((remoteFiles = getStream("remoteFiles")) == FALSE) return FALSE;
+int CGCStar::addRemoteFile(const char* filename, int CcodeFlag) {
+    CodeStream* remoteFiles = getStream("remoteFiles");
     StringList temp = filename;
     temp << " ";
-    return remoteFiles->put(temp,filename);
+    int retval = FALSE;
+    if (remoteFiles) {
+	retval = remoteFiles->put(temp, filename);
+        if (retval && CcodeFlag) {
+	    CodeStream* remoteCFiles = getStream("remoteCFiles");
+	    if (remoteCFiles) retval = remoteCFiles->put(temp, filename);
+	}
+    }
+    return retval;
 }
 
 // Pull in a supporting C module from a library
@@ -1568,8 +1574,8 @@ void CGCStar::addModuleFromLibrary(
 	const char* libraryName) {
     StringList cFile, cPath, includeDir, includeFileQuoted, includePath,
 	       includeDirSpec, libSpec, path, ptolemyLibDirSpec;
-    char* ptolemy = getenv("PTOLEMY");
-    char* ptarch = getenv("PTARCH");
+    char* ptolemy = "$PTOLEMY";
+    char* ptarch = "$PTARCH";
     cFile << module << ".c";
     includeFileQuoted << "\"" << module << ".h\"";
     includeDir << ptolemy << "/" << subdirectory;
@@ -1584,8 +1590,8 @@ void CGCStar::addModuleFromLibrary(
     addCompileOption(includeDirSpec);
     addLocalLinkOption(ptolemyLibDirSpec);
     addLocalLinkOption(libSpec);
-    addRemoteFile(cPath);
-    addRemoteFile(includePath);
+    addRemoteFile(cPath, TRUE);
+    addRemoteFile(includePath, FALSE);
 }
 
 // Pull in a supporting C module from a library
