@@ -93,10 +93,14 @@ int CGGeodesic::forkType() const {
 int CGGeodesic :: forkDelay() const {
 	int n = 0;
 	const CGGeodesic *s = this;
+
+	if (s->sourcePort()->isItInput()) return n;	// check wormhole boundary.
+
 	const CGPortHole* p;
 	while ((p = s->src()) != 0) {
 		n += s->numInitialParticles;
 		s = &p->cgGeo();
+		if (s->sourcePort()->isItInput()) return n;
 	}
 	return n;
 }
