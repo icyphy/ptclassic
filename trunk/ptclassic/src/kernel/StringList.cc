@@ -37,6 +37,38 @@ StringList :: operator = (const StringList& sl) {
 	return *this;
 }
 
+// Assignment operator, string argument
+StringList&
+StringList :: operator = (const char* s) {
+	if (size()) {
+		deleteAllStrings();
+		initialize ();
+	}
+	totalSize = strlen(s);
+	put(savestring(s));
+	return *this;
+}
+
+// Constructors
+StringList::StringList(const char* s) {
+	totalSize=strlen(s);
+	put(savestring(s));
+}
+
+StringList::StringList(int i) {totalSize=0; *this += i;}
+
+StringList::StringList(double d) {totalSize=0; *this += d;}
+
+
+// Copy constructor
+StringList::StringList (const StringList& s) {
+	totalSize = s.totalSize;
+	put(s.newCopy());
+}
+
+// Destructor
+StringList::~StringList() { deleteAllStrings(); }
+
 // Add another StringList to the StringList
 StringList&
 StringList :: operator += (const StringList& l) {
@@ -92,8 +124,8 @@ StringList :: newCopy () const {
 }
 
 // This method consolidates all strings into one string and returns the
-// memory.  It is used in the cast to char*.
-char*
+// memory.  It is used in the cast to const char*.
+const char*
 StringList :: consolidate () {
 	// Handle empty StringList
 	if (totalSize == 0 || size() == 0)
@@ -133,7 +165,7 @@ UserOutput& operator << (UserOutput& o, const StringList& sl) {
 
 // print a StringList on a stream
 
-ostream& operator << (ostream&o, StringList& sl) {
+ostream& operator << (ostream&o, const StringList& sl) {
 	StringListIter next(sl);
 	const char* s;
 	while ((s = next++) != 0)
