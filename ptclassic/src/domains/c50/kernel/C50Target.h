@@ -66,7 +66,8 @@ public:
 	void headerCode();
 	const char* className() const;
 	void setup();
-	int compileCode();
+	// default-C50 target should just generate code
+	//int compileCode();
 
 protected:
 	void writeFloat(double);
