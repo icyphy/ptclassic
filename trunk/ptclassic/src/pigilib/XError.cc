@@ -54,14 +54,14 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 }
 
 void
-Error :: error (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList nam = o.readFullName();
 	PigiErrorMark(nam);
 	outMsg(nam, 0, m1, m2, m3);
 }
 
 void
-Error :: warn (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList nam = o.readFullName();
 	PigiErrorMark(nam);
 	outMsg(nam, 1, m1, m2, m3);
@@ -75,7 +75,7 @@ Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 }
 
 void
-Error :: abortRun (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
 	Scheduler::requestHalt();
 }
@@ -100,7 +100,7 @@ static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 }
 
 void
-Error :: message (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList nam = o.readFullName();
 	info(nam, m1, m2, m3);
 }
@@ -113,7 +113,7 @@ Error :: message (cc* m1, cc* m2, cc* m3) {
 // marking is supported in this implementation
 int Error :: canMark() { return 1;}
 
-void Error :: mark(NamedObj& o) {
+void Error :: mark(const NamedObj& o) {
 	StringList n = o.readFullName();
 	PigiErrorMark(n);
 }
