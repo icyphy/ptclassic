@@ -310,7 +310,7 @@ body ::tycho::Exec::destructor {} {
 body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     clearHistory
     global $statusVariableName tcl_platform tyjavapresent
-    if {[uplevel #0 "set $statusVariableName"] == "running"} {
+    if {[getStatusNow] == "running"} {
         error "Sorry, process is already running"
     }
 
@@ -326,7 +326,6 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     }
 
     # Add command to history log...
-    #$itk_component(history) insertData "<<Running: [get commandToExec]>>\n"
     addHistory "<<Running: $commandToExec in $dirToExecFrom>>\n"
 
     #set continue 0
@@ -404,7 +403,7 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
 #
 body ::tycho::Exec::killProcess {{parent {}}} {
     global $statusVariableName
-    if {[uplevel #0 "set $statusVariableName"]=="killed"} {
+    if {[getStatusNow]=="killed"} {
         error "Process already killed."
     }
     catch {close $fd}
@@ -509,10 +508,11 @@ body ::tycho::Exec::getStatusWait {{timeToWait {}} } {
         after $timeToWait set $statusVariableName "timeout"
     }
 
-    if {[uplevel #0 "set $statusVariableName"]=="running"} {
-        # If the process is running, then you can wait
+    # If the process is running, then you can wait
+    while {[getStatusNow]=="running" || \
+            [getStatusNow]=="constructed"} {
         tkwait variable $statusVariableName
-        if {[uplevel #0 "set $statusVariableName"]=="timeout"} {
+        if {[getStatusNow]=="timeout"} {
             addHistory "Timeout after $timeToWait\n"
             killProcess "$this and ::getStatusWait"
         }
