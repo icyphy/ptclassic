@@ -41,38 +41,59 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DERepeatStar.h"
 
 // DERepeatStar constructor
-
-// we need a method (or constructor) to link the feedback connection.
-// something like, feedbackIn.connect(feedbackOut, ..)
-
 DERepeatStar :: DERepeatStar() {
-	addPort(feedbackIn.setPort("feedbackIn", this));
-	addPort(feedbackOut.setPort("feedbackOut", this));
+	feedbackIn = NULL;
+	feedbackOut = NULL;
+}
 
-	// make a feedback connection
-	feedbackOut.connect(feedbackIn, 0);
-	feedbackIn.triggers();
-	feedbackIn.depth = MINDEPTH;
+void DERepeatStar::initialize() {
 
-	// hide the feedback connections from user interfaces
-	feedbackOut.setAttributes(P_HIDDEN);
-	feedbackIn.setAttributes(P_HIDDEN);
+	if (feedbackIn == NULL) {
+		LOG_NEW; feedbackIn = new InDEPort;
+		addPort(feedbackIn->setPort("feedbackIn", this));
+	}
+
+	if (feedbackOut == NULL) {
+		LOG_NEW; feedbackOut = new OutDEPort;
+		addPort(feedbackOut->setPort("feedbackOut", this));
+	}
+
+	if (feedbackOut->far() == NULL)
+	{
+	    // make a feedback connection
+	    feedbackOut->connect(*feedbackIn, 0);
+	    feedbackIn->triggers();
+	    feedbackIn->depth = MINDEPTH;
+
+	    // hide the feedback connections from user interfaces
+	    feedbackOut->setAttributes(P_HIDDEN);
+	    feedbackIn->setAttributes(P_HIDDEN);
+	}
+
+	// Do the rest of the initialization.
+	DEStar::initialize();
+}
+
+// Destructor.
+DERepeatStar::~DERepeatStar() {
+	LOG_DEL; delete feedbackIn;
+	LOG_DEL; delete feedbackOut;
 }
 
 void DERepeatStar :: refireAtTime(double when) {
-	feedbackOut.put(when) << 0.0;
+	feedbackOut->put(when) << 0.0;
 }
 
 int DERepeatStar :: canGetFired() {
-	int i = feedbackIn.dataNew;
+	int i = feedbackIn->dataNew;
 	if (i == TRUE)
-		feedbackIn.dataNew = FALSE;	// reset the flag.
+		feedbackIn->dataNew = FALSE;	// reset the flag.
 	return i;
 }
 
 // start method for DERepeatStar
 
 void DERepeatStar :: begin() {
-	feedbackOut.put(completionTime) << 0.0;
+	feedbackOut->put(completionTime) << 0.0;
 }
 

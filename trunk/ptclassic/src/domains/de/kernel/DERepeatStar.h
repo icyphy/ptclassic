@@ -47,20 +47,26 @@ class DERepeatStar : public DEStar {
 
 protected:
 	// specify the feedback links to fire itself.
-	InDEPort feedbackIn;
-	OutDEPort feedbackOut;
+	InDEPort* feedbackIn;
+	OutDEPort* feedbackOut;
 
 	// access the feedback arc.
 	void refireAtTime(double when);	// send next event.
 	int canGetFired();		// can it be fired?
 
 public:
+	// initializaion: make the feedback connection
+	/*virtual*/ void initialize();
+
 	// initialization: generate the first event.
 	// completionTime should be setup beforehand.
 	void begin();
 
 	// constructor
 	DERepeatStar();
+
+	// destructor
+	~DERepeatStar();
 };
 
 #endif
