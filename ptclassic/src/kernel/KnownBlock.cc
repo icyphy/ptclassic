@@ -118,7 +118,7 @@ KnownBlock::find(const char* type) {
 		// try the lists for any subdomains
 		Domain* dp = Domain::named(domainNames[currentDomain]);
 		StringListIter next(dp->subDomains);
-		char* sub;
+		const char* sub;
 		while ((sub = next++) != 0) {
 			int ix = domainIndex(sub);
 			KnownListEntry* en = findEntry(type, allBlocks[ix]);
