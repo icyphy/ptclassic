@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __STDC__
 #define quote(x) #x
 #else
-#if defined(hpux) && ! defined __GNUG__ && defined(__cplusplus)
+#if (defined(hpux) && ! defined __GNUG__ && defined(__cplusplus)) || defined(PT_NT4VC)
 /* For hppa.cfront.  pigilib/{POct,PVem}.cc use quote() */
 #define quote(x) #x
 #else
