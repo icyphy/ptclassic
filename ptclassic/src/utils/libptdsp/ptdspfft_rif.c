@@ -28,7 +28,7 @@ Programmer: Joseph Buck
 Version: $Id$
 */
 
-#include "PTDSPfft.h"
+#include "PTDSPfft_rif.h"
 
 /*
  * This fft routine is from ~gabriel/src/filters/fft/fft.c;
