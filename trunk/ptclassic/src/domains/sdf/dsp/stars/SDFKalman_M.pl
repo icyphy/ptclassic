@@ -2,13 +2,30 @@ defstar {
   name      { Kalman_M }
   domain    { SDF }
   desc      {
-Output the state vector estimates of a Kalman filter using
-a one-step prediction algorithm.
+Implements the Kalman filter. 
   }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
   location  { SDF dsp library }
+  explanation {
+.pp
+Initial values for the state transition matrix,
+state vector, correlation matrix, and process noise correlation matrix are
+parameters to the star.  Also parameters are the number of elements in
+the observation vector and the number of elements in the state vector.
+Inputs are the current values of the state transition matrix, process
+noise correlation matrix, measurement noise correlation matrix, 
+measurement matrix, and the observation vector.  The single output is
+the state vector.
+.UH "References"
+.ip [1]
+R.E. Kalman, "A new approach to linear filtering and prediction problems",
+\fITrans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
+.ip [2]
+S. Haykin, \fAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
+N.J., 1986.
+  }
   input {
     name { input }
     type { FLOAT_MATRIX_ENV }
