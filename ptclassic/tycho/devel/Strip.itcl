@@ -41,165 +41,184 @@
 # strips.
 #
 class ::tycho::Strip {
-    inherit ::tycho::Primitive
+    inherit ::tycho::Picture
 
-    ## constructor
-    #
-    constructor {s c x0 y0 x1 y1 args} {}
+    proc construct {id tags canvas x0 y0 x1 y1 args}
+    proc destruct  {id canvas}
 
 
     ###################################################################
     ####                            options                        ####
 
     # The value at the low end of the strip
-    public variable from 0 {
-	recompute
-#	redraw ; FIXME
-    }
+    common from
 
     # The value at the high end of the strip
-    public variable to 100 {
-	recompute
-#	redraw ; FIXME
-    }
+    common to
+
 
     ###################################################################
-    ####                         public methods                    ####
+    ####                         public procs                    ####
 
     # Add a box to the strip
-    method addBox {name low high args} {}
+    proc addBox {id canvas name type tags low high args} {}
 
     # Add several boxes to the strip
-    method addBoxes {args} {}
+    proc addBoxes {args} {}
 
     # Add labels to the boxes
-    method addLabels {args} {}
+    proc addLabels {args} {}
 
     # Get a configuration option of a box
-    method cgetBox {name option} {}
+    proc cgetBox {name option} {}
 
     # Configure options of a box
-    method configureBox {name args} {}
+    proc configureBox {name args} {}
 
     # Delete a box
-    method deleteBox {name} {}
+    proc deleteBox {name} {}
 
     # Get or set the coordinates of the strip.
-    method coords {args} {}
+    proc coords {args} {}
 
     # Get the name of the box at a specified pixel position on the strip
-    method getBox {pos} {}
+    proc getBox {pos} {}
 
     # Change the position of a box
-    method moveBox {name low high} {}
+    proc moveBox {name low high} {}
 
 
     ###################################################################
     ####                         protected variables               ####
 
+    # The box items
+    common boxes
+
     # The font to use for the box labels
-    protected variable labelfont ""
-    
-    # An array containing the box labels
-    protected variable labels
-    
+    common labelfont ""
+
+    # The box labels
+    common labels
+
     # An array mapping values to positions, to save recomputing
-    protected variable positions
-
-    # The distance between high and low pixel positions
-    protected variable length 0
-
-    # The difference between the from and to values
-    protected variable range 0
+    common positions
 
     # The ratio of the length to the range
-    protected variable convertRatio 1
+    common convertRatio
+
+    # The canvas of a picture
+    common canvasmap
 
     ###################################################################
-    ####                         private methods                   ####
+    ####                         private procs                   ####
 
     # Recompute internal numeric parameters
-    private method recompute {} {}
+    private proc recompute {id canvas} {}
 }
 
+array set Strip [array get Picture]
+
+set Strip(construct) ::tycho::Strip::construct
+set Strip(coords)    ::tycho::Strip::coords
+
+set Strip(addBox)    ::tycho::Strip::addBox
+set Strip(addBoxes)  ::tycho::Strip::addBoxes
 
 
-## addBox name low high {option value}+
+#######################################################################
+#### addBox
 #
-# Add a box to the strip. This is fairly slow: if possible,
-# use the addBoxes method instead.
+# Add a box to the strip. The option args must include the tags of
+# this strip.
 #
-body ::tycho::Strip::addBox {name low high args} {
+body ::tycho::Strip::addBox {id canvas name type low high args} {
+
     # Get the coordinates of the strip
-    assign x0 y0 x1 y1 [$canvas coords $component(primary)]
+    set coords [$canvas coords $primary($id)]
+    set x0 [lindex $coords 0]
+    set y0 [lindex $coords 1]
+    set y1 [lindex $coords 3]
 
     # Calculate the positions of the box, reusing cached ones
     # if possible
-    if { [info exists positions($low)] } {
-	set left $positions($low)
+    if { [info exists positions($id.$low)] } {
+	set left $positions($id.$low)
     } else {
-	set left [expr $x0 + (($low-$from) * $convertRatio)]
-	set positions($low) $left
+	set left [expr $x0 + (($low-$from($id)) * $convertRatio($id))]
+	set positions($id.$low) $left
     }
-    if { [info exists positions($high)] } {
-	set right $positions($high)
+    if { [info exists positions($id.$high)] } {
+	set right $positions($id.$high)
     } else {
-	set right [expr $x0 + (($high-$from) * $convertRatio)]
-	set positions($high) $right
+	set right [expr $x0 + (($high-$from($id)) * $convertRatio($id))]
+	set positions($id.$high) $right
     }
 
-    # Create the box
-    eval $this component create $name rectangle $left $y0 $right $y1 $args
+    # Create the picture
+    if { [string match {[a-z]*} $type] } {
+	set boxes($id.$name) \
+		[eval $canvas create $type $left $y0 $right $y1 $args]
+    } else {
+	set boxes($id.$name) \
+		[eval [canvasslate $canvas] create \
+		$type $left $y0 $right $y1 $args]
+    }
 }
 
 
+#######################################################################
 ## addBoxes args
 #
 # Add boxes to the strip. Each argument is a list of the form
 #
-#     name low high args
+#     name type low high args
 #
-# where args is a list of arguments given to the canvas.
+# where args is a list of arguments given to the canvas, and _must_
+# include the tags of this strip.
 #
-body ::tycho::Strip::addBoxes {args} {
-    # Get the coordinates of the strip
-    assign x0 y0 x1 y1 [$canvas coords $component(primary)]
+body ::tycho::Strip::addBoxes {id canvas args} {
 
-    # This code works by creating a list of canvas items. Initialize it.
-    set itemlist {}
+    # Get the coordinates of the strip
+    set coords [$canvas coords $primary($id)]
+    set x0 [lindex $coords 0]
+    set y0 [lindex $coords 2]
+    set y1 [lindex $coords 3]
 
     # For each argument, calculate the positions and add the
     # rectangle item and its label to the item list.
     foreach list $args {
 	# Extract information from the list
 	set name [lindex $list 0]
-	set low  [lindex $list 1]
-	set high [lindex $list 2]
-	set opts [lrange $list 3 end]
+	set type [lindex $list 1]
+	set low  [lindex $list 2]
+	set high [lindex $list 3]
+	set opts [lrange $list 4 end]
 
 	# Calculate the positions of the box, reusing cached ones
 	# if possible
-	if { [info exists positions($low)] } {
-	    set left $positions($low)
+	if { [info exists positions($id.$low)] } {
+	    set left $positions($id.$low)
 	} else {
-	    set left [expr $x0 + (($low-$from) * $convertRatio)]
-	    set positions($low) $left
+	    set left [expr $x0 + (($low-$from($id)) * $convertRatio($id))]
+	    set positions($id.$low) $left
 	}
-	if { [info exists positions($high)] } {
-	    set right $positions($high)
+	if { [info exists positions($id.$high)] } {
+	    set right $positions($id.$high)
 	} else {
-	    set right [expr $x0 + (($high-$from) * $convertRatio)]
-	    set positions($high) $right
+	    set right [expr $x0 + (($high-$from($id)) * $convertRatio($id))]
+	    set positions($id.$high) $right
 	}
 
-	# Append the name and the item args to the item list
-	lappend itemlist \
-		$name \
-		[concat "rectangle" $left $y0 $right $y1 $opts]
+	# Create the picture
+	if { [string match {[a-z]*} $type] } {
+	    set boxes($id.$name) \
+		    [eval $canvas create $type $left $y0 $right $y1 $args]
+	} else {
+	    set boxes($id.$name) \
+		    [eval [canvasslate $canvas] create \
+		    $type $left $y0 $right $y1 $args]
+	}
     }
-
-    # Create the rectangles.
-    eval $this create components $itemlist
 }
 
 
@@ -255,27 +274,33 @@ body ::tycho::Strip::configureBox {name args} {
 }
 
 
-## constructor
+## construct
 #
-body ::tycho::Strip::constructor {s c x0 y0 x1 y1 args} {
-    # Set the slate and canvas variables.
-    set slate  $s
-    set canvas $c
+body ::tycho::Strip::construct {id tags canvas x0 y0 x1 y1 args} {
+    # Initialize the options
+    set defaultoptions {-from 0 -to 100}
 
-    # Get and remember the font for the ticks
-    set labelfont [.tychoFonts findFont {helvetica 9 medium r}]
-	
-    # Create the primary component defining the coordinates
-    $this component create "primary" line $x0 $y0 $x1 $y1 -fill ""
-    
-    # Initialize options
-    eval configure $args
+    foreach {option value} [concat $defaultoptions $args] {
+	set [string trimleft $option -]($id) $value
+    }
+
+    # Create the primary component.
+    set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
+	    -tags $tags]
+
+    # Get and remember the font for the labels
+    if { ! [::info exists labelfont] } {
+	set labelfont [.tychoFonts findFont {helvetica 9 medium r}]
+    }
 
     # If the conversion variables have not been computed,
     # then do it now
-    if { $range == 0 } {
-	recompute
+    if { ! [::info exists convertRatio($id)] } {
+	recompute $id $canvas
     }
+
+    # Remember stuff
+    set canvasmap($id) $canvas
 }
 
 
@@ -291,10 +316,10 @@ body ::tycho::Strip::constructor {s c x0 y0 x1 y1 args} {
 #
 body ::tycho::Strip::coords {args} {
     if { $args == "" } {
-	return [$canvas coords $component(primary)]
+	return [$canvas coords $primary($id)]
     } else {
 	eval ::tycho::Primitive::coords $args
-	recompute
+	recompute $id $canvas
     }
 }
 
@@ -319,7 +344,7 @@ body ::tycho::Strip::deleteBox {name} {
 # on, this should probably be made more robust.
 #
 body ::tycho::Strip::getBox {xposition} {
-    set y1 [lindex [$canvas coords $component(primary)] 3]
+    set y1 [lindex [$canvas coords $primary($id)] 3]
 
     # This is where we'll check the canvas
     set x [expr $xposition]
@@ -330,7 +355,7 @@ body ::tycho::Strip::getBox {xposition} {
     foreach b [$canvas find overlapping $x $y $x $y] {
 	if { [string compare $thistag [lindex [$canvas gettags $b] 0]] == 0 \
 		&& [string compare [$canvas type $b] rectangle] == 0 \
-		&& $b != $component(primary) } {
+		&& $b != $primary($id) } {
 	    
 	    # OK, we have the item, now we have to find out which
 	    # component it is. Scan the component array.
@@ -353,20 +378,20 @@ body ::tycho::Strip::getBox {xposition} {
 #
 body ::tycho::Strip::moveBox {name low high} {
     # Get the coordinates of the strip
-    assign x0 y0 x1 y1 [$canvas coords $component(primary)]
+    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
 
     # Calculate the positions of the box, reusing cached ones
     # if possible
     if { [info exists positions($low)] } {
 	set left $positions($low)
     } else {
-	set left [expr $x0 + (($low-$from) * $convertRatio)]
+	set left [expr $x0 + (($low-$from) * $convertRatio($id))]
 	set positions($low) $left
     }
     if { [info exists positions($high)] } {
 	set right $positions($high)
     } else {
-	set right [expr $x0 + (($high-$from) * $convertRatio)]
+	set right [expr $x0 + (($high-$from) * $convertRatio($id))]
 	set positions($high) $right
     }
 
@@ -379,13 +404,15 @@ body ::tycho::Strip::moveBox {name low high} {
 #
 # Recompute conversion parameters.
 #
-body ::tycho::Strip::recompute {} {
+body ::tycho::Strip::recompute {id canvas} {
     # Remove cached conversion data
-    catch {unset positions}
+    foreach x [array names position $id.*] {
+	unset positions($x)
+    }
     
     # Set the range and conversion variables
-    assign x0 y0 x1 y1 [$canvas coords $component(primary)]
+    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set length [expr $x1 - $x0]
-    set range [expr $to - $from]
-    set convertRatio [expr $length / $range]
+    set range [expr $to($id) - $from($id)]
+    set convertRatio($id) [expr $length / $range]
 }
