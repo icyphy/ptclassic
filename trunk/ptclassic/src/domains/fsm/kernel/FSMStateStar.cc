@@ -91,10 +91,6 @@ void FSMStateStar::begin() {
     }
 }
 
-int FSMStateStar::oneWriterCk() {
-    return TRUE;
-}  // end of oneWriterCk()
-
 Star* FSMStateStar::createWormhole(const char *galname,
 				   const char* where_defined) {
     // Compile the specified galaxy into kernel.
@@ -162,16 +158,80 @@ Star* FSMStateStar::createWormhole(const char *galname,
     return newWorm;
 }
 
-int FSMStateStar::execAction (int) {
-    Error::abortRun(*this, "Method \"execAction\" should be redefined ",
-		    "in derived class.");
-    return FALSE;
+int FSMStateStar::execAction (int actNum) {
+    if (actNum != -1) {
+      StringListIter nextEvent(parsedActEvents[actNum]);
+      StringListIter nextExpr(parsedActExprs[actNum]);
+      const char* event;
+      const char* expr;
+      InfString buf;
+
+      int numEvents = parsedActEvents[actNum].numPieces();
+      for (int indx=0; indx<numEvents; indx++) {
+        event = nextEvent++;
+        expr = nextExpr++;
+
+        // Set status of event to 1 (present).
+	buf = event;
+	buf << "(s)";
+	Tcl_SetVar(myInterp,buf,"1",TCL_GLOBAL_ONLY);
+	    
+	if (!strcmp(expr,"")) {
+	  // When expression is an empty string, set the value of event
+	  // to 1. (In order to be able to represent "present" in SDF.
+	  buf = event;
+	  buf << "(v)";
+	  Tcl_SetVar(myInterp,buf,"1",TCL_GLOBAL_ONLY);
+	      
+	} else {
+	  buf = expr;
+	  if (Tcl_ExprString(myInterp,buf) != TCL_OK) {
+	    Error::abortRun(*this,"Tcl_ExprString failed: ",
+                            myInterp->result) ;
+	    return FALSE;
+	  }
+	  buf = event;
+	  buf << "(v)";
+	  Tcl_SetVar(myInterp,buf,myInterp->result,TCL_GLOBAL_ONLY);
+	}
+
+      } // end of for (int indx=0; indx<numEvents; indx++) 
+    }   // end of if (actNum != -1)
+      
+    return TRUE;
 }
 
-int FSMStateStar::execSlave (int) {
-    Error::abortRun(*this, "Method \"execSlave\" should be redefined ",
-		    "in derived class.");
-    return FALSE;
+int FSMStateStar::execSlave (int curEntryType) {
+    ///////////////////////////////////////////////////////////////////
+    // If the slave process exists, then execute it.
+    if (slave != NULL) {
+
+      // Grab inputs from Tcl Interp to PortHoles.
+      PortHole* p;
+      BlockPortIter next(*slave);
+      while ((p = next++) != NULL)
+      if (p->isItInput()) {
+        if (!interp2port(myInterp, p, slaveInnerDomain)) return FALSE;
+      }
+
+      if (curEntryType == 1) {
+        // Enter slave process by "Default" (initial state).
+        slave->begin();
+      }
+
+      // Do the data processing.
+      if (!(slave->run())) return FALSE;
+
+      // Send outputs from PortHoles to Tcl Interp.
+      next.reset();
+      while ((p = next++) != NULL)
+        if (p->isItOutput()) {
+          if (!port2interp(p, myInterp, slaveInnerDomain)) return FALSE;
+        }
+
+    } // end of if (slave != NULL)
+
+    return TRUE;
 }
 
 int FSMStateStar::getEntryType (int transNum) {

@@ -68,17 +68,14 @@ public:
     virtual FSMStateStar *nextState(int& condNum, int preemption);
 
     // Execute the action.
-    virtual int execAction(int);
+    virtual int execAction(int actNum);
 
     // Execute the internal machine.
-    virtual int execSlave(int);
+    virtual int execSlave(int curEntryType);
 
     // Get the entry type of a possible transition out of this state.
     int getEntryType(int transNum);
 
-    // One-writer rule checking.
-    int oneWriterCk();
-    
 protected:
     IntState isInitState;
     StringState events;
