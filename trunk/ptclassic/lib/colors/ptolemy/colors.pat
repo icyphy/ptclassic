@@ -183,7 +183,7 @@
   (figureGroupDefault intColor
       (userData priority 5)
       (width -2)
-      (color 1000 838 0)    (comment "yellow")
+      (color 1000 595 0)    (comment "orange")
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault floatColor
