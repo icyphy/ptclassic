@@ -309,7 +309,7 @@ proc ::tycho::start {args} {
     # Source specified files in order
     # FIXME: How do we get absolute paths???
     foreach file $tychofeatures(-files) {
-	uplevel #0 tychofeatures(-files)
+	uplevel #0 $file
     }
 
     # If a shell was requested, start it
