@@ -89,7 +89,7 @@ ostream& operator<< (ostream& o, BDFClusterGal& g) {
 // their corresponding BDFClustPorts and connect it all up.
 
 BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
-: bagNumber(1), logstrm(log), urateFlag(FALSE)
+: logstrm(log), bagNumber(1), urateFlag(FALSE)
 {
 	int nports = setPortIndices(gal);
 	LOG_NEW; BDFClustPort** ptable = new BDFClustPort*[nports];
@@ -1132,7 +1132,7 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 
 // constructor: make empty bag.
 BDFClusterBag :: BDFClusterBag()
-: owner(TRUE), exCount(0), sched(0), gal(0)
+: sched(0), gal(0), exCount(0), owner(TRUE)
 {}
 
 
@@ -1868,7 +1868,7 @@ int BDFAtomCluster::myExecTime() {
 // methods for BDFClustSched, the clustering scheduler.
 
 BDFClustSched::BDFClustSched(const char* log , int canDoDyn, int scc)
-: cgal(0), logFile(log), dynamicAllowed(canDoDyn), dynSched(0),
+: cgal(0), dynSched(0), logFile(log), dynamicAllowed(canDoDyn), 
   strongConstCheck(scc) {}
 
 BDFClustSched::~BDFClustSched() {
