@@ -23,6 +23,22 @@ MAKEARCH
 	variable is "vax", say, it will make bin.vax, lib.vax, obj.vax
 	and appropriate subdirectories
 
+config-g++.mk
+	Configuration file for building Ptolemy with g++ on most platforms.
+
+config-{sun3,sun4,vax}.mk
+	These are symbolic links to the g++ version.
+
+config-cfront.mk
+	Configuration file for building Ptolemy with AT&T's "cfront" C++
+	compiler on Suns (should work on other platforms with small changes).
+	EXPERIMENTAL: some parts of Ptolemy don't run correctly with cfront
+	at the moment.
+
+config-mips.mk
+	Configuration file for building Ptolemy with the OSF port of g++
+	to the DecStation (MIPS architecture).
+
 bin/	Contains user-executable shell scripts:
 	pigi
 		Runs the Ptolemy interactive graphics interface
