@@ -40,8 +40,12 @@ set unique 0
 
 # flag whether or not to report tcl error messages.
 # This should be made a settable option.
-set ptkVerboseErrors 0
+set ptkVerboseErrors 1
 
+
+###################################################################
+# Destroy a window if it exists
+proc ptkSafeDestroy {win} {catch {destroy $win}}
 
 ###################################################################
 # procedure to issue an error message from any internal tk error
@@ -70,21 +74,21 @@ proc tkerror message {
 # The user cannot do anything until the window is dismissed.
 #
 proc ptkImportantMessage {w text} {
-    catch {destroy $w}
+    ptkSafeDestroy $w
     toplevel $w
     wm title $w "Ptolemy Message"
     wm iconname $w "Ptolemy Message"
 
-    button $w.ok -text "OK <Return>" -command "destroy $w"
+    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
     message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 25c \
             -text $text -justify left
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
 
     wm geometry $w +200+200
     tkwait visibility $w
-    bind $w <Key> "destroy $w"
-    bind $w <ButtonPress> "destroy $w"
-    bind $w.msg <Button> "destroy $w"
+    bind $w <Key> "ptkSafeDestroy $w"
+    bind $w <ButtonPress> "ptkSafeDestroy $w"
+    bind $w.msg <Button> "ptkSafeDestroy $w"
     set prevFocus [focus]
     focus $w
     grab $w
@@ -107,12 +111,12 @@ proc ptkDisplayErrorInfo {} {
 #
 proc ptkStartupMessage {pigiVersion pigiFilename} {
     set w .ptkStartupMessage
-    catch {destroy $w}
+    ptkSafeDestroy $w
     toplevel $w
     wm title $w "Ptolemy Message"
     wm iconname $w "Ptolemy Message"
 
-    button $w.ok -text "OK <Return>" -command "destroy $w"
+    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
     frame $w.f -relief raised -bd 5
     frame $w.f.msg
     message $w.f.msg.msg1 -font -Adobe-Helvetica-Bold-R-Normal-*-240-* \
@@ -145,13 +149,13 @@ and disclaimer of warranty provisions, push the button below. "
     wm geometry $w +200+300
     tkwait visibility $w
     focus $w
-    bind $w <Button> "destroy $w"
-    bind $w.f.msg <Button> "destroy $w"
-    bind $w.f.msg.msg1 <Button> "destroy $w"
-    bind $w.f.msg.msg2 <Button> "destroy $w"
-    bind $w.f.bm <Button> "destroy $w"
-    bind $w <Key> "destroy $w"
-    bind $w.f <Key> "destroy $w"
+    bind $w <Button> "ptkSafeDestroy $w"
+    bind $w.f.msg <Button> "ptkSafeDestroy $w"
+    bind $w.f.msg.msg1 <Button> "ptkSafeDestroy $w"
+    bind $w.f.msg.msg2 <Button> "ptkSafeDestroy $w"
+    bind $w.f.bm <Button> "ptkSafeDestroy $w"
+    bind $w <Key> "ptkSafeDestroy $w"
+    bind $w.f <Key> "ptkSafeDestroy $w"
     grab $w
     tkwait window $w
 }
@@ -177,12 +181,12 @@ proc ptkDisplayProfile {} {
     set w .profileWindow$unique
     set unique [expr $unique+1]
 
-    catch {destroy $w}
+    ptkSafeDestroy $w
     toplevel $w
     wm title $w "Profile"
     wm iconname $w "Profile"
 
-    button $w.ok -text "OK <Return>" -command "destroy $w"
+    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
     message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 25c \
             -text $ptkProfileString -justify left
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
@@ -190,7 +194,7 @@ proc ptkDisplayProfile {} {
     wm geometry $w +200+200
     tkwait visibility $w
     focus $w
-    bind $w <Return> "destroy $w"
-    bind $w <Button> "destroy $w"
-    bind $w.msg <Button> "destroy $w"
+    bind $w <Return> "ptkSafeDestroy $w"
+    bind $w <Button> "ptkSafeDestroy $w"
+    bind $w.msg <Button> "ptkSafeDestroy $w"
 }
