@@ -37,10 +37,9 @@ include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
+GANTTINCL = $(ROOT)/src/pigilib
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) \
-	$(PTCOMPAT_INCSPEC) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
- 	-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTCLHDRS) -I$(PTKDIR)
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(GANTTINCL)
 
 SRCS =	ParNode.cc ParGraph.cc ParScheduler.cc \
 		UniProcessor.cc CodeGen.cc ParProcessors.cc 
