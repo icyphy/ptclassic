@@ -110,16 +110,16 @@ delim $$
 		TclStarIfc tcl;
 	}
 	setup {
-	    tcl.setup(this,input.numberPorts(),
-			output.numberPorts(), (const char*)tcl_file);
-
             // set the dimensions of the porthole
             //  temporary, would prefer to define some kind of ANY_SIZE
             //  dimensionality
 	    input.setMDSDFParams(int(numRows), int(numCols));
             output.setMDSDFParams(int(numRows), int(numCols));
 	}
-
+	begin {
+	    tcl.setup(this,input.numberPorts(),
+			output.numberPorts(), (const char*)tcl_file);
+	}
 	go {
 	    tcl.go();
 
