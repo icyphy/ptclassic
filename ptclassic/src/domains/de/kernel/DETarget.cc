@@ -33,6 +33,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Declaration for the default DE target. It used to be in DEDomain.cc file.
 
+ Modified: John Davis
+ Date: 12/16/97
+        Facilities have been added to DETarget to allow for
+        mutability. In particular, a parameter is set which
+        allows the MutableCQScheduler to be used instead
+        of the DEScheduler or CQScheduler. Key methods and
+        members are:
+
+                IntState mutableQ;
+
 ***********************************************************************/
 #ifdef __GNUG__
 #pragma implementation
@@ -41,6 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DETarget.h"
 #include "DEScheduler.h"
 #include "CQScheduler.h"
+#include "MutableCQScheduler.h"
 #include "GalIter.h"
 
 // Defined in DEDomain.cc
@@ -50,20 +61,30 @@ DETarget :: DETarget() :
 Target("default-DE", "DEStar", "default DE target", DEdomainName) {
 	addState(timeScale.setState("timeScale",this,"1.0",
 	    "Relative time scale for interface with another timed domain"));
+
 	addState(syncMode.setState("syncMode",this,"YES",
 	"Enforce that the inner timed domain cannot be ahead of me in time"));
+
 	addState(calQ.setState("calendar queue scheduler?", this, "YES",
 	    "Use the CalendarQueue scheduler."));
+
+        addState(mutableQ.setState("mutable calendar queue scheduler?", this,
+            "NO", "Setting the Mutable CalendarQueue will override the
+	    regular CalendarQueue setting."));
 }
 
 void DETarget :: setup() {
 	DEBaseSched* dSched;
-	if (int(calQ)) {
-		LOG_NEW; dSched = new CQScheduler;
-	} 
-	else {
-		LOG_NEW; dSched = new DEScheduler;
-	}
+
+        if (int(mutableQ)) {
+                LOG_NEW; dSched = new MutableCQScheduler;
+        }
+        else if (int(calQ)) {
+                LOG_NEW; dSched = new CQScheduler;
+        }
+        else {
+                LOG_NEW; dSched = new DEScheduler;
+        }
 
 	// setSched deletes the old scheduler.
 	setSched(dSched);
@@ -86,6 +107,10 @@ void DETarget::begin() {
 		// call sendOutput here to get events into the event queue
 		((DEStar*)s)->sendOutput();
 	}
+}
+
+int DETarget::isMutable() {
+	return int(mutableQ);
 }
 
 Block* DETarget :: makeNew() const  {
