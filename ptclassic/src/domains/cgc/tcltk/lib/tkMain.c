@@ -39,6 +39,8 @@ Version: $Id$
 
 #include "tk.h"
 #include "tcl.h"
+#include "itk.h"
+#include "itcl.h"
 
 #define COMMANDSIZE 1024
 #define REPORT_TCL_ERRORS 1
