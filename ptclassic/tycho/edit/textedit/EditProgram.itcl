@@ -42,9 +42,9 @@ class ::tycho::EditProgram {
     ###################################################################
     ####                     public methods                        ####
 
-    #### revert
-    # Revert to previously saved version and recolorize.
-    method revert {}
+    #### reload
+    # Reload the previously saved version and recolorize.
+    method reload {}
 
     constructor {args} {}
     destructor {}
@@ -118,11 +118,11 @@ body ::tycho::EditProgram::constructor {args} {
 }
 
 #####################################################################
-#### revert
-# Override the base-class revert to recolorize.
+#### reload
+# Override the base-class reload to recolorize.
 #
-body ::tycho::EditProgram::revert {} {
-    Edit::revert
+body ::tycho::EditProgram::reload {} {
+    Edit::reload
     $itk_component(text) parse
 }
 
