@@ -199,7 +199,7 @@ body ::tycho::LabelledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
 	    -fill $_fill($id) -outline $_outline($id) \
 	    -width $_width($id) -tags $tags]
 
-    # Create the text label and graphics
+    # Create the graphics and text label -- do not change the order!
     _text     $id $canvas $slate $_text($id)
     _graphics $id $canvas $slate $_graphics($id)
 }
@@ -219,6 +219,6 @@ body ::tycho::LabelledOval::coords {id canvas slate args} {
     eval $canvas coords $primary($id) $args
 
     # Move and scale the text and graphics FIXME: Inefficient
-    _anchor   $id $canvas $slate $_anchor($id)
     _graphics $id $canvas $slate $_graphics($id)
+    _anchor   $id $canvas $slate $_anchor($id)
 }
