@@ -26,7 +26,7 @@ $Id$
 
 CGFullConnect::CGFullConnect(const char* name,const char* sClass,
 			     const char* desc) :
-	BaseMultiTarget(name,sClass,desc)
+	BaseMultiTarget(name,sClass,desc), parProcs(0)
 {
 	addState(childType.setState("childType",this,"default-CG",
 				    "child proc type"));
@@ -67,7 +67,11 @@ void CGFullConnect::start() {
 	} else {
 		LOG_NEW; setSched(new DeclustScheduler(this, logFile));
 	}
-	((ParScheduler*) mySched())->setUpProcs(nChildrenAlloc);
+
+	ParScheduler* tempSched = (ParScheduler*) mySched();
+	tempSched->setUpProcs(nChildrenAlloc);
+	parProcs = tempSched->myProcs();
+
 	canProcs.create(nChildrenAlloc);
 }
 
