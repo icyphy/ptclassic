@@ -6,28 +6,65 @@
 <body bgcolor="#faf0e6">
 <HR>
 <h1>Tycho on the Macintosh</h1>
-<H2>External Mac Tcl places to go</H2>
+<H2><A NAME="macintosh external links (URLs)">External Mac Tcl places to go</A>
+</H2>
 <MENU>
 <LI> <A HREF="http://www.tcltk.com">Itcl homepage</A>
 <LI> <A HREF="http://www.sunlabs.com/people/raymond.johnson/mactcl-project.html">Sun Mac Tcl Home Page</A>
 <A HREF="http://www.cpsc.ucalgary.ca:80/~roseman/mactcl">Mark Roseman's Tcl Projects Page</A>
 <LI> <A HREF="http://www.metrowerks.com">Metrowerks, makers of CodeWarrior</A>
 </MENU>
+ <HR>
+<H2><A NAME="macintosh bugs">Tycho/Macintosh bugs</A></H2>
 
+<B>Note that tycho0.1.1 does not work on the Mac.</B>
+
+We are making Mac Itcl binaries available so that developers can work
+on the port.
+<MENU>
+<LI> Starting Tycho may crash your mac.  The bug seems to be caused
+by the lines in <CODE>Tycho.tcl</CODE> that create the TclShell.
+
+<LI> There are pathname problems with the FileBrowser.  Currently, it is
+not possible to open a file.
+
+<LI> Starting tycho requires sourcing the <CODE>tycho-mac</CODE> script
+by hand.  There must be a better way.
+
+<LI> Tycho on the mac should use an installer.
+</MENU>
+
+ <HR>
 <H2>Installing Tycho on the Macintosh</H2>
+<OL>
 
-The Tycho home page at <A HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"></A> has a link to the downloads page that contains Tycho sources and Itcl binaries for the Mac.
- <P>
+<LI> The Tycho home page at <A
+HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"></A> has a
+link to the downloads page that contains Tycho sources and Itcl
+binaries for the Mac.
 
-Alternatively, you can pick up prebuilt Itcl2.2 Macintosh PowerPC
+ <br>Alternatively, you can pick up prebuilt Itcl2.2 Macintosh PowerPC
 binaries at <A
 HREF="ftp://ftp.tcltk.com/pub/itcl/itcl2.2-ppc.sit.hqx"><CODE>ftp://ftp.tcltk.com/pub/itcl/itcl2.2-ppc.sit.hqx</CODE></A>
 
- <P>
 
-<H3>Tycho/Mac bugs</H3>
-<OL>
+<LI> Download both the tycho distribution and the Itcl distribution and
+place them in directories next to each other.  For example,
+<MENU>
+<LI>  The tycho distribution could be in <CODE>mac:devel:tycho0.1.1</CODE.
+
+<LI>  The itcl distribution could be in <CODE>mac:devel:itcl2.2-ppc</CODE>
+</MENU>
+
+<LI> Move the <CODE>tycho-mac</CODE> script from <CODE>tycho0.1.1:lib:mac</CODE>
+to the top level itcl directory.  In this example, <CODE>tycho-mac</CODE>
+would end up at <CODE>mac:devel:itcl2.2-ppc:tycho</CODE>.
+
+<LI> To start up tycho, start <CODE>Itkwish</CODE>, then type
+<CODE>source tycho-mac</CODE>.
+
 </OL>
+
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
 Previous: <A HREF="releasenotes.html">Release Notes</A> -
