@@ -62,7 +62,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "function name to be created."));
 	addState(compileOptions.setState("compileOptions",this,"",
                         "options to be specified for compiler."));
-	addState(linkOptions.setState("linkOptions",this,"",
+	addState(linkOptions.setState("linkOptions",this,"-lm",
                         "options to be specified for linking."));
 	addState(saveFileName.setState("saveFileName",this,"",
                         "file name to save the generated code."));
