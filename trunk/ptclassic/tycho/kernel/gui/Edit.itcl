@@ -89,7 +89,7 @@ class ::tycho::Edit {
 
     # Return the name of the type of text widget to use. It must be
     # derived from EditText.
-    method textWidget {} {return ::tycho::EditText}
+    protected method textWidget {} {return ::tycho::EditText}
 }
 
 ###################################################################
