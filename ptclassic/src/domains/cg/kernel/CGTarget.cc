@@ -205,11 +205,7 @@ void CGTarget::setup() {
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
 
-	// This will be phased out.  Use either CGTarget::writeFile
-	// or CGUtilities.h rpcWriteFile.
-	// NOTE: writeDirectoryName should be called before writeFileName;
-	// otherwise writeFileName will return /dev/null.
-	writeDirectoryName(destDirectory);
+	StringList logPath = logFilePathName(destDirectory, "schedule.log");
 
 	if (!scheduler()) {
 	    switch (int(loopingLevel)) {
@@ -218,28 +214,27 @@ void CGTarget::setup() {
 		break;
 	    case 1:
 		delete [] schedFileName;
-		schedFileName = writeFileName("schedule.log");
+		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new SDFClustSched(schedFileName));
 		break;
 	    case 2:
 		delete [] schedFileName;
-		schedFileName = writeFileName("schedule.log");
+		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new LoopScheduler(schedFileName));
 		break;
 	    case 3:
 		delete [] schedFileName;
-		schedFileName = writeFileName("schedule.log");
+		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new AcyLoopScheduler(schedFileName));
 		break;
 	    default:
-		Error::abortRun(*this,"Unknown scheduler");
+		Error::abortRun(*this, "Unknown scheduler");
 		break;
 	    }
 	}
 	if (!galaxySetup()) return;
 	if (haltRequested()) return;
 	if (filePrefix.null() && galaxy()) filePrefix = galaxy()->name();
-	
 
 	// Reset the symbol lists.
 	counter = 0;
@@ -258,29 +253,33 @@ void CGTarget::setup() {
 
 	if (inWormHole()) wormPrepare();
 
+	// error checking
 	if (!noSchedule) {
 		if(!schedulerSetup()) return;
 	}
 	if (haltRequested()) return;
-	noSchedule = 0;		// reset for next setup.
+
+	// reset for next setup
+	noSchedule = 0;
 
 	// If in a WormHole, generate, compile, load, and run code.
 	// Ignore flags which may otherwise disable these functions.
-	if (inWormHole() && alone())
-	{
+	if (inWormHole() && alone()) {
 	    adjustSampleRates();
 	    generateCode();
 	    if (haltRequested()) return;
-	    if (compileCode())
-	    {
-		if (loadCode())
-		{
+	    if (compileCode()) {
+		if (loadCode()) {
 		    if (!runCode())
 			Error::abortRun(*this, "could not run!");
 		}
-		else Error::abortRun(*this, "could not load!");
+		else {
+		    Error::abortRun(*this, "could not load!");
+		}
 	    }
-	    else Error::abortRun(*this, "could not compile!");
+	    else {
+		Error::abortRun(*this, "could not compile!");
+	    }
 	}
 }
 
@@ -828,4 +827,26 @@ StringList destDirectoryName(const char* subdir) {
 	    dir << "/" << subdir;
 	}
 	return dir;
+}
+
+// Write a log file to the local machine in the destination directory.
+// Create the directory dir if it does not exist.
+StringList CGTarget::logFilePathName(const char* dir, const char* logfile) {
+	// FIXME: Assumes that the log file should always be written
+	// on the local machine?
+	StringList pathname = "";
+
+	// FIXME: writeDirectoryName will be phased out.  Use either
+	// CGTarget::writeFile or rpcWriteFile (defined in CGUtilities).
+	// Expand environment variables in the directory name.
+	// Create the directory if it does not exist.
+	writeDirectoryName(dir);
+	if (logfile) {
+	    // writeDirectoryName must be called before writeFileName
+	    // otherwise, writeFileName returns /dev/null
+	    char* expandedPath = writeFileName(logfile);
+	    pathname = expandedPath;
+	    delete [] expandedPath;
+	}
+	return pathname;
 }

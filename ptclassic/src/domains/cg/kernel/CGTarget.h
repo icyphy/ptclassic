@@ -405,8 +405,11 @@ protected:
     int typeConversionTableRows;
     virtual int needsTypeConversionStar(PortHole& port);
     
-    // Dynamic copy of default value of the destination directory
+    // Copy of default value of the destination directory
     StringList destDirName;
+
+    // Returns full path name of log file and create dir if it does not exist
+    StringList logFilePathName(const char* dir, const char* logFileName);
 
 private:
     // Counter used to make symbols unique.
