@@ -23,21 +23,10 @@ MAKEARCH
 	variable is "vax", say, it will make bin.vax, lib.vax, obj.vax
 	and appropriate subdirectories
 
-config-g++.mk
-	Configuration file for building Ptolemy with g++ on most platforms.
-
-config-{sun3,sun4,vax}.mk
-	These are symbolic links to the g++ version.
-
-config-cfront.mk
-	Configuration file for building Ptolemy with AT&T's "cfront" C++
-	compiler on Suns (should work on other platforms with small changes).
-	EXPERIMENTAL: some parts of Ptolemy don't run correctly with cfront
-	at the moment.
-
-config-mips.mk
-	Configuration file for building Ptolemy with the OSF port of g++
-	to the DecStation (MIPS architecture).
+athena.sun4
+	(Sun-4 distribution only)
+	This directory contains the Athena widget libraries, which are
+	needed to run pigi under Open Windows.
 
 bin/	Contains user-executable shell scripts:
 	pigi
@@ -60,6 +49,23 @@ bin.ARCH/
 		Program for displaying bitmaps under X11
 	optfir, wfir
 		Filter design programs
+
+config-g++.mk
+	Configuration file for building Ptolemy with g++ on most platforms.
+
+config-{sun3,sun4,vax}.mk
+	These are symbolic links to the g++ version.
+
+config-cfront.mk
+	Configuration file for building Ptolemy with AT&T's "cfront" C++
+	compiler on Suns (should work on other platforms with small changes).
+	EXPERIMENTAL: some parts of Ptolemy don't run correctly with cfront
+	at the moment.
+
+config-mips.mk
+	Configuration file for building Ptolemy with the OSF port of g++
+	to the DecStation (MIPS architecture).
+
 demo/
 	Directory containing pigi and interpreter demos.
 doc/
@@ -109,12 +115,29 @@ src/
 
 Contents of ~ptolemy/src:
 
+compat/
+	A set of directories provided to allow Ptolemy to be built
+	on systems with different compilers or libraries:
+
+	X11/
+		X11 headers for building on systems without them
+
+	cfront/
+		include files for building with cfront instead of g++
+		(this does not completely work)
+
+	libg++-1.37.0/
+		fixes to build with older versions of libg++ than
+		1.37.2
+
 domains/
 	Domain-specific support:
 	ddf/
 	de/
 	sdf/
-		Support for DDF, DE, SDF domains (see below)
+	thor/
+	cg/
+		Support for DDF, DE, SDF, Thor, CG domains (see below)
 	Other experimental domains (with the same structure)
 	may live here as well.
 
@@ -128,6 +151,8 @@ interp/
 	Stuff to build the interpreter with
 kernel/
 	The Ptolemy kernel sources
+libgantt/
+	The Gantt chart display library
 makefile
 	Makefile to build everything
 pigiExample/
@@ -161,3 +186,30 @@ makefile
 	makefile; makes stuff in kernel/ and stars/
 stars/
 	Stars that run under the domain.
+
+There are other subdirectories as well:
+	.../domains/sdf/image
+		Packets for image processing
+
+	.../domains/sdf/expgraph
+		"Expanded graph" classes for sophisticated SDF scheduling
+		(needs work)
+
+	.../domains/sdf/loopScheduler
+		An alternate SDF scheduler
+
+	.../domains/ddf/constructs
+		Recognizers for certain "canonical forms" in DDF
+
+	.../domains/thor/pepp
+		The "pepp" preprocessor
+
+	.../domains/thor/analyzerX11
+		The Thor analyzer
+
+	.../domains/cg/gilsScheduler
+		Gil Sih's parallel scheduler
+
+	.../domains/cg/targets
+		Multiprocessor targets that use Gil's scheduler
+
