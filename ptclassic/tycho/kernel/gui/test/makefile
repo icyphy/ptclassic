@@ -41,9 +41,7 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-SIMPLE_TESTS = \
-	testCircularList.itcl \
-	testStack.itcl
+SIMPLE_TESTS =
 
 # Removed testBuilderDialog.itcl until test levels are implemented
 GRAPHICAL_TESTS = \
