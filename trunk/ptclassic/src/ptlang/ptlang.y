@@ -226,14 +226,32 @@ sgitem:
 
 /* version identifier */
 version:
-	IDENTIFIER IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
+	'@' '(' '#' ')' IDENTIFIER
+		IDENTIFIER
+		IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
+		{ char b[SMALLBUFSIZE];
+		  objVer = $6;
+		  sprintf(b, "\"%s/%s/%s\"", $7, $9, $11);
+		  objDate = save(b);
+		}
+|	IDENTIFIER IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
 		{ char b[SMALLBUFSIZE];
 		  objVer = $1;
 		  sprintf(b, "\"%s/%s/%s\"", $2, $4, $6);
 		  objDate = save(b);
 		}
 |	'%' IDENTIFIER '%' '%' IDENTIFIER '%'	
-		{ objVer = "?.?"; objDate = "\"checked out\""; }
+		{
+		  char b[SMALLBUFSIZE];
+		  long t;
+		  objVer = "?.?";
+		  t = time(0);
+		  b[0] = QUOTE;
+		  strncat(b,ctime(&t),24);
+		  strcat(b,"\"");
+		  objDate = save(b);
+		  /* objDate = "\"checked out\""; */
+		}
 ;
 
 
@@ -373,9 +391,11 @@ stringseq: STRING			{ char* b = malloc(MEDBUFSIZE);
 					  strcpy(b, $1);
 					  $$ = b;
 					}
-|	stringseq STRING		{ strcat($1," ");
-					  strcat($1,$2);
-					  $$ = $1; }
+|	stringseq STRING		{ char* b = malloc(MEDBUFSIZE);
+					  strcpy(b,$1);
+					  strcat(b," ");
+					  strcat(b,$2);
+					  $$ = b; }
 ;
 
 /* inverse of defval: we strip the quotes */
