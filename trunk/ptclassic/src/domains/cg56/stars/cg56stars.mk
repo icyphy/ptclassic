@@ -29,6 +29,7 @@ CG56STARS = \
  $(CG56)/CG56Interpolator.o \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56Limit.o \
+ $(CG56)/CG56LocateMax.o \
  $(CG56)/CG56Log.o \
  $(CG56)/CG56Mult.o \
  $(CG56)/CG56Neg.o \
@@ -37,6 +38,7 @@ CG56STARS = \
  $(CG56)/CG56PickminVal.o \
  $(CG56)/CG56Quantizer.o \
  $(CG56)/CG56QuantizerInt.o \
+ $(CG56)/CG56Reciprocal.o \
  $(CG56)/CG56Sgn.o \
  $(CG56)/CG56Shifter.o \
  $(CG56)/CG56Sin.o \
