@@ -87,17 +87,8 @@ StringList HLLTarget :: sanitize(const char* s) const {
 }
 
 StringList HLLTarget :: sanitizedFullName (const NamedObj& obj) const {
-        StringList out;
-        if(obj.parent() != NULL) {
-		Block* b = obj.parent();
-		if (b->isItWormhole() == 0) {
-                	out = sanitizedFullName(*obj.parent());
-                	out += ".";
-		}
-                out += sanitizedName(obj);
-        } else {
-                out = sanitizedName(obj);
-        }
+        const char *snm = ptSanitize(obj.fullName());
+        StringList out(snm);
         return out;
 }
 
