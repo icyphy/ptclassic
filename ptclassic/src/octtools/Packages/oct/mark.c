@@ -28,6 +28,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "st.h"
+#include "mark.h"
 
 extern int fsys_compare_key(), fsys_hash_key();
 
@@ -55,6 +56,7 @@ octId id;
     return;
 }
 
+int
 oct_lookup_mark(ptr, id)
 generic *ptr;
 octId *id;
@@ -65,6 +67,7 @@ octId *id;
     return retval;
 }
 
+void
 oct_clear_marks()
 {
     st_free_table(mark_table);
