@@ -32,7 +32,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * Modified by J. Buck to correct geometry argument bugs, handle Inf/Nan
  * on input, and support a special binary format, 1992.
  *
- * Modified by Christopher Hylands to be more ANSI C like
+ * Modified by Christopher Hylands to be more ANSI C like 12/94
+ *
+ * Fixed bug with empty input files, tgl, 2/14/95.
  *
  */
 
@@ -350,6 +352,10 @@ char *argv[];
     if (errs) {
 	(void) fprintf(stderr, "Problems found with input data.\n");
 	exit(1);
+    }
+    if (maxitems <= 0) {
+        (void) fprintf(stderr, "No data to plot.\n");
+        exit(1);
     }
 
     /* Parse the argument list to set options */
@@ -1376,7 +1382,7 @@ static int rdFindMax()
 {
     int i;
     PointList *list;
-    int max = -1;
+    int max = 0;
 
     for (i = 0;  i < setNumber;  i++) {
 	for (list = PlotData[i].list;  list;  list = list->next) {
