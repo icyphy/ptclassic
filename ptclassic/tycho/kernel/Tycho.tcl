@@ -310,6 +310,7 @@ package require tycho.kernel.html
 package require tycho.edit.textedit
 package require tycho.edit.visedit
 package require tycho.edit.graphedit
+package require tycho.edit.cts
 
 package require tycho.util.devtools
 package require tycho.util.tydoc
