@@ -8,7 +8,8 @@ value of this binary number and output that as a particle.
 it is translating 7bits only
 it disregards the lsb from the codec that is lost at ThorSerToPar
 	}
-	author { Asawaree }
+	author { Asawaree Kalavade }
+	version { $Id$ }
 	copyright { 1991 The Regents of the University of California }
 	inmulti {
 		name {input}
