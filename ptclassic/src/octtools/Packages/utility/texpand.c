@@ -25,6 +25,8 @@ static char SccsId[]="$Id$";
  * 
  */
 /* LINTLIBRARY */
+#include <pwd.h>
+
 #define _POSIX_SOURCE		/* Argh!  IBM strikes again... */
 #include "copyright.h"
 #include "port.h"
@@ -33,7 +35,6 @@ static char SccsId[]="$Id$";
 
 #define PATHLEN 1024
 
-#include <pwd.h>
 
 #define SCPY(s)	strcpy(ALLOC(char, strlen(s)+1), s)
 
