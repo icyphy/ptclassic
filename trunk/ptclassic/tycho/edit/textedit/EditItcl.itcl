@@ -71,6 +71,11 @@ class ::tycho::EditItcl {
 		-foreground $itk_option(-optioncolor)
     }
 
+    # Location of the template file
+    itk_option define -filetemplate fileTemplate FileTemplate \
+	    $TYCHO/editors/textedit/templates/ItclTemplate.itcl {}
+
+
     ###################################################################
     ####                     public methods                        ####
 
@@ -79,9 +84,6 @@ class ::tycho::EditItcl {
 
     # Execute the Itcl code in the selection or the entire text widget.
     method evaluate {}
-
-    # Get the blank itcl template for a file and insert it into the window
-    method fileTemplate {}
 
     # Generate and display a doc file from the current buffer
     method gendocBuffer {}
@@ -124,7 +126,8 @@ body ::tycho::EditItcl::constructor {args} {
 	    -command "$this bodyTemplate"
 
     menubar add "File Template" Special -underline 0 \
-	    -command "$this fileTemplate"
+	    -command "$this fileTemplate $itk_option(-filetemplate) \
+	    		\[$this getClassName\]"
 
     menubar addSeparator Special
 
@@ -237,66 +240,6 @@ body ::tycho::EditItcl::evaluate {} {
 
     EditTcl::evaluate
 }
-
-#####################################################################
-#### fileTemplate
-# Insert the blank itcl template into the file.
-# FIXME: we should promote this to the FILE class
-#
-body ::tycho::EditItcl::fileTemplate {} {
-    global TYCHO
-
-    # The location of the template file.  Non-UCB users might want
-    # to edit this file for their own use.
-    # FIXME: The directory that contains the templates should be
-    # a textedit preference.
-    set filename $TYCHO/editors/textedit/templates/ItclTemplate.itcl
-
-    # Save the className before we insert the template, or getClassName
-    # will return the class name in the template, which is incorrect.
-    set newClassName [getClassName]
-
-    if {$filename != "" && $filename != "NoName"} {
-	if {[file exists $filename]} {
-	    if {[file readable $filename]} {
-
-		# Read in the template file and stuff it into editor
-		set fd [open $filename r]
-		set data [read $fd]
-		close $fd
-		insertData $data
-                markModified
-
-		# Find all the className strings.
-		# The arguments for findAll are:
-		# tag them 'oldClass', 1 - don't ignore case,
-		# 0 - return only exact matches, 0 -ignore word boundaries,
-		# search for 'ClassName', search from the start to the end ,
-		# {} - don't restrict the search.
-		findAll oldClass 1 0 0 ClassName 0.0 end {}
-
-		# Substitute the new class name for 'ClassName'
-		set ind 1.0
-		while {[set res \
-			[$itk_component(text) tag nextrange \
-			oldClass $ind end]] != {}} {
-		    eval deleteRange $res
-		    insertString [lindex $res 0] $newClassName
-		}
-
-		# Parsing the file probably picked up the bogus classname
-		# from template.itcl, so we set className
-		set className $newClassName
-
-	    } {
-		safeEval ::tycho::warn "File is not readable: $filename"
-	    }
-	} {
-	    safeEval ::tycho::warn "File does not exist: $filename"
-	}
-    }
-}
-
 
 #####################################################################
 #### getClassName
