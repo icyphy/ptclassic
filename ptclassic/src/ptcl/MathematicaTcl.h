@@ -1,7 +1,4 @@
 /*
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,8 +24,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-  Programmer: Steve X. Gu and Brian L. Evans
-  Date of creation: 01/13/96
+  Author:  Brian L. Evans and Steve X. Gu
+  Created: 01/13/96
+  Version: $Id$
 
   This file implements a class that adds Mathematica-specific Tcl commands
   to a Tcl interpreter.
@@ -61,6 +59,7 @@ public:
     // Methods to implement mathematica options
     int end(int argc, char** argv);
     int eval(int argc, char** argv);
+    int get(int argc, char** argv);
     int send(int argc, char** argv);
     int start(int argc, char** argv);
     int status(int argc, char** argv);

@@ -1,7 +1,4 @@
 /*
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,8 +24,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-  Programmer: Steve X. Gu and Brian L. Evans
-  Date of creation: 01/13/96
+  Author:  Steve X. Gu and Brian L. Evans
+  Created: 01/13/96
+  Version: $Id$
 
   This file implements a class that adds Mathematica-specific Tcl commands
   to a Tcl interpreter.
@@ -44,6 +42,7 @@ static const char file_id[] = "MathematicaTcl.cc";
 #include "tcl.h"
 #include "miscFuncs.h"
 #include "StringList.h"
+#include "InfString.h"
 #include "Error.h"
 #include "MathematicaIfc.h"
 #include "MathematicaTcl.h"
@@ -162,6 +161,12 @@ int MathematicaTcl::mathematica(int argc, char** argv)
 	}
 	break;
 	
+      case 'g':
+	if ( strcmp(argv[1], "get") == 0 ) {
+	    return MathematicaTcl::get(argc, argv);
+	}
+	break;
+
       case 's':
 	if ( strcmp(argv[1], "send") == 0 ) {
 	    return MathematicaTcl::send(argc, argv);
@@ -209,14 +214,41 @@ int MathematicaTcl::end(int argc, char** argv) {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::eval(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica eval <mathematica_command>");
+    if (argc != 3) return usage("mathematica eval <script>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], TRUE);
 }
 
+// Evaluate a Mathematica command, and get a variable
+int MathematicaTcl::get(int argc, char** argv) {
+    if (argc != 3 && argc != 4) {
+	return usage("mathematica get <name> ?<script>?");
+    }
+    MATHEMATICATCL_CHECK_MATHEMATICA();
+
+    // Evaluate the script given by argv[3]
+    int retval = TCL_OK;
+    if (argc == 4) {
+	retval = evaluate(argv[3], FALSE);
+    }
+
+    // Get the value of the Mathematica variable name given by argv[2]
+    if (retval == TCL_OK) {
+	InfString getTclForm = "InputForm[N[";
+	getTclForm << argv[2] << "]]";
+	int retval2 =
+	    mathematicaInterface->EvaluateUnrecordedUserCommand(getTclForm);
+        Tcl_AppendResult(tclinterp,
+	    mathematicaInterface->GetPrivateOutputBuffer(),
+	    0);
+	retval = retval2 ? TCL_OK : TCL_ERROR;
+    }
+    return retval;
+}
+
 // Evaluate a Mathematica command
 int MathematicaTcl::send(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica send <mathematica_command>");
+    if (argc != 3) return usage("mathematica send <script>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], FALSE);
 }
