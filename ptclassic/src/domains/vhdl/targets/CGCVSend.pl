@@ -45,12 +45,11 @@ defstar {
     StringList transfer;
     for (int i = numXfer-1 ; i >= 0 ; i--) {
       if (i > 0) transfer << "\n";
-      transfer << "
-  /* Go */
-  $starSymbol(intptr) = 0;
-  $starSymbol(status) = 0;
-  if($starSymbol(status) >= 0) {
-";
+      transfer << "\n";
+      transfer << "  /* Go */\n";
+      transfer << "  $starSymbol(intptr) = 0;\n";
+      transfer << "  $starSymbol(status) = 0;\n";
+      transfer << "  if($starSymbol(status) >= 0) {\n";
 
       StringList oneline = "    (void) sprintf($starSymbol(buffer), \"";
       oneline << format;
@@ -59,13 +58,12 @@ defstar {
       oneline << "));";
       transfer << oneline;
 
-      transfer << "
-    $starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
-    if($starSymbol(status) < 0) {
-      perror($starSymbol(dummy));
-    }
-  }
-";
+      transfer << "\n";
+      transfer << "    $starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));\n";
+      transfer << "    if($starSymbol(status) < 0) {\n";
+      transfer << "      perror($starSymbol(dummy));\n";
+      transfer << "    }\n";
+      transfer << "  }\n";
     }
     addCode(transfer);
   }

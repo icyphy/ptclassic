@@ -91,6 +91,8 @@ protected:
 private:
 //	CodeStream preSynch;
 //	CodeStream postSynch;
+	CodeStream cli_models;
+	CodeStream cli_comps;
 	CodeStream top_uses;
 	CodeStream top_entity;
 	CodeStream top_architecture;

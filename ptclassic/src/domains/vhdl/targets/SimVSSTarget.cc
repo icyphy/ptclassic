@@ -55,9 +55,11 @@ VHDLTarget(name,starclass,desc) {
   addState(interactive.setState("interactive",this,"NO",
 			    "switch for simulating interactively."));
 
-//  addStream("preSynch", &preSynch);
-//  addStream("postSynch", &postSynch);
-
+  addStream("cli_models", &cli_models);
+  addStream("cli_comps", &cli_comps);
+  cli_models.initialize();
+  cli_comps.initialize();
+  
   needC2Vinteger = 0;
   needV2Cinteger = 0;
   needC2Vreal = 0;
@@ -158,6 +160,10 @@ void SimVSSTarget :: frameCode() {
   top_architecture << " of ";
   top_architecture << topName;
   top_architecture << " is\n";
+
+  top_architecture << cli_comps;
+
+/*
   top_architecture << "component C2Vinteger\n";
   top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
   top_architecture << indent(1) << "          numxfer : INTEGER );\n";
@@ -190,6 +196,8 @@ void SimVSSTarget :: frameCode() {
   top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
   top_architecture << "end component;\n";
   top_architecture << "\n";
+  */
+  
   top_architecture << "component ";
   top_architecture << galName;
   top_architecture << "\n";
@@ -263,6 +271,7 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
+/*
   if (needC2Vinteger) {
     code << "\n
 --C2Vinteger.vhdl
@@ -294,7 +303,8 @@ begin
 end;
 ";
   }
-
+  */
+  /*
   if (needV2Cinteger) {
     code << "\n
 --V2Cinteger.vhdl
@@ -327,7 +337,8 @@ begin
 end;
 ";
   }
-  
+  */
+  /*
   if (needC2Vreal) {
     code << "\n
 --C2Vreal.vhdl
@@ -359,7 +370,8 @@ begin
 end;
 ";
   }
-  
+  */
+  /*
   if (needV2Creal) {
     code << "\n
 --V2Creal.vhdl
@@ -392,7 +404,10 @@ begin
 end;
 ";
   }
+  */
   
+  code << "\n" << cli_models;
+
   code << "\n" << top_uses;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
