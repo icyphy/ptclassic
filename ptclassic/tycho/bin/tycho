@@ -25,7 +25,7 @@ endif
 # FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
 #	   $PTOLEMY/tycho/kernel/Lib.tcl
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4p1
+setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
 
 # Not all shells and platforms set $PWD, so we use our own
