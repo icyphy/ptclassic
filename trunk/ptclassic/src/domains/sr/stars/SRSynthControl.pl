@@ -34,6 +34,12 @@ limitation of liability, and disclaimer of warranty provisions.
   }
 
   input {
+    name { pitchBend }
+    type { int }
+    desc { Pitch bend for the channel.  8192 is neutral. }
+  }
+
+  input {
     name { reset }
     type { int }
     desc { Present to reset the system }
@@ -56,11 +62,26 @@ limitation of liability, and disclaimer of warranty provisions.
     type { int }
     desc { Done flag for each voice }
   }
+
   defstate {
     name { AFreq }
     type { float }
     default { "440.0" }
     desc { Frequency output for the A below Middle C }    
+  }
+
+  defstate {
+    name { velocityScale }
+    type { float }
+    default { "0.125" }
+    desc { Maximum pressure velocity output }
+  }
+
+  defstate {
+    name { debug }
+    type { string }
+    default { "NO" }
+    desc { Print real-time event messages }
   }
 
   ccinclude { <math.h>, <stream.h> }
@@ -91,6 +112,15 @@ limitation of liability, and disclaimer of warranty provisions.
 
     // Array translating pitches to frequencies
     double frequencyOfPitch[128];
+
+    // Array translating MIDI velocities to floating velocities
+    double velocityOfVelocity[128];
+
+    // Current pitch translation value.  Value multiplies all frequencies.
+    double frequencyScale;
+
+    // Flag indicating whether debugging messages should be printed
+    int printDebugging;
   }
 
   constructor {
@@ -100,11 +130,17 @@ limitation of liability, and disclaimer of warranty provisions.
     voicePitch = NULL;
     voiceVelocity = NULL;
     numVoices = 0;
+    printDebugging = 0;
 
   }
 
   begin {
     resetVoices();
+    if ( strcmp((const char *) debug, "YES" ) == 0 ) {
+      printDebugging = 1;
+    } else {
+      printDebugging = 0;
+    }
   }
 
   setup {
@@ -121,6 +157,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	frequencyOfPitch[pi] = double(AFreq) * exp((pi-56.0)*log(2.0)/12.0);
 	/*	cout << "Pitch " << pi << " frequency "
 	     << frequencyOfPitch[pi] << '\n'; */
+    }
+
+    // Fill the velocity array with scaled velocity values
+
+    for ( int v = 128 ; --v >= 0 ; ) {
+      velocityOfVelocity[v] = double(v) / 127.0 * double(velocityScale);
     }
 
     // Verify the number of ports
@@ -182,6 +224,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  voicePitch[i] = voiceVelocity[i] = 0;
 	}
       }
+      frequencyScale = 1.0;
     }
 
   }
@@ -218,8 +261,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	  if ( voicePitch[i] == 0 ) {
 	    voicePitch[i] = int(onPitch.get());
 	    voiceVelocity[i] = int(onVelocity.get());
-	    cout << "Note on: pitch " << voicePitch[i] << " velocity "
-		<< voiceVelocity[i] << " voice " << i << '\n';		
+	    if ( printDebugging ) {
+	      cout << "Note on: pitch " << voicePitch[i] << " velocity "
+		   << voiceVelocity[i] << " voice " << i << '\n';
+	    }
 	    break;
 	  }
 	}
@@ -236,17 +281,27 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	  if ( voicePitch[i] == p ) {
 	    voiceVelocity[i] = 0;
-	    cout << "Note off: pitch " << voicePitch[i] << " voice "
-		<< i << '\n';
+	    if ( printDebugging ) {
+	      cout << "Note off: pitch " << voicePitch[i] << " voice "
+		   << i << '\n';
+	    }
 	  }
+	}
+      }
+
+      if ( pitchBend.present() ) {
+	int pb = int(pitchBend.get());
+	frequencyScale = exp( (pb - 8192) * log(2.0)/(8192 * 6) );
+	if ( printDebugging ) {
+	  cout << "Pitch Bend: " << pb << " (" << frequencyScale << ")\n";
 	}
       }
 
       // Emit the frequencies and velocities for the voices
 
       for ( i = numVoices ; --i >= 0 ; ) {
-	frequencyPort[i]->emit() << frequencyOfPitch[voicePitch[i]];
-	velocityPort[i]->emit() << double(voiceVelocity[i]);
+	frequencyPort[i]->emit() << frequencyOfPitch[voicePitch[i]] * frequencyScale;
+	velocityPort[i]->emit() << double(voiceVelocity[i]) / 256.0;
       }
 
     }
@@ -263,7 +318,9 @@ limitation of liability, and disclaimer of warranty provisions.
       if ( donePort[i]->present() && int(donePort[i]->get()) != 0 &&
 	  voicePitch[i] != 0 ) {
 	voicePitch[i] = voiceVelocity[i] = 0;
-	cout << "Done: voice " << i << '\n';
+	if ( printDebugging ) {
+	  cout << "Done: voice " << i << '\n';
+	}
       }
     }
 
