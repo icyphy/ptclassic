@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLTypedObj.h"
 #include "VHDLSignal.h"
+#include "VHDLVariable.h"
 
 class VHDLSignal;
 
@@ -49,8 +50,8 @@ class VHDLPort : public VHDLTypedObj
   // Constructors.
   VHDLPort();
   VHDLPort(const char* n, const char* t, const char* d,
-	   const char* m, VHDLSignal* s)
-    : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s) {}
+	   const char* m, VHDLSignal* s, VHDLVariable* v = NULL)
+    : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s), variable(v) {}
 
   // Destructor.
   ~VHDLPort();
@@ -61,6 +62,8 @@ class VHDLPort : public VHDLTypedObj
   StringList mapping;
   // Signal connection.
   VHDLSignal* signal;
+  // Internal variable.
+  VHDLVariable* variable;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -71,6 +74,8 @@ class VHDLPort : public VHDLTypedObj
 
   void setDirec(const char* newDirec) { direction = newDirec; }
   StringList getDirec() { return direction; }
+  void setVar(VHDLVariable* newVar) { variable = newVar; }
+  VHDLVariable* getVar() { return variable; }
 
   void connect(VHDLSignal*);
 
@@ -110,7 +115,7 @@ class VHDLPortList : public VHDLTypedObjList
 
   // Allocate memory for a new VHDLPort and put it in the list.
   void put(StringList, StringList, StringList, StringList="",
-	   VHDLSignal* =NULL);
+	   VHDLSignal* =NULL, VHDLVariable* =NULL);
 };
 
 class VHDLPortListIter : public VHDLTypedObjListIter {

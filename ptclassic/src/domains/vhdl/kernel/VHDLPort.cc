@@ -45,6 +45,7 @@ VHDLPort :: VHDLPort() {
   direction = "UNINITIALIZED";
   mapping = "UNINITIALIZED";
   signal = NULL;
+  variable = NULL;
   VHDLTypedObj::initialize();
 }
 
@@ -53,7 +54,8 @@ VHDLPort :: ~VHDLPort() {}
 
 // Return a pointer to a new copy of the VHDLPort.
 VHDLPort* VHDLPort :: newCopy() {
-  VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal);
+  VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal,
+				   variable);
   return newPort;
 }
 
@@ -105,7 +107,9 @@ VHDLPortList* VHDLPortList :: newCopy() {
 void VHDLPortList :: put(StringList name, StringList type,
 			 StringList direction,
 			 StringList mapping/*=""*/,
-			 VHDLSignal* signal/*=NULL*/) {
-  VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal);
+			 VHDLSignal* signal/*=NULL*/,
+			 VHDLVariable* variable/*=NULL*/) {
+  VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal,
+				   variable);
   this->put(*newPort);
 }
