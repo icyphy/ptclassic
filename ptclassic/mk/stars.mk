@@ -419,7 +419,21 @@ ifdef ACS
 		LIBFILES += $(LIBDIR)/libacstargets.$(LIBSUFFIX)
 	else
 		TARGETS += $(ACST)/ACSCGCTarget.o \
-				$(ACST)/ACSCGTarget.o
+			$(ACST)/ACSCGFPGATarget.o \
+			$(ACST)/ACSCGTarget.o \
+			$(ACST)/Arch.o \
+			$(ACST)/Connectivity.o \
+			$(ACST)/Delay.o \
+			$(ACST)/DoubleArray.o \
+			$(ACST)/Fpga.o \
+			$(ACST)/HWSchedule.o \
+			$(ACST)/HWTarget.o \
+			$(ACST)/IntArray.o \
+			$(ACST)/Pipealign.o \
+			$(ACST)/Port_Timing.o \
+			$(ACST)/Sg_Constructs.o \
+			$(ACST)/StringArray.o \
+			$(ACST)/acs_vhdl_lang.o
 	endif
 
 	LIBS += -lacsstars -lacs
