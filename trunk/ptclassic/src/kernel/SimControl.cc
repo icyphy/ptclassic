@@ -57,16 +57,22 @@ Polling functions added by Alan Kamas, 1/95
 #endif
 
 #include "compat.h"
-#ifdef PTHPPA_CFRONT
-// cfront on the hp
-typedef void (*SIG_PF)(int);
-#endif /* PTHPPA_CFRONT */
 
-#ifdef __GNUG__
-#ifndef PTIRIX5 /* For use with cc -cckr Irix4.0.5H */
-typedef void (*SIG_PF)(int);
-#endif /* PTIRIX5 */
+// Note, SIG_PF should be the same type as SIG_IGN and the same type
+//       as the second parameter to signal()
+#if !defined(PTIRIX5) 
+// PTIRIX5 defines SIG_PF in <signal.h>
+#if defined(__GNUG__) 
+#if defined (PTSUN4) || defined(PTSOL2)
+// sun4, sol2
+typedef void (*SIG_PF)();
 #else
+typedef void (*SIG_PF)(int);
+#endif // defined sun4, sol2
+#endif // __GNUG__
+#endif // !defined PTIRIX5
+
+#if !defined (__GNUG__)
 #include <std.h>
 #endif
 
@@ -79,7 +85,8 @@ typedef void (*SIG_PF)(int);
 // declare action list stuff.
 SimActionList* SimControl::preList = 0;
 SimActionList* SimControl::postList = 0;
-unsigned int SimControl::flags = 0;
+volatile unsigned int SimControl::flags = 0;
+volatile int SimControl::pollflag = 0;
 int SimControl::nPre = 0, SimControl::nPost = 0;
 SimHandlerFunction SimControl::onInt = 0;
 SimHandlerFunction SimControl::onPoll = 0;
@@ -156,7 +163,7 @@ void SimControl::processFlags() {
 		if (onInt && onInt()) 
 			flags |= error;
 	}
-	if ((flags & poll) != 0) {
+	if (pollflag != 0) {
 		// check to see if a polling function is defined
 		if (onPoll) {
 		    // polling function defined.  Reset the polling
@@ -164,10 +171,10 @@ void SimControl::processFlags() {
 		    // otherwise it is assumed that the polling function
 		    // will handle resetting the flag.
 		    if (!onPoll()) 
-			flags &= ~poll;
+			pollflag = 0;
 		} else {
 		    // There is no polling function defined.  Reset the flag.
-		     flags &= ~poll;
+		     pollflag = 0;
 		}
 	}
 }
@@ -189,14 +196,9 @@ void SimControl::declareErrorHalt ()
 }
 	
 void SimControl::clearHalt () {
-	// turns off the halt and error flag bits
-	// NOTE: it does not turn off either the interrupt or the poll
-	// flag.  A previous version of clearHalt cleared ALL flags.
-	// any old code that depends upon clearHalt to clear flags other 
-	// than error or halt will fail.
+        // Clears all flags
 	CriticalSection region(gate);
-	flags &= ~halt;
-	flags &= ~error;
+	flags = 0;
 }
 
 SimActionList::SimActionList() {}
@@ -220,13 +222,14 @@ void SimControl::intCatcher(int) {
 }
 
 /* In gcc2.5.6, signal.h defines SIG_IGN incorrectly. */
-#if defined(PTMIPS) 
-#ifdef __GNUG__
-#define	SIG_IGN		(void (*)(int))1
-#endif
+#if defined(PTULTRIX) && defined(__GNUG__)
+#undef SIG_IGN
+#define SIG_IGN         (void (*)(int)) 1
 #endif
 
+
 void SimControl::catchInt(int signo, int always) {
+        CriticalSection region(gate);
 	// unspecified interrupt means SIGINT.
 	if (signo == -1) signo = SIGINT;
 	if (!always) {
@@ -248,7 +251,8 @@ SimHandlerFunction SimControl::setInterrupt(SimHandlerFunction f) {
 
         // Set the Poll Flag true
 void SimControl::setPollFlag() {
-        flags |= poll;
+        CriticalSection region(gate);
+        pollflag = 1;
 }
 	
 	// register a function to be called if the poll flag is set.
@@ -257,7 +261,7 @@ SimHandlerFunction SimControl::setPollAction(SimHandlerFunction f) {
         CriticalSection region(gate);
 	SimHandlerFunction ret = onPoll;
 	onPoll = f;
-	flags |= poll;		// Makes sure onPoll can get called 
+	pollflag = 1;	// Makes sure onPoll can get called 
 	return ret;
 }
 
@@ -275,7 +279,7 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
 	// Turn on the poll flag when the timer expires
 	signal(SIGALRM, (SIG_PF)SimControl::setPollFlag);
 	// Turn off the poll flag until the timer fires
-	flags &= ~poll;
+	pollflag = 0;
 	// Start the timer
 	setitimer(ITIMER_REAL, &i, 0);
 }

@@ -87,7 +87,7 @@ public:
 		poll = 8 };
 
 	static int haltRequested () {
-		if (flagValues() != 0) processFlags();
+		if ( (flagValues() | pollflag) != 0) processFlags();
 		return haltStatus();
 	}
 
@@ -146,7 +146,11 @@ private:
 	static int nPre, nPost;
 
 	// system status flags
-	static unsigned int flags;
+	static volatile unsigned int flags;
+	// polling status flag.  NOTE: This is a separate flag from "flags" 
+	// to avoid any possible race conditions.  It is int to make sure
+	// that it is atomic.
+	static volatile int pollflag;
 	// PtGate for controlling threaded access to flags
 	static PtGate* gate;
 
