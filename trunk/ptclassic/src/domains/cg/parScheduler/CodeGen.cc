@@ -112,7 +112,7 @@ void UniProcessor :: createSubGal() {
 		domForClone = copyS->domain();
 		if (SimControl::haltRequested()) return;
 
-		subGal->addBlock(*copyS, org->name());
+		subGal->addBlock(*copyS, copyS->name());
 		copyS->setTarget(targetPtr);
 
 
