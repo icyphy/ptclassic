@@ -14,7 +14,9 @@ VPATH = ../../src/xgraph
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o ps.o idraw.o xtb.o \
+CC=gcc
+
+OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
  st.o params.o
 
 SRCS = $(OBJS:.o=.c)

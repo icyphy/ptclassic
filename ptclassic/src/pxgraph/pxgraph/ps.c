@@ -27,7 +27,7 @@
 #define PS_BDR_PAD		0.075
 #define PS_AXIS_PAD		0.1
 #define PS_LEG_PAD		0.025
-#define PS_TICK_LEN		0.125
+#define PS_TICK_LEN		0.08
 #define BASE_DASH		(1.0/48.0)
 
 #define BASE_WIDTH		(1.0/8.0)

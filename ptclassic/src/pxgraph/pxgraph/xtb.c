@@ -34,7 +34,7 @@ extern void abort();
 typedef struct h_info {
     FNPTR(func, xtb_hret, (XEvent *evt, xtb_data info)); /* Function to call */
     xtb_data info;		/* Additional info  */
-};
+} h_info;
 
 static Display *t_disp;		/* Display          */
 static int t_scrn;		/* Screen           */
@@ -196,7 +196,7 @@ Window win;
 {
     xtb_data data;
 
-    if (!XFindContext(t_disp, win, h_context, &data)) {
+    if (!XFindContext(t_disp, win, h_context, (XPointer*)&data)) {
 	return ((struct h_info *) data)->info;
     } else {
 	return (xtb_data) 0;
@@ -252,7 +252,7 @@ typedef struct b_info {
     int na;			/* Non-zero if not active */
     int line_y, line_w;		/* Entry/Exit line  */
     xtb_data val;		/* User defined info */
-};
+} b_info;
 
 static void bt_draw(win, ri)
 Window win;
@@ -452,7 +452,7 @@ typedef struct br_info {
     FNPTR( func, xtb_hret, (Window win, int prev, int this, xtb_data val) );
     xtb_data val;		/* User data          */
     Window *btns;		/* Button windows     */
-};
+} br_info;
 
 /*ARGSUSED*/
 static xtb_hret br_h(win, val, info)
@@ -587,7 +587,7 @@ Window win;
 typedef struct to_info {
     char *text;			/* Text to display */
     XFontStruct *ft;		/* Font to use     */
-};
+} to_info;
 
 static void to_draw(win, ri)
 Window win;
@@ -685,7 +685,7 @@ typedef struct ti_info {
     int line_y, line_w;		/* Entry/Exit line    */
     int focus_flag;		/* If on, we have focus */
     xtb_data val;		/* User info          */
-};
+} ti_info;
 
 static int text_width(font, str, len)
 XFontStruct *font;		/* What font       */

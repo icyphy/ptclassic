@@ -8,7 +8,7 @@
  * Modified by J. Buck to correct geometry argument bugs, handle Inf/Nan
  * on input, and support a special binary format, 1992.
  *
- * $Id$
+ * @(#)xgraph.c	1.7 1/31/94
  *
  * Please see copyright.h concerning the formal reproduction rights
  * of this software.
@@ -85,7 +85,7 @@
 
 #define DEF_BORDER_WIDTH	"2"
 #define DEF_BORDER_COLOR	"Black"
-#define DEF_TITLE_TEXT		"X Graph"
+#define DEF_TITLE_TEXT		"Ptolemy Xgraph"
 #define DEF_XUNIT_TEXT		"X"
 #define DEF_YUNIT_TEXT		"Y"
 #define DEF_TICK_FLAG		"off"
@@ -108,7 +108,7 @@
 #define DEF_GEOMETRY		""
 #define DEF_REVERSE		"off"
 #define DEF_DEVICE		""
-#define DEF_DISPOSITION		"To Device"
+#define DEF_DISPOSITION		"To File"
 #define DEF_FILEORDEV		""
 
 #define DEF_MARKER_FLAG		"off"
@@ -145,7 +145,7 @@ static char *defStyle[MAXATTR] = {
 
 /* Default color names */
 static char *defColors[MAXATTR] = {
-    "red", "SpringGreen", "blue", "yellow",
+    "red", "green", "blue", "yellow",
     "cyan", "sienna", "orange", "coral"
 };
 
@@ -1236,9 +1236,12 @@ char *fn;			/* Reading from file `fn' */
     if (!redundant_set) {
 	if (setNumber < MAXSETS) {
 	    (void) sprintf(setname, "Set %d", setNumber);
+            /*************
+		 Remove this feature make the set name equal to the filename:
 	    if ((strcmp(PlotData[setNumber].setName, setname) == 0) && fn) {
 		PlotData[setNumber].setName = fn;
 	    }
+            *************/
 	    curSpot = &(PlotData[setNumber].list);
 	    PlotData[setNumber].list = (PointList *) 0;
 	    newGroup = 1;

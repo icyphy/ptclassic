@@ -52,7 +52,7 @@ typedef struct d_info {
     Window tf_size;		/* Title font size spec      */
     Window af_family;		/* Axis font family spec     */
     Window af_size;		/* Axis font size spec       */
-};
+} d_info;
 
 #define	BACKSPACE	0010
 #define DELETE		0177
@@ -645,7 +645,7 @@ typedef struct err_info {
     int num_lines;
     int alloc_lines;
     Window *lines;
-};
+} err_info;
 
 #define E_LINES	2
 #define E_VPAD	3
