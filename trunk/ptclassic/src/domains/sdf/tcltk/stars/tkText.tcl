@@ -58,20 +58,20 @@ if {![winfo exists $s]} {
         pack append $win $win.ok {top fillx}
 
 	if {[set ${starID}(wait_between_outputs)]} {
-	    # Modify the control panel stop button to release the wait
-	    # HACK ALERT: highly non-local code.  Will work only if the
-	    # the design of the control panel does not change.
-	    global ptkControlPanel
-	    $ptkControlPanel.panel.stop configure -command \
-		"incr ${starID}(tkTextWaitTrig); ptkStop $univ"
-	    bind $ptkControlPanel.iter.entry <Escape> \
-		"incr ${starID}(tkTextWaitTrig); ptkStop $univ"
-	    bind $ptkControlPanel <Escape> \
-		"incr ${starID}(tkTextWaitTrig); ptkStop $univ"
+	    # Arrange for the tkTextWaitTrig variable
+	    # to be updated if the run status changes (for example,
+	    # a halt is requested)
+	    global ptkRunFlag
+	    trace variable ptkRunFlag($univ) w tkTextReleaseWait
 	}
     }
 
     global $starID
+
+    proc tkTextReleaseWait {runflag univ op} "
+	global ${starID}
+	incr ${starID}(tkTextWaitTrig)
+    "
 
     ptkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
 		[curuniverse] [set ${starID}(wait_between_outputs)] $starID
@@ -92,13 +92,13 @@ if {![winfo exists $s]} {
 	upvar #0 $starID param
 	global $starID
 
-        set c $param(win).f
-        set inputVals [grabInputs_$starID]
+	set c $param(win).f
+	set inputVals [grabInputs_$starID]
 	for {set i 0} {$i < $param(numInputs)} {incr i} {
-            set in [lindex $inputVals $i]
-            $param(win).f.m$i.t yview -pickplace end
-            $param(win).f.m$i.t insert end $in
-            $param(win).f.m$i.t insert end "\n"
+	    set in [lindex $inputVals $i]
+	    $param(win).f.m$i.t yview -pickplace end
+	    $param(win).f.m$i.t insert end $in
+	    $param(win).f.m$i.t insert end "\n"
 	}
 	incr ${starID}(lineCount)
 	if {$param(lineCount) >= $param(number_of_past_values)} {
