@@ -209,7 +209,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		hostAddr.initialize();
 
 		// code generation.
-		addGlobal("#define HARDPORT 61114\n");
+		addGlobal("#define HARDPORT 61114\n", "hardPort");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
 		addInclude("<udpam.h>");
