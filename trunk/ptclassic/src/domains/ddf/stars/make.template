@@ -23,16 +23,25 @@ GNU = g++
 INCL = -I$(DDFDIR) -I$(SDFDIR) -I$(KERNDIR)
 GNUINCLUDE = /usr/gnu/lib/g++-include
 
-.SUFFIXES: .cc
+.SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(DDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
+
+.pl.cc:
+	cd $(VPATH); ptlang $<
+
+.pl.h:
+	cd $(VPATH); ptlang $<
 
 
-SRCS=DDFSelf.cc LastOfN.cc Repeater.cc Select.cc Switch.cc DownCounter.cc 
+SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelect.pl DDFSelf.pl \
+ DDFSwitch.pl
 
-OBJS=DDFSelf.o LastOfN.o Repeater.o Select.o Switch.o DownCounter.o 
+CCS=$(SRCS:.pl=.cc)
 
-HDRS=DDFSelf.h LastOfN.h Repeater.h Select.h Switch.h DownCounter.h 
+OBJS=$(SRCS:.pl=.o)
+
+HDRS=$(SRCS:.pl=.h)
 
 all:		makefile $(OBJS)
 
@@ -40,12 +49,12 @@ all:		makefile $(OBJS)
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(HDRS) make.template
+sources:	$(CCS) $(HDRS) make.template
 
 clean:
 		rm -f *.o core *~ *#
-depend:
-		makedepend $(INCL) -I$(GNUINCLUDE) $(SRCS)
+depend:		$(CCS)
+		makedepend $(INCL) -I$(GNUINCLUDE) $(CCS)
 
 makefile:	make.template
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
