@@ -30,14 +30,14 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the require packages are loaded
+package require tycho.util.tytest
+package require tycho.edit.slate
 
-if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $env(SLATE_LIBRARY) test defs.itcl]
-} {}
+# We also have to load this helper file
+source [file join $env(SLATE_LIBRARY) test defs.itcl]
 
+# This is used to make the tests watchable
 if { ! [::info exists SHORTTIME] } {
     set SHORTTIME 50
 }
