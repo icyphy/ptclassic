@@ -255,7 +255,7 @@ body ::tycho::EditCpp::_initializeBars {menubar statusbar toolbar} {
 	$menubar separator specialsep3 special
 
         $menubar command classdag special \
-		-label "Generate Class Diagram" -underline 1 \
+		-label "Generate Class Diagram" -underline 9 \
                 -command "$this classDAG"
 
     }

@@ -786,6 +786,7 @@ body ::tycho::EditPtcl::_initializeMenubar {menubar} {
     $menubar delete generatedoc
     $menubar delete generateidoc
     $menubar delete generateclassdiagram
+    $menubar delete specialsep2
  
     # Add my own menu entries
     $menubar command retarget special \
@@ -801,7 +802,7 @@ body ::tycho::EditPtcl::_initializeMenubar {menubar} {
 	    \"Domain(s) used: \[$this domains\]\""
 
     $menubar command liststars special \
-	    -label "List Stars" -underline 5 \
+	    -label "List Stars" -underline 6 \
             -command "::tycho::inform \
 	    \"Stars used: \[$this stars\]\""
 
@@ -823,24 +824,25 @@ body ::tycho::EditPtcl::_initializeMenubar {menubar} {
 	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
 
     $menubar command starxref special \
-	    -label "Star/Demo Xref" -underline 11 \
+	    -label "Star/Demo Xref" -underline 10 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
     $menubar command ptstars special \
-	    -label "Ptolemy stars" -underline 0 \
+	    -label "Ptolemy stars" -underline 6 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY src domains starHTML.idx.fst]"
 
     # Menu for fixed-point simulation
-    $menubar separator specialsep4 special
-    $menubar command setimplementation special \
-            -label "Set Implementation" -underline 4 \
-            -command "$this setImplementation"
-
-    $menubar command generateuniverse special \
-            -label "Generate Universe" -underline 9 \
-            -command "$this generateUniverse"
+    # Removed-- Needs updating.
+#     $menubar separator specialsep4 special
+#     $menubar command setimplementation special \
+#             -label "Set Implementation" -underline 4 \
+#             -command "$this setImplementation"
+# 
+#     $menubar command generateuniverse special \
+#             -label "Generate Universe" -underline 9 \
+#             -command "$this generateUniverse"
 }
 
 

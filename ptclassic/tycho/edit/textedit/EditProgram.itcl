@@ -229,19 +229,13 @@ body ::tycho::EditProgram::constructor {args} {
     
     # Bind the Tab character to automatically indent the line.
     bind $itk_component(text) <Tab> "$this indentLine; break"
-    bind $itk_component(text) <Control-q><Tab> \
-            "$this insertString insert {\t}; break"
-    
-    # Bind S-C-l to recolorize the file. Note that C-L is the equivalent
-    # since the effect of the shift key is to modify the keypress and 
-    # it does not seem that I can intercept this any other way.
-    bind $itk_component(text) <Control-L> "$this parseRegion 1.0 end"
-    
-    # Indent region binding
-    bind $itk_component(text) <Meta-Control-backslash> \
-            "$this busy $this indentSelection"
-    bind $itk_component(text) <Escape><Control-backslash> \
-            "$this busy $this indentSelection"
+
+    # Used to have emacs-like bindings here:
+    # Now rely on menu traversal.  Could perhaps reintroduce virtual
+    # events for these:
+    #   C-L  recolorize (capital L)
+    #   M-C-\ indent selection
+    #   Esc C-\ indent selection
 }
 
 #####################################################################
@@ -801,29 +795,36 @@ body ::tycho::EditProgram::_initializeMenubar {menubar} {
     $menubar add separator formatsep3 format
         
     $menubar command commentregion format \
-	    -label "Comment Out Region" -underline 8 \
+	    -label "Comment Out Region" \
+            -underline 8 \
             -command "$this commentSelection"
     
     $menubar command uncommentregion format \
-	    -label "Uncomment Region" -underline 1 \
+	    -label "Uncomment Region" \
+            -underline 1 \
             -command "$this uncommentSelection"
     
     $menubar add separator formatsep4 format
     
     $menubar command recolorize format \
-	    -label "Recolorize" -underline 0 -accelerator "C-L" \
+	    -label "Recolorize" \
+            -underline 0 \
             -command "$this parseRegion 1.0 end"
     
     $menubar command indentline format \
-	    -label "Indent Line" -underline 0 -accelerator "Tab" \
+	    -label "Indent Line" \
+            -underline 0 \
+            -accelerator "Tab" \
             -command "$this indentLine"
     
     $menubar command tab format \
-	    -label "Tab" -underline 0 -accelerator "C-q Tab" \
+	    -label "Tab" \
+            -underline 0 \
+            -accelerator [::tycho::Shortcuts::getLabel Tab] \
             -command "$this insertString insert {\t}"
     
     $menubar command indentregion format \
-	    -label "Indent Region" -underline 2 \
-            -accelerator "M-C-\\" \
+	    -label "Indent Region" \
+            -underline 2 \
             -command "$this busy $this indentSelection"   
 }
