@@ -69,7 +69,7 @@ extern "C" {
 #include "xfunctions.h"			/* define win_msg */
 #include "handle.h"
 #include "kernelCalls.h"		/* define functions prefixed by Kc */
-int SetChangedFlag();
+#include "dmmSupport.h"			/* define SetChangedFlag */
 #undef Pointer
 }
 
@@ -1655,7 +1655,7 @@ int POct::ptkGetStarName(int aC, char** aV) {
     // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return
          usage("ptkGetStarName <octObjectHandle>");
-    if(strcmp(aV[1], "NIL") == 0) return POCT_TCL_NIL;
+    if (strcmp(aV[1], "NIL") == 0) return POCT_TCL_NIL;
     if (ptkHandle2OctObj(aV[1], facet) == 0) {
          Tcl_AppendResult(interp, "Bad or Stale facet Handle passed to ", 
                           aV[0], (char *) NULL);
@@ -1673,42 +1673,44 @@ int POct::ptkGetStarName(int aC, char** aV) {
 	return TCL_OK;
     }
 }
-//////////////////////////////////////////////////////////////////
-//	Sets the dmm changed flag for DMM domain applications whenever
-// 	parameter is changed
-//	called from ptkParams.tcl
-//	Asawaree Kalavade 11/22/95
-//////////////////////////////////////////////////////////////////
+
+// sets the dmm changed flag for DMM domain applications whenever
+// parameter is changed
+// called from ptkParams.tcl
+// Asawaree Kalavade 11/22/95
 int POct::ptkSetDMMChangedFlag(int aC,char** aV) {
-        octObject instance;
-        if(aC != 2)
-                return usage ("ptkSetDMMChangedFlag <OctInstanceHandle>");
-        if(ptkHandle2OctObj(aV[1], &instance) == 0) {
-                Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ",
-                aV[0], (char *) NULL);
-                return TCL_ERROR;
-        }
-        if(IsStar(&instance) || IsGal(&instance)) {
-        // Must be a star or Galaxy
-        // Set the domain to be that of the instance
-                if (!setCurDomainInst(&instance)) {
-                Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
-                return TCL_ERROR;
-                }
-                char* domain;
-                domain = getDomainInst(&instance);
-                if(strcmp(domain,"DMM") == 0)
-                {
-                        /* the domain is DMM, set the changedFlag */
-                        SetChangedFlag(&instance);
-                }
-        }
-        return TCL_OK;
+    octObject instance = {OCT_UNDEFINED_OBJECT};
+
+    // Error checking: number of arguments, value of arguments, oct facet file
+    if (aC != 2) return usage ("ptkSetDMMChangedFlag <OctInstanceHandle>");
+    if (ptkHandle2OctObj(aV[1], &instance) == 0) {
+	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ",
+			 aV[0], (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (IsStar(&instance) || IsGal(&instance)) {
+	// Must be a star or Galaxy
+	// Set the domain to be that of the instance
+	if (!setCurDomainInst(&instance)) {
+	    Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
+	    return TCL_ERROR;
+	}
+
+	// if the domain is DMM, then set the changedFlag
+	const char* domain = getDomainInst(&instance);
+	if (strcmp(domain, "DMM") == 0) {
+	    SetChangedFlag(&instance);
+	}
+    }
+    FreeOctMembers(&instance);
+    return TCL_OK;
 }
-//////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
 // The rest of the code in this file is duplicated from the PTcl class
 // in $PTOLEMY/src/ptcl/PTcl.cc.
-
+//
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
