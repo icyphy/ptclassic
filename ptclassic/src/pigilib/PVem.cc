@@ -51,6 +51,10 @@ extern "C" {
 #include "rpc.h"
 #undef Pointer
 }
+extern vemStatus vemCommand(char *vemCmd, RPCSpot *spot,
+			     lsList cmdList, long userOptionWord);
+extern Window vemOpenWindow(octObject *facet, char *geo);
+int ptkHandle2OctObj( char *stringValue, octObject *objPtr );
 
 // FIXME: This include is only needed for the "quote" macro
 //        Seems silly to include so much extra baggage - aok
