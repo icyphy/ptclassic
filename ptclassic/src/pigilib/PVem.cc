@@ -51,6 +51,7 @@ extern "C" {
 #include "vemInterface.h"
 #include "octMacros.h"
 #include "rpc.h"
+#include "octIfc.h"
 #undef Pointer
 }
 
@@ -192,6 +193,7 @@ int PVem::pvOpenWindow (int aC,char** aV) {
     if (octBB(&facet, &bbox) == OCT_NO_BB) { 
        AdjustScalePan(newWindow, facet.objectId);
     }
+    FreeOctMembers(&facet);
     return TCL_OK;
 }
 
