@@ -79,7 +79,6 @@ provisions.
       /* Update parameters */
       StringList updateParameters = "$sharedSymbol(CGCStereoBase,set_parameters)";
       updateParameters << "($starSymbol(file), "
-		       << "\"" << encodingType << "\", "
 		       << "\"" << inputPort << "\", "
 		       <<  volume << ", " 
 		       <<  balance << ", " 
