@@ -60,8 +60,9 @@ EXTRA_SRCS =	abbreviations.html \
 		running.html \
 		sponsors.html \
 		troubleshooting.html \
-		tymac.html \
+		tychoClasses.html \
 		tychoFaq.html \
+		tymac.html \
 		tynt.html \
 		tyunix.html
 
