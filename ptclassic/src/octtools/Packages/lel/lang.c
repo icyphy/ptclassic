@@ -1573,7 +1573,7 @@ char **spot;			/* Current spot in string */
 	tok_buf = malloc(tok_buf_len);
     }
     if (idx && *idx) {
-	while (isspace(*idx)) idx++;
+	while (isspace((int)*idx)) idx++;
 	if (*idx == '"') {
 	    /* String constant */
 	    result = idx;
@@ -1583,7 +1583,7 @@ char **spot;			/* Current spot in string */
 	} else {
 	    /* Token until space */
 	    result = idx;
-	    while (*idx && !isspace(*idx)) idx++;
+	    while (*idx && !isspace((int)*idx)) idx++;
 	}
 	len = idx - result;
 	if (len >= tok_buf_len) {
@@ -1656,19 +1656,19 @@ char *expr;
 	    c = token;
 	    /* Attempt to read through as if it were a number */
 	    if ((*c == '+') || (*c == '-')) c++;
-	    if (isdigit(*c)) {
-		while (isdigit(*c)) c++;
+	    if (isdigit((int)*c)) {
+		while (isdigit((int)*c)) c++;
 		if (*c) {
 		    item.type = REAL;
 		    if (*c == '.') {
 			c++;
-			while (isdigit(*c)) c++;
+			while (isdigit((int)*c)) c++;
 		    }
 		    if (*c) {
 			if ((*c == 'e') || (*c == 'E')) c++;
 			if ((*c == '+') || (*c == '-')) c++;
-			if (isdigit(*c)) {
-			    while (isdigit(*c)) c++;
+			if (isdigit((int)*c)) {
+			    while (isdigit((int)*c)) c++;
 			    if (*c) item.type = OP;
 			} else {
 			    item.type = OP;
