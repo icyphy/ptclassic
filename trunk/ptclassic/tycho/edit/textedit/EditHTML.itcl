@@ -453,17 +453,14 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     set text $itk_component(text)
 
     # These keys are special in HTML
-    bind $text <Key-ampersand> "$this insertString insert {&amp;};break"
-    bind $text <Key-greater> "$this insertString insert {&gt;}; break"
-    bind $text <Key-less> "$this insertString insert {&lt;}; break"
-    bind $text <Key-backslash> "$this insertString insert {&#92}; break"
-
-    # Here's how to create those symbols
-    bind $text <Control-c><Key-ampersand> "$this insertString insert {&};break"
-    bind $text <Control-c><Key-greater> "$this insertString insert {>}; break"
-    bind $text <Control-c><Key-less> "$this insertString insert {<}; break"
+    bind $text <Control-c><Key-ampersand> \
+	    "$this insertString insert {&amp;};break"
+    bind $text <Control-c><Key-greater> \
+	    "$this insertString insert {&gt;}; break"
+    bind $text <Control-c><Key-less> \
+	    "$this insertString insert {&lt;}; break"
     bind $text <Control-c><Key-backslash> \
-	    "$this insertString insert {\\}; break"
+	    "$this insertString insert {&#92;}; break"
 
     bind $text <Control-c><Key-a> \
 	    "$this insertAndMove {<address></address>} -10; break"
