@@ -66,6 +66,10 @@ public:
 		return (DFNebulaPort*) port;
 	}
 	
+	/*virtual*/ Nebula* asNebula(Block* b) const {
+		return (DFNebula*) b;
+	}
+	
 	/*virtual*/ void initialize();
 	
 	/*virtual*/ int isSDFinContext() const;

@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DFNebula.h"
 
 int DFNebula::run() {
-	return Nebula::run();
+    return Nebula::run();
 }
 
 // Constructors
@@ -46,33 +46,33 @@ DFNebula::DFNebula() : DataFlowStar(), Nebula(*(DataFlowStar*)this) {};
 
 DFNebulaPort::DFNebulaPort(const PortHole* master, Nebula* parentN)
 : DFPortHole(), NebulaPort(*this,*master,parentN) {
-	const DFPortHole& dfmaster = *(const DFPortHole*)master;
-	DFPortHole::maxBackValue = dfmaster.maxDelay();
+    const DFPortHole& dfmaster = *(const DFPortHole*)master;
+    DFPortHole::maxBackValue = dfmaster.maxDelay();
 }
 
 /*virtual*/ void DFNebula::initialize(){
-	Nebula::initMaster();
-	DataFlowStar::initialize();
+    Nebula::initMaster();
+    DataFlowStar::initialize();
 }
-	
+
 PortHole* DFNebula::clonePort(const PortHole* master) {
-	return new DFNebulaPort(master,this);
+    return new DFNebulaPort(master,this);
 }
 
 Nebula* DFNebula::newNebula(Block* master) const {
-	LOG_NEW; Nebula* neb = new DFNebula();
-	neb->setMasterBlock(master);
-	return neb;
+    LOG_NEW; Nebula* neb = new DFNebula();
+    if (master) neb->setMasterBlock(master);
+    return neb;
 }
 
 int DFNebula::isSDFinContext() const {
-	if (Nebula::master->isItAtomic())
-		return ((DataFlowStar*)Nebula::master)->isSDFinContext();
-	GalStarIter nextStar(gal);
-	DataFlowStar* s;
-	while ((s = (DataFlowStar*) nextStar++) != 0)
-		if (!s->isSDFinContext()) return FALSE;
-	return TRUE;
+    if (Nebula::master->isItAtomic())
+	return ((DataFlowStar*)Nebula::master)->isSDFinContext();
+    GalStarIter nextStar(gal);
+    DataFlowStar* s;
+    while ((s = (DataFlowStar*) nextStar++) != 0)
+	if (!s->isSDFinContext()) return FALSE;
+    return TRUE;
 }
 
 

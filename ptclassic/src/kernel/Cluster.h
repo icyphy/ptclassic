@@ -40,21 +40,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Block.h"
 #include "GalIter.h"
 #include "DynamicGalaxy.h"
+#include "Scheduler.h"
 class Star;
 class NebulaPort;
 
 class Nebula {
 friend class NebulaIter;
 public:
-    // Constructor.
+
     Nebula(Star& self);
 
+    virtual ~Nebula();
     // set the master and build nebula
     virtual void setMasterBlock(Block* master,PortHole** newPorts = NULL);
     
     // Set the scheduler of the Nebula
-    void setInnerSched(Scheduler* s) {sched = s;}
+    void setInnerSched(Scheduler* s);
 
+    void setStopTime(double limit) {
+	sched->setStopTime(limit);
+    }
+
+    double getStopTime() {
+	return sched->getStopTime();
+    }
+    
     Galaxy* galaxy() { return &gal;}
 
     // Generate the schedules of the nested Nebulas recursively.
@@ -87,6 +97,8 @@ public:
     // return the PortHole pointer casted to its repective NebulaPort
     // hole class.  (ie DFNebulaPort for DFNebula)
     virtual NebulaPort* nebulaPort(PortHole*) const = 0;
+
+    virtual Nebula* asNebula(Block*) const = 0;
     
     virtual Nebula* newNebula(Block* s = NULL) const = 0;
 
@@ -106,10 +118,12 @@ protected:
 // An iterator for NebulaList.
 class NebulaIter : private GalStarIter {
 public:
-    NebulaIter(Nebula& n):GalStarIter(n.gal) {};
-    Nebula* next() { return (Nebula*)GalStarIter::next();}
+    NebulaIter(Nebula& n):master(n),GalStarIter(n.gal) {};
+    Nebula* next() { return master.asNebula(GalStarIter::next());}
     Nebula* operator++(POSTFIX_OP) { return next();}
     GalStarIter::reset;
+private:
+    Nebula& master;
 };
 
 class NebulaPort {
