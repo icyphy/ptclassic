@@ -1,10 +1,11 @@
-#!/bin/csh -f
+#!/bin/csh -fx
 # 
 # Version: $Id$
 
 lpr -P$PRINTER users_manIX.ps
 lpr -P$PRINTER references.ps
 lpr -P$PRINTER ptglossary.ps
+lpr -P$PRINTER sharedlib.ps
 lpr -P$PRINTER filter.ps
 lpr -P$PRINTER x.ps
 lpr -P$PRINTER install.ps
