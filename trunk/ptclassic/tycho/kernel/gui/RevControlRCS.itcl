@@ -164,7 +164,7 @@ body ::tycho::RevControlRCS::unedit {} {
     }
     cdDir $dir
     catch {exec rcs -u $basefile} output 
-    set scanout [getRlog $file]
+    set scanout [getRlog $basefile]
     if {[regexp -nocase {([a-z]+):} $scanout]} {
 	error "Unedit failed: $output"
     }    
@@ -198,9 +198,9 @@ body ::tycho::RevControlRCS::viewHistory {} {
 	    error "The file \"$file\" is not under RCS control."
 	}
 	cdDir $dir
-	catch {exec sccs prs $basefile} history
-
-	catch {exec rlog $file} results
+	if [catch {exec rlog $basefile} results] {
+	    error "`rlog $basefile' failed:\n$results"
+	}
 	set ind1 [string first "----------------------------" $results]
 	if {$ind1 == -1} {
 	    # No logs yet.
@@ -223,8 +223,8 @@ body ::tycho::RevControlRCS::viewHistory {} {
 	# Parse the history
 	parseHistory $history [$itk_component(history) textWinName]
 
-	# Delay or the focus command is ignored.  Tk bug?
-	after 500 "focus [$itk_component(history) textWinName]"
+	# FIXME: Delay or the focus command is ignored.  Tk bug?
+	#after 500 "focus [$itk_component(history) textWinName]"
 
 	cd $olddir
     }
@@ -261,7 +261,18 @@ body ::tycho::RevControlRCS::checkIn {object} {
 	return
     }
     set comment [format "%s\n.\n" $comment]
-    catch {exec echo $comment | ci -u $basefile} output
+    if [catch {exec echo $comment | ci -u -q -f $basefile} output] {
+	if [regexp "file is unchanged; reverting to previous revision" \
+		$output] {
+	    ::tycho::warn "Check in command:\n\
+		    `echo $comment | ci -u -q -f $basefile'\
+		    produced a warning:\n\
+		    $output"
+	} else {
+	    error "Checkin command:\n\
+		    `echo $comment | ci -u -q -f $basefile' failed:\n$output"
+	}
+    }
     set scanout [getRlog $file]
     if {[regexp -nocase {([a-z]+):} $scanout]} {
 	error "Checkin failed: $output"
@@ -287,7 +298,11 @@ body ::tycho::RevControlRCS::checkOut {object} {
 	error "The file \"$basefile\" is checked out by: $lockowner."
     } 
     cdDir $dir
-    catch {exec co -l $basefile} output
+    # -l argument locks, -q argument does not print diagnostics
+    if [catch {exec co -l -q $basefile} output] {
+	
+	error "Checkout command `co -l $basefile' failed:\n$output"
+    }
     set scanout [getRlog $file]
     regexp -nocase {([a-z]+):} $scanout garbage lockowner
     if {![info exists lockowner]} {
@@ -404,7 +419,9 @@ body ::tycho::RevControlRCS::parseHistory {history text} {
 # Get rlog information about a file and check for the "locks" field.
 #
 body ::tycho::RevControlRCS::getRlog {file} {
-    catch {exec rlog $file} results
+    if [catch {exec rlog $file} results] {
+	error "`rlog $file' failed:\n$results"
+    }
     set ind1 [string first "locks:" $results]
     set ind2 [string first "access list:" $results]
     set ind1 [expr $ind1 + 6]
