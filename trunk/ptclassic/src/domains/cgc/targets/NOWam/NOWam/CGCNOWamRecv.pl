@@ -68,9 +68,7 @@ Produce code for inter-process communication (receive-side).
 	codeblock (ipcHandler) {
 void $starSymbol(ipc_handler)(void *source_token, void *buf, int nbytes, int d1, int d2, int d3, int d4)
 {
-	double *temp;
-	temp = (double *)buf;
-        $starSymbol(RecvData) = *temp;
+        memcpy((void *)&$starSymbol(RecvData), buf, nbytes);
 }
 	}
         codeblock (errorHandler) {
@@ -118,7 +116,6 @@ void error_handler(int status, op_t opcode, void *argblock)
         }
         codeblock (amdecls) {
 en_t global;
-eb_t bundle;
         }
 	codeblock (timedecls) {
 #ifdef TIME_INFO
@@ -141,14 +138,6 @@ ea_t $starSymbol(endpoint);
 	}
         codeblock (aminit) {
 AM_Init();
-if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
-        fprintf(stderr, "error: AM_AllocateBundle failed\n");
-        exit(1);
-}
-if (AM_SetEventMask(bundle, AM_EMPTYTONOT ) != AM_OK) {
-        fprintf(stderr, "error: AM_SetEventMask error\n");
-        exit(1);
-}
         }
 	codeblock (timeinit) {
 #ifdef TIME_INFO
@@ -214,6 +203,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addGlobal("double $starSymbol(RecvData);\n");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
+		addInclude("<string.h>");
 		addInclude("<thread.h>");
 		addInclude("<udpam.h>");
 		addInclude("<am.h>");
