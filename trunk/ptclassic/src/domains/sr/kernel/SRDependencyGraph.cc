@@ -275,7 +275,8 @@ StringList SRDependencyGraph::displayGraph() const
     } else {
       out << "(fictitious)\n  -> ";
     }
-    for ( int e = 0 ; e < fEdgeCount[v] ; e++ ) {
+    int e;
+    for ( e = 0 ; e < fEdgeCount[v] ; e++ ) {
       out << fEdge[v][e] << " ";
     }
     out << "\n  <- ";
