@@ -309,6 +309,7 @@ KcLoadInit (const char* argv0) {
 	if (ptolemyRoot == 0) {
 		ptolemyRoot = hashstring(expandPathName("~ptolemy"));
 	}
+	// FIXME: Memory Leak
 	tmpFileName = tempFileName();
 	Linker::init (argv0);
 	// look for a file specifying modules to be permanently linked in
