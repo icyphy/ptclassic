@@ -70,6 +70,10 @@ extern "C" {
 #pragma interface
 #endif
 
+// FIXME: Decide which setting is right -BLE
+// Set to a non-zero value to include MkSchemPalette state
+#define POCT_MKSCHEMPALETTE_MEMBER 0
+
 class POct : public TclObj {
 
 public:
@@ -130,17 +134,20 @@ private:
 
 	// State functions to remind users of past input vaules
 	// Note that these are only to help out the user as a convenience
-	//
+
 	// For ptkSetSeed and ptkGetSeed
         int OldRandomSeed; 	
+
 	// For ptkGetMkStar and ptkSetMkStar
 	StringList MkStarName; 
         StringList MkStarDomain; 
 	StringList MkStarDir; 
 	StringList MkStarPalette;
+
 	// For ptkSetMkSchemIcon and ptkGetMkSchemIcon
-	// FIXME:  Add following line back for MkSchemIcon state
-	// StringList MkSchemPalette;
+#if POCT_MKSCHEMPALETTE_MEMBER
+	StringList MkSchemPalette;
+#endif
 
 	// Helper Functions that are not TCL callable directly
 
