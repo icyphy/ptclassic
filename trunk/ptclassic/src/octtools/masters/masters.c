@@ -234,7 +234,7 @@ char **argv;
 	     * Perform preliminary check for validity of the name
 	     */
 	    strcpy(filename,input_name);
-	    strcat(filename,"/schematic/interface;");
+	    strcat(filename,"/schematic/contents;");
 	    if(access(expandPathName(filename),4)) {
 		printf("Skipping %s (invalid facet)\n",input_name);
 		continue;
