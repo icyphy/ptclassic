@@ -207,7 +207,7 @@ $(ITCL_DEST_LIB)/libitcl.a:
 		install)
 fixlinks:
 	@echo "Create unversioned links for arch independent libraries"
-	-(cd $(ITCL_INDEPENDENT_DEST)/lib/itcl; \
+	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
 		rm -f tcl tk itcl itk iwidgets; \
 		ln -s tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER) tcl; \
 		ln -s tk$(ITCL_TK_MAJOR_VERSION_NUMBER) tk; \
