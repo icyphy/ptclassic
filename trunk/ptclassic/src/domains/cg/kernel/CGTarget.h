@@ -173,6 +173,15 @@ public:
     virtual int execTime(DataFlowStar* s, CGTarget* t = 0)
 	{ return s->myExecTime(); }
 
+    // methods for sending and receiving data to a target when
+    // run inside of a wormhole. Argument is the "real port" of the 
+    // interior star that is attached to an event horizon.  If no argument 
+    // is given, send & receive for all the appropriate portholes.
+    virtual int sendWormData();
+    virtual int receiveWormData();
+    virtual int sendWormData(PortHole&);
+    virtual int receiveWormData(PortHole&);
+
 protected:
     // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
@@ -250,15 +259,6 @@ protected:
 	 // the sample rate of event horizons after scheduling is performed.
 	 void adjustSampleRates();
 
-    // methods for sending and receiving data to a target when
-    // run inside of a wormhole. Argument is the "real port" of the 
-    // interior star that is attached to an event horizon.  If no argument 
-    // is given, send & receive for all the appropriate portholes.
-    virtual int sendWormData();
-    virtual int receiveWormData();
-    virtual int sendWormData(PortHole&);
-    virtual int receiveWormData(PortHole&);
-
     // writes initial code
     virtual void headerCode();
 
@@ -278,6 +278,11 @@ protected:
     // public member getStream
     CodeStreamList codeStringLists;
     
+    // splice in a new star, returning a pointer to the new star.
+    // dom is the domain of the new star.
+    Block* spliceStar(PortHole*, const char* name, int delayBefore,
+                             const char* dom);
+
 private:
     // return non-zero if this target is not a child target, or not
     // inherited from another target. Then, generate code in the setup
@@ -285,6 +290,9 @@ private:
     int alone() { return (parent() == NULL) && (inheritFlag == FALSE); }
 
     int inheritFlag;
+
+    // list of spliced stars
+    SequentialList spliceList;
 };
 
 #endif
