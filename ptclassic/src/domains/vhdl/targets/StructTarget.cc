@@ -1397,7 +1397,7 @@ void StructTarget :: buildComponentDeclarations(int level) {
 	}
 	component_declarations << indent(level) << ngen->name << ": "
 			       << ngen->type;
-	if (strlen(ngen->defaultVal) > 0) {
+	if (ngen->defaultVal.length() > 0) {
 	  component_declarations << " := " << ngen->defaultVal;
 	}
 	genCount++;
