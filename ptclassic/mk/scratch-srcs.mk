@@ -144,7 +144,7 @@ xv_bin: $(OBJARCH)/xv
 		$(MAKE) \
 		CC=$(XV_CC) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
-		AR=ar\
+		AR=ar \
 		RANLIB=ranlib \
 		RAND=$(XV_RAND) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
@@ -154,7 +154,7 @@ xv_install: $(OBJARCH)/xv
 		$(MAKE) \
 		CC=$(XV_CC) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
-		AR=ar\
+		AR=ar \
 		RANLIB=ranlib \
 		INSTALL=$(XV_INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
