@@ -293,7 +293,8 @@ void ParScheduler :: compileRun() {
 	if (numProcs == 1) {
 		CGTarget* t = (CGTarget*) mtarget->child(0);
 		t->setGalaxy(*galaxy());
-		mtarget->addProcessorCode(0,t->generateCode());
+		t->generateCode();
+		mtarget->addProcessorCode(0,(*t->getStream("myCode")));
 		return;
 	}
 
