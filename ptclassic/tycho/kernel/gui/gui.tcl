@@ -46,8 +46,6 @@ if { [lsearch -exact $auto_path $env(GUI_LIBRARY)] == -1 } {
 
 # Some files are going to be needed anway, so source them now
 uplevel #0 {
-    source [file join $env(BASIC_LIBRARY) CircularList.itcl]
-
     source [file join $env(GUI_LIBRARY) FontManager.itcl]
     source [file join $env(GUI_LIBRARY) ColorManager.itcl]
     source [file join $env(GUI_LIBRARY) TopLevel.itcl]
