@@ -36,7 +36,6 @@ DEFilter.pl \
 DEFloatDC.pl \
 DEFloatRamp.pl \
 DEFork.pl \
-DEge.pl \
 DEHandShake.pl \
 DEImageToCell.pl \
 DEImpulse.pl \
@@ -68,6 +67,10 @@ DEStatistics.pl \
 DEStopTimer.pl \
 DESwitch.pl \
 DESynchronize.pl \
+DETestEQ.pl \
+DETestGE.pl \
+DETestGT.pl \
+DETestNE.pl \
 DETestLevel.pl \
 DETimeout.pl \
 DETimeoutStar.pl \
