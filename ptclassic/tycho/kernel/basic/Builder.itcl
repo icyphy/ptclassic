@@ -227,7 +227,7 @@ body ::tycho::Builder::glimpse {} {
 #######################################################################
 #### idocs
 # Create idocs in the subdirectories.
-# See $TYCHO/lib/tydoc/idoc for more information.
+# See $TYCHO/util/tydoc/idoc for more information.
 #
 body ::tycho::Builder::idocs {} {
     global TYCHO
@@ -276,7 +276,7 @@ body ::tycho::Builder::indices {} {
 #######################################################################
 #### itcldocs
 # Create itcldocs in the subdirectories.
-# See $TYCHO/lib/tydoc/tydoc for more information.
+# See $TYCHO/util/tydoc/tydoc for more information.
 #
 body ::tycho::Builder::itcldocs {} {
     global TYCHO
