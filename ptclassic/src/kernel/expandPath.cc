@@ -52,6 +52,7 @@ Reference:
 #ifndef PT_NO_PWD
 #include <pwd.h>
 #endif
+#include <unistd.h>
 #include "Error.h"
 #include "Tokenizer.h"
 #include "StringList.h"
