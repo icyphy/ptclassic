@@ -35,7 +35,10 @@ Note: all print functions append \n to string before printing.
 #include "local.h"
 #include <stdio.h>
 #include "compat.h"
-#include "rpc.h"
+
+/* Pull in oct.h and rpc.h to define octObject and remote procedure calls */
+#include "vemInterface.h"
+
 #include "ptk.h"
 #include "err.h"
 #include "octMacros.h"
