@@ -52,7 +52,7 @@ Cluster boundaries are represented by disconnected portholes;
 BDFScheduler treats such portholes exactly as if they were wormhole
 boundaries.
 
-The virtual baseclass BDFCluster refers to either type of cluster.
+The virtual base class BDFCluster refers to either type of cluster.
 
 Two specialized types of scheduler, both derived from BDFScheduler,
 are used; BDFBagScheduler is used for schedules inside BDFClusterBags,
@@ -88,8 +88,8 @@ public:
 	BDFClusterGal(ostream* log = 0)
 	: logstrm(log), bagNumber(-1), urateFlag(FALSE) {}
 
-	// destructor zaps all the member clusters (inherited)
-	~BDFClusterGal() {}
+	// inherit virtual destructor, which zaps inherited data members
+	virtual ~BDFClusterGal() {}
 
         // remove blocks from this galaxy without deallocating the blocks
 	void orphanBlocks();
@@ -199,11 +199,16 @@ enum BDFLoopType {
 
 class BDFTopGal : public BDFClusterGal {
 public:
-	BDFTopGal(Galaxy& g, ostream* log = 0)
-	: BDFClusterGal(g,log), sched(0) {}
-	~BDFTopGal();
+	// constructor
+	BDFTopGal(Galaxy& g, ostream* log = 0) :
+		BDFClusterGal(g,log), sched(0) {}
+
+	// destructor
+	/* virtual */ ~BDFTopGal() {}
+
 	Scheduler* scheduler() const { return sched;}
 	inline void setSched(Scheduler* s) { sched = s;}
+
 private:
 	Scheduler* sched;
 };
@@ -224,8 +229,9 @@ public:
 	// constructor: looping is 1 by default
 	BDFCluster() : pLoop(1), visitFlag(0), pCond(0), pType(DO_ITER) {}
 
-	// make destructor virtual
-	virtual ~BDFCluster() {}
+	// make destructor virtual so that delete p works properly when
+	// p can be either a BDFCluster* or a pointer to child of BDFCluster
+	/* virtual */ ~BDFCluster() {}
 
 	void setVisit(int i) { visitFlag = i; }
 	int  visited() { return visitFlag; }
@@ -388,7 +394,7 @@ public:
 	// constructor: makes an empty bag
 	BDFClusterBag();
 	// destructor
-	~BDFClusterBag();
+	/* virtual */ ~BDFClusterBag();
 
 	// how many clusters
 	int size() const { return gal ? gal->numberBlocks() : 0;}
@@ -497,7 +503,7 @@ public:
 	// constructor and destructor
 	BDFClustSched(const char* log = 0, int canDoDyn = TRUE,
 		      int constCheck = FALSE);
-	~BDFClustSched();
+	/* virtual */ ~BDFClustSched();
 
 	// return the schedule
 	StringList displaySchedule();
@@ -525,6 +531,7 @@ protected:
 		return strongConstCheck ? BDFScheduler::repetitions()
 			: TRUE;
 	}
+
 private:
 	// The clustered galaxy.
 	BDFTopGal* cgal;
