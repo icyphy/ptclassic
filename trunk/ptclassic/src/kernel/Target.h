@@ -26,10 +26,6 @@ $Id$
 
 class Scheduler;
 class Galaxy;
-class PGNode;
-class Cluster;
-class PGParSchedule;
-class IntList;
 
 class Target : public Block {
 private:
@@ -109,8 +105,6 @@ public:
 
 	virtual StringList displaySchedule();
 
-	virtual int commTime(int sender,int receiver,int nUnits, int type);
-
 	// return the nth child Target, null if no children.
 	Target* child(int n);
 
@@ -139,32 +133,11 @@ public:
 	// initialize data structures
 	virtual void initialize();
 
-	// NOTE: to have the Target do specific things based on
-	// state values, do it in a start() function, as for stars.
-
 	// run
 	virtual int run();
 
 	// wrapup
 	virtual void wrapup();
-
-	// methods for use in parallel scheduling -- the baseclass
-	// takes appropriate actions for a single processor, which
-	// is usually almost nothing.
-
-	// these functions manipulate the saved communication pattern
-	// (which doesn't exist in the baseclass)
-	virtual void clearCommPattern();
-	virtual void saveCommPattern();
-	virtual void restoreCommPattern();
-
-	virtual PGNode* backComm(PGNode*);
-
-	// this function schedules a node
-	virtual int scheduleComm(PGNode*, int earliestStart);
-
-	// this function returns a list of alternative candidate processors
-	virtual IntList* whichProcs(Cluster*, PGParSchedule*);
 
 	// Routines for writing code: schedulers may call these
 	// The depth normally just helps with indentations, but can
@@ -172,6 +145,9 @@ public:
 	virtual StringList beginIteration(int repetitions, int depth);
 	virtual StringList endIteration(int repetitions, int depth);
 	virtual StringList writeFiring(Star& s, int depth);
+
+        // resource management
+        virtual int commTime(int sender,int receiver,int nUnits, int type);
 
 	// class identification
 	int isA(const char*) const;
