@@ -219,12 +219,12 @@ void CompileTarget::wrapup() {
     cmd += "( echo make.template already exists) ";
     cmd += " else ";
     cmd += "( cp ";
-    const char* template = expandPathName("~ptolemy/lib/CompileMake.template");
-    cmd += template;
+    const char* templName = expandPathName("~ptolemy/lib/CompileMake.template");
+    cmd += templName;
     cmd += " make.template ) ";
     cmd += "fi";
     if(system(cmd)) {
-	Error::abortRun("Failed to copy ", template, " into make.template");
+	Error::abortRun("Failed to copy ", templName, " into make.template");
 	return;
     }
     // Invoke make depend
