@@ -21,6 +21,7 @@ $Id$
 #include "UserOutput.h"
 #include "CG56Star.h"
 #include "KnownTarget.h"
+#include <sys/file.h>
 
 Sim56Target :: Sim56Target(const char* nam, const char* desc) :
 	CG56Target(nam,desc)
@@ -36,37 +37,56 @@ Sim56Target::Sim56Target(const Sim56Target& arg) :
 }
 
 void Sim56Target :: initStates() {
-	addState(plotFile.setState("plotFile",this,"",
-				   "file to plot with xgraph after run"));
-	addState(plotTitle.setState("plotTitle",this,"Simulator output",
-				    "graph title (if any)"));
-	addState(plotOptions.setState("plotOptions",this,"outfile.sim",
-				      "xgraph options"));
-	runCode.setValue("YES");
-	runCode.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	addState(plotFile.setState("Plot file name",this,"outfile.sim",
+		"file to plot with xgraph after run"));
+	addState(plotTitle.setState("Plot title",this,"Simulator output",
+		"graph title (if any)"));
+	addState(plotOptions.setState("Plot options",this,"",
+		"xgraph options"));
+	addState(interactiveFlag.setState(
+		"Interactive Simulation",this,"YES",""));
+	runFlag.setValue("YES");
+	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
 }
 
-void Sim56Target::initializeCmds() {
-	CG56Target::initializeCmds();
-	assembleCmds += "asm56000 -A -b -l ";
+int Sim56Target::compileTarget() {
+	StringList assembleCmds = "asm56000 -A -b -l ";
 	assembleCmds += uname;
-	assembleCmds += "\n";
-	miscCmds += "load ";
-	miscCmds += fileName(uname,".lod\n");
-	downloadCmds += "xterm -e sim56000 ";
-	downloadCmds += fileName(uname,".cmd\n");
-	const char* file = plotFile;
-	if (*file != 0) {
-		downloadCmds += "awk '{print ++n, $1}' ";
-		downloadCmds += file;
-		downloadCmds += " | xgraph -t '";
-		downloadCmds += (const char*)plotTitle;
-		downloadCmds += "' ";
-		downloadCmds += (const char*)plotOptions;
-		downloadCmds += "&\n";
-	}
+	return systemCall(assembleCmds,"Errors in assembly");
 }
 
+int Sim56Target::runTarget() {
+	const char* file = plotFile;
+	if (*file != 0) unlink(fullFileName((char *)file));
+	StringList cmdFile = "load ";
+	cmdFile += fileName(uname,".lod\n");
+	cmdFile += miscCmds;
+	cmdFile += "break pc>=$ff0\n";
+	cmdFile += "go $48\n";
+	if (!interactiveFlag) cmdFile += "quit\n";
+	if (!genFile(cmdFile, uname,".cmd")) return FALSE;
+	StringList downloadCmds;
+	if (interactiveFlag) 
+		downloadCmds = "(xterm -e sim56000 ";
+	else 
+		downloadCmds = "(sim56000 ";
+	downloadCmds += fileName(uname,".cmd");
+	downloadCmds += " > /dev/null)";
+	if (systemCall(downloadCmds,"Errors in starting up the simulator")) 
+		return FALSE;
+	if (*file != 0 && access(fullFileName((char*)file),F_OK)==0) {
+		StringList plotCmds;
+ 		plotCmds = "awk '{print ++n, $1}' ";
+		plotCmds += file;
+		plotCmds += " | xgraph -t '";
+		plotCmds += (const char*)plotTitle;
+		plotCmds += "' ";
+		plotCmds += (const char*)plotOptions;
+		plotCmds += "&\n";
+		return systemCall(plotCmds,"Plot unsuccessful");
+	}
+	return TRUE;
+}
 
 void Sim56Target :: headerCode () {
 	CG56Target :: headerCode();
@@ -87,10 +107,7 @@ void Sim56Target :: wrapup () {
 		 "	org	p:$ff0\n"
 		 "	nop\n"
 		 "	stop\n");
-	miscCmds += "break pc>=$ff0\n";
-	miscCmds += "go $48\n";
 	inProgSection = TRUE;
-	if (!genFile(miscCmds, uname,".cmd")) return;
 	CG56Target::wrapup();
 }
 
@@ -100,4 +117,3 @@ ISA_FUNC(Sim56Target,CG56Target);
 static Sim56Target proto("sim-CG56","run code on the 56000 simulator");
 
 static KnownTarget entry(proto, "sim-CG56");
-

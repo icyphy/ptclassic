@@ -16,25 +16,20 @@ DSP56000 -- Input data from host to DSP via host port.
 		name {output}
 		type {FIX}
 	}
-        state {
-                name {command}
-	        type {string}
-	        desc { }
-	        default {""}
-	}
-	codeblock (sendCommand) {
-!$val(command)
+	state {
+		name {command}
+		type {string}
+		desc { }
+		default {""}
 	}
 	codeblock (std) {
 $label(l)
-        jclr    #m_hrdf,x:m_hsr,$label(l)
-        jclr    #1,x:m_pbddr,$label(l)
-        movep   x:m_hrx,$ref(output)
-	}
-	initCode {
-		gencode(sendCommand);
+	jclr	#m_hrdf,x:m_hsr,$label(l)
+	jclr	#1,x:m_pbddr,$label(l)
+	movep	x:m_hrx,$ref(output)
 	}
 	go {
+		addRunCmd(command,"\n");
 		gencode(std);
 	}
 }

@@ -25,24 +25,12 @@ $Id$
 #define CG56CodeBlock CodeBlock
 
 class CG56Star : public AsmStar {
-protected:
-	// const char* format(unsigned addr);
 public:
 	// my domain
 	const char* domain() const;
 
-	int fire();
-
 	// class identification
 	int isA(const char*) const;
-
-	// print fixed point values
-	StringList printFixValue(double arg) const {
-		return printFixedPointValue(arg);
-	}
-
-	// body of above function
-	static StringList printFixedPointValue(double);
 };
 
 #endif

@@ -17,63 +17,23 @@ $Id$
 #pragma interface
 #endif
 
-#include "AsmTarget.h"
+#include "MotorolaTarget.h"
 #include "ProcMemory.h"
 #include "StringState.h"
 #include "IntState.h"
 
-class CG56Memory : public DualMemory {
-public:
-	CG56Memory(const char* x_map, const char* y_map);
-	CG56Memory(const CG56Memory& arg) : DualMemory(arg) {}
-};
-
-class CG56Target : public AsmTarget {
-private:
-	NestedSymbol targetNestedSymbol;
-	void initStates();
+class CG56Target : public MotorolaTarget {
 protected:
-	StringState xMemMap;
-	StringState yMemMap;
-
-	void codeSection();
-	void orgDirective(const char* memName, unsigned addr);
-	void writeInt(int);
-	void writeFix(double);
 	void writeFloat(double);
-	void disableInterrupts();
-	void enableInterrupts();
-	void saveProgramCounter();
-	void restoreProgramCounter();
-
-	IntState disCode;
-	IntState runCode;
-	int inProgSection;
-	StringState targetHost;
-	char* uname;
-
-	virtual void initializeCmds();
-	virtual char downloadCmdFlag() const{return '!';}
-	virtual char miscCmdFlag() const{return '@';}
-	StringList downloadCmds;
-	StringList assembleCmds;
-	StringList miscCmds;
-	virtual const char* asmSuffix() const {return ".asm";}
 public:
-	CG56Target (const char* nam, const char* desc);
+	CG56Target (const char* nam, const char* desc) :
+		MotorolaTarget(nam,desc,"CG56Star") {};
 	// copy constructor
-	CG56Target(const CG56Target&);
+	CG56Target(const CG56Target& src) : 
+	  MotorolaTarget(src.readName(),src.readDescriptor(),"CG56Star") {};
 	Block* clone() const;
 	void headerCode();
-	int setup(Galaxy &g);
-	void wrapup();
-	void beginIteration(int repetitions, int depth);
-	void endIteration(int repetitions, int depth);
-	void addCode(const char*);
-	virtual int assembleCode();
-	virtual int downloadCode();
 	const char* readClassName() const{return "CG56Target";}
-	~CG56Target();
 };
 
 #endif

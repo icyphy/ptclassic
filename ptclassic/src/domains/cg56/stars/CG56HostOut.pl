@@ -6,9 +6,9 @@ defstar {
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
-        explanation {
+	explanation {
 Output data from DSP to host via host port.
-        }
+	}
 	input	{
 		name { input }
 		type { fix }
@@ -37,70 +37,64 @@ Output data from DSP to host via host port.
 		desc {  }
 		default { "" }
 	}
-        start {
-               input.setSDFParams(int(samplesConsumed),int(samplesConsumed)-1);
-        }
-
-        initCode {
-                 const char* p=command;
-                 if (p[0] != NULL) gencode(begin);
-        }
-
-        codeblock(begin) {
-!$val(command)
-        }
-        codeblock(yeshostBlock) {
-$label(l)
-        jclr    #m_htde,x:m_hsr,$label(l)
-        jclr    #0,x:m_pbddr,$label(l)
-        movep   $ref(input),x:m_htx
+	start {
+	input.setSDFParams(int(samplesConsumed),int(samplesConsumed)-1);
 	}
-        codeblock(elsehostBlock) {
-        jclr    #m_htde,x:m_hsr,$label(l)
-        jclr    #0,x:m_pbddr,$label(l)
-        movep   $ref(input),x:m_htx
+	initCode {
+		const char* p=command;
+		if (p[0] != NULL) addRunCmd(command,"\n");
+	}
+	codeblock(yeshostBlock) {
 $label(l)
-        }
-        codeblock(nohostBlock) {
-        jclr    #m_htde,x:m_hsr,$label(l3)		      
-        jclr    #0,x:m_pbddr,$label(l3)
-        move    #$addr(input),r0
-        do      #$val(samplesOutput),$label(l)
+	jclr	#m_htde,x:m_hsr,$label(l)
+	jclr	#0,x:m_pbddr,$label(l)
+	movep	$ref(input),x:m_htx
+	}
+	codeblock(elsehostBlock) {
+	jclr	#m_htde,x:m_hsr,$label(l)
+	jclr	#0,x:m_pbddr,$label(l)
+	movep	$ref(input),x:m_htx
+$label(l)
+	}
+	codeblock(nohostBlock) {
+	jclr	#m_htde,x:m_hsr,$label(l3)
+	jclr	#0,x:m_pbddr,$label(l3)
+	move	#$addr(input),r0
+	do	#$val(samplesOutput),$label(l)
 $label(l2)
-        jclr    #m_htde,x:m_hsr,$label(l2)
-        jclr    #0,x:m_pbddr,$label(l2)
-        movep   x:(r0)+,x:m_htx
+	jclr	#m_htde,x:m_hsr,$label(l2)
+	jclr	#0,x:m_pbddr,$label(l2)
+	movep	x:(r0)+,x:m_htx
 $label(l)
 $label(l3)
-        }
-        codeblock(done) {
-        move    #$addr(input),r0
-        do      #$val(samplesOutput),$label(l)
+	}
+	codeblock(done) {
+	move	#$addr(input),r0
+	do	#$val(samplesOutput),$label(l)
 $label(l2)
-        jclr    #m_htde,x:m_hsr,$label(l2)
-        jclr    #0,x:m_pbddr,$label(l2)
-        movep   x:(r0)+,x:m_htx
+	jclr	#m_htde,x:m_hsr,$label(l2)
+	jclr	#0,x:m_pbddr,$label(l2)
+	movep	x:(r0)+,x:m_htx
 $label(l1)
 $label(l3)
-        }        
-        go { 
-            const char* p=blockOnHost;		
-            if (samplesConsumed==1) {
-                if (p[0]=='y' || p[0]=='Y') 
-	              gencode(yeshostBlock);
-		else
-	              gencode(elsehostBlock);
-	    }	
-            else {
-               if (p[0]=='n' || p[0]== 'N')
-	              gencode(nohostBlock);
-	       else
-	              gencode(done);
-            }
-       }
+	}
+	go {
+		const char* p=blockOnHost;
+		if (samplesConsumed==1) {
+			if (p[0]=='y' || p[0]=='Y') 
+				gencode(yeshostBlock);
+			else
+				gencode(elsehostBlock);
+		}	
+		else {
+			if (p[0]=='n' || p[0]== 'N')
+				gencode(nohostBlock);
+			else
+				gencode(done);
+		}
+	}
 
 	execTime { 
 		return 2;
 	}
 }
- 

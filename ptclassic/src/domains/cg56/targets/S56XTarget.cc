@@ -21,6 +21,7 @@ $Id$
 #include "CG56Star.h"
 #include "KnownTarget.h"
 #include <sys/param.h>
+#include <sys/stat.h>
 
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
 	CG56Target(nam,desc)
@@ -40,18 +41,9 @@ void S56XTarget :: initStates() {
 	yMemMap.setValue("0-16383");
 	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
 	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
-	runCode.setValue("YES");
-	runCode.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	runFlag.setValue("YES");
+	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
 	targetHost.setAttributes(A_SETTABLE|A_NONCONSTANT);
-}
-
-void S56XTarget :: initializeCmds() {
-	CG56Target::initializeCmds();
-	assembleCmds += "asm56000 -b -l -A -oso ";
-	assembleCmds += uname;
-	assembleCmds += "\n";
-	downloadCmds += "load_s56x ";
-	downloadCmds += fileName(uname,".lod\n");
 }
 
 void S56XTarget :: headerCode () {
@@ -123,9 +115,25 @@ void S56XTarget :: wrapup () {
 		 "	nop\n"
 		 "	stop\n");
 	inProgSection = TRUE;
-	if (!genFile(miscCmds , uname,".aio")) return;
 	CG56Target::wrapup();
 }
+
+int S56XTarget :: compileTarget() {
+	StringList assembleCmds = "asm56000 -b -l -A -oso ";
+	assembleCmds += uname;
+	if (!genFile(miscCmds , uname,".aio")) return FALSE;
+	return systemCall(assembleCmds,"Errors in assembly");
+}
+
+int S56XTarget :: runTarget() {
+	StringList downloadCmds = "load_s56x ";
+	downloadCmds += fullFileName(uname,".lod\n");
+	downloadCmds += runCmds;
+	if (!genFile(downloadCmds,uname)) return FALSE;
+	chmod(fullFileName(uname),S_IRWXU);	//group execute permission;
+	return hostSystemCall(uname,"Problems loading code onto S56X");
+}
+
 
 ISA_FUNC(S56XTarget,CG56Target);
 
