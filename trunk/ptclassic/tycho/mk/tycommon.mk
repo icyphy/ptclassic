@@ -328,7 +328,8 @@ doc/codeDoc/tree.html:	$(JSRCS) $(OPTIONAL_JSRCS)
 	else \
 	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi; \
 	rm -f doc/codeDoc/*.html; \
-	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS) $(OPTIONAL_JSRCS); \
+	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip$(AUXCLASSPATH) \
+	   $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS) $(OPTIONAL_JSRCS); \
 	for x in doc/codeDoc/*.html; do \
 		echo "Fixing paths in $$x"; \
 		sed -e 's|<a href="java|<a href="$(JAVAHTMLDIR)/java|g' \
