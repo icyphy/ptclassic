@@ -34,12 +34,12 @@ Note: all print functions append \n to string before printing.
 /* Includes */
 
 /* Standard includes */
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 
 /* Octtools includes */
 #include "oct.h"
-#include "list.h"			/* define prototype for lsCreate */
+#include "list.h"		/* define prototype for lsCreate */
 #include "rpc.h"
 #include "rpcApp.h"
 
