@@ -73,6 +73,7 @@ CGWormhole.h \
 CodeBlock.h \
 CodeStream.h \
 CodeStreamList.h \
+ConversionTable.h \
 IntArray.h \
 MReq.h \
 MemMap.h \
