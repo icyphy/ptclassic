@@ -5,6 +5,7 @@
 #include "Output.h"
 #include "StringList.h"
 #include "FloatState.h"
+#include "Geodesic.h"
 
 /**************************************************************************
 Version identification:
