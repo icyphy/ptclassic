@@ -1117,7 +1117,7 @@ void ArchTarget :: frameCode() {
       // To please the Synopsys synthesis:
       // it insists on there being a sensitivity list.
       // FIXME: WAIT! does it?  what is the effect of no sensitivities?
-      //      myCode << addSensitivities(combinedFiring, level);
+      myCode << addSensitivities(combinedFiring, level);
 
       myCode << addDeclarations(combinedFiring, level);
       myCode << addVariableRefs(combinedFiring, level);
