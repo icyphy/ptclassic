@@ -26,17 +26,24 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  Christopher Hylands
-
+# Based on pigiRpc/makefile, originally by Joe Buck,
+#  with modifications from just about everyone on the Ptolemy Team.
+#
 # This makefile is included by makefiles that build standalone binaries.
 # By having one common makefile, we don't need to update lots of other
 # makefiles.  Currently, ptcl, pigiRpc and tycho use this file
 
+# This makefile expects the following variables to be defined:
+#  $(BASENAME), $(MAIN), $(SPECIAL_LIBS), $(SPECIAL_LIBS_DEPENDS)
+#  $(NEED_PALETTES), $(NEED_HOF), $(NEED_GRAPHICS), $(MAIN_DEPEND)
+# For example declarations, see $(PTOLEMY)/src/pigiRpc/makefile
+
 # Todo:
-# fix pigiVersion vs gVersion: installed pigilib/xfunctions.c
-# shared itcl libraries
+# Check out with compile-sdf
+# Build Shared itcl libraries
 # Include Init_itcl in pigi and ptcl
-# make a cp version
-# make a non-shared library
+# Test out pigiRpc.cp
+# Make a non-shared library
 
 # The version number.
 VERSION =	0.6devel.$(BASENAME)
@@ -65,7 +72,6 @@ endif
 
 ifeq ($(NEED_GRAPHICS),no)
 # Don't need graphics.  ptcl does not have tk
-ITCL_LIBSPEC =
 ITK_LIBSPEC =
 TK_LIBSPEC =
 X11_LIBSPEC =
@@ -119,19 +125,17 @@ PIGI_OBJS =	$(MAIN) $(PIGI_PALETTES) $(PIGI_STARS) $(PIGI_TARGETS)
 PTCP_OBJS =	$(MAIN) $(PTCP_PALETTES) $(PTCP_STARS) $(PTCP_TARGETS)
 
 # Define what the binary is dependent on
-PTINY_DEPEND =  $(MAIN_DEPEND) $(PTINY_PALETTES) \
-			$(PTINY_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PTINY_STARS) $(PTINY_TARGETS)
-PTRIM_DEPEND =  $(MAIN_DEPEND) $(PTRIM_PALETTES) \
-			$(PTRIM_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PTRIM_STARS) $(PTRIM_TARGETS)
-PIGI_DEPEND =	$(MAIN_DEPEND) $(PIGI_PALETTES) \
-			$(PIGI_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PIGI_STARS) $(PIGI_TARGETS)
-PTCP_DEPEND =  	$(MAIN_DEPEND) $(PTCP_PALETTES) \
-			$(PTCP_STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
-			$(PTCP_STARS) $(PTCP_TARGETS)
+GENERIC_DEPEND = $(MAIN_DEPEND) $(SPECIAL_LIB_DEPEND) $(LIBDIR)/libptolemy.a
+PTINY_DEPEND =  $(GENERIC_DEPEND) $(PTINY_PALETTES) \
+			$(PTINY_STAR_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
+PTRIM_DEPEND =  $(GENERIC_DEPEND) $(PTRIM_PALETTES) \
+			$(PTRIM_STAR_LIBFILES) $(PTRIM_STARS) $(PTRIM_TARGETS)
+PIGI_DEPEND =	$(GENERIC_DEPEND) $(PIGI_PALETTES) \
+			$(PIGI_STAR_LIBFILES) $(PIGI_STARS) $(PIGI_TARGETS)
+PTCP_DEPEND =  	$(GENERIC_DEPEND) $(PTCP_PALETTES) \
+			$(PTCP_STAR_LIBFILES) $(PTCP_STARS) $(PTCP_TARGETS)
 
+# Names of binaries to produce
 PTINY_BINARIES = 	$(PTINY) $(PTINY).debug $(PTINY).debug.purify \
 			$(PTINY).debug.quantify $(PTINY).debug.purecov
 PTRIM_BINARIES = 	$(PTRIM) $(PTRIM).debug $(PTRIM).debug.purify \
