@@ -73,11 +73,20 @@ void XGraph :: initialize(Block* parent,
 // this check traps IEEE infinities and NaN values
 // the ifdef condition should really be: implement this function if the
 // processor uses IEEE arithmetic.
-inline void XGraph :: fcheck(float y) {
-#ifndef vax
-	if (isinf(y) || isnan(y)) Error::abortRun(*blockIamIn,
-					"Numeric overflow or divide by 0 detected");
+#ifdef mips
+#include <nan.h>
 #endif
+#ifdef sun
+#define IsNANorINF(X) (isnan(X) || isinf(X))
+#endif
+#ifndef IsNANorINF
+#define IsNANorINF(X) 0
+#endif
+
+void XGraph :: fcheck(double y) {
+	if (IsNANorINF(y))
+		Error::abortRun(*blockIamIn,
+				"Numeric overflow or divide by 0 detected");
 };
 
 void XGraph :: addPoint(float y) {
