@@ -31,6 +31,7 @@ PL_SRCS= \
  CG56ASin.pl \
  CG56BiQuad.pl \
  CG56BlackHole.pl \
+ CG56CircToLin.pl \
  CG56Comb.pl \
  CG56Commutator.pl \
  CG56Cos.pl \
@@ -49,6 +50,7 @@ PL_SRCS= \
  CG56Interpolator.pl \
  CG56IntMult.pl \
  CG56Limit.pl \
+ CG56LinToCirc.pl \
  CG56LMS.pl \
  CG56LocateMax.pl \
  CG56Log.pl \

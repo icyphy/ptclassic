@@ -13,6 +13,7 @@ CG56STARS = \
  $(CG56)/CG56ASin.o \
  $(CG56)/CG56BiQuad.o \
  $(CG56)/CG56BlackHole.o \
+ $(CG56)/CG56CircToLin.o \
  $(CG56)/CG56Comb.o \
  $(CG56)/CG56Commutator.o \
  $(CG56)/CG56Cos.o \
@@ -31,6 +32,7 @@ CG56STARS = \
  $(CG56)/CG56Interpolator.o \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56Limit.o \
+ $(CG56)/CG56LinToCirc.o \
  $(CG56)/CG56LMS.o \
  $(CG56)/CG56LocateMax.o \
  $(CG56)/CG56Log.o \
