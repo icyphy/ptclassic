@@ -1,0 +1,84 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Current Working Bug List</title>
+</head>
+<body bgcolor="lightgoldenrodyellow">
+<h1><a name="bug list">Current Working Bug List</a></h1>
+<ul>
+<li><a href="#bugs in the kernel">Kernel bugs</a>
+<li><a href="#bugs in text editors">Bugs in text editors</a>
+<li><a href="#bugs in visual editors">Bugs in visual editors</a>
+</ul>
+<h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
+
+<h3><a href="$TYCHO/kernel/Edit.itcl">Edit</a></h3>
+<ul>
+<li>Fill region is much too slow.
+</ul>
+
+<h3><a href="$TYCHO/kernel/EditSpell.itcl">EditSpell</a></h3>
+<ul>
+<li>Spelling checker should ignore single letter words.
+</ul>
+
+<h3><a href="$TYCHO/kernel/HTML.itcl">HTML</a></h3>
+<ul>
+<li>Bulleted lists are not very well aligned on the left when there is
+    more than one line.
+    See surfit for alternative implementation.
+<li>In "img" directives, align="right" causes an error.
+<li>A &lt;p&gt; after an image is ignored.
+<li>If you have the source code for an HTML file open, and you try to open
+    with HTML file with the "Back" command, you get an error message that
+    is basically wrong, since there is no problem.
+</ul>
+
+<h3><a href="$TYCHO/kernel/ListBrowser.itcl">ListBrowser</a></h3>
+<ul>
+<li>Select an item, then scroll down one page and select another item.
+    Instead of replacing the original item with the new one, the new item
+    and a "\n" are appended to the previous item.
+</ul>
+
+<h3><a href="$TYCHO/kernel/RevControl.itcl">RevControl</a></h3>
+<ul>
+<li>After sccs create, bindings don't work in version control dialog.
+</ul>
+
+
+<h1><a name="bugs in text editors">Bugs in text editors</a></h1>
+
+<h3><a href="$TYCHO/editors/textedit/EditProgram.itcl">EditProgram</a></h3>
+<ul>
+<li>Spelling checker should ignore HTML directives in comments.
+</ul>
+
+<h3><a href="$TYCHO/editors/textedit/EditTcl.itcl">EditTcl</a></h3>
+<ul>
+<li>Indenting fails to ignore backslash on the end of a comment line.
+<li>Indenting confused by a single line with "if {" and nothing more.
+</ul>
+
+<h3><a href="$TYCHO/editors/textedit/EditC.itcl">EditC</a></h3>
+<ul>
+<li>Indenting needs alot of work.
+</ul>
+
+
+<h1><a name="bugs in visual editors">Bugs in visual editors</a></h1>
+<ul>
+<li>
+</ul>
+
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
