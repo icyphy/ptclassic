@@ -86,12 +86,6 @@ class ::tycho::Edit {
     # Reload the current file. 
     method reload {{askuser 1} {filename "defaultfileforreloadmethod"}}
 
-    #### nextRevAction
-    # Check in a file using the selected revision control program command
-    # if the file is writeable. Otherwise check the file out using the
-    # specified revision control program command. 
-    method nextRevAction {}
-
     #### save
     # Save text to a file (by default, the file given by the -file option).
     method save {{name ""}}
@@ -200,12 +194,6 @@ body ::tycho::Edit::constructor {args} {
 	    -accelerator "C-c C-g" \
 	    -command "$itk_component(text) gotoLine"
 
-    $itk_component(editMenu) add command \
-	    -label "Next Rev Action " \
-	    -underline 0 \
-	    -accelerator "C-x v" \
-	    -command "$this nextRevAction"
-
     # Add a Format menu
     itk_component add formatMenuButton {
 	menubutton $itk_component(menuFrame).format \
@@ -250,8 +238,6 @@ body ::tycho::Edit::constructor {args} {
     eval itk_initialize $args
 
     $this loadFile $file
-
-    bind $itk_component(hull) <Control-x><v> "$this nextRevAction; break"
 
     markUnmodified
 }
@@ -354,50 +340,6 @@ body ::tycho::Edit::loadFile {loadfile} {
 		error "File $loadfile is not readable"
 	    }
 	}
-    }
-}
-
-###################################################################
-#### nextRevAction
-# Check to see if a filename is associated with the editor, if not 
-# fail and inform the user. If the file has not been saved we will 
-# do so at this point. Then check in the file if it is writeable, 
-# prompting for a message, and reload the new file with the insert
-# cursor at the same location. If the file is not writeable then 
-# check the file out and reload the new file with the insert cursor 
-# at the same location. If the file is not under revision control, 
-# then we place it under control after asking the user if this is 
-# what he wants. If the necessary revision control directory does 
-# not exist then create it if we can.
-#
-body ::tycho::Edit::nextRevAction {} {
-    set revclass [::tycho::File::getOption revclass]
-    set currentfile [$this filename]
-    set topwin [winfo toplevel $itk_component(hull)]
-    if [winfo exists $topwin.revcontrol] {
-	wm deiconify $topwin.revcontrol
-	raise $topwin.revcontrol
-	$topwin.revcontrol configure -file $currentfile
-	$topwin.revcontrol focusin
-    } {
-	if {$topwin != "" &&  \
-		[uplevel #0 info objects $topwin] != "" && \
-		[$topwin isa ::tycho::Edit]} {
-	    set currentTitle $currentfile
-	} {
-	    set currentTitle "Next Revision Action Window"
-	}
-
-	uplevel #0 "
-	    $revclass $topwin.revcontrol \
-		    -text {Select desired revision control command} \
-		    -object $this \
-		    -textobject $itk_component(text) \
-		    -file $currentfile \
-		    -geometry +0+0 \
-		    -before $itk_component(hull) \
-		    -title $currentTitle "
-	    wm deiconify $topwin.revcontrol
     }
 }
 
