@@ -34,7 +34,11 @@ PL_SRCS= \
  C50Allpass.pl \
  C50Biquad.pl \
  C50BiquadDSPlay.pl \
+ C50DTMFPostTest.pl \
  C50Comb.pl \
+ C50GoertelBase.pl \
+ C50GoertzelPower.pl \
+ C50IIR.pl \
  C50LMS.pl \
  C50LMSGanged.pl \
  C50RaisedCosine.pl \
