@@ -184,8 +184,8 @@ if { [lsearch -exact $auto_path $tycho] == -1 } {
     lappend auto_path $tycho
 }
 
-# Load the Tycho package
-package require Tycho
+# Load the "basic" package
+package require tycho.kernel.basic
 
 # Convert command-line arguments into tychofeatures
 eval ::tycho::processCommandLine $argv
