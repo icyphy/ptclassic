@@ -71,6 +71,8 @@ OBJS	      = main.o \
 		mkIcon.o \
 		palette.o \
 		kernelCalls.o \
+		XOutput.o \
+		xfunctions.o \
 		options.o
 
 SRCS	      = main.c \
@@ -89,6 +91,8 @@ SRCS	      = main.c \
 		mkIcon.c \
 		palette.c \
 		kernelCalls.cc \
+		xfunctions.c \
+		XOutput.cc \
 		options.c
 
 TARGET	      = pigiRpc
