@@ -76,6 +76,10 @@ oct2tim.debug.purify:	$(OBJS)
 TESTBINARY = ./oct2tim
 SCMOS_TECH = /usr/eesww/share/octtools/tech
 
+test:
+	echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(PTOLEMY)/lib/colors -f interface $(PTOLEMY)/src/domains/sdf/demo/butterfly:schematic" | csh -s
+
+
 tests: $(TESTBINARY) sample-tmp sample2-tmp
 	if [ -d $(SCMOS_TECH) ]; then \
 		echo "The next test fails no matter what, so ignore it" ; \
