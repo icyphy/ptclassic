@@ -28,29 +28,41 @@ MAKEVARS = "ARCH=$(ARCH)"
 makefiles:
 	@for x in $(MTDIRS); do \
 	    if [ -w $$x ] ; then \
-		cd $$x ; \
+		( cd $$x ; \
 		echo making makefile in $$x ; \
 		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../src/$$x makefile ;\
-		cd .. ; \
+		) \
 	    fi ; \
 	done
 
 	@for x in $(SDIRS); do \
 	    if [ -w $$x ] ; then \
-		cd $$x ; \
+		( cd $$x ; \
 		echo making $@ in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../src/$$x $@ ;\
-		cd .. ; \
+		) \
 	    fi ; \
 	done
 
 all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
-		cd $$x ; \
+		( cd $$x ; \
 		echo making $@ in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../src/$$x $@ ;\
-		cd .. ; \
+		) \
 	    fi ; \
 	done
+
+TAGS:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../src/$$x $@ ; \
+		) \
+	    fi ; \
+	done
+	-cat -s $(DIRS:%=%/TAGS) > $@
+
