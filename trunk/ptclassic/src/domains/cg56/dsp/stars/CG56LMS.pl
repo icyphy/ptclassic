@@ -214,42 +214,53 @@ $label(loop1)
         org     p:
         }
         setup {
-                coefLen=coef.size();
-                delayLineSize=errorDelay-1;
-		delayLineSize=coefLen+decimation*delayLineSize;
-		delayLine.resize(delayLineSize);
-                input.setSDFParams(int(decimation),int(decimation)-1);
-
-	        if (decimation <=0)
-        	      Error::abortRun(*this, "Decimation must be greater than 0.");
-
+		coefLen = coef.size();
+		delayLineSize = int(errorDelay) - 1;
+		delayLineSize = int(coefLen) +
+				int(decimation)*int(delayLineSize);
+		delayLine.resize(int(delayLineSize));
+		input.setSDFParams(int(decimation),int(decimation)-1);
         }
+        method {
+	    name {CheckParameterValues}
+	    arglist { "()" }
+	    type { void }
+	    code {
+	        if (int(decimation) <= 0) {
+        	    Error::abortRun(*this,
+				    "Decimation must be greater than 0.");
+		    return;
+		}
+	    }
+	}
         initCode  {
 	        addCode(makeblock);
                 addCode(delaystart);
         }
         go { 
-                Y=errorDelay-1;
-                Y=coefLen-1+decimation*Y;
+		CheckParameterValues();
+
+                Y = int(errorDelay)-1;
+                Y = int(coefLen) - 1 + int(decimation)*int(Y);
 
 	        addCode(std);
-	
-        	if(coefLen>2) {
-	            loopVal=coefLen-1;    
+
+        	if (int(coefLen) > 2) {
+	            loopVal = int(coefLen) - 1;    
 	            addCode(loop);
 		}
 		else addCode(noloop);
 
 	        addCode(cont);
       	
-		if(decimation>1)
+		if ( int(decimation) > 1)
 	            addCode(decimationGreaterthanOne);
 		else
 	            addCode(decimationOne);
 	    
 	        addCode(cont1);
 
-		if(coefLen>2)
+		if ( int(coefLen) > 2)
         	     addCode(loop1);
 		else
         	     addCode(noloop1);
