@@ -52,8 +52,6 @@ VHDLSignal* VHDLSignal :: newCopy() {
   VHDLSignal* newSignal = new VHDLSignal;
   newSignal->setName(this->name);
   newSignal->type = this->type;
-  newSignal->from = this->from;
-  newSignal->to = this->to;
 
   return newSignal;
 }
@@ -79,12 +77,9 @@ VHDLSignalList* VHDLSignalList :: newCopy() {
 }
 
 // Allocate memory for a new VHDLSignal and put it in the list.
-void VHDLSignalList :: put(StringList name, StringList type,
-			   StringList from, StringList to) {
+void VHDLSignalList :: put(StringList name, StringList type) {
   VHDLSignal* newSignal = new VHDLSignal;
   newSignal->setName(name);
   newSignal->type = type;
-  newSignal->from = from;
-  newSignal->to = to;
   this->put(*newSignal);
 }

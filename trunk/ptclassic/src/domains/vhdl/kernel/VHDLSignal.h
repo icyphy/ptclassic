@@ -40,6 +40,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLObj.h"
 #include "VHDLObjList.h"
+#include "VHDLPort.h"
+
+class VHDLPort;
 
 class VHDLSignal : public VHDLObj
 {
@@ -52,10 +55,8 @@ class VHDLSignal : public VHDLObj
 
   // Type.
   StringList type;
-  // Name of port coming from.
-  StringList from;
-  // Name of port going to.
-  StringList to;
+  // Pointer to source VHDLPort.
+  VHDLPort* source;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -63,6 +64,10 @@ class VHDLSignal : public VHDLObj
 
   // Return a pointer to a new copy of the VHDLSignal.
   VHDLSignal* newCopy();
+
+  void setType(const char* newType) { type = newType; }
+  void setSource(VHDLPort* newSource) { source = newSource; }
+  VHDLPort* getSource() { return source; }
 
  protected:
  private:
@@ -99,7 +104,7 @@ class VHDLSignalList : public VHDLObjList
   VHDLSignalList* newCopy();
 
   // Allocate memory for a new VHDLSignal and put it in the list.
-  void put(StringList, StringList, StringList, StringList);
+  void put(StringList, StringList);
 };
 
 class VHDLSignalListIter : public VHDLObjListIter {

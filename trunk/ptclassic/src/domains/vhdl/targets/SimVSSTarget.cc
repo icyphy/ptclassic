@@ -430,9 +430,9 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   mainPortMapList.put(dataName, "", "", dataName);
   mainPortMapList.put(doneName, "", "", doneName);
   // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, vtype, dataName, dataName);
-  topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
+  topSignalList.put(goName, "STD_LOGIC");
+  topSignalList.put(dataName, vtype);
+  topSignalList.put(doneName, "STD_LOGIC");
 }
 
 // Method to write out com file for VSS if needed.
