@@ -64,13 +64,14 @@ TCL_SRCS = \
 	Path.tcl \
 	Startup.tcl \
 	String.tcl \
+	Tyexec.tcl \
 	URLPath.tcl\
+
 	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
 	Builder.itcl \
 	CircularList.itcl \
-	Exec.itcl \
 	Object.itcl \
 	Registry.itcl \
 	Resource.itcl \
