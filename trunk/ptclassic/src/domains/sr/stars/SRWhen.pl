@@ -6,10 +6,10 @@ defstar {
 When the clock input is true, copy the input to the output;
 when the clock is absent, make the output absent.
 }
-    version { @(#)SRWhen.pl	1.1 4/25/96 }
+    version { $Id$ }
     author { S. A. Edwards }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
