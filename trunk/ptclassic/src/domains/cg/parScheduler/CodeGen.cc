@@ -526,8 +526,9 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
 	PortHole* sP = newR->portWithName("output");
 	sP->connect(*rP, delay);
 
+	int comp = myId() - pindex;
 	if (g == 0) {
-		matchReceiveNode(newR, rP, n);
+		matchReceiveNode(newR, rP, n, comp);
 		return;
 	}
 
@@ -538,6 +539,9 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
 		if (pn->getOrigin() == g) {
 			pn->setCopyStar(newR,0);
 			newR->setMaster(pn);
+			// pair Send and Receive star
+			if (comp > 0) mtarget->pairSendReceive(
+				pn->getPartner()->getCopyStar(), newR);
 			break;
 		}
 	}
@@ -555,8 +559,9 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 	PortHole* rP = newS->portWithName("input");
 	sP->connect(*rP, 0);
 
+	int comp = myId() - pindex;
 	if (g == 0) {
-		matchSendNode(newS, sP, n);
+		matchSendNode(newS, sP, n, comp);
 		return;
 	}
 
@@ -567,6 +572,9 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 		if (pn->getOrigin() == g) {
 			pn->setCopyStar(newS,0);
 			newS->setMaster(pn);
+			// pair Send and Receive star
+			if (comp > 0) mtarget->pairSendReceive(newS, 
+					pn->getPartner()->getCopyStar());
 			break;
 		}
 	}
@@ -669,7 +677,8 @@ M:
 ///////////////////////////////////////
 
 // set the cloned star pointer of the Receive node
-void UniProcessor :: matchReceiveNode(SDFStar* s, PortHole* p, ParNode* n) {
+void UniProcessor :: matchReceiveNode(SDFStar* s, PortHole* p, 
+				      ParNode* n, int update) {
 	// Note that n is the first invocation.
 	while (n) {
 		ParAncestorIter iter(n);
@@ -677,14 +686,21 @@ void UniProcessor :: matchReceiveNode(SDFStar* s, PortHole* p, ParNode* n) {
 		while ((pn = iter++) != 0) {
 			EGGate* orgG = pn->getOrigin();
 			if (orgG)
-			  if(!strcmp(orgG->readName(), p->readName())) 
+			  if(!strcmp(orgG->readName(), p->readName())) {
 				pn->setCopyStar(s,0);
+				// pair Send and Receive star
+				if (update > 0) {
+					mtarget->pairSendReceive(pn->
+					    getPartner()->getCopyStar(),s);
+				}
+			  }
 		}
 		n = (ParNode*) n->getNextInvoc();
 	}
 }
 
-void UniProcessor :: matchSendNode(SDFStar* s, PortHole* p, ParNode* n) {
+void UniProcessor :: matchSendNode(SDFStar* s, PortHole* p, 
+				   ParNode* n, int update) {
 	// Note that n is the first invocation.
 	while (n) {
 		ParDescendantIter iter(n);
@@ -692,8 +708,14 @@ void UniProcessor :: matchSendNode(SDFStar* s, PortHole* p, ParNode* n) {
 		while ((pn = iter++) != 0) {
 			EGGate* orgG = pn->getOrigin();
 			if (orgG)
-			  if(!strcmp(orgG->readName(), p->readName())) 
+			  if(!strcmp(orgG->readName(), p->readName())) {
 				pn->setCopyStar(s,0);
+				// pair Send and Receive star
+				if (update > 0) {
+					mtarget->pairSendReceive(s,
+					    pn->getPartner()->getCopyStar());
+				}
+			  }
 		}
 		n = (ParNode*) n->getNextInvoc();
 	}
