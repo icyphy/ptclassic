@@ -201,9 +201,12 @@ static dmTextItem items[] = {
        so that the user may enter something like "~/work/stars" where
        '~' stands for user's own home directory.  Comment out the 
        test for items[2].value[1]. (wtc, 12/12/90)
+       OLDTEST: if (*items[2].value != '~' || !isalpha(items[2].value[1]) ) {
+
+       allow $PTOLEMY (kennard, Oct92)
     */
-    if (*items[2].value != '~' /* || !isalpha(items[2].value[1]) */ ) {
-	PrintErr("Star src directory must begin with '~user'");
+    if (items[2].value[0] != '~' && items[2].value[0] != '$') {
+	PrintErr("Star src directory must begin with '~user' or '$variable'");
 	ViDone();
     }
     if (!MkStar(items[0].value, items[1].value, items[2].value)) {
