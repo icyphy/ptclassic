@@ -57,10 +57,6 @@ VERSION=0.5-development
 .cc.o:
 	$(CPLUSPLUS) $(GPPFLAGS) $(INCL) -c $<
 
-all: vem vem.debug
-vem: include $(OBJECTS) linkvem
-vem.debug: include $(OBJECTS) linkvem.debug
-
 DIRS=bags buffers dialogs dispatch doc drawing drs lib main \
 	options patterns physical properties rpc schematic select strings \
 	symbolic utility windows
@@ -69,17 +65,6 @@ DIRS=bags buffers dialogs dispatch doc drawing drs lib main \
 MTDIRS = bags buffers dialogs dispatch doc drawing drs lib main \
 	options patterns physical properties rpc schematic select strings \
 	symbolic utility windows
-
-# This target makes sure all the makefiles are current
-makefiles:
-	@for x in $(MTDIRS); do \
-		cd $$x ; \
-		echo making makefile in $$x ; \
-		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/octtools/vem/$$x makefile ;\
-		cd .. ; \
-	done
-
 
 #skip bitmaps, doc, lib
 LIBS=bags/libbags.$(LIBSUFFIX)  buffers/libbuffers.$(LIBSUFFIX) \
@@ -125,6 +110,39 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 VEMOBJECTS =	$(OBJECTS) dialogs/libdialogs.$(LIBSUFFIX) \
 	rpc/librpcserver.$(LIBSUFFIX)
 
+VEMLIBS = -Lrpc -lrpcserver -Ldialogs -ldialogs \
+	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
+	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -lvov -ltap \
+	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
+	-lTgl -lutility -lport -lerrtrap -luprintf -lst $(OCTTOOLS_MM_LIB)  \
+	$(X11_LIBSPEC) -lXaw -lXt -lXmu $(X11EXT_LIBSPEC) -lX11 $(SYSLIBS)
+
+all: vem vem.debug
+vem: include $(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+ 		VPATH=../../../../src/octtools/vem/main version.o)
+	$(LINKER) $(LINKFLAGS) -o vem main/version.o $(OBJECTS) $(VEMLIBS)
+
+vem.debug: include $(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+ 		VPATH=../../../../src/octtools/vem/main version.o)
+	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug main/version.o \
+		$(OBJECTS) $(VEMLIBS)
+
+# This target makes sure all the makefiles are current
+makefiles:
+	@for x in $(MTDIRS); do \
+		cd $$x ; \
+		echo making makefile in $$x ; \
+		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../src/octtools/vem/$$x makefile ;\
+		cd .. ; \
+	done
+
+
+
 # This rule uses GNU make specific directives $(@D) $(@F) 
 $(VEMOBJECTS):
 	(cd $(@D); \
@@ -133,13 +151,6 @@ $(VEMOBJECTS):
 	)
 
 #rpc/librpcserver.$(LIBSUFFIX) dialogs/libdialogs.$(LIBSUFFIX) \
-
-VEMLIBS = -Lrpc -lrpcserver -Ldialogs -ldialogs \
-	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
-	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -lvov -ltap \
-	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
-	-lTgl -lutility -lport -lerrtrap -luprintf -lst $(OCTTOOLS_MM_LIB)  \
-	$(X11_LIBSPEC) -lXaw -lXt -lXmu $(X11EXT_LIBSPEC) -lX11 $(SYSLIBS)
 
 INC_FILES = \
 	../bags/bags.h \
@@ -174,35 +185,6 @@ _vem:
 			VPATH=../../../../src/octtools/vem/$$x all ;\
 		cd .. ; \
 	done
-
-
-linkvem.cc.debug: $(VEMOBJECTS)
-	rm -f main/version.o
-	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
- 		VPATH=../../../../src/octtools/vem/main version.o)
-	$(CC) $(CC_STATIC) $(OCT_DEBUG_FLAGS) \
-		-o vem.debug main/version.o $(OBJECTS) $(VEMLIBS)
-
-linkvem.cc: $(VEMOBJECTS)
-	rm -f main/version.o
-	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
- 		VPATH=../../../../src/octtools/vem/main version.o)
-	$(CC) $(CC_STATIC) $(OCT_DEBUG_FLAGS) \
-		-o vem main/version.o main/version.o \
-		$(OBJECTS) $(VEMLIBS)
-
-linkvem.debug:$(VEMOBJECTS)
-	rm -f main/version.o
-	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
- 		VPATH=../../../../src/octtools/vem/main version.o)
-	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug main/version.o \
-		$(OBJECTS) $(VEMLIBS)
-
-linkvem: $(VEMOBJECTS)
-	rm -f main/version.o
-	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
- 		VPATH=../../../../src/octtools/vem/main version.o)
-	$(LINKER) $(LINKFLAGS) -o vem main/version.o $(OBJECTS) $(VEMLIBS)
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
 DESTBIN =	$(OCTBINDIR)/vem
