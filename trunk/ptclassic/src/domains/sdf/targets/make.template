@@ -1,7 +1,7 @@
 # $Id$
 # Copyright (c) 1991 The Regents of the University of California.
 #				All Rights Reserved.
-# For creating an SDF loop scheduler.
+# Special SDF targets.
 
 LIBSOURCES =	CompiledUniverse.cc CompiledError.cc
 SOURCES =	$(LIBSOURCES) CompileTarget.cc
@@ -17,12 +17,10 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
-LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
 
-INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL) -I$(CGKERNEL)
+INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 .SUFFIXES: .cc 
 .cc.o:
 	$(GNU) $(GPPFLAGS) $(INC) -c $<
