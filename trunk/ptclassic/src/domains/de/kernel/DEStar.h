@@ -21,11 +21,10 @@ $Id$
 #include "type.h"
 #include "DEConnect.h"
 #include "Particle.h"
-#include "Output.h"
 #include "Star.h"
-#include "IntState.h"
 
 enum FiringMode {SIMPLE, PHASE};
+class EventQueue;
 
 	////////////////////////////////////
 	// class DEStar
