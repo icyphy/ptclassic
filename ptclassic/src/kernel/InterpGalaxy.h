@@ -68,8 +68,8 @@ public:
 	inline void
 	setDescriptor(const char* dtext) { NamedObj::setDescriptor(dtext);}
 
-// initialize: does variable-parameter connections
-	void initialize();
+// preinitialize: redoes variable-parameter connections
+	void preinitialize();
 
 // add a new star to the galaxy
 	int
@@ -147,7 +147,7 @@ public:
 	Block* blockWithDottedName(const char* s);
 
 // Register a connection that needs to be reinitialized each time
-// initialize() is called.  Note that this is needed only if the
+// preinitialize() is called.  Note that this is needed only if the
 // connection is created in some way that bypasses the connect
 // method here. The tag indicates what type of connection it is.
 // Use "B" for bus, "C" for ordinary, and "c" for node.
