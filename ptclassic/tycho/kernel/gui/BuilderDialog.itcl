@@ -48,7 +48,7 @@ class ::tycho::BuilderDialog {
     inherit ::tycho::View
 
     constructor {args} {}
-    
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -59,7 +59,14 @@ class ::tycho::BuilderDialog {
     ####                         public procs                      ####
 
     # Check to see what files need to be built and bring up a dialog
-    proc checkFiles {}}
+    proc checkFiles {}
+
+    ####################################################################
+    ####                  private methods                           ####
+
+    # Initialize a test menu submenu will all the .itcl files in that dir.
+    private method initializeTestSubmenu {menuname dir}
+}
 
 #######################################################################
 #### constructor
@@ -90,26 +97,26 @@ body ::tycho::BuilderDialog::constructor {args} {
 
     $myMenubar addMenu Test -underline 0
 
-    $myMenubar add {All Tests} Test -underline 0 \
+    $myMenubar add {Run All Tests} Test -underline 0 \
 	    -command "$this busy ::tycho::Builder::testAll"
+
+    $myMenubar add {Testing Help} Test -underline 0 \
+	    -command "::tycho::File::openContext \
+            [file join $TYCHO doc coding testing.html]"
 
     $myMenubar addSeparator Test
 
-    $myMenubar add {Kernel Tests} Test -underline 0 \
-	    -command "$this busy ::tycho::Builder::testDir \
-            [file join $TYCHO kernel test]"
+    initializeTestSubmenu {Kernel Tests} \
+            [file join $TYCHO kernel test]
 
-    $myMenubar add {Text Editor Tests} Test -underline 0 \
-	    -command "$this busy ::tycho::Builder::testDir \
-            [file join $TYCHO editors textedit test]"
+    initializeTestSubmenu {Text Editor Tests} \
+            [file join $TYCHO editors textedit test]
 
-    $myMenubar add {Slate Tests} Test -underline 0 \
-	    -command "$this busy ::tycho::Builder::testDir \
-            [file join $TYCHO editors slate test]"
+    initializeTestSubmenu {Slate Tests} \
+            [file join $TYCHO editors slate test]
 
-    $myMenubar add {Visual Editor Tests} Test -underline 0 \
-	    -command "$this busy ::tycho::Builder::testDir \
-            [file join $TYCHO editors visedit test]"
+    initializeTestSubmenu {Visual Editor Tests} \
+            [file join $TYCHO editors visedit test]
 
     # If Ptolemy is present, then we can run some tests.
     global ptolemyfeature
@@ -125,7 +132,6 @@ body ::tycho::BuilderDialog::constructor {args} {
 
     }
 
-    # FIXME: Should this be a preference?
     if [file writable [::tycho::Builder::getDistBuildDir]] {
         $myMenubar addMenu Distribute -underline 0
 
@@ -238,4 +244,22 @@ body ::tycho::BuilderDialog::help {} {
 
 
 
+#########################################################################
+#########################################################################
+####                          private methods                        ####
 
+#####################################################################
+#### initializeTestSubmenu
+# Initialize a test menu submenu will all the .itcl files in that dir.
+#
+body ::tycho::BuilderDialog::initializeTestSubmenu {menuname dir} {
+    $myMenubar add $menuname Test -underline 0 -type cascade
+    $myMenubar command "Run All $menuname" $menuname -underline 0 \
+	    -command "$this busy ::tycho::Builder::testDir $dir"
+    $myMenubar addSeparator $menuname
+    foreach file [glob -nocomplain [file join $dir *.tcl] \
+	    [file join $dir *.itcl]] {
+	$myMenubar command [::tycho::simplifyPath $file {TYCHO}] $menuname\
+                -command "::tycho::File::openContext $file"
+    }
+}
