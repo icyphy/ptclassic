@@ -54,7 +54,7 @@ VHDLVariable :: ~VHDLVariable() {}
 // Return a pointer to a new copy of the VHDLVariable.
 VHDLVariable* VHDLVariable :: newCopy() {
   VHDLVariable* newVariable = new VHDLVariable;
-  newVariable->name = this->name;
+  newVariable->name = hashstring(this->name);
   newVariable->type = this->type;
   newVariable->initVal = this->initVal;
 
@@ -86,7 +86,7 @@ void VHDLVariableList :: put(StringList name, StringList type,
 			     StringList initVal) {
 //  if (this->inList(name)) return;
   VHDLVariable* newVar = new VHDLVariable;
-  newVar->name = name;
+  newVar->name = hashstring(name);
   newVar->type = type;
   newVar->initVal = initVal;
   this->put(*newVar);

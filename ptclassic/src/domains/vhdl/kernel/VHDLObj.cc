@@ -53,7 +53,7 @@ VHDLObj :: ~VHDLObj() {}
 
 // Initializer.
 void VHDLObj :: initialize() {
-  name = "";
+//  name = hashstring("");
 }
 
 // Class identification.

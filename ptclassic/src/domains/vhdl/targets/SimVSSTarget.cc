@@ -455,7 +455,7 @@ void SimVSSTarget :: registerCompMap(StringList name, StringList type,
 				     VHDLGenericMapList* genMapList) {
   // Allocate memory for a new VHDLCompMap and put it in the list.
   VHDLCompMap* newCompMap = new VHDLCompMap;
-  newCompMap->name = name;
+  newCompMap->name = hashstring(name);
   newCompMap->type = type;
   newCompMap->genMapList = genMapList;
   newCompMap->portMapList = portMapList;
@@ -494,25 +494,25 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
   genMapList->initialize();
   portMapList->initialize();
   
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
+  genMapList->put(hashstring("pairid"), pairid);
+  genMapList->put(hashstring("numxfer"), numxfer);
+  portMapList->put(hashstring("go"), goName);
+  portMapList->put(hashstring("data"), dataName);
+  portMapList->put(hashstring("done"), doneName);
   registerCompMap(label, name, portMapList, genMapList);
 
   // Also add to port list of main.
-  mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "IN", vtype);
-  mainPortList.put(doneName, "IN", "STD_LOGIC");
+  mainPortList.put(hashstring(goName), "OUT", "STD_LOGIC");
+  mainPortList.put(hashstring(dataName), "IN", vtype);
+  mainPortList.put(hashstring(doneName), "IN", "STD_LOGIC");
   // Also add to port map list of main.
-  mainPortMapList.put(goName, goName);
-  mainPortMapList.put(dataName, dataName);
-  mainPortMapList.put(doneName, doneName);
+  mainPortMapList.put(hashstring(goName), goName);
+  mainPortMapList.put(hashstring(dataName), dataName);
+  mainPortMapList.put(hashstring(doneName), doneName);
   // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, vtype, dataName, dataName);
-  topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
+  topSignalList.put(hashstring(goName), "STD_LOGIC", goName, goName);
+  topSignalList.put(hashstring(dataName), vtype, dataName, dataName);
+  topSignalList.put(hashstring(doneName), "STD_LOGIC", doneName, doneName);
 }
 
 // Method called by V2C star to place important code into structure.
@@ -547,25 +547,25 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
   genMapList->initialize();
   portMapList->initialize();
   
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
+  genMapList->put(hashstring("pairid"), pairid);
+  genMapList->put(hashstring("numxfer"), numxfer);
+  portMapList->put(hashstring("go"), goName);
+  portMapList->put(hashstring("data"), dataName);
+  portMapList->put(hashstring("done"), doneName);
   registerCompMap(label, name, portMapList, genMapList);
 
   // Also add to port list of main.
-  mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "OUT", vtype);
-  mainPortList.put(doneName, "IN", "STD_LOGIC");
+  mainPortList.put(hashstring(goName), "OUT", "STD_LOGIC");
+  mainPortList.put(hashstring(dataName), "OUT", vtype);
+  mainPortList.put(hashstring(doneName), "IN", "STD_LOGIC");
   // Also add to port map list of main.
-  mainPortMapList.put(goName, goName);
-  mainPortMapList.put(dataName, dataName);
-  mainPortMapList.put(doneName, doneName);
+  mainPortMapList.put(hashstring(goName), goName);
+  mainPortMapList.put(hashstring(dataName), dataName);
+  mainPortMapList.put(hashstring(doneName), doneName);
   // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, vtype, dataName, dataName);
-  topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
+  topSignalList.put(hashstring(goName), "STD_LOGIC", goName, goName);
+  topSignalList.put(hashstring(dataName), vtype, dataName, dataName);
+  topSignalList.put(hashstring(doneName), "STD_LOGIC", doneName, doneName);
 }
 
 // Method to write out com file for VSS if needed.

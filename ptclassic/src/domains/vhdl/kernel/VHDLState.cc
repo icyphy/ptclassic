@@ -59,7 +59,7 @@ VHDLState :: ~VHDLState() {}
 // Return a pointer to a new copy of the VHDLState.
 VHDLState* VHDLState :: newCopy() {
   VHDLState* newState = new VHDLState;
-  newState->name = this->name;
+  newState->name = hashstring(this->name);
   newState->lastFiring = this->lastFiring;
   newState->type = this->type;
 

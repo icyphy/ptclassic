@@ -51,8 +51,8 @@ class VHDLObj : public NamedObj
   ~VHDLObj();
 
   // Name.
-//  const char* name;
-  StringList name;
+//  StringList name;
+  const char* name;
 
   // Initializer.
   /* virtual */ void initialize();

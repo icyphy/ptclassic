@@ -129,13 +129,16 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   VHDLArcListIter nextArc(arcList);
   VHDLArc* arc;
   while ((arc = nextArc++) != 0) {
-    if (!strcmp(arc->name, name)) {
+//    if (!strcmp(arc->name, name)) {
+    if (hashstring(arc->name) == hashstring(name)) {
       noSuchArc = 0;
-      if (!strcmp(port->direction(),"OUT")) {
+//      if (!strcmp(port->direction(),"OUT")) {
+      if (hashstring(direction) == hashstring("OUT")) {
 	if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
 	if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
       }
-      else if (!strcmp(port->direction(),"IN")) {
+//      else if (!strcmp(port->direction(),"IN")) {
+      else if (hashstring(direction) == hashstring("IN")) {
 	if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
 	if (tokenNum > arc->highRead) arc->highRead = tokenNum;
       }
@@ -148,15 +151,17 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   // If no arc with the given name is in the list, then create one.
   if (noSuchArc) {
     VHDLArc* newArc = new VHDLArc;
-    newArc->name = name;
-    if (!strcmp(port->direction(),"OUT")) {
+    newArc->name = hashstring(name);
+//    if (!strcmp(port->direction(),"OUT")) {
+    if (hashstring(direction) == hashstring("OUT")) {
       newArc->type = port->dataType();
       newArc->lowWrite = tokenNum;
       newArc->highWrite = tokenNum;
       newArc->lowRead = port->geo().firstGet();
       newArc->highRead = port->geo().firstGet();
     }
-    else if (!strcmp(port->direction(),"IN")) {
+//    else if (!strcmp(port->direction(),"IN")) {
+    else if (hashstring(direction) == hashstring("IN")) {
       newArc->type = port->dataType();
       newArc->lowWrite = port->geo().firstPut();
       newArc->highWrite = port->geo().firstPut();
@@ -280,9 +285,10 @@ void VHDLTarget :: trailerCode() {
       if (!(variableList.inList(sourceName))) {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = sourceName;
+	newvar->name = hashstring(sourceName);
 	newvar->type = arc->type;
-	if (!strcmp(arc->type,"INTEGER")) {
+	//	if (!strcmp(arc->type,"INTEGER")) {
+	if (hashstring(arc->type) == hashstring("INTEGER")) {
 	  newvar->initVal = "0";
 	}
 	else {
@@ -294,9 +300,10 @@ void VHDLTarget :: trailerCode() {
       {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = sourceName;
+	newvar->name = hashstring(sourceName);
 	newvar->type = arc->type;
-	if (!strcmp(arc->type,"INTEGER")) {
+//	if (!strcmp(arc->type,"INTEGER")) {
+	if (hashstring(arc->type) == hashstring("INTEGER")) {
 	  newvar->initVal = "0";
 	}
 	else {
@@ -309,9 +316,10 @@ void VHDLTarget :: trailerCode() {
       if (!(variableList.inList(destName))) {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = destName;
+	newvar->name = hashstring(destName);
 	newvar->type = arc->type;
-	if (!strcmp(arc->type,"INTEGER")) {
+	//	if (!strcmp(arc->type,"INTEGER")) {
+	if (hashstring(arc->type) == hashstring("INTEGER")) {
 	  newvar->initVal = "0";
 	}
 	else {
@@ -323,9 +331,10 @@ void VHDLTarget :: trailerCode() {
       {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = destName;
+	newvar->name = hashstring(destName);
 	newvar->type = arc->type;
-	if (!strcmp(arc->type,"INTEGER")) {
+//	if (!strcmp(arc->type,"INTEGER")) {
+	if (hashstring(arc->type) == hashstring("INTEGER")) {
 	  newvar->initVal = "0";
 	}
 	else {
@@ -641,7 +650,7 @@ void VHDLTarget :: registerState(State* state, const char* varName,
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
+  newvar->name = hashstring(ref);
   newvar->type = stateType(state);
   newvar->initVal = initVal;
   firingVariableList.put(*newvar);
@@ -671,9 +680,10 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
+  newvar->name = hashstring(ref);
   newvar->type = port->dataType();
-  if (!strcmp(newvar->type,"INTEGER")) {
+//  if (!strcmp(newvar->type,"INTEGER")) {
+  if (hashstring(newvar->type) == hashstring("INTEGER")) {
     newvar->initVal = "0";
   }
   else {
@@ -690,9 +700,10 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
+  newvar->name = hashstring(ref);
   newvar->type = sanitizeType(type);
-  if (!strcmp(newvar->type,"INTEGER")) {
+//  if (!strcmp(newvar->type,"INTEGER")) {
+  if (hashstring(newvar->type) == hashstring("INTEGER")) {
     newvar->initVal = "0";
   }
   else {
@@ -710,7 +721,7 @@ void VHDLTarget :: registerDefine(const char* define, const char* type,
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
+  newvar->name = hashstring(ref);
   newvar->type = sanitizeType(type);
   newvar->initVal = init;
   firingVariableList.put(*newvar);
@@ -748,9 +759,11 @@ StringList VHDLTarget :: stateType(const State* st) {
 StringList VHDLTarget :: sanitizeType(const char* ctyp) {
   StringList type;
 
-  if (!strcmp(ctyp,"INT") || !strcmp(ctyp,"int"))
+  if ((hashstring(ctyp) == hashstring("INT")) ||
+      (hashstring(ctyp) == hashstring("int")))
     type << "INTEGER";
-  else if (!strcmp(ctyp,"COMPLEX") || !strcmp(ctyp,"complex"))
+  else if ((hashstring(ctyp) == hashstring("COMPLEX")) ||
+	   (hashstring(ctyp) == hashstring("complex")))
     type << "REAL";
   else
     type << "REAL";
