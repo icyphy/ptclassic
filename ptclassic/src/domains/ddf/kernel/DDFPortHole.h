@@ -36,7 +36,8 @@ This file contains definitions of DDF-specific PortHole classes.
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "PortHole.h"
+
+#include "SDFPortHole.h"
 
         //////////////////////////////////////////
         // class DDFPortHole
@@ -45,7 +46,7 @@ This file contains definitions of DDF-specific PortHole classes.
 // Contains all the special features required for
 //   dynamic dataflow (DDF)
 
-class DDFPortHole : public PortHole
+class DDFPortHole : public DFPortHole
 {
 	friend class MultiDDFPort;
 
@@ -64,11 +65,12 @@ public:
 			  // Maximum delay the Particles are accessed
 			  unsigned delay = 0);
 
-	int isDynamic() { return varying ;}
+	int isDynamic() const { return varying ;}
 
 	// function to alter only numTokens.
 	void setDDFParams(unsigned numTokens = 1);
 
+	// FIXME: I find this exceedingly ugly -- JTB
 	// these methods are for recursion construct.
 	// Since DDFStars will not be heavily used in a system, we 
 	// include them in this base class.
@@ -168,6 +170,24 @@ public:
 
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
+};
+
+// Iterators for MultiDDFPorts -- they aren't required but make coding
+// stars a bit cleaner.  They "know" that MultiInDDFPorts have InDDFPorts
+// and MultiOutDDFPorts have OutDDFPorts.
+
+class InDDFMPHIter : public MPHIter {
+public:
+	InDDFMPHIter(MultiInDDFPort& mph) : MPHIter(mph) {}
+	InDDFPort* next() { return (InDDFPort*) MPHIter::next();}
+	InDDFPort* operator++() { return next();}
+};
+
+class OutDDFMPHIter : public MPHIter {
+public:
+	OutDDFMPHIter(MultiOutDDFPort& mph) : MPHIter(mph) {}
+	OutDDFPort* next() { return (OutDDFPort*) MPHIter::next();}
+	OutDDFPort* operator++() { return next();}
 };
 
 #endif

@@ -48,15 +48,11 @@ class DDFWormhole;
 	// class DDFStar
 	////////////////////////////////////
 
-class DDFStar : public DataFlowStar  {
-
- 	friend class DDFScheduler;
-	PortHole* waitPort;
-	int waitNum;
+class DDFStar : public DynDFStar  {
 
 public:
 	// constructor
-	DDFStar() { waitNum = 0; waitPort = NULL; }
+	DDFStar() {}
 
 	// initialize DDF-specific members, plus std initialize
 	void initialize();
@@ -70,13 +66,6 @@ public:
 	// my domain
 	const char* domain() const;
 
-	// wait until this porthole has as many tokens as "waitNum"
-	void waitFor(PortHole& p, int num = 1) ;
-	
-	// return the number of tokens waiting for waitPort
-	int reqTokens() { return (waitNum - waitPort->numTokens()) ; }
-	int hasWaitPort() { return ( waitPort ? TRUE : FALSE ) ;}
-
 	// is it recursion star?
 	virtual int isItSelf();
 
@@ -86,7 +75,7 @@ public:
 
 	virtual const char* readTypeName();
 protected:
-	void initWait() { waitPort = NULL; waitNum = 0;}
+	void initWait() { clearWaitPort();}
 };
 
 #endif

@@ -39,7 +39,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  Soonhoi Ha
+ Programmer:  Soonhoi Ha, J. Buck
  Date of creation: 4/24/91
 	Keep the main part of the DDF scheduler.
  	Strip off the auto-wormholization routine to DDFAutoWorm.cc.
@@ -53,7 +53,7 @@ These are the methods for the dynamic dataflow scheduler.
 	
 extern const char DDFdomainName[];
 
-int fireSource(Star&, int);
+static int fireSource(Star&, int);
 
 // correct numTokens value for each EventHorizon.
 extern void renewNumTokens(Block* b, int flag);
@@ -64,27 +64,24 @@ extern void renewNumTokens(Block* b, int flag);
 
 typedef const char* MESSAGE;
 
-static MESSAGE err0 = " lies in an inconsistent DDF system : \n";
-static MESSAGE err1_1 = "First check DELAY-FREE LOOP or ";
+static MESSAGE err0 = " lies in an inconsistent DDF system:\n";
+static MESSAGE err1_1 = "Check for a delay-free loop. ";
 static MESSAGE err1_2 = "The auto-wormholization procedure may create an "
 "artificial deadlock.\n";
-static MESSAGE err1_3 = "You can disable the procedure by defining a IntState "
-"(restructure) and \nsetting 0 in the DDF target.";
-static MESSAGE err2_1 = " needs too large input buffer size (>";
-static MESSAGE err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
-static MESSAGE err2_3 = "other semantic errors \n... (sorry for poor hints) \n";
-static MESSAGE err2_4 = "You may increase the max buffer size by defining a ";
-static MESSAGE err2_5 = "IntState (maxBufferSize) \nin the DDF target.";
-	
-static int lazyDepth;
-static int overFlow;
-static StringList msg;
+static MESSAGE err1_3 = "You can disable the procedure by setting the DDF\n"
+			"target parameter 'restructure' to NO.";
+
+static MESSAGE err2_1 = " maximum buffer size exceeded (numTokens > ";
+static MESSAGE err2_2 = ") \nCheck for inconsistent sample rates or ";
+static MESSAGE err2_3 = "other semantic errors. \nYou may ";
+static MESSAGE err2_4 = "increase the maximum buffer size by changing the ";
+static MESSAGE err2_5 = "'maxBufferSize' parameter\nof the DDF target.";
 
 /*******************************************************************
 		Main DDF scheduler routines
 *******************************************************************/
 
-int isSource(Star& s) {
+static int isSource(Star& s) {
 	BlockPortIter nextp(s);
 	PortHole* p;
 
@@ -125,7 +122,7 @@ void DDFScheduler :: setup () {
 		return;
 	}
 		
-	GalStarIter nextStar(*galaxy());
+	DFGalStarIter nextStar(*galaxy());
 
 	// initialize sourceBlocks list
 	sourceBlocks.initialize();
@@ -138,16 +135,16 @@ void DDFScheduler :: setup () {
 
 	// star initialize.  Stars must be derived from DataFlowStar.
 	// (for example, SDF, DDF).  Also compute the size.
-	Star* s;
+	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
 		if (!s->isA("DataFlowStar")) {
 			Error::abortRun (*s, " is not a dataflow star");
 			return;
 		}
-		// we do not handle other DataFlowStars (eg BDF) yet.
-		DataFlowStar* ds = (DataFlowStar*)s;
-		if (!ds->isSDF() && !ds->isA("DDFStar")) {
-			Error::abortRun (*s, " is neither SDF nor DDF");
+		else if (!s->setDynamicExecution(TRUE)) {
+			// this will reject code-generation stars, for now.
+			Error::abortRun (*s,
+				 " cannot be executed by a dynamic scheduler");
 			return;
 		}
 	}
@@ -167,11 +164,11 @@ void DDFScheduler :: setup () {
 	}
 
 	if (canDom == DDF) {
-		GalStarIter nextS(*galaxy());
+		nextStar.reset();
 		Star* sW;
 
 		galSize = 0;
-		while ((sW = nextS++) != 0) {
+		while ((sW = nextStar++) != 0) {
 			// put the source block into the sourceBlocks list.
 			if (isSource(*sW))
 				sourceBlocks.put(sW);
@@ -182,7 +179,6 @@ void DDFScheduler :: setup () {
 		if (gpar && gpar->isItWormhole()) 
 			renewNumTokens(gpar, FALSE);
 	}
-			
 		
 	return;
 }
@@ -217,7 +213,7 @@ DDFScheduler :: run () {
 
 	}
 		
-	GalStarIter nextStar(*galaxy());
+	DFGalStarIter nextStar(*galaxy());
 
 	int scanSize = galSize;		// how many not-runnable stars scanned
 	int deadlock = TRUE;		// deadlock detection.
@@ -246,7 +242,7 @@ DDFScheduler :: run () {
 	   while (scanSize) {
 
 		// look at the next star in the block-list
-		Star* s = nextStar++;
+		DataFlowStar* s = nextStar++;
 		if (!s) {
 			nextStar.reset();
 			s = nextStar++;
@@ -306,60 +302,65 @@ DDFScheduler :: run () {
 	return TRUE;
 }
 
-int DDFScheduler :: isRunnable(Star& s) {
+static int checkInputOverflow(Star& s, int maxToken, StringList& msg) {
+	// check arc overflow on input arcs to s.
+
+	BlockPortIter nextp(s);
+	PortHole* p;
+	while ((p = nextp++) != 0) {
+		if (p->isItOutput()) continue;
+		if (p->numTokens() > maxToken) {
+			msg << p->fullName();
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+int DDFScheduler :: isRunnable(DataFlowStar& s) {
 
 	// if source, return FALSE
 	if (isSource(s)) return FALSE;
 
 	lazyDepth = 1;		 // initialize lazyDepth
 
-	// check the domain of the star
-	// if DDFStar...
+	DFPortHole* wp = s.waitPort();
 
-	if (strcmp (s.domain(), DDFdomainName) == 0) {
-
-		// if user specified waitPort exists...
-		DDFStar* p = (DDFStar*) &s;
-		if (p->hasWaitPort()) {
-		
-			// check arc overflow
-
-			BlockPortIter nextp(s);
-			for (int i = s.numberPorts(); i > 0; i--) {
-				// look at the next port
-				PortHole& tp = *nextp++;
-				if (tp.isItInput()) {
-					// check arc size 
-					int numOnArc = tp.numTokens();
-					if (numOnArc > maxToken) {
-						overFlow = TRUE;
-						msg += tp.fullName();
-						return FALSE;
-					}
-				}
-			}
-
-			// regular routine
-
-			int req = p->reqTokens();
-			while (req > 0) {
-			   // if # tokens are static, return FALSE.
-			   // if on wormhole boundary, return FALSE.
-			   DDFPortHole* po = (DDFPortHole*) p->waitPort;
-			   if (po->isDynamic() && po->far()->isItOutput()) {
-				// if dynamic, enable lazy evaluation.
-				lazyDepth++;
-				if (!lazyEval((Star*) po->far()->parent()))
-					return FALSE;
-				lazyDepth--;
-			   } else
-					return FALSE;
-			   req = p->reqTokens();
-			}
-			return TRUE;
+	if (wp) {
+		// check arc overflow
+		if (checkInputOverflow(s,maxToken,msg)) {
+			overFlow = TRUE;
+			return FALSE;
 		}
-	}
 
+		// regular routine
+
+		int nwait = s.waitTokens();
+
+		// if enough tokens already return TRUE.
+		if (wp->numTokens() >= nwait) return TRUE;
+
+		// if # tokens are static, return FALSE.
+		// if on wormhole boundary, return FALSE.
+		
+		if (!wp->isDynamic() || wp->atBoundary())
+			return FALSE;
+
+		// OK, try to get some tokens by evaluating the source star.
+
+		DataFlowStar* srcStar = (DataFlowStar*)wp->far()->parent();
+
+		// if dynamic, enable lazy evaluation.
+		lazyDepth++;
+		int lzStatus;
+		while (wp->numTokens() < nwait &&
+		       (lzStatus = lazyEval(srcStar) != 0))
+			;	// empty loop body, go until enough tokens
+				// or lazy eval fails.
+		lazyDepth--;
+		return lzStatus;
+	}
+	// this handles the no-waitport case.
 	// if all input ports have no data, return FALSE
 	int count = 0;
 	BlockPortIter nextp(s);
@@ -378,117 +379,101 @@ int DDFScheduler :: isRunnable(Star& s) {
 }
 	
 
-int DDFScheduler :: lazyEval(Star* s) {
+int DDFScheduler :: lazyEval(DataFlowStar* s) {
 
 	if (lazyDepth > galSize) return FALSE;
 
-	if (strcmp (s->domain(), DDFdomainName) == 0) {
+	DFPortHole* wp = s->waitPort();
+	if (wp) {
+		int nwait = s->waitTokens();
 
-		// if user specified waitPort exists...
-		DDFStar* p = (DDFStar*) s;
-		if (p->hasWaitPort()) {
+		// if on wormhole boundary, return FALSE: we cannot
+		// get tokens to make this star executable.
+		if (wp->atBoundary()) return FALSE;
 
-			int req = p->reqTokens();
-			DDFPortHole* po = (DDFPortHole*) p->waitPort;
-			while (req > 0) {
-			   // if on wormhole boundary, return FALSE.
-			   if (po->far()->isItOutput()) {
-				lazyDepth++;
-				if (!lazyEval((Star*) po->far()->parent())) {
-					return FALSE;
-				}
-				lazyDepth--;
-			   } else {
-					return FALSE;
-			   }
-			   req = p->reqTokens();
-			}
-			s->run();
-			return TRUE;
-		}
+		DataFlowStar* srcStar = (DataFlowStar*)wp->far()->parent();
+		// if dynamic, enable lazy evaluation.
+		lazyDepth++;
+		int lzStatus;
+		while (wp->numTokens() < nwait &&
+		       (lzStatus = lazyEval(srcStar) != 0))
+			;	// empty loop body
+		lazyDepth--;
+		// execute star if lazy evaluation succeeded in
+		// producing enough tokens.
+		if (lzStatus) s->run();
+		return lzStatus;
 	}
-
-	int result = checkLazyEval(s);
-	if (result) {
+	else if (checkLazyEval(s)) {
 		// fire the star
 		s->run();
 		return TRUE;
-	} else
+	}
+	else
 		return FALSE;
 }
 
-int DDFScheduler :: checkLazyEval(Star* s) {
+int DDFScheduler :: checkLazyEval(DataFlowStar* s) {
 	BlockPortIter nextp(*s);
 
 	for (int i = s->numberPorts(); i > 0; i--) {
 		
-		// look at the next port
+		// look at the next input port
 		PortHole& p = *nextp++;
-		if (p.isItInput()) {
+		if (p.isItOutput()) continue;
 
-			int numOnArc = p.numTokens();
+		int req = p.numXfer() - p.numTokens();
+		// if I require input but am on a wormhole boundary,
+		// quit now.
+		if (req > 0 && p.atBoundary())
+			return FALSE;
 
-			int req = p.numXfer() - numOnArc;
-			if ((req > 0) && 
-				// check wormhole, recursive star
-				(p.far()->isItInput())) {
-				 return FALSE;
-			}
-
-			Star* str = (Star*) p.far()->parent();
-			if (strcmp (str->domain(), DDFdomainName) == 0) {
-			   // check if wormhole...
-			   if (str->scheduler() == (Scheduler*) this) {
-				// check dynamic port for ddf star.
-			   	DDFPortHole* po = (DDFPortHole*) p.far();
-			   	if (req > 0 && po->isDynamic()) {
-					return FALSE;
-				}
-			   }
-			}
-
-			while (req > 0) {
-				lazyDepth++;
-				if (!lazyEval(str)) 
-					return FALSE;
-				lazyDepth--;
-				req = p.numberTokens - p.numTokens();
-			}
-
-			// check Geodesic size if it exceeds the limit
-			if (numOnArc > maxToken) {
-				msg += p.fullName();
-				overFlow = TRUE;
+		DataFlowStar* str = (DataFlowStar*) p.far()->parent();
+		if (str->scheduler() == this) {
+			// check dynamic port for ddf star.
+			DFPortHole* po = (DFPortHole*) p.far();
+			if (req > 0 && po->isDynamic()) {
 				return FALSE;
 			}
 		}
-	}
 
+		while (p.numXfer() > p.numTokens()) {
+			lazyDepth++;
+			if (!lazyEval(str)) 
+				return FALSE;
+			lazyDepth--;
+		}
+
+		// check Geodesic size if it exceeds the limit
+		if (p.numTokens() > maxToken) {
+			msg += p.fullName();
+			overFlow = TRUE;
+			return FALSE;
+		}
+	}
 	return TRUE;
 }
 
-int fireSource(Star& s, int k) {
+static int fireSource(Star& s, int k) {
 			
 	// check how many unused tokens are on output arcs.
-	int min = 10000;		// large enough number
+	int min = 1000000;		// large enough number
 	int minIn = 1000;
 	BlockPortIter nextp(s);
 	for (int j = s.numberPorts(); j > 0; j--) {
 		PortHole& port = *nextp++;
 
-	  	if (port.numberTokens == 0) {
+	  	if (port.numXfer() == 0) {
 			Error::abortRun(s,
-			      ": output port has undefined number of tokens");
+			      ": output port requires undefined number of tokens");
 			return FALSE;
 		}
+		int r = port.numTokens()/port.numXfer();
 		if (port.isItOutput()) {
-			int r = port.numTokens()/port.numXfer();
 			if (r < min) min = r;
 		} else {
-			int k = port.numTokens() / port.numberTokens;
-			if (minIn > k) minIn = k;
+			if (minIn > r) minIn = r;
 		}
-			
 	}
 
 	if (s.numberPorts() == 0) min = 0;
@@ -542,21 +527,29 @@ void DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 	// detectConstruct
 	////////////////////////////
 
+// This routine attempts to detect a special construct and run an
+// optimized scheduler.  We cannot use this trick if there are wormholes
+// for arbitrary domains, or stars that are not DDF, present.  This
+// is a cheat and should be cleaned up.
+
 void DDFScheduler :: detectConstruct(Galaxy& gal) {
 
-	GalStarIter nextStar(gal);
-	Star* s;
+	DFGalStarIter nextStar(gal);
+	DataFlowStar* s;
 
 	if ((canDom == DDF) || (canDom == SDF)) return;
 
 	while ((s = nextStar++) != 0) {
 		if (s->isItWormhole()) {
 			const char* dom = s->scheduler()->domain();
-			if (strcmp(dom + 1, "DF"))
+			if (strcmp(dom , "DF")) {
 				canDom = DDF;
-		} else if (strcmp(s->domain(), DDFdomainName)) {
-			Error::abortRun(*s, " is not a Wormhole.");
-			canDom = Unknown;
+				return;
+			}
+		}
+		else if (!s->isA("DDFStar")) {
+			canDom = DDF;
+			return;
 		}
 	}
 
@@ -572,6 +565,8 @@ DDFScheduler::DDFScheduler () {
 	restructured = FALSE;
 	realSched = 0;
 	schedulePeriod = 10000.0;
+	overFlow = FALSE;
+	lazyDepth = 0;
 }
 
 DDFScheduler::~DDFScheduler() { LOG_DEL; delete realSched; }

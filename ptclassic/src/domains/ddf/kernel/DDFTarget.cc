@@ -63,13 +63,8 @@ Block* DDFTarget::makeNew() const {
 void DDFTarget::setup() {
 	// set up the parameters for the DDF scheduler
 	DDFScheduler* s = (DDFScheduler*) scheduler();
-	s->numOverlapped = int(numOverlapped);
-	s->schedulePeriod = float (double(schedulePeriod));
-	s->maxToken = int(maxBufferSize);
-	int tmp = int(restructure);
-	if (!tmp) { s->restructured = TRUE;
-		    s->canDom = DDF; }
-	else s->restructured = FALSE;
+	s->setParams(numOverlapped,schedulePeriod,maxBufferSize,
+		     restructure);
 	Target :: setup();
 }
 
