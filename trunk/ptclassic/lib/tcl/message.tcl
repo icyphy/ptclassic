@@ -166,7 +166,6 @@ and disclaimer of warranty provisions, push the button below. "
 
     wm geometry . +200+300
     tkwait visibility .
-    focus .
     bind . <Button> "wm iconify ."
     bind .version.msg <Button> "wm iconify ."
     bind .version.msg.msg1 <Button> "wm iconify ."
@@ -174,7 +173,6 @@ and disclaimer of warranty provisions, push the button below. "
     bind .version.bm <Button> "wm iconify ."
     bind . <Key> "wm iconify ."
     bind .version <Key> "wm iconify ."
-    grab .
 }
 
 ###################################################################
