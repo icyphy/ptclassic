@@ -41,17 +41,21 @@ catch {delete class ::tycho::View}
 #######################################################################
 #### View
 # This class is the base class for most graphical and textual widgets
-# in Tycho. It is designed to be inserted into a
-# <code>Displayer</code>, although it can be used alone as an ordinary
-# widget. A displayer can contain multiple views, although the
-# functionality has not yet been fully developed. The displayer
-# provides a menu bar, a status bar, and a tool bar. Methods are
-# provided for defining the contents of these bars. If a view widget is
-# used without a displayer, then commands issued via these methods to
-# the bars are ignored. A view object that has been attached to a
-# displayer should only be destroyed by calling the
-# <code>destroyView</code> method of the displayer. Otherwise the
-# displayer will be unaware that the view is gone.
+# in Tycho. It is designed to be inserted into a <a href="Displayer.html">
+# Displayer</a>
+# window, although it can be used alone as an ordinary widget.
+# Subclasses of the View class display text or graphics, and may
+# choose to contain "subviews" within themselves. (The protocols
+# and functionality needed to properly implemented nested views
+# has not yet been developed.)
+#
+# The displayer of a view provides it with a menu bar, a status bar,`
+# and a tool bar. The View class provides methods that issue commands
+# to these bars; if a view widget is used without a displayer, then
+# commands issued via these methods to the bars are ignored. A view
+# that has been attached to a displayer must only be destroyed by
+# calling the <code>destroyView</code> method of the displayer, or
+# otherwise the displayer will be unaware that the view is gone.
 # <p>
 # Here is an example:
 # <tcl><pre>
@@ -79,9 +83,6 @@ class ::tycho::View {
     ###################################################################
     ####                         public methods                    ####
 
-    # Add a subview to the view.  NOTE: Not implemented yet.
-    method addSubview {subviewName type side args}
-
     # In derived classes, return the current point for use by seeFragment.
     method currentPoint {} {return {}}
 
@@ -102,9 +103,6 @@ class ::tycho::View {
 
     # Print a status message, if possible.
     method putStatus {string}
-
-    # Remove a subview from the view. NOTE: Not implemented yet.
-    method removeSubview {subviewName}
 
     # Invoke a command on the status bar, if it exists.
     method statusbar {args}
@@ -213,36 +211,6 @@ body ::tycho::View::destructor {} {
     ###################################################################
     ####                      public methods                       ####
 
-#######################################################################
-#### addSubview
-# Add a subview to this view.  The name of the subview that is to be
-# added is the first argument.  Also required are the type of view
-# that needs to be inserted: slateView, ganttView, textView,
-# position of insertion (top, bottom, left, right) in the case
-# of simple packing.  For derived views that require different
-# positioning elements such as coordinates or insertion points as
-# would be the case for slateView or textView then this method
-# should be redefined for those views.  The last argument are
-# args that are options to the view being inserted.
-# NOTE: Not fully implemented.
-#
-body ::tycho::View::addSubview {subviewName type side args} {
-
-    itk_component add $subviewName {
-	eval "::tycho::$type $itk_interior.$subviewName $args"
-    } {
-	keep -cursor -background
-    }
-
-    # Packing may not necessarily be the thing to use in derived
-    # classes; for instance, inserting views into a text widget
-    # is different - one needs to use "create window" in that case.
-    pack $itk_component($subviewName) -expand true -fill both -side $side
-
-    # Add to subview list
-    set subviewList($subviewName) $itk_component($subviewName)
-}
-
 #########################################################################
 #### displayer
 # If there is a Displayer associated with this view, use the arguments
@@ -301,19 +269,10 @@ body ::tycho::View::menubar {args} {
 
 ###################################################################
 #### putStatus
-# Print a status message
+# Print a status message to the view's status bar.
 #
 body ::tycho::View::putStatus {string} {
     statusbar puts $string
-}
-
-#######################################################################
-#### removeSubview
-# This method removes a subview from parent view.  It requires the 
-# name of the subview as an argument.
-# NOTE: Not implemented yet.
-# 
-body ::tycho::View::removeSubview {subviewName} {
 }
 
 #########################################################################
