@@ -63,8 +63,10 @@ typedef void (*SIG_PF)(int);
 
 #include "SimAction.h"
 #include "SimControl.h"
+#include "PtGate.h"
 #include <signal.h>
 
+// declare action list stuff.
 SimActionList* SimControl::preList = 0;
 SimActionList* SimControl::postList = 0;
 unsigned int SimControl::flags = 0;
@@ -72,9 +74,11 @@ int SimControl::nPre = 0, SimControl::nPost = 0;
 SimHandlerFunction SimControl::onInt = 0;
 SimHandlerFunction SimControl::onPoll = 0;
 
+// magic class: we care only about getting constructor called before
+// __main and destructor at end.
 class SimControlOwner {
 public:
-	SimControlOwner() {
+	SimControlOwner() : gk(SimControl::gate) {
 		LOG_NEW; SimControl::preList = new SimActionList;
 		LOG_NEW; SimControl::postList = new SimActionList;
 	}
@@ -82,9 +86,16 @@ public:
 		LOG_DEL; delete SimControl::preList;
 		LOG_DEL; delete SimControl::postList;
 	}
+private:
+	GateKeeper gk;
 };
 
+// dummy object causes actions to be called.  It also acts as the
+// GateKeeper for SimControl's gate pointer.
 static SimControlOwner simControlDummy;
+
+// SimControl's gate pointer
+PtGate* SimControl::gate = 0;
 
 int SimControl::internalDoActions(SimActionList* l, Star* which) {
 	SimActionListIter nextAction(*l);
@@ -127,6 +138,7 @@ int SimControl::cancel(SimAction* a) {
 }
 
 void SimControl::processFlags() {
+	CriticalSection region(gate);
 	if ((flags & interrupt) != 0) {
 		flags &= ~interrupt;
 		// if onInt is set, call the on-interrupt function.
@@ -140,6 +152,27 @@ void SimControl::processFlags() {
 		if (onPoll && !onPoll())
 			flags &= ~poll;
 	}
+}
+
+unsigned int SimControl::readFlags() {
+	CriticalSection region(gate);
+	return flags;
+}
+
+void SimControl::requestHalt () {
+	CriticalSection region(gate);
+	flags |= halt;
+}
+ 
+void SimControl::declareErrorHalt () 
+{
+	CriticalSection region(gate);
+	flags |= (error|halt);
+}
+	
+void SimControl::clearHalt () {
+	CriticalSection region(gate);
+	flags = 0;
 }
 
 SimActionList::SimActionList() {}
@@ -175,5 +208,22 @@ void SimControl::catchInt(int signo, int always) {
 	}
 	flags &= ~interrupt;
 	signal(signo, (SIG_PF)SimControl::intCatcher);
+}
+
+	// register a function to be called if interrupt flag is set.
+	// Returns old handler if any.
+SimHandlerFunction SimControl::setInterrupt(SimHandlerFunction f) {
+	SimHandlerFunction ret = onInt;
+	onInt = f;
+	return ret;
+}
+
+	// register a function to be called if the poll flag is set.
+	// Returns old handler if any.
+SimHandlerFunction SimControl::setPoll(SimHandlerFunction f) {
+	SimHandlerFunction ret = onPoll;
+	onPoll = f;
+	flags |= poll;
+	return ret;
 }
 
