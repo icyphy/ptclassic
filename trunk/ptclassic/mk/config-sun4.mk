@@ -65,7 +65,7 @@ CSYSLIBS =	-lm
 
 # system libraries (libraries from the environment) for c++ files
 # gcc-2.7.0/libg++-2.7 seems to require -liostream and -liberty (for memmove)
-SYSLIBS =	-liostream -lg++ -liberty $(CSYSLIBS)
+SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 
 
 #
