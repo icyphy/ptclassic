@@ -40,6 +40,9 @@ VPATH =		$(ROOT)/edit/slate
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# Sub directories to run make in.
+DIRS =		test doc
+
 TCL_SRCS =
   
 ITCL_SRCS = \
@@ -82,10 +85,7 @@ ITCL_SRCS = \
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl
 
-MISC_FILES = tclIndex doc img test
-
-# Sub directories to run make in.
-DIRS =			test doc
+MISC_FILES = $(DIRS) tclIndex bin demo img 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
