@@ -495,7 +495,9 @@ const char* SDFScheduler::domain() const { return SDFdomainName;}
 // display the schedule
 
 StringList SDFScheduler::displaySchedule() {
-	return mySchedule.printVerbose();
+    StringList out;
+    out << "Default SDF Scheduler\n" << mySchedule.printVerbose();
+    return out;
 }
 
 // constructor -- initialize members
