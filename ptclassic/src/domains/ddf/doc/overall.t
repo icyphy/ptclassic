@@ -394,7 +394,7 @@ where N is the control input.
 	go {
 	   // get control data
 	   if (!readyToGo) {
-                control.grabData();
+                control.receiveData();
                 int i = int (control%0);
                 waitFor(input, i);
                 readyToGo = TRUE;
@@ -402,7 +402,7 @@ where N is the control input.
                 // skip the N-1 inputs
                 int num = int (control%0);
                 for (int i = num; i > 0; i--)
-                        input.grabData();
+                        input.receiveData();
 
                 // prepare for the next round.
                 waitFor(control);
@@ -493,7 +493,7 @@ defstar {
         }
 	go {
 	   // get input data from Geodesic
-	   input.grabData();
+	   input.receiveData();
 
            // generates output
            int in = int (input%0);
