@@ -71,6 +71,8 @@ void StructTarget :: setup() {
   
   VHDLTarget::setup();
 
+  clockList.initialize();
+
   initCodeStreams();
   initVHDLObjLists();
   initFiringLists();
@@ -92,8 +94,10 @@ int StructTarget :: runIt(VHDLStar* s) {
 
   // Begin constructing the components of the firing's code.
   StringList tempName = s->fullName();
-  StringList sanTempName = sanitize(tempName);
-  StringList fiName = targetNestedSymbol.push(sanTempName);
+  tempName << "_F" << s->firingNum();
+  //  StringList sanTempName = sanitize(tempName);
+  //  StringList fiName = targetNestedSymbol.push(sanTempName);
+  StringList fiName = sanitize(tempName);
   fi->setName(fiName);
   fi->starClassName = s->className();
   fi->genericList = firingGenericList.newCopy();
@@ -164,9 +168,113 @@ void StructTarget :: allFiringsOneCluster() {
 
 // Trailer code (done last).
 void StructTarget :: trailerCode() {
+  // Iterate through the state list and connect registers and
+  // initial value multiplexors for each referenced state.
+  VHDLStateListIter nextState(stateList);
+  VHDLState* state;
+  while ((state = nextState++) != 0) {
+    // If its a constant source, need to do things a bit differently:
+    // only have a source with a signal, and no mux or reg.
+    if (state->constant) {
+      signalList.put(state->name, state->type, "", "");
+      connectSource(state->initVal, state->name);
+    }
+    // If firings change state, need to connect a reg and a mux
+    // between the lastRef to the state and the firstRef to the state.
+    if (!(state->constant)) {
+      StringList tempName = state->name;
+      tempName << "_Temp";
+      signalList.put(tempName, state->type, "", "");
+      StringList initName = state->name;
+      initName << "_Init";
+
+      signalList.put(initName, state->type, "", "");
+      //      connectRegister(state->lastRef, tempName, "iter_clock", state->type);
+      //      connectMultiplexor(tempName, state->firstRef, initName, state->type);
+      connectMultiplexor(state->lastRef, state->firstRef, initName, state->type);
+      connectSource(state->initVal, initName);
+    }
+  }
+
+  // Iterate through the arc list.
+  // Track the read/write references made on each arc.
+  VHDLArcListIter nextArc(arcList);
+  VHDLArc* arc;
+  while ((arc = nextArc++) != 0) {
+    // Determine which signals need to be fed back through registers.
+    // All signals which were read, but weren't written, must be latched.
+    for (int ix = arc->lowRead; ix < arc->lowWrite; ix++) {
+      StringList sourceName = arc->name;
+      StringList destName = arc->name;
+      int sx = (ix + (arc->highWrite - arc->lowWrite) + 1);
+      if (sx >= 0) {
+	sourceName << "_" << sx;
+      }
+      else { /* (sx < 0) */
+	sourceName << "_N" << (-sx);
+      }
+      if (ix >= 0) {
+	destName << "_" << ix;
+      }
+      else { /* (ix < 0) */
+	destName << "_N" << (-ix);
+      }
+
+      // NEW: Even though these are "source" and "dest", the naming
+      // convention is that any latched output of an exu is being
+      // called "sink" (for now). 4/12/96.
+      sourceName << "_sink";
+      destName << "_sink";
+
+      // sourceName is input to register, destName is output of register.
+      connectRegister(sourceName, destName, "iter_clock", "INTEGER");
+
+      // Must also create signals for those lines which are neither read nor
+      // written by a $ref() - e.g. if more delays than tokens read.
+      // However, do not create a signal if it's a wormhole input.
+      // Will have created a system port input instead.
+
+      // If no system port by the given name, go ahead and make the signal.
+      if (sx < arc->lowWrite) {
+	signalList.put(sourceName, "INTEGER", "", "");
+      }
+      if (ix < arc->lowWrite) {
+	signalList.put(destName, "INTEGER", "", "");
+      }
+    }
+  }
+
+  // Add in the entity, architecture, entity declaration, and
+  // component mapping for the controller.
+  VHDLFiring* ctlerFi = new VHDLFiring;
+  ctlerFi->setName("controller");
+  ctlerFi->starClassName = "Sequencer";
+  ctlerFi->genericList = ctlerGenericList.newCopy();
+  ctlerFi->portList = ctlerPortList.newCopy();
+  ctlerFi->genericMapList = ctlerGenericMapList.newCopy();
+  ctlerFi->portMapList = ctlerPortMapList.newCopy();
+  ctlerFi->signalList = ctlerSignalList.newCopy();
+  ctlerFi->variableList = ctlerVariableList.newCopy();
+  ctlerFi->portVarList = ctlerPortVarList.newCopy();
+  ctlerFi->action = ctlerAction;
+  ctlerAction.initialize();
+  ctlerFi->varPortList = ctlerVarPortList.newCopy();
+
+  // Create a new VHDLFiringList and put the firing in the list.
+  VHDLFiringList* ctlerFl = new VHDLFiringList;
+  ctlerFl->put(*ctlerFi);
+
+  // Create a new VHDLCluster and put the firing list in the cluster.
+  VHDLCluster* ctlerCl = new VHDLCluster;
+  ctlerCl->setName(ctlerFi->name);
+  ctlerCl->firingList = ctlerFl;
+  
+  // Add the cluster to the main list of clusters.
+  clusterList.put(*ctlerCl);
+
 
   // Special Action: merge all firings into one cluster
-//  allFiringsOneCluster();
+  //  allFiringsOneCluster();
 
   int level = 0;
   // Iterate through the cluster list.
@@ -203,75 +311,6 @@ void StructTarget :: trailerCode() {
     registerAndMerge(cl);
   }
   
-  // Iterate through the state list and connect registers and
-  // initial value multiplexors for each referenced state.
-  VHDLStateListIter nextState(stateList);
-  VHDLState* state;
-  while ((state = nextState++) != 0) {
-    // If its a constant source, need to do things a bit differently:
-    // only have a source with a signal, and no mux or reg.
-    if (state->constant) {
-      signalList.put(state->name, state->type, "", "");
-      connectSource(state->initVal, state->name);
-    }
-    // If firings change state, need to connect a reg and a mux
-    // between the lastRef to the state and the firstRef to the state.
-    if (!(state->constant)) {
-      StringList tempName = state->name;
-      tempName << "_Temp";
-      signalList.put(tempName, state->type, "", "");
-      StringList initName = state->name;
-      initName << "_Init";
-
-      signalList.put(initName, state->type, "", "");
-      connectRegister(state->lastRef, tempName, state->type);
-      connectMultiplexor(tempName, state->firstRef, initName, state->type);
-      connectSource(state->initVal, initName);
-    }
-  }
-
-  // Iterate through the arc list.
-  // Track the read/write references made on each arc.
-  VHDLArcListIter nextArc(arcList);
-  VHDLArc* arc;
-  while ((arc = nextArc++) != 0) {
-    // Determine which signals need to be fed back through registers.
-    // All signals which were read, but weren't written, must be latched.
-    for (int ix = arc->lowRead; ix < arc->lowWrite; ix++) {
-      StringList sourceName = arc->name;
-      StringList destName = arc->name;
-      int sx = (ix + (arc->highWrite - arc->lowWrite) + 1);
-      if (sx >= 0) {
-	sourceName << "_" << sx;
-      }
-      else { /* (sx < 0) */
-	sourceName << "_N" << (-sx);
-      }
-      if (ix >= 0) {
-	destName << "_" << ix;
-      }
-      else { /* (ix < 0) */
-	destName << "_N" << (-ix);
-      }
-      
-      // sourceName is input to register, destName is output of register.
-      connectRegister(sourceName, destName, "INTEGER");
-
-      // Must also create signals for those lines which are neither read nor
-      // written by a $ref() - e.g. if more delays than tokens read.
-      // However, do not create a signal if it's a wormhole input.
-      // Will have created a system port input instead.
-
-      // If no system port by the given name, go ahead and make the signal.
-      if (sx < arc->lowWrite) {
-	signalList.put(sourceName, "INTEGER", "", "");
-      }
-      if (ix < arc->lowWrite) {
-	signalList.put(destName, "INTEGER", "", "");
-      }
-    }
-  }
-
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
   buildComponentDeclarations(level);
@@ -320,6 +359,47 @@ void StructTarget :: frameCode() {
 
 // Write the code to a file.
 void StructTarget :: writeCode() {
+  ////////////////////////////////////////////
+  // Print out the list of clock names.
+  printf("CLOCK FIRINGS IN ORDER:\n\n");
+  StringListIter nextClock(clockList);
+  const char* clockName;
+  while ((clockName = nextClock++) != 0) {
+    printf("ASSERT:  %s\n", clockName);
+  }
+
+  StringList ctlerCode = "";
+  ctlerCode << "entity CONTROLLER is\n";
+  ctlerCode << "  port\n";
+  ctlerCode << "  (\n";
+  int portCount = 0;
+  nextClock.reset();
+  while ((clockName = nextClock++) != 0) {
+    if (portCount) {
+      ctlerCode << ";\n";
+    }
+    ctlerCode << "    " << clockName << ": OUT BOOLEAN";
+    portCount++;
+  }
+  ctlerCode << "\n";
+  ctlerCode << "  );\n";
+  ctlerCode << "end CONTROLLER;\n";
+  ctlerCode << "\n";
+  ctlerCode << "architecture SEQUENCE of CONTROLLER is\n";
+  ctlerCode << "begin\n";
+  ctlerCode << "process\n";
+  ctlerCode << "begin\n";
+  nextClock.reset();
+  while ((clockName = nextClock++) != 0) {
+    ctlerCode << "  " << clockName << " <= '1';\n";
+  }
+  ctlerCode << "end process;\n";
+  ctlerCode << "end SEQUENCE;\n";
+
+  printf("Sequencer Code:\n");
+  printf("%s", (const char*) ctlerCode);
+  ////////////////////////////////////////////
+
   writeFile(myCode,".vhdl",displayFlag);
 }
 
@@ -385,6 +465,7 @@ void StructTarget :: registerState(State* state, const char* varName,
   StringList root;
   StringList initVal;
   
+  // Initialize the state and check for inconsistencies.
   if (pos >= 0) {
     if (!(state->isArray())) {
       Error::error(*state, " reference of non-arrayState as an arrayState");
@@ -417,9 +498,9 @@ void StructTarget :: registerState(State* state, const char* varName,
   root = ref;
 
   StringList refIn = sanitize(ref);
-  refIn << "_" << thisFiring << "_In";
+  refIn << "_F" << thisFiring << "_In";
   StringList refOut = sanitize(ref);
-  refOut << "_" << thisFiring << "_Out";
+  refOut << "_F" << thisFiring << "_Out";
   StringList reg = sanitize(root);
   reg << "_Reg";
 
@@ -476,6 +557,18 @@ void StructTarget :: registerState(State* state, const char* varName,
       listState->constant = 0;
     }
     
+    // Contstruct the name of the last ref to the state.
+    StringList stateSignal = root;
+    stateSignal << "_F" << listState->lastFiring << "_Out";
+    StringList temp_state = stateSignal;
+    temp_state << "_sink";
+    StringList temp_in = refIn;
+    temp_in << "_sink";
+    StringList temp_out = refOut;
+    temp_out << "_source";
+    StringList temp_out_reg = refOut;
+    temp_out_reg << "_sink";
+
     // If it's the first firing to refer to this state,
     if (isFirstStateRef) {
       if (constState) {
@@ -485,23 +578,24 @@ void StructTarget :: registerState(State* state, const char* varName,
       if (!(constState)) {
 	firingSignalList.put(refIn, stType, "", refIn);
 	firingPortMapList.put(refIn, refIn);
-	firingPortMapList.put(refOut, refOut);
+	firingPortMapList.put(refOut, temp_out);
       }
     }
     
     // If this isn't the first firing to refer to this state,
     if (!isFirstStateRef) {
-      // Contstruct the name of the last ref to the state.
-      StringList stateSignal = root;
-      stateSignal << "_" << listState->lastFiring << "_Out";
       if (constState) {
 	firingSignalList.put(root, stType, root, root);
 	firingPortMapList.put(refIn, root);
       }
       if (!(constState)) {
-	firingSignalList.put(stateSignal, stType, stateSignal, refIn);
-	firingPortMapList.put(refIn, stateSignal);
-	firingPortMapList.put(refOut, refOut);
+	//	firingSignalList.put(stateSignal, stType, stateSignal, refIn);
+	//	firingSignalList.put(stateSignal, stType, stateSignal, refIn);
+	//	firingPortMapList.put(refIn, stateSignal);
+	//	firingPortMapList.put(refOut, refOut);
+	firingSignalList.put(temp_state, stType, temp_state, refIn);
+	firingPortMapList.put(refIn, temp_state);
+	firingPortMapList.put(refOut, temp_out);
       }
     }
 
@@ -511,17 +605,36 @@ void StructTarget :: registerState(State* state, const char* varName,
       firingPortList.put(refIn, "IN", stType);
     }
     if (!(constState)) {
-      firingSignalList.put(refOut, stType, refOut, "");
+      //      firingSignalList.put(refOut, stType, refOut, "");
+      //      firingVariableList.put(ref, stType, "");
+      //      firingPortVarList.put(refIn, ref);
+      //      firingVarPortList.put(refOut, ref);
+      //      firingPortList.put(refIn, "IN", stType);
+      //      firingPortList.put(refOut, "OUT", stType);
+      firingSignalList.put(temp_out, stType, temp_out, "");
       firingVariableList.put(ref, stType, "");
       firingPortVarList.put(refIn, ref);
       firingVarPortList.put(refOut, ref);
       firingPortList.put(refIn, "IN", stType);
       firingPortList.put(refOut, "OUT", stType);
+
+      // Data clock name.  Needs to be the name of the firing, not the star.
+      StringList clockName = sanitize(state->parent()->fullName());
+      clockName << "_F" << thisFiring;
+      clockName << "_clk";
+      // Create a register for data value.
+      connectRegister(temp_out, temp_out_reg, clockName, stType);
+      firingSignalList.put(temp_out_reg, stType, temp_out_reg, "");
+ 
     }
+
+    // Reset state's lastRef name.
+    //  listState->lastRef = refOut;
+    //    listState->lastRef = temp_out;
+    listState->lastRef = temp_out_reg;
+
   }
 
-  // Reset state's lastRef name.
-  listState->lastRef = refOut;
   // Reset state's lastFiring tag just before exiting.
   listState->lastFiring = thisFiring;
 }
@@ -566,23 +679,29 @@ void StructTarget :: registerSource(StringList /*type*/) {
 // Connect a multiplexor between the given input and output signals.
 void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
 				     StringList initVal, StringList /*type*/) {
-      registerMultiplexor("INTEGER");
-      StringList label = outName;
-      label << "_MUX";
-      StringList name = "Mux";
-      name << "_" << "INT";
+  registerMultiplexor("INTEGER");
+  StringList label = outName;
+  label << "_MUX";
+  StringList name = "Mux";
+  name << "_" << "INT";
 
-      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-      VHDLPortMapList* portMapList = new VHDLPortMapList;
-      genMapList->initialize();
-      portMapList->initialize();
+  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
+  VHDLPortMapList* portMapList = new VHDLPortMapList;
+  genMapList->initialize();
+  portMapList->initialize();
       
-      portMapList->put("input", inName);
-      portMapList->put("output", outName);
-      portMapList->put("init_val", initVal);
-      portMapList->put("control", "control");
-      systemPortList.put("control", "IN", "boolean");
-      registerCompMap(label, name, portMapList, genMapList);
+  portMapList->put("input", inName);
+  portMapList->put("output", outName);
+  portMapList->put("init_val", initVal);
+  portMapList->put("control", "control");
+  //  systemPortList.put("control", "IN", "boolean");
+  ctlerPortList.put("control", "OUT", "boolean");
+  ctlerPortMapList.put("control", "control");
+  ctlerSignalList.put("control", "boolean", "", "");
+  ctlerPortList.put("system_clock", "IN", "boolean");
+  ctlerPortMapList.put("system_clock", "system_clock");
+  systemPortList.put("system_clock", "IN", "boolean");
+  registerCompMap(label, name, portMapList, genMapList);
 }
 
 // Add a multiplexor component declaration.
@@ -608,23 +727,54 @@ void StructTarget :: registerMultiplexor(StringList /*type*/) {
 
 // Connect a register between the given input and output signals.
 void StructTarget :: connectRegister(StringList inName, StringList outName,
-				     StringList /*type*/) {
-      registerRegister("INTEGER");
-      StringList label = outName;
-      label << "_REG";
-      StringList name = "Reg";
-      name << "_" << "INT";
+				     StringList clkName, StringList /*type*/) {
+  // Add the clock to the list of clocks to be triggered.
+  const char* clock = clkName;
+  if (clockList.tail()) {
+    if (strcmp(clockList.tail(),clock)) {
+      clockList << clock;
+      ctlerAction << "     -- Toggle " << clkName << "\n";
+      ctlerAction << "wait until "
+		  << "system_clock'event and system_clock = TRUE;\n";
+      ctlerAction << clkName << " <= TRUE;\n";
+      ctlerAction << "wait until "
+		  << "system_clock'event and system_clock = TRUE;\n";
+      ctlerAction << clkName << " <= FALSE;\n";
+    }
+  }
+  else {
+    clockList << clock;
+    ctlerAction << "     -- Toggle " << clkName << "\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clkName << " <= TRUE;\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clkName << " <= FALSE;\n";
+  }
 
-      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-      VHDLPortMapList* portMapList = new VHDLPortMapList;
-      genMapList->initialize();
-      portMapList->initialize();
+  registerRegister("INTEGER");
+  StringList label = outName;
+  label << "_REG";
+  StringList name = "Reg";
+  name << "_" << "INT";
+
+  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
+  VHDLPortMapList* portMapList = new VHDLPortMapList;
+  genMapList->initialize();
+  portMapList->initialize();
       
-      portMapList->put("D", inName);
-      portMapList->put("Q", outName);
-      portMapList->put("C", "clock");
-      systemPortList.put("clock", "IN", "boolean");
-      registerCompMap(label, name, portMapList, genMapList);
+  portMapList->put("D", inName);
+  portMapList->put("Q", outName);
+  portMapList->put("C", clkName);
+  //  systemPortList.put(clkName, "IN", "boolean");
+  ctlerPortList.put(clkName, "OUT", "boolean");
+  ctlerPortMapList.put(clkName, clkName);
+  ctlerSignalList.put(clkName, "boolean", "", "");
+  ctlerPortList.put("system_clock", "IN", "boolean");
+  ctlerPortMapList.put("system_clock", "system_clock");
+  systemPortList.put("system_clock", "IN", "boolean");
+  registerCompMap(label, name, portMapList, genMapList);
 }
 
 // Add a register component declaration.
@@ -647,36 +797,66 @@ void StructTarget :: registerRegister(StringList /*type*/) {
 }
 
 // Register PortHole reference.
-void StructTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
+void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
+				      int firing,
 				      int tokenNum/*=-1*/,
 				      const char* part/*=""*/) {
-  StringList ref = varName;
-  
+  // I want to pass along the offset info as well as whether it's
+  // a read or a write so I can keep tabs on the production window and
+  // the read window, and then do nice things at the end based on that.
+  // Also, must do special things if it's a wormhole input.
+
+  // Continue to do normal signal naming and portmapping.
+
+  // NEW:  If the port reference is to be latched, then outputs will
+  // refer to signals that are inputs to registers, and inputs will
+  // refer to signals that are outputs of registers.  Additional names
+  // are required for this.  An additional register is needed.  The
+  // register needs its own clock signal also, keyed off of when the
+  // exu that feeds it completes its execution (outputs are stable).
+
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
-// I want to pass along the offset info as well as whether it's
-// a read or a write so I can keep tabs on the production window and
-// the read window, and then do nice things at the end based on that.
-// Also, must do special things if it's a wormhole input.
+  StringList ref = dataName;
+  ref << part;
 
-// Continue to do normal signal naming and portmapping.
+  // Data source signal name.
+  StringList sourceName = ref;
+  sourceName << "_source";
+  // Data sink signal name.
+  StringList sinkName = ref;
+  sinkName << "_sink";
+  // Data clock name.  Needs to be the name of the firing, not the star.
+  StringList clockName = sanitize(port->parent()->fullName());
+  clockName << "_F" << firing;
+  clockName << "_clk";
 
   // Create a port and a port mapping for this firing entity.
-  ref << part;
-  
   firingPortList.put(ref, port->direction(), port->dataType());
-  firingPortMapList.put(ref, ref);
+  if (port->isItInput()) {
+    firingPortMapList.put(ref, sinkName);
+  }
+  else {
+    // Create a register for data value.
+    connectRegister(sourceName, sinkName, clockName, port->dataType());
+    firingPortMapList.put(ref, sourceName);
+  }
 
   // For wormhole inputs, create a system port.
   // But for delayed values of wormhole inputs, do not create another port.
   // For local inputs, create a signal.
   if ((port->atBoundary()) && (tokenNum >= 0)) {
+    // NEW: Signal an error: we won't support wormholes for now:
+    Error::error(*port, "is at a wormhole boundary: Not currently supported");
     // Port at wormhole boundary, so create a system port instead of a signal.
-    systemPortList.put(ref, port->direction(), port->dataType());
+    //    systemPortList.put(ref, port->direction(), port->dataType());
   }
   else {
-    firingSignalList.put(ref, port->dataType(), ref, ref);
+    //    firingSignalList.put(ref, port->dataType(), ref, ref);
+    firingSignalList.put(sourceName, port->dataType(), ref, ref);
+    firingSignalList.put(sinkName, port->dataType(), ref, ref);
+    //    firingSignalList.put(clockName, "boolean", ref, ref);
   }
 }
 
@@ -787,6 +967,11 @@ void StructTarget :: addSensitivities(VHDLCluster* cl, int level) {
     VHDLFiring* nfiring;
     int sensCount = 0;
     while ((nfiring = nextFiring++) != 0) {
+      // Special exception to avoid sensitivity list for controller
+      // which will contain wait statements.  Synopsys complains that
+      // it can't synthesize blocks with wait statements if they also
+      // have sensitivity lists.
+      if (!strcmp(nfiring->name,"controller")) continue;
       if ((*(nfiring->portList)).head()) {
 	VHDLPortListIter nextPort(*(nfiring->portList));
 	VHDLPort* nport;
@@ -1321,6 +1506,7 @@ void StructTarget :: addCodeStreams() {
   addStream("architecture_body_closer", &architecture_body_closer);
   addStream("configuration_declaration", &configuration_declaration);
   addStream("firingAction", &firingAction);
+  addStream("ctlerAction", &ctlerAction);
 }
 
 // Initialize codeStreams.
@@ -1333,6 +1519,7 @@ void StructTarget :: initCodeStreams() {
   architecture_body_closer.initialize();
   configuration_declaration.initialize();
   firingAction.initialize();
+  ctlerAction.initialize();
 
   VHDLTarget::initCodeStreams();
 }
@@ -1340,11 +1527,21 @@ void StructTarget :: initCodeStreams() {
 // Initialize VHDLObjLists.
 void StructTarget :: initVHDLObjLists() {
   systemPortList.initialize();
+  ctlerPortList.initialize();
   compDeclList.initialize();
   signalList.initialize();
   compMapList.initialize();
   stateList.initialize();
   clusterList.initialize();
+
+  ctlerGenericList.initialize();
+  ctlerPortList.initialize();
+  ctlerGenericMapList.initialize();
+  ctlerPortMapList.initialize();
+  ctlerSignalList.initialize();
+  ctlerVariableList.initialize();
+  ctlerPortVarList.initialize();
+  ctlerVarPortList.initialize();
 
   VHDLTarget::initVHDLObjLists();
 }
