@@ -25,20 +25,6 @@ $Id$
 // Utility routines //
 //////////////////////
 
-// Check whether a state which is modified during runtime,
-// exists in a block.
-int StateExists(DataFlowStar& star)
-{
-  	BlockStateIter nextState(star);
-  	State* s;
-
-  	while ((s=nextState++)!=0) {
-    		if ((s->attributes() | AB_CONST) == 0) 
-      		return(1);
-  	}
-  	return(0);
-}  // StateExists
-
 // This function checks whether the argument star uses past input or outputs. 
 
 int PastPortsUsed(DataFlowStar& star) 
@@ -245,7 +231,7 @@ int ExpandedGraph::ExpandArc(DataFlowStar* src, PortHole* src_port,
 
 int ExpandedGraph::SelfLoop(DataFlowStar& s)
 { 
-	if ( enforcedSelfLoop || s.hasInternalState() || StateExists(s) || PastPortsUsed(s)) {
+	if ( enforcedSelfLoop || s.hasInternalState() || PastPortsUsed(s)) {
 
 		// connect successive invocations of the star as a chain of 
 		// precedences.
