@@ -128,4 +128,8 @@ XV_RAND=
 XV_INSTALL=install
 
 # Used for Matlab's external interface; by default, Matlab is not installed
+# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed 
+#    and MATLABLIBDIR points to the directory containing the Matlab libraries
+# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
+#    and MATLABLIBIDR is undefined
 MATLABDIR= $(ROOT)/src/compat/matlab
