@@ -38,6 +38,7 @@ $Id$
 
 class Star;
 class Galaxy;
+class Scheduler;
 
 class Block : public NamedObj
 {
@@ -108,6 +109,9 @@ public:
 
 	// print portholes as part of the info-printing method
 	StringList printPorts(const char* type);
+
+	// return the scheduler under which it is in.
+	virtual Scheduler* mySched() ;
 
         // Add  State to the block
         addState(State& s) {states.put(s);}
