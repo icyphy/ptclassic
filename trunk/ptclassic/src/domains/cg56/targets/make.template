@@ -54,6 +54,7 @@ CGSTARDIR=$(ROOT)/src/domains/cg/stars
 # CGC directory
 CGCDIR=$(ROOT)/src/domains/cgc/kernel
 CGCTAR=$(ROOT)/src/domains/cgc/targets/main
+CGCSTARDIR=$(ROOT)/src/domains/cgc/stars
 
 # CG56 kernel support
 CG56DIR=$(ROOT)/src/domains/cg56/kernel
@@ -71,7 +72,8 @@ S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
 		CGCXPoke.pl CGCXPeek.pl
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
-     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) $(S56WHI) \
+     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCSTARDIR) \
+     -I$(CGCDIR) $(S56WHI) \
      -I$(COMPAT) -I$(CGCTAR)
 
 # stars to make
