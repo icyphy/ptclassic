@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = html_library tydoc util
+DIRS = html_library tydoc util widgets
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
 itcldocs:
