@@ -37,6 +37,7 @@ defstar {
 		type { int }
 		default { 0 }
 		desc { "internal counting state" }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 	go {
 		double t = 0.0;

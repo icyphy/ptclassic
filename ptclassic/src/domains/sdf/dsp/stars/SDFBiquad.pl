@@ -61,12 +61,14 @@ defstar {
 		type { float }
 		default { "0.0" }
 		desc { "state1 (internal)"}
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name {state2}
 		type { float }
 		default { "0.0" }
 		desc {"state2 (internal)"}
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	go {
 		double t = float(input%0) - double(d1) * double (state1) -
