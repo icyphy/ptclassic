@@ -141,6 +141,14 @@ else
 	$(RANLIB) $@
 endif
 
+$(LIBNONSHARED): $(OBJS)
+	rm -f $@
+	$(AR) cq $@ $^
+	$(RANLIB) $@
+
+$(LIBDIR)/$(LIBNONSHARED):	$(LIBNONSHARED) $(EXP)
+	rm -f $@
+	ln $(LIBNONSHARED) $(LIBDIR)
 
 # AIX used EXP for export lists
 $(EXP): $(LIB)
