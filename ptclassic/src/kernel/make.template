@@ -165,7 +165,7 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	sed 's/"IntARRAY/"INTARRAY/' Int.int.ArrayState.cc > IntArrayState.cc; \
 	rm Int.int.ArrayState.cc
 
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
