@@ -64,6 +64,7 @@ extern int RpcGetObjectNames ARGS((RPCSpot *spot, lsList cmdList,
 				   long userOptionWord));
 extern void getSelectedObjNames ARGS((int* numObjs, char *nameList[]));
 extern void clearSelectedObjNames();
-extern int getFacetContents ARGS((char* facetName, int* numObjs, char* fname));
+extern int getFacetContents ARGS((char* facetName, int* numObjs,
+				  const char* fname));
 
 #endif   /* _EDIT_H */

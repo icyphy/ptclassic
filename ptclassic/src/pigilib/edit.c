@@ -145,7 +145,7 @@ void clearSelectedObjNames()
 int getFacetContents(facetName,numObjs,fname)
 char* facetName;
 int* numObjs;
-char* fname;
+const char* fname;
 {
 	FILE* fp;
 	octObject facet = {OCT_UNDEFINED_OBJECT};
