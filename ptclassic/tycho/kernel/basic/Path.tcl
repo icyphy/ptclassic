@@ -283,6 +283,14 @@ proc ::tycho::rm { args } {
 # If we cannot simplify the pathname, then we return the original pathname.
 # The first environment variable that matches a non-zero number of characters
 # is the environment variable that is used
+#
+# The following example expands and then simplifies $TYCHO/README.files:
+# <tcl><pre>
+# ::tycho::simplifyPath [::tycho::expandPath &#92
+#    [file join &#92$TYCHO README.files]] &#92
+#    [list TYCHO]]
+# </pre></tcl>
+# 
 proc ::tycho::simplifyPath {pathName envVarList} {
     global env
     set expandedPathName [::tycho::expandPath $pathName]
