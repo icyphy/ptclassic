@@ -19,17 +19,18 @@ The star hard limits input samples to keep the range of
 		type {FIX}
 	}
 	state {
-		name {top}
-		type {FIX}
-		default {0.1}
-		desc {sets top limit.}
-	}
-	state {
 		name {bottom}
 		type {FIX}
-		default {"-0.1"}
-		desc {sets bottom limit}
+		default {"0.0"}
+		desc {Lower limit of the output.}
 	}
+	state {
+		name {top}
+		type {FIX}
+		default {1.0}
+		desc {Upper limit of the output.}
+	}
+
 
 	codeblock(limitblock) {
 	move	#$val(top),x0
