@@ -1,4 +1,7 @@
 .\" $Id$
+.EQ
+delim off
+.EN
 .H1 "Using Galaxies"
 .pp
 .IE galaxies
@@ -283,3 +286,9 @@ of the old icon in any open window (regardless of whether the window
 is iconified).  Hence, you must either close those windows with
 ``control-d'' or delete the offending icon before replacing
 it with a new icon.
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:

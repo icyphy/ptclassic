@@ -1,4 +1,7 @@
 .\" $Id$
+.EQ
+delim off
+.EN
 .H1 "Debugging \*(PT and Extensions Within Pigi"
 .pp
 .Ir debugging
@@ -220,3 +223,9 @@ be included.  The easiest way to do this is to build a version
 of pigiRpc.debug that includes your star already linked into the system.
 Then repeat the above procedure.  The bottom of the stack frame will
 have much more complete information about what is occurring.
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:
