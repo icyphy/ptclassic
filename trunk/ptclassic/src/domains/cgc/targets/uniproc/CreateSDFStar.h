@@ -50,20 +50,33 @@ public:
 	
     /*virtual*/ int compileCode();
     /*virtual*/ int loadCode();
+    /*virtual*/ int runCode() {return TRUE;}
     /*virtual*/ void frameCode();
     /*virtual*/ void writeCode();
     /*virtual*/ void initCodeStrings();
 
-    /*virtual*/ void wormInputCode(PortHole&);
-    /*virtual*/ void wormOutputCode(PortHole&);
+    /*virtual*/ void wormPrepare();
+    /*virtual*/ void allWormInputCode();
+    /*virtual*/ void allWormOutputCode();
 
-    int makeCCFile();
-    int compileCCCode();
     int linkFiles();
 	
 protected:
     int connectStar(Galaxy& galaxy);
+
+    /*virtual*/ void mainLoopCode();
+private:
+    SDFSchedule wormInputStars;
+    SDFSchedule wormOutputStars;
+
+    // We may leave graph in broken state if an Error::abortRun is
+    // called.  When we disconnect the SDF-CGC wormhole, we mark the
+    // graph as dirty.  When we successfully link in the SDFCGC worm
+    // star, the graph is marked as ok.
+    int dirty;
+
     CodeStream starPorts;
+    CodeStream starSetup;
 };
 
 #endif
