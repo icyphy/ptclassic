@@ -332,9 +332,9 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
 
     myCode += "\n// Initialize the Tcl interpreter\n";
     myCode += "ptkInterp = Tcl_CreateInterp();\n";
-    myCode += "ptkW = Tk_CreateMainWindow(ptkInterp, NULL, ";
+    myCode += "ptkW = Tk_CreateMainWindow(ptkInterp, NULL, \"";
     myCode += universeName;
-    myCode += ", \"Pigi\");\n";
+    myCode += "\", \"Pigi\");\n";
     myCode +=
 "if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n\
     cerr << \"Tcl_Init: Error initializing the Tcl interpreter\";\n\
@@ -377,9 +377,9 @@ delete [] fulldirname;\n";
     myCode += universeName;
     myCode += " ";
     myCode += universeName;
-    myCode += " \"Standalone version of ";
+    myCode += " \\\"Standalone version of ";
     myCode += universeName;
-    myCode += "\"\");\n";
+    myCode += "\\\"\");\n";
     myCode += "Tcl_Eval(ptkInterp, \"ptkRunControlStandalone .run_";
     myCode += universeName;
     myCode += "\");\n";
