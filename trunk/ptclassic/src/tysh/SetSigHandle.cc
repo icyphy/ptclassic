@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /**************************************************************************
 Version identification:
-@(#)SetSigHandle.cc	
+$Id$
 
 Author: Joel R. King
 
@@ -35,8 +35,19 @@ Sets up the signal handlers for Tycho.
 
 **************************************************************************/
 
-#include "SetSigHandle.h"
+// SigHandle.h defines SIG_PF
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "compat.h"
 #include "SigHandle.h"
+#include "SetSigHandle.h"
 
 /****************************************************************************/
 
@@ -46,27 +57,18 @@ Sets up the signal handlers for Tycho.
 /***** PT_DEVELOP when set to a non-zero value, or not set at all,    *******/
 /***** will cause the core to be dumped, and the debugger to be run.  *******/
 
-int 
-setSignalHandlers(void) 
+int setSignalHandlers(void) 
 {
-
-    char *isDevelop; 
+    // get environment variable PT_DEVELOP
+    char *isDevelop = getenv("PT_DEVELOP");
     int returnValue = 0;
 
-    isDevelop = getenv("PT_DEVELOP"); /* getenv(char *) returns a pointer to*/
-                                      /* environmental variable or returns  */
-                                      /* NULL if it does not exist. This is */
-                                      /* used to get value of PT_DEVELOP if */
-                                      /* it exists.                         */
-         
-    if (isDevelop == 0 || isDevelop[0] == '0') 
-    {
+    if (isDevelop == 0 || isDevelop[0] == '0') {
         setCoreLimitRelease();
         if (setHandlers((SIG_PF) signalHandlerRelease) != 0)
 	    returnValue = 1;
     }
-    else
-    {
+    else {
         setCoreLimitDebug();
         if (setHandlers((SIG_PF) signalHandlerDebug) != 0)
 	    returnValue = 2;
@@ -81,29 +83,26 @@ setSignalHandlers(void)
 /****** This function sets the value of the maximum size of core file *******/
 /****** allowed.                                                      *******/
 
-int
-setCoreLimitDebug(void) 
+int setCoreLimitDebug(void) 
 {
 
 #ifndef PTHPPA
 
     struct rlimit coreLimit;
 
-    if (getrlimit(RLIMIT_CORE, &coreLimit) != 0) 
-    {             /* getrlimit gets information about RLIMIT (max size      */
-        return 1; /* of core) and places it in a rlimit struct. Returns 0   */
-    }             /* on a failure.                                          */
+    // getrlimit gets information about RLIMIT (max size of core files)
+    // and places it in a rlimit struct.  Returns 0 on failure.
+    if (getrlimit(RLIMIT_CORE, &coreLimit) != 0) {
+        return 1;
+    }
 
-    coreLimit.rlim_cur = coreLimit.rlim_max; /* Set RLIMIT to max allowable */
-                                             /* value, to insure that core  */
-                                             /* file is generated. If this  */
-                                             /* was set to zero it would    */
-                                             /* prevent a core file from    */
-                                             /* being made.                 */
+    // Set RLIMIT to max allowable value to insure that core file is generated.
+    // If this were set to zero, it would prevent a core file from being made.
+    coreLimit.rlim_cur = coreLimit.rlim_max;
 
-    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) 
-    {             /* setrlimit sets system values to the information in     */
-        return 1; /* rlimit struct.                                         */
+    // setrlimit sets system values to the information in rlimit struct
+    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) {
+        return 1;
     }
 
 #endif // PTHPPA
@@ -118,25 +117,23 @@ setCoreLimitDebug(void)
 /****** This function sets the value of the maximum size of core file *******/
 /****** allowed.                                                      *******/
 
-int
-setCoreLimitRelease(void) 
+int setCoreLimitRelease(void) 
 {
 
 #ifndef PTHPPA
 
     struct rlimit coreLimit;
 
-    coreLimit.rlim_cur = 0; /* Set RLIMIT 0. This prevents core file from   */
-                            /* being generated. This is included just in    */
-                            /* case an error occurs in the setting of the   */
-                            /* signal handlers, and the user continues.     */
-                            /* In normal operation however any signals that */
-                            /* could cause a core dump are intercepted so   */
-                            /* that a core file would never be generated.   */
+    // Set RLIMIT 0. This prevents core file from being generated.
+    // This is included just in case an error occurs in the setting of the
+    // signal handlers, and the user continues.  n normal operation, however,
+    // any signals that could cause a core dump are intercepted so 
+    // that a core file would never be generated.
+    coreLimit.rlim_cur = 0;
 
-    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) 
-    {             /* setrlimit sets system values to the information in     */
-        return 1; /* rlimit struct.                                         */
+    // setrlimit sets system values to the information in rlimit struct
+    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) {
+        return 1;
     }
 
 #endif // PTHPPA
