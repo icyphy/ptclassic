@@ -62,6 +62,7 @@ the OverflowHandler will be called.
 		  if ( fixIn.invalid() )
 		    Error::abortRun( *this, "Invalid InputPrecision" );
 		}
+		fixIn.set_rounding( ((int) RoundFix) );
 
 	        product = Fix( ((const char *) OutputPrecision) );
 		if ( product.invalid() )
@@ -69,6 +70,7 @@ the OverflowHandler will be called.
 	        product.set_ovflow( ((const char *) OverflowHandler) );
 		if ( product.invalid() )
 		  Error::abortRun( *this, "Invalid OverflowHandler" );
+		product.set_rounding( ((int) RoundFix) );
 	}
 	go {
 	        MPHIter nexti(input);

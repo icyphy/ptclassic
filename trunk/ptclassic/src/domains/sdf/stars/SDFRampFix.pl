@@ -76,6 +76,7 @@ The precision of this state is the precision of the accumulation.
                 t.set_ovflow( ((const char *) OverflowHandler) );
 		if ( t.invalid() )
 		   Error::abortRun( *this, "Invalid OverflowHandler" );
+		t.set_rounding( ((int) RoundFix) );
         }
 	go {
 		// operator Fix() when applied to a FixState performs a cast

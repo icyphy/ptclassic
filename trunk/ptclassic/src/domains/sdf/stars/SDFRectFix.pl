@@ -77,6 +77,7 @@ the OverflowHandler will be called.
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		   Error::abortRun( *this, "Invalid OverflowHandler" );
+		out.set_rounding( ((int) RoundFix) );
         }
 	go {
 		out = 0.0;

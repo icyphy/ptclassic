@@ -85,6 +85,7 @@ the OverflowHandler will be called.
 		  if ( fixIn.invalid() )
 		    Error::abortRun( *this, "Invalid InputPrecision" );
 		}
+		fixIn.set_rounding( ((int) RoundFix) );
 
                 out = Fix( ((const char *) OutputPrecision) );
 		if ( out.invalid() )
@@ -92,6 +93,7 @@ the OverflowHandler will be called.
                 out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		  Error::abortRun( *this, "Invalid OverflowHandler" );
+		out.set_rounding( ((int) RoundFix) );
         }
 	go {
 		// all computations should be performed with out since that
