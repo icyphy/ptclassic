@@ -136,6 +136,14 @@ public:
 	// operations are complete) a child of the appropriate type.
 	/*virtual*/ int childIsA(const char*) const;
 protected:
+        // This flag keeps track if we have modified the galaxy.  We
+        // Should only modify the galaxy ONCE per time the graph is 
+        // compiled.  In this target we flatten wormholes.  If we
+	// modify the galaxy after flattening the wormholes, we may
+	// end up with stars from other domains in galaxies that the
+	// user never intended.
+        int modifiedGalaxy;
+
 	void setup();
 
 	// parameters to set the child targets
@@ -188,7 +196,6 @@ protected:
 	void updateRM(int from, int to);
 
 	// parallel processors
-	ParProcessors* parProcs;
 	IntArray canProcs;
 
 	// Does the child target support the given star?
