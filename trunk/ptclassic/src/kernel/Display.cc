@@ -211,10 +211,14 @@ void XGraph :: terminate () {
                     }
         }
 
-        // remove temporary files
+        // issue commands to remove temporary files
         for (i = 0; i<ng; i++) {
-            cmd += "; /bin/rm -f ";
-            cmd += tmpFileNames[i];
+		char* name = tmpFileNames[i];
+		cmd += "; /bin/rm -f ";
+		cmd += name;
+		// remove the filenames so we won't zap them later.
+		delete name;
+		tmpFileNames[i] = 0;
         }
         cmd += ")";
         cmd += "&";
