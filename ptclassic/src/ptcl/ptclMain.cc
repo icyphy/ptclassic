@@ -91,7 +91,14 @@ static Tcl_DString command;
  * is being run interactively (e.g. "~/.tclshrc").  Set by Tcl_AppInit.
  * NULL means don't source anything ever.
  */
+
+
+#if TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION > 4
 char *tcl_RcFileName = "~/.ptclrc";
+#else
+extern char *tcl_RcFileName;
+#endif
+
 
 /* This defines the default domain for ptcl. */
 char DEFAULT_DOMAIN[] = "SDF";
@@ -123,6 +130,13 @@ main(int argc, char **argv) {
     // Fix for DECalendarQueue SIGFPE under linux.
     __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
 #endif
+
+    /*
+     * Name of a user-specific startup script to source if the application
+     * is being run interactively (e.g. "~/.tclshrc").  Set by Tcl_AppInit.
+     * NULL means don't source anything ever.
+     */
+    tcl_RcFileName = "~/.ptclrc";
 
     interp = Tcl_CreateInterp();
     Linker::init(argv[0]);	// initialize incremental link module
