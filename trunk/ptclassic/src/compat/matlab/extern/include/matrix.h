@@ -34,6 +34,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef matrix_h
 #define matrix_h
 
+#ifndef ARGS
+#if defined(__STDC__) || defined(__cplusplus)
+#define ARGS(args)      args
+#else
+#define ARGS(args)      ()
+#endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
