@@ -98,8 +98,8 @@ protected:
     PNCondition* start;
     int iteration;
 
-    // ThreadScheduler for keeping track of Threads.
-    PNThreadScheduler* threads;
+    // List for keeping track of threads.
+    PNThreadList* threads;
 };
 
 #endif

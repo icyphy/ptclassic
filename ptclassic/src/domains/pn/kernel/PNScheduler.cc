@@ -166,7 +166,7 @@ void PNScheduler::createThreads()
     GalStarIter nextStar(*galaxy());
     DataFlowStar* star;
 
-    LOG_NEW; threads = new PNThreadScheduler;
+    LOG_NEW; threads = new PNThreadList;
 
     // Create Threads for all the Stars.
     while((star = (DataFlowStar*)nextStar++) != NULL)
