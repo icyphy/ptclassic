@@ -68,14 +68,14 @@ public:
 	// return a new copy of the target
 	Block* makeNew() const;
 
-	// returns true if this is a wormhole with no external inputs
+	// returns TRUE if this is a wormhole with no external inputs
 	int selfFiringRequested();
 
 	// returns the no. of inputs to the galaxy/wormhole
 	int noOfInputs();
 
-	// returns the next self-firing time if selfFiringRequested() 
-	// returns TRUE
+	// If the selfFiringRequested returns true, then this function
+        // returns the next self-firing time 
 	double nextFiringTime();
 
 protected:
