@@ -62,10 +62,11 @@ int DFClusterBase::isClusterSDFinContext() const {
     ClusterPort* port;
     while((port = clusterPorts++) != NULL) {
 	DFPortHole* internalPort = (DFPortHole*) port->clusterAlias();
-	int reps = internalPort->parentReps();
+	int numXfer = internalPort->parentReps()*internalPort->numXfer();
+	int maxDelay 
+	    = numXfer + internalPort->maxDelay() - internalPort->numXfer();
 	DFPortHole& dfPort = (DFPortHole&)port->asPort();
-	dfPort.setSDFParams(internalPort->numXfer()*reps,
-			    internalPort->maxDelay()*reps);
+	dfPort.setSDFParams(numXfer,maxDelay);
     }
     return TRUE;
 }
