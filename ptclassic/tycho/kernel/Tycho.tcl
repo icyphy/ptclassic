@@ -95,7 +95,11 @@ if {![info exists tychoExitWhenNoMoreWindows]} {
 }
 # Check to see whether the usual exit mechanism (where we enable 
 # C-x C-c and have the exit command in the File menu) is enabled.
+if {[info exists tychoShouldWeDoRegularExit]} {
+    puts "xy: $tychoShouldWeDoRegularExit"
+}
 if {![info exists tychoShouldWeDoRegularExit]} {
+    puts yx
     set tychoShouldWeDoRegularExit 1
 }
 
