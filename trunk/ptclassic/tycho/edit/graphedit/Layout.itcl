@@ -237,7 +237,7 @@ body ::tycho::Layout::getcoords {item} {
 #
 body ::tycho::Layout::item {item spec args} {
     _verifynot item $item
-    _entity item {} $item [concat [list $spec] $args]
+    _entity item {} $item $spec $args
 }
 
 ########################################################################
