@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Author:	T.M. Parks
     Created:	28 August 1992
 
-    Auto-forking version of MTDFGeodesic.
+    Auto-forking version of PNGeodesic.
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -35,25 +35,25 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFForkNode.h"
+#include "PNForkNode.h"
 
 // Class identification.
-ISA_FUNC(MTDFForkNode, MTDFGeodesic);
+ISA_FUNC(PNForkNode, PNGeodesic);
 
 // Identify node as persistent.
-int MTDFForkNode::isItPersistent() const
+int PNForkNode::isItPersistent() const
 {
     return TRUE;
 }
 
 // Make a new source connection.
-PortHole* MTDFForkNode::setSourcePort(GenericPort &port, int delay)
+PortHole* PNForkNode::setSourcePort(GenericPort &port, int delay)
 {
     return autoFork.setSource(port, delay);
 }
 
 // Make a new destination connection.
-PortHole* MTDFForkNode::setDestPort(GenericPort &port)
+PortHole* PNForkNode::setDestPort(GenericPort &port)
 {
     // Make fork Star only after first connection.
     return autoFork.setDest(port);

@@ -32,75 +32,75 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFEventHorizon.h"
-#include "MTDFScheduler.h"
+#include "PNEventHorizon.h"
+#include "PNScheduler.h"
 
-// --------------------MTDFtoUniversal--------------------
+// --------------------PNtoUniversal--------------------
 
-void MTDFtoUniversal::initialize()
+void PNtoUniversal::initialize()
 {
-    InMTDFPort::initialize();
+    InPNPort::initialize();
     ToEventHorizon::initialize();
 }
 
-int MTDFtoUniversal::isItInput() const
+int PNtoUniversal::isItInput() const
 {
     return ToEventHorizon::isItInput();
 }
 
-int MTDFtoUniversal::isItOutput() const
+int PNtoUniversal::isItOutput() const
 {
     return ToEventHorizon::isItOutput();
 }
 
-EventHorizon* MTDFtoUniversal::asEH()
+EventHorizon* PNtoUniversal::asEH()
 {
     return this;
 }
 
-void MTDFtoUniversal::receiveData()
+void PNtoUniversal::receiveData()
 {
-    InMTDFPort::receiveData();	// Block until data is available.
+    InPNPort::receiveData();	// Block until data is available.
     tokenNew = TRUE;
 
-    if (MTDFtoUniversal::isItInput())	// MTDF on the outside.
+    if (PNtoUniversal::isItInput())	// PN on the outside.
     {
 	timeMark = outerSched()->now();
     }
-    else		// MTDF on the inside.
+    else		// PN on the inside.
     {
 	// Undo the time increment at the end of the run.
-	MTDFScheduler* sched = (MTDFScheduler*)innerSched();
+	PNScheduler* sched = (PNScheduler*)innerSched();
 	timeMark = sched->now() - sched->schedulePeriod;
     }
 
     transferData();
 }
 
-// -------------------MTDFfromUniversal-------------------
+// -------------------PNfromUniversal-------------------
 
-void MTDFfromUniversal::initialize()
+void PNfromUniversal::initialize()
 {
-    OutMTDFPort::initialize();
+    OutPNPort::initialize();
     FromEventHorizon::initialize();
 }
 
-int MTDFfromUniversal::isItInput() const
+int PNfromUniversal::isItInput() const
 {
     return FromEventHorizon::isItInput();
 }
 
-int MTDFfromUniversal::isItOutput() const
+int PNfromUniversal::isItOutput() const
 {
     return FromEventHorizon::isItOutput();
 }
 
-EventHorizon* MTDFfromUniversal::asEH()
+EventHorizon* PNfromUniversal::asEH()
 {
     return this;
 }
 
-void MTDFfromUniversal::sendData()
+void PNfromUniversal::sendData()
 {
     // Transfer all available data, even if there is more than expected.
     transferData();

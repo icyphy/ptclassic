@@ -31,18 +31,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Date of creation:	6 February 1992
 */
 
-#ifndef _MTDFUniverse_h
-#define _MTDFUniverse_h
+#ifndef _PNUniverse_h
+#define _PNUniverse_h
 
 #include "Universe.h"
-#include "MTDFScheduler.h"
+#include "PNScheduler.h"
 
-const char MTDFstring[] = "MULTI-THREADED DATAFLOW";
+const char PNstring[] = "MULTI-THREADED DATAFLOW";
 	
-class MTDFUniverse : public Universe
+class PNUniverse : public Universe
 {
 public:
-    MTDFUniverse() : Universe(new MTDFScheduler,MTDFstring) {}
+    PNUniverse() : Universe(new PNScheduler,PNstring) {}
 };
 
 #endif

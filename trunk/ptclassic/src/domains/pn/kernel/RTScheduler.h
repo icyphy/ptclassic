@@ -35,10 +35,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "MTDFScheduler.h"
+#include "PNScheduler.h"
 #include "Clock.h"
 
-class RTScheduler : public MTDFScheduler
+class RTScheduler : public PNScheduler
 {
 public:
     // Run (or continue) the simulation.
@@ -53,11 +53,11 @@ public:
 
 protected:
     // Select Thread function for a Star.
-    /*virtual*/ void (*selectThread(MTDFStar*))(MTDFStar*);
+    /*virtual*/ void (*selectThread(PNStar*))(PNStar*);
 
     // Thread functions.
-    static void periodicThread(MTDFStar*);
-    static void sourceThread(MTDFStar*);
+    static void periodicThread(PNStar*);
+    static void sourceThread(PNStar*);
 
 private:
     Clock clock;

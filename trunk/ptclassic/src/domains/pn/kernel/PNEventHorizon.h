@@ -1,5 +1,5 @@
-#ifndef _MTDFEventHorizon_h
-#define _MTDFEventHorizon_h
+#ifndef _PNEventHorizon_h
+#define _PNEventHorizon_h
 
 /* 
 Copyright (c) 1990-1993 The Regents of the University of California.
@@ -34,13 +34,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "EventHorizon.h"
-#include "MTDFPortHole.h"
+#include "PNPortHole.h"
 
-class MTDFtoUniversal : public ToEventHorizon, public InMTDFPort
+class PNtoUniversal : public ToEventHorizon, public InPNPort
 {
 public:
     // Constructor.
-    MTDFtoUniversal() : ToEventHorizon(this) {}
+    PNtoUniversal() : ToEventHorizon(this) {}
 
     /*virtual*/ void initialize();
     /*virtual*/ int isItInput() const;
@@ -48,13 +48,16 @@ public:
     /*virtual*/ EventHorizon* asEH();
 
     /*virtual*/ void receiveData();
+
+    /*virtual*/ Geodesic* allocateGeodesic()
+    { return ToEventHorizon::allocateGeodesic(); }
 };
 
-class MTDFfromUniversal : public FromEventHorizon, public OutMTDFPort
+class PNfromUniversal : public FromEventHorizon, public OutPNPort
 {
 public:
     // Constructor.
-    MTDFfromUniversal() : FromEventHorizon(this) {}
+    PNfromUniversal() : FromEventHorizon(this) {}
 
     /*virtual*/ void initialize();
     /*virtual*/ int isItInput() const;
@@ -62,6 +65,9 @@ public:
     /*virtual*/ EventHorizon* asEH();
 
     /*virtual*/ void sendData();
+
+    /*virtual*/ Geodesic* allocateGeodesic()
+    { return FromEventHorizon::allocateGeodesic(); }
 };
 
 #endif
