@@ -157,6 +157,9 @@ class ::tycho::File {
     # If possible, mark the window as containing unmodified data.
     method markUnmodified {}
 
+    # Open a file browser, and then open an editor for the file.
+    method openWinMethod {} {}
+
     # Print the contents of the file. The default behavior is an error.
     method print {}
 
@@ -424,7 +427,8 @@ body ::tycho::File::constructor {args} {
 
         # File menu contents
         $myMenubar add {Open...} File -underline 0 \
-                -accelerator "C-x C-f" -command "::tycho::File::openWin"
+                -accelerator "C-x C-f" \
+                -command "$this openWinMethod"
         
         $myMenubar add "Switch File..." File -underline 4 \
                 -accelerator "C-x C-v" -command "$this altFile"
@@ -785,6 +789,19 @@ body ::tycho::File::markUnmodified {} {
     }
 }
 
+#####################################################################
+#### openWinMethod
+# Open a file browser, and then open an editor for the file.
+# The editor is chosen based on the file extension, if the extension
+# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
+# ordinary text editor.
+#
+body ::tycho::File::openWinMethod {} {
+    ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
+	    -command "::tycho::File::openContext " \
+	    -text "Open File:" \
+            -default $file
+}
 #####################################################################
 #### print
 # Print the contents of the file. The default behavior is an error.
