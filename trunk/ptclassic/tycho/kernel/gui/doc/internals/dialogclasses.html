@@ -29,9 +29,13 @@ labeled <CODE>Yes</CODE> and <CODE>No</CODE>.  For example:
 wm deiconify .y
 .y focusin
 </pre></tcl>
-Typing "y" or "n" will invoke the corresponding button.
-Typing Return (or Enter on some keyboards) will invoke the "Yes" button."
-Typing Escape will dismiss the dialog without invoking either button.
+
+Typing <CODE>y</CODE> or <CODE>n</CODE> will invoke the corresponding
+button.  Typing <CODE>Return</CODE> (or <CODE>Enter</CODE> on some
+keyboards) will invoke the <CODE>Yes</CODE> button.  Typing
+<CODE>Escape</CODE> will dismiss the dialog without invoking either
+button.
+
 <p>
 The options <a name="yescommand option"><CODE>-yescommand</CODE></a> and
 <a name="nocommand option"><CODE>-nocommand</CODE></a>
@@ -54,8 +58,10 @@ if {$response == 1} {
     ::tycho::inform {Then how did you click on the No button?}
 }
 </pre></tcl>
-Notice that the response may in fact be a null string.
-This occurs if the user types Escape without invoking either button.
+
+Notice that the response may in fact be a null string.  This occurs if
+the user types <CODE>Escape</CODE> without invoking either button.
+
 <p>
 
 There is a bit of a technicality with using this capability.  Suppose
@@ -64,7 +70,7 @@ you wish to create a dialog box that returns the strings
 <CODE>1</CODE>.  The <CODE>-yescommand</CODE> and
 <CODE>-nocommand</CODE> options specify Tcl scripts, and it is
 difficult to get a Tcl script to return a value.  You could use the
-"set" command as follows:
+<CODE>set</CODE> command as follows:
 
 <tcl><pre>
 ::tycho::YesNoQuery .z -text {Are you awake?} &#92
@@ -72,7 +78,7 @@ difficult to get a Tcl script to return a value.  You could use the
          -nocommand {set y {no}}
 ::tycho::Dialog::wait .z
 </pre></tcl>
-But this not good coding style.  The variable "<CODE>y</CODE>" gets set
+But this not good coding style.  The variable <CODE>y</CODE> gets set
 at the global scope, clobbering any previous value the user might
 have unwisely stored in <CODE>y</CODE>.  A simple workaround is to use the
 Tcl <a name="format command"><code>format</code></a> command,
@@ -97,11 +103,13 @@ To see an example, execute this:
 ::tycho::YesNoCancel .z -text {Are you awake?}
 ::tycho::Dialog::wait .z
 </pre></tcl>
-By default, the cancel button returns <CODE>-1</CODE>, unless you specify
-something different withe the <CODE>-cancelcommand</CODE> option.
+
+By default, the <CODE>Cancel</CODE> button returns <CODE>-1</CODE>,
+unless you specify something different withe the
+<CODE>-cancelcommand</CODE> option.
 Similarly, by default, the <CODE>Yes</CODE>button returns <CODE>1</CODE>
 and the <CODE>No</CODE> button <CODE>0</CODE>.
-As usual, typing Escape dismisses the window without invoking
+As usual, typing <CODE>Escape</CODE> dismisses the window without invoking
 any of the buttons, so the above will return an empty string in this
 case.
 
@@ -172,7 +180,7 @@ passed to the Tk <code>entry</code> widget.  For example,
 .bb line a {password} {} -show *
 ::tycho::Dialog::wait .bb
 </pre></tcl>
-This causes the entry box to display the character "*" rather than
+This causes the entry box to display the character <CODE>*</CODE> rather than
 whatever you type.  This is useful, for example, to query the user
 for a password.
 <p>
@@ -185,11 +193,12 @@ text edit boxes, as in the following example:
 </pre></tcl>
 <p>
 Now the query will have four lines.
-Note that typing Return will no longer invoke the <CODE>OK</CODE> button
-while the focus is in the multi-line text widget.
+Note that typing <CODE>Return</CODE> will no longer invoke the
+<CODE>OK</CODE> button while the focus is in the multi-line text
+widget.
 Typing <code>Control+Tab</code> will move the focus to the next item in the
 query box (a simple <code>Tab</code> simply inserts a tab in the text window.
-Then Return works again to invoke <code>OK</code>.
+Then <CODE>Return</CODE> works again to invoke <code>OK</code>.
 <p>
 The <code><a name="radio method">radio</a></code> method
 puts radio buttons into the dialog.  For example, assuming you
@@ -358,7 +367,7 @@ The order of the <CODE>-bitmap</CODE> and <CODE>-text</CODE> options
 relative to the <CODE>-queries</CODE>
 option is important.  In most circumstances, you will want them first.
 <p>
-You also have access to the "new" method of the base class.
+You also have access to the <CODE>new</CODE> method of the base class.
 For example,
 <tcl quiet><pre>
 ::tycho::Dialog::new &#92
