@@ -24,15 +24,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	    type {int}
 	}
 	private {
-	    Encoder E;
+	    Encoder encoder;
 	}
 	setup {
-	    E.Reset();
+	    encoder.Reset();
 	}
 	go {
-	    int output[ 2 ];
-	    E( input%0, output );
-	    I%0 << output[ 0 ];
-	    Q%0 << output[ 1 ];
+	    int output[2];
+	    encoder(input%0, output);
+	    I%0 << output[0];
+	    Q%0 << output[1];
 	}
 }
