@@ -57,6 +57,7 @@ ITCL_SRCS = \
 	EditStack.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
+	Exec.itcl \
 	File.itcl \
 	FileBrowser.itcl \
 	FontManager.itcl \
