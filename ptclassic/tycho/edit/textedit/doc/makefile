@@ -41,7 +41,10 @@ include $(CONFIG)
 EXTRA_SRCS = \
 	index.html
 
-MISC_FILES =	codeDoc internals usersGuides
+MISC_FILES =	internals usersGuides
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES =	codeDoc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
