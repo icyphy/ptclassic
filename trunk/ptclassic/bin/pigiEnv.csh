@@ -21,7 +21,7 @@ set progname = `basename $0`
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
 if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/arch`
+    setenv ARCH `$PTOLEMY/bin/ptarch`
 endif
 if ( ! $?USER ) then
     setenv USER $LOGNAME
