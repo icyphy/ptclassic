@@ -11,30 +11,31 @@ DIRS =	$(PTOLEMY)/src/domains/mq/doc \
 	$(PTOLEMY)/src/domains/de/doc \
 	$(PTOLEMY)/src/domains/ddf/doc \
 	$(PTOLEMY)/src/domains/sdf/doc \
-	main
+	$(PTOLEMY)/doc/main
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
 		"PRINTER=$(PRINTER)"
 
-$(DIRS):
-	cd $@; make print
-
 almagest print:
 	for x in $(DIRS); do \
 		cd $$x ; \
 		make print ; \
-		cd .. ; \
 	done; \
-	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
-	make index
+	make prtitle; \
+	make prindex
 
-index:
-	/bin/rm $(PTOLEMY)/doc/index; \
+prtitle:
+	cd $(PTOLEMY)/doc; \
+	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
+
+prindex:
+	/bin/rm -f $(PTOLEMY)/doc/index; \
 	for x in $(DIRS); do \
 		cd $$x ; \
 		cat index >> $(PTOLEMY)/doc/index; \
 		chmod g+w $(PTOLEMY)/doc/index; \
 		cd .. ; \
 	done; \
+	cd $(PTOLEMY)/doc; \
 	$(PTOLEMY)/doc/bin/prindex index
