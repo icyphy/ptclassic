@@ -252,10 +252,10 @@ int BDFClusterGal::uniformRate() {
 // Merge adjacent actors that can be treated as a single cluster.
 int BDFClusterGal::mergePass() {
 	if (numberClusts() <= 1) return FALSE;
-	int changes = 0;
+	int changes = FALSE, contflag = TRUE;
 	BDFClusterGalIter nextClust(*this);
-	BDFCluster *c1, *c2 = 0;
-	do {
+	while ( contflag && !SimControl::haltRequested() ) {
+		BDFCluster *c1 = 0, *c2 = 0;
 		while ((c1 = nextClust++) != 0) {
 			c2 = c1->mergeCandidate();
 			if (c2) break;
@@ -273,11 +273,14 @@ int BDFClusterGal::mergePass() {
 		// note we must always reset the iterator after a
 		// merge since it might be invalid (point to a deleted
 		// cluster).
+		// FIXME: Memory leak: is c2 is added to any lists? -BLE
 		else if ((c2 = fullSearchMerge()) != 0) {
 			nextClust.reset();
 			changes = TRUE;
 		}
-	} while (c2 && !SimControl::haltRequested());
+
+		contflag = (c2 != 0);
+	}
 
 	// Try to turn clusters with self-loops into while-loops now.
 	// this code is the way it is because iterators are not
@@ -285,14 +288,15 @@ int BDFClusterGal::mergePass() {
 	// if we do a makeWhile.
 	int gotThrough;
 	do {
-		BDFClustPort* ctl;
+		BDFCluster* c1 = 0;
+		BDFClustPort* ctl = 0;
 		BDFRelation rel;
-		gotThrough = 1;
+		gotThrough = TRUE;
 		nextClust.reset();
 		while ((c1 = nextClust++) != 0) {
 			if ((ctl = c1->canBeWhiled(rel)) != 0) {
 				makeWhile(ctl,rel);
-				gotThrough = 0;
+				gotThrough = FALSE;
 				changes = TRUE;
 				break;
 			}
@@ -510,6 +514,7 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 		if (logstrm)
 			*logstrm << a->name() << " and " << b->name()
 				 << ": doing loop merge, result:\n";
+		// FIXME: Memory leak
 		LOG_NEW; BDFCluster *c = new BDFWhileLoop(desrel,condSrc,a,b);
 		addBlock(c->setBlock(genBagName(),this));
 		if (logstrm) *logstrm << *c << "\n";
@@ -827,8 +832,7 @@ void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 	while ((p = nextPort++) != 0) {
 		if (p == cond) continue;
 
-		// FIXME: should deal correctly with already-conditional
-		// ports.
+		// FIXME: should deal correctly with already-conditional ports.
 
 		p->setRelation(rel,cond);
 	}
@@ -845,10 +849,12 @@ static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
 	BDFCluster* cpar = cond->parentClust();
 	cond->markDuped();
 	if (!in) {
+		// FIXME: Memory leak
 		LOG_NEW; a = new BDFClustPort(cond->real(),cpar,BCP_DUP);
 		a->setPort(name,cpar,INT);
 	}
 	else {
+		// FIXME: Memory leak
 		BDFClustPort* d = createDupPort(in,name);
 		LOG_NEW; a = new BDFClustPort(*d,cpar,BCP_BAG);
 		// a is the external link for d.
@@ -937,7 +943,8 @@ BDFClustPort* BDFClusterGal::connectBoolean(
 	// create it in the near cluster -- name matches original
 	// condition and the inner port is cond->innermost(), so
 	// we will not be effected when outer bag ports are zapped.
-	LOG_NEW; BDFClustPort *b =
+	// FIXME: Memory leak
+	BDFClustPort *b =
 		new BDFClustPort(cond->innermost()->real(),c,BCP_DUP_IN);
 	b->setPort(cond->name(),c,INT);
 	c->addPort(*b);
@@ -1257,6 +1264,7 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	while ((p = nextP++) != 0) {
 		p->setNameParent(p->name(),this);
 		addPort(*p);
+		nextP.remove();
 	}
 	// get rid of b.
 	par->removeBlock(*b);	// remove from parent galaxy
@@ -1737,18 +1745,19 @@ const char* BDFCluster::mungeName(NamedObj& o) {
 	StringList name = o.fullName();
 	const char* cname = strchr (name, '.');
 	if (cname == 0) return "top";
+	// Change dots . to underscores _, but leave the first dot alone
 	cname++;
-// change dots to _ .
-	char buf[80];
+	char* buf = new char[ strlen(cname) + 1 ];
+	strcpy(buf, cname);
 	char* p = buf;
-	int i = 0;
-	while (i < 79 && *cname) {
-		if (*cname == '.') *p++ = '_';
-		else *p++ = *cname;
-		cname++;
+	while (*p) {
+		if (*p == '.') *p = '_';
+		p++;
 	}
 	*p = 0;
-	return hashstring(buf);
+	const char* hashed = hashstring(buf);
+	delete [] buf;
+	return hashed;
 }
 
 // create an atomic cluster to surround a single DataFlowStar.
@@ -2209,6 +2218,7 @@ void BDFWhileLoop::fixArcs(BDFCluster* x,BDFCluster* y) {
 		BDFCluster* peer = pFar->parentClust();
 		if (peer != x && peer != y) {
 			// create an external port
+			// FIXME: Memory leak
 			LOG_NEW; BDFClustPort *np =
 				new BDFClustPort(*cp,this,BCP_BAG);
 			cp->makeExternLink(np);
