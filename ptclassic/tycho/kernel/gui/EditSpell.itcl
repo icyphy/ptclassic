@@ -101,9 +101,6 @@ class ::tycho::EditSpell {
     # Where we are in the search.
     private variable upto {}
 
-    # For unique temporary file names
-    private common count 0
-
     ###################################################################
     ####                      private methods                      ####
 
@@ -194,7 +191,7 @@ body ::tycho::EditSpell::clearSpellMatch {} {
 # 
 body ::tycho::EditSpell::dictionary {} {
     ::tycho::File::makeTychoDir
-    ::tycho::File::openContext "~/.Tycho/tychodict.lst"
+    ::tycho::File::openContext [file join ~ .Tycho tychodict.lst]
     ::tycho::post {You must save your changes and \
 	    recheck for them to take effect}
 }
@@ -261,7 +258,7 @@ body ::tycho::EditSpell::next {} {
 body ::tycho::EditSpell::recheck {} {
     set tw $itk_option(-edit)
 
-    set filename "/tmp/tychoSpell[pid]x[incr count]"
+    set filename [::tycho::tmpFilename tychoSpell]
     if {![$tw busy writeSpellText $filename]} {return}
     set errs [exec spell $filename]
     set dict [readDictionary]
@@ -330,7 +327,7 @@ body ::tycho::EditSpell::replace {} {
 # 
 body ::tycho::EditSpell::readDictionary {} {
     ::tycho::File::makeTychoDir
-    set dictfile {~/.Tycho/tychodict.lst}
+    set dictfile [file join ~ .Tycho tychodict.lst]
     if {[file exists $dictfile]} {
 	if {[file readable $dictfile]} {
 	    set fd [open $dictfile]
@@ -338,7 +335,7 @@ body ::tycho::EditSpell::readDictionary {} {
 	    close $fd
 	    return $dict
 	} {
-	    ::tycho::warn "Personal dictionary file, ~/.Tycho/tychodict.lst, \
+	    ::tycho::warn "Personal dictionary file, $dictfile,\
 		    is not readable"
 	}
     }
@@ -353,7 +350,7 @@ body ::tycho::EditSpell::readDictionary {} {
 # 
 body ::tycho::EditSpell::writeDictionary {dict} {
     ::tycho::File::makeTychoDir
-    set dictfile {~/.Tycho/tychodict.lst}
+    set dictfile [file join ~ .Tycho tychodict.lst]
     set fd [open $dictfile w]
     set sorted [lsort $dict]
     foreach item $sorted {
