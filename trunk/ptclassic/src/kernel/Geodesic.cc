@@ -51,6 +51,10 @@ Geodesics can be created named or unnamed.
 #include "Plasma.h"
 #include "StringList.h"
 
+Geodesic::Geodesic() : pstack(0), originatingPort(0), destinationPort(0),
+numInitialParticles(0), sz(0), maxBufLength(0)
+{ }
+
 StringList Geodesic :: print (int) const {
 	StringList out;
 	if (isItPersistent()) out += "Persistent ";
@@ -126,14 +130,18 @@ void Geodesic :: initialize()
 		Particle* p = originatingPort->myPlasma->get();
 		pstack.putTail(p);
 	}
-	sz = numInitialParticles;
+	sz = maxBufLength = numInitialParticles;
 	// TO DO: Allow Particles in the Geodesic to be
 	// initialized to specific values
 }
 
-// simulated run bookkeeping
-void Geodesic :: incCount(int n) { sz += n;}
+// Functions for determining maximum buffer size during a simulated run.
+void Geodesic :: incCount(int n) { sz += n; maxBufLength += n;}
 void Geodesic :: decCount(int n) { sz -= n;}
+
+void Geodesic :: setMaxArcCount(int n) {
+	if (n > maxBufLength) maxBufLength = n;
+}
 
 // destructor
 Geodesic :: ~Geodesic () {

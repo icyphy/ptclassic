@@ -81,12 +81,7 @@ public:
 	PortHole* destPort () const   { return destinationPort;}
 
         // Constructor
-        Geodesic() : pstack(0)
-	{ 
-		originatingPort = NULL;
-		destinationPort = NULL;
-		numInitialParticles = sz = 0;
-	}
+        Geodesic();
 
 	// class identification
 	int isA(const char*) const;
@@ -129,19 +124,30 @@ public:
 	// These methods are available for schedulers such as the
 	// SDF scheduler to simulate a run and keep track of the
 	// number of particles on the geodesic.
-	// incCount increases the count, decCount decreases it,
-	// they are virtual to allow additional bookkeeping
+	// incCount increases the count, decCount decreases it.
+
+	// setMaxArcCount asserts that the maximum length the buffer
+	// reaches is the argument (for use in buffer allocation).
+	// They are virtual to allow additional bookkeeping
 	// in derived classes.
 
 	virtual void incCount(int);
 	virtual void decCount(int);
+	virtual void setMaxArcCount(int);
 
+	// return max # of particles
+	int maxNumParticles() const { return maxBufLength;}
 
 protected:
 	void portHoleConnect();
 	// my neighbors
         PortHole *originatingPort;
         PortHole *destinationPort;
+
+	// Max # of particles ever on geo.
+	// By default, only affected by incCount, decCount, and
+	// setMaxArcCount.
+	int maxBufLength;
 
 private:
         // A connection may require some initial particles.
