@@ -1,17 +1,44 @@
+/* Version Identification:
+ * @(#)masters.c	1.6	10/26/94
+ */
+/* Copyright (c) 1990-1993 The Regents of the University of California.
+ * All rights reserved.
+ * 
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that the above
+ * copyright notice and the following two paragraphs appear in all copies
+ * of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+ * FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ * ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+ * THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+ * SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+ * PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+ * CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ * ENHANCEMENTS, OR MODIFICATIONS.
+ * 
+ */
+
 /*
  * octfix
  * Hacked version of octmvlib.
  * Improved to support multiple (old,new) pairs by Joe Buck.
  * Improved to support view-name matching and replacement by Kennard.
  * Improved to support full string matches (instead of partial) by Kennard.
- *
- * $Id$
+ * ansified by Christopher Hylands
  */
 #include "port.h"
 #include "utility.h"
 #include "options.h"
 #include "oct.h"
 #include "oh.h"
+#include "errtrap.h"
 
 optionStruct optionList[] = {
     {"N",	"newpath",	"new path name"},
@@ -27,7 +54,7 @@ optionStruct optionList[] = {
 void bomb(str)
 char * str;
 {
-    fprintf(stderr, "octmvlib: fatal: %s\n");
+    fprintf(stderr, "octmvlib: fatal: %s\n", str);
 }
 
 /* 
@@ -86,11 +113,12 @@ replaceInstance(newInst, oldInst, force)
 
 #define MAX_PATHS 50
 
+int
 main(argc, argv)
 int argc;
 char **argv;
 {
-    char *input_name, *output_name;
+    char *input_name = (char *)NULL, *output_name;
     char *oldpath[MAX_PATHS];
     int oldlen[MAX_PATHS];
     char *oldview[MAX_PATHS];
@@ -232,8 +260,9 @@ char **argv;
     /* Avoid infinite loops. */
     count = ohCountContents( &facet, OCT_INSTANCE_MASK );
     while (octGenerate(&gen, &instance) == OCT_OK) {
-	int old_len;
-        char * new_path, *new_view, *old_path, *old_view;
+	int old_len = 0;
+        char * new_path, *new_view = (char *)NULL;
+	char *old_path = (char *)NULL, *old_view;
 	int idx;
 	char newname[2048];
 
@@ -280,7 +309,7 @@ char **argv;
     octFreeGenerator( &gen );
     OH_ASSERT(octCloseFacet(&facet));
     
-    exit(0);
+    return 0;
 }
 
 
