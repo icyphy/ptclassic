@@ -87,6 +87,10 @@ public:
 	// get the adjustSchedule parameter
 	int overrideSchedule() { return int(adjustSchedule); }
 
+        // return the nth child Target, null if no children or if child is
+	// not a CGTarget.
+        CGTarget* cgChild(int n);
+
 // to support CGDDF domains
 	// Enforce inheritance of targets inside wormholes (e.g. CGDDFWormhole)
 	void enforceInheritance() { inheritProcessors.setInitValue(1); }
