@@ -126,7 +126,6 @@ body ::tycho::WelcomeMessage::constructor {args} {
     append html "<h1><a href=$TYCHO/doc/index.html>" \
 	    {Tycho Documentation</a></h1>}
 
-    configure -size 0
     configure -textwidth 60
     configure -textheight 17
     configure -data $html

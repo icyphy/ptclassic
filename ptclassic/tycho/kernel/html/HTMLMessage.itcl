@@ -66,9 +66,6 @@ proc ::tycho::htmlmessage {source} {
 # The -directory option specifies the directory with respect to which
 # relative hypertext or image references should be interpreted.
 # The -scrollbar option specifies whether a scrollbar is used.
-# The -size option gives an adjustment up or down from the nominal
-# point size (14 points).  The default value is 2, which gives a nominal
-# point size of 16 points.
 #
 class ::tycho::HTMLMessage {
     inherit ::tycho::Message
@@ -83,7 +80,7 @@ body ::tycho::HTMLMessage::constructor {args} {
         ::tycho::HTML $itk_component(top).html
     } {
         keep -background -cursor -textforeground \
-                -scrollbar -directory -data -size \
+                -scrollbar -directory -data \
                 -textwidth -textheight
     }
     pack $itk_component(html) -side right -fill both
