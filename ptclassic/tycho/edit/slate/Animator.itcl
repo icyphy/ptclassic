@@ -201,9 +201,9 @@ body ::tycho::Animator::deactivate {args} {
         set afterid ""
     }
     # Terminate interaction sequence
-    release $currentX $currentY
+    release
     if { $deactivatecommand != "" } {
-        uplevel #0 $deactivatecommand $target $currentX $currentY
+        uplevel #0 $deactivatecommand $target
     }
     # Clear the target
     set target ""

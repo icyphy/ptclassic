@@ -67,7 +67,7 @@ class ::tycho::Polygon {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate x y args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -82,7 +82,7 @@ class ::tycho::Polygon {
     proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc _reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate}
 
     # Get one or more aspects of a polygon
     proc aspect {coords args}
@@ -100,7 +100,7 @@ class ::tycho::Polygon {
 #######################################################################
 #### _aspect
 #
-body ::tycho::Polygon::_aspect {id canvas slate x y args} {
+body ::tycho::Polygon::_aspect {id canvas slate args} {
     array set opts {-aspects {}}
     array set opts $args
     set coords [$slate coords $id]
@@ -211,8 +211,8 @@ body ::tycho::Polygon::_reshapedrag {id canvas slate x y} {
 # This just calls the "parent" class -- we should probably
 # implement "inheritance."
 #
-body ::tycho::Polygon::_reshaperelease {id canvas slate x y} {
-    ::tycho::Line::_reshaperelease $id $canvas $slate $x $y
+body ::tycho::Polygon::_reshaperelease {id canvas slate} {
+    ::tycho::Line::_reshaperelease $id $canvas $slate
 }
 
 #######################################################################
