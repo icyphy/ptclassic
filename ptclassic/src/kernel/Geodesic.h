@@ -81,8 +81,8 @@ public:
 	virtual int isItPersistent() const;
 
 	// return who is connected to source, destination
-	PortHole* sourcePort () const { return originatingPort;}
-	PortHole* destPort () const   { return destinationPort;}
+	inline PortHole* sourcePort () const { return originatingPort;}
+	inline PortHole* destPort () const   { return destinationPort;}
 
         // Constructor
         Geodesic();
@@ -100,7 +100,7 @@ public:
 
 	// Put a Particle into the Geodesic.  Note that this is not
 	// virtual but slowPut is virtual.
-	void put(Particle* p) {
+	inline void put(Particle* p) {
 		if (gate == 0) { 
 			pstack.putTail(p); sz++;
 		}
@@ -109,7 +109,7 @@ public:
 
 	// Get a Particle from the Geodesic.  Note that this is not
 	// virtual but slowGet is virtual.
-	Particle* get() {
+	inline Particle* get() {
 		return (sz > 0 && gate == 0)
 			? (sz--, pstack.get()) : slowGet();
 	}
@@ -118,10 +118,10 @@ public:
 	virtual void pushBack(Particle* p);
 
 	// Return the number of Particles on the Geodesic
-	int size() const {return sz;}
+	inline int size() const {return sz;}
 
 	// return the number of initial particles
-	int numInit() const {return numInitialParticles;}
+	inline int numInit() const {return numInitialParticles;}
 
 	// access head and tail of queue
 	Particle* head() const;
@@ -145,7 +145,7 @@ public:
 	virtual void setMaxArcCount(int);
 
 	// return max # of particles
-	int maxNumParticles() const { return maxBufLength;}
+	inline int maxNumParticles() const { return maxBufLength;}
 
 	// locking functions
 
@@ -156,7 +156,7 @@ public:
 	// delete lock for the Geodesic.
 	virtual void delLock();
 
-	int isLockEnabled() const { return gate != 0;}
+	inline int isLockEnabled() const { return gate != 0;}
 
         // Return the initValues string
         const char * initDelayValues();

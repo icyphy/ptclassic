@@ -60,7 +60,7 @@ public:
 
     DataFlowStar* next() {
 	Cluster* cluster = ClusterIter::next();
-	return cluster? (DataFlowStar*) &cluster->star() :(DataFlowStar*)NULL ;
+	return cluster? (DataFlowStar*) &cluster->star() : (DataFlowStar*)NULL ;
     }
     
     DataFlowStar* operator++(POSTFIX_OP) { return next();}
@@ -74,9 +74,7 @@ public:
 
     const DataFlowStar* next() {
 	const Cluster* cluster = CClusterIter::next();
-	return cluster ?
-	    (const DataFlowStar*)&cluster->star():
-	    (const DataFlowStar*)NULL ;
+	return cluster? (const DataFlowStar*) &cluster->star() : (DataFlowStar*)NULL ;
     }
     
     const DataFlowStar* operator++(POSTFIX_OP) { return next();}

@@ -105,14 +105,14 @@ public:
 	StringList& operator << (const StringList&);
 
 	// Return first string on list
-	const char* head() const {
+	inline const char* head() const {
 		return (const char*)SequentialList::head();
 	}
 
 	// Return the length in characters.
-	int length() const { return totalSize;}
+	inline int length() const { return totalSize;}
 	// Return the number of pieces
-	int numPieces() const { return size();}
+	inline int numPieces() const { return size();}
 
 	// Convert to const char*
 	// NOTE!!  This operation modifies the StringList -- it calls
@@ -120,7 +120,7 @@ public:
 	// one string and clean up the garbage.  No modification happens
 	// if the StringList is already in one chunk.  A null pointer
 	// is always returned if there are no characters, never "".
-	operator const char* () { return consolidate();}
+	inline operator const char* () { return consolidate();}
 
 	// Allow write access to the buffer after consolidation.
 	// WARNING: this is to permit StringLists to be used with
@@ -128,7 +128,7 @@ public:
 	// would do, or things like Tcl that may temporarily modify
 	// the argument but that restore it to its original form before
 	// returning.  If used otherwise, no promises are made.
-	char * chars() { return consolidate();}
+	inline char * chars() { return consolidate();}
 	
 	// Make a copy of the StringList as a char* in dynamic memory.
 	// the user is responsible for deletion.
@@ -136,27 +136,27 @@ public:
 
 // add objects to a StringList, old syntax
 
-	StringList& operator += (const char* arg) {
+	inline StringList& operator += (const char* arg) {
 		return *this << arg;
 	}
 
-	StringList& operator += (char arg) {
+	inline StringList& operator += (char arg) {
 		return *this << arg;
 	}
 
-	StringList& operator += (double arg) {
+	inline StringList& operator += (double arg) {
 		return *this << arg;
 	}
 
-	StringList& operator += (int arg) {
+	inline StringList& operator += (int arg) {
 		return *this << arg;
 	}
 
-	StringList& operator += (const StringList& arg) {
+	inline StringList& operator += (const StringList& arg) {
 		return *this << arg;
 	}
 
-	StringList& operator += (unsigned int arg) {
+	inline StringList& operator += (unsigned int arg) {
 		return *this << arg;
 	}
 
@@ -176,8 +176,8 @@ private:
 class StringListIter : private ListIter {
 public:
 	StringListIter(const StringList& s) : ListIter(s) {}
-	const char* next() { return (const char*)ListIter::next();}
-	const char* operator++(POSTFIX_OP) { return next();}
+	inline const char* next() { return (const char*)ListIter::next();}
+	inline const char* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 

@@ -165,8 +165,10 @@ void FixState::setPrecision(const Precision& p, int overrideable)
 	    if (symbolic_intBits) {
 		LOG_DEL; delete [] symbolic_intBits;
 	    }
-	    symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : (char*) NULL;
-	    symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : (char*) NULL;
+	    symbolic_length  = p.symbolic_len()  ?
+	      savestring(p.symbolic_len())  : (char*)NULL;
+	    symbolic_intBits = p.symbolic_intb() ?
+	      savestring(p.symbolic_intb()) : (char*)NULL;
 
 	    overrideablePrecision = overrideable;
 	}

@@ -77,7 +77,7 @@ public:
 	Plasma(Particle& p,Plasma* globalP = 0);
 
 	// Put a Particle into the Plasma
-	void put(Particle* p) {
+	inline void put(Particle* p) {
 		if (gate == 0)
 			ParticleStack::put(&(p->initialize()));
 		else slowPut(p);
@@ -86,16 +86,16 @@ public:
 	// Get a Particle from the Plasma, creating a
 	// new one if necessary.  We do it inline for the fastest
 	// case.
-	Particle* get() {
+	inline Particle* get() {
 		return (moreThanOne() && gate == 0) ? ParticleStack::get()
 			: slowGet();
 	}
 
 	// type of the Plasma
-	DataType type() const { return head()->type();}
+	inline DataType type() const { return head()->type();}
 
 	// is Plasma local?
-	int isLocal() const { return localFlag;}
+	inline int isLocal() const { return localFlag;}
 
 	// get the appropriate global Plasma object given a type
 	static Plasma* getPlasma (DataType t);
@@ -113,13 +113,13 @@ public:
 	// inc reference count, when adding reference from PortHole to
 	// a local Plasma.  New count is returned.  Global Plasmas
 	// pretend their count is always 1.
-	short incCount() { return localFlag ? ++refCount : 1;}
+	inline short incCount() { return localFlag ? ++refCount : 1;}
 
 	// dec reference count, when removing reference from PortHole to
 	// a local Plasma.  New count is returned.  Idea is we can
 	// delete it if it drops to zero.  Global Plasmas pretend
 	// their count is always 1.
-	short decCount() { return localFlag ? --refCount : 1;}
+	inline short decCount() { return localFlag ? --refCount : 1;}
 	
 protected:
 	// general implementation of "get"

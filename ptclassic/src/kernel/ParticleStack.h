@@ -57,7 +57,7 @@ and Geodesic.
 class ParticleStack {
 public:
 	// put a particle onto the stack
-	void put(Particle* p) {
+	inline void put(Particle* p) {
 		if (!pHead) pTail = p;
 		p->link = pHead; pHead = p;
 	}
@@ -67,7 +67,7 @@ public:
 	// if we get the last, pTail will still point to it.
 	// however, tail() will correctly return null.
 
-	Particle* get() {
+	inline Particle* get() {
 		Particle* p = pHead;
 		pHead = p->link;
 		return p;
@@ -75,7 +75,7 @@ public:
 
 	// put an article on the "tail" of the stack (to use the
 	// stack like a queue)
-	void putTail(Particle* p) {
+	inline void putTail(Particle* p) {
 		if (pHead) pTail->link = p;
 		else pHead = p;	// first particle
 		pTail = p;	// point to new last particle
@@ -83,10 +83,10 @@ public:
 	}
 
 	// empty stack check
-	int empty() const { return pHead ? 0 : 1;}
+	inline int empty() const { return pHead ? 0 : 1;}
 
 	// return true if more than one member (for Plasma)
-	int moreThanOne() const { return (pHead && pHead->link) ? 1 : 0;}
+	inline int moreThanOne() const { return (pHead && pHead->link) ? 1 : 0;}
 
 	// constructor (built with 0 or one particle)
 	ParticleStack(Particle*h) : pHead(h), pTail(h) {
@@ -101,10 +101,10 @@ public:
 	void freeup ();
 
 	// return ptr to head, tail respectively.
-	Particle* head() const { return pHead;}
+	inline Particle* head() const { return pHead;}
 	// note that for an empty stack, pTail may not be 0,
 	// hence the following code:
-	Particle* tail() const { return pHead ? pTail : 0;}
+	inline Particle* tail() const { return pHead ? pTail : 0;}
 private:
 	Particle* pHead;
 	Particle* pTail;

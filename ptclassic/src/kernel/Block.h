@@ -77,9 +77,9 @@ public:
 
 	// Methods making ports available on the outside;
 	// can be read but not set
-	int numberPorts() const {return ports.size();}
+	inline int numberPorts() const {return ports.size();}
 
-	int numberMPHs() const {return multiports.size();}
+	inline int numberMPHs() const {return multiports.size();}
 
 	// Method setting internal data in the Block
 	// If the parent pointer is not provied, it defaults to NULL
@@ -124,14 +124,14 @@ public:
 	// Add elements to the to the lists
 	// Made public for the benefit of MultiPortHole and
 	// classes derived therefrom.
-	void addPort(PortHole& p) {ports.put(p);}
+	inline void addPort(PortHole& p) {ports.put(p);}
 
 	// remove a porthole from the list
-	int removePort(PortHole& p) { return ports.remove(&p);}
+	inline int removePort(PortHole& p) { return ports.remove(&p);}
 
 	// This function saves the given MultiPortHole so portWithName
 	// can find it.
-	void addPort(MultiPortHole& p) {multiports.put(p);}
+	inline void addPort(MultiPortHole& p) {multiports.put(p);}
 
 	// Retrieve the PortHole with the given name
 	// The first method returns a generic port, the second returns
@@ -140,7 +140,7 @@ public:
 	PortHole *portWithName(const char* name);
 
 	// Retrieve the MultiPortHole with the given name
-	MultiPortHole *multiPortWithName(const char* name) {
+	inline MultiPortHole *multiPortWithName(const char* name) {
 		return multiports.multiPortWithName(name);
 	}
 
@@ -159,7 +159,7 @@ public:
 	virtual Scheduler* scheduler() const;
 
         // Add  State to the block
-        void addState(State& s) {states.put(s);}
+        inline void addState(State& s) {states.put(s);}
 
 	// Initialize the State
         virtual void initState();
@@ -168,7 +168,7 @@ public:
         virtual void initPorts();
 
         // Return number of states 
-        int numberStates() const {return states.size();}
+        inline int numberStates() const {return states.size();}
 
         // print states as part of the info-printing method
         StringList printStates(const char* type,int verbose) const;
@@ -233,11 +233,11 @@ protected:
 
 	// delete all States.  This must not be called unless the
 	// States are on the heap!
-	void deleteAllStates() { states.deleteAll();}
+	inline void deleteAllStates() { states.deleteAll();}
 
 	// same for ports and multiports.  Order is important:
 	// delete multiports first.
-	void deleteAllGenPorts() {
+	inline void deleteAllGenPorts() {
 		multiports.deleteAll();
 		ports.deleteAll();
 	}
