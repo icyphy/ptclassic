@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, editors/textedit directory.
+# Makefile for Ptolemy Tycho system, editors/slate/test directory.
 #
 # $Id$
 # Makefile Author: Christopher Hylands
