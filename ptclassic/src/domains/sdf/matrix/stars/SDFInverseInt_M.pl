@@ -32,16 +32,16 @@ NOTE: If A is the input Matrix and !A is the inverse, then
   go {
     Envelope pkt;
     (input%0).getMessage(pkt);
-    const IntMatrix *matrix = (const IntMatrix *)pkt.myData();
+    const IntMatrix& matrix = *(const IntMatrix *)pkt.myData();
 
-    if((matrix->numRows() != int(rowsCols)) ||
-       (matrix->numCols() != int(rowsCols))) {
+    if((matrix.numRows() != int(rowsCols)) ||
+       (matrix.numCols() != int(rowsCols))) {
       Error::abortRun(*this,"Dimension size of IntMatrix input does ",
                             "not match the given state parameters.");
       return;
     }
     IntMatrix *result = new IntMatrix(int(rowsCols),int(rowsCols));
-    *result = !(*matrix);        // invert the matrix
+    *result = !matrix;        // invert the matrix
 
     output%0 << *result;
   }

@@ -37,15 +37,15 @@ defstar {
   go {
     Envelope pkt;
     (input%0).getMessage(pkt);
-    const ComplexMatrix *matrix = (const ComplexMatrix *)pkt.myData();
-    if((matrix->numRows() != int(numRows)) ||
-       (matrix->numCols() != int(numCols))) {
+    const ComplexMatrix& matrix = *(const ComplexMatrix *)pkt.myData();
+    if((matrix.numRows() != int(numRows)) ||
+       (matrix.numCols() != int(numCols))) {
         Error::abortRun(*this,"Dimension of ComplexMatrix received does ",
                               "not match the given state parameters.");
         return;
     }
     for(int i = 0; i < size; i++)
-      output%(size - i - 1) << matrix->entry(i);
+      output%(size - i - 1) << matrix.entry(i);
   }
 }
 

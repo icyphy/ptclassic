@@ -27,11 +27,11 @@ defstar {
     // get input
     Envelope inpkt;
     (input%0).getMessage(inpkt);
-    const ComplexMatrix *matrix = (const ComplexMatrix *)inpkt.myData();
+    const ComplexMatrix& matrix = *(const ComplexMatrix *)inpkt.myData();
 
     // do scalar * matrix
-    ComplexMatrix *result = new ComplexMatrix(matrix->numRows(),matrix->numCols());
-    *result = Complex(gain) * *matrix;
+    ComplexMatrix *result = new ComplexMatrix(matrix.numRows(),matrix.numCols());
+    *result = Complex(gain) * matrix;
     output%0 << *result;
   }
 }

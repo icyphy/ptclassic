@@ -28,16 +28,16 @@ The output matrix has dimensions (rowsCols,rowsCols).
   go {
     Envelope pkt;
     (input%0).getMessage(pkt);
-    const FixMatrix *matrix = (const FixMatrix *)pkt.myData();
+    const FixMatrix& matrix = *(const FixMatrix *)pkt.myData();
 
-    if((matrix->numRows() != int(rowsCols)) ||
-       (matrix->numCols() != int(rowsCols))) {
+    if((matrix.numRows() != int(rowsCols)) ||
+       (matrix.numCols() != int(rowsCols))) {
       Error::abortRun(*this,"Dimension size of FixMatrix input does ",
                             "not match the given state parameters.");
       return;
     }
     FixMatrix *result = new FixMatrix(int(rowsCols),int(rowsCols));
-    *result = !(*matrix);        // invert the matrix
+    *result = !matrix;         // invert the matrix
 
     output%0 << *result;
   }

@@ -41,16 +41,16 @@ Matrix C has dimensions (numRows,numCols).
           // get inputs
           Envelope Apkt;
           (Ainput%0).getMessage(Apkt);
-          const ComplexMatrix *Amatrix = (const ComplexMatrix *)Apkt.myData();
+          const ComplexMatrix& Amatrix = *(const ComplexMatrix *)Apkt.myData();
 
           Envelope Bpkt;
           (Binput%0).getMessage(Bpkt);
-          const ComplexMatrix *Bmatrix = (const ComplexMatrix *)Bpkt.myData();
+          const ComplexMatrix& Bmatrix = *(const ComplexMatrix *)Bpkt.myData();
 
           // just check that A's dimensions match the state info.
           // the operator + on matricies will check that A matches B
-          if((Amatrix->numRows() != int(numRows)) ||
-             (Amatrix->numCols() != int(numCols))) {
+          if((Amatrix.numRows() != int(numRows)) ||
+             (Amatrix.numCols() != int(numCols))) {
             Error::abortRun(*this,"Dimension size of ComplexMatrix inputs do ",
                                   "not match the given state parameters.");
             return;
@@ -58,7 +58,7 @@ Matrix C has dimensions (numRows,numCols).
 
           // do matrix addition
           ComplexMatrix *result = new ComplexMatrix(int(numRows),int(numCols));
-          *result = *Amatrix + *Bmatrix;
+          *result = Amatrix + Bmatrix;
           output%0 << *result;
 	}
 }

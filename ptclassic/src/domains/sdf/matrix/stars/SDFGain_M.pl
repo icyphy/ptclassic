@@ -27,11 +27,11 @@ defstar {
     // get input
     Envelope inpkt;
     (input%0).getMessage(inpkt);
-    const FloatMatrix *matrix = (const FloatMatrix *)inpkt.myData();
+    const FloatMatrix& matrix = *(const FloatMatrix *)inpkt.myData();
 
     // do scalar * matrix
-    FloatMatrix *result = new FloatMatrix(matrix->numRows(),matrix->numCols());
-    *result = double(gain) * *matrix;
+    FloatMatrix *result = new FloatMatrix(matrix.numRows(),matrix.numCols());
+    *result = double(gain) * matrix;
     output%0 << *result;
   }
 }

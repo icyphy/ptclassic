@@ -34,15 +34,15 @@ The output matrix has dimensions (numCols,numRows).
   go {
     Envelope pkt;
     (input%0).getMessage(pkt);
-    const FixMatrix *matrix = (const FixMatrix *)pkt.myData();
-    if((matrix->numRows() != int(numRows)) ||
-       (matrix->numCols() != int(numCols))) {
+    const FixMatrix& matrix = *(const FixMatrix *)pkt.myData();
+    if((matrix.numRows() != int(numRows)) ||
+       (matrix.numCols() != int(numCols))) {
       Error::abortRun(*this,"Dimension size of FixMatrix input does ",
                             "not match the given state parameters.");
       return;
     }
     FixMatrix *result = new FixMatrix(int(numCols),int(numRows));
-    *result = matrix->transpose();
+    *result = ~matrix;             // equivalent to matrix.transpose()
     output%0 << *result;
   }
 }
