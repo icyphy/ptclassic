@@ -115,7 +115,7 @@ For more information about polyphase filters, see F. J. Harris,
 		default {0}
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-	start {
+	setup {
 		int d = decimation;
 		int i = interpolation;
 		int dP = decimationPhase;

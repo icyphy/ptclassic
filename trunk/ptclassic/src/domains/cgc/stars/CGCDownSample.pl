@@ -41,7 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		noInternalState();
 	}
-	start {
+	setup {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");

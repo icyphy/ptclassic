@@ -53,7 +53,7 @@ TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 	constructor {
 		noInternalState();
 	}
-	start {
+	setup {
 		if (int(inputIsPower)) gain=10.0;
 		addInclude("<math.h>");
 	}

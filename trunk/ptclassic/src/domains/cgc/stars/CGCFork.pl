@@ -26,7 +26,7 @@ are laid out; no code is required.
 	constructor {
 		noInternalState();
 	}
-	start {
+	setup {
 		forkInit(input,output);
 	}
 	exectime {

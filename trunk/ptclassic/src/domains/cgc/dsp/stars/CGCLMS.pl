@@ -68,7 +68,7 @@ will be stored there after the run has completed.
 		// taps are no longer constant
 		taps.clearAttributes(A_CONSTANT);
 	}
-	start {
+	setup {
 	// First check to be sure that interpolation is 1.
 		interpolation = 1;
 
