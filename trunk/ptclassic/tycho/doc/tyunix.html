@@ -19,27 +19,8 @@ design environment developed at U.C. Berkeley.
 
 <h2><a name="setup">Setup</a></h2>
 <p>
-If you are set up to run Ptolemy version 0.6 or higher, and
-Tycho is installed in the Ptolemy tree, then
-you are already set up to run Tycho.
-If you do not have Ptolemy installed
-on your system, or are not set up to run Ptolemy,
-then you must have the program <a name=itkwish>"itkwish"</a> in your
-<a name="path environment variable">path</a>.
-This program is a generic Itcl shell.
-<A NAME="Itcl2.0 vs. Itcl2.1"> must be running Itcl version 2.1 or higher.</A>
-Tycho0.01 was shipped with Ptolemy0.6, and it will only work with Itcl2.0.
-Tycho0.1 was first shipped in August, 1996, and it will work with Itcl2.0
-or Itcl2.1.  Tycho0.1.1 will work only with Itcl2.1, as it uses the tcl7.5
-<A NAME="file join errors">'file join'</A> command.
- <P>
-Tycho0.1 was shipped with <CODE>itclIndex</CODE> files that
-were built with Itcl2.1.  If you are using Itcl2.0, you must regenerate
-the <CODE>tclIndex</CODE> files
-<PRE>
-cd $TYCHO
-make sources
-</PRE>
+Tycho0.1.1 will not work with Itcl2.0, which is the version shipped with
+Ptolemy0.6.  To use Tycho0.1.1, you must have Itcl2.1 or Itcl2.2 installed
 <P>
 
 You can obtain the latest tycho release from 
@@ -57,7 +38,7 @@ into a Tycho console.
 above and the version information will be printed in the Console
 window).
 
-You will also need to have the tycho/bin directory in your path.
+ <P>You will also need to have the tycho/bin directory in your path.
 In addition, you will need to set an
 <a name="environment variables">environment variable</a>
 <a name="TYCHO environment variable">TYCHO</a>
