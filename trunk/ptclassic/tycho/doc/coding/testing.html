@@ -229,16 +229,37 @@ invoke the actions of an arbitrary method.
 
  <P>The problem is that when a model dialog box comes up, execution
 halts, so during testing the user would need to know what button to
-hit.  
- <P>As a workaround, we have designed a system that can
-automatically invoke a button during testing.  If we are testing, then
-<CODE>Dialog::wait</CODE> checks to see if the <CODE>TY_TEST_SCRIPT</CODE>
-variable exists.  If <CODE>TY_TEST_SCRIPT</CODE> exists, then
-<CODE>Dialog::wait</CODE> assumes that it is a script, substitutes in the
-dialog name for <CODE>%0</CODE> (percent zero) 
-and then evals the script at level <CODE>#0</CODE>
-The script can do anything, usually it just invokes a button and then
-unsets <CODE>TY_TEST_SCRIPT</CODE>.  For example, the
+hit.  To work around this, the
+<CODE>Dialog::wait</CODE> procedure (which is user to wait for
+the result of all modal
+dialog boxes in Tycho) 
+checks for the <code>TY_TESTING</code>
+global variable, to see if it has been called from within
+a test script. If so, then <CODE>Dialog::wait</CODE> will not
+actually make the dialog model but will do
+one of two things:
+
+<ul>
+<li> If the global variable <code>TY_TEST_MODAL</code> exists
+and is not null, then this is taken to be a list of
+scripts. It will remove the first script from this list,
+and evaluate it at the global scope with the name of the dialog box
+substituted for every occurrence of the string <code>%0</code>. The
+script should invoke methods of the dialog box to insert
+data into the dialog and invoke buttons, as a user would
+in normal usage. Because <CODE>Dialog::wait</CODE> removes
+the script from <code>TY_TEST_MODAL</code>, successive calls
+to <CODE>Dialog::wait</CODE> execute each script in the list
+in succession, allowing tests to easily simulate user input
+from a complex succession of dialog boxes. 
+
+<li> If the global variable <code>TY_TEST_MODAL</code> does not
+exist or  is null, then <CODE>Dialog::wait</CODE> just returns
+the name of the dialog box.
+</ul>
+
+<p>
+For example, the
 <A HREF="../../kernel/test/testWidgets.itcl"><CODE>$TYCHO/kernel/test/testWidgets.itcl</CODE></A> script includes a test for <A HREF="../../kernel/YesNoQuery.itcl"><CODE>YesNoQuery</CODE></A>:
 <tcl><pre>
 if {[string compare test [info procs test]] == 1} then { 
@@ -246,14 +267,55 @@ if {[string compare test [info procs test]] == 1} then {
 } {}
 
 test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
-    set TY_TEST_SCRIPT {
-        %0 invoke yes
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+        {
+	    %0 invoke yes
+	}
     }
     ::tycho::askuser "Are you awake?"
 } 1
 </pre></tcl>
-	
+
+<p> Note that <code>TY_TEST_MODAL</code> must be a list of
+scripts, even if the list contains only one script. Here is
+another sample test that simulates the user interaction to
+a series of two dialog boxes.
+The code being test is an example from
+the <a href="../../kernel/doc/internals/dialogclasses.html">
+Dialog Classes</a> tutorial:
+
+<tcl><pre>
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
+
+test sampleTest-1 {Test a series of modal dialogs} {
+    # Set the series of response to the dialogs. The
+    # first one clicks on the Yes button, the second clicks
+    # on the OK button. Note that comments
+    set TY_TEST_MODAL {
+        {
+            # This script simulates pressing the Yes button
+            # of the YesNoQuery box
+            %0 invoke yes
+	}
+        {
+            # This script simulates pressing the OK button
+            # of the Message box invoked by :tycho::inform
+            %0 invoke ok
+	}
+    }
+    # Now execute the code that creates the modal dialogs.
+    # In this case, the result is null.
+    ::tycho::YesNoQuery .z -text {Are you awake?}
+    if [::tycho::Dialog::wait .z] {
+        ::tycho::inform {You said yes!}
+    } {
+        ::tycho::inform {Then how did you click on the No button?}
+    }
+} {{}}
+</pre></tcl>
+
 <H3>Using <CODE>event generate</CODE></H3>
 
 The Tk <CODE>event generate</CODE> command is very handy for testing
