@@ -210,9 +210,9 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addCode(timedecls, "mainDecls", "timeDecls");
 		addCode(stardecls, "mainDecls");
                 addCode(timeinit, "mainInit", "timeInit");
-                addCode(starinit, "mainInit");
 		addCode(openfd, "mainInit", "openFd");
                 addCode(aminit, "mainInit", "amInit");
+                addCode(starinit, "mainInit");
 	}
 		
 	codeblock (block) {
