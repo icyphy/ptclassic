@@ -69,15 +69,25 @@ proc ::tycho::tyexec { args } {
 # is reused.  If the third argument is the empty string, then
 # a new Exec widget is created.
 #
-# Here's an example:
+# Here's an example of executing, and get the name of the Monitor widget.
+# Because the following command will generate an error, the widget will
+# not close after successful execution.
 # <tcl><pre>
-#    set retVal [::tycho::execModal {ls -l} {/tmp}]
-#    ::tycho::execModal {} {} [lindex $retVal 1]
+#    set win [::tycho::execModal {make MAKE_DOESNT_EXIST} {}]
 # </pre></tcl>
-# The above example runs <code>ls -l</code> the first time, then
-# the user can edit the command to a different command and then
-# the command is run.  If the user did not edit the command then
-# <code>ls -l</code> is rerun.
+#
+# Here's an example of reusing the same widget, if it still exists.
+# You can use this only if the previous command has been executed:
+# <tcl><pre>
+#    if [winfo exists [lindex $win 1]] {
+#        ::tycho::execModal {ls -al} {} [lindex $win 1]
+#    }
+# </pre></tcl>
+# The above example runs <code>make MAKE_DOESNT_EXIST</code> the first 
+# time, and make will return "abnormal" status. The Monitor window
+# will not autoclose if an error status is returned from the execution.
+# The second command will check to see if the window still exists, and
+# reuse the window if it is still alive.
 #
 proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
     if {$execWidget == {}} {
