@@ -43,6 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PTcl.h"
 #include "TyTcl.h"
 #include "SimAction.h"
+#ifdef PTUSE_EXPECT
+#include "expect_tcl.h"
+#endif
 
 class TyConsole {
 
