@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <stdio.h>
 #include <math.h>
+#include <string.h>		/* define memset for sol2 */
 
 #include "CGCrtlib.h"
 
