@@ -154,9 +154,9 @@ namespace ::tycho {
             {::tycho::view TclShell -file {%s}} \
             {Tcl shell} "tools"
 
-    # If we open a shared object, try to load it
+    # If we open a shared object, try to load it as a Tycho task
     ::tycho::File::registerExtensions [info sharedlibext] \
-            {load {%s}} \
+            {::tycho::controlpanel {%s}} \
             {}
 
 }
