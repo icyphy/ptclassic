@@ -99,9 +99,9 @@ proc _JRPCServer_ReadOrClose {fd} {
     # Check for cookie and execute command if one was got
     if { $line == "_JRPC_EndCommand_Cookie_" } {
 	global debug
-	if $debug {
+	#if $debug {
 	    puts "JRPCServer: \"[string trimright $_JRPC_command_ \n]\""
-	}
+	#}
         if [catch {uplevel #0 $_JRPC_command_} result] {
             puts $fd [list 1 $result]
             flush $fd
