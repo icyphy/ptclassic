@@ -363,20 +363,6 @@ int FSMStateStar::ioNmLists(StringList& inNmList, StringList& outNmList, Star* w
       else  outNmList << mp->name();
     }
 
-printf("\n----- Wormhole name: %s -----\n",this->name());
-const char* pNm;
-StringListIter nexti(inNmList);
-printf("input names: ");
-while ((pNm = nexti++) != 0) {
-  printf("%s ",pNm);
-}
-StringListIter nexto(outNmList);
-printf("\noutput names: ");
-while ((pNm = nexto++) != 0) {
-  printf("%s ",pNm);
-}
-printf("\n-----------------------\n");
-
     return TRUE;
 }
 
@@ -485,7 +471,6 @@ int FSMStateStar::doAction (int actNum) {
 	  // In addition, set the result into Tcl.
 	  InfString buf = result;
 	  Tcl_SetVar(myInterp,(char*)p->name(),buf,TCL_GLOBAL_ONLY);
-//printf("output : %s with value %f\n",(const char *)p->name(),double((*p)%0));
 	} // end of if (strcmp(parsedAct[actNum][index],"-")) 
 
 	index++;
