@@ -58,7 +58,7 @@ code {
 				Error::abortRun(*this, inPkt.typeError("GrayI"));
 				return;
 			}
-			if (!strstr(mvPkt.dataType(), "MVI")) {
+			if (!StrStr(mvPkt.dataType(), "MVI")) {
 				Error::abortRun(*this, mvPkt.typeError("MVI"));
 				return;
 			}
