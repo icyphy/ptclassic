@@ -422,7 +422,7 @@ class ::tycho::Resource {
 
     # Open the resource to which this object is connected. The optional
     # argument defaults to "r", which opens it for reading. The
-    # legal value of ths argument are the same as for the Tcl open{}
+    # legal value of this argument are the same as for the Tcl open{}
     # command.
     method open {{mode "r"}} {::tycho::abstractMethod open}
 

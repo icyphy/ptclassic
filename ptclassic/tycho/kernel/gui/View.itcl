@@ -203,7 +203,7 @@ body ::tycho::View::attachDisplayer {displayer menubar statusbar toolbar} {
 #### displayer
 # If no arguments are given, return the displayer; if there is none,
 # return null. If arguments are given and there is a Displayer, execute
-# ths command on the displayer and return the result. If there are args
+# this command on the displayer and return the result. If there are args
 # but no displayer, do nothing and return null.
 #
 body ::tycho::View::displayer {{method {}} args} {

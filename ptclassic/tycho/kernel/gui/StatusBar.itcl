@@ -503,7 +503,7 @@ body ::tycho::StatusBar::_entrycommand {command} {
 # 
 # If no arguments are given, return the entry widget; if there is none,
 # return null. If arguments are given and there is an entry widget, execute
-# ths command on the entry and return the result. If there are args
+# this command on the entry and return the result. If there are args
 # but no entry, do nothing and return null.
 #
 body ::tycho::StatusBar::_entrywidget {args} {
