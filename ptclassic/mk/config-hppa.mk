@@ -41,6 +41,16 @@ include $(ROOT)/mk/config-g++.mk
 # Comment the next line out if you don't want shared libraries.
 include $(ROOT)/mk/config-g++.shared.mk
 
+# ptbin.mk uses this to decide whether to include the PN stars
+# If you are under HPUX10, then the PN domain requires DCE threads.
+#  you will need to install the DCE development set of the OS cds.
+#  If you don't have a /usr/include/pthread.h, then you probably
+#  don't have the DCE developement set installed.  If you don't have
+#  this installed, set INCLUDE_PN_DOMAIN to no
+#INCLUDE_PN_DOMAIN = no
+INCLUDE_PN_DOMAIN = yes
+
+
 # gcc-2.7.2 under hpux10 requires '-shared -fPIC' to produce shared
 # libraries, '-shared' by itself won't work, so we override these three
 # variables from config-g++.shared.mk
@@ -97,8 +107,10 @@ WARNINGS =	-Wall -Wsynth #-Wcast-qual
 
 # Misc. flags for OS version, if you are under HPUX9.x:
 #ARCHFLAGS =	
-# If you are under HPUX10.x:
-ARCHFLAGS =	-DPTHPUX10 
+# If you are under HPUX10.x, define -DPTHPUX10
+# Under HPUX10.x, you will need to define _CMA_NOWRAPPERS_ to get
+#   the PN domain to work (see /usr/include/dce/cma_ux.h)
+ARCHFLAGS =	-DPTHPUX10 -D_CMA_NOWRAPPERS_
 # Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
 LOCALCCFLAGS =	-g -DUSG -DUSE_SHLLOAD -fno-for-scope
 
@@ -206,5 +218,3 @@ MATARCH = hp700
 # libpigi, libptcl and libtycho are all static on the hppa.
 USE_CORE_STATIC_LIBS = 1
 
-# Build gthreads
-INCLUDE_GTHREADS =	yes
