@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, kernel/demo directory.
+# Makefile for Ptolemy Tycho system, kernel/model/demo directory.
 #
 # @Author: Christopher Hylands
 #
@@ -31,10 +31,10 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
+ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/demo
+VPATH =		$(ROOT)/kernel/model/demo
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -60,7 +60,7 @@ DIRS =
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/kernel/demo
+TYDOC_DESC =	Index of classes in tycho/kernel/model/demo
 
 sources:: $(DEMO_SRCS)
 	chmod a+x $(DEMO_SRCS)
