@@ -46,6 +46,7 @@
 # </pre></tcl>
 #
 class ::tycho::ClassName {
+    inherit ::tycho::ParentClassName
 
     constructor {args} {}
     destructor {}
@@ -95,9 +96,10 @@ class ::tycho::ClassName {
     ###################################################################
     ####                   private variables                       ####
 
-    # Comments come before the variable declaration; variables listed
-    # in alphabetical order
-    private variable variableName
+    # A comment before one or a group of private variables;
+    # alphabetical order unimportant
+    private variable variableName1
+    private variable variableName2
 
     private common variableName
 }
