@@ -68,7 +68,11 @@ public:
 // check whether linker is active (so objects can be marked as dynamically
 // linked).  Actually it's set while constructors or other functions that
 // have just been linked are being run.
+// NOTE: for historical reasons, isActive lies about permlinked stars:
+// it returns FALSE when permlinking.  doingDynLink returns TRUE during
+// both perm and non-perm links.
 	static int isActive();
+	static int doingDynLink();
 
 // see whether the linker is enabled.
 	static int enabled() { return ptolemyName != 0;}
@@ -107,8 +111,11 @@ private:
 	// pointer to the current position in memBlock
 	static char* availMem;
 
-	// indicator that the linker is active
+	// indicator that the linker is active and doing a non-perm link
 	static int activeFlag;
+
+	// indicator that the linker is active (either perm or non-perm link)
+	static int dynLinkFlag;
 
 	// default options to be added to links
 	static const char* myDefaultOpts;

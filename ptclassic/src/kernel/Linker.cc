@@ -136,6 +136,7 @@ void DebugMessage(char *str1, char *str2)
 
 // static data objects
 int Linker::activeFlag = 0;
+int Linker::dynLinkFlag = 0;
 const char* Linker::ptolemyName = 0;
 const char* Linker::symTableName = 0;
 
@@ -156,10 +157,12 @@ int Linker::linkSeqNum = 0;
 StringList Linker::permlinkFiles;
 const size_t LINK_MEMORY = (size_t)(1024L * 1024L);
 
+int Linker::isActive() { return activeFlag;}
+
+int Linker::doingDynLink() { return dynLinkFlag;}
+
 // This routine creates the memory block if needed, and aligns it
 // to a page boundary.
-
-int Linker::isActive() { return activeFlag;}
 
 void Linker::adjustMemory() {
 #if defined(USE_DLOPEN) || defined(USE_SHLLOAD)
@@ -480,6 +483,7 @@ int Linker::multiLink (int argc, char** argv) {
 	// inside KnownBlock is saved.  This is how we can later tell
 	// if a Block was dynamically linked in, or if it was compiled-in.
 	if (!perm) activeFlag = TRUE;	
+	dynLinkFlag = TRUE;
 				// Call with objName, not tname
 	int nCalls = invokeConstructors(objName, dlhandle);
 
@@ -517,6 +521,7 @@ int Linker::multiLink (int argc, char** argv) {
 	// inside KnownBlock is saved.  This is how we can later tell
 	// if a Block was dynamically linked in, or if it was compiled-in.
 	if (!perm) activeFlag = TRUE;	
+	dynLinkFlag = TRUE;
 				// Call with objName, not tname
 	int nCalls = invokeConstructors(objName, (void*)lib_handle);
 
@@ -571,11 +576,15 @@ int Linker::multiLink (int argc, char** argv) {
 	// inside KnownBlock is saved.  This is how we can later tell
 	// if a Block was dynamically linked in, or if it was compiled-in.
 	if (!perm) activeFlag = TRUE;	
+	dynLinkFlag = TRUE;
 				// Call with tname, not objName
 	int nCalls = invokeConstructors(tname, (void *)NULL);
 #endif //USE_SHLLOAD
 #endif //USE_DLOPEN
 
+
+	activeFlag = FALSE;	// turn off the indication.
+	dynLinkFlag = FALSE;
 
 	int status = (nCalls >= 0);
 
@@ -584,7 +593,6 @@ int Linker::multiLink (int argc, char** argv) {
 		status = FALSE;
 	}
 
-	activeFlag = FALSE;	// turn off the indication.
 	if (status) {
 // we do not bump the memory pointer until now; this makes it official
 #if !defined(USE_DLOPEN) && !defined(USE_SHLLOAD)
