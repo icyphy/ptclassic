@@ -108,12 +108,12 @@ int workAfter(ParNode* pd) {
 	ParNode* node;
 	int total = 0;
 
-	if (pd->alreadyVisited())	return 0;
+	pd->beingVisited();
 
 	// iterate for descendents.
 	while ((dflink = desciter++) != 0) {
 		node = (ParNode*)dflink->farEndNode();
-		node->beingVisited();
+		if (node->alreadyVisited()) continue;
 	        total += workAfter(node);
 	}
 	total += pd->myExecTime();
