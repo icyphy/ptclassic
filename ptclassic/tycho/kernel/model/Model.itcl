@@ -33,9 +33,8 @@
 # This class is the abstract superclass of Tycho's implementation of the 
 # _model_ component of the model-view user interface architecture.  The 
 # model-view architecture is a derivation of the well-known 
-# model-view-controller architecture developed as part of Smalltalk and 
-# seemingly discussed in just about every book on object-oriented 
-# architectures and design techniques.  The model-view derivation combines 
+# model-view-controller architecture developed as part of Smalltalk.
+# The model-view derivation combines 
 # MVC's view and controller into a single abstraction -- the key forces 
 # driving this change are the increased control functionality provided 
 # these days by widgets in UI frameworks (including Tk) and the increased 
@@ -50,7 +49,8 @@
 # multiple views using the ``publish-and-subscribe'' design pattern (known 
 # as the ``Observer'' pattern in books such as Gamma _et al's_ `Design 
 # Patterns.'' It also incorporates two additional factors not essential 
-# to, but very useful to, the model abstraction: persistence and a 
+# to, but very useful to, the model abstraction: standard data
+# interchange formats, persistence and a 
 # command history.
 #
 # Multiple views can _subscribe_ to the same model -- when any view 
@@ -79,14 +79,14 @@
 # she performs via the user interface, is persistent across window 
 # openings and closings, and even across invocations of the application 
 # program.  It is supported by the three options *-sourcefile*, 
-# *-datafile*, and *-imagefile*.  These are all file names, and any may be 
+# *-datafile*, and *-statefile*.  These are all file names, and any may be 
 # used, depending on the subclass and the particular application.  The 
 # "source" is a file containing information needed to build the data and 
 # is never modified by the data object; the "file" is a file containing 
 # the same information, but can be written by the data object: it is thus 
-# the same as the usual *-file* option to the Tycho editors; the "image" 
+# the same as the usual *-file* option to the Tycho editors; the "state" 
 # is a file containing the data in a form that can be rapidly 
-# reconstructed by the data object.  The image is a simple Tcl 
+# reconstructed by the data object.  The state is a simple Tcl 
 # implementation of the ``Memento'' design pattern (Gamma _et al_).
 #
 # A key aspect of a user interface that encourages user interaction and 
@@ -109,7 +109,7 @@
 # Patterns_.) This would be more flexible -- for example, substituting a 
 # tree-structured history for the linear history would be straightforward.  
 # There is some close coupling between the history and the persistence 
-# (the history is saved in the image) which makes it convenient to combine 
+# (the history is saved in the state) which makes it convenient to combine 
 # them into one class.  Perhaps after some usage this issue should be 
 # examined to see whether to split the history out.
 #
@@ -129,8 +129,10 @@
 #          exists at the given index, while others will just insert
 #          additional data at that index. If the data subclass accepts
 #          data options, then following arguments are option values.
-#     <li>*replace* _index_ _data_: Replace the data at the given index
-#          with new data. Some subclasses may not allow this operation
+#  		   The methid is often named for the type of data: _entry_,
+#		   _vertex_, _edge_, and so on.
+#     <li>*assign* _index_ _data_: Assign a new value to the data at the
+# 	 	   given index. Some subclasses may not allow this operation
 #          if data does not exist at the given index; others will.
 #     <li>*create* _index_ _args_: Create some kind of data with the given
 #          index, where the additional arguments describe how to create
@@ -141,6 +143,7 @@
 #          model in which some data can be given additional attributes.
 #          It is often renamed according to the model: entryconfigure{},
 #          itemconfigure{}, textconfigure{}, and so on.
+#     <li>*delete* _index_: Delete data at the given index.
 #     </ul>
 #
 #     Every data change command 
@@ -154,15 +157,14 @@
 #     (for example), but is not difficult (after all, that's what Tk
 #     widgets require).
 #    
-# <li>Access commands: get{}, match{}, indexes{}.
-#     All of these are abstract and must be 
-#     overridden by subclasses. Most subclasses will also define a 
+# <li>Access commands: These comands get values of the data. Examples
+#     might include get{}, match{}, names{}. Most subclasses will define a 
 #     function called datacget{} or something similar, which can be used
 #     to access configuration options of data.
 #    
-# <li>Persistence commands: load{}, describe{}, and  
-#     write{}. load{} and write{} must never be overridden; 
-#     describe{} usually is.
+# <li>File commands: load{}, save{}, internalize{}, externalize{},
+#     read{}, write{}, describe{}. load{} and save{} must never be overridden; 
+#     the others usually are.
 #    
 # <li>Publish-subscribe commands: subscribe{}, unsubscribe{}, and publish{}.
 #     None of these must ever be overridden (except in special
@@ -196,17 +198,24 @@ class ::tycho::Model {
     # The file that this data is based on
     public variable datafile {}
 
-    # The file used for storing this data
-    public variable imagefile {}
+    # How to match when looking for subscribers to notify. Can be
+    # "exact," (the default) "glob", "all"
+    public variable notifymode "exact"
 
-    # The immutable file that this data is based on
-    public variable sourcefile {}
+    # A script to that changes the default notification mechanism
+    public variable notifyscript {}
+
+    # A script saying how to parse data from a "source" file
+    public variable parsescript {}
 
     # A flag saying whether this model is persistent
     public variable persistent 0
 
-    # A script to that changes the default notification mechanism
-    public variable notifyscript {}
+    # The immutable file that this data is based on
+    public variable sourcefile {}
+
+    # The file used for storing this data
+    public variable statefile {}
 
     #################################################################
     ####                     public methods                      ####
@@ -217,20 +226,20 @@ class ::tycho::Model {
     # Compact a portion of the undo history
     method compactHistory {from to publish {command {}} {inverse {}}}
     
-    # Describe data matched by the given pattern
-    method describe {pattern args}
+    # Describe the data in the model, in the same format as write{}
+    method describe {{prefix {}}}
 
     # Execute a list of data change commands
     method execute {commands}
 
-    # Return some data given a symbolic index
-    method get {index}
-
-    # Return a list of indexes that match a pattern
-    method indexes {pattern args}
-
+    # Externalize the model into a state file
+    method externalize {fd {nohistory {}}}
+    
+    # Add to the model from a state file or a string
+    method internalize {type data}
+    
     # Load data into the object
-    method load {{description {}}}
+    method load {args}
 
     # Get or set a mark in the undo history
     method mark {{markname {}} {position current}}
@@ -238,17 +247,20 @@ class ::tycho::Model {
     # Return the index of a mark
     method markIndex {markname}
 
-    # Return a list of index-data pairs based on a pattern
-    method match {pattern args}
-
     # Publish a change in data
     method publish {command index args}
 
+    # Read data into the model
+    method read {type data}
+    
     # Record a change in data
     method record {command index args}
 
     # Redo changes to the data
     method redo {{distance 1}}
+
+    # Write the model to its files
+    method save {args}
 
     # Subscribe to data changes that match an index pattern
     method subscribe {subscriber pattern {whattodo {}}}
@@ -262,35 +274,20 @@ class ::tycho::Model {
     # Update the model with a change in data
     method update {subscriber command index args}
 
-    # Add data specific to a view
-    method viewput {key index data}
-
-    # Read one data item specific to a view
-    method viewget {key index}
-
-    # Read many data items specific to a view
-    method viewmatch {key pattern}
-
-    # Write the data to a file
-    method write {{file {}} {image {}}}
-
+    # Write the model to a file
+    method write {fd {prefix {}}}
+    
     #################################################################
     ####                  protected methods                      ####
 
     # Notify the subscribers of a change in data
     protected method notify {subscriber command pattern args}
 
-    # Write data to a data file and image file.
-    protected method writeData {fd id}
-
     #################################################################
     ####                  protected variables                    ####
 
     # The array of undo commands
     protected variable undoCommands
-
-    # A flag marking this model as having been modified
-    protected variable modified
 
     # The array of redo commands
     protected variable redoCommands
@@ -306,8 +303,18 @@ class ::tycho::Model {
     # The marks in the redo/undo history
     protected variable historyMark
     
-    # The view-specific data stored here by views
-    protected variable viewdata
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args}  {
+	puts "[info class] $args"
+	eval $args
+    }
+
+    method debug {args} {
+        eval $args
+    }
 }
 
 
@@ -319,7 +326,7 @@ body ::tycho::Model::constructor {args} {
     set historyMark(current) 0
     set historyMark(first) 0
     set historyMark(last) 0
-    set historyMark(opened) 0
+    set historyMark(loaded) 0
     set historyMark(published) 0
     set historyMark(saved) 0
 
@@ -344,9 +351,7 @@ body ::tycho::Model::destructor {} {
     # If the model is persistent and modified, save it
     # FIXME: Need to really work out the logic of persistence and
     # loading and writing.
-    if { $persistent && $modified } {
-	write
-    }
+    #    if { $persistent && $modified } {save}
 }
 
 ########################################################################
@@ -463,7 +468,7 @@ body ::tycho::Model::compactHistory {from to publish {command {}} {inverse {}}} 
 
     # Flag an error if from is not earlier than to
     if { $fromindex >= $toindex } {
-	error "Cannot compact from $from ($fromindex) to $to (toindex) in $dataname"
+	error "Cannot compact from $from ($fromindex) to $to ($toindex) in $dataname"
     }
     
     # Build composite commands if not supplied
@@ -491,34 +496,14 @@ body ::tycho::Model::compactHistory {from to publish {command {}} {inverse {}}} 
 ########################################################################
 #### describe
 #
-# Return a "description" of the data with indexes that match the
-# given pattern. By default, the indexes are matched using glob-style 
-# matching. The form taken by the returned result varies; it is also
-# supposed to be opaque to clients, so do not rely on it having any
-# particular form! It is, however, guaranteed to be understood
-# by the load{} method, so can be used to efficiently clone objects
-# or create representations to be regenerated at some later time.
-# Most subclasses will implement this
-# method so that all data is returned given the pattern "*".
+# Return a string that describes the model. The data format is exectly
+# that generated by the write{} method -- note that it is probably
+# _not_ a well-formed Tcl list. The
+# argument, if present, is a string to place at the start
+# of each line. <i>This is an abstract method</i>.
 #
-# Additional arguments may be supported by some subclasses to select
-# the kind of pattern-matching (*-regexp*) or the contents of data
-# returned (for example, whether or not to include the undo history
-# in the result.)
-#
-# The default method given here generates a description of the undo
-# history. Subclasses
-# should override this method and then call it
-# explicitly if they need to include the undo history in their output.
-#
-body ::tycho::Model::describe {pattern args} {
-    set result "# The undo history of $dataname\n"
-    append result "array set undoCommands [list [array get undoCommands]]\n"
-    append result "array set redoCommands [list [array get redoCommands]]\n"
-    append result "array set publishable  [list [array get publishable]]\n"
-    append result "array set historyMark  [list [array get historyMark]]\n"
-
-    return $result
+body ::tycho::Model::describe {{prefix {}}} {
+    abstractMethod describe
 }
 
 ########################################################################
@@ -536,28 +521,78 @@ body ::tycho::Model::execute {commands} {
 }
 
 ########################################################################
-#### get
+#### externalize
 #
-# Get data at the specified index. What the index means is 
-# entirely dependent on the specific subclass. Note that the index
-# is not pattern-matched: use the match{} method for that.
+# Write a class-dependent description of the data to a file.
+# The argument is a file descriptor so that this method can be used
+# to write a collection of models to a single file. In the Model class,
+# this method writes the undo/redo history. Subclasses should override
+# this method and use chain to include the undo history. If the second
+# argument is present and true, don't write the history to the file.
 #
-# This method must be overridden by subclasses.
+# The format of the state file must be such that the object can be
+# reconstructed by the internalize{} method. Usually, this will mean
+# that the object can be loaded by sourcing the file within the
+# object context. In general, the file will be a collection of set{}
+# and *array set* commands.
 #
-body ::tycho::Model::get {index} {
-    ::tycho::abstractMethod get
+body ::tycho::Model::externalize {fd {nohistory {}}} {
+    puts $fd "# Tycho model state file for $dataname\n\n"
+    if { $nohistory == "" || ! $nohistory } {
+	puts $fd "# Undo/redo history\n"
+	puts $fd "array set undoCommands [list [array get undoCommands]]\n"
+	puts $fd "array set redoCommands [list [array get redoCommands]]\n"
+	puts $fd "array set publishable  [list [array get publishable]]\n"
+	puts $fd "array set historyMark  [list [array get historyMark]]\n"
+    }
+    return ""
+}
+
+########################################################################
+#### internalize
+#
+# Load a class-dependent description of the data. If the _type_ argument
+# is "string" then _data_ is a string that can be evaluated in the
+# object context to load the data. If it is "file", then _data_ is
+# the _name_ (note: not the descriptor) of a file that can be sourced
+# to load the data.
+#
+# <b>Important</b>: Subclasses generally do not need to override
+# this method. However, they _must_ provide a method called
+# <i>evalInSpecificContext</i>, which just evals its args.
+# This is needed so that the scoping of variables
+# is correct: since the file sets variables in the superclass, it
+# must be executed within that scope. There appears to be no way around
+# this even using @scope.
+#
+body ::tycho::Model::internalize {type data} {
+    if { $type == "file" } {
+	# Evaluate in object-specific context. To make sure the correct
+	# method exists, qualify the call. To access the method (since
+	# it's private to prevent general use) use @scope.
+	@scope [info class] [list \
+		$this [info class]::evalInSpecificContext source $data]
+    } elseif { $type == "string" } {
+	@scope [info class] [list \
+		$this [info class]::evalInSpecificContext $data]
+    } else {
+	error "Invalid type $type"
+    }
+    return ""
 }
 
 ########################################################################
 #### load
 #
-# Load data into the object. If no argument is given, then the
-# object loads itself using the most recent of the *-datafile*, *-sourcefile*,
-# and *-imagefile* options. If an argument is given, then it loads that
-# data. The form of the description varies, but all Model subclasses
-# can be reproduced by loading the data returned by "describe *".
+# Load the data from files. With no arguments given, this method
+# reads from the most recent of the *-datafile*, *-sourcefile*,
+# and *-statefile* options.
+# If there are arguments, they are option-value pairs, where the
+# valid options are *-datafile*, *-sourcefile*, and *-statefile*,
+# and the values are used instead of the options of the object. To
+# prevent a file from being read, supply a null value for that option.
 #
-# Note that none of the *-datafile*, *-sourcefile*, or *-imagefile* options
+# Note that none of the *-datafile*, *-sourcefile*, or *-statefile* options
 # cause the data to be reloaded when they are changed: this must be done
 # explicitly by a) deleting the data and b) calling this method.
 # In all cases, a load _adds_ (or overwrites) data already in this
@@ -566,54 +601,63 @@ body ::tycho::Model::get {index} {
 # may require one or many calls to delete{}). (It would probably just
 # be faster to delete the object and create a new one.)
 #
-body ::tycho::Model::load {{description {}}} {
-    # If there's no description, get it from a file
-    if { $description == "" } {
-	# Remember this position
-	set historyMark(opened) $historyMark(current)
+# <i>Do not override this method: override read{} and
+# internalize{} instead.</i>
+#
+body ::tycho::Model::load {args} {
+    # Override options with args
+    set temp(-sourcefile) $sourcefile
+    set temp(-datafile) $datafile
+    set temp(-statefile) $statefile
+    array set temp $args
 
-	# Load the most recently-written file: get non-null files
-	set files [concat $datafile $sourcefile $imagefile]
-	if { $files == "" } {
-	    error "$dataname has no files"
-	}
-	set newestFile [::tycho::expandPath [lindex $files 0]]
-	foreach f [lrange $files 1 end] {
+    # Figure out which is the most recent file.
+    set time 0 ;# FIXME: is this reliable???
+    set file ""
+    set type ""
+    foreach {y f} [array get temp] {
+	if { $f  != "" } {
 	    set f [::tycho::expandPath $f]
 	    if { [file exists $f] } {
-		if { [file mtime $f] > [file mtime $newestFile] } {
-		    set newestFile $f
+		set t [file mtime $f]
+		if { $t > $time } {
+		    set file $f
+		    set type $y
+		    set time $t
 		}
 	    }
 	}
-
-	# Evaluate the file in the context of the most specific class.
-	set fd [open $newestFile]
-	$this internalize [read $fd]
-	close $fd
-    } else {
-	$this internalize $description
     }
-}
+    if { $file == "" } {
+	error "No file found to load"
+    }
 
-########################################################################
-#### indexes
-#
-# Return a list of indexes, where each index matches the
-# given pattern using glob-style matching. If no matches are found, an
-# empty list will be returned. The exact form of the indexes depends
-# on the subclass: if the subclass has discrete and exclusive indexes,
-# then the returned indexes are simply the ones that match the pattern;
-# if it has continuous or overlapping indexes, then it is up to the
-# subclass to decide what to return.
-#
-# Some subclasses support the additional argument *-regexp* to select
-# regular-expression matching instead of glob-style matching.
-#
-# This method must be overridden by subclasses.
-#
-body ::tycho::Model::indexes {pattern args} {
-    ::tycho::abstractMethod indexes
+    # Remember this position
+    set historyMark(loaded) $historyMark(current)
+
+    # Load data from the file according to what type of file it
+    # is.
+    switch -exact /$type {
+        "/-sourcefile" {
+            # Load the model from the source file. If the -parsescript
+            # option is present, execute that to load the file. Otherwise
+            # assume that the source file format is the same as the data
+            # file format and use read{}.
+            if { $parsescript != "" } {
+                uplevel #0 [list apply $parsescript $file $this]
+            } else {
+                read "file" $file
+            }
+        }
+        "/-datafile" {
+            # Load the model from the data file
+            read "file" $file
+        }
+        "/-statefile" {
+            # Load the model from the state file
+            internalize "file" $file
+        }
+    }
 }
 
 ########################################################################
@@ -621,7 +665,7 @@ body ::tycho::Model::indexes {pattern args} {
 #
 # Place a mark in the undo history. The first argument is the name of
 # the mark to set. The second is the name of the mark to set it to;
-# if omitted, it defaults to "current." Models maintain at least 
+# if omitted, it defaults to "current". Models maintain at least 
 # the following marks, which can be the second argument to
 # this method but not the first:
 # <ul>
@@ -629,7 +673,7 @@ body ::tycho::Model::indexes {pattern args} {
 # <li>*root*: The first command in the history.
 # <li>*published*: The most recently published command.
 # <li>*saved*: The last command before the last save to files.
-# <li>*opened*: The last command before the file was last opened.
+# <li>*loaded*: The last command before the file was last loaded.
 # </ul>
 #
 # (Note the policy with marking commands: the command marked is the
@@ -691,25 +735,6 @@ body ::tycho::Model::markIndex {markname} {
 }
 
 ########################################################################
-#### match
-#
-# Return a flat list of index-value pairs, where each index matches the
-# given pattern using glob-style matching. If no matches are found, an
-# empty list will be returned. Most subclasses will implement this
-# method so that all data is returned given the pattern "*".
-#
-# Additional arguments may be supported by some subclasses to select
-# the kind of pattern-matching (*-regexp*) or the format of returned
-# data (for example, return a list of index-(value-option) pairs instead
-# of index-value-option triples).
-#
-# This method must be overridden by subclasses.
-#
-body ::tycho::Model::match {pattern args} {
-    ::tycho::abstractMethod match
-}
-
-########################################################################
 #### publish
 #
 # Publish data. This is the same as recording it, except that 
@@ -724,6 +749,32 @@ body ::tycho::Model::match {pattern args} {
 #
 body ::tycho::Model::publish {command index args} {
     eval [list update {} $command $index] $args
+}
+
+########################################################################
+#### read
+#
+# Read data from a data file or from a string. If the _type_ argument
+# is "string" then _data_ is a string; if it is "file", then _data_ is
+# the _name_ (note: not the descriptor) of a file that contains the
+# data. By default, the file format is taken to be executable Tcl
+# that calls methods. Subclasses can override for more sophisticated
+# behavior.
+#
+body ::tycho::Model::read {type data} {
+    if { $type == "file" } {
+	# Evaluate in object-specific context. To make sure the correct
+	# method exists, qualify the call. To access the method (since
+	# it's private to prevent general use) use @scope.
+	@scope [info class] [list \
+		$this [info class]::evalInSpecificContext source $data]
+    } elseif { $type == "string" } {
+	@scope [info class] [list \
+		$this [info class]::evalInSpecificContext $data]
+    } else {
+	error "Invalid type $type"
+    }
+    return ""
 }
 
 ########################################################################
@@ -755,9 +806,6 @@ body ::tycho::Model::record {command index args} {
 
     # Mark the command as not publishable
     set publishable($historyMark(current)) 0
-
-    # Mark model as modified
-    set modified 1
 }
 
 ########################################################################
@@ -790,9 +838,6 @@ body ::tycho::Model::redo {{distance 1}} {
 	set distance [expr $historyMark(last) - $historyMark(current)]
     }
 
-    # Mark model as modified
-    set modified 1
-
     # Redo the commands
     set count 0
     while { $count < $distance } {
@@ -811,6 +856,76 @@ body ::tycho::Model::redo {{distance 1}} {
 
     # Return 1 if there are commands left to redo
     return [expr ! ($historyMark(current) == $historyMark(last))]
+}
+
+########################################################################
+#### save
+#
+# Write the data to a file. With no arguments given, this method
+# writes to both files given by the *-datafile* and *-statefile* options.
+# If there are arguments, they are option-value pairs, where the
+# valid options are *-datafile* and *-statefile*, and the values
+# are used instead of the options of the object. Nothing is
+# written if either file is null.
+#
+# The file given by *-datafile* is written in a "user-editable" form:
+# depending on the particular subclass, it may be just plain text,
+# or it may be a series of method calls that reconstruct the 
+# data. The file given by the *-statefile* option contains information
+# in a form the particular subclass finds useful, and
+# includes code that "clones" the data object quickly, as 
+# well as the undo/redo history of that data. Subscription
+# information is _not_ written to the state file.
+#
+# <i>Do not override this method: override write{} and
+# externalize{} instead.</i>
+#
+body ::tycho::Model::save {args} {
+    # Override options with args
+    set temp(-datafile) $datafile
+    set temp(-statefile) $statefile
+    array set temp $args
+
+    # Remember this position
+    set historyMark(saved) $historyMark(current)
+    
+    # Expand file names
+    if { $temp(-datafile) != "" } {
+	set df [tycho::expandPath $temp(-datafile)]
+    } else {
+	set df ""
+    }
+    if { $temp(-statefile) != "" } {
+	set sf [tycho::expandPath $temp(-statefile)]
+    } else {
+	set sf ""
+    }
+    
+    # Open files
+    set dd ""
+    if { $df != "" } {
+	if { ! [file exists $df] || [file writable $df] } {
+	    set dd [open $df "w"]
+	}
+    }
+    set sd ""
+    if { $sf != "" } {
+	if { ! [file exists $sf] || [file writable $sf] } {
+	    set sd [open $sf "w"]
+	}
+    }
+
+    # Write the data file and state file. Note that the state
+    # file must be written _after_ the data file if load{}
+    # is to work correctly.
+    if { $dd != "" } {
+	write $dd
+	close $dd
+    }
+    if { $sd != "" } {
+	externalize $sd
+	close $sd
+    }
 }
 
 ########################################################################
@@ -949,109 +1064,19 @@ body ::tycho::Model::update {subscriber command index args} {
 }
 
 ########################################################################
-#### viewput
-#
-# Add data specific to a view.
-#
-body ::tycho::Model::viewput {key index data} {
-	set viewData($key,$index) $data
-}
-
-########################################################################
-#### viewget
-#
-# Read one data item specific to a view. Null if no data.
-#
-body ::tycho::Model::viewget {key index} {
-	if { [::info exists viewData($key,$index)] } {
-		return viewData($key,$index)
-	} else {
-		return ""
-	}
-}
-
-########################################################################
-#### viewmatch
-#
-# Read many data items specific to a view. Null if no match. 
-#
-body ::tycho::Model::viewmatch {key pattern} {
-	return [array get viewData $pattern]
-}
-
-########################################################################
 #### write
 #
-# Write the data to a file. With no arguments given, this method
-# writes to both files given by the *-datafile* and *-imagefile* options.
-# If either option is not given, then that option is ignored.
-# If the file does not exist, then this method attempts to create
-# it. If it cannot create the file given by *-datafile*, it flags an 
-# error; if it cannot create the file given by *-imagefile*, it 
-# proceeds silently.
+# Write data to a data file. The first argument is a file descriptor
+# so that multiple objects can be streamed to a single file. The
+# second argument, if present, is a string to place at the start
+# of each line. In this default method, the data to be written to
+# the file is generated by the describe{} method, which must be
+# over-ridden by subclasses. Subclasses can override for
+# efficiency or to change the file format.
 #
-# The file given by *-datafile* is written in a "user-editable" form:
-# depending on the particular subclass, it may be just plain text,
-# or it may be a series of method calls that reconstruct the 
-# data. The file given by the *-imagefile* option contains information
-# in whatever form the particular subclass finds useful, and
-# may include code that "clones" the data object quickly, as 
-# well as the undo/redo history of that data. Subscription
-# information is _not_ written to the image file.
-#
-# If the _file_ or _image_ arguments are given, they are used
-# instead of the *-datafile* and *-imagefile* options.
-#
-# <i>Do not override this method: override writeData{} instead.</i>
-#
-body ::tycho::Model::write {{file {}} {image {}}} {
-    # Remember this position
-    set historyMark(saved) $historyMark(current)
-    
-    # Get the right files
-    if { $file == "" } {
-	set file $datafile
-    }
-    if { $file != "" } {
-	set file [tycho::expandPath $file]
-    }
-    if { $image == "" } {
-	set image $imagefile
-    }
-    if { $image != "" } {
-	set image [tycho::expandPath $image]
-    }
-    
-    # Open files
-    set id ""
-    if { $image != "" } {
-	if { ! [file exists $image] || [file writable $image] } {
-	    set id [open $image "w"]
-	}
-    }
-    set fd ""
-    if { $file != "" } {
-	if { ! [file exists $file] || [file writable $file] } {
-	    set fd [open $file "w"]
-	}
-    }
-
-    # Write signature to the image file
-    if { $id != "" } {
-	puts $id "# This is a Tycho image file for $dataname\n"
-    }
-
-    # Write data specific to the subclass
-    writeData $fd $id
-    
-    # Close the files
-    catch {close $fd}
-    catch {close $id}
-    
-    # Clear modified flag
-    set modified 0
+body ::tycho::Model::write {fd {prefix {}}} {
+    puts $fd [eval describe $prefix]
 }
-
 
 ########################################################################
 ########################################################################
@@ -1061,6 +1086,7 @@ body ::tycho::Model::write {{file {}} {image {}}} {
 #### notify
 #
 # Notify subscribers except _subscriber_ with the given change in data.
+# How subscribers are found depends 
 # Matching is done using glob-style pattern-matching. The
 # default notification method is very direct: if _index_ matches an
 # index pattern to which the subscriber is subscribed, the given command
@@ -1077,15 +1103,35 @@ body ::tycho::Model::write {{file {}} {image {}}} {
 # still exists, and if it doesn't, unsubscribes the offending subscriber.
 #
 body ::tycho::Model::notify {subscriber command index args} {
+    set subscribers {}
     # Scan for subscribers with a pattern that matches the index
-    # FIXME: this is going to be too slow: we will have to
-    # change back to fixed, or maybe to matching on the
-    # first element of the pattern (if a list)
-    foreach subindex [array names subscriptions] {
-	::tycho::assign sub pattern [split $subindex ,]
-	if { ! [string match $pattern $index] } {
-	    continue
+    switch -exact $notifymode {
+	"exact" {
+	    foreach subindex [array names subscriptions *,$index] {
+		eval lappend subscribers [split $subindex ","] \
+			[list $subscriptions($subindex)]
+	    }
 	}
+	"glob" {
+	    foreach subindex [array names subscriptions] {
+		set si [split $subindex ","]
+		set sub [lindex $si 0]
+		set idx [lindex $si 1]
+		if { [string match *,$pattern $index] } {
+		    lappend subscribers $sub $idx $subscriptions($subindex)
+		}
+	    }
+	}
+	"all" {
+	    foreach subindex [array names subscriptions] {
+		eval lappend subscribers [split $subindex ","] \
+			[list $subscriptions($subindex)]
+	    }
+	}
+    }
+
+    # Process each subscriber
+    foreach {sub index script} $subscribers {
 	# Don't notify the caller
 	if { $sub == $subscriber } {
 	    continue
@@ -1096,7 +1142,6 @@ body ::tycho::Model::notify {subscriber command index args} {
 	    continue
 	}
 
-	set script $subscriptions($subindex)
 	if { $script != "" } {
 	    # if there's a script supplied by the subscriber, apply it
 	    # FIXME: should $args be inside the list?
@@ -1111,30 +1156,5 @@ body ::tycho::Model::notify {subscriber command index args} {
 	    # By default, call the subscriber directly
 	    uplevel #0 $sub $command [list $index] $args
 	}
-    }
-}
-
-########################################################################
-#### writeData
-#
-# Write data to a data file and an image file. The two arguments
-# are the file descriptors of the open data and image files respectively.
-# Either of the file descriptors may be null, but not both.
-#
-# This default method will be adequate for many subclasses: it uses
-# <pre>match * -alloptions</pre> to get the data to write
-# to the data file, and <pre>describe *</pre> to get the description
-# to write to the image file. Subclasses should overwrite this method if
-# this generates inappropriate data or if the data is likely to be
-# large, in which case overriding this method to directly write
-# to the file rather than generating huge strings which are then
-# written to the file is likely to be more efficient.
-#
-body ::tycho::Model::writeData {fd id} {
-    if { $fd != "" } {
-	puts $fd [match * -alloptions]
-    }
-    if { $id != "" } {
-	puts $id [describe *]
     }
 }
