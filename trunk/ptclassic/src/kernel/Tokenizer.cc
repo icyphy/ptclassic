@@ -69,6 +69,9 @@ Tokenizer::init() {
 	comment_char = '#';
 	quote_char = '\"';
 	escape_char = '\\';
+
+	pb_buffer.ptr = NULL;
+	pb_buffer.index = pb_buffer.size = 0;
 }
 
 // This one reads from a file
@@ -126,6 +129,8 @@ Tokenizer::~Tokenizer() {
 	if (myStrm) {
 		LOG_DEL; delete strm;
 	}
+	if (pb_buffer.ptr)
+		free(pb_buffer.ptr);
 }
 
 // Function to interpret escaped characters in strings
@@ -189,6 +194,12 @@ Tokenizer::get() {
 		ungot = 0;
 		return 1;
 	}
+// check pushback buffer
+	if (pb_buffer.index > 0) {
+		c = pb_buffer.ptr[--pb_buffer.index];
+		return 1;
+	}
+
 // Attempt to read a character.
 	while (1) {
 		strm->get(c);
@@ -234,10 +245,10 @@ void
 Tokenizer::clearwhite () {
 top:	
         while (get()) {
-                if (!strchr (whitespace, c)) break;
+                if (!strchr(whitespace, c)) break;
         }
 // Quit if eof
-        if (strm->eof()) {
+	if (strm->eof() && (pb_buffer.index == 0)) {
                 return;
         }
 // if c is the comment character, dump the line and start over
@@ -250,12 +261,10 @@ top:
 	return;
 }
 
-
-
 // EOF check
 int
 Tokenizer::eof () const {
-	return (depth>0) ? 0 : strm->eof();
+	return (depth>0) ? 0 : (strm->eof() && (pb_buffer.index == 0));
 }
 
 // get the next token.
@@ -265,8 +274,8 @@ Tokenizer::operator >> (char *s) {
 // note: we always read into c, so it will save the last character read
 // skip whitespace, if any
 	clearwhite();
-        // Return null token on eof
-	if (strm->eof()) {
+	// Return null token on eof
+	if (strm->eof() && (pb_buffer.index == 0)) {
 		*s = 0;
 		return *this;
 	}
@@ -279,7 +288,7 @@ Tokenizer::operator >> (char *s) {
 				get();
 				*s++ = slash_interp(c);
 			}
-			else if (c == quote_char || strm->eof())
+			else if (c == quote_char || (strm->eof() && (pb_buffer.index == 0)))
 				break;
 			else *s++ = c;
 		}
@@ -303,6 +312,40 @@ Tokenizer::operator >> (char *s) {
 	}
 	*s = 0;
 	return *this;
+}
+
+// push back a token;
+// The token is saved at the end of the pushback buffer after a
+// whitespace character, so that it is later reparsed if the
+// special character set changes.
+
+void
+Tokenizer::pushBack(const char* s)
+{
+	int toklen = strlen(s)+1;
+	// save ungot character, if any
+	if (ungot) toklen++;
+
+	if (pb_buffer.index + toklen >= pb_buffer.size) {
+		pb_buffer.size += (toklen > 16) ? toklen : 16;
+		pb_buffer.ptr = (char*)
+			(pb_buffer.ptr ? realloc(pb_buffer.ptr, pb_buffer.size)
+				       : malloc(pb_buffer.size));
+	}
+	char* pb_ptr = &pb_buffer.ptr[pb_buffer.index];
+
+	if (ungot) {
+		*pb_ptr++ = ungot,  ungot = 0;
+		pb_buffer.index++, toklen--;
+	}
+	*pb_ptr++ = *whitespace;
+
+	// push characters in reversed order
+	s += strlen(s);
+	for (int i=0; i < toklen-1; i++)
+		*pb_ptr++ = *--s;
+
+	pb_buffer.index += toklen;
 }
 
 // this function discards the remainder of a line, if we're in the middle
