@@ -33,7 +33,7 @@
 ROOT =		..
 
 # True source directory
-VPATH =		$(ROOT)doc
+VPATH =		$(ROOT)/doc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
