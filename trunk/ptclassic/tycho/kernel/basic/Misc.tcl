@@ -41,6 +41,15 @@ proc ::tycho::abstractMethod {method} {
 }
 
 ##########################################################################
+#### abstractProc
+#
+# Complain about an abstract procedure being called.
+#
+proc ::tycho::abstractProc {proc} {
+    error "Procedure $proc of class [uplevel {info context}] is abstract."
+}
+
+##########################################################################
 #### apply script arg ?arg?
 #
 # "Apply" a script to some arguments. This is a clumsy imitation
