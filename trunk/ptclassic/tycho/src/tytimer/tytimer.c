@@ -1,6 +1,6 @@
 /* 
-   Artificial Tcl event loop using timers. Taken from Ptolemy's
-   CGC/Tk library file, tkMain.c.
+   Support for timing tasks in Tycho. Adapted from Ptolemy's
+   SimControl.cc and cgc/tcltk/lib/tkMain.c.
 
 Authors: Edward A. Lee, John Reekie.
 
@@ -121,12 +121,15 @@ static volatile int
 timerElapsed = 1;
 
 /*
- * Ty_TickPeriod
+ * timerSeconds, timerMicroSeconds
  *
- * The period of the timer, in microseconds.
+ * The period of the timer, in seconds and microseconds.
  */
 static int
-timerPeriod = 20000;
+timerSeconds = 0;
+
+static int
+timerMicroSeconds = 20000;
 
 
 /*
@@ -145,15 +148,15 @@ Ty_TimerDone() {
  * Set the period of the scheduler timer.
 */
 void
-Ty_TimerPeriod( int ms ) {
-  /* Maximum time allowed is 999 ms, minimum is 1 ms */
-  if (ms > 999) {
-    ms = 999;
-  } else if (ms < 1) {
-    ms = 1;
+Ty_TimerPeriod( int period ) {
+  /* Minimum time is 1 ms, no maximum */
+  if (period < 1) {
+    period = 1;
   }
 
-  timerPeriod = ms * 1000;
+  period = period * 1000;
+  timerSeconds = period / 1000000;
+  timerMicroSeconds = period % 1000000;
 }
 
 /*
@@ -170,8 +173,8 @@ Ty_TimerStart( ) {
 
   /* reset the timer - this cancels any current timing in progress */
   i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
-  i.it_value.tv_sec = 0;
-  i.it_value.tv_usec = timerPeriod;
+  i.it_value.tv_sec = timerSeconds;
+  i.it_value.tv_usec = timerMicroSeconds;
 
   /* Call the handler function when the timer expires */
   signal(SIGALRM, Ty_TimerDone);
@@ -206,8 +209,8 @@ Ty_TimerStop()
   ptReleaseSig(SIGALRM);
   ptBlockSig(SIGALRM);
 
-  /* Reset the timer elapsed flag */
-  timerElapsed = 0;
+  /* Set the timer elapsed flag */
+  timerElapsed = 1;
 }
 
 /*
@@ -263,15 +266,15 @@ Ty_DoAllEvents() {
 
 
 /*
- * Ty_Scheduler
+ * Ty_Timer
  *
  * The Tcl interface to the functions in this package.
  */
 int
-Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
+Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 
   /* Check number of arguments */
-  if (argc < 3) {
+  if (argc < 2) {
     sprintf(interp->result, "Expected arguments: mode ?value?");
     return TCL_ERROR;
   }
@@ -279,7 +282,7 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
   /* Switch on the first argument */
   if ( ! strcmp(argv[1], "start") ) {
     /* Start the timer */
-    int periodcopy;
+    int tempsecs, tempusecs;
     int period;
 
     /* If the timer is already running, generate an error */
@@ -294,10 +297,12 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 	sprintf(interp->result, "Integer period expected: %s", argv[2]);
 	return TCL_ERROR;
       }
-      periodcopy = timerPeriod;
-      timerPeriod = period;
+      tempsecs = timerSeconds;
+      tempusecs = timerMicroSeconds;
+      Ty_TimerPeriod(period);
       Ty_TimerStart();
-      timerPeriod = periodcopy;
+      timerSeconds = tempsecs;
+      timerMicroSeconds = tempusecs;
     } else {
       Ty_TimerStart();
     }
@@ -325,7 +330,7 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
       }
       Ty_TimerPeriod(period);
     }
-    sprintf(interp->result, "%d", timerPeriod / 1000);
+    sprintf(interp->result, "%d", timerSeconds*1000 + timerMicroSeconds/1000);
     return TCL_OK;
 
   } else {
@@ -336,14 +341,14 @@ Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 
 
 /*
- * Tysched_Init
+ * Tytimer_Init
  *
  * Initialize the package. This adds the interface proc to Tcl.
  */
 int
-Tyevent_Init(Tcl_Interp *interp) {
+Tytimer_Init(Tcl_Interp *interp) {
   
-  Tcl_CreateCommand(interp, "scheduler", Ty_Scheduler,
+  Tcl_CreateCommand(interp, "timer", Ty_Timer,
 		    (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
 
   return TCL_OK;
