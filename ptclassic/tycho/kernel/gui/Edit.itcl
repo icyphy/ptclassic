@@ -35,12 +35,6 @@
 #  - Reload should also be undoable.
 
 #######################################################################
-# options
-#
-# Class to use for revision control.
-option add *Edit.revclass "::tycho::RevControlSCCS" widgetDefault
-
-#######################################################################
 #### Edit
 # This class defines a window for editing plain text. It supports
 # emacs-like key bindings plus mouse movements. It interfaces to a
@@ -110,13 +104,6 @@ class ::tycho::Edit {
     # derived from EditText.
     method textWidget {} {return ::tycho::EditText}
 
-    ###################################################################
-    ####                     publics procedures                    ####
-
-    #### getOption
-    # Return the value of the option specified by the argument.
-    proc getOption {option} {}
-    
 }
 
 ###################################################################
@@ -267,22 +254,6 @@ body ::tycho::Edit::constructor {args} {
 
 ###################################################################
 ###################################################################
-####                      public procedures                    ####
-
-###################################################################
-#### getOption
-# Return the value of the option specified by the argument.
-# This hack is used because options are not inherited by 
-# subclasses (hence the object name .bogusOptionObject.)
-body ::tycho::Edit::getOption {option} {
-    if {[info object .bogusOptionObject] == ""} {
-	Edit .bogusOptionObject
-    }
-    return [option get .bogusOptionObject $option Edit]	    
-}
-
-###################################################################
-###################################################################
 ####                      public methods                       ####
 
 ###################################################################
@@ -396,7 +367,7 @@ body ::tycho::Edit::loadFile {loadfile} {
 # not exist then create it if we can.
 #
 body ::tycho::Edit::nextRevAction {} {
-    set revclass [::tycho::Edit::getOption revclass]
+    set revclass [::tycho::File::getOption revclass]
     set currentfile [$this filename]
     set topwin [winfo toplevel $itk_component(hull)]
     if [winfo exists $topwin.revcontrol] {
