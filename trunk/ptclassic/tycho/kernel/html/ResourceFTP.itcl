@@ -30,12 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-# The current status of an ftpget. This is a common array
-# so that tkwait can access it. Can be "header," "body,"
-# "abort," or "done".
-## DO NOT USE THIS VARIABLE DIRECTLY! Use method ftpset instead.
-set _ftpstatus(ftp://127.0.0.1) done
-
 #######################################################################
 #### ResourceFTP
 #
@@ -79,7 +73,7 @@ set _ftpstatus(ftp://127.0.0.1) done
 # </pre></tcl>
 #
 class ::tycho::ResourceFTP {
-    inherit ::tycho::Resource
+    inherit ::tycho::ResourceRemote
 
     constructor {args} {}
     destructor {}
@@ -89,21 +83,6 @@ class ::tycho::ResourceFTP {
 
     ###################################################################
     ####                         public methods                    ####
-
-    # Get a cached copy of the data
-    method cachefile {}
-
-    # Close the resource. Calls ftpget to send out the message.
-    method close {}
-
-    # Return the eof of file status
-    method eof {}
-
-    # Read a string from a streamable resource
-    method gets {{varName {}}}
-    
-    # Not open by default
-    method isopen {} 
 
     # if there's timeout on protocol, we can't connect to the ftp server.
     method ftptimeout {oldstate}
@@ -115,25 +94,19 @@ class ::tycho::ResourceFTP {
     method progress {} {return $progress}
 
     # Write a string to a streamable resource.
-    method puts {string}
-
-    # Read a string containing the data in a streamable resource
-    method read {}
-
-    # Return 1 if this resource is streamable
-    method streamable {} 
+    method puts {string} {error "FTP puts not implemented yet"}
 
     ###################################################################
     ####                           public procs                    ####
 
     # Change the permissions of a resource
-    proc chmod {permissions path} {error "Not implemented yet"}
+    proc chmod {permissions path} {error "FTP chmod not implemented yet"}
 
     # Return the content type of the current file
     proc contenttype {path}
 
     # Delete a resource
-    proc delete {path} {error "Not implemented yet"}
+    proc delete {path} {error "FTP delete not implemented yet"}
 
     # Return a directory listing
     proc dirlist {path}
@@ -141,12 +114,8 @@ class ::tycho::ResourceFTP {
     # See if the server or hostname exists
     proc exists {path}
 
-    # Forward the location
-    # NOTE: This is unique (ie. not in the base class)
-    proc forward {url}
-
     # Create a new directory
-    proc mkdir {path} {error "Mkdir not implemented yet"}
+    proc mkdir {path} {error "FTP mkdir not implemented yet"}
 
     # Create a new resource object
     proc new {path args}
@@ -159,9 +128,6 @@ class ::tycho::ResourceFTP {
 
     ###################################################################
     ####                         protected methods                 ####
-
-    # Puts a string to console of the debug option is set
-    protected method debugputs {string}
 
     # 1) Initiate a connection on the FTP server. Called by open.
     protected method ftpget {{url {}}}
@@ -184,20 +150,8 @@ class ::tycho::ResourceFTP {
     # Abort in the middle of ftphandler transaction.
     protected method ftpabort {message}
 
-    # This will set or read the global variable value
-    protected method ftpstatus {value} 
-
-    # This will wait until the ftpstatus is set to "done"
-    protected method ftpwait {}
-
     ###################################################################
     ####                        protected commons                  ####
-
-    # forward (ie. ftp://ptolemy/pub --> ftp://ptolemy/pub/)
-    protected common _forward
-
-    # A flag tagging whether a given URL exists or not.
-    protected common _exists
 
     # Stat information, used for caching the LIST info.
     protected common _stat
@@ -207,9 +161,6 @@ class ::tycho::ResourceFTP {
 
     ###################################################################
     ####                        protected variables                ####
-
-    # The url this object is accessing
-    protected variable currentURL {}
 
     # The progress, can be used with the statusbar
     protected variable progress 0.0
@@ -221,10 +172,7 @@ class ::tycho::ResourceFTP {
     protected variable status 200
 
     # By all UNIX default (/etc/services), 21 is the port to open.
-    protected variable _socketid {}
-
-    # Cache file id
-    protected variable fileid {}
+    protected variable ftpid {}
 
     # Attribute of the FTP server and the file/directory.
     protected variable ftpserver {}
@@ -237,34 +185,21 @@ class ::tycho::ResourceFTP {
     protected variable ftptype "file"
 
     # Attribute of the current connection (FTP client). Attributes
-    # are set after "fconfigure _socketid -sockname", which returns:<br>
-    # <tt>n1.n2.n3.n4  client_name  unique_16_bit_client_socket</tt>
-    protected variable _dataport 0
-    protected variable _dataaddr 127.0.0.1
-    protected variable _datafd -1
+    # are set after "fconfigure ftpid -sockname", which returns:<br>
+    # <tt>n1.n2.n3.n4  client_name  unique_16_bit_clientsocket</tt>
+    protected variable dataport 0
+    protected variable dataaddr 127.0.0.1
+    protected variable datafd -1
 
     # Attribute of myself (FTP client)
-    protected variable _myusername "anonymous"
-    protected variable _mypassword "tycho@"
+    protected variable myusername "anonymous"
+    protected variable mypassword "tycho@"
 
     ###################################################################
     ####                         private variables               ####
     
-    # Debug status. Print if 1
-    private variable debug 0
-
-    # Cache file name
-    private variable cachefilename
-
-    # Cache file id
-    private variable cachefileid
-
     # Cache buffer (so we don't have to re-read it again during dir parse)
     private variable cachefilebuffer
-
-    # True if the file is open
-    private variable fileIsOpen 0
-
 }
 
 
@@ -289,88 +224,6 @@ body ::tycho::ResourceFTP::destructor {} {
 ####                      public methods                             ####
 
 #####################################################################
-#### cachefile
-# Get a cached copy of the contents of the file. This is provided
-# to work around Tcl's lack of binary data handling.
-#
-body ::tycho::ResourceFTP::cachefile {} {
-    set url [forward [path]]
-    debugputs "Cachefile, seeking at $url"
-
-    if {![::tycho::cache exists $url]} {
-        # If cache doesn't exist, go fetch the information
-	if ![isopen] {
-	    open "r"
-	    read
-	    close
-	} else {
-	    read
-	}
-    }
-
-    return [::tycho::cache getcachefile $url]
-    #return $_cachefile($url)
-}
-
-#####################################################################
-#### close
-body ::tycho::ResourceFTP::close {} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open."
-    }
-    set fileIsOpen 0
-    if { $fileid != "" } {
-        ::close $fileid
-        set fileid ""
-    }
-}
-
-#####################################################################
-#### eof
-body ::tycho::ResourceFTP::eof {} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open (eof)"
-    }
-    ::eof $fileid
-}
-
-#####################################################################
-#### forward
-# Get a file name, and forward it automatically.
-# Used with _forward to forward the right location. For example,<br>
-# <tt>ftp://ptolemy/pub   -->   ftp://ptolemy/pub/</tt>
-#
-body ::tycho::ResourceFTP::forward {url} {
-    while {[::info exists _forward($url)] && $_forward($url)!=$url} {
-	set url $_forward($url)
-    }
-    return $url
-}
-
-#####################################################################
-#### gets
-# If the local FTPed file is a text file, then perform the exact
-# same task that the base method gets does.
-#
-body ::tycho::ResourceHTTP::gets {{varName {}}} {
-    if !$fileIsOpen {
-	openerror "File \"$this\" is not open (gets)"
-    }
-    if { $varName == "" } {
-	::gets $fileid
-    } else {
-	upvar $varName v
-	uplevel ::gets $fileid v
-    }
-}
-
-#####################################################################
-#### isopen
-body ::tycho::ResourceFTP::isopen {} {
-    return $fileIsOpen
-}
-
-#####################################################################
 #### open
 # Open a connection for ftp on port 21.
 #
@@ -388,45 +241,22 @@ body ::tycho::ResourceFTP::open {{mode "r"}} {
 	error "File $currentURL does not exist"
     }
     set currentURL [forward $currentURL]
-    
+
     # Seek out on network for the file
     if {![::tycho::cache exists $currentURL]} {
         # Get it if not already
         ftpget $currentURL
-        ftpwait
+        remotewait
     }
 
     set url [forward $currentURL]
 
     if {[info exists _exists($url)] && $_exists($url)==1} {
-        set fileid [::open [::tycho::cache getcachefile $url] "r"]
+        set cachefileid [::open [::tycho::cache getcachefile $url] "r"]
         set fileIsOpen 1
     }
     set progress 1.0
     if {$status>=400} {return 0} {return 1}
-}
-
-#####################################################################
-#### puts
-body ::tycho::ResourceFTP::puts {string} {
-    if {!$fileIsOpen} {error "File is not open."}
-    lappend ftpbuffer $string
-}
-
-#####################################################################
-#### Return a string containing the data in a streamable resource 
-body ::tycho::ResourceFTP::read {} {
-    if {!$fileIsOpen} {
-	error "File \"$this\" is not open (read)"
-    }
-    #::puts "EXISTS [info exists fileid]"
-    ::read $fileid
-}
-
-#####################################################################
-#### streamable
-body ::tycho::ResourceFTP::streamable {} {
-    return 1
 }
 
 #########################################################################
@@ -606,21 +436,11 @@ body ::tycho::ResourceFTP::stat {url varName} {
 ####                     protected methods                           ####
 
 #########################################################################
-#### debugputs
-# Puts a string to the console if the *-debug* option is set.
-#
-body ::tycho::ResourceFTP::debugputs {string} {
-    if $debug {
-	::puts $string
-    }
-}
-
-#########################################################################
 #### ftpget
 # Opening a ftp connection, and set the fileevent.
 #
 body ::tycho::ResourceFTP::ftpget {{url {}}} {
-    ftpstatus "getting"
+    remotestatus "getting"
 
     # do not change currentURL, since it is used for tkwait
     if {$url!={}} {
@@ -659,8 +479,8 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
     debugputs "$ftpserver:$ftpport path:$ftppath file:$ftpfile type:$ftptype"
 
     # Connect to server
-    if {[catch {socket -async $ftpserver $ftpport} _socketid]} {
-	catch {unset $_socketid}
+    if {[catch {socket -async $ftpserver $ftpport} ftpid]} {
+	catch {unset $ftpid}
         ftpabort "Can't open $ftpserver, $ftpport"
         return
     }
@@ -674,19 +494,19 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
     debugputs "Cache file $cachefilename on $cachefileid"
 
     # Set my port information
-    set tmpinfo [fconfigure $_socketid -sockname]
-    set _dataaddr [lindex $tmpinfo 0]   ;# Client location
-    set _dataport [lindex $tmpinfo 2]   ;# Client's port connecting to server
+    set tmpinfo [fconfigure $ftpid -sockname]
+    set dataaddr [lindex $tmpinfo 0]   ;# Client location
+    set dataport [lindex $tmpinfo 2]   ;# Client's port connecting to server
 
     set state USER
     set status 200
 
     # Set up the file events for incoming data
-    ::fileevent $_socketid w {}
-    ::fileevent $_socketid r \
+    ::fileevent $ftpid w {}
+    ::fileevent $ftpid r \
             [list @scope ::tycho::ResourceFTP [list $this ftphandler]]
     #"[list catch [list @scope ::tycho::ResourceFTP [list $this ftphandler]]]"
-    ::fconfigure $_socketid -blocking no -translation auto
+    ::fconfigure $ftpid -blocking no -translation auto
 }
 
 #########################################################################
@@ -701,11 +521,11 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
 # </pre>
 body ::tycho::ResourceFTP::ftphandler {} {
     # Line will contain the status
-    ::gets $_socketid line
-    debugputs "$state> $line ($_socketid)"
+    ::gets $ftpid line
+    debugputs "$state> $line ($ftpid)"
 
     if {$state=="DISCONNECTED"} {
-        ftpabort "FTP handshaking failed, trying to write $line ($_socketid)"
+        ftpabort "FTP handshaking failed, trying to write $line ($ftpid)"
         return
     }
 
@@ -720,7 +540,7 @@ body ::tycho::ResourceFTP::ftphandler {} {
         USER {
             # USER 220 messier.eecs.berkeley.edu FTP server
             if [regexp -nocase {^22[0-9] .*} $line] {
-                set cmd "USER $_myusername"
+                set cmd "USER $myusername"
                 set state PASS
                 after $timeout "eval $this ftptimeout $state"
             }
@@ -729,7 +549,7 @@ body ::tycho::ResourceFTP::ftphandler {} {
         PASS {
             # 331 Guest login ok, send ident as password.
             if [regexp -nocase {^33[0-9] .*} $line] {
-                set cmd "PASS $_mypassword"
+                set cmd "PASS $mypassword"
                 set state PWD
                 after $timeout "eval $this ftptimeout $state"
             }
@@ -778,9 +598,9 @@ body ::tycho::ResourceFTP::ftphandler {} {
                 ftpabort "$status> Could not open up a client socket"
                 return
             }
-            set tmpport [join [split $_dataaddr .] ,]
-            set p1 [expr $_dataport / 256]        ;# upper 8 bits
-            set p2 [expr $_dataport - ($p1*256)]  ;# lower 8 bits
+            set tmpport [join [split $dataaddr .] ,]
+            set p1 [expr $dataport / 256]        ;# upper 8 bits
+            set p2 [expr $dataport - ($p1*256)]  ;# lower 8 bits
             set cmd "PORT $tmpport,$p1,$p2"
             if {$ftptype=="file"} {
                 set state TYPE
@@ -876,7 +696,7 @@ body ::tycho::ResourceFTP::ftphandler {} {
             if [regexp -nocase {^22[0-9] .*} $line] {
                 set state DISCONNECTED
                 # DO NOT SET A TIME OUT!
-                catch {::close $_socketid}
+                catch {::close $ftpid}
                 return
             }
         }
@@ -885,9 +705,9 @@ body ::tycho::ResourceFTP::ftphandler {} {
 
     # The following is required because Tcl will buffer all output
     if {$cmd!={}} {
-        debugputs "$state> $cmd ($_socketid)"
-        ::puts $_socketid $cmd
-        ::flush $_socketid
+        debugputs "$state> $cmd ($ftpid)"
+        ::puts $ftpid $cmd
+        ::flush $ftpid
     }
 
     # Timeout 421
@@ -916,23 +736,23 @@ body ::tycho::ResourceFTP::ftpdataportopen {} {
 
     # Port incremental amount. If a port is already taken, increment
     set iamount 1
-    set _dataport [expr $_dataport + $iamount]
+    set dataport [expr $dataport + $iamount]
     while {$n > 0} {
-        debugputs "Going to open up port $_dataport"
+        debugputs "Going to open up port $dataport"
         
         if {![catch {
             socket -server \
                     "@scope ::tycho::ResourceFTP $this ftpdataportinit" \
-                    $_dataport
-        } _datafd]} {
-            debugputs "SUCCESS: ($_datafd), [fconfigure $_datafd -sockname]"
-            fconfigure $_datafd -blocking no
-            return $_dataport
+                    $dataport
+        } datafd]} {
+            debugputs "SUCCESS: ($datafd), [fconfigure $datafd -sockname]"
+            fconfigure $datafd -blocking no
+            return $dataport
         }
         incr n -1
         # Increase the port amount more will increase the probability
         # of hitting an empty port.
-        set _dataport [expr ($_dataport + [incr iamount $iamount])%(256*256)]
+        set dataport [expr ($dataport + [incr iamount $iamount])%(256*256)]
     }
     return 0
 }
@@ -944,7 +764,7 @@ body ::tycho::ResourceFTP::ftpdataportopen {} {
 # 
 # The arguments are fd, location, and port (originator's port)
 body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
-    debugputs "Initializing ($_datafd) GOT ($fd) $location $port"
+    debugputs "Initializing ($datafd) GOT ($fd) $location $port"
 
     fileevent $fd w {}
     fileevent $fd r \
@@ -964,7 +784,7 @@ body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
 body ::tycho::ResourceFTP::ftpdataport {fd} {
     if [::eof $fd] {
         catch {::close $cachefileid}
-        catch {::close $_socketid}
+        catch {::close $ftpid}
         catch {::close $fd}
         $this ftpdone $fd
         return
@@ -991,11 +811,11 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
     debugputs "TRANSFER1> EOF"
 
     catch {::close $fd}
-    catch {::close $_datafd}
+    catch {::close $datafd}
     catch {::close $cachefileid}
     set fd -1
-    set _datafd -1
-    set _socketid -1
+    set datafd -1
+    set ftpid -1
     set cachefileid -1
     set state DISCONNECTED
 
@@ -1061,36 +881,7 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
             $ftptype \
             $cachefilename
 
-    ftpstatus "done"
-}
-
-
-#########################################################################
-#### ftpstatus
-# A procedure that handles set and read of the status.
-#
-body ::tycho::ResourceFTP::ftpstatus {{value {}}} {
-    if {$value!={}} {
-        uplevel #0 "set _ftpstatus($currentURL) $value"
-    }
-
-    if ![uplevel #0 "::info exists _ftpstatus($currentURL)"] {
-        error "ASSERTION FAILED: _ftpstatus($currentURL) does not exist!"
-    }
-
-    # Return the value
-    uplevel #0 "set _ftpstatus($currentURL)"
-}
-
-#########################################################################
-#### ftpwait
-# Wait until the current GET completes
-body ::tycho::ResourceFTP::ftpwait {} {
-    # Wait until the status becomes "done"
-    while { [ftpstatus] != "done" } {
-        uplevel #0 "tkwait variable _ftpstatus($currentURL)"
-    }
-    return
+    remotestatus "done"
 }
 
 #########################################################################
@@ -1112,12 +903,12 @@ body ::tycho::ResourceFTP::ftptimeout {oldstate} {
 # When the protocol fails, output an error message, and close socket
 #
 body ::tycho::ResourceFTP::ftpabort {message} {
-    catch {::close $_datafd}
-    catch {::close $_socketid}
+    catch {::close $datafd}
+    catch {::close $ftpid}
     catch {::close $cachefileid}
     #catch {unset _forward([string trimright $currentURL /])}
     #catch {unset _forward([string trimright $currentURL /]/)}
-    set _socketid -1
+    set ftpid -1
     set cachefileid -1
     set state DISCONNECTED
     set status 500
@@ -1126,5 +917,5 @@ body ::tycho::ResourceFTP::ftpabort {message} {
     # If we're not executing proc exists, then output error.
     if {$_exists($currentURL)!=-1} {error $message}
     set _exists($currentURL) 0
-    ftpstatus "done"
+    remotestatus "done"
 }
