@@ -1,5 +1,13 @@
 #ifndef _FixArrayState_h
 #define _FixArrayState_h 1
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "State.h"
+#include "Fix.h"
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -27,49 +35,66 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  J. T. Buck
- Date of creation: 10/17/91
+ Programmer: A. Khazeni 
+ Date of creation: 2/24/93 
  Revisions:
 
- A FixArrayState is conceptually represented as an array of fixed
- point numbers.  Legal values for elements range from -1 to just under 1
- (an exact one is allowed and converted to the largest possible
- fixed point number).
-
- Its initialization expression can have arbitrary floating values,
- as long as the final value for each element is within the [-1,1] range.
-
- bitVal(int el, int nBits) returns the value, as an n-bit 2's complement
- integer, of the el'th element.
-
- nBits can be no more than the number of bits in a long.
+ State  with Fix type
 
 **************************************************************************/
-#include "FloatArrayState.h"
-#ifdef __GNUG__
-#pragma interface
-#endif
 
-// arraystate of values that are conceptually represented as twos
-// complement fixed point numbers.  They range from -1 to just under
-// 1 (an exact one is allowed and converted to the largest possible
-// fixed point number).
+///////////////////////////////////////////
+// class  FixArrayState
+///////////////////////////////////////////
 
-class FixArrayState : public FloatArrayState {
+class FixArrayState : public State
+{
 public:
-	void initialize();
+	// Constructor
+	FixArrayState () {nElements = 0; val = 0;}
 
-	const char* type() const; // return "FIXARRAY"
+	// alternate constructor: size
+	FixArrayState (int size);
 
-	// value as string is same as for floatstate
+	// alternate constructor: size and fill value
+	FixArrayState (int size, const Fix& fill_value) ;
 
-	// return element el as an integer, assuming represented by nBits bits
-	long bitVal(int el, int nBits);
+	// Destructor
+	~FixArrayState ();
+
+	// Size
+	int size() const;
+
+	// Array element 
+	Fix & operator [] (int n) {
+		return val[n];
+	}
+
+	// The type
+	const char* type() const; // { return "FixArray";}
 
 	// class identification
 	int isA(const char*) const;
-	const char* ClassName() const {return "FixArrayState";}
+	const char* className() const;
+	int isArray() const;
 
-	State* clone () const; // { return new FixArrayState;}
+        // the value as a string
+        StringList currentValue() const;
+
+	// Parse initValue to set Value
+	void initialize();
+
+	// Truncate/extend to new size
+	void resize(int);
+
+	// Parse element
+	ParseToken evalExpression(Tokenizer&);
+
+	// clone method
+	virtual State* clone() const;
+protected:
+	int	nElements;
+	Fix	*val;
 };
+
 #endif
