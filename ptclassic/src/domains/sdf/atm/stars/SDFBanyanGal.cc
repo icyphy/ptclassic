@@ -3,7 +3,7 @@ static const char file_id[] = "SDFBanyanGal.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -44,7 +44,7 @@ be.
 #include "GalIter.h"
 
 
-#define STAR(i,j) stars[(i)*(columns) + (j)]
+#define STAR(i,j) (stars[(i)*(columns) + (j)]) 
 
 const char *star_nm_SDFBanyanGal = "SDFBanyanGal";
 
@@ -59,7 +59,7 @@ const char* SDFBanyanGal :: domain () const { return SDFdomainName; }
 
 
 SDFBanyanGal::SDFBanyanGal () {
-	stars = NULL;
+	stars = 0;
 	addPort(left0.setPort("left0",this,MESSAGE));
 	addPort(left1.setPort("left1",this,MESSAGE));
 	addPort(right0.setPort("right0",this,MESSAGE));
@@ -70,34 +70,31 @@ SDFBanyanGal::SDFBanyanGal () {
 
 void SDFBanyanGal::setup() {
 
-        int columns, rows;
-        int i, j, k;
+        int rows = int(left0.numberPorts());
+        int columns = int((log10(rows*2.0))/(log10(2.0)));
 
-        rows = int (left0.numberPorts());
-        columns = int ((log10(int(rows*2)))/(log10(2)));
+	//Place the BanyanStg stars in the galaxy
 
-//Place the BanyanStg stars in the galaxy
+	delete [] stars;
+	stars = new SDFBanyanStg[rows*columns];
 
-	if (!stars)  stars = new SDFBanyanStg[int(rows)*int(columns)];
+	//Do addBlock's
+	//  Name and allocate in this order:
+	//   --------------->
+	//   --------------->
+	//        .
+	//        .
+	//   --------------->
+	//Also set the state called "stage" in BanyanStg instances
 
-        char nameit[512];
-        char nameitvalue[512];
-
-//Do addBlock's
-//  Name and allocate in this order:
-//   --------------->
-//   --------------->
-//        .
-//        .
-//   --------------->
-//Also set the state called "stage" in BanyanStg instances
-
-        for (k=0;k<int(rows);k++){
-            for (j=0;j<int(columns);j++){
-                sprintf (nameit, "packetinstance#%d",(k*int(columns)+ j));
-                sprintf (nameitvalue,"%d",int(columns)-j);
-                addBlock(stars[(k)*int(columns) + (j)].setBlock(hashstring(nameit),this));
-	        STAR(k,j). setState("stage", hashstring(nameitvalue));
+        for (int k=0; k<rows; k++) {
+            char nameit[64];
+            char nameitvalue[64];
+            for (int j=0; j<columns; j++) {
+                sprintf(nameit, "packetinstance#%d", (k*columns + j));
+                sprintf(nameitvalue, "%d", columns-j);
+                addBlock(stars[k*columns + j].setBlock(hashstring(nameit),this));
+	        STAR(k,j).setState("stage", hashstring(nameitvalue));
             }
         }
 
@@ -107,7 +104,7 @@ void SDFBanyanGal::setup() {
 	// actually form the connection from the "far" port to the internal
 	// star port
 
-        i=0;
+        int i = 0;
         PortHole *p, *q, *r, *s;
 	PortHole *pfar, *qfar, *rfar, *sfar;
 
@@ -115,7 +112,6 @@ void SDFBanyanGal::setup() {
         MPHIter nextq(left1);
         MPHIter nextr(right0);
         MPHIter nexts(right1);
-
 
         while ((p=nextp++)!=0) {
               pfar = p->far();
@@ -172,20 +168,17 @@ void SDFBanyanGal::setup() {
 //top left and proceed down to (rows/2-1), then start
 //at second column and proceed in the same way.
 
-// i = columns, j = rows
+// l = columns, m = rows
 // banyan  0-0,0-1,1-2,1-3
 // banyan  2-0,2-1,3-2,3-3
 
-
-for (i=0; i<(int(columns)-1); i++)
-{
-    for (j=0; j<int(rows/2); j++)
-    { 
-       connect(STAR(j,i).output1, STAR(2*j,i+1).input1);
-       connect(STAR(j,i).output2, STAR(2*j+1,i+1).input1);
-       connect(STAR(j+int(rows/2),i).output1, STAR(2*j,i+1).input2);
-       connect(STAR(j+int(rows/2),i).output2, STAR(2*j+1,i+1).input2);
-    }
+	for (int l=0; l<(int(columns)-1); l++) {
+	    for (int m=0; m<int(rows/2); m++) { 
+	       connect(STAR(m,l).output1, STAR(2*m,l+1).input1);
+	       connect(STAR(m,l).output2, STAR(2*m+1,l+1).input1);
+	       connect(STAR(m+int(rows/2),l).output1, STAR(2*m,l+1).input2);
+	       connect(STAR(m+int(rows/2),l).output2, STAR(2*m+1,l+1).input2);
+    	}
 }
 
 
@@ -198,7 +191,6 @@ SDFBanyanGal::wrapup()
 
 {
 	PortHole  *p, *q, *qfar;
-        int j;
 
 	MPHIter nextp(left0);
 	MPHIter nextq(left1);
@@ -206,9 +198,9 @@ SDFBanyanGal::wrapup()
 	MPHIter nexts(right1);
 
 	int rows = int (left0.numberPorts());
-	int columns = int ((log10(int(rows*2)))/(log10(2)));
+	int columns = int ((log10(rows*2.0))/(log10(2.0)));
 
-        j = 0;
+        int j = 0;
 	while ((p=nextp++)!=0) {
 	   // q = (PortHole*) (&(p->realPort()));
            q = (PortHole*) (&(STAR(j,0).input1));
@@ -252,16 +244,13 @@ SDFBanyanGal::wrapup()
 	   for (int i = 0; i < rows*columns; i++) {
 	       removeBlock(stars[i]);
            }
-	   delete [] stars;
-	   stars = NULL;
         }
-
 }
 
 
  
 SDFBanyanGal::~SDFBanyanGal() { 
-    if (stars)  delete [] stars;
+    delete [] stars;
 }
 
 static SDFBanyanGal proto;
