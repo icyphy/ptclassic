@@ -373,27 +373,18 @@ body ::tycho::Edit::loadFile {loadfile} {
 
 ###################################################################
 #### nextRevAction
-# If this is called from within a Console class then give the user a 
-# directory listing of the current file and perform the selected 
-# action (currently unimplemented.). Otherwise check to see if a 
-# filename is associated with the editor, if not fail and inform 
-# the user. If the file has not been saved we will do so at this 
-# point. Then check in the file if it is writeable, prompting for a
-# message, and reload the new file with the insert cursor at the same 
-# location. If the file is not writeable then check the file out and 
-# reload the new file with the insert cursor at the same location. 
-# If the file is not under revision control, then we place it
-# under control after asking the user if this is what he wants.
-# If the necessary revision control directory does not exist then 
-# create it if we can.
+# Check to see if a filename is associated with the editor, if not 
+# fail and inform the user. If the file has not been saved we will 
+# do so at this point. Then check in the file if it is writeable, 
+# prompting for a message, and reload the new file with the insert
+# cursor at the same location. If the file is not writeable then 
+# check the file out and reload the new file with the insert cursor 
+# at the same location. If the file is not under revision control, 
+# then we place it under control after asking the user if this is 
+# what he wants. If the necessary revision control directory does 
+# not exist then create it if we can.
 #
 body ::tycho::Edit::nextRevAction {} {
-    if {[info class] == "::tycho::Console"} {
-	# we are being called by a console.
-	tycho::inform "This function is not currently implemented for\
-		consoles."
-	return 
-    }
     set currentfile [$this filename]
     if {$currentfile == "NoName"} {
 	# The contents of this editor does not currently have a name.
@@ -403,7 +394,7 @@ body ::tycho::Edit::nextRevAction {} {
     }
     if {$modified} {
 	if [askuser "Do you want modifications saved before checking\
-		in file?"] {
+		in the file?"] {
 	    # update changes since last save, so they will appear in delta
 	    $this save 
 	}
