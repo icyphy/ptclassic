@@ -121,7 +121,7 @@ INCL= -I$(KERNDIR) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
 C_INCL=-I$(OCTTOOLS)/include -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
-	lint -u -I$(OCTTOOLS)/include $(LIBCSRCS) > lint
+	lint -u $(INCL) $(LIBCSRCS) > lint
 
 
 # include common definitions, rules
