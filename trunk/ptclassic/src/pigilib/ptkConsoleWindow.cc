@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: Alan Kamas 
+ Programmers: Alan Kamas, Christopher Hylands
  Created: 5/27/93
 
 Sets up the standard input to feed from the xterm that started up
@@ -62,6 +62,8 @@ extern "C" {
 }
 
 // The following function is taken directly from tkMain.c
+// We split up Tcl_Main () so that we can run the Ptolemy event loop
+// and the tcl event loop (I think).
 
 /*
  *----------------------------------------------------------------------
@@ -82,31 +84,42 @@ extern "C" {
  */
 
 static void
-_ptkPrompt(Tcl_Interp *interp, int partial) {
-    /* Tcl_Interp *interp; */		/* Interpreter to use for prompting. */
-    /* int partial; */			/* Non-zero means there already
+_ptkPrompt(Tcl_Interp *interp, int gotPartial) {
+  /* Tcl_Interp *interp; */		/* Interpreter to use for prompting. */
+  /* int gotPartial; */			/* Non-zero means there already
 					 * exists a partial command, so use
 					 * the secondary prompt. */
-    char *promptCmd;
-    int code;
+  char *promptCmd;
+  int code;
+  Tcl_Channel inChannel, outChannel, errChannel;
 
-    promptCmd = Tcl_GetVar(interp,
-	partial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
-    if (promptCmd == NULL) {
-	defaultPrompt:
-	if (!partial) {
-	    fputs("% ", stdout);
-	}
-    } else {
-	code = Tcl_Eval(interp, promptCmd);
-	if (code != TCL_OK) {
-	    Tcl_AddErrorInfo(interp,
-		    "\n    (script that generates prompt)");
-	    fprintf(stderr, "%s\n", interp->result);
-	    goto defaultPrompt;
-	}
+  inChannel = Tcl_GetStdChannel(TCL_STDIN);
+  outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+  promptCmd = Tcl_GetVar(interp,
+		 gotPartial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
+  if (promptCmd == NULL) {
+defaultPrompt:
+    if (!gotPartial && outChannel) {
+      Tcl_Write(outChannel, "% ", 2);
     }
-    fflush(stdout);
+  } else {
+    code = Tcl_Eval(interp, promptCmd);
+    inChannel = Tcl_GetStdChannel(TCL_STDIN);
+    outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+    errChannel = Tcl_GetStdChannel(TCL_STDERR);
+    if (code != TCL_OK) {
+      if (errChannel) {
+	Tcl_Write(errChannel, interp->result, -1);
+	Tcl_Write(errChannel, "\n", 1);
+      }
+      Tcl_AddErrorInfo(interp,
+		       "\n    (script that generates prompt)");
+      goto defaultPrompt;
+    }
+  }
+  if (outChannel) {
+    Tcl_Flush(outChannel);
+  }
 }
 
 /*
@@ -129,77 +142,106 @@ _ptkPrompt(Tcl_Interp *interp, int partial) {
  *----------------------------------------------------------------------
  */
 
-static Tcl_DString _ptkStdinCmdStr;
+static Tcl_DString command;	/* Used to buffer incomplete commands being
+				 * read from stdin. */
 
     /* ARGSUSED */
 static void
-_ptkStdinProc(ClientData /*clientData*/, int /*mask*/) {
+_ptkStdinProc(ClientData /*clientData*/, int /*mask*/)
+{
 #define BUFFER_SIZE 4000
-    char input[BUFFER_SIZE+1];
-    static int gotPartial = 0;
-    char *cmd;
-    int code, count;
-    int tty = 1;
+  char buffer[BUFFER_SIZE+1], *cmd/*, *args, *fileName*/;
+  int code, gotPartial, tty, length;
+  int exitCode = 0;
+  Tcl_Channel inChannel, outChannel, errChannel;
 
-    count = read(fileno(stdin), input, BUFFER_SIZE);
-    if (count <= 0) {
-	if (!gotPartial) {
-	    if (tty) {
-		Tcl_Eval(ptkInterp, "exit");
-		exit(1);
-	    } else {
-		Tk_DeleteFileHandler(0);
-	    }
-	    return;
-	} else {
-	    count = 0;
-	}
+  /*
+   * Process commands from stdin until there's an end-of-file.  Note
+   * that we need to fetch the standard channels again after every
+   * eval, since they may have been changed.
+   */
+
+  gotPartial = 0;
+  inChannel = Tcl_GetStdChannel(TCL_STDIN);
+  outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+  tty = isatty(0);
+  
+  if (!inChannel) {
+    goto done;
+  }
+  length = Tcl_Gets(inChannel, &command);
+  if (length < 0) {
+    goto done;
+  }
+  if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
+    goto done;
+  }
+
+  /*
+   * Add the newline removed by Tcl_Gets back to the string.
+   */
+
+  (void) Tcl_DStringAppend(&command, "\n", -1);
+  cmd = Tcl_DStringValue(&command);
+  if (!Tcl_CommandComplete(cmd)) {
+    gotPartial = 1;
+    goto prompt;
+  }
+
+  gotPartial = 0;
+  /*
+   * Disable the stdin file handler while evaluating the command;
+   * otherwise if the command re-enters the event loop we might
+   * process commands from stdin before the current command is
+   * finished.  Among other things, this will trash the text of the
+   * command being evaluated.
+   */
+
+  Tk_CreateFileHandler(0, 0, _ptkStdinProc, (ClientData) 0);
+  code = Tcl_RecordAndEval(ptkInterp, cmd, 0);
+  Tk_CreateFileHandler(0, TK_READABLE, _ptkStdinProc, (ClientData) 0);
+  inChannel = Tcl_GetStdChannel(TCL_STDIN);
+  outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+  errChannel = Tcl_GetStdChannel(TCL_STDERR);
+  Tcl_DStringFree(&command);
+  if (code != TCL_OK) {
+    if (errChannel) {
+      Tcl_Write(errChannel, ptkInterp->result, -1);
+      Tcl_Write(errChannel, "\n", 1);
     }
-    cmd = Tcl_DStringAppend(&_ptkStdinCmdStr, input, count);
-    if (count != 0) {
-	if ((input[count-1] != '\n') && (input[count-1] != ';')) {
-	    gotPartial = 1;
-	    goto prompt;
-	}
-	if (!Tcl_CommandComplete(cmd)) {
-	    gotPartial = 1;
-	    goto prompt;
-	}
+  } else if (tty && (*ptkInterp->result != 0)) {
+    if (outChannel) {
+      Tcl_Write(outChannel, ptkInterp->result, -1);
+      Tcl_Write(outChannel, "\n", 1);
     }
-    gotPartial = 0;
+  }
 
-    /*
-     * Disable the stdin file handler while evaluating the command;
-     * otherwise if the command re-enters the event loop we might
-     * process commands from stdin before the current command is
-     * finished.  Among other things, this will trash the text of the
-     * command being evaluated.
-     */
 
-    Tk_CreateFileHandler(0, 0, _ptkStdinProc, (ClientData) 0);
-    code = Tcl_RecordAndEval(ptkInterp, cmd, 0);
-    Tk_CreateFileHandler(0, TK_READABLE, _ptkStdinProc, (ClientData) 0);
-    Tcl_DStringFree(&_ptkStdinCmdStr);
-    if (*ptkInterp->result != 0) {
-	if ((code != TCL_OK) || (tty)) {
-	    printf("%s\n", ptkInterp->result);
-	}
-    }
+  /*
+   * Output a prompt.
+   */
+  
+prompt:
+  if (tty) {
+    _ptkPrompt(ptkInterp, gotPartial);
+  }
+  return;
 
-    /*
-     * Output a prompt.
-     */
-
-    prompt:
-    if (tty) {
-	_ptkPrompt(ptkInterp, gotPartial);
-    }
+  /*
+   * Rather than calling exit, invoke the "exit" command so that
+   * users can replace "exit" with some other command to do additional
+   * cleanup on exit.  The Tcl_Eval call should never return.
+   */
+done:
+  sprintf(buffer, "exit %d", exitCode);
+  Tcl_Eval(ptkInterp, buffer);
 }
 
 
 
 void ptkConsoleWindow() {
-    Tcl_DStringInit(&_ptkStdinCmdStr);
-    Tk_CreateFileHandler(0, TK_READABLE, _ptkStdinProc, (ClientData) 0);
-    _ptkPrompt(ptkInterp,0);
+  Tcl_DStringInit(&command);
+  Tcl_CreateFileHandler(Tcl_GetFile((0),TCL_UNIX_FD),
+			TK_READABLE, _ptkStdinProc, (ClientData) 0);
+  _ptkPrompt(ptkInterp,0);
 }
