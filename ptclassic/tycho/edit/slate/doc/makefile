@@ -43,7 +43,8 @@ include $(CONFIG)
 DIRS =          internals tutorial usersGuides
 
 EXTRA_SRCS =  \
-	index.html
+	index.html \
+	distribution.html
 
 MISC_FILES =	$(DIRS) img
 
