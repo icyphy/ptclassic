@@ -30,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
   go {
     if ( !output.known() ) {
       if ( input.absent() ) {
-	output.makeabsent();
+	output.makeAbsent();
       } else {
 	char theString[10];
 	sprintf( theString, "%d", input.get() );
