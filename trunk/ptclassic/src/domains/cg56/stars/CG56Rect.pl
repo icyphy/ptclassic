@@ -97,8 +97,8 @@ $label(end)
 		 if(p<1)    
 		     Error::abortRun(*this, ": Invalid period value.");
 		 if(p<=w)
-		     Error::abortRun(*this, ":
-		              Period must be greater than width");
+		     Error::abortRun(*this,
+		              "Period must be greater than width");
         }			      
 	go {
                 gencode(main);
