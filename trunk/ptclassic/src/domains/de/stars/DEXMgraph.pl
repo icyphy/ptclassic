@@ -2,7 +2,7 @@ defstar {
 	name { XMgraph }
 	domain { DE }
 	desc {
-Generate a plot with the xgraph program with one point per event.
+Generate a plot with the pxgraph program with one point per event.
 Any number of event sequences can be plotted simultaneously, up
 to the limit determined by the XGraph class.
 By default, a straight line is drawn between each pair of events.
@@ -16,7 +16,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	seealso {xgraph Xhistogram}
+	seealso {pxgraph Xhistogram}
 	inmulti {
 		name { input }
 		type { float }
@@ -31,13 +31,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {saveFile}
 		type {string}
 		default {""}
-		desc { File to save the output to the xgraph program. }
+		desc { File to save the output to the pxgraph program. }
 	}
 	defstate {
 		name {options}
 		type {string}
 		default {"-P =800x300+0+0"}
-		desc { Command line options for the xgraph program.}
+		desc { Command line options for the pxgraph program.}
 	}
 	hinclude { "Display.h" }
 	protected {

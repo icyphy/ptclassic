@@ -2,7 +2,7 @@ defstar {
 	name { Xhistogram }
 	domain { DE }
 	desc {
-Generate a histogram with the xgraph program.  The parameter "binWidth" determines the
+Generate a histogram with the pxgraph program.  The parameter "binWidth" determines the
 width of a bin in the histogram.  The number of bins will depend on the range of
 values in the events that arrive. The time of arrival of events is ignored.
 This star is identical to the SDF Xhistogram, but is used often enough in the
@@ -43,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {options}
 		type {string}
 		default {""}
-		desc { Command line options for xgraph.}
+		desc { Command line options for pxgraph.}
 	}
 	protected {
 		// The XHistogram class does all the work.
