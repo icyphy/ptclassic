@@ -17,6 +17,8 @@ if ( ! $?DISPLAY ) then
 endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
+if ( ! $?USER ) setenv USER $LOGNAME
 if ( ! $?ARCH ) then
     setenv ARCH `$PTOLEMY/bin/arch`
 endif
