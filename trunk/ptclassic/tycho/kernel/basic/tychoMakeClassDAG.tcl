@@ -47,8 +47,13 @@ source $TYCHO/kernel/Path.tcl
 proc tychoMkClassGraph {name filename args} {
     set entries {}
     foreach file $args {
+	if {$file == {} } {
+	    continue
+	}
 	set fd [open [::tycho::expandPath $file] r]
-	set contents [read $fd]
+ 	if [catch {set contents [read $fd]} errMsg] {
+            error "Error while reading $file:\n$errMsg"
+        }
 	close $fd
         set nm {}
 	set classexp "\n\[ \t\]*class\[ \t\]+(\[^\{ \t\n\]*)"
@@ -56,11 +61,18 @@ proc tychoMkClassGraph {name filename args} {
             set classfile($nm) $file
 	}
 	set inheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)"
+	set multiinheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)\[ \t\]+(\[^ \t\n\]*)"
         # Look for inheritance only if a class definition was found.
         if {$nm != {}} {
-            if {[regexp $inheritexp $contents matchvar pnm] \
-                    != 0} {
+            if {[regexp $inheritexp $contents matchvar pnm] != 0} {
                 set parent($nm) $pnm
+		if {[regexp $multiinheritexp $contents matchvar pnm] != 0} {
+		    puts stderr "Warning: $classfile($nm) has multiple\
+			    inheritance,\nwhich\
+			    cannot currently be displayed by\
+			    Tycho.\nOnly the inheritance link from the\
+			    child to the\nfirst parent will be shown."
+		}
             } {
                 set parent($nm) {}
             }
