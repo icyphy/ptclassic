@@ -76,9 +76,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Bar graph object
 	    BarGraph bg;
 
-	    StringList butName;
-	    StringList sliderName;
-	    StringList command;
+	    InfString butName;
+	    InfString sliderName;
+	    InfString command;
 
 	    // Keep track of whether the setup routine has run already.
 	    // Avoid recreating the window if so.
