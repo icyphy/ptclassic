@@ -117,11 +117,12 @@ of the icon.  The following colors are currently in use:
 	FLOAT: blue
 	INT: yellow
 	COMPLEX: white
+	PACKET: green
 .sp
 .fi
 The color is currently set automatically by the icon generator
 by using layers defined specifically for this purpose, called
-anytypeColor, floatColor, intColor, and complexColor.
+anytypeColor, floatColor, intColor, complexColor, and packetColor.
 You can change the color
 manually, if you wish.  To do this, select the stem, type ``"xxxx"'',
 where xxxx is replaced by the color name (the quotes are necessary),
@@ -165,14 +166,14 @@ to transform the terminal.
 .pp
 A little more detail on the Oct internals may be useful if you explore
 the files that are created by these operations.
-For make-schem-icon, if the schematic is called xxx,
-then the icon itself is stored in xxx/schematic/interface;.
+For make-schem-icon, if the schematic is called \fIxxx\fR,
+then the icon itself is stored in ''\fIxxx\fR/schematic/interface;''.
 The semicolon is part of the filename (this creates some
 interesting challenges when manipulating this file in Unix,
 since Unix interprets the semicolon as a command delimiter).
 The standard stars that are normally part of the Ptolemy distribution
-are stored in ~ptolemy/src/domains/xxx, where xxx is the domain
-name such as ``sdf'' or ``de''.
+are stored in ``~ptolemy/src/domains/\fIdom\fR'', where \fIdom\fR
+is the domain name such as ``sdf'' or ``de''.
 The icons for the stars are stored in a subdirectory called
 .c icons ,
 the icons for demo systems in a subdirectory called
