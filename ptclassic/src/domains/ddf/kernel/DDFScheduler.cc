@@ -96,10 +96,8 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-int DDFScheduler :: setup (Block& b) {
+int DDFScheduler :: setup (Galaxy& galaxy) {
 	clearHalt();
-
-	Galaxy& galaxy = b.asGalaxy();
 
 	// if canDom is already set SDF, do SDFScheduling
 	if (canDom == SDF) 
@@ -116,14 +114,12 @@ int DDFScheduler :: setup (Block& b) {
 		return FALSE;
 	}
 
-	// star initialize.  We allow any domain ending in "DF"
+	// star initialize.  Stars must be derived from DataFlowStar.
 	// (for example, SDF, DDF).  Also compute the size.
 	Star* s;
 	while ((s = nextStar++) != 0) {
-		const char* dom = s->domain();
-		int l = strlen(dom) - 2;
-		if (strcmp(dom + l, "DF") != 0) {
-			Error::abortRun (*s, " is not a DDF or SDF star");
+		if (!s->isA("DataFlowStar")) {
+			Error::abortRun (*s, " is not a dataflow star");
 			return FALSE;
 		}
 		// member initialization.
@@ -200,16 +196,14 @@ int DDFScheduler :: setup (Block& b) {
 // EXPLICIT STOPPING CONDITION : # of firing of all sources - 
 // default stopTime = 0
 int
-DDFScheduler :: run (Block& block) {
+DDFScheduler :: run (Galaxy& galaxy) {
 
 	msg.initialize();
 
 	if (haltRequested()) {
-		Error::abortRun(block, ": Can't continue after run-time error");
+		Error::abortRun(galaxy, ": Can't continue after run-time error");
 		return FALSE;
 	}
-
-	Galaxy& galaxy = block.asGalaxy();
 
 	// check whether it is a predefined construct or not.
 	switch(canDom) {
