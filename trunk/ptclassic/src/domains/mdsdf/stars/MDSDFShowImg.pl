@@ -94,7 +94,7 @@ This star does not support frame numbers.  See ShowImg2.
     if (fileName[0] == '\000') {
       char* nm = tempFileName();
       strcpy(fileName, nm);
-      LOG_DEL; delete nm;
+      LOG_DEL; delete [] nm;
     }
 
     FILE* fptr = fopen(fileName, "w");
@@ -125,7 +125,7 @@ This star does not support frame numbers.  See ShowImg2.
 
     fwrite((const char*)buffer, sizeof(unsigned char), size, fptr);
     fclose(fptr);
-    delete[] buffer;
+    delete [] buffer;
 
     char cmdbuf[256];
     sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);

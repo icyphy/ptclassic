@@ -101,7 +101,7 @@ complete filename of the displayed image.
     if (fileName[0] == '\000') {
       char* nm = tempFileName();
       strcpy(fileName, nm);
-      LOG_DEL; delete nm;
+      LOG_DEL; delete [] nm;
     }
     char numstr[16];
     sprintf(numstr, ".%d", frame);
@@ -136,7 +136,7 @@ complete filename of the displayed image.
 
     fwrite((const char*)buffer, sizeof(unsigned char), size, fptr);
     fclose(fptr);
-    delete[] buffer;
+    delete [] buffer;
 
     char cmdbuf[256];
     sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);
