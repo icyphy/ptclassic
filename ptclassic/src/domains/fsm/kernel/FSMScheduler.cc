@@ -34,11 +34,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "FSMScheduler.h"
+#include "utilities.h"
+
+// Ptolemy kernel includes
 #include "Galaxy.h"
 #include "EventHorizon.h"
 #include "Error.h"
 #include "InfString.h"
-#include "utilities.h"
+#include "checkConnect.h"		// define warnIfNotConnected
+
 
 	//////////////////////////////////////////
 	// Methods for FSMScheduler
@@ -47,17 +51,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 FSMScheduler::FSMScheduler() {
     currentTime = 0;
 
-    inputNameMap = NULL;
-    outputNameMap = NULL;
-    internalNameMap = NULL;
-    machineType = NULL;
+    inputNameMap = 0;
+    outputNameMap = 0;
+    internalNameMap = 0;
+    machineType = 0;
 
-    myInPorts = NULL;
-    myOutPorts = NULL;
+    myInPorts = 0;
+    myOutPorts = 0;
 
-    initialState = NULL;
-    curState = NULL;
-    nextState = NULL;
+    initialState = 0;
+    curState = 0;
+    nextState = 0;
 }
 
 // Destructor.
@@ -77,8 +81,6 @@ void FSMScheduler::setStopTime(double) {
 void FSMScheduler::resetStopTime(double) {
     // reactive system takes no time to output.
 }
-
-extern int warnIfNotConnected (Galaxy&);
 
 // Initialization.
 void FSMScheduler::setup() {
@@ -126,8 +128,8 @@ void FSMScheduler::setup() {
 }
 
 int FSMScheduler::setupIOPorts() {
-    myInPorts = NULL;
-    myOutPorts = NULL;
+    myInPorts = 0;
+    myOutPorts = 0;
 
     GalTopBlockIter next(*galaxy());
     Block *bl;
@@ -142,10 +144,10 @@ int FSMScheduler::setupIOPorts() {
       }
     }
 
-    if (myInPorts == NULL) {
+    if (myInPorts == 0) {
       Error::abortRun("FSMScheduler:", " No data input star.");
       return FALSE;  
-    } else if (myOutPorts == NULL) {
+    } else if (myOutPorts == 0) {
       Error::abortRun("FSMScheduler:", " No data output star.");
       return FALSE;
     }
@@ -156,7 +158,7 @@ int FSMScheduler::setupIOPorts() {
 
     MPHIter nextp(*myOutPorts);
     PortHole* p;
-    while ( (p = nextp++) != NULL ) {
+    while ( (p = nextp++) != 0 ) {
       // Register each output name into Tcl.
       Tcl_SetVar(myInterp,(char*)p->name(),"0",TCL_GLOBAL_ONLY);
     }
@@ -183,7 +185,7 @@ int FSMScheduler::setNameMap(MultiPortHole& mph, const char* Name_Map) {
     MPHIter nextp(mph);
     PortHole* p;
     int indx = 0;
-    while ( (p = nextp++) != NULL ) {
+    while ( (p = nextp++) != 0 ) {
       p->setName((const char*)parsedName[indx]);
       indx++;
     }
