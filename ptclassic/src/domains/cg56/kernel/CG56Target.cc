@@ -84,13 +84,18 @@ void CG56Target::initDataMembers() {
     typeConversionTableRows = 6;
 
     // Initialize the assembler options
-    assemblerOptions = "-A -B -L -Oso";
+    assemblerOptions = "-A  -B -L -Oso";
 }
 
 int CG56Target :: compileCode() {
     StringList assembleCmds = "asm56000 ";
-    assembleCmds << assemblerOptions << " " << filePrefix;
+    StringList postAssembleCmds = "cldlod ";
+    assembleCmds << " " << assemblerOptions <<" "<<filePrefix<<".asm";
+    postAssembleCmds << " "<<filePrefix<<".cld > "<<filePrefix<<".lod";
     int valid = !systemCall(assembleCmds, "Errors in assembly", targetHost);
+    int valid2 = !systemCall(postAssembleCmds, "Errors in post processing",
+			      targetHost);
+    valid = valid && valid2;
     if (valid && int(reportMemoryUsage)) {
 	if ( computeImplementationCost() )
 	    Error::message(*this, describeImplementationCost());
