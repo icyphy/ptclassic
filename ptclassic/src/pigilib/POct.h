@@ -132,6 +132,7 @@ public:
 	int ptkCompile (int argc,char** argv);
 	int ptkGetParams (int argc,char** argv);
 	int ptkSetParams (int argc,char** argv);
+	int ptkSetFindName (int argc,char** argv);
 	int ptkGetComment (int argc,char** argv);
 	int ptkSetComment (int argc,char** argv);
 	int ptkGetSeed (int argc,char** argv);
