@@ -1811,6 +1811,16 @@ long functionNumber;
 	    
         case RPC_CLEAN_EXIT_FUNCTION:
             status = RPCcleanExit(application, receiveStream);
+            if (status == RPC_OK) {
+
+                /*
+                 * At this point the connection has been shut
+                 * down so go ahead and return. (11/95)
+                 */
+
+                return status;
+            }
+
             break;
 
         case RPC_X_GET_DEFAULT_FUNCTION:
