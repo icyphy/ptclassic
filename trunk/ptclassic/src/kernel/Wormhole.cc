@@ -133,8 +133,8 @@ void Wormhole::freeContents () {
 	EventHorizon* p;
 	while ((p = (EventHorizon*)nextp++) != 0) {
 		// remove parents
-		p->ghostPort->setPort("",0);
-		p->setPort("",0);
+		p->ghostPort->PortHole::setPort("",0);
+		p->PortHole::setPort("",0);
 		LOG_DEL; delete p->ghostPort;
 		LOG_DEL; delete p;
 	}
