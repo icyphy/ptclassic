@@ -35,18 +35,19 @@
 
 # Register the standard context-sensitive editors
 namespace ::tycho {
+
+    ############# text editors (alphabetical except the first one)
+
     ::tycho::File::registerExtensions {} \
             {::tycho::view Edit {-file {%s}}} \
             {Plain text editor} "text"
+
     ::tycho::File::registerExtensions {.sched .c .y} \
             {::tycho::view EditC {-file {%s}}} \
             {C editor} "text"
     ::tycho::File::registerExtensions {.C .cc .h .H} \
             {::tycho::view EditCpp {-file {%s}}} \
             {C++ editor} "text"
-    ::tycho::File::registerExtensions {.dag} \
-            {::tycho::view EditDAG {-file {%s}}} \
-            {DAG editor} "graphics"
     ::tycho::File::registerExtensions {.strl} \
             {::tycho::view EditEsterel {-file {%s}}} \
             {Esterel editor} "text"
@@ -56,39 +57,69 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {} \
             {::tycho::view EditHTML {-file {%s}}} \
             {HTML editor} "text"
+    ::tycho::File::registerExtensions {.html .htm .htl} \
+            {::tycho::view HTML {-file {%s}} Displayer {-toolbar 1}} \
+            {}
     ::tycho::File::registerExtensions {.itcl .itk} \
             {::tycho::view EditItcl {-file {%s}}} \
             {Itcl editor} "text"
     ::tycho::File::registerExtensions {.java} \
             {::tycho::view EditJava {-file {%s}}} \
             {Java editor} "text"
+    ::tycho::File::registerExtensions {.mk .template} \
+            {::tycho::view EditMake {-file {%s}}} \
+	    {Makefile editor} "text"
+    ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
+            {::tycho::view EditMake {-file {%s}}} \
+	    {} 
+    ::tycho::File::registerExtensions {.pt .ptcl} \
+            {::tycho::view EditPtcl {-file {%s}}} \
+            {Ptcl editor} "text"
+    ::tycho::File::registerExtensions .pl \
+            {::tycho::view EditPtlang {-file {%s}}} \
+            {Ptlang editor} "text"
     ::tycho::File::registerExtensions .tcl \
             {::tycho::view EditTcl {-file {%s}}} \
             {Tcl editor} "text"
+
+    ########### graphical editors (alphabetical)
+
     if {[uplevel #0 info commands ptkOpenFacet] != {} && \
-        [uplevel #0 info commands pvOpenWindow] != {}} {
-        # Ptolemy and vem are present.  Use them.
-        ::tycho::File::registerContents [file join schematic {contents;}] \
-                {::pvOpenWindow [::ptkOpenFacet {%s} schematic contents]} \
-                {Vem facet} "graphics"
+            [uplevel #0 info commands pvOpenWindow] != {}} {
+        set ptolemypresent 1
     } {
+        set ptolemypresent 0
+    }
+    ::tycho::File::registerExtensions {.dag} \
+            {::tycho::view EditDAG {-file {%s}}} \
+            {DAG editor} "graphics"
+    # NOTE: Not useful on its own.
+    # ::tycho::File::registerExtensions {.fsm} \
+    #       {::tycho::view EditFSM {-file {%s}}} \
+    #       {Finite state machine editor}
+    if !$ptolemypresent {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::tycho::view EditPalette {-file {%s}}} \
                 {Palette editor} "graphics"
     }
-    ::tycho::File::registerExtensions .pl \
-            {::tycho::view EditPtlang {-file {%s}}} \
-            {Ptlang editor} "text"
-    ::tycho::File::registerExtensions {.pt .ptcl} \
-            {::tycho::view EditPtcl {-file {%s}}} \
-            {Ptcl editor} "text"
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view TclShell  {-file {%s}}} \
-            {Tcl shell} "tools"
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view ProfileTcl {-file {%s}} Displayer {-toolbar 1}} \
-            {Tcl profiler} "tools"
+    # NOTE: Not ready for release
+    #     ::tycho::File::registerExtensions {.std} \
+    #             {::tycho::view EditSTD {-file {%s}}} \
+    #             {State transition diagram editor} "graphics"
+    ::tycho::File::registerExtensions {.idx} \
+            {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
+            -file {%s}} \
+            {}
+    if $ptolemypresent {
+        # Ptolemy and vem are present.  Use them.
+        ::tycho::File::registerContents [file join schematic {contents;}] \
+                {::pvOpenWindow [::ptkOpenFacet {%s} schematic contents]} \
+                {Vem facet} "graphics"
+    }
+
+    ########### tools (alphabetical)
+
     ::tycho::File::registerExtensions {} \
             {::tycho::view CommandShell  {-file {%s}}} \
             {Command shell} "tools"
@@ -102,25 +133,13 @@ namespace ::tycho {
                 {::tycho::view Mathematica {-file {%s}}} \
                 {Mathematica console} "tools"
     }
-    ::tycho::File::registerExtensions {.html .htm .htl} \
-            {::tycho::view HTML {-file {%s}} Displayer {-toolbar 1}} \
-            {}
-    ::tycho::File::registerExtensions {.mk .template} \
-            {::tycho::view EditMake {-file {%s}}} \
-	    {Makefile editor} "text"
-    ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
-            {::tycho::view EditMake {-file {%s}}} \
-	    {} 
-    # ::tycho::File::registerExtensions {.fsm} \
-    #       {::tycho::view EditFSM {-file {%s}}} \
-    #       {Finite state machine editor}
-    ::tycho::File::registerExtensions {.std} \
-            {::tycho::view EditSTD {-file {%s}}} \
-            {State transition diagram editor} "graphics"
-    ::tycho::File::registerExtensions {.idx} \
-            {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
-            -file {%s}} \
-            {}
+    ::tycho::File::registerExtensions {} \
+            {::tycho::view ProfileTcl {-file {%s}} Displayer {-toolbar 1}} \
+            {Tcl profiler} "tools"
+    ::tycho::File::registerExtensions {} \
+            {::tycho::view TclShell  {-file {%s}}} \
+            {Tcl shell} "tools"
+
 }
 
 # FIXME: This entry binding patch may not be needed in the future.
