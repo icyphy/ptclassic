@@ -35,7 +35,8 @@ of the input, so the two methods yield slightly different results.
 .pp
 The universe parameters are \fIlog2NumInputs\fR, the log base 2 of the
 number of input samples to generate, and \fIorder\fR, the order of the
-AR model to use in the autocorrelation and Burg's method estimates.
+autoregressive (AR) model to use in the autocorrelation and Burg's
+method estimates.
 .pp
 The periodogram method amounts to computing a direct DFT of the observations
 of the input process.
@@ -70,14 +71,19 @@ The final output is scaled by an estimate of the power of the input
 process, extracted from the autocorrelation estimate using the
 .c Cut
 star.
- The
+The
 .c Repeat
 star is needed to maintain consistent sample rates.
-The
-.c FloatPad
-star is used to prepend the AR coefficients with a one, the value of
-the first coefficient, which need not be computed.
-.Se FloatPad
+The AR coefficients output by the
+.c LevDur
+star do not include the leading coefficient of value one.
+A one is prepended to the AR coefficients first by passing the
+AR coefficients through
+.c Chop
+star, which writes one more sample (of zero value) than it reads,
+and then by adding the output to an
+.c Impulse
+star.
 .pp
 The Burg method does not require first estimating the autocorrelation.
 It estimates the AR parameters directly from the input samples.
@@ -89,7 +95,7 @@ a spectral estimate.
 .UH "References"
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
-\fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.
+\fIProc. IEEE\fR, vol. 63, pp. 561-580, Apr. 1975.
 .ip [2]
 S. M. Kay, \fIModern Spectral Estimation: Theory & Application\fR,
 Prentice-Hall, Englewood Cliffs, NJ, 1988.

@@ -16,7 +16,7 @@ A Gaussian white noise signal serves as input to an
 filter and
 an adaptive filter using the LMS algorithm.
 Real-valued Gaussian white noise is added to the feedback loop in an
-ammount controled by an on-screen slider.  Note that the noise affects
+amount controlled by an on-screen slider.  Note that the noise affects
 only the real part of the taps.
 The resulting error signal displayed using the
 .c TkBarGraph

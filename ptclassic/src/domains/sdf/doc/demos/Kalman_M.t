@@ -50,9 +50,9 @@ the Kalman filter.
 .UH "References"
 .ip [1]
 R.E. Kalman, "A new approach to linear filtering and prediction problems",
-\fITrans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
+\fITrans. ASME, J. Basic Eng.\fR, Ser 82D, pp. 35-45, March 1960.
 .ip [2]
-S. Haykin, \fAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
+S. Haykin, \fIAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
 N.J., 1986.
 .SA
 Kalman_M,
