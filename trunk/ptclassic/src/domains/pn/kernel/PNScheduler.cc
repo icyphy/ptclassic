@@ -96,9 +96,14 @@ void PNScheduler::setup()
 // Run (or continue) the simulation.
 int PNScheduler::run()
 {
+    if (!galaxy()) {
+	Error::abortRun("No galaxy to run");
+	return FALSE;
+    }
+
     if (SimControl::haltRequested())
     {
-	Error::abortRun(*galaxy(), " cannot continue.");
+	Error::abortRun(*galaxy(), "Cannot continue.");
 	return FALSE;
     }
 
