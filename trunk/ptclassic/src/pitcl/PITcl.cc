@@ -776,7 +776,7 @@ int PTcl::targetparam(int argc,char ** argv) {
 	   		(char*) NULL);
 		return TCL_ERROR;
 	}
-	if (argc == 1) {
+	if (argc == 2) {
 		return staticResult(s->initValue());
 	}
 	s->setInitValue(hashstring(argv[2]));
