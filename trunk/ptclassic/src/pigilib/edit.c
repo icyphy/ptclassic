@@ -492,8 +492,13 @@ long userOptionWord;
     }
 
     sprintf(buf, "domain = '%s'", domain);
+    /* dmWhichOne has a bug.  It doesn't always set 'which' to -1 when
+       no item is selected.  If the dialog box pops out with no default
+       selected item and the user doesn't touch any selection button and
+       directly clicks the "OK" or "Cancel" button, 'which' will be set
+       to a large integer.  So I add the test 'which >= nDomains'. */
     if (dmWhichOne(buf, nDomains, items, &which, NULL, NULL) != VEM_OK
-        || which == -1) {
+        || which < 0 || which >= nDomains) {
         PrintCon("Aborted entry");
         ViDone();
     }
