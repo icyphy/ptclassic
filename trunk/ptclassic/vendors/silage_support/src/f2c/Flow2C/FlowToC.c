@@ -40,12 +40,13 @@ st_table *Edgetable[MAXINDEXLEVEL];
 
 static st_table *GraphTable;
 
-FlowToC(l_flag,pl_flag,highlevel,bittrue,tmp_thor)
+FlowToC(l_flag,pl_flag,highlevel,bittrue,tmp_thor,sdf_flag)
 bool l_flag;
 bool pl_flag;
 bool highlevel;
 bool bittrue;
 bool tmp_thor;
+bool sdf_flag;
 {
     printmsg(NULL, "\n\n\t\t\t*** STARTING CODE GENERATION ***\n\n");
     /* input commands first */
@@ -64,7 +65,7 @@ bool tmp_thor;
     EnforceBoolType(Root);
     printmsg(NULL, "GENERATING INITIALIZATION CODE...\n\n");
 /*    DumpFlowGraph(Root, FALSE);  */
-    GenCode(l_flag,pl_flag,highlevel,bittrue,tmp_thor); 
+    GenCode(l_flag,pl_flag,highlevel,bittrue,tmp_thor,sdf_flag); 
 }
 
 BuildRootGraph()
@@ -630,18 +631,19 @@ EdgePointer edge;
 	return(edge->Name);
 }
 
-GenCode(l_flag,pl_flag,highlevel,bittrue,tmp_thor)
+GenCode(l_flag,pl_flag,highlevel,bittrue,tmp_thor,sdf_flag)
 bool l_flag;
 bool pl_flag;
 bool highlevel;
 bool bittrue;
 bool tmp_thor;
+bool sdf_flag;
 {
     /* Initialize Edgetable */
     indexlevel = 0;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
-    if (pl_flag == true) GenPtHeading(highlevel,bittrue,tmp_thor);
+    if (pl_flag == true) GenPtHeading(highlevel,bittrue,tmp_thor,sdf_flag);
     else GenHeading();
     fprintf (CFD, "/* Delay structure definition goes here...*/\n\n");
     GenDelayStruct(Root,pl_flag);  /*  Process all hierarchy  */
@@ -711,15 +713,19 @@ GenHeading ()
    fprintf (CFD, "int CycleCount;\n\n");
 }
 
-GenPtHeading (highlevel,bittrue,tmp_thor)
+GenPtHeading (highlevel,bittrue,tmp_thor,sdf_flag)
 bool highlevel;
 bool bittrue;
 bool tmp_thor;
+bool sdf_flag;
 {
    long ct;
    time (&ct);
    fprintf (CFD, "defstar { \n");
    fprintf (CFD, "\t name { %s } \n", Root->Name);
+if(sdf_flag) 
+   fprintf (CFD, "\t domain { SDF } \n");
+else
    fprintf (CFD, "\t domain { Silage } \n");
    fprintf (CFD, "\t desc { Automatically Generated Silage code for Galaxy %s } \n",Root->Name);
    fprintf (CFD, "\t author { *** } \n");
