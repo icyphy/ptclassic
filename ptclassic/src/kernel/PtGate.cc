@@ -1,4 +1,4 @@
-static const char file_id[] = "PtGate.cc";
+static const char file_id[] = "$RCSfile$";
 /**************************************************************************
 Version identification:
 $Id$
@@ -31,6 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 This file defines classes that support multi-threading in the kernel.
 
 **************************************************************************/
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "PtGate.h"
 #include "logNew.h"
