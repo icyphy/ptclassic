@@ -135,7 +135,7 @@ subinstall:
 
 # Install links for scripts in $PTOLEMY/bin and $TYCHO/bin
 tybin_install:
-	@if [ "x$(EXTRA_SRCS)" != "x" ]; then \
+	-if [ "x$(EXTRA_SRCS)" != "x" ]; then \
 		set $(EXTRA_SRCS); \
 		for f do \
 			if [ -w "$(PTOLEMY)/bin" ]; then \
