@@ -34,14 +34,14 @@
 
 # Load up the test definitions.
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $env(PTOLEMY) src domains sdf test testDEDefs.tcl]
+    source [file join $env(PTOLEMY) src domains de test testDEDefs.tcl]
 } {}
 
 #######################################################################
 #### deallstars
 # Create all the stars
 test deallstars { create all the stars} {
-    domain de
+    domain DE
     foreach star [knownlist] {
 	star star[::tycho::autoName star] $star
     }
