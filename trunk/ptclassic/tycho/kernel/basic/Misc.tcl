@@ -46,12 +46,14 @@
 #
 # Assign elements of a list to multiple variables. If the number
 # of variable names is less then the length of the list, then
-# later elements pf the list are just ignored. if the number of
+# later elements of the list are just ignored. if the number of
 # variable names is more than the length of the list, then an error
 # will be generated.
 #
 # -- varnames: One or more names of variables.
 # -- list: The list containing values to assign to the variables.
+#
+# FIXME: Use the Tcl7.5 foreach{} to implement.
 #
 proc assign {args} {
     set values [lindex $args end]            ;# llast
@@ -157,6 +159,23 @@ proc getopt {option listname} {
     set t [lsearch -exact $l -$option]
     if { $t != -1 } {
 	set v [lindex   $l [expr $t+1]]
+	set l [lreplace $l $t [expr $t+1]]
+
+	return 1
+    }
+
+    return 0
+}
+
+
+proc configopt {option listname} {
+
+    upvar $listname l
+    upvar $option   v
+
+    set t [lsearch -exact $l -$option]
+    if { $t != -1 } {
+	uplevel configure -$option [lindex   $l [expr $t+1]]
 	set l [lreplace $l $t [expr $t+1]]
 
 	return 1
@@ -427,6 +446,9 @@ proc loop {args} {
 # the constant overhead (for one input list) at about the same as
 # creating a 50 x 50 rectangle on the Tk canvas.
 #
+# FIXME: The functionalty of foreach*{} will be subsumed by foreach*
+# in Tcl7.5. When that happens, remove this proc!
+#
 proc foreach* {args} {
     set v [readopt counter args]
     if {$v != ""} {
@@ -470,6 +492,9 @@ proc foreach* {args} {
 #
 #   3
 #   7
+#
+# FIXME: The functionalty of foreachpair{} will be subsumed by foreach*
+# in Tcl7.5. When that happens, remove this proc!
 #
 proc foreachpair {x y l body} {
     upvar $x fst
