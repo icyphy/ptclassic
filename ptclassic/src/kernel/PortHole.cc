@@ -95,9 +95,12 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
 	return;
 }
 
-// destructor remove myself from the circle but preserve a smaller circle
-// of typePortPtrs.
+// destructor: remove myself from the circle but preserve a smaller circle
+// of typePortPtrs.  If someone is aliased to me, remove the alias.
+// Basic idea: remove all pointers to me before deletion.
+
 GenericPort :: ~GenericPort () {
+	if (aliasedFrom) aliasedFrom->aliasedTo = 0;
 	if (!typePortPtr) return;
 	GenericPort* q = typePortPtr;
 	while (q->typePortPtr != this) q = q->typePortPtr;
@@ -197,7 +200,7 @@ GenericPort :: printVerbose () const {
         out += readFullName();
         out += "\n";
         
-        if(alias != NULL) {
+        if(alias() != NULL) {
            GenericPort& eventualAlias = realPort();
            out += "       Aliased to: ";
            out += eventualAlias.readFullName();
@@ -210,7 +213,7 @@ StringList
 PortHole :: printVerbose () const {
 	StringList out;
 	out = GenericPort::printVerbose();
-	if (alias == NULL) {
+	if (alias() == NULL) {
            if (far() != NULL) {
               out += "    Connected to port: ";
               out += far()->readFullName();
@@ -226,8 +229,13 @@ int MultiPortHole :: isItMulti() const { return TRUE;}
 
 void MultiPortHole :: initialize() {}
 
-// this is not really a do-nothing: it destroys its member object "ports".
-MultiPortHole :: ~MultiPortHole() {}
+// MPH destructor: delete all contained portholes
+MultiPortHole :: ~MultiPortHole() {
+	MPHIter next(*this);
+	PortHole* p;
+	while ((p = next++) != 0)
+		delete p;
+}
 
 StringList
 MultiPortHole :: printVerbose () const {
@@ -419,7 +427,7 @@ PortHole& MultiPortHole :: newPort() {
 
 PortHole& MultiPortHole :: newConnection() {
 	// resolve aliases
-	if (alias) return realPort().newConnection();
+	if (alias()) return realPort().newConnection();
 
 	// find an unconnected porthole
 	MPHIter next(*this);
