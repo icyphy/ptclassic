@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Evaluate the "command" parameter in Tcl. Inputs are referenced in
 the comand as "input#1", "input#2", etc.  Outputs are file names,
 and are referenced in the command as "output#1", "output#2", etc.
-For example, if "command" is "exec sed -e /foo/s//bar/ input#1 > output#1",
+For example, if "command" is "exec sed -e /foo/s//bar/ input#1 &gt output#1",
 then the program "sed" will be used to replace all instances of "foo"
 in the input file given by the first input to yield the output file
 on the first output.  
@@ -23,13 +23,11 @@ on the first output.
 	htmldoc {
 The command may or may not be executed.  It will be executed
 if any of the following conditions holds:
-<p>  
-  (1) There are files in the inputs and these are newer than the outputs.
-<p>  
-  (2) The "conditional" parameter is "NO" (this is the default).
-<p>  
-  (3) The "command" is different from the previous invocation.
-<p>
+<OL>
+<LI> There are files in the inputs and these are newer than the outputs.
+<LI> The "conditional" parameter is "NO" (this is the default).
+<LI> The "command" is different from the previous invocation.
+</OL>
 For the purposes of testing condition (3), the command is compared
 to the previous invocation after replacing all input and output references
 with the values of the inputs and the names of the input files.
