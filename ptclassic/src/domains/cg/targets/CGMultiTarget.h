@@ -73,6 +73,8 @@ public:
 	// redefine 
 	SDFStar* createSend(int from, int to, int num);
 	SDFStar* createReceive(int from, int to, int num);
+	SDFStar* createSpread();
+	SDFStar* createCollect();
 
 	// display Gantt chart
 	void displaySchedule(ParScheduler* );

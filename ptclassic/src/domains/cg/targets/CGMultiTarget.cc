@@ -24,6 +24,8 @@ $Id$
 #include "KnownTarget.h"
 #include "CGSend.h"
 #include "CGReceive.h"
+#include "CGSpread.h"
+#include "CGCollect.h"
 #include "pt_fstream.h"
 
 CGFullConnect::CGFullConnect(const char* name,const char* sClass,
@@ -241,6 +243,16 @@ SDFStar* CGFullConnect :: createReceive(int from, int to, int num) {
 	LOG_NEW; CGReceive* newS = new CGReceive;
 	newS->registerProcs(from, to);
 	return newS;
+}
+
+SDFStar* CGFullConnect :: createSpread() {
+	LOG_NEW; CGSpread* newS = new CGSpread;
+	return newS;
+}
+
+SDFStar* CGFullConnect :: createCollect() {
+	LOG_NEW; CGCollect* newC = new CGCollect;
+	return newC;
 }
 
 static CGFullConnect targ("FullyConnected","CGStar",
