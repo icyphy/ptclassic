@@ -18,18 +18,22 @@ include $(CONFIG)
 
 VHDLKERNEL = $(ROOT)/src/domains/vhdl/kernel
 VHDLSTARS = $(ROOT)/src/domains/vhdl/stars
-CGCSTARS = $(ROOT)/src/domains/cgc/stars
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 
-INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(CGCSTARS) -I$(SDFKERNEL) \
+INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(SDFKERNEL) \
 	-I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL)
 
-SRCS = StructTarget.cc SynthTarget.cc SimTarget.cc SimMTTarget.cc SimVSSTarget.cc
+PL_SRCS = CGCVSend.pl CGCVReceive.pl
+EXTRA_SRCS = $(PL_SRCS)
+
+SRCS = StructTarget.cc SynthTarget.cc SimTarget.cc SimMTTarget.cc \
+	SimVSSTarget.cc $(PL_SRCS:.pl=.cc)
+
 HDRS = $(SRCS:.cc=.h)
-OBJS = StructTarget.o SynthTarget.o SimTarget.o SimMTTarget.o SimVSSTarget.o \
-	$(LIBSRCS:.cc=.o)
+OBJS = $(SRCS:.cc=.o) $(LIBSRCS:.cc=.o) 
+
 LIB = libvhdltargets.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
