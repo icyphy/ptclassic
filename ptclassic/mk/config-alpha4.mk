@@ -1,4 +1,3 @@
-#
 # Config file to build on an Alpha AXP running DEC OSF/1, V4.0
 # 
 # $Id$
@@ -29,3 +28,6 @@
 #		       
 
 include $(ROOT)/mk/config-alpha.mk
+
+# Suggested by Frederic Boulanger <Frederic.Boulanger@supelec.fr>
+XV_RAND = "-DfsQ_RANDOM_DECL=extern int random fsQ_proto((void))"
