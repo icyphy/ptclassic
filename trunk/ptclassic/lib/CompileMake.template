@@ -14,30 +14,30 @@
 # It requires GNU make.
 
 # Root of source tree
-ROOT = $(PTOLEMY)
+ROOT =		$(PTOLEMY)
 # Path (absolute or relative) to the object directory root
-OBJDIR=$(ROOT)/obj.$(PTARCH)
+OBJDIR =	$(ROOT)/obj.$(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-SDF=$(OBJDIR)/domains/sdf/stars
-SDF_DSP=$(OBJDIR)/domains/sdf/dsp/stars
-SDF_IMAGE=$(OBJDIR)/domains/sdf/image/stars
-SDF_ATM=$(OBJDIR)/domains/sdf/atm/stars
-SDF_MATRIX=$(OBJDIR)/domains/sdf/matrix/stars
-SDF_TCLTK=$(OBJDIR)/domains/sdf/tcltk/stars
+SDF =		$(OBJDIR)/domains/sdf/stars
+SDF_DSP =	$(OBJDIR)/domains/sdf/dsp/stars
+SDF_IMAGE =	$(OBJDIR)/domains/sdf/image/stars
+SDF_ATM =	$(OBJDIR)/domains/sdf/atm/stars
+SDF_MATRIX =	$(OBJDIR)/domains/sdf/matrix/stars
+SDF_TCLTK =	$(OBJDIR)/domains/sdf/tcltk/stars
 
-SDFSRC=$(ROOT)/src/domains/sdf/stars
-SDF_DSP_SRC=$(ROOT)/src/domains/sdf/dsp/stars
-SDF_IMAGE_SRC=$(ROOT)/src/domains/sdf/image/stars
-SDF_ATM_SRC=$(ROOT)/src/domains/sdf/atm/stars
-SDF_MATRIX_SRC=$(ROOT)/src/domains/sdf/matrix/stars
-SDF_TCLTK_SRC=$(ROOT)/src/domains/sdf/tcltk/stars
+SDFSRC =	$(ROOT)/src/domains/sdf/stars
+SDF_DSP_SRC =	$(ROOT)/src/domains/sdf/dsp/stars
+SDF_IMAGE_SRC =	$(ROOT)/src/domains/sdf/image/stars
+SDF_ATM_SRC =	$(ROOT)/src/domains/sdf/atm/stars
+SDF_MATRIX_SRC =$(ROOT)/src/domains/sdf/matrix/stars
+SDF_TCLTK_SRC =	$(ROOT)/src/domains/sdf/tcltk/stars
 
-SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
-SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
+SDFKERSRC =	$(ROOT)/src/domains/sdf/kernel
+SDFLOOP =	$(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
 
@@ -45,42 +45,43 @@ SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 # MATARCH is defined in the configuration makefiles in $PTOLEMY/mk
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
 ifeq ("$MATLABDIR","")
-MATLABDIR= $(ROOT)/src/compat/matlab
-SDF_MATLAB=$(OBJDIR)/domains/sdf/nomatlab/stars
-SDF_MATLAB_SRC=$(ROOT)/src/domains/sdf/nomatlab/stars
+MATLABDIR =	$(ROOT)/src/compat/matlab
+SDF_MATLAB =	$(OBJDIR)/domains/sdf/nomatlab/stars
+SDF_MATLAB_SRC =$(ROOT)/src/domains/sdf/nomatlab/stars
 else
-MATLABEXT_LIB = -lsdfmatlabstars -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
-SDF_MATLAB=$(OBJDIR)/domains/sdf/matlab/stars
-SDF_MATLAB_SRC=$(ROOT)/src/domains/sdf/matlab/stars
+MATLABEXT_LIB =	 -lsdfmatlabstars -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+SDF_MATLAB =	$(OBJDIR)/domains/sdf/matlab/stars
+SDF_MATLAB_SRC =$(ROOT)/src/domains/sdf/matlab/stars
 endif
 
 # Follows the order used by the pigiRpc makefile
-LIBS = -lsdfatmstars -latm -lsdfimagestars -lImage \
-	-lsdfdspstars -lsdfstars -lLS -lsdf \
-	-lsdfmatrixstars $(MATLABEXT_LIB) \
-	-lsdftclstars -lcompileSDF -lpigi -lptolemy \
-	$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+LIBS = 	-lsdfatmstars -latm -lsdfimagestars -lImage \
+		-lsdfdspstars -lsdfstars -lLS -lsdf \
+		-lsdfmatrixstars $(MATLABEXT_LIB) \
+		-lsdftclstars -lcompileSDF -lptk -lptolemy \
+		$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
-LIBFILES=\
- $(LIBDIR)/libLS.$(LIBSUFFIX) \
- $(LIBDIR)/libsdf.$(LIBSUFFIX) \
- $(LIBDIR)/libImage.$(LIBSUFFIX) \
- $(LIBDIR)/libatm.$(LIBSUFFIX) \
- $(LIBDIR)/libcompileSDF.$(LIBSUFFIX) \
- $(LIBDIR)/libptolemy.$(LIBSUFFIX) \
- $(LIBDIR)/libpigi.$(LIBSUFFIX)
+LIBFILES =  $(LIBDIR)/libLS.$(LIBSUFFIX) \
+		 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
+		 $(LIBDIR)/libImage.$(LIBSUFFIX) \
+		 $(LIBDIR)/libatm.$(LIBSUFFIX) \
+		 $(LIBDIR)/libcompileSDF.$(LIBSUFFIX) \
+		 $(LIBDIR)/libptk.$(LIBSUFFIX) \
+		 $(LIBDIR)/libptolemy.a
 
-OBJS=code.o
-SRCS=code.cc
+OBJS =	code.o
+SRCS =	code.cc
 
 # Include directories
-# PIGIDIR is only necessary for SDF Tcl/Tk stars
-PIGIDIR = $(ROOT)/src/pigilib
-INCL = -I$(KERNDIR) -I$(SDFKERSRC) -I$(SDFLOOP) \
-	-I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) \
-	-I$(SDF_ATM_SRC) -I$(SDF_MATRIX_SRC) -I$(SDF_TCLTK_SRC) \
-	-I$(MATLABDIR)/extern/include -I$(SDF_MATLAB_SRC) \
-	-I$(PIGIDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+# PIGIDIR and PTKDIR are only necessary for SDF Tcl/Tk stars
+PIGIDIR = 	$(ROOT)/src/pigilib
+PTKDIR = 	$(ROOT)/src/ptklib
+INCL = 		-I$(KERNDIR) -I$(SDFKERSRC) -I$(SDFLOOP) \
+		-I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) \
+		-I$(SDF_ATM_SRC) -I$(SDF_MATRIX_SRC) -I$(SDF_TCLTK_SRC) \
+		-I$(MATLABDIR)/extern/include -I$(SDF_MATLAB_SRC) \
+		-I$(PTKDIR) -I$(PIGIDIR) \
+		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Rule for compiling with C++ programs
 .SUFFIXES: .cc
