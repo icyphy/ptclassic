@@ -209,12 +209,17 @@ void CGTarget::wormPrepare() {
 }
 
 int CGTarget :: run() {
+    // avoid core dumps from incorrect operation
+    if (!scheduler() || !galaxy()) {
+	Error::abortRun(*this, "Target has not been setup correctly");
+	return FALSE;
+    }
     // if a wormhole, we must do the transfer of data to and from the target.
     if(inWormHole()) {
 	if(!allSendWormData()) return FALSE;
 	if(!allReceiveWormData()) return FALSE;
     }
-    else 	
+    else
 	generateCode();
 	
     return !haltRequested();
