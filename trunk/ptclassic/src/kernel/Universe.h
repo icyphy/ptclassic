@@ -2,7 +2,6 @@
 #define _Universe_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -59,7 +58,7 @@ public:
 	StringList displaySchedule() {return target->displaySchedule();}
 
 	// destructor: deletes scheduler
-	~Runnable() { INC_LOG_DEL; delete target;}
+	virtual ~Runnable() { INC_LOG_DEL; delete target;}
 
 protected:
 	const char* type;
