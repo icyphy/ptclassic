@@ -21,7 +21,8 @@ DESTDIR = /usr/tools/ptolemy/lib/sdf
 .cc.o:
 	$(GNU) $(GPPFLAGS) -c  $<
 
-SRCS=BlackHole.cc CheatGain.cc ComplexDC.cc ComplexProduct.cc ComplexSum.cc \
+SRCS=BlackHole.cc CheatGain.cc ComplexDC.cc ComplexFIR.cc \
+ ComplexProduct.cc ComplexSum.cc \
  ComplexPower.cc Cos.cc \
  FloatDC.cc FloatGain.cc FloatProduct.cc FloatRamp.cc FloatSum.cc Fork.cc \
  FloatThresh.cc IIDUniform.cc IIDGaussian.cc IntRamp.cc \
@@ -29,7 +30,8 @@ SRCS=BlackHole.cc CheatGain.cc ComplexDC.cc ComplexProduct.cc ComplexSum.cc \
  AdaptFilter.cc FIR.cc IIR.cc FloatImpulse.cc FloatRect.cc BiQuad.cc \
  UpSample.cc DownSample.cc
 
-OBJS=BlackHole.o CheatGain.o ComplexDC.o ComplexProduct.o ComplexSum.o \
+OBJS=BlackHole.o CheatGain.o ComplexDC.o ComplexFIR.o \
+ ComplexProduct.o ComplexSum.o \
  ComplexPower.o Cos.o \
  FloatDC.o FloatGain.o FloatProduct.o FloatRamp.o FloatSum.o Fork.o \
  FloatThresh.o IIDUniform.o IIDGaussian.o IntRamp.o \
@@ -37,7 +39,8 @@ OBJS=BlackHole.o CheatGain.o ComplexDC.o ComplexProduct.o ComplexSum.o \
  AdaptFilter.o FIR.o IIR.o FloatImpulse.o FloatRect.o BiQuad.o \
  UpSample.o DownSample.o
 
-HDRS=BlackHole.h CheatGain.h ComplexDC.h ComplexProduct.h ComplexSum.h \
+HDRS=BlackHole.h CheatGain.h ComplexDC.h ComplexFIR.h \
+ ComplexProduct.h ComplexSum.h \
  ComplexPower.h Cos.h \
  FloatDC.h FloatGain.h FloatProduct.h FloatRamp.h FloatSum.h Fork.h \
  FloatThresh.h IIDUniform.h IIDGaussian.h IntRamp.h \
