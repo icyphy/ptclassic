@@ -18,6 +18,7 @@ a universe.
 #endif
 
 #include "CompileTarget.h"
+#include "LoopScheduler.h"
 #include "KnownTarget.h"
 #include "Galaxy.h"
 #include "GalIter.h"
@@ -34,9 +35,14 @@ Block* CompileTarget::makeNew() const {
 void CompileTarget::setup() {
 	char* schedFileName = 0;
 	writeDirectoryName(destDirectory);
-	if (loopScheduler) {
+	int lv = int(loopingLevel);
+	if (lv) {
 		schedFileName = writeFileName("schedule.log");
-		LOG_NEW; setSched(new SDFClustSched(schedFileName));
+		if (lv == 1) {
+			LOG_NEW; setSched(new SDFClustSched(schedFileName));
+		} else {
+			LOG_NEW; setSched(new LoopScheduler(schedFileName));
+		}
 	}
 	else {
 		LOG_NEW; setSched(new SDFScheduler);
