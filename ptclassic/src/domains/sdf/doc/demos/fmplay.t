@@ -8,6 +8,13 @@ Sound generator using FM modulation that plays on the workstation speaker.
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
+.Ir "Chowning, H. M."
+.Ie "sound synthesis"
+.Ie "audio, Sparcstation"
+.Ie "Sparcstation audio"
+.Ie "modulation, frequency"
+.Ie "frequency modulation"
+.Ie "FM"
 This universe implements the FM-based sound synthesis system
 invented by H. M. Chowning and described in
 "The Synthesis of Complex Audio Spectra by Means of Frequency Modulation",

@@ -8,6 +8,7 @@ Doppler shift
 .AL "Edward A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
+.Id "doppler shift"
 A sine wave of frequency 2*PI/40 radians
 is subjected to four successive amounts of doppler shift.
 The first 100 samples are not shifted at all (in the first 64 samples
@@ -23,10 +24,10 @@ The remaining samples are not shifted at all.
 The doppler shift is accomplished by the phaseShift galaxy,
 which forms an analytic signal (using a Hilbert transform)
 which modulates a complex exponential.
-.IE "phase shifter"
-.IE "analytic signal"
-.IE "Hilbert transform"
-.IE "complex exponential"
+.Ie "phase shift"
+.Ie "analytic signal"
+.Ie "Hilbert transform"
+.Ie "phaseShift"
 The input is assumed to be real, and the output
 produced is real.  The frequency shift produced by the phaseShift
 galaxy is the slope of the phase control input.  This input is

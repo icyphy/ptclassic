@@ -11,6 +11,7 @@ This demo computes a DFT (using the FFT star) of a finite signal.
 .Ie "discrete Fourier transform"
 .Ie "Fourier transform, discrete"
 .Ie "DFT"
+.Ie "spectral estimation"
 It can be used, for example, to plot the frequency response of an FIR filter
 given its impulse response.  This system is so useful that it is
 included in the Utilities menu of pigi.

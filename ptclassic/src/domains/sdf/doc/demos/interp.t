@@ -10,6 +10,9 @@ Linear interpolation
 .LD
 This system uses an FIR filter to upsample by a factor of 8
 and linearly interpolate between samples.
+.Ie "interpolation, linear"
+.Ie "linear interpolation"
+.Ie "sample rate conversion"
 .SA
 FIR.
 .ES
