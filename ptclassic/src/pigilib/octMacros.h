@@ -32,146 +32,170 @@ Version identification:
 $Id$
 Useful OCT macros.  Don't use this any more; use oh.h instead.  oh.h
 is the standard Oct package that does the same thing.  (It was developed
-after this file was written.)
+after this file was written, and its macros are preceded by an "oh" prefix.)
 From: /usr5/octtools/src/octflat/my.h copied 8/7/88
+
+The only macros from this file actually used by pigilib are GetByPropName,
+GetById, CreateInstance2, and CK_OCT.  -BLE
 */
 
-/*
- *  Macro's to call octGetByName()
- *	c = the container
- *	t = the object
- *	s = the object name
- */
-
-#define GetByTermName(c, t, s)				\
-    ((t)->type=OCT_TERM, (t)->contents.term.name=s, octGetByName(c,t))
-
-#define GetByNetName(c, t, s)				\
-    ((t)->type=OCT_NET, (t)->contents.net.name=s, octGetByName(c,t))
-
-#define GetByInstName(c, t, s)				\
-    ((t)->type=OCT_INSTANCE,(t)->contents.instance.name=s, octGetByName(c,t))
-
-#define GetByLabelName(c, t, s)				\
-    ((t)->type=OCT_LABEL, (t)->contents.label.label=s, octGetByName(c,t))
-
-#define GetByBagName(c, t, s)				\
-    ((t)->type=OCT_BAG, (t)->contents.bag.name=s, octGetByName(c,t))
-
-#define GetByLayerName(c, t, s)				\
-    ((t)->type=OCT_LAYER, (t)->contents.layer.name=s, octGetByName(c,t))
-
-#define GetByPropName(c, t, s)				\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s, octGetByName(c,t))
+/* Define prototypes for octGetByName, octCreate, octGetById, octErrorString */
+#include "oct.h"
 
 /*
- *  Macro's to call octCreate()
- *	c = the container
- *	t = the object
- *	s = the object name (for named objects)
+ *  Macros to call octGetByName()
+ *	cc = the container
+ *	tt = the object
+ *	ss = the object name
  */
 
-#define CreateTerm(c, t, s)				\
-    ((t)->type=OCT_TERM, (t)->contents.term.name=s, 	\
-    (t)->contents.term.instanceId = oct_null_id, octCreate(c,t))
+#define GetByTermName(cc,tt,ss)				\
+    ((tt)->type = OCT_TERM,				\
+     (tt)->contents.term.name = (ss),			\
+     octGetByName((cc),(tt)))
 
-#define CreateNet(c, t, s)				\
-    ((t)->type=OCT_NET, (t)->contents.net.name=s, octCreate(c,t))
+#define GetByNetName(cc,tt,ss)				\
+    ((tt)->type = OCT_NET,				\
+     (tt)->contents.net.name = (ss),			\
+     octGetByName((cc),(tt)))
 
-#define CreateLabel(c, t, s, zx, zy)			\
-    ((t)->type=OCT_LABEL, 				\
-    (t)->contents.label.label = s, 			\
-    (t)->contents.label.position.x = zx,		\
-    (t)->contents.label.position.y = zy,		\
-    octCreate(c,t))
+#define GetByInstName(cc,tt,ss)				\
+    ((tt)->type = OCT_INSTANCE,				\
+     (tt)->contents.instance.name = (ss),		\
+     octGetByName((cc),(tt)))
 
-#define CreateBag(c, t, s)				\
-    ((t)->type=OCT_BAG, (t)->contents.bag.name=s, octCreate(c,t))
+#define GetByLabelName(cc,tt,ss)			\
+    ((tt)->type = OCT_LABEL,				\
+     (tt)->contents.label.label = (ss),			\
+     octGetByName((cc),(tt)))
 
-#define CreateLayer(c, t, s)				\
-    ((t)->type=OCT_LAYER, (t)->contents.layer.name=s, octCreate(c,t))
+#define GetByBagName(cc,tt,ss)				\
+    ((tt)->type = OCT_BAG,				\
+     (tt)->contents.bag.name = (ss),			\
+     octGetByName((cc),(tt)))
 
-#define CreatePropInt(c, t, s, i)			\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_INTEGER, 		\
-    (t)->contents.prop.value.integer = i,		\
-    octCreate(c,t))
+#define GetByLayerName(cc,tt,ss)			\
+    ((tt)->type = OCT_LAYER,				\
+     (tt)->contents.layer.name = (ss),			\
+     octGetByName((cc),(tt)))
 
-#define CreatePropStr(c, t, s, s1)			\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_STRING, 		\
-    (t)->contents.prop.value.string = s1,		\
-    octCreate(c, t))
-
-#define CreatePropReal(c, t, s, d)			\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_REAL, 		\
-    (t)->contents.prop.value.real = d,			\
-    octCreate(c, t))
-
-#define CreateInstance(c, t, xname, xmaster, xview, tx, ty, ttype)\
-    ((t)->type=OCT_INSTANCE, 				\
-    (t)->contents.instance.name = xname,		\
-    (t)->contents.instance.master = xmaster, 		\
-    (t)->contents.instance.view = xview,		\
-    (t)->contents.instance.version = OCT_CURRENT_VERSION,\
-    (t)->contents.instance.transform.translation.x = tx,\
-    (t)->contents.instance.transform.translation.y = ty,\
-    (t)->contents.instance.transform.transformType = ttype,\
-    octCreate(c, t))
-
-#define CreateInst(c, t, xname, xmaster, xview)		\
-    CreateInstance(c, t, xname, xmaster, xview, 0, 0, OCT_NO_TRANSFORM)
-
-#define CreateBox(c, t, llx, lly, urx, ury)		\
-    ((t)->type = OCT_BOX, 				\
-    (t)->contents.box.lowerLeft.x = llx, 		\
-    (t)->contents.box.lowerLeft.y = lly,		\
-    (t)->contents.box.upperRight.x = urx, 		\
-    (t)->contents.box.upperRight.y = ury,		\
-    octCreate(c, t))
-
-#define CreateCircle(c, t, startAng, endAng, inRad, outRad, cx, cy)\
-    ((t)->type = OCT_CIRCLE, 				\
-    (t)->contents.circle.startingAngle = startAng,	\
-    (t)->contents.circle.endingAngle = endAng,		\
-    (t)->contents.circle.innerRadius = inRad,		\
-    (t)->contents.circle.outerRadius = outRad,		\
-    (t)->contents.circle.center.x = cx,			\
-    (t)->contents.circle.center.y = cy,			\
-    octCreate(c, t))
-
-/* these were macros but are now functions */
-boolean CreateOrModifyPropInt();
-boolean CreateOrModifyPropReal();
-boolean CreateOrModifyPropStr();
-boolean GetOrCreatePropInt();
-boolean GetOrCreatePropReal();
-
-#ifndef __cplusplus
-/* These are defined in OctIfc.c */
-boolean GetOrCreatePropStr();
-boolean OpenFacet();
-#endif
+/*  GetByPropName: used by octIfc.c */
+#define GetByPropName(cc,tt,ss)				\
+    ((tt)->type = OCT_PROP,				\
+     (tt)->contents.prop.name = (ss),			\
+     octGetByName((cc),(tt)))
 
 /*
- *  Get object by id
+ *  Macros to call octCreate()
+ *	cc = the container
+ *	tt = the object
+ *	ss = the object name (for named objects)
  */
-#define GetById(obj, id)				\
-    ((obj)->objectId = id, octGetById(obj))
 
-#define CreateInstance2(c, t, xname, xmaster, xview, xfacet, tx, ty, ttype)\
-    ((t)->type=OCT_INSTANCE, 				\
-    (t)->contents.instance.name = xname,		\
-    (t)->contents.instance.master = xmaster, 		\
-    (t)->contents.instance.view = xview,		\
-    (t)->contents.instance.facet = xfacet,		\
-    (t)->contents.instance.version = OCT_CURRENT_VERSION,\
-    (t)->contents.instance.transform.translation.x = tx,\
-    (t)->contents.instance.transform.translation.y = ty,\
-    (t)->contents.instance.transform.transformType = ttype,\
-    octCreate(c, t))
+#define CreateTerm(cc,tt,ss)				\
+    ((tt)->type = OCT_TERM,				\
+     (tt)->contents.term.name = (ss),			\
+     (tt)->contents.term.instanceId = oct_null_id,	\
+     octCreate((cc),(tt)))
 
+#define CreateNet(cc,tt,ss)				\
+    ((tt)->type = OCT_NET,				\
+     (tt)->contents.net.name = (ss),			\
+     octCreate((cc),(tt)))
+
+#define CreateLabel(cc,tt,ss,zx,zy)			\
+    ((tt)->type = OCT_LABEL,				\
+     (tt)->contents.label.label = (ss),			\
+     (tt)->contents.label.position.x = (zx),		\
+     (tt)->contents.label.position.y = (zy),		\
+     octCreate((cc),(tt)))
+
+#define CreateBag(cc,tt,ss)				\
+    ((tt)->type = OCT_BAG,				\
+     (tt)->contents.bag.name = (ss),			\
+     octCreate((cc),(tt)))
+
+#define CreateLayer(cc,tt,ss)				\
+    ((tt)->type = OCT_LAYER,				\
+     (tt)->contents.layer.name = (ss),			\
+     octCreate((cc),(tt)))
+
+#define CreatePropInt(cc,tt,ss,ii)			\
+    ((tt)->type = OCT_PROP,				\
+     (tt)->contents.prop.name = (ss),			\
+     (tt)->contents.prop.type = OCT_INTEGER,		\
+     (tt)->contents.prop.value.integer = (ii),		\
+     octCreate((cc),(tt)))
+
+#define CreatePropStr(cc,tt,ss,s1)			\
+    ((tt)->type = OCT_PROP,				\
+     (tt)->contents.prop.name = (ss),			\
+     (tt)->contents.prop.type = OCT_STRING,		\
+     (tt)->contents.prop.value.string = (s1),		\
+     octCreate((cc),(tt)))
+
+#define CreatePropReal(cc,tt,ss,dd)			\
+    ((tt)->type = OCT_PROP,				\
+     (tt)->contents.prop.name = (ss),			\
+     (tt)->contents.prop.type = OCT_REAL,		\
+     (tt)->contents.prop.value.real = (dd),		\
+     octCreate((cc),(tt)))
+
+#define CreateInstance(cc,tt,xname,xmaster,xview,tx,ty,ttype)\
+    ((tt)->type = OCT_INSTANCE,				\
+     (tt)->contents.instance.name = (xname),		\
+     (tt)->contents.instance.master = (xmaster),	\
+     (tt)->contents.instance.view = (xview),		\
+     (tt)->contents.instance.version = OCT_CURRENT_VERSION,\
+     (tt)->contents.instance.transform.translation.x = (tx),\
+     (tt)->contents.instance.transform.translation.y = (ty),\
+     (tt)->contents.instance.transform.transformType = (ttype),\
+     octCreate((cc),(tt)))
+
+#define CreateInst(cc,tt,xname,xmaster,xview)		\
+    CreateInstance(cc,tt,xname,xmaster,xview,0,0,OCT_NO_TRANSFORM)
+
+#define CreateBox(cc,tt,llx,lly,urx,ury)		\
+    ((tt)->type = OCT_BOX,				\
+     (tt)->contents.box.lowerLeft.x = (llx),		\
+     (tt)->contents.box.lowerLeft.y = (lly),		\
+     (tt)->contents.box.upperRight.x = (urx),		\
+     (tt)->contents.box.upperRight.y = (ury),		\
+     octCreate((cc),(tt)))
+
+#define CreateCircle(cc,tt,startAng,endAng,inRad,outRad,cx,cy)\
+    ((tt)->type = OCT_CIRCLE,				\
+     (tt)->contents.circle.startingAngle = (startAng),	\
+     (tt)->contents.circle.endingAngle = (endAng),	\
+     (tt)->contents.circle.innerRadius = (inRad),	\
+     (tt)->contents.circle.outerRadius = (outRad),	\
+     (tt)->contents.circle.center.x = (cx),		\
+     (tt)->contents.circle.center.y = (cy),		\
+     octCreate((cc),(tt)))
+
+/*  CreateInstance2: used by palette.c  */
+#define CreateInstance2(cc,tt,xname,xmaster,xview,xfacet,tx,ty,ttype)\
+    ((tt)->type = OCT_INSTANCE,				\
+     (tt)->contents.instance.name = (xname),		\
+     (tt)->contents.instance.master = (xmaster),	\
+     (tt)->contents.instance.view = (xview),		\
+     (tt)->contents.instance.facet = (xfacet),		\
+     (tt)->contents.instance.version = OCT_CURRENT_VERSION,\
+     (tt)->contents.instance.transform.translation.x = (tx),\
+     (tt)->contents.instance.transform.translation.y = (ty),\
+     (tt)->contents.instance.transform.transformType = (ttype),\
+     octCreate((cc),(tt)))
+
+/*
+ *  Miscellaneous macros
+ */
+
+/*  GetById: used by compile.c  */
+#define GetById(obj,id)					\
+    ((obj)->objectId = (id), octGetById(obj))
+
+/*  CK_OCT:  used by compile.c, mkIcon.c, mkTerm.c, octIfc.c,  */
+/*  palette.c, and vemInterface.c */
 #define CK_OCT(cond) \
     if ((cond) < OCT_OK) { \
 	ErrAdd(octErrorString()); \
