@@ -11,13 +11,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE logic library }
 	desc {
-This star compares its two inputs "upper" and "lower" using the comparison
-test "condition".  The "condition" test can be any of {EQ NE LT LE GT GE} or
-equivalently any one of {== != < <= > >=}, whose elements represent the
-binary operations of equals, not equals, less-than, less-than or equals, etc.
-If "crossingsOnly" parameter is TRUE, then an output event is generated only
-when the value of the output changes.  Hence, the output events will always
-alternate between TRUE and FALSE.  This star outputs 0 on FALSE and 1 on TRUE.
+This star compares its two inputs "upper" and "lower" using the
+comparison test "condition".  The "condition" test can be any of {EQ
+NE LT LE GT GE} or equivalently any one of {== != &lt; &lt;= &gt;
+&lt;=}, whose elements represent the binary operations of equals, not
+equals, less-than, less-than or equals, etc.  If "crossingsOnly"
+parameter is TRUE, then an output event is generated only when the
+value of the output changes.  Hence, the output events will always
+alternate between TRUE and FALSE.  This star outputs 0 on FALSE and 1
+on TRUE.
 	}
 	htmldoc {
 Like all DE stars, this star will fire when it gets an event on either input.
