@@ -143,6 +143,16 @@ foreach file $argv {
     }
 }
 
+# Retrieve binary and version info. If the two variables already exist,
+# then we must be in a tysh binary we they are set by SetVersionInfo
+# which is in TyConsole.cc. Otherwise we are being called from itkwish,
+# or another script. 
+if {![info exists TychoBinaryInfo]} {
+    set TychoBinaryInfo $env(PTOLEMY)/tcltk/itcl.$env(PTARCH)/bin/itkwish
+}
+if {![info exists TychoVersionInfo]} {
+    set TychoVersionInfo "Version 0.6"
+}
 # To disable the welcome message, set the global variable
 # tychoWelcomeMessage to zero before sourcing this file.
 # This can be done in your .tycho file.
@@ -150,9 +160,8 @@ foreach file $argv {
 # rather than a global variable.
 #
 if {$tychoWelcomeWindow != 0} {
-    ::tycho::welcomeMessage
+    ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
 }
-
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
