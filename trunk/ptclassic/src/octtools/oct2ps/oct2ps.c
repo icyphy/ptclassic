@@ -70,11 +70,11 @@ extern long time();
 
 extern int octIdCmp(), octIdHash();
 
-void processCell();
-void processTerminals();
-void setTechnology();
-void drawPath();
-char *tail();
+static void processCell();
+static void processTerminals();
+static void setTechnology();
+static void drawPath();
+static char *tail();
 
 
 /* transform stack */
@@ -211,7 +211,7 @@ optionStruct optionList[] = {
 };
 
 
-main(argc,argv)
+int main(argc,argv)
 int argc;
 char **argv;
 {
@@ -286,7 +286,7 @@ char **argv;
     	    case 'S':
 		ptr = optarg;
 		while ((ptr = strtok(ptr, ",")) != NIL(char)) {
-		    (void) st_insert(LayerTable, ptr, 0);
+		    (void) st_insert(LayerTable, ptr, (char *)0);
 		    ptr = NIL(char);
                 }
 		break;
@@ -503,13 +503,13 @@ char **argv;
     box.upperRight.y = (int) (bbdy * scale) + box.lowerLeft.y;
 
     (void) printf("%%%%BoundingBox: %d %d %d %d\n",
-		   box.lowerLeft.x,
-		   box.lowerLeft.y,
-		   box.upperRight.x,
-		   box.upperRight.y);
+		   (int)box.lowerLeft.x,
+		   (int)box.lowerLeft.y,
+		   (int)box.upperRight.x,
+		   (int)box.upperRight.y);
     
-    (void) printf("/sc %lf def\n", scale);
-    (void) printf("/fsize %lf def\n", (double) fontSize);
+    (void) printf("/sc %f def\n", scale);
+    (void) printf("/fsize %f def\n", (double) fontSize);
     (void) printf("/fscale fsize sc div def\n");
     /*
      * psize is the size of a bitmap in PostScript units, independent of scaling
@@ -523,7 +523,8 @@ char **argv;
     (void) printf("/bmw scsize def\n");
     (void) printf("/bmh scsize def\n");
     (void) printf("sc sc scale\n");
-    (void) printf("%d %d translate\n", -bb.lowerLeft.x, -bb.lowerLeft.y);
+    (void) printf("%d %d translate\n", (int)(-bb.lowerLeft.x),
+		  (int)(-bb.lowerLeft.y));
 
     TechnologyTable = st_init_table(octIdCmp, octIdHash);
 
@@ -533,8 +534,8 @@ char **argv;
     if (plotCellLabel == 1) {
 	(void) printf("lfont\n");
 	(void) printf("%d %d moveto (%s) show\n",
-	       bb.lowerLeft.x,
-	       bb.lowerLeft.y,
+	       (int)bb.lowerLeft.x,
+	       (int)bb.lowerLeft.y,
 	       facet.contents.facet.cell);
     }
 
@@ -548,6 +549,7 @@ char **argv;
 	fclose( stdout );
     }
     VOVend(0);
+    return(0);
 }
 
 
@@ -563,7 +565,7 @@ typedef struct lbl_desc {
 /* Maintains space for decomposing labels into lines */
 static dary lblInfo = (dary) 0;	/* Type is (lblDesc) */
 
-static int
+static void
 prep_line(count)
 int count;
 /*
@@ -620,6 +622,8 @@ char* lbl_str;			/* Label string */
 }
 
 
+#ifdef NEVER
+/*Formerly called in dspLabel()*/
 static char *
 parens(string)
 char *string;
@@ -640,7 +644,16 @@ char *string;
     buffer[i] = '\0';
     return buffer;
 }
+#endif
 
+/* Round a double argument and return an int.  Not all platforms
+ * (hppa) have an irint() and/or rint() call.
+ */
+static int ptirint(x)
+double x;
+{
+  return ( (x-(int)(x) < 0.5) ? (int)x : (int)(x+1) ); 
+}
 
 static void
 dspLabel(oneLabel)
@@ -659,7 +672,6 @@ struct octLabel *oneLabel;
     int idx, lines;
     int maxheight;			/* size of text */
     int regwidth, regheight;		/* region size  */
-    int x, y, margin;
 
     /* Now break lines in text */
     lines = decompLbl(oneLabel->label);
@@ -675,7 +687,7 @@ struct octLabel *oneLabel;
     printf("gsave\n");
     /* the font is scaled down slightly here */
     printf("/Helvetica findfont %d scalefont setfont\n", 
-	(int) rint(0.8*oneLabel->textHeight));
+	ptirint(0.8*oneLabel->textHeight));
 
     printf("/maxwidth 0 def\n");
     for (idx = 0;  idx < daLen(lblInfo);  idx++) {
@@ -693,15 +705,15 @@ struct octLabel *oneLabel;
     /* Shift label slightly to clear lines if left justified -- EAL 1/5/94 */
     switch (oneLabel->horizJust) {
     case OCT_JUST_LEFT:
-	printf("/margin %d def\n", oneLabel->region.lowerLeft.x + 2);
+	printf("/margin %d def\n", (int)oneLabel->region.lowerLeft.x + 2);
 	break;
     case OCT_JUST_CENTER:
 	printf("/temp %d maxwidth sub 2 div def\n", regwidth);
-	printf("/margin %d temp add def\n", oneLabel->region.lowerLeft.x);
+	printf("/margin %d temp add def\n", (int)oneLabel->region.lowerLeft.x);
 	break;
     case OCT_JUST_RIGHT:
 	printf("/temp %d maxwidth sub def\n", regwidth);
-	printf("/margin %d temp add def\n", oneLabel->region.lowerLeft.x);
+	printf("/margin %d temp add def\n", (int)oneLabel->region.lowerLeft.x);
 	break;
     default:
 	printf("label display: bad horizJust\n");
@@ -713,16 +725,16 @@ struct octLabel *oneLabel;
     switch (oneLabel->vertJust) {
     case OCT_JUST_BOTTOM:
 	printf("/y %d def\n",
-	   2 + oneLabel->region.lowerLeft.y + maxheight - oneLabel->textHeight);
+	   (int)(2 + oneLabel->region.lowerLeft.y + maxheight - oneLabel->textHeight));
 	break;
     case OCT_JUST_CENTER:
 	printf("/y %d def\n",
-	       oneLabel->region.upperRight.y - (regheight - maxheight) / 2 - oneLabel->textHeight);
+	       (int)(oneLabel->region.upperRight.y - (regheight - maxheight) / 2 - oneLabel->textHeight));
 	break;
     case OCT_JUST_TOP:
 	printf("/y %d %d sub def\n", 
-	       oneLabel->region.upperRight.y,
-	       oneLabel->textHeight);
+	       (int)oneLabel->region.upperRight.y,
+	       (int)oneLabel->textHeight);
 	break;
     default:
 	printf("label display: bad vertJust\n");
@@ -753,7 +765,7 @@ struct octLabel *oneLabel;
 	printf("x y moveto\n");
 	/* removed call to "parens" for daData below - EAL */
 	printf("(%s) show\n", daData(char, daGet(lblDesc, lblInfo, idx)->line));
-	printf("/y y %d sub def\n", oneLabel->textHeight);
+	printf("/y y %d sub def\n", (int)oneLabel->textHeight);
     }
     if (!alwaysDisplayLabel) {
 	printf("} if\n");
@@ -779,7 +791,6 @@ int level;
     octGenerator instgen, circlegen;
     int i;
     int32 numpoints;
-    int fontset;
     st_table *layerTable;
     struct layerdescription *layerDescription;
     char *bbname;
@@ -857,13 +868,13 @@ int level;
 		    }
 		    
 		    (void) printf("%d %d %d %d (%s) ot\n",
-				  bb.lowerLeft.x, bb.lowerLeft.y,
-				  bb.upperRight.x, bb.upperRight.y,
+				  (int)bb.lowerLeft.x, (int)bb.lowerLeft.y,
+				  (int)bb.upperRight.x, (int)bb.upperRight.y,
 				  bbname);
 		} else {
 		    (void) printf("%d %d %d %d con\n",
-				  bb.lowerLeft.x, bb.lowerLeft.y,
-				  bb.upperRight.x, bb.upperRight.y);
+				  (int)bb.lowerLeft.x, (int)bb.lowerLeft.y,
+				  (int)bb.upperRight.x, (int)bb.upperRight.y);
 		}		
 	    } else {
 	    
@@ -973,24 +984,28 @@ int level;
 		octTransformPoints(numpoints, points, &transform);
 	    
 		(void) printf("newpath\n");
-		(void) printf("%d %d moveto\n", points[0].x, points[0].y);
+		(void) printf("%d %d moveto\n",
+			      (int)points[0].x, (int)points[0].y);
 		for (i = 1; i < numpoints; i++) {
-		    (void) printf("%d %d lineto\n", points[i].x, points[i].y);
+		    (void) printf("%d %d lineto\n",
+				  (int)points[i].x, (int)points[i].y);
 		}
 		(void) printf("closepath clip\n");
 		
 		(void) printf("%d %d %d %d tp\n",
-			      bb.lowerLeft.x, bb.lowerLeft.y,
-			      bb.upperRight.x, bb.upperRight.y);
+			      (int)bb.lowerLeft.x, (int)bb.lowerLeft.y,
+			      (int)bb.upperRight.x, (int)bb.upperRight.y);
 	    
 		(void) printf("grestore\n");
 
 		/* see if the outline should be generated */
 		if ((layerDescription->outlinep == 1) || (plotOutlines == 1)) {
 		    (void) printf("newpath\n");
-		    (void) printf("%d %d moveto\n", points[0].x, points[0].y);
+		    (void) printf("%d %d moveto\n", 
+				  (int)points[0].x, (int)points[0].y);
 		    for (i = 1; i < numpoints; i++) {
-			(void) printf("%d %d lineto\n", points[i].x, points[i].y);
+			(void) printf("%d %d lineto\n", 
+				      (int)points[i].x, (int)points[i].y);
 		    }
 		    (void) printf("closepath stroke\n");
 		}
@@ -1032,19 +1047,19 @@ int level;
 		(void) printf("newpath\n");
 	    
 		if (circle.contents.circle.outerRadius == circle.contents.circle.innerRadius) {
-		    (void) printf("%d %d %d %lf %lf arc\n",
-				  circle.contents.circle.center.x,
-				  circle.contents.circle.center.y,
-				  circle.contents.circle.outerRadius,
+		    (void) printf("%d %d %d %f %f arc\n",
+				  (int)circle.contents.circle.center.x,
+				  (int)circle.contents.circle.center.y,
+				  (int)circle.contents.circle.outerRadius,
 				  (double) circle.contents.circle.startingAngle / 10.0,
 				  (double) circle.contents.circle.endingAngle / 10.0);
 
 		    (void) printf("stroke\n");
 		} else if (circle.contents.circle.innerRadius == 0) {
-		    (void) printf("%d %d %d %lf %lf arc\n",
-				  circle.contents.circle.center.x,
-				  circle.contents.circle.center.y,
-				  circle.contents.circle.outerRadius,
+		    (void) printf("%d %d %d %f %f arc\n",
+				  (int)circle.contents.circle.center.x,
+				  (int)circle.contents.circle.center.y,
+				  (int)circle.contents.circle.outerRadius,
 				  (double) circle.contents.circle.startingAngle / 10.0,
 				  (double) circle.contents.circle.endingAngle / 10.0);
 
@@ -1054,13 +1069,13 @@ int level;
 		    tr_transform(stack, &bb.upperRight.x, &bb.upperRight.y);
 		    BOXNORM(bb);
 		    (void) printf("%d %d %d %d tp\n",
-				  bb.lowerLeft.x, bb.lowerLeft.y,
-				  bb.upperRight.x, bb.upperRight.y);
+				  (int)bb.lowerLeft.x, (int)bb.lowerLeft.y,
+				  (int)bb.upperRight.x, (int)bb.upperRight.y);
 		} else {
-		    (void) printf("%d %d %d %lf %lf arc\n",
-				  circle.contents.circle.center.x,
-				  circle.contents.circle.center.y,
-				  circle.contents.circle.outerRadius,
+		    (void) printf("%d %d %d %f %f arc\n",
+				  (int)circle.contents.circle.center.x,
+				  (int)circle.contents.circle.center.y,
+				  (int)circle.contents.circle.outerRadius,
 				  (double) circle.contents.circle.startingAngle / 10.0,
 				  (double) circle.contents.circle.endingAngle / 10.0);
 		    (void) printf("stroke\n");
@@ -1097,17 +1112,17 @@ int level;
 		BOXNORM(box.contents.box);
 	    
 		(void) printf("%d %d %d %d tb\n",
-			      box.contents.box.lowerLeft.x,
-			      box.contents.box.lowerLeft.y,
-			      box.contents.box.upperRight.x,
-			      box.contents.box.upperRight.y);
+			      (int)box.contents.box.lowerLeft.x,
+			      (int)box.contents.box.lowerLeft.y,
+			      (int)box.contents.box.upperRight.x,
+			      (int)box.contents.box.upperRight.y);
 		
 		if ((layerDescription->outlinep == 1) || (plotOutlines == 1)) {
 		    (void) printf("%d %d %d %d bx\n",
-				  box.contents.box.lowerLeft.x,
-				  box.contents.box.lowerLeft.y,
-				  box.contents.box.upperRight.x,
-				  box.contents.box.upperRight.y);
+				  (int)box.contents.box.lowerLeft.x,
+				  (int)box.contents.box.lowerLeft.y,
+				  (int)box.contents.box.upperRight.x,
+				  (int)box.contents.box.upperRight.y);
 		}
 	    }
 	}
@@ -1160,7 +1175,7 @@ int level;
 			  "can not get the path points");
 		octTransformPoints(numpoints, points, &transform);
 		octTransformGeo(&path, &transform);
-		drawPath(path.contents.path.width, numpoints, points,
+		drawPath((int)path.contents.path.width, (int)numpoints, points,
 		     (plotOutlines | layerDescription->outlinep), layerDescription->fillp);
 	    }
 	}
@@ -1261,10 +1276,10 @@ int bbp;			/* 0 - normal, 1 - font already in effect */
 	    }
 		
 	    (void) printf("%d %d %d %d (%s) %s\n",
-		   bb.lowerLeft.x,
-		   bb.lowerLeft.y,
-		   bb.upperRight.x,
-		   bb.upperRight.y,
+		   (int)bb.lowerLeft.x,
+		   (int)bb.lowerLeft.y,
+		   (int)bb.upperRight.x,
+		   (int)bb.upperRight.y,
 		   term.contents.term.name,
 		   (type == FORMAL) ? "ft" : "at");
 	}
@@ -1653,18 +1668,20 @@ int outlinep;
 	(void) printf("gsave\n");
 	(void) printf("newpath\n");
     
-	(void) printf("%d %d moveto\n", points[0].x, points[0].y);
+	(void) printf("%d %d moveto\n", (int)points[0].x, (int)points[0].y);
 	for (i = 1; i < 4; i++) {
-	    (void) printf("%d %d lineto\n", points[i].x, points[i].y);
+	    (void) printf("%d %d lineto\n", (int)points[i].x, (int)points[i].y);
 	}
 
 	(void) printf("closepath clip\n");
 
 	if (outlinep == 1) {
 	    (void) printf("newpath\n");
-	    (void) printf("%d %d moveto\n", points[0].x, points[0].y);
+	    (void) printf("%d %d moveto\n",
+			  (int)points[0].x, (int)points[0].y);
 	    for (i = 1; i < 4; i++) {
-		(void) printf("%d %d lineto\n", points[i].x, points[i].y);
+		(void) printf("%d %d lineto\n",
+			      (int)points[i].x, (int)points[i].y);
 	    }
 	    (void) printf("closepath stroke\n");
 	}
@@ -1691,7 +1708,7 @@ int outlinep;
 	
     } else {
 	(void) printf("newpath %d %d moveto %d %d lineto stroke\n",
-	       x1, y1, x2, y2);
+	       (int)x1, (int)y1, (int)x2, (int)y2);
     }
     
     return;
@@ -1744,17 +1761,17 @@ int outlinep, fillp;
 		}
 
 		(void) printf("%d %d %d %d tb\n",
-			      box.lowerLeft.x,
-			      box.lowerLeft.y,
-			      box.upperRight.x,
-			      box.upperRight.y);
+			      (int)box.lowerLeft.x,
+			      (int)box.lowerLeft.y,
+			      (int)box.upperRight.x,
+			      (int)box.upperRight.y);
 		
 		if (outlinep == 1) {
 		    (void) printf("%d %d %d %d bx\n",
-				  box.lowerLeft.x,
-				  box.lowerLeft.y,
-				  box.upperRight.x,
-				  box.upperRight.y);
+				  (int)box.lowerLeft.x,
+				  (int)box.lowerLeft.y,
+				  (int)box.upperRight.x,
+				  (int)box.upperRight.y);
 		}
 		
 	    } else {
@@ -1762,8 +1779,9 @@ int outlinep, fillp;
 		if (fillp) {
 #endif
 		    (void) printf("%d %d %d %d ln\n",
-				  points[index].x, points[index].y,
-				  points[index+1].x, points[index+1].y);
+				  (int)points[index].x, (int)points[index].y,
+				  (int)points[index+1].x,
+				  (int)points[index+1].y);
 #ifdef notdef		    
 		}
 #endif
@@ -1794,17 +1812,17 @@ int outlinep, fillp;
 		}
 
 		(void) printf("%d %d %d %d tb\n",
-		       box.lowerLeft.x,
-		       box.lowerLeft.y,
-		       box.upperRight.x,
-		       box.upperRight.y);
+			      (int)box.lowerLeft.x,
+			      (int)box.lowerLeft.y,
+			      (int)box.upperRight.x,
+			      (int)box.upperRight.y);
 
 		if (outlinep == 1) {
 		    (void) printf("%d %d %d %d bx\n",
-				  box.lowerLeft.x,
-				  box.lowerLeft.y,
-				  box.upperRight.x,
-				  box.upperRight.y);
+				  (int)box.lowerLeft.x,
+				  (int)box.lowerLeft.y,
+				  (int)box.upperRight.x,
+				  (int)box.upperRight.y);
 		}
 		
 	    } else {
@@ -1812,8 +1830,8 @@ int outlinep, fillp;
 		if (fillp) {
 #endif
 		    (void) printf("%d %d %d %d ln\n",
-				  points[index].x, points[index].y,
-				  points[index+1].x, points[index+1].y);
+				  (int)points[index].x, (int)points[index].y,
+				  (int)points[index+1].x, (int)points[index+1].y);
 #ifdef notdef		    
 		}
 #endif
@@ -1830,8 +1848,8 @@ int outlinep, fillp;
 		if (fillp) {
 #endif
 		    (void) printf("%d %d %d %d ln\n",
-				  points[index].x, points[index].y,
-				  points[index+1].x, points[index+1].y);
+				  (int)points[index].x, (int)points[index].y,
+				  (int)points[index+1].x, (int)points[index+1].y);
 #ifdef notdef		    
 		}
 #endif
@@ -1847,17 +1865,17 @@ int outlinep, fillp;
 		(void) printf("newpath\n");
 	    
 		(void) printf("%d %d %d 0 360 arc\n",
-		       points[index].x,
-		       points[index].y,
+			      (int)points[index].x,
+			      (int)points[index].y,
 		       widthOverTwo);
 		
 		(void) printf("closepath clip\n");
 		
 		(void) printf("%d %d %d %d tp\n",
-		       points[index].x - widthOverTwo,
-		       points[index].y - widthOverTwo,
-		       points[index].x + widthOverTwo,
-		       points[index].y + widthOverTwo);
+			      (int)(points[index].x - widthOverTwo),
+			      (int)(points[index].y - widthOverTwo),
+			      (int)(points[index].x + widthOverTwo),
+			      (int)(points[index].y + widthOverTwo));
 		(void) printf("grestore\n");
 	    }
 	}
@@ -1871,17 +1889,17 @@ int outlinep, fillp;
 	    (void) printf("newpath\n");
 	    
 	    (void) printf("%d %d %d 0 360 arc\n",
-		   points[numpoints-1].x,
-		   points[numpoints-1].y,
-		   widthOverTwo);
+			  (int)points[numpoints-1].x,
+			  (int)points[numpoints-1].y,
+			  widthOverTwo);
 		
 	    (void) printf("closepath clip\n");
 	    
 	    (void) printf("%d %d %d %d tp\n",
-		   points[numpoints-1].x - widthOverTwo,
-		   points[numpoints-1].y - widthOverTwo,
-		   points[numpoints-1].x + widthOverTwo,
-		   points[numpoints-1].y + widthOverTwo);
+			  (int)(points[numpoints-1].x - widthOverTwo),
+			  (int)(points[numpoints-1].y - widthOverTwo),
+			  (int)(points[numpoints-1].x + widthOverTwo),
+			  (int)(points[numpoints-1].y + widthOverTwo));
 	    (void) printf("grestore\n");
 	}
     }
