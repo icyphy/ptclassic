@@ -30,6 +30,25 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+#######################################################################
+#### execModal
+# Short cut to run a Modal Exec by creating an Exec widget,
+# automatically starting and automatically exiting.
+# If you call this proc with no arguments, then 'make' is run. 
+# 
+proc ::tycho::execModal {{command {}} {dir {}}} {
+    set win [::tycho::autoName .makeExec]
+    set exec [::tycho::Exec $win -autodestroy 1]
+    if {$command != {} } {
+	$exec configure -command $command
+    }
+    if {$dir != {} } {
+	$exec configure -dir $dir
+    }
+    $win centerOnScreen
+    $exec execProcess
+    ::tycho::Dialog::wait $win
+}
 
 #######################################################################
 #### Exec
