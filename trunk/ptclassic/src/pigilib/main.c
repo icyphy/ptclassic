@@ -77,7 +77,7 @@ RPCFunction CommandArray[] = {
     {ClearMarks, "Edit", "clear-marks"},
     {RpcOpenPalette, "Window", "open-palette", "O", 0},
     {RpcOpenFacet, "Window", "open-facet", "F", 0},
-    {RpcEditIcon, "Window", "edit-icon"},
+    {RpcEditIcon, "Window", "edit-icon", "I", 0},
     {RpcLookInside, "Window", "look-inside", "i", 0},
     {RpcRun, "Exec", "run", "R", 0},
     {RpcReRun, "Exec", "re-run", "!", 0},
