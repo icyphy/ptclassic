@@ -286,7 +286,7 @@ body ::tycho::Edit::altFile {} {
 	update idletasks
 	$this unBusy
 	update
-    } 
+    }
 }
 
 ###################################################################
@@ -303,11 +303,11 @@ body ::tycho::Edit::focusin {} {
 #
 body ::tycho::Edit::setFont {} {
     set ifont [cget -textfont]
-    set font [::tycho::DialogWindow::newModal FontManager \
-	    [autoName $itk_component(hull).font] -initialfont $ifont]
-    if {$font != {}} {
-	configure -textfont $font
-    }
+    set wname [autoName $itk_component(hull).font]
+    ::tycho::DialogWindow::new FontManager $wname \
+	    -initialfont $ifont \
+	    -okcommand [code \
+	    "$this configure -textfont \[$wname getCurrentFont\]"]
 }
 
 ###################################################################
