@@ -444,18 +444,26 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	currentTarget = universe->myTarget();
 	definingGal = FALSE;
 	curDomain = outerDomain;
-	return currentTarget?status:TCL_ERROR;
+	if (! currentTarget) {
+		Tcl_AppendResult(interp,
+				 "Error in restoring outer universe target",
+				 (char*) NULL);
+		return TCL_ERROR;
+	}
+	return status;
 }
 
 int PTcl::computeSchedule() {
 	SimControl::clearHalt();
 	universe->initTarget();
-	if (SimControl::flagValues() & SimControl::error) {
-		Tcl_AppendResult(interp, "Error in setting up the schedule",
-	   		(char*) NULL);
+	unsigned int flags = SimControl::flagValues();
+	if (flags & SimControl::abort) {
+		Tcl_SetResult(interp, "Aborted", TCL_STATIC);
 		return FALSE;
 	}
-	if (SimControl::flagValues() & SimControl::halt) {
+	if (flags & (SimControl::error | SimControl::halt)) {
+		Tcl_SetResult(interp, "Error in setting up the schedule",
+			      TCL_STATIC);
 		return FALSE;
 	}
 	return TRUE;
@@ -470,9 +478,9 @@ int PTcl::schedule(int argc,char **) {
 	// stars.  We just want to generate the schedule.
 	if (! (universe->myTarget() && universe->myTarget()->scheduler()) )
 	    universe->Runnable::initTarget();
-	if (SimControl::flagValues() & SimControl::error) {
-		Tcl_AppendResult(interp, "Error in setting up the schedule",
-			(char*) NULL);
+	if (SimControl::flagValues() & (SimControl::error|SimControl::halt)) {
+		Tcl_SetResult(interp, "Error in setting up the schedule",
+			      TCL_STATIC);
 		return TCL_ERROR;
 	} else
 		return result(universe->displaySchedule());
@@ -481,7 +489,7 @@ int PTcl::schedule(int argc,char **) {
 // return the stop time of the current run
 int PTcl::stoptime(int argc, char ** /*argv*/) {
 	if (argc > 1) return usage("stoptime");
-	sprintf(interp->result, "%g", stopTime);
+	sprintf(interp->result, "%.10g", stopTime);
 	return TCL_OK;
 }
 
@@ -505,7 +513,7 @@ int PTcl::schedtime(int argc,char **argv) {
 				time /= atof(value);
 			}
 		}
-		sprintf (interp->result, "%g", time);
+		sprintf (interp->result, "%.10g", time);
 		return TCL_OK;
 	}
 	else {
@@ -537,8 +545,24 @@ int PTcl::run(int argc,char ** argv) {
 	// because computeSchedule resets the stop time.
 	universe->setStopTime(stopTime);
 	universe->run();
-	return (SimControl::flagValues() & SimControl::error) ?
-		TCL_ERROR : TCL_OK;
+
+	return checkErrorAbort();
+}
+
+// function to check error/abort status
+// common code for run, cont, wrapup
+int PTcl::checkErrorAbort() {
+	// If aborted, override any existing result
+	// (the Tcl result may contain some random command's result,
+	// so we don't want to return it)
+	unsigned int flags = SimControl::flagValues();
+	if (flags & SimControl::abort) {
+		Tcl_SetResult(interp, "Aborted", TCL_STATIC);
+		return TCL_ERROR;
+	}
+	// Else check the error flag bit.
+	// If it is set, we assume the result has been set to an error message.
+	return (flags & SimControl::error) ? TCL_ERROR : TCL_OK;
 }
 
 int PTcl::cont(int argc,char ** argv) {
@@ -550,27 +574,41 @@ int PTcl::cont(int argc,char ** argv) {
 			return TCL_ERROR;
 		lastTime = d;
 	}
+
+	// If an error or abort has occurred, do not proceed.
+	if (SimControl::flagValues() & (SimControl::error|SimControl::abort)) {
+		Tcl_SetResult(interp, "Cannot continue after error", TCL_STATIC);
+		return TCL_ERROR;
+	}
+
+	// Clear the halt bit, because the run may have been terminated
+	// prematurely by a halt request, and we still want to continue.
+	SimControl::clearHalt();
+
 	stopTime += lastTime;
 	universe->setStopTime(stopTime);
 	universe->run();
-	return (SimControl::flagValues() & SimControl::error) ?
-		TCL_ERROR : TCL_OK;
+
+	return checkErrorAbort();
 }
 
 int PTcl::wrapup(int argc,char **) {
 	if (argc > 1)
 		return usage("wrapup");
 
-	// If an error has occurred, do not proceed.
-	if (SimControl::flagValues() & SimControl::error)
+	// If an error or abort has occurred, do not proceed.
+	if (SimControl::flagValues() & (SimControl::error|SimControl::abort)) {
+		Tcl_SetResult(interp, "Cannot wrapup after error", TCL_STATIC);
 		return TCL_ERROR;
+	}
 
 	// Clear the halt bit, because the run may have been terminated
 	// prematurely by a halt request, and we still want to wrap up.
 	SimControl::clearHalt();
+
 	universe->wrapup();
-	return (SimControl::flagValues() & SimControl::error) ?
-		TCL_ERROR : TCL_OK;
+
+	return checkErrorAbort();
 }
 
 // domains: list domains
@@ -1022,9 +1060,15 @@ int PTcl::exit(int argc,char ** argv) {
 	return TCL_ERROR;	// should not get here
 }
 
-// Request a halt of a running universe
+// Request a non-error halt of a running universe
 int PTcl::halt(int /*argc*/, char ** /*argv*/) {
 	SimControl::requestHalt();
+	return TCL_OK;
+}
+
+// Request an abortive halt of a running universe
+int PTcl::abort(int /*argc*/, char ** /*argv*/) {
+	SimControl::declareAbortHalt();
 	return TCL_OK;
 }
 
@@ -1189,12 +1233,13 @@ struct InterpTableEntry {
 #define ENTRY2(verb,action) { quote(verb), PTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
-// Also, the first entry should be "monitorPtcl", because the
-// dispatcher treats it specially.
+// CAUTION: the dispatcher treats the first three entries specially
+// for monitor support.
 static InterpTableEntry funcTable[] = {
         ENTRY(monitorPtcl),
         ENTRY(monitorOn),
         ENTRY(monitorOff),
+	ENTRY(abort),
 	ENTRY(alias),
 	ENTRY(animation),
 	ENTRY(busconnect),
