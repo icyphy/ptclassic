@@ -610,9 +610,9 @@ endif
 ifdef OCT
     CUSTOM_DIRS += $(CROOT)/src/pigilib
     ifdef DMM
-	LIBS += $(ROOT)/obj.$(PTARCH)/pigilib/ptkDMMRegisterCmds.o
+	MISC_OBJS += $(ROOT)/obj.$(PTARCH)/pigilib/ptkDMMRegisterCmds.o
     else
-	LIBS += $(ROOT)/obj.$(PTARCH)/pigilib/ptkRegisterCmds.o
+	MISC_OBJS += $(ROOT)/obj.$(PTARCH)/pigilib/ptkRegisterCmds.o
     endif
     LIBS += 	-L$(OCTLIBDIR) -lpigi \
 		-lrpc -loh -lvov -lrpc -llist \
