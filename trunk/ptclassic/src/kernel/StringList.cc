@@ -28,7 +28,10 @@ StringList&
 StringList :: operator = (const StringList& sl) {
 	// check for assignment to self and do nothing
 	if (this != &sl) {
-		if (size()) deleteAllStrings();
+		if (size()) {
+			deleteAllStrings();
+			initialize ();
+		}
 		totalSize = sl.totalSize;
 		put(sl.newCopy());
 	}
@@ -38,7 +41,10 @@ StringList :: operator = (const StringList& sl) {
 // Assignment operator, string argument
 StringList&
 StringList :: operator = (const char* s) {
-	if (size()) deleteAllStrings();
+	if (size()) {
+		deleteAllStrings();
+		initialize ();
+	}
 	totalSize = strlen(s);
 	put(savestring(s));
 	return *this;
@@ -60,6 +66,9 @@ StringList::StringList (const StringList& s) {
 	totalSize = s.totalSize;
 	put(s.newCopy());
 }
+
+// Destructor
+StringList::~StringList() { deleteAllStrings(); }
 
 // Add another StringList to the StringList
 StringList&
@@ -127,11 +136,13 @@ StringList :: consolidate () {
 	// Allocate new memory
 	char* s = newCopy();
 	deleteAllStrings();
+	initialize();
 	put(s);
 	return s;
 }
 
-// for use as destructor: delete all substrings
+// for use in destructor: delete all substrings
+// we don't delete the nodes because the base class destructor does that.
 
 void StringList::deleteAllStrings() {
 	totalSize = 0;
@@ -139,9 +150,8 @@ void StringList::deleteAllStrings() {
 	// the result
 	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
-		LOG_DEL; delete next++;
+		delete next++;
 	}
-	SequentialList::initialize();
 }
 
 // print a StringList on a UserOutput
