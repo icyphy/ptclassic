@@ -43,7 +43,7 @@ proc ::tycho::foo {} {
     # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
 
     # FIXME: Where should this go??     
-    $nm library load edits/graphedit/stars.tim
+    $nm library load edit/graphedit/stars.tim
     $nm library addtomenu stars stars \
             -command "$nm newstar stars" \
             -customizecommand "$nm _initmenu stars" \
