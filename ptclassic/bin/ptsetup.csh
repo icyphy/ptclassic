@@ -3,7 +3,7 @@
 # Setup common environment variables used by pigi, ptcl and tycho
 # 
 # Version: $Id$
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996-%Q% The Regents of the University of California.
 # 	All Rights Reserved.
 #
 # Author: Christopher Hylands
@@ -23,18 +23,7 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
-if ( ! $?PTX11DIR ) then
-    switch ($PTARCH)
-	case sol2:
-	case sol2.cfront:
-	    setenv PTX11DIR /usr/openwin
-	    breaksw
-	case *:
-	    setenv PTX11DIR /usr/X11
-	    breaksw
-    endsw
-endif
-
+# Used by cg56/targets/CGCXBase.pl
 if ( ! $?QCKMON ) then
     switch ($PTARCH)
 	case sol2:
