@@ -54,7 +54,6 @@ SIMPLE_TESTS = \
 	testURLPath.itcl
 
 GRAPHICAL_TESTS = \
-	testExec.itcl \
 	testLoader.itcl
 
 ITCL_SRCS = \
@@ -82,9 +81,6 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 # These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
 	tytest $(GRAPHICAL_TESTS)
-
-test_exec_msg:
-	@echo "This message is used to test the Exec class"
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
