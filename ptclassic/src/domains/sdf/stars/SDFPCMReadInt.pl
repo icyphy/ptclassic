@@ -45,19 +45,12 @@ star.
 	constructor { input = 0;   }
 	destructor  { LOG_DEL; delete input;}
 
-	start
-	{
-		LOG_DEL; delete input; input = 0;
-		// open input file
-		int fd = open(expandPathName(fileName), O_RDONLY);
-		if (fd < 0) {
-			Error::abortRun(*this, "can't open file ", fileName);
-			return;
-		}
-		LOG_NEW; input = new ifstream(fd);
-	}
-
 	code {
+		// Stuff for reporting errors (should be moved to a system
+		// routine):
+		extern int errno;
+		extern char *sys_errlist[];
+
 		// This routine is by
 		// Craig Reese: IDA/Supercomputing Research Center
 		// 29 September 1989
@@ -87,6 +80,19 @@ star.
 			return sample;
 		}
 	}
+	start
+	{
+		LOG_DEL; delete input; input = 0;
+		// open input file
+		int fd = open(expandPathName(fileName), O_RDONLY);
+		if (fd < 0) {
+			Error::abortRun(*this, fileName, ": can't open file: ",
+					sys_errlist[errno]);
+			return;
+		}
+		LOG_NEW; input = new ifstream(fd);
+	}
+
 	go {
 		int x = 0;
 		unsigned char ch;
@@ -102,8 +108,9 @@ star.
 				LOG_DEL; delete input; input = 0;
 				int fd = open(expandPathName(fileName), 0);
 				if (fd < 0) {
-					Error::abortRun(*this,
-					     "can't re-open file ", fileName);
+					Error::abortRun(*this, fileName,
+					     ": can't re-open file: ",
+							sys_errlist[errno]);
 					return;
 				}
 				LOG_NEW; input = new ifstream(fd);
