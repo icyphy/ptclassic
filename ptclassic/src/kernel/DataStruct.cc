@@ -200,7 +200,7 @@ int SequentialList::member (Pointer x) const {
 
 void ListIter::reset() {
     startAtHead = TRUE;
-    ref = list->lastNode ? list->lastNode->next:0;
+    ref = 0;
 }
 
 Pointer ListIter::next() {
