@@ -107,7 +107,7 @@ SYSLIBS=-lm
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
 
-OPTIMIZER =
+OPTIMIZER = -O2
 # -g
 # debug info uses too much disk space
 ##WARNINGS =	-Wall -Wcast-qual
