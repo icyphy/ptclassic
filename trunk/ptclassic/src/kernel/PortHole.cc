@@ -192,8 +192,9 @@ void PortHole :: setDelay (int delays) {
 // a multiporthole is ambiguous.  Since fancier geodesics work differently,
 // this is virtual -- redefined for some domains.
 void PortHole :: disconnect(int delGeo) {
-
+	if (!farSidePort) return;
 	if (myGeodesic && delGeo) {
+
 		// remove the connection on the geodesic end too
 		myGeodesic->disconnect(*this);
 
@@ -215,13 +216,15 @@ void PortHole :: disconnect(int delGeo) {
 
 // Porthole constructor.
 PortHole :: PortHole () : myGeodesic(0), farSidePort(0), 
-	myPlasma(0), myBuffer(0), myMultiPortHole(0) {}
+myPlasma(0), myBuffer(0), myMultiPortHole(0), myResolvedType(0) {}
 	
 EventHorizon* PortHole :: asEH() { return NULL; }
 
-// Porthole destructor.
+// Porthole destructor.  We remove connections and Plasma, and also
+// remove ourselves from the parent's port list, if any.
 PortHole :: ~PortHole() {
 	disconnect();
+	deletePlasma();
 	if (parent())
 		parent()->removePort(*this);
 	LOG_DEL; delete myBuffer;
@@ -260,14 +263,6 @@ int PortHole :: numInitDelays() const {
 	return myGeodesic->numInit();
 }
 
-// adjust the number of initial delays on the Geodesic
-void PortHole :: adjustDelays(int newNumDelay) {
-	if (newNumDelay != numInitDelays()) {
-		myGeodesic->setDelay(newNumDelay);
-		myGeodesic->initialize();
-	}
-}
-
 void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
@@ -283,11 +278,12 @@ void PortHole :: allocateBuffer()
 
 PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
-                              DataType t) {
+                              DataType t,
+			      int nmv) {
 // zero my plasma if my type is being changed.
-	if (t != type()) myPlasma = 0;
+	if (t != type()) deletePlasma();
 	GenericPort::setPort (s, parent, t);
-	numberTokens = 1;
+	numberTokens = nmv;
 	bufferSize = numberTokens;
         return *this;
 }
@@ -342,6 +338,24 @@ int setPortIndices(Galaxy& g) {
 	return cnt;
 }
 
+// enable locking on the connecting Geodesic and Plasma.
+void PortHole :: enableLocking(const PtGate& master) {
+	if (!far() || !myPlasma || myGeodesic->isLockEnabled()) return;
+	myGeodesic->makeLock(master);
+	myPlasma->makeLock(master);
+}
+
+// inverse of above
+void PortHole :: disableLocking() {
+	if (!far() || !myPlasma) return;
+	myGeodesic->delLock();
+	myPlasma->delLock();
+}
+
+int PortHole :: isLockEnabled() const {
+	return myGeodesic && myGeodesic->isLockEnabled();
+}
+
 int MultiPortHole :: isItMulti() const { return TRUE;}
 
 void MultiPortHole :: initialize() {}
@@ -379,20 +393,15 @@ MultiPortHole :: print (int verbose) const {
 }
 
 // define a marker value to prevent infinite recursion
-Plasma* const Mark = (Plasma*)1;
+const DataType Mark = "MARK";
 
-// return the type of my Plasma
-DataType PortHole :: resolvedType() const {
-	return myPlasma ? myPlasma->type() : 0;
-}
-
-// The setPlasma function's job is to propagate types all around the
+// The setResolvedType function's job is to propagate types all around the
 // structure.  It is, unfortunately, necessarily complex.  It supports
 // several functions:
 // 1) The allowance and correct resolution of ANYTYPE (for Fork, Printer,
 //    type stars)
 // 2) Allowing ports with different types to be connected together; the
-//    input porthole determines what Plasma to use
+//    input porthole determines what type to use
 // 3) The use of typePort() to require that several PortHoles have the
 //    same type
 // 4) Handle wormhole boundary conditions, where far() doesn't quite
@@ -407,25 +416,25 @@ DataType PortHole :: resolvedType() const {
 //
 // There are no types anywhere in the system.
 
-Plasma*
-PortHole :: setPlasma (Plasma* useType) {
+DataType
+PortHole :: setResolvedType (DataType useType) {
 
 // check for infinite recursion
-	if (myPlasma == Mark) return 0;
+	if (myResolvedType == Mark) return 0;
 
 // Set initial value if not set and not ANYTYPE.
-	if (myPlasma == 0 && type() != ANYTYPE)
-		myPlasma = Plasma::getPlasma(type());
+	if (myResolvedType == 0 && type() != ANYTYPE)
+		myResolvedType = type();
 
 // I am allowed to change my type only if I am an output porthole.
 // This happens if, say, an output of type FLOAT feeds an input of
 // type Complex.
 	if (useType) {
-		if (useType == myPlasma) return useType;
-		if (!myPlasma || isItOutput()) {
-			myPlasma = useType;
+		if (useType == myResolvedType) return useType;
+		if (!myResolvedType || isItOutput()) {
+			myResolvedType = useType;
 			// following recursion ends when we get to ourself
-			if (typePort()) typePort()->setPlasma(useType);
+			if (typePort()) typePort()->setResolvedType(useType);
 		}
 		else {
 			// mark neighbors that may have problems
@@ -440,68 +449,119 @@ PortHole :: setPlasma (Plasma* useType) {
 				nMark--;
 			}
 			Error::abortRun(*this, ": unresolvable type conflict");
-			return myPlasma;
+			return myResolvedType;
 		}
 	}
 // If it is an input PortHole
 	else if (isItInput()) {
-// If my type isn't known try to set it.
-		if (!myPlasma) {
+// If my type isn't known try to set it.  The settings to Mark avoid infinite
+// recursion.
+		if (!myResolvedType) {
 			if (typePort()) {
-				myPlasma = Mark;
-				myPlasma = typePort()->setPlasma();
+				myResolvedType = Mark;
+				myResolvedType = typePort()->setResolvedType();
 			}
 			// If still not set, try the connected output
-			if (!myPlasma && far()) {
-				myPlasma = Mark;
-				myPlasma = far()->setPlasma();
+			if (!myResolvedType && far()) {
+				myResolvedType = Mark;
+				myResolvedType = far()->setResolvedType();
 			}
 		}
 	} 
 // If it is an output PortHole.
 	else {	
 		// first, if far() has known type, use it
-		if (far() && far()->myPlasma != Mark &&
-		    (far()->myPlasma || far()->type() != ANYTYPE)) {
-			if (!far()->myPlasma) {
-				Plasma* p = Plasma::getPlasma(far()->type());
-				far()->myPlasma = p;
+		if (far() && far()->myResolvedType != Mark &&
+		    (far()->myResolvedType || far()->type() != ANYTYPE)) {
+			if (!far()->myResolvedType) {
+				DataType p = far()->type();
+				far()->myResolvedType = p;
 			}
-			myPlasma = far()->myPlasma;
+			myResolvedType = far()->myResolvedType;
 		}
 		// or, far() has typePort: set far() and use it
 		else if (far() && far()->typePort()) {
-			Plasma* save = myPlasma;
-			myPlasma = Mark;
-			myPlasma = far()->setPlasma();
-			if (!myPlasma) myPlasma = save;
-			if (myPlasma) far()->setPlasma(myPlasma);
+			DataType save = myResolvedType;
+			myResolvedType = Mark;
+			myResolvedType = far()->setResolvedType();
+			if (!myResolvedType) myResolvedType = save;
+			if (myResolvedType) far()->setResolvedType(myResolvedType);
 		}
 		// still not set: look for typePort
-		if (myPlasma == 0 && typePort()) {
-			myPlasma = Mark;
-			myPlasma = typePort()->setPlasma();
+		if (myResolvedType == 0 && typePort()) {
+			myResolvedType = Mark;
+			myResolvedType = typePort()->setResolvedType();
 		}
 	}
-	if (myPlasma) {
-		if (typePort()) typePort()->setPlasma(myPlasma);
+	if (myResolvedType) {
+		if (typePort()) typePort()->setResolvedType(myResolvedType);
 	}
-	return myPlasma;
+	return myResolvedType;
 }
 
 // Function to get plasma type for a MultiPortHole.
-Plasma*
-MultiPortHole :: setPlasma (Plasma* useType) {
-	return typePort() ? typePort()->setPlasma(useType) : 0;
+DataType
+MultiPortHole :: setResolvedType (DataType useType) {
+	return typePort() ? typePort()->setResolvedType(useType) : 0;
+}
+
+// by default, use the global Plasma appropriate to my resolved type.
+int PortHole :: allocatePlasma() {
+	myPlasma = Plasma::getPlasma(myResolvedType);
+	if (!myPlasma) {
+		Error::abortRun(*this, "PortHole::allocatePlasma failed");
+	}
+	return (myPlasma != 0);
+}
+
+// this function verifies that a Plasma is local and of the given
+// type.  If it does, it returns a pointer to it, otherwise it returns 0.
+static Plasma* rightLocPlas(Plasma* myPlasma,DataType t) {
+	return (myPlasma && myPlasma->isLocal() && myPlasma->type() == t)
+		? myPlasma : 0;
+}
+
+// remove a reference to my Plasma and delete it if the refcount drops
+// to zero.
+
+void PortHole :: deletePlasma() {
+	if (myPlasma && myPlasma->decCount() == 0) {
+		LOG_DEL; delete myPlasma;
+	}
+	myPlasma = 0;
+}
+
+// alternate function: use a local Plasma for the connection.  This
+// function may be used as an overload for allocatePlasma by derived
+// PortHole classes.
+int PortHole :: allocateLocalPlasma() {
+	if (rightLocPlas(myPlasma,myResolvedType)) return TRUE;
+	deletePlasma();
+	// if other side of connection has a correct local plasma, attach
+	// to it and return success.
+	if (farSidePort) {
+		myPlasma = rightLocPlas(farSidePort->myPlasma,myResolvedType);
+		if (myPlasma) {
+			myPlasma->incCount();
+			return TRUE;
+		}
+	}
+	// just make a Plasma
+	myPlasma = Plasma::makeNew(myResolvedType);
+	if (myPlasma) {
+		myPlasma->incCount();
+		return TRUE;
+	}
+	else return FALSE;
 }
 
 void PortHole :: initialize()
 {
-	if (!setPlasma ()) {
+	if (!setResolvedType ()) {
 		Error::abortRun (*this, "can't determine DataType");
 		return;
 	}
-
+	if (!allocatePlasma()) return;
 	// allocate buffer if not allocated or wrong size
 	if (myBuffer == NULL || bufferSize != myBuffer->size())
 		allocateBuffer ();
@@ -520,14 +580,6 @@ void PortHole :: initialize()
 	// input porthole), initialize myGeodesic
 	if (far() && myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
 		myGeodesic->initialize();
-}
-
-void PortHole :: setMaxDelay(int delay)
-{
-	// This method can be used to change the maximum delay
-	// or to set it based on a parameter
-
-	bufferSize = delay + numberTokens;
 }
 
 Particle& PortHole ::  operator % (int delay)
@@ -647,18 +699,21 @@ void PortHole :: getParticle()
 	for(int i = numberTokens; i>0; i--)
 	{
 		// Move the current time pointer in the buffer
-		Particle** p = myBuffer->next();
+		// Get a pointer to the next Particle* in the buffer.
+		Particle** pOld = myBuffer->next();
 
-                // Put current Particle back into Plasma  to be
-		// recycled back to some OutSDFPort
-		(*p)->die();
- 
-		// Get another Particle from the Geodesic
-        	*p = myGeodesic->get();
-		if (*p == NULL) {
-			Error::abortRun(*this,"Attempt to read from empty geodesic");
+		// Get another Particle from the Geodesic.
+		Particle* pNew = myGeodesic->get();
+		
+		if (!pNew) {
+			Error::abortRun(*this,
+					"Attempt to read from empty geodesic");
 			return;
 		}
+		// Recycle the old particle by putting it into the Plasma.
+		myPlasma->put(*pOld);
+		// Put the new particle into the buffer.
+		*pOld = pNew;
 	}
 }
 
