@@ -43,6 +43,7 @@ TCL_SRCS =
 
 GRAPHICAL_TESTS = \
 	testEditForest.itcl \
+	testEditSTD.itcl \
 	testFiles.itcl
 
 ITCL_SRCS = $(GRAPHICAL_TESTS) \
