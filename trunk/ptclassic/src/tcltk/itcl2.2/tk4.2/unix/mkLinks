@@ -23,7 +23,7 @@ fi
 cd $1
 echo foo > xyzzyTestingAVeryLongFileName.foo
 x=`echo xyzzyTe*`
-rm xyzzyTe*
+rm -f xyzzyTe*
 if test "$x" != "xyzzyTestingAVeryLongFileName.foo"; then
     exit
 fi
