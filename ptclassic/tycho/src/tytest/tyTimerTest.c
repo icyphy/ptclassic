@@ -1,5 +1,5 @@
 /* 
-   Test functions for Tycho packages.
+   Example Tycho "task" written in C.
 
 Authors: John Reekie.
 
