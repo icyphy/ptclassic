@@ -77,7 +77,7 @@ initCode {
 
 
 setup {
-	CGCS56XTarget* parent = (CGCS56XTarget*)(myTarget()->parent());
+	CGCS56XTarget* parent = (CGCS56XTarget*)(cgTarget()->parent());
 	if(parent) S56XFilePrefix.setCurrentValue(parent->s56xFilePrefix());
 	CGCXBase::setup();
 }
