@@ -158,6 +158,9 @@ proc ::pakman::_create {template dir pkgname args} {
 		puts "Ignoring [file join $dir $dest]"
 	    }
 	} else {
+	    if $options(-debug) {
+		puts "Reading template file [file join $template _$file]"
+	    }
 	    set fd [open [file join $template _$file]]
 	    set text [read $fd]
 	    close $fd
