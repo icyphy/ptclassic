@@ -89,6 +89,8 @@ This is not currently handled.
 	desc { "True if any input is not scalar." }
 	attributes {A_NONSETTABLE|A_NONCONSTANT}
     }
+    // For sprintf()
+    ccinclude { <stdio.h> }
     setup {
 	output.setSDFParams(int(blockSize),int(blockSize)-1);
 	input.setSDFParams(int(blockSize),int(blockSize)-1);

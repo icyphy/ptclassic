@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __GNUG__
 #pragma implementation
 #endif
+#include <stdio.h>              // sprintf()
 #include "ConstIters.h"
 #include "ACSPortHole.h"
 #include "ACSTarget.h"

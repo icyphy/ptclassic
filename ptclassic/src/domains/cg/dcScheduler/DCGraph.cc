@@ -29,7 +29,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha based on G.C. Sih's work.
-Date of last revision: 5/92 
 
 *****************************************************************/
 #ifdef __GNUG__
@@ -39,6 +38,7 @@ Date of last revision: 5/92
 #include "GalIter.h"
 #include "DCGraph.h"
 #include "type.h"
+#include <stdio.h>              // sprintf()
 #include <fstream.h>
 #include "Error.h"
 

@@ -45,7 +45,7 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 #include "PrecisionState.h"
 #include "CGUtilities.h"
 #include <ctype.h>
-
+#include <stdio.h>              // sprintf(), sscanf()
 
 // isA
 ISA_FUNC(ACSCGCore, ACSCore);

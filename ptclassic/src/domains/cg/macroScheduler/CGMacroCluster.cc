@@ -67,6 +67,7 @@ static const char file_id[] = "CGMacroCluster.cc";
 #include "Geodesic.h"
 #include "Plasma.h"
 #include "Target.h"
+#include <stdio.h>              // sprintf()
 #include "pt_fstream.h"
 #include "Error.h"
 
