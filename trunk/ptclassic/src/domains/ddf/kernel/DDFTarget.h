@@ -35,10 +35,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDF Target, the default target to be used in the DDF
  domain. 
 
- If restructure is 1, auto-wormholization is performed.
- This is an experimental facility that automatically creates SDF wormholes
- for subsystems that consist entirely of SDF stars.  It is disabled by
- default.
+ If useOldScheduler is non-zero, we use the DDF scheduler distributed
+ with Ptolemy 0.5.2.
+
+ If restructure is 1, SDF stars are collected into clusters and scheduled
+ by the SDF scheduler. This is an experimental facility and currently
+ does not work with wormholes.  A safer alternative for the time being
+ is to manually create SDF wormholes when the effeciency is desired.
 
 ***********************************************************************/
 #ifndef _DDFTarget_h
@@ -57,10 +60,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class DDFTarget : public Target {
 protected:
 
-	// For the original DDF scheduler, it defines the number of
-	// execution cycles to be overlapped in execution.
-	IntState numOverlapped;
-
 	// The user can specify the maximum buffer size on each arc.
 	// Unbounded arc is detected at runtime by comparing the arc size
 	// and this limit.
@@ -69,10 +68,24 @@ protected:
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
+	// If this is nonzero, either of the new schedulers
+	// (but not the old scheduler) will run until deadlock
+	// in a single iteration.  This is sometimes useful for
+	// wormholes that are DDF on the inside.
+	IntState runUntilDeadlock;
+
 	// Specify whether or not to use the experimental automatic
 	// restructuring of DDF systems.  This facility identifies
-	// SDF subsystems and creates SDF wormholes for them.
+	// SDF subsystems and creates SDF clusters that are scheduled
+	// by the SDF scheduler.
 	IntState restructure;
+
+	// Use the original (0.5.2 version) DDF scheduler.
+	IntState useOldScheduler;
+
+	// For the original DDF scheduler, it defines the number of
+	// execution cycles to be overlapped in execution.
+	IntState numOverlapped;
 
 	StringState logFile;
 
@@ -84,30 +97,38 @@ public:
 	// class identification
 	int isA(const char*) const;
 	const char* className() const;
+	void setFirings(TextTable& tbl);
 
-	// Support hints that are used to define the number of
+	// Support pragmas that are used to define the number of
 	// firings in one iteration. A value of zero is interpreted
 	// as "don't care".
-	StringList hint () { return "firingsPerIteration INT 0"; }
+	StringList pragma () const { return "firingsPerIteration INT 0"; }
 
-	// To determine the value of all hints that have been
+	// To determine the value of all pragmas that have been
 	// specified for a particular block, call this method.
 	// It returns a list of "name value" pair, separated by spaces,
-	// or an empty string if there is no hint for this block.
-	StringList hint (const char* blockname);
+	// or an empty string if there is no pragma for this block.
+	StringList pragma (const char* parentname, const char* blockname) const;
 
-	// To determine the value of a hint of a particular type
+	// To determine the value of a pragma of a particular type
 	// that has been specified for a particular block, call this
 	// method. It returns a value or an empty string.
-	StringList hint (const char* blockname, const char* hintname);
+	StringList pragma (const char* parentname,
+			   const char* blockname,
+			   const char* pragmaname) const;
 
-	// To specify a hint to a target, call this method.
+	// To specify a pragma to a target, call this method.
 	// The return value is always a null string.
-	StringList hint (const char* blockname,
-		   const char* name,
-		   const char* value);
+	StringList pragma (const char* parentname,
+			   const char* blockname,
+			   const char* name,
+			   const char* value);
 
+	// Need to redefine clone() to copy the firings table
+	// (a private member, see below).
+	/* virtual */ Block* clone () const;
 private:
-	TextTable firings;
+	// The following table is used to keep track of pragmas.
+	TextTable* firings;
 };
 #endif
