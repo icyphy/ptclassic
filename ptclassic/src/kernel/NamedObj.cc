@@ -185,8 +185,3 @@ void NamedObjList::deleteAll() {
 }
 
 NamedObjList::NamedObjList() {}
-
-NamedObjListIter :: NamedObjListIter(NamedObjList& sl)
-  : ListIter (sl) {}
-CNamedObjListIter :: CNamedObjListIter (const NamedObjList& sl)
-  : ListIter (sl) {}

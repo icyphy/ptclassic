@@ -171,11 +171,14 @@ public:
 
 class ListIter {
 public:
+	// reset to the beginning of a list
+        void reset() {
+	  startAtHead = TRUE;
+	  ref = 0;
+	}
+
 	// constructor: attach to a SequentialList
 	inline ListIter(const SequentialList& l) : list(&l) { reset(); }
-
-	// reset to the beginning of a list
-        void reset();
 
 	// next and operator++ are synonyms.  Return the next element,
 	// return 0 if there are no more.
