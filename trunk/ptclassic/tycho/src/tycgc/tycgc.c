@@ -33,3 +33,50 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "tycgc.h"
 
 
+/*
+ * connectControl
+ *
+ * Connect to a control by name.
+*/
+void
+connectControl (char *starname, char *ctrlname, Tcl_CmdProc *callback)
+{	
+  /* Register the callback function with Tcl */
+  sprintf(command, "%s.%s.Callback", starname, ctrlname);
+  Tcl_CreateCommand (interp, command, callback,
+		     (ClientData) 0, (void (*)()) NULL);
+
+  /* Call Tcl to make the connection */
+  sprintf(command,
+	  "::tycho::connectControl %s %s %s.%s.Callback",
+	  starname, ctrlname, starname, ctrlname);
+  if(Tcl_Eval(interp, command) != TCL_OK) {
+    printf("Cannot connect control %s.%s\n", starname, ctrlname);
+  }
+}
+
+/*
+ * Ty_CGC
+ *
+ * The Tcl interface to this package.
+ */
+int
+Ty_CGC (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
+  /* Doesn't do anything... */
+  interp-result = "Hey, don't call this!!";
+  return TCL_ERROR;
+}
+
+/*
+ * Tycgc_Init
+ *
+ * Initialize the package. This adds the interface proc to Tcl.
+ */
+int
+Tycgc_Init(Tcl_Interp *interp) {
+  
+  Tcl_CreateCommand(interp, "cgc", Ty_CGC,
+		    (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
+
+  return TCL_OK;
+}
