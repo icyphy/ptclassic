@@ -17,7 +17,7 @@ CFLAGS = -g
 DEPEND= $(CPLUSPLUS) -MM
 
 # where the Gnu library is
-GNULIB=/usr/tools/gnu/lib
+GNULIB=$(PTOLEMY)/gnu/$(ARCH)/lib
 
 # linker to use for pigi and interpreter.
 LINKER=g++
