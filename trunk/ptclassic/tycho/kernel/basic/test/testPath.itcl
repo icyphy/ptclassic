@@ -80,7 +80,7 @@ test Path-1.4 { try to expand a pathname that contains a single dollar sign} {
 
 test Path-1.5 { nonexistand variable} {
     catch {::tycho::expandPath \
-	    [file join $thisvariableisnotavariable bif bar} errmsg
+	    [file join $thisvariableisnotavariable bif bar]} errmsg
     list $errmsg
 } {{can't read "thisvariableisnotavariable": no such variable}}
 
@@ -249,3 +249,156 @@ test Path-8.1 {Test out expandPathSplit} {
     set path2 [file join {$MY_TY_TEST_VAR} g h i]
    ::tycho::expandPathSplit "$path1:$path2:[file join j k l]"
 } {/a/b/c/d/e/f:/a/b/c/g/h/i:j/k/l}
+
+
+#######################################################################
+# Test ::tycho::url. This is a foreach loop that generated a whole
+# series of tests on different names and for different cases. For
+# each name, the following options are called, in this order:
+#   dirname
+#   extension
+#   path
+#   pathtype
+#   protocol
+#   rootname
+#   server
+#   split
+#   tail
+#
+# Some additional tests for the "join" and "aslocal" options follow.
+#
+set _count 0
+foreach _name {
+    foo.bar
+    /users/ptolemy/foo.bar
+    file:/users/ptolemy/foo.bar
+    http://ptolemy.eecs
+    http://ptolemy.eecs/~ptdesign
+    http://ptolemy.eecs/~ptdesign/index.html
+} _result {
+    {
+	.
+	.bar
+	foo.bar
+	relative
+	{}
+	foo
+	{}
+	foo.bar
+	foo.bar
+    }
+    {
+	/users/ptolemy
+	.bar
+	/users/ptolemy/foo.bar
+	absolute
+	{}
+	/users/ptolemy/foo
+	{}
+	{/ users ptolemy foo.bar}
+	foo.bar
+    }
+    {
+	file:/users/ptolemy
+	.bar
+	/users/ptolemy/foo.bar
+	absolute
+	file:
+	file:/users/ptolemy/foo
+	{}
+	{file: {} users ptolemy foo.bar}
+	foo.bar
+    }
+    {
+	http://ptolemy.eecs
+	{}
+	/
+	absolute
+	http:
+	http://ptolemy.eecs
+	ptolemy.eecs
+	{http: ptolemy.eecs}
+	{}
+    }
+    {
+	http://ptolemy.eecs
+	{}
+	/~ptdesign
+	absolute
+	http:
+	http://ptolemy.eecs/~ptdesign
+	ptolemy.eecs
+	{http: ptolemy.eecs ~ptdesign}
+	~ptdesign
+    }
+    {
+	http://ptolemy.eecs/~ptdesign
+	.html
+	/~ptdesign/index.html
+	absolute
+	http:
+	http://ptolemy.eecs/~ptdesign/index
+	ptolemy.eecs
+	{http: ptolemy.eecs ~ptdesign index.html}
+	index.html
+    }
+} {
+    foreach _test {
+	dirname
+	extension
+	path
+	pathtype
+	protocol
+	rootname
+	server
+	split
+	tail
+    } _rslt $_result {
+	test Path-::tycho::url-$_count [list ::tycho::url $_test $_name] {
+            incr _count
+            update ;# so results can be seen while running
+	    ::tycho::url $_test $_name
+	} $_rslt
+    }
+}
+
+# Test the join option
+foreach _name {
+    foo.bar
+    /users/ptolemy/foo.bar
+    file:/users/ptolemy/foo.bar
+    http://ptolemy.eecs
+    http://ptolemy.eecs/~ptdesign
+    http://ptolemy.eecs/~ptdesign/index.html
+} _result {
+    foo.bar
+    {/ users ptolemy foo.bar}
+    {file: {} users ptolemy foo.bar}
+    {http: ptolemy.eecs}
+    {http: ptolemy.eecs ~ptdesign}
+    {http: ptolemy.eecs ~ptdesign index.html}
+} {
+    test Path-::tycho::url-$_count [list ::tycho::url join $_result] {
+        incr _count
+        update ;# so results can be seen while running
+        eval ::tycho::url join $_result
+    } $_name
+}
+
+# Test the aslocal option
+foreach _name {
+    foo/bar
+    /foo/bar
+    /foo:/bar:
+} _result {
+    foo/bar
+    /foo/bar
+    /foo:/bar:
+} {
+    test Path-::tycho::url-$_count [list ::tycho::url aslocal $_name] {
+        incr _count
+        update ;# so results can be seen while running
+        eval ::tycho::url aslocal $_result
+    } $_result
+}
+
