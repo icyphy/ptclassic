@@ -2,8 +2,10 @@
 .bp
 .UH "Appendix B: VEM Command Summary"
 .pp
-This appendix contains a summary of useful VEM commands
+This appendix contains a summary of VEM commands
 and dialog box editing control characters.
+More complete documentation can be found in the VEM section
+of the Almagest.
 .(b
 .lp
 .TS
@@ -16,30 +18,58 @@ Command	Key	Description
 =
 	ctrl-H, del	Clear last argument on argument stack.
 redraw-window	ctrl-L	Redraws the window.
+_
+open-window	o	Opens a new window.
+close-window	ctrl-D	Closes a window (doesn't save).
+where	?	Shows where your cursor is
+palette	P	Open the layer palette.
+save-window	S	Saves contents of window.
+bindings	b	T{
+Identify key bindings.  After issuing the bindings command,
+type the key you are interested in.  VEM will identify the command
+associated with it.
+T}
+re-read		Re-reads a facet from disk.
+_
+pan	p	Move area under cursor to center of window.
 zoom-in	z	Zooms in one level.
 zoom-out	Z	Zooms out one level.
-pan	p	Move area under cursor to center of window.
 show-all	f	Zoom to full view of facet.
+same-scale	=	T{
+Force a window to have the same scale as some other window.
+Place a point in the window with the right scale, and issue the
+same-scale command in the window you wish to rescale.
+T}
+_
+window-options		Set various VEM options.
+layer-display		Select layers to display or omit.
+toggle-grid	g	Turn on or off the grid display
+_
+show-property	ctrl-P	Shows properties of object under cursor.
+_
+undo	U	Undo last action.  Has infinite memory.
+_
 create	c	Create instances, wires.
-select-objects	s	Selects objects for manipulation.
-unselect-objects	u	Unselects objects.
 delete-objects	D	Deletes selected objects.
-drag-instance	M	T{
-Moves selected instance along with its properties and connections.
-T}
-move-instance	m	T{
-Replaces drag-instance on more recent versions of VEM.
-T}
+edit-label	E	Edit a label.
+_
+select-objects	s	Selects objects for manipulation.
+select-net	ctrl-N	Select only nets.
+unselect-objects	u	Unselects objects.
 transform	t	T{
 Rotates an object 90 degrees.  Use the move-instance or drag-instance
 command to finalize the transform.  Use the "mx" or "my" modifier
 to reflect rather than rotate the object.
 T}
-open-window	o	Opens a new window.
-close-window	ctrl-D	Closes a window (doesn't save).
-save-window	S	Saves contents of window.
-re-read		Re-reads facet from disk.
-show-property	ctrl-P	Shows properties of object under cursor.
+move-objects	m	T{
+Move selected objects, preserving their property lists.
+T}
+copy-objects	x	T{
+Copy selected objects, preserving their property lists.
+T}
+delete-objects	D	(repeated) Deletes selected objects.
+_
+rpc-any		Start some other VEM application.
 .TE
 .)b
 .(b

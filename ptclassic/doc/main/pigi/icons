@@ -7,15 +7,15 @@ when you invoke the \fImake-star\fP or
 Pigi puts the new icon in a user-specified palette,
 which by default is user.pal in the directory in which you
 started Pigi.
-More or less any Vem manipulations can be performed on this icon,
+More or less any VEM manipulations can be performed on this icon,
 but some guidelines should be followed.
 These icons
 have a generic symbol.  To change it,
 place the cursor over the icon and execute the
-\fIedit-icon\fP command in the Pigi menu.\**
+\fIedit-icon\fP (``I'') command in the Pigi menu.\**
 .IE edit-icon
 .(f
-You must have write
+\** You must have write
 permission on the facet to change the icon.
 .)f
 A new window containing
@@ -36,7 +36,8 @@ called ``physical editing style''.  In this mode, we create objects
 such as lines, boxes, and polygons.  This is in contrast to ``schematic
 editing style'' which we used before to create instances and connect
 them together with wires.
-.pp
+Physical editing style shares many commands with schematic editing
+style.  For example, \fIselect-objects\fP is active in both modes.
 A list of useful physical editing style commands and their
 key bindings are given in appendix B.
 .pp
@@ -44,27 +45,22 @@ The commands that create geometry expect a layer argument.  The layer
 an object is attached to determines its color and its fill.  To specify
 a layer, place the cursor over an object attached to the desired layer
 before executing a command.  You can open a palette of layers with the
-\fIpalette\fP command.
-.pp
-Physical editing style also shares many commands with schematic editing
-style.  For example, \fIselect-objects\fP is active in both modes.
+\fIpalette\fP (``P'') command.
 .pp
 A few simple notes will greatly help.
 First note that when the icon window is opened, the snap
 is automatically set to 5 units.  This is because the default snap
 for schematic windows, normally 25 units,
-is far too coarse for most editing functions.
+is far too coarse for most icon editing functions.
 A reasonable compromise is 5 units, unless you are going to
 try to create a very elaborate icon, in which case 1 unit is
 probably what you want.  The VEM Options:window-options command
 allows you to change the snap.
 .pp
-Note that when editing an icon, the Vem menu is different than
+When editing an icon, the VEM menu is different than
 when you are editing a schematic.  This is because you are working
-with the physical view of a facet.  You can explore most of the Vem
-commands in the Edit and Selection Vem menus.
-We do not recommend, however, using the \fIcreate-terminal\fP command.
-Pigi should have already created all the terminals you will need.
+with the physical view of a facet.  You can explore most of the VEM
+commands in the Edit and Selection VEM menus.
 Most icons can be created
 by experimenting with the following operations:
 .ip 1)
@@ -79,7 +75,7 @@ Selection:delete-objects.  WARNING: Do not delete terminals!
 If you accidentally delete a terminal, the easiest action is
 begin again from scratch, asking Pigi to create a new icon.
 .ip 2)
-Bring up the Vem color palette by typing ``P'' (or System:palette in
+Bring up the VEM color palette by typing ``P'' (or System:palette in
 the menu).
 .ip 3)
 Draw a line by clicking the left button
@@ -107,8 +103,8 @@ puts at the bottom of the icon.  To change it, select it and type ``E''
 explanatory.  The standard Emacs-like editing commands apply.
 .ip 8)
 BE SURE TO SAVE YOUR ICON.  This can be done by typing ``S''
-(System:save-window in the Vem menu).  You can close your window
-with control-d.  Note that Vem buffers the data in the window.
+(System:save-window in the VEM menu).  You can close your window
+with control-d.  Note that VEM buffers the data in the window.
 You can close it and reopen it without saving it, as long
 as the session has not been interrupted.
 .pp
@@ -123,14 +119,18 @@ of the icon.  The following colors are currently in use:
 	COMPLEX: white
 .sp
 .fi
-The color is currently set automatically by the icon generator.
-You can also change the color
-manually.  To do this, select the stem, type ``"xxxx"'',
+The color is currently set automatically by the icon generator
+by using layers defined specifically for this purpose, called
+anytypeColor, floatColor, intColor, and complexColor.
+You can change the color
+manually, if you wish.  To do this, select the stem, type ``"xxxx"'',
 where xxxx is replaced by the color name (the quotes are necessary),
-and then type the single character ``l'' (or Edit:change-layer in the menu).
+and then type the single character ``l'' (an el \(em
+or Edit:change-layer in the menu).
 Again, be sure to save the window.
 To see what color names are available in the current technology,
-execute the Vem ``System:palette'' command, or ``P''.
+execute the VEM ``System:palette'' command, or ``P''.
+Note the layers specifically used for icon stems.
 .pp
 One final editing operation is a little trickier: moving terminals.
 Pigi places terminals rather arbitrarily, since it knows nothing
@@ -163,17 +163,8 @@ the terminal, type ``t'' (or Selection:transform in the menu),
 then type ``m'' to move it.  Repeatedly typing ``t'' will continue
 to transform the terminal.
 .pp
-As of this writing, when an icon is edited, instances of the icon
-may disappear from open palettes.  This is a Vem bug
-that will hopefully be fixed soon.
-DO NOT SAVE THE PALETTE WITH AN ICON MISSING.
-If you do, another related bug in Vem will damage the palette
-by confusing its bounding box.  An Oct expert is required to
-repair the damage.
-Instead, execute the Vem ``System:re-read'' command to get the icon
-to reappear.  At that time, it is safe to save the palette.
-.pp
-A little more detail on the Oct internals may be useful.
+A little more detail on the Oct internals may be useful if you explore
+the files that are created by these operations.
 For make-schem-icon, if the schematic is called xxx,
 then the icon itself is stored in xxx/schematic/interface;.
 The semicolon is part of the filename (this creates some
@@ -189,5 +180,4 @@ the icons for demo systems in a subdirectory called
 and the source code for the stars are stored in a subdirectory
 called
 .c stars .
-These are all accessible through the init.pal palette in ~ptolemy/demo.
-Refer to the Oct and Vem manuals for more information [2].
+Feel free to explore these directories.
