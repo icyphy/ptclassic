@@ -29,6 +29,14 @@ $Id$
 #define O_RDONLY 0
 #endif
 
+// choose compiler to use
+#ifdef __GNUG__
+#define CPLUSPLUS "g++"
+#else
+#define CPLUSPLUS "CC"
+#endif
+
+// architecture-specific stuff
 #ifdef __sun__
 #ifdef __mc68000__
 #define ARCH "sun3"
@@ -41,8 +49,12 @@ $Id$
 #ifdef vax
 #define ARCH "vax"
 #endif
+
 #ifdef mips
 #define ARCH "mips"
+#define EXTRAOPTS "-G 0"
+#else
+#define EXTRAOPTS ""
 #endif
 
 // root of Ptolemy source/lib directory
@@ -127,9 +139,10 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 {
 	char domain[32], cmd[512];
 	strcpyLC (domain, idomain);
-	sprintf (cmd, "cd %s; g++ -c -I %s/src/domains/%s/kernel "
+	sprintf (cmd, "cd %s; %s %s -c -I %s/src/domains/%s/kernel "
 		 "-I %s/src/domains/%s/stars -I %s/src/kernel "
-		 "-I %s %s/%s%s.cc >& %s", objDir, ptolemyRoot, domain,
+		 "-I %s %s/%s%s.cc >& %s", objDir, CPLUSPLUS,
+		 EXTRAOPTS, ptolemyRoot, domain,
 		 ptolemyRoot, domain, ptolemyRoot,
 		 srcDir, srcDir, idomain, name, tmpFileName);
 	PrintDebug (cmd);
