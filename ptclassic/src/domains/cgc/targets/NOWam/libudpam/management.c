@@ -1,4 +1,4 @@
-/* Misc. stuff to manage locks, FIFOS, lists) */
+/* Misc. stuff to manage locks, FIFOS, lists */
 /******************************************************************
 Version identification:
 $Id$
@@ -38,19 +38,29 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
-#include <netdb.h>
 #include <sys/ioctl.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+
+/* Define sysinfo */
+#include <sys/systeminfo.h>
+
+/* Define gethostbyname */
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/socketvar.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include <sys/socketvar.h>
 #include <udpam.h>
 #include <am.h>
 #include <misc.h>  
 #include <thread.h>
 #include <sys/filio.h>  
+
+/* FIXME: Replace with a standard Unix function */
+extern int gethostname(char* name, int namelen);
 
 extern void ThreadExitHandler(int sig);   /* SIGTERM signal handler */
 
@@ -92,6 +102,9 @@ static void BindAndSetSocket(int sd)
     exit(-1);
   }
 #else
+  /* FIXME: gethostname is not a standard Unix function */
+  /* It is SunOS/BSD Compatibility Library Function and should not be used */
+  /* because it requires linkage against the bsd library. */
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
@@ -1057,8 +1070,11 @@ static void BindAndSetKnownSocket(int sd, int port)
     perror("malloc error\n");
     exit(-1);
   }
+  /* FIXME: gethostname is not a standard Unix function */
+  /* It is SunOS/BSD Compatibility Library Function and should not be used */
+  /* because it requires linkage against the bsd library. */
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
-    perror("gethostbyname error\n");
+    perror("gethostname error\n");
     exit(-1);
   }
 
