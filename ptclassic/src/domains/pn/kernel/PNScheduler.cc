@@ -77,7 +77,7 @@ void PNScheduler::setup()
 {
     if (! galaxy())
     {
-	Error::abortRun(domain(), "Process Networks Scheduler has no galaxy.");
+	Error::abortRun("Process Networks Scheduler has no galaxy.");
 	return;
     }
    
@@ -96,14 +96,8 @@ void PNScheduler::setup()
 // Run (or continue) the simulation.
 int PNScheduler::run()
 {
-    if (! galaxy()) {
+    if (SimControl::haltRequested() || ! galaxy()) {
 	Error::abortRun("Process Networks Scheduler has no galaxy to run");
-	return FALSE;
-    }
-
-    if (SimControl::haltRequested())
-    {
-	Error::abortRun(*galaxy(), "Cannot continue.");
 	return FALSE;
     }
 
