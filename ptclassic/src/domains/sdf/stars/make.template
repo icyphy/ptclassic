@@ -18,11 +18,11 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 SRCS=AdaptFilter.cc FIR.cc FloatFork.cc FloatPrinter.cc FloatRamp.cc \
 	Fork.cc Gaussian.cc IIR.cc IntFork.cc IntPrinter.cc IntRamp.cc \
-	Printer.cc CheatGain.cc Sin.cc
+	Printer.cc CheatGain.cc Sin.cc Xgraph.cc
 
 OBJS=AdaptFilter.o FIR.o FloatFork.o FloatPrinter.o FloatRamp.o \
 	Fork.o Gaussian.o IIR.o IntFork.o IntPrinter.o IntRamp.o Printer.o \
-	CheatGain.o Sin.o
+	CheatGain.o Sin.o Xgraph.cc
 
 all:		$(OBJS)
 
