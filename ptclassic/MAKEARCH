@@ -55,10 +55,10 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=cg
+set EXPDOMAINS=cg56
 
 cd domains
-foreach x (sdf ddf de thor $EXPDOMAINS)
+foreach x (sdf ddf de thor cg $EXPDOMAINS)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/domains/$x makefile
