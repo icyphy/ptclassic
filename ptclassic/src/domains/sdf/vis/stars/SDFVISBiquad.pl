@@ -58,8 +58,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	code {
 #define NUMPACK (4)
-#define UPPERBOUND (32767) 
-#define LOWERBOUND (-32768)
 	}
 	protected {
 	  double *inarray,*split_result;
@@ -125,7 +123,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int outerloop,innerloop;
 	  short *statetap_prod,*invalue,*result_den;
 
-	  vis_write_gsr(8);
 	  *inarray = double(signalIn%0);
        	  invalue = (short *) inarray;
 	  statemem = (float *) state;
