@@ -642,9 +642,9 @@ body ::tycho::Graphics::centeredText \
             set cwidth [expr $cwidth-20]
         }
         if {$font != {}} {
-            set usefont [::tycho::.tychoFonts findFont $font]
+            set usefont [eval ::tycho::xfont $font]
         } {
-            set usefont [::tycho::.tychoFonts defaultFont variable]
+            set usefont [::tycho::font helvetica]
         }
         set usecolor [ptkColor $color]
         set id [$slate create text $xcoord $top \
