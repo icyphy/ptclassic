@@ -26,7 +26,7 @@ $Id$
 #include "miscFuncs.h"
 #include "StringList.h"
 #include <ctype.h>
-#include "streamCompat.h"
+#include "pt_fstream.h"
 
 // choose compiler to use
 #ifdef __GNUG__
@@ -183,6 +183,14 @@ KcLoadInit (const char* argv0) {
 		ptolemyRoot = hashstring(expandPathName("~ptolemy"));
 	tmpFileName = tempFileName();
 	Linker::init (argv0);
+	// look for a file specifying modules to be permanently linked in
+	// this relies on pigiRpc starting in the home directory.
+	ifstream lstream(".pigilink");
+	if (lstream) {
+		char buf[1010];
+		lstream.getline(buf, 999);
+		Linker::multiLink(buf, 1);
+	}
 }
 
 // Load an object file (local only)
