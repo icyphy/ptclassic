@@ -74,7 +74,7 @@ proc pftOctMvLib { facet oldpat newpat } {
     set facet [pftGetFullFacet $facet]
     puts stdout "    $facet: $oldpat --> $newpat"
     if [catch {exec $path_octmvlib -N $newpat -O $oldpat $facet} result] {
-	puts stderr "********* octmvlib failed ***********"
+	puts stderr "********* octfix failed ***********"
 	puts stderr "failed on: $facet: $oldpat --> $newpat"
 	puts stderr "$result"
 	exit 1
@@ -201,10 +201,28 @@ proc pftGetCellMap { cell } {
 
 proc pftSetCellMap { cell newcell } {
     global mapcells
+    global mapcelldirs
     if { [info exist mapcells($cell)] } {
 	error "Mapping for cell $cell redefined."
     }
     set mapcells($cell) $newcell
+    set celldir [file dirname $cell]
+    if { "$celldir" != "." } {
+	# We don't use file dirname, because it expands ~
+	set celltail [file tail $newcell]
+	regsub "/$celltail$" $newcell "" newcelldir
+	set mapcelldirs($celldir) $newcelldir
+	puts "Adding $celldir -> $newcelldir"
+    }
+}
+
+proc pftGetCellDirMap { cell } {
+    global mapcelldirs
+    set celldir [file dirname $cell]
+    if { [info exist mapcelldirs($celldir)] } {
+	return $mapcelldirs($celldir)
+    }
+    return "" 
 }
 
 #
@@ -212,13 +230,22 @@ proc pftSetCellMap { cell newcell } {
 #
 proc pftPromptSubst { cell } {
     while { ![eof stdin] } {
-	puts stdout "  Enter replacement for $cell:\n\t===> " nonew
+	puts stdout "  Enter replacement for $cell:"
+	set celltail [file tail $cell]
+	set newcelldir [pftGetCellDirMap $cell]
+	if { "$newcelldir"!="" } {
+	    puts stdout "  Hit return for $newcelldir/$celltail\n"
+	}
+	puts stdout "\n\t===> " nonew
 	flush stdout
 	set newfacet [gets stdin]
 	if { "$newfacet"==":skip" } {
 	    error ":skip"
 	}
+	if { "$newfacet"=="" } {
+	    set newfacet "$newcelldir/$celltail"
 
+	}
 	if [pftIsGoodFacetB $newfacet why] {
 	    return $newfacet
 	}
@@ -319,12 +346,28 @@ proc pftMainLoop { } {
 	        pftListFacet $facet
 		pftSetGoodFacet $facet "done"
 	    } else {
-		puts stdout "Examining $facet"
-		while 1 {
-		    set status [pftFixFacet $facet]
-		    if { "$status"!="redo" } {
-			pftSetGoodFacet $facet $status
-			break
+     		set finfo [split $facet :]
+    		set cell [lindex $finfo 0]
+		set cellPath $cell
+		if { [catch {pftExpandCellPath $cell} cellPath] } {
+		    puts stdout "Invalid facet(path): $facet\n\t(error $cellPath)"
+		}
+   		if { [file isdir "$cellPath"] && 
+		     [file isdir "$cellPath/[lindex $finfo 1]"] && 
+		     [file isfile \
+			"$cellPath/[lindex $finfo 1]/[lindex $finfo 2];"] && 
+		     ! [file writable \
+			"$cellPath/[lindex $finfo 1]/[lindex $finfo 2];"]} {
+		    puts stdout "Skipping $facet"
+ 		    pftSetGoodFacet $facet "done"
+   		} else {
+		    puts stdout "Examining $facet"
+		    while 1 {
+			set status [pftFixFacet $facet]
+			if { "$status"!="redo" } {
+			    pftSetGoodFacet $facet $status
+			    break
+		    	}
 		    }
 		}
 	    }
