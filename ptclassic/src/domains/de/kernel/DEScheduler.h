@@ -109,6 +109,9 @@ public:
 	// in DE scheduler.
 	EventQueue eventQ;
 
+	// Resort the events in the queue according to updated fine levels.
+	void resortEvents();
+
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
 
