@@ -33,11 +33,11 @@ PL_SRCS= \
  SDFBitsToInt.pl \
  SDFBlackHole.pl \
  SDFBusToNum.pl \
+ SDFChop.pl \
  SDFCommutator.pl \
  SDFConst.pl \
  SDFConstCx.pl \
  SDFCos.pl \
- SDFCutAndPaste.pl \
  SDFCutVarOffset.pl \
  SDFCxToFix.pl \
  SDFCxToFloat.pl \
