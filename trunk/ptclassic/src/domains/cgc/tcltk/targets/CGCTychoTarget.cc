@@ -169,8 +169,7 @@ void CGCTychoTarget :: frameCode() {
   // Add the comment, and include files
   myCode << headerComment() << "\n\n"
 	 << include
-	 << "#include \"tycgc.h\"\n"
-	 << "#include \"tytimer.h\"\n\n";
+	 << "#include \"/users/johnr/ptdesign/tycho/src/tycgc/tycgc.h\"\n\n";
 
     // Add static variables used by all modules
   myCode << comment("Name of this CGC module")
@@ -215,7 +214,7 @@ void CGCTychoTarget :: frameCode() {
   buffer[0] = toupper(buffer[0]);
 
 
-  StringList initProcedure = "static int ";
+  StringList initProcedure = "int ";
   initProcedure << buffer << "_Init"
     <<"(Tcl_Interp *interp) {\n"
         << "/* Adds a single interface command */\n"
@@ -226,7 +225,7 @@ void CGCTychoTarget :: frameCode() {
 	<<"return TCL_OK;\n}\n";
 
   myCode << setupDecl << wrapupDecl << executeDecl 
-	 << "#include \"tycgcif.c\"\n\n"
+	 << "#include \"/users/johnr/ptdesign/tycho/src/tycgc/tclif.c\"\n\n"
 	 << initProcedure;
 
   // after generating code, initialize code strings again.
