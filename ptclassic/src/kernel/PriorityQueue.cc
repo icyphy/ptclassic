@@ -200,8 +200,8 @@ Pointer PriorityQueue :: getFirstElem()
 		f->next->before = lastNode;
 	}
 	numberNodes--;
-	return f->e;
 	putFreeLink(f);
+	return f->e;
 }
 
 LevelLink* PriorityQueue :: get()
@@ -227,8 +227,8 @@ Pointer PriorityQueue :: getLastElem()
 	numberNodes--;
 	LevelLink *f = lastNode;
 	lastNode = f->before;
-	return f->e;
 	putFreeLink(f);
+	return f->e;
 }
 
 LevelLink* PriorityQueue :: teg()
