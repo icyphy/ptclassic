@@ -36,42 +36,10 @@ complex particles.
         }
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkText.tcl";
 
-        // For now, we pass the relevant parameter values to tcl
-        // by setting global variables.  We need a better way.
-        sprintf(buf,"%d",input.numberPorts());
-        if((Tcl_SetVar(ptkInterp,"TkText_numInputs",buf,TCL_GLOBAL_ONLY) == NULL)
-        || (Tcl_SetVar(ptkInterp,"TkText_label",label,TCL_GLOBAL_ONLY) == NULL)) {
-            Error::abortRun(*this,"Failed to set parameter values for tcl");
-            return;
-        }
-        if(int(put_in_control_panel)) {
-           Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
-        } else {
-           Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
-        }
-        if(int(wait_between_outputs)) {
-           Tcl_SetVar(ptkInterp,"TkText_waitBetweenOutputs","1",TCL_GLOBAL_ONLY);
-        } else {
-           Tcl_SetVar(ptkInterp,"TkText_waitBetweenOutputs","0",TCL_GLOBAL_ONLY);
-        }
-
-
-        if(Tcl_SetVar(ptkInterp,"TkText_numberOfValues",number_of_past_values,
-			TCL_GLOBAL_ONLY) == NULL) {
-            Error::abortRun(*this,"Failed to set parameter values for tcl");
-            return;
-        }
         SDFTclScript::setup();
     }
     constructor {
 	put_in_control_panel.clearAttributes(A_SETTABLE);
 	label = "Inputs to the TkText star";
-    }
-    destructor {
-        Tcl_UnsetVar(ptkInterp,"TkText_numInputs",TCL_GLOBAL_ONLY);
-        Tcl_UnsetVar(ptkInterp,"TkText_label",TCL_GLOBAL_ONLY);
-        Tcl_UnsetVar(ptkInterp,"putInCntrPan",TCL_GLOBAL_ONLY);
-        Tcl_UnsetVar(ptkInterp,"TkText_waitBetweenOutputs",TCL_GLOBAL_ONLY);
-        Tcl_UnsetVar(ptkInterp,"TkText_numberOfValues",TCL_GLOBAL_ONLY);
     }
 }

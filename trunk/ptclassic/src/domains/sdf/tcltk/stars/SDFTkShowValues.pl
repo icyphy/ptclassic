@@ -47,34 +47,10 @@ create problems.
         }
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkShowValues.tcl";
 
-        // For now, we pass the relevant parameter values to tcl
-        // by setting global variables.  We need a better way.
-        sprintf(buf,"%d",input.numberPorts());
-        if((Tcl_SetVar(ptkInterp,"TkShowValues_numInputs",buf,TCL_GLOBAL_ONLY) == NULL)
-	|| (Tcl_SetVar(ptkInterp,"TkShowValues_label",label,TCL_GLOBAL_ONLY) == NULL)) {
-            Error::abortRun(*this,"Failed to set parameter values for tcl");
-            return;
-        }
-        if(int(put_in_control_panel)) {
-           Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
-        } else {
-           Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
-        }
-        if(int(wait_between_outputs)) {
-           Tcl_SetVar(ptkInterp,"TkShowValues_waitBetweenOutputs","1",TCL_GLOBAL_ONLY);
-        } else {
-           Tcl_SetVar(ptkInterp,"TkShowValues_waitBetweenOutputs","0",TCL_GLOBAL_ONLY);
-        }
         SDFTclScript::setup();
     }
     constructor {
         output.setAttributes(P_HIDDEN);
         tcl_file.clearAttributes(A_SETTABLE);
-    }
-    destructor {
-	Tcl_UnsetVar(ptkInterp,"TkShowValues_numInputs",TCL_GLOBAL_ONLY);
-	Tcl_UnsetVar(ptkInterp,"TkShowValues_label",TCL_GLOBAL_ONLY);
-	Tcl_UnsetVar(ptkInterp,"putInCntrPan",TCL_GLOBAL_ONLY);
-	Tcl_UnsetVar(ptkInterp,"TkShowValues_waitBetweenOutputs",TCL_GLOBAL_ONLY);
     }
 }

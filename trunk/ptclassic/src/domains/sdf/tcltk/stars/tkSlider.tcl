@@ -8,21 +8,10 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
-# When this file is sourced, it is assumed that the following global
-# variables have been set:
-#	uniqueSymbol
-#	ptkControlPanel
-#	TkSlider_identifier
-#	TkSlider_low
-#	TkSlider_high
-#	TkSlider_value
-# where the last three are given values corresponding to parameter values.
 
-if {![info exists putInCntrPan]} {set putInCntrPan 1}
-
-if {$putInCntrPan} \
-   { set s $ptkControlPanel.low.${uniqueSymbol}slider } \
-   { set s $ptkControlPanel.${uniqueSymbol}slider }
+if {[set ${starID}(put_in_control_panel)]} \
+   { set s $ptkControlPanel.low.slider_$starID } \
+   { set s $ptkControlPanel.slider_$starID }
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -30,7 +19,7 @@ if {$putInCntrPan} \
 
 if {![winfo exists $s]} {
 
-    if {$putInCntrPan} {
+    if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
 	pack append $ptkControlPanel.low $s top
     } {
@@ -39,17 +28,21 @@ if {![winfo exists $s]} {
         wm iconname $s "Sliders"
     }
 
-    proc ${uniqueSymbol}setOut {position} "
-        ${uniqueSymbol}setOutputs \
-	\[expr {$TkSlider_low+($TkSlider_high-$TkSlider_low)*\$position/100.0}]
+    proc setOut_$starID {position} "
+        setOutputs_$starID \
+	\[expr {[set ${starID}(low)]+([set ${starID}(high)]-\
+	[set ${starID}(low)])*\$position/100.0}]
     "
 
     frame $s.f
     set position [expr \
-	100*($TkSlider_value-$TkSlider_low)/($TkSlider_high-$TkSlider_low)]
-    ptkMakeScale $s.f m $TkSlider_identifier $position ${uniqueSymbol}setOut
+	{100*([set ${starID}(value)]-[set ${starID}(low)])/ \
+	([set ${starID}(high)]-[set ${starID}(low)])}]
+    ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
     pack append $s $s.f top
 }
 
 # Initialize the output
-${uniqueSymbol}setOutputs $TkSlider_value
+setOutputs_$starID [set ${starID}(value)]
+
+unset s

@@ -49,34 +49,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkMeter.tcl";
-	    // For now, we pass the relevant parameter values to tcl
-	    // by setting global variables.  We need a better way.
-	    sprintf(buf,"%d",input.numberPorts());
-	    if((Tcl_SetVar(ptkInterp, "TkMeter_label", label, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "TkMeter_low", low, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "TkMeter_high", high, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "TkMeter_numInputs", buf, TCL_GLOBAL_ONLY)
-		== NULL)) {
-                Error::abortRun(*this,"Failed to set parameter values for tcl");
-                return;
-            }
-	    if(int(put_in_control_panel)) {
-	       Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
-	    } else {
-	       Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
-	    }
 	    SDFTclScript::setup();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.
 	    output.setAttributes(P_HIDDEN);
 	    tcl_file.clearAttributes(A_SETTABLE);
-	}
-	destructor {
-	    Tcl_UnsetVar(ptkInterp, "TkMeter_label", TCL_GLOBAL_ONLY);
-	    Tcl_UnsetVar(ptkInterp, "TkMeter_low", TCL_GLOBAL_ONLY);
-	    Tcl_UnsetVar(ptkInterp, "TkMeter_high", TCL_GLOBAL_ONLY);
-	    Tcl_UnsetVar(ptkInterp, "TkMeter_numInputs", TCL_GLOBAL_ONLY);
-	    Tcl_UnsetVar(ptkInterp, "putInCntrPan", TCL_GLOBAL_ONLY);
 	}
 }
