@@ -6,8 +6,10 @@
 # 	All Rights Reserved.
 #
 # usage: tychoOpen file1 file2 file3 ....
+
 foreach file ($argv)
-   echo "File::openContext $file"| perl -pe 's/(.*)#(\d+)/[$1] setInsert $2/g' >> /tmp/tychoOpen$$
+   echo "openContext $file" >> /tmp/tychoOpen$$
 end
+
 tychoSend /tmp/tychoOpen$$
 rm /tmp/tychoOpen$$
