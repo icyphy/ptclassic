@@ -63,9 +63,7 @@ can be added or reduced-search motion compensation can be performed.
 		name { doMC }
 		type { "void" }
 		access { private }
-		arglist { "(unsigned char* diff, unsigned const char* cur, 
-				unsigned const char* prev, char* horz, char* vert, 
-				const int width, const int height)" }
+		arglist { "(unsigned char* diff, unsigned const char* cur, unsigned const char* prev, char* horz, char* vert, const int width, const int height)" }
 		code {
 			int ii, jj, xvec, yvec;
 
@@ -85,10 +83,7 @@ can be added or reduced-search motion compensation can be performed.
 	virtual method {
 		name { FindMatch }
 		type { "void" }
-		arglist { "(unsigned const char* cur, 
-				unsigned const char* prev, const int ii, const int jj, 
-				int& xvec, int& yvec, const int width,
-				const int height)" }
+		arglist { "(unsigned const char* cur, unsigned const char* prev, const int ii, const int jj, int& xvec, int& yvec, const int width, const int height)" }
 		access { protected }
 		code {
 // If we're near the border, don't do motion comp.
@@ -134,10 +129,7 @@ can be added or reduced-search motion compensation can be performed.
 		name { DoOneBlock }
 		access { protected }
 		type { "void" }
-		arglist { "(char& horz, char& vert, unsigned char* diff, 
-				unsigned const char* cur, unsigned const char* prev, 
-				const int ii, const int jj, const int xvec, 
-				const int yvec, const int width)" }
+		arglist { "(char& horz, char& vert, unsigned char* diff, unsigned const char* cur, unsigned const char* prev, const int ii, const int jj, const int xvec, const int yvec, const int width)" }
 		code { // Set diff frame and mvects.
 			int i, j, tmp1, tmp2;
 			for(i = 0; i < blocksize; i++) {
@@ -169,8 +161,7 @@ can be added or reduced-search motion compensation can be performed.
 		name	{ inputsOk }
 		access	{ private }
 		type	{ "int" }
-		arglist	{ "(const GrayImage& one, const GrayImage& two,
-			char* buf)" }
+		arglist	{ "(const GrayImage& one, const GrayImage& two, char* buf)" }
 		code {
 			if (one.retWidth() != two.retWidth()) {
 				sprintf(buf, "Widths differ: %d %d", one.retWidth(),

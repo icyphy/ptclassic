@@ -41,8 +41,7 @@ write the result to 'output'.
 		// mvImage is of incorrect type.
 		name { otherInputs }
 		type { "int" }
-		arglist { "(const GrayImage** pi, const MVImage** mi, 
-					Envelope& pEnvp, Envelope& mEnvp)" }
+		arglist { "(const GrayImage** pi, const MVImage** mi, Envelope& pEnvp, Envelope& mEnvp)" }
 		access { private }
 		code {
 			(pastIn%0).getMessage(pEnvp);
@@ -65,10 +64,7 @@ write the result to 'output'.
 		name { doInvMC }
 		type { "void" }
 		access { private }
-		arglist { "(unsigned char* out, unsigned const char* prev, 
-				unsigned const char* diff, const char* horz, 
-				const char* vert, const int width, 
-				const int height, const int blocksize)" }
+		arglist { "(unsigned char* out, unsigned const char* prev, unsigned const char* diff, const char* horz, const char* vert, const int width, const int height, const int blocksize)" }
 		code {
 			int ii, jj;
 			for(ii = 0; ii < height; ii += blocksize) {
@@ -88,8 +84,7 @@ write the result to 'output'.
 	virtual method {
 		name { BlockIsLost }
 		access { protected }
-		arglist{ "(unsigned const char* ptr, const int ii, 
-				const int jj, const int blocksize, const int width)" }
+		arglist{ "(unsigned const char* ptr, const int ii, const int jj, const int blocksize, const int width)" }
 		type { "int" }
 		code {
 			int i, j, indx;
@@ -107,10 +102,7 @@ write the result to 'output'.
 		name { DoOneBlock }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, 
-				unsigned const char* diff, const char horz, 
-				const char vert, const int ii, const int jj, 
-				const int blocksize, const int width)" }
+		arglist { "(unsigned char* out, unsigned const char* prev, unsigned const char* diff, const char horz, const char vert, const int ii, const int jj, const int blocksize, const int width)" }
 		code {
 			int i, j, index, mcindex;
 			for(i = 0; i < blocksize; i++) {
@@ -129,9 +121,7 @@ write the result to 'output'.
 		name { DoLostBlock }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, 
-				const char horz, const char vert, const int ii, 
-				const int jj, const int blocksize, const int width)" }
+		arglist { "(unsigned char* out, unsigned const char* prev, const char horz, const char vert, const int ii, const int jj, const int blocksize, const int width)" }
 		code {
 			int i, j, index, mcindex;
 			for(i = 0; i < blocksize; i++) {
@@ -164,8 +154,7 @@ write the result to 'output'.
 		name { sizesMatch }
 		type { "int" }
 		access { private }
-		arglist { "(const GrayImage* im1, const GrayImage* im2, 
-				const MVImage* imm)" }
+		arglist { "(const GrayImage* im1, const GrayImage* im2, const MVImage* imm)" }
 		code {
 			int w = im1->retWidth();
 			int h = im1->retHeight();
