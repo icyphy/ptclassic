@@ -41,6 +41,7 @@ CCS_WITH_H_FILES=\
  Code.cc \
  ComplexArrayState.cc \
  ComplexState.cc \
+ ComplexSubset.cc \
  Connect.cc \
  DataStruct.cc \
  Display.cc \
@@ -91,7 +92,8 @@ LIBCCSRCS=$(CCS_WITH_H_FILES) \
  checkConnect.cc \
  expandPath.cc \
  RanGen.cc \
- hashstring.cc
+ hashstring.cc \
+ miscImpl.cc
 
 # .c sources used in the library.
 # (depending on particular configuration, CONSTRUCTOR_HACK may be empty)
@@ -106,7 +108,6 @@ SRCS=$(LIBSRCS) interpmain.cc
 HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  Attribute.h \
  CircularBuffer.h \
- ComplexSubset.h \
  ConstIters.h \
  Linker.sysdep.h \
  Output.h \
