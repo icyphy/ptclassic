@@ -220,8 +220,8 @@ protected:
 	InvokeInterp interp;
 
 	// support one character directives
-	mergeFileContents(Tokenizer& lexer, ParseToken& t, char* token);
-	sendToInterpreter(Tokenizer& lexer, ParseToken& t, char* token);
+	mergeFileContents(Tokenizer& lexer, char* token);
+	sendToInterpreter(Tokenizer& lexer, char* token);
 	getParameterName(Tokenizer& lexer, char* token);
 
 private:

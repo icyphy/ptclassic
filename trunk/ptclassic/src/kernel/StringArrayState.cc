@@ -135,7 +135,6 @@ void StringArrayState  :: initialize() {
 	int i = 0, err = FALSE;
 	char* buf[MAXLEN];
 	while(!lexer.eof() && i < MAXLEN && !err) {
-		ParseToken t;
 		char tokbuf[MAXSTRINGLEN];
 		lexer >> tokbuf;
 		char c = tokbuf[0];
@@ -144,7 +143,7 @@ void StringArrayState  :: initialize() {
 		switch (c) {
 
 		    case '<':
-			err = !mergeFileContents(lexer, t, tokbuf);
+			err = !mergeFileContents(lexer, tokbuf);
 			break;
 
 		    case '[':
@@ -236,7 +235,7 @@ void StringArrayState  :: initialize() {
 		      break;
 
 		    case '!':
-			err = !sendToInterpreter(lexer, t, tokbuf);
+			err = !sendToInterpreter(lexer, tokbuf);
 			break;
 
 		    default:
