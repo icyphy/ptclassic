@@ -1,4 +1,3 @@
-static const char file_id[] =  "DFDynPortHole.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -32,6 +31,11 @@ DFPortHole is the base class for portholes in the various dataflow
 domains other than SDF that may be dynamic.
 
 ******************************************************************/
+static const char file_id[] =  "DFDynPortHole.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "DynDFPortHole.h"
 
