@@ -43,7 +43,9 @@ Programmer: J. T. Buck and E. A. Lee
 #include <time.h>
 #include <malloc.h>
 #include <stdlib.h>
+#ifndef PT_NT4VC
 #include <unistd.h> /* for getcwd() */
+#endif
 
 /* Symbols for special characters*/
 #define LPAR '('
