@@ -200,14 +200,24 @@ limitation of liability, and disclaimer of warranty provisions.
 
 		NamedObj *farObj;
 		if (!source->parent()->isA("HOFStar")) {
-		  farObj = source->parent();
-		  objectsToReinitialize.remove(farObj);
-		  objectsToReinitialize.put(*farObj);
+		  if (source->parent()->isItWormhole()) {
+		    source->initialize();
+		    sink->initialize();
+		  } else {
+		    farObj = source->parent();
+		    objectsToReinitialize.remove(farObj);
+		    objectsToReinitialize.put(*farObj);
+		  }
 		}
 		if (!sink->parent()->isA("HOFStar")) {
-		  farObj = sink->parent();
-		  objectsToReinitialize.remove(farObj);
-		  objectsToReinitialize.put(*farObj);
+		  if (sink->parent()->isItWormhole()) {
+		    source->initialize();
+		    sink->initialize();
+		  } else {
+		    farObj = sink->parent();
+		    objectsToReinitialize.remove(farObj);
+		    objectsToReinitialize.put(*farObj);
+		  }
 		}
 		po = nexto++;
 		pi = nexti++;
