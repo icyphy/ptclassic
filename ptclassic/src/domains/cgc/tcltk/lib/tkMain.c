@@ -52,7 +52,7 @@ void tkSetup();
 void errorReport(message)
 char *message;
 {
-    char *msg;
+    char *msg, *cmd;
     sprintf(command, "popupMessage .error { %s }", message);
     Tcl_Eval(interp, command);
 #if REPORT_TCL_ERRORS
