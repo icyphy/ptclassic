@@ -747,8 +747,7 @@ void CGCStar :: updateOffsets()
 			    code << "\t{ int i;\n"
 				"\tfor (i=0;i<" << nx << ";i++)\n"
 			    	"\t\t" << SYMBOLIC_EXPR('+' << nx) <<
-				" = "  << SYMBOLIC_EXPR("") <<
-			    	"\n\t}\n";
+				" = "  << SYMBOLIC_EXPR("") << ";\n\t}\n";
 # undef SYMBOLIC_EXPR
 			    code << '\t' << pname << " += " << nx << ";\n"
 				"\tif (" << pname << " >= " << bs << ")\n"
