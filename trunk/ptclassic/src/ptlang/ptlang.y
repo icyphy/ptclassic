@@ -58,7 +58,8 @@ Programmer: J. T. Buck and E. A. Lee
 #define NUMCODEBLOCKS 100
 
 #define FLEN 256
-#define NINC 10
+/* number of include files */
+#define NINC 30
 #define NSEE 30
 #define NSTR 20
 
@@ -148,7 +149,7 @@ void clearDefs(), clearStateDefs(), addMembers(), genState(), describeState(),
      initPort(), genPort(), describePort(), clearMethodDefs(), wrapMethod(),
      genInstance(), genStdProto(), yyerror(), yyerr2(), cvtCodeBlockExpr(),
      cvtCodeBlock(), genCodeBlock(), cvtMethod(), genMethod(), genDef(),
-     yywarn(), mismatch(), genAlias(), stripDefaultArgs();
+     yywarn(), mismatch(), genAlias(), stripDefaultArgs(), checkIncludes();
 
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
@@ -615,7 +616,8 @@ aliasitem:
 
 /* include files */
 cclist: /* nothing */
-|	cclist optcomma STRING		{ ccInclude[nCcInclude++] = $3;}
+|	cclist optcomma STRING		{ checkIncludes(nCcInclude); 
+					  ccInclude[nCcInclude++] = $3;}
 ;
 
 /* see also list */
@@ -624,7 +626,8 @@ seealso: /* nothing */
 ;
 
 hlist:	/* nothing */
-|	hlist optcomma STRING		{ hInclude[nHInclude++] = $3;}
+|	hlist optcomma STRING		{ checkIncludes(nHInclude); 
+					  hInclude[nHInclude++] = $3;}
 ;
 
 optcomma:/* nothing */
@@ -1272,6 +1275,7 @@ void genDef ()
 /* Include files */
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
 	
+	checkIncludes();
 	for (i = 0; i < nHInclude; i++) {
 		fprintf (fp, "#include %s\n", hInclude[i]);
 	}
@@ -2219,3 +2223,14 @@ char *s;
 	exit (1);
 }
 
+/* Check that we are not blowing the top off an array */
+void checkIncludes(numIncludes)
+int numIncludes;
+{
+	if (numIncludes > NINC) {
+		fprintf (stderr, 
+	 "Too many include files(%d), recompile with NINC (%d) larger.\n",
+		numIncludes, NINC);
+		exit(1);
+	}
+}
