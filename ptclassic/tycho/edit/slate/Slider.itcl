@@ -1,8 +1,8 @@
 ##########################################################################
-# Version: $Id$
-# Author: H. John Reekie and William Chen
+# @Version: $Id$
+# @Author: H. John Reekie and William Chen
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,7 +30,28 @@
 #######################################################################
 #### Slider
 #
-# A (vertical) slider widget.
+# A slider widget. This widget provides an alternative to the
+# Tk <code>scale</code> widget, and is supposed to be reminiscent
+# of a vertical ``slider'' as used in audio equipment. It also
+# provides a good example of how Tycho's <i>Slate</i> widget can
+# be used to (relatively) quickly create new interactive components.
+#<p>
+# To create a simple slider:
+# <tcl><pre>
+#     ::tycho::Slider .s -text Fred -resolution 0.5 -command puts
+#     pack .s
+#     wm deiconify .
+# </pre></tcl>
+#<p>
+# To move the slider, use the left button on the horizontal ``bar''
+# and click and drag. Clicking the left button anywhere near the vertical
+# ``trough'' but not on the bar will cause the bar to move in increments.
+# Clicking the middle button anywhere near the trough will cause the
+# bar to jump to that position; it can then be dragged.
+#
+# Slider uses the following interactor classes:
+# <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
+# <i>Interactor</i> (the abstract superclass).
 #
 class ::tycho::Slider {
     inherit itk::Widget
