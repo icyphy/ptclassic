@@ -83,6 +83,7 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	srcStar = savestring(srcStar);
 	dstPipe = savestring(dstPipe);
 	dstStar = savestring(dstStar);
+
 // add the action to the list
 	actionList += "C";
 	actionList += srcStar;
@@ -145,20 +146,18 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 		    const char* portname) {
 	galportname = savestring (galportname);
 // first get the portname for the contained star
-	PortHole *ph = findPortHole (starname, portname);
+	GenericPort *ph = findGenericPort (starname, portname);
 	if (ph == NULL) return FALSE;
 	portname = savestring (portname);
 	starname = savestring (starname);
 // create new galaxy port, add to galaxy, do the alias
-	if (ph->isItInput()) {
-		InPortHole *p = new InPortHole;
+	if (ph->isItMulti()) {
+		GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this));
-		Galaxy::alias (*p, *ph);
 	}
 	else {
-		OutPortHole *p = new OutPortHole;
+		GalPort *p = new GalPort(*ph);
 		addPort(p->setPort(galportname,this));
-		Galaxy::alias (*p, *ph);
 	}
 // add action to list
 	actionList += "A";
@@ -351,6 +350,10 @@ InterpGalaxy::setDomain (const char* name) {
 	return TRUE;
 }
 
+// clone function: uses copy constructor.
+Block*
+InterpGalaxy::clone() const { return new InterpGalaxy(*this);}
+
 // DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
 // the action strings to be combined into one string.  This will break
 // clone()!!!  Do not do it!
@@ -359,19 +362,19 @@ InterpGalaxy::setDomain (const char* name) {
 // for (i = actionList.size(); i > 0; i--) cout << actionList.next() << "\n";
 
 // This is the key to the works -- the function that makes an identical
-// galaxy, given a galaxy.
-Block* 
-InterpGalaxy::clone() const {
+// galaxy, given a galaxy.  It's the body of the copy constructor.
+
+void
+InterpGalaxy::copy(const InterpGalaxy& g) {
 // make a new interpreted galaxy!  We do this by processing the action
 // list.
-	InterpGalaxy* gal = new InterpGalaxy;
-	gal->descriptor = descriptor;
-	gal->setNameParent(readName(), NULL);
+	descriptor = g.descriptor;
+	setNameParent(g.readName(), NULL);
 	const char* oldDom = NULL; // old domain
 
 // process the action list
-	int nacts = actionList.size();
-	StringListIter next(actionList);
+	int nacts = g.actionList.size();
+	StringListIter next(g.actionList);
 
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
@@ -383,13 +386,13 @@ InterpGalaxy::clone() const {
 		case 'S':	// make a Star
 			a = next++;
 			b = next++;
-			gal->addStar (a, b);
+			addStar (a, b);
 			nacts -= 3;
 			break;
 
 		case 's':	// remove a Star
 			a = next++;
-			gal->delStar (a);
+			delStar (a);
 			nacts -= 2;
 			break;
 
@@ -400,7 +403,7 @@ InterpGalaxy::clone() const {
 			d = next++;
 			ndelay = atoi(next++);
 
-			gal->connect (a, b, c, d, ndelay);
+			connect (a, b, c, d, ndelay);
 			nacts -= 6;
 			break;
 
@@ -409,19 +412,19 @@ InterpGalaxy::clone() const {
 			b = next++;
 			c = next++;
 
-			gal->alias (a, b, c);
+			alias (a, b, c);
 			nacts -= 4;
 			break;
 
 		case 'n':	// make a node (Geodesic)
 			a = next++;
-			gal->addNode (a);
+			addNode (a);
 			nacts -= 2;
 			break;
 
 		case 'x':	// delete a node (Geodesic)
 			a = next++;
-			gal->delNode (a);
+			delNode (a);
 			nacts -= 2;
 			break;
 
@@ -430,14 +433,14 @@ InterpGalaxy::clone() const {
 			b = next++;
 			c = next++;
 			ndelay = atoi(next++);
-			gal->nodeConnect (a, b, c, ndelay);
+			nodeConnect (a, b, c, ndelay);
 			nacts -= 5;
 			break;
 
 		case 'd':	// disconnect a porthole
 			a = next++;
 			b = next++;
-			gal->disconnect (a, b);
+			disconnect (a, b);
 			nacts -= 3;
 			break;
 
@@ -446,7 +449,7 @@ InterpGalaxy::clone() const {
                         b = next++;
                         c = next++;
 
-                        gal->addState (a, b, c);
+                        addState (a, b, c);
                         nacts -= 4;
                         break;
                case 'R':       // set a state
@@ -454,7 +457,7 @@ InterpGalaxy::clone() const {
                         b = next++;
                         c = next++;
 
-                        gal->setState (a, b, c);
+                        setState (a, b, c);
                         nacts -= 4;
                         break;
 
@@ -463,14 +466,14 @@ InterpGalaxy::clone() const {
 			b = next++;
 			c = next++;
 
-			gal->numPorts (a, b, atoi (c));
+			numPorts (a, b, atoi (c));
 			nacts -= 4;
 			break;
 
 		case 'D':	// change the domain
 			oldDom = KnownBlock::domain();
 			a = next++;
-			gal->setDomain (a);
+			setDomain (a);
 			nacts -= 2;
 			break;
 
@@ -481,7 +484,6 @@ InterpGalaxy::clone() const {
 
 // if we're producing a wormhole, change the domain back
 	if (oldDom) KnownBlock::setDomain (oldDom);
-	return gal;
 }
 
 // add the galaxy to the known list (completing the definition of a galaxy
@@ -529,7 +531,10 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 // We don't need to do this for compiled Galaxys because the blocks,
 // ports, and states are members.
 
-InterpGalaxy :: ~InterpGalaxy () {
+// (this routine forms the body of the destructor, but has a different
+// name so it can be used elsewhere)
+
+void InterpGalaxy :: zero () {
 	// delete permanent nodes
 	NodeListIter nextn(nodes);
 	for (int i = nodes.size(); i > 0; i--)
@@ -549,6 +554,9 @@ InterpGalaxy :: ~InterpGalaxy () {
 	BlockStateIter nexts(*this);
 	for (i = numberStates(); i > 0; i--)
 		delete nexts++;
+
+	// Clear action list
+	actionList.initialize();
 }
 
 // function to find Node with given name, or NULL if no match
