@@ -2,11 +2,12 @@ defstar {
 	name { Impulse }
 	domain { SDF }
 	desc {
-Generate a stream of impulses of size "level" (default 1.0).
-The period is given by "period" (default 0).
-If period = 0 then only one impulse is generated.
+Generate a single impulse or an impulse train.  The impulse(s) have
+amplitude "level" (default 1.0).  If "period" (default 0) is equal to 0,
+then only a single impulse is generated; otherwise, it specifies the
+period of the impulse train.
 	}
-	version {$Id$}
+	version { $Id$ }
 	author { J. T. Buck }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -42,8 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		double t = 0.0;
 		if (int(count) == 0) t = level;
 		count = int(count) + 1;
-		if (int(period) > 0 && int(count) >= int(period))
-			count = 0;
+		if (int(period) > 0 && int(count) >= int(period)) count = 0;
 		output%0 << t;
 	}
 }

@@ -2,11 +2,11 @@ defstar {
 	name { IIDUniform }
 	domain { SDF }
 	desc {
-Generate an i.i.d. uniformly distributed pseudo-random process.
-Output is uniformly distributed between "lower" (default 0)
-and "upper" (default 1).
+Generate an identically independently distributed uniformly distributed
+pseudo-random process.  Output is uniformly distributed between "lower"
+(default 0) and "upper" (default 1).
 	}
-	version {$Id$}
+	version { $Id$ }
 	author { D. G. Messerschmitt }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -46,7 +46,7 @@ This Star uses the GNU library <Uniform.h>.
 		extern ACG* gen;
 	}
 	constructor {
-		random = NULL;
+		random = 0;
 	}
 	destructor {
 		LOG_DEL; delete random;
