@@ -504,6 +504,7 @@ int DDFClustSched :: run() {
 	}
       }
     }
+    currentTime += schedulePeriod;
   }
   return TRUE;
 }
