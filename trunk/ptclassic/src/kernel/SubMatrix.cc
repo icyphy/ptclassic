@@ -117,7 +117,7 @@ ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src) {
 }
 
 // General operators
-int ComplexSubMatrix::operator == (const Matrix& m) {
+int ComplexSubMatrix::operator == (const PtMatrix& m) {
   if(typesEqual(m)) {
     const ComplexSubMatrix& src = *((const ComplexSubMatrix*)&m);
     if((parent == src.parent) && (data = src.data) &&
@@ -127,7 +127,7 @@ int ComplexSubMatrix::operator == (const Matrix& m) {
   return 0;
 }
 
-Matrix& ComplexSubMatrix::operator = (const Matrix& src) {
+PtMatrix& ComplexSubMatrix::operator = (const PtMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to ComplexSubMatrix");
   else {
@@ -221,7 +221,7 @@ FixSubMatrix::FixSubMatrix(const FixSubMatrix& src) {
 }
 
 // General operators
-int FixSubMatrix::operator == (const Matrix& m) {
+int FixSubMatrix::operator == (const PtMatrix& m) {
   if(typesEqual(m)) {
     const FixSubMatrix& src = *((const FixSubMatrix*)&m);
     if((parent == src.parent) && (data = src.data) &&
@@ -231,7 +231,7 @@ int FixSubMatrix::operator == (const Matrix& m) {
   return 0;
 }
 
-Matrix& FixSubMatrix::operator = (const Matrix& src) {
+PtMatrix& FixSubMatrix::operator = (const PtMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to FixSubMatrix");
   else {
@@ -325,7 +325,7 @@ FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src) {
 }
 
 // General operators
-int FloatSubMatrix::operator == (const Matrix& m) {
+int FloatSubMatrix::operator == (const PtMatrix& m) {
   if(typesEqual(m)) {
     const FloatSubMatrix& src = *((const FloatSubMatrix*)&m);
     if((parent == src.parent) && (data = src.data) &&
@@ -335,7 +335,7 @@ int FloatSubMatrix::operator == (const Matrix& m) {
   return 0;
 }
 
-Matrix& FloatSubMatrix::operator = (const Matrix& src) {
+PtMatrix& FloatSubMatrix::operator = (const PtMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
       Error::abortRun("improper type in attempt to copy to FloatSubMatrix");
   else {
@@ -430,7 +430,7 @@ IntSubMatrix::IntSubMatrix(const IntSubMatrix& src) {
 }
 
 // General operators
-int IntSubMatrix::operator == (const Matrix& m) {
+int IntSubMatrix::operator == (const PtMatrix& m) {
   if(typesEqual(m)) {
     const IntSubMatrix& src = *((const IntSubMatrix*)&m);
     if((parent == src.parent) && (data = src.data) &&
@@ -440,7 +440,7 @@ int IntSubMatrix::operator == (const Matrix& m) {
   return 0;
 }
 
-Matrix& IntSubMatrix::operator = (const Matrix& src) {
+PtMatrix& IntSubMatrix::operator = (const PtMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to IntSubMatrix");
   else {
