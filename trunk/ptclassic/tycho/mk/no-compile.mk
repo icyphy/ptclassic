@@ -108,13 +108,14 @@ tests:: makefile
 # Generate html files from itcl files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
+TYDOC=$(ROOT)/lib/tydoc/tydoc
 itcldocs: $(ITCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
-		echo "$(ROOT)/lib/tydoc/tydoc -d $(ITCL_SRCS)"; \
-	 	$(ROOT)/lib/tydoc/tydoc -d $(ITCL_SRCS); \
+		echo "$(TYDOC) -d $(ITCL_SRCS)"; \
+	 	$(TYDOC) -d $(ITCL_SRCS); \
 	else \
-		echo "$(ROOT)/lib/tydoc/tydoc -d -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
-		$(ROOT)/lib/tydoc/tydoc -d -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
+		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
+		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
 
 # We use a GNU make extension here
