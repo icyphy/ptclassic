@@ -127,6 +127,56 @@ proc sdfTest1In1Out {star {rampStep 1.0} {rampType "Float"} } {
 }
 
 ######################################################################
+#### sdfTest1In1OutFork
+# Test out one input one output star connected to a Fork.
+# This is useful for testing Particle operator =.
+proc sdfTest1In1OutFork {star {rampStep 1.0} {rampType "Float"} } {
+	reset __empty__
+	domain SDF
+    newuniverse ${star}Test SDF
+	target loop-SDF
+	star "$star.a" $star
+        if [regexp {Fix$} $star] {
+	    catch {
+		setstate "$star.a" ArrivingPrecision NO
+		setstate "$star.a" InputPrecision 15.1
+	    }
+	    setstate "$star.a" OutputPrecision 15.1
+	}
+	switch $rampType {
+	    Float {
+		star Rampa Ramp
+	    }
+	    Fix {
+		star Rampa RampFix
+	    }
+	    Int {
+		star Rampa RampFloat
+	    }
+	    default {
+		error "rampType `$rampType' not supported"
+	    }
+	}
+
+	setstate Rampa step $rampStep
+
+	set tmpfile [sdfSetupPrinter]
+	set tmpfile2 [sdfSetupPrinter Printb]
+	star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+
+	connect Rampa output "$star.a" input
+	connect Fork.output=21 input "$star.a" output
+	connect Fork.output=21 output#1 Printa input
+	connect Fork.output=21 output#2 Printb input
+
+	run 5
+	wrapup
+
+	list [readTmpFile $tmpfile] [readTmpFile $tmpfile2]
+}
+
+######################################################################
 #### sdfTestArithmetic2input
 # Test out two input arithmetic stars
 #
