@@ -40,8 +40,13 @@ directory.
 <DD> This file sources all of the files that are listed as test files
 in the <CODE>makefile</CODE>.
 
-<DT> <A HREF="../../kernel/test/alltychotests.tcl"><CODE>$TYCHO/kernel/test/alltychotests.tcl</CODE></A>
-<DD> <CODE>alltychotests.tcl</CODE> will run all the <CODE>alltests.itcl</CODE>
+</DL>
+After running <CODE>make sources</CODE>, you can open up either of these files
+and then evaluate it, which will run all the tests in that directory.
+
+<LI> <A HREF="../../kernel/test/alltychotests.tcl"><CODE>$TYCHO/kernel/test/alltychotests.tcl</CODE></A>
+
+<br>  <CODE>alltychotests.tcl</CODE> will run all the <CODE>alltests.itcl</CODE>
 files.  <CODE>$TYCHO/makefile</CODE> has two rules:
 	<DL>
 	<DT> <CODE>make alltests</CODE>
@@ -51,13 +56,7 @@ files.  <CODE>$TYCHO/makefile</CODE> has two rules:
 	<DD> Run all the tests in a <CODE>tycho -ptiny</CODE>
 
 	</DL>
-</DL>
 
-
-
-</DL>
-After running <CODE>make sources</CODE>, you can open up either of these files
-and then evaluate it, which will run all the tests in that directory.
 
 
 <LI> The tests can also be run by cding into a <CODE>test</CODE>
