@@ -81,7 +81,7 @@ private:
 	int stopTime;
 
 	// check whether a star is runnable. Also enable lazy evaluation.
-	int isRunnable(DataFlowStar&);
+	int isRunnable(DataFlowStar&, int enableLazyEvalForDynPorts = TRUE);
 
 	// lazy evaluation
 	int lazyEval(DataFlowStar*);
@@ -89,6 +89,9 @@ private:
 
 	// list of source blocks.
 	SequentialList sourceBlocks;
+
+	// list of non-source blocks.
+	SequentialList nonSourceBlocks;
 
 	// the number of firing all sources so far
 	int numFiring;
