@@ -1,7 +1,7 @@
 /* Version Identification:
  * $Id$
  */
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -27,6 +27,7 @@
 
 /* stolen from sys/types.h on 4.3 BSD */
 
+#include "port.h"
 
 #define	RPC_NBBY	8		/* number of bits in a byte */
 /*
@@ -52,7 +53,12 @@ typedef	struct rpc_fd_set {
 #define	RPC_FD_SET(n, p)	((p)->fds_bits[(n)/RPC_NFDBITS] |= (1 << ((n) % RPC_NFDBITS)))
 #define	RPC_FD_CLR(n, p)	((p)->fds_bits[(n)/RPC_NFDBITS] &= ~(1 << ((n) % RPC_NFDBITS)))
 #define	RPC_FD_ISSET(n, p)	((p)->fds_bits[(n)/RPC_NFDBITS] & (1 << ((n) % RPC_NFDBITS)))
+
+#ifdef SYSV
+#define RPC_FD_ZERO(p)	memset((char *)(p), 0, sizeof(*(p)))
+#else
 #define RPC_FD_ZERO(p)	bzero((char *)(p), sizeof(*(p)))
+#endif
 
 extern void RPC_FD_AND();
 extern void RPC_FD_OR();
