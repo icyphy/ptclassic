@@ -47,8 +47,9 @@ void DDFStar :: prepareForScheduling() {
 		start();	// define inside Galaxy
 		// If error happens, return
 		if (Scheduler :: haltRequested()) return;
+		BlockPortIter nextp(*this);
 		for (int i = numberPorts(); i > 0; i--) {
-			DDFPortHole& dp = (DDFPortHole&) nextPort();
+			DDFPortHole& dp = (DDFPortHole&) *nextp++;
 			int nTok = dp.imagePort->numberTokens;
 			if (nTok > 1)
 				dp.setDDFParams(nTok);
