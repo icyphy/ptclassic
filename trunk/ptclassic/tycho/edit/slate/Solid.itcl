@@ -48,7 +48,7 @@ namespace ::tycho {
 # they look fine.
 #
 # <i>Solid</i> implements its scaling code so that the borderwidth remains 
-# constant when the picture is resized. Its coordinates, (like the 
+# constant when the item is resized. Its coordinates, (like the 
 # standard Tk canvas <i>polygon</i> item) are a list of vertex 
 # coordinates. They must, however, be in a "clockwise" direction for the 
 # borders to be drawn properly.  In all other respects, it can be 

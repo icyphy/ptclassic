@@ -49,7 +49,7 @@
 # to physical mouse clicks, drags, and releases.
 #
 # Interactors can be combined to make more complex interactions: several
-# interactors can be <i>bound</i> to the same picture; they can be
+# interactors can be <i>bound</i> to the same item; they can be
 # <i>cascaded</i> to modify each other's effects. Actions eventually
 # end up being given to am IncrCanvas item, which then reacts according
 # to its current "behavior."
@@ -146,7 +146,7 @@ class ::tycho::Interactor {
     # Set up bindings to intercept events that I need from now on
     method activate {t x y args}
 
-    # ``Bind'' an interactor to a picture
+    # ``Bind'' an interactor to an item
     method bind {tagOrID args}
 
     # Forward actions to a cascaded interactor
@@ -188,7 +188,7 @@ class ::tycho::Interactor {
     ###################################################################
     ####                   protected variables                     ####
 
-    # The tags or pictures to which this picture has been bound and arguments
+    # The tags or items to which this item has been bound and arguments
     protected variable _bindings
 
     # The canvas on which this interactor resides.
@@ -197,7 +197,7 @@ class ::tycho::Interactor {
     # The slate on which this interactor resides.
     protected variable slate ""
 
-    # The picture that this interactor is currently operating on.
+    # The item that this interactor is currently operating on.
     protected variable target ""
 
     # An interactor to forward actions to.
@@ -284,9 +284,9 @@ body ::tycho::Interactor::activate {t x y args} {
 #######################################################################
 #### bind target
 #
-# ``Bind'' an interactor to a picture or to a tag. This creates a binding
-# to the specified picture or tag so that, when the appropriate event
-# occurs on that picture or a picture with the specified tags, the
+# ``Bind'' an interactor to an item or to a tag. This creates a binding
+# to the specified item or tag so that, when the appropriate event
+# occurs on that item or an item with the specified tags, the
 # interactor is ``activated'' on the target. The
 # options *-button* and *-modifiers* determine the actual events.
 # By default, the mouse-press event is the one used to activate
@@ -464,13 +464,13 @@ body ::tycho::Interactor::release {x y} {
 #######################################################################
 #### target
 #
-# Set or get the picture that this interactor is currently
+# Set or get the item that this interactor is currently
 # operating on. With no argument, return the current target;
-# with an argument, sets the target picture to that value. This
+# with an argument, sets the target item to that value. This
 # method is for use only within actions -- the target is not valid
 # until the interactor has been activated. You can call this method
-# in the *-activatecommand* script to have the picture being operated on
-# set to a different picture to the one being moused on, which is
+# in the *-activatecommand* script to have the item being operated on
+# set to a different item to the one being moused on, which is
 # very useful in some situations -- see
 # <a href="Slider.html"><i>Slider</i></a> for an example.
 #
@@ -488,7 +488,7 @@ body ::tycho::Interactor::target {args} {
 #######################################################################
 #### unbind
 #
-# Remove a binding from the interactor to a picture or a tag. The
+# Remove a binding from the interactor to an item or a tag. The
 # optional arguments _must_ be the same as they were for the
 # corresponding call to bind{}.
 #

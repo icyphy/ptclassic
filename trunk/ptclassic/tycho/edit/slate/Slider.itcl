@@ -140,14 +140,14 @@ class ::tycho::Slider {
     ###################################################################
     ####                   private variables                       ####
 
-    # The pictures that make up the slider
+    # The items that make up the slider
     private variable back
     private variable bar
     private variable labellabel
     private variable trough
     private variable valuelabel
 
-    # The interactors that operate on the slider pictures
+    # The interactors that operate on the slider items
     private variable stepper
     private variable bounder
     private variable shifter
@@ -412,7 +412,7 @@ body ::tycho::Slider::jump {ignore x y} {
 #
 body ::tycho::Slider::redraw {} {
 
-    # Delete existing pictures
+    # Delete existing items
     #
     # FIXME: Should resize/move existing components (if they exist)!
     if { [info exists trough] } {

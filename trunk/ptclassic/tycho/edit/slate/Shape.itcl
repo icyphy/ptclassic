@@ -261,8 +261,8 @@ body ::tycho::Shape::_reshape {id canvas slate x y args} {
 # _Abstract procedure._
 # Start a click-drag-release sequence for reshaping an item. This
 # assumes that a release action has been called since previous
-# drag actions. The optional -ghost flag indicates that the picture
-# is to be reshaped by dragging a ``ghost'' of the picture. One or
+# drag actions. The optional -ghost flag indicates that the item
+# is to be reshaped by dragging a ``ghost'' of the item. One or
 # more aspects can be specified.
 #
 body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
@@ -276,7 +276,7 @@ body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
 # Reshape the aspects previously specified by click{}
 # to the specified value. Aspects are modified by the relevent
 # x or y coordinate only.
-# Drag assumes that click has already been called on the picture,
+# Drag assumes that click has already been called on the item,
 # and will function unpredictably if not.
 #
 body ::tycho::Shape::_reshapedrag {id canvas slate x y} {
@@ -288,9 +288,9 @@ body ::tycho::Shape::_reshapedrag {id canvas slate x y} {
 #
 # _Abstract procedure._
 # Terminate a click-drag-release sequence. If a ghost is
-# being reshaped, then the picture is reshaped to the shape of the ghost
+# being reshaped, then the item is reshaped to the shape of the ghost
 # and the ghost is deleted. Note: A release must be used to terminate
-# the click-drag-release sequence, even if not ghosting the picture.
+# the click-drag-release sequence, even if not ghosting the item.
 #
 body ::tycho::Shape::_reshaperelease {id canvas slate x y} {
     error "Abstract procedure"

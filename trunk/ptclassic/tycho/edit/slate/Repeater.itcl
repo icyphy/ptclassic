@@ -36,10 +36,10 @@
 # button is held down. As with all interactor callbacks, the called
 # command has the current coordinates passed to it, so that the
 # command can modify its action according to the current position
-# within the picture.
+# within the item.
 #
 # <b>Caveat</b>: the command is still called repeatedly even if the mouse
-# is moved outside the picture while the mouse is held down. This
+# is moved outside the item while the mouse is held down. This
 # interactor should perhaps have another option that controls whether
 # this happens or not.
 #
@@ -118,10 +118,10 @@ class ::tycho::Repeater {
     ###################################################################
     ####                         public methods                    ####
 
-    # Attach the interactor to the current picture
+    # Attach the interactor to the current item
     method activate {t x y args} {}
 
-    # Remove the interactor from the current picture
+    # Remove the interactor from the current item
     method deactivate {args} {}
 
     # Record a mouse movement
@@ -149,14 +149,14 @@ class ::tycho::Repeater {
 #######################################################################
 #### activate target x y
 #
-# Attach the interactor to the current picture. After setting up bindings 
+# Attach the interactor to the current item. After setting up bindings 
 # for the motion and release events, the *-command* script is executed,
 # and a delayed call to reactivate{} set up for *-delay* milliseconds 
 # later.
 #
 body ::tycho::Repeater::activate {t x y args} {
     # Set the target. If the target argument is
-    # in fact a tag, get the current picture from the slate.
+    # in fact a tag, get the current item from the slate.
     target [$slate find withtag current]
     
     # Set up the bindings.
@@ -182,7 +182,7 @@ body ::tycho::Repeater::activate {t x y args} {
 #######################################################################
 #### deactivate
 #
-# Remove this interactor from the current picture. This removes
+# Remove this interactor from the current item. This removes
 # the mouse bindings, cancels the delayed command, and clears the target.
 #
 body ::tycho::Repeater::deactivate {args} {
