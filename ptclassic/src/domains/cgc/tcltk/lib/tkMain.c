@@ -565,9 +565,24 @@ int main(int argc, char *argv[]) {
 		argv[0], interp->result);
 	exit(1);
     }
+
     Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
     w = Tk_MainWindow(interp);
 #endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
+
+    /* Add [incr Tcl] and [incr Tk] */
+    if (Itcl_Init(interp) == TCL_ERROR) {
+	fprintf(stderr,
+		"%s: Error while trying to initialize [incr tcl]: %s\n",
+		argv[0], interp->result);
+	exit(1);
+      }
+    if (Itk_Init(interp) == TCL_ERROR)  {
+	fprintf(stderr,
+		"%s: Error while trying to initialize [incr Tk]: %s\n",
+		argv[0], interp->result);
+	exit(1);
+    }
 
     if (w == NULL) {
 	fprintf(stderr,
