@@ -11,7 +11,7 @@ Header file for util.c
 
 #define UFree(buf) (void) free((buf))
 
-#define DEFAULT_DOMAIN "SDF"
+extern char DEFAULT_DOMAIN[];
 
 extern boolean UMalloc();
 extern boolean StrDup();
