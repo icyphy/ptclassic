@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 int
 util_csystem(s)
-char *s;
+const char *s;
 {
     register SIGNAL_FN (*istat)(), (*qstat)();
 #ifdef WAIT_TAKES_INT_STAR
