@@ -1,0 +1,41 @@
+% Version $Id$
+% Author:	T. M. Parks
+% Created:	11 February 1994
+
+\date{$Date$}
+\alwaysrefill
+\setfilename{userMan.info}
+
+\node Top
+
+\begin{iftex}
+\begin{titlepage}
+\centering
+\Huge\bsf
+The Almagest \\
+\comment \psfig{figure=\FIGURES/PtolemySmall.epsi,width=\textwidth}
+Volume \thevolume :  A User's Guide to Ptolemy 0.5
+\end{titlepage}
+
+\clearpage
+\pagestyle{empty}
+\vspace*{\fill}
+\input{copyright.tex}
+
+\clearpage
+\pagestyle{headings}
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\end{iftex}
+
+\begin{ifinfo}
+\title{The Almagest\\
+A User's Guide to Ptolemy 0.5}
+\author{}
+\maketitle
+\end{ifinfo}
+
