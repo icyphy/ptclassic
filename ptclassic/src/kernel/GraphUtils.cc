@@ -37,28 +37,17 @@ Programmer: Jose Luis Pino
 
 #include "GraphUtils.h"
 #include "InfString.h"
+#include "GalIter.h"
 #include <string.h>
 
-GalGalaxyIter::GalGalaxyIter(Galaxy& g) : GalAllBlockIter(g) {}
-
-// This method returns the next star.
-Galaxy* GalGalaxyIter::next() {
-    while (1) {
-	Block* b = GalAllBlockIter::next();
-	if (!b) return 0;
-	if (!b->isItAtomic()) return &(b->asGalaxy());
-    }
-}
-
-CGalGalaxyIter::CGalGalaxyIter(const Galaxy& g) : CGalAllBlockIter(g) {}
-
-// This method returns the next star.
-const Galaxy* CGalGalaxyIter::next() {
-    while (1) {
-	const Block* b = CGalAllBlockIter::next();
-	if (!b) return 0;
-	if (!b->isItAtomic()) return &(b->asGalaxy());
-    }
+DSGalAllBlockIter::DSGalAllBlockIter(Galaxy&g,int(*test)(Block&))
+:testBlock(test){
+    GalAllBlockIter nextBlock(g);
+    Block *block;
+    while ((block = nextBlock++) != NULL)
+	if (testBlock(*block))
+	    blocksThatMeetTest.put(*block);
+    nextBlockThatMeetsTest = new BlockListIter(blocksThatMeetTest);
 }
 
 // function to count stars in a galaxy
