@@ -137,10 +137,11 @@ WILDFORCE_DIR 	= $(WF4_BASE)
 WILDFORCE_INCL	= $(WILDFORCE_DIR)/include
 WILDFORCE_LIBSPEC = -L$(WILDFORCE_DIR)/lib -lWF4
 
-# Uncomment the two lines below if you have the Annapolis 
+# Uncomment the three lines below if you have the Annapolis 
 # Micro Systems Wildforce board and software
 #WILDFORCECFLAGS = -DPT_WILDFORCE -I$(WILDFORCE_INCL)
 #SDFWILDFORCE =	1
+#WILDFORCE = wildforce	
 
 #
 # Variables for miscellaneous programs
