@@ -641,6 +641,20 @@ int PTcl::knownlist (int argc,char** argv) {
 	return TCL_OK;
 }
 
+int PTcl::isgalaxy (int argc,char ** argv) {
+	if (argc != 2)
+		return usage ("isgalaxy <block>");
+	const Block* b = getBlock(argv[1]);
+	if (!b) return TCL_ERROR;
+	if (b->isItAtomic()) {
+            result("0");
+	} else {
+            result("1");
+        }
+	// empty value returned for atomic blocks
+	return TCL_OK;
+}
+
 int PTcl::topblocks (int argc,char ** argv) {
 	if (argc > 2)
 		return usage ("topblocks ?<block-or-classname>?");
@@ -1187,6 +1201,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(exit),
 	ENTRY(halt),
 	ENTRY(initialize),
+        ENTRY(isgalaxy),
 	ENTRY(knownlist),
 	ENTRY(link),
 	ENTRY(listobjs),
