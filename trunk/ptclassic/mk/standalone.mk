@@ -38,6 +38,11 @@
 # where the suffix is one of: .bin, .debug, .purify, .quantify, .purecov
 #
 
+# matlab.mk and mathematica.mk check these vars before traversing the path
+NEED_MATLABDIR =        1
+NEED_MATHEMATICADIR =   1
+
+
 ROOT=$(PTOLEMY)
 
 ifndef NOPTOLEMY
