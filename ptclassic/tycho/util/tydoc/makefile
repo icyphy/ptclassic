@@ -1,10 +1,10 @@
-# Makefile for the Tycho tycho.util.tydoc package
+# Makefile for the Tycho tycho.edit.tydoc package
 #
 # @Author: Christopher Hylands
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1998 The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -35,7 +35,7 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/util/tydoc
+VPATH =		$(ROOT)/edit/tydoc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -46,15 +46,24 @@ DIRS =
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS =  \
+	ClassModel.itcl \
+	ClassParser.itcl \
+	ClassViewer.itcl \
+	ItclParser.itcl \
+	ItclViewer.itcl \
+	JavaParser.itcl \
+	JavaViewer.itcl \
+	MultiPanel.itcl \
+	TyDocMain.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	tydoc.tcl \
 	README.txt \
-	makefile \
-	pkgIndex.tcl
+	pkgIndex.tcl \
+	tydoc.style
 
-MISC_FILES = adm bin demos doc test
+MISC_FILES = adm bin demo doc test tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
