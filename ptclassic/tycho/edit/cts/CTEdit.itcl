@@ -71,6 +71,9 @@ class ::tycho::EditCTS {
 #### constructor
 #
 body ::tycho::EditCTS::constructor {args} {
+    # Initialize options
+    eval itk_initialize $args
+
     # Set the "mode" of the graph model so it will
     # be loaded correctly later
     # FIXME: Is this the right place for this?
