@@ -3,7 +3,7 @@ static const char file_id[] = "CGCDomain.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -41,14 +41,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCForkNode.h"
 #include "CGCWormhole.h"
 
-// for error messages (temporary, until wormholes exist):
-#include "Error.h"
-
 extern const char CGCdomainName[] = "CGC";
 
 class CGCDomain : public Domain {
 public:
-	// no XXXinCGC wormholes yet, so no newWorm
 	Star& newWorm(Galaxy& innerGal, Target* tg)  {
 		LOG_NEW; return *new CGCWormhole(innerGal, tg);
 	}
