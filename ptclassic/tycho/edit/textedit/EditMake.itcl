@@ -189,6 +189,6 @@ body ::tycho::EditMake::parseNow {start stop} {
 # "editmake" preferences.
 #
 body ::tycho::EditMake::preference {mode args} {
-    eval ::preference $mode "editmake" $args
+    eval ::tycho::preference $mode "editmake" $args
 }
 
