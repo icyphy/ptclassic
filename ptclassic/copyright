@@ -25,3 +25,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Note that some programs are distributed with Ptolemy for the convenience
 of the user, but are not covered by the above copyright notice.
 These include xv and all Gnu software.
+
+xv is under the following copyright:
+
+Copyright Notice
+----------------
+Copyright 1989, 1990, 1991, 1992 by John Bradley 
+              and the University of Pennsylvania
+
+Permission to use, copy, and distribute for non-commercial purposes,
+is hereby granted without fee, providing that the above copyright
+notice appear in all copies and that both the copyright notice and this
+permission notice appear in supporting documentation. 
+
+The software may be modified for your own purposes, but modified versions
+may not be distributed without prior consent of the the author.
+
+This software is provided "as is" without any express or implied warranty.
+
+The author may be contacted via:
+    US Mail:   John Bradley
+               GRASP Lab, Room 312C
+               3401 Walnut St.  
+               Philadelphia, PA  19104
+
+    Phone:     (215) 898-8813
+    EMail:     bradley@cis.upenn.edu       
+
+
+If you'd like to do something with XV that the copyright prohibits (such
+as include it in a commercial product), please contact the author (preferably
+through email).  Arrangements can probably be worked out.
+
