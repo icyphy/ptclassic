@@ -153,38 +153,43 @@ It performs most of its computation during its setup() phase.
 The default scheduler
 exactly implements the method described in [1] for sequential schedules.
 If there are sample rate changes in a program graph, some parts of the
-graph are executed multiple times, which may be looped. 
-The default scheduler does not consider the looping possibility and
-generates a list of blocks to be executed. For example, if star A is
+graph are executed multiple times.
+The default scheduler does not attempt to generate loops; it simply
+generates a linear list of blocks to be executed. For example, if star A is
 executed 100 times, the generated schedule includes 100 instances of A.
 .Id "loop scheduler, SDF"
 .Id "SDF loop scheduler"
-A loop scheduler will include only one instance on A and indicate 
+A loop scheduler will include in its schedule (where possible)
+only one instance of A and indicate 
 the repetition count of A somehow, say 100(A).
-For simulation, it might be tolerable, but not in the code generation
+For simulation, a long unstructured list might be tolerable,
+but not in code generation
 (The SDF schedulers are also used in the code generation for a 
 single processor target). 
 .pp
 By setting the
 .c loopScheduler
 .Ir "loopScheduler, parameter"
-.Id "Joe's scheduling"
+.Id "loop scheduling algorithm"
 target parameter, we can select a scheduler developed by J. Buck.
-Before applying the default scheduling algorithm, J. Buck clusters
-blocks as long as the program graph is dead-locked. 
-This clustering algorithm consists of 
-the "merging" step and the "looping" step repeatedly. 
+Before applying the default scheduling algorithm, this algorithm collects
+actors into a hierarchy of clusters.
+This clustering algorithm consists of alternating a
+"merging" step and a "looping" step until no further changes can be made. 
 In the merging step, blocks connected together 
 are merged into a cluster if there is no sample rate change between
-them. In the looping step, a cluster is looped to make it possible to 
+them and the merge will not introduce deadlock. In the looping step,
+a cluster is looped to make it possible to 
 be merged with the neighbor blocks or clusters.
 Since this looping algorithm is conservative, some complicated looping
-possibilities, if rare,  are not disclosed.
+possibilities are not disclosed.
 .pp
-The more complicated looping algorithm was developed by three colleagues,
-called "SJS" (Shuvra-Joe-Soonhoi) scheduling.
+The more complicated looping algorithm was developed by combining
+postprocessing steps to the above algorithm to handle cases that
+it cannot handle.  For lack of a better name, we call this technique
+"SJS scheduling", for the first initials of the designers.
 .Id "SJS scheduling"
-We apply Joe's scheduling as the first pass. In the
+We apply the previously described scheduling algorithm as the first pass. In the
 second pass, we decompose the graph (S. Bhattacharyya's contribution) so
 that the graph becomes acyclic. The decomposed graphs are
 expanded to acyclic precedence graphs in which looping structures are
