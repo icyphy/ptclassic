@@ -460,8 +460,9 @@ proc ptkGantt_DrawProcLabels {chart} {
 
     set layoutPositions [spread $ptkGantt_Layout($chart.numprocs) \
 	    [expr $base + $ptkGantt_Layout($chart.graphTop) ]\
-	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ] \
-	    -indented]
+	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ]]
+
+#	    -indented
 
     foreach* location $layoutPositions -counter n {
 	$chart.proclabel create text \
@@ -600,9 +601,8 @@ proc ptkGantt_RedrawLabels {chart stars} {
     set base [expr [winfo y $chart.canvas] - [winfo y $chart.proclabel]]
     set layoutPositions [spread $ptkGantt_Layout($chart.numprocs) \
 	    [expr $base + $ptkGantt_Layout($chart.graphTop) ]\
-	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ] \
-	    -indented ]
-
+	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ] ]
+#	    -indented R
     foreach s $stars {
 	assign star proc $s
 
@@ -1102,9 +1102,9 @@ proc gantt_measureLabel {canvas value} {
 # #
 # # rectWidth: return the width of a rectangle
 # #
-# proc rectWidth {rect} {
-#     return [expr [x1 $rect] - [x0 $rect]]
-# }
+proc rectWidth {rect} {
+     return [expr [x1 $rect] - [x0 $rect]]
+}
 # 
 # 
 # 
@@ -1113,139 +1113,138 @@ proc gantt_measureLabel {canvas value} {
 # #
 # # Extract coordinates from a 2-list
 # #
-# proc x {xy} {
-#     return [lindex $xy 0]
-# }
+proc x {xy} {
+    return [lindex $xy 0]
+}
+
+proc y {xy} {
+    return [lindex $xy 1]
+}
+
+
+#
+# x0, y0, x1, y1
+#
+# Extract coordinates from a 4-list
+#
+proc x0 {xy} {
+    return [lindex $xy 0]
+}
+
+proc y0 {xy} {
+    return [lindex $xy 1]
+}
+
+proc x1 {xy} {
+    return [lindex $xy 2]
+}
+
+proc y1 {xy} {
+    return [lindex $xy 3]
+}
+
+
+
+# mapping.tcl
+#
+# Utility functions for mapping between number ranges, scaling
+# intervals, and so on.
+#
+
+
+#
+# Given a number, round up or down to the nearest power of two.
+#
+proc roundUpTwo {x} {
+    set exp [expr ceil (log($x)/log(2))]
+    set x   [expr pow(2,$exp)]
+}
+
+proc roundDownTwo {x} {
+    set exp [expr floor (log($x)/log(2))]
+    set x   [expr pow(2,$exp)]
+}
+
+
+
+# Given a number, round up to the nearest power of ten
+# times 1, 2, or 5.
+#
+proc axisRoundUp {x} {
+    set exp [expr floor (log10($x))]
+    set x [expr $x * pow(10, -$exp)]
+
+    if {$x > 5.0} {
+	set x 10.0
+    } elseif {$x > 2.0} {
+	set x 5.0
+    } elseif {$x > 1.0 } {
+	set x 2.0
+    }
+
+    set x [expr $x * pow(10,$exp)]
+    return $x
+}
+
+ 
+#
+# Given a range, space, field width, and padding, figure out how
+# the field increment so they will fit.
+#
+proc axisIncrement {low high space width padding} {
+    set maxnum   [expr $space / ($width+$padding)]
+    set estimate [expr (double($high) - $low) / ($maxnum)]
+    set estimate [axisRoundUp $estimate]
+
+    return $estimate
+}
+
 # 
-# proc y {xy} {
-#     return [lindex $xy 1]
-# }
-# 
-# 
-# #
-# # x0, y0, x1, y1
-# #
-# # Extract coordinates from a 4-list
-# #
-# proc x0 {xy} {
-#     return [lindex $xy 0]
-# }
-# 
-# proc y0 {xy} {
-#     return [lindex $xy 1]
-# }
-# 
-# proc x1 {xy} {
-#     return [lindex $xy 2]
-# }
-# 
-# proc y1 {xy} {
-#     return [lindex $xy 3]
-# }
-# 
-# 
-# 
-# #
-# # mapping.tcl
-# #
-# # Utility functions for mapping between number ranges, scaling
-# # intervals, and so on.
-# #
-# 
-# 
-# #
-# # Given a number, round up or down to the nearest power of two.
-# #
-# proc roundUpTwo {x} {
-#     set exp [expr ceil (log($x)/log(2))]
-#     set x   [expr pow(2,$exp)]
-# }
-# 
-# proc roundDownTwo {x} {
-#     set exp [expr floor (log($x)/log(2))]
-#     set x   [expr pow(2,$exp)]
-# }
-# 
-# 
-# #
-# # Given a number, round up to the nearest power of ten
-# # times 1, 2, or 5.
-# #
-# proc axisRoundUp {x} {
-#     set exp [expr floor (log10($x))]
-#     set x [expr $x * pow(10, -$exp)]
-# 
-#     if {$x > 5.0} {
-# 	set x 10.0
-#     } elseif {$x > 2.0} {
-# 	set x 5.0
-#     } elseif {$x > 1.0 } {
-# 	set x 2.0
-#     }
-# 
-#     set x [expr $x * pow(10,$exp)]
-#     return $x
-# }
-# 
-# 
-# #
-# # Given a range, space, field width, and padding, figure out how
-# # the field increment so they will fit.
-# #
-# proc axisIncrement {low high space width padding} {
-#     set maxnum   [expr $space / ($width+$padding)]
-#     set estimate [expr (double($high) - $low) / ($maxnum)]
-#     set estimate [axisRoundUp $estimate]
-# 
-#     return $estimate
-# }
-# 
-# 
-# #
-# # Given a range and an increment, return the list of numbers
-# # within that range and on that increment.
-# #
-# proc rangeValues {low high inc} {
-#     set result {}
-#     set n      1
-# 
-#     set val [roundUpTo $low $inc]
-#     while {$val <= $high} {
-# 	lappend result $val
-# 	set val [expr $val + $n * $inc]
-#     }
-# 
-#     return $result
-# }
-# 
-# 
-# #
-# # Given two ranges and a list of numbers in the first range,
-# # produce the mapping of that list to the second range.
-# #
-# proc mapRange {low high values lowdash highdash} {
-#     set result {}
-# 
-#     set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
-#     foreach n $values {
-# 	lappend result [expr $lowdash + ($n-$low) * $scale]
-#     }
-# 
-#     return $result
-# }
-# 
-# 
-# #
-# # Given two numbers, round the first up or down to the
-# # nearest multiple of the second.
-# #
-# proc roundDownTo {x i} {
-#     return [expr $i * (floor($x/$i))]
-# }
-# 
-# proc roundUpTo {x i} {
-#     return [expr $i * (ceil($x/$i))]
-# }
+#
+# Given a range and an increment, return the list of numbers
+# within that range and on that increment.
+#
+proc rangeValues {low high inc} {
+set result {}
+set n      1
+
+set val [roundUpTo $low $inc]
+while {$val <= $high} {
+lappend result $val
+set val [expr $val + $n * $inc]
+}
+
+return $result
+}
+
+
+#
+# Given two ranges and a list of numbers in the first range,
+# produce the mapping of that list to the second range.
+#
+proc mapRange {low high values lowdash highdash} {
+set result {}
+
+set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
+foreach n $values {
+lappend result [expr $lowdash + ($n-$low) * $scale]
+}
+
+return $result
+}
+
+
+#
+# Given two numbers, round the first up or down to the
+# nearest multiple of the second.
+#
+proc roundDownTo {x i} {
+return [expr $i * (floor($x/$i))]
+}
+
+proc roundUpTo {x i} {
+return [expr $i * (ceil($x/$i))]
+}
 # 
 # 
 # 
@@ -1318,236 +1317,237 @@ proc foreach* {args} {
 	incr counter
     }
 }
-# 
-# 
+
+
+#
+# loop
+#
+# Loop $n times. Called as "loop n body." The -counter option
+# introduces the name of a variable that ranges from 0 to $n-1.
+#
+# "body" cannot contain return commands. This could be fixed
+# if it ever becomes a problem --- see pg 123 of Ousterhout's
+# book.
+#
+proc loop {args} {
+set v [readopt counter args]
+if {$v != ""} {
+upvar $v counter
+}
+
+set n    [lindex $args 0]
+set body [lindex $args 1]
+for {set counter 0} {$counter < $n} {incr counter} {
+uplevel $body
+}
+}
+
+
+#
+# readopt
+#
+# Read an option argument, like getopt{}, but instead of setting
+# a variable return the read value of the option.
+#
+# The argument list is modified as for getopt{}.
+#
+# Example:
+#
+#    set thing [readopt fred args]
+#
+# Note that readopt{} does not make getopt{} redundant, since getopt{]
+# does not change the option variable if the option is not present.
+#
+proc readopt {option listname} {
+
+upvar $listname l
+
+set t [lsearch -exact $l -$option]
+if { $t != -1 } {
+set v [lindex   $l [expr $t+1]]
+set l [lreplace $l $t [expr $t+1]]
+
+return $v
+}
+return ""
+}
+
+
+#
+# getflag
+#
+# Like getopt{}, but set the option variable to 1 if the
+# option flag is there, else 0. Delete the option flag 
+# from the argument list.
+#
+proc getflag {option listname} {
+
+upvar $listname l
+upvar $option   v
+
+set t [lsearch -exact $l -$option]
+if { $t != -1 } {
+set v 1
+set l [lreplace $l $t $t]
+
+return 1
+} else {
+set v 0
+
+return 0
+}
+}
+
+
+#
+# assign
+#
+# Assign elements of a list to multiple variables. Doesn't
+# care if the list is longer than the number of variables, ot
+# the list is too short. (Should probably at least put an assertion
+# in here...)
+#
+proc assign {args} {
+foreach* var [linit $args] val [llast $args] {
+upvar $var v
+set v $val
+}
+}
+
+
+#
+# list.itcl
+#
+# Utility functions on lists. See also syntax.tcl.
+#
+
+proc lhead {list} {
+return [lindex $list 0]
+}
+
+#proc lhead {list} {
+#    return [lindex $list 0
+#}
+
+proc ltail {list} {
+return [lreplace $list 0 0]
+}
+
+proc linit {list} {
+return [ltake $list [expr [llength $list] - 1]]
+}
+
+proc llast {list} {
+return [lindex $list [expr [llength $list] - 1]]
+}
+
+
+#
+# Test for a null list (or element). Written the way it is
+# because a) `==' cannot be used if the list starts with a number and b
+# llength is not so good because it traverses the whole list.
+#
+# The second case checks for the list being null but indicated
+# by empty braces. I'm confused as to why I need this...
+#
+proc lnull {list} {
+return [expr (! [string match "?*" $list]) \
+|| [string match "{}" $list]]
+}
+
+
+#
+# Take or drop list elements
+#
+proc ltake {list n} {
+return [lrange $list 0 [expr $n - 1]]
+}
+
+proc ldrop {list n} {
+return [lreplace $list 0 [expr $n-1]]
+}
+
+proc ldropUntil {list item} {
+set index [lsearch -exact $list $item]
+if { $index == -1 } {
+return {}
+} else {
+return [ldrop $list $index]
+}
+}
+
+
+#
+# Make a list containing n copies of the specified item
+#
+proc lcopy {n item} {
+set result {}
+loop $n {
+lappend result $item
+}
+return $result
+}
+
+
+#
+# Return list of n integers in the range x to y
 # #
-# # loop
-# #
-# # Loop $n times. Called as "loop n body." The -counter option
-# # introduces the name of a variable that ranges from 0 to $n-1.
-# #
-# # "body" cannot contain return commands. This could be fixed
-# # if it ever becomes a problem --- see pg 123 of Ousterhout's
-# # book.
-# #
-# proc loop {args} {
-#     set v [readopt counter args]
-#     if {$v != ""} {
-# 	upvar $v counter
-#     }
-# 
-#     set n    [lindex $args 0]
-#     set body [lindex $args 1]
-#     for {set counter 0} {$counter < $n} {incr counter} {
-# 	uplevel $body
-#     }
-# }
-# 
-# 
-# #
-# # readopt
-# #
-# # Read an option argument, like getopt{}, but instead of setting
-# # a variable return the read value of the option.
-# #
-# # The argument list is modified as for getopt{}.
-# #
-# # Example:
-# #
-# #    set thing [readopt fred args]
-# #
-# # Note that readopt{} does not make getopt{} redundant, since getopt{]
-# # does not change the option variable if the option is not present.
-# #
-# proc readopt {option listname} {
-# 
-#     upvar $listname l
-# 
-#     set t [lsearch -exact $l -$option]
-#     if { $t != -1 } {
-# 	set v [lindex   $l [expr $t+1]]
-# 	set l [lreplace $l $t [expr $t+1]]
-# 
-# 	return $v
-#     }
-#     return ""
-# }
-# 
-# 
-# #
-# # getflag
-# #
-# # Like getopt{}, but set the option variable to 1 if the
-# # option flag is there, else 0. Delete the option flag 
-# # from the argument list.
-# #
-# proc getflag {option listname} {
-# 
-#     upvar $listname l
-#     upvar $option   v
-# 
-#     set t [lsearch -exact $l -$option]
-#     if { $t != -1 } {
-# 	set v 1
-# 	set l [lreplace $l $t $t]
-# 
-# 	return 1
-#     } else {
-# 	set v 0
-# 
-# 	return 0
-#     }
-# }
-# 
-# 
-# #
-# # assign
-# #
-# # Assign elements of a list to multiple variables. Doesn't
-# # care if the list is longer than the number of variables, ot
-# # the list is too short. (Should probably at least put an assertion
-# # in here...)
-# #
-# proc assign {args} {
-#     foreach* var [linit $args] val [llast $args] {
-# 	upvar $var v
-# 	set v $val
-#     }
-# }
-# 
-# 
-# #
-# # list.itcl
-# #
-# # Utility functions on lists. See also syntax.tcl.
-# #
-# 
-# proc lhead {list} {
-#     return [lindex $list 0]
-# }
-# 
-# #proc lhead {list} {
-# #    return [lindex $list 0
-# #}
-# 
-# proc ltail {list} {
-#     return [lreplace $list 0 0]
-# }
-# 
-# proc linit {list} {
-#     return [ltake $list [expr [llength $list] - 1]]
-# }
-# 
-# proc llast {list} {
-#     return [lindex $list [expr [llength $list] - 1]]
-# }
-# 
-# 
-# #
-# # Test for a null list (or element). Written the way it is
-# # because a) `==' cannot be used if the list starts with a number and b
-# # llength is not so good because it traverses the whole list.
-# #
-# # The second case checks for the list being null but indicated
-# # by empty braces. I'm confused as to why I need this...
-# #
-# proc lnull {list} {
-#     return [expr (! [string match "?*" $list]) \
-# 	         || [string match "{}" $list]]
-# }
-# 
-# 
-# #
-# # Take or drop list elements
-# #
-# proc ltake {list n} {
-#     return [lrange $list 0 [expr $n - 1]]
-# }
-# 
-# proc ldrop {list n} {
-#     return [lreplace $list 0 [expr $n-1]]
-# }
-# 
-# proc ldropUntil {list item} {
-#     set index [lsearch -exact $list $item]
-#     if { $index == -1 } {
-# 	return {}
-#     } else {
-# 	return [ldrop $list $index]
-#     }
-# }
-# 
-# 
-# #
-# # Make a list containing n copies of the specified item
-# #
-# proc lcopy {n item} {
-#     set result {}
-#     loop $n {
-# 	lappend result $item
-#     }
-#     return $result
-# }
-# 
-# 
-# #
-# # Return list of n integers in the range x to y
-# #
-# proc interval {x y} {
-#     set result {}
-# 
-#     while { $x <= $y } {
-# 	lappend result $x
-# 	incr x +1
-#     }
-# 
-#     return $result
-# }
-# 
-# 
-# #
-# # Test whether an element is in a list
-# #
-# proc lmember {list item} {
-#     return [expr [lsearch -exact $list $item] != -1]
-# }
-# 
-# 
-# #
-# # Remove an item from a list
-# #
-# proc ldelete {list item} {
-#     set i [lsearch -exact $list $item]
-# 
-#     if { $i != -1 } {
-# 	return [lreplace $list $i $i]
-#     }
-# 
-#     return $list
-# }
-# 
-# 
-# #
-# # Return list of n numbers in the range x to y, but with
-# # half the interval before the first and last numbers.
-# #
-# # This is useful for spacing graphical elements "evenly" along
-# # a given distance.
-# #
-# proc spread {n x y} {
-#     set result {}
-#     set i      0
-#     set delta  [expr (double($y) - $x) / $n]
-# 
-#     set x [expr $x + $delta / 2]
-#     while { $i < $n } {
-# 	lappend result [expr $x + $i * $delta]
-# 
-# 	incr i +1
-#     }
-# 
-#     return $result
-# }
+proc interval {x y} {
+     set result {}
+ 
+     while { $x <= $y } {
+ 	lappend result $x
+ 	incr x +1
+     }
+ 
+     return $result
+}
+
+
+
+#
+# Test whether an element is in a list
+#
+proc lmember {list item} {
+return [expr [lsearch -exact $list $item] != -1]
+}
+
+
+#
+# Remove an item from a list
+#
+proc ldelete {list item} {
+    set i [lsearch -exact $list $item]
+
+    if { $i != -1 } {
+        return [lreplace $list $i $i]
+    }
+
+    return $list
+}
+
+
+#
+# Return list of n numbers in the range x to y, but with
+# half the interval before the first and last numbers.
+#
+# This is useful for spacing graphical elements "evenly" along
+# a given distance.
+#
+proc spread {n x y} {
+    set result {}
+    set i      0
+    set delta  [expr (double($y) - $x) / $n]
+
+    set x [expr $x + $delta / 2]
+    while { $i < $n } {
+        lappend result [expr $x + $i * $delta]
+
+        incr i +1
+    }
+
+    return $result
+}
 
 
 
