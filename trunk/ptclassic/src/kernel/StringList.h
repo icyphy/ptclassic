@@ -61,129 +61,148 @@ which uses the const char* conversion implicitly.
 #include "miscFuncs.h"
 #include "DataStruct.h"
 
+/***********************************************************************
+
+  An ordered list of char *s that may grow arbitrarily
+
+  @Author	J. Buck
+
+  @Description StringList stores a list of char* strings, and can then
+               read them back one-by-one, or can concatinate them into
+               a single char* string. A StringList can only grow;
+               there is no way to take something away that has been
+               added to the list. <P>
+
+               StringList implements a small subset of the functin of
+	       the String class that will someday be an ANSI
+	       standard. <P>
+
+	       <B>WARNING</B>: if a function or expression returns a
+	       StringList, and that value is not assigned to a
+	       StringList variable or reference, and the (const char*)
+	       cast is used, it is possible (likely under g++) that
+	       the StringList temporary will be destroyed too soon,
+	       leaving the const char* pointer pointing to garbage.
+	       Always assign temporary StringLists to StringList
+	       variables or references before using the const char*
+	       conversion.  This includes code like
+
+<PRE>
+strcpy(destBuf,functionReturningStringList());
+</PRE>
+
+	       which uses the const char* conversion implicitly. <P>
+
+	       <B>Note</B> all components of a StringList are in
+	       dynamic memory, and are deleted by the StringList
+	       destructor.
+
+***********************************************************************/
 class StringList : private SequentialList
 {
-	friend class StringListIter;
+  friend class StringListIter;
 public:
-	// Constructors
-	// Note: StringList foo = bar; calls the constructor,
-	// if bar is char*, int, or double
-	StringList() : totalSize(0) {}
+  StringList() : totalSize(0) {}
+  StringList(char c);
+  StringList(const char* s);
+  StringList(int i); 
+  StringList(double d);
+  StringList(unsigned u);
+  StringList(const StringList& s);
 
-	StringList(char c);
+  ~StringList();
 
-	StringList(const char* s);
+  void initialize();
 
-	StringList(int i);
+  StringList& operator = (const StringList& sl);
+  StringList& operator = (const char* s);
+  StringList& operator = (char c);
+  StringList& operator = (int i);
+  StringList& operator = (double d);
+  StringList& operator = (unsigned u);
+  
+  StringList& operator << (const char*);
+  StringList& operator << (char);
+  StringList& operator << (int);
+  StringList& operator << (unsigned int);
+  StringList& operator << (double);
+  StringList& operator << (const StringList&);
 
-	StringList(double d);
-	StringList(unsigned u);
+  // Return first string on the list
+  inline const char* head() const {
+    return (const char*)SequentialList::head();
+  }
 
-	// Copy constructor
-	StringList(const StringList& s);
+  // Return last string on list
+  inline const char* tail() const {
+    return (const char*)SequentialList::tail();
+  }
 
-	// initialize
-	void initialize();
+  // Return the length in characters.
+  inline int length() const { return totalSize;}
 
-	// Assignment operator
-	StringList& operator = (const StringList& sl);
-	StringList& operator = (const char* s);
-	StringList& operator = (char c);
-	StringList& operator = (int i);
-	StringList& operator = (double d);
-	StringList& operator = (unsigned u);
+  // Return the number of pieces
+  inline int numPieces() const { return size();}
 
-	// Destructor
-	~StringList();
+  /*****
+    Convert to const char*
 
-        // Add a thing to list
-        StringList& operator << (const char*);
-	StringList& operator << (char);
-	StringList& operator << (int);
-	StringList& operator << (unsigned int);
-	StringList& operator << (double);
-	StringList& operator << (const StringList&);
+    @Description <B>NOTE</B> This operation modifies the StringList --
+                 it calls the private consolidate method to collect
+                 all strings into one string and clean up the garbage.
+                 No modification happens if the StringList is already
+                 in one chunk.  A null pointer is always returned if
+                 there are no characters, never "".
+   *****/
+  inline operator const char* () { return consolidate();}
 
-	// Return first string on list
-	inline const char* head() const {
-		return (const char*)SequentialList::head();
-	}
+  /*****
+     Allow write access to the buffer after consolidation.
 
-	// Return last string on list
-	inline const char* tail() const {
-		return (const char*)SequentialList::tail();
-	}
+     @Description <B>WARNING</B>: this is to permit StringLists to be
+     		  used with routines that incorrectly request a char*
+     		  when a const char* would do, or things like Tcl that
+     		  may temporarily modify the argument but that restore
+     		  it to its original form before returning.  If used
+     		  otherwise, no promises are made.
+   *****/
+  inline char * chars() { return consolidate();}
+ 
+  char* newCopy() const;
 
-	// Return the length in characters.
-	inline int length() const { return totalSize;}
-	// Return the number of pieces
-	inline int numPieces() const { return size();}
+  // Append a string (old syntax)
+  inline StringList& operator += (const char* arg) { return *this << arg; }
 
-	// Convert to const char*
-	// NOTE!!  This operation modifies the StringList -- it calls
-	// the private consolidate method to collect all strings into
-	// one string and clean up the garbage.  No modification happens
-	// if the StringList is already in one chunk.  A null pointer
-	// is always returned if there are no characters, never "".
-	inline operator const char* () { return consolidate();}
+  // Append a character (old syntax)
+  inline StringList& operator += (char arg) { return *this << arg; }
 
-	// Allow write access to the buffer after consolidation.
-	// WARNING: this is to permit StringLists to be used with
-	// routines that incorrectly request a char* when a const char*
-	// would do, or things like Tcl that may temporarily modify
-	// the argument but that restore it to its original form before
-	// returning.  If used otherwise, no promises are made.
-	inline char * chars() { return consolidate();}
-	
-	// Make a copy of the StringList as a char* in dynamic memory.
-	// the user is responsible for deletion.
-	char* newCopy() const;
+  // Append a double (old syntax)
+  inline StringList& operator += (double arg) { return *this << arg; }  
 
-// add objects to a StringList, old syntax
+  // Append an integer (old syntax)
+  inline StringList& operator += (int arg) { return *this << arg; }
 
-	inline StringList& operator += (const char* arg) {
-		return *this << arg;
-	}
+  // Append a StringList (old syntax)
+  inline StringList& operator += (const StringList& arg) { return *this << arg; }
 
-	inline StringList& operator += (char arg) {
-		return *this << arg;
-	}
-
-	inline StringList& operator += (double arg) {
-		return *this << arg;
-	}
-
-	inline StringList& operator += (int arg) {
-		return *this << arg;
-	}
-
-	inline StringList& operator += (const StringList& arg) {
-		return *this << arg;
-	}
-
-	inline StringList& operator += (unsigned int arg) {
-		return *this << arg;
-	}
+  // Append an unsigned int
+  inline StringList& operator += (unsigned int arg) { return *this << arg; }
 
 protected:
-	// change chunks into one chunk
 	char* consolidate();
 
 private:
-	// copy constructor body
 	void copy(const StringList&);
-
 	int totalSize;
 };
 
 // An Iterator for StringList
-
 class StringListIter : private ListIter {
 public:
-	StringListIter(const StringList& s) : ListIter(s) {}
-	inline const char* next() { return (const char*)ListIter::next();}
-	inline const char* operator++(POSTFIX_OP) { return next();}
-	ListIter::reset;
+  StringListIter(const StringList& s) : ListIter(s) {}
+  inline const char* next() { return (const char*)ListIter::next();}
+  inline const char* operator++(POSTFIX_OP) { return next();}
+  ListIter::reset;
 };
 
 // print a StringList on a stream

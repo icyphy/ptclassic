@@ -50,11 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define SMALL_STRING 32
 
-// Note: all components of a StringList are in dynamic memory,
-// and are deleted by the StringList destructor
-
     
-// Assignment operator
 StringList&
 StringList :: operator = (const StringList& sl) {
 	// check for assignment to self and do nothing
@@ -65,7 +61,6 @@ StringList :: operator = (const StringList& sl) {
 	return *this;
 }
 
-// Assignment operator, string argument
 StringList&
 StringList :: operator = (const char* s) {
 	if (size()) {
@@ -76,7 +71,6 @@ StringList :: operator = (const char* s) {
 	return *this;
 }
 
-// Assignment operator, char assignment
 StringList&
 StringList :: operator = (char c) {
 	char buf[2];
@@ -94,7 +88,6 @@ StringList& StringList :: operator = (unsigned u)
 {initialize(); return *this << u;}
 
 
-// Constructors
 StringList::StringList(const char* s) {
 	totalSize=strlen(s);
 	put(savestring(s));
@@ -117,7 +110,6 @@ void StringList::copy(const StringList& s) {
 	totalSize = s.totalSize;
 }
 
-// Copy constructor
 StringList::StringList (const StringList& s) {
 	copy(s);
 }
@@ -144,7 +136,7 @@ StringList :: operator << (const char* s) {
   return *this;
 }
 
-// Add in a char: uses the above method
+// Add in a char
 StringList&  
 StringList :: operator << (char c)
 {
@@ -154,7 +146,7 @@ StringList :: operator << (char c)
         return *this << buf;
 }
 
-// Add in an int: uses the above method
+// Add in an int
 StringList&  
 StringList :: operator << (int i)
 {
@@ -172,7 +164,15 @@ StringList :: operator << (unsigned int i)
 	return *this << buf;
 }
 
-// Add in a double: uses the above method
+/***********************************************************************
+
+   Add in a double
+
+   @Description Use %.15g as the format string and if the result looks
+                like an integer (i.e., there is no decimal point or
+                alphabetic characters), append ".0"
+
+***********************************************************************/
 StringList&
 StringList :: operator << (double f)
 {
@@ -201,7 +201,15 @@ StringList :: operator << (double f)
 	return *this << buf;
 }
 
-// Make a new (concatenated together) copy of the StringList string.
+// 
+
+/***********************************************************************
+
+   Make a concatenated together copy of the StringList string.
+
+   @Description The user is responsible for deletion.
+
+***********************************************************************/
 char*
 StringList :: newCopy () const {
 	LOG_NEW; char* s = new char[totalSize+1];
@@ -217,10 +225,15 @@ StringList :: newCopy () const {
 	return out;
 }
 
-// This method consolidates all strings into one string and returns the
-// memory.  It is used in the cast to const char* and in the chars()
-// method (which gives write access to the store).
+/***********************************************************************
 
+   Consolidate all the strings into a single char *
+
+   @Description The memory for the char * is allocated.  This method
+   		is used in the cast to const char* and in the chars()
+   		method (which gives write access to the store).
+
+***********************************************************************/
 char*
 StringList :: consolidate () {
 	// Handle empty StringList
@@ -239,7 +252,7 @@ StringList :: consolidate () {
 	return s;
 }
 
-// make the stringlist empty
+// Make the stringlist empty
 void StringList::initialize() {
 	totalSize = 0;
 	// note use of ListIter, not StringListIter, so we can delete
@@ -252,8 +265,13 @@ void StringList::initialize() {
 	SequentialList::initialize();
 }
 
-// destructor -- a subset of initialize since baseclass will do the
-// rest.
+/***********************************************************************
+
+  Free all strings in the StringList
+
+  @Description This is a subset of initialize since baseclass will do the rest.
+
+***********************************************************************/
 StringList::~StringList() {
 	// note use of ListIter, not StringListIter, so we can delete
 	// the result
@@ -265,7 +283,6 @@ StringList::~StringList() {
 }
 
 // print a StringList on a stream
-
 ostream& operator << (ostream&o, const StringList& sl) {
 	StringListIter next(sl);
 	const char* s;

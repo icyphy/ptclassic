@@ -8,7 +8,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -47,145 +47,202 @@ where the parent is a Block (a specific type of NamedObj).
 
 class Block;
 
+/***********************************************************************
+
+  An object with a name, a descriptor, and a parent, which is a Block
+
+  @Description NamedObj is the baseclass for most of the common
+               Ptolemy objects.  A NamedObj is, simply put, a named
+               object; in addition to a name, a NamedObj has a pointer
+               to a parent object, which is always a Block (a type of
+               NamedObj). This pointer can be null. A NamedObj also
+               has a descriptor. <P>
+
+               <B>Warning!</B> NamedObj assumes that the name and
+	       descriptor "live" as long as the NamedObj does.  They
+	       are not deleted by the destructor, so that they can be
+	       compile-time strings. <P>
+
+  @Author J. T. Buck
+
+***********************************************************************/
 class NamedObj {
 public:
-	// constructors
-	NamedObj () : nm(""), prnt(0), myDescriptor("") {}
-	NamedObj (const char* n,Block* p,const char* d) :
-		nm(n), prnt(p), myDescriptor(d) {}
 
-	// class name
-	virtual const char* className() const;
+  /*****
+    Construct a blank NamedObj
+    @Description Set the name and descriptor to empty strings and the
+    	         parent pointer to null.
+   *****/
+  NamedObj () : nm(""), prnt(0), myDescriptor("") {}
 
-	// return just the end name
-	inline const char* name() const { return nm;}
+  NamedObj (const char* n,Block* p,const char* d)
+    : nm(n), prnt(p), myDescriptor(d) {}
 
-	// return the descriptor
-	inline const char* descriptor() const {return myDescriptor;}
+  /*****
+    Return the name of the class.
 
-	// return the parent block
-	inline Block* parent() const { return prnt;}
+     @Description Every derived class should supply a new
+     impementation (except for abstract classes, where this is not
+     necessary)
+   *****/
+  virtual const char* className() const;
 
-	// return the full name
-	virtual StringList fullName() const;
+  // Return just the the local portion of the name of the class 
+  inline const char* name() const { return nm; }
 
-	// set the name
-	inline void setName (const char* my_name) {
-		nm = my_name;
-	}
+  // Return the descriptor
+  inline const char* descriptor() const { return myDescriptor; }
 
-	// set the parent
-	inline void setParent (Block* my_parent) {
-		prnt = my_parent;
-	}
+  // Return a pointer to the parent block
+  inline Block* parent() const { return prnt;}
+ 
+  virtual StringList fullName() const;
 
-	// set the name and parent
-	void setNameParent (const char* my_name,Block* my_parent) {
-		setName(my_name);
-	        setParent(my_parent);
-	}
+  // Set the name of this object
+  inline void setName (const char* my_name) {
+    nm = my_name;
+  }
 
-	// initialize the object
-	virtual void initialize() = 0;
+  // Set the parent of this object
+  inline void setParent (Block* my_parent) {
+    prnt = my_parent;
+  }
 
-	// method to print top-level info.
-	virtual StringList print (int verbose) const;
+  // Set the name and parent of this object
+  void setNameParent (const char* my_name,Block* my_parent) {
+    setName(my_name);
+    setParent(my_parent);
+  }
 
-	// answer queries about my class
-	virtual int isA(const char* cname) const;
+  // Prepare the object for system execution.
+  virtual void initialize() = 0;
+  
+  virtual StringList print (int verbose) const;
 
-	// make destructors for all NamedObjs virtual
-	virtual ~NamedObj();
+  virtual int isA(const char* cname) const;
 
-	// Many schedulers and targets need to be able to mark blocks
-	// in various ways, to count invocations, or flag
-	// that the block has been visited, or to classify it
-	// as a particular type of block.  To support this,
-	// we provide an array of flags that are not used
-	// by class Block, and may be used in any way by a Target
-	// or scheduler.  The array can be of any size, and the size
-	// will be increased automatically as elements are referenced.
-	// For readability and consistency, the user should define an enum
-	// in the Target class to give the indices, so that mnemonic names
-	// can be associated with flags, and so that multiple schedulers
-	// for the same target are consistent.
-	//
-	// For efficiency, there is no checking to prevent
-	// two different pieces of code (say a target and scheduler) from
-        // using the same flags (which are indexed only by non-negative
-	// integers) for different purposes.  The policy, therefore, is
-	// that the target is in charge.  It is incumbent upon
-	// the writer of the target to know what flags are used by schedulers
-	// invoked by that target, and to avoid corrupting those flags
-	// if the scheduler needs them preserved.
+  // make destructors for all NamedObjs virtual
+  virtual ~NamedObj();
 
-	FlagArray flags;
+  /*****
+    An array of flags for use by targets and schedulers
+
+    @Description Many schedulers and targets need to be able to mark
+                 blocks in various ways, to count invocations, or flag
+                 that the block has been visited, or to classify it as
+                 a particular type of block.  To support this, we
+                 provide an array of flags that are not used by class
+                 Block, and may be used in any way by a Target or
+                 scheduler.  The array can be of any size, and the
+                 size will be increased automatically as elements are
+                 referenced.  For readability and consistency, the
+                 user should define an enum in the Target class to
+                 give the indices, so that mnemonic names can be
+                 associated with flags, and so that multiple
+                 schedulers for the same target are consistent. <P>
+
+                 For efficiency, there is no checking to prevent two
+		 different pieces of code (say a target and scheduler)
+		 from using the same flags (which are indexed only by
+		 non-negative integers) for different purposes.  The
+		 policy, therefore, is that the target is in charge.
+		 It is incumbent upon the writer of the target to know
+		 what flags are used by schedulers invoked by that
+		 target, and to avoid corrupting those flags if the
+		 scheduler needs them preserved.
+   *****/
+  FlagArray flags;
+
 protected:
-	void setDescriptor(const char* d) { myDescriptor = d;}
+
+  /*****
+    Set the descriptor of this object
+
+    @Description The string pointed to by desc must live as long as the
+    NamedObj does.
+   *****/
+  void setDescriptor(const char* d) { myDescriptor = d;}
 private:
-	// name of object
-	const char* nm;
-	// pointer to its parent
-	Block* prnt;
-	// descriptor
-	const char* myDescriptor;
+  // name of the object
+  const char* nm;
+
+  // pointer to this object's parent Block
+  Block* prnt;
+
+  // descriptor of the object
+  const char* myDescriptor;
 };
 
 // This structure is a list of NamedObj objects.  It should be privately
 // inherited from when creating, say, a list of Block objects.
 
+/***********************************************************************
+
+   A sequential list of NamedObjs.
+
+   @Description Class NamedObjList is simply a list of objects of
+                class NamedObj. It is privately inherited from class
+                SequentialList, and, as a rule, other classes
+                privately inherit from it. It supports only a subset
+                of the operations provided by SequentialList; in
+                particular, objects are added only to the end of the
+                list. It provides extra operations, like searching for
+                an object by name and deleting objects. <P>
+
+                This object enforces the rule that only const pointers
+                to members can be obtained if the list is itself
+                const; hence, two versions of some functions are
+                provided.
+
+   @Author J. T. Buck
+
+***********************************************************************/
 class NamedObjList : private SequentialList
 {
-	friend class NamedObjListIter;
-	friend class CNamedObjListIter;
+  friend class NamedObjListIter;
+  friend class CNamedObjListIter;
 public:
-	NamedObjList();
+  NamedObjList();
 
-	// Add object to list
-	void put(NamedObj& s) {SequentialList::put(&s);}
+  // Add an object to the end of the list
+  void put(NamedObj& s) {SequentialList::put(&s);}
 
-	// export size and initialize functions
-	SequentialList::size;
-	SequentialList::initialize;
+  SequentialList::size;
+  SequentialList::initialize;
 
-	// find the object with the given name and return pointer
-	// const and non-const forms.
-	// The rule is that you need a non-const list to get a
-	// non-const pointer.
+  /*****
+    Return the first object with the given name
 
-	NamedObj* objWithName(const char* name) {
-		return findObj(name);
-	}
+    @Description Return 0 if no object with the name is found
+   *****/
+  NamedObj* objWithName(const char* name) { return findObj(name); }
 
-	const NamedObj* objWithName(const char* name) const {
-		return findObj(name);
-	}
+  const NamedObj* objWithName(const char* name) const {
+    return findObj(name);
+  }
 
-	// Apply initialize fn to all elements
-	void initElements();
+  void initElements();
 
-	// head of list (const and non-const versions)
-	inline NamedObj* head() {return (NamedObj*)SequentialList::head();}
+  // Return the first object on the list
+  inline NamedObj* head() {return (NamedObj*)SequentialList::head();}
 
-	inline const NamedObj* head() const {
-		return (const NamedObj*)SequentialList::head();
-	}
+  inline const NamedObj* head() const {
+    return (const NamedObj*)SequentialList::head();
+  }
 
-	// remove obj from list.  Note: obj is not deleted
-	int remove(NamedObj* o) { return SequentialList::remove(o);}
+  /*****
+     Remove the object from the list
+     @Description Note: The object is not deleted
+   *****/
+  int remove(NamedObj* o) { return SequentialList::remove(o);}
 
-	// delete all elements from the list.  WARNING: assumes that the
-	// elements are on the heap!
-	void deleteAll();
+  void deleteAll();
 private:
-	// publicly, we enforce the rule that you can only get const
-	// pointers from a const list.  However, findObj can get non
-	// const pointers from a const list; it implements the guts
-	// of both objWithName methods.
-	NamedObj* findObj(const char* name) const;
+  NamedObj* findObj(const char* name) const;
 };
 
-// an iterator for NamedObjList
+// An iterator for NamedObjList
 class NamedObjListIter : private ListIter {
 public:
 	NamedObjListIter(NamedObjList& sl);
@@ -195,7 +252,7 @@ public:
 	ListIter::remove;
 };
 
-// an iterator for NamedObjList, const form
+// An iterator for NamedObjList, const form
 class CNamedObjListIter : private ListIter {
 public:
 	CNamedObjListIter(const NamedObjList& sl);
