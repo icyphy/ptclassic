@@ -1,5 +1,5 @@
-#ifndef _compat_h
-#define _compat_h 1
+#ifndef _sol2compat_h
+#define _sol2compat_h 1
 /**************************************************************************
 Version identification:
 $Id$
@@ -49,4 +49,4 @@ ENHANCEMENTS, OR MODIFICATIONS.
 typedef int boolean;
 #endif /*TYPEDEF_BOOLEAN*/
 
-#endif /*_compat_h*/
+#endif /*_sol2compat_h*/
