@@ -119,6 +119,10 @@ public:
 	// return the number of initial particles
 	int numInit() const {return numInitialParticles;}
 
+	// access head and tail of queue
+	Particle* head() const { return pstack.head();}
+	Particle* tail() const { return pstack.tail();}
+
 	// Information printing
 	StringList print(int verbose = 0) const;
 
