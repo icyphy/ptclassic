@@ -290,9 +290,7 @@ body ::tycho::Interactor::activate {t x y args} {
 # interactor is ``activated'' on the target. The
 # options *-button* and *-modifiers* determine the actual events.
 # By default, the mouse-press event is the one used to activate
-# the interactor.
-#
-# Always return the bound script for this tag and options.
+# the interactor. Return the first argument.
 #
 body ::tycho::Interactor::bind {t args} {
     # Remember the binding
@@ -303,8 +301,8 @@ body ::tycho::Interactor::bind {t args} {
 	    [eval ::tycho::Interactor::event Click $args] \
 	    "$this activate \[$slate find withtag current\] %x %y $args"
 
-    # Return the script
-    return "$this activate $t %x %y $args"
+    # Return the passed tag
+    return $t
 }
 
 #######################################################################
