@@ -50,11 +50,13 @@ Tcl_Interp *ptkInterp;
 	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
     }
 /*
+ * Generate an operating system command to display text files.
  * If the PT_DISPLAY environment variable is not set, then set
  * buf to the empty string.
- * If the PT_DISPLAY environment variable is set, then use print
- * the value of $PT_DISPLAY into buf.  PT_DISPLAY should 
- * be printf format string, like "xedit -name ptolemy_code %s".
+ * If the PT_DISPLAY environment variable is set, then print the
+ * value of $PT_DISPLAY into buf and put the job in the background.
+ * PT_DISPLAY should be a printf format string, such as
+ * "xedit -name ptolemy_code %s".
  */
 static void genDispCommand(char *buf, const char *fileName)
 {
@@ -64,6 +66,7 @@ static void genDispCommand(char *buf, const char *fileName)
     }
     else {
 	sprintf(buf, dispCmd, fileName);
+	strcat(buf, " &");
     }
 }
 
