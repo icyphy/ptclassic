@@ -106,6 +106,7 @@ ITCL_SRCS = \
 	PreferenceEditor.itcl \
 	PopupMenu.itcl \
 	Query.itcl \
+	Registry.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
 	ResourceFTP.itcl \
