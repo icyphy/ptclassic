@@ -22,11 +22,8 @@
 
 # gawk -f /usr/sww/share/lib/htmlchek-4.1/makemenu.awk toc=1 hof*.html > menu.html
 
-#tmptoc=/tmp/addtoc.$$
-#tmpfile=/tmp/addtoc.file.$$
-
-tmptoc=/tmp/addtoc
-tmpfile=/tmp/addtoc.tmp
+tmptoc=/tmp/addtoc.$$
+tmpfile=/tmp/addtoc.file.$$
 
 # Subroutine to insert the tmpfile as a toc into $1
 inserttoc() {
@@ -63,7 +60,7 @@ inserttoc() {
 		' $1 >> $tmpfile
 
 	#diff $1 $tmpfile
-	cp $tmpfile ../wmwork.tst/$1
+	cp $tmpfile ../wmwork/$1
 }
 filelist=$@
 
