@@ -194,7 +194,6 @@ abcdefghijklmnopqrstuvwxyz
 	    [$itk_component(fontname) cget -font]
 
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     # If no -okcommand option is specified, use a reasonable default.
     if {$itk_option(-okcommand) == {}} {

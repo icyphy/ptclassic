@@ -192,7 +192,6 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \

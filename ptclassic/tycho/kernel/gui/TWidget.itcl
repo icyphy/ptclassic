@@ -137,7 +137,6 @@ body ::tycho::TWidget::constructor {args} {
     set prefix $itk_component(hull)
 
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     # This is not a good idea because some widgets don't want the focus:
     # ::bind $itk_component(hull) <Enter> "$this focusin"
@@ -372,7 +371,7 @@ body ::tycho::TWidget::configureContextMenu {} {
 # Initialize options of a widget. This method overrides the
 # default itk_initialize{} provided in ::itk::Archetype to
 # remember the options that have been explicitly set by the
-# user. This is used by the preference manager so that these
+# user. This is used by the preferences manager so that these
 # options "override" any option subscriptions.
 #
 body ::tycho::TWidget::itk_initialize {args} {
@@ -381,7 +380,7 @@ body ::tycho::TWidget::itk_initialize {args} {
 	lappend temp $option
     }
     if { $temp != "" } {
-	eval ::tycho::preference excludeoptions $this $temp
+	eval ::tycho::preference excludeoptions dummy $this $temp
     }
     uplevel ::itk::Archetype::itk_initialize $args
 }

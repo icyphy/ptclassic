@@ -108,5 +108,4 @@ body ::tycho::YesNoQuery::constructor {args} {
     # Explicitly handle configs that may have been ignored earlier.
     #
     eval itk_initialize $args
-    eval preference exclude $this $args
 }

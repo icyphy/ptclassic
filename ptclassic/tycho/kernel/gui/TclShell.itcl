@@ -218,7 +218,6 @@ body ::tycho::TclShell::constructor {args} {
     $itk_component(text) mark set promptEnd end
 
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \

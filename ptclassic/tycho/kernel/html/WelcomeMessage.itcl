@@ -90,7 +90,6 @@ body ::tycho::WelcomeMessage::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     # Arrange for destruction, if appropriate.
     if {!$itk_option(-persistent)} {

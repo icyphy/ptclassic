@@ -318,7 +318,6 @@ body ::tycho::Query::constructor {args} {
     pack $itk_component(querysite) -pady 5 -after $itk_component(top)
 
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \

@@ -168,7 +168,6 @@ body ::tycho::View::constructor {args} {
     }
 
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     # Attach myself to the displayer and get back my menu bar, status
     # bar, and tool bar. The view won't

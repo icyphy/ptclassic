@@ -126,7 +126,6 @@ body ::tycho::ColorBrowser::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the same preferences as an index browser
     preference subscribeoptions $this \
