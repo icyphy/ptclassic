@@ -11,11 +11,11 @@
 #define _MTDFStar_h
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
 #include "SDFStar.h"
+#include "MTDFConnect.h"
 
 class MTDFStar : public DataFlowStar
 {
@@ -29,8 +29,8 @@ public:
     // Domain-specific initialization.
     virtual void prepareForScheduling();
 
-    // Number of times this Star has fired during this run.
-    unsigned int numTimes;
+    // Identify Star as a data source.
+    int isItSource() const;
 };
 
 #endif
