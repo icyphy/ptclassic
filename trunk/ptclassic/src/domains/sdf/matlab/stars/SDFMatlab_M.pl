@@ -215,7 +215,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	}
 
 	wrapup {
-		char* wrapupCommand = (char*) MatlabSetUp;
+		char* wrapupCommand = (char*) MatlabWrapUp;
 		if ( wrapupCommand && *wrapupCommand ) {
 		  int err = matlabInterface.EvaluateUserCommand(wrapupCommand);
 		  if ( err ) {
