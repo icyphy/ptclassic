@@ -122,7 +122,6 @@ fa_region *region;
 {
     fa_point *ptr, *last;
     fa_region *iregion;
-    void do_point();
 
     while (region != NIL(fa_region)) {
 
