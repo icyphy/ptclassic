@@ -1,4 +1,3 @@
-static const char file_id[] = "DynDFStar.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -32,6 +31,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
  that have dynamic behavior.
 
 *******************************************************************/
+static const char file_id[] = "DynDFStar.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "DynDFStar.h"
 #include "DFPortHole.h"
