@@ -3,18 +3,17 @@
 .SD
 This is simple demonstration of chaos, in which the phase-space
 plot of the famous Henon map is given.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .IE chaos
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .Ir "Henon map"
 .Ir "chaos"

@@ -2,17 +2,16 @@
 .NA MotionComp
 .SD
 A universe that does motion compensation image coding.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Paul E. Haskell"
+.EQ
+delim $$
+.EN
 .LD
 This universe reads images from a file and performs motion compensation
 on the image sequence.

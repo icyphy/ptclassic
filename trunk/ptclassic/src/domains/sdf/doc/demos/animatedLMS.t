@@ -4,17 +4,16 @@
 An LMS adaptive filter is configured as in the
 .c adaptFilter
 demo, but this time the filter taps are displayed as they adapt.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 A Gaussian white noise signal serves as input to an FIR filter and
 an adaptive filter using the LMS algorithm.

@@ -2,17 +2,16 @@
 .NA overlapAdd/FFT
 .SD
 Convolution is implemented in the frequency domain using overlap and add.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "E. A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 A white noise signal serves as input to an FIR filter that directly implements
 convolution in the time domain.

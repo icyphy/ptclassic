@@ -3,17 +3,16 @@
 .SD
 This is an example of an inconsistent SDF system.
 It fails to run, generating an error message instead.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
+.EQ
+delim $$
+.EN
 .LD
 This is an example of an SDF universe that cannot be run because
 of sample rate inconsistencies.

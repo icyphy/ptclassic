@@ -8,17 +8,16 @@ galaxy, which forms an analytic signal (using a
 .c Hilbert
 transform)
 that modulates a complex exponential.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .Id "Doppler shift"
 A sine wave of frequency 2*PI/40 radians

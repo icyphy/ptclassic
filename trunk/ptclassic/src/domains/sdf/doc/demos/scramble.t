@@ -9,20 +9,19 @@ and
 stars.
 Note that because these are multirate stars, one iteration involves
 more than one sample.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.DM SDF Universe
+.AL "J. T. Buck"
 .EQ
 delim $$
 .EN
-.DM SDF Universe
+.LD
 .Se Commutator
 .Se Distributor
 .SV $Revision$ $Date$
-.AL "J. T. Buck"
-.LD
 This system is a simple demonstration of the
 .c Commutator
 and

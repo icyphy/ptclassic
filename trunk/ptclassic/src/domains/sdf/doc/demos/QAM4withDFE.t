@@ -4,18 +4,17 @@
 This is a model of a digital communication system that uses quadrature
 amplitude modulation and a fractionally spaced decision feedback
 equalizer.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF universe
 .IE QAM4withDFE
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
+.EQ
+delim $$
+.EN
 .LD
 .Ie "modulation, quadrature amplitude"
 .Ie "quadrature amplitude modulation"

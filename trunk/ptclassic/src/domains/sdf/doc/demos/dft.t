@@ -5,11 +5,16 @@ Compute a discrete Fourier transform of a finite signal using the
 .c FFT
 star.
 The magnitude and phase (unwrapped) are plotted.
-.DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/utilities"
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 This demo computes a DFT (using the FFT star) of a finite signal.
 .Ie "discrete Fourier transform"

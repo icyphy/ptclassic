@@ -7,17 +7,16 @@ One uses an
 filter in a feedback path, and the other uses the
 .c BlockAllPole
 star.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	"%D%"
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 A noise signal is fed into two realizations of an all pole filter.
 .Ie "all-pole filter"

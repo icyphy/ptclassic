@@ -4,17 +4,16 @@
 Assuming a sampling rate of 8 kHz, a sinusoid at 500 Hz
 is transmitted through a simulation of a telephone channel with
 additive Gaussian noise, nonlinear distortion, and phase jitter.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 The time domain plot of the output clearly shows the phase jitter
 and the noise, but only the most discerning eye can see the nonlinear

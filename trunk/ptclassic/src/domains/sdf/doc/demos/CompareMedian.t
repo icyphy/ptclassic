@@ -3,17 +3,16 @@
 .SD
 A universe that median filters an image to reduce artifacts
 due to interleaved scanning of video sequences.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Paul E. Haskell"
+.EQ
+delim $$
+.EN
 .LD
 This universe reads an image from a file and median filters the image.
 .Ie "filter, median"

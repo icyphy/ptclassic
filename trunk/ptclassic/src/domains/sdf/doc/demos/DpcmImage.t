@@ -3,17 +3,16 @@
 .SD
 A universe that performs differential pulse code modulation (DPCM)
 on an image sequence.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Paul E. Haskell"
+.EQ
+delim $$
+.EN
 .LD
 .Ie "image DPCM"
 .Ie "DPCM, image"

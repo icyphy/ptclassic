@@ -3,17 +3,16 @@
 .SD
 Use of Levinson-Durbin algorithm to design a lattice filter with a specified
 transfer function.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .Ie "filter design, lattice"
 .Ie "lattice filter design"

@@ -5,17 +5,16 @@ This is a simple illustration of the
 .c bus
 facility in Ptolemy, in which multiple signals are combined onto a
 single graphical connection.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"
+.EQ
+delim $$
+.EN
 .LD
 This trivial system connects a
 .c Distributor
