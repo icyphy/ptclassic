@@ -150,7 +150,7 @@ int usePattern;
     vemSelSet ss;
 
     if (name == NULL) return TRUE;
-    facet = *rootFacetPtr;
+    facet = *rootFacetPtr;			/* don't deallocate facet */
     while (1) {
 	head(name, word, 256);
 	/* If name is wormhole, the following get will fail because */
@@ -169,11 +169,7 @@ int usePattern;
 	    if (!MyOpenMaster(&facet, &inst, "contents", "r")) {
 	        return FALSE;
 	    }
-
-/* These two lines are incorrect - memory is freed prematurely if we 
-   are trying to hilite a block inside of a hilited galaxy */
-/*	    FreeOctMembers(&facet);
-	    FreeOctMembers(&inst);*/
+	    FreeOctMembers(&inst);
 	}
 	if ((name = incr(name)) == NULL) break;
     }
