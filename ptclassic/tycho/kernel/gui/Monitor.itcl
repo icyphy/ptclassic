@@ -438,6 +438,10 @@ body ::tycho::Monitor::setErrorCount {count} {
 # automatically exit upon successful execution.
 #
 body ::tycho::Monitor::execProcessInMonitor {} {
+    set oldCursor [lindex [config -cursor] end]
+    config -cursor {watch}
+    ::tycho::safeUpdate $this
+
     # Clear both history logs before executing
     $itk_component(history) configure -readonly 0
     $itk_component(history) clear
@@ -462,6 +466,8 @@ body ::tycho::Monitor::execProcessInMonitor {} {
     # Make sure everything's done, then reset the error count
     $this getStatusWait
     set errorCount 0
+    
+    config -cursor $oldCursor
 }
 
     ##################################################################
