@@ -238,6 +238,7 @@ dirs="c50/dsp/stars cg56/dsp/stars \
 	sdf/atm/kernel sdf/atm/stars sdf/contrib/kernel sdf/contrib/stars \
 	sdf/dsp/stars sdf/image/stars sdf/tcltk/stars \
 	sdf/dfm/stars sdf/matrix/stars sdf/matlab/stars sdf/vis/stars \
+	sdf/wildforce/kernel sdf/wildforce/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/contrib/stars \
