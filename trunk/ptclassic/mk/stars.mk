@@ -46,7 +46,7 @@ S56WH_LIBDIR= -L$(S56DIR)/lib
 S56WH_O= $(CG56T)/S56XTargetWH.o $(CG56T)/CG56S56XCGCReceive.o \
          $(CG56T)/CG56S56XCGCSend.o $(CG56T)/CGCS56XReceive.o \
          $(CG56T)/CGCS56XSend.o $(CG56T)/CGCS56XTarget.o \
-	 $(CG56T)/CGCS56XBase.o
+	 $(CG56T)/CGCS56XBase.o $(CG56T)/CG56S56XCGCBase.o
 endif
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
