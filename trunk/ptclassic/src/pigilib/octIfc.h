@@ -111,8 +111,8 @@ extern boolean IsGalFacet();
 extern boolean IsMarker();
 extern boolean IsCursor();
 
-extern boolean GetCommentProp();
-extern boolean SetCommentProp();
+extern boolean GetStringProp();
+extern boolean SetStringProp();
 extern boolean GOCDomainProp();
 extern int GetIterateProp();
 extern void SetIterateProp();
