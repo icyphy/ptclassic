@@ -40,7 +40,7 @@ by powers of two.
 	}
 	codeblock(powerOfTwo) {
 	move	$ref(input),a
-	move	$val(powerOfTwoMask),x0
+	move	#$val(powerOfTwoMask),x0
 	and	x0,a
 	move	a,$ref(output)
 	}
