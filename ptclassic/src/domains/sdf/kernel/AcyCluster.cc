@@ -3,7 +3,7 @@ static const char file_id[] = "AcyCluster.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,6 +27,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
+
+  Programmer: Praveen K. Murthy
 
 Acyclic cluster to implement graph cutting routines needed by the
 RPMC algorithm in AcyLoopScheduler.  For details of this graph cutting
@@ -140,10 +142,10 @@ void AcyCluster::tagDelayArcs()
 Mark c and all the successors of c and return the number of successors.
 
 @Description
-The marking is done by setting the <code>TMP_PARTITION</code> flag to 1
-in computing the number of successors, we include the total number of
+The marking is done by setting the <code>TMP_PARTITION</code> flag to 1.
+In computing the number of successors, we include the total number of
 blocks inside all the clusters that might be inside us; however, only
-the top-level clusters are actually marked
+the top-level clusters are actually marked.
 
 @SideEffects flag location at <code>TMP_PARTITION</code> is marked 1
 for nodes that are successors.
@@ -169,9 +171,9 @@ int AcyCluster::markSuccessors(AcyCluster* c)
 	if ( out->far() && (nc = (AcyCluster*)out->far()->parent()) != NULL) {
 	    if (TMP_PARTITION(nc) == 2) {
 		StringList message;
-		message << "Cluster presented to AcyCluster::markSuccessors"
-			<< "appears to be cyclic.  This could be due to an"
-			<< "earlier clustering step.  Aborting...";
+		message << "Cluster presented to AcyCluster::markSuccessors "
+			<< "appears to be cyclic.\n This could be due to an "
+			<< "earlier clustering step.  Aborting...\n";
 		Error::abortRun(message);
 		return 0;
 	    }
@@ -202,9 +204,9 @@ int AcyCluster::markPredecessors(AcyCluster* c)
 	if (inp->far() && (pc = (AcyCluster*)inp->far()->parent()) != NULL) {
 	    if (TMP_PARTITION(pc) == 2) {
 		StringList message;
-		message << "Cluster presented to AcyCluster::markPredecessors"
-			<< "appears to be cyclic.  This could be due to an"
-			<< "earlier clustering step.  Aborting...";
+		message << "Cluster presented to AcyCluster::markPredecessors "
+			<< "appears to be cyclic.\n This could be due to an "
+			<< "earlier clustering step.  Aborting...\n";
 		Error::abortRun(message);
 		return 0;
 	    }
@@ -476,12 +478,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	    }
 	}
 	
-	// Update best cut.  Also, use the following numbering scheme
-	// to indicate the partition.  Nodes on the left side of the
-	// cut get the value of their parent while the nodes on the
-	// right side of the cut get the value of parent + number of
-	// nodes on left hand side.  This is to make it easy to deduce the
-	// ordering if this function is called recursively many times.
+	// Update best cut.  
 	
 	if (minCutVal > cutVal && numSucc <= K && totalNumberOfBlocks()-numSucc <= K) {
 	    updateBestCut(totalNumberOfBlocks()-numSucc);
