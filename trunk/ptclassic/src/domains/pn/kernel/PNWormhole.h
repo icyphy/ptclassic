@@ -64,6 +64,9 @@ public:
     // Identify self as Wormhole.
     /*virtual*/ int isItWormhole() const;
 
+    // Override Star::asWormhole definition
+    /*virtual*/ Wormhole* asWormhole() { return this; }
+
     // Print a description of the Wormhole.
     /*virtual*/ StringList print(int) const;
 
