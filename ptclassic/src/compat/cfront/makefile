@@ -39,5 +39,8 @@ HDRS = 	ACG.h NegExp.h Normal.h Random.h Uniform.h builtin.h minmax.h \
 
 MISC_FILES = README
 
+# Avoid messages from tycommon.mk
+LIBR = dummylib
+
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
