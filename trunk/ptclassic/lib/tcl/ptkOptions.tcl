@@ -45,6 +45,20 @@ option add Pigi.negativeColor [ptkColor red]
 option add Pigi.pressMeBg [ptkColor orange1]
 option add Pigi.pressMeActiveBg [ptkColor tan3]
 
+#Colors used for plots with multiple traces
+option add Pigi.plotColor1 [ptkColor red3]
+option add Pigi.plotColor2 [ptkColor SkyBlue3]
+option add Pigi.plotColor3 [ptkColor DarkOliveGreen3]
+option add Pigi.plotColor4 [ptkColor ivory]
+option add Pigi.plotColor5 [ptkColor gray40]
+option add Pigi.plotColor6 [ptkColor gold]
+option add Pigi.plotColor7 [ptkColor BlueViolet]
+option add Pigi.plotColor8 [ptkColor CadetBlue]
+option add Pigi.plotColor9 [ptkColor chocolate]
+option add Pigi.plotColor10 [ptkColor DarkSlateGray]
+option add Pigi.plotColor11 [ptkColor ForestGreen]
+option add Pigi.plotColor12 [ptkColor LightYellow]
+
 # set font for all message windows used in Pigi
 option add *Pigi*Message*Font [option get . mainfont Mainfont]
 
