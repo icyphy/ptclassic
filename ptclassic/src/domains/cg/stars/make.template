@@ -47,7 +47,9 @@ HDRS= $(SRCS:.cc=.h)
 
 all:		$(CCSRCS) makefile $(OBJS)
 
-EXTRA_SRCS=cgstars.mk $(PL_SRCS)
+DOMAIN=CG
+STAR_MK=cgstars
+EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
 
 # nothing to install -- use it where it lies
 install:	all
