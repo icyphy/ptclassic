@@ -39,8 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Galaxy.h"
 #include "DEStar.h"
 #include "DEScheduler.h"
-#include "CQEventQueue.h"
+#include "MutableCQEventQueue.h"
 #include "CalendarQueue.h"
+#include "MutableCalendarQueue.h"
 
 
 	////////////////////////////
@@ -59,7 +60,7 @@ public:
 
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
-	CQEventQueue eventQ;
+	MutableCQEventQueue eventQ;
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
