@@ -54,8 +54,6 @@ if {${itcl::version} < 2.1} {
     exit 3
 }
 
-set tyDebug 1
-
 # Currently Tycho.tcl checks this variable to workaround a bug
 if {$tcl_platform(platform) == "macintosh"} {
     set tyDebug 1
