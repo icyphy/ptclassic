@@ -35,8 +35,8 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-# Get the egcs definitions; we override some below.
-include $(ROOT)/mk/config-egcs.mk
+# Get the g++ definitions; we override some below.
+include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
@@ -131,17 +131,20 @@ PURECOV = 	purecov
 # Wildforce Directory
 # Annapolis Micro Systems (http://www.annapmicro.com) uses 
 # WF4_BASE as the root of their installation for 
-# the Wildforce board software
+# the Wildforce board software.  $(PTOLEMY)/vendors/annapolis/wf4 is
+# a good place to install it.
 WILDFORCE_DIR 	= $(WF4_BASE)
 
 WILDFORCE_INCL	= $(WILDFORCE_DIR)/include
 WILDFORCE_LIBSPEC = -L$(WILDFORCE_DIR)/lib -lWF4
+# g++-2.95.1 needs these
+WILDFORCEDEFINES=-Duint32_t="unsigned int" -Dint32_t=int
 
 # Uncomment the three lines below if you have the Annapolis 
 # Micro Systems Wildforce board and software
-#WILDFORCECFLAGS = -DPT_WILDFORCE -I$(WILDFORCE_INCL)
-#SDFWILDFORCE =	1
-#WILDFORCE = wildforce	
+WILDFORCECFLAGS = $(WILDFORCEDEFINES) -DPT_WILDFORCE -I$(WILDFORCE_INCL)
+SDFWILDFORCE =	1
+WILDFORCE = wildforce	
 
 #
 # Variables for miscellaneous programs
