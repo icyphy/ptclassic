@@ -30,10 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /*
  * equal.c
  *
- * Copyright -C- 1988	Brian D. N. Lee
- * University of California, Berkeley
- *
- * Comapare two fang geometries for equality.
+ * Compare two fang geometries for equality.
  */
 
 #include "copyright.h"
