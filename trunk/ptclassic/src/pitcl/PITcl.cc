@@ -30,24 +30,37 @@ COPYRIGHTENDKEY
 Programmer:  E. A. Lee
 Loosely based on: PTcl design by Joe Buck
 Date of creation: 2/97
-
-This file implements a class that adds Ptolemy-specific Itcl
-commands to an Itcl interpreter. The commands are designed to
-resemble those of the Ptolemy kernel, mostly. These commands are
-defined in the ::pitcl namespace. Normally, these commands should
-not be used directly. Use instead the class interface defined in the
-::ptolemy namespace.
-
-FIXME: To do:
-  - begin without init causes a core dump.
-  - check aliasing mechanism interaction with HOF.
-  - Need a way to invoke the go method of stars.  Generalize run.
-  - Also need a method to just initialize portholes.
-  - Need a way to get types of portholes, states.
-  - Eliminate curtarget, curuniverse.  Leave only curgalaxy, curdomain.
-  - Provide a way in the naming scheme to address a domain: e.g. SDF:Ramp.
-
 **************************************************************************/
+
+// NOTE: DO NOT REMOVE THIS LINE.  START OF OVERVIEW.
+
+// Author: Edward A. Lee (eal@eecs.berkeley.edu)
+//
+// The Tcl commands defined here implement an interface to the Ptolemy
+// kernel that is significantly richer than the older *ptcl* interface.
+// Normally, these commands should not be used directly. Use instead
+// the class interface defined in the ::ptolemy namespace.
+//
+// The commands are designed to expose most of functionality of the
+// kernel at the Tcl level, although at this point the facilities are
+// still incomplete. In certain cases, the commands are designed to try
+// to hide blemishes in the design of the kernel, providing a more
+// sensible interface. All commands are defined in the ::pitcl
+// namespace.
+//
+// Remaining to be done:
+// <ul>
+// <li> begin without init causes a core dump.
+// <li> check aliasing mechanism interaction with HOF.
+// <li> Need a way to invoke the go method of stars.  Generalize run.
+// <li> Also need a method to just initialize portholes.
+// <li> Need a way to get types of portholes, states.
+// <li> Eliminate curtarget, curuniverse.  Leave only curgalaxy, curdomain.
+// <li> Provide a way in the naming scheme to address a domain: e.g. SDF:Ramp.
+// </ul>
+// 
+// NOTE: DO NOT REMOVE THIS LINE.  END OF OVERVIEW.
+
 static const char file_id[] = "PITcl.cc";
 #ifdef __GNUG__
 #pragma implementation
