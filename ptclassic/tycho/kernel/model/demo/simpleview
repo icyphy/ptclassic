@@ -65,6 +65,7 @@ $view2 configure -model $model
 # reflected in both views. For example, change the -phone attribute of
 # item John:
 
+update
 after 1000
 $model publish attrset john -phone 3-7683
 
@@ -78,6 +79,7 @@ $model publish attrset john -phone 3-7683
 # will change. Any other data-modifying command can be recorded. Delete
 # an item:
 
+update
 after 1000
 $model publish delete john
 
