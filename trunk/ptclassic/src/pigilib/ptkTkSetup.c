@@ -33,10 +33,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* 
   This file creates the Tcl Interpreter, Tk Main Window, and 
-  creates the RPC connection from Tcl to RPC - Alan Kamas
+  creates the RPC connection from Tcl to RPC
 */
    
 #include <stdio.h>
+#include <itcl.h>
+#ifdef ITCL_VERSION
+/* ITCL2.0 or better */
+#include <itk.h>
+#endif
 #include "compat.h"
 #include "ptk.h"
 #include "ptkRegisterCmds.h"
@@ -71,6 +76,16 @@ _ptkAppInit( ip, win)
 	return TCL_ERROR;
     if (Tk_Init(ip) == TCL_ERROR)
 	return TCL_ERROR;
+    /* Add [incr Tcl] (itcl) facilities */
+    if (Itcl_Init(ip) == TCL_ERROR) {
+      return TCL_ERROR;
+    }
+#ifdef ITCL_VERSION
+    /* ITCL2.0 or better */
+    if (Itk_Init(ip) == TCL_ERROR) {
+      return TCL_ERROR;
+    }
+#endif
     ptkRegisterCmds( ip, win);
     return TCL_OK;
 }
