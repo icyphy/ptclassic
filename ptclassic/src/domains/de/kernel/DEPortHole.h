@@ -33,6 +33,8 @@ Two DE-specific struct/classes are defined.
 
 class Particle;
 
+#define MINDEPTH -100000	// guarantee it is far below the minimum depth
+
         //////////////////////////////////////////
         // class DEPortHole
         //////////////////////////////////////////
@@ -81,9 +83,6 @@ friend class MultiInDEPort;
 	// porthole.
 	int complete;
 
-	// number of simultaneous events on the same arc - 1.
-	int moreData;
-
 	// If there are simultaneous events for a star, this port should
 	// have higher priority than "beforeP" porthole. (default = NULL)
 	GenericPort* beforeP;
@@ -92,11 +91,20 @@ friend class MultiInDEPort;
 	// it keeps the list of the (possibly-)affected outputs.
 	SequentialList *triggerList;
 
+	// Queue for the all simultaneous events.
+	Queue* inQue;
+
+        // number of simultaneous events on the same arc - 1.
+        int moreData;
+
 public:
+
 	int isItInput () const {return TRUE; }
 
-	// Get particles from global queue and set the timeStamp
-	void grabData(Particle* p);
+	// Get particles from global queue and set the timeStamp.
+	// At A TIME INSTANCE, the first call of this method returns TRUE,
+	// afterwards return FALSE.
+	int grabData(Particle* p);
 
 	// operator to return a zero delayed Particle,
 	// which is same as operator % (0).
@@ -110,13 +118,22 @@ public:
 	// set "beforeP" member. 
 	void before(GenericPort& gp) { beforeP = &gp; }
 
-	// check whether there are simultaneous events on the same arc.
-	// If yes, fetch the event from the event queue.
+	// Number of the pending simultaneous events in the porthole.
+	int numSimulEvents() {  if (inQue) return inQue->length();
+			 	else return (moreData - 1); }
+
+	// Fetch a simultaneous event from the global queue.
 	void getSimulEvent();
-	int numSimulEvents() {return moreData;}
+
+	// create inQue
+	void createQue() { if (!inQue) inQue = new Queue; }
+
+	// clean itself before a new phase of firing.
+	void cleanIt(); 
 
 	// constructor
-	InDEPort() : complete(TRUE), triggerList(0), beforeP(0) {}
+	InDEPort() : complete(TRUE), triggerList(0), beforeP(0), inQue(0) {}
+	~InDEPort() { if (inQue) delete inQue; }
 };
 
 	////////////////////////////////////////////
