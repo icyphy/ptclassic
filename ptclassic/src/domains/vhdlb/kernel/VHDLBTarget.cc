@@ -134,7 +134,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
   while ((st = galStateIter++) != 0) {
     if(genericList.numPieces() > 1) genericList << "; ";
-    genericList << sanitize(st.name()) << ": ";
+    genericList << sanitize(st->name()) << ": ";
     if(!strcmp(st->type(), "INT")) {
       genericList << "INTEGER";
     }
