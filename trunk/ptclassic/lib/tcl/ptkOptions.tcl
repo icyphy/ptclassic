@@ -114,6 +114,9 @@ option add Pigi*Scale.background [ptkColor tan4] startupFile
 option add Pigi*Scale.sliderForeground [ptkColor bisque] startupFile
 option add Pigi*Scale.activeForeground [ptkColor bisque2] startupFile
 
+# Make the Tk 4.0 widget traversal ring match the default background
+option add Pigi*highlightBackground [option get . background Pigi] startupFile
+
 # Default font for all message windows used in Pigi
 option add Pigi*Message*Font [option get . mediumfont Pigi] startupFile
 
