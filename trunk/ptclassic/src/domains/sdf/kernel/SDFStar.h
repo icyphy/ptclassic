@@ -119,10 +119,22 @@ public:
 	// 3 if its execution is to be deferred (only if deferFiring is true)
 	virtual int simRunStar(int deferFiring);
 
-	// move data and execute the go function
+	// move data and execute the go function.  OVERRIDE IF NOT SDF!
 	int run();
 
+	// functions for use with the loop scheduler.  Default no-op
+	virtual void beginLoop(int reps,DFPortHole* cond=0,int relation=0);
+	virtual void endLoop();
+
+	// functions for dynamic execution
+	virtual int setDynamicExecution(int); // default returns TRUE
+	virtual DFPortHole* waitPort() const; // default returns 0
+	virtual int waitTokens() const; // default: return 0
+
 protected:
+	// initialize the port counts used by isSource, isSink, etc.
+	void initPortCounts();
+
 	// During scheduling, the scheduler must keep track of how
 	// many times it has scheduled a star.  This is a convenient
 	// place to do that.
@@ -153,6 +165,29 @@ public:
 	// class identification
 	int isA(const char*) const;
 
+};
+
+// class DynDFStar
+// dataflow star that may be dynamic.  BDFStar, DDFStar, CG-stars
+// are inherited from this.
+class DynDFStar : public DataFlowStar {
+public:
+	DynDFStar();
+	/* virtual */ DFPortHole* waitPort() const;
+	/* virtual */ int waitTokens() const;
+	/* virtual */ int isA(const char* className) const;
+protected:
+	void waitFor(DFPortHole& port,int howMany = 1) {
+		myWaitPort = &port;
+		myWaitCount = howMany;
+	}
+	void clearWaitPort() {
+		myWaitPort = 0;
+		myWaitCount = 0;
+	}
+private:
+	DFPortHole* myWaitPort;
+	int myWaitCount;
 };
 
 class SDFStarPortIter : public BlockPortIter {

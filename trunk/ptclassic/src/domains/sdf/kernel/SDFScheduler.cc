@@ -205,12 +205,6 @@ int SDFScheduler::checkStars()
 	return TRUE;
 }
 
-inline int wormEdge(PortHole& p) {
-	PortHole* f = p.far();
-	if (!f) return TRUE;
-	else return p.atBoundary();
-}
-
 // if the schedule is for a wormhole, we need to set the number
 // of tokens transferred by the attached event horizons.
 // This function does the job.
@@ -389,7 +383,7 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 	BlockPortIter nextp(block);
 	for(int i = block.numberPorts(); i>0; i--) {
 		PortHole& nearPort = *nextp++;
-		if (wormEdge(nearPort))
+		if (nearPort.atBoundary())
 			// if the port is at the boundary of the wormhole.
 			continue;
 		PortHole& farPort = *(nearPort.far());
