@@ -57,6 +57,7 @@ include $(CONFIG)
 # Set up definitions for stars.mk
 
 ifdef FULL
+	PTCL=ptcl
 	BDF=1
 	CG56=1
 	CG96=1
@@ -75,6 +76,7 @@ ifdef FULL
 endif
 
 ifdef PTINY
+	PTCL=ptcl.ptiny
 	DE=1
 	SDF=1
 	SDFDSP=1
@@ -83,6 +85,7 @@ ifdef PTINY
 endif
 
 ifdef PTRIM
+	PTCL=ptcl.ptrim
 	BDF=1
 	CGCFULL=1
 	CGFULL=1
