@@ -532,8 +532,13 @@ body ::tycho::DocSys::readFile {file} {
     
     # Substitute a magic cookie for newlines
     set a [split $inEscapedComments "\n"]
+    set b [join $a " $newlineMagicCookie "]
 
-    set fileAsList [join $a " $newlineMagicCookie "]
+    # Add a space between a close curly and a close square.
+    # The following example was breaking:
+    # curlybracket-followed-by-squarebracket-2 [list {foo new zoo}]
+    regsub -all "\}]" $b "\} ]" fileAsList
+
     $this parseFileAsList $fileAsList
 }	    
 
@@ -556,7 +561,7 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
 
     # Check to see if we are going to fail because fileAsList is not
     # a proper list
-    if { [catch {llength $fileAsList} errMsg] == 1} {
+    if [catch {llength $fileAsList} errMsg] {
 	error "Problem with reading the file as a list.\nThe error message \
 		was:\n$errMsg\nThe contents of the file:\n$fileAsList"
     }
