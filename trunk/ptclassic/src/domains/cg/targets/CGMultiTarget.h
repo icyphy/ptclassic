@@ -65,6 +65,9 @@ public:
 	// type identification
 	/*virtual*/ int isA(const char*) const;
 
+	// redefine
+	/* virtual */ int isHetero();
+
 	// redefine: generateCode routine generates code if inside a wormhole
 	// in this redefinition.  It also calls all of the child targets
 	// generateCode methods
@@ -72,25 +75,10 @@ public:
 
 	void setStopTime(double);
 
-	// compute profile
-	int computeProfile(int nP, int resWork = 0, IntArray* avail = 0);
-
-	// set the profile
-	void setProfile(Profile* p);
-
-	// download the code with a specified processor
-	int downLoadCode(int, int, Profile* prof = 0);
-
-	// total work load
-	int totalWorkLoad();
-
 	Block* makeNew() const;
 
 	// communication cost
 	int commTime(int,int,int,int);
-
-	// return the array of candidate processors.
-	IntArray* candidateProcs(ParProcessors*, DataFlowStar*);
 
 	// resource management
 	int scheduleComm(ParNode* /*comm*/, int when, int /*limit*/ = 0) 
@@ -105,7 +93,8 @@ public:
 	DataFlowStar* createReceive(int from, int to, int num);
 	DataFlowStar* createSpread();
 	DataFlowStar* createCollect();
-
+	CGStar* createMacro(CGStar*, int, int, int);
+ 
 	// generate Gantt chart
 	void writeSchedule();
 
@@ -152,9 +141,7 @@ protected:
 	IntArrayState relTimeScales;
 
 	// parameters to set the scheduling option
-	IntState useCluster;
-	IntState overlapComm;
-	IntState ignoreIPC;
+	StringState schedName;
 	IntState useMultipleSchedulers;
         IntState displaySchedulerStats;
 
@@ -170,9 +157,6 @@ protected:
 	// If no "resources" in the child target, create one.
 	virtual void resourceInfo();
 	
-	// reset resources
-	virtual void resetResources();
-
 	// choose scheduler
 	virtual void chooseScheduler();
 
@@ -180,9 +164,6 @@ protected:
 	// By default, it clones from KnownTarget list with "chile-type" state.
 	virtual Target* createChild(int);
  
-	// flatten wormholes if heterogeneous targets
-	void flattenWorm();
-
         // Optionally provides stats to the user
         /*virtual*/ int schedulerSetup();
 
@@ -198,9 +179,6 @@ protected:
 	// update the reachability matrix for communication amortization.
 	// This method is supposed to be called in createSend() method.
 	void updateRM(int from, int to);
-
-	// parallel processors
-	IntArray canProcs;
 
 	// Does the child target support the given star?
 	virtual int childSupport(Target*,Star*);

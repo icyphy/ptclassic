@@ -45,11 +45,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DLScheduler.h"
 #include "HuScheduler.h"
 #include "DeclustScheduler.h"
+#include "MacroScheduler.h"
+#include "CGDDFScheduler.h"
 #include "KnownTarget.h"
 #include "CGSpread.h"
 #include "CGCollect.h"
 #include "CGSend.h"
-#include "CGWormBase.h"
 #include "CGReceive.h"
 #include "Geodesic.h"
 #include "pt_fstream.h"
@@ -69,18 +70,15 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 	addState(relTimeScales.setState("relTimeScales",this,"1",
 		"define the relative time scales of child targets"));
 	filePrefix.setAttributes(A_SETTABLE);
+        addState(schedName.setState("schedName(DL,HU,DC,MACRO,CGDDF)",this,"DL",
+           "schedulers: DL - dynamic level \n\t HU - ignore IPC \n\t DC - cluste
+ring \n\t MACRO - parallel task\n\t CGDDF - dynamic constructs \n"));
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
                                      "log file to write to (none if empty)"));
         addState(amortizedComm.setState("amortizedComm",this,"NO",
                                      "try to amortize communication?"));
-	addState(ignoreIPC.setState("ignoreIPC",this,"NO",
-				   "ignore communication cost?"));
-	addState(overlapComm.setState("overlapComm",this,"NO",
-				   "processor can overlap communication?"));
-	addState(useCluster.setState("useCluster",this,"NO",
-				   "Use Gil's declustering algorithm?"));
 	addState(useMultipleSchedulers.setState("Use multiple schedulers?",
 						this,"NO",
 				   "Use hierarchical schedulers?"));
@@ -90,7 +88,7 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 }
 
 CGMultiTarget::~CGMultiTarget() {
-	if (!inherited()) deleteChildren();
+	deleteChildren();
 	delSched();
 	addedStates.deleteAll();
 	LOG_DEL; delete rm;
@@ -133,16 +131,9 @@ void CGMultiTarget::setup() {
 	//choose the right scheduler
 	chooseScheduler();
 	
-	// in case of heterogeneous targets, flatten the wormholes.
-	if (childType.size() > 1) {
-		flattenWorm();
-	}
-
 	ParScheduler* sched = (ParScheduler*) scheduler();
 	sched->setGalaxy(*galaxy());
 	sched->setUpProcs(nChildrenAlloc);
-
-	canProcs.create(nChildrenAlloc);
 
 	// CG stuff
 	myCode.initialize();
@@ -150,29 +141,27 @@ void CGMultiTarget::setup() {
 	if (galaxy()->parent()) {
 		sched->ofWorm();
 	}
+	installDDF();
 	Target :: setup();
 
-	if (!inherited()) {
-		writeSchedule();
-		if (inWormHole()) {
-		   	adjustSampleRates();
-			generateCode();
-			if (compileCode())
+	writeSchedule();
+	if (inWormHole()) {
+	   	adjustSampleRates();
+		generateCode();
+		if (compileCode())
+		{
+			if (loadCode())
 			{
-			    if (loadCode())
-			    {
 				if (!runCode())
 				    Error::abortRun(*this, "could not run!");
-			    }
-			    else Error::abortRun(*this, "could not load!");
 			}
-			else Error::abortRun(*this, "could not compile!");
+			else Error::abortRun(*this, "could not load!");
 		}
+		else Error::abortRun(*this, "could not compile!");
 	}
 }
 
 void CGMultiTarget :: prepareChildren() {
-    if (!inherited()) {
 	deleteChildren();
 	nChildrenAlloc = nprocs;
 	if (childType.size() > nChildrenAlloc) {
@@ -184,6 +173,7 @@ void CGMultiTarget :: prepareChildren() {
 	    "[childType] and [relTimeScales].\n",
 	    "By default, we assume the same time scale, 1");
 	}
+	reorderChildren(0);	// first call initializes the structure
 	StringList tname;
 	for (int i = 0; i < nChildrenAlloc; i++) {
 	    Target* t = createChild(i);
@@ -205,9 +195,8 @@ void CGMultiTarget :: prepareChildren() {
 	}
 	resourceInfo();
 	for (i = 0; i < nChildrenAlloc; i++) {
-	    child(i)->initialize();
+		((CGTarget*) child(i))->childInit();
 	}
-    }
 }
 
 Target* CGMultiTarget :: createChild(int i) {
@@ -270,84 +259,43 @@ void CGMultiTarget :: resourceInfo() {
 void CGMultiTarget :: chooseScheduler() {
     delSched();
     ParScheduler* mainScheduler;
-    if (int(ignoreIPC)) {
-	LOG_NEW; mainScheduler = new HuScheduler(this, logFile);
+    const char* sname = schedName;
+    if (*sname == 'M' || *sname == 'm') {
+    	LOG_NEW; mainScheduler = new MacroScheduler(this, logFile);
+    } else if (*sname == 'H' || *sname == 'h') {
+    	LOG_NEW; mainScheduler = new HuScheduler(this, logFile);
+    } else if (*(sname+1) == 'C' || *(sname+1) == 'c') {
+    	if (childType.size() > 1) {
+    		Error :: warn("Declustering technique can not be",
+    		"applied for heterogeneous targets.\n By default",
+    		"we use dynamic-level scheduling");
+    		LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+    	} else if (resources.size() > 1) {
+    		Error :: warn("Declustering technique can not be",
+    		"applied with resource restriction.\n By default",
+    		"we use dynamic-level scheduling");
+    		LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+    	} else {
+    		LOG_NEW; mainScheduler = new DeclustScheduler(this, logFile);
+    	}
+    } else if (*(sname+1) == 'G' || *(sname+1) == 'g') {
+    	LOG_NEW; mainScheduler = new CGDDFScheduler(this, logFile);
+    } else {
+    	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
     }
-    else if (int(overlapComm)) {
-	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 0);
-    }
-    else if (int(useCluster)) {
-	if (childType.size() > 1) {
-	    Error :: warn("Declustering technique can not be",
-			  "applied for heterogeneous targets.\n By default",
-			  "we use dynamic-level scheduling");
-	    LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
-	}
-	else if (resources.size() > 1) {
-	    Error :: warn("Declustering technique can not be",
-			  "applied with resource restriction.\n By default",
-			  "we use dynamic-level scheduling");
-	    LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
-	}
-	else {
-	    LOG_NEW; mainScheduler = new DeclustScheduler(this, logFile);
-	}
-    }
-    else {
-	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
-    }
+
     if(int(useMultipleSchedulers)) {
 	LOG_NEW; mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
     }
     setSched(mainScheduler);
 }
 
-void CGMultiTarget :: flattenWorm() {
-	Galaxy* myGalaxy = galaxy();
-	GalStarIter next(*myGalaxy);
-	CGStar* s;
-	CGStar* prev = 0;
-	Galaxy* prevG = myGalaxy;
-	int changeFlag = FALSE;
-	while ((s = (CGStar*) next++) != 0) {
-		if (prev) {
-			prevG->removeBlock(*prev);
-			LOG_DEL; delete prev;
-			prev = 0;
-		}
-		if (s->isItWormhole()) {
-			CGWormBase* w = s->myWormhole();
-			if (w == NULL) {
-				Error::abortRun(*this,"flattenWorm: Wormhole does returns a NULL pointer.  Is the myWormhole() method defined for the current domain?");
-				return;
-			}
-			// if inside domain is a CG domain, explode wormhole.
-			prevG = (Galaxy*) s->parent();
-			if (w->isCGinside()) {
-				prev = s;
-				Galaxy* inG = w->explode();
-				prevG->addBlock(*inG, inG->name());
-				changeFlag = TRUE;
-			}
-		}
-	}
-	if (prev) {
-		prevG->removeBlock(*prev);
-		LOG_DEL; delete prev;
-	}
-
-	// recursive application of this routine.
-	if (changeFlag) flattenWorm();
-}
-				
 void CGMultiTarget :: setStopTime(double f) {
 	Target::setStopTime(f);
 
 	// For child targets
-	if (!inherited()) {
-		for (int i = 0; i < nChildrenAlloc; i++) {
-			child(i)->setStopTime(f);
-		}
+	for (int i = 0; i < nChildrenAlloc; i++) {
+		child(i)->setStopTime(f);
 	}
 }
 
@@ -627,46 +575,16 @@ int CGMultiTarget::commTime(int, int, int nSamps, int type) {
         return type == 2 ? 2*cost : cost;
 }
 
-// return the array of candidate processors
-IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched,
-	DataFlowStar* s) {
-	
-	// clear the array.
-	int k = 0;
-	int flag = 0;
-	int temp = -1;
-
-	// heterogeneous case
-	int hetero = (childType.size() > 1) || (relTimeScales.size() > 1);
-
-	// Scan the processors. By default, include only one
-	// unused processor and all used processors which satisfy
-	// resource constraints.
-	for (int i = 0; i < parSched->size(); i++) {
-		UniProcessor* uni = parSched->getProc(i);
-		CGTarget* t = uni->target();
-		if (s && t && !childSupport(t,s)) continue;
-		else if (s && t && !childHasResources(*s, i)) continue;
-		else if (uni->getAvailTime() || hetero) {
-			canProcs[k] = i;
-			k++;
-		} else if (!flag) {
-			temp = i;
-			flag = 1;
-		} 
-	}
-	if (temp >= 0) { canProcs[k] = temp; k++; }
-	canProcs.truncate(k);
-	return &canProcs;
+// is a heterogeneous target?
+int CGMultiTarget :: isHetero() {
+	return (childType.size() > 1) || (relTimeScales.size() > 1);
 }
-	
+
 ParNode* CGMultiTarget :: backComm(ParNode* n) {
 	if (n->getType() >= -1) return 0;
 	ParAncestorIter iter(n);
 	return (iter++);
 }
-
-void CGMultiTarget :: resetResources() {}			
 
 // create communication stars
 DataFlowStar* CGMultiTarget :: createSend(int from, int to, int /*num*/) {
@@ -689,6 +607,13 @@ DataFlowStar* CGMultiTarget :: createCollect() {
 	LOG_NEW; return (new CGCollect);
 }
 	
+// create Macro Star
+CGStar* CGMultiTarget :: createMacro(CGStar*, int, int, int) {
+	Error :: abortRun("code generation fails with macro actor",
+	"\n create domain-specific Macro star");
+	return 0;
+}
+
 // return the execution of a star if scheduled on the given target.
 // If the target does not support the star, return -1.
 int CGMultiTarget :: execTime(DataFlowStar* s, CGTarget* t) {
@@ -721,58 +646,6 @@ int CGMultiTarget :: amortize(int from, int to) {
 	int x = rm->getElem(from, to) + rm->getElem(to, from);
 	if (x < 2) return TRUE;
 	else return FALSE;
-}
-
-	/////////////////////////
-	// CGDDF support
-	/////////////////////////
-
-void CGMultiTarget :: setProfile(Profile* p) {
-	((ParScheduler*) scheduler())->setProfile(p);
-}
-
-// flag = -2 when manual scheduling option is taken (final stage).
-// flag = -1 indicate the final scheduling from the automatic scheduling
-// flag = 1 is the setup stage scheduling in the automatic scheduling.
-
-int CGMultiTarget :: computeProfile(int nP, int flag, IntArray* procMap) {
-	ParScheduler* qs = (ParScheduler*) scheduler();
-	if (flag >= -1) {
-		resetResources();
-		qs->setUpProcs(nP);
-		if (!qs->mainSchedule()) return FALSE;
-	}
-	if ((flag == -1) || ((flag == -2) && (nP > 1))) {
-		qs->mapTargets(procMap);
-		if (!qs->createSubGals(*galaxy())) return FALSE;
-		return qs->finalSchedule();
-	} 
-	return TRUE;
-}
-
-int CGMultiTarget :: totalWorkLoad() {
-        return ((ParScheduler*) scheduler())->getTotalWork();
-}
-
-int CGMultiTarget::downLoadCode(int index, int pId, Profile*) {
-	if (nChildrenAlloc == 1) {
-		ParScheduler* ps = (ParScheduler*) scheduler();
-
-		// set the numProcs of ParScheduler to be zero to call the
-		// SDFScheduler :: compileRun() method. Refer to the
-		// ParScheduler :: compileRun() method when numProcs = 0.
-
-		ps->setUpProcs(0);
-		CGTarget* t = (CGTarget*) child(pId);
-		GalStarIter next(*galaxy());
-		Star* s;
-		while ((s = next++) != 0) s->setTarget(t);
-
-		return t->insertGalaxyCode(galaxy(), ps);
-	} else {
-		return ((ParScheduler*)scheduler())->
-			getProc(index)->genCodeTo(child(pId));
-	}
 }
 
 ISA_FUNC(CGMultiTarget, MultiTarget);
