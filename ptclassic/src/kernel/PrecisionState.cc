@@ -43,7 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownState.h"
 #include "Tokenizer.h"
 #include <ctype.h>
-#include <minmax.h>
+#include <stdlib.h>		// strtol()
+
+inline unsigned char max(unsigned char a, unsigned char b) {return (a>b)?a:b;}
 
 #define TOKSIZE 256
 
@@ -269,13 +271,19 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 
 	Tokenizer lexer(arg, "");
 
-	(Precision&)*this = parsePrecisionString(lexer);
+	//(Precision&)*this = parsePrecisionString(lexer);
+	//Precision foo = Precision(6,3,NULL,NULL);
+	Precision foo = parsePrecisionString(lexer);
+	(Precision&)*this = foo;
+
+	//*this = foo;
+	//*this = Precision( foo.len(), foo.intb(), foo.symbolic_len(), foo.symbolic_intb());
 
 	if (!this->isValid())
 		;  // parse error already reported in parser routine
 	else {
 		// check for extra cruft (this also eats up any pushback token)
-		if (getParseToken(lexer).tok != T_EOF) {
+	  	if (getParseToken(lexer).tok != T_EOF) {
 			parseError ("extra text after valid expression");
 			return *this;
 		}
@@ -290,12 +298,28 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 PrecisionState& PrecisionState :: operator = (const PrecisionState& p)
 {
 	(Precision&)*this = p;
-	val = savestring(p.val);
+	val = p.val ? savestring(p.val) : NULL;
 	return *this;
 }
 
+#ifdef NEVER
+// copy from a Precision
+PrecisionState& PrecisionState :: operator = (const Precision& p)
+{
+  StringList sl(p);
+  val = savestring(sl);
+  return *this;
+}
+#endif
 // the type
 const char* PrecisionState :: type() const { return "PRECISION";}
+
+// Return the current value
+StringList PrecisionState :: currentValue() const {
+	StringList res;
+	if (val) res = val;
+	return res;
+}
 
 // clone
 State* PrecisionState :: clone () const
