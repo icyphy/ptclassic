@@ -51,7 +51,10 @@
 # <code>bar</code> is the _local name_ of this item, and that
 # <code>group:foo</code> is its _context_. Local names are unique
 # for each type and context -- for example, there could also be an
-# item named <code>icon:foo</code>.
+# item named <code>icon:foo</code>. Items within each context
+# are maintained in the order in which they were added to the
+# model -- this ordering can be changed with the <b>reorder</b>
+# method.
 #
 # The data of an item is a list of named attributes. By convention,
 # attribute names begine with a leading dash, although there is
@@ -72,8 +75,7 @@
 # way as the Tcl <b>array</b> command. The <b>match</b> method
 # returns an ordered list of child items within a given context,
 # optionally matching against atribute values, while <b>search</b>
-# provides a more powerful searching mechanism. <b>sort</b>
-# allows the ordering of child items to be changed; <b>exists</b>
+# provides a more powerful searching mechanism. <b>exists</b>
 # provides a simple test whether data is present.
 #
 # _DataModel_ is designed to be subclassed to create application-specific
@@ -133,11 +135,11 @@ class ::tycho::DataModel {
     # Load data from a TIM string
     method parse {data {context {}}}
     
-    # Search for items with regexp or glob-syle matching
-    method search {mode args}
+    # Re-order items in a given context
+    method reorder {type {context {}} list}
 
-    # Sort items in a given context
-    method sort {type {context {}} args}
+    # Search for items with regexp or glob-syle matching
+    method search {args}
 
     # Define or configure item types
     method type {mode {type {}} args}
@@ -239,10 +241,7 @@ body ::tycho::DataModel::constructor {args} {
     # Initialize the array name
     set _dataname [::info namespace tail $this]
 
-    # Initialize the model attributes
-    @scope $scope set [set _dataname]() {}
-
-   # Create a proc to parse the "configure" syntax
+    # Create a proc to parse the "configure" syntax
     @scope $scope eval {
         proc __parse_configure {args} {
             global _object_
@@ -286,9 +285,19 @@ body ::tycho::DataModel::add {name args} {
         history append "add $name $args" "delete $name"
     }
 
-    # Extract type and tail
-    regexp {([^:]+):(.+)} [lindex $name end] _ type tail
+    # Extract type and tail, and do lots of time-consuming
+    # error-checking
+    if ![regexp {([^:]+):(.+)} [lindex $name end] _ type tail] {
+	error "Item name \"$name\" is not of the form type:name"
+    }
+    if ![::info exists _typeconfig($scope:$type)] {
+	error "Unknown type \"$type\" in $modelname"
+    }
     set context [lreplace $name end end]
+    if { $context != "" \
+            && ![@scope $scope ::info exists [set _dataname]($context)] } {
+	error "Unknown context \"$context\" in $modelname"
+    }
 
     # Extract contents
     if { !$_leafonly($type) && ([llength $args] & 1) } {
@@ -593,30 +602,32 @@ body ::tycho::DataModel::itemset {name args} {
 ########################################################################
 #### match
 #
-# Get child items of the given _type_. If the _context_ is given,
-# get items within that context; otherwise, get top-level items. The
-# returned names are the local names within the given context.
+# Get child items of the given _type_, optionally matching against
+# attribute values. The returned list contains the local names
+# of matched items, in the order in which the items were added
+# to the model (or subsequently re-ordered with <b>reorder</b>).
+# If the _context_ is given, get items within that context;
+# otherwise, get top-level items. If _context_ is supplied and
+# does not exist, raise an error. Any additional arguments are
+# taken to be a list of attribute name-value pairs. If supplied,
+# only items that have the given attributes with the given values
+# will be returned.
+# 
 # For example, if the model contains items with full names *item:foo*
 # and *item:bar*, then the call
 # <pre>
 #     $model match item
 # </pre>
 # will return <code>{foo bar}</code>. (In comparison, the names{}
-# method will return <code>{item:foo item:bar}</code>.) Children
-# are returned in the same order in which they were added to
-# the model -- the order of children of a given type can be altered
-# with the <b>sort</b> method. If additional arguments are given,
-# they specify attributes of the items that must be exactly matched
-# in order to include an item in the return list.
-# If _context_ is supplied and does not exist, raise an error.
+# method will return <code>{item:foo item:bar}</code>.)
 #
 body ::tycho::DataModel::match {type {context {}} args} {
     # Adjust for presence of context argument
     if { [llength $args] & 1 } {
         set args [linsert $args 0 $context]
         set context {}
-    } elseif ![exists $context] {
-        error "Unknown context \"$context\""
+    } elseif { $context != "" && ![exists $context] } {
+        error "Unknown context \"$context\" in $modelname"
     }
     # Get all children in order
     if [@scope $scope ::info exists [set _dataname]:[set type]($context)] {
@@ -675,6 +686,10 @@ body ::tycho::DataModel::names {{pattern *}} {
 # will be parsed relative to that item.
 #
 body ::tycho::DataModel::parse {data {context {}}} {
+    if { $context != "" && ![exists $context] } {
+	error "Unknown context \"$context\" in $modelname"
+    }
+
     global _current_ _context_ _object_
     set saved $_context_
 
@@ -686,147 +701,166 @@ body ::tycho::DataModel::parse {data {context {}}} {
 }
 
 ########################################################################
-#### search
+#### reorder
 #
-# Search the model for data. This method has several forms, depending
-# on the _mode_ argument:
+# Change the ordering of items of a given type. _type_ is
+# the type of items to reorder. If _context_ is not present,
+# then reorder items at the top level, otherwise reorder
+# items within that context. _list_ is a list that
+# must contain the same names returned by a call to
+# <code>match type ?context?</code> but in any order.
+# For example, items can be sorted alphabetically
+# by a call of the form
+# <pre>
+#     $model reorder type [lsort [$model match type]]
+# </pre>
+# Future calls to match{} and describe{} will return items in the
+# new order given by _list_.
 #
-# <dl>
-# <dt><b>done</b> _index_
-# <dd>
-# Terminate a search. _index_ must be a value returned by a previous
-# call to <b>search glob</b> or <b>search regexp</b>.
-#
-# <dt><b>glob</b> _attribute_ _glob_ ?_pattern_?
-# <dd>
-# Start a glob-style expression search and return an index to be
-# used in future calls to the <b>next</b> and <b>done</b> options.
-# The glob-style pattern _glob_ will be matched against
-# the values of each attribute named _attribute_. _attribute_
-# is itself a glob-style pattern. The glob-style patterns
-# are as for the Tcl <b>string match</b> command. If _pattern_
-# is supplied, it is a glob-style pattern that is matched against
-# item names before beginning the search -- this can be used to
-# limit the items through which the search is performed.
-#
-# <dt><b>next</b> _index_
-# <dd>
-# Return the name of the next item that matches the search 
-# criteria given by _index_. _index_ must be a value returned
-# by a previous call to <b>search glob</b> or <b>search regexp</b>.
-# If no item is found, return null. Note that the search is somewhat
-# optimistic: it is possible for an item to be returned that does
-# not in fact match the search criteria. Clients should therefore
-# verify that a proper match occurred by performing a <b>regexp</b>
-# or <b>string match</b> on the attributes of found items.
-#
-# <dt><b>regexp</b> _attribute_ _regexp_ ?_pattern_?
-# <dd>
-# Start a regular expression search and return an index to be
-# used in future calls to the <b>next</b> and <b>done</b> options.
-# The regular expression _regexp_ will be matched against
-# the values of each attribute named _attribute_. _attribute_
-# is itself a regular expression. The regular expressions are as
-# for the Tcl <b>regexp</b> command, but cannot contain an initial
-# <b>^</b> or final <b>$</b> character. If _pattern_ is supplied,
-# it is a glob-style pattern that is matched against item names before
-# starting the search -- this can be used to limit the items through
-# which the search is performed.
-#
-# </dl>
-#
-body ::tycho::DataModel::search {mode args} {
-    switch -exact $mode {
-        "done" {
-            if { [llength $args] != 1 } {
-		error "wrong # args: should be \"search done index\""
-            }
-            set index [lindex $args 0]
-            if ![::info exists _searchdata($index)] {
-                error "invalid search index \"$index\""
-            }
-           unset _searchdata($index)
-           unset _searchtype($index)
-            unset _searchexp($index)
-        }
-        "glob" -
-        "regexp" {
-	    if { [llength $args] < 2 || [llength $args] > 3 } {
-		error "wrong # args: should be \"search $mode \
-                        attribute $mode ?pattern?\""
-	    }
-            set index [::tycho::autoName search]
-            set attribute [lindex $args 0]
-            set expression [lindex $args 1]
-            if { $mode == "glob" } {
-                set exp "*$attribute $expression*"
-            } else {
-                set exp "$attribute $expression"
-            }
-
-            set _searchtype($index) $mode
-            set _searchexp($index) $exp
-            if { [llength $args] == 2 } {
-                set _searchdata($index) [get]
-            } else {
-                set _searchdata($index) [get $pattern]
-            }
-            return $index
-	}
-       "next" {
-	    if { [llength $args] != 1 } {
-		error "wrong # args: should be \"search next index\""
-	    }
-            set index [lindex $args 0]
-            if ![::info exists _searchdata($index)] {
-                error "invalid search index \"$index\""
-            }
-            set data $_searchdata($index)
-            set t [lsearch -$_searchtype($index) \
-                    $data \
-                    $_searchexp($index)]
-
-            if { $t == -1 } {
-                # Nothing found
-                set item ""
-                set data ""
-            } elseif { !($t & 1) } {
-                # Oops, matched against item name...
-                set item [lindex $data $t]
-                set data [lreplace $data 0 [expr $t+1]]
-            } else {
-                # Matched against data
-                set item [lindex $data [expr $t-1]]
-                set data [lreplace $data 0 $t]
-            }
-            set _searchdata($index) $data
-            return $item
-        }
-        default {
-            error "Invalid option \"$mode\": must be done, \
-                    glob, regexp, or next"
-        }
+body ::tycho::DataModel::reorder {type {context {}} {list {}}} {
+    # Adjust for presence of context argument
+    if { $list == {} } {
+        set list $context
+        set context {}
     }
+    # Check that the list contains the right names
+    if { [lsort $list] != [lsort [match $type $context]] } {
+        error "Child names do not match"
+    }
+    @scope $scope set [set _dataname]:[set type]($context) $list
 }
 
 ########################################################################
-#### sort
+#### search ?mode? ?defaults? attribute pattern ?namepatt?
 #
-# Sort items. If just _type_ is given, sort the top-level items
-# with that type. If _context_ is given, this is an item name,
-# and its children of type _type_ will be sorted. Remaining
-# arguments are passed directly to the Tcl <b>lsort</b> procedure.
-# This method does not add anything to the history.
+# Search for items with an attribute that matches an expression.
+# If _globpattern_ is provided, it is a glob pattern that is
+# matched against the names of all data items to find the items
+# to search through. If _namepatt_ is not provided, all items
+# are searched. _mode_ is a flag that determines the type of
+# matching, and must be <b>-exact</b>, <b>-glob</b>, or <b>-regexp</b>.
+# The default is <b>-glob</b>. _defaults_ is a flag that determines
+# whether default attribute values are matched against, and must be
+# either <b>-nodefaults</b> or <b>-defaults</b>. The default is
+# <b>-nodefaults</b>, which is considerably faster. _attribute_ is
+# the name of the attribute to match against. (Note: it is not
+# possible to match against the value of more than one attribute.)
+# _pattern_ is the pattern that is matched against the attribute of
+# each data item. The returned value is a list of all items that
+# matched.
+# 
+# For example, to find all items with the attribute <b>-foo</b>
+# with value <b>bar</b>:
+# <pre>
+#     $model search -exact -foo bar
+# </pre>
 #
-body ::tycho::DataModel::sort {type {context {}} args} {
-    # Adjust for presence of context argument
-    if { [llength $args] & 1 } {
-        set args [linsert $args 0 $context]
-        set context {}
+# To find all descendants of <b>X:blue</b> with an integer
+# value of <b>-foo<b>:
+# <pre>
+#     $model search -regexp -foo {^[0-9]+$} {X:blue *}
+# </pre>
+#
+body ::tycho::DataModel::search {mode defaults args} {
+    # Extract option flags and arguments <groan>
+    if ![regexp {^(-exact|-glob|-regexp)$} $mode] {
+        set args [linsert $args 0 $defaults]
+        set defaults $mode
+        set mode -glob
     }
-    set children [@scope $scope set [set _dataname]:[set type]($context)]
-    set children [eval lsort $args [list $children]]
-    @scope $scope set [set _dataname]:[set type]($context) $children
+    if ![regexp {^(-defaults|-nodefaults)$} $defaults] {
+        set args [linsert $args 0 $defaults]
+        set defaults -nodefaults
+    }
+    set attribute [lindex $args 0]
+    set pattern [lindex $args 1]
+    set namepatt [lindex $args 2]
+    # Get the data to search
+    if { $namepatt == "" } {
+        set data [get]
+    } else {
+        set data [get $namepatt]
+    }
+    set candidates {}
+    set result {}
+
+    # Get pattern for initial search
+    switch -exact -- $mode {
+        "-exact" -
+        "-glob" {
+            set searchmode -glob
+            set searchpatt "*$attribute $pattern*"
+        }
+        "-regexp" {
+            set searchmode -regexp
+            set searchpatt [string trimleft [string trimright $pattern $] ^]
+        }
+    }
+    # If the -defaults flag is on, rebuild the data list with defaults in it
+    if { $defaults == "-defaults" } {
+        set tempdata $data
+        set data {}
+        foreach {name attr} $tempdata {
+            regexp {^[^:]+} [lindex $name end] type
+            array set t $_defaults($type)
+            array set t $attr
+            lappend data $name [array get t]
+            unset t
+        }
+    }
+    # Find candidate items. This search is inexact.
+    while { $data != "" } {
+        set index [lsearch $searchmode $data $searchpatt]
+        if { $index == -1 } {
+            # No more left
+            break
+        } elseif { !($index & 1) } {
+            # Oops, matched against item name..
+            incr index
+        }
+        set name [lindex $data [expr $index-1]]
+        set attrs [lindex $data $index]
+        if { $attrs != "" } {
+            lappend candidates $name $attrs
+        }
+        set data [lreplace $data 0 $index]
+    }
+
+    # Now process the candidates to find those that match exactly
+     switch -exact -- $mode {
+        "-exact" {
+            foreach {name attr} $candidates {
+                array set arr $attr
+                if { [::info exists arr($attribute)] \
+                        && $arr($attribute) == $pattern } {
+                    lappend result $name
+                }
+                unset arr
+            }
+        }
+        "-glob" {
+             foreach {name attr} $candidates {
+                array set arr $attr
+                if { [::info exists arr($attribute)] \
+                        && [string match $pattern $arr($attribute)] } {
+                    lappend result $name
+                }
+                unset arr
+            }
+        }
+        "-regexp" {
+            foreach {name attr} $candidates {
+                array set arr $attr
+                if { [::info exists arr($attribute)] \
+                        && [regexp $pattern $arr($attribute)] } {
+                    lappend result $name
+                }
+                unset arr
+            }
+        }
+    }
+    # Done
+    return $result
 }
 
 ########################################################################
@@ -1242,7 +1276,7 @@ body ::tycho::DataModel::_mkparseproc {type} {
             set $_current_.cachevalid 0
         }
         # Parse contents if the item is not a leaf. Use the safe
-		# interpreter to ensure safety.
+	# interpreter to ensure safety.
         if !$_leafonly($type) {
             append proc {if { $contents != "" }}
             set t {
