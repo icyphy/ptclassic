@@ -44,7 +44,7 @@ public:
 	~MacroParSched();
 
         // set-up Processors
-        void setUpProcs(int num);
+        ParProcessors* setUpProcs(int num);
  
 	int generateSchedule(CGMacroClusterGal* g);
 

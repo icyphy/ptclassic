@@ -182,11 +182,12 @@ int MacroParSched :: generateSchedule(CGMacroClusterGal* mgal) {
 // setUpProcs
 /////////////////////////////
 
-void MacroParSched :: setUpProcs(int num) {
+ParProcessors* MacroParSched :: setUpProcs(int num) {
 	ParScheduler :: setUpProcs(num);
 	LOG_DEL; if (parSched) delete parSched;
 	LOG_NEW; parSched = new MacroParProcs(numProcs, mtarget);
 	parProcs = parSched;
+	return parProcs;
 }
 
 MacroParSched :: ~MacroParSched() {
