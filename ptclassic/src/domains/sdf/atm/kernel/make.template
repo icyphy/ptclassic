@@ -1,4 +1,4 @@
-# Makefile for DE ATM kernel
+# Makefile for SDF ATM kernel
 # Version identification:
 # $Id$
 # Copyright (c) 1990 The Regents of the University of California.
@@ -14,16 +14,16 @@
 # Root of Ptolemy directory
 ROOT=../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/de/atm/kernel
+VPATH = $(ROOT)/src/domains/sdf/atm/kernel
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-# DE Kernel
-DEKERNDIR = $(ROOT)/src/domains/de/kernel
+# SDF Kernel
+SDFKERNDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(DEKERNDIR) -I$(KERNDIR)
+INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
 #Library name
 LIB = libatm.a
