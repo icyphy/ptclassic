@@ -1,7 +1,11 @@
 .\" $Id$
 .NA timing
 .SD
-Approximate MMSE timing recovery
+This demo illustrates the use of the DDF domain
+to implement asynchronous signal processing systems.
+In this case, the system performs baud-rate timing
+recovery using an approximate minimum mean-square-error
+(MMSE) technique.
 .DE
 .LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
@@ -10,12 +14,8 @@ Approximate MMSE timing recovery
 .Ie "timing recovery, MMSE"
 .Ie "MMSE timing recovery"
 .Ir "asynchronous signal processing"
-This demo illustrates the use of the DDF domain
-to implement asynchronous signal processing systems.
-In this case, the system performs baud-rate timing
-recovery using an approximate minimum mean-square-error
-technique, as described in [1].
-.pp
+The approximate minimum mean-square-error
+timing recovery technique is described in [1].
 .Ir "amplitude shift keying"
 .Ir "ASK"
 .Ir "modulation, amplitude shift keying"

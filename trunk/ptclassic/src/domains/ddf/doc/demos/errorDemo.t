@@ -2,17 +2,20 @@
 .NA errorDemo
 .SD
 An example of an inconsistent DDF system.
+An inconsistent DDF program is one where the long term
+average number of particles produced on an arc is not the same
+as the average long term number of particles consumed.
+This error is detected by bounding the buffer sizes and detecting
+overflow.
 .DE
 .LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .LD
-An inconsistent DDF program is one where the long term
-average number of particles produced on an arc is not the same
-as the average long term number of particles consumed.
-This idea is elaborated in [1].
 This demo shows what to expect when an inconsistent DDF program
-is run.  Inconsistency is considered an error, so
+is run.
+Consistency in dataflow graphs is explained in [1].
+Inconsistency is considered an error, so
 it should be detected.  Pending implementation of the techniques
 described in [1], these errors are detected indirectly through
 their effect on buffer sizes at run time.

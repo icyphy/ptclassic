@@ -1,7 +1,8 @@
 .\" $Id$
 .NA repeater
 .SD
-Demonstrates the Repeater star.
+This is a simple illustration of the Repeater star, used
+in an SDF wormhole.
 .DE
 .LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
