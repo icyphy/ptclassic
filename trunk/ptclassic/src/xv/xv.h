@@ -84,7 +84,11 @@
 
 #ifndef VMS
 extern int   errno;             /* this SHOULD be in errno.h */
+#ifdef netbsd_i386
+extern const char *const sys_errlist[];
+#else
 extern char *sys_errlist[];     /* this SHOULD be in errno.h */
+#endif
 #endif
 
 #ifndef VMS     /* VMS hates multi-line '#if's */
