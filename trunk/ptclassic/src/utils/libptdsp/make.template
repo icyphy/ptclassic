@@ -40,7 +40,7 @@
 # root of source tree
 ROOT	      = ../../..
 # VPATH points to the real source directory
-VPATH         = $(ROOT)/src/utils/libcephes
+VPATH         = $(ROOT)/src/utils/libptdsp
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
@@ -48,17 +48,17 @@ include $(CONFIG)
 
 C_INCL = $(PTCOMPAT_INCSPEC)
 
-HDRS = cephes.h PTDSPfft_rif.h PTDSPNearestNeighbor.h \
+HDRS = PTDSP.h PTDSPcephes.h PTDSPfft_rif.h PTDSPNearestNeighbor.h \
  PTDSPPartitionCodebook.h PTDSPRaisedCosine.h PTDSPWindow.h
 
-LIBCSRCS = chbevl.c i0.c PTDSPfft_rif.c PTDSPNearestNeighbor.c \
+LIBCSRCS = PTDSPchbevl.c PTDSPi0.c PTDSPfft_rif.c PTDSPNearestNeighbor.c \
  PTDSPPartitionCodebook.c PTDSPRaisedCosine.c PTDSPWindow.c
 
 SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB = libcephes.$(LIBSUFFIX)
+LIB = libptdsp.$(LIBSUFFIX)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
