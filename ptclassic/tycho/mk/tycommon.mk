@@ -672,7 +672,7 @@ realclean:
 		done ; \
 	fi
 	rm -f $(CRUD) configure $(REALCLEAN_STUFF) 
-	rm -rf doc/codeDoc/* $(OPTIONAL_FILES) $(HTMLCHEKOUT)*
+	rm -f doc/codeDoc/* $(OPTIONAL_FILES) $(HTMLCHEKOUT)*
 
 
 
