@@ -8,7 +8,7 @@ $Id$
 
  Programmer:  D. G. Messerschmitt
  Date of creation: 1/17/89
- Revisions:
+ Revisions: 1/22/90 : corrected destructors (EAL)
 
 This header file contains basic container class data structures
 used widely. Each container class stores a set of void*'s,
@@ -122,6 +122,9 @@ inline Pointer SingleLinkList :: getNotRemove()
 
 inline Pointer SingleLinkList :: next()
 {
+	// TO BE DONE:
+	// Check for empty list and invoke an error.
+	// Should this be done throughout this file?
 	lastReference = lastReference->next;
 	return lastReference->e;
 }
@@ -137,16 +140,23 @@ inline Pointer SingleLinkList :: elem(int i)
 
 inline void SingleLinkList :: clear()
 {
-	SingleLink *l = lastNode;
-	if (l == 0) return;	// List already empty
+	if (lastNode == 0) return;	// List already empty
 
-	do	{
+	// Point to the first element in the list
+	SingleLink *l = lastNode->next;
 
+	// As long as the first element is not also the last, delete it
+	while (l != lastNode ) {
 		SingleLink *ll=l;
 		l = l->next;
 		delete ll;
+	}
 
-		} while (l != lastNode );
+	// Delete the last node in the list
+	delete lastNode;
+
+	// and mark the list empty
+	lastNode = 0;
 }
 
 	/////////////////////////////////////
