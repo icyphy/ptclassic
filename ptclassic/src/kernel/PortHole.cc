@@ -77,6 +77,10 @@ Particle** CircularBuffer :: previous(int i) const
 extern const Attribute P_HIDDEN(PB_HIDDEN,0);
 extern const Attribute P_VISIBLE(0,PB_HIDDEN);
 
+// constructor
+GenericPort :: GenericPort () : type(ANYTYPE),aliasedTo(0),typePortPtr(0),
+	aliasedFrom(0), attributeBits(0) {}
+
 // Small virtual methods
 int GenericPort :: isItInput () const { return FALSE;}
 int GenericPort :: isItOutput () const { return FALSE;}
@@ -85,6 +89,20 @@ int GenericPort :: isItMulti () const { return FALSE;}
 PortHole& GenericPort :: newConnection () {
 	// my apologies for this horrible cast
 	return *(PortHole *)&realPort();
+}
+
+// translate aliases, if any.
+GenericPort* GenericPort :: translateAliases() {
+	GenericPort* p = this;
+	while (p->aliasedTo) p = p->aliasedTo;
+	return p;
+}
+
+// really the same as translateAliases; works on const objects
+const GenericPort& GenericPort :: realPort() const {
+	const GenericPort* p = this;
+	while (p->aliasedTo) p = p->aliasedTo;
+	return *p;
 }
 
 // inheritTypeFrom maintains a circular list of typePortPtr pointers.
@@ -152,6 +170,11 @@ void PortHole :: disconnect(int delGeo) {
 	return;
 }
 
+// Porthole constructor.
+PortHole :: PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
+		      myBuffer(0) {}
+	
+
 // Porthole destructor.
 PortHole :: ~PortHole() {
 	disconnect();
@@ -163,9 +186,15 @@ PortHole :: ~PortHole() {
 void PortHole :: grabData () { return;}
 void PortHole :: sendData () { return;}
 
+// GalPort constructor
+GalPort :: GalPort(GenericPort& a) { GenericPort::setAlias(a);}
+
 // get answer by asking the alias.
 int GalPort :: isItInput() const { return alias()->isItInput();}
 int GalPort :: isItOutput() const { return alias()->isItOutput();}
+
+// constructor: a GalMultiPort always has an alias
+GalMultiPort ::	GalMultiPort(GenericPort& a) { GenericPort::setAlias(a);}
 
 // get answer by asking the alias.
 int GalMultiPort :: isItInput() const { return alias()->isItInput();}
