@@ -57,6 +57,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
 **************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "BarGraph.h"
 #include "ptkBarGraph.h"
