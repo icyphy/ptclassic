@@ -77,9 +77,7 @@ proc ::tycho::xfont {family {size 12} {weight medium} {style r} {shift 0}} {
 class ::tycho::FontManager {
     inherit ::tycho::Singleton
 
-    constructor {args} {
-	error "The FontManager class cannot be instantiated"
-    }
+    constructor {args} {}
     destructor {}
 
     ##########################################################################
