@@ -49,11 +49,11 @@ class ::tycho::EditCpp {
 
     # Location of the .cc template file
     itk_option define -filetemplate fileTemplate FileTemplate \
-	    $TYCHO/editors/textedit/templates/CppTemplate.cc {}
+	    $TYCHO/edit/textedit/templates/CppTemplate.cc {}
 
     # Location of the .h template file
     itk_option define -hfiletemplate fileTemplate FileTemplate \
-	    $TYCHO/editors/textedit/templates/CppTemplate.h {}
+	    $TYCHO/edit/textedit/templates/CppTemplate.h {}
 
     constructor {args} {}
     destructor {}
@@ -182,7 +182,7 @@ body ::tycho::EditCpp::getClassName {} {
 #### fileTemplate
 # Insert the blank template into the file.
 # The fileTemplate argument names the template file that should by used.  
-# $TYCHO/editors/textedit/templates contains some sample templates.
+# $TYCHO/edit/textedit/templates contains some sample templates.
 # If the optional className argument is set, then its value will 
 # be substituted wherever the template file contains the string 'ClassName'
 #
