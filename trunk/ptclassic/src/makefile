@@ -11,20 +11,20 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel domains interp pigiRpc xgraph tests
+DIRS = kernel preproc domains interp pigiRpc xgraph tests
 
 # directories with a make.template
 MTDIRS = kernel pigiRpc tests
 
 # "leaf" directories with no make.template
-LDIRS = interp xgraph
+LDIRS = preproc interp xgraph
 
 # directories with subtrees
 SDIRS = domains
 
 MAKEVARS = "ARCH=$(ARCH)"
 
-# This target makes sure all the 
+# This target makes sure all the makefiles are current
 makefiles:
 	@for x in $(MTDIRS); do \
 		cd $$x ; \
