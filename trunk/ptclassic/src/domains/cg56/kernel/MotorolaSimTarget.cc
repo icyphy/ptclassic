@@ -59,7 +59,7 @@ void MotorolaSimTarget :: initStates(const char* dsp,const char* start,
 
 int MotorolaSimTarget::compileCode() {
 	StringList assembleCmds;
-	assembleCmds << "asm" << dspType << " -A -b -l " << uname;
+	assembleCmds << "asm" << dspType << " -A -b -l " << filePrefix;
 	return !systemCall(assembleCmds,"Errors in assembly");
 }
 
@@ -67,11 +67,11 @@ int MotorolaSimTarget::loadCode() {
 	const char* file = plotFile;
 	if (*file != 0) unlink(fullFileName(file));
 	StringList cmdFile;
-	cmdFile << "load " << uname << ".lod\n" << simulatorCmds
+	cmdFile << "load " << filePrefix << ".lod\n" << simulatorCmds
 		<< "break pc>=$" << endAddress << "\ngo $" << startAddress
 		<< "\n";
 	if (!interactiveFlag) cmdFile << "quit\n";
-	return genFile(cmdFile, uname,".cmd");
+	return genFile(cmdFile, filePrefix,".cmd");
 }
 
 int MotorolaSimTarget::runCode() {
@@ -81,7 +81,7 @@ int MotorolaSimTarget::runCode() {
 		downloadCmds << "(xterm -e sim";
 	else 
 		downloadCmds << "(sim";
-	downloadCmds << dspType << " " << uname << ".cmd" << " > /dev/null)";
+	downloadCmds << dspType << " " << filePrefix << ".cmd" << " > /dev/null)";
 	if (systemCall(downloadCmds,"Errors in starting up the simulator")) 
 		return FALSE;
 	if (*file != 0 && access(fullFileName(file),0)==0) {
