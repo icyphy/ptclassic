@@ -712,16 +712,16 @@ have built with previous commands.
 The
 .c reset
 .IE "reset command"
-command replaces
-.c mainGalaxy
-by an empty
-.c Galaxy .
+command replaces the universe
+.c main
+or a named universe by an empty universe.
 Any
 .c defgalaxy
 definitions you have made are still remembered.
 The syntax is
 .(c
 reset
+reset \fIuniverse_name\fP
 .)c
 .H3 "Removing a Star
 .pp
@@ -991,6 +991,39 @@ help ?
 .)c
 for a list of topics.  If the argument is omitted, a short "help on help"
 is printed.
+.pp
+.H3 "Registering actions"
+.pp
+It is possible to associate a Tcl action with the firing of any star.
+The
+.c registerAction
+command does this.  The syntax is
+.(c
+registerAction pre \fItcl_command\fR
+registerAction post \fItcl_command\fR
+.)c
+The first argument specifies whether the action should occur before
+or after the firing of a star.
+The second argument is a string giving the first part of a tcl command.
+Before this command is invoked, the name of the star that triggered
+the action will be appended as an argument.  For example:
+.(c
+registerAction pre puts
+.)c
+will result in the name of a star being printed on the standard output
+before it is fired.  A typical "action" resulting from this command
+would be
+.(c
+puts \fIuniverse_name.galaxy_name.star_name\fP
+.)c
+The value returned by
+.c registerAction
+is an "action_handle", which must be used to cancel the action using
+.c cancelAction .
+The syntax is
+.(c
+cancelAction \fIaction_handle\fP
+.)c
 .H2 "Limitations of the Interpreter"
 .pp
 There should be many more commands returning information on the
