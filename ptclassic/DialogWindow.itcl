@@ -272,7 +272,7 @@ body tycho::DialogWindow::execCommand {option args} {
 
 	# Intercept any errors in the command and issue a message.
 	if {[catch {set retval \
-		[namespace tycho \
+		[namespace ::tycho \
 		[concat $itk_option($option) $args]]} errcode] != 0} {
 	    error "Failed to execute command in the $option option:\n$errcode" \
 		    $errorInfo
