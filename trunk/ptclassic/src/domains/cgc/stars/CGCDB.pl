@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CGC main library }
 	htmldoc {
 For inputs that are greater than zero, the output either
-<i>N </i>log<i> <sub></i>10<i></sub> </i>(<i>input</i>) or <i>min</i>, whichever is larger, where
+<i>N </i>log<sub>10</sub>(<i>input</i>) or <i>min</i>, whichever is larger, where
 <i>N  </i>=<i>  </i>10 if <i>inputIsPower</i> is TRUE, and <i>N  </i>=<i>  </i>20 otherwise.
 <a name="decibel"></a>
 The default is <i>N  </i>=<i>  </i>20.
