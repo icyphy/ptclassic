@@ -16,14 +16,8 @@ limitation of liability, and disclaimer of warranty provisions.
 
 ccinclude { <stdio.h>,"compat.h" }
 
-state {
-	name { S56XFilePrefix }
-	type { string }
-	default { "" }
-	attributes { A_NONSETTABLE|A_NONCONSTANT}
-	desc { 	The file prefix of the s56x generated files.  Set by 
-			CGCS56XTarget::create{Send,Receive}
-	}
+public {
+    StringList S56XFilePrefix;
 }
 
 codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
@@ -89,6 +83,13 @@ codeblock(startDSP) {
 }
 
 initCode {
+        CodeStream *compileOptions, *linkOptions;
+        if ((compileOptions = getStream("compileOptions")) == FALSE)
+            return;
+        if ((linkOptions = getStream("linkOptions")) == FALSE)
+            return;
+        compileOptions->put("-I$S56DSP/include ","S56X Include");
+        linkOptions->put("-L$S56DSP/lib -l$QCKMON ","S56X Link");
 	addInclude("<sys/types.h>");
 	addInclude("<sys/uio.h>");
 	addInclude("<signal.h>");

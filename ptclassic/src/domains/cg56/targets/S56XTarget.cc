@@ -40,17 +40,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "MotorolaTarget.h"
 
+#include "CGCXSynchComm.h"
+#include "CG56XCSynchComm.h"
+#include "CG56XCReceive.h"
+#include "CG56XCSend.h"
+#include "CGCXSend.h"
+#include "CGCXReceive.h"
+
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
-	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star")
-{
+CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star"),pairNumber(0) {
 	initStates();
 }
 
 S56XTarget::S56XTarget(const S56XTarget& arg) :
-	CG56Target(arg),MotorolaTarget(arg)
-{
+CG56Target(arg),MotorolaTarget(arg),pairNumber(0) {
 	initStates();
 	copyStates(arg);
+}
+
+void S56XTarget::setup() {
+    // Keeps track of how many send/receive communication pairs we create
+    CG56Target::setup();
 }
 
 void S56XTarget :: initStates() {
@@ -129,6 +139,34 @@ int S56XTarget :: runCode() {
 
 
 ISA_FUNC(S56XTarget,CG56Target);
+
+void S56XTarget::configureCommPair(CommPair& pair) {
+    CGCXSynchComm* cgcSide = (CGCXSynchComm*) pair.cgcStar;
+    CG56XCSynchComm* s56xSide = (CG56XCSynchComm*) pair.cgStar;
+    cgcSide->s56xSide = s56xSide;
+    s56xSide->cgcSide = cgcSide;
+    s56xSide->commCount = cgcSide->commCount = &pairNumber;
+    s56xSide->pairNumber = cgcSide->pairNumber = pairNumber++;
+    char *expandedDirName = expandPathName(destDirectory.currentValue());
+
+    cgcSide->S56XFilePrefix.initialize();
+    cgcSide->S56XFilePrefix << expandedDirName << "/"
+	       << filePrefix.currentValue();
+
+    delete [] expandedDirName;
+}
+
+CommPair S56XTarget::fromCGC(PortHole&) {
+    CommPair pair(new CGCXSend,new CG56XCReceive);
+    configureCommPair(pair);
+    return pair;
+}
+
+CommPair S56XTarget::toCGC(PortHole&) {
+    CommPair pair(new CGCXReceive,new CG56XCSend);
+    configureCommPair(pair);
+    return pair;
+}
 
 // make an instance
 static S56XTarget proto("S-56X","run code on the S-56X card");
