@@ -318,13 +318,11 @@ PortHole :: setPlasma (Plasma* useType) {
 			// also, avoid infinite loop in case of corrupted
 			// typePort ptrs that don't form a loop
 			GenericPort* q = typePort();
+			// mark at most 10 stars
 			int nMark = 10;
 			while (q && q != this && nMark > 0) {
 				Error::mark(*q);
-				// this cast is temporary -- it cheats
-				// next time a basic .h file is changed,
-				// typePort will be made public.
-				q = ((PortHole*)q)->typePort();
+				q = q->typePort();
 				nMark--;
 			}
 			Error::abortRun(*this, ": unresolvable type conflict");
