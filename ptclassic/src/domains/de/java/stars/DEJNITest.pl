@@ -1,13 +1,14 @@
 defstar {
 	name { JNITest }
 	domain { DE }
-	version { 0.2   6/23/97 }
+	version { $Id$ }
 	author { J. Voigt }
 	copyright {
             Copyright (c) 1997 Dresden University of Technology,
             Mobile Communications Systems
         }
-	desc { }
+	desc { This is a simple test of interfacing Ptolemy and Java using
+the JDK1.1 JNI}
 	explanation {
         }
 	hinclude { "TclStarIfc.h", "ptkTclCommands.h", <iostream.h> }
@@ -25,7 +26,7 @@ defstar {
 	defstate {
             name { tcl_file }
             type { string }
-            default { "/users/voigtje/java/test/jni.tcl" }
+            default { "$PTOLEMY/src/domains/de/java/stars/jni.tcl" }
             desc { The file from which to read the Tcl script }
 	}
 	header {
