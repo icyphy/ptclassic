@@ -158,7 +158,7 @@ body ::tycho::PtVertexController::add {libname iconname \
     # puts [$icon toString]
 
     set type [$icon getChildElement entitytype]
-    puts [$type toString]
+    # puts [$type toString]
     set realname [$type getAttribute "name"]
     set etype [$type getAttribute "type"]
 
@@ -183,7 +183,7 @@ body ::tycho::PtVertexController::add {libname iconname \
 		set port [java::new ptolemy.actor.TypedIOPort \
 			$actor \
 			[$p getAttribute name]]
-		puts "Created port [$port toString]"
+		# puts "Created port [$port toString]"
 
 		if { [$p getAttribute input] == "false" } {
 		    $port setOutput 1
@@ -360,12 +360,12 @@ body ::tycho::PtVertexController::drag {tag x y} {
 #### editparameters
 #
 body ::tycho::PtVertexController::editparameters {tag} {
-    puts "editparameters $tag"
+    # puts "editparameters $tag"
 
     # FIXME: The parameter editing window must include the whole
     # path name of the model
     set items [$slateview find withtag $tag]
-puts ###$items
+    # puts ###$items
     foreach i $items {
 	# Filter out non-vertices
         # FIXME FIXME FIXME (access to slate)
