@@ -51,7 +51,8 @@ namespace ::tycho {
 # <p><b>Options</b>:
 # 
 # _IconRect_ has all options of <a href="IconItem.html">IconItem</a>
-# and <a href="LabeledRect.html">LabeledRect</a>.
+# and <a href="LabeledRect.html">LabeledRect</a>.  The <b>-fill</b>
+# option, however, defaults to white instead of null.
 #
 # </ul>
 # 
@@ -151,6 +152,8 @@ class ::tycho::IconRect {
     array set optiondefault [@scope ::tycho::LabeledRect \
             array get optiondefault]
     array set optiondefault [array get ::tycho::IconItem::optiondefault]
+
+    set optiondefault(-fill)  white
 }
 
 ##########################################################################
