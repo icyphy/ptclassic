@@ -48,7 +48,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownBlock.h"
 #include "miscFuncs.h"
 #include "pt_fstream.h"
+#include "checkConnect.h"
 
+
+const Attribute ANY = {0,0};
 
 // constructor
 AsmTarget :: AsmTarget(const char* nam, const char* desc,
@@ -58,6 +61,19 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 	addStream("mainLoop",&mainLoop);
 	addStream("trailer",&trailer);
 	starTypes +=  "AnyAsmStar";
+	// if mem has not been defined by this point, define
+	// it to be a vanilla LinProcMemory of very large size.
+	// This is so that AsmTarget can be used with CG stars
+	// to test schedulers and memory allocation routines
+	// in the CG kernel.  The definition is done here so
+	// that any target derived from AsmTarget can delete
+	// mem and create a new one appropriate for itself
+	// in its setup method.
+	if (mem==0) mem = new LinProcMemory("AsmMem",ANY,ANY,"0-64000");
+}
+
+AsmTarget::~AsmTarget() {
+	delete mem; mem = 0;
 }
 
 void AsmTarget :: initStates() {
@@ -86,6 +102,7 @@ int AsmTarget::allocateMemory() {
 // clear the sharedStarState list.  As states are added to this list,
 // the memory allocation requests are processed.  Thus, we must
 // clear the list each time we allocateMemory.
+	// in the CG kernel.
 	sharedStarStates.initialize();
 
 	GalStarIter nextStar(*galaxy());
@@ -188,8 +205,6 @@ inline int hasCirc(PortHole* p) {
 	return (p->attributes() & PB_CIRC) != 0;
 }
 
-extern int warnIfNotConnected (Galaxy&);
-
 // Here's the main guy.
 int AsmTarget::modifyGalaxy() {
 
@@ -286,6 +301,13 @@ int AsmTarget::modifyGalaxy() {
     return TRUE;
 }
 
+StringList AsmTarget::comment(const char* msg, const char* begin,
+const char* end, const char* cont) {
+	if (begin==NULL) return CGTarget::comment(msg,"; ");
+	else return CGTarget::comment(msg,begin,end,cont);
+}
+
+
 void AsmTarget::disableInterrupts() {}
 
 void AsmTarget::enableInterrupts() {}
@@ -350,3 +372,5 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 }
 
 ISA_FUNC(AsmTarget,CGTarget);
+
+
