@@ -45,7 +45,7 @@ SDFSchedule :: printVerbose () {
 	for (int i = size(); i>0; i--) {
 		out += nextBlock().readFullName();
 		out += "\n";
-		}
+	}
 	return out;
 }
 
@@ -80,15 +80,15 @@ void SDFScheduler :: runOnce () {
 
 	for (int i = mySchedule.size(); i>0; i--) {
 
-	    // Next star in the list
-	    SDFStar& currentStar = (SDFStar&)mySchedule.nextBlock();
+		// Next star in the list
+		SDFStar& currentStar = (SDFStar&)mySchedule.nextBlock();
 
-	    // Now call beforeGo(), go(), and afterGo() for each Star
-	    // for each PortHole
-	    currentStar.beforeGo();
-	    currentStar.go();
-	    currentStar.afterGo();
-		}
+		// Now call beforeGo(), go(), and afterGo() for each Star
+		// for each PortHole
+		currentStar.beforeGo();
+		currentStar.go();
+		currentStar.afterGo();
+	}
 }
 
 
@@ -98,9 +98,9 @@ void SDFScheduler :: runOnce () {
 
 int SDFScheduler :: wrapup (Block& galaxy) {
 
-   // Run the termination routines of all the atomic stars.
-   for (int i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-        ((SDFStar&)alanShepard.nextBlock()).wrapup();
+	// Run the termination routines of all the atomic stars.
+	for (int i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
+		((SDFStar&)alanShepard.nextBlock()).wrapup();
 }
 
 
@@ -109,110 +109,96 @@ int SDFScheduler :: wrapup (Block& galaxy) {
 	// setup
 	////////////////////////////
 
-int SDFScheduler :: setup (Block& galaxy) {
+int SDFScheduler :: setup (Block& block) {
+	if (block.isItAtomic()) return;	// ERROR?
 
-   numItersSoFar = 0;
+	Galaxy& galaxy = (Galaxy&)block;
+	numItersSoFar = 0;
 
-   // initialize the SpaceWalk member
-   alanShepard.setupSpaceWalk((Galaxy&)galaxy);
+	// initialize the SpaceWalk member
+	alanShepard.setupSpaceWalk(galaxy);
 
-   int i;
+	int i;
 
-
-   // Run the initialize routines of all the atomic stars.
-   // This must happen first because the number of tokens generated
-   // by a star execution may depend on a State (e.g. a downsample star)
-   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
+	// Run the initialize routines of all the atomic stars.
+	// This must happen first because the number of tokens generated
+	// by a star execution may depend on a State (e.g. a downsample star)
+	for (i = alanShepard.totalSize(galaxy); i>0; i--)
 	{
-	SDFStar& s = (SDFStar&)alanShepard.nextBlock();
+		SDFStar& s = (SDFStar&)alanShepard.nextBlock();
 
-	// Call system initialization
-	s.initialize();
+		// Call system initialization
+		s.initialize();
+		
+		// Call user-provided initialization
+		s.start();
 
-	// Call user-provided initialization
-	s.start();
+		// force recomputation of repetitions and noTimes
+		s.repetitions = 0;
+		s.noTimes = 0;
 	}
+	
+	alanShepard.setupSpaceWalk(galaxy);
+	
+	// This computes the number of times each component star must be
+	// run in one cycle of a periodic schedule.
 
-   alanShepard.setupSpaceWalk((Galaxy&)galaxy);
+	repetitions(galaxy);
+	
+	mySchedule.initialize();
 
-   // Begin by setting the repetitions member of each component star
-   // to zero, to force it to be recomputed.
-   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--) {
-	// Get the next atomic block and set its repetitions property
-	SDFStar& star = (SDFStar&)alanShepard.nextBlock();
-
-	star.repetitions = 0;
-   }
-   alanShepard.setupSpaceWalk((Galaxy&)galaxy);
-
-   // This computes the number of times each component star must be
-   // run in one cycle of a periodic schedule.
-   // The cast to Galaxy here assumes the Block being operated on
-   // is a galaxy.
-   repetitions((Galaxy&)galaxy);
-
-   Block* atom;
-   Block* dead;
-   int passValue;
-   int runResult;
-
-   // Disable default scheduler optimizations
-   // deferredFiring = FALSE;
-   // repeatedFiring = FALSE;
-
-   // MAIN LOOP
-   do {
+	// MAIN LOOP
 	// After a scheduler pass, the passValue tells us whether the
 	// scheduler is finished.  After the pass, the meaning of the
 	// possible values is:
 	// 	2 - scheduler is finished
 	// 	1 - scheduler is deadlocked
 	// 	0 - more passes are required
-	passValue = 2;
-	// In case the deferred firing option is enabled:
-	numDeferredBlocks = 0;
 
-	// step through the Galaxy
-	for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--) {
-	    atom = &alanShepard.nextBlock();
+	do {
+		passValue = 2;
+		numDeferredBlocks = 0;
+		
+		for (i = alanShepard.totalSize(galaxy); i>0; i--) {
+			SDFStar& atom = (SDFStar&)alanShepard.nextBlock();
+			int runResult;
 
-	    // Inner loop:  if the repeatedFiring option is set,
-	    // the following is repeated as long as the star can be run
-	    do {
-		runResult = simRunStar(*atom,deferredFiring);
-		if(runResult == 0) {
-		   mySchedule.append(atom);	// put block on the schedule
-		   passValue = 0;	// Any zero is a successful run
-		} else
-		   if ((runResult == 1) && (passValue != 0)) {
-			passValue = 1;	// Potential deadlock
-			dead = atom;	// culprit?
-		   }
-	    } while (repeatedFiring && (runResult == 0));
-	}
+			do {
+				runResult = addIfWeCan(atom,deferredFiring);
+			} while (repeatedFiring && (runResult == 0));
+		}
+		
+		// If the deferred firing option is set, we must now schedule
+		// the deferred blocks
 
-	// If the deferred firing option is set, we must now schedule
-	// the deferred blocks
-	for (i=0; i<numDeferredBlocks; i++) {
-		runResult = simRunStar(*deferredBlocks[i], FALSE);
-		if(runResult == 0) {
-		   mySchedule.append(deferredBlocks[i]);
-					// put block on the schedule
-		   passValue = 0;	// Any zero is a successful run
-		} else
-		   if ((runResult == 1) && (passValue != 0)) {
-			passValue = 1;	// Potential deadlock
-			dead = deferredBlocks[i];	// culprit?
-		   }
-	}
-
-   } while (passValue == 0);
-   // END OF MAIN LOOP
-
-   if (passValue == 1)
-	errorHandler.error("DEADLOCK! Not enough delay in a loop containing:",
+		for (i=0; i<numDeferredBlocks; i++) {
+			SDFStar& atom = (SDFStar&)*deferredBlocks[i];
+			addIfWeCan (atom);
+		}
+		
+	} while (passValue == 0);
+	// END OF MAIN LOOP
+	
+	if (passValue == 1)
+		errorHandler.error("DEADLOCK! Not enough delay in a loop containing:",
                                    dead->readFullName());
+	
+}
 
+// This routine simulates running the star, adding it to the
+// schedule where it can be run
+
+int SDFScheduler::addIfWeCan (SDFStar& star, int defer = FALSE) {
+	int runRes = simRunStar(star,defer);
+	if (runRes == 0) {
+		mySchedule.append(&star);
+		passValue = 0;
+	}
+	else if (runRes == 1 && passValue != 0) {
+		passValue = 1;
+		dead = &star;
+	}
+	return runRes;
 }
 
 /*******************************************************************
@@ -230,7 +216,6 @@ int SDFScheduler :: setup (Block& galaxy) {
 	////////////////////////////
 
 int SDFScheduler :: repetitions (Galaxy& galaxy) {
-	Block* currentBlock;
 
 	// Initialize the least common multiple, which after all the
 	// repetitions properties have been set, will equal the lcm
@@ -244,24 +229,24 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	// Should we allow disconnected universes?
 	for(int i = alanShepard.totalSize(galaxy); i>0; i--) {
 
-	   // Get the next atomic block:
-	   currentBlock = &alanShepard.nextBlock();
+		// Get the next atomic block:
+		SDFStar& star = (SDFStar&) alanShepard.nextBlock();
 
-	   // First check to see whether a repetitions property has
-	   // been set.  If so, do nothing.  Otherwise, compute the
-	   // repetitions property.
-	   // The block must be an SDFStar for this to work.
-	   // Should there be some error checking here?
-	   if(((SDFStar*)currentBlock)->repetitions == 0) {
+		// First check to see whether a repetitions property has
+		// been set.  If so, do nothing.  Otherwise, compute the
+		// repetitions property.
+		// The block must be an SDFStar for this to work.
+		// Should there be some error checking here?
+		if(star.repetitions == 0) {
 
-		// Set repetitions to 1 and set repetitions for
-		// all connected block.
-		((SDFStar*)currentBlock)->repetitions = 1;
+			// Set repetitions to 1 and set repetitions for
+			// all connected block.
+			star.repetitions = 1;
 
-		// set the repetitions property of all atomic blocks
-		// connected to the currentBlock
-		reptConnectedSubgraph(*currentBlock);
-	   }
+			// set the repetitions property of all atomic blocks
+			// connected to the currentBlock
+			reptConnectedSubgraph(star);
+		}
 	}
 
 	// Once all the repetitions properties are set, the lcm member
@@ -269,14 +254,10 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	// of all the fractional repetitions.  To convert them to
 	// integers, we multiply through by lcm.
 	for(i = alanShepard.totalSize(galaxy); i>0; i--) {
-	   // Get the next atomic block:
-	   currentBlock = &alanShepard.nextBlock();
-
-	   ((SDFStar*)currentBlock)->repetitions =
-		((SDFStar*)currentBlock)->repetitions * lcm;
-
-	   // simplify the result
-	   ((SDFStar*)currentBlock)->repetitions.simplify();
+		// Get the next atomic block:
+		SDFStar& star = (SDFStar&) alanShepard.nextBlock();
+		star.repetitions *= Fraction(lcm);
+		star.repetitions.simplify();
 	}
 }
 
@@ -290,19 +271,18 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 // It is assumed that block has its repetitions property already set.
 
 int SDFScheduler :: reptConnectedSubgraph (Block& block) {
-	PortHole* currentPort;
 
 	// Step through each portHole
 	for(int i = block.numberPorts(); i>0; i--) {
-	   currentPort = &block.nextPort();
+		PortHole& nearPort = block.nextPort();
+		if (nearPort.far() == NULL) continue;
 
-	   bombIfNotConnected (currentPort);
+		PortHole& farPort = *(nearPort.far());
+		// recursively call this function on the farSideBlock,
+		// having determined that it has not previously been done.
 
-	   if(reptArc(*(SDFPortHole*)currentPort,
-			*(SDFPortHole*)currentPort->far()))
-	      // recursively call this function on the farSideBlock,
-	      // having determined that it has not previously been done.
-	      reptConnectedSubgraph (*(*currentPort->far()).parent());
+		if(reptArc(nearPort,farPort))
+			reptConnectedSubgraph (*(farPort.parent()));
 	}
 }
 
@@ -318,39 +298,39 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 // then consistency is checked, and FALSE is returned.  Otherwise,
 // TRUE is returned.
 
-int SDFScheduler :: reptArc (SDFPortHole& port1, SDFPortHole& port2){
-	Fraction& nearStarRepetitions =
-			((SDFStar*)(port1.parent()))->repetitions;
-	Fraction& farStarRepetitions =
-			((SDFStar*)(port2.parent()))->repetitions;
+int SDFScheduler :: reptArc (PortHole& port1, PortHole& port2){
+	SDFStar& nearStar = (SDFStar&)*(port1.parent());
+	SDFStar& farStar = (SDFStar&)*(port2.parent());
+	Fraction& nearStarRepetitions = nearStar.repetitions;
+	Fraction& farStarRepetitions = farStar.repetitions;
 	Fraction farStarShouldBe;
 	Fraction temp;
 
 	// compute what the far star repetitions property should be.
-	// Casts to Fraction ensure the result is type Fraction.
-	farStarShouldBe =
-	   nearStarRepetitions * (Fraction)port1.numberTokens /
-	   (Fraction)port2.numberTokens;
+
+	farStarShouldBe = nearStarRepetitions *
+		Fraction(port1.numberTokens,port2.numberTokens);
 
 	// Simplify the fraction
 	farStarShouldBe.simplify();
+	
+	if (farStarRepetitions == Fraction(0)) {
+		// farStarRepetitions has not been set, so set it
+		farStarRepetitions = farStarShouldBe;
 
-	if (farStarRepetitions == (Fraction)0) {
-	   // farStarRepetitions has not been set, so set it
-	   farStarRepetitions = farStarShouldBe;
-
-	   // update the least common multiple of the denominators
-	   temp = (Fraction)(lcm,farStarShouldBe.denominator);
-	   lcm = temp.computeGcdLcm().lcm;
-	   return TRUE;
-	} else {
-	   // farStarRepetitions has been set, so test for equality
-	   if (!(farStarRepetitions == farStarShouldBe)) {
-		errorHandler.error("Inconsistent sample rate at:",
-				   (port1.parent())->readFullName());
-		// MUST GIVE MORE INFORMATION HERE
-	   }
-	   return FALSE;
+		// update the least common multiple of the denominators
+		temp = (Fraction)(lcm,farStarShouldBe.denominator);
+		lcm = temp.computeGcdLcm().lcm;
+		return TRUE;
+	}
+	else {
+		// farStarRepetitions has been set, so test for equality
+		if (!(farStarRepetitions == farStarShouldBe)) {
+			errorHandler.error("Inconsistent sample rate at:",
+					   nearStar.readFullName());
+			// MUST GIVE MORE INFORMATION HERE
+		}
+		return FALSE;
 	}
 }
 
@@ -364,13 +344,11 @@ int SDFScheduler :: reptArc (SDFPortHole& port1, SDFPortHole& port2){
 	// simRunStar
 	////////////////////////////
 
-int SDFScheduler :: simRunStar (Block& atom,
+int SDFScheduler :: simRunStar (SDFStar& atom,
 				int deferFiring = FALSE,
 				int updateOutputs = TRUE){
 
-	// Consider checking here to be sure the block is atomic
-
-	int test = notRunnable((SDFStar&)atom);
+	int test = notRunnable(atom);
 	if(test) return test;	// return if the star cannot be run
 
 	// If we get to this point without returning, then the star can be run.
@@ -384,72 +362,8 @@ int SDFScheduler :: simRunStar (Block& atom,
 	// has enough data on it to satisfy destination stars.
 	// This is optional because it slows down the scheduling.
 
-	if(deferFiring) {
-
-	   // Check to see whether any destination blocks are runnable
-	   for(i = atom.numberPorts(); i>0; i--) {
-		// Look at the next port in the list
-		port = (SDFPortHole*)&atom.nextPort();
-		bombIfNotConnected(port);
-
-		// Is the port an output port?
-		if(port->isItOutput()) {
-
-		   // Is the destination star runnable?
-
-		   if(notRunnable(*(SDFStar*)port->far()->parent())
-			== 0) {
-
-			// It is runnable.
-
-			// If possible, store a pointer to the block
-			// (If the list of deferredBlocks is full, then
-			// the block effectively gets deferred until a
-			// future pass.  This is harmless).  But at least
-			// one deferred block must go on the list, or the
-			// scheduler can deadlock.
-			if(numDeferredBlocks < MAX_NUM_DEFERRED_BLOCKS) {
-			   deferredBlocks[numDeferredBlocks] =
-				port->parent();
-			   numDeferredBlocks += 1;
-			}
-
-			// Give up on this star -- it's been deferred
-			return 1;
-		   }
-		}
-	   }
-	   // Alternatively, the block might be deferred if its output
-	   // Geodesics all have enough data on them to satisfy destination
-	   // stars, even if the destination stars are not runnable.	
-
-	   // We must detect the case that there are no output ports
-	   int outputPorts = FALSE;
-	   for(i = atom.numberPorts(); i>0; i--) {
-
-		// Look at the farSidePort of the next port in the list
-		port = (SDFPortHole*)(atom.nextPort().far());
-
-		if(port->isItInput()) {
-
-		   // The farside port is an input.  Check Particle supply
-		   if(port->myGeodesic->numInitialParticles
-				< port->numberTokens)
-
-			// not enough data.  Block cannot be deferred.
-			goto noDefer;
-
-		   // Since the farside port is an input, the nearside is
-		   // an output
-		   outputPorts = TRUE;
-		}
-	   }
-	   // If we get here, all destinations have enough data,
-	   // and the block can be deferred, assuming there are output ports.
-	   if (outputPorts) return 1;
-	}
-
-noDefer:
+	if(deferFiring && deferIfWeCan(atom))
+		return 1;
 
 	// Iterate over the ports again to adjust
 	// the numInitialParticles member of the geodesic.
@@ -457,23 +371,102 @@ noDefer:
 
 	for(i = atom.numberPorts(); i>0; i--) {
 
-	   // Look at the next port in the list
-	   port = (SDFPortHole*)&atom.nextPort();
+		// Look at the next port in the list
+		port = (SDFPortHole*)&atom.nextPort();
 
-	   if( port->isItInput() )
-		// OK to update numInitialParticles for input PortHole
-		port->myGeodesic->numInitialParticles -= port->numberTokens;
+		if( port->isItInput() )
+			// OK to update numInitialParticles for input PortHole
+			port->myGeodesic->numInitialParticles -=
+				port->numberTokens;
 
-	   else if (updateOutputs)
-		// OK to update numInitialParticles for output PortHole
-		port->myGeodesic->numInitialParticles += port->numberTokens;
+		else if (updateOutputs)
+			// OK to update numInitialParticles for output PortHole
+			port->myGeodesic->numInitialParticles +=
+				port->numberTokens;
 	}
 
 	// Increment noTimes
-	((SDFStar&)atom).noTimes += 1;
+	atom.noTimes += 1;
 
 	// Indicate that the block was successfully run
 	return 0;
+}
+
+	///////////////////////////
+	// deferIfWeCan
+	///////////////////////////
+
+// return TRUE if we defer atom, FALSE if we don't.
+// Postpone any execution of a star feeding data to another
+// star that is runnable.  Also postpone if each output Geodesic
+// has enough data on it to satisfy destination stars.
+
+int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
+
+	int i;
+	SDFPortHole* port;
+
+	// Check to see whether any destination blocks are runnable
+	for(i = atom.numberPorts(); i>0; i--) {
+		// Look at the next port in the list
+		port = (SDFPortHole*)&atom.nextPort();
+		bombIfNotConnected(port);
+		SDFStar& dest = (SDFStar&)*(port->far()->parent());
+
+		// If not an output, or destination is not
+		// runnable, skip to the next porthole
+
+		if(!port->isItOutput() || notRunnable(dest) != 0)
+			continue;
+
+		// It is runnable.
+
+		// If possible, store a pointer to the block
+		// (If the list of deferredBlocks is full, then
+		// the block effectively gets deferred until a
+		// future pass.  This is harmless).  But at least
+		// one deferred block must go on the list, or the
+		// scheduler can deadlock.
+
+		if(numDeferredBlocks < MAX_NUM_DEFERRED_BLOCKS) {
+			deferredBlocks[numDeferredBlocks] =
+				port->parent();
+			numDeferredBlocks += 1;
+		}
+		// Give up on this star -- it has been deferred
+		return TRUE;
+	}
+
+	// Alternatively, the block might be deferred if its output
+	// Geodesics all have enough data to satisfy destination
+	// stars, even if the destination stars are not runnable.
+
+	// We must detect the case that there are no output ports
+	int outputPorts = FALSE;
+	for(i = atom.numberPorts(); i>0; i--) {
+
+		// Look at the farSidePort of the next port in the list
+		port = (SDFPortHole*)&atom.nextPort();
+		// Skip if it is not output or not connected
+		if (!port->isItOutput() || port->far() == NULL)
+			continue;
+		
+		port = (SDFPortHole*)(port->far());
+
+
+		// The farside port is an input.  Check Particle supply
+		// if not enough, atom cannot be deferred.
+		if(port->myGeodesic->numInitialParticles < port->numberTokens)
+			return FALSE;
+			
+		// Since the farside port is an input, the nearside is
+		// an output
+		outputPorts = TRUE;
+	}
+
+	// If we get here, all destinations have enough data,
+	// and the block can be deferred, assuming there are output ports.
+	return outputPorts;
 }
 
 	////////////////////////////
@@ -489,30 +482,28 @@ noDefer:
 
 int SDFScheduler :: notRunnable (SDFStar& atom) {
 
-	int i;
+	int i, v = 0;
 	SDFPortHole* port;
 
 	// Check to see whether the requisite repetitions have been met.
 	if (atom.repetitions.numerator <= atom.noTimes)
-	   return 2;
+		v = 2;
 
 	// Step through all the input ports, checking to see whether
 	// there is enough data on the inputs
-	for(i = atom.numberPorts(); i>0; i--) {
+	else for(i = atom.numberPorts(); i>0; i--) {
 
-	   // Look at the next port in the list
-	   port = (SDFPortHole*)&atom.nextPort();
+		// Look at the next port in the list
+		SDFPortHole& port = (SDFPortHole&)atom.nextPort();
 
-	   if(port->isItInput())
-		// The port is an input.  Check Particle supply
-		if(port->myGeodesic->numInitialParticles < port->numberTokens)
-		   // not enough data
-		   return 1;
+		if(port.isItInput() &&
+		   port.myGeodesic->numInitialParticles < port.numberTokens) {
+			// not enough data
+			v = 1;
+			break;
+		}
 	}
-
-	// If we get to this point without returning, then the star
-	// can be run.
-	return 0;
+	return v;
 }
 
 // We should handle this error better, but the alternative is a core dump.
