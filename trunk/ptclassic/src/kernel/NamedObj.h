@@ -43,6 +43,7 @@ where the parent is a Block (a specific type of NamedObj).
 **************************************************************************/
 #include "StringList.h"
 #include "isa.h"
+#include "FlagArray.h"
 
 class Block;
 
@@ -95,6 +96,8 @@ public:
 
 	// make destructors for all NamedObjs virtual
 	virtual ~NamedObj();
+
+	FlagArray flags;
 protected:
 	void setDescriptor(const char* d) { myDescriptor = d;}
 private:
