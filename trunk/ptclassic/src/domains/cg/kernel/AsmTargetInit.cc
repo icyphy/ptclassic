@@ -144,10 +144,12 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 			if (!pType) return;
 			if (strcmp(pType,INT)==0)  writeInt(0);
 			else if (strcmp(pType,FIX)==0) writeFix(0);
+			else if (strcmp(pType,COMPLEX)==0) writeFix(0);
 			else writeFloat(0);
 		}
 	}
 	codeSection();
 	cgStar.initCode();
 }
+
 
