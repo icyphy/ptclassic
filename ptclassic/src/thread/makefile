@@ -26,7 +26,7 @@ endif
 MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
-ifeq ($(DIRS), "") 
+ifneq (,$(DIRS)) 
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
