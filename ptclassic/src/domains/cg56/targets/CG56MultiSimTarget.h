@@ -47,14 +47,12 @@ class CG56MultiSimTarget : public CGMultiTarget {
 public:
 	CG56MultiSimTarget(const char* name, const char* starclass, const char* desc);
 
-	void setup();
-	void wrapup();
-	Block* makeNew() const;
-	int isA(const char*) const;
+	/*virtual*/ Block* makeNew() const;
+	/*virtual*/ int isA(const char*) const;
 
 	// compile and run the code
-	int compileCode();
-	int runCode();
+	/*virtual*/ int compileCode();
+	/*virtual*/ int runCode();
 
 	// redefine IPC funcs
 	DataFlowStar* createSend(int from, int to, int num);
@@ -69,20 +67,17 @@ public:
 	void prepareCodeGen();
 
 protected:
+	/*virtual*/ void setup();
+
 	// redefine 
 	Target* createChild(int);
 
         // AsmTargets always support "AnyAsmStar" stars.
         const char* auxStarClass() const;
 
-
 	// redefine
 	int sendWormData(PortHole&);
 	int receiveWormData(PortHole&);
-
-	// The following method downloads code for the inside of a wormhole
-	// and starts it executing.
-	int wormLoadCode();
 
 	// shared memory
 	ProcMemory* sharedMem;
