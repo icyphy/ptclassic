@@ -10,13 +10,10 @@ defstar {
 Does nothing.  Input is ignored.
 	}
 	execTime {
-		// Execution time is really zero, but this makes it show
-		// on the Gantt charts
-		return 1;
+		return 0;
 	}
-// Should be made a multiInput
-	input {
-		name {in}
-		type {FLOAT}
+	inmulti {
+		name {input}
+		type {ANYTYPE}
 	}
 }
