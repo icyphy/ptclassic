@@ -49,19 +49,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <string.h>
 #include <stream.h>
 
-#include "StringList.h"
-#include "Error.h"
-#include "Scheduler.h"
-#include "miscFuncs.h"
-#include "NamedObj.h"
+#include "StringList.h"			/* define StringList */
+#include "Error.h"			/* define Error class */
+#include "Scheduler.h"			/* define Scheduler::requestHalt */
+#include "miscFuncs.h"			/* define savestring */
+#include "NamedObj.h"			/* define NamedObj class */
 #include "PtGate.h"
 
+// Pigilib includes: vemInterface.h includes rpc.h
 extern "C" {
 #define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
 #include "vemInterface.h"		/* define PrintErr, PrintCon, ViXXX */
 #include "exec.h"			/* define PigiErrorMark */
 #include "ganttIfc.h"			/* define FindClear */
-#include "ptk.h"
 #include "xfunctions.h"			/* define win_msg */
 #undef Pointer
 }
