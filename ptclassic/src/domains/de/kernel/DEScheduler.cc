@@ -265,3 +265,6 @@ int DEScheduler :: setDepth(DEStar* s) {
 	}
 	return s->depth;
 }
+
+// my domain
+const char* DEScheduler :: domain() const { return DEdomainName ;}

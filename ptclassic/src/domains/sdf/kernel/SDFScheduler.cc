@@ -557,3 +557,5 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 	}
 	return v;
 }
+
+const char* SDFScheduler::domain() const { return SDFdomainName;}
