@@ -261,7 +261,8 @@ proc gedPtolRun {w runB} {
     if { "[set facetId $wvars(facetId)]"=="" } return
     set fmt [toct_fmt $facetId]
     set fullFacet [lindex $fmt 4]:[lindex $fmt 5]:contents
-    set o2p ../oct2ptcl/sun4.opt/oct2ptcl
+    #set o2p ../oct2ptcl/sun4.opt/oct2ptcl
+    set o2p oct2ptcl
 
     if { $runB } {
         exec $o2p -r -g -t $fullFacet | ptcl >&@ stdout
@@ -324,7 +325,13 @@ proc ged_window { w args} {
 proc doit { } {
     global env
     wm withdraw .
-    ged_window .g -facet $env(PTOLEMY)/init.pal:schematic:contents
+    if { [file exists {init.pal/schematic/contents;} ] } {
+      ged_window .g -facet init.pal:schematic:contents
+    } else {
+      # FIXME: if init.pal does not exist, we should create one
+      puts "init.pal/schematic/contents; does not exist, opening \$PTOLEMY/init.pal instead"
+      ged_window .g -facet $env(PTOLEMY)/init.pal:schematic:contents
+    }
 #    ged_window .g -facet upSample:schematic:contents
 #    gedOpen .g
 }
