@@ -81,6 +81,9 @@ class ::tycho::RevControlRCS {
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {}
 
+    # Return the name of the person who checked this file out
+    protected method isCheckedOutBy {}
+
     # Update the history information, if it is on display.
     protected method updateHistory {}
 
@@ -337,6 +340,31 @@ body ::tycho::RevControlRCS::checkOut {object} {
 }
 
 #####################################################################
+#### fixRecent
+# Check out the most recent file, then remove it from history
+# 
+body ::tycho::RevControlRCS::fixRecent {object version} {
+    ::tycho::RevControl::checkOut $object
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    checkOut $object
+
+    # At this point, successful check out, now delete from the history
+    cdDir $dir
+    # -l argument locks, -q argument does not print diagnostics
+
+    if [catch {exec rcs -o$version -q $basefile} output] {
+	error "Checkout command `co -l $basefile' failed:\n$output"
+    }
+
+    cd $olddir
+    $object reload
+}
+
+#####################################################################
 #### isUnderRevControl
 # Check whether the given file is under revision control, and return a
 # 1 if it is or a 0 otherwise.
@@ -361,12 +389,49 @@ body ::tycho::RevControlRCS::isUnderRevControl {file} {
 # Here we assume that if the file is read-only, then it is not checked out.
 # 
 body ::tycho::RevControlRCS::isCheckedOut {} {
-    if [file writable [$object filename]] {
+    #if [file writable [$object filename]] {}
+    if {[isCheckedOutBy]!={}} {
 	return 1
     } {
 	return 0
     }
 }
+
+#####################################################################
+#### isCheckedOutBy
+# Later we will get rid of isCheckedOut, and replace it with this function
+#
+body ::tycho::RevControlRCS::isCheckedOutBy {} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    puts "Checking check out"
+
+    cdDir $dir
+    # Read in information list (who checked this file?)
+    catch {exec rcsinfo} infolist
+    set info {}
+    foreach i [split $infolist \n] {
+        # Need to match the format:
+        # "1.cc                 kchang      1.5    Fri May  2 13:12:04 1997
+        # "4.cc                 kchang      1.6    Wed Apr 23 13:48:59 1997
+        if [regexp "$basefile.*" $i] {
+            # Format is:
+            set info $i
+        }
+    }
+    cdDir $olddir
+
+    if {$info!={}} {
+        return " [lindex $i 4] [lindex $i 5] [lindex $i 6]\
+                <checked out by [lindex $i 1]>"
+    } else {
+        return {}
+    }
+}
+
+
 
 #####################################################################
 #### updateHistory
