@@ -54,8 +54,14 @@ GNU_DEST=	$(PTOLEMY)/gnu
 TCLTK_DEST=	$(PTOLEMY)/tcltk
 XV_DEST= 	$(PTOLEMY)
 OBJARCH=	$(PTOLEMY)/obj.$(ARCH)
+ROOT=		.
+
+include $(ROOT)/mk/config-$(ARCH).mk
+
 all: gnu_all tcltk_all xv_all
 install: gnu_all tcltk_all xv_all
+clean: gnu_clean tcltk_clean xv_clean
+
 .PHONY: gnu_all tcltk_all
 
 #
@@ -74,6 +80,9 @@ gnu_bin: stats $(OBJARCH)/gnu
 
 gnu_install: stats $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) install)
+
+gnu_clean:
+	(cd $(PTOLEMY)/src/gnu; $(MAKE) clean)
 
 # For hppa
 hpgnu_all: stats  $(OBJARCH)/gnu
@@ -96,6 +105,8 @@ tcltk_bin: stats $(OBJARCH)/tcltk
 
 tcltk_install: stats $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) TCLTK_DEST=$(TCLTK_DEST) install)
+tcltk_clean: 
+	(cd $(PTOLEMY)/src/tcltk; $(MAKE) clean)
 
 #
 # Build and install xv
@@ -104,27 +115,6 @@ tcltk_install: stats $(OBJARCH)/tcltk
 xv_all: xv_configure xv_bin xv_install xv_install.man
 
 .PHONY: xv_configure xv_bin xv_install xv_install.man
-
-
-# The following is a GNU make extension
-# Some day, these defines could be moved into config-$(ARCH).mk
-ifeq ($(ARCH),hppa)
-XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-INSTALL=bsdinst
-CC_STATIC=-Wl,-a,archive
-endif
-
-ifeq ($(ARCH),mips)
-XV_RAND=
-CC_STATIC=
-INSTALL=install
-endif
-
-ifeq ($(ARCH),sun4)
-XV_RAND=
-CC_STATIC=-Bstatic
-INSTALL=install
-endif
 
 xv_configure: $(OBJARCH)/xv \
 		$(OBJARCH)/xv/jpeg $(OBJARCH)/xv/jpeg/Makefile \
@@ -160,14 +150,21 @@ xv_install: $(OBJARCH)/xv
 		$(MAKE) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		RANLIB=ranlib \
-		INSTALL=$(INSTALL) \
+		INSTALL=$(XV_INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
 xv_install.man:
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
-		INSTALL=$(INSTALL) \
+		INSTALL=$(XV_INSTALL) \
 		MANDIR=$(XV_DEST)/man/man1  install.man)
+
+xv_clean:
+	(cd $(OBJARCH)/xv; $(MAKE) clean)
+
+
+
+	
 
 $(OBJARCH):
 	mkdir $@ 
