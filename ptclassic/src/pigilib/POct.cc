@@ -530,6 +530,9 @@ int POct::ptkGetParams (int aC, char** aV) {
         }
     }
 
+    // Clear the interp->result by setting it to "".
+    Tcl_SetResult(interp,"",TCL_STATIC);
+
     // Convert pList into a TCL list of Strings to return as result
     Tcl_AppendElement (interp, title);
     if (pList.length > 0) {
