@@ -9,27 +9,27 @@ MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles:
 	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo Updating makefile in domains/$(ME)/$$x ; \
-		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/domains/$(ME)/$$x makefile ;\
-		cd .. ; \
+		( cd $$x ; \
+		  echo Updating makefile in domains/$(ME)/$$x ; \
+		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../src/domains/$(ME)/$$x $@ ; \
+		) \
 	done
 
 all install clean sources realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo making $@ in domains/$(ME)/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/domains/$(ME)/$$x $@ ;\
-		cd .. ; \
+		( cd $$x ; \
+		  echo making $@ in domains/$(ME)/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../src/domains/$(ME)/$$x $@ ; \
+		) \
 	done
 
 depend:
 	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo making $@ in domains/$(ME)/$$x ; \
-		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/domains/$(ME)/$$x $@ ;\
-		cd .. ; \
+		( cd $$x ; \
+		  echo making $@ in domains/$(ME)/$$x ; \
+		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../src/domains/$(ME)/$$x $@ ; \
+		) \
 	done
