@@ -13,9 +13,8 @@ By default, <code>pakman</code> creates a very small package
 structure -- to make it create a package in the Tycho
 format, give it the <code>-style tycho</code> option.
 
-<p>To learn more about how to use <code>pakman</code>, go
-read his documentation. If you want to know more about
-why packages are created the way they or how to roll your own, read on!
+<p> The rest of this page describes the structure
+of a package, so you can roll your own.
 
 <h2>What a package contains</h2>
 
@@ -23,25 +22,27 @@ Each package contains a file called <code>pkgIndex.tcl</code>
 that looks like this:
 
 <pre>
-  package ifneeded tycho.<i>package</i> 2.0 \
+  package ifneeded tycho.<i>metapkg.package</i> 2.0 \
       [list source [file join $dir <i>package</i>.tcl]]
 </pre>
 
-where <i>package</i> means the name of the package. What this
-says is that when a startup script or another package
-says something like:
+where <i>package</i> means the name of the package, and <I>metapkg</I>
+is the directory containing this package. For example, the package
+<CODE>tycho.kernel.gui</CODE> has the meta-package <I>kernel</I>, and
+the package name <I>gui</I>. What this says is that when a startup
+script or another package says something like:
 
 <pre>
-  package require tycho.<i>package</i>
+  package require tycho.<i>metapkg.package</i>
 </pre>
 
-then the package load script named <code><i>package</i>.tcl</code> will be
-sourced.  When a package is required, the package load script is
+then the package load file named <code><i>package</i>.tcl</code> will
+be sourced.  When a package is required, the package load script is
 responsible for doing everything that is needed so that it can
 operate. Here is the minimum necessary in the package load file:
 
 <pre>
-  package provide <i>package</i> 2.0
+  package provide tycho.<i>metapkg.package</i> 2.0
   global env
   set env(<i>PACKAGE</i>_LIBRARY) [file dirname [info script]]
   lappend auto_path $env(<i>PACKAGE</i>_LIBRARY)
@@ -59,29 +60,24 @@ so that Tcl can load files automatically. (For this to work,
 the directory must contain a valid <code>tclIndex</code> file.)
 </ol>
 
-<p>
-The package load file can perform other actions.  Typical actions
-include: creating a namespace for its procedures; performing a
-<code>package require</code> for any packages that it depends upon; sourcing
-Tcl or [incr Tcl] files then and there, to avoid the overhead of
-auto-loading. Some people write Tcl packages in which the
-package load file contains their actual Tcl source code.
-We strongly recommend that this not be done: place Tcl and [incr 
-Tcl] source in separate files, not in the package load file.
+<p> The package load file can perform other actions.  Typical actions
+include performing a <code>package require</code> for any packages
+that it depends upon and sourcing Tcl or [incr Tcl] files then and
+there to avoid the overhead of auto-loading.  We recommend that in
+general, the package load file not contain Tcl procedure definitions
+-- these should be in separate files, not in the package load file.
 
 <h2>Making a meta-package</h2>
 
-"Meta-package" is our corny term for a directory that
-does nothing but contain a collection of real packages.
-In the standard Tycho installation, the directories
-<code>kernel</code>, <code>editors</code>, and <code>utils</code> are meta-packages.
-In fact, Tycho itself is a meta-package.
+"Meta-package" is our term for a directory that does nothing but
+contain a collection of real packages.  In the standard Tycho
+installation, the directories <code>kernel/</code>,
+<code>edit/</code>, and <code>util/</code> are meta-packages.
 
-<p>The purpose of a meta-package is simply to provide a way
+<p> The purpose of a meta-package is simply to provide a way
 to group packages in order to manage growth. In Tycho, because
 we have quite a number of packages and developers that come
 and go developing their own packages, this is important.
-In your own development, you may not need meta-packages.
 
 <p>
 The only trick about meta-packages is that Tcl has to be told
@@ -89,7 +85,7 @@ about the packages contained inside it. Provided that Tcl can find
 the meta-package (its directory or parent directory is in the
 <code>auto_path</code> -- see <a href="install.html">Installing packages</a>),
 the first <code>package require</code> will cause Tcl to source the
-meta-package's <code>pkgIndex.tcl</code>. In order to tell Tcl about
+meta-package's <code>pkgIndex.tcl</code> file. In order to tell Tcl about
 the packages contained therein, just make the file contain this:
 
 <pre>
@@ -104,8 +100,8 @@ catch {
 </pre>
 
 Bingo! Your packages will be found and the one given as the argument
-to the <code>package require</code> will be loaded.  (By the way, this is
-also the reason we recommend that stand-alone command-line-driven
+to the <code>package require</code> will be loaded.  (By the way, this
+is also the reason we recommend that stand-alone command-line-driven
 packages not be in the Tycho meta-package: doing all that globbing and
 sourcing does increase start-up time.)
 
