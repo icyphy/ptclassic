@@ -246,7 +246,7 @@ extern int unlink(const char *);
 
 /* Here we define common types that differ by platform */
 
-/* thor/analyzerX11/event.c uses FDS_TYPE */
+/* thor/analyzerX11/event.c, octtools/vem/rpc/serverNet use FDS_TYPE */
 #ifdef PTHPPA
 #ifndef FDS_TYPE
 #define FDS_TYPE (int *)
@@ -309,6 +309,15 @@ extern int unlink(const char *);
 #define HAS_TERMIOS
 #endif
 
+/* Is sys_siglist[] present?  See octtools/vem/rpc/vemRPC.c */
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX)
+#define NO_SYS_SIGLIST
+#endif 
+
+/* Should we use getrlimit()?  See octtools/vem/rpc/{server.c, serverNet.c} */
+#if defined(PTHPPA) || defined(SYSV)
+#define USE_GETRLIMIT
+#endif
 
 /* End of octtools specific defines */
 
