@@ -1,0 +1,184 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie
+#
+# Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### EditLattice
+#
+# _EditLattice_ is an editor for the _Lattice_ model. It edits
+# a 2-D projection onto a multi-dimensional lattice.
+#
+class ::tycho::EditLattice {
+    inherit ::tycho::TCanvas
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+
+    # The lattice model
+    itk_option define -lattice lattice Lattice {}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Handle change notification from the lattice model
+    method notify {method args}
+
+    # General-purpose redraw -- to be replaces
+    method redraw {}
+
+    #################################################################
+    ####                  protected methods                      ####
+    
+    #################################################################
+    ####                 protected variables                     ####
+    
+    # The projection onto the lattice
+    protected variable projection {0 1}
+
+    # The name of the projection I'm looking at
+    protected variable projname ""
+
+    #################################################################
+    ####                   private methods                       ####
+
+    # Initialize the menubar
+    private method initializeMenubar {}
+}
+
+#####################################################################
+#### -lattice configuration
+# Subscribe to the lattice model. Note: there will be a problem here
+# if the model is changed, since the old one is not unsubscribed...
+#
+configbody ::tycho::EditLattice::lattice {
+    if { $itk_option(-lattice) != "" } {
+        $itk_option(-lattice) subscribe $this all
+    }
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::EditLattice::constructor {args} {
+    # Evaluate options
+    eval itk_initialize $args
+
+    # If there is not already a lattice model, create one
+    if { $itk_option(-lattice) == "" } {
+	configure -lattice \
+                [uplevel #0 ::tycho::Lattice [::tycho::autoName lattice]]
+    }
+    # Get the projection
+    set projname [::tycho::autoName projection]
+    $itk_option(-lattice) projection $projname $projection
+
+    # Add menu stuff
+    if {$myMenubar != {}} {
+        # We have to qualify the call to this suppossedly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditLattice::initializeMenubar
+    }
+    # Make sure I'm drawn up-to-date
+    redraw
+}
+
+########################################################################
+#### notify
+#
+# Handle notification that the lattice model has changed.
+#
+body ::tycho::EditLattice::notify {method args} {
+    puts "$this: Got notification: $method $args"
+}
+
+########################################################################
+#### redraw
+#
+# Redraw this view.
+#
+body ::tycho::EditLattice::redraw {} {
+    $slate delete all
+    foreach {i j x y} [$itk_option(-lattice) getCoordinates $projname] {
+        set circle [eval $slate create oval \
+                [::tycho::Rectangle::stretch $x $y $x $y 10] \
+                [list -fill blue -outline ""]]
+        $slate bind $circle <Enter> "$this putStatus \"($i,$j)\""
+        $slate bind $circle <Leave> "$this putStatus \"\""
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+    #####################################################################
+    #####################################################################
+    ####                       private methods                       ####
+
+#####################################################################
+#### initializeMenubar
+# Adds entries to the menu bar specific to this class.
+#
+body ::tycho::EditLattice::initializeMenubar {} {
+    # Add an Edit menu before the Window menu
+    $myMenubar addMenu Edit -before Window -underline 0
+    
+    $myMenubar command {Undo} Edit -accelerator "M-z" \
+	    -underline 0 -command "$this undo"
+    
+    $myMenubar command {Redo} Edit -accelerator "M-r" \
+	    -underline 0 -command "$this redo"
+    
+    $myMenubar addSeparator Edit
+    
+    $myMenubar command Cut Edit -underline 0 -accelerator "C-w" \
+	    -command "$this cut"
+    
+    $myMenubar command Copy Edit -underline 1 -accelerator "M-w" \
+	    -command "$this copy"
+    
+    $myMenubar command Paste Edit -underline 0 -accelerator "C-y" \
+	    -command "$this paste"
+    
+    $myMenubar addSeparator Edit
+    
+    $myMenubar command "Select All" Edit -underline 0 \
+	    -accelerator "C-/" -command "$this selectRange 1.0 end"
+    
+    $myMenubar command "Unselect" Edit -underline 0 \
+	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
+
+    # Add a Devel menu for development use
+    $myMenubar addMenu Devel -underline 0
+
+    $myMenubar command {Show lattice} Devel \
+		    -command "::tycho::post \[\[$this cget -lattice\] describe\]"
+}
