@@ -45,12 +45,13 @@ option add *EditSearch.findMatchForegroundColor \
 
 ##########################################################################
 #### EditSearch class.
-# Create a dialog box for searching for text in a Edit object.
-# This dialog box should be child window of the Edit object so that it
-# is removed when the parent is removed.  To do this, just give it a
-# name that is the name of the Edit window with an additional field
-# appended after a period. For example, if the name of the Edit object
-# is ".file0", the search object could be ".file0.search".
+# Create a dialog box for searching for text in a EditText object. This
+# dialog box should be child window of the EditText object so that it
+# is removed when the parent is removed. To do this, just give it a
+# name that is the name of the EditText window (or its top-level
+# parent) with an additional field appended after a period. For
+# example, if the name of the Edit object is ".file0", the search
+# object could be ".file0.search".
 #
 class ::tycho::EditSearch {
     inherit ::tycho::EntryQuery
@@ -60,7 +61,7 @@ class ::tycho::EditSearch {
     #################################################################
     ####                        options                          ####
 
-    # The option to specify backwards search.
+    # Specify backwards search.
     itk_option define -backwards backwards Backwards 0
 
     # The command to execute on a change and find command.
@@ -81,38 +82,39 @@ class ::tycho::EditSearch {
     # Change the selection, replacing it with the replacement string.
     method change {}
 
-    # Change the text in the selection to the value in the Change To box.
+    # Change the text in the selection to the value in the "Change To" box.
     method changeAndFind {}
 
     # Clear the find-match marks on the associated text window.
     method clearFindMatch {}
 
-    # Find the specified pattern and mark in the text.
+    # Find the specified pattern and tag it in the text.
     method find {{start {}}}
 
     ###################################################################
-    ####                      protected variables                  ####
+    ####                      private variables                    ####
 
     # Remember the last search pattern and change string
-    protected common lastSearchPattern ""
-    protected common lastChangeString ""
+    private common lastSearchPattern ""
+    private common lastChangeString ""
 
     # Keep common configuration information
-    protected common wordsw 0
-    protected common casesw 0
-    protected common backwardssw 0
-    protected common regexpsw 0
-    protected common changeallsw 0
+    private common wordsw 0
+    private common casesw 0
+    private common backwardssw 0
+    private common regexpsw 0
+    private common changeallsw 0
 
     # Identify "find again" as distinct from the first find of a
     # a particular string.  This is used to avoid repeatedly finding
     # the same string.
-    protected variable myLastSearchPattern ""
+    private variable myLastSearchPattern ""
 }
 
 #####################################################################
 #### -backwards option
 # Set or change the configuration for forwards or backwards search.
+# The value of the option should be 0 or 1.
 # 
 configbody ::tycho::EditSearch::backwards {
     if {$itk_option(-backwards)} \
@@ -282,7 +284,7 @@ body ::tycho::EditSearch::changeAndFind {} {
 
 #####################################################################
 #### clearFindMatch
-# Clear the highlighting in the search window due to a search.
+# Clear the highlighting in the text window due to a search.
 # 
 body ::tycho::EditSearch::clearFindMatch {} {
     set tw $itk_option(-edittext)
@@ -294,7 +296,8 @@ body ::tycho::EditSearch::clearFindMatch {} {
 # Find and mark the specified pattern in the associated EditText
 # object. The search starts at the insertion cursor, unless the
 # optional argument is given, in which case it starts at the specified
-# point. The first match found is selected.
+# point. The first match found is selected.  The rest are tagged and the
+# background color changed.
 # 
 body ::tycho::EditSearch::find {{start {}}} {
 
