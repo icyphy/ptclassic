@@ -69,14 +69,15 @@ int ivBufGetLength( buf )
 }
 
 
-void ivBufAddChar( buf, c )
-    ivBuf* buf;
-    char c;
+void ivBufAddChar(buf, c) 
+ivBuf* buf;
+char c;
 {
     if (  buf->count + 2 <= buf->size  ) {
 	buf->buf[ buf->count++ ] = c;
 	buf->buf[ buf->count ] = '\0';
     } else {
+
 	IVRINGBELL( ivBufDisplay );
     }
     buf->buf[ buf->count ] = '\0';
@@ -87,6 +88,7 @@ void ivBufAddString( buf, s )
     char* s;
 {
     int len = strlen( s );
+
     if ( buf->count + len < buf->size ) {
 	strcpy( &buf->buf[ buf->count ] , s ) ;
 	buf->count += len ;
