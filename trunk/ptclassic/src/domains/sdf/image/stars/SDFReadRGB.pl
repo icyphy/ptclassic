@@ -1,4 +1,4 @@
- defstar {
+defstar {
 //////// INFO ON STAR.
 	name		{ ReadRGB }
 	domain		{ SDF }
@@ -13,13 +13,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	location	{ SDF image library }
 	desc {
 Read a PPM-format image from a file and
-send it out in three inputs--a Red, Green, and Blue image.
+separate the colors into three different images\(em
+a red, green, and blue image.
 Each image is of type GrayImage.
 
 If present, the character '#' in the 'fileName' state is replaced with
 the frame number to be read next. For example, if the 'frameId' state is
 set to 2 and if the 'fileName' state is 'dir.#/pic#' then the files that
-are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
+are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
 	explanation {
 .Id "image reading"
@@ -30,14 +31,14 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h" }
 
 //////// OUTPUTS AND STATES.
-	output { name { output1 } type { message } }
-	output { name { output2 } type { message } }
-	output { name { output3 } type { message } }
+	output { name { output1 } type { message } desc { Red image. } }
+	output { name { output2 } type { message } desc { Green image. } }
+	output { name { output3 } type { message } desc { Blue image. } }
 
 	defstate {
 		name	{ fileName }
 		type	{ string }
-		default { "~ptolemy/src/domains/sdf/demo/ppimage" }
+		default { "$PTOLEMY/src/domains/sdf/demo/ppimage" }
 		desc	{ Name of file containing PPM-format image. }
 	}
 
