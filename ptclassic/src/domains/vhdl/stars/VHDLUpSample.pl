@@ -52,6 +52,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 	  StringList out;
 	  for (int i = 0; i < int(factor); i++) {
+	    // FIXME: Will not work for COMPLEX type
 	    out << "$ref(output, ";
 	    out << -i;
 	    out << ") $assign(output) ";
@@ -59,8 +60,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	      out << "$ref(input, 0)";
 	    }
 	    else {
+	      float fillFloat = double(fill);
+	      int fillInt = (int) fillFloat;
 	      out << (strcmp(input.resolvedType(),INT)==0?
-		      int(fill):double(fill));
+		      fillInt:fillFloat);
 	      // yes, the previous statement really does work correctly
 	      // even if the type of the output is resolved to COMPLEX
 	      // or INT.  The appropriate conversion is performed.
