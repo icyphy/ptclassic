@@ -19,10 +19,6 @@ Copyright (c) 1989 The Regents of the University of California.
 #include "oh.h"
 #include "mkTerm.h"
 
-/* the names of the layers for the icon stems all end in "Solid",
-   e.g., redSolid, blueSolid,... */
-#define TERM_LAYER_SUFFIX "Solid"
-
 #define SHAPE_MAX 100  /* max number of points in a Shape */
 
 struct Shape_s {
@@ -123,18 +119,8 @@ struct octPoint boxTranslates[] = {
 
 
 static octObject *facetPtr, wiringLayer;
-static octObject floatTermLayer, intTermLayer, complexTermLayer,
-		 anytypeTermLayer;
-
-/* Combine the 1st and 2nd strings and return it in the 3rd string */
-static boolean
-StrCombine(str1, str2, result)
-char *str1, *str2, *result;
-{
-    strcpy(result, str1);
-    strcat(result, str2);
-    return (TRUE);
-}
+static octObject floatColorLayer, intColorLayer, complexColorLayer,
+		 anytypeColorLayer;
 
 /* MkTermInit 7/28/89 8/6/88 8/27/88
 Call this first.
@@ -143,21 +129,11 @@ boolean
 MkTermInit(CurrentFacetPtr)
 octObject *CurrentFacetPtr;
 {
-    char floatLayerName[20], intLayerName[20], complexLayerName[20],
-	 anytypeLayerName[20];
-    boolean StrCombine();
-
-    /* FLOAT_COLOR, etc. are defined in mkTerm.h */
-    StrCombine(FLOAT_COLOR, TERM_LAYER_SUFFIX, floatLayerName);
-    StrCombine(INT_COLOR, TERM_LAYER_SUFFIX, intLayerName);
-    StrCombine(COMPLEX_COLOR, TERM_LAYER_SUFFIX, complexLayerName);
-    StrCombine(ANYTYPE_COLOR, TERM_LAYER_SUFFIX, anytypeLayerName);
-
     facetPtr = CurrentFacetPtr;
-    CK_OCT(ohGetOrCreateLayer(facetPtr, &floatTermLayer, floatLayerName));
-    CK_OCT(ohGetOrCreateLayer(facetPtr, &intTermLayer, intLayerName)); 
-    CK_OCT(ohGetOrCreateLayer(facetPtr, &complexTermLayer, complexLayerName));
-    CK_OCT(ohGetOrCreateLayer(facetPtr, &anytypeTermLayer, anytypeLayerName)); 
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &floatColorLayer, "floatColor"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &intColorLayer, "intColor")); 
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &complexColorLayer, "complexColor"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &anytypeColorLayer, "anytypeColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
     return(TRUE);
 }
@@ -226,13 +202,13 @@ enum Position_e position;
     octObject *layerPtr;
 
     if (strcmp(type, "float") == 0 || strcmp(type, "FLOAT") == 0) {
-	layerPtr = &floatTermLayer;
+	layerPtr = &floatColorLayer;
     } else if (strcmp(type, "int") == 0 || strcmp(type, "INT") == 0 ) {
-	layerPtr = &intTermLayer;
+	layerPtr = &intColorLayer;
     } else if (strcmp(type, "complex") == 0 || strcmp(type, "COMPLEX") == 0) {
-	layerPtr = &complexTermLayer;
+	layerPtr = &complexColorLayer;
     } else if (strcmp(type, "anytype") == 0 || strcmp(type, "ANYTYPE") == 0) {
-	layerPtr = &anytypeTermLayer;
+	layerPtr = &anytypeColorLayer;
     } else {
 	/* print error message, unknown datatype */ ;
     }
