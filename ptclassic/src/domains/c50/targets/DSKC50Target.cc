@@ -41,8 +41,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "TITarget.h"
 
-DSKC50Target :: DSKC50Target(const char* nam, const char* desc) :
-	C50Target(nam,desc),TITarget(nam,desc,"C50Star","C50") {
+DSKC50Target :: DSKC50Target(const char* nam, const char* desc,
+			     const char* assocDomain) :
+	C50Target(nam,desc),TITarget(nam,desc,"C50Star", assocDomain) {
 	initStates();
 	addStream("shellCmds",&shellCmds);
 }
