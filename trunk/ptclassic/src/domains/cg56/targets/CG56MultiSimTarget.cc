@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "FixState.h"
 #include "pt_fstream.h"
+#include "SimControl.h"
 
 // CG56MultiSimTarget AnyAsmStar.
 const char* CG56MultiSimTarget :: auxStarClass() const { return "AnyAsmStar";}
@@ -129,6 +130,7 @@ void CG56MultiSimTarget :: wrapup() {
 // -----------------------------------------------------------------------------
 
 void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
+	if (SimControl::haltRequested()) return;
 	StringList code = s;
 	StringList fileName;
 	fileName << (const char*) filePrefix << i << ".asm";
@@ -152,12 +154,12 @@ void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
 
 int CG56MultiSimTarget::wormLoadCode() {
 
-    if (Scheduler::haltRequested()) return FALSE;
+    if (SimControl::haltRequested()) return FALSE;
 
     if (compileCode()) runCode();
 
     // done
-    if(Scheduler::haltRequested()) return FALSE;
+    if(SimControl::haltRequested()) return FALSE;
     return TRUE;
 }
 
