@@ -1508,7 +1508,11 @@ proc HMlink_callback {win href} {
 
     if [regexp {^http:|^ftp:|^gopher:|^news:|^mailto:|^telnet:|^wais:} \
 	    $href] {
-	if [::tycho::askuser "OK to invoke netscape to view $href?"] {
+	if ![::tycho::askuser "OK to invoke netscape to view $href?"] {
+            # The user said no, so just return
+            return
+        } {
+            # The user said yes
             global tcl_platform
 	    switch $tcl_platform(platform) {
                 unix {
