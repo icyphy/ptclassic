@@ -7,11 +7,6 @@
 #include "type.h"
 #include "Connect.h"
 
-// temporarily set
-// later will be unified with SDF stuff.
-#define grabData beforeGo
-#define sendData afterGo
-
 /**************************************************************************
 Version identification:
 $Id$
