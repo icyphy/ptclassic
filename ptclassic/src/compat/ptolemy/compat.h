@@ -62,6 +62,10 @@ extern "C" {
 #define PTLINUX
 #endif
 
+#if defined(netbsd_i386)
+#define PTNBSD_386
+#endif
+
 #if defined(__sparc) && (defined(__svr4__) || defined(__SVR4))
 /* Sun SPARC running Solaris2.x, SunC++ or g++ */
 #ifndef SOL2
@@ -115,7 +119,7 @@ extern "C" {
 #endif /* PTSUN4_CFRONT or PTHPPA_CFRONT */
 #endif /* ! VOLATILE */
 
-#ifndef PTLINUX
+#if !defined(PTLINUX) && !defined(PTNBSD_386)
 #if defined(USG) && ! defined(PTHPPA)
 extern int sprintf();
 #else
@@ -137,7 +141,7 @@ extern char *sprintf();
 #endif
 #endif /* PTLINUX */
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(PTNBSD_386)
 
 #include <stdio.h>			/* Get the decl for FILE.  sigh.
 					 * Also get sprintf() for linux. */
@@ -218,6 +222,13 @@ extern double hypot(double, double); /* kernel/ComplexSubset.h */
 #endif
 
 extern int listen(int, int);
+
+#ifdef PTNBSD_386
+extern off_t lseek();		/* octtools/vem/serverVem.c uses lseek(). */
+#else
+extern long lseek();
+#endif /* PTNBSD_386 */
+
 extern int pclose(FILE *);
 extern void perror (const char *);
 extern int printf (const char *, ...);
@@ -241,19 +252,43 @@ extern void setpwent();		/* octtools/Packages/fc/fc.c and
 extern int sscanf (const char *, const char *, ...);
 extern int socket(int, int, int); /* thor/kernel/rpc.c uses socket() */
 extern int symlink(const char *, const char *);	/* CGCTarget.cc */
+
+#ifdef NEED_SYS_ERRLIST
+#ifdef PTNBSD_386
+extern const char *const sys_errlist[];
+#else
+extern char *sys_errlist[];
+#endif /* PTNBSD_386 */
+extern int sys_nerr;
+extern int errno;
+#endif /* NEED_SYS_ERRLIST */
+
 extern int unlink(const char *);
 
 /* End of common missing function prototypes */
 #endif /* __GNUC__ */
 
+
+
+
 /* Here we define common types that differ by platform */
 
-/* thor/analyzerX11/event.c, octtools/vem/rpc/serverNet use FDS_TYPE */
+/* thor/analyzerX11/event.c, octtools/vem/rpc/serverNet.c,
+ octtools/Xpackages/rpc/appNet.c use FDS_TYPE */
 #ifdef PTHPPA
+
 #ifndef FDS_TYPE
 #define FDS_TYPE (int *)
 #endif
+
+#else /* PTHPPA */
+
+#ifndef FDS_TYPE
+#define FDS_TYPE (fd_set *)
+#endif
+
 #endif /* PTHPPA */
+
 
 /* Fix up casts for kernel/TimeVal.cc */
 
@@ -302,7 +337,7 @@ extern int unlink(const char *);
 
 /* Do we need to defined stricmp()?  See octtools/installColors/installColors.c
  */
-#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA)
+#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386)
 #define NEED_STRICMP
 #endif
 
