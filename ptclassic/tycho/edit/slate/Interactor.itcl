@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,7 +28,7 @@
 
 
 #######################################################################
-### Interactor
+#### Interactor
 #
 # The abstract superclass of all interactor classes. <i>Interactors</i>
 # are a mechanism originally developed in Brad Meyer's Garnet system.
@@ -38,14 +38,14 @@
 # interactors implemented in this set of classes fulfills both of these
 # goals, although they are much smaller, lighter, and more numerous
 # than the interactors in Garnet.
-# <p>
+#
 # Each sub-class of <i>Interactor</i> implements a particular kind of
 # user interaction. Each is based on the observation that most user
 # interactions can be broken into a sequence: a <i>click</i>, some number
 # of <i>drags</i>, and a <i>release</i>. Note that each of these
 # <i>actions</i> is abstract, and they do not necessarily correspond to
 # to physical mouse clicks, drags, and releases.
-# <p>
+#
 # Interactors can be combined to make more complex interactions: several
 # interactors can be <i>bound</i> to the same picture; they can be
 # <i>cascaded</i> to modify each other's effects. Actions eventually
@@ -74,7 +74,7 @@ class ::tycho::Interactor {
     # A script executed at the beginning of the interaction sequence. It
     # is typically used to set target parameters or to chain interactors.
     # As with all interactor scripts, this script takes four arguments:
-    # this interactor, the target picture, and the <i>x</i> and <i>y</i>
+    # this interactor, the target picture, and the _x_ and _y_
     # co-ordinates. See the <a href="../../../../lib/util/syntax.tcl#apply">
     # <i>apply</i></a> procedure for the format of the script.
     public variable activatecommand {}
@@ -171,9 +171,9 @@ class ::tycho::Interactor {
 #### activate
 #
 # <i>Abstract method</i>.
-# Make myself active. That is, set up bindings to intercept
+# Make this interactor active. That is, set up bindings to intercept
 # events that I need from now on. One of the bindings is obliged to
-# call <code>deactivate</code> to remove the bindings.
+# call *deactivate* to remove the bindings.
 #
 body ::tycho::Interactor::activate {args} {
     abstractMethod Interactor activate
@@ -187,7 +187,8 @@ body ::tycho::Interactor::activate {args} {
 # ``Bind'' an interactor to a picture or to a tag. This creates a binding
 # to the specified picture or tag so that, when the appropriate event
 # occurs on that picture or a picture withe the specified tags, the
-# interactor is ``activated'' on the target.
+# interactor is ``activated'' on the target. The configuration
+# options *-button* and *-modifiers* determine the actual events.
 #
 body ::tycho::Interactor::bind {t args} {
     abstractMethod Interactor bind
@@ -199,7 +200,7 @@ body ::tycho::Interactor::bind {t args} {
 #
 # Forward actions to a proxy interactor instead of directly
 # to the target object. This used when further modification of the
-# interaction can be provided by another interaactor -- for example,
+# interaction can be provided by another interactor -- for example,
 # a <a href="Stepper.html"><i>Stepper</i></a> interactor can be used
 # to quantize movement within a bounded rectangular region provided by the
 # <a href="Bounder.html"><i>Bounder</i></a> interactor.
@@ -213,9 +214,9 @@ body ::tycho::Interactor::cascade {that} {
 #######################################################################
 #### click
 #
-# Start an interaction sequence. The co-ordinates <i>x</i> and <i>y</i>
+# Start an interaction sequence. The co-ordinates _x_ and _y_
 # are the current mouse coordinates relative to the slate.
-# By default, this method simply forwards a <code>click</code> action
+# By default, this method simply forwards a *click* action
 # to the target, or to the proxy interactor if there
 # is one. Sub-classes that over-ride this method should always call
 # this implementation to forward the click action.
@@ -249,7 +250,7 @@ body ::tycho::Interactor::continue {} {
 #### deactivate
 #
 # <i>Abstract method</i>.
-# Make myself inactive. In other words, remove my bindings.
+# Make this interactor inactive. In other words, remove my bindings.
 #
 body ::tycho::Interactor::deactivate {args} {
     abstractMethod Interactor deactivate
@@ -260,8 +261,8 @@ body ::tycho::Interactor::deactivate {args} {
 #### drag
 #
 # Continue an interaction sequence with a mouse move. The co-ordinates
-# <i>x</i> and <i>y</i> are the current mouse coordinates relative to
-# the slate. By default, this method simply forwards a <code>drag</code>
+# _x_ and _y_ are the current mouse coordinates relative to
+# the slate. By default, this method simply forwards a *drag*
 # action to the target, or to the proxy interactor if there
 # is one. Sub-classes that over-ride this method should always call
 # this implementation to forward the drag action.
@@ -279,7 +280,7 @@ body ::tycho::Interactor::drag {x y} {
 #######################################################################
 #### execute
 # Execute a script, by applying it to the interactor, the target, and
-# the current x and y coordinates.
+# the current _x_ and _y_ coordinates.
 #
 body ::tycho::Interactor::execute {script x y} {
     if { $script != "" } {
@@ -307,7 +308,7 @@ body ::tycho::Interactor::proxy {args} {
 #### release
 #
 # Terminate an interaction sequence. By default, this method
-# simply forwards a <code>release</code>
+# simply forwards a *release*
 # action to the target, or to the proxy interactor if there
 # is one. Sub-classes that over-ride this method should always call
 # this implementation to forward the release action.
@@ -325,7 +326,7 @@ body ::tycho::Interactor::release {} {
 #### target
 #
 # Set or get the picture that this interactor is currently
-# operating on. With no argument, returns the current target;
+# operating on. With no argument, return the current target;
 # with an argument, sets the target picture to that value. This
 # method is for use only within actions -- the target is not valid
 # until the interactor has been activated. If you're careful about it,
