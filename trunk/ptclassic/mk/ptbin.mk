@@ -40,14 +40,18 @@
 # Test out pigiRpc.cp
 # Make a non-shared library
 
-VERSION =	0.6devel.$(BASENAME)
+# To create a custom executable, you should define a file named override.mk
+# in your $(ROOT)/obj.$(PTARCH)/$(PIGI) directory. You should also have a 
+# symbolic link from $(ROOT)/src.$(PTARCH)/$(PIGI)/SCCS to the ptolemy
+# SCCS directory $(PTOLEMY/src.$(PTARCH)/$(PIGI)/SCCS.
+# The override.mk file should define the variables necessary from stars.mk
+# to pull in the domains you want.  It also must define the $(PIGI) variable.
+# Here a minimal override.mk which will just pull in SDF:
+#
+# PIGI=pigiRpc
+# SDFFULL=1
 
-ifndef PTINY
-ifndef PTRIM
-	# If PTINY or PTRIM are not defined, then this is a full build
-	FULL=1
-endif
-endif
+VERSION =	0.6devel.$(BASENAME)
 
 ifdef FULL
 	PIGI=$(BASENAME)
