@@ -237,7 +237,6 @@ if $ptolemyfeature(ptolemyinstalled) {
 
 ########### tool modes
 ::tycho::register extensions "itclclasslist" .icl
-::tycho::register extensions "javaprofile" .prof
 
 ########### filename modes	
 ::tycho::register filenames "makefile" Makefile makefile GNUmakefile
@@ -445,14 +444,6 @@ if {$tcl_platform(platform) != "macintosh"} {
 	-label {Itcl Class List}  \
 	-category "tool" \
 	-underline 5
-
-# Java profile viewer
-::tycho::register mode "javaprofile" \
-	-command {::tycho::view ProfileJava -file {%s} -toolbar 1} \
-	-label {Java Profiler}  \
-	-category "tool" \
-	-underline 0
-
 
 # Tcl profiling tool
 ::tycho::register mode "profile" \
