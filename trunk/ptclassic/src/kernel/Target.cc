@@ -47,24 +47,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "Error.h"
 #include "ConstIters.h"
-#include "miscFuncs.h"
 #include "Domain.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "SimControl.h"
 #include "StringArrayState.h"
 
 // constructor
-Target::Target(const char* nam, const char* starClass, const char* desc) :
-Block(nam,0,desc),resetFlag(0),
-children(0), link(0), nChildren(0), sched(0), gal(0), dirFullName(0) {
+Target::Target(const char* nam, const char* starClass,
+	       const char* desc, const char* assocDomain) :
+Block(nam,0,desc), resetFlag(0), children(0), link(0), nChildren(0),
+sched(0), gal(0), associatedDomain(assocDomain) {
 	starTypes = starClass;
 }
 
 // destructor
 Target::~Target() {
-// should we delete children?
-	LOG_DEL; delete [] dirFullName;
+	// FIXME: Should we delete the children?
 }
 
 void Target::setSched(Scheduler* sch) {
@@ -209,7 +206,7 @@ void Target::wrapup () {
 	gal->Galaxy::wrapup();
 }
 
-int Target :: commTime(int,int,int,int) { return 0;}
+int Target::commTime(int,int,int,int) { return 0;}
 
 // by default, pass these on through
 void Target::setStopTime(double f) { if (sched) sched->setStopTime(f);}
@@ -312,58 +309,6 @@ int Target::childHasResources(Star& s,int childNum) {
 	return ch->hasResourcesFor(s,num);
 }
       
-// set up directory for writing files associated with Target.
-
-const char* Target::writeDirectoryName(const char* dirName) {
-
-   if (dirName && *dirName) {
-	// delete old value if any
-	LOG_DEL; delete [] dirFullName;
-	// expand the path name
-	dirFullName = expandPathName(dirName);
-
-	// check to see whether the directory exists, create it if not
-	struct stat stbuf;
-	if (stat(dirFullName, &stbuf) == -1) {
-	    // Directory does not exist.  Attempt to create it.
-	    // A -p flag is necessary because it might be a nested directory
-	    // in which one of the parent directories does not exist
-	    StringList mkdir = "mkdir -p ";
-	    mkdir << dirFullName;
-	    if (system(mkdir)) {
-		Error::warn("Cannot create Target directory ", dirFullName);
-		return 0;
-	    }
-	} else {
-	    // Something by that name exists, see whether it's a directory
-	    if ((stbuf.st_mode & S_IFMT) != S_IFDIR) {
-		Error::warn("Target directory is not a directory: ",
-			    dirFullName);
-		return 0;
-	    }
-	}
-	return dirFullName;
-   }
-
-   return 0;
-}
-
-// Method to set a file name for writing.
-// Prepends dirFullName to fileName with "/" between.
-// Always returns a pointer to a string in new memory.
-// It is up to the user to delete the memory when no longer needed.
-// If dirFullName or fileName is NULL then it returns a
-// pointer to a new copy of the string "/dev/null".
-char* Target::writeFileName(const char* fileName) {
-	if (dirFullName && *dirFullName && fileName && *fileName) {
-		StringList fullName = dirFullName;
-		fullName += "/";
-		fullName += fileName;
-		return fullName.newCopy();
-	}
-	return savestring("/dev/null");
-}
-
 // Small virtual functions with dummy implementations
 void Target::beginIteration(int,int) {}
 void Target::endIteration(int,int) {}
@@ -380,7 +325,6 @@ const char* Target::className() const {return "Target";}
 ISA_FUNC(Target,Block);
 
 // see if there is a child of the appropriate type
-
 int Target::childIsA(const char* type) const {
 	Target * c = children;
 	while (c) {
@@ -388,4 +332,13 @@ int Target::childIsA(const char* type) const {
 		c = c->link;
 	}
 	return FALSE;
+}
+
+// Return the domain of the galaxy if it exists or
+// the associated domain if it is non-null or
+// the value of the baseclass domain method otherwise
+const char* Target::domain() const {
+	if (galaxy()) return galaxy()->domain();
+	else if (associatedDomain) return associatedDomain;
+	else return Block::domain();
 }
