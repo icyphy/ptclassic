@@ -7,10 +7,11 @@ through a complicated pattern matching technique.
 .SE
 .LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 10/10/92
-.AL "GSWalter."
+.AL "G. S. Walter"
 .LD
  This demonstration reads 8 kHz voice samples, converts them into 64 kbps
 PCM using CCITT Recommendation G.711, and then loads them into 
+.Ir "CCITT Recommendation G.711"
 .c SeqATMCElls.
  The
 .c SeqATMCells
@@ -51,13 +52,18 @@ proper order.  A
 .c PCMBitDecoder
 galaxy produced the correct PCM levels given the input bits.
 .pp
+.Ir "PCM"
  The default parameters in this demonstration are set so that
 50 samples are encoded every iteration which will fill
 approximately 1.04 cells.
  Running the demonstration for 580 iterations will produce
 604 cells consuming about 29,000 voice samples.
+.Ir "Goodman, J."
+.Ir "Lockhart, G."
+.Ir "Wasem, O."
+.Ir "Wong, W."
 .UH REFERENCES
-Goodman, J., LockHart, G., Wasem, O., and Wong, W.,
+Goodman, J., Lockhart, G., Wasem, O., and Wong, W.,
 "Waveform Substitution Techniques for Recovering
 Missing Speech Segment in Packet Voice Communications,"
 \fIIEEE Trans. on ASSP\fR, vol ASSP-34, no. 6, pp. 1440-
