@@ -118,8 +118,10 @@ int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
     int numInitDelays;
     Galaxy* parentGal;
     StringList starName;
-
-    numInitDelays = peekPort.numInitDelays();
+    // FIXME - we do not support initial delays on peek/poke arcs
+    // The peekPort and pokePort are in a disconnected state here.
+    // numInitDelays = peekPort.numInitDelays();
+    numInitDelays = 0;
     peekPort.disconnect();
     output->connect(peekPort,numInitDelays);
     parentGal = (Galaxy*) peekPort.parent()->parent();
