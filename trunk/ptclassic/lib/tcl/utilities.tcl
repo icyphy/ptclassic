@@ -45,7 +45,7 @@ proc ptkStartTycho { } {
 	    } else {
 		set path $ptolemy/tycho
 	    }
-	    source $path/kernel/Tycho.tcl
+	    source $path/kernel/basic/Tycho.tcl
 	}
     }
 }
