@@ -1939,6 +1939,7 @@ body ::tycho::HTMLDocSys::putsConstructIfNotEmpty {fd docClass construct} {
 # the links to parent classes in tycho subdirectories right.
 #
 body ::tycho::HTMLDocSys::getFileName {classname} { 
+    #puts "getFileName: $classname"
     global env
     set docFile "[info namespace tail $classname].html"
     if [file readable $docFile] {
@@ -1952,6 +1953,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 	    # The codeDoc.idx file is present, check it to see if it
 	    # has a link to our file
 	    if { $codeDocIdxContents == {} } {
+		#puts "getFileName: reading in $codeDocIdx"
 		# Read codeDoc.idx into a common variable
 		set fd [open $codeDocIdx r]
 		set tmpContents [read $fd]
@@ -1968,7 +1970,11 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 			    or { id indexlist }"
 		}
 		if [regexp "$classname class$" [lindex $item 0]] {
-		    return [::tycho::relativePath [pwd] [lindex $item 1]]
+		    #puts "getFileName: found $item "
+		    #puts "getFileName: [::tycho::relativePath \
+		    #	    [file join [pwd] doc codeDoc] [lindex $item 1]]"
+		    return [::tycho::relativePath \
+			    [file join [pwd] doc codeDoc] [lindex $item 1]]"
 		}
 	    }
 	}
@@ -1977,6 +1983,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
     # We failed to find a pre-existing html file with the right name,
     # so we just return the calculated name and hope that it gets
     # created later
+    #puts "getFileName: returning $docFile"
     return $docFile
 }
 
