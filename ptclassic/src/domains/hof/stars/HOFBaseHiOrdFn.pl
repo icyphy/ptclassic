@@ -407,8 +407,9 @@ The full path and facet name for the definition of blockname.
 		if (gp.isA("PortHole")) p = (PortHole*)(&gp);
 		far = p->far();
 	      }
-	      // Ignore the porthole if far is still NULL
-	      if (far && (far->parent() != star)) {
+	      // Ignore the porthole if far is still NULL,
+	      // or if the porthole is hidden
+	      if (far && !hidden(*far) && (far->parent() != star)) {
 		Error::abortRun(*this,
 			    "Sorry, replacement block can only be a single block");
 		return FALSE;
