@@ -3050,12 +3050,12 @@ struct InterpTableEntry {
 // in which case the command will be registered in the global
 // namespace.
 
-#define ENTRY(verb) { quote(::pitcl::verb), PTcl::verb }
-#define GLOBAL(verb) { quote(verb), PTcl::verb }
+#define ENTRY(verb) { quote(::pitcl::verb), &PTcl::verb }
+#define GLOBAL(verb) { quote(verb), &PTcl::verb }
 
 // synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(::pitcl::verb), PTcl::action }
-#define GLOBAL2(verb,action) { quote(verb), PTcl::action }
+#define ENTRY2(verb,action) { quote(::pitcl::verb), &PTcl::action }
+#define GLOBAL2(verb,action) { quote(verb), &PTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
 // CAUTION: the dispatcher treats the first two entries specially
