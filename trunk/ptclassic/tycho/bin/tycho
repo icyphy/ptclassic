@@ -230,7 +230,8 @@ if ( $?noconsole ) set prog = ($prog -noconsole)
 if ( $tclscript != "") set prog = ($prog -e $tclscript)
 
 # If neither tyedit or selectPtolemy are set then we are just running itkwish
-if (! -x `eval $prog[1]` && ($?tyedit || $?selectPtolemy)) then
+# Note that the order of these tests matters
+if (($?tyedit || $?selectPtolemy) && ! -x `eval $prog[1]`) then
 	echo "Program does not exist: $prog"
 else
     if (! $?filename || $?tychodebug) then
