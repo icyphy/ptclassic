@@ -32,6 +32,8 @@ CG56DIR=$(ROOT)/src/domains/cg56/kernel
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
 
+# if S56DIR is defined compile in the S56X Wormhole target.  This
+# is defined in config-sun4.mk.
 ifdef S56DIR
 S56WHO= S56XTargetWH.o
 S56WHI= -I$(S56DIR)/include 
