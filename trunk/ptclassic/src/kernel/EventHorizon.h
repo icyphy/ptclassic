@@ -209,7 +209,10 @@ public:
 	int isItInput() const;
 	int isItOutput() const;
 
+	// make new ports and connections, building event horizon
+	// pairs as needed.
 	PortHole& newPort();
+	PortHole& newConnection();
 };
 
 #endif
