@@ -23,8 +23,8 @@ BDFDIR = $(ROOT)/src/domains/bdf/kernel
 
 INCL = -I$(BDFDIR) -I$(SDFDIR) -I$(KERNDIR)
 
-# no library
-LIB=dummy
+# stars library
+LIB=libbdfstars.a
 
 # source files for all stars, using preprocessor
 PL_SRCS=\
