@@ -489,19 +489,7 @@ void VHDLBTarget :: setup () {
 	runCode << sectionComment(leader) << mainInitialization << vhdlCode;
 	vhdlCode = runCode;
 
-// get the name of the universe to write to that file.vhdl
-	StringList codeName;
-	StringList univ = gal->name();
-	codeName = univ;
-	univ << ".vhdl";
-	char* codeFileName = writeFileName(univ);
-	pt_ofstream codeFile(codeFileName);
-	if(!codeFile) return;
-	myCode << vhdlCode;
-        codeFile << myCode;
-        codeFile.flush();
-
-        // Display the code
+// Display the code
         writeFile(vhdlCode, "", 1);
 }
 
