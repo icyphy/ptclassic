@@ -428,10 +428,8 @@ proc pftMain { } {
 	set env(PTOLEMY) [glob ~ptolemy]
     }
     if ![info exist env(PTARCH)] {
-	if { [catch {exec /bin/arch} arch] } {
-	    if { [catch {exec /bin/machine} arch] } {
-		pftUsage "Unknown PTARCH"
-	    }
+	if { [catch {exec $env(PTOLEMY)/bin/ptarch} arch] } {
+	    pftUsage "Unknown PTARCH: $arch"
 	}
 	set env(PTARCH) $arch
     }
