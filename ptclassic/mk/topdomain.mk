@@ -16,7 +16,7 @@ makefiles:
 		cd .. ; \
 	done
 
-all install clean sources realclean checkjunk:
+all install clean sources realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in domains/$(ME)/$$x ; \
