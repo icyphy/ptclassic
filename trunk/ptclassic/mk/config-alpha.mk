@@ -40,6 +40,16 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Note that UC Berkeley does not formally support Ptolemy on the DEC Alpha.
+# UCB does not regularly build on this platform, nor does UCB provide
+# DEC Alpha Ptolemy binaries.  This is the first release of Ptolemy on the
+# DEC Alpha, so there are bound to be bugs.
+#
+# Currently, there are problems with unaligned access that need to be cleaned
+# up.  For more information, see the ultrix-osf1 FAQ, available at
+# ftp://rtfm.mit.edu/pub/usenet/news.answers/dec-faq.
+#
+
 #
 # Programs to use
 #
