@@ -93,7 +93,7 @@ LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
 CC = 		gcc
 # Note that the bundled hppa cc compiler is non-ansi so it won't 
 #  compile certain files in octtools that use ansi CPP, such as oct/io.h
-OCT_CC =	gcc
+OCT_CC =	gcc -fwritable-strings
 # If you compile with gcc, then you will need to add -lgcc to the link
 #  or you will get complaints about _eprintf missing
 LIBGCC_SPEC =	-L$(PTOLEMY)/gnu/hppa/lib/gcc-lib/hppa/2.7.2 -lgcc 
