@@ -42,6 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "AsmTarget.h"
 #include "ProcMemory.h"
 #include "StringState.h"
+#include "IntState.h"
+#include "StringList.h"
 
 class MotorolaMemory : public DualMemory {
 public:
@@ -68,13 +70,29 @@ public:
 	void trailerCode() { CGTarget::trailerCode();}
 #endif
 
+	int computeMemoryUsage();
+	inline int programMemoryUsage() { return ProgramDataMemory; }
+	inline int xdataMemoryUsage() { return XDataMemory; }
+	inline int ydataMemoryUsage() { return YDataMemory; }
+	const char* memoryUsageString();
+	void resetMemoryUsage();
+
+	inline const char* setAssemblerOptions(const char* options) {
+		assemblerOptions = options;
+		return assemblerOptions;
+	}
+	inline const char* getAssemblerOptions() {
+		return assemblerOptions;
+	}
+
 	~MotorolaTarget();
+
 protected:
+	// Target parameters (states)
 	StringState xMemMap;
 	StringState yMemMap;
-
-	// Write star firings as subroutine calls.
-	IntState subFire;
+	IntState reportMemoryUsage;
+	IntState subFire;	// Write star firings as subroutine calls.
 
 #ifdef __GNUG__
 	// Workaround a bug in gcc-2.6.0.  Otherwise Sim56Target.cc 
@@ -93,7 +111,14 @@ protected:
 	void saveProgramCounter();
 	void restoreProgramCounter();
 
+	// Other data members
 	int inProgSection;
+	int ProgramDataMemory;
+	int XDataMemory;
+	int YDataMemory;
+	StringList MemoryUsageString;
+	StringList assemblerOptions;
+
 private:
 	void initStates();
 };
