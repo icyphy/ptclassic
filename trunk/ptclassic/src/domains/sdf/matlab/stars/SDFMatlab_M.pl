@@ -83,13 +83,13 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 extern "C" {
 #include "matrix.h"
 #include "engine.h"
-#undef COMPLEX
-#undef REAL
-}
 
 // Give Matlab's definition of COMPLEX and REAL different names
+#undef  COMPLEX
+#undef  REAL
 #define MXCOMPLEX  1
 #define MXREAL     0
+}
 	}
 
 	protected {
@@ -146,9 +146,9 @@ extern "C" {
 
 		  char *inputBaseName = ((char *) MatlabInputVarName);
 		  if ( matlabInputNames != 0 ) {
-		    delete [] matlabInputNames;
+		    LOG_DEL; delete [] matlabInputNames;
 		  }
-		  matlabInputNames = new StringList[numInputs];
+		  LOG_NEW; matlabInputNames = new StringList[numInputs];
 		  for ( i = 0; i < numInputs; i++ ) {
 		    sprintf(numstr, "%d", i+1);
 		    matlabInputNames[i] << inputBaseName << numstr;
@@ -167,9 +167,9 @@ extern "C" {
 
 		  char *outputBaseName = ((char *) MatlabOutputVarName);
 		  if ( matlabOutputNames != 0 ) {
-		    delete [] matlabOutputNames;
+		    LOG_DEL; delete [] matlabOutputNames;
 		  }
-		  matlabOutputNames = new StringList[numOutputs];
+		  LOG_NEW; matlabOutputNames = new StringList[numOutputs];
 		  for ( i = 0; i < numOutputs; i++ ) {
 		    sprintf(numstr, "%d", i+1);
 		    matlabOutputNames[i] << outputBaseName << numstr;
@@ -178,7 +178,7 @@ extern "C" {
 
 		// create the command to be sent to the Matlab interpreter
 		if ( matlabCommand != 0 ) {
-		  delete [] matlabCommand;
+		  LOG_DEL; delete [] matlabCommand;
 		}
 		StringList commandString;
 		if ( numOutputs > 0 ) {
@@ -196,16 +196,18 @@ extern "C" {
 		  }
 		  commandString << ")";
 		}
-		matlabCommand = new char[commandString.length()];
+		LOG_NEW; matlabCommand = new char[commandString.length()];
 		strcpy(matlabCommand, (char *) commandString);
 	}
 
 	go {
 		// allocate memory for Matlab matrices
 		MPHIter nexti(input);
+		PortHole *iportp;
 		for ( int i = 0; i < numInputs; i++ ) {
 		  Envelope Apkt;
-		  ((*nexti++)%0).getMessage(Apkt);
+		  iportp = nexti++;
+		  ((*iportp)%0).getMessage(Apkt);
 		  const ComplexMatrix& Amatrix =
 			*(const ComplexMatrix *)Apkt.myData();
 
@@ -217,13 +219,13 @@ extern "C" {
 			     (char *) matlabInputNames[i]);
 
 		  // copy values in Ptolemy matrix to Matlab matrix
-		  double *rp = mxGetPr(matlabInputMatrices[i]);
-		  double *ip = mxGetPi(matlabInputMatrices[i]);
+		  double *realp = mxGetPr(matlabInputMatrices[i]);
+		  double *imagp = mxGetPi(matlabInputMatrices[i]);
 		  for ( int irow = 0; irow < rows; irow++ ) {
 		    for ( int icol = 0; icol < cols; icol++ ) {
 		      Complex temp = Amatrix[irow][icol];
-		      *rp++ = real(temp);
-		      *ip++ = imag(temp);
+		      *realp++ = real(temp);
+		      *imagp++ = imag(temp);
 		    }
 		  }
 		}
@@ -240,22 +242,25 @@ extern "C" {
 
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
+		PortHole* oportp;
 		for ( int j = 0; j < numOutputs; j++ ) {
 		  matlabOutputMatrices[j] =
 			engGetMatrix( matlabEnginePtr,
 				      (char *) matlabOutputNames[j] );
 
-		  double *rp = mxGetPr(matlabOutputMatrices[j]);
-		  double *ip = mxGetPi(matlabOutputMatrices[j]);
+		  double *realp = mxGetPr(matlabOutputMatrices[j]);
+		  double *imagp = mxGetPi(matlabOutputMatrices[j]);
 		  int rows = mxGetM(matlabOutputMatrices[j]);
 		  int cols = mxGetN(matlabOutputMatrices[j]);
+		  LOG_NEW;
 		  ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
 		  for ( int jrow = 0; jrow < rows; jrow++ ) {
 		    for ( int jcol = 0; jcol < cols; jcol++ ) {
-		      Amatrix[jrow][jcol] = Complex(*rp++, *ip++);
+		      Amatrix[jrow][jcol] = Complex(*realp++, *imagp++);
 		    }
 		  }
-		  ((*nextp++)%0) << Amatrix;
+		  oportp = nextp++;
+		  ((*oportp)%0) << Amatrix;
 		}
 
 		// free Matlab memory-- assume Matlab is good with memory alloc
@@ -268,9 +273,9 @@ extern "C" {
 	}
 
 	destructor {
-		delete [] matlabInputNames;
-		delete [] matlabOutputNames;
-		delete [] matlabCommand;
+		LOG_DEL; delete [] matlabInputNames;
+		LOG_DEL; delete [] matlabOutputNames;
+		LOG_DEL; delete [] matlabCommand;
 	}
 
 	wrapup {
