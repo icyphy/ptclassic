@@ -158,7 +158,7 @@ void Target::addChild(Target& newChild) {
 		p->link = &newChild;
 	}
 
-// Create child name.   This is a memory leak!
+// Create child name.
 	char buf[20];
 	sprintf (buf, "proc%d", nChildren);
 	const char* cname = hashstring(buf);
@@ -235,15 +235,9 @@ char* Target::writeFileName(const char* fileName) {
 	return savestring("/dev/null");
 }
 
-// default functions to make event horizons
-EventHorizon& Target :: newFrom() {
-	Domain* tDomain = Domain::domainOf(*gal);
-	return tDomain->newFrom();
-}
-
-EventHorizon& Target :: newTo() {
-	Domain* tDomain = Domain::domainOf(*gal);
-	return tDomain->newTo();
-}
+// Small virtual functions
+void Target::beginIteration(int,int) {}
+void Target::endIteration(int,int) {}
+void Target::writeFiring(Star&,int) {}
 
 ISA_FUNC(Target,Block);
