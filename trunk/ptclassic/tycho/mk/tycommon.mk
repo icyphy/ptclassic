@@ -295,9 +295,9 @@ JDESTDIR = /vol/ptolemy/pt0/ftp/pub/ptolemy/www/java
 
 updatewebsite: $(JDISTS)
 	@echo "Updating website"
-	cp $(JDISTS) $(JDESTDIR)
-	(cd $(JDESTDIR); rm -rf $(JPACKAGE); \
-	 gtar -zxf $(JDIST).tar.gz; \
+	(cd $(JDESTDIR); rm -rf $(JPACKAGE); mkdir $(JPACKAGE))
+	cp $(JDISTS) $(JDESTDIR)/$(JPACKAGE)
+	(cd $(JDESTDIR); gtar -zxf $(JPACKAGE)/$(JDIST).tar.gz; \
 	 chmod g+w $(JDISTS); chmod g+ws $(JPACKAGE))
 
 installjdist:
