@@ -173,7 +173,15 @@ void TITarget::writeInt(int val) {
 }
 
 void TITarget::writeFix(double val) {
-	*defaultStream << "\t.q15\t" << limitFix(val) << "\n";
+
+// << (double) operator of StringList uses "%.g" to print
+// doubles so don't use it here.  "%.f" instead so that the 
+// number is always fixed point
+
+	char* buf = new char[32];
+	sprintf(buf,"%.15f",limitFix(val));
+	*defaultStream << "\t.q15\t" << buf << "\n";
+	delete [] buf;
 }
 
 void TITarget::writeFloat(double val) {
@@ -181,7 +189,7 @@ void TITarget::writeFloat(double val) {
 }
 
 void TITarget::trailerCode() {
-	trailer << "\tb\tENDE		;jump to end of program\n";
+	trailer << "\tnop\n\tnop\n\tb\tENDE	;jump to end of program\n";
 }
 
 // Put a STOP instruction at the end of program memory.
@@ -273,3 +281,8 @@ void TITarget::writeFiring(Star& s, int level) {
 	AsmTarget::writeFiring(s,level);
     }
 }
+
+
+
+
+
