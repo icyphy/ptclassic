@@ -93,7 +93,7 @@ depend:		$(SRCS) $(HDRS)
 
 makefile:	make.template $(MDEPS)
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		make -f make.template sources depend
+		$(MAKE) -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
