@@ -56,6 +56,7 @@ variable.
 #include "Error.h"
 #include "type.h"
 #include "PrecisionState.h"
+#include "compat.h"		// PT_NT4VC: pickup strcasecmp
 #include <stream.h>
 #include <std.h>
 #include <string.h>
@@ -330,9 +331,6 @@ void Fix::initialize()
 static char *OverflowDescriptions[] =
 	{ "saturate", "zero_saturate", "wrap", "warn" };
 
-#ifdef PT_NT4VC
-#define strcasecmp(a,b) strcmp((a),(b))
-#endif
 void Fix::set_ovflow(const char *p)
 {
     int found = FALSE;
