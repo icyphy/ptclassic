@@ -8,6 +8,8 @@ static const char file_id[] = "$RCSfile$";
     Programmer:		T.M. Parks
     Date of creation:	6 February 1992
 
+    Geodesic with mutual exclusion for all methods which access data members
+    at run-time.
 */
 
 #ifdef __GNUG__
@@ -18,7 +20,7 @@ static const char file_id[] = "$RCSfile$";
 #include "CriticalSection.h"
 
 // Class identification.
-ISA_FUNC(MTDFGeodesic,AutoForkNode);
+ISA_FUNC(MTDFGeodesic, Geodesic);
 
 // Constructor.
 MTDFGeodesic::MTDFGeodesic() : geoMon(), notEmpty(geoMon)

@@ -6,6 +6,8 @@
     Programmer:		T.M. Parks
     Date of creation:	6 February 1992
 
+    Geodesic with mutual exclusion for all methods which access data members
+    at run-time.
 */
 
 #ifndef _MTDFGeodesic_h
@@ -15,29 +17,27 @@
 #pragma interface
 #endif
 
-#include "AutoForkNode.h"
+#include "Geodesic.h"
 #include "Monitor.h"
 #include "Condition.h"
 
-// Mutual exclusion must be provided for all methods which access data
-// members at run-time.
-class MTDFGeodesic : public AutoForkNode
+class MTDFGeodesic : public Geodesic
 {
 public:
     // Class identification.
-    virtual int isA(const char* className) const;
+    /* virtual */ int isA(const char*) const;
 
     // Constructor.
     MTDFGeodesic();
 
     // put with mutual exclusion.
-    void put(Particle* p);
+    void put(Particle*);
 
     // get with mutual exclusion.
     Particle* get();
 
     // pushBack with mutual exclusion.
-    void pushBack(Particle* p);
+    void pushBack(Particle*);
 
     // size with mutual exclusion.
     int size();
