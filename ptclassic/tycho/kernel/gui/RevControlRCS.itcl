@@ -37,7 +37,8 @@ option add *RevControlRCS.commentColor [ptkColor firebrick black] widgetDefault
 #### RevControlRCS
 # This class defines how revision control will be handled when using 
 # RCS, and is intended to be contained within objects that use such 
-# facilities.
+# facilities.  Note that this is a UNIX-specific interface to RCS.
+#
 class ::tycho::RevControlRCS {
     inherit ::tycho::RevControl
 
