@@ -391,12 +391,20 @@ body ::tycho::ListBrowser::select {name} {
     if {$closing} {return}
     set closing 1
     update idletasks
-    if [processItem $name] {
-	# nextWindow not used because focus goes to the new window.
-	delete object $this
-	return
+    set complete 0
+    if [catch {
+        if [processItem $name] {
+            set complete 1
+        }
+    } msg] {
+        set closing 0
+        error $msg
     }
-
+    if $complete {
+        # nextWindow not used because focus goes to the new window.
+        delete object $this
+        return
+    }
     set closing 0
 }
 
