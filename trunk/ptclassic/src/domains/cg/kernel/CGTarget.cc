@@ -40,7 +40,7 @@ StringList CGTarget::indent(int depth) {
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep = '_')
-: Target(name,starclass,desc), schedFileName(0)
+: Target(name,starclass,desc), schedFileName(0), noSchedule(0)
 {
 	separator = sep;
 	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
@@ -82,7 +82,8 @@ int CGTarget::setup(Galaxy& g) {
 
 	if (!modifyGalaxy(g)) return FALSE;
 
-	if (!Target::setup(g)) return FALSE;
+	if (!noSchedule) 
+		if (!Target::setup(g)) return FALSE;
 
 	initStars(g);
 
@@ -115,14 +116,16 @@ int CGTarget :: wormCodeGenerate(Galaxy&g) {
 		if (p->isItOutput()) wormOutputCode(p->newConnection());
 	}
 	endIteration(-1,0);
+	frameCode();
 	return wormLoadCode();
 }
 
 void CGTarget :: start() {
+	noSchedule = 0;
 	myCode.initialize();
 	LOG_DEL; delete dirFullName;
 	dirFullName = writeDirectoryName(destDirectory);
-	if (!mySched() && !parent()) {
+	if (!mySched()) {
 		if(int(loopScheduler)) {
 			schedFileName = writeFileName("schedule.log");
 			LOG_NEW; setSched(new SDFClustSched(schedFileName));
@@ -155,8 +158,26 @@ int CGTarget :: run() {
 		beginIteration(iters,0);
 		mySched()->compileRun();
 		endIteration(iters,0);
+		frameCode();
 	}
 	return !Scheduler::haltRequested();
+}
+
+void CGTarget :: frameCode() {}
+
+void CGTarget :: copySchedule(SDFSchedule& s) {
+	SDFScheduler* sched = (SDFScheduler*) mySched();
+	sched->copySchedule(s);
+	// indicate multiprocessor scheduler already generated schedule
+	noSchedule = TRUE;
+	// make this processor runs forever
+	sched->setStopTime(-1);	
+}
+
+StringList CGTarget :: generateCode(Galaxy& g) {
+	setup(g);
+	run();
+	return myCode;
 }
 
 Block* CGTarget :: clone() const {
@@ -199,11 +220,11 @@ int CGTarget :: runCode() {
 }
 
 void CGTarget :: wormInputCode(PortHole& p) {
-	myCode << "READ from wormhole port " << p.readFullName() << "\n";
+	myCode << "/* READ from wormhole port " << p.readFullName() << " */\n";
 }
 
 void CGTarget :: wormOutputCode(PortHole& p) {
-	myCode << "WRITE to wormhole port " << p.readFullName() << "\n";
+	myCode << "/* WRITE to wormhole port " << p.readFullName() << " */\n";
 }
 
 int CGTarget :: sendWormData(PortHole& p) {
