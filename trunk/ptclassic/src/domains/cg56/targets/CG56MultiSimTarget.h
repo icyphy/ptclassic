@@ -64,6 +64,9 @@ public:
 	void addProcessorCode(int, const char* s);
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
+	// allocate the shared memory
+	/* virtual */ void prepareCodeGen();
+
 protected:
 	// redefine 
 	Target* createChild();

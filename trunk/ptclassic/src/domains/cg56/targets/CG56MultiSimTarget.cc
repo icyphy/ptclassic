@@ -108,6 +108,9 @@ void CG56MultiSimTarget :: setup() {
 	LOG_DEL; delete sharedMem;
 	LOG_NEW; sharedMem = new LinProcMemory("x",ANY,ANY,sMemMap);
 	CGMultiTarget :: setup();
+}
+
+void CG56MultiSimTarget :: prepareCodeGen() {
 	// allocate the sharedMemory
 	sharedMem->performAllocation();
 	Galaxy* g = galaxy();
