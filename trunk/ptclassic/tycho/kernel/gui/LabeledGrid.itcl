@@ -1,40 +1,32 @@
 #
 # Query
 # ----------------------------------------------------------------------
-# The Query class provides support a grid of widgets useful for user input,
+# The Query class implements a grid of labeled widgets for user input,
 # such as entry fields, radiobuttons and checkbuttons, option menus, and
-# so on. It provides a simple mechanism designed to easily produce good
-# layouts, based on the principles described on pp 162 - 167 of Mullet
-# and Sano, "Designing Visual Interfaces: Communication Oriented
-# Techniques", SunSoft Press, 1995. Query uses the Tk grid{} geometry
-# manager for its underlying geometry management.
+# so on. It uses the Tk <b>grid</b> geometry manager to implement the 
+# principles of alignment and grid-based design described in the book
+# "Designing Visual Interfaces: Communication Oriented Techniques", by
+# Kevin Mullet and Darrell Sano, SunSoft Press, 1995.
 #
 ## WISH LIST:
 #   This section lists possible future enhancements.  
 #
-#   1) Although labels on the left produces simple and clear layouts,
-#      labeled bounding boxes are very popular these days. It might
-#      be possible to introduce a "labelmode" option that selects
-#      either labels on the left or a labeled box. The option needs
-#      to be specifiable individually for each group. Mullet and Sano's
-#      comment: "While the practice is encouraged by many environments,
-#      it should be used with restraint, since explicit structure is
-#      a very poor substitue for effective spatial segregation." (p110).
-#   2) The Tk grid is fantastic, but its huge failing is that doesn't
-#      allow you to say "make columns 3 to 5 all the same width."
-#      This support should be added here, perhaps using the techniques
+#   1) The Tk grid is really great, but really fails in not providing
+#      a way to allow you to say "make columns 3 to 5 all the same width."
+#      This support could be added here, perhaps using the techniques
 #      in ButtonBox.
 #
 # ----------------------------------------------------------------------
 #  AUTHOR: H. John Reekie              EMAIL: johnr@eecs.berkeley.edu
 #
-#  Based on the tycho::Query widget by Edward A. Lee of UC Berkeley.
-#  The iwidgets::Query widget makes the widget an itk::Widget instead of an
-#  itk::Toplevel, makes grid placement more structured, and adds the notion
-#  of allowing arbitrary child widget types. Additional contributions
-#  by Joel R. King, Bilung Lee, Christopher Hylands, Seehyun Kim, and
-#  Mark L. Ulferts. Query is contributed to [incr Widgets] by the Tycho
-#  project at UC Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
+#  Based on the tycho::Query widget by Prof. Edward A. Lee of UC Berkeley.
+#  iwidgets::Query is a itk::Widget instead of an itk::Toplevel, and
+#  adds more structured grid placement, different display styles, and
+#  the facility to support arbitrary widget types. Original author is
+#  Prof. Edward A. Lee; additional contributions by Joel R. King,
+#  Bilung Lee, Christopher Hylands, Seehyun Kim, and Mark L. Ulferts.
+#  Query is contributed to [incr Widgets] by the Tycho project at UC
+#  Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
 #
 #  $Id$
 # ----------------------------------------------------------------------
@@ -76,114 +68,64 @@ itk::usual Query {
 ##                            QUERY
 # ------------------------------------------------------------------
 #
-# The Query class provides support a grid of widgets useful for user input,
+# The Query class implements a grid of labeled widgets for user input,
 # such as entry fields, radiobuttons and checkbuttons, option menus, and
-# so on. It provides a simple mechanism designed to easily produce good
-# layouts, based on the principles described on pp 162 - 167 of Mullet
-# and Sano, <i>Designing Visual Interfaces: Communication Oriented
-# Techniques</i>, SunSoft Press, 1995.
+# so on. It uses the Tk <b>grid</b> geometry manager to implement the 
+# principles of alignment and grid-based design described in the book
+# "Designing Visual Interfaces: Communication Oriented Techniques", by
+# Kevin Mullet and Darrell Sano, SunSoft Press, 1995.
 #
-# Mullet and Sano propose that widget layouts use a "canonical grid"
-# which is basically a 12-column grid that divides the window
-# into one, two, three, four, or six columns. A single window can use
-# combinations of numbers of columns in different rows (for example,
-# some rows may be divided into three columns, and some into six).
-# They use the left-most column for the label describing the purpose
-# of a widget or group of widgets -- this can either be the left
-# column of the chosen grid size or an additional column to the left
-# of the grid.
+# Mullet and Sano propose that widget layouts use a canonical grid,
+# which is a 12-column grid that can be used to divide a window
+# into one, two, three, four, or six columns. The layout within each
+# window uses different combinations of these columns to produce a
+# pleasing and readable layout. Mullet and Sano's examples generally
+# use the left column for labels -- Query supports this as its default
+# mode, but also adds other display styles, such as labeled bounding
+# boxes.
 #
-# Query requires that each label in the left column corresponds
-# to either a single widget (entry, checkbutton, and so on), or to
-# a "group" of widgets. When the Query widget is created,
-# the number of columns is specified as the <b>-columnspan</b> option.
-# (The default is four.) Widgets and groups are added with the <b>add</b>
-# method. By default, Query places a label for each
-# widget in column zero, and the widget itself spanning columns
-# one to three. If the first argument to <b>add</b> is
-# "group," then the label applies to a group of widgets, each of
-# which spans a single column. For example, one could create a
-# group and then add six "child" checkbuttons to that group, and
-# Query will neatly place them in two rows of three.
+# Query views a grid as being divided into groups, where each group
+# contains labeled widgets, or other groups. All widgets are
+# placed into the same layout grid, however, ensuring that alignment is
+# achieved even between logical groups. Groups can be contained within
+# other groups, to arbitrary depth, and the widget as a whole is best
+# thought of as the top-level group. Each group and widget has
+# its own label and border, as selected by the display style of
+# that group or widget (see <i>Display styles</i> below).
 #
-# The default behaviour makes it easy to construct common layouts,
-# and is very much the same sort of behaviour as implemented in the
-# Tycho Query dialog upon which this is based. More flexible
-# layout can be achieved in a number of ways. Firstly, <b>-columnspan</b>
-# can be set to a value other than the default. Secondly, the
-# <b>-childspan</b> option could be set to a non-zero value, forcing
-# GriddedOptions to use that span for each new widget. For example,
-# setting <b>-columnspan</b> to six and <b>-childspan</b> to 2 will cause
-# widgets to be placed into four layout columns (labels in
-# columns 0 and 3, widgets spanning columns 1-2 and 4-5), with groups
-# being divided each into two columns.
+# A group has a number of options that control layout (at the top
+# level, they are specified by options to the widget, at lower levels,
+# by options to the <b>group</b> method). The <b>-columnspan</b>
+# option, for example, is the width occupied by items within the
+# group, not including rows or columns needed for labels and borders.
+# Adding items to a group places
+# the new item at the position determined by the current row and
+# column counters of that group. When the <b>-columnspan</b> of the
+# group is reached, the counters move to the next row. The default
+# values of these layout options are chosen to make is easy to
+# produce a simple layout, and possible to produce a complex one.\
+# Each group also has a <b>-childspan</b> option, which specifies
+# the defaullt column span of children; the option can be overridden
+# when a particular child is created.
 #
-# Individual items also have options that affect layout. The
-# <b>-columnspan</b> item option controls the number of columns
-# that a widget crosses, and if set, overrides the default given
-# by <b>-childspan</b> <b>-rowspan</b> does likewise for rows (although
-# this should be used very sparingly). Every item also has <b>-row</b> and
-# <b>-column</b> options, which specify the placement of the item label:
-# the widget or group is always placed in the column to the right
-# of the label.
+# One of the unique features of Query is its ability to perform
+# standard operations on widgets regardless of what type they are.
+# The operations are: setting the current value, reading the current
+# value, enabling and disabling user input, and creating and deleting
+# the widget. This makes access to user input very simple for
+# client programs, and relieves them of any need to understand
+# particular widgets.
 #
-# Query supports a set of operations on widgets irrespective
-# of widget type: setting the current value, reading the current
-# value, and enabling and disabling user input. This
-# makes accessing the results from a modal dialog (for example)
-# very simple: a single method call returns a list of tag-value
-# pairs that can be set into an array and read as required!
-# Individual widgets can also be accessed directly for more
-# detailed configuration. 
-#
-# Query provides a useful set of widgets for placing into
-# a layout, including entry and text fields, radio buttons and
-# check buttons, and option menus. However, since the number
-# of different kinds of widget that could be placed into a
-# Query window is potentially unlimited, the Query
-# class can have new widget types added to its collection of
-# known widget types by calling the <b>newtype</b> procedure, together
-# with options that tell it how to create and access widgets of
-# that type.
+# Query provides a useful set of widgets for placing into a layout,
+# including entry and text fields, radio buttons and check buttons,
+# and option menus. However, since the number of different kinds of
+# widget that could be placed into a Query window is potentially
+# unlimited, the <b>newtype</b> procedure is provided so that new
+# widget types can be added to Query's collection of known widget types.
 #
 # <h3>Item types</h3>
 #
-# By default, Query recognises a number of widget types. Unless
-# indicated otherwise, these all accept any options valid
-# for the corresponding Tk widget type, and the following:
-# <ul>
-# <li><b>-label</b> _string_: The text to place in the
-# label that appears at the left of the widget. The default is null.
-#
-# <li><b>-column</b> _int_: The column of the grid in which to place
-# the label. The widget will be placed in the column after this one.
-# If there are two or more columns available in the currect row,
-# the default is the first column available. Otherwise the default is
-# column zero.
-#
-# <li><b>-columnspan</b> _int_: The number of columns spanned by the
-# label and the created widget. The default is the <b>-childspan</b>
-# option of the Query widget or the number of columns remaining
-# in this row, whichever is smallest.
-#
-# <li><b>-initial</b> _value_: The initial value assigned to
-# this widget.
-#
-# <li><b>-row</b> _int_: The row of the grid in which to place the label
-# and widget. If there are two or more columns available in the current
-# row, the default is the current row. Otherwise the default is column zero.
-#
-# <li><b>-rowspan</b> _int_: The number of rows spanned by the
-# created widget. The default is one.
-#
-# <li><b>-sticky</b> _string_: The "stickiness" of the widget within
-# its alloted boxes. This overrides the <b>-sticky</b> option specified
-# for its type.
-# </ul>
-#
-# The known widget types are as follows. (Note that additional types
-# can be defined with the <b>newtype</b> procedure, and that unrecognised
-# types can also be created -- see below.)
+# By default, Query recognises the following widget types:
 #
 # <dl>
 # <dt><b>entry</b>
@@ -193,23 +135,7 @@ itk::usual Query {
 # <dt><b>checkbutton</b>
 # <dd>
 # A Tk checkbutton. Checkbuttons can usefully be placed into groups,
-# as well as being a labeled item.
-#
-# <dt><b>frame</b>
-# <dd>
-# A Tk frame. Frames are useful for creating an area in which
-# additional layout can be performed. They can also be used
-# to create a "blank" area in the grid which can be filled
-# in later. (The difference to creating a frame and using the
-# <b>hskip</b> or <b>vskip</b> method is that with a frame,
-# the assigned row and column can be queried at a later time.)
-#
-# <dt><b>group</b> _tag_ ?_option value_...? ?contents?
-# <dd>
-# A group of items. A group has a label, and contains a set of
-# items within it. See <i>Item Groups</i> below.
-# The <b>group</b> command also accepts a declarative
-# specification of its contents -- see <i>Declarative Syntax</i>.
+# as well as being labeled individually.
 #
 # <dt><b>radiobutton</b>
 # <dd>
@@ -228,116 +154,136 @@ itk::usual Query {
 #
 # </dl>
 #
+# Widgets are added to Query with the <b>add</b> method. This method
+# accepts any options that are valid for the particular widget type,
+# and the following:
+#
+# <dl>
+# <dt><b>-label</b> _string_
+# <dd> The text to place in the item label. The default is null.
+# This option is ignored by the <b>plain</b> display style.
+#
+# <dt><b>-columnspan</b> _int_
+# <dd> The number of columns to be spanned
+# by the created widget, not including any borders. The default is
+# the <b>-childspan</b> of the parent group.
+#
+# <dt><b>-initial</b> _value_
+# <dd> The initial value assigned to this widget. If the widget is
+# within a shared group, this option will be ignored.
+#
+# <dt><b>-sticky</b> _string_
+# <dd> The "stickiness" of the widget within the grid. This option
+# will be passed to the <b>grid configure</b> command. The default is
+# the <b>-sticky</b> option specified for its type.
+#
+# <dt><b>-style</b> _string_
+# <dd> The display style of the item. See <i>Display styles</i>
+# below. The default value is the <b>-childstyle</b> option of
+# the item's parent.
+# </dl>
+#
 # <h3>Item groups</h3>
 #
-# The item type <b>group</b> creates a label and then allocates
-# space for a group of items. Items within a group have hierarchical
-# tags, constructed as for Tk widgets. Groups accept the following
-# options:
+# A new group of items is added to Query with the <b>group</b> method.
+# Groups accept many of the same options as regular items, and can
+# have labels and bounding boxes. Items within a group have hierarchical
+# tags; for example, the item <code>foo.bar</code> is within the group
+# <code>foo</code>. Groups accept the following options:
 #
-# <ul>
-# <li><b>-childspan</b> _int_: The default value of <b>-columnspan</b>
-# for the group's children.
+# <dl>
+# <dt><b>-childspan</b> _int_
+# <dd> The default value of the <b>-columnspan</b> option of the
+# group's children. The default is one.
 #
-# <li><b>-column</b> _int_: The start column of the group. The
-# group label will be placed in this column, and group members
-# in columns to the right.
-# If there are two or more columns available in the currect row,
-# the default is the first column available. Otherwise the default is
-# column zero.
+# <dt><b>-childstyle</b> _string_
+# <dd> The default value of <b>-style</b> option of the group's children.
+# The default is </b>plain</b>
 #
-# <li><b>-columnspan</b> _int_: The number of columns spanned by the
-# group, including the label. The default is the <b>-childspan</b>
-# option of the Query widget or the number of columns remaining
-# in this row, whichever is smallest.
+# <dt><b>-column</b> _int_
+# <dd> The start column of the group, as an absolute
+# value (in other words, the column is not relative to the start of the
+# parent group). This is the first column that will be used for any
+# component of the group, including its label or border. This option
+# should be used sparingly, if at all. The default is the current column
+# counter of its parent group.
 #
-# <li><b>-initial</b> _value_: If not null, the initial value of a
-# variable created for the whole group. In this case, all members of
-# the group are given a shared variable rather than individual ones.
-# This is most useful for radiobutton groups. The value of the group will
-# be the value of this single variable. If this option is null,
-# each member will get its own variable and the value of the
-# group will be a list of the values of each group member.
+# <dt><b>-columnspan</b> _int_
+# <dd> The number of columns spanned by the
+# group. This includes the label and borders of child items but does
+# <i>not</i> include the labels and borders of the group itself.
+# The default is the <b>-childspan</b> of its parent group, or the
+# number of columns remaining with the parent group, whichever is
+# smallest.
 #
-# <li><b>-label</b> _string_: The text to place in the
-# label that appears at the left of the widget. The default is null.
+# <dt><b>-initial</b> _value_
+# <dd> If not null, the initial value of a
+# variable created for the whole group. In this case, all items in
+# the group are given a shared variable rather than individual ones,
+# and the value of the group will be the value of this variable.
+# This is most useful for radiobutton groups. If this option is null,
+# each item will get its own variable and the value of the
+# group will be a compsite of the values of each child item.
 #
-# <li><b>-row</b> _int_: The start row of the group.
-# If there are two or more columns available in the current row,
-# the default is the current row. Otherwise the default is
-# column zero.
+# <dt><b>-label</b> _string_
+# <dd> The text to place in the group's label.
+# This option is ignored by the <b>plain</b> display mode.
 #
-# <li><b>-rowspan</b> _int_: The number of rows spanned by the
-# group. If zero, the group expands until the next top-level
-# item is added. If not zero, that many rows are reserved for
-# the group and unfilled positions are available for later use.
-# The default is zero.
-# </ul>
+# <dt><b>-row</b> _int_
+# <dd> The start row of the group, as an absolute
+# value (in other words, the row is not relative to the start of the
+# parent group). This is the first row that will be used for any
+# component of the group, including its label or border. This option
+# should be used sparingly, if at all. The default is the current row
+# counter of its parent group.
 #
-# Any options not recognised become default options which will be
-# passed to the constructor of each member of the group.
-# Items can be added to a group in one of two ways.
-# The first is to add items to a group later by using
-# hierarchical tags, as in:
-# <pre>
-#   $items add group foo -initial a
-#   $items add radiobutton foo.a -text A
-#   $items add radiobutton foo.b -text B
-# </pre>
+# <dt><b>-rowspan</b> _int_
+# <dd> The number of rows spanned by the
+# group. This includes the label and borders of child items but does
+# <i>not</i> include the labels and borders of the group itself.
+# If zero, the group expands until the next sibling item
+# is added. The default is one.
 #
-# The second is to add a list of widget commands at the end
-# of the options when creating the group. For example,
-# <pre>
-#   $items add group foo -initial a {
-#       radiobutton a -text A
-#       radiobutton b -text B
-#   }
-# </pre>
-# See <i>Declarative Syntax</i> below.
+# <dt><b>-style</b> _string_
+# <dd> The display style of the group. See <i>Display styles</i>
+# below. The default value is the <b>-childstyle</b> option of
+# the group's parent.
 # 
-# Groups cannot be nested, so tags of the form <code>a.b.c</code>
-# cannot be passed to the <b>add</b> method. (This restriction
-# may be relaxed in future -- there's no fundamental reason
-# not to have arbitrary nesting.) Items added to a group
-# accept any options valid for their widget type, and the
-# following:
-# <ul>
-# <li><b>-column</b> _int_: The column in which to place the member, relative
-# to the group's start column. Default is the next column, or the
-# first column of the group if the end of the group's span
-# has been reached.
+# </dl>
 #
-# <li><b>-columnspan</b> _int_: The number of columns spanned by
-# this member. The default is one.
+# <h3>Adding new types</h3>
 #
-# <li><b>-initial</b> _value_: The initial value of the variable
-# created for this member.
-#
-# <li><b>-row</b> _int_:  The row in which to place the member, relative
-# to the group's start row. The default is the same row, or the
-# next row if the end of the group's span has been reached.
-#
-# <li><b>-rowspan</b> _int_: The number of columns spanned by
-# this member. The default is one. If this option is not zero, then
-# all subsequent members may have
-# to have explicit <b>row</b> and <b>column</b> options given to prevent
-# collision of this item with subsequent items.
-# </ul>
-#
-# Note that individual items within a group are not labeled.
-#
-# <h3>Control Scripts</h3>
-#
-# Query provides a fairly straight-forward mechanism for defining
-# new item types. For each of the operations it supports on
-# its items, it has a small script that it evaluates to
-# perform this action. If you use Query only with the predefined
-# item types (which is adequate for most common applications),
-# then you do not need to read about control scripts. If,
-# however, you need to add a new widget type, then call the
-# <b>newtype</b> procedure. This procedure accepts a number
-# of options that specify the scripts that Query evaluates
-# to perform operations on items of the new type.
+# Query provides a mechanism for defining new item types. For each
+# of the operations it supports on its items, it has a small script
+# that it evaluates to perform this action. These scripts are added
+# to the Query class with the <b>newtype</b> procedure, which accepts
+# a number of options that specify the scripts that Query evaluates
+# to perform operations on items of the new type. These options are:
+# <dl>
+# <dt><b>-assign</b>
+# <dd> The script to assign a value to an item. If null, an attempt to assign
+# a value will raise an error. The default is <code>{set %v %a}</code>.
+# <dt><b>-create</b>
+# <dd> The script to create an item. An error will be raised if this
+# option is not specified.
+# <dt><b>-delete</b>
+# <dd> The script to delete an item. The default is <code>{destroy %w}</code>.
+# If null, an error will be raised on an attempt to delete that type.
+# <dt><b>-disable</b>
+# <dd> Disable user input to the item. If null, the type cannot be disabled.
+# The default is <code>{%w configure -state disabled}</code>.
+# <dt><b>-enable</b>
+# <dd> Enable user input to the item. If null, the widget cannot be enabled.
+# The default is <code>{%w configure -state normal}</code>.
+# <dt><b>-get</b>
+# <dd> Get the item's value. If null, the item will not appear in the
+# results of any value-getting methods. The default is <code>{set %v}</code>.
+# <dt><b>-options</b>
+# <dd> A string passed as the second argument to <b>itk_component add</b>
+# when the widget is created. The default is <code>{usual}</code>.
+# <dt><b>-sticky</b>
+# <dd> The default "stickiness" of widget of thos type.
+# </dl>
 #
 # Before evaluating a script, Query performs the following
 # substitutions:
@@ -349,32 +295,70 @@ itk::usual Query {
 # <li><code>%Q</code> is substituted with the Query widget.
 # </ul>
 #
-# The options accepted by <b>newtype</b> are:
-# <ul>
-# <li><b>-assign</b>: Set a value to the item. If null, an attempt
-# to assign a value will raise an error.
-# The default is <code>{set %v %a}</code>.
-# <li><b>-create</b>: Create an item. An error will be raised
-# of this option is not specified.
-# <li><b>-delete</b>: Delete the item.
-# The default is <code>{destroy %w}</code>.  If null,
-# the widget cannot be deleted, and an error will be raised
-# on an attempt to do so.
-# <li><b>-disable</b>: Disable user input to the item. If null,
-# the widget cannot be disabled.
-# The default is <code>{%w configure -state disabled}</code>.
-# <li><b>-enable</b>: Enable user input to the item. If null,
-# the widget cannot be disabled.
-# The default is <code>{%w configure -state normal}</code>.
-# <li><b>-get</b>: Get the item's value. If null, an attempt
-# to get the item's value will return null.
-# The default is <code>{set %v}</code>.
-# <li><b>-options</b>: This is not a control script, but will
-# be passed as the second argument to <b>itk_component add</b>,
-# to control option propagation.
-# The default is <code>{usual}</code>.
-# </ul>
+# <h3>Display styles</h3>
 #
+# Query supports several display styles. A display style is simply
+# a combination of label position and item border. Different display
+# styles can be mixed, although this should of course be done with care
+# and there are some caveats (note that the default behaviour of Query
+# is to use the same display style for every item within a group.)
+# Depending on the style, zero or more rows or columns of the grid
+# may be used, in addition to the rows and columns required to display
+# the item itself. The display styles are:
+#
+# <dl>
+# <dt><b>plain</b>
+# <dd>There is no label or border, and no additional rows or columns
+# are used. This style is generally used for groups of radiobuttons
+# or checkbuttons. It can also be used for items that need to
+# occupy the same row as another item, but without its own label,
+# and as a way of grouping related widgets without any explicit
+# visual structure.
+#
+# <dt><b>simple</b>
+# <dd>The label is drawn in the column to the left of the item. The label
+# anchor is given by the <b>-labelanchor</b> widget option.
+# There is no border drawn around the item. This style uses one additional
+# row. This is the style used in the examples in Mullet and Sano's book.
+#
+# <dt><b>boxed</b>
+# <dd>The label is drawn in the row above the item, and a border is drawn
+# around the whole item. An additional row or column on all four
+# sides is required for the border and label. This style seems to be
+# very popular these days, but shouldn't be used to the point of
+# cluttering the layout. Mullet and Sano comment: "While the practice
+# is encouraged by many environments, it should be used with restraint,
+# since explicit structure is a very poor substitute for effective
+# spatial segregation." (p110).
+#
+# <dt><b>separated</b>
+# <dd>The label is drawn in the row above the item, and a horizontal line
+# line spanning its width drawn under the label. This is useful for
+# separating large dialog boxes into two or three distinct vertical
+# regions. It uses a row for the separator line and a column to the
+# left of the item for spacing.
+# </dl>
+#
+# The default behavior of Query is to give top-level items the
+# <b>simple</b> style, and items within those the <b>plain</b>
+# style -- plain and simple...
+#
+# <h3>Caveats</h3>
+#
+# Query is designed to make it easy to construct designed
+# layouts. It provides no support for changing an existing layout.
+# Although layouts can be moved around by directly calling the Tk
+# <b>grid</b> command, this is unlikely to be very reliable.
+#
+# There are some caveats associated with mixing different display styles
+# within the same grid. Firstly, the <b>-columnspan</b> and <b>-rowspan</b>
+# options of groups need to take into account the display styles of
+# children. If display styles in an existing layout are changed, the
+# options may need tweaking to get the layout right again. Secondly, since
+# labels and borders use up whole rows or columns of the grid, some care
+# needs to be taken to avoid placing items within the same column (for
+# example) as a border in another part of the layout.
+# ------------------------------------------------------------------
 class iwidgets::Query {
     inherit itk::Widget
     
@@ -403,12 +387,12 @@ class iwidgets::Query {
     method disable {tag}
     method enable  {tag}
     method exists  {tag}
-    method get     {{pattern {}}}
+    method get     {{tag {}}}
     method group   {tag args}
-    method hskip   {columns {parent {}}}
+    method hskip   {{tag {}} args}
     method itemcget      {tag option}
     method itemconfigure {tag {option {}} args}
-    method vskip   {{parent {}}}
+    method vskip   {{tag {}} args}
     
     proc newtype {type args}   ;# add a new type
     
@@ -416,7 +400,7 @@ class iwidgets::Query {
     private method _group    {mode tag args}
     private method _drawitem \
             {tag style label col row colspan rowspan {path {}} {sticky {}}}
- 
+    
 
     # Common information about item types
     private common _knowntypes {
@@ -543,8 +527,8 @@ body iwidgets::Query::constructor {args} {
 # ----------------------------------------------------------------------
 ## OPTION -columnspan
 #
-# The number of columns in the grid. The default is four. Changing
-# this option only affects the layout of items subsquently added
+# The column span in the grid. The default is four. Changing
+# this option only affects the layout of items subsequently added
 # to the grid, not of items already added.
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::columnspan {
@@ -556,10 +540,10 @@ configbody iwidgets::Query::columnspan {
 # ----------------------------------------------------------------------
 ## OPTION -childspan
 #
-# The default column span of top-level groups. If zero, the item will
+# The default column span of top-level items. If zero, the item will
 # span all remaining columns of the grid. The default is zero.
 # Changing this option only affects the default column span of
-# groups subsequently added to the grid, not of items already added. 
+# items subsequently added to the grid, not of items already added. 
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::childspan {
     set _childspan() $itk_option(-childspan)
@@ -568,9 +552,7 @@ configbody iwidgets::Query::childspan {
 # ----------------------------------------------------------------------
 ## OPTION -childstyle
 #
-# The default style of top-level items. Any non-group item will be
-# drawn in this style, while groups will default to this style
-# but can override it. The default is "simple."
+# The default style of top-level items. The default is "simple".
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::childstyle {
     set _childstyle() $itk_option(-childstyle)
@@ -579,7 +561,8 @@ configbody iwidgets::Query::childstyle {
 # ----------------------------------------------------------------------
 ## OPTION -labelanchor
 #
-# The default anchoring of the text labels. The value of this option
+# The default anchoring of the text labels in the <b>simple</b>
+# style. The value of this option
 # is passed directly to the <b>-sticky</b> option of the Tk <b>grid</b>
 # command. It can be overridden for individual widgets and labels
 # by calling the <b>grid configure</b>command with the Tk widget
@@ -591,8 +574,7 @@ configbody iwidgets::Query::labelanchor {
 # ----------------------------------------------------------------------
 ## OPTION -labelcolor
 #
-# The default foreground color of the text labels. This can be overridden
-# by directly accessing the label widgets.
+# The foreground color of the text labels.
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::labelcolor {
 }
@@ -600,8 +582,7 @@ configbody iwidgets::Query::labelcolor {
 # ----------------------------------------------------------------------
 ## OPTION -labelfont
 #
-# The default font of the text labels. This can be overridden
-# by directly accessing the label widgets.
+# The font of the text labels.
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::labelfont {
 }
@@ -609,14 +590,9 @@ configbody iwidgets::Query::labelfont {
 # ----------------------------------------------------------------------
 ## OPTION -padx
 #
-# The default horizontal padding to use when gridding widgets. Widgets
+# The horizontal padding to use when gridding widgets. Widgets
 # are gridded with the <b>-padx</b> option to the Tk <b>grid</b> command
-# set to this value. To override this value for individual widgets,
-# call <B>grid configure</b> directly with the component
-# widget. For example:
-# # <pre>
-#   grid configure [$griddeditems component size] -padx 4
-# </pre>
+# set to this value.
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::padx {
     foreach slave [grid slaves $itk_interior] {
@@ -629,14 +605,9 @@ configbody iwidgets::Query::padx {
 # ----------------------------------------------------------------------
 ## OPTION -pady
 #
-# The default horizontal padding to use when gridding widgets. Widgets
+# The horizontal padding to use when gridding widgets. Widgets
 # are gridded with the <b>-pady</b> option to the Tk <b>grid</b> command
-# set to this value. To override this value for individual widgets,
-# call <B>grid configure</b> directly directly with the component
-# widget. For example:
-# # <pre>
-#   grid configure [$griddeditems component size] -pady 4
-# </pre>
+# set to this value.
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::pady {
     foreach slave [grid slaves $itk_interior] {
@@ -654,8 +625,8 @@ configbody iwidgets::Query::pady {
 # ------------------------------------------------------------------
 ## METHOD: add type tag ?option value...? 
 #
-# Add a new item to the layout. The first argument is the name
-# of the widget type to create. This is followed by the _tag_
+# Add a new item to the layout. The first argument is type of
+# widget to create. This is followed by the _tag_
 # that will be used to reference the widget, then an option-value
 # list. The options can be any that are valid for the widget type
 # _type_, plus options that specify labeling and positioning
@@ -663,7 +634,7 @@ configbody iwidgets::Query::pady {
 # above. For each item, a variable is created that can be used to
 # hold its value, which can be accessed within control scripts
 # as *%v*.
-#
+# ------------------------------------------------------------------
 body iwidgets::Query::add {type tag args} {
     if [::info exists _layout($tag)] {
 	error "Item already exists: \"$tag\""
@@ -688,9 +659,9 @@ body iwidgets::Query::add {type tag args} {
     array set opts $args
 
     set init   $opts(-initial)
+    set span   $opts(-columnspan)
     set label  $opts(-label)
     set sticky $opts(-sticky)
-    set span   $opts(-columnspan)
     set style  $opts(-style)
 
     unset \
@@ -730,15 +701,17 @@ body iwidgets::Query::add {type tag args} {
 # ------------------------------------------------------------------
 ## METHOD: assign tag value
 #
-# Assign a value to an item. The value must make sense for the item.
-# If the item is a group with a shared variable, the value will
-# be assigned to the shared variable. If the group is not shared,
-# the value must be a list, and one consecutive elements of the list
-# will be assigned to each member of the group, in the order created.
-# Raise an error if _tag_ does not exist.
-#
+# Assign a value to an item. If the item is a group with a shared
+# variable, the value is be assigned to the shared variable. If
+# the group is not shared, the value must be a list of name-value
+# pairs, where each name is relative to _tag_. Each group member that
+# appears in the list is assigned the corresponding value. If assignment
+# is supported for the item's type, assign _value_ to the item; if 
+# assignment is not supported, raise an error. Raise an error if
+# _tag_ does not exist.
+# ------------------------------------------------------------------
 body iwidgets::Query::assign {tag value} {
-    if ![::info exists _row($tag)] {
+    if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
     eval [_getcmd assign $tag $value]
@@ -748,10 +721,11 @@ body iwidgets::Query::assign {tag value} {
 ## METHOD: delete tag
 #
 # Delete an item. If the item is a group, all members of the group
-# will also be deleted. Raise an error if _tag_ does not exist.
-#
+# will also be deleted. Raise an error if _tag_ does not exist,
+# or if deletion is not supported for its type.
+# ------------------------------------------------------------------
 body iwidgets::Query::delete {tag} {
-    if ![::info exists _row($tag)] {
+    if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
     if { $_delete($tag) == "" } {
@@ -763,7 +737,7 @@ body iwidgets::Query::delete {tag} {
     # Clean up internal data
     unset itk_component($tag)
     unset _row($tag)
-    unset _column($tag)
+    unset _col($tag)
     unset _currow($tag)
     unset _curcol($tag)
     unset _columnspan($tag)
@@ -781,9 +755,9 @@ body iwidgets::Query::delete {tag} {
 #
 # Disable an item. If the item is a group, all members of the group
 # will also be disabled. Raise an error if _tag_ does not exist.
-#
+# ------------------------------------------------------------------
 body iwidgets::Query::disable {tag} {
-    if ![::info exists _row($tag)] {
+    if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
     eval [_getcmd disable $tag]
@@ -794,25 +768,36 @@ body iwidgets::Query::disable {tag} {
 #
 # Enable an item. If the item is a group, all members of the group
 # will also be enabled. Raise an error if _tag_ does not exist.
-#
+# ------------------------------------------------------------------
 body iwidgets::Query::enable {tag} {
-    if ![::info exists _row($tag)] {
+    if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
     eval [_getcmd enable $tag]
 }
 
 # ------------------------------------------------------------------
-## METHOD: get ?pattern?
+## METHOD: exists tag
 #
-# Get the value of one or more items. If the _tag_ argument is
-# not supplied or is null, return the value of that item.
-# If the tag is a group with a shared variable, the group's value
-# is that value of that variable. Otherwise the group's value is 
-# a list of member tags and their values. If the argument is
-# not supplied, return tha tag-value list containing all top-level
-# items.
+# Return one if _tag_ is an item in this Query widget, otherwise
+# zero.
+# ------------------------------------------------------------------
+body iwidgets::Query::exists {tag} {
+    ::info exists _type($tag)]
+}
+
+# ------------------------------------------------------------------
+## METHOD: get ?tag?
 #
+# Get the value of one or more items. If _tag_ is a widget, return
+# that item's value, or null if getting the value is not supported
+# for the item's type. If _tag_ is a group with a shared variable,
+# return the value of the shared variable. If _tag_ is any other group,
+# return a name-value list of its members, where each name is relative
+# to _tag_. If _tag_ is not supplied, return a name-value list of
+# all top-level items. Raise an error if _tag_ is supplied but is not
+# an item.
+# ------------------------------------------------------------------
 body iwidgets::Query::get {{tag {}}} {
     if { $tag != "" } {
         return [eval [_getcmd get $tag]]
@@ -831,8 +816,9 @@ body iwidgets::Query::get {{tag {}}} {
 # ------------------------------------------------------------------
 ## METHOD: group tag $args
 #
-# Add a group. Options are as described in <i>Item Groups</b> above.
-#
+# Add a group. Options are as described in <i>Item Groups</i> above.
+# Raise an error if an item with that tag already exists.
+# ------------------------------------------------------------------
 body iwidgets::Query::group {tag args} {
     if [::info exists _layout($tag)] {
 	error "Item already exists: \"$tag\""
@@ -889,21 +875,37 @@ body iwidgets::Query::group {tag args} {
 }
 
 # ------------------------------------------------------------------
-## METHOD: hskip columns ?parent?
+## METHOD: hskip ?tag? ?option value... ?
 #
-# Skip to the next location. The _columns_ argument is the
-# number of columns to skip. The _parent_ argument, if supplied,
-# is the name of a group within which to skip.
-# If the skip takes the current column counter past the end of the
-# group, call <b>vskip</b> to move to the next row.
-#
-body iwidgets::Query::hskip {columns {parent {}}} {
-    if { $parent != "" && ![::info exists _layout($parent)] } {
-        error "Unknown group: \"$parent\""
+# Skip a column. _tag_ is recorded as being at the location if _tag has
+# not already been recorded. The tag also indicates the group within which
+# to skip, if not at the top level. Any options supported by the Tk
+# <b>grid columnconfigure</b> command are supported -- that is,
+# <b>-minsize</b>, <b>pad</b>, and <b>-weight</b>. Note that these
+# options affect the grid used by all items. If the skip takes the
+# current column counter past the end of the group, call <b>vskip</b>
+# to move to the next row. 
+# ------------------------------------------------------------------
+body iwidgets::Query::hskip {{tag {}} args} {
+    if { [llength $args] & 1 } {
+	set args [concat $tag $args]
+	set tag _
+	set par {}
+    } elseif { $tag == {} } {
+	set tag _
+	set par {}
+    } else {
+	regexp {^((.*)\.)?[^\.]*$} $tag _ _ par
     }
-    incr _curcol($parent) $columns
-    if { $_curcol($parent) >= [lindex $_layout($parent) 2] } {
-        vskip $parent
+    if { $args != "" } {
+	eval grid columnconfigure $itk_interior $_curcol($par) $args
+    }
+    if ![::info exists _row($tag)] {
+	set _row($tag) _currow($par)
+	set _col($tag) _curcol($par)
+    }
+    if { [incr $_curcol($par)] >= $_lastcol($par) } {
+        vskip $tag
     }
 }
 
@@ -911,11 +913,10 @@ body iwidgets::Query::hskip {columns {parent {}}} {
 ## METHOD: itemcget tag option
 #
 # Get an option of an item. The options can be any that can be specified
-# in the call to <b>add</b> when the widget _tag_ was created. Raise
-# an error if _tag_ does not exist.
-#
+# to <b>add</b> or <b>group</b>. Raise an error if _tag_ does not exist.
+# ------------------------------------------------------------------
 body iwidgets::Query::itemcget {tag option} {
-    if ![::info exists _row($tag)] {
+    if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
     if { $option == "-label" } {
@@ -936,22 +937,19 @@ body iwidgets::Query::itemcget {tag option} {
 # all options. If two arguments are supplied, the second is taken
 # to be an option and the value list of that option is returned.
 # If more arguments are supplied, each option is set to the specified
-# value, with the exception of the following:
-# <ul>
-# <li>The options <b>-row</b>, <b>-column</b>, <b>-columnspan</b>
-# and <b>-rowspan</b>. It would be possible to support changing
-# these, but it's just tedious and doesn't seem to be something
-# that would be needed very often... If an attempt is made to
-# change them they will just be ignored.
-# <li>The <b>-initial</b> options of the type <b>group</b>. This
-# cannot be changed since either a) it's only the initial of a
-# shared group and changing it would mean nothing, or b) it's
-# being changed from null to non-null or vice-versa. which implies
-# changing a group from shared to non-shared or vice-versa.
-# </ul>
+# value.
 #
+# Because Query does not support re-arrangement of the layout, some
+# options cannot be specified. For widgets, these are <b>-columnspan</b>,
+# <b>-initial</b>, and <b>-style</b>. For groups, these are
+# <b>-column</b>, <b>-columnspan</b>,
+# <b>-initial</b>, <b>-style</b>
+# <b>-row</b>, <b>-rowspan</b>. The <b>-childstyle</b> and
+# <b>-childspan</b> options affect only subsequently-created
+# items.
+# ------------------------------------------------------------------
 body iwidgets::Query::itemconfigure {tag {option {}} args} {
-    if ![::info exists _row($tag)] {
+    if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
     if { $option == "" } {
@@ -989,21 +987,38 @@ body iwidgets::Query::itemconfigure {tag {option {}} args} {
 }
 
 # ------------------------------------------------------------------
-## METHOD: vskip ?parent?
+## METHOD: vskip ?tag? ?option value... ?
 #
-# Skip to the next row. The current row counter is incremented
-# by the row span of the item in the current row with the
-# largest row span, and the current row counter reset to zero.
-# If the _parent_ argument is supplied the row counter within
-# that group is incremented.
-#
-body iwidgets::Query::vskip {{parent {}}} {
-    if { $parent != "" && ![::info exists _layout($parent)] } {
-		error "Unknown group: \"$parent\""
+# Skip a row. _tag_ is recorded as being at the location if _tag has
+# not already been recorded. The tag also indicates the group within which
+# to skip, if not at the top level. Any options supported by the Tk
+# <b>grid rowconfigure</b> command are supported -- that is,
+# <b>-minsize</b>, <b>pad</b>, and <b>-weight</b>. The current row
+# counter is incremented by the row span of the item in the current row
+# with the largest row span, and the current column counter reset
+# to the start column of the group.
+# ------------------------------------------------------------------
+body iwidgets::Query::vskip {{tag {}} args} {
+    if { [llength $args] & 1 } {
+	set args [concat $tag $args]
+	set tag _
+	set par {}
+    } elseif { $tag == {} } {
+	set tag _
+	set par {}
+    } else {
+	regexp {^((.*)\.)?[^\.]*$} $tag _ _ par
     }
-    set _curcol($parent) $_col($parent)
-    incr _currow($parent) $_height($parent)
-    set _height($parent) 1
+    if { $args != "" } {
+	eval grid rowconfigure $itk_interior $_currow($par) $args
+    }
+    if ![::info exists _row($tag)] {
+	set _row($tag) _currow($par)
+	set _col($tag) _curcol($par)
+    }
+    set _curcol($par) $_col($par)
+    incr _currow($par) $_height($par)
+    set _height($par) 1
 }
 
 # ------------------------------------------------------------------
@@ -1028,8 +1043,7 @@ body iwidgets::Query::vskip {{parent {}}} {
 # <li><i>_nextcol($tag)</i> is the next column after this item
 # <li><i>_rowspan($tag)</i> is the height including borders
 # </ul>
-#
-#
+# ------------------------------------------------------------------
 body iwidgets::Query::_drawitem {tag style label \
 	col row colspan rowspan {path {}} {sticky {}}} {
     set delta 0
@@ -1068,17 +1082,20 @@ body iwidgets::Query::_drawitem {tag style label \
 	    }
         }
         "separated" {
-	    # Create and grid the frame that contains the separator
+	    # Create and grid the frame that contains the separator and label
             itk_component add ${tag}frame {
                 frame $itk_interior._[incr itemCounter]
             }
             grid $itk_component(${tag}frame) \
                     -row $row -column $col \
-                    -rowspan 1 -columnspan $colspan \
+                    -rowspan 1 -columnspan [expr $colspan+1] \
                     -sticky nsew
 
-             # Configure this row
+	    # Configure this row
             grid rowconfigure $itk_interior $row -minsize 30
+
+	    # Configure the spacer column
+            grid columnconfigure $itk_interior $col -minsize 48
 
 	    # Create and place the separator line
             itk_component add ${tag}separator {
@@ -1090,12 +1107,13 @@ body iwidgets::Query::_drawitem {tag style label \
                     -width -6 -relwidth 1 \
                     -in $itk_component(${tag}frame) 
 
-            # Create the label and place it. -labelanchor is ignored.
+            # Create the label and place it.
             itk_component add ${tag}label {
                 label $itk_interior._[incr itemCounter] -text $label
             }
-            place $itk_component(${tag}label) -x 9 -y 18 -anchor w \
+	    place $itk_component(${tag}label) -x 12 -y 18 -anchor w \
                     -in $itk_component(${tag}frame)
+	    incr col
 
             # Now grid the item and raise it so it shows
             incr row
@@ -1178,7 +1196,7 @@ body iwidgets::Query::_drawitem {tag style label \
 # selects the widget mode and must be one of <b>get</b>, <b>assign</b>,
 # <b>enable</b>, <b>delete</b>, <b>disable</b>, or <b>create</b>.
 # The _tag_ argument is the item to evaluate the command on.
-#
+# ------------------------------------------------------------------
 body iwidgets::Query::_getcmd {mode tag args} {
     set command [set _[set mode]($_type($tag))]
     if { $command != "" } {
@@ -1198,7 +1216,7 @@ body iwidgets::Query::_getcmd {mode tag args} {
 #
 # Access a group. The mode is assign, delete, disable, enable,
 # or get.
-#
+# ------------------------------------------------------------------
 body iwidgets::Query::_group {mode tag args} {
     switch -exact $mode {
 	"assign" {
@@ -1249,7 +1267,7 @@ body iwidgets::Query::_group {mode tag args} {
 	}
     }
 }
-    
+
 # ------------------------------------------------------------------
 ##                          PROCEDURES
 # ------------------------------------------------------------------
@@ -1257,12 +1275,11 @@ body iwidgets::Query::_group {mode tag args} {
 # ------------------------------------------------------------------
 ## PROCEDURE: newtype type ?option value?
 #
-# Add a new item type to the Query class. The _type_ is the
-# item type. Following arguments are an option-value list,
-# where legal options are as described in <i>Control Scripts</i>
-# above. Raise an error if the _type_ already exists, or
-# if an invalid option is specified.
-#
+# Add a new item type to the Query class. Following arguments are
+# an option-value list, where legal options are as described in
+# <i>Control Scripts</i> above. Raise an error if the _type_ already
+# exists, or if an invalid option is specified.
+# ------------------------------------------------------------------
 body iwidgets::Query::newtype {type args} {
     if { [lsearch -exact $_knowntypes $type] != -1 } {
 	error "Type \"$type\" is already defined"
