@@ -70,8 +70,16 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
     StringList rshCommand = cmd;
     if ( dir != NULL ) {
 	StringList newCmd;
-	newCmd << "cd " << (onHostMachine(hname)?expandPathName(dir):dir)
-	       <<";"<< rshCommand;
+	newCmd << "cd ";
+	if ( onHostMachine(hname) ) {
+	  char *expandedName = expandPathName(dir);
+	  newCmd << expandedName;
+	  delete [] expandedName;
+	}
+	else {
+	  newCmd << dir;
+	}
+	newCmd << ";" << rshCommand;
 	rshCommand = newCmd;
     }
     if (onHostMachine(hname)) {
@@ -127,7 +135,9 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 	directory << dir;
     }
     else {
-	directory << expandPathName(dir);
+	char *expandedName = expandPathName(dir);
+	directory << expandedName;
+	delete [] expandedName;
     }
 
     fileName << directory << "/" << file;
@@ -219,29 +229,34 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 		int deleteOld, const char* newFileName) {
-    StringList expandedFilePath;
-    expandedFilePath << expandPathName(filePath);
+    char *expandedName = expandPathName(filePath);
+    StringList expandedFilePath = expandedName;
+    delete [] expandedName;
     if (access(expandedFilePath,R_OK) == -1) {
-	Error::abortRun("rcpCopyFile: ",filePath," does not exist");
+	Error::abortRun("rcpCopyFile: ", filePath, " does not exist");
 	return FALSE;
     }
 
     StringList fileName;
-    if (newFileName)
+    if (newFileName) {
 	fileName << newFileName;
+    }
     else {
-	char* fileNameStart = strrchr(filePath,'/');
+	const char* fileNameStart = strrchr(filePath,'/');
 	if (fileNameStart)
 	    fileName << ++fileNameStart;
 	else
 	    fileName << expandedFilePath;
     }
 
-    StringList directory = expandPathName(dir);
+    char *expandedDirName = expandPathName(dir);
+    StringList directory = expandedDirName;
+    delete [] expandedDirName;
     StringList command;
     StringList rmOldFile;
-    if (deleteOld) 
+    if (deleteOld) {
 	rmOldFile << "/bin/rm -f " << directory << "/" << fileName << "; ";
+    }
     if (onHostMachine(hname)) {
 	if (access(directory, W_OK) == -1)
 	    command << "mkdir " << directory << "; ";
