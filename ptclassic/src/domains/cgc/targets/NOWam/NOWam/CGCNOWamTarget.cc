@@ -75,6 +75,7 @@ CGCNOWamTarget::CGCNOWamTarget(const char* name,const char* starclass,
 	resources.setInitValue("");
 
 	machineInfo = 0;
+	pairs = 0;
 	baseNum = 0;
 	mapArray = 0;
 	replicateFlag = 0;
@@ -114,6 +115,11 @@ void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
  
         cs->numNodes.setInitValue(pnum);
         cr->numNodes.setInitValue(pnum);
+
+        cs->pairNumber.setInitValue(pairs);
+        cr->pairNumber.setInitValue(pairs);
+	pairs++;
+
         StringList nodeAddrs = " ";
         for (int i = 0; i < pnum; i++) {
                 nodeAddrs << (int)(machineInfo[i].inetAddr) << " ";
