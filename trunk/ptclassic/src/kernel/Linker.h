@@ -51,6 +51,12 @@ public:
 
 // get name of executable image file (for make-like checking)
 	static const char* imageFileName() { return ptolemyName;}
+
+// return current value of defaultOpts
+	static const char* defaultOpts() { return myDefaultOpts;}
+
+// set new defaultOpts value
+	static void setDefaultOpts(const char* newValue);
 private:
 	// invoke global constructors in the object file
 	static int invokeConstructors(const char* objName);
@@ -78,5 +84,8 @@ private:
 
 	// indicator that the linker is active
 	static int activeFlag;
+
+	// default options to be added to links
+	static const char* myDefaultOpts;
 };
 #endif
