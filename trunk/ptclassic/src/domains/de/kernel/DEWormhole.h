@@ -28,6 +28,7 @@ public:
 
 	void start() {Wormhole :: setup() ;}
 	void go();
+	void wrapup() { endSimulation(); }
 
 	// constructor
 	DEWormhole(Galaxy &g) : Wormhole(*this,g) {
