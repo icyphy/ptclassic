@@ -35,8 +35,12 @@ see below for an alternative.
 If you are loading Ptolemy from a tape, do the following:
 .ip a.
 cd /tmp
+.br
 (or any directory where you have write permission
-and there is at least 22 Mbytes of free disk space).
+and there is at least 30 Mbytes of free disk space).
+(If you do not have this amount free, you can extract the four files one
+at a time.  See the tar man page for details, or ask your
+system administrator)
 .ip b.
 Load the tape into your drive
 .ip c.
@@ -48,7 +52,7 @@ has a different name.)
 tar xf /dev/nrst8
 .lp
 If you have used FTP to down load the files, then
-cd to the directory that contains the "*tar.Z" files you downloaded
+cd to the directory that contains the files you downloaded
 via FTP.
 .lp
 Now, whether you've used tape or FTP,
@@ -57,7 +61,7 @@ Proceed as follows:
 .ip 1.
 zcat pt-0.4.doc.tar.Z | ( chdir ~ptolemy/..; tar xf - )
 .br
-(this uncompresses the documentation, changes directory the parent of the
+(this uncompresses the documentation, changes directory to the parent of the
 "ptolemy" user, and then creates all of the documentation files.)
 .ip 2.
 zcat pt-0.4.src.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
@@ -171,37 +175,19 @@ To install the ptolemy gnu subset, proceed as follows:
 cd /usr/tools
 .ip 2.
 Check to see if there is already a "gnu" directory.  If so, you
-probably don't want to load the ptoelmy gnu files here and should
+probably don't want to load the ptolemy gnu files here and should
 pick a different location for the ptolemy gnu subset (be especially
 careful in step 6 below).
 If there is not already a "gnu" directory, then do the following command:
 .br
 mkdir gnu
 .ip 3.
-If you have \*(PT on tape, then do the following:
-.ip a.
-cd /tmp
-(or any directory where you have write permission
-and there is plenty, many Mbytes, of free disk space).
-.ip b.
-If you just installed Ptolemy from tape, and the tape is still
-in the tape drive you may skip the next step (c) and go to step (d),
-since you will be pointing to the second tar archive on the tape
-already.
-.ip c.
-insert the tape into the tape drive.
-.ip
-mt -f /dev/nrst8 rewind
-.br
-(This rewinds the tape -- change the device name if your tape drive
-has a different name.)
-.ip 
-mt -f /dev/nrst8 fsf 1
-.ip d.
-tar xf /dev/rst8
+If you have \*(PT on tape, then cd to the directory you used
+to download the files from the tape in the "Basic \*(PT installation"
+steps above.  
 .ip 4.
 If you have used FTP to get the ptolemy gnu file, 
-then cd to the directory that contains the "tar.Z" file you
+then cd to the directory that contains the files you
 downloaded via FTP.
 .ip 5.
 You should now have a gnu-xxx.tar.Z file (where xxx is an architecture
