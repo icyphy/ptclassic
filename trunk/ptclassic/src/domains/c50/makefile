@@ -13,7 +13,7 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars dsp demo targets doc icons
+DIRS = kernel stars dsp targets
 
 ME = c50
 
