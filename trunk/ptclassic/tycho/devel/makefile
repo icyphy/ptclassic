@@ -44,11 +44,19 @@ TCL_SRCS = \
 	tychoSend.tcl
   
 ITCL_SRCS = \
+	EditLattice.itcl \
 	GanttView.itcl \
 	GanttDF.itcl \
+	HyperGraph.itcl \
+	Index.itcl \
+	Lattice.itcl \
+	ModelDebug.itcl \
+	ModelSchema.itcl \
+	MultiGraph.itcl \
 	Options.tcl \
-	Preferences.itcl \
 	Runcontrol.itcl \
+	Schedule.itcl \
+	UndirectedGraph.itcl \
 	VSM.itcl \
 	Strip.itcl \
 	SlateView.itcl 
