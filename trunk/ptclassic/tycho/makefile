@@ -94,6 +94,7 @@ FORCE:
 # We could use the GNU make $(wildcard) extension here, but that would
 # force users to have GNU make.
 tycho.idx: FORCE
+	@echo "You should be sure to run 'make itcldocs' before updating $@"
 	@echo "Updating $@"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
@@ -107,6 +108,7 @@ tycho.idx: FORCE
 
 # Create a tycho code index file
 codeDoc.idx: FORCE
+	@echo "You should be sure to run 'make itcldocs' before updating $@"
 	@echo "Updating $@"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
