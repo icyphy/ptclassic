@@ -39,42 +39,41 @@ public:
 
 	// Methods making ports available on the outside;
 	// can be read but not set
-	int numberPorts() {return ports.size();}
-	PortHole& nextPort()  {return ports++;}
+	int numberPorts() const {return ports.size();}
+	PortHole& nextPort() {return ports++;}
 
 	// Method setting internal data in the Block
 	// If the parent pointer is not provied, it defaults to NULL
-	Block& setBlock(char* s, Block* parent = NULL) {
+	virtual Block& setBlock(const char* s, Block* parent = NULL) {
 		setNameParent (s, parent);
 		return *this;
-		}
-
-	// Constructor
-	Block() { 
-		 saveMPH = NULL;
 	}
 
-	// Method to set the parameters of the block
-	// NOT CURRENTLY IMPLEMENTED
-	virtual int initParameters() {};
+	// Constructor
+	Block() { saveMPH = 0;}
+
+	// Another constructor
+	Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {
+		saveMPH = 0;
+	}
 
 	// Method to reply "false" if the block contains component
 	// blocks that can be seen from the outside.
 	// i.e., it is true for stars and wormholes, false for galaxies.
-	virtual int isItAtomic () {return TRUE;}
+	virtual int isItAtomic () const {return TRUE;}
 
 	// virtual method to make a new object of the same type.  This
 	// version should never be called; stars and galaxies should 
 	// redefine it as
 	// virtual Block* clone () {return new MyType;}
-	// We return NULL instead of "new Block" here to avoid errors.
-	virtual Block* clone () {return NULL;}
+
+	virtual Block* clone ();
 
 	// Method to print out a description of the block
 	// Note that this function flattens the profile of a galaxy,
 	// which may not always be wanted.  It produces a great deal
 	// of data.
-	virtual operator char* ();
+	virtual operator StringList ();
 
 	// Add elements to the to the lists
 	// Made public for the benefit of MultiPortHole and
@@ -82,7 +81,7 @@ public:
 	addPort(PortHole& p) {ports.put(p);}
 
 	// Retrieve the PortHole with the given name
-	PortHole *portWithName(char* name);
+	PortHole *portWithName(const char* name);
 
 protected:
 	// Database for this block
