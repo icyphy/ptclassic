@@ -476,38 +476,22 @@ long userOptionWord;
     ViDone();
 }
 
-/* kernel Call */
-void KcEditSeed();
-
+/* Rewritten for Tcl/Tk 1/94 by Alan Kamas */
 int
 RpcEditSeed(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    int n;
-    char buf[64];
-    static oldN = 1;
-    static dmTextItem item = {"Seed for Random number", 1, 20,
-				NULL, NULL};
-
     ViInit("edit-seed");
     ErrClear();
     FindClear();
 
-    /* default seed is 1 */
-    sprintf(buf, "%d", oldN);
-    item.value = buf;
-    if (dmMultiText("Edit-Seed", 1, &item) != VEM_OK) {
-            PrintCon("Aborted entry");
-            PrintErr(ErrGet());
-	    ViDone();
-    }
-    ERR_IF2((n = atoi(item.value)) <= 0,
-        "Invalid entry, number must be > 0");
-
-    oldN = n;
-    KcEditSeed(n);
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
+                   " \"Edit Seed\" ",
+                   " \"ptkSetSeed %s \" ",
+                   " \"{Seed for Random Number} [ptkGetSeed]\" ",
+                   (char *)NULL) )
     ViDone();
 }
 
