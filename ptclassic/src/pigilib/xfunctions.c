@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 #ifndef lint
-static char	sccsid_xfunctions[] = "$Id$";
+static char SccsId[] = "$Id$";
 #endif
 
 #include <stdlib.h>
