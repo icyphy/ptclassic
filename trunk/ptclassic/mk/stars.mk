@@ -21,7 +21,7 @@
 # Stub files that pull in the stars.
 SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfimagestars.o \
  	   $(LIBDIR)/sdfdspstars.o 
-CGCSTARS = $(LIBDIR)/cgcstars.o
+CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
 CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
 CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
 CGSTARS = $(LIBDIR)/cgstars.o
@@ -36,7 +36,7 @@ PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
 STAR_LIBFILES=\
-$(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgc.a \
+$(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgctcltk.a $(LIBDIR)/libcgc.a \
 $(LIBDIR)/libcg96dspstars.a \
 $(LIBDIR)/libcg96stars.a $(LIBDIR)/libcg96.a \
 $(LIBDIR)/libcg56dspstars.a \
@@ -52,7 +52,7 @@ $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
--lcgcstars -lcgc \
+-lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 \
 -lcgddfstars -lcgddf \
@@ -66,6 +66,7 @@ STAR_LIBS=\
 SDFT = $(OBJDIR)/domains/sdf/targets
 CGT = $(OBJDIR)/domains/cg/targets
 CGCT = $(OBJDIR)/domains/cgc/targets
+CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
 CG56T = $(OBJDIR)/domains/cg56/targets
 CG96T = $(OBJDIR)/domains/cg96/targets
 
@@ -74,7 +75,7 @@ CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 		$(SDFT)/CompileTarget.o 
 CGCTARGETS =	$(CGCT)/CGCUnixSend.o $(CGCT)/CGCUnixReceive.o \
 		$(CGCT)/CGCMultiTarget.o $(CGCT)/CGCDDFTarget.o \
-		$(CGCT)/CGCTclTkTarget.o
+		$(CGCTCL)/CGCTclTkTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
 		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o
