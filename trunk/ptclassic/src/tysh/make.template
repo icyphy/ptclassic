@@ -79,7 +79,7 @@ HDRS = \
   BarGraph.h \
   TyConsole.h \
   TyTcl.h \
-  pthreadCompat.h \
+  pthreadsCompat.h \
   ptk.h \
   sol2compat.h \
   TclObj.h \
