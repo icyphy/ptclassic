@@ -89,7 +89,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
     addButton copyright -text "Copyright" \
             -underline 0 \
             -command \
-	    "::tycho::File::openContext \"[file join $TYCHO copyright]\""
+	    "::tycho::File::openContext \"[file join $TYCHO copyright.txt]\""
 
     # Pack the introduction button.
     addButton intro -text "Home Page" \
