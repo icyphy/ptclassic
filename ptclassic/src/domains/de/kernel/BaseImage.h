@@ -6,7 +6,6 @@
 #ifndef _BaseImage_h
 #define _BaseImage_h
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
