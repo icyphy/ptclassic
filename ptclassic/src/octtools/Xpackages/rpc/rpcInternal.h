@@ -147,11 +147,13 @@ typedef FILE *STREAM;
 #endif /* RPCLOCATION */
 
 #include "errtrap.h"
-
+/* Note that we use ANSI cpp here to substitute in the value of
+ * function_and_args into a literal string
+ */
 #define RPCASSERT(function_and_args) \
     if (!function_and_args) { \
 	char errbuffer[1024]; \
-        (void) sprintf(errbuffer, "RPC Error: %s: %s (line %d): function_and_args", RPCLOCATION, __FILE__, __LINE__); \
+        (void) sprintf(errbuffer, "RPC Error: %s: %s (line %d): %s", RPCLOCATION, __FILE__, __LINE__, #function_and_args); \
 	perror(errbuffer); \
 	errRaise(RPC_PKG_NAME, -1, errbuffer); \
     }
