@@ -70,6 +70,7 @@ private:
 	// Among candidate processors, choose a processor that can execute
 	// the node earliest.
 	/* virtual */ int decideStartingProc(DLNode*, int*);
+	int isCandidate(int);	// determine if specified proc is in the "candidate" array
 };
 
 #endif
