@@ -68,7 +68,7 @@ public:
 		myport.assignAddr(proc,addr);
 	}
 	StringList print();
-	int size() { return myport.bufSize();}
+	int size() { return myport.localBufSize();}
 
 	// Return a pointer to the AsmPortHole using the requested memory.
 	AsmPortHole* port() { return &myport; }
