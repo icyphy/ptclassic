@@ -90,7 +90,7 @@ public:
 	int syncMode;
 
 	// fetch an event on request.
-	void fetchEvent(InDEPort* p, float timeVal);
+	int fetchEvent(InDEPort* p, float timeVal);
 };
 
 #endif
