@@ -51,6 +51,7 @@ XPM_DEFINES="-DZPIPE"
 #ARCH=		sun4
 #########################################
 # Should not have to change below here
+SHELL=		/bin/sh
 GNU_DEST=	$(PTOLEMY)/gnu
 TCLTK_DEST=	$(PTOLEMY)/tcltk
 XV_DEST= 	$(PTOLEMY)
@@ -139,8 +140,11 @@ xv_configure: $(OBJARCH)/xv \
 	(cd $(OBJARCH)/xv; $(XMKMF) )
 
 $(OBJARCH)/xv:
-	if [ ! -d $(OBJARCH) ]; then mkdir $(OBJARCH); fi
+	if [ ! -d $(OBJARCH) ]; then \
+		mkdir $(OBJARCH); \
+	fi
 	mkdir $(OBJARCH)/xv
+
 $(OBJARCH)/xv/Imakefile:
 	-(cd $(OBJARCH)/xv; ln -s ../../src/xv/* .)	
 
