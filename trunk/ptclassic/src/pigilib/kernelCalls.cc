@@ -65,7 +65,7 @@ UserOutput& operator<<(UserOutput& o,const SafeTcl& stcl) {
 	int special = 0;
 	while ((c = *s++) != 0) {
 		if (isalnum(c) || c == '.' || c == '_') continue;
-		if (strchr("\\[$\n", c) != 0) {
+		if (strchr("\"\\[$\n", c) != 0) {
 			return o << "{" << str << "}";
 		}
 		special++;
@@ -350,6 +350,7 @@ KcSetDesc(const char* desc) {
 extern "C" boolean
 KcRun(int n) {
  	LOG << "run " << n << "\nwrapup\n";
+	LOG.flush();
 	if (!universe->initSched())
 		return FALSE;
 	universe->setStopTime(n);
