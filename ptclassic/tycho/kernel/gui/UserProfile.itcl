@@ -248,7 +248,7 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
             set id [_map title $title]
             if { $id != "" } {
                 if [exists preference:title.$id -$stylesheet] {
-                    return [itemcget preference:title.$id -$stylesheet]
+                    return [attrset preference:title.$id -$stylesheet]
                 }
             }
         }
@@ -258,14 +258,14 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
             set id [_map class $class]
             if { $id != "" } {
                 if [exists preference:class.$id -$stylesheet] {
-                    return [itemcget preference:class.$id -$stylesheet]
+                    return [attrset preference:class.$id -$stylesheet]
                 }
             }
         }
     }
     # See if there's a global preference    
     if [exists preference:global -$stylesheet] {
-	return [itemcget preference:global -$stylesheet]
+	return [attrset preference:global -$stylesheet]
     }
     # Nothing found
     return "default"
@@ -295,7 +295,7 @@ body ::tycho::UserProfile::registerstyle \
 	add $name
     }
     # Add the preference
-    itemconfigure $name -$stylesheet $style
+    attrset $name -$stylesheet $style
 
     # Save the profile file. This appears to be necessary because
     # the destructor is not called when we exit.
@@ -315,10 +315,10 @@ body ::tycho::UserProfile::registerstyle \
 # Update the name maps.
 #
 body ::tycho::UserProfile::_updatecache {} {
-    array set _mapclass [assign map:class]
-    array set _unmapclass [assign unmap:class]
-    array set _maptitle [assign map:title]
-    array set _unmaptitle [assign unmap:title]
+    array set _mapclass [itemset map:class]
+    array set _unmapclass [itemset unmap:class]
+    array set _maptitle [itemset map:title]
+    array set _unmaptitle [itemset unmap:title]
     cache validate
 }
 
@@ -342,8 +342,8 @@ body ::tycho::UserProfile::_newmap {type name} {
     set _map[set type]($name) $_id
     set _unmap[set type]($_id) $name
 	
-    assign map:$type [array get _map$type]
-    assign unmap:$type [array get _unmap$type]
+    itemset map:$type [array get _map$type]
+    itemset unmap:$type [array get _unmap$type]
 
     return $_id
 }

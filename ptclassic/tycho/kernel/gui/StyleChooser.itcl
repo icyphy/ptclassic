@@ -91,7 +91,7 @@ class ::tycho::StyleChooser {
 #### constructor
 #
 body ::tycho::StyleChooser::constructor {args} {
-    # Create the labelled grid. Give it a columnspan of just 2
+    # Create the labeled grid. Give it a columnspan of just 2
     itk_component add items {
 	iwidgets::Labeledgrid $itk_component(childsite).items \
                 -columnspan 2 -childcolumnspan 1 \
@@ -137,7 +137,7 @@ body ::tycho::StyleChooser::constructor {args} {
             -label "Tycho Preferences" \
             -category tool
 
-    # Initialise options
+    # Initialize options
     eval itk_initialize $args
 
     # Subscribe to styles
@@ -174,7 +174,7 @@ body ::tycho::StyleChooser::_changestyle {stylesheet} {
         if { [::info which -command $subscriber] == "" } {
             continue
         }
-        # Get the style -- note that it won't necessrily change,
+        # Get the style -- note that it won't necesserily change,
         # because the subscriber may have an override.
         set style [::tycho::profile getstyle $stylesheet $subscriber]
 
@@ -206,8 +206,8 @@ body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
 	set model [::tycho::stylesheet access $stylesheet]
 	set master [$model cget -master]
 
-	# Get label -- ignore if no label
-	set label [$master modelcget -label]
+	# Get title -- ignore if no title
+	set label [$master cget -title]
 	if { $label == "" } {
 	    continue
 	}
@@ -223,7 +223,7 @@ body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
 	# Get styles and their labels, from the stylesheet and its master
         foreach m [list [$model cget -master] $model] {
             foreach s [$m match style] {
-                set label [$m itemcget style:$s -label]
+                set label [$m attrset style:$s -label]
                 if { $label == "" } {
                     continue
                 }
@@ -309,7 +309,7 @@ body ::tycho::StyleChooser::close {} {
         set text    "The following style-sheets have been changed.\n"
         append text "Do you want to save the changes permanently?\n\n"
         foreach {sheet model} $save {
-            append text "[[$model cget -master] modelcget -label]\n"
+            append text "[[$model cget -master] cget -title]\n"
         }
         ::tycho::YesNoCancel $nm -text $text
         set answer [::tycho::Dialog::wait $nm]
