@@ -71,25 +71,49 @@ EXTERN rpcInternalStatus RPCReceiveFunctionToken
 rpcStatus RPCApplicationFunctionComplete();
 
 
+/*
+ * This is an attempt at a backward-compatible fix to a deeply broken
+ * bit of code.  VEM starts applications with arguments "1 2 3 4 mumble",
+ * where "mumble" is the integer value of the sequence of 1 2 3 4 in
+ * consecutive memory chars.  That's enough to say only whether the
+ * server is little or big endian.  The client needs to figure out if
+ * it sees data the same as the server, or with reversed byte order.
+ * The assumptions made about storage classes and alignment were terrifying.
+ */
+
 /* see if the application is byte swapped relative to the server */
 void
-RPCByteSwappedApplication(a, b, c, d, server)
-int a, b, c, d, server;
+RPCByteSwappedApplication(a, b, c, d, int32val)
+int a, b, c, d;
+int32 int32val;
 {
-    char number[4];
-    long *pointer;
-    
+    char number[sizeof(int32)];
+    int32 *pointer;
+    char rebmun[sizeof(int32)];
+    int32 *retniop;
+
+    int i;
+
+
+    RPCByteSwapped = 0;		/* Assume same byte ordering */
 
     number[0] = a;
     number[1] = b;
     number[2] = c;
     number[3] = d;
-    pointer = (long *) number;
+    pointer = (int32 *) number;
     
-    if (*pointer != server) {
+    if (*pointer != int32val) /* We don't see it the same way */ {
+
+      /* Flip the word around */
+
+      for(i=0; i<sizeof(int32); i++) rebmun[i] = number[(sizeof(int32)-1)-i];
+      retniop = (int32 *) rebmun;
+      if(*retniop == int32val) /* We see it backwards */ {
 	RPCByteSwapped = 1;
-    } else {
-	RPCByteSwapped = 0;
+      } else {
+	(void) fprintf(stderr, "RPCByteSwappedApplication() Failure\n");
+      }
     }
 }
 
