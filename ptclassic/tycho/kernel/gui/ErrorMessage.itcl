@@ -93,7 +93,8 @@ proc ::ptkDisplayErrorInfo {} {
     global ::errorInfo
     # We have to return immediately, or the pigiRpc process gets into
     # very bad state where it hangs on an Rpc call.
-    after 1 [list ::tycho::post $errorInfo]
+    # Delay the posting of the message so that we can return immediately
+    after 1 [list error $errorInfo]
 }
 
 ##########################################################################
