@@ -31,6 +31,8 @@ static char SccsId[]="$Id$";
 #include <stdio.h>
 #include <sys/types.h>
 #include "port.h"
+#include "ansi.h"
+#include "errtrap.h"
 #ifdef SYSV
 #include <dirent.h>
 #else
@@ -39,6 +41,7 @@ static char SccsId[]="$Id$";
 #include <sys/stat.h>
 
 #include "fb.h"
+
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
 #include <X11/Xaw/AsciiText.h>
@@ -59,6 +62,9 @@ static char *DirClass =	DIR_CLASS;
 static char *FileClass = FILE_CLASS;
 
 static char *XtClassName = "Browser";
+static int scan_dir
+	ARGS((char *dir, fb_item **items));
+
 static void XtStart();
 static Widget Top;
 static Widget Browser();
@@ -94,6 +100,7 @@ XErrorEvent *evt;
     abort();
 }
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -163,16 +170,16 @@ char *dir;
 
     num_items = scan_dir(dir, &items);
     pop_up = XtCreatePopupShell(POP_UP_NAME, topLevelShellWidgetClass,
-				parent, (ArgList *) 0, 0);
+				parent, (ArgList) 0, 0);
     pane = XtCreateManagedWidget("pane", panedWidgetClass,
-				 pop_up, (ArgList *) 0, 0);
+				 pop_up, (ArgList) 0, 0);
     box = XtCreateManagedWidget("box", boxWidgetClass,
-				pane, (ArgList *) 0, 0);
+				pane, (ArgList) 0, 0);
     close = XtCreateManagedWidget("close", commandWidgetClass,
-				  box, (ArgList *) 0, 0);
+				  box, (ArgList) 0, 0);
     XtAddCallback(close, XtNcallback, Dump, (caddr_t) pop_up);
     refresh = XtCreateManagedWidget("refresh", commandWidgetClass,
-				    box, (ArgList *) 0, 0);
+				    box, (ArgList) 0, 0);
     files = fb_create(pane, num_items, items, Open, (caddr_t) dir);
     rd = (refresh_data *) XtMalloc(sizeof(refresh_data));
     rd->file_browser = files;
@@ -192,7 +199,11 @@ fb_item **items;		/* Returned list of items */
  */
 {
     DIR *dp;
+#ifdef SYSV
+    struct dirent *entry;
+#else
     struct direct *entry;
+#endif
     struct stat buf;
     char full_name[MAX_NAME];
     int num_alloc, num_items;
@@ -200,15 +211,17 @@ fb_item **items;		/* Returned list of items */
     num_alloc = EST_DIR_SIZE;
     num_items = 0;
     (*items) = (fb_item *) XtCalloc(num_alloc, sizeof(fb_item));
-    if (dp = opendir(dir)) {
-	while (entry = readdir(dp)) {
+    if ( (dp = opendir(dir)) ) {
+	while ( (entry = readdir(dp)) ) {
 	    if (entry->d_name[0] != '.') {
-		(void) sprintf(full_name, "%s/%s", dir, entry->d_name);
+		(void) sprintf(full_name, "%s/%s", dir,
+			       (char *)(entry->d_name));
 		if (stat(full_name, &buf) == 0) {
 		    if (num_items >= num_alloc) {
 			num_alloc *= 2;
 			(*items) = (fb_item *)
-			  XtRealloc((*items), num_alloc*sizeof(fb_item));
+			  XtRealloc((char *)(*items),
+				    num_alloc*sizeof(fb_item));
 		    }
 		    if ((buf.st_mode & S_IFMT) == S_IFDIR) {
 			(*items)[num_items].class = DirClass;
