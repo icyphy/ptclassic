@@ -23,6 +23,8 @@ $Id$
 #include "ClusterNodeList.h"
 #include "Target.h"
 
+SDFFiring :: ~SDFFiring() { LOG_DEL; delete next;}
+
 // constructor
 LSCluster :: LSCluster (LSGraph& g, ClusterNodeList* clist) {
 	

@@ -59,3 +59,7 @@ void ClusterNodeList :: setComponents(LSNode* n) {
 		}
 	}
 }
+
+ClusterNodeList :: ~ClusterNodeList() {
+	LOG_DEL; delete next;
+}
