@@ -368,7 +368,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
 #    {line <i>linenumber</i>}
 #    {range <i>startindex endindex</i>}
 #    <i>name</i>
-# <pre>
+# </pre>
 # where in the latter form, <i>name</i> should be a named
 # anchor within the HTML file.
 #
