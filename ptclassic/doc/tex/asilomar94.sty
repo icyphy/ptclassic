@@ -1,0 +1,171 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% File:     asilomar94.sty        (derived from "icassp.sty")
+%
+% Version:  $Id$
+%
+% Usage:    \documentstyle[...,asilomar94,...]{article}
+%
+% Purpose:
+%
+% Style file for ICASSP.
+% Features:
+%    - correct page size (175mm x 226mm)
+%    - twocolumn format
+%    - boldfaced, numbered, and centered section headings
+%    - correct subsection and subsubsection headings
+%    - use \title{xx} for title, will be typeset all uppercase
+%    - use \name{xx} for author name(s) only, will be typeset in italics
+%    - use \address{xx} for one address of all authors
+%    - use \authors{author1}{address1}{author2}{address2} if two authors
+%         with two separate addresses
+%    - note: no need for \author nor \date
+%    - optional: use \thanks{xx} within \name or \authors, asterisk is
+%         suppressed
+%    - optional: use \ninept to typeset text in 9 pt; default is 10pt.
+%
+% Example of use for one or more authors at a common address:
+%
+%                 \documentstyle[icassp]{article}
+%                 \title{Title of the paper}
+%                 \name{George P. Burdell and John Q. Professor
+%                       \thanks{This work was supported by...}}
+%                 \address{Common address, department\\
+%                          City, etc\\
+%                          optional e-mail address}
+%
+%                 \begin{document}
+%  OPTIONAL -->   \ninept            <-- OPTIONAL, for nine pt only
+%                 \maketitle
+%                 \begin{abstract}
+%                 This is the abstract for my paper.
+%                 \end{abstract}
+%                         .
+%                 Insert text of paper
+%                         .
+%                 \end{document}
+%
+% Example of use for two authors at two distinct addresses
+%
+%                 \documentstyle[icassp]{article}
+%                 \title{Title of the paper}
+%                 \twoauthors{John Doe
+%                       \thanks{This work was supported by...}}
+%                            {Doe's address, department\\
+%                             City, etc\\
+%                             optional e-mail address}
+%                            {Judy Smith}
+%                            {Smith's address, department\\
+%                             City, etc\\
+%                             optional e-mail address}
+%
+%                 \begin{document}
+%  OPTIONAL -->   \ninept            <-- OPTIONAL, for nine pt only
+%                 \maketitle
+%                 \begin{abstract}
+%                 This is the abstract for my paper.
+%                 \end{abstract}
+%                         .
+%                 Insert text of paper
+%                         .
+%                 \end{document}
+%
+%
+% PLEASE REPORT ANY BUGS
+%
+% Author:  Stephen Martucci  -- smartucci@sarnoff.com
+%
+% Date:    4 August 1994
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\oddsidemargin  -0.31in
+\evensidemargin -0.31in
+
+\topmargin 0truept
+\headheight 0truept
+\headsep 0truept
+\footheight 0truept
+\footskip 0truept
+\textheight 226truemm
+\textwidth 175truemm
+
+\addtolength{\oddsidemargin}{0.175in}
+\addtolength{\evensidemargin}{-0.175in}
+\addtolength{\topmargin}{-0.125in}
+
+\twocolumn
+\columnsep 8truemm
+\pagestyle{empty}
+
+\def\ninept{\def\baselinestretch{.95}\let\normalsize\small\normalsize}
+
+\def\maketitle{\par
+ \begingroup
+ \def\thefootnote{}
+ \def\@makefnmark{\hbox
+ to 0pt{$^{\@thefnmark}$\hss}}
+ \if@twocolumn
+ \twocolumn[\@maketitle]
+ \else \newpage
+ \global\@topnum\z@ \@maketitle \fi\@thanks
+ \endgroup
+ \setcounter{footnote}{0}
+ \let\maketitle\relax
+ \let\@maketitle\relax
+ \gdef\@thanks{}\gdef\@author{}\gdef\@title{}\let\thanks\relax}
+
+\def\@maketitle{\newpage
+ \null
+ \vskip 2em \begin{center}
+ {\large \bf \@title \par} \vskip 1.5em {\large \lineskip .5em
+\begin{tabular}[t]{c}\@name \\ \@address
+ \end{tabular}\par} \end{center}
+ \par
+ \vskip 1.5em}
+
+\def\title#1{\gdef\@title{\uppercase{#1}}}
+\def\name#1{\gdef\@name{{\em #1}\\}}
+\def\address#1{\gdef\@address{#1}}
+\gdef\@address{Address - Line 1 \\
+               Address - Line 2 \\
+               Address - Line 3}
+
+\def\twoauthors#1#2#3#4#5{\gdef\@address{}
+   \gdef\@name{\makebox[3.25in]{\begin{tabular}{@{}c@{}}
+        {\em #1} \\ \\
+        #2\relax
+   \end{tabular}}{\hskip 0.3in}\makebox[3.25in]{\begin{tabular}{@{}c@{}}
+        {\em #4} \\ \\
+        #5\relax
+\end{tabular}}}}
+
+\def\@sect#1#2#3#4#5#6[#7]#8{
+   \refstepcounter{#1}\edef\@svsec{\csname the#1\endcsname.\hskip 0.6em}
+       \begingroup \ifnum #2=1\large\bf  %% \centering
+          \noindent{\interlinepenalty \@M
+             \@svsec{#8}\par}\else\ifnum #2=2\bf
+          \noindent{\interlinepenalty \@M \@svsec #8\par}\else\it
+          \@hangfrom{\hskip\parindent}{\interlinepenalty \@M
+             \@svsec #8\par}\fi\fi\endgroup
+       \csname #1mark\endcsname{#7}\addcontentsline
+         {toc}{#1}{\protect\numberline{\csname the#1\endcsname} #7}
+     \@tempskipa #5\relax
+     \@xsect{\@tempskipa}}
+
+\def\abstract{\begin{center}
+\large{\bf Abstract}  %%% \vspace{-.5em}\vspace{0pt}}
+\end{center}}
+\def\endabstract{\par}
+
+\def\thebibliography#1{\section{References}\list
+ {[\arabic{enumi}]}{\settowidth\labelwidth{[#1]}\leftmargin\labelwidth
+ \advance\leftmargin\labelsep
+ \usecounter{enumi}}
+ \def\newblock{\hskip .11em plus .33em minus .07em}
+ \sloppy\clubpenalty4000\widowpenalty4000
+ \sfcode`\.=1000\relax}
+\let\endthebibliography=\endlist
+
+\flushbottom
+
