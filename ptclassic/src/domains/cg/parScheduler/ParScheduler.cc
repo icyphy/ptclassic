@@ -53,6 +53,8 @@ void ParScheduler::setup() {
 	// targetPtr setup for each processor
 	mapTargets();
 
+	if (haltRequested()) return;
+	
 	// sub-universe creation.
 	if (!createSubGals(*galaxy())) {
 		invalid = TRUE;
