@@ -50,6 +50,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* this modification is necessary to make a galaxy code as a function */
 #define MAINDECLS (*getStream("mainDecls"))
 #define MAININIT (*getStream("mainInit"))
+// The symbol CODE is declared in CGTarget.h.
+#define MYCODE (*getStream(CODE))
 #define MAINCLOSE (*getStream("mainClose"))
 
 // Add code to the beginning of a CodeStream instead of the end.
@@ -688,7 +690,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	if (!flag) {
 		// run the star
-		defaultStream = &myCode;
+		defaultStream = &MYCODE;
 		writeFiring(*cs, 1);
 		return TRUE;
 	}
@@ -721,8 +723,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 	cs->initCode();
 
 	// run the star
-	defaultStream = &myCode;
-
+	defaultStream = &MYCODE;
 	writeFiring(*cs, 1);
 
 	defaultStream = &MAINCLOSE;
@@ -747,7 +748,7 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 
 // redefine compileRun to switch code stream of stars
 void CGCTarget :: compileRun(SDFScheduler* s) {
-	defaultStream = &myCode;
+	defaultStream = &MYCODE;
 	s->compileRun();
 	defaultStream = &MAINCLOSE;
 }
