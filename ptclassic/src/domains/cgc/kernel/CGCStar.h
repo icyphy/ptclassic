@@ -28,12 +28,10 @@ private:
 protected:
 	void setForkId() { forkId = TRUE; }
 
-	// If "name" is a state, add the state to the list of referenced
-	// states.  Then check to see whether name is a PortHole. If so,
-	// get the reference from the geodesic.  Otherwise, invoke the
-	// same method in CGStar.
-	StringList getRef(const char* name);
-	StringList getRef2(const char* name, const char* offset);
+	// Expand State or PortHole reference macros.
+	// If "name" is a state, add it to the list of referenced states.
+	virtual StringList expandRef(const char* name);
+	virtual StringList expandRef(const char* name, const char* offset);
 
 	// If "name" is a state, and is not already on the list
 	// referencedStates, add it.
