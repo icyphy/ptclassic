@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptdspSinc.h"
 #include <math.h>
 
-static double DELTA = 1.0e-9;	// Approximately zero
+static double DELTA = 1.0e-9;	/* Approximately zero */
 
 double 
 Ptdsp_Sinc(double input) {
