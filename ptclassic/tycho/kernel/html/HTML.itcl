@@ -320,7 +320,9 @@ body ::tycho::HTML::constructor {args} {
 
     # Modify the menu commands appropriately.
     if {$myMenubar != {}} {
-        $myMenubar delete  Edit
+        $myMenubar disable {Undo/Redo}
+        $myMenubar disable {Cut}
+        $myMenubar disable {Paste}
         $myMenubar disable "Font..."
         $myMenubar delete "Fill Region"
         $myMenubar delete "Right Fill Column"
