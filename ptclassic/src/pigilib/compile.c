@@ -125,7 +125,7 @@ static boolean
 ProcessFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-    ParamListType pList;
+    ParamListType pList = {0, 0};
     ParamType *p;
     int i;
 
@@ -143,13 +143,15 @@ ProcessTargetParams(targName, galFacetPtr)
 char* targName;
 octObject *galFacetPtr;
 {
-    ParamListType pList;
+    ParamListType pList = {0, 0};
     if (targName[0] == '<') return TRUE;
     ERR_IF1(!GetTargetParams(targName, galFacetPtr, &pList));
     ERR_IF1(!KcModTargetParams(&pList));
     return(TRUE);
 }
 
+/* This function will be called recursively if there's hierarchy */
+/* Do not free local octObject variable inst */
 static boolean
 ProcessSubGals(facetPtr)
 octObject *facetPtr;
@@ -164,8 +166,8 @@ octObject *facetPtr;
 	    /* skip */
 	    ;
 	} else if (IsGal(&inst)) {
-	    if (!MyOpenMaster(&galFacet, &inst, "contents", "r")
-	      || !CompileGal(&galFacet)) {
+	    if ( !MyOpenMaster(&galFacet, &inst, "contents", "r") ||
+		 !CompileGal(&galFacet) ) {
 		octFreeGenerator(&genInst);
 		return (FALSE);
 	    }
@@ -177,7 +179,6 @@ octObject *facetPtr;
 		return (FALSE);
 	    }
 	}
-        FreeOctMembers(&inst);
     }
     octFreeGenerator(&genInst);
     return(TRUE);
@@ -304,7 +305,7 @@ octObject *facetPtr;
     octGenerator genInst;
     octObject inst = {OCT_UNDEFINED_OBJECT};
     char *name, *parentname;
-    ParamListType pList;
+    ParamListType pList = {0, 0};
     char *akoName, *oldInstName;
     char instanceHandle[POCT_FACET_HANDLE_LEN];
     char facetHandle[POCT_FACET_HANDLE_LEN];
@@ -317,22 +318,26 @@ octObject *facetPtr;
 	} else if (IsDelay(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay")) {
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else if (IsDelay2(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay2")) {
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else if (IsBus(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "buswidth")) {
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else {
 	    /* assume it's a sog */
 	    if (!GetOrInitSogParams(&inst, &pList)) {
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	    akoName = BaseName(inst.contents.instance.master); 
@@ -348,12 +353,14 @@ octObject *facetPtr;
 		inst.contents.instance.name = name;
 		if (octModify(&inst) != OCT_OK) {
 		    octFreeGenerator(&genInst);
+		    FreeOctMembers(&inst);
 		    ErrAdd(octErrorString());
 		    return FALSE;
 		}
 	    }
 	    if (!KcInstance(name, akoName, &pList)) {
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	    /* Process the pragmas list, if any */
@@ -573,6 +580,7 @@ octObject *facetPtr;
     while (octGenerate(&netGen, &net) == OCT_OK) {
 	if (!CollectTerms(&net, in, &inN, out, &outN)) {
 	    octFreeGenerator(&netGen);
+	    FreeOctMembers(&net);
 	    return FALSE;
 	}
 	totalN = inN + outN;
@@ -589,6 +597,7 @@ octObject *facetPtr;
 	    /* bad net, delete it */
 	    if (octDelete(&net) != OCT_OK) {
 		octFreeGenerator(&netGen);
+		FreeOctMembers(&net);
 		ErrAdd(octErrorString());
 		return FALSE;
 	    }
@@ -829,6 +838,7 @@ octObject *galFacetPtr;
 static boolean recompileFlag;
 
 /* compile a galaxy. */
+/* this function will be called recursively if there's hierarchy */
 
 boolean
 CompileGal(galFacetPtr)
