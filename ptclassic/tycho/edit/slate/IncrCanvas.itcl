@@ -734,41 +734,6 @@ body ::tycho::IncrCanvas::delete {args} {
 }
 
 #######################################################################
-#### delete_
-#
-# Helper method for deleting complex items.
-#
-body ::tycho::IncrCanvas::delete_ {id} {
-    # Delete a complex item. Make sure it still exists
-    if { ! [::info exists itemClass($id)] } {
-	return
-    }
-
-    # Call its destruct method
-    if { [@scope ::tycho::$itemClass($id) \
-	    [list ::info exists methodtable(destruct)]] } {
-	@scope ::tycho::$itemClass($id) [list \
-		eval \[set methodtable(destruct)\] $id $canvas $this]
-    }
-
-    # Delete complex item components
-    foreach {_ pc} [array get parentChild $id,*] {
-	delete_ [lindex $pc 1]
-    }
-
-    # Remove the parent link (if there is one)
-    foreach ix [array names parentChild *,$id] {
-	unset parentChild($ix)
-    }
-
-    # Then forget the item
-    unset itemClass($id)
-    foreach i [array names taggedItems *,$id] {
-	unset taggedItems($i)
-    }
-}
-
-#######################################################################
 #### dtag
 #
 # Delete tags from items. If _delete_ is not given, delete _tag_
@@ -1432,6 +1397,41 @@ body ::tycho::IncrCanvas::yview {args} {
 #####################################################################
 ####                     protected methods                       ####
 
+
+#######################################################################
+#### delete_
+#
+# Helper method for deleting complex items.
+#
+body ::tycho::IncrCanvas::delete_ {id} {
+    # Delete a complex item. Make sure it still exists
+    if { ! [::info exists itemClass($id)] } {
+	return
+    }
+
+    # Call its destruct method
+    if { [@scope ::tycho::$itemClass($id) \
+	    [list ::info exists methodtable(destruct)]] } {
+	@scope ::tycho::$itemClass($id) [list \
+		eval \[set methodtable(destruct)\] $id $canvas $this]
+    }
+
+    # Delete complex item components
+    foreach {_ pc} [array get parentChild $id,*] {
+	delete_ [lindex $pc 1]
+    }
+
+    # Remove the parent link (if there is one)
+    foreach ix [array names parentChild *,$id] {
+	unset parentChild($ix)
+    }
+
+    # Then forget the item
+    unset itemClass($id)
+    foreach i [array names taggedItems *,$id] {
+	unset taggedItems($i)
+    }
+}
 
 #######################################################################
 #### findabove
