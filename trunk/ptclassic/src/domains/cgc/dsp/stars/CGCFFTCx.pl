@@ -170,7 +170,9 @@ int nn, isign;
 		input.setSDFParams (int(size), int(size)-1);
 		output.setSDFParams (temp, temp-1);
 		fftSize = temp;
+	}
 
+	initCode {
 		// add fft routine
 		addProcedure(fftRoutine, "fft_rif");
 	}
