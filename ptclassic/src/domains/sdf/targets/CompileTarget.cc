@@ -114,6 +114,7 @@ int CompileTarget::run() {
     StringList universeClassName = sanitizedName(*galaxy());
     universeClassName += "Class";
     StringList universeName = sanitizedName(*galaxy());
+    int tcltkFlag = TRUE;
 
     // First generate the files that define the galaxies
     GalTopBlockIter next(*galaxy());
@@ -135,10 +136,16 @@ int CompileTarget::run() {
     myCode += "#include \"GalIter.h\"\n";
     myCode += galDef(galaxy(), universeClassName, 0);
 
-    myCode += tcltkSetup();
-
+    myCode += "\n// Constant setting whether or not to include Tcl/Tk\n";
+    myCode += "#define SDF_COMPILE_TCL_TK ";
+    myCode += tcltkFlag;
     myCode += "\n";
-    myCode += "// MAIN FUNCTION\n";
+
+    myCode += "\n#if SDF_COMPILE_TCL_TK\n";
+    myCode += tcltkSetup();
+    myCode += "#endif\n";
+
+    myCode += "\n// MAIN FUNCTION\n";
     myCode += "main(int argc, char** argv) {\n";
     myCode += "int iterations;\n";
     myCode += universeClassName;
@@ -158,18 +165,20 @@ int CompileTarget::run() {
     myCode += universeName;
     myCode += ".parseCommandLine(argc, argv, &iterations);\n";
 
+    myCode += "\n#if SDF_COMPILE_TCL_TK\n";
     myCode += tcltkInitialize(universeName);
+    myCode += "#endif\n";
 
     myCode += "\n// INITIALIZE CODE\n";
     myCode += universeName;
     myCode += ".initialize();\n";
 
     myCode += "\n// BEGIN CODE\n";
-    myCode += "{";
+    myCode += "{\n";
     myCode += "GalStarIter nextStar(";
     myCode += universeName;
     myCode += ");\n";
-    myCode += "Star *s;";
+    myCode += "Star *s;\n";
     myCode += "while ((s = nextStar++) != 0) s->begin();\n";
     myCode += "}\n";
 
@@ -298,7 +307,7 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
 StringList CompileTarget::tcltkSetup() {
     StringList myCode;
     myCode.initialize();
-    myCode += "// Tcl/Tk include files\n";
+    myCode += "\n// Tcl/Tk include files\n";
     myCode += "#include <iostream.h>\n";
     myCode += "#include \"SimControl.h\"\n";
     myCode += "\n";
@@ -311,7 +320,7 @@ StringList CompileTarget::tcltkSetup() {
     myCode += "{\n";
     myCode += "    SimControl::requestHalt();\n";
     myCode += "    return TCL_OK;\n";
-    myCode += "}\n\n";
+    myCode += "}\n";
 
     return myCode;
 }
@@ -321,37 +330,59 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
     StringList myCode;
     myCode.initialize();
 
+    myCode += "\n// Initialize the Tcl interpreter\n";
+    myCode += "ptkInterp = Tcl_CreateInterp();\n";
+    myCode += "ptkW = Tk_CreateMainWindow(ptkInterp, NULL, ";
+    myCode += universeName;
+    myCode += ", \"Pigi\");\n";
     myCode +=
-"\n// Initialize the Tcl interpreter\n\
-ptkInterp = Tcl_CreateInterp();\n\
-ptkW = Tk_CreateMainWindow(ptkInterp, NULL, \"standalone\", \"Pigi\");\n\
-if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n\
-    cerr << \"Tcl_Init\n\";\n\
+"if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n\
+    cerr << \"Tcl_Init: Error initializing the Tcl interpreter\";\n\
     exit(1);\n\
 }\n";
 
     myCode +=
-"\n// Define halt and ptkStop Tcl commands, and initialize Tk\n\
+"\n\
+// Define halt and ptkStop Tcl commands, and initialize Tk\n\
 Tcl_CreateCommand(ptkInterp, \"halt\", halt_Cmd, 0, 0);\n\
 Tcl_CreateCommand(ptkInterp, \"ptkStop\", halt_Cmd, 0, 0);\n\
 if (Tk_Init(ptkInterp) == TCL_ERROR) {\n\
-    cerr << \"Tk_Init\n\";\n\
+    cerr << \"Tk_Init: Error initializing the Tk interpreter\";\n\
     exit(1);\n\
 }";
 
     myCode +=
-"\n// Read pigi tcl initialization files to set key bindings, colors, etc.\n\
-if (Tcl_EvalFile(ptkInterp, \"$PTOLEMY/lib/tcl/pigilib.tcl\") != TCL_OK) {\n\
-    cerr << \"pigilib.tcl\n\";\n\
+"\n\
+// Read pigi tcl initialization files to set key bindings, colors, etc.\n\
+const char *expandeddirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n\
+char *fulldirname = new char[strlen(expandeddirname) + 1];
+strcpy(fulldirname, expandeddirname);
+if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n\
+    cerr << \"Tcl_EvalFile: Error in evaluating pigilib.tcl\";\n\
     exit(1);\n\
-}\n;";
+}\n\
+delete [] fulldirname;\n";
 
-    myCode += "// Some tcl/tk stars use these ptcl commands.\n";
+    myCode += "\n// Some Tcl/Tk stars use these ptcl commands.\n";
     myCode += "Tcl_Eval(ptkInterp, \"proc curuniverse {} { return ";
     myCode += universeName;
     myCode += " }\");\n";
     myCode += "extern int runEventsOnTimer();\n";
     myCode += "SimControl::setPollAction(runEventsOnTimer);\n";
+
+    myCode += "\n// Mimic a Ptolemy run control panel\n";
+    myCode += "Tcl_Eval(ptkInterp, \"ptkRunControlInit ";
+    myCode += universeName;
+    myCode += " .run_";
+    myCode += universeName;
+    myCode += " ";
+    myCode += universeName;
+    myCode += " \"Standalone version of ";
+    myCode += universeName;
+    myCode += "\"\");\n";
+    myCode += "Tcl_Eval(ptkInterp, \"ptkRunControlStandalone .run_";
+    myCode += universeName;
+    myCode += "\");\n";
 
     return myCode;
 }
