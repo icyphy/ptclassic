@@ -31,7 +31,7 @@ defstar {
 	   addCode(init); 
 	   for (int i = 1; i <= neg.numberPorts(); i++) {
 		index = i;
-		addCode(CodeBlock("\t$ref(output) -= $ref(neg#index);\n"));
+		addCode("\t$ref(output) -= $ref(neg#index);\n");
 	   }
 	}
 	codeblock (init) {
