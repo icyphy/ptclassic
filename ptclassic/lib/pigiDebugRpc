@@ -11,6 +11,13 @@ if (! ($?PIGIRPC)) then
 	setenv PIGIRPC ~ptolemy/obj.$ARCH/pigiRpc/pigiRpc
 endif
 
+# check if we have an env-passing file
+set tfile=/tmp/pigiDebug.$USER
+if (-r $tfile ) then
+	source $tfile
+	rm -f $tfile
+endif
+
 cat > /tmp/rpc$$ <<EOF
 break main
 run $*
