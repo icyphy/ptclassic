@@ -26,12 +26,14 @@ static const char file_id[] = "ptclMain.cc";
 
 extern "C" int isatty(int);
 
-void prompt (int tty) {
+static void prompt (int tty) {
 	if (tty) {
 		printf("ptcl: ");
 		fflush(stdout);
 	}
 }
+
+static void loadStartup(Tcl_Interp* interp);
 
 main (int argc, char** argv) {
 	if (argc > 2) {
@@ -51,6 +53,10 @@ main (int argc, char** argv) {
 	char line[200];
 	Tcl_Interp* interp = Tcl_CreateInterp();
 	PTcl ptcl(interp);
+
+// Load in [info library]/init.tcl.
+	loadStartup(interp);
+
 	int gotPartial = 0;
 	int status = 0;		// return status.
 	if (argc == 2) {
@@ -100,4 +106,26 @@ extern "C" int displayGanttChart(const char* file) {
 	cmd << "gantt " << file;
 	system(cmd);
 	return 0;
+}
+
+// this file loads in the startup Tcl code.
+// The environment variable TCL_LIBRARY is also set to a standard position.
+
+static void loadStartup(Tcl_Interp* interp) {
+	const char *pt = getenv("PTOLEMY");
+	if (!pt) pt = expandPathName("~ptolemy");
+	StringList dir = pt;
+	dir << "/tcl/lib";
+	StringList f = dir;
+	f << "/init.tcl";
+	FILE* fd;
+	if ((fd = fopen(f,"r")) != 0) {
+		fclose(fd);
+		StringList putenvArg;
+		putenvArg << "TCL_LIBRARY=" << dir;
+		putenv(hashstring(putenvArg));
+		if (Tcl_EvalFile(interp, f) == TCL_ERROR)
+			fprintf(stderr, "ptcl: error in startup file");
+	}
+	else fprintf(stderr, "ptcl: cannot locate Tcl startup file\n");
 }
