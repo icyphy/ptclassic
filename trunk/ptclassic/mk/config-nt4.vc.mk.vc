@@ -118,17 +118,20 @@
 # 	unless the the *star.c file is edited and compiled as a .cc file.
 	For each stars directory (src/domains/{de,sdf,sdf/dsp}/stars
 #	make the following changes:
-#	1. Create the .cc files from the .pl files
 #	Note that we use GNU make here, not nmake
-#	make sources
-#	2. Edit {destars.c,sdfstars.c,sdfdspstars.c}
-	    and add 'const' in two places
+#	1. Create {destars.c,sdfstars.c,sdfdspstars.c}
+#	   make PTARCH=nt4 destars.c
+#	2. Create the .cc files from the .pl files
+#	   nmake -f makefile.vc sources
+#	3. Edit {destars.c,sdfstars.c,sdfdspstars.c}
+#	    and add 'const' in two places
 #		#define STR extern const char *
 #		static const char** nm_table[] = {
-#	3. Copy destars.c to foo.cc
-#	4. Compile with: nmake -f makefile.vc foo.obj
-#	5. Substitute foo.obj for destars.obj: cp foo.obj destars.obj
-
+#	4. Copy destars.c to foo.cc
+#	5. Compile with: nmake -f makefile.vc foo.obj
+#	6. Substitute foo.obj for destars.obj: cp foo.obj destars.obj
+#    Repeat the above steps for sdf/stars and sdf/dsp/stars
+#
 # 10. To build, run:
 #	nmake -f $PTOLEMY/mk/build-nt4.vc.mk.vc all
 #
