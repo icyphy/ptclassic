@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: John Reekie
 #
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -70,7 +70,7 @@ namespace ::tycho {
 #
 # <p><b>Example</b>: Create a junction:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   source $tycho/edit/slate/doc/internals/newslate.itcl
 #   $slate create Junction 100 100 -fill white -outline blue &#92
 # 		-width 4 -text Foo -tags moveable
 # </pre></tcl>

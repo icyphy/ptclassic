@@ -179,7 +179,7 @@
 #
 # Create a blank slate and draw the icons on it:
 # <tcl><pre>
-#     source $TYCHO/editors/slate/doc/internals/newslate.itcl
+#     source $TYCHO/edit/slate/doc/internals/newslate.itcl
 #     $icons draw {sample add} $slate 100 100 -tags moveable
 #     $icons draw {sample foo} $slate 200 100 -tags moveable &#92
 #            -termstyle 1-0-west
