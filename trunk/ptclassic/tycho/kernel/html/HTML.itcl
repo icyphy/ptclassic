@@ -131,6 +131,19 @@ body ::tycho::HTML::constructor {args} {
     }
     pack $itk_component(text) -expand yes -fill both
 
+    # FIXME: The HTML object comes up different sizes on different
+    # machines.  Below is an attempt to fix this, but unfortunately,
+    # this attempt merely demonstrates that the "wm grid" command
+    # does not work.  Even if we set the grid parameters to exactly
+    # their original values, the window sizing gets totally messed
+    # up, resulting in completely bogus sizing.
+    #     set grid [wm grid $prefix]
+    #     if {$grid != {}} {
+    #         set width [lindex $grid 0]
+    #         set height [lindex $grid 1]
+    #         wm grid $prefix $width $height 7 14
+    #     }
+
     # A toolbar for frequently used functions.
     addTool back Back "$this component text back"
     # FIXME: need a forward command.
