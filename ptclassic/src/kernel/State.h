@@ -82,13 +82,13 @@ public:
 	int tok;
 	union {
 		char cval;
-		const char *sval;
+		char* sval;
 		int intval;
-		double  doubleval;
+		double doubleval;
 		Complex* Complexval;
-		const State*  s;
+		const State* s;
 	}; 
-	ParseToken () { tok = 0; intval = 0;}
+	ParseToken () { tok = 0; intval = 0; }
 };
 
 ////////////////////////////////////////////
