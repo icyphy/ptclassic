@@ -30,7 +30,7 @@
 
 # Please don't use GNU make extensions in this or any other Tycho makefile
 
-DIRS = kernel editors lib domains slate devel doc #bin
+DIRS = kernel editors lib domains slate devel doc typt #bin
 
 # Root of Tycho directory
 ROOT =		.
