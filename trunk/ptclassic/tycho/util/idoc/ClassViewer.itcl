@@ -1,4 +1,4 @@
-# A viewer for the idocumentation.
+# A viewer for ClassModel objects.
 #
 # @Author: Cliff Cordeiro
 #
@@ -31,7 +31,7 @@
 #######################################################################
 
 #######################################################################
-#### IDoc
+#### ClassViewer
 # This class defines a combination of a MultiPanel widget and two HTML
 # widgets which is used for efficient class browsing of Itcl and Java
 # source.
@@ -51,15 +51,15 @@
 #
 # Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.idoc">
 # ::tycho::Class</a> model. The model is in turn generated from the code.
-# (See <a href="IDocSys.idoc">::tycho::IdocSys</a> for information about 
+# (See <a href="ClassViewerSys.idoc">::tycho::IdocSys</a> for information about 
 # generation.)
 # 
-# IDoc supports any language that can be encoded into a ::tycho::Class
+# ClassViewer supports any language that can be encoded into a ::tycho::Class
 # representation. Currently, keywords are correct for Itcl as well as Java.
 # However, the default behaviour will allow browsing of any language,
 # though certain information may be left out in the current implementation.
 #
-# To add a new language to IDoc, many methods must be modified. These include:
+# To add a new language to ClassViewer, many methods must be modified. These include:
 # <ul> 
 # <li><b>display</b> Sets up the MultiPanel widget when a file is loaded or
 # it's parent classes are imported. 
@@ -87,12 +87,12 @@
 # <li><b>generateHtmlBody</b> Generates the body of the standalone HTML.
 # </ul> An easier way is to search for <code>switch $language</code>.
 # 
-# IDoc also is able to transform ::tycho::Class models into pure HTML documents.
+# ClassViewer also is able to transform ::tycho::Class models into pure HTML documents.
 #  
 # To use this class, go to the Special menu in either the Itcl or Java editors
-# and select _Generate IDoc Documentation_. 
+# and select _Generate ClassViewer Documentation_. 
 #
-class ::tycho::IDoc {
+class ::tycho::ClassViewer {
     inherit ::tycho::File
 
     ##########################################################################
@@ -314,7 +314,7 @@ class ::tycho::IDoc {
 # Parse the given X font to figure out what font family, size,
 # and style to use for the display font
 #
-configbody ::tycho::IDoc::headfont {
+configbody ::tycho::ClassViewer::headfont {
 
     set f $itk_option(-headfont)
     foreach panel [$myContents panels] {
@@ -329,7 +329,7 @@ configbody ::tycho::IDoc::headfont {
 # Parse the given X font to figure out what font family, size,
 # and style to use for the display font
 #
-configbody ::tycho::IDoc::bodyfont {
+configbody ::tycho::ClassViewer::bodyfont {
 
     set f $itk_option(-bodyfont)
     foreach label [$myContents labels] {
@@ -343,7 +343,7 @@ configbody ::tycho::IDoc::bodyfont {
 #### -height configuration
 # Height of the compound widget must be passed to the displayer.
 #
-configbody ::tycho::IDoc::height {
+configbody ::tycho::ClassViewer::height {
     displayer config -height $itk_option(-height)
 }
 
@@ -351,7 +351,7 @@ configbody ::tycho::IDoc::height {
 #### -width configuration
 # Width of the compound widget must be passed to the displayer.
 #
-configbody ::tycho::IDoc::width {
+configbody ::tycho::ClassViewer::width {
     displayer config -width $itk_option(-width)
 }
 
@@ -360,7 +360,7 @@ configbody ::tycho::IDoc::width {
 # Reset the placement of widgets to reflect the new relative height
 # priorities.
 #
-configbody ::tycho::IDoc::relheight {
+configbody ::tycho::ClassViewer::relheight {
 
     set h $itk_option(-relheight)
     set cw $itk_option(-relwidth)
@@ -384,7 +384,7 @@ configbody ::tycho::IDoc::relheight {
 # Reset the placement of widgets to reflect the new relative width
 # priorities.
 #
-configbody ::tycho::IDoc::relwidth {
+configbody ::tycho::ClassViewer::relwidth {
 
     set h $itk_option(-relheight)
     set cw $itk_option(-relwidth)
@@ -409,7 +409,7 @@ configbody ::tycho::IDoc::relwidth {
 ###################################################################
 #### constructor
 #
-body ::tycho::IDoc::constructor {args} {
+body ::tycho::ClassViewer::constructor {args} {
     # Set the view "type" for the Window menu
     set viewType "graphics"
 
@@ -482,7 +482,7 @@ body ::tycho::IDoc::constructor {args} {
 # However, a better fix would be to somehow separate the file=widget 
 # assumption.
 #
-body ::tycho::IDoc::destructor {args} {
+body ::tycho::ClassViewer::destructor {args} {
     $myHtmlTop config -file "NoName"
     $myHtmlBottom config -file "NoName"
 }
@@ -495,7 +495,7 @@ body ::tycho::IDoc::destructor {args} {
 #### clear
 # Clear the internal data.
 #
-body ::tycho::IDoc::clear {} {
+body ::tycho::ClassViewer::clear {} {
 }
 
 #####################################################################
@@ -503,7 +503,7 @@ body ::tycho::IDoc::clear {} {
 # Return a description of the current class by calling describe. The 
 # class must be loaded. Calling with no arguments describes the mainClass.
 #
-body ::tycho::IDoc::describe {{class {}}} {
+body ::tycho::ClassViewer::describe {{class {}}} {
     if {$class == {}} {
         set class $mainClass
     }
@@ -514,7 +514,7 @@ body ::tycho::IDoc::describe {{class {}}} {
 #### docFile
 #
 # Return the documentation file for a given classname. This
-# can be any class of the language of the current IDoc. This method will
+# can be any class of the language of the current ClassViewer. This method will
 # attempt to find the file using a language specific algorithm and will return 
 # the filename or {} if one isn't found.
 #
@@ -523,7 +523,7 @@ body ::tycho::IDoc::describe {{class {}}} {
 # especially). Java uses the CLASSPATH, which may or may not point to the
 # needed file.
 #
-body ::tycho::IDoc::docFile {classname} {
+body ::tycho::ClassViewer::docFile {classname} {
     if {$classname == $mainClass} {
         return [$this cget -file]
     }
@@ -590,7 +590,7 @@ body ::tycho::IDoc::docFile {classname} {
 # Call downSize (decrease the current font size) on the constituent (HTML)
 # widgets.
 # 
-body ::tycho::IDoc::downSize {} {
+body ::tycho::ClassViewer::downSize {} {
     $myHtmlTop downSize
     $myHtmlBottom downSize
 }
@@ -599,7 +599,7 @@ body ::tycho::IDoc::downSize {} {
 #### generateDAG
 # Generate the DAG for the current class and its parents.
 #
-body ::tycho::IDoc::generateDAG {} {
+body ::tycho::ClassViewer::generateDAG {} {
     if {$myHeritage == {}} {
         inheritAll 0
     }
@@ -629,12 +629,12 @@ body ::tycho::IDoc::generateDAG {} {
 #### generateHtml
 # Output the class data in HTML form. 
 #
-body ::tycho::IDoc::generateHtml {} {
+body ::tycho::ClassViewer::generateHtml {} {
     set verbose $itk_option(-verbose)
     set classModel $myClass($mainClass)
     set className [$classModel modelcget -name]
     
-    set html "<!-- Automatically generated by the Tycho IDoc viewer -->\
+    set html "<!-- Automatically generated by the Tycho ClassViewer viewer -->\
             \n<html>\
             \n<title>Class $className</title>\
             \n</head>\
@@ -677,7 +677,7 @@ body ::tycho::IDoc::generateHtml {} {
 # are resizing a frame. This is done by _placing_ a frame of the correct
 # size on top of the proper location.
 #
-body ::tycho::IDoc::ghostHandle {horizontal pixels} {
+body ::tycho::ClassViewer::ghostHandle {horizontal pixels} {
     if {$horizontal} {
         if {$pixels == 0} {
             # when the mouse is released, sent ghostHandle 1 0
@@ -705,12 +705,12 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
 
 #########################################################################
 #### help
-# Open a window with help on the IDoc widget.
+# Open a window with help on the ClassViewer widget.
 #
-body ::tycho::IDoc::help {} {
+body ::tycho::ClassViewer::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO lib tydoc doc usersGuides IDocHelp.html]
+	    [file join $TYCHO lib tydoc doc usersGuides ClassViewerHelp.html]
 }
 
 #######################################################################
@@ -721,7 +721,7 @@ body ::tycho::IDoc::help {} {
 # _must_ of course be the same language as the current class. This is not
 # explicitly checked here.)
 #
-body ::tycho::IDoc::inheritAll {{redisplay 1}} {
+body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
     set classModel $myClass($mainClass)
 
     # clear inherited classes
@@ -770,7 +770,7 @@ body ::tycho::IDoc::inheritAll {{redisplay 1}} {
 # Append the specified data to the existing display. The data is in the
 # form of a ::tycho::Class and is read by methods from that class.
 #
-body ::tycho::IDoc::insertData {data} {
+body ::tycho::ClassViewer::insertData {data} {
     if [getReadOnly] {bell; return}
     deleteClasses
     set tempClass [::tycho::Class [::tycho::autoName class]]
@@ -797,7 +797,7 @@ body ::tycho::IDoc::insertData {data} {
 # show is true, reload the data in the HTML widget. Show is set to false 
 # when generating HTML for output to a file.
 #
-body ::tycho::IDoc::putHtml {class data {top 1}} {
+body ::tycho::ClassViewer::putHtml {class data {top 1}} {
     switch $top {
         1 {
             set myTopData "
@@ -833,7 +833,7 @@ body ::tycho::IDoc::putHtml {class data {top 1}} {
 # This should use the class model -source option and modify that
 # to get the _rel.idoc name.
 # 
-body ::tycho::IDoc::relFile {classname} {
+body ::tycho::ClassViewer::relFile {classname} {
     set relname "[info namespace tail $classname]_rel.idoc"
 
     lappend dirs {$TYCHO/kernel}
@@ -857,7 +857,7 @@ body ::tycho::IDoc::relFile {classname} {
 #### resizeFrame
 # Resize the frame after a mouse event involving either handle.
 #
-body ::tycho::IDoc::resizeFrame {horizontal pixels} {
+body ::tycho::ClassViewer::resizeFrame {horizontal pixels} {
     if {$horizontal} {
         $this config -relwidth [newRelWidth $pixels]
     } {
@@ -870,7 +870,7 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
 # Call upSize (increase the current font size) on the constituent (HTML)
 # widgets.
 #
-body ::tycho::IDoc::upSize {} {
+body ::tycho::ClassViewer::upSize {} {
     $myHtmlTop upSize
     $myHtmlBottom upSize
 }
@@ -894,13 +894,13 @@ body ::tycho::IDoc::upSize {} {
 # This method is called by it's displayer when attachView is called (usually
 # in ::tycho::view)
 #
-body ::tycho::IDoc::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::ClassViewer::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::IDoc::initializeMenubar $menubar
+        ::tycho::ClassViewer::initializeMenubar $menubar
     }
 
     # Bindings
@@ -935,9 +935,9 @@ body ::tycho::IDoc::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 
 #####################################################################
 #### preference
-# preference function for IDoc
+# preference function for ClassViewer
 #
-body ::tycho::IDoc::preference {mode args} {
+body ::tycho::ClassViewer::preference {mode args} {
     eval ::tycho::preference $mode "idoc" $args
 }
 
@@ -951,7 +951,7 @@ body ::tycho::IDoc::preference {mode args} {
 # the display of the description of the given item in the statusbar
 # if such a description exists
 #
-body ::tycho::IDoc::bindDesc {class item label} {
+body ::tycho::ClassViewer::bindDesc {class item label} {
     set classModel $myClass($class)
 
     # get the type of the label
@@ -991,7 +991,7 @@ body ::tycho::IDoc::bindDesc {class item label} {
 # the explanation includes extra information besides the
 # actual explanation field of the item
 #
-body ::tycho::IDoc::bindExpl {class item label} {
+body ::tycho::ClassViewer::bindExpl {class item label} {
     # get the type of the label
     switch [string range $label end end] {
         "\p" {set type method}
@@ -1017,7 +1017,7 @@ body ::tycho::IDoc::bindExpl {class item label} {
 # all is 0, delete only the inherited classes. Either way, set myHeritage to
 # an empty string.
 #
-body ::tycho::IDoc::deleteClasses {{all 1}} {
+body ::tycho::ClassViewer::deleteClasses {{all 1}} {
     if ![info exists myClass] {
         return
     }
@@ -1040,7 +1040,7 @@ body ::tycho::IDoc::deleteClasses {{all 1}} {
 #### display
 # display the contents of myClass($mainClass) in the myContents widget
 #
-body ::tycho::IDoc::display {} {
+body ::tycho::ClassViewer::display {} {
     set classModel $myClass($mainClass)
 
     # clear the contents widget
@@ -1120,7 +1120,7 @@ body ::tycho::IDoc::display {} {
 # Display the constructor(s) in the myContents
 # widget according to the $language variable.
 #
-body ::tycho::IDoc::displayCon {} {
+body ::tycho::ClassViewer::displayCon {} {
     set classModel $myClass($mainClass)
 
     switch $language {
@@ -1182,7 +1182,7 @@ body ::tycho::IDoc::displayCon {} {
 # Display the destructor(s) in the myContents
 # widget according to the $language variable.
 #
-body ::tycho::IDoc::displayDes {} {
+body ::tycho::ClassViewer::displayDes {} {
     set classModel $myClass($mainClass)
 
     switch $language {
@@ -1244,7 +1244,7 @@ body ::tycho::IDoc::displayDes {} {
 # Display the methods/procedures of the given protection in the myContents
 # widget in according to the $language variable.
 #
-body ::tycho::IDoc::displayMeth {protection} {
+body ::tycho::ClassViewer::displayMeth {protection} {
     set classModel $myClass($mainClass)
 
     switch $language {
@@ -1473,7 +1473,7 @@ body ::tycho::IDoc::displayMeth {protection} {
 # Display the related procs (only) to the current class in the myContents 
 # widget according to the $language variable. NOTE: only Itcl supported
 # here.
-body ::tycho::IDoc::displayRel {} {
+body ::tycho::ClassViewer::displayRel {} {
     set classModel $myClass(related)
     
     switch $language {
@@ -1511,7 +1511,7 @@ body ::tycho::IDoc::displayRel {} {
 # Display the variables of the given protection in the myContents
 # widget according to the $language variable.
 #
-body ::tycho::IDoc::displayVar {protection} {
+body ::tycho::ClassViewer::displayVar {protection} {
     set classModel $myClass($mainClass)
 
     switch $language {
@@ -1744,9 +1744,9 @@ body ::tycho::IDoc::displayVar {protection} {
 # An item may not have an explanation, but _must_ have a description.
 # 
 # If extern is set (it's to be externally viewed), follow the Tydoc
-# style of formatting. If unset, follow the IDoc style.
+# style of formatting. If unset, follow the ClassViewer style.
 #
-body ::tycho::IDoc::formatExpl {class item type {extern 0}} {
+body ::tycho::ClassViewer::formatExpl {class item type {extern 0}} {
     set classModel $myClass($class)
 
     if [catch {set expl [$classModel get annotation $item.explanation $type]}] {
@@ -1892,7 +1892,7 @@ body ::tycho::IDoc::formatExpl {class item type {extern 0}} {
 # they have a non-blank description, and only do not output private
 # entities. Verbose outputs everything.
 #
-body ::tycho::IDoc::generateHtmlContents {} {
+body ::tycho::ClassViewer::generateHtmlContents {} {
     set classModel $myClass($mainClass)
     set verbose $itk_option(-verbose)
     
@@ -2074,7 +2074,7 @@ body ::tycho::IDoc::generateHtmlContents {} {
 # It may be desireable to generate "flattened" documentation, listing all
 # methods/variables available to a class. This is a FIXME for future versions.
 #
-body ::tycho::IDoc::generateHtmlBody {} {
+body ::tycho::ClassViewer::generateHtmlBody {} {
     set classModel $myClass($mainClass)
     set verbose $itk_option(-verbose)
 
@@ -2330,7 +2330,7 @@ body ::tycho::IDoc::generateHtmlBody {} {
 # field as the link text, if it's given (otherwise use item). This will
 # not work if the source is formatted differently.
 #
-body ::tycho::IDoc::hyperLink {class item type {text {}} {itemtype {}}} {
+body ::tycho::ClassViewer::hyperLink {class item type {text {}} {itemtype {}}} {
     set classModel $myClass($class)
 
     if {$text == {}} {
@@ -2394,7 +2394,7 @@ body ::tycho::IDoc::hyperLink {class item type {text {}} {itemtype {}}} {
 #### initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::IDoc::initializeMenubar {menubar} {
+body ::tycho::ClassViewer::initializeMenubar {menubar} {
     $menubar delete compareto
     $menubar delete insert
     $menubar delete save
@@ -2436,7 +2436,7 @@ body ::tycho::IDoc::initializeMenubar {menubar} {
 #### javaNamespaceQual
 # Perform an info namespace qualifiers, Java style
 #
-body ::tycho::IDoc::javaNamespaceQual {classname} {
+body ::tycho::ClassViewer::javaNamespaceQual {classname} {
     if [regexp {^(.+)[.][^.]+$} $classname dmy classname] {
         return $classname
     } else {
@@ -2448,7 +2448,7 @@ body ::tycho::IDoc::javaNamespaceQual {classname} {
 #### javaNamespaceTail
 # Perform an info namespace tail, Java style
 #
-body ::tycho::IDoc::javaNamespaceTail {classname} {
+body ::tycho::ClassViewer::javaNamespaceTail {classname} {
     regexp {[.]([^.]+)$} $classname dmy classname
     return $classname
 }
@@ -2459,7 +2459,7 @@ body ::tycho::IDoc::javaNamespaceTail {classname} {
 # division of widgets over the cursor. _pixels_ is the distance from the 
 # old location to the desired location
 #
-body ::tycho::IDoc::newRelWidth {pixels} {
+body ::tycho::ClassViewer::newRelWidth {pixels} {
     set contentsRelW $itk_option(-relwidth)
     set totalW [winfo width [$this windowName]]
     set newX [expr ($totalW * $contentsRelW) + $pixels] 
@@ -2480,7 +2480,7 @@ body ::tycho::IDoc::newRelWidth {pixels} {
 # division of widgets over the cursor. _pixels_ is the distance from the
 # old location to the desired location
 #
-body ::tycho::IDoc::newRelHeight {pixels} {
+body ::tycho::ClassViewer::newRelHeight {pixels} {
     set topRelH $itk_option(-relheight)
     set totalH [winfo height [$this windowName]]
     set newY [expr ($totalH * $topRelH) + $pixels]
@@ -2502,7 +2502,7 @@ body ::tycho::IDoc::newRelHeight {pixels} {
 # changed. It no longer is probably due to JohnR's removal of the 
 # -data option.
 #
-body ::tycho::IDoc::resetHtml {{top 1}} {
+body ::tycho::ClassViewer::resetHtml {{top 1}} {
     switch $top {
         "0" {$myHtmlBottom insertData $myBottomData}
         "1" {$myHtmlTop insertData $myTopData}
@@ -2518,7 +2518,7 @@ body ::tycho::IDoc::resetHtml {{top 1}} {
 # Setup the resizing handles to behave properly: configure the cursor,
 # bind the behaviours. Called by the constructor.
 #
-body ::tycho::IDoc::setupHandles {} {
+body ::tycho::ClassViewer::setupHandles {} {
     set updown $itk_component(updown)
     set leftright $itk_component(leftright)
 
@@ -2553,7 +2553,7 @@ body ::tycho::IDoc::setupHandles {} {
 # (Itcl has problems with string matching brackets.) and foo(int,int) to 
 # foo (int, int)
 #
-body ::tycho::IDoc::fixName {name {short 1}} {
+body ::tycho::ClassViewer::fixName {name {short 1}} {
     if {$short} {
         regexp {^(.*)[(]} $name dmy name
         return $name
