@@ -1,4 +1,4 @@
-# The abstract superclass of file-like "resources"
+# The cache management system to keep local/remote files synchronized.
 # 
 # @Author: Kevin Chang
 #
@@ -69,26 +69,42 @@ class ::tycho::CacheManager {
     #####################################################################
     ####                          options                            ####
 
-    
     ###################################################################
     ####                         public methods                    ####
 
     ###################################################################
     ####                           public procs                    ####
 
-    proc cachefile {path} {incr _forward; puts _forward}
-    proc contenttype {path} {set _forward 0}
-    proc date {path}
-    # Get the size
-    proc size {path}
+    # Return the full path and name of the cache associated with $path
+    proc cachefile   {path}     {}
+
+    # Return the contenttype associated with $path
+    proc contenttype {path}     {returninfo $path 2}
+
+    # Return the size associated with $path
+    proc size        {path}     {returninfo $path 1}
+
+    # Return the date associated with $path
+    proc date        {path}     {returninfo $path 0}
+
+    # Return the information in the common array, used by cachefile,
+    # contenttype, size, and date.
+    proc returninfo  {path idx}
 
     # The following are used directly by Resource<protocol>
     # Test if a resource exists.
-    proc exists {path}
+    proc exists {path} {[info exists _stat($path)]}
+
+    # Initialization routine, called to reset the common variable,
+    # then read from the database file if it exists. Also, create
+    # appropriate cache file, etc...
+    proc initialize {}
 
     # True if path still has the same information
     proc same {path date size contenttype}
-    proc update {path newphysicalfile}
+
+    # Update in the database the new file
+    proc update {path date size contenttype newphysicalfile}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -96,8 +112,14 @@ class ::tycho::CacheManager {
     ###################################################################
     ####                        protected commons                  ####
 
-    # The cache file associated with URLs
-    protected common _forward
+    # Array which returns cache file name, contenttype, date, and size.
+    protected common _stat
+
+    # The directory name of the cache
+    protected common cachedir
+
+    # The index file name
+    protected common indexfile
 
     ###################################################################
     ####                        protected variables                ####
@@ -105,7 +127,6 @@ class ::tycho::CacheManager {
     ###################################################################
     ####                         private variables               ####
 }
-
 
 #######################################################################
 #### constructor
@@ -127,8 +148,93 @@ body ::tycho::CacheManager::destructor {} {
 
 #####################################################################
 #### cachefile
-# Get a cached copy of the contents of the file. This is provided
-# to work around Tcl's lack of binary data handling.
+# Return the cache file name (with it's full path) that's associated
+# with $path
+#
 body ::tycho::CacheManager::cachefile {path} {
+    set returnstring [returninfo $path 3]
+    if {$returnstring!={}} {
+        return [file join $cachedir $returnstring]
+    }
+    return $returnstring
+}    
 
+#####################################################################
+#### returninfo
+# Helper function for cachefile, contenttype, date, and size. 
+body ::tycho::CacheManager::returninfo {path idx} {
+    if [info exists _stat($path)] {
+        return [lindex $_stat($path) $idx]
+    }
 }
+
+#####################################################################
+#### initialize
+# Make sure that the cache directory exists. Also make sure that
+# the index.db (database) exists.
+#
+# Read back from the database.
+#
+# Compact the database if necessary
+#
+body ::tycho::CacheManager::initialize {} {
+    global TYCHO
+    # Reset the variable in memory.
+    catch {unset _stat}
+
+    # Cache directory is in ~/.Tycho/cache
+    set cachedir [file join [::tycho::tychoDir] cache]
+    set indexfile [file join $cachedir index.db]
+    if {![file exists $cachedir]} {
+        file mkdir $cachedir
+    }
+    if {![file exists $indexfile]} {
+        set fd [open $indexfile "w+"]
+        close $fd
+    }
+
+    # Open up the index file, remember the association in memory.
+    # Each line in index.db has the format:
+    #                0                      1     2            3
+    # link name      date modified          size  contenttype  file name
+    # http://ptolemy {{11/15/95 Mon 1:51PM} 1152  text/html    cache5.html}
+    set fd [open $indexfile]
+    while {![eof $fd]} {
+        set line [gets $fd]
+        set link         [lindex $line 0]
+        set _stat($link) [lindex $line 1]
+    }
+    close $fd
+}
+
+
+#####################################################################
+#### same
+# True if path still has the same information
+body ::tycho::CacheManager::same {path date size contenttype} {
+    if {    [date $path]==$date && [size $path]==$path && \
+            [contenttype $path]==$contenttype} {
+        return 1
+    }
+    return 0
+}
+
+
+#####################################################################
+#### update
+# Update in the database the new file
+proc ::tycho::CacheManager::update {path date size contenttype newfile} {
+    set info [list [list $date $size $contenttype $newfile]]
+    set _stat($path) $info
+    # append it to the index
+    set fd [open $indexfile a]
+    puts $fd "$path $info"
+    close $fd
+}
+
+
+
+
+
+
+::tycho::CacheManager::initialize
