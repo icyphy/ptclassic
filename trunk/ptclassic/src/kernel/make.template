@@ -19,16 +19,11 @@ VPATH = ../../src/kernel
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
-# Rule for compiling with C++ programs
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) -c  $<
-
-# need gcc, not cc, to build gnulib3a
-CC = gcc
-
 # Library name
 LIB=libptolemy.a
+
+# No extra directories to include
+INCL =
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
@@ -90,26 +85,19 @@ CCS_WITH_H_FILES=\
  logNew.cc
 
 # The complete list of .cc files used in the library
-LIBCCSRCS=$(CCS_WITH_H_FILES) \
+SRCS=$(CCS_WITH_H_FILES) \
  checkConnect.cc \
  expandPath.cc \
  RanGen.cc \
  hashstring.cc \
  miscImpl.cc
 
-# .c sources used in the library.
-# (depending on particular configuration, CONSTRUCTOR_HACK may be empty)
-LIBCSRCS=$(CONSTRUCTOR_HACK)
-
-LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
-# All sources.
-SRCS=$(LIBSRCS) interpmain.cc
-
 # Header files.  When adding a new header, add it here only if there is
 # no corresponding .cc file; otherwise add the .cc file to CCS_WITH_H_FILES.
 HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  Attribute.h \
  CircularBuffer.h \
+ CompiledUniverse.h \
  ConstIters.h \
  Linker.sysdep.h \
  Output.h \
@@ -122,44 +110,14 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  type.h
 
 # Library objects
-LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
+OBJS=$(SRCS:.cc=.o)
 
-all:	makefile $(LIB) interpmain.o
-
-$(LIB):	$(LIBOBJS)
-	rm -f $(LIB)
-	ar cq $(LIB) $(LIBOBJS)
-	ranlib $(LIB)
+all:	makefile $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB) $(LIBDIR)/interpmain.o
+install:	makefile $(LIBDIR)/$(LIB)
 
-$(LIBDIR)/$(LIB):	$(LIB)
-		rm -f $(LIBDIR)/$(LIB)
-		cp $(LIB) $(LIBDIR)
-		ranlib $(LIBDIR)/$(LIB)
-
-$(LIBDIR)/interpmain.o:	interpmain.o
-		rm -f $(LIBDIR)/interpmain.o
-		cp interpmain.o $(LIBDIR)
-
-# "make clean" removes .o files and other cruft
-clean:
-		rm -f *.o core *~ *.bak *#
-
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template XDomain.ccP
-
-depend:
-		cd $(VPATH); \
-		$(DEPEND) $(SRCS) | cat make.template - > makefile.n; \
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+EXTRA_SRCS=XDomain.ccP
 
 # Need to define LIBDIR for the interpreter
 Interpreter.o:	Interpreter.cc
@@ -194,6 +152,8 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	mv Int.int.ArrayState.h IntArrayState.h; \
 	sed 's/"IntARRAY/"INTARRAY/' Int.int.ArrayState.cc > IntArrayState.cc; \
 	rm Int.int.ArrayState.cc
+
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
