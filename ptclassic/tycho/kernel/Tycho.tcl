@@ -87,15 +87,15 @@ set tychokernel $tycho/tycho/kernel
 # and TK_LIBRARY environment variables, because most other tcl
 # apps rely on them.  We have to set them here.
 
-set env(TCL_LIBRARY) $TYCHO/tcltk/itcl-2.0b2/lib/tcl7.4
-set env(TK_LIBRARY) $TYCHO/tcltk/itcl-2.0b2/lib/tk4.0
+set env(TCL_LIBRARY) $TYCHO/tcltk/itcl/lib/tcl
+set env(TK_LIBRARY) $TYCHO/tcltk/itcl/lib/tk
 set tk_library $env(TK_LIBRARY)
 
 uplevel #0 {
-    source $TYCHO/tcltk/itcl-2.0b2/lib/tcl7.4/init.tcl
-    source $TYCHO/tcltk/itcl-2.0b2/lib/tk4.0/tk.tcl
-    source $TYCHO/tcltk/itcl-2.0b2/lib/itcl2.0/init.itcl
-    source $TYCHO/tcltk/itcl-2.0b2/lib/itk2.0/init.itk
+    source $TYCHO/tcltk/itcl/lib/tcl/init.tcl
+    source $TYCHO/tcltk/itcl/lib/tk/tk.tcl
+    source $TYCHO/tcltk/itcl/lib/itcl/init.itcl
+    source $TYCHO/tcltk/itcl/lib/itk/init.itk
 }
 
 uplevel #0 {
