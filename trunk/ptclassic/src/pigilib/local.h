@@ -15,7 +15,11 @@ extern char *calloc();
 /*
 extern void free();
 */
+#ifdef USG
+extern int sprintf();
+#else
 extern char *sprintf();
+#endif
 
 /* buffer length constants */
 #define MSG_BUF_MAX 512 /* for messages */
