@@ -4,7 +4,6 @@
 #
 
 PTOLEMY       = /usr/users/ptolemy
-PRINTER       = lw
 
 DIRS =	$(PTOLEMY)/src/domains/mq/doc \
 	$(PTOLEMY)/src/domains/capsim/doc \
@@ -20,13 +19,13 @@ MAKEVARS =	\
 almagest print:
 	for x in $(DIRS); do \
 		cd $$x ; \
-		make print ; \
+		make $(MAKEVARS) print ; \
 	done; \
-	make prtitle; \
-	make prindex
+	cd $(PTOLEMY)/doc; \
+	make $(MAKEVARS) prtitle; \
+	make $(MAKEVARS) prindex
 
 prtitle:
-	cd $(PTOLEMY)/doc; \
 	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
 
 prindex:
