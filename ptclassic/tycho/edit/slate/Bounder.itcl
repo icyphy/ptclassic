@@ -34,17 +34,6 @@
 class ::tycho::Bounder {
     inherit ::tycho::Follower
 
-    ## bounds
-    #
-    # The region in which to move. If null, use whole canvas, the Bounder
-    # looks at the target object to see if it has a parent, and, if it has,
-    # restricts the object to move only within the confines of the parents
-    # bounds. If the object has no parent, then bounder uses the whole
-    # canvas.
-    #
-    public variable bounds ""
-
-
     ## constructor
     #
     constructor {{s {}} {c {}} args} {
@@ -55,10 +44,30 @@ class ::tycho::Bounder {
     }
 
 
-    ## x0, y0 , x1, y1
+    ###################################################################
+    ####                            options                        ####
+
+    # The bounds to move the object between. Note that these bounds
+    # are for the object being moved, not for the cursor.
+    # If null, the bounds are the width and height of the slate.
     #
+    public variable bounds ""
+
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Start interaction sequence
+    method click {x y} {}
+
+    # Continue interaction sequence
+    method drag {x y} {}
+
+
+    ###################################################################
+    ####                    private variables                      ####
+
     # Individual values of bounds
-    #
     private variable x0
     private variable y0
     private variable x1
@@ -66,81 +75,74 @@ class ::tycho::Bounder {
     
     private variable actualX
     private variable actualY
+}
 
 
-    ## click, drag, continue, release
-    #
-    # Similar to the methods in the parent class, Follower, except that
-    # movement is prevented outside _bounds_.
-    #
-    method click {x y} {
-	#
-	# Get individual coordinates of the bounding region.
-	# If there are no bounds specified, use the parent's bounds,
-	# of the whole canvas if it has no parent.
-	#
-	if { $bounds != "" } {
-	    assign x0 y0 x1 y1 $bounds
-	} elseif { [$target parent] != "" } {
-	    assign x0 y0 x1 y1 [[$target parent] query bounds]
-	} else {
-	    set x0 1
-	    set y0 1
-	    set x1 [expr [winfo width  $slate] - 1]
-	    set y1 [expr [winfo height $slate] - 1]
+## click
+#
+# Start the interaction. To find the bounds within which to move
+# the picture, the interactor first examines its -bounds option.
+# If that it is null, then it tries to see if the picture responds
+# to " query bounds"; if that doesn't work, then use the size of the
+# slate.
+#
+body ::tycho::Bounder::click {x y} {
+    # Get the bounds to move between.
+    if { [llength $bounds] == 4 } {
+	set b $bounds
+    } else {
+	set b [$target query bounds]
+	if { [llength $b] != 4 } {
+	    set b [list 1 1 \
+		    [expr [winfo width $slate] - 2] \
+		    [expr [winfo height $slate] - 2]]
 	}
+    }
+    assign x0 y0 x1 y1 $b
 
-	#
-	# Make the bounds smaller to allow for the size of the target
-	# object. Use the coords if possible, else use the bounding
-	# box.
-	#
-	set box [$target coords]
-	if { [llength $box] != 4 } {
-	    set box [$target query bbox]
-	}
-	assign a0 b0 a1 b1 $box
+    # Here's the size of the picture
+    assign a0 b0 a1 b1 [$target region]
 
-	set x0 [expr $x0 + ($x - $a0)]
-	set y0 [expr $y0 + ($y - $b0)]
-	set x1 [expr $x1 + ($x - $a1)]
-	set y1 [expr $y1 + ($y - $b1)]
+    # Adjust the bounds accrodingly
+    set x0 [expr $x0 + ($x - $a0)]
+    set y0 [expr $y0 + ($y - $b0)]
+    set x1 [expr $x1 + ($x - $a1)]
+    set y1 [expr $y1 + ($y - $b1)]
 
-	#
-	# Initialise other variables, and click on target
-	#
-	$targetproxy click $x $y
+    # Initialise other variables, and click on target
+    $proxy click $x $y
 
+    set actualX $x
+    set actualY $y
+}
+
+
+## drag
+#
+# Test if the new point is outside the bounds. If it is,
+# then move to the boundary. Otherwise, move to the
+# new point.
+#
+body ::tycho::Bounder::drag {x y} {
+    if { $x < $x0 } {
+	set actualX $x0
+    } elseif { $x > $x1  } {
+	set actualX $x1
+    } else {
 	set actualX $x
+    }
+
+    if { $y < $y0 } {
+	set actualY $y0
+    } elseif { $y > $y1  } {
+	set actualY $y1
+    } else {
 	set actualY $y
     }
 
-    method drag {x y} {
-	#
-	# Test if the new point is outside the bounds. If it is,
-	# then move to the boundary. Otherwise, move to the
-	# new point.
-	#
-	if { $x < $x0 } {
-	    set actualX $x0
-	} elseif { $x > $x1  } {
-	    set actualX $x1
-	} else {
-	    set actualX $x
-	}
-
-	if { $y < $y0 } {
-	    set actualY $y0
-	} elseif { $y > $y1  } {
-	    set actualY $y1
-	} else {
-	    set actualY $y
-	}
-
-	$targetproxy drag $actualX $actualY
-
-	if { $dragcommand != "" } {
-	    uplevel #0 $dragcommand
-	}
+    $proxy drag $actualX $actualY
+    
+    if { $dragcommand != "" } {
+	uplevel #0 apply [list $dragcommand] $target $x $y
     }
 }

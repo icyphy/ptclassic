@@ -44,13 +44,13 @@ class ::tycho::Stepper {
     }
 
 
-    ## click, drag, continue, release
+    ## click
     #
     # The behavior is identical to that of the superclass, Gridder,
-    # except for the initialisation of state variables.
+    # except for the initialization of state variables.
     #
-    method click {x y} {
-	$targetproxy click $x $y
+    protected method click {x y} {
+	::tycho::Interactor::click $x $y
 
 	set actualX $x
 	set actualY $y

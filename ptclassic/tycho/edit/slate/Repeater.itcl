@@ -61,26 +61,36 @@ class ::tycho::Repeater {
     ###################################################################
     ####                         public methods                    ####
 
-    # Attach the interactor to the current picture
-    method activate {t x y} {}
-
     # Bind the interactor to a picture or tag
     method bind {t args} {}
-
-    # Remove the interactor from the current picture
-    method deactivate {} {}
-
-    # Reinvoke the activation command
-    method reactivate {} {}
 
     ## Remove the binding of an interactor to a picture or tag
     method unbind {t} {}
 
     ###################################################################
-    ####                      protected variables                  ####
+    ####                   protected methods                       ####
+
+    # Attach the interactor to the current picture
+    protected method activate {t x y} {}
+
+    # Remove the interactor from the current picture
+    protected method deactivate {} {}
+
+    # Record a mouse movement
+    protected method motion {x y} {}
+
+    # Reinvoke the activation command
+    protected method reactivate {x y} {}
+
+    ###################################################################
+    ####                       private variables                   ####
 
     # The id of the "after" script, so it can be cancelled
     protected variable afterid
+
+    # The current mouse position
+    private variable currentX
+    private variable currentY
  }
 
 
@@ -106,18 +116,22 @@ body ::tycho::Repeater::activate {t x y} {
     foreach b $button {
 	$slate bind $tag \
 		[eventcode Release -button $b ] \
-		"$this deactivate"
+		[list @scope [info class] "$this deactivate"]
+	$slate bind $tag \
+		[eventcode Motion -button $b ] \
+		[list @scope [info class] "$this motion %x %y"]
     }
 
-    # Execute the user-specified activation command with the
-    # target as argument
-    if { $command != "" } {
-	uplevel #0 apply [list $command] $this $target $x $y
-    }
+    # Execute the user-specified command
+    execute $command $x $y
 
     # Set up the delayed call to reactivate{}. Use catch in case
     # something catastrophic happens and the interactor has disappeared.
-    set afterid [after $delay [list catch [list $this reactivate]]]
+    set currentX $x
+    set currentY $y
+    set afterid [after $delay \
+	    [list catch \
+	    [list @scope [info class] $this reactivate $currentX $currentY]]]
 }
 
 
@@ -128,7 +142,7 @@ body ::tycho::Repeater::bind {t args} {
     foreach b $button {
 	$slate bind $t \
 		[eventcode Click -button $b] \
-		"$this activate $t %x %y"
+		[list @scope [info class] "$this activate $t %x %y"]
     }
 }
 
@@ -166,14 +180,27 @@ body ::tycho::Repeater::deactivate {} {
 # Reinvoke the interactor's activation command, and set up to
 # call this again after the time specified by the -interval option.
 #
-body ::tycho::Repeater::reactivate {} {
+body ::tycho::Repeater::reactivate {x y} {
     # Execute the user-specified activation command
     if { $command != "" } {
 	uplevel #0 apply [list $command] $this $target $x $y
     }
 
     # Set up another delayed call
-    set afterid [after $interval [list catch [list $this reactivate]]]
+    set afterid [after $interval \
+	    [list catch \
+	    [list @scope [info class] $this reactivate $currentX $currentY]]]
+}
+
+
+#######################################################################
+#### motion
+#
+# Record a change in mouse position.
+#
+body ::tycho::Repeater::motion {x y} {
+    set currentX $x
+    set currentY $y
 }
 
 
