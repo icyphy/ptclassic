@@ -75,13 +75,14 @@ complete filename of the displayed image.
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
 		StringList fileName;
-		if ((const char*) imageName) {
-		  fileName = (const char*) imageName;
+		const char* iname = imageName;
+		if (iname && iname[0]) {
+		  fileName = iname;
 		}
 		else {
 		  char* nm = tempFileName();
 		  fileName = nm;
-		  LOG_DEL; delete [] nm;
+		  delete [] nm;
 		}
 		fileName << "." << image->retId();
 
@@ -99,7 +100,7 @@ complete filename of the displayed image.
 		fclose(fptr);
 
 		StringList cmdbuf = "(";
-		cmdbuf << (const char *) command << fileName;
+		cmdbuf << (const char *) command << " " << fileName;
 		if (del) {
 		  cmdbuf << "; rm -f " << fileName;
 		}

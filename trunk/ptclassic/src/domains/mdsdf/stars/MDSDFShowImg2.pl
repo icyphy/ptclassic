@@ -94,18 +94,17 @@ complete filename of the displayed image.
     const char* saveMe = saveImage;
     int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-    char fileName[256]; fileName[0] = '\000';
-    if ((const char*) imageName) {
-      strcpy(fileName, (const char*) imageName);
+    StringList fileName;
+    const char* iname = imageName;
+    if (iname && iname[0]) {
+      fileName = iname;
     }
-    if (fileName[0] == '\000') {
+    else {
       char* nm = tempFileName();
-      strcpy(fileName, nm);
-      LOG_DEL; delete [] nm;
+      fileName = nm;
+      delete [] nm;
     }
-    char numstr[16];
-    sprintf(numstr, ".%d", frame);
-    strcat(fileName, numstr);
+    fileName << "." << frame;
 
     FILE* fptr = fopen(fileName, "w");
     if (fptr == (FILE*) NULL) {
@@ -123,7 +122,7 @@ complete filename of the displayed image.
     unsigned int size = int(width) * int(height);
     unsigned char* buffer = new unsigned char[size];
     unsigned char* p = buffer;
-    for(int i = 0; i < size; i++) {
+    for(unsigned int i = 0; i < size; i++) {
       // limit range to be between 0 and 255
       double tmp = image->entry(i);
       if(tmp < 0)
@@ -138,14 +137,14 @@ complete filename of the displayed image.
     fclose(fptr);
     delete [] buffer;
 
-    char cmdbuf[256];
-    sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);
+    StringList cmdbuf = "(";
+    cmdbuf << (const char*) command << " " << fileName;
     if (del) {
-      strcat (cmdbuf, "; rm -f ");
-      strcat (cmdbuf, fileName);
+      cmdbuf << "; rm -f " << fileName;
     }
-    strcat (cmdbuf, ")&");		// Run command in the background
-    system (cmdbuf);
+    cmdbuf << ")&"; 			// Run command in the background
+    system(cmdbuf);
+
     delete image;
     delete frameId;
   } // end go{}

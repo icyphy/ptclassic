@@ -90,13 +90,14 @@ to produce the full filename of the displayed image.
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
 		StringList fileName;
-		if ((const char*) imageName) {
-		  fileName = (const char*) imageName;
+		const char* iname = imageName;
+		if (iname && iname[0]) {
+		  fileName = iname;
 		}
 		else {
 		  char* nm = tempFileName();
 		  fileName = nm;
-		  LOG_DEL; delete [] nm;
+		  delete [] nm;
 		}
 		fileName << "." << imgR->retId();
 
@@ -114,7 +115,6 @@ to produce the full filename of the displayed image.
 		unsigned const char* gdata = imgG->constData();
 		unsigned const char* bdata = imgB->constData();
 
-		LOG_NEW;
 		unsigned char* rgbfp = new unsigned char[3*Width*Height];
 
 		int i, j, temp1, temp2, temp3;
@@ -135,11 +135,11 @@ to produce the full filename of the displayed image.
 				unsigned(3*Width*Height), fptr);
 		fclose(fptr);
 
-		LOG_DEL; delete [] rgbfp;
+		delete [] rgbfp;
 
 		// Build up Unix command to display the image
 		StringList buf = "(";
-		buf << (const char*) command << fileName;
+		buf << (const char*) command << " " << fileName;
 		if (del) {
 			buf << "; rm -f " << fileName;
 		}
