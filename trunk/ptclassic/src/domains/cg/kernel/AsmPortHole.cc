@@ -97,6 +97,24 @@ int AsmPortHole::initOffset() {
 
 int InAsmPort :: isItInput() const {return TRUE; }
 int OutAsmPort :: isItOutput() const {return TRUE; }
+
+// MultiPortHole support.
+
 int MultiInAsmPort :: isItInput() const {return TRUE; }
 int MultiOutAsmPort :: isItOutput() const {return TRUE; }
+
+PortHole& MultiInAsmPort :: newPort () {
+	LOG_NEW; PortHole& p = *new InAsmPort;
+	p.numberTokens = numberTokens;
+	return installPort(p);
+}
+
+// The forkProcessing call handles the case where a new output porthole is
+// added to a fork star.
+PortHole& MultiOutAsmPort :: newPort () {
+	LOG_NEW; OutAsmPort& p = *new OutAsmPort;
+	p.numberTokens = numberTokens;
+	forkProcessing(p);
+	return installPort(p);
+}
 

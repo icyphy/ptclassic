@@ -89,18 +89,25 @@ public:
 
 };
 
-#define MultiAsmPort MultiCGPort
+class MultiAsmPort : public MultiCGPort {
+public:
+	MultiAsmPort() {}
+	~MultiAsmPort() {}
+};
 
 class MultiInAsmPort : public MultiAsmPort {
 public:
 	int isItInput() const;
-	// PortHole& newPort();
+
+	// Add a new physical port to the MultiPortHole list
+	PortHole& newPort();
 };
 
 class MultiOutAsmPort : public MultiAsmPort {
 public:
 	int isItOutput() const;
-	// PortHole& newPort();
+	// Add a new physical port to the MultiPortHole list
+	PortHole& newPort();
 };
 
 #endif
