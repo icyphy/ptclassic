@@ -264,7 +264,12 @@ body ::tycho::Graphics::constructor {args} {
     } {
 	keep -background -cursor
     }
-    pack $itk_component(info) -expand no -fill x
+    # Use some packing tricks so that the info frame doesn't disappear
+    # when the window is resized. I (hjr) am not 100% certain that
+    # this is the right way to do it, but it appears to work...
+    pack $itk_component(info) -expand no -fill x \
+            -side bottom \
+            -before $itk_component(bottom)
 
     # Create and configure the widget's menu bar
 
