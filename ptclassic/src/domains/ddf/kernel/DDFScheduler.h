@@ -94,7 +94,7 @@ public:
 	StringList displaySchedule() ;
 
 	// Constructor sets default options
-	DDFScheduler () { stopTime = 1;
+	DDFScheduler () : newGal(0) { stopTime = 1;
 			 numOverlapped = 1; 
 			 schedulePeriod = 10000.0; }
 
