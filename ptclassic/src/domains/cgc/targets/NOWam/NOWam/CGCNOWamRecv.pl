@@ -205,9 +205,9 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addInclude("<udpam.h>");
 		addInclude("<am.h>");
 		addCompileOption(
-			"-I$(PTOLEMY)/src/domains/cgc/targets/NOWam/libudpam");
+			"-I$PTOLEMY/src/domains/cgc/targets/NOWam/libudpam");
                 addLinkOption(
-			"-L$(PTOLEMY)/lib.$(PTARCH) -ludpam -lnsl -lsocket -lthread");
+		"-L$PTOLEMY/lib.$PTARCH -ludpam -lnsl -lsocket -lthread");
 
 		addCode(timeincludes, "include", "timeIncludes");
                 addCode(amdecls, "mainDecls", "amDecls");
