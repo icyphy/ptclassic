@@ -26,6 +26,20 @@
 #                                                         COPYRIGHTENDKEY
 ##########################################################################
 
+#######################################################################
+## preferencedialog
+#
+# Open a preferences dialog box. If there already is one, bring it
+# to the top.
+#
+proc ::tycho::preferencedialog {} {
+    if { [info exists .tychoPreferences] } {
+	raise .tychoPreferences
+    } else {
+	::tycho::PreferenceDialog .tychoPreferences
+    }
+}
+
 
 #######################################################################
 #### PreferenceDialog
@@ -33,6 +47,8 @@
 # A window that controls a set of preference editors.
 #
 class ::tycho::PreferenceDialog {
+    # FIXME: this should be a subclass of ::tycho::TopLevel but it
+    # hangs - ?
     inherit itk::Toplevel
 
     constructor {args} {}
@@ -47,10 +63,14 @@ class ::tycho::PreferenceDialog {
     ###################################################################
     ####                         public methods                    ####
 
+    # Open an editor for the specified preference set
+    method edit {set}
 
     ###################################################################
     ####                       private variables                   ####
 
+    # The current preferences editor
+    private variable editor {}
 }
 
 
@@ -60,13 +80,11 @@ class ::tycho::PreferenceDialog {
 body ::tycho::PreferenceDialog::constructor {args} {
 
     foreach set [preference info] {
-	puts $set
 	set description [preference cget $set -description]
-	puts $description
 	if { $description != "" } {
 	    itk_component add $set {
 		button $itk_interior.$set -text $description \
-			-command "puts [list $description!]"
+			-command "$this edit $set"
 	    } {
 		keep -background -cursor
 	    }
@@ -74,7 +92,41 @@ body ::tycho::PreferenceDialog::constructor {args} {
 	}
     }
 
+    itk_component add space {
+	frame $itk_interior.space -height 6
+    } {
+	keep -background -cursor
+    }
+    grid $itk_component(space)
+
+    itk_component add close {
+	button $itk_interior.close -text Close -command "delete object $this"
+    } {
+	keep -background -cursor
+    }
+    grid $itk_component(close) -sticky e
 
     # Initialise options
     eval itk_initialize $args
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::PreferenceDialog::destructor {} {
+    if { $editor != "" } {
+	delete object $editor
+    }
+}
+
+#######################################################################
+#### edit
+#
+body ::tycho::PreferenceDialog::edit {set} {
+    if { $editor != "" } {
+	delete object $editor
+	set editor {}
+    }
+
+    set editor [::tycho::PreferenceEditor .$set -preferences $set]
 }
