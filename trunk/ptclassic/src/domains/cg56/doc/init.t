@@ -1,3 +1,3 @@
-.\" @(#)init	1.1	10/15/90
+.\" $Revision$	$Date$
 .nr SN 0 \" Initialize section number
-.nr AS 6 \" Almagest section number
+.nr AS 8 \" Almagest section number
