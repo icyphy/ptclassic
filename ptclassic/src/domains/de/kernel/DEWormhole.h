@@ -43,6 +43,15 @@ public:
 
 	// clone -- allows interpreter to make copies
 	Block* clone();
+
+protected:
+	// redefine getStopTime() : 
+	// return the currentTime if syncMode of the scheduler is set (default)
+	// otherwise     the stopTime.
+	float getStopTime();
+
+	// redefine sumUp()
+	void sumUp();
 };
 	
 #endif
