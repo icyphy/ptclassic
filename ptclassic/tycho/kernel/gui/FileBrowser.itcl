@@ -85,6 +85,7 @@ class ::tycho::FileBrowser {
     inherit ::tycho::ListBrowser
 
     constructor {args} {}
+    destructor {}
 
     ##################################################################
     ####                     public methods                       ####
@@ -171,6 +172,15 @@ body ::tycho::FileBrowser::constructor {args} {
     insert entry $fileLastOpened
 }
 
+
+###################################################################
+#### destructor
+# Unsubscribe from all preferences
+#
+body ::tycho::FileBrowser::destructor {} {
+    # Unsubscribe from all preferences
+    preference unsubscribe filebrowser $this
+}
 
     ##################################################################
     ##################################################################

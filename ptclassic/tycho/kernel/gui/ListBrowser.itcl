@@ -153,9 +153,10 @@ body ::tycho::ListBrowser::constructor {args} {
 		-setgrid 1 \
 		-selectmode single
     } {
-	keep -background -cursor -foreground -font -height -width
-	rename -background -textbackground textBackground Background
-	rename -foreground -textforeground textForeground Foreground
+	keep -cursor -height -width
+	rename -background -entrybackground entryBackground EntryBackground
+	rename -foreground -entryforeground entryForeground EntryForeground
+	rename -font -entryfont entryFont EntryFont
     }
     pack $itk_component(listbox) -side left -expand yes -fill both
     

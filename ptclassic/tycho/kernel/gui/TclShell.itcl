@@ -172,6 +172,9 @@ class ::tycho::TclShell {
 
     # Partially entered command.
     private variable partialCommand ""
+
+    ## class initialization
+    protected common preferences console
 }
 
 ###################################################################
@@ -222,8 +225,6 @@ body ::tycho::TclShell::constructor {args} {
 
     # Subscribe to the preference set
     preference subscribe console $this \
-	    -textwidth textWidth \
-	    -textheight textHeight \
 	    -answerforeground answerForeground \
 	    -promptforeground promptForeground
 

@@ -87,6 +87,12 @@ class ::tycho::Edit {
     # Specify the text in the edit window.
     itk_option define -text text Text {}
 
+    # The color of selected text.
+    itk_option define -selectcolor selectColor SelectColor white {
+	$itk_component(text) tag configure sel \
+		-background $itk_option(-selectcolor)
+    }
+
     ##########################################################################
     ####                         public methods                           ####
 
@@ -639,15 +645,13 @@ body ::tycho::Edit::constructor {args} {
 
     # Subscribe to the preference set
     preference subscribe textedit $this \
-	    -textfont textfont \
+	    -textfont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \
-	    -relief textrelief \
+	    -relief textRelief \
 	    -textwidth textWidth \
-	    -textheight textHeight
-
-    $itk_component(text) tag configure sel \
-	    -background [preference get textedit selectColor]
+	    -textheight textHeight \
+	    -selectcolor selectColor
 
     set maxLineLength \
             [preference get textedit fillColumn]
