@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Define SIG_PF
 #include "ptsignals.h"
 
-#ifdef PTHPPA
+#if !defined(PTSOL2) && !defined(PTSUN4)
 typedef void (*SIG_PF)(int);
 #endif
 
@@ -47,5 +47,7 @@ int setHandlers(SIG_PF sigHandler);
 void signalHandlerRelease(void);
 void signalHandlerDebug(int signo);
 void abortHandling();
+void setReleaseStrings(void); 
+void setDebugStrings(void) ;
 
 #endif
