@@ -141,7 +141,6 @@ int CGStar::addCode (const char* string,const char* stream, const char* name)
 	}
 	else
 	{
-	    Error::abortRun(*this, " unknown stream: ", stream);
 	    return FALSE;
 	}
 }
