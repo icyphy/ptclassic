@@ -45,6 +45,7 @@ include $(CONFIG)
 DIRS =	
 
 TCL_SRCS = \
+	defs.tcl \
 	demoGrapple.tcl \
 	demoLabeledLine.tcl \
 	demoSmartLine.tcl \
