@@ -30,6 +30,40 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+##############################################################################
+#### compileC
+# Invoke an external program using compileCTcl.
+# The format of the command is exactly that of the Tcl "exec" command,
+# with colorization (parseError function called).
+#
+set compiler {}
+proc ::tycho::compileC { args } {
+    global tcl_platform compiler
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the tcl \"exec\" command is not supported on the\
+		Macintosh.\nThe command:\n$args\ncannot be executed"
+    }
+
+    # NOTE: Unix-ism.
+    # WARNING: winfo doesn't work for some reason!
+    # Now always creating a new widget
+    if {$compiler=={}} {
+        set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
+    }
+
+    puts "Compiler name $compiler"
+
+    if [catch {eval $compiler compile $args} msg] {
+        # The command failed.  It would be nice to check to see
+        # whether the program exists, and generate a suitable message,
+        # but it's not clear how to do this.
+        error "The following command invocation failed:\n \
+                $args\n \
+                Is the program [lindex $args 0] installed and in your path?\n \
+                $msg"
+    }
+}
+
 
 #######################################################################
 #### Compile
@@ -331,23 +365,18 @@ body ::tycho::Compile::compileFiles {} {
     if {![winfo exists $compileWidget]} {
         putStatus "Compile window created. Compile again to start execution."
         #set compileWidget [$this cget -view].compile
-        #::tycho::Monitor $compileWidget
-        #set retList [::tycho::execModal $compileString $dirname $compileWidget]
         #set retList [::tycho::execModal $compileString $dirname]
 
-        set autostart [file exists [file join $dirname/.autostart]]
-        set autodestroy [file exists [file join $dirname/.autodestroy]]
+        set autostart 1
+        set autodestroy 0
 
-        set compileString "make -f $makefile"
+        set compileString "make"
         set compileWidget \
                 [::tycho::Monitor [::tycho::autoName .makeExec] \
-                -autostart $autostart -autodestroy 1 \
+                -autostart $autostart -autodestroy $autodestroy \
                 -command $compileString -dir $dirname]
 
         # Basic initialization here
-        #$compileWidget configure -autostart 0
-        #$compileWidget configure -autodestroy 0
-
         if {$compileString != {} } {
             $compileWidget configure -command $compileString
         }
