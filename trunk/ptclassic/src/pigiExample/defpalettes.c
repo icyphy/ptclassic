@@ -8,5 +8,9 @@ $Id$
  */
 
 char* defaultPalettes() {
-	return "~ptolemy/src/domains/sdf/icons/main.pal:~ptolemy/src/domains/sdf/icons/dsp.pal:~ptolemy/src/domains/ddf/icons/ddf.pal:~ptolemy/src/domains/de/icons/de.pal:./user.pal:./init.pal";
+	return "$PTOLEMY/src/domains/sdf/icons/main.pal:$PTOLEMY/src/domains/sdf/icons/dsp.pal:$PTOLEMY/src/domains/ddf/icons/ddf.pal:$PTOLEMY/src/domains/de/icons/de.pal:./user.pal:./init.pal";
 }
+
+/* This defines the default domain for pigiRpc */
+
+char DEFAULT_DOMAIN[] = "SDF";
