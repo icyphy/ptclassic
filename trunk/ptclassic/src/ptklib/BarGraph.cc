@@ -41,6 +41,7 @@ Defines and maintains a Tcl bar graph.
 #include "BarGraph.h"
 #include "ptkBarGraph.h"
 #include "ieee.h"
+#include "ptkTclCommands.h"
 
 /////////////////////////////////////////////////////////////////////////
 //			Tcl Callable Procedures
@@ -85,8 +86,8 @@ static int rescale(
 BarGraph::BarGraph () {
 	starID = "ptkBarGraph";
 	starID += unique++;
-	data = NULL;
-	ids = NULL;
+	data = 0;
+	ids = 0;
 	winName = "";
 }
 
@@ -95,10 +96,8 @@ BarGraph::~BarGraph() {
 	// avoid core dump if interpreter did not set up right
 	if (!ptkInterp) return;
 
-	InfString buf;
-
 	// Delete Tcl commands created by this object
-	buf = winName;
+	InfString buf = winName;
 	buf += "redraw";
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
 
@@ -125,7 +124,7 @@ int BarGraph::setup (Block* star,       // The star I am in
                    double width,        // Desired width of the window (cm)
                    double height)  	// Desired height of the window (cm)
 {
-	int i;		// Loop counter repeatedly used
+	if (!ptkInterp) return FALSE;
 
 	// Store the parameters
 	top = initTop;
@@ -133,6 +132,9 @@ int BarGraph::setup (Block* star,       // The star I am in
 	myStar = star;
 	noBars = numBars;
 	noInputs = numInputs;
+
+	// Loop counter repeatedly used
+	int i;
 
 	// Allocate the memory for storing the data
 	// First, delete previous versions
@@ -160,7 +162,9 @@ int BarGraph::setup (Block* star,       // The star I am in
 	// stem of the window name.  This means that the window will
 	// be a child window of the control panel, and hence will be
 	// destroyed when the control panel window is destroyed.
-	if(Tcl_GlobalEval(ptkInterp, "global ptkControlPanel;set ptkControlPanel") != TCL_OK) {
+	char initControlPanelCmd[ sizeof(PTK_CONTROL_PANEL_INIT) ];
+	strcpy(initControlPanelCmd, PTK_CONTROL_PANEL_INIT);
+	if(Tcl_GlobalEval(ptkInterp, initControlPanelCmd) != TCL_OK) {
 		winName = ".bar";
 		winName += starID;
 	} else {
@@ -221,6 +225,8 @@ int BarGraph::update (int input,          // Identifies the data set
                       int bar,            // Identifies the bar within the set
                       double newVal)
 {
+	if (!ptkInterp) return FALSE;
+
 	data[input][bar] = newVal;
 
 	// Update the one bar that is affected
@@ -242,6 +248,7 @@ int BarGraph::update (int input,          // Identifies the data set
 }
 
 void BarGraph::redrawBars () {
+	if (!ptkInterp) return;
 	ptkSetBarGraph (ptkInterp,
 		&ptkW,
 		(char*)winName,
