@@ -200,13 +200,13 @@ class ::tycho::Model {
     method redo {{distance 1}}
 
     # Subscribe to this model
-    method subscribe {type subscriber args}
+    method subscribe {type {subscriber {}} {name {}} {command {}}}
 
     # Execute undo commands
     method undo {{distance 1}}
 
     # Unsubscribe from this model
-    method unsubscribe {type subscriber args}
+    method unsubscribe {type subscriber {name {}}}
 
     #################################################################
     ####                protected methods                        ####
@@ -619,7 +619,7 @@ body ::tycho::Model::norecord {method args} {
 # doesn't, unsubscribes it.
 #
 body ::tycho::Model::notify {mode args} {
-    # Extract the -except option
+   # Extract the -except option
     if ![regexp "^-except (\[^ \t\n\]+) (.*)$" $args _ except args] {
         set except {}
     }
@@ -679,6 +679,7 @@ body ::tycho::Model::notify {mode args} {
         }
         if { $cmd != "" } {
             # Override default notification
+            puts "uplevel \#0 $cmd $args"
             uplevel \#0 $cmd $args
         } else {
             # By default, call the subscriber's notify{} method
@@ -809,9 +810,16 @@ body ::tycho::Model::redo {{distance 1}} {
 # place by calling the subscriber's <b>notify</b> method --
 # this can be overridden by supplying the _command_ argument.
 #
+# <dt><b>info</b> ?_subscriber_?
+# <dd>
+# Return a string that prints information on subscribers. This
+# is mainly intended for debugging and monitoring. If _subscriber_
+# is provided, print info only on that subscriber; if not, print
+# info on all subscribers.
+#
 # </dl>
 #
-body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
+body ::tycho::Model::subscribe {mode {subscriber {}} {name {}} {command {}}} {
     switch -exact $mode {
 	"data" {
 	    if { $name == "" } {
@@ -825,6 +833,23 @@ body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
 	    }
 	    set _subs([list event $name $subscriber]) $command
 	}
+        "info" {
+            set string ""
+            if { $subscriber == "" } {
+                set subscriber "*"
+            }
+            foreach {ix cmd} [array get _subs [list * * $subscriber]] {
+                foreach {m d s} $ix {}
+                append string "\nmode:       $m"
+                append string "\ndata:       $d"
+                append string "\nsubscriber: $s"
+                if { $cmd != "" } {
+                    append string "\ncommand:    $cmd"
+                }
+                append string "\n"
+            }
+            return $string
+        }
 	default {
 	    error "bad option \"$mode\": should be data or event"
 	}
@@ -906,7 +931,7 @@ body ::tycho::Model::undo {{distance 1}} {
 # </dl>
 #
 body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
-    if ![regexp {^(data|event)$}] {
+    if ![regexp {^(data|event)$} $mode] {
 	error "bad option \"$mode\": should be data or event"
     }
     if { $name != "" } {
