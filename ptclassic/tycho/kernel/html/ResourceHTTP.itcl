@@ -65,14 +65,14 @@ class ::tycho::ResourceHTTP {
     # Close the resource.
     method close {}
 
-    # Return the content type of the current file
-    method contenttype {}
-
     # Return the end of file status
     method eof {}
 
     # Read a string from a streamable resource
     method gets {{varName {}}}
+
+    # FIXME: This is a hack to get  proc contenttype  to return contenttype
+    method getcontenttype {} {return $contenttype}
 
     # Test if the file is currently open
     method isopen {}
@@ -104,6 +104,9 @@ class ::tycho::ResourceHTTP {
 
     # Change the permissions of a resource
     proc chmod {permissions path}
+
+    # Return the content type of the current file
+    proc contenttype {path}
 
     # Delete a resource
     proc delete {path}
@@ -201,9 +204,6 @@ class ::tycho::ResourceHTTP {
     # The name of the cache file associated with this HTTP
     protected variable filename {}
 
-    # The index of the get. FIXME: Not being used yet (performance issue)
-    protected variable idx 0
-    # Instead, the following variable is used!
     # This is the cache file id, used for [$this gets] and [$this eof]
     protected variable fileid {}
 
@@ -229,8 +229,8 @@ class ::tycho::ResourceHTTP {
     protected variable forwardlocation {}
 
     # FIXME: need to find out where to collect protocols that Tycho
-    # understands:
-    protected variable accept {text/*}
+    # understands. Also, this should be more specific (no wildcard!!!):
+    protected variable accept {text/* image/*}
 
     ###################################################################
     ####                         private variables               ####
@@ -299,13 +299,6 @@ body ::tycho::ResourceHTTP::close {} {
         ::close $fileid
         set fileid ""
     }
-}
-
-#####################################################################
-#### contenttype
-# Return the content type of the open file.
-body ::tycho::ResourceHTTP::contenttype {} {
-    return $contenttype
 }
 
 #####################################################################
@@ -414,6 +407,20 @@ body ::tycho::ResourceHTTP::write {string} {
 #### chmod
 body ::tycho::ResourceHTTP::chmod {permissions path} {
     error "Cannot change status of $path"
+}
+
+#####################################################################
+#### contenttype
+# Return the content type of the open file.
+body ::tycho::ResourceHTTP::contenttype {url} {
+    #return $contenttype
+    set resource [new $url]
+    $resource httpget $url header
+    $resource httpwait
+    set contenttype [$resource getcontenttype]
+    ::delete object $resource
+
+    return $contenttype
 }
 
 #####################################################################
