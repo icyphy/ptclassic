@@ -19,11 +19,27 @@ limitation of liability, and disclaimer of warranty provisions.
 .Id "Hilbert filter"
 .Id "filter, Hilbert"
 The exact Hilbert transform cannot be realized; instead, we just truncate
-the response symmetrically at -N/2 and N/2.  This is accurate enough
-for some applications, but for high accuracy we suggest the use of the Parks-McClellan
-algorithm to design a Hilbert transformer filter with the desired
-characteristics.  The "optfir" program supplied with Ptolemy can do this.
+the response symmetrically at $-N/2$ and $N/2$ [1].
+This is accurate enough for some applications, but for high accuracy we
+suggest the use of the Parks-McClellan algorithm [2] to design a Hilbert
+transformer filter with the desired characteristics [3].
+The "optfir" program supplied with Ptolemy can do this.
 .Ir "optfir program"
+.ID "Oppenheim, A. V."
+.ID "Schafer, R. W."
+.ID "Parks, T. W."
+.UH REFERENCES
+.ip [1]
+A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+Prentice-Hall: Englewood Cliffs, NJ, 1989.
+.ip [2]
+T. W. Parks and J. H. McClellan,
+``Chebyshev Approximation for Nonrecursive Digital Filters With Linear Phase,''
+\fIIEEE Trans. on Circuit Theory\fR, vol. 19, no. 2, pp. 189-194, March 1972.
+.ip [3]
+L. R. Rabiner, J. H. McClellan, and T. W. Parks,
+``FIR Digital Filter Design Techniques Using Weighted Chebyshev Approximation,''
+\fIProc. of the IEEE\fR, vol. 63, no. 4, pp. 595-610, April 1975.
 	}
 	ccinclude { <math.h> }
 	defstate {
