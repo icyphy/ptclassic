@@ -4,8 +4,8 @@ defstar {
 	desc { 
 A decimator by "factor" (default 2).
 The "phase" tells which sample to output.
-If phase = 0, the most recent sample is the output,
-while if phase = factor-1 the oldest sample is the output.
+If phase = 0, the oldest sample is the output, while
+if phase = factor-1 the most recent sample is the output.
 Phase = 0 is the default.
 	}
 	version {$Id$}
@@ -35,13 +35,17 @@ Phase = 0 is the default.
 		default {0}
 		desc { Downsample phase. }
 	}
+	protected {
+		int rphase;
+	}
 	start {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
+		rphase = int(factor) - int(phase) - 1;
 	}
 	go {
-		output%0 = input%int(phase);
+		output%0 = input%rphase;
 	}
 }
 
