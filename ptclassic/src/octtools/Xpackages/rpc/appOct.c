@@ -27,7 +27,8 @@ static char SccsId[]="$Id$";
 /*LINTLIBRARY*/
 #include "copyright.h"
 #include "port.h"
-  
+#include "ansi.h"  
+
 /*
  * application routines for oct requests
  *
@@ -45,6 +46,9 @@ octStatus	RPCOctGenerate();
 octStatus	RPCOctGenerateDone();
 octStatus	RPCOctGenerateError();
 octStatus	RPCOctGenerateSpecial();
+
+rpcInternalStatus RPCReceiveFacetInfo
+	ARGS((struct octFacetInfo *info, STREAM stream)); 
 
 
 /*
