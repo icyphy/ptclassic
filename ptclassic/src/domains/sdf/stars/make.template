@@ -41,6 +41,7 @@ PL_SRCS= \
  SDFCommutator.pl \
  SDFConst.pl \
  SDFConstCx.pl \
+ SDFConstFix.pl \
  SDFCos.pl \
  SDFCxToFix.pl \
  SDFCxToFloat.pl \
