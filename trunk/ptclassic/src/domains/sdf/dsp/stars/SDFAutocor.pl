@@ -65,7 +65,7 @@ autocorrelation estimate may have negative components.
 		return;
 	    }
 	    input.setSDFParams(int(noInputsToAvg), int(noInputsToAvg)-1);
-	    output.setSDFParams(2*int(noLags), 2*int(noLags)-1);
+	    output.setSDFParams(2*int(noLags), 2*int(noLags));
 	}
 	go {
 	    for(int i = int(noLags); i>=0; i--) {
