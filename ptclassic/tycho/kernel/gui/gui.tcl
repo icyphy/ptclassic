@@ -215,6 +215,50 @@ if {$tcl_platform(platform) != "macintosh"} {
 	-category "tool" \
 	-underline 6
 
+# FIXME FIXME: Need to move into a ptolemy-specific package
+if $ptolemyfeature(ptolemyinstalled) {
+    # Ptcl -- Ptolemy's Tcl interface language
+    ::tycho::register mode "ptcl" \
+            -command {::tycho::view EditPtcl -file {%s}} \
+            -viewclass ::tycho::EditPtcl \
+            -label {Ptcl Editor}  \
+            -category "ptolemy" \
+            -underline 1
+    
+    # Ptlang -- Ptolemy's star definition language
+    ::tycho::register mode "ptlang" \
+            -command {::tycho::view EditPtlang -file {%s}} \
+            -viewclass ::tycho::EditPtlang \
+            -label {Ptlang Editor}  \
+            -category "ptolemy" \
+            -underline 2
+    
+    # The VEM facet mode behaves differently if we are inside Ptolemy
+    if $ptolemyfeature(octtools) {
+        # Ptolemy and vem are present.  Use them.
+        ::tycho::register mode "vemfacet" \
+                -command {::pvOpenWindow \
+                [::ptkOpenFacet {%s} schematic contents]} \
+                -label {Vem Facet} \
+                -category "ptolemy"
+    } else {
+        # Vem is not present.
+        ::tycho::register mode "vemfacet" \
+                -command {::tycho::view EditPalette -facet {%s}} \
+                -viewclass ::tycho::EditPalette \
+                -label {Palette Editor} \
+                -category "ptolemy" \
+                -underline 0
+    }
+    # Retargetting editor
+    if { $ptolemyfeature(ptolemy)} {
+        ::tycho::register mode "retarget" \
+                -command {::tycho::view Retarget -file {%s} -toolbar 1} \
+                -viewclass ::tycho::Retarget \
+                -label {Ptolemy Retargeter}  \
+                -category "ptolemy"
+    }
+}
 
 
 # HELP MENU ENTRIES
