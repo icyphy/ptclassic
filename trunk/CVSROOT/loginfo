@@ -27,8 +27,8 @@
 
 CVSROOT/.* mailx -s "%s" johnr@eecs.berkeley.edu
 
-diva/.* mailx -s "%s" diva-cvs@gigascale.eecs.berkeley.edu
-diva-binaries/.* mailx -s "%s" diva-cvs@gigascale.eecs.berkeley.edu
+diva/.* mailx -s "%s" diva-cvs@gigascale.org
+diva-binaries/.* mailx -s "%s" diva-cvs@gigascale.org
 mescal/.* mailx -s "%s" mescal-cvs@gigascale.eecs.berkeley.edu
 
 #panda releated stuff (Bart Kienhuis)
