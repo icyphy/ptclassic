@@ -59,7 +59,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref(status)--;
 	}
 	go {
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 		  addCode(complexBlock);
 		else
 		  addCode(nonComplexBlock);

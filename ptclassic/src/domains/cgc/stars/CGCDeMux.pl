@@ -79,7 +79,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode("\t{\n");
 		// control value i means port number i+1
 		for (int i = 0; i < output.numberPorts(); i++) {
-		  if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		  if (input.resolvedType() == COMPLEX) 
 		    addCode(complexCopyData(i,i+1));
 		  else
 		    addCode(nonComplexCopyData(i,i+1));

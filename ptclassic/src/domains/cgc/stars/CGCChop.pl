@@ -167,7 +167,7 @@ Lower limit on the indexing from the input to the output buffer
 
 		addCode(decl);
 		addCode(moreDeclarations);
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 		  addCode(complexOut);
 		else
 		  addCode(nonComplexOut);

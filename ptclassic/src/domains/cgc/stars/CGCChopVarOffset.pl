@@ -42,7 +42,7 @@ determined at run time through a control input.
 		addCode(decl);			// look at CGCChop star
 		addCode(init);
 		addCode(range);
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 		  addCode(complexOut);		// look at CGCChop star
 		else
 		  addCode(nonComplexOut);	// look at CGCChop star
