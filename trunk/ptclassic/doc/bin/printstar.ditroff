@@ -2,16 +2,45 @@
 # $Id$
 
 # Print documentation for a Ptolemy star or demo
+#
+# Usage:
+#
+#	printstar [-icons] [-ps] file
+#
+# "file" is a troff source file.  Options are:
+#
+#	-icons		Print icons using postscript.  Assumes icons already
+#			have been generated.  (See "makepsicons").
+#
+#	-ps		Generate postscript to standard out, don't print.
+#			Only works with -icons.
+#
+# Two implicit header files, $PTOLEMY/doc/headers/shared,
+# and $PTOLEMY/doc/headers/domain, are prepended.
 
 # Command uses printer defined by environmental variable $PRINTER
 # User .cshrc file must contain "setenv PRINTER whatever"
 
-# The argument is the troff source file.
-# Two implicit header files, $PTOLEMY/doc/headers/shared,
-# and $PTOLEMY/doc/headers/domain, are prepended.
+set icons = 0
+set ps = 0
+
+while ($#argv)
+	switch ($argv[1])
+	case -icons:
+		set icons = 1
+		shift
+		breaksw
+	case -ps:
+		set ps = 1
+		shift
+		breaksw
+	default:
+		break
+	endsw
+end
 
 if ($#argv != 1) then
-	echo "usage: printstar file"
+	echo "usage: printstar [-icons] file"
 	exit 1
 endif
 
@@ -21,5 +50,22 @@ if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 set dirheader = $PTOLEMY/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
+set psincludecommand = $PTOLEMY/doc/bin/ditpsinc
 
-$printcommand $printoptions $dirheader/shared $dirheader/domain $1
+if ($icons) then
+	# Turn on "icon printing" flag.
+	echo '.nr Ic 1' > /tmp/pt.$$
+	if ($ps) then
+		$printcommand $printoptions -t /tmp/pt.$$ \
+			$dirheader/shared $dirheader/domain $1 | \
+			 $psincludecommand
+	else
+		$printcommand $printoptions -t /tmp/pt.$$ \
+			$dirheader/shared $dirheader/domain $1 | \
+			 $psincludecommand | lpr
+	endif
+	/bin/rm -f /tmp/pt.$$
+else
+	# Just print normally
+	$printcommand $printoptions $dirheader/shared $dirheader/domain $1
+endif
