@@ -36,11 +36,11 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT =		../../..
+ROOT =		../..
 # Path (absolute or relative) to the object directory root
-OBJDIR =	../..
+OBJDIR =	..
 # True source directory
-VPATH =		$(ROOT)/src/tycho/tysh
+VPATH =		$(ROOT)/src/tysh
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
@@ -79,6 +79,7 @@ HDRS = \
   BarGraph.h \
   TyConsole.h \
   TyTcl.h \
+  pthreadCompat.h \
   ptk.h \
   sol2compat.h \
   TclObj.h \
