@@ -377,7 +377,7 @@ class BDFClusterBag : public BDFCluster {
 public:
 	// constructor: makes an empty bag
 	BDFClusterBag();
-	// destructor deletes contents if owner is set
+	// destructor
 	~BDFClusterBag();
 
 	// how many clusters
@@ -437,8 +437,6 @@ protected:
 	BDFBagScheduler* sched;
 	BDFClusterGal* gal;
 	int exCount;
-private:
-	int owner;
 };
 
 // a BDFWhileLoop is a cluster that represents data-dependent iteration.
