@@ -94,7 +94,6 @@ ITCL_SRCS = \
 	IconIndex.itcl \
 	IndexBrowser.itcl \
 	Interchange.itcl \
-	KeyedDigraph.itcl \
 	Library.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
@@ -106,9 +105,10 @@ ITCL_SRCS = \
 	MultiPanel.itcl \
 	Object.itcl \
 	ParameterEdit.itcl \
+	PopupMenu.itcl \
+	PortedDigraph.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
-	PopupMenu.itcl \
 	Query.itcl \
 	Registry.itcl \
 	Resource.itcl \
