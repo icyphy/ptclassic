@@ -246,7 +246,7 @@ int SRtoUniversal::onlyOne() const
 void SRfromUniversal::sendData()
 {
 
-  // If this port is on the OUTS1IDE of a wormhole, transfer data across the
+  // If this port is on the OUTSIDE of a wormhole, transfer data across the
   // wormhole boundary (otherwise do nothing)
 
   transferData();
@@ -266,6 +266,13 @@ void SRfromUniversal::sendData()
     emit() = **p;
 
     tokenNew = FALSE;
+
+  } else {
+
+    // No particle -- make it absent.
+
+    makeAbsent();
+
   }
 
 }
