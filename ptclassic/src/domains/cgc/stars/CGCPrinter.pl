@@ -41,11 +41,12 @@ the same line, separated by tabs.
 	      || strcmp(fn, "cout")==0 || strcmp(fn, "stdout")==0
 	      || strcmp(fn, "<cout>")==0 || strcmp(fn, "<stdout>")==0);
 	    if(fileOutput) {
-		StringList s =
-			processCode(CodeBlock("FILE *$starSymbol(fp);\n"));
-		addDeclaration(s);
+		StringList sym = processCode("$starSymbol(fp)");
+		StringList s;
+		s << "FILE* " << sym << ";\n";
+		addDeclaration(s, sym);
 		addInclude("<stdio.h>");
-		gencode(openfile);
+		addCode(openfile);
 	    }
 	}
 codeblock (openfile) {
@@ -58,21 +59,21 @@ codeblock (openfile) {
 	    for (int i = 1; i <= input.numberPorts(); i++) {
 		index = i;
 		if(fileOutput) {
-			gencode(CodeBlock(
+			addCode(CodeBlock(
 "\tfprintf($starSymbol(fp),\"%f\\t\", $ref(input#index));\n"));
 		} else {
-			gencode(CodeBlock( 
+			addCode(CodeBlock( 
 "\tprintf(\"%f\\t\", $ref(input#index));\n"));
 		}
 	    }
 	    if (fileOutput) {
-		gencode(CodeBlock("\tfprintf($starSymbol(fp),\"\\n\");\n"));
+		addCode(CodeBlock("\tfprintf($starSymbol(fp),\"\\n\");\n"));
 	    } else {
-		gencode(CodeBlock("\tprintf(\"\\n\");\n"));
+		addCode(CodeBlock("\tprintf(\"\\n\");\n"));
 	   }
 	}
 	wrapup {
 	    if(fileOutput)
-		gencode(CodeBlock("\tfclose($starSymbol(fp));\n"));
+		addCode(CodeBlock("\tfclose($starSymbol(fp));\n"));
 	}
 }

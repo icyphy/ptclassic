@@ -21,7 +21,7 @@ defstar {
 		addInclude("<math.h>");
 	}
 	go {
-		gencode(cosgen);
+		addCode(cosgen);
 	}
    codeblock(cosgen) {
 	$ref(output) = cos($ref(input));

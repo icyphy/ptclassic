@@ -21,7 +21,7 @@ defstar {
 		addInclude("<math.h>");
 	}
 	go {
-		gencode(singen);
+		addCode(singen);
 	}
    codeblock(singen) {
 	$ref(output) = sin($ref(input));

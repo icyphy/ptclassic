@@ -108,10 +108,10 @@ Produce code for inter-process communication (send-side)
 	}
 	}
 	go {
-		gencode(block);
+		addCode(block);
 	}
 	wrapup {
-		gencode("\tclose($starSymbol(sId));\n");
+		addCode("\tclose($starSymbol(sId));\n");
 	}
 }
 

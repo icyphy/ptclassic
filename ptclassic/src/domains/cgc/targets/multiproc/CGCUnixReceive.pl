@@ -114,11 +114,11 @@ Produce code for inter-process communication (receive-side)
 	}
 	}
 	go {
-		gencode(block);
+		addCode(block);
 	}
 	wrapup {
-		gencode("\tclose($starSymbol(sId));\n");
-		gencode("\tclose($starSymbol(newSId));\n");
+		addCode("\tclose($starSymbol(sId));\n");
+		addCode("\tclose($starSymbol(newSId));\n");
 	}
 }
 

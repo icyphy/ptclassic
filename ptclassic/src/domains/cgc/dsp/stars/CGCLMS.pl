@@ -80,9 +80,9 @@ will be stored there after the run has completed.
 		addInclude("<stdio.h>");
 	}
 	go {
-		gencode(bodyDecl);	// from FIR
-		gencode(update);
-		gencode(body);		// from FIR
+		addCode(bodyDecl);	// from FIR
+		addCode(update);
+		addCode(body);		// from FIR
 	}
 
    codeblock(update) {
@@ -101,9 +101,9 @@ will be stored there after the run has completed.
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			gencode(CodeBlock("    {\n"));
-			gencode(save);
-			gencode(CodeBlock("    }\n"));
+			addCode(CodeBlock("    {\n"));
+			addCode(save);
+			addCode(CodeBlock("    }\n"));
 		}
 	}
 

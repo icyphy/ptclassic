@@ -165,7 +165,7 @@ For more information about polyphase filters, see F. J. Harris,
 	}
    }
 	go {
-		gencode(bodyDecl);
-		gencode(body);
+		addCode(bodyDecl);
+		addCode(body);
 	}
 }

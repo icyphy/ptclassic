@@ -63,8 +63,8 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	go {
 		ix = int(factor) - int(phase) - 1;
 		if (output.staticBuf() && output.linearBuf())
-			gencode(sendOne);
+			addCode(sendOne);
 		else
-			gencode(sendAll);
+			addCode(sendAll);
 	}
 }
