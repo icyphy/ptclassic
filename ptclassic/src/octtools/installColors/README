@@ -1,5 +1,5 @@
 #
-# ~ptolemy/src/utils/installColors/README
+# $PTOLEMY/src/utils/installColors/README
 # Version: $Id$
 #
 This directory contains a modified version of the pat2tap
@@ -7,24 +7,27 @@ program from the Berkeley octtools distribution.
 The program has been modified to work more easily with Ptolemy,
 and has been renamed "installColors".
 
+The following instructions assume the environment variable PTOLEMY
+points to the root of the Ptolemy directory tree.
+
 To use the program:
 
 A text file is used to define the colors used by vem to display ptolemy
 facets.  In Vem terminology, it defines the "ptolemy technology."
 The colors can be changed, and users can define their own colors.
 The default ptolemy colors are defined in
-    ~ptolemy/lib/colors/ptolemy/colors.pat for color monitors; and
-    ~ptolemy/lib/colors/ptolemy/bw.pat for black and white monitors.
+    $PTOLEMY/lib/colors/ptolemy/colors.pat for color monitors; and
+    $PTOLEMY/lib/colors/ptolemy/bw.pat for black and white monitors.
 
 Editing the text file is not sufficient to effect changes to the colors.
 The colors must be incorporated into the tap.views facet for any
 changes to take effect.  This can be done as follows:
 
-        cd ~ptolemy/lib/colors/ptolemy
+        cd $PTOLEMY/lib/colors/ptolemy
 	vi colors.pat
         installColors
 
-The last line invokes a program located in ~ptolemy/octtools/bin.sun4, where
+The last line invokes a program located in $PTOLEMY/octtools/bin.sun4, where
 'sun4' may be replaced with whatever machine type you are running on.
 The dialog with the program should proceed as follows:
 	Name of the color pattern file [colors.pat]:
@@ -35,12 +38,14 @@ The dialog with the program should proceed as follows:
 	Output display type [MIT X Consortium]:
         Color output device [yes]:
 
-If you are modified the colors in ~ptolemy/lib/colors/colors.pat,
+If you are modified the colors in $PTOLEMY/lib/colors/colors.pat,
 the defaults will work.  Otherwise, you must enter answers to the above
 questions.  The program uses your DISPLAY environment variable to
 determine your output display type ("MIT X Consortium" above).
 If you wish to over-ride this, you can answer "yes" to the third
 query.  You will then be asked for a display name.
+The other output devices that you may wish to specify include
+GENERIC-COLOR and PostScript-BW.
 
 The file colors.pat is pretty self-explanatory.
 Larger priorities 0,1,2,... indicate greater visibility priority.
@@ -52,7 +57,7 @@ called "~myLogin/myColors".  Then
 
         mkdir ~myLogin/myColors
         cd ~myLogin/myColors
-        cp -r ~ptolemy/lib/colors/ptolemy .
+        cp -r $PTOLEMY/lib/colors/ptolemy .
         cd ptolemy
         vi colors.pat
 
@@ -72,10 +77,12 @@ YOUR OWN pigi SCRIPT.
 		eliminate this problem.
 
 You should also update the pointers in your new color specification
-by running the octmvlib program:
+by running the masters program:
 
 	cd ~myLogin/myColors
-	octmvlib -O "$PTOLEMY/lib/colors" -N "~myLogin/myColors" tap.views:schematic
+	masters tap.views
+Using this program, replace any instances of "$PTOLEMY/lib/colors"
+with "~myLogin/myColors".
 
 Then restart pigi.
 
@@ -105,19 +112,13 @@ So cleantap is written to remove these spurious edges in the
 DESIGN-RULES bag, sort of "clean up tap.views", hence the name.
 
 ---------
-tapPP	(Kennard White)
-There is a new octtools program named "tapPP" which creates an index
-of all the connectors.  This supposedly speeds up vem.  It is not
-clear if we should run it or not since we have so few connectors.
-
----------
 technologies (Kennard White)
 All octtools programs understand a "technology root directory".  This
 is specified with the "vem*technology" resource or with the "=-T" option.
-This directory then has a set of directories, which each directory cooresponding
+This directory then has a set of directories, which each directory corresponding
 to a particular technology.  For ptolemy, the root directory is
-"~ptolemy/lib/colors", and the name of the technology is "ptolemy".
-Thus the ptolemy technology resides in "~ptolemy/lib/colors/ptolemy".
+"$PTOLEMY/lib/colors", and the name of the technology is "ptolemy".
+Thus the ptolemy technology resides in "$PTOLEMY/lib/colors/ptolemy".
 Within this directory, there is one key facet "tap.views" which contains
 all the configuration information about the technology.  In particular,
 it contains all the color information, design rules, pointers to
