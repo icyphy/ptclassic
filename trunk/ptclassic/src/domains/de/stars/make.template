@@ -74,10 +74,7 @@ DEStatistics.pl \
 DEStopTimer.pl \
 DESwitch.pl \
 DESynchronize.pl \
-DETestEQ.pl \
-DETestGE.pl \
-DETestGT.pl \
-DETestNE.pl \
+DETest.pl \
 DETestLevel.pl \
 DETimeout.pl \
 DETimeoutStar.pl \
