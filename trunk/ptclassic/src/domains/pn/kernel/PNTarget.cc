@@ -35,14 +35,15 @@ static const char file_id[] = "$RCSfile$";
 
 #include "MTDFTarget.h"
 #include "MTDFScheduler.h"
-#include "RTScheduler.h"
+#include "MTDFThread.h"
+#include "MTDFMonitor.h"
+
+static MTDFMonitor prototype;
 
 // Constructor.
 MTDFTarget::MTDFTarget() : Target("default-MTDF", "MTDFStar",
 	"Schedule dataflow systems using Sun's lightweight process library.")
 {
-    addState(realTime.setState("real-time", this, "NO",
-		"specify whether to run in real time."));
 }
 
 // Destructor.
@@ -60,16 +61,23 @@ Block* MTDFTarget::makeNew() const
 // Initialization.
 void MTDFTarget::setup()
 {
-    delSched();
-    if (realTime) { LOG_NEW; setSched(new RTScheduler); }
-    else { LOG_NEW; setSched(new MTDFScheduler); }
+    LOG_NEW; setSched(new MTDFScheduler);
+
+    // Enable all registered PtGates before additional threads are created.
+    GateKeeper::enableAll(prototype);
+
     Target::setup();
 }
 
-// End simulation.
 void MTDFTarget::wrapup()
 {
-    MTDFScheduler* sched = (MTDFScheduler*)scheduler();
-    sched->deleteThreads();
     Target::wrapup();
+
+    // Uninitialize the thread library.
+    MTDFThread::wrapup();
+
+    // Disable all registered PtGates after threads have been deleted.
+    GateKeeper::disableAll();
+
+    delSched();
 }
