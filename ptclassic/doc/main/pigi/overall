@@ -19,6 +19,7 @@ David G. Messerschmitt
 .AE
 .so terminology
 .so setup
+.so xwindow
 .so demos
 .so universes
 .so galaxies
