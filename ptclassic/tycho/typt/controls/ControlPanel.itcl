@@ -49,11 +49,23 @@
 # example, the *foo.so* package will implement the procedure
 # *::tycho::foo*. This proc has the following submodes:
 # <ul>
-# <li><b>setup</b>: ...
-# <li> etc...
+# <LI><B>scriptfile</B>: Return the name of the user interface script
+# file set in the TychoTarget parameters window in VEM.
+# <LI><B>init</B>: Call the <CODE>tychoSetup()</CODE> function,
+# causing stars to tell Tycho what to do when controls
+# are moved by the user.
+# <LI><B>setup</B>: Call the <CODE>setup()</CODE> function. If
+# an additional argument is called, it is the name of a Tcl
+# variable that is updated with the iteration count after
+# each call to <CODE>execute()</CODE>.
+# <LI><B>execute</B>: Execute the universe until the C timer
+# expires (by default, Tycho sets this to 20 ms).
+# Update the Tcl iteration counter if one was specified
+# in the setup call.
+# <LI><B>wrapup</B>: Call the <CODE>wrapup()</CODE> function.
 # </ul>
 # 
-# The <b>scriptfile</b> mode whould return the name of a file
+# The <b>scriptfile</b> mode should return the name of a file
 # that adds "panels" to a ControlPanel widget called
 # "controlPanel." Each panel should be a subclass of
 # <a href="ControlSubpanel.html">ControlSubpanel</a>.
@@ -154,8 +166,8 @@ proc ::tycho::controlpanel {filename {widgetname {}}} {
 # This widget is generally created by the
 # <code>::tycho::controlpanel</code> procedure, which also
 # sources a script file that should configure a control panel
-# named "controlPanel." (See the <a href="ControlPanl_rel.html">
-# <code>::tycho::controlpanel></code</a> proc for more information.)
+# named "controlPanel." (See the <a href="ControlPanel_rel.html">
+# <code>::tycho::controlpanel</code></a> proc for more information.)
 # Most of the methods of the ControlPanel widget are used
 # internally, by the <a href="../../../../src/tycgc/doc">tycgc</a>
 # support library, and by the ControlSubPanel class, but the script file
