@@ -13,6 +13,7 @@ Utility functions.
 #include "err.h"
 #include "util.h"
 #include "rpc.h"
+#include "octIfc.h"
 
 
 /* UMalloc  12/10/88
@@ -346,4 +347,71 @@ char *str;
 	}
     }
     return (count == 0);
+}
+
+extern char* curDomainName();
+
+/* Given the spot that locates the curson in a facet, set
+   the KnownBlocks currentDomain to correspond to the domain
+   of the facet.  As a side effect, if the domain property of
+   the facet has not been defined, it will be set to current domain
+   of the KnownBlocks object.
+   Returns a pointer to the string identifying the previous domain,
+   or NULL if it fails.
+        EAL, 9/23/90
+*/
+char *
+setCurDomainS(spot)
+RPCSpot *spot;
+{
+    octObject facet;
+    char *domain, *oldDomain;
+
+    oldDomain = curDomainName();
+
+    /* get current facet */
+    facet.objectId = spot->facet;
+
+    if (octGetById(&facet) != OCT_OK) {
+        PrintErr(octErrorString());
+        return FALSE;
+    }
+    if (!GOCDomainProp(&facet, &domain, oldDomain)) {
+        PrintErr(ErrGet());
+        return NULL;
+    }
+    /* Call Kernel function to set KnownBlock current domain */
+    if (! KcSetKBDomain(domain)) {
+	PrintErr("Domain error in current facet.");
+	return NULL;
+    }
+    return oldDomain;
+}
+
+/* Given a facet, set the KnownBlocks currentDomain to correspond
+   to the domain of the facet.
+   As a side effect, if the facet domain property has not been set,
+   it will be set to current domain in the KnownBlocks object.
+   Returns a pointer to the string identifying the old domain, or
+   NULL if this fails.
+        EAL, 9/23/90
+*/
+char *
+setCurDomainF(facetPtr)
+octObject *facetPtr;
+{
+    char *domain, *oldDomain;
+
+    oldDomain = curDomainName();
+
+    if (!GOCDomainProp(facetPtr, &domain, oldDomain)) {
+        PrintErr(ErrGet());
+        return NULL;
+    }
+    /* Call Kernel function to set KnownBlock current domain */
+    if (! KcSetKBDomain(domain)) {
+	PrintErr("Domain error in current facet.");
+	return NULL;
+    }
+    return oldDomain;
 }
