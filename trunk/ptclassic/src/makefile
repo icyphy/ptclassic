@@ -47,7 +47,7 @@ include $(CONFIG)
 DIRS = kernel thread ptlang domains utils ptcl pigilib ptklib tysh pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
-MTDIRS = kernel pigilib pxgraph ptcl ptklib pigiRpc
+MTDIRS = kernel pigilib pxgraph ptcl ptklib pigiRpc tysh
 
 # "leaf" directories with no make.template
 LDIRS = ptlang filters utils
