@@ -146,6 +146,7 @@ if ( -d ../src/tst ) then
 	foreach x ($NONDOMAINTSTS)
 		optmkdir $x
 		cd $x
+		optlink ../../../src/tst/$x make.template
 		optlink ../../../src/tst/$x makefile
 		cd ..
 	endif
