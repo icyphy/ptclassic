@@ -10,15 +10,17 @@
 
 ROOT = ../../..
 VPATH = $(ROOT)/src/stars/sdf
-# SRCDIR is the directory containing the Ptolemy kernel source.
-SRCDIR = $(ROOT)/src/kernel
-GPPFLAGS = -g -I$(SRCDIR)
+# KERNDIR is the directory containing the Ptolemy kernel source.
+KERNDIR = $(ROOT)/src/kernel
+# SDFDIR is the directory containing SDF domain support
+SDFDIR = $(ROOT)/src/domains/sdf
+GPPFLAGS = -g
 GNU = g++
-GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include
+GNUINCLUDE = /usr/gnu/lib/g++-include
 
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -c  $<
 
 SRCS=BlackHole.cc ComplexDC.cc ComplexFIR.cc \
  ComplexFFT.cc ComplexPolar.cc ComplexProduct.cc ComplexSum.cc \
@@ -58,7 +60,7 @@ sources:	$(SRCS) $(HDRS) make.template
 clean:
 		rm -f *.o core *~ *#
 depend:
-		makedepend $(GNUINCLUDE) $(SRCS)
+		makedepend -I$(SDFDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
 
 makefile:	make.template
 		rm -f makefile
