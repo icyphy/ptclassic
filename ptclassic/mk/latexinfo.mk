@@ -76,7 +76,7 @@ INFO_CLEAN= $*.cp $*.pg $*.fn $*.vr $*.tp $*.ky \
 
 # Convert LaTeX output to PostScript.
 %.ps:	%.dvi
-	dvips -r -o $@ $<
+	dvips -o $@ $<
 
 # Remove all intermediate files.
 %.clean:
