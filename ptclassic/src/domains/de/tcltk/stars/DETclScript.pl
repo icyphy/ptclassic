@@ -68,6 +68,13 @@ by the star every time it fires.
 The procedure could, for example, grab input values and compute output values,
 although it can do anything the designer wishes, even ignoring the input
 and output values.
+.pp
+For the DE domain, this star checks to see which inputs are new and
+determines which outputs will be affected by the Tcl/Tk script.
+It then calls the Tcl/Tk script, and writes out the output values
+on the appropriate output ports.
+The time stamp on the affected output ports will be the same
+as the time stamp on the input port(s) that caused this star to fire.
 .EQ
 delim $$
 .EN
@@ -118,22 +125,29 @@ delim $$
 		  while ((iportp = nextp++) != 0) {
 		    if ( iportp->dataNew ) {
 		      // set proper entry of newInputFlags of the Tcl object
-		      tcl.inputNewFlags[portnum] = TRUE;
+		      tcl.setOneNewInputFlag(portnum, TRUE);
 
 		      // see which outputs are affected by the new input
 		      if ( ! alloutflag ) {
-		        if ( iportp->complete ) {
+		        if ( iportp->getcomplete() ) {
 			  tcl.setAllNewOutputFlags(TRUE);
 			  alloutflag = TRUE;
-			} else {
-			// walk down triggerList to find affected outputs ??
-
+			}
+			else {
+			  // walk down triggerList to find affected outputs
+			  SequentialList *outListp = iportp->gettriggerList();
+			  int numTriggers = outListp->size();
+			  int *datap;
+			  for (int trig = 0; trig < numTriggers; trig++ ) {
+			    datap = (int *) outListp->elem(trig);
+			    tcl.setOneNewOutputFlag(*datap, TRUE);
+			  }
 			}
 		      }
 		    }
 		    portnum++;
-		 }
-	       }
+		  }
+		}
 	}
 	method {
 		name{ processOutputs }
@@ -146,8 +160,9 @@ delim $$
 		  OutDEPort *oportp;
 		  int portnum = 0;
 		  while ((oportp = nextp++) != 0) {
-		    if ( tcl.outputNewFlags[portnum] ) 
-		      oportp->put(completionTime) = tcl.outputValues[portnum];
+		    if ( tcl.outputNewFlags[portnum] ) {
+		      oportp->put(completionTime) << tcl.outputValues[portnum];
+		    }
 		    portnum++;
 		  }
 		}
@@ -163,6 +178,5 @@ delim $$
 
 	   // Send the outputs which are new through the output portholes
 	   processOutputs();
-
 	}
 }
