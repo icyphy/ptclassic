@@ -72,12 +72,11 @@ complete filename of the displayed images.
 
 	wrapup { // Display the video here.
 		LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
-		sprintf(cmd, "rm -f %s", temp1); system(cmd);
 
 		if (!(allFileNames[0])) { // No files to show.
 			LOG_DEL; delete [] cmd; cleanUp(); return;
 		}
-		sprintf(cmd, "(getx11 -m %s)&", allFileNames);
+		sprintf(cmd, "getx11 -m %s", allFileNames);
 		system (cmd);
 
 		LOG_DEL; delete [] cmd;
