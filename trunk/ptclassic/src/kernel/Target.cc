@@ -26,7 +26,10 @@ int Target::commTime(int,int,int,int) { return 0;}
 
 // display the schedule
 StringList Target::displaySchedule() {
-	return sched ? sched->displaySchedule() : "no schedule";
+	if (sched) {
+		return sched->displaySchedule();
+	}
+	return "no scheduler member, so no schedule\n";
 }
 
 // default setup: set all stars to have me as their Target, then
@@ -114,3 +117,21 @@ Target& Target::copyStates(const Target& src) {
 		destStatePtr->setValue(srcStatePtr->getInitValue());
 	return *this;
 }
+
+// Dummy parallel scheduling funcs.
+void Target :: clearCommPattern() {}
+void Target :: saveCommPattern() {}
+void Target :: restoreCommPattern() {}
+
+PGNode* Target :: backComm(PGNode*) { return 0;}
+
+	// this function schedules a node
+int Target :: scheduleComm(PGNode*, int earliestStart) {
+	return earliestStart;
+}
+
+// this function returns a list of alternative candidate processors
+IntList* Target :: whichProcs(Cluster*, PGParSchedule*) {
+	return 0;
+}
+
