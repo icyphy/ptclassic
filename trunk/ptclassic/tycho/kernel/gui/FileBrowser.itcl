@@ -39,7 +39,10 @@ option add *FileBrowser*textBackground \
 	[ptkColor antiqueWhite white] widgetDefault
 option add *FileBrowser.textForeground \
 	[ptkColor black black] widgetDefault
-option add *FileBrowser.entryfont [.tychoFonts defaultFont fixed]
+option add *FileBrowser.entryfont \
+	[.tychoFonts defaultFont fixed] widgetDefault
+option add *FileBrowser.width 30 widgetDefault
+option add *FileBrowser.height 12 widgetDefault
 
 ########################################################################
 #### expandPath
@@ -75,12 +78,6 @@ proc ::tycho::filename {} {
     return [DialogWindow::newModal FileBrower [autoName .file]]
 }
 
-#######################################################################
-# options
-#
-option add *FileBrowser.textBackground \
-	[ptkColor antiqueWhite white] startupFile
-
 ##########################################################################
 #### FileBrowser
 # Create a file browser window that is destroyed when the user has
@@ -103,62 +100,27 @@ option add *FileBrowser.textBackground \
 # </pre></tcl>
 #
 class ::tycho::FileBrowser {
-    inherit ::tycho::EntryQuery
-
-    # The command to execute on a file when one is identified
-    itk_option define -command command Command "::tycho::DialogWindow::answer"
+    inherit ::tycho::ListBrowser
 
     constructor {args} {}
 
     ##################################################################
     ####                     public methods                       ####
 
-    #### breakCompleteSequence
-    # Break the interpretation of a sequence of Tabs as scrolling over matches.
-    method breakCompleteSequence {}
-
-    #### clearselection
-    # Clear any selections made by file completion.
-    method clearselection {}
-
-    #### complete
-    # Complete the partially entered filename.
-    method complete {}
+    #### help
+    # Open a help window.
+    method help {}
 
     #### mkdir
     # Make a new directory and go to it.
     method mkdir {}
 
-    #### goto
-    # Goto the specified item in the listbox.
-    method goto {item}
-
-    #### help
-    # Open a help window.
-    method help {}
-
-    #### ok
-    # Open the file or directory specified in the entry box.
-    method ok {}
-
-    #### open
-    # Open the file or directory specified in the argument.
-    method open {name}
-
-    #### scroll
-    # Move up or down a number of pages or units in the listbox or selection.
-    method scroll {num what}
-
-    #### selectFile
-    # Copy filename from listbox to entry.
-    method selectFile {lb ypos}
-
     ##################################################################
     ####                   protected methods                      ####
 
-    #### checkFile
+    #### processItem
     # Process a file or directory selection.
-    protected method checkFile {filename}
+    protected method processItem {filename}
 
     #### updateListbox
     # Fill the listbox with file and directory names.
@@ -171,12 +133,6 @@ class ::tycho::FileBrowser {
     # and the directory last visited.
     protected common fileLastOpened
     protected common CWD
-
-    ##################################################################
-    ####                   private variables                      ####
-    private variable closing 0
-    private variable scrollposition 0
-    private variable uselastpattern 0
 }
 
 ######################################################################
@@ -186,13 +142,10 @@ body ::tycho::FileBrowser::constructor {args} {
     # The text to insert at the top of the file browser
     configure -text "Select File:"
     
-    # To make things more compact
-    component hull configure -borderwidth 0
-    
     global env
     
     if {! [info exists fileLastOpened]} {
-	# First call to this routine.
+	# First FileBrowser window constructed.
 	# If the environment variable PTPWD exists, it gives the directory.
 	# Otherwise, we issue the Unix command pwd.
 	set fileLastOpened ""
@@ -203,18 +156,6 @@ body ::tycho::FileBrowser::constructor {args} {
 	}
     }
 
-    # Entry box for entering file names directly
-    addQuery entry {} $fileLastOpened
-    
-    # frane for listbox for listing files and directories.
-    itk_component add listscroll {
-	frame $itk_interior.childsite.listscroll
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(listscroll) -side top \
-	    -expand yes -fill both -padx 5
-
     # Current directory display.
     itk_component add dir {
 	label $itk_interior.childsite.dir -text $CWD -width 35 -anchor e
@@ -223,107 +164,16 @@ body ::tycho::FileBrowser::constructor {args} {
     }
     pack $itk_component(dir) -side top -fill x
     
-    # Listbox for files and directories.
-    itk_component add listbox {
-	listbox $itk_component(listscroll).listbox -relief sunken \
-		-yscroll "$itk_component(listscroll).scroll set" \
-		-setgrid 1 \
-		-selectmode single
-    } {
-	keep -background -cursor -foreground -font
-	rename -background -textbackground textBackground Background
-	rename -foreground -textforeground textForeground Foreground
-    }
-    pack $itk_component(listbox) -side left -expand yes -fill both
-    
-    updateListbox
-    
     # In case updateListbox inserts into the entry; to avoid repetition
     clear entry
     insert entry $fileLastOpened
 
-    # Scrollbar for files.
-    itk_component add scroll {
-	scrollbar $itk_component(listscroll).scroll \
-		-command "$itk_component(listscroll).listbox yview" \
-		-relief sunken
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(scroll) -side right -fill y
-
-    itk_component add buttons {
-	buttonbox $itk_interior.childsite.buttons
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(buttons) -expand no
-
+    # Create directory button.
     $itk_component(buttons) add mkdir -text "New Directory" \
 	    -command [code $this mkdir]
-    $itk_component(buttons) add help -text "Help" \
-	    -command [code $this help]
 
-    ###################################################################
-    # bindings
-    # NOTE: The Escape bindings below don't work because Escape is used
-    # to close the window.
-    #
-    # Any key breaks a sequence of Tabs
-    bind $itk_component(hull) <KeyPress> \
-	    [code {%Q breakCompleteSequence}]
-    bind $itk_component(hull) <Tab> { }
-    bind $itk_component(entry_entry) <Tab> \
-	    [code {%Q complete; break}]
-
-    # Mouse bindings
-    bind $itk_component(listbox) <Double-1> \
-	    [code {%Q open [%Q get entry]; break}]
-    bind $itk_component(listbox) <1> \
-	    [code %Q selectFile %W %y]
-
-    # Navigation bindings
-    bind $itk_component(hull) <Meta-v> [code %Q scroll -1 pages]
-    # Escape removed the window, so it doesn't work as an alternative to meta.
-    # bind $itk_component(hull) <Escape><v> [code %Q scroll -1 pages]
-
-    bind $itk_component(hull) <Control-v> [code %Q scroll 1 pages]
-    bind $itk_component(hull) <Control-backslash> [code %Q clearselection]
-    bind $itk_component(hull) <Control-p> [code %Q scroll -1 selection]
-    bind $itk_component(hull) <Control-n> [code %Q scroll 1 selection]
-
-    # Special keys for moving about.
-    bind $itk_component(hull) <Prior> [code %Q scroll -1 pages]
-    bind $itk_component(hull) <Next> [code %Q scroll 1 pages]
-    bind $itk_component(hull) <End> [code %Q goto end]
-    bind $itk_component(hull) <Meta-greater> [code %Q goto end]
-    # bind $itk_component(hull) <Escape><greater> [code %Q goto end]
-    bind $itk_component(hull) <Up> [code %Q scroll -1 selection]
-    bind $itk_component(hull) <Down> [code %Q scroll 1 selection]
-    bind $itk_component(hull) <Home> [code %Q goto 0]
-    bind $itk_component(hull) <Meta-less> [code %Q goto 0]
-    # bind $itk_component(hull) <Escape><less> [code %Q goto 0]
-    
-    # We have gotten some reported problems about these keys
-    # being undefined on some machines.  But they also seem
-    # be needed for other machines.  Hence the catch.
-    catch {
-	bind $itk_component(hull) <KP_Prior> [code %Q scroll -1 pages]
-	bind $itk_component(hull) <KP_Next> [code %Q scroll 1 pages]
-	bind $itk_component(hull) <KP_End> [code %Q goto end]
-	bind $itk_component(hull) <KP_Up> [code %Q scroll -1 selection]
-	bind $itk_component(hull) <KP_Down> [code %Q scroll 1 selection]
-	bind $itk_component(hull) <KP_Home> [code %Q goto 0]
-    }
     # Process any unevaluated arguments.
     eval itk_initialize $args
-
-    wm resizable $prefix 1 1
-    # NOTE: There seems to be no way to find out the actual window size at this
-    # point.  The commands "wm reqwidth" and "wm width" return 1, even after
-    # a "tkwait visibility" and an "update".  So we just set some reasonable
-    # minimum size.
-    wm minsize $prefix 10 10
 }
 
 
@@ -332,101 +182,13 @@ body ::tycho::FileBrowser::constructor {args} {
     ####                     public methods                       ####
 
 ######################################################################
-#### breakCompleteSequence
-# Break the interpretation of a sequence of Tabs as scrolling through
-# matching filenames.  This is bound to any key other than Tab.
-#
-body ::tycho::FileBrowser::breakCompleteSequence {} {
-    set uselastpattern 0
-}
-
-######################################################################
-#### clearselection
-# Clear any selections made by file completion.
-#
-body ::tycho::FileBrowser::clearselection {} {
-    $itk_component(listbox) selection clear 0 end
-}
-
-######################################################################
-#### complete
-# Complete a partially entered filename.  On the first invocation,
-# this method finds an entry in the listbox that has the contents of
-# the entry box as a prefix.  Glob-style rules are used, so the entry
-# can be a pattern (* for any substring, ? for any single character,
-# [chars] for a set of characters, or \x for a single character.
-# If there is more than one matching entry, then all matching entries
-# are selected in the listbox.  The selected entries can then be
-# scrolled with the up and down arrow keys.
-# If the method is invoked again without an intervening invocation
-# of breakCompleteSequence, then it scrolls through the selected entries
-# as if the down arrow had been pressed.
-#
-body ::tycho::FileBrowser::complete {} {
-    if {$uselastpattern} {
-	scroll 1 selection
-	return
-    }
-    set pattern "[get entry]*"
-    set index 0
-    set foundone 0
-    set firstone -1
-    set foundtwo 0
-    $itk_component(listbox) selection clear 0 end
-    foreach name [$itk_component(listbox) get 0 end] {
-	if [string match $pattern $name] {
-	    if $foundone {
-		set foundtwo 1
-	    }
-	    set foundone 1
-	    if {$firstone == -1} {set firstone $index}
-	    $itk_component(listbox) selection set $index
-	}
-	incr index
-    }
-    if {$foundone == 0} {
-	# No match found.
-	bell
-	return
-    }
-    if {$foundtwo == 0} {
-	# Found exactly one match.  Replace the entry contents.
-	clear
-	insert entry [selection get]
-    } {
-	# Found more than one.  Alert user that entry is not complete.
-	set uselastpattern 1
-	bell
-    }
-    $itk_component(listbox) see $firstone
-    if {$firstone > 0} {
-	set scrollposition [expr $firstone-1]
-    } {
-	set scrollposition 0
-    }	
-}
-
-######################################################################
-#### goto
-# Goto the specified item in the listbox.  The item identifier can
-# be an integer (starting with 0), the word "end", or any of the index
-# forms understood by the Tk listbox widget.
-#
-body ::tycho::FileBrowser::goto {item} {
-    $itk_component(listbox) see $item
-    clear
-    insert entry [$itk_component(listbox) get $item]
-    set idx [$itk_component(listbox) index $item]
-    set scrollposition $idx
-}
-
-######################################################################
 #### help
 # Open a help window.
 #
 body ::tycho::FileBrowser::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/FileBrowserHelp.html
+    ::tycho::File::openContext \
+	    $TYCHO/kernel/doc/usersGuides/FileBrowserHelp.html
 }
 
 ######################################################################
@@ -438,92 +200,8 @@ body ::tycho::FileBrowser::mkdir {} {
     if {$dirname != {}} {
 	# FIXME: Unix command built in
 	exec mkdir $dirname
-	checkFile $dirname
+	processItem $dirname
     }
-}
-
-######################################################################
-#### ok
-# Open the file specified in the entry box.
-#
-body ::tycho::FileBrowser::ok {} {
-    open [get entry]
-}
-
-######################################################################
-#### open
-# Open a file or directory.
-#
-body ::tycho::FileBrowser::open {name} {
-    # This method might be in the middle of being processed already.
-    # If so, return.
-    if {$closing} {return}
-    set closing 1
-    update idletasks
-    if [checkFile $name] {
-	#nextWindow not used because focus goes to the new window
-	delete object $this
-	return
-    }
-    set closing 0
-}
-
-######################################################################
-#### scroll
-# Move up or down a number of pages or units in the listbox or
-# selection. The first argument is an integer (negative means to move
-# up). If the second argument is "pages", then scrolling is by
-# screenfulls. If it is "units", then scrolling is by individual items.
-# If it is "selection", then we move up or down by individual items
-# within the selected items, if any items are selected.  If there are
-# no items selected, then we move up and down as if the value of
-# second argument were "units".
-#
-body ::tycho::FileBrowser::scroll {num what} {
-    clear
-    if {$what == "pages"} {
-	$itk_component(listbox) yview scroll $num $what
-	set scrollposition [$itk_component(listbox) nearest 0]
-    } elseif {$what == "units"} {
-	incr scrollposition $num
-	set size [$itk_component(listbox) size]
-	if {$scrollposition < 0} {
-	    set scrollposition 0
-	} elseif {$scrollposition >= $size} {
-	    set scrollposition [incr size -1]
-	}
-    } elseif {$what == "selection"} {
-	set indexes [$itk_component(listbox) curselection]
-	if {$indexes == {}} {
-	    scroll $num units
-	    return
-	}
-	foreach idx $indexes {
-	    if {$idx > $scrollposition} {
-		goto $idx
-		return
-	    }
-	}
-	# Need to wrap around to the start.
-	goto [lindex $indexes 0]
-	return
-    } else {
-	error "Unrecognized argument: $what.  \
-		Should be units, pages, or selection"
-    }
-    insert entry [$itk_component(listbox) get $scrollposition]
-}
-
-######################################################################
-#### selectFile
-# Determine the file name in the listbox lb that is closest to the
-# mouse position ypos and insert its name in the entry box.
-#
-body ::tycho::FileBrowser::selectFile {lb ypos} {
-    $lb selection clear @0,0 end
-    $lb selection set [$lb nearest $ypos]
-    clear entry
-    insert entry [selection get]
 }
 
     ##################################################################
@@ -531,7 +209,7 @@ body ::tycho::FileBrowser::selectFile {lb ypos} {
     ####                   protected methods                      ####
 
 ######################################################################
-#### checkFile
+#### processItem
 # This procedure checks and processes the user selection. If the user
 # has selected a file, then the specified command is invoked with that
 # filename as an argument, and a 1 is returned. If the user specified a
@@ -541,8 +219,10 @@ body ::tycho::FileBrowser::selectFile {lb ypos} {
 # filename exists but is not readable, an error is triggered.  If the
 # filename does not exist as either a file or a directory, then the
 # command given by the -command option is invoked on that file.
+# If the entry is invalid for some reason, the user is warned and
+# the method returns 0.
 #
-body ::tycho::FileBrowser::checkFile {filename} {
+body ::tycho::FileBrowser::processItem {filename} {
 
     # In case the filename starts with an environment variable, expand
     set file [expandPath $filename]
@@ -569,7 +249,8 @@ body ::tycho::FileBrowser::checkFile {filename} {
 	    set fileLastOpened $relPath
 	    return 1
 	} {
-	    error "Directory does not exist: $dir"
+	    ::tycho::warn "Directory does not exist: $dir"
+	    return 0
 	}
     } 
     
@@ -581,7 +262,8 @@ body ::tycho::FileBrowser::checkFile {filename} {
 	    if {$char == "~"} {
 		set dir [glob -nocomplain $relPath]
 		if {! [file exist $dir]} {
-		    error "\"$dir\" does not exist!"
+		    ::tycho::warn "\"$dir\" does not exist!"
+		    return 0
 		} else {
 		    set CWD $dir
 		    $itk_component(dir) config -text $CWD
@@ -607,20 +289,23 @@ body ::tycho::FileBrowser::checkFile {filename} {
 		    if [regsub {(.*)/[^/]+$} $newPath {\1} temp] {
 			set newPath $temp
 		    } else {
-			error "Invalid component: \"$partOfPath\""
+			::tycho::warn "Invalid component: \"$partOfPath\""
+			return 0
 		    }
 		} else {
 		    if {$newPath == "/"} {
 			if [file exists /$partOfPath] {
 			    set newPath /$partOfPath
 			} else {
-			    error "Invalid component: \"$partOfPath\""
+			    ::tycho::warn "Invalid component: \"$partOfPath\""
+			    return 0
 			}
 		    } else {
 			if [file exists $newPath/$partOfPath] {
 			    set newPath $newPath/$partOfPath
 			} else {
-			    error "Invalid component: \"$partOfPath\""
+			    ::tycho::warn "Invalid component: \"$partOfPath\""
+			    return 0
 			}
 		    }
 		}
@@ -635,7 +320,9 @@ body ::tycho::FileBrowser::checkFile {filename} {
 	    updateListbox
 	    return 0
 	} else {
-	    error "Directory \"[string trimright $file /]\" is unreadable"
+	    ::tycho::warn \
+		    "Directory \"[string trimright $file /]\" is unreadable"
+	    return 0
 	}
     } else {
 	# It's a plain file
@@ -645,7 +332,8 @@ body ::tycho::FileBrowser::checkFile {filename} {
 	    set fileLastOpened $relPath
 	    return 1
 	} {
-	    error "\"$file\" is unreadable"
+	    ::tycho::warn "\"$file\" is unreadable"
+	    return 0
 	}
     }
 }

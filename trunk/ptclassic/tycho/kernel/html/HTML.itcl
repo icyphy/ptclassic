@@ -73,7 +73,7 @@ class ::tycho::HTML {
     method reload {}
 
     #### seeName
-    # Follow a hypertext link within the file.
+    # Goto a named point within the file.
     method seeName {name}
 
     #### switchFile
@@ -291,37 +291,10 @@ body ::tycho::HTML::reload {} {
 
 #####################################################################
 #### seeName
-# Follow a hypertext link.  If the hypertext link is in this same file,
-# defer to the HTMLText widget.  Otherwise, check to see whether
-# the other referenced file is an HTML file.  If it is, read the other
-# file into this same text widget.  Otherwise, open a new window.
+# Go to a named point within the file.
 #
 body ::tycho::HTML::seeName {name} {
-    if {![regexp {([^#]*)#(.+)} $name dummy fileref fragment]} {
-	set fileref $name
-	set fragment {}
-    }
-
-    if {$fileref == {} && $fragment != {}} {
-	# A local reference within the same file
-	$itk_component(text) seeName $fragment
-	return
-    }
-    # Got a reference to a file.
-    # If the filename is not absolute, use the current file directory
-    # as a prefix.
-    if {![string match /* $fileref]} {
-	set fileref [$itk_component(text) lastDirectory]/$file
-    }
-
-    # If the file is another html file, we open it in this same window.
-    # Otherwise, we open a new window.
-    if {[file extension $fileref] == {.html}} {
-	configure -file $fileref
-	switchFile $fileref
-    } {
-	::tycho::File::openContext $fileref
-    }
+    $itk_component(text) seeName $name
 }
 
 #####################################################################
