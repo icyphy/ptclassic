@@ -32,6 +32,11 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+# NOTE:  I considered using the file browser in the iwidgets library,
+# which is more like the standard Motif file browser.  I rejected it for
+# aesthetic reasons, settling on this simpler browser.  This one is
+# fashioned after the file browser in FrameMaker.
+
 # Options from the derived class
 option add *FileBrowser*entryWidth 30 widgetDefault
 
@@ -52,11 +57,11 @@ option add *FileBrowser.height 12 widgetDefault
 
 ########################################################################
 #### expandPath
-# Procedure to expand a filename that might begin with
+# Expand a filename that might begin with
 # an environment variable.  For example, if the value of
 # of the environment variable TYCHO is /usr/tools/tycho, then
 # <pre>
-#       ::tycho::expandPath \$TYCHO/tmp
+#     ::tycho::expandPath \$TYCHO/tmp
 # </pre>
 # returns /usr/tools/tycho/tmp.
 #
@@ -72,7 +77,7 @@ proc ::tycho::expandPath { path } {
     }
 }
 
-# COMPATIBILITY with pigi
+# COMPATIBILITY procedure.  Use <code>::tycho::expandPath</code>.
 proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 
 ##########################################################################
@@ -86,17 +91,19 @@ proc ::tycho::filename {} {
 
 ##########################################################################
 #### FileBrowser
-# Create a file browser window that is destroyed when the user has
-# selected a file. If the -command option is specified, then the value
-# of the option is taken as a command to execute when the user has
-# selected a filename. Before executing the command, the filename
-# selected by the user (which may represent a file that does not exist)
-# is appended to the command as an argument.
-# <p>
-# Note that I considered using the file browser in the iwidgets library,
-# which is more like the standard Motif file browser.  I rejected it for
-# aesthetic reasons, settling on this simpler browser.  This one is
-# fashioned after the file browser in FrameMaker.
+# This file browser displays a list of the files in the current
+# directory, permitting the user to select a file or directory by
+# clicking or by typing the name in an entry box. File completion (only
+# in the current directory) is supported via the Tab key, as is
+# glob-style pattern matching. The file browser has a "Help" button and
+# a "New Directory" button. When the user selects a directory, the
+# listbox is updated to reflect the contents of that directory. When
+# the user has selected a file, the file browser self-destructs. If the
+# -command option is specified, then the value of the option is taken
+# as a command to execute before self destructing. The filename
+# selected by the user (with the complete path, and which may represent
+# a file that does not exist) is appended to the command as an
+# argument.
 # <p>
 # For example, the following command will query the user for a file name,
 # and then post that filename in top-level window:
@@ -104,6 +111,15 @@ proc ::tycho::filename {} {
 # ::tycho::FileBrowser .w -command ::tycho::post
 # .w centerOnScreen
 # </pre></tcl>
+# <p>
+# The <code>FileBrowser</code> class maintains its own notion of the
+# current working directory that is not necessarily the same as the
+# current working directory of the Tcl interpreter. Each instance of
+# the <code>FileBrowser</code> updates this when the user selects a new
+# directory. If multiple file browsers are open at once, they navigate
+# the file system independently. But the most recently selected
+# directory will then be the default directory of any newly created
+# file browser.
 #
 class ::tycho::FileBrowser {
     inherit ::tycho::ListBrowser
@@ -131,9 +147,9 @@ class ::tycho::FileBrowser {
     ##################################################################
     ####                   protected variables                    ####
 
-    # Common variables store the name of the last file opened
-    # and the directory last visited.
+    # The last file opened.
     protected common fileLastOpened
+    # The directory last visited.
     protected common CWD
 
     # A local version of the CWD is kept in case multiple file browsers
@@ -202,7 +218,8 @@ body ::tycho::FileBrowser::help {} {
 
 ######################################################################
 #### mkdir
-# Make a new directory and go to it.
+# Make a new directory and list its contents in the list box.
+# Also, make this new directory the common working directory.
 #
 body ::tycho::FileBrowser::mkdir {} {
     set dirname [::tycho::queryinfo "Directory name" "$localCWD/" 80]
@@ -219,17 +236,17 @@ body ::tycho::FileBrowser::mkdir {} {
 
 ######################################################################
 #### processItem
-# This procedure checks and processes the user selection. If the user
-# has selected a file, then the specified command is invoked with that
-# filename as an argument, and a 1 is returned. If the user specified a
-# directory, then the listbox is updated with the contents of the
-# directory and a 0 is returned. If the specified filename is an empty
-# string, then nothing is done and a zero is returned. If the specified
-# filename exists but is not readable, an error is triggered.  If the
-# filename does not exist as either a file or a directory, then the
-# command given by the -command option is invoked on that file.
-# If the entry is invalid for some reason, the user is warned and
-# the method returns 0.
+# Check and process the user selection. If the user has selected a
+# file, then the command specified with the -command option is invoked
+# with that filename as an argument, and a 1 is returned. If the user
+# specified a directory, then the listbox is updated with the contents
+# of the directory and a 0 is returned. If the specified filename is an
+# empty string, then nothing is done and a zero is returned. If the
+# specified filename exists but is not readable, an error is triggered.
+# If the filename does not exist as either a file or a directory, then
+# the command given by the -command option is invoked on that file. If
+# the entry is invalid for some reason, the user is warned and the
+# method returns 0.
 #
 body ::tycho::FileBrowser::processItem {filename} {
 
@@ -352,10 +369,9 @@ body ::tycho::FileBrowser::processItem {filename} {
 
 ######################################################################
 #### updateListbox
-# This procedure fills the listbox with filenames. It classifies
-# directories and files. Directories are inserted at the top
-# and are arranged alphabetically.  Files are listed next, also
-# alphabetically.
+# Fill the listbox with filenames. Classify directories and files.
+# Directories are inserted at the top and are arranged alphabetically.
+# Files are listed next, also alphabetically.
 #
 body ::tycho::FileBrowser::updateListbox {} {
     
