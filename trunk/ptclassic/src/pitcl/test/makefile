@@ -52,13 +52,13 @@ SIMPLE_TESTS = \
 	testName.itcl \
 	testPorts.itcl \
 	testPredicates.itcl \
-	remove.itcl
+	testRemove.itcl
 
 # We need at least one GRAPHICAL_TEST so that we can generate alltests.itcl
 GRAPHICAL_TESTS = \
 	testDummy.itcl
 
-ITCL_SRCS =	$(SIMPLE_TESTS) alltests.itcl all.itcl
+ITCL_SRCS =	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -74,13 +74,13 @@ REALCLEAN_STUFF =
 tests:: test_graphics
 
 # These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+test_simple: $(EXTRA_SRCS)
 	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
 		$(ITCLSH)
 
 # These tests require a graphics terminal
-test_graphics: alltests.itcl
-	tycho -e alltests.itcl
+test_graphics: $(EXTRA_SRCS)
+	tycho -ptiny -noconsole -nowelcome -e alltests.itcl
 
 FORCE:
 
