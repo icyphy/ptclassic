@@ -26,6 +26,9 @@ done with g++ (type "long long"), but it isn't portable.
 		name { output }
 		type { fix }
 	}
+	// FIXME: This state is incompatible with the SDF version.
+	// The SDF version uses lower and upper as the states, so
+	// this star is only valid when -lower = upper = range < 1.0
 	defstate {
 		name { range }
 		type { fix }
