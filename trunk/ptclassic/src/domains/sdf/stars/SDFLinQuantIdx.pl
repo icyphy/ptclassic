@@ -50,45 +50,39 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 		float height;
-		float thresholds[255];
-		float values[255];
 		int number;
 	}
 	setup {
 		int i;
 		
-		height		= (high-low) /(levels-1);
-		thresholds[0]	= low+height;
-		values[0]	= low;
-
-		for(i=1;i<int(levels);i++) 
+		if(high > low) 		
+			height	= (high-low)/(levels-0);
+		else			
 		{
-			values[i]=values[i-1]+height;
-			thresholds[i]=thresholds[i-1]+height;
+		Error::abortRun("quantization range incorrectly specified");
+		return;
 		}
-
-		number= int( (-1)*(int(levels))* (0.5));
-		}
-	
+	}
 	go {
-	    int i;
-	    number= int( (-1)*(int(levels))* (0.5));
+	    	float in = input%0;
 
-	    float in = input%0;
-
-	    if( in >= high) {
-		    amplitude%0 << double(high);
-                    stepNumber%0 << (-1*number) -1 ;
-		    return;
+	    	if( in >= high) 	
+		{
+			amplitude%0 << double(high);
+                    	stepNumber%0 << int(levels);
+		    	return;
 		}
-	
-	    for(i = 0; i < levels; i++) {
-		if( in < thresholds[i] ) {
-		    amplitude%0 << values[i];
-		    stepNumber%0 << number;
-		    return;
+		else if(in <=low) 
+		{
+			amplitude%0 << double(low);
+                    	stepNumber%0 << 0;
+		    	return;
 		}
-		number++;
-	    }
+		else
+		{
+			int step = int((in-low)/height);
+			stepNumber%0 << step;
+        		amplitude%0 << (double(low + step*height));
+		}
 	}
 }
