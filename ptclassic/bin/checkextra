@@ -92,7 +92,10 @@ ls -d $files > /tmp/cj2$$
 set files = (`comm -23 /tmp/cj1$$ /tmp/cj2$$`)
 if ($#files > 0) then
 	set res = 1
-	echo "$prefix$files"
+	# for very long lines, this barfs
+	#echo "$prefix$files"
+	echo -n $prefix
+	echo $files
 endif
 
 rm -f /tmp/cj[12]$$
