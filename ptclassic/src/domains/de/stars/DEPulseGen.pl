@@ -12,9 +12,9 @@ time-value pairs, given in the syntax of complex numbers.
   version { $Revision$ $Date$ }
   author { Stefan De Troch (of IMEC) }
   copyright {
-Copyright (c) 1994 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
   location { }

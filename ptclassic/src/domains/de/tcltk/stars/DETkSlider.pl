@@ -6,9 +6,9 @@ defstar {
 	version { $Id$ }
 	author { Brian Evans and Edward Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE tcltk library }

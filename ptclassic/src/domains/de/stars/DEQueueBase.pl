@@ -10,9 +10,9 @@ All inputs are simply routed to the "overflow" output.  None are stored.
 	author { Soonhoi Ha and E. A. Lee }
 	acknowledge { Incorporates design ideas from Philip Bitar. }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	input {

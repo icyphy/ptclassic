@@ -8,9 +8,9 @@ Dynamically display the value of any number of input signals on a set of bar met
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF tcltk library }
