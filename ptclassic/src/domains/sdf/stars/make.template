@@ -76,6 +76,7 @@ PL_SRCS= \
  SDFLinQuantIdx.pl \
  SDFLog.pl \
  SDFLogic.pl \
+ SDFModulo.pl \
  SDFMpy.pl \
  SDFMpyCx.pl \
  SDFMpyFix.pl \
