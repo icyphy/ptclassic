@@ -44,8 +44,9 @@ CC_STATIC = 	-Wl,-a,archive
 # Note that -s will disable incremental linking
 # As a workaround, we run strip -x after producing the pigiRpc and ptcl
 # binaries.  Note that linking pigiRpc on a 32Mb hp735 can take upwards
-# of 30 minutes 
-STRIP_DEBUG =	strip -x
+# of 30 minutes.  GNU strip (cygnus-2.3.1 version) was reported to have 
+# troubles here, so use HP strip.
+STRIP_DEBUG =	/bin/strip -x
 
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
