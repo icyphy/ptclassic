@@ -57,14 +57,7 @@ Block* S56XTarget::clone() const {
 }
 
 void S56XTarget :: wrapup () {
-	addCode (
-		 "MAINEND equ	*\n"
-		 "	jmp	ERROR\n"
-		 "	org	p:$1ff0\n"
-		 "	nop\n"
-		 "	stop\n"
-		 "	org	p:MAINEND\n");
-		
+	addCode ("	jmp	ERROR\n");
 	inProgSection = TRUE;
 	CG56Target::wrapup();
 }
