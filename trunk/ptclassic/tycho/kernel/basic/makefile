@@ -41,6 +41,16 @@ VPATH =		$(ROOT)/kernel/basic
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# The variables below are used to create distributions
+TYPACKAGE =     tycho.kernel.basic
+TYPACKAGE_ROOTDIR = $(ROOT)/kernel
+TYPACKAGE_DIR = basic
+# If you change JVERSION, modify the version numbers in basic.tcl
+TYVERSION =     2.0
+TYDIST =        $(TYPACKAGE)$(TYVERSION)
+TYZIP =         $(TYPACKAGE_DIR)/$(TYPACKAGE).zip
+TYJARFILE =
+
 # Sub directories to run make in.
 DIRS =	 bin demo doc test
 
