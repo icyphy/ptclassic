@@ -205,7 +205,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
             }
         }
 
-        /* Now have the current event of highest priority.    
+        /* Now have the current event of highest priority.     */
         /* See if this event can access the Resource           */
         if (!canAccessResource(topEvent)) {
             // Cannot access resource, so reschedule the Events
@@ -317,7 +317,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                         } else {
                             break;
                         }
-                        ResLLCell* p = (ResLLCell*)getAppECT++;
+                        p = (ResLLCell*)getAppECT++;
                     }
                     if (nextTry == -1) {
                         Error::abortRun("Event never got rescheduled in NewEventFromEventQ()");
@@ -410,7 +410,7 @@ SequentialList* Resource :: getOtherEvents(DERCEvent* e, double now) {
     DERCEvent* nextEvent;   
     do {
         nextEvent = (DERCEvent*)sortList->getAndRemove();
-        if (getDERCStar(nextEvent)->resourcePointer) != this){
+        if (getDERCStar(nextEvent)->resourcePointer != this){
             // not for this resource, so put back in queue
             DEPortHole* destPort = (DEPortHole*)nextEvent->dest;
             eventQ->levelput(nextEvent, now, destPort->depth);  
