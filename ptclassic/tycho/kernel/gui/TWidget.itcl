@@ -319,7 +319,7 @@ body ::tycho::TWidget::seeFragment {point} {
 #    after idle [code evalIfExists $this methodname]
 # </pre>
 #
-proc ::tycho::TWidget::evalIfExists {command args} {
+body ::tycho::TWidget::evalIfExists {command args} {
     if {[info which -command $command] != {}} {
         eval $command $args
     }
