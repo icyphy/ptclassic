@@ -49,6 +49,7 @@ static const char file_id[] = "PTcl.cc";
 #include "textAnimate.h"
 #include "SimControl.h"
 #include "ConstIters.h"
+#include "Scheduler.h"
 
 // we want to be able to map Tcl_interp pointers to PTcl objects.
 // this is done with a table storing all the PTcl objects.
@@ -381,6 +382,34 @@ int PTcl::schedule(int argc,char **) {
 	else return TCL_ERROR;
 }
 
+// return the current time from the top-level scheduler of the current
+// universe.  If the target has a state named "schedulePeriod", the
+// returned time is divided by this value, unless a second argument
+// with the value "actual" appears.
+
+int PTcl::schedtime(int argc,char **argv) {
+	int actualFlag = (argc == 2 && strcmp(argv[1], "actual") == 0);
+	if (argc > 2 || argc == 2 && !actualFlag)
+		return usage("schedtime [actual]");
+	Scheduler *sch = universe->scheduler();
+	if (sch) {
+		double time = sch->now();
+		if (!actualFlag) {
+			State* s = universe->myTarget()->stateWithName
+				("schedulePeriod");
+			if (s) {
+				time /= atof(s->currentValue());
+			}
+		}
+		sprintf (interp->result, "%g", time);
+		return TCL_OK;
+	}
+	else {
+		strcpy (interp->result, "no scheduler!");
+		return TCL_ERROR;
+	}
+}
+
 int PTcl::run(int argc,char ** argv) {
 	if (argc > 2)
 		return usage("run ?<stoptime>?");
@@ -485,6 +514,37 @@ int PTcl::topblocks (int argc,char ** argv) {
 	// empty value returned for atomic blocks
 	return TCL_OK;
 }
+
+// return the list of states, ports, or multiports in the given block.
+// No arg: states in current galaxy.
+int PTcl::listobjs (int argc,char ** argv) {
+	static char use[] =
+		"listobjs [states|ports|multiports] ?<block-or-classname>?";
+	if (argc > 3 || argc <= 1)
+		return usage (use);
+	const Block* b = getBlock(argv[2]);
+	if (strcmp(argv[1], "states") == 0) {
+		CBlockStateIter nexts(*b);
+		const State* s;
+		while ((s = nexts++) != 0)
+			addResult(s->name());
+	}
+	else if (strcmp(argv[1], "ports") == 0) {
+		CBlockPortIter nexts(*b);
+		const PortHole* s;
+		while ((s = nexts++) != 0)
+			addResult(s->name());
+	}
+	else if (strcmp(argv[1], "multiports") == 0) {
+		CBlockMPHIter nexts(*b);
+		const MultiPortHole* s;
+		while ((s = nexts++) != 0)
+			addResult(s->name());
+	}
+	else return usage(use);
+	return TCL_OK;
+}
+
 
 int PTcl::reset(int argc,char**) {
 	if (argc > 1)
@@ -749,6 +809,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(halt),
 	ENTRY(knownlist),
 	ENTRY(link),
+	ENTRY(listobjs),
 	ENTRY(multilink),
 	ENTRY(newstate),
 	ENTRY(newuniverse),
@@ -760,6 +821,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(renameuniv),
 	ENTRY(reset),
 	ENTRY(run),
+	ENTRY(schedtime),
 	ENTRY(schedule),
 	ENTRY(seed),
 	ENTRY(setstate),
