@@ -106,6 +106,10 @@ void DynDFScheduler :: setup () {
 
 	galaxy()->initialize();
 
+        // If an error occured while initializing the galaxy,
+        // then it is not safe to continue.
+        if (SimControl::haltRequested()) return;
+
 	currentTime = schedulePeriod;
 	overFlowArc = 0;
 	initStructures();
