@@ -114,12 +114,12 @@
 #
 # Get the edges coming _in_ to a given port:
 # <pre><tcl>
-#     $graph edges * * c in-0
+#     $graph edges * {c in-0}
 # </tcl></pre>
 #
 # Get the edges coming _out_ of a given port:
 # <pre><tcl>
-#     $graph edges b out * *
+#     $graph edges {b out}
 # </tcl></pre>
 #
 # Delete an edge:
@@ -162,7 +162,7 @@ class ::tycho::PortedGraph {
     ####                     public methods                      ####
 
     # Return edges matching a vertex and port patterns
-    method edges {{v1 *} {p1 *} {v2 *} {p2 *}}
+    method edges {{v1 *} {v2 *}}
 
     # Remove a vertex _and_ adjacent edges from the graph
     method remove {vertex}
@@ -226,13 +226,17 @@ body ::tycho::PortedGraph::constructor {args} {
 #### edges
 #
 # Return a list containing the edges of the graph that match the
-# given patterns, where _v1_ and _p1_ are the source vertex and port,
-# and _v2_ and _p2_ are the target vertex and port.
+# given patterns, where _v1_ and _v2_ are the source and
+# target of the edge. These can be glob patterns. Note that if
+# testing for connection to ports, supply a two-list for
+# each, as in 
+# <pre>
+#    $graph edges {vertex1 output}
 #
-body ::tycho::PortedGraph::edges {{v1 *} {p1 *} {v2 *} {p2 *}} {
+body ::tycho::PortedGraph::edges {{v1 *} {v2 *}} {
 	_update
     set result {}
-    foreach {_ edge} [array get _edges [list "$v1 $p1" "$v2 $p2"]] {
+    foreach {_ edge} [array get _edges [list $v1 $v2]] {
         lappend result $edge
     }
     return $result
@@ -293,16 +297,16 @@ body ::tycho::PortedGraph::repair {} {
 # argument is the name of a vertex.
 #
 body ::tycho::PortedGraph::subgraphEdges {args} {
-	_update
-	set result {}
+    _update
+    set result {}
     foreach v $args {
-    	array set out [array get _edges [list "$v *" *]]
+        array set out [array get _edges [list "$v *" *]]
     }
     foreach v $args {
-		foreach {edge name} [array get _edges [list * "$v *"]] {
-			if [::info exists out($edge)] {
-				lappend result $name
-			}
+        foreach {edge name} [array get _edges [list * "$v *"]] {
+            if [::info exists out($edge)] {
+                lappend result $name
+            }
         }
     }
     return $result
@@ -315,20 +319,20 @@ body ::tycho::PortedGraph::subgraphEdges {args} {
 # argument is the short name of a vertex.
 #
 body ::tycho::PortedGraph::subgraphInputs {args} {
-	_update
-	set result {}
+    _update
+    set result {}
     foreach v $args {
-    	array set in [array get _edges [list * "$v *"]]
+        array set in [array get _edges [list * "$v *"]]
     }
     foreach v $args {
-		foreach {edge name} [array get _edges [list "$v *" *]] {
-			if [::info exists in($edge)] {
-				unset in($edge)
-			}
+        foreach {edge name} [array get _edges [list "$v *" *]] {
+            if [::info exists in($edge)] {
+                unset in($edge)
+            }
         }
     }
     foreach {_ e} [array get in] {
-    	lappend result $e
+        lappend result $e
     }
     return $result
 }
@@ -340,20 +344,20 @@ body ::tycho::PortedGraph::subgraphInputs {args} {
 # argument is the short name of a vertex.
 #
 body ::tycho::PortedGraph::subgraphOutputs {args} {
-	_update
-	set result {}
+    _update
+    set result {}
     foreach v $args {
-    	array set out [array get _edges [list "$v *" *]]
+        array set out [array get _edges [list "$v *" *]]
     }
     foreach v $args {
-		foreach {edge name} [array get _edges [list * "$v *"]] {
-			if [::info exists out($edge)] {
-				unset out($edge)
-			}
+        foreach {edge name} [array get _edges [list * "$v *"]] {
+            if [::info exists out($edge)] {
+                unset out($edge)
+            }
         }
     }
     foreach {_ e} [array get out] {
-    	lappend result $e
+        lappend result $e
     }
     return $result
 }
