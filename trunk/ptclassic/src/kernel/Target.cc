@@ -403,3 +403,14 @@ const char* Target::domain() const {
 	else if (associatedDomain) return associatedDomain;
 	else return Block::domain();
 }
+
+//The default implentation of this function for different Targets 
+int Target::selfFiringRequested() {
+return FALSE;
+}
+
+//If self firing is required, then the function should return the time for 
+//next firing. This is the default definition of the function
+double Target::nextFiringTime() {
+return 0.0;
+}
