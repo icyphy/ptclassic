@@ -25,17 +25,23 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: J. T. Buck
+ Modified by Alan Kamas to use a Tcl interpreter in the main loop
 
  Main program for pigiRpc.
 
 ********************************************************************/
+
+extern ptkConsoleWindow();
 
 extern "C" {
 	int KcInitLog(const char*);
 	void KcCatchSignals();
 	void CompileInit();
 	void KcLoadInit(const char*);
-	void RPCMain (int argc, char** argv);
+
+	int ptkRPCInit( int argc, char **argv);
+	int ptkMainLoop ();
+
 };
 
 extern const char* pigiFilename;
@@ -47,6 +53,16 @@ main (int argc, char ** argv)
 	KcInitLog("pigiLog.pt");
 	CompileInit();
 	KcCatchSignals();
-	RPCMain (argc, argv);
+
+	/* Strip off end of argv, not front */
+	int doConsole = 0;
+	if (argc>=2 && strcmp(argv[argc-1], "-console")==0) {
+		doConsole = 1;
+		--argc;
+	}
+
+	ptkRPCInit (argc, argv);
+	if ( doConsole )  ptkConsoleWindow();
+	ptkMainLoop();
 	return 0;
 }
