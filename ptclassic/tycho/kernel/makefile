@@ -45,6 +45,7 @@ TCL_SRCS = \
 	List.tcl \
 	Loader.tcl \
 	Lib.tcl \
+	Math.tcl \
 	Misc.tcl \
 	Path.tcl \
 	String.tcl \
