@@ -2,6 +2,7 @@ defstar {
 	name { FloatThresh }
 	domain { SDF }
 	desc {
+NOTE:  THIS STAR SHOULD BE REPLACED BY Quantizer.
 Compares input values to "threshold" (default 0.5).
 Output is 0 if input <= threshold, otherwise it is 1.
 	}
