@@ -47,8 +47,7 @@ void CG56Target :: headerCode () {
 void CG56Target :: wrapup () {
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
-	Target::wrapup();
-	Error::message(myCode);
+	CGTarget::wrapup();
 }
 
 CG56Target :: ~CG56Target () {
