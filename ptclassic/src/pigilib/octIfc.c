@@ -218,6 +218,7 @@ octObject *facetPtr;
  */
 static boolean
 HasUPC(facetPtr)
+octObject *facetPtr;
 {
     octObject inst;
     octGenerator gen;
@@ -380,7 +381,7 @@ octObject *instPtr;
 		  "Unknown star '%s' in current domain, trying to load it...",
 		  akoName);
     PrintCon(buf);
-    return LoadTheStar(instPtr, FALSE, NULL);
+    return LoadTheStar(instPtr, FALSE, (char *)NULL);
 }
 
 /* used to be part of AutoLoadCk; this always loads the star,
@@ -399,7 +400,7 @@ LoadTheStar(instPtr, permB, linkArgs)
     octFullName(&mFacet, &fullName);
     FreeOctMembers(&mFacet);
     ERR_IF1(!KcLoad(fullName, permB, linkArgs));
-    PrintCon("Load completed");
+    (void) PrintCon("Load completed");
     return (TRUE);
 }
 
@@ -767,7 +768,7 @@ int iterate;
     octObject prop;
 
     CreateOrModifyPropInt(facetPtr, &prop, "iterate", iterate);
-    FreeOctMembers(prop);
+    FreeOctMembers(&prop);
 }
 /***** End of iterate prop */
 
