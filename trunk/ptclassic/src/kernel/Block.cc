@@ -9,6 +9,7 @@ static const char file_id[] = "Block.cc";
 #include "Error.h"
 #include "SimControl.h"
 #include "StringList.h"
+#include "Scope.h"
 
 /**************************************************************************
 Version identification:
@@ -50,7 +51,11 @@ Routines implementing class Block methods
 
 // constructor
 
-Block :: Block() : pTarget(0) {}
+Block :: Block() : pTarget(0), scp(0){}
+
+// alternate constructor
+Block::Block(const char* n,Block* p,const char* d):NamedObj(n,p,d),
+    pTarget(0),scp(0){}
 
 int Block :: setTarget(Target* t) {
     if (t) {
@@ -66,9 +71,6 @@ int Block :: setTarget(Target* t) {
 Target* Block :: target() const {
     return pTarget;
 }
-
-// alternate constructor
-Block::Block(const char* n,Block* p,const char* d):NamedObj(n,p,d),pTarget(0){}
 
 // print all port names in the block, omitting hidden ports
 
@@ -96,6 +98,25 @@ Block :: printPorts (const char* type, int verbose) const {
 		while ((mp = next++) != 0)
 			if (!hidden(*mp)) out += mp->print(verbose);
 	}
+	return out;
+}
+
+// Return the block which defines the lexical scope of our states
+Scope* Block::scope() const{
+    return scp;
+}
+ 
+// Set the lexical scope for our states
+void Block::setScope(Scope* s) { scp = s; }
+ 
+// Return full name using scoping hierarchy.
+
+/*virtual*/ StringList Block :: fullName () const
+{
+	StringList out;
+	if(scope() != NULL)
+		out << scope()->fullName() << ".";
+	out << name();
 	return out;
 }
 
@@ -331,10 +352,12 @@ Scheduler* Block :: scheduler() const {
 
 // destructor isn't really do-nothing because it calls destructors
 // for members
-Block::~Block () {}
+Block::~Block () {
+    if (scope()) scope()->remove(*this);
+}
 
 
-// return my domain.  Should this be an error (if noone has redefined
+// return my domain.  Should this be an error (if no one has redefined
 // this?)
 const char* Block :: domain () const { return "UNKNOWN";}
 

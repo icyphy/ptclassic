@@ -188,12 +188,12 @@ public:
 	// an external interpreter for evaluating commands
 	InvokeInterp interp;
 
+	// lookup state from name
+	const State* lookup(const char*, Block*);
+
 protected:
 	// get Token  from  string 
 	virtual ParseToken getParseToken(Tokenizer&, int = T_Float);
-
-	// lookup state from name
-	const State* lookup(const char*, Block*);
 
 	// complain of parse error
 	void parseError (const char*, const char* = "");

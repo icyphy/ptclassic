@@ -52,6 +52,7 @@ class Star;
 class Galaxy;
 class Scheduler;
 class Target;
+class Scope;
 
 class Block : public NamedObj
 {
@@ -64,6 +65,11 @@ class Block : public NamedObj
 	friend class CBlockPortIter;
 	friend class CBlockStateIter;
 	friend class CBlockMPHIter;
+
+	// Scope is defined Scope.h.  Scope needs
+        // access to the block state list to clone it.
+        friend class Scope;
+    
 public:
 	// Initialize the data structures
 	/* virtual */ void initialize();
@@ -179,6 +185,15 @@ public:
         // Set the value of a state - returns false if no state named stateName
 	virtual int setState(const char* stateName, const char* expression);
 
+        // Return the block which defines the lexical scope of our states
+        Scope* scope() const;
+ 
+        // Set the lexical scope for our states
+        void setScope(Scope*);
+ 
+        // Return the full name, using the scoping block hierarchy
+        /*virtual*/ StringList fullName() const;
+
 	// Return reference to Block as a Star.  Error if it's not.
 	virtual const Star& asStar() const;
 	virtual Star& asStar();
@@ -244,7 +259,12 @@ protected:
 private:
 	// Database for this block
 
-	// The following are set from within the Block; hence, protected
+  	Target* pTarget;
+
+        // The scope our states belong.
+        Scope* scp;
+
+        // The following are set from within the Block; hence, protected
 	PortList ports;
 	
         // stateWithName can find a state.
@@ -253,7 +273,6 @@ private:
 	// This is a list of multiportholes in the block.
 	MPHList multiports;
 
-	Target* pTarget;
 };
 
 // Iterator classes associated with Block
