@@ -46,6 +46,8 @@ the xfered list or if it has been changed since the last transfer.
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include "oct.h"
+#include "oh.h"
 #include "rpc.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
@@ -501,13 +503,14 @@ octObject *facetPtr;
     octGenerator netGen;
     int inN = 0, outN = 0, totalN, i;
     char delay[BLEN], initDelayValues[BLEN], width[BLEN];
-    char *errMsg = 0;
+    char *errMsg = 0;    /* errMsg is initialized to 0.  If error occurs,
+			    errMsg will be non-zero, since it will point
+			    to an error message.  Note that the error message
+			    could be the null string "". */
+    char msg[1024];      /* for constructing an error message */
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
-    while (octGenerate(&netGen, &net) == OCT_OK && !errMsg) {
-/* For each net, we require only that there be at least one input
-   and at least one output.  Other errors are handled by the kernel.
- */
+    while (octGenerate(&netGen, &net) == OCT_OK) {
 	if (!CollectTerms(&net, in, &inN, out, &outN)) {
 	    octFreeGenerator(&netGen);
 	    return FALSE;
@@ -516,9 +519,12 @@ octObject *facetPtr;
 	if(GetStringizedProp(&net, "delay", delay, BLEN))
 	    /* old type delay, mark it */
 	    sprintf(initDelayValues, "*%s",delay);
-	else GetStringizedProp(&net, "delay2", initDelayValues, BLEN);
+	else
+	    GetStringizedProp(&net, "delay2", initDelayValues, BLEN);
 	GetStringizedProp(&net, "buswidth", width, BLEN);
 
+	/* For each net, we require that there be at least one input
+	   and at least one output. */
 	if (totalN < 2) {
 	    /* bad net, delete it */
 	    if (octDelete(&net) != OCT_OK) {
@@ -528,24 +534,29 @@ octObject *facetPtr;
 	    }
 	    PrintDebug("Warning: bad net deleted");
 	    continue;
-	}
-	else if (inN == 0 || outN == 0)
+	} else if (inN == 0 || outN == 0) {
 	    errMsg = "ConnectPass: cannot match an input to an output";
-/* We only allow delay on point-to-point connections */
-	else if (*initDelayValues && totalN > 2)
+	    break;
+	} else if (*initDelayValues && totalN > 2) {
+	    /* We only allow delay on point-to-point connections */
 	    errMsg = "ConnectPass: delay not allowed on multi-connections";
-	else if (*width && totalN > 2)
+	    break;
+	} else if (*width && totalN > 2) {
 	    errMsg = "ConnectPass: bus not allowed on multi-connections";
-	else if (totalN == 2) {
+	    break;
+	} else if (totalN == 2) {
 	    if (*width > 0 &&
-		(!TermIsMulti(&in[0]) || !TermIsMulti(&out[0])))
+		(!TermIsMulti(&in[0]) || !TermIsMulti(&out[0]))) {
 		errMsg = "Bus connection only works with multiports";
-	    else if (!JoinOrdinary(&in[0], &out[0], initDelayValues, width))
+		break;
+	    } else if (!JoinOrdinary(&in[0], &out[0],
+		     initDelayValues, width)) {
 		errMsg = "";
-        }
-/* Handle input multiporthole case.  Eventually this will be handled
- * in the kernel (we will eliminate this else clause. */
-	else if (inN == 1 && outN > 1) {
+		break;
+	    }
+	} else if (inN == 1 && outN > 1) {
+	    /* Handle input multiporthole case.  Eventually this will be
+	     * handled in the kernel (we will eliminate this else clause. */
 	    if (TermIsMulti(&in[0])) {
 		for (i = 0; i < outN; i++) {
 		    if (!JoinOrdinary(&in[0], &out[i], (char*)0, (char*)0)) {
@@ -553,18 +564,28 @@ octObject *facetPtr;
 			break;
 		    }
 		}
+	    } else {
+		/* error: multiple outputs are connected to one ordinary
+		   input */
+		strcpy(msg, "can't connect more than one output port:\n");
+		for (i = 0; i < outN; i++) {
+		    strcat(msg, "\t");
+		    strcat(msg, ohFormatName(out + i));
+		    strcat(msg, "\n");
+		}
+		strcat(msg, "to an ordinary input port:\n");
+		strcat(msg, "\t");
+		strcat(msg, ohFormatName(in));
+		errMsg = msg;
+		break;
 	    }
-	    else {
-		errMsg = "can't connect multiple outputs to ordinary input";
-	    }
-	}
-/* All other cases are handled by the kernel, including autofork */
-	else {
+	} else {
+	    /* All other cases are handled by the kernel, including autofork */
 	    char *nodename = UniqNameGet("node");
 	    if (!KcNode(nodename)) {
 		errMsg = "";
-	    }
-	    else {
+		break;
+	    } else {
 		for (i = 0; i < outN; i++) {
 		    if (!JoinToNode(&out[i], nodename)) {
 			errMsg = "";
@@ -586,7 +607,7 @@ octObject *facetPtr;
 	EssAddObj(&net);
     }
     octFreeGenerator(&netGen);
-/* free up the terms */
+    /* free up the terms */
     for (i = 0; i < inN; i++) FreeOctMembers(&in[i]);
     for (i = 0; i < outN; i++) FreeOctMembers(&out[i]);
     return errMsg ? FALSE : TRUE;
