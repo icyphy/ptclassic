@@ -96,7 +96,7 @@ based on the procedure defined by Shpak.
 	      x1 = x0 -	fval/fprimeval;
  
 	      i = 0;
-	      while(fabs(x1-x0) > tol & i < niter){
+	      while((fabs(x1-x0) > tol) & (i < niter)){
 		x0 = x1;
 		fval = -bw/2+atan(x0*wc/2)-atan(wc/(2*x0));
 		fprimeval = (wc/2)/(1+(x0*wc/2)*(x0*wc/2)) +
@@ -149,7 +149,7 @@ based on the procedure defined by Shpak.
           static void bandpass(parametric_t *parametric,double *filtercoeff)
 	    {
 	      double omegacwarp,omegacornerwarp,omegacorner_guess,gamma;
-	      double n0,d0,d1,d2,Qzsquared,Qpsquared,Qz,Qp,initial;
+	      double Qz,Qp,initial;
 	      double a2,b2;
 
 	      omegacwarp = 2*tan(parametric->omegac/2);
@@ -247,23 +247,23 @@ based on the procedure defined by Shpak.
 #define PI (M_PI)
 	}
 	codeblock(mainDecl){
-	  parametric_t parametric;
+	  parametric_t $starSymbol(parametric);
 	  double $starSymbol(filtercoeff)[5];
 	}
 	codeblock(findparams){
-	  setparams(&parametric);
+	  setparams(&$starSymbol(parametric));
 	  if($val(filtertype) == LOW){
-	    lowpass(&parametric,$starSymbol(filtercoeff));
+	    lowpass(&$starSymbol(parametric),$starSymbol(filtercoeff));
 	  }
 	  else if($val(filtertype) == HI){
-	    hipass(&parametric,$starSymbol(filtercoeff));
+	    hipass(&$starSymbol(parametric),$starSymbol(filtercoeff));
 	  }
 	  else if($val(filtertype) == BAND){
-	    bandpass(&parametric,$starSymbol(filtercoeff));
+	    bandpass(&$starSymbol(parametric),$starSymbol(filtercoeff));
           }
 	  /*else
 	    error;*/
-	  setfiltertaps(&parametric,$starSymbol(filtercoeff),$starSymbol(filtertaps));
+	  setfiltertaps(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));
 	}
 	initCode {
 	  CGCBiquad::initCode();
@@ -281,3 +281,5 @@ based on the procedure defined by Shpak.
 	  CGCBiquad::go();
 	}
 }
+
+
