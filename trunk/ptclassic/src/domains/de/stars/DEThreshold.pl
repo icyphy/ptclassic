@@ -6,6 +6,9 @@ defstar {
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	desc {
+
+*** THIS STAR IS OBSOLETE *** Use TestLevel star.
+
 A particle on the "input" is compared to "threshold".
 If its value is larger or equal, and was previously smaller, then a TRUE is output.
 If its value is smaller, and was previously larger or equal, then a FALSE is output.
