@@ -31,3 +31,16 @@ print:
 	$(PRINTSEC) $(OPTIONS) $(HEADER) init $(TMPFILE)
 	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title
 #	/bin/rm $(TMPFILE)
+
+preview:
+	rm -f $(TMPFILE)
+	for x in $(DIRS); do \
+		cd $$x ; \
+		soelim $(MAINSEC) >> $(TMPFILE) ; \
+		cd .. ; \
+	done
+	$(PRINTSEC) -preview $(HEADER) init $(TMPFILE)
+
+# this does preview a second time
+review:
+	$(PRINTSEC) -preview $(HEADER) init $(TMPFILE)
