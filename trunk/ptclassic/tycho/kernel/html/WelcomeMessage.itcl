@@ -39,14 +39,14 @@ if {[::info classes ::tycho::HTML] == {}} {
 #### welcomeMessage
 # For convenience, a procedure to create a Tycho welcome message.
 #
-proc ::tycho::welcomeMessage {} {
+proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
     if [winfo exists .welcome] {
 	.welcome raiseWindow
     } {
 	# FIXME: Get version and executable information.
 	uplevel #0 [list WelcomeMessage .welcome \
-		-version 0.1 \
-		-executable {} \
+		-version $version \
+		-executable $binary \
 		-persistent 0]
 	.welcome centerOnScreen
     }
