@@ -5,11 +5,8 @@ defstar {
 	desc {
 Generate a rectangular pulse of width "width".  If "period" is greater
 than zero, then the pulse is repeated with the given period.  The height
-of the pulse is a complex quantity.  The magnitude of the height, which
-is a function of the square root of the noise power "SqrPthn" and the
-signal-to-noise ratio "SNRn", is equal to SqrPthn * 10^(SNRn/20).  The
-phase of the height is equal to Pi ( 2 Fpor (count - sdelay) / Fsimu -
-bandwidth (count - sdelay)^2 / (Te Fsimu^2) + 4 dopplercount Fe Tp vn / c ).
+of the pulse is a complex quantity that is a function of the Doppler
+parameters.
 	}
 	version { $Id$ }
 	author { Karim-Patrick Khiar }
@@ -24,6 +21,17 @@ This pulse generator is similiar to the \fIRect\fR star, except
 that it is complex-valued and supports several additional options
 for Doppler effects.  This star was initially intended for radar
 simulations.
+.pp
+The magnitude of the height of the pulse is equal to
+.EQ
+SqrPthn 10 sup {{SNRn} over {20}}
+.EN
+The phase of the height of the pulse is equal to
+.EQ
+Pi ( {{2 Fpor (count - sdelay)} over {Fsimu}} -
+{{bandwidth (count - sdelay)^2} over {Te Fsimu^2}} +
+{{4 dopplercount Fe Tp vn} over {c}} )
+.EN
 	}
 	location { SDF main library }
 	defstate {
