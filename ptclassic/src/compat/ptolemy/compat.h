@@ -371,6 +371,16 @@ extern int errno;
 #endif
 #endif /* NEED_TIMEVAL */
 
+#ifdef PTNT
+/* src/kernel/TimeVal.cc uses timercmp */
+#define	timercmp(tvp, uvp, cmp) \
+	/* CSTYLED */ \
+	((tvp)->tv_sec cmp (uvp)->tv_sec || \
+	((tvp)->tv_sec == (uvp)->tv_sec && \
+	/* CSTYLED */ \
+	(tvp)->tv_usec cmp (uvp)->tv_usec))
+#endif /* PT_NT */
+
 /* Here we define common types that differ by platform */
 
 /* thor/analyzerX11/event.c, octtools/vem/rpc/serverNet.c,
