@@ -150,15 +150,16 @@ $(TK_OBJ)/libtk.a: $(TK_OBJ) $(TK_OBJ)/xpm/libxpm.a
 	(cd  $(TK_OBJ); $(MAKE) all)
 
 # Build libxpm for TkPixMap
+# Pick up the X11 includes on machines like Solaris2
 # If your system does not have strdup(), use the following (Ultrix4.3a)
-XPM_DEFINES=-DZPIPE -DNEED_STRDUP
+XPM_DEFINES=-DZPIPE -DNEED_STRDUP $(X11_INCSPEC)
 # Otherwise:
-#XPM_DEFINES="-DZPIPE"
+#XPM_DEFINES=-DZPIPE $(X11_INCSPEC)
 
-ROOT	      = ../..
-# get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
-include $(CONFIG)
+# If necessary override values for each independent architecture
+# This line needs to be after the XPM_DEFINES line
+ROOT =	../..
+include $(ROOT)/mk/config-$(ARCH).mk
 
 all_xpm: $(TK_OBJ)/xpm/libxpm.a
 $(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
@@ -166,6 +167,7 @@ $(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
 		DESTBINDIR=$(TK_DEST)/bin \
 		DESTLIBDIR=$(TK_DEST)/lib \
 		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
+		CC=$(CC) \
 		RANLIB=$(RANLIB) \
 		DEFINES="$(XPM_DEFINES)" \
 	all)
