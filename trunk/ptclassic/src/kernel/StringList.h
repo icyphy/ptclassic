@@ -2,7 +2,7 @@
 SCCS version identification
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -120,6 +120,14 @@ public:
 	// is always returned if there are no characters, never "".
 	operator const char* () { return consolidate();}
 
+	// Allow write access to the buffer after consolidation.
+	// WARNING: this is to permit StringLists to be used with
+	// routines that incorrectly request a char* when a const char*
+	// would do, or things like Tcl that may temporarily modify
+	// the argument but that restore it to its original form before
+	// returning.  If used otherwise, no promises are made.
+	char * chars() { return consolidate();}
+	
 	// Make a copy of the StringList as a char* in dynamic memory.
 	// the user is responsible for deletion.
 	char* newCopy() const;
@@ -150,11 +158,14 @@ public:
 		return *this << arg;
 	}
 
+protected:
+	// change chunks into one chunk
+	char* consolidate();
+
 private:
 	// copy constructor body
 	void copy(const StringList&);
-	// change chunks into one chunk
-	const char* consolidate();
+
 	int totalSize;
 };
 
