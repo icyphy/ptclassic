@@ -46,7 +46,9 @@ still in service will be delayed by more than the nominal service time.
 		int numberInService;
 	}
 	constructor {
-		delayType = TRUE;
+		// input does not trigger any zero-delay output events;
+		// but feedback port does, so don't set delayType.
+		input.triggers();
 		numberInService = 0;
 	}
 	setup {
