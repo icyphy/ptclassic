@@ -53,9 +53,9 @@
 # <tcl><pre>
 #     catch {delete object $graph}
 #     set graph [::tycho::PortedDigraph [::tycho::autoName graph]]
+#     $graph type configure vertex -weight 1
 #     $graph type configure edge -initialdelay 0
-#     $graph type configure port -tokencount 1
-#     $graph type configure port -type input
+#     $graph type configure port -tokencount 1 -type input
 #     $graph parse {
 #         vertex a {
 #             port out -tokencount 2 -type output
@@ -71,7 +71,7 @@
 #         vertex d {
 #             port in
 #         }
-#         edge a out c in-0 -initialdelay 0
+#         edge a out c in-0 -initialdelay 1
 #         edge b out c in-1
 #         edge b out d in
 #     }
@@ -197,15 +197,16 @@ class ::tycho::PortedDigraph {
 body ::tycho::PortedDigraph::constructor {args} {
     # Define the "edge" type
     type define edge \
-            -override 1 \
-            -leafonly 1
+            :override 1 \
+            :leafonly 1
 
-    # Define the "port" entity: no value, no default attributes
-    type define port -leafonly 1
+    # Define the "port" entity
+    type define port \
+	    :leafonly 1
 
-    # Turn off the -leaf option of vertices, so that
+    # Turn off the :leafonly option of vertices, so that
     # they can contain ports
-    # type configure vertex -leaf 0
+    # type configure vertex :leafonly 0
 
     # Evaluate options
     eval configure $args
@@ -473,9 +474,16 @@ body ::tycho::PortedDigraph::_describeitem {name {prefix {}}} {
         set string $prefix
         append string "edge"
 
-        # Append the two vertices and the data
-        eval lappend string [split $tail ^.] [itemcget edge:$tail]
+        # Append the two vertices and ports
+        eval lappend string [split $tail ^.]
 
+	# Append data that differs from the default
+	array set dflt [type defaults edge]
+	foreach {attr val} [itemcget edge:$tail] {
+	    if { ! [::info exists dflt($attr)] || $dflt($attr) != $val } {
+		lappend string $attr $val
+	    }
+	}
         append string \n
     } else {
         chain $name $prefix
