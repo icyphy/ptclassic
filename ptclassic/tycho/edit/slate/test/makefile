@@ -77,6 +77,7 @@ GRAPHICAL_TESTS = \
 	testIconFrame.itcl \
 	testInteractor.itcl \
 	testFollower.itcl \
+	testBounder.itcl \
 	testTute.itcl
 
 # make checkjunk should not complain about the OLD directory
