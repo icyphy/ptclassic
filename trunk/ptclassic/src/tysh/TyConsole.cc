@@ -35,6 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "TyConsole.h"
 #include "InfString.h"
+#if ITCL_MAJOR_VERSION == 2
+#include <itk.h>
+#endif
 #include <stdio.h>
 
 TyConsole::TyConsole(int argc, char **argv) {
@@ -54,7 +57,7 @@ TyConsole::TyConsole(int argc, char **argv) {
   ptkw = Tk_CreateMainWindow(interp, NULL, appName, appClass);
   if (!ptkw) {
     fprintf(stderr,"Failed to create Tk main window: %s\n", interp->result);
-    exit(1);
+    exit);
   }
 
   // Define Tcl and Tk extensions
@@ -114,7 +117,7 @@ TyConsole::TyConsole(int argc, char **argv) {
     char *fullName = Tcl_TildeSubst(interp, tcl_RcFileName, &buffer);
     if (fullName == NULL) {
       fprintf(stderr,
-	"Tilde substition failed in ~/.tycho: %s\n", interp->result);
+	"Tilde substitution failed in ~/.tycho: %s\n", interp->result);
     } else {
       if (access(fullName, R_OK) == 0) {
 	if (Tcl_EvalFile(interp, fullName) != TCL_OK) {
@@ -148,6 +151,15 @@ void TyConsole::tyExit(int code) {
   // users can replace "exit" with some other command to do additional
   // cleanup on exit.  The Tcl_Eval call should never return.
   // In case it does, we call exit anyway.
+
+  // If ptkVerboseErrors is set, print out errorInfo on the way out
+  int ptkVerboseErrors = 0;
+  Tcl_GetBoolean(interp, "ptkVerboseErrors", &ptkVerboseErrors);
+  if (ptkVerboseErrors) {
+    fprintf(stderr, "%s\n", Tcl_GetVar(interp, "errorInfo",TCL_GLOBAL_ONLY));
+    fflush(stderr);
+  }
+
   InfString cmd = "exit ";
   cmd << code;
   Tcl_Eval(interp, (char*)cmd);
@@ -169,6 +181,11 @@ int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
   if (Itcl_Init(ip) == TCL_ERROR) {
     return TCL_ERROR;
   }
+#if ITCL_MAJOR_VERSION == 2
+  if (Itk_Init(interp) == TCL_ERROR) {
+    return TCL_ERROR;
+  }
+#endif
   return TCL_OK;
 }
 
