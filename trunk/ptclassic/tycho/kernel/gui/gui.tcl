@@ -131,6 +131,12 @@ uplevel #0 {
 ::tycho::register category open "graphics" -label "Open Graphics Editors"
 ::tycho::register category open "tool" -label "Open Tools"
 
+global ::ptolemyfeature
+if $ptolemyfeature(ptolemyinstalled) {
+    ::tycho::register category new "ptolemy" -label "Ptolemy Tools" -underline 6
+    ::tycho::register category open "ptolemy" -label "Open Ptolemy Tools"
+}
+
 ### MODE MAPPINGS
 
 ############# text editing modes
