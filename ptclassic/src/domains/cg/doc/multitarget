@@ -1,3 +1,4 @@
+.\" $Id$
 .H2 "Multiprocessor Target"
 .pp
 Targets representing multiple processors are derived from 
