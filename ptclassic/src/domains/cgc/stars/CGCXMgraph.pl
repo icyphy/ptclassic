@@ -84,6 +84,7 @@ for a complete explanation of the options.
 	private {
 		int count;
 	}
+	ccinclude { "Target.h" }
 	start {
 		index = xInit;
 		numIn = input.numberPorts();
@@ -100,7 +101,9 @@ for a complete explanation of the options.
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";
 			w += i;
-			w += "] = fopen(\"$starSymbol(temp)";
+			w += "] = fopen(\"";
+			w += targetPtr->name();
+			w += "_$starSymbol(temp)";
 			w += i;
 			w += "\",\"w\")))";
 			gencode(CodeBlock((const char*) w));
@@ -164,7 +167,8 @@ codeblock(closeFile) {
 
 		// put file names
 		for (int i = 0; i < int(numIn); i++) {
-			cmd += "$starSymbol(temp)";
+			cmd += targetPtr->name();
+			cmd += "_$starSymbol(temp)";
 			cmd += i;
 			cmd += " ";
 		}
@@ -174,7 +178,8 @@ codeblock(closeFile) {
 		if (sf != NULL && *sf != 0) {
 			for (i = 0; i<int(numIn); i++) {
 				cmd += "; /bin/cat ";
-				cmd += "$starSymbol(temp)";
+				cmd += targetPtr->name();
+				cmd += "_$starSymbol(temp)";
 				cmd += i;
 				cmd += " >> ";
 				cmd += sf;
@@ -186,7 +191,8 @@ codeblock(closeFile) {
 		// remove temporary files
 		for (i = 0; i < int(numIn); i++) {
 			cmd += "; /bin/rm -f ";
-			cmd += "$starSymbol(temp)";
+			cmd += targetPtr->name();
+			cmd += "_$starSymbol(temp)";
 			cmd += i;
 		}
 
