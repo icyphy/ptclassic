@@ -256,9 +256,8 @@ uplevel #0 {
     # Source the preference manager and the default preferences.
     # Might as well source needed files first
     # Already loaded (?): source [file join $tychokernel Object.itcl]
+    source [file join $tychokernel Interchange.itcl]
     source [file join $tychokernel Model.itcl]
-    source [file join $tychokernel NamedData.itcl]
-    source [file join $tychokernel TypedData.itcl]
     source [file join $tychokernel WidgetPreferences.itcl]
     ::tycho::_announce "Handled preferences"
 
