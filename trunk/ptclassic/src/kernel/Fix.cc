@@ -425,8 +425,8 @@ Fix::Fix(double d)
     if (intBits > length ) intBits = length;
     makeBits(d, TRUE);
     ovf_type = ovf_saturate;
-    roundFlag = FALSE;
   }
+  roundFlag = FALSE;
 }
 
 ////////////////////////////////////////////////////////////////
