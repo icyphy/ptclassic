@@ -35,6 +35,7 @@ $(PAPER).bbl:	$(PAPERBIB)
 # The palatino.sty file is necessary for good-looking pdf files
 # but causes latex2html to fail, so we work around the problem
 $(HTMLDIR)/$(PAPER):	$(PAPERDEPEND)
+	-mkdir -p $(HTMLDIR)
 	-mv palatino.sty palatino.$$$$.sty
 	echo '\typeout{Stub palatino.sty file for latex2html compatibility}' >palatino.sty
 	$(TEXTTOHTML) $(L2HARGS) $(PAPERFILE)
