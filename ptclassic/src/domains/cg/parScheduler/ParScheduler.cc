@@ -4,7 +4,7 @@ static const char file_id[] = "ParScheduler.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -42,7 +42,8 @@ Date of last revision:
 #include "UniProcessor.h"
 #include "StringList.h"
 #include "streamCompat.h"
-
+#include "../../../pigilib/ptk.h"
+#include <tcl.h>
 
 void ParScheduler::setup() {
     	// compute repetitions, schedule (by calling computeSchedule)
@@ -405,22 +406,23 @@ int ParScheduler :: finalSchedule() { return TRUE; }
 
 void ParScheduler::writeGantt(ostream& o) {
 	int span = parProcs->getMakespan();
-
-	o << "no_processors " << numProcs << "\n";
-	o << "period " << span << "\n\n";
+	const char* universe = this->exGraph->myGalaxy()->name();
+	char tmpbuf[160];
+	sprintf(tmpbuf, "ptkGanttDisplay %s", universe);
+	Tcl_Eval(ptkInterp, tmpbuf);
 	int total = 0;
 	for (int i = 0; i < numProcs; i++) {
 		UniProcessor* proc = parProcs->getProc(i);
-		total += proc->writeGantt(o);
+		total += proc->writeGantt(universe, numProcs, span);
 	}
 
 	// this stuff is not right
-	o << "min " << span << "\n";
 	double p = (100.0 * total) / double(span * numProcs);;
-	o << "percentage " << float(p) << "\n";
-	o << "optimum " << float(p) << "\n";
-	o << "runtime " << total << "\n";
-	o.flush();
+	sprintf(tmpbuf, "ptkGantt_MakeLabel %s %d %d %f %f", universe,
+			span, span, p, p);
+	Tcl_Eval(ptkInterp, tmpbuf);
+	sprintf(tmpbuf, "ptkGantt_Bindings %s %d", universe, numProcs);
+	Tcl_Eval(ptkInterp, tmpbuf);
 }
 
 /////////////////////////////
