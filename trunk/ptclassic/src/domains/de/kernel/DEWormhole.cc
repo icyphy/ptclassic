@@ -116,7 +116,8 @@ int DEtoUniversal :: getFromQueue(Particle* p) {
 
 		// get Particle
 		Particle** myP = myBuffer->next();
-		myPlasma->put(*myP);
+		// first return existing particle to plasma
+		(*myP)->die();
 		*myP = p;
 
 		// set the data members
