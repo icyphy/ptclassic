@@ -74,6 +74,18 @@ public:
         // makes myGeodesic of this type.
         CGGeodesic& cgGeo() const { return *(CGGeodesic*)myGeodesic;}
 
+	// switch myGeodesic pointer to the argument Geodesic
+	// If the geodesic is switched, no longer need to allocate the
+	// memory for this port -> that means the argument geodesic should
+	// be allocated beforehand.
+	// This method is virtual since we may need to save the original
+	// geodesic in other domains.
+	virtual void switchGeo(Geodesic* g) { switchFlag = TRUE;
+				      myGeodesic = g; }
+	virtual void revertGeo(Geodesic* g) { switchFlag = FALSE;
+					myGeodesic = g; }
+	int switched() const { return switchFlag; }
+
         // Return the size of the buffer connected to this PortHole.
         virtual int bufSize() const;
 
@@ -124,6 +136,10 @@ protected:
 	int embeddedLoc;
 	// Am I embedding ports?
 	int embeddingFlag;
+
+private:
+	// If the geodesic is switched, return TRUE;
+	int switchFlag;
 };
 
 	///////////////////////////////////////////
