@@ -48,17 +48,13 @@ TCL_SRCS = \
 
 ITCL_SRCS = \
 	CircularList.itcl \
-	ConsoleText.itcl \
 	DialogWindow.itcl \
 	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
-	Dismiss.itcl \
 	Edit.itcl \
-	EditText.itcl \
 	EditSearch.itcl \
 	EditSpell.itcl \
 	EditStack.itcl \
-	EditStackText.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	File.itcl \
@@ -68,11 +64,10 @@ ITCL_SRCS = \
 	Graph.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
-	HTMLText.itcl \
 	IndexBrowser.itcl \
 	ListBrowser.itcl \
 	Loader.itcl \
-	Menubar.itcl \
+	MenuBar.itcl \
 	Message.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
@@ -80,10 +75,10 @@ ITCL_SRCS = \
 	Stack.itcl \
 	StatusBar.itcl \
 	Subpanel.itcl \
-	TclConsole.itcl \
+	TclShell.itcl \
+	ToolBar.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
-	TychoWidget.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
 	YesNoCancel.itcl \

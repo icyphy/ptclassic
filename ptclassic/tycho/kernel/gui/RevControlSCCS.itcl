@@ -263,9 +263,9 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 
 	# Create the display
 	itk_component add history {
-	    ::tycho::EditText $itk_component(hull).history -height 30
+	    ::tycho::Edit $itk_component(hull).history -textheight 30
 	} {
-	    keep -readonly -width -background \
+	    keep -readonly -textwidth -background \
 		    -highlightbackground -highlightcolor -selectforeground \
 		    -cursor -insertbackground -textforeground -textfont \
 		    -textbackground

@@ -1,4 +1,4 @@
-# TopLevel window for stack display for Tcl errors.
+# Stack display for Tcl errors.
 #
 # @Author: Edward A. Lee
 #
@@ -31,54 +31,81 @@
 #######################################################################
 
 #######################################################################
+#### options
+# NOTE: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditStack.textWidth 80 widgetDefault
+option add *EditStack.textHeight 30 widgetDefault
+option add *EditStack.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditStack.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditStack.fillMaxLineLength 70 widgetDefault
+option add *EditStack.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditStack.textfont [.tychoFonts defaultFont fixed]
+option add *EditStack.relief raised widgetDefault
+option add *EditStack.selectColor [ptkColor yellow white] widgetDefault
+
+# new options
+
+option add *EditStack.errorColor \
+	[ptkColor red black] widgetDefault
+option add *EditStack.commentColor \
+	[ptkColor forestGreen black] widgetDefault
+option add *EditStack.titleColor \
+	[ptkColor black black] widgetDefault
+option add *EditStack.linkColor \
+	[ptkColor blue black] widgetDefault
+
+#######################################################################
 #### EditStack
-# This class defines a top-level window for displaying Tcl stack trace
-# information.
+# This class defines a text widget for displaying Tcl stack trace information.
 #
 class ::tycho::EditStack {
     inherit ::tycho::Edit
 
-    ###################################################################
-    ####                     public methods                        ####
-
     constructor {args} {}
     destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
 
     # Open a help window.
     method help {}
 
-    ###################################################################
-    ####                  protected methods                        ####
-
-    # Return the name of the type of text widget to use (EditStackText).
-    protected method textWidget {} {return ::tycho::EditStackText}
+    # Color the stack information in a region.
+    method parseNow {start stop}
 }
 
 ###################################################################
 #
 body ::tycho::EditStack::constructor {args} {
-    
+
     eval itk_initialize $args
 
-    wm iconname $prefix "Stack Trace"
-    wm title $prefix "Stack Trace"
+# FIXME:
+#    wm iconname $prefix "Stack Trace"
+#    wm title $prefix "Stack Trace"
 
     markUnmodified
 
     # Remove irrelevant capabilities from the menus.
-    disableMenuItem  "Switch File..." File
-    disableMenuItem  "Insert..." File
-    disableMenuItem  "Save" File
-    disableMenuItem  Reload File
-    disableMenuItem  "Revision Control..." File
+    menubar disableMenuItem  "Switch File..." File
+    menubar disableMenuItem  "Insert..." File
+    menubar disableMenuItem  "Save" File
+    menubar disableMenuItem  Reload File
+    menubar disableMenuItem  "Revision Control..." File
 
-    disableMenuItem "Undo/Redo" Edit
-    disableMenuItem "Cut" Edit
-    disableMenuItem "Paste" Edit
+    menubar disableMenuItem "Undo/Redo" Edit
+    menubar disableMenuItem "Cut" Edit
+    menubar disableMenuItem "Paste" Edit
 
-    disableMenuItem "Fill Region" Format
-    disableMenuItem "Right Fill Column" Format
-    disableMenuItem "Set Fill Prefix" Format
+    menubar disableMenuItem "Fill Region" Format
+    menubar disableMenuItem "Right Fill Column" Format
+    menubar disableMenuItem "Set Fill Prefix" Format
+    
+    # The default fill prefix works for Tcl and shell scripts.
+    set fillPrefix "#"
 }
 
 ###################################################################
@@ -89,4 +116,56 @@ body ::tycho::EditStack::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditStackHelp.html
+}
+
+#####################################################################
+#### parseNow
+# Parse the stack information, coloring it for better readability.
+# Eventually, this should insert hyperlinks to the code referenced in
+# the stack.
+#
+body ::tycho::EditStack::parseNow {start stop} {
+
+    set hull $itk_component(hull)
+    set text $itk_component(text)
+
+    # The first line is always a title
+    $text tag add title 1.0 "0.0 lineend"
+    $text tag configure title -foreground \
+	    [option get $hull titleColor EditStack]
+
+    set comments {while executing|invoked from within|\(while constructing [^)]*\)|\(command bound to event\)}
+    set point $start
+    set first {}
+    while {[set st [$text search -count cnt -regexp $comments $point $stop]] \
+	    != {}} {
+	set end [$text index "$st + $cnt chars"]
+	if {$first == {}} {
+	    # Color the error message
+	    $text tag add error 2.0 "$st -1 chars"
+	    set first 0
+	}
+	$text tag add comment $st "$st + $cnt chars"
+	set point $end
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $point >= end] {break}
+    }
+
+    # Eventually the following will be hyperlinks, I hope.
+    set links {\([^\)]* body line [0-9]*\)|\(procedure [^\)]*\)}
+    set point $start
+    while {[set st [$text search -count cnt -regexp $links $point $stop]] \
+	    != {}} {
+	set end [$text index "$st + $cnt chars"]
+	$text tag add link $st "$st + $cnt chars"
+	set point $end
+    }
+    
+    # Set the visual characteristics of the tagged text
+    $text tag configure error -foreground \
+	    [option get $hull errorColor EditStack]
+    $text tag configure comment -foreground \
+	    [option get $hull commentColor EditStack]
+    $text tag configure link -foreground \
+	    [option get $hull linkColor EditStack]
 }

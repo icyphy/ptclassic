@@ -95,6 +95,7 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # </pre></tcl>
 #
 class ::tycho::Subpanel { 
+    # FIXME: TychoWidget no longer exists.
     inherit ::tycho::TychoWidget
 
     constructor {args} {}

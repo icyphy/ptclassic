@@ -45,10 +45,10 @@ option add *EditSearch.findMatchForegroundColor \
 
 ##########################################################################
 #### EditSearch class.
-# Create a dialog box for searching for text in a EditText object. This
-# dialog box should be child window of the EditText object so that it
+# Create a dialog box for searching for text in an Edit object. This
+# dialog box should be child window of the Edit object so that it
 # is removed when the parent is removed. To do this, just give it a
-# name that is the name of the EditText window (or its top-level
+# name that is the name of the Edit window (or its top-level
 # parent) with an additional field appended after a period. For
 # example, if the name of the top-level object is ".file0", the search
 # object could be ".file0.search".
@@ -67,8 +67,8 @@ class ::tycho::EditSearch {
     # The command to execute on a change and find command.
     itk_option define -chfindcommand chfindcommand ChangeAndFindCommand ""
 
-    # The associated EditText object.
-    itk_option define -edittext edittext EditText ""
+    # The associated Edit object.
+    itk_option define -edit edit Edit ""
 
     # The command to execute on a find command.
     itk_option define -findcommand findcommand FindCommand ""
@@ -123,15 +123,15 @@ configbody ::tycho::EditSearch::backwards {
 }
 
 #####################################################################
-#### -edittext option
-# Specify the EditText object on which the search will occur.
+#### -edit option
+# Specify the Edit object on which the search will occur.
 # 
-configbody ::tycho::EditSearch::edittext {
-    if {$itk_option(-edittext) == {} || \
-	    [::info objects $itk_option(-edittext)] == {} || \
-	    ![$itk_option(-edittext) isa ::tycho::EditText]} {
-	error "EditSearch::find: Invalid -edittext option: \
-		$itk_option(-edittext)"
+configbody ::tycho::EditSearch::edit {
+    if {$itk_option(-edit) == {} || \
+	    [::info objects $itk_option(-edit)] == {} || \
+	    ![$itk_option(-edit) isa ::tycho::Edit]} {
+	error "EditSearch::find: Invalid -edit option: \
+		$itk_option(-edit)"
     }
 }
 
@@ -253,7 +253,7 @@ body ::tycho::EditSearch::constructor {args} {
 # Change the text in the selection to the value in the "Change To" box.
 # 
 body ::tycho::EditSearch::change {} {
-    set editWindow $itk_option(-edittext)
+    set editWindow $itk_option(-edit)
 
     set changeto [get change]
     if {$changeallsw} {
@@ -287,13 +287,13 @@ body ::tycho::EditSearch::changeAndFind {} {
 # Clear the highlighting in the text window due to a search.
 # 
 body ::tycho::EditSearch::clearFindMatch {} {
-    set tw $itk_option(-edittext)
+    set tw $itk_option(-edit)
     [$tw textWinName] tag remove findmatch 1.0 end
 }
 
 #####################################################################
 #### find
-# Find and mark the specified pattern in the associated EditText
+# Find and mark the specified pattern in the associated Edit
 # object. The search starts at the insertion cursor, unless the
 # optional argument is given, in which case it starts at the specified
 # point. The first match found is selected.  The rest are tagged and the
@@ -301,7 +301,7 @@ body ::tycho::EditSearch::clearFindMatch {} {
 # 
 body ::tycho::EditSearch::find {{start {}}} {
 
-    set tw $itk_option(-edittext)
+    set tw $itk_option(-edit)
     set pattern [get pattern]
     if {$pattern == ""} {
 	error "A search requires text in the Search Pattern box"

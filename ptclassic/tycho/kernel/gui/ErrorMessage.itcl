@@ -156,10 +156,11 @@ body ::tycho::ErrorMessage::constructor {args} {
 body ::tycho::ErrorMessage::stackTrace {} {
     if {$localErrorInfo != ""} {
 	set nm [::tycho::autoName .stack]
-	::tycho::EditStack $nm \
-		-text "The most recent stack trace found is:\n$localErrorInfo"
-	$nm configure -readonly 1
-	$nm centerOnScreen
+        ::tycho::Displayer $nm
+	::tycho::EditStack $nm.v \
+		-text "The most recent stack trace found is:\n$localErrorInfo" \
+                -readonly 1
+        $nm centerOnScreen
     } {
 	::tycho::warn "No stack trace found"
     }
