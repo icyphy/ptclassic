@@ -79,28 +79,7 @@ Block* CompileTarget::makeNew() const {
 }
 
 void CompileTarget::setup() {
-	SDFScheduler* s = 0;
-	switch(int(loopingLevel)) {
-	    case 0:
-		LOG_NEW; s = new SDFScheduler;
-		break;
-	    case 1:
-		logPath = logFilePathName(destDirectory, "schedule.log");
-		LOG_NEW; s = new SDFClustSched(logPath);
-		break;
-	    case 2:
-		logPath = logFilePathName(destDirectory, "schedule.log");
-		LOG_NEW; s = new LoopScheduler(logPath);
-		break;
-	    case 3:
-		logPath = logFilePathName(destDirectory, "schedule.log");
-		LOG_NEW; s = new AcyLoopScheduler(logPath);
-		break;
-	    default:
-		Error::abortRun(*this, "Unknown scheduler");
-		return;
-	}
-	setSched(s);
+	CGTarget::chooseScheduler();
 
 	// This kludge bypasses setup() in CGTarget, which casts
 	// the portholes to CGPortHole.  These casts are no good for
