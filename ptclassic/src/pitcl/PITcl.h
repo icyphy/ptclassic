@@ -36,11 +36,13 @@ interpreter.
 
 #ifndef _PTcl_h
 #define _PTcl_h 1
-#include "tcl.h"
 
 #ifdef __GNUG__
 #pragma interface
 #endif
+
+#include "tcl.h"
+#include "NamedObj.h"
 
 class InterpUniverse;
 class InterpGalaxy;
@@ -48,11 +50,41 @@ class Target;
 class Block;
 class StringList;
 
+// IUList is a list of InterpUniverses.  The destructor deletes
+// all universes on the list.
+
+class IUList : private NamedObjList {
+    friend class IUListIter;
+public:
+	IUList() {}
+	~IUList() { deleteAll();}
+	void put(InterpUniverse& u);
+	InterpUniverse* univWithName(const char* name) {
+		return (InterpUniverse*)objWithName(name);
+	}
+	// delete the universe with name "name" on the list, if it exists.
+	int delUniv(const char* name);
+	NamedObjList::size;
+	NamedObjList::initElements;
+	NamedObjList::deleteAll;
+};
+
+// an iterator for IUList
+class IUListIter : private NamedObjListIter {
+public:
+	IUListIter(IUList& sl) : NamedObjListIter (sl) {}
+	InterpUniverse* next() {
+		return (InterpUniverse*)NamedObjListIter::next();
+	}
+	InterpUniverse* operator++(POSTFIX_OP) { return next();}
+	NamedObjListIter::reset;
+};
+
 class PTcl {
 
 // Used in pigilib's kernel calls, so must be public - aok
 public:
-	// the Ptolemy universe
+	// the current Ptolemy universe
 	InterpUniverse* universe;
 
 	// current galaxy being built
@@ -79,6 +111,9 @@ private:
 	// flag to indicate that interp is owned by me
 	short myInterp;
 
+	// the list of known universes
+	IUList univs;
+
 	// function to register extensions with the Tcl interpreter
 	void registerFuncs();
 
@@ -91,11 +126,11 @@ public:
 	void makeEntry();
 	void removeEntry();
 
-	// create a new universe
-	void newUniverse();
+	// create a new universe with name nm and domain dom.
+	void newUniv(const char* nm, const char* dom);
 
-	// recreate the univers
-	void resetUniverse();
+	// delete the universe named nm.  return FALSE if no such univ.
+	int delUniv(const char* nm);
 
 	// return a usage error
 	int usage(const char*);
@@ -135,9 +170,11 @@ public:
 	int busconnect(int argc,char** argv);
 	int connect(int argc,char** argv);
 	int cont(int argc,char** argv);
+	int curuniverse(int argc,char** argv);
 	int defgalaxy(int argc,char** argv);
 	int delnode(int argc,char** argv);
 	int delstar(int argc,char** argv);
+	int deluniverse(int argc,char** argv);
 	int descriptor(int argc,char** argv);
 	int disconnect(int argc,char** argv);
 	int domain(int argc,char** argv);
@@ -147,10 +184,12 @@ public:
 	int link(int argc,char** argv);
 	int multilink(int argc,char** argv);
 	int newstate(int argc,char** argv);
+	int newuniverse(int argc,char** argv);
 	int node(int argc,char** argv);
 	int nodeconnect(int argc,char** argv);
 	int numports(int argc,char** argv);
 	int print(int argc,char** argv);
+	int renameuniv(int argc,char** argv);
 	int reset(int argc,char** argv);
 	int run(int argc,char** argv);
 	int schedule(int argc,char** argv);
@@ -162,6 +201,7 @@ public:
 	int targetparam(int argc,char** argv);
 	int targets(int argc,char** argv);
 	int topblocks(int argc,char** argv);
+	int univlist(int argc,char** argv);
 	int wrapup(int argc,char** argv);
 };
 

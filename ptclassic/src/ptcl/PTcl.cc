@@ -90,7 +90,7 @@ currentTarget(0), definingGal(0)
 {
 	// perhaps default domain should be obtained some other way.
 	curDomain = KnownBlock::defaultDomain();
-	newUniverse();
+	reset(1,0);
 	if (!interp) {
 		interp = Tcl_CreateInterp();
 		myInterp = TRUE;
@@ -102,7 +102,6 @@ currentTarget(0), definingGal(0)
 
 // destructor
 PTcl::~PTcl() {
-	LOG_DEL; delete universe;
 	removeEntry();
 	if (myInterp) {
 		Tcl_DeleteInterp(interp);
@@ -110,16 +109,24 @@ PTcl::~PTcl() {
 	}
 }
 
-// Attach the PTcl to a new universe
-void PTcl::newUniverse () {
-	LOG_NEW; universe = new InterpUniverse("main", curDomain);
+// Create a new universe with name name and domain dom and make it the
+// current universe.  Whatever universe was previously the current universe
+// is not affected, unless it was named <name>.
+
+void PTcl::newUniv(const char* name, const char* dom) {
+	univs.delUniv(name);
+	LOG_NEW; universe = new InterpUniverse(name, dom);
 	currentGalaxy = universe;
+	curDomain = universe->domain();
+	univs.put(*universe);
 }
 
 // Delete the universe and make another
-void PTcl::resetUniverse () {
-	LOG_DEL; delete universe;
-	newUniverse ();
+int PTcl::delUniv (const char* nm) {
+	int remake = (strcmp(nm,universe->name()) == 0);
+	if (!univs.delUniv(nm)) return FALSE;
+	if (remake) newUniv("main", curDomain);
+	return TRUE;
 }
 
 // Return a "usage" error
@@ -295,6 +302,15 @@ int PTcl::setstate(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+static const State* findState(const Block* b, const char* nm) {
+	CBlockStateIter next(*b);
+	const State* s;
+	while ((s = next++)) {
+		if (strcmp(nm,s->name()) == 0) return s;
+	}
+	return 0;
+}
+
 // statevalue: return a state value
 // syntax: statevalue <block> <state> ?current/initial?
 // default is current value
@@ -302,9 +318,9 @@ int PTcl::statevalue(int argc,char ** argv) {
 	if (argc < 3 || argc > 4 ||
 	    (argc == 4 &&argv[3][0] != 'c' && argv[3][0] != 'i'))
 		return usage ("statevalue <block> <state> ?current/initial?");
-	Block* b = (Block*)getBlock(argv[1]);
+	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
-	const State* s = b->stateWithName(argv[2]);
+	const State* s = findState(b, argv[2]);
 	if (!s) {
 		sprintf (interp->result, "No state named '%s' in block '%s'",
 			 argv[2], argv[1]);
@@ -339,6 +355,7 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	else currentGalaxy->addToKnownList(outerDomain,currentTarget);
 	currentGalaxy = universe;
 	definingGal = FALSE;
+	curDomain = outerDomain;
 	return status;
 }
 
@@ -469,7 +486,91 @@ int PTcl::topblocks (int argc,char ** argv) {
 int PTcl::reset(int argc,char**) {
 	if (argc > 1)
 		return usage ("reset");
-	resetUniverse();
+	newUniv("main", curDomain);
+	return TCL_OK;
+}
+
+// Create a new, empty universe named <name> (default main) and make it
+// the current  universe with domain <dom> (default current domain).  If
+// there was previously a universe with this name, it is  deleted.
+// Whatever universe was previously the current universe is not affected,
+// unless it was named <name>. 
+
+int PTcl::newuniverse(int argc,char** argv) {
+	if (argc > 3)
+		return usage("newUniverse ?<name> ?<dom>");
+	if (argc == 3) curDomain = hashstring(argv[2]);
+	const char* nm = "main";
+	if (argc > 1) nm = hashstring(argv[1]);
+	newUniv(nm, curDomain);
+	return TCL_OK;
+}
+
+// deluniverse <name>
+// Delete the named universe.  If argument is not given, delete the
+// current universe.
+
+int PTcl::deluniverse(int argc,char** argv) {
+	if (argc > 2)
+		return usage("delUniverse ?<name>");
+	const char* nm = argv[1];
+	if (argc == 1) nm = universe->name();
+	delUniv(nm);
+	return TCL_OK;
+}
+
+int PTcl::curuniverse(int argc,char** argv) {
+	if (argc == 1) {
+		strcpy(interp->result, universe->name());
+		return TCL_OK;
+	}
+	else if (argc == 2) {
+		InterpUniverse* u = univs.univWithName(argv[1]);
+		if (u) {
+			universe = u;
+			currentGalaxy = u;
+			curDomain = u->domain();
+			return TCL_OK;
+		}
+		else {
+			Error::error("No such universe: ", argv[1]);
+			return TCL_ERROR;
+		}
+	}
+	else return usage("curuniverse ?<name>");
+}
+
+// renameuniv <newname>: rename current univ to newname.
+// renameuniv <oldname> <newname>: rename <oldname> to <newname>.
+
+int PTcl::renameuniv(int argc,char ** argv) {
+	InterpUniverse* u = universe;
+	const char* newname = argv[1];
+	if (argc < 2 || argc > 3)
+		return usage(
+		  "renameuniv <newname> or renameuniv <oldname> <newname>");
+	if (argc == 3) {
+		u = univs.univWithName(argv[1]);
+		if (!u) {
+			Error::error("No such universe: ", argv[1]);
+			return TCL_ERROR;
+		}
+		// rename with same name has no effect.
+		if (strcmp(argv[1],argv[2]) == 0) return TCL_OK;
+		newname = argv[2];
+	}
+	univs.delUniv(newname);
+	u->setNameParent(hashstring(newname),0);
+	return TCL_OK;
+}
+
+int PTcl::univlist(int argc,char **) {
+	if (argc > 1) return usage("univlist");
+	IUListIter next(univs);
+	InterpUniverse* u;
+	while ((u = next++) != 0) {
+		addResult(u->name());
+	}
 	return TCL_OK;
 }
 
@@ -561,14 +662,14 @@ int PTcl::multilink(int argc,char ** argv) {
 	return Linker::multiLink(argc,argv) ? TCL_OK : TCL_ERROR;
 }
 
-// Override tcl exit function with one that does cleanup of the universe.
+// Override tcl exit function with one that does cleanup of the universe(s).
 int PTcl::exit(int argc,char ** argv) {
 	int estatus = 0;
 	if (argc > 2) return usage("exit ?<returnCode>?");
 	if (argc == 2 && Tcl_GetInt(interp, argv[1], &estatus) != TCL_OK) {
 		return TCL_ERROR;
 	}
-	LOG_DEL; delete universe;
+	univs.deleteAll();
 	::exit (estatus);
 	return TCL_ERROR;	// should not get here
 }
@@ -598,9 +699,11 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(busconnect),
 	ENTRY(connect),
 	ENTRY(cont),
+	ENTRY(curuniverse),
 	ENTRY(defgalaxy),
 	ENTRY(delnode),
 	ENTRY(delstar),
+	ENTRY(deluniverse),
 	ENTRY(descriptor),
 	ENTRY(disconnect),
 	ENTRY(domain),
@@ -610,11 +713,13 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(link),
 	ENTRY(multilink),
 	ENTRY(newstate),
+	ENTRY(newuniverse),
 	ENTRY(node),
 	ENTRY(nodeconnect),
 	ENTRY(numports),
 	ENTRY2(permlink,multilink),
 	ENTRY(print),
+	ENTRY(renameuniv),
 	ENTRY(reset),
 	ENTRY(run),
 	ENTRY(schedule),
@@ -626,6 +731,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(targetparam),
 	ENTRY(targets),
 	ENTRY(topblocks),
+	ENTRY(univlist),
 	ENTRY(wrapup),
 	0, 0
 };
@@ -659,4 +765,17 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	int status = (obj->*(funcTable[i].func))(argc,argv);
 	activeInterp = save;
 	return status;
+}
+
+// IUList methods.
+
+void IUList::put(InterpUniverse& u) {NamedObjList::put(u);}
+
+int IUList::delUniv(const char* name) {
+	InterpUniverse* z = univWithName(name);
+	if (z) {
+		remove(z);
+		LOG_DEL; delete z;
+	}
+	return (z != 0);
 }
