@@ -120,7 +120,7 @@ body ::tycho::CompileCTcl::createMakefile {} {
 	error "Sorry, the PTARCH environment variable is not set.\nIn csh,\
 		you can exit Tycho, and run\nsetenv PTARCH `$TYCHO/bin/ptarch`"
     }
-    if {![file exists [file join $tycho obj.$PTARCH tcl.mk]]}
+    if {![file exists [file join $tycho obj.$PTARCH tcl.mk]]} {
 	putStatus "About to make tcl.mk, when complete, be\
 		sure to close the Exec window to continue."
 	::tycho::execModal "make config_tclexts" $tycho
