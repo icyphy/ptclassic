@@ -116,6 +116,7 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  dataType.h \
  isa.h \
  miscFuncs.h \
+ streamCompat.h \
  type.h
 
 # Library objects
