@@ -59,8 +59,10 @@ PL_SRCS= \
  AnyAsmFork.pl \
  AnyAsmGround.pl \
  AnyCGPeekPoke.pl \
+ CGCircToLin.pl \
  CGCollect.pl \
  CGFork.pl \
+ CGLinToCirc.pl \
  CGMultiIn.pl \
  CGMultiInOut.pl \
  CGMultiOut.pl \
@@ -72,6 +74,7 @@ PL_SRCS= \
  CGSource.pl \
  CGSpread.pl \
  CGSwitch.pl \
+ CGTestMultirate.pl \
  CGThrough.pl
 
 # The .cc files
