@@ -1,10 +1,11 @@
+# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "system" master style-sheet
 #
 modelconfigure -label "System"
-modelconfigure -description [
+modelconfigure -description {
 	This style contains system-wide application settings.
 }
 
@@ -45,7 +46,7 @@ style default \
 
     parameter revisionControlTypes {SCCS RCS} \
 	    -label "Supported revision control types" \
-	    description {
+	    -description {
 	Types of revision control software, in order of parameter.
 	It is assumed that for each type listed, there is a class defined
 	called RevControl$type, where $type is the type, and that this

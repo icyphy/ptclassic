@@ -1,3 +1,4 @@
+# -*- mode: tcl -*-
 #
 # $Id$
 #
@@ -12,9 +13,8 @@ style default \
 	-label "Default" \
 	-description {
     The default style for the fonts. These font settings are
-    chosen to be a good (larg-ish) size for medium- to
-    high-resolution screens, and use the most commonly
-    available font families.
+    chosen to be a large-ish size on high-resolution screens,
+    and use the most commonly available font families.
 } {
     parameter textFont {Screen 14} \
 	    -type font \
@@ -43,7 +43,7 @@ style default \
 }
 
 style small \
-	-label "Clean" \
+	-label "Small" \
 	-description {
     A font style designed for people who hate the default fonts. The fonts
     are slightly smaller, and use some less common fonts.
