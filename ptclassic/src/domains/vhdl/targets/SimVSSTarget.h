@@ -131,7 +131,7 @@ private:
 	void configureCommPair(CommPair&);
 
 	// Method to write out com file for VSS if needed.
-	void writeComFile();
+	virtual void writeComFile();
 };
 
 #endif
