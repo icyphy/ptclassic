@@ -1,4 +1,4 @@
-.VR 0.$Revision$ "%G"
+.VR 0.$Revision$ "$Date$"
 .TI "SDF Domain"
 .AU
 J. T. Buck
