@@ -111,7 +111,7 @@ public:
 	Pointer getFirstElem();
 
 	// Remove and return link from the head of the queue...
-	// WARNING -- Must call die() after finishing with it.
+	// WARNING -- Must call putFreeLink() after finishing with it.
 	// Use getFirstElem() to get and free in one step.
 	LevelLink* get();
 
@@ -119,12 +119,9 @@ public:
 	Pointer getLastElem();
 
 	// Remove and return link from the tail of the queue...
-	// WARNING -- Must call die() after finishing with it.
+	// WARNING -- Must call putFreeLink() after finishing with it.
 	// Use getLastElem() to get and free in one step.
 	LevelLink* teg();
-
-	// Free a link that has been removed from the queue by get or teg
-	void die(LevelLink*);
 
 	// Return the next node on list, relative to the last reference
 	LevelLink* next();
