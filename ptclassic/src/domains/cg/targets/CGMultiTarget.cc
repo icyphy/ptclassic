@@ -135,7 +135,16 @@ void CGMultiTarget::setup() {
 		if (inWormHole()) {
 		   	adjustSampleRates();
 			generateCode();
-			wormLoadCode();
+			if (compileCode())
+			{
+			    if (loadCode())
+			    {
+				if (!runCode())
+				    Error::abortRun(*this, "could not run!");
+			    }
+			    else Error::abortRun(*this, "could not load!");
+			}
+			else Error::abortRun(*this, "could not compile!");
 		}
 	}
 }
@@ -359,14 +368,14 @@ int CGMultiTarget :: run() {
 
 	// if a wormhole, setup already generated code.
 	// We must do the transfer of data to and from the target.
-	if (!sendWormData()) return FALSE;
-	return receiveWormData();
+	if (!allSendWormData()) return FALSE;
+	return allReceiveWormData();
 }
 
-int CGMultiTarget :: sendWormData() {
+int CGMultiTarget :: allSendWormData() {
 	if (nChildrenAlloc == 1) {
 		CGTarget* t = (CGTarget*) child(0);
-		return t->receiveWormData();
+		return t->allReceiveWormData();
 	}
 
 	BlockPortIter nextPort(*galaxy());
@@ -389,10 +398,10 @@ int CGMultiTarget :: sendWormData() {
 	return !Scheduler::haltRequested();
 }
 
-int CGMultiTarget :: receiveWormData() {
+int CGMultiTarget :: allReceiveWormData() {
 	if (nChildrenAlloc == 1) {
 		CGTarget* t = (CGTarget*) child(0);
-		return t->receiveWormData();
+		return t->allReceiveWormData();
 	}
 
 	BlockPortIter nextPort(*galaxy());
