@@ -31,11 +31,12 @@ Version identification:
 $Id$
 */
 
+#include "sol2compat.h"
+#include "paramStructs.h"
+
 extern char *AkoName();
 
 #ifdef __cplusplus
-extern char *AkoName();
-
 extern boolean GetStarName(octObject *instPtr, char** namePtr);
 extern boolean SetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
 extern boolean GetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
@@ -56,13 +57,16 @@ extern boolean IsGalFacet(octObject *facetPtr);
 extern boolean IsMarker(octObject *instPtr);
 extern boolean IsCursor(octObject *instPtr);
 
-extern int GetIterateProp(octObject *facetPtr, int *pIterate);
-extern void SetIterateProp(octObject *facetPtr, int iterate);
 extern boolean GetStringProp(octObject *objPtr, char *propName, 
                              char **valuePtr);
 extern boolean SetStringProp(octObject *objPtr, char *propName, char *value);
+extern boolean GOCDomainProp(octObject *facetPtr, char **domainPtr,
+			     char *defaultDomain);
+extern int GetIterateProp(octObject *facetPtr, int *pIterate);
+extern void SetIterateProp(octObject *facetPtr, int iterate);
 
-extern boolean GOCDomainProp(octObject *facetPtr, char **domainPtr, char *defaultDomain);
+extern boolean FreeOctMembers(octObject *o);
+
 extern boolean MyOpenMaster( octObject *t, octObject *i, char *f, char *m);
 extern boolean IsPal(octObject *instPtr);
 extern boolean SetTargetParams(octObject *instPtr, ParamListType *pListPtr);
@@ -92,16 +96,22 @@ extern boolean GOCArchProp();
 extern boolean GetOrCreatePropStr(octObject *c, octObject *t,char *s,
 				  char *s1);
 
+extern int octInitGenContentsSpecial(octObject *object,
+				     octObjectMask mask,
+				     octGenerator *generator);
+
 extern boolean OpenFacet(octObject *t, char *c, char *v, char *f, char *m);
 
 #else
-extern void GetOrInitDelayProp();
-extern void GetOrInitBusProp();
-extern void IntizeProp();
+
+extern boolean GetStarName();
 extern boolean SetFormalParams();
 extern boolean GetFormalParams();
 extern boolean SetSogParams();
 extern boolean GetOrInitSogParams();
+extern void GetOrInitDelayProp();
+extern void GetOrInitBusProp();
+extern void IntizeProp();
 extern boolean IsVemConnector();
 extern boolean IsIoPort();
 extern boolean IsInputPort();
@@ -123,24 +133,25 @@ extern void SetIterateProp();
 extern boolean FreeOctMembers(/* octObject *o */);
 
 /* Added for POct.cc */
-extern boolean IsUnivFacet();
-extern boolean IsBus();
 extern boolean MyOpenMaster();
 extern boolean IsPal();
-extern boolean OpenFacet();
+extern boolean SetTargetParams();
+extern boolean SetTargetProp();
+extern boolean GetTargetParams();
+extern boolean GOCTargetProp();
+extern boolean SetDomainProp();
+extern boolean StringizedProp();
 extern boolean AutoLoadCk();
 extern boolean GetStringizedProp( /* octObject *objPtr, char *name,
 				     char*dest, int dlen */);
 extern boolean IsPalFacet();
-extern boolean LoadTheStar(/* octObject* instPtr, int permB, char*
-			      linkArgs */);
-extern boolean GetDefaultParams(/* octObject *instPtr, ParamListType
-				 *pListPtr */); 
-extern boolean SetTargetParams();
-extern boolean GetTargetParams();
-extern boolean GOCTargetProp();
-extern boolean SetDomainProp();
-extern boolean SetTargetProp();
+extern boolean LoadTheStar(/* octObject* instPtr, int permB, char* linkArgs */);
+extern boolean GetDefaultParams(/* octObject *instPtr,
+				   ParamListType *pListPtr */); 
+
+/* Added for ptkCommands.cc */
+extern boolean IsUnivFacet();
+extern boolean IsBus();
 
 /* FIXME: These Functions are NOT defined in octIfc.c */
 extern boolean GetGalTerms();
@@ -148,11 +159,17 @@ extern boolean GetHardwareProp();
 extern boolean SetHardwareProp();
 extern boolean GOCArchProp();
 
-/* This is defined in octtools/Packages/oct/gen.c, and used in
+extern boolean GetOrCreatePropStr();
+
+/*
+ * This is defined in octtools/Packages/oct/gen.c, and used in
  * octIfc.c, mkIcon.c and palette.c
  */
 extern int octInitGenContentsSpecial(/* octObject *object,
-				      octObjectMaskmask, octGenerator
-				      *generator */);
+				        octObjectMask mask,
+					octGenerator *generator */);
+
+extern boolean OpenFacet();
+
 #endif /* __cplusplus*/
 #endif /* OCTIFC_H */
