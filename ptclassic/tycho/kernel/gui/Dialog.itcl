@@ -383,13 +383,16 @@ body ::tycho::Dialog::wait {instance {autoraise 1}} {
 
     set commandResult($instance) {}
     $instance centerOnScreen
-    # Do not continue in this thread until the window is dismissed.
     update idletasks
+
+    # Do not continue in this thread until the window is dismissed.
     if [winfo exists $instance] {
         grab set $instance
-        # NOTE: Don't know why this has to be deferred.
-        # The catch is in case the object is gone already.
+        # NOTE: This seems to need to be both deferred and done now
+        # probably because window events might give the focus to some
+        # other window (e.g. if some window gets deleted).
         after 1 [list catch "$instance focusin"]
+        $instance focusin
         if $autoraise {
             # If the user mouses in another window, raise
             bind $instance <Button> "+raise $instance"
