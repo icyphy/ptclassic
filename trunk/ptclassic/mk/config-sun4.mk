@@ -99,7 +99,7 @@ X11EXT_LIBSPEC=-lXext -lSM -lICE
 COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld-2.6.3
 
 PURELINK =	purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	purelink $(COLLECTOR) purify
+PURIFY =	purelink $(COLLECTOR) purify -best-effort
 QUANTIFY =	purelink $(COLLECTOR) quantify
 PURECOV = 	purecov $(COLLECTOR)
 
