@@ -54,8 +54,19 @@ proc ::tycho::inform {msg} {
 # Post an informational message to the user in a window and return.
 # The name of the window is returned.
 #
-proc ::tycho::post {msg} {
-    return [DialogWindow::new Message [autoName .message] -text $msg]
+proc ::tycho::post {msg {title ""}} {
+    return [DialogWindow::new Message [autoName .message] -text $msg \
+	    -title $title]
+}
+
+##########################################################################
+#### postLong
+# Post a long informational message to the user in a window and return.
+# The name of the window is returned.
+#
+proc ::tycho::postLong {msg {title ""}} {
+    return [DialogWindow::new Message [autoName .message] -scrolltext $msg \
+	    -title $title]
 }
 
 # COMPATIBILITY procedures.  The following procedures emulate the behavior
