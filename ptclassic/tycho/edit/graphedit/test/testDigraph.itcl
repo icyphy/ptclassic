@@ -168,11 +168,15 @@ test Digraph-5.2 {Topological sort} {
     digraph topologicalSort
 } {a d b c}
 
-test Digraph-5.3 {Cyclic} {
+test Digraph-5.3 {Grid-layout} {
+    digraph gridLayout
+} {{a 1 d 0} {b 0} {c 0}}
+
+test Digraph-5.4 {Cyclic} {
     digraph acyclic
 } {0}
 
-test Digraph-5.4 {Acyclic} {
+test Digraph-5.5 {Acyclic} {
     digraph edgedelete b c
     digraph acyclic
 } {1}
