@@ -36,6 +36,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SRStar.h"
 #include "Block.h"
 
+// #include <stream.h> // for debugging
+
 extern const char SRdomainName[];
 
 // Class identification.
@@ -87,12 +89,14 @@ void SRStar::tick()
 // Compute the output of the star
 //
 // @Description For this strict star, it calls go() at most once an
-// instant when all its inputs are known, and at least one is present
-// if it's a reactive star.
+// instant when all its non-independent inputs are known, and at least
+// one is present if it is a reactive star.
 
 int SRStar::run()
 {
   if ( !hasFired ) {
+
+    // cout << "Trying to run " << name() << " isReactive:" << isReactive <<'\n';
 
     int ableToFire = 1;
     int presentInputs = 0;
@@ -101,13 +105,17 @@ int SRStar::run()
     PortHole * p;
 
     while ( ( p = nextPort++) != 0 ) {
+      // cout << "Checking " << p->name() << '\n';
       if ( p->isItInput() ) {
-	if ( !((InSRPort *) p)->known() ) {
+	if ( !((InSRPort *) p)->isItIndependent() &&
+	     !((InSRPort *) p)->known() ) {
+	  // cout << "unknown dependent input\n";
 	  ableToFire = 0;
 	  break;
 	} else {
 	  if ( ((InSRPort *) p)->present() ) {
 	    presentInputs = TRUE;
+	    // cout << "present input\n";
 	  }
 	}
       }
@@ -119,6 +127,7 @@ int SRStar::run()
 	// All of the inputs are known, and if the star is reactive,
 	// there is at least one present input--call go()
 
+	// cout << "Reactive with at least one present input: calling go()\n";
 	go();
 
       } else {
@@ -164,10 +173,10 @@ int SRStar::knownOutputs()
 
 // Initialize the star in preparation for simulation
 //
-// @Description Calls Star::initialize and resets the isReactive flag
+// @Description Resets the isReactive flag and calls Star::initialize
 void SRStar::initialize()
 {
-  Star::initialize();
-
   isReactive = 0;
+
+  Star::initialize();
 }
