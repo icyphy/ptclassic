@@ -2,7 +2,7 @@ defstar
 {
     name { ReadFile }
     domain { SDF }
-    version { $Id$ }
+    version { @(#)SDFReadFile.pl	1.8	7/28/93 }
     author { T. M. Parks }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -51,19 +51,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	istream* input;
     }
 
-    constructor { input = 0;   }
-    destructor  { delete input;}
-
     setup
     {
-	LOG_DEL; delete input; input = 0;
 	// open input file
-	int fd = open(expandPathName(fileName), O_RDONLY);
-	if (fd < 0) {
+	LOG_NEW; input = new ifstream(expandPathName(fileName));
+	if (!(*input))
 		Error::abortRun(*this, "can't open file ", fileName);
-		return;
-	}
-	LOG_NEW; input = new ifstream(fd);
     }
 
     go
@@ -76,13 +69,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		SimControl::requestHalt();
 	    else if (periodic)		// close and re-open file
 	    {
-		LOG_DEL; delete input; input = 0;
-		int fd = open(expandPathName(fileName), 0);
-		if (fd < 0) {
-			Error::abortRun(*this, "can't re-open file ", fileName);
-			return;
+		LOG_DEL; delete input;
+                LOG_NEW; input = new ifstream(expandPathName(fileName));
+         	if (!(*input)) {
+		    Error::abortRun(*this, "can't re-open file ", fileName);
+		    return;
 		}
-		LOG_NEW; input = new ifstream(fd);
 		(*input) >> x;		// get next value
 		ws(*input);
 	    }
@@ -96,11 +88,6 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     wrapup
-    {
-	LOG_DEL; delete input;
-	input = 0;
-    }
-    destructor
     {
 	LOG_DEL; delete input;
     }
