@@ -220,12 +220,9 @@ const char* newName(int flag) {
 }
 	
 // find a porthole with a given name and set the numberTokens parameter
-// FIXME: need DFPortHole methods to fix SDF parameters.  This should
-// use DFPortHole instead.
-// also, is 0 right for maxDelay?
 PortHole* findPortHole(DataFlowStar* s, const char* n, int num) {
-	SDFPortHole* p = (SDFPortHole*) s->portWithName(n);
-	p->setSDFParams(num,0);
+	DFPortHole* p = (DFPortHole*) s->portWithName(n);
+	p->setSDFParams(num,num-1);
 	return p;
 }
 
@@ -323,8 +320,10 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN,
 	DataFlowStar* newCollect = 0;
 	if (spreadReq < 0) spreadReq = 0;
 	if (collectReq < 0) collectReq = 0;
-	if (spreadReq == TRUE) newSpread =  makeSpread(srcP,sN); 
-	if (collectReq == TRUE) newCollect = makeCollect(destP, dN);
+	if (spreadReq == TRUE) 
+		newSpread =  makeSpread(srcP,sN,farP->numXfer()); 
+	if (collectReq == TRUE) 
+		newCollect = makeCollect(destP,dN,ref->numXfer());
 
 	// STEP4: depending on the situation, we make connections
 	// Note that delay is added on the arc of the destinations 
@@ -532,15 +531,15 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 
 // create a Spread star and connect it to the source porthole.
 
-DataFlowStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
+DataFlowStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN, int n) {
 	DataFlowStar* newSpread = mtarget->createSpread();
 	newSpread->setTarget(targetPtr);
 	subGal->addBlock(*newSpread,newName(1));
 	int numTok;
 	if (sN)
-		numTok = srcP->numXfer() * sN->numAssigned();
+		numTok = n * sN->numAssigned();
 	else
-		numTok = srcP->numXfer();
+		numTok = n;
 	PortHole* p = findPortHole(newSpread, "input", numTok);
 	srcP->connect(*p,0);
 	return newSpread;
@@ -548,15 +547,15 @@ DataFlowStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 
 // create a Collect star and connect it to the destination porthole.
 
-DataFlowStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
+DataFlowStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN,int n) {
 	DataFlowStar* newCollect = mtarget->createCollect();
 	newCollect->setTarget(targetPtr);
 	subGal->addBlock(*newCollect,newName(0));
 	int numTok;
 	if (dN)
-		numTok = destP->numXfer() * dN->numAssigned();
+		numTok = n * dN->numAssigned();
 	else
-		numTok = destP->numXfer();
+		numTok = n;
 	PortHole* p = findPortHole(newCollect, "output", numTok);
 	p->connect(*destP,0);
 	return newCollect;
@@ -593,7 +592,7 @@ M:
 
 	DataFlowStar* newSpread = 0;
 	if (count > 1) {
-		newSpread = makeSpread(srcP, sN);
+		newSpread = makeSpread(srcP, sN, ref->numXfer());
 	}
 
 	// make connections.
