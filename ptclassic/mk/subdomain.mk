@@ -29,13 +29,21 @@
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
+# Hack so that we can use this file at directories that are deeper,
+# such as cgc/targets/NOWam.  Note that this 'ifdef' is a GNU make extension
+ifdef MYVPATH
+	TMPVPATH = $(MYVPATH)
+else
+	TMPVPATH = ../../../../..
+endif
+
 makefiles:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo Updating makefile in domains/$(ME)/$$x ; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
@@ -46,7 +54,7 @@ all install clean sources realclean checkjunk sccsinfo:
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
@@ -58,7 +66,7 @@ TAGS:
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
@@ -70,7 +78,7 @@ depend:
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
+			VPATH=$(TMPVPATH)/src/domains/$(ME)/$$x $@ ; \
 		) \
 	    fi ; \
 	done
