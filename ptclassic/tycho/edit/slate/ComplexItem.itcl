@@ -134,7 +134,7 @@ class ::tycho::Picture {
 # an object constructor. The default implementation just creates
 # the primary component (which must be present in _all_ complex items)
 # as a rectangle at the given coordinates. From now on, this item
-# will be used to get and set the coordinatse of the new item.
+# will be used to get and set the coordinates of the new item.
 # Components items can then be added to the new complex item with
 # the Slate's create{} method.
 #
