@@ -41,6 +41,20 @@ static char rcsid[] = "$Header$ SPRITE (Berkeley)";
 #include "oct.h"
 #include "toct.h"
 
+/* Simple routine to return the full path name of the initialization file
+ */
+char *
+tkvemInitFile(filename)
+char *filename;
+{
+  char *ptolemy = getenv("PTOLEMY");
+  if (ptolemy)
+    sprintf(filename,"%s/src/tkvem/tkvem/ged.tcl",ptolemy);
+  else
+    sprintf(filename,"/users/ptolemy/src/tkvem/tkvem/ged.tcl");
+  return filename;
+}
+
 /*
  * The following variable is a special hack that allows applications
  * to be linked using the procedure "main" from the Tk library.  The
@@ -74,6 +88,8 @@ int
 Tcl_AppInit(interp)
     Tcl_Interp *interp;		/* Interpreter for application. */
 {
+    char initfilename[1024];
+
     Tk_Window main;
 
     main = Tk_MainWindow(interp);
@@ -102,7 +118,7 @@ Tcl_AppInit(interp)
      * Call Tcl_CreateCommand for application-specific commands, if
      * they weren't already created by the init procedures called above.
      */
-    if ( Tcl_EvalFile(interp,"ged.tcl")!=TCL_OK ) {
+    if ( Tcl_EvalFile(interp,tkvemInitFile(initfilename))!=TCL_OK ) {
 	return TCL_ERROR;
     }
 
