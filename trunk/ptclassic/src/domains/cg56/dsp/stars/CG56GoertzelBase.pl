@@ -61,6 +61,7 @@ first-order feedback coefficient which is a function of k and N }
 		double theta;
 	}
 	constructor {
+		noInternalState();
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
