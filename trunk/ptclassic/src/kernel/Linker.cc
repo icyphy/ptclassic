@@ -190,6 +190,18 @@ int Linker::multiLink (int argc, char** argv) {
 	}
 	TFile tname;
 
+#ifdef USE_DLOPEN
+	if (dlopen(argv[1],RTLD_NOW) == NULL) {
+	  char buf[1024];
+	  sprintf(buf,"Error linking file: dlopen: %s", dlerror());
+	  Error::abortRun(buf);
+	  return FALSE;
+	}
+// flag for permanent-link or not
+	int perm = (argv[0][0] == 'p');	// KLUDGE!
+
+	int nCalls = invokeConstructors(argv[1]);
+#else //USE_DLOPEN
 // round up to be on a page boundary
 	adjustMemory();
 
@@ -237,6 +249,7 @@ int Linker::multiLink (int argc, char** argv) {
 // invoke constructors in the newly read in code
 	if (!perm) activeFlag = TRUE;	// indicate dynamically linked objects
 	int nCalls = invokeConstructors(tname);
+#endif //USE_DLOPEN
 	int status = (nCalls >= 0);
 
 	if (nCalls == 0 && !perm) {
@@ -247,7 +260,9 @@ int Linker::multiLink (int argc, char** argv) {
 	activeFlag = FALSE;	// turn off the indication.
 	if (status) {
 // we do not bump the memory pointer until now; this makes it official
+#ifndef USE_DLOPEN
 		availMem += size;
+#endif
 // if this is a "permalink", make tfile the new symbol file
 		if (perm) installTable(tname);
 	}
@@ -380,6 +395,14 @@ Linker::invokeConstructors (const char* objName) {
 	}
 
 #else //USE_NM_GREP
+
+#ifdef USE_DLOPEN
+	// dlopen() does not seem to care about where the symbols are
+	// There could be bugs here.
+	availMem=0;
+	memoryEnd=0xffffffff;
+#endif //USE_DLOPEN
+
 	while (fscanf(fd, "%lx %s %s", &addr, type, symbol) == 3) {
 		if (addr >= (size_t)availMem && addr <= memoryEnd &&
 		    strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
