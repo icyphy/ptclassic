@@ -84,10 +84,6 @@ public:
 	// The run function resumes the run where it was left off.
 	int run(Block& galaxy);
 
-	// The wrapup function runs the termination routines of all the
-	// atomic blocks
-	int wrapup(Block& galaxy);
-
 	// Options for the scheduler are specified by setting
 	// various Booleans.  The repeatedFiring option will schedule
 	// a block several times in a row, if possible.  This consumes
@@ -123,6 +119,7 @@ public:
 		deferredFiring = TRUE;
 		numItersSoFar = 0;
 		numIters = 1;
+		invalid = 1;
 	}
 
 	// setStopTime, for compatibility with DE scheduler.
@@ -213,6 +210,9 @@ private:
 
 	// Pointer to star that may be causing deadlock
 	Block* dead;
+
+	// Flag for errors detected while computing the schedule
+	int invalid;
 };
 
 #endif
