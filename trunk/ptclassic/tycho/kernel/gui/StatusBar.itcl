@@ -87,6 +87,9 @@ class ::tycho::StatusBar {
     ###################################################################
     ####                         public methods                    ####
 
+    # Complete the filename in the "minibuffer."
+    method _complete {filename caseSens {down 1}}
+
     # Display the file status help -- callback for enter events
     method _filestatushelp {}
 
@@ -95,14 +98,20 @@ class ::tycho::StatusBar {
     
     # Execute a command with the entry widget or return it's name
     method _entrywidget {args}
+    
+    # Open the file or begin searching the directory in the minibuffer
+    method _openfile {filename caseSensitive}
 
     # Create an entry field in the status bar
     method entry {label args}
     
+    # Create an entry field to open a file in the status bar
+    method fileentry {label args}
+    
     # Get the most recent string written to the status bar
     method get {}
 
-     # Put a string to the status bar
+    # Put a string to the status bar
     method puts {string}
 
     # Start or update progress display
@@ -114,7 +123,10 @@ class ::tycho::StatusBar {
     # Draw the progress bar
     private method _drawprogress {progress {color blue}}
 
-    # Lock the current display mode
+    # Set the label text
+    private method _label {label}
+
+   # Lock the current display mode
     private method _lock {}
 
     # Set the current display mode
@@ -125,6 +137,9 @@ class ::tycho::StatusBar {
 
     ###################################################################
     ####                       private variables                   ####
+
+    # The current file completion
+    private variable _completedata
 
     # The current mode lock
     private variable _lock 0
@@ -281,6 +296,181 @@ body ::tycho::StatusBar::constructor {args} {
     eval itk_initialize $args
 }
 
+#####################################################################
+#### _complete
+# 
+# Implements completion in the minibuffer. Called when tab is pressed,
+# as well as up, down, and sometimes return (see fileentry{}).
+#
+# If many completions exist, the first call will reset the minibuffer to
+# the common completion, and the second call will begin scrolling through
+# the possible completions. Up and down (passing the appropriate value to 
+# the down argument) will scroll in the respective directions. 
+#
+# FIXME: NT support for spaces in filenames is incomplete. Completion works, 
+# however, scrolling through completions does not.
+#
+body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
+    set entryWidget $itk_component(feedback)
+
+    # Check for dummy filename signifying repeat
+    if {$filename == "?DUMMY?"} {
+        set filename $_completedata(lastEntry)
+    }
+
+    ###### Implement "rotation" through possible completions ######
+    if {($filename == $_completedata(lastEntry)) && \
+            ($caseSens == $_completedata(lastCase))} {
+        set length [llength $_completedata(list)]
+
+        # Rotate if length > 1
+        if {$length > 1} {
+            # Calculate next item 
+            if {$down} {
+                set num [expr ($_completedata(listNum) + 1) % $length]
+            } else {
+                set num $_completedata(listNum)
+                if {$num != -1} {
+                    # -1 is special (should become _last_ item)
+                    incr num -1
+                } 
+                set num [expr $num % $length]
+            }
+            set completion [::tycho::expandPath \
+                    [lindex $_completedata(list) $num]]
+
+            # Make sure separator is inserted (expandPath removes it)
+            if {([file type $completion] == "directory")} {
+                append completion [::tycho::directorySeparator]
+            }
+
+            # Save _completedata
+            set _completedata(listNum) $num
+            set _completedata(lastEntry) "$completion"
+
+            # Insert completion
+            $entryWidget delete 0 end
+            $entryWidget insert 0 $completion
+            _label "Open File: ([expr $num+1]/$length)"
+        } elseif {$length == 1} {
+            # Open if length == 1 unless directory
+            if {[file type $filename] != "directory"} {
+                _label {}
+                ::tycho::openContext $filename
+                set _completedata(lastEntry) {}
+                set _completedata(list) {}
+            } else {
+                # else recurse (continue in directory)
+                if {$caseSens} {
+                    set _completedata(list) [glob -nocomplain -- $filename*]
+                } else {
+                    set _completedata(list) [glob -nocomplain -- \
+                            [::tycho::noCase $filename]*]
+                }
+                set _completedata(listNum) -1
+                _complete $filename $caseSens $down
+            }
+        } else {
+            bell
+        }
+        return
+    }
+
+    ###### directory parent shortcut #####
+    if {[regexp "[::tycho::directorySeparator]\[.\]\$" $filename]} {
+        if {[glob -nocomplain -- $filename.*] != {}} {
+            # Insert completion
+            $entryWidget delete 0 end
+            $entryWidget insert 0 $filename.
+            return
+        }
+    }
+
+    ###### standard completion ######
+    if {$caseSens} {
+        set files [glob -nocomplain -- $filename*]
+    } else {
+        set filename [::tycho::noCase $filename]
+        set files [glob -nocomplain -- $filename*]
+    }
+    set length [llength $files]
+
+    if {$length == 0} {
+        # No completion
+        _label "Open File: (0)  "
+        bell
+    } elseif {$length == 1} {
+        # Single completion
+        set completion $files
+
+        # Fix for bug in glob (try [file exists [glob c:/Pro*]] on NT)
+        if {![file exists $completion]} {
+            set completion [lindex $completion 0]
+        } 
+
+        set completion [::tycho::expandPath $completion]
+
+        # Make sure separator is inserted (expandPath removes it)
+        if {([file type $completion] == "directory")} {
+            append completion [::tycho::directorySeparator]
+            _label "Open Directory:  "
+        } else {
+            _label "Open File: (1/1)"
+        }
+
+        # Insert completion
+        $entryWidget delete 0 end
+        $entryWidget insert 0 $completion
+
+        # Save _completedata
+        set _completedata(lastEntry) "$completion"
+        set _completedata(lastCase) $caseSens
+        set _completedata(list) $completion
+        set _completedata(listNum) 0
+    } else {        
+        # Multiple completions
+
+        if {$caseSens} {
+            set completion [::tycho::expandPath \
+                    [::tycho::lsubstring $files]]
+        } else {
+            set completion [::tycho::expandPath \
+                    [::tycho::lsubstring $files -nocase]]
+        }
+
+        # Insert separator
+        if {[file exists $completion] && \
+                ([file type $completion] == "directory")} {
+            append completion [::tycho::directorySeparator]
+        }                               
+
+        # Insert completion
+        $entryWidget delete 0 end
+        $entryWidget insert 0 $completion
+        
+        # If it's valid, this is the first completion
+        if {[file exists $completion]} {
+            if {[file type $completion] != "directory"}  {
+                _label "Open File: (1/$length)"
+                set _completedata(listNum) 0
+            } else {
+                # It's a directory
+                set _completedata(listNum) -1
+                _label "Open Directory: (0/$length)"
+            }
+        } else {
+            # It's not yet a completion
+            set _completedata(listNum) -1
+            _label "Open File: (0/$length)"
+        }
+ 
+       # Save _completedata
+        set _completedata(lastEntry) "$completion"
+        set _completedata(lastCase) $caseSens
+        set _completedata(list) $files        
+    }
+}
+
 #######################################################################
 #### _entrycommand
 #
@@ -338,6 +528,29 @@ body ::tycho::StatusBar::_filestatushelp {} {
     }
 }
 
+#####################################################################
+#### _openfile
+# Expects to be called from the minibuffer during a minibuffer file open,
+# checks to see if the given name is a directory or file, and either opens
+# the file using openContext or opens the directory in the minibuffer.
+#
+body ::tycho::StatusBar::_openfile {filename caseSens} {
+    if {[file exists $filename] && ([file type $filename] == "directory")} {
+        if {$_completedata(listNum) > -1} {
+            # In the middle of a scroll, break out of it 
+            _complete $filename* $caseSens
+        } else {
+            # Not scrolling, repeat complete
+            _complete $filename $caseSens
+        }
+    } else {
+        ::tycho::openContext $filename
+        puts {}
+    }
+    set _completedata(lastEntry) {}
+    set _completedata(list) {}
+}
+
 #######################################################################
 #### entry
 #
@@ -372,7 +585,7 @@ body ::tycho::StatusBar::entry {label args} {
     if ![_setmode "entry"] {
 	return
     }
-
+    
     # Extract args
     array set opts {-command {} -keycommand {} -default {} -tabcommand {}}
     array set opts [list -returnfocus [winfo toplevel $itk_component(hull)]]
@@ -382,9 +595,7 @@ body ::tycho::StatusBar::entry {label args} {
     $itk_component(message) configure -text $label
 
     # Configure the entry widget
-    if { $opts(-default) != "" } {
-        $itk_component(feedback) insert 0 $opts(-default)
-    }
+    $itk_component(feedback) insert 0 $opts(-default)
     if { $opts(-command) != "" } {
         bind $itk_component(feedback) <Return> \
                 [list $this _entrycommand $opts(-command)]
@@ -393,17 +604,66 @@ body ::tycho::StatusBar::entry {label args} {
         bind $itk_component(feedback) <Key> $opts(-keycommand)
     }
     # Make sure the Tab key breaks to prevent tab-traversal
-    if { $opts(-keycommand) != "" } {
+    if { $opts(-tabcommand) != "" } {
         bind $itk_component(feedback) <Tab> \
                 "[list $this _entrycommand $opts(-tabcommand)]; break"
-    } else {
-        bind $itk_component(feedback) <Tab> {break}
+    } elseif {[bind $itk_component(feedback) ] == {}} {
+	# Only bind if unbound. I call this function repeatedly
+	# to update the label.
+	bind $itk_component(feedback) <Tab> {break}
     }
+
     # The Escape key returns the focus to where it was
     bind $itk_component(feedback) <Escape> "$opts(-returnfocus) focusin"
    
     # Now focus on the entry
     focus $itk_component(feedback)
+}
+
+#######################################################################
+#### fileentry
+#
+# Create an entry field in the status bar and configure it to
+# perform file completion. If the progress bar is currently active,
+# do nothing. The first argument is
+# a string to display to the left of the entry field; following
+# arguments are an option-value list, and can be any of:
+# <ul>
+# <li><b>-casesensitive</b>: If true, completion is case-sensitive.
+# The default is false.
+# <li><b>-default</b>: The default text to place into the entry field.
+# <li><b>-returnfocus</b>: A widget to return the focus to if
+# <Escape> is pressed. Defaults to the toplevel containing
+# this status bar.
+# </ul>
+#
+body ::tycho::StatusBar::fileentry {label args} {
+    # Extract args
+    array set opts {-command {} -default {} -casesensitive 0}
+    array set opts [list -returnfocus [winfo toplevel $itk_component(hull)]]
+    array set opts $args
+
+    # Call the entry{} method
+    entry $label \
+            -default $opts(-default) \
+            -returnfocus $opts(-returnfocus) \
+            -command "$this _openfile \"%%\" $opts(-casesensitive)" \
+            -tabcommand "$this _complete \"%%\" $opts(-casesensitive)"
+
+    # Bind for reverse rotation
+    bind $itk_component(feedback) <Control-Tab> \
+            "$this _complete ?DUMMY? $opts(-casesensitive) 0"
+    bind $itk_component(feedback) <Up> \
+            "$this _complete ?DUMMY? $opts(-casesensitive) 0"
+    # Alternative to Tab
+    bind $itk_component(feedback) <Down> \
+            "$this _complete ?DUMMY? $opts(-casesensitive) 1"
+    
+    # Initialize completion data
+    set _completedata(lastEntry) {}
+    set _completedata(lastCase) {}
+    set _completedata(list) {}
+    set _completedata(listNum) 0
 }
 
 #######################################################################
@@ -527,6 +787,16 @@ body ::tycho::StatusBar::_drawprogress {progress {color blue}} {
     $itk_component(feedback) coords foo 0 0 $width $height
     # Update the color too in case it changed
     $itk_component(feedback) itemconfigure foo -fill $color
+}
+
+#######################################################################
+#### _label
+#
+# Set the label text. This is intended for use to change the
+# label of the widget created by entry{} or fileentry{}.
+#
+body ::tycho::StatusBar::_label {label} {
+    $itk_component(message) configure -text $label
 }
 
 #######################################################################
