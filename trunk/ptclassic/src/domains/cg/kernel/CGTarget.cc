@@ -183,6 +183,21 @@ void CGTarget :: endIteration(int reps, int depth) {
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
 
+int CGTarget :: compileCode() {
+	Error::abortRun("No compileCode method defined for current target");
+	return FALSE;
+}
+
+int CGTarget :: loadCode() {
+	Error::abortRun("No loadCode method defined for current target");
+	return FALSE;
+}
+
+int CGTarget :: runCode() {
+	Error::abortRun("No runCode method defined for current target");
+	return FALSE;
+}
+
 void CGTarget :: wormInputCode(PortHole& p) {
 	myCode << "READ from wormhole port " << p.readFullName() << "\n";
 }

@@ -92,6 +92,7 @@ protected:
 	// run inside of a wormhole.  Arguments are same as above.
 	virtual int sendWormData(PortHole&);
 	virtual int receiveWormData(PortHole&);
+
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc,
 		 char sep = '_');
@@ -120,6 +121,12 @@ public:
 
 	// fn for adding code to the target
 	void addCode(const char*);
+
+	// methods to compile and run the target.
+	// check access privilege later.
+	virtual int compileCode();
+	virtual int loadCode();
+	virtual int runCode();
 
 	// do we need this?
 	virtual void writeCode(UserOutput&);
