@@ -3,7 +3,7 @@ defstar {
 	domain {SDF}
 	desc {
 A Recursive (Backward) (IIR) Lattice filter.  The default coefficient
-implement the synthesis filter for a particular 4th order AR random process.
+implement the synthesis filter for a particular 4th-order AR random process.
 To read reflection coefficients from a file, replace the default
 coefficients with "<fileName", preferably specifying a complete path.
 	}
@@ -21,13 +21,13 @@ limitation of liability, and disclaimer of warranty provisions.
 This star implements a recursive lattice filter.
 To load filter coefficients from a file,
 simply replace the default coefficients with the string "<filename".
-It is advisable not to use an absolute path name as part of the file name,
-especially if you are using the graphical interface.
-This will allow the Lattice filter to work as expected regardless of
-the directory in which the ptolemy process actually runs.
-It is best to use tilde's in the filename to reference them to user's
-home directory.  This way, future filesystem reorganizations
-will have minimal effect.
+It is not advisable to use an absolute path name as part of the file name.
+Instead, the path name should be relative to a known directory,
+such as the user's home directory referenced by the tilde character
+or another known directory referenced by an environment variable.
+This will allow the RLattice filter to work as expected regardless of
+the directory in which Ptolemy actually runs and regardless of
+future file system reorganizations.
 .pp
 .nf
 .na
@@ -46,7 +46,7 @@ X(n) ---(+)->--o-->----(+)->--o--->-- ... ->--(+)->--o--->---o--->  Y(n)
 
 .cs R
 .fi
-where the [z] are unit delays and the (+) are adders.
+where the [z] are unit delays and the (+) are adders
 and "y" and "z" are defined in the code.
 .ad
 .pp
@@ -70,8 +70,8 @@ are the negative of the ones used by this star, which
 correspond to the definition in most other texts,
 and to the definition of partial-correlation (PARCOR)
 coefficients in the statistics literature.
-The sign of the coefficients used in this star is appropriate for values
-given by the LevDur or Burg stars.
+The signs of the coefficients used in this star are appropriate for values
+given by the LevDur and Burg stars.
 .UH REFERENCES
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",

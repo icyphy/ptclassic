@@ -4,7 +4,7 @@ defstar {
 	derivedFrom { FIR }
 	desc {
 THIS STAR IS OBSOLETE ----- USE SDF RaisedCosine.
-An FIR filter with a magnitude frequency response shaped
+An FIR filter with a magnitude frequency response that is shaped
 like the standard raised cosine used in digital communications.
 By default, the star upsamples by a factor of 16, so 16 outputs
 will be produced for each input unless the "interpolation"
@@ -22,9 +22,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 This star implements an FIR filter with
 a raised cosine frequency response, with the excess bandwidth given
-by \fIexcessbw\fR and the distance from center to first
+by \fIexcessbw\fR and the distance from center to the first
 zero crossing given by \fIP\fP.
-The length of the filter (the number of taps) is \fIN\fP.
+The length of the filter (i.e., the number of taps) is \fIN\fP.
 Ideally, the impulse response of the filter would be
 .EQ
 h(n) ~=~ left ( { sin ( pi n / P ) } over { pi n / P } right )
@@ -39,15 +39,15 @@ g(n) ~=~ h(n - M)
 .EN
 where $M ~=~ N/2$ if $N$ is even, and $M ~=~ (N+1)/2$ if $N$ is odd.
 Since the impulse response is simply truncated outside this range,
-note that if $N$ is even the impulse response will not be symmetric.
-It will have one more sample to the left than to the right of center.
+the impulse response will not be symmetric if $N$ is even because
+it will have one more sample to the left than to the right of center.
 Unless this extra sample is zero, the filter will not have linear phase
 if $N$ is even.
 .sp
 The output sample rate is \fIupsample\fP times the input.
-This is set by default to 16 becuase in digital communication systems
-this pulse is used for line coding of symbols, and upsampling is necessary.
-The star is implemented by deriving from the FIR star.
+This is set by default to 16 because in digital communication systems
+this pulse is used for the line coding of symbols, and upsampling is necessary.
+The star is derived from the FIR star.
 .Id "raised cosine pulse"
 .Id "Nyquist pulse"
 .UH REFERENCES
