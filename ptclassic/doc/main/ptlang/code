@@ -49,7 +49,7 @@ the wrapup() method is called to complete the simulation run.
 .pp
 The precise mechanism for references to input and output portholes
 depends somewhat on the domain.  This is because stars in the domain
-XYZ use objects of class InXYZPort and OutXYZPort (derived from PortHole)
+XXX use objects of class InXXXPort and OutXXXPort (derived from PortHole)
 for input and output, respectively.
 We will explain here how such references are used in the SDF domain.
 A later section discusses the DE domain.
@@ -96,7 +96,7 @@ subdirective of the
 or
 .c output
 directive.
-Currently this can be float, int, or complex.
+Currently this can be float, int, complex, or packets.
 .pp
 The operator ``%'' operating on an SDF porthole returns a reference
 to a particle.
@@ -173,14 +173,18 @@ go {
 }
 .)c
 Note the distinction between the ``<<'' operator and the assignment
-operator; the latter operator copys Particles, the former operator
+operator; the latter operator copies Particles, the former operator
 loads data into particles.  The type of the right-side operand
 of ``<<'' may be
 .c int ,
 .c float ,
+.c Complex
 or
-.c Complex ;
+.c Packet;
 the appropriate type conversion will be performed.
+For more information on the
+.c Packet
+type, please see the appendix at the end of this section.
 .H3 "SDF PortHole parameters"
 .pp
 In the above example, where
@@ -386,7 +390,7 @@ Conversion of a
 to an
 .c int
 produces the greatest integer that is less than or equal to
-to
+the
 .c float
 value.
 .pp
@@ -433,8 +437,8 @@ checking the
 member of the
 .c DEPortHole .
 It is possible
-for simultaneous events to arrive on each of several input porthole,
-however, if simultaneous events arrive on the same input, the
+for simultaneous events to arrive on several different input portholes.
+However, if simultaneous events arrive on the same input porthole, the
 scheduler fires the star two separate times, presenting the
 events one at a time.  The result is that any input porthole
 has at most one event (particle).
@@ -694,50 +698,6 @@ A member of the
 class can be initialized and operated upon any number of ways.
 For details, see the file ~ptolemy/src/kernel/ComplexSubset.h.
 .pp
-.b WARNING:
-were the compiler perfect, it would never be necessary to use
-explicit casts with
-.c State s.
-But because of a compiler bug in the Gnu C++ compiler
-(g++ version 1.37.1), if you attempt to cast a
-.c FloatState
-to type
-.c float ,
-either explicitly by writing
-.(c
-output%0 << float(myFloatState);
-.)c
-or implicitly by writing
-.(c
-float x = myFloatState;
-.)c
-the compiler will erroneously assign zero.  This bug is fixed
-in the alpha version of g++ 1.37.2, but this version hasn't been
-released yet.  Until it is, for safety
-.i always
-write an explicit cast to
-.c double
-when a
-.c FloatState
-is used in an expression.  For example:
-.(c
-go {
-	output% << (double(myState) + 0.5) * float(input%0);
-}
-.)c
-Similarly, an
-.c IntState
-should be cast explicitly to
-.c int ,
-a
-.c ComplexState
-to
-.c Complex ,
-and
-.c StringState
-to
-.c char* .
-.pp
 A state may be updated by ordinary assignment in C++, as in the following
 lines
 .(c
@@ -833,7 +793,7 @@ and
 .c aState
 is a
 .c FloatArrayState .
-The accesses like those in the following lines are routine:
+The accesses, like those in the following lines, are routine:
 .(c
 sState = aState[1] + 0.5;
 aState[1] = (double)sState * 10.0;
