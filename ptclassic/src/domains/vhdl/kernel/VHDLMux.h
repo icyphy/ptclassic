@@ -53,6 +53,8 @@ class VHDLMux : public VHDLFiring
  public:
   // Constructors.
   VHDLMux();
+  VHDLMux(const char* n, const char* t)
+    : type(t) { setName(n); }
 
   // Destructor.
   ~VHDLMux();
