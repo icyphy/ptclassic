@@ -71,9 +71,9 @@ OPTIMIZER =	-O2
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
 LOCALFLAGS =	-pipe -fno-for-scope
 WARNINGS =	-Wall -Wcast-qual
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCAL_FLAGS)
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCALFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCAL_FLAGS)
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCALFLAGS)
 
 # system libraries for linking .o files from C files only
 # -lots is needed to resolve _OtsDivide64Unsigned which is in the Matlab lib.
