@@ -278,7 +278,7 @@ body ::tycho::EditTcl::configureContextMenu {} {
 	set link [file split $itk_option(-file)]
 	set path [lrange $link 0 [expr [llength $link] - 2]]
 	set fname [join [concat \
-		[linit [split [lindex $link end] .]] "html"] .]
+		[lreplace [split [lindex $link end] .] end end] "html"] .]
 	set link [eval file join $path doc codeDoc $fname]
 
 	if { [file exists $link] } {
