@@ -6,7 +6,7 @@ defstar {
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
-	author { William Chen}
+	author { William Chen and John Reekie}
 	copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
@@ -61,14 +61,14 @@ based on the procedure defined by Shpak.
 	}
 	codeblock(setparams) {
 	  static void setparams(parametric_t *parametric){
-	    double gaintmp,t0,t1;
+	    double gaintmp,t0,invf1prime;
 
 	    parametric->T = 1/$val(sampleFreq);
 	    parametric->omegap = 2*PI*$val(passFreq)*parametric->T;
 	    parametric->omegac = 2*PI*$val(centerFreq)*parametric->T;
 	    t0 = log(2)/2;
-	    t1 = exp($val(bandwidth)*t0);
-	    parametric->omegabw = parametric->omegac*(t1-1/t1);
+	    invf1prime = exp($val(bandwidth)*t0);
+	    parametric->omegabw = parametric->omegac*(invf1prime-1/invf1prime);
 
 	    if ($val(gain)>=0){
 	      parametric->gainflag = 1;
