@@ -307,7 +307,7 @@ configure_tclblend: $(TCLBLEND_OBJ)
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
 tclblend: #$(TCLBLEND_OBJ)/pkgIndex.tcl
-	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) tclblend.jar)
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) all)
 
 #$(TCLBLEND_OBJ)/pkgIndex.tcl: $(TCLBLEND_SRC)/pkgIndex.tcl
 #	rm -f $@
