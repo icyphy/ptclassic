@@ -32,14 +32,11 @@ arithmetic so that overflow results in wraparound.
 	  type { float }
 	  desc { Output float type }
 	}
+	hinclude {<vis_types.h>}
         ccinclude {<vis_proto.h>}
 	go {
 	  
-	  double sum=0.0;
-	  
 	  /*calculate the sum*/
-	  sum = vis_fpadd16(double(inA%0),double(inB%0));
-	  
-          out%0 << (double) sum;
+          out%0 << (vis_d64) vis_fpadd16(double(inA%0),double(inB%0));
       	}
 }

@@ -32,10 +32,10 @@ arithmetic so that overflow results in wraparound.
 		type { float }
 		desc { Output float type }
 	}
+	hinclude {<vis_types.h>}
         ccinclude {<vis_proto.h>}
 	go {
 	  // calculate the difference
-	  double diff = vis_fpsub16(double(inA%0),double(inB%0));
-          out%0 << diff;
+          out%0 << vis_fpsub16(double(inA%0),double(inB%0));
       	}
 }
