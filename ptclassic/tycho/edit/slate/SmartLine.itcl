@@ -663,8 +663,11 @@ body ::tycho::SmartLine::construct {id canvas slate tags args} {
     # Create the primary component -- the line
     set primary($id) [eval $canvas create line $args [list \
             -arrow   $option(arrow$id) \
+            -width   $option(width$id) \
             -fill    $option(fill$id) \
             -smooth  $option(smooth$id) \
+            -capstyle  $option(capstyle$id) \
+            -joinstyle $option(joinstyle$id) \
             -tags $tags]]
 
     # Call redraw to reshape it
