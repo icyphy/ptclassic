@@ -48,7 +48,7 @@ class ::tycho::CircularList {
     # Return the elements as a list, optionally starting at the given element.
     method elements {{start {}}}
 
-    # Insert an element, at the beginning or before the given element.
+    # Insert an element in the list.
     method insert {element {before {}}}
 
     # Remove an element from the list.
@@ -68,7 +68,7 @@ body ::tycho::CircularList::constructor {args} {}
 
 #####################################################################
 #### append
-# Append an element to the list.
+# Append an element, at the end or after the given element.
 # If only one argument is given, the element is appended at the end.
 # Otherwise, it is appended after the element given by the second argument.
 # If the second argument gives an invalid element, an error is reported.
@@ -109,7 +109,7 @@ body ::tycho::CircularList::append {element {after {}}} {
 
 #####################################################################
 #### clear
-# Clear the CircularList.
+# Reinitialize the list.
 #
 body ::tycho::CircularList::clear {} {
     unset forward
@@ -188,7 +188,7 @@ body ::tycho::CircularList::insert {element {before {}}} {
 
 #####################################################################
 #### remove
-# Remove a specified element.
+# Remove an element from the list.
 #
 body ::tycho::CircularList::remove {element} {
     if {![info exists forward($element)]} {
