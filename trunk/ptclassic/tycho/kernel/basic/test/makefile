@@ -81,9 +81,8 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 
 # These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tytest alltests.itcl
+	tytest $(GRAPHICAL_TESTS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
 
