@@ -483,3 +483,34 @@ inline int getpagesize() { return 4096;}
 #ifdef PTAIX_XLC
 extern "C" int getpagesize(void);
 #endif
+
+#ifdef PTSUN4
+/* The sun4 port of Ptolemy requires a static pigiRpc for incremental linking
+ * to work.  The pigiRpc binary can have _no_ shared libraries, or
+ * the bsd style ld incremental linking will fail with a message like
+ * ld: -ldl: No such file or directory
+ * However, Tcl7.6 permits incremental linking of shared objects, so
+ * it has calls to dlsym, dlopen and dlerror.  However, we cannot
+ * link to -ldl, so we provide dummy functions here.  
+ */
+static void ptsun4dlerror() {
+     fprintf(stderr,
+             "Linker: The sun4 port of Ptolemy does not support dl* calls\n");
+} 
+void *dlopen(char * /*path*/, int /*mode*/) {
+	ptsun4dlerror();
+	return (void *)NULL;
+}
+void *dlsym(void * /*handle*/, char * /*symbol*/) {
+	ptsun4dlerror();
+	return (void *)NULL;
+}
+char *dlerror() {
+	ptsun4dlerror();
+	return (char *)NULL;
+}
+int dlclose(void * /*handle*/) {
+	ptsun4dlerror();
+	return 0;
+}
+#endif /* PTSUN4 */
