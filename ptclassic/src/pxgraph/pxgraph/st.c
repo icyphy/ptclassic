@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 #include <stdio.h>
-#include "malloc.h"
+#include <malloc.h>
 #include "st.h"
 #include "xgraph.h"
 
