@@ -30,7 +30,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __STDC__
 #define quote(x) #x
 #else
+#if defined(hpux) && ! defined __GNUG__ && defined(__cplusplus)
+/* For hppa.cfront.  pigilib/{POct,PVem}.cc use quote() */
+#define quote(x) #x
+#else
 #define quote(x) "x"
+#endif
 #endif
 
 extern "C" int strcmp(const char*,const char*);
