@@ -19,10 +19,8 @@ ROOT	      = ../..
 VPATH         = $(ROOT)/src/pigilib
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
-
-PTCLHDRS = $(ROOT)/src/ptcl
 
 HDRS	      = compile.h \
 		edit.h \
@@ -105,9 +103,10 @@ all:	makefile $(LIB)
 install: makefile $(LIBDIR)/$(LIB)
 
 # include the X11, oct and tcl headers for C++ as well as C
-INCL=-I$(KERNDIR) -I$(OCTTOOLS)/include $(X11INCL) -I$(TCL_H_DIR) -I$(PTCLHDRS)
+INCL=	-I$(KERNDIR) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
+	$(X11_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
 
-C_INCL=-I$(OCTTOOLS)/include $(X11INCL) -I$(TCL_H_DIR)
+C_INCL=-I$(OCTTOOLS)/include $(X11_INCSPEC) -I$(TCL_INCDIR)
 
 lint:	$(LIBCSRCS)
 	lint -u -I$(OCTTOOLS)/include $(LIBCSRCS) > lint
