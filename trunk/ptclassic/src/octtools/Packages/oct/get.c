@@ -27,6 +27,16 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "create.h"
+#include "modify.h"
+#include "oct_utils.h"
+#include "get.h"
+
+/* Forward references (Should these be static?)*/
+int oct_do_get_by_name
+	ARGS((generic *cptr, octObject *object, generic **optr_p));
+int oct_do_get_container_by_name
+	ARGS((generic *optr, octObject *container, generic **cptr_p));
 
   /* implement the various oct `get' funcitons  */
 
@@ -91,6 +101,7 @@ octObject *object;
     return retval;
 }
 
+int
 oct_do_get_by_name(cptr, object, optr_p)
 generic *cptr;
 octObject *object;
@@ -130,6 +141,7 @@ generic **optr_p;
     return retval;
 }
 
+int
 oct_do_get_container_by_name(optr, container, cptr_p)
 generic *optr;
 octObject *container;
@@ -170,6 +182,7 @@ generic **cptr_p;
     return retval;
 }
 
+int
 octGetOrCreate(container, object)
 octObject *container;
 octObject *object;
@@ -206,10 +219,12 @@ octObject *object;
 	errRaise(OCT_PKG_NAME, OCT_ERROR, octErrorString());
     }
     /*NOTREACHED*/
+    return OCT_ERROR;
 }
 
 
 /* XXX hack for oct_add_to_error_bag */
+int
 oct_get_or_create(cptr, object)
 generic *cptr;
 octObject *object;
@@ -239,9 +254,11 @@ octObject *object;
 	errRaise(OCT_PKG_NAME, OCT_ERROR, octErrorString());
     }
     /*NOTREACHED*/
+    return OCT_ERROR;
 }
 
 
+octStatus
 octCreateOrModify(container, object)
 octObject *container;
 octObject *object;
@@ -275,8 +292,10 @@ octObject *object;
 	errRaise(OCT_PKG_NAME, OCT_ERROR, octErrorString());
     }
     /*NOTREACHED*/
+    return OCT_ERROR;
 }
 
+octStatus
 octGetById(object)
 octObject *object;
 {
