@@ -125,7 +125,7 @@ public:
                           unsigned numTokens = 1);      // defaults to 1
 
 	// redefine
-	PortHole& installPort(DFPortHole& p);
+	/* virtual */ PortHole& installPort(PortHole& p);
 
 protected:
         // The number of Particles consumed
