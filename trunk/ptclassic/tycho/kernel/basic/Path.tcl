@@ -177,7 +177,7 @@ proc ::tycho::mkdir { args } {
 # use of $TYCHO.
 #
 proc ::tycho::relativePath {srcFile dstFile} {
-    puts "$srcFile $dstFile"
+    #puts "$srcFile $dstFile"
     if { [string index $dstFile 0] != "$" && \
 	    [file pathtype $dstFile] != "absolute" } {
 	return $dstFile
@@ -200,7 +200,7 @@ proc ::tycho::relativePath {srcFile dstFile} {
 	set dstLength [llength $dstList]
 
 	set upDirs [expr {[llength $srcList] - $equalCount}]
-	puts "$srcList $dstList $equalCount $srcLength $dstLength $upDirs"
+	#puts "$srcList $dstList $equalCount $srcLength $dstLength $upDirs"
 
 	for {set i 0} {$i < $upDirs} {incr i} {
 	    lappend results ..
