@@ -521,7 +521,9 @@ body ::tycho::ClassViewer::generateDAG {} {
         set sourcedir [::tycho::expandPath [file join \
                 [file dirname $docfile] .. ..]]
         set source [file join $sourcedir $source]
-        set parents [$_classmodels($parent) parents]
+        set parents [concat \
+        	[$_classmodels($parent) modelcget -inherits] \
+        	[$_classmodels($parent) modelcget -implements]]
         lappend DAGinfo "add $parent \{label [info namespace tail $parent] \
                 link $source altlink $docfile\} \{$parents\}"
     }
@@ -635,7 +637,7 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
     # clear inherited classes
     _deleteClasses 0
 
-    set parents [$classModel parents -inheritance implementation]
+    set parents [$classModel modelcget -inherits]
 
     while {[llength $parents] != 0} {
         set parent [lindex $parents 0]
@@ -652,10 +654,13 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
             # NOTE: parents which aren't loaded aren't part of _heritage
             lappend _heritage $parent
 
-            set _classmodels($parent) [::tycho::Class [::tycho::autoName class]]
+            set _classmodels($parent) \
+            		[::tycho::ClassModel [::tycho::autoName class]]
             putStatus "Loading $parent"
             ::tycho::safeUpdate $this
-            $_classmodels($parent) read file $parentFile
+            set fd [open $parentFile]
+            $_classmodels($parent) parse [$fd read]
+            close $fd
             
             # Load my parents too.
             set newparents [$_classmodels($parent) parents]
@@ -681,8 +686,8 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
 body ::tycho::ClassViewer::insertData {data} {
     if [getReadOnly] {bell; return}
     _deleteClasses
-    set tempClass [::tycho::Class [::tycho::autoName class]]
-    $tempClass read string "$data"
+    set tempClass [::tycho::ClassModel [::tycho::autoName class]]
+    $tempClass parse "$data"
     set language [$tempClass modelcget -language]
     set _currentclass [$tempClass modelcget -name]
     set _classmodels($_currentclass) $tempClass
@@ -690,12 +695,15 @@ body ::tycho::ClassViewer::insertData {data} {
     # get the related file, if it exists
     set relfile [relFile $_currentclass]
     if {$relfile != {}} {
-        set _classmodels(related) [::tycho::Class [::tycho::autoName class]]
-        $_classmodels(related) read file $relfile
+        set _classmodels(related) \
+        		[::tycho::ClassModel [::tycho::autoName class]]
+        set fd [open $relfile]
+		$_classmodels(related) parse [$fd read]
+		close $fd    
     }
     
     _display
-    putHtml $_currentclass [$tempClass get annotation explanation]
+    putHtml $_currentclass [$tempClass modelcget -explanation]
 }
 
 #########################################################################
@@ -807,8 +815,8 @@ body ::tycho::ClassViewer::_bindDesc {class item label} {
         "\m" {set type method}
         "\v" {set type variable}
         "\r" {set type method}
-        "\c" {set type Constructor}
-        "\d" {set type Destructor}
+        "\c" {set type constructor}
+        "\d" {set type destructor}
         default {set type {}}
     }
 
@@ -819,15 +827,16 @@ body ::tycho::ClassViewer::_bindDesc {class item label} {
         set class ""
     }
 
-   if ![catch {set desc [$classModel get annotation $item.description $type]}] {
+    set desc [$classModel itemcget $item -description]
+    if { $desc != "" } {
         $itk_component(contents) bind $label <Enter> \
-                [code "$this putStatus \{$class$desc\}"]
+                "$this putStatus \{$class$desc\}"
         $itk_component(contents) bind $label <KeyRelease-Shift_L> \
-                [code "$this putStatus \{$class$desc\}"]
+                "$this putStatus \{$class$desc\}"
         $itk_component(contents) bind $label <KeyRelease-Shift_R> \
-                [code "$this putStatus \{$class$desc\}"]
+                "$this putStatus \{$class$desc\}"
         $itk_component(contents) bind $label <Leave> \
-                [code "$this putStatus {}"]
+                "$this putStatus {}"
     }   
 }
 
@@ -845,12 +854,13 @@ body ::tycho::ClassViewer::_bindExpl {class item label} {
         "\m" {set type method}
         "\v" {set type variable}
         "\r" {set type method}
-        "\c" {set type Constructor}
-        "\d" {set type Destructor}
+        "\c" {set type constructor}
+        "\d" {set type destructor}
         default {set type {}}
     }
 
     # format explanation
+    set item [lindex [split $item :] 1]
     set expl [_formatExpl $class $item $type]
 
     # bind explanation to button 1 click
@@ -894,12 +904,13 @@ body ::tycho::ClassViewer::_display {} {
 
     $itk_component(contents) bind class <Button-1> \
             [code "$this putHtml \
-            $_currentclass \{[$classModel get annotation explanation]\}"]
+            $_currentclass \{[$classModel modelcget -explanation]\}"]
 
     # Class description is optional
-    if ![catch {$classModel get annotation description}] {
+    set desc [$classModel modelcget -description]
+    if { $desc != "" } {
         $itk_component(contents) bind class <Enter> [code \
-                "$this putStatus \{[$classModel get annotation description]\}"]
+                "$this putStatus \{$desc\}"]
         $itk_component(contents) bind class <Leave> [code \
                 "$this putStatus {}"]
     }
@@ -1002,7 +1013,7 @@ body ::tycho::ClassViewer::_formatExpl {class item type {extern 0}} {
 #####################################################################
 #### _generateHtmlContents
 # Create the internal links for an HTML output of the class model. 
-# If verbose is unset, only output Constructors and Destructors if 
+# If verbose is unset, only output constructors and destructors if 
 # they have a non-blank description, and only do not output private
 # entities. Verbose outputs everything.
 #
@@ -1016,7 +1027,7 @@ body ::tycho::ClassViewer::_generateHtmlContents {} {
 # Create the body of an HTML document describing the current class.
 # Similar to _display{} >
 #
-# If verbose is unset, only output Constructors and Destructors if 
+# If verbose is unset, only output constructors and destructors if 
 # they have a non-blank description, and only do not output private
 # entities. Verbose outputs everything.
 #

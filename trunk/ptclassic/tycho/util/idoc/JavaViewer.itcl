@@ -160,24 +160,24 @@ body ::tycho::JavaViewer::_displayConstructors {} {
     set classModel $_classmodels($_currentclass)
 
     set subnames {}
-    foreach Constructor [$classModel Constructors] {
+    foreach constructor [$classModel match constructor] {
 	# put label into contents widget
-	$itk_component(contents) appendlabel $Constructor\c \
-		-text [_fixName $Constructor 0] \
+	$itk_component(contents) appendlabel $constructor\c \
+		-text [_fixName $constructor 0] \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass $Constructor $Constructor\c
-	_bindExpl $_currentclass $Constructor $Constructor\c
-	lappend subnames $Constructor\c
+	_bindDesc $_currentclass constructor:$constructor $constructor\c
+	_bindExpl $_currentclass constructor:$constructor $constructor\c
+	lappend subnames $constructor\c
     }
     
     # No inherited (overloading) constructors
     
-    # insert panel if a Constructor found
+    # insert panel if a constructor found
     if {$subnames != {}} {
 	set subnames [lsort $subnames]
-	$itk_component(contents) append Constructor\c "$subnames" \
+	$itk_component(contents) append constructor\c "$subnames" \
 		-text "Constructors" \
 		-font [$this cget -headfont] \
 		-foreground [$this cget -publiccolor]
@@ -192,16 +192,16 @@ body ::tycho::JavaViewer::_displayDestructors {} {
     set classModel $_classmodels($_currentclass)
 
     set subnames {}
-    foreach Destructor [$classModel Destructors] {
+    foreach Destructor [$classModel match destructor] {
 	# put label into contents widget
-	$itk_component(contents) appendlabel $Destructor\d \
-		-text [_fixName $Destructor 0] \
+	$itk_component(contents) appendlabel $destructor\d \
+		-text [_fixName $destructor 0] \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass $Destructor $Destructor\d
-	_bindExpl $_currentclass $Destructor $Destructor\d
-	lappend subnames $Destructor\d
+	_bindDesc $_currentclass destructor:$destructor $destructor\d
+	_bindExpl $_currentclass destructor:$destructor $destructor\d
+	lappend subnames $destructor\d
     }
     
     # No inherited (overloading) destructors
@@ -209,7 +209,7 @@ body ::tycho::JavaViewer::_displayDestructors {} {
     # insert panel if a Destructor (finalizer) found
     if {$subnames != {}} {
 	set subnames [lsort $subnames]
-	$itk_component(contents) append Destructor\d "$subnames" \
+	$itk_component(contents) append destructor\d "$subnames" \
 		-text "Finalizers" \
 		-font [$this cget -headfont] \
 		-foreground [$this cget -publiccolor]
@@ -228,7 +228,7 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
     
     # Instance methods
     set subnames {}
-    foreach method [$classModel methods \
+    foreach method [$classModel match method \
 	    -protection $protection -scope instance] {
 	# put label into contents widget
 	$itk_component(contents) appendlabel $method\m \
@@ -236,8 +236,8 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass $method $method\m
-	_bindExpl $_currentclass $method $method\m
+	_bindDesc $_currentclass method:$method $method\m
+	_bindExpl $_currentclass method:$method $method\m
 	lappend subnames $method\m
     }
 
@@ -256,8 +256,8 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class $method $method\m
-		    _bindExpl $class $method $method\m
+		    _bindDesc $class method:$method $method\m
+		    _bindExpl $class method:$method $method\m
 		    lappend subnames $method\m
 		}
 	    }
@@ -276,7 +276,7 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 
     # Static Methods
     set subnames {}
-    foreach method [$classModel methods \
+    foreach method [$classModel match method \
 	    -protection $protection -scope class] {
 	# put label into contents widget
 	$itk_component(contents) appendlabel $method\p \
@@ -284,8 +284,8 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass $method $method\p
-	_bindExpl $_currentclass $method $method\p
+	_bindDesc $_currentclass method:$method $method\p
+	_bindExpl $_currentclass method:$method $method\p
 	lappend subnames $method\p
     }
 
@@ -304,8 +304,8 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class $method $method\p
-		    _bindExpl $class $method $method\p
+		    _bindDesc $class method:$method $method\p
+		    _bindExpl $class method:$method $method\p
 		    lappend subnames $method\p
 		}
 	    }
@@ -335,7 +335,7 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
     
     # Instance variables
     set subnames {}
-    foreach variable [$classModel variables \
+    foreach variable [$classModel match variable \
 	    -protection $protection -scope instance] {
 	# put label into contents widget   
 	$itk_component(contents) appendlabel $variable\v \
@@ -343,8 +343,8 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass $variable $variable\v
-	_bindExpl $_currentclass $variable $variable\v
+	_bindDesc $_currentclass variable:$variable $variable\v
+	_bindExpl $_currentclass variable:$variable $variable\v
 	lappend subnames $variable\v
     }
 
@@ -363,8 +363,8 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class $variable $variable\v
-		    _bindExpl $class $variable $variable\v
+		    _bindDesc $class variable:$variable $variable\v
+		    _bindExpl $class variable:$variable $variable\v
 		    lappend subnames $variable\v
 		}
 	    }
@@ -383,7 +383,7 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 
     # Static variables
     set subnames {}
-    foreach variable [$classModel variables \
+    foreach variable [$classModel match variable \
 	    -protection $protection -scope class] {
 	# put label into contents widget
 	$itk_component(contents) appendlabel $variable\v \
@@ -391,8 +391,8 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -optioncolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass $variable $variable\v
-	_bindExpl $_currentclass $variable $variable\v
+	_bindDesc $_currentclass variable:$variable $variable\v
+	_bindExpl $_currentclass variable:$variable $variable\v
 	lappend subnames $variable\v
     }
     
@@ -411,8 +411,8 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class $variable $variable\v
-		    _bindExpl $class $variable $variable\v
+		    _bindDesc $class variable:$variable $variable\v
+		    _bindExpl $class variable:$variable $variable\v
 		    lappend subnames $variable\v
 		}
 	    }
@@ -442,29 +442,29 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
     set classModel $_classmodels($class)
 
-    if [catch {set expl \
-	    [$classModel get annotation $item.explanation $type]}] {
-        set expl [$classModel get annotation $item.description $type]
+    set expl [$classModel itemcget $type:$item -explanation]
+    if { $expl == "" } {
+        set expl [$classModel itemcget $type:$item -description]
     }
     
     set other {}
     set exceptions {}
 
-    if {$type == "method" || $type == "Constructor" \
-	    || $type == "Destructor"} {
+    if {$type == "method" || $type == "constructor" \
+	    || $type == "destructor"} {
 
 	# Get method parameters and their types
-	set paramlist "("
-	foreach parameter [$classModel parameters $item] {
-	    set paramtype [$classModel itemcget parameter \
-		    $item.$parameter -type $type]
-	    append paramlist $paramtype " " $parameter ", "
+	set arglist "("
+	foreach arg [$classModel match argument $type:$item] {
+	    set argtype [$classModel itemcget \
+		    [concat $type:$item argument:$arg] -type]
+	    append arglist $argtype " " $arg ", "
 	}
 	# Remove extra comma
-	set other [string trimright $paramlist " ,"])
+	set other [string trimright $arglist " ,"])
 	
 	# Get exceptions
-	set exceptions [$classModel itemcget $type $item -exceptions]
+	set exceptions [$classModel itemcget $type:$item -exceptions]
 	
 	# Format exceptions
 	if {$exceptions != {}} {
@@ -478,19 +478,19 @@ body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
     } elseif {$type == "variable"} {
 	
 	# Get the default value
-	set default [$classModel itemcget variable $item -default]
+	set default [$classModel itemcget variable:$item -default]
 	if {$default != {}} {
 	    set other "= $default"
 	}
     }
     
     set shortname [_fixName $item]
-    set modifiers [$classModel itemcget $type $item -modifiers]
+    set modifiers [$classModel itemcget $type:$item -modifiers]
     # Constructors don't have an explicit type
-    if {$type != "Constructor"} {
+    if {$type != "constructor"} {
 	# Remove signature portion of item name
 	set shortname [_fixName $item]
-	set itemtype [$classModel itemcget $type $item -type]
+	set itemtype [$classModel itemcget $type:$item -type]
     } {
 	set shortname "$_currentclass"
 	set itemtype ""
@@ -533,7 +533,7 @@ body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
 #####################################################################
 #### _generateHtmlContents
 # Create the internal links for an HTML output of the class model. 
-# If verbose is unset, only output Constructors and Destructors if 
+# If verbose is unset, only output constructors and destructors if 
 # they have a non-blank description, and only do not output private
 # entities. Verbose outputs everything.
 #
@@ -549,7 +549,7 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
     }
         
     set html "<HR>"
-    set extends [$classModel parents -inheritance implementation]
+    set extends [$classModel modelcget -inherits]
     if {$extends != {}} {
 	append html "Extends: "
 	append html "<a href=\"[::tycho::relativePath\
@@ -558,7 +558,7 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
 	append html "<code>$extends</code></a> -\n"
     }
     
-    set implements [$classModel parents -inheritance interface]
+    set implements [$classModel modelcget -implements]
     if {$implements != {}} {
 	append html "Implements: "
 	foreach parent $implements {
@@ -575,16 +575,16 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
     set of_class "of $_currentclass class"
     
     # Check for constructors
-    if {[$classModel Constructors] != {}} {
+    if {[$classModel match constructor] != {}} {
 	append html "<a href=\"#constructor $of_class\">constructor</a>\
 		-\n"
     }
     
     # Check for destructor
-    set destructor [$classModel Destructors]
+    set destructor [$classModel match destructor]
     if {$destructor != {}} {
-	if {$verbose || !$verbose && [$classModel get annotation \
-		$destructor.description Destructor] != { }} {
+	if {$verbose || [$classModel itemcget \
+		destructor:$destructor -description] != { }} {
 	    append html "<a href=\"#finalizer $of_class\"\
 		    >finalizer</a> -\n"
 	}
@@ -593,25 +593,25 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
     # Check for methods/procs/variables/commons by protection
     foreach protection $tempprotect {
 	# Check for methods
-	if {[$classModel methods -protection $protection \
+	if {[$classModel match method -protection $protection \
 		-scope instance] != {}} {
 	    append html "<a href=\"#$protection methods\
 		    $of_class\">$protection methods</a> -\n"
 	}
 	# Check for static methods
-	if {[$classModel methods -protection $protection \
+	if {[$classModel match method -protection $protection \
 		-scope class] != {}} {
 	    append html "<a href=\"#$protection static methods\
 		    $of_class\">$protection static methods</a> -\n"
 	}
 	# Check for variables
-	if {[$classModel variables -protection $protection \
+	if {[$classModel match variable -protection $protection \
 		-scope instance] != {}} {
 	    append html "<a href=\"#$protection variables\
 		    $of_class\">$protection variables</a> -\n"
 	}
 	# Check for static variables
-	if {[$classModel variables -protection $protection \
+	if {[$classModel match variable -protection $protection \
 		-scope class] != {}} {
 	    append html "<a href=\"#$protection static variables\
 		    $of_class\">$protection static variables</a> -\n"
@@ -649,7 +649,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
         set tempprotect [lreplace $_protections end end]
     }
     
-    set html [$classModel get annotation explanation]
+    set html [$classModel modelcget -explanation]
     # Remove footer
     regexp {^(.*<hr>)(<br>[^:]+:.*)$} $html dmy html footer
     
@@ -661,7 +661,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
 	    modelcget -name] class"
 
     # Check for constructors
-    set constructors [$classModel Constructors]
+    set constructors [$classModel match constructor]
     if {$constructors != {}} {
 	append html "<h2><a name=\"constructor $of_class\"\
 		>Constructor</a></h2>\n<dl>"
@@ -669,22 +669,21 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
 	    append html "<a name = \"[_fixName $constructor 0]\
 		    $of_lclass\"></a>\n"
 	    append html "[_formatExpl $_currentclass\
-		    $constructor Constructor 1]\n"
+		    $constructor constructor 1]\n"
 	}
 	append html "</dl>\n"
     }
     
     # Check for destructors
-    set destructors [$classModel Destructors]
-    set destructor [$classModel Destructors]
+    set destructors [$classModel match destructor]
     if {$destructor != {}} {
-	if {$verbose || !$verbose && [$classModel get annotation \
-		$destructor.description Destructor] != { }} {
+	if {$verbose || [$classModel itemcget \
+		destructor:$destructor -description] != { }} {
 	    append html "<h2><a name=\"finalizer $of_class\"\
 		    >Finalizer</a></h2><dl>"
 	    append html "<a name = \"finalizer $of_lclass\"></a>\n"
 	    append html "[_formatExpl $_currentclass\
-		    $destructor Destructor 1]\n"
+		    $destructor destructor 1]\n"
 	    append html "</dl>\n"
 	}
     }
@@ -695,7 +694,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
 	set temp {}
 	
 	# Check for methods
-	set methods [$classModel methods -protection $protection \
+	set methods [$classModel match method -protection $protection \
 		-scope instance] 
 	if {$methods != {}} {
 	    append temp "<h3><a name=\"$protection methods\
@@ -709,7 +708,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
 	}
 
 	# Check for static methods
-	set smethods [$classModel methods -protection $protection \
+	set smethods [$classModel match method -protection $protection \
 		-scope class]
 	if {$smethods != {}} {
 	    append temp "<h3><a name=\"$protection static methods\
@@ -724,7 +723,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
 	}
 
 	# Check for variables
-	set variables [$classModel variables -protection $protection \
+	set variables [$classModel match variable -protection $protection \
 		-scope instance]
 	if {$variables != {}} {
 	    append temp "<h3><a name=\"$protection variables\
@@ -739,7 +738,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
 	}
 
 	# Check for static variables
-	set svariables [$classModel variables -protection $protection \
+	set svariables [$classModel match variable -protection $protection \
 		-scope class]
 	if {$svariables != {}} {
 	    append temp "<h3><a name=\"$protection static variables\
@@ -779,13 +778,13 @@ body ::tycho::JavaViewer::_hyperLink \
     }
 
     # Assume text is the fixed name and item is the full name
-    set protection [$classModel itemcget $type $item -protection]
+    set protection [$classModel itemcget $type:$item -protection]
     if {$protection == "package"} {
 	set protection {}
     } else {
 	set protection "$protection "
     }
-    set modifiers [$classModel itemcget $type $item -modifiers]
+    set modifiers [$classModel itemcget $type:$item -modifiers]
     if {$modifiers != {}} {
 	set modifiers "$modifiers "
     }
@@ -793,7 +792,7 @@ body ::tycho::JavaViewer::_hyperLink \
 	set itemtype "$itemtype "
     }
 
-    if {$type != "method" && $type != "Constructor"} {
+    if {$type != "method" && $type != "constructor"} {
 	set text "<a href = \
 		\"[$classModel modelcget \
 		-source]#$protection$modifiers$itemtype$text\"\
