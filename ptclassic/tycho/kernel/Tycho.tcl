@@ -38,9 +38,6 @@ wm withdraw .
 # is set, try to find a user named ptolemy.  If all this fails, issue
 # an error message.
 #
-# FIXME:  We should include in the startup message information about
-# where the version of tycho that we are running is installed.
-#
 global env tk_library tk_version
 global ptolemy PTOLEMY
 global tycho TYCHO
@@ -87,8 +84,11 @@ if {![info exists ptolemy]} {
 
 global tychokernel
 set tychokernel $tycho/kernel
-if {![info exists tychoRegExit]} {
-    set tychoRegExit 1
+
+# Check to see whether the usual exit mechanism (where we exit
+# if there are no more windows) is enabled.
+if {![info exists tychoExitWhenNoMoreWindows]} {
+    set tychoExitWhenNoMoreWindows 1
 }
 
 # Note that it is NOT normally acceptable to rely on the TCL_LIBRARY
@@ -169,11 +169,9 @@ if {![info exists TychoVersionInfo]} {
 if {$tychoWelcomeWindow != 0} {
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
 }
-# If tychoRegExit is 0, then disable exiting when the last window is
-# killed.
-if {$tychoRegExit == 0} {
-    ::tycho::TopLevel::exitWhenNoMoreWindows 0
-}
+# Determine whether we exit when there are no more windows.
+::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
+
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
@@ -187,4 +185,4 @@ if {$tychoOpenFiles == 0} {
 unset tychoWelcomeWindow
 unset tychoConsoleWindow
 unset tychoOpenFiles
-
+unset tychoExitWhenNoMoreWindows
