@@ -25,7 +25,7 @@ CFLAGS        = -g -I$(OCTTOOLS)/include
 
 # C++ compiler variables
 GXX	      = g++
-GFLAGS        = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
+GXXFLAGS      = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
 GNUINCLUDE    = /usr/gnu/lib/g++-include
 
 # Linker variables
@@ -87,6 +87,7 @@ SRCS	      = main.c \
 		mkTerm.c \
 		mkIcon.c \
 		palette.c \
+		kernelCalls.cc \
 		options.c
 
 TARGET	      = pigiRpc
@@ -108,8 +109,7 @@ clean:
 sources:	$(SRCS) $(HDRS) make.template
 
 depend:	
-		makedepend -I$(GNUINCLUDE) \
-			   -I$(PTOLEMY)/src/kernel \
+		makedepend -I$(GNUINCLUDE) -I$(PTOLEMY)/src/kernel \
 			   -I$(OCTTOOLS)/include $(SRCS)
 
 makefile:	make.template
@@ -119,15 +119,22 @@ makefile:	make.template
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
+# tags files for vi and emacs
+tags:	$(SRCS)
+	ctags $(SRCS)
+
+TAGS:	$(SRCS)
+	etags $(SRCS)
+
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GXX) $(GFLAGS) -c  $<
+	$(GXX) $(GXXFLAGS) -c  $<
 
 # print out source file names
-srcs:;	@echo "$(SRCS)"
-hdrs:;  @echo "$(HDRS)"
-files:; @echo "$(SRCS) $(HDRS) $(MAKEFILE) $(MISCFILES)"
+printsrcs:;	@echo "$(SRCS)"
+printhdrs:;  @echo "$(HDRS)"
+printfiles:; @echo "$(SRCS) $(HDRS) $(MAKEFILE) $(MISCFILES)"
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
