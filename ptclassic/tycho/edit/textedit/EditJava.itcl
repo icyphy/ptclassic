@@ -69,15 +69,12 @@ class ::tycho::EditJava {
     # Execute the Java code in the selection (or the entire text widget).
     method evaluate {}
 
-    # Get the blank itcl template for a file and insert it into the window
+    # Get the blank Java template for a file and insert it into the window
     method fileTemplate { fileTemplate {newClassName {}}}
 
     # Generate and display a doc file from the current buffer
     method gendocBuffer {}
  
-    # Guess about the class name from the filename
-    public method getClassName {}
-
     # Open a help window.
     method help {}
 
@@ -102,9 +99,6 @@ class ::tycho::EditJava {
 
     ##########################################################################
     ####                         protected variables                      ####
-
-    # The name of the class in this file.
-    protected variable className {}
 
     # Counter for hyperlinks.
     protected variable hypcount 0
@@ -303,20 +297,6 @@ body ::tycho::EditJava::gendocBuffer {} {
     set window [::tycho::File::openContext $htmlFile]
     $window reload
     return $window
-}
-
-#####################################################################
-#### getClassName
-# Guess about the class name from the filename
-# If the file has not been parsed then the className variable might
-# not be set.  If it is not set, guess on the className from
-# the name of the file
-#
-body ::tycho::EditJava::getClassName {} {
-    if {$className == {}} {
-	return [file tail [file rootname [filename]]]
-    }
-    return $className
 }
 
 ###################################################################
