@@ -22,13 +22,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { step }
 		type { int }
 		default { 1 }
-		desc {  Ramp step. }
+		desc { Increment from one sample to the next. }
 	}
 	defstate {
 		name { value }
 		type { int }
 		default { 0.0 }
-		desc {  Initial (or latest) value output by Ramp. }
+		desc { Initial (or latest) value output by Ramp. }
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	go {
