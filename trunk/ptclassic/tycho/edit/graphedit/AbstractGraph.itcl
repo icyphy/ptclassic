@@ -138,14 +138,11 @@ class ::tycho::AbstractGraph {
     # Return adjacency edges matching two vertex patterns
     method adjacency {{pattern1 *} {pattern2 *}}
 
-    # Remove all data
-    method clear {}
+    # Get the children of a vertex
+    method children {vertex}
 
     # Remove a vertex _and_ adjacent edges from the graph
     method delete* {vertex}
-
-    # Return the "depth" of a given vertex
-    method depth {vertex}
 
     # Perform a depth-first traversal of the graph
     method depthFirst {{roots {}}}
@@ -156,14 +153,14 @@ class ::tycho::AbstractGraph {
     # Layout the vertices on a grid, better for tree-like graphs
     method gridLayout {}
 
-    # Return the number of edges in the graph
-    method numberofedges {}
+    # Get the "leaves" of the graph
+    method leaves {}
 
-    # Return the number of vertices in the graph
-    method numberofvertices {}
+    # Get the parents of a vertex
+    method parents {vertex}
 
-    # Load data from a TIM string
-    method parse {data}
+    # Get the roots of the graph
+    method roots {}
 
     # Return the topological sort of a graph
     method topologicalSort {{leaves {}}}
@@ -198,30 +195,23 @@ class ::tycho::AbstractGraph {
     #################################################################
     ####                   protected methods                     ####
 
-    # Add an edge to the adjacency matrix
-    protected method _adjacencyadd {vertex1 vertex2}
-
-    # Delete an edge from the adjacency matrix
-    protected method _adjacencydelete {vertex1 vertex2}
-
-    # Get the "leaves" of the graph
-    protected method _graphleaves {}
-
-    # Get the roots of the graph
-    protected method _graphroots {}
-
     #################################################################
     ####                  protected variables                    ####
 
-    # A "cache" of structural information. All methods that modify
-    # the adjacency matrix clear this array.
-    protected variable _cache
+    # A cached list of edge names
+    protected variable _edges ""
 
-    # The adjacency "matrix." See the comment with _adjacencyadd{}.
-    protected variable _adjacency
+    # An array of cached lists of vertex parents
+    protected variable _parents
 
-    # Keep a copy of vertex names for efficiency.
-    protected variable _vertices
+    # An array of cached lists of vertex children
+    protected variable _children
+
+    # A cached list of vertex names
+    protected variable _vertices ""
+
+    # Array for "visited" flags for each vertex
+    protected variable _visited
 
     #################################################################
     ####                     private methods                     ####
@@ -229,11 +219,14 @@ class ::tycho::AbstractGraph {
     # Grid layout auxiliary method
     private method _gridlayout {roots ymin}
 
-    # Array of available positions, used by grid layout
-    private variable _firstfree
+    #################################################################
+    ####                    private variables                    ####
 
-    # Array of used positions, used by grid layout
+    # Arrays used by various algorithms
+    private variable _firstfree
+    private variable _widthpos
     private variable _taken
+    private variable _depth
 }
 
 
@@ -246,7 +239,6 @@ body ::tycho::AbstractGraph::constructor {args} {
 
     # Define the "vertex" entity
     definetype vertex \
-            -override 1 \
 	    -leafonly 0
 }
 
@@ -276,27 +268,27 @@ body ::tycho::AbstractGraph::acyclic {} {
 # from vertex to vertex -- see _KeyedDigraph_ for an example.
 #
 body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
+    _update
     set result {}
-    foreach v [array names _vertices $pattern1] {
-	foreach c $_adjacency($v,children) {
-	    if { [string match $pattern2 $c] } {
-		lappend result $v $c
-	    }
-	}
+    foreach v $_vertices {
+        foreach c $_children($v) {
+            if { [string match $pattern2 $c] } {
+                lappend result $v $c
+            }
+        }
     }
     return $result
 }
 
 ########################################################################
-#### clear
+#### children
 #
-# Clear all data.
+# Return the children of a vertex. An error will result
+# if the vertex does not exist.
 #
-body ::tycho::AbstractGraph::clear {} {
-    catch {unset _cache}
-    catch {unset _adjacency}
-    catch {unset _vertices}
-    chain
+body ::tycho::AbstractGraph::children {vertex} {
+    _update
+    return $_children($vertex) 
 }
 
 ########################################################################
@@ -307,18 +299,6 @@ body ::tycho::AbstractGraph::clear {} {
 #
 body ::tycho::AbstractGraph::delete* {vertex} {
     abstractMethod delete*
-}
-
-########################################################################
-#### depth
-#
-# Return the depth of a given node.
-#
-body ::tycho::AbstractGraph::depth {vertex} {
-    if { ! [::info exists _cache($vertex,depth)] } {
-	depthSort
-    }
-    return $_cache($vertex,depth) 
 }
 
 ########################################################################
@@ -340,10 +320,12 @@ body ::tycho::AbstractGraph::depth {vertex} {
 # a single vertex as argument and examining the result list.
 #
 body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
+    _update
+
     # If we already have it, just return it
     set cacheindex depthfirst,[join $roots -]
-    if { [::info exists _cache($cacheindex)] } {
-	return $_cache($cacheindex)
+    if [cache exists $cacheindex] {
+	return [cache get $cacheindex]
     }
 
     # The traversal "stack" and result list
@@ -351,13 +333,13 @@ body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
     set result {}
 
     # Initialize visited flags to 0
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _visited($v) 0
     }
 
     # Push start vertices onto the stack
     if { $roots == "" } {
-	set roots [_graphroots]
+	set roots [roots]
     }
     set stack $roots
 
@@ -371,16 +353,15 @@ body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
 	lappend result $current
 
 	# Put each non-visited child onto the stack and mark it
-	foreach child $_adjacency($current,children) {
-	    if { ! $_cache($child,visited) } {
+	foreach child $_children($current) {
+	    if { ! $_visited($child) } {
 		lappend stack $child
-		set _cache($child,visited) 1
-	    }
-	}
+		set _visited($child) 1
+            }
+        }
     }
-
     # Remember the search in case it's needed later
-    set _cache($cacheindex) $result
+    cache set $cacheindex $result
     return $result
 }
 
@@ -399,24 +380,26 @@ body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
 # a "backwards" edge.
 #
 body ::tycho::AbstractGraph::depthSort {} {
+    _update
+
     # If we already have it, just return it
-    if { [::info exists _cache(depthsort)] } {
-	return $_cache(depthsort)
+    if { [cache exists depthsort] } {
+	return [cache get depthsort]
     }
 
     # The traversal "stack" and result list
     set stack {}
-    set _cache(depthsort) {}
+    set result {}
 
     # Initialize visited flags to 0 and depths to -1
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
-	set _cache($v,depth) -1
+    foreach v $_vertices {
+	set _visited($v) 0
+	set _depth($v) -1
     }
 
     # Push all leaves onto the stack. If there are none, use all
     # vertices.
-    set stack [_graphleaves]
+    set stack [leaves]
     if { $stack == {} } {
 	set stack [vertices]
     }
@@ -427,23 +410,23 @@ body ::tycho::AbstractGraph::depthSort {} {
 	set current [lindex $stack end]
 
 	# Switch on the "visited" flag
-	if { $_cache($current,visited) == 0 } {
+	if { $_visited($current) == 0 } {
 	    # The vertex has not been seen, so mark it but leave
 	    # it on the stack
-	    set _cache($current,visited) 1
+	    set _visited($current) 1
 	    
 	    # Put each unmarked parent onto the stack
-	    foreach parent $_adjacency($current,parents) {
-		if { ! $_cache($parent,visited) } {
+	    foreach parent $_parents($current) {
+		if { ! $_visited($parent) } {
 		    lappend stack $parent
 		}
 	    }
-	} elseif { $_cache($current,visited) == 1 } {
+	} elseif { $_visited($current) == 1 } {
 	    # This vertex is still on the stack, and hasn't been
 	    # processed by some other path through the graph. Remove
 	    # it from the stack and mark it as "done."
 	    set stack [lreplace $stack end end]
-	    set _cache($current,visited) -1
+	    set _visited($current) -1
 	    
 	    # "Exit" processing is to get the depth of the parents,
 	    # find the maximum, and add one to get the depth of 
@@ -452,16 +435,16 @@ body ::tycho::AbstractGraph::depthSort {} {
 	    # -1, and any vertex that completes a cycle will have
 	    # a depth of -1. -- i.e. add one and you get zero!
 	    set depth -1
-	    foreach p $_adjacency($current,parents) {
-		if { $_cache($p,depth) > $depth } {
-		    set depth $_cache($p,depth)
+	    foreach p $_parents($current) {
+		if { $_depth($p) > $depth } {
+		    set depth $_depth($p)
 		}
 	    }
 	    incr depth
-	    set _cache($current,depth) $depth
+	    set _depth($current) $depth
 	    lappend atlevel($depth) $current
 
-	} else { ;# $_cache($current,visited) == 1
+	} else { ;# $_visited($current) == 1
 	    # This vertex has already been processed, by some other
 	    # path through the graph. Remove it from the stack.
 	    set stack [lreplace $stack end end]
@@ -469,9 +452,13 @@ body ::tycho::AbstractGraph::depthSort {} {
     }
     # Sort the nodes into the depthsort
     foreach lv [lsort -integer [array names atlevel]] {
-	lappend _cache(depthsort) $lv $atlevel($lv)
+	lappend result $lv $atlevel($lv)
     }
-    return $_cache(depthsort)
+
+    # Remember the result in case it's needed later
+    cache set depthsort $result
+
+    return $result
 }
 
 ########################################################################
@@ -487,17 +474,19 @@ body ::tycho::AbstractGraph::depthSort {} {
 # since the cache is cleared when a new vertex is added.
 #
 body ::tycho::AbstractGraph::gridLayout {} {
+    _update
+
     # If we already have it, just return it
-    if { [::info exists _cache(gridlayout)] } {
-        return $_cache(gridlayout)
+    if { [cache exists gridlayout] } {
+        return [cache get gridlayout]
     }
     # Make sure we have a depth-sort
     set depthsort [depthSort]
 
     # Initialize vertices
-    foreach v [array names _vertices] {
-	set _cache($v,widthpos) -1
-        set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _widthpos($v) -1
+        set _visited($v) 0
     }
     # Initialize the "firstfree" array
     foreach {d _} $depthsort {
@@ -509,117 +498,66 @@ body ::tycho::AbstractGraph::gridLayout {} {
 
     # Call _gridlayout with the roots of the graph
     # FIXME: What if the graph has no roots?
-    _gridlayout [_graphroots] 0
+    _gridlayout [roots] 0
 
     # Assemble the result
-    set _cache(gridlayout) {}
+    set result {}
     foreach {depth vertices} $depthsort {
 	set r {}
 	foreach v $vertices {
-            lappend r $v $_cache($v,widthpos)
+            lappend r $v $_widthpos($v)
 	}
-        lappend _cache(gridlayout) $r
+        lappend result $r
     }
-    return $_cache(gridlayout)
+    # Remember and return the result
+    cache set gridlayout $result
+
+    return $result
 }
 
 ########################################################################
-#### _gridlayout
+#### leaves
 #
-body ::tycho::AbstractGraph::_gridlayout {roots ymin} {
+# Return the "leaves" of the graph.
+#
+body ::tycho::AbstractGraph::leaves {} {
+    _update
+
     set result {}
-    # NOTE: Assume no graph with more than a million nodes.
-    set firstpos 1000000
-    set lastpos 0
-
-    foreach v $roots {
-        # If it's already visited, we're in a cycle, so forget it
-        if { $_cache($v,visited) } {
-            continue
-        }
-        set _cache($v,visited) 1
-
-        # Get the depth of the current node.
-        set depth $_cache($v,depth)
-
-        # Get the width position
-        set wpos $_cache($v,widthpos)
-
-        # If it does not already have a position, give it one.
-        if {$wpos == -1} {
-            # Set a minimum position (ff)
-            set ff $_firstfree($depth)
-
-            # Make sure the minimum position is not less than ymin.
-            if {$ymin > $ff} {
-                set ff $ymin
-            }
-            set children $_adjacency($v,children)
-            if {$children != {}} {
-                # Get the top and bottom positions of the children
-                set range [_gridlayout $children $ff]
-                # Only make this choice here if the children
-                # were not all visited nodes
-                if { $range != "" } {
-                    # Choose the average as the preferred position
-                    set desired [expr \
-                            ([lindex $range 0]+[lindex $range 1])/2]
-                    # If desired position is greater than minimum, use it.
-                    if {$desired > $ymin} {
-                        set wpos $desired
-                    } else {
-                        set wpos $ymin
-                    }
-                } else {
-                    set wpos $ff
-                }
-            } else {
-                set wpos $ff
-            }
-            # Avoid levels that are already taken.
-            while { [::info exists _taken($depth,$wpos)] } {
-                incr wpos
-            }
-            # Mark the position taken.
-            set _cache($v,widthpos) $wpos
-            set _taken($depth,$wpos) 1
-            set _firstfree($depth) [expr $wpos+1]
-        }
-        if {$wpos < $firstpos} {set firstpos $wpos}
-        if {$wpos > $lastpos} {set lastpos $wpos}
-        set result [list $firstpos $lastpos]
+    foreach v $_vertices {
+    	if { $_children($v) == "" } {
+	    lappend result $v
+	}
     }
     return $result
 }
 
 ########################################################################
-#### numberofedges
+#### parents
 #
-# Return the number of edges in the graph.
+# Return the parents of a vertex. An error will result
+# if the vertex does not exist.
 #
-body ::tycho::AbstractGraph::numberofedges {} {
-    expr [llength [names vertex]] - [array size _vertices]
+body ::tycho::AbstractGraph::parents {vertex} {
+    _update
+    return $_parents($vertex)
 }
 
 ########################################################################
-#### numberofvertices
+#### roots
 #
-# Return the number of vertices in the graph.
+# Return the roots of the graph.
 #
-body ::tycho::AbstractGraph::numberofvertices {} {
-    array size _vertices
-}
+body ::tycho::AbstractGraph::roots {} {
+    _update
 
-########################################################################
-#### parse
-#
-# Read data from a string containing a TIM representation of a
-# model. This method extends the superclass method to clear
-# the cache.
-#
-body ::tycho::AbstractGraph::parse {data} {
-    catch {unset _cache}
-    chain $data
+    set result {}
+    foreach v $_vertices {
+    	if { $_parents($v) == "" } {
+	    lappend result $v
+	}
+    }
+    return $result
 }
 
 ########################################################################
@@ -637,24 +575,26 @@ body ::tycho::AbstractGraph::parse {data} {
 # a "backwards" edge.
 #
 body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
+    _update
+
     # If we already have it, just return it
-    if { [::info exists _cache(topologicalsort)] } {
-	return $_cache(topologicalsort)
+    if { [cache exists topologicalsort] } {
+	return [cache get topologicalsort]
     }
 
     # The traversal "stack" and result list
     set stack {}
-    set _cache(topologicalsort) {}
+    set result {}
 
     # Initialize visited flags to 0
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _visited($v) 0
     }
 
     # Push all leaves onto the stack. If there are none, use all
     # vertices.
     if { $leaves == {} } {
-	set leaves [_graphleaves]
+	set leaves [leaves]
 	if { $leaves == {} } {
 	    set leaves [vertices]
 	}
@@ -667,34 +607,37 @@ body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
 	set current [lindex $stack end]
 	
 	# Switch on the "visited" flag
-	if { $_cache($current,visited) == 0 } {
+	if { $_visited($current) == 0 } {
 	    # The vertex has not been seen, so mark it but leave
 	    # it on the stack
-	    set _cache($current,visited) 1
+	    set _visited($current) 1
 	    
 	    # Put each unmarked parent onto the stack
-	    foreach parent $_adjacency($current,parents) {
-		if { ! $_cache($parent,visited) } {
+	    foreach parent $_parents($current) {
+		if { ! $_visited($parent) } {
 		    lappend stack $parent
 		}
 	    }
-	} elseif { $_cache($current,visited) == 1 } {
+	} elseif { $_visited($current) == 1 } {
 	    # This vertex is still on the stack, and hasn't been
 	    # processed by some other path through the graph. Remove
 	    # it from the stack and mark it as "done."
 	    set stack [lreplace $stack end end]
-	    set _cache($current,visited) -1
+	    set _visited($current) -1
 	    
 	    # "Exit" processing is to append the vertex to the sort
-	    lappend _cache(topologicalsort) $current
+	    lappend result $current
 	    
-	} else { ;# $_cache($current,visited) == 1
+	} else { ;# $_visited($current) == 1
 	    # This vertex has already been processed, by some other
 	    # path through the graph. Remove it from the stack.
 	    set stack [lreplace $stack end end]
 	}
     }
-    return $_cache(topologicalsort)
+    # Remember and return the result
+    cache set topologicalsort $result
+
+    return $result
 }
 
 ########################################################################
@@ -712,13 +655,15 @@ body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
 # with no roots.
 #
 body ::tycho::AbstractGraph::traverse1 {} {
+    _update
+
     # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _visited($v) 0
     }
 
     # Initialize the traversal stack with the roots of the graph
-    set stack [_graphroots]
+    set stack [roots]
     
     # Initialize the result to empty
     set result {}
@@ -730,12 +675,12 @@ body ::tycho::AbstractGraph::traverse1 {} {
 	set stack [lreplace $stack end end]
 	
 	# If we've already seen it, ignore it
-	if { $_cache($current,visited) } {
+	if { $_visited($current) } {
 	    continue
 	}
 	
 	# Mark the vertex
-	set _cache($current,visited) 1
+	set _visited($current) 1
 	
 	# Process the vertex here
 	lappend result $current
@@ -757,15 +702,17 @@ body ::tycho::AbstractGraph::traverse1 {} {
 # no performance improvement.
 #
 body ::tycho::AbstractGraph::traverse2 {} {
+    _update
+     
     # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _visited($v) 0
     }
 
     # Initialize the traversal stack with the roots of the graph
-    set stack [_graphroots]
+    set stack [roots]
     foreach v $stack {
-	set _cache($v,visited) 1
+	set _visited($v) 1
     }
 
     # Initialize the result to empty
@@ -782,9 +729,9 @@ body ::tycho::AbstractGraph::traverse2 {} {
 	
 	# Mark each non-visited child and place it onto the stack
 	foreach child [children $current] {
-	    if { ! $_cache($child,visited) } {
+	    if { ! $_visited($child) } {
 		lappend stack $child
-		set _cache($child,visited) 1
+		set _visited($child) 1
 	    }
 	}
     }
@@ -826,13 +773,15 @@ body ::tycho::AbstractGraph::traverse2 {} {
 # processing a vertex.
 #
 body ::tycho::AbstractGraph::traverse3 {} {
+    _update
+
     # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _visited($v) 0
     }
 
     # Initialize the traversal stack with the roots of the graph
-    set stack [_graphroots]
+    set stack [roots]
     
     # Initialize the result to empty
     set result {}
@@ -844,11 +793,11 @@ body ::tycho::AbstractGraph::traverse3 {} {
 	
 	# Switch on the visited flag. For time-critical methods,
 	# use if-statements instead, as they will be a little faster.
-	switch -exact /$_cache($current,visited) {
-	    "/0" {
+	switch -exact -- $_visited($current) {
+	    "0" {
 		# The vertex has not been seen, so mark it but leave
 		# it on the stack
-		set _cache($current,visited) 1
+		set _visited($current) 1
 		
 		# This is where we do "entry" processing
 		lappend result $current
@@ -857,22 +806,22 @@ body ::tycho::AbstractGraph::traverse3 {} {
 		# algorithm be faster (and still work) if _all_
 		# children were pushed onto the stack?
 		foreach child [children $current] {
-		    if { ! $_cache($child,visited) } {
+		    if { ! $_visited($child) } {
 			lappend stack $child
 		    }
 		}
 	    }
-	    "/1" {
+	    "1" {
 		# This vertex is still on the stack, and hasn't been
 		# processed by some other path through the graph. Remove
 		# it from the stack and mark it as "done."
 		set stack [lreplace $stack end end]
-		set _cache($current,visited) -1
+		set _visited($current) -1
 		
 		# Here is where we do "exit" processing
 		lappend result !$current
 	    }
-	    "/-1" {
+	    "-1" {
 		# This vertex has already been processed, by some other
 		# path through the graph. Remove it from the stack,
 		# but don't do anything else with it.
@@ -893,9 +842,10 @@ body ::tycho::AbstractGraph::traverse3 {} {
 # it doesn't work with the subclass, or to perform additional tests.
 #
 body ::tycho::AbstractGraph::verify {} {
+    _update
+
     foreach {src tgt} [adjacency] {
-        if { ! [::info exists _vertices($src)] \
-                || ! [::info exists _vertices($tgt)] } {
+        if { ! [exists vertex:$src] || ! [exists vertex:$tgt] } {
 	    return 0
 	}
     }
@@ -908,26 +858,12 @@ body ::tycho::AbstractGraph::verify {} {
 # Add a new vertex to the graph and return the undo command.
 # Additional arguments are a flat attribute-value list for the
 # vertex. Flag an error if the vertex already exists.
-#
-# <b>Note</b>: Call this method to add a vertex. Do _not_ call
-# the add{} method directly.
+# This method clears any cached information
+# on the graph structure (transitive closure, depth, and so on)
+# so that they will be recalculated for the new structure.
 #
 body ::tycho::AbstractGraph::vertex {vertex args} {
-    # Add vertex
     eval add vertex:$vertex $args
-
-    # Initialize parent-child links
-    set _adjacency($vertex,children) {}
-    set _adjacency($vertex,parents) {}
-
-    # Clear the cache
-    catch {unset _cache}
-
-    # Remember the vertex name
-    set _vertices($vertex) ""
-
-     # Return undo command
-    list vertexdelete $vertex
 }
 
 ########################################################################
@@ -961,25 +897,8 @@ body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
 # edges connected to this vertex are not deleted: use <code>delete*</code>
 # for that.
 #
-# <b>Note</b>: Call this method to delete a vertex. Do _not_ call
-# the delete{} method directly.
-#
 body ::tycho::AbstractGraph::vertexdelete {vertex} {
-    # Delete vertex and get undo command
-    set undo [delete vertex:$vertex]
-
-    # Clear parent-child links
-    unset _adjacency($vertex,children)
-    unset _adjacency($vertex,parents)
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Forget the copy of the vertex name
-    unset _vertices($vertex)
-
-    # Return the undo command
-    return $undo
+    delete vertex:$vertex
 }
 
 ########################################################################
@@ -991,7 +910,8 @@ body ::tycho::AbstractGraph::vertexdelete {vertex} {
 # as the argument and compare the result with the empty list.
 #
 body ::tycho::AbstractGraph::vertices {{pattern *}} {
-    array names _vertices $pattern
+    _update
+    return $_vertices
 }
 
 #####################################################################
@@ -999,77 +919,71 @@ body ::tycho::AbstractGraph::vertices {{pattern *}} {
 ####                     protected methods                       ####
 
 ########################################################################
-#### _adjacencyadd
+#### _gridlayout
 #
-# Add an edge to the adjacency matrix. If it already exists,
-# the edge will be added again -- subclasses should make sure
-# that this doesn't happen.
-#
-# This and the associated method _adjacencydelete{} build the
-# internal topology of the graph independent of complexities
-# associated with hyperedges or keyed connections. There are two
-# key structures we could use:
-#
-# <ul>
-# <li>The "edges" representation: the adjacency array is indexed as
-# {_vertex1_ _vertex2_}.
-# <li>The "parent-child" representation: the adjacency array is indexed
-# as _vertex_<b>.parents</b> and _vertex_<b>.children</b>, with each
-# element being a list of parents or children of that vertex.
-# </ul>
-#
-# The former is faster and more convenient to build and maintain, but
-# is slower to find adjacent vertices. We use the
-# second representation to make the graph traversal algorithms
-# as fast as possible.
-#
-body ::tycho::AbstractGraph::_adjacencyadd {vertex1 vertex2} {
-    lappend _adjacency($vertex1,children) $vertex2
-    lappend _adjacency($vertex2,parents)  $vertex1
-}
-
-########################################################################
-#### _adjacencydelete
-#
-# Delete an edge from the adjacency matrix. If it doesn't exist, do
-# nothing, an error will occur -- sub-classes should make sure
-# that this doesn't happen.
-#
-body ::tycho::AbstractGraph::_adjacencydelete {vertex1 vertex2} {
-    set pindex [lsearch -exact $_adjacency($vertex1,children) $vertex2]
-    set cindex [lsearch -exact $_adjacency($vertex2,parents)  $vertex1]
-    set _adjacency($vertex1,children) \
-            [lreplace $_adjacency($vertex1,children) $pindex $pindex]
-    set _adjacency($vertex2,parents) \
-            [lreplace $_adjacency($vertex2,parents) $cindex $cindex]
-}
-
-########################################################################
-#### _graphleaves
-#
-# Return the "leaves" of the graph.
-#
-body ::tycho::AbstractGraph::_graphleaves {} {
+body ::tycho::AbstractGraph::_gridlayout {roots ymin} {
     set result {}
-    foreach v [array names _vertices] {
-    	if { $_adjacency($v,children) == "" } {
-	    lappend result $v
-	}
+    # NOTE: Assume no graph with more than a million nodes.
+    set firstpos 1000000
+    set lastpos 0
+
+    foreach v $roots {
+        # If it's already visited, we're in a cycle, so forget it
+        if { $_visited($v) } {
+            continue
+        }
+        set _visited($v) 1
+
+        # Get the depth of the current node.
+        set depth $_depth($v)
+
+        # Get the width position
+        set wpos $_widthpos($v)
+
+        # If it does not already have a position, give it one.
+        if {$wpos == -1} {
+            # Set a minimum position (ff)
+            set ff $_firstfree($depth)
+
+            # Make sure the minimum position is not less than ymin.
+            if {$ymin > $ff} {
+                set ff $ymin
+            }
+            set children $_children($v)
+            if {$children != {}} {
+                # Get the top and bottom positions of the children
+                set range [_gridlayout $children $ff]
+                # Only make this choice here if the children
+                # were not all visited nodes
+                if { $range != "" } {
+                    # Choose the average as the preferred position
+                    set desired [expr \
+                            ([lindex $range 0]+[lindex $range 1])/2]
+                    # If desired position is greater than minimum, use it.
+                    if {$desired > $ymin} {
+                        set wpos $desired
+                    } else {
+                        set wpos $ymin
+                    }
+                } else {
+                    set wpos $ff
+                }
+            } else {
+                set wpos $ff
+            }
+            # Avoid levels that are already taken.
+            while { [::info exists _taken($depth,$wpos)] } {
+                incr wpos
+            }
+            # Mark the position taken.
+            set _widthpos($v) $wpos
+            set _taken($depth,$wpos) 1
+            set _firstfree($depth) [expr $wpos+1]
+        }
+        if {$wpos < $firstpos} {set firstpos $wpos}
+        if {$wpos > $lastpos} {set lastpos $wpos}
+        set result [list $firstpos $lastpos]
     }
     return $result
 }
 
-########################################################################
-#### _graphroots
-#
-# Return the roots of the graph.
-#
-body ::tycho::AbstractGraph::_graphroots {} {
-    set result {}
-    foreach v [array names _vertices] {
-    	if { $_adjacency($v,parents) == "" } {
-	    lappend result $v
-	}
-    }
-    return $result
-}
