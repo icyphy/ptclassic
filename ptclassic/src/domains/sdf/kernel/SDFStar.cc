@@ -51,5 +51,6 @@ extern const char SDFdomainName[];
 
 const char* SDFStar :: domain () const { return SDFdomainName;}
 
-// isA function
-ISA_FUNC(SDFStar,Star);
+// isA functions
+ISA_FUNC(DataFlowStar,Star);
+ISA_FUNC(SDFStar,DataFlowStar);
