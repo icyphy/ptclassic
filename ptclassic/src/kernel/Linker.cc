@@ -488,6 +488,9 @@ int Linker::multiLink (int argc, char** argv) {
 	if ( (lib_handle = shl_load(objName, BIND_IMMEDIATE | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
 	  StringList msg = "Error linking file ";
 	  msg << objName << " dlopen: " << strerror (errno);
+	  if (errno == ENOMEM)
+	    msg << "\nNote that HPUX sometimes returns 'Not enough space'"
+ 	      " if shl_load() could not find a symbol";
 	  Error::abortRun(msg);
 	  return FALSE;
 	}
