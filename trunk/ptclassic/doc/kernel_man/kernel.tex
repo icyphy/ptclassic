@@ -58,7 +58,7 @@ public:
 \}
 \end{example}
 
-\code{POSTFIX_OP} is a macro that is defined to be an empty string on
+\code{POSTFIX\_OP} is a macro that is defined to be an empty string on
 older compilers (such as cfront 2.1 and versions of g++ before 2.4) and
 to the string "int" with newer compilers.  This conditional behavior is
 required because of the evolution of the C++ language; previously,
@@ -113,12 +113,12 @@ const char* expandPathName(const char* \var{fileName});
 \end{example}
 
 This function accepts a string and interprets it as a Unix path name.
-If the string does not begin with a \code{~} or \code{$} character,
-the string itself is returned.  A leading ``\code{~/}'' is replaced
-by the user's home directory; a leading ``\code{~\var{user}/}'' is
+If the string does not begin with a \code{~} or \code{\$} character,
+the string itself is returned.  A leading ``\code{\~/}'' is replaced
+by the user's home directory; a leading ``\code{\~\var{user}/}'' is
 replaced by the home directory for \var{user}, unless there is no
 such user, in which case the original string is returned.  Finally,
-a leading ``\code{$\var{env}}'' is replaced by the value of the
+a leading ``\code{\$\var{env}}'' is replaced by the value of the
 environment variable \var{env}; if there is no such environment
 variable, the original string is returned.  Note that references
 to environment variables other than at the beginning are \emph{not}
@@ -643,7 +643,7 @@ virtual int isA(const char* \var{cname}) const;
 The isA method should be redefined for all classed derived from
 NamedObj.  Its function is to return TRUE if the argument is the name
 either of the class or of one of the base classes.  To make this easy to
-implement, a macro \code{ISA_FUNC} is provided; for example, in the
+implement, a macro \code{ISA\_FUNC} is provided; for example, in the
 file \code{Block.cc} we see the line
 
 \begin{example}
@@ -805,7 +805,7 @@ Attribute& operator &= (const Attribute& \var{arg});
 \end{example}
 
 These operations combine attributes, by applying the \code{|=} and
-\code{&=} operators to the bitsOn and bitsOff fields.  The first
+\code{\&=} operators to the bitsOn and bitsOff fields.  The first
 operation, as attributes are commonly used, represents a requirement
 that two sets of attributes be met, so it has been argued that it
 really should be the ``and'' operation.   However, the current scheme
@@ -833,8 +833,8 @@ bitWord off() const;
 
 Retrieve the bitsOn and bitsOff values, respectively.
 
-Inline definitions of operators \code{&} and \code{|} are also defined
-to implement nondestructive forms of the \code{&=} and \code{|=}
+Inline definitions of operators \code{\&} and \code{|} are also defined
+to implement nondestructive forms of the \code{\&=} and \code{|=}
 operations.
 
 \node FlagArray
@@ -4736,7 +4736,7 @@ FloatParticle, and ComplexParticle.  As their names suggest, each
 class adds to Particle a private data member of type int, double (not
 float!), and class Complex, respectively.
 
-When a casting operator or ``<<'' operator is used on a particle of one of
+When a casting operator or ``\<\<'' operator is used on a particle of one of
 these types, a type conversion may take place.  If the type of the
 argument of cast matches the type of the particle's data, the data is
 simply copied.  If the requested operation involves a ``widening''
@@ -4914,7 +4914,7 @@ virtual int isA(const char*) const;
 
 The \code{isA} function returns true if given the name of the class
 or the name of any base class.  Exception: the base class function returns
-FALSE to everything (as it has no data at all).  A macro \code{ISA_FUNC}
+FALSE to everything (as it has no data at all).  A macro \code{ISA\_FUNC}
 is defined to automate the generation of implementations of derived
 class \code{isA} functions; it is the same one as that used for the
 NamedObj class.
@@ -5144,7 +5144,7 @@ Code that is linked in by the ``permanent link'' method has the same
 status as code that was linked into the original executable.  
 
 With ``ld -A'' style incremental linking, a permanent link creates or
-replaces the \file{.pt_symtable} file in the directory in which
+replaces the \file{.pt\_symtable} file in the directory in which
 Ptolemy was started.  This file contains the current symbol table for
 use by subsequent links, temporary or permanent.  This file is deleted
 when the Ptolemy process exits normally.  It is left around when the
@@ -5280,10 +5280,10 @@ error message will be produced and the link will return.
 There are several ways to specify the path to a shared object.
 
 1) Using just a file name ``link foo.so'' will not work unless
-LD_LIBRARY_PATH includes the directory where \file{foo.so} resides.
-The man pages for code{dlopen()} and code{ld} discuss LD_LIBRARY_PATH
+LD\_LIBRARY\_PATH includes the directory where \file{foo.so} resides.
+The man pages for code{dlopen()} and code{ld} discuss LD\_LIBRARY\_PATH
 
-Interestingly, using code{putenv()} to set LD_LIBRARY_PATH from within ptcl
+Interestingly, using code{putenv()} to set LD\_LIBRARY\_PATH from within ptcl
 has no effect on the runtime loader.
 	
 2) If the file name begins with ``./'', then the current directory is
@@ -5301,7 +5301,7 @@ shared object is in that path, then the shared object will be found.
 
 The Sun Linker Manual says:
 	``To locate the shared object foo.so.1, the runtime linker will
-	use any LD_LIBRARY_PATH definition presently in effect,
+	use any LD\_LIBRARY\_PATH definition presently in effect,
 	followed by any runpath specified during the link-edit of prog
 	and finally, the default location /usr/lib.  If the file name
 	had been specified ./foo.so.1, then the runtime linker would
@@ -5351,7 +5351,7 @@ than creating blocks of the right size with \code{new}, because the
 right size is not known in advance but a starting location must, as a
 rule, be passed to the loader in advance.  This means that there is a
 wired-in limit to how much code can be linked in.  The symbol
-\code{LINK_MEMORY}, which is set to one megabyte by default, is easily
+\code{LINK\_MEMORY}, which is set to one megabyte by default, is easily
 changed if required.
 
 Here are the steps taken by the linker to do its work:
@@ -5372,7 +5372,7 @@ by use of the \file{nm} program; the output is parsed to search for
 constructor symbols, whose form depends on the compiler used.
 
 If this is a permanent link, copy the linker output to file
-\file{.pt_symtable}; otherwise delete it.
+\file{.pt\_symtable}; otherwise delete it.
 
 \node dlopen() style linking
 \subsection{dlopen() Style Dynamic Linking}
@@ -5400,11 +5400,11 @@ invoked.  Currently, sol2.cfront does not need to search for, or
 invoke constructors.  gcc-2.5.8 has patches that allow similar
 functionality, but apparently these patches are not in gcc-2.6.0.
 
-Shared libraries in the SVR4 implementation contain optional \code{__init}
-and \code{__fini} functions, called when the library is first connected to
+Shared libraries in the SVR4 implementation contain optional \code{\_\_init}
+and \code{\_\_fini} functions, called when the library is first connected to
 (at startup or \code{dlopen()}) and when the library is disconnected from (at
 \code{dlclose()} or program exit), respectively.  Some C++ implementations
-can arrange for these \code{__init} and \code{__fini} functions to
+can arrange for these \code{\_\_init} and \code{\_\_fini} functions to
 contain calls to all the global constructors or destructors.  On
 platforms where this happens, such as sol2.cfront, there is no need
 for the Linker class to explicitly call the constructors, as this will
@@ -5439,8 +5439,8 @@ current values of appropriate type.
 
 The constructor for class State sets the initial value to a null
 pointer, and sets the state's attributes to a value determined by
-the constant AB_DEFAULT, which is defined in ``State.h'' to be the
-bitwise or of AB_CONST and AB_SETTABLE.
+the constant AB\_DEFAULT, which is defined in ``State.h'' to be the
+bitwise or of AB\_CONST and AB\_SETTABLE.
 The destructor does nothing extra.
 
 \node State public members
@@ -5578,12 +5578,12 @@ integer value, a double value, a Complex value, or a State value
 Token types are equal to the ASCII character value for single-character tokens.
 Other possible token values are:
 \begin{itemize}
-\item \code{T_EOF} for end of file,
-\item \code{T_ERROR} for error,
-\item \code{T_Float} for a floating value,
-\item \code{T_Int} for an integer value,
-\item \code{T_ID} for a reference to a state, and
-\item \code{T_STRING} for a string value.
+\item \code{T\_EOF} for end of file,
+\item \code{T\_ERROR} for error,
+\item \code{T\_Float} for a floating value,
+\item \code{T\_Int} for an integer value,
+\item \code{T\_ID} for a reference to a state, and
+\item \code{T\_STRING} for a string value.
 \end{itemize}
 For most of these, the token value holds the appropriate value.
 
@@ -5596,7 +5596,7 @@ The functions provided here can then be used to parse expressions
 appearing in that string.
 
 \begin{example}
-ParseToken getParseToken(Tokenizer& \var{tok}, int \var{wantedType}= T_Float);
+ParseToken getParseToken(Tokenizer& \var{tok}, int \var{wantedType}= T\_Float);
 \end{example}
 
 This function obtains the next token from the input stream associated
@@ -5617,24 +5617,24 @@ interpreter is also parsed by this function.
 Therefore, the external interpreter can perform both numeric and symbolic
 computations.
 
-When the parser hits the end of the input stream, it returns T_EOF.
-The characters in the set \code{,[]+*-/()^} are considered to be special
+When the parser hits the end of the input stream, it returns T\_EOF.
+The characters in the set \code{\,\[\]\+\*\-\/\(\)^} are considered to be special
 and the lexical value is equal to the character value.
 Integer and floating values are recognized and evaluated to produce
-either T_Int or T_Float tokens.  However, the decision is based on
-the value of \var{wantedType}; if it is T_Float, all numeric values
-are returned as T_Float; if it is T_Int, all numeric values are returned
-as T_Int.
+either T\_Int or T\_Float tokens.  However, the decision is based on
+the value of \var{wantedType}; if it is T\_Float, all numeric values
+are returned as T\_Float; if it is T\_Int, all numeric values are returned
+as T\_Int.
 
 Names that take the form of a
 C or C++ identifier are assumed to be names of states defined at a
 higher level (states belonging to the parent galaxy or some ancestor
 galaxy).  They are searched for using \code{lookup}; if not found,
 an error is reported using \code{parseError} and an error token is
-returned.  If a State is found, a token of type T_ID is returned if
+returned.  If a State is found, a token of type T\_ID is returned if
 it is an array state or COMPLEX; otherwise the state's current value
 is substituted and reparsed as a token.  This means, for example, that
-a name of an IntState will be replaced with a T_Int token with the
+a name of an IntState will be replaced with a T\_Int token with the
 correct value.
 
 \begin{example}
@@ -5684,14 +5684,14 @@ signs for exponentiation.  (Note, C fans!  ^ means exponentiation, not
 exclusive-or!).
 
 An atom is any number of optional unary minus signs, followed either
-by a parenthesized expression or a T_Int token.
+by a parenthesized expression or a T\_Int token.
 
 If any of these methods reads too far, the pushback token is used.
-All \code{getParseToken} calls use \var{wantedType} T_Int, so any
+All \code{getParseToken} calls use \var{wantedType} T\_Int, so any
 floating values in the expression are truncated to integer.
 
 The token types returned from each of these methods will be one of
-T_Int, T_EOF, or T_ERROR.
+T\_Int, T\_EOF, or T\_ERROR.
 
 \begin{example}
 ParseToken evalFloatExpression(Tokenizer& \var{lexer});
@@ -5704,7 +5704,7 @@ These functions have the identical structure as the corresponding
 Int functions.
 
 The token types returned from each of these methods will be one of
-T_Float, T_EOF, or T_ERROR.
+T\_Float, T\_EOF, or T\_ERROR.
 
 \node types of states
 \section{types of states}
@@ -6103,7 +6103,7 @@ XXXDomain might override this as follows:
 
 \begin{example}
 Star& XXXDomain::newWorm(Galaxy& innerGal,Target* innerTarget)  \{
-        LOG_NEW; return *new XXXWormhole(innerGal,innerTarget);
+        LOG\_NEW; return *new XXXWormhole(innerGal,innerTarget);
 \}
 \end{example}
 
@@ -6276,7 +6276,7 @@ take arguments of the types
 \code{unsigned int}.
 
 There are also six assignment operators corresponding to these
-constructors: one that takes a \code{const StringList&} argument and
+constructors: one that takes a \code{const StringList\&} argument and
 also one for each of the five standard types:
 \code{char}, \code{const char *}, \code{int}, \code{double}, and
 \code{unsigned int}.
@@ -6289,7 +6289,7 @@ StringList in which case it has the same number of pieces.
 
 There are six functions that can add a printed representation of an
 argument to a StringList: one each for arguments of type
-\code{const StringList&}, \code{char}, \code{const char *}, \code{int},
+\code{const StringList\&}, \code{char}, \code{const char *}, \code{int},
 \code{double}, and \code{unsigned int}.  In each case, the function
 can be accessed in either of two equivalent ways:
 
@@ -6444,21 +6444,21 @@ a copy constructor and six single-argument constructors that can
 function as conversions from other types to type InfString; they
 take arguments of the types
 \code{char}, \code{const char *}, \code{int}, \code{double}, 
-\code{unsigned int}, and \code{const StringList&}.
+\code{unsigned int}, and \code{const StringList\&}.
 
 There are also seven assignment operators corresponding to these
-constructors: one that takes a \code{const InfString&} argument and
+constructors: one that takes a \code{const InfString\&} argument and
 also one for each of the six standard types:
 \code{char}, \code{const char *}, \code{int}, \code{double},
-\code{unsigned int}, and \code{const StringList&}.
+\code{unsigned int}, and \code{const StringList\&}.
 
 \node adding to InfStrings
 \subsection{adding to InfStrings}
 
 There are seven functions that can add a printed representation of an
 argument to a InfString: one each for arguments of type
-\code{const InfString&}, \code{char}, \code{const char *}, \code{int},
-\code{double}, \code{unsigned int}, and \code{const StringList&}.
+\code{const InfString\&}, \code{char}, \code{const char *}, \code{int},
+\code{double}, \code{unsigned int}, and \code{const StringList\&}.
 In each case, the function
 can be accessed in either of two equivalent ways:
 
@@ -6570,7 +6570,7 @@ standard input stream, \code{cin}.  Its special characters are
 simply \key{(} and \key{)}.
 
 \begin{example}
-Tokenizer(istream& \var{input},const char* \var{spec},
+Tokenizer(istream\& \var{input},const char* \var{spec},
           const char* \var{w} = defWhite);
 \end{example}
 
@@ -6683,8 +6683,8 @@ int current_line() const;
 
 These methods report on the file name and line number where Tokenizer is
 currently reading from.  This information is maintained for include
-files.  At the top level,  \code{current_file} returns a null pointer,
-but \code{current_line} returns one more than the number of line feeds
+files.  At the top level,  \code{current\_file} returns a null pointer,
+but \code{current\_line} returns one more than the number of line feeds
 seen so far.
 
 \begin{example}
@@ -6695,24 +6695,24 @@ Returns true (1) if the Tokenizer is reading from an include file,
 false (0) if not.
 
 \node augmented fstreams
-\section{pt_ifstream and pt_ofstream: augmented fstream classes}
+\section{pt\_ifstream and pt\_ofstream: augmented fstream classes}
 
-The classes pt_ifstream and pt_ofstream are derived from the standard
+The classes pt\_ifstream and pt\_ofstream are derived from the standard
 stream classes ifstream and ofstream, respectively.  They are defined
-in the header file \file{pt_fstream.h}.  They add the
+in the header file \file{pt\_fstream.h}.  They add the
 following features:
 
 First, certain special ``filenames'' are recognized.  If the filename used in
-the constructor or an \code{open} call is \code{<cin>}, \code{<cout>},
-\code{<cerr>}, or \code{<clog>} (the angle brackets must be part of
+the constructor or an \code{open} call is \code{\<cin>}, \code{\<cout>},
+\code{\<cerr>}, or \code{\<clog>} (the angle brackets must be part of
 the string), then the corresponding standard stream of the same name
-is used for input (pt_ifstream) or output (pt_ofstream).  In addition,
-C standard I/O fans can specify \code{<stdin>}, \code{<stdout>}, or
-\code{<stderr>} as well.
+is used for input (pt\_ifstream) or output (pt\_ofstream).  In addition,
+C standard I/O fans can specify \code{\<stdin>}, \code{\<stdout>}, or
+\code{\<stderr>} as well.
 
 Second, the Ptolemy \code{expandPathName} is applied to the filename
 before it is opened, permitting it to start with \code{~user} or
-\code{$VAR}.
+\code{\$VAR}.
 
 Finally, if a failure occurs when the file is opened,
 \code{Error::abortRun} is called with an appropriate error message,
@@ -6906,7 +6906,7 @@ This section includes classes that did not fit elsewhere.
 \subsection{class Complex}
 
 Class Complex is a simple subset of functions provided in the Gnu and
-AT&T complex classes.  The standard arithmetic operators are
+AT\&T complex classes.  The standard arithmetic operators are
 implemented, as are the assignment arithmetic operators \code{+=},
 \code{-=}, \code{*=}, and \code{/=}, and equality and inequality
 operators \code{==} and \code{!=}.  There is also \code{real()} and
@@ -6966,7 +6966,7 @@ Complex pow(const Complex& \var{base}, const Complex& \var{expon});
 
 Raise base to expon power.
 
-There is also an << operator to print a Complex on an ostream.
+There is also an \<\< operator to print a Complex on an ostream.
 
 \node class Fraction
 \subsection{class Fraction}
@@ -7013,7 +7013,7 @@ Fraction& simplify();
 reduces the fraction to lowest terms, and returns a reference
 to the fraction.
 
-There is also an << operator to print a Fraction on an ostream.
+There is also an \<\< operator to print a Fraction on an ostream.
 
 \node class IntervalList
 \section{Class IntervalList}
@@ -7198,7 +7198,7 @@ the Interval, or the IntervalList, \var{src}.
 IntervalList operator&(const IntervalList& \var{arg}) const;
 \end{example}
 
-The binary \code{&} operator returns the intersection of its arguments,
+The binary \code{\&} operator returns the intersection of its arguments,
 which are not changed.
 
 \begin{example}
