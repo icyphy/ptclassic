@@ -654,13 +654,17 @@ Iterate prop stores the number of iterations for a universe.
 */
 
 int
-GetIterateProp(facetPtr)
+GetIterateProp(facetPtr, pIterate)
 octObject *facetPtr;
+int *pIterate;
 {
     octObject prop;
 
-    return (GetByPropName(facetPtr, &prop, "iterate") == OCT_NOT_FOUND)
-	? -1 : (int) prop.contents.prop.value.integer;
+    *pIterate = 1;
+    if ( GetByPropName(facetPtr, &prop, "iterate") == OCT_NOT_FOUND )
+	return -1;
+    *pIterate = prop.contents.prop.value.integer;
+    return 0;
 }
 
 void

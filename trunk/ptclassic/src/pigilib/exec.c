@@ -30,7 +30,7 @@ int *nPtr;
     char buf[64];
     int oldN;
 
-    if ((oldN = GetIterateProp(facetPtr)) == -1) {
+    if (GetIterateProp(facetPtr, &oldN) == -1) {
 	oldN = 10;
     }
     sprintf(buf, "%d", oldN);
