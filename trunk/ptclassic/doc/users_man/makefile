@@ -15,9 +15,9 @@ SRCS = \
 
 CLEAN = $(SRCS:.tex=.clean)
 
-all:	userMan.ps userMan.master.info
+all:	userMan.ps userMan.info
 
 clean:	$(CLEAN)
 
-userMan.ps:		$(SRCS) userMan.cps
-userMan.master.info:	$(SRCS)
+userMan.ps:	$(SRCS) userMan.cps
+userMan.info:	$(SRCS)
