@@ -36,7 +36,7 @@ public:
 
 	// constructor: makes an uninitialized array
 	IntVecData(int l) : len(l) {
-		data = new int[l];
+		INC_LOG_NEW; data = new int[l];
 	}
 
 	// constructor: makes an initialized array from a int array

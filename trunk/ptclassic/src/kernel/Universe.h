@@ -59,7 +59,7 @@ public:
 	StringList displaySchedule() {return target->displaySchedule();}
 
 	// destructor: deletes scheduler
-	~Runnable() { delete target;}
+	~Runnable() { INC_LOG_DEL; delete target;}
 
 protected:
 	const char* type;
