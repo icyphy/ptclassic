@@ -40,7 +40,7 @@ Block* DDFTarget::makeNew() const {
 	LOG_NEW; return new DDFTarget;
 }
 
-void DDFTarget::start() {
+void DDFTarget::setup() {
 	// set up the parameters for the DDF scheduler
 	DDFScheduler* s = (DDFScheduler*) scheduler();
 	s->numOverlapped = int(numOverlapped);
@@ -50,6 +50,7 @@ void DDFTarget::start() {
 	if (!tmp) { s->restructured = TRUE;
 		    s->canDom = DDF; }
 	else s->restructured = FALSE;
+	Target :: setup();
 }
 
 DDFTarget::~DDFTarget() { 
