@@ -45,8 +45,8 @@ Distributes an input signal among two outputs, alternating samples.
 
         codeblock(moveBlock,"int outputNum") {
 @(int(blockSize)!= 1 ? "\n\tdo\t#$val(blockSize),$label(txBlock)\n":"")\
-        move     x:(r1)+,x0
-        move    x0,$ref(output#@outputNum)\
+        move	$mem(input):(r1)+,a
+        move    a,$ref(output#@outputNum)\
 @(int(blockSize)!= 1 ? "\n$label(txBlock)":"")
 	}
 

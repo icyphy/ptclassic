@@ -133,8 +133,8 @@ This is not currently handled.
 	nop
 	move	x:(r0+n0),r2
 	nop	
-	move	x:(r2),x0
-	move	x0,$ref(output)
+	move	$mem(input#1):(r2),a
+	move	a,$ref(output)
     }
     codeblock(cbCopyBlock) {
 	move	#$addr(ptrvec),r0
@@ -145,8 +145,8 @@ This is not currently handled.
 	  move	y:(r0+n0),m2	; for scalars m2=0=fft, but doesnt matter
 	ENDIF
 	.LOOP	#$val(blockSize)
-	  move	x:(r2)+,x0
-	  move	x0,x:(r3)+
+	  move	$mem(input#1):(r2)+,a
+	  move	a,x:(r3)+
 	.ENDL
 	nop
     }

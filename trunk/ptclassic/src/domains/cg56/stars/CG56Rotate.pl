@@ -57,21 +57,21 @@ The parameter \fIrotation\fR must be smaller than the parameter
         move    #<$addr2(input,rotate),r0
         move    #<$addr(output),r1
         do      #$val(length)-$val(rotate),$label(lab2)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    a,$mem(output):(r1)+
 $label(lab2)
         move    #<$addr(input),r0
         do      #$val(rotate),$label(lab3)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    a,$mem(outpu):(r1)+
 $label(lab3)
 	}
         codeblock(other) {
         move    #<$addr(input),r0
         move    #<$addr(output),r1
         do      #$val(length),$label(lab4)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    a,$mem(outpu):(r1)+
 $label(lab4)
         }
         codeblock(one) {

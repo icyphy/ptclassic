@@ -44,8 +44,8 @@ limitation of liability, and disclaimer of warranty provisions.
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	codeblock (sendsample) {
-	move	$ref2(input,phase),x0
-	move	x0,$ref(output)
+	move	$ref2(input,phase),a
+	move	a,$ref(output)
 	}
 	go {
 		addCode(sendsample);

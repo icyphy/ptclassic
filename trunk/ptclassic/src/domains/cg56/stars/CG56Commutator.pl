@@ -48,8 +48,8 @@ the next B particles from the next input, etc.
         }
         codeblock(moveBlock,"int inputNum") {
 @(int(blockSize)!= 1 ? "\tdo\t#$val(blockSize),$label(txBlock)\n":"")\
-        move    $ref(input#@inputNum),x0
-        move    x0,x:(r1)+\
+        move    $ref(input#@inputNum),a
+        move    a,$mem(output):(r1)+\
 @(int(blockSize)!= 1 ? "\n$label(txBlock)":"")
 	}
 
