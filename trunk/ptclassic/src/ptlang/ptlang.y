@@ -60,6 +60,7 @@ Programmer: J. T. Buck and E. A. Lee
 #define FLEN 256
 /* number of include files */
 #define NINC 30
+/* number of see alsos */
 #define NSEE 30
 #define NSTR 20
 
@@ -149,7 +150,8 @@ void clearDefs(), clearStateDefs(), addMembers(), genState(), describeState(),
      initPort(), genPort(), describePort(), clearMethodDefs(), wrapMethod(),
      genInstance(), genStdProto(), yyerror(), yyerr2(), cvtCodeBlockExpr(),
      cvtCodeBlock(), genCodeBlock(), cvtMethod(), genMethod(), genDef(),
-     yywarn(), mismatch(), genAlias(), stripDefaultArgs(), checkIncludes();
+     yywarn(), mismatch(), genAlias(), stripDefaultArgs(),
+     checkIncludes(), checkSeeAlsos();
 
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
@@ -616,17 +618,18 @@ aliasitem:
 
 /* include files */
 cclist: /* nothing */
-|	cclist optcomma STRING		{ checkIncludes(nCcInclude); 
+|	cclist optcomma STRING		{ checkIncludes(nCcInclude-1); 
 					  ccInclude[nCcInclude++] = $3;}
 ;
 
 /* see also list */
 seealso: /* nothing */
-|	seealso optcomma IDENTIFIER	{ seeAlsoList[nSeeAlso++] = $3;}
+|	seealso optcomma IDENTIFIER	{ checkSeeAlsos(nSeeAlso-1);
+					  seeAlsoList[nSeeAlso++] = $3;}
 ;
 
 hlist:	/* nothing */
-|	hlist optcomma STRING		{ checkIncludes(nHInclude); 
+|	hlist optcomma STRING		{ checkIncludes(nHInclude-1); 
 					  hInclude[nHInclude++] = $3;}
 ;
 
@@ -1275,7 +1278,7 @@ void genDef ()
 /* Include files */
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
 	
-	checkIncludes();
+	checkIncludes(nHInclude);
 	for (i = 0; i < nHInclude; i++) {
 		fprintf (fp, "#include %s\n", hInclude[i]);
 	}
@@ -1518,9 +1521,11 @@ void genDef ()
 
 /* See Also list */
 	if (nSeeAlso > 0) fprintf (fp, ".SA\n");
-	if (nSeeAlso > 2)
+	if (nSeeAlso > 2) {
+	    checkSeeAlsos(nSeeAlso);
 	    for (i = 0; i < (nSeeAlso - 2); i++)
 		fprintf (fp, "%s,\n", seeAlsoList[i]);
+	}
 	if (nSeeAlso > 1) fprintf (fp, "%s and\n", seeAlsoList[nSeeAlso-2]);
 	if (nSeeAlso > 0) fprintf (fp, "%s.\n", seeAlsoList[nSeeAlso-1]);
 
@@ -2229,8 +2234,20 @@ int numIncludes;
 {
 	if (numIncludes > NINC) {
 		fprintf (stderr, 
-	 "Too many include files(%d), recompile with NINC (%d) larger.\n",
+    "Too many include files(%d), recompile ptlang with NINC (%d) larger.\n",
 		numIncludes, NINC);
+		exit(1);
+	}
+}
+
+/* Check that we are not blowing the top off an array */
+void checkSeeAlsos(numSeeAlsos)
+int numSeeAlsos;
+{
+	if (numSeeAlsos > NSEE) {
+		fprintf (stderr, 
+	 "Too many see alsos (%d), recompile ptlang with NSEE (%d) larger.\n",
+		numSeeAlsos, NSEE);
 		exit(1);
 	}
 }
