@@ -10,7 +10,7 @@ defstar {
 Reads data from file for use by simulator.
 	}
 	execTime {
-		return (output.bufSize() >= 1) ? 2 : 0;
+		return 2;
 	}
 	output {
 		name {output}
@@ -25,17 +25,12 @@ Reads data from file for use by simulator.
 	state {
 		name { inVal}
 		type { INT }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
 	}
-	start {
-		if (output.bufSize() >= 1) {
-			// these attributes allocate memory
-			inVal.setAttributes(A_YMEM|A_NOINIT);
-		}
-	}
-	// this codeblock tells the simulator to log writes to the
-	// outVal state, which works when the buffersize is >= 1.
+
+	// this codeblock causes the simulator to read from a file into
+	// a memory location each time it is referenced.
 
 	codeblock (logIn) {
 input $ref(inVal) $val(fileName).sim -RD
@@ -50,7 +45,7 @@ input $ref(inVal) $val(fileName).sim -RD
 	move	a,$ref(output)
 	}
 	go {
-		if (output.bufSize() >= 1) gencode(copy);
+		gencode(copy);
 	}
 }
 
