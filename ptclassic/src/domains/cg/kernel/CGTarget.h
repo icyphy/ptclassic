@@ -48,6 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class CGStar;
 class SDFSchedule;
+class SDFScheduler;
 
 extern const char *CODE, *PROCEDURE;
 
@@ -83,6 +84,9 @@ public:
     // write the generated code to files
     virtual void writeCode(const char* name = NULL);
 
+    // incrementally add a star
+    virtual int incrementalAdd(CGStar* s);
+
     // methods to compile and run the target.
     // check access privilege later.
     virtual int compileCode();
@@ -91,6 +95,10 @@ public:
 
     // generate code, final code is left in a target CodeStream
     virtual void generateCode();
+
+    // add codes from a galaxy during mainLoopCode function.
+    // The schedule of the galaxy should be also provided.
+    virtual int insertGalaxyCode(Galaxy* g, SDFScheduler*);
 
     // type identification
     /*virtual*/ int isA(const char*) const;
@@ -147,6 +155,9 @@ virtual StringList headerComment(const char* begin=NULL,const char* end="",const
 
     const char* lookupSharedSymbol(const char* scope, const char* name);
 
+    // set inheritFlag;
+    void amInherited() { inheritFlag = TRUE; }
+
 protected:
     // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
@@ -168,6 +179,10 @@ protected:
     // myCode contains the code generated for the target
     CodeStream myCode;
     CodeStream procedures;
+
+    // change the myCode pointer of the CGStars in the argument galaxy
+    // to the appropriate code stream.
+    void switchCodeStream(Block* b, CodeStream* s);
 
     StringState destDirectory;
     // If we set this state 0, no looping. 1, Joe's looping.
@@ -208,6 +223,9 @@ protected:
     // generate the code for the main loop.
     virtual void mainLoopCode();
 
+    // call the scheduler compileRun(). Make this method virtual to
+    // allow derived target to manage the target code streams.
+    virtual void compileRun(SDFScheduler*);
 
     // The following method downloads code for the inside of a wormhole
     // and starts it executing.
@@ -246,8 +264,12 @@ private:
     // public member getStream
     CodeStreamList codeStringLists;
     
+    // return non-zero if this target is not a child target, or not
+    // inherited from another target. Then, generate code in the setup
+    // stage if it is inside a wormhole.
+    int alone() { return (parent() == NULL) && (inheritFlag == FALSE); }
 
-
+    int inheritFlag;
 };
 
 #endif
