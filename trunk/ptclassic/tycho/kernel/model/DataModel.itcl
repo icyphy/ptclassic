@@ -1,0 +1,468 @@
+##########################################################################
+# @Version: $Id$
+# @Author: John Reekie
+#
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### DataModel
+#
+# DataModel extends the Model class to support the TIM interchange
+# format.  (See <a href="../../../doc/tim.html">the TIM documentation</a>).
+#
+# The class defines one type, called an _attribute_. Attributes are
+# written to the TIM file only if they differ from a default value.
+# The default attributes supported by all persistent models are:
+# <ul>
+# <li>...
+# </ul>
+#
+class ::tycho::DataModel {
+    inherit ::tycho::Model
+
+    constructor {args} {}
+    destructor {}
+
+    #################################################################
+    ####                        options                          ####
+
+    # The file containing the data in this model 
+    public variable datafile {}
+
+    # The file containing an image of this model
+    public variable imagefile {}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Define an attribute of the model
+    method attribute {args}
+
+    # Remove all data
+    method clear {}
+
+    # Describe the data in the model in TIM
+    method describe {}
+
+    # Load data from files into the model
+    method load {args}
+
+    # Get an attribute of the model
+    method modelcget {name}
+
+    # Configure attributes of the model
+    method modelconfigure {args}
+
+    # Parse data into the model from a string
+    method parse {data}
+
+    # Write the model to its files
+    method save {args}
+
+    #################################################################
+    ####                   protected methods                     ####
+
+    # Create a header string
+    protected method _header {}
+
+    #################################################################
+    ####                  protected variables                    ####
+
+    # The Interchange object holding my data
+    protected variable _data
+
+    #################################################################
+    ####                    private methods                      ####
+
+    # Describe an attribute
+    private method _describeattribute {type name prefix}
+
+    #################################################################
+    ####                  private variables                    ####
+
+    # The default model attributes
+    private variable _defaultattributes {
+	-version 0.0
+	-class {}
+	-mode "model"
+	-title {}
+	-author {}
+    }
+
+    # The safe interpreter provided for safe parsing
+    private variable safeInterp [interp create]
+
+    # Debugging only
+    method debug {args} {
+	eval $args
+    }
+}
+
+
+########################################################################
+#### constructor
+#
+# The constructor of this class performs two main functions. Firstly,
+# it creates an instance of Interchange to hold this model's data.
+# Secondly, it defines the type "attribute" and creates the default
+# model attributes. The attribute type is given a *-describe* option
+# so that attributes are produced in a TIM description only if the
+# current value differs from the default.
+#  
+body ::tycho::DataModel::constructor {args} {
+    # Evaluate options
+    eval configure $args
+    
+    # Create an Interchange object
+    set $_data [uplevel #0 Interchange [::tycho::autoName interchange]]
+
+    # Create the attribute type
+    $_data newtype attribute \
+	    -rootonly 1 \
+	    -ordered 1 \
+	    -valued 1 \
+	    -default {} \
+	    -describe [code "$this _describeattribute"]
+    
+    # Create the default attributes
+    foreach {name value} $_defaultattributes {
+	attribute $name $value
+    }
+    modelconfigure -class [info class]   ;# Override default
+}
+
+########################################################################
+#### attribute
+#
+# Add a new attribute to the model. The attribute _name_ is defined and
+# given the _value_ as both its current and default values.
+# If the attribute already exists, its default value and current value
+# are changed to the given value. Model attributes are printed
+# in the description of the model only if they differ from the default.
+# Note that model attributes are treated separately from options
+# of Itk widgets or Itcl objects, in order to support dynamic creation
+# of attributes. This method is not undoable.
+#
+body ::tycho::DataModel::attribute {name value} {
+    if [$_data exists attribute $name] {
+	# Change existing attribute
+	$_data assign attribute $name $value
+	$_data itemconfigure attribute $name -default $value
+    } else {
+	# Create new attribute
+	$_data add attribute $name $value -default $value
+    }
+    return ""
+}
+
+########################################################################
+#### clear
+#
+# Clear all data from the model, except for the model attributes.
+# This method is not, by default, undoable, because of the potential
+# size of the undo command. A client could add an undo command to
+# the history explicitly with the <code>history add</code>.
+#
+body ::tycho::DataModel::clear {} {
+    set attributes [$_data get attribute]
+    $_data clear
+    foreach {name value} $attributes {
+	$_data assign attribute $name $value
+    }
+    # Not undoable
+    return ""
+}
+
+########################################################################
+#### describe
+#
+# Return a string that describes the model. The description starts
+# with an emacs-style header string that contains the mode, class, and
+# version attributes, and the current date.
+#
+body ::tycho::DataModel::describe {} {
+    set result "# -*- [_header] -*-"
+    append result [$_data describe]
+    return $result
+}
+
+########################################################################
+#### load
+#
+# Load the data from files. With no arguments given, this method
+# uses the current values of the *-datafile* and *-imagefile* options.
+# If there are arguments, they are option-value pairs, where the valid
+# options are *-datafile* and *-imagefile*, and the values are used
+# instead of the options of the object. To prevent a file from being
+# read, supply a null value for that option. The image file must be a
+# local file (that is, <code>::tycho::resource isremote</code> returns
+# false), but the data file can be any valid URL.
+#
+# This method chooses whether to read the data file and supply the
+# contents to the Interchange object's parse{} method, or whether
+# to perform a fast load using the image file. It will load the
+# image file only if:
+# <ol>
+# <li>The value of the *-imagefile* option is not null.
+# <li>The image file exists, is a file, and has non-zero size.
+# <li>The data file exists and is a file.
+# <li>The modification date of the image file is no earlier than
+# modification date of the data file.
+# <li>Both files have header strings containing version, class,
+# and date fields.
+# <li>The version number and class of the imagefile is the same
+# as that the data file.
+# <li>The date in the image file header is no earlier than that of
+# the data file.
+# <li>The image file is successfully loaded.
+# </ol>
+#
+# If any of these conditions fails, the model is loaded from the data
+# file. Note that changing the *-datafile* or *-imagefile* options does
+# not cause the data to be reloaded: this must be done explicitly by
+# calling clear{} and then this method. Note also that, in general,
+# clients should not call this method directly -- instead, they
+# should call the procedure <code>::tycho::model open</code>. The
+# command history is cleared if loading from a data file, or set to the
+# history contained in the image file if loading from an image file.
+# After loading, subscribers are notified with the "save" event.
+# This method is not, by default, undoable, because of the potential
+# size of the undo command. A client could add an undo command to
+# the history explicitly with the <code>history add</code>.
+#
+body ::tycho::DataModel::load {args} {
+    # Figure out what files to load
+    set temp(-datafile) $datafile
+    set temp(-imagefile) $imagefile
+    array set temp $args
+    set image $temp(-imagefile)
+    set data $temp(-datafile)
+    if { $temp(-imagefile) != "" } {
+	set image [::tycho::expandPath $temp(-imagefile)]
+    }
+    if { $temp(-datafile) } { 
+	set data [::tycho::url expand $temp(-datafile)]
+    }
+
+    # Figure out whether the image file can be loaded.
+    set loadimage 0
+    if { $image != "" \
+	    &&  [file exists $image] \
+	    && ![file isdirectory $image] \
+	    &&  [file size $image] > 0 \
+	    &&  [::tycho::resource exists $data] \
+	    && ![::tycho::resource isdirectory $data] \
+	    && [file mtime $image] >= [::tycho::resource mtime $data] } {
+	::tycho::readFileHeader $image iopts
+	::tycho::readFileHeader $data dopts
+	if { [::info exists iopts(version)] \
+		&& [::info exists dopts(version)] \
+		&& $iopts(version) == $dopts(version) \
+		&& [::info exists iopts(class)] \
+		&& [::info exists dopts(class)] \
+		&& $iopts(class) == $dopts(class) \
+		&& [::info exists iopts(mtime)] \
+		&& [::info exists dopts(mtime)] \
+		&& $iopts(mtime) >= $dopts(mtime) } {
+	    # OK, clear the data and history and try loading the image file
+	    clear
+	    history clear
+	    if [catch {$_data internalize $file}] {
+		# Oops -- that failed... Load the data file.
+		clear
+		history clear
+		set fd [open $data]
+		$_data load [$fd read]
+		close $fd
+	    } else {
+		# Load the command history
+		history set [$_data annotation get history]
+	    }
+	}
+    }
+    # Notify subscribers that the model has been loaded
+    notify event "load"
+    
+    # Not undoable
+    return ""
+}
+
+########################################################################
+#### modelcget
+#
+# Get the current value of an attribute of the model. An error
+# is raised if the attribute is not known.
+#
+body ::tycho::DataModel::modelcget {name} {
+    if { ! [::info exists _currentoptions($name)] } {
+        error "Unknown option $name in $errorname"
+    }
+    return $_currentoptions($name)
+}
+
+########################################################################
+#### modelconfigure
+#
+# Change the current attributes of the model.  Raise an error if any
+# attribute has not been defined with the attribute{} method. Return
+# an undo command.
+#
+body ::tycho::DataModel::modelconfigure {args} {
+    concat "modelconfigure" [$_data itemconfigure attribute $name $value]
+}
+
+########################################################################
+#### parse
+#
+# Load data from a string into the model.
+#
+body ::tycho::DataModel::parse {data} {
+    $_data parse $data
+}
+
+########################################################################
+#### save
+#
+# Write the model data to files. With no arguments given, this method
+# writes to the files given by the *-datafile* and *-imagefile* options.
+# If there are arguments, they are option-value pairs, where the
+# valid options are *-datafile* and *-imagefile*, and the values
+# are used instead of the options of the object. Nothing is
+# written to a file if its name is null.  The image file must be a
+# local file (that is, <code>::tycho::resource isremote</code> returns
+# false), but the data file can be any valid URL. If the data file
+# is not writable, raise an error. If the image file is not writable,
+# just don't write it.
+#
+# The file given by *-datafile* is written in the TIM format, while
+# the file given by *-imagefile* is written in the opaque fast loading
+# format produced by the externalize{} method of the DataModelchange class.
+# Both files begin with an emacs-style header containing the mode, class,
+# and version attributes the model, and the current date. After writing,
+# the minor version number is incremented by one, and subscribers
+# are notified of the save event. A mark called "save" is also placed
+# into the command history.
+# This method is not, by default, undoable, because of the potential
+# size of the undo command. A client could add an undo command to
+# the history explicitly with the <code>history add</code>.
+#
+body ::tycho::DataModel::save {args} {
+    # Figure out what files to load
+    set temp(-datafile) $datafile
+    set temp(-imagefile) $imagefile
+    array set temp $args
+    set image $temp(-imagefile)
+    set data $temp(-datafile)
+    if { $image != "" } {
+	set image [::tycho::expandPath $temp(-imagefile)]
+    }
+    if { $data } { 
+	set data [::tycho::url expand $temp(-datafile)]
+    }
+    
+    # Generate the header string
+    set header "# -*- [_header] -*-"
+
+    # Write the data file first
+    if { data != "" } {
+	if { ![::tycho::resource writable [file dirname $df]] \
+		|| ![::tycho::resource writable $df] } {
+	    error "File \"$data\" cannot be written"
+	}
+	set dd [open $data]
+    	puts $dd $header
+    	puts $dd [$_data describe]
+    	close $dd
+    }
+    # Then the image file
+    if { $image != "" } {
+	if { [file exists [file dirname $df]] && [file writable $df] } {
+	    set ii [open $image "w"]
+	    puts $ii $header                            ;# header
+	    $_data annotation set history [history get] ;# history
+	    $_data externalize $ii                      ;# data
+	    close $ii
+	}
+    }
+    # Increment version
+    foreach {major minor} [split [modelcget -version] "."] {}
+    incr minor
+    modelconfigure -version $major.$minor
+    
+    # Mark the command history
+    mark set "save" current
+
+    # Notify subscribers that the model has been saved
+    notify event "save"
+    
+    return ""
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+########################################################################
+#### _header
+#
+# Return a header string for this model. The returnd string contains
+# only the field name-value pairs, so that subclasses can chain
+# and add additional fields. This method
+# returns a string containing the current values of the mode, version,
+# and class attributes, and the current time as the mtime field.
+#
+body ::tycho::DataModel::_header {} {
+    set header ""
+    append header "mode: [modelcget -mode]; "
+    append header "class: [modelcget -class]; "
+    append header "version: [modelcget -version] "
+    append header "mtime: [clock format [clock ticks]] "
+    return $header
+}
+
+#####################################################################
+#####################################################################
+####                      private methods                        ####
+
+########################################################################
+#### _describeattribute
+#
+# Return a description of an attribute. This method is called by the
+# DataModelchange object when its describe{} method is called. An
+# attribute is printed only if its current value is different from
+# its default value.
+#
+body ::tycho::DataModel::_describeattribute {type name prefix} {
+    set value [$_data value $type $name]
+    if { $value == [$_data itemcget $type $name -default] } {
+	return ""
+    } else {
+	set result $prefix
+	lappend result $value
+    }
+}
