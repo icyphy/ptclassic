@@ -52,7 +52,7 @@ option add *File.autoSaveInterval 5 widgetDefault
 # Three menu buttons are put at the top of the window.
 # The File menu contains commands to open a file, insert a file,
 # save data to a file, save as some other file name, print,
-# evaluate the data, revert to the last saved version,
+# evaluate the data, reload the last saved version,
 # close the window, and exit the application.
 # The Window menu contains commands to open new (blank) top-level
 # windows of all types that have been registered with the File class
@@ -130,12 +130,8 @@ class ::tycho::File {
     # Print the contents of the file. The default behavior is an error.
     method print {}
 
-    #### revert
-    # Revert to previously saved file.  The default behavior is an error.
-    method revert {}
-
     #### reload
-    # Reload the current file. The default behavior is an error.
+    # Reload the previously saved file.  The default behavior is an error.
     method reload {}
 
     #### save
@@ -446,11 +442,6 @@ body ::tycho::File::constructor {args} {
 	    -command "$this evaluate"
     
     $itk_component(fileMenu) add command \
-	    -label Revert \
-	    -underline 0 \
-	    -command "$this revert"
-    
-    $itk_component(fileMenu) add command \
 	    -label Reload \
 	    -underline 1 \
 	    -command "$this reload"
@@ -663,14 +654,6 @@ body ::tycho::File::markUnmodified {} {
 #
 body ::tycho::File::print {} {
     error "Sorry, print not implemented yet."
-}
-
-#####################################################################
-#### revert
-# Revert to previously saved file.
-#
-body ::tycho::File::revert {} {
-    error "Sorry, revert not implemented yet."
 }
 
 #####################################################################
