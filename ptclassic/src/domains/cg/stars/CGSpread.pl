@@ -26,8 +26,11 @@ one Send star, more than one Send stars, and so on.)
 	start {
 		MPHIter iter(output);
 		CGPortHole* p;
-		while ((p = (CGPortHole*) iter++) != 0)
-			input.embed(*p);
+		int loc = 0;
+		while ((p = (CGPortHole*) iter++) != 0) {
+			input.embed(*p, loc);
+			loc += p->numXfer();
+		}
 	}
 	go {
 	}

@@ -25,8 +25,11 @@ is more than one. Its role is just opposite to that of Scatter star.
 	start {
 		MPHIter iter(input);
 		CGPortHole* p;
-		while ((p = (CGPortHole*) iter++) != 0)
-			output.embed(*p);
+		int loc = 0;
+		while ((p = (CGPortHole*) iter++) != 0) {
+			output.embed(*p, loc);
+			loc += p->numXfer();
+		}
 	}
 	go {
 	}
