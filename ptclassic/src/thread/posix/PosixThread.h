@@ -46,29 +46,13 @@ public:
     // Terminate the thread.
     /*virtual*/ void terminate();
 
+    // Run all threads.
+    static void runAll();
+
 protected:
     static void* runThis(PosixThread*);
 
     pthread_t thread;
-};
-
-
-class PosixThreadList : public ThreadList
-{
-public:
-    // Constructor.  System-wide initialization.
-    PosixThreadList();
-
-    // Allow all registered threads to run (or continue).
-    /*virtual*/ void run();
-
-protected:
-    pthread_t mainThread;
-    pthread_attr_t mainAttributes;
-
-    // Priority limits.
-    int maxPriority;
-    int minPriority;
 };
 
 #endif
