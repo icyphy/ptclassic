@@ -38,6 +38,7 @@ PL_SRCS= \
  CG56Const.pl \
  CG56Cos.pl \
  CG56Cut.pl \
+ CG56CxToRect.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
  CG56DownSample.pl \
@@ -83,6 +84,7 @@ PL_SRCS= \
  CG56Repeat.pl \
  CG56Reverse.pl \
  CG56Rotate.pl \
+ CG56RectToCx.pl \
  CG56SSI.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
