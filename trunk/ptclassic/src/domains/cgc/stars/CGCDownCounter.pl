@@ -9,7 +9,7 @@ at once.
 	version { $Id$ }
 	author { Soonhoi Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -30,6 +30,7 @@ Input should be a positive integer (can not be zero).
 	output {
 		name { output }
 		type { int }
+		num { 0 }
 	}
 	state {
 		name { status }
@@ -38,6 +39,13 @@ Input should be a positive integer (can not be zero).
 		desc { monitoring the control value }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
+	method {
+		name { readTypeName }
+		access { public }
+		type { "const char *" }
+		code { return "UpSample"; }
+	}
+
 	codeblock (block) {
 	if ($ref(status) == 0) {
 		if ($ref(input) > 0) {
