@@ -38,6 +38,8 @@ static const char file_id[] = "$RCSfile$";
 
 #include "Clock.h"
 
+extern "C" int gettimeofday(timeval *, timezone *);
+
 Clock::Clock()
 {
     reset();
