@@ -258,6 +258,7 @@ char *s;
 
 /***** DupSheet routines  1/24/89
 Updates: 4/13/90 = allow multiple DupSheets
+1/30/97: no longer need version with only one string parameter.
 */
 
 void
@@ -282,28 +283,16 @@ DupSheet *ds;
     *ds = NULL;
 }
 
-/* It looks like DupSheetAdd is used to record compiling universes */
-boolean
-DupSheetAdd(ds, item)
-DupSheet *ds;
-const char *item;
-{
-    DupSheetNode *new;
-    
-    ERR_IF1(!UMalloc((char **)&new, sizeof(DupSheetNode)));
-    new->info = item;
-    new->moreinfo = NULL;
-    new->next = *ds;
-    *ds = new;
-    return(TRUE);
-}
-
-/* It looks like DupSheetAdd is used to record compiling galaxies.
- * The moreinfo field stores the domain name of the galaxy, and is
- * NULL for universes
+/* DupSheetAdd is used to record compiling galaxies.
+ * We need to record both the path and the domain name.
+ * NOTE: formerly, this relied on the passed string pointers staying
+ * valid indefinitely.  That strikes me as unsafe, since they are
+ * references to Oct facet storage that perhaps could get reclaimed?
+ * Anyway, hashstring'ing the path and domain eliminates the worry,
+ * and costs no extra space because other places will do the same.
  */
 boolean
-DupSheetAdd2(ds, item, item2)
+DupSheetAdd(ds, item, item2)
 DupSheet *ds;
 const char *item;
 const char *item2;
@@ -311,33 +300,16 @@ const char *item2;
     DupSheetNode *new;
     
     ERR_IF1(!UMalloc((char **)&new, sizeof(DupSheetNode)));
-    new->info = item;
-    new->moreinfo = item2;
+    new->info = HashString(item);
+    new->moreinfo = HashString(item2);
     new->next = *ds;
     *ds = new;
     return(TRUE);
 }
 
-/*
- * The way this is used, could probably compare the pointer values
- * rather than the strings.  But for conservatism, we don't do that.
- */
+/* Check to see if list contains a match. */
 boolean
-DupSheetIsDup(ds, item)
-DupSheet *ds;
-const char *item;
-{
-    DupSheetNode *p;
-
-    for (p = *ds; p != NULL; p = p->next) {
-      if (strcmp(p->info, item) == 0) {
-	    return(TRUE);
-	  }
-    }
-    return(FALSE);
-}
-boolean
-DupSheetIsDup2(ds, item, item2)
+DupSheetIsDup(ds, item, item2)
 DupSheet *ds;
 const char *item;
 const char *item2;
@@ -345,11 +317,9 @@ const char *item2;
     DupSheetNode *p;
 
     for (p = *ds; p != NULL; p = p->next) {
-	if (strcmp(p->info, item) == 0) {
-        /* moreinfo is NULL for universes. */
-        if (p->moreinfo && strcmp(p->moreinfo, item2) == 0) {
+	if (strcmp(p->info, item) == 0 &&
+	    strcmp(p->moreinfo, item2) == 0) {
 	    return(TRUE);
-	  }
 	}
     }
     return(FALSE);
