@@ -292,7 +292,7 @@ proc ::tycho::rmIfNotWritable { file } {
 # <CODE>/users/ptolemy/tycho</CODE>, and this directory is actually
 # automounted at <CODE>/export/watson/watson2/ptolemy/tycho</CODE>, and
 # we pass simplifyPath the pathname
-# <CODE>/export/watson/watson2/ptolemy/tycho/README<CODE>, then we
+# <CODE>/export/watson/watson2/ptolemy/tycho/README</CODE>, then we
 # should get back <CODE>$TYCHO/README</CODE>.
 #
 # If we cannot simplify the pathname, then we return the original pathname.
