@@ -8,7 +8,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1991-1993 The Regents of the University of California.
+Copyright (c) 1991-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -231,9 +231,9 @@ class FixMatrix: public Matrix {
   // copy constructor
   FixMatrix(const FixMatrix& src);
   // special copy constructors with precision and masking
-  FixMatrix(const ComplexMatrix& src, int ln, int ib, mask_func_pointer mask);
-  FixMatrix(const FloatMatrix& src, int ln, int ib, mask_func_pointer mask);
-  FixMatrix(const IntMatrix& src, int ln, int ib, mask_func_pointer mask);
+  FixMatrix(const ComplexMatrix& src, int ln, int ib, int round);
+  FixMatrix(const FloatMatrix& src, int ln, int ib, int round);
+  FixMatrix(const IntMatrix& src, int ln, int ib, int round);
 
   // copy constructor, copies only a submatrix of the original, as
   // specified by the starting row and col, and the number of rows and

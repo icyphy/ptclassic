@@ -13,7 +13,7 @@ static const char file_id[] = "FixState.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1991, 1992, 1993 The Regents of the University of California.
+Copyright (c) 1993-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,7 +36,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: A. Khazeni 
+ Programmer: A. Khazeni, J. Buck 
  Date of creation: 2/24/93 
  Revisions:
 
@@ -54,8 +54,7 @@ const char* FixState :: type() const { return "FIX";}
 
 // the value as a string
 StringList FixState :: currentValue() const {
-        StringList s;
-        s = val.value();
+        StringList s = val.value();
         return s;
 }
 
@@ -112,12 +111,14 @@ void FixState :: initialize() {
                 }
                 t =  evalFloatExpression(lexer);
                 if (t.tok != T_Float) return;
-                double prec = t.doubleval;
-                char pprec[8];
-                sprintf(pprec,"%g",prec);
-                int ln = Fix::get_length(pprec);
-                int ib = Fix::get_intBits(pprec);
-                val = Fix(ln , ib, fixval);
+		// we rely on the StringList feature that prints
+		// 3.0 for a 3 value.
+		StringList prec = t.doubleval;
+		val = Fix(prec, fixval);
+		if (val.invalid()) {
+			parseError ("invalid Fix precision specifier");
+			return;
+		}
                 t = getParseToken (lexer);
                 if (t.tok != ')') {
                         parseError ("expected )");
