@@ -37,6 +37,7 @@ style default \
 	The full name of the user.
     }
 
+    # FIXME: This doesn't belong here (or anywhere, for that matter!)
     parameter itclHTMLPage {$tycho/doc/itclhtml/TclTkMainList.html} \
 	    -label "Pathname of Itcl TclTkMainList.html file" \
 	    -description {

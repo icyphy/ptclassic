@@ -5,13 +5,13 @@
 # The "interaction" master style-sheet
 #
 modelconfigure -label "Interaction"
-modelconfigure -description [
+modelconfigure -description {
 	This style contains settings for key user-interaction
 	parameters.
 }
 
 style default \
-	-label "Default" \
+	-label "Noisy" \
 	-description {
     The default style for user interaction.
 } {
@@ -50,7 +50,20 @@ style default \
 	    -type boolean \
 	    -label "Case-sensitive name completion"
 
-    parameter oneWindow 0 \
+    parameter singleStackTrace 0 \
 	    -type boolean \
 	    -label "Only create a single stack trace window"
+}
+
+style quiet \
+	-label "Quiet" \
+	-description {
+    A less irritating style for user interaction.
+} {
+    parameter confirmOnExit 0
+    parameter welcomeWindow 0
+    parameter itclClassRedefinitionWarning 0
+    parameter fileBrowserUseLastDirectory 0
+    parameter caseSensitiveCompletion 1
+    parameter singleStackTrace 1
 }

@@ -81,6 +81,6 @@ style fullscreen \
     Layout parameters that work well using the small fonts for
     a high-resolution screen.
 } {
-    parameter textHeight 60
+    parameter textHeight 56
 }
 
