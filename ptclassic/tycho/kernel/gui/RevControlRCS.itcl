@@ -108,7 +108,7 @@ class ::tycho::RevControlRCS {
 #
 body ::tycho::RevControlRCS::constructor {args} {
     eval itk_initialize $args 
-    configure -text "RCS revision control for:\n\n$file"
+    configure -text "RCS revision control for: $file"
 }
 
 #####################################################################

@@ -89,10 +89,6 @@ class ::tycho::RevControlSCCS {
     ###################################################################
     ####                   private methods                         ####
 
-    #### cdDir
-    # Change to the given directory with appropriate error checks.
-    private method cdDir {dir}
-
     #### parseHistory
     # Parse the history information and insert a synopsis into the text window.
     private method parseHistory {history text}
@@ -107,6 +103,7 @@ class ::tycho::RevControlSCCS {
 #
 body ::tycho::RevControlSCCS::constructor {args} {
     eval itk_initialize $args 
+    configure -text "SCCS revision control for: $file"
 }
 
 #####################################################################
@@ -114,14 +111,7 @@ body ::tycho::RevControlSCCS::constructor {args} {
 # Check in the file associated with this class.
 # 
 body ::tycho::RevControlSCCS::checkIn {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
-    if [$object isModified] {
-	if [askuser "Save modifications before checking in?"] {
-	    $object save 
-	}
-    }
+    ::tycho::RevControl::checkIn 
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
@@ -140,8 +130,8 @@ body ::tycho::RevControlSCCS::checkIn {} {
     }
     cd $olddir
     $object reload
-    ::tycho::RevControl::checkIn
-
+    enableButton checkout
+ 
     updateHistory
 }
 
@@ -150,9 +140,7 @@ body ::tycho::RevControlSCCS::checkIn {} {
 # Check out the file associated with this class.
 # 
 body ::tycho::RevControlSCCS::checkOut {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
+    ::tycho::RevControl::checkOut
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
@@ -163,11 +151,11 @@ body ::tycho::RevControlSCCS::checkOut {} {
     cdDir $dir
     catch {exec sccs edit $basefile} output
     if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
-	error "Checkout failed: $output"
+	error "Checkout failed: $output."
     }
     cd $olddir
     $object reload
-    ::tycho::RevControl::checkOut
+    enableButton checkin
 
     updateHistory
 }
@@ -177,15 +165,11 @@ body ::tycho::RevControlSCCS::checkOut {} {
 # Put the file under revision control.
 # 
 body ::tycho::RevControlSCCS::initializeRevControl {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
     ::tycho::RevControl::initializeRevControl
     set dir [file dirname $file]
     set revdir [format "%s/SCCS" $dir]
     set basefile [file tail $file]
     set olddir [eval pwd]
-
     if {![file exists $revdir]} {
 	if {![file writable $dir]} {
 	    error "The directory \"$revdir\" doesn't exist, and you do not\
@@ -217,7 +201,7 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
     # Unfortunately, this means there is no way to report errors.
     set text [exec sccs get -p -r$version $basefile 2> /dev/null]
 
-    ::tycho::File::displayData $text $file
+    ::tycho::File::displayData $text $file 
     cd $olddir
 }
 
@@ -339,18 +323,6 @@ body ::tycho::RevControlSCCS::isUnderRevControl {} {
 
     ###################################################################
     ####                   private methods                         ####
-
-#####################################################################
-#### cdDir
-# Change to the appropriate file directory, with error checks.
-# 
-body ::tycho::RevControlSCCS::cdDir {dir} {
-    if {[file isdirectory $dir] && [file executable $dir]} {
-	cd $dir
-    } else {
-	error "The directory \"$dir\" is not writable."
-    }
-}
 
 #####################################################################
 #### parseHistory
