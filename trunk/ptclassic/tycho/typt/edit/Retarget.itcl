@@ -44,6 +44,13 @@
 # </pre></tcl>
 class ::tycho::Retarget {
     inherit ::tycho::EditForest
+
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the name of the PtclEdit object we are working with
+    itk_option define -edit edit Edit ""
+
     constructor {args} {}
     destructor {}
 
@@ -51,7 +58,7 @@ class ::tycho::Retarget {
     ####                         public methods                    ####
 
     # Generate data for new domains
-    method compareDomains {}
+    method compareDomains { {universeName {}} {domainStarList {}}}
 
     # Update domainA
     method changeDomainA {}
@@ -75,8 +82,9 @@ class ::tycho::Retarget {
     ####                         private methods                   ####
 
     # Initialize the counters at the bottom of the window
-    private method modifyAfterDomainChange { {ports 0} {multiports 0} \
-        {states 0} {aOnly 0} {bOnly 0} {bothAandB 0} {bTotal 0} {aTotal 0}} {}
+    private method modifyAfterDomainChange { {universeName {}} \
+            {ports 0} {multiports 0} {states 0} \
+            {aOnly 0} {bOnly 0} {bothAandB 0} {bTotal 0} {aTotal 0}} {}
 
     ###################################################################
     ####                         private variables                 ####
@@ -86,10 +94,22 @@ class ::tycho::Retarget {
     # If we need to run compareDomains, then set this variable to 1
     private variable dirtyCompareDomains 1
 
+    # Editor object that contains the universe we are retargetting.
+    private variable editor
+
     # List of stars that clash, arranged by categories into sublists
     private variable clashList
 }
 
+#######################################################################
+#### -editor configuration
+# The id of the editor we are using.  This editor is usually a ptclEdit 
+# object that contains the universe we are trying to retarget.
+configbody ::tycho::Retarget::edit {
+    set editor $itk_option(-edit)
+    if {$editor != "" } {
+    }
+}
 #######################################################################
 #### constructor
 #
@@ -154,10 +174,14 @@ body ::tycho::Retarget::changeDomainB {} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::checkUniverse {} {
-    clear
-    if {!$dirtyCompareDomains} {
+    if {$editor == {} } {
+        error "No universe loaded, use the Ptcl editor to load a universe"
+        return
+    }
+    set starList [$editor stars]
+    if {$dirtyCompareDomains} {
 	putStatus "Regenerating Domain Information, please wait."
-	compareDomains
+	compareDomains [$editor universeName] $starList
 	putStatus ""
     }
     
@@ -168,12 +192,20 @@ body ::tycho::Retarget::checkUniverse {} {
 # Determine what stars are in two domains and compare them by plotting
 # the information as a Forest.
 #
-body ::tycho::Retarget::compareDomains {} {
+body ::tycho::Retarget::compareDomains { {universeName {}} \
+        {domainStarList {}}} {
     set clashList [::tycho::DomainInfo::diffDomains $domainA $domainB]
 
     clear
     catch {delete object component graphics}
 
+    set starList {}
+    if { $domainStarList != {} } {
+        # Generate a list of just stars
+        foreach domainStar $domainStarList {
+            lappend starList [lindex $domainStar 1]
+        }
+    }
     # Cycle through the different types of clashes
     set headers [list {Common Stars} {Different Ports} \
             {Different MultiPorts} {Different States} \
@@ -183,16 +215,53 @@ body ::tycho::Retarget::compareDomains {} {
         component graphics add $header {} {}
         set header [list $header]
         foreach star [lindex $clashList $indexCount] {
-            set contents [list tcl \
-                    "::tycho::Retarget::printStars $star \"$header\" \
-                    $domainA $domainB" ]
-            component graphics add $star $contents $header
+            if { $starList != {} } {
+                if {[lsearch $starList $star] != -1 } {
+                    set contents [list tcl \
+                            "::tycho::Retarget::printStars $star \"$header\" \
+                            $domainA $domainB" ]
+                    component graphics add $star $contents $header
+                }
+            } else {
+                set contents [list tcl \
+                        "::tycho::Retarget::printStars $star \"$header\" \
+                        $domainA $domainB" ]
+                component graphics add $star $contents $header
+            }
         }
         incr indexCount
     }
 
+    # If the user has loaded in a universe in domain A, but is
+    # comparing domains B and C, it could be that a star that is present
+    # in domain A might not be present in domain B or C, so we check.
+    # If there is a hit, then we add another category to the forest.
+    if { $starList != {} } {
+        # Set createdTop to 1 after we have created the top of the tree
+        set createdTop 0
+        foreach star $starList {
+            set foundIt 0
+            for {set indexCount 0} {$indexCount <= 5} {incr indexCount} { 
+                if {[lsearch [lindex $clashList $indexCount] $star] != -1} {
+                    set foundIt 1
+                    break
+                }
+            }
+            if {$foundIt == 0} {
+                if {!$createdTop} {
+                    set createdTop 1
+                    component graphics add "Not in $domainA or $domainB" {} {}
+                }
+                set contents [list tcl \
+                        "::tycho::Retarget::printStars $star \"$header\" \
+                        $domainA $domainB" ]
+                component graphics add $star $contents \
+                        [list "Not in $domainA or $domainB"]
+            }
+        }
+    }
     # ports multiports states aOnly bOnly bothAandB bTotal0 aTotal0
-    modifyAfterDomainChange \
+    modifyAfterDomainChange $universeName \
             [llength [lindex $clashList 1]] \
             [llength [lindex $clashList 2]] \
             [llength [lindex $clashList 3]] \
@@ -252,7 +321,7 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
                     \"The $starName star does not have the same multiports \
                     in $domainA and $domainB.\"
         }
-        {Different States } {
+        {Different States} {
             set relationMessage \
                     \"The $starName star does not have the same states \
                     in $domainA and $domainB.\"
@@ -302,8 +371,9 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
 #######################################################################
 #### modifyAfterDomainChange
 # Initialize the counters at the bottom of the window
-body ::tycho::Retarget::modifyAfterDomainChange { {ports 0} {multiports 0} \
-        {states 0} {aOnly 0} {bOnly 0} {bothAandB 0} {bTotal 0} {aTotal 0}} {
+body ::tycho::Retarget::modifyAfterDomainChange { {universeName {}} \
+        {ports 0} {multiports 0} {states 0} {aOnly 0} {bOnly 0} \
+        {bothAandB 0} {bTotal 0} {aTotal 0}} {
     addInfo diffPorts {Ports} $ports 3 \
             "Number of stars that have the same name, but different ports."
     addInfo diffMultiports {MultiPorts} $multiports 3 \
@@ -323,8 +393,12 @@ body ::tycho::Retarget::modifyAfterDomainChange { {ports 0} {multiports 0} \
     addInfo domainACount "$domainA" $bTotal 3 \
             "Total number of stars in $domainA."
 
-    component graphics titleSet title \
-            "Comparison of $domainA and $domainB domains"
-
+    if {$universeName != {}} {
+        component graphics titleSet title \
+                "Retargetting $universeName from $domainA domain to $domainB domain"
+    } else {
+        component graphics titleSet title \
+                "Comparison of $domainA and $domainB domains"
+    }
+    set dirtyCompareDomains 1
 }
-
