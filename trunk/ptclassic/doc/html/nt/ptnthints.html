@@ -65,11 +65,22 @@ shutdown /L /R /Y /C
 
 
 <h2><a name="cygwin32hints">Cygwin32 hints</a></h2>
+
 If you have problems, try searching the Cygwin32 mailing list archives
 via <a href="http://www.cygnus.com/misc/gnu-win32/">Cygnus Cygwin32 page</a>.
 The FAQ is also useful.
+
 <h3>Setup</h3>
 <MENU>
+
+<li> <CODE>c:\Cygnus32\B19\Cygnus.bat</CODE> is a MSDOS batch script
+that starts up <CODE>bash</CODE> with the proper environment variables
+set for finding the compiler and such.  <CODE>Cygnus.bat</CODE> is
+what is run when the Cygnus icon in the Program menu is clicked on.
+If you ever need to start <CODE>bash</CODE> from a MSDOS prompt, you
+get better results if you run <CODE>Cygnus.bat</CODE> instead of
+<CODE>bash.exe</CODE> itself
+
 <li> If your tree is located on a Unix file system, use Samba.
 See the <a href="ptntinstall.html">Ptolemy NT Installation page</a>
 for details
