@@ -47,7 +47,9 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-EXTRA_SRCS=cgcstars.mk $(PL_SRCS)
+DOMAIN=CGC
+STAR_MK=cgcstars
+EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
 
 all:		$(SRCS) makefile $(OBJS)
 
