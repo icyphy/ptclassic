@@ -75,14 +75,14 @@ to specify the base class.
 .IE "descriptor { }"
 This item defines the descriptor for the class.  It has the syntax
 .(c
-descriptor { \fIdesclist\fP }
+descriptor { \fItext\fP }
 .)c
 or
 .(c
-desc { \fIdesclist\fP }
+desc { \fItext\fP }
 .)c
 where
-.i desclist
+.i text
 is simply a section of text that will become the short descriptor
 of the star or galaxy.  A principal use of the short descriptor
 is to get on-screen help, so the descriptor should not include
@@ -385,7 +385,7 @@ defstar {
 .pp
 Full details for accessing portholes C++ methods
 associated with a star are explained below, in the section entitled
-``Writing C++ code.''
+``Writing C++ code for stars.''
 .UH constructor
 .pp
 .IE "constructor { }"
@@ -586,6 +586,9 @@ The argument list for the method, as a quoted string.  If omitted,
 the method has no arguments.
 .ip \f(\*Ftype\fR:
 The return type of the method.  If the return type is not a single
-identifier, you must put quotes around it.
+identifier, you must put quotes around it.  If it is omitted, the
+return type is
+.c void
+(no value is returned).
 .ip \f(\*Fcode\fR:
 The code that implements the method.  This is a required item.
