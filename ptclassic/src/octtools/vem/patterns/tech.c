@@ -132,7 +132,7 @@ octObject *theFacet;		/* Cell to look up technology on */
  */
 {
     tkIntTech *theTech;
-    octId tapFacetId;
+    octId tapFacetId = (octId)0;
     STR pkgName, message;
     int code;
     
