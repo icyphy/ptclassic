@@ -107,8 +107,6 @@ void UniProcessor :: createSubGal() {
 		    parentBlock->asGalaxy().removeBlock(*master);
 		    subGal->addBlock(*master, master->name());
 		    master->setTarget(targetPtr);
-		    // FIXME Not needed if we use new scope scheme
-		    master->setParent(parentBlock);  
 		    Scheduler* clusterSched = copyS->asCluster()->innerSched();
 		    if (clusterSched) clusterSched->setTarget(*targetPtr);
 		}
