@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DDFTarget.h"
 #include "KnownTarget.h"
 #include "DDFScheduler.h"
-#include "DDFWormhole.h"
+#include "SDFWormhole.h"
 #include "AutoForkNode.h"
 
 extern const char DDFdomainName[] = "DDF";
@@ -49,20 +49,14 @@ class DDFDomain : public Domain {
 public:
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		LOG_NEW; return *new DDFWormhole(innerGal,innerTarget);
+		LOG_NEW; return *new SDFWormhole(innerGal,innerTarget);
 	}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new DDFfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new SDFfromUniversal;}
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new DDFtoUniversal;}
-
-	// Make all galaxies wormholes.
-	// This is removed for now.  It is needed for restructuring,
-	// but restructuring is not working properly, and neither are
-	// wormholes with arbitrary DDF properties on their boundaries.
-	// int isGalWorm() {return TRUE;}
+	EventHorizon& newTo() { LOG_NEW; return *new SDFtoUniversal;}
 
 	// constructor: permit BDF and SDF as subdomains.
 	DDFDomain() : Domain("DDF") {
@@ -70,6 +64,9 @@ public:
 		subDomains += "SDF";
 		subDomains += "BDF";
 	}
+
+	// new Geodesic (Node)
+	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// require DDFTarget
 	const char* requiredTarget() { return "DDFTarget";}
