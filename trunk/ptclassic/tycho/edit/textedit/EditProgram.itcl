@@ -703,7 +703,6 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
     set root [file rootname $tail]
     eval $setDocCommand
     set fulldoc [file join $dir $docfile]
-    puts "fulldoc=$fulldoc"
     if {![file exists $fulldoc] || \
             [file mtime $filename] > [file mtime $fulldoc] } {
         # Need to regenerate the doc.  Check permissions first.
