@@ -36,6 +36,23 @@ Block& DDFStar :: setBlock(char* s, Block* parent = NULL) {
 	return *this;
 }
 
+// initialize DDF specific members
+void DDFStar :: prepareForScheduling() {
+	waitPort = NULL;
+	waitNum = 0;
+	// special care for DDFSelf star (recursion)
+	// adjust numberTokens
+	if (isItSelf()) {
+		start();	// define inside Galaxy
+		for (int i = numberPorts(); i > 0; i--) {
+			DDFPortHole& dp = (DDFPortHole&) nextPort();
+			int nTok = dp.imagePort->numberTokens;
+			if (nTok > 1)
+				dp.setDDFParams(nTok);
+		}
+	}
+}
+
 // set the waiting condition for execution
 void DDFStar :: wait(PortHole& p, int num = 1) {
 	// check p is input, if not, error.
