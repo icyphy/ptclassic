@@ -150,7 +150,7 @@ class ::tycho::EditDiff {
     # Keep track of where exactly error occured.
     public variable differenceList {}
 
-    # Keep track of where in the error we are now.
+    # Keep track of where in the < we are now.
     public variable differenceListCount -1
 
     # File names that are being diffed.
@@ -171,28 +171,41 @@ body ::tycho::EditDiff::constructor {args} {
     set execDiff ""
     configure -readonly 1
 
-    toolbar button preverror {Jump to the previous error} \
-            -text {Prev Difference} -command "$this jumpDifference -1"
-    toolbar button nexterror {Jump to the next error} \
-            -text {Next Difference} -command "$this jumpDifference 1"
+    toolbar button prevdiff \
+            -text {Prev Difference} \
+            -description {Jump to the previous difference} \
+            -command "$this jumpDifference -1"
 
-    toolbar button compare {Read in both files, and start parsing} \
-            -text Compare -command "$this compareFile"
-    toolbar button addfile {Read in one more file to compare} \
-            -text "Add File" -command {} -state disabled
-    toolbar button remfile {Remove one more file entry} \
-            -text "Remove File" -command {} -state disabled
+    toolbar button nextdiff \
+            -text {Next Difference} \
+            -description {Jump to the next difference} \
+            -command "$this jumpDifference 1"
+
+    toolbar button compare \
+            -text Compare \
+            -description {Read in both files, and start parsing} \
+            -command "$this compareFile"
+
+    toolbar button addfile \
+            -text "Add File" \
+            -description {Read in one more file to compare} \
+            -command {} -state disabled
+
+    toolbar button remfile \
+            -text "Remove File" \
+            -description {Remove one more file entry} \
+            -command {} -state disabled
            
-    #toolbar button test {Kevin's test button} -text "Test" \
+    #toolbar button test -description {Kevin's test button} -text "Test" \
     #        -command "$this test"
 
     toolbar entry filename1 "File 1 name: " {} "puts " \
-            -foreground [lindex $linecolor1 0] -command \
-            "$this insertSelectedFileName 1"
+            -foreground [lindex $linecolor1 0] \
+            -command "$this insertSelectedFileName 1"
            
     toolbar entry filename2 "File 2 name: " {} "$this compareFile" \
-            -foreground [lindex $linecolor2 0] -command \
-            "$this insertSelectedFileName 2"
+            -foreground [lindex $linecolor2 0] \
+            -command "$this insertSelectedFileName 2"
 
     eval itk_initialize $args
 
