@@ -93,11 +93,11 @@ body ::tycho::YesNoQuery::constructor {args} {
     #
     addButton yes -text "Yes <Ret>" -command \
 	    "$this execCommand -yescommand; \
-	    $this nextWindow; \
+	    $this prevWindow; \
 	    delete object $this"
     addButton no -text "No <Esc>" -command \
 	    "$this execCommand -nocommand; \
-	    $this nextWindow; \
+	    $this prevWindow; \
 	    delete object $this"
     default yes
 
