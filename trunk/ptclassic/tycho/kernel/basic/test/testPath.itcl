@@ -108,7 +108,7 @@ test Path-2.2 { Test out tmpFileName } {
     set env(TMPDIR) $env(HOME)
     set file7 [::tycho::tmpFileName]
     set file8 [::tycho::tmpFileName]
-    if [info exists env(TMPDIR)] {
+    if [info exists oldTMPDIR2] {
 	set env(TMPDIR) $oldTMPDIR
     }
 
