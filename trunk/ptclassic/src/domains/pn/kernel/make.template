@@ -14,10 +14,6 @@ ROOT=../../../..
 # True source directory
 VPATH=$(ROOT)/src/domains/mtdf/kernel
 
-THREADDIR=$(ROOT)/src/thread
-SDFDIR=$(ROOT)/src/domains/sdf/kernel
-
-
 # get configuration info
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
@@ -25,11 +21,15 @@ include $(CONFIG)
 # Library name
 LIB=libmtdf.a
 
+THREADDIR=$(ROOT)/src/thread
+SDFDIR=$(ROOT)/src/domains/sdf/kernel
+
 INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR)
 
 # Library sources
 CC_WITH_H=\
 	MTDFTarget.cc MTDFScheduler.cc MTDFStar.cc\
+	RTDFScheduler.cc\
 	MTDFPortHole.cc MTDFGeodesic.cc MTDFForkNode.cc\
 	MTDFThread.cc
 
