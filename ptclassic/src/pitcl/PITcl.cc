@@ -578,9 +578,22 @@ int PTcl::univlist(int argc,char **) {
 	return TCL_OK;
 }
 
-// display or change the domain.  If on top level, target always changes
-// to the default for that domain.  Thus, if both a domain and a target
-// are specified, domain must be first.
+// return true if Target *t is a legal target for the domain domName.
+
+static int legalTarget(const char* domName, Target* t) {
+	const char* targetName = t->name();
+	const int MAX_NAMES = 40;
+	const char *names[MAX_NAMES];
+	int n = KnownTarget::getList (domName, names, MAX_NAMES);
+	for (int i = 0; i < n; i++)
+		if (strcmp(names[i], targetName) == 0) return TRUE;
+	return FALSE;
+}
+
+// display or change the domain.  If on top level, the existing target
+// is not legal for the new domain, it reverts to to the default for the
+// new domain.
+
 int PTcl::domain(int argc,char ** argv) {
 	if (argc > 2)
 		return usage ("domain ?<newdomain>?");
@@ -588,10 +601,21 @@ int PTcl::domain(int argc,char ** argv) {
 		strcpy(interp->result,curDomain);
 		return TCL_OK;
 	}
+
+	// check to see if domain already matches.  If so do nothing.
+	if (strcmp(currentGalaxy->domain(), argv[1]) == 0) return TCL_OK;
+
+	// change the domain.
 	if (! currentGalaxy->setDomain (argv[1]))
 		return TCL_ERROR;
 	curDomain = currentGalaxy->domain();
-	if (!definingGal) universe->newTarget ();
+
+	// check to see if existing target is legal for the new domain,
+	// if not, revert to default target.
+	if (!definingGal) {
+		if (!legalTarget(curDomain, universe->myTarget()))
+			universe->newTarget ();
+	}
 	return TCL_OK;
 }
 
