@@ -790,8 +790,7 @@ void BDFScheduler::initInfo(DataFlowStar& star) {
 		pinfo.relation = p->assocRelation();
 		if (conditional(*p))
 			sinfo.numToksConst = FALSE;
-		else
-			pinfo.traceBack (*p);
+		pinfo.traceBack (*p);
 	}
 }
 
@@ -809,7 +808,8 @@ void BDFScheduler::commonPortInfo(DFPortHole& port) {
 }
 
 // this function traces all the assocPort()s and relations back
-// to find the origin of a signal.
+// to find the origin of a signal.  We count the delays we cross,
+// if any.
 void BDFPortSchedInfo::traceBack (DFPortHole& port) {
 	relDelay = 0;
 	if (!conditional(port)) {
@@ -818,25 +818,36 @@ void BDFPortSchedInfo::traceBack (DFPortHole& port) {
 		return;
 	}
 // trace back the signal
-	int negated = !port.assocRelation();
-	PortHole* where = port.assocPort();
+	neg = (port.assocRelation() == BDF_FALSE);
+	DFPortHole* where = (DFPortHole*)port.assocPort();
+// see if there is an earlier source for the signal.  Repeat as follows:
+// for inputs, replace with the output that produced the signal.
+// for outputs with BDF_SAME or BDF_COMPLEMENT relationships, replace
+// with corresponding input (e.g. find the fork input).
 	while (1) {
-		relDelay += where->numTokens();
-		DFPortHole* fp = (DFPortHole*)where->far();
-// see if BDF: if so, look for BDF_SAME, BDF_COMPLEMENT
-		if (!fp->assocPort()) break;
-		if (fp->assocRelation() == BDF_SAME) {
-			where = fp->assocPort();
+		if (where->isItInput()) {
+			if (where->atBoundary()) break;
+			relDelay += where->numTokens();
+			where = (DFPortHole*)where->far();
 		}
-		else if (fp->assocRelation() == BDF_COMPLEMENT) {
-			where = fp->assocPort();
-			negated = !negated;
+		else if (SorC((BDFRelation)where->assocRelation())) {
+			// seek an input that is the same or complement.
+			// If none found, use original.
+			DFPortHole* mark = where;
+			while (!where->isItInput()) {
+				if (where->assocRelation() == BDF_COMPLEMENT)
+					neg = !neg;
+				where = (DFPortHole*)where->assocPort();
+				if (where == mark) {
+					finalAssoc = where;
+					return;
+				}
+			}
 		}
 		else break;
 	}
-// now far() points to the corresponding signal from the source block
-	finalAssoc = where->far();
-	neg = negated;
+// we are now back to the original source.
+	finalAssoc = where;
 }
 
 BDFPortSchedInfo::~BDFPortSchedInfo() {
