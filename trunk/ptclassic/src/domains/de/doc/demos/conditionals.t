@@ -5,7 +5,7 @@ Demonstrates the use of various blocks that compare the values
 of input events with floating-point values.
 .DE
 .LO "~ptolemy/src/domains/de/demo"
-.SV $Id$	$Revision$
+.SV $Id$ $Revision$
 .AL "Rolando Diesta and Edward A. Lee"
 .LD
 .Se TestGE DE
