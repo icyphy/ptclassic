@@ -75,13 +75,13 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		}
 		myCode << comment(smsg);
 		unsigned addr;
-		ProcMemory *mem = star.lookupEntry(s->name(),addr);
-		if (mem==NULL) {
+		ProcMemory *memLoc = star.lookupEntry(s->name(),addr);
+		if (memLoc==NULL) {
 			Error::abortRun(*this,"No memory allocated for ",
 					s->fullName());
 			return;
 		}
-		orgDirective(mem->name(), addr);
+		orgDirective(memLoc->name(), addr);
 
 		// handle A_REVERSE attribute, which makes arrays
 		// write out backwards.
