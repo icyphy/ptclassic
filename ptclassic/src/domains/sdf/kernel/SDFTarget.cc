@@ -121,3 +121,7 @@ void SDFTarget::setup() {
 		o << scheduler()->displaySchedule() << "\n";
 	}
 }
+
+const char* SDFTarget::domain() {
+	return galaxy() ? galaxy()->domain() : "SDF";
+}

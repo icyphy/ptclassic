@@ -50,6 +50,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FloatState.h"
 
 class SDFTarget : public Target {
+
+public:
+	// constructor
+	SDFTarget(const char* nam, const char* desc);
+
+	// destructor
+	~SDFTarget();
+
+	// call the setup method on the galaxy if it exists
+	void setup();
+
+	// return a new copy of the target
+	Block* makeNew() const;
+
+	// return the domain of the galaxy or "SDF" otherwise
+	/*virtual*/ const char* domain();
+
 protected:
 	StringState logFile;
 	IntState loopScheduler;
@@ -57,11 +74,5 @@ protected:
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
-public:
-	SDFTarget(const char* nam, const char* desc);
-	void setup();
-	Block* makeNew() const;
-	~SDFTarget();
-private:
 };
 #endif
