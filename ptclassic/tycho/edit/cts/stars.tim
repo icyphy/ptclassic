@@ -24,27 +24,27 @@ group source -label {Source Stars} {
             -class {Impulse} \
             -label {Impulse} \
             -icon {edit/cts/icons.tim#source.impulse} {
-        attribute Amplitude -default 1.0 -type number -label Value
-        attribute AtTime -default 0.0 -type number -label Value
+        attribute Amplitude -default 1.0 -type number -label Amplitude
+        attribute AtTime -default 0.0 -type number -label "At Time"
         port output -datatype float
     }
     star squarewave \
             -class {SquareWave} \
             -label {SquareWave} \
             -icon {edit/cts/icons.tim#source.squarewave} {
-        attribute MaxValue -default 1.0 -type number -label Value
-        attribute MinValue -default -1.0 -type number -label Value
-        attribute Frequency -default 1.0 -type number -label Value
+        attribute MaxValue -default 1.0 -type number -label "Maximum Value"
+        attribute MinValue -default -1.0 -type number -label "Minimum Value"
+        attribute Frequency -default 1.0 -type number -label Frequency
         port output -datatype float
     }
     
 }
 
 group sink -label {Sink Stars} {
-    star plotter \
+    star plot \
             -class {Plot} \
             -label {Plotter} \
-            -icon {edit/cts/icons.tim#sink.plotter} {
+            -icon {edit/cts/icons.tim#sink.plot} {
         attribute YMin -default "-1.0" -label "Y minimum" -type number
         attribute YMax -default "1.0" -label "Y maximum" -type number
         port input -datatype float
