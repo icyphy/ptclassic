@@ -59,11 +59,11 @@ endif
 
 TK=1
 
-PT_DEPEND = pigiMain.o
+PT_DEPEND += pigiMain.o
 
 ADD_OBJS=version.$(PIGI).o palettes.$(PIGI).o
 
-PIGI_OBJS = pigiMain.o -lptcl $(ADD_OBJS)
+PIGI_OBJS += pigiMain.o $(ADD_OBJS)
 
 LIBS += -L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist -ltr -lutility \
 	-lst -lerrtrap -luprintf -lport
