@@ -10,7 +10,7 @@
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
-include ../../../topdomain.mk
+include ../../../mk/topdomain.mk
 
 DIRS = kernel stars loopScheduler dsp image targets tcltk matrix
 
