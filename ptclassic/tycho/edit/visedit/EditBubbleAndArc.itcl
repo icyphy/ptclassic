@@ -2,7 +2,7 @@
 #
 # Author: Wan-Teh Chang
 #
-# Version: $Id$ 
+# Version: $Id$
 #
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -952,6 +952,7 @@ body ::tycho::EditBubbleAndArc::bind_node_B1 {x y} {
 	$this chooseCursorOverNode $x $y
 	$c itemconfigure $nodeInfo([$c find withtag current],label) \
 		-fill red
+	$c raise $nodeInfo([$c find withtag current],label)
     }
     set oldx $x
     set oldy $y
@@ -1382,7 +1383,7 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
 body ::tycho::EditBubbleAndArc::mkNode {x y} {
     set oldx $x
     set oldy $y
-    set node_id [$c create oval $x $y $x $y -outline brown]
+    set node_id [$c create oval $x $y $x $y -outline brown -fill white]
 }
 
 body ::tycho::EditBubbleAndArc::mkArc {x y} {
