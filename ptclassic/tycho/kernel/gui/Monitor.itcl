@@ -398,7 +398,7 @@ body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
 # In the constructor, doEachLine is set as "$this insertLine $line" so that
 # during each input, this method will be called. This method is responsible
 # for updating the history.text widget interactively, as well as colorization
-# of the error and warning messages. Later on, this functionaility will
+# of the error and warning messages. Later on, this functionality will
 # be moved to MonitorC and MonitorJava to handle different coloring and
 # interaction.
 #

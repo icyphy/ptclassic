@@ -60,7 +60,7 @@
 # style for a widget. This will be the preferred style for its
 # class or for the first superclass with a registered style found
 # by traversing up the class hierarchy. If a global style has
-# been registered for _stylesheet_, that is the preferred globale
+# been registered for _stylesheet_, that is the preferred global
 # style; otherwise, the preferred global style is "default."
 #
 # </dl>

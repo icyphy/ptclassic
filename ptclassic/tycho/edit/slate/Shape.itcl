@@ -43,7 +43,7 @@
 # classes are, like the ComplexItem class, really just collections
 # of procedures with shared data that use item IDs to "simulate"
 # real objects. The Slate separates the concept of "shape" into a
-# separate hierarcchy to enhance re-usability -- after all, there
+# separate hierarchy to enhance re-usability -- after all, there
 # could be dozens of different items types shaped like a "rectangle",
 # which would probably not fit neatly into a class hierarchy in which
 # all of these inherited from a Rectangle class. In the OO design pattern
