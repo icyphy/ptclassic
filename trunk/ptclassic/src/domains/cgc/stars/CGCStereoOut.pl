@@ -102,8 +102,11 @@ provisions.
 
   initCode {
     CGCAudioBase::initCode();
+
     /* variable for the sync codeblock below */
     addDeclaration(syncCounter);
+    addCode("$starSymbol(count) = 0;");
+
     /* Declare "buffer" to be of type short and blockSize/2 bytes */
     addDeclaration(declarations("short", int(blockSize)/2));
     /* Open file for writing data */
