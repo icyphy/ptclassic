@@ -45,6 +45,15 @@ if {${itcl::version} < 2.1} {
     Itcl2.1 and recompile tysh."
     exit 3
 }
+
+if ![regexp Iwidgets [package name]] {
+    # Iwidgets is not present, we use the buttonbox from it.
+    # Load in the packages.  For example, on the mac, we need this.
+    package require Itcl
+    package require Itk
+    package require Iwidgets
+}
+
 ########################################################################
 # If the environment variable TYCHO is set, use that to determine
 # where the tycho libraries are.  Otherwise, use PTOLEMY.  If neither
