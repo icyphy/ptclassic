@@ -63,12 +63,15 @@ public:
 
 protected:
 	void setup();
-	FloatState timeScale;	// relative time scale for interface with
-				// another timed domain.
-	IntState   syncMode;	// If TRUE, the inner timed domain can not
-				// be ahead of the outer DE domain.
-	IntState calQ;		// Use CalendarQueue scheduler if TRUE;
 
+	// relative time scale for interface with another timed domain.
+	FloatState timeScale;
+
+	// If TRUE, inner timed domain cannot be ahead of outer DE domain
+	IntState syncMode;
+
+	// Use CalendarQueue scheduler if TRUE;
+	IntState calQ;
 };
 
 #endif
