@@ -102,15 +102,15 @@ non-zero integer (not necessarily 1).
 		switch( test ) {
 		  case ANDID:
 		  case NANDID:
-		    iterator << "\tresult = result && $ref(input,#@i);\n";
+		    iterator << "\tresult = result && $ref2(input,i);\n";
 		    break;
 		  case ORID:
 		  case NORID:
-		    iterator << "\tresult = result || $ref(input,#@i);\n";
+		    iterator << "\tresult = result || $ref2(input,i);\n";
 		    break;
 		  case XORID:
 		  case XNORID:
-		    iterator << "\tif ( $ref(input,#@i) ) {\n"
+		    iterator << "\tif ( $ref2(input,i) ) {\n"
 			     << "\t\tresult = ! result;\n"
 			     << "\t}\n";
 		    break;
