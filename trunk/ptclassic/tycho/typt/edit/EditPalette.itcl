@@ -65,6 +65,9 @@ class ::tycho::EditPalette {
 
     # Return the name of the class of graphics widget to use.
     protected method graphicsWidget {} {return ::tycho::EditPaletteWidget}
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 }
 
 #######################################################################
@@ -90,14 +93,6 @@ configbody ::tycho::EditPalette::facet {
 #
 body ::tycho::EditPalette::constructor {args} {
     eval itk_initialize $args
-    menubar addMenu Special -underline 0
-    menubar add "Show Ptcl" Special -underline 0 \
-            -command "::tycho::view EditPtcl -facet $itk_option(-facet)"
-
-    #menubar add "Retarget" Special -underline 0 \
-    #        -command "::tycho::view Retarget -edit $this -toolbar 1"
-
-
 }
 
     ###################################################################
@@ -111,4 +106,33 @@ body ::tycho::EditPalette::constructor {args} {
 body ::tycho::EditPalette::help {} {
     hyperJump [file join \$TYCHO editors visedit doc \
 	    usersGuides EditPaletteHelp.html] {}
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditPalette::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        $menubar addMenu Special -underline 0
+        $menubar add "Show Ptcl" Special -underline 0 \
+                -command "::tycho::view EditPtcl -facet $itk_option(-facet)"
+
+        #menubar add "Retarget" Special -underline 0 \
+        #        -command "::tycho::view Retarget -edit $this -toolbar 1"
+    }
+
 }

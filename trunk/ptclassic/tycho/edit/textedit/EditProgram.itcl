@@ -194,9 +194,17 @@ class ::tycho::EditProgram {
     # Generate documentation.  Not all derived classes can do this.
     protected method gendocBufferInternal { genDocFile genCommand}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
     # Change this to 0 in derived classes if keywords are not case sensitive.
     protected variable caseSensitiveKeywords 1
+
+    ##########################################################################
+    ####                     private variables and methods                ####
+
+    # Initialize the menubar
+    private method initializeMenubar {menubar}
 }
 
 ###################################################################
@@ -216,34 +224,6 @@ body ::tycho::EditProgram::constructor {args} {
 	    -variablecolor variableColor \
 	    -proccolor procColor
 
-    # Create the Special menu for file templates and so on
-    menubar addMenu Special -underline 0
-
-    # Add to the format menu commands to comment and uncomment
-    # the regions defined by the selection.
-    menubar addSeparator Format
-    
-    menubar command "Comment Out Region" Format -underline 8 \
-	    -command "$this commentSelection"
-    
-    menubar command "Uncomment Region" Format -underline 1 \
-	    -command "$this uncommentSelection"
-    
-    menubar addSeparator Format
-    
-    menubar command "Recolorize" Format -underline 0 -accelerator "C-L" \
-	    -command "$this parseRegion 1.0 end"
-    
-    menubar command "Indent Line" Format -underline 0 -accelerator "Tab" \
-	    -command "$this indentLine"
-
-    menubar command "Tab" Format -underline 0 -accelerator "C-q Tab" \
-	    -command "$this insertString insert {\t}"
-
-    menubar command "Indent Region" Format -underline 2 \
-            -accelerator "M-C-\\" \
-	    -command "$this busy $this indentSelection"
-    
     # The default fill prefix works for Tcl and shell scripts.
     set fillPrefix "#"
     
@@ -790,3 +770,63 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
     }
 }
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditProgram::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    # Insert items in the menu bar. This is faster in a seperate
+    # method.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditProgram::initializeMenubar $menubar
+    }
+}
+
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar. Adds entries specific to this class.
+#
+body ::tycho::EditProgram::initializeMenubar {menubar} {
+    # Create the Special menu for file templates and so on
+    $menubar addMenu Special -underline 0
+        
+    # Add to the format menu commands to comment and uncomment
+    # the regions defined by the selection.
+    $menubar addSeparator Format
+        
+    $menubar command "Comment Out Region" Format -underline 8 \
+            -command "$this commentSelection"
+    
+    $menubar command "Uncomment Region" Format -underline 1 \
+            -command "$this uncommentSelection"
+    
+    $menubar addSeparator Format
+    
+    $menubar command "Recolorize" Format -underline 0 -accelerator "C-L" \
+            -command "$this parseRegion 1.0 end"
+    
+    $menubar command "Indent Line" Format -underline 0 -accelerator "Tab" \
+            -command "$this indentLine"
+    
+    $menubar command "Tab" Format -underline 0 -accelerator "C-q Tab" \
+            -command "$this insertString insert {\t}"
+    
+    $menubar command "Indent Region" Format -underline 2 \
+            -accelerator "M-C-\\" \
+            -command "$this busy $this indentSelection"   
+}

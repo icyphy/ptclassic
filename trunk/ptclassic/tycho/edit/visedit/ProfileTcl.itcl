@@ -70,10 +70,22 @@ class ::tycho::ProfileTcl {
     method updateTimes {}
 
     ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
     ####                         private variables                 ####
 
     # Controls whether profiling is stopped.
     private variable cancel 0
+
+    ###################################################################
+    ####                          private methods                  ####
+
+    # Initialize the tool bar.
+    private method initializeToolbar {toolbar}
 }
 
 #######################################################################
@@ -81,22 +93,7 @@ class ::tycho::ProfileTcl {
 #
 body ::tycho::ProfileTcl::constructor {args} {
     global env tycho
-    toolbar button on \
-            -text "Start" \
-            -description {Start collecting profiling data} \
-            -command "$this profileStart"
-    toolbar button off \
-            -text Display \
-            -description {Display profile as a call tree} \
-            -command "$this busy $this profileDisplay"
-    toolbar button cancel \
-            -text Cancel \
-            -description {Cancel profile collection or profile rendering} \
-            -command "$this profileCancel"
-
-    toolbar disable off
-    toolbar disable cancel
-
+ 
     # Add a display at the bottom for the profile stats.
     addInfo count {Call count} 0 10 \
             "Number of times the function under the cursor was called."
@@ -131,9 +128,6 @@ body ::tycho::ProfileTcl::constructor {args} {
 	}
     }
     ::tycho::loadIfNotPresent profile tclx $packagePathList
-
-    # Give the window a title
-    displayer configure -title {[Incr Tcl] Profiler}
     
     # Set up bindings to update the times.
     $slate bind node <Enter> "$this updateTimes"
@@ -299,3 +293,59 @@ body ::tycho::ProfileTcl::updateTimes {} {
                 [expr {$contents(cpu) / ($totalCPU + 0.0) *100}]]
     }
 }
+
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::ProfileTcl::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::ProfileTcl::initializeToolbar $toolbar
+    }
+
+    # Give the window a title
+    displayer configure -title {[Incr Tcl] Profiler}
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeToolbar
+# Initialize the tool bar.  Adds entries specific to this class.
+#
+body ::tycho::ProfileTcl::initializeToolbar {toolbar} {
+    $toolbar button on \
+            -text "Start" \
+            -description {Start collecting profiling data} \
+            -command "$this profileStart"
+    $toolbar button off \
+            -text Display \
+            -description {Display profile as a call tree} \
+            -command "$this busy $this profileDisplay"
+    $toolbar button cancel \
+            -text Cancel \
+            -description {Cancel profile collection or profile rendering} \
+            -command "$this profileCancel"
+
+    $toolbar disable off
+    $toolbar disable cancel
+}
+

@@ -223,6 +223,9 @@ class ::tycho::HTML {
     ###################################################################
     ####                     protected methods                     ####
 
+    # Initialize the menu/status/tool bars associated with this widget.
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Access the "viewhtml" preferences
     protected method preference {mode args}
 
@@ -237,6 +240,12 @@ class ::tycho::HTML {
 
     ###################################################################
     ####                      private methods                      ####
+
+    # Initialize the menubar.
+    private method initializeMenubar {menubar}
+
+    # Initialize the toolbar.
+    private method initializeToolbar {toolbar}
 
     # Push a new file onto the stack.
     private method pushNextHTMLFile {}
@@ -378,40 +387,6 @@ body ::tycho::HTML::constructor {args} {
     # Set the view "type" for the Window menu
     set viewType "html"
 
-    # Add buttons to the toolbar, if it exists.
-    # FIXME: should the user be allowed to change the home window?
-    
-    toolbar button back \
-	    -description {Go back to the previously-viewed page} \
-            -text Back -command "$this back" -state disabled
-    
-    toolbar button forward \
-	    -description {Go forward to the next previously-viewed page} \
-            -text Forward -command "$this forward" -state disabled
-    
-    global ::TYCHO
-    
-    toolbar button home \
-	    -description {Go to the Tycho home page} \
-            -text Home -command "$this hyperJump \
-	    [file join \$TYCHO doc index.html]"
-    
-    toolbar button reload \
-	    -description {Reload and reparse from the file} \
-            -text Reload -command "$this reload"
-    
-    toolbar button open \
-	    -description {Open a new file} \
-            -text Open -command "$this altFile"
-    
-    toolbar button find \
-	    -description {Find text or a pattern on this page} \
-            -text Find -command "$this search"
-    
-    toolbar button stop \
-	    -description {Abort rendering} \
-            -text Stop -command "$this stopRendering"
-
     set text $itk_component(text)
 
     # Initialize the text window.  The returned value is supposed to be
@@ -459,48 +434,6 @@ body ::tycho::HTML::constructor {args} {
     # Double clicks normally select text, something we don't want here.
     bind $text <Double-Button-1> {break}
 
-
-    # Setup Special menu
-    menubar addMenu Special -underline 0
-
-    menubar add "Appletviewer" Special -underline 0 \
-            -command "$this appletViewer"
-    global tcl_platform
-    if {$tcl_platform(platform) == "macintosh"} {
-	menubar disable Appletviewer
-    }
-
-    # Modify the menu commands appropriately.
-    if {$myMenubar != {}} {
-        $myMenubar disable {Undo/Redo}
-        $myMenubar disable {Cut}
-        $myMenubar disable {Paste}
-        $myMenubar disable "Font..."
-        $myMenubar delete "Fill Region"
-        $myMenubar delete "Right Fill Column"
-        $myMenubar delete "Set Fill Prefix"
-        $myMenubar delete "Lower Case"
-        $myMenubar delete "Upper Case"
-        $myMenubar delete "Capitalize"
-
-        $myMenubar insert "Open Source" "Switch File..." \
-                -underline 1 -accelerator {C-x s} \
-                -command "$this openSource"
-
-        # delete entire Format bar (to remove Separators)
-        $myMenubar delete Format
-
-        # then re-create it
-        $myMenubar addMenu Format -underline 1
- 
-        # with font size control
-        $myMenubar command "Bigger Font" Format -underline 0\
-                -accelerator "C-+" -command "$this upSize"
-        $myMenubar command "Smaller Font" Format -underline 0\
-                -accelerator "C--" -command "$this downSize"
-
-    }
-
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
     bind $prefix <Control-x><Control-s> {bell; break}
@@ -516,25 +449,12 @@ body ::tycho::HTML::constructor {args} {
     bind $itk_component(text) <Meta-Right> "$this forward"
     bind $itk_component(text) <Control-Right> "$this forward"
 
-    configure -readonly 1
-    focusin
-
-    # Add myself to the list of open files. 
-    windowMenuAddAll $file
-
-    # Disable auto-save.
-    configure -save 0
-
     # Make the insertion cursor invisible.
     $text configure -insertofftime 0
     $text configure -insertbackground [$text cget -background]
 
-    # Add the entry widget displaying the current page
-    toolbar entry location Location $file "$this hyperJump"
-
     # Put some space around the text
     $text configure -padx 0.25c -pady 0.25c
-
 }
 
 ###################################################################
@@ -891,7 +811,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         set ext [file extension $filename]
         if {($ext == ".html" || $ext == ".htm" || $ext == ".htl" || \
             [isAnImageFileExtension $ext]) && \
-                $myDisplayer != {}} {
+                [displayer] != {}} {
 
             # Special care is required here because there might be a
             # source file open for either the old or the new file. If
@@ -1358,6 +1278,42 @@ body ::tycho::HTML::render {obj {html {}}} {
 ####                    protected methods                            ####
 
 #####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+#
+# This functionality used to be in the constructor, however that design
+# was not flexible and didn't fit with the notion of multiple views.
+#
+body ::tycho::HTML::initialize {{menubar {}} \
+        {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+     
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::HTML::initializeToolbar $toolbar
+    }      
+
+    # Modify the menu commands appropriately.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::HTML::initializeMenubar $menubar
+    }
+
+    configure -readonly 1
+
+    # Add myself to the list of open files. 
+    windowMenuAddAll $file
+
+    # Disable auto-save.
+    configure -save 0
+}
+
+#####################################################################
 #### preference
 # Access the preferences associated with this widget. This method
 # overrides the default method in ::tycho::TWidget to access the
@@ -1393,6 +1349,92 @@ body ::tycho::HTML::configureContextMenu {} {
 #########################################################################
 #########################################################################
 ####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::HTML::initializeMenubar {menubar} {
+    $menubar disable {Undo/Redo}
+    $menubar disable {Cut}
+    $menubar disable {Paste}
+    $menubar disable "Font..."
+    $menubar delete "Fill Region"
+    $menubar delete "Right Fill Column"
+    $menubar delete "Set Fill Prefix"
+    $menubar delete "Lower Case"
+    $menubar delete "Upper Case"
+    $menubar delete "Capitalize"
+
+    $menubar insert "Open Source" "Switch File..." \
+            -underline 1 -accelerator {C-x s} \
+            -command "$this openSource"
+
+    # delete entire Format bar (to remove Separators)
+    $menubar delete Format
+
+    # then re-create it
+    $menubar addMenu Format -underline 1
+ 
+    # with font size control
+    $menubar command "Bigger Font" Format -underline 0\
+            -accelerator "C-+" -command "$this upSize"
+    $menubar command "Smaller Font" Format -underline 0\
+            -accelerator "C--" -command "$this downSize"
+
+    # Setup Special menu
+    $menubar addMenu Special -underline 0
+    
+    $menubar add "Appletviewer" Special -underline 0 \
+            -command "$this appletViewer"
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+        $menubar disable Appletviewer
+    }
+}
+
+#####################################################################
+#### initializeToolbar
+# Initialize the tool bar.  Adds entries specific to this class.
+#
+body ::tycho::HTML::initializeToolbar {toolbar} {
+    # Add buttons to the toolbar, if it exists.
+    # FIXME: should the user be allowed to change the home window?
+    
+    $toolbar button back \
+	    -description {Go back to the previously-viewed page} \
+            -text Back -command "$this back" -state disabled
+    
+    $toolbar button forward \
+	    -description {Go forward to the next previously-viewed page} \
+            -text Forward -command "$this forward" -state disabled
+    
+    global ::TYCHO
+    
+    $toolbar button home \
+	    -description {Go to the Tycho home page} \
+            -text Home -command "$this hyperJump \
+	    [file join \$TYCHO doc index.html]"
+    
+    $toolbar button reload \
+	    -description {Reload and reparse from the file} \
+            -text Reload -command "$this reload"
+    
+    $toolbar button open \
+	    -description {Open a new file} \
+            -text Open -command "$this altFile"
+    
+    $toolbar button find \
+	    -description {Find text or a pattern on this page} \
+            -text Find -command "$this search"
+    
+    $toolbar button stop \
+	    -description {Abort rendering} \
+            -text Stop -command "$this stopRendering"
+
+    # Add the entry widget displaying the current page
+    $toolbar entry location Location $file "$this hyperJump"
+}
 
 #####################################################################
 #### pushNextHTMLFile
@@ -1440,7 +1482,7 @@ body ::tycho::HTML::sourcewinIsMine {} {
 #
 body ::tycho::HTML::isAnImageFileExtension {ext} {
     return [expr {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
-		    $ext == ".xbm") && $myDisplayer != {}}]
+		    $ext == ".xbm") && [displayer] != {}}]
 }
 
 

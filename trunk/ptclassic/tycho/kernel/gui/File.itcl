@@ -235,6 +235,9 @@ class ::tycho::File {
     ##########################################################################
     ####                  protected methods                               ####
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Return the data to be saved. Redefine in derived classes.
     protected method saveText {}
 
@@ -274,8 +277,8 @@ class ::tycho::File {
     ##########################################################################
     ####                  private methods                                 ####
 
-    # Initialize the menubar
-    private method initializeMenubar {}
+    # Initialize the menubar.
+    private method initializeMenubar {menubar}
 
     # Remove the backup file that gets automatically created periodically.
     private method removeBackupFiles {}
@@ -427,15 +430,6 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
     bind $prefix <Control-x><Control-q> "$this toggleReadOnly; break"
     bind $prefix <Control-x><v> "$this revisionControl; break"
-
-    # Insert items in the menu bar. This is in a separate method
-    # because this constructor is so long. As it turns out, it's
-    # faster as well.
-    if {$myMenubar != {}} {
-        # We have to qualify the call to this supposed-ly private
-        # method because Itcl (2.2) has virtual private methods!
-        ::tycho::File::initializeMenubar
-    }
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -1423,6 +1417,33 @@ body ::tycho::File::winGetByRootName {rootname} {
 ####                          protected methods                      ####
 
 #####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+    
+    # Insert items in the menu bar. This is faster in a seperate
+    # method.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::File::initializeMenubar $menubar
+    }
+    displayer configure -title "$file"
+
+    if {$file != "NoName"} {
+        windowMenuAddAll $file
+    }
+}
+
+#####################################################################
 #### saveText
 # Return the text to save.  In this base class, trigger an error,
 # since we don't know how to save.  This should be redefined in derived
@@ -1440,63 +1461,63 @@ body ::tycho::File::saveText {} {
 #### initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::File::initializeMenubar {} {
+body ::tycho::File::initializeMenubar {menubar} {
     global tcl_platform
 
     # Construct the menus
-    $myMenubar addMenu File -underline 0
-    $myMenubar addMenu Window -underline 0
-    $myMenubar addMenu Help -side right -underline 0
+    $menubar addMenu File -underline 0
+    $menubar addMenu Window -underline 0
+    $menubar addMenu Help -side right -underline 0
 
     # File menu contents
     # Note that <Control-x><Control-f> is actually bound in TopLevel.
-    $myMenubar add {Open...} File -underline 0 \
+    $menubar add {Open...} File -underline 0 \
 	    -accelerator "C-x C-f" \
 	    -command "$this openWinMethod"
     
-    $myMenubar command "Switch File..." File -underline 4 \
+    $menubar command "Switch File..." File -underline 4 \
 	    -accelerator "C-x C-v" -command "$this altFile"
     
-    $myMenubar command {Insert...} File -underline 0 \
+    $menubar command {Insert...} File -underline 0 \
 	    -accelerator "C-x i" -command "$this insertFile"
     
-    $myMenubar command Save File -underline 0 -accelerator "C-x C-s" \
+    $menubar command Save File -underline 0 -accelerator "C-x C-s" \
 	    -command "$this save"
     
-    $myMenubar command {SaveAs...} File -underline 4 \
+    $menubar command {SaveAs...} File -underline 4 \
 	    -accelerator "C-x C-w" -command "$this saveAs"
     
-    $myMenubar command {Print...} File -underline 0 \
+    $menubar command {Print...} File -underline 0 \
 	    -accelerator "C-x p" -command "$this print"
     
-    $myMenubar command Evaluate File -underline 0 \
+    $menubar command Evaluate File -underline 0 \
 	    -accelerator "C-x C-r" -command "$this evaluate"
     
-    $myMenubar command {Compare To...} File -underline 2 \
+    $menubar command {Compare To...} File -underline 2 \
             -command "$this compareTo "
 
-    $myMenubar command Reload File -underline 0 \
+    $menubar command Reload File -underline 0 \
 	    -command "$this reload"
     
-    $myMenubar command "Toggle Read-Only" File -underline 0 \
+    $menubar command "Toggle Read-Only" File -underline 0 \
 	    -accelerator "C-x C-q" -command "$this toggleReadOnly"
 
-    $myMenubar command "Revision Control..." File -underline 2 \
+    $menubar command "Revision Control..." File -underline 2 \
 	    -accelerator "C-x v" -command "$this revisionControl"
 
     # Windows might have a chmod and RCS.
     if {$tcl_platform(platform) == "macintosh"} {
-	$myMenubar disable "Toggle Read-Only"
-	$myMenubar disable "Revision Control..."
+	$menubar disable "Toggle Read-Only"
+	$menubar disable "Revision Control..."
     }
 
-    $myMenubar addSeparator File
+    $menubar addSeparator File
     
-    $myMenubar command Close File -underline 0 -accelerator "C-x k" \
+    $menubar command Close File -underline 0 -accelerator "C-x k" \
 	    -command "[displayer] nextWindow; delete object [displayer]"
     
     if {[::tycho::Displayer::normalExit] == 1} {
-	$myMenubar command Quit File -underline 0 \
+	$menubar command Quit File -underline 0 \
 		-accelerator "C-x C-c" \
 		-command "::tycho::TopLevel::exitProgram"
     }
@@ -1504,9 +1525,9 @@ body ::tycho::File::initializeMenubar {} {
     # Window menu contents
     
     # Create the submenus for blank editors
-    $myMenubar add {Text editors} Window -type cascade
-    $myMenubar add {Graphics editors} Window -type cascade
-    $myMenubar add {Tools} Window -type cascade
+    $menubar add {Text editors} Window -type cascade
+    $menubar add {Graphics editors} Window -type cascade
+    $menubar add {Tools} Window -type cascade
 
     # Construct menu entries for registered editors.
     foreach entry $windowMenuEntries {
@@ -1517,28 +1538,28 @@ body ::tycho::File::initializeMenubar {} {
 	# Add to a menu
 	switch -exact $class {
 	    "text" {
-		$myMenubar command $desc {Text editors} -command $command
+		$menubar command $desc {Text editors} -command $command
 	    }
 	    "graphics" {
-		$myMenubar command $desc {Graphics editors} -command $command
+		$menubar command $desc {Graphics editors} -command $command
 	    }
 	    "tools" {
-		$myMenubar command $desc {Tools} -command $command
+		$menubar command $desc {Tools} -command $command
 	    }
 	    default {
 		# Add to the end of the main menu
-		$myMenubar command $desc Window -command $command
+		$menubar command $desc Window -command $command
 	    }
 	}
     }
-    $myMenubar addSeparator Window
+    $menubar addSeparator Window
 
     # Create the submenus for open files
-    $myMenubar add {Open HTML viewers} Window -type cascade -state disabled
-    $myMenubar add {Open text editors} Window -type cascade -state disabled
-    $myMenubar add {Open graphics editors} Window -type cascade\
+    $menubar add {Open HTML viewers} Window -type cascade -state disabled
+    $menubar add {Open text editors} Window -type cascade -state disabled
+    $menubar add {Open graphics editors} Window -type cascade\
 	    -state disabled
-    $myMenubar add {Open tools} Window -type cascade -state disabled
+    $menubar add {Open tools} Window -type cascade -state disabled
 
     # use the filesOpen variable to construct menu entries for all open
     # files.
@@ -1552,11 +1573,11 @@ body ::tycho::File::initializeMenubar {} {
     
     # Help menu contents
     
-    $myMenubar command "About Tycho" Help -underline 0 -command \
+    $menubar command "About Tycho" Help -underline 0 -command \
 	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
     
     global ::TYCHO
-    $myMenubar command "Tycho Home Page" Help -underline 0 -command \
+    $menubar command "Tycho Home Page" Help -underline 0 -command \
 	    {::tycho::File::openContext \
 	    [file join $TYCHO doc index.html]}
 
@@ -1564,39 +1585,38 @@ body ::tycho::File::initializeMenubar {} {
     # on a global basis without modifying this file.
     global ptolemyfeature
     if $ptolemyfeature(ptolemy) {
-	$myMenubar command "About Ptolemy" Help -underline 0 -command \
-		ptkStartupMessage
+        $menubar command "About Ptolemy" Help -underline 0 -command \
+                ptkStartupMessage
         global ::PTOLEMY
-	$myMenubar command "Ptolemy Home Page" Help -underline 0 -command \
-	    {::tycho::File::openContext \
-	    [file join $PTOLEMY doc html index.html]}
-
+        $menubar command "Ptolemy Home Page" Help -underline 0 -command \
+                {::tycho::File::openContext \
+                [file join $PTOLEMY doc html index.html]}
     }
-
-    $myMenubar command "Guide to $myclass widget" Help -underline 0 \
-	    -command "$this help"
+ 
+    $menubar command "Guide to $myclass widget" Help -underline 0 \
+            -command "$this help"
     
-    $myMenubar command "Concept Index..." Help -underline 8 \
+    $menubar command "Concept Index..." Help -underline 8 \
 	    -command {::tycho::File::openContext \
 	    [file join \$TYCHO lib idx tycho.idx]}
     
-    $myMenubar command "Code Index..." Help -underline 0 \
+    $menubar command "Code Index..." Help -underline 0 \
 	    -command {set _nmBogosity [::tycho::autoName .index]; \
             ::tycho::IndexBrowser $_nmBogosity \
 	    -file [file join \$TYCHO lib idx codeDoc.idx] \
 	    -width 80; $_nmBogosity centerOnScreen}
     
-    $myMenubar command "Class Diagram" Help -underline 6 -command \
+    $menubar command "Class Diagram" Help -underline 6 -command \
 	    {::tycho::File::openContext \
 	    [file join \$TYCHO doc tychoClasses.dag]}
 
-    $myMenubar command "Itcl man pages" Help -underline 0 \
+    $menubar command "Itcl man pages" Help -underline 0 \
 	    -command "$this ::tycho::File::openItclHTMLPage"
 
     # Add the Preferences menu. This is probably the wrong place
     # for it, but it will do until we figure out a good menu to
     # put it in that doesn't keep disappearing...
-    $myMenubar command "Preferences..." Help -underline 0 \
+    $menubar command "Preferences..." Help -underline 0 \
 	    -command { ::tycho::preferencedialog }
 }
 

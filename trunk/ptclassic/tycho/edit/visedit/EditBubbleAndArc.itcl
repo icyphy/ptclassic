@@ -103,6 +103,9 @@ class ::tycho::EditBubbleAndArc {
     # Delete an item, node or arc. 
     protected method deleteNode {node}
     protected method deleteArc {arc}
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
     
     # Draw node on canvas, used by bind_B1 
     protected method mkNode {x y}
@@ -148,6 +151,12 @@ class ::tycho::EditBubbleAndArc {
     protected variable drag_action
     protected variable button1_down 0
     protected variable over_selected 0
+ 
+    ##########################################################################
+    ####                         private methods                          ####
+    
+    # Initialize the menu bar.
+    private method initializeMenubar {menubar}
 }
 
 #########################################################################
@@ -155,35 +164,6 @@ class ::tycho::EditBubbleAndArc {
 
 body ::tycho::EditBubbleAndArc::constructor {args} {
     interactiveEnable 0
-
-    # Disable and remove items in Edit menu
-    menubar disable "Cut"
-    menubar disable "Copy"
-    menubar disable "Paste"
-    menubar disable "Edit Item"
-
-    # Renew items in Edit menu
-    menubar add {Delete} Edit -underline 0 \
-	    -command "$this deleteItem selected"
-
-    # Add an Special menu
-    menubar addMenu Special -before Window -underline 0
-    menubar add {Smooth Toggle} Special -underline 0 \
-	    -command "$this smoothToggleArc selected"
-    menubar add {Add Point Downstream} Special -underline 0 \
-	    -command "$this addPoint"
-    menubar add {Delete Point} Special -underline 0 \
-	    -command "$this deletePoint"
-    menubar addSeparator Special
-    menubar add "Get Info" Special -underline 0 \
-            -command "$this getInfo"
-
-    # Add new commands into Edit menu.
-    menubar addSeparator Edit
-    menubar add {New Node} Edit -underline 4 -accelerator "N" \
-	    -command "$this newNode"
-    menubar add {New Arc} Edit -underline 4 -accelerator "A" \
-	    -command "$this newArc"
 
     # Initialize the variables.
     set create_item {}
@@ -867,6 +847,27 @@ body ::tycho::EditBubbleAndArc::deleteArc {arc} {
     $this markModified
 }
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditBubbleAndArc::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditBubbleAndArc::initializeMenubar $menubar
+    }
+}
+
 ################################################################
 #### mkNode
 # Create new node at (x,y)
@@ -1296,4 +1297,45 @@ body ::tycho::EditBubbleAndArc::setUpCanvasBindings {} {
     bind $slate <B1-Motion> [list $this bind_B1_Motion %x %y]
     bind $slate <ButtonRelease-1> [list $this bind_BR1 %x %y]
     bind $slate <Motion> [list $this bind_Motion %x %y]
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditBubbleAndArc::initializeMenubar {menubar} {
+
+    # Disable and remove items in Edit menu
+    $menubar disable "Cut"
+    $menubar disable "Copy"
+    $menubar disable "Paste"
+    $menubar disable "Edit Item"
+
+    # Renew items in Edit menu
+    $menubar add {Delete} Edit -underline 0 \
+            -command "$this deleteItem selected"
+
+    # Add an Special menu
+    $menubar addMenu Special -after Format -underline 0
+    $menubar add {Smooth Toggle} Special -underline 0 \
+	    -command "$this smoothToggleArc selected"
+    $menubar add {Add Point Downstream} Special -underline 0 \
+	    -command "$this addPoint"
+    $menubar add {Delete Point} Special -underline 0 \
+	    -command "$this deletePoint"
+    $menubar addSeparator Special
+    $menubar add "Get Info" Special -underline 0 \
+            -command "$this getInfo"
+
+    # Add new commands into Edit menu.
+    $menubar addSeparator Edit
+    $menubar add {New Node} Edit -underline 4 -accelerator "N" \
+	    -command "$this newNode"
+    $menubar add {New Arc} Edit -underline 4 -accelerator "A" \
+	    -command "$this newArc"
+
 }

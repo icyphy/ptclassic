@@ -84,7 +84,16 @@ class ::tycho::Retarget {
     public proc printStars { starName relation domainA domainB}
 
     ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
     ####                         private methods                   ####
+
+    # Initialize the tool bar.
+    private method initializeToolbar {toolbar}
 
     # Initialize the counters at the bottom of the window
     private method modifyAfterDomainChange { {universeName {}} \
@@ -146,23 +155,6 @@ body ::tycho::Retarget::constructor {args} {
         set domainA [lindex $domainList 0]
     }
     set domainB [lindex $domainList end]
-
-    toolbar button newDomains \
-            -text {Compare Domains} \
-            -description {Compare Domains} \
-	    -command "$this busy $this compareDomains"
-    toolbar button domainAButton \
-            -text "Change Domain A: $domainA" \
-            -description "Change DomainA: $domainA" \
-	    -command "$this changeDomainA"
-    toolbar button domainBButton \
-            -text "Change Domain B: $domainB" \
-            -description "Change Domain B: $domainB" \
-	    -command "$this changeDomainB"
-    toolbar button checkUniverse \
-            -text {Check Universe} \
-	    -description {Check Universe} \
-	    -command "$this checkUniverse"
 
     modifyAfterDomainChange
 }
@@ -399,9 +391,58 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
     "]
     return $hmsg
 }
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::Retarget::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Retarget::initializeToolbar $toolbar
+    }
+}
+
     ###################################################################
     ###################################################################
     ####                      private methods                      ####
+
+#####################################################################
+#### initializeToolbar
+# Initialize the tool bar.  Adds entries specific to this class.
+#
+body ::tycho::Retarget::initializeToolbar {toolbar} {
+    $toolbar button newDomains \
+            -text {Compare Domains} \
+            -description {Compare Domains} \
+	    -command "$this busy $this compareDomains"
+    $toolbar button domainAButton \
+            -text "Change Domain A: $domainA" \
+            -description "Change DomainA: $domainA" \
+	    -command "$this changeDomainA"
+    $toolbar button domainBButton \
+            -text "Change Domain B: $domainB" \
+            -description "Change Domain B: $domainB" \
+	    -command "$this changeDomainB"
+    $toolbar button checkUniverse \
+            -text {Check Universe} \
+	    -description {Check Universe} \
+	    -command "$this checkUniverse"
+}
 
 #######################################################################
 #### modifyAfterDomainChange

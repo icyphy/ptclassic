@@ -108,6 +108,9 @@ class ::tycho::EditSTD {
 
     ##########################################################################
     ####                     protected methods                            ####
+   
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
     # Insert the specified data into the canvas.
     protected method insertData {data}
@@ -146,6 +149,12 @@ class ::tycho::EditSTD {
     # Store the value used in makeIcon last time.
     protected common makeIconSrcDir [file join \$PTOLEMY src domains fsm demo]
     protected common makeIconPaletteName "user.pal"
+
+    ##########################################################################
+    ####                         private methods                          ####
+    
+    # Initialize the menu bar.
+    private method initializeMenubar {menubar}
 }
 
 ##########################################################################
@@ -153,32 +162,6 @@ class ::tycho::EditSTD {
 #
 body ::tycho::EditSTD::constructor {args} {
     interactiveEnable 0
-
-    # Add items into File menu
-    menubar insert "Look Inside" "Close" \
-	    -underline 5 -accelerator "i" -command "$this lookInside selected"
-    menubar insertSeparator "Close"
-
-    # Enable items in Edit menu
-    menubar enable "Edit Item"
-
-    # Change command of items in Edit menu
-    menubar entryconfigure {Edit Item} \
-	    -command "$this editItem selected"
-
-    # Add items into Special menu
-    menubar insert "I/O Port Names..." "Smooth Toggle" \
-	    -underline 0 -command "$this ioPortNames"
-    menubar insert "Set Initial State" "Smooth Toggle" \
-	    -underline 0 -command "$this setInitialState selected"
-    menubar insertSeparator "Smooth Toggle"
-
-    menubar insert "Make Icon..." "Get Info" -underline 0 \
-            -command "$this makeIcon"
-
-    menubar insert "Options..." "Make Icon..." -underline 0 \
-            -command "$this modifyOptions"
-
 
     # Initialize the io portNames array elements.
     set portNames(in)  ""
@@ -844,6 +827,26 @@ body ::tycho::EditSTD::setReadOnly {bool} {
     ##########################################################################
     ####                     protected methods                            ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditSTD::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditSTD::initializeMenubar $menubar
+    }
+}
+
 #######################################################################
 #### insertData
 # Append the specified data to the existing display.
@@ -1109,4 +1112,39 @@ body ::tycho::EditSTD::transGuard {guard} {
     }
 
     return $result
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditSTD::initializeMenubar {menubar} {
+    # Add items into File menu
+    $menubar insert "Look Inside" "Close" \
+	    -underline 5 -accelerator "i" -command "$this lookInside selected"
+    $menubar insertSeparator "Close"
+
+    # Enable items in Edit menu
+    $menubar enable "Edit Item"
+
+    # Change command of items in Edit menu
+    $menubar entryconfigure {Edit Item} \
+	    -command "$this editItem selected"
+
+    # Add items into Special menu
+    $menubar insert "I/O Port Names..." "Smooth Toggle" \
+	    -underline 0 -command "$this ioPortNames"
+    $menubar insert "Set Initial State" "Smooth Toggle" \
+	    -underline 0 -command "$this setInitialState selected"
+    $menubar insertSeparator "Smooth Toggle"
+
+    $menubar insert "Make Icon..." "Get Info" -underline 0 \
+            -command "$this makeIcon"
+
+    $menubar insert "Options..." "Make Icon..." -underline 0 \
+            -command "$this modifyOptions"
 }

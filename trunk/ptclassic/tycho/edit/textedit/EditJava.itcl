@@ -88,9 +88,11 @@ class ::tycho::EditJava {
     ####################################################################
     ####                    protected methods                       ####
 
-
     # Return the regular expression used to identify line-oriented comments.
     protected method commentRegexp {}
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
     ##########################################################################
     ####                         protected variables                      ####
@@ -103,37 +105,21 @@ class ::tycho::EditJava {
 
     # The name of the java package in this file.
     protected variable packageName {}
+
+    ###################################################################
+    ####                          private methods                  ####
+
+    # Initialize the menu bar.
+    private method initializeMenubar {menubar}
 }
 
 ###################################################################
 #
 body ::tycho::EditJava::constructor {args} {
-    global tcl_platform
     eval itk_initialize $args
 
     # Set the fill prefix to be the comment character for Java.
     set fillPrefix "//"
-
-    menubar delete ".cc File Template"
-    menubar delete ".h File Template"
-
-    menubar add "File Template" Special -underline 0 \
-	    -command "$this fileTemplate \[$this getClassName\]"
-
-    menubar addSeparator Special
-
-    menubar add "Appletviewer" Special -underline 0 \
-            -command "$this execProcess appletviewer"
-
-    menubar add "Generate doc" Special -underline 0 \
-            -command "$this gendocBuffer"
-
-    if {$tcl_platform(platform) == "macintosh"} {
-	menubar disable "Generate doc"
-	menubar disable Appletviewer
-    }
-    menubar insert "Java Documentation" {Preferences...} -underline 0 \
-	    -command "$this ::tycho::EditJava::openJavaHTMLPage"
 }
 
 ###################################################################
@@ -538,4 +524,57 @@ body ::tycho::EditJava::fixJavaHTMLFiles {javaHTMLDir dirname} {
 #
 body ::tycho::EditJava::commentRegexp {} {
     return "(^|;)\[ \t\]*#.*\$"; #line comment
+}
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditJava::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditJava::initializeMenubar $menubar
+    }
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditJava::initializeMenubar {menubar} {
+    global tcl_platform
+
+    $menubar delete ".cc File Template"
+    $menubar delete ".h File Template"
+
+    $menubar add "File Template" Special -underline 0 \
+	    -command "$this fileTemplate \[$this getClassName\]"
+
+    $menubar addSeparator Special
+
+    $menubar add "Appletviewer" Special -underline 0 \
+            -command "$this execProcess appletviewer"
+
+    $menubar add "Generate doc" Special -underline 0 \
+            -command "$this gendocBuffer"
+
+    if {$tcl_platform(platform) == "macintosh"} {
+	$menubar disable "Generate doc"
+	$menubar disable Appletviewer
+    }
+    $menubar insert "Java Documentation" {Preferences...} -underline 0 \
+	    -command "$this ::tycho::EditJava::openJavaHTMLPage"
 }

@@ -298,6 +298,9 @@ class ::tycho::Edit {
     # the "current" mark sits.
     protected method getTaggedText {tag}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Access the "edittext" preferences
     protected method preference {mode args}
 
@@ -314,7 +317,7 @@ class ::tycho::Edit {
     private method columnNumber {}
 
     # Initialize the menubar
-    private method initializeMenubar {}
+    private method initializeMenubar {menubar}
 
     # Number of characters from the selection to the next word.
     private method nextWord {}
@@ -672,15 +675,6 @@ body ::tycho::Edit::constructor {args} {
 	bind $itk_component(text) <KP_Down> [code "%Q undoBoundary"]
 	bind $itk_component(text) <KP_Left> [code "%Q undoBoundary"]
 	bind $itk_component(text) <KP_Home> [code "%Q undoBoundary"]
-    }
-
-    # Insert items in the menu bar. This is in a separate method
-    # because this constructor is so long. As it turns out, it's
-    # faster as well.
-    if {$myMenubar != {}} {
-        # We have to qualify the call to this supposed-ly private
-        # method because Itcl (2.2) has virtual private methods!
-        ::tycho::Edit::initializeMenubar
     }
 
     # Initialize options and tell preferences manager to ignore them
@@ -2099,6 +2093,29 @@ body ::tycho::Edit::getTaggedText {tag} {
 }
 
 #####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+#
+# This functionality used to be in the constructor, however that design
+# was not flexible and didn't fit with the notion of multiple views.
+#
+body ::tycho::Edit::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    # Insert items in the menu bar. This is faster in a seperate
+    # method.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Edit::initializeMenubar $menubar
+    }
+}
+
+
+#####################################################################
 #### preference
 # Access the preferences associated with this widget. This method
 # overrides the default method in ::tycho::TWidget to access the
@@ -2146,86 +2163,86 @@ body ::tycho::Edit::columnNumber {} {
 #### initializeMenubar
 # Initialize the menu bar. Adds entries specific to this class.
 #
-body ::tycho::Edit::initializeMenubar {} {
+body ::tycho::Edit::initializeMenubar {menubar} {
     global tcl_platform
 
     # Insert items in the menu bar.
-#    $myMenubar insert "Compile" "Evaluate" -underline 2 \
+#    $menubar insert "Compile" "Evaluate" -underline 2 \
 #	    -command "$this execProcess make"
     
     if {$tcl_platform(platform) == "macintosh"} {
-	$myMenubar disable Compile
+	$menubar disable Compile
     }
 
     # Add an Edit menu
-    $myMenubar addMenu Edit -before Window -underline 0
+    $menubar addMenu Edit -before Window -underline 0
     
-    $myMenubar command {Undo/Redo} Edit -accelerator "C-x u" \
+    $menubar command {Undo/Redo} Edit -accelerator "C-x u" \
 	    -underline 0 -command "$this undo"
     
-    $myMenubar addSeparator Edit
+    $menubar addSeparator Edit
     
-    $myMenubar command Cut Edit -underline 0 -accelerator "C-w" \
+    $menubar command Cut Edit -underline 0 -accelerator "C-w" \
 	    -command "$this cut"
     
-    $myMenubar command Copy Edit -underline 1 -accelerator "M-w" \
+    $menubar command Copy Edit -underline 1 -accelerator "M-w" \
 	    -command "$this copy"
     
-    $myMenubar command Paste Edit -underline 0 -accelerator "C-y" \
+    $menubar command Paste Edit -underline 0 -accelerator "C-y" \
 	    -command "$this paste"
     
-    $myMenubar addSeparator Edit
+    $menubar addSeparator Edit
     
-    $myMenubar command "Select All" Edit -underline 0 \
+    $menubar command "Select All" Edit -underline 0 \
 	    -accelerator "C-/" -command "$this selectRange 1.0 end"
     
-    $myMenubar command "Unselect" Edit -underline 0 \
+    $menubar command "Unselect" Edit -underline 0 \
 	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
     
-    $myMenubar command "Find/Change..." Edit -underline 0 \
+    $menubar command "Find/Change..." Edit -underline 0 \
 	    -accelerator "C-s" -command "$this search"
     
-    $myMenubar command "Spelling..." Edit -underline 2 \
+    $menubar command "Spelling..." Edit -underline 2 \
 	    -accelerator "M-$" -command "$this spellCheck"
     if {$tcl_platform(platform) == "macintosh"} {
-	$myMenubar disable "Spelling..."
+	$menubar disable "Spelling..."
     }
 
-    $myMenubar command {Goto Line...} Edit -underline 0 \
+    $menubar command {Goto Line...} Edit -underline 0 \
 	    -accelerator "C-c C-g" -command "$this gotoLine"
     
     # Add a Format menu
-    $myMenubar addMenu Format -underline 1
+    $menubar addMenu Format -underline 1
     
-    $myMenubar addSeparator Format
+    $menubar addSeparator Format
 
-    $myMenubar command "Fill Region" Format -underline 2 \
+    $menubar command "Fill Region" Format -underline 2 \
 	    -accelerator "M-q" -command "$this busy $this fillSelection"
     
-    $myMenubar command "Right Fill Column" Format -underline 2 \
+    $menubar command "Right Fill Column" Format -underline 2 \
 	    -accelerator "C-x f" -command "$this queryFillColumn"
     
-    $myMenubar command "Set Fill Prefix" Format -underline 1 \
+    $menubar command "Set Fill Prefix" Format -underline 1 \
 	    -accelerator "C-x ." -command "$this queryFillPrefix"
 
-    $myMenubar addSeparator Format
+    $menubar addSeparator Format
 
-    $myMenubar command "Capitalize" Format -underline 0 \
+    $menubar command "Capitalize" Format -underline 0 \
 	    -accelerator "M-C" -command "$this capitalize"
 
-    $myMenubar command "Lower Case" Format -underline 0 \
+    $menubar command "Lower Case" Format -underline 0 \
 	    -accelerator "M-l" -command "$this lowerCase"
 
-    $myMenubar command "Upper Case" Format -underline 0 \
+    $menubar command "Upper Case" Format -underline 0 \
 	    -accelerator "M-u" -command "$this upperCase"
 
-    $myMenubar addSeparator Format
+    $menubar addSeparator Format
     
     # Add font size control
-    $myMenubar command "Bigger Font" Format -underline 0\
+    $menubar command "Bigger Font" Format -underline 0\
             -accelerator "C-+" -command "$this upSize"
 
-    $myMenubar command "Smaller Font" Format -underline 0\
+    $menubar command "Smaller Font" Format -underline 0\
             -accelerator "C--" -command "$this downSize"
 
 }
