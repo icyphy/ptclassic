@@ -122,6 +122,9 @@ const int linkingNotSupported =
 // Full pathname of the "nm" program; it reads symbol names from a .o
 // file.  Do NOT use a "demangling" version such as gnu nm.
 
+#if defined(PTAIX)       
+#define NM_PROGRAM "/usr/ucb/nm"
+#else
 #if defined(PTIRIX5) || defined (PTLINUX) || defined(PTNBSD_386)
 #define NM_PROGRAM "/usr/bin/nm"
 #else
@@ -130,7 +133,8 @@ const int linkingNotSupported =
 #else
 #define NM_PROGRAM "/bin/nm"
 #endif // PTSOL2
-#endif // PTIRIX5
+#endif // PTIRIX5 || PTLINUX || PTNBSD_386
+#endif // PTAIX
 
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
@@ -222,21 +226,21 @@ extern "C" size_t getpagesize(void);
 // This is an attempt to support both g++ and cfront.
 #ifdef __GNUG__
 #if defined(mips) || defined(PTHPPA)
-#if defined(PTIRIX5) || defined(PTIRIX5)
+#if defined(PTIRIX5)
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else
 #define CONS_PREFIX "_GLOBAL_$I$"
 #define CONS_LENGTH 11
-#endif // PTIRIX5
+#endif // PTIRIX5 || PTAIX
 #else /* g++, nonmips & nonPTHPPA */
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined (PTAIX)
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
-#else /*SOL2*/
+#else // PTSOL2 || PTAIX
 #define CONS_PREFIX "__GLOBAL_$I$"
 #define CONS_LENGTH 12
-#endif/*SOL2*/
+#endif //PTSOL2 || PTAIX
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
 #if defined(PTHPPA) || defined(PTSOL2)
@@ -428,4 +432,17 @@ inline int getpagesize() { return 4096;}
 #define ALPHAFIX (char*)(const char*)
 #else
 #define ALPHAFIX
+#endif
+
+#ifdef PTAIX
+#define N_TXTOFF(f, a) 1024
+#define STRUCT_DEFS filehdr h1; aouthdr h2
+#define READHEAD_FAIL \
+(read (fd, (char*) &h1, sizeof h1) <= 0 ||\
+ read (fd, (char*) &h2, sizeof h2) <= 0)
+#define OBJ_READ_SIZE ((size_t)(h2.tsize + h2.dsize))
+#define READOBJ_FAIL \
+ (lseek(fd, N_TXTOFF(h1,h2), 0) < 0 \
+   || read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
+#define OBJ_SIZE (size_t)(h2.tsize + h2.dsize + h2.bsize)
 #endif
