@@ -30,6 +30,8 @@
 # Author:  Alberto Vignani, FIAT Research Center, TORINO
 # Modified by: 	Neal Becker (neal@ctd.comsat.com)
 # 		Dirk Forchel (df2@inf.tu-dresden.de)
+#               Wolfgang Reimer (reimer@e-technik.tu-ilmenau.de)
+
 #
 # --------------------------------------------------------------------
 # |  Please note that Linux is moving to the ELF object file format, |
@@ -56,52 +58,65 @@ include $(ROOT)/mk/config-default.mk
 
 include $(ROOT)/mk/config-g++.mk
 
+# Get the g++ definitions for shared libraries; we override some below.
+# Comment the next line out if you don't want shared libraries.
+include $(ROOT)/mk/config-g++.shared.mk
+
 #
 # Programs to use
 #
 RANLIB = 	ranlib
+# Use gcc everywhere including in octtools
 CC =		gcc
-# If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
-# based probably don't have gcc.
-# OCT_CC is used in src/octtools/vem-{lib,bin}.mk
-OCT_CC =	gcc
 
 #
 # Programs to use - override previous definitions
 #
 ifeq ($(HAVE_ELF),yes)
 ifeq ($(USE_ELF),yes)
-CC	=	gcc
-# If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
-# based probably don't have gcc.
-# OCT_CC is used in src/octtools/vem-{lib,bin}.mk
-# define in this way to avoid recursion
-OCT_CC	=	gcc
-CPLUSPLUS =	g++
-LD	=	ld -m elf_i386
 DLLIB	=	-ldl
-CPP	=	gcc -E -D__ELF__
-OBJDUMP	=	objdump
-OBJDUMP_FLAGS =	-k -q 
 else
 AS	=	/usr/i486-linuxaout/bin/as
 LD	=	/usr/i486-linuxaout/bin/ld -m i386linux
 CC	=	gcc -b i486-linuxaout
-OCT_CC	=	gcc -b i486-linuxaout
+OCT_CC	=	gcc -b i486-linuxaout -fwritable-strings
 CPP	=	gcc -E
 CPLUSPLUS = 	g++ -b i486-linuxaout
 endif
-else
-CC	=	gcc
-OCT_CC	=	gcc
-CPP	=	gcc -E
-AS	=	as
-LD	=	ld
-CPLUSPLUS = 	g++
 endif
 
-LINKER	=	$(CPLUSPLUS)
-RANLIB	= 	ranlib
+DEPEND= $(CPLUSPLUS) -MM
+
+# where the Gnu library is
+GNULIB= /usr/lib #$(PTOLEMY)/gnu/$(PTARCH)/lib
+
+# linker to use for pigi and interpreter.
+LINKER	= $(CPLUSPLUS)
+
+# Location of GNU libg++ shared libraries
+SHARED_COMPILERDIR =	/usr/lib#$(PTOLEMY)/gnu/$(PTARCH)/lib
+SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
+
+# Command to build C++ shared libraries
+SHARED_LIBRARY_COMMAND = $(CPLUSPLUS) -shared $(SHARED_COMPILERDIR_FLAG) -o
+ 
+# Command to build C shared libraries
+CSHARED_LIBRARY_COMMAND = $(CC) -shared $(SHARED_COMPILERDIR_FLAG) -o
+
+# linker for C utilities.  If we are using shared libraries, then
+# we want to avoid involving libg++.so, so we use gcc to link.
+CLINKER = $(CC)
+
+# These are the additional flags that we need when we are compiling code
+# which is to be dynamically linked into Ptolemy.  -shared is necessary
+# with gcc-2.7.0
+INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
+ 
+# List of libraries to search, obviating the need to set LD_LIBRARY_PATH
+# See the ld man page for more information.  These path names must
+# be absolute pathnames, not relative pathnames.
+SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/:$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/shared
+SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
 
 # domains/ipus/islang uses BISONFLEXLIBS
 BISONFLEXLIB =	-fl
@@ -126,15 +141,15 @@ BISONFLEXLIB =	-fl
 #OPTIMIZER =	-g #-m486 -pipe
 OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
-# Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
+# Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
-# utils/rman-2.4/rman.c wants -DI_UNISTD to find getopt()
-ARCHFLAGS =	-DI_UNISTD -Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
+# you will need -DI_UNISTD for rman to find the declaration of getopt()
+ARCHFLAGS =	-Dlinux -DI_UNISTD#-D_GNU_SOURCE -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
 LOCALCCFLAGS =	-fno-for-scope
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
-LOCALCFLAGS =	-fwritable-strings
+LOCALCFLAGS =
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
@@ -146,13 +161,16 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 CSYSLIBS =	-lieee -lm $(DLLIB)
 
 # system libraries (libraries from the environment)
-SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
+SYSLIBS =	$(CSYSLIBS) $(SHARED_COMPILERDIR_FLAG) -lg++
 
 
-#LINKFLAGS=-L$(LIBDIR) Xlinker -S -Xlinker -x # -static
+# Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
+LINKSTRIPFLAGS=-Wl,-S,-x
+
+#LINKFLAGS=-L$(LIBDIR) $(LINKSTRIPFLAGS)# -static
 #LINKFLAGS_D=-L$(LIBDIR) -g -static
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -rdynamic # -static
-LINKFLAGS_D=-L$(LIBDIR) -g -rdynamic #-static
+LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS) -rdynamic # -static
+LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) -g -rdynamic #-static
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
@@ -162,7 +180,7 @@ TERMLIB_LIBSPEC = -ltermcap
 #
 # Used by xv
 # -DXLIB_ILLEGAL_ACCESS is need for X11R6 to compile xv.c:rd_str_cl()
-XV_CC =		gcc -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
+XV_CC =		$(CC) -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 
 #
 # Directories to use
