@@ -71,6 +71,7 @@ all: tychoClasses.dag
 FORCE:
 
 tychoClasses.dag: FORCE
+	@echo "Generating diagram of tycho classes"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
