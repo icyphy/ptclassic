@@ -34,7 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	outmulti {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
 	defstate {
 		name {blockSize}
@@ -57,9 +57,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	int n = $ref(control);
 	int j = $val(blockSize);
 	}
-	codeblock(copyData, "int i, int portnum") {
+	codeblock(nonComplexCopyData, "int i, int portnum") {
 		/* Output port #@portnum */
 		if (n != @i) $ref(output#@portnum,j) = 0;
+		else $ref(output#@portnum,j) = $ref(input,j);
+	}
+	codeblock(complexCopyData, "int i, int portnum") {
+		/* Output port #@portnum */
+		if (n != @i) {
+		  $ref(output#@portnum,j).real = 0;
+		  $ref(output#@portnum,j).imag = 0;
+		}
 		else $ref(output#@portnum,j) = $ref(input,j);
 	}
 	codeblock(blockIterator) {
@@ -71,7 +79,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode("\t{\n");
 		// control value i means port number i+1
 		for (int i = 0; i < output.numberPorts(); i++) {
-			addCode(copyData(i,i+1));
+		  if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		    addCode(complexCopyData(i,i+1));
+		  else
+		    addCode(nonComplexCopyData(i,i+1));
 		}
 		addCode("\t}\n");
 	}
