@@ -54,6 +54,16 @@ namespace ::tycho {
 }
 
 ##########################################################################
+#### exit
+# We redefine the Tcl exit procedure to cleanly exit, querying the user
+# to save work.
+#
+rename ::exit ::tclexit
+proc ::exit {} {
+    ::tycho::TopLevel::exitprogram
+}
+
+##########################################################################
 #### TopLevel
 # This class creates a top-level window with nothing in it, and provides
 # a repository for common functions on windows, such as centering them
@@ -98,16 +108,16 @@ class ::tycho::TopLevel {
     destructor {}
 
     # Center the window on the screen.
-    method centerOnScreen {} {}
+    method centerOnScreen {}
 
     # Prevent interactive resizing of the window.
-    method freezeWindowSize {} {}
+    method freezeWindowSize {}
 
     # Shift the focus ot the next window in the topLevelWindows list.
-    method nextWindow {} {}
+    method nextWindow {}
 
     # Exit the program
-    protected method exitprogram {} {}
+    public proc exitprogram {}
 }
 
 #####################################################################
@@ -126,9 +136,7 @@ body ::tycho::TopLevel::constructor {args} {
     # To prevent the "o" from appearing in Entry windows,
     bind Entry <Control-x><o> { }
     
-    #
     # Explicitly handle configs that may have been ignored earlier.
-    #
     eval itk_initialize $args
 }
 
@@ -244,6 +252,15 @@ body ::tycho::TopLevel::nextWindow {} {
 #
 body ::tycho::TopLevel::exitprogram {} {
     if [askuser "OK to exit the program?"] {
-	exit
+	# Need to delete all Toplevel objects first to make sure destructors
+	# are invoked before the exit process begins.
+	foreach obj [::info objects] {
+	    # A second check for object instance is necessary, because the
+	    # object may have been deleted earlier in the loop.
+	    if {[::info objects $obj] != {} && [$obj isa ::tycho::TopLevel]} {
+		delete object $obj
+	    }
+	}
+	::tclexit
     }
 }

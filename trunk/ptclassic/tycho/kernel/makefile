@@ -53,6 +53,7 @@ TCL_SRCS = \
   
 ITCL_SRCS = \
 	Console.itcl \
+	ConsoleText.itcl \
 	DialogWindow.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
@@ -70,6 +71,7 @@ ITCL_SRCS = \
 	HTMLTclText.itcl \
 	Message.itcl \
 	Preferences.itcl \
+	Stack.itcl \
 	TopLevel.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl

@@ -36,7 +36,7 @@
 # should mark the buffer unmodified.
 
 #######################################################################
-# Edit
+#### Edit
 # This is a window that contains arbitrary text and allows editing of
 # this text using emacs bindngs plus mouse movements. Some improvements
 # are made over emacs, such as in the search mechanism and the undo.
@@ -209,13 +209,19 @@ body ::tycho::Edit::constructor {args} {
     eval configure $args
 
     # Read contents from the specified file, unless the name is "NoName".
-    if {$file != {NoName}} {
-	set savereadonly [$itk_component(text) cget -readonly]
-	$itk_component(text) configure -readonly 0
-	$itk_component(text) readFile $file
-	markUnmodified
-	$itk_component(text) configure -readonly $savereadonly
+    if {$file != {NoName} && $file != {}} {
+	if [file exists $file] {
+	    if [file readable $file] {
+		set savereadonly [$itk_component(text) cget -readonly]
+		$itk_component(text) configure -readonly 0
+		$itk_component(text) readFile $file
+		$itk_component(text) configure -readonly $savereadonly
+	    } {
+		error "File $file is not readable"
+	    }
+	}
     }
+    markUnmodified
 }
 
 #####################################################################

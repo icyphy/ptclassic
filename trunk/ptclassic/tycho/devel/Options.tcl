@@ -47,12 +47,9 @@
 
 # font values are controlled in the file Font.tcl, not here.
 
+# FIXME:  All of the following mechanisms for handling options are obsolete.
 # The name of the application class.
 set topLevelClass [winfo class .]
-
-# Configuration and size information
-option add $topLevelClass.consoleWidth 60 startupFile
-option add $topLevelClass.consoleHeight 8 startupFile
 
 # Define Special Colors
 option add $topLevelClass.positiveColor [ptkColor blue black] startupFile
@@ -87,12 +84,6 @@ option add $topLevelClass.scaleWidthInC 7.0 startupFile
 
 # Standard default colors for standard Tk widgets
 # FIXME: These appear to have no affect.
-option add *Text.Background \
-	[ptkColor antiqueWhite white] startupFile
-option add *Entry.Background \
-	[ptkColor wheat3 white] startupFile
-option add *Listbox.background \
-	[ptkColor antiqueWhite white] startupFile
 option add *Listbox.HighlightColor \
 	[ptkColor firebrick black] startupFile
 option add *selectForeground \
