@@ -34,7 +34,7 @@
 
 # Load up the test definitions.
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $env(PTOLEMY) src domains sdf test testSDFDefs.tcl]
+    source [file join $env(PTOLEMY) src domains de test testDEDefs.tcl]
 } {}
 
 
@@ -47,4 +47,5 @@ if {[string compare test [info procs test]] == 1} then {
 #### test DEDynBlock
 #
 test DEDynBlock {DEDynBlock} {
+   # Can't test DEDynBlock from ptcl because decontribstars uses tk
 } {}
