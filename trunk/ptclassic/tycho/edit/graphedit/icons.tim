@@ -14,14 +14,14 @@ termstyle 2-1-north-east {
     terminal out -coords {100 50} \
             -direction {1 0} \
             -style arrowout \
-            -type output
+            -tags output
 }
 
 termstyle 2-1-east {
     terminal in-0 -coords {0 25} -direction {-1 0} -style circle
     terminal in-1 -coords {0 75} -direction {-1 0} -style circle
     terminal out -coords {100 50} -direction {1 0} \
-            -style arrowout -fill green2 -type output
+            -style arrowout -fill green2 -tags output
 }
 
 termstyle 1-0-east {
@@ -32,7 +32,7 @@ termstyle 0-1-east {
     terminal out -coords {100 50} \
             -direction {1 0} \
             -style arrowout \
-            -type output
+            -tags output
 }
 
 termstyle 1-1-east {
@@ -42,16 +42,16 @@ termstyle 1-1-east {
     terminal out -coords {100 50} \
             -direction {1 0} \
             -style arrowout \
-            -type output
+            -tags output
 }
 
 termstyle 2-2-east {
     terminal in-0 -coords {0 25} -direction {-1 0} -style circle
     terminal in-1 -coords {0 75} -direction {-1 0} -style circle
     terminal out-0 -coords {100 25} -direction {1 0} \
-            -style arrowout -fill green2 -type output
+            -style arrowout -fill green2 -tags output
     terminal out-1 -coords {100 75} -direction {1 0} \
-            -style arrowout -fill green2 -type output
+            -style arrowout -fill green2 -tags output
 }
 
 group arithmetic -label {Basic Arithmetic} {
@@ -143,9 +143,9 @@ group miscellaneous \
         terminal in-1 -coords {50 0} -direction {0 -1} \
                 -style circle -fill cyan
         terminal out-0 -coords {100 50} -direction {1 0} \
-                -style doublearrowout -fill blue -type output
+                -style doublearrowout -fill blue -tags output
         terminal out-1 -coords {50 100} -direction {0 1} \
-                -style doublearrowout -fill blue -type output
+                -style doublearrowout -fill blue -tags output
     }
     
     icon bar \
@@ -189,7 +189,7 @@ group miscellaneous \
         terminal out -coords {100 50} -direction {1 0}  \
                 -style arrowout  \
                 -fill sienna -width 3 \
-                -arrowshape {8 12 5} -type output
+                -arrowshape {8 12 5} -tags output
     }
 }
 
@@ -203,7 +203,7 @@ group sdf -label {SDF Icons} {
         polygon 20 80 80 80 80 20 -fill orange -outline ""
     } {
         terminal output -coords {100 50} -direction {1 0} \
-                -style arrowout -fill blue -type output
+                -style arrowout -fill blue -tags output
     }
     icon xgraph \
             -slatetype IconFrame \
@@ -248,6 +248,6 @@ group test \
     } {
         terminal out -coords {100 50} -direction {1 0} \
                 -style doublearrowout -fill blue \
-                -type output
+                -tags output
     }
 }
