@@ -15,7 +15,6 @@ Date of last revision: 5/92
 #endif
 
 #include "DeclustScheduler.h"
-#include "UserOutput.h"
 #include "miscFuncs.h"
 #include "streamCompat.h"
 
