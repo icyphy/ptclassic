@@ -533,12 +533,22 @@ body ::tycho::IncrCanvas::children {tag} {
 # With one argument, return the names of the components of this
 # complex item. With two arguments, return the specified component. With
 # more than two arguments, call the specified method on the
-# component and return its result.
+# component and return its result. Note that if there is more than
+# one item registered as a component (some ComplexItem classes
+# may choose to do this) then the method will be called on the
+# first one only.
 #
 # Since this method shadows the default itk method of the same name,
 # this one checks for the argument "canvas" and returns the canvas
 # name if it matches -- using component to access the canvas inside
 # the slate thus still works as expected.
+#
+# Note that this method cannot be used to _add_ a component
+# to a complex item -- this can only be done within complex
+# item classes, or by methods provided by complex item classes.
+# (The reason is that the complex item class needs to be
+# in control of what components it has so that it can implement
+# scaling properly.)
 #
 body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
     # Check for "component canvas"
@@ -574,13 +584,13 @@ body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
         # Finally, read its value
 	set item [@scope ::tycho::ComplexItem set component([set component]$id)]
     }
-
-    # Call a method on the component
-    # FIXME: Should this deal with multiple items returned?
     if { $method == {} } {
+	# Return the item or list of them
 	return $item
     } else {
-	return [eval $this $method $item $args]
+	# Call a method on the component. Use lindex to make
+	# sure that there is only one component.
+	return [eval $this $method [lindex $item 0] $args]
     }
 }
 
