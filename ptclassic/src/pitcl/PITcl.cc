@@ -1076,12 +1076,8 @@ int PTcl::getData(int argc,char** argv) {
             g->put(particle);
         }
     } else {
-        // FIXME: This only gets the most recent particle.
-        // PortHole has no public methods for accessing the size of its
-        // CircularBuffer.
         PortHole& port = ((PortHole&)rp);
-        Particle& particle = port%0;
-        addResult(particle.print());
+        addListResult(port.getDataAsStrings());
     }
     return TCL_OK;
 }
@@ -2292,11 +2288,27 @@ InfString PTcl::fullName(const NamedObj* obj) {
 /////////////////////////////////////////////////////////////////////////////
 //// addResult
 // Append a string to the Tcl result as a list element.
-// You can pass this a StringList.
+// You can pass this a StringList, but it will be concatenated into a single
+// string with no list structure.  Use *addListResult* to preserve the list
+// structure.
 //
 void PTcl::addResult(const char* value) {
     // cast-away-const needed to interface with Tcl.
     Tcl_AppendElement(interp, (char*)value);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// addListResult
+// Append a list of strings to the Tcl result as list elements.
+// 
+//
+void PTcl::addListResult(StringList& value) {
+    StringListIter next(value);
+    char* p;
+    // Cast to char* to communicate with Tcl.
+    while ((p = (char*)(next++)) != 0) {
+        Tcl_AppendElement(interp,p);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
