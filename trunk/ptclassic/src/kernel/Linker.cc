@@ -131,11 +131,13 @@ int Linker::linkObj (const char* objName) {
 		delete headerName;
 	}
 	fd = open (tname, 2, 0);
-//	if (lseek (fd, sizeof (header), L_SET) < 0)
-	if (read (fd, (void*) &header, sizeof(header)) <= 0) {
+// unix lets us do this: the file actually disappears when closed.
+	unlink (tname);
+
+	if (fd < 0 || read (fd, (void*) &header, sizeof(header)) <= 0) {
 		Error::abortRun("Can't read header from incremental link output");
 		delete codeBlock;
-		unlink (tname);
+		close (fd);
 		return FALSE;
 	}
 	// we should not need this checking but better safe than sorry
@@ -143,15 +145,17 @@ int Linker::linkObj (const char* objName) {
 	if (nsize > size && nsize > availSpace) {
 		// code will not fit
 		Error::abortRun ("Linker: code size unexpectedly large");
+		close (fd);
 		return FALSE;
 	}
 
 	read (fd, (char*) init_fn, nsize);
 	close (fd);
+
+// makeExecutable is a do-nothing on many systems.
 	if (makeExecutable(size,pagsiz,init_fn) != 0) {
 		Error::error ("Linker: Can't make code executable");
 		delete codeBlock;
-		unlink (tname);
 		return FALSE;
 	}
 // get the first word, use it as a function pointer and call it.
