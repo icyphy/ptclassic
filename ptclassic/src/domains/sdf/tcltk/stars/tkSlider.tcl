@@ -3,7 +3,7 @@
 # Author: Edward A. Lee
 # Version: $Id$
 #
-# Copyright (c) 1993 The Regents of the University of California.
+# Copyright (c) 1993-1995 The Regents of the University of California.
 # All rights reserved.
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
@@ -35,15 +35,17 @@ if {!$window_previously_existed} {
 }
 
 proc setOut_$starID {position} "
-        setOutputs_$starID \
-	\[expr {[set ${starID}(low)]+([set ${starID}(high)]-\
+	set val \[expr {[set ${starID}(low)]+([set ${starID}(high)]-\
 	[set ${starID}(low)])*\$position/100.0}]
+        setOutputs_$starID \$val
+        $s.f.m.value configure -text \$val
 "
 
 set position [expr \
 	{round(100*([set ${starID}(value)]-[set ${starID}(low)])/ \
 	([set ${starID}(high)]-[set ${starID}(low)]))}]
 ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
+$s.f.m.value configure -text $position
 
 if {!$window_previously_existed} {
 
