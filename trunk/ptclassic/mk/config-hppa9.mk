@@ -227,6 +227,9 @@ CSYSLIBS = 	-lm -ldld
 # Matlab architecture
 MATARCH = hp700
 
+# Mathematica architecture
+MATHEMATICAARCH = HP-RISC
+
 # HPUX has a hard time handling symbols that are defined both in a static
 # library and in a shared library, so, since we have different Error::
 # functions for pigiRpc, ptcl and tycho, we need to be sure that

@@ -150,11 +150,8 @@ XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 # Matlab architecture
 MATARCH = sol2
 
-# Mathematica architexture
+# Mathematica architecture
 MATHEMATICAARCH = Solaris
-
-# Mathematica MathLink library
-MATHLINKLIBNAME = MLelf
 
 # Build gthreads
 INCLUDE_GTHREADS =	yes

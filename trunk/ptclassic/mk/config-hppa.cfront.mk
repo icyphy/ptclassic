@@ -222,6 +222,9 @@ XV_CC =		cc -Ac -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 # Matlab architecture
 MATARCH = hp700
 
+# Mathematica architecture
+MATHEMATICAARCH = HP-RISC
+
 # ptbin.mk uses this to decide whether to include the PN stars
 # If you are under HPUX10, then the PN domain requires DCE threads.
 #  you will need to install the DCE development set of the OS cds.

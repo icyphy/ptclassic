@@ -123,3 +123,6 @@ TERMLIB_LIBSPEC = -ltermcap
 
 # Matlab architecture
 MATARCH =	aix
+
+# Mathematica architecture
+MATHEMATICAARCH = DEC-AXP

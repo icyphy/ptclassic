@@ -130,3 +130,6 @@ XV_CC =        gcc -traditional
 
 # Matlab architecture
 MATARCH = aix
+
+# Mathematica architecture
+MATHEMATICAARCH = DEC-AXP
