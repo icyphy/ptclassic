@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
-Date of last revision: 
+Date of last revision: $Date$
 
 special routines to generate the sub universes.
 *****************************************************************/
@@ -48,6 +48,7 @@ special routines to generate the sub universes.
 #include "dataType.h"
 #include "Wormhole.h"
 #include <string.h>
+#include <stdio.h>              // sprintf()
 
 #include <iostream.h>
 

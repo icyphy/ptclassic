@@ -40,6 +40,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <string.h>
+#include <stdio.h>              // sprintf()
+
 #include "Galaxy.h"
 #include "TITarget.h"
 #include "TIAttributes.h"

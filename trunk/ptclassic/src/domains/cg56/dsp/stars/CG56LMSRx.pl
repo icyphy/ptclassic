@@ -114,6 +114,8 @@ tap equal to 0.5 and all other taps zero.
 	default { 0 }
 	attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
     }
+    // For sprintf()
+    ccinclude { <stdio.h> }
     setup {
 	int d = int(decimation);
 	input_r.setSDFParams( d, d-1);

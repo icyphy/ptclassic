@@ -109,8 +109,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	int numDenom,numNumer;
     }
 
-    // for max()
-    ccinclude { <minmax.h> }
+    // for max(), sprintf()
+    ccinclude { <minmax.h>, <stdio.h> }
 
     setup {
 	numNumer = numerator.size();

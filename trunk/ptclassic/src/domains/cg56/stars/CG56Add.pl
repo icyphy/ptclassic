@@ -28,6 +28,8 @@ The inputs are added and the result is written on the output.
 		default { "YES" }
 		desc { If true, use saturation arithmetic }
 	}
+        // For sprintf()
+        ccinclude { <stdio.h> }
 	constructor {
 		noInternalState();
 	}

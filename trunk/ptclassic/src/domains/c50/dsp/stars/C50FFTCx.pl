@@ -56,7 +56,7 @@ setup {
 	input.setSDFParams(order,order-1);
 	output.setSDFParams(order,order-1);
 }
-
+hinclude { <stdio.h> }
 protected{
 	int log2OfOrder;
 	int twiceOrder;
