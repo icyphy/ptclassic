@@ -62,13 +62,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 
 // small virtual functions in baseclass
-void State :: setInitValue(const char* s) { myInitValue = s;}
+void State :: setInitValue(const char* s) { myInitValue = s; }
 
-int State :: isArray() const { return FALSE;}
+int State :: isArray() const { return FALSE; }
 
 State :: ~State() {}
 
-int State :: size () const { return 1;}
+int State :: size () const { return 1; }
 
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
@@ -107,10 +107,9 @@ extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 const int MAXLEN = 20000;
 const int MAXSTRINGLEN = 4096;
 
-// This could be moved as a member function of State so that other states
-// can use it.  We allow the filename to be inherited from a state value
-// using the curly braces, e.g. < {FilterTapFile} or < {Directory}/{File}
-StringList parseFileName(State& state, const char* fileName) {
+// We allow the filename to be inherited from a state value using the
+// curly braces, e.g. < {FilterTapFile} or < {Directory}/{File}
+StringList State::parseFileName(const char* fileName) {
     StringList emptyString, parsedFileName;
     char tokbuf[MAXSTRINGLEN];
     const char* specialChars = "{}";
@@ -126,15 +125,15 @@ StringList parseFileName(State& state, const char* fileName) {
 	  case '{': {
 	    // next token must be a state name followed by a closed curly brace
 	    lexer >> tokbuf;
-	    const State* s = state.lookup(tokbuf,state.parent()->parent());
+	    const State* s = lookup(tokbuf,parent()->parent());
 	    if (!s) {
-		Error::abortRun(state,"undefined symbol: ",tokbuf);
+		Error::abortRun(*this,"undefined symbol: ",tokbuf);
 		return emptyString;
 	    }
 	    parsedFileName << s->currentValue();
 	    lexer >> tokbuf;
 	    if (tokbuf[0] != '}') {
-		Error::abortRun(state,"expected closed curly brace: ",tokbuf);
+		Error::abortRun(*this,"expected closed curly brace: ",tokbuf);
 		return emptyString;
 	    }
 	    break;
@@ -150,13 +149,13 @@ StringList parseFileName(State& state, const char* fileName) {
 // We parse nested sub-expressions appearing in the expression, e.g.
 // {{{FilterTapFile}/{File}}}, that might be passed off to another
 // interpreter for evaluation, e.g. Tcl.  Code derived from parseFileName.
-StringList parseNestedExpression(State& state, const char* expression) {
+StringList State::parseNestedExpression(const char* expression) {
     StringList parsedExpression;
     char tokbuf[MAXSTRINGLEN], tmptokbuf[MAXSTRINGLEN];
     const char* curSeparator = "";
     const char* tokSeparator = " ";
     const char* specialChars = "{}";
-    Tokenizer lexer(expression,specialChars);
+    Tokenizer lexer(expression, specialChars);
 
     while( !lexer.eof() ) {
 	lexer >> tokbuf;
@@ -176,7 +175,7 @@ StringList parseNestedExpression(State& state, const char* expression) {
 	    curSeparator = tokSeparator;
 
 	    // lookup the next token on the parameter list
-	    const State* s = state.lookup(tokbuf,state.parent()->parent());
+	    const State* s = lookup(tokbuf,parent()->parent());
 	    if (s) {
 	      lexer >> tmptokbuf;
 	      if ( tmptokbuf[0] == '}' ) {
@@ -203,10 +202,11 @@ StringList parseNestedExpression(State& state, const char* expression) {
 
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
+// We allow one push back token in State class to support multithreading
 ParseToken
 State :: getParseToken(Tokenizer& lexer, int stateType) {
 	char token[TOKSIZE];
-	ParseToken t = pushback();	// allow for one pushback token.
+	ParseToken t = pushback();	
 	if (t.tok) {
 		clearPushback();
 		return t;
@@ -214,13 +214,13 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 	lexer >> token;
 
 	// read tokens from a file name
-	if (*token == '<') {
+	if (token[0] == '<' && token[1] == 0) {
 		char filename[TOKSIZE];
 		// temporarily disable special characters, e.g. so '/' 
 		// does not screw us up.
 		const char* tc = lexer.setSpecial("");
 		lexer >> filename;
-		StringList parsedFileName = parseFileName(*this,filename);
+		StringList parsedFileName = parseFileName(filename);
 		// enable special characters
 		lexer.setSpecial(tc);
 		// check for an error in parsing the file name
@@ -229,7 +229,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		if (!lexer.fromFile(parsedFileName)) {
 			StringList msg;
 			msg << parsedFileName << ": " << why();
-			parseError ("can't open file ", msg);
+			parseError("cannot open the file ", msg);
 			t.tok = T_ERROR;
 			return t;
 		}
@@ -237,14 +237,13 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 	}
 
 	// read tokens from the output of an external interpreter
-	if (*token == '!') {
+	if (token[0] == '!' && token[1] == 0) {
 		char shellCommand[TOKSIZE];
 		// temporarily disable special characters because we don't
 		// know what special characters the external interpreter uses
 		const char* tc = lexer.setSpecial("");
 		lexer >> shellCommand;
-		StringList parsedCommand =
-			parseNestedExpression(*this,shellCommand);
+		StringList parsedCommand = parseNestedExpression(shellCommand);
 		// enable special characters
 		lexer.setSpecial(tc);
 		// send the command to the external interpreter
@@ -260,30 +259,56 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			return t;
 		}
 		else {
-			lexer.pushBack(result);	// overwrites ! expr in state
-			lexer >> token;		// overwrites token buffer
+			lexer.pushBack(result);	// overwrites ! in expr
+			lexer >> token;		// updates token buffer
+		}
+	}
+
+	if (token[0] == '{' && token[1] == 0) {
+		char parameterName[TOKSIZE], closeBraceBuf[TOKSIZE];
+
+		// look for a state name followed by a closed curly brace '}'
+		lexer >> parameterName;
+		lexer >> closeBraceBuf;
+		const State* s = lookup(parameterName, parent()->parent());
+		if (s == 0 || closeBraceBuf[0] != '}' || closeBraceBuf[1]) {
+			lexer.pushBack(closeBraceBuf);
+			lexer.pushBack(parameterName);
+		}
+		else {
+			StringList value = s->currentValue();
+			lexer.pushBack(value);	// overwrites {name} in expr
+			lexer >> token;		// update token buffer
 		}
 	}
 
 	if (*token == 0) {
 		t.tok = T_EOF;
+		t.sval = 0;
 		return t;
 	}
-	
-// handle all special characters
-	if (strchr (",[]+*-/()^", *token)) {
+
+	if (stateType == T_STRING) {
+		t.tok = *token;
+		t.sval = savestring(token);
+		return t;
+	}
+
+	// handle all special characters in non-string states
+	if (strchr(",[]+*-/()^", *token)) {
 		t.tok = t.cval = *token;
 		return t;
 	}
 
-// we stay in this while loop only if a scalar state value is substituted
-// for, otherwise we return immediately.
-	while (1) {
-// note: we can get a minus if 2nd time in loop and the value of the
-// substituted state was negative.
+	// stay in this while loop only if a scalar state value is substituted
+	// for, otherwise we return immediately.
+	while (TRUE) {
+		// note: we can get a minus if 2nd time in loop and value of
+		// substituted state was negative.
 		if (isdigit(*token) || *token == '.' || *token == '-' )  {
-// possible scientific notation if ending in e or E.  Elim + and - as
-// special if so, and append to token.  Ugly hack.
+			// possible scientific notation if ending in e or E.
+			// Eliminate + and - as special if so, and append
+			// to token.  Ugly hack.
 			int l = strlen(token);
 			if (token[l-1] == 'e' || token[l-1] == 'E') {
 				const char* tc = lexer.setSpecial("*()/[],^");
@@ -297,7 +322,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			}
 			else {
 				t.tok = T_Int;
-				t.intval = (int)strtol(token,0,0);
+				t.intval = int(strtol(token,0,0));
 				return t;
 			}
 		}
