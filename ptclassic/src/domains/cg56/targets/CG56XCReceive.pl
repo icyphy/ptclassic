@@ -42,11 +42,11 @@ setup {
 }
 
 go {
-	if (output.far()->parent()->isA("CG56Collect")) {
+/*	if (output.far()->parent()->isA("CG56Collect")) {
 		if (addCode("",NULL,output.far()->parent()->name())) {
 			((CGStar*)output.far()->parent())->go();
 		}
-	}
+	} */
 	addCode(receiveData(pairNumber,numXfer));
 	addCode(interruptHost(pairNumber));
 }
