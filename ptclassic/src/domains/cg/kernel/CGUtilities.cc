@@ -141,7 +141,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
       }
 
     } else {
-      pt_ofstream o(fileName);
+      pt_ofstream o(fileName.chars());
       if (o) {
 	if (text != NULL) o << text;  // if text is null create empty file
 	o.flush();
@@ -181,7 +181,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 	if(tmpFile)
 	  sprintf(cmdbuf,(disp?disp:defaultDisplay), tmpFile);
 	else 
-	  sprintf(cmdbuf,(disp?disp:defaultDisplay), fileName);
+	  sprintf(cmdbuf,(disp?disp:defaultDisplay), fileName.chars());
 	StringList displayCommand;
 	if (tmpFile) displayCommand << "(";
 	displayCommand << cmdbuf;
