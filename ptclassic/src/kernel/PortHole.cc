@@ -193,6 +193,8 @@ MultiPortHole :: printVerbose () {
 
 Plasma*
 PortHole :: setPlasma () {
+	// zeroth case: disconnected porthole.  Return what I am.
+	if (far() == NULL) return myPlasma;
 	// first case: my type is known, and I'm an input.  Leave alone.
 	if (myPlasma && (isItInput() || (isItInput() == far()->isItInput()))) 
 		return myPlasma;
@@ -203,7 +205,7 @@ PortHole :: setPlasma () {
 	// output porthole.
 	// fourth case: I'm an output, and the connected input
 	// specifies a type
-	if (far() && (isItInput() || far()->myPlasma))
+	if (isItInput() || far()->myPlasma)
 		myPlasma = far()->setPlasma();
 	if (myPlasma) return myPlasma;
 	errorHandler.error ("Can't determine type of ",readFullName());
