@@ -68,9 +68,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
+#define OCT_EXTERN extern "C"
 #else
-#define EXTERN extern
+#define OCT_EXTERN extern
 #endif
 
 #if defined(__cplusplus) || defined(__STDC__) 
