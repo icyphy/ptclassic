@@ -1,5 +1,6 @@
 #include "type.h"
-#include "Scheduler.h"
+#include "SDFScheduler.h"
+#include "SDFStar.h"
 #include "Fraction.h"
 #include "Output.h"
 #include "StringList.h"
@@ -12,12 +13,11 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
- Date of creation: 1/17/89
- Revisions:
+ Date of creation: 1/17/90
+ Revisions: 5/29/90 -- renamed to SDFScheduler.cc from Scheduler.cc
+		Other schedulers will go in separate files.
 
- Scheduler methods
-
- At present, only SDF Scheduler is implemented
+ SDF Scheduler methods
 
 **************************************************************************/
 
@@ -30,12 +30,13 @@ extern Error errorHandler;
 *************************************************************************/
 
 	////////////////////////////
-	// operator StringList
+	// printVerbose
 	////////////////////////////
 
 // Display a schedule
 
-SDFSchedule :: operator StringList () {
+StringList
+SDFSchedule :: printVerbose () {
 	StringList out;
 	out = "SDF SCHEDULE:\n";
 	reset();
