@@ -19,10 +19,16 @@ part. The code should be modified for portability.
 		type { float }
 	}
 	defstate {
-		name { range }
+		name { lower }
+		type { float }
+		default { 0.0 }
+		desc { lower limit of uniform random number generator }
+	}
+	defstate {
+		name { upper }
 		type { float }
 		default { 1.0 }
-		desc { range of random number generator is [-range,+range] }
+		desc { upper limit of uniform random number generator }
 	}
 	defstate {
 		name { seed }
@@ -42,7 +48,8 @@ part. The code should be modified for portability.
 	}
 	// "common" part of random number generation
 	codeblock(random) {
-		float scale = $val(range) * 2.0;
-		$ref(output) = scale * (drand48() - 0.5);
+		float scale = $val(upper) - ($val(lower));
+		float center = ($val(upper) + ($val(lower)))/2.0;
+		$ref(output) = scale * (drand48() - 0.5) + center;
 	}
 }
