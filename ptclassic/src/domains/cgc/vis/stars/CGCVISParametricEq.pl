@@ -8,7 +8,7 @@ A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
 	author { William Chen and John Reekie}
 	copyright {
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1996- The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

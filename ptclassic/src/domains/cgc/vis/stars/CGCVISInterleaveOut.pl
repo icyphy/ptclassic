@@ -15,7 +15,7 @@ be obtained by looking at the man page for audio.
     version { $Id$ }
     author { Sunil Bhave and Bill Chen}
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved. See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
