@@ -4202,11 +4202,18 @@ a sub-univers is created. If the galaxy is not assigned, return.
 
 (3) Reset the symbol lists.
 
-(4) Modify the galaxy if necessary by calling \code{modifyGalaxy}. In this
-base class it does nothing. But, in AsmTarget, we insert some stars
-(CircToLin, LinToCirc) at loop boundary to change the type of buffer
-addressing in case a loop scheduling is performed. In this method,
-the galaxy can not be initialized particularly if it is a child target.
+(4) If we are the top-level target, initialize the galaxy (which performs
+preinitialization and initialization of the member blocks, including HOF star
+expansion and porthole type resolution).  Then modify the galaxy if necessary
+by calling `modifyGalaxy'.  The base class implementation of modifyGalaxy
+splices in type conversion stars where needed, if the domain has supplied a
+table of type conversion stars.  (If there is no table, type conversion is
+presumed not needed.  If there is a table, and a type mismatch is found that
+the table has no entry to fix, then an error is reported.)  Some derived
+domains redefine modifyGalaxy to perform additional transformations.  For
+example, in AsmTarget we insert some stars (CircToLin, LinToCirc) at loop
+boundaries to change the type of buffer addressing in case a loop scheduling
+is performed.
 
 \begin{example}
 virtual int modifyGalaxy();
@@ -5521,27 +5528,7 @@ Stars are spliced in the following protected method of CGCTarget class.
 void addSpliceStars();
 \end{example}
 
-This method traverses all portholes of stars in the galaxy. For an input
-porthole, it first checks whether type conversion is necessary or not:
-\code{isConverted} method of CGCPortHole class.
-
-\begin{example}
-int isConverted();
-\end{example}
-
-This is a public method of CGCPortHole class. If no type conversion between
-complex and float/int data is required, it returns 0. If we need to convert
-from complex to float/int (or vice versa), it returns 1 (or -1). This 
-method should be called for an output porthole (or source porthole of a
-connection).
-
-If type conversion is required, we splice a CxToFloat star or a FloatToCx
-star at the input porthole of the arc. If the input porthole is embedded or
-embedding and the buffer requirement is larger than the sample rate, 
-we need to splice a Copy star. If we already spliced a type conversion
-star, we do not splice a Copy star since the spliced type conversion star
-performs the task of copying already. Otherwise, we splice a Copy star at
-the input porthole.
+This method traverses all portholes of stars in the galaxy.
 
 When we splice a star at an input porthole (destination porthole), we
 initialize the spliced star and set the target pointer. A spliced star should
