@@ -77,12 +77,11 @@ install_tcltk:
 
 # Usually rebuilding vem and the octtools library is not done everytime.
 # Note that the octtools source is distributed as a separate tar file.
-# Currently, vem will not run properly if it is built with gcc.
-OCT_CC=cc
+
 octtools: obj.$(ARCH)/octtools
-	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) all
+	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) all
 install_octtools: obj.$(ARCH)/octtools
-	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) install
+	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) install
 
 install_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_all
