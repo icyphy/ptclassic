@@ -1873,7 +1873,11 @@ body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
 #
 body ::tycho::HTMLDocSys::putsDefinition {fd xref name arglist} {
     tydocUpdate $this
-    puts $fd " <DT>$xref<CODE>\n $name</CODE></A><CODE> $arglist</CODE>"
+    if { "$arglist" != "" } {
+	puts $fd " <DT>$xref<CODE>\n $name</CODE></A><CODE> $arglist</CODE>"
+    } else {	
+	puts $fd " <DT>$xref<CODE>\n $name</CODE></A>"
+    }
     puts -nonewline $fd " <DD>"
 }
 
