@@ -61,6 +61,7 @@ EXTRA_SRCS =	\
 	EditPtclHelp.html \
 	EditPtlangHelp.html \
 	EditTclHelp.html \
+	ItclClassListHelp.html \
 	MathematicaHelp.html \
 	MatlabHelp.html
 
