@@ -192,11 +192,13 @@ DEScheduler :: run (Block& galaxy) {
 			 	ds->arrivalTime = level;
 			}
 
+			// start a new phase.
+			ds->startNewPhase();
+
 			// Grab the Particle from the queue to the terminal.
 			// Record the arrival time, and flag existence of data.
 			if (!s->isItWormhole()) {
 				InDEPort* inp = (InDEPort*) terminal;
-				inp->moreData = 0;
 				inp->grabData(ent->p);
 			} else {
 				DEtoUniversal* ep = (DEtoUniversal*) terminal;
@@ -207,6 +209,9 @@ DEScheduler :: run (Block& galaxy) {
 			ds = (DEStar*) f->e;
 			ds->arrivalTime = level;
 			s = ds;
+
+			// start a new phase.
+			ds->startNewPhase();
 		}
 		// put the LinkList into the free pool for memory management.
 		eventQ.putFreeLink(f);
@@ -233,19 +238,17 @@ DEScheduler :: run (Block& galaxy) {
 
 			// if same destination star with same time stamp..
 			if (dest == s) {
-				if (tl && tl != terminal) {
+				if (tl) {
+				     int success;
 				     if (dest->isItWormhole()) {
-((DEtoUniversal*) tl)->fetchData(ee->p);
+success = ((DEtoUniversal*) tl)->fetchData(ee->p);
 				     } else {
-((InDEPort*) tl)->grabData(ee->p);
+success = ((InDEPort*) tl)->grabData(ee->p);
 				     }
-				     eventQ.extract(h);
+				     if (success) eventQ.extract(h);
 				} else if (!tl) {
 				     eventQ.extract(h);
-				} else if (!s->isItWormhole()) {
-				     InDEPort* inp = (InDEPort*) terminal;
-				     inp->moreData++;
-				}
+				} 
 			} 
 		} // end of inside while
 
@@ -266,7 +269,7 @@ DEScheduler :: run (Block& galaxy) {
 	////////////////////////////
 
 // fetch an event on request.
-void DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
+int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 
 	eventQ.reset();
 	int l = eventQ.length();
@@ -275,8 +278,7 @@ void DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 		LevelLink* h = eventQ.next();
 		if (h->level > timeVal)	{
 			Error :: abortRun (*p, " has no more data.");
-			p->moreData = 0;
-			return;
+			return FALSE;
 		}
 		InDEPort* tl = 0;
 		if (h->fineLevel != 0) {
@@ -285,10 +287,8 @@ void DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 
 			// if same destination star with same time stamp..
 			if (tl == p) {
-				tl->grabData(ent->p);
-				eventQ.extract(h);
-				p->moreData--;
-				return;
+				if (tl->grabData(ent->p)) eventQ.extract(h);
+				return TRUE;
 			}
 		} 
 	}
@@ -337,7 +337,7 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 
 	DEPortHole* dp = (DEPortHole*) p;
 
-	if (!dp->depth) 	return TRUE;
+	if (!dp->depth || dp->depth == MINDEPTH) 	return TRUE;
 	else if (dp->depth < 0) {
 
 	   if (dp->isItInput()) {
