@@ -16,6 +16,7 @@ Programmer: E. Goei, J. Buck
 #include "miscFuncs.h"
 #include "Domain.h"
 #include "Architecture.h"
+#include "Animate.h"
 #include <ACG.h>
 
 extern ACG* gen;
@@ -594,4 +595,22 @@ Return the name of the nth architecture in the list of known architectures
 extern "C" char*
 nthArchName(int n) {
         return (char*) Architecture::nthArchName(n);
+}
+
+/* 7/22/91, by eal
+Set the state of the Animate object to either enable or disable
+animation.
+*/
+extern "C" void
+KcSetAnimationState(int s) {
+	if(s) Animate::enable();
+	else Animate::disable();
+}
+
+/* 7/22/91, by eal
+Get the state of the Animate object.
+*/
+extern "C" int
+KcGetAnimationState() {
+	return Animate::enabledFlag;
 }

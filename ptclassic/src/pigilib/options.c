@@ -21,6 +21,7 @@ lsList cmdList;
 long userOptionWord;
 {
     static dmTextItem items[] = {
+	{"Animation", 1, 10, NULL, NULL},
 	{"Debug msgs", 1, 10, NULL, NULL},
 	{"Error Windows", 1, 10, NULL, NULL}
     };
@@ -28,14 +29,16 @@ long userOptionWord;
 
     ViInit("options");
     ErrClear();
-    items[0].value = BooleanToYesNo(PrintDebugGet());
-    items[1].value = BooleanToYesNo(ViGetErrWindows());
+    items[0].value = BooleanToYesNo(KcGetAnimationState());
+    items[1].value = BooleanToYesNo(PrintDebugGet());
+    items[2].value = BooleanToYesNo(ViGetErrWindows());
     if (dmMultiText("Options", ITEMS_N, items) != VEM_OK) {
 	PrintCon("Aborted entry");
 	ViDone();
     }
-    PrintDebugSet(YesNoToBoolean(items[0].value));
-    ViSetErrWindows(YesNoToBoolean(items[1].value));
+    KcSetAnimationState(YesNoToBoolean(items[0].value));
+    PrintDebugSet(YesNoToBoolean(items[1].value));
+    ViSetErrWindows(YesNoToBoolean(items[2].value));
     ViDone();
 #undef ITEMS_N
 }
