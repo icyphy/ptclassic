@@ -22,6 +22,10 @@ $Id$
 
  State with <C> type
 
+ IMPORTANT!!!!  If the name of this file is not ScalarState.hP, DO NOT
+ EDIT IT!  The files IntState.h and FloatState.h are both generated from
+ a template file by means of the "genclass" program.
+
 **************************************************************************/
 
 ///////////////////////////////////////////
