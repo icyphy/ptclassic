@@ -42,6 +42,8 @@ VPATH         = $(ROOT)/src/utils/libgslider
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
+C_INCL = 	$(PTCOMPAT_INCSPEC)
+
 HDRS		= gslider.h
 
 LIBCSRCS	= gslider.c
