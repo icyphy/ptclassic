@@ -12,6 +12,7 @@ static const char file_id[] = "DEScheduler.cc";
 #include "FloatState.h"
 #include "GalIter.h"
 #include "IntState.h"
+#include <assert.h>
 
 extern const char DEdomainName[];
 
@@ -131,7 +132,7 @@ int DEScheduler :: run () {
 // FIXME we should be able to insert the destination stuff
 // during put so that we don't have to search for it here.
 
-fprintf(stderr,"DESC: started DEScheduler::run\n");
+// fprintf(stderr,"DESC: started DEScheduler::run\n");
     if (haltRequested()) {
 	    Error::abortRun(*galaxy(),
 			    "Can't continue after run-time error");
@@ -145,18 +146,18 @@ fprintf(stderr,"DESC: started DEScheduler::run\n");
 
 	// fetch the earliest event.
 	CqLevelLink* f   = eventQ.get();
-fprintf(stderr,"DESC: got event at top of outer loop\n");
+// fprintf(stderr,"DESC: got event at top of outer loop\n");
 	if (f == NULL) {
-fprintf(stderr,"DESC: event is null\n");
+// fprintf(stderr,"DESC: event is null\n");
 	    break;
 	}
 	double level    = f->level;
 
 	// if level > stopTime, RETURN...
 	if (level > stopTime)	{
-fprintf(stderr,"DESC: have to push it back\n");
+// fprintf(stderr,"DESC: have to push it back\n");
 		eventQ.pushBack(f);		// push back
-fprintf(stderr,"DESC: pushed it back\n");
+// fprintf(stderr,"DESC: pushed it back\n");
 		// set currentTime = next event time.
 		currentTime = level/relTimeScale;
 		stopBeforeDeadFlag = TRUE;  // there is extra events.
@@ -189,7 +190,7 @@ fprintf(stderr,"DESC: pushed it back\n");
 	Star* s;
 	PortHole* terminal = 0;
 	if (f->fineLevel != 0) {
-fprintf(stderr,"DESC: Doing stuff for fineLevel != 0\n");
+// fprintf(stderr,"DESC: Doing stuff for fineLevel != 0\n");
 		Event* ent = (Event*) f->e;
 		terminal = ent->dest;
 		s = &terminal->parent()->asStar();
@@ -208,7 +209,7 @@ fprintf(stderr,"DESC: Doing stuff for fineLevel != 0\n");
 		InDEPort* inp = (InDEPort*) terminal;
 		inp->getFromQueue(ent->p);
 	} else {
-fprintf(stderr,"DESC: Doing stuff for fineLevel == 0\n");
+// fprintf(stderr,"DESC: Doing stuff for fineLevel == 0\n");
 	// process star is fetched
 		ds = (DEStar*) f->e;
 		ds->arrivalTime = level;
@@ -219,23 +220,24 @@ fprintf(stderr,"DESC: Doing stuff for fineLevel == 0\n");
 	}
 	// put the LinkList into the free pool for memory management.
 
-fprintf(stderr,"DESC: called putFreeLink\n");
+// fprintf(stderr,"DESC: called putFreeLink\n");
 	eventQ.putFreeLink(f);
 			
 	// Check if there is another event launching onto the
 	// same star with the same time stamp (not the same port)...
-
+        CqLevelLink *store = NULL;
 	Star* dest;
 	while (TRUE) {
-fprintf(stderr,"DESC: Attempting another get\n");
+// fprintf(stderr,"DESC: Attempting another get\n");
             CqLevelLink *h = eventQ.get();
-fprintf(stderr,"DESC: got event at top of inner loop\n");
+// fprintf(stderr,"DESC: got event at top of inner loop\n");
 	    if (h == NULL) {
-fprintf(stderr,"DESC: null event, break\n");
+// fprintf(stderr,"DESC: null event, break\n");
 		break;
 	    }
 	    if (h->level > level) {
-fprintf(stderr,"DESC: event in future, break\n");
+// fprintf(stderr,"DESC: event in future, break\n");
+		eventQ.pushBack(h);
 		break;
 	    }
 	    PortHole* tl = 0;
@@ -249,15 +251,20 @@ fprintf(stderr,"DESC: event in future, break\n");
 		    dest = (Star*) h->e;
 	    }
 
+assert(dest == h->dest);
 	    // if same destination star with same time stamp..
 // We don't need to extract since our get does an extract
-fprintf(stderr,"DESC: check dest in inner loop\n");
+// fprintf(stderr,"DESC: check dest in inner loop\n");
 	    if (dest == s) {
+	    // FIXME
 		if (tl) {
 		     int success =
 			((InDEPort*) tl)->getFromQueue(ee->p);
 		     if (success) eventQ.putFreeLink(h);
-		     else eventQ.pushBack(h);
+		     else {
+			    h->next = store;
+			    store = h;
+		     }
 		} else if (!tl) {
  		     eventQ.putFreeLink(h);
 		} 
@@ -272,11 +279,18 @@ fprintf(stderr,"DESC: check dest in inner loop\n");
 
         }   // while TRUE
 
+        
+        while (store != NULL) {
+          CqLevelLink *temp = store;
+          store = store->next;
+          eventQ.pushBack(temp);
+        }
+
 // fire the star.
 	if (!bFlag) {
-fprintf(stderr,"DESC: call run\n");
+// fprintf(stderr,"DESC: call run\n");
 	    if (!s->run()) return FALSE;
-fprintf(stderr,"DESC: called run\n");
+// fprintf(stderr,"DESC: called run\n");
         }
 
     } // end of while
@@ -284,7 +298,7 @@ fprintf(stderr,"DESC: called run\n");
 if (haltRequested()) return FALSE;
 
 stopBeforeDeadFlag = FALSE;	// yes, no more events...
-fprintf(stderr,"end of run()\n");
+// fprintf(stderr,"end of run()\n");
 return TRUE;
 }
 
@@ -329,9 +343,7 @@ int DEScheduler :: fetchEvent(InDEPort* p, double timeVal)
                                 return TRUE;
                         }
                 }
-		store->next->before = h;
 		h->next = store;
-		h->before = NULL;
 		store = h;
 	}
 	Error :: abortRun (*p, " Should never get here.");
