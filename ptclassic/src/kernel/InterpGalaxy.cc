@@ -711,7 +711,8 @@ InterpGalaxy::processActionList(const StringList& actionListToProcess) {
 // add the galaxy to the known list (completing the definition of a galaxy
 // class)
 void
-InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
+InterpGalaxy::addToKnownList(const char* definitionSource,
+			     const char* outerDomain, Target* innerTarget) {
 	const char* myName = hashstring(name());
 	setNameParent(myName, parent());
 // use my name as the "class name" for all objects that are cloned from me.
@@ -733,11 +734,11 @@ InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
 	    strcmp (outerDomain, domain()) != 0) {
 		Star& s = od->newWorm(*this,innerTarget);
 		setBlock (myName, &s);
-		KnownBlock::addEntry (s, myName, 1);
+		KnownBlock::addEntry (s, myName, 1, definitionSource);
 	}
 // If not, ordinary galaxy
 	else {
-		KnownBlock::addEntry (*this, myName, 1);
+		KnownBlock::addEntry (*this, myName, 1, definitionSource);
 	}
 }
 
