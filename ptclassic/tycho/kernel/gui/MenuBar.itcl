@@ -60,6 +60,12 @@ class ::tycho::MenuBar {
     # Add a menu to the menu bar
     method addMenu {tag args}
 
+    # Get an option of a menu button
+    method buttoncget {tag option}
+
+    # Set options of a menu button
+    method buttonconfigure {tag args}
+
     # Delete a menu or menu entry
     method delete {menu}
 
@@ -68,6 +74,22 @@ class ::tycho::MenuBar {
 
     # Enable an entry or an entire menu
     method enable {tag}
+
+    # Return the entries in a menu
+    method entries {{tag {}}}
+
+    # Post a menu or cascade menu
+    method post {tag}
+
+    # Unpost a menu or cascade menu
+    method unpost {tag}
+
+    ###################################################################
+    ####                       private variables                   ####
+    
+    # The list of menu buttons
+    private variable menubuttons {}
+
 }
 
 #######################################################################
@@ -106,11 +128,11 @@ body ::tycho::MenuBar::constructor {args} {
 #
 # The above options cannot be changed once the menu has been created.
 # If the specified menu already exists, then this method does
-# nothing.
-#
-# To specify options of the menu itself,
+# nothing. To specify options of the menu itself,
 # use the *menuconfigure* method. Note that the menu is created with
 # the menu's *-tearoff* option set false.
+#
+# The returned result is the menu's tag.
 #
 body ::tycho::MenuBar::addMenu {tag args} {
 
@@ -138,7 +160,7 @@ body ::tycho::MenuBar::addMenu {tag args} {
     itk_component add button$tag {
 	eval menubutton $itk_interior.button$tag \
 		$args \
-		-menu $itk_interior.button$tag.menu
+		-menu $itk_interior.button$tag.menu$tag
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground -highlightbackground \
@@ -149,7 +171,7 @@ body ::tycho::MenuBar::addMenu {tag args} {
     # that adding menu entries in the superclass (MenuSupport)
     # do not invoke unknown{}.
     itk_component add menu$tag {
-	uplevel #0 menu $itk_component(button$tag).menu -tearoff 0
+	uplevel #0 menu $itk_component(button$tag).menu$tag -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
@@ -159,15 +181,58 @@ body ::tycho::MenuBar::addMenu {tag args} {
     if { $before != "" } {
 	pack $itk_component(button$tag) -side $side \
 		-before $itk_component(button$before)
+	set menubuttons [linsert $menubuttons \
+		[lsearch -exact $menubuttons $before] $tag]
     } elseif { $after != "" } {
 	pack $itk_component(button$tag) -side $side \
 		-after $itk_component(button$after)
+	set menubuttons [linsert $menubuttons \
+		[expr [lsearch -exact $menubuttons $after] + 1] $tag]
     } else {
 	pack $itk_component(button$tag) -side $side
+	lappend menubuttons $tag
     }
 
     # Record its "path"
-    set menupath($tag) $itk_component(button$tag).menu
+    set menupath($tag) $itk_component(button$tag).menu$tag
+    return $tag
+}
+
+#####################################################################
+#### buttoncget
+# Get a configuration option of a menu button. Flag an error if the button
+# does not exist.
+#
+body ::tycho::MenuBar::buttoncget {tag option} {
+    # Check validity
+    if { ! [::info exists itk_component(button$tag)] } {
+	error "$tag is not a top-level menu"
+    }
+    # Get the option
+    if { $option == "-label" } {
+	set option "-text"
+    }
+    $itk_component(button$tag) cget $option
+}
+
+#####################################################################
+#### buttonconfigure
+# Get or configure options of a menu button. Flag an error if the button
+# does not exist.
+#
+body ::tycho::MenuBar::buttonconfigure {tag args} {
+    # Check validity
+    if { ! [::info exists itk_component(button$tag)] } {
+	error "$tag is not a top-level menu"
+    }
+    # Get or set the option(s)
+    array set opts $args
+    if [::info exists opts(-label)] {
+	set opts(-text) $opts(-label)
+	unset opts(-label)
+	set args [array get opts]
+    }
+    eval $itk_component(button$tag) configure $args
 }
 
 #####################################################################
@@ -177,7 +242,7 @@ body ::tycho::MenuBar::addMenu {tag args} {
 #
 body ::tycho::MenuBar::delete {tag} {
     # See if it's a top-level menu
-    if { [::info exists itk_component(menu$tag)] } {
+    if { [::info exists itk_component(button$tag)] } {
 	# Delete a top-level menu
 	clear $tag
 
@@ -186,6 +251,7 @@ body ::tycho::MenuBar::delete {tag} {
 	unset itk_component(menu$tag)
 	unset itk_component(button$tag)
 	unset menupath($tag)
+	set menubuttons [::tycho::ldelete $menubuttons $tag]
     } else {
 	# If not, perform default removal
 	chain $tag
@@ -201,6 +267,7 @@ body ::tycho::MenuBar::disable {tag} {
     if { [::info exists itk_component(button$tag)] } {
 	# Disable a menu button
 	$itk_component(button$tag) configure -state disabled
+	unpost $tag
     } else {
 	chain $tag
     }
@@ -213,8 +280,53 @@ body ::tycho::MenuBar::disable {tag} {
 #
 body ::tycho::MenuBar::enable {tag} {
     if { [::info exists itk_component(button$tag)] } {
-	# Disable a menu button
+	# Enable a menu button
 	$itk_component(button$tag) configure -state normal
+    } else {
+	chain $tag
+    }
+}
+
+#####################################################################
+#### entries
+# 
+# Return the entries in a menu. If no tag is given,
+# return the tags of the menu buttons. The returned entries
+# will be in the order in which they appear on the screen.
+#
+body ::tycho::MenuBar::entries {{tag {}}} {
+    if { $tag == "" } {
+	return $menubuttons
+    } else {
+	chain $tag
+    }
+}
+
+#####################################################################
+#### post
+# Post a menu or cascade-menu.
+#
+body ::tycho::MenuBar::post {tag} {
+    if { [::info exists itk_component(button$tag)] } {
+	# Post a top-level menu
+	set button $itk_component(button$tag)
+	$itk_component(menu$tag) post \
+		[winfo rootx $button] \
+		[expr [winfo rooty $button] + [winfo height $button]]
+    } else {
+	chain $tag
+    }
+}
+
+#####################################################################
+#### unpost
+# Unpost a menu or cascade-menu.
+#
+body ::tycho::MenuBar::unpost {tag} {
+    if { [::info exists itk_component(button$tag)] } {
+	# Post a top-level menu
+	set button $itk_component(button$tag)
+	$itk_component(menu$tag) unpost
     } else {
 	chain $tag
     }
