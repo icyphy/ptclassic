@@ -47,6 +47,7 @@ CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Directory containing the [incr Tcl] extensions to Tcl
+
 # FIXME: This should be in the Ptolemy tree
 
 ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
