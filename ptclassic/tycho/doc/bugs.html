@@ -70,7 +70,7 @@ clipboard.
 <ul>
 <li>Glimpse should not freeze Tycho while running. Searching
 through say the Ptolemy tree can take a very long time.
-<li>Glimpse.itcl should probably not be in the kernel.
+<li><CODE>Glimpse.itcl</CODE> should probably not be in the kernel.
 <li>If <CODE>$TYCHO/.glimpse_exclude</Code> is not present, then we should
 ask the user if we want to create it.
 </ul>
@@ -82,9 +82,10 @@ ask the user if we want to create it.
 
 <li>In "img" directives, align="right" and size
     directives (width and height) are ignored.
-<li>A construct like "&lt;center&gt; &lt;img ... &gt; &lt;/center&gt;"
+<li>A construct like
+ <CODE>&lt;center&gt; &lt;img ... &gt; &lt;/center&gt;</CODE>
     results in an in-line image rather than a centered image.
-<li>A &lt;p&gt; after an image is ignored.
+<li>A <CODE>&lt;p&gt;</CODE> after an image is ignored.
 <li> 	The following two line HTML file causes an error:
 <PRE>
 &lt;/pre&gt;&lt;/tcl&gt;
@@ -119,10 +120,10 @@ The short term workaround is to add a space:
 <li>	Need to support forms (most of the infrastructure is there already).
 <li> 	Need to support mailto, gif files, etc.
 
-<li> If you Open Source and then do a Save As in the source file
-window to save the source as a different file, then executing
-Open Source in the HTML viewer again raises the new file
-instead of re-opening the source file.
+<li> If you <CODE>Open Source</CODE> and then do a <CODE>Save As</CODE>
+in the source file window to save the source as a different
+file, then executing <CODE>Open Source</CODE> in the HTML viewer again
+raises the new file instead of re-opening the source file.
 
 <li> If an HTML viewer and editor are open on the same file,
 then there is no window menu entry for the editor. This is
@@ -141,8 +142,8 @@ menu in the file browser that selects the type of editor.
 <h3><a href="../kernel/Query.itcl">Query</a></h3>
 <ul>
 
-<li> Control-v in the search window inserts garbage into the search
-field.
+<li> <CODE>Control-v</CODE> in the search window inserts garbage into
+the search field.
 
 </ul>
 
@@ -171,9 +172,9 @@ It should check for the lock file.
 <ul>
 <li> When a TclShell is displaying stdout on its last line, typed
 commands are not always interpreted correctly.
-<li> Meta-&lt; is not interpreted correctly: it puts the insertion
+<li> <CODE>Meta-&lt;</CODE> is not interpreted correctly: it puts the insertion
 cursor at the top of the shell.  It should only put the view up there.
-It needs to run adjustInsertionCursor.
+It needs to run <CODE>adjustInsertionCursor</CODE>.
 </ul>
 
 <h3><a href="../kernel/WelcomeWindow.itcl">WelcomeWindow</a></h3>
@@ -181,7 +182,7 @@ It needs to run adjustInsertionCursor.
 <li> If your ptolemy binary has a long name,
 	then the welcome window is cropped at the bottom, and there
 	is no scrollbar.  We don't generally want a scrollbar here,
-        and either the space bar or C-x v will scroll down (or the
+        and either the space bar or <CODE>C-x v</CODE> will scroll down (or the
  	page down or down arrow buttons), so it's not clear this is a
 	bug.
 </ul>
@@ -237,9 +238,10 @@ won't help much.
 <h1><a name="bugs in gendoc">Bugs in the documentation generator</a></h1>
 
 <ul>
-<li>The gendoc command leaves a huge number of ::tycho::DocClass objects
-    around after completing.  Do "info objects" after running gendoc
-    to see them.
+<li>The <CODE>gendoc</CODE> command leaves a huge number of
+    <CODE>::tycho::DocClass</CODE>
+    objects around after completing.  Do <CODE>info objects</CODE> after
+    running <CODE>gendoc</CODE> to see them.
 
 </ul>
 
