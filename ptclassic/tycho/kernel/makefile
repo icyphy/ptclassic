@@ -44,12 +44,12 @@ TCL_SRCS =
 
 ITCL_SRCS =
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) kernel.tcl pkgIndex.tcl Tycho.tcl
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pkgIndex.tcl Tycho.tcl
 
 MISC_FILES =  test styles tclIndex html basic gui model
 
 # Sub directories to run make in.
-DIRS = demo doc test styles html basic gui model
+DIRS = test styles html basic gui model
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
