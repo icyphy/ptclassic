@@ -86,11 +86,13 @@ Class comments have the following elements:
 	<LI> An
 <A HREF="../documentation.html#HTML extensions">embedded tcl code example</A>.
 	<PRE>
-	# &lt;pre&gt;&lt;tcl&gt;
+	# &lt;tcl&gt;&lt;pre&gt;
 	# ::tycho::MyClass
 	# &lt;/pre&gt;&lt;/tcl&gt;
 	</PRE>
-	
+	Note that the <CODE>pre</CODE> block is nested inside the
+	<CODE>tcl</CODE> block.
+
 	<LI> The last line of the class comment, located right before
 	the actual class definition should be a blank comment line, consisting
 	of only a single hashmark.
@@ -188,10 +190,10 @@ body ::tycho::ClassName::publicMethodA {} {
 <P>
 <a href="../index.html">Tycho Home Page</a><br>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>tycho@eecs.berkeley.edu</author>
 </body>
 </html>

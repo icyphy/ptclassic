@@ -10,8 +10,8 @@ Tycho has a certain directory structure that you need to know about
 if you are planning on extending tycho.
 <p>
 <MENU>
-	<LI> <A HREF="../../README.files">$TYCHO/README.files</A> contains
-	a description of the tycho directory structure.
+	<LI> <A HREF="../../README.files"><CODE>$TYCHO/README.files</CODE></A>
+	contains a description of the tycho directory structure.
 	<LI> <A HREF="#tylndir and private trees"><CODE>tylndir</CODE>
 	and private trees</A>
 	<LI> <A HREF="#makefile structure">makefile structure</A>
@@ -49,7 +49,7 @@ it is set each time you log in.
 set path = ($TYCHO/bin $path)
 </PRE>
 
-<LI> Start tycho with files in your private tree by typing <CODE>tycho</CODE>.
+<LI> Start Tycho with files in your private tree by typing <CODE>tycho</CODE>.
 
 </OL>
 
@@ -62,7 +62,7 @@ files such as <CODE>,*</CODE> and <CODE>*~</CODE> in your private tree.
  <P>It is best if the makefiles do not contain any <A NAME="gnu make">GNU make</A>
  extensions so that the makefiles can be used with non-GNU make.
 
- <P>The general structure of a tycho makefile is
+ <P>The general structure of a Tycho makefile is
 <OL>
 
 <LI> A header that includes a one line summary, author, version and
@@ -74,7 +74,7 @@ copyright information.
 <DL> 
 
 <DT> <CODE>ROOT</CODE>
-<DD> is a relative path to the top of the tycho distribution
+<DD> is a relative path to the top of the Tycho distribution
 
 <DT> <CODE>VPATH</CODE>
 <DD> is a pathname to the current directory that uses <CODE>$(ROOT)</CODE>.
@@ -149,7 +149,7 @@ all install: sources $(MISC_SRCS) tclIndex
 
 
 <LI> The final section includes the makefile that has rules that are
-common to all tycho makefiles.  This <A NAME="no-compile.mk">file</A>
+common to all Tycho makefiles.  This <A NAME="no-compile.mk">file</A>
 is usually <A
 HREF="../../mk/no-compile.mk"><CODE>$TYCHO/mk/no-compile.mk</CODE></A>
 
@@ -169,7 +169,7 @@ These rules are useful when extending Tycho.
 <DT> <CODE>make sources</CODE>
 
 <DD> This rule will update any source files that are out of date.  The
-publicly available distribution of tycho does not include version
+publicly available distribution of Tycho does not include version
 control files, but the development distribution at UC Berkeley does
 have version control files.  If a directory has version control files,
 then <CODE>make sources</CODE> will update any files that have changed
@@ -177,7 +177,7 @@ in the master tree, but not in the local tree.
 
 <DT> <CODE>make all</CODE>
 
-<DD> For the most part, tycho uses interpreted files that do not
+<DD> For the most part, Tycho uses interpreted files that do not
 require compilation, so <CODE>make all</CODE> does things like create
 <CODE>tclIndex</CODE> files, and fix the permissions on scripts.  
 <CODE>make all</CODE> also runs the <CODE>make sources</CODE> rules.
@@ -185,8 +185,8 @@ require compilation, so <CODE>make all</CODE> does things like create
 
 <DT> <CODE>make install</CODE>
 
-<DD> In tycho, <CODE>make install</CODE> usually just does whatever
-<CODE>make all</CODE> does.  In tycho, there is no need to run
+<DD> In Tycho, <CODE>make install</CODE> usually just does whatever
+<CODE>make all</CODE> does.  In Tycho, there is no need to run
 <CODE>make install</CODE> after running <CODE>make all</CODE>.
 <CODE>make install</CODE> is present only for compatibility with other
 packages, such as Ptolemy.
@@ -220,17 +220,17 @@ removed when <CODE>make realclean</CODE> is run
 <CODE>make realclean</CODE> does.  Note that to retrieve the sources
 automatically after running <CODE>make extraclean</CODE>you need to
 have the sources checked into RCS or SCCS.  The publically available
-distribution of tycho does not include SCCS files, so running this
-command is not recommended <CODE>make extraclean sources</CODE> is a
+distribution of Tycho does not include SCCS files, so running this
+command is not recommended. <CODE>make extraclean sources</CODE> is a
 good way to change all the links created by <CODE>tylndir</CODE> into
 actual files.
 
 <DT> <CODE>make sccsinfo</CODE>
 
-<DD> This rule is only useful if the tycho distribution has SCCS
+<DD> This rule is only useful if the Tycho distribution has SCCS
 version control information.  The publicly available distribution does
 not have SCCS version control information, so this rule is only useful
-in the tycho development tree.  <CODE>make sccsinfo</CODE> traverses
+in the Tycho development tree.  <CODE>make sccsinfo</CODE> traverses
 the distribution and runs <CODE>sccs info</CODE> in each directory.
 <CODE>sccs info</CODE> prints out the names of any files that are checked out.
 
@@ -250,7 +250,7 @@ before release.
 Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 96/08/31,
+Last updated: $Date$,
 comments to: <author>tycho@eecs.berkeley.edu</author>
 </body>
 </html>

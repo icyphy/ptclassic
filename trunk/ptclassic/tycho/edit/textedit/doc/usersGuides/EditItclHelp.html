@@ -20,17 +20,8 @@ therefore inherits all of its features.
 It colors certain Itcl constructs, such as comments
 and class and method definitions.
 <p>
-This class inherits its hyperlink mechanism (the
-<a name="Show Links command">"Show Links" command</a> in the "Format" menu)
-from the Tcl editor.
-However, because of the namespaces in Itcl, the references to
-procedures and methods are only identified if
-they are completely qualified.  For
-example, "::tycho::EditTcl" will be identified as a link,
-but "EditTcl" will not.  Unfortunately, since Itcl-2.0 is
-dynamically scoped, it appears that there is no way around this.
-<p>
-The <a name="Evaluate command">"Evaluate" command</a> in the "File" menu
+The <a name="Evaluate command"><CODE>Evaluate</CODE> command</a>
+in the <CODE>File</CODE> menu
 evaluates the Itcl code in the selection (if there is a selection) or
 the entire file (if there is no selection).  The returned result
 is displayed.
@@ -55,8 +46,9 @@ If the class name is not fully specified, we assume it is defined
 in the global namespace only.
 <p>
 
-The <A NAME="Itcl Editor Body Template">"Body Template" command</A> in
-the "Special" menu places a body template at the current point in the buffer.
+The <A NAME="Itcl Editor Body Template"><CODE>Body Template</CODE>
+command</A> in the <CODE>Special</CODE>
+menu places a body template at the current point in the buffer.
 An example body template would be:
 <PRE>
 #####################################################################
@@ -68,16 +60,16 @@ An example body template would be:
 </PRE>
 <P>
 
-The <A NAME="Itcl Editor File Template">"File Template" command</A> in
-the "Special" menu copies the file <A
+The <A NAME="Itcl Editor File Template"><CODE>File Template</CODE>
+command</A> in the <CODE>Special</CODE> menu copies the file <A
 HREF="../../templates/ItclTemplate.itcl"><CODE>$TYCHO/editors/textedit/templates/ItclTemplate.itcl</CODE></A>
 into the editor and substitutes in a class name based on the file
 name.  For example, if the file is named <CODE>Elvis.itcl</CODE>, then
 the class name <CODE>Elvis</CODE> will be substituted in.
  <P>
 
-The <A NAME="Itcl Editor Generate doc">"Generate doc" command</A> in
-the "Special" menu asks the user if they would like to save the buffer
+The <A NAME="Itcl Editor Generate doc"><CODE>Generate doc</CODE> command</A>
+in the "Special" menu asks the user if they would like to save the buffer
 and then runs the <A
 HREF="../../../../lib/tydoc/doc/index.html">Tydoc</A> itcl to
 HTML converter on the file and displays the results.  Tydoc produces a
@@ -88,14 +80,21 @@ updated by "Generate doc", since we are only passing one file to the
 Tydoc system.  To update <CODE>index.html</CODE>, usually one runs
 <CODE>make itcldocs</CODE>.
 
+ <P>The <A HREF="Class Diagram, Itcl Editor"><CODE>Class
+Diagram</CODE></A> command in the <CODE>Special</CODE> menu brings up
+the <A HREF="ItclClassList.html">Itcl Class List</A> editor, which
+allows the user to generate a class diagram from a user supplied
+lists.  <A HREF="../../../../doc/tychoClasses.html">Class diagrams</A>
+are documented separately.
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!--$Id$-->
+<!-- $Id$ -->
 <html>
 <head>
 <title>Tycho under Windows</title>
@@ -33,7 +33,7 @@ just mouse on a Tycho Icon and then tycho would come up.
 files and making directories.  If you use Itcl2.1, then Tycho
 <CODE>exec</CODE>s <CODE>rm</CODE> or <CODE>mkdir</CODE>, which fail
 under windows.  Instead of using Itcl2.1 under windows, use the
-Itcl2.2 binaries
+Itcl2.2 binaries.
 
 <LI> Because of differences in the end-of-line characters between Unix
 and Windows, it appears that tcl scripts edited with the NT
@@ -76,7 +76,8 @@ with the environment variable <CODE>$TYCHO</CODE>.  In Unix, under
 
  <P> You can either hardwire this variable by setting it in the
 <CODE>tycho-windows</CODE> start up script, or under NT, you can set
-the TYCHO environment variable by clicking on <CODE>Start</CODE>, then
+the <CODE>TYCHO</CODE> environment variable by clicking on
+<CODE>Start</CODE>, then
 <CODE>Settings</CODE>, then <CODE>Control Panel</CODE> and finally the
 <CODE>System</CODE> icon.  In the <CODE>System Properties</CODE>
 window that comes up, select <CODE>Environment</CODE>.  There, you can
@@ -84,14 +85,15 @@ add <CODE>TYCHO</CODE> as a User Variable.  Incidentally, this is
 where you set your path.
 
  <P> If your Tycho distribution is at <CODE>c:\tycho0.1.1</CODE>, then
-you need not set the TYCHO environment variable, it will be set for
-you, by the <CODE>tycho-windows</CODE> script.  If your distribution
-is elsewhere, then you must either set the TYCHO variable, or edit
+you need not set the <CODE>TYCHO</CODE> environment variable, it will
+be set for you, by the <CODE>tycho-windows</CODE> script.  If your
+distribution is elsewhere, then you must either set the
+<CODE>TYCHO</CODE> variable, or edit
 <CODE>tycho0.1.1/lib/windows/tycho-windows</CODE>.
 
 <LI> The script <CODE>tycho0.1.1/lib/windows/tycho-windows</CODE>
-first checks the <CODE>$TYCHO</CODE> variable, and if
-<CODE>$TYCHO</CODE> is not set, then the script expects that the Tycho
+first checks the <CODE>TYCHO</CODE> variable, and if
+<CODE>TYCHO</CODE> is not set, then the script expects that the Tycho
 distribution will be at <CODE>c:\tycho0.1.1</CODE>.
 
 <LI> Itcl2.2 associates files with the <CODE>itk</CODE> extension with
@@ -110,10 +112,10 @@ Next: <A HREF="troubleshooting.html">Troubleshooting Tycho</A> -
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>tycho@eecs.berkeley.edu</author>
 </body>
 </html>

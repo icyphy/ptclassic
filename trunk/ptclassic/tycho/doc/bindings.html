@@ -29,12 +29,12 @@ text widgets in editors.
 <h3>Navigation</h3>
 <p>
 <dl COMPACT>
-<b><dt>C-a</b><dd>go to the beginning of the line
-<b><dt>C-b</b><dd>backward one character
-<b><dt>M-b</b><dd>backward one word
-<b><dt>C-e</b><dd>go to the end of the line
-<b><dt>C-f</b><dd>forward one character
-<b><dt>M-f</b><dd>forward one word
+<dt><CODE>C-a</CODE><dd>go to the beginning of the line
+<dt><CODE>C-b</CODE><dd>backward one character
+<dt><CODE>M-b</CODE><dd>backward one word
+<dt><CODE>C-e</CODE><dd>go to the end of the line
+<dt><CODE>C-f</CODE><dd>forward one character
+<dt><CODE>M-f</CODE><dd>forward one word
 </dl>
 <p>
 <h3>Modifying text</h3>
@@ -44,14 +44,14 @@ unless there is a selection, in which case they erase the selection.
 M-Delete, M-C-h, and M-Backspace behave the same way, except that
 they erase a word at a time.  In addition, the following bindings apply:
 <dl COMPACT>
-<b><dt>C-d</b><dd>delete the next character
-<b><dt>M-d</b><dd>forward erase one word
-<b><dt>C-k</b><dd>erase to the end of the line (save to clipboard)
-<b><dt>C-w</b><dd>erase the selection
-<b><dt>M-w</b><dd>copy the selection to the clipboard
-<b><dt>C-y</b><dd>yank from the clipboard and insert at cursor
-<b><dt>C-/</b><dd>select the entire contents
-<b><dt>C-&#92;</b><dd>clear any selection
+<dt><CODE>C-d</CODE><dd>delete the next character
+<dt><CODE>M-d</CODE><dd>forward erase one word
+<dt><CODE>C-k</CODE><dd>erase to the end of the line (save to clipboard)
+<dt><CODE>C-w</CODE><dd>erase the selection
+<dt><CODE>M-w</CODE><dd>copy the selection to the clipboard
+<dt><CODE>C-y</CODE><dd>yank from the clipboard and insert at cursor
+<dt><CODE>C-/</CODE><dd>select the entire contents
+<dt><CODE>C-&#92;</CODE><dd>clear any selection
 </dl>
 <p>
 Commands that delete characters will save them to the
@@ -64,19 +64,19 @@ in the clipboard.
 Entry boxes have all the
 <a href="#generic key bindings">generic bindings</a> plus one more:
 <dl COMPACT>
-<b><dt>C-u</b><dd>delete all the text in the entry box
+<dt><CODE>C-u</CODE><dd>delete all the text in the entry box
 </dl>
 <p>
 <h2><a name="dialog box bindings">Bindings for Dialogs</a></h2>
 <p>
 <dl COMPACT>
-<b><dt>Escape</b><dd>dismiss the dialog, cancelling the command
-<b><dt>Return</b><dd>dismiss the dialog, completing the command
-<b><dt>M-Return</b><dd>dismiss the dialog, completing the command (used when
-the dialog need Return for text entries).
-<b><dt>Space</b><dd>invoke a button
-<b><dt>Tab</b><dd>move from one item to another
-<b><dt>C-Tab</b><dd>move from one item to another
+<dt><CODE>Escape</CODE><dd>dismiss the dialog, cancelling the command
+<dt><CODE>Return</CODE><dd>dismiss the dialog, completing the command
+<dt><CODE>M-Return</CODE><dd>dismiss the dialog, completing the command (used when
+the dialog need Return for text entries)
+<dt><CODE>Space</CODE><dd>invoke a button
+<dt><CODE>Tab</CODE><dd>move from one item to another
+<dt><CODE>C-Tab</CODE><dd>move from one item to another
 </dl>
 <p>
 <h2><a name="text editor bindings">Bindings for Text Editors</a></h2>
@@ -88,17 +88,17 @@ plus a few more.
 <h3>Changing Text</h3>
 
 <dl COMPACT>
-<b><dt>C-o</b><dd>open a line of text above the insert cursor
-<b><dt>C-x u</b><dd>undo the last change
-<b><dt>M-C</b><dd>capitalize the selection or the current word
-<b><dt>M-l</b><dd>make the selection or current word lower case
-<b><dt>M-u</b><dd>make the selection or current word upper case
+<dt><CODE>C-o</CODE><dd>open a line of text above the insert cursor
+<dt><CODE>C-x u</CODE><dd>undo the last change
+<dt><CODE>M-C</CODE><dd>capitalize the selection or the current word
+<dt><CODE>M-l</CODE><dd>make the selection or current word lower case
+<dt><CODE>M-u</CODE><dd>make the selection or current word upper case
 </dl>
 <h3><a name="filling text">Filling Text</a></h3>
 <dl COMPACT>
-<b><dt>M-q</b><dd>fill selected region or current paragraph
-<b><dt>C-x f</b><dd>change the right column used for the fill
-<b><dt>C-x .</b><dd>change the prefix characters used by the fill
+<dt><CODE>M-q</CODE><dd>fill selected region or current paragraph
+<dt><CODE>C-x f</CODE><dd>change the right column used for the fill
+<dt><CODE>C-x .</CODE><dd>change the prefix characters used by the fill
 </dl>
 <p>
 The fill capability requires some explanation.
@@ -119,15 +119,15 @@ character.
 The emacs-like bindings for moving around in a multi-line
 text widget are:
 <dl COMPACT>
-<b><dt>C-l</b><dd>center the insert cursor on the screen
-<b><dt>C-n</b><dd>down one line
-<b><dt>C-p</b><dd>up one line
-<b><dt>C-r</b><dd>search backwards
-<b><dt>C-s</b><dd>search forwards
-<b><dt>C-v</b><dd>forward one page
-<b><dt>M-v</b><dd>backward one page
-<b><dt>M-&lt;</b><dd>move to the top of the document
-<b><dt>M-&gt;</b><dd>move to the bottom of the document
+<dt><CODE>C-l</CODE><dd>center the insert cursor on the screen
+<dt><CODE>C-n</CODE><dd>down one line
+<dt><CODE>C-p</CODE><dd>up one line
+<dt><CODE>C-r</CODE><dd>search backwards
+<dt><CODE>C-s</CODE><dd>search forwards
+<dt><CODE>C-v</CODE><dd>forward one page
+<dt><CODE>M-v</CODE><dd>backward one page
+<dt><CODE>M-&lt;</CODE><dd>move to the top of the document
+<dt><CODE>M-&gt;</CODE><dd>move to the bottom of the document
 </dl>
 <p>
 Other capabilities for moving around in a text document are
@@ -253,15 +253,15 @@ The view in the widget can be adjusted by dragging with
 mouse button 2.  If mouse button 2 is  clicked  without
 moving the mouse, the selection is copied into the text
 at the position of the insertion cursor. The Insert key
-also inserts the selection.
+also inserts the selection."
 <p>
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

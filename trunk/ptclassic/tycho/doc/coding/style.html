@@ -1,4 +1,4 @@
-<!--$Id$	%Q%-->
+<!-- $Id$ -->
 <html>
 <head>
 <title>Programming Style for Tycho</title>
@@ -60,7 +60,7 @@ option.
 backslashes to make the text more readable.  Note that each backslash
 introduces a space in the output.
 <pre>
-        puts "This is a long line &#92
+        puts "This is a long line&#92
              that extends over a few\n&#92
              lines"
 </pre>
@@ -84,9 +84,9 @@ the object definition.
 
 <h2><a name="naming conventions">Naming conventions</a></h2>
 
-All programming languages have a global namespace.  In itcl, it's class
-names, global variables, and procedure names.  Choose names carefully.
-In particular,
+All programming languages have a global namespace.  In Itcl, class
+names, global variables, and procedure names are in the global namespace.
+Choose names carefully.  In particular,
 <ul>
 <li> All <a href="#global variables">global variables</a>
      in Tycho should begin
@@ -97,11 +97,11 @@ In particular,
      existed in pigi, in which case they should begin with "ptk" and
      should be backward compatible.
 </ul>
-In itcl, there is no limit to name sizes (as it should be).
+In Itcl, there is no limit to name sizes (as it should be).
 Do not hesitate to use long names.
 <p>
 When naming objects, use automatic naming as much as possible.
-For any itcl class that does not define a top-level window,
+For any Itcl class that does not define a top-level window,
 the syntax is:
 
 <pre>
@@ -121,7 +121,7 @@ underscore and an integer that ensures that the name will be unique.
 
 <h2><a name="global variables">Global Variables</a></h2>
 
-Global variables are almost entirely unnecessary in itcl.
+Global variables are almost entirely unnecessary in Itcl.
 If you need a global variable, use a "common" variable in a class.
 Note that at least one instance of the class must have been created
 for the common variable to exist. (Apparently, it can have been
@@ -174,7 +174,7 @@ style, but if it is a large piece of code, it is probably not
 worth doing.  We will need to devise a scheme to avoid
 confusing the automatic documentation generator.
 If it is Tcl/Tk code, it <em>must</em> be ported to Tk 4.0
-(a nontrivial task).  If it is not itcl code, it should
+(a nontrivial task).  If it is not Itcl code, it should
 be carefully searched for namespace violations.
 
  <P>If your file is based on a file that has non-UC Berkeley
@@ -182,10 +182,11 @@ copyrights, then you should be sure to include the copyrights.
 
 <h3><a name="SCCS and copyrights">SCCS and copyrights</a></h3>
 
-Currently we are using the &#37Q&#37 sccs
+Currently we are using the <CODE>&#37Q&#37</CODE> SCCS
 directive to adjust the copyright dates automatically.  The
-copyright should have &#37Q&#37 as the ending date of the copyright:
-1990-&#37Q&#37
+copyright should have <CODE>&#37Q&#37</CODE>
+as the ending date of the copyright:
+<CODE>1990-&#37Q&#37</CODE>
 If you are setting up a new directory, then you should do:
 <pre>
 sccs admin -fq1995 SCCS
