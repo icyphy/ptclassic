@@ -203,4 +203,16 @@ group sdf {
         port input Terminal -anchor {0 50} -direction {-1 0} \
                 -type input -style blob -fill red
     }
+    icon Printer IconFrame {
+        -label {Printer}
+        -text Printer
+        -color lightblue
+	-graphics {
+		polygon 20 50 20 90 80 90 80 50 50 50 45 45 30 45 25 50 \
+			-fill red -outline red
+		line 50 10 50 45 -width 10 -arrow last
+	}
+        port input Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob -fill red
+    }
 }
