@@ -46,7 +46,7 @@ ITCL_SRCS =	internals.tyc
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	results
+MISC_FILES =	
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
