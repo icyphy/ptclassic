@@ -27,8 +27,8 @@ falseOutput.
 		type { =input }
 	}
 	constructor {
-		trueOutput.setBDFParams(1, control, TRUE, 0);
-		falseOutput.setBDFParams(1, control, FALSE, 0);
+		trueOutput.setBDFParams(1, control, BDF_TRUE, 0);
+		falseOutput.setBDFParams(1, control, BDF_FALSE, 0);
 	}
 	go {
 		// get Particles from Geodesic

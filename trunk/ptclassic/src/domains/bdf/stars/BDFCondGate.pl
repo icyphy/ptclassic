@@ -22,8 +22,8 @@ of a Select gate.
 		type { =input }
 	}
 	constructor {
-		input.setBDFParams(1,control,TRUE);
-		output.setBDFParams(1,control,TRUE, 0);
+		input.setBDFParams(1,control,BDF_TRUE);
+		output.setBDFParams(1,control,BDF_TRUE, 0);
 	}
 	go {
 		control.grabData();

@@ -25,8 +25,8 @@ is copied to the output; otherwise, falseInput is.
 		type { =trueInput }
 	}
 	constructor {
-		trueInput.setBDFParams(1,control,TRUE);
-		falseInput.setBDFParams(1,control,FALSE);
+		trueInput.setBDFParams(1,control,BDF_TRUE);
+		falseInput.setBDFParams(1,control,BDF_FALSE);
 	}
 	go {
 	// get control Particles from Geodesic
