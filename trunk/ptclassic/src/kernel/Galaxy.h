@@ -85,14 +85,14 @@ protected:
 	}
 
 	// support blockWithName message to access internal block list
-	Block* blockWithName (const char* name) const;
+	Block* blockWithName (const char* name);
 
 	// class identification
 	int isA(const char*) const;
 public:
 
 	// Constructor
-	Galaxy () : myDomain(0) {}
+	Galaxy ();
 
 	// destructor
 	~Galaxy ();
