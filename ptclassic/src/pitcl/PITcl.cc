@@ -90,8 +90,8 @@ void PTcl::removeEntry() {
 extern char DEFAULT_DOMAIN[];
 
 // constructor
-PTcl::PTcl(Tcl_Interp* i) : interp(i), universe(0), currentGalaxy(0),
-currentTarget(0), definingGal(0), stopTime(0.0), lastTime(1.0)
+PTcl::PTcl(Tcl_Interp* i) : universe(0), currentGalaxy(0),
+currentTarget(0), interp(i), stopTime(0.0), lastTime(1.0), definingGal(0)
 {
 	KnownBlock::setDefaultDomain(DEFAULT_DOMAIN);
 	// Start up in the default domain.
@@ -894,7 +894,7 @@ int PTcl::registerAction(int argc,char ** argv) {
 
     // Create a unique name for the action
     char buf[32];
-    sprintf(buf,"an%u",tclAction);
+    sprintf(buf,"an%u",(unsigned int)tclAction);
     tclAction->name = savestring(buf);
 
     // Register the action with the action list
