@@ -103,7 +103,7 @@ void SDFScheduler :: runOnce () {
 	}
 }
 
-extern StringList checkConnect (Galaxy&);
+extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup
@@ -118,9 +118,7 @@ int SDFScheduler :: setup (Block& block) {
 	haltRequestFlag = FALSE;
 
 // check connectivity
-	StringList msg = checkConnect (galaxy);
-	if (msg.size() > 0) {
-		errorHandler.error (msg);
+	if (warnIfNotConnected (galaxy)) {
 		invalid = TRUE;
 		return FALSE;
 	}
@@ -150,10 +148,7 @@ int SDFScheduler :: setup (Block& block) {
 	{
 		Star& s = alanShepard.nextStar();
 		if (strcmp (s.domain(), SDFdomainName) != 0) {
-			StringList msg = s.readFullName();
-			msg += " is not an SDF star: domain = ";
-			msg += s.domain();
-			errorHandler.error(msg);
+			Error::abortRun(s, " is not an SDF star");
 			invalid = TRUE;
 			return FALSE;
 		}
@@ -204,10 +199,8 @@ int SDFScheduler :: setup (Block& block) {
 	// END OF MAIN LOOP
 	
 	if (passValue == 1) {
-		StringList msg;
-		msg = "DEADLOCK! Not enough delay in a loop containing: ";
-		msg += dead->readFullName();
-		errorHandler.error (msg);
+		Error::abortRun (*dead,
+				 ": DEADLOCK in a loop containing this block");
 		invalid = TRUE;
 	}
 	return !invalid;
