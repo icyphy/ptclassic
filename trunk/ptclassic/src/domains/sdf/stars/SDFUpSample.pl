@@ -26,11 +26,11 @@ defstar {
 	}
 	input {
 		name{input}
-		type{float}
+		type{ANYTYPE}
 	}
 	output {
 		name{output}
-		type{float}
+		type{=input}
 	}
 	defstate {
 		name {factor}
@@ -51,7 +51,7 @@ defstar {
 		desc { "fill value" }
 	}
 	start {
-		output.setSDFParams(int(factor),int(factor)-1);
+		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
@@ -62,5 +62,8 @@ defstar {
 				output%i = input%0;
 			else
 				output%i << double(fill);
+		// yes, the previous statement really does work correctly
+		// even if the type of the output is resolved to COMPLEX
+		// or INT.  The appropriate conversion is performed.
 	}
 }
