@@ -602,6 +602,8 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   return TRUE;
 }
 
+extern int warnIfNotConnected (Galaxy&);
+
 /////////////////////////////////////////
 // setup
 /////////////////////////////////////////
@@ -609,6 +611,8 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 void VHDLBTarget :: setup () {
 
   Galaxy* gal = galaxy();
+  if (warnIfNotConnected(*gal)) return;
+
   codeGenInit();
 
   // Initializations
