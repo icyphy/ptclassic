@@ -190,8 +190,8 @@ proc ::tycho::relativePath {srcFile dstFile} {
 	}
 	incr equalCount
     }
+
     set results {}
-    puts "$srcFile $dstFile $equalCount [llength $srcList] [llength $dstList]"
     if {$equalCount < [llength $srcList]} {
 	set srcLength [llength $srcList]
 	set dstLength [llength $dstList]
