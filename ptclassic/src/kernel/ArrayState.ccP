@@ -108,7 +108,7 @@ void <T>ArrayState  :: initialize() {
 	nElements = 0;
 
 	<C> buf[MAXLEN];
-	const char* specialChars = "*+-/()<[]";
+	const char* specialChars = "*+-/()<[]!";
 	Tokenizer lexer(initValue(),specialChars);
 
 	int i = 0, err = 0;
