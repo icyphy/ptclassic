@@ -242,8 +242,11 @@ Typically, all major subsections of the document would be written
 in their own file, with a corresponding ``.so'' entry in ``overall''.
 .pp
 Your new directory should also itself contain a Makefile, used
-for printing the document in standalone form.  A copy of the Makefile
-in ``~ptolemy/doc/main/documents'' should work fine.
+for printing the document in standalone form.  This should be
+a symbolic link to the file
+``~ptolemy/doc/main/sectionMake'' \-
+using a link rather than a copy guarantees that all sections will
+print the same even if the master copy is modified.
 .H2 "Index entries"
 .pp
 The documentation scripts for \*(PT will automatically
