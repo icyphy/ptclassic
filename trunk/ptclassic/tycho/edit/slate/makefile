@@ -40,6 +40,15 @@ VPATH =		$(ROOT)/edit/slate
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+TYPACKAGE =     tycho.edit.slate
+TYPACKAGE_ROOTDIR = $(ROOT)/edit/
+TYPACKAGE_DIR = slate
+# If you change JVERSION, modify the version numbers in slate.tcl
+TYVERSION =     2.0
+TYDIST =        $(TYPACKAGE)$(TYVERSION)
+TYZIP =         $(TYPACKAGE_DIR)/$(TYPACKAGE).zip
+TYJARFILE =
+
 # Sub directories to run make in.
 DIRS =		test doc demo
 
