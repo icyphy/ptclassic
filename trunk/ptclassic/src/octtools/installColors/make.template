@@ -51,7 +51,7 @@ SRCS = fill_pat.c installColors.c process.c scan.c tech.c cleantap.c
 
 OBJS = $(SRCS:.c=.o)
 
-C_INCL= -I../include $(X11_INCSPEC)
+C_INCL= -I../include $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
 all::	 makefile installColors
 
