@@ -102,6 +102,7 @@ SRCS= \
  SDFIntegrator.pl \
  SDFLMS.pl \
  SDFLMSPlot.pl \
+ SDFLattice.pl \
  SDFLevDur.pl \
  SDFLimit.pl \
  SDFLog.pl \
@@ -115,6 +116,7 @@ SRCS= \
  SDFPolarRect.pl \
  SDFPrinter.pl \
  SDFQuantizer.pl \
+ SDFRLattice.pl \
  SDFRaisedCos.pl \
  SDFReadFile.pl \
  SDFReadImage.pl \
