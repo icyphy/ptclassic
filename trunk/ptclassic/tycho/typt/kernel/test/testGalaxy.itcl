@@ -31,32 +31,36 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
 
-# Set the following to avoid endless calls to exit.
-set reallyExit 0
+# If necessary load up the class definitions
+if {[namespace ptolemy {info classes Galaxy}] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
+    }
+}
 
 ######################################################################
 #### setup
 # Create an empty universe.
 
 test Galaxy::setup {create a test universe} {
-    ::pitcl::addUniverse .x
+    ::pitcl::addUniverse .x SDF
 } {}
 
 ######################################################################
 #### constructor
 
-test Galaxy::constructor.1 {create an empty galaxy} {
+test Galaxy::constructor-1.1 {create an empty galaxy} {
     catch {delete object y}
     ::ptolemy::Galaxy y {}
 } {y}
 
-test Galaxy::constructor.2 {create a populated galaxy} {
+test Galaxy::constructor-1.2 {create a populated galaxy} {
     catch {delete object z}
     ::ptolemy::Galaxy z {
         addBlock a Ramp
@@ -68,7 +72,7 @@ test Galaxy::constructor.2 {create a populated galaxy} {
 ######################################################################
 #### getBlocks method
 
-test Galaxy::getBlocks.1 {Query for the blocks in a master galaxy} {
+test Galaxy::getBlocks-1.1 {Query for the blocks in a master galaxy} {
         z getBlocks
 } {z.a}
 

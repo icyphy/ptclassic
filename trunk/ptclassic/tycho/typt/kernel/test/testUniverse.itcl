@@ -31,24 +31,28 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
 
-# Set the following to avoid endless calls to exit.
-set reallyExit 0
+# If necessary load up the class definitions
+if {[namespace ptolemy {info classes Universe}] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
+    }
+}
 
 ######################################################################
 #### constructor
 
-test Universe::constructor.1 {create an empty universe} {
+test Universe::constructor-1 {create an empty universe} {
     catch {delete object .a}
     ::ptolemy::Universe .a {}
 } {.a}
 
-test Universe::constructor.2 {create a populated universe} {
+test Universe::constructor-2 {create a populated universe} {
     catch {delete object .b}
     ::ptolemy::Universe .b {
         addBlock x Ramp
@@ -58,7 +62,7 @@ test Universe::constructor.2 {create a populated universe} {
     .b getBlocks
 } {.b.x .b.y}
 
-test Universe::constructor.3 {create an empty universe, then populate it} {
+test Universe::constructor-3 {create an empty universe, then populate it} {
     catch {delete object .b}
     ::ptolemy::Universe .b {}
     .b addBlock x Ramp
