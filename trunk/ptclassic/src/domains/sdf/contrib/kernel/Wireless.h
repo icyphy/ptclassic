@@ -1,7 +1,7 @@
 #ifndef _Wireless_h
 #define _Wireless_h
 
-/* ********************************************************************** *
+/*
 Version identification:
 $Id$
 
@@ -32,17 +32,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Programmer: John S. Davis, II
 
- * ********************************************************************** */
+ */
 
-#ifdef		__GNUG__
-#pragma 	interface
+#ifdef __GNUG__
+#pragma	interface
 #endif
 
-#include "SDFStar.h"
-#include <math.h>
-#include <stdlib.h>
-#include <Random.h>
-#include <ACG.h>
+#include "miscFuncs.h"
+#include "ComplexSubset.h"
+
 #include <Uniform.h>
 
 #define LIGHT 3e8
@@ -50,6 +48,7 @@ Programmer: John S. Davis, II
 class ChannelParameters
 {
    public:
+	// No Constructor/Destructor Needed
 	double wc;		// Carrier Frequency
 	double Ts;		// Symbol (Sample) Period
 	double Td;              // RMS Delay Spread
@@ -59,20 +58,16 @@ class ChannelParameters
 	double ref_power_loss;	// Reference Power (1 Meter From Tx Antenna)
 	double mean_distance;	// Tx/Rx Mean Separation Distance in Meters
 	char channel_type; 	// Type Of Wireless Channel (Indoor, Outdoor Mobile) 
-
-
-	// No Constructor/Destructor Needed
 };
-
 
 class WirelessChannel 
 {
    public:
 	// Setup Up Parameters
-	void Setup( const ChannelParameters );
+	void Setup( const ChannelParameters channelparams );
 
 	// Input Data (Symbols)
-	Complex Input( Complex );
+	Complex Input( Complex input );
 
 	// Constructor
 	WirelessChannel();
@@ -81,8 +76,8 @@ class WirelessChannel
 	~WirelessChannel();
 
    private:
-	Complex * orig_symbols;		// Data Sent Into Channel Unmodified
-	Complex * corrupt_symbols;	// Corrupted Data Symbol After Channel
+	Complex* orig_symbols;		// Data Sent Into Channel Unmodified
+	Complex* corrupt_symbols;	// Corrupted Data Symbol After Channel
 
 	ChannelParameters params;
 
@@ -90,11 +85,11 @@ class WirelessChannel
 	int no_paths;
 
 	double PhaseFromDistance( int );
-	Complex SetPathLoss( int, Complex );
-	Complex PhasorToRectangular( double, double );
+	Complex SetPathLoss( int path, Complex number );
+	Complex PhasorToRectangular( double phase, double mag );
 
 	// Declare Pointer To Random Number Generator Function 
-	Uniform *random;
+	Uniform* random;
 
 	// Shift Data By One Sample
 	void ShiftData( Complex );
@@ -103,17 +98,4 @@ class WirelessChannel
 	void CorruptData();
 };
 
-
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
