@@ -34,10 +34,15 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-test Exec-1.1 {run make} {
+proc _initialize {} {
     catch {destroy .exec}
     catch {delete object .exec}
     ::tycho::Exec .exec
+}
+
+# Test the different 
+test Exec-1.1 {run make} {
+    _initialize
     
     .exec execProcess {make test_exec_msg} [file join $TYCHO kernel test]
 
@@ -58,9 +63,7 @@ This message is used to test the Exec class
 }}
 
 test Exec-1.2 {If we kill fast enough, then we'll get a result "Killed"} {
-    catch {destroy .exec}
-    catch {delete object .exec}
-    ::tycho::Exec .exec
+    _initialize
     .exec execProcess {ls -al} {}
     .exec killProcess
     set results [.exec getHistory]
@@ -70,9 +73,7 @@ test Exec-1.2 {If we kill fast enough, then we'll get a result "Killed"} {
 
 
 test Exec-1.3 {Make sure that clear history really clears up everything} {
-    catch {destroy .exec}
-    catch {delete object .exec}
-    ::tycho::Exec .exec
+    _initialize
     .exec execProcess {ls -al} {}
     .exec getStatusWait
     .exec clearHistory
@@ -80,6 +81,48 @@ test Exec-1.3 {Make sure that clear history really clears up everything} {
     set results [.exec getHistory]
     list $results
 } {{}}
+
+# This will dump all the content into the editor, and check
+# whether they have been dumped or not
+test Exec-1.4 {Check doEachLine and doWhenDone} {
+    _initialize
+    set text [::tycho::view Edit]
+    update idletasks
+    
+    .exec doEachLine "$text insertData \$line"
+    .exec doWhenDone "$text insertData I_AM_DONE\n"
+    .exec execProcess {ls -al} {}
+    .exec getStatusWait
+
+
+    set content [$text get 0.0 end]
+    
+    # Close the text window
+    $text markUnmodified
+    catch [$text statusbar cget -closecommand]
+  
+    set str1 {}
+    set str2 {}
+    set str3 {}
+    regexp {(Running:)} $content _ str1
+    regexp {(exited Normally)} $content _ str2
+    regexp {(I_AM_DONE)} $content _ str3
+
+    list $str1 $str2 $str3
+
+} {Running: {exited Normally} I_AM_DONE}
+
+# Check the method getStautsNow, which should return "running"
+# WARNING: This is machine speed dependent
+test Exec-1.5 {Check method getStatusNow without blocking} {
+    _initialize
+    .exec execProcess {ls -al} {}
+    set statusnow1 [.exec getStatusNow]
+    .exec killProcess
+    set statusnow2 [.exec getStatusNow]
+
+    list $statusnow1 $statusnow2
+} {running killed}
 
 
 
