@@ -1079,20 +1079,6 @@ void StructTarget :: connectClockGen(StringList clkName) {
   mainCompDeclList.put(label, portList, genList, name, portList, genList);
 }
 
-// Return the assignment operator for States.
-const char* StructTarget :: stateAssign() {
-  // FIXME: Make these perm. strings (hash or save)
-  const char* assign = ":=";
-  return assign;
-}
-
-// Return the assignment operator for PortHoles.
-const char* StructTarget :: portAssign() {
-  // FIXME: Make these perm. strings (hash or save)
-  const char* assign = "<=";
-  return assign;
-}
-
 ISA_FUNC(StructTarget,SimVSSTarget);
 
 // Method called by comm stars to place important code into structure.
