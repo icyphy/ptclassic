@@ -135,11 +135,11 @@ bin:
 	@echo $$PATH
 	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
 	@echo "Build gcc first, so we can build shared libiberty.so"
-	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) all-gcc)
-	@echo "Cleaning libiberty"
-	(cd $(GNU_OBJ)/libiberty; $(MAKE) clean)
+	(cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) \
+		LANGUAGES=c )
 	@echo "Building libiberty and g++"
-	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC=$(GNU_OBJ)/gcc/xgcc MAKE=$(GMAKE))
+	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) \
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ MAKE=$(GMAKE))
 
 $(BINDIR):
 	mkdir $(BINDIR)
