@@ -29,7 +29,9 @@ public:
 	int run();
 	void wrapup ();
 	Block* clone() const
-		{ LOG_NEW; return new CompileTarget(*this);}
+		{ LOG_NEW; CompileTarget* t = new CompileTarget(readName(),
+						starType(), readDescriptor());
+		  return &t->copyStates(*this); }
 
 	// Routines for writing code: schedulers may call these
 	StringList writeFiring(Star& s, int depth);
@@ -178,7 +180,7 @@ void CompileTarget::wrapup() {
     // Check to see whether makefile is present, and if not, copy it in.
 
     cmd = "cd ";
-    cmd += destDirectory;
+    cmd += (const char*)destDirectory;
     cmd += "; if (test -r make.template) then ";
     cmd += "( echo make.template already exists) ";
     cmd += " else ";
@@ -204,7 +206,7 @@ void CompileTarget::wrapup() {
 	return;
     }
     cmd = "cd ";
-    cmd += destDirectory;
+    cmd += (const char*)destDirectory;
     cmd += "; mv -f code ";
     cmd += gal->readName();
     cmd += "; cp code.cc ";
