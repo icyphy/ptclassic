@@ -3,6 +3,7 @@
 
 #include "StringList.h"
 #include "DataStruct.h"
+#include <Complex.h>
 
 /**************************************************************************
 Version identification:
@@ -26,7 +27,7 @@ $Id$
 // Types of data stored in queues between stars
 // ANYTYPE is provided for the benefit of Stars like Fork
 // and Printer that operate independently of Particle type
-enum dataType { INT, FLOAT, STRING, ANYTYPE };
+enum dataType { INT, FLOAT, STRING, COMPLEX, ANYTYPE };
 
 // Particle is a virtual base class -- you can't declare a Particle.
 class Particle
@@ -35,10 +36,13 @@ public:
 	// Identify what type of Particle this is
 	virtual dataType readType() = 0;
 
-	// Cast this Particle to an int, float, and char*
+	// Cast this Particle to an int, float, Complex, and char*
 	virtual operator int () {return 0;}
 	virtual operator float () {return 0.;}
-	virtual operator StringList () {return "";}
+	// For following operator, compiler won't actually perform the cast
+	//  if Complex rather than Complex&
+	virtual operator Complex& () {return 0.;}
+	virtual operator char* () {return "";}
 
 	// Zero or initialize this Particle
 	virtual void initialize() = 0;
@@ -46,6 +50,7 @@ public:
 	// Load the Particle with data
 	virtual void operator << (int) = 0;
 	virtual void operator << (float) = 0;
+	virtual void operator << (Complex) = 0;
 
 	// Copy a Particle -- since Stars must be able to
 	// assign Particles in type-independent fashion,
@@ -85,7 +90,8 @@ public:
 	// Cast to an int, float, and char*
 	operator int () {return data;}
 	operator float () {return (float)data;}
-	operator StringList ();
+	operator Complex& () {return (Complex&)data;}
+	operator char* ();
 
 	// Initialize
 	IntSample(int i) {data=i;}
@@ -97,6 +103,7 @@ public:
 	// Load up with data
 	void operator << (int i) {data=i;}
 	void operator << (float f) {data=(int)f;}
+	void operator << (Complex c) {data=(int)c.real();}
 
 	// Copy the Particle
 	Particle& operator = (const Particle&);
@@ -118,7 +125,8 @@ public:
         // Cast to an int, float, and char*
         operator int () {return (int)data;}
         operator float () {return data;}
-        operator StringList ();
+	operator Complex () {return (Complex&)data;}
+        operator char* ();
  
         // Initialize
         FloatSample(float f) {data=f;}
@@ -130,11 +138,48 @@ public:
         // Load up with data
         void operator << (int i) {data=(float)i;}
         void operator << (float f) {data=f;}
+        void operator << (Complex c) {data=(float)c.real();}
 
         // Copy the Particle
         Particle& operator = (const Particle&);
  private:
         float data;
+};
+
+        /////////////////////////////////////
+        // class ComplexSample
+        /////////////////////////////////////
+ 
+class ComplexSample : public Particle
+{
+public:
+        // Tell this world this Particle contains an float
+        dataType readType() {return COMPLEX;}
+ 
+        // Cast to an int, float, Complex, and char*
+        operator int () {return (int)data.real();}
+        operator float () {return (float)data.real();}
+	operator Complex& () {return data;}
+        operator char* ();
+ 
+        // Initialize
+        ComplexSample(Complex c) {data=c;}
+	ComplexSample(float f) {data=f;}
+	ComplexSample(int i) {data = (float)i;}
+        ComplexSample() {data=0.0;}
+
+        // Initialize the Particle
+        void initialize() {data=0.0;}
+
+        // Load up with data
+        void operator << (int i) {data=(Complex)i;}
+        void operator << (float f) {data=(Complex)f;}
+	void operator << (Complex c) {data=c;}
+
+        // Copy the Particle
+        Particle& operator = (const Particle&);
+ private:
+        Complex data;
 };
 
 /****************************************************************
