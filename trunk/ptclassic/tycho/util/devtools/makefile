@@ -44,8 +44,7 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	 bin demo doc test
 
-TCL_SRCS = \
-	JRPCServer.tcl
+TCL_SRCS =
 
 ITCL_SRCS = \
 	Compile.itcl \
@@ -54,7 +53,6 @@ ITCL_SRCS = \
 	EditDiff.itcl \
 	Glimpse.itcl \
 	ItclClassList.itcl \
-	JRPC.itcl \
 	ProfileJava.itcl
 
 
