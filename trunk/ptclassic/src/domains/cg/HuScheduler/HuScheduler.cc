@@ -111,11 +111,9 @@ int HuScheduler :: scheduleIt()
 StringList HuScheduler :: displaySchedule() {
 
 	Galaxy* galaxy = myGraph->myGalaxy();
-
 	StringList out;
-	out += parSched->display(galaxy);
-	out += ParScheduler :: displaySchedule();
-
+	out << "Hu Parallel Scheduler\n" << parSched->display(galaxy)
+	    << ParScheduler :: displaySchedule();
 	return out;
 }
 
