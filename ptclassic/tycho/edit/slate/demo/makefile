@@ -46,13 +46,16 @@ DIRS =
 
 TCL_SRCS = \
 	defs.tcl \
+	demoAnimator.tcl \
+	demoBinding.tcl \
 	demoGrapple.tcl \
 	demoLabeledLine.tcl \
-	demoSmartLine.tcl \
 	demoPaper1.tcl \
 	demoPaper2.tcl \
 	demoSelection1.tcl \
-	demoSelection2.tcl
+	demoSelection2.tcl \
+	demoSmartLine.tcl \
+	demoWidget.tcl
 
 ITCL_SRCS =
 
