@@ -29,32 +29,78 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "SRGeodesic.h"
-#include "PortHole.h"
+#include "SRPortHole.h"
 #include "Block.h"
 #include <stream.h>
 #include <assert.h>
 
 
+// Construct an unconnected Geodesic
 SRGeodesic::SRGeodesic()
+{}
+
+// Destroy a Geodesic, disconnecting all connected PortHoles
+SRGeodesic::~SRGeodesic()
 {
 
-  cout << "Constructed an SRGeodesic\n";
+  if ( originatingPort ) {
+    originatingPort->disconnect(0);
+    originatingPort = NULL;
+  }
 
+  ListIter nextReceiver( receivers );
+  for ( int size = receivers.size() ; --size >= 0 ; ) {
+    SRPortHole * receiver = (SRPortHole *) nextReceiver++;
+    if ( receiver ) {
+      receiver->disconnect(0);
+    }
+  }
+
+  // Clear these references even though the SR domain doesn't use them
+  destinationPort = NULL;
 }
+
+// Set this Geodesic's driver
+//
+// @Description Used for both point-to-point and node-style connections.
+// Disconnect the old driver if necessary.
 
 PortHole * SRGeodesic::setSourcePort( GenericPort & p, int, const char * = 0 )
 {
-  cout << "SRGeodesic::setSourcePort called on " << p.parent()->name()
-    << " " << p.name() << "\n";
+  //  cout << "SRGeodesic::setSourcePort called on " << name() << " to "
+  //       << p.parent()->name() << " " << p.name() << "\n";
+
+  if ( originatingPort ) {
+    originatingPort->disconnect(0);
+  }
+
+  originatingPort = (PortHole *) &p;
+
+  ((SRPortHole &) p).setGeodesic(this);
 
   return (PortHole *) &p;  
 }
 
+// Add a receiver to the list of receivers in this Geodesic
+//
+// @Description Used for both point-to-point and node-style connections.
+
 PortHole * SRGeodesic::setDestPort( GenericPort & p )
 {
-  cout << "SRGeodesic::setDestPort called on " << p.parent()->name()
-    << " " << p.name() << "\n";
+  //  cout << "SRGeodesic::setDestPort called on " << name() << " to "
+  //       << p.parent()->name() << " " << p.name() << "\n";
+
+  // Add this destination port to the list of receivers
+  receivers.append( &p );
+
+  // Normally, portHoleConnect() would do this, but that assumes
+  // point-to-point connections
+  ((SRPortHole &) p).setGeodesic(this);
 
   return (PortHole *) &p;
 

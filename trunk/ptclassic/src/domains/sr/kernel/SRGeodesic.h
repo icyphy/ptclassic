@@ -32,24 +32,39 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "Geodesic.h"
 
 /**********************************************************************
 
   The geodesic for the SR domain
 
-  @Description a hack
+  @Description This implements the single-driver, multiple-receiver
+  communication channels of the SR domain.
+
+  <P> originatingPort defines the driver, but receivers defines the list
+  of receivers.  The Geodesic::destinationPort is ignored.
 
 **********************************************************************/
 class SRGeodesic : public Geodesic {
+private:
+
+  // A list of InSRPort *s driven by this geodesic 
+  // @Description This supplants the destinationPort field of the
+  // Geodesic class
+  SequentialList receivers;
 
 public:
 
   SRGeodesic();
+  ~SRGeodesic();
 
   PortHole * setSourcePort( GenericPort &, int, const char * = 0 );
   PortHole * setDestPort( GenericPort & );
-
+  
 };
 
 #endif
