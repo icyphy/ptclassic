@@ -49,14 +49,6 @@ public:
 // The following methods are provided by the system and accessed
 // by the Scheduler
 
-	// Access the parameters by name, and store them
-	// in the associated parameter variables
-	// NOT CURRENTLY IMPLEMENTED
-	initParameters() {};
-
-	// Initialize by calling initialize() for each PortHole
-        void initialize() {Block::initialize();}
-
 	// Methods called by the Scheduler before go() and
 	//  after go(); they call methods of the same name for each
 	//  input or output PortHole
