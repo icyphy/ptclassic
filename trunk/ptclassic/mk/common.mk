@@ -51,7 +51,13 @@ PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
 $(PTLANG_IN_OBJ):
 	(cd $(PTOLEMY)/obj.$(ARCH)/ptlang; $(MAKE) VPATH=../../src/ptlang)
 
+# Rule to build the ../doc/star directory
 # Can't use mkdir -p here, it might not exist everywhere
+# Run 'exit 0' as the last command if the directories already exist.
+#  (Otherwise the mips ARCH will produce make error message like:
+#  'make: *** [DETest.cc] Error 2' because the if [] statement is returning
+#  non-zero if the directory exists.  sigh.)
+
 $(STARDOCDIR):
 	$(STARDOCRULE) 
 STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
@@ -61,7 +67,9 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 	if [ ! -d $(STARDOCDIR) ]; then \
 		echo "Making directory $(STARDOCDIR)"; \
 		mkdir $(STARDOCDIR); \
+	else exit 0; \
 	fi
+
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
 # the "mv" part moves the documentation to the doc dir.
