@@ -79,21 +79,18 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 
 	setup {
 		tapsNum = taps.size();
-		oldSamples.resize(int(tapsNum + 1));
+		if (tapsNum < 1) {
+			Error::abortRun(*this,
+			"There must be a positive number of taps");
+		}
+		oldSamples.resize(int(tapsNum)+1);
         }
 
         initCode {
 		tapInit<<"$starSymbol(cfs):\n";
 		for (int i = (tapsNum - 1); i >= 0 ; i--)
 			tapInit << "\t.q15\t" << double(taps[i]) << '\n';
-		tapInit<<"$starSymbol(cfe):\n\t.text\n";
-		if (tapsNum > 0) {
-			addCode(block((int(tapsNum) + 1)*16));
-		}else {
-			Error::abortRun(*this,
-			"There must be a positive number of taps");
-		}
-		addCode(block(16*(int(tapsNum)+1)));
+		tapInit<<"$starSymbol(cfe):\n";
         }
 
 	go {
@@ -112,7 +109,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	codeblock(std,""){
 	LAR	AR2,#$addr(oldSamples)	; AR0 -> start of old sample array
 	LAR	AR1,#$addr(signalOut)	; AR1 -> output signal
-	lar	ar0,#$addr(oldSamples,@(tapsNum))
+	lar	ar0,#$addr(oldSamples,@(tapsNum-1))
 	ZAP				; zero accumulator and product reg.
 	MAR	*,AR2			; ARP = AR0
 	BLDD	#$addr(signalIn),*,ar0	; move (input) to first addr in array
