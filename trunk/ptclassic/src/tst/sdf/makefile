@@ -33,55 +33,45 @@ include ../makefile.tst
 
 DOMAIN = $(SRC)/domains/sdf
 DEMO = $(DOMAIN)/demo
-#	$(DEMO)/DeSpreader.pal $(DEMO)/NR2Zero.pal $(DEMO)/PseudoNoise.pal 
-#	$(DEMO)/Spread.pal
 
 # Don't include	$(DEMO)/init.pal, instead run in each subpalette
-
+# Don't run the tcltk demos, as they require stars that are not in ptcl
+# Don't run the matlab demos, as they require and x connection.
 DEMOS = \
 	$(DEMO)/basic.pal \
 	$(DEMO)/comm.pal \
-	$(DEMO)/cosine.pal \
 	$(DEMO)/dsp.pal \
 	$(DEMO)/fix.pal \
 	$(DEMO)/image.pal \
-	$(DEMO)/matlab.pal \
-	$(DEMO)/misc.pal \
 	$(DEMO)/multirate.pal \
 	$(DEMO)/script.pal \
 	$(DEMO)/sound.pal \
-	$(DEMO)/user.pal \
 	$(DEMO)/vq.pal \
-	$(DOMAIN)/dfm/demo/init.pal \
-	$(DOMAIN)/matrix/demo/init.pal \
+	$(DOMAIN)/dfm.pal \
+	$(DOMAIN)/matrix.pal \
 	$(DOMAIN)/tcltk/demo/init.pal
-BAD_DEMOS =
 
-#	NR2Zero.pt 	DeSpreader.pt 	PseudoNoise.pt  
-#	Spread.pt 
+BAD_DEMOS =
 
 # Don't include init.pal, instead, run in each subdomain
 DEMOS_PT = \
 	basic.pt \
 	comm.pt \
-	cosine.pt \
 	dsp.pt \
 	fix.pt \
 	image.pt \
-	matlab.pt \
-	misc.pt \
 	multirate.pt \
 	script.pt \
 	sound.pt \
-	user.pt \
 	vq.pt \
-	dfm/demo/init.pal \
-	matrix/demo/init.pal \
-	tcltk/demo/init.pal
+	dfm.pt \
+	matrix.pt \
 
 DEMOS_POUT = $(DEMOS_PT:.pt=.pout)
-TESTBED_STARS =
+TESTBED_STARS = stars/SDFTkText.o
 TST_PREAMBLE = sdf_preamble.pt
+
+KRUFT = fmsound *.au
 
 # Makefile with rules
 include ../makefile.tst2
