@@ -16,11 +16,12 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 CG56DIR = $(ROOT)/src/domains/cg56/kernel
+CG56SDIR = $(ROOT)/src/domains/cg56/stars
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(CG56SDIR)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
@@ -31,10 +32,12 @@ PL_SRCS= \
  CG56Biquad.pl \
  CG56BiquadDSPlay.pl \
  CG56Comb.pl \
+ CG56FFT.pl \
  CG56FIR.pl \
  CG56LMS.pl \
  CG56LMSGanged.pl \
- CG56RaisedCos.pl
+ CG56RaisedCos.pl \
+ CG56Window.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
