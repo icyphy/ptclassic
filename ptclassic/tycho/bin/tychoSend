@@ -10,4 +10,5 @@
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?PTARCH ) setenv PTARCH `$PTOLEMY/bin/ptarch`
 
-$PTOLEMY/bin.$PTARCH/itkwish -f $PTOLEMY/tycho/lib/tychoSend.tcl $argv
+# we need the safe tcl interpreter mechanism in Tcl7.5 & tksend from tk
+$PTOLEMY/tcltk/itcl-1.5-tcl7.5a1.sol2/bin/itcl_wish -f $PTOLEMY/tycho/lib/tychoSend.tcl $argv
