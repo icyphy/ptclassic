@@ -10,10 +10,11 @@ MAINSEC	      = overall
 TMPFILE	      = tmp_print
 OPTIONS       =
 
-DIRS = overview pigi interpreter ptlang domains documents
+DIRS = overview pigi interpreter ptlang domains documents xgraph filters
 SECTIONS = overview/$(TMPFILE) pigi/$(TMPFILE) \
 	interpreter/$(TMPFILE) ptlang/$(TMPFILE) \
-	domains/$(TMPFILE) documents/$(TMPFILE)
+	domains/$(TMPFILE) documents/$(TMPFILE) \
+	xgraph/$(TMPFILE) filters/$(TMPFILE)
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
