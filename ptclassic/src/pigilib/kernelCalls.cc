@@ -59,10 +59,6 @@ extern "C" {
 extern ACG* gen;
 extern char DEFAULT_DOMAIN[];
 
-// "InterpGalaxy" is used as a temporary variable to hold a value
-// between a call to KcDefGalaxy and KcEndDefgalaxay.  
-static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
-
 ///////////////////////////////////////////////////////////////////////
 // Define a stream for logging -- log output to pigiLog.pt
 
@@ -384,7 +380,7 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 
 ///////////////////////////////////////////////////////////////////////
 // Given the name of a domain, set ptcl->curDomain, and the domain of the
-// galaxy if it exists, to correspond to the this domain.
+// current galaxy if it exists, to correspond to this domain.
 // Returns false if this fails (invalid domain).
 
 extern "C" boolean
@@ -394,15 +390,16 @@ KcSetKBDomain(const char* domain) {
 		Error::abortRun("Invalid domain: ", domain);
 		return FALSE;
 	}
-	// FIXME: this isn't quite right, but can go away when we
-	// complete the job of eliminating current domain.  We avoid
-	// changing the galaxy domain if it is non-empty.
+
+	// Note: Changing the galaxy domain fails if the galaxy is
+	// non-empty.
 
 	// equality can be used here because of hashstring call.
-	if (ptcl->currentGalaxy && ptcl->currentGalaxy->numberBlocks() == 0 &&
+	if (ptcl->currentGalaxy &&
 	    ptcl->currentGalaxy->domain() != domain &&
-	    !ptcl->currentGalaxy->setDomain(domain))
-		return FALSE;
+	    !ptcl->currentGalaxy->setDomain(domain)) {
+	    return FALSE;
+	}
 	ptcl->curDomain = domain;
 	return TRUE;
 }
@@ -419,18 +416,18 @@ curDomainName() {
 extern "C" boolean
 KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	logDomain();
-	LOG << "defgalaxy " << SafeTcl(galname) << " {\n\tdomain "
-	    << domain << "\n";
+	LOG << "defgalaxy " << SafeTcl(galname) << " {\n";
+	LOG_NEW; ptcl->currentGalaxy = new InterpGalaxy(galname,ptcl->curDomain);
+	ptcl->currentGalaxy->setBlock(galname, 0);
+	// Set the domain of the galaxy
+	LOG << "\tdomain " << domain << "\n";
+	if (!KcSetKBDomain(domain)) return FALSE;
 	if (innerTarget && strcmp(innerTarget, "<parent>") != 0) {
 		LOG << "target " << innerTarget << "\n";
 		ptcl->currentTarget = KnownTarget::clone(innerTarget);
 	}
 	else ptcl->currentTarget = 0;
-	saveGalaxy = ptcl->currentGalaxy;
-	LOG_NEW; ptcl->currentGalaxy = new InterpGalaxy(galname,ptcl->curDomain);
-	ptcl->currentGalaxy->setBlock(galname, saveGalaxy);
-	// Set the domain of the galaxy
-	return KcSetKBDomain(domain);
+	return TRUE;
 }
 
 extern "C" boolean
@@ -438,11 +435,11 @@ KcEndDefgalaxy(const char* outerDomain) {
 	//
 	// add to the knownlist for the outer domain, and create a
 	// wormhole if that is different from current domain.
-	// note that this call also restores the KnownBlock::currentDomain
+	// note that this call also restores the current domain
 	// to equal the outerDomain.
 	LOG << "}\n";
 	ptcl->currentGalaxy->addToKnownList(outerDomain,ptcl->currentTarget);
-	ptcl->currentGalaxy = saveGalaxy;
+	ptcl->currentGalaxy = ptcl->universe;
 	return KcSetKBDomain(outerDomain);
 }
 
@@ -486,7 +483,7 @@ KcDisplaySchedule() {
  	// LOG << "run " << n << "\nwrapup\n";
 	// LOG.flush();
 	if ( ptcl->currentTarget == NULL ) {
-	    cerr << "No current target";
+	    Error::error("No current target");
 	    return FALSE;
 	}
 	StringList name;
@@ -779,12 +776,12 @@ KcInfo(char* name, char** info)
 	return TRUE;
 }
 
+static void displayStates(const Block *b,char** names,int n_names);
+
 ///////////////////////////////////////////////////////////////////////
 // Input: the name of a star in the current domain
 // Pops up a window displaying the profile and returns true if all goes well,
 // otherwise returns false.
-static void displayStates(const Block *b,char** names,int n_names);
-
 extern "C" int
 KcProfile (char* name) {
 	char* fieldnames[MAX_NUM_FIELDS];
@@ -941,7 +938,7 @@ KcNodeConnect (const char* inst, const char* term, const char* node) {
 // Return a list of targets supported by the current domain.
 extern "C" int
 KcDomainTargets(const char** names, int nMax) {
-	return KnownTarget::getList(ptcl->curDomain,names,nMax);
+	return KnownTarget::getList(ptcl->curDomain, names, nMax);
 }
 
 ///////////////////////////////////////////////////////////////////////
