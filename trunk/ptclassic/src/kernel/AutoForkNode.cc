@@ -36,7 +36,7 @@ int AutoForkNode::isItPersistent () const {
 PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int delay) {
 	if (originatingPort) {
 		StringList msg = readFullName();
-		msg += " already has a source port";
+		msg += ": multiple output ports found on the same node.";
 		Error::abortRun (msg);
 		return 0;
 	}
