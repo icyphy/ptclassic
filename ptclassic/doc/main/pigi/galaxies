@@ -141,12 +141,12 @@ i.e., in the grey background of the facet.
 Execute \fIedit-params\fR and fill in the dialog as follows:
 .(c
 New name:  freq
-New value:  0.0628
+New value:  PI/50
 .)c
 Then click on ``OK''.
 .LE
 We just created a new formal parameter called ``freq'' with a
-default value of ``0.0628''.  Additional parameters may be added or
+default value of ``PI/50''.  Additional parameters may be added or
 old ones changed simply by invoking \fIedit-params\fP again.  Notice
 that the action of \fIedit-params\fP changes depending on where the
 cursor is.  If the cursor is over an instance, it edits the actual
@@ -181,7 +181,7 @@ terminals or formal parameters of a galaxy change in order to
 be sure that consistency is maintained.
 .BU
 Change the frequency of one of the ``singen'' instances to
-``0.628'' by using \fIedit-params\fP.  This ``singen'' will be
+``PI/5'' by using \fIedit-params\fP.  This ``singen'' will be
 ten times the frequency of the other.
 .BU
 Run the universe with an iteration of 100.  The output should
