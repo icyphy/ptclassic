@@ -120,7 +120,7 @@ body ::tycho::PtParameterDialog::edit {namedObj} {
 
     # Set the current model
     set _namedObj $namedObj
-
+    puts "Object [$namedObj getFullName]"
     # Configure the title
     configure -title "[$namedObj getFullName]"
     configure -labelcolor [::tycho::color blue black]
@@ -130,10 +130,17 @@ body ::tycho::PtParameterDialog::edit {namedObj} {
     while { [$i hasMoreElements] } {
 	set attr [$i nextElement]
 	set label [$attr getName]
+        puts "Got attribute $label"
+
 	set type [string tolower [[$attr getClass] getName]]
 	set _type($label) $type
 	set _object($label) $attr
-	set _val($label) [[$attr getToken] stringValue]
+        set token [$attr getToken]
+        if { $token == [java::null] } {
+            puts "Failed to get token from [$attr getFullName]!"
+        } else {
+            set _val($label) [$token stringValue]
+        }
     }
 
     # Build queries

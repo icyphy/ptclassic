@@ -178,10 +178,8 @@ body ::tycho::PtButtonPanel::resume {} {
 # Start the simulation.
 #
 body ::tycho::PtButtonPanel::start {} {
-    # Call the simulation
-    if { $simulation != "" } {
-	$simulation start
-    }
+    #### FIXME FIXME This is hacked up for blocking call
+    # to PtII because of a threading bug
 
     # Change button states
     set bbox $itk_component(bbox)
@@ -191,6 +189,18 @@ body ::tycho::PtButtonPanel::start {} {
 
     set _isPaused 0
     putStatus "Running"
+
+    #### Update to GUI shows it
+    ####::ty cho::safeUpdate $this
+
+    # Call the simulation. This will return when the simulation
+    # finishes FIXME FIXME
+    if { $simulation != "" } {
+	$simulation start
+    }
+
+    #### Call stop to reset the buttons
+    ###stop
 }
 
 #######################################################################
