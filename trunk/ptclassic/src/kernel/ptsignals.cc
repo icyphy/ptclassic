@@ -141,7 +141,7 @@ void ptReleaseSig( int SigNum ) {
 }
 
 #else
-#if defined (PTNT)
+#if defined (PTNT) && !defined(PT_NT4VC)
 void ptSafeSig( int ) {}
 sigset_t signalmask = 0;
 void ptBlockSig( int SigNum ) {
