@@ -38,19 +38,19 @@
 # Note that some facets have glitches in them, so oct2ptcl barfs.
 
 #DOMAINS = sdf hof de ddf bdf cg cgc cg56 vhdl vhdlb mdsdf $(EXPDOMAINS)
-DOMAINS = bdf ddf mdsdf 
+DOMAINS = bdf ddf de mdsdf sdf
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
 # Directories we want to run in
 DIRS = 	$(DOMAINS) incLink
 
-test clean::
+sources test all.pt diff updateresults clean realclean::
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in domains/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../src/tst/$$x $@ ;\
+		echo making $@ in tst/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \
 	done
