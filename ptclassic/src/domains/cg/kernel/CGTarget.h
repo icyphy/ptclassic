@@ -324,8 +324,8 @@ public:
     // Pacific Grove, CA, Oct. 31 - Nov. 2, 1994.
     virtual AsynchCommPair createPeekPoke(CGTarget& peekTarget,
 					  CGTarget& pokeTarget);
-protected:
 
+protected:
     // Initialization for code generation.
     // The default version does nothing.
     virtual int codeGenInit();
@@ -368,7 +368,7 @@ protected:
     IntState reportExecutionTime;
 
     // Name of schedule file
-    char *schedFileName;
+    char* schedFileName;
 
     // scheduling is not needed since the schedule is 
     // copied by copySchedule method. (Multiprocessor case)
@@ -421,4 +421,7 @@ private:
 // value
 int setAsynchCommState(AsynchCommPair pair, const char* stateName,
 		     const char* value);
+
+// Create the name of the destination directory
+StringList destDirectoryName(const char* subdir);
 #endif
