@@ -2372,14 +2372,14 @@ body ::tycho::Edit::incSearch {key} {
 
         # Add selection
         set _incSearchFail 0
-        #$textWidget tag add sel $searchIndex \
-        #       "$searchIndex + $foundLength chars"
+        $textWidget tag add sel $searchIndex \
+               "$searchIndex + $foundLength chars"
 
         $textWidget tag add currmatch $searchIndex \
                 "$searchIndex + $foundLength chars"
+        $textWidget tag raise sel currmatch
         $textWidget tag configure currmatch \
-                -background [stylesheet get text search.background]
-        $textWidget tag configure currmatch \
+                -background [stylesheet get text search.background] \
                 -foreground [stylesheet get text search.foreground]
 
         # Show selection
