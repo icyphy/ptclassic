@@ -12,6 +12,10 @@
 // include all of the Complex class except the stream functions
 #include "ComplexSubset.h"
 
+class ParticleStack;
+class Plasma;
+class block;
+
 /**************************************************************************
 Version identification:
 $Id$
