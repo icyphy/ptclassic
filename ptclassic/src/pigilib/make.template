@@ -49,6 +49,7 @@ HDRS	      = compile.h \
 		ptk.h \
 		poct.h \
 		ptkRegisterCmds.h \
+		ptkTclIfc.h \
 		ptkNet.h \
 		ptkTkSetup.h \
 		POct.h
@@ -74,8 +75,9 @@ LIBCSRCS      = main.c \
 		xfunctions.c \
 		options.c \
 		ptkGlobals.c \
-		ptkTemplate.c \
 		ptkNet.c \
+		ptkTemplate.c \
+		ptkTclIfc.c \
 		ptkTkSetup.c
 
 
