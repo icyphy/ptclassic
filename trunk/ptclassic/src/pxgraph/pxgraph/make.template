@@ -22,12 +22,14 @@ HDRS = copyright.h general.h hard_devices.h params.h plotter.h st.h \
 all:	makefile xgraph
 
 xgraph:	$(OBJS)
-	cc $(X11LIBDIR) -o xgraph $(OBJS) -lXext -lX11 -lm
+	rm -f xgraph
+	cc $(X11LIBDIR) -o xgraph $(OBJS) $(LXEXT) $(LX11) -lm
 
 OUT = $(BINDIR)/xgraph
 
 $(OUT):	xgraph
-	cp xgraph $(OUT)
+	rm -f $(OUT)
+	ln xgraph $(OUT)
 
 install:	makefile $(OUT)
 
