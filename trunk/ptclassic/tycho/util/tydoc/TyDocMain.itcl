@@ -1004,6 +1004,38 @@ class ::tycho::HTMLDocSys {
     # itk_option add, and private methods and variables
     public variable verbose 0
 
+    ###################################################################
+    ####                      protected methods                    ####
+
+    # Return a string appropriate for a H2 reference
+    protected method xrefH2String {className construct {access {}}} {}
+
+    # Return a string appropriate for a H2 reference
+    protected method xrefItk_OptionString {className constructList} {}
+
+    # Return 1 if we are supposed to print constructors and destructors
+    # that don't have comments
+    protected method printConstructorDestructor {construct constructList} {
+	return [expr { [ expr {$construct == "constructor" || \
+		$construct == "destructor"}]  && \
+		$verbose == 0 && \
+		[getDocCommentTag $constructList -desc] == {} && \
+		[getDocCommentTag $constructList -expl] == {} } ]
+    }
+
+    # Return 1 if we are supposed to print 'option add' lines
+    protected method printOptionAdd {construct constructList} {
+	return [expr { $verbose == 0 && \
+		$construct == "option" && \
+		[getName $constructList] == "add"} ]
+    }
+
+    # Return 1 if we need to output any outside constructs here.
+    # If verbose is not set, then don't print out any options
+    protected method needToOutputOutsideConstructs {class} {
+	return [expr {[$class cget -outsideProc] != "" || \
+		[$class cget -outsideOption] != "" && $verbose == 1}]
+    }
 
     ###################################################################
     ####                         private procs                     ####
@@ -1044,38 +1076,8 @@ class ::tycho::HTMLDocSys {
     # into the file named by the tcl filedescriptor fd.
     private method putsConstructIfNotEmpty {fd docClass construct} {}
 
-    # Return a string appropriate for a H2 reference
-    private method xrefH2String {className construct {access {}}} {}
-
-    # Return a string appropriate for a H2 reference
-    private method xrefItk_OptionString {className constructList} {}
-
     # Generate a table of contents for this class
     private method putsClassConstructs {fd class} {}
-
-    # Return 1 if we are supposed to print constructors and destructors
-    # that don't have comments
-    private method printConstructorDestructor {construct constructList} {
-	return [expr { [ expr {$construct == "constructor" || \
-		$construct == "destructor"}]  && \
-		$verbose == 0 && \
-		[getDocCommentTag $constructList -desc] == {} && \
-		[getDocCommentTag $constructList -expl] == {} } ]
-    }
-
-    # Return 1 if we are supposed to print 'option add' lines
-    private method printOptionAdd {construct constructList} {
-	return [expr { $verbose == 0 && \
-		$construct == "option" && \
-		[getName $constructList] == "add"} ]
-    }
-
-    # Return 1 if we need to output any outside constructs here.
-    # If verbose is not set, then don't print out any options
-    private method needToOutputOutsideConstructs {class} {
-	return [expr {[$class cget -outsideProc] != "" || \
-		[$class cget -outsideOption] != "" && $verbose == 1}]
-    }
 
     ###################################################################
     ####                         private variable                  ####
@@ -1402,6 +1404,31 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
     delete object $HTMLDocSys
     return $retval
 }
+ 
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+#######################################################################
+#### xrefH2String
+# Return a string appropriate for a H2 reference
+#
+body ::tycho::HTMLDocSys::xrefH2String {className construct {access {}}} {
+    if {$access != {}} {
+	return \
+	"$access $construct of [info namespace tail $className] class"
+    } else {
+	return "$construct of [info namespace tail $className] class" 
+    }
+}
+
+#######################################################################
+#### xrefItk_OptionString
+# Return a string appropriate for a itk_option reference
+#
+body ::tycho::HTMLDocSys::xrefItk_OptionString {className constructList} {
+    return "[lindex [lindex $constructList 3] 2] itk_option of [info namespace tail $className] class"
+}
 
     ###################################################################
     ###################################################################
@@ -1572,29 +1599,6 @@ body ::tycho::HTMLDocSys::putsConstructIfNotEmpty {fd docClass construct} {
 	}
     }
 }
-
-#######################################################################
-#### xrefH2String
-# Return a string appropriate for a H2 reference
-#
-body ::tycho::HTMLDocSys::xrefH2String {className construct {access {}}} {
-    if {$access != {}} {
-	return \
-	"$access $construct of [info namespace tail $className] class"
-    } else {
-	return "$construct of [info namespace tail $className] class" 
-    }
-}
-
-
-#######################################################################
-#### xrefItk_OptionString
-# Return a string appropriate for a itk_option reference
-#
-body ::tycho::HTMLDocSys::xrefItk_OptionString {className constructList} {
-    return "[lindex [lindex $constructList 3] 2] itk_option of [info namespace tail $className] class"
-}
-
 
     ###################################################################
     ###################################################################
