@@ -64,18 +64,19 @@ public:
 		return gal.stateWithName(name);
 	}
 
-	// return stopTime
-	double getStopTime();
-
 	// state initialize
 	void initState() { gal.initState(); }
 
-	StringList printVerbose() const;
-	StringList printRecursive() const;
+	StringList print(int verbose) const {
+		return Wormhole::print(verbose);
+	}
 
 protected:
 	void setup();
 	void go();
+
+	// return stopTime
+	double getStopTime();
 };
 
 class XXXtoUniversal : public ToEventHorizon, public InXXXPort {
