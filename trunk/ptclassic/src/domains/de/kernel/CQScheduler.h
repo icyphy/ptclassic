@@ -43,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DEStar.h"
 #include "Scheduler.h"
 #include "EventQueue.h"
+#include "CalendarQueue.h"
+
 
 	////////////////////////////
 	// DEScheduler
@@ -80,6 +82,9 @@ public:
 
 	// The global event queue is implemented as a priority queue
 	// in DE scheduler.
+
+	// EWK we have redefined eventQ to inherit from CalendarQueue
+	// rather than PriorityQueue
 	EventQueue eventQ;
 
 	// Set up the stopping condition.
