@@ -54,6 +54,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	setup {
 	        // We have to account for errorDelay past input snapshots
 		input.setSDFParams(1, int(errorDelay));
