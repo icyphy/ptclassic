@@ -92,7 +92,7 @@ proc ptkPrintXYPlot {w canv title} {
     #
     pack [frame $wpr.cntr] -side bottom -fill x -expand 1 -padx 5 -pady 5
     frame $wpr.cntr.prfr -relief sunken -bd 2
-    button $wpr.cntr.prfr.print -text "PRINT" -command "ptkPrintXYPlotGo $w; destroy $wpr"
+    button $wpr.cntr.prfr.print -text "PRINT" -command "ptkPrintXYPlotGo $w $canv; destroy $wpr"
     button $wpr.cntr.cancel -text "CANCEL" -command "destroy $wpr"
 
     pack $wpr.cntr.prfr.print -fill x -expand 1
@@ -104,7 +104,7 @@ proc ptkPrintXYPlot {w canv title} {
     #
     pack [entry $wpr.file -relief ridge -bg wheat3] \
        -side bottom -padx 5 -pady 5 -fill x
-    bind $wpr.file <Return> "ptkPrintXYPlotGo $w; destroy $wpr"
+    bind $wpr.file <Return> "ptkPrintXYPlotGo $w $canv; destroy $wpr"
     bind $wpr.file <Tab> "focus $wpr.size.b.height"
     $wpr.file insert @0 [pwd]/[lindex $title 0].ps
     # Guess about the number of characters in the window here.
@@ -136,7 +136,7 @@ proc ptkPrintXYPlot {w canv title} {
 
 }
 
-proc ptkPrintXYPlotGo w canv {
+proc ptkPrintXYPlotGo {w canv} {
 	
    global env
    set wpr ${w}_print
