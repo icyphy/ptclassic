@@ -33,7 +33,7 @@
 # to the top.
 #
 proc ::tycho::preferencedialog {} {
-    if { [info exists .tychoPreferences] } {
+    if { [::info which -command .tychoPreferences] != "" } {
 	raise .tychoPreferences
     } else {
 	::tycho::PreferenceDialog .tychoPreferences
