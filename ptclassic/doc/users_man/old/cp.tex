@@ -10,35 +10,42 @@
 
 \date{$Date$}
 
-The Communicating Processes (CP) domain in Ptolemy is a
+The Communicating Processes (CP) domain
+\cindex{Communicating processes domain}
+\cindex{CP domain}
+in Ptolemy is a
 process-oriented domain.  The model of computation is an extension of
 \emph{Communicating Sequential Processes(CSP)} proposed by Hoare
-\cite{Hoare78}.  In the CP domain, a system is modeled as a set of
+[\ref{Hoare78}].  In the CP domain, a system is modeled as a set of
 processes that execute concurrently and interact with each other by
-message-passing.  Stars represent autonomous processes.  Each star is
+message-passing.  Blocks represent autonomous processes.  Each block is
 converted into an independent process once the simulation begins, and
 the process keeps running until the end of simulation.  The CP domain
-is a timed domain, i.e. it has the notion of time.  The scheduler
-maintains the global clock and manages the execution of stars to be
-synchronized with the clock.
+is timed, i.e. it has the notion of time.
+\cindex{timed domain}
+The scheduler maintains the global clock and manages the execution of
+blocks to be synchronized with the clock.
 
-The major application of the CP domain is system modeling at an early
+The major application of the CP domain is system modeling
+\cindex{system modeling} at an early
 design stage where the system is partitioned into large subblocks with
-complex behavior.  Consequently, a CP star tends to show very
+complex behavior.  Consequently, a CP block tends to show very
 complicated and application-specific behavior, and a user is expected
 to write his own models for his application except for the signal
-sources and monitoring stars, which are  provided in the library.  Many
-useful constructs are provided to ease the task of describing the
-complex behavior of big stars.
+sources and monitoring blocks, which are  provided in the library.
+Many useful constructs are provided to ease the task of describing the
+complex behavior of big blocks.
 
 \node The CP Scheduler
 \section{The Scheduler}
 
+\cindex{CP scheduler}
 The ordinary role of the scheduler in Ptolemy is to determine the order
-of execution of each star.  But in the CP domain all the stars are
+of execution of each block.  But in the CP domain all the blocks are
 presumably running all the time so that there is no need of scheduling
 in that sense.  The task of the CP scheduler, instead, is to synchronize
-the execution of concurrent processes while they compete with each
+the execution of concurrent processes
+\cindex{concurrent processes} while they compete with each
 other for the CPU.  It keeps the global clock and waiting list of
 suspended processes, and manages all the processes to proceed in
 lock-step fashion.
@@ -46,18 +53,20 @@ lock-step fashion.
 \node Process Scheduling
 \subsection{Process Scheduling}
 
-Process scheduling in the CP domain is based on priority and is
+Process scheduling \cindex{process scheduling}
+in the CP domain is based on priority and is
 preemptive.   The scheduler is just another process with higher
-priority than stars.  When the simulation starts, the scheduler
-converts each star into a process.  All the processes are created with
+priority than blocks.  When the simulation starts, the scheduler
+converts each block into a process.  All the processes are created with
 the same priority.  After that, the scheduler voluntarily relinquishes
 the CPU and goes to sleep.
 
-The stars execute one at a time until the execution is either blocked
-or suspended.  While stars are executing, the scheduler sleeps and the
-global clock doesn't advance.  Hence, all the execution of stars is
-considered to happen instantaneously.  When there are no more runnable
-process, the scheduler wakes up and regains the CPU.  It fetches the
+The blocks execute one at a time until the execution is either blocked
+or suspended.  While blocks are executing, the scheduler sleeps and the
+global clock doesn't advance.  Hence, all the execution of blocks is
+considered to happen instantaneously.  \cindex{instantaneous execution}
+When there are no more runnable processes, the scheduler wakes up and
+regains the CPU.  It fetches the
 next earliest suspended process from the waiting list and advances the
 global clock.  If the global clock is past the end time, the scheduler
 returns and the simulation ends.  Otherwise, the scheduler resumes all
@@ -67,13 +76,20 @@ sleep.
 \node Simultaneous Events and Non-Determinism
 \subsection{Simultaneous Events and Non-Determinism}
 
-Handling simultaneous events in a consistent and predictable way is not
-an easy task for event-driven simulation.  When there are simultaneous
+Handling simultaneous events \cindex{simultaneous events}
+in a consistent and predictable way is not
+an easy task for event-driven simulation.
+\cindex{event-driven simulation} When there are simultaneous
 events, they have to be handled sequentially in a uni-processor
 environment.  The result may show non-deterministic behavior depending
+\cindex{non-deterministic behavior}
 on the order they are processed.  The problem stems from the existence
 of zero-delay blocks.  This problem has been thought out in the
-implementation of DE scheduler, and many schemes have been devised to
+implementation of DE scheduler (see chapter\tie\ref{DE Domain}),
+\cindex{DE scheduler}
+\cindex{DE domain}
+\cindex{Discrete event domain}
+and many schemes have been devised to
 help a user avoid unexpected behavior.
 
 The CP domain provides no special scheme to handle simultaneous events
@@ -82,14 +98,18 @@ existence of zero-delay blocks is not completely ruled out, which may
 result in non-deterministic behavior of the system.   A zero-delay
 path from an input to an output within a block is equally dangerous.
 
+\node Inter-Process Communication
 \section{Inter-Process Communication}
 
-Stars communicate with each other by passing messages through
-portholes.  Each star may have several input and output portholes.  A
+Blocks communicate with each other by passing messages through
+portholes.  \cindex{message passing}
+Each block may have several input and output portholes.  A
 channel connects an output porthole to an input porthole.  Only
 one-to-one connections are allowed.  That implies \emph{auto-forking}
+\cindex{auto-forking}
 is not supported in this domain.
 
+\node Communication Channels
 \subsection{Communication Channels}
 
 Channels can be either buffered or unbuffered.  A buffered channel
@@ -98,6 +118,7 @@ either finite or infinite.  The default action of connecting an output
 porthole to an input porthole is to create an unbuffered channel, and
 the communication through that connection becomes synchronous.  
 
+\begin{ignore}
 Two types of queue object are available in the library to implement
 buffered channel.  One is a simple FIFO queue and the other is a FIFO
 queue with a monitor.  The monitor records the variation of the queue
@@ -106,11 +127,14 @@ is finished.  The maximum capacity of the queue is parameterized so
 that it can be arbitrarily set at run-time.   The capacity of -1 is
 interpreted as an infinite buffer.  In that case the queue can grow
 without limit, and the sender to this queue will never block.
+\end{ignore}
 
+\node Communication Protocols
 \subsection{Communication Protocols}
 
 A porthole is characterized by a data type it carries and a port
-protocol.  The port protocol specifies the behavior when a channel is
+protocol.  \cindex{port protocol} \cindex{communication protocol, port}
+The port protocol specifies the behavior when a channel is
 full or empty.  Four different protocols are supported for each input
 and output porthole.  For an output porthole, it can be \emph{block on
 full, block on full with timeout, overwrite on full,} and \emph{ignore
@@ -118,7 +142,13 @@ on full}.  For an input porthole, it can be \emph{block on empty,
 block on empty with timeout, previous on empty,} and \emph{ignore on
 empty}.  The default protocol is \emph{block on full/empty}.
 
+\node CP Star Overview
 \section{An Overview of CP Stars}
+
+Figure\tie\ref{figure CP stars} shows the top-level palette of blocks
+included in the CP domain.  Only the blocks used in the demos are
+included here.  Most blocks in the CP domain will be application
+specific, and so will be written by the user.
 
 \begin{figure}
 \begin{center}
@@ -128,22 +158,33 @@ empty}.  The default protocol is \emph{block on full/empty}.
 \label{figure CP stars}
 \end{figure}
 
+\node CP Basic Stars
 \subsection{Basic Stars}
+
+The first row of icons in figure\tie\ref{figure CP stars} shows the
+basic stars included in the CP domain.  These stars can be used to
+model simple network queueing systems.  The other icon is the palette
+for InfoPad stars (\pxref{CP InfoPad Stars}
+and figure\tie\ref{figure CP infopad stars}).
 
 \begin{blocklist}{(CP block)}
 
 \block{Customer}
-Model customers with exponential interarrival intervals.
+Model customers with exponential inter-arrival intervals.
 
 \block{Qserver}
 Model server with exponential service time.
 
 \block{QueueMon}
-Fifo queue with finite or infinite length.
+FIFO queue with finite or infinite length.
 
 \end{blocklist}
 
+\node CP InfoPad Stars
 \subsection{InfoPad Stars}
+
+Figure\tie\ref{figure CP infopad stars} shows the InfoPad
+\cindex{InfoPad} stars available in the CP domain.
 
 \begin{figure}
 \begin{center}
@@ -200,7 +241,11 @@ the image on an X window.
 
 \end{blocklist}
 
+\node CP Demo Overview
 \section{An Overview of CP Demos}
+
+Figure\tie\ref{figure CP demos} shows the top-level palette of demos
+available in the CP domain.
 
 \begin{figure}
 \begin{center}
@@ -210,7 +255,12 @@ the image on an X window.
 \label{figure CP demos}
 \end{figure}
 
+\node CP Basic Demos
 \subsection{Basic Demos}
+
+Figure\tie\ref{figure CP basic demos} shows the palette of basic demos
+available in the CP domain.  Currently there is only a simple network
+queueing demo.
 
 \begin{figure}
 \begin{center}
@@ -222,13 +272,22 @@ the image on an X window.
 
 \begin{blocklist}{(CP demo)}
 \block{MM1Queue}
-The first M means the invervals between arriving processes
-follows Poisson distribution, i.e. \( p[x > t] = e^{-at} \)
+\begin{tex}
+The first M means the intervals between arriving processes
+follows Poisson distribution, i.e.  $ p[x > t] = e^{-at} $
 (exponentially distributed).  The second M means the service time, and
-the last argument is the nember of the servers.
+the last argument is the number of the servers.
+\end{tex}
 \end{blocklist}
 
+\node CP InfoPad Demos
 \subsection{InfoPad Demos}
+
+Figure\tie\ref{figure CP infopad demos} shows the InfoPad
+\cindex{InfoPad} demos available in the CP domain.  The demos are
+simulations of communication between a base station and a hand-held
+voice/video terminal.  Each demo models the system at a different level
+of detail.
 
 \begin{figure}
 \begin{center}
@@ -240,8 +299,17 @@ the last argument is the nember of the servers.
 
 \begin{blocklist}{(CP demo)}
 \block{level0}
+This is a very high-level simulation of the communication from base
+station to terminal.  A summary of processed events is produced on the screen.
+
 \block{level1}
+This is a more detailed simulation which displays moving
+images and plays sound on the workstation speaker.
+
 \block{IPFastChannel}
+This simulation is similar to the previous one except that a more
+complicated channel model is used.
+
 \end{blocklist}
 
 \node Installing the CP Domain
@@ -259,15 +327,18 @@ domains (SDF, DDF, BDF, CG, CGC, etc.) in \code{pigiRpc} or
 quit.  You may also get core dumps when running some systems.  If you
 must have both the CP domain and one or more of the dataflow domains
 and can accept this problem, then disregard the instructions below
-about excluding the dataflow domains from \code{pigiRpc}.
+about excluding the dataflow domains from \code{pigiRpc} and \code{ptcl}.
+
+\node Customizing pigiRpc
+\subsection{Customizing \protect\code{pigiRpc}}
 
 To build a version of \code{pigiRpc} that includes the CP domain, you
 will have to edit the files \file{makefile} and \file{defpalettes.c} in
 \file{$PTOLEMY/src/pigiRpc}.  In \file{makefile}, modify the definition
 of \code{LIBS} to include \samp{$(CP_LIBS)} following
 \samp{$(STARLIBS)}, and \samp{$(LWP_LIBS)} after \samp{-lptolemy}.
-This change causes the proper libraries to be searched when pigiRpc is
-built.
+This change causes the proper libraries to be searched when
+\code{pigiRpc} is built.
 
 \begin{example}
 LIBS=     $(STAR_LIBS) $(CP_LIBS) -lsdftclstars \back
@@ -276,7 +347,8 @@ LIBS=     $(STAR_LIBS) $(CP_LIBS) -lsdftclstars \back
 \end{example}
 
 Modify the definition of \code{LIBFILES} to include
-\samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change sets up
+\samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change,
+which is optional, sets up
 the proper dependencies so that \code{pigiRpc} will be considered
 out-of-date if any of the required library files are more recent.
 
@@ -303,9 +375,59 @@ to the definition of \code{defaultPalettes}.  If you wish, you may also
 remove references to the palettes of unused domains, but this is not
 necessary.  Also modify the value of \code{DEFAULT_DOMAIN} to refer to
 a domain that will be included in  \code{pigiRpc}, such as CP.
+Once these changes have been made, simply issue the command \samp{make}
+in the \file{$PTOLEMY/obj.$ARCH/pigiRpc} directory.  You can now use
+this version of \code{pigiRpc} either by setting the environment
+variable \code{PIGIRPC} to the full path name of this newly created
+version of \code{pigiRpc}, or by using the \samp{-rpc} option of the
+\code{pigi} command.
 
-\unnumbered{References}
-C. A. R. Hoare,
-"Communicating Sequential Processes",
-\emph{Communications of the ACM},
-August 1978.
+\node Customizing ptcl
+\subsection{Customizing \protect\code{ptcl}}
+
+To build a version of \code{ptcl} that includes the CP domain, you will
+have to edit the file \file{makefile.template} in
+\file{$PTOLEMY/src/ptcl}.  The modifications to \file{make.template}
+are similar to those made to \file{makefile} for \code{pigiRpc}.
+In \file{make.template}, modify the definition of \code{LIBS} to
+include \samp{$(CP_LIBS)} after \samp{$(STAR_LIBS)} and
+\samp{$(LWP_LIBS)} after \samp{-lptolemy}.  This change causes the
+proper libraries to be searched when \code{ptcl} is built.
+
+\begin{example}
+LIBS= $(STAR_LIBS) $(CP_LIBS) -lptolemy $(LWP_LIBS) $(TCL_LIBSPEC) $(SYSLIBS)
+\end{example}
+
+Modify the definition of \code{LIBFILES} to include
+\samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change, which
+is optional, sets up the proper dependencies so that \code{ptcl} will
+be considered out-of-date if any of the required library files are more
+recent.
+
+\begin{example}
+LIBFILES= $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \
+	  $(LIBDIR)/libptolemy.a
+\end{example}
+
+Modify the definition of \code{ALLSTARS} to include \samp{$(CPSTARS)}
+and exclude all dataflow and code generation stars.  Also eliminate the
+targets in \samp{ALLTARGETS}.  This causes the CP domain to be compiled
+in to \code{pigiRpc}, and prevents the other domains from being
+included.
+
+\begin{example}
+ALLSTARS = $(CPSTARS) $(THORSTARS) $(DESTARS)
+ALLTARGETS =
+\end{example}
+
+Once these changes have been made, simply issue the command
+\samp{make} in the \file{$PTOLEMY/obj.$ARCH/ptcl} directory.  Your special
+version of \code{ptcl} is ready for use.
+
+\node References
+\unnumberedsec{References}
+\begin{enumerate}
+\item \label{Hoare78}
+C. A. R. Hoare, "Communicating Sequential Processes",
+\emph{Communications of the ACM}, August 1978.
+\end{enumerate}
