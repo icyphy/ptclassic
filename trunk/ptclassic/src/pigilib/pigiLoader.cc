@@ -304,7 +304,7 @@ static char* genObjDir (const char* srcDirStr) {
 	  // 2. If not found, then check for src sub-directory in path name
 	  if ( ! found ) {
 	    while ( i-- ) {
-	      if ( *srcloc == '/' && strncmp(srcloc, "/src/", 5) ) {
+	      if ( *srcloc == '/' && ( strncmp(srcloc, "/src/", 5) == 0 ) ) {
 		found = TRUE;
 		break;
 	      }
