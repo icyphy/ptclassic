@@ -9,7 +9,7 @@ The two input busses must have the same width, which must
 be half the width of the output bus.
 The input signals are connected to the output in an alternating fashion.
 	}
-	version {$Id$ }
+	version {$Id$}
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -20,7 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { HOF main library }
 	outmulti {
 		name {output}
-		type {=top}
+		type {anytype}
 	}
 	inmulti {
 	        name {top}
@@ -28,95 +28,92 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 	        name {bottom}
-		type {=top}
+		type {anytype}
 	}
 	ccinclude {"Galaxy.h"}
-	ccinclude {"InterpGalaxy.h"}
-	setup {
 
-	  MPHIter nexttop(top);
-	  MPHIter nextbottom(bottom);
-	  // start with the top inputs
-	  MPHIter *nexti = &nexttop;
-	  MPHIter *previ = &nextbottom;
-	  MPHIter nexto(output);
-	  PortHole *source, *sink;
-	  const char *sourceDelayVals, *sinkDelayVals;
-	  int numInDelays, numOutDelays;
+	method {
+	  name { preinitialize }
+	  access { public }
+	  code {
+	    HOFBase::preinitialize();
 
-	  PortHole *pi, *po;
-	  while ((po = nexto++) != 0) {
-	    if ((pi = (*nexti)++) == 0) {
-	      // Out of inputs, flag error
-	      Error::abortRun(*this,
-		"Not enough inputs for the given number of outputs");
-	      return;
-	    }
-	    if((source = pi->far()) == 0 ||
-	       (sink = po->far()) == 0) {
-	      Error::abortRun(*this,"Star is not fully connected");
-	      return;
-	    }
-	    sourceDelayVals = pi->initDelayValues();
-	    sinkDelayVals = po->initDelayValues();
-	    numInDelays = pi->numInitDelays();
-	    numOutDelays = po->numInitDelays();
+	    // Make sure we know the number of connections on the
+	    // input and output multiPortHoles.
+	    initConnections(output);
+	    initConnections(top);
+	    initConnections(bottom);
 
-	    // Get alias pointers before disconnecting
-	    GenericPort *gpo = aliasPointingAt(po);
-	    GenericPort *gpi = aliasPointingAt(pi);
+	    MPHIter nexttop(top);
+	    MPHIter nextbottom(bottom);
+	    // start with the top inputs
+	    MPHIter *nexti = &nexttop;
+	    MPHIter *previ = &nextbottom;
+	    MPHIter nexto(output);
+	    PortHole *source, *sink;
+	    const char *sourceDelayVals, *sinkDelayVals;
+	    int numInDelays, numOutDelays;
 
-	    source->disconnect();
-	    sink->disconnect();
-
-	    int numDelays = 0;
-	    const char* delayVals = 0;
-	    if ((numInDelays > 0) || (sourceDelayVals && *sourceDelayVals)) {
-	      numDelays = numInDelays;
-	      delayVals = sourceDelayVals;
-	      if ((numOutDelays > 0) || (sinkDelayVals && *sinkDelayVals)) {
-		Error::warn(*this,
-			    "Cannot have delays on inputs and outputs."
-			    " Using input value");
+	    PortHole *pi, *po;
+	    while ((po = nexto++) != 0) {
+	      if ((pi = (*nexti)++) == 0) {
+		// Out of inputs, flag error
+		Error::abortRun(*this,
+				"Not enough inputs for the given number of outputs");
+		return;
 	      }
-	    } else {
-	      numDelays = numOutDelays;
-	      delayVals = sinkDelayVals;
-	    }
-	    source->connect(*sink,numDelays,delayVals);
-	    // Register the connection with the parent galaxy so that delays get
-	    // initialized when the galaxy is reinitialized.
-	    if(parent()->isA("InterpGalaxy") && 
-	       ((numDelays > 0) || (delayVals && *delayVals))) {
-	      ((InterpGalaxy*)parent())->registerInit("C",
-						      source->parent()->name(),
-						      source->name(),
-						      delayVals,
-						      sink->parent()->name(),
-						      sink->name());
-	    }
-	    fixAliases(gpi,pi,sink);
-	    fixAliases(gpo,po,source);
+	      if((source = pi->far()) == 0 ||
+		 (sink = po->far()) == 0) {
+		Error::abortRun(*this,"Star is not fully connected");
+		return;
+	      }
+	      sourceDelayVals = pi->initDelayValues();
+	      sinkDelayVals = po->initDelayValues();
+	      numInDelays = pi->numInitDelays();
+	      numOutDelays = po->numInitDelays();
 
-	    source->initialize();
-	    sink->initialize();
+	      // Get alias pointers before disconnecting
+	      GenericPort *gpo = aliasPointingAt(po);
+	      GenericPort *gpi = aliasPointingAt(pi);
 
-	    // Swap iterators
-	    MPHIter *tmp = previ;
-	    previ = nexti;
-	    nexti = tmp;
-	  }                        // while loop
-	  // Out of outputs at this point.
-	  // Check to be sure we are also out of inputs.
-	  if ((nextbottom++ != 0) || (nexttop++ != 0)) {
-	    Error::abortRun(*this,
-		"Not enough outputs for the given number of inputs");
-	    return;
+	      source->disconnect();
+	      sink->disconnect();
+
+	      int numDelays = 0;
+	      const char* delayVals = 0;
+	      if ((numInDelays > 0) || (sourceDelayVals && *sourceDelayVals)) {
+		numDelays = numInDelays;
+		delayVals = sourceDelayVals;
+		if ((numOutDelays > 0) || (sinkDelayVals && *sinkDelayVals)) {
+		  Error::warn(*this,
+			      "Cannot have delays on inputs and outputs."
+			      " Using input value");
+		}
+	      } else {
+		numDelays = numOutDelays;
+		delayVals = sinkDelayVals;
+	      }
+	      connectPorts(*source,*sink,numDelays,delayVals);
+	      fixAliases(gpi,pi,sink);
+	      fixAliases(gpo,po,source);
+
+	      // Swap iterators
+	      MPHIter *tmp = previ;
+	      previ = nexti;
+	      nexti = tmp;
+	    }                        // while loop
+	    // Out of outputs at this point.
+	    // Check to be sure we are also out of inputs.
+	    if ((nextbottom++ != 0) || (nexttop++ != 0)) {
+	      Error::abortRun(*this,
+			      "Not enough outputs for the given number of inputs");
+	      return;
+	    }
+	    // Now remove ourselves from the parent galaxy and self-destruct
+	    Galaxy* mom = idParent();
+	    if(!mom) return;
+	    mom->deleteBlockAfterInit(*this);
 	  }
-	  // Now remove ourselves from the parent galaxy and self-destruct
-	  Galaxy* mom = idParent();
-	  if(!mom) return;
-	  mom->deleteBlockAfterInit(*this);
 	}
 }
 
