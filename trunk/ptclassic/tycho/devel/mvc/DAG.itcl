@@ -158,6 +158,10 @@ body ::tycho::DirectedAcyclicGraph::depth {node {init 1}} {
 # Within each depth, nodes are sorted alphabetically by name.
 #
 body ::tycho::DirectedAcyclicGraph::depthSort {} {
+    if ![array exists contentslist] {
+        # graph is empty.
+        return {}
+    }
     attributeInit depth -1
     set searchid [array startsearch contentslist]
     while {[set node [array nextelement contentslist $searchid]] != {}} {
