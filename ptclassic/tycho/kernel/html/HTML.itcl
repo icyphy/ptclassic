@@ -2014,32 +2014,33 @@ proc HMtag_applet {win param text} {
     HMextract_param $param width
     HMextract_param $param height
 
-    puts "HMtag_applet [info exists tyjavapresent] param='$param'\n\
-            name='$name' code='$code' codebase='$codebase' width='width' \
-            height='$height'"
+#    puts "HMtag_applet [info exists tyjavapresent] param='$param'\n\
+#            name='$name' code='$code' codebase='$codebase' width='width' \
+#            height='$height'"
 
 }
 
-proc HMtag_/applet {win param text} {
-    if { "$name" != "" && [info exists tyjavapresent] } {
-	if [catch {set appletFrame [::java::new TclAppletFrame \
-		[::tycho::autoName .appletFrame]] } errMsg] {
-	    puts "::java::new failed to create a TclAppletFrame:\n$errMsg"
-            return
-	}
+#proc HMtag_/applet {win param text} {
+#    if { "$name" != "" && [info exists tyjavapresent] } {
+#	if [catch {set appletFrame [::java::new TclAppletFrame \
+#		[::tycho::autoName .appletFrame]] } errMsg] {
+#	    puts "::java::new failed to create a TclAppletFrame:\n$errMsg"
+#            return
+#	}
+#
+#	if [catch {$appletFrame run $name} errMsg] {
+#	    puts "Failed to run applet $name\n$errMsg"
+#	}
+#    }
+#}
 
-	if [catch {$appletFrame run $name} errMsg] {
-	    puts "Failed to run applet $name\n$errMsg"
-	}
-    }
-}
+#proc HMtag_param {win param text} {
+#    HMextract_param $param name
+#    HMextract_param $param value
+#    puts "HMtag_param name='$name' value='$value'"
+#
+#}
 
-proc HMtag_param {win param text} {
-    HMextract_param $param name
-    HMextract_param $param value
-    puts "HMtag_param name='$name' value='$value'"
-
-}
 #######################################################################
 #### HMtag_body
 # This code is modified from "surfit".
