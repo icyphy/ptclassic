@@ -59,7 +59,7 @@
 # <a href="Alonger.html">
 # <i>Alonger</i></a>: moves the bar vertically
 # <li>
-# <a href="Interactor.html">
+# <a href="Stepper.html">
 # <i>Stepper</i></a>: moves the bar in discrete steps
 # <li>
 # <a href="Repeater.html">
