@@ -64,8 +64,6 @@ ITCL_SRCS = \
 	EditSearch.itcl \
 	EditSpice.itcl \
 	EditSpiceText.itcl \
-	EditVHDL.itcl \
-	EditVHDLText.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	File.itcl \
