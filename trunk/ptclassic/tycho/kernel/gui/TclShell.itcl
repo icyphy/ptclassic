@@ -188,7 +188,9 @@ class ::tycho::TclShell {
 # name=monitorPtcl>"monitorPtcl"</a> command to display Ptcl commands
 # in its window. The destructor will restore the "puts" and
 # "monitorPtcl" to their original form if the shell window is
-# destroyed.
+# destroyed.  Note that destroying this widget is the only way
+# to restore the puts command.  Configuring the option to 0 after
+# it is constructed is ignored.
 #
 configbody ::tycho::TclShell::stdout {
     if $itk_option(-stdout) {
@@ -202,12 +204,6 @@ configbody ::tycho::TclShell::stdout {
                 $this displayOutput \$args}\] {eval tclputs \$args}}; \
 		proc monitorPtcl {args} \
 		{eval $this recordCommand [list \$args]}"
-    } {
-        # Restore redirected output.
-        after idle "if {\[info commands tclputs\] != {}} \
-                {rename puts {}; rename tclputs puts; \
-                rename monitorPtcl {}; \
-                catch {rename ptclMonitorPtcl monitorPtcl}}"
     }
 }
 
@@ -350,7 +346,11 @@ body ::tycho::TclShell::constructor {args} {
 body ::tycho::TclShell::destructor {} {
     # Restore redirected output, if necessary.
     if $itk_option(-stdout) {
-        configure -stdout 0
+        # Restore redirected output.
+        after idle "if {\[info commands tclputs\] != {}} \
+                {rename puts {}; rename tclputs puts; \
+                rename monitorPtcl {}; \
+                catch {rename ptclMonitorPtcl monitorPtcl}}"
     }
     set menulabel "[info class] $this"
     windowMenuRemoveAll $menulabel
@@ -489,7 +489,7 @@ body ::tycho::TclShell::deleteRange {first last} {
 #
 body ::tycho::TclShell::displayHistory {} {
     set history [join $commandList "\n"]
-    ::tycho::view EditTcl [list -text \"$history\"] ;#" (for highlighting...)
+    ::tycho::view EditItcl [list -text $history] ;#" (for highlighting...)
 }
  
 #########################################################################
