@@ -115,7 +115,7 @@ glimpse: .glimpse_exclude
 		chmod a+r $(PTOLEMY)/tycho/.glimpse_*; \
 	else \
 		$(GLIMPSEINDEX) -H $(TYCHO) $(TYCHO); \
-		chmod a+r $(TYCHO/.glimpse_*; \
+		chmod a+r $(TYCHO)/.glimpse_*; \
 	fi
 
 # Check html docs for problems
