@@ -242,6 +242,8 @@ PortHole :: PortHole () : myGeodesic(0), farSidePort(0),
 myPlasma(0), myBuffer(0), myMultiPortHole(0) {}
 	
 EventHorizon* PortHole :: asEH() { return NULL; }
+	
+ClusterPort* PortHole :: asClusterPort() { return NULL; }
 
 // Porthole destructor.  We remove connections and Plasma, and also
 // remove ourselves from the parent's port list, if any.

@@ -1,5 +1,5 @@
-#ifndef _Nebula_h
-#define _Nebula_h 1
+#ifndef _Cluster_h
+#define _Cluster_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -42,19 +42,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DynamicGalaxy.h"
 #include "Scheduler.h"
 class Star;
-class NebulaPort;
+class ClusterPort;
 
-class Nebula {
-friend class NebulaIter;
+class Cluster {
+friend class ClusterIter;
 public:
 
-    Nebula(Star& self);
+    Cluster(Star& self);
 
-    virtual ~Nebula();
-    // set the master and build nebula
+    virtual ~Cluster();
+    // set the master and build cluster
     virtual void setMasterBlock(Block* master,PortHole** newPorts = NULL);
     
-    // Set the scheduler of the Nebula
+    // Set the scheduler of the Cluster
     void setInnerSched(Scheduler* s);
 
     void setStopTime(double limit) {
@@ -67,12 +67,12 @@ public:
     
     Galaxy* galaxy() { return &gal;}
 
-    // Generate the schedules of the nested Nebulas recursively.
+    // Generate the schedules of the nested Clusters recursively.
     virtual int generateSchedule();
 
-    int isNebulaAtomic() const;
+    int isClusterAtomic() const;
     
-    void addNebula(Nebula*);
+    void addCluster(Cluster*);
 
     void addGalaxy(Galaxy*,PortHole**);
 
@@ -84,14 +84,14 @@ public:
     
     Scheduler* innerSched() { return sched;} 
 
-//	void merge(Nebula*);
-//	void absorb(Nebula*);
+//	void merge(Cluster*);
+//	void absorb(Cluster*);
 
     int run();
 
     virtual PortHole* clonePort(const PortHole*,Star*) = 0;
 
-    virtual Nebula* newNebula(Block* s = NULL) const = 0;
+    virtual Cluster* newCluster(Block* s = NULL) const = 0;
 
     virtual int flattenGalaxy(Galaxy*) {return FALSE;}
     
@@ -99,7 +99,7 @@ public:
     StringList displaySchedule();
     
 protected:
-    // The Star part of the Nebula.
+    // The Star part of the Cluster.
     Star& selfStar;
 
     Block* master;
@@ -108,27 +108,27 @@ protected:
     Scheduler* sched;
 
 private:
-    // Connect two Nebula PortHoles together
+    // Connect two Cluster PortHoles together
     void connect(PortHole* source, PortHole* destination);
 };
 
-// An iterator for NebulaList.
-class NebulaIter : private GalStarIter {
+// An iterator for ClusterList.
+class ClusterIter : private GalStarIter {
 public:
-    NebulaIter(Nebula& n):GalStarIter(n.gal) {};
+    ClusterIter(Cluster& n):GalStarIter(n.gal) {};
 
-    Nebula* next() {
+    Cluster* next() {
 	Star* star = GalStarIter::next();
-	return star? star->asNebula(): NULL;
+	return star? star->asCluster(): NULL;
     }
 
-    Nebula* operator++(POSTFIX_OP) { return next();}
+    Cluster* operator++(POSTFIX_OP) { return next();}
     GalStarIter::reset;
 };
 
-class NebulaPort {
+class ClusterPort {
 public:
-    NebulaPort(PortHole& self, const PortHole& p, Star* parent);
+    ClusterPort(PortHole& self, const PortHole& p, Star* parent);
     const PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
@@ -138,50 +138,50 @@ public:
 	return real().isItOutput();
     }
 
-    void setNebAlias(PortHole* np) { nebAliasedTo = np;} 
+    void setClusterAlias(PortHole* np) { clusterAliasedTo = np;} 
 
-    PortHole* nebAlias() const { return nebAliasedTo; }
+    PortHole* clusterAlias() const { return clusterAliasedTo; }
 
-    PortHole* realNebulaPort();
+    PortHole* realClusterPort();
 private:
     
-    // selfPort is a reference to the PortHole side of a NebulaPort
+    // selfPort is a reference to the PortHole side of a ClusterPort
     PortHole& selfPort;
 
-    // nebulaAliased much like aliases used in Galaxy ports, points to
-    // the actual nebulaPort.
-    PortHole* nebAliasedTo;
+    // clusterAliased much like aliases used in Galaxy ports, points to
+    // the actual clusterPort.
+    PortHole* clusterAliasedTo;
 
     // master is a reference to the original PortHole that this
     // porthole represents.
     const PortHole& master;
 };
 
-class NebulaIterContext;
+class ClusterIterContext;
 
-class AllNebulaIter {
+class AllClusterIter {
 public:
-    AllNebulaIter(Nebula&);
-    ~AllNebulaIter();
-    Nebula* next();
-    Nebula* operator++(POSTFIX_OP) { return next();}
+    AllClusterIter(Cluster&);
+    ~AllClusterIter();
+    Cluster* next();
+    Cluster* operator++(POSTFIX_OP) { return next();}
     void reset();
 protected:
-    NebulaIter *thisLevelIter;
-    NebulaIterContext *stack;
-    void push(Nebula&);
+    ClusterIter *thisLevelIter;
+    ClusterIterContext *stack;
+    void push(Cluster&);
     void pop();
 };
 
-class FatNebulaIter : private AllNebulaIter {
+class FatClusterIter : private AllClusterIter {
 public:
-    FatNebulaIter(Nebula&);
-    Nebula* next();
-    Nebula* operator++(POSTFIX_OP) { return next();}
-    void reset() { AllNebulaIter::reset();}
+    FatClusterIter(Cluster&);
+    Cluster* next();
+    Cluster* operator++(POSTFIX_OP) { return next();}
+    void reset() { AllClusterIter::reset();}
 
     // need a public destructor because of private derivation
-    ~FatNebulaIter(){}
+    ~FatClusterIter(){}
 };
 
 #endif

@@ -47,6 +47,8 @@ class Target;
 	// class Star
 	////////////////////////////////////
 
+class Cluster;
+
 class Star : public Block  {
 
 public:
@@ -67,6 +69,9 @@ public:
 	/* virtual */ Star& asStar();
 	/* virtual */ const Star& asStar() const;
 
+        // Return myself as a Cluster
+        virtual Cluster* asCluster();
+    
 	// Return my indexValue.
 	int index() const { return indexValue;}
 

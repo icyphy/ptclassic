@@ -1,4 +1,4 @@
-static const char file_id[] = "DFNebula.cc";
+static const char file_id[] = "DFCluster.cc";
 /******************************************************************
 Version identification:
  $Id$
@@ -35,35 +35,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "DFNebula.h"
+#include "DFCluster.h"
 
-int DFNebula::run() {
-    return Nebula::run();
+int DFCluster::run() {
+    return Cluster::run();
 }
 
 // Constructors
-DFNebula::DFNebula() : DataFlowStar(), Nebula(*(DataFlowStar*)this) {};
+DFCluster::DFCluster() : DataFlowStar(), Cluster(*(DataFlowStar*)this) {};
 
-DFNebulaPort::DFNebulaPort(const PortHole* master, Star* parent)
-: DFPortHole(), NebulaPort(*this,*master,parent) {
+DFClusterPort::DFClusterPort(const PortHole* master, Star* parent)
+: DFPortHole(), ClusterPort(*this,*master,parent) {
     const DFPortHole& dfmaster = *(const DFPortHole*)master;
     DFPortHole::maxBackValue = dfmaster.maxDelay();
 }
 
-PortHole* DFNebula::clonePort(const PortHole* master, Star* parent) {
-    return new DFNebulaPort(master,parent);
+PortHole* DFCluster::clonePort(const PortHole* master, Star* parent) {
+    return new DFClusterPort(master,parent);
 }
 
-Nebula* DFNebula::newNebula(Block* master) const {
-    LOG_NEW; Nebula* neb = new DFNebula();
-    if (master) neb->setMasterBlock(master);
-    return neb;
+Cluster* DFCluster::newCluster(Block* master) const {
+    LOG_NEW; Cluster* cluster = new DFCluster();
+    if (master) cluster->setMasterBlock(master);
+    return cluster;
 }
 
-int DFNebula::isSDFinContext() const {
+int DFCluster::isSDFinContext() const {
     
-    if (isNebulaAtomic())
-	return Nebula::master?((DataFlowStar*)Nebula::master)->isSDFinContext():TRUE;
+    if (isClusterAtomic())
+	return Cluster::master?((DataFlowStar*)Cluster::master)->isSDFinContext():TRUE;
     GalStarIter nextStar(gal);
     DataFlowStar* s;
     while ((s = (DataFlowStar*) nextStar++) != 0)
@@ -71,21 +71,21 @@ int DFNebula::isSDFinContext() const {
     return TRUE;
 }
 
-/*virtual*/ void DFNebula::setMasterBlock(Block*master,PortHole**newPorts) {
-    Nebula::setMasterBlock(master,newPorts);
+/*virtual*/ void DFCluster::setMasterBlock(Block*master,PortHole**newPorts) {
+    Cluster::setMasterBlock(master,newPorts);
     if (master->isItAtomic())
 	this->repetitions = ((DataFlowStar*)master)->repetitions;
 }
 
-/*virtual*/ int DFNebula::generateSchedule() {
-    if (isNebulaAtomic()) return TRUE;
-    if (!Nebula::generateSchedule()) return FALSE;
-    // Now we must adjust all external Nebula porthole parameters
-    BlockPortIter nebulaPorts(*this);
-    DFNebulaPort* port;
-    while((port = (DFNebulaPort*) nebulaPorts++) != NULL) {
-	DFNebulaPort* realPort=(DFNebulaPort*)port->asNebulaPort()->nebAlias();
-	DFNebula* star = (DFNebula*) realPort->parent();
+/*virtual*/ int DFCluster::generateSchedule() {
+    if (isClusterAtomic()) return TRUE;
+    if (!Cluster::generateSchedule()) return FALSE;
+    // Now we must adjust all external Cluster porthole parameters
+    BlockPortIter clusterPorts(*this);
+    DFClusterPort* port;
+    while((port = (DFClusterPort*) clusterPorts++) != NULL) {
+	DFClusterPort* realPort=(DFClusterPort*)port->asClusterPort()->clusterAlias();
+	DFCluster* star = (DFCluster*) realPort->parent();
 	int reps = star->reps();
 	port->setSDFParams(realPort->numXfer()*reps,realPort->maxDelay()*reps);
     }
