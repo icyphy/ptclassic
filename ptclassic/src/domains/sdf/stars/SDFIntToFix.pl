@@ -45,6 +45,7 @@ specified in the precision parameter, then the OverflowHandler will be called.
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		  Error::abortRun( *this, "Invalid OverflowHandler" );
+		out.set_rounding( ((int) RoundFix) );
         }
 	go {
 		out = (double) ((int)(input%0));

@@ -213,10 +213,10 @@ The input particles are only cast to this precision if the parameter
 		out.set_ovflow( ((const char *) OverflowHandler) );
 
 		// Set all fixed-point assignments/computations to use rounding
-		fixIn.set_rounding(TRUE);
-		tap.set_rounding(TRUE);
-		Accum.set_rounding(TRUE);
-		out.set_rounding(TRUE);
+		fixIn.set_rounding( ((int) RoundFix) );
+		tap.set_rounding( ((int) RoundFix) );
+		Accum.set_rounding( ((int) RoundFix) );
+		out.set_rounding( ((int) RoundFix) );
         }
         go {
             int phase, tapsIndex;

@@ -33,17 +33,6 @@ If the value of the double cannot be represented by the number of bits
 specified in the precision parameter, then a error message is given.
 		}
 	}
-	defstate {
-		name { masking }
-		type { string }
-		default { "truncate" }
-		desc {
-Masking method.
-This parameter is used to specify the way the complex number converted to
-a double is masked for casting to the fixed-point notation.
-The keywords are: "truncate" (the default) and "round".
-		}
-	}
 	protected {
 		Fix out;
 	}
@@ -56,14 +45,7 @@ The keywords are: "truncate" (the default) and "round".
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		  Error::abortRun( *this, "Invalid OverflowHandler" );
-
-		const char* Masking = masking;
-		if ( strcasecmp(Masking, "truncate") == 0 )
-		  out.Set_MASK(Fix::mask_truncate);
-		else if ( strcasecmp(Masking, "round") == 0 )
-		  out.Set_MASK(Fix::mask_truncate_round);
-		else
-		  Error::abortRun(*this, ": not a valid function for masking");
+		out.set_rounding( ((int) RoundFix) );
 	}
 	go {
 		out = (double) (input%0);
