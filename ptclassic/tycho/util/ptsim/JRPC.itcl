@@ -70,7 +70,7 @@ class ::tycho::JRPC {
     public variable portnum 19876
 
     # Debug flag
-    public variable debug 0
+    public variable debug 1
 
     ###################################################################
     ####                         public methods                    ####
@@ -95,6 +95,9 @@ class ::tycho::JRPC {
     # Socket used to communicate with the Tcl Blend sub process
     private variable _clientSocket
 
+    # Log file that contains the output of the tyjtclsh command
+    private variable _logFile
+
     # Process ID of the Tcl Blend process
     private variable _subprocpid
 }
@@ -111,18 +114,43 @@ body ::tycho::JRPC::constructor {args} {
 
     # FIXME: this will probably only work under Unix right now.
     # FIXME: we need to save the output
-    set _subprocpid [exec tyjtclsh \
+    set _logFile [::tycho::tmpFileName JRPClog .txt]
+    if [catch {set _subprocpid [exec tyjtclsh \
             [file join $tycho util devtools JRPCServer.tcl] \
-            $portnum &]
-
+            $portnum >& $_logFile &]} err] {
+        puts "Failed to start up tyjtclsh:\n$err\nLogfile:\n"
+	if [file exists $_logFile] {
+	    set fd [open $_logFile]
+	    while [gets $fd lineIn] {
+		puts "$lineIn"
+		if [eof $fd] {
+		    break
+		}
+	    }
+	    close $fd
+	}
+        error "Failed to start up tyjtclsh:\n$err"
+    }
     debug "Created sub-process $_subprocpid"
 
-    # FIXME: this is lame too.
-    debug "Falling asleep for five seconds..."
-    exec sleep 5
+
+    set startupDelay 5
+    debug "Waiting $startupDelay seconds for the backend to start..."
+    set endTime [expr [clock seconds] + $startupDelay]
+    # FIXME: Busy loop.  We don't have a 'sleep' binary under Windoze
+    # We could use after, but what we want to do is delay the
+    # use of the JRPC send method until after we set _clientSocket
+    while {[clock seconds] < $endTime} {}
 
     debug "About to get socket at port $portnum"    
-    set _clientSocket [socket localhost $portnum]
+    if [catch {set _clientSocket [socket localhost $portnum]} err] {
+	error "JRPC: Maximum retry count of $maxRetryCount exceeded"
+	if [file exists $_logFile] {
+	    set fd [open $_logFile]
+	    while [puts [gets $fd]] {}
+	    close $fd
+	}
+    }
     debug "Got socket $_clientSocket"
     fconfigure $_clientSocket -blocking 0
 
@@ -138,6 +166,7 @@ body ::tycho::JRPC::destructor {} {
     catch {send exit}
     catch {close $_clientSocket}
     catch {exec kill $_subprocpid}
+    catch {file delete -force $_logFile}
 }
 
 
@@ -150,9 +179,16 @@ body ::tycho::JRPC::destructor {} {
 # Run a remote command on channel.  Wait for the results
 #
 body ::tycho::JRPC::send {script} {
+    if ![info exists _clientSocket] {
+	global errorInfo
+	error "Can't send commands to sub process, _clientSocket is not set\n\
+		$errorInfo"
+    }
+
     puts $_clientSocket $script
     puts $_clientSocket _JRPC_EndCommand_Cookie_
     flush $_clientSocket
+
 
     # FIXME: this is a busy loop, and it sucks.
     set rl {}
