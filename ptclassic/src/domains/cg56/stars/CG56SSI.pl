@@ -3,7 +3,7 @@ defstar {
     domain { CG56 }
     desc { A generic input/output star the 560001 SSI port. }
     version { $Id$ }
-    author { Chih-Tsung Huang }
+    author { Kennard White, Chih-Tsung Huang (ported from Gabriel) }
     acknowledge { Gabriel author Phil Lapsley. }
     copyright { 1992 The Regents of the University of California }
     location { CG56 library }
@@ -551,7 +551,6 @@ $label(tx_done)
 	config_hardware();
     }
     initCode {
-	    cerr << "initCode: " << doIntr << "\n";
 	    if ( ! doIntr ) {
 	        gencode(ssiInit);
             } else {
@@ -571,7 +570,6 @@ $label(tx_done)
             }
     }	   
     go {
-	cerr << "go: " << doIntr << "\n";
 	if ( ! doIntr ) {
 	    if ( doErrAbort )
 		gencode(abortyes);
