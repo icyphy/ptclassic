@@ -38,7 +38,7 @@ ROOT =		.
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-MISC_FILES =	README.files copyright
+MISC_FILES =	README README.files copyright
 
 makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
 extraclean:
