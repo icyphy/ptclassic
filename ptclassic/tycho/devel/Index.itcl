@@ -1,8 +1,8 @@
 ##########################################################################
 # Version: $Id$
-# Author: John Reekie, Edward A. Lee
+# Author: John Reekie
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,35 +30,60 @@
 ##########################################################################
 #### Index
 #
-# The _Index_ class implements a hierarchical associative array.
-# It inherits all the capabilities of its Model superclass:
-# a set of files, changes to the array can be undone, redone, and
-# published, and each entry in the 
-# array can have options as well as a value. For example, you
-# can add an entry to an array and give it some options with:
-# <pre>
-#     $dataarray add Foo "Hello" -bar 1
-# </pre>
+# The _Index_ model is a hierarchical associative array.
+# Is has a single entity type, _entry_. The names of nested entries are
+# constructed by joining with the character given by the
+# *-separator* character -- if this is a space, then the
+# names are proper Tcl lists.
+# By default, entries have no attributes; however,
+# these can be added with the *configureEntity* method; in addition,
+# if *-strictoptions* is set to zero, any attributes at all can be
+# given to entries.
 #
-# To change an option, use the entryconfigure{} method:
-# <pre>
-#     $dataarray entryconfigure Foo -bar 0
-# </pre>
+# Here are some examples illustrating the use of _Index_.
+# (For more general information on models, see <a 
+# href="Model.html">Model</a>.) Create an index:
+# <pre><tcl quiet>
+#     catch {delete object $index}
+#     set index [::tycho::Index [::tycho::autoName index]]
+# </tcl></pre>
 #
-# By default, an entry will accept any options. To limit
-# the options that will be accepted and to set the default values,
-# set the *-entryoptions* option (of the Index, not of an entry):
-# <pre>
-#     $dataarray configure -entryoptions {-bar 0 -tar 99}
-# </pre>
+# Now load the index with some data. In
+# this example, give it a string
+# in TIM format -- usually, you would set the *-datafile* option and
+# call load{} (see <a href="Model.html">Model</a>):
+# <pre><tcl>
+#     $index read string {
+#         entry a foo
+#         entry b bar
+#         entry c {} {
+#             entry x boo
+#             entry y baz
+#         }
+#     }
+#     $index describe
+# </tcl></pre>
 #
-# There are a number of methods to access the data. The 
-# simplest is get{}, which returns the value of an entry. The
-# names{} method returns the entry names that match a given 
-# glob-style pattern or regular expression. The match{} method
-# returns a list of names and patterns, and supports various
-# options to select the format of the returned list.
+# Get the value of an entry:
+# <pre><tcl>
+#     $index get a
+# </tcl></pre>
 #
+# Get a nested entry:
+# <pre><tcl>
+#     $index get c.x
+# </tcl></pre>
+#
+# Change the value of an entry:
+# <pre><tcl>
+#     $index assign c.x moo
+#     $index describe
+# </tcl></pre>
+#
+# Find all entries with names between "b" and "x":
+# <pre><tcl>
+#     $index names {[b-x]} *
+# </tcl></pre>
 #
 class ::tycho::Index {
     inherit ::tycho::Model
@@ -77,7 +102,7 @@ class ::tycho::Index {
     method assign {name data}
     
     # Get the children of an entry
-    method children {name {select all}}
+    method children {name}
     
     # Add an entry to the array
     method entry {name data args}
@@ -85,10 +110,10 @@ class ::tycho::Index {
     # Get the attributes of an entry
     method entryattrs {name}
 
-    # Get an option or options of an entry
-    method entrycget {name option}
+    # Get an attribute or attributes of an entry
+    method entrycget {name attribute}
 
-    # Configure the entry with one or more options
+    # Configure the entry with one or more attributes
     method entryconfigure {name args}
     
     # Delete an entry
@@ -103,11 +128,11 @@ class ::tycho::Index {
     # Return an entry
     method get {name}
 
-    # Return a list of entries and values based on a pattern
-    method match {pattern args}
-
     # Return a list of names that match a pattern
-    method names {{pattern *} {regexpflag {}}}
+    method names {{pattern *} {context {}}}
+
+    # Return a list of names that match a regular expression
+    method namesregexp {{pattern *} {context {}}}
 
     # Get the parent of an entry
     method parent {name}
@@ -116,7 +141,7 @@ class ::tycho::Index {
     method root {name}
     
     # Get the root entries
-    method roots {{select all}}
+    method roots {}
     
     #################################################################
     ####                   private methods                       ####
@@ -128,18 +153,21 @@ class ::tycho::Index {
 ########################################################################
 #### constructor
 #
-body ::tycho::Index::constructor {args} {
+body ::tycho::Index::constructor {args} {	
+	# By default, use a period as separator
+	configure -separator "."
+
     # Evaluate options
     eval configure $args
 
     # I have only one entity type with a value and no default attributes
-    entity entry 1
+    defineEntity entry -valued 1
 }
 
 ########################################################################
 #### assign
 #
-# Assign new data to an existsing entry. Flag an error if the entry
+# Assign new data to an existing entry. Flag an error if the entry
 # does not exist. Return the inverse command.
 #
 body ::tycho::Index::assign {name value} {
@@ -152,8 +180,8 @@ body ::tycho::Index::assign {name value} {
 #
 # Return the children of an entry.
 #
-body ::tycho::Index::children {name {select all}} {
-    _children $name {} $select
+body ::tycho::Index::children {name} {
+    _children $name entry
 }
 
 ########################################################################
@@ -161,7 +189,7 @@ body ::tycho::Index::children {name {select all}} {
 #
 # Add a new entry to the array. Flag an error if the entry
 # already exists. Additional arguments are the initial values
-# of entry options. Return the inverse command.
+# of entry attributes. Return the inverse command.
 #
 body ::tycho::Index::entry {name value args} {
     _verifynot entry $name
@@ -172,7 +200,7 @@ body ::tycho::Index::entry {name value args} {
 #### entryattrs
 #
 # Return a list containing the attributes of the entry as a flat
-# option-value list.
+# attribute-value list.
 #
 body ::tycho::Index::entryattrs {name} {
     _verify entry $name
@@ -182,25 +210,20 @@ body ::tycho::Index::entryattrs {name} {
 ########################################################################
 #### entrycget
 #
-# Get an option of a data entry. Flag an error if the entry
-# does not exist or the option does not.
+# Get an attribute of a data entry. Flag an error if the entry
+# does not exist or the attribute does not.
 #
-body ::tycho::Index::entrycget {name option} {
+body ::tycho::Index::entrycget {name attribute} {
     _verify entry $name
-    _cget entry $name $option
+    _cget entry $name $attribute
 }
 
 ########################################################################
 #### entryconfigure
 #
-# Configure the given entry.  The argument list
-# is a flat list of option-value pairs. If there are arbitrary
-# options, the undo command will not delete options
-# that have not already been set, although it will change
-# back existing options that are changed.
-#
-# Flag an error if the entry does not exist, or if an
-# option is invalid.
+# Configure the given entry and return the inverse command.  The
+# argument list is a flat list of attribute-value pairs.
+# Flag an error if the entry does not exist.
 # 
 body ::tycho::Index::entryconfigure {name args} {
     _verify entry $name
@@ -223,7 +246,7 @@ body ::tycho::Index::entrydelete {name} {
 #
 # Add a new nested entry to the array. Flag an error if the entry
 # already exists. Additional arguments are the initial values
-# of entry options. Return the inverse command.
+# of entry attributes. Return the inverse command.
 #
 body ::tycho::Index::entryin {context name value args} {
     _verifynotin entry $context $name
@@ -233,9 +256,7 @@ body ::tycho::Index::entryin {context name value args} {
 ########################################################################
 #### exists
 #
-# Returns true if the entry is in the model, else false.
-#
-# FIXME: Rename.
+# Returns true if the entry exists, else false.
 #
 body ::tycho::Index::exists {name} {
     _exists entry $name
@@ -253,170 +274,49 @@ body ::tycho::Index::get {name} {
 }
 
 ########################################################################
-#### match
+#### names
 #
-# Return a list of name-value pairs based on the given pattern. By
-# default, the entries in the model are matched against _pattern_
-# using glob-style matching and the returned list is a flat list of
-# name-value pairs. For example, it might return
-# <code>{first This second That}</code>. The
-# following flags can follow the pattern argument:
-# <ul>
-# <li>*-regexp*: Use regular expression matching instead of glob-style
-# matching.
-# <li>*-options*: Return a list of lists, where each sub-list is the
-# entry name, its value, and following elements are option-value
-# pairs, where options are included in the list only if they differ
-# from the defaults. If an entry has an options that has no
-# default (possible if *-checkoptions* is zero) then include it in
-# the result.
-# <li>*-alloptions*: Return a list of lists, where each sub-list is the
-# entry name, its value, and following elements are option-value
-# pairs, where all options are included in the result.
-# <li>*-withoptions* _option_ ... _option_: 
-# Return a list of lists, where each sub-list is the
-# entry name, its value, and following elements are option-value
-# pairs, where only options in the argument list are included in
-# the result. If *-alloptions* is specified, include all of the
-# options in the argument list; if not, include only those that
-# differ from the defaults. This must be the last option flag
-# in the argument list.
-# </ul>
+# Return a list of names matching the given pattern. The
+# _context_ argument, if present, gives the context in which
+# the match is to take place -- by default, this is the root
+# context. To match for entries in all context, supply
+# the value *.
 #
-# FIXME: Works with hierarchical indexes?
-#
-body ::tycho::Index::match {pattern args} {
-    set regexp 0
-    set options "none"
-
-    # Get the option flags
-    while { $args != "" } {
-	set test [lindex $args 0]
-	set args [lreplace $args 0 0]
-	if { $test == "-regexp" } {
-	    set regexp 1
-	} elseif { $test == "-options" } {
-	    set options "different"
-	} elseif { $test == "-alloptions" } {
-	    set options "all"
-	} elseif { $test == "-withoptions" } {
-	    if { $options == "all" } {
-		set options "withalloptions"
-	    } else {
-		set options "withdifferentoptions"
-	    }
-            set requested $args
-	    set args ""
-	}
-    }
-
-    # Get the matching names
-    if { $regexp } {
-	set matching [names $pattern -regexp]
-    } else {
-	# Glob-style matching. Optimize for the default case
-	if { $options == "none" } {
-	    return [array get _value $pattern]
-	} else {
-	    set matching [array names _value $pattern]
-	}
-    }
-    
-    # Return the found entries with option values
-    array set default [_defaults entry]
+body ::tycho::Index::names {{pattern *} {context {}}} {
     set result {}
-    switch -exact $options {
-	"none" {
-	    # Return names and values
-	    foreach name $matching {
-		lappend result $name $_value($name)
-		append result "\n"
-	    }
-	}
-	"all" {
-	    # Return list of lists with all options
-	    foreach name $matching {
-		set partial [list $name $_value($name)]
-		eval lappend partial $_attrs($name)
-                lappend result $partial
-		append result "\n"
-	    }
-	}
-	"different" {
-	    # Include options only if they differ from the default
-	    foreach name $matching {
-		set partial [list $name $_value($name)]
-		foreach {opt val} $_attrs($name) {
-		    if { ! [::info exists default($opt)] \
-			    || $default($opt) != $val } {
-			lappend partial $opt $val
-		    }
-		}
-		lappend result $partial
-                append result "\n"
-	    }
-	}
-	"withalloptions" {
-	    # Include options only if they are requested
-	    foreach name $matching {
-		lappend result $name $_value($name)
-		array set temp $_attrs($name)
-		foreach opt $requested {
-		    lappend partial $opt $temp($opt)
-		}
-		lappend result $partial
-		append result "\n"
-	    }
-	}
-	"withdifferentoptions" {
-	    # Include options only if they are requested and they
-	    # are different from the default
-	    foreach name $matching {
-		set partial [list $name $_value($name)]
-		array set temp $_attrs($name)
-		foreach opt $requested {
-		    if { ! [::info exists default($opt)] \
-			    || $default($opt) != $temp($opt) } {
-			lappend partial $opt $temp($opt)
-		    }
-		}
-		lappend result $partial
-		append result "\n"
-	    }
-	}
+    # We have to flatten the pattern, because Tcl insists
+    # on putting braces around it... I have no confidence that
+    # this will work in all reasonable cases...
+    # FIXME
+    foreach quad [array names _info [concat [list entry $context] $pattern *]] {
+        lappend result [lindex $quad 3]
     }
     return $result
 }
 
 ########################################################################
-#### names
+#### namesregexp
 #
-# Return a list of names based on the given pattern. The
-# *-regexp* flag following the pattern selects regular expression
-# matching instead of glob-style matching.
+# Return a list of names matching the given regular expression. The
+# _context_ argument, if present, gives the context in which
+# the match is to take place -- by default, this is the root
+# context. To match for entries in all contexts, supply
+# the value *.
 #
-# FIXME: Works with hierarchical indexes?
-#
-body ::tycho::Index::names {{pattern *} {regexpflag {}}} {
-    if { $regexpflag != "" } {
-	# Get names using regular expression matching
-	set result {}
-	set testlist [array names _value]
-	while { [set name [lsearch -regexp $testlist $pattern]] != -1 } {
-	    lappend result [lindex $testlist $name]
-	    set result [lreplace $testlist 0 $name]
-	}
-	return $result
-    } else {
-	# Glob-style matching
-	return [array names _value $pattern]
+body ::tycho::Index::namesregexp {{pattern *} {context {}}} {
+    set result {}
+    foreach quad [array names _info [list entry $context * *]] {
+        if [regexp $pattern [lindex $quad 2]] {
+            lappend result [lindex $quad 3]
+        }
     }
+    return $result
 }
 
 ########################################################################
 #### parent
 #
-# Return the parent of an entry.
+# Return the parent of an entry or group.
 #
 body ::tycho::Index::parent {name} {
     _parent entry $name
@@ -436,7 +336,7 @@ body ::tycho::Index::root {name} {
 #
 # Return the root entries.
 #
-body ::tycho::Index::roots {{select all}} {
-    _roots {} $select
+body ::tycho::Index::roots {} {
+    _roots entry
 }
 
