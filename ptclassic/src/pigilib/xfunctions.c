@@ -50,13 +50,8 @@ void
 win_msg(omsg)
 char * omsg;
 {
-	Tcl_CmdBuf buf;
-	char* command;
-	buf = Tcl_CreateCmdBuf();
-	Tcl_AssembleCmd(buf,"ptkImportantMessage .ptkMessage {");
-	Tcl_AssembleCmd(buf,omsg);
-	command = Tcl_AssembleCmd(buf,"}\n");
-	if(Tcl_Eval(ptkInterp, command, 0, (char **) NULL) != TCL_OK) {
+	if (Tcl_VarEval(ptkInterp, "ptkImportantMessage .ptkMessage {",
+	  omsg, "}",NULL) != TCL_OK) {
 		fputs(omsg,stdout);
 	}
 }
@@ -123,8 +118,6 @@ char *pigiFilename = NULL;      /* initialized by pigiMain */
 void PrintVersion ()
 {
     char buf[200];
-    Tcl_CmdBuf tclBuf;
-    char* command;
 
     PrintCon(pigiVersion);
     if ( pigiFilename == NULL )
@@ -132,11 +125,6 @@ void PrintVersion ()
     sprintf( buf, "Running %s, %d", pigiFilename, getpid());
     PrintCon(buf);
 
-    tclBuf = Tcl_CreateCmdBuf();
-    Tcl_AssembleCmd(tclBuf,"ptkStartupMessage {");
-    Tcl_AssembleCmd(tclBuf,pigiVersion);
-    Tcl_AssembleCmd(tclBuf,"} {");
-    Tcl_AssembleCmd(tclBuf,pigiFilename);
-    command = Tcl_AssembleCmd(tclBuf,"}\n");
-    Tcl_Eval(ptkInterp, command, 0, (char **) NULL);
+    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", pigiVersion, "} {",
+      pigiFilename, "}", NULL);
 }
