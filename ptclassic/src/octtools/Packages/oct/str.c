@@ -24,7 +24,6 @@ static char SccsId[]="$Id$";
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
-static char rcs_id[] = "$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "st.h"
