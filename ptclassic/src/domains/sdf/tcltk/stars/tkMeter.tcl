@@ -9,9 +9,7 @@
 # limitation of liability, and disclaimer of warranty provisions.
 #
 
-if {[set ${starID}(put_in_control_panel)]} \
-   { set s $ptkControlPanel.low.meter_$starID } \
-   { set s $ptkControlPanel.meter_$starID }
+set s $ptkControlPanel.meter_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -21,7 +19,7 @@ if {![winfo exists $s]} {
 
     if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
-	pack append $ptkControlPanel.low $s top
+	pack after $ptkControlPanel.low $s top
     } {
         toplevel $s
         wm title $s "Bar Meters"
@@ -50,8 +48,17 @@ if {![winfo exists $s]} {
 	}
     }
 
-    proc callTcl_$starID {starID} "
+    proc goTcl_$starID {starID} "
         tkMeterSetValues $starID [set ${starID}(numInputs)] $s
     "
+
+    proc destructorTcl_$starID {starID} {
+	global $starID
+	if {[set ${starID}(put_in_control_panel)]} {
+	    # Remove the meters from the control panel, if they still exist
+	    global ptkControlPanel
+	    destroy $ptkControlPanel.meter_$starID
+	}
+    }
 }
 unset s
