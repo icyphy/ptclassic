@@ -18,7 +18,7 @@ source value.
 Currently only scalors may be output (not waveforms).  One of three
 graphical interfaces may be used: pushbutton, checkbutton, and slider.
 (scale is synonymous with slider, commandbutton is synonymous with pushbutton).
-The \fIwidget\fP state controls which interface will be used.
+The \fIbuttonType\fP state controls which interface will be used.
 .LP
 Both \fBbutton\fP widgets presents a single button to the user that
 may be "pressed" with the mouse.  The buttons differ
@@ -43,31 +43,35 @@ otherwise \fIdspMinVal\fP is output.
 	    attributes { A_NONSETTABLE }
     }
     state {
-	    name { hostInitVal }
-	    type { FLOAT }
-	    desc { Initial value. }
+	    name { offVal }
+	    type { FIX }
+	    desc { Value to output when button off/not pressed. }
+	    default { "0" }
+    }
+    state {
+	    name { onVal }
+	    type { FIX }
+	    desc { Value to output when button on/pressed. }
+	    default { ONE }
+    }
+    state {
+	    name { initiallyOn }
+	    type { INT }
+	    desc { "Boolean: Initial state is on? (checkbutton only)" }
 	    default { 0 }
     }
-    state {
-	    name { dspMin }
-	    type { FIX }
-	    desc { DSP minimum value. }
-	    default { "-1" }
-    }
-    state {
-	    name { dspMax }
-	    type { FIX }
-	    desc { DSP maximum value. }
-	    default { 1 }
-    }
     codeblock(cbButtonAio) {
-$val(canonicalWidget) $ref(value) $fullname() "$val(label)" $val(hostMin) $val(hostMax) $val(hostInitVal) $val(dspMin) $val(dspMax) "$val(scale)"
+$val(canonicalWidget) $ref(value) $fullname() "$val(label)" $val(offVal) $val(onVal) $val(initiallyOn)
     }
     start {
-	const char *wn = widget;
+	const char *wn = buttonType;
 	/*IF*/ if ( strcmp(wn,"pushbutton")==0 
 		 || strcmp(wn,"commandbutton")==0 ) {
-	    cononicalWidget = "pushbutton";
+	    canonicalWidget = "aio_pushbutton";
+	    initiallyOn = 0;
+	} else if ( strcmp(wn,"checkbutton")==0 ) {
+	    canonicalWidget = "aio_checkbutton";
+	    initiallyOn = int(initiallyOn) ? 1 : 0;
 	} else {
 	    Error::abortRun(*this,"Unknown button type.");
 	    return;
