@@ -6,14 +6,16 @@ Demonstrates a DDF Wormhole whose inside domain is SDF.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE Case
 This rather trivial demo illustrates the use of a wormhole.
+.Ie "wormhole, SDF in DDF"
 The DDF domain has an \fIif-then-else\fR overall structure, consisting
 of a pair of
 .c Case
 and
 .c EndCase
-stars.  If the \fIcontrol\fR boolean is FALSE, the input token to the
+stars.
+.Se Case
+If the \fIcontrol\fR boolean is FALSE, the input token to the
 .c Case
 star routes to the false output(output#1) port, then the
 wormhole, and finally to the false input(input#1)

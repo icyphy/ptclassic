@@ -6,10 +6,11 @@ Demonstrates the Self star.
 .SV $Revision$ $Date$
 .AL "S. Ha and E. A. Lee"
 .LD
-.IE "Self"
 This demo shows how the
 .c Self
 star implements recursion.
+.Se Self
+.Ie recursion
 The Fibonnacci sequence is generated using a rather inefficient recursion
 that nonetheless is a good example
 of how to realize recursion.

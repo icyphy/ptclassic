@@ -6,7 +6,7 @@ Demonstrates the Repeater star.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE "Repeater"
+.Se Repeater
 This demo shows what the
 .c Repeater
 star does.

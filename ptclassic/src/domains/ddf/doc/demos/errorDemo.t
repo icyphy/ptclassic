@@ -23,7 +23,8 @@ infinite waiting usually due to a delay-free loop.  The other
 is an unbounded build up of particles on an arc.  The latter can be
 caused in many ways,
 one of which is illustrated in this demo.
-.IE consistency
+.Ie "inconsistent DDF system"
+.Ie "DDF inconsistent system"
 .pp
 Here, the true output(output#2) of the
 .c Case
@@ -43,6 +44,7 @@ detected by examining the number of particles stored in an arc.
 If the number is larger than the limit (which defaults to 1024), the
 error is signaled.  A lower or higher limit can be specified
 by setting the state called \fImaxBufferSize\fR in the universe.
+.Ir "maxBufferSize"
 In this demo, the maxBufferSize is set to "5".  Since the control
 boolean is always FALSE, the \fIinput#2\fR arc of the
 .c EndCase

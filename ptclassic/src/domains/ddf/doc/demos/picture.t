@@ -6,11 +6,13 @@ Two dimensional random walk with equally spaced points.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE "Repeater"
+.Ie "wormholes, nested"
+.Ie "nested wormholes"
 This demo demonstrates a hierarchy of nested wormholes.
 The outermost SDF domain has a wormhole called "drawline"
 which internally uses the DDF domain.  That wormhole, in turn,
 has a wormhole called "display" which internally uses the SDF domain.
+.Se Repeater
 .pp
 A two-dimensional random vector is generated using two
 .c IIDUniform
