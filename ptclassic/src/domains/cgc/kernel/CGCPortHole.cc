@@ -53,6 +53,9 @@ void CGCPortHole :: finalBufSize() {
 	if (isItInput()) return;
 
 	int reqSize = cgGeo().getMaxNum();
+
+	if (far()->isItOutput()) return;	// check wormhole boundary.
+
 	CGCPortHole* p = realFarPort();
 	if (p->fork()) {
 		// determine the maximum offset.
@@ -91,6 +94,9 @@ void CGCPortHole :: setupForkDests() {
 	ForkDestIter next(this);
 	CGCPortHole *outp, *inp;
 	while ((outp = next++) != 0) {
+		//  check wormhole boundary
+		if (outp->far()->isItOutput()) continue;
+
 		inp = outp->realFarPort();
 		if (inp->fork()) temp.put(inp);
 	}
