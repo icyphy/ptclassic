@@ -71,7 +71,7 @@ public:
 	int size() const; // { return nElements;}
 
 	// Array element 
-	const char* & operator [] (int n) {
+	const char* operator [] (int n) {
 		return val[n];
 	}
 
