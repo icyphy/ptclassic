@@ -36,7 +36,9 @@ include $(CONFIG)
 
 SRCS = 	ptplay.sol2.c
 
-EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.hppa ptplay.linux \
+EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.irix5.cfront \
+	ptplay.irix6 ptplay.irix6.cfront \
+	ptplay.hppa ptplay.linux \
 	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
 	ptplay.hppa.cfront ptplay.freebsd \
 	ptplay.sol2.5 ptplay.sol2.5.cfront
@@ -69,7 +71,9 @@ ptplay.cfront:  ptplay.sun4
 	ln -s $^ $@ 
 ptplay.irix4: ptplay.irix5
 	ln -s $^ $@ 
-ptplay.irix5.cfront: ptplay.irix5
+ptplay.irix6: ptplay.irix5
+	ln -s $^ $@ 
+ptplay.irix6.cfront: ptplay.irix5
 	ln -s $^ $@ 
 ptplay.hppa.cfront: ptplay.hppa
 	ln -s $^ $@ 
