@@ -184,8 +184,8 @@ namespace ::tycho {
 
     # Cliff's IDoc viewer (still under construction)
     ::tycho::File::registerExtensions {.idoc} \
-            {::tycho::view Idoc -file {%s}} \
-            {Idoc viewer} "graphics"
+            {::tycho::view IDoc -file {%s}} \
+            {IDoc viewer} "graphics"
 
 }
 
