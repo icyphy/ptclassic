@@ -58,6 +58,7 @@ HDRS	      = compile.h \
 		PVem.h \
 		TclStarIfc.h \
 		BarGraph.h \
+		XYPlot.h \
 		pigidefine.h
 
 
@@ -96,7 +97,8 @@ LIBCPPSRCS    = kernelCalls.cc \
 		POct.cc \
 		PVem.cc \
 		TclStarIfc.cc \
-		BarGraph.cc
+		BarGraph.cc \
+		XYPlot.cc
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
