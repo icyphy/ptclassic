@@ -303,22 +303,32 @@ body ::tycho::CacheManager::initialize {} {
     # http://ptolemy {{11/15/95 1:50} 1152  text/html    [0-9]+.html          }
     set fd [open $INDEXFILE]
     while {![eof $fd]} {
-        set line [gets $fd]
+        gets $fd line
         if {$line!={}} {
-            set link [lindex $line 0]
-            # Associate URL with other information
-            set _URL($link) [lindex $line 1]
+            set link [lindex $line 0]   ;# Name of URL
+            set info [lindex $line 1]   ;# Information from 0-4
             
-            # Associate filename (if it exists)
-            set _fname([lindex $_URL($link) 3]) 1
-            
-            # Retrieve the index by the name of the cache file
-            regexp {^([0-9]+).*$} [lindex $_URL($link) 3] _ newidx
-            if {$newidx > $INDEX} {set INDEX $newidx}
+            # If all the fields have content, then associate.
+            if {    [lindex $info 0]!={} &&\
+                    [lindex $info 1]!={} &&\
+                    [lindex $info 2]!={}} {
+                # Associate URL with rest of the information
+                set _URL($link) $info
+                
+                # Associate filename (if it exists)
+                set _fname([lindex $info 3]) 1
+                
+                # Retrieve the index by the name of the cache file
+                regexp {^([0-9]+).*$} [lindex $info 3] _ newidx
+                if {$newidx > $INDEX} {set INDEX $newidx}
+            } else {
+                # Otherwise, force to unassociate
+                catch {unset _URL($link)}
+            }
         }
     }
     close $fd
-
+    
     # Clean up cache directory (cache files not in index.db)
     foreach filename [glob -nocomplain [file join $CACHEDIR *]] {
         set filename [file tail $filename]
@@ -327,15 +337,13 @@ body ::tycho::CacheManager::initialize {} {
             file delete [file join $CACHEDIR $filename]
         }
     }
-
+    
     # Clean up index.db (files in index.db not exist in cache directory)
-    set dirtyIndex 0
     foreach url [array names _URL] {
         set file [lindex $_URL($url) 3]
         if {![file exists [file join $CACHEDIR $file]]} {
             #::puts "deleting: $file"
             catch {unset _URL($url)}
-            set dirtyIndex 1
         }
     }
 
