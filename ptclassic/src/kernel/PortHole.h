@@ -302,9 +302,15 @@ class PortHole : public GenericPort
 
 public:
 
+	// Constructor: we come into the world disconnected and nameless,
+	// without a parent.
+	PortHole ();
+	
+	// Destructor: we disconnect ourselves and remove ourselves
+	// from the parent Block
+	~PortHole ();
+
         // Every PortHole must be initialized with the setPort function
-        // This is not done in the constructor because c++ does not
-        // allow us to initialize member classes.
         // Arguments are the name and type (see type.h for supported types).
         PortHole& setPort(const char* portName,
                           Block* parent,                // parent block pointer
@@ -380,12 +386,6 @@ public:
 
 	// initialize the Plasma
 	Plasma* setPlasma(Plasma *useType = NULL);
-
-	// Constructor
-	PortHole ();
-	
-	// Destructor
-	~PortHole ();
 
 	// index value
 	int index() const { return indexValue;}
@@ -526,11 +526,11 @@ public:
         // Add MultiPortHole to list
         void put(MultiPortHole& p) {NamedObjList::put(p);}
 	// Find a multiport with the given name and return pointer
-	const MultiPortHole* multiPortWithName(const char* name) const {
-		return (const MultiPortHole*)objWithName(name);
-	}
 	MultiPortHole* multiPortWithName(const char* name) {
 		return (MultiPortHole*)objWithName(name);
+	}
+	const MultiPortHole* multiPortWithName(const char* name) const {
+		return (const MultiPortHole*)objWithName(name);
 	}
 
 	NamedObjList::size;

@@ -55,7 +55,7 @@ public:
 	// initialize the object
 	virtual void initialize() = 0;
 
-	// method to print top-level info.  MUST BE REDEFINED
+	// method to print top-level info.
 	virtual StringList print (int verbose) const;
 
 	// answer queries about my class
@@ -74,6 +74,9 @@ private:
 	const char* myDescriptor;
 };
 
+// This structure is a list of NamedObj objects.  It should be privately
+// inherited from when creating, say, a list of Block objects.
+
 class NamedObjList : private SequentialList
 {
 	friend class NamedObjListIter;
@@ -91,19 +94,23 @@ public:
 	// The rule is that you need a non-const list to get a
 	// non-const pointer.
 
-	const NamedObj* objWithName(const char* name) const {
+	NamedObj* objWithName(const char* name) {
 		return findObj(name);
 	}
 
-	NamedObj* objWithName(const char* name) {
+	const NamedObj* objWithName(const char* name) const {
 		return findObj(name);
 	}
 
 	// Apply initialize fn to all elements
 	void initElements();
 
-	// ptr to first obj on list (const method)
-	NamedObj* head() const {return (NamedObj*)SequentialList::head();}
+	// head of list (const and non-const versions)
+	NamedObj* head() {return (NamedObj*)SequentialList::head();}
+
+	const NamedObj* head() const {
+		return (const NamedObj*)SequentialList::head();
+	}
 
 	// remove obj from list.  Note: obj is not deleted
 	int remove(NamedObj* o) { return SequentialList::remove(o);}

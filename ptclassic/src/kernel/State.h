@@ -24,8 +24,8 @@ $Id$
  Date of creation: 5/26/90
  Revisions:
 
- State is a data member of a Block, it is where data is stored in
- a Block.
+ State is a data member of a Block, it is where paremeters and
+ state information is stored for that Block.
 
 **************************************************************************/
 
@@ -99,9 +99,6 @@ public:
 
 	// set the initial value
 	void setInitValue(const char* s);
-
-	// alias for Ptolemy 0.3.1 compatibility
-	void setValue(const char* s) {setInitValue(s);}
 
 	// get the initial value
 	const char* initValue () const { return myInitValue;}
@@ -195,12 +192,12 @@ public:
 	void put(State& s) {NamedObjList::put(s);}
 
 	// Find a state with the given name and return pointer
-	const State* stateWithName(const char* name) const {
-		return (const State*)objWithName(name);
-	}
-
 	State* stateWithName(const char* name) {
 		return (State*)objWithName(name);
+	}
+
+	const State* stateWithName(const char* name) const {
+		return (const State*)objWithName(name);
 	}
 
 	NamedObjList::size;
