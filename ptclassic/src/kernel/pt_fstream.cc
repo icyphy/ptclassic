@@ -42,26 +42,42 @@ static void reportError(const char* op) {
 	Error::abortRun(msg);
 }
 
-pt_ifstream::pt_ifstream(const char *name,int mode, int prot)
-: ifstream(expand(name),mode,prot)
-{
+// check for special file names
+// This uses the hardcoded descriptors 0,1,2.  These are appropriate
+// for UNIX only.
+static int check_special(const char *name) {
+	int	fd;
+
+	/*IF*/ if ( strcmp(name,"<cin>")==0 || strcmp(name,"<stdin>")==0 ) {
+	    return 0;
+	} else if ( strcmp(name,"<cout>")==0 || strcmp(name,"<stdout>")==0 ) {
+	    return 1;
+	} else if ( strcmp(name,"<cerr>")==0 || strcmp(name,"<stderr>")==0 ) {
+	    return 2;
+	} else if ( strcmp(name,"<clog>")==0 || strcmp(name,"<stdlog>")==0 ) {
+	    return 2;
+	}
+	return -1;
+}
+
+pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
+	open(name,mode,prot);
+}
+
+void pt_ifstream::open(const char* name, int mode, int prot) {
+	int	fd = check_special(name);
+	if ( fd >= 0 )		rdbuf()->attach(fd);
+	else			ifstream::open(expand(name),mode,prot);
 	if (!*this) reportError("reading");
 }
 
-void pt_ifstream::open(const char* name, int mode, int prot)
-{
-	ifstream::open(expand(name),mode,prot);
-	if (!*this) reportError("reading");
+pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
+	open(name,mode,prot);
 }
 
-pt_ofstream::pt_ofstream(const char *name,int mode, int prot)
-: ofstream(expand(name),mode,prot)
-{
-	if (!*this) reportError("writing");
-}
-
-void pt_ofstream::open(const char* name, int mode, int prot)
-{
-	ofstream::open(expand(name),mode,prot);
+void pt_ofstream::open(const char* name, int mode, int prot) {
+	int	fd = check_special(name);
+	if ( fd >= 0 )		rdbuf()->attach(fd);
+	else			ofstream::open(expand(name),mode,prot);
 	if (!*this) reportError("writing");
 }

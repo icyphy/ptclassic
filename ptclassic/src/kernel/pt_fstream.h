@@ -13,8 +13,10 @@
 
 // 1. expand the file name using expandFileName
 // 2. report file-open errors using Ptolemy's error-reporting functions.
-// The system error value (from "errno") is reported as part of the error
-// message and Error::abortRun is called on an open failure.
+//    The system error value (from "errno") is reported as part of the error
+//    message and Error::abortRun is called on an open failure.
+// 3. The special file names "<cin>", "<cout>" and "<cerr>" 
+//    (and <stdin>, <stdout> ,<stderr>) are recognized.
 //
 // Otherwise they are the same as their baseclasses.
 
