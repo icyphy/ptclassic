@@ -38,8 +38,13 @@ static const char file_id[] = "$RCSfile$";
 #include <signal.h>
 #include <sys/types.h>
 
+#if defined(hppa)
+extern "C" int select(unsigned int width, int* read, int* write, int*
+		      except, const struct timeval *timeout);
+#else
 extern "C" int select(int width, fd_set* read, fd_set* write, fd_set* except,
 			const timeval* timeout);
+#endif
 
 TimeVal::TimeVal()
 {
