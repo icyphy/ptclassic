@@ -13,17 +13,21 @@ Programmer: E. Goei, J. Buck
 #include "kernelCalls.h"
 #include "InterpUniverse.h"
 #include "StringList.h"
+#include "Scheduler.h"
 #include "miscFuncs.h"
 #include "Domain.h"
-#include "Architecture.h"
+#include "Target.h"
+#include "KnownTarget.h"
 #include "Animate.h"
 #include <ACG.h>
+#include <signal.h>
 
 extern ACG* gen;
 
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
+static Target *galTarget = NULL;	 // target for a galaxy
 
 // Define a stream for logging -- log output to pigiLog.pt
 #include <stream.h>
@@ -205,9 +209,14 @@ curDomainName() {
 
 // start a galaxy definition
 extern "C" boolean
-KcDefgalaxy(char *galname, char *domain) {
+KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	logDomain();
 	LOG << "(defgalaxy " << galname << "\n\t(domain " << domain << ")\n";
+	if (innerTarget && strcmp(innerTarget, "<parent>") != 0) {
+		LOG << "(target " << innerTarget << ")\n";
+		galTarget = KnownTarget::clone(innerTarget);
+	}
+	else galTarget = 0;
 	saveGalaxy = currentGalaxy;
 	currentGalaxy = new InterpGalaxy;
 	currentGalaxy->setBlock(galname, saveGalaxy);
@@ -223,7 +232,7 @@ KcEndDefgalaxy(const char* outerDomain) {
 	// note that this call also restores the KnownBlock::currentDomain
 	// to equal the outerDomain.
 	LOG << ")\n";
-	currentGalaxy->addToKnownList(outerDomain);
+	currentGalaxy->addToKnownList(outerDomain,galTarget);
 
 	currentGalaxy = saveGalaxy;
 	return TRUE;
@@ -259,12 +268,13 @@ KcIsKnown(char *className) {
 }
 
 /* 3/28/91
-Return TRUE if name is a compiled-in star, false if static or unknown.
+Return TRUE if name is a compiled-in star, false if static, derived from
+InterpGalaxy (meaning it is legal to replace it), or unknown.
 */
 extern "C" boolean
 KcIsCompiledInStar(char *className) {
 	const Block* b = findClass(className);
-	if (b == 0) return FALSE;
+	if (b == 0 || b->isA("InterpGalaxy")) return FALSE;
 	return !KnownBlock::isDynamic(b->readName());
 }
 
@@ -360,10 +370,11 @@ KcIsMulti(char* blockname, char* portname)
 }
 
 /*
-Get default params of a block.
+Get default params of a block, or for a target.
+KcGetParams, or KcGetTargetParams
 
 Inputs:
-    name = name of block to get params of
+    name = name of block, or target, to get params of
     pListPtr = the address of a ParamList node
 Outputs:
     return = TRUE if ok (no error), else FALSE.
@@ -372,12 +383,10 @@ Outputs:
         if the star has any.  Callers can free() memory in ParamList
         array when no longer needed.
 */
-// done as separate functions because of a wierd 1.37.1 compiler
-// bug: g++ 1.37.1 won't accept an iterator in an extern "C" function!
+
 static boolean
-realGetParams(const char* name, ParamListType* pListPtr)
+realGetParams(const Block* block, ParamListType* pListPtr)
 {
-	const Block *block = findClass(name);
 	if (block == 0) {
 		return FALSE;
 	}
@@ -422,9 +431,34 @@ realGetParams(const char* name, ParamListType* pListPtr)
 	return TRUE;
 }
 
+/* Get a parameter list for a star or galaxy */
 extern "C" boolean
 KcGetParams(char* name, ParamListType* pListPtr) {
-	return realGetParams(name, pListPtr);
+	return realGetParams(findClass(name), pListPtr);
+}
+
+/* like the above, except that it is for a target */
+extern "C" boolean
+KcGetTargetParams(char* name, ParamListType* pListPtr) {
+	return realGetParams(KnownTarget::find(name), pListPtr);
+}
+
+/* modify parameters of a target */
+extern "C" boolean
+KcModTargetParams(ParamListType* pListPtr) {
+	Target* t = universe->myTarget();
+	for (int i = 0; i < pListPtr->length; i++) {
+		const char* n = pListPtr->array[i].name;
+		const char* v = pListPtr->array[i].value;
+		LOG << "\t(targetparam " << n << " \"" << v << "\")\n";
+		State* s = t->stateWithName(n);
+		if (s == 0) {
+			Error::abortRun (*t, "no target-state named ", n);
+			return FALSE;
+		}
+		s->setValue(savestring(v));
+	}
+	return TRUE;
 }
 
 /*
@@ -476,7 +510,7 @@ KcProfile (char* name) {
 		accum_string (name);
 		accum_string (" (");
 		accum_string (b->asGalaxy().myDomain);
-		accum_string ("\n");
+		accum_string (")\n");
 	}
 	const char* desc = b->readDescriptor();
 	accum_string (desc);
@@ -576,11 +610,27 @@ KcNodeConnect (const char* inst, const char* term, const char* node) {
 }
 
 /*
-Return a list of architectures supported by the current domain.
+Return a list of targets supported by the current domain.
 */
 extern "C" int
-supportedArches(const char** names, int nMax) {
-	return Architecture::supportedNames(names,nMax);
+KcDomainTargets(const char** names, int nMax) {
+	return KnownTarget::getList(KnownBlock::domain(),names,nMax);
+}
+
+/*
+Set the target for the universe
+*/
+extern "C" int
+KcSetTarget(const char* targetName) {
+	return universe->newTarget (savestring(targetName));
+}
+
+/*
+Return the default target name for the current domain.
+*/
+extern "C" const char*
+KcDefTarget() {
+	return KnownTarget::defaultName();
 }
 
 /* 7/22/91, by eal
@@ -599,4 +649,11 @@ Get the state of the Animate object.
 extern "C" int
 KcGetAnimationState() {
 	return Animate::enabledFlag;
+}
+
+// catch signals -- Vem passes the SIGUSR1 signal by default
+
+extern "C" void
+KcCatchSignals() {
+	Scheduler::catchInt(SIGUSR1);
 }
