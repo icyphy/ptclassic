@@ -40,6 +40,7 @@ CCS_WITH_H_FILES=\
  Connect.cc \
  DataStruct.cc \
  Display.cc \
+ DoubleLink.cc \
  Domain.cc \
  DynamicGalaxy.cc \
  Error.cc \
