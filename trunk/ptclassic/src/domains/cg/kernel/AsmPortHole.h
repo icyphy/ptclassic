@@ -100,8 +100,11 @@ public:
 		return offset + numberTokens > bufSize();
 	}
 
-	// Initialize
-	void initialize();
+	// Initialize the offset member -- must be called after
+	// any setSDFParams calls on ports take place (e.g. start
+	// funcs in AsmStars).  This is handled by doing it from
+	// AsmTarget after everything has been init-ed.
+	void initOffset();
 public:
 	// return true if I am a fork input
 	int fork() const { return forkDests.size() > 0;}

@@ -54,16 +54,16 @@ Geodesic* AsmPortHole::allocateGeodesic() {
 	return g;
 }
 
-// initialize.  Main job here is to set up the offset.
-void AsmPortHole::initialize() {
-	PortHole::initialize();
+// initialize the offset member.
+void AsmPortHole::initOffset() {
+	int bsiz = bufSize();
 	if (isItOutput()) {
 		offset = numTokens();
-		while (offset > numberTokens) offset -= numberTokens;
+		while (offset > bsiz) offset -= bsiz;
 	}
 	else {
 		offset = -geo().forkDelay();
-		while (offset < 0) offset += numberTokens;
+		while (offset < 0) offset += bsiz;
 	}
 }
 
