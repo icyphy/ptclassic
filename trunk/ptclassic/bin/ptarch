@@ -88,11 +88,11 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo irix5
 	exit 0 ;;
 
-    9000/7??:HP-UX:*:* | 9000/8?7:HP-UX:*:* )
-	echo hppa
+    9000/???:HP-UX:A.09.*:*)
+	echo hppa9
 	exit 0 ;;
 
-    9000/8??:HP-UX:*:*)
+    9000/???:HP-UX:*:*)
 	echo hppa
 	exit 0 ;;
 
