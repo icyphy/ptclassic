@@ -92,6 +92,10 @@ Suppose that the following virtual circuit has been defined:
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 extern int vciToVpi (int);
 extern int vciToSW (int);
 
