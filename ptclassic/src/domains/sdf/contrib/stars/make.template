@@ -51,13 +51,13 @@ SDFVariance.pl \
 SDFWirelessChannel.pl \
 SDFWriteVar.pl
 
-# supporting C++ code
+# supporting C++ files
 LIB_SRCS= \
 Decoder.cc \
 Encoder.cc \
 Interp.cc \
 Wireless.cc \
-fft.cc
+nb_fft.cc
 
 # The .cc files
 SRCS =		$(LIB_SRCS) $(PL_SRCS:.pl=.cc)
@@ -72,12 +72,13 @@ STAR_MK =	sdfcontribstars
 DOMAIN =	SDF_CONTRIB
 DOMAIN_2 =	SDF
 MISC_FILES =	README README.notes
+
 EXTRA_SRCS = \
 $(STAR_MK).c \
-$(PL_SRCS) \
-$(LIB_SRCS) \
-$(LIB_SRCS:.cc=.h) \
-Constants.h
+$(LIB_CC_SRCS) \
+$(LIB_CC_SRCS:.cc=.h) \
+Constants.h \
+$(PL_SRCS)
 
 all:		$(SRCS) stars_all
 
