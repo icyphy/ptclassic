@@ -57,6 +57,9 @@ public:
 // provide the methods setup, begin, go, and wrapup.
 // Any Block, however, may have setup and wrapup.
 
+	// Destructor
+	~Star();
+  
 	// initialization that is called after Scheduler::setup().
 	virtual void begin () {}
 

@@ -53,9 +53,10 @@ Cluster::Cluster(Star&self, const char* domain):
 myDomain(domain),selfStar(self),master(NULL),sched(0),scheduled(0) {};
 
 /*virtual*/ Cluster::~Cluster() {
-    if (isClusterAtomic()) {
-	if (master) ((Star*)master)->setParentCluster(0);
+    if (isClusterAtomic() && master && master->isItAtomic()) {
+	((Star*)master)->setParentCluster(0);
     }
+    selfStar.deleteAllGenPorts();
     LOG_DEL; delete sched;
 }
 
@@ -248,7 +249,7 @@ void Cluster::initMaster() {
 }
 
 int Cluster::isClusterAtomic() const {
-    return master? master->isItAtomic() : FALSE;
+    return !gal.numberBlocks();
 }
 
 int Cluster::run() {
