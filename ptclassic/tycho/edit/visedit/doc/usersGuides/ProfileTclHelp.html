@@ -19,11 +19,11 @@ includes a section on <A HREF="../../../../doc/coding/performance.html">Performa
 
 The Profile Tcl tool uses the TclX <CODE>profile</CODE> command.  TclX
 is an extension to Tcl.  The TclX sources are available at <A
-HREF="ftp.neosoft.com:/pub/tcl/tclx-distrib"><CODE>ftp.neosoft.com:/pub/tcl/tclx-distrib</CODE></A>.
+HREF="ftp://ftp.neosoft.com/pub/tcl/tclx-distrib"><CODE>ftp://ftp.neosoft.com/pub/tcl/tclx-distrib</CODE></A>.
 To use the Profile Tcl tool, you must have the TclX <CODE>profile</CODE>
 command available at runtime.
 
- <P>When the Profiler is started, the Tycho<A
+ <P>When the Profiler is started, the Tycho <A
 HREF="../../../../kernel/doc/usersGuides/LoaderHelp.html">Loader</A>
 will look for the TclX shared library that contains the
 <CODE>profile</CODE> command and attempt to load it.
@@ -60,7 +60,7 @@ To install the patch
 <OL>
 <LI> Grab the TclX sources from
 <A
-HREF="ftp.neosoft.com:/pub/tcl/tclx-distrib"><CODE>ftp.neosoft.com:/pub/tcl/tclx-distrib</CODE></A>.
+HREF="ftp://ftp.neosoft.com/pub/tcl/tclx-distrib"><CODE>ftp://ftp.neosoft.com/pub/tcl/tclx-distrib</CODE></A>.
 
 <LI> <CODE>cd </CODE>to 
 	<CODE>tclX</CODE><I>version</I><CODE>/tcl/generic</CODE>.
@@ -102,18 +102,19 @@ makefile variable.
 There are two ways to adjust these variables:
 <OL>
 <LI> Edit <CODE>$TYCHO/lib/profile/makefile</CODE>
-<LI> Pass the new values as command line options:
+After you have adjusted the makefile accordingly, configure and build
+the shared object:
+<PRE>
+ <CODE>cd $TYCHO/lib/profile; make</CODE>
+</PRE>
+<LI> Or, Pass the new values as command line options:
 <PRE>
 cd $TYCHO/lib/profile
 make TCL_SRC_INCLUDE_DIR=$PTOLEMY/src/tcltk/itcl2.1/tcl7.5/generic/ \
 	$PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl/tclConfig.sh
 </PRE>
 </OL>
-After you have adjusted the makefile accordingly, configure and build
-the shared object:
-<PRE>
- <CODE>cd $TYCHO/lib/profile; make</CODE>
-</PRE>
+
 
 The <CODE>tclXprofile</CODE> shared object will be in
 <CODE>$TYCHO/lib/profile/$PTARCH</CODE>.  Under solaris, the file will
