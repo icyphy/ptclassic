@@ -28,6 +28,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# Please don't use GNU make extensions in this or any other Tycho makefile
 
 DIRS = kernel editors lib domains slate devel doc #bin
 
@@ -87,14 +88,12 @@ subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 # Creat all the indexes
 indices: $(INDICES)
 
+FORCE:
+
 # Create a tycho index file.
-# Note that $wildcard is a gnu make extension
-tycho.idx: kernel/tychoMakeIndex.tcl \
-	    $(wildcard kernel/doc/*.html \
-		    kernel/doc/usersGuides/*.html \
-		    kernel/doc/internals/*.html \
-		    editors/textedit/doc/*.html \
-		    editors/textedit/doc/usersGuides/*.html)
+# We could use the GNU make $(wildcard) extension here, but that would
+# force users to have GNU make.
+tycho.idx: FORCE
 	@echo "Updating $@"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
@@ -107,8 +106,7 @@ tycho.idx: kernel/tychoMakeIndex.tcl \
 	fi
 
 # Create a tycho code index file
-codeDoc.idx: $(wildcard kernel/doc/codeDoc/*.html \
-		    editors/textedit/doc/codeDoc/*.html)
+codeDoc.idx: FORCE
 	@echo "Updating $@"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
