@@ -545,7 +545,7 @@ getNid(Lextok *n)
 
 	if (n->sym->Nid == 0)
 	{	fatal("bad channel name '%s'",
-		(n->sym)?n->sym->name:"no name");
+		(char *) ((n->sym) ? n->sym->name : "no name"));
 	}
 	return n->sym->Nid;
 }
