@@ -1,8 +1,8 @@
-# Makefile for sdf/dsp
+# Makefile for cgc/targets
 # Copyright (c) 1990 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# @(#)makefile	1.3 11/22/93
+# $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
 # Instead run in from ~ptolemy/obj.$ARCH/domains/cg (through the symbolic
@@ -11,7 +11,7 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = stars
+DIRS = main cm5
 
-ME = sdf/dsp
+ME = cgc/targets
 
