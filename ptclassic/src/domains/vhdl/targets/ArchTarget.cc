@@ -403,6 +403,50 @@ void ArchTarget :: trailerCode() {
 	return;
       }
 
+      StringList firstRefPortName = state->firstRef;
+      firstRefPortName << "_IN";
+      StringList muxName = state->firstFiringName;
+      muxName << "_" << firstRefPortName;
+      VHDLMux* firstRefMux =
+	muxList.vhdlMuxWithName(muxName);
+
+      if (!firstRefMux) {
+	Error::abortRun(muxName, ": no such mux in muxList");
+	return;
+      }
+      else {
+	firstRefMux->addInput(initSignal);
+      }
+
+      // FIXME:  dummy signal for control just to please mux maker.
+      // if only one input signal, mux should get replaced anyway
+      VHDLSignal* firstIterDone =
+	signalList.vhdlSignalWithName("FIRST_ITER_DONE");
+      if (!firstIterDone) {
+	firstIterDone = new VHDLSignal;
+	firstIterDone->setName("FIRST_ITER_DONE");
+	firstIterDone->setType("INTEGER");
+	signalList.put(*firstIterDone);
+      }
+
+      firstRefMux->setControl(firstIterDone);
+      initSignal->setControlValue(0);
+      signalList.put(*initSignal);
+
+      /*
+      StringList initName = state->name;
+      initName << "_INIT";
+      signalList.put(initName, state->type);
+      VHDLSignal* initSignal = signalList.vhdlSignalWithName(initName);
+      if (initSignal) {
+	connectSource(state->initVal, initSignal);
+      }
+      else {
+	Error::abortRun(initName,
+			": no such signal with this name in signalList");
+	return;
+      }
+
       VHDLReg* firstRefReg =
 	regList.vhdlRegWithName(state->firstRef);
       if (!firstRefReg) {
@@ -421,6 +465,7 @@ void ArchTarget :: trailerCode() {
 	}
 	firstRefReg->setClock(startClockSignal);
       }
+      */
     }
     // If firings change state, need to connect a reg and a mux
     // between the lastRef to the state and the firstRef to the state.
@@ -460,6 +505,19 @@ void ArchTarget :: trailerCode() {
 	firstRefMux->addInput(initSignal);
 	connectSource(state->initVal, initSignal);
       }
+
+      // NEW: Add a dependency over iterations between
+      // the last ref signal and the first ref reg.
+      VHDLDependency* dep = new VHDLDependency;
+      dep->source = lastRefSignal;
+      dep->sink = firstRefReg;
+      // Need dep to have unique name before putting into list.
+      StringList depName = "";
+      depName << lastRefSignal->getName() << "," << firstRefReg->getName();
+      dep->setName(depName);
+      iterDependencyList.put(*dep);
+      // END NEW
+
       VHDLSignal* iterClockSignal =
 	signalList.vhdlSignalWithName("start_clock");
       if (!iterClockSignal) {
@@ -564,6 +622,7 @@ void ArchTarget :: trailerCode() {
 	}
       }
       else {
+	// Need to create the reg and set it up appropriately.
 	sourceReg = new VHDLReg;
 	sourceReg->setName(sourceName);
 	sourceReg->setType(arc->getType());
@@ -586,6 +645,7 @@ void ArchTarget :: trailerCode() {
 	}
       }
       else {
+	// Need to create the reg and set it up appropriately.
 	destReg = new VHDLReg;
 	destReg->setName(destName);
 	destReg->setType(arc->getType());
@@ -595,6 +655,28 @@ void ArchTarget :: trailerCode() {
 	regList.put(*destReg);
       }
 
+      // NEW: Add a dependency over iterations between
+      // the source reg and the dest reg.
+      VHDLDependency* dep = new VHDLDependency;
+      dep->source = sourceReg;
+      dep->sink = destReg;
+      // Need dep to have unique name before putting into list.
+      StringList depName = "";
+      depName << sourceReg->getName() << "," << destReg->getName();
+      dep->setName(depName);
+      iterDependencyList.put(*dep);
+
+      // Add a token to the token list so that it will get processed
+      // by the interactive app.
+      VHDLToken* sourceToken = new VHDLToken;
+      sourceToken->setName(sourceReg->getName());
+      VHDLToken* destToken = new VHDLToken;
+      destToken->setName(destReg->getName());
+
+      tokenList.put(*sourceToken);
+      tokenList.put(*destToken);
+      // END NEW
+      
       toggleClock("feedback_clock");
 
       // Must also create signals for those lines which are neither read nor
@@ -655,20 +737,18 @@ void ArchTarget :: trailerCode() {
       // Get the name of the only output signal
       StringList outName = mux->getOutput()->getName();
       // Iterate through all firings
-      int foundIt = 0;
-      VHDLPort* port;
-      VHDLPort* thePort;
+      VHDLPort* port = 0;
+      VHDLPort* thePort = 0;
       VHDLFiringListIter nextFiring(masterFiringList);
       VHDLFiring* firing;
       while ((firing = nextFiring++) != 0) {
 	// Find the port with the given name
 	port = firing->portList->vhdlPortWithName(outName);
 	if (port) {
-	  foundIt = 1;
 	  thePort = port;
 	}
       }
-      if (foundIt) {
+      if (thePort) {
 	// Re-connect that port to the only input signal's name
 	cout << "Reconnecting port " << outName;
 	cout<< " to signal " << mux->getInputs()->head()->getName() << "\n";
@@ -683,6 +763,23 @@ void ArchTarget :: trailerCode() {
       Error::error(mux->getName(), ":  Mux has zero inputs");
     }
   }
+
+  // Stupid test code
+  StringList hall = "Halleluia!";
+  const char* blank = 0;
+  StringList end = "\n";
+  cout << hall << end;
+  savestring(hall);
+  cout << blank << end;
+  savestring(blank);
+
+  // Stupid test code
+
+
+  // Call the method to interactively rework the arch, if
+  // it is provided (by derived targets)
+  interact();
+
 
   // Add in the entity, architecture, entity declaration, and
   // component mapping for the controller.
@@ -1331,6 +1428,8 @@ void ArchTarget :: registerState(State* state, const char* varName,
     firingVariableList.put(*inVar);
 
     if (constState) {
+      // NEW: NO LONGER CREATE A TOKEN FOR CONST STATES
+      /*
       listState->constant = 1;
       if (isFirstStateRef) {
 	// This is the first state ref, so create a new token.
@@ -1361,6 +1460,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
 	existToken->addDestFiring(currentFiring);
 	inPort->setToken(existToken);
       }
+      */
     }
 
     if (!constState) {
@@ -2408,6 +2508,7 @@ void ArchTarget :: initVHDLObjLists() {
   newFiringList.initialize();
   firegroupList.initialize();
   dependencyList.initialize();
+  iterDependencyList.initialize();
   tokenList.initialize();
   muxList.initialize();
   regList.initialize();
