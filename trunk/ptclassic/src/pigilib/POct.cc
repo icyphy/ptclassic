@@ -678,18 +678,24 @@ int POct::ptkSetRunUniverse (int aC,char** aV) {
     return TCL_OK; 
 }
 
-// ptkGetComment <facet-id>
-// returns the Comment for the passed facet or instance.
+// ptkGetStringProp object-handle property-name
+// returns the value of the string property for the 
+// passed facet or instance.
 //
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
-// 
-int POct::ptkGetComment (int aC,char** aV) {
+// modified by Edward Lee and Douglas Niehaus 8/94
+// to generalize for string properties rather than 
+// just comments
+int POct::ptkGetStringProp (int aC,char** aV) {
     octObject facet;
-    char *comment;
+    char *value;
 
-    if (aC != 2) return  
-            usage ("ptkComment <OctObjectHandle>");
+    // always takes arguments: object and property name
+    //
+    if (aC != 3) {
+      return usage ("ptkGetStringProp <OctObjectHandle> propName");
+    }
 
     if (strcmp(aV[1],"NIL")==0)  return result("NIL");
 
@@ -699,38 +705,41 @@ int POct::ptkGetComment (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    if (!GetCommentProp(&facet, &comment)) {
+    if (!GetStringProp(&facet, aV[2], &value)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
 
-    // Make sure that the comment is defined.
-    if (comment == NULL) {
+    // Make sure that the value is defined.
+    if (value == NULL) {
         Tcl_AppendResult(interp, "", (char *) NULL);
     } else {
-        // return the comment as a list element to preserve whitespace
-        Tcl_AppendElement( interp, comment);
+        // return the value as a list element to preserve whitespace
+        Tcl_AppendResult(interp, value);
     }
 
     return TCL_OK;
 }
 
-// ptkSetComment <facet-id> <comment> 
+// ptkSetStringProp facet-id propName value 
 //
-// saves the comment into the passed facet/instance
-// This procedure was written to work with ptkEditStrings
+// saves the value of the named property into the 
+// passed facet/instance
 //
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
+// modified by Edward Lee and Douglas Niehaus 8/94
+// to generalize for string properties rather than 
+// just comments
 //
-int POct::ptkSetComment (int aC,char** aV) {
+int POct::ptkSetStringProp (int aC,char** aV) {
     octObject facet;
-    char* comment;
+    char* value;
 
-    if (aC != 3) return 
-        usage ("ptkSetComment <OctObjectHandle> <Comment>");
+    if (aC != 4) return 
+        usage ("ptkSetStringProp <OctObjectHandle> <propName> <value>");
 
-    comment = aV[2];
+    value = aV[3];
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
@@ -738,8 +747,8 @@ int POct::ptkSetComment (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    // Set the comment into the passed facet
-    if (!SetCommentProp(&facet, comment)) {
+    // Set the value into the passed facet
+    if (!SetStringProp(&facet, aV[2], value)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
@@ -779,7 +788,7 @@ int POct::ptkSetMkSchemIcon (int aC,char** aV) {
     char buf[512];
 
     if (aC != 3) return 
-        usage ("ptkSetComment <OctObjectHandle> <Palette>");
+        usage ("ptkSetMkSchemIcon <OctObjectHandle> <Palette>");
    
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
@@ -1584,7 +1593,6 @@ int POct::ptkSetEventLoop (int aC,char** aV) {
     return TCL_OK;
 }
 
-
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -1612,8 +1620,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkGetMkStar),
 	ENTRY(ptkSetMkStar),
 	ENTRY(ptkSetRunUniverse),
-	ENTRY(ptkGetComment),
-	ENTRY(ptkSetComment),
+	ENTRY(ptkGetStringProp),
+	ENTRY(ptkSetStringProp),
 	ENTRY(ptkGetMkSchemIcon),
 	ENTRY(ptkSetMkSchemIcon),
 	ENTRY(ptkGetSeed),

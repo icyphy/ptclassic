@@ -860,7 +860,7 @@ octObject *galFacetPtr;
      * The following sets the new domain again.
      */
     ERR_IF1(!KcDefgalaxy(name,galDomain,galTarget));
-    ERR_IF1(!GetCommentProp(galFacetPtr,&desc));
+    ERR_IF1(!GetStringProp(galFacetPtr,"comment",&desc));
     KcSetDesc(desc);
     ERR_IF1(!ProcessTargetParams(galTarget,galFacetPtr));
     ERR_IF2(!ProcessFormalParams(galFacetPtr),

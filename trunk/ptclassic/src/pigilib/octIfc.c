@@ -651,44 +651,52 @@ octObject *propPtr;
 	return;
 }
 
-/* GetCommentProp  5/31/89
-Outputs: commentPtr = returns comment string.  NULL means the prop doesn't
-    exist (or has a NULL value).  The string is hashed.
-*/
+/* GetStringProp
+ * Get the value of a string property with the specified name 
+ * associated with an oct object.
+ * Output: valuePtr = returned string.  NULL means the prop doesn't
+ * exist (or has a NULL value).  The string is hashed.
+ */
 boolean
-GetCommentProp(objPtr, commentPtr)
+GetStringProp(objPtr, propName, valuePtr)
 octObject *objPtr;
-char **commentPtr;
+char  *propName;
+char **valuePtr;
 {
     octObject prop;
 
-    if (GetByPropName(objPtr, &prop, "comment") == OCT_NOT_FOUND)
-	*commentPtr = NULL;
+    if (GetByPropName(objPtr, &prop, propName) == OCT_NOT_FOUND)
+	*valuePtr = NULL;
     else {
-	*commentPtr = HashString(prop.contents.prop.value.string);
+	*valuePtr = HashString(prop.contents.prop.value.string);
 	FreeOctMembers(&prop);
     }
     return(TRUE);
 }
 
-/* SetCommentProp  5/31/89
-Inputs: comment = string, if string is NULL or == "" then the comment prop
-    is deleted, if it exists.
-*/
+/* SetStringProp
+ * Set the value of a string property associated with the
+ * specified oct object.
+ * Input: 
+ *    propName = string giving property name
+ *    value = string, if string is NULL or == "" then the 
+ *            named property is deleted, if it exists.
+ */
 boolean
-SetCommentProp(objPtr, comment)
+SetStringProp(objPtr, propName, value)
 octObject *objPtr;
-char *comment;
+char  *propName;
+char  *value;
 {
     octObject prop;
 
-    if (comment == NULL || *comment == '\0') {
-	/* empty comment: delete prop if it exists */
-	if (GetByPropName(objPtr, &prop, "comment") != OCT_NOT_FOUND) {
+    if (value == NULL || *value == '\0') {
+	/* empty string: delete prop if it exists */
+	if (GetByPropName(objPtr, &prop, propName) != OCT_NOT_FOUND) {
 	    ERR_IF2(octDelete(&prop) != OCT_OK, octErrorString());
 	}
     } else {
-	ERR_IF2(CreateOrModifyPropStr(objPtr, &prop, "comment", comment) 
+	ERR_IF2(CreateOrModifyPropStr(objPtr, &prop, propName, value) 
 	    != OCT_OK, octErrorString());
     }
     return(TRUE);

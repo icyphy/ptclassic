@@ -315,8 +315,8 @@ long userOptionWord;
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditText ",
 		   " \"Edit Comment\" ",
-                   " \"ptkSetComment ", facetHandle, " %s \" ",
-                   " [lindex [ptkGetComment ", facetHandle, "] 0] ",
+                   " \"ptkSetStringProp ", facetHandle, " comment %s \" ",
+                   " [ptkGetStringProp ", facetHandle, " comment]",
                    (char *)NULL) )
 
     ViDone();
