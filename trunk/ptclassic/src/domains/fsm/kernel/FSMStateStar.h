@@ -64,7 +64,7 @@ public:
 
     // clear those internal events that are not emitted by the slave
     // and the triggered action indexed by "actNum".
-    virtual clearIntlEvent (int actNum);
+    virtual int clearIntlEvent (int actNum);
 
     // Execute the action.
     virtual int execAction(int actNum);
