@@ -181,11 +181,12 @@ public:
     // Create a new CodeStream for the target.
     CodeStream* newStream(const char* name) { return codeStringLists.newStream(name); }
 
+    // Return a pointer to the counter to make symbols unique.  If their
+    // is a CGTarget parent, return its counter
+    int* symbolCounter();
+
     // separator for symbols, <name><separator><unique number>
     char separator;
-
-    // Counter used to make symbols unique.
-    int symbolCounter;
 
     const char* lookupSharedSymbol(const char* scope, const char* name);
 
@@ -211,6 +212,13 @@ public:
     // Return FALSE on error.
     virtual int allocateMemory();
 
+    // Make a unique symbol
+    StringList symbol(const char *name) {
+	StringList sym;
+	sym << targetNestedSymbol.symbol(name);
+	return sym;
+    }
+
 protected:
 
     // Initialization for code generation.
@@ -222,12 +230,7 @@ protected:
     virtual void mainLoopCode();
     virtual void trailerCode();
 
-    // method for supervising all code generation for the case of
-    // a wormhole.  The default implementation generates an infinite
-    // loop that reads input wormholes, runs the schedule, and writes
-    // output wormholes, forever.
- /*   virtual int wormCodeGenerate() {generateCode(); return haltRequested; }
-   */
+    // Symbols which are nested, such as for loops
     SymbolStack targetNestedSymbol;
 
     // Symbols which are shared Target-wide.
@@ -303,6 +306,9 @@ protected:
                              const char* domainName);
 
 private:
+    // Counter used to make symbols unique.
+    int counter;
+
     // return non-zero if this target is not a child target, or not
     // inherited from another target. Then, generate code in the setup
     // stage if it is inside a wormhole.
