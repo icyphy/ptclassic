@@ -157,8 +157,8 @@ public:
 	virtual void 	   putFreeLink(LevelLink*);
 
 	// Constructor
-	PriorityQueue() : freeLinkHead(0), numberNodes(0), 
-			  lastNode(0), numFreeLinks(0) {}
+	PriorityQueue() : lastNode(0), numberNodes(0),
+	                  freeLinkHead(0), numFreeLinks(0) {}
 	PriorityQueue(Pointer a, double v, double fv) ;
 	virtual ~PriorityQueue();
 
