@@ -247,7 +247,7 @@ class ::tycho::File {
 
     # This is used to recall the previous filename associated with
     # the window in case the name is changed.
-    protected variable previousfile
+    protected variable previousfile {}
 
     ##########################################################################
     ####                  protected methods and procedures                ####
@@ -325,8 +325,7 @@ configbody ::tycho::File::file {
     # Keep track of which files are open by name.
     # This is used to avoid opening the same file twice.
     # It is also used to maintain the Window menu entries.
-    if {[info exists previousfile] && [info exists filesOpen($previousfile)]} {
-	unset filesOpen($previousfile)
+    if {$previousfile != {}} {
 	windowMenuRemoveAll $previousfile
 	# unmap the revcontrol window.
 	set topwin [winfo toplevel $itk_component(hull)]
@@ -341,9 +340,8 @@ configbody ::tycho::File::file {
     if {$file != "NoName"} {
 	# If there is already an entry for this filename, do not overwrite it.
 	if {![info exists filesOpen($file)]} {
-	    set filesOpen($file) [code $this]
 	    # Add the current object to the menu entries in all open editors.
-	    windowMenuAddAll [code $this] $file
+	    windowMenuAddAll $this $file
 	}
 	set previousfile $file
     }
@@ -449,48 +447,48 @@ body ::tycho::File::constructor {args} {
 	    -label "Switch File..."\
 	    -underline 4 \
 	    -accelerator "C-x C-v" \
-	    -command [code "$this altFile"]
+	    -command "$this altFile"
     
     $itk_component(fileMenu) add command \
 	    -label {Insert...}\
 	    -underline 0 \
 	    -accelerator "C-x i" \
-	    -command [code "$this insertFile"]
+	    -command "$this insertFile"
     
     $itk_component(fileMenu) add command \
 	    -label Save \
 	    -underline 0 \
 	    -accelerator "C-x C-s" \
-	    -command [code "$this save"]
+	    -command "$this save"
     
     $itk_component(fileMenu) add command \
 	    -label {SaveAs...} \
 	    -underline 4 \
 	    -accelerator "C-x C-w" \
-	    -command [code "$this saveAs"]
+	    -command "$this saveAs"
     
     $itk_component(fileMenu) add command \
 	    -label {Print...} \
 	    -underline 0 \
 	    -accelerator "C-x p" \
-	    -command [code "$this print"]
+	    -command "$this print"
     
     $itk_component(fileMenu) add command \
 	    -label Evaluate \
 	    -underline 0 \
 	    -accelerator "C-x C-r" \
-	    -command [code "$this evaluate"]
+	    -command "$this evaluate"
     
     $itk_component(fileMenu) add command \
 	    -label Reload \
 	    -underline 1 \
-	    -command [code "$this reload"]
+	    -command "$this reload"
     
     $itk_component(fileMenu) add command \
 	    -label "Revision Control..." \
 	    -underline 0 \
 	    -accelerator "C-x v" \
-	    -command [code "$this revisionControl"]
+	    -command "$this revisionControl"
 
     $itk_component(fileMenu) add separator
     
@@ -498,7 +496,7 @@ body ::tycho::File::constructor {args} {
 	    -label Close \
 	    -underline 0 \
 	    -accelerator "C-x k" \
-	    -command [code "$this nextWindow; delete object $this"]
+	    -command "$this nextWindow; delete object $this"
  
     if {$normalExit == 1} {
 	$itk_component(fileMenu) add command \
@@ -559,7 +557,7 @@ body ::tycho::File::constructor {args} {
     $itk_component(helpMenu) add command \
 	    -label "User's Guide" \
 	    -underline 0 \
-	    -command [code $this help]
+	    -command "$this help"
 
     $itk_component(helpMenu) add command \
 	    -label "Index" \
@@ -568,27 +566,27 @@ body ::tycho::File::constructor {args} {
     
     # Bindings
     bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
-    bind $prefix <Control-x><Control-s> [code "$this save; break"]
-    bind $prefix <Control-x><Control-v> [code "$this altFile; break"]
-    bind $prefix <Control-x><Control-w> [code "$this saveAs; break"]
-    bind $prefix <Control-x><Key-i> [code "$this insertFile; break"]
-    bind $prefix <Control-x><Key-p> [code "$this print; break"]
-    bind $prefix <Control-x><Control-r> [code "$this evaluate; break"]
-    bind $itk_component(hull) <Control-x><v> \
-	    [code "$this revisionControl; break"]
+    bind $prefix <Control-x><Control-s> "$this save; break"
+    bind $prefix <Control-x><Control-v> "$this altFile; break"
+    bind $prefix <Control-x><Control-w> "$this saveAs; break"
+    bind $prefix <Control-x><Key-i> "$this insertFile; break"
+    bind $prefix <Control-x><Key-p> "$this print; break"
+    bind $prefix <Control-x><Control-r> "$this evaluate; break"
+    bind $prefix <Control-x><v> \
+	    "$this revisionControl; break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
 
     # Identify the object for crash recovery
-    set fileObjects($this) [code $this]
+    set fileObjects($this) $this
 
     # Initiate the auto-save loop
     autoSave
 
     # Save if instructed by the window manager.
-    wm protocol $prefix WM_SAVE_YOURSELF [code "$this saveCrash"]
+    wm protocol $prefix WM_SAVE_YOURSELF "$this saveCrash"
 
     # FIXME: Because of some Itcl bogosity, filesOpen finds itself
     # not settable as an array.  Here we force it to be an array
@@ -620,18 +618,11 @@ body ::tycho::File::destructor {} {
 	    save
 	}
     }
-    if {[info exists filesOpen($file)] && \
-	    ($filesOpen($file) == $this || \
-	    "::$filesOpen($file)" == $this || \
-	    $filesOpen($file) == [code $this] || \
-	    $filesOpen($file) == "::$this") } {
-	unset filesOpen($file)
-	windowMenuRemoveAll $file
-    }
+    windowMenuRemoveAll $file
 
     # If an error occurred in construction, this may not exist.
-    if [info exists fileObjects([code $this])] {
-	unset fileObjects([code $this])
+    if [info exists fileObjects($this)] {
+	unset fileObjects($this)
     }
     
     # Do not get rid of the backup files.  This should be done
@@ -879,7 +870,7 @@ body ::tycho::File::windowMenuAppend {obj label} {
     if {$label != {NoName} && $label != {}} {
 	$itk_component(windowMenu) add command \
 		-label $label \
-		-command [code "$obj raiseWindow"]
+		-command "$obj raiseWindow"
     }
 }
 
@@ -953,8 +944,7 @@ body ::tycho::File::hyperJump {filename point} {
     if {$point != {}} {
 	# The seeName call is postponed to give time for the widget
 	# to be created. The catch is in case it is immediately deleted.
-	after idle [code [list catch \
-		[list $obj seeName $point]]]
+	after idle [list catch [list $obj seeName $point]]
     }
 }
 
@@ -1050,6 +1040,7 @@ body ::tycho::File::registerEditor {extensions editorClass {description {}} \
 # The second argument, normally a file name, gives the menu label.
 #
 body ::tycho::File::windowMenuAddAll {obj label} {
+    set filesOpen($label) $obj
     foreach fileobj [array names fileObjects] {
 	catch {$fileobj windowMenuAppend $obj $label}
     }
@@ -1061,8 +1052,11 @@ body ::tycho::File::windowMenuAddAll {obj label} {
 # File objects.
 #
 body ::tycho::File::windowMenuRemoveAll {filename} {
-    foreach fileobj [array names fileObjects] {
-	catch {$fileobj windowMenuRemove $filename}
+    if {[info exists filesOpen] && [info exists filesOpen($filename)]} {
+	unset filesOpen($filename)
+	foreach fileobj [array names fileObjects] {
+	    catch {$fileobj windowMenuRemove $filename}
+	}
     }
 }
 
@@ -1102,7 +1096,7 @@ body ::tycho::File::autoSave {} {
 	error "Auto-save interval is out of range (object $this)"
     }
     if {$interval != 0} {
-	after $interval [code "::tycho::File::callAutoSave $this"]
+	after $interval "::tycho::File::callAutoSave $this"
     }
 }
 
