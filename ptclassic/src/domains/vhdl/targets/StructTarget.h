@@ -98,12 +98,6 @@ public:
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);
 
-	// Declare PortHole buffer.
-	/*virtual*/ StringList declBuffer(const VHDLPortHole*);
-
-	// Declare State variable.
-	/*virtual*/ StringList declState(const State*, const char*);
-
 	// Register component declaration.
 	void registerCompDecl(StringList name,
 			      VHDLPortList* portList,
@@ -193,6 +187,15 @@ private:
 
 	// Return the condition indicating if registers are needed.
         int registers() { return regsUsed; }
+
+	// Flag indicating if initials are needed.
+        int initsUsed;
+
+	// Set the condition indicating initials are needed.
+	void setInitials() { initsUsed = 1; }
+
+	// Return the condition indicating if initials are needed.
+        int initials() { return initsUsed; }
 };
 
 #endif
