@@ -68,8 +68,9 @@ void CodeStreamList::deleteStreams() {
 	ListIter nextNode(myStreams);
 	NamedNode* node;
 	while((node = (NamedNode*)nextNode++) != 0) {
-		remove(node->name());
+	    delete node->object();
 	}
+	myStreams.initialize();
 }
 
 void CodeStreamList::initialize() {
