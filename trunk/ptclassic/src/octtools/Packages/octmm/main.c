@@ -27,6 +27,7 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "utility.h"
+#include "errtrap.h"
 #include "options.h"
 #include "oct.h"
 #include "oh.h"
@@ -52,6 +53,7 @@ optionStruct optionList[] = {
 };
 
 
+int
 main(argc, argv)
 int argc;
 char **argv;
@@ -116,4 +118,5 @@ char **argv;
 				       out_view, scale, filename);
     octEnd();
     VOVend(0);
+    return 0;
 }
