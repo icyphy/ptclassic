@@ -416,6 +416,8 @@ StringList PortHole :: print(int) const {
 		out << "(delay = " << myGeodesic->numInit() << ")";
 	    if (myGeodesic->initDelayValues())
 		out << "(initValues = "<< myGeodesic->initDelayValues() << ")";
+	    // added to visibility into PortHole objects via ptcl interface
+	    out << "(numTokens = " << numberTokens << ")";
 	}
 	else
 	    out << "\tot connected.";
