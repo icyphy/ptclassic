@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	adm bin demo doc test
+DIRS =	 bin demo doc test
 
 TCL_SRCS = 
 
@@ -62,7 +62,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES = adm bin demo doc test tclIndex
+MISC_FILES =  bin demo doc test tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
