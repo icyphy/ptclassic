@@ -762,8 +762,13 @@ body ::tycho::Model::redo {{distance 1}} {
 #
 # Subscribe to this model. This command has two forms, depending
 # on the value of the _mode_ argument. The _subscriber_ is
-# always the name of the widget that is subscribing to this model,
-# but remaining arguments differ according to the mode.
+# usually the name of the widget that is subscribing to this model,
+# but remaining arguments differ according to the mode. If
+# _subscriber_ is an object or Tk window, then is is converted 
+# into its access command (for example, <code>.foo</code> will be
+# converted into <code>::.foo</code>. If it is not, then the given
+# string will be used as-is -- this string is arbitrary, but care
+# should be taken to avoid clashing with object or widget names.
 #
 # <dl>
 # <dt><b>data</b> _subscriber_ ?_name_? ?_command_?
@@ -801,6 +806,13 @@ body ::tycho::Model::redo {{distance 1}} {
 # </dl>
 #
 body ::tycho::Model::subscribe {mode {subscriber {}} {name {}} {command {}}} {
+    # Get subscriber command
+    set s [::info which -command $subscriber]
+    if { $s != "" } {
+        set subscriber $s
+    }
+
+    # Process by mode
     switch -exact $mode {
 	"data" {
 	    if { $name == "" } {
@@ -890,8 +902,9 @@ body ::tycho::Model::undo {{distance 1}} {
 #
 # Unsubscribe from this model. This command has two forms, depending
 # on the value of the _mode_ argument. The _subscriber_ is
-# always the name of the widget that is being unsubscribed from this
-# model, but remaining arguments differ according to the mode.
+# either the name of the widget that is being unsubscribed from this
+# model, or some special key given to <b>subscribe</b>. Remaining
+# arguments differ according to the mode.
 #
 # <dl>
 # <dt><b>data</b> _subscriber_ ?_name_?
@@ -915,14 +928,21 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
     if ![regexp {^(data|event)$} $mode] {
 	error "bad option \"$mode\": should be data or event"
     }
+    
+    # Get subscriber command if it exists
+    set s [::info which -command $subscriber]
+    if { $s != "" } {
+        set subscriber $s
+    }
+    # Unsubscribe it
     if { $name != "" } {
         if [::info exists _subs([list $mode $name $subscriber]) {
             unset _subs([list $mode $name $subscriber])
         }
     } else {
-	foreach index [array names _subs [list $mode * $subscriber]] {
-	    unset _subs($index)
-	}
+        foreach index [array names _subs [list $mode * $subscriber]] {
+            unset _subs($index)
+        }
     }
 }
 
