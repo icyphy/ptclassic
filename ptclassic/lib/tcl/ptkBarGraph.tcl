@@ -43,9 +43,9 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
 
     message $w.msg -width 5i -text "$desc"
     frame $w.cntr -bd 10
-    label $w.cntr.label -text "Full scale:"
-    set startScale [${w}verticalScale 1.0]
-    label $w.cntr.value -width 10 -text $startScale
+    label $w.cntr.label -text "Scale range:"
+    set startScale [${w}rescale 1.0]
+    label $w.cntr.value -width 20 -text "$startScale"
     button $w.cntr.hv -text "Zoom In" -command "changeBarScale $w 0.5"
     button $w.cntr.dbl -text "Zoom Out" -command "changeBarScale $w 2.0"
     pack append $w.cntr \
@@ -75,12 +75,13 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
 
     wm geometry $w $geo
     wm minsize $w 400 200
+    tkwait visibility $w.pf.plot
     # Binding to redraw the plot when the window is resized.
-    bind $w.pf.plot <Configure> "${w}LMSTkCBredraw"
+    bind $w.pf.plot <Configure> "${w}redraw"
 }
 
 proc changeBarScale {w s} {
-    set newScale [${w}verticalScale $s]
-    $w.cntr.value configure -text $newScale
-    ${w}LMSTkCBredraw
+    set newScale [${w}rescale $s]
+    $w.cntr.value configure -text "$newScale"
+    ${w}redraw
 }
