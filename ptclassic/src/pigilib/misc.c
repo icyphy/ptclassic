@@ -45,6 +45,10 @@ $Id$
 #include "err.h"
 #include "main.h"
 #include "list.h"
+#include "compile.h"
+#include "kernelCalls.h"
+#include "icon.h"
+#include "utility.h"
 
 /* for ShowFacetNum */
 #include "ptk.h"
@@ -350,8 +354,6 @@ long userOptionWord;
     }
     ViDone();
 }
-
-static void AdjustScalePan();
 
 /* 6/27/89 = tries to open facet read-only first */
 /* 10/21/93  Now uses Wei-Jen's nifty Tk code */
