@@ -315,7 +315,6 @@ int UniProcessor :: getStartTime() {
 	NodeSchedule* obj;
 
 	while((obj = schedIter++) != 0) {
-		ParNode* node = (ParNode*) obj->getNode();
 		if (obj->isIdleTime()) {	// idle node
 			idleTime += obj->getDuration();
 		} else {
@@ -334,6 +333,12 @@ StringList UniProcessor :: generateCode() {
 	// for child target.
 	convertSchedule();
 
+	// Initialize the galaxy
+	subGal->initialize();
+
+	// simulate the schedule
+	simRunSchedule();
+
 	// now, call the child target routines to generate code
 	// as well as memory assignment
 	return targetPtr->generateCode(*subGal);
@@ -349,6 +354,26 @@ void UniProcessor :: convertSchedule() {
 		sched.append(*s);
 	}
 	targetPtr->copySchedule(sched);
+}
+
+// trace the schedule to obtain the right buffer size
+void UniProcessor :: simRunSchedule() {
+	ProcessorIter iter(*this);
+	ParNode* n;
+	
+	while ((n = iter.nextNode()) != 0) {
+		if (n->getType() > 0) continue;
+		SDFStar* copyS = n->getCopyStar();
+
+		SDFStarPortIter piter(*copyS);
+		SDFPortHole* p;
+		while ((p = piter++) != 0) {
+			if (p->isItInput())
+				p->decCount(p->numXfer());
+			else
+				p->incCount(p->numXfer());
+		}
+	}
 }
 
 		/////////////////////////////////////
@@ -462,5 +487,4 @@ NodeSchedule* UniProcessor :: getNodeSchedule(ParNode* n) {
 		if (ns->getNode() == n) return ns;
 	return 0;
 }
-
 
