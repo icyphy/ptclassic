@@ -75,12 +75,9 @@ lsList cmdList;			/* List of arguments        */
 {
     octId finalFctId;
     octObject repl_inst, bag, fct, inst;
-    struct octBox bb;
     octGenerator gen;
     int count;			/* Count instances to be replaced. */
-    vemStatus stat, final_stat = VEM_OK;
     char m_name[VEMMAXSTR*4], v_name[VEMMAXSTR], f_name[VEMMAXSTR];
-    int i;
 
     seInit();
 
@@ -178,6 +175,7 @@ octObject *inst;		/* Instance (if any)        */
     return VEM_OK;
 }
 
+#ifdef NEVER
 
 static void do_revert(inst)
 octObject *inst;		/* Instance itself     */
@@ -202,6 +200,7 @@ octObject *inst;		/* Instance itself     */
 	revert_it(&master);
     }
 }
+#endif
 
 static void revert_it(fct)
 octObject *fct;			/* Facet to revert  */
