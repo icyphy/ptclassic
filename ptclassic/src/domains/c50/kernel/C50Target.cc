@@ -46,6 +46,23 @@ Base target for TI 320C5x assembly code generation.
 // Defined in C50Domain.cc
 extern const char C50domainName[];
 
+// constructor
+C50Target::C50Target(const char* nam, const char* desc) :
+TITarget(nam,desc,"C50Star") {
+	initDataMembers();
+}
+
+// copy constructor
+C50Target::C50Target(const C50Target& src) :
+TITarget(src.name(),src.descriptor(),"C50Star") {
+	initDataMembers();
+}
+
+void C50Target :: initDataMembers() {
+	StringList destDirName = destDirectoryName(C50domainName);
+	destDirectory.setInitValue(destDirName);
+}
+
 int C50Target :: compileCode() {
       StringList assembleCmds;
       assembleCmds << "assembl " << filePrefix << ".asm";
@@ -53,22 +70,36 @@ int C50Target :: compileCode() {
       return TRUE;
 }
 
+static const char memoryMapInitString[] =
+"	.mmregs		; Include memory map reg\n"
+"	.ps	01AC0h	; initialize PC\n"
+"	.entry\n";
+
+const char* C50Target :: memoryMapInitCode() {
+	return memoryMapInitString;
+}
+
+static const char startCodeString[] =
+"START	setc	SXM		; set sign extension mode\n"
+"	ldp	#0		; set data page pointer\n"
+"	splk	#830h,PMST	; 9K on.chip RAM as Data, no ROM\n"
+"	lacl	#0\n"
+"	samm	CWSR		; set Wait State Control Register\n"
+"	samm	PDWSR		; for 0 waits in pgm & data memory\n"
+"	clrc	OVM\n";
+
+const char* C50Target :: startCode() {
+	return startCodeString;
+}
+
 // code starts at address 1AC0h so that splits the SARAM chip in C50 into
 // two sections, one for program and one for data, each roughly 4400 words
 // long.
 void C50Target :: headerCode () {
-    TITarget::headerCode();
-    myCode << "\t.mmregs\t		; Include memory map reg\n"
-	   << "\t.ps	01AC0h		; initialize PC\n"
-	   << "\t.entry\n";
-    TITarget::disableInterrupts();	   
-    myCode<< "START	setc	SXM		; set sign extension mode\n"
-	   << "\tldp	#0		; set data page pointer\n"
-	   << "\tsplk	#830h,PMST	; 9K on.chip RAM as Data, no ROM\n"
-	   << "\tlacl	#0\n"
-	   << "\tsamm	CWSR		; set Wait State Control Register\n"
-	   << "\tsamm	PDWSR		; for 0 waits in pgm & data memory\n"
-	   << "\tclrc	OVM		\n";
+	TITarget::headerCode();
+	myCode << memoryMapInitCode();
+	TITarget::disableInterrupts();
+	myCode << startCode();
 }
 
 void C50Target :: setup() {
