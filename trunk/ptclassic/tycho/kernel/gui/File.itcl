@@ -452,7 +452,7 @@ body ::tycho::File::constructor {args} {
 	    -command "$this reload"
     
     $itk_component(fileMenu) add command \
-	    -label "Toggle read-only" \
+	    -label "Toggle Read-Only" \
 	    -underline 0 \
 	    -accelerator "C-x C-q" \
 	    -command "$this toggleReadOnly"
