@@ -46,7 +46,7 @@ set reallyExit 0
 # Naming convention: Galaxy masters: am, bm, ...,
 # Galaxy instances: a,b,c,...,  Stars: x,y,z.
 
-test connected.0 {create a test universe} {
+test connected-0 {create a test universe} {
     namespace ::pitcl {
         defGalaxy cm SDF {
             addBlock x Ramp
@@ -76,179 +76,179 @@ test connected.0 {create a test universe} {
 ######################################################################
 #### aliasUp
 
-test connected.1 {upward alias of a star port} {
+test connected-1 {upward alias of a star port} {
     ::pitcl::aliasUp .a.b.c.x.output
 } {.a.b.c.o}
 
-test connected.2 {deep upward alias of a star port} {
+test connected-2 {deep upward alias of a star port} {
     ::pitcl::aliasUp -deep .a.b.c.x.output
 } {.a.b.o}
 
-test connected.3 {upward alias of a galaxy port} {
+test connected-3 {upward alias of a galaxy port} {
     ::pitcl::aliasUp .a.b.c.o
 } {.a.b.o}
 
-test connected.4 {deep upward alias of a galaxy port} {
+test connected-4 {deep upward alias of a galaxy port} {
     ::pitcl::aliasUp -deep .a.b.c.o
 } {.a.b.o}
 
-test connected.5 {upward alias of a top-level port} {
+test connected-5 {upward alias of a top-level port} {
     ::pitcl::aliasUp .a.b.o
 } {}
 
-test connected.6 {deep upward alias of a top-level port} {
+test connected-6 {deep upward alias of a top-level port} {
     ::pitcl::aliasUp -deep .a.b.o
 } {.a.b.o}
 
-test connected.7 {upward alias of a top-level star port} {
+test connected-7 {upward alias of a top-level star port} {
     ::pitcl::aliasUp .a.z.output
 } {}
 
-test connected.8 {deep upward alias of a top-level port} {
+test connected-8 {deep upward alias of a top-level port} {
     ::pitcl::aliasUp -deep .a.z.output
 } {.a.z.output}
 
-test connected.9 {upward alias of a multiport} {
+test connected-9 {upward alias of a multiport} {
     ::pitcl::aliasUp .a.d.e.y.input
 } {.a.d.e.i}
 
-test connected.10 {upward alias of a port within a multiport} {
+test connected-10 {upward alias of a port within a multiport} {
     ::pitcl::aliasUp .a.d.e.y.input#1
 } {.a.d.e.i#1}
 
-test connected.11 {upward alias of a galaxy multiport} {
+test connected-11 {upward alias of a galaxy multiport} {
     ::pitcl::aliasUp .a.d.e.i
 } {.a.d.i}
 
 # NOTE: surprising
-test connected.12 {upward alias of a galaxy port within a multiport} {
+test connected-12 {upward alias of a galaxy port within a multiport} {
     ::pitcl::aliasUp .a.d.e.i#1
 } {.a.d.i#1}
 
 # NOTE: surprising
-test connected.13 {upward alias of a top-level galaxy port within a multiport} {
+test connected-13 {upward alias of a top-level galaxy port within a multiport} {
     ::pitcl::aliasUp .a.d.i#1
 } {}
 
 ######################################################################
 #### aliasDown
 
-test connected.14 {downward alias of a star port} {
+test connected-14 {downward alias of a star port} {
     ::pitcl::aliasDown .a.b.c.x.output
 } {}
 
-test connected.15 {deep downward alias of a star port} {
+test connected-15 {deep downward alias of a star port} {
     ::pitcl::aliasDown -deep .a.b.c.x.output
 } {.a.b.c.x.output}
 
-test connected.16 {downward alias of a galaxy port} {
+test connected-16 {downward alias of a galaxy port} {
     ::pitcl::aliasDown .a.b.c.o
 } {.a.b.c.x.output}
 
-test connected.17 {deep downward alias of a galaxy port} {
+test connected-17 {deep downward alias of a galaxy port} {
     ::pitcl::aliasDown -deep .a.b.c.o
 } {.a.b.c.x.output}
 
-test connected.18 {downward alias of a top-level port} {
+test connected-18 {downward alias of a top-level port} {
     ::pitcl::aliasDown .a.b.o
 } {.a.b.c.o}
 
-test connected.19 {deep downward alias of a top-level port} {
+test connected-19 {deep downward alias of a top-level port} {
     ::pitcl::aliasDown -deep .a.b.o
 } {.a.b.c.x.output}
 
-test connected.20 {downward alias of a top-level star port} {
+test connected-20 {downward alias of a top-level star port} {
     ::pitcl::aliasDown .a.z.output
 } {}
 
-test connected.21 {deep downward alias of a top-level star port} {
+test connected-21 {deep downward alias of a top-level star port} {
     ::pitcl::aliasDown -deep .a.z.output
 } {.a.z.output}
 
-test connected.22 {downward alias of a multiport} {
+test connected-22 {downward alias of a multiport} {
     ::pitcl::aliasDown .a.d.e.y.input
 } {}
 
-test connected.23 {downward alias of a port within a multiport} {
+test connected-23 {downward alias of a port within a multiport} {
     ::pitcl::aliasDown .a.d.e.y.input#1
 } {}
 
-test connected.24 {downward alias of a galaxy multiport} {
+test connected-24 {downward alias of a galaxy multiport} {
     ::pitcl::aliasDown .a.d.e.i
 } {.a.d.e.y.input}
 
 # NOTE: surprising
-test connected.25 {downward alias of a galaxy port within a multiport} {
+test connected-25 {downward alias of a galaxy port within a multiport} {
     ::pitcl::aliasDown .a.d.e.i#1
 } {.a.d.e.y.input#1}
 
 # NOTE: surprising
-test connected.26 {deep downward alias of a top-level galaxy port within a multiport} {
+test connected-26 {deep downward alias of a top-level galaxy port within a multiport} {
     ::pitcl::aliasDown -deep .a.d.i#1
 } {.a.d.e.y.input#1}
 
 ######################################################################
 #### connected
 
-test connected.27 {connection of a star port} {
+test connected-27 {connection of a star port} {
     ::pitcl::connected .a.b.c.x.output
 } [list [list aliasUp .a.b.c.o]]
 
-test connected.28 {deep connection of a star port} {
+test connected-28 {deep connection of a star port} {
     ::pitcl::connected -deep .a.b.c.x.output
 } {.a.d.e.y.input#1}
 
-test connected.29 {connection of a galaxy port} {
+test connected-29 {connection of a galaxy port} {
     ::pitcl::connected .a.b.c.o
 } [list [list aliasUp .a.b.o]]
 
-test connected.30 {deep connection of a galaxy port} {
+test connected-30 {deep connection of a galaxy port} {
     ::pitcl::connected -deep .a.b.c.o
 } [list [list .a.d.e.y.input#1]]
 
 # NOTE: surprising
-test connected.31 {connection of a top-level port} {
+test connected-31 {connection of a top-level port} {
     ::pitcl::connected .a.b.o
 } {.a.d.i#1}
 
-test connected.32 {deep connection of a top-level port} {
+test connected-32 {deep connection of a top-level port} {
     ::pitcl::connected -deep .a.b.o
 } {.a.d.e.y.input#1}
 
 # NOTE: surprising
-test connected.33 {connection of a top-level star port} {
+test connected-33 {connection of a top-level star port} {
     ::pitcl::connected .a.z.output
 } {.a.d.i#2}
 
-test connected.34 {deep connection of a top-level star port} {
+test connected-34 {deep connection of a top-level star port} {
     ::pitcl::connected -deep .a.z.output
 } {.a.d.e.y.input#2}
 
-test connected.35 {connection of a multiport} {
+test connected-35 {connection of a multiport} {
     ::pitcl::connected .a.d.e.y.input
 } [list [list aliasUp .a.d.e.i]]
 
-test connected.36 {deep connection of a multiport} {
+test connected-36 {deep connection of a multiport} {
     ::pitcl::connected -deep .a.d.e.y.input
 } {.a.b.c.x.output .a.z.output}
 
-test connected.37 {connection of a port within a multiport} {
+test connected-37 {connection of a port within a multiport} {
     ::pitcl::connected .a.d.e.y.input#1
 } [list [list aliasUp .a.d.e.i#1]]
 
-test connected.38 {deep connection of a port within a multiport} {
+test connected-38 {deep connection of a port within a multiport} {
     ::pitcl::connected -deep .a.d.e.y.input#1
 } {.a.b.c.x.output}
 
-test connected.39 {connection of a galaxy multiport} {
+test connected-39 {connection of a galaxy multiport} {
     ::pitcl::connected .a.d.e.i
 } [list [list aliasUp .a.d.i]]
 
-test connected.40 {connection of a galaxy port within a multiport} {
+test connected-40 {connection of a galaxy port within a multiport} {
     ::pitcl::connected .a.d.e.i#1
 } [list [list aliasUp .a.d.i#1]]
 
-test connected.41 {deep connection of a top-level galaxy port within a multiport} {
+test connected-41 {deep connection of a top-level galaxy port within a multiport} {
     ::pitcl::connected -deep .a.d.i#1
 } {.a.b.c.x.output}
 
@@ -257,7 +257,7 @@ test connected.41 {deep connection of a top-level galaxy port within a multiport
 # Create a hierarchical universe where a multiport is connected and
 # also aliased up.
 
-test connected.42 {create a strange test universe} {
+test connected-42 {create a strange test universe} {
     namespace ::pitcl {
         defGalaxy am SDF {
             addBlock x Ramp
@@ -274,46 +274,46 @@ test connected.42 {create a strange test universe} {
     }
 } {}
 
-test connected.43 {aliased and connected multiport} {
+test connected-43 {aliased and connected multiport} {
     ::pitcl::connected .b.a.y.input
 } {{aliasUp .b.a.i} .b.a.x.output}
 
-test connected.44 {aliased and connected multiport} {
+test connected-44 {aliased and connected multiport} {
     ::pitcl::connected -deep .b.a.y.input
 } {.b.a.x.output .b.b.output}
 
-test connected.45 {aliased and connected multiport} {
+test connected-45 {aliased and connected multiport} {
     ::pitcl::connected -deep .b.b.output
 } {.b.a.y.input#2}
 
-test connected.45 {aliased and connected multiport} {
+test connected-45 {aliased and connected multiport} {
     ::pitcl::connected .b.b.output
 } {.b.a.i#1}
 
-test connected.45 {aliased and connected multiport} {
+test connected-45 {aliased and connected multiport} {
     ::pitcl::connected .b.a.x.output
 } {.b.a.y.input#1}
 
-test connected.45 {aliased and connected multiport} {
+test connected-45 {aliased and connected multiport} {
     ::pitcl::connected -deep .b.a.x.output
 } {.b.a.y.input#1}
 
 ######################################################################
 #### portsContained
 
-test connected.46 {ports contained by a star multiport} {
+test connected-46 {ports contained by a star multiport} {
     ::pitcl::portsContained .a.d.e.y.input
 } {.a.d.e.y.input#1 .a.d.e.y.input#2}
 
-test connected.47 {ports contained by a galaxy multiport} {
+test connected-47 {ports contained by a galaxy multiport} {
     ::pitcl::portsContained .a.d.e.i
 } {.a.d.e.i#1 .a.d.e.i#2}
 
-test connected.48 {deep ports contained by a galaxy multiport} {
+test connected-48 {deep ports contained by a galaxy multiport} {
     ::pitcl::portsContained -deep .a.d.i
 } {.a.d.e.y.input#1 .a.d.e.y.input#2}
 
-test connected.49 {attempt to access a simple port as a multiport} {
+test connected-49 {attempt to access a simple port as a multiport} {
     catch {::pitcl::portsContained .a.b.o} msg
     list $msg
 } [list {.a.b.o is not a multiport.}]

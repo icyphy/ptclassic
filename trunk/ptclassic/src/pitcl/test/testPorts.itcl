@@ -44,7 +44,7 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y
 
-test ports.0 {create a test universe} {
+test ports-0 {create a test universe} {
     namespace pitcl {
         defGalaxy y SDF {
             addBlock z Ramp
@@ -66,55 +66,55 @@ test ports.0 {create a test universe} {
 ######################################################################
 #### ports
 
-test ports.1 {list ports of a master star} {
+test ports-1 {list ports of a master star} {
     ::pitcl::ports Ramp
 } {output}
 
-test ports.2 {list ports of a master star with multiports} {
+test ports-2 {list ports of a master star with multiports} {
     ::pitcl::ports Add
 } {output}
 
-test ports.3 {list ports of a master star with only multiports} {
+test ports-3 {list ports of a master star with only multiports} {
     ::pitcl::ports XMgraph
 } {}
 
-test ports.4 {list ports of a simple star} {
+test ports-4 {list ports of a simple star} {
     ::pitcl::ports b
 } {output}
 
-test ports.5 {list ports of a star with multiports} {
+test ports-5 {list ports of a star with multiports} {
     ::pitcl::ports d
 } {input#1 input#2}
 
-test ports.6 {list mulitports of a master star} {
+test ports-6 {list mulitports of a master star} {
     ::pitcl::ports -multiports Add
 } {input {}}
 
-test ports.7 {list mulitports of a star instance} {
+test ports-7 {list mulitports of a star instance} {
     ::pitcl::ports -multiports c
 } {input {input#1 input#2}}
 
-test ports.8 {list input ports only} {
+test ports-8 {list input ports only} {
     ::pitcl::ports -inputs c
 } {input#1 input#2}
 
-test ports.9 {list output ports only} {
+test ports-9 {list output ports only} {
     ::pitcl::ports -outputs c
 } {output}
 
-test ports.10 {list input multiports only} {
+test ports-10 {list input multiports only} {
     ::pitcl::ports -inputs -multiports c
 } {input {input#1 input#2}}
 
-test ports.11 {list output multiports only} {
+test ports-11 {list output multiports only} {
     ::pitcl::ports -outputs -multiports c
 } {}
 
-test ports.12 {list output ports of a star with no outputs} {
+test ports-12 {list output ports of a star with no outputs} {
     ::pitcl::ports -outputs XMgraph
 } {}
 
-test ports.13 {verify that an instance has no inout ports} {
+test ports-13 {verify that an instance has no inout ports} {
     ::pitcl::ports -outputs -inputs a
 } {}
 

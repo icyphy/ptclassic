@@ -44,7 +44,7 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y
 
-test descriptor.0 {create a test universe} {
+test descriptor-0 {create a test universe} {
     namespace pitcl {
         defGalaxy y SDF {
             addBlock z Ramp
@@ -65,7 +65,7 @@ test descriptor.0 {create a test universe} {
 ######################################################################
 #### getDescriptor
 
-test descriptor.1 {get the descriptor of a library block} {
+test descriptor-1 {get the descriptor of a library block} {
     ::pitcl::getDescriptor BlackHole
 } {Discard all inputs.  This star is useful for terminating
 signals that are not useful.}
