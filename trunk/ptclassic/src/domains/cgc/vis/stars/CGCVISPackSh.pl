@@ -42,31 +42,25 @@ limitation of liability, and disclaimer of warranty provisions.
 	  in.setSDFParams(PACKIN,PACKIN-1);
 	}
 	codeblock(mainDecl){
-	  const int $starSymbol(NUMIN) = 4;
-	  const int $starSymbol(UPPERBOUND) = 32767;
-	  const int $starSymbol(LOWERBOUND) = -32768;
-	  short* $starSymbol(packedout) = (short *)memalign(sizeof(double),sizeof(short)*$starSymbol(NUMIN));
+	  short* $starSymbol(packedout) =
+	    (short*)memalign(sizeof(double),sizeof(short)*4);
 	}	  
 	initCode{
 	  addDeclaration(mainDecl);
 	}
 	codeblock(localDecl){
-	  int index;
-	  double invalue;
 	  double* outvalue;
 	}
 	codeblock(packit){
-	  /*scale input, check bounds of the input,*/ 
-	  /*and cast each float to short*/
-	      for (index=0;index<$starSymbol(NUMIN);index++){
-		invalue = (double) $val(scale) * (double) $ref2(in,index);
-		if (invalue <= (double) $starSymbol(LOWERBOUND))
-		  $starSymbol(packedout)[index] = (short) $starSymbol(LOWERBOUND);
-		else if (invalue >= (double) $starSymbol(UPPERBOUND))
-		  $starSymbol(packedout)[index] = (short) $starSymbol(UPPERBOUND);
-		else 
-		  $starSymbol(packedout)[index] = (short) invalue;
-	      }	
+          /*scale,cast,and pack input*/
+          $starSymbol(packedout)[0] = (short)
+	    ($val(scale)*(double)$ref2(in,0));
+          $starSymbol(packedout)[1] = (short)
+	    ($val(scale)*(double)$ref2(in,1));
+          $starSymbol(packedout)[2] = (short)
+	    ($val(scale)*(double)$ref2(in,2));
+          $starSymbol(packedout)[3] = (short)
+	    ($val(scale)*(double)$ref2(in,3));
 	  /*output packed double*/	  
 	  outvalue = (double *) $starSymbol(packedout);
 	  $ref(out) = *outvalue;
