@@ -76,6 +76,10 @@ EventHorizon :: ~EventHorizon() {
 	}
 }
 
+// predicate saying whether the eventhorizon is retricted to one token
+// at a time.  This is the default implementation.
+int EventHorizon :: onlyOne() const { return FALSE; }
+
 void EventHorizon :: setEventHorizon (
 			     inOutType inOut,
 			     const char* s,
@@ -90,9 +94,12 @@ void EventHorizon :: setEventHorizon (
 	// Initialize the EventHorizon members
 	timeMark = 0.0;
 	tokenNew = FALSE;
-	asPort()->numberTokens = numTokens;
-	asPort()->bufferSize = numTokens;
-
+	if (numTokens > 1 && onlyOne())
+		Error::abortRun(*asPort(),"cannot support numTokens > 1");
+	else {
+		asPort()->numberTokens = numTokens;
+		asPort()->bufferSize = numTokens;
+	}
 	// set which wormhole it is in
 	wormhole = parentWormhole;
 
@@ -102,10 +109,17 @@ void EventHorizon :: setEventHorizon (
 
 // This method should be called from the inside EH of the wormhole.
 void EventHorizon :: setParams(int numTok) {
+	// no effect if either end can transfer only one token and we
+	// ask for more.
+	if (numTok > 1) {
+		if (onlyOne()) return;
+		if (ghostPort && ghostPort->onlyOne()) return;
+	}
 	asPort()->numberTokens = numTok;
 	asPort()->bufferSize = numTok;
 	ghostAsPort()->numberTokens = numTok;
 	ghostAsPort()->bufferSize = numTok;
+
 	// note that ghost port is the visible EH of the wormhole.
 	ghostAsPort()->initialize();
 }
