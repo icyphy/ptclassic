@@ -873,10 +873,10 @@ XtTblMask opt;			/* Justification options */
 
     if (opt & TBL_LEFT) rx = x;
     else if (opt & TBL_RIGHT) rx = x + width - rw;
-    else rx = x + (width-rw)/2;
+    else rx = x + (int)(width-rw)/2;
     if (opt & TBL_TOP) ry = y;
     else if (opt & TBL_BOTTOM) ry = y + height - rh;
-    else ry = y + (height-rh)/2;
+    else ry = y + (int)(height-rh)/2;
 #ifdef NOTDEF
     rx += w->core.border_width;
     ry += w->core.border_width;
