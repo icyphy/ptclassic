@@ -47,13 +47,15 @@ among others.
     }
     hinclude 	{ "Matrix.h" }
     go {
-        int i,j,k;
-        // collect inputs and put into the matrix
-        FixMatrix& X = *(new FixMatrix(int(numRows),int(numCols)));
+	int numrows = int(numRows);
+	int numcols = int(numCols);
 
-	for(i = 0; i < int(numRows); i++) {
-            k = int(numCols) - i - 1;
-	    for(j = 0; j < int(numCols); j++,k++)
+        // collect inputs and put into the matrix
+        FixMatrix& X = *(new FixMatrix(numrows, numcols));
+
+	for (int i = 0; i < numrows; i++) {
+            int k = numrows - i - 1;
+	    for (int j = 0; j < numcols; j++, k++)
 		X[i][j] = Fix(input%k);
         }
 
@@ -61,5 +63,3 @@ among others.
         output%0 << X;
     }		
 }
-
-
