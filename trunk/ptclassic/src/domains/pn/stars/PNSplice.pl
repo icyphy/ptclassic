@@ -13,22 +13,25 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     location { PN library }
 
-    hinclude { "InterpGalaxy.h" }
-    ccinclude { "Geodesic.h", "PNThread.h" }
+    hinclude { "PNThread.h", "InterpGalaxy.h" }
+    ccinclude { "Geodesic.h" }
 
     protected
     {
 	InterpGalaxy* gal;	// Container for dynamically created stars.
 	int spliceCount;	// Number of spliced stars.
+	PNThreadScheduler* threads;	// Container for dynamically
+					// created threads.
     }
 
     conscalls
     {
-	gal(0), spliceCount(0)
+	gal(0), spliceCount(0), threads(0)
     }
 
     destructor
     {
+	LOG_DEL; delete threads;
 	LOG_DEL; delete gal;
     }
 
@@ -88,6 +91,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { unsplice }
 	code
 	{
+	    // Delete any processes that were created.
+	    LOG_DEL; delete threads; threads = NULL;
+
 	    // Step through the ports to reestablish the
 	    // original connections.
 	    BlockPortIter nextPort(*this);
@@ -127,7 +133,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	arglist { "(DataFlowStar* star)" }
 	code
 	{
-	    LOG_NEW; new DataFlowProcess(*star);
+	    if (!threads)
+	    {
+		LOG_NEW; threads = new PNThreadScheduler;
+	    }
+	    LOG_NEW; new DataFlowProcess(*threads, *star);
 	}
     }
 
