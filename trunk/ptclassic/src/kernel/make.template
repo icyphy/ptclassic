@@ -23,7 +23,7 @@ include $(CONFIG)
 LIB=libptolemy.$(LIBSUFFIX)
 
 # No extra directories to include
-INCL =
+INCL = $(PTCOMPAT_INCSPEC)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
@@ -80,6 +80,7 @@ CCS_WITH_H_FILES=\
  Particle.cc \
  ParticleQueue.cc \
  Plasma.cc \
+ PrecisionState.cc \
  PriorityQueue.cc \
  PtGate.cc \
  Scheduler.cc \
