@@ -18,6 +18,7 @@ $Id$
 #include "CGStar.h"
 #include "CGWormhole.h"
 #include "CGTarget.h"
+#include "StringList.h"
 #include <ctype.h>
 
 /*******************************************************************
@@ -57,24 +58,70 @@ void CGStar::advance() {
 const int MAXLINELEN = 256;
 const int TOKLEN = 80;
 
-// Add processed code to the Target.
-void CGStar::gencode(const char* code)
-{
-    StringList temp = processCode(code);
-    addCode(temp);
+// Find the code StringList called name, if a StringList doesn't exist 
+// with the name name specified Error::abortRun is called.
+StringList* CGStar::getStream(const char* name) {
+	StringList* slist = myTarget()->getStream(name);
+	if (slist == NULL) 
+	{
+		StringList message;
+		message << "getStream: " << name << " does not exist";
+		Error::abortRun(*this,message);
+	}
+	return slist;
 }
 
-// Add processed code to the Target.
-void CGStar::gencode(CodeBlock& block)
+// lookup a shared symbol by list name & symbol name, if it is
+// not found Error::abortRun is called.
+const char* CGStar::lookupSharedSymbol(const char* list,const char* name) {
+	if (list==NULL || name==NULL) return NULL;
+	SymbolList* pList = sharedSymbolLists.get(list);
+	if (pList == NULL) {
+		StringList message;
+		message << "sharedSymbol: SymbolList " << list
+		        << " does not exist.";
+		Error::abortRun(*this,message);
+		return NULL;
+	}
+	const char* pSymbol=pList->lookup(name);
+	if (pSymbol == NULL) {
+		StringList message;
+		message << "sharedSymbol: symbol " << name
+			<< " was not found is SymbolList "<< list;
+	}
+	return pSymbol;
+}
+
+// add a SymbolList to the list of symbol lists.  For a SymbolList
+// to be shared it should be declared static.  If a SymbolList
+// is found with the same name but different pointer Error::abortRun
+// is called.  If a SymbolList is found with the same name and
+// same pointer, it is ignored.  This command should be called in 
+// the defining star's constructor.
+void CGStar :: addSharedSymbolList(SymbolList* list, const char* name){
+	if (list==NULL || name==NULL) return;
+	if(!sharedSymbolLists.add(name,list)) {
+		StringList message;
+		message << "addSharedSymbolList: A SymbolList named " << name
+			<< " already exists"; 
+		Error::abortRun(*this,message);
+	}
+}
+
+// Set the Target pointer, initialize the symbols to point to the target
+// and initize the pointer to the stream code.
+void CGStar :: setTarget(Target* t)
 {
-    StringList temp = processCode(block);
-    addCode(temp);
+	Star::setTarget(t);
+	codeblockSymbol.setSeparator(myTarget()->separator);
+	starSymbol.setSeparator(myTarget()->separator);
+	code = getStream("code");
 }
 
 // Add a string to the Target code.
-void CGStar::addCode (const char* code)
+void CGStar::addCode (const char* string)
 {
-	myTarget()->addCode(code);
+	*code << processCode(string);
 }
 
 // Process a CodeBlock, expanding macros.
@@ -242,6 +289,7 @@ StringList CGStar::expandMacro(const char* func, const StringList& argList)
 	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg++);
 	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg++);
 	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg++);
+	else if (matchMacro(func, argList, "sharedSymbol", 1)) s = lookupSharedSymbol(arg++,arg++);
 	else macroError(func, argList);
 
 	return s;
