@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -54,7 +54,12 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pakman.tcl pkgIndex.tcl
 
-MISC_FILES = demos doc bin test  tclIndex
+MISC_FILES =  $(DIRS) \
+	README.txt \
+	adm \
+	template.simple \
+	template.tycho \
+	tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF = tclIndex
