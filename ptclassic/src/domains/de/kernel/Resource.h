@@ -4,7 +4,7 @@
 /**************************************************************************
 Version identification:	$Id$
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,7 +36,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* 
  Programmer:  Neil Smyth
  Date of creation: 11/11/97
- Revisions:
+ Revisions: 4/15/98 version 2, removed the seperate q for pending events. 
+     Instead store the pending events in the RC star
 */
 
 
@@ -61,12 +62,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DataStruct.h"
 #include "DERCStar.h"
 #include "CQEventQueue.h"
-#include "DERCEventQ.h"
 #include "DERCScheduler.h"
 
-class DERCEventQ;
-class DERCEvent;
 class DERCScheduler;
+class ResLLCell;
+class DERCStar;
 
 ////////////////////////////////////////////////////////////////////////////
 // Resource : to be used in a POLIS simulation.
@@ -86,25 +86,26 @@ class Resource {
     Resource(const char*, int, DERCScheduler* );
 
     // returns int so it can pass along value from DEStar.run()
-    int newEventFromEventQ(DERCEvent* , double); 
-    int newEventFromInterruptQ(DERCEvent*, double);
-    void intQupdate(DERCEvent*, double, double);
-    int canAccessResource(DERCEvent*);
+    int newEventFromEventQ(CqLevelLink* , double); 
+    int canAccessResource(Event*);
     // used to get the destination of the event as a DERC Star
-    DERCStar* getDERCStar(Event*);
-    
+    DERCStar* getDERCStar(CqLevelLink*);
+
+    void removeFinishedStar(DERCStar*);
+    ResLLCell* getTopCell();
+    double getECT(DERCStar*);
+ 
     const char* name;
     int schedPolicy;
     double timeWhenFree; // set to ECT of last event in LL, or else -1
     DERCScheduler* mysched;   // the DERCScheduler which created this object
     
-    SequentialList* getOtherEvents(DERCEvent*, double);
+    SequentialList* getOtherEvents(CqLevelLink*, double);
     // used to store information about interrupted processes
-    SequentialList* intEventList; 
+    SequentialList* intStarList; 
     
-    // Pointers to the event queues of the DERCScheduler controlling the simulation
-    DERCEventQ* eventQ;
-    DERCEventQ* interruptQ;
+    // Pointers to the eventQ of the DERCScheduler controlling the simulation
+    CQEventQueue* eventQ;
 };
 
 
@@ -112,20 +113,20 @@ class Resource {
 ////////////////////////////////////////////////////////////////////////////
 // ResLLCell : to be used in Links in the Linked List.
 //
-// It stores information about the interrupted Events, and the output Events
-// of the Star which is using the Resource, but which have not yet been 
-// outputted.
+// It stores information about the Star that is using the resource, and 
+// the stars that are waiting to finish executing on the resource ( ie stars 
+// that were preempted while executing)
 //
 ////////////////////////////////////////////////////////////////////////////
 
 class ResLLCell {
 public: 
-    DERCEvent* event;
+    DERCStar* star;
     double ECT;     // Expected Completion Time
     int priority;
 
     // For some reason, under Cygwin32, we need to the body in the .cc file
-    ResLLCell( DERCEvent* e, double time, int prio); 
+    ResLLCell( DERCStar* e, double time, int prio); 
 };
 
 #endif

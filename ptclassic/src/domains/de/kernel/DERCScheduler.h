@@ -2,12 +2,12 @@
 #define _DERCScheduler_h 1
 
 /**************************************************************************
-Version identification:	$Id$
+Version identification:	@(#)DERCScheduler.h	1.5 03/02/98
 
  
 Author: Mudit Goel, Neil Smyth
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -43,7 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DEScheduler.h"
 #include "CQEventQueue.h"
 #include "Resource.h"
-#include "DERCEventQ.h"
 #include <string.h>
 
 
@@ -66,8 +65,7 @@ public:
 
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
-	DERCEventQ interruptQ;
-	DERCEventQ eventQ;
+	CQEventQueue eventQ;
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
@@ -102,7 +100,6 @@ public:
 
 	// fetch an event on request.
 	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
-	/*virtual*/ BasePrioQueue* interruptQueue() { return &interruptQ; }
 	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
 
         // class identification
