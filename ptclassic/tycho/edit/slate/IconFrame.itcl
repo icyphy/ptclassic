@@ -51,7 +51,8 @@ namespace ::tycho {
 # <p><b>Options</b>:
 # 
 # _IconFrame_ has all options of <a href="Connectible.html">Connectible</a>
-# and <a href="LabeledFrame">LabeledFrame</a>. In addition, is the options:
+# and <a href="LabeledFrame.html">LabeledFrame</a>. In addition, it
+# has the options:
 #
 # <ul>
 # <li><b>-height</b>
@@ -71,14 +72,15 @@ namespace ::tycho {
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   .t.s create IconFrame 100 100 &#92
-#       -inputs {0 50 50 0} &#92
-#       -outputs 2 &#92
+#   set icon [$slate create IconFrame 100 100 &#92
 #       -color green &#92
 #       -graphics {line 20 20 80 80} &#92
-#       -tags moveable &#92
-#       -intype {Terminal -type input -style blob -fill red} &#92
-#       -outtype {Terminal -type output -style doublearrow -fill blue}
+#       -tags moveable]
+#   $slate createchild $icon Terminal 0 0 &#92
+#       -anchor {50 0} &#92
+#       -direction {0 -1} &#92
+#       -type input &#92
+#       -style doublearrow
 # </pre></tcl>
 # 
 # <p><b>Enhancements</b>: Would a <b>-anchor</b> option be useful?

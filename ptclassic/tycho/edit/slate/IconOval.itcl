@@ -71,14 +71,24 @@ namespace ::tycho {
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   .t.s create IconOval 80 80 &#92
+#   set icon [$slate create IconOval 80 80 &#92
 #       -inputs {0 50 50 0} &#92
 #       -outputs 1 &#92
 #       -fill green &#92
-#       -graphics {line 20 50 80 50 -width 4; line 50 20 50 80 -width 4} &#92
-#       -tags moveable &#92
-#       -intype {Terminal -type input -style blob -fill red} &#92
-#       -outtype {Terminal -type output -style doublearrow -fill blue}
+#       -graphics {line 20 50 80 50 -width 4
+#                  line 50 20 50 80 -width 4} &#92
+#       -tags moveable]
+#   $slate createchild $icon Terminal 0 0 &#92
+#       -anchor {0 50} &#92
+#       -direction {-1 0} &#92
+#       -type input &#92
+#       -style blob &#92
+#       -fill red
+#   $slate createchild $icon Terminal 0 0 &#92
+#       -anchor {100 50} &#92
+#       -type output &#92
+#       -style doublearrow  &#92
+#       -fill blue
 # </pre></tcl>
 # 
 # <p><b>Enhancements</b>: Make terminals connect anywhere on the oval.

@@ -95,7 +95,10 @@ namespace ::tycho {
 #
 # <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
-# <b>Note</b>: This is an experimental class.
+# <b>Note</b>: This is an experimental class. Most of the support
+# for positioning inputs and outputs has been made redundant
+# by the *-anchor* option of the Terminal class. We need to figure
+# out whether any of this is still needed at all...
 #
 class ::tycho::Connectible {
     inherit ::tycho::ComplexItem

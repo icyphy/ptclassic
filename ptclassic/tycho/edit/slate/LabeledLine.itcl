@@ -99,24 +99,46 @@ namespace ::tycho {
 # dragged around to change their shapes:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   proc mv {mode id x y args} {
+#       global d l slate
+#       $slate move$mode $d $x $y
+#       $slate reshape$mode $l $x $y end
+#   }
+#   $follower configure &#92
+#           -clickprefix "mv click" &#92
+#           -dragprefix "mv drag" &#92
+#           -releaseprefix "mv release"
 #   set l [$slate create LabeledLine 50 50 110 100 110 200 &#92
 #               -arrow last -text Foo]
 #   set d [$slate create Solid 100 210 110 200 120 210 110 220 100 210 &#92
 #   		-color green -tags moveable]
-#   $slate constraint $d "move" {lambda id x y -> &#92
-# 		$slate reshape $l $x $y "end"}
-#   set m [$slate create LabeledLine 210 50 260 150 &#92
-#               -arrow last -text Bar]
-#   set e [$slate create Solid 250 160 260 150 270 160 260 170 250 160 &#92
-#   		-color green -tags moveable]
-#   $slate constraint $e "move" {lambda id x y -> &#92
-# 		$slate reshape $m $x $y "end"}
 # </pre></tcl>
 #
-# Move the diamond around to see how the label moves.
+# Move the diamond around to see the effect.
+#
+# Here's one with an odd number of segments:
+# <tcl quiet><pre>
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   proc mv {mode id x y args} {
+#       global d l slate
+#       $slate move$mode $d $x $y
+#       $slate reshape$mode $l $x $y end
+#   }
+#   $follower configure &#92
+#           -clickprefix "mv click" &#92
+#           -dragprefix "mv drag" &#92
+#           -releaseprefix "mv release"
+#   set l [$slate create LabeledLine 210 50 260 150 &#92
+#               -arrow last -text Bar]
+#   set d [$slate create Solid 250 160 260 150 270 160 260 170 250 160 &#92
+#               -color green -tags moveable]
+# </pre></tcl>
 #
 class ::tycho::LabeledLine {
     inherit ::tycho::ComplexItem
+
+    ###################################################################
+    ####                         public procs                      ####
 
     # Update the *-anchor* option
     proc _anchor {id canvas slate anchor}
@@ -132,30 +154,12 @@ class ::tycho::LabeledLine {
 
     # Update the *-text* option
     proc _text {id canvas slate text}
-
-    ###################################################################
-    ####                         public procs                      ####
 
     # Create a new item
     proc construct {id canvas slate tags args}
 
     # Set or get the lines's coordinates
     proc coords {id canvas slate args}
-
-    # Update the *-anchor* option
-    proc _anchor {id canvas slate anchor}
-    
-    # Update the *-arrow* option
-    proc _arrow {id canvas slate arrow}
-
-    # Update the *-fill* option
-    proc _fill {id canvas slate fill}
-
-    # Update the *-smooth* option
-    proc _smooth {id canvas slate smooth}
-
-    # Update the *-text* option
-    proc _text {id canvas slate text}
 
     ###################################################################
     ####                         protected variables               ####
