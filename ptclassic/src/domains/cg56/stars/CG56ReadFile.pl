@@ -19,9 +19,6 @@ Reads one data value from the \fIfileName\fR for use with the
 Motorola DSP56000 simulator.
 The \fIinVal\fR is used as the storage location of the read data value.
 	}
-	execTime {
-		return 2;
-	}
 	output {
 		name {output}
 		type {fix}
@@ -30,7 +27,9 @@ The \fIinVal\fR is used as the storage location of the read data value.
 		name { fileName }
 		type { STRING }
 		default { "infile" }
-		desc { 'Root' of filename that gets the data. '.sim' is appended.}
+		desc {
+'Root' of filename that gets the data. '.sim' is appended.
+		}
 	}
 	state {
 		name { inVal}
@@ -43,20 +42,22 @@ The \fIinVal\fR is used as the storage location of the read data value.
 	// a memory location each time it is referenced.
 	codeblock (logIn) {
 input $ref(inVal) $val(fileName).sim -RF
-}
-	initCode {
-                addCode(logIn,"simulatorCmds");
 	}
 
-	// this codeblock produces code
+	initCode {
+                addCode(logIn, "simulatorCmds");
+	}
+
 	codeblock (copy) {
 	move	$ref(inVal),a
 	move	a,$ref(output)
 	}
+
 	go {
 		addCode(copy);
 	}
+
+	execTime {
+		return 2;
+	}
 }
-
-
-
