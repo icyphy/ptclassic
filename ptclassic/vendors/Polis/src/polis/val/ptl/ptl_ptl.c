@@ -394,7 +394,6 @@ FILE *fp;
 net_node_t *node;
 {
     fprintf( fp, "  constructor {\n    delayType = TRUE;\n" );
-    fprintf( fp, "    clkFreq = Clock_freq;\n" );
     fprintf( fp, "    emittedEvents = new SequentialList(); \n" );
     fprintf( fp, " }\n" );
 }
@@ -752,9 +751,9 @@ char *option;
   fprintf( fp, "    int saveimpl;\n\n" );
 
   /* set variables which reflect Star parameters */
-  fprintf( fp, "    // set variables which reflect Star parameters /n");
+  fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
   fprintf( fp, "    priority = Priority;\n");
-  fprintf( fp, "    clkFreq = Clock_freq;\n"); 
+  fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
 
  
   fprintf( fp, "    if ( needResource < 2 ) {\n" );
@@ -935,7 +934,7 @@ int autotick, unittime;
   } end_foreach_net_node_fanin;
 
   /* Read input values */
-  fprintf( fp, "    // Read the input values \n");
+  fprintf( fp, "\n    // Read the input values \n");
   foreach_net_node_fanin( node, var ) {
       if ( assoc_var = isInputValue( var, node )) {
           pvar = net_var_parent_var( var, node );
@@ -953,6 +952,7 @@ int autotick, unittime;
   } end_foreach_net_node_fanin;
  
   /* output eachh CFSM firing to the firing file */
+  fprintf( fp, "\n    // write to firing file \n");
   fprintf( fp, "    if ( fpfire && needResource) {\n" );
   fprintf( fp, "      sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
   fprintf( fp, "(const char*) name, now, priority);\n" );
