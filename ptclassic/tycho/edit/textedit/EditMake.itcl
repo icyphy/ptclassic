@@ -29,12 +29,44 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #######################################################################
+#### FIXME: Known bugs:
+# Multi-line rules are not consistently parsed correctly.
+
+#######################################################################
+#### options
+#
+# NOTE: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditMake.textWidth 80 widgetDefault
+option add *EditMake.textHeight 40 widgetDefault
+option add *EditMake.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditMake.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditMake.fillMaxLineLength 70 widgetDefault
+option add *EditMake.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditMake.textfont [.tychoFonts defaultFont fixed]
+option add *EditMake.relief raised widgetDefault
+option add *EditMake.selectColor [ptkColor yellow white] widgetDefault
+option add *EditMake.commentColor [ptkColor firebrick black] \
+	widgetDefault
+option add *EditMake.fixmeColor [ptkColor red black] widgetDefault
+option add *EditMake.stringColor [ptkColor gray50 black] widgetDefault
+
+# new options
+
+option add *EditMake.includeColor [ptkColor blue black] widgetDefault
+option add *EditMake.variableColor [ptkColor DeepPink black] \
+	widgetDefault
+option add *EditMake.ruleColor [ptkColor forestGreen black] widgetDefault
+option add *EditMake.refvarColor [ptkColor purple black] widgetDefault
 
 #######################################################################
 #### EditMake
-# This class defines a window that provides an emacs-like editor
-# specialized for editing Make files. It colorizes the code, identifying
-# comments, and fills blocks of comments.
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing Make files. This editor also
+# colors comments and the strings "FIXME" and "NOTE". Note that a Tab 
+# is a literal tab, and has no special default behavior.
 #
 class ::tycho::EditMake {
     inherit ::tycho::EditProgram
@@ -42,20 +74,26 @@ class ::tycho::EditMake {
     constructor {args} {}
     destructor {}
 
+    ##########################################################################
+    ####                         public methods                           ####
+
     # Open a help window.
     method help {}
 
-    ###################################################################
-    ####                  protected methods                        ####
-
-    # Return the name of the type of text widget to use (EditMakeText).
-    protected method textWidget {} {return ::tycho::EditMakeText}
+    # Tag and color the code in a region.
+    method parseNow {start stop}
 }
 
 ###################################################################
 #
 body ::tycho::EditMake::constructor {args} {
+
     eval itk_initialize $args
+
+    # Rebind the Tab character to insert literal Tab.
+    bind $itk_component(text) <Tab> "$this insertString insert {\t}; break"
+
+    set fillPrefix "#" 
 }
 
 ###################################################################
@@ -66,4 +104,101 @@ body ::tycho::EditMake::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditMakeHelp.html
+}
+
+#####################################################################
+#### parseNow
+# This is a very simple parser that tags and colors the lines of text
+# starting with the one containing the "start" index and ending on
+# the line containing the "stop" index.
+#
+body ::tycho::EditMake::parseNow {start stop} {
+
+    EditProgram::parseNow $start $stop
+
+    set text $itk_component(text)
+
+    # Get the line numbers from the indices
+    regexp {[0-9]+} [$text index $start] startline
+    regexp {[0-9]+} [$text index $stop] endline
+        
+    # Remove tags first, if necessary
+    $text tag remove include $startline.0 "$stop lineend"
+    $text tag remove variable $startline.0 "$stop lineend"
+    $text tag remove rule $startline.0 "$stop lineend"
+    $text tag remove refvar $startline.0 "$stop lineend"
+
+    # Scan each line of text.
+    # NOTE: This should probably be re-written to not use this line-oriented
+    # style, which is very slow.  See the other editors, like EditTcl.
+    for {set lineno $startline} {$lineno <= $endline} {incr lineno} {
+	set line [$text get $lineno.0 "$lineno.0 lineend"]
+	
+	# include and -include.
+	if [regexp "^\[ \t\]*(include|-include)\[ \]+" $line] {
+	    $text tag add include \
+		    $lineno.0 "$lineno.0 lineend +1 char"
+	}
+
+	# Rules.
+	if [regexp "^.*:.*" $line] {
+	    $text tag add rule \
+		    $lineno.0 "$lineno.0 lineend +1 char"
+	    # Tag commands as well 
+	    for {set templineno [expr $lineno + 1]; set templine \
+		    [$text get $templineno.0 \
+		    "$templineno.0 lineend"]} {[regexp "^\t.*" $templine]} {\
+		    set templineno [expr $templineno + 1]; set templine \
+		    [$text get $templineno.0 "$templineno.0 \
+		    lineend"]} {
+		$text tag add rule \
+			$templineno.0 "$templineno.0 lineend +1 char"
+	    }
+	}
+
+	# Variable.
+	if [regexp -nocase "^\[ \t\]*\[a-z_\]+\[ \t\]*=" $line firstInst] {
+	    regexp -nocase "\[a-z_\]\[ \t\]*=" $line lastInst
+	    set startchar [string first $firstInst $line]
+	    set finishchar [string last $lastInst $line]
+	    $text tag add variable \
+		    $lineno.$startchar "$lineno.$finishchar +1 char"
+	}
+
+	# Referenced variables "$(VARNAME)". If you can make sense of
+	# this parsing routine is less then 5 minutes, I'll buy you 
+	# lunch. It really is that convoluted!
+	if [regexp -nocase "^.*\\$\\(\[a-z_\]+\\).*" $line] {
+	    for {set templine $line; set offset 0} \
+		    {[regexp -nocase "\\$\\(\[a-z_\]+\\).*" $templine next]} \
+		    {} {
+		set startchar [string first $next $templine]
+		set startchar [expr $startchar + $offset]
+		set offset $startchar
+		set finishchar [string first ")" $next]
+		set offset [expr $finishchar + $offset]
+		regexp "\\).*" $next templine
+		set finishchar [expr $finishchar + $startchar]
+		$text tag add refvar \
+			$lineno.$startchar "$lineno.$finishchar +1 char"
+		
+	    }
+	}
+
+    }
+    
+    # Set the visual characteristics of the tagged text
+    $text tag configure rule -foreground \
+	    [option get $itk_component(hull) ruleColor EditMake]
+    $text tag configure include -foreground \
+	    [option get $itk_component(hull) includeColor EditMake]
+    $text tag configure variable -foreground \
+	    [option get $itk_component(hull) variableColor EditMake]
+    $text tag configure refvar -foreground \
+	    [option get $itk_component(hull) refvarColor EditMake]
+
+    $text tag lower rule comment
+    $text tag lower include comment
+    $text tag lower variable comment
+    $text tag lower refvar comment
 }

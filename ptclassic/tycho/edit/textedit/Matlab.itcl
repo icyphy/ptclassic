@@ -1,4 +1,4 @@
-# Definition of a Matlab window that executes Matlab commands.
+# A Matlab console widget.
 #
 # @Author: Edward A. Lee
 #
@@ -30,20 +30,139 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+#### options
+# Unfortunately, Itcl appears to require us to repeat the options
+# from the base class with the new class name.
+option add *Matlab.textWidth 60 widgetDefault
+option add *Matlab.textHeight 16 widgetDefault
+option add *Matlab.parenColor [ptkColor white white] widgetDefault
+option add *Matlab.targetColor [ptkColor white white] widgetDefault
+option add *Matlab.fillMaxLineLength 50 widgetDefault
+option add *Matlab.textBackground \
+	[ptkColor lightblue1 white] widgetDefault
+option add *Matlab.textfont [.tychoFonts defaultFont fixed]
+option add *Matlab.relief raised widgetDefault
+option add *Matlab.answerForeground \
+	[ptkColor NavyBlue4 black] widgetDefault
+option add *Matlab.selectColor \
+	[ptkColor yellow white] widgetDefault
+
 #######################################################################
 #### Matlab
-# A Matlab window contains a MatlabText widget, which accepts Matlab
-# commands and executes them.  Note that the -text option will specify
-# the welcome message.
+# A Matlab widget is a Console widget that accepts Matlab commands
+# instead of Tcl commands.
 #
 class ::tycho::Matlab {
-    inherit ::tycho::TclConsole
+    inherit ::tycho::TclShell
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Evaluate a command. Return the result.
+    method evalCommand {com}
+
+    # Evaluate the current command in the text widget.
+    method evalTextEntry {}
 
     # Open a help window.
     method help {}
 
-    # Return the name of the type of text widget to use (MatlabText).
-    protected method textWidget {} {return ::tycho::MatlabText}
+    ##########################################################################
+    ####                          common members                          ####
+    
+    # Keep a count on the number of Consoles.
+    private common consoleCount 0
+
+}
+
+###################################################################
+#
+body ::tycho::Matlab::constructor {args} {
+
+    if {[uplevel #0 info commands matlab] == {}} {
+	error "Command matlab not defined. \
+		Perhaps you are not running Ptolemy?"
+    }
+
+    # Start matlab, if necessary
+    if {[matlab status] != 0} {
+	uplevel #0 [list \
+		::tycho::Message .patience -text \
+		{Starting Matlab.  Please be patient.}]
+	.patience centerOnScreen
+	update
+	uplevel #0 matlab start Matlab
+	if [winfo exists .patience] {
+	    delete object .patience
+	}
+    }
+    if {[matlab status] != 0} {
+	error "Failed to start Matlab!"
+    }
+  
+    incr consoleCount 
+  
+    eval itk_initialize $args
+}
+
+###################################################################
+#
+body ::tycho::Matlab::destructor {} {
+
+    incr consoleCount -1
+
+    if {$consoleCount == 0} {
+	matlab end Matlab
+    }
+
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#########################################################################
+#### evalCommand
+# Evaluate a command. Return the result.
+#
+body ::tycho::Matlab::evalCommand {com} {
+    # To be sure a prompt gets printed even if an error occurs,
+    # catch errors here
+    if {[catch {matlab eval $com} retval] != 0} {
+	tkerror $retval
+    }
+    return $retval
+}
+
+#########################################################################
+#### evalTextEntry
+# Evaluate the current command in the text widget.
+# There seems to be no way to tell whether a Matlab command is complete.
+#
+body ::tycho::Matlab::evalTextEntry {} {
+
+    append command [$itk_component(text) get "promptEnd + 1 chars" end]
+    
+    # Add it to history in the first position.
+    set com [string trim $command " \n\t"]
+    if {$com != ""} {lappend commandList $com}
+    set historypos 0
+	
+    set result [evalCommand $command]
+    set command ""
+	
+    # Note: cannot use displayResult here because it will only
+    # conditionally display the result.
+    if {$result != ""} {
+	insertWithTags $result\n result
+	$itk_component(text) tag config result \
+		-foreground \
+		[option get $itk_component(hull) answerForeground Matlab]
+    }
+    printPrompt $result
 }
 
 ###################################################################
@@ -55,4 +174,3 @@ body ::tycho::Matlab::help {} {
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/MatlabHelp.html
 }
-

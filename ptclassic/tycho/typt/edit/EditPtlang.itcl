@@ -31,8 +31,34 @@
 #######################################################################
 
 #######################################################################
+#### options
+#
+# NOTE: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditPtlang.textWidth 80 widgetDefault
+option add *EditPtlang.textHeight 40 widgetDefault
+option add *EditPtlang.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditPtlang.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditPtlang.fillMaxLineLength 70 widgetDefault
+option add *EditPtlang.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditPtlang.textfont [.tychoFonts defaultFont fixed]
+option add *EditPtlang.relief raised widgetDefault
+option add *EditPtlang.selectColor [ptkColor yellow white] widgetDefault
+option add *EditPtlang.commentColor [ptkColor firebrick black] widgetDefault
+option add *EditPtlang.fixmeColor [ptkColor red black] widgetDefault
+option add *EditPtlang.stringColor [ptkColor gray50 black] widgetDefault
+
+# new options
+
+option add *EditPtlang.ptkeywordColor [ptkColor coral black] \
+	widgetDefault
+
+
+#######################################################################
 #### EditPtlang
-# This class defines a window that provides an emacs-like editor
+# This class defines a widget that provides an emacs-like editor
 # specialized for editing ptlang files. Ptlang is the preprocessor
 # language used to define stars in Ptolemy. This class colorizes the
 # code, identifying comments and ptlang keywords, automatically indents
@@ -50,23 +76,20 @@ class ::tycho::EditPtlang {
 
     itk_option define -star star Star {}
 
-    ###################################################################
-    ####                         public methods                    ####
+    ##########################################################################
+    ####                         public methods                           ####
 
     # Open a help window.
     method help {}
+
+    # Tag and color the code in a region.
+    method parseNow {start stop}
 
     ###################################################################
     ####                         public procs                      ####
 
     # Given a source file (a .pl file) generate and display a doc file.
     proc gendoc {filename}
-
-    ###################################################################
-    ####                  protected methods                        ####
-
-    # Return the name of the type of text widget to use (EditPtlangText).
-    protected method textWidget {} {return ::tycho::EditPtlangText}
 }
 
 #######################################################################
@@ -111,30 +134,27 @@ body ::tycho::EditPtlang::constructor {args} {
     global PTOLEMY
     eval itk_initialize $args
 
-    addMenu Special left {} -underline 0
+    menubar addMenu Special left {} -underline 0
 
     # Stuff for the special menu
-    addMenuItem "Stars" Special -underline 0 \
+    menubar addMenuItem "Stars" Special -underline 0 \
             -command "::tycho::File::openContext \
 	    [file join $PTOLEMY src domains starHTML.idx.fst]"
 
-    addMenuItem "Universes" Special -underline 0 \
+    menubar addMenuItem "Universes" Special -underline 0 \
             -command "::tycho::File::openContext \
 	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
 
-    addMenuItem "Xref, stars/demos" Special -underline 0 \
+    menubar addMenuItem "Xref, stars/demos" Special -underline 0 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
-    addMenuSeparator Special
+    menubar addMenuSeparator Special
 
-    addMenuItem "Generate doc" Special -underline 0 \
+    menubar addMenuItem "Generate doc" Special -underline 0 \
             -command "::tycho::EditPtlang::gendoc $file"
-}
 
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
+}
 
 ###################################################################
 #### help
@@ -144,6 +164,41 @@ body ::tycho::EditPtlang::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditPtlangHelp.html
+}
+
+
+#####################################################################
+#### parseNow
+# Tag and color the Ptlang keywords and then invoke the C++ parser.
+#
+body ::tycho::EditPtlang::parseNow {start stop} {
+
+    set text $itk_component(text)
+
+    $text tag remove ptkeyword $start $stop
+
+    # Added features: ptlang keyword search.
+    # NOTE: This should really just tag the text and then use the
+    # EditProgram keyword search mechanism.
+    set keywords {ACCESS|ACKNOWLEDGE|ALIAS|ARGLIST|ATTRIB|AUTHOR|BEGIN|BODY|CCINCLUDE|CLASS|CODE|CODEBLOCK|CONNECT|CONSCALLS|CONSTRUCTOR|COPYRIGHT|DEFAULT|DEFSTAR|DEFSTATE|DERIVED|DERIVEDFROM|DESC|DESTRUCTOR|DOMAIN|EXECTIME|EXPLANATION|GALAXY|GO|HEADER|HINCLUDE|HTMLDOC|ID|IDENTIFIER|INHERIT|INITCODE|INLINE|INMULTI|INOUT|INOUTMULTI|INPUT|LINE|LOCATION|METHOD|NAME|NUM|NUMPORTS|OUTMULTI|OUTPUT|PRIVATE|PROTECTED|PUBLIC|PURE|SEEALSO|SETUP|STAR|START|STATIC|STRING|TYPE|VERSION|VIRTUAL|WRAPUP}
+    set next 1.0
+    while {[set next [$text search -nocase -count cnt\
+	    -regexp "($keywords)\[ \t\]*\{" $next $stop]] \
+	    != {}} {
+
+	$text tag add ptkeyword $next \
+		"$next + $cnt chars -1 chars"
+
+	set next [$text index "$next + $cnt char"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $next >= end] {break}
+    }
+
+    $text tag configure ptkeyword -foreground \
+	    [option get $itk_component(hull) ptkeywordColor EditPtlang]
+
+    # To get C++ parsing
+    EditCpp::parseNow $start $stop
 }
 
     ###################################################################

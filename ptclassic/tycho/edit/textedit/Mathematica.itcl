@@ -1,4 +1,4 @@
-# Definition of a Mathematica window that executes Mathematica commands.
+# Definition of a Mathematica console widget.
 #
 # @Authors: Joel R. King and Edward A. Lee
 #
@@ -30,20 +30,141 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+#### options
+# Unfortunately, Itcl appears to require us to repeat the options
+# from the base class with the new class name.
+option add *Mathematica.textWidth 60 widgetDefault
+option add *Mathematica.textHeight 16 widgetDefault
+option add *Mathematica.parenColor [ptkColor white white] widgetDefault
+option add *Mathematica.targetColor [ptkColor white white] widgetDefault
+option add *Mathematica.fillMaxLineLength 50 widgetDefault
+option add *Mathematica.textBackground \
+	[ptkColor lightblue1 white] widgetDefault
+option add *Mathematica.textfont [.tychoFonts defaultFont fixed]
+option add *Mathematica.relief raised widgetDefault
+option add *Mathematica.answerForeground \
+	[ptkColor NavyBlue4 black] widgetDefault
+option add *Mathematica.selectColor \
+	[ptkColor yellow white] widgetDefault
+
 #######################################################################
 #### Mathematica
-# A Mathematica window contains a MathematicaText widget, which accepts 
-# Mathematica commands and executes them.  Note that the -text option 
-# will specify the welcome message.
+# A Mathematica widget is a Console widget that accepts Mathematica 
+# commands instead of Tcl commands.
 #
 class ::tycho::Mathematica {
-    inherit ::tycho::TclConsole
+    inherit ::tycho::TclShell
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Evaluate a command. Return the result.
+    method evalCommand {com}
+
+    # Evaluate a the current command in the text widget.
+    method evalTextEntry {}
 
     # Open a help window.
     method help {}
 
-    # Return the name of the type of text widget to use (MathematicaText).
-    protected method textWidget {} {return ::tycho::MathematicaText}
+    ##########################################################################
+    ####                          common members                          ####
+    
+    # Keep a count on the number of Consoles.
+    private common consoleCount 0
+
+}
+
+###################################################################
+#
+body ::tycho::Mathematica::constructor {args} {
+
+    if {[uplevel #0 info commands mathematica] == {}} {
+	error "Command mathematica not defined. \
+		Perhaps you are not running Ptolemy?"
+    }
+
+    # Start mathematica, if necessary
+    if {[mathematica status] != 0} {
+	uplevel #0 [list \
+		::tycho::Message .patience -text \
+		{Starting Mathematica.  Please be patient.}]
+	.patience centerOnScreen
+	update
+	uplevel #0 mathematica start Mathematica
+	if [winfo exists .patience] {
+	    delete object .patience
+	}
+    }
+    if {[mathematica status] != 0} {
+	error "Failed to start Mathematica!"
+    }
+  
+    incr consoleCount 
+  
+    eval itk_initialize $args
+}
+
+###################################################################
+#
+body ::tycho::Mathematica::destructor {} {
+
+    incr consoleCount -1
+
+    if {$consoleCount == 0} {
+	mathematica end Mathematica
+    }
+
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#########################################################################
+#### evalCommand
+# Evaluate a command. Return the result.
+#
+body ::tycho::Mathematica::evalCommand {com} {
+    # To be sure a prompt gets printed even if an error occurs,
+    # catch errors here
+    if {[catch {mathematica eval $com} retval] != 0} {
+	tkerror $retval
+    }
+    return $retval
+}
+
+#########################################################################
+#### evalTextEntry
+# Evaluate the current command in the text widget.
+# There seems to be no way to tell whether a Mathematica command is
+# complete.
+#
+body ::tycho::Mathematica::evalTextEntry {} {
+
+    append command [$itk_component(text) get "promptEnd + 1 chars" end]
+    
+    # Add it to history in the first position.
+    set com [string trim $command " \n\t"]
+    if {$com != ""} {lappend commandList $com}
+    set historypos 0
+	
+    set result [evalCommand $command]
+    set command ""
+	
+    # Note: cannot use displayResult here because it will only
+    # conditionally display the result.
+    if {$result != ""} {
+	insertWithTags $result\n result
+	$itk_component(text) tag config result \
+		-foreground \
+		[option get $itk_component(hull) answerForeground \
+		Mathematica]
+    }
+    printPrompt $result
 }
 
 ###################################################################
