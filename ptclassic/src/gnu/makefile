@@ -311,17 +311,17 @@ hp_bin_flex:
 	# Reconfigure flex so as to avoid alloca problems
 	-mkdir $(GNU_OBJ)/flex
 	rm -f $(GNU_OBJ)/flex/config.cache
+	# If we don't have 'MAKE=make', then configure will fail
 	(cd $(GNU_OBJ)/flex; \
+		MAKE=make; \
 		CC=$(BINDIR)/gcc; \
 		$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-	# Adding  MAKE=$(GNU_OBJ)/make/make to the command below causes
-	# problems
-	(cd $(GNU_OBJ)/flex; 
+	(cd $(GNU_OBJ)/flex; \
 		$(GNU_OBJ)/make/make \
-			MAKE=make \
-			CC=$(BINDIR)/gcc; \
+			MAKE=$(GNU_OBJ)/make/make \
+			CC=$(BINDIR)/gcc \
 			YACC="$(GNU_OBJ)/bison/bison -y")
 
 hp_postgcc_install:
