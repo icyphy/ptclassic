@@ -50,8 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructor
 SDFPTclTarget::SDFPTclTarget(const char* nam,const char* desc)
-: SDFTarget(nam,desc), numIters(0)
-{
+: SDFTarget(nam,desc), numIters(0) {
 }
 
 Block* SDFPTclTarget::makeNew() const {
@@ -76,7 +75,7 @@ void SDFPTclTarget::setStopTime (double limit) {
 
 int SDFPTclTarget::run() {
     if ( ! galaxy() ) {
-	Error::abortRun("No galaxy to run");
+	Error::abortRun("SDF PTcl target has no galaxy to run");
 	return FALSE;
     }
     starProfiles.set(*galaxy());
