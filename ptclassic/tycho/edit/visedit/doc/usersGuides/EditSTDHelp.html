@@ -43,7 +43,7 @@ input/output. Each name should be separated by at least one space.
 
 To draw a state, either drag down the <CODE>Edit</CODE> menu and
 choose <CODE>New Node</CODE>, or use the keyboard accelerator
-<CODE>N</CODE>.  . Then a crossbar cursor will appear in the
+<CODE>N</CODE>. Then a crossbar cursor will appear in the
 window. Press and hold (don't release) the left mouse button, and move
 the mouse to get a different shape of node. Release the button to
 finish the drawing.
@@ -96,36 +96,48 @@ model.
 
 <H3>Make an Icon in <CODE>vem</CODE></H3>
 
-Unlike other domains, an FSM galaxy is edited in a previous mentioned
-STD file using Tycho instead of <CODE>vem</CODE>. However, to work with other
-domains, an icon in <CODE>vem</CODE> is required to represent the corresponding FSM
-galaxy described in an STD file. In Ptolemy, the Tycho can be started
-by typing a <CODE>y</CODE> while the mouse is over a  facet.
-To make an icon in <CODE>vem</CODE> for the STD
-file, first open the file in term of Tycho started in Ptolemy. Then
-drag down the <CODE>Special</CODE> menu and choose <CODE>Make
-Icon...</CODE>. This will load the FSM galaxy into the Ptolemy kernel,
+Unlike other domains, an FSM galaxy is edited within the Tycho STD
+Editor instead of within <CODE>vem</CODE>. However, to work with other
+domains, an icon in <CODE>vem</CODE> is required to represent the
+corresponding FSM galaxy described in an STD file. 
+<OL>
+
+<LI> In Ptolemy, Tycho can be started by typing a <CODE>y</CODE> while
+the mouse is over a facet.
+
+<LI> To make an icon in <CODE>vem</CODE> for the STD file,
+first open the file from within the Tycho window started from within Ptolemy.
+
+<LI> Then drag down the <CODE>Special</CODE> menu and choose
+<CODE>Make Icon...</CODE>
+
+<LI> This will load the FSM galaxy into the Ptolemy kernel,
 and make an icon with appropriate input/output ports in the specified
 palette in <CODE>vem</CODE>.
+<LI> 
+</OL>
 
-The icon looks like a star (blue outline), but it is actually an
-galaxy. It may cause confusion, but the reason is to avoid using
-octool handle. There are two different ways to make an icon in
-<CODE>vem</CODE>: <CODE>ptkSetMkSchemIcon</CODE> and
-<CODE>ptkSetMkStar</CODE>. The former one needs an OctFactHandle as
-one argument and is used for other <CODE>vem</CODE> galaxy. The FSM
-galaxy uses Tycho as the editor instead of <CODE>vem</CODE>, so there
-is no OctFactHandle for an FSM galaxy. Therefore the latter one, which
-uses the star (or galaxy) name instead, is more appropriate for this
-case.
 
- <P>Similar to the galaxy icon in other domains, when the
-<CODE>i</CODE> key is pressed on the icon to look inside the galaxy,
-the corresponding STD file which describes the FSM galaxy will be
-automatically invoked in Tycho. (Note: if the environment variable
-<CODE>PT_DISPLAY</CODE>
- is set to other editor instead of Tycho, it must be unset for the
-look-inside to work.)
+ <P>The icon looks like a star (blue outline), but it is actually an
+galaxy. This may be confusing, but the reason is to avoid using a
+Octtools handle, which would require adding Octtools knowledge to
+Tycho.
+
+ <P> There are two different ways to make an icon in <CODE>vem</CODE>:
+<CODE>ptkSetMkSchemIcon</CODE> and <CODE>ptkSetMkStar</CODE>. The
+former one needs an <CODE>OctFactHandle</CODE> as one argument and is
+used for other <CODE>vem</CODE> galaxy. The FSM galaxy uses Tycho as
+the editor instead of <CODE>vem</CODE>, so there is no OctFactHandle
+for an FSM galaxy. Therefore the latter one, which uses the star (or
+galaxy) name instead, is more appropriate for this case.
+
+ <P>If the mouse is over a FSM galaxy icon inside vem and the
+<CODE>i</CODE> key is pressed, then Tycho will automatically display
+the corresponding STD file inside a STD editor.
+
+(Note: if the environment variable
+<CODE>PT_DISPLAY</CODE> is set to other editor instead of Tycho, it
+must be unset for the look-inside to work).
 
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
