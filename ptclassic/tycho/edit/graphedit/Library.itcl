@@ -120,6 +120,14 @@
 #             item Add {
 #                 -icon sample.Add
 #                 -binary {$PTOLEMY/src/foo.pt}
+#                 parameter string Hello -label String
+#                 parameter integer 12 -type integer -label Integer
+#                 parameter number 1.234 -type number -label Number
+#                 parameter choice x -type choice -values {x y z} -label Choice
+#                 parameter set a -type set -values {a b c} -label Set
+#                 parameter boolean 0 -type boolean -label Boolean
+#                 parameter font Times -type font -label Font
+#                 parameter color red -type color -label Color
 #             }
 #             item Ramp {
 #                 -icon sample.Ramp
@@ -136,9 +144,14 @@
 #    ::tycho::MenuBar .mb
 #    pack .mb
 #    raise .
-#    wm deitemify .
+#    wm deiconify .
 #    .mb addMenu Foo
 #    $library menu .mb Foo ::tycho::inform
+# </pre></tcl>
+#
+# Create an editing widget on the sample.Add item
+# <tcl quiet><pre>
+#    $library edit sample.Add "::tycho::inform \[$library describe\]"
 # </pre></tcl>
 #
 class ::tycho::Library {
@@ -164,7 +177,7 @@ class ::tycho::Library {
     method group {name args}
     
     # Add an item
-    method item {name value args}
+    method item {name args}
 
     # Create a menu with items in this library
     method menu {menubar menuname prefix {context {}}}
@@ -182,7 +195,7 @@ class ::tycho::Library {
     protected method _item {group name args}
 
     # Add a parameter to an item -- parser call
-    protected method _parameter {item name data args}
+    protected method _parameter {item name value args}
     
     # Evaluate code in this object's context
     protected method evalInSpecificContext {args} {
@@ -204,10 +217,14 @@ body ::tycho::Library::constructor {args} {
     defineEntityType group -valued 0 -ordered 1 -label ""
 
     # The item entity type. Label is for menu display.
-    defineEntityType item -valued 1 -ordered 1 -label ""
+    defineEntityType item -valued 0 -ordered 1 -label ""
 
     # The parameter entity type
-    defineEntityType parameter -valued 1 -ordered 1 -leaf 1
+    defineEntityType parameter -valued 1 -ordered 1 \
+            -label "" \
+            -description "" \
+            -type string \
+            -values {}
 }
 
 ########################################################################
@@ -219,19 +236,23 @@ body ::tycho::Library::constructor {args} {
 # is the created editing widget.
 #
 body ::tycho::Library::edit {item command} {
-	set nm .[$model modelname].$item
-	if { [::info which -command $nm] != "" } {
-		# Already exists
-		wm raise $nm
-		return
-	}
-	::tycho::ParameterEditor $nm -command $command
-	$nm edit $this $item
-	return $nm
+    regsub -all {\.} $item "_" nm
+    set nm .$nm
+    #catch {delete object .bar}
+    #set nm .bar
+    if { [::info which -command $nm] != "" } {
+        # Already exists
+        raise $nm
+     } else {
+        uplevel #0 [list ::tycho::ParameterEdit $nm -command $command]
+        $nm edit $this $item
+        wm deiconify $nm
+    }
+    return $nm
 }
 
 ########################################################################
-#### edit
+#### editModal
 #
 # Create a modal graphical editor for an item. The returned 
 # result is a list of _changed_ parameter name and 
@@ -272,13 +293,13 @@ body ::tycho::Library::group {name args} {
 # Note that is the item is in a group, it's name is
 # in the form "group.itemname".
 #
-body ::tycho::Library::item {name value args} {
+body ::tycho::Library::item {name args} {
     set splut [split $name $separator]
     set cntxt [join [lreplace $splut end end] "."]
     set local [lindex $splut end]
 
     _verifynot item $cntxt $local $name
-    _addentity item $cntxt $local $name $value $args
+    _addentity item $cntxt $local $name {} $args
     if { [_cget item $cntxt $local -label] == "" } {
 	_configure item $cntxt $local [list -label $local]
     }
@@ -365,9 +386,9 @@ body ::tycho::Library::_group {context name args} {
 # of item attributes. If the
 # *-label* attribute is null, set it to the item name.
 #
-body ::tycho::Library::_item {group name value args} {
+body ::tycho::Library::_item {group name args} {
     _verifynot item $group $name $group$separator$name
-    _addentity item $group $name $group$separator$name $value $args
+    _addentity item $group $name $group$separator$name {} $args
     if { [_cget item $group $name -label] == "" } {
 	_configure item $group $name [list -label $name]
     }
