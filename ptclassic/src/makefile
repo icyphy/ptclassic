@@ -11,13 +11,13 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel preproc domains interp ptcl pigilib libgantt pigiRpc xgraph filters
+DIRS = kernel preproc domains interp ptcl pigilib libgantt pigiRpc pigi56 xgraph filters
 
-# directories with a make.template
+# "leaf" directories with a make.template
 MTDIRS = kernel interp pigilib libgantt xgraph ptcl
 
 # "leaf" directories with no make.template
-LDIRS = preproc pigiRpc filters
+LDIRS = preproc pigiRpc pigi56 filters
 
 # directories with subtrees
 SDIRS = domains
@@ -41,7 +41,7 @@ makefiles:
 		cd .. ; \
 	done
 
-all install clean realclean sources depend:
+all install clean realclean sources depend checkjunk:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
