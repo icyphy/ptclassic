@@ -131,8 +131,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
         if (i < numNumer) {
 			temp = scaleNumer*double(numerator[i]);
 			if (temp > 1 ) {
-				Error::abortRun(*this, "Scaled numerator coefficient ",i,
-							" > 1");
+				Error::abortRun(*this,"Scaled numerator coefficient > 1");
 			} else {
 				coeffs[i*2+1] = temp;
 			}
@@ -143,8 +142,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		if ( i < numDenom ) {
 			temp = scaleDenom * -(double(denominator[i]));
 			if (temp > 1 ) {
-				Error::abortRun(*this, "Scaled denominator coefficient ",i,
-							" > 1");
+				Error::abortRun(*this,"Scaled denominator coefficient > 1");
 			} else {
 				coeffs[i*2] = temp;
 			}
