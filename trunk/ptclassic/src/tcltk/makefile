@@ -80,6 +80,11 @@ BLT_VERSION =		blt2.0
 BLT_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(BLT_VERSION)
 BLT_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(BLT_VERSION)
 
+# TCLDEBUG
+TCLDEBUG_VERSION =	tcl-debug-1.5
+TCLDEBUG_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(TCLDEBUG_VERSION)
+TCLDEBUG_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(TCLDEBUG_VERSION)
+
 # Location of the itcl source
 ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)
 
@@ -253,6 +258,43 @@ install_blt:
 	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 $(BLT_OBJ):
 	mkdir -p $@
+
+######################################################
+# Tcldebug rules
+all_tcldebug: all config_tcldebug tcldebug
+
+config_tcldebug: $(TCLDEBUG_OBJ)	
+	( cd $(TCLDEBUG_OBJ); PWD=$(ITCL_OBJ); export PWD; \
+		$(TCLDEBUG_SRC)/configure \
+		--srcdir=$(TCLDEBUG_SRC) \
+		--prefix=$(ITCL_INDEPENDENT_DEST) \
+		--exec-prefix=$(ITCL_DEST) \
+		$(ENABLE_GCC) $(ENABLE_SHARED) )
+
+tcldebug: 
+	@echo "Making all in tcldebug"
+	# Don't pass CFLAGS down or you will end up overriding
+	# -fPIC in tcl-debug-1.5/Makefile
+	(cd  $(TCLDEBUG_OBJ); \
+		$(MAKE) \
+		CC="$(CC)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
+
+install_tcldebug:
+	@echo "Making install in itcl"
+	(cd  $(TCLDEBUG_OBJ); $(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		install)
+	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
+$(TCLDEBUG_OBJ):
+	mkdir -p $@
+
+clean_tcldebug:
+	(cd  $(TCLDEBUG_OBJ); $(MAKE) clean)
 
 # Links so that older programs can find libs and includes.
 # Note that itcl contains its own tcl/tk so we have to make links
