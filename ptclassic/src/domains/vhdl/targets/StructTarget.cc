@@ -157,8 +157,6 @@ int StructTarget :: runIt(VHDLStar* s) {
     nfi->decls << addVariableDecls(&localVariableList);
     // Add to the variable list.
     nfi->variableList->addList(firingVariableList);
-    // Add to the PortVar list.
-    nfi->portVarList->addList(firingPortVarList);
     // Add to the action list.
     StringList naction = "";
     naction << preSynch;
@@ -168,8 +166,6 @@ int StructTarget :: runIt(VHDLStar* s) {
     preSynch.initialize();
     firingAction.initialize();
     postSynch.initialize();
-    // Add to the VarPort list.
-    nfi->varPortList->addList(firingVarPortList);
   }
 
   if (!foundFiring) {
@@ -189,21 +185,17 @@ int StructTarget :: runIt(VHDLStar* s) {
     localVariableList.initialize();
 
     fi->variableList = firingVariableList.newCopy();
-    fi->portVarList = firingPortVarList.newCopy();
 
     StringList action = "";
     action << preSynch;
     action << firingAction;
     action << postSynch;
   
-    //  fi->action = firingAction;
     fi->action = action;
 
     preSynch.initialize();
     firingAction.initialize();
     postSynch.initialize();
-
-    fi->varPortList = firingVarPortList.newCopy();
 
     // Create a new VHDLFiringList and put the firing in the list.
     VHDLFiringList* fl = new VHDLFiringList;
@@ -431,10 +423,8 @@ void StructTarget :: trailerCode() {
   ctlerFi->portMapList = ctlerPortMapList.newCopy();
   ctlerFi->signalList = ctlerSignalList.newCopy();
   ctlerFi->variableList = ctlerVariableList.newCopy();
-  ctlerFi->portVarList = ctlerPortVarList.newCopy();
   ctlerFi->action = ctlerAction;
   ctlerAction.initialize();
-  ctlerFi->varPortList = ctlerVarPortList.newCopy();
   ctlerFi->noOutclocking = TRUE;
 
   // Create a new VHDLFiringList and put the firing in the list.
@@ -509,7 +499,6 @@ void StructTarget :: trailerCode() {
   
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
-  //  buildComponentDeclarations(level);
   component_declarations << addComponentDeclarations(&mainCompDeclList, level);
   signal_declarations << addSignalDeclarations(&mainSignalList, level);
   component_mappings << addComponentMappings(&mainCompDeclList, level);
@@ -520,8 +509,6 @@ void StructTarget :: trailerCode() {
 // Combine all sections of code.
 void StructTarget :: frameCode() {
   StringList code = headerComment();
-
-  //  myCode << cli_models;
 
   if (systemClock()) {
     myCode << clockGenCode();
@@ -797,15 +784,19 @@ void StructTarget :: registerState(State* state, const char* varName,
     StringList state_out = root;
     state_out << "_F" << thisFiring;
 
+    VHDLVariable* inVar = new VHDLVariable;
+    inVar->setName(ref);
+    inVar->setType(stType);
+
     VHDLPort* inPort = new VHDLPort;
     inPort->setName(refIn);
     inPort->setType(stType);
     inPort->setDirec("IN");
+    inPort->setVar(inVar);
 
     firingPortList.put(*inPort);
 
-    firingVariableList.put(ref, stType, "");
-    firingPortVarList.put(refIn, ref);
+    firingVariableList.put(*inVar);
 
     if (constState) {
       if (isFirstStateRef) {
@@ -886,8 +877,13 @@ void StructTarget :: registerState(State* state, const char* varName,
       topSignalList.put(*outSignal);
       firingSignalList.put(*outSignal);
 
+      VHDLVariable* outVar = new VHDLVariable;
+      outVar->setName(ref);
+      outVar->setType(stType);
+
+      outPort->setVar(outVar);
+
       firingPortList.put(*outPort);
-      firingVarPortList.put(refOut, ref);
 
       // Data clock name.  Needs to be the name of the firing, not the star.
       StringList clockName = sanitize(state->parent()->fullName());
@@ -1339,17 +1335,19 @@ StringList StructTarget :: addPortVarTransfers(VHDLCluster* cl,
 
     VHDLFiringListIter nextFiring(*(cl->firingList));
     VHDLFiring* nfiring;
-    int portVarCount = 0;
+    int portCount = 0;
     while ((nfiring = nextFiring++) != 0) {
-      VHDLPortVarListIter nextPortVar(*(nfiring->portVarList));
-      VHDLPortVar* nPortVar;
-      while ((nPortVar = nextPortVar++) != 0) {
-	body << nPortVar->variable << " := " << nPortVar->name << ";\n";
-	portVarCount++;
+      VHDLPortListIter nextPort(*(nfiring->portList));
+      VHDLPort* nPort;
+      while ((nPort = nextPort++) != 0) {
+	if (!strcmp(nPort->direction,"IN") && nPort->variable) {
+	  body << nPort->variable->name << " := " << nPort->name << ";\n";
+	  portCount++;
+	}
       }
     }
     
-    if (portVarCount) {
+    if (portCount) {
       all << body;
     }
   }
@@ -1418,24 +1416,26 @@ StringList StructTarget :: addVarPortTransfers(VHDLCluster* cl,
 
     VHDLFiringListIter nextFiring(*(cl->firingList));
     VHDLFiring* nfiring;
-    int varPortCount = 0;
+    int portCount = 0;
     while ((nfiring = nextFiring++) != 0) {
-      VHDLPortVarListIter nextVarPort(*(nfiring->varPortList));
-      VHDLPortVar* nVarPort;
-      while ((nVarPort = nextVarPort++) != 0) {
-	body << nVarPort->name << " <= " << nVarPort->variable << ";\n";
-	varPortCount++;
+      VHDLPortListIter nextPort(*(nfiring->portList));
+      VHDLPort* nPort;
+      while ((nPort = nextPort++) != 0) {
+	if (!strcmp(nPort->direction,"OUT") && nPort->variable) {
+	  body << nPort->name << " <= " << nPort->variable->name << ";\n";
+	  portCount++;
+	}
       }
     }
     
-    if (varPortCount) {
+    if (portCount) {
       all << body;
     }
   }
   return all;
 }
 
-// Register compDecls and compMaps and merge signals.
+// Register compDecls and merge signals.
 void StructTarget :: registerAndMerge(VHDLCluster* cl) {
   StringList clLabel = cl->name;
   clLabel << "_proc";
@@ -1492,8 +1492,6 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
   mainCompDeclList.put(clLabel, masterPortList, masterGenericList,
 		       clName, masterPortList, masterGenericList);
   mergeSignalList(masterSignalList);
-  //  mainCompDeclList.put(clLabel,  masterPortMapList, masterGenericMapList,
-  //		       clName, masterPortMapList, masterGenericMapList);
 }
 
 // Generate the entity_declaration.
@@ -1537,7 +1535,6 @@ void StructTarget :: buildArchitectureBodyOpener(int /*level*/) {
 // Add in component declarations here from mainCompDeclList.
 void StructTarget :: buildComponentDeclarations(int level) {
   Error::warn("buildComponentDeclarations", ": Don't call me anymore!");
-  //  component_declarations << cli_comps;
 
   // HashTable to keep track of which components already declared.
   HashTable myTable;
@@ -1895,8 +1892,6 @@ void StructTarget :: initVHDLObjLists() {
   ctlerPortMapList.initialize();
   ctlerSignalList.initialize();
   ctlerVariableList.initialize();
-  ctlerPortVarList.initialize();
-  ctlerVarPortList.initialize();
 
   SimVSSTarget::initVHDLObjLists();
 }
@@ -1909,6 +1904,4 @@ void StructTarget :: initFiringLists() {
   firingPortMapList.initialize();
   firingSignalList.initialize();
   firingVariableList.initialize();
-  firingPortVarList.initialize();
-  firingVarPortList.initialize();
 }
