@@ -1,6 +1,7 @@
 #ifndef _StringList_h
 #define _StringList_h 1
 #include <std.h>
+#include "miscFuncs.h"
 #include "DataStruct.h"
 #include "Output.h"
 
@@ -31,8 +32,9 @@ The revised version eliminates memory leaks and adds constructors
 with arguments.
 *******************************************************************/
 
-class StringList : SequentialList
+class StringList : public SequentialList
 {
+	friend class StringListIter;
 public:
 	// Constructors
 	// Note: StringList foo = bar; calls the constructor,
@@ -41,9 +43,7 @@ public:
 
 	StringList(const char* s) {
 		totalSize=strlen(s);
-		char* n = new char[totalSize+1];
-		strcpy(n,s);
-		put(n);
+		put(savestring(s));
 	}
 
 	StringList(int i) {totalSize=0; *this += i;}
@@ -51,21 +51,16 @@ public:
 	StringList(double d) {totalSize=0; *this += d;}
 
 	// Copy constructor
-	StringList(StringList& s) {totalSize=0; *this += s;}
-
-	// Assignment operator
-	StringList& operator = (StringList& sl) {
-		// check for assignment to self and do nothing
-		if (this != &sl) {
-			totalSize = 0;
-			initialize ();
-			*this += sl;
-		}
-		return *this;
+	StringList(const StringList& s) {
+		totalSize = s.totalSize;
+		put(s.newCopy());
 	}
 
+	// Assignment operator
+	StringList& operator = (const StringList& sl);
+
 	// Destructor
-	~StringList();
+	~StringList() { deleteAllStrings(); }
 
 	// Put first string on list: same as +=
 	// Use of this operator to add something to a nonempty
@@ -78,37 +73,45 @@ public:
         StringList& operator += (const char*);
 	StringList& operator += (int);
 	StringList& operator += (double);
-	StringList& operator += (StringList&);
+	StringList& operator += (const StringList&);
 
         // Return size of list
-        int size() {return SequentialList::size();}
+        int size() const {return SequentialList::size();}
 
-        // Return next string on list
-        char* next () {return (char*) SequentialList::next();}
- 
-        // Reset to start of the list
-        void reset() {SequentialList::reset();}
+	// Return first string on list
+	char* head() const {return (char*)SequentialList::head();}
 
 	// Convert to char*
 	// NOTE!!  This operation modifies the StringList -- it calls
 	// the private consolidate method to collect all strings into
-	// one string and clean up the garbage.
+	// one string and clean up the garbage.  No modification happens
+	// if the StringList is already in one chunk.
 	operator char* () { return consolidate();}
 
-	// The following isn't all that efficient but...
-	StringList operator+(char* s) { StringList r(*this); r += s; return r;}
-
+	// Make a copy of the StringList as a char* in dynamic memory.
+	// the user is responsible for deletion.
+	char* newCopy() const;
 private:
+	// delete everything currently on the list.  Doesn't zap the
+	// underlying SequentialList nodes.
+	void deleteAllStrings();
+
 	char* consolidate();
 	int totalSize;
 };
 
+// An Iterator for StringList
+
+class StringListIter : private ListIter {
+public:
+	StringListIter(const StringList& s) : ListIter(s) {}
+	char* next() { return (char*)ListIter::next();}
+	char* operator++() { return next();}
+	ListIter::reset;
+};
+
 // print a StringList on a UserOutput
-inline UserOutput& operator << (UserOutput& o, StringList& sl) {
-	char* s = sl;		// cast
-	o << s;
-	return o;
-}
+UserOutput& operator << (UserOutput& o, const StringList& sl);
 
 // print a StringList on a stream (don't give function here so we
 // don't have to include stream.h)
