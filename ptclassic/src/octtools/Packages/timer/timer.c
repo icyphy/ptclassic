@@ -123,7 +123,7 @@ struct timestruct *timer;
 
 #ifdef SYSV
     /* For Solaris2, taken from solaris2_porting.faq */
-    sprintf(proc,"/proc/%d", getpid());
+    sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc, O_RDONLY)) == -1)
       perror("timerContinue(): open");
     if (ioctl(fd, PIOCUSAGE, &rst) == -1)
@@ -212,7 +212,7 @@ struct timestruct *timer;
 
 #if defined(SYSV) && defined (__GNUC__)
     /* For Solaris2, taken from solaris2_porting.faq */
-    sprintf(proc,"/proc/%d", getpid());
+    sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc,O_RDONLY)) == -1)
       perror("util_cpu_time(): open");
     if (ioctl(fd, PIOCUSAGE, &rst) == -1)
