@@ -36,8 +36,6 @@
 #### autoSaveInterval option
 # The auto-save interval in minutes.  A value of zero means no auto-save.
 option add *File.autoSaveInterval 5 widgetDefault
-# Class to use for revision control.
-option add *File.revclass "::tycho::RevControlSCCS" widgetDefault
 
 #######################################################################
 #### File
@@ -117,11 +115,6 @@ class ::tycho::File {
     # Return the name of the file associated with the object.
     method filename {} {return $file}
 
-    #### focusin
-    # Redefined in base classes to focus on right widget. It is 
-    # defined here as well because nextRevAction needs it.
-    method focusin {} 
-
     #### getReadonly
     # Return the value of the readonly option.
     method getReadonly {} 
@@ -146,11 +139,11 @@ class ::tycho::File {
     # Mark the window as not containing modified data.
     method markUnmodified {}
 
-    #### nextRevAction
+    #### revisionControl
     # Check in a file using the selected revision control program command
     # if the file is writeable. Otherwise check the file out using the
     # specified revision control program command. 
-    method nextRevAction {}
+    method revisionControl {}
 
     #### print
     # Print the contents of the file. The default behavior is an error.
@@ -235,10 +228,6 @@ class ::tycho::File {
     # Remove a filename from the window menus of all open File objects.
     proc windowMenuRemoveAll {filename} {}
 
-    #### getOption
-    # Return the value of the option specified by the argument.
-    proc getOption {option} {}
-    
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -501,7 +490,7 @@ body ::tycho::File::constructor {args} {
 	    -label "Revision Control..." \
 	    -underline 0 \
 	    -accelerator "C-x v" \
-	    -command "$this nextRevAction"
+	    -command "$this revisionControl"
 
     $itk_component(fileMenu) add separator
     
@@ -585,8 +574,7 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Key-i> "$this insertFile; break"
     bind $prefix <Control-x><Key-p> "$this print; break"
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
-    bind $itk_component(hull) <Control-x><v> "$this nextRevAction; \
-	    break"
+    bind $itk_component(hull) <Control-x><v> "$this revisionControl; break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -688,14 +676,6 @@ body ::tycho::File::evaluate {} {
     }
 }
 
-###################################################################
-#### focusin
-# This will be redefined in derived classes to hand the focus to the 
-# right widget.
-#
-body ::tycho::File::focusin {} {
-}
-
 #####################################################################
 #### getReadonly
 # Return the value of the readonly option.
@@ -757,37 +737,6 @@ body ::tycho::File::markUnmodified {} {
     }
 }
 
-###################################################################
-#### nextRevAction
-# Check to see if a filename is associated with the editor, if not 
-# fail and inform the user. If the file has not been saved we will 
-# do so at this point. Then check in the file if it is writeable, 
-# prompting for a message, and reload the new file with the insert
-# cursor at the same location. If the file is not writeable then 
-# check the file out and reload the new file with the insert cursor 
-# at the same location. If the file is not under revision control, 
-# then we place it under control after asking the user if this is 
-# what he wants. If the necessary revision control directory does 
-# not exist then create it if we can.
-#
-body ::tycho::File::nextRevAction {} {
-    set revclass [::tycho::File::getOption revclass]
-    set currentfile [$this filename]
-    set topwin [winfo toplevel $itk_component(hull)]
-    if [winfo exists $topwin.revcontrol] {
-	wm deiconify $topwin.revcontrol
-	raise $topwin.revcontrol
-	$topwin.revcontrol focusin
-    } {
-	uplevel #0 "
-	    $revclass $topwin.revcontrol \
-		    -object $this \
-		    -geometry +0+0 \
-		    -before $itk_component(hull)"
-	    wm deiconify $topwin.revcontrol
-    }
-}
-
 #####################################################################
 #### print
 # Print the data.  The default behavior is an error.
@@ -802,6 +751,14 @@ body ::tycho::File::print {} {
 #
 body ::tycho::File::reload {} {
     error "Sorry, reload not implemented yet."
+}
+
+###################################################################
+#### revisionControl
+# Create a revision control object for the current file.  
+#
+body ::tycho::File::revisionControl {} {
+    ::tycho::RevControl::setup $itk_component(hull) $this
 }
 
 #####################################################################
@@ -1100,18 +1057,6 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
     foreach fileobj [array names fileObjects] {
 	catch {$fileobj windowMenuRemove $filename}
     }
-}
-
-###################################################################
-#### getOption
-# Return the value of the option specified by the argument.
-# This hack is used because options are not inherited by 
-# subclasses (hence the object name .bogusOptionObject.)
-body ::tycho::File::getOption {option} {
-    if {[info object .fileBogusOptionObject] == ""} {
-	File .fileBogusOptionObject
-    }
-    return [option get .fileBogusOptionObject $option File]	    
 }
 
 #########################################################################
