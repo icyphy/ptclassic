@@ -136,7 +136,7 @@ non-zero integer (not necessarily 1).
 
 	codeblock(XorAccumulator,"int i") {
 	not	a	a,y0		; save a in y0 and invert a
-	tst	b	$ref(input#@i),b	; test input and read next input
+	tst	b	$ref(input#@i),b		; test input and read next input
 	teq	y0,a			; restore a if input != 0
 	}
 
@@ -149,11 +149,11 @@ non-zero integer (not necessarily 1).
 	// Reusable code blocks
 
 	codeblock(loadAccumulator,"int i") {
-	move	$ref(input#@i),a		; read input#@i to accumulator a
+	move	$ref(input#@i),a			; read input#@i to accumulator a
 	}
 
 	codeblock(loadx0,"int i") {
-	move	$ref(input#@i),x0		; read input#@i to register x0
+	move	$ref(input#@i),x0			; read input#@i to register x0
 	}
 
         codeblock(invertAccumulator) {
@@ -219,7 +219,7 @@ non-zero integer (not necessarily 1).
 			header << "positive logic";
 			addCode(header);
 			addCode(beginXor);
-			for (i = 2; i < input.numberPorts(); i++ ) {
+			for (i = 2; i <= input.numberPorts(); i++ ) {
 				addCode(XorAccumulator(i));
 			}
 			addCode(endXor);
