@@ -1,10 +1,10 @@
 defstar {
 	name { MpyInt }
 	domain { CG56 }
-	desc { Two input integer multiplier.  The output wraps around on overflow.}
+	desc { Multiply any number of inputs, producing an output. }
 	version { $Id$ }
-	acknowledge { Gabriel version by Martha Fratt }
 	author { Chih-Tsung Huang, ported from Gabriel }
+	acknowledge { Martha Fratt, who wrote the Gabriel version }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -13,17 +13,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	explanation {
-.Id "multiplication, integer"
-.Id "integer multiplication"
-Input and output are assumed to be integers (right-justified in word).
-}
-
-	input {
-		name {firstInput}
-		type {int}
+.Id "multiplication"
+The inputs are multiplied and the result is written on the output.
+This star is similar to the Mpy star.
 	}
-	input {
-		name {secondInput}
+	inmulti {
+		name {input}
 		type {int}
 	}
 	output {
@@ -33,17 +28,41 @@ Input and output are assumed to be integers (right-justified in word).
 	constructor {
 		noInternalState();
 	}
-	codeblock (multblock) {
-	move	$ref(firstInput),x0		; input #1 -> x0
-	move	$ref(secondInput),y0         	; input #2 -> y0
-	mpy 	x0,y0,a
-        asr     a                           ;  needed to handle data as integer
-	move 	a0,$ref(output)
+
+	codeblock (copyInput) {
+	move	$ref(input#1),x0	; just move data from in to out
+	move	x0,$ref(output)
 	}
- 	go {
-		addCode(multblock);
-  	}
+
+	codeblock (multiplyStart) {
+	move	$ref(input#1),x0	 ; 1st input -> x0
+        move	$ref(input#2),y0         ; 2nd input -> y0
+	}
+
+        codeblock(multiply,"int i") {
+        mpy     x0,y0,a     $ref(input#@i),x0	; a = x0 * y0, get next input
+	move    a1,y0		; y0 = integer result in accumulator
+        }
+
+	codeblock (multiplyEnd) {
+	mpy	x0,y0,a		; a = x0 * y0
+	move	a1,$ref(output)	; return the integer result
+	}
+
+	go {
+		if (input.numberPorts() == 1) {
+			addCode(copyInput);
+			return;
+		}
+
+		addCode(multiplyStart);
+		for (int i = 3; i <= input.numberPorts(); i++) {
+			addCode(multiply(i));
+		}
+	        addCode(multiplyEnd);
+	}
 	exectime {
-	 	return 4; 
+		if (input.numberPorts() == 1) return 2;
+		return 2 + input.numberPorts();
 	}
 }
