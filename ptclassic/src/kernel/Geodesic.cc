@@ -17,11 +17,14 @@ Particles. Actually it stores only Particle*s, so that its
 operation is independent of the type of Particle.
 
 Geodesics can be created named or unnamed.
+
 *****************************************************************/
 
 #include "Geodesic.h"
+#include "Block.h"
 #include "Connect.h"
 #include "Plasma.h"
+#include "StringList.h"
 
 int Geodesic :: isItPersistent () {
 	return FALSE;
@@ -85,17 +88,6 @@ void Geodesic :: initialize()
 	// initialized to specific values
 }
 
-StringList
-Geodesic :: printVerbose () {
-	StringList msg = "GEODESIC: ";
-	msg += readFullName();
-	msg += "\nSource port: ";
-	msg += originatingPort->readFullName();
-	msg += "\nDestination port: ";
-	msg += destinationPort->readFullName();
-	msg += "\n";
-}
-
 // destructor
 Geodesic :: ~Geodesic () {
 	// free all particles (return them to Plasma)
@@ -104,4 +96,16 @@ Geodesic :: ~Geodesic () {
 	// not to have PortHole::disconnect try to do things to geodesic
 	if (originatingPort) originatingPort->disconnect(0);
 	if (destinationPort) destinationPort->disconnect(0);
+}
+
+
+// readFullName
+StringList Geodesic :: readFullName () const {
+	StringList out;
+	if (blockIamIn) {
+		out = blockIamIn->readFullName();
+		out += ".";
+	}
+	out += name;
+	return out;
 }

@@ -16,10 +16,17 @@ Geodesic
 
 Geodesic is where Particles reside in transit between
 Blocks. It is a container class, which stores and retreives
-Particles. Actually it stores only Particle*'s, so that its
+Particles. Actually it stores only Particle*s, so that its
 operation is independent of the type of Particle.
 
 Geodesics can be created named or unnamed.
+
+It would be most natural to multiply inherit Geodesic from
+ParticleStack and NamedObj.  However, gdb 3.5 chokes, gags, and
+dies on such code, and I'm willing to sacrifice some elegance
+to be able to use gdb.  Hence the very NamedObj-like name, parent,
+readFullName, readName members.
+
 *****************************************************************/
 
 #include "NamedObj.h"
@@ -32,8 +39,7 @@ class PortHole;
 	// class Geodesic
 	///////////////////////////////////////////
 
-class Geodesic : private ParticleStack, public NamedObj
-{
+class Geodesic : private ParticleStack {
 public:
 	// set the source and destination portholes -- virtual
 	// these functions return a pointer to the "real porthole"
@@ -91,11 +97,26 @@ public:
         // be the same as when it started, or the run will have been aborted
         // due to a sample-rate inconsistency.
 	int numInitialParticles;
+
+	// NamedObj-like methods.  Was done by MH
+	void setNameParent(const char* nm, Block* bp) {
+		name = nm; blockIamIn = bp;
+	}
+	const char* readName() const { return name;}
+
+	Block* parent() const { return blockIamIn;}
+
+	StringList readFullName() const;
+
 protected:
 	void portHoleConnect();
         PortHole *originatingPort;
         PortHole *destinationPort;
 private:
 	int sz;
+// This could also be done by multiple inheritance from NamedObj, but gdb
+// chokes on that.  Once we get a new gdb I may change this back.
+	const char* name;
+	Block* blockIamIn;
 };
 #endif
