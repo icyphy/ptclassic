@@ -7,7 +7,7 @@ Base class for Goertzel algorithm stars
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -55,16 +55,16 @@ which is a function of k and N
 		}
 		attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
-	protected{
+	protected {
 		double theta;
 	}
-	constructor{
+	constructor {
 		noInternalState();
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
 
-	method{
+	method {
 	    name{CheckParameterValues}
 	    arglist{  "()" }
 	    type { void }
@@ -103,7 +103,7 @@ which is a function of k and N
 		// FIXME: Parameters are not always resolved properly
 		// before setup but should be.  For now, check parameters
 		// in go method and guard against division by N = 0
-		CheckParameterValues();
+		// CheckParameterValues();
 		// double Nd = double(int(N));
 		double Nd = double(int(N) ? int(N) : 1);
 		double kd = double(int(k));
@@ -111,55 +111,53 @@ which is a function of k and N
 		WnReal= double(cos(theta));
 		WnImag  = double(sin(theta));
 		input.setSDFParams(int(size), int(size)-1);
-	
+	}
 
-		}
-
-	codeblock(initialize){
-;initialize:
-;b=x0=y0=0
-;x1=WnReal
-;y1=WnImag
-;r0=r4=address of input
-;a = real part of first input
-	clr	a		#$addr(input),r0
-	clr	b		$ref(WnReal),x1	a,y0
-	clr	a		b,x0				$ref(WnImag),y1
-	move 	x:(r0)+,a
+	codeblock(initialize) {
+; Register usage:
+; x0 = real part of previous output 
+; x1 = WnReal
+; y0 = imaginary part of previous output
+; y1 = WnImag
+; a = real part of this output
+; b = imaginary part of this output
+; r0 = address of real part of input
+;
+; Initialization
+; b = x0 = y0 = 0
+	clr	a	#$addr(input),r0		; r0 = address of input
+	clr	b	$ref(WnReal),x1		a,y0	; x1 = WnReal
+	clr	a	b,x0		$ref(WnImag),y1	; y1 = WnImag
+	move 	x:(r0)+,a			; a = real part of first input
 	}	
 
 	codeblock(loop,"int len"){
-;x0=real part of previous output 
-;x1=WnReal
-;y0=imaginary part of previous output
-;y1=WnImag
-;a=real part of this output
-;b=imaginary part of this output
-;r0->real part of input
-;r4->imaginary part of imput
+; Compute the output of the Goertzel filter
 	do	#@len,$label(_GoertzelLoop)
 	macr	x1,x0,a		b,y0	
-	macr	-y1,y0,a		#0,b		
+	macr	-y1,y0,a	#0,b		
 	macr	x0,y1,b		a,x0
 	macr	x1,y0,b		x:(r0)+,a
 $label(_GoertzelLoop)
-;when the loop ends the real coeff. is stored in x0
-;the imaginary coeff is stored in b
+; Register usage:
+; x0 = real coefficient
+; b = imaginary coefficient
 	}
 
 	go {
 		int dftLength = int(N);
+
+		// See the FIXME statement above
+		CheckParameterValues();
+
   		// Initialize registers
 		addCode(initialize);
+
 		// Compute kth coeff discarding all but last sample
 		addCode(loop(dftLength + 1));
 	}
 
 	exectime {
-                // FIXME. Estimates of execution time are given in pairs of
-		// oscillator cycles because that's the way it was done in
-		// Gabriel: they simply counted the number of instructions.
-
-		return ( 4 + 3 + 4*(int(N)+1) );
+		return (4 + 3 + 4*(int(N)+1));
 	}
 }

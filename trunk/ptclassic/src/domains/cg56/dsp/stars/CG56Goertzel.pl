@@ -9,7 +9,7 @@ N-point DFT using Goertzel's algorithm.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -35,28 +35,24 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		type{complex}
 	}
 
-	//Inherit setup from GoertzelBase
+	// Inherit the setup method from the GoertzelBase star
 
 	codeblock(result) {
-;when the loop ends the real coeff. is stored in x0
-;the imaginary coeff is stored in b
 	move 	x0,a
 	move	ab,$ref(output)
 	}
 
 	go {
-		//Discard all but the last sample
+		// Discard all but the last sample
+		// real coeff. stored in x0, imaginary coeff. stored in b
 		CG56GoertzelBase::go();
-		//Output the complex result
+
+		// Output the complex result
 		addCode(result);
 	}
 
 	exectime {
-                // FIXME. Estimates of execution time are given in pairs of
-		// oscillator cycles because that's the way it was done in
-		// Gabriel: they simply counted the number of instructions.
-
-		return ( 2 + CG56GoertzelBase::myExecTime() );
+		return (2 + CG56GoertzelBase::myExecTime());
 	}
 }
 
