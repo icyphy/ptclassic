@@ -11,7 +11,6 @@
  still change slightly.  Caveat hacker.
 
  Programmer: J. T. Buck
- Alpha version: 9/26/90
 
 ************************************************************************/
 
@@ -93,6 +92,7 @@ char* domain;			/* domain of object (if star) */
 char* derivedFrom;		/* class obj is derived from */
 char* portName;			/* name of porthole */
 char* portType;			/* dataType of porthole */
+char* portInherit;		/* porthole for inheritTypeFrom */
 char* portNum;			/* expr giving # of tokens */
 int   portOut;			/* true if porthole is output */
 int   portMulti;		/* true if porthole is multiporthole */
@@ -100,6 +100,7 @@ char* stateName;		/* name of state */
 char* stateClass;		/* class of state */
 char* stateDef;			/* default value of state */
 char* stateDesc;		/* descriptor for state */
+char* stateAttrib;		/* attributes for state */
 char* instName;			/* star instance within galaxy */
 char* instClass;		/* class of star instance */
 char* methodName;		/* name of user method */
@@ -107,6 +108,7 @@ char* methodArgs;		/* arglist of user method */
 char* methodAccess;		/* protection of user method */
 char* methodType;		/* return type of user method */
 char* methodCode;		/* body of user method */
+char* consCalls;		/* constructor calls for members */
 char* galPortName;		/* name of galaxy port */
 char* consCode;			/* extra constructor code */
 char* destCode;			/* destructor */
@@ -132,7 +134,7 @@ typedef char * STRINGVAL;
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS OUTPUT INPUT ACCESS
 %token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
-%token BODY IDENTIFIER STRING 
+%token BODY IDENTIFIER STRING CONSCALLS ATTRIB
 %%
 /* a file consists of a series of definitions. */
 file:
@@ -181,6 +183,7 @@ sgitem:
 		'{' methlist '}'	{ genMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
+|	conscalls BODY			{ consCalls = $2; bodyMode = 0;}
 |	error '}'			{ yyerror ("bad sgitem");}
 ;
 
@@ -196,6 +199,9 @@ staritem:
 constructor:
 	CONSTRUCTOR optp '{'		{ bodyMode = 1;}
 ;
+
+conscalls:
+	CONSCALLS '{'			{ bodyMode = 1;}
 
 destructor:
 	DESTRUCTOR optp '{'		{ bodyMode = 1;}
@@ -274,6 +280,7 @@ portlist:
 portitem:
 	NAME '{' ident '}'		{ portName = $3;}
 |	TYPE '{' ident '}'		{ portType = portDataType($3);}
+|	TYPE '{' '=' ident '}'		{ portInherit = $4;} 
 |	NUM '{' expval '}'		{ portNum = $3;}
 ;
 
@@ -291,7 +298,10 @@ dstateitem:
 					}
 |	DEFAULT '{' defval '}'		{ stateDef = $3;}
 |	DESC '{' desc '}'		{ stateDesc = $3;}
+|	attrib BODY			{ stateAttrib = $2; bodyMode=0;}
 ;
+
+attrib:	ATTRIB '{'			{ bodyMode=1;}
 
 /* allow single token as a default value */
 defval:	STRING				{ $$ = $1;}
@@ -373,7 +383,7 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objDesc = domain = derivedFrom = NULL;
+	objName = objDesc = domain = derivedFrom = consCalls = NULL;
 	consStuff[0] = ccCode[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 }
@@ -381,7 +391,7 @@ int g;
 /* Generate a state definition */
 clearStateDefs ()
 {
-	stateName = stateClass = stateDef = stateDesc = NULL;
+	stateName = stateClass = stateDef = stateDesc = stateAttrib = NULL;
 }
 
 char*
@@ -458,8 +468,10 @@ genState ()
 		stateDesc = buf;
 	}
 	sprintf (str1,"\t%s %s;\n", stateClass, stateName);
-	sprintf (str2,"\taddState(%s.setState(\"%s\",this,%s,%s));\n",
-	stateName, stateName, stateDef, stateDesc);
+	sprintf (str2,"\taddState(%s.setState(\"%s\",this,%s,%s",
+		 stateName, stateName, stateDef, stateDesc);
+	if (stateAttrib) sprintf (str2, "\n%s", stateAttrib);
+	sprintf (str2, "))\n");
 	strcat (protectedMembers, str1);
 	strcat (consStuff, str2);
 }
@@ -470,7 +482,8 @@ int out, multi;
 {
 	portOut = out;
 	portMulti = multi;
-	portName = portType = portNum = NULL;
+	portName = portNum = portInherit = NULL;
+	portType = "ANYTYPE";
 }
 
 char* portDataType (name)
@@ -497,6 +510,11 @@ genPort ()
 			portName, portName, cvtToUpper(portType));
 	strcat (publicMembers, str1);
 	strcat (consStuff, str2);
+	if (portInherit) {
+		sprintf (str2, "\t%s.inheritTypeFrom(%s);\n", portName,
+			 portInherit);
+		strcat (consStuff, str2);
+	}
 }
 
 /* set up for user-supplied method */
@@ -654,7 +672,7 @@ genDef ()
 	if (publicMembers)
 		fprintf (fp, "%s\n", publicMembers);
 /* The clone function; end of file */
-	fprintf (fp, "\tBlock* clone() { return new %s;}\n};\n", fullClass);
+	fprintf (fp, "\tBlock* clone() const { return new %s;}\n};\n", fullClass);
 	fprintf (fp, "#endif\n");
 	(void) fclose (fp);
 
@@ -675,7 +693,10 @@ genDef ()
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
 /* prefix code and constructor */
-	fprintf (fp, "\n%s%s::%s () {\n", ccCode, fullClass, fullClass);
+	fprintf (fp, "\n%s%s::%s ()", ccCode, fullClass, fullClass);
+	if (consCalls)
+		fprintf (fp, " :\n\t%s", consCalls);
+	fprintf (fp, "\n{\n");
 	if (objDesc)
 		fprintf (fp, "\tdescriptor = %s;\n", objDesc);
 	if (!consCode) consCode = "";
@@ -708,9 +729,13 @@ struct tentry keyTable[] = {
 	"access", ACCESS,
 	"alias", ALIAS,
 	"arglist", ARGLIST,
+	"attrib", ATTRIB,
+	"attributes", ATTRIB,
 	"ccinclude", CCINCLUDE,
 	"class", CLASS,
 	"code", CODE,
+	"conscalls", CONSCALLS,
+	"consCalls", CONSCALLS,
 	"constructor", CONSTRUCTOR,
 	"default", DEFAULT,
 	"defstar", DEFSTAR,
@@ -813,7 +838,7 @@ yylex () {
 				return '/';
 			}
 			/* comment -- eat rest of line */
-			while (input() != '\n');
+			while (input() != NEWLINE);
 		}
 	}
 	/* STRING token includes surrounding quotes */
@@ -828,6 +853,9 @@ yylex () {
 			}
 			else if (c == ESC) {
 				*p++ = input();
+			}
+			else if (c == NEWLINE) {
+				yyerror ("warning: multi-line string");
 			}
 			else if (c == EOF) {
 				yyerror ("Unexpected EOF in string");
