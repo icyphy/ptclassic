@@ -88,15 +88,18 @@ extern "C" {
 };
 
 static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
-	char buf[1024];
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
+	int l = strlen(m1)+strlen(m2)+strlen(m3)+1;
+	if (obj) l += strlen(obj) + 2;
+	char* buf = new char[l];
 	if (obj)
 		sprintf (buf, "%s: %s%s%s", obj, m1, m2, m3);
 	else	sprintf (buf, "%s%s%s", m1, m2, m3);
 	if (ViGetErrWindows())
 		win_msg (buf);
 	else PrintCon (buf);
+	delete buf;
 }
 
 void
