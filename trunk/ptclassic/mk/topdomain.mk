@@ -89,7 +89,7 @@ depend:
 
 doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
 	@if [ -w $(dir $@) ]; then \
-		@echo "Updating $@"; \
+		echo "Updating $@"; \
 		rm -f $@; \
 		(cd doc/stars; \
 		echo "set TYCHO $(PTOLEMY)/tycho; \
