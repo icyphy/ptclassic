@@ -51,7 +51,6 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #include "Error.h"
 #include "pt_fstream.h"
 #include "DataFlowStar.h"
-#include "Cluster.h"
 #include <minmax.h>
 
 // following defines are used for Blocks
@@ -66,7 +65,6 @@ SequentialList findSinks(Galaxy* g, int flagLoc, DataFlowStar* deletedNode=0);
 // Set a bunch of pointers to 0 (that will be allocated later).
 AcyLoopScheduler :: AcyLoopScheduler()
 {
-    graph = 0;
     topSort = 0;
     topInvSort = 0;
     nodelist = 0;
@@ -94,7 +92,6 @@ AcyLoopScheduler::~AcyLoopScheduler()
     delete gcdMatrix;
     delete splitMatrix;
     delete costMatrix;
-    delete graph;
 }
 
 /****
@@ -136,8 +133,10 @@ void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
 	    SuccessorIter nextSucc(*t);
 	    while ((u=(DataFlowStar*)nextSucc++) != NULL) {
 		if (reachMatrix->m[u->NODE_NUM][s->NODE_NUM]) {
-		    Error::abortRun("Failed to create reachability matrix.
-		                      Graph appears to be non-acyclic.");
+			StringList message;
+			message << "Failed to create reachability matrix.";
+		    message << "Graph appears to be non-acyclic.";
+		    Error::abortRun(message);
 		    return;
 		}
 		reachMatrix->m[s->NODE_NUM][u->NODE_NUM] = 1;
@@ -158,7 +157,7 @@ Create a list of edges in the graph
 a class data member.
 
 ****/
-void AcyLoopScheduler :: createEdgelist(AcyCluster* gr)
+void AcyLoopScheduler :: createEdgelist(Galaxy* gr)
 {
     AcyClusterIter nextClust(*gr);
     SynDFClusterPort *clustPort;
@@ -253,15 +252,16 @@ Copy the flag value of the first cluster inside this cluster to its flags
 // results in the flag value of the Star being propagated to its cluster
 // wrapper.  Hence, this function is usually called after a cluster hierarchy
 // has been set up using <code>Cluster::initializeForClustering</code>
-// so that things
-// like node numbering can be kept consistent in the Cluster hierarchy
-// as well.
+// so that things like node numbering can be kept consistent in the Cluster
+// hierarchy as well.
 
 @SideEffects <code>flags[flagLocation]</code> for each cluster in gr changes
 
 ****/
-void AcyLoopScheduler :: copyFlagsToClusters(AcyCluster* gr, int flagLocation)
+void AcyLoopScheduler :: copyFlagsToClusters(Galaxy* gr, int flagLocation)
 {
+	// FIXME: Should we always check whether the Galaxy does in fact have
+	// AcyClusters inside?
     AcyCluster* c;
     AcyClusterIter nextClust(*gr);
     while ((c=nextClust++) != NULL) {
@@ -326,14 +326,23 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	// Reachability matrix is needed by APGAN.
 	createReachabilityMatrix(gal);
 
-	delete graph;
-	graph = new AcyCluster;
+	AcyCluster dummy;
 
 	// Prepare galaxy for clustering
-	graph->initializeForClustering(gal);
-	gal.PARTITION = 0;
-	clusterGraph = (AcyCluster*)(&gal);
+	dummy.initializeForClustering(gal);
+
+	// Add a top level cluster inside the galaxy to hold all the
+	// clusters inside.  This is needed because gal is of type
+	// galaxy and everything inside is of type cluster.  Since
+	// many routines here work recursively from the top, it doesn't
+	// make sense to have a dichotomy between the top level and everything
+	// below it.
+
+	if (!addTopLevelCluster(&gal)) return FALSE;
+
+	clusterGraph = (AcyCluster*)(gal.head());
 	clusterGraph->settnob(-1);
+	clusterGraph->PARTITION = 0;
 
 	// The following function is a hack; see its comments for more info.
 	if (!clusterSplicedStars(clusterGraph)) return FALSE;
@@ -349,17 +358,16 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	Matrix RPMCSplitMatrix = *splitMatrix;
 
 	// Flatten everything for the second heuristic
-	graph->initializeForClustering(gal);
+	dummy.initializeForClustering(gal);
 	gal.PARTITION = 0;
-	clusterGraph->settnob(-1);
 
 	// APGAN requires the node numbers in the clusters as well; hence,
 	// copy those numbers to the constituent clusters.  RPMC did not
 	// want this so wasn't done before.
-	copyFlagsToClusters(clusterGraph,0);
+	copyFlagsToClusters(&gal,0);
 
 	// Second of the two main heuristics
-	apgan = APGAN(clusterGraph);
+	apgan = APGAN(&gal);
 	if (apgan<0) return FALSE;
 	topSort = APGANTopSort;
 	apganDppo = DPPO();
@@ -384,6 +392,55 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     // FIXME: Should we check something here before returning?
     return TRUE;
 }
+
+/****
+Add a top level cluster under the galaxy.  So gal will have just one cluster.
+
+@Description
+// We do this by absorbing all of the clusters into one.
+// This function is essentially a hack to get around
+// a vexing problem with teh clustering process that leaves the
+// topmost level structure as a Galaxy instead of a Cluster.
+
+@Returns Int: -1 if unsuccessful , 1 if successful.
+
+@SideEffects gal will only have one block, a cluster containing everything
+else inside it.
+
+****/
+
+int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
+{
+    AcyCluster* c, *b;
+    if ((gal->head())->isItCluster()) {
+	AcyClusterIter nextClust(*gal);
+	c = nextClust++;
+	while ((b=nextClust++) != NULL) {
+	    if (b==c) continue;
+	    if (!c->absorb(*b)) return -1;
+	}
+	if (gal->numberBlocks() != 1) {
+	    StringList message;
+	    message << "Bug in addTopLevelCluster; galaxy has more than";
+		message << "one block after clustering process";
+	    Error::abortRun(message);
+	    return -1;
+	}
+	// Change c's name to gal's name.
+	c->setName(gal->name());
+	return 1;
+    } else {
+	StringList message;
+	message << "Function addTopLevelCluster called on galaxy that has";
+	message << "not been converted to cluster hierarchy by calling";
+	message << "Cluster::initializeForClustering first";
+	message << "OR There's a bug in addTopLevelCluster since it thinks";
+	message	<< "that the members of the argument galaxy are not Clusters.";
+	Error::abortRun(message);
+	return -1;
+   }
+}
+
 
 /****
 
@@ -516,7 +573,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	if (leftGroup.size() > 0) {
 	    ListIter nextLeft(leftGroup);
 	    c = (AcyCluster*)nextLeft++;
-	    newL = (AcyCluster*)gr->group(*leftSubGraph, *c);
+	    newL = (AcyCluster*)(leftSubGraph->group(*c));
 	    if (!newL) return -1;
 	    newL->PARTITION = leftSubGraph->PARTITION;
 	    while ((c = (AcyCluster*)nextLeft++) != NULL) {
@@ -526,7 +583,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	if (rightGroup.size() > 0) {
 	    ListIter nextRight(rightGroup);
 	    c = (AcyCluster*)nextRight++;
-	    newR = (AcyCluster*)gr->group(*rightSubGraph, *c);
+	    newR = (AcyCluster*)(rightSubGraph->group(*c));
 	    if (!newR) return -1;
 	    newR->PARTITION = rightSubGraph->PARTITION;
 	    while ((c = (AcyCluster*)nextRight++) != NULL) {
@@ -570,7 +627,7 @@ schedule was computed successfully.
 edgelist are also modified.
 
 ****/
-int AcyLoopScheduler::APGAN(AcyCluster* gr)
+int AcyLoopScheduler::APGAN(Galaxy* gal)
 {
     // APGAN heuristic.  In this heuristic, we build up a cluster hierarchy
     // by clustering pairs of actors together at each step.  The pair chosen
@@ -586,8 +643,8 @@ int AcyLoopScheduler::APGAN(AcyCluster* gr)
     int N, rho, flag, tmp, i;
     SynDFClusterPort *p, *clusterEdge=0;
     AcyCluster *src, *snk, *clusterSrc=0, *clusterSnk=0, *omega, *superOmega;
-    createEdgelist(gr);
-    while ((N=gr->numberBlocks()) > 1) {
+    createEdgelist(gal);
+    while ((N=gal->numberBlocks()) > 1) {
 	// explore each edge in the graph.
 	rho = 1;
 	ListIter nextEdge(edgelist);
@@ -625,7 +682,7 @@ int AcyLoopScheduler::APGAN(AcyCluster* gr)
 	// cluster clusterSrc and clusterSnk.  Also update the reachability
 	// matrix and the edge list.  The edgelist is updated next time around;
 	// now it is simply marked to be deleted.
-	omega = (AcyCluster*)gr->group(*clusterSrc, *clusterSnk);
+	omega = (AcyCluster*)(clusterSrc->group(*clusterSnk));
 	omega->NODE_NUM = clusterSrc->NODE_NUM;
 	// the following two statements are to make it easy to determine
 	// which way the arc is going between clusterSrc and clusterSnk.
@@ -672,14 +729,14 @@ int AcyLoopScheduler::APGAN(AcyCluster* gr)
     }
     // graph has been completely clustered now.  Build up the schedule
     // tree by traversing the clustering hierarchy backwards.
-    // First check that there is only one node in gr.
-    if (gr->numberBlocks() != 1) {
+    // First check that there is only one node in gal.
+    if (gal->numberBlocks() != 1) {
 	// This means there is a bug either in the implementation above,
 	// or in the clustering routines that it calls.
 	Error::abortRun("Bug in APGAN implementation; didn't cluster properly.");
 	return -1;
     }
-    superOmega = (AcyCluster*)gr->head();
+    superOmega = (AcyCluster*)gal->head();
     return buildAPGANTopsort(superOmega, 0);
 }
 

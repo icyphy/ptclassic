@@ -114,8 +114,7 @@ public:
 	void isWellOrdered(Galaxy* g, SequentialList& topsort);
 	int DPPO();		// compute optimal loop hierarchy
 	int RPMC(AcyCluster* gr);	// generate top-sort using RPMC
-	int APGAN(AcyCluster* gr);	// generate top-sort using APGAN
-//	SDFCluster* cluster(int i, int j);	// cluster using DPPO results
+	int APGAN(Galaxy* gr);	// generate top-sort using APGAN
 
 	virtual StringList displaySchedule();
 	virtual void compileRun();
@@ -130,8 +129,9 @@ protected:
 	void createReachabilityMatrix(Galaxy& gal);
 	virtual void runOnce();
 	int buildAPGANTopsort(AcyCluster* gr, int ti);
-	void createEdgelist(AcyCluster* gr);
-	void copyFlagsToClusters(AcyCluster* gr, int flagLocation);
+	void createEdgelist(Galaxy* gr);
+	void copyFlagsToClusters(Galaxy* gr, int flagLocation);
+	int addTopLevelCluster(Galaxy* gal);
 private:
 	Matrix* incMatrix;	// Incidence matrix
 	Matrix* delMatrix;  // delay matrix to hold delays on arcs
