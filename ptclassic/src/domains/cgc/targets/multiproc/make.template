@@ -5,9 +5,9 @@
 
 
 # Root of Ptolemy directory
-ROOT=../../../..
+ROOT=../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cgc/targets
+VPATH = $(ROOT)/src/domains/cgc/targets/main
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
