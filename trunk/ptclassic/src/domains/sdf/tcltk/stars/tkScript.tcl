@@ -56,7 +56,7 @@ if {![winfo exists $s] || ![info exists ${uniqueSymbol}ballId]} {
     wm iconname $s "Playing Field"
 
     frame $s.f -bd 10
-    canvas $s.f.pad -relief sunken -bg tan -height 5c -width 10c
+    canvas $s.f.pad -relief sunken -bg burlywood -height 5c -width 10c
     scale $s.f.slider -orient horizontal -from 0 -to 100 -bg tan4 \
 	-sliderforeground bisque1 -fg bisque1 -length 10c \
         -command ${uniqueSymbol}setOut -showvalue 0
