@@ -102,7 +102,10 @@ class ::tycho::TWidget {
     protected method safeEval {args}
 
     # Register code to be evaluated when the widget has been constructed.
-    protected method whenConstructed {args}
+    protected method whenConstructed {command}
+
+    # Register a command to execute when a component is mapped
+    protected method whenMapped {component command}
 
     ###################################################################
     ####                         protected variables               ####
@@ -119,8 +122,8 @@ class ::tycho::TWidget {
     ###################################################################
     ####                         private methods                   ####
 
-    # Notify that construction is complete
-    private method _notifyconstruction {}
+    # Execute code waiting for the status bar to be mapped
+    private method _notifymapped {component}
 
     ###################################################################
     ####                         private variables                 ####
@@ -142,6 +145,10 @@ class ::tycho::TWidget {
 
     # Commands to execute when the widget has been constructed
     private variable _whenConstructed {}
+
+    # A array of lists of commands to execute when a component
+    # is mapped. The array is indexed by the component name
+    private variable _whenMapped
 }
 
 #######################################################################
@@ -305,15 +312,19 @@ body ::tycho::TWidget::focusin {} {
 # anchor in the file. For text files, it will normally be either "{line
 # <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
 # <i>start</i> and <i>end</i> have the form
-# <i>linenumber.characternumber</i>.
+# <i>linenumber.characternumber</i>. The seeFragment{} method of the
+# target widget is responsible for making sure that the <i>point</i>
+# is displayed properly, using the whenMapped{} method if necessary to
+# defer the jump until after the widget is mapped to the screen
+# (see Edit.itcl for an example).
 # 
 body ::tycho::TWidget::hyperJump {file {point {}}} {
     if {$file != {}} {
         set obj [uplevel #0 [list ::tycho::File::openContext $file]]
         if {$point != {}} {
-            # The seeFragment call is postponed to give time for the widget
-            # to be created. The catch is in case it is immediately deleted.
-            after 1000 [list catch [list $obj seeFragment $point]]
+            # The seeFragment{} method is called directly here,
+            # on the assumption that $obj works properly.
+            $obj seeFragment $point
         }
     } {
         seeFragment $point
@@ -570,24 +581,77 @@ body ::tycho::TWidget::safeEval {args} {
 ########################################################################
 #### whenConstructed
 #
-# Register code to be executed when the last constructor in the
-# chain of constructor executes. The list of arguments is
-# considered to be the code to execute. The command will be
-# executed in the scope of the class from which this method
-# was called, at the completion of the call to itk_initialize.
-# The purpose of this method is to delay evaluation of code
-# until construction is complete.
+# Register a command to be executed when the last constructor in the
+# chain of constructor executes. The command will be executed
+# in the scope of the class from which this method was called,
+# at the completion of the call to itk_initialize. The purpose of
+# this method is to delay evaluation of code until construction
+# of the widget is complete.
 #
 # If the widget is already constructed, the command will be
 # executed immediately in the caller's context -- this method
 # can therefore be called from methods that will only sometimes
 # be executed within an object's constructor.
 #
-body ::tycho::TWidget::whenConstructed {args} {
+body ::tycho::TWidget::whenConstructed {command} {
     set w [string trimleft $this :]
     if $_isConstructed {
-        uplevel $args
+        uplevel $command
     } else {
-        lappend _whenConstructed [uplevel info context] $args
+        lappend _whenConstructed [uplevel info context] $command
+    }
+}
+
+#######################################################################
+#### whenMapped
+#
+# Register a command to be executed when a component of the mega-widget
+# is mapped. Any number of commands can be registered for each component.
+# If the component is already mapped, the command will be executed
+# immediately in the caller's scope; if not, a binding will be made
+# to the component for the &lt;Map&gt; event and the pending commands
+# executed within the caller's scope when the binding is triggered.
+# The purpose of this method is to support code that depends on the
+# screen appearance or size of the component.
+#
+# Note that it is necessary to specify the deferred commands
+# on a component basis (rather than just for the whole mega-widget),
+# since Tk maps containing widgets before contained widgets.
+#
+body ::tycho::TWidget::whenMapped {component command} {
+    set w [component $component]
+    if [winfo ismapped $w] {
+        uplevel $command
+    } else {
+        lappend _whenMapped($component) [uplevel info context] $command
+
+        # Make the binding to the component
+        bind $w <Map> "@scope [info context] $this _notifymapped $component"
+    }
+}
+
+#######################################################################
+#### _notifymapped
+#
+# This method is a callback to be executed when the <Map>
+# event is triggered on a component. If the component is not
+# already mapped, return without doing anything. Otherwise,
+# evaluate the commands registered with the *whenMapped* method
+# and remove the binding that triggered this callback.
+#
+body ::tycho::TWidget::_notifymapped {component} {
+    set w [component $component]
+
+    # Just check this to make sure...
+    if ![winfo ismapped $w] {
+        # Not mapped: return
+        return
+    } else {
+        # Mapped: evaluate commands and then remove the binding
+        foreach {scope cmd} $_whenMapped($component) {
+            @scope $scope $cmd
+        }
+        unset _whenMapped($component)
+        bind $w <Map> {}
     }
 }
