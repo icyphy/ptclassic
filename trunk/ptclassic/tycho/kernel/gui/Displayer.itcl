@@ -63,8 +63,8 @@ proc ::tycho::view {view {viewoptions {}} \
         set displayer "::tycho::$displayer"
     }
     set wname [::tycho::autoName .view]
-    eval $displayer $wname $dispoptions
-    eval $view $wname.v $viewoptions
+    uplevel #0 eval $displayer $wname $dispoptions
+    uplevel #0 eval $view $wname.v $viewoptions
     $wname centerOnScreen
     return $wname
 }
