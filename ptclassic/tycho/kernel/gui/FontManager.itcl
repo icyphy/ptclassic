@@ -32,7 +32,8 @@ option add *FontManager.preferredResolutions {75 *} widgetDefault
 option add *FontManager.families \
 	{times courier helvetica lucida lucidatypewriter lucidabright} \
 	widgetDefault
-option add *FontManager.sizes {10 12 14 18 24 32 48} widgetDefault
+# The smallest fonts are used by HTMLText to make thin horizontal lines.
+option add *FontManager.sizes {2 4 6 8 10 12 14 16 18 24 32 48} widgetDefault
 option add *FontManager.weights {medium bold} widgetDefault
 option add *FontManager.styles {r i} widgetDefault
 option add *FontManager.specialFonts \
@@ -44,10 +45,14 @@ option add *FontManager.fixed \
 	{9x15 {lucidatypewriter 14 medium r} {courier 14 medium r}}
 option add *FontManager.fixedBold \
 	{9x15bold {lucidatypewriter 14 bold r} {courier 14 bold r}}
+option add *FontManager.fixedItalic \
+	{{lucidatypewriter 14 medium i} {courier 14 medium i}}
 option add *FontManager.variable \
 	{{lucida 14 medium r} {helvetica 14 medium r} 9x15}
 option add *FontManager.variableBold \
 	{{lucida 14 bold r} {helvetica 14 bold r} 9x15bold}
+option add *FontManager.variableItalic \
+	{{lucida 14 medium i} {helvetica 14 medium i}}
 
 #########################################################################
 #### FontManager
@@ -55,13 +60,14 @@ option add *FontManager.variableBold \
 # dialog windows that permit the user to select a font. If the instance
 # is created using the DialogWindow::newModal procedure, the procedure
 # will return either a valid font name selected by the user or the null
-# string.
+# string (if the user cancels).
 #
 # One instance of this class called .tychoFonts is created and left
 # unmapped at all times. This instance can be used by any widget to
 # select a valid font, using for example the "findFont" method. It is
 # necessary to have such an instance because the way that the validity
 # of a font is checked is by configuring a text widget with that font.
+# Thus, it would not be sufficient to just provide procs with the class.
 #
 # Unfortunately, fonts are a major weak point in the X window system,
 # since there is only one font that is guaranteed to be installed on
@@ -73,6 +79,13 @@ class ::tycho::FontManager {
 
     constructor {args} {}
     destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    #### -initialfont option
+    # Specify the initial font displayed in the window.
+    itk_option define -initialfont initialFont InitialFont {9x15}
 
     ##########################################################################
     ####                         public methods                           ####
@@ -97,6 +110,11 @@ class ::tycho::FontManager {
     # Given a font specification, return a font name or an empty string.
     method getFont {family {size 14} {weight medium} {style r}}
 
+    #### getValidSize
+    # Return the next size larger than the argument in the sizes list,
+    # or the largest value in the sizes list.
+    method getValidSize {proposed}
+
     #### setCurrentFont
     # Attempt to set the font specified by the menu radio buttons.
     method setCurrentFont {}
@@ -108,10 +126,33 @@ class ::tycho::FontManager {
     ##########################################################################
     ####                      private common variables                    ####
 
-    private common familySelection times
+    private common familySelection courier
     private common sizeSelection 14
     private common weightSelection medium
     private common styleSelection r
+}
+
+#########################################################################
+#### -initialfont option configuration
+# Set the initial font.
+# 
+configbody ::tycho::FontManager::initialfont {
+    # If the font can be parse so that the family, size, weight, and style
+    # are recognized, then we set the radio buttons to match.  Otherwise,
+    # we leave them alone.
+    set families [join [option get $itk_component(hull) families FontManager] |]
+    set sizes [join [option get $itk_component(hull) sizes FontManager] |]
+    set weights [join [option get $itk_component(hull) weights FontManager] |]
+    set styles [join [option get $itk_component(hull) styles FontManager] |]
+    set exp "^-(\[a-z\]*|\\*)-($families)-($weights)-($styles)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-($sizes)0-"
+    if [regexp -- $exp $itk_option(-initialfont) \
+	    match foundry family weight style junk1 junk2 size] {
+	set familySelection $family
+	set sizeSelection $size
+	set weightSelection $weight
+	set styleSelection $style
+    }
+    tryFont $itk_option(-initialfont)
 }
 
 #####################################################################
@@ -325,25 +366,27 @@ abcdefghijklmnopqrstuvwxyz
     itk_component add sampler {
 	label $itk_component(childsite).sampler -text $sample
     } {
-	keep -font -highlightthickness -background \
+	keep -highlightthickness -background \
 		-foreground -highlightbackground
+	rename -font -displayfont displayFont DisplayFont
     }
     pack $itk_component(sampler) -fill both -expand yes
 
     itk_component add fontname {
 	label $itk_component(childsite).label
     } {
-	keep -font -highlightthickness -background \
+	keep -highlightthickness -background \
 		-foreground -highlightbackground
+	rename -font -displayfont displayFont DisplayFont
     }
     pack $itk_component(fontname) -fill both -expand yes    
-
-    eval itk_initialize $args
 
     $itk_component(fontname) configure -text \
 	    [$itk_component(fontname) cget -font]
 
     catch {setCurrentFont}
+
+    eval itk_initialize $args
 }
 
 #########################################################################
@@ -353,7 +396,8 @@ abcdefghijklmnopqrstuvwxyz
 ########################################################################
 #### defaultFont
 # Get a preferred font from a list of possibilities given by an option.
-# The possible options are fixed, fixedBold, variable, and variableBold.
+# The possible options are fixed, fixedBold, fixedItalic,
+# variable, variableBold, and variableItalic.
 #
 body ::tycho::FontManager::defaultFont {optionName} {
     return [findFont \
@@ -398,11 +442,13 @@ body ::tycho::FontManager::findFont {specs} {
 # Return 0 if the specified font is not available on the current
 # system, otherwise return 1.  If the font is valid, the commandResult
 # variable is set to the name of the font.  This determines the value
-# returned by the newModal method.
+# returned by the newModal method.  This font name is also displayed
+# in the window.
 #
 body ::tycho::FontManager::fontValid {font} {
-    if {[catch {$itk_component(sampler) configure -font $font}] == 0} {
+    if {[catch {configure -displayfont $font}] == 0} {
 	set commandResult($prefix) $font
+	$itk_component(fontname) configure -text $font
 	return 1
     }
     return 0
@@ -435,14 +481,25 @@ body ::tycho::FontManager::getFont {family {size 14} {weight medium} {style r}} 
 	    set font \
 	"-$foundry-$family-$weight-$style-normal-*-*-${size}0-$res-$res-*-*-*-*"
 	    if [fontValid $font] {
-		$itk_component(fontname) configure -text \
-			[$itk_component(sampler) cget -font]
 		return $font
 	    }
 	}
     }
     set commandResult($prefix) {}
     return {}
+}
+
+#########################################################################
+#### getValidSize
+# Return the next size larger than the argument in the sizes list,
+# or the largest value in the sizes list.
+#
+body ::tycho::FontManager::getValidSize {proposed} {
+    set sizes [option get $itk_component(hull) sizes FontManager]
+    foreach size $sizes {
+	if {$proposed <= $size} {return $size}
+    }
+    return $size
 }
 
 #########################################################################
@@ -467,8 +524,6 @@ body ::tycho::FontManager::setCurrentFont {} {
 #
 body ::tycho::FontManager::tryFont {font} {
     if [fontValid $font] {
-	$itk_component(fontname) configure -text \
-		[$itk_component(sampler) cget -font]
 	set commandResult($prefix) $font
     } {
 	error "Invalid font: $font"
@@ -484,5 +539,6 @@ namespace ::tycho {
     # The overall default font is fixed
     set defaultFont [.tychoFonts defaultFont fixed]
     option add *Font $defaultFont widgetDefault
+    option add *TextFont $defaultFont widgetDefault
     option add *font $defaultFont widgetDefault
 }

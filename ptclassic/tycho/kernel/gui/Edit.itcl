@@ -74,6 +74,10 @@ class ::tycho::Edit {
     # Insert the contents of a file at the insertion cursor.
     method insertFile {}
 
+    #### setFont
+    # Query the user for an alternative font.
+    method setFont {}
+
     #### setInsert
     # Set the insertion point to the value of position.
     method setInsert {position}
@@ -113,7 +117,7 @@ body ::tycho::Edit::constructor {args} {
 	[textWidget] $itk_component(childsite).text \
 		-markmodified "$this markModified"
     } {
-	keep -text -readonly -textfont -width -height -background \
+	keep -text -readonly -width -height -background \
 		-highlightbackground -highlightcolor -selectforeground \
 		-cursor -insertbackground -foreground -textfont \
 		-textbackground
@@ -189,7 +193,7 @@ body ::tycho::Edit::constructor {args} {
 	    -command "$itk_component(text) search"
     
     $itk_component(editMenu) add command \
-	    -label {Goto Line}\
+	    -label {Goto Line...}\
 	    -underline 0 \
 	    -accelerator "C-c C-g" \
 	    -command "$itk_component(text) gotoLine"
@@ -215,6 +219,13 @@ body ::tycho::Edit::constructor {args} {
 		-background -foreground
     }
     
+    $itk_component(formatMenu) add command \
+	    -label "Font..." \
+	    -underline 0 \
+	    -command "$this setFont"
+ 
+    $itk_component(formatMenu) add separator
+
     $itk_component(formatMenu) add command \
 	    -label "Fill Region" \
 	    -accelerator "M-q" \
@@ -280,6 +291,19 @@ body ::tycho::Edit::altFile {} {
 #
 body ::tycho::Edit::focusin {} {
     focus [$itk_component(text) textWinName]
+}
+
+###################################################################
+#### setFont
+# Query the user for an alternative font.
+#
+body ::tycho::Edit::setFont {} {
+    set ifont [cget -textfont]
+    set font [::tycho::DialogWindow::newModal FontManager \
+	    [autoName $itk_component(hull).font] -initialfont $ifont]
+    if {$font != {}} {
+	configure -textfont $font
+    }
 }
 
 ###################################################################
