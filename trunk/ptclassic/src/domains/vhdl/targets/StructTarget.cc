@@ -749,7 +749,7 @@ void StructTarget :: connectSource(StringList initVal, StringList initName,
       
       genMapList->put("value", "", initVal);
       portMapList->put("output", "", "", initName);
-      mainCompMapList.put(label, name, portMapList, genMapList);
+      mainCompMapList.put(label, portMapList, genMapList, name, portMapList, genMapList);
 }
 
 // Add a source component declaration.
@@ -773,7 +773,7 @@ void StructTarget :: registerSource(StringList type/*="INTEGER"*/) {
   genList->put("value", type);
   portList->put("output", "OUT", type);
 
-  mainCompDeclList.put(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList, "", portList, genList);
 }
 
 // Connect a multiplexor between the given input and output signals.
@@ -810,7 +810,7 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
   else {
     systemPortList.put("system_clock", "IN", "boolean");
   }
-  mainCompMapList.put(label, name, portMapList, genMapList);
+  mainCompMapList.put(label, portMapList, genMapList, name, portMapList, genMapList);
 }
 
 // Add a multiplexor component declaration.
@@ -836,7 +836,7 @@ void StructTarget :: registerMultiplexor(StringList type/*="INTEGER"*/) {
   portList->put("output", "OUT", type);
   portList->put("control", "IN", "boolean");
 
-  mainCompDeclList.put(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList, "", portList, genList);
 }
 
 // Connect a register between the given input and output signals.
@@ -870,7 +870,7 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
   else {
     systemPortList.put("system_clock", "IN", "boolean");
   }
-  mainCompMapList.put(label, name, portMapList, genMapList);
+  mainCompMapList.put(label, portMapList, genMapList, name, portMapList, genMapList);
 }
 
 // Connect a clock generator driving the given signal.
@@ -887,7 +887,7 @@ void StructTarget :: connectClockGen(StringList clkName) {
       
       portMapList->put("system_clock", "", "", clkName);
       portMapList->put("iter_clock", "", "", "iter_clock");
-      mainCompMapList.put(label, name, portMapList, genMapList);
+      mainCompMapList.put(label, portMapList, genMapList, name, portMapList, genMapList);
 }
 
 // Add a clock generator declaration.
@@ -904,7 +904,7 @@ void StructTarget :: registerClockGen() {
   
   portList->put("system_clock", "out", "boolean");
   portList->put("iter_clock", "in", "boolean");
-  mainCompDeclList.put(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList, "", portList, genList);
 }
 
 // Add a register component declaration.
@@ -928,7 +928,7 @@ void StructTarget :: registerRegister(StringList type/*="INTEGER"*/) {
   portList->put("D", "IN", type);
   portList->put("Q", "OUT", type);
   portList->put("C", "IN", "boolean");
-  mainCompDeclList.put(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList, "", portList, genList);
 }
 
 // Register PortHole reference.
@@ -1050,7 +1050,7 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer, const 
   portMapList->put("go", "", "", goName);
   portMapList->put("data", "", "", dataName);
   portMapList->put("done", "", "", doneName);
-  mainCompMapList.put(label, name, portMapList, genMapList);
+  mainCompMapList.put(label, portMapList, genMapList, name, portMapList, genMapList);
 
   ctlerPortList.put(startName, "OUT", "STD_LOGIC");
   firingPortList.put(startName, "IN", "STD_LOGIC");
@@ -1365,10 +1365,10 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
     }
   }
 
-  mainCompDeclList.put(clName, masterPortList, masterGenericList);
+  mainCompDeclList.put(clName, masterPortList, masterGenericList, "", masterPortList, masterGenericList);
   mergeSignalList(masterSignalList);
-  mainCompMapList.put(clLabel, clName, masterPortMapList,
-		      masterGenericMapList);
+  mainCompMapList.put(clLabel,  masterPortMapList, masterGenericMapList,
+		      clName, masterPortMapList, masterGenericMapList);
 }
 
 // Generate the entity_declaration.

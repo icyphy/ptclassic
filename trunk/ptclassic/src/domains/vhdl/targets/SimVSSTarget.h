@@ -41,7 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLTarget.h"
 #include "VHDLCompDecl.h"
-#include "VHDLCompMap.h"
 #include "VHDLSignal.h"
 #include "VHDLCSend.h"
 #include "VHDLCReceive.h"
@@ -123,7 +122,7 @@ private:
 	VHDLGenericList mainGenMapList;
 	VHDLPortList mainPortMapList;
 	VHDLSignalList topSignalList;
-	VHDLCompMapList topCompMapList;
+	VHDLCompDeclList topCompMapList;
 
 	int pairNumber;
 	int writeCom;

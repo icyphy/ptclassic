@@ -231,7 +231,8 @@ void SimVSSTarget :: frameCode() {
 
   StringList label = galName;
   label << "_proc";
-  topCompMapList.put(label, galName, &mainPortMapList, &mainGenMapList);
+  topCompMapList.put(label, &mainPortMapList, &mainGenMapList,
+		     galName, &mainPortMapList, &mainGenMapList);
 
   top_architecture << addComponentMappings(&topCompMapList);
   top_architecture << "end ";
@@ -413,7 +414,7 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   portMapList->put("go", "", "", goName);
   portMapList->put("data", "", "", dataName);
   portMapList->put("done", "", "", doneName);
-  topCompMapList.put(label, name, portMapList, genMapList);
+  topCompMapList.put(label,  portMapList, genMapList, name, portMapList, genMapList);
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
