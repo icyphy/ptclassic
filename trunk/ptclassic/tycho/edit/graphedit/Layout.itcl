@@ -215,7 +215,7 @@ body ::tycho::Layout::attrset {item args} {
     #if { [lsearch -exact $args -coords] != -1 } {
     #    catch {unset _dirty($item)}
     #}
-    eval chain $item $args
+    eval chain [list $item] $args
 }
 
 ########################################################################
