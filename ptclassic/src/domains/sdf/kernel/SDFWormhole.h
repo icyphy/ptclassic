@@ -49,7 +49,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	//////////////////////////////
 
 class SDFWormhole : public Wormhole, public SDFStar {
-
 private:
 	// time interval between samples.
 	double space;
@@ -61,15 +60,16 @@ private:
 	double arrivalTime;
 
 protected:
+	void setup();
+	void go();
+
 	// redefine the getStopTime() 
 	double getStopTime();
 
-	// no necessary of sumUp method.
+	// no need of sumUp method.
 
 public:
-	void setup();
 	void begin() { Wormhole::begin(); }
-	void go();
 	void wrapup();
 
 	// Constructor
