@@ -48,6 +48,7 @@ EXTRA_SRCS =	\
 	HTMLHelp.html \
 	IndexBrowserHelp.html \
 	ListBrowserHelp.html \
+	LoaderHelp.html \
 	TclShellHelp.html \
 	index.html
 
