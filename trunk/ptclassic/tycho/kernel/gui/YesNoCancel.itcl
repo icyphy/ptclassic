@@ -41,6 +41,15 @@
 # used. By default, the value returned by the cancel button is -1,
 # while yes is 1 and no is 0.
 #
+# Below is a simple example
+# <tcl><pre>
+# set nm [::tycho::autoName .tYNC]
+# ::tycho::YesNoCancel $nm &#92
+#     -text "Are you awake?"
+# ::tycho::Dialog::wait $nm
+# </pre></tcl>
+# The value returned will be -1, 0 or 1, depending on which button is hit.
+#
 class ::tycho::YesNoCancel {
     inherit ::tycho::YesNoQuery
 
