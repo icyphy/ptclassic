@@ -44,13 +44,12 @@
 # are present, call _method_ with _args_ on the stylesheet and
 # return the result.
 #
-# <dt><b>get</b> _subscriber_ _stylesheet_ _param_
+# <dt><b>get</b> _stylesheet_ _style_ _param_
 # <dd>
-# Get the value of a stylesheet parameter. _subscriber_ is the
-# widget that wants to know the value, _stylesheet_ is the
-# style-sheet, and _param_ is the parameter is wants to know,
-# in the same format as for the <b>subscribe</b> option.
-# Color and font values are always converted into X values.
+# Get the value of a stylesheet parameter. _stylesheet_ is the
+# style-sheet, _style_ the style_, and _param_ is the parameter
+# to be returned, in the same format as for the <b>subscribe</b>
+# option. Color and font values are always converted into X values.
 #
 # <dt><b>register</b> _stylesheet_ _basefile_ _userfile_
 # <dd>
@@ -68,6 +67,15 @@
 # model is updated to add or remove any parameters present in
 # _basefile_ but not in _userfile_, or vice versa.
 #
+#
+# <dt><b>set</b> _stylesheet_ _style_ _param_ _value_
+# <dd>
+# Set the value of a stylesheet parameter. _stylesheet_ is the
+# style-sheet, _style_ the style_, and _param_ is the parameter
+# to be returned, in the same format as for the <b>subscribe</b>
+# option. The parameter is set using the <b>publish</b> method
+# of the stylesheet model, so any subscribers to the style will
+# be notified of the new value.
 #
 # <dt><b>style</b> _subscriber_ _stylesheet_ ?_style_?
 # <dd>
@@ -111,12 +119,12 @@ ensemble ::tycho::stylesheet {
     }
 
     # Get a style parameter
-    option get {subscriber stylesheet param} {
+    option get {stylesheet style param} {
 	# Make sure it's loaded
 	set model [::tycho::StyleSheet::_load $stylesheet]
 	
 	# Get it
-	$model value [fullname $param] 1
+	$model value [$model namebystyle $style $param] 1
     }
 
     # Register a stylesheet
@@ -128,14 +136,24 @@ ensemble ::tycho::stylesheet {
 	@scope ::tycho::StyleSheet set _userfile($stylesheet) $userfile
     }
 
-    # Get or set a style
+    # Set a style parameter
+    option set {stylesheet style param value} {
+	# Make sure it's loaded
+	set model [::tycho::StyleSheet::_load $stylesheet]
+	
+	# Set it and publish
+	$model publish itemconfigure \
+                [$model namebystyle $style $param] -value $value
+    }
+
+    # Select or get the style to which a widget is subscribed
     option style {subscriber stylesheet {style {}}} {
 	# Make sure it's loaded
-	set model ::tycho::StyleSheet::_load $stylesheet]
+	set model [::tycho::StyleSheet::_load $stylesheet]
 	
 	# Call it
 	if { $style == "" } {
-	    @scope ::tycho::StyleSheet set _widgetstyle($stylesheet)
+	    @scope ::tycho::StyleSheet set _widgetstyle($subscriber)
 	} else {
 	    $model subscribe style $subscriber $style
 	}
@@ -148,6 +166,15 @@ ensemble ::tycho::stylesheet {
 	
 	# Call it
 	eval $model subscribe options $subscriber $args
+    }
+
+    # Unsubscribe options
+    option unsubscribe {subscriber stylesheet args} {
+	# Make sure it's loaded
+	set model [::tycho::StyleSheet::_load $stylesheet]
+	
+	# Call it
+	eval $model unsubscribe options $subscriber $args
     }
 }
 
@@ -257,8 +284,11 @@ class ::tycho::StyleSheet {
     # Notify on parameter update
     method _notify {widget command name args}
 
-     # Convert a parameter name into an item name
-    method fullname {subscriber param}
+    # Convert a style and parameter name into an item name
+    method namebystyle {style param}
+
+    # Convert a subscriber and parameter name into an item name
+    method namebysubscriber {subscriber param}
 
     # Subscribe to this model
     method subscribe {type {subscriber {}} args}
@@ -359,19 +389,41 @@ body ::tycho::StyleSheet::_notify {widget option command name args} {
             # configure{} method. Also note that we use value{}
             # to get the converted value of the parameter, not the
             # set value.
-            uplevel #0 $widget configure $option [list [value $name 1]]
+            uplevel \#0 $widget ::itk::Archetype::configure \
+		    $option [list [value $name 1]]
         }
     }
 }
 
 ########################################################################
-#### fullname
+#### namebystyle
 #
-# Convert a widget and parameter name into a full item name. The
-# name wil include the name of teh style to which _subscriber_ is
+# Convert a style and parameter name into a full item name.
+#
+body ::tycho::StyleSheet::namebystyle {style param} {
+    set name "style:$style"
+    set splat [split $param .]
+    foreach g [lreplace $param end end] {
+	lappend name "group:$g"
+    }
+    lappend name "parameter:[lindex $splat end]"
+    return $name
+}
+
+########################################################################
+#### namebysubscriber
+#
+# Convert a subscriber and parameter name into a full item name. The
+# name will include the name of the style to which _subscriber_ is
 # currently subscribed.
 #
-body ::tycho::StyleSheet::fullname {subscriber param} {
+body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
+    # Get subscriber command
+    set s [::info which -command $subscriber]
+    if { $s != "" } {
+        set subscriber $s
+    }
+
     set name "style:$_widgetstyle($subscriber)"
     set splat [split $param .]
     foreach g [lreplace $param end end] {
@@ -386,8 +438,13 @@ body ::tycho::StyleSheet::fullname {subscriber param} {
 #
 # Subscribe to this model. This command has four forms, depending
 # on the value of the _mode_ argument. The _subscriber_ is
-# always the name of the widget that is subscribing to this model,
-# but remaining arguments differ according to the mode.
+# usually the name of the widget that is subscribing to this model,
+# but remaining arguments differ according to the mode. If
+# _subscriber_ is an object or Tk window, then is is converted 
+# into its access command (for example, <code>.foo</code> will be
+# converted into <code>::.foo</code>. If it is not, then the given
+# string will be used as-is -- this string is arbitrary, but care
+# should be taken to avoid clashing with object or widget names.
 #
 # <dl>
 # <dt><b>data</b> _subscriber_ ?_name_? ?_command_?
@@ -426,8 +483,13 @@ body ::tycho::StyleSheet::fullname {subscriber param} {
 #
 body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
     switch -exact $mode {
-    	"options" {
-	    # Make sure we have at least the default style
+        "options" {
+            # Get subscriber command if it exists
+            set s [::info which -command $subscriber]
+            if { $s != "" } {
+                set subscriber $s
+            }
+            # Make sure we have at least the default style
 	    if ![::info exists _widgetstyle($subscriber)] {
                 set _widgetstyle($subscriber) "default"
             }
@@ -438,7 +500,7 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 	    set updatelist {}
 	    foreach {option param} $args {
 		# Get the item name
-		set name [fullname $subscriber $param]
+		set name [namebysubscriber $subscriber $param]
 
 		# Subscribe to the item, and supply a notify command
 		# that calls myself back.
@@ -450,8 +512,14 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 	    }
 	    # Update the widget now
 	    eval $subscriber ::itk::Archetype::configure $updatelist
-    	}
-    	"style" {
+        }
+        "style" {
+            # Get subscriber command if it exists
+            set s [::info which -command $subscriber]
+            if { $s != "" } {
+                set subscriber $s
+            }
+            # Check style
 	    set style [lindex $args 0]
 	    if ![exists style:$style] {
 		error "Unknown style \"$style\" in style-sheet \"$modelname\""
@@ -476,23 +544,42 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 ########################################################################
 #### synchronize
 #
-# "Sytnchronize" this model with a "master" model. _master_ is the
-# reference to the master model, and _mstyle_ is the name of the style
-# in that model to synchronize to. The _context_ argument is the
+# "Synchronize" this model with a "master" model. _master_ is the
+# reference to the master model. The _context_ argument is the
 # context within which the synchronization takes place and is only
 # used by recursive calls. The synchronization process is as follows:
-# <ol>
-# <li>Add each parameter in master not present here.
-# <li>Delete each parameter here that is not in master.
-# <li>For all other parameters, change all attributes 
-# to be the same as the master, with the exception of the
-# parameter value, which is changed only if it is the same
-# as the previous default.
-# </ol>
+# <ul>
+# <li>Add any style present in master but not here.
+# <li>Change the parameters of each style to match that of
+# the corresponding style in master, if there is one.
+# <li>Compare each style in this model with the "default"
+# style of the master. While doing so:
+#    <ul>
+#    <li>Add each parameter and group in master not present here.
+#    <li>Delete each parameter and group here that is not in master.
+#    <li>For all other groups, change the group's attributes to
+#    match the master.
+#    <li>For all other parameters, change the parameter's attributes
+#    to be the same as the master, with the exception of the
+#    parameter value, which is changed only if it is the same
+#    as the previous default.
+#   </ul>
+# </ul>
 #
 body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
     set styles [match style]
     set rstyle [lindex $styles 0]
+
+    # Update styles
+    foreach s [$master match style] {
+        if ![exists style:$s] {
+            # Add new style
+            parse [$master describe style:$s]
+        } else {
+            # Update style parameters
+            eval itemconfigure style:$s [$master assign style:$s]
+        }
+    }
 
     # Recursively process groups
     set rgroups [match group [concat style:$rstyle $context]]
@@ -514,7 +601,7 @@ body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
     }
     # Synchronize groups
     foreach g [::tycho::lintersection $rgroups $mgroups] {
-        synchronize $master $style [concat $context group:$g]
+        synchronize $master $mstyle [concat $context group:$g]
     }
 
     # Process parameters
@@ -593,18 +680,23 @@ body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
 #
 body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
     switch -exact $mode {
-    	"option" {
-	    if { $args == "" } {
-		# Unsubscribe from everything
+        "option" {
+            # Get subscriber command if it exists
+            set s [::info which -command $subscriber]
+            if { $s != "" } {
+                set subscriber $s
+            }
+            if { $args == "" } {
+                # Unsubscribe from everything
 		chain unsubscribe data $subscriber
-		catch {unset _widgetstyle($subscriber)}
+		catch {unset _<($subscriber)}
 		catch {unset _widgetoptions($subscriber)}
 	    } else {
 		# Unsubscribe from selected options
 		array set opts $_widgetoptions($subscriber)
 		set unsubs {}
 		foreach option $args {
-		    set name [fullname $opts($option)]
+		    set name [namebysubscriber $subscriber $opts($option)]
 		    lappend unsubs $name
 		    unset opts($option)
 		}
@@ -655,13 +747,7 @@ body ::tycho::StyleSheet::_load {stylesheet} {
     }
     # If it's not loaded, load it
     if ![::info exists _stylemodel($stylesheet)] {
-	# FIXME: This is a temporary work-around for bogus
-	# expandPath behaviour.
-	# set userfile [::tycho::expandPath $_userfile($stylesheet)]
-	set userfile [file join \
-		[::tycho::expandPath [file dirname $_userfile($stylesheet)]] \
-		[file tail $_userfile($stylesheet)]]
-
+	set userfile [::tycho::expandPath $_userfile($stylesheet)]
 	set basefile [::tycho::expandPath $_basefile($stylesheet)]
 
 	# If the user file doesn't exist, create it
@@ -675,7 +761,7 @@ body ::tycho::StyleSheet::_load {stylesheet} {
 	set fd [open $userfile]
 	set data [read $fd]
 	close $fd
-	
+
 	# Create the model
 	set model [::tycho::StyleSheet [::tycho::autoName stylesheet] \
 		-modelname $stylesheet]
@@ -690,15 +776,21 @@ body ::tycho::StyleSheet::_load {stylesheet} {
         # (WidgetPreferences), this is not likely to be very robust.
         # We need to use version numbers.
         if { [::file mtime $basefile] > [file mtime $userfile] } {
+            # Read data
             set fd [open $basefile]
             set data [read $fd]
             close $fd
 
+            # Load and synchronize models
             set base [::tycho::StyleSheet [::tycho::autoName stylesheet]]
             $base parse $data
-
             $model synchronize $base "default"
-            delete object $base
+            ::delete object $base
+
+            # Rewrite user file
+            set fd [open $userfile "w"]
+            puts $fd [$model describe]
+            close $fd
         }
     } else {
 	set model $_stylemodel($stylesheet)
