@@ -32,7 +32,7 @@ defstar {
 	}
 	input {
 		name { reset }
-		type { float }
+		type { int }
 	}
 	output {
 		name { output }
