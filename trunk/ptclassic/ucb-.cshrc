@@ -21,6 +21,10 @@ if ( "$PTARCH" == hppa || "$PTARCH" == "hppa.cfront" ) then
 	setenv PT_DISPLAY "xterm -e vi %s"
 endif
 
+# Only include /usr/tools/bin in our path if we are running under Solaris
+# otherwise the sun4 build will fail because /usr/tools/mathematica is Solaris
+if ( $PTARCH =~ sol?* ) set path = ($path /usr/tools/bin)
+
 
 # Needed for SUN CC, may interfere with Synopsys
 setenv LM_LICENSE_FILE /opt/lm/lmgrd.key
