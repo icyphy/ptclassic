@@ -23,6 +23,9 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
 # Library name
 LIB=libsdfimagestars.a
 
+# Where star doc files go
+STARDOCDIR = ../../doc/stars
+
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFAddMotionVecs.pl \

@@ -22,6 +22,9 @@ INCL = -I$(SDFDIR) -I$(KERNDIR)
 # Library name
 LIB=libsdfdspstars.a
 
+# Where star doc files go
+STARDOCDIR = ../../doc/stars
+
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFAutocor.pl \
