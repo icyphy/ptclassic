@@ -50,15 +50,19 @@ option add *IndexBrowser.height 20 widgetDefault
 
 ##########################################################################
 #### IndexBrowser
-# An IndexBrowser is simply a ListBrowser where the items are each a list
-# of three strings.  The first string in each item is what is displayed
-# in the list box.  The second string is a file name and the third
-# string is a point within the file.  When the user selects an item,
-# we make a hyperjump to the file and to the position given by the point.
+# A browser for an index. This is implemented as a list browser where
+# the items in the list are each a list of three strings. The first
+# string in each item is what is displayed in the list box. The second
+# string is a file name and the third string is a point within the
+# file. When the user selects an item, we make a hyperjump to the file
+# and to the position given by the point.
+# <p>
 # If the -file option is given, that file is read for the contents of
 # the listbox.  Moreover, the directory of that file is used for relative
 # filenames referenced by the index.  Otherwise, the current working directory
-# is used for relative file names.  The format of the file is as follows:
+# is used for relative file names.
+# <p>
+# The format of the file is as follows:
 # name { items }, where each item is a list of three elements.
 # The name at the beginning of the list identifies the index, and is used
 # to set the -text option.
@@ -66,12 +70,10 @@ option add *IndexBrowser.height 20 widgetDefault
 class ::tycho::IndexBrowser {
     inherit ::tycho::ListBrowser
 
-    #### -file variable
     # Specify the name of the file that contains the index.
-    # This file should contain a list of three-element lists.
     itk_option define -file file File {}
 
-    # FIXME: Should remove the -command option.
+    # FIXME: Should remove the -command option (or support it?)
 
     constructor {args} {}
 
@@ -92,6 +94,7 @@ class ::tycho::IndexBrowser {
 
     # The directory of the index file.
     protected variable CWD {}
+    # The entries in the index.
     protected variable entries
 }
 
@@ -100,6 +103,8 @@ class ::tycho::IndexBrowser {
 # Set or change the name of the file that specifies the contents of the
 # listbox.  This also specifies the directory relative to which file
 # references are understood.
+# The file should contain a list of three-element lists, a label,
+# a filename, and a point within the file.
 #
 configbody ::tycho::IndexBrowser::file {
     set fd [open $itk_option(-file) r]
