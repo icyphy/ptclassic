@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLTarget.h"
+#include "SimVSSTarget.h"
 #include "VHDLStar.h"
 #include "VHDLCompDecl.h"
 #include "VHDLCompMap.h"
@@ -50,7 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLFiring.h"
 #include "Attribute.h"
 
-class StructTarget : public VHDLTarget {
+class StructTarget : public SimVSSTarget {
 public:
 	StructTarget(const char* name, const char* starclass, const char* desc);
 	/*virtual*/ Block* makeNew() const;
