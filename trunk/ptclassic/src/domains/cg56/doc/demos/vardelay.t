@@ -1,7 +1,7 @@
 .\" $Id$
-.NA Vardelay
+.NA vardelay
 .SD
-A universe showing the vardelay with linear interpolation
+Variable delay with linear interpolation.
 .DE
 .SV 1.1 "November 24, 1992"
 .AL "Chih-Tsung Huang (ported from Gabriel)"
