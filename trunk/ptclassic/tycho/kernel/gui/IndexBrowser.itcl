@@ -65,7 +65,11 @@ option add *IndexBrowser.height 20 widgetDefault
 # The format of the file is as follows:
 # name { items }, where each item is a list of three elements.
 # The name at the beginning of the list identifies the index, and is used
-# to set the -text option.
+# to set the -text option.  Each three element entry contains
+# a label (displayed by the index browser), a file name
+# (which can be relative to the index file), and a point within
+# the file (in any syntax supported by the <code>seePoint</code>
+# method of the target editor).
 #
 class ::tycho::IndexBrowser {
     inherit ::tycho::ListBrowser
@@ -106,8 +110,6 @@ class ::tycho::IndexBrowser {
 # Set or change the name of the file that specifies the contents of the
 # listbox.  This also specifies the directory relative to which file
 # references are understood.
-# The file should contain a list of three-element lists, a label,
-# a filename, and a point within the file.
 #
 configbody ::tycho::IndexBrowser::file {
     set file $itk_option(-file)
