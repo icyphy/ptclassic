@@ -153,7 +153,12 @@ if {![info exists tychoShouldWeDoRegularExit]} {
 ### MODE MAPPINGS
 
 ############# text editing modes
-::tycho::register extensions "html" .html .htm .htl
+if [::tycho::stylesheet get interaction viewHTMLSourceUponOpen] {
+    ::tycho::register extensions "edithtml" .html .htm .htl
+} else {
+    ::tycho::register extensions "html" .html .htm .htl
+}
+
 ::tycho::register extensions "image" .gif .ppm .pgm .xbm
 
 ########### graphical editing modes

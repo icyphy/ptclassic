@@ -50,6 +50,10 @@ style default \
 	    -type boolean \
 	    -label "Case-sensitive name completion"
 
+    parameter viewHTMLSourceUponOpen 0 \
+	    -type boolean \
+	    -label "When opening a .html file, view the HTML source."
+
     parameter singleStackTrace 0 \
 	    -type boolean \
 	    -label "Only create a single stack trace window"
