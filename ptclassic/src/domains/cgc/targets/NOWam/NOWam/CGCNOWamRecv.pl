@@ -114,7 +114,6 @@ void error_handler(int status, op_t opcode, void *argblock)
 }
         }
         codeblock (amdecls) {
-eb_t bundle;
 en_t global;
         }
 	codeblock (timedecls) {
@@ -133,18 +132,11 @@ prusage_t $starSymbol(beginRecv);
 prusage_t $starSymbol(endRecv);
 #endif
 int $starSymbol(i);
+eb_t $starSymbol(bundle);
 ea_t $starSymbol(endpoint);
 	}
         codeblock (aminit) {
 AM_Init();
-if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
-        fprintf(stderr, "error: AM_AllocateBundle failed\n");
-        exit(1);
-}
-if (AM_SetEventMask(bundle, AM_EMPTYTONOT ) != AM_OK) {
-        fprintf(stderr, "error: AM_SetEventMask error\n");
-        exit(1);
-}
         }
 	codeblock (timeinit) {
 #ifdef TIME_INFO
@@ -156,7 +148,16 @@ timeRun = 0.0;
 $starSymbol(timeRecv) = 0.0;
 $starSymbol(RecvData) = -0.001;
 #endif
-if (AM_AllocateKnownEndpoint(bundle, &$starSymbol(endpoint), HARDPORT + $val(pairNumber)) != AM_OK) {
+if (AM_AllocateBundle(AM_PAR, &$starSymbol(bundle)) != AM_OK) {
+        fprintf(stderr, "error: AM_AllocateBundle failed\n");
+        exit(1);
+}
+if (AM_SetEventMask($starSymbol(bundle), AM_EMPTYTONOT ) != AM_OK) {
+        fprintf(stderr, "error: AM_SetEventMask error\n");
+        exit(1);
+}
+
+if (AM_AllocateKnownEndpoint($starSymbol(bundle), &$starSymbol(endpoint), HARDPORT + $val(pairNumber)) != AM_OK) {
         fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
         exit(1);
 }
@@ -205,7 +206,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addInclude("<am.h>");
 		addCompileOption(
 			"-I$(PTOLEMY)/src/domains/cgc/targets/NOWam/libudpam");
-                addLinkOption("-L$(PTOLEMY)/lib.$(PTARCH) -ludpam");
+                addLinkOption(
+			"-L$(PTOLEMY)/lib.$(PTARCH) -ludpam -lnsl -lsocket -l thread");
 
 		addCode(timeincludes, "include", "timeIncludes");
                 addCode(amdecls, "mainDecls", "amDecls");
@@ -232,7 +234,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	for (i = 0; i < $val(numData); i++) {
 		while ($starSymbol(RecvData) == -0.001) {
-			AM_Poll(bundle);
+			AM_Poll($starSymbol(bundle));
 		}
 		pos = $val(numData) - 1 + i;
 		$ref(output,pos) = $starSymbol(RecvData);
