@@ -1,8 +1,9 @@
-defstar {
+defstar
+{
     name { Expr }
     domain { CGC } 
     desc { General expression evaluation. }
-    version { $Id$ }
+    version { $Id$ %G}
     author { T. M. Parks }
     copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -12,126 +13,129 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC main library }
 
-    inmulti {
+    inmulti
+    {
 	name { in }
 	type { float }
     }
 
-    output {
+    output
+    {
 	name { out }
 	type { float}
     }
 
-    state {
+    state
+    {
 	name { expr }
 	type { string }
 	default { "$ref(in#1)" }
-	desc {
-C expression to evaluate. A semicolon will be appended to it.
-	}
+	desc { Expression to evaulate. }
     }
 
     state {
 	name { inDataType }
 	type { string }
 	default { "float" }
-	desc{
-DataType of in portholes, one of float, int, anytype, or complex.
-	}
+	desc{ "DataType of `in` porthole, one of [float,int,complex,anytype]" }
     }
 
     state {
 	name { outDataType }
 	type { string }
 	default { "float" }
-	desc {
-DataType of the out porthole, one of float, int, complex, or =in.
-	}
+	desc
+	 {"DataType of `out` porthole, one of [float,int,complex,=in]"}
     }
 
-    state {
+    state
+    {
 	name { include }
 	type { stringArray }
-	default { "\"<math.h>\"" }
-	desc {
-List of necessary include files separated by white space.
-Express standard include files as "<math.h>" and user include files
-as "\\"myinclude.h\\"".  The extra syntax is necessary to override
-one-character directives in the state parser.
-	}
+	default { "<math.h>" }
+	desc { List of necessary include files. }
     }
 
-    state {
+    state
+    {
 	name { runTime }
 	type { int }
 	default { "2" }
-	desc { estimated execution time }
+	desc { execution time }
     }
-
-    // define strcasecmp and toupper, respectively
-    ccinclude { <string.h>, <ctype.h> }
 
     method {
-	name { returnDataType }
-	access { protected }
-	type { DataType }
-	arglist { "(const char* dataTypeString)" }
-	code {
-		DataType datatype = 0;
-		switch (toupper(dataTypeString[0])) {
-		  case 'A':
-		    if ( strcasecmp(dataTypeString, "anytype") == 0 )
-			datatype = ANYTYPE;
-		    break;
-		  case 'C':
-		    if ( strcasecmp(dataTypeString, "complex") == 0 )
-			datatype = COMPLEX;
-		    break;
-		  case 'F':
-		    if ( strcasecmp(dataTypeString, "float") == 0 )
-			datatype = FLOAT;
-		    break;
-		  case 'I':
-		    if ( strcasecmp(dataTypeString, "int") == 0 )
-			datatype = INT;
-		    break;
-		}
-		return datatype;
+      name { preinitialize }
+      access { public }
+      code {
+	// We must change the porthole types at preinitialize time
+	// so that porthole type resolution works correctly.
+	// That means we have to initialize the states ourselves.
+	initState();
+	const char* letter = inDataType;
+	switch (letter[0]) {
+	case 'F':
+	case 'f':
+	    in.setPort(in.name(),this,FLOAT);
+	    break;
+	case 'I':
+	case 'i':
+	    in.setPort(in.name(),this,INT);
+	    break;
+	case 'C':
+	case 'c':
+	    in.setPort(in.name(),this,COMPLEX);
+	    break;
+	case 'A':
+	case 'a':
+	    in.setPort(in.name(),this,ANYTYPE);
+	    break;
+	default:
+	    Error::abortRun(*this,"CGC Expr does not support the type",
+			    inDataType);
+	    break;
 	}
+	letter = outDataType;
+	switch (letter[0]) {
+	case 'F':
+	case 'f':
+	    out.setPort(out.name(),this,FLOAT);
+	    break;
+	case 'I':
+	case 'i':
+	    out.setPort(out.name(),this,INT);
+	    break;
+	case 'C':
+	case 'c':
+	    out.setPort(out.name(),this,COMPLEX);
+	    break;
+	case '=':
+	    out.setPort(out.name(),this,ANYTYPE);
+	    out.inheritTypeFrom(in);
+	    break;
+	default:
+	    Error::abortRun(*this,"CGC Expr does not support the type",
+			    outDataType);
+	    break;
+	}
+      }
     }
 
-    setup {
-	DataType intype = returnDataType(inDataType);
-	if ( intype == 0 ) {
-	    Error::abortRun(*this,
-			    "CGCExpr star does not support the type ",
-			    (const char*) inDataType);
-	    return;
-	}
-	in.setPort("in", this, intype);
-
-	DataType outtype = returnDataType(outDataType);
-	if ( outtype == 0 ) {
-	    Error::abortRun(*this,
-			    "CGCExpr star does not support the type ",
-			    (const char*) outDataType);
-	    return;
-	}
-	out.setPort("out", this, outtype);
-    }
-
-    initCode {
+    initCode
+    {
 	for(int i = 0; i < include.size(); i++)
 	    addInclude(include[i]);
     }
 
-    go {
-	StringList code = "$ref(out) = ";
-	code << expr << ";\n";
+    go
+    {
+	StringList code;
+	code << "$ref(out) = " << expr << ";\n";
 	addCode(code);
     }
 
-    exectime {
+    exectime
+    {
 	return int(runTime);
     }
 }
