@@ -24,6 +24,7 @@ of the particle is used to generate the output.
 		default { "cout" }
 		desc { Filename for output, or "cout" for stdout. }
 	}
+	hinclude { "UserOutput.h" }
 	protected {
 		UserOutput output;
 	}
