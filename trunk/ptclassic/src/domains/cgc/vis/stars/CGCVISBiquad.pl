@@ -187,8 +187,8 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	  addDeclaration(mainDecl);
-	  addProcedure(quadmult, "mult4");
-	  addProcedure(settaps, "taps");
+	  addProcedure(quadmult, "CGCVISBiquad_mult4x4");
+	  addProcedure(settaps, "CGCVISBiquad_settaps");
 	  addCode(initialize);
 	}
 

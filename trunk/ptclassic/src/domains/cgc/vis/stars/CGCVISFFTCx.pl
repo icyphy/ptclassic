@@ -162,10 +162,10 @@ void $sharedSymbol(CGCVISFFTFx,reorderfft)(vis_s16* s1, vis_s16* s2, int nn) {
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	  addInclude("<math.h>");
-	  addProcedure(calculateSinandCos,"sine");
-	  addProcedure(quadmult,"mult4");
-	  addProcedure(doublemult,"mult2");
-	  addProcedure(bitreverse,"reorder");
+	  addProcedure(calculateSinandCos, "CGCVISFFTCx_calculateSinandCos");
+	  addProcedure(quadmult, "CGCVISFFTCx_quadmult");
+	  addProcedure(doublemult, "CGCVISFFTCx_doublemult");
+	  addProcedure(bitreverse, "CGCVISFFTCx_bitreverse");
 	  addGlobal(globalDecl);
 	  addDeclaration(mainDecl);
 	  addCode(initialize);
