@@ -212,6 +212,9 @@ octObject *facetPtr;
 	    }
 	}
 	(void) octDetach(&net, &prop);
+	if ( prop.contents.prop.type == OCT_STRING ) {
+	    free(prop.contents.prop.value.string);
+	}
         FreeOctMembers(&net);
     }
     FreeOctMembers(&net);
