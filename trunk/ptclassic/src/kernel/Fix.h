@@ -220,6 +220,8 @@ public:
     int     ovf_occurred() const { return (errors & err_ovf) != 0;}
     int     invalid() const { return (errors & (err_dbz|err_invalid)) != 0;}
     int     dbz() const { return (errors & err_dbz) != 0;}
+
+    void    clear_errors() { errors = 0; }
 ///////////////////////////////////
 // other operators
 
