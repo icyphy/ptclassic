@@ -39,10 +39,13 @@ VPATH =		$(ROOT)/editors/slate/doc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# Sub directories to run make in.
+DIRS =          internals tutorial usersGuides
+
 EXTRA_SRCS =  \
 	index.html
 
-MISC_FILES =	internals usersGuides
+MISC_FILES =	$(DIRS) img
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 OPTIONAL_FILES =	codeDoc
@@ -50,9 +53,6 @@ OPTIONAL_FILES =	codeDoc
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-# Sub directories to run make in.
-DIRS =          internals usersGuides
- 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
 
