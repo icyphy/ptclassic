@@ -58,7 +58,7 @@ ITCL_SRCS =	\
 	RCS.itcl
 
 
-EXTRA_SRCS =	$(ITCL_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES =	#rcsdir sccsdir
 
