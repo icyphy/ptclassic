@@ -34,11 +34,14 @@ static char SccsId[]="$Id$";
 #include "io.h"
 #include "internal.h"
 #include "obj.h"
+#include "template.h"
 
-updateScreen()
+#include "update.h"
+
+void updateScreen()
 {
     octGenerator gen;
-    octStatus status;
+    octStatus status = OCT_OK;
     octObject obj;
     int i;
 
@@ -69,7 +72,7 @@ updateScreen()
     OCT_ASSERT(status, "%s");
 }
 
-updateHeader(objPtr)
+void updateHeader(objPtr)
 octObject *objPtr;
 {
     struct maskEntry *mePtr;
@@ -99,7 +102,7 @@ octObject *objPtr;
     IOputchar('\n');
 }
 
-printObjectSummary(objPtr)
+void printObjectSummary(objPtr)
 octObject *objPtr;
 {
     if (objPtr == NIL(octObject)) return;
@@ -107,7 +110,7 @@ octObject *objPtr;
     printTemplate(summaryTemplate, objPtr);
 }
 
-PROMPT(str)
+void PROMPT(str)
 char *str;
 {
     quitAll = 0;
