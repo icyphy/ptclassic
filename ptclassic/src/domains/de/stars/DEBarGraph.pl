@@ -2,7 +2,7 @@ defstar {
 	name { BarGraph }
 	domain { DE }
 	desc {
-Generate a plot with the xgraph program that uses
+Generate a plot with the pxgraph program that uses
 a zero-order hold to interpolate between event values.
 Two points are plotted for each event, one when the event
 first occurs, and the second when the event is supplanted
@@ -19,7 +19,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	seealso {Xgraph XMgraph xgraph Xhistogram }
+	seealso {XMgraph pxgraph Xhistogram }
 	inmulti {
 		name { input }
 		type { anytype }
@@ -34,7 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {saveFile}
 		type {string}
 		default {""}
-		desc { File to save xgraph input.}
+		desc { File to save pxgraph input.}
 	}
 	defstate {
 		name { draw_line_to_base }
@@ -52,7 +52,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {options}
 		type {string}
 		default {"-bb -lw 3 -zg black -x time -0 input"}
-		desc { Command line options for a bar graph in xgraph.}
+		desc { Command line options for a bar graph in pxgraph.}
 	}
 	hinclude { "Display.h" }
 	protected {
