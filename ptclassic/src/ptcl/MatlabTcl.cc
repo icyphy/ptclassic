@@ -106,6 +106,18 @@ int MatlabTcl::init() {
     return TRUE;
 }
 
+// support evaluation of a Matlab command
+int MatlabTcl::evaluate(char* command, int outputBufferFlag) {
+    sethandle();
+    matlabInterface->AttachMatlabFigureIds();
+    int merror = matlabInterface->EvaluateOneCommand(command);
+    if ( outputBufferFlag || merror ) {
+	Tcl_AppendResult(tclinterp, matlabInterface->GetOutputBuffer(), 0);
+    }
+    if ( merror ) return TCL_ERROR;
+    return TCL_OK;
+}
+
 // evaluate the Tcl command "matlab"
 int MatlabTcl::matlab(int argc, char** argv) {
 
@@ -183,22 +195,22 @@ int MatlabTcl::end(int argc, char** /*argv*/) {
 int MatlabTcl::eval(int argc, char** argv) {
     if (argc != 3) return usage("matlab eval <matlab_command>");
     MATLABTCL_CHECK_MATLAB();
-    sethandle();
-    matlabInterface->AttachMatlabFigureIds();
-    int merror = matlabInterface->EvaluateOneCommand(argv[2]);
-    Tcl_AppendResult(tclinterp, matlabInterface->GetOutputBuffer(), 0);
-    if (merror) return TCL_ERROR;
-    return TCL_OK;
+    return evaluate(argv[2], TRUE);
 }
 
 // get a Matlab matrix
 int MatlabTcl::get(int argc, char** argv) {
-    if (argc != 3) return usage("matlab get <matrix_name>");
+    if ((argc < 3) || (argc > 4))
+	return usage("matlab get <matrix_name> ?<matlab_command>?");
     MATLABTCL_CHECK_MATLAB();
 
+    if (argc == 4) {
+	if ( MatlabTcl::evaluate(argv[3], FALSE) != TCL_OK ) return TCL_ERROR;
+    }
+
     int numrows = 0, numcols = 0;
-    char **realStrings = 0;
-    char **imagStrings = 0;
+    char** realStrings = 0;
+    char** imagStrings = 0;
 
     // return a four-element list: numrows numcols realvalues imagvalues
     if ( matlabInterface->GetMatlabVariable(argv[2], &numrows, &numcols,
@@ -230,21 +242,20 @@ int MatlabTcl::get(int argc, char** argv) {
 }
 
 // get a Matlab matrix
-int MatlabTcl::getpairs(int argc, char** /*argv*/) {
+int MatlabTcl::getpairs(int argc, char** argv) {
     if ((argc < 3) || (argc > 4))
 	return usage("matlab getpairs <matrix_name> ?<matlab_command>?");
-    return error("'matlab getpairs' is not yet implemented.");
+    MATLABTCL_CHECK_MATLAB();
+    InfString command = "eval makeOrderedPairs [lrange [matlab get ";
+    command << argv[2] << "] 2 end]";
+    return Tcl_Eval(tclinterp, command);
 }
 
 // evaluate a Matlab command
 int MatlabTcl::send(int argc, char** argv) {
     if (argc != 3) return usage("matlab send <matlab_command>");
     MATLABTCL_CHECK_MATLAB();
-    sethandle();
-    matlabInterface->AttachMatlabFigureIds();
-    int merror = matlabInterface->EvaluateOneCommand(argv[2]);
-    if ( merror ) return TCL_ERROR;
-    return TCL_OK;
+    return evaluate(argv[2], FALSE);
 }
 
 // set a Matlab matrix
