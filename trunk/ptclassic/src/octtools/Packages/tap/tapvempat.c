@@ -54,42 +54,7 @@ optionStruct optionList[] = {
 };
 
 
-main(argc, argv)
-int argc;
-char *argv[];
-{
-    octObject facet;
-    int options;
-    extern int optind;
-
-    parseOptions(argc, argv);
-
-    if (argc != optind+2) optUsage();
-
-    octBegin();
-
-    /* get the technology facet directly */
-    Tech = argv[optind+1];
-    tapOpenTechFacet(argv[optind], argv[optind+1], &facet, "r");
-
-    /* keep the facet open even if tap flushes its caches and closes it */
-    facet.contents.facet.mode = "r";
-    if (octOpenFacet(&facet) != OCT_ALREADY_OPEN) {
-	(void) fprintf(stderr,
-		    "can't reopen technology facet %s:%s:%s???\n",
-		    facet.contents.facet.cell, facet.contents.facet.view,
-		    facet.contents.facet.facet);
-	exit(1);
-    }
-
-    printLayerLooks(&facet, Type);
-
-    octEnd();
-
-    exit(0);
-}
-
-parseOptions(argc, argv)
+void parseOptions(argc, argv)
 int argc;
 char *argv[];
 {
@@ -135,7 +100,7 @@ char *type;
 	tapSetDisplayType(type, Chrom);
 	tapGetDisplayInfo(&layer, &prio, &nColors, &fill, &border);
         printf("      (userData priority %d)\n", prio);
-        printf("      (width %d)\n", tapGetMinWidth(&layer));
+        printf("      (width %ld)\n", (long)tapGetMinWidth(&layer));
         if (Chrom == TAP_COLOR) {
 	    if (nColors >= 0) {
 	        tapGetDisplayColor(&layer, 0, &r, &g, &b);
@@ -156,4 +121,39 @@ char *type;
     printf(")\n");
     OH_ASSERT(status);
     return;
+}
+
+int
+main(argc, argv)
+int argc;
+char *argv[];
+{
+    octObject facet;
+    extern int optind;
+
+    parseOptions(argc, argv);
+
+    if (argc != optind+2) optUsage();
+
+    octBegin();
+
+    /* get the technology facet directly */
+    Tech = argv[optind+1];
+    tapOpenTechFacet(argv[optind], argv[optind+1], &facet, "r");
+
+    /* keep the facet open even if tap flushes its caches and closes it */
+    facet.contents.facet.mode = "r";
+    if (octOpenFacet(&facet) != OCT_ALREADY_OPEN) {
+	(void) fprintf(stderr,
+		    "can't reopen technology facet %s:%s:%s???\n",
+		    facet.contents.facet.cell, facet.contents.facet.view,
+		    facet.contents.facet.facet);
+	exit(1);
+    }
+
+    printLayerLooks(&facet, Type);
+
+    octEnd();
+
+    return 0;
 }
