@@ -39,7 +39,9 @@ include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
+ifndef BUILD_STATIC_BINARIES
 include $(ROOT)/mk/config-g++.shared.mk
+endif
 
 # gcc-2.7.2 under hpux10 requires '-shared -fPIC' to produce shared
 # libraries, '-shared' by itself won't work, so we override these three
