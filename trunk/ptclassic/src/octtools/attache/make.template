@@ -62,7 +62,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-C_INCL= -I../include
+C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 all::	 makefile attache
 

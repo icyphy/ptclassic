@@ -46,7 +46,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-C_INCL= -I../include
+C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 all::	 makefile masters
 
@@ -57,7 +57,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 
 masters:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
-  		-o masters \
+		-o masters \
 		$(LIBS) -lm 
 
 DEST = $(OCTTOOLS)/bin.$(ARCH)/masters
@@ -68,7 +68,7 @@ $(DEST):	masters
 		ln masters $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/masters
-	
+
 $(BINDIR)/masters:
 	(cd $(BINDIR); rm -f masters; ln -s ../octtools/bin.$(ARCH)/masters .)
 
