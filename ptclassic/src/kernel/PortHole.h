@@ -312,7 +312,7 @@ private:
 
 class GalPort : public PortHole {
 public:
-	GalPort(GenericPort& a) { setAlias(a);}
+	GalPort(GenericPort& a) { GenericPort::setAlias(a);}
 	int isItInput() const;
 	int isItOutput() const;
 };
@@ -418,7 +418,7 @@ protected:
 class GalMultiPort : public MultiPortHole {
 public:
 	// a GalMultiPort always has an alias
-	GalMultiPort(GenericPort& a) { setAlias(a);}
+	GalMultiPort(GenericPort& a) { GenericPort::setAlias(a);}
 
 	// queries pass through to the inside
 	int isItInput() const;
