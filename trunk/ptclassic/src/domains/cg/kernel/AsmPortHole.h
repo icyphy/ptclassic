@@ -21,6 +21,8 @@ $Id$
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;
 
+extern const Attribute P_CIRC;
+
 // attributes for code generation portholes
 
 class ProcMemory;
@@ -29,6 +31,7 @@ class AsmGeodesic;
 // PortHole class specific to assembly code generation.
 // It contains methods for allocating memory for inputs and outputs.
 class AsmPortHole : public SDFPortHole {
+protected:
 	int offset;
 public:
 	// Allocate a geodesic and give it a name
@@ -75,6 +78,9 @@ public:
 	int circAccessThisTime() const {
 		return offset + numberTokens > bufSize();
 	}
+
+	// Initialize
+	void initialize();
 };
 
 class InAsmPort : public AsmPortHole {
