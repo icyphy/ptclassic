@@ -78,7 +78,8 @@ OCT_DEBUG_FLAGS =
 # to find out what version of HPPA CC you are using.
 # If you are running under HPUX9, then remove -DPTHPUX10
 # We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc
-ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
+#ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
+ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10  -D_REENTRANT -D_HPUX_SOURCE
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 
@@ -128,7 +129,7 @@ CRT0 =
 # /usr/lib/end.o is necessary for debugging with xdb under hpux9.x
 # /opt/langtools/lib/end.o is necessary for debugging with xdb under hpux10.x
 #SYSLIBS =	-lm /opt/langtools/lib/end.o
-SYSLIBS =	$(LIBGCC_SPEC) -lm /opt/langtools/lib/end.o
+SYSLIBS =	$(LIBGCC_SPEC) -lm -L/opt/dce/lib/libcma.a -lcma /opt/langtools/lib/end.o
 
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
@@ -186,6 +187,15 @@ XV_CC =		cc -Ac -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 
 # Matlab architecture
 MATARCH = hp700
+
+# ptbin.mk uses this to decide whether to include the PN stars
+# If you are under HPUX10, then the PN domain requires DCE threads.
+#  you will need to install the DCE development set of the OS cds.
+#  If you don't have a /usr/include/pthread.h, then you probably
+#  don't have the DCE developement set installed.  If you don't have
+#  this installed, set INCLUDE_PN_DOMAIN to no
+#INCLUDE_PN_DOMAIN = no
+INCLUDE_PN_DOMAIN = yes
 
 # Ipus uses templates in a way that is compatible with g++, but not hppa.cfront
 INCLUDE_IPUS_DOMAIN = no
