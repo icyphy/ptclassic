@@ -21,8 +21,7 @@ a universe.
 
 // constructor
 HLLTarget::HLLTarget(const char* nam, const char* startype,
-	const char* desc) : CGTarget(nam, startype, desc),
-	unique(0)
+	const char* desc) : CGTarget(nam, startype, desc)
 {
 }
 
@@ -36,9 +35,10 @@ void HLLTarget::beginIteration(int repetitions, int depth) {
 	if (repetitions == -1)          // iterate infinitely
 		myCode << "while(1) {\n";
 	else {
-		myCode << "int i" << unique << "; ";
-		myCode << "for (i" << unique << "=0; i" << unique <<
-		    " < " << repetitions << "; i" << unique++ << "++) {\n";
+	    myCode << "int " << targetNestedSymbol.push("i") << "; "
+	           << "for (" << targetNestedSymbol.get() << "=0; "
+		   << targetNestedSymbol.get() << " < " << repetitions << "; "
+		   << targetNestedSymbol.pop() << "++) {\n";
 	}
 }
 

@@ -37,10 +37,6 @@ public:
 
 protected:
 
-
-	// Counter used to generate unique identifiers
-	int unique;
-
 	// return a name that can be used as C++ identifiers, derived
 	// from the actual name.
 	StringList sanitize(const char* s) const;
