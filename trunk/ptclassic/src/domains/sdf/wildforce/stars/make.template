@@ -20,60 +20,62 @@
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 # 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
-# Makefile for Ptolemy SDF image and network stars
+#                                               PT_COPYRIGHT_VERSION_2
+#                                               COPYRIGHTENDKEY
+# Makefile for Ptolemy SDF Wildforce kernel
 # $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
-#	cp make.template makefile
-#	chmod +w makefile
-#	make depend
+#       cp make.template makefile
+#       chmod +w makefile
+#       make depend
 # This will add the dependencies to the makefile.
-
+ 
 ROOT = ../../../../..
 VPATH = $(ROOT)/src/domains/sdf/wildforce/stars
-
+ 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
-
+ 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
+WILDFORCEKERN = $(ROOT)/src/domains/sdf/wildforce/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/sdf/stars \
-       -I$(ROOT)/src/utils/libptdsp $(WILDFORCECFLAGS)
-
+       -I/usr/include -I/usr/include/sys \
+       -I$(WILDFORCEKERN) $(WILDFORCECFLAGS)
+ 
 # Library name
 PTLIB=libsdfwildforcestars.$(LIBSUFFIX)
-
+ 
 # source files for all stars, using preprocessor, put derived stars first
 PL_SRCS= \
-	SDFWF4.pl
-
+        SDFWF4.pl
+ 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
-
+ 
 # object files for all stars
 OBJS= $(SRCS:.cc=.o) 
-
+ 
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
-
+ 
 STAR_MK=sdfwildforcestars
 DOMAIN=SDF_WILDFORCE
 DOMAIN_2=SDF
 EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
-
-all:		makefile stars_all
-
-install:	stars_install
-
-
+ 
+all:            makefile stars_all
+ 
+install:        stars_install
+ 
+ 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
-
-
+ 
+ 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
