@@ -19,7 +19,7 @@ $Id$
  an envelope for passing objects of type PacketData around.  A
  PacketSample is a type of Particle that transports Packets.
 
-***************************************************************/
+**************************************************************************/
 #include "Particle.h"
 #include "StringList.h"
 
@@ -49,6 +49,10 @@ public:
 
 	// specify how to print the packet.
 	virtual StringList print() const;
+
+	// clone the packet.  MUST BE REDEFINED by each derived class!
+	// don't forget the "const" keyword when you do so!
+	virtual PacketData* clone() const;
 };
 
 // A Packet is simply a way of making a single PacketData look like
@@ -94,7 +98,8 @@ public:
 	}
 
 	// type error message generation
-	StringList typeError(const char* expected) const;
+	// the pointer points to a static buffer!
+	const char* typeError(const char* expected) const;
 
 	// interfaces to PacketData functions
 	int asInt() const { return d->asInt();}
@@ -106,6 +111,10 @@ public:
 	// pointer so it cannot be used to alter the PacketData
 	// (since there may be other references to it).
 	const PacketData* myData() const { return d;}
+
+	// produce a writable copy of the packetData.  side effect --
+	// contents of Packet are changed to dummyPacket.
+	PacketData* writableCopy();
 };
 
 // A Particle class to transmit Packets
@@ -118,7 +127,7 @@ public:
 	operator Complex () const;
 	StringList print() const;
 
-	void getPacket (Packet& p) const;
+	void getPacket (Packet& p);
 
 	// fill in remaining functions for Particle classes
 
