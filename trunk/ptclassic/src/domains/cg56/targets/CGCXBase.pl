@@ -1,7 +1,7 @@
 defstar {
     name { XBase }
     domain { CGC }
-    desc { Base star from  CGC <-> S56X IPC }
+    desc { Base star from CGC <-> S56X IPC }
     version { $Id$ }
     author { Jose Luis Pino }
     copyright { 
@@ -29,22 +29,22 @@ codeblock(downloadCode,"const char* s56path") {
     /* open the DSP */
     if (($val(S56XFilePrefix)_dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
 	char message[1024];
-	sprintf(message,"%s: %s","Could not access the S-56X Card",
+	sprintf(message, "%s: %s", "Could not access the S-56X Card",
 		strerror(errno));
 	EXIT_CGC(message);
     }
 
-    /* boot the moniter */
+    /* boot the monitor */
     if (qckBoot($val(S56XFilePrefix)_dsp,"@s56path/lib/qckMon.lod")==-1) {
 	char message[1024];
-	sprintf(message,"%s: %s",qckErrString,strerror(errno));
+	sprintf(message, "%s: %s", qckErrString, strerror(errno));
 	EXIT_CGC(message);
     }
 
     /* load the application */
     if (qckLoad($val(S56XFilePrefix)_dsp,"@(cgTarget()->destDirectory)/$val(S56XFilePrefix).lod") == -1) {
 	char message[1024];
-	sprintf(message,"%s: %s",qckErrString,strerror(errno));
+	sprintf(message, "%s: %s", qckErrString, strerror(errno));
 	EXIT_CGC(message);
     }
 }
@@ -54,7 +54,7 @@ codeblock(signalSOL2){
     int sig = SIGUSR1;
     if (ioctl($val(S56XFilePrefix)_dsp->fd,DspSetAsyncSig, &sig) == -1) {
 	char message[1024];
-	sprintf(message,"%s: %s",
+	sprintf(message, "%s: %s",
 		"Setting of interrupt process pointer to S56X driver failed",
 		strerror(errno));
 	EXIT_CGC(message);
@@ -65,7 +65,7 @@ codeblock(signalSOL2){
 codeblock(startDSP) {    
     if (qckJsr($val(S56XFilePrefix)_dsp,"START") == -1) {
 	char message[1024];
-	sprintf(message,"%s: %s",qckErrString,strerror(errno));
+	sprintf(message, "%s: %s", qckErrString, strerror(errno));
 	EXIT_CGC(message);
     }
 }
@@ -81,6 +81,8 @@ initCode {
 	addInclude("<s56dspUser.h>");
 	addInclude("<qckMon.h>");
 	addInclude("<stdio.h>");
+	addInclude("<string.h>");
+	addInclude("<memory.h>");
 	addGlobal("    QckMon* $val(S56XFilePrefix)_dsp;","dsp");
 	// We do this here so that all the stars can do their initialization
 	// before starting the DSP
