@@ -59,8 +59,8 @@ These points occupy two positions in the buffer, and hence take two slots of per
 	    xyplot.addPoint(sampleCount,(double)((*py)%0), set++);
 	  }
 	  sampleCount += 1;
-	  if (sampleCount > int(xMax)) {
-	    sampleCount = int(xMin);
+	  if (sampleCount > int(xRange[1])) {
+	    sampleCount = int(xRange[0]);
 	    // Plot the points all over again for continuity
 	    nexty.reset();
 	    set = 1;
