@@ -145,6 +145,11 @@ void UniProcessor :: createSubGal() {
 // This functionality should probably be inside the cgddf scheduler
 // If you want to turn on this functionality, compile this file with:
 // -DCGDDF_CODEGEN_CC_WORKAROUND
+//  cd $PTOLEMY/obj.$PTARCH/domains/cg/parScheduler; rm -f CodeGen.o
+//  make USERFLAGS=-DCGDDF_CODEGEN_CC_WORKAROUND install
+// Note that to build for CGDDF, you will also need to recompile
+// kernel/PortHole.cc 
+
 // 
 #ifdef CGDDF_CODEGEN_CC_WORKAROUND
                 Block* black = 0;
