@@ -38,7 +38,7 @@ static const char file_id[] = "$RCSfile$";
 
 #include "Clock.h"
 
-extern "C" int gettimeofday(timeval *, timezone *);
+extern "C" int gettimeofday(timeval *, struct timezone *);
 
 Clock::Clock()
 {
