@@ -77,12 +77,12 @@ non-zero integer (not necessarily 1).
 		else if ( strcasecmp(cn, "NOR") == 0 ) test = NORID;
 		else if ( strcasecmp(cn, "XOR") == 0 ) test = XORID;
 		else if ( strcasecmp(cn, "XNOR") == 0 ) test = XNORID;
-		else Error::abortRun(*this,"Unrecognized test.");
+		else Error::abortRun(*this, "Unrecognized test ", cn );
 	}
 	go {
 	    MPHIter nexti(input);
 	    PortHole* p = 0;
-	    int result = 0;
+	    int result = FALSE;
 
 	    switch( test ) {
 		case NOTID:
@@ -91,21 +91,21 @@ non-zero integer (not necessarily 1).
 		    break;
 		case ANDID:
 		case NANDID:
-		    result = 1;
+		    result = TRUE;
 		    while ((p = nexti++) != 0)
 			result = result && int((*p)%0);
 		    if (test == NANDID) result = !result;
 		    break;
 		case ORID:
 		case NORID:
-		    result = 0;
+		    result = FALSE;
 		    while ((p = nexti++) != 0)
 			result = result || int((*p)%0);
 		    if (test == NORID) result = !result;
 		    break;
 		case XORID:
 		case XNORID:
-		    result = 0;
+		    result = FALSE;
 		    while ((p = nexti++) != 0)
 			if (int((*p)%0)) result = !result;
 		    if (test == XNORID) result = !result;
