@@ -234,13 +234,13 @@ int Cluster::setTarget(Target*t) {
 		 Methods to convert a user-specified
 	       galaxy hierarchy to a cluster hierarchy
  **********************************************************************/
-void Cluster::initTopBlocksForClustering(BlockList& list, Galaxy& g) {
+void Cluster::initTopBlocksForClustering(Galaxy& list, Galaxy& g) {
     GalTopBlockIter nextBlock(g);
     Block* b;
     while ((b = nextBlock++) != NULL) {
 	if (b->isItAtomic()) {
 	    Cluster* cluster = convertStar(b->asStar());
-	    list.put(*cluster);
+	    list.addBlock(*cluster,b->name());
 	}
 	else if (flattenTest(b->asGalaxy())) { 
 	    initTopBlocksForClustering(list,b->asGalaxy());
@@ -249,7 +249,7 @@ void Cluster::initTopBlocksForClustering(BlockList& list, Galaxy& g) {
 	}
 	else {
 	    Cluster* cluster = convertGalaxy(b->asGalaxy());
-	    list.put(*cluster);
+	    list.addBlock(*cluster,b->name());
 	    b->asGalaxy().empty();
 	    delete b;
 	}
@@ -262,29 +262,27 @@ void Cluster::initializeForClustering(Galaxy& galaxy) {
     // allows us to do this without losing inherited states.
     Scope::createScope(galaxy);
 
-    BlockList blocksToMove;
+    Galaxy blocksToMove;
 
     initTopBlocksForClustering(blocksToMove,galaxy);
 
     galaxy.empty();
     
+    blocksToMove.flatten(&galaxy);
+    
     // Fix far ports, we only need to do this here - from now on,
     // merge and absorb will update this
-    BlockListIter nextBlock(blocksToMove);
-    Block *block;
-    while ((block = nextBlock++) != NULL) {
-	galaxy.addBlock(*block,block->name());
-    }
-    
     GalStarIter nextStar(galaxy);
     Star* star;
     while ((star = nextStar++) != NULL) {
 	BlockPortIter nextPort(*star);
 	PortHole* starPort;
 	while ((starPort = nextPort++) != NULL) {
-	    ClusterPort* port = (ClusterPort*)starPort;
-	    while ((port = (ClusterPort*)port->aliasFrom()) != NULL)
+	    ClusterPort* port = (ClusterPort*)starPort->aliasFrom();
+	    while (port != NULL) {
 		port->initializeClusterPort();
+		port = (ClusterPort*)port->aliasFrom();
+	    }
 	}
     }
 }
@@ -313,13 +311,9 @@ Cluster* Cluster::convertGalaxy(Galaxy& g) {
 	cluster->addNewPort((PortHole&)*portToAlias);
     }
 
-    BlockList list;
-    initTopBlocksForClustering(list,g);
-    BlockListIter nextBlock(list);
-    Block *block;
-    while ((block = nextBlock++) != NULL) {
-	cluster->addBlock(*block,block->name());
-    }
+    Galaxy dummy;
+    initTopBlocksForClustering(dummy,g);
+    dummy.flatten(cluster);
     return cluster;
 }
 

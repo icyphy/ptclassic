@@ -75,11 +75,17 @@ int Galaxy::flatten(Galaxy* g, int removeFlag) {
 	delete this;
     }
 
+    Geodesic* nodeToMove;
+    NodeListIter nextNodeToMove(nodes);
+    while ((nodeToMove = nextNodeToMove++) != NULL)
+	g->nodes.put(*nodeToMove);
+    nodes.initialize();
     empty();
     return TRUE;
 }
 
 void Galaxy::empty() {
+    nodes.initialize();
     blocks.initialize();
     deleteAllGenPorts();
 }    
