@@ -50,10 +50,12 @@ class ::tycho::PreferenceEditor {
     ###################################################################
     ####                         public methods                    ####
 
+    # Apply one or all preferences
+    method apply {{name {}}}
 
     ###################################################################
     ####                       private variables                   ####
-
+    private common variables
 }
 
 
@@ -62,13 +64,17 @@ class ::tycho::PreferenceEditor {
 #
 configbody ::tycho::PreferenceEditor::preferences {
     set group $itk_option(-preferences)
+    if { $group == "" } {
+	return
+    }
     set i 0
-    foreach preference [preference list $group] {
+    foreach preference [preference names $group] {
 	set description [preference description $group $preference]
 	if { $description != "" } {
 	    # Create and grid the entry label
 	    itk_component add $preference {
-		label $itk_interior.$preference -text $description
+		label $itk_interior.$preference -text $description \
+			-foreground blue
 	    } {
 		keep -background -cursor
 	    }
@@ -76,18 +82,84 @@ configbody ::tycho::PreferenceEditor::preferences {
 
 	    # Create and grid the entry field
 	    set entry [set preference]Entry
-	    itk_component add $entry {
-		entry $itk_interior.$entry
-	    } {
-		keep -background -cursor
-	    }
-	    $itk_component($entry) insert 0 [preference get $group $preference]
-	    grid $itk_component($entry) -column 1 -row $i -sticky w
 
-	    # Set up bindings to update preferences
-	    bind $itk_component($entry) <Return> \
-		    "preference set $group $preference \
-		          \[$itk_component($entry) get\]"
+	    switch -exact [preference cget $group $preference -type] {
+		"integer" -
+		"number" -
+		"string" {
+		    itk_component add $entry {
+			entry $itk_interior.$entry
+		    } {
+			keep -background -cursor
+		    }
+		    $itk_component($entry) insert 0 \
+			    [preference get $group $preference]
+		    grid $itk_component($entry) -column 1 -row $i -sticky we
+		    
+		    # Set up bindings to update preferences
+		    bind $itk_component($entry) <Return> \
+			    "preference assign $group $preference \
+			    \[$itk_component($entry) get\]"
+		}
+		"choice" {
+		    itk_component add $entry {
+			frame $itk_interior.$entry
+		    } {
+			keep -background -cursor
+		    }
+		    foreach v [preference cget $group $preference -values] {
+			itk_component add $entry.[join $v ""] {
+			    radiobutton $itk_interior.$entry.[join $v ""] \
+				    -variable variables($entry) \
+				    -text $v \
+				    -value $v \
+				    -padx 0
+			} {
+			    keep -background -cursor
+			}
+			pack $itk_interior.$entry.[join $v ""] -side left
+		    }
+		    set variables($entry) \
+			    [preference get $group $preference]
+		    grid $itk_component($entry) -column 1 -row $i -sticky w
+		}
+		"set" {
+		    itk_component add $entry {
+			optionmenu $itk_interior.$entry
+		    } {
+			keep -background -cursor
+		    }
+		    $itk_interior.$entry configure -items \
+			    [preference cget $group $preference -values]
+		    $itk_interior.$entry select \
+			    [preference get $group $preference]
+
+		    grid $itk_component($entry) -column 1 -row $i -sticky w
+		}
+		"custom" {
+		    itk_component add $entry {
+			frame $itk_interior.$entry
+		    } {
+			keep -background -cursor
+		    }
+		    itk_component add $entry.value {
+			label $itk_interior.$entry.value -text \
+				[preference get $group $preference]
+		    } {
+			keep -background -cursor
+		    }
+		    pack $itk_interior.$entry.value -fill y -expand on  \
+			    -side left
+		    itk_component add $entry.button {
+			button $itk_interior.$entry.button -text "Edit" \
+				-command {puts !} -pady 0
+		    } {
+			keep -background -cursor
+		    }
+		    pack $itk_interior.$entry.button -side left
+		    grid $itk_component($entry) -column 1 -row $i -sticky ew
+		}
+	    }
 	    incr i
 	}
     }
@@ -97,7 +169,7 @@ configbody ::tycho::PreferenceEditor::preferences {
 #### constructor
 #
 body ::tycho::PreferenceEditor::constructor {args} {
- 
+    
     # A frame so we can have reliefs and stuff
     itk_component add frame {
         frame $itk_interior.frame
@@ -118,14 +190,14 @@ body ::tycho::PreferenceEditor::constructor {args} {
 body ::tycho::PreferenceEditor::destructor {} {
     # See if any entries have changed, and if so, update the preference
     set group $itk_option(-preferences)
-    foreach preference [preference list $group] {
+    foreach preference [preference names $group] {
 	set entry [set preference]Entry
 	if { [::info exists itk_component($entry)] } {
-	    if { [preference get $group $preference] \
-		    != [$itk_component($entry) get] } {
-		preference set $group $preference \
-			[$itk_component($entry) get]
-	    }
-	}
+#	    if { [preference get $group $preference] \
+#		    != [$itk_component($entry) get] } {
+#		preference assign $group $preference \
+#			[$itk_component($entry) get]
+#	    }
+}
     }
 }
