@@ -53,6 +53,14 @@
 
 VERSION =	0.6devel.$(BASENAME)
 
+ifdef ALLBINARIES
+ifndef PTRIM
+ifndef PTINY
+	FULL =		1
+endif
+endif
+endif
+
 ifdef FULL
 	PIGI = 		$(BASENAME)
 	VERSION_DESC =	'With All Common Domains'
