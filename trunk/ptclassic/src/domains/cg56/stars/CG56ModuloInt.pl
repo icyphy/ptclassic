@@ -51,12 +51,13 @@ by powers of two.
 		    return;
 		}
 
-		// convert the modulo parameter to a mask (stop at 16 bits)
-		int regValue = 0x01;		// 1, 2, 4, 8, ...
-		int mask = 0x00;		// 0, 1, 3, 7, ...
+		// convert the modulo parameter to a mask
+		// stop at 15 unsigned bits
+		int regValue = 0x02;		// 2, 4, 8, ...
+		int mask = 0x01;		// 1, 3, 7, ...
 		int modValue = int(modulo);
-		for (int i = 0; i < 16; i++) {
-		    if ( regValue == modValue ) break;
+		for (int i = 1; i < 16; i++) {
+		    if ( modValue == regValue ) break;
 		    mask = (mask << 1) | 0x01;
 		    regValue <<= 1;
 		}
