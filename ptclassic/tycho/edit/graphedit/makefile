@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -67,10 +67,14 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	README.txt \
 	pkgIndex.tcl
 
-MISC_FILES =		$(DIRS) tclIndex
-
 # Sub directories to run make in.
-DIRS =			adm bin demo doc test
+DIRS =		bin demo doc test
+
+MISC_FILES =	$(DIRS) tclIndex
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	adm
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex

@@ -63,10 +63,14 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	pkgIndex.tcl \
 	tydoc.style
 
-MISC_FILES =  $(DIRS) adm tclIndex
+MISC_FILES =  $(DIRS) tclIndex
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	adm
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF =	tclIndex 
 
 # Title for the tydoc index page
 TYDOC_DESC =
