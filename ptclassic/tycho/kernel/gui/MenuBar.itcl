@@ -58,30 +58,23 @@ class ::tycho::MenuBar {
     ####                         public methods                    ####
 
     # Add a menu to the menu bar
-    method addMenu {name args}
+    method addMenu {tag args}
 
     # Delete a menu or menu entry
     method delete {menu}
 
     # Disable an entry or an entire menu
-    method disable {name}
+    method disable {tag}
 
     # Enable an entry or an entire menu
-    method enable {name}
+    method enable {tag}
 }
-
 
 #######################################################################
 #### constructor
 #
 body ::tycho::MenuBar::constructor {args} {
     eval itk_initialize $args
-}
-
-#######################################################################
-#### destructor
-#
-body ::tycho::MenuBar::destructor {} {
 }
 
 ###################################################################
@@ -91,7 +84,7 @@ body ::tycho::MenuBar::destructor {} {
 
 #######################################################################
 #### addMenu
-# Add a menu to the menu bar.  The first argument is the name of the
+# Add a menu to the menu bar.  The first argument is the tag of the
 # menu, and can be any arbitrary string. Remaining arguments control
 # the appearance and layout of the menu. Options include the following:
 #
@@ -100,11 +93,15 @@ body ::tycho::MenuBar::destructor {} {
 # (the default) or _right_.
 # <li>*-before* _menu_: Pack before the specified menu.
 # <li>*-after* _menu_: Pack after the specified menu.
+# <li>*-label* _string_: The label of the menu button. Note that
+# this option will be translated into the *-text* option of
+# the Tk *menubutton* widget -- this is for consistency with
+# the option used for menu entries.
 # <li>*-underline* _index_: Underline the specified character of the label.
 # </ul>
 #
 # Other options are supported: the whole set of options supported
-# by the Tk menubutton widget are supported, except for the *-text_
+# by the Tk menubutton widget are supported, except for the
 # and *-menu* options.
 #
 # The above options cannot be changed once the menu has been created.
@@ -115,16 +112,20 @@ body ::tycho::MenuBar::destructor {} {
 # use the *menuconfigure* method. Note that the menu is created with
 # the menu's *-tearoff* option set false.
 #
-body ::tycho::MenuBar::addMenu {name args} {
+body ::tycho::MenuBar::addMenu {tag args} {
 
     # Do nothing at all if the menu already exists
-    if { [::info exists entrypath($name)] } {
+    if { [::info exists entrypath($tag)] } {
 	return
-	# error "menu $name already exists"
+	# error "menu $tag already exists"
     }
 
     # Get special options
-    array set temp [concat {-side left -before {} -after {}} $args]
+    array set temp [concat {-side left -before {} -after {} -label {}} $args]
+    if { $temp(-label) != "" } {
+	set temp(-text) $temp(-label)
+    }
+    unset temp(-label)
     set side   $temp(-side)
     set before $temp(-before)
     set after  $temp(-after)
@@ -134,11 +135,10 @@ body ::tycho::MenuBar::addMenu {name args} {
     set args [array get temp]
 
     # Create the menu button
-    itk_component add menuButton$name {
-	eval menubutton $itk_interior.menuButton$name \
+    itk_component add button$tag {
+	eval menubutton $itk_interior.button$tag \
 		$args \
-		-text [list $name] \
-		-menu $itk_interior.menuButton$name.menu
+		-menu $itk_interior.button$tag.menu
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground -highlightbackground \
@@ -148,26 +148,26 @@ body ::tycho::MenuBar::addMenu {name args} {
     # Create the new menu. This is done at the global scope so
     # that adding menu entries in the superclass (MenuSupport)
     # do not invoke unknown{}.
-    itk_component add menu$name {
-	uplevel #0 menu $itk_component(menuButton$name).menu -tearoff 0
+    itk_component add menu$tag {
+	uplevel #0 menu $itk_component(button$tag).menu -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
     }
 
-    # Pack it
+    # Pack it. This should be simplified with Tk8.0
     if { $before != "" } {
-	pack $itk_component(menuButton$name) -side $side \
-		-before $itk_component(menuButton$before)
+	pack $itk_component(button$tag) -side $side \
+		-before $itk_component(button$before)
     } elseif { $after != "" } {
-	pack $itk_component(menuButton$name) -side $side \
-		-after $itk_component(menuButton$after)
+	pack $itk_component(button$tag) -side $side \
+		-after $itk_component(button$after)
     } else {
-	pack $itk_component(menuButton$name) -side $side
+	pack $itk_component(button$tag) -side $side
     }
 
     # Record its "path"
-    set menupath($name) $itk_component(menuButton$name).menu
+    set menupath($tag) $itk_component(button$tag).menu
 }
 
 #####################################################################
@@ -175,20 +175,20 @@ body ::tycho::MenuBar::addMenu {name args} {
 # Delete a menu or a menu entry. If the specified menu or entry
 # does not exist, nothing happens.
 #
-body ::tycho::MenuBar::delete {name} {
+body ::tycho::MenuBar::delete {tag} {
     # See if it's a top-level menu
-    if { [::info exists itk_component(menu$name)] } {
+    if { [::info exists itk_component(menu$tag)] } {
 	# Delete a top-level menu
-	clear $name
+	clear $tag
 
-	destroy $itk_component(menu$name)
-	destroy $itk_component(menuButton$name)
-	unset itk_component(menu$name)
-	unset itk_component(menuButton$name)
-	unset menupath($name)
+	destroy $itk_component(menu$tag)
+	destroy $itk_component(button$tag)
+	unset itk_component(menu$tag)
+	unset itk_component(button$tag)
+	unset menupath($tag)
     } else {
 	# If not, perform default removal
-	::tycho::MenuSupport::delete $name
+	chain $tag
     }
 }
 
@@ -197,26 +197,25 @@ body ::tycho::MenuBar::delete {name} {
 # Disable a menu or a menu entry. Signal an error if the menu or entry
 # does not exist.
 #
-body ::tycho::MenuBar::disable {name} {
-    if { [::info exists itk_component(menuButton$name)] } {
+body ::tycho::MenuBar::disable {tag} {
+    if { [::info exists itk_component(button$tag)] } {
 	# Disable a menu button
-	$itk_component(menuButton$name) configure -state disabled
+	$itk_component(button$tag) configure -state disabled
     } else {
-	::tycho::MenuSupport::disable $name
+	chain $tag
     }
 }
-
 
 #####################################################################
 #### enable
 # Enable a menu or a menu entry. Signal an error if the menu or entry
 # does not exist.
 #
-body ::tycho::MenuBar::enable {name} {
-    if { [::info exists itk_component(menuButton$name)] } {
+body ::tycho::MenuBar::enable {tag} {
+    if { [::info exists itk_component(button$tag)] } {
 	# Disable a menu button
-	$itk_component(menuButton$name) configure -state normal
+	$itk_component(button$tag) configure -state normal
     } else {
-	::tycho::MenuSupport::enable $name
+	chain $tag
     }
 }
