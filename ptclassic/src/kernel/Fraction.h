@@ -120,12 +120,12 @@ inline Fraction operator/ (const Fraction& a,const Fraction& b) {
 
 // Equality test.  Works for 2/3, 4/6.
 
-int operator == (const Fraction& i, const Fraction& j)
+inline int operator == (const Fraction& i, const Fraction& j)
 {
 	return i.myNum*j.myDen == i.myDen*j.myNum;
 }
 
-int operator != (const Fraction& i, const Fraction& j)
+inline int operator != (const Fraction& i, const Fraction& j)
 {
 	return i.myNum*j.myDen != i.myDen*j.myNum;
 }
