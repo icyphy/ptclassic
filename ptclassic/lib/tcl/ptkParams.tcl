@@ -203,15 +203,13 @@ proc ed_AddParamDialog {facet number} {
     bind $ask.fvalue.entry <Control-p> "focus $ask.ftype.entry"
 
     pack append [frame $ask.b] \
-	[button $ask.b.dismiss -text "OK <Return>" -command \
+	[button $ask.b.dismiss -text "  OK  " -command \
 		"ed_AddParam $facet $number \
 		\[$ask.fname.entry get\] \
 		\[$ask.ftype.entry get\] \
 		\[$ask.fvalue.entry get\]
 		destroy $ask"] {left expand fill} \
-	[button $ask.b.done -text "Done <M-space>" -command \
-		"$ask.b.dismiss invoke; destroy $top"] {left expand fill} \
-	[button $ask.b.cancel -text "Cancel <M-Delete>" \
+	[button $ask.b.cancel -text "Cancel" \
 		-command "destroy $ask"] {left expand fill}
     pack append $ask $ask.m {top fillx} $ask.fname {top fillx} \
 	$ask.ftype {top fillx} $ask.fvalue {top fillx} $ask.b {top fillx}
@@ -221,7 +219,6 @@ proc ed_AddParamDialog {facet number} {
 		\[$ask.ftype.entry get\] \
 		\[$ask.fvalue.entry get\]
 		destroy $ask"
-    ptkRecursiveBind $ask <M-space> "$ask.b.dismiss invoke; destroy $top"
     ptkRecursiveBind $ask <M-Delete> "destroy $ask"
 
     grab $ask
@@ -297,9 +294,11 @@ proc ed_AddParam {facet number name type value} {
     ed_MkEntryButton $f.par.f$count $name
     ptkRecursiveBind $f.par.f$count <Return> "ed_Apply $facet $number
                                 $top.b.close invoke"
+# For the bindings to work
+#    ptkRecursiveBind $f.par.f$count <Any-Enter> {focus %W}
     
-    bind $f.par.f$count.entry <Any-Leave> \
-	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+#    bind $f.par.f$count.entry <Any-Leave> \
+#	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
     bind $f.par.f$count.entry <Tab> "ed_NextEntry $count \
 		$f.par $facet $number"
     bind $f.par.f$count.entry <Control-n> "ed_NextEntry $count \
@@ -369,7 +368,7 @@ proc ed_RemoveParam {facet number top button} {
     set oldB1LabelBinding [bind Label <1>]
     set oldB1ScrollbarBinding [bind Scrollbar <1>]
     set oldB1ButtonCmdq [lindex [$button.q config -command] 4]
-    set oldB1ButtonCmdok [lindex [$button.ok config -command] 4]
+    set oldB1ButtonCmdok [lindex [$button.okfr.ok config -command] 4]
     set oldB1ButtonCmdadd [lindex [$button.add config -command] 4]
 
     set oldFocus [focus]
@@ -377,7 +376,7 @@ proc ed_RemoveParam {facet number top button} {
     focus none
 
     $button.q config -command {set ed_EntryDestroyFlag 1}
-    $button.ok config -command {set ed_EntryDestroyFlag 1}
+    $button.okfr.ok config -command {set ed_EntryDestroyFlag 1}
     $button.add config -command {set ed_EntryDestroyFlag 1}
 
     ed_ChangeCursor $top.f.c.f pirate
@@ -392,7 +391,7 @@ proc ed_RemoveParam {facet number top button} {
     bind Label <1> $oldB1LabelBinding
     bind Scrollbar <1> $oldB1ScrollbarBinding
     $button.q config -command $oldB1ButtonCmdq
-    $button.ok config -command $oldB1ButtonCmdok
+    $button.okfr.ok config -command $oldB1ButtonCmdok
     $button.add config -command $oldB1ButtonCmdadd
 
     if [winfo exists $oldFocus] { focus $oldFocus }
@@ -596,6 +595,10 @@ proc ptkEditParams {facet number} {
 	        "ed_RestoreParam $facet $number
 		catch \"unset paramArray($facet,$number) \
 		paramArrayBAK($facet,$number\"; destroy $top"
+
+# For the bindings to work outside the entry widgets
+#    ptkRecursiveBind $top <Any-Enter> {focus %W}
+
     if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
 	ptkRecursiveBind $top <M-a> "ed_AddParamDialog $facet $number"
 	ptkRecursiveBind $top <M-r> \
