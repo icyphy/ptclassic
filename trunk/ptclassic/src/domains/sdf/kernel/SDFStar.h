@@ -38,6 +38,12 @@ private:
         EGMaster *master;
 
 public:
+	// constructor
+	SDFStar() {
+		repetitions = 0;
+		noTimes = 0;
+	}
+
 	// my expanded graph master (temporary)
 	EGMaster *myMaster() { return master;}
 
@@ -54,7 +60,7 @@ public:
 	void fire();
 
 	// The number of repetitions of the star in a periodic
-	// schedule.  Initialized to 1 by setBlock.  Set to correct
+	// schedule.  Initialized to 0 by constructor.  Set to correct
 	// value by an SDF scheduler.  It is represented as a fraction
 	// for the convenience of the scheduler.
 	Fraction repetitions;
@@ -63,11 +69,6 @@ public:
 	// many times it has scheduled a star.  This is a convenient
 	// place to do that.
 	unsigned noTimes;
-
-	// Redefine method setting internal data in the Block
-	// so that various SDF-specific initilizations can be performed.
-	// If the parent pointer is not provied, it defaults to NULL
-	Block& setBlock(char* starName, Block* parent = NULL);
 
 	// Execution time, for schedulers that use it
 	virtual int myExecTime();
