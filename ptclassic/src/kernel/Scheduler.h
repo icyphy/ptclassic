@@ -99,7 +99,7 @@ public:
 	int setup(Block& galaxy);
 
 	// The run function resumes the run where it was left off.
-	int run(Block& galaxy, int numIterations = 1);
+	int run(Block& galaxy);
 
 	// The wrapup function runs the termination routines of all the
 	// atomic blocks
