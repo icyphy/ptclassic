@@ -22,6 +22,8 @@ $Id$
 Routines implementing class Block methods
  
 **************************************************************************/
+
+extern Error errorHandler;
      
 StringList
 Block :: printPorts (const char* type) {
@@ -117,7 +119,6 @@ MultiPortHole* Block::multiPortWithName(const char* name) {
 // a star or galaxy in the known list hasn't redefined the clone
 // method.
 Block* Block::clone() {
-	extern Error errorHandler;
 	StringList msg = "The star or galaxy \"";
 	msg += readName();
 	msg += "\" doesn't implement the \"clone\" method!\n";
@@ -163,4 +164,19 @@ Block::stateWithName(const char* name)
                 return NULL;
         }
 
+class Star;
+class Galaxy;
 
+// Error-catchers; these should be redefined.
+
+Star&
+Block::asStar () const {
+	errorHandler.error (readFullName(), " is not a Star!");
+	exit (1);
+}
+
+Galaxy&
+Block::asGalaxy () const {
+	errorHandler.error (readFullName(), " is not a Galaxy!");
+	exit (1);
+}
