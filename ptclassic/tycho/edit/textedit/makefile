@@ -56,7 +56,8 @@ ITCL_SRCS = \
 	EditPtlang.itcl \
 	EditTcl.itcl \
 	Matlab.itcl \
-	Mathematica.itcl
+	Mathematica.itcl \
+	Shell.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
