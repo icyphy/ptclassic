@@ -44,8 +44,10 @@ static const char file_id[] = "MathematicaTcl.cc";
 #include "MathematicaIfc.h"
 #include "MathematicaTcl.h"
 
+#define MATHEMATICATCL_NOT_START "Could not start Mathematica"
+
 #define MATHEMATICATCL_CHECK_MATHEMATICA() \
-        if (! init()) return error("Could not start Mathematica")
+        if (! init()) return error(MATHEMATICATCL_NOT_START)
 
 // Consturctor
 MathematicaTcl::MathematicaTcl() {
@@ -185,7 +187,7 @@ int MathematicaTcl::send(int argc, char** argv) {
 int MathematicaTcl::start(int argc, char** /*argv*/){
     if (argc != 2) return usage("mathematica start");
     if (init()) return TCL_OK;
-    return error("Could not start mathematica");
+    return error(MATHEMATICATCL_NOT_START);
 }
 
 // Return the status of the Tcl/Mathematica interface
