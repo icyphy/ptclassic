@@ -129,7 +129,7 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb)
+set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf)
 set EXPEXTRAS=(cg56/targets cg96/targets)
 
 cd domains
@@ -155,7 +155,7 @@ end
 foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
-	cg56/dsp cg96/dsp sdf/dsp sdf/image sdf/matrix sdf/atm \
+	cg56/dsp cg96/dsp sdf/dsp sdf/image sdf/matrix sdf/atm mdsdf/tcltk \
 	de/atm $EXPEXTRAS )
 	optmkdir $x
 	cd $x
@@ -176,6 +176,7 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	sdf/dsp/stars sdf/image/kernel sdf/image/stars sdf/tcltk/stars \
 	sdf/matrix/stars \
 	sdf/atm/kernel sdf/atm/stars \
+	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
 	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
