@@ -59,11 +59,8 @@ const int linkingNotSupported =
 //
 // dlopen() style linking works under sun4, but if you try and load a
 // star that has undefined symbols, pigiRpc or ptcl will exit.
-#if defined(PTLINUX) && defined(__ELF__)
-#define PTLINUX_ELF
-#endif
 
-#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF)
+#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF) || defined(PTSVR4)
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
@@ -75,7 +72,7 @@ const int linkingNotSupported =
 #define DLOPEN_FLAGS RTLD_NOW
 #endif // PTIRIX5
 
-#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF)
+#if defined(PTSVR4_STYLE_LINKING)
 #define DLOPEN dlopen
 #if defined(PTSOL2) || defined(PTALPHA)
 #define DLOPEN_FLAGS RTLD_NOW
@@ -86,7 +83,7 @@ const int linkingNotSupported =
 #endif // PTSOL2 || PTSUN4
 
 #ifdef __GNUG__
-#if defined(PTSOL2) || defined (PTIRIX5) || defined (PTLINUX_ELF)
+#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX_ELF) || defined (PTSVR4)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
 #else
 #ifdef PTSUN4
@@ -106,11 +103,11 @@ const int linkingNotSupported =
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
-#if defined(PTIRIX5) || defined (PTIRIX5) || defined (PTLINUX) || defined(PTNBSD_386)
+#if defined(PTIRIX5) || defined(PTLINUX) || defined(PTNBSD_386)
 // For USE_DLOPEN, we need ld so we can process .o files into .so files
 #define LOADER "/usr/bin/ld"
 #else
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 #define LOADER "/usr/ccs/bin/ld"
 #else
 #define LOADER "/bin/ld"
@@ -137,7 +134,7 @@ const int linkingNotSupported =
 #if defined(PTIRIX5) || defined (PTLINUX) || defined(PTNBSD_386)
 #define NM_PROGRAM "/usr/bin/nm"
 #else
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 #define NM_PROGRAM "/usr/ccs/bin/nm"
 #else
 #define NM_PROGRAM "/bin/nm"
@@ -243,7 +240,7 @@ extern "C" size_t getpagesize(void);
 #define CONS_LENGTH 11
 #endif // PTIRIX5 || PTAIX
 #else /* g++, nonmips & nonPTHPPA */
-#if defined(PTSOL2) || defined (PTAIX)
+#if defined(PTSOL2) || defined (PTAIX) || defined(PTSVR4)
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else // PTSOL2 || PTAIX
@@ -326,7 +323,7 @@ extern "C" {
 #include <fcntl.h>
 #endif
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 #include <unistd.h>
 #endif
 
