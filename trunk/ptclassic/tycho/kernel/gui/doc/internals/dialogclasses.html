@@ -14,7 +14,7 @@ or questions that require a file name response.
 <ul>
 <li><a href="#YesNoQuery class">YesNoQuery Class</a>
 <li><a href="#YesNoCancel class">YesNoCancel Class</a>
-<li><a href="#EntryQuery class">EntryQuery Class</a>
+<li><a href="#Query class">Query Class</a>
 <li><a href="#FileBrowser class">FileBrowser Class</a>
 </ul>
 <h2><a name="YesNoQuery class">YesNoQuery Class</a></h2>
@@ -90,138 +90,199 @@ set x [::tycho::DialogWindow::newModal YesNoCancel .z -text {Are you awake?}]
 By default, the cancel button returns -1.
 
 <p>
-<h2><a name="EntryQuery class">EntryQuery Class</a></h2>
+<h2><a name="Query class">Query Class</a></h2>
 <p>
-The EntryQuery class opens a dialog box with one or more
+The <code>Query</code> class opens a dialog box with one or more
 <a name="text entry">text entry widgets widgets</a>
 and/or <a name="radio button widgets">radio button widgets.</a>
-It is used by the "<a href="dialogs.html#queryinfo procedure">queryinfo</a>"
-procedure,
-which provides a simplified procedural interface.
+It is used by the "<a href="dialogs.html#query procedure">query</a>"
+and "<a href="dialogs.html#queryinfo procedure">queryinfo</a>"
+procedures, which provide simpler interfaces.
 You can also create instances of it directly.
-It creates a dialog box that includes OK
-and Cancel buttons.  The actions taken in response to these buttons
-are given by the <a name="okcommand option">-okcommand</a> and
-<a name="cancelcommand option">-cancelcommand</a> options.
-By default, the -okcommand just returns the value(s) entered by the user
-or selected in the radio buttons (you will only see this returned
-value if you create a modal version of the dialog, using newModal,
-for example, as explained below).
-The -cancelcommand does nothing.  After either command is executed,
+<p>
+The actions taken in response to the OK and Cancel buttons
+are given by the <i><a name="okcommand option">-okcommand</a></i> and
+<i><a name="cancelcommand option">-cancelcommand</a></i> options.
+By default, the OK button just returns the user responses.
+The Cancel does nothing.  After either command is executed,
 the widget is destroyed.
 <p>
-Entry boxes can be created using the
-<a name="addQuery method">addQuery method</a>, as shown here:
+The <code>Query</code> class creates a dialog box with any of
+several types of interactions with the user.
+Text entry boxes can be created using the
+<a name="line method"><code>line</code></a> method, as shown here:
 <tcl><pre>
-::tycho::EntryQuery .bb -okcommand {::tycho::inform [.bb get]}
-.bb addQuery month {Enter Month} Jan
-.bb addQuery day {Enter Day} Mon
+::tycho::Query .bb -okcommand {::tycho::inform [.bb get]}
+.bb line month {Enter Month} Jan
+.bb line day {Enter Day} Mon
 .bb centerOnScreen
 </pre></tcl>
+<p>
 This method takes three arguments,
 a tag, a label, and a default string.
-The get method, invoked on clicking the OK button, returns
-an indexed list of entries.
-<p>
-The <a name="addRadioQuery method">addRadioQuery method</a>
-puts radio buttons into the dialog.  For example, assuming you
-have not dismissed the EntryQuery that you created above,
+An alternative method allows you to create multi-line
+text edit boxes, as in the following example:
 <tcl><pre>
-.bb addRadioQuery selmonth {Select Month} {Jan Feb March} Jan
-.bb addRadioQuery selday {Select Day} {Mon Tue Wed Thu Fri} Mon
+.bb lines third {Third entry:} {Yet another default} 4
 </pre></tcl>
+<p>
+Now the query will four lines and that the OK button
+is no longer triggered by &lt;Return&gt;.  It can now be triggered by
+&lt;Meta-Return&gt;.  This is because in a multi-line entry box, &lt;Return&gt;
+moves the insertion cursor to a new line.
+<p>
+Notice in the above example that Control-Tab moves the insertion
+cursor from query to query.  Within a radio button, it moves the focus
+from button to button.  The Space key selects the current button.
+If there are no multi-line entries, the Tab key can be used instead.
+<p>
+The <code><a name="radio method">radio</a></code> method
+puts radio buttons into the dialog.  For example, assuming you
+have not dismissed the Query that you created above,
+<tcl><pre>
+.bb radio selmonth {Select Month} {Jan Feb March} Jan
+.bb radio selday {Select Day} {Mon Tue Wed Thu Fri} Mon
+</pre></tcl>
+<p>
 The arguments are a name for the bank of buttons, a label,
 the list of possible values, and the default selection.
 <p>
-The <a name="queries option">-queries option</a> specifies the initial
-list of entry boxes that will appear in the window (there is not currently
-a comparable option for radio buttons).
-The value of this option should be a list of three or four-element lists.
-The first element of each list is an arbitrary tag used to identify
-the entry box.  The second element is the label to put next to the
-entry box.  The third element is the default string to put into
-entry box.  The optional fourth element specifies the number of text
-lines that should be allowed in the entry box.  This defaults to one.
+The <code>get</code> method, invoked above on clicking the OK button, returns
+an indexed list of entries.  A modal dialog can be created as well,
+and will return the values in the same form as the <code>get</code> method.
 For example,
 <tcl><pre>
-::tycho::EntryQuery .z &#92
-    -queries {{first {First entry:} {Default string}} &#92
-        {second {Second entry:} {Another default}}}  &#92
-    -entrywidth 60 &#92
+::tycho::Query .bb
+.bb line text {Enter Something} {foo bar}
+.bb radio select {Select One} {First Second Third} First
+::tycho::post [::tycho::DialogWindow::wait .bb]
+</pre></tcl>
+<p>
+Notice that it was no longer necessary to specify a
+<i>-okcommand</i> option.
+<p>
+The list returned by the <code><a name="get method">get</a></code>
+method has the form {tag value tag value ...}. This form can be used to
+set the contents of an array using <code>array set</code>, providing a
+very simple way to access multiple responses.
+<p>
+It is also possible to have queries that are mediated by some other
+widget.  For example,
+<tcl><pre>
+::tycho::Query .bb -entrywidth 70
+.bb mediated color {Color:} red {::tycho::querycolor {Choose color}}
+.bb mediated font {Font:} fixed ::tycho::queryfont
+::tycho::post [::tycho::Dialog::wait .bb]
+</pre></tcl>
+<p>
+Here, the query takes the form of a pushbutton.
+Pushing this button invokes another widget (in this case the
+<code>ColorBrowser</code> or
+<code>FontBrowser</code>), which mediates the selection of a value.
+<p>
+The <i><a name="queries option">-queries option</a></i> specifies the initial
+list of entry boxes that will appear in the window, and can be used
+to create an entire dialog all at once.
+The value of this option should be a list of queries, where each
+query is a list beginning with a type keyword.
+This keyword is actually a method name for the <code>Query</code>
+class.  Here is a summary of the arguments associated with each
+method:
+<menu>
+<li> line tag label default
+<li> lines tag label default height
+<li> radio tag label possibilities default
+<li> mediated tag label default command
+</menu>
+In addition, all four can accept any number of additional arguments.
+These arguments are passed to the widget that implements the query
+(a Tk entry, a Tycho Edit, a set of Tk radio buttons, or a single Tk
+button, respectively).  These additional arguments can be used to
+control the appearance of the query.
+<p>
+The arguments above are explained below:
+<menu>
+<li> tag: a string that uniquely
+     identifies the query. No two queries in the same dialog box
+     can have the same tag.
+<li> label: a string that is inserted in the display to the left
+     of the query.
+<li> default: the initial value of the query.
+<li> height: the number of lines in a multi-line text query.
+     An <code>Edit</code> widget is used, providing
+     an emacs-like text editor.
+<li> possibilities: a list of button names.  These are the labels
+     that appear on each of the radio buttons.
+<li> command: a command to invoke for a mediated query.  Before
+     invoking this command, the current (default) value of the
+     query will be appended to the command, separated by a space.
+     The command should return the new value of the query.
+</menu>
+For example,
+<tcl><pre>
+::tycho::Query .z &#92
+    -queries { &#92
+        {line first {First query:} {Default string}} &#92
+        {lines second {Second query:} {Another default} 4}  &#92
+        {radio third {Third query:} {A B C D} A}  &#92
+        {mediated fourth {Fourth entry:} red {::tycho::querycolor Choose}}  &#92
+     } &#92
     -okcommand {::tycho::inform "Result of a get: [.z get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
 .z centerOnScreen
 </pre></tcl>
-If you click OK, you see the result of the
-<a name="get method"><em>get</em> method</a> for this widget.
-The get method returns a list of two-element lists.  The first element
-of each list is a tag, and the second element is the value in the
-corresponding entry box (which will be either the default or a new
-value entered by the user.  Note that the order in which entries
-are returned is arbitrary.
 <p>
-Alternatively, entry boxes can be added after the EntryQuery object
-is created using the
-<a name="addQuery method">addQuery method</a>, as detailed above.
-The removeQuery method
-takes a tag as an argument and simply removes the corresponding query.
-Click again on the above example to create the EntryQuery, if you dismissed
-it.  Then try this example:
-<tcl><pre>
-.z addQuery third {Third entry:} {Yet another default} 4
-</pre></tcl>
-Notice that now the query has four lines and that the OK button
-is no longer triggered by &lt;Return&gt;.  It can now be triggered by
-&lt;Meta-Return&gt;.  This is because in a multi-line entry box, &lt;Return&gt;
-moves the insertion cursor to a new line.
-The <a name="removeQuery">removeQuery method</a>
+The <code><a name="remove">remove</a></code> method
 takes a tag as an argument and simply removes the corresponding query.
 <tcl><pre>
-.z removeQuery first
+.z remove first
 </pre></tcl>
-The get method may also specify a particular tag.
+<p>
+The <code>get</code> method may also specify a particular tag.
 <tcl><pre>
 ::tycho::inform [.z get second]
 </pre></tcl>
+<p>
 The <a name="clear method">clear method</a>
 clears all defaults (or a single default, if
 a tag argument is given).
 <tcl><pre>
 .z clear
 </pre></tcl>
-The
-<a name="insert method">insert method</a>
+<p>
+The <a name="insert method">insert method</a>
 inserts a string into the specified entry.
 <tcl><pre>
-.z insert third {An inserted string. }
+.z insert second {An inserted string. }
 </pre></tcl>
+<p>
 You may delete this window by clicking on the OK button.
 <p>
-The class is derived from <a href="dialogwindow.html">DialogWindow</a>,
+The class is derived from <a href="dialogwindow.html">Dialog</a>,
 so it has the
 options -text, -bitmap, and -title, which control the text
 of the query, a bitmap left of the query, and a window manager title.
 For example,
 <tcl><pre>
-::tycho::EntryQuery .aa &#92
+::tycho::Query .aa &#92
     -bitmap questhead &#92
     -text {Enter modified values, then click OK} &#92
-    -queries {{first {First entry:} {Default string}} &#92
-        {second {Second entry:} {Another default}}}  &#92
-    -entrywidth 20 &#92
-    -title "EntryQuery Widget" &#92
+    -queries {{line first {First entry:} {Default string}} &#92
+        {line second {Second entry:} {Another default}}}  &#92
+    -title "Query Widget" &#92
     -okcommand {::tycho::inform "Result of a get: [.aa get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
 .aa centerOnScreen
 </pre></tcl>
+<p>
 The order of the -bitmap and -text options relative to the -queries
 option is important.  In most circumstances, you will want them first.
 <p>
-You also have access to the "new" and "newModal" methods of the base class.
+You also have access to the "new" method of the base class.
 For example,
 <tcl><pre>
-::tycho::inform [::tycho::DialogWindow::newModal &#92
-    EntryQuery .z -queries {{n {Enter value} {default}}}]
+::tycho::Dialog::new &#92
+    Query .z -queries {{line n {Enter value} {default}}}
 </pre></tcl>
 <p>
 <h2><a name="FileBrowser class">FileBrowser Class</a></h2>
@@ -242,7 +303,7 @@ for further information about the file browser.
 <p>
 As usual, you can get a modal file browser using newModal.
 <tcl><pre>
-::tycho::inform [::tycho::DialogWindow::newModal FileBrowser .w]
+::tycho::inform [::tycho::Dialog::newModal FileBrowser .w]
 </pre></tcl>
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>

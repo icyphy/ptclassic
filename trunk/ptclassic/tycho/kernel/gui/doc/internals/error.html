@@ -8,7 +8,7 @@
 <p>
 Errors in scripts, procedures, and methods should be handled simply
 by calling the
-<a name="error procedure"><em>error procedure</em></a>,
+<a name="error procedure"><code>error</code> procedure</a>,
 which is built into Tcl.  The single argument is an error message.
 This procedure unravels the stack (so you do not need to return
 after calling it).  If the error occurs in the background (most
@@ -16,7 +16,7 @@ errors are
 <a name="background errors">background errors</a>, since Tycho
 applications are interactive, and most procedures are invoked in
 response to key or mouse bindings), then the error procedure calls
-the <a name="tkerror procedure"><em>tkerror</em> procedure</a>.
+the <a name="tkerror procedure"><code>tkerror</code> procedure</a>.
 This procedure is defined by Tycho
 in the global scope, rather than the "tycho" scope.
 Thus, if I trigger an error as follows:
@@ -35,7 +35,8 @@ generally reflects information about the most recent
 error that generated a stack trace.  Thus, if you invoke the "tkerror"
 script directly the stack trace will be
 fairly meaningless, if there is one at all.  The correct way to
-signal an error within your own scripts by calling error, not tkerror.
+signal an error within your own scripts by calling <code>error</code>, not
+<code>tkerror</code>.
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
