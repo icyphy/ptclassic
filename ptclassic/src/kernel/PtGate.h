@@ -142,7 +142,7 @@ private:
 // A KeptGate is a GateKeeper that contains its own PtGate pointer.
 class KeptGate : public GateKeeper {
 public:
-	KeptGate() : myGate(0), GateKeeper(myGate) {}
+        KeptGate() :  GateKeeper(myGate), myGate(0) {}
 private:
 	PtGate* myGate;
 };
