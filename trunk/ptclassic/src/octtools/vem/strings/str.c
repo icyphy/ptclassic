@@ -91,8 +91,8 @@ register char *a, *b;
 
     for ( /* nothing */;
 	 ((*a | *b) &&
-	  !(value = ((isupper(*a) ? *a - 'A' + 'a' : *a) -
-		     (isupper(*b) ? *b - 'A' + 'a' : *b))));
+	  !(value = ((isupper((int)*a) ? *a - 'A' + 'a' : *a) -
+		     (isupper((int)*b) ? *b - 'A' + 'a' : *b))));
 	 a++, b++)
       /* Empty Body */;
 
@@ -113,7 +113,7 @@ char *a;
     if (a == (char *) 0) return a;
 
     for (i = a;  (*i != '\0');  i++) {
-	if (isupper(*i)) {
+	if (isupper((int)*i)) {
 	    *i = tolower(*i);
 	}
     }
@@ -133,7 +133,7 @@ char *a;
     if (a == (char *) 0) return a;
 
     for (i = a;  (*i != '\0');  i++) {
-	if (islower(*i)) {
+	if (islower((int)*i)) {
 	    *i = toupper(*i);
 	}
     }

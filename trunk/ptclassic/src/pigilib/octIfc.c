@@ -687,13 +687,13 @@ octObject *propPtr;
 	if (p->type != OCT_STRING) return;
 	s = p->value.string;
 	/* skip initial whitespace */
-	while (*s && isspace(*s)) s++;
+	while (*s && isspace((int)*s)) s++;
 	/* return if this is not a number */
-	if (*s == 0 || !isdigit(*s)) return;
+	if (*s == 0 || !isdigit((int)*s)) return;
 	/* skip digits */
-	while (*s && isdigit(*s)) s++;
+	while (*s && isdigit((int)*s)) s++;
 	/* skip trailing whitespace */
-	while (*s && isspace(*s)) s++;
+	while (*s && isspace((int)*s)) s++;
 	/* if not at end-of-string, not a number */
 	if (*s != 0) return;
 	/* OK, convert to a number */

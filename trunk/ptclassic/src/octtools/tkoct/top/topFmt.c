@@ -167,11 +167,11 @@ _topFmtParse( char *fmt, TOPFmtInfo *pInfo) {
 	pInfo->Flags |= TOPFmtF_TotSig;
 	++fmt;
     }
-    if ( isdigit(*fmt) ) {
+    if ( isdigit((int)*fmt) ) {
 	pInfo->Flags |= TOPFmtF_TotDigs;
 	for (; ; totDigs *= 10) {
 	    totDigs += (*(fmt++) & 0377) - '0';
-	    if ( !isdigit(*fmt) )
+	    if ( !isdigit((int)*fmt) )
 		break;
 	}
     }
@@ -184,18 +184,18 @@ _topFmtParse( char *fmt, TOPFmtInfo *pInfo) {
 	    pInfo->Flags |= TOPFmtF_FracSig;
 	    ++fmt;
 	}
-        if ( isdigit(*fmt) ) {
+        if ( isdigit((int)*fmt) ) {
 	    pInfo->Flags |= TOPFmtF_FracDigs;
 	    for ( ; ; fracDigs *= 10) {
 	        fracDigs += (*(fmt++) & 0377) - '0';
-		if ( !isdigit(*fmt) )
+		if ( !isdigit((int)*fmt) )
 		    break;
 	    }
 	}
     }
     pInfo->fracDigs = fracDigs;
 
-    if ( ! isalpha(*fmt) )
+    if ( ! isalpha((int)*fmt) )
 	return TOP_FALSE;
     pInfo->typeFmt = fmt;
     pInfo->CvtType = *(fmt++) & 0377;
@@ -560,7 +560,7 @@ topFmtChangeScale( char *newFmt, char *fmt, char newScale) {
 	strcpy( newFmt, "ErrorPreParsed");
 	return TOP_FALSE;
     }
-    if ( newScale != '-' && !isalpha(newScale) ) {
+    if ( newScale != '-' && !isalpha((int)newScale) ) {
 	strcpy( newFmt, "ErrorBadScale");
 	return TOP_FALSE;
     }
@@ -614,7 +614,7 @@ topFmtChangeType( char *newFmt, char *fmt, char newType) {
 	strcpy( newFmt, "ErrorPreParsed");
 	return TOP_FALSE;
     }
-    if ( !isalpha(newType) ) {
+    if ( !isalpha((int)newType) ) {
 	strcpy( newFmt, "ErrorBadType");
 	return TOP_FALSE;
     }
@@ -698,15 +698,15 @@ _topPrsDblCmd( ClientData cld, Tcl_Interp *ip, int aC, char **aV) {
     }
 
     Tcl_ResetResult( ip);
-    while ( isspace(*dblStr) )
+    while ( isspace((int)*dblStr) )
 	++dblStr;
-    for ( last = dblStr + strlen(dblStr)-1; last > dblStr && isspace(*last);
+    for ( last = dblStr + strlen(dblStr)-1; last > dblStr && isspace((int)*last);
       last--)
 	;
     last[1] = '\0';
-    if ( ! isalpha(*last) ) {
+    if ( ! isalpha((int)*last) ) {
 	s = ip->result;
-	for ( ; *dblStr != '\0' && !isspace(*dblStr); s++, dblStr++) {
+	for ( ; *dblStr != '\0' && !isspace((int)*dblStr); s++, dblStr++) {
 	    *s = *dblStr;
 	}
 	*s = '\0';

@@ -412,7 +412,7 @@ Fhelp()
     IOhome();
     IOputs("Key  Command         Action\n");
     for (cTabPtr = commandTable; cTabPtr->binding != '\0'; cTabPtr++) {
-	if (iscntrl(cTabPtr->binding)) {
+	if (iscntrl((int)cTabPtr->binding)) {
 	    IOputchar('^');
 	    IOputchar(0100 ^ cTabPtr->binding);
 	} else {
@@ -526,11 +526,11 @@ char *stopList;
 		cPtr--;
 	    }
 	} else if (ch == wordEraseChar) {
-	    while (cPtr > start && isspace(*cPtr)) {
+	    while (cPtr > start && isspace((int)*cPtr)) {
 		IOputs("\b \b");
 		cPtr--;
 	    }
-	    while (cPtr > start && !isspace(*cPtr)) {
+	    while (cPtr > start && !isspace((int)*cPtr)) {
 		IOputs("\b \b");
 		cPtr--;
 	    }
@@ -561,7 +561,7 @@ strUpcase(strPtr)
 char *strPtr;
 {
     while (*strPtr != '\0') {
-	if (islower(*strPtr)) *strPtr = toupper(*strPtr);
+	if (islower((int)*strPtr)) *strPtr = toupper((int)*strPtr);
 	if (*strPtr == '-') *strPtr = '_';
 	strPtr++;
     }
