@@ -52,7 +52,7 @@
 
 whatToBuild:	all
 
-.SUFFIXES:	.o .cc .h .pl .chdl .is
+.SUFFIXES:	.o .cc .h .htm .pl .chdl .is
 
 # Include rules for compiling C and C++ code, building libraries, etc.
 include $(ROOT)/mk/compile.mk
@@ -127,6 +127,11 @@ $(PEPP_IN_OBJ):
 
 .pl.h: $(PTLANG_IN_OBJ)
 	cd $(VPATH); $(PTLANG) $< 
+	@$(STARDOCRULE)
+
+
+.pl.htm: $(PTLANG_IN_OBJ)
+	cd $(VPATH); $(PTLANG) -htm $< 
 	@$(STARDOCRULE)
 
 # Rules for running the islang processor

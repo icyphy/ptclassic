@@ -141,8 +141,13 @@ $(LIBDIR)/$(CLIB):	$(CLIB) $(EXP)
 		rm -f $@
 		ln $(CLIB) $(LIBDIR)
 
+STARHTMS = $(PL_SRCS:.pl=.htm)
+starhtms: $(STARHTMS)
+
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
+sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template \
+			 $(STARHTMS)
+
 CRUD=*.o *.so *.sl core *~ *.bak ,* LOG* $(KRUFT) 
 clean:
 	rm -f $(CRUD)
