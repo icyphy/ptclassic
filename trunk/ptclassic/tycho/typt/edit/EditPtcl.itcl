@@ -332,7 +332,7 @@ body ::tycho::EditPtcl::getStarInfoList {} {
 body ::tycho::EditPtcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO typt edit doc usersGuides EditPtclHelp.html]
+        [file join $TYCHO typt edit doc usersGuides EditPtclHelp.html] html
 }
 
 #####################################################################

@@ -106,7 +106,7 @@ body ::tycho::EditPalette::constructor {args} {
 body ::tycho::EditPalette::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO typt edit doc usersGuides EditPaletteHelp.html]
+        [file join $TYCHO typt edit doc usersGuides EditPaletteHelp.html] html
 }
 
 ####################################################################

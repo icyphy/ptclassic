@@ -298,7 +298,7 @@ body ::tycho::BuilderDialog::_initializeMenubar {menubar} {
     $menubar command testinghelp test \
 	    -label {Testing Help} -underline 0 \
 	    -command "::tycho::File::openContext \
-            [file join $TYCHO doc coding testing.html]"
+            [file join $TYCHO doc coding testing.html] html"
 
     $menubar separator testsep1 test
 

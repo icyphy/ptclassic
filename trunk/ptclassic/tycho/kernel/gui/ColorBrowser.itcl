@@ -173,7 +173,8 @@ body ::tycho::ColorBrowser::constructor {args} {
 body ::tycho::ColorBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel gui doc usersGuides ColorBrowserHelp.html]
+	    [file join $TYCHO kernel gui doc usersGuides \
+	    ColorBrowserHelp.html] html
 }
 
     ##################################################################

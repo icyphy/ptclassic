@@ -444,7 +444,7 @@ body ::tycho::Exec::addHistory {line} {
 body ::tycho::Exec::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel gui doc usersGuides ExecHelp.html]
+	    [file join $TYCHO kernel gui doc usersGuides ExecHelp.html] html
 }
 
 

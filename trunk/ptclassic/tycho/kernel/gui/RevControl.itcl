@@ -524,7 +524,8 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
 body ::tycho::RevControl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-            [file join $TYCHO kernel gui doc usersGuides RevControlHelp.html]
+            [file join $TYCHO kernel gui doc usersGuides \
+	    RevControlHelp.html] html
 }
 
 ###################################################################
