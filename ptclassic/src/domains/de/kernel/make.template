@@ -1,4 +1,4 @@
-# Makefile for SDF image particles
+# Makefile for DE domain support
 # Version identification:
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -34,30 +34,31 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT = ../../../../..
+ROOT = ../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/sdf/image/kernel
+VPATH = $(ROOT)/src/domains/de/kernel
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# SDF kernel
-SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
+INCL = -I$(KERNDIR)
 
-INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
+HDRS= DEPortHole.h DEScheduler.h DEStar.h \
+ DEWormhole.h DERepeatStar.h EventQueue.h DETarget.h \
+ CalendarQueue.h CQEventQueue.h CQScheduler.h \
+ NetworkCell.h SeqATMCell.h BaseImage.h GrayImage.h \
+ DCTImage.h MVImage.h
 
-HDRS = BaseImage.h DCTImage.h GrayImage.h MVImage.h
-
-SRCS = $(HDRS:.h=.cc)
+SRCS = $(HDRS:.h=.cc) DEDomain.cc
 
 #Library name
-LIB=libImage.$(LIBSUFFIX)
+LIB=libde.$(LIBSUFFIX)
 
 # Objects:
 OBJS = $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all: 	makefile $(LIB)
 
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIB)
