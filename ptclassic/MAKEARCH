@@ -93,7 +93,7 @@ end
 cd ..
 
 cd utils
-foreach x (libgslider ptplay rman-2.4 tkman-1.7.3)
+foreach x (libcephes libgslider ptplay rman-2.4 tkman-1.7.3)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/utils/$x makefile
