@@ -26,10 +26,14 @@ static char SccsId[]="$Id$";
  */
 #include "port.h"
 #include "utility.h"
+#include "ansi.h"
 #include "fang.h"
 #include "fa_internal.h"
 
 /*LINTLIBRARY*/
+
+void fa_grow_xy
+	ARGS((fa_geometry *geo, int amount, int direction, fa_geometry *outgeo));
 
 void fa_frame(geo, grow, shrink, outgeo)
 fa_geometry *geo;
