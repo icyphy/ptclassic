@@ -132,9 +132,9 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "${DISPLAY-}" ]; then
-    echo "$prg: Your DISPLAY environment variable must be set or use the"
-    echo "      -display option"
-    exit 1
+    echo "$prg: Setting DISPLAY to localhost:0" 
+    DISPLAY=localhost:0
+    export DISPLAY
 fi
 
 # Try and do some smart error recovery if the pigiRpc binary can't be found.
@@ -217,6 +217,8 @@ elif [ -x "/usr/bin/X11/$1" ]; then
     append PATH /usr/bin/X11
 elif [ -x "/usr/openwin/bin/$1" ]; then
     append PATH /usr/openwin/bin
+elif [ -x "/usr/X11R6.4/bin/$1" ]; then
+    append PATH /usr/X11R6.4/bin
 else
     echo "$prg: warning: '$1' not found."
 fi
