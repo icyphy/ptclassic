@@ -371,6 +371,13 @@ body ::tycho::EditSearch::find {{start {}}} {
         set firstind [lindex $result 0]
         set numchars [lindex $result 1]
         if {$firstind != {}} {
+            # First, do the sel tag so that when the focus is in the 
+            # window we are searching, the selection is highlighted.
+            $tw selectRange $firstind "$firstind + $numchars chars"
+
+            # Then, do the currmatch tag so that we can see the results
+            # in the window we are searching while the focus is 
+            # in the EditSearch window. 
             $text see $firstind
             $text tag add currmatch $firstind "$firstind + $numchars chars"
             $text mark set insert $firstind
