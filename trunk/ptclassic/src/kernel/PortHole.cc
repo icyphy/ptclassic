@@ -621,7 +621,7 @@ void PortHole :: getParticle()
 
                 // Put current Particle back into Plasma  to be
 		// recycled back to some OutSDFPort
-		myPlasma->put(*p);
+		p->die();
  
 		// Get another Particle from the Geodesic
         	*p = myGeodesic->get();
