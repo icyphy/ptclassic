@@ -162,7 +162,7 @@ DEScheduler :: run (Galaxy& g) {
 		return FALSE;
 	}
 
-	while (eventQ.length() > 0 && !haltRequested()) {
+	while (eventQ.length() > 0) {
 
 		int bFlag = FALSE;  // flag = TRUE when the terminal is on the
 		   		    // boundary of a wormhole of DE domain.
@@ -276,7 +276,9 @@ success = ((InDEPort*) tl)->getFromQueue(ee->p);
 		} // end of inside while
 
  		// fire the star.
- L1 :		if (!bFlag) s->fire();
+ L1 :		if (!bFlag) {
+	 		if (!s->fire()) return FALSE;
+		}
 
 	} // end of while
 

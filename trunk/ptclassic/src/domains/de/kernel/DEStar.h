@@ -48,7 +48,7 @@ public:
 	void prepareForScheduling();
 
 	// define firing
-	void fire();
+	int fire();
 
 	// send output events to the global event queue.
 	void sendOutput();
