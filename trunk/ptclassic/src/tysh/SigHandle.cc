@@ -29,9 +29,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Version identification:
 $Id$
 
-Author: Joel R. King
+Authors: Joel R. King
 
 Defines the signal handlers for Tycho.
+Some refinement by Brian Evans.
 
 *****************************************************************************/
 
@@ -43,35 +44,46 @@ Defines the signal handlers for Tycho.
 #include <string.h>
 #include <unistd.h>		
 #include "compat.h"
+#include "ptarch.h"
 #include "tcl.h"
-#include "StringList.h"
 #include "SigHandle.h"
 
-/****************************************************************************/
+// Maximum path name length in characters
+#define MAX_PATH_LENGTH  512
 
-extern Tcl_Interp *ptkInterp; /* Used so we can call emergencySave. */
-extern "C" char **environ;/* An array of pointers to strings containing the */
-                       /* environmental variables. This is needed by the    */
-                       /* execle() function, as an argument to setup the    */
-                       /* environment for the process that its launching.   */
+// Sub-directory of $PTOLEMY that contains the itcl binary plus binary
+// file name, e.g., "bin.sol2/itkwish"
+// ANSI C will concatenate adjacent strings
+#define SH_ITCLTK_PROG ("/bin." PTARCH "/itkwish")
 
-/****************************************************************************/
+// Sub-directory of $PTOLEMY that contains itcl file to source plus file name
+#define SH_ITCLTK_FILE "/tycho/kernel/TyCoreRelease.itcl"
 
-/**** This function calls the method emergencySave, which attempts to do ****/
-/**** an emergency save of all active files with names. It is a method   ****/
-/**** of the class TyConsole and we invoke it for the object             ****/
-/**** .mainConsole because we know this object is alive as long as the   ****/
-/**** program is.                                                        ****/
+// Used so we can call the Tcl procedure emergencySave
+extern Tcl_Interp *ptkInterp;
+
+// An array of pointers to strings containing the environment variables
+// Needed by the execle() function to setup the process it is launching
+extern "C" char **environ;
+
+
+// DoTychoSave
+//
+// This function calls the Tcl method emergencySave, which attempts to do 
+// an emergency save of all active files with names. It is a method of the
+// class TyConsole and we invoke it for the object .mainConsole because we
+// know this object is alive as long as the program is.
 
 static void DoTychoSave(void)
 {
     Tcl_VarEval(ptkInterp, ".mainConsole emergencySave", NULL);
 }    
 
-/****************************************************************************/
 
-/***** This function sets the signal handler function for each of the   *****/
-/***** signals that we want to intercept.                               *****/
+// setHandlers
+//
+// This function sets the signal handler function for each of the
+// signals that we want to intercept.
 
 int setHandlers(SIG_PF sigHandler)
 {
@@ -113,12 +125,13 @@ int setHandlers(SIG_PF sigHandler)
     return 0;
 }
 
-/****************************************************************************/
 
-/***** This function defines the way that a signal that is received     *****/
-/***** will be handled when PT_DEVELOP is not defined, or 0. The action *****/
-/***** of this function is to issue an error message letting the user   *****/
-/***** know that a fatal error occured, then exit.                      *****/
+// signalHandlerRelease
+//
+// This function defines the way that a signal that is received will be
+// handled when PT_DEVELOP is not defined, or 0.  The action of this
+// function is to issue an error message letting the user know that a
+// fatal error occured, then exit.
 
 void signalHandlerRelease(void)
 {
@@ -130,43 +143,52 @@ void signalHandlerRelease(void)
 	DoTychoSave();
     }
 
-    // Define path of itcl_wish 
-    const char *ptolemy = getenv("PTOLEMY");
-    const char *arch = getenv("PTARCH");
-    if ( arch == 0 ) arch = getenv("ARCH");
-    StringList path = ptolemy;
-    path << "/bin." << arch << "/itcl_wish";
-    StringList filename = ptolemy;
-    filename << "/tycho/kernel/TyCoreRelease.itcl";
+    // Use execle to execute the Unix command "$path $file -name Tycho" where
+    //   path = $PTOLEMY/bin.$PTARCH/itkwish
+    //   file = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl
+    // Cannot use dynamic memory
+    static char path[MAX_PATH_LENGTH], file[MAX_PATH_LENGTH];
 
-    // Convert filename to const char* because execle takes a variable number
-    // of arguments and cannot cast a StringList
-    const char *file = filename; 
+    // 1. Find the value of the PTOLEMY environment variable
+    const char *ptolemy = getenv("PTOLEMY");
+    if ( ptolemy == 0 ) ptolemy = "~ptolemy";
+
+    // 2. Make sure that path and file names will not overflow static buffer
+    unsigned int pstrlen = strlen(ptolemy);
+    if ( ( sizeof(SH_ITCLTK_PROG) + pstrlen >= MAX_PATH_LENGTH ) ||
+         ( sizeof(SH_ITCLTK_FILE) + pstrlen >= MAX_PATH_LENGTH ) ) {
+      abortHandling();
+    }
+
+    // 3. Define the path of itcl_wish and itcl file name to source
+    strcpy(path, ptolemy);
+    strcat(path, SH_ITCLTK_PROG);
+    strcpy(file, ptolemy);
+    strcat(file, SH_ITCLTK_FILE);
 
     switch(fork()) 
     {
-        case -1: // fork() return value for error. 
+        case -1:		// fork() return value for error. 
 	    abortHandling();
 
-	case 0: // fork() return value for child. 
-	    sleep(1); // Allow core file to be generated.   
+	case 0:			// fork() return value for child. 
+	    sleep(1);		// Allow time for core file to be generated.   
 	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
 		   environ);
-	    abortHandling(); // If you make it this far something went wrong.
+	    abortHandling();	// If you make it this far something went wrong
     }
-    /*************************** In parent ******************************/
 
-    exit(0); // Kill off parent.
-
+    // We are now in the parent process.  Kill off parent.
+    exit(0);
 }
 
-/****************************************************************************/
 
-/***** This function defines the way that a signal that is received     *****/
-/***** will be handled when PT_DEVELOP is defined to be non-zero. The   *****/
-/***** action of this function is to inform the user that a fatal error *****/
-/***** occured, then call the debugger, if requested, to view the core  *****/
-/***** file.                                                            *****/
+// signalHandlerDebug
+//
+// This function defines the way that a signal that is received will
+// be handled when PT_DEVELOP is defined to be non-zero.  The action
+// of this function is to inform the user that a fatal error occured,
+// then call the debugger, if requested, to view the core file.
 
 void signalHandlerDebug(int signo)
 {
@@ -178,55 +200,64 @@ void signalHandlerDebug(int signo)
 	DoTychoSave();
     }
 
-    // Define path of itcl_wish 
-    const char *ptolemy = getenv("PTOLEMY");
-    const char *arch = getenv("PTARCH");
-    if ( arch == 0 ) arch = getenv("ARCH");
-    StringList path = ptolemy;
-    path << "/bin." << arch << "/itcl_wish";
-    StringList filename = ptolemy;
-    filename << "/tycho/kernel/TyCoreDebug.itcl";
+    // Use execle to execute the Unix command "$path $file -name Tycho" where
+    //   path = $PTOLEMY/bin.$PTARCH/itkwish
+    //   file = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl
+    // Cannot use dynamic memory
+    static char path[MAX_PATH_LENGTH], file[MAX_PATH_LENGTH];
 
-    // Convert filename to const char* because execle takes a variable number
-    // of arguments and cannot cast a StringList
-    const char *file = filename; 
+    // 1. Find the value of the PTOLEMY environment variable
+    const char *ptolemy = getenv("PTOLEMY");
+    if ( ptolemy == 0 ) ptolemy = "~ptolemy";
+
+    // 2. Make sure that path and file names will not overflow static buffer
+    unsigned int pstrlen = strlen(ptolemy);
+    if ( ( sizeof(SH_ITCLTK_PROG) + pstrlen >= MAX_PATH_LENGTH ) ||
+         ( sizeof(SH_ITCLTK_FILE) + pstrlen >= MAX_PATH_LENGTH ) ) {
+      abortHandling();
+    }
+
+    // 3. Define the path of itcl_wish and itcl file name to source
+    strcpy(path, ptolemy);
+    strcat(path, SH_ITCLTK_PROG);
+    strcpy(file, ptolemy);
+    strcat(file, SH_ITCLTK_FILE);
 
     switch(fork()) 
     {
-        case -1: // fork() return value for error. 
+        case -1:		// fork() return value for error. 
 	    abortHandling();
       
-	case 0: // fork() return value for child. 
-	    sleep(1); // Allow core file to be generated.  
+	case 0:			// fork() return value for child. 
+	    sleep(1);		// Allow core file to be generated.  
 	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
 		   environ);
-	    abortHandling(); // If you make it this far something went wrong.
+	    abortHandling();	// If you make it this far something went wrong
     }
 
-    /************************ In parent **********************************/
-
+    // We are now in the parent process
     ptSignal(signo, (SIG_PF) SIG_DFL);
 
-    if (kill(getpid(), signo) != 0)  // Commit suicide in manner that      
-        abortHandling();            // generates core file for child, if  
-                                     // suicide fails abort.               
+    // Commit suicide in manner that generates core file for child,
+    // if suicide fails abort.               
+    if (kill(getpid(), signo) != 0)
+        abortHandling();
 
     // Program should never get to this point. 
-
 }
 
-/****************************************************************************/
 
-/**** This function is called when everything else goes wrong and the    ****/
-/**** program has no choice but to bomb out in an ungraceful manner.     ****/
+// abortHandling
+//
+// This function is called when everything else goes wrong and the
+// program has no choice but to bomb out in an ungraceful manner.
 
 void abortHandling() 
 {
+    static char msg[128] = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
 
-    static char msg[400]="\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
-    write(1, msg, sizeof(msg));  // Used instead of printf,      
-                                 // because it is reentrant.     
+    // Use write instead of printf because it is reentrant.
+    // Send message to the standard output
+    write(1, msg, sizeof(msg));
     exit(1);
-
 }
-
