@@ -38,6 +38,7 @@ VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
 VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
 CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
 ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
+MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
@@ -68,7 +69,8 @@ $(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdfmatrixstars.a \
 $(LIBDIR)/libbdfstars.a $(LIBDIR)/libbdf.a \
 $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
 $(LIBDIR)/libvhdlfstars.a $(LIBDIR)/libvhdlf.a \
-$(LIBDIR)/libvhdlbstars.a $(LIBDIR)/libvhdlb.a
+$(LIBDIR)/libvhdlbstars.a $(LIBDIR)/libvhdlb.a \
+$(LIBDIR)/libmdsdfstars.a $(LIBDIR)/libmdsdf.a
 
 CP_LIBFILES= $(LIBDIR)/libcpstars.a $(LIBDIR)/libcpipstars.a \
 	$(LIBDIR)/libcp.a
@@ -95,7 +97,8 @@ STAR_LIBS=\
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
 -lvhdlfstars -lvhdlf \
--lvhdlbstars -lvhdlb
+-lvhdlbstars -lvhdlb \
+-lmdsdfstars -lmdsdf
 
 # -laudio is for the Infopad stars in the CP domain
 CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
