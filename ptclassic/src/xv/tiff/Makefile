@@ -32,7 +32,7 @@ include $(CONFIG)
 
 DESTDIR=.
 #
-AR=	/bin/ar
+AR=	ar
 #RANLIB=	/usr/bin/ranlib
 NULL=
 
