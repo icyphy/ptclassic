@@ -152,7 +152,7 @@ class ::tycho::TopLevel {
     ####                   public procedures                     ####
 
     # Exit the program
-    public proc exitProgram {} {}
+    public proc exitProgram { {exitWithNoConfirmation 0}} {}
 
     # Return 1 if we are in the process of exiting, 0 otherwise.
     public proc returnExitCon {} {}
@@ -506,8 +506,15 @@ body ::tycho::TopLevel::raiseWindow {} {
 # it will return 0 if the user canceled the exit, and 1 if the exit
 # is in progress.
 #
-body ::tycho::TopLevel::exitProgram {} {
-    if { [::preference get misc confirmOnExit] } {
+# If the optional argument 'exitWithNoConfirmation' is non-zero, then
+# we don't check the preferences, we just exit.  We need this optional
+# argument if we want to call this proc from itclsh, since preferences
+# require tk, so we can't load them in.  Any change to this proc should
+# be verified by running the test suite.
+#
+body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
+    if { $exitWithNoConfirmation != 0 && \
+	    [::preference get misc confirmOnExit] } {
 	set response [::tycho::askuser "OK to exit the program?"]
     } else {
 	set response 1
