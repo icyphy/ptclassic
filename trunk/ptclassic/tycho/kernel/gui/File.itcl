@@ -1295,7 +1295,7 @@ body ::tycho::File::openContext {filename} {
             }
             return $result
         } {
-            return [eval newEditor Displayer Edit -file $filename]
+            return [eval newEditor Displayer Edit -file [list $filename]]
         }
     }
 }
