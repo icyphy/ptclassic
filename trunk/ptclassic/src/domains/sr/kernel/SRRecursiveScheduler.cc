@@ -456,6 +456,7 @@ SRRecursiveScheduler::mincost(
 
     if ( bound < SCCsize[i] ) {
       destroySCCs( SCCs );
+      delete [] SCCsize;
       return INT_MAX;		// Bound cannot possibly be met
     }
 
@@ -539,6 +540,7 @@ SRRecursiveScheduler::mincost(
 
       if ( actual == INT_MAX ) {
 	destroySCCs( SCCs );
+	delete [] SCCsize;
 	return INT_MAX;		// no considered partition could meet this
       }
 
