@@ -137,7 +137,7 @@ class ::tycho::Selector {
 	eval configure $args
 
 	# Create the selection handler
-	::selection handle $slate "$this describe"
+	# ::selection handle $slate "$this describe"
     }
     destructor {}
 
@@ -722,7 +722,7 @@ body ::tycho::Selector::_bind {} {
 #
 body ::tycho::Selector::_clear {} {
     if { $clearprefix == "" } {
-	$slate _select clear
+	$slate _selection clear
     } else {
 	eval $clearprefix
     }
@@ -733,7 +733,7 @@ body ::tycho::Selector::_clear {} {
 #
 body ::tycho::Selector::_deselect {id} {
     if { $deselectprefix == "" } {
-	$slate _select remove $id
+	$slate _selection remove $id
     } else {
 	eval $deselectprefix $id
     }
@@ -756,7 +756,7 @@ body ::tycho::Selector::_detach {} {
 #
 body ::tycho::Selector::_select {id} {
     if { $selectprefix == "" } {
-	$slate _select add $id
+	$slate _selection add $id
     } else {
 	eval $selectprefix $id
     }
