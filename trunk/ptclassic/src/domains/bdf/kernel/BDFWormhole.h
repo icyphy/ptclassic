@@ -64,10 +64,11 @@ protected:
 	// redefine the getStopTime() 
 	double getStopTime();
 
-	// no necessary of sumUp method.
+	// no need of sumUp method.
 
 public:
 	void setup();
+	void begin() { Wormhole::begin(); }
 	void go();
 	void wrapup();
 
@@ -75,10 +76,10 @@ public:
 	BDFWormhole(Galaxy& g,Target* t = 0);
 
 	// Destructor
-	~BDFWormhole() { freeContents();}
+	~BDFWormhole() { freeContents(); }
 
 	// return my scheduler
-	Scheduler* scheduler() const { return myTarget()->scheduler();}
+	Scheduler* scheduler() const { return myTarget()->scheduler(); }
 
 	// print methods
 	StringList printVerbose() const;
@@ -92,7 +93,7 @@ public:
 	double getArrivalTime();
 
 	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE;}
+	int isItWormhole() const { return TRUE; }
 
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
@@ -100,7 +101,7 @@ public:
 	}
 	
 	// state initialize
-	void initState() { gal.initState() ;}
+	void initState() { gal.initState(); }
 };
 
         //////////////////////////////////////////
