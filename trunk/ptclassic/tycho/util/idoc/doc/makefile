@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1998 The Regents of the University of California.
+# @Copyright (c) 1998-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -49,6 +49,7 @@ TCL_SRCS =
 ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	ClassViewerHelp.html \
 	index.html
 
 MISC_FILES = 
