@@ -342,7 +342,7 @@ body ::tycho::Slate::addtag {add mode args} {
 
 	    } elseif { [string match {[0-9]*} $tag] } {
 		# Hey, this is just an item ID
-		$canvas addtag $tag withtag $add
+		$canvas addtag $add withtag $tag
 
 	    } elseif { [string match {_*} $tag] } {
 		# Hey, this is just a picture ID
