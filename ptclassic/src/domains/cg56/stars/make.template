@@ -142,6 +142,8 @@ PL_SRCS= \
  CG56Sqr.pl \
  CG56Sqrt.pl \
  CG56Sub.pl \
+ CG56SubCx.pl \
+ CG56SubInt.pl \
  CG56Table.pl \
  CG56TableInt.pl \
  CG56Test.pl \
