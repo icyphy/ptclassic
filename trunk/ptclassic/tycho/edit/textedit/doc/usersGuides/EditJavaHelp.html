@@ -14,10 +14,10 @@ is also missing a few features C++ has, like multiple inheritance.
 <!-- If you don't know what java is, then you have probably been in solitary
 confinement :-) -->
  <P>
-The <a name="EditJava class">EditJava class</a> is derived from the
-<a href="EditCppHelp.html">EditCpp class</a>, and
+The <a name="EditJava class">EditJava Itcl class</a> is derived from the
+<a href="EditCppHelp.html">EditCpp Itcl class</a>, and
 therefore inherits all of its features, such as invoking <CODE>make</CODE>.
-The EditJava class colors certain Java constructs, as with comments.
+The EditJava class colors certain Java constructs, such as comments.
  <P>
 For more Java resources, see the Tycho
 <A HREF="../../../../java/doc/index.html">Java</A> page.
@@ -34,18 +34,18 @@ user level details below.
 The EditJava editor supports two primary methods of evaluating Java files:
 <MENU>
 <li>If the <code>.java</code> file contains a <code>main()</code>, then we
-call <CODE>java -cs</CODE> <i>ClassName</i>, which will check the
+call <CODE>java -cs <i>ClassName</i></CODE>, which will check the
 modification times of the <code>.java</code> and <code>.class</code>
 file and compile if necessary. Then the class file is run and we are
 done.
 
 <li>If the <code>.java</code> file does not contain a
-<code>main()</code>, then we call <code>javac</code> <i>ClassName</i>,
+<code>main()</code>, then we call <code>javac <i>ClassName</i></CODE>,
 which will compile the file.
 
 <p>After the compilation successfully completes, we check if there is a
-<i>ClassName</i><code>.html</code> file present, then we run
-<code>appletViewer</code> <i>ClassName.html</i>. It would be nice if we
+<CODE><i>ClassName</i>.html</code> file present, then we run
+<code>appletViewer <i>ClassName.html</i></CODE>. It would be nice if we
 checked to see if the <code>.java</code> file extends
 <code>Applet</code>, but that is more work.
 </MENU>
@@ -57,22 +57,16 @@ Java tools such as <code>javac</code>, <code>java</code>, and
 take a <code>-classpath</code> option, <code>appletviewer</code> does
 not.
 
-<p>If <A NAME="useEnvClassPath
-preference"><code>useEnvClassPath</code>preference</A> is true, then
-the <code>CLASSPATH</code> is read from the environment
+<p>If
+<A NAME="useEnvClassPath preference"><code>useEnvClassPath</code> preference</A> is true, then
+the <code>CLASSPATH</code> is read from the user's senvironment with
 <code>$env(CLASSPATH)</code> and passed to <code>java</code> or
 <code>javac</code>.  (The <CODE>useEnvClassPath</CODE> preferences and the other Java editor preferences are set in the <CODE>Java</CODE> preference).
 
 <p>If the <code>useEnvClassPath</code> preference is false, then Tycho
 reads the <code>classPath</code> preference and sets the
-<code>CLASSPATH</code> environment variable before calling the java
-tools.  The <code>useEnvClassPath</code> and <code>classpath</code>
-preferences are set in the java preferences.
-
-<P>The Tycho <A NAME="classPath preference"><CODE>classPath</CODE> preference</A>
-is used to set the
-<CODE>CLASSPATH</CODE> environment variable before the various Java
-tools are run.
+<code>CLASSPATH</code> environment variable before calling the Java
+tools.
 
  <P>For more information about <CODE>CLASSPATH</CODE>, see the
 <A HREF="../../../../java/tycho/doc/internals/tcljava.html#CLASSPATH">TclJava</A>
@@ -102,7 +96,7 @@ this file and then invoke <CODE>Evaluate</CODE> with either
 then an 
 <A
 HREF="../../../../kernel/doc/codeDoc/Exec.html"><CODE>Exec</CODE></A>
-widget will come up and evaluate and run the java file with
+widget will come up and evaluate and run the Java file with
 <CODE>java -cs -v</CODE>
 <P> Note that evaluating a Java file will create a <CODE>.class</CODE>
 file in the directory where the <CODE>.java</CODE> file resides.  If
@@ -121,7 +115,7 @@ Note that the Exec windows that come up when you evaluate a Java file are
 persistent between evaluations.  This allows you to modify the command line
 once and reuse your command line during the next evaluation.
 
-<H2>'Special' Menu choices</H2>
+<H2><CODE>Special</CODE> Menu choices</H2>
 The <A NAME="Java Editor Body Template"><CODE>Body Template</CODE>
 command</A> in the <CODE>Special</CODE>
 menu places a body template at the current point in the buffer.
@@ -133,7 +127,7 @@ into the editor and does some substitutions described
 <A HREF="#java file template substitution">below</A>.
  <P>
 The <A NAME="Java Editor Generate doc"><CODE>Generate doc</CODE> command</A>
-in the "Special" menu asks the user if they would like to save the buffer
+in the <CODE>Special</CODE> menu asks the user if they would like to save the buffer
 and then runs the <CODE>javadoc</CODE> program to produce HTML documentation
 for the current file.
  <P>
@@ -162,7 +156,7 @@ package devel.mystuff;
 If the file is not below <CODE>$TYCHO/java</CODE>, then the
 <CODE>package</CODE> line is commented out.
  <P>
-The <CODE>@author</CODE> java doc tag is updated to use the
+The <CODE>@author</CODE> Java doctag is updated to use the
 <I>userName</I> preference which contains the full name of the user.
 This preference can be updated by mousing on the Help button on the
 upper right of most Tycho windows and then clicking on
@@ -194,13 +188,13 @@ Foo.java Bar.java</CODE>.
 <DD> White space is significant here, there must be a single space
 between the arguments
 
-<DT> <CODE>@see <I>&lt; a href="myfile.html"&gt;My File&lt;/a&gt;</I></CODE>
+<DT> <CODE>@see <I>&lt;a href="myfile.html"&gt;My File&lt;/a&gt;</I></CODE>
 <DD>
 
 <DT> <CODE>@version <I>text</I></CODE>
 <DD> The <CODE>@version</CODE> tag may only be used before a class
 definition.  Call <CODE>javadoc</CODE> with the <CODE>-version</CODE>
-flag to generate an author listing in the html file.
+flag to generate an version listing in the html file.
 
 <DT> <CODE>@author <I>text</I></CODE>
 <DD> The <CODE>@author</CODE> tag may only be used before a class
