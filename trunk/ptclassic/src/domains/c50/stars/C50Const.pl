@@ -23,8 +23,8 @@ output buffer is initialized with the specified DC value.
 	state {
 		name {level}
 		type {FIX}
-		default {0.001}
-		descriptor { Constant value to go to the output. }
+		default {"0.0"}
+		descriptor {Constant value to be output}
 	}
 	codeblock (org) {
 	.ds	$addr(output)
@@ -37,7 +37,7 @@ output buffer is initialized with the specified DC value.
 	}
 	initCode {
 		addCode(org);
-		for (int i=0 ; i<output.bufSize() ; i++) addCode(dc);
+		for (int i = 0; i < output.bufSize(); i++) addCode(dc);
 		addCode(orgp);
 	}
 	execTime {
