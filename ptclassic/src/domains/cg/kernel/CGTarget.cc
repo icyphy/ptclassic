@@ -69,7 +69,7 @@ int CGTarget :: codeGenInit() { return TRUE; }
 // behave the same way.
 
 void CGTarget::setup() {
-	noSchedule = 0;
+	//noSchedule = 0;
 	myCode.initialize();
 	writeDirectoryName(destDirectory);
 	if (!scheduler()) {
