@@ -83,6 +83,8 @@ provisions.
   
   initCode {
     CGCAudioBase::initCode();
+    /* Hack: variable for the sync codeblock below */
+    addDeclaration(syncCounter);
     /* Declare buffer type and size depending on the encoding */
     if (strcasecmp(encodingType, "linear16") == 0){
       addDeclaration(declarations("short", int(blockSize)/2));
