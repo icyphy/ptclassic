@@ -58,12 +58,12 @@ defstar {
 			(const char*) title,
 			(const char*) saveFile);
 		index = 0;
-		input.reset();
 	}
 
 	go {
+		MPHIter nexti(input);
 		for (int i = 1; i <= input.numberPorts(); i++) {
-			graph.addPoint(i, float(index), float(input()%0));
+			graph.addPoint(i, float(index), float((*nexti++)%0));
 		}
 		index++;
 	}

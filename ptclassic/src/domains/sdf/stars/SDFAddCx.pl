@@ -29,11 +29,12 @@ defstar {
 		name {output}
 		type {complex}
 	}
-	start { input.reset();}
 	go {
+		MPHIter nexti(input);
+		PortHole *p;
 		Complex sum = 0.0;
-		for(int i=input.numberPorts(); i>0; i--)
-			sum += Complex(input()%0);
+		while ((p = nexti++) != 0)
+			sum += Complex((*p)%0);
 		output%0 << sum;
 	}
 }

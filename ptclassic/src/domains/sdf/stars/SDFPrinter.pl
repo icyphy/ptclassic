@@ -40,12 +40,13 @@ defstar {
 	}
 	start {
 		output.fileName(fileName);
-		input.reset();
 	}
 
 	go {
-		for(int i=input.numberPorts(); i>0; i--)
-		 	output << (input()%0).print() << "\t";
+		MPHIter nexti(input);
+		PortHole* p;
+		while ((p = nexti++) != 0)
+		 	output << ((*p)%0).print() << "\t";
 		output << "\n";
 	}
 }

@@ -29,11 +29,12 @@ defstar {
 		name {output}
 		type {float}
 	}
-	start { input.reset();}
 	go {
+		MPHIter nexti(input);
+		PortHole *p;
 		double product = 1.0;
-		for(int i=input.numberPorts(); i>0; i--)
-			product *= float(input()%0);
+		while ((p = nexti++) != 0)
+			product *= float((*p)%0);
 		output%0 << product;
 	}
 }
