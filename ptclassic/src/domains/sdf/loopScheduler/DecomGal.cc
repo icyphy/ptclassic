@@ -71,7 +71,7 @@ int DecomGal :: simplify() {
 		while ((p = nextP++) != 0) {
 			if (p->isItOutput()) continue;
 			if (p->numTokens() >= 
-				p->numIO() * int(c->repetitions) {
+				p->numIO() * int(c->repetitions)) {
 				// this port has enough delay. Remove it.
 				LOG_DEL; delete p->far();
 				p->disconnect(0);
