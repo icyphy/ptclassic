@@ -1398,7 +1398,6 @@ void genDef ()
 /* extra header code */
 	fprintf (fp, "%s\n", hCode);
 /* The class template */
-	fprintf (fp, "class %s : public %s\n{\n", fullClass, baseClass);
 	fprintf (fp, "class %s : public %s ", fullClass, baseClass);
 	for( i = 1; i < nDerivedFrom; i++ ) {
 	    if (domain &&
