@@ -203,7 +203,8 @@ body ::tycho::EditItcl::evaluate {} {
 	
     # NOTE: Itcl 2.0 and 2.1 can dump core here if here we delete a class that
     # has objects existing as components of another class.
-    if {$itclClasses != {}} {
+    if {$itclClasses != {} && \
+            [preference get itclClassRedefinitionWarning] == 1} {
         if {![safeEval ::tycho::askuser \
                 "Warning: all objects with the following \
                 classes (and derived classes) will be deleted: \n \
