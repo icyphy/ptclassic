@@ -182,12 +182,10 @@ body ::tycho::Displayer::constructor {args} {
 	    -side left \
 	    -fill x
 
-    # reset the text of the dismiss button
-    $itk_component(dismiss) configure -text "DISMISS"
-
     # Undo the binding in the base class, where Return dismisses
     # the window.
-    bind $prefix <Return> {}
+    # FIXME: Commented out for now -- hjr
+    # bind $prefix <Return> {}
 
     eval itk_initialize $args
 
