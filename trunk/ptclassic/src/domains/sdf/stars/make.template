@@ -131,6 +131,7 @@ PL_SRCS= \
  SDFRamp.pl \
  SDFRampFix.pl \
  SDFRampInt.pl \
+ SDFRanConst.pl \
  SDFReadFile.pl \
  SDFReadVar.pl \
  SDFReciprocal.pl \
