@@ -11,21 +11,33 @@ once.  The default value is 0.1 0.2 0.3 0.4.
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
- CG56WaveForm outputs a sequence of data values with period period,
- zero-padding or truncating to period if necessary.  Although the star
- allocates a circular buffer to hold the data values, the buffer is used
- as a linear buffer  for certain values of period and len
- (len = number of values in value).
- The code is divided into 5 cases as follows:
+You can get periodic signals with any period, and can halt a simulation
+at the end of the given waveform.  The following table summarizes the
+capabilities:
 
-               buffer use   buffer length     output
+haltAtEnd   periodic   period    operation
+-----------------------------------------------------------------------
+NO          YES        0         The period is the length of the waveform
+NO          YES        N>0       The period is N
+NO          NO         anything  Output the waveform once, then zeros
+YES         anything   anything  Stop after outputing the waveform once
 
- period=0, len=1     linear         len            impulse
- period=0, len>1     circular       len            aperiodic seq.
- period=1            (not used)     period         DC source
- period<=len         circular       period         periodic, first period values in seq.
- period>len          linear         len            periodic, zero-padded
-	}
+The first line of the table gives the default settings.
+.PP
+This star may be used to read a file by simply setting "value" to
+something of the form "< filename".  The file will be read completely
+and its contents stored in an array.  The size of the array is currently
+limited to 20,000 samples.  To read longer files, use the
+.c ReadFile
+star.  This latter star reads one sample at a time, and hence also
+uses less storage.
+.IE "file read"
+.IE "waveform from file"
+.IE "reading from a file"
+.IE "halting a simulation"
+        }
+
+        ccinclude { "Scheduler.h" }
 
         output {
 		name { output }
@@ -34,14 +46,26 @@ once.  The default value is 0.1 0.2 0.3 0.4.
 	state {
 		name { value }
 		type { fixarray }
-		desc { list of values. }
+                desc { One period of the output waveform. }
 		default { "0.1 0.2 0.3 0.4" }
                 attributes { A_CIRC|A_NONCONSTANT|A_YMEM}
 	}
+        state {
+	        name { haltAtEnd }
+	        type { int }
+	        default { "NO" }
+	        desc { Halt the run at the end of the given data. }
+	}
+        state {
+                name { periodic }
+	        type { int }
+	        default { "YES" }
+	        desc { Output is periodic if "YES" (nonzero). }
+        }
 	state {
 		name { period }
 		type { int }
-		desc { period  }
+                desc {If greater than zero, gives the period of the waveform}
 		default { 0 }
 	}
         state  {
@@ -149,67 +173,75 @@ $label(l28)
         org     p:
         }
 
-        start {
-        firstVal=value[0];
-        valueLen=value.size();
-        if((period>valueLen) || (period==0))
-                value.resize(int(valueLen));
-        else
-                value.resize(int(period));
-        }    
-        initCode {
-        if (period==1) {                // special case, reproduce DC star.       
-                gencode(org);
-                for (int i=0 ; i<output.bufSize() ; i++) gencode(dc);
-                gencode(orgp);
-                   }
-		
-        if (period!=1) {
-                if((period==0 && valueLen>1) || (period!=0 && period<=valueLen)) {
-                        gencode(initDataCirc);
-                }
- 		else {
-                        if(period>valueLen)
-             	              gencode(makeblock);
-             	}
-        }
+	start {
+		firstVal = value[0];
+		valueLen = value.size();
+		if (!(int (haltAtEnd)) &&int (periodic) && period == 0)
+			period = valueLen;
+		if (!(int (haltAtEnd)) &&!(int (periodic)))
+			period = 0;
+		if ((period > valueLen) || (period == 0))
+			value.resize(int (valueLen));
+		else
+			value.resize(int (period));
 	}
-        go { 
-		
-        if(period==1)
-                return;      // special case, output stored at compile time.
-        if(period==0) {
-                if (valueLen==1) 
-                   gencode(impulse);  // output impulse.
-       		else {
-	           X=valueLen-1;
-                   gencode(aperiodic); // output general aperiodic value.
-                }
-	}                
-        if(period<=valueLen && period !=1 && period !=0) {
-                  // output periodic value-- use first period values.
-                X=period-1;
-                gencode(periodperiodicSequence);
-        }
-        if(period>valueLen && period !=1 && period !=0) {
-                 //  output periodic value-- zero padded.
-                X=period-1;
-                gencode(zeroPaddedSequence);
-        }
+	initCode {
+		if (period == 1) {
+			//special case, reproduce DC star.
+				gencode(org);
+			for (int i = 0; i < output.bufSize(); i++)
+				gencode(dc);
+			gencode(orgp);
+		}
+		if (period != 1) {
+			if ((period == 0 && valueLen > 1) ||
+			   (period != 0 && period <= valueLen)) {
+				gencode(initDataCirc);
+			} else {
+				if (period > valueLen)
+					gencode(makeblock);
+			}
+		}
+	}
+	go {
+                if (int(haltAtEnd))
+                        Scheduler::requestHalt();
+		if (period == 1)
+			return;
+		//special case, output stored at compile time.
+			if (period == 0) {
+			if (valueLen == 1)
+				gencode(impulse);
+			//output impulse.
+				else {
+				X = valueLen - 1;
+				gencode(aperiodic);
+				//output general aperiodic value.
+			}
+		}
+		if (period <= valueLen && period != 1 && period != 0) {
+			//output periodic value-- use first period values.
+				X = period - 1;
+			gencode(periodperiodicSequence);
+		}
+		if (period > valueLen && period != 1 && period != 0) {
+			//output periodic value-- zero padded.
+				X = period - 1;
+			gencode(zeroPaddedSequence);
+		}
+	}
 
- 	}
-
-	execTime { 
-            if(int(period)==0)
-                if(int(valueLen)==1)
-	             return 3;
-                else
-	          return 9;
-            if(int(period)==1)
-                return 0;
-	    if(int(period)<=int(valueLen))
-                return 9;
-            return 19;
+	execTime {
+		if (int (period) == 0)
+			if (int (valueLen) == 1)
+				return 3;
+			else
+				return 9;
+		if (int (period) == 1)
+			return 0;
+		if (int (period) <= int (valueLen))
+			return 9;
+		return 19;
 
 	}
 }
