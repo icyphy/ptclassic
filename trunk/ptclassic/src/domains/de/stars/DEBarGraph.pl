@@ -19,7 +19,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	seealso {XMgraph pxgraph Xhistogram }
+	seealso {XMgraph $PTOLEMY/src/pxgraph/pxgraph.htm Xhistogram }
 	inmulti {
 		name { input }
 		type { anytype }
