@@ -145,7 +145,7 @@ HTMLCHEK=/usr/tools/www/htmlchek
 HTMLCHEKOUT=htmlchekout
 htmlchek:
 	rm -f $(HTMLCHEKOUT)*
-	HTMLCHEK=$(HTMLCHEK); \
+	HTMLCHEK=$(HTMLCHEK); export HTMLCHEK; \
 	sh $(HTMLCHEK)/runachek.sh `pwd` $(HTMLCHEKOUT) `pwd` \
 		map=1 netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR
 
