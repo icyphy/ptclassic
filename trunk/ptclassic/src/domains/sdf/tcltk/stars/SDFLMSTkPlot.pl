@@ -6,7 +6,7 @@ defstar {
 Just like the LMS filter, but with an animated Tk display of
 the taps, plus associated controls.
 	}
-	version { @(#)SDFLMSTkPlot.pl	1.1	10/8/93 }
+	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1993 The Regents of the University of California.
@@ -64,59 +64,44 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {"10"}
 		desc {Number of invocations between display updates.}
 	}
-	hinclude { "ptk.h" }
-	ccinclude { "ptkBarGraph.h" }
+	hinclude { "BarGraph.h" }
 	private {
 	    // Count iterations
 	    int invCount;
 
-	    // Store the tk id's of the rectangles
-	    int *ids;
-
-	    // To create a unique name for each instance of the star
+	    // To create unique Tcl command names, we generate unique symbols
 	    static int instCount;
 	    int myInst;
-	    char winName[128];
-	    char butName[20];
-	    char sliderName[20];
-	    char command[128];
 
-	    // Keep a modifiable version of the fullScale parameter
-	    double scale;
+	    // Bar graph object
+	    BarGraph bg;
+
+	    StringList butName;
+	    StringList sliderName;
+	    StringList command;
 
 	    // Keep track of whether the setup routine has run already.
 	    // Avoid recreating the window if so.
 	    int setupRun;
 	}
-	code {
-	    // The following line initializes the member "instCount"
-	    // when the .o file is loaded.
-	    int SDFLMSTkPlot::instCount = 0;
-	}
 	constructor {
-	    // Used to generate a unique name
+	    // Name of the reset button
 	    myInst = instCount++;
-	    sprintf(butName,"reset%d",myInst);
-	    sprintf(sliderName,"scale%d",myInst);
+	    butName = "sdfLMSTkPlotreset";
+	    butName += myInst;
+	    sliderName = "sdfLMSTkPlotscale";
+	    sliderName += myInst;
 	    setupRun = 0;
-	    ids = 0;
 	}
 	destructor {
 	    // Remove Tcl commands
-	    sprintf(command, "%sLMSTkCB", sliderName);
-	    Tcl_DeleteCommand (ptkInterp, command);
+	    command = butName;
+	    Tcl_DeleteCommand (ptkInterp, (char*)command);
 
-	    sprintf(command, "%sLMSTkCB", butName);
-	    Tcl_DeleteCommand(ptkInterp, command);
-
-	    sprintf(command, "%sLMSTkCBredraw", winName);
-	    Tcl_DeleteCommand(ptkInterp, command);
-
-	    LOG_DEL; delete ids;
+	    command = sliderName;
+	    Tcl_DeleteCommand(ptkInterp, (char*)command);
 	}
 	setup {
-
-	    scale = double(fullScale);
 	    // Initialize iteration count
 	    invCount = 0;
     
@@ -124,6 +109,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    int position = int(0.5 + 100*(double(stepSize)
 			    - double(stepSizeLow))/(double(stepSizeHigh)
 			    - double(stepSizeLow)));
+
 	    // Check that the slider position is in the range of 0 to 100
 	    if ((position < 0) || (position > 100)) {
         	    Error::abortRun(*this,
@@ -132,81 +118,64 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	    if (setupRun == 0) {
 		setupRun = 1;
-		// Create a new window
-	        LOG_DEL; delete ids;
-	        LOG_NEW; ids = new int[taps.size()];
-
-		// First check to see whether a global Tcl variable named
-		// "ptkControlPanel" is defined.  If so, then use it as the
-		// stem of the window name.  This means that the window will
-		// be a child window of the control panel, and hence will be
-		// destroyed when the control panel window is destroyed.
-		if(Tcl_VarEval(ptkInterp,
-		    "global ptkControlPanel;set ptkControlPanel",
-		    (char*)NULL) != TCL_OK)
-			sprintf(winName,".sdfLMSTkPlot%d",myInst);
-		else
-			sprintf(winName,"%s.sdfLMSTkPlot%d",
-				ptkInterp->result, myInst);
 
 		// Register the callback functions with Tcl
-		sprintf(command, "%sLMSTkCB", sliderName);
-		Tcl_CreateCommand (ptkInterp, command, setStep,
+		command = sliderName;
+		Tcl_CreateCommand (ptkInterp, (char*)command, setStep,
 			(ClientData)this, NULL);
-		sprintf(command, "%sLMSTkCB", butName);
-		Tcl_CreateCommand(ptkInterp, command, reset,
-			(ClientData)this, NULL);
-		sprintf(command, "%sLMSTkCBredraw", winName);
-		Tcl_CreateCommand(ptkInterp, command, redraw,
+		command = butName;
+		Tcl_CreateCommand(ptkInterp, (char*)command, reset,
 			(ClientData)this, NULL);
 
-	        // Hack alert: passes a pointer to the implemenation
-	        // array for the taps.  Thus makeBarChart directly reads the 
-	        // value of the taps, violating the object-oriented nature of
-	        // the FloatArrayState object.  This was done so that the same
-	        // code could be shared with CGC, and so that it would be very
-	        // efficient in both cases.
-	        if(ptkMakeBarGraph(
-		    ptkInterp,			// Tcl interpreter
-		    ptkW,			// reference window
-		    winName,			// name of top level window
-		    (const char*)identifier,	// identifying string
-		    &taps[0],			// data to be plotted
-		    taps.size(),		// number of data points
-		    &scale,			// full scale value
-		    ids,			// array to store item ids
-		    (const char*)geometry,	// shape and position, window
-		    double(width),		// width, in cm
-		    double(height)		// height, in cm
-	        ) == 0) {
-		    Error::abortRun(*this, "Cannot create bar chart");
-		    return;
+		if(bg.setup(this,(char*)identifier,1,taps.size(),
+		    double(fullScale), - double(fullScale), (char*)geometry,
+		    double(width), double(height)) == 0) {
+			Error::abortRun(*this, "Cannot create bar chart");
+			return;
 	        }
     
 	        // Put controls entries into the window
 	        // First, a button to reset the taps
-	        sprintf(command,
-		    "ptkMakeButton %s.middle %s \"Reset taps\" %sLMSTkCB",
-		    winName, butName, butName);
-	        Tcl_GlobalEval(ptkInterp, command);
+	        command = "ptkMakeButton ";
+	        command += bg.winName;
+		command += ".middle ";
+	        command += butName;
+		command += " {Reset taps} ";
+	        command += butName;
+	        Tcl_GlobalEval(ptkInterp, (char*)command);
 	    	
 	        // Next, a slider to control the step size
-	        sprintf(command,
-		    "ptkMakeScale %s.low %s \"Step size\" %d %sLMSTkCB",
-		    winName, sliderName, position, sliderName);
-	        if(Tcl_GlobalEval(ptkInterp, command) != TCL_OK)
+	        command = "ptkMakeScale ";
+	        command += bg.winName;
+		command += ".low ";
+	        command += sliderName;
+		command += " {step size} ";
+	        command += position;
+	        command += " ";
+	        command += sliderName;
+	        if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
 		    Error::warn(*this,"Cannot make step size control");
     
 	    }
 	    // display the slider value
-	    sprintf(command, "%s.low.%s.value configure -text \"%.4f \"",
-		    winName, sliderName, double(stepSize));
-	    if(Tcl_GlobalEval(ptkInterp, command) != TCL_OK)
+	    command = bg.winName;
+	    command += ".low.";
+	    command += sliderName;
+	    command += ".value configure -text {";
+	    command += double(stepSize);
+	    command += "}";
+	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
 		    Error::warn(*this,"Cannot update step size display");
 
 	    // set the scale position
-	    sprintf(command, "%s.low.%s.scale set %d",
-		    winName, sliderName, position);
+	    command = bg.winName;
+	    command += ".low.";
+	    command += sliderName;
+	    command += ".scale set ";
+	    command += position;
+	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
+		    Error::warn(*this,"Cannot set step size slider position");
+
 	    SDFLMS :: setup();
 	}
 	go {
@@ -232,15 +201,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    access { public }
 	    arglist { "()" }
 	    code {
-		if (ptkSetBarGraph(
-			ptkInterp,		// tcl interpreter
-			ptkW,			// reference window
-			winName,		// window name
-			&taps[0],		// data to be plotted
-			taps.size(),		// number of data points
-			&scale,			// full scale value
-			ids			// array to store item ids
-		   ) == 0)
+		for(int i=0; i < taps.size(); i++)
+		    if(bg.update(0,i,taps[i]) == 0)
 			Error::abortRun(*this,"Cannot update bar graph.");
 	    }
 	}
@@ -259,9 +221,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		    + (double(stepSizeHigh) - double(stepSizeLow))
 		    * (position/100.0);
 		// display the slider value
-		sprintf(command, "%s.low.%s.value configure -text \"%.4f \"",
-			winName, sliderName, double(stepSize));
-		if(Tcl_GlobalEval(ptkInterp, command) != TCL_OK)
+		command = bg.winName;
+		command += ".low.";
+		command += sliderName;
+		command += ".value configure -text {";
+		command += double(stepSize);
+		command += "}";
+		if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
 		    Error::abortRun(*this,"Cannot update step size display");
 	    }
 	}
@@ -278,11 +244,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		((SDFLMSTkPlot*)star)->setStepSize(argv[1]);
 		return TCL_OK;
 	    }
-	    static int
-	    redraw(ClientData star, Tcl_Interp *interp, int argc, char **argv)
-	    {
-		((SDFLMSTkPlot*)star)->redrawTaps();
-		return TCL_OK;
-	    }
+
+	    // The following line initializes the member "instCount"
+	    // when the .o file is loaded.
+	    int SDFLMSTkPlot::instCount = 0;
 	}
 }
