@@ -49,7 +49,7 @@ ifeq ("$(MATHEMATICADIR)","")
 MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
 MATHEMATICAEXT_LIB = 	-lptmathematica
 else
-MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMFelf.a
+MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMFelf
 endif
 MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 
