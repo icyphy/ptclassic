@@ -30,6 +30,13 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 #include <sys/wait.h>
 
+#if defined(__sparc) && !defined(__svr4__) && defined(__GNUC__)
+#include <sys/time.h>
+#include <sys/resource.h>
+extern int wait3(int *statusp, int options, struct rusage *rusage);
+#endif
+
+
 /*
  * util_pipefork - fork a command and set up pipes to and from
  *
@@ -54,7 +61,7 @@ int *pid;
     int forkpid, waitPid;
     int topipe[2], frompipe[2];
     char buffer[1024];
-#if defined(hpux) || defined(SYSV)
+#if defined(hpux) || defined(SYSV) || defined(__sparc)
     int status;
 #else
     union wait status;
