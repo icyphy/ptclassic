@@ -791,7 +791,11 @@ bool pl_flag;
 				fprintf(CFD,"*s_%s_",Graph->Name);
     				GenEdgeName(edge);
 				fprintf(CFD," = ");
-    				GenEdgeName(edge);
+    				GenSingleEdgeDeref(edge);
+    				/*GenEdgeName(edge);*/
+/* commented this and added above line on 3/7/93 bec integrator
+refused to work for the output. not sure why it didnt work
+in the first place when i had only upper line..*/
 				fprintf(CFD,";\n");
 			}
 		}
