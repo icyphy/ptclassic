@@ -44,12 +44,8 @@ TCL_SRCS = \
 SIMPLE_TESTS = \
 	testCacheManager.itcl \
 	testCircularList.itcl \
-	testClass.tcl \
 	testMail.itcl \
 	testResource.itcl \
-	testResourceFTP.itcl \
-	testResourceHTTP.itcl \
-	testResourceRemote.itcl \
 	testStack.itcl \
 	testURLPath.itcl
 
@@ -69,7 +65,6 @@ GRAPHICAL_TESTS = \
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
 	alltychotests.tcl \
-	DirectedAcyclicGraph.itcl \
 	FileTester.itcl \
 	MenuSupportTester.itcl \
 	alltests.itcl all.itcl
