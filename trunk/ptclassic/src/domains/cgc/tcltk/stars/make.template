@@ -32,6 +32,14 @@ PL_SRCS= \
  CGCTkSlider.pl \
  CGCTkSunSound.pl
 
+TCL_SRCS= \
+ tkBall.tcl \
+ tkKeyboard.tcl \
+ tkScript.tcl \
+ tkBallAsync.tcl \
+ tkKeypad.tcl \
+ tkUniverse.tcl
+
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
 
@@ -47,7 +55,7 @@ SCRIPTS= tkBall.tcl tkBallAsync.tcl tkKeyboard.tcl tkKeypad.tcl \
 
 DOMAIN=CGC
 STAR_MK=cgctcltkstars
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
 LIB=libcgctcltk.a
 
 # Where star doc files go
