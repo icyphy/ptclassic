@@ -54,29 +54,11 @@ class ::tycho::ResourceFile {
     ###################################################################
     ####                         public methods                    ####
 
-    # Change the permissions
-    method chmod {permissions {path {}}}
-
     # Close the resource
     method close {}
 
-    # Return the content type of the current file
+    # Return the content type of the resource
     method contenttype {}
-
-    # Make a duplicate of the contents of this resource
-    method copy {source target args}
-
-    # Delete a resource
-    method delete {path}
-
-    # Test if a file is executable
-    method executable {path}
-
-    # Test if a given resource exists
-    method exists {path}
-
-    # Return the current file type 
-    method filetype {}
 
     # Flush buffered output to a streamable resource 
     method flush {}
@@ -84,23 +66,8 @@ class ::tycho::ResourceFile {
     # Read a string from a streamable resource 
     method gets {}
 
-    # Return files at a given path
-    method glob {pattern}
-
-    # Return true if a given path is a file
-    method isfile {path}
-
-    # Create a new directory
-    method mkdir {path}
-
-    # Open a new resource
-    method new {{path {}}}
-
     # Open the resource
-    method open {{path {}} {mode "r"}}
-
-    # Get the current full resource path
-    method path {}
+    method open {path {mode "r"}}
 
     # Write a string to a streamable resource 
     method puts {string}
@@ -108,23 +75,44 @@ class ::tycho::ResourceFile {
     # Return a string containing the data in a streamable resource 
     method read {}
 
-    # Return true if a given resource is readable
-    method readable {path}
-
-    # Source a streamable resource as a Tcl script
-    method source {{path {}}}
-
-    # Get the status of a resource
-    method stat {path varName}
-
     # Return 1 if this resource is streamable
     method streamable {}
 
-    # Return true if a resource is writable
-    method writable {{path {}}}
-
     # Write a string to a streamable resource
     method write {data}
+
+    ###################################################################
+    ####                           public procs                    ####
+
+    # Change the permissions of a resource
+    proc chmod {permissions path}
+
+    # Delete a resource
+    proc delete {path}
+
+    # Test if a given resource exists
+    proc exists {path}
+
+    # Return files at a given path
+    proc glob {pattern}
+
+    # Create a new directory
+    proc mkdir {path}
+
+    # Create a new resource object
+    proc new {path}
+
+    # Query properties of a file
+    proc query {path option}
+
+    # Source the file as Tcl
+    proc source {path}
+
+    # Get the status of a resource
+    proc stat {path varName}
+
+    # Return the type of a given file
+    proc type {path}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -162,21 +150,6 @@ body ::tycho::ResourceFile::destructor {} {
 ####                      public methods                             ####
 
 #####################################################################
-#### chmod
-body ::tycho::ResourceFile::chmod {permissions {path {}}} {
-    # NOTE: Unix-dependent implementation
-    if { $path == "" } {
-        if { $currentFile != "" } {
-            exec chmod $permissions $currentFile
-        } else {
-            error "No path name specified"
-        }
-    } else {
-        exec chmod $permission $path
-    }
-}
-
-#####################################################################
 #### close
 body ::tycho::ResourceFile::close {} {
     if { $fileid != "" } {
@@ -199,43 +172,6 @@ body ::tycho::ResourceFile::contenttype {} {
 }
 
 #####################################################################
-#### copy
-body ::tycho::ResourceFile::copy {source target args} {
-    if { $args != "" } {
-	::file copy $args $source $target
-    } else {
-	::file copy $source $target
-    }
-}
-
-#####################################################################
-#### delete
-body ::tycho::ResourceFile::delete {path} {
-    if { $path == $currentFile } {
-	close
-    }
-    ::file delete $path
-}
-
-#####################################################################
-#### executable
-body ::tycho::ResourceFile::executable {path} {
-    ::file executable $path
-}
-
-#####################################################################
-#### exists
-body ::tycho::ResourceFile::exists {path} {
-    ::file exists $path
-}
-
-#####################################################################
-#### filetype
-body ::tycho::ResourceFile::filetype {} {
-    return "file"
-}
-
-#####################################################################
 #### flush
 body ::tycho::ResourceFile::flush {} {
     if !$fileIsOpen {
@@ -254,48 +190,17 @@ body ::tycho::ResourceFile::gets {} {
 }
 
 #####################################################################
-#### glob
-body ::tycho::ResourceFile::glob {pattern} {
-    ::glob $pattern
-}
-
-#####################################################################
-#### isfile
-body ::tycho::ResourceFile::isfile {path} {
-    expr { [::file exists $path] && [::file type] == "file" }
-}
-
-#####################################################################
-#### mkdir
-body ::tycho::ResourceFile::mkdir {path} {
-    ::file mkdir $path
-}
-
-#####################################################################
 #### open
-body ::tycho::ResourceFile::open {{path {}} {mode "r"}} {
+body ::tycho::ResourceFile::open {path {mode "r"}} {
     if $fileIsOpen {
 	$this close
     }
-    if { $path == "" } {
-	if { $currentFile == "" } {
-	    error "No path specified"
-	}
-	set path $currentFile
-	set mode $accessMode
-    } else {
-	set currentFile $path
-	set accessMode $mode
-    }
+    regsub {^file:} $path {} path
+    set currentFile $path
+    set accessMode $mode
     set fileid [::open $path $mode]
     set fileIsOpen 1
     return 1
-}
-
-#####################################################################
-#### path
-body ::tycho::ResourceFile::path {} {
-    return $currentFile
 }
 
 #####################################################################
@@ -321,58 +226,9 @@ body ::tycho::ResourceFile::read {} {
 }
 
 #####################################################################
-#### readable
-body ::tycho::ResourceFile::readable {{path {}}} {
-    if { $path == "" } {
-	if { $currentFile != "" } {
-	    ::file readable $currentFile
-	} else {
-	    error "No path name specified"
-	}
-    } else {
-	::file readable $path
-    }
-}
-
-#####################################################################
-#### source
-body ::tycho::ResourceFile::source {{path {}}} {
-    if { $path == "" } {
-	if { $currentFile != "" } {
-	    ::source $currentFile
-	} else {
-	    error "No path name specified"
-	}
-    } else {
-	::source $path
-    }
-}
-
-#####################################################################
-#### stat
-body ::tycho::ResourceFile::stat {path varName} {
-    # FIXME!!!!
-    ::stat $path $varName
-}
-
-#####################################################################
 #### streamable
 body ::tycho::ResourceFile::streamable {} {
     return 1
-}
-
-#####################################################################
-#### writable
-body ::tycho::ResourceFile::writable {{path {}}} {
-    if { $path == "" } {
-	if { $currentFile != "" } {
-	    ::file writable $currentFile
-	} else {
-	    error "No path name specified"
-	}
-    } else {
-	::file writable $path
-    }
 }
 
 #####################################################################
@@ -383,3 +239,82 @@ body ::tycho::ResourceFile::write {data} {
     }
     ::puts $fileid $data
 }
+
+
+#########################################################################
+#########################################################################
+####                          public procedures                      ####
+
+#####################################################################
+#### chmod
+body ::tycho::ResourceFile::chmod {permissions path} {
+    # NOTE: Unix-dependent implementation
+    regsub {^file:} $path {} path
+    exec chmod $permission $path
+}
+
+#####################################################################
+#### delete
+body ::tycho::ResourceFile::delete {path} {
+    # FIXME: Check if file is open?
+    regsub {^file:} $path {} path
+    ::file delete $path
+}
+
+#####################################################################
+#### exists
+body ::tycho::ResourceFile::exists {path} {
+    regsub {^file:} $path {} path
+    ::file exists $path
+}
+
+#####################################################################
+#### glob
+body ::tycho::ResourceFile::glob {path} {
+    regsub {^file:} $path {} path
+    ::glob $path
+}
+
+#####################################################################
+#### mkdir
+body ::tycho::ResourceFile::mkdir {path} {
+    regsub {^file:} $path {} path
+    ::file mkdir $path
+}
+
+#####################################################################
+#### new
+body ::tycho::ResourceFile::new {path} {
+    uplevel #0 ::tycho::ResourceFile [::tycho::autoName resourcefile]
+}
+
+#####################################################################
+#### query
+body ::tycho::ResourceFile::query {path option} {
+    # Check for "remote"
+    if { $option == "remote" } {
+	return 0
+    }
+    # Check for valid option
+    if { [lsearch {executable exists isdirectory \
+	    isfile readable writable} $option] >= 0 } {
+	regsub {^file:} $path {} path
+	::file $option $path
+    }
+}
+
+#####################################################################
+#### source
+body ::tycho::ResourceFile::source {path} {
+    regsub {^file:} $path {} path
+    ::source $path
+}
+
+#####################################################################
+#### stat
+body ::tycho::ResourceFile::stat {path varName} {
+    # FIXME: Need to do uplevel?
+    regsub {^file:} $path {} path
+    ::stat $path $varName
+}
+
