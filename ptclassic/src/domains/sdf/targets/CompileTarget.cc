@@ -88,7 +88,8 @@ void CompileTarget::setup() {
 		LOG_NEW; s = new LoopScheduler(schedFileName);
 		break;
 	case 3:
-		LOG_NEW; s = new AcyLoopScheduler;
+		schedFileName = writeFileName("schedule.log");
+		LOG_NEW; s = new AcyLoopScheduler(schedFileName);
 		break;
 	default:
 		Error::abortRun(*this,"Unknown scheduler");
