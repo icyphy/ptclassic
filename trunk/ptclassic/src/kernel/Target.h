@@ -124,6 +124,11 @@ public:
 
 	virtual void writeFiring(Star& s, int depth);
 
+	// Functions to generate loop initialization and termination code
+	// (default versions do nothing)
+	virtual void genLoopInit(Star& s, int reps);
+	virtual void genLoopEnd(Star& s);
+
         // resource management
         virtual int commTime(int sender,int receiver,int nUnits, int type);
 

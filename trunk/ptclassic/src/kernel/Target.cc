@@ -300,5 +300,7 @@ char* Target::writeFileName(const char* fileName) {
 void Target::beginIteration(int,int) {}
 void Target::endIteration(int,int) {}
 void Target::writeFiring(Star&,int) {}
+void Target::genLoopInit(Star&,int) {}
+void Target::genLoopEnd(Star&) {}
 const char* Target::className() const {return "Target";}
 ISA_FUNC(Target,Block);
