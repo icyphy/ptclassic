@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/csh -f
 # $Id$
 
 # Command uses printer defined by environmental variable $PRINTER
