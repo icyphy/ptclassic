@@ -81,6 +81,7 @@
 # JFLAGS	Flags to pass to javac.
 # JAVADOC	The 'javadoc' program
 # JDOCFLAGS	Flags to pass to javadoc.
+# JZIP		Zip file to be produced.
 # JTESTHTML	Test html file for a java class.
 
 ##############
@@ -252,6 +253,28 @@ jtest: $(JTESTHTML) $(JCLASS)
 htest-netscape: $(JTESTHTML) $(JCLASS)
 	CLASSPATH=$(CLASSPATH) netscape $(TESTHTML)
 
+# Create a zip file of the .class files
+# We cd up one level so that the zip file has the proper package name
+jzip: $(JZIP)
+$(JZIP): $(JSRCS) $(JCLASS)
+	(cd ..; zip $(JPACKAGE)/$@ $(JPACKAGE)/*.class)
+
+
+# Rules to build Java package distributions
+# This rule builds both a tar file and zip file of the sources
+jdist: $(JDIST).tar.gz $(JDIST).zip 
+
+# List of files to exclude
+JDIST_EX =	/tmp/$(JDIST).ex
+$(JDIST_EX): $(ROOT)/mk/tycommon.mk
+	/bin/echo "SCCS\nmakefile\n$(JDIST).tar.gz\n$(JDIST).zip" > $@ 
+
+$(JDIST).tar.gz:  $(JDIST_EX)
+	(cd ..; gtar -zchf $(JPACKAGE)/$@ -X $(JDIST_EX) $(JPACKAGE))
+
+$(JDIST).zip:
+	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
+
 ##############
 # Rules for testing 
 # Most users will not run these rules.
@@ -367,7 +390,7 @@ checkjunk:
 # Rules for cleaning
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
-	config.cache config.log config.status $(JCLASS) $(KRUFT)  
+	config.cache config.log config.status $(JCLASS) $(JZIP) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
