@@ -83,7 +83,7 @@ void UniProcessor :: createSubGal() {
 		prevN = smallest;
 
 		copyS->setMaster(smallest);
-		assignedFirstInvocs.append(smallest);
+		assignedFirstInvocs.put(smallest);
 
 		// add to the galaxy
 		subGal->addBlock(*copyS, org->readName());
@@ -441,6 +441,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 		numSamples = 0;
 		int startFlag = TRUE;
 		int count = dN->numAssigned();
+		int escape = FALSE;
 		do {
 			EGGateLinkIter ancs(n->ancestors);
 			EGGate* g;
@@ -451,7 +452,12 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 				}
 				if (strcmp(g->readName(),ref->readName()))
 					continue;
-				if ((count == 0) && (g == firstGate)) goto L;
+				if ((count == 0) && (g == firstGate)) {
+					// jump out of the two loops, as if:
+					// goto L;
+					escape = TRUE;
+					break;
+				}
 
 				numDel += g->delay();
 				partner = (ParNode*) g->farEndNode();
@@ -488,11 +494,13 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 					makeReceive(parId,rP,0,n,g);
 				}
 			}
+			if (escape) break;
 			n = n->getNextNode();
 			if (!n) n = dN;
 			count--;
 		} while (count >= 0);
-	L:	if (numSamples > 0) { 	// last connection
+// L: (jump here if escaping from loop)
+		if (numSamples > 0) { 	// last connection
 			rP = findPortHole(newCollect, "input", numSamples);
 			if (curScat) {
 				sP = findPortHole(curScat,"output",numSamples);

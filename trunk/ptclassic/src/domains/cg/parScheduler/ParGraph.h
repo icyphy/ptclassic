@@ -56,7 +56,7 @@ protected:
 
 public:
 	// Null constructor : See comment for ExpandedGraph constructor
-	ParGraph(): logstrm(0), myGal(0) {};
+	ParGraph(): logstrm(0), myGal(0) {}
 	~ParGraph();
 
 	// A list of initially runnable Nodes

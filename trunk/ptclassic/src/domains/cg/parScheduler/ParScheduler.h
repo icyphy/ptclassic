@@ -23,7 +23,6 @@ Date of last revision:
 #include "ParGraph.h"
 
 class UniProcessor;
-class UserOutput;
 class Galaxy;
 class ostream;
 
@@ -100,7 +99,7 @@ public:
 	int getTotalWork() { return totalWork; }
 
         // prepare for Gantt chart display
-        void writeGantt(UserOutput& o);
+        void writeGantt(ostream& o);
 
 	UniProcessor* getProc(int n) { return parProcs->getProc(n); }
 	ParProcessors* myProcs() { return parProcs; }

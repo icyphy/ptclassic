@@ -20,7 +20,6 @@ Date of last revision:
 #include "ParGraph.h"
 #include "GalIter.h"
 #include "UniProcessor.h"
-#include "UserOutput.h"
 #include "CGWormhole.h"
 #include "StringList.h"
 #include "streamCompat.h"
@@ -285,7 +284,7 @@ StringList ParScheduler :: displaySchedule() {
 // write Gantt chart
 /////////////////////////////
 
-void ParScheduler::writeGantt(UserOutput& o) {
+void ParScheduler::writeGantt(ostream& o) {
 	int span = parProcs->getMakespan();
 
 	o << "no_processors " << numProcs << "\n";
