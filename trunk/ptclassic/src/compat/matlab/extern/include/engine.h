@@ -13,13 +13,13 @@
 
 typedef char Engine;
 
-#define engEvalString(ep,string)	0
+#define engEvalString(ep,string)	1
 #define engOpen(s)			0
-#define engClose(ep)			0
+#define engClose(ep)			1
 #define engGetMatrix(ep,name)		0
-#define engPutMatrix(ep,mp)		0
-#define engGetFull(ep,name,m,n,pr,pl)	0
-#define engPutFull(ep,name,m,n,pr,pl)	0
-#define engOutputBuffer(ep,b,len)	0
+#define engPutMatrix(ep,mp)		1
+#define engGetFull(ep,name,m,n,pr,pl)	1
+#define engPutFull(ep,name,m,n,pr,pl)	1
+#define engOutputBuffer(ep,b,len)
 
 #endif /* engine_h */
