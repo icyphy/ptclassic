@@ -131,7 +131,7 @@ HDRS= $(SRCS:.cc=.h)
 
 STAR_MK=sdfstars
 DOMAIN=SDF
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 

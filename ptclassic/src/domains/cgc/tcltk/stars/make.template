@@ -55,7 +55,7 @@ SCRIPTS= tkBall.tcl tkBallAsync.tcl tkKeyboard.tcl tkKeypad.tcl \
 
 DOMAIN=CGC
 STAR_MK=cgctcltkstars
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
 LIB=libcgctcltk.a
 
 # Where star doc files go

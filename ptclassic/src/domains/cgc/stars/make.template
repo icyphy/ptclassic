@@ -103,7 +103,7 @@ HDRS= $(SRCS:.cc=.h)
 
 DOMAIN=CGC
 STAR_MK=cgcstars
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 LIB=libcgcstars.a
 
 all:		makefile stars_all

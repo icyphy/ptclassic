@@ -74,7 +74,7 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfdspstars
 DOMAIN=SDF_DSP
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		$(SRCS) stars_all
 

@@ -44,7 +44,7 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfatmstars
 DOMAIN=SDF_ATM
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 
