@@ -1003,6 +1003,8 @@ body ::tycho::Graphics::exportGif {filename} {
     # NOTE: -transparent color option should be added for the background.
     ::tycho::invoke xwdtopnm $fn1 | ppmtogif -interlace > $filename 2> /dev/null
     ::tycho::rm $fn1
+    # For some reason, the above leaves a non-readable file.    
+    exec chmod +r $filename
     # FIXME: Should display the gif!
 }
 
