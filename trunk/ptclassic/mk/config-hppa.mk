@@ -21,13 +21,11 @@ include $(ROOT)/mk/config-g++.mk
 GPPFLAGS=-DUSG -g $(MEMLOG)
 
 # Use gcc
+# Note that you cannot compile vem with gcc, you must use cc.
+# Hopefully, this will go away sometime soon
 CC=gcc
 CFLAGS=-DUSG -g
 
-# The following is temporary until the problem with LINK_LIBGCC_SPECIAL
-# is cleared up -- must pass dir with libg++.a to linker
-GNULIBDIR=
-#LINKFLAGS=-L$(LIBDIR) -L$(GNULIBDIR) -Xlinker -x -static
 LINKFLAGS=-L$(LIBDIR) -Xlinker -x -static
 X11_INCSPEC = -I$(ROOT)/src/compat
 X11_LIBSPEC = -L/usr/lib/X11R5 -lX11
