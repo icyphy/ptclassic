@@ -6,13 +6,14 @@
 #                       All Rights Reserved.
 #
 # oct2pcl was originally authored by Kennard White
+# Ptolemy style makefile by Christopher Hylands (11/94)
 
 # Root of Ptolemy directory
-ROOT=../../..
+ROOT =		../../../..
 # Where we are
-VPATH = ../../../src/tkvem/oct2ptcl
-# get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+VPATH = 	../../../../src/octtools/tkoct/oct2ptcl
+# Get configuration info
+CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 OBJS = 		misc.o oct2ptcl.o
