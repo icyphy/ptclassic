@@ -11,6 +11,7 @@ $Id$
 *******************************************************************/
 
 #include "DDFStar.h"
+#include "Scheduler.h"
 
 extern Error errorHandler;
 
@@ -44,6 +45,8 @@ void DDFStar :: prepareForScheduling() {
 	// adjust numberTokens
 	if (isItSelf()) {
 		start();	// define inside Galaxy
+		// If error happens, return
+		if (Scheduler :: haltRequested()) return;
 		for (int i = numberPorts(); i > 0; i--) {
 			DDFPortHole& dp = (DDFPortHole&) nextPort();
 			int nTok = dp.imagePort->numberTokens;
