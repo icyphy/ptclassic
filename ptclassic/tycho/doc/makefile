@@ -69,13 +69,13 @@ EXTRA_SRCS =	abbreviations.html \
 		tyunix.html
 
 
-MISC_FILES =		itclhtml coding img tychoClasses.dag
+MISC_FILES =		coding demo img img tychoClasses.dag
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tychoClasses.dag
 
 # Sub directories to run make in.
-DIRS =			coding
+DIRS =			coding demo
 
 # Sources that may or may not be present, but if they are present, we don't
 # want make checkjunk to barf on them.
