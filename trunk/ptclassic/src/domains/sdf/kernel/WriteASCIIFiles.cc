@@ -67,10 +67,10 @@ int doubleArrayAsASCFile(const char* filename, const char* formatstr,
 		for (i = 0; i < length; i++) {
 		    // write the value to file in ASCII format
 		    if (writeIndexFlag) {
-			fprintf(fp, formatstr, i, dptr);
+			fprintf(fp, formatstr, i, *dptr);
 		    }
 		    else {
-			fprintf(fp, formatstr, dptr);
+			fprintf(fp, formatstr, *dptr);
 		    }
 		    dptr++;
 
