@@ -6,41 +6,47 @@
 <body bgcolor="#faf0e6">
 <h1><a name="HTML viewer">User's Guide to the HTML Viewer</a></h1>
 <p>
-The HTML viewer in Tycho provides a top-level window that
-displays formatted HTML.  It is based on the
-<a href="../../../lib/html_library/html/help.html">HTML library</a>
-written by Stephen Uhler of Sun Microsystems, which supports all the
-features of HTML 2.0.
-There is currently no support in Tycho for
-<a name=HTTP>HTTP</a> hyperlink references, so you cannot
-read documents directly on the internet from within Tycho, although
-this might come in the future.  If Tycho encounters a HTML reference
-that it does not understand, then Tycho with ask the user if they want 
-to start up <CODE>Netscape</CODE>. (The Macintosh does not support
-<CODE>exec</CODE>, so this will not work on the Mac).
 
+The HTML viewer in Tycho is a widget that displays
+formatted HTML. Usually, the widget is displayed in a top-level
+window with a menu bar, tool bar, and status bar, but it can
+also be used as a component
+of a more complex widget. The HTML renderer is based on the <a
+href="../../../lib/html_library/html/help.html">HTML library</a>
+written by Stephen Uhler of Sun Microsystems, which supports all the
+features of HTML 2.0. The viewer fully supports the HTTP, FTP, and
+mailto: protocols, so this viewer can be used to access HTML
+documentation across networks as well as from the local disk.
+HTML forms are supported, but more complex HTML features such as tables
+and frames are not properly supported.
 A <a href="../../../lib/html_library/html/sample.html">sample document</a>
 illustrates the HTML tags that are supported.
-<p>
-The HTML viewer is derived from the <a href="FileHelp.html">File class</a>, and
-therefore inherits all of its features.
-In addition, it provide a pull-down menu for adjusting the sizes
-of the fonts in the display plus a toolbar at the top for invoking
-commonly invoked functions. The "File" menu provides the following
-commands:
-<dl COMPACT>
-<dt><CODE>C-x C-f</CODE><dd>open a file
-<dt><CODE>C-x C-v</CODE><dd>switch to viewing another HTML file
-<dt><CODE>C-x s</CODE><dd>open HTML source using the
-<a href="../../../editors/textedit/doc/usersGuides/EditHTMLHelp.html">
-HTML editor</a>
-<dt><CODE>C-x p</CODE><dd>print the contents (not yet implemented)
-<dt><CODE>none</CODE><dd>reload the file from disk
-<dt><CODE>C-x k</CODE><dd>close the window
-<dt><CODE>C-x C-c</CODE><dd>exit the program
-</dl>
-<p>
 
+<p> The HTML viewer is derived from the <a href="FileHelp.html">File
+class</a>, and therefore inherits all of its features and all of the
+standard menus. In addition, it provides a toolbar at the top
+for invoking common functions.
+
+<p>The <code>Location</code> entry widget underneath the toolbar
+contains the name of the currently open file. This entry widget is
+quite flexible: entering a local file namand pressing return will cause
+that file to be opened. (If the file is not an HTML file, it will be
+opened in the appropriate editor -- for example, a Tcl file will be
+opened in a new Tcl editor window.) The entered name can also start
+with a protocol name. For example, entering <code><a
+href="http://ptolemy.eecs.berkeley.edu/index.html">http://ptolemy.eecs.berkeley.edu/index.html</a></code>
+and pressing Return will open the Ptolemy home page. The ftp protocol
+is also supported -- entering <code><a
+href="ftp://ptolemy.eecs.berkeley.edu/">ftp://ptolemy.eecs.berkeley.edu/</a></code> will open a directory
+listing of the Ptolemy ftp site.
+
+<p>Local files can also be specified using the <code>file</code>
+protocol. Either <code><a
+href="file:/users/ptolemy">file:/users/ptolemy</a></code> or <code><a
+href="file:///users/ptolemy">file:///users/ptolemy</a></code> will open
+the indicated file.
+
+<p>
 The <CODE>Special</CODE> menu includes an <CODE>Appletviewer</CODE> choice that
 will bring up a Monitor widget with the
 command to run the <CODE>appletviewer</CODE> on the current file.
