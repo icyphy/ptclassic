@@ -113,7 +113,7 @@ istream& operator>>(istream& s,Interval& ival) {
 	// that we have the single-value form.
 	if (!s.get(ch)) return s;
 	if (ch == '-') {
-		int eval;
+		unsigned int eval;
 		s >> eval;
 		if (eval < ival.pOrigin)
 			ival.pLength = 0;

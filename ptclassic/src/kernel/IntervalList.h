@@ -46,11 +46,11 @@ class Interval {
 	Interval* next;
 public:
 	Interval(unsigned o=0, unsigned l=0, Interval* nxt = 0) :
-		pOrigin(o), pLength(l), next(nxt) {};
+		pOrigin(o), pLength(l), next(nxt) {}
 	Interval(const Interval& i1) : pOrigin(i1.pOrigin),
-		pLength(i1.pLength), next(0) {};
+		pLength(i1.pLength), next(0) {}
 	Interval(const Interval& i1,Interval* nxt) :
-		pOrigin(i1.pOrigin), pLength(i1.pLength), next(nxt) {};
+		pOrigin(i1.pOrigin), pLength(i1.pLength), next(nxt) {}
 
 	unsigned origin() const { return pOrigin;}
 	unsigned length() const { return pLength;}

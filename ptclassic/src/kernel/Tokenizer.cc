@@ -28,7 +28,7 @@ and a quote character for strings.
 #include "streamCompat.h"
 
 // The default whitespace string
-const char Tokenizer::defWhite[] = " \t\n\r";
+const char *Tokenizer::defWhite = " \t\n\r";
 
 // Constructors
 // for some reason, g++ has trouble when these are included in the
