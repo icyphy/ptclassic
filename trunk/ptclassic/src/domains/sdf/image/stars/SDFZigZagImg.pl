@@ -4,7 +4,7 @@ defstar {
   version { $Id$ }
   author { Paul Haskell }
   copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -83,7 +83,7 @@ This is useful before quantizing a DCT transformed image.
       const int width = inImg.numCols();
       const int height = inImg.numRows();
 
-      LOG_NEW; float* outArr = new float[width*height];
+      float* outArr = new float[width*height];
 
       // For each row and col...
       int row, col;
@@ -113,8 +113,7 @@ This is useful before quantizing a DCT transformed image.
       return;
     }
 
-    //Allocate output image.
-    LOG_NEW;
+    // Allocate output image.
     FloatMatrix& outImg = *(new FloatMatrix(inImg));
 
     // Do processing and send out.
