@@ -54,31 +54,32 @@ option add *ListBrowser.entryfont \
 # the list. Before executing the command, the item selected by the user
 # is appended to the command as an argument. If no -command option is
 # specified, then the default behavior is to return the selected item
-# when the ListBrowser is created by a ::tycho::DialogWindow::newModal
+# when the <code>ListBrowser</code> is created by a
+# <code>::tycho::DialogWindow::newModal</code>
 # procedure.
-#
-# When the user has selected an item, the processItem protected method
-# is consulted.  If this method return 1, then the ListBrowser is
-# destroyed.  However, this method could change the contents of the
-# ListBrowser and return 0, in which case the user must make another
-# selection.
-# 
+# <p>
+# When the user has selected an item, the <code>processItem</code>
+# protected method is consulted. If this method return 1, then the
+# list browser is destroyed. However, this method could change the
+# contents of the list browser and return 0, in which case the user can
+# make another selection.
+# <p>
 # For example, the following command will query the user to select an
 # item from a list, and then post that item in top-level window:
 # <tcl><pre>
 # ::tycho::ListBrowser .w -command ::tycho::post -items {a b c d}
 # .w centerOnScreen
 # </pre></tcl>
-#
-# The ListBrowser object performs automatic completion of partial entries
+# <p>
+# The list browser performs automatic completion of partial entries
 # and pattern matching on entries.  See the
-# <a href="doc/ListBrowserHelp.html">help page</a>.
+# <a href="../usersGuides/ListBrowserHelp.html">help page</a> for details.
 # It is not case sensitive in its matching.
 #
 class ::tycho::ListBrowser {
     inherit ::tycho::EntryQuery
 
-    # The command to execute on a file when one is identified
+    # Specify the command to execute on an when one is chosen.
     itk_option define -command command Command "::tycho::DialogWindow::answer"
 
     # The list to display
@@ -89,7 +90,7 @@ class ::tycho::ListBrowser {
     ##################################################################
     ####                     public methods                       ####
 
-    # Break the interpretation of a sequence of Tabs as scrolling over matches.
+    # Break the interpretation of a sequence of Tabs to scroll over matches.
     method breakCompleteSequence {}
 
     # Copy an item from the listbox to the entry box.
@@ -135,7 +136,7 @@ class ::tycho::ListBrowser {
 
 #########################################################################
 #### -items option configuration
-# We simply call updateListbox, which iserts the items in the listbox.
+# Specify items in the listbox.
 # 
 configbody ::tycho::ListBrowser::items {
     updateListbox
@@ -259,8 +260,8 @@ body ::tycho::ListBrowser::constructor {args} {
 
 ######################################################################
 #### breakCompleteSequence
-# Break the interpretation of a sequence of Tabs as scrolling over matches.
-# This is bound to any key other than Tab.
+# Break the interpretation of a sequence of Tabs to scroll over matches.
+# This is bound to every key other than Tab.
 #
 body ::tycho::ListBrowser::breakCompleteSequence {} {
     set uselastpattern 0
@@ -268,8 +269,9 @@ body ::tycho::ListBrowser::breakCompleteSequence {} {
 
 ######################################################################
 #### chooseItem
-# Determine the item name in the listbox lb that is closest to the
-# mouse position ypos and insert its name in the entry box.
+# Determine the item name in the listbox given by the first argument
+# that is closest to the mouse position in the vertical direction given
+# by the second argument and insert its name in the entry box.
 #
 body ::tycho::ListBrowser::chooseItem {lb ypos} {
     $lb selection clear @0,0 end
@@ -288,17 +290,17 @@ body ::tycho::ListBrowser::clearselection {} {
 
 ######################################################################
 #### complete
-# Complete a partially entered item.  On the first invocation,
-# this method finds an entry in the listbox that has the contents of
-# the entry box as a prefix.  Glob-style rules are used, so the entry
-# can be a pattern (* for any substring, ? for any single character,
-# [chars] for a set of characters, or \x for a single character.
-# If there is more than one matching entry, then all matching entries
-# are selected in the listbox.  The selected entries can then be
-# scrolled with the up and down arrow keys.
-# If the method is invoked again without an intervening invocation
-# of breakCompleteSequence, then it scrolls through the selected entries
-# as if the down arrow had been pressed.
+# Complete a partially entered item. On the first invocation, this
+# method finds an entry in the listbox that has the contents of the
+# entry box as a prefix. Glob-style rules are used, so the entry can be
+# a pattern (* for any substring, ? for any single character, [chars]
+# for a set of characters, or \x for a single character. If there is
+# more than one matching entry, then all matching entries are selected
+# in the listbox. The selected entries can then be scrolled with the up
+# and down arrow keys. If the method is invoked again without an
+# intervening invocation of <code>breakCompleteSequence</code>, then it
+# scrolls through the selected entries as if the down arrow had been
+# pressed.
 #
 body ::tycho::ListBrowser::complete {} {
     if {$uselastpattern} {
@@ -451,11 +453,12 @@ body ::tycho::ListBrowser::scroll {num what} {
 
 ######################################################################
 #### processItem
-# This procedure checks and processes the user selection. If it return 1,
-# then the ListBrowser is destroyed.  If it returns 0, then it is not
-# destroyed.  Note that if processItem aborts with an error, then
-# the list browser is disabled.  Thus, unless the error is fatal,
-# processItem should just issue a message and return 0.
+# This procedure checks and processes the user selection. If it return
+# 1, then the <code>ListBrowser</code> is destroyed. If it returns 0,
+# then it is not destroyed. Note that if <code>processItem</code>
+# aborts with an error, then the list browser is disabled. Thus, unless
+# the error is fatal, <code>processItem</code> should just issue a
+# message and return 0.
 #
 body ::tycho::ListBrowser::processItem {item} {
     execCommand -command $item
