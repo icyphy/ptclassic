@@ -23,7 +23,7 @@ frequency axis.
  Each stage of the analysis section splits the incoming signal into
 highpass and lowpass components via two (multirate) FIR filter stars.
  These components are then decimated by a factor of two.
- The decimated highpass signal proceeds directly to the synthesis filterbank,
+ The decimated highpass signal proceeds directly to the synthesis filter bank,
 whereas the decimated lowpass signal is sent to the next level of analysis.
  The effect is to split the frequency domain progressively into finer bins,
 with higher resolution at the lower frequencies.
