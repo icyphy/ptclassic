@@ -205,10 +205,10 @@ body ::tycho::VertexController::click {tag x y args} {
 	$layout publish moveclick $this.edge $x $y
     }
     foreach edge $_inputedges {
-        $layout publish reshapeclick $edge $x $y -aspects end
+        $layout publish reshapeclick $edge $x $y -features end
     }
     foreach edge $_outputedges {
-        $layout publish reshapeclick $edge $x $y -aspects start
+        $layout publish reshapeclick $edge $x $y -features start
     }
 }
 
@@ -433,7 +433,7 @@ body ::tycho::VertexController::place {iconlib iconname starname x y} {
     # Move its nw corner to the right position. Find the position
     # from my slate, and then move by publishing to the model
     # $_slate moveto $id $iconx $icony "nw" -shape rectangle
-    set current [$layout forward aspect $starname "nw" -shape "rectangle"]
+    set current [$layout forward feature $starname "nw" -shape "rectangle"]
     set dx [expr $x - [lindex $current 0]]
     set dy [expr $y - [lindex $current 1]]
     $layout publish move $starname $dx $dy

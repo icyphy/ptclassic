@@ -533,7 +533,7 @@ body ::tycho::GraphEditor::select {mode args} {
             # There is: grapple it
             # FIXME: publish to model
             set _grapplededge $id
-            $_slate grapple $id -interactor $dropper -aspects {start end}
+            $_slate grapple $id -interactor $dropper -features {start end}
         }
     } elseif { $_grapplededge != "" } {
         $_slate ungrapple $_grapplededge

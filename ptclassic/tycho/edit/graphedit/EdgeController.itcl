@@ -114,8 +114,8 @@ class ::tycho::EdgeController {
     #################################################################
     ####                 protected variables                     ####
     
-    # The aspect of the edge being worked on
-    protected variable _aspect
+    # The feature of the edge being worked on
+    protected variable _feature
 
     # The direction we are connecting in
     protected variable _direction
@@ -123,7 +123,7 @@ class ::tycho::EdgeController {
     # The interactor to connect edges
     protected variable _dropper
 
-    # The aspect we are connecting at
+    # The feature we are connecting at
     protected variable _connectat
 
     # The name of the edge being worked on
@@ -292,31 +292,31 @@ body ::tycho::EdgeController::disconnect {edge end} {
     set edgeitem [slateid $edge]
     set term [$graph attrget $edge $end]
     set termitem [slateid $term]
-    set termaspect [$slate itemcget $edgeitem ${end}aspect]
+    set termfeature [$slate itemcget $edgeitem ${end}feature]
 
     # Disconnect
     $graph publish attrset $edge $end {}
     
     # Move the end of the edge
     if { $end == "-from" } {
-	set aspect "start"
+	set feature "start"
     } else {
-	set aspect "end"
+	set feature "end"
     }
-    set point [$slate aspect $termitem $termaspect]
+    set point [$slate feature $termitem $termfeature]
     if [$slate hastag $termitem "junction"] {
-        set dirn $termaspect
+        set dirn $termfeature
     } else {
         set dirn  [$slate itemcget $termitem -direction]
     }
     set vector [::tycho::Shape::compassToVector $dirn]
     set x [expr [lindex $point 0] + 10 * [lindex $vector 0]]
     set y [expr [lindex $point 1] + 10 * [lindex $vector 1]]
-    $slate reshapeto $edgeitem $x $y $aspect
+    $slate reshapeto $edgeitem $x $y $feature
     
     # Place a sticky grapple on the end
-    $slate grapple $edgeitem -interactor $_dropper -aspects $aspect
-    $slate itemconfigure "$aspect.$edgeitem" -sticky 1
+    $slate grapple $edgeitem -interactor $_dropper -features $feature
+    $slate itemconfigure "$feature.$edgeitem" -sticky 1
 
     # Tag the edge if it is completely disconnected
     if { [$graph attrget $edge -from] == "" && \
@@ -349,7 +349,7 @@ body ::tycho::EdgeController::drag {id x y} {
     if { $id == "" } {
 	# The drag-dropper is not over a target: move
         # start/end point and grapple
-	$slate reshapeto $_edgeitem $x $y $_aspect
+	$slate reshapeto $_edgeitem $x $y $_feature
         if { $_grapple != "" } {
             $slate moveto $_grapple $x $y center
         }
@@ -362,14 +362,14 @@ body ::tycho::EdgeController::drag {id x y} {
             set _connectat "terminal"
             set _direction [$slate itemcget $id -direction]
         }
-	set coords [$slate aspect $id $_connectat]
-	eval $slate reshapeto $_edgeitem $coords $_aspect
+	set coords [$slate feature $id $_connectat]
+	eval $slate reshapeto $_edgeitem $coords $_feature
 
 	# Change the end direction of the line 
-        if { $_aspect == "end" } {
+        if { $_feature == "end" } {
             set _direction [::tycho::Shape::compass $_direction "rev"]
         }
-	$slate itemconfigure $_edgeitem -$_aspect $_direction
+	$slate itemconfigure $_edgeitem -$_feature $_direction
 
         # Move the grapple
         if { $_grapple != "" } {
@@ -427,25 +427,25 @@ body ::tycho::EdgeController::junctionaccepts {name id tag} {
 body ::tycho::EdgeController::junctionnearest {name id x y} {
     # puts "junctionnearest $id $x $y"
 
-    # Find connected aspects
+    # Find connected features
     set used {}
     foreach edge [$graph edges $name] {
-        lappend used [$slate itemcget [slateid $edge] -fromaspect]
+        lappend used [$slate itemcget [slateid $edge] -fromfeature]
     } 
     foreach edge [$graph edges * $name] {
-        lappend used [$slate itemcget [slateid $edge] -toaspect]
+        lappend used [$slate itemcget [slateid $edge] -tofeature]
     }
 
     set nearest n
     set metric -1
-    foreach aspect [::tycho::lsubtract {n s e w} $used] {
-        set xy [$slate aspect $id $aspect]
+    foreach feature [::tycho::lsubtract {n s e w} $used] {
+        set xy [$slate feature $id $feature]
         set x0 [lindex $xy 0]
         set y0 [lindex $xy 1]
         set m [expr pow($x-$x0, 2) + pow($y-$y0, 2)]
         if { $metric < 0 || $m < $metric } {
             set metric $m
-            set nearest $aspect
+            set nearest $feature
         }
     }
     return $nearest
@@ -472,18 +472,18 @@ body ::tycho::EdgeController::redraw {edge end} {
         set direction [$slate itemcget $id -direction]
     }
     if { $end == "-from" } {
-	set aspect "start"
+	set feature "start"
     } else {
-	set aspect "end"
+	set feature "end"
     }
-    set coords [$slate aspect $id $connectat]
-    eval $slate reshapeto $edgeitem $coords $aspect
+    set coords [$slate feature $id $connectat]
+    eval $slate reshapeto $edgeitem $coords $feature
 
     # Change the end direction of the line 
-    if { $aspect == "end" } {
+    if { $feature == "end" } {
         set direction [::tycho::Shape::compass $direction "rev"]
     }
-    $slate itemconfigure $edgeitem -$aspect $direction
+    $slate itemconfigure $edgeitem -$feature $direction
 }
 
 ########################################################################
@@ -512,7 +512,7 @@ body ::tycho::EdgeController::release {args} {
             }
         } else {
             $slateview select add $_edgeitem
-            $slate itemconfigure "$_aspect.$_edgeitem" -sticky 1
+            $slate itemconfigure "$_feature.$_edgeitem" -sticky 1
         }
     } else {
         # The line is connected. If there's a grapple, make it unsticky
@@ -526,12 +526,12 @@ body ::tycho::EdgeController::release {args} {
         $slate dtag $_edgeitem disconnected
 
         # Set the -from or -to attribute of the edge
-        if { $_aspect == "end" } {
+        if { $_feature == "end" } {
             $graph publish attrset $_edgename -to [itemname $_target]
-            $layout publish attrset $_edgename -toaspect $_connectat
+            $layout publish attrset $_edgename -tofeature $_connectat
         } else {
             $graph publish attrset $_edgename -from [itemname $_target]
-            $layout publish attrset $_edgename -fromaspect $_connectat
+            $layout publish attrset $_edgename -fromfeature $_connectat
         }
 	# The graph has been modified (I think...), so notify any
 	# subscriber to the graph
@@ -619,7 +619,7 @@ body ::tycho::EdgeController::trytarget {id} {
 #### _cleanup
 #
 body ::tycho::EdgeController::_cleanup {} {
-    set _aspect ""
+    set _feature ""
     set _edgename ""
     set _edgeitem ""
     set _grapple ""
@@ -658,10 +658,10 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
     # Split the edge: get coordinates
     set out [eval ::tycho::Line::direction [list $coords] $point]
     set in [::tycho::Shape::compass $out rev]
-    set start1 [$slate aspect $edgeitem1 start]
-    set end1 [$slate aspect $junctionitem $in]
-    set start2 [$slate aspect $junctionitem $out]
-    set end2 [$slate aspect $edgeitem1 end]
+    set start1 [$slate feature $edgeitem1 start]
+    set end1 [$slate feature $junctionitem $in]
+    set start2 [$slate feature $junctionitem $out]
+    set end2 [$slate feature $edgeitem1 end]
 
     # Add the new edge
     $graph publish add edge $edgename2 \
@@ -672,7 +672,7 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
 	    -coords [concat $start2 $end2] \
             -start $out \
             -end [$slate itemcget $edgeitem1 -end] \
-            -fromaspect $out \
+            -fromfeature $out \
             -tags "edge"
     
     # Modify the old edge
@@ -687,7 +687,7 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
 
     $layout publish attrset $edgename1 \
             -end $out \
-            -toaspect $in
+            -tofeature $in
 
     # Create the new edge which is being drawn. Find the point to join
     if { $out == "w" || $out == "e" } {
@@ -707,13 +707,13 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
     $graph publish add edge $_edgename -from $junctionname
     $layout publish add item $_edgename \
             -slatetype Net \
-            -coords [concat [$slate aspect $junctionitem $joinat] $x $y] \
+            -coords [concat [$slate feature $junctionitem $joinat] $x $y] \
             -start $joinat \
             -end $joinat \
-            -fromaspect $joinat \
+            -fromfeature $joinat \
             -tags "edge"
 
-    set _aspect "end"
+    set _feature "end"
     set _edgeitem [slateid $_edgename]
     set _totags "input"
 }
@@ -726,8 +726,8 @@ body ::tycho::EdgeController::_initdrag:grapple {x y} {
     set _edgename [itemname $_edgeitem]
 
     # Set up variables for drag-dropping
-    set _aspect [$slate itemcget $_grapple -aspect]
-    if { $_aspect == "start" } {
+    set _feature [$slate itemcget $_grapple -feature]
+    if { $_feature == "start" } {
         set _totags "output"
 	set end "from"
     } else {
@@ -736,7 +736,7 @@ body ::tycho::EdgeController::_initdrag:grapple {x y} {
     }     
     # Disconnect the edge
     $graph publish attrset $_edgename -$end ""
-    $layout publish attrset $_edgename -${end}aspect ""
+    $layout publish attrset $_edgename -${end}feature ""
 }
 
 ########################################################################
@@ -751,9 +751,9 @@ body ::tycho::EdgeController::_initdrag:junction {x y} {
     
     # Make an output connection always.
     set end "from"
-    set _aspect end
+    set _feature end
     set _totags input
-    set coords [concat [$slate aspect $id $connectat] $x $y]       
+    set coords [concat [$slate feature $id $connectat] $x $y]       
 
     # Get a unique name for the edge/net
     set _edgename [$graph uniqueid edge]
@@ -784,14 +784,14 @@ body ::tycho::EdgeController::_initdrag:terminal {x y} {
     # output or input
     if [$slate hastag $source "output"] {
     	set end "from"
-        set _aspect end
+        set _feature end
         set _totags input
-        set coords [concat [$slate aspect $source terminal] $x $y]       
+        set coords [concat [$slate feature $source terminal] $x $y]       
     } else {
     	set end "to"
-        set _aspect start
+        set _feature start
         set _totags output
-        set coords [concat $x $y [$slate aspect $source terminal]]
+        set coords [concat $x $y [$slate feature $source terminal]]
         set dir [::tycho::Shape::compass $dir "rev"]
     }
     # Get a unique name for the edge/net
