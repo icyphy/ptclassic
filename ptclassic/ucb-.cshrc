@@ -38,7 +38,7 @@ setenv PRINTER sp524
 setenv FRAMEUSERSD_HOST mho.eecs.berkeley.edu
 setenv FMHOME /usr/cluster/frame
 setenv FM_FLS_HOST mho.eecs.berkeley.edu
-set path = ($path $FMHOME/bin)
+set path = ($path $FMHOME/bin /usr/sww/urt/bin)
 
 
 if ( "$PTARCH" == hppa || "$PTARCH" == "hppa.cfront" ) then
