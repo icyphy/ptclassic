@@ -704,10 +704,14 @@ realGetParams(const Block* block, ParamListType* pListPtr,
 		    // Only return settable states that are not in
 		    // the names list.
 		    if ((s->attributes() & AB_SETTABLE) &&
-			!isStringInList(s->name(),(const char **)names,n_names,pos)) {
-		        tempArray[j].name = s->name();
-			tempArray[j].type = s->type();
-		        tempArray[j++].value = s->initValue();
+			!isStringInList(s->name(), (const char **)names,
+					n_names, pos)) {
+			// This cast is okay because tempArray is a "flat"
+			// parameter list; i.e., name/type/value are not
+			// considered dynamic strings
+		        tempArray[j].name = (char *) s->name();
+			tempArray[j].type = (char *) s->type();
+		        tempArray[j++].value = (char *) s->initValue();
 		    }
 	    }
 	    /* Now we know there are exactly j settable states.
