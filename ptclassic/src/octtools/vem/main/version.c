@@ -80,7 +80,7 @@ char *vemVerString()
     char temp[1024];
 
     if (!vemVersion) {
-	sprintf(temp, "%s.Y (made %s)", CUR_VER, proc_date(CUR_DATE));
+	sprintf(temp, "%s.Z (made %s)", CUR_VER, proc_date(CUR_DATE));
 	vemVersion = VEMSTRCOPY(temp);
     }
     return vemVersion;
