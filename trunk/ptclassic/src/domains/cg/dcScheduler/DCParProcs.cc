@@ -123,7 +123,7 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 
 		// < switch processors >
 		// backtrack slp until to meet a comm node
-		DCNode* node, *commNode;
+		DCNode* node, *commNode = 0;
 		while ((node = slp->headNode()) != 0) {
 			if (node->getType() >= 0) { // non-receive node
 				slp->takeFromFront(); // cut off node
