@@ -50,21 +50,18 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	codeblock (initfill) {
 ; initialization code for star $fullname() - class CG56UpSample
 	move	$ref(output),r1
-	move	$size(output),m1
 	move	$val(fill),a
 	}
 	codeblock (repeatcode) {
-	rep	#$val(factor)
+	rep	#$size(output)
 	}
 	codeblock (fillcode) {
 	move	a,x:(r1)+
 	}
 	initCode {
 		gencode (initfill);
-		if (factor > 1) {
-			gencode(repeatcode);
-			gencode(fillcode);
-		}
+		if (factor > 1) gencode(repeatcode);
+		gencode(fillcode);
 	}
 	codeblock (sendsample) {
 	move	$ref(input),x0
