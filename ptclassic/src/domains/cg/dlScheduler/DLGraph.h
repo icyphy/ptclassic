@@ -30,16 +30,9 @@ Date of last revision:
 class DLGraph : public ParGraph {
 
 public:
-
-	// destructor
-	~DLGraph();
-
 	// Display the graph
 	StringList display();
 	
-	// A list of the initially runnable DLNodes
-	EGNodeList runnableNodes;
-
 	// reset the graph for new schedules.
 	// initialize runnableNodes.
 	void resetGraph();
