@@ -44,6 +44,9 @@ value (or minimum for negative magnitudes).
 		output.setPrecision(OutputPrecision);
         }
 
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	begin {
 		// if the precision for the output port is not defined
 		// - neither by this nor the successor star -, the actual
@@ -72,6 +75,6 @@ value (or minimum for negative magnitudes).
 		CGCFix::checkOverflow();
 	}
 
-	// a wrap-up method is inherited from CGCFix
-	// if you defined your own, you should call CGCFix::wrapup()
+	// a wrapup method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }

@@ -1,8 +1,9 @@
 defstar {
 	name { FixToFloat }
 	domain { CGC }
+	derivedFrom { Fix }
 	version { $Id$ }
-	author { J.Weiss }
+	author { J. Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -21,7 +22,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
+	// a setup method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::setup()
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
 	go {
 @	$ref(output) = FIX_Fix2Double($ref(input));
 	}
+	// a wrap-up method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }

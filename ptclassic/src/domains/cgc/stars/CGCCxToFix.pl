@@ -55,8 +55,12 @@ minimum for negative magnitudes).
 			input.setSDFParams(int(numSample));
 			output.setSDFParams(int(numSample));
 		}
+
 		output.setPrecision(OutputPrecision);
 	}
+
+        // an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
 
 	begin {
 		// if the precision for the output port is not defined
@@ -68,6 +72,7 @@ minimum for negative magnitudes).
 	}
 
 	initCode {
+		CGCFix::initCode();
 		numSample = output.numXfer();
 		addInclude("<math.h>");
 	}
@@ -93,6 +98,6 @@ minimum for negative magnitudes).
 		CGCFix::checkOverflow();
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }

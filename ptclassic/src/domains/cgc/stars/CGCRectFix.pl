@@ -59,6 +59,7 @@ If the value cannot be represented by this precision,
 the output is set to its maximum value (or minimum for negative magnitudes).
                 }
         }
+
         setup {
 		CGCFix::setup();
 		// if the user specified an invalid precision string, the error
@@ -66,6 +67,10 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 		// class PrecisionState
 		output.setPrecision(OutputPrecision);
         }
+
+        // an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	go {
 @	FIX_SetToZero($ref(output));
 
@@ -79,6 +84,6 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 @		$ref(count) = 0;
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::wrapup()
 }

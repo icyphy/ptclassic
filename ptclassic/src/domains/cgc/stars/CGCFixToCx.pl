@@ -1,8 +1,9 @@
 defstar {
 	name { FixToCx }
 	domain { CGC }
+	derivedFrom { Fix }
 	version { $Id$ }
-	author { J.Weiss }
+	author { J. Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -29,25 +30,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	setup {
-		if (int(numSample) > 1) {
-			input.setSDFParams(int(numSample));
-			output.setSDFParams(int(numSample));
+		if (int(numSample) <= 0) {
+			Error::abortRun(*this, "numSample must be positive");
+			return;
+		}
+		input.setSDFParams(int(numSample));
+		output.setSDFParams(int(numSample));
+	}
+
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
+	codeblock (body) {
+		int i = 0;
+		for (; i < $val(numSample); i++) {
+			$ref(output,i).real = FIX_Fix2Double($ref(input,i));
+			$ref(output,i).imag = 0;
 		}
 	}
 
-	initCode {
-		numSample = output.numXfer();
-		addInclude("<math.h>");
-	}
-
-   codeblock (body) {
-	int i = 0;
-	for (; i < $val(numSample); i++) {
-		$ref(output,i).real = FIX_Fix2Double($ref(input,i));
-		$ref(output,i).imag = 0;
-	}
-   }
 	go {
 		addCode(body);
 	}
+
+	// a wrap-up method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::wrapup()
 }
