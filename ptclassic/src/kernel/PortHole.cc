@@ -153,6 +153,12 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	return;
 }
 
+// set delay by adjusting geodesic.
+void PortHole :: setDelay (int delays) {
+	if (myGeodesic)
+		myGeodesic->setDelay (delays);
+}
+
 // This is not a GenericPort method because the concept of disconnecting
 // a multiporthole is ambiguous.  Since fancier geodesics work differently,
 // this is virtual -- redefined for some domains.
@@ -181,6 +187,8 @@ PortHole :: PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
 // Porthole destructor.
 PortHole :: ~PortHole() {
 	disconnect();
+	if (parent())
+		parent()->removePort(*this);
 	LOG_DEL; delete myBuffer;
 }
 
@@ -294,12 +302,21 @@ int MultiPortHole :: isItMulti() const { return TRUE;}
 
 void MultiPortHole :: initialize() {}
 
-// MPH destructor: delete all contained portholes
-MultiPortHole :: ~MultiPortHole() {
+// MPH constructor
+MultiPortHole :: MultiPortHole() : peerMPH(0), busDelay(0) {}
+
+// delete and reinitialize the porthole list.  Any bus connection is
+// broken as well.
+void MultiPortHole :: delPorts () {
 	MPHIter next(*this);
 	PortHole* p;
 	while ((p = next++) != 0) {
 		LOG_DEL; delete p;
+	}
+	ports.initialize();
+	if (peerMPH) {
+		peerMPH->peerMPH = 0;
+		peerMPH = 0;
 	}
 }
 
@@ -308,6 +325,10 @@ MultiPortHole :: printVerbose () const {
 	StringList out;
 	out = "Multi ";
 	out += GenericPort::printVerbose();
+	if (peerMPH) {
+		out += "bus connection to multiporthole ";
+		out += peerMPH->readFullName();
+	}
 	out += "This MultiPortHole contains ";
 	out += numberPorts();
 	out += " PortHoles.\n";
@@ -490,7 +511,8 @@ PortHole& MultiPortHole :: installPort(PortHole& p) {
 	ports.put(p);
 	parent()->addPort(p.setPort(newName(), parent(), type));
 	p.inheritTypeFrom(*this);
-	p.setMyMultiPortHole(this);
+	// we can do the following as a friend function
+	p.myMultiPortHole = this;
 	return p;
 }
 
@@ -514,6 +536,24 @@ PortHole& MultiPortHole :: newConnection() {
 	return newPort();
 }
 
+// Create a bus connection between two multiportholes.
+// any pre-existing connection to either is broken.
+// if bus already exists we can efficiently do nothing or widen it.
+
+void MultiPortHole :: busConnect (MultiPortHole& peer, int width, int del) {
+	if (peerMPH == &peer && del == busDelay && width >= numberPorts()) {
+		// fast way: do nothing or widen existing bus
+		for (int i = numberPorts(); i < width; i++)
+			connect (peer, del);
+		return;
+	}
+	// slow way: disconnect, build the bus.
+	delPorts();
+	peer.delPorts();
+	for (int i = 0; i < width; i++)
+		connect (peer, del);
+	busDelay = del;
+}
 
 // allocate a new Geodesic.  Set its name and parent according to the
 // source porthole (i.e. *this).

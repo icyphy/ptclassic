@@ -192,7 +192,13 @@ inline int hidden(const GenericPort& p) { return p.attributes() & PB_HIDDEN; }
 class PortHole : public GenericPort
 {
 	friend class Geodesic;	// allow Geodesic to access myPlasma
+
+	// the following function may set indices
 	friend setPortIndices(Galaxy&);
+
+	// the following function may set myMultiPortHole
+	friend MultiPortHole::installPort(PortHole&);
+
 public:
 
         // Every PortHole must be initialized with the setPort function
@@ -267,10 +273,13 @@ public:
 	// index value
 	int index() const { return indexValue;}
 
-	// set or return the MultiPortHole that spawned this PortHole, or NULL
+	// return the MultiPortHole that spawned this PortHole, or NULL
 	// if there is no such MultiPortHole.
+
 	MultiPortHole* getMyMultiPortHole() const { return myMultiPortHole; }
-	void setMyMultiPortHole(MultiPortHole* m) { myMultiPortHole = m; }
+
+	// adjust the delay on the connection
+	virtual void setDelay (int);
 
 protected:
         // Indicate the real port (aliases resolved) at the far end
@@ -365,7 +374,12 @@ class MultiPortHole: public GenericPort
 	friend class MPHIter;
 	friend class CMPHIter;
 public:
+	MultiPortHole();
+
 	void initialize();
+
+	// make a bus connection with another multiporthole
+	void busConnect (MultiPortHole&, int width, int delay = 0);
 
 	// virtual function to identify multi-ness
 	int isItMulti() const; // {return TRUE;}
@@ -406,7 +420,7 @@ public:
 	Plasma* setPlasma(Plasma *useType = NULL);
 
 	// destructor
-	~MultiPortHole();
+	~MultiPortHole() { delPorts();}
 protected:                           
         // List of ports allocated
         PortList ports;
@@ -416,6 +430,16 @@ protected:
 
 	// add a newly created port to the multiporthole
 	PortHole& installPort(PortHole& p);
+
+	// delete all contained portholes
+	void delPorts();
+
+private:
+	// peer multiporthole in a bus connection
+	MultiPortHole* peerMPH;
+
+	// delay on portholes in a bus connection
+	int busDelay;
 };
 
         //////////////////////////////////////////
