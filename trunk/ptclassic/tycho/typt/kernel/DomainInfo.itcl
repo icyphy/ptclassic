@@ -52,8 +52,9 @@ catch {delete class DomainInfo}
 # ptcl is present in pigi, ptiny, ptrim, ptcl, ptcl.ptiny, ptcl.ptrim
 # pitcl is present in tycho -pigi, tycho -ptiny, tycho -ptrim,
 # pitcl, pitcl.ptiny, pitcl.ptrim 
+# 
 # FIXME: once pitcl is everywhere, the older ptcl sections of this class
-# should be removed
+# should be removed.
 #
 class ::tycho::DomainInfo {
     inherit ::tycho::Object
@@ -64,52 +65,55 @@ class ::tycho::DomainInfo {
     ###################################################################
     ####                         public methods                    ####
 
-    # Return the descriptor for starName
+    # Return the descriptor for starName.
     method descriptor {starName} {}
 
-    # Return the multiports for starName
+    # Return the multiports for starName.
     method multiports {starName} {}
 
-    # Return the ports for starName
+    # Return the ports for starName.
     method ports {starName} {}
 
-    # Print all the stars in the current DomainInfo object
-    method print {}
-    
-    # Print one star in the current DomainInfo object
+    # Return the 'print' output for one star in the current DomainInfo object.
     method printStar {id}
 
-    # Return a list of all the stars
+    # Return the 'print' output for all the stars in the current DomainInfo object.
+    method printStars {}
+    
+    # Return a list of all the stars.
     method stars {} {}
 
-    # Return the states for starName
+    # Return the states for starName.
     method states {starName} {}
 
     ###################################################################
     ####                      public procs                         ####
 
-    # Return a list of all the domains
+    # Return a list of all the domains.
     public proc domains {}
 
-    # Bring up ListBox with all the domains, return the user's choice
+    # Bring up ListBox with all the domains, return the user's choice.
     public proc domainBrowser { {msg "Choose a Domain:"} {default {}} } {}
 
-    # Compare two domainInfo objects
+    # Compare two domainInfo objects.
     public proc diffDomains {domainA domainB}
 
-    # Return the list of known blocks in domain
+    # Return the list of known blocks in domain.
     public proc knownBlocks {domain}
+
+    # Return the 'print' output for starName in domain.
+    method print {starName domain}
 
     ###################################################################
     ####                   protected procs                         ####
 
-    # Compare two domainInfo objects
+    # Compare the stars in two domainInfo objects.
     protected proc diffStars {domainA domainB}
 
     ###################################################################
     ####                   private methods                         ####
 
-    # Return the star information as a list of keyword value pairs
+    # Return the star information as a list of keyword value pairs.
     private method starInfo {starName}
 
     ###################################################################
@@ -189,10 +193,10 @@ body ::tycho::DomainInfo::states {starName} {
 }
 
 #######################################################################
-#### print
+#### printStars
 # Print all the stars in the current DomainInfo object
 #
-body ::tycho::DomainInfo::print {} {
+body ::tycho::DomainInfo::printStars {} {
     foreach id [array names stars] {
        lappend results [printStar $id ]
     }
@@ -201,7 +205,11 @@ body ::tycho::DomainInfo::print {} {
 
 #######################################################################
 #### printStar
-# Print all the stars in the current DomainInfo object
+# Print one star in the current DomainInfo object
+# DomainInfo::printStar differs from DomainInfo::print in that printStar
+# returns a list of elements for a star in the DomainInfo object,
+# and print returns a string for any star in any domain.
+#
 body ::tycho::DomainInfo::printStar {id} {
     set stateList [lindex [states $id] 1]
     set stateResults {}
@@ -221,7 +229,7 @@ body ::tycho::DomainInfo::printStar {id} {
 
 #######################################################################
 #### domains
-# Return a list of all the domains
+# Return a list of all the domains.
 #
 body ::tycho::DomainInfo::domains {} {
     if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
@@ -281,16 +289,22 @@ body  ::tycho::DomainInfo::knownBlocks {domain} {
     }
 }
 
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
+#######################################################################
+#### print
+# Given the starName and domain, print the star
+#
+body ::tycho::DomainInfo::print {starName domain} {
+    if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+        return [::pitcl::print $starName $domain]
+    } {
+        ::domain $domain
+        return [::print $starName]
+    }
+}
 
     ###################################################################
     ###################################################################
     ####                      protected procedures                 ####
-
 
 #######################################################################
 #### diffStars
