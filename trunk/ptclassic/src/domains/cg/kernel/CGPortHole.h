@@ -71,6 +71,12 @@ public:
         // consumed in this PortHole when the Star fires.
         virtual void advance();
 
+	// The buffer assigned to this porthole is embedded in a buffer:
+	// ex) input.embed(output) means that the buffer of the input
+	// porthole contains the buffer of the output porthole.
+	void embed(CGPortHole& p) { p.embeddedPort = this; }
+	CGPortHole* embedded() { return embeddedPort; }
+
 	// return true if I am a fork input
 	int fork() const { return forkDests.size();}
 
@@ -86,6 +92,9 @@ protected:
 	// Stuff to support fork buffers
 	SequentialList forkDests;
 	CGPortHole* forkSrc;
+	
+	// Where I am embedded.
+	CGPortHole* embeddedPort;
 };
 
 	///////////////////////////////////////////
