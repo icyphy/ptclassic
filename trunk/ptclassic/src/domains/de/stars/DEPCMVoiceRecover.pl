@@ -12,11 +12,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { DE main palette }
 
 	desc {
-This star inputs a stream of SeqATMCell objects.  All of the
+This star inputs a stream of
+.c SeqATMCell
+objects.  All of the
 information bits in the objects received with correct sequence
 numbers are sent to 'output'.
 
-If a missing SeqATMCell object is detected, then this star sends the most
+If a missing
+.c SeqATMCell
+object is detected, then this star sends the most
 recent 8 * 'tempSize' received bits to the 'temp' output, and the
 most recent (8 * 'searchWindowSize' + 'numInfoBits') received bits
 to the 'window' output.
@@ -37,7 +41,7 @@ whether or not a packet has been dropped during network
 transmission.  If the missing packet is one of the
 first five
 .c SeqATMCell
-s to be sent over the network, then this star will substitutue
+s to be sent over the network, then this star will substitute
 all zero bits for the bits which were lost during
 transmission.  These bits are sent through the \fIoutput\fR
 port.  If the dropped packet was not one of the first
@@ -73,7 +77,7 @@ galaxy will take the \fInumInfoBits\fR / 8 samples
 from the \fIwindow\fR samples following the \fIwindow\fR's
 best match with the \fItemp\fR samples. These samples
 are then encoded, loaded into a
-.SeqATMCell
+.c SeqATMCell
 and sent back to the DE domain where they enter the
 \fIsubIn\fR port of this star.  This star unloads
 the bits from this
