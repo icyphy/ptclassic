@@ -29,7 +29,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 	        name { scale }
 		type { float }
-		default { "1.0" }
+		default { "32767.0" }
 		desc { Input scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
@@ -38,36 +38,46 @@ limitation of liability, and disclaimer of warranty provisions.
                 #define UpperBound (32767) 
                 #define LowerBound (-32768)
 	}
+	protected{
+	  short *packedout;
+	  int allocflag;
+	}
+	constructor{
+	  packedout = 0;
+	  allocflag = 0;
+	}
+	destructor{
+	  free(packedout);
+	  allocflag = 0;
+	}
         setup {
-                In.setSDFParams(NumIn,NumIn);
+	  if (allocflag == 0){
+	    packedout = (short *)
+	      memalign(sizeof(double),sizeof(double));
+	    allocflag = 1;
+	  }
+	  In.setSDFParams(NumIn,NumIn);
         }
 	go {
-	  int i;
 
-	  union vis_dreg {
-	    double dreg64;
-	    short  sreg16[NumIn];
-	  };
-
-	  union vis_dreg packedout; 
-	  double intmp[NumIn];
-
-	  /*scale input to reduce possibility of overflow*/
-	  for (i=NumIn;i>0;i--){
-	  intmp[i-1] = double(scale)*double(In%(i-1));
-	  }
+	  int index;
+	  double invalue;
+	  double *outvalue;
 	  
-	  /*check bounds of the input and cast each float to short*/
-	  for (i=NumIn;i>0;i--){
-	  if (intmp[i-1] <= double(LowerBound))
-	    packedout.sreg16[i-1] = double(LowerBound);
-	  else if (intmp[i-1] >= double(UpperBound))
-	    packedout.sreg16[i-1] = double(UpperBound);
-	  else 
-	    packedout.sreg16[i-1] = short(intmp[i-1]);
-	  }
+	  //scale input, check bounds of the input, 
+	      //  and cast each float to short
+	      for (index=0;index<NumIn;index++){
+		invalue = (double) scale * double(In%(index));
+		if (invalue <= (double) LowerBound)
+		  packedout[index] = (short) LowerBound;
+		else if (invalue >= (double) UpperBound)
+		  packedout[index] = (short) UpperBound;
+		else 
+		  packedout[index] = (short) invalue;
+	      }
 
 	  /*output packed double*/	  
-	  Out%0 << packedout.dreg64;
+	  outvalue = (double *) packedout;
+	  Out%0 << *outvalue;
 	}
 }
