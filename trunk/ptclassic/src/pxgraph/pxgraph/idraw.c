@@ -1,6 +1,6 @@
 /*******************************************************************
 SCCS version identification
-@(#)hard_devices.h	1.3 02 Nov 1994
+$Id$
 
 Copyright (c) 1989-1994 The Regents of the University of California.
 All rights reserved.
