@@ -484,32 +484,32 @@ endif
 
 ifdef SDF 
 	PALETTES += PTOLEMY/src/domains/sdf/icons/sdf.pal
-	ifdef SDFTK
-		CUSTOM_DIRS += $(SDFDIR)/tcltk/stars
-		SDFDSP=1
-		SDFDMM = 1
-		STARS += $(LIBDIR)/sdftclstars.o
-		LIBS += -lsdftclstars
-		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
-	endif
 	ifdef ATM
 		CUSTOM_DIRS += $(SDFDIR)/atm/stars
 		LIBS += -lsdfatmstars
 		LIBFILES += $(LIBDIR)/libsdfatmstars.$(LIBSUFFIX)
-	endif
-	ifdef SDFDSP 
-		CUSTOM_DIRS += $(SDFDIR)/dsp/stars
-		# Cephes library is used by the Window star
-		CEPHESLIB = 1
-		STARS += $(LIBDIR)/sdfdspstars.o
-		LIBS += -lsdfdspstars
-		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
 	endif
 	ifdef SDFDMM
 		CUSTOM_DIRS += $(SDFDIR)/dmm/stars
 		STARS += $(LIBDIR)/sdfdmmstars.o
 		LIBS += -lsdfdmmstars
 		LIBFILES += $(LIBDIR)/libsdfdmmstars.$(LIBSUFFIX)
+		SDFTK = 1
+	endif
+	ifdef SDFTK
+		CUSTOM_DIRS += $(SDFDIR)/tcltk/stars
+		STARS += $(LIBDIR)/sdftclstars.o
+		LIBS += -lsdftclstars
+		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
+		SDFDSP = 1
+	endif
+	ifdef SDFDSP 
+		CUSTOM_DIRS += $(SDFDIR)/dsp/stars
+		STARS += $(LIBDIR)/sdfdspstars.o
+		LIBS += -lsdfdspstars
+		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
+		# Cephes library is used by the Window star
+		CEPHESLIB = 1
 	endif
 	ifdef SDFMATRIX 
 		CUSTOM_DIRS += $(SDFDIR)/matrix/stars
