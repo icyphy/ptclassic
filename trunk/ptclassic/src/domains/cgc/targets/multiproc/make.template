@@ -41,7 +41,7 @@ PLSRC = $(PL_SRCS:.pl=.cc)
 
 SRCS =	CreateSDFStar.cc CompileCGSubsystems.cc \
 	CGCMultiTarget.cc CGCBDFTarget.cc \
-	CGCDDFCode.cc CGCMacroStar.cc 
+	CGCDDFCode.cc CGCMacroStar.cc \
 	CGCMakefileTarget.cc \
 	$(PLSRC) 
 
