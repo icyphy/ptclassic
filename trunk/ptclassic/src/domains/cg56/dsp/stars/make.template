@@ -62,6 +62,7 @@ PL_SRCS= \
  CG56FFTCx.pl \
  CG56Goertzel.pl \
  CG56GoertzelPower.pl \
+ CG56IIR.pl \
  CG56LMS.pl \
  CG56LMSOscDet.pl \
  CG56LMSRx.pl \
