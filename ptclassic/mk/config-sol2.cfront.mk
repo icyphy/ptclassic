@@ -98,6 +98,8 @@ XPM_DEFINES =	-DZPIPE -DSYSV $(X11_INCSPEC)
 
 # Defines to build xv
 XMKMF =		/usr/openwin/bin/xmkmf
-XV_CC =		cc -Xs -I/usr/openwin/include \
+# -Xs is needed for the varargs code in xv/tiff
+# -w turns of warnings.  xv/bitmaps.h causes _lots_ of warnings
+XV_CC =		cc -Xs -w -I/usr/openwin/include \
 		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY -L/usr/openwin/lib
 XV_RAND = 	-DNO_RANDOM
