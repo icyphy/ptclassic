@@ -59,6 +59,7 @@ class StringList;
 class InfString;
 class GenericPort;
 class PortHole;
+class State;
 
 /////////////////////////////////////////////////////////////////////
 //// IUList
@@ -209,6 +210,7 @@ public:
 
     int abort(int argc,char** argv);
     int addBlock(int argc,char** argv);
+    int addState(int argc,char** argv);
     int addUniverse(int argc,char** argv);
     int aliasDown(int argc,char** argv);
     int aliasUp(int argc,char** argv);
@@ -232,14 +234,15 @@ public:
     int getFullName(int argc,char** argv);
     int getParent(int argc,char** argv);
     int halt(int argc,char** argv);
-    int initialize(int argc,char** argv);
+    int initBlock(int argc,char** argv);
+    int initState(int argc,char** argv);
     int isGalaxy(int argc,char** argv);
     int isMultiPort(int argc,char** argv);
     int isWormhole(int argc,char** argv);
     int knownBlocks(int argc,char** argv);
     int knownDomains(int argc,char** argv);
+    int knownUniverses(int argc,char** argv);
     int link(int argc,char** argv);
-    int listobjs(int argc,char** argv);
     int matlab(int argc,char** argv);
     int mathematica(int argc,char** argv);
     
@@ -249,7 +252,6 @@ public:
     int monitorPtcl(int argc,char** argv);
     
     int multilink(int argc,char** argv);
-    int newstate(int argc,char** argv);
     int node(int argc,char** argv);
     int nodeconnect(int argc,char** argv);
     int pragma(int argc,char** argv);
@@ -258,7 +260,6 @@ public:
     int ports(int argc,char** argv);
     int portsContained(int argc,char** argv);
     int remove(int argc,char** argv);
-    int renameuniv(int argc,char** argv);
     int registerAction(int argc,char** argv);
     int reset(int argc,char** argv);
     int run(int argc,char** argv);
@@ -266,12 +267,12 @@ public:
     int schedtime(int argc,char** argv);
     int schedule(int argc,char** argv);
     int seed(int argc,char** argv);
-    int setstate(int argc,char** argv);
-    int statevalue(int argc,char** argv);
+    int setState(int argc,char** argv);
+    int states(int argc,char** argv);
+    int stateValue(int argc,char** argv);
     int target(int argc,char** argv);
     int targetparam(int argc,char** argv);
     int targets(int argc,char** argv);
-    int univlist(int argc,char** argv);
     int wrapup(int argc,char** argv);
 
 
@@ -319,7 +320,10 @@ protected:
     InterpGalaxy* getParentGalaxy(const char*);
     
     // Return a pointer to a port with the given name.
-    GenericPort* getPort(const char*);
+    const GenericPort* getPort(const char*);
+    
+    // Return a pointer to a state with the given name.
+    const State* getState(const char*);
     
     // Add this object to the table of PTcl objects.
     void makeEntry();
