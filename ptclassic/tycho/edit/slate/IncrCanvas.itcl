@@ -1075,7 +1075,7 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
 # item with that tag.
 #
 body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
-    eval $canvas lower $tag $aboveThis
+    eval $canvas lower $tag $belowThis
 }
 
 #######################################################################
