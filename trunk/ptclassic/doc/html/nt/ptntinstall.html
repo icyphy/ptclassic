@@ -91,6 +91,9 @@ and you will need to update your path.
 
 <ol>
 
+<li> Since Ptolemy has lots of small files, you are better off 
+avoid FAT partitions and placing the sources on a NTFS partition.
+
 <LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
 tar file from
 <a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html</CODE></a>
@@ -99,6 +102,8 @@ tar file from
 tar -ztvf pt0.7.1.src.tar.gz
 tar -ztvf pt0.7.1.other.src.tar.gz
 </PRE>
+If you get a warning like <CODE>tar: Error exit delayed from previous errors</CODE>, you can ignore it.  The warning probably comes from files that 
+are included twice in the tar file because of symbolic links.
 
 <li> Building Itcl, Octtools and Ptolemy will require about 400Mb of
 space for the sources, build directories and installation directories.
@@ -170,6 +175,27 @@ you will get errors while configuring Itcl.
 cd $PTOLEMY
 make -k everything &gt;&amp; make.out
 </pre>
+
+<li> You can safely ignore the following warnings and errors:
+	<menu>
+	<li> While building Itcl, you may see warnings like:
+<pre>
+checking host system type... Invalid configuration
+`i586-CYGWIN32-NT40': system `NT40' not recognized
+
+</pre>
+	
+	<li> Ignore warnings from X11R6 files of the form:
+<pre>
+type defaults to `int' in declaration
+</pre>
+	
+	<li> Ignore the warning:
+<pre>
+touch: /users/ptolemy/obj.nt4: Permission denied
+</pre>
+
+	</menu>
 
 
 <li> If you have  problems, try
