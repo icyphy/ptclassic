@@ -277,7 +277,7 @@ proc ::tycho::rm { args } {
 # by the user.  The solution is to break the link.
 #
 proc ::tycho::rmLinkIfNotWritable { file } {
-    if {[file exists $file] && ![file writeable $file]} {
+    if {[file exists $file] && ![file writable $file]} {
 	catch {::tycho::rm -f $file}
     }
 
