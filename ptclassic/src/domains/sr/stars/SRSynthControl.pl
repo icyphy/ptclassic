@@ -118,8 +118,9 @@ limitation of liability, and disclaimer of warranty provisions.
     // Fill the pitch array with equal-tempered pitch values
 
     for ( int pi = 128 ; --pi >= 0 ; ) {
-      frequencyOfPitch[pi] = double(AFreq) * pow( double(pi-56) / 12.0, 2.0 );
-      cout << "Pitch " << pi << " frequency " << frequencyOfPitch[pi] << '\n';
+	frequencyOfPitch[pi] = double(AFreq) * exp((pi-56.0)*log(2.0)/12.0);
+	/*	cout << "Pitch " << pi << " frequency "
+	     << frequencyOfPitch[pi] << '\n'; */
     }
 
     // Verify the number of ports
