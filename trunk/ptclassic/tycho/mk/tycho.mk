@@ -37,13 +37,13 @@
 # The home of the Java Developer's Kit (JDK)
 # Generating Java documentation uses this makefile variable
 # JAVAHOME = 	/opt/SUNWjws/JDK
-JAVAHOME = 	/opt/jdk1.1
+JAVAHOME = 	/opt/jdk1.1.1
 
 # Location of the Java html documentation.
 # The file java.lang.Object.html should
 # be at $JAVAHTMLDIR/java.lang.Object.html
 # JAVAHTMLDIR = 	/opt/SUNWjws/JWS/lib/html/java/api
-JAVAHTMLDIR = 	/opt/jdk1.1/docs/api
+JAVAHTMLDIR = 	/opt/jdk1.1.1/docs/api
 
 ########## You should not have to change anything below this line ######
 
