@@ -38,38 +38,8 @@ Programmer: Jose Luis Pino
 #include "GraphUtils.h"
 #include "InfString.h"
 #include "GalIter.h"
+#include "Cluster.h"
 #include <string.h>
-
-
-DSBlockPortIter::DSBlockPortIter(Block& b,int (*test)(PortHole&))
-:DSNamedObjIter(), testPort(test)
-{
-    BlockPortIter nextPort(b);
-    PortHole *port;
-    while ((port = nextPort++) != NULL)
-	put(*port);
-    initInternalIterator();
-}
-
-DSGalAllBlockIter::DSGalAllBlockIter(Galaxy&g,int(*test)(Block&))
-:DSBlockIter(test)
-{
-    GalAllBlockIter nextBlock(g);
-    Block *block;
-    while ((block = nextBlock++) != NULL)
-	put(*block);
-    initInternalIterator();
-}
-
-DSGalTopBlockIter::DSGalTopBlockIter(Galaxy&g,int(*test)(Block&))
-:DSBlockIter(test)
-{
-    GalTopBlockIter nextBlock(g);
-    Block *block;
-    while ((block = nextBlock++) != NULL)
-	put(*block);
-    initInternalIterator();
-}
 
 // function to count stars in a galaxy
 int totalNumberOfStars(Galaxy& g) {
@@ -85,15 +55,21 @@ Block* BlockParentIter::next() {
     return current;
 }
 
+inline InfString dotName(Block& b) {
+    InfString name;
+    name << b.name() << "_" << b.flags[0];
+    replaceString(name,"=","_");
+    replaceString(name,".","_");
+    return name;
+}
+
 StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
     StringList dot;
     GalTopBlockIter nextBlock(galaxy);
     Block* block;
     while ((block = nextBlock++) != NULL) {
-	InfString blockName = block->className();
-	blockName << "_" << block->flags[0];
-	replaceString(blockName,"=","_");
-	replaceString(blockName,".","_");
+	InfString blockName;
+	blockName << dotName(*block);
 	if (! block->isItAtomic()) {
 	    StringList clusterDepth = depth;
 	    clusterDepth << "  ";
@@ -101,27 +77,8 @@ StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
 		<< printTopBlockDot(block->asGalaxy(),clusterDepth)
 		<< depth << "}\n";
 	}
-	else {
-	    BlockPortIter nextPort(*block);
-	    PortHole *port;
-	    while ((port = nextPort++) != NULL) {
-		if (port->isItOutput()) {
-		    InfString sinkName =
-			port->far()->realPort().parent()->className();
-		    sinkName <<"_"<<port->far()->realPort().parent()->flags[0];
-		    replaceString(sinkName,"=","_");
-		    replaceString(sinkName,".","_");    
-		    dot << depth << blockName << " -> " << sinkName << ";\n";
-		}
-	    }
-	    // Special case for peek-poke ports
-// 	    if (!strncmp("Poke",blockName,4)) {
-// 		InfString peekName = blockName;
-// 		strncpy(peekName,"Peek",4);
-// 		dot << depth << blockName << " -> " << peekName
-// 		    << "[style = \"dotted\"];\n"; 
-// 	    }
-	}
+	else
+	    dot << depth << blockName << ";\n";
     }
     return dot;
 }
@@ -131,8 +88,55 @@ StringList printDot(Galaxy& galaxy) {
     StringList dot;
     dot << "digraph " << galaxy.name() << " {\n"
 	<< "  node [shape=record,width=.1,height=.1];\n"
-	<< printTopBlockDot(galaxy,"  ") << "}\n";
+	<< printTopBlockDot(galaxy,"  ");
+    GalStarIter nextStar(galaxy);
+    Star* source;
+    while ((source = nextStar++) != NULL) {
+	InfString sourceName;
+	sourceName << dotName(*source);
+	SuccessorIter nextSuccessor(*source);
+	Block* successor;
+	while ((successor = nextSuccessor++) != NULL)
+	    dot << "  " << sourceName << " -> " << dotName(*successor) << ";\n";
+    }
+    dot << "}\n";
     return dot;
+}
+
+StringList printClusterDot(Galaxy& galaxy) {
+    numberAllBlocks(galaxy);
+    StringList dot;
+    dot << "digraph " << galaxy.name() << " {\n"
+	<< "  node [shape=record,width=.1,height=.1];\n";
+    ClusterIter nextCluster(galaxy);
+    Cluster* cluster;
+    while ((cluster = nextCluster++) != NULL) {	
+	InfString sourceName;
+	sourceName << dotName(*cluster);
+	if (!cluster->numberBlocks())
+	    dot << "  " << sourceName << ";\n";
+ 	SuccessorIter nextSuccessor(*cluster);
+	Block* successor;
+	while ((successor = nextSuccessor++) != NULL)
+	    dot << "  " << sourceName << " -> " << dotName(*successor) <<";\n";
+    }
+    dot << "}\n";
+    return dot;
+}
+	
+void cleanupAfterCluster(Galaxy& g) {
+    GalTopBlockIter nextBlock(g);
+    Block* block;
+	
+    while ((block = nextBlock++) != NULL) {
+	if (! block->isItAtomic() &&
+	    ! block->asGalaxy().numberBlocks()) {
+	    delete block;
+	    nextBlock.remove();
+	}
+	else if (block->parent() != &g)
+	    nextBlock.remove();
+    }
 }
 
 void replaceString(char* master, const char* match, const char* insert) {
@@ -174,86 +178,10 @@ void resetFlags(Galaxy& galaxy,int flagLocation) {
 	block->flags[flagLocation] = 0;
 }
 
-GraphMatrix::GraphMatrix(Galaxy& g, int flag):
-IntMatrix(g.numberBlocks(),g.numberBlocks()){
-    flagLoc = flag;
-    graphBlock = NULL;
-    *(IntMatrix*)this = 0;
-
-    graphBlock = new (Block*)[g.numberBlocks()];
-
-    numBlocks = 0;
-    GalTopBlockIter nextBlock(g);
-    Block* block;
-    while ((block = nextBlock++) != NULL) {
-	graphBlock[numBlocks] = block;
-	block->flags[flagLoc] = numBlocks++;
-    }
-}
-
-GraphMatrix::~GraphMatrix() {
-    delete [] graphBlock;
-}
-
-int GraphMatrix::cluster(Block& replacement,int a, int b) {
-    if ( ! (0 <= a < numBlocks && 0 <= b < numBlocks)) return FALSE;
-    graphBlock[a] = &replacement;
-    graphBlock[b] = NULL;
-    return TRUE;
-}
-
-// int GraphMatrix::clusterByBlockRefs(Block& replacement, Block& a, Block& b) {
-//     if (&a == &b) return TRUE;
-//     if ( ! 0 <= a.flags[flagLoc] < numBlocks ||
-// 	 ! 0 <= b.flags[flagLoc] < numBlocks)
-// 	return FALSE;
-//     return clusterByMatrixIndex(replacement,a.flags[flagLoc],b.flags[flagLoc]);
-// }
-
-StringList GraphMatrix::print() {
-    StringList out;
-    int i;
-    out << "Index\tName\n";
-    for (i = 0 ; i < numBlocks; i++)
-	out << i << '\t'
-	    << (graphBlock[i]?graphBlock[i]->name():"Ignore")
-	    << '\n';
-    out << '\n' << IntMatrix::print();
-    return out;
-}
-
-TopologyMatrix::TopologyMatrix(Galaxy& g,int flagLocation):
-GraphMatrix(g,flagLocation) {
-    identity();
-    GalTopBlockIter nextBlock(g);
-    Block* block;
-    while ((block = nextBlock++) != NULL) {
-	int blockIndex = block->flags[flagLocation];
-	BlockPortIter nextPort(*block);
-	PortHole *port;
-	while ((port = nextPort++) != NULL) {
-	    // Assumes that all ports are connected and all ports
-	    // have a parent
-	    int sourceIndex, sinkIndex;
-	    if (port->isItInput()) {
-		sourceIndex = port->far()->parent()->flags[flagLocation];
-		sinkIndex = blockIndex;
-	    }
-	    else {
-		sourceIndex = blockIndex;
-		sinkIndex = port->far()->parent()->flags[flagLocation];
-	    }
-	    (*this)[sourceIndex][sinkIndex] = TRUE;
-	}
-    }
-}
-
-int TopologyMatrix::cluster(Block& replacement, int a, int b) {
-    int i;
-    if (!GraphMatrix::cluster(replacement,a,b)) return FALSE;
-    for (i=0 ; i < numBlocks ; i++) {
-	(*this)[a][i] = (*this)[a][i] || (*this)[b][i];
-	(*this)[i][a] = (*this)[i][a] || (*this)[i][b];
-    }
-    return TRUE;
+void deleteGalaxy(Galaxy&g) {
+    BlockPortIter nextPort(g);
+    PortHole* port;
+    while ((port = nextPort++) != NULL)
+	delete port;
+    delete &g;
 }
