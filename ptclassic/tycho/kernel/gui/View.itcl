@@ -225,12 +225,15 @@ body ::tycho::View::getReadOnly {} {
 
 #########################################################################
 #### menubar
-# If there is a menu bar associated with this view, use the arguments
+# With no arguments, return this view's menubar. Otherwise,
+# if there is a menu bar associated with this view, use the arguments
 # as a command to issue to the Menubar, and return whatever is returned
 # by the command.  Otherwise, return an empty string.
 #
 body ::tycho::View::menubar {args} {
-    if {$myMenubar != {}} {
+    if { $args == "" } {
+        return $myMenubar
+    } elseif {$myMenubar != {}} {
         return [eval $myMenubar $args]
     } {
         return {}
@@ -247,12 +250,15 @@ body ::tycho::View::putStatus {string} {
 
 #########################################################################
 #### statusbar
-# If there is a status bar associated with this view, use the arguments
+# With no arguments, return this view's status bar. Otherwise,
+# if there is a status bar associated with this view, use the arguments
 # as a command to issue to the StatusBar, and return whatever is returned
 # by the command.  Otherwise, return an empty string.
 #
 body ::tycho::View::statusbar {args} {
-    if {$myStatusbar != {}} {
+    if { $args == "" } {
+        return $myStatusbar
+    } elseif {$myStatusbar != {}} {
         return [eval $myStatusbar $args]
     } {
         return {}
@@ -261,14 +267,17 @@ body ::tycho::View::statusbar {args} {
 
 #########################################################################
 #### toolbar
-# If there is a tool bar associated with this view, use the arguments
+# With no arguments, return this view's tool bar. Otherwise,
+# if there is a tool bar associated with this view, use the arguments
 # as a command to issue to the toolbar, and return whatever is returned
 # by the command.  Otherwise, return an empty string.
 #
 body ::tycho::View::toolbar {args} {
-    if {$myToolbar != {}} {
+    if { $args == "" } {
+        return $myToolbar
+    } elseif {$myToolbar != {}} {
         return [eval $myToolbar $args]
-    } {
+    } else {
         return {}
     }
 }
