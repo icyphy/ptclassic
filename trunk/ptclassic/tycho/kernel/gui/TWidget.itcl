@@ -383,6 +383,7 @@ body ::tycho::TWidget::itk_initialize {args} {
 #####################################################################
 #### safeEval
 # Prevent destruction of this object while evaluating the arguments.
+# Return the result of evaluating the arguments.
 # Destruction will be cancelled by invoking a silent error, and will
 # be scheduled for another attempt in the future.
 # <p>
