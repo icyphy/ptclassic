@@ -170,12 +170,13 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& /*readyNodes*/)
 	   EGGate* g;
 	   for (int i = 2; i > 0; i--) {	// loop twice
 		while ((g = giter++) != 0) {
+			int num = g->samples();
+			if (num == 0) continue;
 			if (hidden && g->isItInput()) continue;
 			ParNode* desc = (ParNode*)(g->farEndNode());
 			int from = pg->whichProc();
 			int to = desc->whichProc();
 			if (from != to) {
-				int num = g->samples();
 
 				// make comm nodes.
 				// 1. compute communication times.
