@@ -273,9 +273,15 @@ body ::tycho::Glimpse::updateTychoDatabase {} {
     set savedir [pwd]
     cd $TYCHO
 
+    # Create a monitor window and make it run make glimpse.
     set win [::tycho::autoName .glimpseExec]
-    ::tycho::Monitor $win -command {make glimpse} -dir [file join $TYCHO]
-    $win centerOnScreen
+    ::tycho::Monitor $win \
+            -command {make glimpse} \
+            -dir [file join $TYCHO] \
+            -autostart 1 -autodestroy 1
+
+    # Not needed any more because the above will map the window
+    # $win centerOnScreen
 
     cd $savedir
 }
