@@ -30,11 +30,11 @@ Methods for class Galaxy
 
 
 	////////////////////////////////////
-	// Galaxy::printVerbose()
+	// Galaxy::printRecursive()
 	////////////////////////////////////
 
 StringList
-Galaxy :: printVerbose () {
+Galaxy :: printRecursive () {
 	StringList out;
 	out = "GALAXY: ";
 	out += readFullName();
@@ -49,10 +49,33 @@ Galaxy :: printVerbose () {
 	out += printStates("Galaxy");
 	out += "Blocks in the Galaxy:----------------------------------\n";
 	for(int i = numberBlocks(); i>0; i--)
-		out += nextBlock().printVerbose();
+		out += nextBlock().printRecursive();
 	return out;
 }
 
+	////////////////////////////////////
+	// Galaxy::printVerbose()
+	////////////////////////////////////
+
+StringList
+Galaxy :: printVerbose () {
+	StringList out;
+	out = "GALAXY: ";
+	out += readFullName();
+	out += "\n";
+	out += "Descriptor: ";
+	out += readDescriptor();
+	out += "\n";
+	out += "Contained blocks: ";
+	for (int i = numberBlocks(); i>0; i--) {
+		out += nextBlock().readName();
+		if (i > 1) out += ", ";
+	}
+	out += "\n";
+	out += printPorts("Galaxy");
+	out += printStates("Galaxy");
+	return out;
+}
 
         ////////////////////////////////////
         // initState()
