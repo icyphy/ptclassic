@@ -68,6 +68,12 @@ class ::tycho::ProfileTcl {
 
     # Update the times displayed at the bottom.
     method updateTimes {}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # Controls whether profiling is stopped.
+    private variable cancel 0
 }
 
 #######################################################################
@@ -85,7 +91,7 @@ body ::tycho::ProfileTcl::constructor {args} {
             -command "$this busy $this profileDisplay"
     toolbar button cancel \
             -text Cancel \
-            -description {Cancel profile, discarding collected data} \
+            -description {Cancel profile collection or profile rendering} \
             -command "$this profileCancel"
 
     toolbar disable off
@@ -152,10 +158,12 @@ body ::tycho::ProfileTcl::help {} {
 # Turn profiling off and do not report the results.
 #
 body ::tycho::ProfileTcl::profileCancel {} {
-    profile off results
+    set cancel 1
     toolbar disable off
     toolbar disable cancel
     toolbar enable on
+    profile off results
+
 }
 
 #######################################################################
@@ -163,8 +171,10 @@ body ::tycho::ProfileTcl::profileCancel {} {
 # Turn profiling off and report the results.
 #
 body ::tycho::ProfileTcl::profileDisplay {} {
-    clear
     profile off results
+    #parray results
+    clear
+    set cancel 0
     set depth 1
     set maxdepth 1
 
@@ -172,39 +182,61 @@ body ::tycho::ProfileTcl::profileDisplay {} {
     # However, the user might have installed our standalone
     # version of profile, in which case lassign is not present.
 
+    # Place this outside the loop for performance
+    set colors [list black navyblue blue cyan purple magenta red orange \
+            yellow white white]
+
     while {$depth <= $maxdepth} {
+        set count 0
+        set resultssize [array size results]
         set id [array startsearch results]
+        statusbar puts \
+                "depth= $depth of $maxdepth, array is $resultssize elements"
         while {[set entry [array nextelement results $id]] != {}} {
+	    if { $cancel == 1 } {
+		set cancel 0
+		toolbar disable off
+		toolbar disable cancel
+		toolbar enable on
+		redrawGraph
+		return
+	    }
+	    ::tycho::safeUpdate $this
             set len [llength $entry]
             if {$len > $maxdepth} {set maxdepth $len}
             if {$len == $depth} {
-		set count [lindex $results($entry) 0]
-		set real [lindex $results($entry) 1] 
-		set cpu [lindex $results($entry) 2] 
+                set resent $results($entry)
+		set count [lindex $resent 0]
+		set real [lindex $resent 1] 
+		set cpu [lindex $resent 2] 
 
                 set parent [join [lrange $entry 1 end] +]
                 if {$parent == {}} {
                     set color white
+                    set globaltime $cpu
                 } {
                     set fst [graph]
                     array set parcontents [$fst contents $parent]
                     set partime $parcontents(cpu)
                     if {$partime > 0} {
                         set fraction [expr $cpu*10/$partime]
-                        # FIXME: Handle colors better.
-                        set colors [list black navyblue blue cyan purple magenta red orange yellow white white]
                         set color [lindex $colors $fraction]
                     } {
-                        set color black
+                        if {$globaltime > 0} {
+                            set fraction [expr $cpu*10/$globaltime]
+                            set color [lindex $colors $fraction]
+                        } {
+                            set color black
+                        }
                     }
                 }
-                if {$depth >= 2} {
+                if {$depth >= 20} {
                     set open 0
                 } {
                     set open 1
                 }
                 set contents [list \
-                        label [list [lindex $entry 0]] \
+                        label [list [lindex $entry 0] $resent] \
                         color $color \
                         count $count \
                         real $real \
@@ -216,6 +248,7 @@ body ::tycho::ProfileTcl::profileDisplay {} {
         array donesearch results $id
         incr depth
     }
+    
     toolbar disable off
     toolbar disable cancel
     toolbar enable on
@@ -227,6 +260,7 @@ body ::tycho::ProfileTcl::profileDisplay {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileStart {} {
+    set cancel 0
     toolbar enable off
     toolbar enable cancel
     toolbar disable on
