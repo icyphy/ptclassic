@@ -143,24 +143,33 @@ body ::tycho::EditSpell::constructor {args} {
 		"$this replace; break"
     }
 
-    #
     # Create a button box for dictionary buttons
     # FIXME: Layout needs to be improved.
-    #
     itk_component add dbox {
-	button $itk_component(childsite).dbox -text {Dictionary}\
-		-command "$this dictionary" -pady 5 -padx 5 -width 14
+ 	::tycho::ButtonBox $itk_component(childsite).dbox
     } {
-	keep -background -cursor
+ 	keep -background -font -padx -pady
     }
-    pack $itk_component(dbox) -side right  -before $itk_component(querysite)
-    itk_component add lbox {
-	button $itk_component(childsite).lbox -text {Learn} \
-		-command "$this learn" -pady 5 -padx 5 -width 14
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(lbox) -side right -before $itk_component(querysite)
+    $itk_component(dbox) add dictionary -text {Dictionary} \
+ 	    -command "$this dictionary"
+    $itk_component(dbox) add learn -text {Learn} \
+	    -command "$this learn"
+    pack $itk_component(dbox) -side right -before $itk_component(querysite)
+
+#     itk_component add dbox {
+# 	button $itk_component(childsite).dbox -text {Dictionary}\
+# 		-command "$this dictionary" -pady 5 -padx 5 -width 14
+#     } {
+# 	keep -background -cursor
+#     }
+#     pack $itk_component(dbox) -side right  -before $itk_component(querysite)
+#     itk_component add lbox {
+# 	button $itk_component(childsite).lbox -text {Learn} \
+# 		-command "$this learn" -pady 5 -padx 5 -width 14
+#     } {
+# 	keep -background -cursor
+#     }
+#     pack $itk_component(lbox) -side right -before $itk_component(querysite)
 }
 
 ##################################################################
