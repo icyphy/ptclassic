@@ -36,39 +36,21 @@ provisions.
        desc { Audio input port: line_in or internal_cd. }
        attributes { A_GLOBAL }
     }
-    codeblock(globalDecl){
-      union $sharedSymbol(CGCVISStereoIn,regoverlay) {
-	vis_d64 regvaluedbl;
-	vis_s16 regvaluesh[4];
-      };
-    }
-    codeblock(mainDecl){
-      union $sharedSymbol(CGCVISStereoIn,regoverlay) $starSymbol(packit);
-    }
+
     codeblock (convert) {
       /* Convert data in buffer to Output format */
-
-      for (i=0; i <($val(blockSize)/8); i++) {
-	j = 4*i;
-	$starSymbol(packit).regvaluesh[0] = $starSymbol(buf)[j];
-	$starSymbol(packit).regvaluesh[1] = $starSymbol(buf)[j+1];
-	$starSymbol(packit).regvaluesh[2] = $starSymbol(buf)[j+2];
-	$starSymbol(packit).regvaluesh[3] = $starSymbol(buf)[j+3];
-
-	$ref(leftright,i) = $starSymbol(packit).regvaluedbl;	
+      for (i=0;i<($val(blockSize)/2);i++) {
+	$ref(leftright,i) = $starSymbol(buf)[i] /32768.0;
       }
     }
-
+    
     setup {
       CGCStereoBase::setup();
-      leftright.setSDFParams(int(blockSize/8), int(blockSize/8)-1);
+      leftright.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
     }
 
     initCode {
       CGCStereoBase::initCode();
-      addInclude("<vis_types.h>");
-      addGlobal(globalDecl,"CGCVISStereoIn_globalDecl");
-      addDeclaration(mainDecl);
       if (standardIO) {
 	addCode(noOpen);
       }
@@ -88,7 +70,7 @@ provisions.
     }
 
     go {
-      addDeclaration("int i, j;");
+      addDeclaration("int i;");
       addCode(read);
       addCode(convert);
     }
