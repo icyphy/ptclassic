@@ -89,7 +89,9 @@ gnu_clean:
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) clean)
 
 # For hppa
-hpgnu_all: $(OBJARCH)/gnu
+# No need to depend on  $(OBJARCH)/gnu, as hp_all will run configure
+# for us
+hpgnu_all: 
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
 
 # For irix5
@@ -191,7 +193,7 @@ $(XV_DEST)/man/man1:
 	fi
 	if [ ! -d $(XV_DEST)/man/man1 ]; then \
 		mkdir $(XV_DEST)/man/man1; \
-	fi
+	else true; fi
 
 xv_clean:
 	(cd $(OBJARCH)/xv; $(MAKE) clean)
