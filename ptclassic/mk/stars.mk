@@ -151,7 +151,6 @@ ifdef CGDDF
 	DDF = 1
 	CGC = 1
 	CGFULL = 1
-	TARGETS += $(CGCT)/main/CGCDDFTarget.o
 endif
 
 ifdef CGCFULL
