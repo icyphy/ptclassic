@@ -330,13 +330,15 @@ body ::tycho::EditSearch::find {{start {}}} {
 	if {$backwardssw} {
 	    if [safeEval ::tycho::askuser \
 		    "Not found.  Start search again at the bottom?"] {
-		after idle "$this focusin"
+                # This used to be deferred with "after idle". Not sure why.
+		$this focusin
 		find end
 	    }
 	} {
 	    if [safeEval ::tycho::askuser \
 		    "Not found.  Start search again at the top?"] {
-		after idle "$this focusin"
+                # This used to be deferred with "after idle". Not sure why.
+		$this focusin
 		find 1.0
 	    }
 	}
