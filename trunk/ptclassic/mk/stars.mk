@@ -449,8 +449,7 @@ ifeq ($(USE_SHARED_LIBS),yes)
 endif
 
 ifdef TK
-	LIBS += -lptk -lgantt \
-		 $(ITCL_LIBSPEC) $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
+	LIBS += -lptk -lgantt $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
 	PT_DEPEND += $(LIBDIR)/libptk.a \
 		$(LIBDIR)/libgantt.$(LIBSUFFIX)
 endif
@@ -458,4 +457,5 @@ endif
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS)
 
-LIBS += version.o -lptcl -lptolemy $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
+LIBS += version.o -lptcl -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
+	$(SYSLIBS) $(LIB_FLUSH_CACHE)
