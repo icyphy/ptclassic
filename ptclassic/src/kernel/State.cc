@@ -236,8 +236,10 @@ int State::sendToInterpreter(Tokenizer& lexer, char* token) {
 	// temporarily disable special characters because we don't
 	// know what special characters the external interpreter uses
 	const char* tc = lexer.setSpecial("");
+	char oldchar = lexer.setQuoteChar('\"');
 	lexer >> shellCommand;
 	StringList parsedCommand = parseNestedExpression(shellCommand);
+	lexer.setQuoteChar(oldchar);
 	lexer.setSpecial(tc);		// re-enable special characters
 
 	// check for an error in parsing the expression
