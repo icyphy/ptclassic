@@ -93,11 +93,10 @@ void XGraph :: zapFiles () {
 		if (name) {
 			unlink(name);
 		}
-
+		LOG_DEL; delete [] name;
 	    }
 	}
 	LOG_DEL; delete [] strm;
-	LOG_DEL; delete [] name;
 	LOG_DEL; delete [] tmpFileNames;
 	LOG_DEL; delete [] count;
 	ng = 0;
