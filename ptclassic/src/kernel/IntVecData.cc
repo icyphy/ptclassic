@@ -10,7 +10,9 @@ Date of creation: 8/17/91
 
 Methods for class IntVecData
 **************************************************************************/
-
+#ifdef __GNUG__
+#pragma implementation
+#endif
 #include "IntVecData.h"
 
 void IntVecData::init(int l,const int *srcData) {
@@ -32,7 +34,7 @@ StringList IntVecData::print() const {
 	StringList out = "{";
 	for (int i = 0; i < len-1; i++) {
 		out += data[i];
-		if (out += ", ");
+		out += ", ";
 	}
 	if (len > 0) out += data[i];
 	out += "}";
