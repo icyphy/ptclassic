@@ -50,17 +50,14 @@ public:
 	/*virtual*/ Block* makeNew() const;
 	/*virtual*/ int isA(const char*) const;
 
-	// compile and run the code
-	/*virtual*/ int compileCode();
-	/*virtual*/ int runCode();
+	// the code is not run in this target
+	/*virtual*/ int runCode() {return TRUE;}
 
 	// redefine IPC funcs
 	DataFlowStar* createSend(int from, int to, int num);
 	DataFlowStar* createReceive(int from, int to, int num);
 
-	// redefine
-	void addProcessorCode(int, const char* s);
-	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
+	/*virtual*/ void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 	// allocate the shared memory
 	/*virtual*/ void prepareCodeGen();
@@ -86,3 +83,12 @@ private:
 };
 
 #endif
+
+
+
+
+
+
+
+
+

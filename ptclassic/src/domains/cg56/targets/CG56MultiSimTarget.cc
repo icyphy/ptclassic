@@ -123,43 +123,6 @@ void CG56MultiSimTarget :: prepareCodeGen() {
 }
 
 // -----------------------------------------------------------------------------
-
-void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
-	if (SimControl::haltRequested()) return;
-	if (!cgChild(i)) return;
-
-	cgChild(i)->stateWithName("directory")->setCurrentValue(destDirectory);
-	StringList fn;
-	fn << (const char*) filePrefix << i << ".asm";
-	rcpWriteFile("localhost",destDirectory,fn,s);
-
-// 	to create the .cmd file
-	StringList fName,cmd;
-	fName << "command" << i << ".cmd";
-	cmd << "load " << (const char*) filePrefix << i << "\n";
-	cmd << "go \n";
-	rcpWriteFile("localhost",destDirectory,fName,cmd);
-}
-
-// -----------------------------------------------------------------------------
-int CG56MultiSimTarget :: compileCode() {
-	int flag = TRUE;
-	for (int i = 0; i < nChildrenAlloc; i++) {
-		if (!cgChild(i)) {
-			flag = FALSE;
-			break;
-		}
-		flag = cgChild(i)->compileCode();
-		if (flag == FALSE) break;
-	}
-	return flag;
-}
-
-// -----------------------------------------------------------------------------
-int CG56MultiSimTarget :: runCode() {
-    return TRUE;
-}
-// -----------------------------------------------------------------------------
 Block* CG56MultiSimTarget :: makeNew() const {
 	LOG_NEW; return new CG56MultiSimTarget(name(),starType(),descriptor());
 }
