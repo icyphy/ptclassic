@@ -101,7 +101,7 @@ class ::tycho::ResourceHTTP {
     ####                      public variables                     ####
 
     # Used with httpget
-    public variable statusVariableName {}
+    public variable httpGlobalStatus {}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -111,6 +111,9 @@ class ::tycho::ResourceHTTP {
 
     # This is called by file event handler, from httpget.
     method httpread {fd tmpfd}
+
+    # Parse url and decode the names into protected variables
+    method httpparse {url}
 
     # Set the global http status to "running" or "normal" or "abnormal"
     method httpsetstatus {status}
@@ -134,11 +137,26 @@ class ::tycho::ResourceHTTP {
     # The name of the HTTP port. Default is 80
     protected variable port 80
 
+    # The name of the cache file associated with this HTTP
+    protected variable cache {}
+
     # The index of the get
     protected variable idx 0
 
     # Whether we are getting the header or not (header mode or body mode)
     protected variable isheader 1
+
+    # Returning status of a http get. 200 by default is "normal"
+    protected variable status 200
+
+    # The last modified date of this http file. Used for caching purpose.
+    protected variable lastmodified {}
+
+    # Content type of this http file.
+    protected variable contenttype {}
+
+    # Location of this file, if the returning status is 300-399 (forward)
+    protected variable forwardlocation {}
 
     # FIXME: need to find out where to collect protocols that Tycho
     # understands:
@@ -230,36 +248,29 @@ body ::tycho::ResourceHTTP::open {url {mode "r"}} {
         return -1
     }
 
-    #puts "Going to get url: $url"
-    # 
-    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
-            hosttmp optport porttmp pathtmp]} {
-        if {$hosttmp!={}} {set hostname $hosttmp} ;# Supply reasonable default
-        if {$porttmp!={}} {set port $porttmp}     ;# HTTP default service
-        if {$pathtmp!={}} {set path $pathtmp}
+    # Parse the url into separated variables
+    httpparse $url
+
+    # One status variable per open
+    set httpGlobalStatus [::tycho::autoName httpgetStatus]
+    global $httpGlobalStatus
+    #uplevel #0 "set $httpGlobalStatus running"
+    httpSetStatus $httpGlobalStatus "running"
+
+    # Get the cache file associated with the above URL.
+    # Note that httpget could potentially call itself recursively
+    # until we get the correct HTTP file.
+    httpget
+
+    # Wait until the entire http file is here on local drive
+    httpwait
+
+    # If the get status is not within 200-299 then get isn't successful
+    if {$status>=200 && $status<300} {
+        return 0
     } else {
-        # Recover from malformed URL
-        if {![string match */* $url]} {
-            # Assume only the hostname:port has been given
-            regexp {([^:]*)(:(.*))?} $url match \
-                    hosttmp optport porttmp
-            if {$hosttmp != {}} {set hostname $hosttmp}
-            if {$porttmp != {}} {set port $porttmp}
-            set path /
-        } else {
-            error "no hostname given in URL \"$url\""
-        }
+        return $status
     }
-    # Surfit ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    set cacheFile [httpget]
-    ::puts "CACHE: $cacheFile"
-
-    # Read in the cache file
-    set fd [::open $cacheFile r]
-    ::gets $fd status
-
 }
 
 
@@ -317,6 +328,42 @@ body ::tycho::ResourceHTTP::writable {{path {}}} {
 ####                     protected methods                           ####
 
 #########################################################################
+#### httpparse
+# Parse a url, and move them to status, last modified, contenttype, etc...
+#
+body ::tycho::ResourceHTTP::httpparse {url} {
+    # Reset the status from the header of HTTP protocol
+    set cache {}
+    set port 80
+    set status 200
+    set lastmodified {}
+    set contenttype {}
+    set forwardlocation {}
+
+    # The following parses the url into hostname, port, and path
+    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
+            hosttmp optport porttmp pathtmp]} {
+        if {$hosttmp!={}} {set hostname $hosttmp} ;# Supply reasonable default
+        if {$porttmp!={}} {set port $porttmp}     ;# HTTP default service
+        if {$pathtmp!={}} {set path $pathtmp}
+    } else {
+        # Recover from malformed URL
+        if {![string match */* $url]} {
+            # Assume only the hostname:port has been given
+            regexp {([^:]*)(:(.*))?} $url match \
+                    hosttmp optport porttmp
+            if {$hosttmp != {}} {set hostname $hosttmp}
+            if {$porttmp != {}} {set port $porttmp}
+            set path /
+        } else {
+            error "no hostname given in URL \"$url\""
+        }
+    }
+    # Surfit ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+}
+
+#########################################################################
 #### httpget
 # Opening an HTTP connection. This returns the file name of the 
 # temporary HTTP file (later on cache). This method assumes that
@@ -325,36 +372,28 @@ body ::tycho::ResourceHTTP::writable {{path {}}} {
 body ::tycho::ResourceHTTP::httpget {} {
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} fd]} {
-        unset $fd
+        catch {unset $fd}
         error "Can't open $host, $port"
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    # Wait until finished reading HTTP file
-    set tmpFile [::tycho::tmpFileName Cache].html
-    set tmpfd [::open $tmpFile "w"]
-    set statusVariableName [::tycho::autoName httpgetStatus]
-    set isheader 1    ;# Initially we're getting the header first
-    httpStatus $statusVariableName "running"
-
     # connect now!
     fconfigure $fd -blocking no -translation crlf
-    ::puts $fd "GET $path HTTP/1.0\
-            User-Agent: Tycho Jr. Beta\
+    ::puts $fd "GET $path HTTP/1.0\n\
+            User-Agent: Tycho Jr. Beta\n\
             Accept-Encoding: $accept"
     ::puts $fd ""
     ::flush $fd
     fconfigure $fd -translation auto
 
+    # Wait until finished reading HTTP file
+    set cache [::tycho::tmpFileName Cache].html
+    set tmpfd [::open $cache "w"]
+    set isheader 1    ;# Initially we're getting the header first
+
     ::tycho::safeUpdate $this
     fileevent $fd w {}
     fileevent $fd r "$this httpread $fd $tmpfd"
-
-    ::puts "File ids are $fd $tmpfd"
-    # Wait until the entire http file is here on local drive
-    httpwait
-
-    return $tmpFile
 }
 
 #########################################################################
@@ -362,20 +401,35 @@ body ::tycho::ResourceHTTP::httpget {} {
 # This is called by file event handler, from httpget.
 #
 body ::tycho::ResourceHTTP::httpread {fd tmpfd} {
+    global $httpGlobalStatus
     if [eof $fd] {
+        # Got the HTTP file, now check to see if everything's valid.
 	catch {::close $fd}
 	catch {::close $tmpfd}
-        httpStatus $statusVariableName "done"
+
+        # If returning status is 300-399, then we need to automatically
+        # forward the HTTP location. This is done under all the smart
+        # browsers such as Internet Explorer and Netscape, and is almost
+        # always done transparent to the user.
+        if {$status>=300 && $status<=399} {
+            # Need to determine the new location.
+            httpparse "$forwardlocation"
+            # Second attempt to get the file
+            after idle "$this httpget"
+            return
+        }
+        httpSetStatus $httpGlobalStatus done
+        #uplevel #0 "set $httpGlobalStatus done"
     } else {
-        
 	::gets $fd line
         if {$isheader==1} {
-            # Header mode
+            # Header mode, the information about this http get.
             if {$line=={}} {
                 # End of header is denoted by an empty line
                 set isheader 0
+                return
             } else {
-                # Parse the header information:
+                # Parse the possible header information:
                 #HTTP/1.0 200 Document follows
                 #Date: Wed, 21 May 1997 00:54:29 GMT
                 #Server: NCSA/1.4.1
@@ -395,16 +449,13 @@ body ::tycho::ResourceHTTP::httpread {fd tmpfd} {
                 #Content-type: text/html
                 #Last-modified: Mon, 12 May 1997 18:46:57 GMT
                 #Content-length: 683
-
-                if {[string first "HTTP/1.0" $line]} {
-                    set status [lindex $line 1]
-                }
-                
-
-
+                regexp {^HTTP/1.0 ([0-9]+)} $line match status
+                regexp {^Last-modified: (.+)} $line match lastmodified
+                regexp {^Content-type: (.+)} $line match contenttype
+                regexp {^Location: (.+)} $line match forwardlocation
             }
         } else {
-            # Body mode
+            # Body mode (content of http get), write to the cache file.
             ::puts $tmpfd $line
         }
     }
@@ -414,12 +465,13 @@ body ::tycho::ResourceHTTP::httpread {fd tmpfd} {
 #### httpwait
 # Wait until the variable name has been changed.
 body ::tycho::ResourceHTTP::httpwait {} {
-    global $statusVariableName
-    ::puts "status: $statusVariableName"
-    if {[uplevel #0 "set $statusVariableName"]=="running"} {
-        tkwait variable $statusVariableName
+    global $httpGlobalStatus
+    # Keep waiting until we are done fetching the http file.
+    #after 2000 "set $httpGlobalStatus done"
+    while {[uplevel #0 "set $httpGlobalStatus"]!="done"} {
+        tkwait variable $httpGlobalStatus
     }
-    return [uplevel #0 "set $statusVariableName"]
+    return [uplevel #0 "set $httpGlobalStatus"]
 }
 
 
@@ -433,7 +485,7 @@ body ::tycho::ResourceHTTP::httpwait {} {
 # the global variable to change from "running" to either
 # "normal" or "abnormal"
 
-proc httpStatus {name value} {
+proc httpSetStatus {name value} {
     global $name
     set $name $value
 }
