@@ -66,9 +66,6 @@ class ::tycho::JavaDocSys {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Format a description properly
-    protected method formatDesc {comment}
-
     # Format an explanation properly (in HTML)
     protected method formatExpl {comment {parsetags 1}}
 
@@ -334,16 +331,6 @@ body ::tycho::JavaDocSys::modCheck {filename} {
     ###################################################################
     ###################################################################
     ####                     protected methods                     ####
-
-#####################################################################
-#### formatDesc 
-# Format the description appropriately by removing carriage returns
-# and returning a filler value if no description is found. (The IDoc
-# viewer requires a description.)
-#
-body ::tycho::JavaDocSys::formatDesc {comment} {
-    return [shortDesc $comment]
-}
 
 #####################################################################
 #### formatExpl
@@ -885,7 +872,7 @@ body ::tycho::JavaDocSys::addVariable {class protection modifiers\
             -protection $protection -type $type -default $default
 
     # Add the comments
-    set desc [formatDesc $comment]
+    set desc [shortDesc $comment]
     set expl [formatExpl $comment]
     $classModel annotation $varName.description $desc variable
     if {$expl != {}} {
@@ -958,7 +945,7 @@ body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} 
     set methodName [uniqueName $methodName $arguments]
 
     set classModel $myClass($class)
-    set desc [formatDesc $comment]
+    set desc [shortDesc $comment]
     set expl [formatExpl $comment]
 
     if {$isConstructor} {
