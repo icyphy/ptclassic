@@ -50,5 +50,3 @@ test Exec-1.1 {run make} {
 
 
 }}
-
-doneTests

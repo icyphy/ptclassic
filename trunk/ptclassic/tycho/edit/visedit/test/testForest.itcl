@@ -52,5 +52,3 @@ test Forest-1.1 {Build a forest} {
     foo add d {} a
     list [foo depthFirstSort] [foo describe]
 } {{a c d} {{d {} a} {a {} {}} {c {} a}}}
-
-doneTests

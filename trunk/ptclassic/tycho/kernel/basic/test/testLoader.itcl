@@ -59,4 +59,3 @@ test Loader-1.1 {load up the profile command} {
 	    [list tclXprofile $profileobjdir]]
 } {}
 
-doneTests
