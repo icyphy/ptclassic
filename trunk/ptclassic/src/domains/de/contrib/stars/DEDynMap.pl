@@ -127,7 +127,7 @@ However, we have to be careful with deleting the input-portholes of <tt>DEDynMer
 
         // do they agree?
         if ( numberOfOutputs != numberOfPorts ) {
-            Error::abortRun(*this, "Number of DynMerge-Blocks does not fit the number of outputs spezified in the output_map");
+            Error::abortRun(*this, "Number of DynMerge-Blocks does not fit the number of outputs specified in the output_map");
             return;
         }
 
@@ -165,6 +165,12 @@ However, we have to be careful with deleting the input-portholes of <tt>DEDynMer
                     Error::abortRun(*this, "You must put an DEDynMerge-star on my out-porthole.");
                     return;
                 }
+
+		// Make the DEDynMerge star a mutable star.
+		DETarget *tar = (DETarget *)target();
+		if( tar->isMutable() ) {
+		    myDynMerge_p->makeMutable();
+		}
         
                 // get the outputs of the newly created block
                 if (!(Dest = block_p->portWithName(output_map[i-1]))) {
@@ -244,25 +250,36 @@ However, we have to be careful with deleting the input-portholes of <tt>DEDynMer
                 // it is connected to)
                 PortHole *farside_p = port_p->far();
 
+		// The far side porthole better be a DEPortHole since
+		// the farside should be a DynMerge star.
+		DEPortHole *defarside_p;
+		if( farside_p->isA("DEPortHole") ) {
+		    defarside_p = (DEPortHole *)farside_p;
+		}
+		else {
+		    Error::abortRun("Attempting to disconnect 
+			non-DE PortHole of DynMerge Star");
+		}
+
                 // are we fully connected?
-                if (farside_p == NULL) {
+                if (defarside_p == NULL) {
                     connectError();
                     return;
                 }  
 
                 // get the parent
-                myDynMerge_p = (DEDynMerge *)farside_p->parent();
+                myDynMerge_p = (DEDynMerge *)defarside_p->parent();
 
                 // This farside is an input. We have to check whether there are
                 // any events scheduled for that porthole. If there are any, we
                 // better delete them. 
-                deletePendingEventsOfPortHole(farside_p);
+                deletePendingEventsOfPortHole(defarside_p);
 
                 // disconnect the porthole
-                farside_p->disconnect();
+                defarside_p->disconnect();
                     
                 // delete its farside
-                myDynMerge_p->removePortHole(farside_p);
+                myDynMerge_p->removePortHole(defarside_p);
             }
             return;
         }
