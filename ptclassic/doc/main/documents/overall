@@ -8,7 +8,7 @@
 .\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
 .\" BELOW, to indicate a new version.  Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
-.VR 0.$Revision$ %D%
+.VR 0.$Revision$ $Date$
 .TI "\*(PT Documentation"
 .AU
 Edward A. Lee
@@ -135,7 +135,7 @@ or in combination with other manual sections.
 A typical document has the following syntax:
 .(c
 	.\\\\\&" %\&W\&%	%\&G\&%
-	.VR 0.%\&I\&% %\&D\&%
+	.VR 0.%\&I\&% %\&G\&%
 	.TI "SECTION TITLE"
 	.AU
 	Author list
@@ -169,7 +169,7 @@ translated by sccs into the same version number that follows
 For instance, this document is version ``$Revision$'' (see the lower
 left corner), with a prepended number
 corresponding to major releases of \*(PT.
-If the date is given by ``%\&D\&%'', it will be translated
+If the date is given by ``%\&G\&%'', it will be translated
 by sccs into a date as shown in the lower right hand corner of
 this document.
 .pp
@@ -315,7 +315,7 @@ In both cases, the syntax of the document source files is as follows:
 	.SD
 	Short descriptor
 	.SE
-	.SV %\&I\&% %\&D\&%
+	.SV %\&I\&% %\&G\&%
 	.AL "Author list, with commas, and a period."
 	.LO "Location of the galaxy or demo definition"
 	.LD
@@ -331,7 +331,7 @@ In both cases, the syntax of the document source files is as follows:
 The first line is again a troff comment, containing the sccs version ID.
 The second line defines how the version ID and date should be printed
 when the manual is printed.
-The version number %\&I\&% and date %\&D\&%
+The version number %\&I\&% and date %\&G\&%
 keywords have the same meaning as before.
 The date here must be manually modified when the galaxy or demo is modified.
 The rest of the entries should be self-explanatory.
@@ -343,7 +343,7 @@ Here is an example:
 	A demo of the LMS adaptive filter star
 	.DE
 	.IE LMS
-	.SV %\&I\&% %\&D\&%
+	.SV %\&I\&% %\&G\&%
 	.AL "Edward A. Lee"
 	.LO "~ptolemy/src/domains/sdf/demo"
 	.LD
