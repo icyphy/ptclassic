@@ -311,7 +311,6 @@ CqLevelLink* MutableCalendarQueue :: NextEvent()
 		result->destinationRef = 0; 
 		starPtr = (DEStar *)result->dest; 
 		starPtr->removePendingEvent( starPendingEventRef );
-		// FIXME: Should we delete starPtr??
 	    }
 
             // ************************************************ //
