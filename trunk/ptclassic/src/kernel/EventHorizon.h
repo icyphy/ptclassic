@@ -51,10 +51,7 @@ public:
 	void ghostConnect(EventHorizon& to );
 
 	// TimeStamp of the current data, which is necessary for interface
-	// of two domains. If a EventHorizon has more than one buffer,
-	// timeStamp should be associated with each buffer. (TimeStamp
-	// becomes a circular buffer? or we derive another circular buffer
-	// with timeStamp?)
+	// of two domains. 
 	float timeStamp;
 
 	// Is data new?
@@ -91,8 +88,21 @@ protected:
 	// transfer data from Universal EventHorizon to ghostPort.
 	void transferData();
 
+public:
 	// redefine initialize()
 	void initialize(); 
+
+	// for timed domain, it returns the next global time of the 
+	// outside domain. This value is used to set the stop time
+	// of the inside "timed" domain.
+	// for untimed domain, it gives the value when to stop the
+	// inside "timed" domain.
+	virtual float getNextStamp() = 0;
+
+	// flag to check that the inner domain finishes its scheduling
+	// before deadlocked. For untimed domain, they are always FALSE.
+	// But for timed domains, it varies at runtime.
+	int outputBeforeDeadlocked;
 			   
 };
 
@@ -113,12 +123,14 @@ protected:
 	// fire ghostPort :: grabData to get Data
 	void transferData();
 
+	// make sure this port is ready for inside Galaxy if it is an input.
+	// if ready, set up the stopping condition for the inner-domain.
+	virtual int ready();
+			   
+public:
 	// redefine initialize()
 	void initialize(); 
 
-	// make sure this port is ready for inside Galaxy if it is an input.
-	virtual int ready();
-			   
 };
 
 #endif
