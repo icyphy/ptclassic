@@ -38,6 +38,12 @@ a Tcl interpreter.
 #include "tcl.h"
 #include "StringList.h"
 
+#if defined(hppa)
+/* Include math.h outside of extern "C", other wise we get errors with
+   pow() g++2.5.8 */
+#include <math.h>
+#endif
+
 typedef int boolean;
 extern "C" {
 #define Pointer screwed_Pointer
