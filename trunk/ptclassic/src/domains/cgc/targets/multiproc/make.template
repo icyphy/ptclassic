@@ -28,25 +28,25 @@
 # Code generation targets
 
 # Root of Ptolemy directory
-ROOT=../../../../..
+ROOT =		../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cgc/targets/multiprocessor
+VPATH = 	$(ROOT)/src/domains/cgc/targets/multiproc
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG = 	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-BDFKERNEL = $(ROOT)/src/domains/bdf/kernel
-CGKERNEL = $(ROOT)/src/domains/cg/kernel
-CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
-CGCSTARS = $(ROOT)/src/domains/cgc/stars
-PARDIR = $(ROOT)/src/domains/cg/parScheduler
-CGTARDIR = $(ROOT)/src/domains/cg/targets
-DLDIR = $(ROOT)/src/domains/cg/dlScheduler
-MACRODIR = $(ROOT)/src/domains/cg/macroScheduler
-CGDDFDIR = $(ROOT)/src/domains/cg/ddfScheduler
-CGCT = $(ROOT)/src/domains/cgc/targets
+SDFKERNEL =	$(ROOT)/src/domains/sdf/kernel
+BDFKERNEL =	$(ROOT)/src/domains/bdf/kernel
+CGKERNEL =	$(ROOT)/src/domains/cg/kernel
+CGCKERNEL =	$(ROOT)/src/domains/cgc/kernel
+CGCSTARS =	$(ROOT)/src/domains/cgc/stars
+PARDIR =	$(ROOT)/src/domains/cg/parScheduler
+CGTARDIR =	$(ROOT)/src/domains/cg/targets
+DLDIR =		$(ROOT)/src/domains/cg/dlScheduler
+MACRODIR =	$(ROOT)/src/domains/cg/macroScheduler
+CGDDFDIR =	$(ROOT)/src/domains/cg/ddfScheduler
+CGCT =		$(ROOT)/src/domains/cgc/targets
 
 # Include directories
 INCL= -I$(CGCT)/uniprocessor -I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) \
