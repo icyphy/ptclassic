@@ -69,10 +69,19 @@ class Matrix : public Message {
   int numCols() const { return nCols; }
   int numRows() const { return nRows; }
 
+  virtual Matrix& operator = (const Matrix &) = 0;
+  virtual int operator == (const Matrix &) const = 0;
+  virtual int operator != (const Matrix &) const = 0;
+
+  int totalDataSize;     // number of elements
  protected:
+  int typesEqual(const Matrix& m) const {
+    return (dataType() == m.dataType());
+  }
+  int compareType(const Matrix& m) const;
+
   int nRows;
   int nCols;
-  int totalDataSize;     // number of elements
 };
 
 ///////////////////////////////
@@ -123,8 +132,8 @@ class ComplexMatrix: public Matrix {
   // Operators
   virtual Complex* operator [] (int row) { return &data[row*nCols]; }
   virtual const Complex* operator[] (int row) const {return &data[row*nCols]; }
-  virtual int operator == (const ComplexMatrix& src) const;
-  virtual int operator != (const ComplexMatrix& src) const;
+  virtual int operator == (const Matrix& src) const;
+  virtual int operator != (const Matrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator FixMatrix () const;
@@ -133,7 +142,7 @@ class ComplexMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual ComplexMatrix& operator = (const ComplexMatrix& src);
+  virtual Matrix& operator = (const Matrix& src);
   ComplexMatrix& operator = (const Complex& value);          
      // element wise operators
   ComplexMatrix& operator += (const ComplexMatrix& src);
@@ -250,8 +259,8 @@ class FixMatrix: public Matrix {
   // Operators 
   virtual Fix* operator [] (int row) { return &data[row*nCols]; }
   virtual const Fix* operator [] (int row) const { return &data[row*nCols]; }
-  virtual int operator == (const FixMatrix& src) const;
-  virtual int operator != (const FixMatrix& src) const;
+  virtual int operator == (const Matrix& src) const;
+  virtual int operator != (const Matrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator ComplexMatrix () const;
@@ -260,7 +269,7 @@ class FixMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual FixMatrix& operator = (const FixMatrix& src);
+  virtual Matrix& operator = (const Matrix& src);
   FixMatrix& operator = (const Fix& value);
      // element wise operators
   FixMatrix& operator += (const FixMatrix& src);
@@ -353,8 +362,8 @@ class FloatMatrix: public Matrix {
   // Operators
   virtual double* operator [] (int row) { return &data[row*nCols]; }
   virtual const double* operator[] (int row) const { return &data[row*nCols]; }
-  virtual int operator == (const FloatMatrix& src) const;
-  virtual int operator != (const FloatMatrix& src) const;
+  virtual int operator == (const Matrix& src) const;
+  virtual int operator != (const Matrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator ComplexMatrix () const;
@@ -363,7 +372,7 @@ class FloatMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual FloatMatrix& operator = (const FloatMatrix& src);
+  virtual Matrix& operator = (const Matrix& src);
   FloatMatrix& operator = (double value);
      // element wise operators
   FloatMatrix& operator += (const FloatMatrix& src);
@@ -456,8 +465,8 @@ class IntMatrix: public Matrix {
   // Operators
   virtual int* operator [] (int row) { return &data[row*nCols]; }
   virtual const int* operator [] (int row) const { return &data[row*nCols]; }
-  virtual int operator == (const IntMatrix& src) const;
-  virtual int operator != (const IntMatrix& src) const;
+  virtual int operator == (const Matrix& src) const;
+  virtual int operator != (const Matrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator ComplexMatrix () const;
@@ -466,7 +475,7 @@ class IntMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual IntMatrix& operator = (const IntMatrix& src);
+  virtual Matrix& operator = (const Matrix& src);
   IntMatrix& operator = (int value);
      // element wise operators
   IntMatrix& operator += (const IntMatrix& src);

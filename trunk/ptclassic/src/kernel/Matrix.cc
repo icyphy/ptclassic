@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <strstream.h>
 #include "Matrix.h"
 #include "Plasma.h"
 #include "Error.h"
@@ -479,6 +480,21 @@ IntMatrix& multiply (const IntMatrix& left,const IntMatrix& right,
 }
 
 /////////////////////////////////////////////////////////////
+// Matrix Message Class
+/////////////////////////////////////////////////////////////
+
+int Matrix::compareType(const Matrix & m) const {
+  if(typesEqual(m)) return 1;
+  StringList msg = "Attempt to copy ";
+  msg += m.dataType();
+  msg += " Matrix to ";
+  msg += dataType();
+  msg += " Matrix";
+  Error::abortRun (msg);
+  return 0;
+}
+
+/////////////////////////////////////////////////////////////
 // Complex Matrix Message Class - holds data of type Complex
 /////////////////////////////////////////////////////////////
 
@@ -563,42 +579,37 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
 
 // Prints matricies in standard row column form.
 StringList ComplexMatrix::print() const {
+  ostrstream strm;
   char buf[SMALL_STRING];
-  StringList out = "ComplexMatrix: (";
-  out << nRows;
-  out << ",";
-  out << nCols;
-  out << ")\n";
+  strm << "ComplexMatrix: (";
+  strm << nRows;
+  strm << ",";
+  strm << nCols;
+  strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       sprintf(buf,"%22.15g", real((*this)[row][col]));
-      out << buf;
-      out << "+";
+      strm << buf;
+      strm << "+";
       sprintf(buf,"%22.15g", imag((*this)[row][col]));
-      out << buf;
-      out << "j ";
+      strm << buf;
+      strm << "j ";
     }
-    out << "\n";
+    strm << "\n";
   }
-  return out;
+  strm << ends;
+  return StringList(strm.str());
 }
 
-int ComplexMatrix::operator == (const ComplexMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
+int ComplexMatrix::operator == (const Matrix& src) const {
+  if(!typesEqual(src)) return 0;
+  if((nRows != ((const ComplexMatrix*)&src)->nRows) || 
+     (nCols != ((const ComplexMatrix*)&src)->nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
+    if(entry(i) != ((const ComplexMatrix*)&src)->entry(i))
       return 0;
   return 1;
-}
-
-int ComplexMatrix::operator != (const ComplexMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
-    return 1;
-  for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
-      return 1;
-  return 0;
 }
 
 // cast conversion operators
@@ -624,18 +635,21 @@ ComplexMatrix::operator IntMatrix () const {
 }
 
 // destructive replacement operators
-ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& src) {
+Matrix& ComplexMatrix::operator = (const Matrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
-  if(totalDataSize != src.totalDataSize) {
-    LOG_DEL; delete[] data;
-    totalDataSize = src.totalDataSize;
-    data = new Complex[totalDataSize];
+  if(compareType(m)) {
+    const ComplexMatrix& src = *((const ComplexMatrix*)&m);
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete[] data;
+      totalDataSize = src.totalDataSize;
+      data = new Complex[totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
   }
-  nRows = src.nRows;
-  nCols = src.nCols;
-  for(int i = 0; i < totalDataSize; i++)
-    entry(i) = src.entry(i);
   return *this;
 }
 
@@ -1019,39 +1033,34 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matricies in standard row column form.
 StringList FixMatrix::print() const {
+  ostrstream strm;
   char buf[SMALL_STRING];
-  StringList out = "FixMatrix: (";
-  out << nRows;
-  out << ",";
-  out << nCols;
-  out << ")\n";
+  strm << "FixMatrix: (";
+  strm << nRows;
+  strm << ",";
+  strm << nCols;
+  strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       sprintf(buf,"%22.15g", (double)(*this)[row][col]);
-      out << buf;
-      out << " ";
+      strm << buf;
+      strm << " ";
     }
-    out << "\n";
+    strm << "\n";
   }
-  return out;
+  strm << ends;
+  return StringList(strm.str());
 }
 
-int FixMatrix::operator == (const FixMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
+int FixMatrix::operator == (const Matrix& src) const {
+  if(!typesEqual(src)) return 0;
+  if((nRows != ((const FixMatrix*)&src)->nRows) || 
+     (nCols != ((const FixMatrix*)&src)->nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
+    if(entry(i) != ((const FixMatrix*)&src)->entry(i))
       return 0;
   return 1;
-}
-
-int FixMatrix::operator != (const FixMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
-    return 1;
-  for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
-      return 1;
-  return 0;
 }
 
 // cast conversion operators
@@ -1077,18 +1086,21 @@ FixMatrix::operator IntMatrix () const {
 }
 
 // destructive replacement operators
-FixMatrix& FixMatrix::operator = (const FixMatrix& src) {
+Matrix& FixMatrix::operator = (const Matrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
-  if(totalDataSize != src.totalDataSize) {
-    LOG_DEL; delete[] data;
-    totalDataSize = src.totalDataSize;
-    data = new Fix[totalDataSize];
+  if(compareType(m)) {
+    const FixMatrix& src = *((const FixMatrix*)&m);
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete[] data;
+      totalDataSize = src.totalDataSize;
+      data = new Fix[totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
   }
-  nRows = src.nRows;
-  nCols = src.nCols;
-  for(int i = 0; i < totalDataSize; i++)
-    entry(i) = src.entry(i);
   return *this;
 }
 
@@ -1360,39 +1372,34 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
 
 // Prints matricies in standard row column form.
 StringList FloatMatrix::print() const {
+  ostrstream strm;
   char buf[SMALL_STRING];
-  StringList out = "FloatMatrix: (";
-  out << nRows;
-  out << ",";
-  out << nCols;
-  out << ")\n";
+  strm << "FloatMatrix: (";
+  strm << nRows;
+  strm << ",";
+  strm << nCols;
+  strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       sprintf(buf,"%22.15g", (*this)[row][col]);
-      out << buf;
-      out << " ";
+      strm << buf;
+      strm << " ";
     }
-    out << "\n";
+    strm << "\n";
   }
-  return out;
+  strm << ends;
+  return StringList(strm.str());
 }
 
-int FloatMatrix::operator == (const FloatMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
+int FloatMatrix::operator == (const Matrix& src) const {
+  if(!typesEqual(src)) return 0;
+  if((nRows != ((const FloatMatrix*)&src)->nRows) || 
+     (nCols != ((const FloatMatrix*)&src)->nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
+    if(entry(i) != ((const FloatMatrix*)&src)->entry(i))
       return 0;
   return 1;
-}
-
-int FloatMatrix::operator != (const FloatMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
-    return 1;
-  for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
-      return 1;
-  return 0;
 }
 
 // cast conversion operators
@@ -1418,18 +1425,21 @@ FloatMatrix::operator IntMatrix () const {
 }
 
 // destructive replacement operators
-FloatMatrix& FloatMatrix::operator = (const FloatMatrix& src) {
+Matrix& FloatMatrix::operator = (const Matrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
-  if(totalDataSize != src.totalDataSize) {
-    LOG_DEL; delete[] data;
-    totalDataSize = src.totalDataSize;
-    data = new double[totalDataSize];
+  if(compareType(m)) {
+    const FloatMatrix& src = *((const FloatMatrix*)&m);
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete[] data;
+      totalDataSize = src.totalDataSize;
+      data = new double[totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
   }
-  nRows = src.nRows;
-  nCols = src.nCols;
-  for(int i = 0; i < totalDataSize; i++)
-    entry(i) = src.entry(i);
   return *this;
 }
 
@@ -1702,39 +1712,34 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matricies in standard row column form.
 StringList IntMatrix::print() const {
+  ostrstream strm;
   char buf[SMALL_STRING];
-  StringList out = "IntMatrix: (";
-  out << nRows;
-  out << ",";
-  out << nCols;
-  out << ")\n";
+  strm << "IntMatrix: (";
+  strm << nRows;
+  strm << ",";
+  strm << nCols;
+  strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
       sprintf(buf,"%11d", (*this)[row][col]);
-      out << buf;
-      out << " ";
+      strm << buf;
+      strm << " ";
     }
-    out << "\n";
+    strm << "\n";
   }
-  return out;
+  strm << ends;
+  return StringList(strm.str());
 }
 
-int IntMatrix::operator == (const IntMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
+int IntMatrix::operator == (const Matrix& src) const {
+  if(!typesEqual(src)) return 0;
+  if((nRows != ((const IntMatrix*)&src)->nRows) || 
+     (nCols != ((const IntMatrix*)&src)->nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
+    if(entry(i) != ((const IntMatrix*)&src)->entry(i))
       return 0;
   return 1;
-}
-
-int IntMatrix::operator != (const IntMatrix& src) const {
-  if((nRows != src.nRows) || (nCols != src.nCols))
-    return 1;
-  for(int i = 0; i < totalDataSize; i++)
-    if(entry(i) != src.entry(i))
-      return 1;
-  return 0;
 }
 
 // cast conversion operators
@@ -1760,18 +1765,21 @@ IntMatrix::operator FloatMatrix () const {
 }
 
 // destructive replacement operators
-IntMatrix& IntMatrix::operator = (const IntMatrix& src) {
+Matrix& IntMatrix::operator = (const Matrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
-  if(totalDataSize != src.totalDataSize) {
-    LOG_DEL; delete[] data;
-    totalDataSize = src.totalDataSize;
-    data = new int[src.totalDataSize];
+  if(compareType(m)) {
+    const IntMatrix& src = *((const IntMatrix*)&m);
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete[] data;
+      totalDataSize = src.totalDataSize;
+      data = new int[src.totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
   }
-  nRows = src.nRows;
-  nCols = src.nCols;
-  for(int i = 0; i < totalDataSize; i++)
-    entry(i) = src.entry(i);
   return *this;
 }
 
