@@ -51,6 +51,7 @@ test Loader-1.1 {load up the profile command} {
 	set makeWindow [::tycho::execModal {make tclexts} $TYCHO]
         # New Monitor cannot be just destroyed, since it also contains view.
         #destroy [lindex $makeWindow 1]
+	update
         set makeWindow [lindex $makeWindow 1]
         $makeWindow getStatusWait
         # Force to autodestroy no matter exit status is normal or not.
