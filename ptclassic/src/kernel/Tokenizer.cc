@@ -64,6 +64,8 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 // is not changed.  A cast to get around this.
 	char* p = (char*) buffer;
 	LOG_NEW; strm = new istrstream(p, strlen(p));
+// work around memory leak with libg++-2.2
+	strm->unsetf(ios::dont_close);
 	myStrm = 1;
 	init ();
 }
@@ -127,7 +129,7 @@ Tokenizer::pop() {
 	if (depth == 0) return;
 	TokenContext* t = stack;
 	LOG_DEL; delete strm;
-	LOG_DEL; delete curfile;
+	LOG_DEL; delete []curfile;
 	strm = t->savestrm;
 	curfile = t->filename;
 	line_num = t->line_num;
