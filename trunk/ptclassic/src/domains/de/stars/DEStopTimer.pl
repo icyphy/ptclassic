@@ -1,25 +1,19 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/8/90
-
- It generates an output at the stopTime of the DEScheduler controlling 
- this block. This block is useful for clock input of the Sampler
- or statistical Blocks.
-
-**************************************************************************/
-}
 defstar {
 	name { StopTimer }
 	domain { DE }
-	desc {	"It generates an output at the stopTime of the\n"
-		"DEScheduler under which this block is.\n"
+	desc {
+Generates an output at the stopTime of the
+DEScheduler under which this block is running.
+	}
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	explanation {
+This block generates an output at the stopTime of the DEScheduler controlling 
+the block.  It is useful for clocking the input of the Sampler
+or statistical Blocks in order to observe their final outputs at the end
+of the simulation.
 	}
 	input {
 		name { input }

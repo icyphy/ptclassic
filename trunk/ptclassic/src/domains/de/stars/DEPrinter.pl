@@ -1,26 +1,18 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/30/90
-
- Printer prints out its input, which may be any supported type.
- There may be multiple inputs: all inputs are printed together on
- the same line (separated by tab).
-
-**************************************************************************/
-}
 defstar {
 	name { Printer }
 	domain { DE }
-	desc {	"Prints out one sample from each input port per line\n"
-		"If 'fileName' is not equal to 'cout' (the default), it\n"
-		"specifies the filename to print to.\n"
+	desc {
+Prints out one sample from each input port per line
+If "fileName" is not equal to "cout" (the default), it
+specifies the filename to print to.
+	}
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	explanation {
+The input may be a particle of any type.  The print() method
+of the particle is used to generate the output.
 	}
 	inmulti {
 		name { input }
@@ -30,7 +22,7 @@ defstar {
 		name { fileName }
 		type { string }
 		default { "cout" }
-		desc { "filename for output" }
+		desc { Filename for output, or "cout" for stdout. }
 	}
 	protected {
 		UserOutput output;

@@ -1,23 +1,12 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/29/90
-
- This star delays its input by an amount given by the delay parameter.
-
-**************************************************************************/
-}
 defstar {
 	name {Delay}
 	domain {DE}
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	desc {
-	   "Delays its input by an amount given by the delay parameter."
+Delays its input by an amount given by the delay parameter.
 	}
 	input {
 		name {input}
@@ -31,7 +20,7 @@ defstar {
 		name {delay}
 		type {float}
 		default {"1.0"}
-		desc { "Amount of time delay" }
+		desc { Amount of time delay. }
 	}
 	constructor {
 		input.inheritTypeFrom(output);

@@ -1,21 +1,22 @@
 ident {
-/**************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
-Programmer:  E. A. Lee and S. Ha
-Date of creation: 10/10/90
-
+#define NUMINPUTS 10
+}
+defstar {
+	name {PrQueue}
+	domain {DE}
+	desc { Priority queue with finite total capacity.  }
+	version { $Id$}
+	author { E. A. Lee and Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	explanation {
 This star queues input particles and produces output particles on demand.
 The inputs are assigned priorities so that when an output is demanded,
-if any particles from input#1 are available, the next one in the queue
-will be sent to the output.  Only if the queue for input#1 is empty
-will the queue for input#2 be examined.
-This means that later arrivals on input#1 may go to the output before
-earlier arrivals on input#2.
+if any particles from \fIinput#1\fR are available, the next one in the queue
+will be sent to the output.  Only if the queue for \fIinput#1\fR is empty
+will the queue for \fIinput#2\fR be examined.
+This means that later arrivals on \fIinput#1\fR may go to the output before
+earlier arrivals on \fIinput#2\fR.
 There is currently a limit of 10 distinct inputs, and hence 10 priorities.
 .pp
 A total capacity limit is specified.
@@ -40,44 +41,34 @@ Any intervening demand inputs (between the time that the queues
 go empty and the next arrival of a data input) are ignored.
 .pp
 Each time a data or demand input arrives, the size of the queue
-after processing the input is sent to the ``size'' output.
-
- TEMPORARY:  THE MAXIMUM NUMBER OF INPUTS IS HARDWIRED BECAUSE I DON'T
- KNOW HOW TO A #define USING THE PREPROCESSOR.
-
-**************************************************************************/
-}
-defstar {
-	name {PrQueue}
-	domain {DE}
-	desc {
-	   "Priority queue with finite total capacity."
+after processing the input is sent to the \fIsize\fR output.
 	}
+	seealso {Queue}
 	input {
 		name {demand}
 		type {anytype}
-		// desc { "Demand an ouput" }
+		desc { Demand an ouput. }
 	}
 	inmulti {
 		name {inData}
 		type {anytype}
-		// desc { "Particles to be queued" }
+		desc { Particles to be queued. }
 	}
 	output {
 		name {outData}
 		type {anytype}
-		// desc { "Particles that are de-queued on demand" }
+		desc { Particles that are de-queued on demand. }
 	}
 	output {
 		name {size}
 		type {int}
-		// desc { "The current number of particles stored" }
+		desc { The current number of particles stored. }
 	}
 	ccinclude {
 		"DataStruct.h"
 	}
 	protected {
-		Queue* queue[10];	// maximum of 10 inputs
+		Queue* queue[NUMINPUTS];	// maximum of NUMINPUTS inputs
 	}
 	constructor {
 		inData.inheritTypeFrom(outData);
@@ -86,17 +77,17 @@ defstar {
 		name {curSize}
 		type {int}
 		default {"0"}
-		desc { "Current number of particles stored." }
+		desc { Current number of particles stored. }
 	}
 	defstate {
 		name {capacity}
 		type {int}
 		default {"10"}
-		desc { "Maximum total number of particles stored." }
+		desc { Maximum total number of particles stored. }
 	}
 
 	start {
-	   if (inData.numberPorts() > 10) {
+	   if (inData.numberPorts() > NUMINPUTS) {
 		Error::abortRun(*this, "Too many input ports.");
 	   } else {
 		// Create or initialize the Queues

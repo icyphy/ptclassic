@@ -1,23 +1,16 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer: S. Ha
-Date of creation: 8/28/90
-
- A BlackHole accepts input Particles, but doesnt do anything with
- them -- typically used to connect up unwanted signals on other blocks
-
-************************************************************************/
-}
 defstar {
 	name {BlackHole}
 	domain {DE}
-	desc { "All inputs are consumed.  There are no outputs." }
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	desc { Discards all input particles. }
+	explanation {
+A BlackHole accepts input Particles, but doesnt do anything with
+them \(em it is
+typically used to discard unwanted signals from other blocks.
+	}
 	inmulti {
 		name{input}
 		type{ANYTYPE}

@@ -9,6 +9,16 @@ Copyright (c) 1990 The Regents of the University of California.
 Programmer:  E. A. Lee
 Date of creation: 10/9/90
 
+**************************************************************************/
+}
+defstar {
+	name {Filter}
+	domain {DE}
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	explanation {
 This star filters the input signal with a first-order, AR impulse response.
 The data input is interpreted as weighted impulses.  An output is triggered
 by a clock input.  Assuming a clock input event triggers the star at time $T$,
@@ -26,14 +36,8 @@ s( tau ) ~=~ i( tau ) ~+~ d sup {( tau ~-~ tau prime )} s( tau prime )
 .EN
 where $tau prime$ is the time of the previous data input event,
 and $i( tau )$ is the data input.
-**************************************************************************/
-}
-defstar {
-	name {Filter}
-	domain {DE}
-	desc {
-	   "First order AR filter."
 	}
+	desc { First order AR filter.  }
 	input {
 		name {clock}
 		type {anytype}
@@ -50,19 +54,19 @@ defstar {
 		name {decay}
 		type {float}
 		default {"0.9"}
-		desc { "Exponential decay parameter." }
+		desc { Exponential decay parameter. }
 	}
 	defstate {
 		name {tau}
 		type {float}
 		default {"0.0"}
-		desc { "Time of the latest data input event." }
+		desc { Time of the latest data input event. }
 	}
 	defstate {
 		name {state}
 		type {float}
 		default {"0.0"}
-		desc { "State of the filter as of the latest input event." }
+		desc { State of the filter as of the latest input event. }
 	}
 
 	go {

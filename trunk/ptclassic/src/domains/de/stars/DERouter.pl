@@ -1,27 +1,14 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer: S. Ha and E. A. Lee
-Date of creation: 9/29/90
-Revision: use gnu random number generator (S. Ha, 10/11/90)
-
- Randomly routes an input event to one of its outputs.
- Probability is equal for each output.
-
-************************************************************************/
-}
 defstar {
 	name {Router}
 	domain {DE}
 	desc {
-	   "Randomly routes an input event to one of its outputs.\n"
-	   "Probability is equal for each output. Delay is zero."
+Randomly routes an input event to one of its outputs.
+Probability is equal for each output. The time delay is zero.
 	}
+	version { $Id$}
+	author { Soonhoi Ha and E. A. Lee}
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	input {
 		name{input}
 		type{ANYTYPE}

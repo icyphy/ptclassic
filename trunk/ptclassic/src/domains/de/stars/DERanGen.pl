@@ -1,28 +1,15 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/8/90
-
- It is a parameterised random number generator.
- By setting a state, we can select the distribution function among
- (uniform, exponential, normal).
-
-**************************************************************************/
-}
 defstar {
 	name { RanGen }
 	domain { DE }
-	desc {	"It is a parameterized random number generator.\n"
-		"We can select the distribution function by setting\n"
-		"the state and parameters.\n"
-		"distribution : uniform(u), exponential(e), normal(n).\n"
+	desc {
+This is a parameterized random number generator.
+We can select the distribution function by setting the state and parameters.
+Distributions currently supported : uniform(u), exponential(e), normal(n).
 	}
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	input {
 		name { input }
 		type { anytype }
@@ -35,19 +22,19 @@ defstar {
 		name { distribution }
 		type { string }
 		default { "uniform" }
-		desc { "uniform(u;U), exponential(e;E), normal(n;N)" }
+		desc {  Uniform(u;U), exponential(e;E), normal(n;N). }
 	}
 	defstate {
 		name { meanORupper }
 		type { float }
 		default { "0.0" }
-		desc { "mean value or upper value" }
+		desc { Mean value or upper value. }
 	} 
 	defstate {
 		name { varianceORlower }
 		type { float }
 		default { "0.0" }
-		desc { "variance or lower value" }
+		desc { Variance or lower value. }
 	}
 	hinclude { <Random.h> }
 	ccinclude { <ACG.h>, <Uniform.h>, <Normal.h>, <NegativeExpntl.h> }

@@ -1,14 +1,13 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
-Programmer:  E. A. Lee
-Date of creation: 10/9/90
-
+defstar {
+	name {Queue}
+	domain {DE}
+	desc { FIFO queue with finite length.  }
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	seealso {PrQueue}
+	explanation {
 This star queues inputs in a finite length FIFO queue.
 Note that in the DE domain, ordinary arcs also function as a FIFO queue.
 One difference here is that this star refuses to accept any new inputs
@@ -26,17 +25,11 @@ goes empty and the next arrival of a data input) are ignored.
 .pp
 Each time a data or demand input arrives, the size of the queue
 after processing the input is sent to the ``size'' output.
-**************************************************************************/
-}
-defstar {
-	name {Queue}
-	domain {DE}
-	desc {
-	   "FIFO queue with finite length."
 	}
 	input {
 		name {demand}
 		type {anytype}
+		desc { Triggers an output. }
 	}
 	input {
 		name {inData}
@@ -63,7 +56,7 @@ defstar {
 		name {capacity}
 		type {int}
 		default {"10"}
-		desc { "Maximum size of the queue." }
+		desc { Maximum size of the queue. }
 	}
 
 	start {

@@ -1,28 +1,21 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/8/90
-
- It is a general resettable up/down counter with demand input.
- Since it is most general form of a counter, we may connect a Null star
- to unused ports to get a simplified version of Counter.  
-
-**************************************************************************/
-}
 defstar {
 	name { UDCounter }
 	domain { DE }
-	desc {	"In(De)crease the content on each countUp(Down) input.\n"
-		"When the reset input comes, reset the content.\n"
-		"Output is generated on each demand input.\n"
-		"When demand and reset arrives at the same time,\n"
-		"output first and reset the content.\n"
+	desc {
+Increase or decrease the count upon receiving a "countUp" or "countDown" input.
+When a "reset" input is received, the count is reset to zero.
+An output is generated when a "demand" input is received.
+When "demand" and "reset" particles arrive at the same time,
+the output is generated before the count is reset.
+	}
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	explanation {
+This is a rather general counter.
+Special cases, such as an up only counter, can be realized by connect
+a Null star to the unneeded inputs.
 	}
 	input {
 		name { countUp }
@@ -39,6 +32,7 @@ defstar {
 	input {
 		name { demand }
 		type { anytype }
+		desc { Stimulate an output. }
 	}
 	output {
 		name { output }
@@ -48,7 +42,7 @@ defstar {
 		name { resetValue }
 		type { int }
 		default { "0" }
-		desc { "initial value for the content" }
+		desc {  Initial value for the counter. }
 	}
 	private {
 		int content;

@@ -1,24 +1,13 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/30/90
-
- This star generates events at regular intervals, starting at time zero.
-
-**************************************************************************/
-}
 defstar {
 	name {Clock}
 	derivedFrom { RepeatStar }
 	domain {DE}
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	desc {
-	   "Generates events at regular intervals, starting at time zero."
+Generates events at regular intervals, starting at time zero.
 	}
 	output {
 		name {output}
@@ -28,13 +17,13 @@ defstar {
 		name {interval}
 		type {float}
 		default {"1.0"}
-		desc { "The interval of events" }
+		desc { The interval of events. }
 	}
 	defstate {
 		name {magnitude}
 		type {float}
 		default {"1.0"}
-		desc { "The magnitude of samples generated" }
+		desc { The value of the output particles generated. }
 	}
 	go {
 	   // Generate the output event

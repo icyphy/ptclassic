@@ -1,27 +1,18 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/20/90
-
- Creates a histogram with the xgraph function.  It is assumed that "xgraph"
- is on your path, or this will not work!!!
- The time of arrival is ingored.  This star is identical to the SDF
- Xhistogram, but is used often enough in the DE domain that it is provided
- here for convenience.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Xhistogram }
 	domain { DE }
-	desc { "Generate a histogram with the xgraph program." }
+	desc { Generate a histogram with the xgraph program. }
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	explanation {
+Creates a histogram with the xgraph function.  It is assumed that "xgraph"
+is on your path, or this will not work!!!
+The time of arrival is ingored.  This star is identical to the SDF
+Xhistogram, but is used often enough in the DE domain that it is provided
+here for convenience.
+	}
 	input {
 		name { input }
 		type { anytype }
@@ -30,25 +21,25 @@ defstar {
 		name {title}
 		type {string}
 		default {"Xhistogram"}
-		desc {"graph title"}
+		desc { Graph title.}
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save Xhistogram input"}
+		desc { File to save Xhistogram input.}
 	}
 	defstate {
 		name {binWidth}
 		type {float}
 		default {"1.0"}
-		desc {"Width of bins for histogram."}
+		desc { Width of bins for histogram.}
 	}
 	defstate {
 		name {options}
 		type {string}
 		default {"-bar -nl"}
-		desc {"command line options for xgraph"}
+		desc { Command line options for xgraph.}
 	}
 	protected {
 		SequentialList bins;

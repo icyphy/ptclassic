@@ -1,27 +1,26 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 10/23/90
-
- It measures the time difference of the first and second arrival of the
- same data. If a data arrives at the first time, it is stored into the
- queue. If it is a second arrival of a data, it is matched to the
- first arrival in the queue and generates an output of time difference.
- The data itself is also generated at the second arrival.
-**************************************************************************/
-}
 defstar {
 	name { MeasureDelay }
 	domain { DE }
-	desc {	"Measure the time difference between the first arrival\n"
-		"and the second arrival of an event.\n"
-		"Output event is generated on the second arrival.\n"
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	desc {
+Measure the time difference between the first arrival
+and the second arrival of an event with the same value.
+The second arrival and the time difference are each sent to outputs.
+	}
+	explanation {
+This star measures the time difference of the first and second arrival of
+particles with the same value on the same input.
+When the first particle with a particular data value
+arrives, it is stored.
+When the second particle with a particular data value arrives,
+it is matched to the first arrival in storage, and
+a \fItimeDiff\fR
+output is generated with value equal to the arrival time difference.
+The data value itself is also
+sent to the \fIoutput\fR port upon the second arrival.
 	}
 	input {
 		name { input }
@@ -36,12 +35,6 @@ defstar {
 		type { ANYTYPE }
 	}
 	hinclude { "PriorityQueue.h" }
-	defstate {
-		name { queueSize }
-		type { int }
-		default { "100" }
-		desc { "size of the queue" }
-	}
 	protected {
 		PriorityQueue firstArrivalQ;
 	}

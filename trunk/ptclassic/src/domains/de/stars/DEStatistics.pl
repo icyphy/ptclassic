@@ -1,34 +1,18 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 11/30/90
-
- It calculates the average and variance of inputs in time from the 
- last reset time.  
- It generates the average and variance outputs on demand input.
- The start time is given by the reset input. If an input event comes
- before the reset input, the start time is the arrival time of the
- first input.  The reset input restarts the statistics.
- demand input before the start time is ignored.
-
-**************************************************************************/
-}
 defstar {
 	name { Statistics }
 	domain { DE }
-	desc {	"Calculate the statistics (average, variance) of the \n"
-		"input values in time since the last reset. \n" 
-		"Output is generated on each demand input.\n"
-		"When the reset input comes, reset the content and restarts.\n"
-		"When demand and reset arrives at the same time,\n"
-		"output first and reset next.\n"
+	desc {
+Calculate the average and variance of the
+input values that have arrived since the last reset.
+An output is generated when a "demand" input is received.
+When a "reset" input arrives, the calculations are restarted.
+When "demand" and "reset" particles arrive at the same time,
+an output is produced before the calculations are restarted.
 	}
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	input {
 		name { input }
 		type { float }
@@ -36,10 +20,12 @@ defstar {
 	input {
 		name { reset }
 		type { anytype }
+		desc { Restart the calculations. }
 	}
 	input {
 		name { demand }
 		type { anytype }
+		desc { Stimulate an output. }
 	}
 	output {
 		name { average }
