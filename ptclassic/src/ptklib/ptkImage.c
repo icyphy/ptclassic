@@ -1381,7 +1381,7 @@ GetColorTable(instancePtr)
 	memset((VOID *) &colorPtr->id, 0, sizeof(ColorTableId));
 	colorPtr->id = id;
 #if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
-	Tk_PreserveColormap(colorPtr->id.display, colorPtr->id.colormap); */
+	Tk_PreserveColormap(colorPtr->id.display, colorPtr->id.colormap);
 #endif
 	colorPtr->flags = 0;
 	colorPtr->refCount = 0;
