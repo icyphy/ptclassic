@@ -83,7 +83,7 @@ GRAPHICAL_TESTS = \
 TEST_SCRIPTS =  alltests.itcl all.itcl
 
 # make checkjunk should not complain about the OLD directory
-OPTIONAL_FILES = OLD $(TEST_SCRIPTS)
+OPTIONAL_FILES = $(TEST_SCRIPTS)
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF = $(TEST_SCRIPTS)
