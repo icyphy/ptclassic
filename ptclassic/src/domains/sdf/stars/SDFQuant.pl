@@ -38,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {""}
 		desc { Output levels.  If empty, use 0, 1, 2, ...}
 	}
-	start {
+	setup {
 		int n = thresholds.size();
 		if (levels.size() == 0) {
 			// default: 0, 1, 2...

@@ -52,7 +52,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		float values[255];
 		int number;
 	}
-	start {
+	setup {
 		int i;
 		
 		height		= (high-low) /(levels-1);

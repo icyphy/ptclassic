@@ -47,7 +47,7 @@ TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 	private {
 		double gain;
 	}
-	start {
+	setup {
 		if (int(inputIsPower)) gain=10.0;
 		else gain = 20.0;
 	}

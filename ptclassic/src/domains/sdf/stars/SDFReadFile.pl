@@ -54,7 +54,7 @@ limitation of liability, and disclaimer of warranty provisions.
     constructor { input = 0;   }
     destructor  { delete input;}
 
-    start
+    setup
     {
 	LOG_DEL; delete input; input = 0;
 	// open input file

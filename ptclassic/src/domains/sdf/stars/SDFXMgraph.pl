@@ -71,7 +71,7 @@ for a complete explanation of the options.
 	}
 	hinclude { "Display.h" }
 
-	start {
+	setup {
 		graph.initialize(this, input.numberPorts(),
 			options, title, saveFile, ignore);
 		index = xInit;

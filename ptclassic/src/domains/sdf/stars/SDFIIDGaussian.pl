@@ -50,7 +50,7 @@ This Star uses the GNU library <Normal.h>
 	destructor {
 		LOG_DEL; delete random;
 	}
-	start {
+	setup {
 		LOG_DEL; delete random;
 		LOG_NEW; random = new Normal(double(mean),double(variance),gen);
 	}

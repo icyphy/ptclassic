@@ -51,7 +51,7 @@ This Star uses the GNU library <Uniform.h>.
 	destructor {
 		LOG_DEL; delete random;
 	}
-	start {
+	setup {
 		LOG_DEL; delete random;
 		LOG_NEW; random = new Uniform(double(lower),double(upper),gen);
 	}

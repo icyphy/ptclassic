@@ -28,7 +28,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {64}
 		desc {Number of particles read and written.}
 	}
-	start {
+	setup {
 		input.setSDFParams(int(N),int(N)-1);
 		output.setSDFParams(int(N),int(N)-1);
 	}

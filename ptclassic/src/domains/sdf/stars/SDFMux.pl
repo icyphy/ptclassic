@@ -40,7 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {1}
 		desc {Number of particles in a block.}
 	}
-	start {
+	setup {
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
 	}

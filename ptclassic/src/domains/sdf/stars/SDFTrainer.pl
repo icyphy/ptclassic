@@ -42,7 +42,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 		int count;
 	}
-	start {
+	setup {
 		count = 0;
 	}
 	go {
