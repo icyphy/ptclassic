@@ -144,6 +144,20 @@ void ParScheduler :: saveProcIds(Galaxy& g) {
 	}
 }
 
+int procIdOfFork(CGStar* s) {
+	BlockPortIter piter(*s);
+	PortHole* p;
+	p = piter++;
+	while (p->isItOutput()) p = piter++;
+	CGStar* farS = (CGStar*) p->far()->parent();
+	if (farS->isItFork()) {
+		s->setProcId(procIdOfFork(farS));
+	} else {
+		s->setProcId(farS->getProcId());
+	}
+	return  s->getProcId();
+}
+
 /////////////////////////////
 // scheduleManually
 /////////////////////////////
@@ -153,6 +167,10 @@ int ParScheduler :: scheduleManually(Galaxy& g) {
 	GalStarIter iter(g);
 	CGStar* s;
 	while ((s = (CGStar*) iter++) != 0) {
+		// If it is a Fork star, assign the procId with the parent's.
+		if (s->isItFork()) {
+			procIdOfFork(s);
+		}
 		if (s->getProcId() < 0) {
 			Error::abortRun(*s, " is not assigned a processor",
 				"Manual assignment fails.");
@@ -214,6 +232,10 @@ void ParScheduler :: compileRun() {
 		logstrm->flush();
 	}
 
+	// make parallel target intervene here to do something necessary
+	// by default, do nothing
+	mtarget->prepareCodeGen();
+	
 	// run sub-universe in each processor to generate the code
 	parProcs->generateCode();
 }
