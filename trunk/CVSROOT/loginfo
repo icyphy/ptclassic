@@ -31,5 +31,5 @@ diva/.* mailx -s "%s" diva-cvs@gigascale.eecs.berkeley.edu
 diva-binaries/.* mailx -s "%s" diva-cvs@gigascale.eecs.berkeley.edu
 
 #panda releated stuff (Bart Kienhuis)
-panda/.* mailx -s "%s" kienhuis@eecs.berkeley.edu
+panda/.* mailx -s "%s" kienhuis@eecs.berkeley.edu rypkema@cas.et.tudelft.nl
 
