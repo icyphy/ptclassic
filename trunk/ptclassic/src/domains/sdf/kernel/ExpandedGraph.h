@@ -100,6 +100,10 @@ protected:
 	// Create a new star node with given invocation index
 	virtual EGNode *newNode(DataFlowStar*, int);
 
+	// If any star is enforced "self-loop", set the parallelizable flag
+	// FALSE.
+	int parallelizable;
+
 private:
 
 	// Create the precedence links corresponding to an
