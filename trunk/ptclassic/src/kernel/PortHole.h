@@ -379,7 +379,7 @@ public:
 	/* virtual */ StringList print (int verbose = 0) const;
 
 	// set the alias
-	inline void setAlias (PortHole& blockPort);
+	void setAlias (PortHole& blockPort);
     
 	// class identification
 	int isA(const char*) const;
