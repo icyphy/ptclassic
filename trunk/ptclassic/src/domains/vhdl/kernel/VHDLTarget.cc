@@ -74,6 +74,7 @@ HLLTarget(name, starclass, desc) {
 
   // Initialize lists.
   variableList.initialize();
+  localVariableList.initialize();
 
   // Make states defined in CGTarget settable.
   displayFlag.setAttributes(A_SETTABLE);
@@ -306,6 +307,10 @@ void VHDLTarget :: trailerCode() {
   
   // Go through registered variables and give them
   // declarations with initialization.
+  variable_declarations << addVariableDecls(&variableList);
+  variable_declarations << addVariableDecls(&localVariableList);
+
+  /* The old way:
   VHDLVariableListIter nextVariable(variableList);
   VHDLVariable* variable;
   while ((variable = nextVariable++) != 0) {
@@ -319,6 +324,7 @@ void VHDLTarget :: trailerCode() {
     }
     variable_declarations << ";\n";
   }
+  */
 
   // Generate the architecture_body_closer.
   architecture_body_closer << "-- architecture_body_closer\n";
@@ -631,7 +637,8 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   else {
     newvar->initVal = "0.0";
   }
-  variableList.put(*newvar);
+  //  variableList.put(*newvar);
+  localVariableList.put(*newvar);
 }
 
 // Register the constant storage reference.
@@ -642,7 +649,8 @@ void VHDLTarget :: registerDefine(const char* define, const char* type,
   newvar->setName(define);
   newvar->type = sanitizeType(type);
   newvar->initVal = init;
-  variableList.put(*newvar);
+  //  variableList.put(*newvar);
+  localVariableList.put(*newvar);
 }
 
 // Return the assignment operator for States.
@@ -724,6 +732,7 @@ void VHDLTarget :: initCodeStreams() {
 void VHDLTarget :: initVHDLObjLists() {
   arcList.initialize();
   variableList.initialize();
+  localVariableList.initialize();
 }
 
 // Return a generic clause based on genList.
@@ -862,6 +871,29 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompMapList* compMapList,
     }
     
     all << indent(level) << ";\n";
+    level--;
+  }
+  return all;
+}
+
+// Return variable declarations based on variableList.
+StringList VHDLTarget :: addVariableDecls(VHDLVariableList* variableList,
+					  int level/*=0*/) {
+  StringList all;
+  VHDLVariableListIter nextVariable(*variableList);
+  VHDLVariable* variable;
+  while ((variable = nextVariable++) != 0) {
+    level++;
+    all << "variable ";
+    all << variable->name;
+    all << ": ";
+    all << variable->type;
+    //    if ((variable->initVal).numPieces() > 0) {
+    if ((variable->initVal).length() > 0) {
+      all << " := ";
+      all << variable->initVal;
+    }
+    all << ";\n";
     level--;
   }
   return all;
