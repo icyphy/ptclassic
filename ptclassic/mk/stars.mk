@@ -35,6 +35,14 @@ BDFSTARS = $(LIBDIR)/bdfstars.o
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
 	$(LIBDIR)/libPar.a $(LIBDIR)/libcgstars.a $(LIBDIR)/libcg.a
 
+# if S56DIR is defined compile in the S56X Wormhole target.  This
+# is defined in config-sun4.mk.
+ifdef S56DIR
+S56WH_LIB= -lqckMon
+S56WH_LIBDIR= -L$(S56DIR)/lib
+S56WH_O= $(CG56T)/S56XTargetWH.o
+endif
+
 # Library files reqd by stars.  Note that libptolemy.a is not included.
 STAR_LIBFILES=\
 $(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgctcltk.a $(LIBDIR)/libcgc.a \
@@ -56,7 +64,7 @@ $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a
 STAR_LIBS=\
 -lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
--lcg56dspstars -lcg56stars -lcg56 \
+-lcg56dspstars -lcg56stars -lcg56 $(S56WH_LIBDIR) $(S56WH_LIB)\
 -lcgddfstars -lcgddf \
 -lcgstars -lDC -lHu -lDL -lPar -lcg \
 -lddfstars -lddf \
@@ -80,7 +88,7 @@ CGCTARGETS =	$(CGCT)/CGCUnixSend.o $(CGCT)/CGCUnixReceive.o \
 		$(CGCT)/CGCMultiTarget.o $(CGCT)/CGCDDFTarget.o \
 		$(CGCTCL)/CGCTclTkTarget.o
 BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/CGCBDFTarget.o
-CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
+CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
 		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o
 CG96TARGETS =	$(CG96T)/Sim96Target.o
