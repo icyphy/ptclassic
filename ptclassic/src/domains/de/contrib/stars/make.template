@@ -58,8 +58,6 @@ DEMobile_Station.pl \
 DEParallel2Serial.pl \
 DEWeighted_List.pl \
 DEWiNeS_Tcl_Animation.pl \
-DEXYgraph.pl \
-DEXgraph.pl \
 DEcell_list.pl \
 DEpos_generator.pl \
 DEpropag_uldl.pl \
