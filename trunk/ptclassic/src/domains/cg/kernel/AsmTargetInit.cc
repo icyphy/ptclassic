@@ -9,7 +9,7 @@ $Id$
  Programmer: J. Buck
 
  This is the star/state initialization function for AsmTarget.
- It's kept separate because lots of include files not needed for
+ It is kept separate because lots of include files not needed for
  the rest of AsmTarget are referenced here.
 
 *******************************************************************/
@@ -39,13 +39,26 @@ void AsmTarget::doInitialization(AsmStar& star) {
 		unsigned addr;
 		ProcMemory *mem = star.lookupEntry(s->readName(),addr);
 		orgDirective(mem->readName(), addr);
+
+		// handle A_REVERSE attribute, which makes arrays
+		// write out backwards.
+
+		int sIdx = 0;
+		int limit = s->size();
+		int step = 1;
+
+		if ((s->attributes() & AB_REVERSE) != 0) {
+			sIdx = limit - 1;
+			limit = -1;
+			step = -1;
+		}
 		if (strcmp(s->type(), "INT") == 0) {
 			IntState* i = (IntState*)s;
 			writeInt(int(*i));
 		}
 		else if (strcmp(s->type(), "INTARRAY") == 0) {
 			IntArrayState* i = (IntArrayState*)s;
-			for (int j = 0; j < i->size(); j++)
+			for (int j = sIdx; j != limit; j += step)
 				writeInt((*i)[j]);
 		}
 		else if (strcmp(s->type(), "FIX") == 0) {
@@ -54,7 +67,7 @@ void AsmTarget::doInitialization(AsmStar& star) {
 		}
 		else if (strcmp(s->type(), "FIXARRAY") == 0) {
 			FixArrayState* i = (FixArrayState*)s;
-			for (int j = 0; j < i->size(); j++)
+			for (int j = sIdx; j != limit; j += step)
 				writeFix((*i)[j]);
 		}
 		else if (strcmp(s->type(), "FLOAT") == 0) {
@@ -63,7 +76,7 @@ void AsmTarget::doInitialization(AsmStar& star) {
 		}
 		else if (strcmp(s->type(), "FLOATARRAY") == 0) {
 			FloatArrayState* i = (FloatArrayState*)s;
-			for (int j = 0; j < i->size(); j++)
+			for (int j = sIdx; j != limit; j += step)
 				writeFloat((*i)[j]);
 		}
 		else {
