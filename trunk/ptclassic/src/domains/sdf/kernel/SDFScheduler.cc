@@ -1,9 +1,14 @@
+// Programmer: Edward A. Lee
+// EECS Dept., UC Berkeley
+// Jan. 5, 1990
+
 #include "type.h"
 #include "Scheduler.h"
 #include "Fraction.h"
 #include "Error.h"
 
 #include <stream.h>
+
 
 extern Error errorHandler;
 
