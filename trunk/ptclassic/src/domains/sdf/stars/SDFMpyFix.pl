@@ -80,14 +80,14 @@ the OverflowHandler will be called.
 		// (if it exists) and then compute the product
 		p = nexti++;
 		if ( p != 0 ) {
-	          fixIn = Fix((*p)%0);
+	          fixIn = (Fix)((*p)%0);
 	          product = fixIn;
 		  checkOverflow(product);
 	          while ((p = nexti++) != 0) {
 		    if ( int(ArrivingPrecision) )
-		      product *= Fix((*p)%0);
+		      product *= (Fix)((*p)%0);
 		    else {
-	              fixIn = Fix((*p)%0);
+	              fixIn = (Fix)((*p)%0);
 		      product *= fixIn;
 		    }
 		    checkOverflow(product);

@@ -84,27 +84,27 @@ The other operations are self-explanatory.
 	    switch( test ) {
 		case NOTID:
 		    p = nexti++;
-		    result = !int((*p)%0);
+		    result = !(int)((*p)%0);
 		    break;
 		case ANDID:
 		case NANDID:
 		    result = 1;
 		    while ((p = nexti++) != 0)
-			result = result && int((*p)%0);
+			result = result && (int)((*p)%0);
 		    if (test == NANDID) result = !result;
 		    break;
 		case ORID:
 		case NORID:
 		    result = 0;
 		    while ((p = nexti++) != 0)
-			result = result || int((*p)%0);
+			result = result || (int)((*p)%0);
 		    if (test == NORID) result = !result;
 		    break;
 		case XORID:
 		case XNORID:
 		    result = 0;
 		    while ((p = nexti++) != 0)
-			if (int((*p)%0)) result = !result;
+			if ((int)((*p)%0)) result = !result;
 		    if (test == XNORID) result = !result;
 		    break;
 	    }
