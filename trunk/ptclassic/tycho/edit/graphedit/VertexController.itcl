@@ -316,7 +316,7 @@ body ::tycho::VertexController::editparameters {tag} {
 	# Filter out non-vertices
         # FIXME FIXME FIXME (access to slate)
         set id [$slateview slateid $i]
-        set sl [$slateview component slate]
+        set sl [$slateview slate]
 	if ![$sl hastag $id "vertex"] {
 	    continue
 	}
