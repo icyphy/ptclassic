@@ -55,8 +55,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	MPHIter nextPort(input);
 	for (int i = input.numberPorts(); i > 0; i--)
 	{
-	    PortHole& port = *nexti++;
+	    PortHole& port = *nextPort++;
 	    port.receiveData();
+	    output.receiveData();
 	    for (int j = int(blockSize)-1; j >= 0; j--)
 		output%j = port%j;
 	    output.sendData();
