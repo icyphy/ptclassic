@@ -70,6 +70,8 @@ public:
 		setStopTime(limit * relTimeScale) ;
 	}
 
+	float getStopTime() { return stopTime;}
+
 	// Set the current time
 	void setCurrentTime(float val) {
 		currentTime = val * relTimeScale ;
