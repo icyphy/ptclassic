@@ -61,7 +61,16 @@ sched(0), gal(0), associatedDomain(assocDomain) {
 
 // destructor
 Target::~Target() {
-	// FIXME: Should we delete the children?
+	// Unlink myself from my parent
+	if (parent() && parent()->isA("Target")) {
+		((Target*)parent())->remChild(*this);
+	}
+	// Unlink myself from my children
+	remChildren();
+	// FIXME: Should we delete the children, rather than just unlinking?
+	// Seems safer to expect derived classes to call deleteChildren
+	// in their destructors if they dynamically allocated their children.
+	// If they forget, memory leak, but no crash.
 }
 
 void Target::setSched(Scheduler* sch) {
@@ -245,6 +254,12 @@ Target* Target::child(int n) {
 
 // add a new child target.
 void Target::addChild(Target& newChild) {
+	// safety check: if it's already in some child chain, take it out
+	// to avoid corrupting that chain.
+	if (newChild.parent() && newChild.parent()->isA("Target")) {
+		((Target*)newChild.parent())->remChild(newChild);
+	}
+
 	if (children == 0) {
 		children = &newChild;
 	}
@@ -261,15 +276,52 @@ void Target::addChild(Target& newChild) {
 	nChildren++;
 }
 
+// if the given target is one of my children, remove it from list
+// (does not delete the child!).  Return 1 if found in list, else 0.
+int Target::remChild(Target& child) {
+	if (&child == children) {
+		children = child.link;
+		nChildren--;
+		child.setParent(0);
+		return TRUE;
+	}
+	for (Target* p = children; p; p = p->link) {
+		if (&child == p->link) {
+			p->link = child.link;
+			nChildren--;
+			child.setParent(0);
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+// remove all my children (without deleting them)
+void Target::remChildren()
+{
+	for (Target* p = children; p; p = p->link) {
+		p->setParent(0); // we needn't bother clearing p->link
+	}
+	children = 0;
+	nChildren = 0;
+}
+
 // delete all children; use only when children were dynamically created.
 void Target::deleteChildren() {
 	Target* p = children;
 	while (p) {
+		// NOTE: each child is removed from list before being deleted,
+		// but we do not clear its parent link.  A derived Target
+		// destructor might want to know whether it is a child target,
+		// so clearing the parent link would be bad.  But since we
+		// already unlinked, Target::~Target's attempt to remChild
+		// will fail harmlessly.
 		children = p->link;
+		nChildren--;
 		LOG_DEL; delete p;
 		p = children;
 	}
-	nChildren = 0;
+	nChildren = 0;		// just to be sure
 }
 
 // function for use by "hasResourcesFor".  Finds the StringArrayState

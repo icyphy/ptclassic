@@ -47,7 +47,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class Scheduler;
 class Galaxy;
-class EventHorizon;
 
 class Target : public Block {
 public:
@@ -240,8 +239,12 @@ protected:
 	// add a new child
 	void addChild(Target&);
 
-	// remove the "children" list (no effect on children)
-	void remChildren() { nChildren = 0; children = 0;}
+	// if the given target is one of my children, remove it from list
+	// (does not delete the child!).  Return 1 if found in list, else 0.
+	int remChild(Target&);
+
+	// remove all my children (without deleting them)
+	void remChildren();
 
 	// delete all the "children" (for when they are created dynamically)
 	void deleteChildren();
