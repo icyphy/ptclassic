@@ -25,7 +25,7 @@ LIB = libcgstars.a
 DOMAIN_2 = AnyAsm
 DOMAIN=CG
 STAR_MK=cgstars
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
