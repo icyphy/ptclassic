@@ -66,6 +66,11 @@ defined below, and are also declared in ptkImage.h.
 
 /* From Tk's generic/tkInt.h */
 #ifndef TkPutImage
+/* From unix/tkUnixPort.h */
+#define TkPutImage(colors, ncolors, display, pixels, gc, image, destx, desty, srcx, srcy, width, height) \
+	XPutImage(display, pixels, gc, image, destx, desty, srcx, \
+	srcy, width, height);
+
 extern void             TkPutImage _ANSI_ARGS_((unsigned long *colors,
                             int ncolors, Display* display, Drawable d,
                             GC gc, XImage* image, int src_x, int src_y,
