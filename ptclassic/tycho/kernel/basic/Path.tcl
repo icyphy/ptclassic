@@ -435,7 +435,7 @@ proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
 	set tmpdir $env(TMPDIR)
     } elseif [info exists env(TEMP)] {
 	set tmpdir $env(TEMP)
-    } else
+    } else {
 	set tmpdir /tmp
     }
     
