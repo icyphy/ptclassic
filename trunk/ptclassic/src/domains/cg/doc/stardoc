@@ -157,7 +157,7 @@ expanded in a language or target specific manner after the target has
 allocated the resources properly.  In this section, we discuss the
 macros defined in the CGStar class.
 .UH "$ref(name):"
-.Ir "ref, CG macro"
+.Id "macro, ref"
 Returns a reference to a state or a port. If the argument, name, refers
 to a port, it is functionally equivalent to \fBname%0\fR operator in
 the SDF simulation stars.  If a star has a multi-porthole, say
@@ -170,21 +170,21 @@ Returns a reference to an array state or a port with an offset that is
 not negative.  For a port, it is functionally equivalent to \fBname%offset\fR
 operator in SDF simulation stars. 
 .UH "$val(state-name):"
-.Ir "val, CG macro"
+.Ir "macro, val"
 Returns the current value of the state. If the state is an array state,
 the macro will return a string of all the elements of the array spaced
 by the new line character.  The advantage of not using \fB$ref\fR macro
 in place of \fB$val\fR is that no additional target resources need to be
 allocated.
 .UH "$size(name):"
-.Ir "size, CG macro"
+.Ir "macro, size"
 Returns the size of the state/port argument. The size of a non-array
 state is one; the size of a array state is the total number of elements
 in the array.  The size of a port is the buffer size allocated to the
 port.  The buffer size is usually larger than the number of tokens
 consumed or produced through that port.
 .UH "$starSymbol(name):"
-.Ir "starSymbol, CG macro"
+.Ir "macro, starSymbol"
 Returns a unique label in the star instance scope.  The instance scope
 is owned by a particular instance of that star in a graph.
 Furthermore, the scope is alive across all firings of that particular
@@ -214,7 +214,7 @@ globally, and the $starSymbol macro guarantees the uniqueness. Within
 the same star instance, the macro returns the same label. Refer to the
 CGC domain document for the method: addDeclaration and addInclude.
 .UH "$sharedSymbol(list,name):"
-.Ir "sharedSymbol, CG macro"
+.Id "macro, sharedSymbol"
 Returns the symbol for \fBname\fR in the \fBlist\fR scope.  This macro
 is provide so that various stars in the graph can share the same data
 structures such as sin/cos lookup tables and conversion table from
@@ -271,8 +271,8 @@ codeblock has not been previously defined, addGlobal returns true, thus
 allowing addCode(sharedInit). If there are more than one instances of
 the PCM star, only one instance will succeed in adding the code.
 .UH "$label(name), $codeblockSymbol(name):"
-.Ir "label, CG macro"
-.Ir "codeblockSymbol, CG macro"
+.Id "macro, label"
+.Id "macro, codeblockSymbol"
 Returns a unique symbol in the codeblock scope. Both label and
 codeblockSymbol refer to the same macro expansion.  The codeblock scope
 only lives as long as a codeblock is having code generated from it.
@@ -304,6 +304,9 @@ The base CGStar class provides the above 8 macros. In the derived
 classes, we can add more macros, or redefine the meaning of
 these macros. Refer to each domain document to see how these
 macros are actually expanded.
+.pp
+.Id "macro, $$"
+To have "$" appear in the output code, put "$$" in the codeblock.
 .H2 "Possibilities for Effective Buffering"
 .pp
 .Sr Fork, code generation
