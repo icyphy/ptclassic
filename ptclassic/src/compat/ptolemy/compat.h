@@ -371,6 +371,10 @@ extern int errno;
 #endif
 #endif /* NEED_TIMEVAL */
 
+#ifdef PT_NT4VC
+#define strcasecmp(a,b) stricmp((a),(b))
+#endif
+
 #ifdef PTNT
 /* src/kernel/TimeVal.cc uses timercmp */
 #define	timercmp(tvp, uvp, cmp) \
