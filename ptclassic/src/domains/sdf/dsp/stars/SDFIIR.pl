@@ -91,7 +91,7 @@ It is often desirable to expand the filter into a parallel or cascade form.
 	double* stateEnd;
     }
     ccinclude {
-	<builtin.h>	// for max()
+	<minmax.h>	// for max()
     }
     start {
 	int numNumer = numerator.size();
