@@ -125,5 +125,6 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
     configure -textwidth 60
     configure -textheight 17
     configure -scrollbar 0
+    configure -title "Welcome to Ptolemy"
     insertData $html
 }
