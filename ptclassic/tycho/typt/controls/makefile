@@ -40,10 +40,14 @@ VPATH =		$(ROOT)/typt/controls
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS =     AudioIO.itcl \
-				GraphicEq.itcl \
-				ParametricEq.itcl \
-				ToneControl.itcl
+ITCL_SRCS = \
+	AudioIO.itcl \
+	ControlPanel.itcl \
+	ControlSubpanel.itcl \
+	GraphicEq.itcl \
+	ParametricEq.itcl \
+	Scheduler.itcl \
+	ToneControl.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
