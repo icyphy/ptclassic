@@ -1,11 +1,11 @@
 defstar {
         name { SubFix }
         domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
         desc {
 Output as a fixed-point number the "pos" input minus all "neg" inputs.
 	}
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.

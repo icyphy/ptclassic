@@ -1,14 +1,14 @@
 defstar {
 	name { RampFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc {
 Generate a fixed-point ramp signal, starting at "value" (default 0.0)
 with step size "step" (default 1.0).
 A precision and an initial value can be specified for a parameter by using
 the notation ( <initial_value>, <precision> ).
 	}
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.

@@ -1,14 +1,14 @@
 defstar {
 	name { RectFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc {
 Generate a fixed-point rectangular pulse of height "height" 
 (default 1.0) and width "width" (default 8).
 If "period" is greater than zero, then the pulse is repeated with the
 given period.
 	}
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.

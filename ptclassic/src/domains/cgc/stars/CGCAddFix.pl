@@ -1,12 +1,12 @@
 defstar {
 	name { AddFix }	
-	domain {CGC}
-	derivedFrom{ CGCFix }
+	domain { CGC }
+	derivedFrom { Fix }
 	desc {
 Output the sum of the fixed-point inputs as a fixed-point value.
 	}
 	version { $Id$ }
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.

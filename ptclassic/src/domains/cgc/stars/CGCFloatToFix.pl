@@ -1,7 +1,7 @@
 defstar {
 	name { FloatToFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	version { $Id$ }
 	author { J.Weiss }
 	copyright {
