@@ -33,6 +33,18 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io.h"
 
+#include "change_record.h"
+#include "io_procs.h"
+#include "mark.h"
+#include "oct_utils.h"
+#include "term_update.h"
+
+#include "term.h"
+
+/* Forward reference, should this be static? */
+int oct_do_term_undelete
+	ARGS((struct facet *desc, struct octObject *term, generic **new_p, int32 xid, int32 old_xid, int32 old_id));
+
 extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
 
@@ -40,12 +52,14 @@ static int term_create(), term_uncreate(), term_delete(), term_undelete(), term_
 static int term_free_fields(), term_write_fields(), term_read_fields();
 static int term_copy_fields();
 
+void
 oct_formal_desc_set(object_desc)
 struct object_desc *object_desc;
 {
     oct_term_desc_set(object_desc);
 }
 
+void
 oct_term_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -101,7 +115,7 @@ struct octObject *term;
 generic **new_p;
 int32 old_xid,old_id;
 {
-    struct octTerm *user_term = &term->contents.term;
+    /*struct octTerm *user_term = &term->contents.term;*/
 
     if (strcmp(desc->user_facet.facet, "contents") != 0) {
 	oct_error("terminals may be only created in the contents facet");
@@ -111,6 +125,7 @@ int32 old_xid,old_id;
     return oct_do_term_undelete(desc, term, new_p, (int32) 0, old_xid, old_id);
 }
 
+octStatus
 oct_do_term_create(desc, term, new_p, xid)
 struct facet *desc;
 struct octObject *term;
@@ -169,6 +184,7 @@ int32 xid;	/* force the xid to be this */
 	return OCT_OK;
 }
 
+int
 oct_do_term_undelete(desc, term, new_p, xid, old_xid, old_id)
 struct facet *desc;
 struct octObject *term;
@@ -232,6 +248,10 @@ int size;
     if (copy->name != NIL(char)) {
 	copy->name = oct_str_intern(copy->name);
     }
+    return OCT_OK;		/* Return OCTOK because we take the
+				   pointer of this func and pass it
+				   around as a func returning an int */
+				   
 }
 
 static int
@@ -243,6 +263,9 @@ generic *nptr;
     if (term->user_term.name != NIL(char)) {
 	oct_str_free(term->user_term.name);
     }
+    return OCT_OK;		/* Return OCTOK because we take the
+				   pointer of this func and pass it
+				   around as a func returning an int */
 }
 
 static octStatus
