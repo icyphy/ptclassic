@@ -125,13 +125,13 @@ defstar {
 	addCode("	org	x:$addr(coef_table)");
 	for ( k=0; k < numTaps; k++) {
 	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", init_taps_r[k]);
+	    sprintf(buf, "	dc	%.15f", double(init_taps_r[k]));
 	    addCode(buf);
 	}
 	addCode("	org	y:$addr(coef_table)");
 	for ( k=0; k < numTaps; k++) {
 	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", init_taps_i[k]);
+	    sprintf(buf, "	dc	%.15f", double(init_taps_i[k]));
 	    addCode(buf);
 	}
 	addCode("	org	p:");
