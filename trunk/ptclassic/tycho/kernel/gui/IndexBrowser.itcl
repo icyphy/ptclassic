@@ -187,7 +187,7 @@ body ::tycho::IndexBrowser::currentPoint {} {
 body ::tycho::IndexBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides IndexBrowserHelp.html]
+	    [file join $TYCHO kernel gui doc usersGuides IndexBrowserHelp.html]
 }
 
 #####################################################################
