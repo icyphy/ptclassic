@@ -3,9 +3,15 @@
 #				All Rights Reserved.
 # For creating an SDF loop scheduler.
 
-SRCS =	LSNode.cc LSMaster.cc LSGraph.cc LoopScheduler.cc MergeList.cc LoopTarget.cc
-HDRS =	LSNode.h LSMaster.h LSGraph.h LoopScheduler.h MergeList.h 
- 
+SRCS =	LSNode.cc LSCluster.cc LSGraph.cc LoopScheduler.cc \
+		MergeList.cc ClusterNodeList.cc \
+		BooleanMatrix.cc ReachabilityMatrix.cc \
+		DecomGal.cc DecomScheduler.cc LoopTarget.cc
+HDRS =	LSNode.h LSCluster.h LSGraph.h LoopScheduler.h \
+		MergeList.h ClusterNodeList.h \
+		BooleanMatrix.h ReachabilityMatrix.h \
+		DecomGal.h DecomScheduler.h
+
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
@@ -17,9 +23,8 @@ include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
-LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
-INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL) -I$(CGKERNEL)
+INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(CGKERNEL)
 
 OBJS = $(SRCS:.cc=.o)
 LIB = libLS.a
