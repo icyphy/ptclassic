@@ -53,10 +53,6 @@ class ::tycho::Compile {
     ###################################################################
     ####                            options                        ####
 
-    # View of controlling widget, used to post status messages.
-    itk_option define -view view View {}
-
-
     ###################################################################
     ####                         public methods                    ####
 
@@ -64,22 +60,29 @@ class ::tycho::Compile {
     method compileAndLoad { filenames}
 
     ###################################################################
+    ####                         public methods                    ####
+
+    public variable view {}
+    ###################################################################
     ####                   protected methods                       ####
 
     # Check the source files for necessary features.
-    protected checkSourceFiles {}
+    protected method checkSourceFiles {}
 
     # Compile the file.
-    protected compileFiles {}
+    protected method compileFiles {}
 
     # Create a makefile.
-    protected createMakefile {}
+    protected method createMakefile {}
 
     # Run make and then load the result back into Tycho.
     protected method loadFiles {}
 
     # Determine the name of the makefile.
     protected method makefileName {}
+
+    # Print status messages to the controlling widget, if any.
+    protected method putStatus {msg}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -98,13 +101,6 @@ class ::tycho::Compile {
 
     # Name of the makefile to use.
     protected variable makefile makefile
-}
-
-#######################################################################
-#### -view configuration
-# Description of view option.
-#
-configbody ::tycho::Compile::view {
 }
 
 #######################################################################
@@ -135,8 +131,8 @@ body ::tycho::Compile::compileAndLoad {filenames} {
     }
     set filenameList $filenames
     set firstFile [lindex $filenameList 0]
-    set dirname [file dirname $firstfile]
-    set basename [file rootname [file tail $firstfile]]
+    set dirname [file dirname $firstFile]
+    set basename [file rootname [file tail $firstFile]]
 
     # Should we check that thie files exist here?
 
@@ -204,11 +200,9 @@ body ::tycho::Compile::loadFiles {} {
 body ::tycho::Compile::makefileName {} {
     if [file exists [file join $dirname makefile]] {
 	set makefile makefile
-    }
-    if [file exists [file join $dirname Makefile]] {
+    } elseif [file exists [file join $dirname Makefile]] {
 	set makefile Makefile
-    }
-    if [file exists [file join $dirname $basename.mk] {
+    } else {
 	set makefile $basename.mk
     }
 }
@@ -217,10 +211,8 @@ body ::tycho::Compile::makefileName {} {
 #### printStatus
 # Print status messages if -view was passed at construction time.
 #
-body ::tycho::Compile::printStatus {msg} {
-    if {$itk_option(-view) != {}} {
-	$itk_option(-view) printStatus $msg
+body ::tycho::Compile::putStatus {msg} {
+    if {$view != {}} {
+	$view putStatus $msg
     }
 }
-
-
