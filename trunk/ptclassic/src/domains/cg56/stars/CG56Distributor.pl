@@ -19,7 +19,7 @@ Distributes an input signal among two outputs, alternating samples.
 	}
 	input {
 		name {input}
-		type {anytype}
+		type {ANYTYPE}
 	}
 	outmulti {
 		name {output}
