@@ -164,12 +164,20 @@ CC_STATIC=
 XV_RAND=
 XV_INSTALL=install
 
-# Used for Matlab's external interface; by default, Matlab is not installed
-# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed 
-#    and MATLABLIBDIR points to the directory containing the Matlab libraries
-# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
-#    and MATLABLIBIDR is undefined
+# Matlab settings
+# Matlab is installed if the matlabRootDir script returns an non-empty string
+# -- If Matlab is not installed, then set MATLABDIR to
+#    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
+# -- If Matlab is installed, then set MATLABDIR accordingly
+#    and set MATLABLIBDIR to the external library directory
+MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+ifeq ($MATLABDIR,)
 MATLABDIR= $(ROOT)/src/compat/matlab
+else
+MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+MATLABLIBDIR = -L$(MATLABDIR)/extern/lib/$(MATARCH)
+MATLABEXT_LIB= $(MATLABLIBDIR) -lmat
+endif
 
 # Directory for general compatiblity include files.  Mainly function
 # declarations to quiet gcc -Wall down
