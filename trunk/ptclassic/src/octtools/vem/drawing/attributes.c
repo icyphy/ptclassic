@@ -572,12 +572,6 @@ int l_width;			/* Brush size for outlines      */
     atrInternal *new_internal;
     int selreturn;
 
-				/* If we are on black and white, then
-				 * xor will not work when we draw lines
-				 */
-    if (xv_depth() ==  1)
-      return VEM_OK;
-
     new_internal = VEMALLOC(atrInternal);
     new_internal->atrFlags = ATR_SELECT;
     switch (selreturn = sel_resolve(col, &(new_internal->pix_or_offset))) {
@@ -1081,11 +1075,32 @@ atrHandle attr;
 
     /* Then tweek the graphics contexts as appropriate */
     values.function = GXxor;
+#ifdef OLD_VEM_BLACK_AND_WHITE_BUG
     if (real_attr->atrFlags & ATR_PLANE) {
 	values.foreground = attr_planes[real_attr->pix_or_offset] ^ atrQBg();
     } else if (col_state == IS_LOWCOL) {
 	values.foreground = attr_pixvalues[real_attr->pix_or_offset].pixel ^ atrQBg();
     }
+#else
+    /* 6/95 - Change from Thomas Burger to fix highliting on B&W
+     * monitor 
+     */
+    if( col_state == IS_HICOL ) {
+      /* real_attr->pix_or_offset is an offset */
+      if (real_attr->atrFlags & ATR_PLANE) {
+  	values.foreground = attr_planes[real_attr->pix_or_offset] ^ atrQBg();
+      } else {
+	values.foreground =
+	  attr_pixvalues[real_attr->pix_or_offset].pixel ^ atrQBg(); 
+      }
+    } else if( col_state == IS_LOWCOL ) {
+      /* its the actual pixel value */  
+      values.foreground = real_attr->pix_or_offset ^ atrQBg();
+    } else {
+      /* IS_BW: draw white on black bg and black on white bg */  
+      values.foreground = vuBlack((XColor *) 0);
+    }
+#endif
     XChangeGC(_AGC.disp, _AGC.solid_gc, GCFunction | GCForeground, &values);
     XChangeGC(_AGC.disp, _AGC.line_gc, GCFunction | GCForeground, &values);
     XChangeGC(_AGC.disp, _AGC.stipple_gc, GCFunction | GCForeground, &values);
