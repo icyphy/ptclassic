@@ -15,7 +15,9 @@ Determine the order in which actors are to be executed on a processor;
 .ip
 Arrange the execution of actors into standard control structures, 
 like nested loops.
-
+.pp
+In this section, we explain different scheduling options and their
+effect on the generated code.
 .H2 "Single-Processor Schedulers"
 .pp
 For targets consisting of a single processor, we provide three different
@@ -37,7 +39,7 @@ this schedule. This is a quick and efficient approach unless
 there are large sample rate changes, in which case it corresponds to 
 completely unrolling all loops, so results in huge code size. 
 .pp
-The second approach we call /fIJoe's/fR scheduling. In this approach
+The second approach we call \fIJoe's\fR scheduling. In this approach
 .Id "Joe's scheduling"
 (loopingLevel = 1), actors that have the same sample rate are merged 
 (wherever this will not cause deadlock) and loops are introduced to 
@@ -49,7 +51,7 @@ together with sequences of code from the actors.
 Since the second approach uses a conservative approach, there are some
 cases, if rare, in which some looping possibilities are undetected. 
 By setting the loopingLevel to 2, we can choose the third approach,
-called SJS (Shuvra-Joe-Soonhoi) scheduling after the inventor's
+called \fISJS\fR (Shuvra-Joe-Soonhoi) scheduling after the inventor's
 .Id "SJS scheduling"
 first names. After performing Joe's scheduling at the front end,
 it attacks the remaining graph with more complicated approach.
@@ -84,6 +86,15 @@ advanced schedulers. We have designed a suite of specialized schedulers
 that can be mixed and matched for specific applications. After the 
 scheduling is performed, each processor is assigned 
 a set of blocks to be executed in a scheduler-determined order. 
+.pp
+The first step for multiple-processor scheduling, or parallel scheduling,
+is to translate a given SDF graph to a acyclic precedence expanded graph 
+(shortly, APEG graph). The APEG graph describes the dependency between
+invocations of blocks in the SDF graph during execution of one iteration.
+Refer to the SDF domain documentation for the meaning of one iteration.
+Hence, a block in an SDF graph may correspond to 
+several APEG nodes in a multi-rate example. Parallel schedulers are
+schedule the APEG nodes, not SDF stars, onto processors. 
 .pp
 We have implemented three scheduling techniques that map 
 SDF graphs onto multiple-processors with various interconnection 
@@ -123,7 +134,7 @@ parameter is proved to be
 the third parameter,
 .c useCluster ,
 is examined. If that parameter is set, the Sih's declustering scheduling
-scheme is used. Otherwize, the modified version of Sih's dynamic level
+scheme is used. Otherwise, the modified version of Sih's dynamic level
 scheduling is used.
 .pp 
 Whichever scheduler is used, we schedule communication nodes
@@ -148,7 +159,7 @@ If there exists any star, except
 .c Fork
 star, that has an illegal
 .c procId
-state, an error is generated saying that manual scheduling is faild.
+state, an error is generated saying that manual scheduling is failed.
 Otherwise, we invoke a list scheduling based on the manual assignment
 to determine the order of execution of blocks on each processor.
 We do not support the case in which a block requires more than
@@ -166,11 +177,11 @@ by setting the
 star to 
 .c YES .
 Then, all invocations of a star are enforced to be assigned to the same
-processor regardless of whether they are parallelizable ot not.
+processor regardless of whether they are parallelizable or not.
 The advantage of doing this is its simplicity of code generation since we
 do not need 
 .c Spread/Collect
-stars, which will be discussed in a later section.
+stars, which will be discussed later.
 Also, it provides us another possibility of scheduling option:
 .c adjustSchedule .
 .Id "adjustSchedule, target parameter"
@@ -190,17 +201,197 @@ manually. It can be done by setting the
 parameter. If that parameter is set, after the automatic scheduling
 is performed, the 
 .c procId
-state of each star is automatically updated with the assigned processorr. 
+state of each star is automatically updated with the assigned processor. 
 The programmer override the scheduling decision by setting that state.
 The
 .c adjustSchedule
 can not be YES before any scheduling decision is made previously.
 Again, this option is not supported in this release.
 .pp
+Different scheduling options result in different assignments of APEG
+nodes. Therefore, one block in a problem SDF graph can be assigned to
+more than one processors.
+Regardless of which scheduling options are chosen, however,
+The final stage of the scheduling is to decide the execution order
+of stars including send/receive stars by a simple list scheduling
+algorithm in each child target. 
+The final scheduling results are displayed in Gantt chart.
 The multiple-processor scheduler produces a list of single 
 processor schedules, copying them to the child targets. 
-Given these single-processor schedules, the same schemes as discussed 
-above are re-used to generate the code for each child processor target. 
+The schedules include send/receive stars for interprocessor communication.
+.pp
+To produce codes for child targets, we create a sub-galaxy
+.Id "sub-galaxy"
+.Id "sub-universe"
+for each child target, which consists of the stars scheduled on that
+target and some extra stars to be discussed below if necessary. 
+A child target follows the same step to generate code as a single
+processor target except that the schedule is not computed again since
+the scheduling result is inherited from the parent target.
+.H3 "Send/Receive Stars"
+.pp
+.Id "send/receive stars"
+.Id "send star"
+.Id "receive star"
+After the assignment of APEG nodes is finished, the interprocessor
+communication requirements between blocks are determined in sub-galaxies. 
+Suppose, star A is connected to star B, and  there is no sample rate change.
+By assigning star A and star B to different processors (1 and 2 respectively),
+the parallel scheduler introduces interprocessor communication.
+Then, processor 1 should generate code for star A and a "send" star, while
+processor 2 should generate code for a "receive" star and star B. Therefore,
+These "send" and "receive" stars are automatically inserted by the Ptolemy
+kernel when determining the execution order of blocks in each child target
+and also when creating sub-galaxies. The parallel scheduler asks the
+multi-processor target to create "send" and "receive" stars.
+.pp
+Once the generated code is loaded, processors run autonomously. 
+The synchronization protocol between processors is hardwired into the 
+"send" and "receive" stars. One common approach in shared-memory 
+architectures is the use of semaphores. Thus a typical synchronization 
+protocol used is to have the send star set a flag signaling the completion 
+of the data transfer; the receive star would then wait for the 
+proper semaphores to be set. When the semaphores are 
+set, the receive star will read the data and clear the 
+semaphores. In a message passing architecture, 
+the send star may form a message header to specify the source and 
+destination processors. In this case, the receive star would decode 
+the message by examining the message header.
+.H3 "Spread/Collect stars"
+.pp
+.Id "spread/collect stars"
+.Id "spread star"
+.Id "collect star"
+Consider an multi-rate example in which star A produces two
+tokens and star B consumes one token each time. And, suppose that
+the first invocation of star B is assigned to the same processor
+as the star A (processor 1), but the second invocation  is assigned to
+processor 2. After star A fires in processor 1, the first token produced
+is routed to the star B assigned to the processor while the second token
+produced should be shipped to processor 2; interprocessor communication
+is required! Since star A has one output port and that port
+should be connected two different destination (one is to star B, the other
+is to a "send" star), we insert a "spread" star after the star A.
+As a result, the sub-galaxy created for processor 1 contains 4 blocks:
+star A is connected to a "spread" star, which has two outputs connected
+to star B and a "send" star. The role of a "spread" star is to spread
+tokens from a single output porthole to multiple destinations.
+.pp
+On the other hand, we may need to "collect" tokens from
+multiple sources to a single input porthole. Suppose we reverse the
+connection in the above example: star B produces one token and
+star A consumes two tokens. We have to insert a "collect" star
+at the input porthole of star A to collect tokens from star B
+and a "receive" star that receives a token from processor 2.
+.pp
+The "spread" and "collect" stars are automatically inserted by the
+Ptolemy kernel, so invisible from the user. Moreover, these stars
+can not be scheduled. They are added to sub-galaxies only for
+the allocation of memory and other resources before generating code.
+The "spread" and "collect" stars themselves do not require
+extra memory in most cases by overlaying memory buffers. 
+For example, in the first example, a buffer of size 2 is assigned for
+the output of star A. Via the "spread" star, star B obtains the
+information that it needs to fetch a token from the first location
+of the buffer while the "send" star knows that it will fetch a token
+from the second location. Thus, the buffers for the outputs of 
+the "spread" star are overlaid with the output buffer of star A.
+.pp
+In cases there are delays or past tokens are used on the connection
+between two blocks that should be connected through "spread" or
+"collect" stars, we need to copy data explicitly, thus need extra
+memory for these stars. Then, the user can see the existence of
+"spread/collect" stars in the generated code.
+.H3 "The Gantt Chart Display"
+.pp
+Demos that use targets derived from
+.c CGMultiTarget
+can produce an interactive Gantt chart display for viewing the parallel
+schedule.
+.pp
+The Gantt chart display involves two windows \- one for displaying
+part of the Gantt chart (the display window), and one for controlling
+how much of the Gantt chart is shown in the display window (the
+control window).
+.pp
+The control window represents the entire Gantt chart, and
+it contains a shaded region which represents the part of the
+Gantt chart that is currently shown in the display window.
+This shaded region can be moved around inside the control window
+by dragging the mouse with the middle button depressed and
+its size can be changed with the left or right mouse button. Moving the
+shaded region horizontally changes the time from which the
+Gantt chart display begins ; moving it vertically changes the
+topmost processor displayed. The fraction of the control window's
+width spanned by the shaded region is approximately
+the fraction of the total duration of the schedule that is
+currently being displayed, and the fraction of the control window's
+height spanned by the shaded region is approximately
+the fraction of the total number of processors which are currently
+displayed.
+.pp
+The display window represents each star or "nops" in the schedule
+as a box drawn through the time interval it is scheduled over.
+If the name of a star can fit in its box, it is printed inside.
+A vertical bar inside the window is available for identifying
+stars which cannot be labeled. The names of the stars which
+this bar passes through are printed alongside their respective
+processors. The bar can be moved horizontally by pressing
+the middle mouse button in the vicinity of the bar and then dragging
+the mouse with the middle button down.
+The stars which the bar passes through are identified by having
+their icons highlighted.
+.pp
+The vertical bar used for identifying stars is sometimes
+hard to find \- for example, it might be coincident with a
+vertical line in the Gantt chart. Pressing the right button
+in the display window locates the bar by moving the mouse on top
+of it. Pressing the left button in the display window moves the
+bar to the mouse and identifies the stars touched by the bar
+in its new position.
+.pp
+Here is a summary of commands that can be used while the Gantt chart
+display is active:
+.pp
+\fBTo change the size of shaded area inside the control window:\fR
+.ip
+Depress the left or right mouse button inside the shaded area and
+drag the mouse with the left or right button depressed.
+.pp
+\fBTo move the shaded area around inside the control window:\fR
+.ip
+Depress the middle mouse button inside the shaded area and
+drag the mouse with the middle button depressed.
+.pp
+\fBTo move the vertical bar inside the display window:\fR
+.ip
+Depress the middle mouse button in the vicinity of the bar and
+drag the mouse with the middle button depressed.
+.pp
+\fBTo locate the vertical bar used for identifying stars:\fR
+.ip
+Depress the right mouse button inside the display window.
+.pp
+\fBTo move the vertical bar to the mouse inside the display window:\fR
+.ip
+Depress the left mouse button inside the display window.
+.pp
+\fBTo redraw the Gantt chart:\fR
+.ip
+Type control-L inside the display window.
+.pp
+\fBTo exit the Gantt chart display program:\fR
+.ip
+Type control-D inside the display window.
+.pp
+There are a fixed (hard-coded) number of colors available for coloring
+processors and highlighting icons. If the number of processors
+exceeds the number of available colors, the Gantt chart will be
+displayed in black and white.
+.pp
+On monochrome displays, highlighting of stars does not work.
+
+
 .UH "References"
 .ip [1]
 G. C. Sih and
