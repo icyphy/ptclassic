@@ -1,7 +1,7 @@
 defstar {
 	name { ReadFile }
 	domain { C50 }
-	desc { Reads data from file for use with simulator.}
+	desc { Reads data from file for use with simulator. }
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -15,10 +15,9 @@ limitation of liability, and disclaimer of warranty provisions.
 .Ir "TI DSK320C5x simulator"
 .Ir "simulator, TI DSK320C5x"
 .Id "file input"
-Reads data from file for use with TI DSK320C5x simulator.
-	}
-	execTime {
-		return 2;
+Reads one value data from the \fIfileName\fR for use with
+Texas Instruments DSK320C5x simulator.
+The \fIinVal\fR is used as the storage location of the read data value.
 	}
 	output {
 		name {output}
@@ -28,7 +27,9 @@ Reads data from file for use with TI DSK320C5x simulator.
 		name { fileName }
 		type { STRING }
 		default { "infile" }
-		desc { 'Root' of filename that gets the data. '.sim' is appended.}
+		desc {
+'Root' of filename that gets the data. '.sim' is appended.
+		}
 	}
 	state {
 		name { inVal}
@@ -41,21 +42,23 @@ Reads data from file for use with TI DSK320C5x simulator.
 	// a memory location each time it is referenced.
 	codeblock (logIn) {
 input $ref(inVal) $val(fileName).sim -RF
-}
-	initCode {
-                addCode(logIn,"simulatorCmds");
 	}
 
-	// this codeblock produces code
+	initCode {
+		addCode(logIn, "simulatorCmds");
+	}
+
 	codeblock (copy) {
 	mar	*,AR6
 	lar	AR6,#$addr(inVal)
 	bldd	*,#$addr(output)
 	}
+
 	go {
 		addCode(copy);
 	}
+
+	execTime {
+		return 2;
+	}
 }
-
-
-

@@ -15,9 +15,6 @@ limitation of liability, and disclaimer of warranty provisions.
 .Id "negation"
 The input is moved into accumlator "a", where the "neg" instruction is applied.
 	}
-	execTime {
-		return 5;
-	}
 	input {
 		name {input}
 		type {FIX}
@@ -37,7 +34,7 @@ The input is moved into accumlator "a", where the "neg" instruction is applied.
 	go {
 		addCode(negblock);
 	}
+	execTime {
+		return 5;
+	}
 }
-
-
-

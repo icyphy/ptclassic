@@ -1,7 +1,7 @@
 defstar {
 	name { Limit }
 	domain { C50 }
-	desc { Hard Limiter }
+	desc { Hard limiter }
 	version { $Id$ }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { C50 nonlinear functions library }
 	explanation {
 .Id "hard limiter"
-The star hard limits input samples to keep the range of 
-(\fIbottom, top\fR).
+The star hard limits the values of input samples to be in the range
+(\fIbottom\fR, \fItop\fR).
 	}
 	input {
 		name {input}
@@ -28,15 +28,14 @@ The star hard limits input samples to keep the range of
 		name {bottom}
 		type {FIX}
 		default {0}
-		desc {Lower limit of the output.}
+		desc {Lower limit of the output}
 	}
 	state {
 		name {top}
 		type {FIX}
 		default {ONE}
-		desc {Upper limit of the output.}
+		desc {Upper limit of the output}
 	}
-
 
 	codeblock(limitblock) {
 	mar	*,AR1				;
@@ -52,15 +51,15 @@ The star hard limits input samples to keep the range of
  	bcnd	$label(end),TC			;if yes fump to label(end)
 	lar	AR1,#$addr(input)		;Address input		=> AR1
 $label(end)
-        mar	*,AR1				;
+	mar	*,AR1				;
 	bldd	*,#$addr(output)		;ouput = val at address in AR1
-        }
+	}
 
  	go {
  		addCode(limitblock);
  	}
 
 	exectime {
-		return 10;
+		return 14;
  	}
 }
