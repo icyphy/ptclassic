@@ -57,9 +57,12 @@ extern const char SRdomainName[];
 StringList SRRecursiveScheduler::displaySchedule()
 {
   StringList out;
-  out << "{\n  { scheduler \"Recursive SR Scheduler\" }\n"
-      << schedule->printVerbose()
-      << "}\n";
+  out << "{\n  { scheduler \"Recursive SR Scheduler\" }\n";
+  if ( schedule ) {
+    out << "  { numberOfStarOrClusterFirings " << schedule->cost() << " }\n"
+	<< schedule->printVerbose();
+  }
+  out << "}";
   return out;
 }
 
@@ -143,7 +146,9 @@ void SRRecursiveScheduler::runOneInstant()
 
   // Run the schedule
 
-  schedule->runSchedule();
+  if ( schedule ) {
+    schedule->runSchedule();
+  }
 
   // Finish the instant by calling each star's tick() method
 
@@ -190,6 +195,12 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   dgraph = new SRDependencyGraph( g );
 
+  if ( dgraph->vertices() == 0 ) {
+    delete dgraph;
+    dgraph = 0;
+    return 0;
+  }
+
   // cout << dgraph->displayGraph();
 
   Set wholeGraph(dgraph->vertices(), 1);
@@ -197,6 +208,7 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
   if ( schedule != NULL ) {
     delete schedule;
   }
+
   schedule = new SRRecursiveSchedule( *dgraph );
 
   //  cout << "There are " << Set::setcount() << " sets to begin with\n";
@@ -204,9 +216,9 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
   int mc = mincost( wholeGraph, INT_MAX, *schedule, 0, 0);
 
   if ( mc == INT_MAX ) {
-    cout << "No schedule met the bound\n";
+    // cout << "No schedule met the bound\n";
   } else {
-    cout << "mincost is " << mc << "\n";
+    // cout << "mincost is " << mc << "\n";
     // cout << "best schedule was " << schedule->print() << '\n';
 
     int cost = schedule->cost();
