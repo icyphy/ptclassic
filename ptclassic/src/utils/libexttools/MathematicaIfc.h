@@ -24,8 +24,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-Programmer: Steve X. Gu and Brian L. Evans
-Date of creation: 01/13/96
+Author:  Steve X. Gu and Brian L. Evans
+Created: 01/13/96
+Version: $Id$
 
 General base class to define an interface to Mathematica via MathLink.
 
@@ -69,6 +70,8 @@ public:
     int GetOutputBufferLength();
     const char* GetErrorString();
     const char* GetWarningString();
+    const char* GetPrivateOutputBuffer();
+    int GetPrivateOutputBufferLength();
 
     // get static members
     MLINK GetCurrentLink();
@@ -84,7 +87,8 @@ public:
 
     int ExpectPacket(MLINK link, int discardFlag, int& returnType);
     int LoopUntilPacket(MLINK link, int packetType, int& returnType);
-    int EvaluatePrivateCommand(MLINK link, char* command);
+    int EvaluatePrivateCommand(MLINK link, char* command,
+			       int storeResult = FALSE);
     int InitXWindows(MLINK link);
 
     // B. higher-level interfaces to the Mathematica process
@@ -92,21 +96,29 @@ public:
 	return SendToMathLink(mathlink, command);
     }
 
-    inline int EvaluateUnrecordedCommand(char* command) {
-	return EvaluatePrivateCommand(mathlink, command);
+    inline int EvaluateUnrecordedCommand(char* command, int storeResult) {
+	return EvaluatePrivateCommand(mathlink, command, storeResult);
     }
 
     // C. highest-level interface to the Mathematica process
     int StartMathematica();
     int StartMathematica(int oargc, char** oargv);
     int MathematicaIsRunning();
-    int EvaluateUserCommand(char* command);
+    inline int EvaluateUserCommand(char* command) {
+	return mathematicaCommand(command, TRUE);
+    }
+    inline int EvaluateUnrecordedUserCommand(char* command) {
+	return mathematicaCommand(command, FALSE);
+    }
     int CloseMathematicaFigures();
     int KillMathematica();
 
 protected:
-    // place to store output from Mathematica
+    // place to store Mathematica output returned by EvaluateUserCommand
     InfString outputBuffer;
+
+    // place to store Mathematica output returned by EvaluateUnrecordedCommand
+    InfString privateOutputBuffer;
 
     // Mathematica error string
     InfString errorString;
@@ -149,6 +161,9 @@ protected:
     // whether to display the input prompt and expression
     int displayInputFlag;
     int displayOutputNumFlag;
+
+    // abstraction of highest-level evaluate methods
+    int mathematicaCommand(char* command, int preprocessedFlag);
 };
 
 #endif

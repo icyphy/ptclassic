@@ -1,7 +1,4 @@
 /*
-Version:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,8 +24,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-Programmer: Steve X. Gu and Brian L. Evans
-Date of creation: 01/13/96
+Author:  Steve X. Gu and Brian L. Evans
+Created: 01/13/96
+Version: $Id$
 
 General base class for an interface to Mathematica via MathLink.
 
@@ -204,6 +202,12 @@ MathematicaIfc::MathematicaIfc(
     setContext(name, privateContextFlag);
     displayInputFlag = echoInputFlag;
     displayOutputNumFlag = echoOutputNumFlag;
+
+    // Initialize the remaining InfString members
+    outputBuffer = "";
+    privateOutputBuffer = "";
+    errorString = "";
+    warningString = "";
 }
 
 void MathematicaIfc::setContext(const char* name, int flag) {
@@ -282,6 +286,14 @@ int MathematicaIfc::GetMathematicaIfcInstanceCount () {
     return mathematicaStarsCount;
 }
 
+const char* MathematicaIfc::GetPrivateOutputBuffer() {
+    return privateOutputBuffer;
+}
+
+int MathematicaIfc::GetPrivateOutputBufferLength() {
+    return strlen(privateOutputBuffer);
+}
+
 // Methods to interface to the Mathematica process via MathLink
 
 // A. low-level interfaces
@@ -336,18 +348,28 @@ int MathematicaIfc::LoopUntilPacket(
 
 // Evaluate a command that does not go into the user history by
 // bypassing the Mathematica parser
-int MathematicaIfc::EvaluatePrivateCommand(MLINK linkp, char* command) {
+int MathematicaIfc::EvaluatePrivateCommand(
+		MLINK linkp, char* command, int storeResult) {
     int retval = TRUE;
+    StringList result = "";
     if ( command && *command ) {
 	MLPutFunction(linkp, "EvaluatePacket", 1);
+	MLPutFunction(linkp, "ToString", 1);
 	MLPutFunction(linkp, "ToExpression", 1);
 	MLPutString(linkp, command);
 	MLEndPacket(linkp);
 
 	// Expect a Return Packet back
 	int returnType = ILLEGALPKT;
-	retval = LoopUntilPacket(linkp, RETURNPKT, returnType);
+    	retval = ExpectPacket(linkp, FALSE, returnType);
+	while ( retval && (returnType != RETURNPKT) ) {
+	    MLNewPacket(linkp);
+	    retval = ExpectPacket(linkp, FALSE, returnType);
+	}
+	if (! retval) SetErrorString("Error reading results from Mathematica.");
+	result = ReadPacketContents(linkp);
     }
+    if (storeResult) privateOutputBuffer = result;
     return retval;
 }
 
@@ -493,8 +515,8 @@ int MathematicaIfc::StartMathematica(int oargc, char** oargv) {
 	return FALSE;
     }
 
-    EvaluateUnrecordedCommand(customInitCommand);
-    EvaluateUnrecordedCommand(initCode);
+    EvaluateUnrecordedCommand(customInitCommand, FALSE);
+    EvaluateUnrecordedCommand(initCode, FALSE);
 
     return TRUE;
 }
@@ -505,10 +527,11 @@ int MathematicaIfc::MathematicaIsRunning() {
 }
 
 // EvaluateUserCommand
-int MathematicaIfc::EvaluateUserCommand(char* command) {
-    EvaluateUnrecordedCommand(prolog);
-    int retval = EvaluateOneCommand(command);
-    EvaluateUnrecordedCommand(epilog);
+int MathematicaIfc::mathematicaCommand(char* command, int preprocessFlag) {
+    EvaluateUnrecordedCommand(prolog, FALSE);
+    int retval = preprocessFlag ? EvaluateOneCommand(command) :
+				  EvaluateUnrecordedCommand(command, TRUE);
+    EvaluateUnrecordedCommand(epilog, FALSE);
     return retval;
 }
 
