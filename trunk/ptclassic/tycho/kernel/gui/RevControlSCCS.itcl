@@ -139,8 +139,6 @@ body ::tycho::RevControlSCCS::checkIn {object} {
     }
     cd $olddir
     $object reload
-
-    resetDiff
 }
 
 #####################################################################
@@ -167,8 +165,6 @@ body ::tycho::RevControlSCCS::checkOut {object} {
     }
     cd $olddir
     $object reload
-    
-    resetDiff
 }
 
 #####################################################################
@@ -340,8 +336,6 @@ body ::tycho::RevControlSCCS::unedit {} {
 
     enableButton checkout
     updateHistory
-
-    resetDiff
 }
 
 #####################################################################
