@@ -25,6 +25,7 @@ include $(CONFIG)
 PTCLHDRS = $(ROOT)/src/ptcl
 
 HDRS	      = compile.h \
+		compat.h \
 		edit.h \
 		err.h \
 		exec.h \
