@@ -57,12 +57,19 @@ public:
 	VHDLBTarget(const VHDLBTarget&);
 	Block* makeNew() const;
 	void headerCode();
-	void setup();
+	virtual void setup();
 	int run();
 	void wrapup();
 
 	// make public this method
 	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
+
+	// Return the data type suitable for VHDL from the ptlang
+	// standart data type string.
+	StringList translateType(const char* type);
+
+	// Return the portHole direction.
+	StringList direction(const GenericPort* port);
 
 // public?
 // 	put this a diff name to generate VHDL compatible code

@@ -38,6 +38,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PortHole.h"
 #include "VHDLBStar.h"
 #include "VHDLBTarget.h"
+#include "State.h"
+#include "Fix.h"
 
 // The following is defined in VHDLBDomain.cc -- this forces that module
 // to be included if any VHDLB stars are linked in.
@@ -48,6 +50,11 @@ const char* VHDLBStar :: domain () const { return VHDLBdomainName;}
 // isa
 
 ISA_FUNC(VHDLBStar, CGStar);
+
+const char* VHDLBStar::portWidthName(const MultiVHDLBPort* pp) {
+  Error::abortRun(*this, pp->print(), ": Must redefine portWidthName");
+  return pp->print();
+}
 
 StringList VHDLBStar::expandRef(const char* name) 
 {
