@@ -37,7 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "CGGeodesic.h"
-#include "CGWormhole.h"
+#include "CGWormBase.h"
 #include "CGTarget.h"
 #include "StringList.h"
 #include "CodeStream.h"
@@ -50,7 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 
 //Constructor
-CGStar :: CGStar() : forkId(0) {
+CGStar :: CGStar() : forkId(0), dataParallel(0), profile(0) {
 	starSymbol.initialize();
         addState(procId.setState("procId", this, "-1",
                 "assigned processor id. If -1, not assigned manually."));
@@ -71,9 +71,7 @@ void CGStar::advance() {
         BlockPortIter nextPort(*this);
         CGPortHole* p;
         while ((p = (CGPortHole*) nextPort++) != 0) {
-		// temporary do not consider WORMHOLE case.
-		if (p->far()->parent()->isItWormhole() == FALSE)
-                	p->advance();
+                p->advance();
 	}
 }
 
@@ -519,7 +517,10 @@ void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
 }
 
 // return NULL
-CGWormhole* CGStar :: myWormhole() { return NULL; }
+CGWormBase* CGStar :: myWormhole() { return NULL; }
+
+// return the profile
+Profile* CGStar :: getProfile(int) { return profile; }
 
 // The following is defined in CGDomain.cc -- this forces that module
 // to be included if any CG stars are linked in.
