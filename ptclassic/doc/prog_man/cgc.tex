@@ -7,14 +7,14 @@ E. A. Lee \\
 T. M. Parks}
 \date{$Date$}
 
-The \defn{CGC domain} is used to generate \code{C} code. The generated
+The \dfn{CGC domain} is used to generate \code{C} code. The generated
 code is compiled, downloaded, and run on the \var{host} computer, by
 default the computer where Ptolemy is running.  The chapter on the CG
 domain describes the features common to all code generation domains.
 This chapter explains features specific to the CGC domain.  You should
 also refer to CGC domain chapter in the user's manual.
 
-\node Single-Processor Target
+\node Single-Processor Targets
 \section{Single-Processor Targets}
 
 The default target \code{default-CGC}, which is implemented by the
@@ -25,20 +25,22 @@ The parameters described in the user's manual are implemented by the state
 members of the \code{CGCTarget} class listed in Table \ref{CGC-param}.
 
 \begin{table}
-\begin{tabular{ll}
+\begin{center}
+\begin{tabular}{ll}
 \var{host} & \code{targetHost} \\
 \var{directory} & \code{destDirectory} \\
 \var{file} & \code{filePrefix} \\
 \var{display?} & \code{displayFlag} \\
 \var{compile?} & \code{compileFlag} \\
 \var{run?} & \code{runFlag} \\
-\var{staticBuffering & \code{staticBuffering} \\
+\var{staticBuffering} & \code{staticBuffering} \\
 \var{funcName} & \code{funcName} \\
 \var{compileCommand} & \code{compileCommand} \\
 \var{compileOptions} & \code{compileOptions} \\
 \var{linkOptions} & \code{linkOptions} \\
 \var{resources} & \code{resources}
 \end{tabular}
+\end{center}
 \caption{Correspondence between paramters and states
 for the \protect\code{CGCTarget} class.}
 \end{table}
