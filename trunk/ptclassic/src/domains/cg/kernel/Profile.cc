@@ -70,8 +70,8 @@ void Profile :: summary() {
 	// miscellanies
 	/////////////////////
 
-void Profile :: copyIt(Profile* dest, int offsetIndex = 0,
-				      int offsetTime = 0) {
+void Profile :: copyIt(Profile* dest, int offsetIndex,
+				      int offsetTime) {
 
 	for (int i = 0; i < effP; i++) {
 		dest->setStartTime(i+offsetIndex, offsetTime+startTime[i]);
@@ -83,7 +83,7 @@ void Profile :: copyIt(Profile* dest, int offsetIndex = 0,
 
 void Profile :: sortWithFinishTime() {
 
-	int order[effP];
+	LOG_NEW; int *order = new int[effP];
 	for (int i = 0; i < effP; i++)	order[i] = i;
 
 	// insertion sort
@@ -101,11 +101,13 @@ void Profile :: sortWithFinishTime() {
 	}
 
 	// copy values.
-	int value[effP];
+	LOG_NEW; int *value = new int[effP];
 	for (i = 0; i < effP; i++) value[i] = finishTime[order[i]];
 	for (i = 0; i < effP; i++) finishTime[i] = value[i];
 	for (i = 0; i < effP; i++) value[i] = startTime[order[i]];
 	for (i = 0; i < effP; i++) startTime[i] = value[i];
+	LOG_DEL; delete value;
+	LOG_DEL; delete order;
 }
 
 // currently insertion sort.
@@ -130,11 +132,12 @@ void Profile :: sortWithStartTime() {
 	}
 
 	// copy values.
-	int value[effP];
+	LOG_NEW; int *value = new int[effP];
 	for (i = 0; i < effP; i++) value[i] = finishTime[procId[i]];
 	for (i = 0; i < effP; i++) finishTime[i] = value[i];
 	for (i = 0; i < effP; i++) value[i] = startTime[procId[i]];
 	for (i = 0; i < effP; i++) startTime[i] = value[i];
+	LOG_DEL; delete value;
 }
 
 // Calculate the idle time due to the unknown pattern of
