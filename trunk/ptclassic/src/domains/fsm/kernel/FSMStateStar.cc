@@ -45,10 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Galaxy.h"
 #include "KnownBlock.h"
 #include "InfString.h"
-#include "PTcl.h"
 #include "ptk.h"
-
-extern PTcl *ptcl;
 
 ISA_FUNC(FSMStateStar,FSMStar);
 
@@ -156,42 +153,47 @@ Star* FSMStateStar::createWormhole(const char *galname,
     const char* classname = ptkCompile(galname, where_defined);
     if (!classname) return 0;
 
-    // Should now have a master of the block -- clone it in "FSM".
-    Block *block = KnownBlock::clone(classname, this->domain());
+    // Find the current domain in which the galname is compiled.
+    InfString command = "domain";
+    Tcl_GlobalEval(ptkInterp, (char*)command);
+    const char* currentDomain = hashstring(ptkInterp->result);
+    // Should now have a master of the block -- clone it in currentDomain.
+    Block *block = KnownBlock::clone(classname, currentDomain);
     if (!block) return 0;
 
-    Star *newWorm = 0;
+    Galaxy* myGal = NULL;
+    Target* myInTarget = NULL;
     if (block->isItWormhole()) {
-      // We already made a Wormhole.
-      // Note : if inner FSM galaxy is specified its own Target,
-      // "ptkCompile" will also make a wormhole for it.
-      newWorm = &(block->asStar());
-    }
-    else {
-      // To create a wormhole for the FSM domain that 
-      // will encapsulate this inner FSM galaxy.
+      // Though it's a Wormhole, the outside domian may not be FSM.
+      // Therefore, we explode the Wormhole as an Galaxy, and keep
+      // its inner Target.
+      // Note : Every inner FSM galaxy will be specified its own Target,
+      // so "ptkCompile" will also make a wormhole for it.
+      Wormhole* myWorm = (block->asStar()).asWormhole();
+      myInTarget = myWorm->myTarget();
+      myGal = myWorm->explode();
+
+    } else {
       if (!block->isA("Galaxy")) {
 	Error::abortRun(*this,"Can only use galaxies for ",
 			"replacement blocks");
 	return 0;
       }
 
-      Galaxy& mygal = block->asGalaxy();
+      myGal = &(block->asGalaxy());
 
-      // Use "FSM" as the outer domain to encapsulate the inner FSM galaxy.
-      Domain* od = Domain::named("FSM");
-      if (!od) {
-	Error::abortRun(*this,"FSM domain does not exist! Help!");
-	return 0;
-      }
-      
-      // For the moment, no Target is specified.  This means
-      // that the target is <parent>. Then a clone copy of
-      // the FSM parent's Target will be used.
-      Target& parentTarget = parent()->scheduler()->target();
-      Target* myInTarget = parentTarget.cloneTarget();
-      newWorm = &(od->newWorm(mygal,myInTarget));
+      // No Target is specified for a Galaxy, then a copy of default
+      // Target of the inner domain will automatically be used.
     }
+
+    // To create a wormhole in the FSM domain that will encapsulate 
+    // the inner galaxy.
+    Domain* od = Domain::named("FSM");
+    if (!od) {
+      Error::abortRun(*this,"FSM domain does not exist! Help!");
+      return NULL;
+    }
+    Star *newWorm = &(od->newWorm(*myGal,myInTarget));
 
     // Choose a name for the block
     StringList instancename = "FSM_";
@@ -214,11 +216,6 @@ const char* FSMStateStar::ptkCompile(const char *galname,
     fullName << "/";
     fullName << galname;
    
-    // Save the current domain name, and let the current domain to be "FSM".
-    // This is used for the outer domain when doing "ptkCompile".
-    const char* currentDomain = ptcl->curDomain;
-    ptcl->curDomain = this->domain(); // It would be "FSM".
-
     InfString command = "file exists ";
     command << fullName;
     Tcl_GlobalEval(ptkInterp, (char*)command);
@@ -255,9 +252,6 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 	return 0;
       }
 
-      // Restore the original domain name.
-      ptcl->curDomain = currentDomain;
-
       return galname;
 
     } else {
@@ -274,9 +268,6 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 	return NULL;
       }
       const char* classname = hashstring(ptkInterp->result);
-
-      // Restore the original domain name.
-      ptcl->curDomain = currentDomain;
 
       return classname;
     }
