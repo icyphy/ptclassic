@@ -101,10 +101,9 @@ tcltk_install: stats $(OBJARCH)/tcltk
 # Build and install xv
 # 	These rules might not work on architectures other than sun4 w/ cc
 #	
-xv_all: xv_configure xv_bin xv_install
+xv_all: xv_configure xv_bin xv_install xv_install.man
 
-.PHONY: xv_configure xv_bin xv_install
-
+.PHONY: xv_configure xv_bin xv_install xv_install.man
 
 
 # The following is a GNU make extension
@@ -164,6 +163,11 @@ xv_install: $(OBJARCH)/xv
 		INSTALL=$(INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
+xv_install.man:
+	(cd $(OBJARCH)/xv; \
+		$(MAKE) \
+		INSTALL=$(INSTALL) \
+		MANDIR=$(XV_DEST)/man/man1  install.man)
 
 $(OBJARCH):
 	mkdir $@ 
