@@ -160,6 +160,17 @@ void BDFClusterGal::orphanBlocks() {
 	}
 }
 
+// remove ports from this galaxy without deallocating the ports.
+// It does deallocate the sequential list holding the port pointers. -BLE
+void BDFClusterGal::orphanPorts() {
+	BlockPortIter nextp(*this);
+	PortHole* p;
+	while ((p = nextp++) != 0) {
+		removePort(*p);
+		nextp.reset();
+	}
+}
+
 // Core clustering routine.  Alternate merge passes and loop passes
 // until no more can be done.
 int BDFClusterGal::clusterCore(int& urate) {
@@ -523,8 +534,12 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	return 0;
 }
 
+BDFTopGal::~BDFTopGal() {
+	delete sched;
+}
+
 // return TRUE if this and b have the same loop condition.
-// TEMPORARY: only return true for DO_ITER type loops -- needs
+// FIXME: only return true for DO_ITER type loops -- needs
 // work for other types.
 int BDFCluster::sameLoopCondition(const BDFCluster& b) const
 {
@@ -1269,6 +1284,7 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	// get rid of b.
 	par->removeBlock(*b);	// remove from parent galaxy
 	b->gal->orphanBlocks();	// b's galaxy's blocks no longer owned by b
+	b->gal->orphanPorts();	// b's galaxy's ports no longer owned by b
 	delete b;		// zap the shell
 	adjustAssociations();
 }
@@ -1550,6 +1566,7 @@ void BDFClusterBag::wrapup() {
 BDFClusterBag::~BDFClusterBag() {
 	delete gal;
 	delete sched;
+	deleteAllGenPorts();
 }
 
 // This function, given a BDFClustPort, tries to find another port that
@@ -2201,6 +2218,10 @@ BDFWhileLoop::BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
 		fixArcs(b,a);
 	}
 	else fixArcs(a,0);
+}
+
+BDFWhileLoop::~BDFWhileLoop() {
+	deleteAllGenPorts();
 }
 
 // setup: initialize sub-clusters.
