@@ -46,7 +46,7 @@ output integer will always be non-negative.
 	input.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	move    #$addr(input),r0
+	move    #>$addr(input),r0
 	clr     a
         do      #$val(nBits),$label(compress)
         lsl     a
