@@ -75,6 +75,12 @@ for a complete explanation of the options.
 		default { 0 }
 		attributes {A_NONCONSTANT|A_NONSETTABLE}
 	}
+	defstate {
+		name {iy}
+		type {int}
+		default { 0 }
+		attributes {A_NONCONSTANT|A_NONSETTABLE}
+	}
 	private {
 		int count;
 	}
@@ -85,9 +91,9 @@ for a complete explanation of the options.
 	}
 
 	initCode {
-                StringList s = "FILE (*$starSymbol(fp))[";
+                StringList s = "FILE *$starSymbol(fp)[";
 		s += input.numberPorts();
-		s += "]\n";
+		s += "];\n";
 		StringList ss = processCode(CodeBlock((const char*)s));
                 addDeclaration(ss);
                 addInclude("<stdio.h>");
@@ -115,16 +121,16 @@ codeblock (err) {
 		if (count <= int(ignore)) return;
 		for (int i = 1; i <= int(numIn); i++) {
 			ix = i;
+			iy = i - 1;
 			gencode(CodeBlock(
-"\tfprintf($starSymbol(fp)[i],\"%g %g\\n\",$ref(index),$ref(input#ix));\n"));
+"\tfprintf($starSymbol(fp)[$val(iy)],\"%g %g\\n\",$ref(index),$ref(input#ix));\n"));
 		}
 		gencode(CodeBlock("\t$ref(index) += $val(xUnits);\n"));
 		
 	}
 
 codeblock(closeFile) {
-	for (i = 0; i < $val(numIn); i++)
-	    fclose($starSymbol(fp)[i]);
+    for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
 }
 
 	wrapup {
@@ -159,7 +165,7 @@ codeblock(closeFile) {
 
 		// put file names
 		for (int i = 0; i < int(numIn); i++) {
-			cmd += "$starSymbol(temp) ";
+			cmd += "$starSymbol(temp)";
 			cmd += i;
 			cmd += " ";
 		}
@@ -186,9 +192,9 @@ codeblock(closeFile) {
 		}
 
 		cmd += ") &";
-		StringList out = "    system(";
+		StringList out = "    system(\"";
 		out += cmd;
-		out += ");\n";
+		out += "\");\n    }\n";
 		gencode(CodeBlock((const char*)out));
 	}
 }
