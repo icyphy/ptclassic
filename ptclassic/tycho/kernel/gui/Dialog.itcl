@@ -81,6 +81,9 @@ class ::tycho::Dialog {
     # The message to display at the top of the widget.
     itk_option define -text text Text ""
 
+    # The font to use for "message" displays
+    itk_option define -messagefont messageFont Font [::tycho::font helvetica]
+
     #####################################################################
     ####                        public methods                       ####
 
@@ -253,7 +256,8 @@ body ::tycho::Dialog::constructor {args} {
     preference subscribe $this \
 	    -font menuFont \
 	    -padx buttonPadX \
-	    -pady buttonPadY
+	    -pady buttonPadY \
+	    -messagefont messageFont
 
     # Most dialog windows don't want the user resizing. Those that
     # do should reverse this.
