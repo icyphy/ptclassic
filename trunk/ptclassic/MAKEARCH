@@ -56,6 +56,12 @@ foreach x (optfir wfir)
 end
 cd ..
 
+# Make thread and CP directories (currently specific to sun)
+if ($ARCH =~ sun?) then
+	mkarch thread thread/lwp
+	mkarch domains/cp{,/kernel,/stars,/infopad{,/stars}}
+endif
+
 # Make link for xgraph bitmaps
 cd xgraph
 optlink ../../src/xgraph bitmaps
