@@ -766,7 +766,7 @@ genDef ()
 		 inputFile, progName);
 /* copyright */
 	if (objCopyright)
-		fprintf (fp, "/*\n * copyright (c) %s\n */", objCopyright);
+		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
 
 /* ID block */
 	if (idBlock)
