@@ -82,11 +82,11 @@ body ::tycho::WelcomeMessage::constructor {args} {
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
-	    "::tycho::File::openContext [file join $TYCHO copyright]"
+	    "::tycho::File::openContext \"[file join $TYCHO copyright]\""
 
     # Pack the introduction button.
     addButton intro -text "Home Page" -command \
-	    "::tycho::File::openContext [file join $TYCHO doc index.html]"
+	    "::tycho::File::openContext \"[file join $TYCHO doc index.html]\""
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
