@@ -62,7 +62,7 @@ const int linkingNotSupported =
 // this is not done, then symbols from one dlopen() will not be
 // visible to subsequent dlopens().  Note that using dlopen() means
 // that link and permlink have the same functionality.
- #if defined(__sgi)
+#if defined(__sgi)
 #define DLOPEN sgidladd
 #define DLOPEN_FLAGS RTLD_NOW
 #endif // __sgi
