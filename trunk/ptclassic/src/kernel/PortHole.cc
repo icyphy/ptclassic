@@ -153,8 +153,8 @@ PortHole :: ~PortHole() {
 
 int InPortHole :: isItInput() { return TRUE;}
 int OutPortHole :: isItOutput() { return TRUE;}
-void PortHole :: beforeGo () { return;}
-void PortHole :: afterGo () { return;}
+void PortHole :: grabData () { return;}
+void PortHole :: sendData () { return;}
 
 // return number of tokens waiting on Geodesic
 int PortHole :: numTokens() const { return myGeodesic->size();}

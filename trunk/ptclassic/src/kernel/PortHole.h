@@ -164,12 +164,10 @@ public:
 	// set the alias
 	setAlias (PortHole& blockPort) { alias = &blockPort; }
 
-	// Methods that are called by the Star::beforeGo()
-	//  and Star::afterGo() before and after go()
 	// Can be used for things like inputing and output
 	//  Particles.  These are currently do-nothing functions
-	virtual void beforeGo(); 
-	virtual void afterGo();
+	virtual void grabData(); 
+	virtual void sendData();
 
 	// Operator to return Particles previously input or output
 	// Argument is the delay in the past
