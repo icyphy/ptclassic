@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StringList.h"
+#include "InfString.h"
 #include "MatlabIfcFuns.h"
 
 #define MATLAB_BUFFER_LEN        1023
@@ -89,13 +90,11 @@ public:
 	// manage Matlab process (low-level methods)
 	// derived class must override these methods
 	Engine* MatlabEngineOpen(char* unixCommand);
-	int MatlabEngineSend(Engine* enginePtr, char* command);
-	int MatlabEngineOutputBuffer(Engine* enginePtr,
-				     char* buffer,
-				     int buferLength);
-	Matrix* MatlabEngineGetMatrix(Engine* enginePtr, char* name);
-	int MatlabEnginePutMatrix(Engine* enginePtr, Matrix* matrixPtr);
-	int MatlabEngineClose(Engine* enginePtr);
+	int MatlabEngineSend(char* command);
+	int MatlabEngineOutputBuffer(char* buffer, int buferLength);
+	Matrix* MatlabEngineGetMatrix(char* name);
+	int MatlabEnginePutMatrix(Matrix* matrixPtr);
+	int MatlabEngineClose();
 
         // higher-level interfaces to the Matlab process
 	int EvaluateOneCommand(char* command);
@@ -103,7 +102,6 @@ public:
 	// highest-level interface to the Matlab process
 	int StartMatlab();
 	int MatlabIsRunning();
-	int AssertOutputBuffer();
 	int EvaluateUserCommand();
 	int EvaluateUserCommand(char* command);
 	int ChangeMatlabDirectory();
