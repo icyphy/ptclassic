@@ -30,12 +30,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #ifndef _MutableCQEventQueue_h
 #define _MutableCQEventQueue_h 1
+
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 #include "MutableCalendarQueue.h"
-#include "CalendarQueue.h"
 #include "EventQueue.h"
 
 class Particle;
@@ -70,7 +70,7 @@ public:
 
  // The following takes care of the case where levelput is called
  // directly without going thru pushHead. In that case it is called
- // with three arguments and dest must be internallu calculated.
+ // with three arguments and dest must be internally calculated.
 
 	LevelLink* levelput(Pointer a, double v, double fv) {
 	     Star *dest= NULL;
@@ -90,15 +90,12 @@ public:
 	    CqLevelLink* link; 
 	    
 	    link = MutableCalendarQueue::levelput(a, v, fv, dest);
-	    if( dest->isA("DEStar") ) {
-		DEStar* deStarDestination = (DEStar *)dest;
-		if( deStarDestination->isMutable() ) {
-		    link->destinationRef = 
-			    deStarDestination->addToPendingEventList(link);
-		}
-	    }
 
 	    return link;
+	}
+
+	void decrementEventNum() {
+	    cq_eventNum--;
 	}
 
 	void putFreeLink(CqLevelLink* p); // virtual
