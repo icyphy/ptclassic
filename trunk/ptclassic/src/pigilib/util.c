@@ -33,14 +33,12 @@ Utility functions.
 #include <stdio.h>
 #include <string.h>
 #include <pwd.h>
-#include <search.h>
+#include "tcl.h"
 #include "err.h"
 #include "util.h"
 #include "rpc.h"
 #include "octIfc.h"
 #include "vemInterface.h"
-
-extern char * HashString();
 
 /* UMalloc  12/10/88
 Allocate using malloc.
@@ -215,12 +213,11 @@ boolean bit;
 }
 
 
-/***** UniqName routines  11/30/89
-Uses <search.h> package for hash table.
+/***** UniqName routines
+Uses Tcl's hash table library procedures.
 */
-void hdestroy();
 
-static boolean UniqNameInitDone = FALSE;
+static Tcl_HashTable uniqNameTable;
 
 /*
 Clears all names
@@ -228,39 +225,39 @@ Clears all names
 boolean
 UniqNameInit()
 {
-    if (UniqNameInitDone) {
-	hdestroy();
-    }
-    ERR_IF2(!hcreate(100), "UniqNameInit: cannot create hash table");
-    UniqNameInitDone = TRUE;
+    static int UniqNameInitDone = 0;
+
+    if (UniqNameInitDone)
+	Tcl_DeleteHashTable(&uniqNameTable);
+    else
+	UniqNameInitDone = 1;
+    Tcl_InitHashTable(&uniqNameTable, TCL_STRING_KEYS);
     return TRUE;
 }
 
 /*
-Outputs: return = str with unique name or NULL if error.  Can free() str.
-Updates: 3/8/90 = fix for uvax: ++ lvalue
-    3/20/90 = check for full hash table
+Output: return = str with unique name or NULL if error.  Can free() str.
 */
 char *
 UniqNameGet(s)
 char *s;
 {
+    int new;
+    Tcl_HashEntry *item;
+    int n;
     char buf[100];
-    int *ip;
 
-    ENTRY item, *found, *hsearch();
-    item.key = HashString(s);
-    found = hsearch(item, FIND);
-    if (found == NULL) {
-	item.data = 0;
-	if (!(found = hsearch(item, ENTER))) {
-	    ErrAdd("UniqNameGet: hash table is full!");
-	    return NULL;
-	}
+    item = Tcl_CreateHashEntry(&uniqNameTable, s, &new);
+    if (new) {
+	n = 0;  /* instance number starts from 1 */
+    } else {
+	n = (int) Tcl_GetHashValue(item);
     }
-    ip = (int *) &found->data;
-    sprintf(buf, "%s%d", s, ++ (*ip));
-    return(DupString(buf));
+
+    n++;
+    Tcl_SetHashValue(item, (ClientData) n);
+    sprintf(buf, "%s%d", s, n);
+    return DupString(buf);
 }
 /***** End UniqName routines */
 
@@ -359,7 +356,6 @@ char *
 setCurDomainS(spot)
 RPCSpot *spot;
 {
-    octObject facet;
     char *domain, *oldDomain;
     domain = getDomainS(spot);
     if (!domain) return NULL;
