@@ -453,6 +453,8 @@ long userOptionWord;
     octObject facet;
     char *domain, buf[MSG_BUF_MAX];
     int i, which, nDomains;
+    char *temp;    /* for swapping two pointers to char */
+    int current = 0;    /* actual index of current domain */
 
     ViInit("edit-domain");
     ErrClear();
@@ -475,6 +477,18 @@ long userOptionWord;
         items[i].itemName = nthDomainName(i);
         items[i].userData = NULL;
         items[i].flag = 0;
+	/* Because dmWhichOne always makes items[0] as the default
+	   selected item, I put the current domain in items[0] so
+	   that the current domain is the default new domain.  So
+	   0 becomes the temperary index of the current domain.  The
+	   actual index of the current domain is saved in "current". */
+	if (i > 0 && !strcmp(items[i].itemName, domain)) {
+	    current = i;  /* actual index of current domain is "i" */
+	    /* swap items[0] and items[current] */
+	    temp = items[0].itemName;
+	    items[0].itemName = items[current].itemName;
+	    items[current].itemName = temp;
+        }
     }
 
     sprintf(buf, "domain = '%s'", domain);
@@ -482,6 +496,13 @@ long userOptionWord;
         || which == -1) {
         PrintCon("Aborted entry");
         ViDone();
+    }
+    /* Since we swapped items[0] and items[current], we must 
+       do the following adjustment on "which". */
+    if (which == 0) {
+	which = current;
+    } else if (which == current) {
+	which = 0;
     }
     domain = nthDomainName(which);
     if (!SetDomainProp(&facet, domain)) {
