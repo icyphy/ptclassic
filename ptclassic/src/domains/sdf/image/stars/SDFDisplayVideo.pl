@@ -155,14 +155,14 @@ may have changed.
 		access { private }
 		arglist { "()" }
 		code {
-			LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
-			sprintf(cmd, "rm -f %s", tmpFile); system(cmd);
+			StringList cmd = "rm -f ";
+			cmd << tmpFile;
+			system(cmd);
 			if ((allFileNames[0]) && !int(Save)) {
-				sprintf(cmd, "rm -f %s", allFileNames);
+				cmd = "rm -f ";
+				cmd << allFileNames;
 				system(cmd);
 			}
-			LOG_DEL; delete [] cmd;
-
 			allFileNames[0] = '\000'; // Clear the file list.
 			LOG_DEL; delete [] tmpFrm;
 			tmpFrm = 0;
@@ -172,10 +172,9 @@ may have changed.
 	wrapup {
 		// Display the video here.
 		if ( allFileNames[0] ) {
-		  LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
-		  sprintf(cmd, "getx11 -m %s", allFileNames);
-		  system (cmd);
-		  LOG_DEL; delete [] cmd;
+		  StringList cmd = "getx11 -m ";
+		  cmd << allFileNames;
+		  system(cmd);
 		}
 
 		CleanUp();
