@@ -73,7 +73,6 @@ ITCL_SRCS = \
 	StyleChooser.itcl \
 	StyleEditor.itcl \
 	Query.itcl \
-	Registry.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
