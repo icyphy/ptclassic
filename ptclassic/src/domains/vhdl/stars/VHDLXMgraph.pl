@@ -50,6 +50,17 @@ $starSymbol(icount) := $starSymbol(icount) + 1;
 	}
 	initCode {
 	  addCode(uses, "useLibs", "textio");
+	  StringList filedecl = "";
+	  for (int i = 1 ; i <= input.numberPorts() ; i++) {
+	    filedecl << "file $starSymbol(fileout";
+	    filedecl << i;
+	    filedecl << "): text is out \"$starSymbol(xgraph";
+	    filedecl << i;
+	    filedecl << ").dat\";";
+	    filedecl << "\n";
+	  }
+	  addCode(filedecl, "mainDecls");
+	  addCode(init, "mainDecls");
 	  StringList cmd = "";
 	  cmd << "! /bin/rm -f ";
 	  cmd << "$starSymbol(xgraph)";
@@ -76,17 +87,6 @@ $starSymbol(icount) := $starSymbol(icount) + 1;
 	  addCode(graph, "simWrapup");
 	}
 	go {
-	  StringList filedecl = "";
-	  for (int i = 1 ; i <= input.numberPorts() ; i++) {
-	    filedecl << "file $starSymbol(fileout";
-	    filedecl << i;
-	    filedecl << "): text is out \"$starSymbol(xgraph";
-	    filedecl << i;
-	    filedecl << ").dat\";";
-	    filedecl << "\n";
-	  }
-	  addCode(filedecl, "mainDecls", "xgraphFileDecl");
-	  addCode(init, "mainDecls", "xgraphFileInit");
 	  StringList dataout = "";
 	  for (int k = 1 ; k <= input.numberPorts() ; k++) {
 	    dataout << "write($starSymbol(aline), $starSymbol(icount));\n";
