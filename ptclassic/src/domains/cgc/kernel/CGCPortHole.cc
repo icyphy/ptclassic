@@ -20,12 +20,12 @@ $Id$
 #include "SDFStar.h"
 #include "Error.h"
 
-#define SETFLAGS(p) \
-    if ((p->asLinearBuf == TRUE) && (maxBuf % p->numXfer() != 0)) \
-	p->asLinearBuf = FALSE; \
-    if (p->asLinearBuf == FALSE) p->hasStaticBuf = FALSE; \
-    else if ((p->numXfer() * ((SDFStar*) p->parent())->reps()) % maxBuf != 0) \
-	p->hasStaticBuf = FALSE; 
+void CGCPortHole::setFlags() {
+	if (asLinearBuf && (maxBuf % numXfer() != 0))
+		asLinearBuf = FALSE;
+	if (!asLinearBuf || (numXfer() * parentReps()) % maxBuf != 0)
+		hasStaticBuf = FALSE; 
+}
 
 		////////////////////////////////////////
 		// Buffer size determination routines
@@ -129,7 +129,7 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 	}
 
 	// set the static buffering option and offserReq flag
-	SETFLAGS(this)
+	setFlags();
 
 	// confirm the asLinearBuf flag of fork-destination ports
 	if (p->fork()) {
@@ -138,10 +138,10 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 		CGCPortHole* outp;
 		while ((outp = next++) != 0) {
 			CGCPortHole* inp = outp->realFarPort();
-			SETFLAGS(inp);
+			inp->setFlags();
 		}
 	} else {
-		SETFLAGS(p);
+		p->setFlags();
 	}
 }
 
