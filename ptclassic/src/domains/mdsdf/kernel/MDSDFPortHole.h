@@ -128,6 +128,8 @@ class MDSDFPortHole : public DFPortHole
   virtual PtMatrix* getInput(int rowDelay = 0, int colDelay = 0);
   virtual PtMatrix* getOutput();
 
+  /*virtual*/ void resetBufferValues() {};
+
  protected:
   // the dimensions of matrix particles that flow through this porthole
   int numRows;
