@@ -45,9 +45,14 @@ public:
 
 	void				setSize(const int);
 
-	inline	int	retBS() const		{ return blocksize; }
-	inline	int	fullWidth() const	{ return upWidth; }
-	inline	int	fullHeight() const	{ return upHeight; }
+	inline	int	retBS() const
+			{ return blocksize; }
+	inline	int	fullWidth() const
+			{ return upWidth; }
+	inline	int	fullHeight() const
+			{ return upHeight; }
+	inline	int processed() const
+			{ return(upWidth*upHeight != fullSize); }
 
 // PacketData-like stuff
 	virtual const char* dataType() const;
