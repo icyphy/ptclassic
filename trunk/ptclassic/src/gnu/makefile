@@ -240,8 +240,8 @@ hp_configure: $(GNU_OBJ)
 
 # Set up links for GNU as.
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
-	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
 	if [ ! -d $(GNU_OBJ)/gas; ] then mkdir $(GNU_OBJ)/gas; fi
+	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
 	-ln -s $(GNU_OBJ)/gas/as.new $(GNU_OBJ)/gas/as
 	-chmod a+x $(GNU_OBJ)/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
