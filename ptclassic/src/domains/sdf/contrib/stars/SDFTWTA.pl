@@ -1,22 +1,24 @@
 defstar {
   name { TWTA }
   domain { SDF }
-  desc { model of TWTA }
+  desc { Model of a TWTA amplifier }
+  version { $Id$ }
   location { SDF user contribution library }
   author { N. Becker }
   explanation {
-A TWTA amplifier is modelled by its transfer characteristic.  Data points for
-output backoff (dB) vs. input backoff (dB) and phase (degree) vs. input backoff
-are supplied in three arrays.  Then for each complex input sample the input backoff
-is computed, and linear interpolation/extrapolation is used to find the phase and 
+A TWTA amplifier is modeled by its transfer characteristic.
+Data points for output backoff (dB) vs. input backoff (dB) and
+phase (degree) vs. input backoff are supplied in three arrays.
+Then for each complex input sample the input backoff is computed,
+and linear interpolation/extrapolation is used to find the phase and 
 output amplitude, which is converted back to a complex output sample.
-					       }
-        copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+}
+  copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-        }
+  }
   state {
     name { InputBackoff }
     type { floatArray }
@@ -25,12 +27,12 @@ limitation of liability, and disclaimer of warranty provisions.
   state {
     name { Phase }
     type { floatArray }
-    desc { Phase (degree) vs Input Backoff (dB) }
+    desc { Phase (degree) vs. Input Backoff (dB) }
   }
   state {
     name { Amplitude }
     type { floatArray }
-    desc { Amplitude (dB) vs Input Backoff (dB) }
+    desc { Amplitude (dB) vs. Input Backoff (dB) }
   }
   state {
     name { Backoff }
@@ -61,28 +63,34 @@ limitation of liability, and disclaimer of warranty provisions.
   hinclude { "Interp.h" }
   ccinclude { <math.h> }
   setup {
-    if( Phase.size() != InputBackoff.size() || Amplitude.size() != InputBackoff.size() )
-      Error::abortRun( *this, "Phase, InputBackoff, and Amplitude arrays must be same size" );
-    if( InputBackoff.size() < 2 )
+    if( Phase.size() != InputBackoff.size() ||
+        Amplitude.size() != InputBackoff.size() ) {
+      Error::abortRun( *this, "Phase, InputBackoff, and Amplitude arrays must be the same size" );
+    }
+    if( InputBackoff.size() < 2 ) {
       Error::abortRun( *this, "Need at least 2 data points" );
+    }
     delete AmplInterp;
     delete PhaseInterp;
     AmplInterp = new Interp( (double *)InputBackoff,
 			     (double *)Amplitude, InputBackoff.size() );
     PhaseInterp = new Interp( (double *)InputBackoff,
-			     (double *)Phase, InputBackoff.size() );
+			      (double *)Phase, InputBackoff.size() );
+  }
+  header {
+#define DEGREES_TO_RADIANS 0.0174532925199432957692
   }
   go {
-    Complex z = (Complex)(in%0);
-    double bo = norm( z );
-    double oldphase = atan2d( z.imag(), z.real() );
-    double bodB = 10. * log10( bo ) - double(Backoff);
+    Complex z = Complex(in%0);
+    double bo = norm(z);
+    double oldphase = arg(z);
+    double bodB = 10. * log10(bo) - double(Backoff);
     double ampdB = (*AmplInterp)[ bodB ];
-// Note the square root to convert power to volts
-    double voltage = pow( 10., 0.05 * ampdB );
-    double Iphase = (*PhaseInterp)[ bodB ];
+    // Note the square root to convert power to volts
+    double voltage = power( 10., 0.05 * ampdB );
+    double Iphase = (*PhaseInterp)[ bodB ] * DEGREES_TO_RADIANS;
     double phase = oldphase + Iphase;
-    Complex v = Complex( cosd( phase ) * voltage, sind( phase ) * voltage );
+    Complex v = Complex( cos( phase ) * voltage, sin( phase ) * voltage );
     out%0 << v;
   }
 }
