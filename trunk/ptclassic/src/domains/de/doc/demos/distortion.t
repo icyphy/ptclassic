@@ -64,15 +64,10 @@ The
 is required in order to ensure that this wormhole always produces
 an output when given an input.
 The outer SDF system expects this.
-The
-.c clock
-input to the sampler is the input, delayed an infinitesimal amount.
-The delay ensures that the sampler fires after the merge
-when samples are routed through the upper path.
-Without the delay, the scheduler could decide to fire the sampler
-before the merge, and the input sample will be delayed by one sample
-period, or possibly even lost.
-The delay prevents this scheduler-dependent non-determinacy.
+Note that the DE scheduler decides the firing order of the sampler
+and the merge deterministically in case of simultaneous events to those
+stars.  It prevents the use of an infinitesimal delay on the clock input
+to the sampler which may be required for some commercial DE schedulers.
 .SA
 distortionQ,
 Router,
