@@ -5,29 +5,74 @@
 </head>
 <body bgcolor=#faf0e6>
 
-<H2>New work</H2>
+<H2>New work in Ptolemy 0.7.1</H2>
 <DL>
 <DT> Further integrations of <A HREF="../../../tycho/doc/index.html">Tycho</A>
-into Ptolemy. 
-
-<DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~eal">Edward A. Lee</A>,
- <A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A>, 
-<A HREF="http://ptolemy.eecs.berkeley.edu/~kchang">Kevin Chang</A>,
-<A
-HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
-and many others.
- <br>
-The <A HREF="../../../tycho/doc/releasenotes0.2.html">Tycho Release</A>
+into Ptolemy. -
+Edward A. Lee, John Reekie, Cliff Cordiero, Kevin Chang, Christopher Hylands and many others.
+ <dd>
+The <A HREF="../../../tycho/doc/releasenotes0.2.1.html">Tycho Release</A>
 notes describe the changes to Tycho more completely, below are some
 highlights:
 <MENU>
+	<li> New package system - John Reekie, Christopher Hylands
+	<li> Emacs-style search and file open - Cliff Cordeiro
+	<li> HTTP, FTP, and mailto support - Kevin Chang, John Reekie
+	<li> New documentation viewer (idoc) - Cliff Cordeiro
 </MENU>
-
-<DT> The Adaptive Computing Systems (ACS) Domain 
+ 
+<DT> The Adaptive Computing Systems (ACS) Domain -
+James Lundblad
 <DD> The ACS domain uses different styles of stars than the rest of
 Ptolemy.  ACS splits a star into a single interface (called a Corona),
 and one or more implementations, called Cores.
- <br> See the <A HREF="../../../src/domains/acs/doc/index.html">ACS Documemntation</A> for more information.
+ <br> See the <A HREF="../../../src/domains/acs/doc/index.html">ACS Documentation</A> for more information.
+ <br>
+
+<DT> Mutable Universe Changes for DE -
+Jens Voigt, John Davis, II
+<DD> There are two demos:
+<menu>
+<li> <a href="../../../src/domains/de/contrib/demo/DynBlockIntTest">NonGraphical Demonstration of Dynamic Map Function</a>
+<li> <a href="../../../src/domains/de/contrib/demo/DynBlockGrTest">Graphical Demonstration of Dynamic Map Function</a>
+</menu>
+
+<dt> HOF fixes - Tom Lane
+<dt> Ptolemy interfaces to Matlab and Mathematica -
+Brian Evans, Guy Maor,  and Wade Schwartzkopf
+
+
+<dd>      <UL>
+     <LI> upgrade to work with Matlab 5 and Mathematica 3 by default but
+          allow it to be recompiled with Matlab 4 and Mathematica 2.2
+     <LI> dynamically link the interface to Matlab
+     <LI> remove dependence of the PTcl class on the interfaces to
+	  Matlab and Mathematica Tcl commands, and instead, have the
+	  Matlab and Mathematica Tcl commands be registered.
+     </UL>
+	We cannot ship binaries built with the current Matlab 5 interface,
+	since they will not work on machines that do not have Matlab installed.
+
+<dt> Java version of <CODE>pxgraph</CODE>, 
+<a href="../../../tycho/java/ptplot/index.html">Ptplot</a> -
+Edward A. Lee, Christopher Hylands, Bicheng William Wu
+
+<dd> Note that the X11 sources for <CODE>pxgraph </CODE> are also
+included, see
+<a href="../../../src/pxgraph/README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a> 
+
+<dt> Support for the <A HREF="http://www.cygnus.com/egcs/">EGCS</A> C++
+Compiler -
+Christopher Hylands
+<dd> See <a href="../../../doc/html/release.html#egcs"><CODE>$PTOLEMY/doc/html/release.html</CODE></a> for more information.
+
+<dt> Support for building <CODE>ptcl</CODE> under NT -
+Christopher Hylands
+<dd> The ptcl binary compiles under Windows NT
+using Cygwin32.  See
+<a href="http://ptolemy.eecs.berkeley.edu/~cxh/nt-ptolemy.html"><CODE>http://ptolemy.eecs.berkeley.edu/~cxh/nt-ptolemy.html</CODE></a>
+for more information
+
 </DL>
 
 <p>
