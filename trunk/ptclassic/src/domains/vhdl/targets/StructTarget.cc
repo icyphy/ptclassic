@@ -731,7 +731,7 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/) {
   int stateLastFiring = -1;
   VHDLStateListIter nextState(stateList);
   VHDLState* nState;
-  VHDLState* listState;
+  VHDLState* listState = new VHDLState;
   while ((nState = nextState++) != 0) {
     StringList tempRoot = root;
     StringList tempName = nState->name;
@@ -927,7 +927,7 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/) {
 }
 
 // Register PortHole reference.
-void StructTarget :: registerPortHole(VHDLPortHole* port, int offset=-1) {
+void StructTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
   StringList ref = port->getGeoName();
   if (offset >= 0) ref << "_" << offset;
 
