@@ -70,6 +70,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "<T>ArrayState";}
 
 	// extend/truncate the array size
 	void resize(int);
