@@ -12,6 +12,7 @@
  */
 struct gslider {
 	char	*dsplabel;	/* DSP memory location label */
+	char	*name;		/* name (typically "") */
 	char	*descr;		/* description */
 	double	hostmin;	/* host minimum value */
 	double	hostmax;	/* host maximum value */
