@@ -2,9 +2,9 @@ defstar {
 	name { Gain }
 	domain { C50 }
 	desc {
-The output is set to the input multiplied by a gain term.  The gain must
-be in [-1,1].
-}
+The output is set to the input multiplied by a gain term.
+The gain must be in interval [-1,1].
+	}
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -23,11 +23,12 @@ in that case.
 		short identity;
 	}
 	setup {
-		identity = (gain.asDouble() >= C50_ONE);
-		if (identity) forkInit(input,output);
-	}
-	execTime {
-		return identity ? 0 : 8;
+		double thegain = gain.asDouble();
+		if (thegain < -1.0 || thegain > 1.0) {
+			Error::warn(*this, "gain is not in the range [-1,1]");
+		}
+		identity = (thegain >= C50_ONE);
+		if (identity) forkInit(input, output);
 	}
 	input {
 		name {input}
@@ -69,17 +70,16 @@ in that case.
 	go {
 		if (identity) {
 		    ;
-		} else if (gain.asDouble()==0.0) {
+		} else if (gain.asDouble() == 0.0) {
 		    addCode(cbZero);
-		} else if (gain.asDouble()==-1.0) {
+		} else if (gain.asDouble() == -1.0) {
 		    addCode(cbNeg);
 	 	} else {
 		    addCode(cbStd);
 		}
 	}
+	execTime {
+		identity = (gain.asDouble() >= C50_ONE);
+		return identity ? 0 : 8;
+	}
 }
-
-
-
-
-
