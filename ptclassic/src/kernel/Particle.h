@@ -45,12 +45,16 @@ public:
 	virtual operator << (int) {};
 	virtual operator << (float) {};
 
-	// Clone this Particle -- this method is required
-	//  where copies of the Particle are needed, as in
-	//  a Fork:Star
-	// NOTE: may be possible to avoid this method later
-	//  by just equating Particles
-	virtual void clone(Particle*) {};
+	// Copy a Particle -- since Stars must be able to
+	// assign Particles in type-independent fashion,
+	// the compiler can't handle this
+	virtual Particle& operator = (const Particle&) {};
+
+protected:
+	// Before copying Particles, always compare their types
+	// Otherwise the user could always copy Particles of
+	//  incompatible types between an input and output PortHole
+	int compareType(Particle& p) {return (readType()==p.readType());}
 };
 
 /***************************************************************
@@ -92,8 +96,8 @@ public:
 	operator << (int i) {data=i;}
 	operator << (float f) {data=(int)f;}
 
-	// Clone the Particle
-	void clone(Particle* p) {((IntSample*)p)->data = data;}
+	// Copy the Particle
+	Particle& operator = (const Particle&);
 
 private:
 	int data;
