@@ -13,6 +13,18 @@
 	<LI> If we have a series of declarations that are not
 	separated by blank lines, should they all share the same
 	doc comment?
+
+
+	<LI> The arguments to <CODE>itk_option</CODE> are not
+	handled properly.  We currently print:
+	<LISTING>
+	itk_option define {-master} 
+	</LISTING>
+	Instead of:
+	<LISTING>
+	itk_option define -master master Master "0"
+	</LISTING>
+
 </MENU>
 
 <H2>Requests For Enhancements (RFEs)</H2>
