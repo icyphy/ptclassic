@@ -288,12 +288,12 @@ It outputs lines of comments, instead of code.
 		    int numzeropads= outlen-numextrasignbits-numstraightcopys; 
 
 		    //sign extend
-		    for (int loop=1; loop <= numextrasignbits; loop++)
+                    int loop;
+		    for (loop=1; loop <= numextrasignbits; loop++)
 			out_fstr << lang->equals(lang->slice("outp",outlen-loop),lang->slice("inp",inlen-1))
 			    << lang->end_statement << endl;
 
 		    //straightcopy
-                    int loop;
 		    for (loop=1; loop <= numstraightcopys; loop++)
 			out_fstr << lang->equals(lang->slice("outp",outlen-loop-numextrasignbits),
 						 lang->slice("inp",inlen-loop)) 
