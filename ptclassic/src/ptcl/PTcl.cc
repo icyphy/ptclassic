@@ -384,7 +384,7 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	currentTarget = universe->myTarget();
 	definingGal = FALSE;
 	curDomain = outerDomain;
-	return status;
+	return currentTarget?status:TCL_ERROR;
 }
 
 int PTcl::computeSchedule() {
