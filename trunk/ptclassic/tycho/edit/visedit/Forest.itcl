@@ -34,21 +34,21 @@
 #######################################################################
 #### Forest
 # A forest is a data structure that includes any number of trees. A
-# tree is a directed acyclic graph with nodes that are either a root or have
-# exactly one parent, and that have any number of children. This class
-# provides methods to build, browse, and edit such a data structure.
-# Data stored on the nodes of the trees are arbitrary Tcl strings. A
-# method is provided to encode the data structure as a list, which can,
-# for example, be written to a file. A method is also provided to
-# convert this list back into a forest.
+# tree is a directed acyclic graph with nodes that are either a root or
+# have exactly one parent, and that have any number of children. This
+# class provides methods to build, browse, and edit such a data
+# structure. Data stored on the nodes of the trees are as in the base
+# class <code>Graph</code>. A method is provided to encode the data
+# structure as a list, which can, for example, be written to a file. A
+# method is also provided to convert this list back into a forest.
 # <p>
 # Here is an example of how to use the Forest:
 # <tcl><pre>
 #    catch {delete object foo}
 #    ::tycho::Forest foo
-#    foo add a aa
-#    foo add c cc a
-#    foo add d dd a
+#    foo add a {}
+#    foo add c {} a
+#    foo add d {} a
 #    ::tycho::post [foo describe]
 # </pre></tcl>
 # The description that is posted in the last line will be:
@@ -67,13 +67,13 @@ class ::tycho::Forest {
     ####                         public methods                    ####
 
     # Add a node to the forest.
-    method add {nodename contents {parents {}} {children {}}}
+    method add {nodename contents {parents {}}}
 
     # Trigger an error (disabling base class methods).
     method addArc {parent child}
 
-    # Return a list that describes the subgraph with the given roots.
-    method describeSubgraph {roots}
+    # Return a list of node names in depth-first sort order.
+    method depthFirstSort {roots}
 }
 
     ###################################################################
@@ -82,20 +82,13 @@ class ::tycho::Forest {
 
 #######################################################################
 #### add
-# Add a leaf node to a tree in the forest.  Only one parent can be specified.
-# It is an error if the parent does not exist. It is also an error
-# if the specified node name already exists in the graph.  A leaf node
-# is one with no children, so the fourth argument, if given, must always
-# be the empty string.
+# Add a node to a tree in the forest.  Only one parent can be specified.
 #
-body ::tycho::Forest::add {nodename contents {parents {}} {children {}}} {
+body ::tycho::Forest::add {nodename contents {parents {}}} {
     if {[llength $parents] > 1} {
         error "Specified multiple parents when only one is allowed: $parents"
     }
-    if {$children != {}} {
-        error "Cannot specify children for node: $nodename"
-    }
-    ::tycho::DirectedAcyclicGraph::add $nodename $contents $parents $children
+    ::tycho::Graph::add $nodename $contents $parents
 }
 
 #######################################################################
@@ -107,25 +100,21 @@ body ::tycho::Forest::addArc {parent child} {
 }
 
 #######################################################################
-#### describeSubgraph
-# Return a list that describes the subgraph with the given roots. This
+#### depthFirstSearch
+# Return a list of node names in the subgraph with the given roots. This
 # includes the roots themselves and all descendants. The returned list
 # contains one element for each node in the subgraph, beginning with
 # the first root, then, in depth-first order, all descendants. Parents
-# are always described before their children. Each node is described as
-# a list with four elements: the node name, the contents, the list of
-# parents, and the list of children.
+# are always listed before their children.  If no arguments are given,
+# then the entire graph is sorted.
 #
-body ::tycho::Forest::describeSubgraph {roots} {
+body ::tycho::Forest::depthFirstSort {{roots {}}} {
+    if {$roots == {}} {set roots $rootnames}
     set result {}
     foreach node $roots {
-        lappend result [list \
-                $node \
-                $contentsstring($node) \
-                $parentnames($node) \
-                $childrennames($node)]
+        lappend result $node
         foreach child $childrennames($node) {
-            set result [concat $result [describeSubgraph [list $child]]]
+            set result [concat $result [depthFirstSort [list $child]]]
         }
     }
     return $result
