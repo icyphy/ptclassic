@@ -63,15 +63,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
   SideEffects [ The integer array mat is modified. ]
   SeeAlso     [ intSwapCols ]
 ******************************************************************************/
-void 
-intSwapRows( int *mat, int row1, int row2, int numRows, int numCols ) {
-  int temp, col;
-
-  if ( row1 != row2 ) {
+static void 
+intSwapRows(int *mat, int row1, int row2, int numRows, int numCols ) {
+  if (row1 != row2) {
+    int col, temp;
     for ( col = 0; col < numCols; col++ )
       INT_SWAP3(mat[row1*numCols + col], mat[row2*numCols + col], temp);
   }
-  
   return;
 }
 
@@ -80,15 +78,13 @@ intSwapRows( int *mat, int row1, int row2, int numRows, int numCols ) {
   SideEffects [ The integer array mat is modified. ]
   SeeAlso     [ intSwapRows ]
 ******************************************************************************/
-void 
-intSwapCols( int *mat, int col1, int col2, int numRows, int numCols ) {
-  int temp, row;
-
+static void 
+intSwapCols(int *mat, int col1, int col2, int numRows, int numCols) {
   if ( col1 != col2 ) {
+    int temp, row;
     for ( row = 0; row < numRows; row++ )
       INT_SWAP3(mat[row*numCols + col1], mat[row*numCols + col2], temp);
   }
-
   return;
 }
 
@@ -103,19 +99,16 @@ intSwapCols( int *mat, int col1, int col2, int numRows, int numCols ) {
   Synopsis    [ Sets matrix to be an identity matrix ]
   SideEffects [ The integer array mat is modified. ]
 ******************************************************************************/
-void 
-identity (int * mat, int numRows, int numCols) {
-  int row, col;
-
-  for ( row = 0; row < numRows; row++)
-    for ( col = 0; col < numCols; col++)
-      if (row == col) {
-	mat[row*numCols + col] = 1;
-      } else {
-	mat[row*numCols + col] = 0;
-      }
+static void 
+identity(int* mat, int numRows, int numCols) {
+  int row;
+  for ( row = 0; row < numRows; row++) {
+    int col;
+    for ( col = 0; col < numCols; col++) {
+      *mat++ = (row == col) ? 1 : 0;
+    }
+  }
 }
-
 
 /* Multiply two matrices, true matrix multiply, this is a fairly fast
    algorithm, especially when optimized by the compiler.
@@ -124,48 +117,53 @@ identity (int * mat, int numRows, int numCols) {
    This function writes the contents to a separate vector before
    copying to the outMatrix if the outMatrix is equal to the
    source. Thus this allows
-             X = X * Y   */
+             X = X * Y
+ */
+
 /**Function*******************************************************************
   Synopsis    [ Matrix multiplcation ]
   Description [         outMatrix = src1 * src2 <BR>
                 This is a fairly fast algorithm, especially when
 		optimized by the  compiler. <BR>
-		Returns 1 if error, ie nCols1 != nRows2. <BR>
+		Returns 0 on error, ie nCols1 != nRows2. <BR>
 		This function writes the output to a separate vector
 		before copying to the outMatrix if the outMatrix is
 		equal to either of the  sources. Thus this allows <BR>
 		        X = X * Y ]
   SideEffects [ The integer array outMatrix is modified. ]
 ******************************************************************************/
-int 
-mul (int * outMatrix, const int * src1, const int nRows1, const int nCols1, 
-     const int * src2, const int nRows2, const int nCols2) {
+static int 
+mul(int* outMatrix, const int* src1, const int nRows1, const int nCols1, 
+    const int * src2, const int nRows2, const int nCols2) {
+  int i = 0;
+  int duplicateMatrix = 0;
+  int* tempMat = 0;
+  int* destMat = 0;
+  int maxi = nRows1 * nCols2;
 
-  int temp, i, j, k;
-  int dup = 0;
-  int tempMat[nRows1*nCols2];
+  if (nCols1 != nRows2) return 0;
 
-  if(nCols1 != nRows2) {
-    return 1;
-  }
-  
-  if (outMatrix == src1 || outMatrix == src2)
-    dup = 1;
+  duplicateMatrix = ((outMatrix == src1 || outMatrix == src2));
+  if (duplicateMatrix) tempMat = (int *) malloc(maxi * sizeof(int));
+  destMat = (duplicateMatrix) ? tempMat : outMatrix;
 
-  for( i = 0; i < nRows1; i++)
+  for( i = 0; i < nRows1; i++) {
+    int j;
     for( j = 0; j < nCols2; j++) {
-      temp = src1[i*nCols1] * src2[j];
-      for(k = 1; k < nCols1; k++)
+      int k;
+      int temp = src1[i*nCols1] * src2[j];
+      for (k = 1; k < nCols1; k++) {
         temp += src1[i*nCols1 + k] * src2[k*nCols2 + j];
-      if (dup) 
-	tempMat[i*nCols2 + j] = temp;
-      else
-	outMatrix[i*nCols2 + j] = temp;
+      }
+      destMat[i*nCols2 + j] = temp;
     }
-  if (dup)
-    for ( i = 0; i < nRows1*nCols2; i++) 
+  }
+  if (duplicateMatrix) {
+    for ( i = 0; i < maxi; i++) 
       outMatrix[i] = tempMat[i];
-  return 0;
+  }
+  free(tempMat);
+  return 1;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -185,37 +183,37 @@ mul (int * outMatrix, const int * src1, const int nRows1, const int nCols1,
   SeeAlso     [ Ptdsp_SmithCanonForm ]
 ******************************************************************************/
 void 
-Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
+Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
 		const int m, const int n) {
 
-  int entry, mincol, minrow, minabsvalue, minvalue, quotient, sum;
-  int endflag, dim, row, col, i;
-
   /* perform the basic Smith form decomposition */
-  int *mVector = (int *) malloc(m * sizeof(int));
-  int *nVector = (int *) malloc(n * sizeof(int));
+  int* mVector = (int *) malloc(m * sizeof(int));
+  int* nVector = (int *) malloc(n * sizeof(int));
   int r = intmin(m, n);
-  
+  int dim, i;
+
   /* copy contents of inputMat into d */
-  for ( i = 0; i < m * n; i++)
+  for (i = 0; i < m * n; i++)
     d[i] = inputMat[i];
 
   /* set u and v to be identity matrixes */
   identity(u, m, m);
   identity(v, n, n);
 
-  for (  dim = 0; dim < r - 1; dim++ ) {
-    endflag = 0;
-    while ( ! endflag ) {
-      
+  for (dim = 0; dim < r - 1; dim++) {
+    int endflag = 0;
+    while (! endflag) {
+      int col, row;
+
       /* find indices of the pivot: non-zero entry with min value in d */
-      mincol = minrow = dim;
-      minvalue = d[minrow * n + mincol]; /* ie
-						   inputMat[minrow][mincol] */
-      minabsvalue = intabs(minvalue);
-      for ( row = dim; row < m; row++ ) {
-	for ( col = dim; col < n; col++ ) {
-	  entry = d[row*n + col];
+      int minrow = dim;
+      int mincol = dim;
+      int minvalue = d[minrow * n + mincol]; /* ie inputMat[minrow][mincol] */
+      int minabsvalue = intabs(minvalue);
+      for (row = dim; row < m; row++) {
+	int col;
+	for (col = dim; col < n; col++) {
+	  int entry = d[row*n + col];
 	  if ( entry < 0 ) entry = -entry;
 	  if ( INT_IS_NOT_ZERO(entry) && ( entry < minabsvalue ) ) {
 	    minabsvalue = entry;
@@ -241,34 +239,34 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
 	 Therefore, full matrix multiplication is not required
 	 We must be careful because we are performing updates in place */
       minvalue = d[dim*n + dim];
-      for ( row = dim + 1; row < m; row++ )
+      for (row = dim + 1; row < m; row++ )
 	mVector[row] = -d[row*n + dim] / minvalue;
-      for ( col = dim + 1; col < n; col++ )
+      for (col = dim + 1; col < n; col++ )
 	nVector[col] = -d[dim*n + col] / minvalue;
       
-      for ( row = dim + 1; row < m; row++ ) {
-	quotient = mVector[row];
+      for (row = dim + 1; row < m; row++) {
+	int quotient = mVector[row];
 	for ( col = dim + 1; col < n; col++ ) {
 	  d[row*n + col] += quotient * d[dim*n + col];
 	}
 	d[row*n + dim] += quotient * minvalue;
       }						/* E^-1 D */
-      for ( col = dim + 1; col < n; col++ ) {
-	quotient = nVector[col];
+      for (col = dim + 1; col < n; col++) {
+	int quotient = nVector[col];
 	for ( row = dim + 1; row < m; row++ ) {
 	  d[row*n + col] += d[row*n + dim] * quotient;
 	}
 	d[dim*n + col] += quotient * minvalue;
       }						/* (E^-1 D) F^-1 */
-      
-      for ( row = 0; row < m; row++ ) {
-	sum = u[row*m + dim];
+
+      for (row = 0; row < m; row++) {
+	int sum = u[row*m + dim];
 	for ( col = dim + 1; col < m; col++ )
 	  sum -= u[row*m + col] * mVector[col];
 	u[row*m + dim] = sum;
       }						/* U E */
       for ( col = 0; col < n; col++ ) {
-	sum = v[dim*n + col];
+	int sum = v[dim*n + col];
 	for ( row = dim + 1; row < n; row++ )
 	  sum -= nVector[row] * v[row*n + col];
 	v[dim*n + col] = sum;
@@ -276,13 +274,13 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
       
       /* check for the ending condition for this iteration */
       endflag = 1;
-      for ( col = dim + 1; col < n; col++ )
+      for (col = dim + 1; col < n; col++)
 	if ( INT_IS_NOT_ZERO(d[dim*n + col]) ) {
 	  endflag = 0;
 	  break;
 	}
-      if ( endflag ) {
-	for ( row = dim + 1; row < m; row++ )
+      if (endflag) {
+	for (row = dim + 1; row < m; row++)
 	  if ( INT_IS_NOT_ZERO(d[row*n + dim]) ) {
 	    endflag = 0;
 	    break;
@@ -313,8 +311,8 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
 void 
 Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
   
-  int ginv[m*m];
-  int hinv[n*n];
+  int* ginv = (int *) malloc(m * m * sizeof(int));
+  int* hinv = (int *) malloc(n * n * sizeof(int));
   int i, j, di, jend, temp, lastd, lasti;
   int lcmvalue, lambda, mu, gcdvalue;
   int r = intmin(m, n);
@@ -345,8 +343,8 @@ Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
   /* (3) shuffle factors along the diagonal */
   lastd = d[0];
   lasti = 0; 
-  /*  process second to last diagonal elements, i = 1
-      ... r-1 */
+
+  /*  process second to last diagonal elements, i = 1 ... r-1 */
   for ( i = 1; i < r; i++ ) {
     di = d[i*n + i];
     gcdvalue = Ptdsp_ExtendedGCD(lastd, di, &lambda, &mu);
@@ -382,5 +380,7 @@ Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
     lastd = lcmvalue;
     lasti = i;
   }
-}  
 
+  free(hinv);
+  free(ginv);
+}  
