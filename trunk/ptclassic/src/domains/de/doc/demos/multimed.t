@@ -44,12 +44,15 @@ be able read mu-law encoded audio and play the audio over a speaker.
 Sun SparcStations typically contain this program.
 The video display galaxy requires "getx11" and several other
 programs from the Utah Raster Toolkit.
-The Utah Raster Toolkit is available free of charge via
-anonymous ftp from the host cs.utah.edu.
+This toolkit is not included with Ptolemy, but it is available free
+of charge via anonymous ftp.
+See the manual page for the DisplayVideo star to find
+out how to obtain the Utah Raster Toolkit.
 The "play" program and the Utah Raster Toolkit programs must be
 in a user's search-path for the audio and video data to be
 output.
 .SA
+DisplayVideo
 Switch4x4
 PseudoCell
 .ES
