@@ -26,6 +26,7 @@ DEArbitrate.pl \
 DEBarGraph.pl \
 DEBeep.pl \
 DEBlackHole.pl \
+DECase.pl \
 DECellLoad.pl \
 DECellRoute.pl \
 DECellToImage.pl \
@@ -34,6 +35,7 @@ DEClock.pl \
 DEConst.pl \
 DEDelay.pl \
 DEDiscard.pl \
+DEEndCase.pl \
 DEEther.pl \
 DEEtherRec.pl \
 DEEtherSend.pl \
@@ -73,7 +75,6 @@ DESeqATMZero.pl \
 DEStack.pl \
 DEStatistics.pl \
 DEStopTimer.pl \
-DESwitch.pl \
 DESynchronize.pl \
 DETest.pl \
 DETestLevel.pl \
