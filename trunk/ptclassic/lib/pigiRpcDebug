@@ -11,5 +11,6 @@ break main
 run $*
 EOF
 
-xterm -display $DISPLAY -title "pigiRpc debug window" -bg black -fg green \
-	-e gdb $PIGIRPC -x $dbgcmdfile &
+DEBUG='xterm -title pigiRpc_debug_window -bg black -fg green -e gdb'
+
+${PT_DEBUG-$DEBUG} -command=$dbgcmdfile $PIGIRPC &
