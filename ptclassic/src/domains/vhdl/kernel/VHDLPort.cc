@@ -65,7 +65,8 @@ void VHDLPort :: connect(VHDLSignal* newSignal) {
     signal = newSignal;
   }
   else {
-    Error::error(*this, "Connecting newSignal is NULL");
+    Error::abortRun(this->name, ": Connecting newSignal is NULL");
+    return;
   }
 
   mapping = newSignal->name;
@@ -77,7 +78,7 @@ void VHDLPort :: connect(VHDLSignal* newSignal) {
       newSignal->setSource(this);
     }
     else {
-      Error::error(*this, "Attempt to drive newSignal that already has a source");
+      Error::error(this->name, ": Attempt to drive newSignal that already has a source");
     }
   }
 }
