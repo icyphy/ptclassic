@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 // Called only once, after the scheduler is done
   begin {
-    printf("VHDLCReceive.pl begin method called!!\n");
+//    printf("VHDLCReceive.pl begin method called!!\n");
     // Call method to wire up a C2V VHDL entity
     targ()->registerC2V(int(pairNumber), numXfer, output.resolvedType());
   }
