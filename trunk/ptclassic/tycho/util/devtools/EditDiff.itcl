@@ -3,7 +3,7 @@
 #
 # @Author: Kevin Chang
 #
-# @Version: @(#)EditDiff.itcl	$Id$	03/18/97
+# @Version: $Id$
 #
 # @Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
@@ -54,6 +54,8 @@ class ::tycho::EditDiff {
     # The type of diff we want to perform
     itk_option define -difftype difftype Difftype 0
 
+    itk_option define -filename1 filename1 Filename1 ""
+    itk_option define -filename2 filename2 Filename2 ""
 
     ##########################################################################
     ####                         public methods                           ####
@@ -75,6 +77,26 @@ class ::tycho::EditDiff {
 
     method test {} 
 
+    method insertFileName {num nameAndPath} {
+        $this toolbar clear filename$num
+        $this toolbar insert filename$num $nameAndPath
+        set filename$num $nameAndPath
+    }
+
+    # insert filename into $numth line
+    method insertSelectedFileName {num} {
+        set nameAndPath [::tycho::queryfilename {File to compare:}]
+        # Only change when user explicitly changed. Otherwise, leave as default
+        if {$nameAndPath != {}} {
+            insertFileName $num $nameAndPath
+        }
+    }
+
+    method configureUpdate {} {
+        insertFileName 1 $filename1
+        insertFileName 2 $filename2
+    }
+
     ####################################################################
     ####           protected methods and variables                  ####
 
@@ -88,12 +110,12 @@ class ::tycho::EditDiff {
     protected variable linecolor1 {{} {}}
     protected variable linecolor2 {{} {}}
 
-    public variable filename1 {}
-    public variable filename2 {}
-
     # This keeps a list of diffs
     public variable diffResult {}
     public variable diffResultLineCount 0
+    
+    public variable filename1
+    public variable filename2
 }
 
 
@@ -101,8 +123,7 @@ class ::tycho::EditDiff {
 ###################################################################
 #
 body ::tycho::EditDiff::constructor {args} {
-    global filename1 filename2
-   
+    #global filename1 filename2 
     # FIXME: Currently, we'd like to change the default colors
     set linecolor1 [list blue {}]
     set linecolor2 [list red {}]
@@ -122,20 +143,18 @@ body ::tycho::EditDiff::constructor {args} {
 
     toolbar entry filename1 "File 1 name: " {} "puts " \
             -foreground [lindex $linecolor1 0] -command \
-            {set filename1 [::tycho::queryfilename {File 1 to compare:}]} \
-            -textvariable filename1
+            "$this insertSelectedFileName 1"
            
     toolbar entry filename2 "File 2 name: " {} "$this compareFile" \
             -foreground [lindex $linecolor2 0] -command \
-            {set filename2 [::tycho::queryfilename {File 2 to compare:}]} \
-            -textvariable filename2
+            "$this insertSelectedFileName 2"
 
     eval itk_initialize $args
 
     # Initialize the format menu
-    array set difftypeList {{Unix diff} 0 {Smart diff} 1}
+    array set difftypeList {{line/line diff} 0 {smart diff} 1}
     if {$myMenubar != {}} {
-        foreach i {{Unix diff} {Smart diff}} {
+        foreach i {{line/line diff}} {
             $myMenubar add $i Format \
 		    -type radiobutton \
                     -variable [scope difftypeName($this)] \
@@ -144,13 +163,13 @@ body ::tycho::EditDiff::constructor {args} {
                     #::tycho::HTML::render $this"
         }
     }
-
     # initialize this variable to "small", since that has a zero
     # offset.
-    set difftypeName($this) "Unix diff"
+    set difftypeName($this) "line/line diff"
     configure -difftype $difftypeList($difftypeName($this))
 
     if {$myMenubar != {}} {
+        $myMenubar disable {Compare To...}
         $myMenubar disable {Undo/Redo}
         $myMenubar disable {Cut}
         $myMenubar disable {Paste}
@@ -175,17 +194,7 @@ body ::tycho::EditDiff::constructor {args} {
         $myMenubar delete "Toggle Read-Only"
     }
 
-
-
-    # Create the Special menu for file templates and so on
-
-    
-    # The default fill prefix works for Tcl and shell scripts.
-    #set fillPrefix "#"
-    
-    # Bind S-C-l to recolorize the file. Note that C-L is the equivalent
-    # since the effect of the shift key is to modify the keypress and 
-    # it does not seem that I can intercept this any other way.
+    # Center the screen.
     bind $itk_component(text) <Control-L> "$this compareFile"
 
     # Configure text color
@@ -196,6 +205,9 @@ body ::tycho::EditDiff::constructor {args} {
                 -foreground [lindex [eval set linecolor$i] 0] \
                 -background [lindex [eval set linecolor$i] 1]
     }
+    
+    if {$filename1 != {}} {insertFileName 1 $filename1}
+    if {$filename2 != {}} {insertFileName 2 $filename2}
 }
 
 ###################################################################
@@ -215,7 +227,14 @@ body ::tycho::EditDiff::insertString {index str {status {common}}} {
 
 # TEST TEST TEST
 body ::tycho::EditDiff::test {} {
-    global filename1 filename2
+    #global filename1 filename2
+    incr filename1
+    incr filename2
+
+
+    return
+
+
     puts "Now entering test..."
     # Create an exec instance
     if {[info object $execDiff ]==""} {
@@ -247,7 +266,7 @@ body ::tycho::EditDiff::test {} {
 # text buffer, read in UNIX's diff, and then compare.
 body ::tycho::EditDiff::compareFile {{nothing {}}} {
     set text $itk_component(text)
-    global filename1 filename2
+    #global filename1 filename2
     global linecolor1 linecolor2
     #set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
     #set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
@@ -285,14 +304,11 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
     $execDiff getStatusWait
     set diffResult [$execDiff getHistory]
 
-    puts "$diffResult"
-
     set diffResult [split $diffResult \n]
     # Reset the line to read from beginning
     set diffResultLineCount 0
     
-    puts "There are [llength $diffResult] lines this time..."
-    
+
     # Open up files 
     set fd1 [open $filename1 r]
     set fd2 [open $filename2 r]
@@ -349,8 +365,6 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
         }
     }
 
-
-    puts "Now done, reading the rest of the files"
     # Read and output the rest of the common lines until EOF
     while {![eof $fd1]} {
         insertString insert [gets $fd1]\n common
