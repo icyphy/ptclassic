@@ -106,6 +106,7 @@ ITCL_SRCS = \
 	Resource.itcl \
 	ResourceFile.itcl \
 	ResourceHTTP.itcl \
+	ResourceMail.itcl \
 	ResourceWELD.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
