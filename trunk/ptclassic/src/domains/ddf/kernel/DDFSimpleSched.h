@@ -101,7 +101,7 @@ private:
 	// Note that there may be repeated entries in these lists.
 	// Return FALSE if an error occurs or a halt is requested.
 	// Set the "firedOne" member if any star actually fires.
-	int fireStar (DataFlowStar* s);
+	int fireStarsFrom (SequentialList& list);
 
 	// List used to store pointers to the stars that have pragmas
 	// registered.  This allows for efficient access at runtime.
@@ -109,14 +109,12 @@ private:
 	// DataFlowStar*.
 	SequentialList pragmaStars;
 
-	// List of enabled and non-deferrable stars and
-	// a pointer to the minimax deferrable star.
-        SequentialList enabledNonDef;
-	DataFlowStar *enabledDef;
+	// Lists of enabled stars, by category.
+        SequentialList enabledNonDef, enabledDefNonSources, defSources;
 
 	// Method to put in a star into one of the above lists.
 	// It also returns the value returned by enabledState.
-        inline int classify (DataFlowStar* c);
+        int classify (DataFlowStar* c);
 
 	// This flag indicates whether an iteration should consist
 	// of running until deadlock.  By default, it is FALSE.
@@ -138,8 +136,7 @@ private:
 	enum {
 	  enabled = 0,
 	  firings = 1,
-	  iter = 2,
-	  maxout = 3
+	  iter =2
 	};
 };
 
