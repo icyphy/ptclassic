@@ -1158,11 +1158,13 @@ body ::tycho::Registry::registerWindow {tag window args} {
 	    set accelerator [lindex $_menus(accelerators) 0]
 	    set _menus(accelerators) [lreplace $_menus(accelerators) 0 0]
 	    set mopts(-accelerator) "  Alt-$accelerator"
-	    set mopts(-underline) 0
 	} else {
 	    set accelerator ""
 	}
-
+        # Set traversal underline
+        if { $counter != "" } {
+	    set mopts(-underline) 0
+        }
 	# Record data
 	set _menus($cat,$window#$tag,counter) $counter
 	set _menus($cat,$window#$tag,accelerator) $accelerator
