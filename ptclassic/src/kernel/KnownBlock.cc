@@ -85,10 +85,10 @@ public:
 static KnownListOwner knownListOwner;
 
 static const char msg[] =
-"No domains can be located by Ptolemy; something is wrong with your\n\
-installation of either Ptolemy (no domains were included, perhaps?) or\n\
-of your C++ compiler and linker (if global constructors aren't being called\n\
-properly, we also get this symptom).  Exiting...\n";
+"No domains can be located by Ptolemy; something is wrong with your\n"
+"installation of either Ptolemy (no domains were included, perhaps?) or\n"
+"of your C++ compiler and linker (if global constructors aren't being called\n"
+"properly, we also get this symptom).  Exiting...\n";
 
 // Function to abort program if there are no known domains.
 static void bombNoDomains() {
