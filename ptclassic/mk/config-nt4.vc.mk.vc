@@ -1,7 +1,7 @@
-# Microsoft VC++ nmake file for VC 5.0
+# Microsoft VC++ nmake file to compile ptcl.ptiny under VC 6.0
 # Based on config-nt4.mk, but modified by hand
 # **** It is _VERY_ unlikely that this makefile works ****
-
+#
 # Version: $Id$
 
 # Copyright (c) 1997-%Q% The Regents of the University of California.
@@ -29,30 +29,116 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# This file is based on the Tcl8.0 win/makefile.vc, which is 
-
-# See the file "license.terms" for information on usage and redistribution
-# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+# This file is based on the Tcl8.0 win/makefile.vc, which has the following 
+# copyright:
 #
-# Copyright (c) 1995-1996 Sun Microsystems, Inc.p
+# This software is copyrighted by the Regents of the University of
+# California, Sun Microsystems, Inc., Scriptics Corporation,
+# and other parties.  The following terms apply to all files associated
+# with the software unless explicitly disclaimed in individual files.
+#
+# The authors hereby grant permission to use, copy, modify, distribute,
+# and license this software and its documentation for any purpose, provided
+# that existing copyright notices are retained in all copies and that this
+# notice is included verbatim in any distributions. No written agreement,
+# license, or royalty fee is required for any of the authorized uses.
+# Modifications to this software may be copyrighted by their authors
+# and need not follow the licensing terms described here, provided that
+# the new terms are clearly indicated on the first page of each file where
+# they apply.
+#
+# IN NO EVENT SHALL THE AUTHORS OR DISTRIBUTORS BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE, ITS DOCUMENTATION, OR ANY
+# DERIVATIVES THEREOF, EVEN IF THE AUTHORS HAVE BEEN ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# THE AUTHORS AND DISTRIBUTORS SPECIFICALLY DISCLAIM ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  THIS SOFTWARE
+# IS PROVIDED ON AN "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE
+# NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR
+# MODIFICATIONS.
+# 
+# GOVERNMENT USE: If you are acquiring this software on behalf of the
+# U.S. government, the Government shall have only "Restricted Rights"
+# in the software and related documentation as defined in the Federal 
+# Acquisition Regulations (FARs) in Clause 52.227.19 (c) (2).  If you
+# are acquiring the software on behalf of the Department of Defense, the
+# software shall be classified as "Commercial Computer Software" and the
+# Government shall have only "Restricted Rights" as defined in Clause
+# 252.227-7013 (c) (1) of DFARs.  Notwithstanding the foregoing, the
+# authors grant the U.S. Government and others acting in its behalf
+# permission to use and distribute the software in accordance with the
+# terms specified in this license. 
 
-# BUGS:
+# How to compile under Microsoft Visual C++
+# NOTE: This does not completely work.  The instructions below
+# assume you are using Bash.
+#
+# 1. Set PTARCH
+# 	PTARCH=nt4.mk
+#	export PTARCH
+# 2. Set PTOLEMY
+# 	PTOLEMY=/users/ptolemy
+#	export PTOLEMY
+#    In this makefile, edit the line below that defines PTOLEMY 
+# 3. Set your path:
+#       PATH=$PTOLEMY/bin:$PTOLEMY/bin.$PTARCH:$PTOLEMY/lib.$PTARCH:$PATH
+#       export $PATH
+# 4. Edit the TOOLS32 and TOOLS16 variables to point to the location
+#    of the 32 bit and 16 bit Microsoft Visual C++ tools.
+# 5. Build and install Tcl 8.0 by copying 
+#    $PTOLEMY/src/tcltk/tcl8.0.4/win/makefile.vc to makefile and 
+#    setting the following variables
+#	TOOLS32		= d:\progra~1\micros~2\vc98
+#	TOOLS32_rc	= d:\progra~1\micros~2\common\msdev98
+#	TOOLS16		= $(TOOLS32)
+#	INSTALLDIR	= d:\users\ptolemy\tcltk\tcl.nt4.vc
+#
+# 6. MSVC++ does not understand the Cygwin symbolic links, so you will
+#    have to build in the $PTOLEMY/src directory
+# 7. In each directory that you want to build in, you will need to
+#    generate a makefile.vc file from from makefile.  To do this,
+#    open each makefile from within Tycho, and then go to the Special
+#    menu and select 'Generate VC Makefile'.  The makevcgen Tcl
+#    script will do this	
+# 8. Statically linked binaries will not pull in the stars
+# 	unless the the *star.c file is edited and compiled as a .cc file.
+#	For each *stars.c file (destars.c, sdfstars.c sdfdspstars.c),
+#	make the following changes:
+#	1. Edit destars.c and add 'const' in two places
+#		#define STR extern const char *
+#		static const char** nm_table[] = {
+#	2. Copy destars.c to foo.cc
+#	3. Compile with: nmake -f makefile.vc foo.obj
+#	4. Substitute foo.obj for destars.obj: cp foo.obj destars.obj
+#	5. Install: nmake -f makefile.vc install
+#
+# 9. To build, run:
+#	nmake -f $PTOLEMY/mk/build-nt4.vc.mk.vc all
+#    
+
+# BUGS
 # ptbin.mk.vc: The version string is not properly set.
 # src/kernel/Clock.cc: We don't have gettimeofday or select(), so
 #	some stars will not work.
 # src/kernel/expandPath: We don't have a pwd.h, so file name expansion
 #       will not work.
+# In theory it should be possible to compile X11 with MSVC++ and
+# then compile the rest of Ptolemy
 
 # See $PTOLEMY/doc/html/nt/index.html for more information.
 
 # Programmer:  Christopher Hylands
 
-# --------------------------- -----------------------------------------
-# |  Please see the file ``config-default.mk'' in this directory!    |
+# --------------------------------------------------------------------
+# |  Please see the file ``config-default.mk.vc'' in this directory!  |
 # --------------------------------------------------------------------
 !include <ntwin32.mak>
 !include  $(ROOT)\mk\config-default.mk.vc
-PTOLEMY=d:\temp\ptolemy
+# Edit this variable to point to the location of your Ptolemy tree
+PTOLEMY=d:\users\ptolemy
 
 # TMPDIR  = location where .obj files should be stored during build
 #
@@ -60,6 +146,10 @@ PTOLEMY=d:\temp\ptolemy
 #	    VC++ 2.0 header files are broken, so you need to use the
 #	    ones that come with the developer network CD's, or later
 #	    versions of VC++.
+#	    Your life will be easier if you use 8.3 style names instead
+#	    of names with spaces here.
+#	    Under Bash, try 'type nmake' to get the path, then
+#	    convert it by hand to 8.3
 #
 # TOOLS16 = location of VC++ 1.5 16-bit tools, needed to build thunking
 #	    library.  This information is optional; if the 16-bit compiler
@@ -71,8 +161,8 @@ PTOLEMY=d:\temp\ptolemy
 #		   command under NT and 95 will not be built.
 #
 TMPDIR		= .
-TOOLS32		= d:\Progra~1\DevStudio\Vc
-TOOLS16		= d:\Progra~1\DevStudio\Vc
+TOOLS32		=  D:\PROGRA~1\Micros~2\VC98
+TOOLS16		= $(TOOLS32)
 
 # Set this to the appropriate value of /MACHINE: for your platform
 MACHINE	= IX86
@@ -83,22 +173,14 @@ MACHINE	= IX86
 
 INCLUDE		= $(TOOLS32)\include
 
-LIBSUFFIX 	= dll
+OBJSUFFIX	= obj
 LIBNONSHAREDSUFFIX = lib
 
-
-
-# Under NT, build a static ptcl first
-
-# Get the g++ definitions for shared libraries; we override some below.
-# Comment the next line out if you don't want shared libraries.
-#include $(ROOT)\mk\config-g++.shared.mk
 
 #
 # Programs to use
 #
-RANLIB = true
-# Use gcc everywhere including in octtools
+RANLIB 		= true
 cc32		= $(TOOLS32)\bin\cl.exe
 link32		= $(TOOLS32)\bin\link.exe
 rc32		= $(TOOLS32)\bin\rc.exe
@@ -109,11 +191,10 @@ link16		= $(TOOLS16)\bin\link.exe
 rc16		= $(TOOLS16)\bin\rc.exe
 include16	= -I$(TOOLS16)\include
 
-CPLUSPLUS = $(cc32) -I$(ROOT)\src\compat\nt.vc -I$(ROOT)\src\compat\cfront -I$(TCL_INCDIR)
-CC =		$(CPLUSPLUS)
+CPLUSPLUS	= $(cc32) -I$(ROOT)\src\compat\nt.vc \
+			-I$(ROOT)\src\compat\cfront -I$(TCL_INCDIR)
+CC		= $(CPLUSPLUS)
 
-#TCL_CFLAGS	= $(cdebug) $(cflags) $(cvarsdll) $(include32) \
-#			$(TCL_INCLUDES) $(TCL_DEFINES)
 CON_CFLAGS	= $(cdebug) $(cflags) $(cvars) $(include32) -DCONSOLE
 DOS_CFLAGS	= $(cdebug) $(cflags) $(include16) -AL 
 DLL16_CFLAGS	= $(cdebug) $(cflags) $(include16) -ALw
@@ -121,6 +202,31 @@ DLL16_CFLAGS	= $(cdebug) $(cflags) $(include16) -ALw
 ######################################################################
 # Link flags
 ######################################################################
+USE_SHARED_LIBS	= no
+!if "$(USE_SHARED_LIBS)" == "yes"
+# As of 12/98 with Microsoft Visual C++ 98, a shared library  build does not
+# work. Currently, we can build a ptcl.ptiny.exe that consists of only the
+# DE domain, but the binary does not start up, we get the following:
+#   bash-2.02$ ./ptcl.ptiny.exe
+#   ERROR: No such domain:  DE
+#   ERROR: No domains can be located by Ptolemy; something is wrong with your
+#   installation of either Ptolemy (no domains were included, perhaps?) or
+#   of your C++ compiler and linker (if global constructors aren't being called
+#   properly, we also get this symptom).  Exiting...
+#
+# I believe that the problem here is that global const values in MSVC++
+# behave differently than in other systems.  Linking with destars.o does
+# not help, the link fails with undefined symbols 'stars_nm_DEAttribute' etc.
+LIBSUFFIX 	= dll
+SYSLIBS		= MSVCRT.LIB MSVCIRT.LIB
+cvarsdllonly	= -D_DLL
+!else
+LIBSUFFIX 	= lib
+SYSLIBS		= $(TOOLS32)\Lib\LIBCMT.LIB $(TOOLS32)\Lib\LIBCIMT.LIB
+cvarsdllonly	= #-D_DLL
+!endif
+
+
 
 !IFDEF NODEBUG
 ldebug = /RELEASE
@@ -190,8 +296,7 @@ cflags = $(ccommon) -D_ALPHA_=1
 
 cvars      = -DWIN32 -D_WIN32
 cvarsmt    = $(cvars) -D_MT
-cvarsdll   = $(cvarsmt) -D_DLL
-
+cvarsdll   = $(cvarsmt) $(cvarsdllonly)
 
 PTLANG = ptlang
 
@@ -208,17 +313,15 @@ PTLANG = ptlang
 # LOCALCFLAGS - Other architecture dependent flags that apply to all releases
 #	      of the OS for this architecture for c++
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
-
-OPTIMIZER =	#-O2
-# -Wsynth is new in g++-2.6.x
-# Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	#-Wall -Wsynth #-Wcast-qual 
+OPTIMIZER =
+WARNINGS =
 LOCALCCFLAGS =	/DPTNT /DPT_NT4VC /DPT_NO_TIMER $(GCC_270_OPTIONS)\
-		/DPT_NO_ITCL /PT_USE_RAND /PT_NO_GETTIMEOFDAY /PT_NO_SELECT \
+		/DPT_NO_ITCL /DPT_USE_RAND /DPT_NO_GETTIMEOFDAY /DPT_NO_SELECT \
 		/DPT_NO_PWD /DPT_SYS_NERR_STDLIB \
 		/Dfar=ptfar -Dstrcasecmp=stricmp \
+		/DM_PI=3.1415926535897 \
 		/nologo /D__WIN32__ \
-		$(cflags) $(cvarsdll) $(include32)
+		$(cflags) $(cvarsdll)
 
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
@@ -227,123 +330,62 @@ LOCALCFLAGS =	$(LOCALCCFLAGS)
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
-#TCL_VERSION_NUM=76i
-#TK_VERSION_NUM=42i
-#ITCL_VERSION_NUM=22
 
-TCL_ROOT=d:\Progra~1\Tcl
 
-TCL_VERSION_NUM=80
-TK_VERSION_NUM=42i
-ITCL_VERSION_NUM=22
+
+# Location where Tcl/Tk is installed.  It seems like we have to build this
+# by hand, the Tcl 8.0.3 installation does not work, link reports that
+# tcl80.lib is invalid
+
+#TCL_ROOT=d:\Progra~1\Tcl
+TCL_ROOT	= $(ROOT)\tcltk\tcl.$(PTARCH)
+
+TCL_VERSION_NUM	= 80
+TK_VERSION_NUM	= 42i
+ITCL_VERSION_NUM= 30
 
 # Combined -L and -l options to link with tcl library.
-#TCL_LIBSPEC= c:\Itcl2.2\tcl7.6\win\Tcl76i.lib
-#TCL_LIBSPEC=-L$(TCL_ROOT)\Bin -ltcl$(TCL_VERSION_NUM)
-#TCL_LIBSPEC=-L\usr\local\lib -ltcl8.0
-TCL_LIBSPEC=$(TCL_ROOT)/lib/tcl80vc.lib
-TCL_LIBSPEC=$(PTOLEMY)\tcltk\bin.$(PTARCH)\tcl80.lib
-TCL_LIBDEP= $(TCL_ROOT)/lib/tcl80vc.lib
+#TCL_LIBSPEC=$(TCL_ROOT)\lib\tcl80.lib
+TCL_LIBSPEC	= $(ROOT)\src\tcltk\tcl8.0.4\win\Release\tcl80.lib
 
-TCL_INCDIR=$(TCL_ROOT)\include
+TCL_LIBDEP	= $(TCL_LIBSPEC)
+TCL_INCDIR	= $(TCL_ROOT)\include
 
 # Directory containing Tk include files
-#TK_INCDIR=$(TCL_ROOT)\itk\include
-TK_INCDIR=$(TCL_ROOT)\include
+TK_INCDIR	= $(TCL_ROOT)\include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and\or -l options to support tk extensions.
-#TK_LIBSPEC=-L$(TCL_ROOT)\itcl.$(PTARCH)\lib\itcl -ltk$(TK_VERSION_NUM) #-lXpm
-TK_LIBSPEC=-L$(TCL_ROOT)\lib -ltk8.0vc.lib
+TK_LIBSPEC	= -L$(TCL_ROOT)\lib -ltk80.lib
 
 # Directory containing itcl include files
+# Currently, we are not building with Itcl
 #ITCL_INCDIR=$(TCL_ROOT)\tcl\include
 #ITCL_INCDIR=$(TCL_ROOT)\include
 #ITCL_LIBSPEC= c:\Itcl2.2\itcl\win\Itcl22.lib 
-ITCL_LIBSPEC=
+ITCL_LIBSPEC	=
+ITCL_INCDIR	=
 
-ITCL_INCDIR=
-
-# Libraries used during creation of dlls
-KERNEL_DLLDEP =	$(ROOT)/src/kernel/libptolemy.lib
-
-#
-# Variables for the linker
-#
-# system libraries (libraries from the environment) for c++ files
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(SHARED_SYSLIBS)
-
-# system libraries for linking .o files from C files only
-CSYSLIBS=$(SHARED_COMPILERDIR_FLAG)
-
-# Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
-# -s conflicts with purelink, so if you are using purelink comment this out.
-LINKSTRIPFLAGS=-Wl,-s
-
-# Can't use -static here, or we won't be able to find -ldl, and
-# dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS) 
-# link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
-
-# These are the additional flags that we need when we are compiling code
-# which is to be dynamically linked into Ptolemy.  -shared is necessary
-# with gcc-2.7.0
-INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
-
-
-# Flag that gcc expects to create statically linked binaries.
-# Binaries that are shipped should be statically linked.
-# Note that cc uses -Bstatic
-CC_STATIC =
-
-#
-# Directories to use
-#
-X11_INCSPEC =	-I\usr\openwin\include
-X11_LIBDIR =	\usr\openwin\lib
-X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
-
-# Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR =
-
-PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	#purify -automount-prefix=\tmp_mnt:\vol -best-effort
-QUANTIFY =	#quantify
-
-
-PURECOV = 	#purecov
-
-#
-# Variables for miscellaneous programs
-#
-# Used by xv
-#XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-XV_INSTALL =
-
-# -DATT is needed so we don't try and include sys\dir.h
-# -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
-#	otherwise, we will need to set LD_LIBRARY_PATH
-XV_CC =		gcc -traditional $(X11_INCSPEC) \
-		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
-		$(X11_LIBSPEC) -R$(X11_LIBDIR)
-
-XV_RAND = 	-DNO_RANDOM
-
-# Under sol2, xmkmf is not compatible with gcc, so we don't use it
-XMKMF =		rm -f Makefile; cp Makefile.std Makefile
-
-# Used by tcltk to build the X pixmap extension
-XPM_DEFINES =	#-DZPIPE $(X11_INCSPEC)
-
+# Libraries used during creation of dlls.  Each makefile has
+# a DLLDEP variable which contains the libraries that we depend on.
+KERNEL_DLLDEP	= $(ROOT)\src\kernel\libptolemy.lib
+# Used by sdf
+PTMATHEMATICA_DLLDEP = $(ROOT)\src\utils\libptmathematica\libptmathematica.lib
+PTCL_DESCRIPTION_OBJ = $(ROOT)\src\ptcl\ptclDescription.obj
+# Used by sdf stars
+SDF_DLLDEP	= $(KERNEL_DLLDEP) $(PTMATHEMATICA_DLLDEP) \
+	$(PTCL_DESCRIPTION_OBJ) \
+	$(ROOT)\src\utils\libptdsp\libptdsp.lib \
+	$(ROOT)\src\domains\sdf\kernel\libsdf.lib 
+SDF_STARS_DLLDEP = $(SDF_DLLDEP) \
+	$(ROOT)\src\domains\sdf\stars\libsdfstars.lib
 
 # Build gthreads
-INCLUDE_GTHREADS =	no
+INCLUDE_GTHREADS	= no
 
 # Include the PN domain.
-INCLUDE_PN_DOMAIN =	no
-INCLUDE_IPUS_DOMAIN = no
+INCLUDE_PN_DOMAIN	= no
+INCLUDE_IPUS_DOMAIN	= no
 
-INCLUDE_MATLAB = no
-INCLUDE_MATHEMATICA=no
-
+INCLUDE_MATLAB		= no
+INCLUDE_MATHEMATICA	= no
