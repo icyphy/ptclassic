@@ -62,6 +62,12 @@ public:
 	// Append to tail and return pointer to element
 	Link * appendGet( CqLevelLink * obj ); 
 
+	// return and remove head of list
+	LinkedList::getHeadAndRemove;
+
+	// return and remove tail of list
+	LinkedList::getTailAndRemove;
+
 	// Clear list
 	void clearList() { LinkedList::initialize(); }
 
