@@ -89,7 +89,7 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 		else Error::abortRun(*this,"Unrecognized test.");
 	}
 	go {
-		int result;
+		int result = 0;
 		double left = double(upper%0);
 		double right = double(lower%0);
 
