@@ -31,17 +31,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
  This file defines the system-dependent cruft needed for incremental
  linking.
 
- The stuff for HP is not yet completed, hence linkingNotSupported is
- true on that platform.
-
 **************************************************************************/
 
 // get size_t definition
 #include <sys/types.h>
 
-// Is linking supported?  Currently not complete for HP/UX.
+// Is linking supported?
+// Currently, linking does not work under hppa and irix4, but this may change.
 const int linkingNotSupported =
-#if defined(hpux) || defined(__alpha)
+#if defined(__alpha) 
  1;
 #else
  0;
@@ -49,12 +47,20 @@ const int linkingNotSupported =
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
+#if defined(__sgi) || defined (sgi)
+#define LOADER "/usr/bin/ld"
+#else
 #define LOADER "/bin/ld"
+#endif
 
 // Full pathname of the "nm" program; it reads symbol names from a .o
 // file.  Do NOT use a "demangling" version such as gnu nm.
 
+#if defined(__sgi) || defined (sgi)
+#define NM_PROGRAM "/usr/bin/nm"
+#else
 #define NM_PROGRAM "/bin/nm"
+#endif
 
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
@@ -71,6 +77,12 @@ const int linkingNotSupported =
 #define LOADOPTS "-N -x"
 #endif // !mips
 #endif // !hpux
+
+#ifdef hpux
+#define DYNLIB "/lib/dyncall.o"
+#else // !hpux
+#define DYNLIB ""
+#endif // hpux
 
 // The assembler to use
 #define ASSEMBLER "as"
@@ -105,8 +117,14 @@ extern "C" size_t getpagesize(void);
 #define CONS_LENGTH 12
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
+// *** srs 940308: Defined CONS_PREFIX and CONS_LENGTH for HP-UX.
+#if defined(hpux)
+#define CONS_PREFIX "__sti"
+#define CONS_LENGTH 5
+#else
 #define CONS_PREFIX "___sti"
 #define CONS_LENGTH 6
+#endif /* hpux */
 #endif
 
 #ifdef hpux
@@ -132,6 +150,14 @@ extern "C" {
 #include <a.out.h>
 #endif
 }
+
+// Sun4: don't include nlist.h after a.out.h, or nlist will be
+// multiply defined.
+#ifdef hpux
+#include <nlist.h>
+#include <stdlib.h>
+extern "C" {int nlist(char *, struct nlist *);};
+#endif //hpux
 
 #include <std.h>
 #ifndef mips
@@ -167,21 +193,34 @@ inline void makeExecutable(size_t size, int pagsiz, char* init_fn) {
 // variables in readInObj, but...
 
 #ifdef hpux
+extern "C" { void flush_cache(void *, size_t);};
+#define INITIALIZE() \
+  (memset((void *) (h2.exec_dmem + h2.exec_dsize), 0, (size_t) (h2.exec_bsize)))
+#define FLUSH_CACHE()  \
+  (flush_cache(availMem, (size_t) ((h2.exec_dmem - h2.exec_tmem) \
+			+ h2.exec_dsize + h2.exec_bsize)))
+#else
+#define INITIALIZE()  /* nothing */
+#define FLUSH_CACHE() /* nothing */
+#endif
+
+#ifdef hpux
 #define READOBJ_FAIL \
-(lseek (fd, h2.exec_tfile, SEEK_SET) < 0 ||\
- read (fd, availMem, h2.exec_tsize) < h2.exec_tsize ||\
- lseek (fd, h2.exec_dfile, SEEK_SET) < 0 ||\
- read (fd, availMem+h2.exec_tsize, h2.exec_dsize) < h2.exec_dsize)
+(lseek (fd, (off_t) h2.exec_tfile, SEEK_SET) < 0 ||\
+ read (fd, (void *) h2.exec_tmem, (size_t) h2.exec_tsize) < h2.exec_tsize ||\
+ lseek (fd, (off_t) h2.exec_dfile, SEEK_SET) < 0 ||\
+ read (fd, (void *) h2.exec_dmem, (size_t) h2.exec_dsize) < h2.exec_dsize)
 
 #define STRUCT_DEFS FILHDR h1; AOUTHDR h2
 
 #define READHEAD_FAIL \
-(read (fd, (char*) &h1, sizeof h1) <= 0 ||\
-read (fd, (char*) &h2, sizeof h2) <= 0)
+(read (fd, (void *) &h1, sizeof h1) <= 0 ||\
+read (fd, (void *) &h2, sizeof h2) <= 0)
 
-#define OBJ_SIZE (size_t)(h2.exec_tsize + h2.exec_dsize + h2.exec_bsize)
+#define OBJ_SIZE (size_t)((h2.exec_dmem - h2.exec_tmem) \
+			 + h2.exec_dsize + h2.exec_bsize)
 
-#endif
+#endif /* hpux */
 
 #ifdef COFF
 #define STRUCT_DEFS filehdr h1;	aouthdr h2
