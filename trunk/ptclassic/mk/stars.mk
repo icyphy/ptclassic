@@ -199,7 +199,6 @@ endif
 ifdef CGCFULL
 	CGC = 1
 	CGFULL = 1
-	CM5 = 1
 	NOWAM = 1
 	ifdef TK
 		CGCTK = 1
