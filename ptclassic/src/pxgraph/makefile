@@ -1,4 +1,4 @@
-# Ptolemy-style makefile for pxgraph
+# Ptolemy-style makefile to create a link for the Java pxgraph script
 #
 # $Id$
 # Copyright (c) 1997 The Regents of the University of California.
@@ -37,12 +37,12 @@ include $(CONFIG)
 all:
 	@echo "Nothing to be done in this directory,"
 	@echo " we now use tycho/java/ptplot/pxgraph."
-	#echo " For the old X11 version of pxgraph,"
+	@echo " For the old X11 version of pxgraph,"
 	@echo " see ftp://ptolemy.eecs.berkeley.edu/pub/misc/ptplot"
 
 install: $(BINDIR)/pxgraph
 
-$(BINDIR)/pxgraph:
+$(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptplot/pxgraph
 	rm -f $@
 	(cd $(BINDIR); ln -s ../tycho/java/ptplot/pxgraph .)
 
