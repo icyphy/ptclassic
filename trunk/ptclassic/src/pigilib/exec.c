@@ -103,12 +103,28 @@ boolean now;
 {
     char* name;
     char octHandle[POCT_FACET_HANDLE_LEN];
+    char buf[512];
 
     /* Reset lastFacet to the current facet */
     if ( lastFacet.objectId != facetPtr->objectId ) FreeOctMembers(&lastFacet);
     lastFacet = *facetPtr;
     ptkOctObj2Handle(facetPtr, octHandle);
     name = BaseName(facetPtr->contents.facet.cell);
+
+    /* It would be nice if we could just fix this for the user by
+     * copying the facet name and chopping off the trailing /, but
+     * this would result in yet another memory leak, since we would
+     * never know when to delete the copy.  An alternative would be
+     * to just change the value of the facet,  and chop of the trailing /
+     * there, but this seems a little risky. Instead we check here 
+     * and in the pigi startup script.
+     */
+    if (strcmp(name,"") == 0) {
+        sprintf(buf, "Can't call ptkRunControl, the facet %s had a trailing /",
+		facetPtr->contents.facet.cell);
+	PrintErr(buf);
+	return FALSE;
+    }
 
     TCL_CATCH_ERR1(
 	Tcl_VarEval(ptkInterp, "ptkRunControl ", name, " ", octHandle,
