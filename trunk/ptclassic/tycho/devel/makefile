@@ -53,6 +53,7 @@ ITCL_SRCS = \
 	Graphics.itcl \
 	Options.tcl \
 	Preferences.itcl \
+	Runcontrol.itcl \
 	SlateView.itcl \
 	View.itcl
 
