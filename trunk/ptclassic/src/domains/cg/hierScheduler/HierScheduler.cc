@@ -59,21 +59,20 @@ Programmer: Jose Luis Pino
 
 /*virtual*/ StringList HierScheduler::displaySchedule(){
     StringList schedule;
-    schedule << "J.L. Pino's Hierarchical Scheduler\n\t["
-	     << sdfStars << " SDF Nodes]\t[" << dagNodes()
-	     << " Precedence DAG Nodes]\n"
-	     << "\t\t\t__________________\n\n"
-	     << "Top-level Scheduler:  "
+    schedule << "{\n  { scheduler \"Pino's Hierarchical Scheduler\" }\n"
+	     << "  { numberOfStars " << sdfStars << " }\n"
+	     << "  { numberOfStarOrClusterFirings " << dagNodes() << " }\n"
+	     << "  { galaxy " << galaxy()->fullName() << " }\n"
+	     << "  { cluster\n"
 	     << topScheduler.displaySchedule()
-	     << "_______________________________________"
-	     << "_______________________________________\n\n";
+	     << "  }\n";
     GalStarIter nextStar(wormholes);
     DataFlowStar* star;
     while ((star = (DataFlowStar*) nextStar++) != NULL)
-	schedule << "Cluster \"" << star->fullName() << "\" using\n\t"
-		     << star->scheduler()->displaySchedule()
-		     << "_______________________________________"
-		     << "_______________________________________\n\n";
+	schedule << "  { cluster " << star->fullName() << " {\n"
+	    << star->scheduler()->displaySchedule()
+	    << "  } }\n";
+    schedule << "}\n";
     return schedule;
 }   
 

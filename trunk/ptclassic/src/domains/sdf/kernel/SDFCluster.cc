@@ -871,25 +871,25 @@ int SDFClusterBag::genSched() {
 static const char* tab(int depth) {
 	// this fails for depth > 20, so:
 	if (depth > 20) depth = 20;
-	static const char *tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-	return (tabs + 20 - depth);
+
+	// For more compact schedule displays, we use two spaces
+	// rather than tabs.
+	static const char *tabs = "                                        ";
+	return (tabs + 40 - depth*2);
 }
 
-// return the bag's schedule.
+// return the bag's schedule as one or more schedule items
 StringList SDFClusterBag::displaySchedule(int depth) {
 	if (sched == 0) genSched();
 	StringList sch;
 	if (loop() > 1) {
-		sch += tab(depth);
-		sch += loop();
-		sch += "*{\n";
+		sch << tab(depth) << "{ repeat " << loop() << " {\n";
 		depth++;
 	}
 	sch += sched->displaySchedule(depth);
 	if (loop() > 1) {
 		depth--;
-		sch += tab(depth);
-		sch += "}\n";
+		sch << tab(depth) << "} }\n";
 	}
 	return sch;
 }
@@ -1012,14 +1012,18 @@ ostream& SDFAtomCluster::printOn(ostream& o) {
 	return printPorts(o);
 }
 
+// Return a single schedule item for a single or repeated firing.
+
 StringList SDFAtomCluster::displaySchedule(int depth) {
 	StringList sch = tab(depth);
 	if (loop() > 1) {
-		sch += loop();
-		sch += "*";
+		sch << "{ repeat " << loop() << " {\n";
+		sch << tab(depth+1);
 	}
-	sch += real().fullName();
-	sch += "\n";
+	sch << "{ fire " << real().fullName() << " }\n";
+	if (loop() > 1) {
+		sch << tab(depth) << "}\n";
+	}
 	return sch;
 }
 
@@ -1156,8 +1160,10 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 
 StringList SDFClustSched::displaySchedule() {
     StringList out;
-    out << "J.T. Buck and S.S. Bhattacharyya's SDF Loop Scheduler\n\n"
-	<< SDFBagScheduler::displaySchedule();
+    out << "{\n"
+        << "{ scheduler \"Buck and Bhattacharyya's SDF Loop Scheduler\" }\n"
+	<< SDFBagScheduler::displaySchedule()
+	<< "}\n";
     return out;
 }
 
@@ -1171,6 +1177,8 @@ void SDFClusterGal::genSubScheds() {
 	while ((c = nextClust++) != 0)
 		c->fixBufferSizes(c->reps());
 }
+
+// Generate a list of schedule items.
 
 StringList SDFBagScheduler::displaySchedule(int depth) {
 	StringList sch;

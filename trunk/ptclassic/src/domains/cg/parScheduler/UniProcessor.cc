@@ -57,23 +57,28 @@ StringList UniProcessor :: display(int makespan)
     while((obj = schedIter++) != 0) {
 	ParNode* node = (ParNode*) obj->getNode();
 	if (obj->isIdleTime()) {	// idle node
-	    schedule << "idle";
+	    schedule << "    { idle ";
 	    sumIdle += obj->getDuration();
 	} else {
 	    if (node->myStar())
-		schedule <<  node->myStar()->fullName();
+		schedule << "    { fire "
+		         <<  node->myStar()->fullName()
+			 << " ";
 	    else if (node->getType() == -1)
-		schedule << "send";
+		schedule << "    { fire send ";
 	    else
-		schedule << "recv";
+		schedule << "    { fire receive ";
 	}
-	schedule << "(" << obj->getDuration() << ")\n";
+	schedule << "{ exec_time " << obj->getDuration() << "} }\n";
     }
 
     StringList out;
+    out << "{\n";
     if (target())
-	out << target()->name() << " - ";
-    out << "idle time: " << sumIdle << '\n' << schedule << '\n';
+	out << "    { target " << target()->name() << " }\n";
+    out << "    { totalIdleTime " << sumIdle << " }\n";
+    out << schedule;
+    schedule << "  }\n";
 
     return out;
 }

@@ -115,7 +115,9 @@ StringList HuScheduler :: displaySchedule() {
 
 	Galaxy* galaxy = myGraph->myGalaxy();
 	StringList out;
-	out << "T.C. Hu's Parallel Scheduler\n\n" << parSched->display(galaxy);
+	out << "{\n  { scheduler \"Hu's Parallel Scheduler\" }\n"
+	    << parSched->display(galaxy)
+	    << "}\n";
 	return out;
 }
 

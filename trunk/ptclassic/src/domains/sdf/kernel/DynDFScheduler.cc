@@ -87,7 +87,7 @@ inline DataFlowStar* peerStar(PortHole& p) {
 	////////////////////////////
 
 StringList DynDFScheduler :: displaySchedule () {
-	return "DDF schedule is computed at run-time\n";
+	return "{ { scheduler \"Dynamic Dataflow Scheduler\" } }";
 }
 
 extern int warnIfNotConnected (Galaxy&);

@@ -30,7 +30,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
 Programmer: Soonhoi Ha
-Date of last revision: 
 
 *****************************************************************/
 
@@ -374,27 +373,22 @@ StringList ParProcessors :: display (NamedObj* galaxy) {
     StringList out;
 
     // title and number of processors.
-    out << "Parallel schedule of \"" << galaxy->fullName()
-	<< "\" on " << numProcs << " processors.\n\n";
+    out << "  { galaxy " << galaxy->fullName() << " }\n"
+	<< "  { numberOfProcessors " << numProcs << " }\n";
 
     // Per each processor.
     for (int i = 0; i < numProcs; i++) {
-	out << "[PROCESSOR " << i << "] - "
-	    << getProc(i)->display(makespan);
+	out << "  { processor " << i << " "
+	    << getProc(i)->display(makespan) << "  }\n";
 	sum += getProc(i)->getSumIdle();
     }
 
     double util = 100*(1 - sum / (double(numProcs)*double(makespan)));
 
     // Print out the schedule statistics.
-    out += "************* STATISTICS ******************";
-    out += "\nMakespan is ................. ";
-    out += makespan;
-    out += "\nTotal Idle Time is .......... ";
-    out += sum;
-    out += "\nProcessor Utilization is .... ";
-    out += util;
-    out += " %\n\n";
+    out << "  { makespan " << makespan << " }\n";
+    out << "  { idletime " << sum << " }\n";
+    out << "  { utilization " << util << " }\n";
 
     return out;
 }
@@ -496,11 +490,9 @@ StringList ParProcessors :: displaySubUnivs() {
 
 	StringList out;
 	for (int i = 0; i < numProcs; i++) {
-		out += " << Processor #";
-		out += i;
-		out += " >> \n";
-		out += getProc(i)->displaySubUniv();
-		out += "\n";
+		out << "  { processor " << i << "\n";
+		out << getProc(i)->displaySubUniv();
+		out << "  }\n";
 	}
 	return out;
 }

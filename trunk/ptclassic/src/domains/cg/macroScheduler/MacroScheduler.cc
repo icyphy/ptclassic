@@ -433,19 +433,23 @@ StringList MacroParSched :: displaySchedule() {
 	CGMacroClusterGal* clustGal = (CGMacroClusterGal*) myGraph->myGalaxy();
 
 	StringList out;
-	out += parSched->display(clustGal->realGal());
+	out << "{\n  { scheduler \"Ha's Macro Parallel Scheduler\" }\n"
+	    << "  { cluster {\n"
+	    << parSched->display(clustGal->realGal())
+	    << "  } }\n";
 
-	// display macro schedule
-	out += "*********** macro Schedules ************\n";
+	// display macro schedules
 	CGMacroClusterGalIter next(*clustGal);
 	CGMacroCluster* s;
 	while ((s = next++) != 0) {
-		CGMacroClusterBag* cbag = s->asSpecialBag();
-		if (cbag) {
-			out += "-------- \n\n";
-			out += cbag->displaySchedule();
+	    CGMacroClusterBag* cbag = s->asSpecialBag();
+	    if (cbag) {
+		out << "  { cluster {\n"
+		    << cbag->displaySchedule()
+		    << " } }\n";
 		}
 	}
+	out << "}\n";
 
 	return out;
 }
