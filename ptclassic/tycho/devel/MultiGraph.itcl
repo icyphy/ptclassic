@@ -30,20 +30,63 @@
 ##########################################################################
 #### MultiGraph
 #
-# The _MultiGraph_ model is a directed graph that associates
-# a "key" with each edge connected to a vertex. This is needed for 
-# applications such as dataflow, in which the order of edges
-# is significant. Keys are completely arbitrary strings; the vertex-key
-# combination to which an edge is connected is called a "weld"
-# and is denoted _vertex_._key_. Each weld (as well each vertex and
-# each edge) can have a set of arbitrary options. More than one
-# edge can be connected to a weld. See the _HyperGraph_ class for
-# a related structure.
+# The _MultiGraph_ model is a directed graph in which each edge is named.
+# Edges are thus uniquely determined by the start and end vertices
+# _and_ the name given to the edge. This makes MultiGraph suitable
+# for applications where there can be multiple edges between
+# vertices, such as finite-state-machine. In comparison, in the
+# superclass, <a href="Digraph.html">Digraph</a>, an edge is
+# uniquely determined by the vertices it connects.
 #
-# <b>Note</b>: Keys must be unique at each vertex.
+# Here are some examples of its use; see <a 
+# href="AbstractGraph">AbstractGraph</a> for examples of
+# the basics of graph construction. First, create a graph
+# that contains two vertices, with edges labelled A or B:
+# <tcl><pre>
+#     catch {delete object $graph}
+#     set graph [::tycho::MultiGraph [::tycho::autoName graph]]
+#     $graph configureLink edge -label {}
+#     $graph read string {
+#         vertex a
+#         vertex b
+#         vertex c
+#         edge A a b -label x/y
+#         edge B a b -label u/v
+#         edge A b a -label x/y
+#     }
+# </tcl></pre>
+#
+# Display a TIM representation of the graph
+# <pre><tcl>
+#     $graph describe
+# </tcl></pre>
+#
+# Find edges between a and b:
+# <pre><tcl>
+#     $graph edges * a b
+# </tcl></pre>
+#
+# Change the label of an edge and query it again:
+# <pre><tcl>
+#     $graph edgeconfigure A a b -label p/q
+#     $graph edgecget A a b -label
+# </tcl></pre>
+#
+# Delete that edge, recording the deletion:
+# <pre><tcl quiet>
+#     $graph record edgedelete A a b
+#     $graph describe
+# </tcl></pre>
+#
+# Undo the deletion:
+# <pre><tcl quiet>
+#     $graph undo
+#     $graph describe
+# </tcl></pre>
+#
 #
 class ::tycho::MultiGraph {
-    inherit ::tycho::Digraph ::tycho::KeyedGraph
+    inherit ::tycho::Digraph
     
     constructor {args} {}
     destructor {}
@@ -51,199 +94,129 @@ class ::tycho::MultiGraph {
     #################################################################
     ####                     public methods                      ####
 
-    # Get edges adjacent to a vertex
-    method adjacentedges {vertex {pattern1 *} {pattern2 *}}
+    # Add an edge and attributes to the graph
+    method edge {name vertex1 vertex2 args}
 
-    # Get vertices adjacent to a vertex
-    method adjacentvertices {vertex {pattern1 *} {pattern2 *}}
+    # Return all attributes of an edge
+    method edgeattrs {name vertex1 vertex2}
 
-    # Get welds adjacent to a vertex
-    method adjacentwelds {vertex {pattern1 *} {pattern2 *}}
+    # Get an attribute or attributes of an edge
+    method edgecget {name vertex1 vertex2 attribute}
 
-    # Add an edge and options to the graph
-    method connect {source target args}
-
-    # Remove a vertex (but not adjacent edges) from the graph
-    method delete {vertex}
+    # Configure the edge with one or more attributes
+    method edgeconfigure {name vertex1 vertex2 args}
 
     # Remove an edge from the graph
-    method disconnect {source target}
+    method edgedelete {name vertex1 vertex2}
+
+    # Return edges matching a pair of connection patterns
+    method edges {{name *} {pattern1 *} {pattern2 *}}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::MultiGraph::constructor {args} {
+	# Give the edge entity a label
+	configureEntity edge -named 1
+
     # Evaluate options
     eval configure $args
 }
 
 ########################################################################
-#### adjacentedges
-#
-# Get the adjacent edges to all welds matching the given patterns.
-# Return the empty string if the weld does not exist or there is
-# no connection to it. Edges are returned as a flat list of
-# vertex.key vertex.key pairs.
-#
-body ::tycho::MultiGraph::adjacentedges {vertex {pattern1 *} {pattern2 *}} {
-	set result {}
-    # Try children
-    foreach {_ e} [array get _edges $vertex.$pattern1^*.$pattern2] {
-    	eval lappend result [split $e "^"]
-    }
-    # Try parents
-    foreach {_ e} [array get _edges *.$pattern2^$vertex.$pattern1] {
-		lappend result [split $e "^"]
-    }
-    return $result
-}
-
-########################################################################
-#### adjacentvertices
-#
-# Get the adjacent vertices to all welds matching the given patterns.
-# Return the empty string if the weld does not exist or there is
-# no connection to it.
-#
-body ::tycho::MultiGraph::adjacentvertices {vertex {pattern1 *} {pattern2 *}} {
-	set result {}
-    # Try children
-    foreach {_ e} [array get _edges $vertex.$pattern1^*.$pattern2] {
-    	lappend result [lindex $e 2]
-    }
-    # Try parents
-    foreach {_ e} [array get _edges *.$pattern2^$vertex.$pattern1] {
-		lappend result [lindex $e 0]
-    }
-    return $result
-}
-
-########################################################################
-#### adjacentwelds
-#
-# Get the adjacent welds to all welds matching the given patterns.
-# Return the empty string if the weld does not exist or there is
-# no connection to it.
-#
-body ::tycho::MultiGraph::adjacentwelds {vertex {pattern1 *} {pattern2 *}} {
-	set result {}
-    # Try children
-    foreach e [array names _edges $vertex.$pattern1^*.$pattern2] {
-		lappend result [lindex [split $e "^"] 1]
-    }
-    # Try parents
-    foreach e [array names _edges *.$pattern2^$vertex.$pattern] {
-		lappend result [lindex [split $e "^"] 0]
-    }
-    return $result
-}
-
-########################################################################
-#### connect
+#### edge
 #
 # Add a new edge to the graph, and return the inverse command.
-# The edge is specified by two welds; additional arguments are a
-# flat option-value list for the edge. Flag an error if the edge
-# already exists, but not if the two vertices or their welds do not exist. 
+# By default, this method just adds a link between the
+# two named edges.  Flag an error if the edge
+# already exists, but not if any of the connected vertices do not exist. 
 #
-body ::tycho::MultiGraph::connect {source target args} {
-	#
-	# The edge matrices are stored as
-	#
-	#     _edges:       source.key^target.key |-> {source key target key}
-	#     _edgeoptions: source.key^target.key |-> {option value ...}
-	#
-	
-    if { [::info exists _edges($source^$target)] } {
-	error "Edge ($source, $target) already exists in $dataname"
-    }
-    set modified 1
+body ::tycho::MultiGraph::edge {name vertex1 vertex2 args} {
+	_verifynot edge [list $name $vertex1 $vertex2]
 
-    # Figure vertex names
-    set edgeinfo "[split $source .] [split $target .]"
-    set src [lindex $edgeinfo 0]
-    set tgt [lindex $edgeinfo 2]
+	# Record the edge
+	set inverse [_link edge [list $name $vertex1 $vertex2] $args]
 
-    # Record the edge
-    set _edges($source^$target) $edgeinfo
-    adjacencyadd $src $tgt
-
-    # Record its options
-    array set temp [concat $edgeoptions $args]
-    set _edgeoptions($source^$target) [array get temp]
-
-    # Remember the welds
-    if { ! [::info exists _weldoptions($source)] } {
-	set _weldoptions($source) $weldoptions
-    }
-    if { ! [::info exists _weldoptions($target)] } {
-	set _weldoptions($target) $weldoptions
-    }
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Return the inverse command
-    return [list disconnect $source $target]
-}
-
-########################################################################
-#### delete
-#
-# Delete a vertex from the graph, and return the inverse command.
-#
-body ::tycho::Digraph::delete {vertex} {
-    if { ! [::info exists _vertices($vertex)] } {
-		error "Unknown vertex $vertex in $dataname"
-    }
-    set modified 1
-
-    set inverse [list add $vertex $_vertices($vertex) $_vertexoptions($vertex)]
-    unset _vertices($vertex)
-
-    foreach weld [array names _weldoptions $vertex.*] {
-		append inverse "; weldconfigure $weld $_weldoptions($weld)"
-		unset _weldoptions($weld)
-    }
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    return $inverse
-}
-
-########################################################################
-#### disconnect
-#
-# Remove an edge from the graph, and return the inverse command. Flag an
-# error if the edge does not exist.
-#
-body ::tycho::Digraph::disconnect {source target} {
-    if { ! [::info exists _edges($source^$target)] } {
-	error "Edge ($source, $target) unknown in $dataname"
-    }
-    set modified 1
-
-    # Figure vertex names
-    set src [lindex [split $source "."] 0]
-    set tgt [lindex [split $target "."] 0]
-
-    # Remember the inverse
-    set inverse [list connect $edge $target $_edgeoptions($source^$target)]
-
-    # Delete the edge
-    unset _edges($source^$target)
-    if { [array names _edges $src.*->$tgt.*] == "" } {
-	adjacencydelete $src $tgt
-    }
-
-    # Delete the options(s)
-    unset _edgeoptions($source^$target)
-
+	# Add links to the adjacency matrix
+    _adjacencyadd $vertex1 $vertex2
+    
     # Clear any cached structural information
     catch {unset _cache}
 
     # Return the inverse command
     return $inverse
+}
+
+########################################################################
+#### edgeattrs
+#
+# Return a list containing the attributes of the edge as a flat
+# attribute-value list. An error will result if the edge does
+# not exist.
+#
+body ::tycho::MultiGraph::edgeattrs {vertex1 vertex2} {
+	_verify edge [list $name $vertex1 $vertex2]
+    _attributes edge [list $name $vertex1 $vertex2]
+}
+
+########################################################################
+#### edgecget
+#
+# Get an attribute of an edge. An error will occur if the edge does not
+# exist or the attribute does not exist.
+#
+body ::tycho::MultiGraph::edgecget {vertex1 vertex2 attribute} {
+	_verify edge [list $name $vertex1 $vertex2]
+    _cget edge [list $name $vertex1 $vertex2] $attribute
+}
+
+########################################################################
+#### edgeconfigure
+#
+# Configure the edge and return the inverse command. An error will
+# occur if the edge does not exist. The argument list
+# is a flat list of attribute-value pairs.
+#
+body ::tycho::MultiGraph::edgeconfigure {vertex1 vertex2 args} {
+	_verify edge [list $name $vertex1 $vertex2]
+    _configure edge [list $name $vertex1 $vertex2] $args
+}
+
+########################################################################
+#### edgedelete
+#
+# Remove an edge from the graph, and return the inverse command. This
+# default method works for simple directed graphs.
+#
+body ::tycho::MultiGraph::deleteedge {vertex1 vertex2} {
+	_verify edge [list $name $vertex1 $vertex2]
+
+	# Delete it from the adjacency list
+	_adjacencydelete $vertex1 $vertex2
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+	# Delete the data and return the inverse command
+	_delete edge [list $name $vertex1 $vertex2]
+}
+
+########################################################################
+#### edges
+#
+# Return a list containing the edges of the graph with source and target
+# vertex names that match the given patterns. The result is a flat list
+# of source-target pairs. If no arguments are supplied, return all edges.
+# To test for the presence of a single edge, provide its source and 
+# target vertices as the arguments and compare the result with the empty
+# list.
+#
+body ::tycho::MultiGraph::edges {{name *} {pattern1 *} {pattern2 *}} {
+    set result {}
+    foreach quad [array names _info \
+    		[list edge * * [list $name $pattern1 $pattern2]]] {
+		eval lappend result [lindex $quad 3]
+    }
+    return $result
 }
