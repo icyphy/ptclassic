@@ -85,17 +85,17 @@ the OverflowHandler will be called.
                 PortHole *p;
 
                 if ( int(ArrivingPrecision) ) {
-		  diff = Fix(pos%0);
+		  diff = (const Fix&)(pos%0);
                   while ((p = nexti++) != 0) {
-                    diff -= (Fix)((*p)%0);
+                    diff -= (const Fix&)((*p)%0);
 		    checkOverflow(diff);
 		  }
 		}
 		else {
-		  fixIn = Fix(pos%0);
+		  fixIn = (const Fix&)(pos%0);
 		  diff = fixIn;
                   while ((p = nexti++) != 0) {
-		    fixIn = (Fix)((*p)%0);
+		    fixIn = (const Fix&)((*p)%0);
                     diff -= fixIn;
 		    checkOverflow(diff);
 		  }

@@ -243,9 +243,9 @@ The input particles are only cast to this precision if the parameter
                             tap = taps[tapsIndex];
         
                         if ( int(ArrivingPrecision) )
-                            Accum += tap * Fix(signalIn%(Decim - inC + i));
+                            Accum += tap * (const Fix&)(signalIn%(Decim - inC + i));
                         else {
-                            fixIn = Fix(signalIn%(Decim - inC + i));
+                            fixIn = (const Fix&)(signalIn%(Decim - inC + i));
                             Accum += tap * fixIn;
 			}
                    }

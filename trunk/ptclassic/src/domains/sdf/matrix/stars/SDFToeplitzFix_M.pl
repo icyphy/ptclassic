@@ -64,7 +64,7 @@ among others.
 	for (int i = 0; i < numrows; i++) {
             int k = numrows - i - 1;
 	    for (int j = 0; j < numcols; j++, k++)
-		X[i][j] = Fix(input%k);
+		X[i][j] = (const Fix&)(input%k);
         }
 
 	// Output X

@@ -88,11 +88,11 @@ will be stored there after the run has completed.
 	}
 	go {
 		// First update the taps
-		Complex e = Complex(error%0) * double(stepSize);
+		Complex e = (const Complex&)(error%0) * double(stepSize);
 		int index = int(errorDelay)*int(decimation) + int(decimationPhase);
 		// adjustment is e times the conjugate of the output
 		for (int i = 0; i < taps.size(); i++) {
-			taps[i] = taps[i] + e * conj(Complex(signalIn%index));
+			taps[i] = taps[i] + e * conj((const Complex&)(signalIn%index));
 			index++;
 		}
 		

@@ -151,7 +151,7 @@ For more information about polyphase filters, see F. J. Harris,
 			    tap = 0.0;
 			else
 			    tap = taps[tapsIndex];
-			out += tap * Complex(signalIn%(int(decimation) - inC + i));
+			out += tap * (const Complex&)(signalIn%(int(decimation) - inC + i));
 		   }
 		   // note: output%0 is the last output chronologically
 		   signalOut%(outCount--) << out;

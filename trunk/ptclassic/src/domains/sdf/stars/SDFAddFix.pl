@@ -80,9 +80,9 @@ the OverflowHandler will be called.
 		sum.setToZero();	// set to zero and clear error bits
                 while ((p = nexti++) != 0) {
                   if ( int(ArrivingPrecision) )
-                    sum += (Fix)((*p)%0);
+                    sum += (const Fix&)((*p)%0);
 		  else {
-                    fixIn = (Fix)((*p)%0);
+                    fixIn = (const Fix&)((*p)%0);
                     sum += fixIn;
 		  }
 		  checkOverflow(sum);

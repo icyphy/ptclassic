@@ -45,7 +45,7 @@ Input blocks of this size will be averaged to produce an output block.
 	    for(int i=int(blockSize)-1; i >= 0; i-- ) {
 		Complex avg = Complex(0.0);
 		for(int j=int(numInputsToAverage)-1; j >= 0; j-- ) {
-		    avg += Complex(input%(j*int(blockSize)+i));
+		    avg += Complex((const Complex &)(input%(j*int(blockSize)+i)));
 		}
 		output%i << Complex(real(avg)/int(numInputsToAverage),
 				    imag(avg)/int(numInputsToAverage));
