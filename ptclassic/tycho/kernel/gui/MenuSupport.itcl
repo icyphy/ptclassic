@@ -67,7 +67,7 @@ class ::tycho::MenuSupport {
     ####                            options                               ####
 
     # The font to use for displaying menus
-    itk_option define -font font Font 8x13
+    itk_option define -font font Font [::tycho::font helvetica]
 
     ###################################################################
     ####                         public methods                    ####
@@ -133,8 +133,15 @@ class ::tycho::MenuSupport {
 #### constructor
 #
 body ::tycho::MenuSupport::constructor {args} {
-    eval itk_initialize $args
-    eval preference exclude $this $args
+    # Create a delete a bogus menubutton. This appears to be necessary
+    # to keep the itk options database happy
+    itk_component add bogus {
+ 	eval menubutton $itk_interior.junk
+    } {
+ 	keep -padx -pady -font
+    }
+    destroy $itk_component(bogus)
+    unset itk_component(bogus)
 
     eval itk_initialize $args
     eval preference exclude $this $args
