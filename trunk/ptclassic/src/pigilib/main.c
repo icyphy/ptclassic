@@ -103,7 +103,7 @@ RPCFunction CommandArray[] = {
     {ExitApp, "Other", "exit-pigi"}
 };
 
-int
+long
 UserMain(display, spot, cmdList, userOptionWord, array) /* ARGSUSED */
 char *display;
 RPCSpot *spot;
