@@ -363,7 +363,7 @@ body ::tycho::Slate::constructor {args} {
 #######################################################################
 #### addtag
 #
-# Add a tag to specified items. Uses find{} to get all relevent
+# Add a tag to specified items. Uses find{} to get all relevant
 # items, and then tags them; optimized for some special cases.
 #
 body ::tycho::Slate::addtag {add mode args} {
