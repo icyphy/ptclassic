@@ -537,7 +537,8 @@ body ::tycho::DocSys::readFile {file} {
     # Add a space between a close curly and a close square.
     # The following example was breaking:
     # curlybracket-followed-by-squarebracket-2 [list {foo new zoo}]
-    regsub -all "\}]" $b "\} ]" fileAsList
+    regsub -all "\}]" $b "\} ]" c
+    regsub -all "\"]" $c "\" ]" fileAsList
 
     $this parseFileAsList $fileAsList
 }	    
