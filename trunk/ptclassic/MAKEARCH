@@ -77,8 +77,8 @@ end
 # create extra directories under domain-specific directories
 # everything must have one slash (be two levels down)
 
-foreach x (thor/pepp cg/architectures sdf/expgraph sdf/image ddf/constructs \
-	sdf/loopScheduler cg/gilsScheduler cg/topologies)
+foreach x (thor/pepp cg/targets sdf/expgraph sdf/image ddf/constructs \
+	sdf/loopScheduler cg/gilsScheduler thor/analyzerX11)
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
