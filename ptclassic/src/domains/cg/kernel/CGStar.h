@@ -48,8 +48,9 @@ class StringList;
 extern "C" int strcasecmp(const char* s1, const char* s2);
 
 class CGTarget;
-class CGWormhole;
+class CGWormBase;
 class CodeStream;
+class Profile;
 
 	////////////////////////////////////
 	// class CGStar
@@ -59,7 +60,7 @@ class CodeStream;
 // isSDF to return TRUE, we permit non-SDF CGStars later on.
 
 class CGStar : public DataFlowStar {
-
+friend class CGTarget;
 public:
 	// Constructor
 	CGStar();
@@ -83,7 +84,13 @@ public:
 
         // virtual method to return this pointer if it is a wormhole.
         // Return NULL if not.
-        virtual CGWormhole* myWormhole();
+        virtual CGWormBase* myWormhole();
+
+	// querry if it is a data-parallel star, or a wormhole?
+	int isParallel() const { return (isItWormhole() || dataParallel); }
+
+	// For a data parallel star, or a wormhole get the profile.
+	virtual Profile* getProfile(int ix = 0); 
 
         // max {cost of communication with its ancestors}
         int maxComm();
@@ -185,6 +192,12 @@ protected:
 
 	// processor id 
 	IntState procId;
+
+	// indicate whether this star is a (data)parallel star or not.
+	int dataParallel;
+
+	// profile (= local schedule) of the data parallel star or wormhole
+	Profile* profile;
 
 	// declare that I am a Fork star
 	void isaFork() { forkId = TRUE; }
