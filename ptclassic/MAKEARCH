@@ -80,12 +80,24 @@ end
 
 foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
 	ddf/constructs sdf/loopScheduler cg/parScheduler thor/analyzerX11 \
-	cg/dlScheduler cg/quasiScheduler cg/dcScheduler $EXPEXTRAS )
+	cg/dlScheduler cg/quasiScheduler cg/dcScheduler \
+	cg56/dsp $EXPEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
 	optlink ../../../../src/domains/$x makefile
 	cd ../..
+end
+
+# create extra subsub dirs in each domain
+# everything must have two slashs (be three levels down)
+
+foreach x ( cg56/dsp/stars )
+	optmkdir $x
+	cd $x
+	optlink ../../../../../src/domains/$x make.template
+	optlink ../../../../../src/domains/$x makefile
+	cd ../../..
 end
 
 # This is for the makefile
