@@ -51,7 +51,7 @@ done with g++ (type "long long"), but it isn't portable.
 		scaledRange = int(range.asDouble() * 8388608);
 	}
 	go {
-		addCode(random);
+		addCode(randomGen);
 		if (range.asDouble() < CG56_ONE) addCode(rangeScale);
 		else addCode (range1);
 	}
@@ -67,7 +67,7 @@ done with g++ (type "long long"), but it isn't portable.
 	org	p:
 	}
 	// "common" part of random number generation
-	codeblock(random) {
+	codeblock(randomGen) {
 	move	#$addr(accum),r1
         move	#>10916575,y1
         move    l:(r1),x
