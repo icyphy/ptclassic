@@ -315,6 +315,58 @@ ensemble ::tycho::resource {
 # captured in an interface ar abstract subclasses.) Note that
 # these methods are in addition to those defined in this superclass.
 #
+# <br><br>
+# <hr>
+# <b>Tutorial on reading HTTP objects</b><br>
+# Create a new HTTP object pointing to Ptolemy homepage<br>
+# <tcl><pre>set obj [::tycho::resource new "http://ptolemy.eecs.berkeley.edu/"]
+# $obj open
+# </pre></tcl>
+#
+# Get next 10 lines (click on this multiple times)<br>
+# <tcl><pre>set ret {}
+# for {set i 0} {$i < 10} {incr i} {append ret [$obj gets]\n}
+# ::tycho::inform $ret
+# </pre></tcl>
+#
+# <hr>
+# <b>Tutorial on reading/writing local objects</b><br>
+# Create a new file, open, write, close.
+# <tcl><pre>set filename [::tycho::tmpFileName Testfile]
+# set obj [::tycho::resource new $filename]
+# $obj open "w+"
+# for {set i 0} {$i < 10} {incr i} {$obj puts "Number $i"}
+# $obj close
+# </tcl></pre>
+# <br><br>
+# <b>Tutorial on reading local objects
+# <tcl><pre>set obj [::tycho::resource new $filename]
+# $obj open "r"
+# set ret {}
+# while {![$obj eof]} {append ret [$obj gets]\n}
+# $obj close
+# ::tycho::inform $ret
+# </pre></tcl>
+#
+# <hr>
+# <b>Tutorial on using mail object</b><br>
+# Create a new destination, write, close.
+# <tcl><pre>::tycho::Query .bb
+# .bb line destination {Enter destination} "user@location.edu"
+# wm deiconify .bb
+# set destination [lindex [::tycho::Dialog::wait .bb] 1]
+# </pre></tcl><br>
+# <br>
+# Create a new mail object, send 0-9, close.
+# <tcl><pre>set obj [::tycho::resource new mailto:$destination]
+# $obj open
+# for {set i 0} {$i < 10} {incr i} {$obj puts "LINE $i"}
+# $obj close
+# </pre></tcl>
+#
+#
+#
+# <hr>
 # <b>Streamable resource interface</b>
 #
 # <dl>
