@@ -30,12 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
-
 # Root of Ptolemy directory
 ROOT =		../../..
 # Path (absolute or relative) to the object directory root
@@ -84,6 +78,9 @@ DIRS =			doc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =			tclIndex
+
+# Title for the tydoc index page
+TYDOC_DESC =	"Index of classes in tycho/kernel/textedit"
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
