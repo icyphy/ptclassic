@@ -126,10 +126,10 @@ class ::tycho::DialogWindow {
     proc answer {value} {return $value}
 
     # Create an object instance and return the name.
-    proc new {class instance args}
+    proc new {class instance args} {}
 
     # Create an object instance and return its result when it is destroyed.
-    proc newModal {class instance args}
+    proc newModal {class instance args} {}
 
     #####################################################################
     ####                       protected methods                     ####
