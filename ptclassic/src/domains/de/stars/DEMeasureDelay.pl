@@ -21,6 +21,11 @@ a \fItimeDiff\fR
 output is generated with value equal to the arrival time difference.
 The data value itself is also
 sent to the \fIoutput\fR port upon the second arrival.
+.pp
+Packets are only considered to have the "same value" if they are copied
+from a common source (so that each packet shares the same common PacketData
+structure).  This suffices for common uses of MeasureDelay where the
+same packet is routed through a delay-free path and also a path with delay.
 	}
 	input {
 		name { input }
@@ -55,7 +60,7 @@ sent to the \fIoutput\fR port upon the second arrival.
 		firstArrivalQ.reset();
 		while (len > 0) {
 			LevelLink* h = firstArrivalQ.next();
-			if (!strcmp(value.print(),((Particle*)h->e)->print())){
+			if (value == *(Particle*)(h->e)) {
 			   // yes, match! --> output
 			   timeDiff.put(completionTime) <<
 				   completionTime - h->level;
@@ -70,7 +75,7 @@ sent to the \fIoutput\fR port upon the second arrival.
 		// no match, register the event into the queue
 		Particle* newp = value.clone();
 		firstArrivalQ.levelput(newp, arrivalTime);
-				
+
 	}
 }
 
