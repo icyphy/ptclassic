@@ -148,7 +148,11 @@ class ::tycho::GanttView {
     # Hold the forest file required to verify a modified schedule
     protected variable forestFile ""
 
+    # Handle to our ruler
     protected variable ruler ""
+
+    # strips containing their schedules, indexed by processor number
+    protected variable schedStrip
 }
 
 #######################################################################
@@ -162,7 +166,7 @@ configbody ::tycho::GanttView::fst {
 
     # if the forest file is null then disable the Edit Menu
     if {$forestFile == ""} {
-	$myDisplayer disableMenu Edit
+	# $myDisplayer disableMenu Edit
     }
 }
 
@@ -173,12 +177,26 @@ configbody ::tycho::GanttView::fst {
 configbody ::tycho::GanttView::vsm {
 
     set myVSM $itk_option(-vsm)
-   
-    # Do we have any nested schedules?
-    set data(MKSPAN) [$myVSM getMakespan]
-    set data(NPROCS) [$myVSM getNumProcs]
-    set data(HIER) [$myVSM create]
-    set data(DISPLAY) [$myVSM getDisplayData]
+    
+    if {$myVSM !=""} {
+        set data(MKSPAN) [$myVSM getMakespan]
+        set data(NPROCS) [$myVSM getNumProcs]
+        set data(HIER) [$myVSM create]
+
+	# If we happen to have nested schedules, we should find
+	# out how many levels of nesting we have
+	# FIXME: requires more efficiency
+	if {$data(HIER) != {}} {
+	    foreach item $data(HIER) {
+		if {[regexp "cluster" $item]} {
+		    if {[$item getID] == ""} {
+			set data(NPROCS) [$item getNumProcs]
+			set data(MKSPAN) [$item getMakespan]
+		    }
+		}
+	    }
+	}
+    }
 }
 
 #######################################################################
@@ -195,7 +213,8 @@ body ::tycho::GanttView::constructor {args} {
     # FIXME: need a better way to do colours
     set layout(COLORS) \
 	    {red steelblue limegreen pink green yellow orangered blue \
-	    coral tan khaki magenta mediumaquamarine forestgreen sienna}
+	    coral tan khaki magenta mediumaquamarine forestgreen sienna \
+	    purple orange}
     
     # Set the padding in cm
     set layout(PADTOP) 2.0
@@ -353,8 +372,9 @@ body ::tycho::GanttView::drawLabels {} {
 	set schedId [$myVSM getSchedName]
     } else {
 	# Set the default schedule id
-	set schedId "No Schedule identifier"
+	set schedId {No Schedule identifier}
     }
+    puts "$myVSM $schedId"
     $slate create Text $layout(PADLEFT)c $layout(LBASE)c \
 	    -text $schedId \
 	    -anchor nw \
@@ -379,7 +399,7 @@ body ::tycho::GanttView::drawLabels {} {
     # for each processor draw the label
     for {set i 1} {$i <= $data(NPROCS)} {incr i 1} {
 	set ypos [expr $padtop + (($i - 1) * $pheight)]
-
+	puts "P$i"
 	$slate create Text $layout(PLX)c $ypos \
 		-text "P$i" \
 		-anchor nw \
@@ -411,7 +431,7 @@ body ::tycho::GanttView::drawMarker {} {
 	    -tags marker
 
     # write the time on top of the marker
-    # $slate create Text $x(2)c [expr $layout(RBASE) - $layout(TICK) \
+    $slate create Text $x(2)c [expr $layout(RBASE) - $layout(TICK) \
 	    - $layout(LOFFSET)]c \
 	    -text [format {%.0f} $data(MTIME)] \
 	    -font $layout(SMFONT) \
@@ -478,36 +498,46 @@ body ::tycho::GanttView::drawProcessor {proc} {
     set axisValues [::rangeValues 0 $data(MKSPAN) $increment]
     set axisLocations [::mapRange 0 $data(MKSPAN) $axisValues $ledge $redge]
     
-    # Draw the outline
-    $slate create Rectangle $ledge \
+    # Draw the schedule strip
+    set schedStrip($proc) [$slate create Strip $ledge \
 	    [expr $padtop + (($proc - 1) * $pheight)] \
 	    $redge [expr $padtop + ($proc * $pheight)] \
-	    -tags procbox
+	    -from 0 \
+	    -to $data(MKSPAN) \
+	    -tags procbox]
     
     # Draw the schedule
+    
     if {[lindex $data(DISPLAY) 0] == "cluster"} {
-	puts "$vwidth"
-	puts "$dwidth"
-	puts "$pheight"
-	itk_component add cframe {
-	    frame $slate.cframe \
-		    -width [expr $redge - $ledge] \
-		    -height $pheight 
-	} {
-	} 
-	pack propagate $itk_component(cframe) false
-	place $itk_component(cframe) \
-		-x $ledge \
-		-y [expr $padtop + (($proc - 1) * $pheight)] \
-		-anchor nw
-		
-	itk_component add cluster {
-	    button $itk_component(cframe).cluster \
-		    -text [lindex [lindex $data(DISPLAY) 3] 0] \
-		    -background red 
-	} {
+	set name [lindex [lindex $data(DISPLAY) 2] 0]
+	set start [lindex [lindex $data(DISPLAY) 2] 1]
+	set end [lindex [lindex $data(DISPLAY) 2] 2]
+    }
+    
+    set color 0
+    if {[lindex $data(DISPLAY) 0] == "proc"} {
+	for {set i 2} {$i < [llength $data(DISPLAY)]} {incr i 1} {
+	    set name [lindex [lindex $data(DISPLAY) $i] 0]
+	    set start [lindex [lindex $data(DISPLAY) $i] 1]
+	    set end [lindex [lindex $data(DISPLAY) $i] 2]
+	    if {$name == "idle"} {
+		$schedStrip($proc) addBox $name $start $end \
+			-fill black
+	    } elseif {$name == "send"} {
+		$schedStrip($proc) addBox $name $start $end \
+			-fill grey
+	    } elseif {$name == "receive"} {
+		$schedStrip($proc) addBox $name $start $end \
+			-fill white
+	    } else {
+		$schedStrip($proc) addBox $name $start $end \
+			-fill [lindex $layout(COLORS) $color]
+	    }
+	    incr color 
+	    if {$color == [llength $layout(COLORS)]} {
+		set color 0
+	    }
 	}
-	pack $itk_component(cluster) -fill both -expand true
     }
 }
 
@@ -554,6 +584,7 @@ body ::tycho::GanttView::drawRuler {makespan} {
 #
 body ::tycho::GanttView::help {} {
 
+    # FIXME: should bring up html window
     ::tycho::inform {
 	Gantt Chart Help:
 	- The zoom menu lets the you zoom the chart; it will scale the
@@ -573,14 +604,9 @@ body ::tycho::GanttView::help {} {
 # Insert view in the display
 #
 body ::tycho::GanttView::insertInDisplay {} {
-    
+
     # insert the view into the displayer
     $myDisplayer setView $itk_component(hull)
-
-    # FIXME: this is a temporary fix to get the scrollbars to adjust
-    #        properly to the size of the slate once it is packed into
-    #        the displayer.  Not sure why this is required.
-    $this scMapEventHandler
 }
 
 
@@ -635,21 +661,49 @@ body ::tycho::GanttView::print {} {
 #
 body ::tycho::GanttView::redraw {} {
 
+    puts "redraw"
     # delete objects on the slate
-    $slate delete label marker procbox
-
+    catch {$slate delete label marker}
+   
     # redraw the ruler
     if {$ruler == ""} {
 	drawRuler $data(MKSPAN)
+	if {$data(HIER) != {}} {
+	    set i 1
+	    foreach item $data(HIER) {
+		if {[regexp "proc" $item]} {
+		    set data(DISPLAY) [$item getDisplayData]
+		    $this drawProcessor $i
+		    incr i
+		}
+	    }
+	}
     } else {
 	# Get slate width and height in pixels
 	set width [winfo width $slate]
-    
+	set height [winfo height $slate]
+ 
+	# convert top padding into pixels
+	set padtop [winfo pixels $slate $layout(PADTOP)c]
+	set padding [expr $padtop + [winfo pixels $slate $layout(PADBOTTOM)c]]
+	
 	# Translate padding, etc. into pixels
 	set rpad [winfo pixels $slate $layout(PADRIGHT)c]
 	set ledge [winfo pixels $slate $layout(PADLEFT)c]
     
-	# Find the display width of the chart
+	# Calculate the y coordinates of the labels depending on 
+	# the number of processors and the space available.
+	set dheight [expr $height - $padding]
+	set pheight [expr $dheight / $data(NPROCS)]
+	
+	# check processor height against max and min
+	if {$pheight < [winfo pixels $slate $layout(MINHGHT)c]} {
+	    set pheight [winfo pixels $slate $layout(MINHGHT)c]
+	} elseif {$pheight > [winfo pixels $slate $layout(MAXHGHT)c]} {
+	    set pheight [winfo pixels $slate $layout(MAXHGHT)c]
+	}
+   
+ 	# Find the display width of the chart
 	set dwidth [expr $width - $rpad - $ledge]
 
 	# We don't want to display anything if our display width is
@@ -660,15 +714,20 @@ body ::tycho::GanttView::redraw {} {
 
 	# Find the virtual width of the display taking into account zoom factor
 	set vwidth [expr $data(ZOOMF) * $dwidth]
+	# Find the right edge
+	set redge [expr $ledge + $vwidth]
 	
 	$ruler configure -length $vwidth
+
+	for {set i 1} {$i <= $data(NPROCS)} {incr i} {
+	    $schedStrip($i) coords $ledge \
+		    [expr $padtop + (($i - 1) * $pheight)] \
+		    $redge [expr $padtop + ($i * $pheight)]
+	}
     }
 
     $this drawMarker
     $this drawLabels
-    for {set i 0} {$i < $data(NPROCS)} {incr i 1} {
-	$this drawProcessor [expr $i + 1]
-    }
 }
 
 #######################################################################
