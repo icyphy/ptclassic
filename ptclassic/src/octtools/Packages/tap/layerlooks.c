@@ -282,6 +282,7 @@ int type;
 octObject *layerPtr;
 {
     octObject prop;
+    double bitArrayLen;
 
     prop.type = OCT_PROP;
     if (type == TAP_FILL_PATTERN) {
@@ -323,8 +324,24 @@ octObject *layerPtr;
     /* must be stippled pattern */
     patPtr->flags = TAP_STIPPLED;
     patPtr->bitArray = util_strsav(prop.contents.prop.value.string);
+
+    /* Hack to avoid Purify warnings here.
+       patPtr->width = sqrt((double)strlen(patPtr->bitArray));
+       was causing trouble
+Purify (bsw): write below stack pointer:
+  * This is occurring while in:
+       parsePattern [line 327, ../../../../src/octtools/Packages/tap/layerlooks.c, pc=0x3415c]
+ parseDisplayBag [line 271, ../../../../src/octtools/Packages/tap/layerlooks.c, pc=0x33f2c]
+      looksInternLayer [line 166, ../../../../src/octtools/Packages/tap/layerlooks.c, pc=0x33860]
+     tapGetDisplayInfo [line 86, ../../../../src/octtools/Packages/tap/layerlooks.c, pc=0x332bc]
+     setTechnology [line 1446, /users/ptolemy/src/gnu/src/gcc/libgcc2.c, pc=0xb99cc]
+ processCell  [line 813, /users/ptolemy/src/gnu/src/gcc/libgcc2.c, pc=0xb51d8]
+  * Writing 4 bytes to 0xeffeef4c.
+
+     */
+    bitArrayLen = strlen(patPtr->bitArray);
     if (type == TAP_FILL_PATTERN) {
-	patPtr->width = sqrt((double) strlen(patPtr->bitArray));
+	patPtr->width = sqrt(bitArrayLen);
 	patPtr->height = patPtr->width;
 	patPtr->bitArray[patPtr->width * patPtr->height] = '\0';
     } else {
