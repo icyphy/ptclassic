@@ -1,5 +1,6 @@
 # Definition of a bunch of control panels for the tcl/tk Ptolemy interface
 # Author: Edward A. Lee
+#         Interactive command added by Alan Kamas
 # Version: $Id$
 #
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -210,10 +211,11 @@ proc ptkSetRunInteractivity { name octHandle } {
 	if {$ptkRunFlag($name)=={ACTIVE}||$ptkRunFlag($name)=={PAUSED}} {
 	    ptkSetEventLoop on
 	}
-	# Return pause and run to active states
+	# Return pause, run, and debug to active states
         if {[winfo exists $Panelwindow]} {
 	    $Panelwindow.panel.pause configure -state normal
 	    $Panelwindow.panel.stop configure -state normal
+	    $Panelwindow.iter.debug configure -state normal
 	}
 	# Debug is now allowed
 	ptkSetOrClearDebug $name $octHandle
@@ -226,10 +228,11 @@ proc ptkSetRunInteractivity { name octHandle } {
 	if {$ptkRunFlag($name)=={ACTIVE} || $ptkRunFlag($name)=={PAUSED} } {
 	    ptkSetEventLoop off
 	}
-	# mark the pause and stop buttons inactive
+	# mark the pause, stop, and debug buttons inactive
         if {[winfo exists $Panelwindow]} {
 	    $Panelwindow.panel.pause configure -state disabled
 	    $Panelwindow.panel.stop configure -state disabled
+	    $Panelwindow.iter.debug configure -state disabled
 	}
     }
 }
