@@ -1,0 +1,226 @@
+# A base class viewer and editor window based on the Tk canvas.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: known bugs
+# -- need to call undoBoundary after reading an input file. Promote?
+
+#######################################################################
+#### Graphics
+# <p>
+# The contents of the display are saved to a file in the form of a list
+# of method invocations of the contained graphical editor, which must
+# be derived from <code>GraphicsWidget</code>.  In the base class,
+# the size, title, and other annotations are saved.
+# <p>
+# Here is an example of how to use the Graphics:
+# <tcl><pre>
+#     catch {delete object .f}
+#     ::tycho::Graphics .f
+#     .f centerOnScreen
+# </pre></tcl>
+#
+class ::tycho::Graphics {
+    inherit ::tycho::File
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Clear the display, discarding the current items.
+    method clear {}
+
+    # Give the canvas the focus.
+    method focusin {}
+ 
+    # Open a help window.
+    method help {}
+
+    # Insert the specified data into the canvas.
+    method insertData {data}
+
+    # Reload the current file and redraw the canvas.
+    # FIXME:
+    # method reload {}
+
+    # Find the item identified by "name".
+    # FIXME: Implement this.
+    # method seePoint {point}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Return the text to be saved.
+    protected method saveText {}
+
+    # Return the name of the class of graphics widget to use.
+    protected method graphicsWidget {} {return ::tycho::GraphicsWidget}
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Graphics::constructor {args} {
+
+    itk_component add graphics {
+       [graphicsWidget] $itk_component(childsite).graphics \
+               -top $this
+    } {
+        keep -readonly -scrolling -canvascolor -cursor 
+        # NOTE:  Cannot keep -canvasheight -canvaswidth.
+        # Overrides saved width and height with the defaults.
+        rename -title -canvastitle canvasTitle CanvasTitle
+    }
+
+    pack $itk_component(graphics) -expand yes -fill both
+    
+    addMenu Edit left Window -underline 0
+
+    addMenuItem {Undo/Redo} Edit -underline 0 -accelerator "C-x u" \
+	    -command "$this component graphics undo"
+
+    addMenuSeparator Edit
+
+    addMenuItem Cut Edit -underline 0 -accelerator "C-w" \
+	    -command "$this component graphics cut"
+    
+    addMenuItem Copy Edit -underline 1 -accelerator "M-w" \
+	    -command "$this component graphics copy"
+    
+    addMenuItem Paste Edit -underline 0 -accelerator "C-y" \
+	    -command "$this component graphics paste"
+    
+    addMenuSeparator Edit
+
+    addMenuItem {Title...} Edit -underline 0 -accelerator "C-t" \
+            -command "$this component graphics titleEdit"
+
+    eval itk_initialize $args
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### clear
+# Clear the display, discarding the current graphics.
+#
+body ::tycho::Graphics::clear {} {
+    if [getReadOnly] {bell; return}
+    [component graphics canvasName] delete all
+}
+
+###################################################################
+#### focusin
+# Hand the focus to the canvas window.
+#
+body ::tycho::Graphics::focusin {} {
+    $itk_component(graphics) focusin
+}
+ 
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::Graphics::help {} {
+    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/GraphicsHelp.html" {}
+}
+
+#######################################################################
+#### insertData
+# Append the specified data to the existing display.
+# The data should be a list of items of the form <i>methodname args</i>,
+# where <i>methodname</i> is a method of the class contained (which must
+# be derived from <code>GraphicsWidget</code>), and <i>args</i> is the
+# set of arguments appropriate for that method.
+#
+body ::tycho::Graphics::insertData {data} {
+    if [getReadOnly] {bell; return}
+    foreach command $data {
+        if [catch {
+            eval $itk_component(graphics) $command
+puts "Graphics::insertData: $command"
+        } msg] {
+            global ::errorInfo
+            set saveErr $errorInfo
+            error "Invalid item: $data\n$msg" $saveErr
+        }
+    }
+}
+
+#######################################################################
+#### reload
+# Reload the current file.  This is redefined in order to call redraw
+# on the component widget.  FIXME:  This seems to be a very bad idea.
+# It screws up the size of the canvas, and draws everything twice on startup.
+#
+# body ::tycho::Graphics::reload {} {
+#     ::tycho::File::reload
+#     after idle "$this component graphics redraw"
+# }
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::Graphics::setReadOnly {bool} {
+    ::tycho::File::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            disableMenuItem {Cut} Edit
+            disableMenuItem {Paste} Edit
+	} {
+            enableMenuItem {Cut} Edit
+            enableMenuItem {Paste} Edit
+	}
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### saveText
+# Return the text to be saved.
+#
+body ::tycho::Graphics::saveText {} {
+    return [component graphics describe]
+}
