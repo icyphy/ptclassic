@@ -39,6 +39,12 @@ option add *EditSpell.entryBackground \
 
 option add *EditSpell.entryfont [.tychoFonts defaultFont fixed]
 
+# Colors for spelling errors
+option add *EditSpell.spellMatchBackgroundColor \
+        [ptkColor red4 black] widgetDefault
+option add *EditSpell.spellMatchForegroundColor \
+        [ptkColor white white] widgetDefault
+
 ##########################################################################
 #### EditSpell class.
 # Create a dialog box for checking the spelling in an EditText widget.
@@ -64,7 +70,7 @@ class ::tycho::EditSpell {
     ####                     public methods                       ####
 
     # Clear the spelling error marks on the associated text window.
-    method clearFindMatch
+    method clearSpellMatch {}
 
     # Open the personal dictionary for editing.
     method dictionary {}
@@ -132,7 +138,7 @@ body ::tycho::EditSpell::constructor {args} {
 	    -command "$this busy next"
 
     addButton clear -text {Clear Marks} \
-	    -command "$this clearFindMatch"
+	    -command "$this clearSpellMatch"
 
     addButton recheck -text {Recheck} \
 	    -command "$this busy recheck"
@@ -168,12 +174,12 @@ body ::tycho::EditSpell::constructor {args} {
 ####                     public methods                       ####
 
 #####################################################################
-#### clearFindMatch
+#### clearSpellMatch
 # Clear the highlighting in the text window due to the spell check.
 # 
-body ::tycho::EditSpell::clearFindMatch {} {
+body ::tycho::EditSpell::clearSpellMatch {} {
     set tw $itk_option(-edittext)
-    $tw clearFindMatch
+    [$tw textWinName] tag remove spellmatch 1.0 end
 }
 
 #####################################################################
@@ -217,10 +223,10 @@ body ::tycho::EditSpell::next {} {
     } {
 	set tw $itk_option(-edittext)
 	set tx [$tw textWinName]
-	set range [$tx tag nextrange findmatch $upto]
+	set range [$tx tag nextrange spellmatch $upto]
 	if {$range == {}} {
 	    if [::tycho::askuser "End of file.  Start at the top?"] {
-		set range [$tx tag nextrange findmatch 1.0]
+		set range [$tx tag nextrange spellmatch 1.0]
 		if {$range == {}} {
 		    # No more errors tagged.  Recheck
 		    recheck
@@ -266,16 +272,24 @@ body ::tycho::EditSpell::recheck {} {
     set pattern [join $errs |]
     set tags [$tw spellCheckTags]
 
-    set result [$tw find -forwards -regexp -wholeword \
-	    -tags $tags $pattern 1.0]
+    $tw findAll spellmatch 1 -regexp 1 $pattern 1.0 end $tags
+    set text [$tw textWinName]
+    set result [$text tag nextrange spellmatch 1.0]
     if {$result == {}} {
+        # This should not happen.
 	error "Can't match reported spelling errors with text: $errs"
     } {
-	set upto [[$tw textWinName] index \
-		"[lindex $result 0] + [lindex $result 1] chars"]
-	clear word
-	insert word [$tw getSelection]
-	return 1
+	set upto [lindex $result 0]
+        # Set up reverse video for the found text. First lower the
+        # priority of the tag so selection is still visible as normal.
+        $text tag raise sel spellmatch
+        $text tag configure spellmatch \
+                -background [option get $itk_component(hull) \
+                spellMatchBackgroundColor EditSpell]
+        $text tag configure spellmatch \
+                -foreground [option get $itk_component(hull) \
+                spellMatchForegroundColor EditSpell]
+        next
     }
 }
 
