@@ -22,11 +22,81 @@ $Id$
 #include "IntState.h"
 #include "StringState.h"
 #include "CGSymbol.h"
+#include "SimControl.h"
 
 class CGStar;
 class SDFSchedule;
 
 class CGTarget : public Target {
+public:
+	CGTarget(const char* name, const char* starclass, const char* desc,
+		 char sep = '_');
+
+	~CGTarget();
+
+	static int haltRequested() {return SimControl::haltRequested();}
+
+	// function that initializes the Target itself, before a Galaxy
+	// is attached to it.  This is called first (before setup).
+	void start();
+
+	// function that computes the schedule, allocates memory (if needed),
+	// and prepares for code generation (generating header and initial
+	// code)
+	int setup(Galaxy&);
+
+	// function that executes the schedule to generate the main code.
+	int run();
+
+	// finalization.  In derived classes, wrapup might download and
+	// execute the generated code; the baseclass simply displays the
+	// code.
+	void wrapup();
+
+	// generate a new, identical CGTarget.
+	Block* clone() const;
+
+	// fn for adding code to the target
+	void addCode(const char*);
+
+	// methods to compile and run the target.
+	// check access privilege later.
+	virtual int compileCode();
+	virtual int loadCode();
+	virtual int runCode();
+
+	// do we need this?
+	virtual void writeCode(ostream&);
+
+	// generate code for a processor in a multiprocessor system
+	virtual StringList generateCode(Galaxy&);
+
+	// type identification
+	int isA(const char*) const;
+
+	// Total Number of Labels generated.
+	int numLabels;
+	// Label Separator
+	char separator;
+
+	// output a comment.  Default form uses C-style comments.
+	virtual void outputComment (const char*);
+
+	// generate code for a firing.  The definition here simply
+	// fires the star
+	void writeFiring(Star&,int depth);
+
+	// dummy beginIteration and endIteration
+	void beginIteration(int,int);
+	void endIteration(int,int);
+
+	// system call in destination directory.  If error is specified
+	// & the system call is unsuccessful display the error message.
+	virtual int systemCall(const char*,const char* error=NULL);
+
+	// Copy an SDF schedule from the multiprocessor schedule, instead
+	// of performing an SDF scheduler for a uni-processor target
+	void copySchedule(SDFSchedule&);
 protected:
 	NestedSymbol targetNestedSymbol;
 
@@ -102,73 +172,6 @@ protected:
 	// In this base class, do nothing.
 	virtual void frameCode();
 
-public:
-	CGTarget(const char* name, const char* starclass, const char* desc,
-		 char sep = '_');
-
-	~CGTarget();
-
-	// function that initializes the Target itself, before a Galaxy
-	// is attached to it.  This is called first (before setup).
-	void start();
-
-	// function that computes the schedule, allocates memory (if needed),
-	// and prepares for code generation (generating header and initial
-	// code)
-	int setup(Galaxy&);
-
-	// function that executes the schedule to generate the main code.
-	int run();
-
-	// finalization.  In derived classes, wrapup might download and
-	// execute the generated code; the baseclass simply displays the
-	// code.
-	void wrapup();
-
-	// generate a new, identical CGTarget.
-	Block* clone() const;
-
-	// fn for adding code to the target
-	void addCode(const char*);
-
-	// methods to compile and run the target.
-	// check access privilege later.
-	virtual int compileCode();
-	virtual int loadCode();
-	virtual int runCode();
-
-	// do we need this?
-	virtual void writeCode(ostream&);
-
-	// generate code for a processor in a multiprocessor system
-	virtual StringList generateCode(Galaxy&);
-
-	// type identification
-	int isA(const char*) const;
-
-	// Total Number of Labels generated.
-	int numLabels;
-	// Label Separator
-	char separator;
-
-	// output a comment.  Default form uses C-style comments.
-	virtual void outputComment (const char*);
-
-	// generate code for a firing.  The definition here simply
-	// fires the star
-	void writeFiring(Star&,int depth);
-
-	// dummy beginIteration and endIteration
-	void beginIteration(int,int);
-	void endIteration(int,int);
-
-	// system call in destination directory.  If error is specified
-	// & the system call is unsuccessful display the error message.
-	virtual int systemCall(const char*,const char* error=NULL);
-
-	// Copy an SDF schedule from the multiprocessor schedule, instead
-	// of performing an SDF scheduler for a uni-processor target
-	void copySchedule(SDFSchedule&);
 };
 
 #endif

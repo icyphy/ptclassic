@@ -363,11 +363,11 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 }
 
 void AsmTarget :: wrapup() {
-	if (int(displayFlag))
+	if (int(displayFlag) && !haltRequested())
 		if (!genDisFile(myCode,uname,asmSuffix())) return;
 	else
 		if (!genFile(myCode,uname,asmSuffix())) return;
-	if (int(runFlag))
-		if (compileCode()) 
-			if (loadCode()) runCode();
+	if (int(runFlag) && !haltRequested())
+		if (compileCode() && !haltRequested()) 
+			if (loadCode() && !haltRequested()) runCode();
 }
