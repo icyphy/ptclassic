@@ -25,11 +25,12 @@ of the binary point includes the sign bit.
 At the programmer's level the precision of a Fix object is specified 
 by two parameters: the total number of bits in the word and the number 
 of integer bits (the number of bits to the left of the binary point). 
-The constructor for this Fix object looks like Fix(8, 3).
+The constructor for a Fix object of length 8 bits and 3 bits to the 
+left of the binary point is Fix(8, 3).
 Unsigned Fix objects are also supported by explicitly using the keyword
-"unsigned" in the appropriate constructor.  For example Fix(3, 1)
+"unsigned" in the appropriate constructor.  For example Fix(4, 3)
 makes a Fix object that holds a maximum value of 3.5 and a minimum 
-of -4, whereas Fix(3, 1, "unsigned") makes an object that holds a 
+of -4, whereas Fix(4, 3, "unsigned") makes an object that holds a 
 Fix object with a maximum value 7.5 and a minimum of 0. 
  
 Use of the Fix types in Ptolemy
