@@ -22,6 +22,11 @@ PacketData Packet::dummyPacket;
 
 // methods for PacketData.  These are typically overridden; they are
 // all virtual.
+
+// dummy destructor
+PacketData::~PacketData() {}
+
+// methods for conversion to other types
 int PacketData::asInt() const {
 	return errorConvert("int");
 }
@@ -32,9 +37,7 @@ Complex PacketData::asComplex() const {
 	return errorConvert("complex");
 }
 
-const char dummyString[] = "DUMMY";
-
-const char* PacketData::dataType() const { return dummyString;}
+const char* PacketData::dataType() const { return "DUMMY";}
 
 StringList PacketData::print() const {
 	StringList out = "<";
@@ -56,6 +59,15 @@ int PacketData::errorConvert(const char* arg) const {
 static Packet dummy;
 
 extern const dataType PACKET = "PACKET";
+
+// Packet error message generation
+StringList Packet::typeError(const char* expected) const {
+	StringList msg = " Expected packet type '";
+	msg += expected;
+	msg += "', got '";
+	msg += dataType();
+	msg += "'";
+}
 
 static PacketSample pproto;
 static Plasma packetPlasma(pproto);
