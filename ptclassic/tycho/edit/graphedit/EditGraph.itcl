@@ -256,7 +256,7 @@ body ::tycho::EditGraph::constructor {args} {
     bind $slate <Meta-Key-r> "$this redo"
 
     # Make a more pronounced highlight
-    $slate configure -highlightcolor azure1 -highlightwidth 8
+    $slate configure -highlightcolor azure2 -highlightwidth 4
 
     # Enable selection with button 1; shift-click toggles
     $slate selector bind click vertex -button 1
@@ -269,7 +269,7 @@ body ::tycho::EditGraph::constructor {args} {
     # Create the interactor to move selected items
     set follower [$slate interactor Follower]
     $slate selector delegate immediate selected $follower vertex \
-	    -button 1 
+	    -button 1
     $slate selector delegate immediate selected $follower vertex \
 	    -button 1 -modifiers shift
 
