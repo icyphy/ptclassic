@@ -9,7 +9,7 @@ Calculation by table lookup.  Input range of (-1,1) scaled by pi.
 	acknowledge { Gabriel version by Maureen O'Reilly }
 	author { J. Pino (ported from Gabriel) }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
