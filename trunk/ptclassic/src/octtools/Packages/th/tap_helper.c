@@ -232,7 +232,7 @@ double thGetPerimCap( layer )
 double thGetSheetResistance( layer )
     octObject *layer;
 {
-    double r = -1.0;
+    volatile double r = -1.0;
     ERR_IGNORE(r = thGetLayerPropReal( layer, "SHEET-RESISTANCE" ));
     return r;
 }
@@ -240,7 +240,7 @@ double thGetSheetResistance( layer )
 double thGetSheetInductance( layer )
     octObject *layer;
 {
-    double r = -1.0;
+    volatile double r = -1.0;
     ERR_IGNORE(r = thGetLayerPropReal( layer, "SHEET-INDUCTANCE" ));
     return r;
 }
