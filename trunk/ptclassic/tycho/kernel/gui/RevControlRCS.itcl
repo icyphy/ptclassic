@@ -182,83 +182,72 @@ body ::tycho::RevControlRCS::unedit {} {
 
 #####################################################################
 #### viewHistory
-# View or close the version control history.
+# View or close the version control history. Read in from UNIX's
+# rlog command, then translate from RCS format  to SCCS format.
 # 
 body ::tycho::RevControlRCS::viewHistory {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    if {[info exists itk_component(history)] && \
-	    [winfo exists $itk_component(history)]} {
-	delete object $itk_component(history)
-	return
-    } {
-	set dir [file dirname $file]
-	set basefile [file tail $file]
-	set olddir [eval pwd]
-	
-	if {![file exists [file join $dir RCS ${basefile},v]]} {
-	    error "The file \"$file\" is not under RCS control."
-	}
-	cdDir $dir
-	if [catch {exec rlog $basefile} results] {
-	    error "`rlog $basefile' failed:\n$results"
-	}
-	set ind1 [string first "----------------------------" $results]
-	if {$ind1 == -1} {
-	    # No logs yet.
-	    set history ""
-	} else {
-            set history [string range $results $ind1 end]
-	}
-	# Create the display
-	itk_component add history {
-	    ::tycho::Edit $itk_component(hull).history -textheight 30
-	} {
-	    keep -readonly -textwidth -background \
-		    -highlightbackground -highlightcolor -selectforeground \
-		    -cursor -insertbackground -textforeground -textfont \
-		    -textbackground
-	}
-	pack $itk_component(history) -expand yes -fill both
-	$itk_component(history) configure -readonly 1
 
-
-        # Translate the RCS format to SCCS format:
-        set version ERROR
-        set history2 "\n\n"
-        foreach line [split $history \n] {
-            if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
-                regexp -nocase \
-                        {^date: ([0-9/]+) ([0-9:]+);  author: ([a-z]*);} \
-                        $line match date time user
-                append history2 "\n"
-                append history2 "D $version $date $time $user ? ? ?\n"
-                append history2 "MRs:\n"
-                append history2 "COMMENTS:\n"
-                set prevline $line
-            } elseif {[regexp {^revision} $line] && \
-                    $prevline == "----------------------------"} {
-                regexp {^revision ([0-9.]*)} $line match version
-                set prevline $line
-            } elseif {[regexp {^----------------------------} $line] \
-                    || [regexp {^============================} $line]} {
-                set prevline $line	    
-            } else {
-                # Comment lines here
-                append history2 "$line\n"
-                set prevline $line	    
-            }
-        }
-
-	# Parse the history
-	parseHistory $history2 [$itk_component(history) textWinName]
-
-	# FIXME: Delay or the focus command is ignored.  Tk bug?
-	#after 500 "focus [$itk_component(history) textWinName]"
-
-	cd $olddir
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    
+    if {![file exists [file join $dir RCS ${basefile},v]]} {
+        error "The file \"$file\" is not under RCS control."
     }
+    cdDir $dir
+
+    if [catch {exec rlog $basefile} results] {
+        error "`rlog $basefile' failed:\n$results"
+    }
+
+
+    # Start translating here. First, skip the header file until "----"
+    set ind1 [string first "----------------------------" $results]
+    if {$ind1 == -1} {
+        # No logs yet.
+        set history ""
+    } else {
+        set history [string range $results $ind1 end]
+    }
+
+    # Translate the RCS format to SCCS format:
+    set version ERROR
+    set history2 "\n\n"
+    foreach line [split $history \n] {
+        if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
+            regexp -nocase \
+                    {^date: ([0-9/]+) ([0-9:]+);  author: ([a-z]*);} \
+                    $line match date time user
+            append history2 "\n"
+            append history2 "D $version $date $time $user ? ? ?\n"
+            append history2 "MRs:\n"
+            append history2 "COMMENTS:\n"
+            set prevline $line
+        } elseif {[regexp {^revision} $line] && \
+                $prevline == "----------------------------"} {
+            regexp {^revision ([0-9.]*)} $line match version
+            set prevline $line
+        } elseif {[regexp {^----------------------------} $line] \
+                || [regexp {^============================} $line]} {
+            set prevline $line	    
+        } else {
+            # Comment lines here
+            append history2 "$line\n"
+            set prevline $line	    
+        }
+    }
+    
+    # Parse the history
+    $itk_component(history) clear
+    parseHistory $history2 [$itk_component(history) textWinName]
+    $itk_component(history) markUnmodified
+    
+    # FIXME: Delay or the focus command is ignored.  Tk bug?
+    #after 500 "focus [$itk_component(history) textWinName]"
+    cd $olddir
 }
 
     ###################################################################
@@ -382,7 +371,6 @@ body ::tycho::RevControlRCS::isCheckedOut {} {
 body ::tycho::RevControlRCS::updateHistory {} {
     if {[info exists itk_component(history)] && \
 	    [winfo exists $itk_component(history)]} {
-	delete object $itk_component(history)
 	viewHistory
     }
 }
