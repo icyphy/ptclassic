@@ -194,7 +194,7 @@ public:
 // this models a two-address-space chip such as the Motorola 56000
 // or the Analog Devices 2100 family.  All porthole buffers are placed
 // in x memory.  States may go into either memory (based on attributes)
-// or go into both memories if they have the AB_SHARED attribute.
+// or go into both memories if they have the AB_SYMMETRIC attribute.
 class DualMemory : public LinProcMemory {
 protected:
 	LinProcMemory x;
