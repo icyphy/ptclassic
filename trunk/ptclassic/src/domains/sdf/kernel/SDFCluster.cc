@@ -641,7 +641,7 @@ SDFClusterBag* SDFClusterGal :: createBag() {
 }
 
 // constructor: make empty bag.
-SDFClusterBag :: SDFClusterBag() : sched(0), gal(0), exCount(0), owner(TRUE) {}
+SDFClusterBag :: SDFClusterBag() : sched(0), gal(0), exCount(0) {}
 
 void SDFClusterBag :: createInnerGal() {
 	delete gal;
@@ -750,12 +750,15 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 	// problems with iterators.
 	SDFClustPortIter nextbp(*this);
 	SDFClustPort* p;
-	SequentialList zap;
-	while ((p = nextbp++) != 0)
-		if (p->far() && p->far()->parent() == b) zap.put(p);
+
 	// zap is the list of connections between the two clusters.  These
 	// become internal connections so we zap them from both bags' lists
 	// of external pointers.
+	SequentialList zap;
+	while ((p = nextbp++) != 0)
+		if (p->far() && p->far()->parent() == b) zap.put(p);
+
+	// now zap those that become internal
 	ListIter nextZap(zap);
 	while ((p = (SDFClustPort*)nextZap++) != 0) {
 		SDFClustPort* near = p->inPtr();
@@ -780,7 +783,7 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 	}
 	// get rid of b
 	par->removeBlock(*b);	// remove b from parent galaxy
-	b->owner = FALSE;	// blocks in b's galaxy are not owned by b
+	b->gal->orphanBlocks();	// b's galaxy's blocks no longer owned by b
 	delete b;		// zap the shell
 }
 
@@ -904,9 +907,6 @@ int SDFClusterBag::run() {
 
 // destroy the bag.
 SDFClusterBag::~SDFClusterBag() {
-	// empty b's galaxy's list of blocks if b doesn't own them
-	// to prevent them from being prematurely deleted -BLE
-	if (gal && !owner) gal->orphanBlocks();
 	delete gal;
 	delete sched;
 	deleteAllGenPorts();
