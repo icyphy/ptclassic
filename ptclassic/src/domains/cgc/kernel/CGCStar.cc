@@ -142,6 +142,7 @@ StringList CGCStar::expandVal(const char *name) {
 StringList CGCStar::expandRef(const char* name)
 {
     StringList ref;
+    GenericPort* genPort;
     CGCPortHole* port;
     State* state;
     StringList portName = expandPortName(name);
@@ -174,8 +175,15 @@ StringList CGCStar::expandRef(const char* name)
     }
 
     // Expand PortHole reference.
-    else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
-    {
+    else if (((genPort = genPortWithName(portName)) != NULL)
+	     && genPort->isItMulti()) {
+	codeblockError(name, " is a multihole name, not an actual "
+		       "port name.  Ports that correspond to a "
+		       "multihole need to be referenced with "
+		       "<name>#<port number> syntax.");
+    }
+    else if (genPort) {
+	port = (CGCPortHole*)genPort;
 	DataType type = port->resolvedType();
 
 	// pass precision for fix ports
@@ -418,6 +426,7 @@ StringList CGCStar::expandFixPrecisionMacro(const char* name)
 StringList CGCStar::expandFixPrecisionMacro(const char* name, const char* offset)
 {
     StringList ref;
+    GenericPort* genPort;
     CGCPortHole* port;
     State *state, *offsetState;
     StringList offsetVal;
@@ -461,10 +470,16 @@ StringList CGCStar::expandFixPrecisionMacro(const char* name, const char* offset
 	    ref.initialize();
 	}
     }
-
     // Expand PortHole reference.
-    else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
-    {
+    else if (((genPort = genPortWithName(portName)) != NULL)
+	     && genPort->isItMulti()) {
+	codeblockError(name, " is a multihole name, not an actual "
+		       "port name.  Ports that correspond to a "
+		       "multihole need to be referenced with "
+		       "<name>#<port number> syntax.");
+    }
+    else if (genPort) {
+	port = (CGCPortHole*)genPort;
 	if (port->resolvedType() == FIX)
 	{
 	    // return a reference to the associated fix_prec variable
