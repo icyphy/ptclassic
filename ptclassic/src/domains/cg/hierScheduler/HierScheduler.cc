@@ -36,12 +36,10 @@ Programmer: Jose Luis Pino
 #endif
 
 #include "HierScheduler.h"
-#include "SDFScheduler.h"
-#include "LoopScheduler.h"
-#include "SDFCluster.h"
 #include "GalIter.h"
 #include "GraphUtils.h"
 #include "HierCluster.h"
+#include <iostream.h>
 
 /*virtual*/double HierScheduler::getStopTime() {
     return TRUE; // topScheduler.getStopTime();
@@ -75,30 +73,19 @@ int HierScheduler::dagNodes() const {
     return TRUE; // topScheduler.dagNodes();
 }
 
-int flattenGalaxy(Galaxy& g) {
-    return g.stateWithName("Scheduler")?FALSE:TRUE;
-}
-
-Cluster* newUserSpecifiedCluster(Galaxy& g) {
-    // FIXME - shouldn't this also fix the cluster/internal stars
-    // repetitions number?
-    const char* schedType = g.stateWithName("Scheduler")->initValue();
-    Scheduler* scheduler;
-    if (strcmp(schedType,"Cluster") == 0)
-	scheduler = new SDFClustSched("");
-    else if (strcmp(schedType,"Loop") == 0)
-	scheduler = new LoopScheduler("");
-    else
-	scheduler = new SDFScheduler;
-    Cluster* cluster = new HierCluster(g);
-    cluster->setScheduler(scheduler);
-    return cluster;
-}
-
 #define VISITED flags[0]
-#define BLOCK_NUMBER flags[1]
-#define ANCESTORS flags[2]
-#define DECENDENTS flags[3]
+#define NUMBER flags[1]
+#define PREDECESSORS flags[2]
+#define SUCCESSORS flags[3]
+
+inline int amIChainSource(Block& b) {
+    if (b.SUCCESSORS != 1) return FALSE;
+    if (b.PREDECESSORS != 1) return TRUE;
+    PredecessorIter predecessors(b);
+    Block* predecessor = predecessors.next();
+    if (predecessor && predecessor->SUCCESSORS > 1) return TRUE;
+    return FALSE;
+}
 
 // The complexity is shown within the O() function.
 // Let:
@@ -108,49 +95,54 @@ Cluster* newUserSpecifiedCluster(Galaxy& g) {
 void clusterChains(Galaxy& g) {
 
     // initialize flags for finding chain clusters - O(V)
-    DSGalTopBlockIter nextBlock(g);
-    Block *block;
-    int blockNum = 0;
-    while ((block = nextBlock++) != NULL) {
-	block->VISITED = block->BLOCK_NUMBER = blockNum++;
-	block->ANCESTORS = block->DECENDENTS = 0;
+    ClusterIter nextCluster(g);
+    Cluster *cluster;
+    int clusterNum = 0;
+    while ((cluster = nextCluster++) != NULL) {
+	// It is more efficient to initialize the flag with
+	// the largest index first
+	cluster->SUCCESSORS = 0;
+	cluster->PREDECESSORS = 0;
+	cluster->NUMBER = clusterNum++;
+	cluster->VISITED = cluster->NUMBER;
+    }
+
+    // compute total number of predecessors and successors - O(E)
+    nextCluster.reset();
+    while ((cluster = nextCluster++) != NULL) {
+	SuccessorIter nextSuccessor(*cluster);
+	Block* successor;
+	while ((successor = nextSuccessor++) != NULL) {
+	    if (successor->VISITED == cluster->NUMBER) continue;
+	    successor->VISITED = cluster->NUMBER;
+	    successor->PREDECESSORS++;
+	    cluster->SUCCESSORS++;
+	}
+    }
+
+    nextCluster.reset();
+    while ((cluster = nextCluster++) != NULL) {
+    	cout << cluster->fullName() << "\nSuccessors: "
+	     << cluster->SUCCESSORS << "\tPredecessors: "
+	     << cluster->PREDECESSORS << "\n\n";
+    }
+
+    nextCluster.reset();
+    while ((cluster = nextCluster++) != NULL) {
+	if (!amIChainSource(*cluster)) continue;
+	SuccessorIter successors(*cluster);
+	Block* successor = successors.next();
+	while (successor && successor->PREDECESSORS == 1) {
+	    cluster->absorb((Cluster&)*successor,FALSE);
+	    if (successor->SUCCESSORS != 1) break;
+	    SuccessorIter successors(*cluster);
+	    successor = successors.next();
+	}
     }
     
-    // compute total number of ancestors and decendents - O(E)
-    nextBlock.reset();
-    while ((block = nextBlock++) != NULL) {
-	BlockOutputIter nextPort(*block);
-	PortHole* port;
-	while ((port = nextPort++) != NULL) {
-	    Block*  farBlock = port->far()->parent();
-	    if (farBlock->VISITED == block->BLOCK_NUMBER) continue;
-	    farBlock->VISITED = block->BLOCK_NUMBER;
-	    farBlock->ANCESTORS++;
-	    block->DECENDENTS++;
-	}
-    }
-
-    nextBlock.reset();
-    while ((block = nextBlock++) != NULL) {
-	if (block->ANCESTORS==1 && block->DECENDENTS==1) {
-	    BlockOutputIter nextPort(*block);
-	    Block* decendent = (nextPort.next())->parent();
-	    if (decendent->parent()->parent())
-		((HierCluster*)decendent->parent())->merge(*block);
-	    else
-		(new HierCluster(*block))->merge(*decendent);
-	}
-    }
-
+    cleanupAfterCluster(g);
 }
-	    
-	    
-	
-    
-    
-    
-	    
-    
+
 void HierScheduler :: setup () {
 
     invalid = FALSE;
@@ -167,58 +159,20 @@ void HierScheduler :: setup () {
     sdfStars = totalNumberOfStars(*galaxy());
 
     if (!repetitions()) return;
-    initializeForClustering(*galaxy(),flattenGalaxy,newUserSpecifiedCluster);
+    HierCluster temp;
+    temp.initializeForClustering(*galaxy());
 
-    TopologyMatrix topology(*galaxy());
+    clusterChains(*galaxy());
+    
+    StringList clusterdot, dot, textDescription;
 
-    // Well-order clustering - FIXME, we should be ignoring arcs with
-    // sufficient delay!
-    GraphMatrixIter nextSink(topology);
-    GraphMatrixIter nextSource(topology);
-    int sink;
-
-    while ((sink = nextSink++) != -1) {
-	int possibleSource, source(-1);
-	nextSource.reset();
-	while ((possibleSource = nextSource++) != -1) {
-	    if (possibleSource == sink) continue;
-	    if (topology[possibleSource][sink]) {
-		if (source != -1) {
-		    source = -1;
-		    break;
-		}
-		else 
-		    source = possibleSource;
-	    }
-	}
-	if (source != -1) {
-	    Block *src = topology.graphBlock[source];
-	    Block *snk = topology.graphBlock[sink];
-	    HierCluster* cluster=NULL;
-	    if (! snk->isItAtomic()) {
-		cluster = (HierCluster*)snk;
-		cluster->absorb(*src);
-	    }
-	    else {
-		cluster = src->isItAtomic() ?
-		    new HierCluster(src->asStar()):(HierCluster*)src;
-		cluster->absorb(*snk);
-	    }
-	    topology.cluster(*cluster,source,sink);
-	    nextSink.reset();
-	    sink = nextSink++;
-	}
-    }
-	    
-    StringList dot, textDescription, topo;
-
-    topo << topology.print();
+    clusterdot << printClusterDot(*galaxy());
     dot << printDot(*galaxy());
     textDescription << galaxy()->print(FALSE);
 
     mtarget->writeFile(dot,".dot");
+    mtarget->writeFile(clusterdot,".cdot");
     mtarget->writeFile(textDescription,".desc");
-    mtarget->writeFile(topo,".topo");
 
     // Set all looping levels for child targets > 0.  Targets might
     // have to do different style buffering (ie. CGC)
