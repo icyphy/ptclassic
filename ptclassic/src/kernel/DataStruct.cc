@@ -204,23 +204,35 @@ void ListIter::reset() {
 }
 
 Pointer ListIter::next() {
-    Pointer p;
-    if (startAtHead) {
-	startAtHead = FALSE;
-	if (list->lastNode) {
-	    ref = list->lastNode->next;
-	    p = ref->e;
+    if (!startAtHead) {
+	if (list->lastNode == 0) {
+	  ref = 0;
+	  return 0;
+	}
+	else if (ref == list->lastNode) {
+	  ref = 0;
+	  return 0;
+	}
+	else if (ref == 0) {
+	  return 0;
 	}
 	else {
-	    ref = 0;
-	    p = 0;
+	  ref = ref->next;
+	  return ref->e;
 	}
     }
     else {
-	if ((list->lastNode == 0) || (list->lastNode == ref)) ref = 0;
-	p = ref ? (ref = ref->next, ref->e) : 0;
+	startAtHead = FALSE;
+	if (list->lastNode) {
+	    ref = list->lastNode->next;
+	    return ref->e;
+	}
+	else {
+	    ref = 0;
+	    return 0;
+	}
     }
-    return p;
+    return 0;
 }
 
 void ListIter::reconnect(const SequentialList& l) {
