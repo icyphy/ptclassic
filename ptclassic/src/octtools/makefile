@@ -27,7 +27,7 @@
 # Makefile for vem source
 
 # Important!  Do not run this makefile while in ~ptolemy/src/octtools.  Instead
-# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 

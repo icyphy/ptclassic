@@ -1,5 +1,5 @@
--*-Mode: text-*- -[Mon Aug 22 16:16:58 2005 by cxh]-
-Version: @(#)README	1.2 7/1/94
+-*-Mode: text-*- -[Thu Aug  3 14:45:11 1995 by cxh]-
+Version: $Id$ %Q%
 
 octtools/README
 
@@ -20,16 +20,16 @@ The main differences between vem from 8.1 and vem from 8.2:
 How to debug Ptolemy/vem problems
 ---------------------------------
 
-    $PTOLEMY/octtools/bin.$ARCH should contain two binaries, vem and
+    $PTOLEMY/octtools/bin.$PTARCH should contain two binaries, vem and
     vem.debug.
 
     I've modified the pigiEnv.csh script so that you can determinie
     which vem is run by setting an environment variable, VEMBINARY.
 
-    Usually pigiEnv.csh will run $PTOLEMY/bin.$ARCH/vem.  
+    Usually pigiEnv.csh will run $PTOLEMY/bin.$PTARCH/vem.  
     To run a debug version of vem, set the VEMBINARY variable with:
 
-	setenv VEMBINARY $PTOLEMY/octtools/bin.$ARCH/vem.debug
+	setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem.debug
     
     And then start up pigi.
 
@@ -38,19 +38,19 @@ How to debug Ptolemy/vem problems
     have problems with bindings, try making a private link from
     from vem to vem.debug:
 	cd ~/bin
-	ln -s $PTOLEMY/octtools/bin.$ARCH/vem.debug vem
+	ln -s $PTOLEMY/octtools/bin.$PTARCH/vem.debug vem
     
     The vem 8.1 binaries are available as:
-    	setenv VEMBINARY $PTOLEMY/octtools/bin.$ARCH/vem-8.1
+    	setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem-8.1
     and
-	setenv VEMBINARY $PTOLEMY/octtools/bin.$ARCH/vem-8.1.debug
+	setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem-8.1.debug
 
     Looking at core files
     ---------------------
     If you create a core file with vem.debug, use gdb to get a
     backtrace:
 
-	gdb $PTOLEMY/octtools/bin.$ARCH/vem.debug core
+	gdb $PTOLEMY/octtools/bin.$PTARCH/vem.debug core
 
     You may find it helpful to use the 'dir' command inside gdb to set
     the path that gdb looks for sources with:
@@ -114,7 +114,7 @@ Vem and gcc
 	Building a vem with gcc
 	-----------------------
 	Part of the vem build process updates the octtools libraries
-	in $PTOLEMY/octtools/lib.$ARCH.
+	in $PTOLEMY/octtools/lib.$PTARCH.
 
 	If you do a clean rebuild of vem with gcc, then those
 	libraries will be updated.  
@@ -149,7 +149,7 @@ Miscellaneous Notes
  depend will not create the proper dependencies.
 
  To actually build a vem binary, you must install the libraries in
- Packages/* and Xpackages/* into $OCTTOOLS/lib.$ARCH.
+ Packages/* and Xpackages/* into $OCTTOOLS/lib.$PTARCH.
 
 *$OCTTOOLS/include should be an exact copy of the include directory.
  $OCTTOOLS/include would be used if you were going to link the
