@@ -86,9 +86,6 @@ class ::tycho::DataModel {
     # Configure an attribute
     method attrconfigure {type attribute args}
 
-    # Get a list children of a given type
-    method listing {type {context {}}}
-
     # Remove all data
     method clear {}
 
@@ -102,7 +99,7 @@ class ::tycho::DataModel {
     method exists {name}
 
     # Get the names and attributes of each item matching a pattern
-    method get {{pattern {}}}
+    method get {{pattern *}}
 
     # Get an attribute or attributes of an item
     method itemcget {name {attribute {}}}
@@ -110,8 +107,11 @@ class ::tycho::DataModel {
     # Configure attributes of an item
     method itemconfigure {name args}
 
+    # Get a list children of a given type
+    method listing {type {context {}}}
+
     # Get the names of each item matching a pattern
-    method names {{pattern {}}}
+    method names {{pattern *}}
 
     # Load data from a TIM string
     method parse {data}
@@ -127,6 +127,15 @@ class ::tycho::DataModel {
     
     # Create a header string
     protected method _header {}
+
+    # Update the cache if it's out of date
+    protected method _update
+
+    # Update the cache
+    protected method _updatecache
+
+    # Manipulate the data cache
+    protected method cache {mode args}
 
     # Define a new type of item
     protected method definetype {type args}
@@ -152,9 +161,6 @@ class ::tycho::DataModel {
     # Verify that an item exists
     private method _verify {name}
 
-    # Verify that an item does not exist
-    private method _verifynot {name}
-
     #################################################################
     ####                  private variables                    ####
 
@@ -170,6 +176,9 @@ class ::tycho::DataModel {
 
     # The scope in which we store data
     private variable scope
+
+    # The  data cache
+    private variable cache
 
     #### _typeinfo
     # This array contains a set of entries for each item type.
@@ -233,9 +242,14 @@ body ::tycho::DataModel::destructor {} {
 # Return the undo command.
 #
 body ::tycho::DataModel::add {name args} {
-    _verifynot $name
+    if [@scope $scope ::info exists [set modelname]($name)] {
+        error "An item \"$name\" already exists in $modelname"
+    }
 
-    # Extract type field
+    # Invalidate cache
+    @scope $scope set [set modelname]._cachevalid 0
+
+   # Extract type field
     regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Extract contents
@@ -318,41 +332,26 @@ body ::tycho::DataModel::attrconfigure {type attribute args} {
 }
 
 ########################################################################
-#### listing
-#
-# Return a list of child items of the given _type_. If the
-# _context_ is given, return children of that item; otherwise
-# return top-level items. The returned names are the names
-# within the given context only. For example, if the model
-# contains items with full names *item:foo* and *item:bar*,
-# then the call
-# <pre>
-#     $model listing item
-# </pre>
-# will return <code>{foo bar}</code>. (In comparison, the names{}
-# method will return <code>{item:foo item:bar}</code>. Children
-# are returned in the same order in which they were added to
-# the model -- the order of children of a given type can be altered
-# with the sort{} method.
-#
-body ::tycho::DataModel::listing {type {context {}}} {
-    @scope $scope set [set modelname].[set type]($context)
-}
-
-########################################################################
 #### clear
 #
-# Clear all data from the model.
+# Clear all data from the model and invalidate the cache.
 # This method is not, by default, undoable, because of the potential
 # size of the undo command. A client could add an undo command to
 # the history explicitly with the <code>history add</code>.
 #
 body ::tycho::DataModel::clear {} {
-    @scope $scope unset $modelname
-    foreach type $_typeinfo($scope) {
-        @scope $scope unset $modelname.$type
+    # Invalidate the cache
+    cache invalidate
+
+    # Unset the array data and the data for each type
+    catch {
+        @scope $scope unset $modelname
+        foreach type $_typeinfo($scope) {
+            @scope $scope unset $modelname.$type
+        }
     }
-    # Not undoable
+
+    # Return null since this is not undoable.
     return ""
 }
 
@@ -366,6 +365,9 @@ body ::tycho::DataModel::clear {} {
 body ::tycho::DataModel::delete {name} {
     _verify $name
     regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
+
+    # Invalidate cache
+    @scope $scope set [set modelname]._cachevalid 0
 
     # Get a description for the undo command
     # FIXME: this is horrendously inefficient. We need to
@@ -437,7 +439,7 @@ body ::tycho::DataModel::exists {name} {
 # listing{} method to get just children. Note also that the returned
 # list will not be ordered, whereas the result from listing{} will be.
 #
-body ::tycho::DataModel::get {{pattern {}}} {
+body ::tycho::DataModel::get {{pattern *}} {
     @scope $scope array get $modelname $pattern
 }
 
@@ -501,6 +503,28 @@ body ::tycho::DataModel::itemconfigure {name args} {
 }
 
 ########################################################################
+#### listing
+#
+# Return a list of child items of the given _type_. If the
+# _context_ is given, return children of that item; otherwise
+# return top-level items. The returned names are the names
+# within the given context only. For example, if the model
+# contains items with full names *item:foo* and *item:bar*,
+# then the call
+# <pre>
+#     $model listing item
+# </pre>
+# will return <code>{foo bar}</code>. (In comparison, the names{}
+# method will return <code>{item:foo item:bar}</code>. Children
+# are returned in the same order in which they were added to
+# the model -- the order of children of a given type can be altered
+# with the sort{} method.
+#
+body ::tycho::DataModel::listing {type {context {}}} {
+    @scope $scope set [set modelname].[set type]($context)
+}
+
+########################################################################
 #### names
 #
 # Return item names that match _pattern_.
@@ -511,7 +535,7 @@ body ::tycho::DataModel::itemconfigure {name args} {
 # listing{} method to get just children. Note also that the returned
 # list will not be ordered, whereas the result from listing{} will be.
 #
-body ::tycho::DataModel::names {{pattern {}}} {
+body ::tycho::DataModel::names {{pattern *}} {
     @scope $scope array names $modelname $pattern
 }
 
@@ -643,6 +667,138 @@ body ::tycho::DataModel::_header {} {
 }
 
 ########################################################################
+#### _update
+#
+# Build an updated version of the cache if it's out of date.
+# This is short-cut version of <b>cache update</b>.
+#
+body ::tycho::DataModel::_update {} {
+    if ![@scope $scope set [set modelname]._cachevalid] {
+        _updatecache
+    }
+}
+
+########################################################################
+#### _updatecache
+#
+# Build an updated version of the cache. This method should
+# be overridden by subclasses that maintain internal data derived
+# from the loaded data. The overriding method should use
+# <b>cache set</b> and <b>cache delete</b> to update the cache data,
+# then chain to this method.
+#
+body ::tycho::DataModel::_updatecache {} {
+    @scope $scope set [set modelname]._cachevalid 1
+}
+
+########################################################################
+#### cache
+#
+# Manipulate the cache state flag. Models often create internal
+# data derived from the data loaded into them, and this method
+# is provided as a means for method to keep this derived information
+# up-to-date.
+# 
+# <dl>
+# <dt><b>delete</b> ?_name_ ...?
+# <dd>
+# Delete the given cache entries. If none are given, delete all
+# cache entries.
+#
+# <dt><b>exists</b> _name_
+# <dd>
+# Return true if the cache contains the given entry, else false.
+#
+# <dt><b>get</b> ?_name_?
+# <dd>
+# Get the value of the cache entry named _name_. If _name_
+# is not supplied, return all cache entries as a name-value list.
+# An error will be generated if there is no cache entry named
+# _name_. Note that the data returned will be invalid if the
+# cache has been invalidate since the last update. (This is
+# intentional -- occasionally the _updatecache{} method may
+# in fact want to get the old data before deleting it.)
+#
+# <dt><b>invalidate</b>
+# <dd>
+# Declare that the cache data is not valid. This option is, in
+# effect, called any time data is added to or deleted from
+# the model. Note, however, that configuring items with
+# itemconfigure{} does not invalidate the cache -- if needed,
+# this can be done by overriding itemconfigure and calling
+# this option.
+#
+# <dt><b>set</b> _name_ _value_ ?_name_ _value_ ...?
+# <dd>
+# Get the value of each cache entry _name_ to the given value.
+#
+# <dt><b>update</b>
+# <dd>
+# Update the cache data. If the cache is not up to date, the
+# protected method updatecache{} will be called.
+#
+# <dt><b>valid</b>
+# <dd>
+# If the cache data is valid, return true, otherwise false.
+#
+# </dl>
+#
+body ::tycho::DataModel::cache {mode args} {
+    switch -exact $mode {
+	"delete" {
+            if { $args == "" } {
+                catch {unset cache}
+            } else {
+                foreach a $args {
+                    catch {unset cache($a)}
+                }
+            }
+        }
+	"exists" {
+	    if { [llength $args] != 1 } {
+		error "wrong # args: should be \"cache exists name\""
+            }
+            info exists cache([lindex $args 0])
+        }
+	"get" {
+	    if { [llength $args] > 1 } {
+		error "wrong # args: should be \"cache get ?name?\""
+            }
+            if { $args == "" } {
+                array get cache
+            } else {
+                return $cache([lindex $args 0])
+            }
+        }
+	"invalidate" {
+	    if { $args != "" } {
+		error "wrong # args: should be \"cache invalidate\""
+	    }
+	    @scope $scope set [set modelname]._cachevalid 0
+	}
+	"set" {
+            array set cache $args
+        }
+        "update" {
+ 	    if { $args != "" } {
+		error "wrong # args: should be \"cache update\""
+	    }
+            _update
+        }
+        "valid" {
+	    if { $args != "" } {
+		error "wrong # args: should be \"cache valid\""
+	    }
+	    @scope $scope set [set modelname]._cachevalid
+	}
+	default {
+	    error "bad option \"$mode\": should be delete, get, invalidate, \
+		    set, update, or valid"
+	}
+    }
+}
+
+########################################################################
 #### definetype
 #
 # Define a new item type. The first argument is the type of the item.
@@ -745,6 +901,7 @@ body ::tycho::DataModel::_mkparseproc {type args} {
     # Proc body
     append proc "    set type $type\n"
 
+
     # If the override option is set, call a method on the
     # object.
     if $opts(-override) {
@@ -769,21 +926,26 @@ body ::tycho::DataModel::_mkparseproc {type args} {
         append proc {
             global _current_ _context_
             global $_current_
-            set [set _current_]($_context_.$type:$name) $args
+            set index [join [concat $_context_ $type:$name] .]
+            set [set _current_]($index) $args
+
             global   $_current_.$type
             lappend [set _current_].[set type]($_context_) $name
+
+            global $_current_._cachevalid
+            set $_current_._cachevalid 0
         }
         # Set the value
         if $opts(-valued) {
             append proc {
-                lappend [set _current_]($_context_.$type:$name) value $value
+                lappend [set _current_]($index) -value $value
             }
         }
         # Parse contents
         if !$opts(-leafonly) {
             set t {
                 set saved $_context
-                set _context_ $_context_.$type:$name
+                set _context_ $index
             }
             append t "$safeinterp eval [list @scope $scope \$contents]\n"
             append t {
@@ -806,17 +968,5 @@ body ::tycho::DataModel::_mkparseproc {type args} {
 body ::tycho::DataModel::_verify {name} {
     if ![@scope $scope ::info exists [set modelname]($name)] {
     	error "Unknown item \"$name\" in $modelname"
-    }
-}
-
-########################################################################
-#### _verifynot
-#
-# Verify that no item with the given _name_ exists, raising
-# an error if it does.
-#
-body ::tycho::DataModel::_verifynot {name} {
-    if [@scope $scope ::info exists [set modelname]($name)] {
-    	error "An item \"$name\" already exists in $modelname"
     }
 }
