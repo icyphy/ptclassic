@@ -104,7 +104,9 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	else if (matchMacro(func, argList, "sharedSymbol", 2))
 	  s = lookupSharedSymbol(arg1, arg2);
 	else if (matchMacro(func, argList, "interOp", 2))
-	  s = expandInterOp(arg1, arg2);
+	  s = expandInterOp(arg1, arg2, "");
+	else if (matchMacro(func, argList, "interOp", 3))
+	  s = expandInterOp(arg1, arg2, arg3);
 	else if (matchMacro(func, argList, "assign", 1))
 	  s = expandAssign(arg1);
 	else if (matchMacro(func, argList, "temp", 2))
@@ -341,12 +343,16 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 }
 
 // Expand an expression interspersing an operator in a list of arguments.
-StringList VHDLStar :: expandInterOp(const char* oper, const char*
-				     args) {
+StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
+				     const char* part) {
   StringList interOp;
   StringList argList;
   StringList finalList;
 
+  // Need to test whether or not it actually uses all remaining
+  // tokens in macro arg as the "args" or if it just takes the
+  // next one in the comma-separated list.
+  
   // First parse out a list of args from the input string.
   while ((*args) != 0) {
     const int MAX_LENGTH = 64;
@@ -375,11 +381,21 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char*
       MPHIter nextPort(*multiPort);
       VHDLPortHole* port;
       while ((port = (VHDLPortHole*) nextPort++) != 0) {
-        finalList << expandRef(port->name());
+	if (!strcmp(part,"")) {
+	  finalList << expandRef(port->name());
+	}
+	else {
+	  finalList << expandRefCx(port->name(), "", part);
+	}
       }
     }
     else {
-      finalList << expandRef(item);
+      if (!strcmp(part,"")) {
+	finalList << expandRef(item);
+      }
+      else {
+	finalList << expandRefCx(item, "", part);
+      }
     }
   }
 
