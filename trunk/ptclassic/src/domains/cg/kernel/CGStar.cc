@@ -200,8 +200,8 @@ StringList CGStar::processCode(const char* text)
 // update text pointer t to point after the end of the argument list.
 StringList CGStar::processMacro(const char*& t)
 {
-    StringList out="";
-    char line[MAXLINELEN], *o = line;
+    StringList out;
+    out.initialize();
 
     // copy any character before the macro header unchanged
     while (*t != '\0') {
@@ -211,7 +211,8 @@ StringList CGStar::processMacro(const char*& t)
 	    // two consecutive substChar values give one on the output
 	    if (t++, *t == substChar())
 	    {
-		*o++ = *t++;
+		t++;
+		out << substChar();
 		continue;
 	    }
 
@@ -227,7 +228,6 @@ StringList CGStar::processMacro(const char*& t)
 	    if (*t++ != '(')
 	    {
 		codeblockError ("expecting '('", " after macro call");
-		out.initialize();
 		return out;
 	    }
 
@@ -298,32 +298,18 @@ StringList CGStar::processMacro(const char*& t)
 	    }
 	    t++;	// skip ')' at end of argument list
 
-	    // Must save temporary value returned by expandMacro.
-	    StringList temp = expandMacro(func, argList);
-	    const char* macro = temp;
-	    if (macro != NULL)
-		while ((*o++ = *macro++) != 0);
-	    else
-		*o++ = '\0';
-
-	    return out << line;
+	    out << expandMacro(func, argList);
+	    return out;
 	}
 	else	// not a macro call
 	{
-	    if ((*o++ = *t++) == '\n')
-	    {
-		*o = 0;
-		out << line;
-		o = line;
-	    }
+	    out << *t++;
 	}
     }
-
-    if (o > line)
+    if (out.length())
     {
-	*o++ = '\n';
-	*o = 0;
-	out << line;
+	const char* string = out;
+	if(string[out.length()-1] != '\n') out << '\n';
     }
     return out;
 }
