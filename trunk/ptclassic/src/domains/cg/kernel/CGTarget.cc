@@ -198,6 +198,8 @@ void CGTarget::setup() {
 	if (!parent())
 	    if (!modifyGalaxy()) return;
 
+	if (inWormHole()) wormPrepare();
+
 	if (!noSchedule) {
 		if(!schedulerSetup()) return;
 	}
@@ -209,7 +211,6 @@ void CGTarget::setup() {
 	if (inWormHole() && alone())
 	{
 	    adjustSampleRates();
-	    wormPrepare();
 	    generateCode();
 	    if (haltRequested()) return;
 	    if (compileCode())
@@ -443,10 +444,13 @@ void CGTarget :: adjustSampleRates() {
    BlockPortIter nextPort(*galaxy());
    PortHole* p;
    while ((p = nextPort++) != 0) {
-		DFPortHole* dp = (DFPortHole*) &p->newConnection();
-		int num = dp->numXfer() * dp->parentReps();
-		dp->far()->asEH()->setParams(num);
-	}
+       DFPortHole* dp = (DFPortHole*) &p->newConnection();
+       int num = dp->numXfer() * dp->parentReps();
+       // DO WE NEED THIS ANYMORE?  By the time we get here
+       // the CGWormTarget has spliced in the communication stars. FIXME
+       if (dp->far()->asEH())
+	   dp->far()->asEH()->setParams(num);
+   }
 }
 
 void CGTarget :: allWormInputCode() {
