@@ -18,9 +18,8 @@ $Id$
 #include "KnownTarget.h"
 #include "SDFTarget.h"
 #include "SDFWormhole.h"
-#include "SDFConnect.h"
-#include "SDFWormConnect.h"
-#include "SDFGeodesic.h"
+#include "SDFPortHole.h"
+#include "AutoForkNode.h"
 
 extern const char SDFdomainName[] = "SDF";
 
@@ -44,7 +43,7 @@ public:
 	EventHorizon& newTo() { LOG_NEW; return *new SDFtoUniversal;}
 
 	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new SDFGeodesic;}
+	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// constructor
 	SDFDomain() : Domain("SDF") {}

@@ -16,53 +16,49 @@ $Id$
 #endif
 
 #include "SDFStar.h"
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 
 
 /*******************************************************************
 
-	class DataFlowStar methods
+	class DataFlowStar/SDFStar methods
+
+The DataFlowStar thingies do SDF-specific methods, with a check
+of the isSDF fn to see if that is OK.
 
 ********************************************************************/
 
-DataFlowStar::DataFlowStar() : noTimes(0), repetitions(0,1) {}
-
-int DataFlowStar::isSDF() const { return FALSE;}
-
-// this must redefined, otherwise it says the star can never be run
-int DataFlowStar::notRunnable() { return 1;}
-
-// this says we cannot defer the star (default behavior)
-int DataFlowStar::deferrable() { return FALSE;}
+DataFlowStar::DataFlowStar() : noTimes(0), repetitions(0,1), nInP(0),
+master(0) {}
 
 // default runCost is 0
 unsigned DataFlowStar::runCost() { return 0;}
 
-int DataFlowStar::simRunStar(int) { return 1;}
-
 // return execution time: define a default time of 5 (why?)
 int DataFlowStar :: myExecTime() { return 5;}
 
-/*******************************************************************
-
-	class SDFStar methods
-
-********************************************************************/
+int DataFlowStar::isSDF() const { return FALSE;}
+int DataFlowStar::isSDFinContext() const { return FALSE;}
 
 int SDFStar::isSDF() const { return TRUE;}
+int SDFStar::isSDFinContext() const { return TRUE;}
 
-// SDF-specific initialize
-void SDFStar :: prepareForScheduling() {
+void DataFlowStar :: initialize() {
+	Star :: initialize();
 	repetitions = 0;
 	noTimes = 0;
+	BlockPortIter nextp(*this);
+	PortHole* p;
+	while ((p = nextp++) != 0)
+		if (p->isItInput()) nInP++;
 }
 
-// firing SDF star
-int SDFStar :: fire() {
+// execute SDF star -- OVERRIDE if not SDF!
+int DataFlowStar :: run() {
 	BlockPortIter next(*this);
 	for(int i = numberPorts(); i > 0; i--)
-		(next++)->grabData();
-	int status = Star::fire();
+		(next++)->receiveData();
+	int status = Star::run();
 	// we send the data even on error
 	next.reset();
 	for(i = numberPorts(); i > 0; i--)
@@ -97,12 +93,11 @@ inline int wormEdge(PortHole& p) {
 // It is assumed that the denominator of the
 // repetitions member is unity (as it should be).
 
-int SDFStar :: notRunnable () {
-
-	SDFStarPortIter nextp(*this);
-	SDFPortHole *p;
+int DataFlowStar :: notRunnable () {
+	DFStarPortIter nextp(*this);
+	DFPortHole *p;
 	// Check to see whether the requisite repetitions have been met.
-	if (repetitions.numerator <= int(noTimes))
+	if (repetitions.num() <= int(noTimes))
 		return 2;
 
 	// Step through all the input ports, checking to see whether
@@ -121,7 +116,7 @@ int SDFStar :: notRunnable () {
 	// simRunStar
 	////////////////////////////
 
-int SDFStar :: simRunStar (int deferFiring) {
+int DataFlowStar :: simRunStar (int deferFiring) {
 
 	int test = notRunnable();
 
@@ -130,7 +125,7 @@ int SDFStar :: simRunStar (int deferFiring) {
 	// If we get to this point without returning, then the star can be run.
 
 	int i;
-	SDFPortHole* port;
+	DFPortHole* port;
 
 	// An important optimization for code generation:
 	// Postpone any execution of a star feeding data to another
@@ -145,7 +140,7 @@ int SDFStar :: simRunStar (int deferFiring) {
 	// the number of tokens on each arc.
 	// Note that this should work equally well if there are no inputs.
 
-	SDFStarPortIter nextp(*this);
+	DFStarPortIter nextp(*this);
 	for(i = numberPorts(); i>0; i--) {
 
 		// Look at the next port in the list
@@ -178,11 +173,11 @@ int SDFStar :: simRunStar (int deferFiring) {
 // star that is runnable.  Also postpone if any output port
 // has enough data on it to satisfy destination stars.
 
-int SDFStar :: deferrable () {
+int DataFlowStar :: deferrable () {
 
 	int i;
-	SDFPortHole* port;
-	SDFStarPortIter nextp(*this);
+	DFPortHole* port;
+	DFStarPortIter nextp(*this);
 	// Check to see whether any destination blocks are runnable
 	for(i = numberPorts(); i>0; i--) {
 		// Look at the next port in the list

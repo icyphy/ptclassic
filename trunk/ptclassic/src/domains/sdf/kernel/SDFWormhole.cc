@@ -27,19 +27,27 @@ Version identification:
 
 ********************************************************************/
 
+void SDFWormhole :: setup() {
+	Wormhole :: setup();
+	mark = 0;
+}
 
 void SDFWormhole :: go() {
 	// set the currentTime of the inner domain.
 	target->setCurrentTime(arrivalTime);
 
 	// run
-	run();
+	Wormhole::run();
+}
+
+void SDFWormhole :: wrapup() {
+	target->wrapup();
 }
 
 // return the next time Stamp for the stopping condition of the inner timed
 // domain.
 
-float SDFWormhole :: getStopTime() {
+double SDFWormhole :: getStopTime() {
 	// set the next token arrival time
 	arrivalTime += space;
 	return arrivalTime;
@@ -49,10 +57,10 @@ float SDFWormhole :: getStopTime() {
 // At the beginning, token is arrived at the currentTime of the SDF
 // scheduler. It is incremented by "space" afterwards.
 
-float SDFWormhole :: getArrivalTime() {
+double SDFWormhole :: getArrivalTime() {
 	// At the very first call, we initialize "arrivalTime".
 	if (!mark) {
-		SDFScheduler* sched = (SDFScheduler*) parent()->mySched();
+		SDFScheduler* sched = (SDFScheduler*) parent()->scheduler();
 		arrivalTime = sched->currentTime;
 		space = sched->schedulePeriod / double(repetitions) ;
 		mark = 1;
@@ -77,6 +85,99 @@ StringList SDFWormhole :: printRecursive() const {
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* SDFWormhole :: clone() const {
-LOG_NEW; return new SDFWormhole(gal.clone()->asGalaxy(),target->cloneTarget());
+	LOG_NEW; return new SDFWormhole(gal.clone()->asGalaxy(),
+					target->cloneTarget());
 }
 
+Block* SDFWormhole :: makeNew() const {
+	LOG_NEW; return new SDFWormhole(gal.makeNew()->asGalaxy(),
+					target->cloneTarget());
+}
+
+/**************************************************************************
+
+	methods for SDFtoUniversal
+
+**************************************************************************/
+
+void SDFtoUniversal :: receiveData ()
+{
+	// 1. get data
+	getData();
+
+	// Check it is an input or output.
+	// BUG: g++ 2.2.2 is screwup up the vtbl for fns inherited
+	// from two different baseclasses.
+	if (SDFtoUniversal::isItInput()) {
+		
+		// 2. set the timeMark from token's arrival Time to wormhole.
+		SDFWormhole* worm = (SDFWormhole*) wormhole;
+		timeMark = worm->getArrivalTime();
+
+	} else {
+		// 2. annul increment of currentTime at the end of run.
+		SDFScheduler* sched = (SDFScheduler*) parent()->scheduler();
+		timeMark = sched->currentTime - sched->schedulePeriod;
+	}
+
+	// transfer Data
+	transferData();
+}
+
+void SDFtoUniversal :: initialize() {
+	InSDFPort :: initialize();
+	ToEventHorizon :: initialize();		
+}
+
+int SDFtoUniversal :: isItInput() const { return EventHorizon :: isItInput(); }
+int SDFtoUniversal :: isItOutput() const {return EventHorizon:: isItOutput();}
+
+EventHorizon* SDFtoUniversal :: asEH() { return this; }
+	
+/**************************************************************************
+
+	methods for SDFfromUniversal
+
+**************************************************************************/
+
+void SDFfromUniversal :: sendData ()
+{
+	// 1. transfer data
+	transferData();
+
+	if (tokenNew) {
+		// 2. put data
+		putData();
+
+	} else if (SDFfromUniversal::isItOutput()) {
+		// 2. inside domain does not generate enough number of tokens,
+		//    which is error.
+		Error::abortRun(*this, "not enough output tokens ",
+				"at SDF wormhole boundary");
+	}
+
+	// no timeMark business since SDF is "untimed" domain.
+}
+
+// wait until has enough number of tokens to fire the inside star
+// (#repetitions) times from SDF scheduler.
+
+int SDFfromUniversal :: ready() {
+	SDFStar* s = (SDFStar*) far()->parent();
+	int target = far()->numXfer() * s->reps();
+	if (numTokens() >= target) {
+		// yes, enough tokens
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void SDFfromUniversal :: initialize() {
+	OutSDFPort :: initialize();
+	FromEventHorizon :: initialize();
+}
+
+int SDFfromUniversal :: isItInput() const {return EventHorizon::isItInput();}
+int SDFfromUniversal :: isItOutput() const {return EventHorizon::isItOutput();}
+
+EventHorizon* SDFfromUniversal :: asEH() { return this; }

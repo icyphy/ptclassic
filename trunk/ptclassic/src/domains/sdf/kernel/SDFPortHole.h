@@ -11,13 +11,13 @@ $Id$
 This file contains definitions of SDF-specific PortHole classes.
 
 ******************************************************************/
-#ifndef _SDFConnect_h
-#define _SDFConnect_h 1
+#ifndef _SDFPortHole_h
+#define _SDFPortHole_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "Connect.h"
+#include "PortHole.h"
 
 /*****************************************************************
 SDF: Synchronous Data Flow
@@ -114,7 +114,7 @@ public:
 	int isItInput () const ; // {return TRUE; }
 
 	// Get Particles from input Geodesic
-	void grabData();
+	void receiveData();
 
         // Services of PortHole that are often used: 
         // setPort(DataType d); 
@@ -134,7 +134,7 @@ public:
 
 	// Move the current Particle in the input buffer -- this
 	// method is invoked by the SDFScheduler before go()
-	void grabData();
+	void receiveData();
 
 	// Put the Particles that were generated into the
 	// output Geodesic -- this method is invoked by the

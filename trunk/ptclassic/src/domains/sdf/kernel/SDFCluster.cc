@@ -45,7 +45,7 @@ static const char file_id[] = "SDFCluster.cc";
 #include "Geodesic.h"
 #include "Plasma.h"
 #include "Target.h"
-#include "streamCompat.h"
+#include "pt_fstream.h"
 #include "Error.h"
 
 // A SDFClusterGal is a Galaxy, built from another galaxy.
@@ -67,9 +67,9 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 {
 	int nports = setPortIndices(gal);
 	LOG_NEW; SDFClustPort** ptable = new SDFClustPort*[nports];
-	GalStarIter nextStar(gal);
-	SDFStar* s;
-	while ((s = (SDFStar*)nextStar++) != 0) {
+	DFGalStarIter nextStar(gal);
+	DataFlowStar* s;
+	while ((s = nextStar++) != 0) {
 		LOG_NEW; SDFAtomCluster* c = new SDFAtomCluster(*s,this);
 		addBlock(*c);
 		SDFClustPortIter nextPort(*c);
@@ -249,7 +249,7 @@ int SDFClusterGal::parallelLoopMergePass() {
 			if (logstrm)
 				*logstrm <<
 				 "Trying parallel loop merge of " <<
-				 c->readName() << " and " << c2->readName();
+				 c->name() << " and " << c2->name();
 			// merge if no indirect paths in either direction.
 			if (indirectPath(c,c2) || indirectPath(c2,c)) {
 				if (logstrm) *logstrm <<
@@ -388,8 +388,8 @@ int SDFClusterGal::loopPass() {
 		c1->loopBy(r1);
 		c2->loopBy(r2);
 		if (logstrm)
-			*logstrm << "looping " << c1->readName() << " by "
-				<< r1 << " and " << c2->readName() << " by "
+			*logstrm << "looping " << c1->name() << " by "
+				<< r1 << " and " << c2->name() << " by "
 					<< r2 << "\n";
 		return TRUE;
 	}
@@ -401,7 +401,7 @@ int SDFClusterGal::loopPass() {
 		if (fac > 1) {
 			c->loopBy(fac);
 			if (logstrm)
-				*logstrm << "looping " << c->readName()
+				*logstrm << "looping " << c->name()
 					<< " by " << fac <<"\n";
 			changes = TRUE;
 		}
@@ -441,14 +441,14 @@ int SDFCluster::loopFactor() {
 
 // fn to print a single port of a cluster
 static ostream& operator<<(ostream& o, SDFClustPort& p) {
-	o << p.parent()->readName() << "." << p.readName();
+	o << p.parent()->name() << "." << p.name();
 	SDFClustPort* pFar = p.far();
 	if (p.isItOutput())
 		o << "=>";
 	else
 		o << "<=";
 	if (!pFar) o << "0";
-	else o << pFar->parent()->readName() << "." << pFar->readName();
+	else o << pFar->parent()->name() << "." << pFar->name();
 	if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
 	return o;
 }
@@ -468,7 +468,7 @@ ostream& SDFCluster::printPorts(ostream& o) {
 // loop a cluster.  Adjust repetitions and token counts.
 void SDFCluster::loopBy(int fac) {
 	pLoop *= fac;
-	repetitions.numerator /= fac;
+	repetitions *= Fraction(1,fac);
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0)
@@ -480,7 +480,7 @@ void SDFCluster::loopBy(int fac) {
 int SDFCluster::unloop() {
 	int fac = pLoop;
 	pLoop = 1;
-	repetitions.numerator *= fac;
+	repetitions *= Fraction(fac);
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0)
@@ -514,8 +514,8 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 	}
 
 	if (logstrm)
-		*logstrm << "merging " << c1->readName() << " and " <<
-			c2->readName() << "\n";
+		*logstrm << "merging " << c1->name() << " and " <<
+			c2->name() << "\n";
 
 	SDFClusterBag* c1Bag = (c1->loop() == 1) ? c1->asBag() : 0;
 	SDFClusterBag* c2Bag = (c2->loop() == 1) ? c2->asBag() : 0;
@@ -566,7 +566,7 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 	}
 // move c from its current galaxy to my galaxy.
 	par->removeBlock(*c);
-	gal->addBlock(*c,c->readName());
+	gal->addBlock(*c,c->name());
 // adjust the bag porthole list.  Some of c's ports will now become
 // external ports of the cluster, while some external ports of the
 // cluster that connnect to c will disappear.
@@ -623,11 +623,11 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 	SDFClusterBagIter nextC(*b);
 	SDFCluster* c;
 	while ((c = nextC++) != 0) {
-		gal->addBlock(*c,c->readName());
+		gal->addBlock(*c,c->name());
 	}
 	SDFClustPortIter nextP(*b);
 	while ((p = nextP++) != 0) {
-		p->setNameParent(p->readName(),this);
+		p->setNameParent(p->name(),this);
 		addPort(*p);
 	}
 // get rid of b.
@@ -669,7 +669,7 @@ int SDFClusterBag::simRunStar(int deferFiring) {
 	// handle FORCE input
 	if (deferFiring == FORCE)
 		noTimes = 0;
-	int status = SDFStar::simRunStar(deferFiring);
+	int status = DataFlowStar::simRunStar(deferFiring);
 	if (status == 0) {
 		int nRun = loop();
 		if (sched == 0) {
@@ -680,7 +680,7 @@ int SDFClusterBag::simRunStar(int deferFiring) {
 		SDFSchedIter nextStar(*sched);
 		for (int i = 0; i < nRun; i++) {
 			nextStar.reset();
-			SDFStar* s;
+			DataFlowStar* s;
 			while ((s = nextStar++) != 0)
 				s->simRunStar(FORCE);
 		}
@@ -691,7 +691,9 @@ int SDFClusterBag::simRunStar(int deferFiring) {
 int SDFClusterBag::genSched() {
 	if (sched) return TRUE;
 	LOG_NEW; sched = new SDFBagScheduler;
-	return sched->setup(*gal);
+	sched->setGalaxy(*gal);
+	sched->setup();
+	return !Scheduler::haltRequested();
 }
 	
 // indent by depth tabs.
@@ -722,12 +724,12 @@ StringList SDFClusterBag::displaySchedule(int depth) {
 }
 
 // run the cluster, taking into account the loop factor
-int SDFClusterBag::fire() {
+int SDFClusterBag::run() {
 	if (!sched) {
 		if (!genSched()) return FALSE;
 	}
 	sched->setStopTime(loop()+exCount);
-	sched->run(*gal);
+	sched->run();
 	exCount += loop();
 	return !Scheduler::haltRequested();
 }
@@ -778,7 +780,7 @@ SDFCluster* SDFCluster::mergeCandidate() {
 
 // function to create names for atomic clusters and portholes.
 static const char* mungeName(NamedObj& o) {
-	StringList name = o.readFullName();
+	StringList name = o.fullName();
 	const char* cname = strchr (name, '.');
 	if (cname == 0) return "top";
 	cname++;
@@ -795,11 +797,11 @@ static const char* mungeName(NamedObj& o) {
 	return hashstring(buf);
 }
 
-// create an atomic cluster to surround a single SDFStar.
-SDFAtomCluster::SDFAtomCluster(SDFStar& star,Galaxy* parent) : pStar(star)
+// create an atomic cluster to surround a single DataFlowStar.
+SDFAtomCluster::SDFAtomCluster(DataFlowStar& star,Galaxy* parent) : pStar(star)
 {
-	SDFStarPortIter nextPort(star);
-	SDFPortHole* p;
+	DFStarPortIter nextPort(star);
+	DFPortHole* p;
 	while ((p = nextPort++) != 0) {
 		// do not make a port in the cluster if it is a "loopback" port
 		if (p->far()->parent() == &star) continue;
@@ -827,7 +829,7 @@ ostream& SDFCluster::printBrief(ostream& o) {
 	if (pLoop > 1) {
 		o << pLoop << "*";
 	}
-	return o << readName();
+	return o << name();
 }
 
 ostream& SDFAtomCluster::printOn(ostream& o) {
@@ -842,14 +844,14 @@ StringList SDFAtomCluster::displaySchedule(int depth) {
 		sch += loop();
 		sch += "*";
 	}
-	sch += real().readFullName();
+	sch += real().fullName();
 	sch += "\n";
 	return sch;
 }
 
-int SDFAtomCluster::fire() {
+int SDFAtomCluster::run() {
 	for (int i = 0; i < loop(); i++) {
-		if (!pStar.fire()) return FALSE;
+		if (!pStar.run()) return FALSE;
 	}
 	return TRUE;
 }
@@ -862,7 +864,7 @@ int SDFAtomCluster::simRunStar(int deferFiring) {
 		noTimes = 0;
 		deferFiring = FALSE;
 	}
-	int status = SDFStar::simRunStar(deferFiring);
+	int status = DataFlowStar::simRunStar(deferFiring);
 	if (status == 0)
 		for (int i = 0; i < loop(); i++)
 			pStar.simRunStar(FALSE);
@@ -875,10 +877,10 @@ int SDFAtomCluster::myExecTime() {
 
 // constructor for SDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an SDFClusterBag.
-SDFClustPort::SDFClustPort(SDFPortHole& port,SDFCluster* parent, int bp)
+SDFClustPort::SDFClustPort(DFPortHole& port,SDFCluster* parent, int bp)
 : pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0)
 {
-	const char* name = bp ? port.readName() : mungeName(port);
+	const char* name = bp ? port.name() : mungeName(port);
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
 	numberTokens = port.numXfer();
@@ -915,28 +917,22 @@ SDFClustPort* SDFClustPort :: realFarPort(SDFCluster* outsideCluster) {
 SDFClustSched::~SDFClustSched() { LOG_DEL; delete cgal;}
 
 // compute the schedule!
-int SDFClustSched::computeSchedule (Galaxy& gal) {
+int SDFClustSched::computeSchedule (Galaxy& g) {
 	LOG_DEL; delete cgal;
 
 	// log file stuff.
-	const char* file = logFile;
 	ostream* logstrm = 0;
-	if (file && *file) {
-		if (strcmp(file,"cerr") == 0 ||
-		    strcmp(file,"stderr") == 0)
-			logstrm = &cerr;
-		else {
-			int fd = creat(expandPathName(file), 0666);
-			if (fd < 0)
-				Error::warn(gal, "Can't open log file ",file);
-			else logstrm = new ofstream(fd);
+	if (logFile && *logFile) {
+		logstrm = new pt_ofstream(logFile);
+		if (!*logstrm) {
+			LOG_DEL; delete logstrm;
+			return FALSE;
 		}
 	}
 
 	// do the clustering.
-	cgal = new SDFClusterGal(gal,logstrm);
+	cgal = new SDFClusterGal(g,logstrm);
 	cgal->cluster();
-
 // generate schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm) {
@@ -972,11 +968,11 @@ StringList SDFBagScheduler::displaySchedule(int depth) {
 // The following functions are used in code generation.  Work is
 // distributed among the two scheduler and two cluster classes.
 void SDFClustSched::compileRun() {
-	Target& target = getTarget();
+	Target& targ = target();
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*)next++) != 0) {
-		c->genCode(target,1);
+		c->genCode(targ,1);
 	}
 }
 

@@ -161,11 +161,11 @@ char* galPortName;		/* name of galaxy port */
  */
 #define C_CONS 0
 #define C_EXECTIME 1
-#define C_START 2
-#define C_GO 3
-#define C_WRAPUP 4
-#define C_INITCODE 5
-#define C_DEST 6
+#define C_WRAPUP 2
+#define C_INITCODE 3
+#define C_DEST 4
+#define C_SETUP 5
+#define C_GO 6
 
 
 #define N_FORMS 7
@@ -174,9 +174,10 @@ int inlineFlag[N_FORMS];		/* marks which are to be inline */
 char destNameBuf[MEDBUFSIZE];		/* storage for destructor name */
 
 /* types and names of standard member funcs */
-char* codeType[] = {"","int ","void ","void ","void ","void ",""};
-char* codeFuncName[] = {"","myExecTime","start","go","wrapup",
-	"initCode",destNameBuf};
+char* codeType[] = {"","int ","void ","void ","","void ","void "};
+char* codeFuncName[] = {
+"","myExecTime","wrapup","initCode",destNameBuf,"setup","go"};
+
 int methKey;			/* signals which of the standard funcs */
 
 #define consCode codeBody[C_CONS]	/* extra constructor code */
@@ -198,7 +199,7 @@ typedef char * STRINGVAL;
 
 %token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS OUTPUT INPUT ACCESS
-%token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
+%token OUTMULTI INMULTI TYPE DEFAULT CLASS SETUP GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
@@ -331,7 +332,7 @@ stdmethkey:
 stdkey2:
 	CONSTRUCTOR			{ methKey = C_CONS;}
 |	DESTRUCTOR			{ methKey = C_DEST;}
-|	START				{ methKey = C_START;}
+|	SETUP				{ methKey = C_SETUP;}
 |	GO				{ methKey = C_GO;}
 |	WRAPUP				{ methKey = C_WRAPUP;}
 |	INITCODE			{ methKey = C_INITCODE;}
@@ -596,7 +597,7 @@ ident:	keyword
 /* keyword in identifier position */
 keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
-|DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
+|DEFAULT|SETUP|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
 |EXPLANATION
 |SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE
@@ -993,27 +994,25 @@ genDef ()
 	fprintf (fp, "%s\n", hCode);
 /* The class template */
 	fprintf (fp, "class %s : public %s\n{\n", fullClass, baseClass);
-	if (privateMembers[0])
-		fprintf (fp, "private:\n%s\n", privateMembers);
-	if (protectedMembers[0])
-		fprintf (fp, "protected:\n%s\n", protectedMembers);
-	fprintf (fp, "public:\n\t%s();\n", fullClass);
-        fprintf (fp, "\tconst char* readClassName() const;\n");
-/* The clone function: only if the class isn't a pure virtual */
-	if (!pureFlag)
-		fprintf (fp, "\tBlock* clone() const;\n");
 	sprintf (destNameBuf, "~%s", fullClass);
-	for (i = C_EXECTIME; i <= C_DEST; i++) {
-		if (codeBody[i])
-			fprintf (fp, "\t%s%s()%s\n", codeType[i],
-				codeFuncName[i], inlineFlag[i] ? " {" : ";");
-		if (inlineFlag[i])
-			fprintf (fp, "%s\n\t}\n", codeBody[i]);
-	}
-	if (publicMembers[0])
-		fprintf (fp, "%s\n", publicMembers);
+	fprintf (fp, "public:\n\t%s();\n", fullClass);
+/* The makeNew function: only if the class isn't a pure virtual */
+	if (!pureFlag)
+		fprintf (fp, "\t/* virtual */ Block* makeNew() const;\n");
+        fprintf (fp, "\t/* virtual*/ const char* className() const;\n");
 	for (i=0; i<numBlocks; i++)
 		fprintf (fp, "\tstatic CodeBlock %s;\n",blockNames[i]);
+	for (i = C_EXECTIME; i <= C_DEST; i++)
+		genStdProto(fp,i);
+	if (publicMembers[0])
+		fprintf (fp, "%s\n", publicMembers);
+	fprintf (fp, "protected:\n");
+	for (i = C_SETUP; i <= C_GO; i++)
+		genStdProto(fp,i);
+	if (protectedMembers[0])
+		fprintf (fp, "%s\n", protectedMembers);
+	if (privateMembers[0])
+		fprintf (fp, "private:\n%s\n", privateMembers);
 /* that's all, end the class def and put out an #endif */
 	fprintf (fp, "};\n#endif\n");
 	(void) fclose (fp);
@@ -1045,11 +1044,11 @@ genDef ()
 	fprintf (fp, "#include \"%s.h\"\n", fullClass);
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
-/* generate readClassName and (optional) clone function */
-        fprintf (fp, "\nconst char* %s :: readClassName() const {return \"%s\";}\n",
+/* generate className and (optional) makeNew function */
+        fprintf (fp, "\nconst char* %s :: className() const {return \"%s\";}\n",
 		fullClass, fullClass);
 	if (!pureFlag) {
-		fprintf (fp, "\nBlock* %s :: clone() const { LOG_NEW; return new %s;}\n",
+		fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s;}\n",
 			 fullClass, fullClass);
 	}
 /* generate the CodeBlock constructor calls */
@@ -1062,12 +1061,12 @@ genDef ()
 		fprintf (fp, " :\n\t%s", consCalls);
 	fprintf (fp, "\n{\n");
 	if (objDesc)
-		fprintf (fp, "\tdescriptor = \"%s\";\n", objDesc);
+		fprintf (fp, "\tsetDescriptor(\"%s\");\n", objDesc);
 	/* define the class name */
 	if (!consCode) consCode = "";
 	fprintf (fp, "%s\n%s\n", consStuff, consCode);
 	fprintf (fp, "}\n");
-	for (i = C_EXECTIME; i <= C_DEST; i++) {
+	for (i = C_EXECTIME; i <= C_GO; i++) {
 		if (codeBody[i] && !inlineFlag[i])
 			fprintf (fp, "\n%s%s::%s() {\n%s\n}\n",
 			codeType[i], fullClass, codeFuncName[i], codeBody[i]);
@@ -1251,8 +1250,9 @@ struct tentry keyTable[] = {
 	"public", PUBLIC,
 	"pure", PURE,
 	"seealso", SEEALSO,
+	"setup", SETUP,
 	"star", STAR,
-	"start", START,
+	"start", SETUP,		/* backward compatibility */
 	"state", DEFSTATE,
 	"type", TYPE,
 	"version", VERSION,
@@ -1659,4 +1659,16 @@ char *s;
 {
 	yyerr2 ("Extra token appears after valid input: ", s);
 	exit (1);
+}
+
+/* fn to write out standard methods in the header */
+genStdProto(fp,i)
+FILE* fp;
+int i;
+{
+	if (codeBody[i])
+		fprintf (fp, "\t/* virtual */ %s%s()%s\n", codeType[i],
+			 codeFuncName[i], inlineFlag[i] ? " {" : ";");
+	if (inlineFlag[i])
+		fprintf (fp, "%s\n\t}\n", codeBody[i]);
 }
