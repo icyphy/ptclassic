@@ -163,10 +163,20 @@ proc _finally2 {prefix tag xinc yinc n args} {
 # Follower-basic-1 test.
 #
 proc _interaction {tag id x y xinc yinc n args} {
+    # Because the interactor bindings use the "current" item,
+    # we have to fool them into thinking that there really
+    # is a current item. To do so, add the current tag to a
+    # canvas item (NB: Cannot add directly to a complex item
+    # -- see the comment to addtag{} in IncrCanvas.
+    if [string match {[A-Z]*} [.s type $id]] {
+        .s addtag current withtag [.s primary $id]
+    } else {
+        .s addtag current withtag $id
+    }
+
     # To simulate click, get bound script from the bound tag
     # and evaluate. Because the code looks at the "current" item,
     # manually add the tag here
-    .s addtag current withtag $id
     set script [.s bind $tag \
 	    [eval ::tycho::Interactor::event Click $args]]
     regsub -all %x $script $x script
@@ -192,5 +202,8 @@ proc _interaction {tag id x y xinc yinc n args} {
     regsub -all %x $script $x script
     regsub -all %y $script $y script
     uplevel #0 $script
+
+    # Remove the "current" tag
+    .s dtag current
 }
 
