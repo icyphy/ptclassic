@@ -239,6 +239,7 @@ ifdef PN
 			$(LIBDIR)/libpn.$(LIBSUFFIX)
 		ifneq ("$(filter sun% sol% ,$(PTARCH))","")
 			# POSIX thread library from Florida State University.
+			LIBFILES += $(ROOT)/thread/lib.$(PTARCH)/libgthreads.a
 			LIBS += -lposixthread \
 				-L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
 		else
