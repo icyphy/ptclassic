@@ -42,8 +42,9 @@ ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
 MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
 
 # parallel scheduler libraries.
-PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
-	$(LIBDIR)/libPar.a $(LIBDIR)/libcgstars.a $(LIBDIR)/libcg.a
+PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
+	$(LIBDIR)/libDL.$(LIBSUFFIX) $(LIBDIR)/libPar.$(LIBSUFFIX) \
+	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
 
 # If S56DIR is defined, then compile in the S56X Wormhole target.
 # This is defined in config-sun4.mk.
@@ -58,43 +59,49 @@ ifdef MATLABLIBDIR
 MATLABEXT_LIB= -lmat
 endif
 
-# Library files reqd by stars.  Note that libptolemy.a is not included.
+# Library files reqd by stars.  Note that libptolemy.$(LIBSUFFIX) is not included.
 PTINY_LIBFILES=\
-$(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
-$(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdfmatrixstars.a \
-$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
+$(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
+$(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
 STAR_LIBFILES=\
-$(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgctcltk.a $(LIBDIR)/libcgc.a \
-$(LIBDIR)/libcg96dspstars.a \
-$(LIBDIR)/libcg96stars.a $(LIBDIR)/libcg96.a \
-$(LIBDIR)/libcg56dspstars.a \
-$(LIBDIR)/libcg56stars.a $(LIBDIR)/libcg56.a \
-$(LIBDIR)/libsilagestars.a $(LIBDIR)/libsilage.a \
-$(LIBDIR)/libcgstars.a $(PARLIBFILES) $(LIBDIR)/libcg.a \
-$(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a \
-$(LIBDIR)/libthorstars.a $(LIBDIR)/libthor.a \
-$(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
-$(LIBDIR)/libsdfimagestars.a $(LIBDIR)/libImage.a \
-$(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdfmatrixstars.a \
-$(LIBDIR)/libbdfstars.a $(LIBDIR)/libbdf.a \
-$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
-$(LIBDIR)/libvhdlfstars.a $(LIBDIR)/libvhdlf.a \
-$(LIBDIR)/libvhdlbstars.a $(LIBDIR)/libvhdlb.a \
-$(LIBDIR)/libmdsdfstars.a $(LIBDIR)/libmdsdf.a
+$(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
+$(LIBDIR)/libcgc.$(LIBSUFFIX) \
+$(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
+$(LIBDIR)/libcg96stars.$(LIBSUFFIX) $(LIBDIR)/libcg96.$(LIBSUFFIX) \
+$(LIBDIR)/libcg56dspstars.$(LIBSUFFIX) \
+$(LIBDIR)/libcg56stars.$(LIBSUFFIX) $(LIBDIR)/libcg56.$(LIBSUFFIX) \
+$(LIBDIR)/libsilagestars.$(LIBSUFFIX) $(LIBDIR)/libsilage.$(LIBSUFFIX) \
+$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(PARLIBFILES) $(LIBDIR)/libcg.$(LIBSUFFIX) \
+$(LIBDIR)/libddfstars.$(LIBSUFFIX) $(LIBDIR)/libddf.$(LIBSUFFIX) \
+$(LIBDIR)/libthorstars.$(LIBSUFFIX) $(LIBDIR)/libthor.$(LIBSUFFIX) \
+$(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) $(LIBDIR)/libImage.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
+$(LIBDIR)/libbdfstars.$(LIBSUFFIX) $(LIBDIR)/libbdf.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
+$(LIBDIR)/libsdf.$(LIBSUFFIX) \
+$(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
+$(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
+$(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX)
 
-CP_LIBFILES= $(LIBDIR)/libcpstars.a $(LIBDIR)/libcpipstars.a \
-	$(LIBDIR)/libcp.a
-LWP_LIBFILES= $(LIBDIR)/liblwpthread.a
-AWE_LIBFILES= $(LIBDIR)/libawethread.a $(LIBDIR)/libawe2.a
+CP_LIBFILES= $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libcpipstars.$(LIBSUFFIX) $(LIBDIR)/libcp.$(LIBSUFFIX)
+LWP_LIBFILES= $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
+AWE_LIBFILES= $(LIBDIR)/libawethread.$(LIBSUFFIX) \
+	$(LIBDIR)/libawe2.$(LIBSUFFIX)
 
-ATM_LIBFILES = $(LIBDIR)/libmq.a $(LIBDIR)/libmqstars.a \
-	$(LIBDIR)/libdeatmstars.a $(LIBDIR)/libsdfatmstars.a \
-	$(LIBDIR)/libatm.a
+ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
 
 
 # CG-DDF no longer supported
-#$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
+#$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
 
 
 # Library switches reqd by stars for a ptiny ptolemy. Note that we don't
