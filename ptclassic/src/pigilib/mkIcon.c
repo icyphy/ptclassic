@@ -41,6 +41,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "oh.h"
 #include "vemInterface.h"
 #include "list.h"
+#include "compile.h"
+#include "kernelCalls.h"
+
 #include "mkIcon.h"
 
 #define ERRBUF_MAX 1000
