@@ -85,7 +85,7 @@ after processing the input is sent to the \fIsize\fR output.
 	input {
 		name {demand}
 		type {anytype}
-		desc { Demand an ouput. }
+		desc { Demand an output. }
 	}
 	inmulti {
 		name {inData}
