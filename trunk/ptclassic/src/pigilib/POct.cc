@@ -57,6 +57,7 @@ extern "C" {
 #include "util.h"
 #include "icon.h"
 #include "compile.h"
+#include "octIfc.h"
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -583,7 +584,25 @@ int POct::ptkSetParams (int aC,char** aV) {
 
 }
 
-// OCT commands to retrieve data from the Oct database
+// ptkFacetContents <facet-id> <list_of_types>
+// where <facet-id> is the string Handle of the Oct ID.
+// and <list_of_types> is a list of the types of contained 
+//   objects desired.  Note that the list could simply be 
+//   a single type.
+// 
+// The function returns the string Handle of the Oct IDs
+// of the contained objects of the appropriate types. 
+// 
+// Since it wasn't much extra work, I've made the function
+// work with all of the possible OCT types:
+// TERM NET INSTANCE PROP BAG POLYGON BOX CIRCLE PATH
+// LABEL LAYER POINT EDGE FORMAL CHANGE_LIST CHANGE_RECORD
+// 
+// Thanks to Joe for suggesting this function (and even
+// giving its specifications).
+//
+// Written by Alan Kamas  9/93
+// 
 int POct::ptkFacetContents (int aC,char** aV) {
     octObject facet;
 
@@ -644,6 +663,46 @@ int POct::ptkFacetContents (int aC,char** aV) {
     
     return TCL_OK;
 }
+
+// ptkGetMaster <OctInstanceHandle> [contents|interface]
+// Returns the Oct ID of the master facet of the passed instance
+// by default it returns the contents facet, but if the third
+// arguement is "contents" or "interface" it returns that facet.
+int POct::ptkGetMaster (int aC,char** aV) {
+    octObject instance;
+    octObject facet;
+
+    if ( (aC != 2) & (aC != 3) ) return 
+          usage ("ptkGetMaster <OctInstanceHandle> [contents|interface]");
+
+    // "NIL" instances have "NIL" masters.  Hope this is what the
+    // user expects
+    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
+
+    if (ptkHandle2OctObj(aV[1], &instance) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Contents is the default master facet
+    char facetType[32];
+    if (aC==2) strcpy(facetType, "contents");
+    else if ( strcmp(aV[2],"interface") == 0) strcpy(facetType,"interface");
+         else strcpy(facetType, "contents");
+
+    if (!MyOpenMaster( &facet, &instance, facetType, "r")) {
+	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    char facetStr[16];
+    ptkOctObj2Handle ( &facet, facetStr );
+    Tcl_AppendResult(interp, facetStr, NULL );
+
+    return TCL_OK;
+}
+
 
 // Basic Vem Facet Type checking command
 int POct::ptkIsStar (int aC,char** aV) {
@@ -783,6 +842,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
 	ENTRY(ptkFacetContents),
+	ENTRY(ptkGetMaster),
 	ENTRY(ptkIsStar),
 	ENTRY(ptkIsGalaxy),
 	ENTRY(ptkIsBus),

@@ -130,6 +130,7 @@ public:
 	int ptkGetParams (int argc,char** argv);
 	int ptkSetParams (int argc,char** argv);
 	int ptkFacetContents (int argc,char** argv);
+	int ptkGetMaster (int argc,char** argv);
 	int ptkIsStar (int argc,char** argv);
 	int ptkIsGalaxy (int argc,char** argv);
 	int ptkIsBus (int argc,char** argv);
