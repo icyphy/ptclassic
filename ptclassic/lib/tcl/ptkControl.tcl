@@ -268,7 +268,7 @@ proc ptkRunControl { name octHandle } {
     set targetToBe [lindex [ptkGetTargetNames $octHandle] 0]
     set targetcust ${targetToBe}-ControlPanel
     if {[info proc $targetcust] == $targetcust} {
-      $targetcust $name $octHandle $ctrlPanel
+      $targetcust $name $octHandle $ptkControlPanel
     }
 
     if {[catch {ptkCompile $octHandle} msg] == 1} {
@@ -658,7 +658,7 @@ proc ptkCondTime {script} {
 #######################################################################
 #procedure to go
 proc ptkGo {name octHandle} {
-    global ptkRunFlag ptkRunEventLoop
+    global ptkRunFlag ptkRunEventLoop ptkControlPanel
 
     # For now, we allow only one run at a time.
     set univ [curuniverse]
@@ -669,8 +669,7 @@ proc ptkGo {name octHandle} {
 	    return
     }
 
-    global ptkControlPanel
-    set ptkControlPanel .run_$octHandle
+    set ctrlPanel .run_$octHandle
 
     # Turn the event loop on (or off) for this run 
     ptkSetEventLoop $ptkRunEventLoop($name)
@@ -682,12 +681,13 @@ proc ptkGo {name octHandle} {
     # update in the ptkUpdateCount routine.
     after 200 ptkUpdateCount $name $octHandle
 
-    catch {$ptkControlPanel.panel.gofr.go configure -relief sunken}
-    catch {$ptkControlPanel.panel.pause configure -relief raised}
+    # update button relief
+    catch {$ctrlPanel.panel.gofr.go configure -relief sunken}
+    catch {$ctrlPanel.panel.pause configure -relief raised}
 
     # So that error highlighting, etc. works
-    if {$univ != $name} {ptkSetHighlightFacet $octHandle}
     ptkClearHighlights
+    ptkSetHighlightFacet $octHandle
 
     # if we are currently paused, then all we have to do
     # is set the status back to ACTIVE, and return to 
@@ -711,7 +711,18 @@ proc ptkGo {name octHandle} {
     # catch errors and reset the run flag.
     if {[catch {
         ptkCompile $octHandle
-        set w .run_$octHandle
+
+  	# OK to set the flag to ACTIVE.  Must not do this before
+ 	# ptkCompile, because ptkCompile looks at the flag to see
+  	# whether the prior run terminated successfully.
+  	set ptkRunFlag($name) ACTIVE
+
+ 	# Set the global indicator of the active control panel
+ 	# (which is used by tcltk stars, for example).  Must not
+ 	# do this before ptkCompile, either, because ptkCompile
+ 	# may cause destruction of an older universe and some
+ 	# tcltk star destructors look at ptkControlPanel.
+ 	set ptkControlPanel $ctrlPanel
 
 	global ptkScriptOn 
 
@@ -720,14 +731,14 @@ proc ptkGo {name octHandle} {
 	    # get the contents of the text window, and then get
 	    # the TCL interpreter to evaluate it
 	    ptkSetStringProp $octHandle script \
-	        [$ptkControlPanel.tclScript.tframe.text get 0.0 end]
+	        [$ctrlPanel.tclScript.tframe.text get 0.0 end]
 	    ptkCondTime \
-		[$ptkControlPanel.tclScript.tframe.text get 0.0 end]
+		[$ctrlPanel.tclScript.tframe.text get 0.0 end]
 	} {
 	    # default run: just run through the specified number
 	    # of iterations, finishing by invoking
 	    # wrapup if no error occurred.
-            set numIter [$w.iter.entry get]
+            set numIter [$ctrlPanel.iter.entry get]
 	    ptkCondTime "run $numIter; wrapup"
 	}
 
