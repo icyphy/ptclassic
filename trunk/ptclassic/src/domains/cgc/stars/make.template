@@ -148,6 +148,8 @@ PL_SRCS= \
  CGCSleep.pl \
  CGCSpread.pl \
  CGCSqrt.pl \
+ CGCStereoIn.pl \
+ CGCStereoOut.pl \
  CGCSub.pl \
  CGCSubCx.pl \
  CGCSubFix.pl \
