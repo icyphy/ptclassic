@@ -48,7 +48,7 @@ $(LIBDIR)/$(LIB):	$(LIB)
 
 $(STAR_MK).mk:	make.template
 		rm -f $(STAR_MK).mk
-		genStarList $(DOMAIN) > $(STAR_MK).mk
+		genStarList $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).mk
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(EXTRA_SRCS) $(SRCS) $(HDRS) make.template
