@@ -42,6 +42,7 @@ environment variable.  Variables are expanded only at the beginning.
 
 #include <pwd.h>
 #include <std.h>
+#include <string.h>
 #include "Error.h"
 #define MAXLEN 256
 
