@@ -172,14 +172,17 @@ body ::tycho::ClassParser::generateIDocIndex { {title {"Index of classes"}}} {
 # If there is only one file, don't catch it so the user can trace the
 # stack.
 #
-# @param debug   a boolean enabling verbose debugging output. (Currently this
+# debug - a boolean enabling verbose debugging output. (Currently this
 # consists only of the names of the files as they are parsed.)
-# @param generateIndex  a boolean specifying whether an index should be 
+#
+# generateIndex  a boolean specifying whether an index should be 
 # generated. This is ignored in the current implementation as HTML is still
 # the preferred method for browsing. It would be simple to port the HTML 
 # index code to IDoc.
-# @param title  the title of the index file to be generated. Ignored.
-# @param filelist  the list of files to generateIDocs for. The files may be any
+#
+# title - the title of the index file to be generated. Ignored.
+#
+# filelist - the list of files to generateIDocs for. The files may be any
 # file type that IDoc supports.  
 #
 body ::tycho::ClassParser::generateIDoc {debug generateIndex title filelist} {
