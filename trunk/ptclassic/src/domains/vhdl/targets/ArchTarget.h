@@ -134,6 +134,17 @@ protected:
 	/*virtual*/ void headerCode();
 	/*virtual*/ void trailerCode();
 
+	// Methods to extract information from dataflow graphs, taking ports, tokens,
+	// states, and arcs and producing regs, muxs, sources, signals, and dependencies.
+	void extract_ports();
+	void extract_tokens();
+	void extract_states();
+	void extract_arcs();
+
+	// Methods to construct regs and muxs from the regList and muxList.
+	void construct_regs();
+	void construct_muxs();
+
 	// Method redefined by derived targets to bring up interactive app.
 	virtual void interact() {}
 
