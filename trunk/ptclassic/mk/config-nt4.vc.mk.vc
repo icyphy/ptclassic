@@ -95,7 +95,10 @@
 #	TOOLS32_rc	= d:\progra~1\micros~2\common\msdev98
 #	TOOLS16		= $(TOOLS32)
 #	INSTALLDIR	= d:\users\ptolemy\tcltk\tcl.nt4.vc
-#
+#    Then do:
+#	cd $PTOLEMY/src/tcltk/tcl8.0.5pt/win; nmake -f makefile.vc
+#    If you get a message about mspdb60.dll missing, then be sure
+#    that d:\progra~1\micros~2\common\msdev98\bin is in your path.
 # 6. MSVC++ does not understand the Cygwin symbolic links, so you will
 #    have to build in the $PTOLEMY/src directory
 # 7. In each directory that you want to build in, you will need to
@@ -135,10 +138,11 @@
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk.vc'' in this directory!  |
 # --------------------------------------------------------------------
-!include <ntwin32.mak>
-!include  $(ROOT)\mk\config-default.mk.vc
+!include <NTWIN32.MAK>
 # Edit this variable to point to the location of your Ptolemy tree
 PTOLEMY=d:\users\ptolemy
+!include  $(PTOLEMY)\mk\config-default.mk.vc
+
 
 # TMPDIR  = location where .obj files should be stored during build
 #
