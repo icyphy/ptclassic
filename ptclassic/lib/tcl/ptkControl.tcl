@@ -40,7 +40,8 @@
 
 # Need a dummy value in ptkRunFlag(main) for startup
 set ptkRunFlag(main) IDLE
-
+# Need a default val for ptkTimeFlag or run will error and die
+set ptkTimeFlag 0
 # The global variable ptkControlPanel is the name of the master control
 # panel window that is currently being used for a run.  This name is therefore
 # available to stars that wish to insert frames into the control panel.
