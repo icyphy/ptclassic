@@ -106,6 +106,9 @@ public:
 
 	// scheduler Period : interface with timed domain.
 	float schedulePeriod;
+
+	// reset newGal member
+	void resetGal() { newGal = 0; }
 };
 
 #endif
