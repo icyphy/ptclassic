@@ -12,6 +12,14 @@ group source -label {Source Stars} {
         attribute seed -default 0 -type integer -label Seed
         port output -datatype int
     }
+
+    star audiosource \
+            -class {AudioSource} \
+            -label {AudioSource} \
+            -icon {edit/pn/icons.tim#source.audiosource} {
+        port input -datatype Token
+	port output -datatype Token
+    }
 }
 
 group dynamic -label {Dynamic Stars} {
@@ -31,6 +39,19 @@ group dynamic -label {Dynamic Stars} {
         port input -datatype Token
         port output -datatype Token
     }
+    star maincontroller \
+            -class {RDMainController} \
+            -label {RDMainController} \
+            -icon {edit/pn/icons.tim#dynamic.maincontroller} {
+        attribute segmentSize -default "4096" -label "segmentSize" -type number
+	attribute maxNumBlocks -default "1" -label "maxNumBlocks" -type numbe
+	attribute diffNumBlocks -default "1" -label "diffNumBlocks" -type number
+	attribute rbudget -default "16384" -label "rbudget" -type number
+	attribute maxDepth -default "1" -label "maxDepth" -type number
+        port input -datatype Token
+        port output -datatype Token
+    }
+
     star interleave \
             -class {Interleave} \
             -label {Interleave} \
@@ -39,6 +60,7 @@ group dynamic -label {Dynamic Stars} {
         port input1 -datatype Token
         port output -datatype Token
     }
+
     star corba \
             -class {CorbaSquare} \
             -label {Corba} \
