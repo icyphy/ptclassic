@@ -5,12 +5,15 @@
 
 PTOLEMY       = /usr/users/ptolemy
 
-DIRS =	$(PTOLEMY)/src/domains/mq/doc \
-	$(PTOLEMY)/src/domains/capsim/doc \
+DIRS =	\
 	$(PTOLEMY)/src/domains/de/doc \
 	$(PTOLEMY)/src/domains/ddf/doc \
 	$(PTOLEMY)/src/domains/sdf/doc \
 	$(PTOLEMY)/doc/main
+
+# omitted from main distribution
+#	$(PTOLEMY)/src/domains/mq/doc \
+#	$(PTOLEMY)/src/domains/capsim/doc \
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
