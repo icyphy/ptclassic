@@ -7,10 +7,14 @@ if (! $?ARCH ) then
 	exit 1
 endif
 
+# Make the top-level directories
 mkdir bin.$ARCH lib.$ARCH obj.$ARCH
+
+# Now, make stuff under obj.$ARCH
+
 cd obj.$ARCH
 ln -s ../src/makefile .
-foreach x (domains interp kernel pigiRpc tests preproc)
+foreach x (domains interp kernel pigiRpc pigilib tests preproc)
 	mkdir $x
 	cd $x
 	ln -s ../../src/$x/makefile .
@@ -25,6 +29,7 @@ foreach x (xgraph filters)
 	cd ..
 end
 
+# Make subdirectories of filters
 cd filters
 foreach x (optfir wfir)
 	mkdir $x
@@ -36,7 +41,7 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=
+set EXPDOMAINS=cg
 
 cd domains
 foreach x (sdf ddf de thor $EXPDOMAINS)
@@ -62,11 +67,19 @@ cd ../..
 
 #special case: cg/loopScheduler
 mkdir cg/loopScheduler
+cd cg/loopScheduler
 ln -s ../../../../src/domains/cg/loopScheduler/{make.template,makefile} .
+cd ../..
+
+#special case: cg/architectures
+mkdir cg/architectures
+cd cg/architectures
+ln -s ../../../../src/domains/cg/architectures/{make.template,makefile} .
 cd ../..
 
 #special case: sdf/expgraph
 mkdir sdf/expgraph
+cd sdf/expgraph
 ln -s ../../../../src/domains/sdf/expgraph/{make.template,makefile} .
 cd ../..
 
