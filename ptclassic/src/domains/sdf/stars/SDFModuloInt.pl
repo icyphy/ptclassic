@@ -28,6 +28,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		default{"10"}
 		desc {The modulo parameter}
 	}
+	setup {
+                if ( int(modulo) == 0 ) {
+		    Error::abortRun(*this,
+				    "The modulo parameter cannot be zero");
+		    return;
+		}
+	}
 	go {
 	   output%0 << int(input%0) % int(modulo);
 	}
