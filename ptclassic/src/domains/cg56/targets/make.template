@@ -39,13 +39,6 @@ CG56STARDIR=$(ROOT)/src/domains/cg56/stars
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
 
-# if S56DIR is defined compile in the S56X Wormhole target.  This
-# is defined in config-sun4.mk.
-ifdef S56DIR
-S56WHO= S56XTargetWH.o
-S56WHI= -I$(S56DIR)/include
-endif
-
 COMPAT= $(ROOT)/src/compat/ptolemy
 S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
 		CGCXBase.pl CGCXSynchComm.pl CGCXAsynchComm.pl \
@@ -64,8 +57,8 @@ EXTRA_SRCS = $(PL_SRCS)
 
 # objects to make
 OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o \
-	CGCS56XTarget.o \
-        $(PL_SRCS:.pl=.o) $(S56WHO)
+	CGCS56XTarget.o S56XTargetWH.o \
+        $(PL_SRCS:.pl=.o)
 
 SRCS=	$(OBJS:.o=.cc)
 
