@@ -175,9 +175,10 @@ read (fd, (char*) &h2, sizeof h2) <= 0)
 #define READHEAD_FAIL \
 (read (fd, (char*) &h1, sizeof h1) <= 0 ||\
  read (fd, (char*) &h2, sizeof h2) <= 0)
+#define OBJ_READ_SIZE ((size_t)(h2.tsize + h2.dsize))
 #define READOBJ_FAIL \
  (lseek(fd, N_TXTOFF(h1,h2), 0) < 0 \
-   || read (fd, availMem, (h2.tsize + h2.dsize)) < (h2.tsize + h2.dsize))
+   || read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
 #define OBJ_SIZE (size_t)(h2.tsize + h2.dsize + h2.bsize)
 
 #endif
@@ -185,8 +186,8 @@ read (fd, (char*) &h2, sizeof h2) <= 0)
 #if defined(sun) || defined(vax)
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
-#define READOBJ_FAIL (read (fd, availMem, (header.a_text + header.a_data)) \
-  < (header.a_text + header.a_data) )
+#define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
+#define READOBJ_FAIL (read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
 #define OBJ_SIZE (size_t)(header.a_text + header.a_data + header.a_bss)
 #endif
 
