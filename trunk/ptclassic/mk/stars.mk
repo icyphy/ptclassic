@@ -314,8 +314,15 @@ ifdef PN
 		LIBS += -lpnstars -lpn
 		LIBFILES += $(LIBDIR)/libpnstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libpn.$(LIBSUFFIX)
-		# POSIX thread library from Florida State University.
-		LIBS += -lposixthread -L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
+		ifneq ("$(filter sun% sol% ,$(PTARCH))","")
+			# POSIX thread library from Florida State University.
+			LIBS += -lposixthread \
+				-L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
+		else
+			# HPUX 
+			LIBS += -lposixthread \
+				-L/opt/dce/lib/libcma.a	-lcma
+		endif
 		LIBFILES += $(LIBDIR)/libposixthread.$(LIBSUFFIX)
 	endif
 endif
