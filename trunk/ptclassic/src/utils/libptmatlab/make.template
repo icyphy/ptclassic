@@ -47,7 +47,7 @@ include $(CONFIG)
 LIBNONSHARED=libptmatlab.a
 
 # Put the Ptolemy kernel directory in the include path
-INCL=-I$(KERNDIR) $(MATLAB_INCSPEC)
+INCL=-I$(KERNDIR) $(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
