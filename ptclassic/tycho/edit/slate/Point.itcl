@@ -28,7 +28,7 @@
 
 
 #######################################################################
-#### AsPoint
+#### Point
 #
 # The shape of items with a single pair of coordinates. Items with
 # this shape include <I>text</I>, <I>bitmap</I>, <I>image</I>,
@@ -56,7 +56,7 @@
 #
 
 #
-class ::tycho::AsPoint {
+class ::tycho::Point {
     inherit ::tycho::Shape
 
     ###################################################################
@@ -87,7 +87,7 @@ class ::tycho::AsPoint {
 #
 # Return the value of an aspect. The only valid aspect is "origin."
 #
-body ::tycho::AsPoint::aspect {id canvas slate args} {
+body ::tycho::Point::aspect {id canvas slate args} {
     set coords [$slate coords $id]
     set result {}
 
@@ -111,27 +111,27 @@ body ::tycho::AsPoint::aspect {id canvas slate args} {
 #######################################################################
 #### reshape
 #
-body ::tycho::AsPoint::reshape {id canvas slate x y args} {
+body ::tycho::Point::reshape {id canvas slate x y args} {
     error "Point objects cannot be reshaped"
 }
 
 #######################################################################
 #### reshapeclick
 #
-body ::tycho::AsPoint::reshapeclick {id canvas slate x y args} {
+body ::tycho::Point::reshapeclick {id canvas slate x y args} {
     error "Point objects cannot be reshaped"
 }
 
 #######################################################################
 #### reshapedrag
 #
-body ::tycho::AsPoint::reshapedrag {id canvas slate x y} {
+body ::tycho::Point::reshapedrag {id canvas slate x y} {
     error "Point objects cannot be reshaped"
 }
 
 #######################################################################
 #### reshaperelease
 #
-body ::tycho::AsPoint::reshaperelease {id canvas slate x y} {
+body ::tycho::Point::reshaperelease {id canvas slate x y} {
     error "Point objects cannot be reshaped"
 }
