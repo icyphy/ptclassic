@@ -97,7 +97,9 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		Ptolemy.xbm tclIndex
+MISC_FILES =		Ptolemy.xbm back.xbm ptolemySmall.gif \
+			ptolemyWelcome.gif ptolemyXmas.gif \
+			doc test tclIndex 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =			tclIndex
