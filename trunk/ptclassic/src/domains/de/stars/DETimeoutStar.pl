@@ -5,9 +5,9 @@ defstar
     domain { DE }
     descriptor
     {
-Base class for stars which check timeout conditions.  The methods
-"set", "clear", and "expired" are provided for setting and testing the
-timer.
+ Base class for stars which check time-out conditions.
+ The methods "set", "clear", and "expired" are provided for
+setting and testing the timer.
     }
     version { $Id$ }
     author { T. M. Parks }
@@ -24,7 +24,7 @@ limitation of liability, and disclaimer of warranty provisions.
 The \fIset\fP method resets and starts a timer.  Invoking \fIset\fP
 again will reset the timer and restart it.  Invoking \fIclear\fP
 stops the timer.  The \fIexpired\fP method indicates whether or not the
-timer has reached \fItimeout\fR.
+timer has reached \fItime-out\fR.
     }
 
     state
@@ -95,7 +95,7 @@ timer has reached \fItimeout\fR.
 	access { public }
 	code
 	{
-	    if (canGetFired())	// timeout event
+	    if (canGetFired())	// time-out event
 	    {
 		if (!safe && arrivalTime == deadline)
 		    expireFlag = TRUE;
