@@ -70,9 +70,6 @@ class ::tycho::Edit {
     # Insert the given data at the insertion cursor.
     method insertData {data}
 
-    # Return 1 if the text has been modified since the last save, 0 otherwise.
-    method isModified {}
-
     # Go to the specified point in the text.
     method seePoint {point}
 
@@ -203,13 +200,6 @@ body ::tycho::Edit::help {} {
 #
 body ::tycho::Edit::insertData {data} {
     $itk_component(text) insertString insert $data
-}
-
-###################################################################
-#### isModified
-#
-body ::tycho::Edit::isModified {} {
-    return $modified
 }
 
 ###################################################################
