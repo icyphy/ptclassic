@@ -63,6 +63,10 @@ all:	makefile $(BINARY)
 
 install:	$(BINARY) $(BINDIR)/$(BINARY) $(ROOT)/man/man1/rman.1
 
+$(BINARY):	rman.o
+	rm -f $@
+	$(CC) $^ -o $(BINARY)
+
 $(BINDIR)/$(BINARY):	$(BINARY)
 	@echo Installing $<
 	rm -f $@
