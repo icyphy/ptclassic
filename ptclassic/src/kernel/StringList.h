@@ -1,9 +1,11 @@
+#ifndef _StringList_h
+#define _StringList_h 1
 #include <std.h>
 #include "DataStruct.h"
 
 
 // SCCS version identification
-// @(#)StringList.h	1.2	1/14/90
+// $Id$
 
 /****************************************************************
 StringList stores a list of char* strings, and can then read
@@ -56,3 +58,5 @@ public:
 private:
 	int totalSize;
 };
+
+#endif
