@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
-int setHandlers(SIG_PF sigHandler);
+extern "C" int setHandlers(SIG_PF sigHandler);
 void signalHandlerRelease(int signo);
 void signalHandlerDebug(int signo);
 
