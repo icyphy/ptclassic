@@ -67,7 +67,6 @@ class StringList;
 // don't know how generally it is available.
 extern "C" int strcasecmp(const char* s1, const char* s2);
 
-class CGWormBase;
 class CodeStream;
 class Profile;
 
@@ -99,25 +98,24 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-        // virtual method to return this pointer if it is a wormhole.
-        // Return NULL if not.
-        virtual CGWormBase* myWormhole();
+	// querry if it is a data-parallel star?
+	virtual int isParallel() const { return dataParallel; }
 
-	// querry if it is a data-parallel star, or a wormhole?
-	int isParallel() const { return (isItWormhole() || dataParallel); }
-
-	// For a data parallel star, or a wormhole get the profile.
+	// For a data parallel star, or a macro actor get the profile.
 	virtual Profile* getProfile(int ix = 0); 
 
         // max {cost of communication with its ancestors}
         int maxComm();
 
 	// get and set the procId
-	int getProcId() { return int(procId); }
-	void setProcId(int i) { procId = i; }
+	virtual int getProcId() { return int(procId); }
+	virtual void setProcId(int i) { procId.setInitValue(i); procId = i; }
 
 	// am I a Fork star?
-	int isItFork() { return forkId; }
+	virtual int isItFork() { return forkId; }
+
+	// return type name for ddf-type stars.
+	virtual const char* readTypeName();
 
 	// set the target pointer, initialize the various target pointers
 	// such as codeStreams & symbols if needed.
@@ -220,7 +218,7 @@ protected:
 	// indicate whether this star is a (data)parallel star or not.
 	int dataParallel;
 
-	// profile (= local schedule) of the data parallel star or wormhole
+	// profile (= local schedule) of the data parallel star or macro actor
 	Profile* profile;
 
 	// declare that I am a Fork star
