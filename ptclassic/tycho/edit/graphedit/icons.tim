@@ -1,3 +1,4 @@
+# -*- tcl -*-
 # $Id$
 # Test icon index for graph editor
 
@@ -208,5 +209,21 @@ group sdf {
 	}
         port input {Terminal 0 50} -direction {-1 0} \
                 -style circle -fill red
+    }
+}
+
+group test {
+    -label {Test Icons}
+    icon simple IconFrame {
+        -label {Simple}
+        -text ""
+        -color green
+	-borderwidth 3
+        -graphics {
+            Frame 20 20 80 80 -color green -relief sunken -borderwidth 3
+        }
+        port out {Terminal 100 50} -direction {1 0} \
+		-style doublearrowout -fill blue \
+		-type output
     }
 }

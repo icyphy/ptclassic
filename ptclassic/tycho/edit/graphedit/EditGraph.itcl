@@ -551,12 +551,6 @@ body ::tycho::EditGraph::vertex {star x y} {
         #        -name $port]
         #eval $layout $cmd
         #eval $layout notify $cmd
-puts [list \
-	eval [list $layout publish subitem $name $port $type] \
-		$attrs \
-                -tags [list [$icons itemcget port $star.$port -type]] \
-		-name $port]
-
 	eval [list $layout publish subitem $name $port $type] \
 		$attrs \
                 -tags [list [$icons itemcget port $star.$port -type]] \
