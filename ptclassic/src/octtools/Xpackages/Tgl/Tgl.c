@@ -417,7 +417,7 @@ Region region;			/* Merged regions */
    TglWidget tw = (TglWidget) w;
    TgPixmap themap;
    XtExposeProc proc;
-   int x, y;
+   int x = 0, y;
 
    /* XXX - This is a patch: */
    if (!XtWindow(w)) return;
