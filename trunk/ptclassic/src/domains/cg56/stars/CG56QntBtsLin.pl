@@ -1,5 +1,5 @@
 defstar {
-	name { QuantBitsLin }
+	name { QntBtsLin }
 	domain { CG56 }
 	desc { Linear quantizer with adjustable offset. }
 	version { $Id$ }
