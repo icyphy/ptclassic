@@ -65,15 +65,17 @@ void PTDSPNearestNeighbor(int* theindex, double* thedistance,
 	    }
 	}
 
-	// Distance we compute here is the X'*Yi-||Yi||^2/2, but actually the 
-	// squared distance is ||X-Yi||^2 = ||X||^2+||Yi||^2-2*X'*Yi. So, we
-	// need to calculate the true squared distance before return. 
+	/*
+	   Distance we compute here is the X'*Yi-||Yi||^2/2, but actually the 
+	   squared distance is ||X-Yi||^2 = ||X||^2+||Yi||^2-2*X'*Yi. So, we
+	   need to calculate the true squared distance before return. 
+	 */
 	distance *= -2;
 	for (i = 0; i < dimension; i++) {
 	    distance += trnVector[i] * trnVector[i];
 	}
 
-	// Return the compute values of codebook index and distance
+	/* Return the compute values of codebook index and distance */
 	*theindex = index;
 	*thedistance = distance;
 }
