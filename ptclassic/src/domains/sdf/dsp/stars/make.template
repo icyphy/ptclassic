@@ -47,6 +47,7 @@ PL_SRCS= \
  SDFLMSPlot.pl \
  SDFLattice.pl \
  SDFLevDur.pl \
+ SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCos.pl \
  SDFUnwrap.pl \
