@@ -204,7 +204,12 @@ POct::~POct() {
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
 int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
-    octObject prop = {OCT_UNDEFINED_OBJECT};	// has some non-dynamic members
+    // Create uninitialized oct property object
+    // NOTE: prop has non-dynamic members, so do not use FreeOctMembers
+    // cfront compiler doesn't support initialization code of the form
+    //   octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject prop;
+    prop.type = OCT_UNDEFINED_OBJECT;
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -230,7 +235,12 @@ int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
 int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
-    octObject prop = {OCT_UNDEFINED_OBJECT};	// has some non-dynamic members
+    // Create uninitialized oct property object
+    // cfront compiler doesn't support initialization code of the form
+    //   octObject facet = {OCT_UNDEFINED_OBJECT};
+    // NOTE: prop has non-dynamic members, so do not use FreeOctMembers
+    octObject prop;
+    prop.type = OCT_UNDEFINED_OBJECT;
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -238,6 +248,7 @@ int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
 
     // Fill in the props new value
     prop.contents.prop.type = OCT_STRING;
+
     // The line below will not compile under cfront1.0
     //((const char*)(prop.contents.prop.value.string)) = pListp->array->value;
     prop.contents.prop.value.string = (char *)pListp->array->value;
@@ -364,7 +375,11 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
 // Do not use octObjectClass: let the memory leak happen; otherwise
 // we will get an array bounds read error from Purify. -BLE
 int POct::ptkCompile (int aC, char** aV) {
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    // Create uninitialized facet
+    // cfront compiler doesn't support initialization code of the form
+    //   octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet;
+    facet.type = OCT_UNDEFINED_OBJECT;
 
     // Error checking: number of arguments, oct facet file
     if (aC != 2) return usage ("ptkCompile <OctObjectHandle>");
