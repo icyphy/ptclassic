@@ -64,7 +64,7 @@ public:
 	}
 
 	// constructor (also allow AnyAsm stars)
-	CG56Domain() : Domain("CG56") {subDomains += "AnyAsm";}
+	CG56Domain() : Domain("CG56") {subDomains += "AnyAsm";subDomains += "AnyCG";}
 
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget) {
 		return *new CG56Wormhole(innerGal,innerTarget);
