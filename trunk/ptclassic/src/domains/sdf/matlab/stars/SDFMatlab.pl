@@ -77,8 +77,7 @@ extern "C" {
 }
 
 #define MATLAB_BUFFER_LEN	 1023
-#define MATLAB_ERROR_STRING	 ">> \x07???"
-#define MATLAB_ERROR_STRING_LEN	 ( sizeof(MATLAB_ERROR_STRING) - 1 )
+#define MATLAB_ERR_STR		 "\x07???"
 
 // Matlab limits filenames to 20 characters (base name + ".m")
 // Therefore, Matlab functions must have 18 or fewer characters
@@ -229,11 +228,10 @@ extern "C" {
 
 		// kludge: engEvalString always returns 0 (success) even if
 		// there is an error.  Therefore, we must determine if there
-		// is an error.  Since we terminate Matlab commands with a
-		// semicolon, an error occurs when the output of the Matlab
-		// command is not null.
+		// is an error.  An error occurs if when the output of the
+		// Matlab contains MATLAB_ERR_STR
 		if ( merror == 0 ) {
-		  merror = ( matlabOutputBuffer[0] != 0 );
+		  merror = ( strstr(matlabOutputBuffer, MATLAB_ERR_STR) != 0 );
 		}
 
 		return( merror );
