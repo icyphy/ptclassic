@@ -771,8 +771,6 @@ void InterpGalaxy :: reset() {
 // name so it can be used elsewhere)
 
 void InterpGalaxy :: zero () {
-	// remove nodes
-	nodes.deleteAll();
 	// remove other stuff
 	DynamicGalaxy :: zero();
 	// Clear action list
