@@ -131,9 +131,6 @@ class ::tycho::FileBrowser {
     # Set the global current working directory.
     proc setCWD {cwd} {set CWD $cwd}
 
-    # Set the global filename that appears by default.
-    proc setLastFile {name} {set fileLastOpened $name}
-
     ##################################################################
     ####                   protected methods                      ####
 
@@ -145,9 +142,6 @@ class ::tycho::FileBrowser {
 
     ##################################################################
     ####                   protected variables                    ####
-
-    # The last file opened.
-    protected common fileLastOpened {}
 
     # The parent directory string: platform-dependent
     protected common directoryParent
@@ -238,34 +232,33 @@ body ::tycho::FileBrowser::constructor {args} {
 	    -width  fileBrowserWidth \
 	    -height fileBrowserHeight
 
-    if [::tycho::preference get dialogs fileBrowserUseLastDirectory] {
-	# If the we prefer to always have the FileBrowser open
-	# the last directory we visted.
-
-	# Load the files into the listbox
-	updateListbox
-
-        # In case updateListbox inserts into the entry; to avoid repetition
-        clear entry
-        insert entry $fileLastOpened
-    } else {
-	# If we would like the FileBrowser to always open the 
-	# same directory as the current file.
+    # The fileBrowserUseLastDirectory preference controls which directory
+    # the browser opens in. By the time we get to here, the localCWD
+    # directory is set to the most recently-accessed directory,
+    # so we don't have to do anything if that's the directory we
+    # want to open in. Otherwise, we execute the code below, which
+    # sets the CWD and localCWD variables to the directory extracted
+    # from the -default option. When the browser is created, this
+    # option will be set to the path of the file from which the
+    # browser was opened -- if the option is not set, then the
+    # most recent directory is used anyway.
+    #
+    if { ! [::tycho::preference get dialogs fileBrowserUseLastDirectory] } {
 	if {$itk_option(-default) != {} && \
 		[file pathtype $itk_option(-default)] == "absolute" } {
-	    set default $itk_option(-default)
-	    if ![file isdirectory $default] {
-		set default [file dirname $default]
-	    }
-	    if [file isdirectory $default] {
-		set CWD $default 
-		set localCWD $CWD
+            set default $itk_option(-default)
+            if ![file isdirectory $default] {
+                set default [file dirname $default]
+            }
+            if [file isdirectory $default] {
+                set CWD $default 
+                set localCWD $CWD
                 $itk_component(dir) config -text $CWD
-	    }
+            }
         }
-	# Load the files into the listbox
-	updateListbox
     }
+    # Load the files into the listbox
+    updateListbox
 }
 
 
@@ -481,7 +474,6 @@ body ::tycho::FileBrowser::processItem {filename} {
 	set dir [file dirname $file]
 	if {[file exist $dir] && [file isdir $dir]} {
 	    execCommand -command $file
-	    set fileLastOpened $filename
 	    return 1
 	} {
 	    safeEval ::tycho::warn "Directory does not exist: $dir"
@@ -496,7 +488,6 @@ body ::tycho::FileBrowser::processItem {filename} {
             set CWD [::tycho::expandPath $file]
             $itk_component(dir) config -text $CWD
             set localCWD $CWD
-            set fileLastOpened ""
             updateListbox
             return 0
 	} else {
@@ -508,8 +499,6 @@ body ::tycho::FileBrowser::processItem {filename} {
 	# It's a plain file or a directory with a registered editor
 	if {[file readable $file]} {
 	    execCommand -command $file
-	    # Store last file opened
-	    set fileLastOpened $filename
 	    return 1
 	} {
 	    safeEval ::tycho::warn "\"$file\" is unreadable"
