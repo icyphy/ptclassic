@@ -33,6 +33,42 @@
  <BR> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
 
 
+<DT> Run control window buttons rearranged and relabeled.
+
+<DD>
+The <CODE>ABORT</CODE> button in the run control window, which was
+formerly hidden in the "debug" controls, has been moved to the place
+where <CODE>STOP</CODE> used to be, and has also been given
+<CODE>STOP</CODE>'s keyboard equivalent (<CODE>Escape</CODE>).
+Conversely, <CODE>STOP</CODE> has been hidden in the "debug" controls,
+and has been relabeled <CODE>EARLY END</CODE>.
+<p>
+The motivation for this change is that <CODE>ABORT</CODE> is actually much
+more useful and less dangerous than <CODE>STOP</CODE>, especially for novices.
+<CODE>ABORT</CODE> simply terminates the simulation run point-blank,
+and is the right thing to use if you decide you don't want to wait
+for results.
+<CODE>EARLY END</CODE> (nee <CODE>STOP</CODE>) terminates the simulation
+as of the point currently reached, but then it runs the wrapup methods
+of the stars, just as if the simulation had ended normally.  Thus, it is an
+invasive alteration of the behavior of the simulation.  The results displayed
+during wrapup may be subtly or wildly different from the results that would
+have been obtained if the simulation had been allowed to proceed to its
+scheduled end time.  Some of the demos will in fact deliver incorrect,
+or at least unexpected, results if stopped early.
+<p>
+The problem is even greater if a run-control-window script is in use, because
+the script will proceed merrily on its way with no idea that one of the
+commanded runs has been stopped early.  <CODE>ABORT</CODE> will kill execution
+of a run control script, but <CODE>EARLY END</CODE> doesn't --- it just ends
+the currently commanded run.
+<p>
+With all this in mind, <CODE>EARLY END</CODE> is a tool that should be used
+only by one who is familiar with the behavior of a particular simulation
+and understands the consequences.  So the button is now hidden in the
+debug controls, and <CODE>ABORT</CODE> has been made the easier button
+to get to.
+
 <DT> <CODE>Make-star</CODE> can create <A NAME="icons that contain html files">icons whose contents are html files</A>.
 
 <DD> <CODE>Make-star</CODE> has been modified so that icons can have html files as their contents.  
