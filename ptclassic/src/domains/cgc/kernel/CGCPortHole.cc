@@ -49,12 +49,20 @@ int CGCPortHole :: initOffset() {
 // Decide the buffer size finally
 // reserve the buffer for initial offsets which the farSide input port
 // will read.
-void CGCPortHole :: finalBufSize() {
+void CGCPortHole :: finalBufSize(int statBuf) {
 	if (isItInput()) return;
 
 	int reqSize = cgGeo().getMaxNum();
+	int staticSize = localBufSize();
+	int tryFlag = TRUE;	// try to achieve static buffering
 
 	if (far()->isItOutput()) return;	// check wormhole boundary.
+
+	if (reqSize < bufferSize) {
+		reqSize = bufferSize;
+		hasStaticBuf = FALSE;
+		tryFlag = FALSE;
+	}
 
 	CGCPortHole* p = realFarPort();
 	if (p->fork()) {
@@ -63,16 +71,31 @@ void CGCPortHole :: finalBufSize() {
 		CGCPortHole* outp;
 		while ((outp = next++) != 0) {
 			CGCPortHole* inp = outp->realFarPort();
-			int temp = inp->cgGeo().getMaxNum();
+			int myTry = TRUE;
+			// access to the past Particles
+			int temp = inp->inBufSize() - inp->numXfer();
+			if (temp) myTry = FALSE;
+			// delays
 			temp += inp->cgGeo().forkDelay();
-			temp += inp->inBufSize() - inp->numberTokens;
+			if (temp % inp->numXfer() != 0) myTry = FALSE;
+
+			temp += inp->cgGeo().getMaxNum();
 			if (temp > reqSize) reqSize = temp;
+
+			// determine whether p can be of static buffering
+			if (!myTry || (hasStaticBuf == FALSE)) {
+				inp->hasStaticBuf = FALSE;
+				tryFlag = FALSE;
+			}
 		}
 	} else {
-		reqSize += p->inBufSize() - p->numberTokens;
+		int temp = p->inBufSize() - p->numXfer();
+		if (temp || (p->numTokens() % p->numXfer() != 0)) { 
+			tryFlag = FALSE;
+			p->hasStaticBuf = FALSE;
+		}
+		reqSize += temp;
 	}
-
-	if (reqSize < bufferSize) reqSize = bufferSize;
 
 	// check whether this size is set manually or not.
 	// If yes, range check.
@@ -81,8 +104,33 @@ void CGCPortHole :: finalBufSize() {
 			Error::warn(*this, "buffer request is too small.");
 			maxBuf = reqSize;
 		}
-	} else {
+	} else if (statBuf == 0) {
 		maxBuf = reqSize;
+	} else { // static buffering option.
+		if (tryFlag && (reqSize % staticSize != 0)) {
+			maxBuf = ((reqSize/staticSize)+1) * staticSize;
+		} else if ((hasStaticBuf != 0) && (reqSize % numXfer() != 0)) {
+			maxBuf = ((reqSize / numXfer()) + 1) * numXfer();
+		} else {
+			maxBuf = reqSize;
+		}
+	}
+	if (maxBuf % numXfer() != 0) hasStaticBuf = FALSE;
+
+	// confirm the hasStaticBuf flag of fork-destination ports
+	if (p->fork()) {
+		// determine the maximum offset.
+		ForkDestIter next(p);
+		CGCPortHole* outp;
+		while ((outp = next++) != 0) {
+			CGCPortHole* inp = outp->realFarPort();
+			if (inp->hasStaticBuf == TRUE) {
+				if (maxBuf % inp->numXfer() != 0)
+					inp->hasStaticBuf = FALSE;
+			}
+		}
+	} else {
+		if (maxBuf % p->numXfer() != 0) p->hasStaticBuf = FALSE;
 	}
 }
 

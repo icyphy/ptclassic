@@ -22,7 +22,7 @@ $Id$
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
-	CGCPortHole() : maxBuf(1), manualFlag(0) {}
+	CGCPortHole() : maxBuf(1), manualFlag(0), hasStaticBuf(1) {}
 
 	CGCPortHole* getForkSrc() { return (CGCPortHole*) forkSrc; }
 
@@ -40,11 +40,15 @@ public:
 	// list via fork stars
 	void setupForkDests();
 
-	// return the buffer requirements for static buffering.
+	// return the buffer requirements. Indicates whether static buffering
+	// is achieved or not.
 	// return 1 if on the wormhole boundary
 	int maxBufReq() const
-		{ if (isItOutput() == far()->isItOutput()) return 1;
+		{ if (atBoundary()) return 1;
 		return isItOutput()? maxBuf: realFarPort()->maxBufReq(); }
+
+	// return TRUE is static buffering is achieved.
+	int staticBuf() const { return hasStaticBuf; }
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
@@ -68,7 +72,7 @@ public:
 	int initOffset();
 
 	// determine the buffer size finally
-	void finalBufSize();
+	void finalBufSize(int statBuf);
 
 	// Set the maxBuf manually. In finalBufSize() method, we will
 	// compare this manual value with what the current scheduler
@@ -78,6 +82,7 @@ public:
 private:
 	int maxBuf;
 	int manualFlag;
+	int hasStaticBuf;
 
 	SequentialList& myDest() { return forkDests; }
 };
