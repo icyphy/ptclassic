@@ -76,7 +76,16 @@ public:
 		return ACSKnownCategory::getCategories();
 	}
 
+	/* virtual */ int isSDF() const { return TRUE; } // FIXME
+	/* virtual */ void initialize();
+	/* virtual */ void wrapup();
+	/* virtual */ void initCode();
+	/* virtual */ int myExecTime();
+
+
 protected:
+
+	/* virtual */ void go();
 
 	// List of availabel cores
         SequentialList coreList;

@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSCorona.h"
 #include "ACSKnownCategory.h"
 #include "KnownBlock.h"
+#include "ACSTarget.h"
 
 extern "C" int
 KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
@@ -56,8 +57,15 @@ ISA_FUNC(ACSCorona, ACSStar);
 int ACSCorona::setCore(const char *coreName)
 {
   ListIter iterator(coreList);
+  ACSCore* ptr;
   // iterate through list until Core is found, if not return null
-  return 0;
+  while ( (ptr = (ACSCore*)(iterator++)) != 0 ) {
+	if ( strcmp(coreName,ptr->getCategory()) == 0 ) {
+		currentCore = ptr;
+		return TRUE;
+	}
+  }
+  return FALSE;
 }
 
 // register Core in the list
@@ -100,3 +108,51 @@ void ACSCorona::addCores() {
 	}
 }
 	
+void ACSCorona::initialize() {
+	ACSStar::initialize();
+	ACSTarget* t = (ACSTarget*)target();
+	if(!setCore(t->getCoreCategory())) {
+		Error::abortRun(*this,"initialize(): could not set core.");
+		return;
+	}
+	if ( currentCore ) {
+		currentCore->initialize();
+	} else {
+		Error::abortRun(*this,"initialize(): currentCore not set.");
+	}
+}
+
+void ACSCorona::go() {
+	if ( currentCore ) {
+		currentCore->go();
+	} else {
+		Error::abortRun(*this, className(), ".run(): currentCore not set.");
+	}
+}
+
+void ACSCorona::wrapup() {
+	if ( currentCore ) {
+		currentCore->wrapup();
+	} else {
+		Error::abortRun(*this, className(), ".wrapup(): currentCore not set.");
+	}
+}
+
+void ACSCorona::initCode() {
+	if ( currentCore ) {
+		currentCore->initCode();
+	} else {
+		Error::abortRun(*this, className(), ".initCode(): currentCore not set.");
+	}
+}
+
+int ACSCorona::myExecTime() {
+	if ( currentCore ) {
+		return(currentCore->myExecTime());
+	} else {
+Error::abortRun(*this, className(), ".myExecTime(): currentCore not set.");
+	}
+	return 0;
+}
+		
+

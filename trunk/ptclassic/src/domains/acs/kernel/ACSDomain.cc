@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "ACSScheduler.h"
 #include "ACSWormhole.h"
+#include "ACSTarget.h"
 
 extern const char ACSdomainName[] = "ACS";
 
@@ -68,26 +69,28 @@ static ACSDomain proto;
 
 // declare the default Target object
 
-class ACSTarget : public Target {
-public:
+//class ACSTarget : public Target {
+//public:
 	// Constructor
-	ACSTarget() : Target("default-ACS", "ACSStar",
-			     "default ACS target", ACSdomainName) {}
+//	ACSTarget() : Target("default-ACS", "ACSStar",
+//			     "default ACS target", ACSdomainName) {}
 
 	// Destructor
-	~ACSTarget() { delSched(); }
+//	~ACSTarget() { delSched(); }
 
 	// Return a copy of itself
-	/*virtual*/ Block* makeNew() const {
-		LOG_NEW; return new ACSTarget;
-	}
+//	/*virtual*/ Block* makeNew() const {
+//		LOG_NEW; return new ACSTarget;
+//	}
 
-protected:
-	void setup() {
-		if (!scheduler()) { LOG_NEW; setSched(new ACSScheduler); }
-		Target::setup();
-	}
-};
+//protected:
+//	void setup() {
+//		if (!scheduler()) { LOG_NEW; setSched(new ACSScheduler); }
+//		Target::setup();
+//	}
+//};
 
-static ACSTarget defaultACStarget;
+static ACSTarget defaultACStarget("default-ACS", "ACSStar",
+"Runs ACS systems on the local workstation using the default\n"
+"one-processor SDF scheduler.");
 static KnownTarget entry(defaultACStarget, "default-ACS");

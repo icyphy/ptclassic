@@ -51,9 +51,17 @@ public:
             const char* assocDomain = ACSdomainName);
     /* virtual */ Block* makeNew() const;
 
+    /* virtual */ int run() { return(Target::run()); }   // FIXME
+
     ACSTarget :: ~ACSTarget();
     // Class identification.
     /*virtual*/ int isA(const char*) const;
+
+   const char* getCoreCategory() { return coreCategory; }
+
+protected:
+
+    StringState coreCategory;
 
 };
 
