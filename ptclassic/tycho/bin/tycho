@@ -15,6 +15,21 @@
 # If you add to this script, make sure that you don't make it dependent
 # on Ptolemy.
 
+# If this script fails for you, you can try starting tycho with:
+#	itkwish -f $TYCHO/kernel/Tycho.tcl
+# To use the Ptolemy itkwish binary:
+#	$PTOLEMY/bin.$PTARCH/tysh
+
+# To debug this script, do: csh -fx $TYCHO/bin/tycho
+
+# Below are several sample invocations:
+# tycho
+# tycho /tmp/foo.tcl
+# tycho -ptiny
+# tycho -debug -ptiny
+# tycho -debug -bin $PTOLEMY/obj.$PTARCH/tysh/tysh.ptiny.debug
+# tycho -java
+# tycho -e /tmp/foo.tcl
 
 set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-e tclscript] [-bak] [file...]"
 
@@ -96,6 +111,11 @@ while ($#argv)
 			breaksw
 		case -noconsole:
 			set noconsole
+			if ( $#argv == 1 && ! $?filename ) then
+				echo "tycho: warning, you called 'tycho -noconsole' without passing a file" 
+				echo "which means that tycho will not do much."
+				echo "Try 'tycho -noconsole yourfile'"
+			endif
 			breaksw
 		case -e:
 			set tclscript = $argv[2]
@@ -154,7 +174,12 @@ if (! $?selectPtolemy && ! $?selectJava) then
 		endif
 		set debugcmdfile = /tmp/tychodbg.$$
 		echo "break main" > $debugcmdfile
-		echo "run -f \"$TYCHO/kernel/Tycho.tcl\" \"$filename\"" >> $debugcmdfile
+		if ( $?filename) then
+			echo run -f \"$TYCHO/kernel/Tycho.tcl\" \"$filename\"  >> $debugcmdfile
+		else
+			echo "run -f $TYCHO/kernel/Tycho.tcl "  >> $debugcmdfile
+		endif
+
 		set prog = ($debugger -x $debugcmdfile itkwish)
 
 		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
@@ -186,8 +211,11 @@ if ( $?selectPtolemy && ! $?selectJava) then
 	    setenv MANPATH "$PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH"
 	endif
 
-	set bindir = (\"\$PTOLEMY/bin.$PTARCH\")
+	set bindir = ($PTOLEMY/bin.$PTARCH)
 
+	if ( ! $?prog && $?tychodebug) then
+		set tychodebugnoprog=1
+	endif
 	if ( ! $?prog ) then
 		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
 		    set prog = "$bindir/tysh.ptiny"
@@ -202,10 +230,6 @@ if ( $?selectPtolemy && ! $?selectJava) then
 				    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
 				endif
 			endif
-		endif
-		if ( ! $?tychoedit && $?tychodebug ) then
-		    # There is no debug version of itkwish yet.
-		    set prog = $prog.debug
 		endif
 		if ( $?tychobak ) then
 			if ( -d ${PTOLEMY}/lib.${PTARCH}.bak ) then
@@ -233,7 +257,44 @@ if ( $?selectPtolemy && ! $?selectJava) then
 			endif
 		    set prog = $prog.bak
 		endif
+	else # ! $?prog
+		echo "prog=$prog"
 	endif
+	if ( $?tychodebug ) then
+		if ( $?PT_DEBUG) then
+			set debugger = $PT_DEBUG
+		else
+			set debugger = gdb
+		endif
+		set debugcmdfile = /tmp/tychodbg.$$
+		echo "break main" > $debugcmdfile
+		if ( $?filename) then
+			echo run -f \"$TYCHO/kernel/Tycho.tcl\" \"$filename\"  >> $debugcmdfile
+		else
+			echo "run -f $TYCHO/kernel/Tycho.tcl "  >> $debugcmdfile
+		endif
+
+		if ( ! $?tychodebugnoprog ) then
+			set prog = ($debugger -x $debugcmdfile $prog)
+		else
+			# The user called 'tycho -ptiny -debug'
+			# but did not specify a binary, so we look for a .debug
+			if ( -e $prog.debug ) then
+			  set prog = ($debugger -x $debugcmdfile $prog.debug)
+			else
+			  if ( $?PTOLEMY && $?PTARCH ) then
+			    if ( -e $PTOLEMY/obj.$PTARCH/tysh/`basename $prog`.debug) then
+			       echo "$prog.debug does not exist"
+			       set prog="$PTOLEMY/obj.$PTARCH/tysh/`basename $prog`.debug"
+			       echo "Using $prog instead"
+			    endif
+			  endif
+			  set prog = ($debugger -x $debugcmdfile $prog)
+			endif	
+		endif
+		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
+	endif
+
 endif # ?selectPtolemy
 
 ##################################################################
@@ -276,14 +337,20 @@ if ( $?nowelcome ) set prog = ($prog -nowelcome)
 if ( $?noconsole ) set prog = ($prog -noconsole)
 if ( $tclscript != "") set prog = ($prog -e $tclscript)
 
-# If neither tyedit or selectPtolemy are set then we are just running itkwish
-# Note that the order of these tests matters
-if (($?tyedit || $?selectPtolemy) && ! -x `eval $prog[1]`) then
-	echo "Program does not exist: $prog"
-else
-    if (! $?filename || $?tychodebug) then
-	eval $prog
-    else
-	eval $prog $filename
-    endif
+# If selectPtolemy is set then we are just running itkwish
+if ($?selectPtolemy && ! $?tychodebug) then
+	# Can't use && here, as since if we are running just 'tycho'
+	# then the program name will be 'itkwish' which is not necessarily
+	# executable.
+	if (! -x $prog) then
+		echo "Program does not exist: $prog"
+		exit 3
+	endif
 endif
+
+if (! $?filename || $?tychodebug) then
+	eval $prog
+else
+	eval $prog $filename
+endif
+
