@@ -50,10 +50,12 @@ static char SccsId[]="$Id$";
 #include "defaults.h"		/* Default handling        */
 #include "se.h"			/* Symbolic editing defns  */
 
+#ifdef NEVER
 static void do_revert();
   /* Attempt to reread masters                   */
 static void revert_it();
   /* Reread one master                           */
+#endif
 static vemStatus replFormat();
   /* Displays replace instance format message    */
 static vemStatus parseInstSpec();
@@ -200,7 +202,7 @@ octObject *inst;		/* Instance itself     */
 	revert_it(&master);
     }
 }
-#endif
+
 
 static void revert_it(fct)
 octObject *fct;			/* Facet to revert  */
@@ -221,6 +223,7 @@ octObject *fct;			/* Facet to revert  */
 	}
     }
 }
+#endif
 
 
 
