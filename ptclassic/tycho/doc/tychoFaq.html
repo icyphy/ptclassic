@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+<!-- W% $Date$ -->
 <html>
 <head>
 <title>Tycho FAQ</title>
@@ -56,7 +56,7 @@ present it here in a slightly different format.
 
 <DD> At first glance, Tycho is a extensible Itcl development
 environment.  We are developing Tycho to use it as a GUI for the
-Ptolemy Project.  Tycho0.1.1 is a work in progress, but others my find
+Ptolemy Project.  Tycho is a work in progress, but others my find
 it useful as is.
 
 <DT> <A NAME="Tycho feature list"><B>1.2 What features does Tycho have?</B></A>
@@ -140,8 +140,8 @@ brief <A HREF="brahe.html">biography</A>.
 <DT> <A NAME="platforms that Tycho runs under"><B>2.2 What platforms does Tycho run under?</B></A>
 <DD> We do our development work under Solaris2.5.1.  Tycho has been run
 under WindowsNT, but some of the features that use <CODE>exec</CODE> are
-broken.  The Macintosh port is substantially broken, but we are working
-on improving it.  
+broken.  The Macintosh port requires Itcl2.2p2, which, as of 5/97 has not
+yet been released by Lucent.
 
 <DT> <A NAME="installation, what do I need"><B>2.3 What do I need to Install Tycho?</B></A>
 <DD> 
@@ -160,7 +160,8 @@ on improving it.
 
 	
 	<LI> To use the Tcljava interface, you will need JDK 1.1, which
-	can be downloaded from <A HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>
+	can be downloaded from <A HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>.  Tcljava has been built on Solaris2.5.1, 
+	HPUX10.20 and Windows NT4.0.
 
 	</MENU>
 
@@ -181,6 +182,7 @@ Your mail should include:
 <LI> What version of Tycho you are running.
 <LI> What platform you are running under (Solaris, Windows etc.)
 <LI> Exactly how to reproduce the bug.
+<LI> A Tcl backtrace, if appropriate.
 </OL>
 
 
@@ -193,7 +195,7 @@ Your mail should include:
 <DD> FSF Emacs is not particularly graphical, though Xemacs is better.
 We want to be able to have active graphical widgets intermingled with text.
 
-<DT> <A NAME="iwidgets"><B>3.2 Why didn't you use the Iwidgets widgets
+<DT> <A NAME="iwidgets"><B>3.2 Why didn't you use the iwidgets widgets
 everywhere?</B></A>
 
 <DD> 
@@ -216,7 +218,7 @@ generated documentation and active Tcl examples.
 <DD> When we started Tycho, Java was still very new.  Currently, we
 don't know of a good canvas like Java class like the Tk canvas.  We'd
 rather not reinvent the wheel here and write our own Java canvas.  We
-are looking into integrating Java and Tycho.
+are looking into integrating Java and Tycho using Sun's TclJava interface.
 
  <P> Also, we wanted to be able to provide an easily extensible
 environment for non-programmers, which makes an interpreted language
