@@ -391,7 +391,7 @@ body ::tycho::TopLevel::busy {args} {
 # <p>
 # FIXME: This procedure doesn't work with widgets that defer mapping
 # (like most iwidgets, including the only one we use, the buttonbox).
-# The width of the button box is not taken into account depite the fact
+# The width of the button box is not taken into account despite the fact
 # that everything has been packed into it already. This is because the
 # widget actually defers the packing using an "after" command.
 #

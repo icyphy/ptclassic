@@ -198,7 +198,7 @@ body ::tycho::Frame::_color {id canvas slate color} {
 #
 # Update the relief of the Frame. Can be one of: flat, raised,
 # sunken. ridge, or groove. The coloring for the raised and ridge
-# options is the same: the coloring for the sunken and grovved options
+# options is the same: the coloring for the sunken and grooved options
 # is the same -- the difference is only in whether the notlit and
 # notshaded components exist.
 #
