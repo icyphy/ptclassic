@@ -391,7 +391,6 @@ body ::tycho::ListBrowser::complete {{case 0}} {
         if {$compMatch != {}} {
             setEntry $compMatch
         } else {
-            # if there is no common initial substring, use the first match
             setEntry [lindex $matches 0]
         }
 	bell
