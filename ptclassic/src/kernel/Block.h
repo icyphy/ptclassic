@@ -14,21 +14,6 @@ $Id$
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
  Date of creation: 1/17/90
- Revisions:
-	3/19/90 - J. Buck
-		Changes required by the interpreter:
-		1) add saveMPH to save a pointer to a contained MultiPortHole.
-		   addPort(MultiPortHole& p) sets it.
-		2) add the virtual method "clone".
-		3) add the method "portWithName" (defined in Block.cc)
-
-	3/23/90 - J. Buck
-		Make a Block a type of NamedObj
-
-        5/26/90 - I. Kuroda and J. Buck
-                Add StateList states and methods for State
-
-	5/29/90	- Change StringList cast to printVerbose function
 
  Block is the basic unit of computation...it is an abstraction that has
  inputs and outputs and certain generic methods common to all
@@ -42,6 +27,10 @@ class Scheduler;
 
 class Block : public NamedObj
 {
+	friend class BlockPortIter;
+	friend class BlockStateIter;
+	friend class BlockMPHIter;
+	friend class BlockGenPortIter;
 public:
 	// Initialize the data structures
 	void initialize();
@@ -57,7 +46,8 @@ public:
 	// Methods making ports available on the outside;
 	// can be read but not set
 	int numberPorts() const {return ports.size();}
-	PortHole& nextPort() {return ports++;}
+
+	int numberMPHs() const {return multiports.size();}
 
 	// Method setting internal data in the Block
 	// If the parent pointer is not provied, it defaults to NULL
@@ -77,18 +67,18 @@ public:
 	// i.e., it is true for stars and wormholes, false for galaxies.
 	virtual int isItAtomic () const; // {return TRUE;}
 
-	// virtual method to make a new object of the same type.  This
-	// version should never be called; stars and galaxies should 
-	// redefine it as
-	// virtual Block* clone () {return new MyType;}
+	// virtual method to make a new object of the same type.
+	// Stars and galaxies should redefine it as, say
+	//
+	// virtual Block* clone () const {return new MyType;}
 
-	virtual Block* clone ();
+	virtual Block* clone () const;
 
 	// Method to print out a description of the block
 	// Note that this function flattens the profile of a galaxy,
 	// which may not always be wanted.  It produces a great deal
 	// of data.
-	StringList printVerbose();
+	StringList printVerbose() const;
 
 	// Add elements to the to the lists
 	// Made public for the benefit of MultiPortHole and
@@ -96,22 +86,22 @@ public:
 	addPort(PortHole& p) {ports.put(p);}
 
 	// Retrieve the PortHole with the given name
-	PortHole *portWithName(const char* name);
+	PortHole *portWithName(const char* name) const;
 
 	// Retrieve the MultiPortHole with the given name
-	MultiPortHole *multiPortWithName(const char* name);
+	MultiPortHole *multiPortWithName(const char* name) const;
 
 	// Get a list of contained PortHole names
-	int portNames (const char** names, int* io, int nMax);
+	int portNames (const char** names, int* io, int nMax) const;
 
 	// Get a list of contained MultiPortHole names
-	int multiPortNames (const char** names, int* io, int nMax);
+	int multiPortNames (const char** names, int* io, int nMax) const;
 
 	// print portholes as part of the info-printing method
-	StringList printPorts(const char* type);
+	StringList printPorts(const char* type) const;
 
 	// return the scheduler under which it is in.
-	virtual Scheduler* mySched() ;
+	virtual Scheduler* mySched() const;
 
         // Add  State to the block
         addState(State& s) {states.put(s);}
@@ -122,13 +112,11 @@ public:
         // Return number of states 
         int numberStates() const {return states.size();}
 
-        State& nextState() {return states++;}
-
         // print states as part of the info-printing method
-        StringList printStates(const char* type);
+        StringList printStates(const char* type) const;
 
         // Retrieve the State with the given name
-        State *stateWithName(const char* name);
+        State *stateWithName(const char* name) const;
 
         // Re-Define State
         setState(const char* stateName, const char* expression) {
@@ -160,4 +148,36 @@ private:
 	MPHList multiports;
 };
 
+// Iterator classes associated with Block
+
+class BlockPortIter : public PortListIter {
+public:
+	BlockPortIter(const Block& b) : PortListIter (b.ports) {}
+};
+
+class BlockStateIter : public StateListIter {
+public:
+	BlockStateIter(const Block& b) : StateListIter (b.states) {}
+};
+
+class BlockMPHIter : private ListIter {
+public:
+	BlockMPHIter(const Block& b) : ListIter (b.multiports) {}
+	MultiPortHole* next() { return (MultiPortHole*)ListIter::next();}
+	MultiPortHole* operator++() { return next();}
+	ListIter::reset;
+};
+
+class BlockGenPortIter : private ListIter {
+public:
+	BlockGenPortIter(const Block& b) : ListIter(b.ports), usedP(0),
+			myBlock(b) {}
+	GenericPort* next();
+	GenericPort* operator++() { return next();}
+	void reset() { reconnect(myBlock.ports);}
+private:
+	const Block& myBlock;
+	int usedP;
+};
+	
 #endif
