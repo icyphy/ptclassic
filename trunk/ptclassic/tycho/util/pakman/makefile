@@ -41,6 +41,15 @@ VPATH =		$(ROOT)/util/pakman
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# The variables below are used to create distributions
+TYPACKAGE = 	tycho.util.pakman
+TYPACKAGE_ROOTDIR = $(ROOT)/..
+TYPACKAGE_DIR = tycho/util/pakman
+TYVERSION =	1.0
+TYDIST =	$(TYPACKAGE)$(TYVERSION)
+TYZIP =		$(TYPACKAGE_DIR)/$(TYPACKAGE).zip
+TYJARFILE =
+
 # Sub directories to run make in.
 DIRS =	 bin demo doc test template.tycho template.simple
 
