@@ -70,7 +70,6 @@ proc tkerror message {
     halt
 }
 
-
 ###################################################################
 # Procedure to open a message window and grab the focus.
 # The user cannot do anything until the window is dismissed.
@@ -120,7 +119,7 @@ proc ptkStartupMessage {pigiVersion pigiFilename} {
     button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
     frame $w.f -relief raised -bd 5
     frame $w.f.msg
-    message $w.f.msg.msg1 -font [option get . bigfont Bigfont] \
+    message $w.f.msg.msg1 -font [option get . bigfont Pigi] \
 	-justify center -foreground [ptkColor firebrick] -width 20c -text { \
 Ptolemy Interactive Graphical Interface }
     append text $pigiVersion {
@@ -133,14 +132,17 @@ Copyright \251 1990-1994 Regents of the University of California
 For copyright notice, limitation of liability,
 and disclaimer of warranty provisions, push the button below. "
     message $w.f.msg.msg2 -justify center -text $text -width 20c
-    button $w.f.msg.copyright -command "ptkDisplayCopyright" \
+    frame $w.f.msg.at -class Attention
+    button $w.f.msg.at.copyright -command "ptkDisplayCopyright" \
 	-text {more information} \
-	-background [ptkColor burlywood1] -font -Adobe-times-medium-r-normal--*-180*
+	-background [ptkColor burlywood1] \
+	-font [option get . mediumfont Pigi]
+    pack append $w.f.msg.at $w.f.msg.at.copyright {bottom fillx}
 
     pack append $w.f.msg $w.f.msg.msg1 {top fillx} $w.f.msg.msg2 {top} \
-	$w.f.msg.copyright {top fillx}
+	$w.f.msg.at {bottom fillx}
 
-    canvas $w.f.bm -width 6c -height 7.5c
+    canvas $w.f.bm -width 6c -height 7.5c -bg [ptkColor bisque]
     global ptolemy
     $w.f.bm create bitmap 3c 3.75c -bitmap @$ptolemy/tcl/lib/Ptolemy.xbm
     pack append $w.f $w.f.bm {left} $w.f.msg {right fill expand}
