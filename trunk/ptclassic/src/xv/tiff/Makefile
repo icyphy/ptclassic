@@ -24,10 +24,16 @@
 # LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
 # OF THIS SOFTWARE.
 #
+
+ROOT = ../../..
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
 DESTDIR=.
 #
 AR=	/bin/ar
-RANLIB=	/usr/bin/ranlib
+#RANLIB=	/usr/bin/ranlib
 NULL=
 
 IPATH=	-I.
