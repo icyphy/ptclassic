@@ -148,6 +148,18 @@ class ::tycho::Monitor {
 
     # Remember where the errors are located
     public variable errorList {}
+   
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+        
+    ###################################################################
+    ####                          private methods                  ####
+
+    # Initialize the tool bar.
+    private method initializeToolbar {toolbar}
 
     ###################################################################
     ####                           private variables               ####
@@ -197,7 +209,8 @@ configbody ::tycho::Monitor::modal {
 # Command to be Executed.
 #
 configbody ::tycho::Monitor::command {
-    if {[toolbar exists commandtoexec]} {
+    # toolbar exists will return {} if there's no toolbar
+    if {[toolbar exists commandtoexec] == 1} {
         $this toolbar clear commandtoexec
         $this toolbar insert commandtoexec $itk_option(-command)
     }
@@ -210,7 +223,8 @@ configbody ::tycho::Monitor::command {
 # we cd to the value of this option.
 #
 configbody ::tycho::Monitor::dir {
-    if {[toolbar exists dirtoexecfrom]} {
+    # toolbar exists will return {} if there's no toolbar
+    if {[toolbar exists dirtoexecfrom] == 1} {
         $this toolbar clear dirtoexecfrom
         $this toolbar insert dirtoexecfrom $itk_option(-dir)
     }
@@ -225,23 +239,6 @@ body ::tycho::Monitor::constructor {args} {
     # Original Tk stuff here
     eval itk_initialize $args
 
-    toolbar entry commandtoexec "Command to execute: " \
-            "$itk_option(-command)" "$this execProcess cmd "
-    toolbar entry dirtoexecfrom "Directory to execute from: " \
-            "$itk_option(-dir)"     "$this execProcess dir "
-
-    toolbar button prev -text {Prev Error} \
-            -description {Jump to previous error} \
-            -command "$this jumpNextError -1" -state disabled
-    toolbar button next -text {Next Error} \
-            -description {Jump to next error} \
-            -command "$this jumpNextError" -state disabled
-    toolbar button stop -text {Stop <Esc>} \
-            -description {Stop execution} \
-            -command "$this killProcess" -state disabled
-    toolbar button help -text {Help <h>} \
-            -description {Help on Monitor} \
-            -command "$this help"
             
     if {![info exists itk_component(history)] || \
             ![winfo exists $itk_component(history)]} {
@@ -531,3 +528,52 @@ body ::tycho::Monitor::updateStatus {} {
     ##################################################################
     ####                   protected methods                      ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::Monitor::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Monitor::initializeToolbar $toolbar
+    }
+
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeToolbar
+# Initialize the tool bar.  Adds entries specific to this class.
+#
+body ::tycho::Monitor::initializeToolbar {toolbar} {
+    $toolbar entry commandtoexec "Command to execute: " \
+            "$itk_option(-command)" "$this execProcess cmd "
+    $toolbar entry dirtoexecfrom "Directory to execute from: " \
+            "$itk_option(-dir)"     "$this execProcess dir "
+
+    $toolbar button prev -text {Prev Error} \
+            -description {Jump to previous error} \
+            -command "$this jumpNextError -1" -state disabled
+    $toolbar button next -text {Next Error} \
+            -description {Jump to next error} \
+            -command "$this jumpNextError" -state disabled
+    $toolbar button stop -text {Stop <Esc>} \
+            -description {Stop execution} \
+            -command "$this killProcess" -state disabled
+    $toolbar button help -text {Help <h>} \
+            -description {Help on Monitor} \
+            -command "$this help"
+}
