@@ -529,7 +529,7 @@ isStringInList(const char* string, const char* list[],
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
 {
-	const Block *block;
+	const Block *block = (const Block *)NULL;
 	char* mphname[MAX_NUM_FIELDS];
 	char* npspec[MAX_NUM_FIELDS];
 	int isMPH[MAX_NUM_FIELDS];
