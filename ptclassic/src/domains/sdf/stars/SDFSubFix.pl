@@ -62,7 +62,9 @@ the OverflowHandler will be called.
         protected {
 		Fix fixIn, diff;
         }
-        setup {
+        begin {
+		SDFFix::begin();
+
                 if ( ! int(ArrivingPrecision) ) {
                   fixIn = Fix( ((const char *) InputPrecision) );
 		  if ( fixIn.invalid() )

@@ -146,6 +146,8 @@ The input particles are only cast to this precision if the parameter
 		fdbckCoefs = fwdCoefs = state = NULL;
 	}
         begin {
+            SDFFix::begin();
+
 	    int numNumer = numerator.size();
 	    int numDenom = denominator.size();
 	    numState = max(numNumer,numDenom);

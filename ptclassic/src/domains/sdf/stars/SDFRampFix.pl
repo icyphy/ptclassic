@@ -67,7 +67,9 @@ The precision of this state is the precision of the accumulation.
         protected {
 		Fix t;
         }
-        setup {
+        begin {
+		SDFFix::begin();
+
 		t = Fix( ((const char *) OutputPrecision) );
 		if ( t.invalid() )
 		  Error::abortRun( *this, "Invalid OutputPrecision" );

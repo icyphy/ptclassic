@@ -68,7 +68,9 @@ the OverflowHandler will be called.
 	protected {
 		Fix out;
 	}
-        setup {
+        begin {
+		SDFFix::begin();
+
                 out = Fix( ((const char *) OutputPrecision) );
 		if ( out.invalid() )
 		   Error::abortRun( *this, "Invalid OutputPrecision" );
