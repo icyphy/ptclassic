@@ -51,6 +51,15 @@ class ::tycho::EditRetarg {
     # Generate data for new domains
     method compareDomains {}
 
+    ###################################################################
+    ####                         public procedures                 ####
+
+    # Print the same star from two different domains
+    public proc printStars { starName relation domainA domainB}
+
+    ###################################################################
+    ####                         private commons                   ####
+
 }
 
 #######################################################################
@@ -91,13 +100,82 @@ body ::tycho::EditRetarg::compareDomains {} {
     foreach header $headers {
         component graphics add $header {}
         foreach star [lindex $clashList $indexCount] {
-            set contents [list html \
-                "<pre>$domainA: [domain $domainA; catch {::print $star} res; set res]</pre> \
-                <pre>$domainB: [domain $domainB; catch {::print $star} res; set res]</pre>" ]
+            set contents [list tcl \
+                    "::tycho::EditRetarg::printStars $star $header \
+                    $domainA $domainB" ]
             component graphics add $star $contents $header
         }
         incr indexCount
     }
 
     component graphics redrawGraph
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### printStars
+# Print the same star from two different domains
+# This procedure is called when the user double clicks on a star name
+body ::tycho::EditRetarg::printStars { starName relation domainA domainB} {
+    domain $domainA
+    if [catch {set domainAPrint [::print $starName]}] {
+        set domainAPrint "Star $starName is not present in domain $domainA"
+    }
+    domain $domainB
+    if [catch {set domainBPrint [::print $starName]}] {
+        set domainAPrint "Star $starName is not present in domain $domainB"
+    }
+    
+    switch $relation {
+        commonStars {
+            set relationMessage \
+                    "$Star $star has the same ports, multiports and states \
+                    in $domainA and $domainB"
+        }
+        commonButPorts {
+            set relationMessage \
+                    "Star $star does not have the same ports \
+                    in $domainA and $domainB"
+        }
+        commonButMultiPorts {
+            set relationMessage \
+                    "Star $star does not have the same multiports \
+                    in $domainA and $domainB"
+        }
+        commonButStates {
+            set relationMessage \
+                    "Star $star does not have the same states \
+                    in $domainA and $domainB"
+        }
+        ${domainA}Only {
+            set relationMessage \
+                    "Star $star is only in $domainA, not in $domainB"
+        } 
+        ${domainB}Only {
+            set relationMessage \
+                    "Star $star is only in $domainB, not in $domainA"
+        }
+    }
+    ::tycho::HTMLMessage .editRetargPrintStars -html "
+        <H1>Star: $starName in domains $domainA and $domainB</H1>
+        $relationMessage
+        <H2>$domainA Domain</H2>
+        <pre>
+        $domainAPrint
+        </pre>
+        <H2>$domainB Domain</H2>
+        <pre>
+        $domainBPrint
+        </pre>
+    "
+
+    .editRetargPrintStars centerOnScreen
 }
