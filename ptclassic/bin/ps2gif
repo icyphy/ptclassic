@@ -28,7 +28,7 @@ if (! $?DISPLAY) then
 	echo "          Font quality may be compromized."
 	set options = "-dNODISPLAY $options"
 endif
-gs $options pstoppm.ps << END-GS >& /dev/null
+gs $options -g1x1 pstoppm.ps << END-GS >& /dev/null
 (${temp:r}) ppm24run
 END-GS
 
@@ -43,7 +43,7 @@ endif
 foreach page ( $ppmFiles )
 	pnmcrop $page | \
 	ppmquant -floyd 256 | \
-	ppmtogif -transparent gray99 > ${file:r}-$p.gif
+	ppmtogif -interlace -transparent gray99 > ${file:r}-$p.gif
 	@ p++
 end
 
