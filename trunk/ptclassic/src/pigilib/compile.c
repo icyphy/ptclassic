@@ -89,7 +89,7 @@ static DupSheet xfered;
 Caveat: Ess routines create a select set in only one facet, so all
 objects added to the select set must be in the same facet!
 */
-static vemSelSet essSelSet;  /* for highlighting errors */
+static vemSelSet essSelSet;		/* for highlighting errors */
 static boolean essExist = FALSE;
 
 boolean
@@ -125,17 +125,22 @@ static boolean
 ProcessFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
     ParamType *p;
     int i;
+    int retval = TRUE;
 
     ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
     for (i = 0, p = pList.array; i < pList.length; i++, p++) {
 	if (!p->type || p->type[0] == 0)
 	    p->type = "FLOAT"; /* backward compatibility */
-	ERR_IF1(!KcMakeState(p->name, p->type, p->value));
+	if (!KcMakeState(p->name, p->type, p->value)) {
+	   retval = FALSE;
+	   break;
+	}
     }
-    return(TRUE);
+    FreeFlatPList(&pList);
+    return(retval);
 }
 
 static boolean
@@ -143,11 +148,17 @@ ProcessTargetParams(targName, galFacetPtr)
 char* targName;
 octObject *galFacetPtr;
 {
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
+    int retval = TRUE;
     if (targName[0] == '<') return TRUE;
-    ERR_IF1(!GetTargetParams(targName, galFacetPtr, &pList));
-    ERR_IF1(!KcModTargetParams(&pList));
-    return(TRUE);
+    if (!GetTargetParams(targName, galFacetPtr, &pList)) {
+	retval = FALSE;
+    }
+    else if (!KcModTargetParams(&pList)) {
+	retval = FALSE;
+    }
+    FreeFlatPList(&pList);
+    return(retval);
 }
 
 /* This function will be called recursively if there's hierarchy */
@@ -315,8 +326,6 @@ char *propname;
  * This function is called recursively if there's hierarchy
  * Don't free octObject inst using FreeOctMembers because it would be
  * freed again during recursion.
- * Don't free ParamListType pList because its members may contain
- * non-dynamic memory.
  * It is okay to free the octGenerator. -BLE
  */
 static boolean
@@ -325,48 +334,53 @@ octObject *facetPtr;
 {
     octGenerator genInst;
     octObject inst = {OCT_UNDEFINED_OBJECT};
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
     char *name, *oldInstName, *akoName, *parentname;
     char instanceHandle[POCT_FACET_HANDLE_LEN];
     char facetHandle[POCT_FACET_HANDLE_LEN];
+    int retval = TRUE;
 
     DetachDelaysFromNets(facetPtr);
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
 
     /* Iterate over all oct objects, overwriting inst at each iteration */
     /* This one line accounts for most of the memory leaks in pigilib */
-    /* but you cannot deallocate inst using FreeOctMembers */
+    /* but you cannot deallocate inst using FreeOctMembers within while loop */
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst)) {
 	    /* skip */
-	} else if (IsDelay(&inst)) {
+	}
+	else if (IsDelay(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay")) {
-		octFreeGenerator(&genInst);
-		return FALSE;
+		retval = FALSE;
+		break;
 	    }
-	} else if (IsDelay2(&inst)) {
+	}
+	else if (IsDelay2(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay2")) {
-		octFreeGenerator(&genInst);
-		return FALSE;
+		retval = FALSE;
+		break;
 	    }
-	} else if (IsBus(&inst)) {
+	}
+	else if (IsBus(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "buswidth")) {
-		octFreeGenerator(&genInst);
-		return FALSE;
+		retval = FALSE;
+		break;
 	    }
-	} else {
-	    /* assume it's a sog */
-	    /* FIXME: Major memory leak here */
-	    /* Do not free inst: it will be read at a later time */
-	    if (!GetOrInitSogParams(&inst, &pList)) {
-		octFreeGenerator(&genInst);
-		return FALSE;
-	    }
+	}
+	/* test if it's a sog */
+	/* FIXME: Major memory leak here */
+	/* Do not free inst: it will be read at a later time */
+	else if (!GetOrInitSogParams(&inst, &pList)) {
+	    retval = FALSE;
+	    break;
+	}
+	else {
 	    akoName = BaseName(inst.contents.instance.master); 
 	    name = UniqNameGet(akoName);
 	    if (name == NULL) {
-		octFreeGenerator(&genInst);
-		return FALSE;
+		retval = FALSE;
+		break;
 	    }
 	    /* put the unique instance name back in the facet,
 	     * unless it is there already
@@ -376,17 +390,15 @@ octObject *facetPtr;
 		if (oldInstName) free(oldInstName);
 		inst.contents.instance.name = name;
 		if (octModify(&inst) != OCT_OK) {
-		    octFreeGenerator(&genInst);
 		    ErrAdd(octErrorString());
-		    FreeOctMembers(&inst);		/* also frees name */
-		    return FALSE;
+		    retval = FALSE;
+		    break;
 		}
 	    }
 	    if (!KcInstance(name, akoName, &pList)) {
-		octFreeGenerator(&genInst);
 		free(name);
-		FreeOctMembers(&inst);
-		return FALSE;
+		retval = FALSE;
+		break;
 	    }
 	    /* Process the pragmas list, if any */
 	    ptkOctObj2Handle(&inst, instanceHandle);
@@ -400,9 +412,11 @@ octObject *facetPtr;
 			(char*)NULL);
 	    free(name);
 	}
+	FreeFlatPList(&pList);
     }
+    FreeFlatPList(&pList);
     octFreeGenerator(&genInst);
-    return(TRUE);
+    return(retval);
 }
 
 /* 6/13/89
@@ -461,7 +475,7 @@ int *inN, *outN;
     octGenerator termGen;
     int i;
     int retval = TRUE;
-    boolean result;
+    boolean inputPortFlag;
 
     *inN = 0;				/* Set length of arrays to zero */
     *outN = 0;
@@ -470,21 +484,24 @@ int *inN, *outN;
     (void) octInitGenContentsSpecial(netPtr, OCT_TERM_MASK, &termGen);
     for (i = 0; i < TERMS_MAX; ) {
 	if (octGenerate(&termGen, &term) != OCT_OK) {
-	    break;
+	    break;				/* Do not free term here */
 	}
 	if (term.contents.term.instanceId != oct_null_id) {
 	    /* actual term */
-	    if (!IsInputTerm(&term, &result)) {
-		octFreeGenerator(&termGen);
+	    if (!IsInputTerm(&term, &inputPortFlag)) {
+		FreeOctMembers(&term);
 		retval = FALSE;
 		break;
 	    }
-	    if (result) {
+	    if (inputPortFlag) {
 		in[(*inN)++] = term;
 	    } else {
 		out[(*outN)++] = term;
 	    }
 	    i++;
+	}
+	else {
+	    FreeOctMembers(&term);
 	}
     }
 
@@ -606,13 +623,33 @@ char *nodename;
 }
 
 
+/* 7/31/90
+Checks to see if octObject is a MultiPortHole.
+*/
+static boolean
+TermIsMulti(termPtr)
+octObject *termPtr;
+{
+    int retval = FALSE;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
+
+    if (GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK) {
+	ErrAdd(octErrorString());
+    }
+    else {
+	retval = KcIsMulti(inst.contents.instance.name,
+			   termPtr->contents.term.name);
+    }
+    FreeOctMembers(&inst);
+
+    return(retval);
+}
+
 
 /* 6/14/89 7/31/90
 Emits connect, input, and output statements.
 */
 #define BLEN 80
-
-static boolean TermIsMulti();
 
 static boolean
 ConnectPass(facetPtr)
@@ -650,8 +687,7 @@ octObject *facetPtr;
 		errMsg = octErrorString();	    /* static string */
 		break;
 	    }
-	    PrintDebug("Warning: bad net deleted");
-	    continue;
+	    PrintDebug("Warning: bad net deleted");	/* continue in while */
 	} else if (inN == 0 || outN == 0) {
 	    errMsg = "ConnectPass: cannot match an input to an output";
 	    break;
@@ -719,41 +755,24 @@ octObject *facetPtr;
 	    free(nodename);
 	}
 	FreeOctMembers(&net);
+	for (i = 0; i < inN; i++) FreeOctMembers(&in[i]);
+	inN = 0;
+	for (i = 0; i < outN; i++) FreeOctMembers(&out[i]);
+	outN = 0;
     }
+
     if (errMsg) {
 	if (*errMsg) ErrAdd (errMsg);
 	EssAddObj(&net);
-	FreeOctMembers(&net);
     }
-    octFreeGenerator(&netGen);
 
-    /* free up the terms */
+    /* Free dynamic memory */
+    octFreeGenerator(&netGen);
+    FreeOctMembers(&net);
     for (i = 0; i < inN; i++) FreeOctMembers(&in[i]);
     for (i = 0; i < outN; i++) FreeOctMembers(&out[i]);
 
     return errMsg ? FALSE : TRUE;
-}
-
-/* 7/31/90
-Checks to see if octObject is a MultiPortHole.
-*/
-static boolean
-TermIsMulti(termPtr)
-octObject *termPtr;
-{
-    int retval = FALSE;
-    octObject inst = {OCT_UNDEFINED_OBJECT};
-
-    if (GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK) {
-	ErrAdd(octErrorString());
-    }
-    else {
-        retval = KcIsMulti(inst.contents.instance.name,
-			   termPtr->contents.term.name);
-    }
-    FreeOctMembers(&inst);
-
-    return(retval);
 }
 
 /*
@@ -1116,6 +1135,7 @@ long userOptionWord;
     else if (!CompileFacet(&facet)) {
 	PrintErr(ErrGet());
     }
+    FreeOctMembers(&facet);
     ViDone();
 }
 
@@ -1138,6 +1158,7 @@ static boolean
 RunAll(facetPtr)
 octObject *facetPtr;
 {
+    int retval = TRUE;
     octGenerator genInst;
     octObject inst = {OCT_UNDEFINED_OBJECT},
 	      univFacet = {OCT_UNDEFINED_OBJECT};
@@ -1147,9 +1168,9 @@ octObject *facetPtr;
 	univFacet.type = OCT_UNDEFINED_OBJECT;
 
 	if (!MyOpenMaster(&univFacet, &inst, "contents", "r")) {
-	    octFreeGenerator(&genInst);
 	    PrintErr(octErrorString());
-	    return FALSE;
+	    retval = FALSE;
+	    break;
 	}
 	/* skip any non-universes */
 	if (IsCursor(&inst)) {
@@ -1157,7 +1178,7 @@ octObject *facetPtr;
 	}
 	else if (IsUnivFacet(&univFacet)) {
 	    char *name = BaseName(univFacet.contents.facet.cell);
-	    char octHandle[16];
+	    char octHandle[POCT_FACET_HANDLE_LEN];
 
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
 	    PrintDebug(msg);
@@ -1165,11 +1186,13 @@ octObject *facetPtr;
 	    /* ptkCompileRun is very similar to ptkGo, but assuming controlled
 	       by the run-all-demos panel instead of ordinary run control
 	       panel. */
+	    retval = FALSE;
 	    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
-	      " ", octHandle, (char *) NULL));
+				      " ", octHandle, (char *) NULL));
 	    /* delete the universe after run finishes. */
-	    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "ptkDelLite ", name,
-	      " ", octHandle, (char *) NULL));
+	    TCL_CATCH_ERR1_BREAK(Tcl_VarEval(ptkInterp, "ptkDelLite ", name,
+					     " ", octHandle, (char *) NULL));
+	    retval = TRUE;
 	}
 	else if (IsPalFacet(&univFacet)) {
 	    RunAll(&univFacet);
@@ -1177,8 +1200,10 @@ octObject *facetPtr;
 	FreeOctMembers(&univFacet);
 	FreeOctMembers(&inst);
     }
+    FreeOctMembers(&univFacet);
+    FreeOctMembers(&inst);
     octFreeGenerator(&genInst);
-    return TRUE;
+    return retval;
 }
 
 /* NEW FUNCTION */
