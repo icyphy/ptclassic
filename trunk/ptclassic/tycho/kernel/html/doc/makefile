@@ -55,6 +55,8 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 
 MISC_FILES = img
 
+OPTIONAL_FILES = codeDoc
+
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
