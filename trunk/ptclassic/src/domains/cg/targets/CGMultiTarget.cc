@@ -239,24 +239,47 @@ void CGMultiTarget :: prepareChildren() {
     reorderChildren(0);	// first call initializes the structure
     StringList tname;
     for (int i = 0; i < nChildrenAlloc; i++) {
-	Target* t = createChild(i);
-	if (!t) return;
-	addChild(*t);
-	tname.initialize();
-	tname << filePrefix << i;
-	const char* childFilePrefix = hashstring(tname);
-	t->setParent(this);
-	if (cgChild(i)) {
-	    t->stateWithName("file")->setInitValue(childFilePrefix);
-	    char* expandedPathName = expandPathName(destDirectory.initValue());
-	    t->stateWithName("directory")
-		->setInitValue(hashstring(expandedPathName));
-	    delete [] expandedPathName;
-	    t->stateWithName("display?")
-		->setInitValue(displayFlag.initValue());
-	    t->stateWithName("Looping Level")
-		->setInitValue(hashstring("0"));
+      Target* t = createChild(i);
+      if (!t) return;
+      addChild(*t);
+      tname.initialize();
+      tname << filePrefix << i;
+      const char* childFilePrefix = hashstring(tname);
+      t->setParent(this);
+      if (cgChild(i)) {
+	// Carefully test for the presence of each state
+	// before attempting to set its value.
+	State* s;
+	if ((s = t->stateWithName("file")) != NULL) {
+	  s->setInitValue(childFilePrefix);
 	}
+	else {
+	  Error::warn(*t, "No state with given name", "file");
+	}
+	if ((s = t->stateWithName("directory")) != NULL) {
+	  char* expandedPathName =
+	    expandPathName(destDirectory.initValue());
+	  s->setInitValue(hashstring(expandedPathName));
+	  delete [] expandedPathName;
+	}
+	else {
+	  Error::warn(*t, "No state with given name", "directory");
+	}
+	if ((s = t->stateWithName("display?")) != NULL) {
+	  s->setInitValue(displayFlag.initValue());
+	}
+	else {
+	  Error::warn(*t, "No state with given name", "display?");
+	}
+	if ((s = t->stateWithName("Looping Level(DEF,CLUST,SJS,ACYLOOP)"))
+	    != NULL) {
+	  s->setInitValue(hashstring("0"));
+	}
+	else {
+	  Error::warn(*t, "No state with given name",
+		      "Looping Level(DEF,CLUST,SJS,ACYLOOP)");
+	}
+      }
     }
     resourceInfo();
     for (i = 0; i < nChildrenAlloc; i++) {
