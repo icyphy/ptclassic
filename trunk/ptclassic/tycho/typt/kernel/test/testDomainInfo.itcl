@@ -56,7 +56,14 @@ namespace ::tycho
 # Pretty much every binary has SDF in it.
 #
 test DomainInfo::domains-1.1 {Check out the domains command} {
+    # Create a domainInfo object in each domain
+    foreach domain [::tycho::DomainInfo::domains] {
+	catch {delete object .domainInfo}
+	::tycho::DomainInfo .domainInfo $domain
+    }
+    catch {delete object .domainInfo}
     lsearch [::tycho::DomainInfo::domains] SDF
+
 } {1}
 
 ######################################################################
@@ -94,7 +101,6 @@ incrementing by step size "step" (default 1) on each firing.}} {MultiPorts {}} {
 ######################################################################
 #### knownBlocks
 # 
-#
 test DomainInfo::knownBlocks-1.1 {Check out the knownBlocks command} {
     set retval1 [expr { [lsearch [::tycho::DomainInfo::knownBlocks SDF] Ramp] \
 	    != -1 }]
@@ -113,3 +119,29 @@ ______________________________________________________________________________
 
 }}
 
+######################################################################
+#### printStars
+test DomainInfo::printStars-1.1 {Check out the printStars command} {
+    catch {delete object .hof}
+    ::tycho::DomainInfo .hof HOF
+    # Print out everything, but just check to see that the Chain star
+    # exists
+    expr { [lsearch -glob [.hof printStars] {*Chain*}]   != -1 }
+} {1}
+
+######################################################################
+#### queryDomains
+test DomainInfo::queryDomains-1.1 {Check out the queryDomains command} {
+    set TY_TEST_SCRIPT {
+	%0 clearselection
+	%0 goto end
+	%0 select DE
+        unset TY_TEST_SCRIPT
+    }
+    ::tycho::DomainInfo::queryDomain {Which domain is your favorite?} {SDF}
+
+} {DE}
+
+catch {delete object .sdf}
+catch {delete object .hof}
+catch {delete object .domainInfo}
