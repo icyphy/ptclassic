@@ -102,18 +102,18 @@ TK_OBJ =	$(TCLTK_OBJ)/$(TK_VERSION)$(TCL_7_5_HACK)
 ITCL_OBJ =	$(TCLTK_OBJ)/$(ITCL_VERSION)
 
 # Destination of tcl only machine dependent files
-#TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
-TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(PTARCH)
+TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
+#TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(PTARCH)
 # Destination of the machine independent tcl files
-#TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
-TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
+TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
+#TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
 
 # Destination of tk only machine dependent files
-#TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
-TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
+TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
+#TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
 # Destination of the machine independent tk files
-#TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
-TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
+TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
+#TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
 ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
