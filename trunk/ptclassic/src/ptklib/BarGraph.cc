@@ -22,7 +22,11 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
-static const char file_id[] = "BarGraph.cc";
+static const char SccsId[] = "$Id$";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 /**************************************************************************
 Version identification:
