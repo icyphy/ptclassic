@@ -82,7 +82,10 @@ octObject *instPtr;
     ParamListType pList;
 
 /* set domain corresponding to the instance */
-    setCurDomainInst(instPtr);
+    if (!setCurDomainInst(instPtr)) {
+	PrintErr("Invalid domain found");
+	return(FALSE);
+    }
 
     ERR_IF1(!GetOrInitSogParams(instPtr, &pList));
     if (pList.length == 0) {
@@ -126,13 +129,6 @@ char* dmTitle;
     /* should free place->value string before assignment */
     place = pListPtr->array;
     for (i = 0; i < pListPtr->length; i++) {
-	if (!IsBalancedParen(items[i].value)) {
-	    char buf[512];
-	    sprintf(buf, "Unbalanced parentheses in parameter `%s`",
-		place->name);
-	    ErrAdd(buf);
-	    return (FALSE);
-	}
 	place->value = items[i].value;
 	place++;
     }
@@ -184,13 +180,6 @@ octObject *galFacetPtr;
     /* should free place->value string before assignment */
     place = pList.array;
     for (i = 0; i < pList.length; i++) {
-	if (!IsBalancedParen(items[i].value)) {
-		char buf[512];
-		sprintf(buf, "Unbalanced parentheses in parameter `%s`",
-			place->name);
-		ErrAdd(buf);
-		return (FALSE);
-	}
 	place->value = items[i].value;
 	place++;
     }
@@ -416,7 +405,9 @@ OpenPaletteInit()
     char *a, *b, *copy, *techDir, buf[FILENAME_MAX];
     int i;
 
-    sprintf(buf, "%s.palettes", UAppName);
+/* dots in resource names no longer work??? */
+/*    sprintf(buf, "%s.palettes", UAppName); */
+    sprintf(buf, "%sPalettes", UAppName);
     if ((b = RPCXGetDefault("vem", buf)) == NULL) {
 	b = defaultPalettes();
     }
@@ -702,7 +693,10 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    setCurDomainF(&facet);
+    if (!setCurDomainF(&facet)) {
+	PrintErr("Unknown domain found; correct the domain first");
+	ViDone();
+    }
     nTargets = KcDomainTargets(targetNames,MAX_NUM_TARGETS);
 
     if(nTargets == 0) {
