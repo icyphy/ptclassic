@@ -141,112 +141,32 @@ limitation of liability, and disclaimer of warranty provisions.
 	      }
 	    }
 	}
-	codeblock(firststages) {
-	  static int firststagesfft(int N,int N2,int order,double*rein,double
-				     *imin,double *Twsine,double *Twcosine)
-	    {
-	      int N1,i,j,k,l;
-	      double ExpofW,reindtmp,imagindtmp,xtcd,xtsd,ytsd,ytcd;
-	      double twopi=6.28318530717959;
-
-	      for(k=0;k<order-2;k++){
-		N1=N2;
-		N2=N2/2;
-		ExpofW=twopi/N1;
-		for(j=0;j<N2/4;j++){
-		  calcTwSinCos(Twsine,Twcosine,ExpofW,N2);
-		  for(i=j;i<N/4;i+=N1/4){
-		    l=i+N2/4;
-		    reindtmp=vis_fpsub16(rein[l],rein[i]);
-		    rein[l] = vis_fpadd16(rein[i],rein[l]);
-		    imagindtmp=vis_fpsub16(imin[l],imin[i]);
-		    imin[l] = vis_fpadd16(imin[i],imin[l]);
-		    xtcd=mult4x4(reindtmp,Twcosine[j]);
-		    xtsd=mult4x4(reindtmp,Twsine[j]);
-		    ytsd=mult4x4(imagindtmp,Twsine[j]);
-		    ytcd=mult4x4(imagindtmp,Twcosine[j]);
-		    rein[i]=vis_fpsub16(xtcd,ytsd);
-		    imin[i]=vis_fpadd16(xtsd,ytcd);
-		  }
-		}
-	      }
-	      return N2;
-	    }
-	}
-	codeblock(secondtolast) {
-	  static void secondlaststagefft(int N1,int N,float *splitf_rein, float
-					 *splitf_imin, double CSd,double SCd)
-	    {
-	      double reinrepeat,iminrepeat;
-	      double xtcxts,ytsytc,xtcminusyts,xtsaddytc;
-	      float reinftmp,imaginftmp;
-	      int i;
-
-	      for(i=0;i<N/2;i+=N1/2){
-		reinftmp=vis_fpsub16s(splitf_rein[i+1],splitf_rein[i]);
-		imaginftmp=vis_fpsub16s(splitf_imin[i+1],splitf_imin[i]);
-		reinrepeat=vis_freg_pair(reinftmp,reinftmp);
-		iminrepeat=vis_freg_pair(imaginftmp,imaginftmp);
-		splitf_rein[i+1]=vis_fpadd16s(splitf_rein[i+1],splitf_rein[i]);
-		splitf_imin[i+1]=vis_fpadd16s(splitf_imin[i+1],splitf_imin[i]);
-		xtcxts=mult4x4(reinrepeat,CSd);
-		ytsytc=mult4x4(iminrepeat,SCd);
-		xtcminusyts=vis_fpsub16(xtcxts,ytsytc);
-		xtsaddytc=vis_fpadd16(xtcxts,ytsytc);
-		splitf_rein[i]=vis_read_hi(xtcminusyts);
-		splitf_imin[i]=vis_read_lo(xtsaddytc);
-	      }
-	    }
-	}
-	codeblock(last) {
-	  static void laststagefft(int N,short *splits_rein,short *splits_imin)
-	    {
-	      double reindhi,reindlo,reindsub,reindadd;
-	      double imindhi,imindlo,imindsub,imindadd;
-	      int i,j;
-
-	      for(j=0;j<N/2;j++){
-		i=2*j;
-		reindhi=vis_ld_u16((splits_rein+i+1));
-		reindlo=vis_ld_u16((splits_rein+i));
-		reindsub=vis_fpsub16(reindhi,reindlo);
-		reindadd=vis_fpadd16(reindhi,reindlo);
-		imindhi=vis_ld_u16((splits_imin+i+1));
-		imindlo=vis_ld_u16((splits_imin+i));
-		imindsub=vis_fpsub16(imindhi,imindlo);
-		imindadd=vis_fpadd16(imindhi,imindlo);
-		vis_st_u16(reindadd,(splits_rein+i+1));
-		vis_st_u16(imindadd,(splits_imin+i+1));
-		vis_st_u16(reindsub,(splits_rein+i));
-		vis_st_u16(imindsub,(splits_imin+i));
-	      }	
-	    }
-	}
 	initCode {
 	  addInclude("<vis_proto.h>");
 	  addProcedure(calculateSinandCos);
 	  addProcedure(quadmult);
 	  addProcedure(bitreverse);
-	  addProcedure(firststages);
-	  addProcedure(secondtolast);
-	  addProcedure(last);
 	  addDeclaration(mainDecl);
 	  addCode(initialize);
 	}
 	codeblock(localDecl) {
-	  double ExpofW;
-	  double CSd,SCd;
+	  double reindtmp,imagindtmp,xtcd,xtsd,ytsd,ytcd;
+	  double reinrepeat,iminrepeat;
+	  double xtcxts,ytsytc,xtcminusyts,xtsaddytc;
+	  double reindhi,reindlo,reindsub,reindadd;
+	  double imindhi,imindlo,imindsub,imindadd;
+	  double ExpofW,CSd,SCd;
+	  float reinftmp,imaginftmp;
 	  float *splitf_rein,*splitf_imin;
 	  float *Cf,*Sf;
-	  int i,N,N1,N2;
+	  int N,N1,N2,i,j,k,l;
 	  short *splits_rein,*splits_imin;
-	}
+	}	
 	codeblock(fft) {       
 	  splitf_rein = (float*)$starSymbol(rein);
 	  splitf_imin = (float*)$starSymbol(imin);
 	  splits_rein = (short*)splitf_rein;
 	  splits_imin = (short*)splitf_imin;
-
 	  /*read in the input*/
 	  for(i=0;i<$val(sizeoffft)/4;i++){
 	    $starSymbol(rein)[i] = (double) $ref2(realIn,i);
@@ -255,9 +175,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	  /*first stages of fft (order of fft minus last two)*/
 	  N=$val(sizeoffft);
 	  N2=N;
-	  N2=firststagesfft(N,N2,$val(orderfft), $starSymbol(rein),
-			    $starSymbol(imin), $starSymbol(Twsine),
-			    $starSymbol(Twcosine));
+	  for(k=0;k<$val(orderfft)-2;k++){
+	    N1=N2;
+	    N2=N2/2;
+	    ExpofW=$starSymbol(twopi)/N1;
+	    for(j=0;j<N2/4;j++){
+	      calcTwSinCos($starSymbol(Twsine),$starSymbol(Twcosine),ExpofW,N2);
+	      for(i=j;i<N/4;i+=N1/4){
+		l=i+N2/4;
+		reindtmp=vis_fpsub16($starSymbol(rein)[l],$starSymbol(rein)[i]);
+		$starSymbol(rein)[l] =
+		  vis_fpadd16($starSymbol(rein)[i],$starSymbol(rein)[l]);
+		imagindtmp=vis_fpsub16($starSymbol(imin)[l],$starSymbol(imin)[i]);
+		$starSymbol(imin)[l] =
+		  vis_fpadd16($starSymbol(imin)[i],$starSymbol(imin)[l]);
+		xtcd=mult4x4(reindtmp,$starSymbol(Twcosine)[j]);
+		xtsd=mult4x4(reindtmp,$starSymbol(Twsine)[j]);
+		ytsd=mult4x4(imagindtmp,$starSymbol(Twsine)[j]);
+		ytcd=mult4x4(imagindtmp,$starSymbol(Twcosine)[j]);
+		$starSymbol(rein)[i]=vis_fpsub16(xtcd,ytsd);
+		$starSymbol(imin)[i]=vis_fpadd16(xtsd,ytcd);
+	      }
+	    }
+	  }
 	  /*second to last stage of the fft*/
 	  N1=N2;
 	  N2=N2/2;
@@ -267,9 +207,36 @@ limitation of liability, and disclaimer of warranty provisions.
 	  Sf=(float *) $starSymbol(Twsine);
 	  CSd = vis_freg_pair(*Cf,*Sf);
 	  SCd = vis_freg_pair(*Sf,*Cf);
-	  secondlaststagefft(N1,N,splitf_rein,splitf_imin,CSd,SCd);
+	  for(i=0;i<N/2;i+=N1/2){
+	    reinftmp=vis_fpsub16s(splitf_rein[i+1],splitf_rein[i]);
+	    imaginftmp=vis_fpsub16s(splitf_imin[i+1],splitf_imin[i]);
+	    reinrepeat=vis_freg_pair(reinftmp,reinftmp);
+	    iminrepeat=vis_freg_pair(imaginftmp,imaginftmp);
+	    splitf_rein[i+1]=vis_fpadd16s(splitf_rein[i+1],splitf_rein[i]);
+	    splitf_imin[i+1]=vis_fpadd16s(splitf_imin[i+1],splitf_imin[i]);
+	    xtcxts=mult4x4(reinrepeat,CSd);
+	    ytsytc=mult4x4(iminrepeat,SCd);
+	    xtcminusyts=vis_fpsub16(xtcxts,ytsytc);
+	    xtsaddytc=vis_fpadd16(xtcxts,ytsytc);
+	    splitf_rein[i]=vis_read_hi(xtcminusyts);
+	    splitf_imin[i]=vis_read_lo(xtsaddytc);
+	  }	
 	  /*last stage of the fft*/
-	  laststagefft(N,splits_rein,splits_imin);
+	  for(j=0;j<N/2;j++){
+	    i=2*j;
+	    reindhi=vis_ld_u16((splits_rein+i+1));
+	    reindlo=vis_ld_u16((splits_rein+i));
+	    reindsub=vis_fpsub16(reindhi,reindlo);
+	    reindadd=vis_fpadd16(reindhi,reindlo);
+	    imindhi=vis_ld_u16((splits_imin+i+1));
+	    imindlo=vis_ld_u16((splits_imin+i));
+	    imindsub=vis_fpsub16(imindhi,imindlo);
+	    imindadd=vis_fpadd16(imindhi,imindlo);
+	    vis_st_u16(reindadd,(splits_rein+i+1));
+	    vis_st_u16(imindadd,(splits_imin+i+1));
+	    vis_st_u16(reindsub,(splits_rein+i));
+	    vis_st_u16(imindsub,(splits_imin+i));
+	  }	
 	  reorderfft(splits_rein,splits_imin,$val(sizeoffft));
 	  /*output the results*/
 	  for(i=0;i<$val(sizeoffft)/4;i++){
