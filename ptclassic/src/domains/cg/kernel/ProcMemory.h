@@ -52,6 +52,9 @@ public:
 		: name(n), reqdStateAttributeBits(a), reqdPortAttributeBits(p)
 		{}
 
+	// Destructor.  Dummy here, but declare it virtual.
+	virtual ~ProcMemory() {}
+
 	// Return true if the State has the required attributes.
 	int match(const State& s) {
 		return consistent(s.attributes(),reqdStateAttributes());
@@ -94,6 +97,7 @@ class MemInterval {
 	MemInterval* link;
 	MemInterval(unsigned a, unsigned l, MemInterval* nxt = 0) :
 		addr(a), len(l), link(nxt) {}
+	~MemInterval();
 };
 
 // A collection of intervals of memory
