@@ -66,7 +66,7 @@ struct OTPDesignInfo {
 #define OTP_DsgnF_Go		TOP_BIT(1)	/* issue run params */
 #define OTP_DsgnF_Verbose	TOP_BIT(2)	/* tell user whats going on */
 #define OTP_DsgnF_NoTcltk	TOP_BIT(3)	/* skip tcltk universes */
-
+#define OTP_DsgnF_Catch		TOP_BIT(4)	/* wrap everything in catch */
 
 /**
     A facet may be one of 3 mutually exclusive types, plus the psuedo-type
