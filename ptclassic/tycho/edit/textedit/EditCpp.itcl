@@ -137,7 +137,8 @@ public [getClassName]::AMethod()
 body ::tycho::EditCpp::classDAG {} {
     if { [info command cppDAG] == {} } {
         global TYCHO
-        source [file join $TYCHO kernel tychoMakeClassDAG.tcl]
+	# FIXME: this should use a package
+        source [file join $TYCHO kernel basic tychoMakeClassDAG.tcl]
     }
     set savedir [pwd]
     cd [file dirname [filename]]
@@ -151,8 +152,9 @@ body ::tycho::EditCpp::classDAG {} {
         global errorInfo
         error "$errmsg $errorInfo"
     }  
-    ::tycho::File::openContext class.dag
+    set window [::tycho::File::openContext class.dag]
     cd $savedir
+    return $window
 }
 
 #####################################################################
@@ -198,7 +200,7 @@ body ::tycho::EditCpp::fileTemplate {fileTemplate {newClassName {}}} {
 body ::tycho::EditCpp::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO edit textedit doc usersGuides \
+	    [file join $env(TEXTEDIT_LIBRARY) doc usersGuides \
 	    EditCppHelp.html]
 }
 
