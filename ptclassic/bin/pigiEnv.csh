@@ -191,6 +191,10 @@ if ( $?PIGIXRES ) then
 endif
 
 if ( $?pigiconsole ) then
+	if ( $?pigidebug ) then
+		echo "-console and -debug together means that the "
+		echo "  console window will come up inside the debugger"
+	endif
         setenv TAILARGS -console
 endif
 if ( $?pigidebug ) then
