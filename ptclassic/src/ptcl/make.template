@@ -73,7 +73,17 @@ HDRS =		MatlabTcl.h MathematicaTcl.h PTcl.h ganttChart.h
 # Objects that make up the library
 OBJS =		$(LIB_SRCS:.cc=.o)
 
-LIB =		libptcl.$(LIBSUFFIX)
+# HPUX has a hard time handling symbols that are defined both in a static
+# library and in a shared library, so, since we have different Error::
+# functions for pigiRpc, ptcl and tycho, we need to be sure that
+# libpigi, libptcl and libtycho are all static on the hppa.
+ifdef USE_CORE_STATIC_LIBS
+	LIBNONSHARED =		libptcl.a
+	INSTALL = $(LIBDIR)/$(LIBNONSHARED)
+else
+	LIB =		libptcl.$(LIBSUFFIX)
+	INSTALL = $(LIBDIR)/$(LIB)
+endif
 
 ifndef BASENAME
 ifndef PIGI
@@ -86,7 +96,7 @@ PT_DEPEND += $(NON_LIB_SRCS:.cc=.o)
 
 PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o) 
 
-INSTALL = $(LIBDIR)/$(LIB)
+
  
 # ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
