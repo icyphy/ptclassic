@@ -45,7 +45,7 @@ is broadcast to all receivers on the medium.
 	}
 	input {
 	    name { address }
-	    type { string }
+	    type { anytype }
 	    desc { Address of the receiver. }
 	}
 	input {
