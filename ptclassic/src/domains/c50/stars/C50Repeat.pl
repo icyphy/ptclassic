@@ -2,10 +2,10 @@ defstar {
 	name { Repeat }
 	domain { C50 }
 	desc { Repeats each input sample the specified number of times. }
-	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch }
+	version {$Id$}
+	author { Luis Gutierrez, A. Baensch, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -67,10 +67,10 @@ worst case.
 	}
 
 	codeblock(cbOnceCx){
-	lmmr	ar1,#$addr(input,0)
-	lmmr	ar2,#$addr(input,1)
-	smmr	ar1,#$addr(output,0)
-	smmr	ar2,#$addr(output,1)
+	lmmr	ar1,#$addr(input)
+	lmmr	ar2,#($addr(input)+1)
+	smmr	ar1,#$addr(output)
+	smmr	ar2,#($addr(output)+1)
 	}
 
 	codeblock(initRepLoop,""){

@@ -2,15 +2,15 @@ defstar {
 	name { GoertzelPower }
 	domain { C50 }
 	derived { GoertzelBase }
-	version { $Id$} 
+	version {$Id$} 
 	desc {
 First-order recursive computation of the power of the kth coefficient of
 an N-point DFT using Goertzel's algorithm.
 This form is used in touchtone decoding.
 	}
-	author { Luis Gutierrez }
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -61,7 +61,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	sqra	*-
 	lar	ar6,#$addr(output)
 	sqra	*
-	bcndd	$starSymbol(cfe),UNC
+	bcndd	$addr(cf),UNC
 	lta	*,ar6
 	sach	*,1
 	}
@@ -70,7 +70,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 		// Compute the (real-valued) power of last (complex) sample
 		addCode(result);
-		addCode(C50GoertzelBase::coeffs);
+		
 	}
 
 	exectime {

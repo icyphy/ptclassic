@@ -4,10 +4,10 @@ defstar {
 	desc { 
 Interleaves the two input signals.
  }
-	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
+	version {$Id$}
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -70,10 +70,10 @@ the next B particles from the next input, etc.
         }
 
 	codeblock(oneCx){
-	lmmr	ar1,#$addr(input#1,0)
-	lmmr	ar2,#$addr(input#1,1)
-	smmr	ar1,#$addr(output,0)
-	smmr	ar2,#$addr(output,1)
+	lmmr	ar1,#$addr(input#1)
+	lmmr	ar2,#($addr(input#1)+1)
+	smmr	ar1,#$addr(output)
+	smmr	ar2,#($addr(output)+1)
 	}
 	
 	codeblock(moveBlockInit){
@@ -83,7 +83,7 @@ the next B particles from the next input, etc.
 	codeblock(moveBlock,"int Inum"){
 	lar	ar1,#$addr(input#@Inum)
 	rpt	#@(effBlockSize - 1)
-	bldd	*+,#$addr(output,@(effBlockSize*(Inum-1)))
+	bldd	*+,#($addr(output)+@(effBlockSize*(Inum-1)))
 	}
 
 	go {

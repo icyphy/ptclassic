@@ -2,8 +2,8 @@ defstar {
     name { FixToInt }
     domain { C50 }
     desc { Convert a fixed-point input to an integer output. }
-    version { $Id$  }
-    author { Luis Gutierrez }
+    version {$Id$}
+    author { Luis Gutierrez, G. Arslan }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -18,7 +18,7 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
 	name {output}
 	type {INT}
-	attributes { P_NOINIT }
+	
     }
     constructor {
 	noInternalState();

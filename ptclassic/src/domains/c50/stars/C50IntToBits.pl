@@ -6,8 +6,8 @@ Read the least significant nBits bits from an integer input,
 and output the bits as integers serially on the output,
 most significant bit first.
     }
-    version { $Id$ }
-    author { Luis Gutierrez }
+    version {$Id$}
+    author { Luis Gutierrez, G. Arslan }
     copyright {
 	Copyright (c) 1990-1996 The Regents of the University of California.
 	All rights reserved.
@@ -41,7 +41,7 @@ most significant bit first.
     }
     codeblock(readNwrite,"") {
 	lar	ar0,#$addr(input)
-	lar	ar1,#$addr(output,@(nBits-1))
+	lar	ar1,#($addr(output)+@(nBits-1))
 	lar	ar2,#0000h
 	lar	ar3,#0001h
 	mar	*,ar0

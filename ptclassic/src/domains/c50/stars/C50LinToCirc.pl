@@ -7,8 +7,8 @@ If N is zero (the default), the number of samples transferred per execution
 equals the number of samples read per execution by the star that reads
 from the output. 
     }
-    version { $Id$  }
-    author { Luis Gutierrez }
+    version {$Id$}
+    author { Luis Gutierrez, G. Arslan }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -33,7 +33,6 @@ Data movement is repeated inline so may not be efficient for large N.
     output {
 	name { output }
 	type { =input }
-	attributes { P_CIRC }
     }
 
     defstate {
@@ -41,7 +40,7 @@ Data movement is repeated inline so may not be efficient for large N.
 	type { int }
 	desc { storage for pointer register (internal) }
 	default { 0 }
-	attributes { A_UMEM|A_NOINIT|A_NONSETTABLE }
+	attributes { A_BMEM|A_NONSETTABLE|A_NONCONSTANT }
     }
 
     defstate {
@@ -120,12 +119,14 @@ Data movement is repeated inline so may not be efficient for large N.
 	return time;
     }
 
+//FIXME compiler error on line add ar0,#$addr(output)
     codeblock(init){
-	.ds	$addr(ptr)
-	.word	$addr(output)
-	.text
+         mar *,ar0
+	 lar ar0,#$addr(output) 
+	 sar ar0,$addr(ptr) 
 	}
 
+    
     codeblock(setupCircBuffer,"") {
 	lmmr	ar0,#$addr(ptr)		; ar0 = start address
 	lacc	#$addr(output),0
@@ -149,9 +150,9 @@ Data movement is repeated inline so may not be efficient for large N.
 
     codeblock(copyCx){
 	lmmr	ar0,#$addr(input)
-	lmmr	ar1,#$addr(input,1)
+	lmmr	ar1,#($addr(input)+1)
 	smmr	ar0,#$addr(output)
-	smmr	ar1,#$addr(output,1)
+	smmr	ar1,#($addr(output)+1)
     }
 
     codeblock(restore) {

@@ -2,11 +2,11 @@ defstar {
 	name { LMS }
 	domain { C50 }
 	desc { Least mean square (LMS) adaptive filter. }
-	version { $Id$ }
+	version {$Id$}
 	acknowledge { Gabriel version by E. A. Lee, Maureen O'Reilly }
-	author { A. Baensch, ported from Gabriel }
+	author { A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -50,7 +50,7 @@ adjust the <i>errorDelay</i> parameter accordingly.
                 type { fix }
                 default { 0.01 }
                 desc { specifies the rate of adaptation }
-		attributes { A_NONCONSTANT|A_UMEM }
+		attributes { A_CONSTANT|A_UMEM }
         }
 	state {
 		name { errorDelay }
@@ -74,7 +74,7 @@ error samples.
                 type { fixarray }
                 desc { internal }
                 default { "-4.0609e-2 -1.6280e-3 1.7853e-1 3.7665e-1 3.7665e-1 1.7853e-1 -1.6280e-3 -4.0609e-2" }
-                attributes { A_NONCONSTANT }
+                attributes { A_NONCONSTANT | A_NONSETTABLE | A_BMEM }
         }
 
         state {
@@ -90,7 +90,7 @@ error samples.
 	        type { int }
                 desc { internal }
                 default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
 
 
@@ -101,7 +101,6 @@ error samples.
 		int	muAsInt;
 		int	length;
 		StringList cfs;
-		int	i; 
 	}
 
 
@@ -133,28 +132,28 @@ error samples.
 		
 		char buf[32];
 		cfs.initialize();
-		cfs<<"$starSymbol(lmss)\n";
-		for (i = 0; i< numTaps-1; i++){
+		
+		for (int i = 0; i< numTaps-1; i++){
 			temp = double(coef[i]);
 			sprintf(buf,"%.15f",temp);
-			cfs<<"\t.q15\t"<<buf<<"\n";
+			cfs << buf << " ";
 		}
 		temp = double(coef[i]);
 		sprintf(buf,"%.15f",temp);
-		cfs<<"$starSymbol(lmsl)\n\t.q15\t"<<buf;
-		cfs<<"\n$starSymbol(lmse)\n";
+		cfs << buf;
+		
 		
 	}
 
 	initCode{
 		addCode(initDelayLinePtr);
-		addCode(cfs,"TISubProcs");
+		coef.setInitValue(cfs);
 	}
 
 	codeblock(initDelayLinePtr){
-	.ds	$addr(delayLinePtr)
-	.word	$addr(delayLine)
-	.text
+        mar *,ar0
+        lar ar0,#$addr(delayLine)
+        sar ar0,$addr(delayLinePtr)
 	}
 
 	codeblock(prepareDelayLine,""){
@@ -163,16 +162,16 @@ error samples.
 	ldp	#0h
 	mar	*,ar1
 	splk	#$addr(delayLine),cbsr1
-	splk	#$addr(delayLine,@(int(length)-1)),cber1
+	splk	#($addr(delayLine)+@(int(length)-1)),cber1
 	splk	#09h,cbcr
 	.if	@(int(decimation)-1)
 	rpt	#@(int(decimation) -1)
 	.endif
-	bldd	#$addr(input,@(int(decimation)-1)),*+
+	bldd	#($addr(input)+@(int(decimation)-1)),*+
 	smmr	ar1,#$addr(delayLinePtr)
 	lmmr	treg0,#$addr(error)
 	splk	#@(int(numTaps)-2),brcr
-	lar	ar3,#$starSymbol(lmsl)
+	lar	ar3,#$addr(coef)
 	spm	1
 	setc	ovm
 	}
@@ -206,7 +205,7 @@ $label(lmsu)
 	apac
 	sach	*,0,ar1
 	splk	#$addr(delayLine),cber1		
-	splk	#$addr(delayLine,@(int(length)-1)),cbsr1	
+	splk	#($addr(delayLine)+@(int(length)-1)),cbsr1	
 	zap
 	}
 
@@ -218,7 +217,7 @@ $label(lmsu)
 	.if	@(int(numTaps)-1)
 	rpt	#@(int(numTaps)-1)
 	.endif
-	mac	$starSymbol(lmss),*-
+	mac	$addr(coef),*-
 	apac
 	lar	ar1,#$addr(output)
 	sach	*

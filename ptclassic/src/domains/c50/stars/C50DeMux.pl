@@ -12,8 +12,8 @@ Integers from 0 through N-1 are accepted at the "control"
 input, where N is the number of outputs.  If the control input is
 outside this range, all outputs get zero.
 	}
-	version { $Id$ }
-	author { Luis Gutierrez }
+	version {$Id$}
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -47,7 +47,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {INTARRAY }
 		default {""}
 		desc { Array of pointers to outputs }
-		attributes { A_NONSETTABLE|A_UMEM|A_RAM|A_NOINIT|A_CIRC}
+		attributes { A_NONSETTABLE|A_BMEM|A_CIRC|A_NONCONSTANT}
 	}
 	
 	protected{
@@ -57,20 +57,18 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	initCode{
 	  StringList ptrInit;
-	  ptrInit << "\t.ds   $addr(ptrarray)\n";
+	  ptrInit << "\t mar *,ar0\n";
 	  for (int i=1; i<= n; i++){
-	    ptrInit<<"\t.word  $addr(output#";
-	    ptrInit<<i;
-	    ptrInit<<")\n";
+	    ptrInit << "\t lar ar0,#$addr(output#" << i << ")\n"
+	            << "\t sar ar0,($addr(ptrarray)+" << (i-1) << ")\n";
 	  }
-	  ptrInit<<"\t.text\n";
 	  addCode(ptrInit);
 	}
 
 	codeblock(loadAddress,""){
 	ldp	#00h
 	splk	#$addr(ptrarray),cbsr1	; load circ buff addr.
-	splk	#$addr(ptrarray,@(n-1)),cber1
+	splk	#($addr(ptrarray)+@(n-1)),cber1
 	splk	#0009h,cbcr		; enable circ buff 1 with ar1
 	lar	ar1,#$addr(ptrarray)	; ar1 -> ptrarray
 	lmmr	indx,#$addr(control)	; index = control

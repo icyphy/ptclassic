@@ -2,8 +2,8 @@
 	name { MaxMin }
 	domain { C50 }
 	desc { Finds maximum or minimum value }
-	version { $Id$ }
-	author { Luis Gutierrez }
+	version {$Id$}
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -66,7 +66,7 @@ Also, the index of the output is provided (count starts at 0).
 
 	codeblock(compare,"" ){
 	setc	ovm
-	lar	ar0,#$addr(input,@(int(N)-1))
+	lar	ar0,#($addr(input+@(int(N)-1))
 	mar	*,ar0
 	ldp	#00h
 	lar	ar1,#@(int(N)-1)
@@ -101,7 +101,7 @@ $starSymbol(lp)
 
 	codeblock(compareMag,""){
 	setc	ovm
-	lar	ar0,#$addr(input,@(int(N)-1))
+	lar	ar0,#($addr(input)+@(int(N)-1))
 	mar	*,ar0
 	ldp	#00h
 	lar	ar1,#@(int(N)-1)

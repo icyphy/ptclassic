@@ -2,11 +2,11 @@ defstar {
 	name { Allpass }
 	domain { C50 }
 	desc { Allpass filter }
-	version { $Id$ }
+	version {$Id$}
 	acknowledge { Gabriel version by E. A. Lee }
-	author { A. Baensch, ported from Gabriel }
+	author { A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -42,21 +42,22 @@ reverberation business', Computer Music. Journal, Vol 3, No.2
                 type { fixarray }
                 desc { buffer }
                 default { "0" }
-                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
         }
         state  {
                 name { delayBufStart }
                 type { int }
                 default { 0 }
                 desc { pointer to the buffer }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
         }
 
         codeblock(block) {
-        .ds     $addr(delayBufStart)		;allpass pointer to buffer
-        .word   $addr(delayBuf)
-        .text
+        mar *,ar0
+        lar ar0,#$addr(delayBuf)
+        sar ar0,$addr(delayBufStart)
         }
+
         codeblock(std) {
         mar 	*,AR1
 	lar	AR0,#$addr(delayBufStart)	;Address delayBufStart 	=> AR0
@@ -64,7 +65,7 @@ reverberation business', Computer Music. Journal, Vol 3, No.2
 	lar	AR6,#$addr(input)		;Address input		=> AR6
         lar 	AR7,#$addr(output)		;Address output		=> AR7
 	splk	#$addr(delayBuf),CBSR1		;startadress circ. buffer 1
-	splk	#$addr(delayBuf)+$size(delayBuf)-1;endadress circ. buffer 1
+	splk	#$addr(delayBuf)+($size(delayBuf)-1)      ;endadress circ. buffer 1
 	splk	#08h,CBCR			;enable circ. buf. 1 with AR0
  	lt    	*,AR0				;polezero => TREG0
         mpy	#8000h				;polezero*(-1.0) in Q15

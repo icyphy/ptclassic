@@ -2,10 +2,10 @@ defstar {
 	name { IIDGaussian }
 	domain { C50 }
 	desc { Gaussian noise source }
-	version { $Id$ }
-	author { A. Baensch }
+	version {$Id$}
+	author { A. Baensch, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -39,48 +39,30 @@ random number.
 		desc { uniform random variables. }
 		default { 16 }
       	}
-	state  {
-		name { noUniformsSpace }
-		type { int }
-		desc { memory space for uniform variables. }
-		default { 0 }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
-	}
 
 	state {
 		name { seed }
 		type { int }
-		default { 0 }
+		default { 0.9877315592 }
 		desc { internal }
-		attributes { A_UMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
+		attributes { A_BMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
 	state {
 		name { ravs }
 		type { fixarray }
 		default { "0" }
 		desc { internal }
-		attributes { A_UMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
+		attributes { A_BMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
 
 	setup {
 		ravs.resize(noUniforms);
 	}		
-	initCode {
-		noUniformsSpace=int(noUniforms)*16;
-		addCode(block);
-	}		
+	
 	go {
 		addCode(std);
 	}		
 
-	codeblock(block) {
-	.ds     $addr(seed)			;initial seed
-	.word	07e6dh
-	.ds     $addr(ravs)			;memory space for random var.
-	.space  $val(noUniformsSpace)		;space in bits
-	.text
-	}
-		       
 	codeblock(std) {
 	mar	*,AR1
 	lar	AR0,#$addr(ravs)		;Address ravs    => AR0

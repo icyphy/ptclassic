@@ -15,11 +15,11 @@ Least-Mean Square (LMS) filter whose first and third coefficients are
 fixed at one.  The second coefficient is adapted.  It is a normalized
 version of the Direct Adaptive Frequency Estimation Technique.
 	}
-	version { $Id$ }
-	author { Luis Gutierrez }
+	version {$Id$}
+	author { Luis Gutierrez, G. Arslan }
 	acknowledge { Brian L. Evans, author of the CG56 version }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -120,7 +120,7 @@ The initial guess at the angle being estimated in radians.
 Buffer to hold old samples, since the star is not derived
 from FIR.
 		}
-		attributes { A_NONSETTABLE| A_NONCONSTANT | A_UMEM }
+		attributes { A_NONSETTABLE| A_NONCONSTANT | A_BMEM }
 	}
 	
 	defstate {
@@ -130,7 +130,7 @@ from FIR.
 		desc {
 Tap that's being adapted.
 		}
-		attributes { A_NONSETTABLE| A_NONCONSTANT | A_UMEM }
+		attributes { A_NONSETTABLE| A_NONCONSTANT | A_BMEM }
 	}
 
 	defstate {
@@ -140,7 +140,7 @@ Tap that's being adapted.
 		desc {
 Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 		}
-		attributes { A_NONSETTABLE|A_NONCONSTANT|A_UMEM }
+		attributes { A_NONSETTABLE|A_NONCONSTANT|A_BMEM }
 	}
 
 	initCode {
@@ -194,9 +194,9 @@ Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 	}
 
 	codeblock(initDelayPtr){
-	.ds	$addr(delayPtr)
-	.word	$addr(lmsOldSamples)
-	.text
+        mar *,ar0
+        lar ar0,#$addr(lmsOldSamples)
+        sar ar0,$addr(delayPtr)
 	}
 
 	codeblock(initialCode,"") {
@@ -211,7 +211,7 @@ Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 	lmmr	ar1,#$addr(delayPtr)
 	lmmr	treg0,#$addr(error)	; treg0 = error[n-errorDelay]
 	splk	#$addr(lmsOldSamples),cbsr1
-	splk	#$addr(lmsOldSamples,@(int(errorDelay))),cber1
+	splk	#($addr(lmsOldSamples)+@(int(errorDelay))),cber1
 	splk	#9h,cbcr		; set circ buffer to be used with one
 	mar	*,ar1
 	mpy	#@intMu		 ; p = 0.5*error*Mu
@@ -219,12 +219,12 @@ Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 ; acc = 0.5*error*Mu, treg0 = x[n-errorDelay -1]
 	bldd	#$addr(input),*+,ar2	; get new input
 	smmr	ar1,#$addr(delayPtr)
-	splk	#$addr(lmsOldSamples,@(int(errorDelay))),cbsr1
+	splk	#($addr(lmsOldSamples)+@(int(errorDelay))),cbsr1
 	splk	#$addr(lmsOldSamples),cber1
 	}
 
 	codeblock(delayOfOne,""){
-	lar	ar1,#$addr(lmsOldSamples,1)
+	lar	ar1,#$addr(lmsOldSamples)+1)
 	lmmr	treg0,#$addr(error)	; treg0 = error
 	mar	*,ar1
 	mpy	#@intMu		; p = 0.5*error*Mu

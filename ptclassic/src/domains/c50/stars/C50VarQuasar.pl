@@ -6,8 +6,8 @@ A sequence of values is repeated at the output with period N, zero-padding
 or truncating to N if necessary.
 A value of 0 for N outputs an aperiodic sequence.
         }
-	version { $Id$ }
-	author { Luis Gutierrez, based on the CG56 version }
+	version {$Id$}
+	author { Luis Gutierrez, based on the CG56 version, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -29,14 +29,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fixarray }
 		desc { list of values. }
 		default { "0.1 0.2 0.3 0.4" }
-                attributes { A_NONCONSTANT|A_UMEM }
+                attributes { A_CONSTANT|A_UMEM }
         }
         state  {
                 name { dataPtr }
                 type { int }
                 default { 0 }
                 desc { keep track number of data }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
         }
         state  {
                 name { dataLen }
@@ -48,14 +48,14 @@ limitation of liability, and disclaimer of warranty provisions.
       
 
 	codeblock(init){
-	.ds	$addr(dataPtr)
-	.word	$addr(data)
-	.text
+	  mar *,ar0
+	  lar ar0,#$addr(data)
+	  sar ar0,$addr(dataPtr)
 	}
 
         codeblock(std,"") {
 	lmmr	ar1,#$addr(dataPtr)	
-	lacc	#$addr(data,@(dataLen))	
+	lacc	#($addr(data)+@(dataLen))	
 	samm	arcr		
 	mar	*,ar1
 	lar	ar4,#$addr(dataPtr)

@@ -2,8 +2,8 @@ defstar {
 	name { RectToCx }
 	domain { C50 }
 	desc {Convert real and imaginary parts to a complex output.}
-	version { $Id$ }
-	author { Luis Gutierrez }
+	version {$Id$}
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -33,8 +33,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (convert) {
 	lmmr	ar0,#$addr(real)
 	lmmr	ar1,#$addr(imag)
-	smmr	ar0,#$addr(output,0)
-	smmr	ar0,#$addr(output,1)
+	smmr	ar0,#$addr(output)
+	smmr	ar0,#($addr(output)+1)
 	}
 	go {
 		addCode(convert);

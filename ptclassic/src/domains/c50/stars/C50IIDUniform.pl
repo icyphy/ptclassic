@@ -5,10 +5,10 @@ defstar {
 Generate pseudo-IID-uniform random variables.  The values range from
 -range to range where "range" is a parameter.
 	}
-	version { $Id$ }
-	author { A. Baensch }
+	version {$Id$}
+	author { A. Baensch, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -30,25 +30,15 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fix }
 		default { ONE }
 		desc { range of random number generator is [-range,+range] }
-		attributes { A_UMEM|A_NOINIT}	
+		attributes { A_UMEM | A_CONSTANT | A_SETTABLE }	
 	}
 	defstate {
 		name { seed }
-		type { int }
-		default { 0 }
-		attributes { A_UMEM|A_NOINIT|A_NONSETTABLE}
+		type { fix }
+		default { 0.9877315592 }
+		attributes { A_BMEM|A_NONSETTABLE|A_NONCONSTANT}
 	}
-	initCode {
-		addCode(initSeed);
-	}
-// "code" to initialize the seed
-	codeblock(initSeed) {
-	.ds	$addr(seed)
-	.word	07e6dh
-	.ds	$addr(range)
-	.q15	$val(range)
-	.text
-	}
+	
 // "common" part of random number generation
 	codeblock(random) {
 	mar	*,AR1

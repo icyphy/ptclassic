@@ -6,10 +6,10 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 "phase" tells where to put the sample in an output block.  The default
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
-	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
+	version {$Id$}
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -98,14 +98,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (sendsampleStd,"") {
 	mar	*,ar1
 	lar	AR1,#$addr(input)		;Address input	=> AR1
-	bldd	*,#$addr(output,@effOffset)	;output = input
+	bldd	*,#($addr(output)+@effOffset)	;output = input
 	}
 
 	codeblock (sendsampleCplx,""){
 	mar	*,ar1
 	lar	ar1,#$addr(input)
 	rpt	#1
-	bldd	*+,#$addr(output,@effOffset)
+	bldd	*+,#($addr(output)+@effOffset)
 	}
 
 	go {

@@ -2,11 +2,11 @@ defstar {
 	name { LMSGanged }
 	domain { C50 }
 	desc { Ganged least mean square (LMS) adaptive filter. }
-	version { $Id$ }
-	author { Chih-Tsung Huang, ported from Gabriel }
+	version {$Id$}
+	author { Chih-Tsung Huang, ported from Gabriel, G. Arslan }
 	acknowledge { Gabriel version by Martha Fratt }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -68,53 +68,37 @@ error samples.
                 type { intarray }
                 desc { internal }
                 default { 0 }
-                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
         }
-	state {
-                name { delayLineAdpSpace }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+	
         state {
                 name { delayLineAdpStart }
 	        type { int }
                 desc { internal }
                 default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
         state {
                 name { delayLineFIR }
                 type { intarray }
                 desc { internal }
                 default { 0 }
-                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
         }
-	 state {
-                name { delayLineFIRSpace }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+	
         state {
                 name { delayLineFIRStart }
 	        type { int }
                 desc { internal }
                 default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
         codeblock(init) {
-        .ds     $addr(delayLineAdp)		; delayLineAdp memory
-        .space  $val(delayLineAdpSpace)
-        .ds     $addr(delayLineAdpStart)	;pointer adaptDelayLine memory
-    	.word   $addr(delayLineAdp)
-        .ds     $addr(delayLineFIR)		; delayLineFIR memory
-        .space  $val(delayLineFIRSpace)
-        .ds	$addr(delayLineFIRStart)	;pointer FIRDelayLine memory
-        .word   $addr(delayLineFIR)
-        .text
+          mar *,ar0
+	  lar ar0,#$addr(delayLineAdp)         
+	  sar ar0,$addr(delayLineAdpStart)
+          lar ar0,#$addr(delayLineFIR)
+	  sar ar0,$addr(delayLineFIRStart)				     
         }
 
         codeblock(first) {
@@ -131,7 +115,7 @@ error samples.
         lt	*,AR5				;TREG0=error
         lar     AR5,#$addr(delayLineAdpStart)	;Address delayStart	=> AR5
         lar     AR3,#$addr(coef)		;Address first coef	=> AR3
-        mpy     #$val(stepSize)        		;error*stepSize
+        mpy     #$valfix(stepSize)        		;error*stepSize
         sph     TREG0				;TREG0=error*stepSize
         lacc    *,15,AR5			;Accu=coef(0)
         }
@@ -169,7 +153,7 @@ $label(loop)
 	apac					;Accu=coef(N)+er*stSi*u(N)
 	sach	*,1,AR5				;Accu => new coef(N)
 	bldd	#$addr(inputAdapt),*+		;inputAdapt = newest del.value 
-	sar	*,#$addr(delayLineAdpStart)	;store new start pointer
+	sar	AR5,#$addr(delayLineAdpStart)	;store new start pointer
         }    
         codeblock(cont1) {
         lar     AR3,#$addr(coef)		;adress first coef	=> AR3
@@ -211,8 +195,6 @@ $label(lp3)					;Accu = Accu + P-Reg.
 		delayLineFIR.resize(coef.size()-1);
         }
         initCode  {
-		delayLineAdpSpace=delayLineAdp.size()*16;
-		delayLineFIRSpace=delayLineFIR.size()*16;
 	        addCode(init);
         }
         go { 

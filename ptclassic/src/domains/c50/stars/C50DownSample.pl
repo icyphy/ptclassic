@@ -13,10 +13,10 @@ same sense as the phase parameter in the FIR star.
 	htmldoc {
 <a name="decimation"></a>
 	}
-	version { $Id$ }
-	author { A. Baensch, Luis Gutierrez, ported from Gabriel }
+	version {$Id$}
+	author { A. Baensch, Luis Gutierrez, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -69,13 +69,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	lar	ar1,#$addr(output)
 	mar	*,ar1
 	rpt	#1
-	bldd	#$addr(input,@(effSize - effOffset - 2)),*+
+	bldd	#($addr(input)+@(effSize - effOffset - 2)),*+
 	}
 
 	codeblock (sendSample,"") {
 	lar	ar1,#$addr(output)
 	mar	*,ar1
-	bldd	#$addr(input,@(effSize - effOffset - 1)),*
+	bldd	#($addr(input)+@(effSize - effOffset - 1)),*
 	}
 
 	go {
