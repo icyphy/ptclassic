@@ -24,7 +24,6 @@ Code for functions declared in DEConnect.h
 #include "Block.h"
 #include "Plasma.h"
 #include "StringList.h"
-#include "Output.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
 #include "DEWormConnect.h"
@@ -35,6 +34,13 @@ Code for functions declared in DEConnect.h
  Member functions for DEPortHoles..
 
  **********************************************************/
+
+// constructor
+DEPortHole :: DEPortHole() : timeStamp(0.0), dataNew(FALSE), depth(-1) {}
+
+// destructor
+// (does nothing extra, but avoids out-of-line versions from cfront)
+DEPortHole :: ~DEPortHole() {}
 
 PortHole& DEPortHole :: setPort (
 			     const char* s,
