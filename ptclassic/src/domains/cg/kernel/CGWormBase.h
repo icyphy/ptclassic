@@ -63,6 +63,10 @@ public:
 	// display the schedules of the CGDDFWormholes.
 	StringList displaySchedule();
 
+	// return TRUE if inside domain is a code generation domain.
+	int isCGinside() 
+	   { return target->isA("CGTarget") && !target->isA("CGDDFTarget"); }
+
 /*******  methods for parallel scheduler. ********/
 
         // return the profile when "pNum" processors are assigned.
