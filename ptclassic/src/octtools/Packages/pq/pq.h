@@ -29,6 +29,7 @@
 
 #include "da.h"
 #include "utility.h"
+#include "ansi.h"
 
 #define PQ_NAME "pq"
 
@@ -98,26 +99,66 @@ struct pq_gen_struct {
     }
     
 
+int pq_numcmp
+	ARGS((char *x, char *y));
+int pq_ptrcmp
+	ARGS((char *x, char *y));
+int pq_rev_numcmp
+	ARGS((char *x, char *y));
+int pq_rev_ptrcmp
+	ARGS((char *x, char *y));
+int pq_rev_strcmp
+	ARGS((char *x, char *y));
 
-int pq_numcmp(), pq_ptrcmp(), pq_rev_numcmp(), pq_rev_ptrcmp(), pq_rev_strcmp();
+pq_t *pq_init_queue
+	ARGS((int (*compare)()));
+pq_t *pq_copy
+	ARGS((pq_t *old_queue));
 
-pq_t *pq_init_queue(), *pq_copy();
-void pq_free_queue();
+void pq_free_queue
+	ARGS((pq_t *queue));
 
-int pq_find_entry();
+int pq_find_entry
+	ARGS((register pq_t *queue, register char *key, char *value));
 
-dary pq_find_key();
+dary pq_find_key
+	ARGS((register pq_t *queue, register char *key));
 
-pq_int_t *pq_queue_to_array();
+/* Not really exported.  Supports the foreach macro */
+pq_int_t * pq_queue_to_array
+	ARGS((pq_t *queue));
 
-int pq_insert(), pq_insert_unique(), pq_delete(), pq_delete_key();
 
-void pq_insert_fast();
+int pq_insert
+	ARGS((register pq_t *queue, register char *key, char *value));
+int pq_insert_unique
+	ARGS((register pq_t *queue, register char *key, char *value));
+int pq_delete
+	ARGS((pq_t *queue, char *key, char *value));
+int pq_delete_key
+	ARGS((pq_t *queue, char *key));
 
-int pq_count(), pq_count_under_key(), pq_empty();
+void pq_insert_fast
+	ARGS((register pq_t *queue, register char *key, char *value));
 
-int  pq_pop(), pq_maximal_key();
+int pq_count
+	ARGS((pq_t *queue));
+int pq_count_under_key
+	ARGS((pq_t *queue, char *key));
+int pq_empty
+	ARGS((pq_t *queue));
 
-void pq_initgen(), pq_nextgen();
+int pq_pop
+	ARGS((register pq_t *queue, char **result));
+int pq_maximal_key
+	ARGS((register pq_t *queue, char **key));
+
+void pq_initgen
+	ARGS((pq_t *queue, pq_gen_t *gen, char **key, char **data));
+void pq_nextgen
+	ARGS((pq_t *queue, pq_gen_t *gen, char **key, char **data));
+
+int pq_next1
+	ARGS((pq_gen_t *gen, char **key, char **value));
 
 #endif
