@@ -72,11 +72,17 @@ class ::tycho::PtSimulation {
     # Set if toplevel actor
     public variable isToplevel 1
 
+    # The URL this simulation came from (I hope)
+    public variable sourceURL ""
+
     ###################################################################
     ####                         public methods                    ####
 
     # Add a new actor to the graph
     method addActor {name uniqueName}
+
+    # Add a new composite actor to the graph
+    method addCompositeActor {name uniqueName}
 
     # Add an edge to a relation
     method addEdge {relation edgename}
@@ -134,6 +140,9 @@ class ::tycho::PtSimulation {
 	return $_ports($name)
     }
 
+    # Instantiate composite actors that haven't already been
+    method instantiateComposites {}
+
     # Get the junctions in a relation
     method junctions {relation} {
 	return $_junctions($relation)
@@ -187,6 +196,11 @@ class ::tycho::PtSimulation {
 	set _domain $domain
     }
 
+    # Set the toplevel actor
+    method setToplevelActor {actor} {
+	set _toplevelActor $actor
+    }
+
     # Start the simulation
     method start {}
 
@@ -226,6 +240,9 @@ class ::tycho::PtSimulation {
 
     # The map from names to actors
     private variable _actors
+
+    # The map from names (of composite actors) to sub-simulations
+    private variable _subsimulations
 
     # The top-level actor
     private variable _toplevelActor ""
@@ -327,6 +344,22 @@ body ::tycho::PtSimulation::addActor {name uniqueName} {
 }
 
 ########################################################################
+#### addCompositeActor
+#
+# Add a new composite actor to the graph
+#
+body ::tycho::PtSimulation::addCompositeActor {name uniqueName} {
+    # Create the actor
+    set actor [java::new ptolemy.actor.TypedCompositeActor \
+	    $_toplevelActor \
+	    $uniqueName]
+
+    # Remember it
+    puts "actor: $actor ([$actor toString])"
+    set _actors($uniqueName) $actor
+}
+
+########################################################################
 #### addEdge
 #
 # Add an edge to a relation
@@ -395,8 +428,13 @@ body ::tycho::PtSimulation::clear {} {
     set _javaDirector ""
     set _directorName ""
  
+    if { $_toplevelActor != "" } {
+	set name [$_toplevelActor getName]
+    } else {
+	set name System
+    }
     set _toplevelActor [java::new ptolemy.actor.TypedCompositeActor]
-    $_toplevelActor setName System
+    $_toplevelActor setName $name
     debug "Toplevel actor: $_toplevelActor"
     
     set _manager [java::new ptolemy.actor.Manager]
@@ -421,6 +459,50 @@ body ::tycho::PtSimulation::connect {edgename source out target in} {
     set _relations($edgename) \
             [$_toplevelActor connect $outPort $inPort $edgename]
     puts "Got relation $_relations($edgename)"
+}
+
+########################################################################
+#### instantiateComposites
+#
+# Instantiate composite actors that haven't already been
+#
+body ::tycho::PtSimulation::instantiateComposites {} {
+    foreach actor [actors] {
+	set a $_actors($actor)
+	if { [java::info class $a] == "ptolemy.actor.TypedCompositeActor" } {
+	    if ![info exists _subsimulations($actor)] {
+		# Create a sub-simulation
+		set subactor [uplevel #0 \
+                        ::tycho::PtSimulation #auto \
+                        -isToplevel 0 \
+                        -domainLibrary $domainLibrary]
+		$subactor setToplevelActor $_toplevelActor
+
+		# Get its url -- fingers crossed
+		set suburl [$graph attrget $actor -url]
+		set myurl $sourceURL
+
+puts $myurl
+puts $suburl
+		regsub {^file:/+} $myurl {} file
+		regsub {/[^/]*$} $file {} file
+		puts "file = $file"
+		set schematicURL "file:/$file/$suburl"
+
+		# Load the data
+		set schematic [::tycho::PtSchematic #auto]
+		puts "$schematic"
+		$schematic parseURL $schematicURL
+		$schematic constructComposite $subactor \
+			"MyName" \
+                        $_toplevelActor
+
+		# We have to remember the URL somewhere
+		$subactor configure -sourceURL $schematicURL
+                set _subsimulations($actor) $subactor
+	    }
+	}
+    }
 }
 
 ########################################################################
@@ -534,6 +616,7 @@ body ::tycho::PtSimulation::setDirector {director} {
 #
 body ::tycho::PtSimulation::start {} {
     debug "Start"
+    instantiateComposites
     $_manager startRun
 }
 

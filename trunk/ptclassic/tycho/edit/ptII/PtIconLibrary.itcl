@@ -376,9 +376,6 @@ body ::tycho::PtIconLibrary::parseLibraryTree {} {
 	set suburl [[$_iconLibrary getSubLibrary $lib] \
 		getAttribute "url"]
 
-	# puts "myurl = $myurl"
-	# puts "suburl = $suburl"
-
 	regsub {^file:/+} $myurl {} file
 	regsub {/[^/]*$} $file {} file
 	# puts "file = $file"
