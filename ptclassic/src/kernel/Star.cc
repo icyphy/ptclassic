@@ -12,9 +12,11 @@ $Id$
 #include "Star.h"
 #include "StringList.h"
 
+/*******************************************************************
 
-// SCCS version identification
-// @(#)Star.cc	1.4	1/14/90
+	class Star methods
+
+********************************************************************/
 
 Star :: operator char* () {
 	StringList out;
@@ -30,6 +32,28 @@ Star :: operator char* () {
 	return out;
 }
 
+void Star :: beforeGo()
+{
+        for(int i = numberPorts(); i>0; i--) {
+                SDFPortHole& port = (SDFPortHole&)nextPort();
+                port.beforeGo();
+                }
+}
+ 
+void Star :: afterGo()
+{
+        for(int i = numberPorts(); i>0; i--) {
+                SDFPortHole& port = (SDFPortHole&)nextPort();
+                port.afterGo();
+                }
+}
+
+/*******************************************************************
+
+	class SDFStar methods
+
+********************************************************************/
+
 // Redefine method setting internal data in the Block
 // so that various SDF-specific initilizations can be performed.
 // If the parent pointer is not provied, it defaults to NULL
@@ -42,13 +66,4 @@ Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
 	noTimes = 0;
 
 	return *this;
-}
-
-// Methods to consume and produce particles, invoked by the scheduler
-void SDFStar :: getParticles() {
-	SDFPortHole* port;
-	for(int i = numberPorts(); i>0; i--) {
-		port = &(SDFPortHole&)nextPort();
-		port->increment(port->numberTokens);
-	}
 }

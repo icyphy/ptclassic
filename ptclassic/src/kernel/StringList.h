@@ -2,17 +2,10 @@
 #include "DataStruct.h"
 
 
-/**************************************************************************
-Version identification:
-$Id$
+// SCCS version identification
+// @(#)StringList.h	1.2	1/14/90
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee and D. G. Messerschmitt
- Date of creation: 1/17/89
- Revisions:
-
+/****************************************************************
 StringList stores a list of char* strings, and can then read
 them back one-by-one, or can concatinate them into a single
 char* string. A StringList can only grow; there is no way to
@@ -25,11 +18,8 @@ let StringList do the cast into char*.
 StringList implements a small subset of the function of the
 String class
 
-TO DO: This class never deletes the memory that it allocates.
-In fact, it typically is cast into char*, it would be the
-responsibility of the user of that char* to delete it.
-We need a solution to this problem.
-
+Programmer: D.G. Messerschmitt, U.C. Berkeley
+Date: Jan 11, 1990
 *******************************************************************/
 
 class StringList : SequentialList

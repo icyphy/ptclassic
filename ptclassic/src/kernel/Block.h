@@ -3,13 +3,30 @@
 
 #include "Connect.h"
 
-// SCCS version identification
-// @(#)Block.h	1.6	1/14/90
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+ Block is the basic unit of computation...it is an abstraction that has
+ inputs and outputs and certain generic methods common to all
+ computational units
+
+**************************************************************************/
 
 
 class Block
 {
 public:
+	// Initialize the data structures
+	void initialize();
+
 	// Methods making ports available on the outside;
 	// can be read but not set
 	int numberPorts() {return ports.size();}
@@ -32,7 +49,7 @@ public:
 		name=s;
 		blockIamIn = parent;
 		return *this;
-	}
+		}
 
 	// Constructor sets key values to prevent segmentation faults
 	// if setBlock is not called, or if certain members such as
@@ -40,10 +57,11 @@ public:
 	Block() {name = "noName";
 		 descriptor = "noDescriptor";
 		 blockIamIn = NULL;
-	}
+		}
 
 	// Method to set the parameters of the block
-	virtual int setParameters() {};
+	// NOT CURRENTLY IMPLEMENTED
+	virtual int initParameters() {};
 
 	// Method to reply "false" if the block contains component
 	// blocks that can be seen from the outside.

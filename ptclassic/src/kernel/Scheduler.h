@@ -1,11 +1,3 @@
-// Programmer: Edward A. Lee
-// EECS Dept., UC Berkeley
-// Jan. 5, 1990
-
-
-// SCCS version identification
-// @(#)Scheduler.h	1.7	1/15/90
-
 #ifndef _Scheduler_h
 #define _Scheduler_h 1
 
@@ -14,6 +6,25 @@
 #include "SpaceWalk.h"
 #include "Star.h"
 #include "DataStruct.h"
+
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+ Scheduler sets up the execution by determining the order in which
+ Blocks are executed. This is done in two phases -- setup and
+ run
+
+ At present only an SDF scheduler is implemented
+
+**************************************************************************/
 
 	////////////////////////////
 	// Scheduler
@@ -65,7 +76,7 @@ public:
 	operator char* ();
 
 	// Clear the data structure
-	void clear() {SequentialList::clear();}
+	void initialize() {SequentialList::initialize();}
 };
 
 

@@ -8,8 +8,8 @@ $Id$
  Programmer:  E. A. Lee and D. G. Messerschmitt
  Date of creation: 12/15/89
 
- This header includes everything needed by a class implementing
- the Star function
+ Star is a Block that implements an atomic function...the
+ Scheduler calls Stars at runtime to execute the simulation
 
 *******************************************************************/
 #ifndef _Star_h
@@ -32,25 +32,40 @@ class Star : public Block  {
 // Scheduler a friend (is this yet another language defect?).
 
 public:
-	// The writer of a Star code has the option to
-	// provide the following methods
+// The writer of a Star code has the option to
+// provide the following methods
 
-	// Access the parameters by name, and store them
-	// in the associated parameter variables
-	// This function is virtual in base class Block, so put
-	// in the Star only if needed
-	setParameters() {};
-
-	// Initialize the simulation; i.e. do everything necessary
+	// Start the simulation; i.e. do everything necessary
 	// to start over, like initializing state variables
-        virtual int initialize() {};
+	virtual void start() {};
 
 	// Run the simulation, accessing Particles on the
 	// input PortHoles, generating Particles on the output PortHoles
-        virtual int go() {}; 
+        virtual void go() {}; 
 
 	// Perform functions at wrapup, such as collecting stats
-        virtual int wrapup() {};
+        virtual void wrapup() {};
+
+// The following methods are provided by the system and accessed
+// by the Scheduler
+
+	// Access the parameters by name, and store them
+	// in the associated parameter variables
+	// NOT CURRENTLY IMPLEMENTED
+	initParameters() {};
+
+	// Initialize by calling initialize() for each PortHole
+        void initialize() {Block::initialize();}
+
+	// Methods called by the Scheduler before go() and
+	//  after go(); they call methods of the same name for each
+	//  input or output PortHole
+	// They can be used to do things like get Particles from
+	//  input Geodesics, put Particles onto output Geodesics, etc.
+	// In general behavior can be different for different types
+	//  of PortHoles
+	void beforeGo();
+	void afterGo();
 
 	// Method to print out description
 	operator char* ();
@@ -80,12 +95,6 @@ public:
 	// so that various SDF-specific initilizations can be performed.
 	// If the parent pointer is not provied, it defaults to NULL
 	Block& setBlock(char* starName, Block* parent = NULL);
-
-	// The following method produces Particles on the geodesics
-	// connected to output ports for the star to write its data,
-	// and brings particles in from the geodesics to the input
-	// PortHoles.
-	void getParticles();
 };
 
 #endif

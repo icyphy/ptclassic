@@ -1,22 +1,33 @@
-// Programmer: Edward A. Lee
-// EECS Dept., UC Berkeley
-// Jan. 5, 1990
-
-// SCCS version identification
-// @(#)Scheduler.cc	1.8	1/15/90
-
-
 #include "type.h"
 #include "Scheduler.h"
 #include "Fraction.h"
 #include "Output.h"
 #include "StringList.h"
 
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+ Scheduler methods
+
+ At present, only SDF Scheduler is implemented
+
+**************************************************************************/
+
 extern Error errorHandler;
 
-/*******************************************************************
-		Members of SDFSchedule
-*******************************************************************/
+/************************************************************************
+
+	Synchronous dataflow (SDF) Scheduler
+
+*************************************************************************/
 
 	////////////////////////////
 	// operator char*
@@ -46,7 +57,6 @@ SDFSchedule :: operator char* () {
 int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
 
    int i,j;
-   SDFStar* currentStar;
 
    // assume the schedule has been set by the setup member
    // Adjust the schedule pointer to point to the beginning of the schedule.
@@ -58,14 +68,14 @@ int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
    for (j = numIterations; j>0; j--)
 	for (i = mySchedule.size(); i>0; i--) {
 
-	    // next star in the list
-	    currentStar = &(SDFStar&)mySchedule.nextBlock();
+	    // Next star in the list
+	    SDFStar& currentStar = (SDFStar&)mySchedule.nextBlock();
 
-	    // First get input Particles and empty output Particles
-	    currentStar->getParticles();
-
-	    // Then run the star
-	    currentStar->go();
+	    // Now call beforeGo(), go(), and afterGo() for each Star
+	    // for each PortHole
+	    currentStar.beforeGo();
+	    currentStar.go();
+	    currentStar.afterGo();
 	}
 }
 
@@ -94,14 +104,13 @@ int SDFScheduler :: setup (Block& galaxy) {
 
    int i;
 
-   SDFStar* star;
    // Begin by setting the repetitions member of each component star
    // to zero, to force it to be recomputed.
    for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--) {
 	// Get the next atomic block and set its repetitions property
-	star = &(SDFStar&)alanShepard.nextBlock();
+	SDFStar& star = (SDFStar&)alanShepard.nextBlock();
 
-	star->repetitions = 0;
+	star.repetitions = 0;
    }
    alanShepard.setupSpaceWalk((Galaxy&)galaxy);
 
@@ -175,8 +184,15 @@ int SDFScheduler :: setup (Block& galaxy) {
 
    // Run the initialize routines of all the atomic stars.
    for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-	((SDFStar&)alanShepard.nextBlock()).initialize();
+	{
+	SDFStar& s = (SDFStar&)alanShepard.nextBlock();
 
+	// Call system initialization
+	s.initialize();
+
+	// Call user-provided initialization
+	s.start();
+	}
 }
 
 /*******************************************************************
