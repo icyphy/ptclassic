@@ -15,7 +15,7 @@ output buffer is initialized with the specified DC value.
 		type {FIX}
 	}
 	state {
-		name {value}
+		name {level}
 		type {FIX}
 		default {0.001}
 		descriptor { Constant value to go to the output. }
@@ -25,7 +25,7 @@ output buffer is initialized with the specified DC value.
 	org	$ref(output)
 	}
 	codeblock (dc) {
-	dc	$val(value)
+	dc	$val(level)
 	}
 	codeblock (orgp) {
 	org	p:
