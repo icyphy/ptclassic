@@ -40,8 +40,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "mkTerm.h"
 #include "mkIcon.h"
 
-/* define paths to each possible terminal position */
-/* relative to the terminal box position */
+/* 
+ * Define paths for stems from the icon body to each possible
+ * terminal position, relative to the terminal box position.
+ * The terminal box is what oct uses as the actual terminal.
+ * The "l" means "left", and there are upper, center,
+ * and lower paths.  The center paths are just straight lines,
+ * while the lower and upper paths bend, for better visual appearance.
+ */
 struct octPoint luPoints[] = {
     {0, 0}, {10, 0}, {25, -15}
 };
@@ -72,7 +78,12 @@ Shape rightPathShapesTable[] = {
     { OCT_PATH, rlPoints, sizeof(rlPoints)/sizeof(struct octPoint) },
 };
 
-/* arrowShape is used to mark terminal as input/output and multiple/single */
+/*
+ * The arrowShape is used to mark a terminal as input or output
+ * and multiple or single porthole. Multiple portholes use two arrows.
+ * The points are given relative to the crotch of the arrow, where
+ * the terminal box goes for single portholes.
+ */
 struct octPoint arrowPoints[] = {
     {0, 0}, {-5, 5}, {5, 0}, {-5, -5}
 };
@@ -81,7 +92,9 @@ Shape arrowShape = {
     OCT_POLYGON, arrowPoints, sizeof(arrowPoints)/sizeof(struct octPoint)
 };
 
-/* largeArrow{Point,Shape} added by Mike Chen for MatrixMessage particles */
+/* 
+ * The largeArrow shape was added by Mike Chen for MatrixMessage portholes
+ */
 struct octPoint largeArrowPoints[] = {
     {0, 0}, {-5, 8}, {5, 0}, {-5, -8}
 };
@@ -90,9 +103,12 @@ Shape largeArrowShape = {
     OCT_POLYGON, largeArrowPoints, sizeof(largeArrowPoints)/sizeof(struct octPoint)
 };
 
-/* end of arrowShape */
+/* end of arrowShapes */
 
-/* boxShape defines terminal implementation */
+/* 
+ * The boxShape defines the terminal itself.  The arrows and paths
+ * are just decorations around the terminal.
+ */
 struct octPoint boxPoints[] = {
     {-1, -1},
     {1, 1}
@@ -106,10 +122,17 @@ Shape boxShape = {
 
 static octObject *facetPtr, wiringLayer;
 static octObject floatColorLayer, intColorLayer, complexColorLayer,
-		 anytypeColorLayer, packetColorLayer, fixColorLayer;
+		 anytypeColorLayer, packetColorLayer, fixColorLayer,
+		 labelLayer;
 
-/* terminalPath 12/21/91 - by Edward A. Lee
-*/
+/* 
+ * terminalPath 12/21/91 - by Edward A. Lee
+ * For a given portole (left or right and given number (position))
+ * return a path shape to use for the stem and translation
+ * (relative to the center of the icon) for that path shape. 
+ * This routine also needs to know the total number of portholes,
+ * in order to select a visulally appealing path shape.
+ */
 static Shape*
 terminalPath(left,position,translation,totalNumber)
 boolean left;
@@ -129,9 +152,60 @@ int totalNumber;
     else return &rightPathShapesTable[1];
 }
 
-/* MkTermInit 7/28/89 8/6/88 8/27/88
-Call this first.
-*/
+/*
+ * MkTermLabel 10/1/94 by Edward A. Lee
+ * If there is more than one terminal total, create a label.
+ */
+static boolean
+MkTermLabel(name, input, position, totalNumber)
+	char *name;
+	boolean input;
+	int position;
+	int totalNumber;
+{
+    octObject label;
+    int llx, lly, urx, ury, len;
+    
+    static struct octBox labelBox;
+
+    if (totalNumber == 1) return (TRUE);
+    
+    /* Compute position of the box, relative to the center of the icon */
+    /* We actually specify the x and y coordinates of the lower left   */
+    /* and upper right corners of the bounding box.                    */
+    /* The size of the bounding box is determined by visual appeal.    */
+    len = strlen(name);
+    if (input)  {
+    	urx = -55;
+    	llx = -8*len - 55;
+    } else  {
+    	urx = 8*len + 55;
+    	llx = 55;
+    }
+    /* The y coordinates do not depend on whether its input. */
+    ury = -(position - 2)*25 + 20;
+    lly = -(position - 2)*25 + 5;
+
+    labelBox.lowerLeft.x = (octCoord) llx;
+    labelBox.lowerLeft.y = (octCoord) lly;
+    labelBox.upperRight.x = (octCoord) urx;
+    labelBox.upperRight.y = (octCoord) ury;
+
+    if (input)  {
+    	CK_OCT(ohCreateLabel(&labelLayer, &label, name, labelBox, (octCoord) 15,
+	    OCT_JUST_BOTTOM, OCT_JUST_RIGHT, OCT_JUST_RIGHT));
+    } else  {
+    	CK_OCT(ohCreateLabel(&labelLayer, &label, name, labelBox, (octCoord) 15,
+	    OCT_JUST_BOTTOM, OCT_JUST_LEFT, OCT_JUST_LEFT));
+    }
+    return (TRUE);
+}
+
+
+/*
+ * MkTermInit 7/28/89 8/6/88 8/27/88
+ * Call this first.  This sets the available layers.
+ */
 boolean
 MkTermInit(CurrentFacetPtr)
 octObject *CurrentFacetPtr;
@@ -144,15 +218,18 @@ octObject *CurrentFacetPtr;
     CK_OCT(ohGetOrCreateLayer(facetPtr, &packetColorLayer, "packetColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &fixColorLayer, "fixColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &labelLayer, "label"));
     return(TRUE);
 }
 
 /*
-Caveats: Assumes that Shape has <= SHAPE_MAX points
-*/
-/* thickness argument handling added 11/11/93 by Mike Chen */
+ * PutShape.
+ * Draw a shape.
+ * Caveats: Assumes that Shape has <= SHAPE_MAX points.
+ * Thickness argument handling added 11/11/93 by Mike Chen.
+ */
 boolean
-PutShape(containPtr, objPtr, shapePtr, translatePtr, thick)
+PutShape (containPtr, objPtr, shapePtr, translatePtr, thick)
 octObject *containPtr, *objPtr;
 Shape *shapePtr;
 struct octPoint *translatePtr;
@@ -170,44 +247,43 @@ boolean thick;
         if(thick) objPtr->contents.path.width = (octCoord) 5;
         else objPtr->contents.path.width = (octCoord) 0;
     case OCT_POLYGON:
-	CK_OCT(octCreate(containPtr, objPtr));
-	src = shapePtr->points;
-	dest = buf;
-	while (dest < (buf + shapePtr->points_n)) {
-	    dest->x = src->x + tx;
-	    dest->y = src->y + ty;
-	    dest++;
-	    src++;
-	}
-	(void) octPutPoints(objPtr, shapePtr->points_n, buf);
-	break;
+        CK_OCT(octCreate(containPtr, objPtr));
+        src = shapePtr->points;
+        dest = buf;
+        while (dest < (buf + shapePtr->points_n)) {
+            dest->x = src->x + tx;
+            dest->y = src->y + ty;
+            dest++;
+            src++;
+        }
+        (void) octPutPoints(objPtr, shapePtr->points_n, buf);
+        break;
     case OCT_BOX:
-	objPtr->contents.box.lowerLeft.x = shapePtr->points[0].x + tx;
-	objPtr->contents.box.lowerLeft.y = shapePtr->points[0].y + ty;
-	objPtr->contents.box.upperRight.x = shapePtr->points[1].x + tx;
-	objPtr->contents.box.upperRight.y = shapePtr->points[1].y + ty;
-	(void) octCreate(containPtr, objPtr);
-	break;
+        objPtr->contents.box.lowerLeft.x = shapePtr->points[0].x + tx;
+        objPtr->contents.box.lowerLeft.y = shapePtr->points[0].y + ty; 
+        objPtr->contents.box.upperRight.x = shapePtr->points[1].x + tx;
+        objPtr->contents.box.upperRight.y = shapePtr->points[1].y + ty;
+        (void) octCreate(containPtr, objPtr);
+        break;
     default:
-	return(FALSE);
+        return(FALSE);
     }
     return(TRUE);
 }
 
-/* 8/24/89 8/6/88
-Finds a terminal and makes its implementation and other related geometry.
-Caveats: Assumes that inputs are always on the left and outputs are
-    on the right.
-Updates: 8/24/89 = change to conform to OCT2.0
-*/
+/*
+ * MkTerm 8/24/89 8/6/88
+ * Create a terminal, arrow, and stem  for a porthole.
+ * Always puts inputs on the left and outputs on the right.
+ */
 boolean
 MkTerm(name, input, type, multiple, position, totalNumber)
-char *name;
-boolean input;
-char *type;
-boolean multiple;
-int position;
-int totalNumber;
+	char	*name;
+	boolean	input;
+	char 	*type;
+	boolean	multiple;
+	int	position;
+	int	totalNumber;
 {
     struct octPoint translation;
     Shape *path;
@@ -249,6 +325,7 @@ int totalNumber;
     }
     path = terminalPath(input,position,&translation,totalNumber);
     ERR_IF1(!PutShape(layerPtr, &dummy, path, &translation, thick));
+    ERR_IF1(!MkTermLabel(name, input, position, totalNumber));
     ERR_IF1(!PutShape(&wiringLayer, &box, &boxShape, &translation, thick));
     CK_OCT(ohGetByTermName(facetPtr, &term, name));
     CK_OCT(octAttach(&term, &box));
