@@ -124,6 +124,9 @@ public:
 
 	// as eventhorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return ToEventHorizon::allocateGeodesic(); }
 };
 
         //////////////////////////////////////////
@@ -146,6 +149,9 @@ public:
 	int onlyOne() const;	// returns TRUE
 	// as eventhorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return FromEventHorizon::allocateGeodesic(); }
 };
 
 #endif
