@@ -107,7 +107,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		port->disconnect();
 		pFar->disconnect(FALSE);
 		alias->disconnect(FALSE);
-		aFar->disconnect(FALSE);
 
 		if (port->isItInput())
 		{
