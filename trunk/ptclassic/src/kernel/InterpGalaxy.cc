@@ -108,6 +108,35 @@ InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	return TRUE;
 }
 
+// Remove a star from the galaxy
+int
+InterpGalaxy::delStar(const char* starname) {
+// the following is a severe violation of information hiding, but
+// better this than a core dump
+	if (strncmp (starname, "!af", 3) == 0) {
+		Error::abortRun (*this, "can't delete autoforks with delStar");
+		return FALSE;
+	}
+// find the block we are to remove
+	Block* st = blockWithName (starname);
+	if (st == NULL) {
+		noInstance (starname, readName());
+		return 0;
+	}
+// this should always work, check anyway
+	if (!removeBlock(*st)) {
+		Error::abortRun (*this, "unexpected delStar failure!");
+		return 0;
+	}
+// delete the object
+	delete st;
+// add action to list.  Yes, when we clone, a star will be created and
+// then deleted.
+	actionList += "s";
+	actionList += starname;
+	return TRUE;
+}
+
 // Add a porthole to the galaxy; alias it to a star porthole.
 int
 InterpGalaxy::alias(const char* galportname,const char* starname,
@@ -152,6 +181,24 @@ InterpGalaxy::addNode (const char* nodename) {
 	return TRUE;
 }
 
+// Delete a node from the nodelist.
+int
+InterpGalaxy::delNode (const char* nodename) {
+	Geodesic *g = nodes.nodeWithName (nodename);
+	if (g == NULL) {
+		noInstance (nodename, readName());
+		return FALSE;
+	}
+	if (!nodes.remove(g)) {
+		Error::abortRun (*this, "delNode failed!?!");
+		return FALSE;
+	}
+	// add to action list
+	actionList += "x";
+	actionList += nodename;
+	return TRUE;
+}
+
 // Connect a porthole to a node.
 int
 InterpGalaxy::nodeConnect (const char* star, const char* port,
@@ -181,6 +228,7 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 	actionList += port;
 	actionList += node;
 	actionList += delay;
+	return TRUE;
 }
 
 // disconnect a porthole from whatever it is connected to.
@@ -337,6 +385,12 @@ InterpGalaxy::clone() const {
 			nacts -= 3;
 			break;
 
+		case 's':	// remove a Star
+			a = next++;
+			gal->delStar (a);
+			nacts -= 2;
+			break;
+
 		case 'C':	// add an internal connection
 			a = next++;
 			b = next++;
@@ -360,6 +414,12 @@ InterpGalaxy::clone() const {
 		case 'n':	// make a node (Geodesic)
 			a = next++;
 			gal->addNode (a);
+			nacts -= 2;
+			break;
+
+		case 'x':	// delete a node (Geodesic)
+			a = next++;
+			gal->delNode (a);
 			nacts -= 2;
 			break;
 
@@ -413,7 +473,7 @@ InterpGalaxy::clone() const {
 			break;
 
 		default:
-			errorHandler.error ("Internal error in InterpGalaxy");
+			Error::abortRun ("Internal error in InterpGalaxy");
 		}
 	}
 

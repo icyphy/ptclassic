@@ -60,6 +60,10 @@ public:
 	int
 	addStar(const char* starname, const char* starclass);
 
+// delete a star from the galaxy
+	int
+	delStar(const char* starname);
+
 // add a connection (point-to-point)
 	int
 	connect(const char* srcstar, const char* srcport, const char* dststar,
@@ -76,6 +80,10 @@ public:
 // add a node
 	int
 	addNode(const char* nodename);
+
+// delete a node
+	int
+	delNode(const char* nodename);
 
 // connnect a porthole to a node
 	int
