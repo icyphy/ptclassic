@@ -101,13 +101,16 @@ ifndef PIGI
 endif
 endif
 
+
 TK = 1
 
 ADD_OBJS=version.$(PIGI).o
 
-PIGI_OBJS = -L./ -ltycho -lptcl version.$(PIGI).o
+PT_DEPEND += $(LIBDIR)/$(LIB)
 
-INSTALL = $(LIBDIR)/$(LIB)
+PIGI_OBJS += -ltycho version.$(PIGI).o
+
+INSTALL += $(LIBDIR)/$(LIB)
  
 include $(ROOT)/mk/ptbin.mk
 
