@@ -18,6 +18,7 @@ $Id$
 #include "octIfc.h"
 
 #define dmWidth 40
+#define dmIncrement 20
 
 /* EditDelayParams  5/27/88
 Edit the delay value associated with a delay instance.
@@ -55,7 +56,7 @@ static boolean
 EditSogParams(facetPtr, instPtr)
 octObject *facetPtr, *instPtr;
 {
-    int i;
+    int i, width, maxwidth;
     ParamListType pList;
     ParamType *place;
     dmTextItem *items;
@@ -68,13 +69,19 @@ octObject *facetPtr, *instPtr;
     }
     items = (dmTextItem *) calloc(pList.length, sizeof(dmTextItem));
     place = pList.array;
+    width = 0;
+    maxwidth = 0;
     for (i = 0; i < pList.length; i++) {
 	items[i].itemPrompt = place->name;
 	items[i].rows = 1;
-	items[i].cols = dmWidth;
 	items[i].value = place->value;
+	width = strlen(place->value);
+	if(maxwidth < width) maxwidth = width;
 	items[i].userData = NULL;
 	place++;
+    }
+    for (i = 0; i < pList.length; i++) {
+	items[i].cols = maxwidth + dmIncrement;
     }
     if (dmMultiText("Edit Actual Parameters", pList.length, items) != VEM_OK) {
 	PrintCon("Aborted entry");
@@ -106,13 +113,17 @@ static boolean
 EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-static dmTextItem defaultItem = {NULL, 1, dmWidth, NULL, NULL};
+static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     int i, j, itemsN, paramsN;
+    int width, maxwidth;
     ParamListType pList;
     ParamType *place;
     dmTextItem *items;
 
     ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
+
+    width = 0;
+    maxwidth = 0;
 
     /* put formal params (if any) into item list */
     itemsN = (pList.length + 1) * 2;
@@ -123,9 +134,13 @@ static dmTextItem defaultItem = {NULL, 1, dmWidth, NULL, NULL};
 	items[j] = defaultItem;
 	items[j].itemPrompt = "Name";
 	items[j++].value = place->name;
+	width = strlen(place->name);
+	if(maxwidth<width) maxwidth = width;
 	items[j] = defaultItem;
 	items[j].itemPrompt = "Value";
 	items[j++].value = place->value;
+	width = strlen(place->value);
+	if(maxwidth<width) maxwidth = width;
 	place++;
     }
     items[j] = defaultItem;
@@ -134,6 +149,11 @@ static dmTextItem defaultItem = {NULL, 1, dmWidth, NULL, NULL};
     items[j] = defaultItem;
     items[j].itemPrompt = "New value";
     items[j++].value = "";
+    /* set the width */
+    maxwidth += dmIncrement;
+    for (i = 0 ; i < itemsN; i++) {
+	items[i].cols = maxwidth;
+    }
     if (dmMultiText("Edit Formal Parameters", itemsN, items) != VEM_OK) {
 	PrintCon("Aborted entry");
 	return(TRUE);
