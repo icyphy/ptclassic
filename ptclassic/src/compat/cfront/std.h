@@ -1,6 +1,7 @@
 // $Id$
 #if defined(hppa)
 #include <stdlib.h>
+#include <sys/unistd.h>
 #include "../../kernel/miscFuncs.h"
 #else
 // Sun
