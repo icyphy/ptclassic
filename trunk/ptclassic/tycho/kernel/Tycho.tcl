@@ -124,12 +124,14 @@ if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
     }
 }
 uplevel #0 {
-    source $tychokernel/Lib.tcl
-    source $tycholib/util/lib.tcl
     set ::auto_path [linsert $auto_path 0 $tychoeditors/textedit ]
     set ::auto_path [linsert $auto_path 0 $tychoeditors/visedit ]
     set ::auto_path [linsert $auto_path 0 $tychoeditors/slate ]
     set ::auto_path [linsert $auto_path 0 $tycholib/widgets ]
+    set ::auto_path [linsert $auto_path 0 \
+	    $PTOLEMY/src/tcltk/itcl2.0/iwidgets2.0.0 ]
+    source $tychokernel/Lib.tcl
+    source $tycholib/util/lib.tcl
 }
 
 if {![info exists tychoWelcomeWindow]} {
