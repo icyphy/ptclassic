@@ -243,7 +243,7 @@ KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	}
 	else galTarget = 0;
 	saveGalaxy = currentGalaxy;
-	currentGalaxy = new InterpGalaxy;
+	currentGalaxy = new InterpGalaxy(galname);
 	currentGalaxy->setBlock(galname, saveGalaxy);
 	// Set the domain of the galaxy
 	return currentGalaxy->setDomain(domain);
