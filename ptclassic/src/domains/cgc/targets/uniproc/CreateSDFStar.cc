@@ -87,9 +87,10 @@ void CreateSDFStar::setup () {
 
 }
 
-inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer) {
+inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
     s.sdfPortName = p.name();
     s.numXfer = numXfer;
+    s.maxDelay = maxDelay;
     DataType type = p.newConnection().resolvedType();
     s.sdfPortType = type;
 }
@@ -124,14 +125,14 @@ int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
 	StringList nm;
 	if (p->isItInput()) {
 	    newStar = new CGCSDFReceive;
-	    commStarInit(*newStar,*p,numXfer);
+	    commStarInit(*newStar,*p,numXfer,maxDelay);
 	    newPort = source = &((CGCSDFReceive*)newStar)->output;
 	    destination = &cgPort;
 	    nm << symbol("CGCSDFReceive");
 	}
 	else {
 	    newStar = new CGCSDFSend;
-	    commStarInit(*newStar,*p,numXfer);
+	    commStarInit(*newStar,*p,numXfer,maxDelay);
 	    source = &cgPort;
 	    newPort = destination = &((CGCSDFSend*)newStar)->input;
 	    nm << symbol("CGCSDFSend");

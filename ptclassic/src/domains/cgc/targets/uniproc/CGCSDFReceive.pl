@@ -19,9 +19,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    type {anytype}
 	}
 	setup {
-	    maxDelay = output.maxDelay();
-	    numXfer = output.numXfer();
 	    output.setResolvedType(sdfPortType);
+	    output.setSDFParams(numXfer,maxDelay);
 	}
 	codeblock(portInit,"") {
 	    input {
