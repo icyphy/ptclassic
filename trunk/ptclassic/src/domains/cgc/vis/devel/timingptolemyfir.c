@@ -58,18 +58,18 @@ main (int argc, char *argv[])
       break;
     case 'l': length = atoi(optarg);
       break;
-    case 't': length = atoi(optarg);
+    case 't': taplength = atoi(optarg);
       break;
     };
     scalefactor = 0;
 /**************allocate memory************************************/
-dst0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*LENGTH);
-dst1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*LENGTH);
-dst2 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*LENGTH/4);
-src0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*LENGTH);
-src1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*LENGTH);
-filtertaps = (vis_s16 *) memalign(sizeof(double),sizeof(short)*NTAPS);
-filtertaps_d64 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*NTAPS);
+dst0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
+dst1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length);
+dst2 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length/4);
+src0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
+src1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length);
+filtertaps = (vis_s16 *) memalign(sizeof(double),sizeof(short)*taplength);
+filtertaps_d64 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*taplength);
 srcptolemy = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 /**************setup filtertaps***********************************/
   for(i=0;i<LENGTH;i++){
