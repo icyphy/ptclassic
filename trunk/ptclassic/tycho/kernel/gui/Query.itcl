@@ -489,14 +489,6 @@ body ::tycho::Query::lines {tag label default lines args} {
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
     
-puts "uplevel #0 [list ::tycho::Edit $itk_component(querysite).tag_$tag \
-                -text $default \
-                -save 0 \
-                -textheight $lines \
-                -scrollbar 0 \
-                -relief sunken] \
-                $args"
-
     itk_component add tag_$tag {
         uplevel #0 [list ::tycho::Edit $itk_component(querysite).tag_$tag \
                 -text $default \
