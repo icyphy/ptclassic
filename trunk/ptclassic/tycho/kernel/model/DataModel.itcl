@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996- The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -457,12 +457,11 @@ body ::tycho::DataModel::clear {} {
     }
 
     # Unset the data of all items and the children of each type
-    catch {
-        @scope $scope unset $_dataname
-        @scope $scope unset $_dataname.cachevalid
-        foreach type $_types($scope) {
-            @scope $scope unset $_dataname:$type
-        }
+    catch {@scope $scope unset $_dataname}
+    catch {@scope $scope unset $_dataname.type}
+    catch {@scope $scope unset $_dataname.cachevalid}
+    foreach type $_types($scope) {
+        catch {@scope $scope unset $_dataname:$type}
     }
 }
 
@@ -1109,14 +1108,17 @@ body ::tycho::DataModel::_describe {name {prefix {}}} {
 
     # Print attributes
     # This is fast:
-    # eval lappend string [@scope $scope set [set _dataname]($name)]
+    eval lappend string [@scope $scope set [set _dataname]($name)]
     #
     # This looks better:
-    append string " " [string trimleft [::tycho::breakLines \
-            [@scope $scope set [set _dataname]($name)] \
-            -length 60 \
-            -substring " -" \
-            -prefix $prefix] " "]
+    # It's also broken! breakLines adds a back-slash that makes
+    # Tcl back-slash escape the whole string. Tcl is such a piece
+    # of shit.
+    #append string " " [string trimleft [::tycho::breakLines \
+    #        [@scope $scope set [set _dataname]($name)] \
+    #        -length 60 \
+    #        -substring " -" \
+    #        -prefix $prefix] " "]
 
     # Print children if I have any
     if !$_leafonly($type) {
