@@ -4,7 +4,6 @@
 #include "type.h"
 #include "Galaxy.h"
 #include "DEStar.h"
-#include "PriorityQueue.h"
 #include "Scheduler.h"
 
 /**************************************************************************
@@ -32,16 +31,22 @@ class DEScheduler : public Scheduler {
 	// stoping condition of the scheduler
 	float stopTime;
 
-	// set the depth of the DEStars.
-	int setDepth(DEStar*);
+	// detect the delay-free loop
+	int checkLoop(PortHole* p, DEStar* s);
 
+	// set the depth of the DEStars.
+	int setDepth(PortHole* p, DEStar* s);
+
+	// report delay-free-loop
+	int errorDelayFree(PortHole* p);
+	void errorUndefined(PortHole* p);
 public:
 	// my domain
 	const char* domain() const;
 
 	// The global event queue is implemented as a priority queue
 	// in DE scheduler.
-	PriorityQueue eventQ;
+	EventQueue eventQ;
 
 	// Set up the stopping condition.
 	void setStopTime(float limit) {stopTime = limit ;}
@@ -79,6 +84,9 @@ public:
 	// If reset, the execution of the process star can be optimized.
 	// Only knowledgeable user may reset this flag!
 	int syncMode;
+
+	// fetch an event on request.
+	void fetchEvent(InDEPort* p, float timeVal);
 };
 
 #endif
