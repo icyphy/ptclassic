@@ -66,10 +66,11 @@ ParamListType *pListPtr;
 /* We support old-style parameters (with '|' as the separator and no
  * type information) and new-style (with ^A as the separator).
  */
-    sep = '|';
+
+    sep = CTLA;
     from = index(pStr, sep);
     if (!from) {
-	sep = CTLA;
+	sep = '|';
 	if ((from = index(pStr, sep)) == NULL) {
 	    /* can't find separator between length and first param! */
 	    return(FALSE);
