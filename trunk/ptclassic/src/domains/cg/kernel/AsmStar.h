@@ -56,9 +56,6 @@ public:
 	// and prepare SDF properties of the star for scheduling.
 	void prepareForScheduling();
 
-	// Generate code.  No data is grabbed or put onto geodesics.
-	void fire();
-
 	// If postprocessing for a line of code after symbol substitution
 	// is needed, the function addCode(char*) should be redefined.
 
@@ -114,10 +111,6 @@ protected:
 	// these functions can be easily redefined in derived classes.
 	StringList processMacro(const char* func, const char* id,
 					const char* arg2);
-
-	// Update all PortHoles so that the offset is incremented by the
-	// number of samples consumed or produced.
-	void advance();
 
 	// Reset the state entry list.
 	void zapStateEntries();

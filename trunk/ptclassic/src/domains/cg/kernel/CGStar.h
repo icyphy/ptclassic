@@ -42,7 +42,7 @@ public:
 	// method for generating initial code
 	virtual void initCode() {}
 
-	// define the firing 
+	// Generate code.  No data is grabbed or put onto geodesics.
 	void fire();
 
 	// class identification
@@ -109,6 +109,10 @@ protected:
 
 	// Pointer to target
         CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+
+	// Update all PortHoles so that the offset is incremented by the
+	// number of samples consumed or produced.
+	void advance();
 
 private:
 	// List of all local star labels
