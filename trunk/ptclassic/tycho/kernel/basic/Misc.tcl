@@ -274,6 +274,30 @@ proc makeflag {option} {
 }
 
 
+
+#
+# makeopt
+#
+# Given the name of a variable, return a string that is either
+# empty or contains an option. For example,
+#
+#     makeopt fred
+#
+# returns "-fred 123" if $fred is equal to 123 in the calling
+# environment, and
+#
+# returns "" if $fred is "" in the calling environment.
+#
+proc makeopt {option} {
+    set value [uplevel [list set $option]]
+    if { $value != "" } {
+	return "-$option $value"
+    } else {
+	return ""
+    }
+}
+
+
 #
 # setquery
 #
