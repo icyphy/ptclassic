@@ -44,19 +44,19 @@ set reallyExit 0
 #### setup
 # Create an empty universe.
 
-test addBlock.0 {create a test universe for addBlock} {
+test addBlock-0 {create a test universe for addBlock} {
     ::pitcl::addUniverse x SDF
 } {}
 
 ######################################################################
 #### addBlock
 
-test addBlock.1 {create a simple block with the same name as the universe} {
+test addBlock-1 {create a simple block with the same name as the universe} {
     ::pitcl::addBlock x Ramp
     ::pitcl::blocks -fullname .x
 } {.x.x}
 
-test addBlock.2 {create a block within a galaxy using relative naming} {
+test addBlock-2 {create a block within a galaxy using relative naming} {
     namespace ::pitcl {
         defGalaxy y SDF {
             addBlock z Ramp
@@ -66,7 +66,7 @@ test addBlock.2 {create a block within a galaxy using relative naming} {
     }
 } {z}
 
-test addBlock.3 {create a block within a galaxy instance using absolute naming} {
+test addBlock-3 {create a block within a galaxy instance using absolute naming} {
     namespace ::pitcl {
         currentGalaxy .main
         addBlock .x.w y
@@ -74,12 +74,12 @@ test addBlock.3 {create a block within a galaxy instance using absolute naming} 
     }
 } {.x.x .x.w.z}
 
-test addBlock.1 {try to add a block that already exists} {
+test addBlock-3.1 {try to add a block that already exists} {
     catch {::pitcl::addBlock .x.x Ramp} msg
     list $msg
 } "{Block x already exists in .x}"
 
-test addBlock.4 {create a block within a master galaxy using absolute naming} {
+test addBlock-4 {create a block within a master galaxy using absolute naming} {
     namespace ::pitcl {
         currentGalaxy .main
         addBlock y.y Xgraph
@@ -87,7 +87,7 @@ test addBlock.4 {create a block within a master galaxy using absolute naming} {
     }
 } {y.z y.y}
 
-test addBlock.2 {create a block within a new galaxy using abosolute naming} {
+test addBlock-5 {create a block within a new galaxy using abosolute naming} {
     namespace ::pitcl {
         defGalaxy yy SDF {
             addBlock yy.z Ramp
