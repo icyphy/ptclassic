@@ -37,6 +37,9 @@ public:
 	// Return a pointer to the State using the requested memory.
 	// If it is not a State, return NULL.
 	virtual const State* state() { return NULL; }
+
+	// return TRUE if the request is for a circular buffer.
+	virtual int circ() { return 0;}
 };
 
 // a list of requests.
@@ -65,19 +68,21 @@ public:
 
 	// Return a pointer to the AsmPortHole using the requested memory.
 	AsmPortHole* port() { return &myport; }
+
+	int circ();
 };
 
 class MStateReq : public MReq {
 	const State& mystate;
 public:
 	MStateReq(const State& s) : mystate(s) {}
-	void assign(ProcMemory& proc, unsigned addr) {
-		((AsmStar*)(mystate.parent()))->addEntry(mystate,proc,addr);
-	}
+	void assign(ProcMemory& proc, unsigned addr);
 	int size() { return mystate.size();}
 
 	// Return a pointer to the State using the requested memory.
 	const State* state() { return &mystate; }
+
+	int circ();
 };
 
 class MConsecStateReq : public MReq {
