@@ -30,7 +30,8 @@
 
 # Please don't use GNU make extensions in this or any other Tycho makefile
 
-DIRS = kernel editors lib domains slate devel doc typt #bin
+# The doc directory should be last, since it contains the Tycho class diagram
+DIRS = kernel editors lib domains slate devel typt doc #bin
 
 # Root of Tycho directory
 ROOT =		.
