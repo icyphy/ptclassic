@@ -271,7 +271,7 @@ body ::tycho::EditSpell::recheck {} {
 	::tycho::inform "Spelling OK."
 	return
     }
-    exec rm $filename
+    ::tycho::rm $filename
     set pattern [join $errs |]
     set tags [$tw spellCheckTags]
 
