@@ -31,6 +31,8 @@ Programmer: J. T. Buck
 Version: $Id$
 */
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +40,8 @@ extern "C" {
 unsigned char Ptdsp_LinearToPCMMuLaw(int sample);
 
 int Ptdsp_PCMMuLawToLinear(unsigned char ulawbyte);
+
+int Ptdsp_WriteSunMuLawHeader(FILE *fp);
 
 #ifdef __cplusplus
 }
