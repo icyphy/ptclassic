@@ -40,7 +40,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Constructor.
 PosixMonitor::PosixMonitor()
 {
+#ifdef PTHPUX10
+    pthread_mutex_init(&mutex, pthread_mutexattr_default);
+#else
     pthread_mutex_init(&mutex, NULL);
+#endif
 }
 
 // Destructor.
@@ -59,14 +63,10 @@ PosixMonitor::PosixMonitor()
 /*virtual*/ void PosixMonitor::lock()
 {
     pthread_mutex_lock(&mutex);
-
-    // Guarantee that the mutex will not remain locked by a cancelled thread.
-    pthread_cleanup_push((void (*)(void *))pthread_mutex_unlock, &mutex);
 }
 
 // Release the lock.
 /*virtual*/ void PosixMonitor::unlock()
 {
-    // Remove cleanup handler and unlock.
-    pthread_cleanup_pop(TRUE);
+    pthread_mutex_unlock(&mutex);
 }
