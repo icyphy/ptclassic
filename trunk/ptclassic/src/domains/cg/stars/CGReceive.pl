@@ -18,10 +18,6 @@ It outputs lines of comments, instead of code.
 		int orgProc;
 		int destProc;
 	}
-	input {
-		name {input}
-		type {FLOAT}
-	}
 	output {
 		name {output}
 		type {FLOAT}
