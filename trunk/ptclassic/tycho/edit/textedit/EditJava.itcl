@@ -91,9 +91,6 @@ class ::tycho::EditJava {
     ####################################################################
     ####                    protected methods                       ####
 
-    # Return the regular expression used to identify line-oriented comments.
-    protected method commentRegexp {}
-
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
@@ -539,14 +536,6 @@ body ::tycho::EditJava::fixJavaHTMLFiles {javaHTMLDir dirname} {
 ####################################################################
 ####################################################################
 ####                    protected methods                       ####
-
-#####################################################################
-#### commentRegexp
-# Return the regular expression used to identify line-oriented comments.
-#
-body ::tycho::EditJava::commentRegexp {} {
-    return "(^|;)\[ \t\]*#.*\$"; #line comment
-}
 
 #####################################################################
 #### initialize
