@@ -281,16 +281,18 @@ GenericPort :: printVerbose () const {
 
 StringList
 PortHole :: printVerbose () const {
-	StringList out;
-	out = GenericPort::printVerbose();
+	StringList out = GenericPort::printVerbose();
 	if (alias() == NULL) {
-           if (far() != NULL) {
-              out += "    Connected to port: ";
-              out += far()->readFullName();
-              out += "\n";
-              }
-           else
-              out += "    Not connected.\n";
+		if (far() != NULL) {
+			out << "    Connected to port: "
+			    << far()->readFullName();
+			if (myGeodesic->numInit() > 0)
+				out << "(delay = "
+				    << myGeodesic->numInit() << ")";
+			out += "\n";
+		}
+		else
+			out << "    Not connected.\n";
         }
         return out;
 }
