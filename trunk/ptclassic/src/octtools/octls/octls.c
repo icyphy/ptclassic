@@ -13,7 +13,7 @@
 #include "oh.h"
 #include <sys/file.h>
 
-#ifdef (linux)
+#if defined(linux)
 #include <unistd.h>
 #endif
 
