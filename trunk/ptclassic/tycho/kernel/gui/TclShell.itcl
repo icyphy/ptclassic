@@ -1,0 +1,799 @@
+# Definition of a Tcl and Itcl shell (an interactive interpreter).
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: To do:
+# - The console should support sessions in separate interpreters or
+#   different namespaces.
+# - Control-e goes to the end of a line.  It should probably (for
+#   consistency) go the end of a command.
+
+option add *TclShell.textWidth 60 widgetDefault
+option add *TclShell.textHeight 8 widgetDefault
+option add *TclShell.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *TclShell.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *TclShell.fillMaxLineLength 70 widgetDefault
+option add *TclShell.textForeground \
+	[ptkColor black black] widgetDefault
+option add *TclShell.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *TclShell.relief raised widgetDefault
+option add *TclShell.answerForeground [ptkColor blue black] widgetDefault
+option add *TclShell.promptForeground \
+	[ptkColor firebrick black] widgetDefault
+
+option add *TclShell.selectColor \
+	[ptkColor yellow white] widgetDefault
+option add *TclShell.textfont [::tycho::.tychoFonts defaultFont fixed]
+
+
+#######################################################################
+#### TclShell
+# This class defines a shell widget that accepts Tcl and Itcl commands from
+# the keyboard and executes them. It tracks the command history, and
+# provides both menu commands and emacs-like key bindings for scrolling
+# through and editing that command history. It will also, on request,
+# put the command history or a transcript of a session into a text
+# editor. The -text option, inherited from the base class, specifies
+# a welcome message. For example,
+# <tcl><pre>
+# ::tycho::TclShell .c -text "A fresh Tcl shell\n"
+# .c centerOnScreen
+# </pre></tcl>
+# <p>
+#
+class ::tycho::TclShell {
+    inherit ::tycho::Edit
+
+    constructor {args} {}
+    destructor {}
+
+    # If non-zero, capture output generated with puts.
+    itk_option define -stdout stdout StdOut 0
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Move the insertion cursor to after the prompt if it is before the prompt.
+    method adjustInsertionCursor {}
+
+    # Move back one space, but not into the prompt.
+    method backChar {}
+
+    # Move back (or forward) a given number of commands in the history.
+    method backCommand {dist}
+
+    # Delete the selection or one character (backwards).
+    method backSpace {}
+
+    # Move back one word, but not into the prompt.
+    method backWord {}
+
+    # Clear the recorded history.
+    method clearHistory {}
+
+    # Delete the specified range of text, but not beyond the prompt.
+    method deleteRange {first last}
+
+    # Open a new window that displays the entire command history.
+    method displayHistory {}
+
+    # Print like the Tcl puts command, but in the console window.
+    method displayOutput {args}
+
+    # Display a result in the console window.
+    method displayResult {result}
+
+    # Open a help window.  This should be redefined in derived classes.
+    method help {}
+
+    # Kill the current command, saving it to the clipboard.
+    method killLine {}
+
+    # Kill to the end of the current command.
+    method killToEndOfLine {}
+
+    # Do nothing.
+    method markModified {} {}
+
+    # Paste the selection from the clipboard and possibly execute a command.
+    method paste {}
+
+    # Print one of two possible prompts.
+    method printPrompt {{flag {}}}
+
+    # Execute the current command.
+    method processReturn {}
+
+    # Display a command and add to the history, but do not execute it.
+    method recordCommand {cmd}
+
+    # Change the associated file to the specified file name and then save.
+    method saveAsFile {filename}
+
+    # Scroll forward (or backwards) by one page (the argument is +-1).
+    method scroll {direction}
+
+    # Open a search window, or raise one that is already open.
+    method search {}
+
+    # Go to the specified point in the console.
+    method seePoint {point}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
+
+    # Insert text from the selection and possibly execute a command.
+    method stuff {}
+
+    ##########################################################################
+    ####                         protected methods                        ####
+
+    # Evaluate a command in the global context. Return the result.
+    protected method evalCommand {com}
+
+    # Evaluate the current command.
+    protected method evalTextEntry {}
+
+    # Insert text and apply one or more tags to that text.
+    protected method insertWithTags {text args}
+
+    ##########################################################################
+    ####                         protected variables                      ####
+
+    # The command history.
+    protected variable commandList ""
+
+    # How far back we've scrolled through the command history.
+    protected variable historypos 0
+
+    ##########################################################################
+    ####                         private variables                        ####
+
+    # Partially entered command.
+    private variable partialCommand ""
+}
+
+###################################################################
+#### -stdout configuration
+# If the value of this option is non-zero, then this shell captures
+# output produced by the Tcl <a name="puts command">"puts"</a> command,
+# emulating <a name="standard output">standard output</a>. If more than
+# one shell has set this option, then the most recently created such
+# shell is the one that captures the output. Also, for interaction with
+# Ptolemy, such a TclShell redefines the <a
+# name=monitorPtcl>"monitorPtcl"</a> command to display Ptcl commands
+# in its window. The destructor will restore the "puts" and
+# "monitorPtcl" to their original form if the shell window is
+# destroyed.
+#
+configbody ::tycho::TclShell::stdout {
+    if $itk_option(-stdout) {
+	# It doesn't work to define puts here, for some reason.
+	# But anyway, it should be postponed until the window appears.
+	# The catch is needed in case we are not running with Ptolemy.
+	after idle "if {\[info commands tclputs\] == {}} \
+		{rename puts tclputs; \
+		catch {rename monitorPtcl ptclMonitorPtcl}}; \
+		proc puts {args} {if \[catch {eval \
+                $this displayOutput \$args}\] {eval tclputs \$args}}; \
+		proc monitorPtcl {args} \
+		{eval $this recordCommand [list \$args]}"
+    } {
+        # Restore redirected output.
+        after idle "if {\[info commands tclputs\] != {}} \
+                {rename puts {}; rename tclputs puts; \
+                rename monitorPtcl {}; \
+                catch {rename ptclMonitorPtcl monitorPtcl}}"
+    }
+}
+
+###################################################################
+#
+body ::tycho::TclShell::constructor {args} {
+
+    # Initialize the "promptEnd" mark
+    $itk_component(text) mark set promptEnd end
+
+    eval itk_initialize $args
+
+    # Modify Button-1 clicks so that the insertion cursor does not end up
+    # before the prompt.  In all three cases below, the default Text binding
+    # is copied into this binding.  It would be better to invoke that
+    # binding directly, but I cannot figure out how to do that.
+    bind $itk_component(text) <Button-1> {
+	tkTextButton1 %W %x %y
+	%W tag remove sel 0.0 end
+	# Adjust the insertion cursor so that it is not before the prompt
+	%Q adjustInsertionCursor
+	break
+    }
+
+    bind $itk_component(text) <Double-Button-1> {
+	set tkPriv(selectMode) word
+	tkTextSelectTo %W %x %y
+	catch {%W mark set insert sel.first}
+	# Adjust the insertion cursor so that it is not before the prompt
+	%Q adjustInsertionCursor
+	break
+    }
+
+    bind $itk_component(text) <Triple-Button-1> {
+	set tkPriv(selectMode) line
+	tkTextSelectTo %W %x %y
+	catch {%W mark set insert sel.first}
+	# Adjust the insertion cursor so that it is not before the prompt
+	%Q adjustInsertionCursor
+	break
+    }
+
+    # Additional Bindings.
+    # The "break" statements prevent the generic Text bindings from being
+    # executed along with these.
+
+    # Go to the end of the line, insert a return, and take action
+    # associated with producing another prompt, including (possibly)
+    # executing a Tcl command.
+    bind $itk_component(text) <Return> {%M processReturn; break}
+
+    # Go to the beginning of the command.
+    bind $itk_component(text) <Control-a> {
+	namespace %C {%W mark set insert "promptEnd + 1 char"}
+	break
+    }
+
+    # Modify backspace, control-w, meta-b, etc to avoid deleting the prompt
+    # or backspacing beyond it.
+    #
+    bind $itk_component(text) <BackSpace> "%Q backSpace; break"
+    bind $itk_component(text) <Control-h> "%Q backSpace; break"
+    bind $itk_component(text) <Delete> "%Q backSpace; break"
+    bind $itk_component(text) <Control-b> "%Q backChar; break"
+    bind $itk_component(text) <Control-w> "%Q deleteSelection; break"
+    bind $itk_component(text) <Meta-b> "%Q backWord; break"
+    bind $itk_component(text) <Key-Escape><Key-b> "%Q backWord; break"
+    bind $itk_component(text) <Control-p> "%Q backCommand 1; break"
+    bind $itk_component(text) <Control-n> "%Q backCommand -1; break"
+    bind $itk_component(text) <Control-u> "%Q killLine; break"
+    
+    # Modify search to not allow changing the text
+    bind $itk_component(text) <Control-s> "%Q searchQuery 0 1; break"
+    bind $itk_component(text) <Control-r> "%Q searchQuery 1 1; break"
+
+    # Remove the unneeded menu items.
+    menubar disableMenuItem Reload File
+    menubar disableMenuItem "Switch File..." File
+    menubar disableMenuItem "Toggle Read-Only" File
+    menubar disableMenuItem "Revision Control..." File
+    menubar disableMenuItem "Goto Line..." Edit
+
+    # Remove the Format menu altogether
+    menubar removeMenu Format
+    
+    # Change some of the configuration made by default.
+    # NOTE: The -title option of itk::Toplevel should probably
+    # change the name of the icon, but it does not, so we do that
+    # here.
+# FIXME
+#     configure -title "Tcl Shell"
+#     set tl [winfo toplevel $itk_component(hull)]
+#     wm iconname $tl "Tcl Shell"
+    
+    # Add a Special menu
+    menubar addMenu Special left {} -underline 0
+
+    # Since the Format menu is gone, we put the Font command here.
+    menubar addMenuItem "Font..." Special -underline 0 \
+	    -command "$this setFont"
+
+    menubar addMenuItem "Edit history" Special -underline 0 \
+	    -command "$this component text displayHistory"
+
+    menubar addMenuItem "Clear history" Special -underline 0 \
+	    -command "$this component text clearHistory"
+
+    printPrompt ""
+
+    # Remove binding for altfile and revision control.
+    bind $prefix <Control-x><Control-v> { }
+    bind $prefix <Control-x><Control-q> { }
+    bind $prefix <Control-x><v> { }
+
+    # Add myself to the list of open files. 
+    set menulabel "[info class] $this"
+    windowMenuAddAll $menulabel
+}
+
+###################################################################
+#### destructor
+# If the console window is a master console window, then the user is
+# queried about exiting the program. If the user declines to exit, the
+# destruction is cancelled by triggering an error. Note that this fails
+# to catch the case where the Tk "destroy <em>windowname</em>" is used
+# instead of "delete object <em>objectname</em>". In the former case,
+# the window is destroyed whatever the user responds to the query. In
+# this case, the Tcl command "puts" will be restored to its original
+# form, but the Ptcl command "monitorPtcl" will no longer work. Thus, a
+# master console window should not be destroyed with the Tk "destroy
+# <em>windowname</em>" command.
+#
+body ::tycho::TclShell::destructor {} {
+    # Restore redirected output, if necessary.
+    if $itk_option(-stdout) {
+        configure -stdout 0
+    }
+    set menulabel "[info class] $this"
+    windowMenuRemoveAll $menulabel
+}
+
+#########################################################################
+#########################################################################
+####                       public methods                            ####
+
+#########################################################################
+#### adjustInsertionCursor
+# Move the insertion cursor to after the prompt if it is before the prompt.
+#
+body ::tycho::TclShell::adjustInsertionCursor {} {
+    if {[$itk_component(text) compare insert <= promptEnd]} {
+	$itk_component(text) mark set insert {promptEnd +1 chars}
+    }
+}
+
+#########################################################################
+#### backChar
+# Move back one space, but not into the prompt.
+#
+body ::tycho::TclShell::backChar {} {
+    if {[$itk_component(text) compare promptEnd < {insert -1 chars}]} {
+	$itk_component(text) mark set insert "insert - 1 chars"
+	$itk_component(text) yview -pickplace insert
+    }
+}
+
+#########################################################################
+#### backCommand
+# Move back a given number of commands in the history and display that
+# previous command on the current line. A negative argument will
+# move forward.
+#
+body ::tycho::TclShell::backCommand {dist} {
+    set historysize [llength $commandList]
+    incr historypos $dist
+    if {$historypos <= $historysize} {
+	if {$historypos > 0} {
+	    $itk_component(text) delete "promptEnd + 1 chars" end
+	    $itk_component(text) insert insert \
+		    [lindex $commandList [expr $historysize-$historypos]]
+	    $itk_component(text) yview -pickplace insert
+	} {
+	    # Tried to go forward in the history beyond the present
+	    $itk_component(text) delete "promptEnd + 1 chars" end
+	    set historypos 0
+	}
+    } {
+	# Gone beyond the end of the list
+	incr historypos [expr -$dist]
+    }
+}
+
+#########################################################################
+#### backSpace
+# If there is a selection, delete it and return.  Otherwise,
+# delete one character (backwards), but not into the prompt.
+#
+body ::tycho::TclShell::backSpace {} {
+    if {[getSelection] != {}} {
+	deleteSelection
+	return
+    }
+    if {[$itk_component(text) compare promptEnd < {insert -1 char}]} {
+	deleteRange {insert - 1 char} insert
+	$itk_component(text) yview -pickplace insert
+    }
+}
+
+#########################################################################
+#### backWord
+# Move back one word, but not into the prompt.
+#
+body ::tycho::TclShell::backWord {} {
+    if [$itk_component(text) compare "insert - 1c wordstart" > promptEnd] {
+	$itk_component(text) mark set insert "insert - 1c wordstart"
+    }
+}
+
+#####################################################################
+#### clearHistory
+# Clear the recorded history.
+#
+body ::tycho::TclShell::clearHistory {} {
+    $itk_component(text) delete 1.0 end
+    $itk_component(text) insert insert $itk_option(-text)
+    printPrompt
+    set commandList ""
+    set historypos 0
+}
+
+#####################################################################
+#### deleteRange
+# Delete the specified range of text, but not before the prompt.
+# Record the deletion for undoing.  If either the beginning or the end
+# of the range align with the contents of lastUndo, then the deleted
+# range is appended to the undo buffer rather than replacing it.  The
+# deleted string is also copied to the clipboard. The arguments are
+# indices in any form accepted by the Tk text widget.
+#
+body ::tycho::TclShell::deleteRange {first last} {
+
+    set win $itk_component(text)
+    if {[$win compare $last <= promptEnd]} {
+	# Everything is before the prompt.  Delete nothing.
+	return
+    }
+    if {[$win compare $first <= promptEnd]} {
+	# Part of the range is before the prompt.  Adjust the range.
+	set first "promptEnd + 1 chars"
+    }
+    # Call deleteRange defined in the parent with the new range.
+    Edit::deleteRange $first $last
+}
+
+#########################################################################
+#### displayHistory
+# Open a new window that displays the entire command history.
+#
+body ::tycho::TclShell::displayHistory {} {
+    set history [join $commandList "\n"]
+    wm deiconify [::tycho::EditTcl [::tycho::autoName .edittcl] -text $history]
+}
+ 
+#########################################################################
+#### displayOutput
+# Print like the Tcl "puts" command, but in the console window. The
+# arguments are an optional -nonewline option, an optional
+# <em>fileid</em>, and a required string to print. If the optional
+# <em>fileid</em> argument is given, then the original Tcl "puts" is
+# used to write to the file.
+#
+body ::tycho::TclShell::displayOutput {args} {
+    set nonewline 0
+    set fileid {}
+    set str {}
+    foreach arg $args {
+	if {$arg == {-nonewline}} {
+	    set nonewline 1
+	} elseif {$str == {}} {
+	    set str $arg
+	} else {
+	    set fileid $str
+	    set str $arg
+	}
+    }
+    if {$fileid != {}} {
+	eval tclputs $args
+    } else {
+	if $nonewline {
+	    displayResult -nonewline $str
+	} {
+	    displayResult $str
+	}
+    }
+}
+
+#####################################################################
+#### displayResult
+# Display on the console the result passed as an argument. The
+# printPrompt method should be called after to ensure that a prompt is
+# printed. If the -nonewline option is given, then do not print a
+# newline.
+#
+body ::tycho::TclShell::displayResult {args} {
+    set nonewline 0
+    set result {}
+    foreach arg $args {
+	if {$arg == {-nonewline}} {
+	    set nonewline 1
+	} {
+	    set result $arg
+	}
+    }
+	
+    if {$result != {}} {
+	insertWithTags $result result
+	if !$nonewline {insertWithTags "\n" result}
+	$itk_component(text) tag config result \
+		-foreground \
+		[option get $itk_component(hull) \
+		answerForeground TclShell]
+    }
+    $itk_component(text) mark set promptEnd "insert - 1 chars"
+}
+
+#########################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::TclShell::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/TclShellHelp.html
+}
+
+#########################################################################
+#### killLine
+# Kill the current command, saving it to the clipboard.
+#
+body ::tycho::TclShell::killLine {} {
+    deleteRange "promptEnd + 1 chars" end
+}
+
+#########################################################################
+#### killToEndOfLine
+# Kill to the end of the current command, rather than just to the end of the
+# current line, as in the base class.
+#
+body ::tycho::TclShell::killToEndOfLine {} {
+    
+    # Do nothing if we are at the end of the buffer
+    if [$itk_component(text) compare insert == {end -1 char}] {return}
+    
+    deleteRange insert end
+}
+
+#####################################################################
+#### paste
+# Paste the selection from the clipboard and evaluate it as a Tcl
+# command if it ends in a carriage return.
+#
+body ::tycho::TclShell::paste {} {
+    Edit::paste
+    if [string match "*\[\n\]" [getClipboard]] {
+	evalTextEntry
+    }
+}
+
+#########################################################################
+#### printPrompt
+# Print one of two possible prompts. If the optional argument is the string
+# INCOMPLETE, then a prompt for incomplete commands is generated.
+# Otherwise, the standard prompt is generated.
+#
+body ::tycho::TclShell::printPrompt {{flag {}}} {
+    if {$flag == "INCOMPLETE"} {
+	insertWithTags "?  " prompt
+    } {
+	insertWithTags "> " prompt
+    }
+    $itk_component(text) tag config prompt -foreground \
+	    [option get $itk_component(hull) promptForeground TclShell]
+
+    insertWithTags { } space
+    $itk_component(text) mark set promptEnd "insert - 1 chars"
+}
+
+#########################################################################
+#### processReturn
+# Execute the current command.
+#
+body ::tycho::TclShell::processReturn {} {
+    # Go to the end of the line
+    $itk_component(text) mark set insert end
+    $itk_component(text) insert insert \n
+    evalTextEntry
+}
+
+###################################################################
+#### recordCommand
+# Display a command and add it to the history, but do not execute it.
+# A prompt is also displayed after the command.
+#
+body ::tycho::TclShell::recordCommand {cmd} {
+    insertWithTags "$cmd\n"
+    if {$cmd != ""} {lappend commandList $cmd}
+    set historypos 0
+    $itk_component(text) mark set promptEnd "insert - 1 chars"
+    return ""
+    printPrompt
+}
+
+#####################################################################
+#### saveAsFile
+# Save a complete record of the transcript in the console window,
+# including return values and prompts, to the specified file. 
+#
+body ::tycho::TclShell::saveAsFile {filename} {
+    if {[file exists $filename]} {
+	if {![::tycho::askuser "File \"$filename\" exists.  Overwrite?"]} {
+	    error {Did not save file}
+	}
+    }
+    set fd [open $filename w+]
+    puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
+    close $fd
+}
+
+#########################################################################
+#### scroll
+# Scroll forward (or backwards) by one page.  If direction is +1,
+# scroll forward one page. If it is -1, scroll backward one page.
+# Two lines of overlap are left between the old and new pages.
+# Unlike the base class method, the insertion point is left in its
+# original position.
+#
+body ::tycho::TclShell::scroll {direction} {
+    $itk_component(text) yview scroll $direction pages
+}
+
+#####################################################################
+#### search
+# Open or raise a search window. Unlike the base class method, the
+# resulting search window will not allow replacing text. It behaves
+# like the search window of a read-only text widget.
+#
+body ::tycho::TclShell::search {} {
+    searchQuery 0 1
+}
+
+#####################################################################
+#### seePoint
+# Go to the specified point in the console, adjusting the view to see
+# the point. The point can be specified in any of three ways:
+# <pre>
+#    {line <i>linenumber</i>}
+#    {range <i>startindex endindex</i>}
+#    <i>regexp</i>
+# </pre>
+# In the first two forms, the point is a list beginning with the keyword
+# "line" or "range".  If the point has neither of these forms, then
+# it is interpreted as a regular expression, and the first match of
+# the regular expression is taken to be the specified point.
+# In all cases, the background color of the matching text is changed
+# temporarily.  Notice that this will not be visible if the "range" form
+# is used and the two indices are equal.  As a side effect, the selection
+# (if there is one) is cleared.
+#
+body ::tycho::TclShell::seePoint {point} {
+    Edit::seePoint $point
+    after 200 "$this adjustInsertionCursor"
+}
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+# This is redefined from the base class because the Format menu has been
+# removed and the base class method refers to it.
+#
+body ::tycho::TclShell::setReadOnly {bool} {
+    ::tycho::File::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disableMenuItem {Undo/Redo} Edit
+            menubar disableMenuItem Cut Edit
+            menubar disableMenuItem Paste Edit
+	} {
+            menubar enableMenuItem {Undo/Redo} Edit
+            menubar enableMenuItem Cut Edit
+            menubar enableMenuItem Paste Edit
+	}
+    }
+}
+
+#########################################################################
+#### stuff
+# Insert text from the selection and possibly execute a command.
+# If the text ends in a Return, then execute it as a Tcl command.
+#
+body ::tycho::TclShell::stuff {} {
+    Edit::stuff
+    # Check to see whether what was stuffed ends in a Return character.
+    # For some reason, it always has at least one Return character.
+    # Execute it only if it has two or more.
+    set cmd [$itk_component(text) get "promptEnd + 1 chars" end]
+    if [string match "*\[\n\]\[\n\]" $cmd] {
+	evalTextEntry
+    }
+}
+
+#########################################################################
+#########################################################################
+####                       protected methods                         ####
+
+#########################################################################
+#### evalCommand
+# Evaluate a command in the global context and return the result.
+# The main reason for this method is to ensure that a prompt gets printed
+# on the console window even if an error occurs.
+#
+body ::tycho::TclShell::evalCommand {com} {
+    # To be sure a prompt gets printed even if an error occurs,
+    # catch errors here
+    if {[catch {uplevel #0 $com} retval] != 0} {
+	tkerror $retval
+    }
+    return $retval
+}
+
+#########################################################################
+#### evalTextEntry
+# Evaluate a command that has been typed into the text widget, if it is
+# a complete command, print its returned value, and print a prompt.
+# If the command is not complete, append it to the partialCommand string
+# and print a special prompt.
+#
+body ::tycho::TclShell::evalTextEntry {} {
+
+    append partialCommand \
+	    [$itk_component(text) get "promptEnd + 1 chars" "end -1 chars"]
+    
+    if [info complete $partialCommand] {
+
+	# Got a complete command.  Add it to history in the first position.
+	set com [string trim $partialCommand " \n\t"]
+	if {$com != ""} {lappend commandList $com}
+	set historypos 0
+	
+	# Eval the command in local context so that Tcl commands
+	# can be easily redefined locally.
+	# First make certain key global variables known
+	set result [evalCommand $partialCommand]
+	set partialCommand ""
+	
+	displayResult $result
+	printPrompt 1
+    } else {
+	printPrompt "INCOMPLETE"
+    }
+}
+
+#####################################################################
+#### insertWithTags
+# Insert text into the console text widget and
+# apply one or more tags to that text.  The first argument is
+# the text to insert (it is inserted at the "insert" mark).
+# The second and subsequent arguments give one or more tags
+# to apply to text.  If there are no such arguments, then all
+# tags are removed from the text.
+#
+body ::tycho::TclShell::insertWithTags {text args} {
+    set start [$itk_component(text) index insert]
+    $itk_component(text) insert insert $text
+    $itk_component(text) yview -pickplace insert
+    foreach tag [$itk_component(text) tag names $start] {
+	$itk_component(text) tag remove $tag $start insert
+    }
+    foreach i $args {
+	$itk_component(text) tag add $i $start insert
+    }
+}
+
