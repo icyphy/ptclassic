@@ -781,25 +781,42 @@ else inside it.
 ****/
 int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 {
-    AcyCluster* c, *b;
+    AcyCluster* c, *b, *topC;
     StringList message = "AcyLoopScheduler::addTopLevelCluster:\n";
     if ((gal->head())->isItCluster()) {
 	AcyClusterIter nextClust(*gal);
 	c = nextClust++;
-	while ((b=nextClust++) != NULL) {
-	    if (b==c) continue;
-	    if (!c->absorb(*b,0)) return FALSE;
+	// first check whether galaxy has only one star.
+	if (gal->numberBlocks() == 1) {
+	    // need to create a new top level cluster and absorb c into that.
+	    topC = new AcyCluster;
+	    topC->setName(gal->name());
+	    // add topC to gal's list
+	    gal->addBlock(*topC, topC->name());
+	    // absorb c into topC and remove c from gal (done by absorb)
+	    if (!topC->absorb(*c)) {
+		gal->removeBlock(*topC);
+		message << "Failed to absorb c into newly created empty cluster";
+		Error::warn(message);
+		return FALSE;
+	    }
+	    return TRUE;
+	} else {
+	    while ((b=nextClust++) != NULL) {
+	        if (b==c) continue;
+	        if (!c->absorb(*b,0)) return FALSE;
+	    }
+	    cleanupAfterCluster(*gal);
+	    if (gal->numberBlocks() != 1) {
+	        message << "Galaxy has more than one block after "
+		        << "clustering process.\n";
+	        Error::warn(message);
+	        return FALSE;
+	    }
+	    // Change c's name to gal's name.
+	    c->setName(gal->name());
+	    return TRUE;
 	}
-	cleanupAfterCluster(*gal);
-	if (gal->numberBlocks() != 1) {
-	    message << "Galaxy has more than one block after "
-		    << "clustering process.\n";
-	    Error::warn(message);
-	    return FALSE;
-	}
-	// Change c's name to gal's name.
-	c->setName(gal->name());
-	return TRUE;
     } else {
 	message << "Galaxy has not been converted to cluster hierarchy "
 		<< "by calling Cluster::initializeForClustering first.\n"
