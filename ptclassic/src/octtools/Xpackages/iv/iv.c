@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -62,7 +62,9 @@ static char SccsId[]="$Id$";
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 #endif
 
+#ifndef ABS
 #define ABS(x)		((x) < 0 ? -(x) : (x))
+#endif
     
 #define STRDUP(xx)	(strcpy(malloc((unsigned) (strlen(xx)+1)), (xx)))
     
