@@ -18,8 +18,8 @@ MAKEVARS = "ARCH=$(ARCH)"
 makefiles:
 	@for x in $(DIRS); do \
 		cd $$x ; \
-		echo Updating makefile in domains/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x makefile ;\
+		echo Updating makefiles in domains/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x makefiles ;\
 		cd .. ; \
 	done
 
