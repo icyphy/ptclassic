@@ -6,7 +6,7 @@
 # $Id$
 #
 # Important!  Do not run this makefile while in $PTOLEMY/src/domains/xxx.
-# Instead run in from $PTOLEMY/obj.$ARCH/domains/xxx (through the symbolic
+# Instead run in from $PTOLEMY/obj.$PTARCH/domains/xxx (through the symbolic
 # link) -- that way a separate directory containing, say, sun4 or mips
 # objects can be maintained.
 

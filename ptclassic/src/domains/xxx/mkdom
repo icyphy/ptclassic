@@ -51,8 +51,8 @@ if ($#argv < 1) then
 endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/ptarch`
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/ptarch`
 endif
 
 set XXX = $PTOLEMY/src/domains/xxx
