@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Jose Luis Pino, initial version based on SIlageSimTarget
+ Programmer: Jose Luis Pino
 
 *******************************************************************/
 
@@ -77,44 +77,76 @@ CGCTargetWH::CGCTargetWH(const char* name,const char* starclass, const
 
 }
 
+void commStarInit(CGCSDFBase* s,PortHole& p,int numXfer) {
+    s->sdfPortName = p.name();
+    s->numXfer = numXfer;
+    DataType type = p.newConnection().resolvedType();
+    s->sdfPortType = type;
+}
+
+CommPair cgcIncoming(PortHole& p,int numXfer) {
+    CommPair pair;
+    pair.outer = NULL;
+    LOG_NEW; CGCSDFBase *newStar = new CGCSDFReceive;
+    commStarInit(newStar,p,numXfer);
+    pair.inner = newStar;
+    return pair;
+}
+
+CommPair cgcOutgoing(PortHole& p,int numXfer) {
+    CommPair pair;
+    pair.outer = NULL;
+    LOG_NEW; CGCSDFBase *newStar = new CGCSDFSend;
+    commStarInit(newStar,p,numXfer);
+    pair.inner = newStar;
+    return pair;
+}
+
 /*virtual*/ void CGCTargetWH::wormPrepare() {
     dirty = 1;
-    BlockPortIter nextPort(*galaxy());
+    prepareCGCWorm(wormInputStars,wormOutputStars,
+		   &cgcIncoming,&cgcOutgoing,*galaxy());
+}
+
+/*virtual*/ int CGCTargetWH::prepareCGCWorm(
+    SDFSchedule &inputs, SDFSchedule &outputs,
+    CommPairF incoming, CommPairF outgoing, Galaxy& gal)
+{
+    BlockPortIter nextPort(gal);
     DFPortHole *p;
     while ((p = (DFPortHole*)nextPort++) != 0) {
 	// Must save type *before* disconnecting port
-	DataType type = p->newConnection().resolvedType();
-	CGCSDFBase* newStar;
+	CGStar* newStar;
 	CGPortHole &cgPort = (CGPortHole&)p->newConnection();
+	int numXfer=((DataFlowStar*)cgPort.parent())->reps()*cgPort.numXfer(); 
 	cgPort.disconnect();
 	DFPortHole *source,*destination,*newPort;
 	StringList newStarName;
 	if (p->isItInput()) {
-	    LOG_NEW; newStar = new CGCSDFReceive;
+	    CommPair inPair = (*incoming)(*p,numXfer);
+	    newStar = inPair.inner;
 	    newStarName << symbol("WormSend");
-	    wormInputStars.append(*newStar);
+	    inputs.append(*newStar);
 	    newPort = source = (DFPortHole*)newStar->portWithName("output");
 	    destination = &cgPort;
 	}
 	else {
-	    LOG_NEW; newStar = new CGCSDFSend;
+	    CommPair outPair = (*outgoing)(*p,numXfer);
+	    newStar = outPair.inner;
 	    newStarName << symbol("WormReceive");
-	    wormOutputStars.append(*newStar);
+	    outputs.append(*newStar);
 	    source = &cgPort;
 	    newPort =destination=(DFPortHole*)newStar->portWithName("input");
 	}
 	const char* wormName = hashstring(newStarName);
-	galaxy()->addBlock(*newStar,wormName);
+	gal.addBlock(*newStar,wormName);
 	newStar->setTarget(this);
 	source->connect(*destination,0);
-	int numXfer=((DataFlowStar*)cgPort.parent())->reps()*cgPort.numXfer(); 
-	newStar->sdfPortName = p->name();
-	newStar->numXfer = numXfer;
-	newStar->sdfPortType = type;
 	newStar->initialize();
 	newStar->repetitions = 1;
     }
     nextPort.reset();
+    return !SimControl::haltRequested();
 }
 
 /*virtual*/ int CGCTargetWH::compileCode() {
