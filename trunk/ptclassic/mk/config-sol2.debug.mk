@@ -61,7 +61,7 @@ CC =		gcc
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	
-#-Wsynth is new in g++-2.6.x
+#-Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 # Define PTSOL2_4 if you are on Solaris2_4.  config-sol2.5.mk defines ARCHFLAGS
 LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe

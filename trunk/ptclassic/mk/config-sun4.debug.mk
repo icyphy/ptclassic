@@ -56,7 +56,7 @@ CC =		gcc
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =
-# -Wsynth is new in g++-2.6.x
+# -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 LOCALCCFLAGS =	-g
 LOCALCFLAGS = 	$(LOCALCCFLAGS)
