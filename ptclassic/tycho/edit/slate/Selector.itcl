@@ -145,7 +145,7 @@ class ::tycho::Selector {
     method activate {tag x y args}
 
     # Bind the selector to mouse events
-    method bind {tagOrID args}
+    method bind {tag args}
 
     # Clear the selection.
     method clear {}
@@ -175,7 +175,7 @@ class ::tycho::Selector {
     method resize {}
 
     # Remove a mouse binding
-    method unbind {tagOrID args}
+    method unbind {tag args}
 
     ###################################################################
     ####                        protected methods                  ####
@@ -289,6 +289,9 @@ body ::tycho::Selector::activate {tag x y args} {
 # item.
 #
 body ::tycho::Selector::bind {tag args} {
+    if [regexp {^_?[0-9]+$} $tag] {
+	error "A Selector can be bound only to tags, not items ids ($tag)"
+    }
     # Extract options
     array set opt [concat -background #background $args]
     set bgtag $opt(-background)
@@ -456,19 +459,16 @@ body ::tycho::Selector::drag {x y} {
     # Process according to selection mode
     if !$toggling {
 	# Add newly covered selectable objects. An object
-	# is selectable if its name is in the binding set, or if
-	# it has a tag that is in the binding set
+	# is selectable if it has a tag that is in the binding set
 	foreach {o tags} $covered {
-	    if { [::tycho::lmember $targetTags $o] \
-		    || ! [::tycho::ldisjoint $targetTags $tags] } {
+	    if { ! [::tycho::ldisjoint $targetTags $tags] } {
 		# Select it
 		_select $o
 	    }
 	}
     	# Deselect selectable objects that are no longer covered
 	foreach {o tags} $uncovered {
-	    if { [::tycho::lmember $targetTags $o] \
-		    || ! [::tycho::ldisjoint $targetTags $tags] } {
+	    if { ! [::tycho::ldisjoint $targetTags $tags] } {
 		# Deselect it
 		_deselect $o
 	    }
@@ -476,10 +476,8 @@ body ::tycho::Selector::drag {x y} {
     } else {
 	# Toggle any selectable objects that have changed state
     	foreach {o tags} [concat $covered $uncovered] {
-	    # An object is selectable if its name is in the binding
-	    # set or if it has a tag in the binding set.
-	    if { [::tycho::lmember $targetTags $o] \
-		    || ! [::tycho::ldisjoint $targetTags $tags] } {
+	    # An object is selectable if it has a tag in the binding set.
+	    if { ! [::tycho::ldisjoint $targetTags $tags] } {
 		# Test if already selected or not, and act accordingly
 		if { [$slate hastag $o "sel"] } {
 		    # Deselect it
