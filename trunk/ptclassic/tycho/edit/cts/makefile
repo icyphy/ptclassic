@@ -49,7 +49,8 @@ TCL_SRCS =
 ITCL_SRCS = \
 	CTEdit.itcl \
 	CTRunWindow.itcl \
-	CTSimulation.itcl
+	CTSimulation.itcl \
+	CTTimePanel.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	cts.tcl \
