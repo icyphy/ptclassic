@@ -95,6 +95,12 @@ int SRPortHole::present() const {
   return FALSE;
 }
 
+Particle & SRPortHole::get() const {
+  Error::abortRun("get() called on class SRPortHole");
+  // A kludge-- return a particle, leaking memory!
+  return *myPlasma->get();  
+}
+
 // Return TRUE if the the output is known
 int OutSRPort::known() const
 {
@@ -152,6 +158,20 @@ int OutSRPort::present() const
   return FALSE;
 }
 
+Particle & OutSRPort::get() const
+{
+  if (emittedParticle > (Particle *) 1 ) {
+    return *emittedParticle;
+  }
+  Error::abortRun("Attempted to get an unknown or absent particle from port ",
+		  name());
+
+  // A kludge--return some particle to avoid a core dump.
+  // This leaks memory!
+  
+  return *myPlasma->get();
+}
+
 // Return TRUE if the far port exists and has a present particle
 int InSRPort::present() const
 {
@@ -170,13 +190,7 @@ Particle & InSRPort::get() const
   OutSRPort * farPort;
 
   if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
-    if ( farPort->emittedParticle > (Particle *) 1 ) {
-      return *(farPort->emittedParticle);
-    } else {
-      Error::abortRun("Attempted to get an unknown or absent particle from port ",
-		      name());
-      
-    }
+    return farPort->get();
   } else {
     Error::abortRun("Attempted to get a particle from unconnected port ", name());
   }
@@ -192,7 +206,9 @@ void OutSRPort::makeAbsent()
 {
   if ( emittedParticle ) {
     Error::error("Repeated emission on port ", name() );
-    emittedParticle->die();
+    if ( emittedParticle > (Particle *) 1) {
+      emittedParticle->die();
+    }
   }
 
   emittedParticle = (Particle *) 1; 
@@ -203,7 +219,9 @@ Particle & OutSRPort::emit()
 {
   if ( emittedParticle ) {
     Error::error("Repeated emission on port ", name() );
-    emittedParticle->die();
+    if ( emittedParticle > (Particle *) 1) {
+      emittedParticle->die();
+    }
   }
 
   return *(emittedParticle = myPlasma->get());  
