@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 #endif
 
-#if defined(PTHPPA) && ! defined(__GNUC__)
+#if defined(__sgi) && ! defined(__GNUC__)
 #ifndef PTIRIX5_CFRONT
 /* SGI running IRIX5.x with native SGI CC*/
 #define PTIRIX5_CFRONT
@@ -48,6 +48,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #if defined(PTHPPA_CFRONT) || defined(SYSV) || defined (SVR4) || defined(PTIRIX5_CFRONT)
 #ifdef PTIRIX5_CFRONT
 #include <stdio.h>	// dpwe: only way to get sprintf() prototype?
+// for open(), used in pigiLoader.cc
+#include <sys/stat.h>
+#include <fcntl.h>
 #endif // PTIRIX5_CFRONT
 #include <stdlib.h>
 #include <unistd.h>
