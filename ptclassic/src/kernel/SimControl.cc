@@ -64,14 +64,14 @@ Polling functions added by Alan Kamas, 1/95
 //       as the second parameter to signal()
 #if !defined(PTIRIX5) 
 // PTIRIX5 defines SIG_PF in <signal.h>
-#if defined(__GNUG__) || defined(PTHPPA_CFRONT)
+#if defined(__GNUG__) || defined(PTHPPA_CFRONT) || defined(PTAIX_XLC)
 #if defined (PTSUN4) || defined(PTSOL2)
 // sun4, sol2
 typedef void (*SIG_PF)();
 #else
 typedef void (*SIG_PF)(int);
 #endif // defined sun4, sol2
-#endif // __GNUG__ || PTHPPA_CFRONT
+#endif // __GNUG__ || PTHPPA_CFRONT || PTAIX_XLC
 #endif // !defined PTIRIX5
 
 #if !defined (__GNUG__)
