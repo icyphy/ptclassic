@@ -26,11 +26,10 @@ CFLAGS =	-g $(OPTIMIZER)
 # Variables for the linker
 #
 
-# Flag that cc expects to create statically linked binaries.
+# Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
-# Note that currently vem is built with cc, not gcc, so vem uses
-# this flag. See also config-g++.mk
-CC_STATIC = 	-Bstatic
+# Note that cc uses -Bstatic
+CC_STATIC = 	-static
 
 #
 # Directories to use
