@@ -187,7 +187,7 @@ body ::tycho::Graphics::clear {} {
 # Hand the focus to the canvas window.
 #
 body ::tycho::Graphics::focusin {} {
-    $itk_component(graphics) focusin
+    catch {$itk_component(graphics) focusin}
 }
  
 #######################################################################
