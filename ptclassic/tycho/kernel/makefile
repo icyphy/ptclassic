@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -42,20 +42,11 @@ include $(CONFIG)
 
 TCL_SRCS = \
 	JRPCServer.tcl \
-	List.tcl \
-	Loader.tcl \
-	Lib.tcl \
-	Math.tcl \
-	Misc.tcl \
-	Path.tcl \
-	String.tcl \
-	URLPath.tcl \
 	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
 	AbstractGraph.itcl \
 	ButtonBox.itcl \
-	Builder.itcl \
 	BuilderDialog.itcl \
 	CacheManager.itcl \
 	CircularList.itcl \
@@ -98,7 +89,6 @@ ITCL_SRCS = \
 	ModelViewer.itcl \
 	Monitor.itcl \
 	MultiPanel.itcl \
-	Object.itcl \
 	PackageData.itcl \
 	PopupMenu.itcl \
 	PortedGraph.itcl \
@@ -127,8 +117,6 @@ ITCL_SRCS = \
 	ToolBar.itcl \
 	TopLevel.itcl \
 	TWidget.itcl \
-	Tycho.tcl \
-	Uninstantiable.itcl \
 	UserProfile.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
