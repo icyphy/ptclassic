@@ -1,0 +1,56 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Continuous Time Simulation Demos</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1><a name="CT demo">Continuous Time Simulation Demos</a></h1>
+
+<p>
+Author:<a href="http://ptolemy.eecs.berkeley.edu/~liuj">Jie Liu</a><br>
+<p>
+<HR>
+<h2>General Guide </h2>
+<p>
+<UL>
+<LI>To run the simulation, click on the tycho code below. The GUI will be loaded.<br></LI>
+<LI>Click on <code><font color="#ff0000"> run </font></code>
+ in the <code><font color="#ff0000"> devel </font></code>menu. <br></LI>
+<LI>Wait for a few second to allow creating the socket connection.<br></LI>
+<UL><LI>If there's a message like: <code>Socket Error</code>, which means
+the socket has already been allocated for other resources, then 
+please <i>close the run window</i> and try again.</LI></UL>
+<LI>Adjust <code>start time</code>, <code>stop time</code>, and <code>step size</code>.</LI>
+<LI>Llick <font color="#ff0000">start</font> to start the simulation<br></LI>
+<LI> During the simulaiton, the slider, if there is any in the run window, can
+be used to adjust the parameters on the fly.</LI>
+<LI> <code>Pause</code>, <code>Resume</code>, and <code>Stop</code> are used for execution control.</LI>
+</UL>
+<p>
+<HR>
+<h2> Demos</h2>
+<p>
+1. <font size=+1>MEMS</font>: A sonator with a comb finger sensor. (Coyote Systems) <br>
+<tcl quiet><pre> ::tycho::openContext Coyote2.cts</pre></tcl><p>
+<UL>
+<LI>After bring up the run window, enter <font color="#ff0000"> 15 </font>
+in the <code>stop time</code> box.<br></LI>
+<LI> Click <code> Start</code>.<p></LI>
+</UL>
+2. <font size=+1>Lorenz System</font>:A simple system with chaotic behavior <p>
+<tcl quiet><pre> ::tycho::openContext Lorenz.cts</pre></tcl></p>
+<UL>
+<LI>After bring up the run window, enter <font color="#ff0000"> 50 </font>
+in the <code>stop time</code> box.<br></LI>
+<LI> Click <code> Start</code>.<p></LI>
+</UL>
+
+<p>
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
