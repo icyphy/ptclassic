@@ -105,7 +105,7 @@ SHELL=/bin/sh
 install_gnu:
 	@echo "Building gnu for $(PTARCH)";
 	case $(PTARCH) in \
-	hppa) 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
+	hppa*) 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
 		$(MFLAGS) hpgnu_all;; \
 	irix5)	$(MAKE) -f mk/scratch-srcs.mk CC="$(IRIX5_GNU_BUILD_CC)" \
 		$(MFLAGS) irix5gnu_all;; \
