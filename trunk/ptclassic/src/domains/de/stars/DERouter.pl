@@ -40,9 +40,9 @@ Probability is equal for each output. The time delay is zero.
 	go {
            completionTime = arrivalTime;
 	   // choose a output port randomly
-	   double p = (*random)() + 1.0;
+	   double p = (*random)();
 	   OutDEMPHIter nextp(output);
-	   OutDEPort* pp;
+	   OutDEPort* pp = nextp++;
 	   for (int i = int(p); i > 0 ; i--) {
 		pp = nextp++;
 	   }
