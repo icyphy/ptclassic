@@ -41,6 +41,9 @@ set ptkPrWidth 4
 set ptkPrVertOffset 0
 set ptkPrHorOffset 0
 set ptkPrlabels 1
+set ptkPrBW 0
+set ptkPrPS 1
+set ptkPrFileName ""
 
 proc ptkPrintFacet {name} {
     catch {destroy .print}
@@ -77,24 +80,39 @@ proc ptkPrintFacet {name} {
     pack .print.cntr.prfr -side left -fill x -expand 1
     pack .print.cntr.cancel -side right -fill x -expand 1
 
+
+    #########################################################################
+    # Print PS/EPSI
+    #
+    frame .print.prps -relief groove -bd 3
+    radiobutton .print.prps.ps -text "PostScript" -variable ptkPrPS \
+	-relief flat -value 1 -command ptkPrfacetPS
+    radiobutton .print.prps.epsi -text "EPSI" \
+	-variable ptkPrPS -relief flat -value 0 -command ptkPrfacetEPSI
+    pack .print.prps.ps -side left
+    pack .print.prps.epsi -side right
+    pack .print.prps -side bottom -anchor w -padx 5 -pady 5 -fill x
+
     #########################################################################
     # Print to file only
     #
-    pack [entry .print.file -relief sunken ] \
+    pack [entry .print.file -relief sunken -textvariable ptkPrFileName] \
 	-side bottom -padx 5 -pady 5 -fill x
     bind .print.file <Return> "ptkPrfacet $name"
     bind .print.file <Tab> "focus .print.size.b.height"
-    .print.file insert @0 ${name}.ps
     # Guess about the number of characters in the window here.
     # Tk returns useless numbers when asked about the width of the widget
     set leftEdge [expr {[string length $name] - 41}]
     if {$leftEdge < 0} {set leftEdge 0}
     .print.file view $leftEdge
     .print.file icursor end
+
+    global ptkPrFileName
+    set ptkPrFileName ${name}.ps
     pack [frame .print.f] -padx 5 -pady 5 -side bottom -fill x
     pack [checkbutton .print.f.on -text "To file only:" \
-	-variable ptkPrintToFile -relief flat] \
-	-side left -anchor w
+	-variable ptkPrintToFile -relief flat ] \
+	-side left -anchor w 
 
     #########################################################################
     # Printer
@@ -111,6 +129,18 @@ proc ptkPrintFacet {name} {
     .print.p.printer insert @0 $printer
 
     #########################################################################
+    # Print BW/Color
+    #
+    frame .print.prbw -relief groove -bd 3
+    radiobutton .print.prbw.bw -text "Black & White" -variable ptkPrBW \
+	-relief flat -value 1
+    radiobutton .print.prbw.color -text "Color" \
+	-variable ptkPrBW -relief flat -value 0
+    pack .print.prbw.bw -side left
+    pack .print.prbw.color -side right
+    pack .print.prbw -side bottom -anchor w -padx 5 -pady 5 -fill x
+
+    #########################################################################
     # Print labels
     #
     frame .print.prlabels -relief groove -bd 3
@@ -121,7 +151,6 @@ proc ptkPrintFacet {name} {
     pack .print.prlabels.pr -side left
     pack .print.prlabels.nopr -side right
     pack .print.prlabels -side bottom -anchor w -padx 5 -pady 5 -fill x
-
 
     #########################################################################
     # Optionally specify the width and/or height
@@ -184,8 +213,14 @@ proc ptkPrfacet {name} {
 
     global ptkPrintToFile
     if {$ptkPrintToFile} {
-	append command " -TOFILE "
-	append command [.print.file get]
+	global ptkPrPS
+    	if { $ptkPrPS } { 
+            append command " -TOFILE "
+	} else {
+	    append command " -TOEPSI "
+	}
+	global ptkPrFileName
+	append command $ptkPrFileName
 	append command " -L"
     }
 
@@ -211,9 +246,24 @@ proc ptkPrfacet {name} {
     global ptkPrlabels
     if {$ptkPrlabels} {append command " -x"}
 
+    global ptkPrBW
+    if {! $ptkPrBW} {append command " -C"}
+
     append command " " $name
 
     puts $command
     uplevel exec "$command"
     destroy .print
 }
+
+proc ptkPrfacetPS {} {
+	global ptkPrFileName
+	regsub "\.epsi$" $ptkPrFileName ".ps" ptkPrFileName
+}
+
+proc ptkPrfacetEPSI {} {
+	global ptkPrFileName
+	regsub "\.ps$" $ptkPrFileName ".epsi" ptkPrFileName
+}
+
+
