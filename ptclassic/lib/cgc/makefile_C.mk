@@ -1,7 +1,7 @@
 # Ptolemy makefile skeleton used by makefile_C CGC target
 # Version:
 # $Id$
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -36,4 +36,9 @@ LDFLAGS = 	$(CSYSLIBS)
 # We are not assuming GNU make, so we can't include common.mk,
 # so we have to set up our own .c.o rule
 .c.o:
-	$(CC) -c $(CFLAGS) $(C_INCL) $<
+	$(CC) -c $(CFLAGS) $(OTHERCFLAGS) $(C_INCL) $<
+
+# The GNU make info page says:
+#  "`N' is made automatically from `N.o' by running the linker 
+#  (usually called `ld') via the C compiler. The precise command
+#  used is `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
