@@ -62,6 +62,9 @@ endif
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
 
+# Mathematica settings
+include $(ROOT)/mk/mathematica.mk
+
 CG56T = $(OBJDIR)/domains/cg56/targets
 CG96T = $(OBJDIR)/domains/cg96/targets
 CGCT = $(OBJDIR)/domains/cgc/targets
@@ -656,7 +659,7 @@ endif
 # depends upon the Ptolemy kernel.  Matlab always is pulled in
 
 CUSTOM_DIRS += $(CROOT)/src/utils/libexttools
-LIBS += -lexttools $(MATLABEXT_LIB)
+LIBS += -lexttools $(MATLABEXT_LIB) $(MATHEMATICAEXT_LIB)
 LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
 
 # Now, pull in the Ptolemy kernel support, system libraries and tcl
