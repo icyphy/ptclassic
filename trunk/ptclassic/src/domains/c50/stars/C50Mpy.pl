@@ -23,13 +23,7 @@ The inputs are multiplied and the result is written on the output.
 		name {output}
 		type {FIX}
 	}
-        state  {
-                name { inputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+
 	codeblock (one) {
 	lmmr	INDX,#$addr(input#1)		; just move data from in to out
 	smmr	INDX,#$addr(output)
@@ -39,11 +33,11 @@ The inputs are multiplied and the result is written on the output.
 	lar	AR7,#$addr(output)		; Adress Output => AR7
 	lmmr	INDX,#$addr(input#1)		; 1st input -> INDX
 	}
-        codeblock(loop) {
-	lmmr	TREG0,#$addr(input#inputNum)	;2(and following)input -> TREGO
-        mpy     INDX				;Input#1 * Input#2
+	codeblock(loop, "int i") {
+	lmmr	TREG0,#$addr(input#@i)	;2(and following)input -> TREGO
+	mpy     INDX				;Input#1 * Input#2
 	sph     INDX				;result => INDX
-        }
+	}
 	codeblock (sat) {
 	pac					;P-reg. => Accu
 	sach	*,1				;Accu =>Output
@@ -52,14 +46,14 @@ The inputs are multiplied and the result is written on the output.
 	go {
 		if (input.numberPorts() == 1) {
 			addCode(one);
-			return;
 		}
-		addCode(std);
-		for (int i = 2; i <= input.numberPorts(); i++) {
-	                inputNum=i;
-			addCode(loop);
+		else {
+			addCode(std);
+			for (int i = 2; i <= input.numberPorts(); i++) {
+				addCode(loop(i));
+			}
+			addCode(sat);
 		}
-	        addCode(sat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;
