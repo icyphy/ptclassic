@@ -27,7 +27,7 @@ static char rcsid[] = "$Header$";
 #include "iv.h"
 
 
-#if defined(hpux) || defined(SYSV) || defined(sgi)
+#if defined(hpux) || defined(SYSV) || defined(sgi) || defined(linux)
 #define HAS_TERMIOS
 #endif
 
