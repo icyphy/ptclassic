@@ -135,7 +135,7 @@ So far, we have used the \fBaddCode()\fR method to generate the code
 inside the main loop body. In the assembly language domains, addCode
 can be called in the initCode and wrapup methods, to place code before
 or after the main loop respectively.  In all of the code generation
-domains, we can use the \fBaddProcedure()\fR method to generate procedural
+domains, we can use the \fBaddProcedure()\fR method to generate
 declarations outside of the main body.  Refer to the Target:Code Streams
 section for documentation on the addCode and addProcedure methods.
 .Ir "addCode, method"
