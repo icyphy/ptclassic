@@ -124,16 +124,17 @@ sccsinfo:
 # Remove everytying that can be retrieved from SCCS, except files that
 # are being edited.
 sccsclean:
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		@for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 	sccs clean
 
 makefiles: makefile
