@@ -11,7 +11,7 @@
 # objects can be maintained.
 
 
-DIRS = kernel stars gilsScheduler targets
+DIRS = kernel stars gilsScheduler dlScheduler quasiScheduler targets
 
 ME = cg
 
