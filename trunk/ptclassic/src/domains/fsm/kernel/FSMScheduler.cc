@@ -228,16 +228,10 @@ void FSMScheduler::setup() {
     curEntryType = 1;
 
     // Set the outerDomain.
-    BlockPortIter next(*galaxy());
-    PortHole* p = next++;
-    if (p == NULL) {
-      Error::abortRun("FSMScheduler:"," No input/output port connected to",
-		      "outer doamin!?");
-      return; 
-    }
-    // p->parent() points to FSM galaxy;
-    // p->parent()->parent() points to Wormhole containning the FSM galaxy.
-    outerDomain = p->parent()->parent()->domain();
+    // galaxy() points to FSM galaxy;
+    // galaxy()->parent() points to Wormhole containning FSM galaxy.
+    // galaxy()->parent()->parent() points to Galaxy containing Wormhole.
+    outerDomain = galaxy()->parent()->parent()->domain();
     if (!outerDomain) return;
 // printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
 }
