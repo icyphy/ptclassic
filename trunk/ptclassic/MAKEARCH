@@ -59,16 +59,22 @@ end
 
 # At this point, we are in obj.$ARCH/domains.
 
+#make subdirectories of cg.
+mkdir cg; cd cg
+foreach x (loopScheduler gilsScheduler topologies)
+    mkdir $x
+    cd $x
+    ln -s ../../../../src/domains/cg/$x/{make.template,makefile} .
+    cd ..
+end
+cd ..
+
+# back in obj.$ARCH/domains
+
 # special case: thor/pepp
 mkdir thor/pepp
 cd thor/pepp
 ln -s ../../../../src/domains/thor/pepp/{make.template,makefile} .
-cd ../..
-
-#special case: cg/loopScheduler
-mkdir cg/loopScheduler
-cd cg/loopScheduler
-ln -s ../../../../src/domains/cg/loopScheduler/{make.template,makefile} .
 cd ../..
 
 #special case: cg/architectures
