@@ -27,6 +27,11 @@
 #
 # $Id$
 
+TCL_VERSION_NUM=76i
+TK_VERSION_NUM=42i
+ITCL_VERSION_NUM=22
+ITK_VERSION_NUM=22
+
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
