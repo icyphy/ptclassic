@@ -79,7 +79,6 @@ public:
 	void createGalaxy(ostream* log) { 
 		INC_LOG_NEW; cgal = new DecomGal(log);
 		INC_LOG_NEW; loopSched = new DecomScheduler(log);
-		sched = loopSched;
 	}
 
 	// setup Galaxy
@@ -98,8 +97,12 @@ public:
 	// run the cluster
 	void go();
 
-	// generate my Schedule
-	int genSched() { return loopSched->genSched(cgal); } 
+protected:
+	// redefine, generate my Schedule
+	int genSched() { 
+		sched = loopSched;
+		return loopSched->genSched(cgal); 
+	} 
 };
 
 #endif
