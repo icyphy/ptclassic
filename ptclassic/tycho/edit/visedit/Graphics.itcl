@@ -375,6 +375,9 @@ configbody ::tycho::Graphics::scrolling {
 body ::tycho::Graphics::constructor {args} {
     interactiveEnable 0
 
+    # Set the view "type" for the Window menu
+    set viewType "graphics"
+
     # Create a top frame to contain both the canvas and vertical 
     # scrollbar and a bottom frame to hold the horizontal scrollbar and 
     # some filler.
