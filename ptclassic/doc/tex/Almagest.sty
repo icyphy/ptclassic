@@ -5,10 +5,27 @@
 % Author:	T. M. Parks
 % Created:	7 January 1994
 
+
 %
 % Use PostScript fonts.
 %
 \input{times.sty}
+\def\@mtt{pcrb at 11pt} % bold and smaller
+
+%
+% Add a bold sans-serif font.
+%
+\newfam\bsffam
+\def\bsf{\protect\pbsf}
+\@getfont\pbsf\bsffam\@vipt{phvb at 6pt}
+\@getfont\pbsf\bsffam\@viiipt{phvb at 8pt}
+\@getfont\pbsf\bsffam\@xpt{phvb at 10pt}
+\@getfont\pbsf\bsffam\@xipt{phvb at 11pt}
+\@getfont\pbsf\bsffam\@xiipt{phvb at 12pt}
+\@getfont\pbsf\bsffam\@xivpt{phvb at 14pt}
+\@getfont\pbsf\bsffam\@xviipt{phvb at 17pt}
+\@getfont\pbsf\bsffam\@xxpt{phvb at 20pt}
+\@getfont\pbsf\bsffam\@xxvpt{phvb at 25pt}
 
 %
 % Adjust margins to fit more on a page.
@@ -34,11 +51,37 @@
     \def\chaptermark##1{\markright{##1}}
     \def\sectionmark##1{} }
 %
-% Redefine the "plain" page style to be the same as "headings".
+% Redefine the "plain" page style to be the same as "empty".
 %
-\let\ps@plain\ps@headings
+\let\ps@plain\ps@empty
 
 \pagestyle{headings}
+
+%
+% Change the appearance of chapter headings.
+%
+\def\@makechapterhead#1{ %
+{\raggedright \noindent \protect\Huge\bsf \@chapapp{} \thechapter . #1}%
+\par \vspace*{3pt} \noindent \rule{\textwidth}{1pt} \par \vspace*{15pt}}
+
+
+%
+% Change the appearance of section headings.
+%
+% @startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE}
+%
+\def\section{\@startsection{section}{1}{0pt}{0pt}{5pt}{\large\bsf}}
+\def\subsection{\@startsection{subsection}{2}{0pt}{0pt}{5pt}{\large\bsf}}
+\def\subsubsection{\@startsection{subsubsection}{3}{0pt}{0pt}{5pt}{\large\bsf}}
+\def\paragraph{\@startsection{paragraph}{4}{0pt}{0pt}{5pt}{\large\bsf}}
+
+%
+% Change the appearance of figure and table captions.
+%
+\def\figurename{FIGURE}
+\def\tablename{TABLE}
+\let\@MAKECAPTION\@makecaption
+\long\def\@makecaption#1#2{\@MAKECAPTION{\bsf#1}{\sf#2}}
 
 %
 % Change indentation of "description" lists.
@@ -46,8 +89,8 @@
 \renewenvironment{description}%
 {\begin{list}{}{%
     \setlength{\leftmargin}{2in}%
-    \setlength{\labelsep}{0.25in}%
-    \setlength{\labelwidth}{1.75in}%
+    \setlength{\labelsep}{0.5in}%
+    \setlength{\labelwidth}{1.5in}%
     \renewcommand{\makelabel}[1]{\descriptionlabel{##1}}}}%
 {\end{list}}
 
