@@ -20,9 +20,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This star produces on its output values that are samples of a standard
 windowing function.  The window function to be sampled is determined by
-the <i>name</i> string parameter.  Possible values are: <b>Rectangle</i>,
-<b>Bartlett</i>, <b>Hanning</i>, <b>Hamming</i>, <b>Blackman</i>, and
-<b>SteepBlackman</i>.  Upper and lower case characters in the names are
+the <i>name</i> string parameter.  Possible values are: <b>Rectangle</b>,
+<b>Bartlett</b>, <b>Hanning</b>, <b>Hamming</b>, <b>Blackman</b>, and
+<b>SteepBlackman</b>.  Upper and lower case characters in the names are
 equivalent.
 <p>
 The parameter <i>length</i> is the length of the window to produce.  Note

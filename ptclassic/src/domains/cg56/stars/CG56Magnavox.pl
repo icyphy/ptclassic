@@ -35,9 +35,9 @@ If this parameter is a number, it will be used for the length
 If a real-time violation occurs and the parameter
 <i>abortOnRealtimeError</i> is set to "yes", the star will abort execution
 with one of the following hexadecimal error codes in register y0:
-<p><b>123052</i>  
+<p><b>123052</b>  
 An interrupt occurred and the receive buffer was full.
-<p><b>123053</i>  
+<p><b>123053</b>  
 An interrupt occurred and the transmit buffer was empty.
 <h3>BUGS</h3>
 <p>

@@ -18,12 +18,12 @@ This is an asynchronous source star (like the Const star) with a particular
 graphical user interface.
 The star always outputs one of two values; which value is output is
 controlled by a button.
-There are two types of buttons: <b>pushbutton</i>s and <b>checkbutton</i>s.
+There are two types of buttons: <b>pushbutton</b>s and <b>checkbutton</b>s.
 Both presents a single button to the user that may be "pressed" with the mouse.
 The buttons differ in the semantics of the push.
-When the <b>pushbutton</i> is pressed, the <i>onVal</i> state
+When the <b>pushbutton</b> is pressed, the <i>onVal</i> state
 is output, otherwise <i>offVal</i>.
-The <b>checkbutton</i> widget is either on or off; pressing it toggles
+The <b>checkbutton</b> widget is either on or off; pressing it toggles
 between on and off.
 When on, the <i>onVal</i> state is output; otherwise <i>offVal</i> is output.
 <p>
