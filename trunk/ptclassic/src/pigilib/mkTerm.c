@@ -18,75 +18,38 @@ Copyright (c) 1989 The Regents of the University of California.
 #include "octMacros.h"
 #include "oh.h"
 #include "mkTerm.h"
-
-#define SHAPE_MAX 100  /* max number of points in a Shape */
-
-struct Shape_s {
-    int type;  /* OCT_PATH, OCT_POLYGON, OCT_BOX */
-    struct octPoint *points;
-    int points_n;
-};
-typedef struct Shape_s Shape;
+#include "mkIcon.h"
 
 /* define paths to each possible terminal position */
-struct octPoint l3uPoints[] = {
-    {-75, 75}, {-65, 75}, {-50, 45}
+/* relative to the terminal box position */
+struct octPoint luPoints[] = {
+    {0, 0}, {10, 0}, {25, -15}
 };
-struct octPoint l2uPoints[] = {
-    {-75, 50}, {-65, 50}, {-50, 35}
+struct octPoint lcPoints[] = {
+    {0, 0}, {25, 0}
 };
-struct octPoint l1uPoints[] = {
-    {-75, 25}, {-50, 25}
+struct octPoint llPoints[] = {
+    {0, 0}, {10, 0}, {25, 15}
 };
-struct octPoint l0Points[] = {
-    {-75, 0}, {-50, 0}
+struct octPoint ruPoints[] = {
+    {0, 0}, {-10, 0}, {-25, -15}
 };
-struct octPoint l1dPoints[] = {
-    {-75, -25}, {-50, -25}
+struct octPoint rcPoints[] = {
+    {0, 0}, {-25, 0}
 };
-struct octPoint l2dPoints[] = {
-    {-75, -50}, {-65, -50}, {-50, -35}
-};
-struct octPoint l3dPoints[] = {
-    {-75, -75}, {-65, -75}, {-50, -45}
-};
-struct octPoint r3uPoints[] = {
-    {75, 75}, {65, 75}, {50, 45}
-};
-struct octPoint r2uPoints[] = {
-    {75, 50}, {65, 50}, {50, 35}
-};
-struct octPoint r1uPoints[] = {
-    {75, 25}, {50, 25}
-};
-struct octPoint r0Points[] = {
-    {75, 0}, {50, 0}
-};
-struct octPoint r1dPoints[] = {
-    {75, -25}, {50, -25}
-};
-struct octPoint r2dPoints[] = {
-    {75, -50}, {65, -50}, {50, -35}
-};
-struct octPoint r3dPoints[] = {
-    {75, -75}, {65, -75}, {50, -45}
+struct octPoint rlPoints[] = {
+    {0, 0}, {-15, 0}, {-25, 15}
 };
 
-Shape pathShapes[] = {
-    { OCT_PATH, l3uPoints, sizeof(l3uPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, l2uPoints, sizeof(l2uPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, l1uPoints, sizeof(l1uPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, l0Points, sizeof(l0Points)/sizeof(struct octPoint) },
-    { OCT_PATH, l1dPoints, sizeof(l1dPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, l2dPoints, sizeof(l2dPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, l3dPoints, sizeof(l3dPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, r3uPoints, sizeof(r3uPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, r2uPoints, sizeof(r2uPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, r1uPoints, sizeof(r1uPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, r0Points, sizeof(r0Points)/sizeof(struct octPoint) },
-    { OCT_PATH, r1dPoints, sizeof(r1dPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, r2dPoints, sizeof(r2dPoints)/sizeof(struct octPoint) },
-    { OCT_PATH, r3dPoints, sizeof(r3dPoints)/sizeof(struct octPoint) }
+Shape leftPathShapesTable[] = {
+    { OCT_PATH, luPoints, sizeof(luPoints)/sizeof(struct octPoint) },
+    { OCT_PATH, lcPoints, sizeof(lcPoints)/sizeof(struct octPoint) },
+    { OCT_PATH, llPoints, sizeof(llPoints)/sizeof(struct octPoint) },
+};
+Shape rightPathShapesTable[] = {
+    { OCT_PATH, ruPoints, sizeof(ruPoints)/sizeof(struct octPoint) },
+    { OCT_PATH, rcPoints, sizeof(rcPoints)/sizeof(struct octPoint) },
+    { OCT_PATH, rlPoints, sizeof(rlPoints)/sizeof(struct octPoint) },
 };
 
 /* arrowShape is used to mark terminal as input/output and multiple/single */
@@ -109,18 +72,31 @@ Shape boxShape = {
 };
 /* end of boxShape */
 
-/* boxTranslates maps a Position_e to coords for boxShape */
-struct octPoint boxTranslates[] = {
-    {-75, 75}, {-75, 50}, {-75, 25}, {-75, 0}, {-75, -25}, {-75, -50},
-    {-75, -75},
-    {75, 75}, {75, 50}, {75, 25}, {75, 0}, {75, -25}, {75, -50},
-    {75, -75}
-};
-
 
 static octObject *facetPtr, wiringLayer;
 static octObject floatColorLayer, intColorLayer, complexColorLayer,
 		 anytypeColorLayer, packetColorLayer;
+
+/* terminalPath 12/21/91 - by Edward A. Lee
+*/
+static Shape*
+terminalPath(left,position,translation,totalNumber)
+boolean left;
+int position;
+struct octPoint *translation;
+int totalNumber;
+{
+    translation->x = (left) ? -75 : 75;
+    translation->y = -(position - 2)*25;
+    if(totalNumber >= 4) {
+	if(left && position == 0) return &leftPathShapesTable[0];
+	if(position == 0) return &rightPathShapesTable[0];
+	if(left && position == totalNumber-1) return &leftPathShapesTable[2];
+	if(position == totalNumber-1) return &rightPathShapesTable[2];
+    }
+    if(left) return &leftPathShapesTable[1];
+    else return &rightPathShapesTable[1];
+}
 
 /* MkTermInit 7/28/89 8/6/88 8/27/88
 Call this first.
@@ -142,11 +118,11 @@ octObject *CurrentFacetPtr;
 /*
 Caveats: Assumes that Shape has <= SHAPE_MAX points
 */
-static boolean
+boolean
 PutShape(containPtr, objPtr, shapePtr, translatePtr)
 octObject *containPtr, *objPtr;
-struct octPoint *translatePtr;
 Shape *shapePtr;
+struct octPoint *translatePtr;
 {
     struct octPoint buf[SHAPE_MAX], *dest, *src;
     octCoord tx, ty;
@@ -190,14 +166,16 @@ Caveats: Assumes that inputs are always on the left and outputs are
 Updates: 8/24/89 = change to conform to OCT2.0
 */
 boolean
-MkTerm(name, input, type, multiple, position)
+MkTerm(name, input, type, multiple, position, totalNumber)
 char *name;
 boolean input;
 char *type;
 boolean multiple;
-enum Position_e position;
+int position;
+int totalNumber;
 {
-    static struct octPoint noTranslate = {0, 0};
+    struct octPoint translation;
+    Shape *path;
     octObject dummy, box, term;
     struct octPoint arrowTranslate;
     octObject *layerPtr;
@@ -217,23 +195,21 @@ enum Position_e position;
 	ErrAdd("Unknown datatype for terminal");
 	return FALSE;
     }
-    ERR_IF1(!PutShape(layerPtr, &dummy, &pathShapes[(int) position],
-	&noTranslate));
-    ERR_IF1(!PutShape(&wiringLayer, &box, &boxShape,
-	&boxTranslates[(int) position]));
+    path = terminalPath(input,position,&translation,totalNumber);
+    ERR_IF1(!PutShape(layerPtr, &dummy, path, &translation));
+    ERR_IF1(!PutShape(&wiringLayer, &box, &boxShape, &translation));
     CK_OCT(ohGetByTermName(facetPtr, &term, name));
     CK_OCT(octAttach(&term, &box));
-    ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, 
-	&boxTranslates[(int) position]));
+    ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &translation));
     if (multiple) {
 	if (input) {
 	    /* multiple input: add arrow to the right */
-	    arrowTranslate.x = boxTranslates[(int) position].x + (octCoord) 5;
+	    arrowTranslate.x = translation.x + (octCoord) 5;
 	} else {
 	    /* multiple output: add arrow to the left */
-	    arrowTranslate.x = boxTranslates[(int) position].x - (octCoord) 5;
+	    arrowTranslate.x = translation.x - (octCoord) 5;
         }
-        arrowTranslate.y = boxTranslates[(int) position].y;
+        arrowTranslate.y = translation.y;
         ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &arrowTranslate));
     }
     if (input) {

@@ -25,6 +25,8 @@ Copyright (c) 1989 The Regents of the University of California.
 
 #define ERRBUF_MAX 1000
 
+static octObject starBoxLayer, galBoxLayer;
+
 /* 8/24/89
 Check to see if icon already exists.
 */
@@ -95,8 +97,10 @@ octObject *destPtr, *srcPtr;
     return (TRUE);
 }
 
-typedef enum IconType_e {star = 0, gal, univ, pal} IconType;
-static char *iconNames[] = {"%iNewStar", "%iNewGal", "%iNewUniv", "%iNewPal"};
+typedef enum IconType_e
+	{pal = 0, univ, gal, star} IconType;
+static char *iconNames[] =
+	{"%iNewPal", "%iNewUniv", "%iNewGal", "%iNewStar"};
 
 /* 8/24/89 7/27/89
 Makes an interface facet and returns it opened.  If one already exists,
@@ -167,6 +171,29 @@ TermList *termsPtr;
 }
 
 static boolean
+MkBox(layerPtr, size)
+octObject *layerPtr;
+int size;
+{
+    Shape box;
+    struct octPoint corners[2];
+    static struct octPoint noTranslate = {0, 0};
+    octObject dummy;
+
+    box.type = OCT_BOX;
+    box.points = corners;
+    box.points_n = 2;
+
+    corners[0].x = -50;
+    corners[0].y = 50;
+    corners[1].x = 50;
+    corners[1].y = 50-size*25;
+
+    ERR_IF1(!PutShape(layerPtr, &dummy, &box, &noTranslate));
+    return TRUE;
+}
+
+static boolean
 MkLabel(facetPtr, name)
 octObject *facetPtr;
 char *name;
@@ -193,110 +220,50 @@ octObject *facetPtr;
 TermList *termsPtr;
 {
     Term *p;
+    int i, numTerms, numIns, numOuts;
 
     /* init the mkTerm.c package */
     ERR_IF1(!MkTermInit(facetPtr));
     /* make input terminals */
     p = termsPtr->in;
-    switch (termsPtr->in_n) {
-    case 0:
-	break;
-    case 1:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0));
-	break;
-    case 2:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d));
-	break;
-    case 3:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d));
-	break;
-    case 4:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d));
-	break;
-    case 5:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2d));
-	break;
-    case 6:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l3u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2d));
-	break;
-    case 7:
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l3u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1u)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l0)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l1d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l2d)); p++;
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, l3d));
-	break;
-    default:
-	ErrAdd("Too many input terminals");
+    numIns = termsPtr->in_n;
+    numOuts = termsPtr->out_n;
+    numTerms = numIns + numOuts;
+    /* Deal with special cases first */
+    if (numTerms > MAX_NUM_TERMS) {
+	ErrAdd("Too many terminals");
 	return(FALSE);
+    } else if (termsPtr->in_n == 1) {
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 2, numIns));
+    } else if (termsPtr->in_n == 2) {
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 1, numIns)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 3, numIns));
+    } else if (termsPtr->in_n == 3) {
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 1, numIns)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 2, numIns)); p++;
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 3, numIns));
+    } else for (i = 0; i < termsPtr->in_n; i++) {
+	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, i, numIns));
+	p++;
     }
     /* make output terminals */
     p = termsPtr->out;
-    switch (termsPtr->out_n) {
-    case 0:
-	break;
-    case 1:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0));
-	break;
-    case 2:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d));
-	break;
-    case 3:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d));
-	break;
-    case 4:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d));
-	break;
-    case 5:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2d));
-	break;
-    case 6:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r3u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2d));
-	break;
-    case 7:
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r3u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1u)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r0)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r1d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r2d)); p++;
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, r3d));
-	break;
-    default:
+    /* Deal with special cases first */
+    if (numTerms > MAX_NUM_TERMS) {
 	ErrAdd("Too many output terminals");
 	return(FALSE);
+    } else if (termsPtr->out_n == 1) {
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 2,numOuts));
+    } else if (termsPtr->out_n == 2) {
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 1,numOuts)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 3,numOuts));
+    } else if (termsPtr->out_n == 3) {
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 1,numOuts)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 2,numOuts)); p++;
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 3,numOuts));
+    } else for (i = 0; i < termsPtr->out_n; i++) {
+	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, i,numOuts));
+	p++;
     }
     return(TRUE);
 }
@@ -347,6 +314,7 @@ octObject *galFacetPtr, *iconFacetPtr;
     char buf[MSG_BUF_MAX];
     octObject prop;
     char *name = BaseName(galFacetPtr->contents.facet.cell);
+    int maxNumTerms, size;
 
     sprintf(buf, "Making galaxy icon for '%s'", name);
     PrintDebug(buf);
@@ -354,7 +322,14 @@ octObject *galFacetPtr, *iconFacetPtr;
     ERR_IF1(!AskAboutIcon(galFacetPtr->contents.facet.cell));
     ERR_IF1(!CompileGalStandalone(galFacetPtr));
     ERR_IF1(!KcGetTerms(name, &terms));
+    if(terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
+    else maxNumTerms = terms.in_n;
+    if(maxNumTerms <= 5) size = 4;
+    else size = maxNumTerms-1;
     ERR_IF1(!MkBaseIcon(iconFacetPtr, galFacetPtr->contents.facet.cell, gal));
+    /* make the box */
+    CK_OCT(ohGetOrCreateLayer(iconFacetPtr, &galBoxLayer, "greenOutline"));
+    ERR_IF1(!MkBox(&galBoxLayer, size));
     ERR_IF1(!MkLabel(iconFacetPtr, name));
     ERR_IF1(!MkTerms(iconFacetPtr, &terms));
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
@@ -375,6 +350,7 @@ octObject *iconFacetPtr;
     char buf[MSG_BUF_MAX];
     char *fileName;
     octObject iconConFacet, prop;
+    int maxNumTerms, size;
 
     ERR_IF2(!KcIsKnown(name),
 	sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)",
@@ -384,7 +360,14 @@ octObject *iconFacetPtr;
     ERR_IF1(!AskAboutIcon(fileName));
     ERR_IF1(!KcGetTerms(name, &terms));
     ERR_IF1(!MkStarConFacet(&iconConFacet, fileName, &terms));
+    if(terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
+    else maxNumTerms = terms.in_n;
+    if(maxNumTerms <= 5) size = 4;
+    else size = maxNumTerms-1;
     ERR_IF1(!MkBaseIcon(iconFacetPtr, fileName, star));
+    /* make the box */
+    CK_OCT(ohGetOrCreateLayer(iconFacetPtr, &starBoxLayer, "blueOutline"));
+    ERR_IF1(!MkBox(&starBoxLayer, size));
     ERR_IF1(!MkLabel(iconFacetPtr, name));
     ERR_IF1(!MkTerms(iconFacetPtr, &terms));
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "star", ""));

@@ -8,7 +8,7 @@ Copyright (c) 1989 The Regents of the University of California.
 			All Rights Reserved.
 */
 
-#define TERM_ARR_MAX 14  /* max # I/O terms = max # positions */
+#define MAX_NUM_TERMS 65  /* max total # input and output terms */
 
 #ifndef __cplusplus
 #ifndef const
@@ -24,9 +24,9 @@ struct Term_s {
 typedef struct Term_s Term;
 
 struct TermList_s {
-    Term in[TERM_ARR_MAX];
+    Term in[MAX_NUM_TERMS];
     int in_n;
-    Term out[TERM_ARR_MAX];
+    Term out[MAX_NUM_TERMS];
     int out_n;
 };
 typedef struct TermList_s TermList;

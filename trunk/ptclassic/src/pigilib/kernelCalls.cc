@@ -336,13 +336,13 @@ KcGetTerms(char* name, TermList* terms)
 	if ((block = findClass(name)) == 0) {
 		return FALSE;
 	}
-	const char *names[TERM_ARR_MAX];
-	const char *types[TERM_ARR_MAX];
-	int isOut[TERM_ARR_MAX];
+	const char *names[MAX_NUM_TERMS];
+	const char *types[MAX_NUM_TERMS];
+	int isOut[MAX_NUM_TERMS];
 
-	int n = block->portNames(names, types, isOut, TERM_ARR_MAX);
+	int n = block->portNames(names, types, isOut, MAX_NUM_TERMS);
 	int nm = block->multiPortNames(names+n, types+n,
-				       isOut+n, TERM_ARR_MAX-n);
+				       isOut+n, MAX_NUM_TERMS-n);
 	if (npspec) {
 		if (nm == 0 || nm == 1 && strcmp (names[n], mphname) != 0) {
 			char buf[80];

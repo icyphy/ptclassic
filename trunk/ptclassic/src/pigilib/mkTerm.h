@@ -22,3 +22,12 @@ extern boolean MkTerm();
 #define INT_COLOR   "yellow"
 #define COMPLEX_COLOR "white"
 #define ANYTYPE_COLOR "red"
+
+#define SHAPE_MAX 100  /* max number of points in a Shape */
+
+struct Shape_s {
+    int type;  /* OCT_PATH, OCT_POLYGON, OCT_BOX */
+    struct octPoint *points;
+    int points_n;
+};
+typedef struct Shape_s Shape;
