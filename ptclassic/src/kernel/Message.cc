@@ -101,12 +101,14 @@ const char* Packet::typeError(const char* expected) const {
 // The writable copy always has reference count 0, and the packet
 // itself is modified to point to dummyPacket.
 PacketData* Packet::writableCopy() {
-	PacketData* result = d;
+	PacketData* result;
 	decCount();
-	d = &dummyPacket;
 	if (refCount() > 0) {
-		result = result->clone();
+		result = d->clone();
 		*(result->refCount) = 0;
+	} else {
+		result = d;
+		d = &dummyPacket;
 	}
 	return result;
 }
