@@ -91,6 +91,9 @@ HDRS=$(OBJS:.o=.h)
 
 INCL = $(DOMINC) -I$(KERNDIR)
 
+# The PTcl object file
+PTCL_OBJS = $(OBJDIR)/ptcl/PTcl.o
+
 # Oct Tools libraries.
 OCTLIBS = -loh -lrpc -llist -ltr -lutility -lst -lerrtrap -luprintf -lport
 
@@ -98,22 +101,22 @@ OCTLIBS = -loh -lrpc -llist -ltr -lutility -lst -lerrtrap -luprintf -lport
 # note that -lrpc is searched twice, before and after -lpigi.
 # (it is also in OCTLIBS).
 LIBS	= $(STAR_LIBS) -lrpc -lpigi -lgantt -lptolemy $(OCTLIBS) \
-		$(LX11) $(SYSLIBS)
+		-ltk -lXpm -ltcl $(LX11) $(SYSLIBS)
 
 # Libraries specified as files.
 LIBFILES = $(STAR_LIBFILES) \
 	$(LIBDIR)/libpigi.a $(LIBDIR)/libptolemy.a $(LIBDIR)/libgantt.a
 
 all:	makefile pigiRpc
-pigiRpc:	$(SRCS) $(OBJS) $(OTHERS) $(LIBFILES) \
+pigiRpc:	$(SRCS) $(OBJS) $(OTHERS) $(PTCL_OBJS) $(LIBFILES) \
 	defpalettes.o pigiMain.o
 	rm -f pigiRpc
 	echo char '*pigiVersion = "Version:' $(VERSION) \
 		'%created' `date` '";' | sed 's/%/\\n/' > version.c
 	$(CC) -c version.c
-	$(LINKER) $(LINKFLAGS) -L$(OCTLIBDIR) $(X11LIBDIR) version.o \
-		pigiMain.o defpalettes.o $(OTHERS) $(LIBS) \
-		-o pigiRpc
+	$(LINKER) $(LINKFLAGS) -L$(OCTLIBDIR) -L$(TCL_LIBDIR) $(X11LIBDIR) \
+	  version.o pigiMain.o defpalettes.o $(OTHERS) $(PTCL_OBJS) \
+	  $(OBJS) $(LIBS) -o pigiRpc
 
 LIB=dummy
 
