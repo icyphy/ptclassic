@@ -77,9 +77,11 @@ Block :: printVerbose ()
 
 void Block :: initialize()
 {
-	// Call initialize() for each PortHole
-	for(int i = numberPorts(); i>0; i--)
-		nextPort().initialize();
+	// Call initialize() for each PortHole, if not of Galaxy
+	if (isItAtomic()) {
+		for(int i = numberPorts(); i>0; i--)
+			nextPort().initialize();
+	}
         // initialize States
         initState();
 	// call user-specified initialization
