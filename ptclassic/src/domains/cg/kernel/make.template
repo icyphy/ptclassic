@@ -31,16 +31,28 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 # Library name
 LIB=libcg.a
 
+# .h files with matching cc files
+H_WITH_MATCH= \
+AsmConnect.h \
+AsmGeodesic.h \
+AsmStar.h \
+AsmTarget.h \
+BaseMultiTarget.h \
+CGConnect.h \
+CGStar.h \
+CGTarget.h \
+CGWormhole.h \
+IntArray.h \
+MReq.h \
+MemMap.h \
+ProcMemory.h \
+Profile.h
+
 # Header files
-HDRS= CGConnect.h CGGeodesic.h CGStar.h CGTarget.h \
- CGWormhole.h CGWormConnect.h IntArray.h Profile.h BaseMultiTarget.h \
-AsmTarget.h AsmConnect.h AsmGeodesic.h AsmStar.h ProcMemory.h MReq.h MemMap.h
- 
+HDRS= $(H_WITH_MATCH) CGGeodesic.h CGWormConnect.h
 
 # Library objects
-OBJS= CGConnect.o CGStar.o CGDomain.o CGTarget.o \
- CGWormhole.o IntArray.o Profile.o BaseMultiTarget.o \
- AsmTarget.o AsmConnect.o AsmGeodesic.o AsmStar.o ProcMemory.o MReq.o MemMap.o
+OBJS= $(H_WITH_MATCH:.h=.o) CGDomain.o AsmTargetInit.o
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)
