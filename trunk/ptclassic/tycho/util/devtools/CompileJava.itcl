@@ -131,12 +131,12 @@ body ::tycho::CompileJava::constructor {args} {
 #
 body ::tycho::CompileJava::destructor {} {
     if {$monitorWidget != {} && \
-            [info object ::tycho::$monitorWidget] != {}} {
+            [infoObject ::tycho::$monitorWidget] != {}} {
         $monitorWidget markUnmodified
         catch {delete object $monitorWidget}
     }
     if {$appletviewerWidget != {} && \
-            [info object ::tycho::$appletviewerWidget] != {}} {
+            [infoObject ::tycho::$appletviewerWidget] != {}} {
         $appletviewerWidget markUnmodified
         catch {delete object $appletviewerWidget}
     }
@@ -200,7 +200,7 @@ body ::tycho::CompileJava::classpath {} {
 			properly finding a class.\n\
 			To change the classPath parameter, select \
 			Preferences menu choice under the Help menu, and then \
-			select the Java style-sheet""
+			select the Java style-sheet"
             }
         }
     }
@@ -267,7 +267,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
 
     # Compile.  If we already have a monitorWidget, reuse it. 
     if {![winfo exists $monitorWidget] && \
-            [info object $monitorWidget] == {}} {
+            [infoObject $monitorWidget] == {}} {
         set retList [::tycho::execModal $compileString $dirname]
     } else {
         set retList [::tycho::execModal {} {} $monitorWidget]
@@ -281,7 +281,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         set appletFile [file rootname $firstFile]
         if [file exists $appletFile.html] {
             if {![winfo exists $appletviewerWidget] && \
-                    [info object $appletviewerWidget] == {}} {
+                    [infoObject $appletviewerWidget] == {}} {
                 set appletviewerWidget [::tycho::view Monitor -toolbar 1]
                 set retList [::tycho::execModal \
                         "appletviewer $appletFile.html" $dirname \
@@ -295,7 +295,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         if {$execStatus == "normal"} {
             # The .java file contains a main statement, so run it
             if {![winfo exists $javaRunWidget] && \
-                    [info object $javaRunWidget] == {}} {
+                    [infoObject $javaRunWidget] == {}} {
                 set javaRunWidget [::tycho::view Monitor -toolbar 1]
                 set retList [::tycho::execModal \
                         "java [file root [file tail $filenames]]" $dirname \

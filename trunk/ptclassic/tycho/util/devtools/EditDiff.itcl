@@ -221,7 +221,7 @@ body ::tycho::EditDiff::compareFile {} {
     set tag 0
 
     # Create an exec instance
-    if {[info object $execDiff ]==""} {
+    if {[infoObject $execDiff ]==""} {
         # Doesn't exist yet, create one
         set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
     }

@@ -186,7 +186,7 @@ body ::tycho::Compile::destructor {} {
 # makefile name, sources, etc, then invoke compileFiles. Args takes
 # in the following forms: -autostart, -autodestroy, -modal.
 #
-body ::tycho::Compile::compile {filenames {args {}}} {
+body ::tycho::Compile::compile {filenames args} {
     initialize $filenames
     # Should we check that the files exist here?
     checkSourceFiles
@@ -200,7 +200,7 @@ body ::tycho::Compile::compile {filenames {args {}}} {
 #### compileAndLoad
 # Compile and load in each file in the list of filenames.
 #
-body ::tycho::Compile::compileAndLoad {filenames {args {}}} {
+body ::tycho::Compile::compileAndLoad {filenames args} {
     eval compile $filenames $args
     loadFiles
 }
@@ -233,7 +233,7 @@ body ::tycho::Compile::checkSourceFiles {} {
 # Quickly compile the files. This takes in arguments, which could be
 # any of the following: -autodestroy, -autostart, and -modal.
 #
-body ::tycho::Compile::compileFiles {{args {}}} {
+body ::tycho::Compile::compileFiles {args} {
     # FIXME: compileString should be a preference.
     # FIXME: dirname should be a preference.
     
