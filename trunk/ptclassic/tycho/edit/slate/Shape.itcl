@@ -113,6 +113,9 @@ class ::tycho::Shape {
     # Get a compass point transformed in some way
     proc compass {compass transformation}
 
+    # Get a compass point from a vector
+    proc compassFromVector {x y}
+
     # Convert radians into degrees
     proc degrees {r}
 
@@ -142,8 +145,8 @@ class ::tycho::Shape {
     private common compassTransformation
     array set compassTransformation {
     	 cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
-    	ccw,n s ccw,ne sw ccw,e w ccw,se sw ccw,s n ccw,sw ne ccw,w e ccw,nw se
-    	rev,n w rev,ne nw rev,e n rev,se ne rev,s e rev,sw se rev,w s rev,nw sw
+    	ccw,n w ccw,ne nw ccw,e n ccw,se ne ccw,s e ccw,sw se ccw,w s ccw,nw sw
+    	rev,n s rev,ne sw rev,e w rev,se sw rev,s n rev,sw ne rev,w e rev,nw se
     	 lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
     	 ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
     	   ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
@@ -308,6 +311,31 @@ body ::tycho::Shape::_reshaperelease {id canvas slate x y} {
 # 
 body ::tycho::Shape::compass {compass transformation} {
     return $compassTransformation($transformation,$compass)
+}
+
+#######################################################################
+#### compassFromVector
+#
+# Given two _x_ and _y_ values, return a compass direction that
+# approximates it. For example, the values 1 and 0 will return "e."
+# of the second argument are:
+# 
+body ::tycho::Shape::compassFromVector {x y} {
+    if { $x == 0 } {
+	set h {}
+    } elseif { $x > 0 } {
+	set h e
+    } else {
+	set h w
+    }
+    if { $y == 0 } {
+	set v {}
+    } elseif { $y > 0 } {
+	set v s
+    } else {
+	set v n
+    }
+    join [list $v $h] ""
 }
 
 ##########################################################################
