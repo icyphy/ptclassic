@@ -128,12 +128,8 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	// create Geodesic, wire it up.
 	PortHole* realSource = &newConnection();
 	Geodesic* geo = realSource->allocateGeodesic();
-	geo->setSourcePort(*realSource);
+	geo->setSourcePort(*realSource,numberDelays);
 	geo->setDestPort(destination);
-
-	// Set the number of delays
-	geo->numInitialParticles = numberDelays;
-
 	return;
 }
 
@@ -318,6 +314,12 @@ PortHole :: setPlasma (Plasma* useType) {
 			if (typePort()) typePort()->setPlasma(useType);
 		}
 		else {
+			// mark neighbors that may have problems
+			GenericPort* q = typePort();
+			while (q && q != this) {
+				Error::mark(*q);
+				q = typePort();
+			}
 			Error::abortRun(*this, ": unresolvable type conflict");
 			return myPlasma;
 		}
@@ -551,3 +553,8 @@ void PortHole :: putParticle()
 		*p = myPlasma->get();
 	}
 }
+
+// isa functions
+ISA_FUNC(GenericPort,NamedObj);
+ISA_FUNC(PortHole,GenericPort);
+ISA_FUNC(MultiPortHole,GenericPort);
