@@ -103,14 +103,11 @@ $label(rloop)
 			addCode(write);
 	}
 	execTime {
-		int             a, b, c;
-
-		if (offset > 0)
-			a = 2 + int (offset);
-		if (nread > 0)
-			b = 2 + 2 * int (nread);
+		int cost = 4;
+		if (offset > 0) cost += 2 + int(offset);
+		if (nread > 0) cost += 2 + 2 * int(nread);
 		if (nwrite > nread + offset)
-			c = 2 + int (nwrite) - int (nread) - int (offset);
-		return 4 + a + b + c;
+			cost += 2 + int (nwrite) - int (nread) - int (offset);
+		return cost;
 	}
 }
