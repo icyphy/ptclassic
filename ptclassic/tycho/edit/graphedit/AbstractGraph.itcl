@@ -367,7 +367,7 @@ body ::tycho::Graph::setNode {oldname newname contents} {
 # returns, the nodename is valid.
 #
 body ::tycho::Graph::verify {nodename} {
-    if ![info exists contentsstring($nodename)] {
+    if ![::info exists contentsstring($nodename)] {
         error "No node in forest $this with name $nodename"
     }
 }
