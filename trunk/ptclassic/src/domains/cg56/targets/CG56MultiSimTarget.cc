@@ -56,6 +56,7 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	const char* desc) : CGMultiTarget(name,starclass,desc), sharedMem(0) {
 
 	// make some states invisible
+	childType.setInitValue("default-CG56");
 	childType.setAttributes(A_NONSETTABLE);
 
 	sharedMem = 0;
@@ -103,15 +104,23 @@ void CG56MultiSimTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 const Attribute ANY = {0,0};
 
 void CG56MultiSimTarget :: setup() {
-	addCG56One(this,galaxy());
 	LOG_DEL; delete sharedMem;
 	LOG_NEW; sharedMem = new LinProcMemory("x",ANY,ANY,sMemMap);
 	CGMultiTarget :: setup();
 }
 
 void CG56MultiSimTarget :: prepareCodeGen() {
+
        	// allocate the sharedMemory
 	sharedMem->performAllocation();
+	Galaxy* g = galaxy();
+	if (g && (g->stateWithName("ONE") == 0)) {
+		LOG_NEW; FixState& ONE = *new FixState;
+		g->addState(ONE.setState("ONE",this,"",
+					"Max Fix point value",
+					A_NONSETTABLE|A_CONSTANT));
+		ONE.setInitValue(CG56_ONE);
+	}
 }
 
 void CG56MultiSimTarget :: writeCode() 
