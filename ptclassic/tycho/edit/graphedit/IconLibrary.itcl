@@ -213,20 +213,20 @@ body ::tycho::IconLibrary::constructor {args} {
     eval configure $args
 
     # The icon type
-    type define icon \
+    define icon \
 	    -label "" \
             -slatetype IconRect \
             -termstyles {}
 
     # The terminal type
-    type define terminal \
+    define terminal \
 	    :leafonly 1 \
             -slatetype Terminal \
             -coords {0 0} \
 	    -tags input
 
     # The termstyle type
-    type define termstyle \
+    define termstyle \
             -label ""
 }
 

@@ -235,11 +235,11 @@ body ::tycho::AbstractGraph::constructor {args} {
     eval configure $args
 
     # Define the "annotation" entity
-    type define annotation \
+    define annotation \
 	    :leafonly 1
 
     # Define the "vertex" entity
-    type define vertex \
+    define vertex \
 	    :leafonly 1
 }
 

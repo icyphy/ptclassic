@@ -230,7 +230,7 @@ body ::tycho::Library::constructor {args} {
 	    -visibletypes
 
     # Define the "attribute" entity
-    type define attribute \
+    define attribute \
 	    :leafonly 1 \
 	    -default "" \
 	    -description "" \
@@ -240,17 +240,17 @@ body ::tycho::Library::constructor {args} {
 	    -values {}
 
     # Define the "group" type.
-    type define group \
+    define group \
 	    -label "" \
 	    -description ""
 
     # Define the "item" type.
-    type define item \
+    define item \
 	    -label "" \
 	    -description ""
 
     # The xref entity type. Label is for menu display.
-    type define xref \
+    define xref \
     	:leafonly 1
 }
 

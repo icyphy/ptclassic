@@ -121,10 +121,10 @@ body ::tycho::StarLibrary::constructor {args} {
     eval configure $args
 
     # The star entity type
-    type define star
+    define star
 
     # The port entity type
-    type define port
+    define port
 }
 
 ########################################################################
