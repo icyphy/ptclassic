@@ -417,14 +417,9 @@ IntervalList IntervalList::operator&(const IntervalList& bL) const {
 // presumably putback writes stuff back into the buffer?)
 
 IntervalList::IntervalList(const char* argString) : head(0) {
-	const int BUFLEN = 80;
-	char buf[BUFLEN], *p = buf;
-	int l = strlen(argString);
-	if (l >= BUFLEN) p = savestring(argString);
-	else strcpy(buf,argString);
-	istrstream strm(p, l);
+	int len = strlen(argString);
+	char buf[len + 1];
+	strcpy(buf, argString);
+	istrstream strm(buf, len);
 	strm >> *this;
-	if (l >= BUFLEN) {
-		LOG_DEL; delete [] p;
-	}
 }
