@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$ $Revision$
+$Id$
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
