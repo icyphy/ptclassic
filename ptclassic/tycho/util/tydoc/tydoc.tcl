@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: @(#)tydoc.tcl	1.8 05/21/98
+# @Version: $Id$
 #
 # @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
