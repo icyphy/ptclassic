@@ -53,10 +53,16 @@ void Linker::init (const char* myName) {
 // main should call this with argv[0] as an argument.
 // We believe argv[0] without checking if it begins with '/'
 	pid = getpid();
+#ifdef mips
+	const char* msg = "Sorry, dynamic linking doesn't work yet\n"
+			 "on the MIPS (or DecStation) architecture";
+	Error::abortRun (msg);
+#else
 	ptolemyName = pathSearch (myName, getenv("PATH"));
 	if (!ptolemyName)
-		Error::abortRun ("Cannot locate the running binary!  "
-				 "Incremental linking disabled");
+		Error::abortRun (
+"Cannot locate the running binary! Incremental linking disabled");
+#endif
 	return;
 }
 
