@@ -171,7 +171,7 @@ user to do this.
 		}
 	    }
 	}
-	setup {
+	begin {
 	    if (medList.hasKey(medium)) {
 		// Medium already exists
 		med = (Medium*)medList.lookup(medium);
@@ -187,6 +187,8 @@ user to do this.
 		med->occupyUntil(0.0);
 		med->receiversInitialized = 1;
 	    }
+	}
+	setup {
 	    DERepeatStar :: setup ();
 
 	    // This initialization is required by the base class RepeatStar
