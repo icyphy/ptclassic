@@ -90,7 +90,7 @@ StringList CGStar::processCode(CodeBlock& cb) {
 			}
 			// get the identifier
 			char id[TOKLEN], arg2[TOKLEN], *p = id;
-			while (isalnum(*t)) *p++ = *t++;
+			while (isalnum(*t)||(*t == '_') ) *p++ = *t++;
 			if (*t == '#') {
 				*p++ = *t++;
 				if (isdigit(*t)) {
