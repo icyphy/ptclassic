@@ -145,7 +145,7 @@ tclexts: config_tclexts all_tclexts install_tclexts
 #
 # If you add an Tcl extension, add the makefile.in to the list of dependencies
 # so that it will be retrieved when others do 'make sources'.
-config_tclexts: obj.$(PTARCH) src/configure mk/tcl.mk.in mk/java.mk.in \
+config_tclexts: obj.$(PTARCH) src/configure mk/tcl.mk.in \
 		src/makefile.in \
 		src/tytimer/makefile.in \
 		src/tytest/makefile.in \
