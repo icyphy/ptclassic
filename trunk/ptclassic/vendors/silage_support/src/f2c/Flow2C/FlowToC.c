@@ -1020,7 +1020,8 @@ GenFixedLeafDecls()
   
     if (ListOfFixedLeafs == NULL) return;
     fprintf(CFD,"/* Declaring FixedPoint Constants as globals */\n");
-    fprintf(CFD,"Sig_Type ");
+    fprintf(CFD,"static Sig_Type ");
+/* change for ptolemy : static added */
     for(ptr = ListOfFixedLeafs; ptr != NULL; ptr = ptr->Next) {
         edge = EP(ptr);
         GenEdgeName(edge);
