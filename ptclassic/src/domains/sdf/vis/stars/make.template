@@ -51,13 +51,18 @@ LIB=libsdfvisstars.$(LIBSUFFIX)
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
 
+# Turn off generation of symbol table because it conflicts with -O4 option
+GPPDEBUGFLAGS =
+CDEBUGFLAGS =
+
 # To compile the VIS stars we need special flags
 # that will only work under solaris2.5 with the SunSoft CC compiler
-VISINLINE  = $(VSDKHOME)/util/vis.il
-ARCH    = -xchip=ultra -xarch=v8plusa
+# Copied from $(VSDKHOME)/examples/src/Makefile.us
+VISINLINE = $(VSDKHOME)/util/vis.il
+VISARCHINFO = -xchip=ultra -xarch=v8plusa
 VERSION = -V
 OPTFLAGS= -fast -xO4 -xdepend
-LOCALCCFLAGS += $(ARCH) $(VERSION) $(OPTFLAGS) $(VISINLINE)
+LOCALCCFLAGS += $(OPTFLAGS) $(VISARCHINFO) $(VERSION) $(VISINLINE)
 
 # source files for all stars, using preprocessor, putting base stars first
 PL_SRCS= \
