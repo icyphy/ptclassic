@@ -10,27 +10,9 @@
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
+include ../../../topdomain.mk
 
 DIRS = kernel stars expgraph loopScheduler image targets
 
 ME = sdf
 
-MAKEVARS = "ARCH=$(ARCH)"
-
-makefiles:
-	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo Updating makefile in domains/$(ME)/$$x ; \
-		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/domains/$(ME)/$$x makefile ;\
-		cd .. ; \
-	done
-
-all install clean sources depend:
-	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo making $@ in domains/$(ME)/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/domains/$(ME)/$$x $@ ;\
-		cd .. ; \
-	done
