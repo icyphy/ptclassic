@@ -1129,9 +1129,6 @@ void StructTarget :: buildComponentDeclarations(int level) {
     }
     
     // Add in port refs here from portList.
-    if (!(compDecl->portList->head())) {
-      Error::error("Empty compDecl port list!");
-    }
     if (compDecl->portList->head()) {
       level++;
       component_declarations << indent(level) << "port(\n";

@@ -625,15 +625,6 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 
 // Continue to do normal signal naming and portmapping.
 
-/*
-  StringList ref = port->getGeoName();
-  if (tokenNum >= 0) {
-    ref << "_" << tokenNum;
-  }
-  else { // (tokenNum < 0)
-    ref << "_N" << (-tokenNum);
-  }
-  */
   ref << part;
   
   //FIXME: May want to do something different if it's a wormhole port.

@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: Michael C. Williamson
+ Programmer: William Tsu, Michael C. Williamson
 
  Target for VHDL code generation and handoff to Synopsys simulator.
 

@@ -116,10 +116,9 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	return s;
 }
 
-/*
 // Reference to State or PortHole with offset and real/imag part.
-StringList VHDLStar :: expandRefCx(const char* name, const char* offset,
-				   const char* part) {
+StringList VHDLStar :: expandRef(const char* name, const char* offset,
+				 const char* part) {
   StringList ref;
   State* state;
   VHDLPortHole* port;
@@ -144,7 +143,7 @@ StringList VHDLStar :: expandRefCx(const char* name, const char* offset,
     }
   }
 
-  // Check if it's a State reference.
+  // Check if name is a State reference.
   if ((state = stateWithName(name)) != NULL) {
 
     if (state->isArray()) {
@@ -181,7 +180,7 @@ StringList VHDLStar :: expandRefCx(const char* name, const char* offset,
     return ref;
   }
 
-  // Check if it's a PortHole reference.
+  // Check if name is a PortHole reference.
   // Expand PortHole reference with offset.
   else if ((port = (VHDLPortHole*) genPortWithName(portName)) != NULL) {
 
@@ -226,176 +225,8 @@ StringList VHDLStar :: expandRefCx(const char* name, const char* offset,
 
   // Error:  Couldn't find a State or a PortHole with given name.
   else {
-    codeblockError(name, " is referenced, but not defined as a State or PortHole");
-    ref.initialize();
-  }
-
-  ref << part;
-  return ref;
-}
-*/
-/*
-// Reference to State or PortHole.
-StringList VHDLStar :: expandRef(const char* name, const char* offset,
-				 const char* part) {
-  StringList ref;
-  State* state;
-  VHDLPortHole* port;
-  StringList portName = expandPortName(name);
-  
-  ref.initialize();
-  
-  // Do this until figure out how to merge with other expandRef
-  StringList dummy = offset;
-
-  // Check if it's a State reference.
-  if ((state = stateWithName(name)) != 0) {
-    ref = starSymbol.lookup(state->name());
-    targ()->registerState(state, ref, firing);
-  }
-  
-  // Check if it's a PortHole reference.
-  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
-    if (multiPortWithName(portName)) {
-      codeblockError(portName,
-		     " is a MultiPortHole referenced as a single PortHole");
-      ref.initialize();
-      return ref;
-    }
-    
-    int tokenNum = port->getOffset();
-    ref << port->getGeoName();
-    if (tokenNum >= 0) {
-      ref << "_" << tokenNum;
-    }
-    else { // (tokenNum < 0)
-      ref << "_N" << (-tokenNum);
-    }
-    
-    targ()->registerPortHole(port, ref, tokenNum, part);
-  }
-
-  // Error:  couldn't find a State or a PortHole with given name.
-  else {
-    codeblockError(name, " is not defined as a State or PortHole");
-    ref.initialize();
-  }
-  
-  ref << part;
-  return ref;
-}
-*/
-
-// Reference to State or PortHole with offset and real/imag part.
-StringList VHDLStar :: expandRef(const char* name, const char* offset,
-				 const char* part) {
-  StringList ref;
-  State* state;
-  VHDLPortHole* port;
-  StringList portName = expandPortName(name);
-  State* offsetState;
-  StringList offsetVal;
-
-  ref.initialize();
-
-  // Check if offset is a State reference.
-  // Convert offset State value to offset.
-  if ((offsetState = stateWithName(offset)) != NULL) {
-    // Get State value as a string.
-    if (offsetState->isA("IntState")) {
-      offsetVal = expandVal(offset);
-      offset = offsetVal;
-    }
-    else {
-      codeblockError(offset, " is not an IntState");
-      ref.initialize();
-      return ref;
-    }
-  }
-
-  // Check if it's a State reference.
-  if ((state = stateWithName(name)) != NULL) {
-
-    if (state->isArray()) {
-      ref = starSymbol.lookup(state->name());
-
-      // generate constant for index from state
-      if (offsetState != NULL) {
-	int offsetInt = *(IntState*)offsetState;
-	targ()->registerState(state, ref, firing, offsetInt);
-	ref << "_P" << offsetInt;
-      }
-
-      // generate constant for index
-      else {
-	// must first convert offset from char* to int
-	int offsetInt = 0;
-	sscanf(offset, "%d", &offsetInt);
-	targ()->registerState(state, ref, firing, offsetInt);
-	ref << "_P" << offsetInt;
-      }
-    }
-
-    // FIXME: Check if offset present before complaining about not array
-    // Error:  Referencing a non-array state with an index.
-    else {
-      // If not an array state, but an offset was specified,
-      // you have to wonder.  May want to reactivate this error.
-//      codeblockError(name, " is not an array state but is referenced as one");
-//      ref.initialize();
-
-      ref = starSymbol.lookup(state->name());
-      targ()->registerState(state, ref, firing);
-    }
-    return ref;
-  }
-
-  // Check if it's a PortHole reference.
-  // Expand PortHole reference with offset.
-  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != NULL) {
-
-    // Error:  Referencing a MultiPortHole as if it were a single PortHole.
-    if (multiPortWithName(portName)) {
-      codeblockError(portName,
-		     " is a MultiPortHole referenced as a single PortHole");
-      ref.initialize();
-      return ref;
-    }
-
-    ref << port->getGeoName();
-
-    int offsetInt, tokenNum;
-
-    if (offsetState != NULL) {
-      // Generate constant for index from state.
-      offsetInt = *(IntState*)offsetState;
-    }
-    else {
-      // Generate constant for index from string.
-      // Must first convert offset from char* to int.
-      if (!strcmp(offset,"")) {
-	offsetInt = 0;
-      }
-      else {
-	sscanf(offset, "%d", &offsetInt);
-      }
-    }
-
-    tokenNum = port->getOffset() - offsetInt;
-
-    if (tokenNum >= 0) {
-      ref << "_" << tokenNum;
-    }
-    else { // (tokenNum < 0)
-      ref << "_N" << (-tokenNum);
-    }
-
-    targ()->registerPortHole(port, ref, tokenNum, part);
-  }
-
-  // Error:  Couldn't find a State or a PortHole with given name.
-  else {
-    codeblockError(name, " is referenced, but not defined as a State or PortHole");
+    codeblockError(name,
+		   " is referenced, but not defined as a State or PortHole");
     ref.initialize();
   }
 
@@ -483,13 +314,11 @@ StringList VHDLStar :: expandAssign(const char* name) {
   
   // Check if it's a State reference.
   if ((state = stateWithName(name)) != 0) {
-//    assign << ":=";
     assign << targ()->stateAssign();
   }
 
   // Check if it's a PortHole reference.
   else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
-//    assign << "<=";
     assign << targ()->portAssign();
   }
 
@@ -569,7 +398,6 @@ void VHDLStar :: initialize() {
 int VHDLStar :: run() {
   int status = 0;
   firing++;
-//  updateOffsets();
   status = targ()->runIt(this);
   updateOffsets();
   return status;
