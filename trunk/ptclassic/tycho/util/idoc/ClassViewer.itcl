@@ -56,11 +56,12 @@
 # Here's an example of how to use this class:
 #
 # <tcl><pre>
+# catch {destroy .u}
 # ::tycho::Displayer .u
 # ::tycho::Idoc .u.i
 # .u showView .u.i
 # .u centerOnScreen
-# .u.i configure -file  $TYCHO/lib/TyDoc/test/Idoc.idoc
+# .u.i configure -file  $TYCHO/lib/tydoc/test/Idoc.idoc
 # .u.i reload
 # </tcl></pre>
 #
@@ -72,23 +73,18 @@ class ::tycho::Idoc {
 
     # The color of Itcl options.
     itk_option define -optioncolor optionColor OptionColor white {
-	$itk_component(text) tag configure optionname \
-		-foreground $itk_option(-optioncolor)
     }
+  
     # The color of public constructs.
     itk_option define -publiccolor publicColor PublicColor white {
-	$itk_component(text) tag configure public \
-		-foreground $itk_option(-publiccolor)
     }
+    
     # The color of protected constructs.
     itk_option define -protectedcolor protectedColor ProtectedColor white {
-	$itk_component(text) tag configure protected \
-		-foreground $itk_option(-protectedcolor)
     }
+    
     # The color of private constructs.
     itk_option define -privatecolor privateColor PrivateColor white {
-	$itk_component(text) tag configure private \
-		-foreground $itk_option(-privatecolor)
     }
 
     # The default head font -- currently an X font, but should
@@ -121,8 +117,8 @@ class ::tycho::Idoc {
     # Current class name and html description
     protected variable myClass
    
-    # Internal text widget
-    protected variable myText
+    # Internal contents widget
+    protected variable myContents
 
     # Internal HTML widget
     protected variable myHtml
@@ -151,7 +147,11 @@ class ::tycho::Idoc {
 configbody ::tycho::Idoc::headfont {
 
     set f $itk_option(-headfont)
-    $myText tag configure head -font $f
+    foreach panel [$myContents panels] {
+        $myContents subconfig $panel -font $f
+    }
+    # must be caught because class may not exist
+    catch {$myContents subconfig class -font $f}
 }
 #########################################################################
 #### -bodyfont configuration
@@ -161,16 +161,17 @@ configbody ::tycho::Idoc::headfont {
 configbody ::tycho::Idoc::bodyfont {
 
     set f $itk_option(-bodyfont)
-    $myText tag configure protected -font $f
-    $myText tag configure private -font $f
-    $myText tag configure optionname -font $f
-    $myText tag configure public -font $f
+    foreach label [$myContents labels] {
+        if {$label != "class"} {    
+            $myContents subconfig $label -font $f
+        }
+    }
 }
 ###################################################################
 #
 body ::tycho::Idoc::constructor {args} {
 
-    # Setup a frame for the HTML and text widgets
+    # Setup a frame for the HTML and contents widgets
     itk_component add mainFrame {
         frame $itk_interior.mainFrame
     } 
@@ -184,17 +185,16 @@ body ::tycho::Idoc::constructor {args} {
 
     set myHtml $itk_component(html)
   
-    itk_component add text {
-        text $itk_interior.text
+    itk_component add contents {
+        ::tycho::MultiPanel $itk_interior.contents
     } {
-        usual
-        keep -height
-        rename -width -textwidth textWidth TextWidth
+       keep -height
+       rename -width -contentswidth contentsWidth ContentsWidth
     }
 
-    set myText $itk_component(text)
+    set myContents $itk_component(contents)
 
-    pack $itk_component(text) -side left -anchor e  -fill y \
+    pack $itk_component(contents) -side left -anchor e  -fill y \
             -in $itk_interior.mainFrame
 
     pack $itk_component(html) -side left -expand 1 -fill both \
@@ -220,15 +220,6 @@ body ::tycho::Idoc::constructor {args} {
         $myMenubar delete "Evaluate"
         $myMenubar delete "Revision Control..."
     }
-
-    # Create standard text tags
-    #$myText tag configure head -font -*-Helvetica-Bold-R-Normal--*-180-*
-
-    # We don't want a cursor or a selection in the text widget
-    bind $myText <Double-Button-1> {break}
-    bind $myText <Button-1> {break}
-    bind $myText <B1-Motion> {break}
-    bind $myText <Button-2> {break}
 
     eval itk_initialize $args
 
@@ -266,84 +257,84 @@ body ::tycho::Idoc::setClass {name html} {
 # display the contents of the myidoc variable in text widget
 body ::tycho::Idoc::display {} {
     
-    # clear the text widget
-    $myText delete 0.0 end
+    # clear the contents widget
+    $myContents clear
 
     # insert the class name, if one exists
     if {![catch {set myClass(name)}]} {
-        $myText insert end $myClass(name)\n\n
-        if {![catch {set myClass(html)}]} {
-            $myText tag configure class
-            $myText tag bind class <Double-Button-1> \
-                    [code "$this putHtml {$myClass(html)}"]
-            $myText tag add class "end - 3 lines" "end - 2 line"
-            $myText tag add head "end - 3 lines" "end - 2 line"
-        }
-    }
+        $myContents appendlabel class \
+                -text $myClass(name) \
+                -font [$this cget -headfont]
 
-    set i 0
+        $myContents bind class <Double-Button-1> \
+                [code "$this putHtml {$myClass(html)}"]
+    }
 
     # put in each type (Protected Method, etc.) by array order
     foreach type [array names myIdoc] {
-        $myText insert end $type\n
-        $myText tag add head "end - 2 lines" "end - 1 line"
+
+        set subnames {}
+
         foreach item [set myIdoc($type)] {
             set name [lindex $item 0]
             set contents [lrange $item 1 end]
             
-            #insert displayed text
-            $myText insert end $name\n
-            switch -regexp $type {
-                Protected.* {$myText tag add protected \
-                        "end - 2 lines" "end - 1 line"}
-                Private.* {$myText tag add private \
-                        "end - 2 lines" "end - 1 line"}
-                Public.* {$myText tag add public \
-                        "end - 2 lines" "end - 1 line"}
-                .*Option {$myText tag add optionname \
-                        "end - 2 lines" "end - 1 line"}
-            }
+            # keep track of names in a list for subpanel
+            lappend subnames $name
+            
+            # insert displayed text
+            $myContents appendlabel $name \
+                    -text $name \
+                    -font [$this cget -bodyfont]
+            switch -glob $type {
+                Protected* {$myContents subconfig $name -fg \
+                        [$this cget -protectedcolor]}
+                Private* {$myContents subconfig $name -fg \
+                        [$this cget -privatecolor]}
+                Public* {$myContents subconfig $name -fg \
+                        [$this cget -publiccolor]}
+                *Option {$myContents subconfig $name -fg \
+                        [$this cget -optioncolor]}
+            } 
 
             # bind <enter> text
             foreach {attr value} $contents {
                 if {$attr == "link"} {
                     # When the pointer is over the tag
-                    $myText tag configure ltag$i
-                    $myText tag bind ltag$i <Enter> \
+                    $myContents bind $name <Enter> \
                             [code "$this putStatus {$value}"]
-                    $myText tag bind ltag$i <KeyRelease-Shift_L> \
+                    $myContents bind $name <KeyRelease-Shift_L> \        
                             [code "$this putStatus {$value}"]
-                    $myText tag bind ltag$i <KeyRelease-Shift_R> \
+                    $myContents bind $name <KeyRelease-Shift_R> \
                             [code "$this putStatus {$value}"]
-                    $myText tag bind ltag$i <Leave> \
+                    $myContents bind $name <Leave> \
                             [code "$this putStatus {}"]
-                    $myText tag add ltag$i "end - 2 lines" "end - 1 line"
                 }
+
                 if {$attr == "altlink"} {
                     # Pointer is over and shift is pressed
-                    $myText tag configure atag$i
-                    $myText tag bind atag$i <Shift-Enter> \
+                    $myContents bind $name <Shift-Enter> \
                             [code "$this putStatus {$value}"]
-                    $myText tag bind atag$i <KeyPress-Shift_L> \
+                    $myContents bind $name <KeyPress-Shift_L> \
                             [code "$this putStatus {$value}"]
-                    $myText tag bind atag$i <KeyPress-Shift_R> \
+                    $myContents bind $name <KeyPress-Shift_R> \
                             [code "$this putStatus {$value}"]
-                    $myText tag bind atag$i <Leave> \
+                    $myContents bind $name <Leave> \
                             [code "$this putStatus {}"]
-                    $myText tag add atag$i "end - 2 lines" "end - 1 line"
                 }
+                
                 if {$attr == "html"} {
                     # HTML to display after double click
-                    $myText tag configure htag$i
-                    $myText tag bind htag$i <Double-Button-1> \
+                    $myContents bind $name <Double-Button-1> \
                             [code "$this putHtml {$value}"]
-                    $myText tag add htag$i "end - 2 lines" "end - 1 line"
                 }
             }
-            incr i
         }
-        $myText insert end \n
+        $myContents append $type "$subnames" \
+                -text $type \
+                -font [$this cget -headfont] 
     }
+
 }
 
 #######################################################################
