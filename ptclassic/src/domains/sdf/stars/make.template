@@ -1,5 +1,5 @@
 # Makefile for Ptolemy SDF stars
-# $Id$
+# @(#)make.template	1.23 9/19/90
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -24,16 +24,15 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 # .cc filenames for all stars
 SRCS= \
- AdaptFilter.cc \
  BiQuad.cc \
  BlackHole.cc \
  Commutator.cc \
  ComplexDC.cc \
  ComplexFFT.cc \
  ComplexFIR.cc \
- ComplexPolar.cc \
  ComplexPower.cc \
  ComplexProduct.cc \
+ ComplexReal.cc \
  ComplexSum.cc \
  Cos.cc \
  Cut.cc \
@@ -53,18 +52,21 @@ SRCS= \
  Fork.cc \
  IIDGaussian.cc \
  IIDUniform.cc \
- IIR.cc \
  IntRamp.cc \
  Integrator.cc \
+ LMS.cc \
  PolarRect.cc \
  Printer.cc \
+ RealComplex.cc \
+ RectPolar.cc \
  Sin.cc \
  Sqrt.cc \
  UpSample.cc \
  WaveForm.cc \
  XMgraph.cc \
  XYgraph.cc \
- Xgraph.cc
+ Xgraph.cc \
+ XMgraph.cc
 
 # object files for all stars
 OBJS= $(SRCS:.cc=.o)
