@@ -385,9 +385,13 @@ extern int errno;
 
 /* Fix up casts for kernel/TimeVal.cc */
 
-#ifdef PTHPPA
+#if defined(PTHPPA) && defined(PTHPUX10)
+#define TV_SEC_TYPE	time_t
+#else
+#if defined (PTHPPA)
 #define TV_SEC_TYPE	unsigned long
 #endif /* PTHPPA */
+#endif /* PTHPPA && PTHPUX10*/
 
 #ifndef TV_USEC_TYPE
 #define TV_USEC_TYPE	long int
