@@ -104,6 +104,9 @@ error samples.
 	}
 
 
+        // sprintf()
+        ccinclude { <stdio.h> }
+
 	setup{
 		delayMask = -1;
 		numTaps = coef.size();
