@@ -65,6 +65,9 @@ ISA_FUNC(CGCStar, CGStar);
 
 StringList cmdArg(const State* state) {
   StringList temp;
+				// Check whether the block has a NULL parent
+				// This is necessary for CGDDF
+  if (!state->parent()->parent()) return "";
   StringList mapsList = state->parent()->target()->\
     pragma(state->parent()->parent()->name(),
 	   state->parent()->name(),
