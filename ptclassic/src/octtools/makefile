@@ -36,7 +36,11 @@ DIRS = Packages Xpackages vem
 LIBDIRS = Packages Xpackages
 
 # "leaf" directories with a make.template
-MTDIRS = attache installColors masters oct2ps oct2tim \
+# OCTTOOLS_ATTACHE_DIR is usually set to attache in
+# $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile attache because of curses issues
+MTDIRS = $(OCTTOOLS_ATTACHE_DIR) installColors masters oct2ps oct2tim \
 	octfix octgc octls octredomain
 
 

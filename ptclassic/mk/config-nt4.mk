@@ -125,6 +125,12 @@ X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
 XMKMF =		$(X11_DIR)/bin/xmkmf
 MKDIRHIER =	$(X11_DIR)/bin/mkdirhier
 
+# OCTTOOLS_ATTACHE_DIR is usually set to attache in
+# $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile attache because of curses issues
+OCTTOOLS_ATTACHE_DIR = attache
+
 # OCTTOOLS_IV_DIR is usually set to iv in $PTOLEMY/mk/config-default.mk
 # but config-nt4.mk overrides it and sets it to nothing because Cygwin
 # cannot compile iv because of signal issues.
