@@ -46,7 +46,6 @@ TCL_SRCS =
 ITCL_SRCS = \
 	EditC.itcl \
 	EditCpp.itcl \
-	EditDiff.itcl \
 	EditEsterel.itcl \
 	EditHTML.itcl \
 	EditItcl.itcl \
@@ -59,7 +58,6 @@ ITCL_SRCS = \
 	EditSDL.itcl \
 	EditTcl.itcl \
 	HTMLOutline.itcl \
-	ItclClassList.itcl \
 	Matlab.itcl \
 	Mathematica.itcl
 
