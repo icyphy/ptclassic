@@ -149,7 +149,8 @@
 #     $model attrget d
 # </tcl></pre>
 #
-# SimpleModel is a subclass of <a href="Model.html">Model</a>, and therefore
+# SimpleModel is a subclass of
+# <a href="../doc/codeDoc/Model.html">Model</a>, and therefore
 # inherits its publish-and-subscribe and history mechanisms. For
 # a working example of the subscription mechanism, see
 # <a href="SimpleView.html">SimpleView</a>. To record a change to
