@@ -37,11 +37,7 @@ If the named block is not on the knownlist (e.g., it is not a built-in block),
 then the <i>where_defined</i> parameter is taken to be the full path name and
 filename of facet that should be compiled to define the block.
 This path name may (and probably should) begin with the environment
-<pre>
-</pre>
 variable $PTOLEMY or ~username.
-<pre>
-</pre>
 <h3>Connections</h3>
 <p>
 The input and output connections specified by <i>input_map</i> and
