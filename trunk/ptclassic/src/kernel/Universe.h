@@ -1,55 +1,62 @@
 #ifndef _Universe_h
 #define _Universe_h 1
 
-#include "type.h"
-#include "Star.h"
-#include "Scheduler.h"
-#include "Galaxy.h"
-#include "StringList.h"
-
-
 // SCCS version identification
 // $Id$
 
 /*******************************************************************
+	The generic Universe class.
 
-	Universes are defined in this file.
-	A Universe is a Star with a pointer to a component Galaxy,
-	and a Scheduler to fire the blocks in the Galaxy.
+	A Universe contains a Galaxy and a Scheduler.
 	From the outside, it looks like a Star with no PortHoles.
-
-	Currently, only an SDFUniverse is defined here.
 
 ********************************************************************/
 
 	//////////////////////////////
-	// SDFUniverse
+	// Universe
 	//////////////////////////////
 	
-class SDFUniverse : public SDFStar {
-	SDFScheduler scheduler;
+
+#include "Galaxy.h"
+#include "Scheduler.h"
+#include "StringList.h"
+
+class Universe : public Star {
 public:
-	// Temporarily make this public:  Maybe can be made private later
-	// with scheduler as a friend.
-	Block* myTopology;
+	// generate the schedule and/or initialize scheduler
+	void initialize() {scheduler->setup(*myTopology);}
 
-	void initialize() {scheduler.setup(*myTopology);}
-	void go() {scheduler.run(*myTopology);}
-	void wrapup () {scheduler.wrapup(*myTopology);}
+	// run the simulation
+	void go() {scheduler->run(*myTopology);}
 
-	// Redefine char* cast
-	operator StringList ();
+	// wrap up the simulation
+	void wrapup() {scheduler->wrapup(*myTopology);}
 
-	// Display the schedule
-	StringList displaySchedule() {return scheduler.displaySchedule();}
+	// set the stopping condition.  A hack.
+	void setStopTime(float limit) {scheduler->setStopTime(limit);}
 
-	// Define clone() for convenience so Universe writers don't need to
-	// Since it returns NULL, clone will fail unless redefined.
-	Block* clone() { return NULL;}
+	// print methods
+	StringList printVerbose() {return print(0);}
+	StringList printRecursive() {return print(1);}
+
+	// display schedule
+	StringList displaySchedule() {return scheduler->displaySchedule();}
+
+	// constructor
+	Universe(Scheduler* s,const char* typeDesc, Galaxy* g) :
+		scheduler(s), type(typeDesc), myTopology(g) {}
+
+	// destructor
+	virtual ~Universe() { delete scheduler; delete myTopology;}
 protected:
-	// The addBlock method should get invoked only once, with a
-	// reference to the component galaxy specified.
-	void addBlock(Block& b) {myTopology = &b;}
+	// print, possibly recursively
+	StringList print(int recursive);
+	// This should be called only once, with a reference to
+	// the component galaxy specified.
+	void addBlock(Block& g) {myTopology = (Galaxy*)&g;}
+private:
+	Scheduler* scheduler;
+	Galaxy* myTopology;
+	const char* type;
 };
-
 #endif
