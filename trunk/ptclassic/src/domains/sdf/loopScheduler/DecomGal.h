@@ -82,6 +82,9 @@ public:
 	SDFClusterBag* asBag() { return idFlag? this: 0; }
 	void resetId()	{ idFlag = 0; }
 
+	// return me as a special bag
+	SDFClusterBag* asSpecialBag() { return this; }
+
 	// run the cluster
 	void go();
 
