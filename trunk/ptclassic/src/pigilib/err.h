@@ -48,19 +48,19 @@ Header for error handing routines.
 /* The following provides more convenient and consistent access to Tcl
    with error checking.  */
 #define TCL_CATCH_ERR(tcl_call) \
-    if (tcl_call != TCL_OK) { \
-	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo", 0, (char **) NULL); \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
     }
 
 #define TCL_CATCH_ERR1(tcl_call) \
-    if (tcl_call != TCL_OK) { \
-	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo", 0, (char **) NULL); \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
 	return FALSE; \
     }
 
 #define TCL_CATCH_ERR2(tcl_call,retVal) \
-    if (tcl_call != TCL_OK) { \
-	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo", 0, (char **) NULL); \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
 	return retVal; \
     }
 
