@@ -94,16 +94,19 @@ const char* SRRecursiveScheduler::domain() const
 // Initialize the galaxy and compute the schedule
 void SRRecursiveScheduler::setup()
 {
-    if (!galaxy()) {
-	Error::abortRun(domain(), " scheduler has no galaxy.");
-	return;
-    }    
+  numInstants = 1;
+  numInstantsSoFar = 0;
 
-    galaxy()->initialize();
+  if (!galaxy()) {
+    Error::abortRun(domain(), " scheduler has no galaxy.");
+    return;
+  }    
 
-    if ( !computeSchedule( *galaxy() ) ) {
-      return;
-    }
+  galaxy()->initialize();
+
+  if ( !computeSchedule( *galaxy() ) ) {
+    return;
+  }
 }
 
 // Run (or continue) the simulation
