@@ -111,7 +111,7 @@ public:
 	// when an event is coming while the star is executing the previous
 	// event, queue that event and return FALSE.
 	// If the incoming event is runnable, return TRUE.
-	int IsItRunnable();
+	int isItRunnable();
 
 	// get the particle associated with an input port
 	Particle* fetchData(InDEPort& p);
