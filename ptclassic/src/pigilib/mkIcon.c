@@ -29,9 +29,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <sys/file.h>
-#include "local.h"
 #include "rpc.h"
 #include "err.h"
 #include "mkTerm.h"
@@ -45,7 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define ERRBUF_MAX 1000
 
-static octObject starBoxLayer, galBoxLayer, iconBackgrLayer, iconShadowLayer;
+static octObject starBoxLayer, galBoxLayer, iconBackgrLayer;
 
 /* 8/24/89
 Check to see if icon already exists.
@@ -134,7 +134,7 @@ char *iconCellName;
 IconType type;
 {
     octObject srcFacet;
-    char buf[FILENAME_MAX];
+    char buf[MAXPATHLEN];
     char *techDir;
 
     srcFacet.type = OCT_FACET;
@@ -210,29 +210,6 @@ int size;
     corners[0].y = 50;
     corners[1].x = 50;
     corners[1].y = 50-size*25;
-
-    ERR_IF1(!PutShape(layerPtr, &dummy, &box, &noTranslate));
-    return TRUE;
-}
-
-static boolean
-MkShadow(layerPtr, size)
-octObject *layerPtr;
-int size;
-{
-    Shape box;
-    struct octPoint corners[2];
-    static struct octPoint noTranslate = {0, 0};
-    octObject dummy;
-
-    box.type = OCT_BOX;
-    box.points = corners;
-    box.points_n = 2;
-
-    corners[0].x = -60;
-    corners[0].y = 40;
-    corners[1].x = 40;
-    corners[1].y = 40-size*25;
 
     ERR_IF1(!PutShape(layerPtr, &dummy, &box, &noTranslate));
     return TRUE;
@@ -380,12 +357,6 @@ octObject *galFacetPtr, *iconFacetPtr;
     if (ohGetOrCreateLayer(iconFacetPtr, &iconBackgrLayer, "iconBackground")
 	== OCT_OK) {
 	ERR_IF1(!MkBox(&iconBackgrLayer, size));
-/* Not making shadows for galaxies
-	if (ohGetOrCreateLayer(iconFacetPtr, &iconShadowLayer, "iconShadow")
-	    == OCT_OK) {
-	    ERR_IF1(!MkShadow(&iconShadowLayer, size));
-	}
-*/
     }
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));

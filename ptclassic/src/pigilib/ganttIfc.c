@@ -28,8 +28,8 @@ $Id$
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 #include "rpc.h"
 #include "err.h"
 #include "ganttIfc.h"
@@ -204,6 +204,7 @@ long userOptionWord;
     ViDone();
 }
 
+void
 FindAndMarkError(facetP, name)
 octObject *facetP;
 char *name;

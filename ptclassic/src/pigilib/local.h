@@ -22,32 +22,45 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
+#ifndef _local_h
+#define _local_h 1
+
 /* local.h  edg
 Version identification:
 $Id$
 This is a local include file for useful macros and definitions.
 */
 
+#include "ansi.h"
+#ifdef HAS_STDARG
+#include <stddef.h>
+#define RAW_PTR void *
+#else
+#define RAW_PTR char *
+#endif
+
 /* boolean data type */
 typedef int boolean;
-#define TRUE	(1)
-#define FALSE	(0)
+#define TRUE	1
+#define FALSE	0
 
 #define EOS '\0' /* end of string */
 
-extern char *calloc();
-/*
-extern void free();
-*/
+extern RAW_PTR calloc ARGS((size_t,size_t));
+extern RAW_PTR malloc ARGS((size_t));
+
+#include <sys/param.h>
+
 #ifdef USG
-extern int sprintf();
+extern int sprintf ARGS((char*, const char*, ...));
+extern char *getcwd ARGS((char *,size_t));
+#define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else
-extern char *sprintf();
+extern char *sprintf ARGS((char*, const char*, ...));
+extern char *getwd ARGS((char *));
 #endif
 
 /* buffer length constants */
 #define MSG_BUF_MAX 512 /* for messages */
 
-#ifndef FILENAME_MAX
-#define FILENAME_MAX 512 /* for filename paths */
 #endif

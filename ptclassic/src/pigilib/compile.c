@@ -44,10 +44,10 @@ the xfered list or if it has been changed since the last transfer.
 */
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <strings.h>
 #include <errno.h>
-#include "local.h"
 #include "rpc.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
@@ -429,6 +429,8 @@ char *nodename;
 Emits connect, input, and output statements.
 */
 #define BLEN 80
+
+static boolean TermIsMulti();
 
 static boolean
 ConnectPass(facetPtr)

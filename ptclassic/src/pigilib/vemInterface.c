@@ -30,8 +30,8 @@ Note: all print functions append \n to string before printing.
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 #include "rpc.h"
 #include "err.h"
 #include "octMacros.h"

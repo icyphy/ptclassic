@@ -28,8 +28,8 @@ $Id$
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 #include "rpc.h"
 #include "vemInterface.h"
 #include "edit.h"

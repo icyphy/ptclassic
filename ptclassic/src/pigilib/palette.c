@@ -31,8 +31,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 #include "rpc.h"
 #include "oh.h"
 #include "octMacros.h"
@@ -115,8 +115,8 @@ static struct octPoint defaultCursorPt = {500, -500};
 
     octGenerator genInst;
     struct octPoint cursorPt;
-    octObject bb;
-    char *techDir, buf[FILENAME_MAX], *cell;
+    octBox bb;
+    char *techDir, buf[MAXPATHLEN], *cell;
 
     octInitGenContents(palFacetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, cursorPtr) == OCT_OK) {
@@ -135,8 +135,8 @@ static struct octPoint defaultCursorPt = {500, -500};
 	/* Locates cursor at an even (100 octUnits) point below the
 	    lowerLeft corner of current bounding box.
 	*/
-	cursorPt.x = AlignFunction(bb.contents.box.lowerLeft.x + 50);
-	cursorPt.y = -AlignFunction(-bb.contents.box.lowerLeft.y + 75);
+	cursorPt.x = AlignFunction(bb.lowerLeft.x + 50);
+	cursorPt.y = -AlignFunction(-bb.lowerLeft.y + 75);
     } else {
 	cursorPt = defaultCursorPt;
     }

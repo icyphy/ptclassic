@@ -29,9 +29,9 @@ $Id$
 
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <strings.h>
-#include "local.h"
 #include "rpc.h"
 #include "vemInterface.h"
 #include "compile.h"
@@ -40,6 +40,8 @@ $Id$
 #include "edit.h"
 #include "err.h"
 #include "util.h"
+#include "ganttIfc.h"
+
 #if defined(PTK)
 #include "ptk.h"  /* Interpreter name, window name, etc.  aok */
 #include "ptkCalls.h"  /* C utilities for using tcl from pigi.  aok */
@@ -307,8 +309,6 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
-
     ViInit("display-schedule");
     ErrClear();
     FindClear();

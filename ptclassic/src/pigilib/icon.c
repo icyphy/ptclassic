@@ -29,12 +29,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <sys/file.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <pwd.h>
-#include "local.h"
 #include "rpc.h"
 #include "util.h"
 #include "err.h"
@@ -109,26 +109,6 @@ int background;
     if (dispCmd == 0) dispCmd = defaultDisplay;
     sprintf (buf, dispCmd, file);
     if (background) strcat(buf, "&");
-}
-
-/* 5/8/90
-Open a window and run xedit (or user selected program) on a file.
-Does not run in the background.
-This routine does not return until program is exited.
-*/
-static boolean
-EditFile(fileName)
-char *fileName;
-{
-    char buf[512];
-    genDispCommand(buf, fileName, 0);
-    PrintDebug(buf);
-    if (util_csystem(buf)) {
-	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
-	ErrAdd(buf);
-	return(FALSE);
-    }
-    return (TRUE);
 }
 
 /* 8/3/90
@@ -512,7 +492,7 @@ int
 IconFileToSourceFile (iconFile, sourceFile, domain)
 char* iconFile, *sourceFile, *domain;
 {
-	char dir[512], *base, *dom;
+	char dir[512], *base, *dom = 0;
 	int i, n;
 
 	strcpy (dir, iconFile);
