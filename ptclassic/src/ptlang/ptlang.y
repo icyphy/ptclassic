@@ -1190,8 +1190,8 @@ void wrapMethod ()
 	}
 	/* not inline: put it into the .cc file */
 	strcat (p, ";\n");
-	sprintf (str2, "\n\n%s %s%s::%s ", methodType,
-		 galDef ? "" : domain, objName, methodName);
+	sprintf (str2, "\n\n%s %s%s%s::%s ", methodType,
+		 galDef ? "" : domain, objName, coreDef ? coreCategory : "", methodName);
 	strcat (miscCode, str2);
 	stripDefaultArgs (str2, methodArgs);
 	strcat (miscCode, str2);
