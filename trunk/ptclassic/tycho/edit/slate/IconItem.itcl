@@ -85,9 +85,8 @@ namespace ::tycho {
 # 
 # <p><b>Components</b>
 #
-# IF a *-name* option is supplied to the terminal{}
-# proc, then the terminal is registered as a component
-# with that name.
+# Each terminal created with the <b>terminal</b> proc becomes
+# a component with name given by the _name_ argument.
 #
 # <p><b>Enhancements</b>: In an earlier version of the Slate,
 # IconItem items had primary and secondary "directions," so that
