@@ -154,6 +154,9 @@ class ::tycho::TopLevel {
     # Raise the window.
     method raiseWindow {}
 
+    # Access stylesheets of this widget
+    method stylesheet {mode args}
+
     # Return the name of my top-level window.
     method windowName {} {return $itk_component(hull)}
 
@@ -201,6 +204,12 @@ class ::tycho::TopLevel {
 
     #################################################################
     ####                  private variables                      ####
+
+    # An array of options subscribed by "stylesheet subscribe"
+    private variable _subscribedOptions
+
+    # An array of options overridden by itk_initialize or configure
+    private variable _overiddenOptions
 
     # Avoid self-destructing recursively -- FIXME: is this needed???
     private variable alreadyexiting 0
@@ -459,21 +468,44 @@ body ::tycho::TopLevel::centerOnScreen {} {
 
 #####################################################################
 #### configure
-# Configure a widget. This method overrides the default in
-# itk::Archetype. It unsubscribes the widget from
-# the prefereences manager for the given options. This ensures that
-# the widget keeps the value set by this method rather then
-# reverting to the value decided by the preferences manager -- that
-# is, setting options with this method "overrides" the preferences.
+# Configure a widget. This method overrides the default in itk::Archetype.
+# Any given options are unsubscribed from any style sheets that they
+# are subscribed to. This ensures that the widget keeps the value
+# set by this method rather than reverting to the value decided by
+# the preferences manager -- that is, setting options with this method
+# "overrides" the preferences.
+#
+# This is actually rather slow, since every time a megawidget
+# creates a component that is a megawidget, this method
+# will get called from within the keep{} and rename{}
+# statements. To speed it up, we should keep a record of which
+# options have been subscribed and which haven't...
 #
 body ::tycho::TopLevel::configure {args} {
+    # FIXME: Delete this obsolete stuff
     set temp {}
     foreach {option arg} $args {
  	lappend temp $option
     }
     if { $temp != "" } {
- 	eval ::tycho::preference unsubscribeoptions $this $temp
+ 	eval preference unsubscribeoptions $this $temp
     }
+
+    # Good stuff starts here:
+
+    # If any options are subscribed, unsubscribe them
+    foreach {option _} $args {
+	if [::info exists _subscribedOptions($option)] {
+	    regexp {^([^\.]+)\.(.+)$} \
+		    $_subscribedOptions($option) _ sheet param 
+	    ::tycho::stylesheet unsubscribe $this $sheet $param
+	    unset _subscribedOptions($option)
+	}
+    }
+    # Remember the over-ridden options
+    array set _overriddenOptions $args
+
+    # Configure the options
     eval ::itk::Archetype::configure $args
 }
 
@@ -560,6 +592,72 @@ body ::tycho::TopLevel::raiseWindow {} {
     wm deiconify $itk_component(hull)
     raise $itk_component(hull)
     focusin
+}
+
+#####################################################################
+#### stylesheet
+# Access stylesheets of this widget. This method should be used
+# to set widget option preferences instead of direct access using the
+# *::tycho::stylesheet* procedure, since it ensures that user-set
+# options are not overridden by style-sheets. The method has several
+# forms, depending on the value of the _mode_ argument:
+#
+# <dl>
+# <dt><b>get</b> _parameter_
+# <dd>
+# Get the value of the given _parameter_, where _parameter_
+# is in the form specified for the <b>subscribe</b> option.
+# Color and font values are converted to raw X values
+# before returning.
+# 
+# <dt><b>subscribe</b> ?_option_ _parameter_ ...?
+# <dd>
+# Subscribe each names _option_ to the given _parameter_. The
+# _parameter_ name must be constructed as a dot-separated name,
+# beginning with the name of the stylesheet model and followed
+# by the parameter name, with intevening group names if
+# appropriate. For example, the name <b>fonts.textFont</b>
+# means the <b>textFont</b> parameter of the <b>fonts</b>
+# stylesheet. Each _option_ that has not been explicitly
+# overridden by supplying a value to the widget's constructor
+# will be set to the current value of _parameter_, and any
+# future changes to _parameter_ will update the option.
+#
+# </dl>
+#
+body ::tycho::TopLevel::stylesheet {mode args} {
+    switch -exact $mode {
+        "get" {
+            # Separate sheet name and param name
+            set name [lindex $args 0]
+            regexp {^([^\.]+)\.(.+)$} $name _ sheet param 
+		    
+            # Get my style
+            set style [::tycho::stylesheet style $this $sheet]
+
+            # Get the value
+            ::tycho::stylesheet get $sheet $style $param
+        }
+	"subscribe" {
+	    # Pre-digest arguments
+	    foreach {option parameter} $args {
+		if ![::info exists _overriddenOptions($option)] {
+		    # Separate sheet name and param name
+		    regexp {^([^\.]+)\.(.+)$} $parameter _ sheet param 
+		    
+		    # Make lists of options per sheet
+		    lappend lists($sheet) $option $param
+
+		    # Remember the subscribed options
+		    set _subscribedOptions($option) $parameter
+		}
+	    }
+	    # Call the stylesheets to do the work
+	    foreach {sheet opts} [array get lists] {
+		eval ::tycho::stylesheet subscribe $this $sheet $opts
+	    }
+	}
+    }
 }
 
 #################################################################
@@ -693,10 +791,11 @@ body ::tycho::TopLevel::confirmDestruct {} {
 # Initialize options of a widget. This method overrides the
 # default itk_initialize{} provided in ::itk::Archetype to
 # remember the options that have been explicitly set by the
-# user. This is used by the preference manager so that these
+# user. This is used by the preferences manager so that these
 # options "override" any option subscriptions.
 #
 body ::tycho::TopLevel::itk_initialize {args} {
+    # FIXME: Delete this obsolete stuff
     set temp {}
     foreach {option value} $args {
 	lappend temp $option
@@ -704,6 +803,22 @@ body ::tycho::TopLevel::itk_initialize {args} {
     if { $temp != "" } {
 	eval ::tycho::preference excludeoptions dummy $this $temp
     }
+
+    # Good stuff starts here:
+
+    # If any options are subscribed, unsubscribe them
+    foreach {option _} $args {
+	if [::info exists _subscribedOptions($option)] {
+	    regexp {^([^\.]+)\.(.+)$} \
+		    $_subscribedOptions($option) _ sheet param 
+	    ::tycho::stylesheet unsubscribe $this $sheet $param
+	    unset _subscribedOptions($option)
+	}
+    }
+    # Remember the over-ridden options
+    array set _overriddenOptions $args
+
+    # Configure the options
     uplevel ::itk::Archetype::itk_initialize $args
 }
 
@@ -738,6 +853,8 @@ body ::tycho::TopLevel::safeEval {args} {
 # all widgets access the "global" preference set; some windows will,
 # however, need to access a different preference set, and they
 # must indicate so by overriding this method.
+#
+# <b>OBSOLETE</b>
 #
 body ::tycho::TopLevel::preference {mode args} {
     eval ::tycho::preference $mode "global" $args
