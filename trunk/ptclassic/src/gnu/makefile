@@ -62,11 +62,11 @@ GNU_PREFIX=$(GNU_DEST)/common
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=2.7.2.1
+GCC_VERSION=2.8.0
 # If you are trying to build GNU for Linux, you may want to uncomment
 # the next line and comment out the following line
 #LIBGPLUSPLUS_VERSION=27.1.0
-LIBGPLUSPLUS_VERSION=2.7.2
+LIBGPLUSPLUS_VERSION=2.8.0
 
 # Machine dependent files
 GNU_EXEC_PREFIX=$(GNU_DEST)/$(PTARCH)
