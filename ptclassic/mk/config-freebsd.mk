@@ -31,54 +31,27 @@
 #                      
 # Programmer: 	John Wehle, john@feith.com
 # Modified by: 	Peter Dufault, dufault@hda.com (HD Associates, Inc)  
-#
 
-# In February  1996, the following configuration was tested:
-# OS: FreeBSD 2.1-STABLE.  This should work OK with 2.1-Release and
-# 2.1-Stable.  Any of the post 2.1-Stable snapshots are good bets since
-# people will be real interested in problems.  2.2 users are on their
-# own, as they know.
-# 
-# Compiler: the Pentium FreeBSD port of gcc 2.7.2 in the FreeBSD ports
-# collection with the following minor fix to disable .weak symbols.
-# This patch will be installed in the port, so hopefully no one else
-# will need to apply it.  I built ptolemy with both "-m486" and
-# "-mpentium", and it appears to work OK in both cases.  I didn't do any
-# timing studies.  Here is the .weak patch for the compiler:
-# 
-# [The file to modify would be $PTOLEMY/src/gnu/src/gcc/config/i386/freebsd.h
-# This patch fixes a bug where ld gets errors because there are multiply
-# defined symbols in different .o files that make up a library. ]
-#
-# *** freebsd.h.b4	Mon Feb 12 18:40:53 1996
-# --- freebsd.h	Mon Feb 12 18:41:25 1996
-# ***************
-# *** 122,130 ****
-# --- 122,134 ----
-#   
-#   /* This is how we tell the assembler that a symbol is weak.  */
-#   
-# + #if 0
-# + /* This requires support in both the assembler and the loader:
-# +  */
-#   #define ASM_WEAKEN_LABEL(FILE,NAME) \
-#     do { fputs ("\t.weak\t", FILE); assemble_name (FILE, NAME); \
-#          fputc ('\n', FILE); } while (0)
-# + #endif
-#   
-#   /* The following macro defines the format used to output the second
-#      operand of the .type assembler directive.  Different svr4 assemblers
-# 
-# Library: libg++-2.7.1 directly from prep.  It configures and installs with
-# no problems.
-#
-# Make: gmake 3.74 from the FreeBSD ports collection, installed in the
-# search path as make.  Hopefully next time around we'll set it up
-# so "gmake MAKE=gmake" will work properly.
-#  
-# Note that Ptolemy0.6 uses itcl2.0 for the tycho editor and the gantt chart
-# viewer, so you will probably want to install itcl from the 
-# Ptolemy other.src tar file
+# Ptolemy 0.7 notes.  All first person presenatations are
+# by dufault@hda.com
+
+# If you're going to use ptolemy during the beta test use FreeBSD 2.2.1.
+# This has the correct versions of the compiler,
+# etc, and you won't have to install the "pgcc" port.  The 3.0 tree
+# may work but of course is under test and active development.
+# The older 2.1 branch will need at least the "pgcc" port of the new compiler.
+
+# I used xv from the ports collection rather than build the one
+# with Ptolemy.
+
+# The basic process is to build the included itcl2.2 and add the shared
+# libraries, build octtools, and then build ptolemy.  I provided a
+# build script that worked for me.
+
+# Note: You need a lot of swap to build Ptolemy.  I expect out of the
+# box installations using the sysinstall default will not have enough.
+# I have about 100MB and it just sneaks by.
+# Use "vnconfig" to swap to a file if you don't have enough.
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
@@ -88,13 +61,17 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# You may want to override the "-g" in LOCALCCFLAGS for a true
+# production environment - the link time and program output are large.
+
 #
 # Programs to use
 #
 RANLIB =	ranlib
 # Use gcc everywhere including in octtools
 CC =		gcc
-CPLUSPLUS =	g++ -I$(ROOT)/src/compat/freebsd
+
+CPLUSPLUS =	g++
 
 OCTTOOLS_MM_LIB=
 OCT_CC =	gcc $(OCTTOOLS_MM_LIB)
@@ -143,9 +120,9 @@ CSYSLIBS =	-lm -lc -lcompat
 # system libraries (libraries from the environment)
 SYSLIBS =	-lg++ -lstdc++  $(CSYSLIBS)
 
-LINKFLAGS =	-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
-#LINKFLAGS =	-L$(LIBDIR) -Xlinker -S -Xlinker -x
-LINKFLAGS_D =	-L$(LIBDIR) -g -static
+LINKSTRIPFLAGS=-Wl,-s
+LINKFLAGS =	-L$(LIBDIR)  $(LINKSTRIPFLAGS)
+LINKFLAGS_D =	-L$(LIBDIR) -g
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
@@ -182,10 +159,12 @@ QUANTIFY =
 #S56DIR =	$(ROOT)/vendors/s56dsp
 S56DIR =
 
-# Used to compile xv.  Use -traditional to avoid varargs problems
-# I'm not proud of this "const" work around for FreeBSD.  I'm not sure
-# why NetBSD doesn't need it - We need "-traditional" for varargs and
-# then we get into problems with "const" in the headers.
-XV_CC =		gcc -Dconst= -D__const= -traditional \
-			-DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
+# XV is not built for Ptolemy 0.7 on FreeBSD.  The version in the ports
+# collection is used.
+XV_CC =		gcc -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 XMKMF =		xmkmf
+
+# Matlab architecture.  Untested by me and taken directly from the
+# Linux configuration - you'll have to have the
+# linux emulator installed with the Linux matlab.
+MATARCH = lnx86 #i486
