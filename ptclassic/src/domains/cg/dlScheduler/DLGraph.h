@@ -57,10 +57,7 @@ public:
 	
 	// reset the graph for new schedules.
 	// initialize runnableNodes.
-	void resetGraph();
-
-	// compute the total work of a node's descendents.
-	int workAfterMe(ParNode* pd);
+	virtual void resetGraph();
 
 	// Fetch the runnable node of highest static level.
 	DLNode* fetchNode()
@@ -70,19 +67,12 @@ public:
 	void decreaseNodes()	{ unschedNodes--; }
 	int  numUnschedNodes()	{ return unschedNodes; }
 
-	// methods for "unschedWork"
-	void decreaseWork(int val) { unschedWork -= val; }
-	int sizeUnschedWork()	{ return unschedWork; }
-
 protected:
 	// reset the busy flag of the DLNodes.
 	virtual void resetNodes();
 
 	// number of unscheduled nodes.
 	int unschedNodes;
-
-	// The sum of unscheduled work
-	int unschedWork;
 
 	// redefine these virtual allocator to allocate DL Nodes.
 	EGNode *newNode(DataFlowStar*, int);
