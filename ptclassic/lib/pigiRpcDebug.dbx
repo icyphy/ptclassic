@@ -10,6 +10,9 @@ dbxcmdfile=/tmp/pigiRpcDebug.dbx$$
 
 cat > $dbxcmdfile <<EOF
 stop in main
+pathmap /export /vol
+pathmap -d /tmp_mnt
+pathmap /tmp_mnt /vol
 EOF
 
 # If the user has a .ptdbxinit file, then add it to the command file
