@@ -46,18 +46,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern StringList CG56ONE;
 
+// Defined in CG56Domain.cc
+extern const char CG56domainName[];
+
 class CG56Target : public virtual MotorolaTarget {
 public:
     // constructor
-    CG56Target (const char* nam, const char* desc);
+    CG56Target(const char* nam, const char* desc,
+	       const char* assocDomain = CG56domainName);
 
     // copy constructor
     CG56Target(const CG56Target& src);
 
+    // return a copy of itself
     /*virtual*/ Block* makeNew() const;
-
-    // return the domain of the galaxy if it exists and "CG56" otherwise
-    /*virtual*/ const char* domain();
 
     /*virtual*/ int isA(const char*) const;
     /*virtual*/ void headerCode();

@@ -45,9 +45,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56Star.h"
 #include "ConversionTable.h"
 
-// Defined in CG56Domain.cc
-extern const char CG56domainName[];
-
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -68,14 +65,16 @@ public:
 };
 static CG56ConversionTable cg56ConversionTable;
 
-CG56Target::CG56Target (const char* nam, const char* desc) :
-MotorolaTarget(nam,desc,"CG56Star") {
+CG56Target::CG56Target(const char* nam, const char* desc,
+		       const char* assocDomain) :
+MotorolaTarget(nam, desc, "CG56Star", assocDomain) {
     initDataMembers();
 }
 
 // copy constructor
 CG56Target::CG56Target(const CG56Target& src) : 
-MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {
+MotorolaTarget(src.name(), src.descriptor(),
+	       src.starType(), src.getAssociatedDomain()) {
     initDataMembers();
 }
 
@@ -86,10 +85,6 @@ void CG56Target::initDataMembers() {
 
     // Initialize the assembler options
     assemblerOptions = "-A -B -L -Oso";
-
-    // Set the pathname of the directory to hold generated code
-    destDirName = destDirectoryName(CG56domainName);
-    destDirectory.setInitValue(destDirName);
 }
 
 int CG56Target :: compileCode() {
@@ -140,10 +135,6 @@ void CG56Target::writeFloat(double val) {
     myCode << "; WARNING: the M56000 does not support floating point!\n";
     myCode << "; perhaps this state was meant to be type FIX?\n";
     MotorolaTarget::writeFloat(val);
-}
-
-const char* CG56Target::domain() {
-    return galaxy() ? galaxy()->domain() : CG56domainName;
 }
 
 const char* CG56Target::className() const { return "CG56Target"; }
