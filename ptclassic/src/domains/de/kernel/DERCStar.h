@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <assert.h>
+#include <stdio.h>
 #include "Particle.h"
 #include "DERepeatStar.h"
 #include "Resource.h"
