@@ -746,7 +746,7 @@ char *key, *value, *arg;
     tkIntTech *realTech = (tkIntTech *) value;
     int *count = (int *) arg;
 
-    if (*count = zeroAlt(realTech)) {
+    if ( (*count = zeroAlt(realTech)) ) {
 	return ST_STOP;
     } else {
 	return ST_CONTINUE;
