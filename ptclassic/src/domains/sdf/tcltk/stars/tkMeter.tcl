@@ -8,21 +8,10 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
-# When this file is sourced, it is assumed that the following global
-# variables have been set:
-#	uniqueSymbol
-#	TkMeter_numInputs
-#	ptkControlPanel
-#	TkMeter_label
-#	TkMeter_low
-#	TkMeter_high
-# where the last three are given values corresponding to parameter values.
 
-if {![info exists putInCntrPan]} {set putInCntrPan 1}
-
-if {$putInCntrPan} \
-   { set s $ptkControlPanel.low.${uniqueSymbol}meter } \
-   { set s $ptkControlPanel.${uniqueSymbol}meter }
+if {[set ${starID}(put_in_control_panel)]} \
+   { set s $ptkControlPanel.low.meter_$starID } \
+   { set s $ptkControlPanel.meter_$starID }
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -30,7 +19,7 @@ if {$putInCntrPan} \
 
 if {![winfo exists $s]} {
 
-    if {$putInCntrPan} {
+    if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
 	pack append $ptkControlPanel.low $s top
     } {
@@ -41,34 +30,30 @@ if {![winfo exists $s]} {
 
     frame $s.f
     message $s.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
-	-text $TkMeter_label
-    for {set i 0} {$i < $TkMeter_numInputs} {incr i} {
-    	ptkMakeMeter $s.f m$i "" $TkMeter_low $TkMeter_high
+	-text [set ${starID}(label)]
+    for {set i 0} {$i < [set ${starID}(numInputs)]} {incr i} {
+    	ptkMakeMeter $s.f m$i "" [set ${starID}(low)] [set ${starID}(high)]
     }
     pack append $s $s.msg {top expand} $s.f top
 
-    if {!$putInCntrPan} {
+    if {![set ${starID}(put_in_control_panel)]} {
         button $s.ok -text "DISMISS" -command \
 		"ptkStop [curuniverse]; destroy $s"
         pack append $s $s.ok {top fillx}
     }
 
-    # In the following procedure, all variables are passed, so
-    # there is no need to evaluat any values when the file is sourced.
-    proc tkMeterSetValues {uniqueSymbol numInputs} "
-        set win $s
-        set c \$win.f
-        set inputVals \[${uniqueSymbol}grabInputs]
-	for {set i 0} {\$i < \$numInputs} {incr i} {
-            set in \[lindex \$inputVals \$i]
-            ptkSetMeter \$win.f m\$i \$in
+    proc tkMeterSetValues {starID numInputs win} {
+        set c $win.f
+        set inputVals [grabInputs_$starID]
+	for {set i 0} {$i < $numInputs} {incr i} {
+            set in [lindex $inputVals $i]
+            ptkSetMeter $win.f m$i $in
 	}
         update
-    "
+    }
 
-    # In the following definition, the value of uniqueSymbol and
-    # numInputs is evaluated when the file is sourced.
-    proc ${uniqueSymbol}callTcl {} "
-        tkMeterSetValues $uniqueSymbol $TkMeter_numInputs
+    proc callTcl_$starID {starID} "
+        tkMeterSetValues $starID [set ${starID}(numInputs)] $s
     "
 }
+unset s

@@ -6,7 +6,7 @@ defstar {
 Just like the LMS filter, but with an animated Tk display of
 the taps, plus associated controls.
 	}
-	version { $Id$ }
+	version { @(#)SDFLMSTkPlot.pl	1.1	10/8/93 }
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1993 The Regents of the University of California.
@@ -188,20 +188,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	        sprintf(command,
 		    "ptkMakeButton %s.middle %s \"Reset taps\" %sLMSTkCB",
 		    winName, butName, butName);
-	        Tcl_Eval(ptkInterp, command, 0, (char**)NULL);
+	        Tcl_GlobalEval(ptkInterp, command);
 	    	
 	        // Next, a slider to control the step size
 	        sprintf(command,
 		    "ptkMakeScale %s.low %s \"Step size\" %d %sLMSTkCB",
 		    winName, sliderName, position, sliderName);
-	        if(Tcl_Eval(ptkInterp, command, 0, (char**)NULL) != TCL_OK)
+	        if(Tcl_GlobalEval(ptkInterp, command) != TCL_OK)
 		    Error::warn(*this,"Cannot make step size control");
     
 	    }
 	    // display the slider value
 	    sprintf(command, "%s.low.%s.value configure -text \"%.4f \"",
 		    winName, sliderName, double(stepSize));
-	    if(Tcl_Eval(ptkInterp, command, 0, (char**)NULL) != TCL_OK)
+	    if(Tcl_GlobalEval(ptkInterp, command) != TCL_OK)
 		    Error::warn(*this,"Cannot update step size display");
 
 	    // set the scale position
@@ -261,7 +261,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		// display the slider value
 		sprintf(command, "%s.low.%s.value configure -text \"%.4f \"",
 			winName, sliderName, double(stepSize));
-		if(Tcl_Eval(ptkInterp, command, 0, (char**)NULL) != TCL_OK)
+		if(Tcl_GlobalEval(ptkInterp, command) != TCL_OK)
 		    Error::abortRun(*this,"Cannot update step size display");
 	    }
 	}

@@ -8,21 +8,10 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
-# When this file is sourced, it is assumed that the following global
-# variables have been set:
-#	uniqueSymbol
-#	TkShowValues_numInputs
-#	TkShowValues_label
-#	TkShowValues_waitBetweenOutputs
-#	putInCntrPan
-# where the last three are given values corresponding to parameter values.
 
-if {![info exists putInCntrPan]} {set putInCntrPan 1}
-
-if {$putInCntrPan} \
-   { set s $ptkControlPanel.low.${uniqueSymbol}label } \
-   { set s $ptkControlPanel.${uniqueSymbol}label }
-
+if {[set ${starID}(put_in_control_panel)]} \
+   { set s $ptkControlPanel.low.label_$starID } \
+   { set s $ptkControlPanel.label_$starID }
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -30,15 +19,15 @@ if {$putInCntrPan} \
 
 if {![winfo exists $s]} {
 
-    proc tkShowValueMakeWindow {putInCntrPan win label numInputs univ} {
+    proc tkShowValueMakeWindow {putInCntrPan win label numInputs univ starID} {
 	global ptkControlPanel
         if {$putInCntrPan} {
 	    frame $win
 	    pack append $ptkControlPanel.low $win top
         } {
             toplevel $win
-            wm title $win "Bar Meters"
-            wm iconname $win "Bar Meters"
+            wm title $win "Show Values"
+            wm iconname $win "Show Values"
         }
 
         frame $win.f
@@ -46,11 +35,11 @@ if {![winfo exists $s]} {
 	    -text $label
 
 	# The following flag is used if the waitBetweenOutputs parameter is set
-	global tkShowValueWaitTrig
-	set tkShowValueWaitTrig 0
+	global $starID
+	set ${starID}(tkShowValueWaitTrig) 0
         for {set i 0} {$i < $numInputs} {incr i} {
     	    button $win.f.m$i -relief raised -width 40 -bg AntiqueWhite \
-		-command "incr tkShowValueWaitTrig" 
+		-command "incr ${starID}(tkShowValueWaitTrig)" 
 	    pack append $win.f $win.f.m$i {top frame w pady 4 expand filly}
         }
         pack append $win $win.msg {top expand} $win.f top
@@ -62,12 +51,13 @@ if {![winfo exists $s]} {
         }
     }
 
-    tkShowValueMakeWindow $putInCntrPan $s $TkShowValues_label \
-	$TkShowValues_numInputs [curuniverse]
+    tkShowValueMakeWindow [set ${starID}(put_in_control_panel)] \
+	$s [set ${starID}(label)] \
+	[set ${starID}(numInputs)] [curuniverse] $starID
 
-    proc tkShowValueSetValues {uniqueSymbol numInputs win} {
+    proc tkShowValueSetValues {starID numInputs win} {
         set c $win.f
-        set inputVals [${uniqueSymbol}grabInputs]
+        set inputVals [grabInputs_$starID]
 	for {set i 0} {$i < $numInputs} {incr i} {
             set in [lindex $inputVals $i]
             $win.f.m$i configure -text $in
@@ -75,15 +65,15 @@ if {![winfo exists $s]} {
         update
     }
 
-    proc tkShowValueWait {flag uniqueSymbol numInputs win} {
+    proc tkShowValueWait {flag starID numInputs win} {
 	if {$flag} {
 	    for {set i 0} {$i < $numInputs} {incr i} {
 	        $win.f.m$i configure -bg {orange1}
 	        $win.f.m$i configure -activebackground {tan3}
 	    }
-	    global tkShowValueWaitTrig
-	    set tkShowValueWaitTrig 0
-	    tkwait variable tkShowValueWaitTrig
+	    global $starID
+	    set ${starID}(tkShowValueWaitTrig) 0
+	    tkwait variable ${starID}(tkShowValueWaitTrig)
 	    for {set i 0} {$i < $numInputs} {incr i} {
 	        $win.f.m$i configure -bg {AntiqueWhite}
 	        $win.f.m$i configure -activebackground {burlywood}
@@ -91,11 +81,12 @@ if {![winfo exists $s]} {
 	}
     }
 
-    # In the following definition, the value of uniqueSymbol and
+    # In the following definition, the value of starID and
     # numInputs is evaluated when the file is sourced.
-    proc ${uniqueSymbol}callTcl {} "
-        tkShowValueSetValues $uniqueSymbol $TkShowValues_numInputs $s
-	tkShowValueWait $TkShowValues_waitBetweenOutputs $uniqueSymbol \
-		$TkShowValues_numInputs $s
+    proc callTcl_$starID {starID} "
+        tkShowValueSetValues $starID [set ${starID}(numInputs)] $s
+	tkShowValueWait [set ${starID}(wait_between_outputs)] $starID \
+		[set ${starID}(numInputs)] $s
     "
 }
+unset s

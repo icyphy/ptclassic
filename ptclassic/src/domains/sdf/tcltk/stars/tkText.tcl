@@ -8,17 +8,8 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 #
-# When this file is sourced, it is assumed that the following global
-# variables have been set:
-#	uniqueSymbol
-#	TkText_numInputs
-#	TkText_label
-#	TkText_numberOfValues
-#	TkText_waitBetweenOutputs
-# where the last three are given values corresponding to parameter values.
 
-set s $ptkControlPanel.${uniqueSymbol}label
-
+set s $ptkControlPanel.label_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -26,19 +17,19 @@ set s $ptkControlPanel.${uniqueSymbol}label
 
 if {![winfo exists $s]} {
 
-    proc tkTextMakeWindow {win label numInputs univ wait} {
+    proc tkTextMakeWindow {win label numInputs univ wait starID} {
 	global ptkControlPanel
         toplevel $win
-        wm title $win "Bar Meters"
-        wm iconname $win "Bar Meters"
+        wm title $win "Text Display"
+        wm iconname $win "Text Display"
 
         frame $win.f
         message $win.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
 	    -text $label
 
 	# The following flag is used if the waitBetweenOutputs parameter is set
-	global tkTextWaitTrig
-	set tkTextWaitTrig 0
+	global $starID
+	set ${starID}(tkTextWaitTrig) 0
         for {set i 0} {$i < $numInputs} {incr i} {
     	    frame $win.f.m$i
     	    text $win.f.m$i.t -relief raised -bd 2 -width 40 -height 10 \
@@ -52,12 +43,11 @@ if {![winfo exists $s]} {
         pack append $win $win.msg {top fill} $win.f {top fill expand}
 
 	if {$wait} {
-	    # The following flag is used if the waitBetweenOutputs
+	    # The following flag is used if the wait_between_outputs
 	    # parameter is set
-	    global tkTextWaitTrig
-	    set tkTextWaitTrig 0
+	    set ${starID}(tkTextWaitTrig) 0
 	    button $win.cont -relief raised -width 40 -bg AntiqueWhite \
-                -command "incr tkTextWaitTrig" -text CONTINUE
+                -command "incr ${starID}(tkTextWaitTrig)" -text CONTINUE
             pack append $win $win.cont {top fillx}
 	}
         button $win.ok -text "DISMISS" -command \
@@ -65,22 +55,22 @@ if {![winfo exists $s]} {
         pack append $win $win.ok {top fillx}
     }
 
-    tkTextMakeWindow $s $TkText_label $TkText_numInputs [curuniverse] \
-		$TkText_waitBetweenOutputs
+    tkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
+		[curuniverse] [set ${starID}(wait_between_outputs)] $starID
 
-    proc tkTextSetValues {uniqueSymbol numInputs win numLines} {
+    proc tkTextSetValues {starID numInputs win numLines} {
         set c $win.f
-        set inputVals [${uniqueSymbol}grabInputs]
+        set inputVals [grabInputs_$starID]
 	for {set i 0} {$i < $numInputs} {incr i} {
             set in [lindex $inputVals $i]
             $win.f.m$i.t yview -pickplace end
             $win.f.m$i.t insert end $in
             $win.f.m$i.t insert end "\n"
 	}
-	global ${uniqueSymbol}LineCount
-	incr ${uniqueSymbol}LineCount
-	if {[set ${uniqueSymbol}LineCount] >= $numLines} {
-	    incr ${uniqueSymbol}LineCount -1
+	global $starID
+	incr ${starID}(lineCount)
+	if {[set ${starID}(lineCount)] >= $numLines} {
+	    incr ${starID}(lineCount) -1
 	    for {set i 0} {$i < $numInputs} {incr i} {
 		$win.f.m$i.t delete 1.0 2.0
 	    }
@@ -88,27 +78,28 @@ if {![winfo exists $s]} {
         update
     }
 
-    proc tkTextWait {flag uniqueSymbol numInputs win} {
+    proc tkTextWait {flag starID numInputs win} {
 	if {$flag} {
 	    $win.cont configure -bg {orange1}
 	    $win.cont configure -activebackground {tan3}
-	    global tkTextWaitTrig
-	    set tkTextWaitTrig 0
-	    tkwait variable tkTextWaitTrig
+	    global $starID
+	    set ${starID}(tkTextWaitTrig) 0
+	    tkwait variable ${starID}(tkTextWaitTrig)
 	    $win.cont configure -bg {AntiqueWhite}
 	    $win.cont configure -activebackground {burlywood}
 	}
     }
 
-    global ${uniqueSymbol}LineCount
-    set ${uniqueSymbol}LineCount 0
+    global $starID
+    set ${starID}(lineCount) 0
 
-    # In the following definition, the value of uniqueSymbol and
+    # In the following definition, the value of starID and
     # numInputs is evaluated when the file is sourced.
-    proc ${uniqueSymbol}callTcl {} "
-        tkTextSetValues $uniqueSymbol $TkText_numInputs $s \
-		$TkText_numberOfValues
-	tkTextWait $TkText_waitBetweenOutputs $uniqueSymbol \
-		$TkText_numInputs $s
+    proc callTcl_$starID {starID} "
+        tkTextSetValues $starID [set ${starID}(numInputs)] $s \
+		[set ${starID}(number_of_past_values)]
+	tkTextWait [set ${starID}(wait_between_outputs)] $starID \
+		[set ${starID}(numInputs)] $s
     "
 }
+unset s
