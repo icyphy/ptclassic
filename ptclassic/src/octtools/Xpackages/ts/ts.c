@@ -554,6 +554,14 @@ String str;			/* Null terminated array of characters */
 char buf[1024];
 #endif
 
+    /* Defend against overlength input string: somewhat arbitrarily,
+     * we choose to truncate the string to fit.
+     */
+    if (len > info->bufsize) {
+      len = info->bufsize;
+    }
+
+
     if ((info->bufsize - info->actsize) <= len) {
 	/* Must make space */
 	if (!ts_line_remove(w, info, len)) {
