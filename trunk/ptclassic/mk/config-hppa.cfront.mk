@@ -58,8 +58,13 @@ X11_INCSPEC = 	-I$(ROOT)/src/compat
 X11_LIBSPEC = 	-L/usr/lib/X11R5 -lX11
 X11EXT_LIBSPEC = -L/usr/lib/X11R5 -lXext
 
+# Used by xv
+XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
+XV_INSTALL=bsdinst
+
 # Ptolemy will not build the s56dsp files under sun cfront or on the hppa
 #S56DIR= 	$(ROOT)/vendors/s56dsp
 S56DIR=
 
-FLUSH_CACHE = $(LIBDIR)/flush_cache.o
+# Used to flush the cache on the hppa.  (source is in the kernel/ directory)
+FLUSH_CACHE = flush_cache.o
