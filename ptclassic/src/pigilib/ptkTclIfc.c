@@ -113,12 +113,19 @@ ptkSetHighlightFacet(dummy, interp, argc, argv)
     int argc;                           /* Number of arguments. */
     char **argv;                        /* Argument strings. */
 {
-    if(argc != 2) {
+    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
+
+    if (argc != 2) {
         strcpy(interp->result,
             "incorrect usage: should be \"ptkSetHighlightFacet <octHandle>\"");
         return TCL_ERROR;
     }
-    if (ptkHandle2OctObj(argv[1], &lastFacet)) return TCL_OK;
+
+    if (ptkHandle2OctObj(argv[1], &facet)) {
+	if (lastFacet.objectId != facet.objectId) FreeOctMembers(&lastFacet);
+	lastFacet = facet;		/* do not free facet */
+	return TCL_OK;
+    }
     else {
 	strcpy(interp->result,
 	    "Failed to find oct object corresponding to handle");
