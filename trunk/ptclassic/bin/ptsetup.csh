@@ -21,14 +21,22 @@ else
 	set progname = ptsetup.csh
 endif
 
+set ptarch=`$PTOLEMY/bin/ptarch`
 if ( ! $?PTARCH ) then
-    setenv PTARCH `$PTOLEMY/bin/ptarch`
+    setenv PTARCH $ptarch
 else 
-	if ( $PTARCH != `$PTOLEMY/bin/ptarch` && $PTARCH !~ *?cfront ) then
-		echo $progname : Warning: \$PTARCH == $PTARCH,
-		echo but \$PTOLEMY/bin/ptarch returns `$PTOLEMY/bin/ptarch`
-	endif
+    # check that the basic architecture is set correctly
+    if ( "$PTARCH" !~ "$ptarch"* ) then
+	echo ${progname}: Warning: \$PTARCH == $PTARCH,
+	echo "        "but \$PTOLEMY/bin/ptarch returns ${ptarch}.
+    endif
+    # check that a makefile for this $PTARCH exists
+    if ( ! -e "$PTOLEMY/mk/config-${PTARCH}.mk" ) then
+	echo ${progname}: Warning: \$PTARCH == $PTARCH,
+	echo "        "but there is no makefile for this architecture.
+    endif
 endif
+unset ptarch
 if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
@@ -109,5 +117,14 @@ endif
 # spaces in its name
 setenv PTPWD "`pwd`"
 
-set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
-
+# check if binary and script path is in $path
+unset sp bp
+foreach i ( $path )
+	if ( "$PTOLEMY/bin.$PTARCH" == "$i" ) set bp
+	if ( "$PTOLEMY/bin" == "$i" ) set sp
+end 
+# prepend Ptolemy binary path if not in $path
+if ( ! $?bp ) set path = ( $PTOLEMY/bin.$PTARCH $path )
+# prepend Ptolemy script path if not in $path
+if ( ! $?sp ) set path = ( $PTOLEMY/bin $path )
+unset sp bp i
