@@ -39,9 +39,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS = \
-	editors.html \
-	index.html \
-	shells.html
+	index.html
 
 MISC_FILES =	codeDoc internals usersGuides
 
