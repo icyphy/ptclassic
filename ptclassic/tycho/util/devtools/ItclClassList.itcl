@@ -187,7 +187,7 @@ body ::tycho::ItclClassList::includeTychoClasses {} {
             [file join edit slate] \
             [file join util devtools] \
             [file join util tydoc] \
-            [file join typt editors ] \
+            [file join typt edit ] \
             [file join typt kernel ] \
             [file join lib util ] \
             [file join lib widgets ] \
