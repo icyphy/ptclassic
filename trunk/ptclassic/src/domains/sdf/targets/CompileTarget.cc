@@ -166,8 +166,7 @@ int CompileTarget::run() {
 
     myCode += tcltkInitialize(universeName);
 
-    myCode += "\n// Define the universe being run";
-    myCode += "int iterations;\n";
+    myCode += "\n// Define the universe being run\n";
     myCode += universeClassName;
     myCode += " ";
     myCode += universeName;
@@ -177,8 +176,8 @@ int CompileTarget::run() {
     myCode += universeName;
     myCode += "\");\n";
     myCode += "\n";
-    myCode += "// set default value for number of iterations\n";
-    myCode += "iterations = ";
+    myCode += "// Set the number of iterations\n";
+    myCode += "int iterations = ";
     myCode += int(scheduler()->getStopTime());
     myCode += ";\n";
 
