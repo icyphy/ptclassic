@@ -472,8 +472,8 @@ body ::tycho::File::constructor {args} {
     # Identify the object for crash recovery
     set fileObjects($this) $this
 
-    # This is deferred so that it runs after constructors are done.
-    after idle [code evalIfExists $this reload]
+    # reload runs after constructors are done
+    whenConstructed $this reload
 
     # Initiate the auto-save loop
     autoSave
