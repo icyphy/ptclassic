@@ -171,6 +171,12 @@ YACC = yacc
 # lex is used by islang on the hp
 LEX = flex
 
+# If you are running bison, you may safely remove -ly from BISONFLEXLIBS
+# domains/ipus/islang uses BISONFLEXLIBS
+# If you are running flex, you may want to try:
+# BISONFLEXLIBS = 	-fl
+BISONFLEXLIBS = 	-ly -ll 
+
 # command to generate dependencies (cfront users can try CC -M)
 DEPEND=g++ -MM
 
