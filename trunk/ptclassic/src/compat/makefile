@@ -33,7 +33,7 @@
 # maintained.
 
 
-DIRS = X11R4 X11R5 cfront freebsd ptolemy
+DIRS = X11R4 X11R5 cfront ptolemy
 DEEPDIRS = matlab/extern/include mathematica/Source/Includes
 
 # Need to have $PTOLEMY as an absolute pathname for wish
