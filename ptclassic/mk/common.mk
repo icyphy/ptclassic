@@ -16,7 +16,7 @@ whatToBuild:	all
 
 # Rule for compiling C++ files
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
+	$(CPLUSPLUS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
 
 # Rule for compiling with cc
 .c.o:
