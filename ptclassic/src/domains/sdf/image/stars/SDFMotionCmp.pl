@@ -60,38 +60,15 @@ can be added or reduced-search motion compensation can be performed.
 		code {
 			int ii, jj, xvec, yvec;
 
-			// Do top row.
-			for(jj = 0; jj < width; jj += blocksize) {
-				DoOneBlock(*horz, *vert, diff, cur, prev, 0, jj, 0, 0,
-						width);
-				horz++; vert++;
-			}
-
-			// Do middle rows.
-			for(ii = blocksize; ii < height-blocksize; ii+=blocksize) {
-				DoOneBlock(*horz, *vert, diff, cur, prev, ii, 0, 0, 0,
-						width);
-				horz++; vert++;
-
-				for(jj = blocksize; jj < width-blocksize;
-						jj += blocksize) {
-					FindMatch(cur, prev, ii, jj, xvec, yvec, width);
+			for(ii = 0; ii < height; ii += blocksize) {
+				for(jj = 0; jj < width; jj += blocksize) {
+					FindMatch(cur, prev, ii, jj, xvec, yvec, width,
+							height);
 					DoOneBlock(*horz, *vert, diff, cur, prev, ii, jj,
 							xvec, yvec, width);
 					horz++; vert++;
 				}
-
-				DoOneBlock(*horz, *vert, diff, cur, prev, ii,
-						width-blocksize, 0, 0, width);
-				horz++; vert++;
 			} // end middle rows
-
-			// Do bottom row.
-			for(jj = 0; jj < width; jj += blocksize) {
-				DoOneBlock(*horz, *vert, diff, cur, prev,
-						height-blocksize, jj, 0, 0, width);
-				horz++; vert++;
-			}
 		} // end code{}
 	} // end doMC()
 
@@ -101,14 +78,22 @@ can be added or reduced-search motion compensation can be performed.
 		type { "void" }
 		arglist { "(unsigned const char* cur, 
 				unsigned const char* prev, const int ii, const int jj, 
-				int& xvec, int& yvec, const int width)" }
+				int& xvec, int& yvec, const int width,
+				const int height)" }
 		access { protected }
 		code {
+// If we're near the border, don't do motion comp.
+			if ((ii == 0) || (jj == 0) || (ii == height-blocksize) ||
+					(jj == width-blocksize)) {
+				xvec = yvec = 0;
+				return;
+			}
+
 			int i, j, deli, delj, *diffArr, bs2 = 2 * blocksize;
 			register int tmp1, tmp2, tmp3;
 			LOG_NEW; diffArr = new int[bs2*bs2];
 
-		// Set difference values for each offset
+// Set difference values for each offset
 			for(deli = 0; deli < bs2; deli++) {
 				for(delj = 0; delj < bs2; delj++) {
 					tmp3 = deli*bs2 + delj;
@@ -122,7 +107,7 @@ can be added or reduced-search motion compensation can be performed.
 									int(prev[tmp2+j]));
 			}	}	}	}
 
-		// Find min difference
+// Find min difference
 			int mini, minj;
 			mini = minj = blocksize;
 			for(i = 0; i < bs2; i++) {
