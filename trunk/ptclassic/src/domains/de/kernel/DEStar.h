@@ -41,7 +41,7 @@ protected:
 	// SIMPLE mode:
 	// A special case of PHASE mode where the size of InQue of input
 	// portholes is one, so unneccesary.
-	void setMode(FiringMode m);
+	void setMode(FiringMode m) { mode = m; }
 
 public:
 	// initialize domain-specific members
@@ -49,6 +49,9 @@ public:
 
 	// define firing
 	void fire();
+
+	// send output events to the global event queue.
+	void sendOutput();
 
 	// class identification
 	int isA(const char*) const;
