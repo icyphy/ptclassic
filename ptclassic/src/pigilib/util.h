@@ -20,7 +20,7 @@ extern void TildeExpand();
 extern char *SkipWhite();
 extern char *BaseName();
 extern boolean ConcatDirName();
-extern boolean UGetTechDir();
+extern boolean UGetFullTechDir();
 extern boolean YesNoToBoolean();
 extern char *BooleanToYesNo();
 extern boolean UniqNameInit();
