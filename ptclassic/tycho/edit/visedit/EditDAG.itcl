@@ -1074,7 +1074,7 @@ body ::tycho::EditDAG::showCurrentNodeInfo {state {press 2}} {
     if { $item != "" } {
 	if { [::tycho::lmember [$slate gettags $item] node] } {
             if {$press == 2} {
-                set shift $state
+                set shift [expr ($state & 1)]
             } else {
                 set shift $press
             }
