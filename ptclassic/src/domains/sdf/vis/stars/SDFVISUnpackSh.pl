@@ -12,9 +12,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF vis library }
 	desc { 
 	  UnPack a single floating point number into four floating 
-	  point numbers.  The input floating point number is first
-	  separated into four shorts and then each short is up cast 
-	  to a floating point number.}
+	    point numbers.  The input floating point number is first
+	    separated into four shorts and then each short is up cast 
+	    to a floating point number. Three things to notice:  
+            First assume that the input ranges from -1 to 1.
+            Second the code is inlined for faster performance.
+            Third data memory is prealigned for faster performance.
+            }	
 	input {
 		name { in }
 		type { float }
@@ -27,14 +31,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	ccinclude {<vis_proto.h>}
 	defstate {
-	        name { scale }
+	        name { scaledown }
 		type { float }
 		default { "1.0/32767.0" }
 		desc { Output scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code {
-                #define NumOut (4)
+#define NumOut (4)
 	}
 	protected{
 	  double *packedin;
@@ -55,16 +59,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 	  
 	  int index;
-	  double outvalue;
 	  short *invalue;
 	  
 	  *packedin = double(in%0);
 	  invalue = (short *) packedin;
-	  
-	  //scale input and unpack output
-	      for (index=0;index<NumOut;index++){
-		outvalue = (double) scale* (double) invalue[index];
-		out%(index) << outvalue;
-	      }
-      	}
+	  //scale down and unpack input
+	  out%0 << (double) (scaledown * (double) invalue[0]);
+	  out%1 << (double) (scaledown * (double) invalue[1]);
+	  out%2 << (double) (scaledown * (double) invalue[2]);
+	  out%3 << (double) (scaledown * (double) invalue[3]);
+	}
 }
