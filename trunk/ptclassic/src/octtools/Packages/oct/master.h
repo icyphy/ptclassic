@@ -30,9 +30,35 @@
 #ifndef ST_H
 #include "st.h"
 #endif /* ST_H */
+#include "ansi.h"
 
-typedef st_table master_table;
+#ifndef OCT_INTERNAL_H
+#include "internal.h"
+#endif
+/*typedef st_table master_table;*/
 
 master_table *oct_make_master_table();
 
+void oct_master_desc_set
+	ARGS((struct object_desc *object_desc));
+
+int oct_get_master
+	ARGS((struct facet *desc, struct octInstance *inst, struct master **master_p));
+
+int oct_make_master
+	ARGS(( struct facet *desc, struct octInstance *inst, struct master **master_p));
+
+octStatus oct_bind_master
+	ARGS((struct facet *desc, struct master *master));
+
+octStatus oct_invalidate_all_instance_bbs
+	ARGS((struct facet *desc));
+octStatus oct_update_all_instance_bbs
+	ARGS((struct facet *desc));
+octStatus oct_validate_all_instance_bbs
+	ARGS((struct facet *facet));
+int oct_dump_instances
+	ARGS((struct facet *desc));
+int oct_restore_instances
+	ARGS((struct facet *desc, int *next_type));
 #endif /* OCT_MASTER_H */
