@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-@(#)CGCrtlib.c	1.1 24/10/94
+$Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
