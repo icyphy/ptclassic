@@ -55,17 +55,6 @@ the HTML editor, not the HTML viewer. But that's what you get.
 <h3><a href="../kernel/gui/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
-<li>Need a "find-again" binding, and perhaps emacs-style incremental search.
-<li>The undo in the text widgets is only one level deep.
-<li>Selecting text does not automatically put it into the clipboard.
-After it's deselected, then it cannot be "stuffed" elsewhere from the
-clipboard.  
- <br>One workaround for this problem and the one level undo would be
-to make it so that deleting text does not automatically put it into the
-cut buffer, instead it goes into a separate undo buffer.  Using emacs
-kill rings would be nice here, but most apps these days have only
-one cut buffer.
- <br><B>To be fixed soon.</B>
 </ul>
 
 <h3><a href="../kernel/gui/Glimpse.itcl">Glimpse</a></h3>
@@ -210,11 +199,15 @@ create their own doc directory.
 <h2><a name="bugs in visual editors">Bugs in visual editors</a></h2>
 There are lots of bugs to be fixed in the visual editors, here are 
 some of the biggies.
- <P>We should remove all the edit commands in the visual editors that do not 
-work.
+ <P>The <CODE>viseditViewOnly</CODE> preference in the
+<CODE>interaction</CODE> stylesheet controls whether
+the node editing capabilities are turned on.  By default, node
+editing is turned off for most editors.
 <h3><a href="../edit/visedit/Graphics.itcl">Graphics</a></h3>
 <ul>
-<li> Cut and paste does not work in the Graphics widget.
+<li> Cut and paste does not work in the Graphics widget and are
+disabled by the <CODE>viseditViewOnly</CODE> preference.
+
 <li> Moved titles new position is not saved.
 <li> Moving or adding titles does not mark the buffer modified.
 <li> Most bindings in the File menu do not work.
@@ -222,7 +215,11 @@ work.
 
 <h3><a href="../edit/visedit/EditDAG.itcl">EditDAG</a></h3>
 <ul>
-<li> addArc does not work. 
+
+<li> All Node Editing capabilities in EditDAG have been disabled.  The
+<CODE>viseditViewOnly</CODE> preference in the interaction style sheet
+can be set to false to reenable Node Editing.
+<li> addArc does not work, and is disabled by <CODE>viseditViewOnly</CODE>
  <P>Karl-Hermann Wieners &lt;kwieners@TechFak.Uni-Bielefeld.DE&gt; writes:
 <PRE>
     Problem is, if I have selected a node with
@@ -253,11 +250,9 @@ work.
     >  test addArc root1 root2
     root1
     >  test roots
-    root1 root2
-    >  test describe
-    {root1 {} {}} {root2 {} root1}
-
+</ul>
 </PRE>
+
 
 </ul>
 <h3><a href="../edit/visedit/ProfileTcl.itcl">ProfileTcl</a></h3>
@@ -268,6 +263,8 @@ work.
 
 <H2><a name="bugs in java">Bugs in the Tycho/Java environment</a></H2>
 <OL>
+
+<li> TclJava has been removed in Tycho0.3 and later.
 
 <LI> In the Java editor,
 The <CODE>Compile</CODE> and <CODE>Compile and Run</CODE>
