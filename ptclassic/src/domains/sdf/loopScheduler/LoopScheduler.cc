@@ -96,7 +96,7 @@ int LoopScheduler::computeSchedule(Galaxy& g)
 	if (SDFScheduler::computeSchedule(*dGal)) {
 		if (logstrm) {
 			*logstrm << "Doing simulated run to set geodesics\n";
-			simRunRealStars();
+			dGal->genSubScheds();
 		}
 		if (logstrm) {
 			*logstrm << "Schedule:\n" << displaySchedule();

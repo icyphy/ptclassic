@@ -134,7 +134,8 @@ int LSCluster :: run() {
 	
 static const int FORCE = 2;
 // simulate the execution of the cluster
-void LSCluster :: simRunRealStars() {
+// FIXME: probably not right.
+void LSCluster :: fixBufferSizes(int) {
 
 	SDFFiring* f = firing;
 	while (f) {
