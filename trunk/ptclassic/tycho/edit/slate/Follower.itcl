@@ -76,9 +76,6 @@ class ::tycho::Follower {
 # interaction behavior.
 # 
 body ::tycho::Follower::activate {t x y args} {
-    # Remember the tag/object, for use in deactivate
-    set tag $t
-
     # Set the target. The client can modify its options later
     # with -activatecommand if desired. If the target argument is
     # in fact a tag, get the current picture from the slate.
@@ -88,25 +85,19 @@ body ::tycho::Follower::activate {t x y args} {
 	target [$slate find withtag current]
     }
 
-    # Set up the bindings. Note: the bindings are set to the tag,
-    # not to the current object. -- WHY???
-    $slate bind $tag \
+    # Set up the bindings.
+    $slate bind $target \
 	    [eval ::tycho::Interactor::event Motion $args] \
 	    [list @scope [info class] "$this drag %x %y; update idletasks"]
-    $slate bind $tag \
+    $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] \
 	    [list @scope [info class] "$this release; $this deactivate $args"]
-
-    # If there's a proxy, tell it about the current target
-    if { $proxy != "" } {
-	$proxy target $target
-    }
 
     # Execute the user-specified activation command
     execute $activatecommand $x $y $args
 
     # Start the interaction sequence
-    eval click $x $y $options $args
+    eval click $x $y $args
 }
 
 
@@ -118,13 +109,10 @@ body ::tycho::Follower::activate {t x y args} {
 # 
 body ::tycho::Follower::deactivate {args} {
     # Remove bindings from the current tag
-    $slate bind $tag \
+    $slate bind $target\
 	    [eval ::tycho::Interactor::event Motion $args] {}
-    $slate bind $tag \
+    $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] {}
 
-    # Execute the user-specified de-activation command
-    if { $deactivatecommand != "" } {
-	uplevel #0 apply [list $deactivatecommand] $target
-    }
+    execute $deactivatecommand $args
 }
