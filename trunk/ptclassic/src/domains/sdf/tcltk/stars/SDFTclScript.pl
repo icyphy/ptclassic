@@ -138,17 +138,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 
 	    if(((const char*)tcl_file)[0] == '$') {
-	        sprintf(buf,"uplevel #0 {source [ptkExpandEnvVar \\%s]}",
+	        sprintf(buf,"source [ptkExpandEnvVar \\%s]",
 			    (const char*)tcl_file);
-	        if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
+	        if(Tcl_GlobalEval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK){
 		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
 					0, (char **) NULL);
 		    Error::abortRun(*this, "Cannot source tcl script");
 		    return;
 		}
 	    } else {
-	        sprintf(buf,"uplevel #0 {source %s}",(const char*)tcl_file);
-	        if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
+	        sprintf(buf,"source %s",(const char*)tcl_file);
+	        if(Tcl_GlobalEval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK){
 		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
 					0, (char **) NULL);
 		    Error::abortRun(*this, "Cannot source tcl script");
