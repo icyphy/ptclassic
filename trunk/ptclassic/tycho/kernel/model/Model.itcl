@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -90,13 +90,16 @@ class ::tycho::Model {
     # Manipulate a history mark
     method mark {mode args}
 
+    # Execute a command and don't record it in ths history
+    method norecord {command index args}
+
     # Notify subscribers of a data change or an event
     method notify {type command args}
 
     # Change model data, record, and publish it
     method publish {command index args}
 
-    # Record a change in data
+    # Execute a command and record it in ths history
     method record {command index args}
 
     # Execute redo commands
@@ -115,10 +118,16 @@ class ::tycho::Model {
     ####                protected methods                        ####
 
     # Execute a sequence of commands in a list
-    protected method sequence {cmdlist}
+    protected method _compound {cmdlist}
 
     #################################################################
     ####               protected variables                       ####
+
+    # A flag saying whether to record commands
+    protected variable recording 0
+
+    # The most-specific class (saves calling [info class] repeatedly)
+    protected variable scope 0
 
     #################################################################
     ####                  private methods                        ####
@@ -143,9 +152,6 @@ class ::tycho::Model {
     # notification script.
     private variable _subs
     
-    # A flag saying whether commands are being recorded (usually true)
-    private variable _recording 1
-
     # The array of redo commands
     private variable _redo
 
@@ -182,13 +188,14 @@ body ::tycho::Model::constructor {args} {
     set _mark(current) 0
     set _mark(first) 0
     set _mark(last) 0
-    set _mark(loaded) 0
     set _mark(published) 0
-    set _mark(saved) 0
 
     # Initialize the first node of the history
     set _undo(0) {}
     set _redo(0) {}
+
+    # Set the "scope" variable
+    set scope [info class]
 
     # Evaluate options
     eval configure $args
@@ -339,23 +346,7 @@ body ::tycho::Model::history {mode args} {
 ########################################################################
 #### mark
 #
-# Place a mark in the command history. Each model maintains a set
-# of marks that can be placed into the undo-redo history. By
-# default, a model maintains these marks:
-#
-# <ul>
-# <li><b>current</b>: The most recent command executed.
-# <li><b>first</b>: The first command in the history.
-# <li><b>last</b>: The last command in the history.
-# <li><b>published</b>: The most recently published command.
-# </ul>
-#
-# Other marks can be defined by clients, and subclasses of Model
-# may also add additional marks. A mark marks exectly one position
-# in the history: it is last one executed to get to the state
-# represented by the given mark. Thus, the "current" mark marks
-# the most recently-executed command.
-#
+# Place a mark in the command history.
 # This command has several forms, depending on the _mode_ argument:
 #
 # <dl>
@@ -367,17 +358,21 @@ body ::tycho::Model::history {mode args} {
 # <pre>
 #     $model mark compare current > saved
 # </pre>
+#
 # <dt><b>delete</b> _mark_
 # <dd>Delete the given mark. Raise an error if the mark does not
 # exist.
+#
 # <dt><b>names</b>
 # <dd>Return a list containing the names of all marks.
+#
 # <dt><b>set</b> _mark_ ?_mark_?
 # <dd>Set a mark to some other mark. The first argument is the name
 # of the mark to set; if the mark doesn't exist, create it. The
 # second argument is the name of the mark to set it to. An error
 # is flagged if this mark does not exist. If omitted, the new mark
 # is set to the "current" mark.
+#
 # </dl>
 #
 # Marks are a powerful and general mechanism for manipulating the undo
@@ -385,6 +380,20 @@ body ::tycho::Model::history {mode args} {
 # incremental changes but have the undo mechanism treat all those
 # changes as a single change, it can set a mark before the incremental
 # changes, and compact the history from that mark into a single command.
+# By default, a model maintains these marks:
+#
+# <ul>
+# <li><b>current</b>: The most recent command executed.
+# <li><b>first</b>: The first command in the history.
+# <li><b>last</b>: The last command in the history.
+# <li><b>published</b>: The most recently published command.
+# </ul>
+#
+# Other marks can be defined by clients, and subclasses of Model
+# may also add additional marks. A mark marks exactly one position
+# in the history: it is the last one executed to get to the state
+# represented by the given mark. Thus, the "current" mark marks
+# the most recently-executed command.
 # 
 body ::tycho::Model::mark {mode args} {
     switch -exact $mode {
@@ -424,17 +433,35 @@ body ::tycho::Model::mark {mode args} {
 	    }
 	    if { [llength $args] == 2 } {
 		set position [lindex $args 1]
-	    }
-	    if ![::info exists _mark($position)] {
-		error "Unknown mark: $position"
-	    }
+            } else {
+                set position "current"
+            }
+            if ![::info exists _mark($position)] {
+                error "Unknown mark: $position"
+            }
 	    set _mark([lindex $args 0]) $_mark($position)
 	}
 	default {
-	    error "bad option \"$mode\": should be compare, \
+            error "bad option \"$mode\": should be compare, \
 		    delete, names, or set"
 	}
     }
+}
+
+########################################################################
+#### norecord
+#
+# Execute a command, but make sure that nothing is recorded in
+# the history. Note that, by default, commands are only recorded
+# if called via the <b>record</b> command. This method is for
+# use by methods that have been called via <b>record</b> that
+# need to prevent recording temporarily.
+#
+body ::tycho::Model::norecord {method args} {
+	set saved $recording
+	set recording 0
+	@scope $scope eval $this $method $args
+	set recording $saved
 }
 
 ########################################################################
@@ -456,7 +483,7 @@ body ::tycho::Model::mark {mode args} {
 # result evaluated in the global scope. If the <b>-except</b>
 # option is specified, then _widget_ will not be notified -- this is
 # generally used when a view needs to update views other than itself.
-# If _command_ is <b>sequence</b>, then all following arguments
+# If _command_ is <b>_compound</b>, then all following arguments
 # are taken to be conmmands themselves and this method is
 # called recursively on each -- this is needed for compound
 # commands built by the history mechanism.
@@ -495,8 +522,8 @@ body ::tycho::Model::notify {mode args} {
             }
             set command [lindex $args 0]
 
-            # Test for the command "sequence", and recursively call if so
-            if { $command == "sequence" } {
+            # Test for the command "_compound", and recursively call if so
+            if { $command == "_compound" } {
                 foreach cmd [lreplace $args 0 0] {
                     if { $except == "" } {
                         eval notify data $cmd
@@ -507,8 +534,7 @@ body ::tycho::Model::notify {mode args} {
                 return
             }
             set name [lindex $args 1]
-
-          }
+        }
         "event" {
             if { [llength $args] == 0 } {
                 error "wrong # args: should be "notify event event ?arg ...?\""
@@ -538,7 +564,7 @@ body ::tycho::Model::notify {mode args} {
         }
         # Unsubscribe the subscriber if it no longer exists
         if { [::info which -command $sub] == "" } {
-            unsubscribe $sub
+            unsubscribe $mode $sub
             continue
         }
         if { $cmd != "" } {
@@ -573,32 +599,25 @@ body ::tycho::Model::publish {command index args} {
 ########################################################################
 #### record
 #
-# Execute a method on this data object. The _method_ argument
-# is the name of the method to call, and remaining arguments are
-# passed directly to the method. The method is called in the scope
-# of the most specific class. The method must return a non-null value
-# or an error is raised. This value is recorded in the command
-# history, along with the method and its
-# arguments, which are recorded as the redo command. Any commands
-# in the "future" are cleared from the history.
+# Set the "recording" flag and clear any future history, then execute
+# the command given by _method_ and following arguments. The
+# command should check the "recording" flag and use <b>history append</b>
+# to add to the history.
 #
 body ::tycho::Model::record {method args} {
     # Clear the redo future if needed
     if { $_mark(current) < $_mark(last) } {
-	_clearhistory current last
+        time {_clearhistory current last}
     }
+    # Set the recording flag
+    set recording 1
 
-    # Execute the command and remember its result (the undo command).
-    # If the command causes an error, this method will abort,
-    # and neither the command nor its undo command will be recorded.
-    set undo [@scope [info class] eval $this $method $args]
+    # Execute the command. If the command raises an error, this method
+    # will abort.
+    @scope $scope eval $this $method $args
 
-    # If the method returned null, raise an error.
-    if { $undo == "" } {
-    	error "The recorded command \"$method $args\" returned no undo command"
-    }
-    # Record the command and the undo command
-    _appendhistory [concat $method $args] $undo
+    # Reset the recording flag
+    set recording 0
 }
 
 ########################################################################
@@ -618,33 +637,29 @@ body ::tycho::Model::record {method args} {
 body ::tycho::Model::redo {{distance 1}} {
     # If a mark is given, figure out the distance
     if { ! [string match {[0-9]*} $distance] } {
-	# Check that the mark exists
-	if { ! [::info exists _mark($distance)] } {
-	    error "Unknown mark $distance in $modelname"
-	}
-	set distance [expr $_mark($distance) - $_mark($current)]
+        # Check that the mark exists
+        if { ! [::info exists _mark($distance)] } {
+            error "Unknown mark $distance in $modelname"
+        }
+        set distance [expr $_mark($distance) - $_mark($current)]
     }
     # Go forward only as far as the last command
     if { $distance > $_mark(last) - $_mark(current) } {
-	set distance [expr $_mark(last) - $_mark(current)]
+        set distance [expr $_mark(last) - $_mark(current)]
     }
-
+    
     # Redo the commands
     set count 0
     while { $count < $distance } {
-	# Adjust indexes
-	incr _mark(current)
-	incr count
-
-	# Execute the command.
-        # Note that here we reset the "recording" flag, so that
-        # any methods that usually write to the history know not to.
-        set recording 0
-        @scope [info class] eval $this $_redo($_mark(current))
-        set recording 1
-
-	# Publish
-	eval notify data $_redo($_mark(current))
+        # Adjust indexes
+        incr _mark(current)
+        incr count
+	
+        # Execute the command.
+        @scope $scope eval $this $_redo($_mark(current))
+        
+        # Notify subscribers
+        eval notify data $_redo($_mark(current))
     }
     # Return the number of commands redone
     return $distance
@@ -740,14 +755,10 @@ body ::tycho::Model::undo {{distance 1}} {
     set count 0
     while { $count < $distance } {
         # Execute the command
-        # Note that here we reset the "recording" flag, so that
-        # any methods that usually write to the history know not to.
-        set recording 0
-        @scope [info class] eval $this $_undo($_mark(current))
-        set recording 1
+        @scope $scope eval $this $_undo($_mark(current))
 
-        # Publish
-	eval notify data $_undo($_mark(current))
+        # Notify subscribers
+		eval notify data $_undo($_mark(current))
 
         # Adjust indexes
         incr _mark(current) -1
@@ -804,16 +815,16 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
 ####                       protected methods                        ####
 
 ########################################################################
-#### sequence
+#### _compound
 #
 # Execute a sequence of commands and return the inverse command.
 # Each argument is a single command. This method's main purpose is
 # for constructing complex commands for the undo and redo history.
 #
-body ::tycho::Model::sequence {args} {
-    set undo [list sequence]
+body ::tycho::Model::_compound {args} {
+    set undo [list _compound]
     foreach cmd $args {
-        lappend undo [eval @scope [info class] $this $cmd]
+        lappend undo [eval @scope $scope $this $cmd]
     }
     return $undo
 }
@@ -941,8 +952,8 @@ body ::tycho::Model::_compacthistory {from to {redo {}} {undo {}}} {
     # Build composite commands if not supplied
     if { $redo == "" && [expr $fromindex+1] < $toindex } {
 	set i [expr $fromindex + 1]
-	set redo [list sequence]
-	set undo [list sequence]
+	set redo _compound
+	set undo _compound
 	while { $i <= $toindex } {
 	    lappend redo $_redo($i)
 	    lappend undo $_undo($i)
