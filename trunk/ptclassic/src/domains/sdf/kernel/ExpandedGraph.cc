@@ -120,16 +120,16 @@ void ExpandedGraph::createInvocations(DataFlowStar* s)
 {
 	int num = s->repetitions;
 	EGNode* prev = 0;
-	for (int i = num; i > 0 ; i--) {
+	for (int i = 1; i <= num ; i++) {
 		EGNode * new_node = newNode(s,i);
 
 		// Make a linked list of all instances of each star.
-		new_node->setNextInvoc(prev);
+		if (prev) prev->setNextInvoc(new_node);
 		prev = new_node;
 	}
 
 	// Put the first instance of each star into the master list.
-	masters.append(prev);
+	masters.append(s->myMaster());
 }
 
 //
@@ -251,7 +251,10 @@ int ExpandedGraph::ExpandArc(DataFlowStar* src, PortHole* src_port,
 
 int ExpandedGraph::SelfLoop(DataFlowStar& s)
 { 
-	if ( enforcedSelfLoop || s.hasInternalState() || PastPortsUsed(s)) {
+	parallelizable = TRUE;
+	if ( enforcedSelfLoop || s.hasInternalState() || PastPortsUsed(s) ||
+	     s.isItWormhole()) {
+		parallelizable = FALSE;
 
 		// connect successive invocations of the star as a chain of 
 		// precedences.
