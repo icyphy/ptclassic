@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <malloc.h>
 
-#define VERSION_STRING	"11.3.3 November 1994"
+#define VERSION_STRING	"11.3.4 April 1999"
 
 #define MAXKEYS		50
 #define MAXATTR 	8
