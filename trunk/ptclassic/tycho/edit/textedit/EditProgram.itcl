@@ -55,6 +55,9 @@ class ::tycho::EditProgram {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
+
     ###################################################################
     ####                  protected methods                        ####
 
@@ -101,4 +104,30 @@ body ::tycho::EditProgram::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditProgramHelp.html
+}
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::EditProgram::setReadOnly {bool} {
+    ::tycho::Edit::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            disableMenuItem {Comment Out Region} Format
+            disableMenuItem {Uncomment Region} Format
+            disableMenuItem {Indent Line} Format
+            disableMenuItem {Indent Region} Format
+            disableMenuItem {Tab} Format
+	} {
+            enableMenuItem {Comment Out Region} Format
+            enableMenuItem {Uncomment Region} Format
+            enableMenuItem {Indent Line} Format
+            enableMenuItem {Indent Region} Format
+            enableMenuItem {Tab} Format
+	}
+    }
 }
