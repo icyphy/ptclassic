@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* 
  Programmer:  Neil Smyth
+              Claudio Passerone
  Date of creation: 11/11/97
  Revisions: 4/15/98 version 2, removed the seperate q for pending events. 
      Instead store the pending events in the RC star
@@ -45,16 +46,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#ifndef RoundRobin
-#define RoundRobin    0
+#ifndef DE_ROUNDROBIN
+#define DE_ROUNDROBIN    0
 #endif
 
-#ifndef NonPreemptive
-#define NonPreemptive 1
+#ifndef DE_NONPREEMPTIVE
+#define DE_NONPREEMPTIVE 1
 #endif
 
-#ifndef Preemptive
-#define Preemptive  2
+#ifndef DE_PREEMPTIVE
+#define DE_PREEMPTIVE  2
+#endif
+
+#ifndef DE_FIFO
+#define DE_FIFO    3
+#endif
+
+#ifndef DE_FIFONONPREEMPTIVE
+#define DE_FIFONONPREEMPTIVE 4
+#endif
+
+#ifndef DE_FIFOPREEMPTIVE
+#define DE_FIFOPREEMPTIVE  5
 #endif
 
 #include "type.h"
@@ -63,6 +76,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DERCStar.h"
 #include "CQEventQueue.h"
 #include "DERCScheduler.h"
+#include "HashTable.h"
 
 class DERCScheduler;
 class ResLLCell;
@@ -85,6 +99,9 @@ class Resource {
     public:
     Resource(const char*, int, DERCScheduler* );
 
+    // Returns scheduling policy code
+    int getSchedPolicy(const char*);
+
     // returns int so it can pass along value from DEStar.run()
     int newEventFromEventQ(CqLevelLink* , double); 
     int canAccessResource(CqLevelLink*);
@@ -94,6 +111,9 @@ class Resource {
     void removeFinishedStar(DERCStar*);
     ResLLCell* getTopCell();
     double getECT(DERCStar*);
+
+    // Register priority so that lastFired can be updated
+    int * registerPriority(const char *prkey);
  
     const char* name;
     int schedPolicy;
@@ -106,6 +126,11 @@ class Resource {
     
     // Pointers to the eventQ of the DERCScheduler controlling the simulation
     CQEventQueue* eventQ;
+
+    // Added by Claudio Passerone 09/24/1998
+    // indexValue of last fired star
+    HashTable lastFired;
+//    int lastFired;
 };
 
 
