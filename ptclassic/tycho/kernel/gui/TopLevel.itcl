@@ -122,7 +122,9 @@ class ::tycho::TopLevel {
     itk_option define -before before Before {}
 
     # Specify the size and/or placement of the window.
-    itk_option define -geometry geometry Geometry "" {}
+    itk_option define -geometry geometry Geometry "" {
+ 	wm geometry $itk_component(hull) $itk_option(-geometry)
+    }
 
     constructor {args} {}
     destructor {}
@@ -224,9 +226,9 @@ configbody ::tycho::TopLevel::before {
 # define the screen position relative to the right or
 # bottom of the screen rather than the left or top.
 # 
-configbody ::tycho::TopLevel::geometry {
-    wm geometry $itk_component(hull) $itk_option(-geometry)
-}
+#configbody ::tycho::TopLevel::geometry {
+#    wm geometry $itk_component(hull) $itk_option(-geometry)
+#}
 
 #####################################################################
 #
