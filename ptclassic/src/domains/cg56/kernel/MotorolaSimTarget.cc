@@ -106,7 +106,8 @@ void MotorolaSimTarget::writeCode() {
 		realcmds << "xterm -e sim";
 	else 
 		realcmds << "sim";
-	realcmds << dspType << " " << filePrefix << ".cmd" << " >/dev/null\n";
+	realcmds << dspType << " " << filePrefix << ".cmd"
+    		 << " >/dev/null 2>&1\n";
 	if (int(reportExecutionTime)) {
 		// Search the simulation state file for the pattern 'cyc:' e.g.
 		// Break #1 pc>=$ff0h dev:0 pc:0ff0 cyc:439131
