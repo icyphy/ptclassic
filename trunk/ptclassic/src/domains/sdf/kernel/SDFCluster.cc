@@ -132,8 +132,9 @@ int SDFClusterGal::cluster() {
 	if (!urate && markFeedForwardDelayArcs()) {
 		change |= clusterCore(urate);
 	}
-	if (!urate)
-		Error::warn("clustering algorithm did not achieve uniform rate");
+	if (!urate && logstrm)
+		*logstrm <<
+			"clustering algorithm did not achieve uniform rate";
 	if (change) {
 		if (logstrm)
 			*logstrm << "Looking for parallel loops\n";
@@ -930,6 +931,11 @@ SDFClustPort* SDFClustPort :: realFarPort(SDFCluster* outsideCluster) {
 
 SDFClustSched::~SDFClustSched() { LOG_DEL; delete cgal;}
 
+static const char nonUniformMessage[] =
+"The loop scheduler could not completely cluster the topology.\n"
+"The generated schedule is valid, but may be substantially longer than\n"
+"expected (with negative consequences if used in code generation).  Sorry.";
+
 // compute the schedule!
 int SDFClustSched::computeSchedule (Galaxy& g) {
 	LOG_DEL; delete cgal;
@@ -947,6 +953,9 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	// do the clustering.
 	cgal = new SDFClusterGal(g,logstrm);
 	cgal->cluster();
+	if (!cgal->uniformRate()) {
+		Error::warn(nonUniformMessage);
+	}
 // recompute repetitions on top-level clusters
 	setGalaxy(*cgal);
 	repetitions();
