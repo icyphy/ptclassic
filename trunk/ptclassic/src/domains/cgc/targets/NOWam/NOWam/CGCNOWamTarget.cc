@@ -110,6 +110,16 @@ void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 		<< "\n"; feedback.flush();
 	CGCNOWamSend* cs = (CGCNOWamSend*) s;
 	CGCNOWamRecv* cr = (CGCNOWamRecv*) r;
+        int pnum = (int)nprocs;
+ 
+        cs->numNodes.setInitValue(pnum);
+        cr->numNodes.setInitValue(pnum);
+        StringList nodeAddrs = " ";
+        for (int i = 0; i < pnum; i++) {
+                nodeAddrs << (int)(machineInfo[i].inetAddr) << " ";
+        }
+        cs->nodeIPs.setInitValue(hashstring(nodeAddrs));
+        cr->nodeIPs.setInitValue(hashstring(nodeAddrs));
 
 	// set the IPC handler names
 	// for sender
