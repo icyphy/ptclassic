@@ -912,8 +912,7 @@ genDef ()
 		 inputFile, progName);
 
 /* Special GNU pragmas for increased efficiency */
-	fprintf (fp, "\n#ifdef __GNUG__\n#pragma once\n");
-	fprintf (fp, "#pragma interface\n#endif\n\n");
+	fprintf (fp, "\n#ifdef __GNUG__\n#pragma interface\n#endif\n\n");
 
 /* copyright */
 	if (objCopyright)
