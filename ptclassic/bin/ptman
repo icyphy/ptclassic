@@ -8,6 +8,12 @@
 # is set, invokes xditview, otherwise uses nroff -- unless the -P option is
 # specified, which causes the page to be printed.
 
+set xditR4options = " -geometry 756x881 "
+set xditR5options = " -resolution 100 -geometry 756x881 "
+# if you have the X11R5 version of xditview, change the following line to:
+# set viewoptions = "$xditR5options"
+set viewoptions = "$xditR4options"
+
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 set domaindir = $PTOLEMY/src/domains
 set headers = "$PTOLEMY/doc/headers/domain $PTOLEMY/doc/headers/shared"
@@ -107,7 +113,7 @@ else if ($?DISPLAY) then
 		echo "ptman: problems running ditroff, trying nroff"
 		goto do_nroff
 	endif
-	xditview -resolution 100 -geometry 756x881 /tmp/ptman.$$
+	xditview $viewoptions /tmp/ptman.$$
 	if ($status) then
 		echo "ptman: problems running xditview, trying nroff"
 		goto do_nroff
