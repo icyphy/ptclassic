@@ -1,3 +1,4 @@
+static const char file_id[] = "CompiledError.cc";
 /*******************************************************************
 SCCS Version identification :
 $Id$
