@@ -96,9 +96,10 @@ void MultiDDFPort :: setDDFParams(unsigned numTokens)
 int InDDFPort :: moveData() 
 {
 	Particle** p;
+        int i;
 
 	// Back up in the buffer by numberTokens
-	for (int i = numberTokens; i > 0; i--)
+	for (i = numberTokens; i > 0; i--)
 		p = myBuffer->last();
 
 	// sending copies to imageGeo
