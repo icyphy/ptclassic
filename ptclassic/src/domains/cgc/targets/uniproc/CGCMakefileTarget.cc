@@ -105,7 +105,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "CGCMakefileTarget.h"
 #include "CGCTarget.h"
-
+#include "Tokenizer.h"
+#include <pwd.h>
 
 CGCMakefileTarget::CGCMakefileTarget(const char* name,const char* starclass,
 				     const char* desc)
@@ -132,6 +133,85 @@ CGCMakefileTarget :: ~CGCMakefileTarget() {
 
 Block* CGCMakefileTarget::makeNew() const {
     LOG_NEW; return new CGCMakefileTarget(name(),starType(),descriptor());
+}
+
+#define CGCMAKEFILE_MAXSTRINGLEN 4096
+// expand the makefile variables.  This function is like expandPathName() in
+// src/kernel/expandPathName.cc, except:
+// 1) Here, environment variables are terminated by white space or tabs
+// 2) If we don't find a variable in the environment, then we return
+// it wrapped in $()
+
+char *CGCMakefileTarget :: expandMakefileVariables(const char *makefileLine)
+{
+    // Allow file name to expand to an arbitrary length
+    StringList expandedVars;
+    expandedVars.initialize();
+
+    // Parse file name using Tokenizer class
+    // '#' is default Tokenizer comment char which is a valid file name char
+    const char* specialChars = "~/$";	// separators
+    const char* whitespace = "\r";	// allow TABS and SPACES in file name
+    Tokenizer lexer(makefileLine, specialChars, whitespace);
+    lexer.setCommentChar('\n');		// override default comment char '#'
+
+    while(!lexer.eof()) {
+	char tokbuf[CGCMAKEFILE_MAXSTRINGLEN];
+	lexer >> tokbuf;
+	char c = tokbuf[0];
+	if (c != 0 && tokbuf[1]) c = 0;
+	switch (c) {
+	case '~' : {
+	    // we only expand the first tilda
+	    if (expandedVars.numPieces() != 0) {
+		expandedVars << '~';
+		break;
+	    }
+
+	    // next token might be user name or /.
+	    lexer >> tokbuf;
+	    passwd* pwd;
+	    if (tokbuf[0] == '/') {
+		pwd = getpwuid(getuid());
+		if (pwd == 0) {
+		    Error::abortRun ("getpwuid doesn't know you!");
+		    exit (1);
+		}
+		expandedVars << pwd->pw_dir << '/';
+	    }
+	    else {
+		pwd = getpwnam(tokbuf);
+		if (pwd == 0)
+		    expandedVars << tokbuf;
+		else
+		    expandedVars << pwd->pw_dir;
+	    }
+	    break;
+	}    
+	case '/' : {
+	    expandedVars << '/';
+	    break;
+	}
+	case '$' : {
+	    // Set whitespace to include tabs and spaces
+	    lexer.setWhite("\r\t ");
+	    // next token might be an environment variable
+	    lexer >> tokbuf;
+	    const char* value = getenv (tokbuf);
+	    if (!value)
+				// Wrap the value in $()
+		expandedVars << '$(' << tokbuf << ")";
+	    else
+		expandedVars << value;
+	    lexer.setWhite("\r");	// Set whitespace back to original;
+	    break;
+	}
+	default: {
+	    expandedVars << tokbuf;
+	}
+	}
+    }
+    return savestring(expandedVars);
 }
 
 void CGCMakefileTarget :: writeCode()
@@ -170,15 +250,15 @@ void CGCMakefileTarget :: writeCode()
 
       input.open(skeletonMakefile);
       while ( input.good() && !input.eof() ) {
-	input.getline(inBuf, BUFSIZ);
-	generatedMakefile << inBuf << "\n";
+	  input.getline(inBuf, BUFSIZ);
+	  generatedMakefile << inBuf << "\n";
       }
       input.close();
 
       /* Code duplication from CreateSDFStar - FIXME */
       if (compileOptionsStream.numPieces()) {
 	  char* expandedCompileOptionsStream =
-	      expandPathName(compileOptionsStream);
+	      expandMakefileVariables(compileOptionsStream);
 	  generatedMakefile << "OTHERCFLAGS= ";
 	  generatedMakefile << expandedCompileOptionsStream << ' ';
 	  delete [] expandedCompileOptionsStream;
@@ -186,11 +266,11 @@ void CGCMakefileTarget :: writeCode()
 				// Now process the parent target compileOptions
       if(strlen((const char*) compileOptions) > 0) {
 	  char* expandedCompileOptions =
-	      expandPathName(compileOptions);
+	      expandMakefileVariables(compileOptions);
 				// If we have not printed OTHERCFLAGS yet,
 				// then do it now
 	  if (!compileOptionsStream.numPieces())
-	     generatedMakefile << "OTHERCFLAGS= ";
+	      generatedMakefile << "OTHERCFLAGS= ";
 	  generatedMakefile << expandedCompileOptions;
 	  delete [] expandedCompileOptions;
       }
@@ -206,7 +286,8 @@ void CGCMakefileTarget :: writeCode()
       				//  `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
       /* Code duplication from CreateSDFStar - FIXME */
       if (linkOptionsStream.numPieces()) {
-	  char* expandedLinkOptionsStream = expandPathName(linkOptionsStream);
+	  char* expandedLinkOptionsStream =
+	      expandMakefileVariables(linkOptionsStream);
 	  generatedMakefile << "LOADLIBES= ";
 	  generatedMakefile << expandedLinkOptionsStream << ' ';
 	  delete [] expandedLinkOptionsStream;
@@ -214,7 +295,7 @@ void CGCMakefileTarget :: writeCode()
 				// Now process the parent target linkOptions
       if(strlen((const char*) linkOptions) > 0) {
 	  char* expandedLinkOptions =
-	      expandPathName(linkOptions);
+	      expandMakefileVariables(linkOptions);
 				// If we have not printed LOADLIBES= yet,
 				// then do it now.
 	  if (!linkOptionsStream.numPieces())
