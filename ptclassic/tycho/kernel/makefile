@@ -75,6 +75,7 @@ ITCL_SRCS = \
 	Preferences.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
+	RevControlRCS.itcl \
 	Stack.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
