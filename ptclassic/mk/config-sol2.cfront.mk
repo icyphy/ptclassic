@@ -34,8 +34,10 @@ LIBSUFFIX =		so
 SHARED_LIBRARY_COMMAND =	CC -G -o
 endif
 
-# If you turn on debugging (-g) with cfront, expect ptcl and pigiRpc to be
-# about 70Mb each.
+# If you turn on debugging (-g) with cfront, ptcl and pigiRpc could be
+# about 70Mb each.  Also, with -g you will need at least 250Mb for the .o
+# files, even before linking
+#
 # If you don't have the -g flag turned on then Sun CC 3.0.1 fails to compile 
 # kernel/PortHole.cc with messages about: 
 #	operands have incompatible types: op ":" 
@@ -94,3 +96,8 @@ S56DIR=
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE -DSYSV $(X11_INCSPEC)
 
+# Defines to build xv
+XMKMF =		/usr/openwin/bin/xmkmf
+XV_CC =		cc -Xs -I/usr/openwin/include \
+		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY
+XV_RAND = 	-DNO_RANDOM
