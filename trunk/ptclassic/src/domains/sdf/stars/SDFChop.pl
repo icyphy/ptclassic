@@ -126,7 +126,7 @@ used for zeros.
 		name {use_past_inputs}
 		type {int}
 		default {YES}
-		desc { If offset > 0, specify whether to use previously read inputs (otherwise use zeros). }
+		desc { If offset &gt 0, specify whether to use previously read inputs (otherwise use zeros). }
 	}
 	protected {
 		int hiLim, inidx, loLim;
