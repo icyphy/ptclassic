@@ -89,7 +89,11 @@ class ::tycho::Message {
 body ::tycho::Message::constructor {args} {
 
     # Pack the OK button.
-    addButton ok -text "OK <Ret>" -command "delete object $this"
+    # For some reason I don't understand, if instead of the "destroy"
+    # call below I do "delete object $this", then a tkwait on this
+    # window never returns.  Perhaps "delete object" does not fully
+    # inform tk that the window is gone?
+    addButton ok -text "OK <Ret>" -command "destroy $itk_component(hull)"
     default ok
 
     bind $prefix <Return> "$this invoke ok"
