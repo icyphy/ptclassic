@@ -85,8 +85,14 @@ class ::tycho::Builder {
     # Create itcldocs in the subdirectories.
     proc itcldocs {}
 
-    # Return a list of files that correspond with the classes that have been loaded.
+    # Return a list of files that correspond with the autoloaded classes.
     proc filesLoaded { {namespace ::tycho} }
+
+    # Build the Ptolemy domain Index.
+    proc ptDomainIndex {}
+
+    # Build the Ptolemy facet forest at $TYCHO/typt/lib/PtolemyFacets.fst
+    proc ptolemyFacetsForest {}
 
     # Get the sources from version control system.
     proc sources {}
@@ -126,7 +132,7 @@ class ::tycho::Builder {
 
 #######################################################################
 #### all
-    # Get the latest sources from version control and create tclIndex files.
+# Get the latest sources from version control and create tclIndex files.
 #
 body ::tycho::Builder::all {} {
     global TYCHO
@@ -153,6 +159,9 @@ body ::tycho::Builder::build {} {
     indices
     puts "Running itcldocs again so we get the cross refs"
     itcldocs
+    ptDomainIndex
+    ptolemyFacetsForest
+
 }
 
 #######################################################################
@@ -291,6 +300,38 @@ body ::tycho::Builder::itcldocs {} {
 }
 
 #######################################################################
+#### ptDomainIndex
+# Build the Ptolemy domain index at $PTOLEMY/src/domains/domain.idx
+#
+body ::tycho::Builder::ptDomainIndex {} {
+    global PTOLEMY
+    if [ file exists [file join $PTOLEMY src domains makefile ]] { 
+	puts "Generating domain.idx may take an hour"
+	set win [::tycho::autoName .starIndices]
+	::tycho::Monitor $win \
+		-command {make src/domains/domain.idx} \
+		-dir $PTOLEMY \
+		-autostart 1 -autodestroy 1
+    }
+}
+
+#######################################################################
+#### ptolemyFacetsForest
+# Build the Ptolemy facet forest at $TYCHO/typt/lib/PtolemyFacets.fst
+#
+body ::tycho::Builder::ptolemyFacetsForest {} {
+    global PTOLEMY TYCHO
+    if [ file exists [file join $PTOLEMY src domains makefile ]] { 
+	set win [::tycho::autoName .ptolemyFacetForest]
+	file delete -force [file join $TYCHO typt lib PtolemyFacets.fst]
+	::tycho::Monitor $win \
+		-command {make PtolemyFacets.fst} \
+		-dir [file join $TYCHO typt lib] \
+		-autostart 1 -autodestroy 1
+    }
+}
+
+#######################################################################
 #### sources
 # Do 'make sources'
 #
@@ -303,11 +344,12 @@ body ::tycho::Builder::sources {} {
             -autostart 1 -autodestroy 1
 }
 
+
 #######################################################################
 #### filesLoaded
-# Return a list of files that correspond with the classes that have been loaded.
-# This method assumes that the file is named after the class.  If, for a particular
-# class, a file can't be found, then error is called.
+# Return a list of files that correspond with the classes that have been
+# loaded. This method assumes that the file is named after the class. 
+# If, for a particular class, a file can't be found, then error is called.
 #
 body ::tycho::Builder::filesLoaded { {namespace ::tycho} } {
     global auto_path
