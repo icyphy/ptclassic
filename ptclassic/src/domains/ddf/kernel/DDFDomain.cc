@@ -60,7 +60,7 @@ static DDFDomain proto;
 
 class DDFTarget : public Target {
 public:
-	DDFTarget() : Target("default-DDF", "DataFlowStar", 0,
+	DDFTarget() : Target("default-DDF", "DataFlowStar",
 			     "default DDF target") {
 		sched = new DDFScheduler;
 	}
