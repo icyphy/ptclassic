@@ -62,10 +62,6 @@ public:
 	Block* makeNew() const;
 	int isA(const char*) const;
 
-	// compile and run the code
-	int compileCode();
-	int runCode();
-
 	// redefine IPC funcs
 	DataFlowStar* createSend(int from, int to, int num);
 	DataFlowStar* createReceive(int from, int to, int num);
@@ -75,7 +71,6 @@ public:
 	DataFlowStar* createCollect();
 
 	// redefine
-	void addProcessorCode(int, const char* s);
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 	// get MachineInfo
