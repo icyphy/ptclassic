@@ -7,11 +7,10 @@ if (! $?ARCH ) then
 	exit 1
 endif
 
-cd ~ptolemy
 mkdir bin.$ARCH lib.$ARCH obj.$ARCH
 cd obj.$ARCH
 ln -s ../src/makefile .
-foreach x (domains interp kernel pigiRpc tests)
+foreach x (domains interp kernel pigiRpc tests preproc)
 	mkdir $x
 	cd $x
 	ln -s ../../src/$x/makefile .
