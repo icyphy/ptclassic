@@ -140,7 +140,7 @@ init_other_table()
         }
     }
     setpwent();
-    while (entry = getpwent()) {
+    while ( (entry = getpwent()) ) {
 	insert_other_table(entry->pw_dir, entry->pw_name);
     }
     endpwent();
