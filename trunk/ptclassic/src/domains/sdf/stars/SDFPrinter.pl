@@ -31,7 +31,7 @@ the same line, separated by tabs.
 		pt_ofstream output;
 	}
 	wrapup {
-		output.flush();
+		output.close();
 	}
 	start {
 		// abortRun is called on open failure

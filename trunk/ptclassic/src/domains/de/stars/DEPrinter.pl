@@ -49,7 +49,7 @@ of the particle is used to generate the output.
 		}
 	}
 	wrapup {
-		output.flush();
+		output.close();
 	}
 }
 
