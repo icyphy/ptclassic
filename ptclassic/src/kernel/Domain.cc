@@ -25,7 +25,7 @@ Domain* Domain::allDomains[NUMDOMAINS];
 
 // return ptr to domain matching given name
 Domain* Domain::named(const char* nm) {
-
+	if (!nm) return 0;
 	for (int i = 0; i < numDomains; i++) {
 		if (strcmp (nm, allDomains[i]->name) == 0)
 			return allDomains[i];
