@@ -14,7 +14,11 @@
 # which are assumed to follow the same directory structure.
 
 ifeq ($(ARCH),sun4)
-EXPDOMAINS = cp
+EXPDOMAINS = cp pn
+endif
+
+ifeq ($(ARCH),mips)
+EXPDOMAINS = pn
 endif
 
 DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
