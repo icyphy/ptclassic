@@ -172,6 +172,9 @@ public:
         // PortHoles initialize
         virtual void initPorts();
 
+        // resetPortBuffers in each Block.
+        virtual void resetPortBuffers();
+
 	// Return the number of blocks in the galaxy.
 	inline int numberBlocks() const {return blocks.size();}
 
