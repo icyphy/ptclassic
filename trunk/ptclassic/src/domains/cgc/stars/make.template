@@ -173,6 +173,7 @@ PL_SRCS= \
  CGCThresh.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
+ CGCWindow.pl \
  CGCXMgraph.pl \
  CGCXYgraph.pl \
  CGCXscope.pl
