@@ -183,7 +183,12 @@ ensemble ::tycho::stylesheet {
 	    set param $style
 	    set style [::tycho::userprofile getstyle $stylesheet]
 	}
+        set name [concat $style [split $param .]] 
 
+        # If this is a master, the parameter may not exist, so add it
+        if ![$model exists $name] {
+            $model add parameter $name
+        }
 	# Set it and publish
 	$model publish attrset [concat $style [split $param .]] -value $value
     }
@@ -192,7 +197,7 @@ ensemble ::tycho::stylesheet {
     option style {stylesheet {subscriber {}} {style {}}} {
 	# Make sure it's loaded
 	set model [::tycho::StyleSheet::load $stylesheet]
-	
+
 	# Call it
 	$model style $stylesheet $subscriber $style
     }
