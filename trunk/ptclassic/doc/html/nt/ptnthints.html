@@ -13,11 +13,24 @@ If you need to install Ptolemy under NT, see
 
 <ol>
 
-<li> You will need to have your environment set as follows:
+<li> You will need to set certain environment variables.  Under NT, the
+way to do this is to use the Start Menu -&gt; Settings -&gt; Control Panels
+-&gt; System and then to select the Environment Tab.  The top pane contains
+the system wide variables, which can only be set if you have Administrator
+privileges.  The bottom pane contains user specific settings.
+
+ <br> The values of <CODE>PTOLEMY</CODE> and <CODE>PTARCH</CODE> should
+follow these conventions:
+	<menu>
+	<li> The value should not contain a colon '<CODE>:</CODE>'.
+	 <brp>For example, <CODE>D:/users/ptolemy</CODE> is incorrect.
+	<li> Do not use multiple slashes.  
+	 <br>For example, <CODE>//D/users/ptolemy</CODE> is incorrect.
+	</menu>
 <menu>
 
 <li> <CODE>PTOLEMY</CODE> should be set to the directory that contains
-the Ptolemy distribution.
+the Ptolemy distribution.  For example, <CODE>/users/ptolemy</CODE>.
 
 <li> <CODE>PTARCH</CODE> should be set to <CODE>nt4</CODE>
 
