@@ -77,6 +77,7 @@ class ::tycho::Node {
     ###################################################################
     ####                         public procs                      ####
 
+    proc aspect   {id canvas args}
     proc coords   {id canvas args}
     proc font     {id canvas fo}
     proc inputs   {id canvas in}
@@ -128,6 +129,7 @@ class ::tycho::Node {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
+    set methodtable(aspect)      ::tycho::Node::aspect
     set methodtable(construct)   ::tycho::Node::construct
     set methodtable(coords)      ::tycho::Node::coords
     set methodtable(icontype)    ::tycho::Node::icontype
@@ -181,6 +183,52 @@ body ::tycho::Node::construct {id tags canvas x0 y0 x1 y1 args} {
     # Create the input and output ports
     inputs  $id $canvas $inputs($id)
     outputs $id $canvas $outputs($id)
+}
+
+
+##########################################################################
+#### aspect
+#
+# Return aspects of a node. Aspects are of the form *input-*_n_
+# or $output-*_n_.
+#
+# FIXME: Make more efficient.
+#
+body ::tycho::Node::aspect {id canvas args} {
+    set result {}
+    set slate [canvasslate $canvas]
+
+    # If there are no args, return a list of valid aspects
+    if { $args == "" } {
+	loop [llength $inports($id)] -counter n {
+	    lappend result input-$n
+	}
+	loop [llength $outports($id)] -counter n {
+	    lappend result output-$n
+	}
+	return $result
+    }
+    
+    # If there are args, return a list of aspects
+    foreach aspect $args {
+	set splut [split $aspect "-"]
+	switch -exact [lindex $splut 0] {
+	    "input" {
+		set result [concat $result \
+			[$slate aspect \
+			[lindex $inports($id) [lindex $splut 1]] "terminal"]]
+	    }
+	    "output" {
+		set result [concat $result \
+			[$slate aspect \
+			[lindex $outports($id) [lindex $splut 1]] "terminal"]]
+	    }
+	    default {
+		error "unknown aspect $aspect"
+	    }
+	}
+    }
+    return $result
 }
 
 
