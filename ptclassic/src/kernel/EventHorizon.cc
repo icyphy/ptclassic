@@ -91,7 +91,7 @@ void EventHorizon :: setEventHorizon (
 	timeMark = 0.0;
 	tokenNew = FALSE;
 	asPort()->numberTokens = numTokens;
-	asPort()->setMaxDelay(0);
+	asPort()->bufferSize = numTokens;
 
 	// set which wormhole it is in
 	wormhole = parentWormhole;
@@ -103,9 +103,9 @@ void EventHorizon :: setEventHorizon (
 // This method should be called from the inside EH of the wormhole.
 void EventHorizon :: setParams(int numTok) {
 	asPort()->numberTokens = numTok;
-	asPort()->setMaxDelay(0);
+	asPort()->bufferSize = numTok;
 	ghostAsPort()->numberTokens = numTok;
-	ghostAsPort()->setMaxDelay(0);
+	ghostAsPort()->bufferSize = numTok;
 	// note that ghost port is the visible EH of the wormhole.
 	ghostAsPort()->initialize();
 }
