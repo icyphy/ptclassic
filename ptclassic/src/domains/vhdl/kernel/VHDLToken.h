@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLTypedObj.h"
+#include "VHDLFiring.h"
 
 class VHDLArc;
 class VHDLFiring;
@@ -50,9 +51,9 @@ class VHDLToken : public VHDLTypedObj
   // Constructors.
   VHDLToken();
   VHDLToken(const char* n, const char* t, VHDLArc* a, int tn,
-	    VHDLFiring* sf, VHDLFiringList* dfs)
-    : VHDLTypedObj(n,t), arc(a), tokenNumber(tn), sourceFiring(sf),
-    destFirings(dfs) {}
+	    VHDLFiring* sp, VHDLFiringList* dps, StringList cn)
+    : VHDLTypedObj(n,t), arc(a), tokenNumber(tn), sourceFiring(sp),
+    destFirings(dps), clockName(cn) {}
 
   // Destructor.
   ~VHDLToken();
@@ -65,6 +66,8 @@ class VHDLToken : public VHDLTypedObj
   VHDLFiring* sourceFiring;
   // Dest firings.
   VHDLFiringList* destFirings;
+  // Clock name for generation of token.
+  StringList clockName;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -72,6 +75,16 @@ class VHDLToken : public VHDLTypedObj
 
   // Return a pointer to a new copy of the VHDLToken.
   VHDLToken* newCopy();
+
+  void setTokenNumber(int newTokenNumber)
+    { tokenNumber = newTokenNumber; }
+  int getTokenNumber() { return tokenNumber; }
+  void setSourceFiring(VHDLFiring* newSourceFiring)
+    { sourceFiring = newSourceFiring; }
+  VHDLFiring* getSourceFiring() { return sourceFiring; }
+  void addDestFiring(VHDLFiring* nextDestFiring)
+    { destFirings->put(*nextDestFiring); }
+  VHDLFiringList* getDestFirings() { return destFirings; }
 
  protected:
  private:
