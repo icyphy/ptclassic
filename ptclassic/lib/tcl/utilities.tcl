@@ -58,17 +58,15 @@ proc ptkTychoLoadFSM { file } {
     set classname [file tail [file rootname $file]]
 
     set winName [::tycho::File::isFileOpen $file]
-    if {$winName != ""} {
-	# File has been open already.
-        $winName ptkCompile
-
-    } else {
+    if {$winName == ""} {
       	# File is not open yet , then open a new window.
 	set wname [::tycho::autoName .view]
 	uplevel #0 eval ::tycho::Displayer $wname
 	uplevel #0 eval ::tycho::EditSTD $wname.v -file $file
-        $wname.v ptkCompile
+        set winName $wname.v
     }
+
+    $winName ptkCompile
 
     # Successfully loading & return the classname 
     return $classname
