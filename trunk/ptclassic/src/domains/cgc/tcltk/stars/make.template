@@ -59,6 +59,8 @@ PL_SRCS= \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
  CGCTkSlider.pl \
+ CGCTkStereoIn.pl \
+ CGCTkStereoOut.pl \
  CGCTkXYPlot.pl \
  CGCTkRadioButton.pl \
  CGCTkCheckButton.pl
