@@ -93,7 +93,7 @@ ITCL_MAJOR_VERSION_NUMBER = 2.0
 ITCL_MAJOR_VERSION_INT = 2
 ITCL_VERSION =		itcl2.0
 
-IWIDGETS_VERSION =	iwidgets2.0.0
+IWIDGETS_VERSION =	iwidgets2.0.1
 
 # Version of tcl and tk shipped with itcl
 ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
@@ -399,12 +399,16 @@ config_itcl_shared: $(TCLTK_OBJ) $(ITCL_SHARED_OBJ)
 $(ITCL_SHARED_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
+# Create all the shared libraries
 itcl_shared: $(ITCL_SHARED_OBJ) \
 		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets \
 		$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX) \
 		$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX) \
 		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) \
-		$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX)
+		$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX) \
+		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) \
+		$(ITCL_SHARED_OBJ)/itcl/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT)
+
 	@echo "Done making all shared libraries in itcl"
 
 $(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
@@ -435,6 +439,13 @@ $(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX):
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		SHLIB_LD=ld \
 		shared)
+$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT):
+		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) 
+	(cd $(ITCL_DEST_LIB); \
+		rm -f $@; \
+		ln -s libitcl.$(LIBSUFFIX) \
+			libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT)
+
 $(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX): 
 	(cd  $(ITCL_SHARED_OBJ)/itk; $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
@@ -442,6 +453,12 @@ $(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX):
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		SHLIB_LD=ld \
 		shared)
+$(ITCL_SHARED_OBJ)/itcl/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT):
+		$(ITCL_SHARED_OBJ)/itcl/libitk.$(LIBSUFFIX) 
+	(cd $(ITCL_DEST_LIB); \
+		rm -f $@; \
+		ln -s libitk.$(LIBSUFFIX) \
+			libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT)
 
 # Install itcl
 install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX)
