@@ -131,6 +131,7 @@ static octObject floatColorLayer = {OCT_UNDEFINED_OBJECT, 0},
 		 packetColorLayer = {OCT_UNDEFINED_OBJECT, 0},
 		 fixColorLayer = {OCT_UNDEFINED_OBJECT, 0},
 		 fileColorLayer = {OCT_UNDEFINED_OBJECT, 0},
+		 stringColorLayer = {OCT_UNDEFINED_OBJECT, 0},
 		 labelLayer = {OCT_UNDEFINED_OBJECT, 0};
 
 /* 
@@ -226,6 +227,7 @@ octObject *CurrentFacetPtr;
     CK_OCT(ohGetOrCreateLayer(facetPtr, &packetColorLayer, "packetColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &fixColorLayer, "fixColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &fileColorLayer, "fileColor")); 
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &stringColorLayer, "stringColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
     CK_OCT(ohGetOrCreateLayer(facetPtr, &labelLayer, "label"));
     return(TRUE);
@@ -319,6 +321,8 @@ MkTerm(name, input, type, multiple, position, totalNumber)
 	layerPtr = &fixColorLayer;
     } else if (strcmp(type, "filemsg") == 0 || strcmp(type, "FILEMSG") == 0) {
 	layerPtr = &fileColorLayer;
+    } else if (strcmp(type, "string") == 0 || strcmp(type, "STRING") == 0) {
+	layerPtr = &stringColorLayer;
     } else if (strcmp(type, "COMPLEX_MATRIX_ENV") == 0 || strcmp(type, "COMPLEX_MATRIX") == 0) {
 	layerPtr = &complexColorLayer;
         thick = TRUE;
