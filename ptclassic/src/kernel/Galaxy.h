@@ -39,7 +39,7 @@ public:
 	Block& head () const {return *(Block*) SequentialList::head();}
 
 	// Remove a Block from the list.  Note: block is not deleted
-	int remove (const Block* b) { return SingleLinkList::remove(b);}
+	int remove (const Block* b) { return SequentialList::remove(b);}
 };
 
 	////////////////////////////////////
@@ -56,9 +56,6 @@ protected:
 
 	// Add blocks to the list
 	void addBlock(const Block& b) {blocks.put(&b);}
-
-	// Remove a block from the list
-	int removeBlock(const Block& b) { return blocks.remove(&b);}
 
 	// Connect sub-blocks with a delay (default to zero delay)
 	void connect(GenericPort& source, GenericPort& destination,
@@ -106,6 +103,9 @@ public:
 	void addBlock(Block& b,const char* bname) {
 		addBlock(b.setBlock(bname,this));
 	}
+
+	// Remove a block from the list
+	int removeBlock(const Block& b) { return blocks.remove(&b);}
 
         // States initialize
         void initState();
