@@ -24,8 +24,8 @@ $Id$
 #include "CGSymbol.h"
 
 class CGStar;
-
 class UserOutput;
+class SDFSchedule;
 
 class CGTarget : public Target {
 protected:
@@ -38,6 +38,10 @@ protected:
 	IntState loopScheduler;
 
 	char *schedFileName;
+
+	// scheduling is not needed since the schedule is 
+	// copied by copySchedule method. (Multiprocessor case)
+	int noSchedule;
 
 	// The following utilities are used by many types of code generators
 	// Return a list of spaces for indenting
@@ -93,6 +97,12 @@ protected:
 	virtual int sendWormData(PortHole&);
 	virtual int receiveWormData(PortHole&);
 
+	// Besides the code the scheduler generated, we usually need to
+	// add more codes (such as global structure definitions). Then,
+	// this virtual method provides the hook for that.
+	// In this base class, do nothing.
+	virtual void frameCode();
+
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc,
 		 char sep = '_');
@@ -131,6 +141,9 @@ public:
 	// do we need this?
 	virtual void writeCode(UserOutput&);
 
+	// generate code for a processor in a multiprocessor system
+	virtual StringList generateCode(Galaxy&);
+
 	// type identification
 	int isA(const char*) const;
 
@@ -153,6 +166,10 @@ public:
 	// system call in destination directory.  If error is specified
 	// & the system call is unsuccessful display the error message.
 	virtual int systemCall(const char*,const char* error=NULL);
+
+	// Copy an SDF schedule from the multiprocessor schedule, instead
+	// of performing an SDF scheduler for a uni-processor target
+	void copySchedule(SDFSchedule&);
 };
 
 #endif
