@@ -30,7 +30,10 @@
 #######################################################################
 #### AsRectangle
 #
-# A shape for rectangular pictures.
+# A shape for rectangular items. Because the "rectangle" shape
+# may be applied to items that are not in fact rectangular,
+# this shape always uses the region{} method instead of the
+# coords{} method.
 #
 class ::tycho::AsRectangle {
     inherit ::tycho::Shape
@@ -41,36 +44,49 @@ class ::tycho::AsRectangle {
     # Get one or more aspects of an item
     proc aspect {id canvas slate args}
 
-    # Deform one or more aspects of an item
-    proc deform {id canvas slate x y args}
-
     # Attach a set of grapples to an item
     proc grapple {id canvas slate interactor args}
 
-    # Process a phase of an interaction sequence to deform an item
-    proc interact {id canvas slate mode x y args}
+    # Reshape one or more aspects of an item
+    proc reshape {id canvas slate x y args}
 
-    # Deform an aspect of a picture to absolute coordinates
-    proc reshape {id canvas slate x y aspect}
+    # Start a reshape interaction sequence
+    proc reshapeclick {id canvas slate x y args}
 
+    # Continue a reshape interaction sequence
+    proc reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc reshaperelease {id canvas slate x y}
 
     ###################################################################
-    ####                   private variables                       ####
+    ####                     private variables                     ####
 
-    # The aspects on which deformations etc are being performed.
-    private common aspect
-
-    # The ghost items
-    private common ghost
-
-    # Initial starting coordinates in interaction sequence
-    private common start
-
-    # Values of the aspects used during click-drag-release sequence.
-    private common west
-    private common north
-    private common east
-    private common south
+    # The weights mapping aspects to aspects
+    private common xweights
+    private common yweights
+    
+    array set xweights {
+	nw.sw 1 nw.w 1 nw.n 0.5 nw.ne 0 nw.c 0.5
+	ne.se 1 ne.e 1 ne.n 0.5 ne.nw 0 ne.c 0.5
+	sw.nw 1 sw.w 1 sw.s 0.5 sw.se 0 sw.c 0.5
+	se.ne 1 se.e 1 se.s 0.5 se.sw 0 se.c 0.5
+	n.w 0 n.nw 0 n.ne 0 n.e 0 n.c 0
+	s.w 0 s.sw 0 s.se 0 s.e 0 s.c 0
+	e.n 0.5 e.ne 1 e.se 1 e.s 0.5 e.c 0.5
+	w.n 0.5 w.ne 1 w.se 1 w.s 0.5 w.c 0.5
+    }
+    
+    array set yweights {
+	nw.sw 0 nw.w 0.5 nw.n 1 nw.ne 1 nw.c 0.5
+	ne.se 0 ne.e 0.5 ne.n 1 ne.nw 1 ne.c 0.5
+	sw.nw 0 sw.w 0.5 sw.s 1 sw.se 1 sw.c 0.5
+	se.ne 0 se.e 0.5 se.s 1 se.sw 1 se.c 0.5
+	n.w 0.5 n.nw 1 n.ne 1 n.e 0.5 n.c 0.5
+	s.w 0.5 s.sw 1 s.se 1 s.e 0.5 s.c 0.5
+	e.n 0 e.ne 0 e.se 0 e.s 0 e.c 0
+	w.n 0 w.ne 0 w.se 0 w.s 0 w.c 0
+    }
 }
 
 
@@ -84,43 +100,8 @@ body ::tycho::AsRectangle::aspect {id canvas slate args} {
     if { $args == "" } {
 	return {c n s e w ne nw se sw}
     } else {
-	return [eval rectAspect [list [$slate coords $id]] $args]
+	return [eval rectAspect [list [$slate region $id]] $args]
     }
-}
-
-#######################################################################
-#### deform
-#
-# Deform one or more aspects of the picture by the specified amount.
-# Deform each aspect by the specified _x_ and _y_ relative
-# values. Aspects are only affected by the appropriate _x_ or _y_
-# value -- for example, if the "e" (east) aspect is specified, it
-# is moved only by the _x_ amount.
-#
-body ::tycho::AsRectangle::deform {id canvas slate x y args} {
-
-    # Get the current values of the four main aspects
-    assign w n e s [$slate coords $id]
-    
-    # For each direction, see if it is present in the aspects list,
-    # and if it is, add to the appropriate direction
-    
-    if { [lsearch $args "*w"] >= 0 } {
-	set w [expr $w + $x]
-    }
-    if { [lsearch $args "*e"] >= 0 } {
-	set e [expr $e + $x]
-    }
-    if { [lsearch $args "n*"] >= 0 } {
-	set n [expr $n + $y]
-    }
-    if { [lsearch $args "s*"] >= 0 } {
-	set s [expr $s + $y]
-    }
-    
-    # Deform with coords{}
-    # FIXME: This should use region{}
-    $slate coords $id $w $n $e $s
 }
 
 #######################################################################
@@ -168,19 +149,19 @@ body ::tycho::AsRectangle::grapple {id canvas slate interactor args} {
     # Set up the interaction between them
     $nw behavior \
 	    exec $nw move $ne movey $sw movex $target \
-	        [concat deform nw [makeflag ghost]]
+	    [concat reshape nw [makeflag ghost]]
 
     $ne behavior \
 	    exec $ne move $nw movey $se movex $target \
-	        [concat deform ne [makeflag ghost]]
+	    [concat reshape ne [makeflag ghost]]
 
     $sw behavior \
 	    exec $sw move $se movey $nw movex $target \
-	        [concat deform sw [makeflag ghost]]
+	    [concat reshape sw [makeflag ghost]]
 
     $se behavior \
 	    exec $se move $sw movey $ne movex $target \
-	        [concat deform se [makeflag ghost]]
+	    [concat reshape se [makeflag ghost]]
 
     # Bind the interactor to each grappler.
     $interactor bind $nw
@@ -225,208 +206,128 @@ body ::tycho::AsRectangle::grapple {id canvas slate interactor args} {
 }
 
 #######################################################################
-#### interact
+#### reshape
 #
-# -- click: Signal the start of a click-drag-release action. This
-#    assumes that a release action has been called since previous
-#    drag actions. The optional -ghost flag indicates that the picture
-#    is to be deformed by dragging a ``ghost'' of the picture. One or
-#    more aspects can be specified.
+# Reshape one or more aspects of the picture by the specified amount.
+# Reshape each aspect by the specified _x_ and _y_ relative
+# values. Aspects are only affected by the appropriate _x_ or _y_
+# value -- for example, if the "e" (east) aspect is specified, it
+# is moved only by the _x_ amount.
 #
-# -- drag: Deform the aspects previously specified by click{} by the
-#    ghost tothe specified value. Aspects are modified by the relevent
-#    x or y coordinate only.
-#    Drag assumes that click has already been called on the picture,
-#    and will function unpredictable if not.
-#
-# -- release: Terminate a click-drag-release sequence. If a ghost is
-#    being deformed, then the picture is deformed to the shape of the ghost
-#    and the ghost is deleted. Note: A release must be used to terminate
-#    the click-drag-release sequence, even if not ghosting the picture.
-#
-# Note: DO NOT OVERRIDE.
-#
-# FIXME: There is a lot of duplicated code in here which needs to
-# be factored out. The best approach would be to generate a script which
-# invoked the constraints directly. Maybe this can be made common enough
-# to put into the Shape superclass.
-#
-body ::tycho::AsRectangle::interact {id canvas slate mode x y args} {
-    global depends
+body ::tycho::AsRectangle::reshape {id canvas slate x y args} {
 
-    switch -exact $mode {
-	"direct" {
-	    set aspect [lindex $args 0]
-
-	    # GET the current values of the four aspects and
-	    # add relative amounts.
-	    assign w n e s [$target coords]
-	
-	    if { [string match "*w" $aspect] } {
-		set w [expr $w + $x]
-	    } elseif { [string match "*e" $aspect] } {
-		set e [expr $e + $x]
-	    }
-
-	    if { [string match "n*" $aspect] } {
-		set n [expr $n + $y]
-	    } elseif { [string match "s*" $aspect] } {
-		set s [expr $s + $y]
-	    }
-
-	    # Deform with coords{}
-	    $target coords $w $n $e $s
-
-	    # Propagate constraints
-	    set ds $depends($aspect)
-	    $target propagate "direct" $x $y [lindex $ds 0]
-	    $target propagate "direct" $x [expr $y/2] [lindex $ds 1]
-	    $target propagate "direct" [expr $x/2] $y [lindex $ds 2]
-	    $target propagate "direct" $x 0  [lindex $ds 3]
-	    $target propagate "direct" 0  $y [lindex $ds 4]
-	    $target propagate "direct" [expr $x/2] 0 [lindex $ds 5]
-	    $target propagate "direct" 0 [expr $y/2] [lindex $ds 6]
-	}
-	"click" {
-	    getflag ghost args
-	    set aspect [lindex $args 0]
-
-	    # Remember how I am now.
-	    set coords [$target coords]
-	    assign w n e s $coords
-	    set start $coords
-
-	    # If the -ghost flag is set, draw the ghost box.
-	    # If not, clear the *ghost* variable so that later drags
-	    # don't get confused.
-	    #
-	    # If the ghost is not set, propagate constraints.
-	    if { $ghost } {
-		set ghost [eval $canvas create rectangle $coords \
-			-outline grey]
-	    } else {
-		set ghost ""
-		$target propagate "click" $x $y [lindex $depends($aspect) 7]
-	    }
-	}
-	"drag" {
-	    if { [string match "*w" $aspect] } {
-		set w [expr $w + $x]
-	    } elseif { [string match "*e" $aspect] } {
-		set e [expr $e + $x]
-	    }
-
-	    if { [string match "n*" $aspect] } {
-		set n [expr $n + $y]
-	    } elseif { [string match "s*" $aspect] } {
-		set s [expr $s + $y]
-	    }
-
-	    # If there's a ghost, deform it. Otherwise deform the picture.
-	    if { $ghost != "" } {
-		$canvas coords $ghost $w $n $e $s
-	    } else {
-		$target coords $w $n $e $s
-
-		set ds $depends($aspect)
-		$target propagate "drag" $x $y [lindex $ds 0]
-		$target propagate "drag" $x [expr $y/2] [lindex $ds 1]
-		$target propagate "drag" [expr $x/2] $y [lindex $ds 2]
-		$target propagate "drag" $x 0  [lindex $ds 3]
-		$target propagate "drag" 0  $y [lindex $ds 4]
-		$target propagate "drag" [expr $x/2] 0 [lindex $ds 5]
-		$target propagate "drag" 0 [expr $y/2] [lindex $ds 6]
-	    }
-	}
-	"release" {
-	    # If there's a ghost, deform the picture to its shape
-	    # and then delete the ghost. Perform a one-shot constraint
-	    # propagation. If there's no ghost, finalize constraint
-	    # propagation.
-	    if { $ghost != "" } {
-		# Perform constraint propagation first. Figure out the
-		# amount of movement in each axis, and then propagate
-		# by that much.
-		assign l t r b $start
-		if { [string match "*w" $aspect] } {
-		    set x [expr $w - $l]
-		} elseif { [string match "*e" $aspect] } {
-		    set x [expr $e - $r]
-		}
-
-		if { [string match "n*" $aspect] } {
-		    set y [expr $n - $t]
-		} elseif { [string match "s*" $aspect] } {
-		    set y [expr $s - $b]
-		}
-
-		# Deform the picture
-		$target coords $w $n $e $s
-		$canvas delete $ghost
-
-		set ghost ""
-
-		set ds $depends($aspect)
-		$target propagate "direct" $x $y [lindex $ds 0]
-		$target propagate "direct" $x [expr $y/2] [lindex $ds 1]
-		$target propagate "direct" [expr $x/2] $y [lindex $ds 2]
-		$target propagate "direct" $x 0  [lindex $ds 3]
-		$target propagate "direct" 0  $y [lindex $ds 4]
-		$target propagate "direct" [expr $x/2] 0 [lindex $ds 5]
-		$target propagate "direct" 0 [expr $y/2] [lindex $ds 6]
-
-	    } else {
-		$target propagate "release" 0 0 [lindex $depends($aspect) 7]
-	    }
-	}
-	default {
-	    error "AsRectangle::deform: Bad mode $mode"
-	}
+    # Get the current values of the four main aspects
+    assign w n e s [$slate region $id]
+    
+    # For each direction, see if it is present in the aspects list,
+    # and if it is, add to the appropriate direction
+    if { [lsearch $args "*w"] >= 0 } {
+	set w [expr $w + $x]
     }
+    if { [lsearch $args "*e"] >= 0 } {
+	set e [expr $e + $x]
+    }
+    if { [lsearch $args "n*"] >= 0 } {
+	set n [expr $n + $y]
+    }
+    if { [lsearch $args "s*"] >= 0 } {
+	set s [expr $s + $y]
+    }
+    
+    # Reshape with region{}
+    $slate region $id $w $n $e $s
 }
-
 
 #######################################################################
-#### reshape aspect x y
+#### reshapeclick
 #
-# Deform an aspect of a picture to absolute coordinates.
+# Start a reshape interaction sequence. This works by building a script
+# that will be evaluated in the drag phase of the interaction. This
+# makes the code somewhat obscure, but does
+# make the drag as fast as possible. If and when the Tcl compiler
+# runs, this strategy may no longer be necessary.
 #
-# FIXME: Needs to accept multiple aspects.
-#
-body ::tycho::AsRectangle::reshape {id canvas slate x y aspect} {
-    global depends
+body ::tycho::AsRectangle::reshapeclick {id canvas slate x y args} {
+    getflag ghost args
 
-    assign w n e s [$target coords]
-    set a 0
-    set b 0
+    # Remember how I am now.
+    assign scratch($id.w) scratch($id.n) scratch($id.e) scratch($id.s)  \
+	    [$slate region $id]
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
 
-    if { [string match "*w" $aspect] } {
-	set a [expr $x - $w]
-	set w $x
-    } elseif { [string match "*e" $aspect] } {
-	set a [expr $x - $e]
-	set e $x
+    # For each direction, see if it is present in the aspects list,
+    # and if it is, add it to the drag script
+    set script ""
+    if { [lsearch $args "*w"] >= 0 } {
+    	append script {; set scratch($id.w) [expr $scratch($id.w) + $deltaX]}
     }
-
-    if { [string match "n*" $aspect] } {
-	set b [expr $y - $n]
-	set n $y
-    } elseif { [string match "s*" $aspect] } {
-	set b [expr $y - $s]
-	set s $y
+    if { [lsearch $args "*e"] >= 0 } {
+    	append script {; set scratch($id.e) [expr $scratch($id.e) + $deltaX]}
+	set e [expr $e + $deltaX]
     }
+    if { [lsearch $args "n*"] >= 0 } {
+    	append script {; set scratch($id.n) [expr $scratch($id.n) + $deltaY]}
+    }
+    if { [lsearch $args "s*"] >= 0 } {
+    	append script {; set scratch($id.s) [expr $scratch($id.s) + $deltaY]}
+    }
+    set scratch($id.script) $script
 
-    # Deform the picture
-    $target coords $w $n $e $s
-
-    # Propagate constraints
-    set ds $depends($aspect)
-    $target propagate "direct" $a $b [lindex $ds 0]
-    $target propagate "direct" $a [expr $b/2] [lindex $ds 1]
-    $target propagate "direct" [expr $a/2] $b [lindex $ds 2]
-    $target propagate "direct" $a 0  [lindex $ds 3]
-    $target propagate "direct" 0  $b [lindex $ds 4]
-    $target propagate "direct" [expr $a/2] 0 [lindex $ds 5]
-    $target propagate "direct" 0 [expr $b/2] [lindex $ds 6]
+    # If the -ghost flag is set, draw the ghost box.
+    if { $ghost } {
+	set scratch($id.ghost) [eval $canvas create rectangle \
+		$scratch($id.coords) \
+		-outline grey]
+    }
 }
 
+#######################################################################
+#### reshapedrag
+#
+body ::tycho::AsRectangle::reshapedrag {id canvas slate x y} {
+    # Get delta coordinates
+    set deltaX [expr $x - $scratch($id.prevX)]
+    set deltaY [expr $y - $scratch($id.prevY)]
+
+    # Remember the current coordinates
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
+    
+    # Evaluate the drag script to update coordinates
+    eval $scratch($id.script)
+
+    # If there's a ghost, reshape it. Otherwise reshape the picture.
+    if { [::info exists scratch($id.ghost)] } {
+	$canvas region $scratch($id.ghost) \
+		$scratch($id.w) $scratch($id.n) $scratch($id.e) $scratch($id.s)
+    } else {
+	$slate region $id  \
+		$scratch($id.w) $scratch($id.n) $scratch($id.e) $scratch($id.s)
+    }
+}
+
+#######################################################################
+#### reshaperelease
+#
+body ::tycho::AsRectangle::reshaperelease {id canvas slate x y} {
+    # If there's a ghost, reshape the picture to its shape
+    # and then delete the ghost.
+    if { [::info exists scratch($id.ghost)] } {
+	# Reshape the picture
+	$slate coords $id [$slate coords $scratch($id.ghost)]
+	$canvas delete $scratch($id.ghost)
+
+	# Clean up
+	unset scratch($id.ghost)
+    }
+
+    # General cleaning up
+    unset scratch($id.prevX)
+    unset scratch($id.prevY)
+    unset scratch($id.w)
+    unset scratch($id.n)
+    unset scratch($id.e)
+    unset scratch($id.s)
+    unset scratch($id.script)
+}
