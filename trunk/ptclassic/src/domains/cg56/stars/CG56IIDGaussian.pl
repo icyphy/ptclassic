@@ -1,5 +1,5 @@
 defstar {
-	name { GaussianClt }
+	name { IIDGaussian }
 	domain { CG56 }
 	desc {Gaussian Noise Source}
 	version { $Id$ }
