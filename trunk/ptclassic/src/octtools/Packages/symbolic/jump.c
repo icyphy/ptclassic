@@ -175,7 +175,7 @@ octObject *net;			/* Net (returned) */
  * heirarchy.
  */
 {
-    octObject inst, interface, ifterm, prop, facet;
+    octObject inst, interface, facet;
     char query_name[SYM_MAX_MSG];
 
     /* Get interface formal terminal */
@@ -213,7 +213,7 @@ octObject *obj;			/* Object to check            */
 {
     octObject *JTBag;
 
-    if (JTBag = symJumpTermBag(obj)) {
+    if ( (JTBag = symJumpTermBag(obj)) ) {
 	return octIsAttached(JTBag, obj) == OCT_OK;
     } else {
 	return 0;
@@ -270,7 +270,7 @@ char **name;			/* Global or local net name             */
  * if it is a global net, and SYM_LOCAL_NET if it is a local net.
  */
 {
-    octObject inst, interface, ifterm, prop;
+    octObject ifterm, prop;
     octGenerator gen;
     symJTInfo result = SYM_NOT_JT;
 
