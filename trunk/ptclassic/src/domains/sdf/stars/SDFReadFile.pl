@@ -46,10 +46,13 @@ defstar
 	istream* input;
     }
 
+    constructor { input = 0;   }
+    destructor  { delete input;}
+
     start
     {
 	// open input file
-	input = new istream(expandPathName(fileName),"r");
+	LOG_NEW; input = new istream(expandPathName(fileName),"r");
 	if (! input->readable() )
 	    Error::abortRun(*this, fileName, " not readable");
     }
@@ -65,8 +68,8 @@ defstar
 	    else if (periodic)		// close and re-open file
 	    {
 		input->close();
-		delete input;
-		input = new istream(expandPathName(fileName),"r");
+		LOG_DEL; delete input;
+		LOG_NEW; input = new istream(expandPathName(fileName),"r");
 		(*input) >> x;		// get next value
 		eatwhite(*input);
 	    }
@@ -82,6 +85,7 @@ defstar
     wrapup
     {
 	input->close();
-	delete input;
+	LOG_DEL; delete input;
+	input = 0;
     }
 }
