@@ -196,10 +196,14 @@ else
 		   JAVABIN=`dirname $JAVAC`
 		   JAVAHOME=`dirname $JAVABIN`
 	    else
-	           AC_MSG_WARN([Failed to find javac, perhaps Java is not installed?])
+	           AC_MSG_WARN([ Failed to find javac, perhaps Java is not installed?])
 	    fi
 	    if test ! -d "$JAVAHOME"; then
-		    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
+	            AC_MSG_WARN(["$JAVAHOME" is not a directory, using the default /opt/jdk1.1.1])
+		    JAVAHOME=`cd /opt/jdk1.1.1; pwd`	
+		    if test ! -d "$JAVAHOME"; then
+			    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist. Try --with-java=DIR, or set the JAVA_HOME environment variable.)
+		    fi	
 	    fi	
 	fi
 
