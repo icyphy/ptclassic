@@ -151,8 +151,8 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 $tychoslate/interactors ]
     set ::auto_path [linsert $auto_path 0 $tychoslate/combinators ]
     set ::auto_path [linsert $auto_path 0 $tycholib/widgets ]
+    set ::auto_path [linsert $auto_path 0 $tycholib/util ]
     source $tychokernel/Lib.tcl
-    source $tycholib/util/lib.tcl
 }
 
 if {![info exists tychoWelcomeWindow]} {
