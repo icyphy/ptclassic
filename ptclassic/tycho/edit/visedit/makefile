@@ -54,7 +54,9 @@ ITCL_SRCS = \
 	EditForest.itcl \
 	EditForestWidget.itcl \
 	EditFSM.itcl \
-	EditMoore.itcl
+	EditMoore.itcl \
+	Graphics.itcl \
+	GraphicsWidget.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
