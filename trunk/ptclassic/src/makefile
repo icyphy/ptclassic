@@ -41,24 +41,16 @@ OBJDIR =	..
 VPATH  = 	$(ROOT)/src
 
 # Get configuration info
-# Need $(INCLUDE_IPUS_DOMAIN) below
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# Don't include IPUS if your are running a non GNU c++
-ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
-ISLANG =	islang
-else
-ISLANG =
-endif
-
-DIRS = kernel thread ptlang $(ISLANG) domains utils ptcl pigilib ptklib tycho pigiRpc pxgraph filters
+DIRS = kernel thread ptlang domains utils ptcl pigilib ptklib tycho pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
 MTDIRS = kernel pigilib pxgraph ptcl ptklib pigiRpc
 
 # "leaf" directories with no make.template
-LDIRS = ptlang $(ISLANG) filters utils
+LDIRS = ptlang filters utils
 
 # directories with subtrees
 SDIRS = thread domains
