@@ -97,8 +97,8 @@ body ::tycho::Bounder::click {x y args} {
 	set b $bounds
     } else {
 	# Didn't get bounds: try for a query
-	# FIXME: Need a machanism for having a picture be asked what its
-	# bounds are
+	# FIXME: Need a mechanism for having a picture be asked what its
+	# bounds are -- ??? why ?? 
 	# set b [$target query bounds]
 	set b {}
 	if { [llength $b] != 4 } {
