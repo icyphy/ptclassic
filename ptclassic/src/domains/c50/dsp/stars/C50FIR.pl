@@ -30,11 +30,11 @@ The default filter is a linear-phase equiripple lowpass filter with its 3dB
 cutoff frequency at about 1/3 of the Nyquist frequency.
 	}
 	input {
-		name {signalIn}
+		name {input}
 		type {FIX}
 	}
 	output {
-		name {signalOut}
+		name {output}
 		type {FIX}
 	}
 	state {
@@ -114,11 +114,11 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	codeblock(std,""){
 	setc	ovm			; set overflow mode
 	LAR	AR2,#$addr(oldSamples)	; AR0 -> start of old sample array
-	LAR	AR1,#$addr(signalOut)	; AR1 -> output signal
+	LAR	AR1,#$addr(output)	; AR1 -> output signal
 	lar	ar0,#$addr(oldSamples,@(tapsNum-1))
 	ZAP				; zero accumulator and product reg.
 	MAR	*,AR2			; ARP = AR0
-	BLDD	#$addr(signalIn),*,ar0	; move (input) to first addr in array
+	BLDD	#$addr(input),*,ar0	; move (input) to first addr in array
 	RPT	#@(int(tapsNum)-1)		; these two instructions 
 	MACD	$starSymbol(cfs),*-	; implement the filter
 	lta	*,ar1

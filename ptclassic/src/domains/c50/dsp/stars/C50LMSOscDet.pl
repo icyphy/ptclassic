@@ -56,12 +56,12 @@ of the LMS star upon which this star derived.
 	seealso {FIR, LMS}
 
 	input {
-		name { signalIn }
+		name { input }
 		type { fix }
 	}
 
 	output {
-		name { signalOut }
+		name { output }
 		type { fix }
 	}
 
@@ -194,7 +194,7 @@ Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 	}
 
 	codeblock(initialCode,"") {
-	lar	ar4,#$addr(signalOut)
+	lar	ar4,#$addr(output)
 	lar	ar2,#$addr(cosOmega)
 	lar	ar3,#$addr(tap)
 	}
@@ -211,7 +211,7 @@ Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 	mpy	#@intMu		 ; p = 0.5*error*Mu
 	ltp	*		 
 ; acc = 0.5*error*Mu, treg0 = x[n-errorDelay -1]
-	bldd	#$addr(signalIn),*+,ar2	; get new input
+	bldd	#$addr(input),*+,ar2	; get new input
 	smmr	ar1,#$addr(delayPtr)
 	splk	#$addr(lmsOldSamples,@(int(errorDelay))),cbsr1
 	splk	#$addr(lmsOldSamples),cber1
@@ -253,7 +253,7 @@ Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 	lt	*		; treg0 = x[n-1]
 	dmov	*,ar3		; x[n-2] = x[n-1] <delay>
 	mpy	*,ar1		; p = 0.5*tap*x[n-1]
-	bldd	#$addr(signalIn),*	; x[n-1] = x[n] <delay>
+	bldd	#$addr(input),*	; x[n-1] = x[n] <delay>
 	apac			; acc = 0.5(x[n-2]/2 + tap*x[n-1])
 	add	*,14,ar4	; acc = 0.5(0.5*x[n] +tap*x[n-1] + 0.5*x[n-2])
 	sach	*,1

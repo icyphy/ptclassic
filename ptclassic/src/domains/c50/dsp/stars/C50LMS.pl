@@ -34,11 +34,11 @@ adjust the \fIerrorDelay\fP parameter accordingly.
         
 	// FIXME: Should be derived from the FIR star
         output {
-		name { signalOut }
+		name { output }
 		type { fix }
 	}
         input  {
-                name { signalIn }
+                name { input }
 	        type { fix }
 	}
         input  {
@@ -167,7 +167,7 @@ error samples.
 	.if	@(int(decimation)-1)
 	rpt	#@(int(decimation) -1)
 	.endif
-	bldd	#$addr(signalIn,@(int(decimation)-1)),*+
+	bldd	#$addr(input,@(int(decimation)-1)),*+
 	smmr	ar1,#$addr(delayLinePtr)
 	lmmr	treg0,#$addr(error)
 	splk	#@(int(numTaps)-2),brcr
@@ -219,7 +219,7 @@ $label(lmsu)
 	.endif
 	mac	$starSymbol(lmss),*-
 	apac
-	lar	ar1,#$addr(signalOut)
+	lar	ar1,#$addr(output)
 	sach	*
 	splk	#0,cbcr
 	spm	0
