@@ -41,6 +41,9 @@ EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.hppa ptplay.linux \
 	ptplay.hppa.cfront
 KRUFT = ptplay.sol2 ptplay	
 
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
+LIB = foo
+
 all:	makefile ptplay
 
 ifeq ($(basename $(ARCH)),sol2)
