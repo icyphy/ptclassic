@@ -392,7 +392,7 @@ body ::tycho::TclShell::destructor {} {
 # prompt. If the insertion cursor is before the current line, then
 # is it moved to _point_; if the cursor is on the current line but
 # before the end of the prompt, it is moved to the end of the prompt;
-# otherwise, it is not moved. This method should be called anytime
+# otherwise, it is not moved. This method should be called any time
 # Tk's default text bindings may move the cursor.
 #
 body ::tycho::TclShell::adjustInsertionCursor {{point {}}} {

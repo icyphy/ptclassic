@@ -1426,7 +1426,7 @@ body ::tycho::Graphics::undo {} {
 #### undoAppend
 # Append a command to the end of the undo or redo buffer (the latter
 # only happens if an undo is in progress). This should be called
-# anytime an object is deleted, to ensure that the deletion can be
+# any time an object is deleted, to ensure that the deletion can be
 # undone. If an object is being created, call <code>register</code>
 # instead.
 #
@@ -1462,7 +1462,7 @@ body ::tycho::Graphics::undoBoundary {} {
 #### undoPrepend
 # Append a command to the beginning of the undo or redo buffer (the
 # latter only happens if an undo is in progress). This should be called
-# anytime an object is deleted, to ensure that the deletion can be
+# any time an object is deleted, to ensure that the deletion can be
 # undone. If an object is being created, call <code>register</code>
 # instead.
 #
