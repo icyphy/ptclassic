@@ -34,8 +34,11 @@
 # Programming" book
 
 package require tycho.kernel.basic
-package require tycho.kernel.gui
-package require tycho.edit.slate
+if [info exists tk_version] {
+    package require tycho.kernel.gui
+    package require tycho.edit.slate
+}
+
 package provide tycho.edit.visedit 2.0
 
 set env(VISEDIT_LIBRARY) [file dirname [info script]]
@@ -43,55 +46,57 @@ if { [lsearch -exact $auto_path $env(VISEDIT_LIBRARY)] == -1 } {
     lappend auto_path $env(VISEDIT_LIBRARY)
 }
 
-### Stylesheets
-::tycho::register stylesheet "graphics" \
-	[file join $env(VISEDIT_LIBRARY) graphics.style] \
-	[file join ~ .Tycho styles graphics.style]
+if [info exists tk_version] {
+    ### Stylesheets
+    ::tycho::register stylesheet "graphics" \
+	    [file join $env(VISEDIT_LIBRARY) graphics.style] \
+	    [file join ~ .Tycho styles graphics.style]
 
-### MODE MAPPINGS
-::tycho::register extensions "dag" .dag
-::tycho::register extensions "forest" .fst
-::tycho::register extensions "std" .std
-::tycho::register extensions "indexbrowser" .idx
+    ### MODE MAPPINGS
+    ::tycho::register extensions "dag" .dag
+    ::tycho::register extensions "forest" .fst
+    ::tycho::register extensions "std" .std
+    ::tycho::register extensions "indexbrowser" .idx
 
-### MODES
-########### graphical editors (alphabetical)
+    ### MODES
+    ########### graphical editors (alphabetical)
 
-# Directed-acyclic graph viewer
-::tycho::register mode "dag" \
-	-command {::tycho::view EditDAG -file {%s}} \
-	-viewclass ::tycho::EditDAG \
-	-label {DAG Editor}  \
-	-category "graphics" \
-	-underline 0
+    # Directed-acyclic graph viewer
+    ::tycho::register mode "dag" \
+	    -command {::tycho::view EditDAG -file {%s}} \
+	    -viewclass ::tycho::EditDAG \
+	    -label {DAG Editor}  \
+	    -category "graphics" \
+	    -underline 0
 
-# NOTE: Not useful on its own.
-# ::tycho::register mode {.fsm} \
-	#       {::tycho::view EditFSM -file {%s}} \
-	#       {Finite state machine editor}
+    # NOTE: Not useful on its own.
+    # ::tycho::register mode {.fsm} \
+	    #       {::tycho::view EditFSM -file {%s}} \
+	    #       {Finite state machine editor}
 
-# Tree viewer
-::tycho::register mode "forest" \
-	-command {::tycho::view EditForest -file {%s}} \
-	-viewclass ::tycho::EditForest \
-	-label {Forest Editor}  \
-	-category "graphics" \
-	-underline 0
+    # Tree viewer
+    ::tycho::register mode "forest" \
+	    -command {::tycho::view EditForest -file {%s}} \
+	    -viewclass ::tycho::EditForest \
+	    -label {Forest Editor}  \
+	    -category "graphics" \
+	    -underline 0
 
-# State-transition diagram editor
-::tycho::register mode "std" \
-	-command {::tycho::view EditSTD -file {%s}} \
-	-viewclass ::tycho::EditSTD \
-	-label {State Transition Diagram Editor}  \
-	-category "graphics" \
-	-underline 0
+    # State-transition diagram editor
+    ::tycho::register mode "std" \
+	    -command {::tycho::view EditSTD -file {%s}} \
+	    -viewclass ::tycho::EditSTD \
+	    -label {State Transition Diagram Editor}  \
+	    -category "graphics" \
+	    -underline 0
 
-#### HELP MENU ENTRIES
+    #### HELP MENU ENTRIES
 
-# Tycho class diagram
-::tycho::register help classdiagram \
-	-label "Class Diagram" \
-	-underline 6 \
-	-command {::tycho::openContext \
-	[file join \$TYCHO doc tychoClasses.dag]}
+    # Tycho class diagram
+    ::tycho::register help classdiagram \
+	    -label "Class Diagram" \
+	    -underline 6 \
+	    -command {::tycho::openContext \
+	    [file join \$TYCHO doc tychoClasses.dag]}
 
+}
