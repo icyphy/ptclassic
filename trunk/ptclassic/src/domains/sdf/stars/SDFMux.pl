@@ -41,6 +41,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc {Number of particles in a block.}
 	}
 	setup {
+		if ( int(blockSize) <= 0 ) {
+			Error::abortRun(*this, "blockSize must be positive");
+			return;
+		}
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
@@ -48,15 +52,15 @@ limitation of liability, and disclaimer of warranty provisions.
 		int numports = input.numberPorts();
 		int n = int(control%0);
 		if (n < 0 || n >= numports) {
-		    StringList msg = "Control input ";
-		    msg << n << " is out of the range [0,"
-			<< (numports - 1) << "]";
-		    Error::abortRun(*this, msg);
+			StringList msg = "Control input ";
+			msg << n << " is out of the range [0,"
+			    << (numports - 1) << "]";
+			Error::abortRun(*this, msg);
 		}
 
 		MPHIter nexti(input);
 		PortHole* p = 0;
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i <= n; i++) {
 			p = nexti++;
 		}
 		for (int j = int(blockSize)-1; j >= 0; j--) {
