@@ -54,6 +54,10 @@ SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 # Command to build shared libraries (Not really supported yet)
 SHARED_LIBRARY_COMMAND = g++ -shared $(SHARED_COMPILERDIR_FLAG) -o
 
+# linker for C utilities.  If we are using shared libraries, then
+# we want to avoid involving libg++.so, so we use gcc to link.
+CLINKER	=	gcc
+
 # Used by cgwork.mk
 INC_LINK_FLAGS =	-shared $(SHARED_COMPILERDIR_FLAG)
 

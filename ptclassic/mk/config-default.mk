@@ -168,6 +168,9 @@ DEPEND=g++ -MM
 
 # linker to use for pigi and interpreter.
 LINKER=g++
+# linker for C utilities.  If we are using shared libraries, then
+# we want to avoid involving libg++.so, so we use gcc to link.
+CLINKER=$(LINKER)
 # system libraries (libraries from the environment)
 SYSLIBS=-lg++ -lm
 # linker options.  Defined by the arch-config mk.
