@@ -100,11 +100,19 @@ public:
 	// discard current line, or close file (error cleanup)
 	void flush();
 
-	// change whitespace characters
-	void setWhite(const char* w) { whitespace = w;}
+	// change whitespace characters, return old ones.
+	const char* setWhite(const char* w) {
+		const char* t = whitespace;
+		whitespace = w;
+		return t;
+	}
 
-	// change special characters
-	void setSpecial(const char* s) { special = s;}
+	// change special characters, return old ones.
+	const char* setSpecial(const char* s) {
+		const char* t = special;
+		special = s;
+		return t;
+	}
 };
 
 #endif
