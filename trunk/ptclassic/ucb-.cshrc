@@ -13,7 +13,9 @@ setenv SIM_ARCH sparcOS5
 
 # Get kerberos in path before sun rsh and kinit
 # Get Synopsys in path
-# Get software warehouse in the path
+# Get software warehouse in the path, however this will mean that
+#  gcc uses gnm from sww/bin, so when building a ptolemy to distribute
+#  don't include gcc in the path
 set path = ( /usr/kerb.local/bin \
 		$path \
 		$SYNOPSYS/$SIM_ARCH/syn/bin \
