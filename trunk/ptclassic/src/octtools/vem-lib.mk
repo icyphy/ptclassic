@@ -24,6 +24,17 @@
 # common included makefile for all vem libraries (src/vem/Packages and 
 # src/vem/Xpackages) built from a make.template file.
 
+
+# If we are building on the irix5, build octtools libraries as shared
+# libraries.  If octtools is built as static libraries, then the GOT will
+# overflow when linking a full blown pigiRpc.  See the Irix dso man page for
+# more information
+
+ifeq ($(ARCH),irix5)
+IRIX5_SHL_MK=$(ROOT)/mk/octtools-irix5-shl.mk
+include $(IRIX5_SHL_MK)
+endif
+
 CC =	$(OCT_CC)
 all:	makefile $(LIB) ../../include/${EXPHDR}
 
