@@ -51,7 +51,7 @@ OTHERDIRS = tkoct $(MTDIRS)
 # directories with subtrees
 SDIRS = Packages Xpackages vem tkoct
 
-MAKEVARS = "ARCH=$(ARCH)"
+MAKEVARS = "ARCH=$(PTARCH)"
 
 OCTTOOLS=$(PTOLEMY)/octtools
 
@@ -70,7 +70,7 @@ otherall:
 	    fi ; \
 	done
 
-otherinstall: $(OCTTOOLS) $(OCTTOOLS)/lib.$(ARCH) $(OCTTOOLS)/include
+otherinstall: $(OCTTOOLS) $(OCTTOOLS)/lib.$(PTARCH) $(OCTTOOLS)/include
 	for x in $(OTHERDIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -116,7 +116,7 @@ liball:
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/octtools/$$x all;\
 		cd .. ; \
 	done
-libinstall: $(OCTTOOLS) $(OCTTOOLS)/lib $(OCTTOOLS)/lib.$(ARCH) $(OCTTOOLS)/include
+libinstall: $(OCTTOOLS) $(OCTTOOLS)/lib $(OCTTOOLS)/lib.$(PTARCH) $(OCTTOOLS)/include
 	@for x in $(LIBDIRS); do \
 		cd $$x ; \
 		echo making install in $$x ; \
@@ -129,13 +129,13 @@ vemall:
 	$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/octtools/vem all;\
 	cd ..
 
-installvem: $(OCTTOOLS) $(OCTTOOLS)/lib.$(ARCH) $(OCTTOOLS)/include
+installvem: $(OCTTOOLS) $(OCTTOOLS)/lib.$(PTARCH) $(OCTTOOLS)/include
 	@echo "making install in vem"
 	cd vem; \
 	$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/octtools/vem install;\
 	cd ..
 
-$(OCTTOOLS) $(OCTTOOLS)/include $(OCTTOOLS)/lib $(OCTTOOLS)/lib.$(ARCH):
+$(OCTTOOLS) $(OCTTOOLS)/include $(OCTTOOLS)/lib $(OCTTOOLS)/lib.$(PTARCH):
 	-mkdir $@
 
 clean realclean sources depend checkjunk sccsinfo lint tests:
