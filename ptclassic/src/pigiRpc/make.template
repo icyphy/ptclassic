@@ -1,0 +1,130 @@
+# Makefile for Ptolemy graphical interface edg 5/23/90
+# Version identification:
+# $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+# 
+# Authors: Jose Luis Pino
+#
+# This makefile may be copied and modified to make your own version of
+# pigiRpc, with a different set of compiled-in stars or support for a
+# different set of domains.  If you do this, change ROOT to point to
+# the root of the Ptolemy source tree, change OBJDIR to point to
+# the directory containing the object files, and revise ALLSTARS and
+# ALLTARGETS to specify the stars and targets you wish to include
+# (using symbols defined in the stars.mk file or your own additions).
+
+# root of source tree
+ROOT	      = ../..
+# Path (absolute or relative) to the object directory root
+OBJDIR= ..
+# VPATH points to the "real" source directory
+VPATH         = $(ROOT)/src/pigiRpc
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+-include override.mk
+
+ifdef FULL
+	PIGI=pigiRpc
+	VERSION=0.6-development
+	BDF=1
+	CG56=1
+	CG96=1
+	CGCFULL=1
+	CGFULL=1
+	DDF=1
+	DE=1
+	IPUS=1
+	MDSDF=1
+	PN=1
+	SDFFULL=1
+	SILAGE=1
+	THOR=1
+	TK=1
+	VHDL=1
+endif
+
+ifdef PTINY
+	PIGI=pigiRpc.ptiny
+	VERSION=0.6-development-ptrim
+	DE=1
+	SDF=1
+	SDFTK=1
+	SDFDSP=1
+	SDFMATRIX=1
+	SDFMATLAB=1
+	TK=1
+endif
+
+ifdef PTRIM
+	PIGI=pigiRpc.ptrim
+	VERSION=0.6-development-ptrim
+	BDF=1
+	CGCFULL=1
+	CGFULL=1
+	DDF=1
+	DE=1
+	SDFFULL=1
+	TK=1
+endif
+
+ifndef VERSION
+ifndef PTRIM
+ifndef PTINY
+ifndef FULL
+EXTRA_INSTALL=$(BINDIR)/pigiRpc.ptrim $(BINDIR)/pigiRpc.ptiny $(BINDIR)/pigiRpc
+
+pigiRpc.ptrim:
+	make PTRIM=1 pigiRpc.ptrim
+
+pigiRpc.ptiny:
+	make PTINY=1 pigiRpc.ptiny
+
+pigiRpc:
+	make FULL=1 pigiRpc
+
+$(BINDIR)/pigiRpc.ptrim: pigiRpc.ptrim
+	make PTRIM=1 install
+
+$(BINDIR)/pigiRpc.ptiny: pigiRpc.ptiny
+	make PTINY=1 install
+
+$(BINDIR)/pigiRpc: pigiRpc
+	make FULL=1 install
+
+endif
+endif
+endif
+endif
+
+# Include information on all stars and targets.
+include $(ROOT)/mk/pigiRpc.mk
+
+
+
