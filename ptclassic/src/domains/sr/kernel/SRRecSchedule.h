@@ -60,10 +60,10 @@ class Set;
 <PRE>
  ([1   2]. 3 ( 4.  5 [ 6   7 ] 8) (9.(10. 11) 12 ))     Schedule
    1   2   3   4   5   6   7   8   9  10  11  12        vertex
-  12       1   5   1   2       1   4   2   1   1        partSize
-   2       0   1   0   0       0   1   1   0   0        headSize
-   2       1   1   1   2       1   1   1   1   1        parSize
-   2       0   1   0   0       0   1   1   0   0        repCount
+  12   0   1   5   1   2   0   1   4   2   1   1        partSize
+   2   0   0   1   0   0   0   0   1   1   0   0        headSize
+   2   0   1   1   1   2   0   1   1   1   1   1        parSize
+   2   0   0   1   0   0   0   0   1   1   0   0        repCount
 </PRE>
 
    <UL>
@@ -96,6 +96,10 @@ public:
   int findPushRange( int, int &, int &, int & );
 
   int mergeVertex( int );
+
+  int deleteIndex( int );
+
+  int insertVertexAtIndex( int, int );
 
 private:
   // The dependency graph for which this schedule is computed
