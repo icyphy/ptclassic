@@ -105,7 +105,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 static const char* ptolemyRoot = 0;
 
 // a temporary file name for compiler errors
-static const char* tmpFileName = 0;
+static char* tmpFileName = 0;
 
 extern "C" {
 #define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
@@ -380,7 +380,7 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 	const char *sourceFile = (preproc ? plName : ccName);
 
 	// Check existence of source file.
-	int fd = open (sourceFile, 0);
+	int fd = open(sourceFile, 0);
 	if (fd < 0) {
 		return noPermission ("Loader: can't open ", sourceFile);
 	}
@@ -393,22 +393,22 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 	// If a makefile exists in the object directory, use make.
 	StringList makeFile = objDir;
 	makeFile << "/Makefile";
-	if (!exists (makeFile)) {
+	if (!exists(makeFile)) {
 		makeFile = objDir;
 		makeFile << "/makefile";
 	}
-	if (exists (makeFile)) {
+	if (exists(makeFile)) {
 		// cd $objDir; make $idomain$name.o >& $tmpFileName
 		StringList cmd = "cd ";
 		cmd << objDir << "; make " << idomain << name << ".o >& ";
 		cmd << tmpFileName;
-		PrintDebug (cmd);
-		if (util_csystem (cmd)) {
+		PrintDebug(cmd);
+		if (util_csystem(cmd)) {
 			reportErrors ("errors from make");
 			return FALSE;
 		}
 		unlink(tmpFileName);
-		return linkObject (oName, permB, linkArgs);
+		return linkObject(oName, permB, linkArgs);
 	}
 
 	// No makefile.  If object is younger than source, assume it's good.
@@ -425,8 +425,8 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 		cmd << srcDir << "; " << preprocProg[preproc] << " ";
 		cmd << idomain << name << "." << preprocSuffix[preproc];
 		cmd << " >& " << tmpFileName;
-		PrintDebug (cmd);
-		if (util_csystem (cmd)) {
+		PrintDebug(cmd);
+		if (util_csystem(cmd)) {
 			reportErrors (cmd);
 			return FALSE;
 		}
@@ -436,17 +436,17 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 			msg += ccName;
 			msg += " still doesn't exist:\ncheck the file ";
 			msg += plName;
-			Error::abortRun (msg);
-			ErrAdd ("Loading file didn't create the star");
+			Error::abortRun(msg);
+			ErrAdd("Loading file didn't create the star");
 			return FALSE;
 		}
 	}
 
 	// now compile
-	if (!compile (name, idomain, srcDir, objDir)) return FALSE;
+	if (!compile(name, idomain, srcDir, objDir)) return FALSE;
 
 	// finally incremental link.
-	return linkObject (oName, permB, linkArgs);
+	return linkObject(oName, permB, linkArgs);
 }
 
 // This function searches for a source file, first looking for preprocessor
