@@ -32,4 +32,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	This must be a C-compatable .h file (included from ptkTkSetup.c)
 */
 
+#ifdef __cplusplus
+extern void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
+#else
 extern void ptkRegisterCmds();
+#endif /* __cplusplus */
