@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: S. Ha, J. Pino
+ Programmer: S. Ha, Jose Luis Pino
 
  Fiction target
 
@@ -62,7 +62,6 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	sharedMem = 0;
 	addState(sMemMap.setState("sMemMap",this,"4096-4195",
 		"shared memory map"));
-	destDirectory.setInitValue("~/DSPcode");
 	runFlag.setAttributes(A_NONSETTABLE);
 }
 
@@ -104,6 +103,7 @@ void CG56MultiSimTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 const Attribute ANY = {0,0};
 
 void CG56MultiSimTarget :: setup() {
+	addCG56One(this,galaxy());
 	LOG_DEL; delete sharedMem;
 	LOG_NEW; sharedMem = new LinProcMemory("x",ANY,ANY,sMemMap);
 	CGMultiTarget :: setup();
@@ -113,14 +113,6 @@ void CG56MultiSimTarget :: prepareCodeGen() {
 
        	// allocate the sharedMemory
 	sharedMem->performAllocation();
-	Galaxy* g = galaxy();
-	if (g && (g->stateWithName("ONE") == 0)) {
-		LOG_NEW; FixState& ONE = *new FixState;
-		g->addState(ONE.setState("ONE",this,"",
-					"Max Fix point value",
-					A_NONSETTABLE|A_CONSTANT));
-		ONE.setInitValue(CG56_ONE);
-	}
 }
 
 void CG56MultiSimTarget :: writeCode() 
