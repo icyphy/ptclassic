@@ -17,8 +17,36 @@ factorials.
 
 <P>This demo does not use any of the real power of Java, it is only a
 first cut at a demo.
+ <P>To use this demo, you must have the Tycho <CODE>tyjni</CODE>
+interface installed.  See
+<a href="../../../../../../../tycho/doc/coding/buildtclexts.html">Building Tcl Extensions</a> for more information.
+ <HR>
+<H2>Features and Limitations</H2>
+
+<H3>Compile Time Issues</H3>
+
+Note that because we use the Tycho tyjni interface,
+we don't have to have Java present to link in these stars.
+However, Java does need to be present at runtime
+
+<H3>JNI Limitations</H3>
+The JNI shipped with JDK1.1.1 has lots of limitations
+<MENU>
+<LI> A Java class that uses <CODE>System.out.println()</CODE>.
+
+<LI> The AWT cannot be used either.
+</MENU>
+
+<H3>Future work</H3>
+<MENU>
+<LI> Once the JNI works better, we can start to do things with
+AWT.
+<LI> We need a generic method of calling Java methods from Tcl.
+It might be possible to use the Java Reflect classes.
+</MENU>
 
  <HR>
+
 <H2>Questions</H2>
 
 <H3>Why do the Java files go in a separate directory?</H3>
@@ -60,13 +88,6 @@ CLASSPATH
 <CODE>libtyjni</CODE> takes an optional argument that is the
 <CODE>CLASSPATH</CODE>
 </OL>
-
-
-<H2>Compile Time Issues</H2>
-
-Note that because we use the Tycho tyjni interface,
-we don't have to have Java present to link in these stars.
-However, Java does need to be present at runtime
 
  <P>
 <a href="../../../../../../../doc/html/index.html">Ptolemy Home Page</a><br>
