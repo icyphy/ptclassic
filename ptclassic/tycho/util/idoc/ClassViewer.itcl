@@ -271,7 +271,7 @@ body ::tycho::IDoc::constructor {args} {
 # Return a description of the current class by calling myClass describe.
 #
 body ::tycho::IDoc::describe {} {
-return [$myClass describe]
+    return [$myClass describe]
 }
 
 #######################################################################
@@ -287,9 +287,9 @@ body ::tycho::IDoc::insertData {data} {
     catch {delete object myClass}
     set myClass [::tycho::Class [::tycho::autoName class]]
     $myClass read string "$data"
-    set language [$myClass cget -language]
+    set language [$myClass modelcget -language]
     display
-    putHtml [$myClass annotationget explanation]
+    putHtml [$myClass get annotation explanation]
 }
 
 #########################################################################
@@ -321,7 +321,7 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
 # if such a description exists
 #
 body ::tycho::IDoc::binddesc {item label} {
-    if ![catch {set desc [$myClass annotationget $item.description]}] {
+    if ![catch {set desc [$myClass get annotation $item.description]}] {
         $myContents bind $label <Enter> \
                 [code "$this putStatus \{$desc\}"]
         $myContents bind $label <KeyRelease-Shift_L> \
@@ -361,16 +361,16 @@ body ::tycho::IDoc::display {} {
 
     # insert the class name
     $myContents appendlabel class \
-            -text [$myClass cget -name] \
+            -text [$myClass modelcget -name] \
             -font [$this cget -headfont]
 
     $myContents bind class <Double-Button-1> \
-            [code "$this putHtml \{[$myClass annotationget explanation]\}"]
+            [code "$this putHtml \{[$myClass get annotation explanation]\}"]
 
     # Class description is optional
-    if ![catch {$myClass annotationget description}] {
+    if ![catch {$myClass get annotation description}] {
         $myContents bind class <Enter> [code \
-                "$this putStatus \{[$myClass annotationget description]\}"]
+                "$this putStatus \{[$myClass get annotation description]\}"]
         $myContents bind class <Leave> [code \
                 "$this putStatus {}"]
     }
@@ -552,12 +552,12 @@ body ::tycho::IDoc::displayvar {protection} {
 # An item may not have an explanation, but _must_ have a description.
 #
 body ::tycho::IDoc::formatexpl {item} {
-    if [catch {set expl [$myClass annotationget $item.explanation]}] {
-        set expl [$myClass annotationget $item.description]
+    if [catch {set expl [$myClass get annotation $item.explanation]}] {
+        set expl [$myClass get annotation $item.description]
     }
     set paramlist {}
     foreach parameter [$myClass parameters $item] {
-        set default [$myClass parametercget $item.$parameter -default]
+        set default [$myClass itemcget parameter $item.$parameter -default]
         if {$default == {}} {
             lappend paramlist $parameter
         } else {
