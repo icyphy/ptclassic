@@ -50,11 +50,16 @@ extern int setPortIndices(Galaxy&);
 Nebula::Nebula(Star& self) : selfStar(self), master(NULL),
 sched(0) {};
 
-Nebula::~Nebula() {
+/*virtual*/ Nebula::~Nebula() {
     LOG_DEL; delete sched;
 }
 
 void Nebula::setInnerSched(Scheduler* s) {
+    if (s == NULL) {
+	Error::abortRun(selfStar,
+			"Nebula::setInnerSched sent a NULL scheduler pointer");
+	return;
+    }
     LOG_DEL; delete sched;
     sched = s;
     sched.setGalaxy(gal);
@@ -72,14 +77,13 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	// but do not change their parents.
 	BlockPortIter starPorts(*master);
 	PortHole* port;
-	while ((port = starPorts++) != NULL)
-	{
+	while ((port = starPorts++) != NULL) {
 	    if (port->far()->parent() == (Block*)&master)
-				// Exclude self-loop connections.
+                // Exclude self-loop connections.
 		continue;
 	    
 	    else if (port->atBoundary())
-				// Exclude wormhole connections.
+		// Exclude wormhole connections.
 		continue;
 	    
 	    else {
@@ -127,11 +131,24 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 
 void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
     GalTopBlockIter nextBlock(*g);
-    Block* b;
+    Block* b; 
     while ((b = nextBlock++) != 0) {
 	if (b->isItAtomic()) {
 	    Nebula* c = newNebula();
 	    c->setMasterBlock(b,newPorts);
+	    addNebula(c);
+	} else if (!flattenGalaxy((Galaxy*)b)) {
+	    Nebula* c = newNebula();
+	    c->setMasterBlock(b,newPorts);
+	    BlockPortIter galaxyPorts(*b);
+	    PortHole* port;
+	    while((port = galaxyPorts++) != NULL) {
+		PortHole* clonedPort = newPorts[((PortHole*)port->alias())->index()];
+		if (clonedPort) {
+		    clonedPort->parent()->removePort(*clonedPort);
+		    c->star().addPort(*clonedPort);    
+		}
+	    }
 	    addNebula(c);
 	}
 	else {
@@ -179,3 +196,74 @@ NebulaPort::NebulaPort(PortHole& self, const PortHole& master,Nebula* parentN)
     selfPort.indexValue = real().index();
 }
 
+////////////////// ITERATORS ////////////////////////
+
+// This private class is a stack of AllNebulaIter iterators.
+
+class NebulaIterContext {
+friend AllNebulaIter;
+    NebulaIter* iter;
+    NebulaIterContext* link;
+    NebulaIterContext(NebulaIter* ii,NebulaIterContext* l)
+    : iter(ii), link(l) {}
+};
+
+// Constructor.  Clear stack, create an iterator for this level.
+AllNebulaIter::AllNebulaIter(Nebula& n) {
+    stack = 0;
+    LOG_NEW; thisLevelIter = new NebulaIter(n);
+}
+
+// The reset method pops up to the top level, then resets the top iterator
+void AllNebulaIter::reset() {
+    while (stack) pop();
+    thisLevelIter->reset();
+}
+
+// Destructor.
+AllNebulaIter::~AllNebulaIter() {
+    reset();
+    LOG_DEL; delete thisLevelIter;
+}
+
+// push current iterator onto stack, enter a new galaxy g.
+inline void AllNebulaIter::push(Nebula& n) {
+    LOG_NEW; stack = new NebulaIterContext(thisLevelIter, stack);
+    LOG_NEW; thisLevelIter = new NebulaIter(n);
+}
+
+// pop an iterator off of the stack.
+void AllNebulaIter::pop() {
+    if (stack == 0) return;
+    NebulaIterContext* t = stack;
+    LOG_DEL; delete thisLevelIter;
+    thisLevelIter = t->iter;
+    stack = t->link;
+    LOG_DEL; delete t;
+}
+
+// This method returns the next block.
+Nebula* AllNebulaIter::next() {
+    Nebula* n = thisLevelIter->next();
+    while (!n) {
+	// current level exhausted.  Try popping to proceed.
+	// if stack is empty we are done.
+	if (stack == 0) return 0;
+	pop();
+	n = thisLevelIter->next();
+    }
+    // have a block.  If it's a galaxy, we will need to process
+    // it; this is pushed so we'll do it next time.
+    if (!n->isNebulaAtomic()) push (*n);
+    return n;
+}		
+
+FatNebulaIter::FatNebulaIter(Nebula& n) : AllNebulaIter(n) {}	
+
+Nebula* FatNebulaIter::next() {	
+    while (1) {			
+	Nebula* n = AllNebulaIter::next();	
+	if (!n) return 0;
+	if (!n->isNebulaAtomic()) return n;
+    }			
+}			

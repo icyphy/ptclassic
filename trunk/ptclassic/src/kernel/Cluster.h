@@ -79,10 +79,13 @@ public:
     }
 
     void addGalaxy(Galaxy*,PortHole**);
-    
+
     void initMaster();
 
-    Scheduler* outerSched() { return selfStar.scheduler(); }
+    Scheduler* outerSched() {
+	return selfStar.scheduler()?selfStar.scheduler():master->scheduler();
+    }
+    
     Scheduler* innerSched() { return sched;} 
 
 //	void merge(Nebula*);
@@ -102,6 +105,8 @@ public:
     
     virtual Nebula* newNebula(Block* s = NULL) const = 0;
 
+    virtual int flattenGalaxy(Galaxy*) {return FALSE;}
+    
     Star& star() const { return selfStar; }
 protected:
     // The Star part of the Nebula.
@@ -141,6 +146,33 @@ public:
 private:
     PortHole& selfPort;
     const PortHole& pPort;
+};
+
+class NebulaIterContext;
+
+class AllNebulaIter {
+public:
+    AllNebulaIter(Nebula&);
+    ~AllNebulaIter();
+    Nebula* next();
+    Nebula* operator++(POSTFIX_OP) { return next();}
+    void reset();
+protected:
+    NebulaIter *thisLevelIter;
+    NebulaIterContext *stack;
+    void push(Nebula&);
+    void pop();
+};
+
+class FatNebulaIter : private AllNebulaIter {
+public:
+    FatNebulaIter(Nebula&);
+    Nebula* next();
+    Nebula* operator++(POSTFIX_OP) { return next();}
+    void reset() { AllNebulaIter::reset();}
+
+    // need a public destructor because of private derivation
+    ~FatNebulaIter(){}
 };
 
 #endif
