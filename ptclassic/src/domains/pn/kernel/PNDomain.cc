@@ -30,33 +30,39 @@ static const char file_id[] = "$RCSfile$";
 
 #include "Domain.h"
 #include "KnownTarget.h"
-#include "MTDFTarget.h"
-#include "MTDFForkNode.h"
-#include "MTDFWormhole.h"
-#include "MTDFEventHorizon.h"
+#include "PNTarget.h"
+#include "PNForkNode.h"
+#include "PNWormhole.h"
+#include "PNEventHorizon.h"
 
-extern const char MTDFdomainName[] = "MTDF";
+extern const char PNdomainName[] = "PN";
 
-class MTDFDomain : public Domain
+class PNDomain : public Domain
 {
 public:
     // Constructor.
-    MTDFDomain() : Domain(MTDFdomainName) {}
+    PNDomain() : Domain(PNdomainName)
+    {
+	subDomains << "SDF" << "BDF" << "DDF";
+    }
 
-    /*virtual*/ Geodesic& newNode()
-	{ LOG_NEW; return *new MTDFForkNode; }
+    /*virtual*/ Geodesic& newGeo(int multi)
+    {
+	if (multi) { LOG_NEW; return *new PNForkNode; }
+	else { LOG_NEW; return *new PNGeodesic; }
+    }
 
     /*virtual*/ Star& newWorm(Galaxy& galaxy, Target* target=0)
-	{ LOG_NEW; return *new MTDFWormhole(galaxy, target); }
+	{ LOG_NEW; return *new PNWormhole(galaxy, target); }
     /*virtual*/ EventHorizon& newTo()
-	{ LOG_NEW; return *new MTDFtoUniversal; }
+	{ LOG_NEW; return *new PNtoUniversal; }
     /*virtual*/ EventHorizon& newFrom()
-	{ LOG_NEW; return *new MTDFfromUniversal; }
+	{ LOG_NEW; return *new PNfromUniversal; }
 };
 
 // Declare a prototype.
-static MTDFDomain protoDomain;
+static PNDomain protoDomain;
 
 // Add a prototype Target to the KnownTarget list.
-static MTDFTarget protoTarget;
-static KnownTarget entry(protoTarget,"default-MTDF");
+static PNTarget protoTarget;
+static KnownTarget entry(protoTarget,"default-PN");
