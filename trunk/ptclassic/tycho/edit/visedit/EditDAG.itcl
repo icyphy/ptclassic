@@ -350,7 +350,7 @@ body ::tycho::EditDAG::constructor {args} {
 
     # The following is done once in the constructor because it's fairly
     # expensive.
-    set defaultfont [preference get defaultFont]
+    set defaultfont [eval ::tycho::font [preference get defaultFont]]
 
     eval itk_initialize $args
     eval preference exclude $this $args
@@ -892,7 +892,7 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     # Get color and font.  Third argument is the defaults.
     contentsToArray $node cnt [list \
             color black \
-            fontspec $defaultfont \
+            fontspec {} \
             label $node \
             link {} \
             altlink {} \
@@ -900,7 +900,11 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
 	    tcl {} \
             open 1]
 
-    set font [eval ::tycho::font $cnt(fontspec)]
+    if { $cnt(fontspec) != "" } {
+	set font [eval ::tycho::font $cnt(fontspec)]
+    } else {
+	set font $defaultfont
+    }
     set color [::tycho::color $cnt(color) black]
     if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
         # FIXME: cache the option for efficiency.
