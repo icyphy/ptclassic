@@ -4,6 +4,7 @@
 #include "StringList.h"
 #include "IntState.h"
 #include "FloatState.h"
+#include "Geodesic.h"
 
 /**************************************************************************
 Version identification:
@@ -201,7 +202,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 		// if user specified waitPort exists...
 		DDFStar* p = (DDFStar*) &s;
 		if (p->waitPort != NULL) {
-			int req = p->waitNum - p->waitPort->myGeodesic->size();
+			int req = p->waitNum - p->waitPort->numTokens();
 			while (req > 0) {
 			   // if # tokens are static, return FASE.
 			   // if on wormhole boundary, return FASE.
@@ -212,7 +213,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 					return FALSE;
 			   } else
 					return FALSE;
-			   req = p->waitNum - p->waitPort->myGeodesic->size();
+			   req = p->waitNum - p->waitPort->numTokens();
 			}
 			return TRUE;
 		}
@@ -222,7 +223,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 	int count = 0;
 	for (int i = s.numberPorts(); i > 0; i--) {
 		PortHole& p = s.nextPort();
-		if (p.isItInput() && p.myGeodesic->size() != 
+		if (p.isItInput() && p.numTokens() != 
 				     p.myGeodesic->numInitialParticles)
 			count++;
 	}
@@ -241,7 +242,7 @@ int DDFScheduler :: lazyEval(Star* s) {
 		// if user specified waitPort exists...
 		DDFStar* p = (DDFStar*) s;
 		if (p->waitPort != NULL) {
-			int req = p->waitNum - p->waitPort->myGeodesic->size();
+			int req = p->waitNum - p->waitPort->numTokens();
 			DDFPortHole* po = (DDFPortHole*) p->waitPort;
 			while (req > 0) {
 			   // if on wormhole boundary, return FASE.
@@ -250,7 +251,7 @@ int DDFScheduler :: lazyEval(Star* s) {
 					return FALSE;
 			   } else
 					return FALSE;
-			   req = p->waitNum - p->waitPort->myGeodesic->size();
+			   req = p->waitNum - p->waitPort->numTokens();
 			}
 			s->fire();
 			return TRUE;
@@ -272,7 +273,7 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 		// look at the next port
 		PortHole& p = s->nextPort();
 		if (p.isItInput()) {
-			int req = p.numberTokens - p.myGeodesic->size() +
+			int req = p.numberTokens - p.numTokens() +
 				  p.myGeodesic->numInitialParticles;
 			if ((req > 0) && 
 				// check wormhole, recursive star
@@ -290,7 +291,7 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 			while (req > 0) {
 				if (!lazyEval(str))
 					return FALSE;
-				req = p.numberTokens - p.myGeodesic->size();
+				req = p.numberTokens - p.numTokens();
 			}
 		}
 	}
