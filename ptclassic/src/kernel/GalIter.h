@@ -26,7 +26,7 @@ class IterContext;
 
 class GalAllBlockIter {
 public:
-	GalAllBlockIter(const Galaxy& g);
+	GalAllBlockIter(Galaxy& g);
 	~GalAllBlockIter();
 	Block* next();
 	Block* operator++() { return next();}
@@ -34,20 +34,22 @@ public:
 protected:
 	GalTopBlockIter *thisLevelIter;
 	IterContext *stack;
-	void push(const Galaxy&);
+	void push(Galaxy&);
 	void pop();
 };
 
-// g++ 1.39.1 has a bug that prevents me from saying
-// class GalStarIter : private GalAllBlockIter
-// (it worked with 1.37.1 and is legal according to the ARM)
+// GalStarIter essentially uses a GalAllBlockIter and skips the
+// internal galaxies, returning only stars.
 
-class GalStarIter : public GalAllBlockIter {
+class GalStarIter : private GalAllBlockIter {
 public:
-	GalStarIter(const Galaxy& g);
+	GalStarIter(Galaxy& g);
 	Star* next();
 	Star* operator++() { return next();}
 	GalAllBlockIter::reset;
+
+	// need a public destructor because of private derivation
+	~GalStarIter() {}
 };
 
 #endif
