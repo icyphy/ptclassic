@@ -23,7 +23,6 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 
  Programmer: J. T. Buck
 
@@ -37,8 +36,9 @@ extern "C" {
 	void CompileInit();
 	void KcLoadInit(const char*);
 	void RPCMain (int argc, char** argv);
-	const char* pigiFilename;
 };
+
+extern const char* pigiFilename;
 
 main (int argc, char ** argv)
 {
