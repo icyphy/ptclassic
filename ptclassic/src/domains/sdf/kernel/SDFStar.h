@@ -1,7 +1,6 @@
 #ifndef _SDFStar_h
 #define _SDFStar_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

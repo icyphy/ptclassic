@@ -1,7 +1,6 @@
 #ifndef _SDFScheduler_h
 #define _SDFScheduler_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
