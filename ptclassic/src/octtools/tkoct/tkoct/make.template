@@ -40,11 +40,11 @@ TKOCT_LIBS =  -L../tkgraph -ltkgraph -L../top -ltop \
 # here.
 tkoct:	$(OBJS)
 	rm -f tkoct
-	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 tkoct.debug:	$(OBJS)
 	rm -f tkoct
-	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 
 OUT =		$(BINDIR)/tkoct
