@@ -158,7 +158,7 @@ proc ptkGantt_SaveFile {chart filename} {
     set FILEOUT [open $filename w]
 
     # first write out period and # of processors
-    puts $FILEOUT "no_processors $ptkGantt_Layout($chart.numprocs)"
+    puts $FILEOUT "numberOfProcessors $ptkGantt_Layout($chart.numprocs)"
     puts $FILEOUT "period $ptkGantt_Layout($chart.period)"
 
     # throw in an extra return
