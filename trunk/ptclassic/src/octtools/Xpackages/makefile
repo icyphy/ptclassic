@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,8 @@
 
 # Makefile for octtools Xpackages. Used to compile vem
 
-# Important!  Do not run this makefile while in ~ptolemy/src/vem/Xpackages.
+# Important!  Do not run this makefile while in
+# ~ptolemy/src/octtools/Xpackages.
 # Instead run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
@@ -48,7 +49,7 @@ makefiles:
 		cd $$x ; \
 		echo making makefile in $$x ; \
 		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/vem/Xpackages/$$x makefile ;\
+			VPATH=../../../../src/octtools/Xpackages/$$x makefile ;\
 		cd .. ; \
 	done
 
@@ -56,6 +57,6 @@ all install clean realclean sources depend checkjunk sccsinfo header:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
-	$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/vem/Xpackages/$$x $@ ;\
+	$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/octtools/Xpackages/$$x $@ ;\
 		cd .. ; \
 	done

@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$ %C%
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 
 # Makefile for Ptolemy vem
 
-# Important!  Do not run this makefile while in ~ptolemy/src/vem/vem.
+# Important!  Do not run this makefile while in ~ptolemy/src/octtools/vem.
 # Instead run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
@@ -33,7 +33,7 @@ ROOT	      = ../../..
 # Path (absolute or relative) to the object directory root
 #OBJDIR=..
 # VPATH points to the "real" source directory
-VPATH         = $(ROOT)/src/vem/vem
+VPATH         = $(ROOT)/src/octtools/vem
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
@@ -73,7 +73,7 @@ makefiles:
 		cd $$x ; \
 		echo making makefile in $$x ; \
 		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/vem/vem/$$x makefile ;\
+			VPATH=../../../../src/octtools/vem/$$x makefile ;\
 		cd .. ; \
 	done
 
@@ -118,7 +118,7 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 $(OBJECTS):
 	(cd $(@D); \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
-		VPATH=../../../../src/vem/vem/$(@D) $(@F)  ;\
+		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
 	)
 
 # If, under gcc, you link with -lmm, then you will probably get bus errors
@@ -164,7 +164,7 @@ _vem:
 		cd $$x ; \
 		echo making all in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/vem/vem/$$x all ;\
+			VPATH=../../../../src/octtools/vem/$$x all ;\
 		cd .. ; \
 	done
 
@@ -201,7 +201,7 @@ install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making install in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/vem/vem/$$x install ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/octtools/vem/$$x install ;\
 		cd .. ; \
 	done
 
@@ -224,6 +224,6 @@ sources depend sccsinfo clean:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/vem/vem/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/octtools/vem/$$x $@ ;\
 		cd .. ; \
 	done
