@@ -176,6 +176,22 @@ void SimVSSTarget :: frameCode() {
   top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
   top_architecture << "end component;\n";
   top_architecture << "\n";
+  top_architecture << "component C2Vreal\n";
+  top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
+  top_architecture << indent(1) << "          numxfer : INTEGER );\n";
+  top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
+  top_architecture << indent(1) << "       data : out REAL      ;\n";
+  top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
+  top_architecture << "end component;\n";
+  top_architecture << "\n";
+  top_architecture << "component V2Creal\n";
+  top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
+  top_architecture << indent(1) << "          numxfer : INTEGER );\n";
+  top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
+  top_architecture << indent(1) << "       data : in  REAL      ;\n";
+  top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
+  top_architecture << "end component;\n";
+  top_architecture << "\n";
   top_architecture << "component ";
   top_architecture << galName;
   top_architecture << "\n";
@@ -214,6 +230,14 @@ void SimVSSTarget :: frameCode() {
   }
   if (needV2Cinteger) {
     top_configuration << indent(1) << "for all:V2Cinteger use entity work.V2Cinteger";
+    top_configuration << "(CLI); end for;\n";
+  }
+  if (needC2Vreal) {
+    top_configuration << indent(1) << "for all:C2Vreal use entity work.C2Vreal";
+    top_configuration << "(CLI); end for;\n";
+  }
+  if (needV2Creal) {
+    top_configuration << indent(1) << "for all:V2Creal use entity work.V2Creal";
     top_configuration << "(CLI); end for;\n";
   }
   top_configuration << "end for;\n";
@@ -274,7 +298,7 @@ begin
 end;
 ";
   }
-  
+
   if (needV2Cinteger) {
     code << "\n
 --V2Cinteger.vhdl
@@ -299,6 +323,74 @@ architecture CLI of V2Cinteger is
 	attribute CLI_EVALUATE	of CLI	: architecture is \"v2cinteger_eval\";
 	attribute CLI_ERROR	of CLI	: architecture is \"v2cinteger_error\";
 	attribute CLI_CLOSE	of CLI	: architecture is \"v2cinteger_close\";
+
+	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
+	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
+	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
+
+begin
+end;
+";
+  }
+  
+  if (needC2Vreal) {
+    code << "\n
+--C2Vreal.vhdl
+
+library SYNOPSYS,IEEE;
+use SYNOPSYS.ATTRIBUTES.all;
+use IEEE.STD_LOGIC_1164.all;
+
+entity C2Vreal is
+	generic ( pairid	: INTEGER	;
+		  numxfer	: INTEGER	);
+	port	( go		: in STD_LOGIC	;
+		  data		: out REAL	;
+		  done		: out STD_LOGIC	);
+end C2Vreal;
+
+architecture CLI of C2Vreal is
+
+	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
+
+	attribute CLI_ELABORATE	of CLI	: architecture is \"c2vreal_open\";
+	attribute CLI_EVALUATE	of CLI	: architecture is \"c2vreal_eval\";
+	attribute CLI_ERROR	of CLI	: architecture is \"c2vreal_error\";
+	attribute CLI_CLOSE	of CLI	: architecture is \"c2vreal_close\";
+
+	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
+	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
+	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
+
+begin
+end;
+";
+  }
+  
+  if (needV2Creal) {
+    code << "\n
+--V2Creal.vhdl
+
+library SYNOPSYS,IEEE;
+use SYNOPSYS.ATTRIBUTES.all;
+use IEEE.STD_LOGIC_1164.all;
+
+entity V2Creal is
+	generic ( pairid	: INTEGER	;
+		  numxfer	: INTEGER	);
+	port	( go		: in STD_LOGIC	;
+		  data		: in REAL	;
+		  done		: out STD_LOGIC	);
+end V2Creal;
+
+architecture CLI of V2Creal is
+
+	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
+
+	attribute CLI_ELABORATE	of CLI	: architecture is \"v2creal_open\";
+	attribute CLI_EVALUATE	of CLI	: architecture is \"v2creal_eval\";
+	attribute CLI_ERROR	of CLI	: architecture is \"v2creal_error\";
+	attribute CLI_CLOSE	of CLI	: architecture is \"v2creal_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
 	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
@@ -551,7 +643,6 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
-
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
