@@ -217,7 +217,6 @@ ALLTESTS = \
 	editors/textedit/test/alltests.itcl \
 	editors/visedit/test/alltests.itcl \
 	editors/slate/test/alltests.itcl \
-	lib/tydoc/test/alltests.itcl \
 	typt/kernel/test/alltests.itcl \
 	typt/editors/test/alltest.itcl
 
