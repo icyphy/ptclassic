@@ -1,0 +1,739 @@
+# Query box that prompts the user for one or more responses in various forms.
+#
+# @Authors: Edward A. Lee, Joel R. King, Bilung Lee, John Reekie
+# @Contributor: Christopher Hylands
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### query
+# Query the user for one or more responses of various types (a line of
+# text, multiple lines of text, a row of radio buttons, or a query mediated
+# by some other dialog).  Return
+# only after the user enters information and hits OK or Cancel button.
+# If the OK button is hit, the entire contents of the query will be
+# returned as a list in the form {tag value tag value ...}. This list
+# can be directly assigned to an array using <code>array set</code>,
+# making it easy to use the results of the query. If the Cancel button
+# is hit an empty string will be returned. The first argument is the
+# label for the entire query, and will appear at the top of the query
+# window. The second argument is the queries, which is actually a
+# collection of method invocations for the <code>Query</code> class.
+# The format of this argument is given in more detail below. The third
+# argument is the width of the entry box in characters. It is optional
+# and defaults to 40.
+# <p>
+# For example, the following call will create a dialog with one of
+# each of the four kinds of queries:
+# <tcl><pre>
+#    ::tycho::query {title text} { &#92
+#          {line w {w label} foo} &#92
+#          {lines x {x label} bar 4} &#92
+#          {radio y {y label} {A B C} A} &#92
+#          {mediated z {z label} red ::tycho::querycolor}}
+# </pre></tcl>
+# This will return a list of the form {w <i>value</i> x <i>value</i> y
+# <i>value</i> z <i>value</i>}.
+# <p>
+# The <i>queries</i> argument is a list of method invocations.
+# There are four relevant methods, shown with their arguments below:
+# <menu>
+# <li> line tag label default
+# <li> lines tag label default height
+# <li> radio tag label possibilities default
+# <li> mediated tag label default command
+# </menu>
+# In addition, all four can accept any number of additional arguments.
+# These arguments are passed to the widget that implements the query
+# (a Tk entry, a Tycho Edit, a set of Tk radio buttons, or a single Tk
+# button, respectively).  These additional arguments can be used to
+# control the appearance of the query.
+# <p>
+# The arguments above are explained below:
+# <menu>
+# <li> tag: a string that uniquely
+#      identifies the query. No two queries in the same dialog box
+#      can have the same tag.
+# <li> label: a string that is inserted in the display to the left
+#      of the query.
+# <li> default: the initial value of the query.
+# <li> height: the number of lines in a multi-line text query.
+#      An <code>Edit</code> widget is used, providing
+#      an emacs-like text editor.
+# <li> possibilities: a list of button names.  These are the labels
+#      that appear on each of the radio buttons.
+# <li> command: a command to invoke for a mediated query.  Before
+#      invoking this command, the current (default) value of the
+#      query will be appended to the command, separated by a space.
+#      The command should return the new value of the query.
+# </menu>
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
+#
+proc ::tycho::query {text queries {entrywidth 40} } {
+    set nm [::tycho::autoName .entry]
+    uplevel #0 [list ::tycho::Query $nm \
+	    -bitmap questhead \
+	    -text $text \
+	    -queries $queries \
+	    -entrywidth $entrywidth]
+    return [::tycho::Dialog::wait $nm]
+}
+
+##########################################################################
+#### queryinfo
+# Query the user for a single typed response. This is a slightly
+# simpler version of <code>query</code>, usable when only a single
+# one-line text response is required. Return only after the user enters
+# information and hits OK or Cancel button. If the OK button is hit,
+# the value entered will be returned. If the Cancel button is hit an
+# empty string will be returned. The first argument is the text of the
+# query. The second argument is optional, and gives a default response.
+# In other words, it will appear initially in the entry box. The third
+# argument is the width of the entry box in characters It is also
+# optional and defaults to 40.
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
+#
+proc ::tycho::queryinfo {text {initvalue ""} {entrywidth 40} } {
+    return [lindex \
+            [::tycho::query $text [list [list line tag {} $initvalue]] \
+            $entrywidth] \
+            1]
+}
+
+# FIXME: Known bugs
+# - When tabbing from query to query, if one of them is a multi-line
+#   text entry, it takes two tabs to give it the focus.
+
+##########################################################################
+#### Query class.
+# Create a dialog window with any number of labeled entry boxes and
+# radio buttons. These can be specified with the <code>-queries</code>
+# option or with methods that add individual queries. The
+# <code>get</code> method returns a list of values. It is possible to
+# modify the action taken by the OK and Cancel buttons. Do this using
+# the <i>-okcommand</i> or <i>-cancelcommand</i> options. The default
+# value for the <i>-okcommand</i> option is a command that simply
+# returns the value returned by the <code>get</code> method. The
+# default <i>-cancelcommand</i> returns a null string. The return value
+# of these commands will determine what is returned by the
+# <code>wait</code> procedure of the base class Dialog, which is
+# the usual way for creating a modal dialog.
+# <p>
+# For examples of the usage of this class, see the
+# <a href="../internals/dialogclasses.html#Query class">
+# dialog classes tutorial</a>.
+# <p>
+# The first query created gets the focus, and Control-Tab moves from one
+# query to the next.
+#
+class ::tycho::Query {
+    inherit ::tycho::Dialog
+
+    constructor {args} {}
+    destructor {}
+
+    # Specify the command to execute on a cancel response.
+    itk_option define -cancelcommand cancelcommand CancelCommand ""
+
+    # Specify the width (in characters) of the entry boxes.
+    itk_option define -entrywidth entryWidth EntryWidth 40
+
+    # Give a list of method invocations from which to make queries.
+    itk_option define -queries queries Queries {}
+
+    # Specify the command to execute on an OK response.
+    itk_option define -okcommand okcommand OkCommand ""
+
+    # The options used by the entry widgets
+    itk_option define -entryforeground entryForeground EntryForeground black
+    itk_option define -entrybackground entryBackground EntryBackground white
+    itk_option define -entryfont entryFont EntryFont 8x13
+
+    ##################################################################
+    ####                       public methods                     ####
+
+    # Clear all or one entry.
+    method clear {{tag {}}}
+
+    # Give the focus to the appropriate subwindow.
+    method focusin {}
+
+    # Get the current value of the queries (or one query).
+    method get {{tag {}}}
+
+    # Insert the specified string into the specified entry box.
+    method insert {tag str}
+
+    # Add an entry box query (a single-line text entry).
+    method line {tag label default args}
+
+    # Add a multi-line edit box query.
+    method lines {tag label default lines args}
+
+    # Add a mediated query (a button that invokes some other widget).
+    method mediated {tag label default command args}
+
+    # Invoke the command of a mediated query.
+    method mediatedCommand {tag command}
+
+    # Execute the -okcommand command and close the window.
+    method ok {}
+
+    # Add a radio button query.
+    method radio {tag label bttnNames default args}
+
+    # Remove the query identified by the specified tag.
+    method remove {tag}
+
+    ##################################################################
+    ####             protected and private variables              ####
+
+    # Remember the number of entries currently in this widget
+    protected variable numentries 0
+
+    # Keep track of tags in the order in which they are created.
+    private variable tags {}
+
+    # Array of clear commands for each tag.
+    private variable tagsclear
+
+    # Array of insert commands for each tag.
+    private variable tagsinsert
+
+    # Array of get commands for each tag.
+    private variable tagsget
+
+    # Keep track of which subwindow should get the focus initially.
+    private variable focuswindow {}
+
+    # If any multi-line text entry widgets are used, then we cannot use
+    # <Return> to dismiss the window.
+    private variable EditWidgetCount 0
+    private variable returnDismisses 0
+}
+
+#####################################################################
+#### -queries option
+# The value of the option must be a list of lists, where each list
+# begins with a method name. The method names currently understood are
+# "line", "lines", and "radio" for text entries with one line or
+# multiple lines, and radio buttons, respectively. After the method
+# name, the arguments to the corresponding method are given.
+#
+configbody ::tycho::Query::queries {
+    foreach query $itk_option(-queries) {
+        eval $this $query
+    }
+}
+
+#####################################################################
+#### constructor
+#
+body ::tycho::Query::constructor {args} {
+
+    itk_component add querysite {
+	frame $itk_component(childsite).querysite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(querysite) -pady 5 -after $itk_component(top)
+
+    itk_component add radiosite {
+	frame $itk_component(childsite).radiosite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(radiosite) -fill x -pady 5 \
+	    -after $itk_component(querysite)
+
+    eval itk_initialize $args
+
+    # Subscribe to the preference set
+    preference subscribe dialogs $this \
+	    -entrywidth entryWidth \
+	    -entryforeground entryForeground \
+	    -entrybackground entryBackground \
+	    -entryfont entryFont
+     
+    # If the -okcommand option is still not set, set a default
+    if {$itk_option(-okcommand) == ""} {
+	configure -okcommand "$this get"
+    }
+
+    addButton ok -text "OK <M-Ret>" \
+	    -command "$this ok"
+    addButton cancel -text "Cancel <ESC>" \
+	    -command "$this execCommand -cancelcommand; \
+	    $this nextWindow; \
+	    delete object $this"
+
+    # Enable <Return> binding if there are no multi-line text entry widgets.
+    if {$EditWidgetCount == 0} {
+	default ok
+	$itk_component(bbox) buttonconfigure ok -text "OK <Ret>"
+	set returnDismisses 1
+    }
+
+    # In any case, allow meta-return to dismiss the window.
+    bind $itk_component(hull) <Meta-Return> \
+	    "$this invoke ok; break"
+
+    bind $prefix <Escape> "$this invoke cancel"
+}
+
+#####################################################################
+#### destructor
+body ::tycho::Query::destructor {} {
+    # Unsubscribe from all preferences
+    preference unsubscribe dialogs $this
+}
+
+    ##################################################################
+    ##################################################################
+    ####                       public methods                     ####
+
+#####################################################################
+#### clear
+# If no argument is given, clear the text in all entry boxes. If a tag
+# is given as an argument, clear the corresponding entry. If the tag is
+# not recognized, do nothing.
+# 
+body ::tycho::Query::clear {{tag {}}} {
+    if {$tag == {}} {
+	foreach tag $tags {
+            eval $tagsclear($tag)
+        }
+    } {
+        eval $tagsclear($tag)
+    }
+}
+
+#####################################################################
+#### focusin
+# Give the focus to the appropriate subwindow, if there is one.
+# If queries are being added dynamically using <code>addTextQuery</code> or
+# <code>addRadioQuery</code>, then the most recently added query will
+# get the focus.  Otherwise, the first query gets the focus.
+# 
+body ::tycho::Query::focusin {} {
+    if {$focuswindow != {}} {
+	focus $focuswindow
+    } {
+	focus $itk_component(hull)
+    }
+}
+
+#####################################################################
+#### get
+# If no argument is given, get the current value of the entry boxes,
+# and return as a list in the form {tag value tag value ...}.  This list
+# can be directly assigned to an array using <code>array set</code>,
+# making it easy to use the results of the query. If a tag is given as an
+# argument, return the value of the corresponding entry only. If the tag
+# is not recognized, return an empty string.
+# 
+body ::tycho::Query::get {{tag {}}} {
+    set response {}
+    if {$tag == {}} {
+	foreach tag $tags {
+            lappend response $tag
+            lappend response [eval $tagsget($tag)]
+        }
+    } {
+        set response [eval $tagsget($tag)]
+    }
+    return $response
+}
+
+#####################################################################
+#### insert
+# Insert the specified string into the specified entry box.
+# If the tag is not recognized, flag an error.
+# 
+body ::tycho::Query::insert {tag str} {
+    eval $tagsinsert($tag) [list $str]
+}
+
+#####################################################################
+#### line
+# Add an entry box query (a single-line text entry). The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query,
+# <li> the label to put on the query,
+# <li> the default text that appears in the entry box,
+# <li> any additional arguments to pass to the entry widget.
+# </menu>
+# A Tk <code>entry</code> widget is used for the query.
+#
+body ::tycho::Query::line {tag label default args} {
+    # The label.
+    itk_component add label_$tag {
+        label $itk_component(querysite).label_$tag \
+                -text "$label"
+    } {
+        keep -background -cursor -foreground -font
+    }
+    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
+    
+    itk_component add tag_$tag {
+        eval entry $itk_component(querysite).tag_$tag \
+                -relief sunken $args
+    } {
+        rename -background -entrybackground \
+                entryBackground EntryBackground
+        rename -foreground -entryforeground \
+                entryForeground EntryForeground
+        rename -width -entrywidth entryWidth EntryWidth 
+        rename -font -entryfont entryFont EntryFont
+    }
+    grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
+    
+    $itk_component(tag_$tag) insert insert $default
+    
+    # Bindings for the Entry box
+    bind $itk_component(tag_$tag) <Control-u> "
+    clipboard clear -displayof %W
+    clipboard append -displayof %W \[%Q get $tag\]
+    %W delete 0 end
+    "
+    
+    bind $itk_component(tag_$tag) <Control-k> "
+    clipboard clear -displayof %W
+    clipboard append -displayof %W \[
+        string range \[%Q get $tag\] \[%W index insert\] \
+            \[%W index end\]]
+    %W delete insert end
+    "
+    if {$focuswindow == {}} {
+        set focuswindow $itk_component(tag_$tag)
+    }
+    
+    incr numentries
+
+    # Record the tag, its get method, and its clear method.
+    lappend tags $tag
+    set tagsclear($tag) "$itk_component(tag_$tag) delete 0 end"
+    set tagsinsert($tag) "$itk_component(tag_$tag) insert insert"
+    set tagsget($tag) "$itk_component(tag_$tag) get"
+
+    focusin
+}
+
+#####################################################################
+#### lines
+# Add a multi-line edit box query. The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query,
+# <li> the label to put on the query,
+# <li> the default text that appears in the text box,
+# <li> the number of lines for the query box, and
+# <li> any additional arguments to pass to the edit widget.
+# </menu>
+# An <code>Edit</code> widget is used for the query, providing an
+# emacs-like text editor.
+#
+body ::tycho::Query::lines {tag label default lines args} {
+
+    # The label.
+    itk_component add label_$tag {
+        label $itk_component(querysite).label_$tag \
+                -text "$label"
+    } {
+        keep -background -cursor -foreground -font
+    }
+    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
+    
+    itk_component add tag_$tag {
+        uplevel #0 [list ::tycho::Edit $itk_component(querysite).tag_$tag \
+                -text $default \
+                -save 0 \
+                -textheight $lines \
+                -scrollbar 0 \
+                -relief sunken] \
+                $args
+    } {
+        rename -background -entrybackground \
+                entryBackground EntryBackground
+        rename -textforeground -entryforeground \
+                entryForeground EntryForeground
+        # FIXME: Pending proper fix
+        # rename -textwidth -entrywidth entryWidth EntryWidth
+        rename -textfont -entryfont entryFont EntryFont
+    }
+    # We have to configure the textheight option again:
+    # Because the Edit widget is subscribed to preferences,
+    # the subscribed values overwrite the ones set in the
+    # options when the widget is created. What we need
+    # is to fix the preference manager... FIXME
+    $itk_component(tag_$tag) configure -textheight $lines
+    $itk_component(tag_$tag) configure -textwidth \
+            $itk_option(-entrywidth)
+    $itk_component(tag_$tag) configure -relief sunken
+    
+    grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
+    
+    set twin [$itk_component(tag_$tag) textWinName]
+    if {$focuswindow == {}} {
+        set focuswindow $twin
+    }
+    
+    # If <Return> is enabled to dismiss the window, disable it.
+    if {$returnDismisses} {
+        $itk_component(bbox) buttonconfigure ok -defaultring no
+        $itk_component(bbox) buttonconfigure ok -text "OK <M-Ret>"
+        bind $itk_component(hull) <Return> { }
+        set returnDismisses 0
+    }
+    incr EditWidgetCount
+    
+    # NOTE: Control-tab moves the focus
+    incr numentries
+
+    # Record the tag, its get method, and its clear method.
+    lappend tags $tag
+    set tagsclear($tag) "$itk_component(tag_$tag) deleteRange 1.0 end"
+    set tagsinsert($tag) "$itk_component(tag_$tag) insertString insert"
+    set tagsget($tag) "$itk_component(tag_$tag) get 1.0 {end -1 chars}"
+
+    # Correct for the fact that the text widget grabs the focus.
+    after 1000 [list catch "$this focusin"]
+}
+
+#####################################################################
+#### mediated
+# Add a mediated query (a button that invokes some other widget).
+# The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query,
+# <li> the label to put on the query,
+# <li> the default text that appears in the button,
+# <li> a command that returns a new value for the query, and
+# <li> any additional arguments to pass to the button widget.
+# </menu>
+# Before the command is invoked, the current value of the query
+# is appended to the end, separated by a space.  The command
+# should return the new value.  If the command returns a null string,
+# then no change is made to the current value of the query.
+#
+body ::tycho::Query::mediated {tag label default command args} {
+
+    # The label.
+    itk_component add label_$tag {
+        label $itk_component(querysite).label_$tag \
+                -text "$label"
+    } {
+        keep -background -cursor -foreground -font
+    }
+    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
+    
+    set cmd "$this mediatedCommand $tag $command"
+
+    itk_component add tag_$tag {
+        eval [list button $itk_component(querysite).tag_$tag \
+                -text $default \
+                -command $cmd] \
+                $args
+    } {
+        rename -background -entrybackground \
+                entryBackground EntryBackground
+        rename -foreground -entryforeground \
+                entryForeground EntryForeground
+        rename -width -entrywidth entryWidth EntryWidth 
+        rename -font -entryfont entryFont EntryFont
+    }
+    
+    grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
+    
+    if {$focuswindow == {}} {
+        set focuswindow $itk_component(tag_$tag)
+    }
+    
+    incr numentries
+
+    # Record the tag, its get method, and its clear method.
+    lappend tags $tag
+    set tagsclear($tag) [list $itk_component(tag_$tag) configure -text $default]
+    set tagsinsert($tag) "$itk_component(tag_$tag) configure -text"
+    set tagsget($tag) "$itk_component(tag_$tag) cget -text"
+
+    focusin
+}
+
+#####################################################################
+#### mediatedCommand
+# Invoke the command of a mediated query.  If it returns a non-null string,
+# then set the text of the appropriate button to that string.
+# The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query and
+# <li> the command.
+# </menu>
+# Before the command is invoked, the current value of the query
+# is appended to the end, separated by a space.
+#
+body ::tycho::Query::mediatedCommand {tag command} {
+    set retval [eval $command \
+            [$itk_component(querysite).tag_$tag cget -text]]
+    if {$retval != {}} {
+        $itk_component(querysite).tag_$tag configure -text $retval
+    }
+}
+
+#####################################################################
+#### ok
+# Execute the -okcommand command and close the window.
+# 
+body ::tycho::Query::ok {} {
+    execCommand -okcommand
+    nextWindow
+    delete object $this
+}
+
+#####################################################################
+#### radio
+# Add a radio button query. The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query,
+# <li> the label to put on the query,
+# <li> the list of radio button items (by label),
+# <li> the default radio button item (the one initially selected), and
+# <li> any additional arguments to pass to the entry widget.
+# </menu>
+# The additional
+# arguments can be used to pass tk <CODE>radiobutton</CODE> options
+# such as <CODE>-command</CODE>.  Typical usage is:
+# <tcl><pre>
+# ::tycho::Query .e
+# .e radio foo {My Foo:} {a b c} a -command {puts foo}
+# .e centerOnScreen
+# </pre></tcl>
+#
+body ::tycho::Query::radio {tag label bttnNames default args} {
+
+    # The label
+    itk_component add label_$tag {
+        eval [list label $itk_component(querysite).label_$tag \
+                -text $label]
+    } {
+        keep -background -cursor -foreground -font
+    }
+    grid $itk_component(label_$tag) -row $numentries -column 0 -sticky e
+    
+    # A frame for the radiobuttons
+    itk_component add tag_$tag {
+        frame $itk_component(querysite).tag_$tag
+    } {
+        keep -background -cursor -background
+    }
+    grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky w
+    
+    # Create and pack buttons
+    set count 0
+    foreach name $bttnNames {
+        itk_component add radio_[set tag]_[incr count] {
+            if { "$args" != {}} {
+                set cmd {radiobutton $itk_component(tag_$tag).radio_$count \
+                        -text $name\
+                        -value $name\
+                        -variable \
+                        [scope $itk_component(hull)_[set tag]sw]}
+                eval $cmd $args
+            } else {
+                radiobutton $itk_component(tag_$tag).radio_$count -text $name\
+                        -value $name\
+                        -variable \
+                        [scope $itk_component(hull)_[set tag]sw]
+            }
+        } {
+            keep -background -cursor
+        }
+        pack $itk_component(radio_[set tag]_$count) -side left -anchor ne \
+                -fill x -expand yes
+    }
+    set [scope $itk_component(hull)_[set tag]sw] $default
+    
+    # Do not grab the focus for a radio query, since it generally
+    # requires the mouse anyway.
+    # set focuswindow $itk_component($tag)
+    
+    incr numentries
+
+    # Record the tag, its get method, and its clear method.
+    lappend tags $tag
+    set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
+            $default]
+    set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+    set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+
+    focusin
+}
+
+#####################################################################
+#### remove
+# Remove the query identified by the specified tag.
+# 
+body ::tycho::Query::remove {tag} {
+    if [info exists itk_component(tag_$tag)] {
+	destroy $itk_component(tag_$tag)
+	unset itk_component(tag_$tag)
+        destroy $itk_component(label_$tag)
+        unset itk_component(label_$tag)
+        unset tagsclear($tag)
+        unset tagsinsert($tag)
+        unset tagsget($tag)
+    }
+    if {[set idx [lsearch -exact $tags $tag]] >= 0} {
+        set tags [lreplace $tags $idx $idx]
+    }
+}
