@@ -118,6 +118,8 @@ protected:
 	// redefine initialize()
 	void initialize(); 
 			   
+	// number of Data collected
+	int numData;
 };
 
 #endif
