@@ -188,7 +188,22 @@ handle.
 <a href="ptntbugs.html#tar">problem with <CODE>$PTOLEMY/colors/ptolemy/con</CODE></a> and file names that contained percent characters.  These
 problems have been fixed in 0.7.2devel
  <br> If you are using tar and you get a warning like
-<CODE>tar: Error exit delayed from previous errors</CODE>, you can ignore it.
+<pre>
+bash-2.02$ tar -xf /tmp/pt0.7.2devel.src.tar
+tar: ptolemy/tcltk/tcl/man/mann/Toplevel.n: Could not create file: Permission denied
+tar: ptolemy/tcltk/tcl/man/mann/optionmenu.n: Could not create file: Permission denied
+tar: ptolemy/tcltk/tcl/man/mann/messagebox.n: Could not create file: Permisson denied
+tar: Error exit delayed from previous errors
+</pre>
+These errors occur because of case sensitivity problems.
+The files that are reported as errors are only different by case.
+For example:
+<pre>
+/users/ptolemy/tcltk/tcl/man/mann/Toplevel.n
+/users/ptolemy/tcltk/tcl/man/mann/toplevel.n
+</pre>
+In the short term, you can ignore the above errors.
+
 
 
 <li> You may need to do:
