@@ -178,6 +178,9 @@ class ::tycho::Edit {
     # Convert the selection or the current word to lower case.
     method lowerCase {}
 
+    # Move the insertion cursor forward or backward one word.
+    method move {type}
+
     # Insert text from the selection if the mouse has not moved.
     method mouseStuff {xpos ypos}
 
@@ -309,8 +312,14 @@ class ::tycho::Edit {
     # Initialize the menubar
     private method initializeMenubar {}
 
+    # Number of characters from the selection to the next word.
+    private method nextWord {}
+
     # Set up the undo buffer for an insertion at position index.
     private method prepareInsert {index} {}
+
+    # Number of characters from the selection to the previous word.
+    private method prevWord {}
 
     # Delete and return the selection or the current word.
     private method selOrWord {}
@@ -577,6 +586,18 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Escape><u> "%Q upperCase; break"
     bind $itk_component(text) <Meta-C> "%Q capitalize; break"
     bind $itk_component(text) <Escape><C> "%Q capitalize; break"
+
+    # Modified cursor motion keys
+    bind $itk_component(text) <Control-f> "%Q move fword; break"
+    bind $itk_component(text) <Meta-f> "%Q move fword; break"
+    bind $itk_component(text) <Escape><f> "%Q move fword; break"
+    bind $itk_component(text) <Control-Right> "%Q move fword; break"
+    bind $itk_component(text) <Meta-Right> "%Q move fword; break"
+    bind $itk_component(text) <Control-b> "%Q move bword; break"
+    bind $itk_component(text) <Meta-b> "%Q move bword; break"
+    bind $itk_component(text) <Escape><b> "%Q move bword; break"
+    bind $itk_component(text) <Control-Left> "%Q move bword; break"
+    bind $itk_component(text) <Meta-Left> "%Q move bword; break"
 
     # Cursor motion keys do not set the modified flag
     # Note that the definitions below have a blank space.
@@ -859,7 +880,8 @@ body ::tycho::Edit::del {type} {
     # or the end of the buffer for forward deletions.
     if {$type == "char" || $type == "word"} {
 	if [$itk_component(text) compare insert == 1.0] {return}
-    } {
+    }
+    if {$type == "fchar" || $type == "fword"} {
 	if [$itk_component(text) compare insert == end] {return}
     }
     
@@ -869,7 +891,7 @@ body ::tycho::Edit::del {type} {
 	char {deleteRange {insert -1 char} insert}
 	word {deleteRange {insert -1 char wordstart} insert}
 	fchar {deleteRange insert {insert +1 char}}
-	fword {deleteRange insert {insert wordend}}
+	fword {deleteRange insert "insert + [nextWord] char"}
     }
 }
 
@@ -1476,6 +1498,28 @@ body ::tycho::Edit::lowerCase {} {
     if $readOnly {bell; return}
     set sel [selOrWord]
     insertString insert [string tolower $sel]
+}
+
+#####################################################################
+#### move
+# Move the insertion cursor forward or backward one word, using the 
+# Emacs rules. fword: forward, bword: backward
+#
+body ::tycho::Edit::move {type} {
+    # Do nothing if the insertion point is 
+    # at the beginning of the buffer for bword
+    # or the end of the buffer for fword 
+    if {$type == "bword"} {
+	if [$itk_component(text) compare insert == 1.0] {return}
+    } elseif {$type == "fword"} {
+	if [$itk_component(text) compare insert == end] {return}
+    }
+    switch $type {
+        "fword" { $itk_component(text) mark set insert \
+                "insert + [nextWord] char"}
+        "bword" {$itk_component(text) mark set insert \
+                "insert - [prevWord] char"}
+    }
 }
 
 #########################################################################
@@ -2186,6 +2230,25 @@ body ::tycho::Edit::initializeMenubar {} {
 }
 
 #####################################################################
+#### nextWord
+# Return the number of characters from the selection to the next "word"
+# using Emacs rules.
+#
+body ::tycho::Edit::nextWord {} {
+    set buffer [$itk_component(text) get insert "insert + 1 line"]
+    # trim whitespace, other chars
+    set newbuff [string trimleft $buffer \
+            " \t\n\!\@\#\$\%\^\&\*\(\)\-\=\\\_\+\|\;\'\
+            \:\"\`\~,.\/\<\>\?\[\]\{\}"]
+    # trim word
+    set newbuff [string trimleft $newbuff \
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"]
+
+    # return number of characters
+    expr [string length $buffer] - [string length $newbuff]
+}
+
+#####################################################################
 #### prepareInsert
 # Set up the undo buffer for an insertion at position index.
 # Return 1 if this insertion is contiguous with an immediately
@@ -2224,6 +2287,25 @@ body ::tycho::Edit::prepareInsert {index} {
     markModified
     
     return $contflag
+}
+
+#####################################################################
+#### prevWord
+# Return the number of characters from the selection to the previous "word"
+# using Emacs rules. (returns a positive number)
+#
+body ::tycho::Edit::prevWord {} {
+    set buffer [$itk_component(text) get "insert - 1 line" insert]
+    # trim whitespace, other chars
+    set newbuff [string trimright $buffer \
+            " \t\n\!\@\#\$\%\^\&\*\(\)\-\=\\\_\+\|\;\'\
+            \:\"\`\~,.\/\<\>\?\[\]\{\}"]
+    # trim word
+    set newbuff [string trimright $newbuff \
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"]
+
+    # return number of characters
+    expr [string length $buffer] - [string length $newbuff]
 }
 
 #####################################################################
