@@ -155,6 +155,26 @@ void Galaxy :: 	initStateSubblocks() {
 }
 
         ////////////////////////////////////
+        // initPorts()
+        ////////////////////////////////////
+
+// like initialize but for portholes only.
+
+void Galaxy :: initPorts() {
+        Block::initPorts();
+	initPortsSubblocks();
+}
+
+// separate for additional control in derived galaxies.
+
+void Galaxy :: 	initPortsSubblocks() {
+	GalTopBlockIter next(*this);
+	Block* b;
+	while ((b = next++) != 0 && !Scheduler::haltRequested())
+		b->initPorts();
+}
+
+        ////////////////////////////////////
         // const char* domain()
         ////////////////////////////////////
 
