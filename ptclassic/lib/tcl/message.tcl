@@ -197,10 +197,15 @@ and disclaimer of warranty provisions, push the button below. "
 
     pack .version.msg.at.copyright -side bottom -fill x
 
-    pack [canvas .version.bm -width 6c -height 7.5c -bg [ptkColor bisque] ] \
-	-side left
     global ptolemy
-    .version.bm create bitmap 3c 3.75c -bitmap @$ptolemy/lib/tcl/Ptolemy.xbm
+    image create photo ptolemygif -palette 4/4/3  \
+	-file $ptolemy/lib/tcl/ptolemyWelcome.gif
+    set height [image height ptolemygif]
+    set width [image width ptolemygif]
+    pack [canvas .version.gif -height $height -width $width -bg \
+	[ptkColor bisque] ] -side left
+    .version.gif create image [expr $width/2] [expr $height/2] \
+	-image ptolemygif
 
     wm geometry . +200+300
     tkwait visibility .
