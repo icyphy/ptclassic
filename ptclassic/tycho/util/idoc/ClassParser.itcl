@@ -284,6 +284,9 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
 
         if ![$IDocSys modCheck $filename] {
             # file does not need to be redocumented
+            if $debug {
+                puts "$filename <not modified>"
+            }
             continue
         }
 
@@ -348,6 +351,10 @@ body ::tycho::IDocSys::readFile {filename} {
             set language Itcl
         }
         .itk {
+            set language Itcl
+        }
+        "" {
+            # Fix for files such as tycho-mac, tydoc, idoc
             set language Itcl
         }
         default {
