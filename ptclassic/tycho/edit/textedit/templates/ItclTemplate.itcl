@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -61,47 +61,47 @@ class ::tycho::ClassName {
     ####                         public methods                    ####
 
     # One line description of the method; listed in alphabetical order
-    method NameA {}
+    method publicMethodA {}
 
     # One line description of the method
-    method NameB {}
+    method publicMethodB {}
 
     ###################################################################
     ####                      public procs                         ####
 
     # One line description procedure; listed in alphabetical order
-    proc NameA {anyargs} {}
+    proc publicProcA {anyargs} {}
 
     ###################################################################
     ####                   protected methods                       ####
 
     # One line description of the method; listed in alphabetical order
-    protected method methodName {}
+    protected method protectedMethodA {}
 
     ###################################################################
     ####                   protected variables                     ####
 
     # Comments come before the variable declaration; variables listed
     # in alphabetical order
-    protected variable variableName
+    protected variable protectedVariableA
 
-    protected common variableName
+    protected common protectedCommonA
 
     ###################################################################
     ####                   private methods                         ####
 
     # One line description; listed in alphabetical order
-    private method NameA {}
+    private method privateMethodA {}
 
     ###################################################################
     ####                   private variables                       ####
 
     # A comment before one or a group of private variables;
     # alphabetical order unimportant
-    private variable variableName1
-    private variable variableName2
+    private variable privateVariableA
+    private variable privateVariableB
 
-    private common variableName
+    private common privateCommonA
 }
 
 #######################################################################
@@ -134,14 +134,14 @@ body ::tycho::ClassName::destructor {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::NameA {} {
+body ::tycho::ClassName::publicMethodA {} {
 }
 
 #####################################################################
 #### NameB
 # Description.
 #
-body ::tycho::ClassName::NameB {} {
+body ::tycho::ClassName::publicMethodB {} {
 }
 
     ###################################################################
@@ -152,7 +152,7 @@ body ::tycho::ClassName::NameB {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::NameA {anyargs} {
+body ::tycho::ClassName::publicProcA {anyargs} {
 }
 
 
@@ -164,7 +164,7 @@ body ::tycho::ClassName::NameA {anyargs} {
 #### MethodName
 # Description.
 #
-body ::tycho::ClassName::methodName {} {
+body ::tycho::ClassName::protectedMethodA {} {
 }
 
     ###################################################################
@@ -175,5 +175,5 @@ body ::tycho::ClassName::methodName {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::NameA {} {
+body ::tycho::ClassName::privateMethodA {} {
 }
