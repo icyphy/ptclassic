@@ -99,6 +99,7 @@ CCS_WITH_H_FILES=\
  logNew.cc \
  miscFuncs.cc \
  paths.cc \
+ ptsignals.cc \
  pt_fstream.cc \
  textAnimate.cc
 
