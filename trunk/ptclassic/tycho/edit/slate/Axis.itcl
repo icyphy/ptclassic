@@ -74,24 +74,6 @@ class ::tycho::Axis {
     proc construct {id canvas slate tags x0 y0 args}
     
     ###################################################################
-    ####                            options                        ####
-
-    # The number of significant digits to display
-    common _digits
-
-    # The low value on the axis
-    common _from
-
-    # The length of the axis in pixels.
-    common _length
-
-    # The length of the tick marks in pixels
-    common _ticklength
-
-    # The high value on the axis
-    common _to
-
-    ###################################################################
     ####                     option update procs                   ####
 
     # Update the *-digits* configuration option
@@ -116,16 +98,10 @@ class ::tycho::Axis {
     proc coords {id canvas slate args}
 
     ###################################################################
-    ####                         protected variables               ####
+    ####                       protected variables                 ####
 
-    # The font to use for the tick labels
-    protected common tickfont
-
-    # The virtual "method" table
-    common methodtable
-
-    # Default values of this item's options
-    common optiondefault
+    # The font to use for the tick font
+    protected common tickfont [::tycho::font helvetica 9]
 
     ###################################################################
     ####                         private procs                     ####
@@ -135,6 +111,15 @@ class ::tycho::Axis {
 
     # Redraw the ticks and labels on the axis. Requires the base coordinate.
     private proc redrawTicks {id canvas x0 y0}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####
@@ -165,7 +150,7 @@ class ::tycho::Axis {
 ## -digits option configuration
 #
 body ::tycho::Axis::_digits {id canvas slate digits} {
-    set _digits($id) $digits
+    set option(digits$id) $digits
     redraw $id $canvas
 }
 
@@ -173,7 +158,7 @@ body ::tycho::Axis::_digits {id canvas slate digits} {
 ## -from option configuration
 #
 body ::tycho::Axis::_from {id canvas slate from} {
-    set _from($id) $from
+    set option(from$id) $from
     redraw $id $canvas
 }
 
@@ -181,7 +166,7 @@ body ::tycho::Axis::_from {id canvas slate from} {
 ## -length option configuration
 #
 body ::tycho::Axis::_length {id canvas slate length} {
-    set _length($id) $length
+    set option(length$id) $length
     redraw $id $canvas
 }
 
@@ -189,7 +174,7 @@ body ::tycho::Axis::_length {id canvas slate length} {
 ## -ticklength option configuration
 #
 body ::tycho::Axis::_ticklength {id canvas slate ticklength} {
-    set _ticklength($id) $ticklength
+    set option(ticklength$id) $ticklength
     redraw $id $canvas
 }
 
@@ -197,7 +182,7 @@ body ::tycho::Axis::_ticklength {id canvas slate ticklength} {
 ## -to option configuration
 #
 body ::tycho::Axis::_to {id canvas slate to} {
-    set _to($id) $to
+    set option(to$id) $to
     redraw $id $canvas
 }
 
@@ -206,18 +191,13 @@ body ::tycho::Axis::_to {id canvas slate to} {
 #
 body ::tycho::Axis::construct {id canvas slate tags x0 y0 args} {
     # Initialize the options
-    foreach {option value} [concat [array get optiondefault] $args] {
-	set _[string trimleft $option -]($id) $value
-    }
-
-    # Get and remember the font for the ticks
-    if { ! [::info exists tickfont] } {
-	set tickfont [::tycho::font helvetica 9]
+    foreach {opt value} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $value
     }
 
     # Create the ruler baseline
     set primary($id) [$canvas create line \
-	    $x0 $y0 [expr $x0+$_length($id)] $y0 \
+	    $x0 $y0 [expr $x0+$option(length$id)] $y0 \
 	    -tags $tags]
 
     # Draw the ticks and the labels
@@ -257,7 +237,7 @@ body ::tycho::Axis::redraw {id canvas} {
     redrawTicks $id $canvas $x0 $y0
     
     # Move the primary
-    $canvas coords $primary($id) $x0 $y0 [expr $x0+$_length($id)] $y0
+    $canvas coords $primary($id) $x0 $y0 [expr $x0+$option(length$id)] $y0
 }
 
 #######################################################################
@@ -268,7 +248,7 @@ body ::tycho::Axis::redrawTicks {id canvas x0 y0} {
 
     # Test the range -- assume that if -from is not less than -to, that
     # this is temporary and will be fixed by the next option.
-    if { $_from($id) >= $_to($id) } {
+    if { $option(from$id) >= $option(to$id) } {
 	return
     }
 
@@ -279,26 +259,28 @@ body ::tycho::Axis::redrawTicks {id canvas x0 y0} {
     $canvas delete $id.tick $id.label
     
     # Find label width -- HACK!
-    set t [$canvas create text 0 0 -text [format %.$_digits($id)f $_from($id)]]
+    set t [$canvas create text 0 0 -text [format %.$option(digits$id)f $option(from$id)]]
     set labelwidth [::rectWidth [$canvas bbox $t]]
     $canvas delete $t
 
     # Calculate axis increment locations
-    set increment [::axisIncrement $_from($id) $_to($id) $_length($id) \
+    set increment [::axisIncrement $option(from$id) \
+	    $option(to$id) $option(length$id) \
 	    $labelwidth 10]
-    set axisValues [::rangeValues $_from($id) $_to($id) $increment]
-    set axisLocations [::mapRange $_from($id) $_to($id) $axisValues \
-	    $x0 [expr $x0 + $_length($id)]]
+    set axisValues [::rangeValues $option(from$id) $option(to$id) $increment]
+    set axisLocations [::mapRange $option(from$id) $option(to$id) \
+	    $axisValues \
+	    $x0 [expr $x0 + $option(length$id)]]
 
     # Create the tick lines and text labels
     set ticktags [concat $tags $id.tick]
     set labeltags [concat $tags $id.label]
 
     foreach x $axisLocations v $axisValues {
-	$canvas create line $x $y0 $x [expr $y0-$_ticklength($id)] \
+	$canvas create line $x $y0 $x [expr $y0-$option(ticklength$id)] \
 		-tags $ticktags
-	$canvas create text $x [expr $y0-$_ticklength($id)] \
- 		-text [format %.$_digits($id)f $v] \
+	$canvas create text $x [expr $y0-$option(ticklength$id)] \
+ 		-text [format %.$option(digits$id)f $v] \
  		-font $tickfont -anchor sw \
 		-tags $labeltags
     }

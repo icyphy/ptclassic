@@ -150,16 +150,19 @@ class ::tycho::Frame {
     proc coords {id canvas slate args}
 
     ###################################################################
-    ####                         protected variables               ####
+    ####                         private variables                 ####
 
     # The virtual "method" table
-    common methodtable
+    private common methodtable
 
     # Default values of this item's options
-    common optiondefault
+    private common optiondefault
+
+    ###################################################################
+    ####                       protected variables                 ####
 
     # Frames are rectangular in shape
-    common shape "rectangle"
+    protected common shape "rectangle"
 
     ###################################################################
     ####                       class initialization                ####

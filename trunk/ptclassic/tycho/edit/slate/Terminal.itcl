@@ -153,14 +153,17 @@ class ::tycho::Terminal {
     ###################################################################
     ####                         protected variables               ####
 
+    # The terminal is a "point" shape
+    protected common shape "point"
+
+    ###################################################################
+    ####                         private variables                 ####
+
     # The virtual "method" table
-    common methodtable
+    private common methodtable
 
     # Default values of this item's options
-    common optiondefault
-
-    # The terminal is a "point" shape
-    common shape "point"
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####

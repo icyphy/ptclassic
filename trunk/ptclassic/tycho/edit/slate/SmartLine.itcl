@@ -209,14 +209,17 @@ class ::tycho::SmartLine {
     ###################################################################
     ####                         protected variables               ####
 
+    # SmartLines are shaped like... lines
+    protected common shape "line"
+
+    ###################################################################
+    ####                         private variables                 ####
+
     # The virtual "method" table
-    common methodtable
+    private common methodtable
 
     # Default values of this item's options
-    common optiondefault
-
-    # SmartLines are shaped like... lines
-    common shape "line"
+    private common optiondefault
 
     ###################################################################
     ####                        private procs                      ####

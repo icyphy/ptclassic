@@ -135,14 +135,17 @@ class ::tycho::LabeledRect {
     ###################################################################
     ####                         protected variables               ####
 
-    # The virtual "method" table
-    common methodtable
-
-    # Default values of this item's options
-    common optiondefault
-
     # Labeled rectangles are rectangular in shape
     common shape "rectangle"
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The virtual "method" table
+    private common methodtable
+
+    # Default values of this item's options
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####
