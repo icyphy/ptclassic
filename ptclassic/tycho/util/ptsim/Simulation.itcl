@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -67,7 +67,7 @@ class ::tycho::Simulation {
     public variable portnum 13579
 
     # A flag that says that we have no simulation running
-    public variable disconnect 0
+    public variable offline
 
     ###################################################################
     ####                         public methods                    ####
@@ -122,19 +122,25 @@ class ::tycho::Simulation {
     ###################################################################
     ####                     private variables                     ####
 
-    # The object that talks to the simulation. This is temporary
-    private variable _socketTalker
+    # The Java system
+    private variable system ""
 
-    # TEMPORARY
-    method send {script} {
-        _send $script
+    # The Java executive director
+    private variable director ""
+
+    public method getSystem {} {
+	return $system
     }
-
-    method talker {} {
-        return $_socketTalker
+    public method getDirector {} {
+	return $director 
+    }
+    public method setSystem {s} {
+	set system $s
+    }
+    public method setDirector {d} {
+	set director $d
     }
 }
-
 
 #######################################################################
 #### debug
@@ -142,8 +148,33 @@ class ::tycho::Simulation {
 # Set or clear the debug flag.
 #
 configbody ::tycho::Simulation::debug {
-    if [info exists _socketTalker] {
-	$_socketTalker configure -debug $debug
+    ;#
+}
+
+#######################################################################
+#### offline
+#
+# Set or clear the offline mode flag.
+#
+configbody ::tycho::Simulation::offline {
+    if !$offline {
+	if {[catch {package require java}]} {
+	    if $offline {
+		puts "Java could not be loaded. Staying in offline mode"
+	    } else {
+		puts "Java could not be loaded. Going into offline mode"
+	    }
+	    set offline 1
+	} else {
+	    set offline 0
+	}
+    } else {
+	set offline 1
+    }
+    if $offline {
+	# Clear java variables to release memory
+	setSystem ""
+	setDirector ""
     }
 }
 
@@ -156,12 +187,7 @@ configbody ::tycho::Simulation::debug {
 # are initialized twice...
 #
 configbody ::tycho::Simulation::portnum {
-    if !$disconnect {
-	#if [info exists _socketTalker] {
-	#    delete object $_socketTalker
-	#}
-	#set _socketTalker [::tycho::JRPC #0 -debug $debug -portnum $portnum]
-    }
+    puts "Simulation::portnum is no longer used"
 }
 
 #######################################################################
@@ -172,11 +198,6 @@ body ::tycho::Simulation::constructor {args} {
 
     # Initialize args
     eval configure $args
-
-    # Create the remote process and the object that talks to it
-    #if !$disconnect {
-    # set _socketTalker [::tycho::JRPC #auto -debug 1 -portnum $portnum]
-    #}
 }
 
 
@@ -225,7 +246,7 @@ body ::tycho::Simulation::perform {graph} {
 #
 body ::tycho::Simulation::pause {} {
     debug "Pause"
-    _send {$univ pause}
+    $director setPause true
 }
 
 #######################################################################
@@ -235,7 +256,7 @@ body ::tycho::Simulation::pause {} {
 #
 body ::tycho::Simulation::resume {} {
     debug "Resume"
-    _send {$univ resume}
+    $director setPause false
 }
 
 #######################################################################
@@ -245,7 +266,7 @@ body ::tycho::Simulation::resume {} {
 #
 body ::tycho::Simulation::start {} {
     debug "Start"
-   _send {$univ start}
+   $director run
 }
 
 #######################################################################
@@ -254,7 +275,7 @@ body ::tycho::Simulation::start {} {
 # Start the simulation server.
 #
 body ::tycho::Simulation::startServer {} {
-    set _socketTalker [::tycho::JRPC #auto -debug $debug -portnum $portnum]
+    configure -offline 0
 }
 
 #######################################################################
@@ -264,7 +285,7 @@ body ::tycho::Simulation::startServer {} {
 #
 body ::tycho::Simulation::stop {} {
     debug "Stop"
-    $_socketTalker send {$univ stop}
+    $director setStop true
 }
 
 
@@ -279,21 +300,5 @@ body ::tycho::Simulation::stop {} {
 # override (for now, at least).
 #
 body ::tycho::Simulation::_construct {} {
-    
-    _send {
-
-    }
-}
-
-#######################################################################
-#### _send
-#
-# Send a message to the simulation.
-#
-body ::tycho::Simulation::_send {script} {
-    if $disconnect {
-	puts "Disconnected: $script"
-    } else {
-	$_socketTalker send $script
-    }
+    ;#
 }
