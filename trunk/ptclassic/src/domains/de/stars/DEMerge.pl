@@ -12,22 +12,15 @@ defstar {
 	}
 	output {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
-	constructor {
-		input.inheritTypeFrom(output);
-	}
-
 	go {
 	   completionTime = arrivalTime;
 	   InDEMPHIter nextp(input);
 	   InDEPort* iport;
 	   while ((iport = nextp++) != 0) {
-		if(iport->dataNew) {
-		    Particle& pp = iport->get();
-		    output.put(completionTime) = pp;
-		    iport->dataNew = FALSE;
-		}
+		if(iport->dataNew)
+		    output.put(completionTime) = iport->get();
 	   }
 	}
 }
