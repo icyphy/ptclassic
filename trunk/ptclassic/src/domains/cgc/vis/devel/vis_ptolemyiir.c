@@ -149,7 +149,7 @@ void vdk_visretimeby4_ptolemyiir(double *src,double *dst4,int length,
 {
   double repeatstate,accumquad0,accumquad1,accumquad2,accumquad3;
   double quad0,quad1,quad2,quad3,statetop,statebott;
-  double t0,t1,t2,t3;
+  double t0,t1,t2,t3,in0,in1,*indextaps;
   float accumpair0hi,accumpair0lo,accumpair1hi,accumpair1lo;
   float accumpair2hi,accumpair2lo,accumpair3hi,accumpair3lo;
   float accumpair0,accumpair1,accumpair2,accumpair3,currentstate;
@@ -161,8 +161,8 @@ void vdk_visretimeby4_ptolemyiir(double *src,double *dst4,int length,
 
   currentstate = vis_fzeros();
   for(i=0;i<length;i++){
-    /*in0 = *src;
-    in1 = *src++ */
+    in0 = *src++;
+    in1 = *src;
     repeatstate = vis_freg_pair(currentstate,currentstate);
     statetop = mult4x4(repeatstate,betatop);
     statetophi = vis_read_hi(statetop);
@@ -171,15 +171,15 @@ void vdk_visretimeby4_ptolemyiir(double *src,double *dst4,int length,
     statebotthi = vis_read_hi(statebott);
     statebottlo = vis_read_lo(statebott);
 
-    accumquad0 = mult4x4(*src,taps4[0]);
-    accumquad1 = mult4x4(*src,taps4[2]);
-    accumquad2 = mult4x4(*src,taps4[4]);
-    accumquad3 = mult4x4(*src++,taps4[6]);
-
-    quad0 = mult4x4(*src,taps4[1]);
-    quad1 = mult4x4(*src,taps4[3]);
-    quad2 = mult4x4(*src,taps4[5]);
-    quad3 = mult4x4(*src,taps4[7]);
+    indextaps = taps4;
+    accumquad0 = mult4x4(in0,*indextaps++);
+    quad0 = mult4x4(in1,*indextaps++);
+    accumquad1 = mult4x4(in0,*indextaps++);
+    quad1 = mult4x4(in1,*indextaps++);
+    accumquad2 = mult4x4(in0,*indextaps++);
+    quad2 = mult4x4(in1,*indextaps++);
+    accumquad3 = mult4x4(in0,*indextaps++);
+    quad3 = mult4x4(in1,*indextaps);
 
     accumquad0 = vis_fpadd16(accumquad0,quad0);
     accumpair0hi = vis_read_hi(accumquad0);
@@ -202,6 +202,7 @@ void vdk_visretimeby4_ptolemyiir(double *src,double *dst4,int length,
     accumpair1 = vis_fpadd16s(accumpair1,statetoplo);
     result1 = *((vis_s32*) &accumpair1);
     out1 = (result1+(result1>>16))<<(scalefactor+1);
+
     ffu = out0 << 16 | out1 & 0xffff;
     accumpair2 = vis_fpadd16s(accumpair2hi,accumpair2lo);
     accumpair2 = vis_fpadd16s(accumpair2,statebotthi);
@@ -215,7 +216,6 @@ void vdk_visretimeby4_ptolemyiir(double *src,double *dst4,int length,
     fu = out2 << 16 | out3 & 0xffff;
     dst4[i] = vis_to_double(ffu,fu);
     currentstate = vis_to_float(fu);
-
   }
 }
 
