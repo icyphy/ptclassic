@@ -42,8 +42,6 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
-# Build a non-shared libptolemy.a for faster startup time
-# It would be nice if we built both
 LIB=libexttools.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
