@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { DE main library }
 	desc {
 Merge input events, keeping temporal order.  Simultaneous events are
-merged in the order of port on which they appear, with the first port
+merged in the order of the port number on which they appear, with port #1
 being processed first.
 	}
 	inmulti {
