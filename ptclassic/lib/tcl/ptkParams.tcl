@@ -1187,7 +1187,7 @@ proc ptkOkCancelButtons {frame okCmd cancelCmd} {
 # Authors: Wei-Jen Huang and Alan Kamas
 #
 # The title argument is the decoration string at the top of the window.
-# The cmd argument is a string to be processed by format.
+# The cmd argument is a string to be processed by the "format" command.
 # The string argument is the long string to being edited.
 
 proc ptkEditText {title cmd string} {
@@ -1223,7 +1223,7 @@ proc ptkEditText {title cmd string} {
 #  editing long strings.
 
 proc ed_EditTextExecute {cmd textWidget} {
-    eval [format $cmd \"[$textWidget get 0.0 end]\"]
+    eval [format $cmd [list [$textWidget get 0.0 end]]]
 }
 
 
