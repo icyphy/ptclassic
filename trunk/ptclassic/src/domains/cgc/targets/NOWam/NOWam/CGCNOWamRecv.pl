@@ -23,7 +23,6 @@ Produce code for inter-process communication (receive-side).
 		name {output}
 		type {FLOAT}
 	}
-        ccinclude { "StringList.h" }
  
 	state {
 		name { numData }
