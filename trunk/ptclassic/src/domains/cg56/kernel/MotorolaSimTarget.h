@@ -60,6 +60,7 @@ public:
 	/*virtual*/ int loadCode();
 	/*virtual*/ int runCode();
 	/*virtual*/ void writeCode();
+	/*virtual*/ void frameCode();
 private:
 	// stream for writeFile stars
 	CodeStream simulatorCmds;

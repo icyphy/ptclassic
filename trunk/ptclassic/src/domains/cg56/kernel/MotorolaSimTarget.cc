@@ -108,10 +108,16 @@ void MotorolaSimTarget :: headerCode () {
 };
 
 void MotorolaSimTarget :: trailerCode () {
-       trailer << "	jmp	$" << endAddress << "\n"
-               <<"ERROR	jmp	$" << endAddress << "\n"
-	       << "	org	p:$" << endAddress << "\n"
-	       << "	nop\n"
-	       << "	stop\n";
+	trailer << "ERROR	jmp	$" << endAddress << "\n";
 	inProgSection = TRUE;
+}
+
+void MotorolaSimTarget::frameCode()
+{
+    MotorolaTarget::frameCode();
+
+    // Put a STOP instruction at the end of program memory.
+    myCode << "	org	p:$" << endAddress << "\n"
+	   << "	nop\n"
+	   << "	stop\n";
 }
