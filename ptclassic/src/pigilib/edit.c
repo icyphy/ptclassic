@@ -552,8 +552,7 @@ long userOptionWord;
 #define MAX_NUM_ARCHS 50
 
 /* Declare the functions in kernelCalls that the next func uses */
-int numberOfArchs();
-char* nthArchName();
+int supportedArches();
 
 int
 RpcEditArch(spot, cmdList, userOptionWord)
@@ -563,10 +562,10 @@ long userOptionWord;
 {
     dmWhichItem *items;
     octObject facet;
-    char *domain, buf[MSG_BUF_MAX];
+    char buf[MSG_BUF_MAX];
     char *arch;
     int i, which, nArchs;
-    int archIndices[MAX_NUM_ARCHS];
+    char *archNames[MAX_NUM_ARCHS];
 
     ViInit("edit-architecture");
     ErrClear();
@@ -576,13 +575,8 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
-        PrintErr(ErrGet());
-        ViDone();
-    }
-
-    /* find out how many target architectures there are, and their indices. */
-    nArchs = numberOfArchs(domain, archIndices);
+    setCurDomainF(&facet);
+    nArchs = supportedArches(archNames,MAX_NUM_ARCHS);
 
     if(nArchs == 0) {
 	PrintErr("No architectures supported by current domain.");
@@ -592,12 +586,12 @@ long userOptionWord;
     /* init data structure for dialog box... */
     items = (dmWhichItem *) malloc(nArchs * sizeof(dmWhichItem));
     for (i = 0; i < nArchs; i++) {
-        items[i].itemName = nthArchName(archIndices[i]);
+        items[i].itemName = archNames[i];
         items[i].userData = NULL;
         items[i].flag = 0;
     }
 
-    if (!GOCArchProp(&facet, &arch, nthArchName(archIndices[0]))) {
+    if (!GOCArchProp(&facet, &arch, archNames[0])) {
         PrintErr(ErrGet());
         ViDone();
     }
@@ -608,7 +602,7 @@ long userOptionWord;
         PrintCon("Aborted entry");
         ViDone();
     }
-    arch = nthArchName(archIndices[which]);
+    arch = archNames[which];
     if (!SetArchProp(&facet, arch)) {
         PrintErr(ErrGet());
         ViDone();
