@@ -49,7 +49,7 @@ JAVAHTMLDIR = 	$(JAVAHOME)/docs/api
 # See http://www.suntest.com/JavaScope
 # The 'jsinstr' command, which instruments Java code.
 JSINSTR = 	jsinstr
-JSINTRFLAGS = 	#-IFLUSHCLASS=true
+JSINTRFLAGS = 	-IFLUSHCLASS=true
 # The 'jsrestore' command which uninstruments Java code.
 JSRESTORE =	jsrestore
 # The pathname to the JavaScope.zip file
