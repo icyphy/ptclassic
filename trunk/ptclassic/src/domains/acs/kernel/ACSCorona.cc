@@ -39,6 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownBlock.h"
 #include "ACSTarget.h"
 
+
+// FIXME: can't call pigilib to dynamically load cores because ptcl, pitcl
+// don't link with it.
+
 /* extern "C" int
 KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
   int permB, const char* linkArgs); */
@@ -118,7 +122,8 @@ void ACSCorona::addCores() {
 		} */
 	}
 }
-	
+
+// virtual initialize() called by run(), sets current core and initializes it.	
 void ACSCorona::initialize() {
 	initCores();
 	ACSStar::initialize();
@@ -134,6 +139,7 @@ void ACSCorona::initialize() {
 	}
 }
 
+// virtual go() called by run, calls current core go() method.
 void ACSCorona::go() {
 	if ( currentCore ) {
 		currentCore->go();
@@ -142,6 +148,7 @@ void ACSCorona::go() {
 	}
 }
 
+// virtual wrapup() called by run, calls current core wrapup() method.
 void ACSCorona::wrapup() {
 	if ( currentCore ) {
 		currentCore->wrapup();
@@ -150,6 +157,7 @@ void ACSCorona::wrapup() {
 	}
 }
 
+// virtual initCode() called by run, calls current core initCode() method.
 void ACSCorona::initCode() {
 	if ( currentCore ) {
 		currentCore->initCode();
@@ -158,6 +166,7 @@ void ACSCorona::initCode() {
 	}
 }
 
+// virtual myExecTime() called by run, calls current core myExecTime() method.
 int ACSCorona::myExecTime() {
 	if ( currentCore ) {
 		return(currentCore->myExecTime());
