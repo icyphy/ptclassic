@@ -57,12 +57,7 @@ private:
 	PacketData* d;
 
 	// bookkeeping function to zap the PacketData when done
-	// have to handle dummyPacket specially (it cannot be deleted)
-	void unlinkData() {
-		d->refCount--;
-		if (d != &dummyPacket && d->refCount == 0)
-			delete d;
-	}
+	void unlinkData();
 public:
 	// constructor
 	Packet(PacketData& dat = dummyPacket) {
