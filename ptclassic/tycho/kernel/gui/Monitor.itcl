@@ -270,8 +270,8 @@ body ::tycho::Monitor::constructor {args} {
     wm minsize $prefix 10 10
 
     # If we are running under the test suite, then autostart and autodestroy
-    global testsuite
-    if [info exists testsuite] {
+    global TY_TESTSUITE
+    if [info exists TY_TESTSUITE] {
 	#set itk_option(-autostart) 1
 	set itk_option(-autodestroy) 1
 	#configure -autostart 1
