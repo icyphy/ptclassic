@@ -128,10 +128,10 @@ body ::tycho::EditItcl::constructor {args} {
     menubar addMenu Special left {} -underline 0
 
     menubar addMenuItem "Body Template" Special -underline 0 \
-	    -command "\[$this component text\] bodyTemplate"
+	    -command "$this bodyTemplate"
 
     menubar addMenuItem "File Template" Special -underline 0 \
-	    -command "\[$this component text\] fileTemplate"
+	    -command "$this fileTemplate"
 
     menubar addMenuSeparator Special
 
