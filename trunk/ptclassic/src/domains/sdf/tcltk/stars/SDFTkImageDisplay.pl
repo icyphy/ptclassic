@@ -22,15 +22,6 @@ black-and-white images.  When the star has three input ports, the
 star treats the matrices as given the red, green, blue intensities,
 respectively, of a color image.
 	}
-	state {
-		name { ptimage_name }
-		type { string }
-		default { "Img" }
-		desc {
-The base name given to create a ptimage image for the image data in memory
-		}
-		attributes { A_CONSTANT|A_NONSETTABLE }
-	}
 	hinclude { "Matrix.h", "InfString.h" }
 	header {
 extern "C" {
@@ -50,45 +41,23 @@ extern "C" {
 	protected {
 		int numInputs;
 
-		// Static variable to help create unique names.
-		static int starSuffix;
-		static int frameSuffix; 
-
-		// A unique string for each instance of this star class.
-		InfString dispStarID;
-
-		// A unique string for each instance of the image this
-		// star instance displays
-		InfString frameID;
-
 		// A pointer to the image of type "ptimage", whose name
-		// is Img_$dispStarID$frameID
+		// is ptkImageData_$starID
 		PtimageMaster* masterPtr;
 
-		// Full name of the image, i.e. it has a base name, "Img"
-		// plus dispStarID "dispStar#" plus frameId "frame#"
-		InfString fullnm;
-	}
-
-	code {
-		int SDFTkImageDisplay::starSuffix = 0;   
-		int SDFTkImageDisplay::frameSuffix = 0;
+		// Full name of the image, i.e. it has a base name,
+		// ptkImageData_$starID
+		InfString tclTkImageName;
 	}
 
 	constructor {
 		// Reset data type of input port to be floating-point matrix
 		input.setPort("output", this, FLOAT_MATRIX_ENV);
 
-		dispStarID = "Display";
-		dispStarID += ++starSuffix;
+		// Initialize all pointers to zero
+		masterPtr = 0;
 	}
 
-	destructor {
-		// Reset member starSuffix back to zero so that things don't
-		// go wrong in next simulation
-		starSuffix = 0;
-	}
- 
 	setup {
 		if (output.numberPorts() > 0) {
 		    Error::abortRun(*this, "Outputs not supported");
@@ -97,64 +66,24 @@ extern "C" {
 	}
 
 	begin {
+		// Set the Tcl script name
 		tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkImageDisplay.tcl";
 
-		// Make sure the image has a unique ID when this run starts
-		frameID = "_Frame";
-		frameID += ++frameSuffix;
-
-		numInputs = input.numberPorts();
-
 		// Determine the number of the input ports 
+		numInputs = input.numberPorts();
 		colorChoice = 0;
 		if (numInputs == 1) colorChoice = GRAYSCALE;
 		else if (numInputs == 3) colorChoice = FULLCOLOR;
 		else {
 		    Error::abortRun(*this,
-				    "The number of input ports must ",
-				    "be 1 for grayscale image, or 3 ",
-				    "for full color image.");
+			"The number of input ports must be 1 for gray scale ",
+			"images, or 3 for full color images.");
 		    return;
 		}
 
-		// Set up business for a ptimage that the star is going to use 
-
-		// I --Create an empty Tk's "ptimage" image, named
-		//     Img_$dispStarID$frameID, if it does not exist yet,
-		//     otherwise skip the creation step. Then get the
-		//     pointer to the master of this image. 
-		fullnm = (const char *)ptimage_name;
-		fullnm += "_";
-		fullnm += dispStarID;
-		fullnm += frameID;
-		InfString command = "image type ";
-		command += fullnm;
-		if (Tcl_GlobalEval(ptkInterp, command) != TCL_OK) {
-		    // which means the image doesn't exist yet, so create it
-		    InfString command = "image create ptimage";
-		    command += " ";
-		    command += fullnm;
-		    if (Tcl_GlobalEval(ptkInterp, command) == TCL_ERROR) {
-			Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
-			Error::abortRun(*this, 
-					"Failed to create ptimage image");
-			return;
-		    }
-		}
-
-		//II -- Before sourcing a tcl script, we set global variable
-		//      dispStarID and frameID, which will be used by the tcl
-		//      script.
-		if ( Tcl_SetVar(ptkInterp, "dispStarID", (char *)dispStarID,
-				TCL_GLOBAL_ONLY) == NULL) {
-		    Error::abortRun(*this, "Failed to set dispStarID");
-		    return;
-		}
-		if ( Tcl_SetVar(ptkInterp, "frameID", (char *)frameID,
-				TCL_GLOBAL_ONLY) == NULL) {
-		    Error::abortRun(*this, "Failed to set frameID");
-		    return;
-		}
+		// Set the name of this image
+		tclTkImageName = "ptkImageData_";
+		tclTkImageName << tcl.id();
 
 		// The base star TclScript assumes floating point inputs
 		// and outputs which are inappropriate here, so we
@@ -289,7 +218,7 @@ extern "C" {
 		// FIXME: What the heck is this mess?  Looks like a kludge.
 		// Configure the image's master; and first of all, free some
 		// previously allocated memory when needed
-		masterPtr = (PtimageMaster *) Tk_FindPtimage((char *) fullnm);
+		masterPtr = (PtimageMaster *) Tk_FindPtimage(tclTkImageName);
 		if (!masterPtr->pix8) free(masterPtr->pix8);
 		if (!masterPtr->newPix8) free(masterPtr->newPix8);
 		if (!masterPtr->pix24) free(masterPtr->pix24);
@@ -332,38 +261,7 @@ extern "C" {
 		// if defined, Unset the master's flags
 		masterPtr->flags &= ~IMAGE_CHANGED;
 
-		// which *has to be* true for this display star
-		InfString command = "info procs goTcl_";
-		command += dispStarID;
-		if (Tcl_GlobalEval(ptkInterp, (char *)command) == TCL_OK &&
-		    strlen(ptkInterp->result) != 0)
-		    // then a goTcl_dispStarID procedure is defined
-		    callTclProc("goTcl");
-
 		tcl.go();
-	}
-
-	// It is for invoking a Tcl procedure *procnm_dispStarID, which is
-	// assumed to be defined, with two arguments dispStarID and frameID 
-	method {
-		name { callTclProc }
-		arglist { "(const char* procnm)" }
-		type { void }
-		code {
-			InfString command = procnm;
-			command += "_";
-			command += dispStarID;
-			command += " ";
-			command += dispStarID;
-			command += " ";
-			command += frameID;
-			if (Tcl_GlobalEval(ptkInterp, command) != TCL_OK) {
-			    Error::abortRun(*this,
-					    "Failed to run Tcl procedure ",
-					    command);
-			}
-			return;
-	       }
 	}
 
 	method {
