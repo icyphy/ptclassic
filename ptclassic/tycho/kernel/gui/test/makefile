@@ -51,10 +51,11 @@ SIMPLE_TESTS = \
 	testLoader.itcl \
 	testGraph.itcl \
 	testPath.itcl \
+	testMail.itcl \
 	testResource.itcl \
-	testResourceRemote.itcl \
 	testResourceFTP.itcl \
 	testResourceHTTP.itcl \
+	testResourceRemote.itcl \
 	testStack.itcl \
 	testURLPath.itcl
 
