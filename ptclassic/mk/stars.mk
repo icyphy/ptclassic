@@ -1,6 +1,6 @@
 #
 # stars.mk :: Common definitions of star and target subsets.
-# Version: $Id$
+# Version: $Id$ 
 #
 # Eventually this file will be automatically generated.
 # But for now, we do it by hand.
@@ -43,7 +43,8 @@ MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
-	$(LIBDIR)/libDL.$(LIBSUFFIX) $(LIBDIR)/libPar.$(LIBSUFFIX) \
+	$(LIBDIR)/libDL.$(LIBSUFFIX) $(LIBDIR)/libMSH.$(LIBSUFFIX) \
+	$(LIBDIR)/libPar.$(LIBSUFFIX) \
 	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
 
 # If S56DIR is defined, then compile in the S56X Wormhole target.
@@ -118,7 +119,7 @@ STAR_LIBS=\
 -lcg56dspstars -lcg56stars -lcg56 \
 $(S56WH_LIBDIR) $(S56WH_LIB) \
 -lsilagestars -lsilage \
--lcgstars -lDC -lHu -lDL -lPar -lcg \
+-lcgstars -lDC -lHu -lDL -lMSH -lPar -lcg \
 -lddfstars -lddf \
 -lthorstars -lthor \
 -ldestars -lde \
