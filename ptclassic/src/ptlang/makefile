@@ -13,6 +13,7 @@ CFLAGS = -O
 all:	ptlang
 
 ptlang:	ptlang.o
+	rm -f ptlang
 	cc ptlang.o -o ptlang
 
 ptlang.o:	ptlang.c
@@ -23,10 +24,13 @@ ptlang.c:	ptlang.y
 install:	$(BINDIR)/ptlang
 
 $(BINDIR)/ptlang:	ptlang
-		rm -f $(BINDIR)/ptlang; cp ptlang $(BINDIR)
+		rm -f $(BINDIR)/ptlang; ln ptlang $(BINDIR)
 
 clean:
-	rm *.o
+	rm -f *.o
+
+realclean:
+	rm -f *.o ptlang.c
 
 sources:	ptlang.y
 
