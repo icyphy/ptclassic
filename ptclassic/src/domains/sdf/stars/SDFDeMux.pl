@@ -16,6 +16,9 @@ outside this range, all outputs get zero.
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "demultiplexing"
+	}
 	input {
 		name {input}
 		type {anytype}
