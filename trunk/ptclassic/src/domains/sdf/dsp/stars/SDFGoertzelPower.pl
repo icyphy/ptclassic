@@ -20,8 +20,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This two-pole, one-zero IIR filter has a transfer function of
 <pre>
-{1 ~+~ z sup -1} over
-{1 ~-~ 2 cos ( {2 pi} over {N} k ) z sup -1 ~+~ sup -2} ~.
+                  1 + z<sup>-1</sup>
+          ------------------------
+          1 - 2cos(2 pi/Nk)z<sup>-1</sup> +z<sup>-2</sup>
 </pre>
 This filter is a biquad filter with
 <p>
@@ -29,7 +30,7 @@ This filter is a biquad filter with
 <li> n0 = 1
 <li> n1 = 1
 <li> n2 = 0
-<li> d1 = -2 cos(2 pi k / N)
+<li> d1 = -2 cos(2 pi k/N)
 <li> d2 = 1
 </ul>
 <p>

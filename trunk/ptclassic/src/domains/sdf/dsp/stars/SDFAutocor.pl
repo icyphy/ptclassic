@@ -27,10 +27,10 @@ the autocorrelation estimate is
 <a name="unbiased autocorrelation"></a>
 <pre>
          N-1-k
-       1 ----| 
+       1 ---- 
 r(k) = -  \    x(n)x(n+k)
        N  /
-         ----|
+         ----
           n=0
 </pre>
 for <i>k </i>=0<i>, ... , p</i>, where <i>N</i> is the number of
@@ -43,10 +43,10 @@ terms in the summation, and yet the summation is still normalized by <i>N</i>.
 If the parameter <i>unbiased</i> is YES (the default), then the estimate is
 <pre>
            N-1-k
-        1  ----| 
+        1  ----
 r(k) = ---  \    x(n)x(n+k)
        N-k  /
-           ----|
+           ----
             n=0
 </pre>
 In this case, the estimate is unbiased.

@@ -42,10 +42,11 @@ the all-pole filter that could have produced the observations
 (input data) given a white noise input.
 The transfer function of the all-pole filter is:
 <pre>
-             N
-             __
+              N
+             ---
 H(z) = 1/(1+ \  d<sub>n</sub>z<sup>-n</sup>)
-             /_
+             /
+             ---
              n=1
 </pre>
 where <i>d</i> is the set of AR coefficients.
