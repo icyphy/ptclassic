@@ -416,9 +416,10 @@ static KnownTarget entry(targ,"CGCTargetWH");
 
 int CGCTargetWH::linkFiles ()
 {
-    StringList linkCmd, dir;
+    StringList dir, linkCmd;
 
-    dir << expandPathName((const char*) destDirectory);
+    const char* expandedDirName = expandPathName((const char*) destDirectory); 
+    dir << expandedDirName;
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
 	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
 	    << " -lCGCrtlib " << starLinkOptions;
@@ -432,6 +433,7 @@ int CGCTargetWH::linkFiles ()
     fprintf(stderr,"multiLink: %s\n",argv[1]);
     int status = Linker::multiLink(2,(char**) argv); 
     fprintf(stderr,"multiLink completed\n");
+    delete [] expandedDirName;
     return status;
 }
 
