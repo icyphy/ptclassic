@@ -82,7 +82,7 @@ the window.
 	setup {
 		const char* wn = name;
 		int winType = PTDSPWindowNumber(wn);
-		if (winType == DSP_WINDOW_TYPE_NULL) {
+		if (winType == PTDSP_WINDOW_TYPE_NULL) {
 		    Error::abortRun(*this, "Unknown window name ", wn);
 		    return;
 		}
