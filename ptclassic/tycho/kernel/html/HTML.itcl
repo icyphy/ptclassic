@@ -188,6 +188,9 @@ class ::tycho::HTML {
     ###################################################################
     ####                     private variables                     ####
 
+    # Keep count of the number of calls to seeFragment
+    private variable seecount 0
+
     # Keep track of the requested size adjustment.
     private common sizeName
 
@@ -587,16 +590,26 @@ body ::tycho::HTML::seeFragment {point} {
         return
     }
     if {$sidx != {} && $eidx != {}} {
+        # If rendering is in progress, the point may not exist yet.
+        if {[$text compare $sidx >= end]} {
+            if {$seecount < 40} {
+                incr seecount
+                after 400 [list $this seeFragment $point]
+                return
+            } {
+                # Give up.  Probably point will never be visible.
+                set sidx end
+                set eidx end
+            }
+        }
+        set seecount 0
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget \
 		-background [preference get targetColor]
 	$text tag configure hypertarget \
 		-foreground black
-        # A delay seems to be needed here to ensure that the target is seen.
-        # The moving of the insertion index is also delayed in case the
-        # binding that triggered this also involves the insertion cursor.
-	after 200 "$this component text mark set insert $sidx; 	\
-                selection clear -displayof $text; $text see insert"
+	component text mark set insert $sidx; 	\
+                selection clear -displayof $text; $text see insert
         after 8000 [list catch \
                [list $text tag delete hypertarget]]
     }
@@ -707,6 +720,7 @@ body ::tycho::HTML::render {obj {html {}}} {
     
     # Put the insertion cursor at the top
     $tktext mark set insert @0,0
+    $tktext mark gravity insert left
     HMreset_win $tktext
 
     # Note that the following parsing operation results in many
@@ -791,7 +805,7 @@ array set HMinsert_space_map {
 	/ol 1
 	/menu 1
 	p	2
-	pre 1	/pre 1
+	pre 1	/pre 2
 }
 
 array set HMparam_map {
@@ -911,7 +925,7 @@ proc HMinit_state {win} {
         S_unknown \xb7
         S_update 10
         S_symbols O*=+-o\xd7\xb0>:\xb7
-        S_insert Insert
+        S_insert HTMLInsert
         linkfg blue
     }
     set var(S_bgcolor) [$win cget -background]
