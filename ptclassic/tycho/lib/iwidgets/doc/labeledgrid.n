@@ -1,4 +1,4 @@
-M.so man.macros
+.so man.macros
 .HS iwidgets::Labeledgrid iwid
 .BS
 .SH NAME
@@ -11,7 +11,8 @@ itk::Widget <- iwidgets::Labeledgrid
 .LP
 .nf
 .ta 4c 8c 12c
--background -font
+\fBbackground\fR	\fBcursor\fR	\fBfont\fR	\fBdisabledForeground\fR
+\fBforeground\fR	\fBhighlightColor\fR	\fBhighlightThickness\fR
 .fi
 .LP
 See the "options" manual entry for details on the standard options.
@@ -51,7 +52,6 @@ to the grid, not of items already added.
 .LP
  
 .nf
-.nf
 Name:	\fBlabelAnchor\fR
 Class:	\fBAnchor\fR
 Command-Line Switch:	\fB-labelanchor\fR
@@ -63,7 +63,16 @@ style. The value of this option is passed directly to the
 overridden for individual widgets and labels by calling the \fBgrid
 configure\fR command with the Tk widget path as argument.
 .LP
- 
+
+.nf
+Name:	\fBentryBackground\fR
+Class:	\fBBackground\fR
+Command-Line Switch:	\fB-entrybackground\fR
+.fi
+.IP
+The background color used in entry and text widgets.
+.LP
+
 .nf
 Name:	\fBlabelForeground\fR
 Class:	\fBForeground\fR
@@ -169,19 +178,26 @@ widget types can be added to Labeledgrid's collection of known widget types.
 
 By default, Labeledgrid recognises the following widget types:
 .TP
-\fBentry\fR
-A Tk entry widget.
-.TP
 \fBcheckbutton\fR
 A Tk checkbutton. Checkbuttons can usefully be placed into groups,
 as well as being labeled individually.
 .TP
-\fBradiobutton\fR
-A Tk radiobutton. Radiobuttons are usually used within
-a shared item group.
+\fBentry\fR
+A Tk entry widget.
+.TP
+\fBlabeledgrid\fR
+A nested labeled grid widget. This is used if alignment must
+\fInot\fR be preserved between the new grid's contents and
+its containing grid. Usually, this occurs only when there are
+alignment problems caused by the fact that borders use up
+whole columns or rows of the grid.
 .TP
 \fBoptionmenu\fR
 An Iwidgets optionmenu.
+.TP
+\fBradiobutton\fR
+A Tk radiobutton. Radiobuttons are usually used within
+a shared item group.
 .TP
 \fBtext\fR
 A Tk text widget.
@@ -321,7 +337,13 @@ results of any value-getting methods. The default is \fB{set %v}\fR.
 .TP
 \fB-options\fR
  A string passed as the second argument to \fBitk_component add\fR
-when the widget is created. The default is \fB{usual}\fR.
+when the widget is created. The default is \fB{usual}\fR, which will
+cause the following option-handling command to be used:
+.DS
+keep -font -background -cursor \
+    -disabledforeground -foreground \
+    -highlightthickness -highlightcolor
+.DE
 .TP
 \fB-sticky\fR
  The default "stickiness" of widget of thos type.
@@ -370,8 +392,8 @@ row. This is the style used in the examples in Mullet and Sano's book.
 \fBboxed\fR
 The label is drawn in the row above the item, and a border is drawn
 around the whole item. An additional row or column on all four
-sides is required for the border and label. This style seems to be
-very popular these days, but shouldn't be used to the point of
+sides is required for the border and label. This style is
+very popular but shouldn't be used to the point of
 cluttering the layout. Mullet and Sano comment: "While the practice
 is encouraged by many environments, it should be used with restraint,
 since explicit structure is a very poor substitute for effective
@@ -395,14 +417,16 @@ layouts. It provides no support for changing an existing layout.
 Although layouts can be moved around by directly calling the Tk
 \fBgrid\fR command, this is unlikely to be very reliable.
 .PP
-There are some caveats associated with mixing different display styles
+There are also some caveats associated with mixing different display styles
 within the same grid. Firstly, the \fB-columnspan\fR and \fB-rowspan\fR
 options of groups need to take into account the display styles of
 children. If display styles in an existing layout are changed, the
 options may need tweaking to get the layout right again. Secondly, since
 labels and borders use up whole rows or columns of the grid, some care
 needs to be taken to avoid placing items within the same column (for
-example) as a border in another part of the layout.
+example) as a border in another part of the layout. A workaround is simply
+to recursively create Labeledgrid widgets: alignment isn't preserved
+between a nested labeled grid and the containing labeledgrid.
 
 .SH "METHODS"
 
@@ -561,19 +585,18 @@ is a Tk frame -- see the "label" widget manual entry for details.
 _EXAMPLE_CODE_
 .DE
 .SH AUTHOR
-H. John Reekie
+John Reekie,  johnr@eecs.berkeley.edu
 
 .SH ACKNOWLEDGMENTS
 
-Based on the tycho::Labeledgrid widget by Prof. Edward A. Lee of
-UC Berkeley.  iwidgets::Labeledgrid adds more structured grid
-placement, different display styles, and the facility to support
-arbitrary widget types. Original author is  Prof. Edward A. Lee;
-additional contributions by Joel R. King, Bilung Lee, Christopher Hylands,
-Seehyun Kim, and Mark L. Ulferts. Labeledgrid is contributed to
-[incr Widgets] by the Tycho project at UC Berkeley:
-http://ptolemy.eecs.berkeley.edu/tycho.
+Based on the tycho::Query widget by Prof.  Edward A.  Lee of UC Berkeley.  
+iwidgets::Labeledgrid adds more structured grid placement, different 
+display styles, and the facility to support arbitrary widget types.  
+Original author is Prof.  Edward A.  Lee; additional contributions by Joel 
+R.  King, Bilung Lee, Christopher Hylands, Seehyun Kim, and Mark L.  
+Ulferts.  Labeledgrid is contributed to [incr Widgets] by the Tycho project 
+at UC Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
 
 .SH KEYWORDS
-labeledgrid, grid
+labeledgrid, grid, widget
 
