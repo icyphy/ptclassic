@@ -57,14 +57,7 @@ int DLGraph::initializeGraph() {
 
 void DLGraph :: resetGraph() {
 
-	// reset the runnable node list.
-	runnableNodes.initialize();
-
-	EGSourceIter nxtSrc(*this);
-	DLNode* src;
-	while ((src = (DLNode*) nxtSrc++) != 0)
-		sortedInsert(runnableNodes,src,1); // sort the runnable nodes.
-
+	findRunnableNodes();
 	resetNodes();
 
 	// reset the appropriate members for schedule.
@@ -155,13 +148,3 @@ int workAfter(ParNode* pd) {
 	return total;
 }
 
-// destructor
-DLGraph :: ~DLGraph() {
-
-	ListIter nextPair(nodePairs);
-	NodePair* p;
-
-	while((p = (NodePair*) nextPair++) != 0) {
-		LOG_DEL; delete p;
-	}
-}
