@@ -66,34 +66,34 @@ proc testRevControl {versionControlSystem} {
 
     if {"$versionControlSystem" == "SCCS" } {
 	# Press the Yes(SCCS) button
-	$myRevControl invoke 0
+	$myRevControl invoke sccs
     } else {
 	# Press the Yes(RCS) button
-	$myRevControl invoke 1
+	$myRevControl invoke rcs
     }
 
     # Press the 'Checkout' button
-    $wname.revcontrol invoke 1
+    $wname.revcontrol invoke checkout
     ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'Checkin' button
-    $wname.revcontrol invoke 0
+    $wname.revcontrol invoke checkin
     ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'Checkout' button
-    $wname.revcontrol invoke 1
+    $wname.revcontrol invoke checkout
     ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'History' button
-    $wname.revcontrol invoke 2
+    $wname.revcontrol invoke history
     ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'unedit' button
-    $wname.revcontrol invoke 3
+    $wname.revcontrol invoke unedit
     ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'esc' button
-    $wname.revcontrol invoke 4
+    $wname.revcontrol invoke cancel
 }
 
 test SCCS-1.1 {test out sccs} {
@@ -101,7 +101,7 @@ test SCCS-1.1 {test out sccs} {
 } {}
 
 test RCS-1.1 {test out sccs} {
-   testRevControl RCS
+    testRevControl RCS
 } {}
 
 doneTests
