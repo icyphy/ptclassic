@@ -13,6 +13,10 @@ $Id$
  Methods for the StringList class
 *************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include <stream.h>
 #include "StringList.h"
@@ -145,7 +149,8 @@ void StringList::deleteAllStrings() {
 	// the result
 	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
-		delete next++;
+		char* p = next++;
+		LOG_DEL; delete p;
 	}
 	SequentialList::initialize();
 }
