@@ -148,7 +148,7 @@ private:
 
 	// set the repetitions property of blocks on each side of
 	// a connection.  Called by reptConnectedSubgraph().
-	int reptArc(SDFPortHole& port1, SDFPortHole& port2);
+	int reptArc(PortHole& port1, PortHole& port2);
 
 	// least common multiple of the denominators of the repetitions
 	// member of a connected subgraph
@@ -175,9 +175,17 @@ private:
 	// been run the number of times given by repetitions, and 2 if
 	// it has been run the number of times given by repetitions.
 
-	int simRunStar(Block& atom,
+	int simRunStar(SDFStar& atom,
 		       int deferFiring = FALSE,
 		       int updateOutputs = TRUE);
+
+
+	// The next function runs simRunStar and adds the star to
+	// the schedule if appropriate
+	int addIfWeCan(SDFStar& atom, int deferFiring = FALSE);
+
+	// The next function contains the code for deferred firing
+	int deferIfWeCan(SDFStar& atom);
 
 	// Determine whether a star can be run (checking the
 	// numInitialParticles
@@ -194,6 +202,12 @@ private:
 	// of the scheduler.
 	int numDeferredBlocks;
 	Block* deferredBlocks[MAX_NUM_DEFERRED_BLOCKS];
+
+	// State of progress in computing the schedule
+	int passValue;
+
+	// Pointer to star that may be causing deadlock
+	Block* dead;
 };
 
 #endif
