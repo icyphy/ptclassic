@@ -365,8 +365,12 @@ body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
         addHistory "<<$errmsg>>"
     }
     set retstatus [$this getStatusWait]
-
-    toolbar disable stop
+    
+    if ![winfo exists $prefix] {
+        # If the process is a long running process, and the user hits
+        # close, the we should just return here.
+        return
+    }
     toolbar enable start
     toolbar enable commandtoexec
     toolbar enable dirtoexecfrom
