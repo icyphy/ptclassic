@@ -242,29 +242,6 @@ class ::tycho::Slate {
     private variable selector
 }
 
-
-#######################################################################
-#### -highlightwidth option configuration
-#
-# If there's a selector, change its corresponding option.
-#
-configbody ::tycho::Slate::highlightwidth {
-    if { [::info exists selector] } {
-	$selector configure -highlightwidth $itk_option(-highlightwidth)
-    }
-}
-
-#######################################################################
-#### -highlightcolor option configuration
-#
-# If there's a selector, change its corresponding option.
-#
-configbody ::tycho::Slate::highlightcolor {
-    if { [::info exists selector] } {
-	$selector configure -highlightcolor $itk_option(-highlightcolor)
-    }
-}
-
 #######################################################################
 #### constructor
 #
@@ -937,8 +914,7 @@ body ::tycho::Slate::selector {args} {
 # If an extra argument given, this method returns the proc to
 # call that implements that method on the item's shape. A
 # third argument, if present and true, causes the item to be treated
-# as a rectangle regardless of its "real" shape. (FIXME: Won't work
-# until the region{} method is implemented properly.)
+# as a rectangle regardless of its "real" shape.
 #
 body ::tycho::Slate::shape {id {method {}} {region 0}} {
     # First get the shape. If the -region flag is given,
@@ -970,7 +946,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
 	} else {
 	    # If we can't get it from the item class, then get it
 	    # from the shape class
-	    return ::tycho::[capitalize $shape]::_$method
+	    return ::tycho::[::tycho::capitalize $shape]::_$method
 	}
     }
 }
