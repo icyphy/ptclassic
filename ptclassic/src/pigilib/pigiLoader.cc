@@ -55,6 +55,7 @@ extern "C" char* BaseName(const char*);
 extern "C" int IconFileToSourceFile (const char*, char*, char*);
 extern "C" int util_csystem (const char*);
 extern "C" void win_msg(const char*);
+extern "C" void ErrAdd(const char*);
 
 static void strcpyLC (char* out, const char* in) {
 	char c;
@@ -71,7 +72,7 @@ static int noPermission (const char* msg, const char* file) {
         sl += file;
 	sl += ": ";
 	sl += sys_errlist[errno];
-	Error::abortRun (sl);
+	ErrAdd (sl);
 	return FALSE;
 }
 
@@ -160,21 +161,19 @@ KcLoadInit (const char* argv0) {
 // name = username of the star
 // idomain = domain of the star
 // srcDir = star source directory
-extern "C" int
-KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
+static int
+compileAndLink (const char* name, const char* idomain, const char* srcDir,
+		  int preproc) {
 	srcDir = expandPathName (srcDir);
 	char* objDir = genObjDir (srcDir);
 	char plName[512], oName[512], ccName[512], cmd[512];
-// debug statement
-	sprintf (cmd, "compileAndLink(%s,%s,%s)", name, idomain, srcDir);
-	PrintDebug (cmd);
-	sprintf (cmd, "objDir is %s", objDir);
-	PrintDebug (objDir);
 
 // form the source file name
 	sprintf (plName, "%s/%s%s.pl", srcDir, idomain, name);
+	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
+	char *sourceFile = preproc ? plName : ccName;
 // check existence of file.
-	int fd = open (plName, O_RDONLY);
+	int fd = open (sourceFile, O_RDONLY);
 	if (fd < 0) return noPermission ("Loader: can't open ", plName);
 	close (fd);
 	sprintf (oName, "%s/%s%s.o", objDir, idomain, name);
@@ -195,11 +194,12 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 		return Linker::linkObj (oName);
 	}
 // No makefile.  If object is younger than source, assume it's good.
-	if (exists (oName) && isYounger (oName, plName))
+// It also must be younger than the Ptolemy image.
+	if (exists (oName) && isYounger (oName, sourceFile) &&
+	    isYounger (oName, Linker::imageFileName()))
 		return Linker::linkObj (oName);
-	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
 // Preprocess if need be.
-	if (!exists (ccName) || isYounger (plName, ccName)) {
+	if (preproc && (!exists (ccName) || isYounger (plName, ccName))) {
 		sprintf (cmd, "cd %s; ptlang %s%s.pl >& %s",
 			 srcDir, idomain, name, tmpFileName);
 		PrintDebug (cmd);
@@ -214,6 +214,7 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 			msg += " still doesn't exist:\ncheck the file ";
 			msg += plName;
 			Error::abortRun (msg);
+			ErrAdd ("Loading file didn't create the star");
 			return FALSE;
 		}
 	}
@@ -223,6 +224,35 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 	return Linker::linkObj (oName);
 }
 
+// Here is the pigi interface used by make-star.  It looks for a .pl
+// or a .cc file and does what's needed.
+
+extern "C" int
+KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
+	if (!Linker::enabled()) {
+		ErrAdd ("Loader disabled");
+		return FALSE;
+	}
+// form the source file name
+	const char* eDir = expandPathName (srcDir);
+	char fName[512];
+	int preproc = 1;
+	sprintf (fName, "%s/%s%s.pl", eDir, idomain, name);
+	if (!exists (fName)) {
+		preproc = 0;
+		sprintf (fName, "%s/%s%s.cc", eDir, idomain, name);
+		if (!exists (fName)) {
+			StringList msg = "Loader: can't find ";
+			msg += fName;
+			msg += " or .pl";
+			ErrAdd (msg);
+			return FALSE;
+		}
+	}
+	return compileAndLink (name, idomain, srcDir, preproc);
+}
+
+
 
 // Here is the pigi interface to the loader.  fullName is the name
 // of the icon for the star.
@@ -230,6 +260,10 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 
 extern "C" int
 KcLoad (const char* iconName) {
+	if (!Linker::enabled()) {
+		ErrAdd ("Loader disabled");
+		return FALSE;
+	}
 	char codeName[512], base[128], domain[64], dir[512];
 
 	iconName = expandPathName (iconName);
@@ -246,12 +280,20 @@ KcLoad (const char* iconName) {
 		msg += domain;
 		msg += " is not a prefix of ";
 		msg += b;
-		Error::abortRun(msg);
+		ErrAdd(msg);
 		return FALSE;
 	}
-// b has a suffix ".pl"; zap it.
+// b has a suffix ".pl" or ".cc"; zap it; tell KcCompileAndLink which one.
 	strcpy (base, b + l);
 	char* p = strrchr (base, '.');
-	if (p) *p = 0;
-	return KcCompileAndLink (base, domain, dir);
+	int preproc = 0;
+	if (p && strcmp (p, ".pl") == 0) preproc = 1;
+	else if (p && strcmp (p, ".cc") != 0) {
+		StringList msg = "Loader: unknown file type: ";
+		msg += base;
+		ErrAdd (msg);
+		return FALSE;
+	}
+	*p = 0;
+	return compileAndLink (base, domain, dir, preproc);
 }
