@@ -13,7 +13,7 @@ extern	double	atof();
 
 static	char	*strdup();
 static	Gslider	*gsl_parse();
-
+static  int	gsl_field();
 /*
  * Read in the async i/o configuration file.  Format:
  *
