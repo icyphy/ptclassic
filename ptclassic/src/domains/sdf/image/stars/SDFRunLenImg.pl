@@ -7,10 +7,10 @@ defstar {
 	location	{ SDF image library }
 	desc {
 Accept a GrayImage and run-length encode it. All values less than
-'thresh' from 'meanVal' are set to 'meanVal' to help improve
+"thresh" from "meanVal" are set to "meanVal" to help improve
 compression.
 
-Runlengths are coded with a start symbol of 'meanVal' and then a
+Runlengths are coded with a start symbol of "meanVal" and then a
 run-length between 1 and 255. Runs longer than 255 must be coded in
 separate pieces.
 	}

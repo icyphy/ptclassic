@@ -6,9 +6,9 @@ defstar {
 	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-If the 'past' input is not a GrayImage or has size 0, pass the 'diff'
-directly to the 'output'. Otherwise, add the 'past' to the
-'diff' (with leak factor 'alpha') and send the result to 'output'.
+If the "past" input is not a GrayImage or has size 0, pass the "diff"
+directly to the "output". Otherwise, add the "past" to the
+"diff" (with leak factor "alpha") and send the result to "output".
 	}
 	explanation {
 .Id "image decompression"

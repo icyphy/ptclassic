@@ -3,7 +3,7 @@ defstar {
 	domain {SDF}
 	desc {
 Converts input to dB.  Zero and negative values are
-converted to 'min' (default -100).
+converted to "min" (default -100).
 	}
 	version {$Id$}
 	author { J. T. Buck }

@@ -6,19 +6,19 @@ defstar {
 	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image palette }
 	desc {
-This star takes a DCTImage input, inserts 'StartOfBlock' markers,
+This star takes a DCTImage input, inserts "StartOfBlock" markers,
 run-length encodes it using 'StartOfRun' markers, and outputs the
 modified DCTImage.
 
 For the run-length encoding, all values with absolute value less than
-'Thresh' are set to 0.0, to help improve compression.
+"Thresh" are set to 0.0, to help improve compression.
 
-Runlengths are coded with a start symbol of 'StartOfRun' (defined below)
+Runlengths are coded with a start symbol of "StartOfRun" (defined below)
 and then an (integer) run-length.
 
-'HiPri' DCT coefficients per block are sent to 'hiport', the
+"HiPri" DCT coefficients per block are sent to "hiport", the
 high-priority output. The remainder of the coefficients are sent
-to 'loport', the low-priority output.
+to "loport", the low-priority output.
 
 NOTE!! This differs from the SDFRunLen star in that this block
 processes DCTImages, not GrayImages.
