@@ -619,6 +619,60 @@ int POct::ptkSetParams (int aC,char** aV) {
 
 }
 
+// ptkSetFindName <facet-id> <NameList> 
+//
+// Does the Find Name Command given the passed name
+// The name must first be extracted from the List
+// The Name List is of the form {Name NameString}
+// This procedure was written to work with ptkEditValues
+//
+// Written by Alan Kamas  1/94
+//
+int POct::ptkSetFindName (int aC,char** aV) {
+    octObject facet;
+    char* nameList;
+    char* name;
+    int nameC;
+    char **nameV;
+
+    if (aC != 3) return 
+        usage ("ptkSetComment <OctObjectHandle> <NameList>");
+    nameList = aV[2];
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Get the Name String out of the Name List
+    if (Tcl_SplitList( interp, nameList, &nameC, &nameV ) != TCL_OK){
+        Error::error("Cannot parse name list: ", nameList);
+        return 0;
+    }
+
+    if (nameC != 2) {
+        Tcl_AppendResult(interp, "Find Name list does not have 2 elements.", 
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    name = nameV[1];
+
+    // Perform the Find Name function:
+    if (!FindNameSet(&facet, name)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        // Free the memory used by commentV as it is no longer needed
+        free((char *) nameV);
+        return TCL_ERROR;
+    }
+
+    // Free the memory used by commentV as it is no longer needed
+    free((char *) nameV);
+
+    return TCL_OK;
+}
+
 // ptkGetComment <facet-id>
 // returns the Comment for the passed facet or instance.
 //
@@ -707,8 +761,6 @@ int POct::ptkSetComment (int aC,char** aV) {
     return TCL_OK;
 
 }
-
-
 
 
 // ptkGetSeed 
@@ -1407,6 +1459,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkCompile),
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
+	ENTRY(ptkSetFindName),
 	ENTRY(ptkGetComment),
 	ENTRY(ptkSetComment),
 	ENTRY(ptkGetSeed),

@@ -36,6 +36,9 @@ $Id$
 #include "oh.h"
 #include "vemInterface.h"
 
+#include "ptk.h"  /* Interpreter name, window name, etc.  aok */
+#include "handle.h"
+
 /* MAX_DEPTH
 Maximum nesting depth for galaxies, eg. a star in a galaxy in a
 galaxy in a universe has depth 3.
@@ -159,7 +162,7 @@ int usePattern;
     return TRUE;
 }
 
-/* The next 2 vars store vemSelSets for RpcFindName() */
+/* The next 2 vars store vemSelSets for FindNameSet() */
 static vemSelSet findSets[MAX_DEPTH];
 static int findDepth = 0;
 
@@ -178,22 +181,42 @@ FindClear()
     findDepth = 0;
 }
 
+int
+FindNameSet(facetPtr, name)
+octObject *facetPtr;
+char *name;
+{
+    static RgbValue color = {65535, 0, 0};
+
+    ErrClear();
+    FindClear();
+
+    if (!FrameStar(facetPtr, name, &color, findSets, &findDepth, 1)) {
+        ErrAdd("Cannot find name in facet");
+        return 0;
+    }
+
+    return 1;
+}
+
+
 /* 3/28/90
 Find a name starting at facet under cursor.  Name can have '.' between
 components and all components in heirarchy will be marked.
 */
+/* Rewritten for Tcl/Tk by Alan Kamas, 1/94 */
 int 
 RpcFindName(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static RgbValue color = {65535, 0, 0};
-    static dmTextItem item = {"Name", 1, 100, NULL, NULL};
     octObject facet;
+    char facetHandle[16]; 
 
     ViInit("find-name");
     ErrClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
@@ -201,17 +224,16 @@ long userOptionWord;
     	ViDone();
     }
 
-    if (dmMultiText("Find Name", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-        ViDone();
-    }
-    FindClear();
-    if (!FrameStar(&facet, item.value, &color, findSets, &findDepth, 1)) {
-	ErrAdd("Cannot find name in facet");
-	PrintErr(ErrGet());
-        ViDone();
-    }
+    ptkOctObj2Handle(&facet,facetHandle);
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
+                   " \"Find Name\" ",
+                   " \"ptkSetFindName ", facetHandle, " %s \" ",
+                   " \"Name\" ",
+                   (char *)NULL) )
+
     ViDone();
+
 }
 
 void
