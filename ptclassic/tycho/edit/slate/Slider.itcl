@@ -34,7 +34,7 @@
 # Tk <code>scale</code> widget, and is supposed to be reminiscent
 # of a vertical ``slider'' as used in audio equipment. It also
 # provides a good example of how Tycho's
-# <a href="../../../../slate/kernel/doc/codeDoc/Slate.html">
+# <a href="Slate.html">
 # <i>Slate</i></a> widget can be used to (relatively) quickly
 # create new interactive components.
 # <p>
@@ -42,7 +42,7 @@
 # <tcl><pre>
 #     ::tycho::Slider .s -text Fred -resolution 0.5 -command puts
 #     pack .s
-#     wm deiconify .
+#     .s centerOnScreen
 # </pre></tcl>
 # <p>
 # To move the slider, use the left button on the horizontal ``bar''
@@ -53,16 +53,16 @@
 #
 # Slider uses the following interactor classes:
 # <ul><li>
-# <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
+# <a href="Interactor.html">
 # <i>Interactor</i></a>: the abstract interactor superclass
 # <li>
-# <a href="../../../../slate/interactors/doc/codeDoc/Alonger.html">
+# <a href="Alonger.html">
 # <i>Alonger</i></a>: moves the bar vertically
 # <li>
-# <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
+# <a href="Interactor.html">
 # <i>Stepper</i></a>: moves the bar in discrete steps
 # <li>
-# <a href="../../../../slate/interactors/doc/codeDoc/Repeater.html">
+# <a href="Repeater.html">
 # <i>Repeater</i></a>: moves the bar in increments while the mouse is pressed.
 # </ul>
 class ::tycho::Slider {
