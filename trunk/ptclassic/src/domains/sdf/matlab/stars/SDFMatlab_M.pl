@@ -72,10 +72,12 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	// Matrix.h is from the Ptolemy kernel
 	hinclude { "Matrix.h", "InfString.h" }
 
+	header { typedef Matrix *MatrixPtr; }
+
 	protected {
 		// Matlab (C) structures
-		Matrix **matlabInputMatrices;
-		Matrix **matlabOutputMatrices;
+		MatrixPtr *matlabInputMatrices;
+		MatrixPtr *matlabOutputMatrices;
 
 		// Ptolemy (C++) structures for Matlab calls
 		InfString *matlabInputNames;	    // array of variable names
@@ -103,15 +105,9 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// generate names for Matlab versions of input matrix names
 		numInputs = input.numberPorts();
 		if ( numInputs > 0 ) {
-		  if ( matlabInputMatrices != 0 ) {
-		    free(matlabInputMatrices);
-		  }
-		  matlabInputMatrices =
-		    (Matrix **) malloc( numInputs * sizeof(Matrix *) );
-
-		  if ( matlabInputNames != 0 ) {
-		    LOG_DEL; delete [] matlabInputNames;
-		  }
+		  LOG_DEL; delete [] matlabInputMatrices;
+		  LOG_NEW; matlabInputMatrices = new MatrixPtr[numInputs];
+		  LOG_DEL; delete [] matlabInputNames;
 		  LOG_NEW; matlabInputNames = new InfString[numInputs];
 		  nameMatlabMatrices( matlabInputNames,
 		  		      numInputs,
@@ -122,15 +118,9 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// generate names for Matlab versions of output matrix names
 		numOutputs = output.numberPorts();
 		if ( numOutputs > 0 ) {
-		  if ( matlabOutputMatrices != 0 ) {
-		    free(matlabOutputMatrices);
-		  }
-		  matlabOutputMatrices =
-		    (Matrix **) malloc( numOutputs * sizeof(Matrix *) );
-
-		  if ( matlabOutputNames != 0 ) {
-		    LOG_DEL; delete [] matlabOutputNames;
-		  }
+		  LOG_DEL; delete [] matlabOutputMatrices;
+		  LOG_NEW; matlabOutputMatrices = new MatrixPtr[numOutputs];
+		  LOG_DEL; delete [] matlabOutputNames;
 		  LOG_NEW; matlabOutputNames = new InfString[numOutputs];
 		  nameMatlabMatrices( matlabOutputNames,
 		  		      numOutputs,
@@ -247,21 +237,16 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// close Matlab connection and exit Ptolemy if fatal error
 		if ( fatalErrorFlag ) {
 		  killMatlab();
-		  if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
-		  if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
 		  Error::abortRun(*this, (char *) errstr, verbstr);
 		}
 	}
 
 	destructor {
+		LOG_DEL; delete [] matlabInputMatrices;
+		LOG_DEL; delete [] matlabOutputMatrices;
+
 		LOG_DEL; delete [] matlabInputNames;
 		LOG_DEL; delete [] matlabOutputNames;
 		LOG_DEL; delete [] matlabCommand;
-	}
-
-	wrapup {
-		if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
-		if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
-		SDFMatlab::wrapup();
 	}
 }
