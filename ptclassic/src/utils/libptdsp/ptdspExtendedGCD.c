@@ -1,4 +1,4 @@
-/**CFile***********************************************************************
+/**CFile*********************************************************************
 
   FileName    [ ptdspExtendedGCD.c ]
 
@@ -6,7 +6,7 @@
 
   Synopsis    [ Function definition for Ptdsp_ExtendedGCD ]
 
-  Author      [ Brian Evans ]
+  Author      [ Brian L. Evans ]
 
   Copyright   [ 
 
@@ -37,20 +37,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ]
 
    Version [ $Id$ ]
-
 ******************************************************************************/
 
 #include "ptdspExtendedGCD.h"
 
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
 
-/* Greatest common divisor function.  If 2nd arg is negative, result is
-   negative.  Magnitude of result equals gcd(abs(a),abs(b)).
-   these are so simplify is easy to write. */
-int gcd(int a, int b) {
-  
+/**Function*******************************************************************
+
+  Synopsis    [Greatest common divisor function]
+
+  Description [If the second arg is negative, result is negative.
+	       Magnitude of result equals gcd(abs(a),abs(b)).]
+
+  SideEffects []
+
+  SeeAlso     []
+******************************************************************************/
+static int
+gcd(int a, int b) {
   int rem, t;
   int sign = 1;
+
   /* record signs */
   if (a < 0) {
     a = -a;
@@ -59,37 +67,46 @@ int gcd(int a, int b) {
     sign = -1;
     b = -b;
   }
+
   /* swap to make a > b if needed */
   if (a < b) { t = a; a = b; b = t;}
   if (b == 0) return a;
-  while (1) {
-    if (b <= 1) return b*sign;
+  while (b > 1) {
     rem = a%b;
-    if (rem == 0) return b*sign;
+    if (rem == 0) break;
     a = b;
     b = rem;
   }
+  return b*sign;
 }
 
 /*---------------------------------------------------------------------------*/
 /* Definition of exported functions                                          */
 /*---------------------------------------------------------------------------*/
+
 /**Function*******************************************************************
-  Synopsis    [ ]
-  SideEffects []
+
+  Synopsis    [Extended greatest common divisor function]
+
+  Description [Solves the Bezout identity
+               alpha a + beta b == 1
+	       over the integers given the values for a and b.]
+
+  SideEffects [Sets the values at addresses alpha and beta.]
+
+  SeeAlso     [gcd]
 ******************************************************************************/
-
-int Ptdsp_ExtendedGCD( int a, int b, int *alpha, int *beta) {
-
-  int mumax, mu, lambdap, lambda, lambdamax, mup;
-
+int
+Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap) {
+  int mu, lambda;
   int lambdavalue = 0, muvalue = 0;
   int gcdvalue = gcd(a, b);
   int anorm = a / gcdvalue;
   int bnorm = b / gcdvalue;
 
   if ( intabs(a) <= intabs(b) ) {
-    mumax = intabs(anorm);
+    int lambdap;
+    int mumax = intabs(anorm);
     for ( mu = 0; mu < mumax; mu++ ) {
       lambdap = ( 1 - mu * bnorm );
       lambda = lambdap / anorm;
@@ -101,7 +118,8 @@ int Ptdsp_ExtendedGCD( int a, int b, int *alpha, int *beta) {
     }
   }
   else {
-    lambdamax = intabs(bnorm);
+    int mup;
+    int lambdamax = intabs(bnorm);
     for ( lambda = 0; lambda < lambdamax; lambda++ ) {
       mup = ( 1 - lambda * anorm );
       mu = mup / bnorm;
@@ -112,9 +130,9 @@ int Ptdsp_ExtendedGCD( int a, int b, int *alpha, int *beta) {
       }
     }
   }
-  
-  *alpha = lambdavalue;
-  *beta = muvalue;
+
+  *alphap = lambdavalue;
+  *betap = muvalue;
   
   return(gcdvalue);
 }

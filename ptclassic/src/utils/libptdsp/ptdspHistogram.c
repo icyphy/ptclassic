@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ******************************************************************************/
 
+#include <string.h>
 #include "ptdspNearestNeighbor.h"
 
 /*---------------------------------------------------------------------------*/
@@ -51,27 +52,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
   Description [ This function takes a integer array which represents
                 an image and computes the histogram of that
 		image. This is useful for contrast enhancement. ]
-   SideEffects []
+  SideEffects [ The histogram buffer hist is modified. ]
 ******************************************************************************/
-
 void
-Ptdsp_Histogram (const int *matrix, int size, int *hist, int min, int max) {
+Ptdsp_Histogram (const int* matrix, int size, int* hist, int min, int max) {
   /* Initialize the histogram buffer to zero */
-  int i, j, index;
+  int i, j;
   int histlen = max - min + 1;
 
-  for ( j = 0; j < histlen; j++) {
-    hist[j] = 0;
-  } 	 
+  /* Reset the elements of the histogram buffer to zero */
+  memset(hist, 0, histlen*sizeof(int));
 
   /* Compute the histogram */
-  index = 0;
-  for ( i = 0; i < size; i++) {
+  for (i = 0; i < size; i++) {
     /* If the value is larger than max, then is counted into max */
-    index = (matrix[i]>max) ? max : matrix[i]; 
     /* If the value is smaller than min, then is counted into min */
-    index = (matrix[i]<min) ? min : matrix[i]; 
-
+    int index = *matrix++;
+    if (index < min) index = min;
+    else if (index > max) index = max;
     hist[index-min]++;
   }
 }

@@ -4,7 +4,7 @@
 
   PackageName [ ptdsp ]
 
-  Synopsis    [ Functions for zig-zag scan and inverse zig-zag scan of an image ]
+  Synopsis    [ Functions for forward/inverse zig-zag scan of a matrix ]
 
   Author      [ Paul Haskell ]
 
@@ -49,18 +49,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /**Function*******************************************************************
   Synopsis    [ Zig-zag scans an image ]
   Description [ This function zig-zag scans a matrix representing an
-                image stored in inImg and  returns the result in
-		outImg.This is useful before quantizing a DCT
-		transformed image. ]
+                image stored in inImg and returns the result in outImg.
+		This is useful before quantizing a DCT transformed image. ]
   SideEffects []
   SeeAlso     [ Ptdsp_ZigZagInverse ]
 ******************************************************************************/
-
-/*
-  This function zig-zag scans a matrix representing an image stored in
-  inImg and  returns the result in "outImg".This is useful before
-  quantizing a DCT  transformed image.
-*/
 void 
 Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
 		  int height, int bSize) {
@@ -68,18 +61,18 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
   double* tmpPtr = outImg;
 
   /* For each row and col... */
-  for(row = 0; row < height; row += bSize) {
-    for(col = 0; col < width; col += bSize) {
+  for (row = 0; row < height; row += bSize) {
+    for (col = 0; col < width; col += bSize) {
       /* Do zig-zag scan. */
       indx = 0;
       /* K is length of current (semi)diagonal, L is iteration along
 	 diag. */
-      for(k = 1; k < bSize; k++) { /* Top triangle */
-	for(l = 0; l < k; l++) { /* down */
+      for (k = 1; k < bSize; k++) { /* Top triangle */
+	for (l = 0; l < k; l++) { /* down */
 	  tmpPtr[indx++] = inImg[col + (row+l)*width + (k-l-1)];
 	}
 	k++; /* NOTE THIS! */
-	for(l = 0; l < k; l++) { /* back up */
+	for (l = 0; l < k; l++) { /* back up */
 	  tmpPtr[indx++] = inImg[col + (row+k-l-1)*width + l];
 	}
       }
@@ -90,12 +83,12 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
       else { k = bSize-1; }
 
       for(; k > 1; k--) { /* Bottom triangle */
-	for(l = 0; l < k; l++) { /* down */
+	for (l = 0; l < k; l++) { /* down */
 	  tmpPtr[indx++] = inImg[col + (row+bSize-k+l)*width +
 				 (bSize-l-1)];
 	}
 	k--; /* NOTE THIS! */
-	for(l = 0; l < k; l++) { /* back up */
+	for (l = 0; l < k; l++) { /* back up */
 	  tmpPtr[indx++] = inImg[col + (row+bSize-l-1)*width +
 				 bSize-k+l];
 	}
@@ -123,18 +116,18 @@ Ptdsp_ZigZagInverse (const double * inImg, double * outImg,
 
   int k, indx, l, row, col;
   int displace = 0;
-  for( row = 0; row < height; row += bSize) {
-    for( col = 0; col < width; col += bSize) {
+  for ( row = 0; row < height; row += bSize) {
+    for ( col = 0; col < width; col += bSize) {
       /* Invert the zigzag. */
       /* k is length of current (semi)diagonal; l is iteration on
 	 diag. */
       k = 0; indx = displace;
-      for(k = 1; k < bSize; k++) { /* Top triangle */
-	for(l = 0; l < k; l++) { /* down */
+      for (k = 1; k < bSize; k++) { /* Top triangle */
+	for (l = 0; l < k; l++) { /* down */
 	  outImg[col + (row+l)*width + (k-l-1)] = inImg[indx++];
 	}
 	k++;						/* NOTE THIS! */
-	for(l = 0; l < k; l++) {			/* back up */
+	for (l = 0; l < k; l++) {			/* back up */
 	  outImg[col + (row+k-l-1)*width + l] = inImg[indx++];
 	}
       }
@@ -143,13 +136,13 @@ Ptdsp_ZigZagInverse (const double * inImg, double * outImg,
       if (bSize % 2) { k = bSize; }
       else { k = bSize-1; }
       
-      for(; k > 1; k--) {			/* Bottom triangle */
-	for(l = 0; l < k; l++) { /* down */
+      for (; k > 1; k--) {			/* Bottom triangle */
+	for (l = 0; l < k; l++) { /* down */
 	  outImg[col + (row+bSize-k+l)*width +
 		(bSize-l-1)] = inImg[indx++];
 	}
 	k--; /* NOTE THIS! */
-	for(l = 0; l < k; l++) {		/* back up */
+	for (l = 0; l < k; l++) {		/* back up */
 	  outImg[col + (row+bSize-l-1)*width +
 		bSize-k+l] = inImg[indx++];
 	}

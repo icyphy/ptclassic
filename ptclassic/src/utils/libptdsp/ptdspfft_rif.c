@@ -6,7 +6,7 @@
 
   Synopsis    [ Function definition for Ptdsp_fft_rif ]
 
-  Author      [ Joseph Buck ]
+  Author      [ Joseph T. Buck ]
 
   Copyright   [ 
 
@@ -50,24 +50,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /*---------------------------------------------------------------------------*/
 
 /**Function*******************************************************************
-  Synopsis    [ Replace data by its discrete Fourier transform or
-                inverse discrete Fourier transform ]
+  Synopsis    [ Compute the discrete Fourier transform of a block of data ]
   Description [ Replace data by its discrete Fourier transform, if
                 isign is input as 1, or by its inverse discrete
 		Fourier transform, if "isign" is input as -1. "data"
 		is a complex array of length "nn", input as a real
 		array data[0..2*nn-1\]. "nn" MUST be an integer power
-		of 2 (this is not checked for!?) ]
-  SideEffects []
+		of 2 (this is not checked for!?).
+		This fft routine is from ~gabriel/src/filters/fft/fft.c;
+		Author is unsure of the original source.  The file
+		contains no copyright notice or description.  The
+		declaration is changed to the prototype form but the
+		function body is unchanged. ]
+  SideEffects [ The data array is modifed to hold the result of the FFT. ]
 ******************************************************************************/
-/*
- * This fft routine is from ~gabriel/src/filters/fft/fft.c;
- * I am unsure of the original source.  The file contains no
- * copyright notice or description.
- * The declaration is changed to the prototype form but the
- * function body is unchanged.  (J. T. Buck)
- */
-
 void 
 Ptdsp_fft_rif(double *data, int nn, int isign) {
   int	n;
