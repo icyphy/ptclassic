@@ -45,8 +45,8 @@ HDRS		= LImage.h \
 		fb.h
 
 LIBCSRCS	= LImage.c \
-		br_test.c \
 		fb.c
+OTHERSRCS	= br_test.c
 
 SRCS =		$(LIBCSRCS)
 
