@@ -62,6 +62,8 @@ DRVROBJ = 	ts_test.o
 
 DRVRLIBS =	-lst -lport -lerrtrap -luprintf -lXaw -lXt -lXmu -lX11
 
+MISC_FILES =	ts.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

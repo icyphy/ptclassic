@@ -65,6 +65,8 @@ DRVROBJ = 	testxg.o
 
 DRVRLIBS =	-lst -lutility -lxpa -lport -lerrtrap -luprintf $(X11_LIBSPEC) $(X11EXT_LIBSPEC) -lm
 
+MISC_FILES =	xg.3
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
