@@ -58,16 +58,15 @@ void CGWormhole :: start() {
 		if (mtarget->inherited()) {
 			if (!mtarget->inheritChildTargets(targetPtr)) return;
 		}
-
-		// Copy the pointer of the profile to the inside.
-		mtarget->setProfile(profile);
-
 	}
 
 	// common function
 	Wormhole :: setup();
 	
 	if (mtarget) {
+		// Copy the pointer of the profile to the inside.
+		mtarget->setProfile(profile);
+
 		// set its average execution time
 		execTime = mtarget->totalWorkLoad();
 	}
