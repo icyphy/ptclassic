@@ -56,7 +56,7 @@ These points occupy two positions in the buffer, and hence take two slots of per
 	  PortHole *py;
 	  int set = 1;
 	  while ((py = nexty++) != 0) {
-	    xyplot.addPoint(sampleCount,double((*py)%0), set++);
+	    xyplot.addPoint(sampleCount,(double)((*py)%0), set++);
 	  }
 	  sampleCount += 1;
 	  if (sampleCount > int(xMax)) {
@@ -67,7 +67,7 @@ These points occupy two positions in the buffer, and hence take two slots of per
 	    while ((py = nexty++) != 0) {
 	      xyplot.breakPlot(set);
 	      if ((int)repeat_border_points) {
-		xyplot.addPoint(sampleCount,double((*py)%0), set);
+		xyplot.addPoint(sampleCount,(double)((*py)%0), set);
 	      }
 	      set++;
 	    }
