@@ -69,6 +69,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	    sinkDelayVals = po->initDelayValues();
 	    numInDelays = pi->numInitDelays();
 	    numOutDelays = po->numInitDelays();
+
+	    // Get alias pointers before disconnecting
+	    GenericPort *gpo = aliasPointingAt(po);
+	    GenericPort *gpi = aliasPointingAt(pi);
+
 	    source->disconnect();
 	    sink->disconnect();
 
@@ -98,16 +103,8 @@ limitation of liability, and disclaimer of warranty provisions.
 						      sink->parent()->name(),
 						      sink->name());
 	    }
-	    // Fix aliases
-	    GenericPort *gp;
-	    if (pi) {
-	      gp = pi->aliasFrom();
-	      if(gp) gp->setAlias(*sink);
-	    }
-	    if (po) {
-	      gp = po->aliasFrom();
-	      if(gp) gp->setAlias(*source);
-	    }
+	    fixAliases(gpi,pi,sink);
+	    fixAliases(gpo,po,source);
 
 	    source->initialize();
 	    sink->initialize();
