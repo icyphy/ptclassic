@@ -298,9 +298,9 @@ FILE *dump_file;
 		oct_type_names[i]+4,
 		f_stats.obj_counts[i].size,
 		f_stats.obj_counts[i].num,
-		f_stats.obj_counts[i].num*f_stats.obj_counts[i].size +
-		    f_stats.obj_counts[i].additional_size,
-		(int)f_stats.obj_counts[i].num_chains*sizeof(struct chain),
+		(int)(f_stats.obj_counts[i].num*f_stats.obj_counts[i].size +
+		    f_stats.obj_counts[i].additional_size),
+		f_stats.obj_counts[i].num_chains*sizeof(struct chain),
 		f_stats.obj_counts[i].namesize,
 		f_stats.obj_counts[i].avg_content,
 		STD_DEV(f_stats.obj_counts[i],avg_content, avg_content_sq),
@@ -313,7 +313,7 @@ FILE *dump_file;
     
     (void) fprintf(dump_file, "%8.8s %6s %6d %8d %8d %8d %8.3f (%8d)\n\n",
 	    "TOTALS", "", f_stats.num_objects, f_stats.objectsize,
-	    (int)f_stats.num_chains*sizeof(struct chain),
+	    (int)(f_stats.num_chains*sizeof(struct chain)),
 	    f_stats.namesize, f_stats.num_chains/(double) f_stats.num_objects,
 	    f_stats.num_chains);
     (void) fprintf(dump_file,
