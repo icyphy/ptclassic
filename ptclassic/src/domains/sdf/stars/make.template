@@ -57,6 +57,7 @@ SRCS= \
  SDFDB.pl \
  SDFDTFT.pl \
  SDFDeMux.pl \
+ SDFDiffImg.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
@@ -77,6 +78,7 @@ SRCS= \
  SDFHilbert.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
+ SDFImgFromFile.pl \
  SDFIntRamp.pl \
  SDFIntTable.pl \
  SDFIntToBits.pl \
@@ -86,7 +88,9 @@ SRCS= \
  SDFLevDur.pl \
  SDFLimit.pl \
  SDFLog.pl \
+ SDFMedian.pl \
  SDFMux.pl \
+ SDFPGMDisplay.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
