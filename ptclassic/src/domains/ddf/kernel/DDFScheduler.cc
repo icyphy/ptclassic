@@ -42,8 +42,6 @@ void fireSource(Star&, int);
 // correct numTokens value for each EventHorizon.
 extern void renewNumTokens(Block* b, int flag);
 
-static SDFScheduler sdfSched;
-	
 /*******************************************************************
  error messages for inconsistent graphs
 *******************************************************************/
@@ -105,7 +103,7 @@ int DDFScheduler :: setup (Galaxy& galaxy) {
 
 	// if canDom is already set SDF, do SDFScheduling
 	if (canDom == SDF) 
-		return (sdfSched.setup(galaxy));
+		return (realSched->setup(galaxy));
 		
 	GalStarIter nextStar(galaxy);
 
@@ -211,14 +209,11 @@ DDFScheduler :: run (Galaxy& galaxy) {
 
 	// check whether it is a predefined construct or not.
 	switch(canDom) {
-		case RECUR : return(recurSched.run(galaxy));
-
-		case SDF : 
-			sdfSched.setStopTime((float) stopTime);
-			return(sdfSched.run(galaxy));
-
 		case DDF : break;
+		case SDF : 
+			realSched->setStopTime((float) stopTime);
 		default : return(realSched->run(galaxy)); 
+			  break;
 
 	}
 		
@@ -265,7 +260,7 @@ DDFScheduler :: run (Galaxy& galaxy) {
 			// run the star
 			do {
 				s->fire();
-				if (haltRequested()) exit(1);
+				if (haltRequested()) return FALSE;
 				deadlock = FALSE;
 			} while (isRunnable(*s));
 
@@ -522,10 +517,9 @@ void DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 
 	// set up the right scheduler
 	switch(canDom) {
-		// special care for SDF and "Recur" domain.
-		case RECUR : recurSched.setup(galaxy);
-			 break;
-		case SDF : sdfSched.setup(galaxy);
+		// special care for SDF domain.
+		case SDF : LOG_NEW; realSched = new SDFScheduler;
+			realSched->setup(galaxy);
 		        if (galaxy.parent()) 
 				renewNumTokens(galaxy.parent(), TRUE);
 			break;
@@ -577,6 +571,8 @@ DDFScheduler::DDFScheduler () {
 	realSched = 0;
 	schedulePeriod = 10000.0;
 }
+
+DDFScheduler::~DDFScheduler() { LOG_DEL; delete realSched; }
 
 // setStopTime, for compatibility with DE scheduler.
 // for now, we assume each schedule interation takes 1.0

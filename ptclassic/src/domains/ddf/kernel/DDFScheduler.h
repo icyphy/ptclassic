@@ -63,9 +63,6 @@ class DDFScheduler : public Scheduler {
 	// candidate domain
 	int canDom;
 
-	// scheduler for recursion construct
-	RecurScheduler recurSched;
-
 	// real scheduler for other constructs
 	Scheduler* realSched;
 
@@ -105,6 +102,7 @@ public:
 
 	// Constructor sets default options
 	DDFScheduler ();
+	~DDFScheduler ();
 
 	// Timing control funcs
 	void setStopTime (float limit);
