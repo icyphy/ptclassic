@@ -47,17 +47,11 @@ class ::tycho::EditSTD {
     ##########################################################################
     ####                         public methods                           ####
 
-    # Set the machine type.
-    method setMachineType {type}
-
     # Clear the display, discarding the current items.
     method clear {}
 
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
-
-    # Invoked by the "Set Initial State" command in the Edit menu.
-    method setInitialState {tag} 
+    method editArc {arc} 
+    method editArcDone {arc w}
 
     # Invoked by the "Edit Item" command in the Edit menu.
     # It invokes the "editState" or "editArc" methods depending on 
@@ -66,27 +60,38 @@ class ::tycho::EditSTD {
 
     method editState {node} 
     method editStateDone {node w} 
-    method editArc {arc} 
-    method editArcDone {arc w} 
 
-    method lookInside {nodeOrArc w}
-    method insideValue {typeInfo nodeOrArc w}
-    method insideValueDone {typeInfo nodeOrArc w}
-    method insideMachine {typeInfo nodeOrArc w}
-    method getNewMachine {w}
-
-    # The following are methods used by the Special menu commands.
-    # To set the names of the I/O ports
+    # getInfo
+    method getInfo {} 
+ 
+    # To set the names of the I/O ports & internal events
     method ioPortNames {}
     method ioPortNamesDone {w}
+
+    # Look inside an item with tag $tag.
+    method lookInside {tag}
+    
+    # Look inside a state with id $node.
+    method lookInsideState {node}
+
     # makeIcon
     method makeIcon {}
     method makeIconOk {w}
-    # getInfo
-    method getInfo {} 
+
+    # Pop up a file
+    method popUpFile {name}
 
     # The following methods are used only when work with Ptolemy
     method ptkCompile {}
+
+    # Invoked by the "Set Initial State" command in the Edit menu.
+    method setInitialState {tag} 
+
+    # Set the machine type.
+    method setMachineType {type}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
 
     ##########################################################################
     ####                     protected methods                            ####
@@ -103,7 +108,7 @@ class ::tycho::EditSTD {
     # The name of the Tk canvas as a variable, for convenience.
     protected variable canvas
 
-    # Machine type of this state transition diagram, Moore or Mealy.
+    # Machine type of this state transition diagram.
     protected variable machineType
 
     # Names of the I/O ports.  This is an array with two elements:
@@ -120,6 +125,11 @@ class ::tycho::EditSTD {
 #
 body ::tycho::EditSTD::constructor {args} {
     interactiveEnable 0
+
+    # Add items into File menu
+    menubar insertMenuItem "Look Inside" "Close" File \
+	    -underline 5 -accelerator "i" -command "$this lookInside selected"
+    menubar insertMenuSeparator "Close" File
 
     # Enable items in Edit menu
     menubar enableMenuItem "Edit Item" Edit
@@ -149,6 +159,7 @@ body ::tycho::EditSTD::constructor {args} {
     # Setup menu hot key and mouse binding
     bind $canvas <Key-e> "$this editItem selected"
     bind $canvas <Double-1> "$this editItem current"
+    bind $canvas <Key-i> "$this lookInside current"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -166,10 +177,6 @@ body ::tycho::EditSTD::constructor {args} {
 		-text "Press button to choose the machine type:"
 	$w addButton mixed -text "Mixed"\
 		-command "$this setMachineType Mixed; destroy $w"
-	$w addButton moore -text "Moore"\
-		-command "$this setMachineType Moore; destroy $w"
-	$w addButton mealy -text "Mealy"\
-		-command "$this setMachineType Mealy; destroy $w"
 	$w centerOnScreen
 	tkwait window $w
     }
@@ -177,12 +184,8 @@ body ::tycho::EditSTD::constructor {args} {
     interactiveEnable 1
 }
 
-#######################################################################
-#### setMachineType
-#
-body ::tycho::EditSTD::setMachineType {type} {
-    set machineType $type
-}
+    ##########################################################################
+    ####                         public methods                           ####
 
 #######################################################################
 #### clear
@@ -191,16 +194,17 @@ body ::tycho::EditSTD::setMachineType {type} {
 #
 body ::tycho::EditSTD::clear {} {
     if [getReadOnly] {bell; return}
-    foreach node [$canvas find withtag node] {
-	# destroy the corresponding edit state window if it exists.
-	set w [$this windowName].stdEditState$node
-	if [winfo exists $w] { destroy $w }
-    }
-    foreach arc [$canvas find withtag arc] {
-	# destroy the corresponding edit arc window if it exists.
-	set w [$this windowName].stdEditArc$arc
-	if [winfo exists $w] { destroy $w }
-    } 
+
+#    foreach node [$canvas find withtag node] {
+#	# destroy the corresponding edit state window if it exists.
+#	set w [$this windowName].stdEditState$node
+#	if [winfo exists $w] { destroy $w }
+#    }
+#    foreach arc [$canvas find withtag arc] {
+#	# destroy the corresponding edit arc window if it exists.
+#	set w [$this windowName].stdEditArc$arc
+#	if [winfo exists $w] { destroy $w }
+#    } 
 
     $canvas delete all
     foreach index [array names nodeInfo] {
@@ -208,376 +212,6 @@ body ::tycho::EditSTD::clear {} {
     }
     foreach index [array names edgeInfo] {
 	unset edgeInfo($index)
-    }
-}
-
-#####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether the associated file is readonly.
-# It merely determines whether the buffer can be modified, not whether the
-# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
-#
-body ::tycho::EditSTD::setReadOnly {bool} {
-    ::tycho::File::setReadOnly $bool
-    if [winfo exists $prefix] {
-	if {$bool} {
-	    menubar disableMenuItem {Edit Item} Edit
-            menubar disableMenuItem {Delete} Edit
-	} {
-	    menubar enableMenuItem {Edit Item} Edit
-            menubar enableMenuItem {Delete} Edit
-	}
-    }
-}
-
-#######################################################################
-#### insertData
-# Append the specified data to the existing display.
-#
-body ::tycho::EditSTD::insertData {data} {
-    if [getReadOnly] {bell; return}
-    if {[catch {eval $data} msg]} {
-	error "$msg "
-    }
-}
-
-################################################################
-#### saveText
-# Save the contents of the canvas widget as text, and return it.
-# This method is invoked by the "save" method.
-#
-body ::tycho::EditSTD::saveText {} {
-    # Identification header comment 
-    set name [file tail $file]
-    set text "### State transition diagram : $name\n"
-
-    # Machine type
-    append text "### Machine type: $machineType\n"
-    append text "set machineType $machineType\n"
-
-    # First, save the canvas dimensions
-    append text "\n### Canvas widget dimensions\n"
-    set height [winfo height $canvas]
-    if {$height == 1} {
-        # Canvas has not been mapped yet
-        set height [cget -canvasheight]
-    }
-    append text "\$canvas configure -height $height\n"
-    set width [winfo width $canvas]
-    if {$width == 1} {
-        # Canvas has not been mapped yet
-        set width [cget -canvaswidth]
-    }
-    append text "\$canvas configure -width $width\n"
-
-    # Set member variables
-    append text "\n### Member variables\n"
-    # I/O port names
-    append text "# InPort names\n"
-    append text "set portNames(in) \"$portNames(in)\"\n"
-    append text "# OutPort names\n"
-    append text "set portNames(out) \"$portNames(out)\"\n"
-    append text "# Internal event names\n"
-    append text "set portNames(internal) \"$portNames(internal)\"\n"
-
-    # Step through all the nodes in the canvas.
-    append text "\n### Creating the nodes\n"
-    foreach node [$canvas find withtag node] {
-	# Generate code to draw the node as an oval on the canvas.
-	append text "set node$node\
-		\[\$canvas create oval [$canvas coords $node]\
-		-outline black -fill white -tags node\]\n"
-	append text "set nodeInfo(\$node$node,inEdges) \{\}\n"
-	append text "set nodeInfo(\$node$node,outEdges) \{\}\n"
-
-	# Generate code to draw the label.
-	append text "set nodeInfo(\$node$node,label)\
-		\[\$canvas create text\
-		[$canvas coords $nodeInfo($node,label)] -fill black"
-	set label [$canvas itemcget $nodeInfo($node,label) -text]
-	if {$label != {}} {
-	    append text " -text \{$label\}"
-	}
-	append text "\]\n"
-
-	if {$machineType == "Mixed"} {
-	    # Internal machine
-	    if "[info exists nodeInfo($node,machine)]" {
-		append text "# Internal machine:\n"
-		append text "set nodeInfo(\$node$node,machine)\
-			[list $nodeInfo($node,machine)]\n"
-	    }
-	} elseif {$machineType == "Moore"} {
-	    # Output choice
-	    if "[info exists nodeInfo($node,outputBy)]" {
-		append text "# Output choice: Value, Machine or None.\n"
-		append text "set nodeInfo(\$node$node,outputBy)\
-			[list $nodeInfo($node,outputBy)]\n"
-
-		if {$nodeInfo($node,outputBy) == "Machine"} {
-		    # Output by an machine
-		    if [info exists nodeInfo($node,machine)] {
-			append text "set nodeInfo(\$node$node,machine)\
-				[list $nodeInfo($node,machine)]\n"
-		    }
-		} elseif {$nodeInfo($node,outputBy) == "Value"} {
-		    # Output by fixed values
-		    foreach outName $portNames(out) {
-			if [info exists nodeInfo($node,value,$outName)] {
-			    append text\
-				    "set nodeInfo(\$node$node,value,$outName)\
-				    [list $nodeInfo($node,value,$outName)]\n"
-			}
-		    }
-		}
-	    }
-	}
-
-	append text "\n"
-    }
-    
-    # See if the initial state is specified.  If so, generate
-    # code to set the initial state.
-    set init_state_id [$canvas find withtag init_state]
-    if {[llength $init_state_id] > 1} {
-	error "Internel error: more than one initial state!!! "
-    } elseif {$init_state_id != ""} {
-	append text "### Initial state\n"
-	append text "\$canvas addtag init_state withtag \$node$init_state_id\n"
-	append text "\$canvas itemconfigure \$node$init_state_id -width 5.0\n"
-    }
-
-    # Step through all the arcs in the canvas.
-    append text "\n### Creating the arcs\n"
-    foreach arc [$canvas find withtag arc] {
-	set smooth [$canvas itemcget $arc -smooth]
-	append text "set arc \[\$canvas create line\
-		[$canvas coords $arc] -arrow last -tags arc -fill black\
-		-smooth $smooth\]\n"
-	# Set up the corresponding nodeInfo and edgeInfo entries.
-	set src $edgeInfo($arc,src)
-	append text "set edgeInfo(\$arc,src) \$node$src\n"
-	append text "lappend nodeInfo(\$node$src,outEdges) \$arc\n"
-	set dest $edgeInfo($arc,dest)
-	append text "set edgeInfo(\$arc,dest) \$node$dest\n"
-	append text "lappend nodeInfo(\$node$dest,inEdges) \$arc\n"
-
-	# Set up the points of the arc.
-	foreach point $edgeInfo($arc,points) {
-	    append text "set point \[\$canvas create rectangle\
-		    [$canvas coords $point] -fill \{\} -outline \{\}\]\n"
-	    append text "lappend edgeInfo(\$arc,points) \$point\n"
-	}
-	
-	# Set up the "outSlope", "outXneg", "inSlope", and "inXneg"
-	# entries.
-	append text "set edgeInfo(\$arc,outSlope) $edgeInfo($arc,outSlope)\n"
-	append text "set edgeInfo(\$arc,outXneg) $edgeInfo($arc,outXneg)\n"
-	append text "set edgeInfo(\$arc,inSlope) $edgeInfo($arc,inSlope)\n"
-	append text "set edgeInfo(\$arc,inXneg) $edgeInfo($arc,inXneg)\n"
-	
-	set mid_xy [$this lineMidpoint $arc]
-	set mid_x [lindex $mid_xy 0]
-	set mid_y [lindex $mid_xy 1]
-	append text "set edgeInfo(\$arc,label)\
-		\[\$canvas create text\
-		[expr $mid_x + $edgeInfo($arc,label_deltax)]\
-		[expr $mid_y + $edgeInfo($arc,label_deltay)]\
-		-fill black"
-	set label [$canvas itemcget $edgeInfo($arc,label) -text]
-	if {$label != {}} {
-	    append text " -text \{$label\}"
-	}
-	append text "\]\n"
-
-	append text "set edgeInfo(\$arc,label_deltax)\
-		$edgeInfo($arc,label_deltax)\n"
-	append text "set edgeInfo(\$arc,label_deltay)\
-		$edgeInfo($arc,label_deltay)\n"
-
-	# Guard
-	if [info exists edgeInfo($arc,guard)] {
-	    append text "set edgeInfo(\$arc,guard)\
-		    [list $edgeInfo($arc,guard)]\n"
-	}
-
-	if {$machineType == "Mixed"} {
-	    if [info exists edgeInfo($arc,preemptive)] {
-		append text "set edgeInfo(\$arc,preemptive)\
-			$edgeInfo($arc,preemptive)\n"
-	    }
-
-	    if [info exists edgeInfo($arc,entryType)] {
-		append text "set edgeInfo(\$arc,entryType)\
-			$edgeInfo($arc,entryType)\n"
-	    }
-
-	    foreach outName $portNames(out) {
-		if [info exists edgeInfo($arc,output,$outName)] {
-		    append text "set edgeInfo(\$arc,output,$outName)\
-			    [list $edgeInfo($arc,output,$outName)]\n"
-		}
-	    }
-
-	    foreach internalName $portNames(internal) {
-		if [info exists edgeInfo($arc,action,$internalName)] {
-		    append text "set edgeInfo(\$arc,action,$internalName)\
-			    [list $edgeInfo($arc,action,$internalName)]\n"
-		}
-	    }
-
-	} elseif {$machineType == "Mealy"} {
-	    # Output choice
-	    if "[info exists edgeInfo($arc,outputBy)]" {
-		append text "# Output choice: Value, Machine or None.\n"
-		append text "set edgeInfo(\$arc,outputBy)\
-			[list $edgeInfo($arc,outputBy)]\n"
-
-		if {$edgeInfo($arc,outputBy) == "Machine"} {
-		    # Output by an machine
-		    if [info exists edgeInfo($arc,machine)] {
-			append text "set edgeInfo(\$arc,machine)\
-				[list $edgeInfo($arc,machine)]\n"
-		    }
-		} elseif {$edgeInfo($arc,outputBy) == "Value"} {
-		    # Output by fixed values
-		    foreach outName $portNames(out) {
-			if [info exists edgeInfo($arc,value,$outName)] {
-			    append text "set edgeInfo(\$arc,value,$outName)\
-				    [list $edgeInfo($arc,value,$outName)]\n"
-			}
-		    }
-		}
-	    }
-	}
-
-	append text "\n"
-    }
-    
-    # Done
-    append text "### End of File\n"
-
-    return $text
-}
-
-###################################################################
-#### setInitialState
-# If the specified item is a node, mark it as the initial state
-# of the STD.
-#
-body ::tycho::EditSTD::setInitialState {tag} {
-    set item [$canvas find withtag $tag]
-    if {$item == {}} return
-    
-    if {[lsearch -exact [$canvas gettags $item] node] >= 0} {
-	# Item is a node.  See if there is already an initial state.
-	set init_state_id [$canvas find withtag init_state]
-	if {$init_state_id != ""} {
-	    $canvas itemconfigure $init_state_id -width 1.0
-	    $canvas dtag init_state
-	}
-	$canvas addtag init_state withtag $item
-	$canvas itemconfigure $item -width 5.0
-	$this markModified
-    }
-}
-
-###################################################################
-#### editItem
-# Invoked by the "Edit Item" command in the Edit menu.
-#
-body ::tycho::EditSTD::editItem {item} {
-    # The indices in the nodeInfo and edgeInfo arrays
-    # are item IDs.
-    set id [$canvas find withtag $item]
-    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
-	# id is a node.
-	$this editState $id
-    } elseif {[lsearch -exact [$canvas gettags $id] arc] >= 0} {
-	# id is an arc.
-	$this editArc $id
-    }
-}
-
-#########################################################################
-#### editState and editStateDone
-# Edit a state.
-#
-body ::tycho::EditSTD::editState {node} {
-    
-    set w [$this windowName].stdEditState$node
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-    } else {
-
-	set nodeLabel [$canvas itemcget $nodeInfo($node,label) -text]
-	set title "Edit $machineType State \"$nodeLabel\""
-	set labelQuery [list label {Label:} $nodeLabel]
-
-	::tycho::EntryQuery $w -title "STD Edit $machineType State" \
-		-text $title -queries [list $labelQuery]\
-		-okcommand "$this editStateDone $node $w"
-
-	if {$machineType == "Mixed"} {
-	    if "![info exists nodeInfo($node,machine)]" {
-		set nodeInfo($node,machine) ""
-	    }
-	    $w addQuery machine {Internal Machine:} $nodeInfo($node,machine)
-
- 	    $w addButton lookInside -text {Look Inside}\
-		    -command "$this insideMachine nodeInfo $node $w"
-
-	} elseif {$machineType == "Moore"} {
-	    if "![info exists nodeInfo($node,outputBy)]" {
-		set nodeInfo($node,outputBy) "Value"
-	    }
-	    $w addRadioQuery outputBy {Output by} {Value Machine None} \
-		    $nodeInfo($node,outputBy) 
-	    
-	    if "![info exists nodeInfo($node,machine)]" {
-		set nodeInfo($node,machine) ""
-	    }
-	    $w addQuery machine {Machine:} $nodeInfo($node,machine)
-
-	    $w addButton lookInside -text {Look Inside}\
-		    -command "$this lookInside $node $w"
-	}
-
-	$w centerOnScreen
-    }
-
-
-}
-
-body ::tycho::EditSTD::editStateDone {node w} {
-
-    set label [$canvas itemcget $nodeInfo($node,label) -text]
-    set newLabel [$w get label]
-    if {$label != $newLabel} {
-	$canvas itemconfigure $nodeInfo($node,label) -text $newLabel
-	$this markModified
-    }
-
-    if {$machineType == "Mixed"} {
-	set newMachine [$w get machine]
-	if {$nodeInfo($node,machine) != $newMachine} {
-	    set nodeInfo($node,machine) $newMachine
-	    $this markModified	
-	}
-    } elseif {$machineType == "Moore"} {
-	set newOutputBy [$w get outputBy]
-	if {$nodeInfo($node,outputBy) != $newOutputBy} {
-	    set nodeInfo($node,outputBy) $newOutputBy
-	    $this markModified	
-	}
-
-	set newMachine [$w get machine]
-	if {$nodeInfo($node,machine) != $newMachine} {
-	    set nodeInfo($node,machine) $newMachine
-	    $this markModified	
-	}
     }
 }
 
@@ -605,9 +239,11 @@ body ::tycho::EditSTD::editArc {arc} {
 	}
 	set guardQuery [list guard {Guard:} $edgeInfo($arc,guard)]
 
+	set cmd "$this editArcDone $arc $w"
+
 	::tycho::EntryQuery $w -title "STD Edit $machineType Arc"\
 		-text $title -queries [list $labelQuery $guardQuery]\
-		-okcommand "$this editArcDone $arc $w"
+		-okcommand [list catch $cmd]
 
 	if {$machineType == "Mixed"} {
 	    if "![info exists edgeInfo($arc,preemptive)]" {
@@ -639,20 +275,6 @@ body ::tycho::EditSTD::editArc {arc} {
 			$edgeInfo($arc,action,$internalName)
 	    }
 
-	} elseif {$machineType == "Mealy"} {
-	    if "![info exists edgeInfo($arc,outputBy)]" {
-		set edgeInfo($arc,outputBy) "Value"
-	    }
-	    $w addRadioQuery outputBy {Output by} {Value Machine None} \
-		    $edgeInfo($arc,outputBy) 
-
-	    if "![info exists edgeInfo($arc,machine)]" {
-		set edgeInfo($arc,machine) ""
-	    }
-	    $w addQuery machine {Machine:} $edgeInfo($arc,machine)
-
-	    $w addButton lookInside -text {Look Inside}\
-		-command "$this lookInside $arc $w"
 	}
 
 	$w centerOnScreen
@@ -702,140 +324,90 @@ body ::tycho::EditSTD::editArcDone {arc w} {
 	    }
 	}
 
-    } elseif {$machineType == "Mealy"} {
-	set newOutputBy [$w get outputBy]
-	if {$edgeInfo($arc,outputBy) != $newOutputBy} {
-	    set edgeInfo($arc,outputBy) $newOutputBy
-	    $this markModified	
-	}
-
-	set newMachine [$w get machine]
-	if {$edgeInfo($arc,machine) != $newMachine} {
-	    set edgeInfo($arc,machine) $newMachine
-	    $this markModified	
-	}
     }
 }
 
 ###################################################################
-#### lookInside, insideValue, insideValueDone, insideMachine and getNewMachine
-# Look inside a state/arc depending on whether it's a Moore/Mealy machine.
+#### editItem
+# Invoked by the "Edit Item" command in the Edit menu.
 #
-body ::tycho::EditSTD::lookInside {nodeOrArc w} {
-    if {[lsearch -exact [$canvas gettags $nodeOrArc] node] >= 0} {
-	# nodeOrArc is a node.
-	set typeInfo nodeInfo
-    } else {
-	# nodeOrArc is an arc.
-	set typeInfo edgeInfo
-    }
-
-    if {[$w get outputBy] == "Machine"} {
-	$this insideMachine $typeInfo $nodeOrArc $w
-    } elseif {[$w get outputBy] == "Value"} {
-	$this insideValue $typeInfo $nodeOrArc $w
+body ::tycho::EditSTD::editItem {item} {
+    # The indices in the nodeInfo and edgeInfo arrays
+    # are item IDs.
+    set id [$canvas find withtag $item]
+    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
+	# id is a node.
+	$this editState $id
+    } elseif {[lsearch -exact [$canvas gettags $id] arc] >= 0} {
+	# id is an arc.
+	$this editArc $id
     }
 }
 
-body ::tycho::EditSTD::insideValue {typeInfo nodeOrArc w} {
-    set w $w.stdInsideValue$nodeOrArc
+#########################################################################
+#### editState and editStateDone
+# Edit a state.
+#
+body ::tycho::EditSTD::editState {node} {
+    
+    set w [$this windowName].stdEditState$node
     if [winfo exists $w] {
-	destroy $w
-    } 
-
-    eval set labelID $[set typeInfo]($nodeOrArc,label)
-    set label [$canvas itemcget $labelID -text]
-    set title "Edit Output Values in \"$label\""
-
-    ::tycho::EntryQuery $w -title "STD Edit Output Values" -text $title\
-	    -okcommand "$this insideValueDone $typeInfo $nodeOrArc $w"
-
-    foreach outName $portNames(out) {
-	if "![info exists [set typeInfo]($nodeOrArc,value,$outName)]" {
-	    set [set typeInfo]($nodeOrArc,value,$outName) 0
-	} 
-	eval $w addQuery $outName "${outName}:"\
-		$[set typeInfo]($nodeOrArc,value,$outName)
-    }
-
-    $w centerOnScreen
-}
-
-body ::tycho::EditSTD::insideValueDone {typeInfo nodeOrArc w} {
-    foreach outName $portNames(out) {
-	set newValue [$w get $outName]
-	if "$[set typeInfo]($nodeOrArc,value,$outName) != \$newValue" {
-	    set [set typeInfo]($nodeOrArc,value,$outName) $newValue
-	    $this markModified
-	}
-    }
-}
-
-body ::tycho::EditSTD::insideMachine {typeInfo nodeOrArc w} {
-
-    eval set filename $[set typeInfo]($nodeOrArc,machine)
-    if {$filename != ""} {
-	set filename [::tycho::expandPath $filename]
-    }
-
-    if [file exists $filename] {
-	if [file isdirectory $filename] {
-	    # filename is a directory, then consider it as a Oct facet.
-	    if [catch {ptkOpenFacet $filename}] {
-		error "Can't open a Oct file for the machine.\
-			This needs Ptolemy to exist. "
-	    }
-	    
-	    pvOpenWindow [ptkOpenFacet $filename]
-	} else {
-	    # filename is a file, pass it to ::tycho::File::openContext
-	    ::tycho::File::openContext $filename
-	}
+	wm deiconify $w
+	raise $w
     } else {
-	set tmpW $w.insideMachineWithName
-	::tycho::DialogWindow $tmpW\
-		-title "Inside Machine"\
-		-text "Specified galaxy for the machine does not exist,\
-		\nor no galaxy for the machine is specified yet."
-	$tmpW addButton create -text {Create New}\
-		-command "destroy $tmpW;\
-		$this getNewMachine $w"
-	$tmpW addButton ignore -text {Ignore} -command "destroy $tmpW"
-	$tmpW default create
-	$tmpW centerOnScreen
-	    
-	# Modal interaction
-	grab set $tmpW
+
+	set nodeLabel [$canvas itemcget $nodeInfo($node,label) -text]
+	set title "Edit $machineType State \"$nodeLabel\""
+	set labelQuery [list label {Label:} $nodeLabel]
+
+	set cmd "$this editStateDone $node $w"
+
+	::tycho::EntryQuery $w -title "STD Edit $machineType State" \
+		-text $title -queries [list $labelQuery]\
+		-okcommand [list catch $cmd]
+
+	if {$machineType == "Mixed"} {
+	    if "![info exists nodeInfo($node,machine)]" {
+		set nodeInfo($node,machine) ""
+	    }
+	    $w addQuery machine {Internal Machine:} $nodeInfo($node,machine)
+	}
+
+	$w centerOnScreen
+    }
+
+
+}
+
+body ::tycho::EditSTD::editStateDone {node w} {
+
+    set label [$canvas itemcget $nodeInfo($node,label) -text]
+    set newLabel [$w get label]
+    if {$label != $newLabel} {
+	$canvas itemconfigure $nodeInfo($node,label) -text $newLabel
+	$this markModified
+    }
+
+    if {$machineType == "Mixed"} {
+	set newMachine [$w get machine]
+	if {$nodeInfo($node,machine) != $newMachine} {
+	    set nodeInfo($node,machine) $newMachine
+	    $this markModified	
+	}
     }
 }
 
-body ::tycho::EditSTD::getNewMachine {w} {
-
-    dialog.openFacet
-    # This is not a clean way to set non-modal window,
-    # but it will be fixed after using Tycho as the fileBrowser.
-    grab set .fileBrowser 
-    tkwait window .fileBrowser
-    global openDialogGlobal
-    if "$openDialogGlobal(response)" { 
-	set filename $openDialogGlobal(dialogLastOpened)
-	if {$filename != ""} {
-	    $w clear machine
-	    $w insert machine $filename
-	}
-    }
-
-if 0 {## Following code is used after Tycho replaces VEM
-    set tmpW $w.getNewMachineFile
-    set filename [::tycho::DialogWindow::newModal FileBrowser $tmpW]
-
-    if {$filename != ""} {
-	set nodeInfo($node,machine) $filename
-	$this markModified
-	???pvOpenWindow [ptkOpenFacet $filename]???
-    }
-} ## Previous code is used after Tycho replaces VEM
-
+##############################################################
+#### getInfo
+body ::tycho::EditSTD::getInfo {} {
+    set nodes [$canvas find withtag node]
+    set arcs [$canvas find withtag arc]
+    set w [$this windowName].getInfo
+    catch {destroy $w}
+    ::tycho::Message $w -text "Machine type: $machineType\
+	    \n# of nodes  : [llength $nodes]\
+	    \n# of arcs   : [llength $arcs]"
+    $w centerOnScreen
 }
 
 ################################################################
@@ -854,16 +426,13 @@ body ::tycho::EditSTD::ioPortNames {} {
 
 	set inPortQuery [list inPort {InPort  names:} $portNames(in)]
 	set outPortQuery [list outPort {OutPort names:} $portNames(out)]
+	set internalQuery [list internalEvents {Internal event names:}\
+		    $portNames(internal)]
 
 	::tycho::EntryQuery $w -title "STD I/O Port Names"\
-		-text $titleLabel -queries [list $inPortQuery $outPortQuery]\
+		-text $titleLabel \
+		-queries [list $inPortQuery $outPortQuery $internalQuery]\
 		-okcommand "$this ioPortNamesDone $w"
-
-	if {$machineType == "Mixed"} {
-	    # Mixed machine.
-	    $w addQuery internalEvents {Internal event names:}\
-		    $portNames(internal)
-	}
 
 	$w centerOnScreen
     }
@@ -886,15 +455,37 @@ body ::tycho::EditSTD::ioPortNamesDone {w} {
 	$this markModified
     }
 
-    if {$machineType == "Mixed"} {
-	set newInternalEvents [$w get internalEvents]
-	if {$portNames(internal) != $newInternalEvents} {
-	    set portNames(internal) $newInternalEvents
-	    $this markModified
-	}	
-    }
-
+    set newInternalEvents [$w get internalEvents]
+    if {$portNames(internal) != $newInternalEvents} {
+	set portNames(internal) $newInternalEvents
+	$this markModified
+    }	
 }
+
+###################################################################
+#### lookInside.
+# Look inside an item with tag $tag.
+#
+body ::tycho::EditSTD::lookInside {tag} {
+    set id [$canvas find withtag $tag]
+    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
+	# If item is a node (state).
+	$this lookInsideState $id
+    }
+}
+
+###################################################################
+#### lookInsideState.
+# Look inside a state (node) with id $node.
+#
+body ::tycho::EditSTD::lookInsideState {node} {
+	if "![info exists nodeInfo($node,machine)]" {
+	    set nodeInfo($node,machine) ""
+	}
+	set name $nodeInfo($node,machine)	
+	$this popUpFile $name
+}
+
 
 ##############################################################
 #### makeIcon
@@ -931,16 +522,30 @@ body ::tycho::EditSTD::makeIconOk {w} {
 }
 
 ##############################################################
-#### getInfo
-body ::tycho::EditSTD::getInfo {} {
-    set nodes [$canvas find withtag node]
-    set arcs [$canvas find withtag arc]
-    set w [$this windowName].getInfo
-    catch {destroy $w}
-    ::tycho::Message $w -text "Machine type: $machineType\
-	    \n# of nodes  : [llength $nodes]\
-	    \n# of arcs   : [llength $arcs]"
-    $w centerOnScreen
+#### popUpFile
+body ::tycho::EditSTD::popUpFile {name} {
+    if {$name == ""} {
+	error "No galaxy for the machine is specified yet."
+    }
+
+    set name [::tycho::expandPath $name]
+
+    if [file exists $name] {
+	if [file isdirectory $name] {
+	    # name is a directory, then consider it as a Oct facet.
+	    if [catch {ptkOpenFacet $name}] {
+		error "Can't open a Oct file for the machine.\
+			This needs Ptolemy to exist. "
+	    }
+	    
+	    pvOpenWindow [ptkOpenFacet $name]
+	} else {
+	    # name is a file, pass it to ::tycho::File::openContext
+	    ::tycho::File::openContext $name
+	}
+    } else {
+	error "Specified galaxy for the machine does not exist."
+    }
 }
 
 ##############################################################
@@ -1087,83 +692,6 @@ body ::tycho::EditSTD::ptkCompile {} {
 		setstate [set star$node] entryType $entryType
 		setstate [set star$node] actions $actions
 
-	    } elseif {$machineType == "Moore"} {
-		# Moore machine.
-		setstate [set star$node] outputBy $nodeInfo($node,outputBy)
-		if {$nodeInfo($node,outputBy) == "Value"} {
-		    # Output by fixed values
-		    set value ""
-		    foreach outName $portNames(out) {
-			if {![info exists nodeInfo($node,value,$outName)]} {
-			    append value \"0\"
-			} else {
-			    append value \"$nodeInfo($node,value,$outName)\"
-			}
-		    }
-		    setstate [set star$node] machineOrValue $value
-
-		} elseif {$nodeInfo($node,outputBy) == "Machine"} {
-		    # Output by an machine
-		    if { ![info exists nodeInfo($node,machine)] ||\
-			    $nodeInfo($node,machine) == "" } {
-			error "Output is by Machine. An Galaxy for the\
-				machine is required. "
-		    } else {
-			set machine [file tail $nodeInfo($node,machine)]
-			setstate [set star$node] machineOrValue $machine
-			set dirname [file dirname $nodeInfo($node,machine)]
-			setstate [set star$node] where_is_defined $dirname
-		    }
-		}
-
-	    } elseif {$machineType == "Mealy"}  {
-		# Mealy machine.
-		set outputBy ""
-		set machineOrValue ""
-		set where_is_defined ""
-		foreach arc $nodeInfo($node,outEdges) {
-		    if "![info exists edgeInfo($arc,outputBy)]" {
-			set edgeInfo($arc,outputBy) "Value"
-		    }
-		    append outputBy "$edgeInfo($arc,outputBy)\ "
-
-		    if {$edgeInfo($arc,outputBy) == "Value"} {
-			# Output by fixed values
-			set value ""
-			foreach outName $portNames(out) {
-			    if {![info exists edgeInfo($arc,value,$outName)]} {
-				append value \"0\"
-			    } else {
-				append value \"$edgeInfo($arc,value,$outName)\"
-			    }
-			}
-			append machineOrValue \{$value\}
-			append where_is_defined \{\}
-
-		    }  elseif {$edgeInfo($arc,outputBy) == "Machine"} {
-			# Output by an machine
-			if { ![info exists edgeInfo($arc,machine)] ||\
-			    $edgeInfo($arc,machine) == "" } {
-			    error "Output is by Machine.\
-				    An Galaxy for the machine is required. "
-		        } else {
-			    set machine [file tail $edgeInfo($arc,machine)]
-			    append machineOrValue \{$machine\}
-			    set dirname [file dirname $edgeInfo($arc,machine)]
-			    append where_is_defined \{$dirname\}
-			}
-		    }  elseif {$edgeInfo($arc,outputBy) == "None"} {
-			append machineOrValue \{\}
-			append where_is_defined \{\}
-		    }  else {
-			error "Unrecognized output type:\
-				$edgeInfo($arc,outputBy). "
-		    }
-		}
-		setstate [set star$node] outputBy $outputBy
-		setstate [set star$node] machineOrValue $machineOrValue
-		setstate [set star$node] where_is_defined $where_is_defined
-
 	    } else {
 		error "Unrecognized machine type: $machineType. "
 	    }
@@ -1184,3 +712,239 @@ body ::tycho::EditSTD::ptkCompile {} {
 
     # Done
 }
+
+###################################################################
+#### setInitialState
+# If the specified item is a node, mark it as the initial state
+# of the STD.
+#
+body ::tycho::EditSTD::setInitialState {tag} {
+    set item [$canvas find withtag $tag]
+    if {$item == {}} return
+    
+    if {[lsearch -exact [$canvas gettags $item] node] >= 0} {
+	# Item is a node.  See if there is already an initial state.
+	set init_state_id [$canvas find withtag init_state]
+	if {$init_state_id != ""} {
+	    $canvas itemconfigure $init_state_id -width 1.0
+	    $canvas dtag init_state
+	}
+	$canvas addtag init_state withtag $item
+	$canvas itemconfigure $item -width 5.0
+	$this markModified
+    }
+}
+
+#######################################################################
+#### setMachineType
+#
+body ::tycho::EditSTD::setMachineType {type} {
+    set machineType $type
+}
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::EditSTD::setReadOnly {bool} {
+    ::tycho::File::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+	    menubar disableMenuItem {Edit Item} Edit
+            menubar disableMenuItem {Delete} Edit
+	} {
+	    menubar enableMenuItem {Edit Item} Edit
+            menubar enableMenuItem {Delete} Edit
+	}
+    }
+}
+
+    ##########################################################################
+    ####                     protected methods                            ####
+
+#######################################################################
+#### insertData
+# Append the specified data to the existing display.
+#
+body ::tycho::EditSTD::insertData {data} {
+    if [getReadOnly] {bell; return}
+    if {[catch {eval $data} msg]} {
+	error "$msg "
+    }
+}
+
+################################################################
+#### saveText
+# Save the contents of the canvas widget as text, and return it.
+# This method is invoked by the "save" method.
+#
+body ::tycho::EditSTD::saveText {} {
+    # Identification header comment 
+    set name [file tail $file]
+    set text "### State transition diagram : $name\n"
+
+    # Machine type
+    append text "### Machine type: $machineType\n"
+    append text "set machineType $machineType\n"
+
+    # First, save the canvas dimensions
+    append text "\n### Canvas widget dimensions\n"
+    set height [winfo height $canvas]
+    if {$height == 1} {
+        # Canvas has not been mapped yet
+        set height [cget -canvasheight]
+    }
+    append text "\$canvas configure -height $height\n"
+    set width [winfo width $canvas]
+    if {$width == 1} {
+        # Canvas has not been mapped yet
+        set width [cget -canvaswidth]
+    }
+    append text "\$canvas configure -width $width\n"
+
+    # Set member variables
+    append text "\n### Member variables\n"
+    # I/O port names
+    append text "# InPort names\n"
+    append text "set portNames(in) \"$portNames(in)\"\n"
+    append text "# OutPort names\n"
+    append text "set portNames(out) \"$portNames(out)\"\n"
+    append text "# Internal event names\n"
+    append text "set portNames(internal) \"$portNames(internal)\"\n"
+
+    # Step through all the nodes in the canvas.
+    append text "\n### Creating the nodes\n"
+    foreach node [$canvas find withtag node] {
+	# Generate code to draw the node as an oval on the canvas.
+	append text "set node$node\
+		\[\$canvas create oval [$canvas coords $node]\
+		-outline black -fill white -tags node\]\n"
+	append text "set nodeInfo(\$node$node,inEdges) \{\}\n"
+	append text "set nodeInfo(\$node$node,outEdges) \{\}\n"
+
+	# Generate code to draw the label.
+	append text "set nodeInfo(\$node$node,label)\
+		\[\$canvas create text\
+		[$canvas coords $nodeInfo($node,label)] -fill black"
+	set label [$canvas itemcget $nodeInfo($node,label) -text]
+	if {$label != {}} {
+	    append text " -text \{$label\}"
+	}
+	append text "\]\n"
+
+	if {$machineType == "Mixed"} {
+	    # Internal machine
+	    if "[info exists nodeInfo($node,machine)]" {
+		append text "# Internal machine:\n"
+		append text "set nodeInfo(\$node$node,machine)\
+			[list $nodeInfo($node,machine)]\n"
+	    }
+	} 
+
+	append text "\n"
+    }
+    
+    # See if the initial state is specified.  If so, generate
+    # code to set the initial state.
+    set init_state_id [$canvas find withtag init_state]
+    if {[llength $init_state_id] > 1} {
+	error "Internel error: more than one initial state!!! "
+    } elseif {$init_state_id != ""} {
+	append text "### Initial state\n"
+	append text "\$canvas addtag init_state withtag \$node$init_state_id\n"
+	append text "\$canvas itemconfigure \$node$init_state_id -width 5.0\n"
+    }
+
+    # Step through all the arcs in the canvas.
+    append text "\n### Creating the arcs\n"
+    foreach arc [$canvas find withtag arc] {
+	set smooth [$canvas itemcget $arc -smooth]
+	append text "set arc \[\$canvas create line\
+		[$canvas coords $arc] -arrow last -tags arc -fill black\
+		-smooth $smooth\]\n"
+	# Set up the corresponding nodeInfo and edgeInfo entries.
+	set src $edgeInfo($arc,src)
+	append text "set edgeInfo(\$arc,src) \$node$src\n"
+	append text "lappend nodeInfo(\$node$src,outEdges) \$arc\n"
+	set dest $edgeInfo($arc,dest)
+	append text "set edgeInfo(\$arc,dest) \$node$dest\n"
+	append text "lappend nodeInfo(\$node$dest,inEdges) \$arc\n"
+
+	# Set up the points of the arc.
+	foreach point $edgeInfo($arc,points) {
+	    append text "set point \[\$canvas create rectangle\
+		    [$canvas coords $point] -fill \{\} -outline \{\}\]\n"
+	    append text "lappend edgeInfo(\$arc,points) \$point\n"
+	}
+	
+	# Set up the "outSlope", "outXneg", "inSlope", and "inXneg"
+	# entries.
+	append text "set edgeInfo(\$arc,outSlope) $edgeInfo($arc,outSlope)\n"
+	append text "set edgeInfo(\$arc,outXneg) $edgeInfo($arc,outXneg)\n"
+	append text "set edgeInfo(\$arc,inSlope) $edgeInfo($arc,inSlope)\n"
+	append text "set edgeInfo(\$arc,inXneg) $edgeInfo($arc,inXneg)\n"
+	
+	set mid_xy [$this lineMidpoint $arc]
+	set mid_x [lindex $mid_xy 0]
+	set mid_y [lindex $mid_xy 1]
+	append text "set edgeInfo(\$arc,label)\
+		\[\$canvas create text\
+		[expr $mid_x + $edgeInfo($arc,label_deltax)]\
+		[expr $mid_y + $edgeInfo($arc,label_deltay)]\
+		-fill black"
+	set label [$canvas itemcget $edgeInfo($arc,label) -text]
+	if {$label != {}} {
+	    append text " -text \{$label\}"
+	}
+	append text "\]\n"
+
+	append text "set edgeInfo(\$arc,label_deltax)\
+		$edgeInfo($arc,label_deltax)\n"
+	append text "set edgeInfo(\$arc,label_deltay)\
+		$edgeInfo($arc,label_deltay)\n"
+
+	# Guard
+	if [info exists edgeInfo($arc,guard)] {
+	    append text "set edgeInfo(\$arc,guard)\
+		    [list $edgeInfo($arc,guard)]\n"
+	}
+
+	if {$machineType == "Mixed"} {
+	    if [info exists edgeInfo($arc,preemptive)] {
+		append text "set edgeInfo(\$arc,preemptive)\
+			$edgeInfo($arc,preemptive)\n"
+	    }
+
+	    if [info exists edgeInfo($arc,entryType)] {
+		append text "set edgeInfo(\$arc,entryType)\
+			$edgeInfo($arc,entryType)\n"
+	    }
+
+	    foreach outName $portNames(out) {
+		if [info exists edgeInfo($arc,output,$outName)] {
+		    append text "set edgeInfo(\$arc,output,$outName)\
+			    [list $edgeInfo($arc,output,$outName)]\n"
+		}
+	    }
+
+	    foreach internalName $portNames(internal) {
+		if [info exists edgeInfo($arc,action,$internalName)] {
+		    append text "set edgeInfo(\$arc,action,$internalName)\
+			    [list $edgeInfo($arc,action,$internalName)]\n"
+		}
+	    }
+
+	}
+
+	append text "\n"
+    }
+    
+    # Done
+    append text "### End of File\n"
+
+    return $text
+}
+
