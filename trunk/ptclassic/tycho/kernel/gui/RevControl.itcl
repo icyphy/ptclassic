@@ -282,6 +282,7 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
 	    -geometry +0+0 \
 	    -before $editorWin"
     wm deiconify $editorWin.revcontrol
+    $editorWin.revcontrol focusin
 }
 
 ###################################################################
