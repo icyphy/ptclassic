@@ -85,6 +85,9 @@ class ::tycho::Line {
     # Get one or more aspects of a line
     proc aspect {coords args}
 
+    # Find the "center" point of a line
+    proc center {coords}
+
     # Reflect a line about the specified x coordinate
     proc flip {coords x0}
 
@@ -275,6 +278,30 @@ body ::tycho::Line::aspect {coords args} {
 	}
     }
     return $result
+}
+
+#######################################################################
+#### center
+#
+# Find the center point of a line. If the line has an odd number of
+# coordinates, this is the middle vertex; if it has an even number
+# of coordinates, this is the center of the middle segment.
+#
+body ::tycho::Line::center {coords} {
+    set len [llength $coords]
+    set N [expr $len / 2]
+    if { $len & 3 } {
+	# Not divisible by four, so there are an odd number of vertices
+	list [lindex $coords [expr $N-1]] [lindex $coords $N]
+    } else {
+	# Divisible by four, so get the center of the middle segment
+	list \
+		[expr ([lindex $coords [expr $N-2]] \
+		+ [lindex $coords $N]) / 2.0] \
+		\
+		[expr ([lindex $coords [expr $N-1]] \
+		+ [lindex $coords [expr $N+1]]) / 2.0]
+    }
 }
 
 #######################################################################
