@@ -1,25 +1,133 @@
 # $Id$
-
 # Test icon index for graph editor
 
-icon foo2 IconFrame \
-		-inputs {0 50 50 0} \
-		-outputs {100 50 50 100} \
-		-text Foo \
-                -anchor nw \
-                -graphics {Frame 10 10 50 50 -color red; Frame 50 50 90 90 -color green -relief sunken} \
-		-color green \
-		-tags vertex \
-		-intype {Terminal -type input -style blob -fill red -tags input} \
-		-outtype {Terminal -type output -style doublearrow -fill blue -tags output}
+group arithmetic {
+    -label {Basic Arithmetic}
 
-icon bar2 IconFrame {
-	    -inputs 2
-	    -outputs 1
-	    -text Bar
-	    -color lightsteelblue
-	    -tags vertex
-	    port in0 {Terminal 0 25} -type input
-	    port in1 {Terminal 0 75} -type input
-	    port out {Terminal 100 50} -type output -fill green2
-	}
+    icon Add IconOval {
+        -fill white
+        -graphics {
+            line 20 50 80 50 -width 4
+            line 50 20 50 80 -width 4
+        }
+
+        port in0 Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob -fill red
+        port in1 Terminal -anchor {50 0} -direction {0 -1} \
+                -type input -style blob -fill red
+        port out Terminal -anchor {100 50} -direction {1 0} \
+                -type output -style arrow -fill blue
+    }
+    icon Multiply IconOval {
+        -fill white
+        -graphics {
+            line 25 25 75 75 -width 4
+            line 25 75 75 25 -width 4
+        }
+
+        port in0 Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob -fill red
+        port in1 Terminal -anchor {50 0} -direction {0 -1} \
+                -type input -style blob -fill red
+        port out Terminal -anchor {100 50} -direction {1 0} \
+                -type output -style arrow -fill blue
+    }
+    icon Subtract IconOval {
+        -fill white
+        -graphics {
+            line 25 50 75 50 -width 4
+            line 40 15 60 15
+            line 4 50 20 50
+            line 12 42 12 58
+        }
+
+        port in0 Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob -fill red
+        port in1 Terminal -anchor {50 0} -direction {0 -1} \
+                -type input -style blob -fill red
+        port out Terminal -anchor {100 50} -direction {1 0} \
+                -type output -style arrow -fill blue
+    }
+}
+ 
+group uncommitted {
+    -label {Uncommitted Icons}
+    icon one-zero IconFrame {
+        -label {One in}
+        -text NoName
+        -color lightsteelblue
+
+        port in Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob
+    }
+    icon zero-one IconFrame {
+        -label {One out}
+        -text NoName
+        -color lightsteelblue
+
+        port out Terminal -anchor {100 50} -direction {1 0} \
+                -type output -fill green2
+    }
+    icon one-one IconFrame {
+        -label {One in, one out}
+        -text NoName
+        -color lightsteelblue
+
+        port in Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob
+        port out Terminal -anchor {100 50} -direction {1 0} \
+                -type output -fill green2
+    }
+    icon two-one IconFrame {
+        -label {Two in, one out}
+        -text NoName
+        -color lightsteelblue
+
+        port in0 Terminal -anchor {0 25} -direction {-1 0} \
+                -type input -style blob
+        port in1 Terminal -anchor {0 75} -direction {-1 0} \
+                -type input -style blob
+        port out Terminal -anchor {100 50} -direction {1 0} \
+                -type output -fill green2
+    }
+    -label {Uncommitted Icons}
+    icon two-two IconFrame {
+        -label {Two in, two out}
+        -text NoName
+        -color lightsteelblue
+
+        port in0 Terminal -anchor {0 25} -direction {-1 0} \
+                -type input -style blob
+        port in1 Terminal -anchor {0 75} -direction {-1 0} \
+                -type input -style blob
+        port out0 Terminal -anchor {100 25} -direction {1 0} \
+                -type output -fill green2
+        port out1 Terminal -anchor {100 75} -direction {1 0} \
+                -type output -fill green2
+    }
+}
+ 
+group miscellaneous {
+    -label {Miscellaneous Icons}
+
+    icon Foo IconFrame {
+        -label {The Foo Icon}
+        -text Foo
+        -anchor nw
+        -graphics {
+            Frame 10 10 50 50 -color red
+            Frame 50 50 90 90 -color green -relief sunken
+        }
+        -color green
+        
+        port in0 Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob -fill red
+        port in1 Terminal -anchor {50 0} -direction {0 -1} \
+                -type input -style blob -fill cyan
+        port out0 Terminal -anchor {100 50} -direction {1 0} \
+                -type output -style doublearrow -fill blue
+        port out1 Terminal -anchor {50 100} -direction {0 1} \
+                -type output -style doublearrow -fill blue
+    }
+}
+
