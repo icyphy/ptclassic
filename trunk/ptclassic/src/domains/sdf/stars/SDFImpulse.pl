@@ -37,7 +37,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { delay }
 		type { int }
 		default { 0 }
-		desc { Output will be delayed by this amount(Delay >= 0) }
+		desc {
+Output will be delayed by this amount (delay must be non-negative)
+		}
 	} 
 	defstate {
 		name { count }
@@ -48,18 +50,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	setup {
 		if (int(period) < 0) {
-			Error::abortRun(*this,
-				"Period must be non-negative");
-		};
+			Error::abortRun(*this, "Period must be non-negative");
+		}
 		if (int(delay) < 0) {
-			Error::abortRun(*this,
-				"Delay must be non-negative");
-		};
-		if (int(period) == 0){
+			Error::abortRun(*this, "Delay must be non-negative");
+		}
+		if (int(period) == 0) {
 			count = - int(delay);
-		} else {
+		}
+		else {
 			count = - (int(delay)%int(period));
-		};
+		}
 	}
 	go {
 		double t = 0.0;
@@ -69,5 +70,3 @@ limitation of liability, and disclaimer of warranty provisions.
 		output%0 << t;
 	}
 }
-
-
