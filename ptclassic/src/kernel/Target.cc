@@ -176,6 +176,9 @@ int Target::schedulerSetup() {
 // invoke begin methods
 void Target::begin() {
    	if (!gal) return;
+
+	sched->begin();
+
 	GalStarIter nextStar(*gal);
 	Star *s;
 	while ((s = nextStar++) != 0) s->begin();
