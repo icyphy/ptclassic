@@ -30,6 +30,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* Header files of Pigi TkCalls */
 
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "compat.h"
+
 /* the following fixes permit the "DECwindows" version of Xlib.h to work with
    C++ */
 

@@ -29,14 +29,13 @@ Version identification:
 $Id$
 */
 
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.  See octtools/include/port.h
+ */
+#include "compat.h"
+
 #include "InterpGalaxy.h"
 #include "Universe.h"
-
-#ifndef TYPEDEF_BOOLEAN
-#define TYPEDEF_BOOLEAN 1
-typedef int boolean;
-#endif
-
 
 #ifndef PARAMSTRUCTS_H
 #include "paramStructs.h"

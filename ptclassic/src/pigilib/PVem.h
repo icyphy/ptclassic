@@ -35,6 +35,12 @@ a Tcl interpreter.
 
 #ifndef _PVem_h
 #define _PVem_h 1
+
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "compat.h"
+
 #include <std.h>
 #include "tcl.h"
 #include "TclObj.h"
@@ -45,7 +51,6 @@ a Tcl interpreter.
 #include <math.h>
 #endif
 
-typedef int boolean;
 extern "C" {
 #define Pointer screwed_Pointer
 #include "oct.h"  // Oct Pointer Structure
