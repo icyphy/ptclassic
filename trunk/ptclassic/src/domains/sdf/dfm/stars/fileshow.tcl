@@ -32,12 +32,7 @@
 #
 
 proc goTcl_$starID {starID} {
-    if {![info exists TYCHO]} {
-	uplevel #0 {
-	    set tychoConsoleWindow 0
-	    source $PTOLEMY/tycho/kernel/Tycho.tcl
-	}
-    }
+    ptkStartTycho
     foreach file [grabInputs_$starID] {
 	::tycho::File::openContext $file
     }
