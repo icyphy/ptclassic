@@ -30,7 +30,11 @@ void prompt (int tty) {
 	}
 }
 
-main () {
+main (int argc, char** argv) {
+	if (argc > 2) {
+		fprintf (stderr, "Usage: ptcl [file]\n");
+		return 1;
+	}
 	int tty = isatty(0);
 	// all this stuff should be moved into the PTcl class.
 	// streams would be better than stdio.
@@ -42,6 +46,16 @@ main () {
 	Tcl_Interp* interp = Tcl_CreateInterp();
 	PTcl ptcl(interp);
 	int gotPartial = 0;
+	if (argc == 2) {
+		result = Tcl_EvalFile(interp, argv[1]);
+		if (result != TCL_OK) {
+			// print error info if it exists
+			char* info = Tcl_GetVar(interp, "errorInfo", 0);
+			if (info) fprintf (stderr, "%s\n", info);
+			return 1;
+		}
+		return 0;
+	}
 	prompt(tty);
 	while (fgets (line, 200, stdin) != NULL) {
 		cmd = Tcl_AssembleCmd(buffer, line);
@@ -65,6 +79,7 @@ main () {
 		}
 	}
 	Tcl_DeleteCmdBuf(buffer);
+	return 0;
 }
 
 // the following stub is here until we support the Gantt chart
