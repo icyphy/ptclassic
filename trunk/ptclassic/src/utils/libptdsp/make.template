@@ -64,7 +64,8 @@ LIB_HDRS = \
  ptdspMuLaw.h \
  ptdspRunLength.h \
  ptdspZigZag.h \
- ptdspRGBYUVConversion.h
+ ptdspRGBYUVConversion.h \
+ ptdspHistogram.h
 
 HDRS = ptdsp.h ptdspcephes.h $(LIB_HDRS)
 
