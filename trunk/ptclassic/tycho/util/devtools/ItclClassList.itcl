@@ -90,30 +90,34 @@ class ::tycho::ItclClassList {
 #
 body ::tycho::ItclClassList::constructor {args} {
     toolbar button includeTychoClasses  \
-            {Insert all Tycho classes into the current file.} \
             -text {Include Tycho} \
-            -command "$this includeTychoClasses"
+            -command "$this includeTychoClasses" \
+            -description {Insert all Tycho classes into the \
+                   current file.}
 
     toolbar button includeDirectoryClasses \
-            {Choose a file in a directory, and then insert all the *.itcl \
-	    and *.itk files into the current file.} \
             -text {Include Directory} \
-            -command "$this includeDirectoryClasses"
+            -command "$this includeDirectoryClasses" \
+            -description {Choose a file in a directory, and then \
+                insert all the *.itcl and *.itk files \
+                into the current file.}
+
     toolbar button clearClassList \
-            {Clear the contents of the current file} \
             -text Clear \
-            -command "$this deleteRange 0.0 end"
+            -command "$this deleteRange 0.0 end" \
+            -description {Clear the contents of the current file}
 
     toolbar button browseClassDiagram \
-            {Choose a filename for the class diagram output to go into.} \
             -text {Diagram File Name} \
-        -command "$this browseClassDiagram"
+            -command "$this browseClassDiagram" \
+            -description {Choose a filename for the class \
+                diagram output to go into.}
 
     toolbar button updateClassDiagram \
-            {Generate a class diagram from the files listed in the\
-            current file.} \
             -text {Update Class Diagram}\
-            -command "$this updateClassDiagram"
+            -command "$this updateClassDiagram" \
+            -description {Generate a class diagram from the files \
+                listed in the current file.}
 
     eval itk_initialize $args
 
