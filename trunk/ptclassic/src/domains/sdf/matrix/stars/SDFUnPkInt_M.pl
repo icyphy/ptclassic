@@ -31,13 +31,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	default { 2 }
 	desc { The number of columns in the matrix. }
   }
+  defstate {
+	name { addStopSymbol }
+	type { int }
+	default { NO }
+	desc { Whether to add a stop symbol at end of output tokens or not. }
+  }
+  defstate {
+	name { stopSymbol }
+	type { int }
+	default { "-1" }
+	desc { The stop symbol to be added at end of output tokens. }
+  }
   ccinclude { "Matrix.h" } 
   protected {
     int size;
   }
   setup {
     size = int(numRows)*int(numCols);
-    output.setSDFParams(size);
+    if (!int(addStopSymbol)) {
+      output.setSDFParams(size);
+    } else {
+      output.setSDFParams(size+1);
+    }
   }
   go {
     Envelope pkt;
@@ -59,9 +75,14 @@ limitation of liability, and disclaimer of warranty provisions.
                                 "not match the given state parameters.");
           return;
       }
-      for(int i = 0; i < size; i++)
-        output%(size - i - 1) << matrix.entry(i);
+      if (!int(addStopSymbol)) {
+	for(int i = 0; i < size; i++)
+	  output%(size - i - 1) << matrix.entry(i);
+      } else {
+	for(int i = 0; i < size; i++)
+	  output%(size - i) << matrix.entry(i);
+	output%0 << int(stopSymbol);
+      }
     }
   }
 }
-
