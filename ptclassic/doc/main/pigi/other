@@ -39,6 +39,84 @@ phase plots.
 A radix-2 FFT is used, so the order of the Fourier transform
 must be a power of two.  The order can be longer than the signal,
 in which case, zero-padding will occur.
+.H2 "Setting parameters"
+.pp
+The \fIedit-params\fR or \fIdefine-params\fR commands in pigi permit
+the user to set the initial value of a settable state of any star,
+and to define parameters for a galaxy or universe.
+The syntax for linking the values of the star parameters to
+values of galaxy or universe parameters is simple.
+Furthermore, a fairly general expression language is supported.
+.pp
+Parameter values set through pigi can be expressions.
+This is particularly useful for propagating values down from
+a universe parameter to star parameters somewhere down in the hierarchy.
+Examples of valid parameter expressions are:
+.(c
+	PI/(2*order)
+.)c
+where
+.c order
+is a parameter defined in the galaxy or universe.
+The basic arithmetic operators are addition (+), subtraction (-),
+multiplication (*), division (/), and exponentiation (^).
+These operators work on integers and floats.
+.pp
+When defining complex values, the basic syntax is
+.(c
+	(real, imag)
+.)c
+where
+.c real
+and
+.c imag
+evaluate to integers or floats.
+.pp
+When defining arrays of integers, floats, or complex numbers,
+the basic syntax is a simple list separated by spaces.
+For example,
+.(c
+	1 2 3 4 5
+.)c
+defines an integer array with five elements.
+The elements can be expressions if they are surrounded by parentheses:
+.(c
+	1 2 PI (2*PI)
+.)c
+Repetition can be indicated using the following syntax:
+.(c
+	value [n]
+.)c
+where
+.c n
+evaluates to an integer.
+.IE "file input"
+.IE "reading from a file"
+An array or portion of an array can be input from a file,
+using the symbol ``<'' as in the following example:
+.(c
+	1 2 < filename 3 4
+.)c
+Here, the first two elements of the array will be 1 and 2,
+the next elements will be read from file
+.c filename,
+and the last two elements will be 3 and 4.
+This latter capability can be used in combination with the
+.c WaveForm
+star to read a signal from a file.
+.pp
+For string valued parameters, most of the above expressions will not work.
+Furthermore, there is a bit of complication when one wishes to set
+a string parameter equal to the value of a galaxy or universe parameter,
+because a distinction must be made between a sequence of characters
+that give the name of a symbol and a sequence of characters to be
+interpreted literally.  The syntax to use is explained in the example:
+.(c
+	This string has the word {word} taken from another parameter
+.)c
+Here,
+.c {word}
+represents the value of a string universe or galaxy parameter.
 .H2 "Particle Types"
 .pp
 The packets of data that pass from one star to another
