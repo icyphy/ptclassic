@@ -1465,7 +1465,7 @@ body ::tycho::HTML::_initializeToolbar {toolbar} {
             -underline 0 \
             -text Find -command "$this search"
     bind $text <Key-f> "$this search; break"
-    #bind $text <Find> "$this search; break"
+    bind $text <Find> "$this search; break"
     bind $text <<Find>> "$this search; break"
     bind $text <<Search>> "$this search; break"
 
@@ -1479,11 +1479,13 @@ body ::tycho::HTML::_initializeToolbar {toolbar} {
     $toolbar entry location Location [filename] "$this hyperJumpUser"
 
     # Make sure that Alt-key still brings up the menus, rather than
-    # triggering one of the bindings above. Disable bindings for
-    # control keys while we are at it.
+    # triggering one of the bindings above.
+    # Formerly, we disabled bindings for control keys, but
+    # this means that under Windows, Control-f will not bring up
+    # the search window.
     foreach key {b w h r o f s} {
         bind $text <Alt-Key-$key> { }
-        bind $text <Control-Key-$key> { }
+        #bind $text <Control-Key-$key> { }
     }
 }
 
