@@ -1,4 +1,5 @@
 #!/bin/sh
-if [ $PTARCH != sun4 ]; then
-	echo --enable-shared
-fi
+case $PTARCH in
+    sun4*|*static);;
+    *)echo --enable-shared;; 
+esac
