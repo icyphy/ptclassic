@@ -117,7 +117,7 @@ reset.
 			gencode(wrapAroundWrapUp);
 			break;
 		default:
-			Error::abortRun("Unrecognized onOverflow option in CG56Integrator.");
+			Error::abortRun(*this,"Unrecognized onOverflow option in CG56Integrator.");
 			break;
 		}
 	}
