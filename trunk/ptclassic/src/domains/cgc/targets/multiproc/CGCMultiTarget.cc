@@ -67,7 +67,7 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 	addState(doCompile.setState("doCompile",this,"NO",
 		"disallow compiling during development stage"));
 
-	addState(doRun.setState("doRun",this,"YES",
+	addState(doRun.setState("doRun",this,"NO",
 		"disallow running before compiling is succeeded."));
 
 	// port_number
@@ -82,6 +82,8 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 
 	// make some states invisible
 	childType.setAttributes(A_NONSETTABLE);
+	childType.setInitValue("default-CGC");
+
 	machineInfo = 0;
 	currentPort = 0;
 	baseNum = 0;
@@ -94,12 +96,6 @@ CGCMultiTarget :: ~CGCMultiTarget() {
 		LOG_DEL; delete [] machineInfo;
 		LOG_DEL; delete currentPort;
 	}
-}
-
-// -----------------------------------------------------------------------------
-Target* CGCMultiTarget :: createChild() {
-	LOG_NEW; return new CGCTarget("default-C", "CGCStar",
-	"C code target for a test CGC multi Target.");
 }
 
 // -----------------------------------------------------------------------------
