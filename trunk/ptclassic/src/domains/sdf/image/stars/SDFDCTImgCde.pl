@@ -11,25 +11,30 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   location { SDF image library }
   desc {
-This star takes a Float Matrix which represents a DCT image, 
-inserts "start of block" markers, run-length encodes it, 
-and outputs the modified image. 
-For the run-length encoding, all values with absolute value less than "Thresh"
-are set to 0.0, to help improve compression.
+This star takes a Float Matrix which represents a DCT image, inserts
+"start of block" markers, run-length encodes it, and outputs the modified
+image. For the run-length encoding, all values with absolute value less
+than "Thresh" are set to 0.0, to help improve compression.
 
 Runlengths are coded with a "start of run" symbol and then an (integer) 
-run-length.
-"HiPri" DCT coefficients per block are sent to "hiport", the high-priority 
-output. 
-The remainder of the coefficients are sent to "loport", the low-priority 
-output.
+run-length.  "HiPri" DCT coefficients per block are sent to "hiport",
+the high-priority output. The remainder of the coefficients are sent to
+"loport", the low-priority output.
   }
 
-  input	{ name { inport }	type { FLOAT_MATRIX_ENV } }
+  input	{
+    name { inport }
+    type { FLOAT_MATRIX_ENV }
+  }
 
-  output { name { hiport }	type { FLOAT_MATRIX_ENV } }
-  output { name { loport }	type { FLOAT_MATRIX_ENV } }
-
+  output {
+    name { hiport }
+    type { FLOAT_MATRIX_ENV }
+  }
+  output {
+    name { loport }
+    type { FLOAT_MATRIX_ENV }
+  }
   output { 
     name { originalW } 
     type { int }
@@ -40,8 +45,10 @@ output.
     type { int }
     desc { The height of the original (input) image. }
   }
-
-  output { name { compr }	type { float } }
+  output {
+    name { compr }
+    type { float }
+  }
 
   defstate {
     name { BlockSize }
@@ -49,17 +56,15 @@ output.
     default { 8 }
     desc { Block size of the input DCT transformed image. }
   }
-
   defstate {
-    name	{ Thresh }
-    type	{ float }
+    name { Thresh }
+    type { float }
     default { 12.0 }
-    desc	{ Threshold for run-length coding. }
+    desc { Threshold for run-length coding. }
   }
-
   defstate {
-    name	{ HiPri }
-    type	{ int }
+    name { HiPri }
+    type { int }
     default { 3 }
     desc { Number of DCT coefficients per block sent to 'hiport'. }
   }
@@ -68,7 +73,6 @@ output.
   hinclude { "Matrix.h", "Error.h", "ptdspRunLength.h" }
 
   protected {
-    double thresh;    
     double *outDc, *outAc;
     int indxDc, indxAc;
   }
@@ -76,10 +80,6 @@ output.
   constructor {
     outDc = 0;
     outAc = 0;
-  }
-
-  setup {
-//    thresh = float(fabs(double(Thresh)));
   }
 
   method { // Do the run-length coding.
@@ -91,8 +91,8 @@ output.
       // Initialize.
       int size = inImage.numCols() * inImage.numRows();
 
-      // set inImagePtr pointing to the array representing the FloatMatrix itself
-      const double * inImagePtr = inImage[0];
+      // set inImagePtr pointing to array representing the FloatMatrix itself
+      const double* inImagePtr = inImage[0];
 
       Ptdsp_RunLengthEncode(inImagePtr, size, int(BlockSize), HiPri,
 			   (double)Thresh, &outDc, &outAc, &indxDc, &indxAc); 
