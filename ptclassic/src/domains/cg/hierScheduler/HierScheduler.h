@@ -64,6 +64,10 @@ public:
 
     /*virtual*/ int dagNodes() const;
 
+    /*virtual*/ void writeGantt(ostream& o) { topScheduler.writeGantt(o); }
+
+    /*virtual*/ ParGraph* myEG() {return topScheduler.myEG();}
+
 private:
     DynamicGalaxy wormholes;
     ParScheduler& topScheduler;
