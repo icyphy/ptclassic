@@ -90,10 +90,10 @@ class ComplexSubMatrix: public ComplexMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
   ComplexSubMatrix& operator = (Complex value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src);
+  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
   /*virtual*/ Complex* operator [] (int row) { 
                                        return &data[row*parent->numCols()]; }
   /*virtual*/ const Complex* operator[] (int row) const {
@@ -149,10 +149,10 @@ class FixSubMatrix: public FixMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
   FixSubMatrix& operator = (Fix value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src);
+  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
   /*virtual*/ Fix* operator [] (int row) { 
                                         return &data[row*parent->numCols()]; }
   /*virtual*/ const Fix* operator[] (int row) const {
@@ -209,10 +209,10 @@ class FloatSubMatrix: public FloatMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
   FloatSubMatrix& operator = (double value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src);
+  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
   /*virtual*/ double* operator [] (int row) { 
                                       return &data[row*parent->numCols()]; }
   /*virtual*/ const double* operator[] (int row) const { 
@@ -268,10 +268,10 @@ class IntSubMatrix: public IntMatrix {
   StringList print() const;
 
   // General operators 
-  /*virtual*/ Matrix& operator = (const Matrix& src);
+  /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
   IntSubMatrix& operator = (int value);
-  /*virtual*/ int operator == (const Matrix& src);
-  /*virtual*/ int operator != (const Matrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src);
+  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
   /*virtual*/ int* operator [] (int row) { return &data[row*parent->numCols()]; }
   /*virtual*/ const int* operator[] (int row) const {
                                              return &data[row*parent->numCols()]; }
