@@ -34,8 +34,8 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
 
-SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelect.pl DDFSelf.pl \
- DDFSwitch.pl DDFCase.pl DDFEndCase.pl
+SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelf.pl \
+ DDFCase.pl DDFEndCase.pl
 
 CCS=$(SRCS:.pl=.cc)
 
