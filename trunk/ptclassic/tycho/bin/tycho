@@ -16,7 +16,7 @@
 # on Ptolemy.
 
 
-set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-bak] [file...]"
+set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-e tclscript] [-bak] [file...]"
 
 set argError = "Usage: $0 -ptiny, -ptrim, -pigi and -bin xxx are mutually exclusive"
 
@@ -32,11 +32,12 @@ while ($#argv)
 			echo " -debug         Bring up in debug mode"
 			echo " -ptiny         Smaller version, fewer domains"
 			echo " -ptrim         Small version, more domains"
-			echo " -pigi         Big version, many domains"
+			echo " -pigi          Big version, many domains"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -bak           Run a .bak binary"
 			echo " -nowelcome     No welcome window"
 			echo " -noconsole     No console window"
+			echo " -e tclfile     Start up and source tclfile"
 			echo " -bak           Run a .bak binary"
 			echo " files...       Files to open"
 			exit 0
@@ -85,6 +86,10 @@ while ($#argv)
 		case -noconsole:
 			set noconsole
 			breaksw
+		case -e:
+			set tclscript = $argv[2]
+			shift
+			breaksw			
 		case -*:
 			echo Bad option: $argv[1]
 			echo "$usagestring"
@@ -228,6 +233,7 @@ endif
 # Add in options that are passed directly to Tycho.
 if ( $?nowelcome ) set prog = ($prog -nowelcome)
 if ( $?noconsole ) set prog = ($prog -noconsole)
+if ( $?tclscript ) set prog = ($prog -e $tclscript)
 
 # If neither tyedit or selectPtolemy are set then we are just running itkwish
 if (! -x $prog[1] && ($?tyedit || $?selectPtolemy)) then
