@@ -45,9 +45,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SimControl.h"
 #include "CodeStreamList.h"
 #include "StringList.h"
-#include "SDFStar.h"
+#include "CGStar.h"
 
-class CGStar;
 class SDFSchedule;
 class SDFScheduler;
 
