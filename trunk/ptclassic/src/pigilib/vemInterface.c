@@ -140,6 +140,42 @@ const char *s;
 #endif
 }
 
+/* PrintErrNoTag: like PrintErr, but don't prepend "Error:".
+*/
+void
+PrintErrNoTag(s)
+const char *s;
+{
+#ifdef OLDNEVER
+    char buf[MSG_BUF_MAX];
+#else
+    char buf[1024];
+#endif /* OLDNEVER */
+#if REPORT_TCL_ERRORS
+    char *msg;
+#endif
+    if (*s == 0) return;        /* ignore blank message */
+    if (!VemReady()) {
+	fprintf (stderr, "%s\n", s);
+	return;
+    }
+    (void) sprintf(buf, "\0062%.1000s\n\0060", s);
+    (void) vemMessage(buf, MSG_DISP);
+    if (errorWindows) {
+	/* print error message in a dialog box */
+ 	(void) sprintf(buf, "%.1000s", s);
+	win_msg (buf);
+    }
+#if REPORT_TCL_ERRORS
+    msg = Tcl_GetVar(ptkInterp, "errorInfo", TCL_GLOBAL_ONLY);
+    if (msg == NULL) {
+        msg = ptkInterp->result;
+    }
+    (void) vemMessage(msg, MSG_DISP);
+    win_msg (msg);
+#endif
+}
+
 
 /* PrintDebug  5/10/88 4/7/88 2/15/96
 Print debug info if PrintDebug is turned on.
