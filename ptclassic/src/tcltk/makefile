@@ -78,7 +78,7 @@ ENABLE_GCC =		--enable-gcc --disable-load
 
 ITCL_MAJOR_VERSION =	itcl-2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
-ITCL_VERSION =		itcl-2.0b2
+ITCL_VERSION =		itcl-2.0
 
 # Version of tcl and tk shipped with itcl
 ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
