@@ -49,10 +49,9 @@
 # The model has the following entities:
 # <ul>
 # <li><b>parent</b> _name_: A parent of the current class. Parents can
-# appear only at the top level. FIXME: implement that. Parents have the 
-# following attributes:
+# appear only at the top level. Parents have the following attributes:
 #   <ul>
-#   <li><b>-source</b>: The file in which the parent class resides.
+#   <li><b>-sourcefile</b>: The file in which the parent class resides.
 #   <li><b>-docfile</b>: The file with the parents documentation (.tim).
 #   </ul>
 # 
@@ -142,6 +141,7 @@
 #     set class [::tycho::Class [::tycho::autoName class]]
 #     $class read string {
 #        modelconfigure -language Itcl -name ::tycho::exampleclass
+#        parent ::tycho::Mommy -sourcefile {$TYCHO/kernel/mommy.itcl}
 #        annotation description {An example class.}
 #        annotation explanation {This is a <i>silly</i> class.}
 #        variable foo {
@@ -172,6 +172,11 @@
 #     $class parameters bar
 # </tcl></pre>
 #
+# Return the source file of a parent:
+# <pre><tcl>
+#     $class itemcget parent ::tycho::Mommy -sourcefile
+# </tcl></pre>
+#
 class ::tycho::Class {
     inherit ::tycho::HierModel
 
@@ -198,6 +203,12 @@ class ::tycho::Class {
 
     # Get the parameters of a method
     method parameters {method}
+
+    # Add a parent with attributes to the class
+    method parent {name args}
+
+    # Get the parents of a method
+    method parents {}
 
     # Add a top-level variable with attributes to the class
     method variable {name args}
@@ -249,11 +260,11 @@ body ::tycho::Class::constructor {args} {
             -leaf 1 \
 	    -format HTML
 
-    # Define the "parent" entity FIXME not implemented
+    # Define the "parent" entity
     defineEntityType parent \
-	    -valued 1 \
+            -ordered 1 \
             -scope "" \
-            -classfile "" \
+            -sourcefile "" \
             -docfile ""
 
     # Define the "method" entity
@@ -365,6 +376,30 @@ body ::tycho::Class::parameter {method name args} {
 body ::tycho::Class::parameters {method} {
     _children parameter $method
 }
+
+########################################################################
+#### parent
+#
+# Add a new parent and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# parent. Flag an error if the parent already exists.
+#
+body ::tycho::Class::parent {name args} {
+    _verifynot parent {} $name $name
+    _addentity parent {} $name {} {} $args
+    list delete parent $name
+}
+
+########################################################################
+#### parents
+#
+# Get the parents of the class.
+#
+body ::tycho::Class::parents {} {
+    _children parent {}
+}
+
+
 
 ########################################################################
 #### variable
