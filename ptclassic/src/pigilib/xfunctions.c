@@ -60,7 +60,7 @@ static char	sccsid_xfunctions[] = "$Id$";
 /* maximum total number of characters that can be involved
  * in a profile request that uses x windows
  */
-#define max_profile	1024
+#define max_profile	2000
 
 /* global string used to accumulate the characters for a profile */
 static char profile[max_profile];
@@ -467,16 +467,19 @@ open_msg_type(msg, type)
 	wmhints.initial_state = NormalState;
 	XSetWMHints(msgDisplay, w, &wmhints);
 
-#ifdef PBaseSize		/* basically "#if X11R4" */
-	hints.flags = PBaseSize|PPosition|USPosition|PSize|PMinSize;
 	hints.x = window_x;
 	hints.y = window_y;
-	hints.base_width = window_w;
-	hints.base_height = window_h;
 	hints.min_width = hints.width = window_w;
 	hints.min_height = hints.height = window_h;
 
+#ifdef PBaseSize		/* basically "#if X11R4" */
+	hints.flags = PBaseSize|PPosition|USPosition|PSize|PMinSize;
+	hints.base_width = window_w;
+	hints.base_height = window_h;
 	XSetWMNormalHints(msgDisplay, w, &hints);
+#else				/* older X11s */
+	hints.flags = PPosition|USPosition|PSize|PMinSize;
+	XSetNormalHints(msgDisplay, w, &hints);
 #endif
 	    
 	XSelectInput(msgDisplay, w, ExposureMask);
