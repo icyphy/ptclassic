@@ -108,10 +108,7 @@ input, with the labels separated by spaces.
 	    Error::abortRun(*this, "Outputs are not supported");
 	    return;
 	}
-// FIXME: The following path is TEMPORARY for testing
-
-//	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
-	tcl_file = "/users/eal/StripChart/tkStripChart.tcl";
+	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
 
 	if (signalLabels.size() < 1 ||
 	    (strcmp(signalLabels[0],"default") ==0)) {
