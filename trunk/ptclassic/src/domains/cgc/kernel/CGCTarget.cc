@@ -224,7 +224,7 @@ StringList CGCTarget :: compileLine(const char* fName) {
 int CGCTarget :: runCode()
 {
     StringList cmd, error;
-    cmd << filePrefix << "&";
+    cmd << "./" << filePrefix << "&";
     error << "Could not run " << filePrefix;
     return (systemCall(cmd, error, targetHost) == 0);
 }
