@@ -49,34 +49,28 @@ class ::tycho::Frame {
     ###################################################################
     ## Private methods
 
-    method _answer {option} {}
-
     private method _borderwidth {args} {}
     private method _fill        {args} {}
     private method _relief      {args} {}
-}
 
+    set classanswers(mary) {
+	1 [code {set borderwidth}]
+    }
 
-## _answer
-#
-# Supply an answer to some query.
-#
-body ::tycho::Frame::_answer {option} {
-    switch -exact $option {
-	"bounds" -
-	"scratchpad" {
-	    if { $relief == "flat" } {
+    set classanswers(fred) {
+	1 {
+	    set bw [$this cget -borderwidth]
+	    set rl [$this cget -relief]
+
+	    if { $rl == "flat" } {
 		set w 1
-	    } elseif { $relief == "ridge" || $relief == "groove" } {
-		set w [expr 2 * $borderwidth + 1]
+	    } elseif { $rl == "ridge" || $rl == "groove" } {
+		set w [expr 2 * $bw + 1]
 	    } else { 
-		set w [expr $borderwidth + 1]
+		set w [expr $bw + 1]
 	    }
 
 	    return [rectShrink [$this coords] $w]
-	}
-	default {
-	    return -1
 	}
     }
 }
