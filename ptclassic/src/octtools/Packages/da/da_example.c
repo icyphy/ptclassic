@@ -45,6 +45,7 @@ char *a, *b;
 }
 
 /*ARGSUSED */
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -65,5 +66,5 @@ char *argv[];
 		      daGet(Pair, items, j)->i,
 		      daGet(Pair, items, j)->f);
     }
-    exit(0);
+    return 0;
 }

@@ -36,6 +36,7 @@ char optProgName[] = "fc_test";
 #define Fprintf		(void) fprintf
 #define Printf		(void) printf
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -63,5 +64,5 @@ char *argv[];
     } else {
 	Printf("no completions.\n");
     }
-    exit(0);
+    return 0;
 }
