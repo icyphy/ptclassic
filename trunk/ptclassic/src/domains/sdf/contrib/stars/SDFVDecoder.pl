@@ -2,6 +2,7 @@ defstar {
 	name {VDecoder}
 	domain {SDF}
 	desc { Viterbi Decoder }
+	location { SDF user contribution library }
 	author { N. Becker }
         copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.

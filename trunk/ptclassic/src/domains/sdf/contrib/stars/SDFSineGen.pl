@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location { ~neal/example/fft }
+	location { SDF user contribution library }
 	defstate {
 	  name {freq}
 	  type {float}

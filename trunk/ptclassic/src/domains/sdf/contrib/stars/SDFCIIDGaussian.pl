@@ -2,6 +2,7 @@ defstar {
 	name { CIIDGaussian }
 	domain { SDF } 
 	version { $Id$ }
+	location { SDF user contribution library }
 	desc { Complex IID Gaussian generator. }
 	author { N. Becker }
         copyright {

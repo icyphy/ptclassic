@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location { SDF dsp library }
+	location { SDF user contribution library }
 	input {
 	  name { in }
 	  type { int }

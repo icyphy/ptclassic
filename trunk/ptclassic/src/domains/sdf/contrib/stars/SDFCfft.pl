@@ -16,7 +16,7 @@ Inverse if Inverse == 1
 Use Hamming window if UseWindow
 	     }
   author { N. Becker }
-  location { ~neal/example/fft }
+  location { SDF user contribution library }
 	input {
 		name {input}
 		type {complex}

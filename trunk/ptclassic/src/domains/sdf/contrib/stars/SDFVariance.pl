@@ -2,6 +2,7 @@ defstar {
 	name { Variance }
 	domain { SDF } 
 	desc { Compute Mean and Variance }
+	location { SDF user contribution library }
 	author { N. Becker }
         copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.

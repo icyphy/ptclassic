@@ -10,7 +10,10 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	desc { Wireless Channel - Equivalent Complex Baseband Channel }
+	desc {
+Wireless Channel - Equivalent Complex Baseband Channel.
+This model takes multipath proprogation into account.
+	}
 
 	hinclude { <stdlib.h>, "Wireless.h" }
 
