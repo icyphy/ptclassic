@@ -115,6 +115,23 @@ CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& target) {
 		   &cgcIncoming,&cgcOutgoing,*this);
 }
 
+// FIXME, modifyGalaxy should always work.  It does not 
+// need to be run with the current cg56-cgc wormholes... but
+// this does not mean it never has to be run.  The problem is that
+// in case 2 below, CGC comm stars are first connected to the non-CGC
+// event horizions.  A correct solution would be to have a SDF-CGC wormhole
+// replace the SDF-CG56 wormhole.
+
+/*virtual*/ int CGCTargetWH::modifyGalaxy() {
+    // If the parent of this galaxy is not a wormhole, this modifyGalaxy is
+    // being called by the setup method of CGCTarget.  This target is
+    // being used as a helper target.  Only call modifyGalaxy when this target
+    // is NOT being used as a helper target.
+    if(galaxy()->parent()->isItWormhole())
+	return CGCTarget::modifyGalaxy();
+    return TRUE;
+}
+
 // This is the MAIN method, it is called both from this target
 // and from targets using this target as a helper target.
 //
@@ -401,8 +418,8 @@ int CGCTargetWH::linkFiles ()
 
     dir << expandPathName((const char*) destDirectory);
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
-	    << "-lCGCrtlib -L" << getenv("PTOLEMY") << "/lib." <<getenv("ARCH")
-	    << " " << starLinkOptions;
+	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("ARCH")
+	    << " -lCGCrtlib " << starLinkOptions;
 
     const char* argv[2];
     const char* multiLink = "multilink";
