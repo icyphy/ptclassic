@@ -161,7 +161,7 @@ DataFlowStar* ParNode :: copyStar(CGTarget* t, int /*pid*/, int) {
 		newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
 	} else {
 		newS = (DataFlowStar*) org->clone();
-		newS->setName(savestring(org->fullName()));
+		newS->setName(hashstring(org->fullName()));
 	}
  
 	CBlockStateIter nexts(*org);
