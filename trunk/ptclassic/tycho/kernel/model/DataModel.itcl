@@ -80,8 +80,14 @@ class ::tycho::DataModel {
     # Add a new item
     method add {name args}
 
-    # Get children of the given type
-    method children {type {context {}}}
+    # Get options of an attribute
+    method attrcget {type attribute {option {}}}
+
+    # Configure an attribute
+    method attrconfigure {type attribute args}
+
+    # Get a list children of a given type
+    method listing {type {context {}}}
 
     # Remove all data
     method clear {}
@@ -153,7 +159,6 @@ class ::tycho::DataModel {
     ####                  private variables                    ####
 
     private common defaulttypeoptions {
-        -describe {}
         -leafonly 0
         -override 0
     	-strict 0
@@ -171,16 +176,21 @@ class ::tycho::DataModel {
     # It is set up and accessed by the newtype{} and
     # typeconfigure{} methods.
     # <pre>
-    #    _typeinfo()                  -> List of types in order defined
-    #    _typeinfo($type)             -> $type
-    #    _typeinfo($type,defaults)    -> Default attribute values
-    #    _typeinfo($type,describe)    -> Script to describe this item
-    #    _typeinfo($type,leafonly)    -> Must be a leaf?
-    #    _typeinfo($type,override)    -> Use a method to parse items?
-    #    _typeinfo($type,strict)      -> Are attributes checked strictly?
-    #    _typeinfo($type,valued)      -> Has a value?
+    #    _typeinfo($scope)                -> List of types in order defined
+    #    _typeinfo($scope,$type)          -> $type
+    #    _typeinfo($scope,$type,leafonly) -> Must be a leaf?
+    #    _typeinfo($scope,$type,override) -> Use a method to parse items?
+    #    _typeinfo($scope,$type,strict)   -> Are attributes checked strictly?
+    #    _typeinfo($scope,$type,valued)   -> Has a value?
     # </pre>
     private common _typeinfo
+
+    # Default attributes, per object
+    # <pre>
+    #    _attrinfo($type)       -> Default values
+    #    _attrinfo($type,$attr) -> Attribute options
+    # </pre>
+    private variable _attrinfo
 
     # Debugging only
     method debug {args} {
@@ -202,6 +212,14 @@ body ::tycho::DataModel::constructor {args} {
 
     # Evaluate options
     eval configure $args
+}
+
+########################################################################
+#### destructor
+#
+body ::tycho::DataModel::destructor {} {
+    # Clear data so as not to leak...
+    clear
 }
 
 ########################################################################
@@ -244,7 +262,63 @@ body ::tycho::DataModel::add {name args} {
 }
 
 ########################################################################
-#### children
+#### attrcget
+#
+# Get options of an attribute of a type. The options are those
+# set by calls to attrconfigure{}. There is only one option
+# define by default, which is *-default*, the default value
+# of this attribute. If _option_ is not given, return an
+# option-value list of all options. Note that _attribute_
+# does not include a leading dash.
+#
+body ::tycho::DataModel::attrcget {type attribute {option {}}} {
+    if ![::info exists _attrinfo($type)] {
+        error "Unknown type \"$type\""
+    }
+    if ![::info exists _attrinfo($type,$attribute)] {
+        error "Unknown attribute \"$attribute\""
+    }
+    if { $option == "" } {
+        return $_attrinfo($type,$attribute)
+    }
+    array set opts $_attrinfo($type,$attribute)
+    if ![::info exists opts($option)] {
+        error "Unknown option \"$option\""
+    }
+    return $opts(option)
+}
+
+########################################################################
+#### attrconfigure
+#
+# Configure an option of an attribute of a type. If the attribute
+# does not exist, create it with a *-default* option of null.
+# Note that if data of _type_ already exists and the *-default*
+# option is modified, the value of the attribute for that data
+# will not change. This method is not undoable. Note that _attribute_
+# does not include a leading dash.
+#
+body ::tycho::DataModel::attrconfigure {type attribute args} {
+    if ![::info exists _attrinfo($type)] {
+        error "Unknown type \"$type\""
+    }
+    set opts(-default) ""
+    if [::info exists _attrinfo($type,$attribute)] {
+        array set opts $_attrinfo($type,$attribute)
+    }
+    array set opts $args
+    set _attrinfo($type,$attribute) [array get opts]
+
+    # Update the default list
+    array set temp $_attrinfo($type)
+    set temp(-$attribute) $opts(-default)
+    set _attrinfo($type) [array get temp]
+
+    return ""
+}
+
+########################################################################
+#### listing
 #
 # Return a list of child items of the given _type_. If the
 # _context_ is given, return children of that item; otherwise
@@ -253,7 +327,7 @@ body ::tycho::DataModel::add {name args} {
 # contains items with full names *item:foo* and *item:bar*,
 # then the call
 # <pre>
-#     $model children item
+#     $model listing item
 # </pre>
 # will return <code>{foo bar}</code>. (In comparison, the names{}
 # method will return <code>{item:foo item:bar}</code>. Children
@@ -261,7 +335,7 @@ body ::tycho::DataModel::add {name args} {
 # the model -- the order of children of a given type can be altered
 # with the sort{} method.
 #
-body ::tycho::DataModel::children {type {context {}}} {
+body ::tycho::DataModel::listing {type {context {}}} {
     @scope $scope set [set modelname].[set type]($context)
 }
 
@@ -294,18 +368,20 @@ body ::tycho::DataModel::delete {name} {
     regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Get a description for the undo command
+    # FIXME: this is horrendously inefficient. We need to
+    # check for children and then decide what to generate.
     set desc [_describeitem $context $type $tail $name]
     
     # Remove from the parent list
-    @scope $scope set [set modelname].[set type]($context)] \
-            [::tycho::ldelete [@scope $scope \
-            set [set modelname].[set type]($context)] $tail]
+    @scope $scope set [set modelname].[set type]($context) \
+            [::tycho::ldelete \
+            [@scope $scope set [set modelname].[set type]($context)] $tail]
 
     # Delete attributes
     @scope $scope unset [set modelname]($name)
     
     # Return the undo command
-    list parse $data
+    list parse $desc
 }
 
 ########################################################################
@@ -316,9 +392,7 @@ body ::tycho::DataModel::delete {name} {
 # header string that contains the mode, class, and version attributes,
 # and the current date. If the _name_ is supplied, generate a description
 # of just that item. If the _prefix_ argument is also
-# supplied, prepend the prefix to each line produced. Note that this
-# method can safely be called to produce a description of a single 
-# item from within the *-describe* attribute of a type (see newtype{}).
+# supplied, prepend the prefix to each line produced.
 #
 body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
     if { $name!= "" } {
@@ -330,21 +404,12 @@ body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
         set string "# -*- [_header] -*-\n"
         foreach type $_typeinfo($scope) {
             # Get the root items of this type
-            set items [children $type]
-            
+            set items [listing $type]
+
             # Append a description of each to the result string
-            if { $_typeinfo($scope,$type,describe) != "" } {
-                # Call external script to get description
-                foreach n $items {
-                    append string [uplevel #0 \
-                            $_typeinfo($scope,$type,describe) \
-                            [list $type:$n $prefix]
-                }
-            } else {
-                foreach n $items {
-                    append string [_describeitem {} $type $n $type:$n \
-                            $prefix]
-                }
+            foreach n $items {
+                append string [_describeitem {} $type $n $type:$n \
+                        $prefix]
             }
         }
         return $string
@@ -369,8 +434,8 @@ body ::tycho::DataModel::exists {name} {
 # Note that this method matches item names against a pattern, so
 # that a pattern such as <code>item:foo.*</code> will return all
 # descendents, not just children, of <code>item:foo</code>. Use the
-# children{} method to get just children. Note also that the returned
-# list will not be ordered, whereas the result from children{} will be.
+# listing{} method to get just children. Note also that the returned
+# list will not be ordered, whereas the result from listing{} will be.
 #
 body ::tycho::DataModel::get {{pattern {}}} {
     @scope $scope array get $modelname $pattern
@@ -414,8 +479,8 @@ body ::tycho::DataModel::itemconfigure {name args} {
     regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Get defaults as an array
-    array set opts $_typeinfo($scope,$type,defaults)
-    
+    array set opts $_attrinfo($type)
+
     if { ! $_typeinfo($scope,$type,strict) } {
         # If checking is turned off, just add the new attributes
         array set opts $args
@@ -443,8 +508,8 @@ body ::tycho::DataModel::itemconfigure {name args} {
 # Note that this method matches item names against a pattern, so
 # that a pattern such as <code>item:foo.*</code> will return all
 # descendants, not just children of <code>item:foo</code>. Use the
-# children{} method to get just children. Note also that the returned
-# list will not be ordered, whereas the result from children{} will be.
+# listing{} method to get just children. Note also that the returned
+# list will not be ordered, whereas the result from listing{} will be.
 #
 body ::tycho::DataModel::names {{pattern {}}} {
     @scope $scope array names $modelname $pattern
@@ -521,7 +586,7 @@ body ::tycho::DataModel::_describeitem {context type tail name {prefix {}}} {
     }
 
     # Get default attributes
-    array set dflt $_typeinfo($scope,$type,defaults)
+    array set dflt $_attrinfo($type)
 
     # Print my attributes
     foreach {opt val} $attributes {
@@ -580,17 +645,11 @@ body ::tycho::DataModel::_header {} {
 ########################################################################
 #### definetype
 #
-# Define a new item type. If the type has already been defined, just
-# ignore this call. The first argument is the type of the item.
-# Following arguments are attribute names and their default values. The
-# following special attributes are recognised:
+# Define a new item type. The first argument is the type of the item.
+# Following arguments are option names and their default values.
+# The following special options are recognised the _first_ time this
+# method is called for a given class:
 # <ul>
-# <li><b>-describe</b> _script_: If not null, a script that will be 
-# evaluated to describe each item of this type. The item name,
-# and a prefix string, will be appended to the script, and the script
-# evaluated in the global scope. The script must return a
-# valid description of the item or null (in which case no description
-# of that item will be produced by describe{}). The default is null.
 # <li><b>-leafonly</b> _bool_: If true, items of this type most be
 # a leaf item -- that is, they cannot contain nested items. This should
 # be set in any situation where a type can only be a leaf, since
@@ -599,51 +658,63 @@ body ::tycho::DataModel::_header {} {
 # be parsed by calling a method with the same name as _type_
 # on the target object. This can be used if models need to do
 # additional processing when items are parsed.
-# <li><b>-strict</b> _bool_: If true, the attributes of this type
+# <li><b>-strict</b> _bool_: If true, the options of this type
 # are limited to those that are declared with definetype{}.
-# If not true, any attributes can be given to items of this type.
+# If not true, any options can be given to items of this type.
 # The default is false.
 # <li><b>-valued</b> _bool_: If true, items of this type have
 # a value. If not true, no value will be parsed or printed in the
 # external format. The default is false.
 # </ul>
-# Any other attribute names become an attribute of this type. For
+# Any other option names become an option of this type. For
 # example, the call
 # <pre>
 #     $NewInterchange newtype foo -ordered 1 -bar hello
 # </pre>
 # will create the type *foo* and make instances of it ordered.
-# In addition, any item of type *foo* can accept the attribute
+# In addition, any item of type *foo* can accept the option
 # *-bar*, which will have the default value "hello." An error
 # will be raised if the type already exists.
 #
+# <b>Note</b>: the special options are recognised only the first
+# time this method is called for a given model class. On the
+# second and subsequent calls, they will be ignored.
+#
 body ::tycho::DataModel::definetype {type args} {
-    # Ignore if already exists
-    if { [@scope $scope ::info procs __parse_$type] != "" } {
-        return
-    }
-    lappend _typeinfo($scope) $type
-
     array set opts $defaulttypeoptions
     array set opts $args
 
-    # Set special attributes
-    set _typeinfo($scope,$type) $type
-    foreach {a _} $defaulttypeoptions {
-        set _typeinfo($scope,$type,[string trim $a "-"]) $opts($a)
-        unset opts($a)
+    # The first time in this scope, create parsing proc and
+    # recognise special options
+    if { [@scope $scope ::info procs __parse_$type] == "" } {
+        lappend _typeinfo($scope) $type
+
+       # Set special options
+        set _typeinfo($scope,$type) $type
+        foreach {a _} $defaulttypeoptions {
+            set _typeinfo($scope,$type,[string trim $a "-"]) $opts($a)
+            unset opts($a)
+        }
+
+        # Create and define the parsing proc
+        # puts [list @scope $scope eval [eval _mkparseproc $type $args]]
+        @scope $scope eval [eval _mkparseproc $type $args]
+
+        # Link the proc into the safe interpreter
+        # puts [list $safeinterp alias $scope::$type $scope::__parse_$type]
+        $safeinterp alias $scope::$type $scope::__parse_$type
+
+    } else {
+        # Second and subsequent times, ignore special options.
+        foreach {a _} $defaulttypeoptions {
+            unset opts($a)
+        }
     }
-    
     # Set defaults
-    set _typeinfo($scope,$type,defaults) [array get opts]
-
-    # Create and define the parsing proc
-    # puts [list @scope $scope eval [eval _mkparseproc $type $args]]
-    @scope $scope eval [eval _mkparseproc $type $args]
-
-    # Link the proc into the safe interpreter
-    # puts [list $safeinterp alias $scope::$type $scope::__parse_$type]
-    $safeinterp alias $scope::$type $scope::__parse_$type
+    set _attrinfo($type) [array get opts]
+    foreach {attr dflt} [array get opts] {
+        lappend _attrinfo($type,[string trimleft $attr -]) -default $dflt
+    }
 }
 
 #####################################################################
