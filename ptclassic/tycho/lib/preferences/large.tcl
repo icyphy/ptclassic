@@ -12,5 +12,3 @@ preference assign viewhtml fontSize medium
 preference assign viewhtml textWidth 72
 preference assign viewhtml textHeight 40
 
-# Unfortunately, we can't do this yet with preferences!
-option add *font [.tychoFonts getFont Helvetica 12 bold]
