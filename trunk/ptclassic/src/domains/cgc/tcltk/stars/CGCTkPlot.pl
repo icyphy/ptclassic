@@ -4,8 +4,8 @@ defstar {
 	derivedFrom {TkXYPlot}
 	desc {
 Plot Y input(s) vs. time with dynamic updating.
-Two styles are currently supported: style = 0 causes
-individual points to be plotted, whereas style = 1 causes
+Two styles are currently supported: "dot" causes
+individual points to be plotted, whereas "connect" causes
 connected lines to be plotted. Drawing a box in the plot
 will reset the plot area to that outlined by the box.
 There are also buttons for zooming in and out, and for
@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 The \fIpersistence\fR parameter specifies the number
 of points that are buffered, and hence the number that will
-be shown on a plot.  In line-drawing mode, however, where style = 1,
+be shown on a plot.  In line-drawing mode, however, where style = "connect",
 some points are plotted twice if the \fIrepeat_border_points\fR
 parameter is true.
 The \fIrepeat_border_points\fR parameter specifies whether the rightmost point
@@ -42,7 +42,7 @@ These points occupy two positions in the buffer, and hence take two slots of per
 	  label.setInitValue("Tk Plot");
 	  xTitle.setInitValue("n");
 	  xRange.setInitValue("0 100");
-	  style.setInitValue("1");
+	  style.setInitValue("connect");
 	  X.setAttributes(P_HIDDEN);
 	}
 	initCode {
