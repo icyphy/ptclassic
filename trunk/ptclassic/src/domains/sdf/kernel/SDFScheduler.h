@@ -197,6 +197,10 @@ private:
 	// to block.  Called by repetitions().
 	int reptConnectedSubgraph(Block& block);
 
+	// List to keep track of a connected subgraph to normalize
+	// repetition factor independently b/w disconnected graphs.  
+	BlockList subgraph;
+	
 	// set the repetitions property of blocks on each side of
 	// a connection.  Called by reptConnectedSubgraph().
 	int reptArc(PortHole& port1, PortHole& port2);
