@@ -116,7 +116,7 @@ source $ptolemy/lib/tcl/ptkBarGraph.tcl
 source $ptolemy/lib/tcl/ptkPrfacet.tcl
 
 # Math extensions for parameter parsing
-source $ptolemy/tycho/lib/util/mathexpr.tcl
+source $ptolemy/lib/tcl/mathexpr.tcl
 
 # Gantt chart support
 source $ptolemy/lib/tcl/ptkGantt.tcl
