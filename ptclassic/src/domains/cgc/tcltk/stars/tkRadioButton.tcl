@@ -34,24 +34,45 @@
 # See the documentation of the TclScript star for an explanation of
 # how the Tcl/Ptolemy interface works.
 
-set s .middle.radio$uniqueSymbol
+proc ${uniqueSymbol}setupTcl {identifier initialChoice pairs} {
+    global uniqueSymbol
 
-frame $s -bd 3 -relief raised
-pack append .middle $s {top fill}
-label $s.lbl -text "WOW"
-pack append $s $s.lbl {top fill}
+    set s .middle.radio$uniqueSymbol
 
-set pairs "{One 1.0} {Two 2.0}"
+    frame $s -bd 3 -relief raised
+    pack append .middle $s {top fill}
+    label $s.lbl -text $identifier
+    pack append $s $s.lbl {top fill}
 
-foreach pair $pairs {
-    set pairlbl [lindex $pair 0]
-    radiobutton $s."p_$pairlbl" -text $pairlbl -val [lindex $pair 1] \
-	    -var $s -com "${uniqueSymbol}setOutputs [lindex $pair 1]"
-    pack append $s $s."p_$pairlbl" { top fill expand }
+    foreach pair $pairs {
+	set pairlbl [lindex $pair 0]
+	radiobutton $s."p_$pairlbl" -text $pairlbl -val \
+		[lindex $pair 1] -var $s \
+		-com "${uniqueSymbol}setOutputs [lindex $pair 1]"
+	pack append $s $s."p_$pairlbl" { top fill expand }
+    }
+
+    $s."p_$initialChoice" select
 }
 
 proc ${uniqueSymbol}callTcl {} {
     global uniqueSymbol
-    global pairs
-    ${uniqueSymbol}setOutputs [lindex [lindex $pairs 1] 1]
+    global $uniqueSymbol
+    set initialChoice [set ${uniqueSymbol}(initialChoice)]
+    set pairs [set ${uniqueSymbol}(pairs)]
+    foreach pair $pairs {
+	if { [lindex $pair 0] == $initialChoice } {
+	    ${uniqueSymbol}setOutputs [lindex $pair 1]
+	    break
+	}
+    }
 }
+
+${uniqueSymbol}setupTcl [set ${uniqueSymbol}(identifier)] \
+	[set ${uniqueSymbol}(initialChoice)] \
+	[set ${uniqueSymbol}(pairs)]
+
+
+
+
+
