@@ -137,8 +137,49 @@
 #
 # </dl>
 #
-# Note that there is no item type that actually stores data. This
-# must be created by an application-specific subclass.
+# Although the <b>item</b> type is provided in this model, subclasses
+# may also want to define additional types.
+#
+# Here is an example of a library model:
+# <pre><tcl>
+#   catch {delete object lib}
+#   set lib [::tycho::Library [::tycho::autoName lib]]
+#   $lib parse {
+#     group a -label "Group A" {
+#         item x -label "Item x" {
+#             attribute width -default 0 -type integer
+#             attribute height -default 0 -type integer
+#         }
+#         item y -label "Item y"
+#         item z -label "Item z"
+#     }
+#     group b -label "Group B" {
+#         item x -label "Item x"
+#         item y -label "Item y"
+#         item z -label "Item z"
+#     }
+#  }
+#  $lib describe
+# </tcl></pre>
+#
+# Produce a list that can be used to create a new item from the lib:
+# <pre><tcl>
+#     $lib instantiate {a x}
+# </tcl></pre>
+#
+# Create a menubar and add this library to it:
+# <tcl quiet><pre>
+#    proc select {library item} {
+#        ::tycho::inform "item $item: [$library describe $item]"
+#    }
+#    catch {delete object .mb}
+#    ::tycho::MenuBar .mb
+#    pack .mb
+#    raise .
+#    wm deiconify .
+#    .mb addMenu foo -label Foo
+#    $lib makemenu item .mb foo "select $lib"
+# </pre></tcl>
 #
 class ::tycho::Library {
     inherit ::tycho::DataModel
@@ -146,6 +187,12 @@ class ::tycho::Library {
     constructor {args} {}
     destructor {}
     
+    #################################################################
+    ####                   public variables                      ####
+
+    # The types of entity defined by this library
+    public variable entities {}
+
     #################################################################
     ####                     public methods                      ####
 
@@ -164,10 +211,29 @@ body ::tycho::Library::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # The group type.
+    # Add to the list of printable types
+    lappend printable \
+	    -entities
+
+    # Define the "attribute" entity
+    type define attribute \
+	    :leafonly 1 \
+	    -default "" \
+	    -description "" \
+	    -label "" \
+	    -readonly 0 \
+	    -type string \
+	    -values {}
+
+    # Define the "group" type.
     type define group \
-    	-label "" \
-    	-description ""
+	    -label "" \
+	    -description ""
+
+    # Define the "item" type.
+    type define item \
+	    -label "" \
+	    -description ""
 
     # The xref entity type. Label is for menu display.
     type define xref \
@@ -175,11 +241,33 @@ body ::tycho::Library::constructor {args} {
 }
 
 
+
+########################################################################
+#### instantiate
+#
+# Instantiate metadata into an item. This method just takes the
+# <b>-default</b> attribute of each attribute, and produces a list
+# that can be used as the value to give to the add{} method of
+# some other model. An error will be raised if _item does not
+# exist.
+#
+body ::tycho::Library::instantiate {item} {
+    if ![exists $item] {
+	error "unknown item \"$item\""
+    }
+    set result ""
+    foreach attr [match attribute $item] {
+	lappend result -$attr [attrget [concat $item $attr] -default]
+    }
+    return $result
+}
+
 ########################################################################
 #### makemenu
 #
-# Add a menu to a menubar containing items in this library.
-# The first argument is the type of item to be added to the menubar.
+# Add a menu to a menubar containing items in this library. ONly
+# items that have a non-null <b>-label</b> attribute will be added.
+# The first argument is the types of item to be added to the menubar.
 # The second argument is the menubar. The third is the name
 # of the menu to place these items into. The fourth is the command
 # for each menu entry, to which will be appended the item
@@ -188,19 +276,33 @@ body ::tycho::Library::constructor {args} {
 # of the name which will be appended to the menu command.
 #
 body ::tycho::Library::makemenu \
-        {type menubar menuname command {context {}} {prefix {}}} {
+        {types menubar menuname command {context {}} {prefix {}}} {
     # Add cascade menus
-    foreach g [listing group] {
-        $menubar add cascade $g $menuname \
-                -label [itemcget [concat $context group:$g] -label]
-        makemenu $type $menubar $g $command \
-                [concat $context group:$g] \
-                [concat $prefix $g]
+    foreach g [match group $context] {
+        set item [concat $context $g]
+        set entry $menuname.$g
+        if [exists $item -label] {
+            set label [attrget $item -label]
+            if { $label != "" } {
+                $menubar add cascade $entry $menuname -label $label
+                makemenu $types $menubar $entry $command \
+                        $item [concat $prefix $g]
+            }
+        }
     }
     # Add items
-    foreach i [listing $type] {
-        $menubar command $i $menuname \
-                -label [itemcget [concat $context $type:$i] -label] \
-                -command [concat $command [concat $prefix $i]]
+    foreach t $types {
+        foreach i [match $t $context] {
+            set item [concat $context $i]
+            set entry $menuname.$i
+            if [exists $item -label] {
+                set label [attrget $item -label]
+                if { $label != "" } {
+                    $menubar command $entry $menuname \
+                            -label $label \
+                            -command [concat $command [list $item]]
+                }
+            }
+        }
     }
 }
