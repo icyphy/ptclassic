@@ -152,14 +152,14 @@ int sign;
     } else {		/* assign (positive) maxmimum value */
 	int i,j;
 	*dst_r++ = (FIX_WORD)((1 << FIX_BITS_PER_WORD-1)-1);
-
 	i = FIX_Words(dst_l);
 	j = FIX_WORDS_PER_FIX - i;
 
 	while (--i > 0)
 	    *dst_r++ = (FIX_WORD) ~0;
 
-	dst_r[-1] &= ~((FIX_WORD)1 << FIX_BITS_PER_WORD - (dst_l % FIX_BITS_PER_WORD));
+	dst_r[-1] &= ~(FIX_WORD)0 
+	    << FIX_BITS_PER_WORD -(dst_l%FIX_BITS_PER_WORD);
 
 	while (j-- > 0)
 	    *dst_r++ = (FIX_WORD) 0;
@@ -212,25 +212,17 @@ FIX_WORD *src_r;
     register int i = 0;
     register FIX_WORD *tp;
 
+    /* Sign extend if negative */
     if (FIX_Sign(src_r)) {
-
-	while (src_i > FIX_BITS_PER_WORD) {
-	    i = (i << FIX_BITS_PER_WORD) + (FIX_WORD)~*src_r++;
-	    src_i -= FIX_BITS_PER_WORD;
-	}
-
-	return -(((i << src_i) +
-	      (int)((FIX_WORD)~*src_r) >> FIX_BITS_PER_WORD-src_i) +1);
-
-    } else {
-
-	while (src_i > FIX_BITS_PER_WORD) {
-	    i = (i << FIX_BITS_PER_WORD) + *src_r++;
-	    src_i -= FIX_BITS_PER_WORD;
-	}
-
-	return   (i << src_i) + (*src_r >> FIX_BITS_PER_WORD-src_i);
+	i = ~0;
     }
+
+    while (src_i > FIX_BITS_PER_WORD) {
+	i = (i << FIX_BITS_PER_WORD) + *src_r++;
+	src_i -= FIX_BITS_PER_WORD;
+    }
+
+    return (i << src_i) + (*src_r >> FIX_BITS_PER_WORD-src_i);
 }
 
 /* compute `dst = op1 + op2' */
