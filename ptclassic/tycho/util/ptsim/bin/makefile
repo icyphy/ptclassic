@@ -60,9 +60,9 @@ TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all: sources $(MISC_SRCS) tclIndex
-	chmod a+x ptsim
+	-chmod a+x ptsim
 
-install: all
+install: all tybin_install
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/tycommon.mk
