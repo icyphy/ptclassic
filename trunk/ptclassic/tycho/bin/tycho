@@ -278,18 +278,29 @@ endif # ?selectPtolemy
 if ( ! $?selectPtolemy && $?selectJava) then
 	# We selected java
 
-	if ($PTARCH !~ sol?* ) then
-		echo "Sorry, tycho -java is only support under PTARCH==sol2*"
+	if ($PTARCH !~ sol?* && $PTARCH !~ hppa*) then
+		echo "Sorry, tycho -java is only support under PTARCH==sol2* and PTARCH==hppa*"
 		exit 42
 	endif
+
 
 	# Add $Tycho/lib.$PTARCH to LD_LIBRARY_PATH so we can find libjtk.so
 	# Note that under hpux, this file will be libjtk.sl, so we can't
 	# easily check
-	if ( ! $?CLASSPATH ) then
-   	   setenv LD_LIBRARY_PATH ${TYCHO}/lib.${PTARCH}:${PTOLEMY}/tcltk/itcl.${PTARCH}/lib/itcl
-	else
-   	   setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${TYCHO}/lib.${PTARCH}:${PTOLEMY}/tcltk/itcl.${PTARCH}/lib/itcl
+	if ($PTARCH =~ sol?*) then	
+		if ( ! $?LD_LIBRARY_PATH ) then
+	   	   setenv LD_LIBRARY_PATH ${TYCHO}/lib.${PTARCH}:${PTOLEMY}/tcltk/itcl.${PTARCH}/lib/itcl
+		else
+	   	   setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${TYCHO}/lib.${PTARCH}:${PTOLEMY}/tcltk/itcl.${PTARCH}/lib/itcl
+		endif
+	endif
+
+	if ($PTARCH =~ hppa*) then	
+		if ( ! $?SHLIB_PATH ) then
+	   	   setenv SHLIB_PATH ${TYCHO}/lib.${PTARCH}:${PTOLEMY}/tcltk/itcl.${PTARCH}/lib/itcl
+		else
+	   	   setenv SHLIB_PATH ${SHLIB_PATH}:${TYCHO}/lib.${PTARCH}:${PTOLEMY}/tcltk/itcl.${PTARCH}/lib/itcl
+		endif
 	endif
 
 	if ( ! $?CLASSPATH ) then
