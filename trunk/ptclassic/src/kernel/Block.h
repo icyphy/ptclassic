@@ -8,6 +8,7 @@
 #include "NamedObj.h"
 #include "PortHole.h"
 #include "State.h"
+#include "FlagArray.h"
 
 /**************************************************************************
 Version identification:
@@ -70,6 +71,11 @@ class Block : public NamedObj
         friend class Scope;
     
 public:
+	// Pre-initialization pass
+	// No-op in most Blocks, but stars that rearrange galaxy connections
+	// (such as HOF stars) need to run before regular initialization
+	virtual void preinitialize();
+
 	// Initialize the data structures
 	/* virtual */ void initialize();
 
@@ -164,7 +170,7 @@ public:
 	// print portholes as part of the info-printing method
 	StringList printPorts(const char* type, int verbose) const;
 
-	// return the scheduler under which it is in.
+	// return the scheduler under which it runs.
 	virtual Scheduler* scheduler() const;
 
         // Add  State to the block
@@ -217,6 +223,29 @@ public:
 
 	virtual int setTarget(Target*);
 	Target* target() const;
+
+	// Many schedulers and targets need to be able to mark blocks
+	// in various ways, to count invocations, or flag
+	// that the block has been visited, or to classify it
+	// as a particular type of block.  To support this,
+	// we provide an array of flags that are not used
+	// by class Block, and may be used in any way by a Target
+	// or scheduler.  The array can be of any size, and the size
+	// will be increased automatically as elements are referenced.
+	// For readability and consistency, the user should define an enum
+	// in the Target class to give the indices, so that mnemonic names
+	// can be associated with flags, and so that multiple schedulers
+	// for the same target are consistent.
+	//
+	// For efficiency, there is no checking to prevent
+	// two different pieces of code (say a target and scheduler) from
+	// using the same flags (which are indexed only by non-negative
+	// integers) for different purposes.  The policy, therefore, is
+	// that the target is in charge.  It is incumbent upon
+	// the writer of the target to know what flags are used by schedulers
+	// invoked by that target, and to avoid corrupting those flags
+	// if the scheduler needs them preserved.
+	FlagArray flags;
 
 protected:
 	// User-specified additional initialization
