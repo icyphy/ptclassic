@@ -114,6 +114,36 @@
 #     $graph adjacent b out
 # </tcl></pre>
 #
+# Delete an edge:
+# <pre><tcl>
+#     $graph edgedelete b out d in
+#     $graph describe
+# </tcl></pre>
+#
+# Delete a vertex but not edges connected to it, and record the deletion:
+# <pre><tcl>
+#     $graph record vertexdelete c
+#     $graph describe
+# </tcl></pre>
+#
+# Undo the deletion:
+# <pre><tcl>
+#     $graph undo
+#     $graph describe
+# </tcl></pre>
+#
+# Delete a vertex and all edges connected to it, recording it:
+# <pre><tcl>
+#     $graph record delete c
+#     $graph describe
+# </tcl></pre>
+#
+# Undo the deletion:
+# <pre><tcl>
+#     $graph undo
+#     $graph describe
+# </tcl></pre>
+#
 class ::tycho::KeyedDigraph {
     inherit ::tycho::Digraph
     
@@ -239,11 +269,25 @@ body ::tycho::KeyedDigraph::adjacent {vertex key {select all}} {
 # Delete a vertex and all connected edges from the graph, and
 # return the inverse command.
 #
-# FIXME: doesn't work
-#
 body ::tycho::KeyedDigraph::delete {vertex} {
     _verify vertex $vertex
-    error "Not implemented"
+
+    # Start inverse command
+    set inverse ""
+
+    # Delete outward edges
+    foreach {v1 k1 v2 k2} [edges $vertex * * *] {
+	append inverse "\n" [edgedelete $v1 $k1 $v2 $k2]
+    }
+    # Delete inward edges
+    foreach {v1 k1 v2 k2} [edges * * $vertex *] {
+	append inverse "\n" [edgedelete $v1 $k1 $v2 $k2]
+    }
+    # Delete the vertex. (NB: This must follow the edge deletion.)
+    append inverse "\n" [vertexdelete $vertex]
+
+    # Return the inverse command
+    return $inverse
 }
 
 ########################################################################
@@ -318,10 +362,10 @@ body ::tycho::KeyedDigraph::edgedelete {vertex1 key1 vertex2 key2} {
     # Delete the data and get the inverse command
     set inverse [_delete edge [list $vertex1 $key1 $vertex2 $key2]]
     
-    # If there are still edges between the same vertices, add
+    # If there are still edges between the same vertices, add an edge
     # back to the adjacency list
     if { [array names _info \
-	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
+	    [list edge * * [list $vertex1 * $vertex2 *]]] != "" } {
     	_adjacencyadd $vertex1 $vertex2
     }
     return $inverse
@@ -385,17 +429,10 @@ body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
 body ::tycho::KeyedDigraph::keydelete {vertex key} {
     _verify key [list $vertex $key]
 
-    # FIXME
-    # Delete the data and get the inverse command
-    set inverse [_delete key [list $vertex $key]]
+    # Delete the key and return the inverse command
+    _delete key [list $vertex $key]
 
-    # If there are still keys between the same vertices, add
-    # back to the adjacency list
-    if { [array names _info \
-	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
-    	_adjacencyadd $vertex1 $vertex2
-    }
-    return $inverse
+    # Are there any other things to be taken care of???
 }
 
 ########################################################################
@@ -441,8 +478,6 @@ body ::tycho::KeyedDigraph::keys {vertex {key *}} {
 # FIXME: Doesn't work.
 #
 body ::tycho::KeyedDigraph::repair {} {
-    set modified 1
-
     foreach {src tgt} [edges] {
 	if { ! [::info exists _vertices($src)] \
                 || ! [::info exists _vertices($tgt)] } {
