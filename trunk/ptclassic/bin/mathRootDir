@@ -69,6 +69,13 @@ else
   # 2. find the expression for mathdir:  grep "mathdir="
   # 3. extract the value of mathdir:     sed -e 's/mathdir=//g'
   newpath=`sed -e 's/#\(.*\)//g' "$mmapath" | grep 'mathdir=' | sed -e 's/mathdir=//g'`
+
+  if [ "$newpath" = "" ]
+  then
+    # Perhaps this is mathematica3?
+    newpath=`sed -e 's/#\(.*\)//g' "$mmapath" | grep 'topdir=' | sed -e 's/topdir=//g'`
+
+  fi
   # If the newpath is not an absolute path name, then append
   # newpath to the mmapath (mmapath is always guaranteed to be correct)
   if [ ! -x "$newpath" ]
@@ -81,6 +88,7 @@ else
   if [ -x "$mathlinksrc" -a -r "$mathlinksrc" -a -d "$mathlinksrc" -a \
        -x "$mathlinkincdir" -a -r "$mathlinkincdir" -a -d "$mathlinkincdir" ]
   then
+    # Mathematica2.x
     mathlinkbin=$newpath/Bin
     mathlinklib=$mathlinkbin/MathLink
     if [ -x "$mathlinkbin" -a -r "$mathlinkbin" -a -d "$mathlinkbin" -a \
@@ -94,6 +102,17 @@ else
 	exit 1
     fi
   else
-    echo ""
+    # Mathematica3.x
+    mathlinkbin=$newpath/AddOns
+    mathlinklib=$mathlinkbin/MathLink
+    if [ -x "$mathlinkbin" -a -r "$mathlinkbin" -a -d "$mathlinkbin" -a \
+         -x "$mathlinklib" -a -r "$mathlinklib" -a -d "$mathlinklib" ]
+    then
+      echo $newpath
+    else
+      echo ""
+      echo "Found the Mathematica installation directory '$newpath', but it did not contain a AddOns/MathLink sub-directory." >&2
+      exit 1
+    fi
   fi
 fi
