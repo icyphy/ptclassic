@@ -64,16 +64,16 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 CLIB =		libdialogs.$(LIBSUFFIX)
 
-LIB_INSTALL =	$(LIB) 
+LIB_INSTALL =	$(CLIB) 
 
 # The clean rule in mk/common.mk will remove KRUFT files.  If 
 # make clean does not remove libdialogs.a then rebuild will not recreate
 # libdialogs.a
-KRUFT =		$(LIB) 
+KRUFT =		$(CLIB) 
 
 MISC_FILES =	XtBug vemDMtest.c vemDMtest2.c
 
-all::	$(LIB)
+all::	$(CLIB)
 
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk

@@ -68,17 +68,17 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 CLIB =		librpcserver.$(LIBSUFFIX)
 
-LIB_INSTALL =	$(LIB) 
+LIB_INSTALL =	$(CLIB) 
 
 # The clean rule in mk/common.mk will remove KRUFT files.  If 
 # make clean does not remove librpcserver.a then rebuild will not recreate
 # librpcserver.a
-KRUFT =		$(LIB) 
+KRUFT =		$(CLIB) 
 OTHERCFLAGS=-DSERVER
 
 MISC_FILES =	TODO
 
-all::	$(LIB)
+all::	$(CLIB)
 
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
