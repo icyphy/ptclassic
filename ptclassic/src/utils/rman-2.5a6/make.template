@@ -1,7 +1,7 @@
 # Ptolemy Makefile for Rosetta Man, use by tkman
 # Version identification:
-# @(#)make.template	1.15 8/15/95
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,7 +41,7 @@ KRUFT =
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
 
-
+KRUFT = rman
 
 # Special to rman
 MANTITLEPRINTF = "%s(%s) manual page"
@@ -65,7 +65,7 @@ $(BINDIR)/rman:	rman
 $(ROOT)/man/man1/rman.1: rman.1
 	@echo Installing $<
 	rm -f $@
-	ln $< $@
+	cp $< $@
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
