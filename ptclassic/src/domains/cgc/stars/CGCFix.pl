@@ -42,7 +42,7 @@ during the simulation.
 	if ($ref(ov_cnt)) {
 		double percentage = (100.0*$ref(ov_cnt)) / ($ref(ck_cnt) ? $ref(ck_cnt):1.0);
 		fprintf(stderr, "star @starName: \
-experienced overflow in %d out of %d fixed-point calculations checked (%.1lf%%)\n",
+experienced overflow in %d out of %d fixed-point calculations checked (%.1f%%)\n",
 			$ref(ov_cnt), $ref(ck_cnt), percentage);
 	}
     }
