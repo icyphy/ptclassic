@@ -71,7 +71,7 @@ class tycho::DialogWindow {
 
     #### title option
     # The title for the window.
-    itk_option define -title title Title "Ptolemy"
+    itk_option define -title title Title "Tycho"
 
     #### addButton
     # Add a button to the set of buttons at the bottom.
@@ -174,21 +174,37 @@ body tycho::DialogWindow::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval configure $args
+}
 
+#########################################################################
+#### title configuration
+# Set the window manager title and icon name.
+#
+configbody tycho::DialogWindow::title {
     wm title $prefix $itk_option(-title)
+    wm iconname $prefix $itk_option(-title)
 }
 
 #########################################################################
 #### bitmap configuration
+# If a non-null bitmap option is given, insert the bitmap left of the text.
 # 
 configbody tycho::DialogWindow::bitmap {
-    if {$itk_option(-bitmap) != ""} {
-	itk_component add bitmap {
-	    label $itk_component(top).bitmap -bitmap $itk_option(-bitmap)
+    if {$itk_option(-bitmap) != "" && ![info exists itk_component(bitmap)]} {
+	if [info exists itk_component(bitmap)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(bitmap) configure -bitmap $itk_option(-bitmap)
 	} {
-	    keep -background -cursor -foreground
+	    # Component does not exist, so we create it.
+	    itk_component add bitmap {
+		label $itk_component(top).bitmap -bitmap $itk_option(-bitmap)
+	    } {
+		keep -background -cursor -foreground
+	    }
+	    pack $itk_component(bitmap) \
+		    -side left -before $itk_component(message)
 	}
-	pack $itk_component(bitmap) -side left -before $itk_component(message)
     }
 }
 
@@ -238,25 +254,15 @@ body tycho::DialogWindow::invoke {args} {
 # defined, and set the commandResult to the value returned by that
 # command. Any arguments beyond the option name to use are passed to
 # the command as arguments. Notice that normally, the option argument
-# begins with a dash "-".  The command is executed in the scope of
-# of the DialogWindow object.  Note that this means that if you create
-# other widgets as a side effect of your command, those widgets will
-# be destroyed when the DialogWindow object is destroyed.  To avoid
-# this, just create your widgets at the global scope, or in some
-# other namespace.  For example,
+# begins with a dash "-".  The command is executed in the ::tycho scope.
+# If you need to access a method in a class derived from DialogWindow,
+# the following sequence in the constructor will work, for example:
 # <pre>
-# YesNoQuery .yesno \
-#	-text "Either button should bring up another dialog" \
-# 	-yescommand {
-#     	    namespace tycho {
-# 		YesNoQuery .another -text {Another dialog}
-# 		.another centerOnScreen
-# 	    }
-# 	} \
-# 	-nocommand "askuser {Are you sure not?}"
-# .yesno centerOnScreen
+#     $this configure -okcommand "[scope $this] mymethod"
+#     addButton b -text "Push Me" -command "$this execCommand -okcommand"
 # </pre>
-# The yescommand creates another dialog box in the namespace "tycho".
+# The "scope" command forces "mymethod" to be invoked in the scope
+# of class that defining the button.
 #
 body tycho::DialogWindow::execCommand {option args} {
     set retval ""
@@ -266,8 +272,8 @@ body tycho::DialogWindow::execCommand {option args} {
 
 	# Intercept any errors in the command and issue a message.
 	if {[catch {set retval \
-		[eval $itk_option($option) $args]} errcode] != 0} {
-	    
+		[namespace tycho \
+		[concat $itk_option($option) $args]]} errcode] != 0} {
 	    error "Failed to execute command in the $option option:\n$errcode" \
 		    $errorInfo
 	}
