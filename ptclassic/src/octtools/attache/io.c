@@ -27,6 +27,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+#ifdef linux
+#include <termio.h>
+#endif
+
 #include <curses.h>		    /* Include this first, as port.h
 				       also defines TRUE and FALSE. */
 #include "copyright.h"
