@@ -49,13 +49,13 @@ include $(CONFIG)
 # and the ptcl interface to Matlab can be compiled.  The
 # utils/libexttools directory provides the interface to the
 # rest of Ptolemy.
-DIRS = kernel thread utils ptlang domains ptcl pitcl pigilib ptklib tysh pigiRpc  filters #pxgraph
+DIRS = kernel thread utils ptlang domains ptcl pitcl pigilib ptklib tysh pigiRpc  filters
 
 # "leaf" directories with a make.template
-MTDIRS = kernel pigilib pxgraph ptcl pitcl ptklib pigiRpc tysh
+MTDIRS = kernel pigilib ptcl pitcl ptklib pigiRpc tysh
 
 # "leaf" directories with no make.template
-LDIRS = ptlang filters utils
+LDIRS = ptlang pxgraph filters utils
 
 # directories with subtrees
 SDIRS = thread domains
