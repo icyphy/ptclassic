@@ -42,7 +42,7 @@ include $(CONFIG)
 EXTRA_SRCS =  \
 	index.html
 
-MISC_FILES =	internals tutorial usersGuides
+MISC_FILES =	internals usersGuides
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 OPTIONAL_FILES =	codeDoc
@@ -51,7 +51,7 @@ OPTIONAL_FILES =	codeDoc
 REALCLEAN_STUFF =
 
 # Sub directories to run make in.
-DIRS =          internals tutorial usersGuides
+DIRS =          internals usersGuides
  
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
