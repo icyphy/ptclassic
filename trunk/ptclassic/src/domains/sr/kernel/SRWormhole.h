@@ -1,3 +1,5 @@
+/* -*- C++ -*- */
+
 #ifndef _SRWormhole_h
 #define _SRWormhole_h
 
@@ -25,8 +27,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks, J. Buck
-    Date of creation:	17 January 1992
+    Programmer:		S. A. Edwards
+    Date of creation:	18 April 1992
 */
 
 #ifdef __GNUG__
@@ -38,85 +40,96 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "SRPortHole.h"
 
-
 class SRWormhole : public Wormhole, public SRStar {
 public:
-	// Constructor
-	SRWormhole(Galaxy& g, Target* t=0);
 
-	// Destructor
-	~SRWormhole();
+  // Constructor
+  SRWormhole(Galaxy& g, Target* t=0);
 
-	void begin() { Wormhole::begin(); }
-	void wrapup();
+  // Destructor
+  ~SRWormhole();
 
-	Scheduler* scheduler() const { return myTarget()->scheduler(); }
+  void begin() { Wormhole::begin(); }
+  void wrapup();
 
-	// clone -- allows interpreter/pigi to make copies
-	Block* clone() const;
-	Block* makeNew() const;
+  Scheduler * scheduler() const { return myTarget()->scheduler(); }
 
-	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE; }
+  // clone -- allows interpreter/pigi to make copies
+  Block * clone() const;
+  Block * makeNew() const;
 
-	// use statelist for inner galaxy for stateWithName
-	State* stateWithName (const char* name) {
-		return gal.stateWithName(name);
-	}
+  // identify myself as a wormhole
+  int isItWormhole() const { return TRUE; }
 
-	// state initialize
-	void initState() { gal.initState(); }
+  // use statelist for inner galaxy for stateWithName
+  State * stateWithName (const char* name) {
+    return gal.stateWithName(name);
+  }
 
-	StringList print(int verbose) const {
-		return Wormhole::print(verbose);
-	}
+  // state initialize
+  void initState() { gal.initState(); }
+
+  StringList print(int verbose) const {
+    return Wormhole::print(verbose);
+  }
 
 protected:
-	void setup();
-	void go();
+  void setup();
+  void go();
 
-	// return stopTime
-	double getStopTime();
+  // return stopTime
+  double getStopTime();
 };
 
 class SRtoUniversal : public ToEventHorizon, public InSRPort {
 public:
-	// constructor
-	SRtoUniversal() : ToEventHorizon(this) {}
 
-	// redefine
-	void receiveData();
+  // constructor
+  SRtoUniversal() : ToEventHorizon(this) {}
 
-	void initialize();
+  // redefine
+  void receiveData();
 
-        int isItInput() const;
-        int isItOutput() const;
+  void initialize();
 
-	// as EventHorizon
-	EventHorizon* asEH();
+  int isItInput() const;
+  int isItOutput() const;
 
-	/*virtual*/ Geodesic* allocateGeodesic()
-	{ return ToEventHorizon::allocateGeodesic(); }
+  // as EventHorizon
+  EventHorizon* asEH();
+
+  /*virtual*/ Geodesic* allocateGeodesic() {
+    return ToEventHorizon::allocateGeodesic();
+  }
+
+  void transferParticle();
+
+  /*virtual*/ int onlyOne() const;
+
 };
 
 class SRfromUniversal : public FromEventHorizon, public OutSRPort {
 public:
-	// constructor
-	SRfromUniversal() : FromEventHorizon(this) {}
 
-	// redefine
-	void sendData();
+  // constructor
+  SRfromUniversal() : FromEventHorizon(this) {}
 
-	void initialize();
+  // redefine
+  void sendData();
 
-        int isItInput() const;
-        int isItOutput() const;
+  void initialize();
 
-	// as EventHorizon
-	EventHorizon* asEH();
+  int isItInput() const;
+  int isItOutput() const;
 
-	/*virtual*/ Geodesic* allocateGeodesic()
-	{ return FromEventHorizon::allocateGeodesic(); }
+  // as EventHorizon
+  EventHorizon* asEH();
+
+  /*virtual*/ Geodesic* allocateGeodesic() {
+    return FromEventHorizon::allocateGeodesic();
+  }
+
+  /*virtual*/ int onlyOne() const;
 };
 
 #endif
