@@ -124,23 +124,11 @@ StringList
 AsmStar::lookupVal(const char* name) {
 	State* s;
 	if ((s = stateWithName(name)) != 0) {
-		// UGLY!  FixState has a special hack!
-		if (s->isA("FixState"))
-			return printFixValue(*(FixState*)s);
-		else {
-			StringList v = s->currentValue();
-			return v;
-		}
+		StringList v = s->currentValue();
+		return v;
 	}
 	codeblockError(name, " is not defined as a state");
 	return "ERROR";
-}
-
-StringList AsmStar::printFixValue(double val) const {
-	StringList out = val;
-	if (strchr(out,'.') == 0)
-		out += ".0";
-	return out;
 }
 
 // the following function is provided by the SunOS and Ultrix
