@@ -44,7 +44,7 @@ IPUSDOMAIN =
 endif
 
 DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
-          mq mdsdf $(IPUSDOMAIN) $(EXPDOMAINS) 
+          mq mdsdf codesign dmm $(IPUSDOMAIN) $(EXPDOMAINS) 
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
