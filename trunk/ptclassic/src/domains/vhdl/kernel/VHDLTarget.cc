@@ -737,6 +737,34 @@ void VHDLTarget :: initVHDLObjLists() {
   localVariableList.initialize();
 }
 
+// Return a set of comments based on firingList.
+StringList VHDLTarget :: addFiringComments(VHDLFiringList* firingList,
+					   int level/*=0*/) {
+  StringList all;
+  if (firingList->head()) {
+    StringList body;
+
+    level++;
+
+    int firCount = 0;
+    VHDLFiringListIter nextFiring(*firingList);
+    VHDLFiring* nfir;
+    while ((nfir = nextFiring++) != 0) {
+      level++;
+      body << indent(level) << "-- Firing " << nfir->name << " (Star class "
+	   << nfir->starClassName << ");\n";
+      firCount++;
+      level--;
+    }
+    level--;
+
+    if (firCount) {
+      all << body;
+    }
+  }
+  return all;
+}
+
 // Return a generic clause based on genList.
 StringList VHDLTarget :: addGenericRefs(VHDLGenericList* genList, int level/*=0*/) {
   StringList all;

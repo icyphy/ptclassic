@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "HLLTarget.h"
 #include "VHDLStar.h"
+#include "VHDLFiring.h"
 #include "VHDLVariable.h"
 #include "VHDLArc.h"
 #include "VHDLGeneric.h"
@@ -172,6 +173,9 @@ protected:
         const char* hashCHARACTER;
         const char* hashIN;
         const char* hashOUT;
+
+	// Return a set of comments based on firingList.
+	StringList addFiringComments(VHDLFiringList*, int=0);
 
 	// Return a generic clause based on genList.
 	StringList addGenericRefs(VHDLGenericList*, int=0);
