@@ -19,13 +19,14 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
 	name {output}
 	type {ANYTYPE}
-    }
+}
 
-    codeblock(receiveData,"int numXfer,const char* command") {
+codeblock(receiveData,"int numXfer,const char* command") {
     char buffer[@(numXfer*3)];
     int status;
     int i;
     /* blocking read */
+    printf("Reading @numXfer tokens from the DSP\n");
     status = read(dsp->fd,buffer,@(numXfer*3));
     if (status == 0) {
 	perror("DSP read ioctl premature EOF");
@@ -40,16 +41,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (value & 0x00800000) value |= 0xff000000;
         @command;
     }
-    }
+}
 
-    setup {
+setup {
         CGCS56XBase::setup();
 	PortHole* input = s56xSide->portWithName("input");
 	DataType inputType = input->setResolvedType();
 	if (strcmp(inputType,FIX) == 0) {
 		output.setPort("output",this,FLOAT,output.numXfer());
 	}
-    }
+}
+
+codeblock(STARTR,"const char* filePrefix"){
+	dspParams.startRead= qckLodGetIntr(dsp->prog,"STARTR");
+        if (dspParams.startRead == -1) {
+                perror("No STARTR label in @filePrefix.lod");
+                exit(1);
+        }
+}
+
+initCode {
+	CGCS56XBase::initCode();
+	addCode(STARTR(S56XFilePrefix),"S56XRoutines","STARTR");
+}
 
     go {
 	CGCS56XBase::go();
