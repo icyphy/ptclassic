@@ -21,11 +21,11 @@ of the final tap values or a plot that traces the
 time evolution of each tap value: the time evolution is obtained
 if \fItrace\fP is YES.
 .lp
-\fGraphTitleMag\fP is used for the title of the magnitude plot;
-\fGraphTitlePhase\fP is used for the title of the phase plot;
-\fGraphOptsMag\fP is handed to the xgraph program as option
+\fIGraphTitleMag\fP is used for the title of the magnitude plot;
+\fIGraphTitlePhase\fP is used for the title of the phase plot;
+\fIGraphOptsMag\fP is handed to the xgraph program as option
 values on the command line when the magnitudes are plotted, and
-\fGraphOptsPhase\fP serves the same function for the phase.
+\fIGraphOptsPhase\fP serves the same function for the phase.
 .lp
 If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 	}
