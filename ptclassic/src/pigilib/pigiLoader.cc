@@ -147,24 +147,29 @@ static int isYounger (const char* fileA, const char* fileB) {
 
 // make a window with the stuff in the file.
 static void reportErrors (const char* text) {
-	const int BUFLEN = 2048;
-	char buf[BUFLEN];
-	sprintf (buf, "Loader: %s\n", text);
-	int len = strlen (buf);
-	char* p = buf + len;			// pointer arithmetic
-	FILE* fd = fopen (tmpFileName, "r");
-	if (fd == 0) {
-		strcpy (p, "Can't open error file!");
+	StringList buf = "Loader: ";
+	buf << text << "\n";
+	FILE* fp = fopen(tmpFileName, "r");
+	if (fp == 0) {
+		buf << "Can't open error file!";
 	}
 	else {
-		int c;
-		while ((c = getc (fd)) != EOF && p < buf + BUFLEN - 1)
-			*p++ = c;
-		*p = 0;
+		const int LINELEN = 80;
+		char line[LINELEN + 1];
+		while ( ! feof(fp) ) {
+		   line[0] = 0;
+		   char *retval = fgets(line, LINELEN, fp);
+		   if ( retval == 0 ) {
+		     buf << "** error reading " << tmpFileName << " **";
+		     break;
+		   }
+		   line[LINELEN] = 0;
+		   buf << line;
+		}
 	}
-	win_msg (buf);
-	ErrAdd ("Compilation failed");
-	unlink (tmpFileName);
+	win_msg(buf);
+	ErrAdd("Compilation failed");
+	unlink(tmpFileName);
 }
 
 // Default compile statement.  We include the kernel directory, the domain-
@@ -206,6 +211,17 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	cmd << "-I" << ptDomainDir << "/image/stars ";
 	cmd << "-I" << ptDomainDir << "/tcltk/stars ";
 	cmd << "-I" << ptDomainDir << "/matrix/stars ";
+
+	//    -- stars in code generation domains rely on includes in CG kernel
+	if ( strcmp(domain, "cg") != 0 ) {
+	  cmd << "-I" << ptSrcDir << "/cg/kernel ";
+	}
+
+	//    -- stars in dataflow domains rely on includes in SDF kernel
+	if ( strcmp(domain, "sdf") != 0 ) {
+	  cmd << "-I" << ptSrcDir << "/sdf/kernel ";
+	}
+
 	cmd << "-I" << ptSrcDir << "/kernel ";
 	cmd << "-I" << srcDir << " ";
 
