@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DETarget.h"
 #include "DEScheduler.h"
 #include "CQScheduler.h"
+#include "GalIter.h"
 
 DETarget :: DETarget() : 
 Target("default-DE","DEStar","default DE target") 
@@ -65,6 +66,18 @@ void DETarget :: setup()
 	dSched->relTimeScale = timeScale;
 	dSched->syncMode = syncMode;
 	Target :: setup();
+}
+
+// invoke begin methods
+void DETarget::begin() {
+  Galaxy *gal = galaxy();
+  if (!gal) return;
+  GalStarIter nextStar(*gal);
+  Star *s;
+  while ((s = nextStar++) != 0) {
+    s->begin();
+    ((DEStar*)s)->sendOutput();
+  }
 }
 
 Block* DETarget :: makeNew() const  {
