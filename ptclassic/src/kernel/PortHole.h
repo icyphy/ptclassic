@@ -63,6 +63,11 @@ Geodesic: The place where the Particles reside in transit
 Plasma: The place where Particles reside in transit back.
 	Particles are re-used as a way to preserve memory.
 
+By default, all connections with the same resolved DataType use
+the same global Plasma.  This can be changed by overriding
+the allocatePlasma function.  Replacing it with a call to
+allocateLocalPlasma will use local Plasmas for each connection.
+
 Particles: Defined in Particle.h
 
 A MultiPortHole is a set of related portholes.
@@ -76,6 +81,7 @@ class Galaxy;
 class EventHorizon;
 class ToEventHorizon;
 class FromEventHorizon;
+class PtGate;
 
 	//////////////////////////////////////////
 	// class GenericPort
@@ -132,8 +138,8 @@ public:
 	// typePort pointers form a circular loop.
 	void inheritTypeFrom(GenericPort& p);
 
-	// function to initialize PortHole Plasmas
-	virtual Plasma* setPlasma(Plasma *useType = NULL) = 0;
+	// function to resolve types.
+	virtual DataType setResolvedType(DataType useType = 0) = 0;
 
 	// function to connect two portholes
 	virtual void connect(GenericPort& destination,int numberDelays);
@@ -274,8 +280,8 @@ public:
         // Print a description of the MultiPortHole
 	/* virtual */ StringList print (int verbose = 0) const;
 
-	// function to set Plasma type of subportholes
-	Plasma* setPlasma(Plasma *useType = NULL);
+	// function to resolve types.
+	virtual DataType setResolvedType(DataType useType = 0);
 
 	// destructor
 	~MultiPortHole();
@@ -334,7 +340,8 @@ public:
         // Arguments are the name and type (see type.h for supported types).
         PortHole& setPort(const char* portName,
                           Block* parent,                // parent block pointer
-                          DataType type = FLOAT);       // defaults to FLOAT
+                          DataType type = FLOAT,	// defaults to FLOAT
+			  int n = 1);			// number xferred
 
 	// Initialize when starting a simulation
 	void initialize();
@@ -364,7 +371,7 @@ public:
 	// represent the cluster boundary)
 
 	int atBoundary() const {
-		return (far() ? (isItInput() == far()->isItInput()) : TRUE);
+		return (farSidePort ? (isItInput() == farSidePort->isItInput()) : TRUE);
 	}
 
 	// Return me as an eventHorizon
@@ -379,20 +386,11 @@ public:
 	// Argument is the delay in the past
         Particle& operator % (int);
 
-	// Set the maximum delay that past Particles can be
-	//  accessed -- defaults to zero if never called
-	void setMaxDelay(int delay);
-
-	// return the type associated with my plasma (0 is returned if
-	// the plasma has not been set, e.g. before initialization)
-	DataType resolvedType () const;
-
-	// Number of Particles stored in the buffer each
-	// time the Geodesic is accessed -- normally this is
-	// one except for SDF, where it is the number of
-	// Particles consumed or generated
-	// THIS WILL CHANGE TO PROTECTED!  USE numXfer()!
-	int numberTokens;
+	// return the "resolved type", the type that the pair of connected
+	// portholes have agreed to use.  This will never by ANYTYPE.
+	// The result will be 0 (a null pointer) if type resolution has
+	// not yet been performed.
+	DataType resolvedType () const { return myResolvedType;};
 
 	// return the number of tokens transferred per execution
 	int numXfer() const { return numberTokens;}
@@ -403,14 +401,11 @@ public:
 	// return the number of initial delays on my Geodesic
 	int numInitDelays() const;
 
-	// adjust the number of delays on the Geodesic
-	void adjustDelays(int numNewDelays);
-
 	// return pointer to my Geodesic
 	Geodesic* geo() { return myGeodesic;}
 
-	// initialize the Plasma
-	Plasma* setPlasma(Plasma *useType = NULL);
+	// function to resolve types.
+	virtual DataType setResolvedType(DataType useType = 0);
 
 	// index value
 	int index() const { return indexValue;}
@@ -427,6 +422,15 @@ public:
 	// type of PortHole
 	virtual Geodesic* allocateGeodesic();
 
+	// enable locking on access to the Geodesic and Plasma.  This is
+	// appropriate for connections that cross thread boundaries.
+	// assumption: initialize() has been called.
+
+	void enableLocking(const PtGate& master);
+	// the converse
+	void disableLocking();
+
+	int isLockEnabled() const;
 protected:
 	// Maintain pointer to Geodesic connected to this PortHole
 	Geodesic* myGeodesic;
@@ -448,6 +452,12 @@ protected:
 	// size of buffer to allocate
 	int bufferSize;
 
+	// Number of Particles stored in the buffer each
+	// time the Geodesic is accessed -- normally this is
+	// one except for dataflow-type stars, where it is the number of
+	// Particles consumed or generated
+	int numberTokens;
+
 	// get Particle from the Geodesic
 	void getParticle();
 
@@ -456,7 +466,22 @@ protected:
 
 	// clear Particle
 	void clearParticle();
+
+	// allocate Plasma (default method uses global Plasma)
+	virtual int allocatePlasma();
+
+	// alternate function allocates a local Plasma (for use in
+	// derived classes)
+	int allocateLocalPlasma();
+
+	// delete Plasma if local; detach other end of connection
+	// from Plasma as well.
+	void deletePlasma();
+
 private:
+	// resolved type for the connection
+	DataType myResolvedType;
+
 	// Allocate new buffer
 	void allocateBuffer();
 
