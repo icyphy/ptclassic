@@ -53,8 +53,9 @@ test Path-1.1 { Check out files in the current dir vs. paths with env vars} {
 	    [ expr {[string length $envfile] - \
 	    [string length [file join tycho kernel test foo]]}] end]
     
-    list $localfile $envfile $localfilecheck $envfilecheck
-} {/export/watson/watson3/cxh/pt/tycho/kernel/test/foo /export/watson/watson3/cxh/pt/tycho/kernel/test/foo tycho/kernel/test/foo tycho/kernel/test/foo}
+    # Verify that localfile is the same as envfile
+    list [expr {$localfile == $envfile}] $localfilecheck $envfilecheck
+} {1 tycho/kernel/test/foo tycho/kernel/test/foo}
 
 test Path-1.2 { tilde expand a user that does not exist} {
     catch {::tycho::expandPath ~anonexistantUser} errMsg
