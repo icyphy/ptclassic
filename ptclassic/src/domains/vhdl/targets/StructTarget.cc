@@ -45,9 +45,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 StructTarget :: StructTarget(const char* name,const char* starclass,
 			 const char* desc) :
 SimVSSTarget(name,starclass,desc) {
-  regsUsed = 0;
-  muxsUsed = 0;
-  sorsUsed = 0;
+  systemClockUsed = 0;
+  regIntsUsed = 0;
+  regRealsUsed = 0;
+  muxIntsUsed = 0;
+  muxRealsUsed = 0;
+  sorIntsUsed = 0;
+  sorRealsUsed = 0;
 
   // Set the default to display the code.
   analyze.setInitValue("NO");
@@ -79,7 +83,12 @@ void StructTarget :: setup() {
 
   clockList.initialize();
 
-  initCodeStreams();
+  // Need to make this conditional depending on if doing sim or synth.
+  setSystemClockUsed();
+
+  // Don't init code streams, because you lose stuff from init,
+  // like the sysWrapup for graphing an xgraph.
+  //  initCodeStreams();
   initVHDLObjLists();
   initFiringLists();
 }
@@ -185,7 +194,7 @@ void StructTarget :: trailerCode() {
     // only have a source with a signal, and no mux or reg.
     if (state->constant) {
       mainSignalList.put(state->name, state->type, "", "");
-      connectSource(state->initVal, state->name);
+      connectSource(state->initVal, state->name, state->type);
     }
     // If firings change state, need to connect a reg and a mux
     // between the lastRef to the state and the firstRef to the state.
@@ -200,7 +209,7 @@ void StructTarget :: trailerCode() {
       //      connectRegister(state->lastRef, tempName, "iter_clock", state->type);
       //      connectMultiplexor(tempName, state->firstRef, initName, state->type);
       connectMultiplexor(state->lastRef, state->firstRef, initName, state->type);
-      connectSource(state->initVal, initName);
+      connectSource(state->initVal, initName, state->type);
     }
   }
 
@@ -312,11 +321,22 @@ void StructTarget :: trailerCode() {
     myCode << "begin\n";
     myCode << "process\n";
 
+    // To please the Synopsys synthesis:
+    // it insists on there being a sensitivity list.
     addSensitivities(cl, level);
+
     addDeclarations(cl, level);
     addVariableRefs(cl, level);
 
     myCode << "begin\n";
+
+    // To please the Synopsys simulation:
+    // It refuses to initialize ports and variables, and if you
+    // don't put a wait statement at the beginning of a process in lieu
+    // of explicit initialization for everything (which is unsynthesizable)
+    // then you get arithmetic overflow when you hit arithmetic expressions
+    // whose inputs are unitiialized variables.
+    //    addWaitStatement(cl, level);
 
     addPortVarTransfers(cl, level);
     addActions(cl, level);
@@ -341,14 +361,26 @@ void StructTarget :: trailerCode() {
 void StructTarget :: frameCode() {
   StringList code = headerComment();
 
-  if (registers()) {
-    myCode << regCode();
+  if (systemClock()) {
+    myCode << clockGenCode();
   }
-  if (multiplexors()) {
-    myCode << muxCode();
+  if (registerInts()) {
+    myCode << regCode("INTEGER");
   }
-  if (sources()) {
-    myCode << sourceCode();
+  if (registerReals()) {
+    myCode << regCode("REAL");
+  }
+  if (multiplexorInts()) {
+    myCode << muxCode("INTEGER");
+  }
+  if (multiplexorReals()) {
+    myCode << muxCode("REAL");
+  }
+  if (sourceInts()) {
+    myCode << sourceCode("INTEGER");
+  }
+  if (sourceReals()) {
+    myCode << sourceCode("REAL");
   }
   
   myCode << "\n-- entity_declaration\n";
@@ -371,7 +403,7 @@ void StructTarget :: frameCode() {
   prepend(code, myCode);
 
   // after generating code, initialize codeStreams again.
-  initCodeStreams();
+  //  initCodeStreams();
 }
 
 // Write the code to a file.
@@ -636,12 +668,13 @@ void StructTarget :: registerState(State* state, const char* varName,
 }
 
 // Connect a source of the given value to the given signal.
-void StructTarget :: connectSource(StringList initVal, StringList initName) {
-      registerSource("INTEGER");
+void StructTarget :: connectSource(StringList initVal, StringList initName,
+				   StringList type) {
+      registerSource(type);
       StringList label = initName;
       label << "_SOURCE";
       StringList name = "Source";
-      name << "_" << "INT";
+      name << "_" << type;
 
       VHDLGenericMapList* genMapList = new VHDLGenericMapList;
       VHDLPortMapList* portMapList = new VHDLPortMapList;
@@ -654,27 +687,32 @@ void StructTarget :: connectSource(StringList initVal, StringList initName) {
 }
 
 // Add a source component declaration.
-void StructTarget :: registerSource(StringList /*type*/) {
+void StructTarget :: registerSource(StringList type/*="INTEGER"*/) {
   // Set the flag indicating sources are needed.
-  setSources();
+  if (!strcmp(type,"INTEGER")) {
+    setSourceInts();
+  }
+  if (!strcmp(type,"REAL")) {
+    setSourceReals();
+  }
 
   StringList name = "Source";
-  name << "_" << "INT";
+  name << "_" << type;
 
   VHDLGenericList* genList = new VHDLGenericList;
   VHDLPortList* portList = new VHDLPortList;
   genList->initialize();
   portList->initialize();
   
-  genList->put("value", "INTEGER");
-  portList->put("output", "OUT", "INTEGER");
+  genList->put("value", type);
+  portList->put("output", "OUT", type);
 
   mainCompDeclList.put(name, portList, genList);
 }
 
 // Connect a multiplexor between the given input and output signals.
 void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
-				     StringList initVal, StringList /*type*/) {
+					StringList initVal, StringList type) {
   // Add the clock to the list of clocks to be triggered.
   const char* clock = "control";
   if (clockList.tail()) {
@@ -694,11 +732,11 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
     ctlerAction << clock << " <= TRUE;\n";
   }
 
-  registerMultiplexor("INTEGER");
+  registerMultiplexor(type);
   StringList label = outName;
   label << "_MUX";
   StringList name = "Mux";
-  name << "_" << "INT";
+  name << "_" << type;
 
   VHDLGenericMapList* genMapList = new VHDLGenericMapList;
   VHDLPortMapList* portMapList = new VHDLPortMapList;
@@ -715,26 +753,38 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
   ctlerSignalList.put("control", "boolean", "", "");
   ctlerPortList.put("system_clock", "IN", "boolean");
   ctlerPortMapList.put("system_clock", "system_clock");
-  systemPortList.put("system_clock", "IN", "boolean");
+  // If using a system clock generator, then need a signal.
+  if (systemClock()) {
+    mainSignalList.put("system_clock", "boolean", "", "");
+    connectClockGen("system_clock");
+  }
+  else {
+    systemPortList.put("system_clock", "IN", "boolean");
+  }
   mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
 // Add a multiplexor component declaration.
-void StructTarget :: registerMultiplexor(StringList /*type*/) {
+void StructTarget :: registerMultiplexor(StringList type/*="INTEGER"*/) {
   // Set the flag indicating multiplexors and sources are needed.
-  setMultiplexors();
+  if (!strcmp(type,"INTEGER")) {
+    setMultiplexorInts();
+  }
+  if (!strcmp(type,"REAL")) {
+    setMultiplexorReals();
+  }
 
   StringList name = "Mux";
-  name << "_" << "INT";
+  name << "_" << type;
 
   VHDLGenericList* genList = new VHDLGenericList;
   VHDLPortList* portList = new VHDLPortList;
   genList->initialize();
   portList->initialize();
   
-  portList->put("init_val", "IN", "INTEGER");
-  portList->put("input", "IN", "INTEGER");
-  portList->put("output", "OUT", "INTEGER");
+  portList->put("init_val", "IN", type);
+  portList->put("input", "IN", type);
+  portList->put("output", "OUT", type);
   portList->put("control", "IN", "boolean");
 
   mainCompDeclList.put(name, portList, genList);
@@ -742,7 +792,7 @@ void StructTarget :: registerMultiplexor(StringList /*type*/) {
 
 // Connect a register between the given input and output signals.
 void StructTarget :: connectRegister(StringList inName, StringList outName,
-				     StringList clkName, StringList /*type*/) {
+				     StringList clkName, StringList type) {
   // Add the clock to the list of clocks to be triggered.
   const char* clock = clkName;
   if (clockList.tail()) {
@@ -768,11 +818,11 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
     ctlerAction << clkName << " <= FALSE;\n";
   }
 
-  registerRegister("INTEGER");
+  registerRegister(type);
   StringList label = outName;
   label << "_REG";
   StringList name = "Reg";
-  name << "_" << "INT";
+  name << "_" << type;
 
   VHDLGenericMapList* genMapList = new VHDLGenericMapList;
   VHDLPortMapList* portMapList = new VHDLPortMapList;
@@ -788,25 +838,71 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
   ctlerSignalList.put(clkName, "boolean", "", "");
   ctlerPortList.put("system_clock", "IN", "boolean");
   ctlerPortMapList.put("system_clock", "system_clock");
-  systemPortList.put("system_clock", "IN", "boolean");
+  // If using a system clock generator, then need a signal.
+  if (systemClock()) {
+    mainSignalList.put("system_clock", "boolean", "", "");
+    connectClockGen("system_clock");
+  }
+  else {
+    systemPortList.put("system_clock", "IN", "boolean");
+  }
   mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
-// Add a register component declaration.
-void StructTarget :: registerRegister(StringList /*type*/) {
-  // Set the flag indicating registers are needed.
-  setRegisters();
+// Connect a clock generator driving the given signal.
+void StructTarget :: connectClockGen(StringList clkName) {
+      registerClockGen();
+      StringList label = clkName;
+      label << "_Clock";
+      StringList name = "ClockGen";
 
-  StringList name = "Reg";
-  name << "_" << "INT";
+      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
+      VHDLPortMapList* portMapList = new VHDLPortMapList;
+      genMapList->initialize();
+      portMapList->initialize();
+      
+      portMapList->put("system_clock", clkName);
+      portMapList->put("iter_clock", "iter_clock");
+      mainCompMapList.put(label, name, portMapList, genMapList);
+}
+
+// Add a clock generator declaration.
+void StructTarget :: registerClockGen() {
+  // Set the flag indicating clock generator used.
+  setSystemClockUsed();
+
+  StringList name = "ClockGen";
 
   VHDLGenericList* genList = new VHDLGenericList;
   VHDLPortList* portList = new VHDLPortList;
   genList->initialize();
   portList->initialize();
   
-  portList->put("D", "IN", "INTEGER");
-  portList->put("Q", "OUT", "INTEGER");
+  portList->put("system_clock", "out", "boolean");
+  portList->put("iter_clock", "in", "boolean");
+  mainCompDeclList.put(name, portList, genList);
+}
+
+// Add a register component declaration.
+void StructTarget :: registerRegister(StringList type/*="INTEGER"*/) {
+  // Set the flag indicating registers are needed.
+  if (!strcmp(type,"INTEGER")) {
+    setRegisterInts();
+  }
+  if (!strcmp(type,"REAL")) {
+    setRegisterReals();
+  }
+
+  StringList name = "Reg";
+  name << "_" << type;
+
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
+  genList->initialize();
+  portList->initialize();
+  
+  portList->put("D", "IN", type);
+  portList->put("Q", "OUT", type);
   portList->put("C", "IN", "boolean");
   mainCompDeclList.put(name, portList, genList);
 }
@@ -928,6 +1024,52 @@ void StructTarget :: addSensitivities(VHDLCluster* cl, int level) {
     
     closer << "\n";
     closer << indent(level) << ")\n";
+    level--;
+
+    if (sensCount) {
+      myCode << opener << body << closer;
+    }
+  }
+}
+
+// Add in wait statement with list of input ports.
+// Do this explicitly for sake of simulation.
+void StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
+  if ((*(cl->firingList)).head()) {
+    StringList opener, body, closer;
+
+    level++;
+    opener << indent(level) << "wait on\n";
+
+    VHDLFiringListIter nextFiring(*(cl->firingList));
+    VHDLFiring* nfiring;
+    int sensCount = 0;
+    while ((nfiring = nextFiring++) != 0) {
+      // Special exception to avoid sensitivity list for controller
+      // which will contain wait statements.  Synopsys complains that
+      // it can't synthesize blocks with wait statements if they also
+      // have sensitivity lists.  Also don't want more than one wait
+      // statement.
+      if (!strcmp(nfiring->name,"controller")) continue;
+      if ((*(nfiring->portList)).head()) {
+	VHDLPortListIter nextPort(*(nfiring->portList));
+	VHDLPort* nport;
+	while ((nport = nextPort++) != 0) {
+	  if (!strcmp(nport->direction,"IN")) {
+	    level++;
+	    if (sensCount) {
+	      body << ",\n";
+	    }
+	    body << indent(level) << nport->name;
+	    sensCount++;
+	    level--;
+	  }
+	}
+      }
+    }
+    
+    closer << "\n";
+    closer << indent(level) << ";\n";
     level--;
 
     if (sensCount) {
@@ -1209,8 +1351,8 @@ void StructTarget :: buildArchitectureBodyCloser(int /*level*/) {
 
 // Add in configuration declaration here from mainCompDeclList.
 void StructTarget :: buildConfigurationDeclaration(int level) {
-  configuration_declaration << "configuration " << "parts" << " of "
-			    << galaxy()->name() << " is\n";
+  configuration_declaration << "configuration " << galaxy()->name() << "_parts"
+			    << " of " << galaxy()->name() << " is\n";
   configuration_declaration << "for " << "structure" << "\n";
 
   VHDLCompDeclListIter nextCompDecl(mainCompDeclList);
@@ -1224,19 +1366,49 @@ void StructTarget :: buildConfigurationDeclaration(int level) {
   }
 
   configuration_declaration << "end " << "for" << ";\n";
-  configuration_declaration << "end " << "parts" << ";\n";
+  configuration_declaration << "end " << galaxy()->name() << "_parts" << ";\n";
+}
+
+// Generate the clock generator entity and architecture.
+StringList StructTarget :: clockGenCode() {
+  StringList codeList;
+  codeList << "\n";
+  codeList << "     -- ClockGen : clock generator\n";
+  codeList << "entity ClockGen is\n";
+  codeList << "     port (system_clock: out boolean;\n";
+  codeList << "           iter_clock: in boolean);\n";
+  codeList << "end ClockGen;\n";
+  codeList << "\n";
+  codeList << "architecture behavior of ClockGen is\n";
+  codeList << "begin\n";
+  codeList << "     main: process\n";
+  codeList << "     	variable internal: boolean := FALSE;\n";
+  codeList << "     	variable loop_count: integer := 0;\n";
+  codeList << "     begin\n";
+  codeList << "		if loop_count <= 70 then\n";
+  codeList << "         	wait for 1 ps;\n";
+  codeList << "         	internal := not internal;\n";
+  codeList << "         	system_clock <= internal;\n";
+  codeList << "     		loop_count := loop_count + 1;\n";
+  codeList << "     	else\n";
+  codeList << "     		wait;\n";
+  codeList << "     	end if;\n";
+  codeList << "     end process main;\n";
+  codeList << "end behavior;\n";
+  codeList << "\n";
+  return codeList;
 }
 
 // Generate the register entity and architecture.
-StringList StructTarget :: regCode() {
+StringList StructTarget :: regCode(StringList type) {
   StringList codeList;
   codeList << "\n";
-  codeList << "     -- Reg_INT : register of type INT\n";
-  codeList << "entity Reg_INT is\n";
-  codeList << "     port (C: in boolean; D: in integer; Q: out integer);\n";
-  codeList << "end Reg_INT;\n";
+  codeList << "     -- Reg_" << type << " : register of type " << type << "\n";
+  codeList << "entity Reg_" << type << " is\n";
+  codeList << "     port (C: in boolean; D: in " << type << "; Q: out " << type << ");\n";
+  codeList << "end Reg_" << type << ";\n";
   codeList << "\n";
-  codeList << "architecture behavior of Reg_INT is\n";
+  codeList << "architecture behavior of Reg_" << type << " is\n";
   codeList << "begin\n";
   codeList << "     main: process\n";
   codeList << "     begin\n";
@@ -1249,20 +1421,20 @@ StringList StructTarget :: regCode() {
 }
 
 // Generate the multiplexor entity and architecture.
-StringList StructTarget :: muxCode() {
+StringList StructTarget :: muxCode(StringList type) {
   StringList codeList;
   codeList << "\n";
-  codeList << "     -- Mux_INT : initial value multiplexor of type INT\n";
-  codeList << "entity Mux_INT is\n";
+  codeList << "     -- Mux_" << type << " : initial value multiplexor of type " << type << "\n";
+  codeList << "entity Mux_" << type << " is\n";
   codeList << "	port(\n";
   codeList << "		control: IN BOOLEAN;\n";
-  codeList << "		init_val: IN INTEGER;\n";
-  codeList << "		input: IN INTEGER;\n";
-  codeList << "		output: OUT INTEGER\n";
+  codeList << "		init_val: IN " << type << ";\n";
+  codeList << "		input: IN " << type << ";\n";
+  codeList << "		output: OUT " << type << "\n";
   codeList << "	);\n";
-  codeList << "end Mux_INT;\n";
+  codeList << "end Mux_" << type << ";\n";
   codeList << "\n";
-  codeList << "architecture behavior of Mux_INT is\n";
+  codeList << "architecture behavior of Mux_" << type << " is\n";
   codeList << "	begin\n";
   codeList << "		process (control, init_val, input)\n";
   codeList << "		begin\n";
@@ -1278,20 +1450,20 @@ StringList StructTarget :: muxCode() {
 }
 
 // Generate the source entity and architecture.
-StringList StructTarget :: sourceCode() {
+StringList StructTarget :: sourceCode(StringList type) {
   StringList codeList;
   codeList << "\n";
-  codeList << "     -- Source_INT : constant generator\n";
-  codeList << "entity Source_INT is\n";
+  codeList << "     -- Source_" << type << " : constant generator\n";
+  codeList << "entity Source_" << type << " is\n";
   codeList << "	generic(\n";
-  codeList << "		value: INTEGER\n";
+  codeList << "		value: " << type << "\n";
   codeList << "	);\n";
   codeList << "	port(\n";
-  codeList << "		output: OUT INTEGER\n";
+  codeList << "		output: OUT " << type << "\n";
   codeList << "	);\n";
-  codeList << "end Source_INT;\n";
+  codeList << "end Source_" << type << ";\n";
   codeList << "\n";
-  codeList << "architecture behavior of Source_INT is\n";
+  codeList << "architecture behavior of Source_" << type << " is\n";
   codeList << "	begin\n";
   codeList << "		output <= value;\n";
   codeList << "end behavior;\n";
@@ -1381,6 +1553,17 @@ StringList StructTarget :: sanitizedFullName (const NamedObj& obj) const {
     out = sanitizedName(obj);
   }
   return out;
+}
+
+// Method to write out com file for VSS if needed.
+void StructTarget :: writeComFile() {
+  // Make sure to do the com file uniquely too!!!
+  StringList comCode = "";
+  comCode << "cd " << galaxy()->name() << "\n";
+  comCode << "assign 0.0 *'vhdl\n";
+  comCode << "run\n";
+  comCode << "quit\n";
+  writeFile(comCode, ".com", 0);
 }
 
 // Add additional codeStreams.
