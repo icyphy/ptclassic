@@ -24,8 +24,6 @@
 # ENHANCEMENTS, OR MODIFICATIONS.
 #
 
-PTOLEMY       = /usr/users/ptolemy
-
 VPATH         = ../../../src/filters/wfir
 
 PROGRAM	      = wfir
@@ -38,7 +36,7 @@ HDRS	      =
 
 EXTHDRS	      =
 
-DEST	      = $(PTOLEMY)/bin.$(ARCH)
+DEST	      = ../../../bin.$(ARCH)
 
 FFLAGS	      = -O
 
