@@ -655,8 +655,8 @@ proc CreateIterConn { conn } {
 
     # xs,ys are the sourceNode coords
     set sourceNode [lindex $conn 0]
-#    set sourceNodeID $dot($sourceNode,topNodeID)
-   set sourceNodeID $dot($sourceNode,bottomNodeID)
+    set sourceNodeID $dot($sourceNode,topNodeID)
+#    set sourceNodeID $dot($sourceNode,bottomNodeID)
     set sourceInOutCoords [NodeInOutCoords .view.c $sourceNodeID]
 
     set xs [lindex $sourceInOutCoords 2]
@@ -664,8 +664,8 @@ proc CreateIterConn { conn } {
 
     # xd,yd are the destNode coords
     set destNode [lindex $conn 1]
-#    set destNodeID $dot($destNode,bottomNodeID)
-    set destNodeID $dot($destNode,topNodeID)
+    set destNodeID $dot($destNode,bottomNodeID)
+#    set destNodeID $dot($destNode,topNodeID)
     set destInOutCoords [NodeInOutCoords .view.c $destNodeID]
 
     set xd [lindex $destInOutCoords 0]
