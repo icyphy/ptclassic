@@ -3,9 +3,9 @@
 #ifndef _SRWormhole_h
 #define _SRWormhole_h
 
-/*  Version $Id$
+/*  Version @(#)SRWormhole.h	1.3 4/22/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
