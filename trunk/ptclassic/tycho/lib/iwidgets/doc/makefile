@@ -45,6 +45,13 @@ ITCL_SRCS =
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
 
 MISC_FILES = \
+	man.macros \
+	mkhtml \
+	mkitclman \
+	tk2html \
+	tk2html.awk \
+	tk2html.perl \
+	tk2html2.awk \
 	widgettree.n
 
 # 'make realclean' should remove tclIndex
