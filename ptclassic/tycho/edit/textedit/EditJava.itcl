@@ -346,8 +346,12 @@ body ::tycho::EditJava::parseNow {start stop} {
    
     # If the user comments out the package directive and then reparses
     # the file, the packageName should reflect the change and be {}
-    set className {}
-    set packageName {}
+    # Note that Edit::parseRegion will call this function more than once
+    # if the file is large.
+    if { "$start" == "1.0" && "$stop" == "[expr $maxNumLinesToParse + 1].0"} {
+	set className {}
+        set packageName {}
+    }
     set text $itk_component(text)
 
     # Remove tags first, if necessary
@@ -407,7 +411,7 @@ body ::tycho::EditJava::parseNow {start stop} {
 	    [option get $hull classColor EditJava]
     $text tag configure methodname -foreground \
 	    [option get $hull methodColor EditJava]
-    putStatus "Package Name: Class Name: "
+    putStatus "Package Name: $packageName  Class Name: $className"
 }
 
 #### tagLinks
