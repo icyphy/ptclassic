@@ -35,8 +35,9 @@ PL_SRCS= \
  SDFLMSTkPlot.pl \
  SDFTclScript.pl \
  SDFTkMeter.pl \
- SDFTkText.pl \
- SDFTkShowValues.pl
+ SDFTkShowValues.pl \
+ SDFTkSlider.pl \
+ SDFTkText.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
