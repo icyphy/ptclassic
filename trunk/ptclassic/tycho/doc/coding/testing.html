@@ -108,7 +108,7 @@ test suite properly indicates that the test failed.
 
 <tcl><pre>
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 test testExample-1.1 {This is the first test example, it does very little} {
 	catch {this is an error} errMsg1
@@ -132,21 +132,25 @@ for the class they are working with.  Usually tests for the class
 
 <LI> The name of the test file should being with the word <CODE>test</CODE>.
 For example, if we were testing the tcl <CODE>foo</CODE> command, then
-the file would be named <CODE>testFoo.itcl</CODE>.
+the file would be named <CODE>testFoo.itcl</CODE>.  The extension of the file
+is either <CODE>.tcl</CODE> or <CODE>.itcl</CODE>:
+<MENU>
+<LI> <CODE>.tcl</CODE> if the file can be sourced in a <CODE>tclsh</CODE>
+	that does not contain Itcl.
+	<CODE>$TYCHO/kernel/test/testPath.tcl</CODE> is an example.
+
+<LI> <CODE>.itcl</CODE> if the file contains Itcl constructs or tests
+	Itcl classes. 
+</MENU>
+Most of the tests are <CODE>.itcl</CODE> files
 
 <LI> The Copyright
 
 <LI> The code that sources testDefs.tcl:
 <PRE>
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
-</PRE>
-
-
-<LI> A line that will cause Tycho to exit if there are no more windows
-<PRE>
-set tychoExitWhenNoMoreWindows 0
 </PRE>
 
 
@@ -168,6 +172,38 @@ test Foo-1.1 {Test out Foo} {
 </PRE>
 
 </OL>
+
+<H3><A NAME="testing modal dialog widgets">Testing Modal Dialog Widgets</A></H3>
+Testing modal dialog widgets and the methods that use them is tricky because 
+we want the test suite to be able to just 'do the right thing' and 
+invoke the actions of an arbitrary method.
+
+ <P>The problem is that when a model dialog box comes up, execution
+halts, so during testing the user would need to know what button to
+hit.  
+ <P>As a workaround, we have designed a system that can
+automatically invoke a button during testing.  If we are testing, then
+<CODE>Dialog::wait</CODE> checks to see if <CODE>TY_TEST_SCRIPT</CODE>
+exists.  If <CODE>TY_TEST_SCRIPT</CODE> exists, then
+<CODE>Dialog::wait</CODE> assumes that it is a script, substitutes in the
+dialog name for <CODE>%O</CODE> and then evals the script at level
+<CODE>#0</CODE>
+The script can do anything, usually it just invokes a button and then
+unsets <CODE>TY_TEST_SCRIPT</CODE>.  For example, the
+<A HREF="../../kernel/test/testWidgets.itcl"><CODE>$TYCHO/kernel/test/testWidgets.itcl</CODE></A> script includes a test for <A HREF="../../kernel/YesNoQuery.itcl"><CODE>YesNoQuery</CODE></A>:
+<tcl><pre>
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
+
+test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
+    set TY_TEST_SCRIPT {
+        %0 invoke yes
+        unset TY_TEST_SCRIPT
+    }
+    ::tycho::askuser "Are you awake?"
+} 1
+</pre></tcl>
 
 <HR>
 <H2><A NAME="testing documentation">Testing Documentation</A></H2>
