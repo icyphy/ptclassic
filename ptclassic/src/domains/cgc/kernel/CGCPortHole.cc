@@ -59,17 +59,6 @@ void CGCPortHole :: initialize() {
 	manualOffset = 0;
 }
 
-// allocate a CGCGeodesic.  Use hashstring for the name since we expect
-// repeated names to occur (lots of Node_input and Node_output, for example)
-Geodesic* CGCPortHole::allocateGeodesic() {
-	char nm[80];
-	strcpy (nm, "Node_");
-	strcat (nm, name());
-	LOG_NEW; Geodesic *g = new CGCGeodesic;
-	g->setNameParent(hashstring(nm), parent());
-	return g;
-}
-
 void CGCPortHole::setFlags() {
 	if (isItOutput() && (embedded() || embedding())) {
 		asLinearBuf = TRUE;
