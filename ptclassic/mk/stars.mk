@@ -428,7 +428,7 @@ ifdef ACS
 			$(ACST)/Fpga.o \
 			$(ACST)/HWSchedule.o \
 			$(ACST)/HWTarget.o \
-			$(ACST)/IntArray.o \
+			$(ACST)/ACSIntArray.o \
 			$(ACST)/Pipealign.o \
 			$(ACST)/Port_Timing.o \
 			$(ACST)/Sg_Constructs.o \
