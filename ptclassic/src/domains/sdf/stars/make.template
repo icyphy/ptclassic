@@ -121,6 +121,7 @@ PL_SRCS= \
  SDFMux.pl \
  SDFNumToBus.pl \
  SDFOrderTwoInt.pl \
+ SDFPCMReadInt.pl \
  SDFPcwzLinear.pl \
  SDFPlay.pl \
  SDFPolarToRect.pl \
@@ -131,7 +132,6 @@ PL_SRCS= \
  SDFRampFix.pl \
  SDFRampInt.pl \
  SDFReadFile.pl \
- SDFReadPCM.pl \
  SDFReadVar.pl \
  SDFReciprocal.pl \
  SDFRect.pl \
