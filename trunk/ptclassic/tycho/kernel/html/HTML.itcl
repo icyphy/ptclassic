@@ -61,12 +61,6 @@ class ::tycho::HTML {
     destructor {}
 
     ###################################################################
-    ####                       options                             ####
-
-    # Offset from the nominal 14 points for the font sizes.
-    itk_option define -sizeadjustment sizeAdjustment SizeAdjustment 2
-
-    ###################################################################
     ####                       public methods                      ####
 
     # Prompt the user for a file name and load in place of the current file.
@@ -133,17 +127,6 @@ class ::tycho::HTML {
     private variable stack {}
 }
 
-#########################################################################
-#### -sizeadjustment configuration
-# The size of normal text will be 14 points plus the size adjustment
-# set with this option.  Note that this does not affect the selected
-# size name in the Format menu.
-#
-configbody ::tycho::HTML::sizeadjustment {
-    HMset_state [$itk_component(text) textWinName] \
-	    -size $itk_option(-sizeadjustment)
-}
-
 ###################################################################
 #
 body ::tycho::HTML::constructor {args} {
@@ -163,7 +146,7 @@ body ::tycho::HTML::constructor {args} {
 	keep -text -readonly -textfont \
 		-highlightbackground -highlightcolor -selectforeground \
 		-cursor -insertbackground -textfont \
-		-textbackground -textforeground
+		-textbackground -textforeground -size
         rename -width -textwidth textWidth TextWidth
         rename -height -textheight textHeight TextHeight
     }
@@ -206,7 +189,7 @@ body ::tycho::HTML::constructor {args} {
 		-label [lindex $size 0] \
 		-variable [scope sizeName($this)] \
 		-command \
-		"$this configure -sizeadjustment [lindex $size 1]; \
+		"$this configure -size [lindex $size 1]; \
 		::tycho::HTMLText::render [winfo command $itk_component(text)]"
     }
     set sizeName($this) medium
