@@ -32,210 +32,127 @@
 ##########################################################################
 #### Library
 #
-# The _Library_ model is a hierarchical model representing 
-# a library of arbitrary items. The attribute-checking
-# of this model is non-strict, so that items can have arbitrary
-# attributes representing semantic information.
+# A _Library_ is a model containing a collection of items that are
+# accessed by other models and widgets. This class is an abstract class
+# for applications-specific libraries, and contains support for
+# grouping items in the library, access to meta-data for viewing and
+# editing, and facilities for building menus for accessing the library.
+# In the future, it may also support transparent access to larger
+# libraries spread over many files.
 #
-# In addition to those in the <a href="Model.html">Model</a> superclass,
-# this model has the following attributes:
-# <ul>
-#   <li><b>(none)</b>:
-# </ul>
+# This model has the following types:
+# <dl>
+# <dt><b>group</b> _name_
+# <dd>
+# A group of items. This is a structuring mechanism for the library.
+# Tools that access a library will usually treat each group as a new
+# hierarchical menu or palette. Groups have the following attributes:
+#   <dl>
+#   <dt><b>-label</b> _string_
+#   <dd>
+#   The label used to display the group in menu bars and the like.
+#   By convention, groups with a null label
+#   will not be made available in user interfaces.
 #
-# The model has the following entities and links:
-# <ul>
-# <li><b>group</b> _name_: A group of items. This is simply a
-# structuring mechanism. The name cannot contain spaces. Tools that
-# read this model will usually
-# treat each group as a new hierarchical menu or palette. Groups
-# have the following attributes:
-#   <ul>
-#   <li><b>-label</b>: The label used to display the group in
-#    menu bars and the like. This is used because the group name
-#    cannot contain spaces. By default, this attribute will be
-#    set to the group name.
-#   </ul>
+#   <dt><b>-description</b> _html-string_
+#   <dd>
+#   An HTML description of the purpose or contents of the group. This
+#   attribute is genreally used by help viewers.
 #
-# <li><b>item</b> _name_: An item. 
-# Items can have any attributes, as well as the following:
-#   <ul>
-#   <li><b>-label</b>: The label used to display the item in
-#    menu bars and the like. This is used because the item name
-#    cannot contain spaces. By default, this attribute will be
-#    set to the item name.
-#   </ul>
+#   </dl>
 #
-# <li><b>parameter</b> _name_ _default_: A parameter of an item.
-# Parameters contain attributes to make it easy to build 
-# graphical editors for them.
-# Parameters can have the following attributes:
-#   <ul>
-#      <li><b>-label</b> <i>label</i>: A brief string describing
-#     the parameter. By convention, parameters are only made
-#     available in user interfaces if they have
-#     a label.
+# <dt><b>xref</b> _name_ _value-list_
+# <dd>
+# A cross-reference to other models. The usage of this type is not
+# dictated by this model at all -- rather, it is provided to allow
+# other models and widgets that manipulate libraries to set up
+# cross-references of various kinds. By convention, a <b>xref</b>
+# item is a name-value list suitable for setting into an array, where
+# each name is the full name of an item in this library, and the value
+# is a cross-reference to an item in another model. The <b>xref</b>
+# item has no attributes, and cannot nest other items.
 #
-#     <li><b>-description</b> <i>description</i>: A more complete
-#     description of the parameter in HTML which will be displayed
-#     in help windows.
+# </dl>
 #
-#     <li><b>-type</b> <i>type</i>: The "type" of the parameter. This
-#     will be used by parameter editors to decide how to display
-#     and edit the parameter. Legal types are:
-#     <ul>
-#       <li><b>string</b>: Can be any arbitrary value. This is the default.
-#       <li><b>number</b>: A number.
-#       <li><b>integer</b>: An integer.
-#       <li><b>boolean</b>: A boolean value.
-#       <li><b>choice</b>: A small set of (arbitrary) possible values. These
-#       are intended for display by radiobuttons.
-#       <li><b>set</b>: A larger set of (arbitrary) possible values. These
-#       are intended for display by an option menu.
-#       <li><b>font</b>: A font value, specified as a list {_family_ _size_
-#       _style_}. The second and third elements can be omitted -- see
-#       FontManager for details.
-#       <li><b>color</b>: A symbolic color value.
-#     </ul>
-#
-#     <li><b>-values</b> <i>list</i>: A list representing
-#     the set of legal values of the parameter. Valid for
-#     _choice_ and _set_ types.
-#
-#   </ul>
-# </ul>
-#
-# Here is an example of a library model. This creates
-# a model and loads it with a string in TIM format -- usually,
-# though, you would set the *-datafile* option and
-# call load{} (see <a href="Model.html">Model</a>). After
-# creating it, call the describe{} method to confirm its
-# contents:
-# <pre><tcl>
-#     catch {delete object $library}
-#     set library [::tycho::Library [::tycho::autoName itemIndex]]
-#     $library read string {
-#         group sample {
-#             -label {Some sample items}
-#             item Add {
-#                 -icon sample.Add
-#                 -binary {$PTOLEMY/src/foo.pt}
-#                 parameter string Hello -label String
-#                 parameter integer 12 -type integer -label Integer
-#                 parameter number 1.234 -type number -label Number
-#                 parameter choice x -type choice -values {x y z} -label Choice
-#                 parameter set a -type set -values {a b c} -label Set
-#                 parameter boolean 0 -type boolean -label Boolean
-#                 parameter font Times -type font -label Font
-#                 parameter color red -type color -label Color
-#             }
-#             item Ramp {
-#                 -icon sample.Ramp
-#                 -binary {$PTOLEMY/src/bar.pt}
-#             }
-#         }
-#     }
-#     $library describe
-# </tcl></pre>
-#
-# Create a menubar and add this library to it:
-# <tcl quiet><pre>
-#    catch {delete object .mb}
-#    ::tycho::MenuBar .mb
-#    pack .mb
-#    raise .
-#    wm deiconify .
-#    .mb addMenu foo -label Foo
-#    $library menu .mb Foo ::tycho::inform
-# </pre></tcl>
-#
-# Create an editing widget on the sample.
-# <tcl quiet><pre>
-#    $library edit sample.Add "::tycho::inform \[$library describe\]"
-# </pre></tcl>
+# Note that there is no item type that actually stores data. This
+# must be created by an application-specific subclass.
 #
 class ::tycho::Library {
-    inherit ::tycho::HierModel
+    inherit ::tycho::DataModel
 
     constructor {args} {}
     destructor {}
     
     #################################################################
-    ####                        options                          ####
-
-
-    #################################################################
     ####                     public methods                      ####
 
-    # Create a graphical editor for an item
-    method edit {item command}
-    
-    # Create a modal graphical editor for an item
-    method editModal {item}
-    
-    # Add a group
-    method group {name args}
-    
-    # Add an item
-    method item {name args}
+    # Create an editor on this library
+    method edit {command}
+
+    # Create a modal editor on this library
+    method editModal {}
+
+    # Create an editor on an item in this library
+    method edititem {item command}
+
+    # Create a modal editor on an item in this library
+    method edititemModal {item}
 
     # Create a menu with items in this library
-    method menu {menubar menuname prefix {context {}}}
-
-    # Add a parameter to an item
-    method parameter {item name value args}
-    
-    #################################################################
-    ####                  protected methods                      ####
-    
-    # Add a nested group to the array -- parser call
-    protected method _group {context name args}
-
-    # Add an item into a group -- parser call
-    protected method _item {group name args}
-
-    # Add a parameter to an item -- parser call
-    protected method _parameter {item name value args}
-    
-    # Evaluate code in this object's context
-    protected method evalInSpecificContext {args} {
-	eval $args
-    }
+    method makemenu {type menubar menuname prefix {context {}}}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::Library::constructor {args} {
-    # Attribute-checking is non-strict
-    configure -strictoptions 0
-
     # Evaluate options
     eval configure $args
 
-    # The group entity type. Label is for menu display.
-    defineEntityType group -valued 0 -ordered 1 -label ""
+    # The group type.
+    definetype group \
+    	-valued 0 \
+    	-label "" \
+    	-description ""
 
-    # The item entity type. Label is for menu display.
-    defineEntityType item -valued 0 -ordered 1 -label ""
-
-    # The parameter entity type
-    defineEntityType parameter -valued 1 -ordered 1 \
-            -label "" \
-            -description "" \
-            -type string \
-            -values {}
+    # The xref entity type. Label is for menu display.
+    definetype xref \
+    	-valued 1 \
+    	-leafonly 1
 }
 
 ########################################################################
 #### edit
+#
+# Create a graphical editor for this library. The _command_
+# argument is a script to evaluate when the user elects
+# to update changes made in the editor. The returned value
+# is the created editing widget.
+#
+body ::tycho::Library::edit {command} {
+	error "not implemented"
+}
+
+########################################################################
+#### editModal
+#
+# Create a modal graphical editor for this library. The returned 
+# result is a list of _changed_ parameter name and 
+# corresponding value.
+#
+body ::tycho::Library::editModal {} {
+	error "Not implemented"
+}
+
+########################################################################
+#### edititem
 #
 # Create a graphical editor for an item. The _command_
 # argument is a script to evaluate when the user elects
 # to update changes made in the editor. The returned value
 # is the created editing widget.
 #
-body ::tycho::Library::edit {item command} {
+body ::tycho::Library::edititem {item command} {
     regsub -all {\.} $item "_" nm
     set nm .$nm
     if { [::info which -command $nm] != "" } {
@@ -251,154 +168,42 @@ body ::tycho::Library::edit {item command} {
 }
 
 ########################################################################
-#### editModal
+#### edititemModal
 #
 # Create a modal graphical editor for an item. The returned 
 # result is a list of _changed_ parameter name and 
 # corresponding value.
 #
-body ::tycho::Library::editModal {item} {
-	error "Not implemented";
+body ::tycho::Library::edititemModal {item} {
+	error "Not implemented"
 }
 
 ########################################################################
-#### group
-#
-# Add a new group. Flag an error if the group
-# already exists. Additional arguments are the initial values
-# of group attributes. Return the inverse command. If the
-# *-label* attribute is null, set it to the group name.
-#
-body ::tycho::Library::group {name args} {
-    set splut [split $name $separator]
-    set cntxt [join [lreplace $splut end end] "."]
-    set local [lindex $splut end]
-
-    _verifynot group $cntxt $local $name
-    _addentity group $cntxt $local $name {} $args
-    if { [_itemcget group $cntxt $local -label] == "" } {
-	_itemconfigure group $cntxt $local [list -label $local]
-    }
-    list delete group $name
-}
-
-########################################################################
-#### item
-#
-# Add a new item. Flag an error if the item
-# already exists. Additional arguments are the initial values
-# of item attributes. Return the inverse command. If the
-# *-label* attribute is null, set it to the item name.
-# Note that is the item is in a group, it's name is
-# in the form "group.itemname".
-#
-body ::tycho::Library::item {name args} {
-    set splut [split $name $separator]
-    set cntxt [join [lreplace $splut end end] "."]
-    set local [lindex $splut end]
-
-    _verifynot item $cntxt $local $name
-    _addentity item $cntxt $local $name {} $args
-    if { [_itemcget item $cntxt $local -label] == "" } {
-	_itemconfigure item $cntxt $local [list -label $local]
-    }
-    list delete item $name
-}
-
-########################################################################
-#### menu
+#### makemenu
 #
 # Add a menu to a menubar containing items in this library.
-# The first argument is the menubar. The second is the name
-# of the menu to place these items into. The third
-# is the command prefix for each menu entry, to which will be
-# appended the item name. The fourth,
-# if supplied and not null, is the group to add items from.
+# The first argument is the type of item to be added to the menubar.
+# The second argument is the menubar. The third is the name
+# of the menu to place these items into. The fourth is the command
+# for each menu entry, to which will be appended the item
+# name. The fifth, if supplied and not null, is the group to add
+# items from. The sixth, if supplied and not null, is the prefix
+# of the name which will be appended to the menu command.
 #
-body ::tycho::Library::menu {menubar menuname prefix {context {}}} {
-    if { $context == "" } {
-	foreach g [names group] {
-            $menubar add cascade $g $menuname \
-                    -label [_itemcget group $context $g -label]
-	    menu $menubar $g $prefix $g
+body ::tycho::Library::makemenu \
+		{type menubar menuname prefix {context {}} {prefix {}}} {
+   	# Add cascade menus
+	foreach g [listing group] {
+        $menubar add cascade $g $menuname \
+        		-label [itemcget [concat $context group:$g] -label]
+	    makemenu $type $menubar $g $prefix \
+	    	[concat $context group:$g] \
+	    	[concat $prefix $g]
 	}
-        foreach i [names item] {
-            $menubar command $i $menuname \
-                    -label [_itemcget item {} $i -label] \
-                    -command [concat $prefix $i]
+	# Add items
+    foreach i [listing $type] {
+        $menubar command $i $menuname \
+             -label [itemcget [concat $context $type:$i] -label] \
+             -command [concat $command [concat $prefix $i]]
 	}
-    } else {
-	foreach g [names group $context] {
-            $menubar add cascade $g $menuname \
-                    -label [_itemcget group $context $g -label]
-	    menu $menubar $g $prefix $context.$g
-	}
-	foreach i [names item $context] {
-            $menubar command $i $menuname \
-		    -label [_itemcget item $context $i -label] \
-		    -command [concat $prefix $context.$i]
-        }
-    }
 }
-
-########################################################################
-#### parameter
-#
-# Add a new parameter to an item. Flag an error if the parameter
-# already exists. Additional arguments are the initial values
-# of parameter attributes. Return the inverse command.
-#
-body ::tycho::Library::parameter {item parameter value args} {
-    _verifynot parameter $item $parameter $item$separator$parameter
-    _addentity parameter $item $parameter $item$separator$parameter $value $args
-    list delete parameter $item$separator$parameter
-}
-
-########################################################################
-########################################################################
-####                       protected methods                        ####
-
-########################################################################
-#### _group
-#
-# Add a new nested group to the array. Flag an error if the group
-# already exists. Additional arguments are the initial values
-# of group attributes. If the
-# *-label* attribute is null, set it to the group name.
-#
-body ::tycho::Library::_group {context name args} {
-    _verifynot group $context $name $context$separator$name
-    _addentity group $context $name $context$separator$name {} $args
-    if { [_itemcget group $context $name -label] == "" } {
-	_itemconfigure group $context $name [list -label $name]
-    }
-}
-
-########################################################################
-#### _item
-#
-# Add a new nested item to the array. Flag an error if the item
-# already exists. Additional arguments are the initial values
-# of item attributes. If the
-# *-label* attribute is null, set it to the item name.
-#
-body ::tycho::Library::_item {group name args} {
-    _verifynot item $group $name $group$separator$name
-    _addentity item $group $name $group$separator$name {} $args
-    if { [_itemcget item $group $name -label] == "" } {
-	_itemconfigure item $group $name [list -label $name]
-    }
-}
-
-########################################################################
-#### _parameter
-#
-# Add a new parameter to an item. Flag an error if the parameter
-# already exists. Additional arguments are the initial values
-# of parameter attributes.
-#
-body ::tycho::Library::_parameter {item parameter value args} {
-    _verifynot parameter $item $parameter $item$separator$parameter
-    _addentity parameter $item $parameter $item$separator$parameter $value $args
-}
-
