@@ -21,11 +21,13 @@ DESTDIR = /usr/tools/ptolemy/lib/sdf
 .cc.o:
 	$(GNU) $(GFLAGS) -c  $<
 
-SRCS=AdaptFilter.cc FIR.cc FloatRamp.cc Fork.cc Gaussian.cc IIR.cc IntRamp.cc \
-	Printer.cc CheatGain.cc Sin.cc Xgraph.cc
+SRCS=BlackHole.cc CheatGain.cc ComplexDC.cc ComplexProduct.cc ComplexSum.cc \
+ FloatDC.cc FloatGain.cc FloatProduct.cc FloatRamp.cc FloatSum.cc Fork.cc \
+ Gaussian.cc IntRamp.cc Printer.cc Sin.cc Xgraph.cc
 
-OBJS=AdaptFilter.o FIR.o FloatRamp.o Fork.o Gaussian.o IIR.o IntRamp.o \
-	Printer.o CheatGain.o Sin.o Xgraph.o
+OBJS=BlackHole.o CheatGain.o ComplexDC.o ComplexProduct.o ComplexSum.o \
+ FloatDC.o FloatGain.o FloatProduct.o FloatRamp.o FloatSum.o Fork.o \
+ Gaussian.o IntRamp.o Printer.o Sin.o Xgraph.o
 
 all:		makefile $(OBJS)
 
@@ -37,7 +39,7 @@ depend:
 makefile:	make.template
 		rm -f makefile
 		cp make.template makefile
-		makedepend $(GNUINCLUDE) $(SRCS)
+		make -f make.template depend  # note: use new SRCS list
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
