@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Wrapper for using xpole within the ptolemy framework.
+# The ``+xxx+'' belows gets sed'd out at install time.
+#
+# RCS: $Header$
+#
+XPOLE_LIBRARY=${XPOLE_LIBRARY-/users/ptdesign/lib/xpole-1.4.6}
+ARCH=${ARCH-`$XPOLE_LIBRARY/arch.sh`}
+XPOLE_BINARY=/users/ptdesign/bin.$ARCH/xpole-1.4.6
+TCL_LIBRARY=${TCL_LIBRARY-/users/ptdesign/lib/xpole-1.4.6/stdtcl}
+TK_LIBRARY=${TK_LIBRARY-/users/ptdesign/lib/xpole-1.4.6/stdtk}
+
+export XPOLE_LIBRARY TCL_LIBRARY TK_LIBRARY
+# The syntax below is important, and can't be duplicated in csh.
+exec $XPOLE_BINARY -name xpole "$@"
