@@ -242,17 +242,11 @@ void ArchTarget :: trailerCode() {
       VHDLPortListIter nextPort(*(firing->portList));
       VHDLPort* port;
       while ((port = nextPort++) != 0) {
+	VHDLSignal* newSignal = new VHDLSignal(port->getName(), port->getType(), 0);
+	signalList.put(*newSignal);
+	port->connect(newSignal);
+	// If it's an input, also add a mux.
 	if (port->isItInput()) {
-	  VHDLSignal* newSignal = new VHDLSignal;
-
-	  StringList newSignalName = port->getName();
-	  newSignal->setName(newSignalName);
-	  newSignal->setType(port->getType());
-
-	  signalList.put(*newSignal);
-
-	  port->connect(newSignal);
-
 	  VHDLMux* newMux = new VHDLMux;
 	  StringList muxName = firing->getName();
 	  muxName << "_" << port->getName();
@@ -266,17 +260,6 @@ void ArchTarget :: trailerCode() {
 
 	  muxList.put(*newMux);
 	}
-	if (port->isItOutput()) {
-	  VHDLSignal* newSignal = new VHDLSignal;
-
-	  StringList newSignalName = port->getName();
-	  newSignal->setName(newSignalName);
-	  newSignal->setType(port->getType());
-
-	  signalList.put(*newSignal);
-
-	  port->connect(newSignal);
-	}
       }
     }
   }
@@ -285,13 +268,7 @@ void ArchTarget :: trailerCode() {
   VHDLTokenListIter nextToken(tokenList);
   VHDLToken* token;
   while ((token = nextToken++) != 0) {
-    //    cout << "Token:  " << token->getName() << "\n";
-    cout.flush();
-
-    VHDLSignal* newSignal = new VHDLSignal;
-    newSignal->setName(token->getName());
-    newSignal->setType(token->getType());
-
+    VHDLSignal* newSignal = new VHDLSignal(token->getName(), token->getType(), 0);
     signalList.put(*newSignal);
 
     VHDLReg* newReg = new VHDLReg;
@@ -301,22 +278,13 @@ void ArchTarget :: trailerCode() {
 
     VHDLSignal* clockSignal =
       signalList.vhdlSignalWithName(token->clockName);
-    if (clockSignal) {
-      newReg->setClock(clockSignal);
-    }
-    else {
+    if (!clockSignal) {
       // No clock signal set for token - must be generated
       // from feedback from previous iterations.
-      StringList clockName = "feedback_clock";
-      StringList clockType = "BOOLEAN";
-
-      clockSignal = new VHDLSignal;
-      clockSignal->setName(clockName);
-      clockSignal->setType(clockType);
+      clockSignal = new VHDLSignal("feedback_clock", "BOOLEAN", 0);
       signalList.put(*clockSignal);
-
-      newReg->setClock(clockSignal);
     }
+    newReg->setClock(clockSignal);
 
     // Connect the reg of the token to
     // the signal of the port of the source firing of the token.
@@ -431,9 +399,7 @@ void ArchTarget :: trailerCode() {
       VHDLSignal* firstIterDone =
 	signalList.vhdlSignalWithName("FIRST_ITER_DONE");
       if (!firstIterDone) {
-	firstIterDone = new VHDLSignal;
-	firstIterDone->setName("FIRST_ITER_DONE");
-	firstIterDone->setType("INTEGER");
+	firstIterDone = new VHDLSignal("FIRST_ITER_DONE", "INTEGER", 0);
 	signalList.put(*firstIterDone);
       }
 
@@ -502,11 +468,7 @@ void ArchTarget :: trailerCode() {
     if (!(state->constant)) {
       StringList initName = state->name;
       initName << "_INIT";
-
-      VHDLSignal* initSignal = new VHDLSignal;
-      initSignal->setName(initName);
-      initSignal->setType(state->type);
-
+      VHDLSignal* initSignal = new VHDLSignal(initName, state->type, 0);
       VHDLSignal* lastRefSignal =
 	signalList.vhdlSignalWithName(state->lastRef);
       VHDLReg* firstRefReg =
@@ -574,9 +536,7 @@ void ArchTarget :: trailerCode() {
       VHDLSignal* iterClockSignal =
 	signalList.vhdlSignalWithName("start_clock");
       if (!iterClockSignal) {
-	iterClockSignal = new VHDLSignal;
-	iterClockSignal->setName("start_clock");
-	iterClockSignal->setType("BOOLEAN");
+	iterClockSignal = new VHDLSignal("start_clock", "BOOLEAN", 0);
 	signalList.put(*iterClockSignal);
       }
       firstRefReg->setClock(iterClockSignal);
@@ -584,9 +544,7 @@ void ArchTarget :: trailerCode() {
       VHDLSignal* firstIterDone =
 	signalList.vhdlSignalWithName("FIRST_ITER_DONE");
       if (!firstIterDone) {
-	firstIterDone = new VHDLSignal;
-	firstIterDone->setName("FIRST_ITER_DONE");
-	firstIterDone->setType("INTEGER");
+	firstIterDone = new VHDLSignal("FIRST_ITER_DONE", "INTEGER", 0);
 	signalList.put(*firstIterDone);
       }
 
@@ -601,18 +559,14 @@ void ArchTarget :: trailerCode() {
     VHDLSignal* iterClockSignal =
       signalList.vhdlSignalWithName("start_clock");
     if (!iterClockSignal) {
-      iterClockSignal = new VHDLSignal;
-      iterClockSignal->setName("start_clock");
-      iterClockSignal->setType("BOOLEAN");
+      iterClockSignal = new VHDLSignal("start_clock", "BOOLEAN", 0);
       signalList.put(*iterClockSignal);
     }
 
     VHDLSignal* firstIterDone =
       signalList.vhdlSignalWithName("FIRST_ITER_DONE");
     if (!firstIterDone) {
-      firstIterDone = new VHDLSignal;
-      firstIterDone->setName("FIRST_ITER_DONE");
-      firstIterDone->setType("INTEGER");
+      firstIterDone = new VHDLSignal("FIRST_ITER_DONE", "INTEGER", 0);
       signalList.put(*firstIterDone);
     }
   }
@@ -641,26 +595,16 @@ void ArchTarget :: trailerCode() {
 	destName << "_N" << (-ix);
       }
 
-      VHDLSignal* sourceSignal = new VHDLSignal;
-      sourceSignal->setName(sourceName);
-      sourceSignal->setType(arc->getType());
-      VHDLSignal* destSignal = new VHDLSignal;
-      destSignal->setName(destName);
-      destSignal->setType(arc->getType());
-
+      VHDLSignal* sourceSignal = new VHDLSignal(sourceName, arc->getType(), 0);
+      VHDLSignal* destSignal = new VHDLSignal(destName, arc->getType(), 0);
       signalList.put(*sourceSignal);
       signalList.put(*destSignal);
 
       // FIXME: feedback_clock and first_iter_done should be merged.
-      StringList clockName = "feedback_clock";
-      StringList clockType = "BOOLEAN";
-
       VHDLSignal* clockSignal =
-	signalList.vhdlSignalWithName(clockName);
+	signalList.vhdlSignalWithName("feedback_clock");
       if (!clockSignal) {
-	clockSignal = new VHDLSignal;
-	clockSignal->setName(clockName);
-	clockSignal->setType(clockType);
+	clockSignal = new VHDLSignal("feedback_clock", "BOOLEAN", 0);
 	signalList.put(*clockSignal);
       }
 
@@ -794,9 +738,7 @@ void ArchTarget :: trailerCode() {
     if (!reg->getClock()) {
       // Create a dummy clock if the register doesn't have one,
       // because connectRegister needs a clock signal.
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal->setName("DummyClock");
-      newSignal->setType("BOOLEAN");
+      VHDLSignal* newSignal = new VHDLSignal("DummyClock", "BOOLEAN", 0);
       signalList.put(*newSignal);
       reg->setClock(newSignal);
     }
@@ -914,15 +856,11 @@ void ArchTarget :: frameCode() {
 	pulseClock(clockName, clockTime);
 
 	// Add a new clock signal also.
-	VHDLSignal* newSignal = new VHDLSignal;
-	newSignal->setName(clockName);
-	newSignal->setType("BOOLEAN");
+	VHDLSignal* newSignal = new VHDLSignal(clockName, "BOOLEAN", 0);
 	signalList.put(*newSignal);
       }
     }
   }
-
-
 
   // Add in the entity, architecture, entity declaration, and
   // component mapping for the controller.
@@ -1262,9 +1200,7 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
       newToken->clockName = clockName;
 
       // Add a new clock signal also.
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal->setName(clockName);
-      newSignal->setType("BOOLEAN");
+      VHDLSignal* newSignal = new VHDLSignal(clockName, "BOOLEAN", 0);
       signalList.put(*newSignal);
 
       newToken->setSourceFiring(currentFiring);
@@ -1481,9 +1417,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
       outToken->clockName = clockName;
 
       // Add a new clock signal also.
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal->setName(clockName);
-      newSignal->setType("BOOLEAN");
+      VHDLSignal* newSignal = new VHDLSignal(clockName, "BOOLEAN", 0);
       signalList.put(*newSignal);
 
       outToken->setSourceFiring(currentFiring);
