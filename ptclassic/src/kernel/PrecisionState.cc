@@ -67,8 +67,8 @@ Precision::Precision(const Fix& f,
 {
 	length = f.len(),  intBits = f.intb();
 
-	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : NULL;
-	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : NULL;
+	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : (char*) NULL;
+	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : (char*) NULL;
 }
 
 Precision::Precision(int len, int intb,
@@ -76,16 +76,16 @@ Precision::Precision(int len, int intb,
 {
 	length = len,      intBits = intb;
 
-	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : NULL;
-	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : NULL;
+	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : (char*) NULL;
+	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : (char*) NULL;
 }
 
 Precision::Precision(const Precision& p)
 {
 	length = p.len(),  intBits = p.intb();
 
-	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : NULL;
-	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : NULL;
+	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : (char*) NULL;
+	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : (char*) NULL;
 }
 
 // destructor
@@ -204,9 +204,9 @@ Precision& Precision::operator = (const Precision& p)
 	length = p.len(),  intBits = p.intb();
 
 	if (symbolic_length)  { LOG_DEL; delete [] symbolic_length;  }
-	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : NULL;
+	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : (char*) NULL;
 	if (symbolic_intBits) { LOG_DEL; delete [] symbolic_intBits; }
-	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : NULL;
+	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : (char*) NULL;
 	return *this;
 }
 
@@ -300,7 +300,7 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 PrecisionState& PrecisionState :: operator = (const PrecisionState& p)
 {
 	(Precision&)*this = p;
-	val = p.val ? savestring(p.val) : NULL;
+	val = p.val ? savestring(p.val) : (char*) NULL;
 	return *this;
 }
 

@@ -325,7 +325,7 @@ int PortHole :: numInitDelays() const {
 
 // 3/2/94 added to support initDelayValues
 const char* PortHole::initDelayValues() const {
-	return myGeodesic?myGeodesic->initDelayValues():NULL;
+	return myGeodesic?myGeodesic->initDelayValues(): (const char*)NULL;
 }
 
 void PortHole :: allocateBuffer()

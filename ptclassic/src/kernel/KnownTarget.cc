@@ -94,7 +94,7 @@ KnownTarget::findEntry (const char* name) {
 const Target*
 KnownTarget::find(const char* type) {
 	KnownTargetEntry * e = findEntry (type);
-	return e ? e->targ : NULL;
+	return e ? e->targ : (const Target*) NULL;
 }
 
 // return TRUE if indicated name refers to a dynamically linked target.
