@@ -28,11 +28,9 @@ Definition of the Galaxy class, together with the BlockList class.
 
 class BlockList : public SequentialList
 {
-	friend class Galaxy;
-	friend class KnownBlock;
-
+public:
 	// Add Block to list
-	void put(Block* b) {SequentialList::put(b);}
+	void put(const Block* b) {SequentialList::put(b);}
 
 	// Return size of list
 	int size() const {return SequentialList::size();}
@@ -40,6 +38,8 @@ class BlockList : public SequentialList
 	// Return first Block on list (a const method)
 	Block& head () const {return *(Block*) SequentialList::head();}
 
+	// Remove a Block from the list.  Note: block is not deleted
+	int remove (const Block* b) { return SingleLinkList::remove(b);}
 };
 
 	////////////////////////////////////
@@ -55,7 +55,10 @@ private:
 protected:
 
 	// Add blocks to the list
-	void addBlock(Block& b) {blocks.put(&b);}
+	void addBlock(const Block& b) {blocks.put(&b);}
+
+	// Remove a block from the list
+	int removeBlock(const Block& b) { return blocks.remove(&b);}
 
 	// Connect sub-blocks with a delay (default to zero delay)
 	void connect(GenericPort& source, GenericPort& destination,
