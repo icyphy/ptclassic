@@ -95,7 +95,33 @@ function)
 </pre>
 The <CODE>tysh</CODE> binary is used when <CODE>tycho -pigi</CODE>
 is started up.  In the short term, this error can be ignored.
-(Reported by
+
+The code in <CODE>SigHandle.cc</CODE>, is used to catch signals so
+that we can attempt to save files etc.  This code never really worked
+well, and is basically dead code.
+
+ <p>The quick and dirty thing to do would be to just ifdef out those lines.
+
+ <p>I think we could use <CODE>SIGABRT</CODE> instead of
+<CODE>SIGIOT</CODE>.  Under Solaris, and egcs-1.0.2,
+<CODE>SIGIOT</CODE> and <CODE>SIGABRT</CODE> are both defined as the
+number 6.
+ <p>Below is a sample code fragment that is unlikely to break other ports.
+<pre>
+    // Under Cygwin32, SIGIOT is not defined
+#ifdef SIGIOT
+    if (ptSignal(SIGIOT, sigHandler) != 0) {
+        return 5;
+    }
+#else
+    if (ptSignal(SIGABRT, sigHandler) != 0) {
+        return 5;
+    }
+#endif
+
+</pre>
+
+ <p>(Reported by
 Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
 
 
