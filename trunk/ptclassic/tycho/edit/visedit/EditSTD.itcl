@@ -165,7 +165,7 @@ body ::tycho::EditSTD::constructor {args} {
     # If no machine type is specified yet, initialize it.
     if {![info exists machineType]} {
 	set w $prefix.editMachineType
-	::tycho::DialogWindow $w -title "Edit the Machine Type"\
+	::tycho::Dialog $w -title "Edit the Machine Type"\
 		-text "Press button to choose the machine type:"
 	$w addButton mixed -text "Mixed"\
 		-command "$this setMachineType Mixed; destroy $w"
@@ -224,16 +224,16 @@ body ::tycho::EditSTD::editArc {arc} {
 	set title "Edit $machineType Arc \"$arcLabel\"\nSource state: $src\
 		\nDestination state: $dest"
 
-	set labelQuery [list label {Label:} $arcLabel]
+	set labelQuery [list line label {Label:} $arcLabel]
 
 	if "![info exists edgeInfo($arc,guard)]" {
 	    set edgeInfo($arc,guard) ""
 	}
-	set guardQuery [list guard {Guard:} $edgeInfo($arc,guard)]
+	set guardQuery [list line guard {Guard:} $edgeInfo($arc,guard)]
 
 	set cmd "$this editArcDone $arc $w"
 
-	::tycho::EntryQuery $w -title "STD Edit $machineType Arc"\
+	::tycho::Query $w -title "STD Edit $machineType Arc"\
 		-text $title -queries [list $labelQuery $guardQuery]\
 		-okcommand [list catch $cmd]
 
@@ -349,11 +349,11 @@ body ::tycho::EditSTD::editState {node} {
 
 	set nodeLabel [$slate itemcget $node -text]
 	set title "Edit $machineType State \"$nodeLabel\""
-	set labelQuery [list label {Label:} $nodeLabel]
+	set labelQuery [list line label {Label:} $nodeLabel]
 
 	set cmd "$this editStateDone $node $w"
 
-	::tycho::EntryQuery $w -title "STD Edit $machineType State" \
+	::tycho::Query $w -title "STD Edit $machineType State" \
 		-text $title -queries [list $labelQuery]\
 		-okcommand [list catch $cmd]
 
@@ -415,12 +415,12 @@ body ::tycho::EditSTD::ioPortNames {} {
 	set name [file tail [file rootname $file]]
 	set titleLabel "Edit I/O Port Names of $name"
 
-	set inPortQuery [list inPort {InPort  names:} $portNames(in)]
-	set outPortQuery [list outPort {OutPort names:} $portNames(out)]
-	set internalQuery [list internalEvents {Internal event names:}\
+	set inPortQuery [list line inPort {InPort  names:} $portNames(in)]
+	set outPortQuery [list line outPort {OutPort names:} $portNames(out)]
+	set internalQuery [list line internalEvents {Internal event names:}\
 		    $portNames(internal)]
 
-	::tycho::EntryQuery $w -title "STD I/O Port Names"\
+	::tycho::Query $w -title "STD I/O Port Names"\
 		-text $titleLabel \
 		-queries [list $inPortQuery $outPortQuery $internalQuery]\
 		-okcommand "$this ioPortNamesDone $w"
@@ -488,13 +488,13 @@ body ::tycho::EditSTD::makeIcon {} {
 	wm deiconify $w
 	raise $w
     } else {
-	set srcdirQuery [list srcdir {Src File Directory:}\
+	set srcdirQuery [list line srcdir {Src File Directory:}\
 		$makeIconSrcDir]
 
-	set paletteQuery [list palette {Pathname of Palette:}\
+	set paletteQuery [list line palette {Pathname of Palette:}\
 		$makeIconPaletteName]
 
-	::tycho::EntryQuery $w -title "stdMakeIcon" -text "Make Icon"\
+	::tycho::Query $w -title "stdMakeIcon" -text "Make Icon"\
 		-queries [list $srcdirQuery $paletteQuery]\
 		-okcommand "$this makeIconOk $w"
 

@@ -201,9 +201,9 @@ body ::tycho::EditHTML::checkLinks {} {
 	}
     }
     if {$ok} {
-	::tycho::inform "Hyperlinks appear to be OK"
+	safeEval ::tycho::inform "Hyperlinks appear to be OK"
     } {
-	::tycho::inform "Done checking hyperlinks"
+	safeEval ::tycho::inform "Done checking hyperlinks"
     }
 }
 
@@ -224,7 +224,7 @@ body ::tycho::EditHTML::fileTemplate {} {
 
     # The location of the template file.  Non-UCB users might want
     # to edit this file for their own use.
-    set filename $TYCHO/doc/HTMLTemplate.html
+    set filename $TYCHO/editors/textedit/templates/HTMLTemplate.html
 
     if {$filename != "" && $filename != "NoName"} {
 	if {[file exists $filename]} {
@@ -236,10 +236,10 @@ body ::tycho::EditHTML::fileTemplate {} {
 		insertData $data
                 markModified
 	    } {
-		::tycho::warn "File is not readable: $filename"
+		safeEval ::tycho::warn "File is not readable: $filename"
 	    }
 	} {
-	    ::tycho::warn "File does not exist: $filename"
+	    safeEval ::tycho::warn "File does not exist: $filename"
 	}
     }
 }
@@ -394,15 +394,15 @@ body ::tycho::EditHTML::fixLink {link start end err} {
     $itk_component(text) tag configure badlink \
 	    -background [preference get htmledit targetColor]
 
-    set replacement [::tycho::DialogWindow::newModal EntryQuery \
-	    [::tycho::autoName .entry] \
+    set nm [::tycho::autoName .entry]
+    ::tycho::EntryQuery $nm \
 	    -bitmap questhead \
 	    -text "$err: Make corrections." \
 	    -queries [list [list correction {} $link]] \
 	    -entrywidth 80 \
-	    -geometry +0+0]
+	    -geometry +0+0
 
-    set replacement [lindex [lindex $replacement 0] 1]
+    set replacement [lindex [::tycho::Dialog::wait $nm] 1]
 
     if {$replacement != {} && $replacement != $link} {
 	deleteRange $start $end

@@ -575,7 +575,7 @@ body ::tycho::GanttView::drawRuler {makespan} {
 body ::tycho::GanttView::help {} {
 
     # FIXME: should bring up html window
-    ::tycho::inform {
+    safeEval ::tycho::inform {
 	Gantt Chart Help:
 	- The zoom menu lets the you zoom the chart; it will scale the
 	  the time axis according to the zoom factor.
@@ -616,14 +616,12 @@ body ::tycho::GanttView::print {} {
     # Create a print dialog box
     # Should really be a print dialog box class that we can use 
     # directly; for now stick with this approach.
-    set printer [::tycho::DialogWindow::newModal EntryQuery \
-	    [::tycho::autoName .printer] \
-	    -queries [list [list pr {Printer:} $defaultPrinter {}]] \
-	    -entrywidth 10]
+    set printer [safeEval ::tycho::queryinfo {} \
+	    [list [list line pr {Printer:} $defaultPrinter {}]] 10]
 
     # The above returns a list with the first element as the identifier;
     # so below we get rid of that and extract only the printer name.
-    set printer [lindex [lindex $printer 0] 1]
+    set printer [lindex $printer 1]
 
     set OUTPUT [open "|lpr -P$printer" w]
     puts $OUTPUT [$slate postscript \
@@ -715,9 +713,7 @@ body ::tycho::GanttView::redraw {} {
 body ::tycho::GanttView::save {} {
 
     # Create an instance of the file browser class
-    set filename [::tycho::DialogWindow::newModal FileBrowser \
-	    [::tycho::autoName .fileBrowser] \
-	    -text "Save As File:"]
+    set filename [safeEval ::tycho::queryinfofilename "Save As File:" $this]
 
     # Filename cannot be NoName
     if {$filename == {NoName}} {
@@ -729,7 +725,9 @@ body ::tycho::GanttView::save {} {
 	
 	# Check to see if file already exists
 	if {[file exists $filename]} {
-	    if [![::tycho::askuser "File \"$filename\" exists. Overwrite?"] {
+	    if [![safeEval ::tycho::askuser \
+                    "File \"$filename\" exists. Overwrite?" \
+                    $this] {
 		error "Did not save file."
 	    }
 	}
@@ -746,13 +744,10 @@ body ::tycho::GanttView::save {} {
 body ::tycho::GanttView::setZoomFactor {} {
 
     # Create a dialog box to ask for the zoom factor
-    set factor [::tycho::DialogWindow::newModal EntryQuery \
-	    [::tycho::autoName .factor] \
-	    -queries [list [list factor {Zoom Factor:} \
-	    $data(ZOOMF) {}]] \
-	    -entrywidth 10]
+    set factor [safeEval ::tycho::queryinfo {} \
+	    [list [list factor {Zoom Factor:} $data(ZOOMF) {}]] 10]
 
-    set data(ZOOMF) [lindex [lindex $factor 0] 1]
+    set data(ZOOMF) [lindex $factor 1]
 }
 
 #######################################################################

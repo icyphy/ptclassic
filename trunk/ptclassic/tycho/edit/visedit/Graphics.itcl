@@ -741,8 +741,8 @@ body ::tycho::Graphics::centeredTextEdit {{tag {}}} {
                     set cmd "$this modify centeredText \[$name get text\] \
                             [list $tag] [list $below] \
                             [list $color] [list $font]"
-                    ::tycho::EntryQuery $name -queries \
-                            [list [list text {Text:} $text]] \
+                    ::tycho::Query $name -queries \
+                            [list [list line text {Text:} $text]] \
                             -okcommand [list catch $cmd]
                     $name centerOnScreen
                     return
@@ -1010,8 +1010,9 @@ body ::tycho::Graphics::edit {{ids {}}} {
             eval $this $itemEdit($id)
         } elseif [info exists itemCreate($id)] {
             set name [::tycho::autoName .query]
-            set queries [list [list x {Create command:} $itemCreate($id) 8]]
-            ::tycho::EntryQuery $name -queries $queries \
+            set queries [list [list \
+                    line x {Create command:} $itemCreate($id) 8]]
+            ::tycho::Query $name -queries $queries \
                     -okcommand "if {\[info objects $this\] != {}} \
                     {eval $this modify \[$name get x\]}"
             $name centerOnScreen
@@ -1030,15 +1031,13 @@ body ::tycho::Graphics::export {} {
         $win raiseWindow
         return
     }
-    ::tycho::EntryQuery $win \
-            -queries {{filename {Export to file:} {~/}}}
+    set result [safeEval ::tycho::query {} { \
+            {line filename {Export to file:} {~/}} \
+            {radio format {File format} \
+            [array names fileformats] $fileformatdefault}}]
 
-    $win addRadioQuery format {File format} \
-            [array names fileformats] $fileformatdefault
-
-    set result [::tycho::DialogWindow::centerAndWait $win $prefix]
-    set filename [lindex [lindex $result 0] 1]
-    set format [lindex [lindex $result 1] 1]
+    set filename [lindex $result 1]
+    set format [lindex $result 3]
 
     # Eps has additional options.  Rather than invoking another method,
     # we just query the user here for those formats.
@@ -1196,13 +1195,13 @@ body ::tycho::Graphics::print {} {
         $win raiseWindow
         return
     }
-    ::tycho::EntryQuery $win -okcommand \
+    ::tycho::Query $win -okcommand \
             "$this printOut $win" \
-            -queries {{width {Width (plus i or c)} {}} \
-            {cmd {Print command} {lpr}}}
-    $win addRadioQuery color {Color mode} {color gray mono} color
-    $win addRadioQuery orient {Orientation} {normal rotated} normal
-    # FIXME: Use centerAndWait
+            -queries {{line width {Width (plus i or c)} {}} \
+            {line cmd {Print command} {lpr}}}
+    $win radio color {Color mode} {color gray mono} color
+    $win radio orient {Orientation} {normal rotated} normal
+    # FIXME: Use wait
     $win centerOnScreen
 }
 
@@ -1250,13 +1249,13 @@ body ::tycho::Graphics::redo {} {
 #
 body ::tycho::Graphics::scrollQuery {} {
     set name [::tycho::autoName .query]
-    ::tycho::EntryQuery $name -okcommand "$this scrollSet $name"
+    ::tycho::Query $name -okcommand "$this scrollSet $name"
     switch -exact [cget -scrolling] {
         bars {set default {Always use scrollbars}}
         auto {set default {Automatic scrollbars}}
         default {set default {Never use scrollbars}}
     }
-    $name addRadioQuery scrolling {} [list \
+    $name radio scrolling {} [list \
             {Always use scrollbars} \
             {Automatic scrollbars} \
             {Never use scrollbars}] $default
@@ -1358,12 +1357,12 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
         if {$categories != {}} {
             # The "catch" is in case the object is deleted before the dialog
             # is dismissed.
-            ::tycho::EntryQuery $name -queries \
-                    [list [list title {Text:} {}]] \
+            ::tycho::Query $name -queries \
+                    [list [list line title {Text:} {}]] \
                     -okcommand [list catch \
                     "$this modify \
                     titleSet \[$name get category\] \[$name get title\]"]
-            $name addRadioQuery category {} $categories [lindex $categories 0]
+            $name radio category {} $categories [lindex $categories 0]
             $name addButton new -text "New Title Item" -command \
                     "$this titleAdd 1; destroy $name"
         } {
@@ -1372,12 +1371,12 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
         }
     } {
         # New title category
-        ::tycho::EntryQuery $name -queries [list \
-                [list text {Text:} {}] \
-                [list category {Tag:} {}] \
-                [list below {Below tags:} {}] \
-                [list color {Color:} {}] \
-                [list font {Font:} {}]] \
+        ::tycho::Query $name -queries [list \
+                [list line text {Text:} {}] \
+                [list line category {Tag:} {}] \
+                [list line below {Below tags:} {}] \
+                [list line color {Color:} {}] \
+                [list line font {Font:} {}]] \
                 -okcommand [list catch \
                 "$this centeredText \[$name get text\] \
                 \[$name get category\] \
@@ -1677,7 +1676,7 @@ body ::tycho::Graphics::paste {} {
                 eval $this $cmd
             } msg] {
                 # FIXME: Insert text label
-                ::tycho::warn "ignoring for now: $cmds\n$msg"
+                safeEval ::tycho::warn "ignoring for now: $cmds\n$msg"
                 break
             }
         }

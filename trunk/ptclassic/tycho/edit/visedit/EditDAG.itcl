@@ -458,7 +458,8 @@ body ::tycho::EditDAG::addArc {} {
     undoBoundary
     set nodes [selected]
     if {[llength $nodes] != 2} {
-        ::tycho::warn "First select the parent node and then the child node. \
+        safeEval ::tycho::warn \
+                "First select the parent node and then the child node. \
                 \n To select the child node, hold the shift key while clicking."
         return
     }
@@ -487,7 +488,7 @@ body ::tycho::EditDAG::addArc {} {
 body ::tycho::EditDAG::addChild {} {
     set nodes [selected]
     if {$nodes == {}} {
-        ::tycho::inform "Select one or more parent nodes first."
+        safeEval ::tycho::inform "Select one or more parent nodes first."
         return
     }
     foreach node $nodes {
@@ -498,9 +499,9 @@ body ::tycho::EditDAG::addChild {} {
         }
     }
     set name [::tycho::autoName .query]
-    ::tycho::EntryQuery $name -queries {
-        {name {Node name:} {}}
-        {contents {Contents:} {} 8}
+    ::tycho::Query $name -queries {
+        {line name {Node name:} {}}
+        {line contents {Contents:} {} 8}
     } -okcommand "$this modify add \[$name get name\] \[$name get contents\] \
             \{ $parents \}"
     $name centerOnScreen
@@ -512,9 +513,9 @@ body ::tycho::EditDAG::addChild {} {
 #
 body ::tycho::EditDAG::addRoot {} {
     set name [::tycho::autoName .query]
-    ::tycho::EntryQuery $name -queries {
-        {name {Node name:} {}}
-        {contents {Contents:} {} 8}
+    ::tycho::Query $name -queries {
+        {line name {Node name:} {}}
+        {line contents {Contents:} {} 8}
     } -okcommand "$this modify add \[$name get name\] \[$name get contents\] {}"
     $name centerOnScreen
 }
@@ -612,9 +613,9 @@ body ::tycho::EditDAG::editNode {id} {
     set node $nametable($id)
     set name [::tycho::autoName .query]
     set queries [list \
-            [list name {Node name:} $node] \
-            [list contents {Contents:} [$mygraph contents $node] 8]]
-    ::tycho::EntryQuery $name -queries $queries \
+            [list line name {Node name:} $node] \
+            [list line contents {Contents:} [$mygraph contents $node] 8]]
+    ::tycho::Query $name -queries $queries \
             -okcommand "$this modify setNode [list $node] \
             \[$name get name\] \[$name get contents\]"
     $name centerOnScreen
@@ -649,7 +650,8 @@ body ::tycho::EditDAG::editNode {id} {
 #
 body ::tycho::EditDAG::exportImagemap {filename {keepfragment 0}} {
     set defaultipath \
-            [::tycho::queryinfo "Base path for hyperlinks:" $defaultipath 80]
+            [safeEval ::tycho::queryinfo "Base path for hyperlinks:" \
+            $defaultipath 80]
     set fid [open $filename w]
     puts $fid "# Image map for $file"
     set id [array startsearch nametable]
@@ -843,13 +845,12 @@ body ::tycho::EditDAG::setReadOnly {bool} {
 # Query the user for x and y spacing.
 #
 body ::tycho::EditDAG::setSpacing {} {
-    set result [::tycho::DialogWindow::newModal \
-            EntryQuery [::tycho::autoName .s] \
-            -text {Enter x and y scaling as a fraction of the default} \
-            -queries [list \
-            [list x {x scaling} $itk_option(-spacingx)] \
-            [list y {y scaling} $itk_option(-spacingy)]]]
-    array set vals [join $result]
+    set result [safeEval ::tycho::query \
+            {Enter x and y scaling as a fraction of the default} \
+            [list \
+            [list line x {x scaling} $itk_option(-spacingx)] \
+            [list line y {y scaling} $itk_option(-spacingy)]]]
+    array set vals $result
     configure -spacingx $vals(x)
     configure -spacingy $vals(y)
     redrawGraph
@@ -934,7 +935,7 @@ body ::tycho::EditDAG::contentsToArray {node arrayname defaults} {
     array set arr $defaults
     # Tolerate syntax errors here by using defaults.
     if {[catch {array set arr [$mygraph contents $node]} msg] != 0} {
-        ::tycho::warn $msg
+        safeEval ::tycho::warn $msg
     }
 }
 
