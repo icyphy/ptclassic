@@ -185,6 +185,13 @@ class ::tycho::EditForest {
 
     # Return the name of the data structure class being edited.
     protected method structClass {} {return ::tycho::Forest}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Initialize the menu bar.
+    private method _initializeMenubar {menubar}
+
 }
 
 #######################################################################
@@ -348,4 +355,24 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
 #
 body ::tycho::EditForest::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditForest::_initializeMenubar $menubar
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#####################################################################
+#### _initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditForest::_initializeMenubar {menubar} {
+    if [::tycho::stylesheet get interaction viseditViewOnly] {
+	$menubar delete edit
+    }
 }
