@@ -2,7 +2,6 @@
 .NA Sih-4-1
 .SD
 Demonstration of the parallel scheduler
-.DE
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .EQ

@@ -2,7 +2,6 @@
 .NA interp
 .SD
 Linear interpolation.
-.DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .EQ

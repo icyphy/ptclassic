@@ -2,7 +2,6 @@
 .NA chaos
 .SD
 A simple demonstration of chaos.
-.DE
 .IE chaos
 .SV $Revision$ $Date$
 .AL "E. A. Lee"

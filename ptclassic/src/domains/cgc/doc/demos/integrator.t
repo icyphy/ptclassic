@@ -2,7 +2,6 @@
 .NA integrator
 .SD
 Demonstrate the features of the integrator star.
-.DE
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .EQ

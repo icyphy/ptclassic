@@ -2,7 +2,6 @@
 .NA nonlinear
 .SD
 Some nonlinear functions plotted in the range 1.0 to 1.99.
-.DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .EQ

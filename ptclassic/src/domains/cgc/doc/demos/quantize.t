@@ -4,7 +4,6 @@
 Demonstrate the
 .c Quantizer
 star.
-.DE
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .EQ
