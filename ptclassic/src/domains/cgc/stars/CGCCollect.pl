@@ -12,11 +12,11 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG demo library }
+	location { CGC main library }
 	explanation {
 This star does not generate codes. In multiprocessor code generation domain,
 it will be automatically attached to a porthole if the sources of the porthole
-is more than one. Its role is just opposite to that of Scatter star.
+is more than one. Its role is just opposite to that of Spread star.
 	}
 	inmulti {
 		name {input}
