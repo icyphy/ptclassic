@@ -57,8 +57,9 @@ delim off
 .EN
 .(c
 if (! $?ARCH) setenv ARCH `/bin/arch`
-set path = ( . ~ptolemy/bin ~ptolemy/bin.$ARCH ~octtools/bin $path )
+set path = ( . ~ptolemy/bin ~ptolemy/bin.$ARCH ~ptolemy/octtools/bin ... )
 .)c
+.br
 The first of these lines sets your environment variable
 .c ARCH
 to the name of the type of machine you are running (e.g. sun3,
