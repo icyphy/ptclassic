@@ -101,7 +101,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef freebsd
 #define EXTRAOPTS "-Dfreebsd"
 #else
+#ifdef PTLINUX
+#define EXTRAOPTS "-g -fpic"
+#else
 #define EXTRAOPTS ""
+#endif /* PTLINUX */
 #endif /* freebsd */
 #endif /* PTSOL2 */
 
