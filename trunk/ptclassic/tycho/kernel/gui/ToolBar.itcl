@@ -241,12 +241,14 @@ body ::tycho::ToolBar::enable {tag} {
 # <li>a command to execute when &lt;Return&gt; is typed in the widget,
 # <li>additional arguments to pass to the Tk entry command.
 # </ul>
-# NEW: By default, the entry will replace an entire line with a
+# By default, the entry will replace an entire line with a
 # Tk <b>label</b> and an entry box. But if the argument contains 
-# "-command {any_cmd_here}", the entire line will be a
-# Tk <b>button</b> and an entry box.  In addition, if the argument
-# contains "-underline int", then int specifies which character of
-# the button label to underline (starting with 0).
+# "-command {any_cmd_here}", the line will also contain a
+# Tk <b>button</b> to the left of the entry box.  In addition, if the argument
+# contains "-underline <i>int</i>", then <i>int</i> specifies which character of
+# the button label to underline (starting with 0).  A binding
+# is automatically added so that if that character is pressed
+# while the toolbar has the focus, then the button is invoked.
 # <br><br>
 # The entry widget has a "click to focus" model.  When the user types
 # a return in the widget, the contents of the entry box are appended
@@ -328,6 +330,16 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     set tagsget($tag) "$itk_component(tag_$tag) get"
     set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
     set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
+
+    # If a character was underlined, bind the hull to invoke the button.
+    if {$option(-underline) != {}} {
+        set char [string index $label $option(-underline)]
+        if {$char != {}} {
+            bind $itk_component(hull) <Key-[string tolower $char]> \
+                    [code [list $itk_component(entrysite).label_$tag invoke]]
+        }
+    }
+
 }
 
 #####################################################################
