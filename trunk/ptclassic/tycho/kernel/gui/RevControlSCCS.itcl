@@ -72,6 +72,13 @@ class ::tycho::RevControlSCCS {
     method viewHistory {}
 
     ###################################################################
+    ####                      public procs                         ####
+
+    #### isUnderRevControl
+    # Return 1 if the given file is under revision control, 0 otherwise.
+    proc isUnderRevControl {file} {}
+
+    ###################################################################
     ####                   protected methods                       ####
 
     #### getComments
@@ -81,10 +88,6 @@ class ::tycho::RevControlSCCS {
     #### isCheckedOut
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {}
-
-    #### isUnderRevControl
-    # Return 1 if the file is under revision control, 0 otherwise.
-    protected method isUnderRevControl {}
 
     ###################################################################
     ####                   private methods                         ####
@@ -169,6 +172,10 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
     set dir [file dirname $file]
     set revdir [format "%s/SCCS" $dir]
     set basefile [file tail $file]
+    if [file exists [format "%s/s.%s" $revdir $basefile]] {
+	# Nothing to do
+	return
+    }
     set olddir [eval pwd]
     if {![file exists $revdir]} {
 	if {![file writable $dir]} {
@@ -275,6 +282,24 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 }
 
     ###################################################################
+    ####                   public procs                            ####
+
+#####################################################################
+#### isUnderRevControl
+# Check whether the given file is under revision control, and
+# return a 1 if it is or a 0 otherwise.
+# 
+body ::tycho::RevControlSCCS::isUnderRevControl {file} {
+    set dir [file dirname $file]
+    set revdir [format "%s/SCCS" $dir]
+    set basefile [file tail $file]
+    if [file exists [format "%s/s.%s" $revdir $basefile]] {
+	return 1
+    }
+    return 0
+}
+
+    ###################################################################
     ####                   protected methods                       ####
 
 #####################################################################
@@ -300,25 +325,6 @@ body ::tycho::RevControlSCCS::isCheckedOut {} {
     } {
 	return 1
     }
-}
-
-#####################################################################
-#### isUnderRevControl
-# Check whether the file associated with this class is under revision 
-# control, and return a 1 if it is or a 0 otherwise.
-# 
-body ::tycho::RevControlSCCS::isUnderRevControl {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
-    set dir [file dirname $file]
-    set revdir [format "%s/SCCS" $dir]
-    set basefile [file tail $file]
-    if {![file exists [format "%s/s.%s" $revdir $basefile]] && \
-	    ![file exists [format "%s/p.%s" $revdir $basefile]]} {
-	return 0
-    }
-    return 1
 }
 
     ###################################################################
