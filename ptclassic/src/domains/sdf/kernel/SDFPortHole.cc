@@ -24,6 +24,12 @@ Code for SDF-type portholes and multiportholes.
 
 **************************************************************************/
 
+// small virtual function implementations
+
+PortHole* DFPortHole :: assocPort() { return 0;}
+
+int DFPortHole :: assocRelation() const { return -1;}
+
 int InSDFPort :: isItInput () const { return TRUE;}
 
 void InSDFPort :: grabData () { getParticle();}
@@ -36,6 +42,9 @@ void OutSDFPort :: sendData () { putParticle();}
 
 int MultiInSDFPort :: isItInput () const { return TRUE;}
 int MultiOutSDFPort :: isItOutput () const { return TRUE;}
+
+// constructor for DFPortHole ... default maxBackValue is 0
+DFPortHole :: DFPortHole() : maxBackValue(0) {}
 
 PortHole& SDFPortHole :: setPort (
 			     const char* s,
@@ -72,6 +81,13 @@ PortHole& SDFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
 	return *this;
 }
 
+// constructor
+MultiSDFPort :: MultiSDFPort() : numberTokens(0) {}
+
+// destructor -- nothing extra, but avoids cfront generating many
+// out-of-line copies
+MultiSDFPort :: ~MultiSDFPort() {}
+
 MultiPortHole& MultiSDFPort :: setPort (const char* s,
                              Block* parent,
                              DataType t,
@@ -94,8 +110,9 @@ PortHole& MultiOutSDFPort :: newPort () {
 	return installPort(p);
 }
 
-void SDFPortHole :: incCount(int n) { myGeodesic->incCount(n);}
-void SDFPortHole :: decCount(int n) { myGeodesic->decCount(n);}
+void DFPortHole :: incCount(int n) { myGeodesic->incCount(n);}
+void DFPortHole :: decCount(int n) { myGeodesic->decCount(n);}
 
 // isA
-ISA_FUNC(SDFPortHole,PortHole);
+ISA_FUNC(DFPortHole,PortHole);
+ISA_FUNC(SDFPortHole,DFPortHole);

@@ -26,7 +26,23 @@ $Id$
 
 ********************************************************************/
 
+DataFlowStar::DataFlowStar() : noTimes(0), repetitions(0,1) {}
+
 int DataFlowStar::isSDF() const { return FALSE;}
+
+// this must redefined, otherwise it says the star can never be run
+int DataFlowStar::notRunnable() { return 1;}
+
+// this says we cannot defer the star (default behavior)
+int DataFlowStar::deferrable() { return FALSE;}
+
+// default runCost is 0
+unsigned DataFlowStar::runCost() { return 0;}
+
+int DataFlowStar::simRunStar(int) { return 1;}
+
+// return execution time: define a default time of 5 (why?)
+int DataFlowStar :: myExecTime() { return 5;}
 
 /*******************************************************************
 
@@ -42,11 +58,6 @@ void SDFStar :: prepareForScheduling() {
 	noTimes = 0;
 }
 
-// default cost = 0
-unsigned SDFStar :: runCost() {
-	return 0;
-}
-
 // firing SDF star
 int SDFStar :: fire() {
 	BlockPortIter next(*this);
@@ -59,9 +70,6 @@ int SDFStar :: fire() {
 		(next++)->sendData();
 	return status;
 }
-
-// return execution time: define a default time of 5.
-int SDFStar :: myExecTime() { return 5;}
 
 // The following is defined in SDFDomain.cc -- this forces that module
 // to be included if any SDF stars are linked in.
