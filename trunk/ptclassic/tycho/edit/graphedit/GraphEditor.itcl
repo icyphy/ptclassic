@@ -42,8 +42,10 @@ proc ::tycho::foo {} {
     # $nm loadStars [::tycho::expandPath {$TYCHO/editors/graphedit/stars.tim}]
     # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
 
+    # FIXME: Where should this go??     
     $nm library load editors/graphedit/stars.tim
-    $nm library addtomenu stars stars -command "$nm addvertex stars"
+    $nm library addtomenu stars stars -command "$nm newstar stars"
+
     return $nm
 }
 
@@ -65,32 +67,23 @@ class ::tycho::DFGEditor {
     #################################################################
     ####                     public methods                      ####
 
-    # Place a star
-    method addvertex {libname starname}
-
-    # Delete an edge
-    method deleteedge {name}
-
-    # Delete a vertex
-    method deletevertex {name}
-
     # Clear all data
     method clear {}
 
+    # Delete the selection
+    method delete {}
+
     # Edit parameters of the given vertices
     method editparameters {args}
+
+    # Add a star
+    method newstar {libname starname}
 
     # Handle change notification from the graph model
     method notifygraph {method args}
 
     # Place an icon
-    method placeicon {iconlib iconname starname}
-
-    # Move mouse over a port
-    method portenter {}
-
-    # Move mouse away from a port
-    method portleave {}
+    method place {}
 
     # Redo the most recent command
     method redo {}
@@ -101,20 +94,14 @@ class ::tycho::DFGEditor {
     # Undo the most recent command
     method undo {}
 
-    # Start moving a vertex
-    method vertexclick {tag x y args}
-
-    # Continue moving a vertex
-    method vertexdrag {tag x y}
-
-    # Stop moving a vertex
-    method vertexrelease {tag}
-
     #################################################################
     ####                  protected methods                      ####
 
     # Initialize the menu/status/tool bars
     protected method _initializeBars {menubar statusbar toolbar}
+
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
 
     # Insert the specified data
     protected method insertData {data}
@@ -128,14 +115,14 @@ class ::tycho::DFGEditor {
     # The interactor to move things around
     protected variable follower
 
-    # The controller for connecting edges
-    protected variable connector
+    # The controller for edges
+    protected variable edgecontroller
 
     # The interactor to connect edges
     protected variable dropper
 
-    # The controller for moving vertexes
-    protected variable mover
+    # The controller for vertices
+    protected variable vertexcontroller
 
     # The item selector
     protected variable selector
@@ -179,7 +166,7 @@ body ::tycho::DFGEditor::constructor {args} {
     # The layout model uses notify{} inherited from SlateView
     set _layout [uplevel #0 ::tycho::Layout [::tycho::autoName layout]]
     model add layout $_layout
-    $_layout subscribe data $this
+    $_layout subscribe data $this "$this notify"
 
     # In addition, subscribe to the layout model as a "view". This
     # is necessary because the Layout model sometimes needs to get
@@ -189,31 +176,51 @@ body ::tycho::DFGEditor::constructor {args} {
     # Evaluate options
     eval itk_initialize $args
 
+    # Create the context-sensitive popup menu
+    contextmenu create $_slate
+
+    # Modify the binding tags of the canvas so that this megawidget
+    # gets events too. This is unfortunate but appears to be necessary
+    set tl [winfo toplevel $itk_component(hull)]
+    set canvas [$_slate component canvas]
+    bindtags $canvas \
+            "$tl $itk_component(hull) $_slate Slate all"
+    
+    # Prevent shadowing of bindings in the Displayer class.
+    bind $_slate <Control-x> {continue}
+
     # Key bindings
     bind $_slate <Meta-Key-z> "$this undo"
     bind $_slate <Meta-Key-r> "$this redo"
+    bind $_slate <Key-Delete> "$this delete"
 
     # Make a more pronounced highlight
     $_slate configure -highlightcolor azure2 -highlightwidth 4
 
-    # Create the controller object for connecting edges
-    set connector [::tycho::DFGConnector [::tycho::autoName controller] \
-            -slate $_slate \
-            -slateview $this \
-            -graph $_graph \
-            -layout $_layout]
-		
-    # Create the controller object for moving vertexes
-    set mover [::tycho::DFGMover [::tycho::autoName controller] \
+    # Create the edge controller object
+    set edgecontroller [uplevel #0 ::tycho::DFGEdgeController \
+    		[::tycho::autoName controller] \
             -slate $_slate \
             -slateview $this \
             -graph $_graph \
             -layout $_layout]
 
+    # Create the vertex controller object
+    set vertexcontroller [uplevel #0 ::tycho::DFGVertexController \
+            [::tycho::autoName controller] \
+            -slate $_slate \
+            -slateview $this \
+            -graph $_graph \
+            -layout $_layout]
+
+    # Cross-link the controllers
+    $edgecontroller configure -vertexcontroller $vertexcontroller
+    $vertexcontroller configure -edgecontroller $edgecontroller
+
     # Get handles to interactors
-    set follower [$mover _follower]
-    set dropper [$connector _dropper]
-    set splitter [$connector _splitter]
+    set follower [$vertexcontroller _follower]
+    set dropper  [$edgecontroller _dropper]
+    set splitter [$edgecontroller _splitter]
 
     # Enable vertex selection with button 1; shift-click toggles
     set selector [$_slate interactor Selector]
@@ -277,86 +284,38 @@ body ::tycho::DFGEditor::constructor {args} {
     
     # Is this needed?
     # $_slate configure -exportselection 0
+    
     # Experiment: move disconnected edges
     $selector delegate $follower disconnected -button 1
     $selector delegate $follower disconnected -button 1 \
-            -modifiers shift    
+            -modifiers shift
 }
 
 ########################################################################
-#### addvertex
+#### delete
 #
-# Add a vertex given the library name and star name
+# Process a delete event.
 #
-body ::tycho::DFGEditor::addvertex {libname starname} {
-    set lib [library access $libname]
+body ::tycho::DFGEditor::delete {} {
+    # Mark the history
+    $_graph mark set temp
+    $_layout mark set temp
 
-    # Instantiate the star as a vertex of the graph
-    set starname [$lib instantiate $starname $_graph -itemtype vertex]
+    # Split the selection into vertices and edges
+    set selection [$_slate find withtag "sel"]
+    set edges [::tycho::lintersection $selection [$_slate find withtag edge]]
+    set vertices [::tycho::lsubtract $selection $edges]
 
-    # Find the icon of the star
-    if [$_graph exists $starname -icon] {
-        set iconpath [$_graph attrget $starname -icon]
-        set splat [split $iconpath #]
-        set iconlib [lindex $splat 0]
-        set iconname [lindex $splat 1]
-
-        # FIXME: Need a shorter way of doing this...
-        set libpath [::tycho::model load $iconlib]
-        # FIXME: key cannpt be reused, hence the autoname...
-        set iconmodel [::tycho::model link $libpath [::tycho::autoName $this]]
-
-        # See if the icon has a dot-separated name
-        if ![$iconmodel exists $iconname] {
-            if [$iconmodel exists [split $iconname .]] {
-                set iconname [split $iconname .]
-            } else {
-                error "Unknown icon \"$iconname\" in $iconlib"
-            }
-        }
-        # Place the icon
-        placeicon $iconmodel $iconname $starname
-    } else {
-        # FIXME
-        error "No icon for $starname"
+    # Delete edges first: it makes less work when deleting vertices
+    foreach edge $edges {
+        $edgecontroller delete [itemname $edge]
     }
-}
-
-########################################################################
-#### deleteedge
-#
-# Delete an edge and net by name
-#
-body ::tycho::DFGEditor::deleteedge {edge} {
-    $_layout publish delete $edge
-    $_graph publish delete $edge
-}
-
-########################################################################
-#### deletevertex
-#
-# Delete a vertex and icon by name
-#
-body ::tycho::DFGEditor::deletevertex {vertex} {
-    # Mark the histories
-    $_layout mark vertex
-    $_graph mark vertex
-
-    # Disconnect input edges
-	foreach edge [$_graph edges * [list $vertex *]] {
-		$connector disconnect $edge end
-	}
-    # Disconnect output edges
-	foreach edge [$_graph edges [list $vertex *] *] {
-		$connector disconnect $edge start
-	}
-	# Delete the vertex and icon
-    $_layout publish delete $vertex
-    $_graph publish delete $vertex
-
-    # Compact the histories
-    $_layout history compact vertex current
-    $_graph history compact vertex current
+    foreach vertex $vertices {
+        $vertexcontroller delete [itemname $vertex]
+    }
+    # Compact the history
+    $_graph history compact temp current
+    $_layout history compact temp current
 }
 
 ########################################################################
@@ -383,6 +342,13 @@ body ::tycho::DFGEditor::editparameters {args} {
 }
 
 ########################################################################
+#### newstar
+#
+body ::tycho::DFGEditor::newstar {libname starname} {
+    $vertexcontroller add $libname $starname
+}
+
+########################################################################
 #### notifygraph
 #
 body ::tycho::DFGEditor::notifygraph {method args} {
@@ -396,36 +362,26 @@ body ::tycho::DFGEditor::notifygraph {method args} {
 }
 
 ########################################################################
-#### placeicon
+#### place
 #
-# Place an icon into the layout model. Currently, this just guesses
-# at a good location to put the icon. Later on, it should do some
+# Find a good place to put an icon in the layout model, and return
+# the coordinates. Currently, this just guesses
+# at a good location to put the icon. Later on, it will do some
 # kind of grab and place or drag-and-drop.
 #
-body ::tycho::DFGEditor::placeicon {iconlib iconname starname} {
+body ::tycho::DFGEditor::place {} {
     # Figure out where to put the icon. First check if topleft is free
     if { [$_slate find overlapping 10 10 10 10] == "" } {
         set iconx 10
         set icony 10
     }
-    # Place the icon into the layout model, giving it the
-    # same name as the vertex in the graph.
-    $iconlib instantiate $iconname $_layout \
-            -itemname $starname \
-            -coords [list $iconx $icony] \
-            -tags vertex
-
-    # Move its nw corner to the right position. Find the position
-    # from my slate, and then move by publishing to the model
-    # $_slate moveto $id $iconx $icony "nw" -shape rectangle
-    set current [$_layout forward aspect $starname "nw" -shape "rectangle"]
-    set x [expr $iconx - [lindex $current 0]]
-    set y [expr $icony - [lindex $current 1]]
-    $_layout publish move $starname $x $y
+    set result [list $iconx $icony]
 
     # Advance place position
     incr iconx 10
     incr icony 10
+    
+    return $result
 }
 
 ########################################################################
@@ -478,8 +434,8 @@ body ::tycho::DFGEditor::select {mode args} {
 # Undo the most recent command
 #
 body ::tycho::DFGEditor::undo {} {
-    set foo [eval $_layout undo]
-    set bar [eval $_graph undo]
+    eval $_layout undo
+    eval $_graph undo
 }
 
 ###################################################################
@@ -489,11 +445,11 @@ body ::tycho::DFGEditor::undo {} {
 #####################################################################
 #### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
+# The root (view) class sets up the menubar methods in its initialize
 # via the chain command, which should always be the first command in
 # this method.
 # 
-# This method is called by it's displayer when attachView is called (usually
+# This method is called by its displayer when attachView is called (usually
 # in ::tycho::view
 #
 body ::tycho::DFGEditor::_initializeBars {menubar statusbar toolbar} {
@@ -518,6 +474,41 @@ body ::tycho::DFGEditor::clear {} {
         $_layout clear
     }
     $_slate delete all
+}
+
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context.
+#
+body ::tycho::DFGEditor::configureContextMenu {} {
+    chain
+
+    contextmenu separator sep1
+    contextmenu command undo -label Undo -command "$this undo"
+    contextmenu command redo -label Redo -command "$this redo"
+    contextmenu separator sep2
+
+    # See if we clicked on something that needs to be handled
+    # specially
+    set current [$_slate find withtag current]
+    if { $current != "" && ![$_slate hastag $current #] } {
+        contextmenu command info -label Info... \
+                -command "::tycho::post \[$this iteminfo $current\]"
+        # contextmenu separator sep3
+        
+        if [$_slate hastag $current "edge"] {
+            $edgecontroller contextmenu $current
+        } elseif [$_slate hastag $current "vertex"] {
+            $vertexcontroller contextmenu $current vertex
+        } elseif [$_slate hastag $current "junction"] {
+            $vertexcontroller contextmenu $current junction
+        }
+    } else {
+        # Do the default according to the selection
+        contextmenu command showselection \
+                -label "Show Selection" \
+                -command "::tycho::inform \"[find withtag sel]\""
+    }
 }
 
 #####################################################################
