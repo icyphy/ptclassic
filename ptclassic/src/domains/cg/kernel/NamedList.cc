@@ -1,4 +1,4 @@
-static const char *file_id = "$RCSfile$";
+static const char SccsId [] = "$Id$";
 /**************************************************************************
 Version identification:
 $Id$
