@@ -29,6 +29,9 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "oh.h"
 
+/* Forward references */
+int map_term
+	ARGS((octObject *facet, octObject *fterm, double scale));
 
 void map_terminals_to_labels(prog_name, facet, scale)
 char *prog_name;
@@ -74,6 +77,7 @@ double scale;
  *	
  */
 
+int
 map_term(facet, fterm, scale)
 octObject *facet;
 octObject *fterm;
