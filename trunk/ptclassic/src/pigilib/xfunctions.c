@@ -226,6 +226,8 @@ clr_accum_string()
     are printed at the bottom of the window.
 */
 
+#define WINDOW_WIDTH 100
+
 static void
 write_message_type(w, msg, type)
 	Window w;
@@ -233,12 +235,13 @@ write_message_type(w, msg, type)
 	int type;
 {
 	int y, c, col;
-	char buf[ 512 ], *ptr = msg;
+	char buf[ WINDOW_WIDTH ], *ptr = msg;
 
 	y = FONT_HEIGHT(msgFont) + Y_BORDER;
 
 	for (;;) {
-		for (col = 0; c = buf[col] = *ptr++; col++) {
+		for (col = 0; (col < WINDOW_WIDTH) &&
+		   (c = buf[col] = *ptr++); col++) {
 			if (c == line_break)
 				break ;
 			else if (c == '\t') {
@@ -396,6 +399,11 @@ line_count(msg, width_ptr)
 		default:
 			cols++;
 			break ;
+		}
+		if(cols >= WINDOW_WIDTH) {
+			cols = 0;
+			rows++;
+			max = WINDOW_WIDTH;
 		}
 	}
 	if (cols > max) max = cols;
