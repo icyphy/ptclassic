@@ -66,6 +66,8 @@ defstar{
             Tab     I_Tab[5];           // to save CIR values of max. 5 slots
             Handy *next;
         };
+    }
+    code { 
         // must be scope file and external linkage 
         Handy *list_h, *list_t; 
     }    
