@@ -316,6 +316,10 @@ extern int puts (const char *);
 extern int setitimer( int, struct itimerval *, struct itimerval *);
 #endif /* PTSUN4 || PTULTRIX */
 
+#if defined(PTLINUX)
+#include <sys/time.h>		/* for select() */
+#endif
+
 #if !defined(PTALPHA)
 extern void setpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
