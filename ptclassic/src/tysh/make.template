@@ -140,7 +140,11 @@ PTINY_OBJS =		$(OBJS) $(PTCL_OBJS) $(PTINY_STARS) $(PTINY_TARGETS)
 
 PTRIM_OBJS =		$(OBJS)	$(PTCL_OBJS) $(PTRIM_STARS) $(PTRIM_TARGETS)
 
-TY_OBJS =		$(OBJS) $(PTCL_OBJS) $(ALLSTARS) $(ALLTARGETS)
+# FIXME: we want ganttChart.o, but not the rest of pigilib, otherwise we
+# get undefined Oct symbols.
+TY_OBJS =		$(OBJS) $(PTCL_OBJS) \
+			$(OBJDIR)/pigilib/ganttChart.o \
+			$(ALLSTARS) $(ALLTARGETS)
 
 PTINY_LIBS =		$(PTINY__LIBS) \
 			$(ITCL_LIBSPEC) \
