@@ -650,7 +650,7 @@ symConFunc *confun;		/* Connector function     */
  */
 {
     struct octPoint pnts[2];
-    octCoord width, diff_x, diff_y, w1, w2;
+    octCoord width, diff_x, diff_y;
     struct octBox intersection;	/* Intersection of the two boxes. */
     int vertical_segment_flag;
 
@@ -929,7 +929,7 @@ register struct octPoint *pmod1, *pmod2;	/* Clipped line      */
  * Sutherland (taken from Newmann and Sproull).
  */
 {
-    register int x, y;
+    register int x = 0, y = 0;
     int c1, c2, cd;
 
     *pmod1 = *p1;     *pmod2 = *p2;
