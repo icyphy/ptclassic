@@ -74,6 +74,7 @@ setSignalHandlers(void)
 	    returnValue = 4;
     }
 
+    printf("Return Value: %i", returnValue);
     return returnValue;
 
 }
