@@ -50,15 +50,6 @@ public:
 	void initialize() {SequentialList::initialize();}
 };
 
-// Iterator for SDFSchedule
-class SDFSchedIter : private ListIter {
-public:
-	SDFSchedIter(const SDFSchedule& s) : ListIter(s) {}
-	SDFStar* next() { return (SDFStar*)ListIter::next();}
-	SDFStar* operator++() { return next();}
-	ListIter::reset;
-};
-
 class GalStarIter;
 
 	////////////////////////////
@@ -66,6 +57,7 @@ class GalStarIter;
 	////////////////////////////
 
 class SDFScheduler : public Scheduler {
+	friend class SDFSchedIter;
 protected:
 	SDFSchedule mySchedule;
 public:
@@ -201,6 +193,17 @@ private:
 
         // Function to report on deadlock
         void reportDeadlock(GalStarIter&);
+};
+
+// Iterator for SDFSchedule
+// also works with SDFScheduler
+class SDFSchedIter : private ListIter {
+public:
+	SDFSchedIter(SDFSchedule& s) : ListIter(s) {}
+	SDFSchedIter(SDFScheduler& sch) : ListIter(sch.mySchedule) {}
+	SDFStar* next() { return (SDFStar*)ListIter::next();}
+	SDFStar* operator++() { return next();}
+	ListIter::reset;
 };
 
 #endif
