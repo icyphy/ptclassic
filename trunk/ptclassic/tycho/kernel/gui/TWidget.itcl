@@ -400,6 +400,11 @@ body ::tycho::TWidget::stylesheet {mode args} {
 	    }
 	    # Call the stylesheets to do the work
 	    foreach {sheet opts} [array get lists] {
+		# Tell the style manager what style I prefer -- FIXME
+		::tycho::stylesheet style $this $sheet \
+			[::tycho::profile getstyle $sheet $this]
+		
+		# Subscribe to it
 		eval ::tycho::stylesheet subscribe $this $sheet $opts
 	    }
 	}
