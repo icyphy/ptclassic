@@ -78,15 +78,17 @@ constructor { fileName.setAttributes(A_NONSETTABLE); }
 
 initCode {
 	StringList outfile;
-	if (saveFile.null())
+	if ( saveFile.null() ) {
 		outfile << "$starSymbol(/tmp/cgxgraph)";
-	else
-		outfile << expandPathName(saveFile);
-	addCode(xgraph(outfile),"shellCmds");
+	}
+	else {
+		char *expandedName = expandPathName(saveFile);
+		outfile << expandedName;
+		delete [] expandedName;
+	}
+	addCode(xgraph(outfile), "shellCmds");
 	CG56WrtFile::initCode();
 }
 
 
 }
-
-
