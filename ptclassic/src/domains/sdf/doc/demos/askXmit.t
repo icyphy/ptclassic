@@ -15,4 +15,4 @@ The sample rate is eight times the baud rate, as controlled by the
 shaping FIR filter.
 .pp
 The resulting signal is low-pass filtered and displayed.
-
+.ES

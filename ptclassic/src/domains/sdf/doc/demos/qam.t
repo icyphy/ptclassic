@@ -3,9 +3,8 @@
 .SD
 A demo that produces a QAM signal
 .DE
-.IE
 .SV $Revision$ $Date$
-.AL "???, Joseph T. Buck"
+.AL "Joseph T. Buck"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
@@ -24,5 +23,4 @@ E. A. Lee and D. G. Messerschmitt,
 Kluwer Academic Publishers, Boston, MA, 1988, pp. 154-172
 .SA
 RaisedCos, Xscope
-
-
+.ES
