@@ -47,12 +47,14 @@ Error :: Error (ostream& foo) : UserOutput (foo) {}
 
 void
 Error :: error() {
+	clr_accum_string ();
 	accum_string ("ERROR (no message specified)\n");
 	pr_accum_string ();
 }
 
 void
 Error :: error(const char *s) {
+	clr_accum_string ();
 	accum_string ("ERROR: ");
 	accum_string (s);
 	pr_accum_string ();
@@ -60,6 +62,7 @@ Error :: error(const char *s) {
 
 void
 Error :: error(const char *s, const char *c) {
+	clr_accum_string ();
 	accum_string ("ERROR: ");
 	accum_string (s);
 	accum_string (c);
