@@ -40,6 +40,9 @@ extern int matherr();
 int *tclDummyMathPtr = (int *) matherr;
  */
 
+/* Resource file name defined in ptclMain.cc */
+extern char* tcl_RcFileName;
+
 /*
  *----------------------------------------------------------------------
  *
@@ -89,6 +92,8 @@ Tcl_AppInit(Tcl_Interp *interp) {
      * then no user-specific startup file will be run under any conditions.
      */
 
-    Tcl_SetVar(interp, "tcl_rcFileName", "~/.ptclrc", TCL_GLOBAL_ONLY);
+    if ( tcl_RcFileName ) {
+      Tcl_SetVar(interp, "tcl_rcFileName", tcl_RcFileName, TCL_GLOBAL_ONLY);
+    }
     return TCL_OK;
 }
