@@ -21,9 +21,9 @@ export PTOLEMY PTARCH
 
 # See $PTOLEMY/src/pxgraph/README.txt for details.
 
-if [ "$(PT_USE_X11_PXGRAPH)x" != "x" ]; then
+if [ "${PT_USE_X11_PXGRAPH}x" != "x" ]; then
     # Use the X11 version
-    if [ -f $PTOLEMY/bin.$PTARCH/pxgraph.x11]; then
+    if [ -f $PTOLEMY/bin.$PTARCH/pxgraph.x11 ]; then
 	exec $PTOLEMY/bin.$PTARCH/pxgraph.x11 ${1+"$@"}
     else 
 	echo "$0: Could not find $PTOLEMY/bin.$PTARCH/pxgraph.x11"
