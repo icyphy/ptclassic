@@ -441,7 +441,10 @@ void param_dump()
 }
 
 
-
+/* Sun has this in its standard library in a file that also defines
+ * other functions that X uses!  Yuk!
+ */
+#ifndef sun
 int stricmp(a, b)
 register char *a, *b;
 /*
@@ -463,6 +466,7 @@ register char *a, *b;
 
     return value;
 }
+#endif
 
 static int strihash(string, modulus)
 register char *string;
