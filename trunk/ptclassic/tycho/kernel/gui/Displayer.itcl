@@ -268,7 +268,7 @@ class ::tycho::Displayer {
 # Set this window as a "master" window: when the window is destroyed,
 # Tycho will exit. The displayer uses this method to set the text
 # in the close button of all its status bars. A master Displayer
-# has its close button labelled "Quit" instead of "Close."
+# has its close button labeled "Quit" instead of "Close."
 #
 body ::tycho::Displayer::configureMaster {master} {
     if $master {

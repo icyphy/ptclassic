@@ -42,8 +42,8 @@
 # The user must give the x and y coordinates (in pixels) of the 
 # ruler base for positioning on the slate.  Options include specifying 
 # the length of the axis in pixels, the number of significant
-# digits to use in labelling the axis, the labelling style (ie whether
-# every increment should be labelled, or just the end points or no
+# digits to use in labeling the axis, the labeling style (ie whether
+# every increment should be labeled, or just the end points or no
 # labels), orientation of the axis (horizontal or vertical), and the
 # length of the tick marks in pixels.  The beginning and end of the 
 # axis can also be specified using the -from and -to options. 

@@ -401,7 +401,7 @@ body ::tycho::Dialog::invoke {args} {
 # variable exists and is not null, then it is taken to be
 # a list of scripts. This procedure evaluates the first
 # script in this list in the global context, with the name of
-# the dialog instance substituted for every ocurrence of the string
+# the dialog instance substituted for every occurrence of the string
 # "%0". It removes the script from the list so that the next modal
 # dialog will have the next dialog executed. This allows a series
 # of modal dialog invocation to be tested without user intervention.

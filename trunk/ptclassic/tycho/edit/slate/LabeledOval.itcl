@@ -58,7 +58,7 @@
 #
 # <p><b>Bugs</b>: (none)
 #
-# <p><b>Example</b>: Create a labelled oval:
+# <p><b>Example</b>: Create a labeled oval:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
 #   $slate create LabeledOval 40 40 100 80 -fill white -outline blue &#92

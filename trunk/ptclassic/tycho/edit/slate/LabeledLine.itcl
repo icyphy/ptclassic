@@ -93,7 +93,7 @@
 #
 #  <P><b>Example</b>
 #
-#  <P>Create a couple of labelled lines and some objects that can be
+#  <P>Create a couple of labeled lines and some objects that can be
 # dragged around to change their shapes:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
