@@ -16,7 +16,7 @@ Read ASCII data from a file.  The simulation can be halted
 on end-of-file, or the file contents can be periodically
 repeated, or the file contents can be padded with zeros.
 	}
-    hinclude { "streamCompat.h" }
+    hinclude { <fstream.h> }
     ccinclude { "SimControl.h" }
 
     output {
