@@ -1,0 +1,92 @@
+# A subclass of MenuSupport for testing.
+#
+# @Authors: John Reekie, Christopher Hylands
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+
+############################################################################
+#### Define a proc that can be used to create a test MenuSupport widget
+#
+proc _menu {args} {
+    catch {delete object .m}
+    eval ::tycho::MenuSupportTester .m $args
+    pack .m
+    wm deiconify .
+    raise .
+    return .m
+}
+
+#######################################################################
+#### MenuSupportTester
+# This is a simple subclass of MenuSupport that provides
+# enough extra code to enable the MenuSupport class to be tested.
+#
+catch {delete class ::tycho::MenuSupportTester}
+class ::tycho::MenuSupportTester {
+    inherit ::tycho::MenuSupport
+
+    constructor {args} {}
+    destructor {}
+    method post {{tag top}}
+    method unpost {{tag top}}
+}
+
+#######################################################################
+#### constructor
+#
+# Create the top-level menu, called "top".
+#
+body ::tycho::MenuSupportTester::constructor {args} {
+    itk_component add top {
+	menu $itk_interior.top -tearoff 0
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+    set menupath(top) $itk_component(top)
+    set menuentries($itk_component(top)) {}
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### post
+# Post the menu
+#
+body ::tycho::MenuSupportTester::post {{tag top}} {
+    chain $tag
+}
+
+#####################################################################
+#### unpost
+# Post the menu
+#
+body ::tycho::MenuSupportTester::unpost {{tag top}} {
+    chain $tag
+}
