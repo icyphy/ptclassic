@@ -42,6 +42,20 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 	if (hname==NULL || *hname=='\0' || strcmp(hname,"localhost")==0 ) {
 	    ; // no work required
 	} else {
+	    // In order for background process to work, we have to make sure
+	    // all rsh pipes are closed.  But we cant close them on this side
+	    // we send the command through a pipe.  Thus we have the remove
+	    // side close the files.  In the future, we may want to *not* do
+	    // this, or redirect it to a file, for non-background jobs.
+	    // If the command has newlines, we can't safely put '()' around it.
+	    // Solution is to put backquotes before newlines, but that might
+	    // not be safe.
+
+	    StringList wrapCmd;
+	    wrapCmd << "( " << rshCommand << " )";
+	    wrapCmd << " < /dev/null > /dev/null 2>&1";
+	    rshCommand = wrapCmd;
+
 	    StringList preCmd, postCmd;
 	    const char* cmdtext = rshCommand;
 	    if ( strchr(cmdtext,'\'')!=NULL ) {
@@ -53,6 +67,7 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 		preCmd << "/bin/cat " << cmdfilename << " | ";
 		postCmd << " ; /bin/rm -f " << cmdfilename;
 	    } else {
+		// cmd is quoteless.  Just echo it directly into the pipe.
 		preCmd << "echo '" << rshCommand << "' | ";
 	    }
 	    // -debug required to keep stdin open
