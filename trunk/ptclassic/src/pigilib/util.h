@@ -69,16 +69,16 @@ typedef DupSheetNode *DupSheet;
 
 extern boolean UMalloc ARGS((char **outPtr, int bytes));
 extern boolean StrDup ARGS((char **outPtr, char *in));
-extern char *DupString ARGS((char *string));
-extern char *SkipWhite ARGS((char *s));
-extern char *BaseName ARGS((char *name));
-extern char *DirName ARGS((char *buf));
+extern char* DupString ARGS((const char *string));
+extern char* SkipWhite ARGS((char *s));
+extern char* BaseName ARGS((char *name));
+extern char* DirName ARGS((char *buf));
 extern boolean ConcatDirName ARGS((char *dir,char *baseName, char **outPtr));
 extern boolean UGetFullTechDir ARGS((char **strPtr));
 extern boolean YesNoToBoolean ARGS((char *str));
-extern char *BooleanToYesNo ARGS((boolean bit));
+extern char* BooleanToYesNo ARGS((boolean bit));
 extern boolean UniqNameInit();
-extern char *UniqNameGet ARGS((char *s));
+extern char* UniqNameGet ARGS((char *s));
 
 extern void DupSheetInit ARGS((DupSheet *ds));
 extern void DupSheetClear ARGS((DupSheet *ds));

@@ -93,7 +93,7 @@ Duplicates string and returns pointer to new string
 */
 char *
 DupString(string)
-char *string;
+const char *string;
 {
     return(strcpy((char *) calloc(strlen(string)+1, sizeof(char)), string));
 }
