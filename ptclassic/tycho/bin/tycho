@@ -32,8 +32,10 @@ endif
 # FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
 #	   $PTOLEMY/tycho/kernel/Lib.tcl
-#setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4
-#setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
+if ($base != "tycho2.0" ) then
+	setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4
+	setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
+endif
 
 # To get tcl/tk man pages before corresponding unix man pages,
 # and to guess about a reasonable manpath if none is set.
@@ -83,9 +85,17 @@ set bindir = $PTOLEMY/obj.$PTARCH
 
 if ( ! $?prog ) then
 	if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
+		if ($base == "tycho2.0" ) then
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel-2.0b2/tysh-itcl2.0b2.ptiny
+		else
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
+		endif
 	else
-	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
+		if ($base == "tycho2.0" ) then
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel-2.0b2/tysh-itcl2.0b2
+		else
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
+		endif
 	endif
 	if ( $?tychodebug ) then
 	    set prog = $prog.debug
