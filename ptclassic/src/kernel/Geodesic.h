@@ -39,6 +39,7 @@ class PortHole;
 	///////////////////////////////////////////
 
 class Geodesic : public NamedObj {
+	friend class AutoFork;	// used to make auto-forking geodesics
 public:
 	// set the source and destination portholes -- virtual
 	// these functions return a pointer to the "real porthole"
