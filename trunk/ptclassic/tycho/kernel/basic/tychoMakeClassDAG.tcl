@@ -29,7 +29,14 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# Create the Tycho namespace -- this script may be sourced
+# without Tycho
+if { $itcl::version >= 3.0 } {
+    namespace eval ::tycho {}
+}
+
 # Pick up ::tycho::expandPath
+source [ file join [file dirname [info script]] Compat.tcl]
 source [ file join [file dirname [info script]] Path.tcl]
 
 #### tychoMkClassGraph
