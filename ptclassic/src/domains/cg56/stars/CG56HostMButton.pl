@@ -1,5 +1,5 @@
 defstar {
-    name { HostMultiButton }
+    name { HostMButton }
     derivedFrom { HostASrc }
     domain { CG56 }
     desc { Graphical one-of-many input source. }
@@ -21,7 +21,7 @@ buttons.  Exactly one button in the group is on.
 	    default { "" }
     }
     codeblock(cbMultiButtonAio) {
-aio_multibutton $ref(value) $fullname() "$val(label)" $val(pairs)
+aio_multibutton $ref(value) $fullname() {$val(label)} {$val(pairs)}
     }
     start {
 	// For now, we dont do anycheck of the pairs
