@@ -20,11 +20,15 @@ $Id$
 
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens
-// read each time doesn't evenly divide the buffer size.
+// read or written each time doesn't evenly divide the buffer size.
 
+// This one may need more thought.
 int AsmPortHole::circAccess() const {
-	if (attributes() | PB_CIRC) return TRUE;
-	return (bufferSize % numberTokens != 0);
+	if ((attributes() & PB_CIRC) != 0) return TRUE;
+	if (numberTokens > 1 && bufferSize % numberTokens != 0) return TRUE;
+	int farTokens = far()->numTokens();
+	if (farTokens > 1 && bufferSize % farTokens != 0) return TRUE;
+	return FALSE;
 }
 
 // return a string indicating the address.  This is virtual so it
