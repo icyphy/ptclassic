@@ -2,7 +2,7 @@ defcorona {
     name { Sub }
     domain { ACS }
     desc { }
-    version { $Id$
+    version { $Id$}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

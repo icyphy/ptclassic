@@ -4,7 +4,7 @@ defcorona {
 	desc {
 	    Generates a single delay for multiple lines
 	}
-	version {$Id$
+	version {$Id$}
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

@@ -2,7 +2,7 @@ defcorona {
     name { Cos }
     domain { ACS }
     desc { This star computes the cosine of its input, assumed to be an angle in radians. }
-    version { $Id$
+    version { $Id$}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

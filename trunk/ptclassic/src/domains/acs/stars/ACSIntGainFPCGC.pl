@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { IntGain } 
     desc { Output the product of the inputs, as a floating-point value. }
-    version { $Id$
+    version { $Id$}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company

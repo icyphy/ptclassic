@@ -6,7 +6,7 @@ defcore {
     desc { Prints out one sample from each input port per line.
 If "fileName" is not equal to "cout" (the default) or "stdout", it
 specifies the filename to write to. }
-    version { $Id$
+    version { $Id$}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { PolarToRect } 
     desc { Convert magnitude and phase to rectangular form. }
-    version { $Id$
+    version { $Id$}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Const } 
     desc { Output the constant level as a fixed-point value. }
-    version { $Id$
+    version { $Id$}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California
