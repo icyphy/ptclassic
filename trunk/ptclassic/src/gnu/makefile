@@ -102,7 +102,7 @@ GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 
 
 bin:
-	(cd $(GNU_OBJ); $(MAKE) MAKE=$(GMAKE) )
+	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) MAKE=$(GMAKE) )
 
 $(BINDIR):
 	mkdir $(BINDIR)
