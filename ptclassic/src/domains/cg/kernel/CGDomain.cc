@@ -51,11 +51,6 @@ extern const char CGdomainName[] = "CG";
 
 class CGDomain : public Domain {
 public:
-	// new wormhole
-        Star& newWorm(Galaxy& innerGal, Target* tg)  {
-                LOG_NEW; return *new CGWormhole(innerGal, tg);
-        }
-
 	// new input porthole
 	PortHole& newInPort() { LOG_NEW; return *new InCGPort;}
 

@@ -5,7 +5,6 @@
 #endif
 
 #include "CGStar.h"
-#include "CGWormBase.h"
 #include "EventHorizon.h"
 #include "CGPortHole.h"
 
@@ -40,40 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of Creation : 5/21/91
 	
 ********************************************************************/
-
-// CGWormhole can not contain a timed-domain. It may contain another
-// type of CGdomain.
-
-	//////////////////////////////
-	// CGWormhole
-	//////////////////////////////
-
-class CGWormhole : public CGWormBase, public CGStar {
-
-public:
-	void wrapup() { }
-
-	// Constructor
-	CGWormhole(Galaxy& g, Target* t = 0);
-	~CGWormhole();
-
-	// return my scheduler
-	Scheduler* scheduler() const { return myTarget()->scheduler() ;}
-
-        // execution time which is the average of the workload inside
-        // the wormhole with 1 processor.
-        int myExecTime() { return execTime; }
-	// clone -- allows interpreter/pigi to make copies
-	Block* clone() const;
-
-	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE;}
-
-	// FIXME: what should this do?
-	double getStopTime() { return 0.0;}
-
-};
-
 
         //////////////////////////////////////////
         // class CGtoUniversal
