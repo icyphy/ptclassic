@@ -1,4 +1,8 @@
+static const char file_id[] = "XYPlot.cc";
 /* 
+SCCS Version identification :
+$Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -23,23 +27,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
+
+ Programmer: Edward A. Lee and D. Niehaus
+ Created:
+
+Defines and maintains a TK XY Plot.
+
 */
-static const char SccsId[] = "$Id$";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
-
-/**************************************************************************
-Version identification:
-$Id$
-
-Author: Edward A. Lee and D. Niehaus
-
-Defines and maintains a TK XY Plot.
-
-
-**************************************************************************/
 
 #include "XYPlot.h"
 extern "C" {

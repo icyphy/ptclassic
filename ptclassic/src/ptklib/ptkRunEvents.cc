@@ -1,3 +1,4 @@
+static const char file_id[] = "ptkRunEvents.cc";
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -23,19 +24,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-*/
 
-/*
-    ptkRunEvents.cc :  Alan Kamas 1/95 
-    Version: $Id$
-*/
+ Programmer: Alan Kamas
+ Created: 1/30/95
 
+This file contains the procedure to process Tcl/Tk events while a
+ptolemy Run is taking place.  This uses the Polling code in the
+SimControl object.
 
-/* 
-  This file contains the procedure to process Tcl/Tk events while a
-  ptolemy Run is taking place.  This uses the Polling code in the
-  SimControl object
-         - Alan Kamas
 */
    
 extern "C" {

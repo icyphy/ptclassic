@@ -1,4 +1,8 @@
+static const char file_id[] = "ptkConsoleWindow.cc";
 /* 
+SCCS Version identification :
+$Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -23,20 +27,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
+
+ Programmer: Alan Kamas 
+ Created: 5/27/93
+
+Sets up the standard input to feed from the xterm that started up
+pigi and feeds stdout to that same window.
+
 */
 
 /*
-    ptkConsoleWindow.cc  aok
-    Version: $Id$
-*/
-
-// Sets up the standard input to feed from the xterm that
-// started up pigi and feeds stdout to that same window.
-
-// Alan Kamas 
-
-
-/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
  */
 #include "sol2compat.h"
