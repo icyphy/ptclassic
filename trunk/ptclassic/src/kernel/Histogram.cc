@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Display.h"
 #include <minmax.h>
 #include "miscFuncs.h"
+#include "StringList.h"
 
 // resize causes the intVec to grow or shrink.  The data are reallocated
 // and copied.
@@ -120,8 +121,10 @@ XHistogram :: XHistogram () {
 void XHistogram :: initialize(Block* parent, double binW, const char* options,
 			      const char* title, const char* saveFile,
 			      int maxBins) {
-	char buf[100];
-	sprintf (buf, "-bar -nl -brw %g %s", binW/2, options);
+	char numstr[64];
+	sprintf(numstr, "%g", binW/2);
+	StringList buf = "-bar -nl";
+	buf << " -brw " << numstr << " " << options;
 	optstring = savestring(buf);
 	display->initialize(parent, 1, optstring, title, saveFile);
 	LOG_DEL; delete hist;
