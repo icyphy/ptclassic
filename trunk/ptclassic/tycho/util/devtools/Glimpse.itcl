@@ -88,7 +88,11 @@ class ::tycho::Glimpse {
 #### constructor
 #
 body ::tycho::Glimpse::constructor {args} {
-    global PTOLEMY TYCHO tcl_library
+    global PTOLEMY TYCHO tcl_library tcl_platform
+    if {$tcl_platform(platform) =!=macintosh} {
+	error "Sorry, Glimpse is not supported on the Mac,\nthere is\
+		no Tcl \"exec\" on the Mac."
+    }
 
     configure -queries [list \
 	{line pattern {Search pattern:} {}} \
