@@ -48,6 +48,14 @@ with Itcl2.0, you must upgrade to Itcl2.1 or later.  See the <A
 HREF="install.html">Installation guide</A> for more information.
 
 
+<H3><A HREF="CircularList error message">CircularList error message</A></H3>
+<PRE>
+Unable to load Tycho.tcl startup file: invalid command name "CircularList"
+</PRE>
+Probably the <CODE>$TYCHO/kernel/tclIndex</CODE>
+file is corrupt, try
+recreating it by cding to that directory and doing <CODE>make</CODE>.
+
 <H3><A NAME="file join error message">file join error message</A></H3>
 If you are starting up Tycho0.1.1 or later and you see a message about
 <PRE>
