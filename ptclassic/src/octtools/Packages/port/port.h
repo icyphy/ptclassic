@@ -210,7 +210,7 @@ typedef int int16;
 #include <stdio.h>
 #include <ctype.h>
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 /* Solaris2.3 defines type boolean as an enum, which is a no no.
  * see also pigilib/compat.h
  */
@@ -269,16 +269,19 @@ extern double trunc();
 #define LACK_SYS5
 #endif
 
-#if defined(PTSUN4) || defined(ultrix4) || defined(PTLINUX)  || defined(PTHPPA) || defined(PTNBSD_386)
+#if defined(PTSUN4) || defined(ultrix4) || defined(PTLINUX) || defined(PTHPPA) || defined(PTNBSD_386) || defined(PTSVR4)
 #define SIGNAL_FN	void
 #else
 /* sequent, ultrix2, 4.3BSD (vax, hp), sunos3 */
 #define SIGNAL_FN	int
 #endif
 
+#ifdef PTSVR4
+#define stricmp strcasecmp
+#endif /* PTSVR4 */
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(PTAIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PNBSD_386)
+#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(PTAIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PNBSD_386) || defined(PTSVR4)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -344,7 +347,7 @@ extern VOID_HACK rewind();
 
 
 /* most machines don't give us a header file for these */
-#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(PTSOL2) || defined(PTHPPA) || defined(PTIRIX5)
+#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(PTSOL2) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSVR4)
 #include <stdlib.h>
 #else
 
@@ -380,7 +383,7 @@ extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
 
-#if defined(PTHPPA) || defined(aiws) || defined(PTLINUX) ||(defined(PTSOL2) || defined(PTNBSD_386) && ! defined(BSD)) 
+#if defined(PTHPPA) || defined(aiws) || defined(PTLINUX) ||(defined(PTSOL2) || defined(PTNBSD_386) && ! defined(BSD)) || defined(PTSVR4)
 extern int sprintf();
 #else
 #ifndef _IBMR2
