@@ -206,7 +206,7 @@ void CGTarget::setup() {
 	}
 	if (!galaxySetup()) return;
 	if (haltRequested()) return;
-	if (filePrefix.null()) filePrefix = galaxy()->name();
+	if (filePrefix.null() && galaxy()) filePrefix = galaxy()->name();
 	
 	// This will be phased out.  Use either CGTarget::writeFile
 	// or CGUtilities.h rpcWriteFile.
@@ -377,7 +377,7 @@ void CGTarget :: mainLoopCode() {
 
 int CGTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 	// save infos
-	Galaxy* saveGal = galaxy();
+	Galaxy* saveGal = galaxy();	// method will work fine if NULL
 	setGalaxy(*g);
 	Target& saveT = s->target();
 	s->setTarget(*this);
@@ -387,10 +387,10 @@ int CGTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
         Target :: wrapup();
 
 	// restore info
-	setGalaxy(*saveGal);
+	if (saveGal) setGalaxy(*saveGal);
 	s->setTarget(saveT);
 	return TRUE;
-}	
+}
 
 // virtual function
 void CGTarget :: compileRun(SDFScheduler* s) {
@@ -464,12 +464,13 @@ int CGTarget :: incrementalAdd(CGStar*, int) {
 
 
 int CGTarget::inWormHole() {
-	return int(galaxy()->parent());
+	return int(galaxy() && galaxy()->parent());
 }
 
 // If a CG domain is inside a wormhole, we may need to change
 // the sample rate of event horizons after scheduling is performed.
 void CGTarget :: adjustSampleRates() {
+   if (! galaxy()) return;
    BlockPortIter nextPort(*galaxy());
    PortHole* p;
    while ((p = nextPort++) != 0) {
@@ -483,6 +484,7 @@ void CGTarget :: adjustSampleRates() {
 }
 
 void CGTarget :: allWormInputCode() {
+	if (! galaxy()) return;
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -494,6 +496,7 @@ void CGTarget :: wormInputCode(PortHole& p) {
 }
 
 void CGTarget :: allWormOutputCode() {
+	if (! galaxy()) return;
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -505,6 +508,7 @@ void CGTarget :: wormOutputCode(PortHole& p) {
 }
 
 int CGTarget :: allSendWormData() {
+    if (! galaxy()) return FALSE;
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -522,6 +526,7 @@ int CGTarget :: sendWormData(PortHole& p) {
 }
 
 int CGTarget :: allReceiveWormData() {
+    if (! galaxy()) return FALSE;
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -625,14 +630,15 @@ StringList CGTarget::comment(const char* text, const char* b,
 
 StringList CGTarget::headerComment(const char* begin, const char* end, 
     const char* cont) {
-	StringList header,msg;
+	StringList header, msg;
 	time_t t = time(NULL);
+	const char* galname = galaxy() ? galaxy()->name() : "-- UNKNOWN --";
 	msg 	<< "User:      " << cuserid(NULL) << "\n"
 		<< "Date:      " << ctime(&t)
 		<< "Target:    " << fullName() << "\n"
-		<< "Universe:  " << galaxy()->name() << "\n";
-	if (begin==NULL) header << comment(msg);
-	else header << comment(msg,begin,end,cont);
+		<< "Universe:  " << galname << "\n";
+	if (begin == NULL) header << comment(msg);
+	else header << comment(msg, begin, end, cont);
 	return header;
 }
 	
@@ -650,6 +656,7 @@ const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
 }
 
 int CGTarget :: modifyGalaxy() {
+    if(! galaxy()) return FALSE;
     if(haltRequested()) return FALSE;
     if(!typeConversionTable) return TRUE;
 
