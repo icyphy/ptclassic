@@ -21,13 +21,17 @@ DEDIR = $(ROOT)/src/domains/de/kernel
 NETWK = $(ROOT)/src/domains/sdf/image/kernel
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(NETWK)
 
+
+
 PL_SRCS= \
 DEAnd.pl \
 DEArbitrate.pl \
 DEBeep.pl \
 DEBlackHole.pl \
+DECellLoad.pl \
 DECellRoute.pl \
 DECellToImage.pl \
+DECellUnload.pl \
 DEClock.pl \
 DEDelay.pl \
 DEDiscard.pl \
@@ -39,6 +43,7 @@ DEFork.pl \
 DEHandShake.pl \
 DEImageToCell.pl \
 DEImpulse.pl \
+DEInsertPacket.pl \
 DEIntPacketize.pl \
 DEIntUnPacketize.pl \
 DEInvert.pl \
@@ -50,6 +55,7 @@ DEPassGate.pl \
 DEPSServer.pl \
 DEPacketize.pl \
 DEPoisson.pl \
+DEPrevPacketSub.pl \
 DEPrQueue.pl \
 DEPriorityCheck.pl \
 DEPriorityQueue.pl \
@@ -82,7 +88,8 @@ DEVarServer.pl \
 DEVirtClock.pl \
 DEXMgraph.pl \
 DEXgraph.pl \
-DEXhistogram.pl
+DEXhistogram.pl \
+DEZeroSubstitution.pl
 
 SRCS =	$(PL_SRCS:.pl=.cc)
 
