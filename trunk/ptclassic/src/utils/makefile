@@ -33,7 +33,7 @@
 # maintained.
 
 
-DIRS = libcephes libexttools libgslider libptmatlab libptmathematica \
+DIRS = libexttools libgslider libptdsp libptmatlab libptmathematica \
        ptplay ptvhdlsim rman-2.4 tkman-1.7.3
 
 # Need to have $PTOLEMY as an absolute pathname for wish
