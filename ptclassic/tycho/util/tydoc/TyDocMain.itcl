@@ -1640,7 +1640,9 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
     }
     if {$generateIndex == 1} {
 	puts $indexfd "</DL>\n<HR>"
-	puts $indexfd "Last Updated: [clock format [clock seconds] -format %D]"
+	# Use %m/%d/%y here instead of %D because %D does not work under
+	# Tcl8.0.4 and Cygwin b20.1n
+	puts $indexfd "Last Updated: [clock format [clock seconds] -format %m/%d/%y]"
 	puts $indexfd "</body>\n</html>"
 	close $indexfd
     }
