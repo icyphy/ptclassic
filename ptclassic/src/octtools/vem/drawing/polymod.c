@@ -48,6 +48,7 @@ static char SccsId[]="$Id$";
 #include "attributes.h"		/* Attribute handler */
 #include "message.h"		/* Message stuff     */
 #include "display.h"		/* Display code      */
+#include "vemUtil.h"
 
 
 
@@ -78,7 +79,7 @@ struct varray {
 
 #define varray_array(varray) (varray)->array
 
-static varray_grow(varray, x, y)
+static void varray_grow(varray, x, y)
 struct varray *varray;
 int x, y;
 {
