@@ -28,12 +28,14 @@ set x1 [expr 5.0-$ballRadius]
 set y1 [expr 2.5-$ballRadius]
 set x2 [expr 5.0+$ballRadius]
 set y2 [expr 2.5+$ballRadius]
-set ${uniqueSymbol}ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
+
+# FIX ME: The following name should be somehow unique
+set ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
 	-outline white -fill firebrick4 ]
 
 proc ${uniqueSymbol}callTcl {} {
 	global uniqueSymbol
-	global ${uniqueSymbol}ballId
+	global ballId
 	set s .${uniqueSymbol}field
 	set c $s.f.pad
 	set ballRadius 0.25
@@ -44,5 +46,5 @@ proc ${uniqueSymbol}callTcl {} {
 	set y1 [expr {$yin-$ballRadius}]
 	set x2 [expr $x1+2*$ballRadius]
 	set y2 [expr $y1+2*$ballRadius]
-	$c coords ${uniqueSymbol}ballId ${x1}c ${y1}c ${x2}c ${y2}c
+	$c coords $ballId ${x1}c ${y1}c ${x2}c ${y2}c
 }
