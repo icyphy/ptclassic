@@ -2,11 +2,16 @@ defstar
 {
     name { Timer }
     domain { DE }
-    descriptor { Measure real elapsed time between events. }
+    descriptor {
+Upon receiving a trigger input, output the
+elapsed time in seconds since the last reset input.
+The time in seconds is related to the scheduler time
+through the scaling factor "timeScale".
+    }
     version { $Id$ }
     author { T.M. Parks }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -20,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { timeScale }
 	type { float }
 	default { 1.0 }
-	desc { Duration of a time unit in seconds. }
+	desc { Duration of a scheduler time unit in seconds. }
     }
 
     input
