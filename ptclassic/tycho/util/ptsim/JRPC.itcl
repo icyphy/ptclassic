@@ -148,12 +148,15 @@ body ::tycho::JRPC::constructor {args} {
 
     debug "About to get socket at port $portnum"    
     if [catch {set _clientSocket [socket localhost $portnum]} err] {
-	error "JRPC: Maximum retry count of $maxRetryCount exceeded"
+	# Print out the log file FIXME: is this a good idea?
 	if [file exists $_logFile] {
 	    set fd [open $_logFile]
 	    while [puts [gets $fd]] {}
 	    close $fd
 	}
+	error "JRPC: failed to connected to port $portnum, try again.\n\
+		error was:\n\
+		$err"  
     }
     debug "Got socket $_clientSocket"
     fconfigure $_clientSocket -blocking 0
