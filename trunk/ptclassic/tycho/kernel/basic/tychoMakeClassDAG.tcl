@@ -100,6 +100,9 @@ proc tychoStandardDAG {} {
             [file join editors visedit] \
             [file join typt editors ] \
             [file join typt kernel ] \
+            [file join slate kernel ] \
+            [file join slate pictures ] \
+            [file join slate interactors ] \
     ]
 
     foreach dir $dirs {
