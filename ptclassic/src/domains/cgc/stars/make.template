@@ -19,7 +19,7 @@ CGCDIR = $(ROOT)/src/domains/cgc/kernel
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR)
+INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
