@@ -175,7 +175,7 @@ body ::tycho::ToolBar::button {tag description args} {
 
 #####################################################################
 #### buttonDisable
-# Disable a button added with <code>button</code, graying out
+# Disable a button added with <code>button</code>, graying out
 # the button.
 #
 body ::tycho::ToolBar::buttonDisable {name} {
