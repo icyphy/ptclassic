@@ -235,5 +235,39 @@ int Wormhole :: run() {
 // arrange things after run
 void Wormhole :: sumUp() {}
 
+// explode myself to expose the inside Galaxy.
+Galaxy* Wormhole :: explode() {
+	BlockPortIter nextp(selfStar);
+	PortHole* p;
 
+	while((p = nextp++) != 0) {
+		int delay = p->numInitDelays();
+		PortHole* tempP = p->far();
+		EventHorizon* eveP = p->asEH();
+		PortHole* inP = eveP->ghostAsPort()->far();
+		GenericPort* alp = p->aliasFrom();
+		tempP->disconnect(1);
+		inP->disconnect(1);
 
+		// remove parent pointers, so portholes won't try to
+		// remove themselves from their parent.
+		eveP->ghostAsPort()->setPort("",0);
+		eveP->asPort()->setPort("",0);
+		// now remove the event horizon pair.
+		LOG_DEL; delete eveP;
+
+		// make new connection
+		if (tempP->isItInput())
+			inP->connect(*tempP, delay);
+		else
+			tempP->connect(*inP, delay);
+
+		// update aliase pointer if necessary.
+		// since deleting EventHorizons may corrupt aliase pointers.
+		if (alp != 0)
+			alp->setAlias(*(inP->aliasFrom()));
+	}
+	galP = 0;
+	return &gal;
+}
+		

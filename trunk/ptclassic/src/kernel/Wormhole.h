@@ -94,6 +94,9 @@ public:
 	// redefine setStopTime()
 	void setStopTime(double stamp);
 
+	// explode myself to expose the inside Galaxy.
+	Galaxy* explode();
+
 protected :
 	// function to connect inner galaxy ports to outside through
 	// event horizons of proper type
