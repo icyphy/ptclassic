@@ -48,6 +48,7 @@ ITCL_SRCS = \
 	ComplexItem.itcl \
 	Connectible.itcl \
 	Connector.itcl \
+	DragDropper.itcl \
 	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
