@@ -354,7 +354,7 @@ body ::tycho::ResourceHTTP::destructor {} {
 #
 body ::tycho::ResourceHTTP::cachefile {} {
     set url [forward [path]]
-    ::puts "CACHEFILE $url"
+    debugputs "Cachefile, seeking at $url"
 
     #if ![::info exists _cachefile($url)] {}
     if ![::tycho::cache exists $url] {
@@ -537,9 +537,6 @@ body ::tycho::ResourceHTTP::contenttype {url} {
     set URLexists [exists $url]
     set url [forward $url]
 
-    ::puts "CACHE: [tycho::cache exists $url]"
-    ::puts "URL: $URLexists"
-
     if {[::tycho::cache exists $url] && $URLexists} {
         return [::tycho::cache getcontenttype $url]
     } else {
@@ -630,12 +627,10 @@ body ::tycho::ResourceHTTP::dirlist {url} {
 #
 body ::tycho::ResourceHTTP::exists {url} {
     set url [forward $url]
-    ::puts "EXISTS? $url"
 
-    #if [::tycho::cache exists $url] {}
-    if {[::info exists _exists($url)]} {
-        return $_exists($url)
-    }
+    # The following is used to speed up transaction (cache every session).
+    if {[::info exists _exists($url)]} {return $_exists($url)}
+
     # Otherwise create an new HTTP object, and get the information.
     set resource [new $url]
     $resource httpget $url "header"
@@ -648,6 +643,7 @@ body ::tycho::ResourceHTTP::exists {url} {
 
     # If necessary, cache the file if it doesn't already exists.
     # If cached, but remote file has been modified, then fetch and catch again.
+    set url [forward $url]
     if {![::tycho::cache exists $url] || \
             ([::tycho::cache exists $url] && \
             ![tycho::cache same $url $newdate $newsize $newcontenttype])} {
@@ -674,7 +670,7 @@ body ::tycho::ResourceHTTP::mkdir {dir} {
 body ::tycho::ResourceHTTP::new {path args} {
     #::puts "::tycho::ResourceHTTP::new $path $args"
     uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] \
-	    $args -debug 1
+	    $args -debug 0
 }
 
 #####################################################################
@@ -927,8 +923,8 @@ body ::tycho::ResourceHTTP::httpget {url type} {
     # FIXME: Need to figure out how to set the Accept-Encoding field
     ::fconfigure $socketid -blocking no -translation crlf
     ::puts $socketid "GET $path HTTP/1.0\n\
-	    User-Agent: Tycho Jr. Beta\n\
-	    Accept-Encoding: $accept"
+            Accept-Encoding: $accept\n\
+            User-Agent: Tycho Browser (http://ptolemy.eecs.berkeley.edu)"
     ::puts $socketid ""
     ::flush $socketid
     ::fconfigure $socketid -translation auto
@@ -1006,14 +1002,24 @@ body ::tycho::ResourceHTTP::httpread {} {
 	    # Check status codes
 	    if {$status>=300 && $status<=399} {
 		# If the header return status is 300-399, then we need to 
-		# automatically forward the HTTP location. This is done 
-		# under all the smart browsers such as Internet Explorer 
-		# and Netscape, and is almost always done transparently
-		# to the user.
+		# automatically forward the HTTP location.
 		debugputs "Closing $socketid"
 		::close $socketid
-		set _forwarding($currentURL) $forwardlocation
-		httpget $forwardlocation $requestMode
+
+                if {[regexp -nocase \
+                        {^http:///(.*)$} $forwardlocation _ rest]} {
+                    # The following check is needed because Apache Server 1.2+
+                    # may return the forward: http:///<etc><etc>, omitting the
+                    # site name completely to save transfer time.
+                    set site [lindex [::tycho::url split $currentURL] 1]
+                    set _forwarding($currentURL) "http://$site/$rest"
+                } else {
+                    # NCSA and Netscape Enterprise server don't do anything
+                    # fancy like Apache.
+                    set _forwarding($currentURL) $forwardlocation
+                }
+                set _exists($currentURL) 1
+		httpget $_forwarding($currentURL) $requestMode
 
 	    } elseif { $requestMode == "header" } {
 		# If in header-only mode, we're done!
