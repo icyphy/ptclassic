@@ -171,7 +171,7 @@ htmlchek:
 # that includes this one and have it set $(EXTRA_SRCS)
 checkjunk:
 	@checkextra -v $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) $(OPTIONAL_FILES) \
-		makefile SCCS
+		$(JSRCS) makefile SCCS
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
@@ -219,7 +219,7 @@ realclean:
 
 # Remove the sources too, so that we can get them back from sccs
 extraclean:
-	rm -f $(CRUD) $(REALCLEAN_STUFF) $(EXTRA_SRCS)
+	rm -f $(CRUD) $(REALCLEAN_STUFF) $(EXTRA_SRCS) $(JSRCS)
 	rm -rf doc/codeDoc/*
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
