@@ -28,7 +28,7 @@ Write the value of the input to a floating-point variable in shared memory.
   }
   protected
   {
-    const char* lastname;
+    char* lastname;
   }
   constructor {
     lastname = 0;
