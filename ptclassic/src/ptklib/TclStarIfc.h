@@ -67,9 +67,13 @@ public:
 	int setup (Block* star, int numInputs,
 		   int numOutputs, const char* tcl_file);
 
-	// Invoke the callTcl procedure, if it was defined in the Tcl script.
+	// Invoke the goTcl procedure, if it was defined in the Tcl script.
 	// Return FALSE if an error occurs, TRUE otherwise.
 	int go ();
+
+	// Invoke the wrapupTcl procedure, if it was defined.
+	// Return FALSE if an error occurs, TRUE otherwise.
+	int wrapup ();
 
 	// Method to get inputs from myStar
 	InfString getInputs();
@@ -95,9 +99,13 @@ protected:
 	// the star within which it sits for the benefit of Tcl routines.
 	InfString starID;
 
-	// A flag specifying whether a callTcl procedure was defined
+	// A flag specifying whether a goTcl procedure was defined
 	// when the Tcl file was sourced.
 	int synchronous;
 
+	// A procedure for invoking a Tcl script of the name
+	// "name_starID".
+	// Returns FALSE if an error occurs, TRUE otherwise
+	int callTclProc(const char* name);
 };
 #endif
