@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkRegisterCommands.cc  aok
-    Version: @(#)ptkRegisterCmds.cc	1.2 6/29/93
+    Version: $Id$
 */
 
 
@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "ptk.h"
 #include "ptcl.h"
+#include "poct.h"
 
 extern "C" {
 #include "ptkRegisterCmds.h"
@@ -44,6 +45,7 @@ extern "C" {
 
 /* global */ 
 PTcl *ptcl;
+POct *poct;
 
 void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
 {
@@ -51,4 +53,6 @@ void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
    // Construct the global PTcl object.  This should be done once only.
    ptcl = new PTcl(ip);
 
+   // Construct the global POct object.  This should be done once only.
+   poct = new POct(ip);
 }
