@@ -62,6 +62,7 @@ ITCL_SRCS = \
 	EditCText.itcl \
 	EditCpp.itcl \
 	EditCppText.itcl \
+	EditFSM.itcl \
 	EditHTML.itcl \
 	EditHTMLText.itcl \
 	EditItcl.itcl \
