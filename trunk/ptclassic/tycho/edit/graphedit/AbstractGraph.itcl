@@ -152,7 +152,7 @@ class ::tycho::AbstractGraph {
     # Return the "depth" of a given vertex
     method depth {vertex}
 
-    # Perform a depth-fiorst traversal of the graph
+    # Perform a depth-first traversal of the graph
     method depthFirst {{roots {}}}
 
     # Perform a depth-sort of the graph
@@ -172,9 +172,6 @@ class ::tycho::AbstractGraph {
 
     # Return the number of vertices in the graph
     method numberofvertices {}
-
-    # "Repair" a graph by deleting improperly-connected edges
-    method repair {}
 
     # Return the topological sort of a graph
     method topologicalSort {{leaves {}}}
@@ -228,10 +225,10 @@ class ::tycho::AbstractGraph {
     protected method _graphroots {}
 
     # Grid layout auxiliary method
-    method _gridleft {roots ymin}
+    protected method _gridleft {roots ymin}
 
     # Vertices cannot be nested
-    protected method vertexin {context vertex args} {
+    protected method _vertex {context vertex args} {
 	_nesterror vertex $context $vertex
     }
 
@@ -268,6 +265,7 @@ body ::tycho::AbstractGraph::constructor {args} {
 
     # Define the "vertex" entity: no value
     defineEntityType vertex \
+	    -leaf 1 \
 	    -description ""
 }
 
@@ -920,29 +918,6 @@ body ::tycho::AbstractGraph::numberofvertices {} {
 }
 
 ########################################################################
-#### repair
-#
-# "Repair" a graph by deleting improperly-connected edges. This method
-# provides a default implementation that will remove invalid edges in 
-# most properly-written subclasses; however,
-# subclasses may choose to override it for efficiency, because it doesn't work
-# with the subclass, or to perform additional repairs. This
-# method should be called after building a graph if it is not certain
-# that the graph is correctly constructed.
-# This method cannot be recorded or published.
-#
-body ::tycho::AbstractGraph::repair {} {
-    foreach {src tgt} [edges] {
-	if { ! [::info exists _vertices($src)] \
-                || ! [::info exists _vertices($tgt)] } {
-	    edgedelete $src $tgt
-	}
-    }
-    # Return null so record{} or publish{} will complain.
-    return ""
-}
-
-########################################################################
 #### topologicalSort
 #
 # Perform a topological sort of the graph and return the vertices
@@ -1213,9 +1188,10 @@ body ::tycho::AbstractGraph::traverse3 {} {
 # it doesn't work with the subclass, or to perform additional tests.
 #
 body ::tycho::AbstractGraph::verify {} {
+puts [array names _vertices]
     foreach {src tgt} [adjacency] {
-	if { ! [::info exists _vertices($src)] \
-		|| ! [::info exists _vertices($dst)] } {
+        if { ! [::info exists _vertices($src)] \
+                || ! [::info exists _vertices($tgt)] } {
 	    return 0
 	}
     }
@@ -1230,7 +1206,7 @@ body ::tycho::AbstractGraph::verify {} {
 # vertex. Flag an error if the vertex already exists. 
 #
 body ::tycho::AbstractGraph::vertex {vertex args} {
-    _verifynot vertex $vertex
+    _verifynot vertex {} $vertex $vertex
 
     # Initialize parent-child links
     set _adjacency($vertex,children) {}
@@ -1242,8 +1218,11 @@ body ::tycho::AbstractGraph::vertex {vertex args} {
     # Remember the vertex name here
     set _vertices($vertex) ""
 
-    # Add vertex and return inverse command
-    _entity vertex {} $vertex {} $args
+    # Add vertex
+    _addentity vertex {} $vertex {} {} $args
+
+    # Return inverse command
+    list vertexdelete $vertex
 }
 
 ########################################################################
@@ -1253,8 +1232,8 @@ body ::tycho::AbstractGraph::vertex {vertex args} {
 # attribute-value list. Flag an error if the vertex does not exist.
 #
 body ::tycho::AbstractGraph::vertexattrs {vertex} {
-    _verify vertex $vertex
-    _attributes vertex $vertex
+    _verify vertex {} $vertex
+    _attributes vertex {} $vertex
 }
 
 ########################################################################
@@ -1264,8 +1243,8 @@ body ::tycho::AbstractGraph::vertexattrs {vertex} {
 # not exist.
 #
 body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
-    _verify vertex $vertex
-    _cget vertex $vertex $attribute
+    _verify vertex {} $vertex
+    _cget vertex {} $vertex $attribute
 }
 
 ########################################################################
@@ -1276,8 +1255,8 @@ body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
 # vertex does not exist.
 #
 body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
-    _verify vertex $vertex
-    _configure vertex $vertex $args
+    _verify vertex {} $vertex
+    _configure vertex {} $vertex $args
 }
 
 ########################################################################
@@ -1291,7 +1270,7 @@ body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
 # for that.
 #
 body ::tycho::AbstractGraph::vertexdelete {vertex} {
-    _verify vertex $vertex
+    _verify vertex {} $vertex
 
     # Clear parent-child links
     unset _adjacency($vertex,children)
@@ -1303,8 +1282,8 @@ body ::tycho::AbstractGraph::vertexdelete {vertex} {
     # Forget the copy of the vertex name
     unset _vertices($vertex)
 
-    # Call the superclass to delete
-    _delete vertex $vertex
+    # Call the superclass to delete and construct the undo command
+    concat vertex $vertex [_delete vertex {} $vertex]
 }
 
 ########################################################################
@@ -1400,4 +1379,3 @@ body ::tycho::AbstractGraph::_graphroots {} {
     }
     return $result
 }
-
