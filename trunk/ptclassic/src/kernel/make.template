@@ -74,6 +74,7 @@ CCS_WITH_H_FILES=\
  NamedObj.cc \
  Packet.cc \
  Particle.cc \
+ ParticleQueue.cc \
  PriorityQueue.cc \
  Scheduler.cc \
  Star.cc \
@@ -112,7 +113,6 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  ConstIters.h \
  Linker.sysdep.h \
  Output.h \
- ParticleQueue.h \
  ParticleStack.h \
  Plasma.h \
  dataType.h \
