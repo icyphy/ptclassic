@@ -7,8 +7,17 @@ undefined) you can type (for csh)
 	setenv PRINTER lw
 where "lw" is replaced with the name of your printer.
 
-The manual is divided into four volumes.  At this time,
-only the first volume is available.  To print it:
+The manual is divided into four volumes: the User's Manual,
+Programmer's Manual, Kernel Manual, and Star Atlas.  Each manual is a
+collection of postscript files in the directory users_man, prog_man,
+kernelManual, or star_atlas.  To print out one of the manuals, cd to
+the appropriate directory and then use the "print_manual" command.
+
+For example, to print the User's Manual:
 
 	cd $PTOLEMY/doc/users_man
 	print_manual
+
+
+The directories header and bin are used to print the star
+documentation that is automatically generated ptlang.
