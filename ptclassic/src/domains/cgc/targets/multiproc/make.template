@@ -20,9 +20,15 @@ CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 CGCSTARS = $(ROOT)/src/domains/cgc/stars
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
+DLDIR = $(ROOT)/src/domains/cg/dlScheduler
+MACRODIR = $(ROOT)/src/domains/cg/macroScheduler
+CGDDFDIR = $(ROOT)/src/domains/cg/ddfScheduler
+
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
-	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
+	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)  -I$(DLDIR) -I$(MACRODIR) \
+	-I$(CGDDFDIR)
+
 
 PL_SRCS = \
 	CGCSDFBase.pl \
@@ -33,7 +39,8 @@ PL_SRCS = \
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS = CGCTargetWH.cc CGCMultiTarget.cc CGCBDFTarget.cc $(PLSRC) 
+SRCS = CGCTargetWH.cc CGCMultiTarget.cc CGCBDFTarget.cc \
+	CGCDDFCode.cc CGCMacroStar.cc $(PLSRC) 
 EXTRA_SRCS = $(PL_SRCS)
 
 HDRS=$(SRCS:.cc=.h)
