@@ -50,7 +50,7 @@
 class ::tycho::Uninstantiable {
 
     constructor {args} {
-	error "The [info class] class cannot be instantiated"
+	error "The [$this info class] class cannot be instantiated"
     }
     destructor {}
 }

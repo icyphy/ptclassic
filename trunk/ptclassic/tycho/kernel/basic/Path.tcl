@@ -326,7 +326,7 @@ proc ::tycho::directoryParent {} {
             return {..:}
         }
         default {error "Don't know the directory separator on \
-                $tcl_platform(platform) yet.}
+                $tcl_platform(platform) yet."}
     }
 }    
 
@@ -352,7 +352,7 @@ proc ::tycho::directorySeparator {} {
             return {:}
         }
         default {error "Don't know the directory separator on \
-                $tcl_platform(platform) yet.}
+                $tcl_platform(platform) yet."}
     }
 }
 
@@ -626,8 +626,8 @@ proc ::tycho::rootDir {pathname} {
 # FIXME: In tcl7.6, this should go away
 #
 proc ::tycho::rm { args } {
-    global itcl::version tcl_platform
-    if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
+    global tcl_platform
+    if { $::itcl::version >= 2.2} {
 	if {[lindex $args 0] == "-f" || [lindex $args 0] == "-rf"} {
 	    eval file delete -force -- $args
 	} else {

@@ -385,7 +385,7 @@ proc ::tycho::runShell {} {
     # This is necessary because the GUI has intercepted
     # the "puts" command, and renamed the standard tcl 
     # command to tclputs
-    if { [info which -command tclputs] == "" } {
+    if { [infoWhichCommand tclputs] == "" } {
 	uplevel #0 {
 	    proc tclputs {args} {
 		eval ::puts $args
