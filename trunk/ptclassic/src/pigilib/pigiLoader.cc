@@ -137,6 +137,7 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 		reportErrors ("errors in compilation");
 		return FALSE;
 	}
+	unlink(tmpFileName);
 	return TRUE;
 }
 
@@ -216,6 +217,7 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 			reportErrors ("errors from make");
 			return FALSE;
 		}
+		unlink(tmpFileName);
 		return linkObject (oName);
 	}
 // No makefile.  If object is younger than source, assume it's good.
