@@ -203,6 +203,8 @@ body ::tycho::Compile::compileAndRun {filenames} {
 # file_name:line_number: Error message here
 #
 body ::tycho::Compile::parseError {results} {
+    puts "Results: $results"
+
     # Default is that we don't have an error
     set errorCount -1
 
@@ -221,7 +223,8 @@ body ::tycho::Compile::parseError {results} {
     set errorList {}    ;# Default is that our list is empty
 
     # Get the output of the compiler
-    set output [[lindex $results 1].history get 0.0 end]
+    #set output [[lindex $results 1].history get 0.0 end]
+    set output [$results.history get 0.0 end]
     set output [split $output "\n"]
     foreach line $output {
         incr cLineNum
@@ -320,27 +323,72 @@ body ::tycho::Compile::checkSourceFiles {} {
 body ::tycho::Compile::compileFiles {} {
     # FIXME: compileString should be a preference.
     # FIXME: dirname should be a preference.
-    set compileString "make -f $makefile"
     
-    putStatus "About to make shared object, when complete, be sure to \
-            close the Exec window to continue."
+    #putStatus "About to make shared object, when complete, be sure to \
+    #        close the Exec window to continue."
 
     # Compile.  If we already have a compileWidget, reuse it. 
     if {![winfo exists $compileWidget]} {
+        putStatus "Compile window created. Compile again to start execution."
         #set compileWidget [$this cget -view].compile
         #::tycho::Monitor $compileWidget
         #set retList [::tycho::execModal $compileString $dirname $compileWidget]
-        set retList [::tycho::execModal $compileString $dirname]
-    } else {
-        set retList [::tycho::execModal {} {} $compileWidget]
+        #set retList [::tycho::execModal $compileString $dirname]
+
+        set autostart [file exists [file join $dirname/.autostart]]
+        set autodestroy [file exists [file join $dirname/.autodestroy]]
+
+        set compileString "make -f $makefile"
+        set compileWidget \
+                [::tycho::Monitor [::tycho::autoName .makeExec] \
+                -autostart $autostart -autodestroy 1 \
+                -command $compileString -dir $dirname]
+
+        # Basic initialization here
+        #$compileWidget configure -autostart 0
+        #$compileWidget configure -autodestroy 0
+
+        if {$compileString != {} } {
+            $compileWidget configure -command $compileString
+        }
+        if {$dirname != {} } {
+            $compileWidget configure -dir $dirname
+        }
+
+        $compileWidget raiseWindow
+
+        if {$autostart} {
+            #$compileWidget execProcessInMonitor
+            $compileWidget getStatusWait
+            parseError $compileWidget
+        } else {
+            # Raise current window back, since default is not autostart
+            set editorName [$this cget -view]
+            if {$editorName!={}} {$editorName raiseWindow}
+        }
+   } else {
+        #set retList [::tycho::execModal {} {} $compileWidget]
+        $compileWidget raiseWindow
+        # Make sure we parse the output of the compiler (ie. esp. error msg)
+        # Colorize our monitor
+        $compileWidget execProcessInMonitor
+        $compileWidget getStatusWait
+        parseError $compileWidget
     }
-    set compileWidget [lindex $retList 1]
-    # Make sure we parse the output of the compiler (ie. esp. error msg)
 
-    parseError $retList
 
-    putStatus ""
-    return $retList
+    #set statusVariableName [$compileWidget getStatusVariableName]
+    #global $statusVariableName
+    
+    # If statement is used to prevent crashing
+    #if [info exists $statusVariableName] {
+    #    return [list [$execWidget getStatusWait] $execWidget]
+    #} else {
+    #    error "ERROR IN execModal: $statusVariableName doesn't exist!"
+    #}
+
+    #putStatus ""
+    #return $retList
 }
 
 #######################################################################
