@@ -24,7 +24,7 @@ if you are planning on extending tycho.
 The script 
 <A HREF="../../bin/tylndir"><CODE>$TYCHO/bin/tylndir</CODE></A>
  will create a private directory tree with links to a common Tycho
-tree.  This allows tycho developers to maintain their own tree and
+tree.  This allows Tycho developers to maintain their own tree and
 edit it as they see fit.
 
  <P>For example, to create your own private tree in <CODE>~/ty</CODE> from
@@ -55,6 +55,22 @@ set path = ($TYCHO/bin $path)
 
 <CODE>tylndir</CODE> is not perfect, as it will create links for garbage
 files such as <CODE>,*</CODE> and <CODE>*~</CODE> in your private tree.
+
+ <P>The tree that <CODE>tylndir</CODE> builds has links for the
+<CODE>SCCS</CODE> directories, so that everyone is sharing the
+ptdesign <CODE>SCCS</CODE> directories via links.
+
+ <P>When you start using your tree, most of the files are also links.
+If you check out a file, then the link is removed, and checked out
+version of the file is put in its place.  The shared <CODE>SCCS</CODE>
+directory is modified so that noone can check out that file while you
+have it checked out.
+
+ <P>To update your tree, you do <CODE>cd $TYCHO; make sources</CODE>.
+This will update any files that have been changed by others.
+
+ <P>It would be nice if we had CVS and could have concurrent and truly
+parallel trees, but the amount of training is fairly substantial.
 
 <HR>
 <H3><A NAME="makefile structure">makefile structure</A></H3>
