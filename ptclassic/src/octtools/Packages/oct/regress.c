@@ -1496,6 +1496,9 @@ tstFacets()
     facet.contents.facet.version = OCT_CURRENT_VERSION;
     facet.contents.facet.mode = "w";
     TEST_NO_PERM(octOpenFacet(&facet));
+    /* Note that this test will pass if you run the tests as root,
+       since root can create a /dummy-no-perm file
+     */
     OKLOG("  no permission facet passed");
 
     facet.type = OCT_FACET;
