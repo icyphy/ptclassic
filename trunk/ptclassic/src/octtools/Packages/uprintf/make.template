@@ -42,8 +42,9 @@ include $(CONFIG)
 
 HDRS		= uprintf.h
 
-LIBCSRCS	= uprintf.c \
-		utest.c
+LIBCSRCS	= uprintf.c
+
+MISCSRCS	= utest.c
 
 SRCS =		$(LIBCSRCS)
 
