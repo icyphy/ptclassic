@@ -68,6 +68,7 @@ MatlabIfc :: MatlabIfc() {
     deleteFigures = FALSE;
     figureHandle = "PtolemyMatlabIfc";
     figureHandle << matlabStarsCount;
+    MakeFigureHandleCommand();
     outputBuffer = matlabDefaultBuffer;
     outputBufferLen = MATLAB_BUFFER_LEN;
     outputBuffer[0] = 0;
@@ -102,6 +103,7 @@ const char* MatlabIfc :: SetScriptDirectory(const char* dir) {
 
 const char* MatlabIfc :: SetFigureHandle(const char* handle) {
     figureHandle = handle;
+    MakeFigureHandleCommand();
     return figureHandle;
 }
 
@@ -346,6 +348,9 @@ int MatlabIfc :: EvaluateUserCommand(char* command) {
     // change directories to one containing the Matlab command
     ChangeMatlabDirectory();
 
+    // tag any created figures 
+    AttachMatlabFigureIds();
+
     // evaluate the passed command and report error if one occurred
     int merror = EvaluateOneCommand(command);
 
@@ -383,9 +388,7 @@ int MatlabIfc :: ChangeMatlabDirectory() {
 // associated with the arg handle implemented by the Matlab
 // function defined by MATLAB_SET_FIGURES in PTOLEMY_MATLAB_DIRECTORY
 int MatlabIfc :: AttachMatlabFigureIds() {
-    InfString command = MATLAB_SET_FIGURES;
-    command << "('" << figureHandle << "');";
-    return EvaluateOneCommand(command);
+    return EvaluateOneCommand(figureHandleCommand);
 }
 
 // close all figures associated with arg handle implemented by Matlab
@@ -728,4 +731,10 @@ void MatlabIfc :: FreeStringArray(char** strarray, int numstrings) {
 	    strarray[k] = 0;
 	}
     }
+}
+
+const char* MatlabIfc :: MakeFigureHandleCommand() {
+    figureHandleCommand = MATLAB_SET_FIGURES;
+    figureHandleCommand << "('" << figureHandle << "');";
+    return figureHandleCommand;
 }
