@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "ptkPlot_defs.h"
 #include "math.h"
+#include "ieee.h"
 
 /* Global scract buffer used for constructing Tcl commands */
 static char strTmp[400];
@@ -50,10 +51,14 @@ double val;			/* Value */
  * it is some power of ten times either 1, 2, or 5.  It is
  * used to find increments for grid lines.  This is a slightly
  * modified version of D. Harrison's roundDown() routine.
+ * For zero or negative numbers, return 1e-15
+ * For NaN or Infinity, return 1e15.
  */
 {
     int exponent, idx;
-    exponent = (int) floor(val == 0.0 ? 0.0 : LOG10(val) + 1e-15);
+    if (IsNANorINF(val)) return 1e15;
+    if (val <= 0) return 1e-15;
+    exponent = (int) floor(LOG10(val) + 1e-1);
     if (exponent < 0) {
       for (idx = exponent;  idx < 0; idx++) {
 	val *= 10.0;
@@ -614,7 +619,6 @@ void freePlot(interp,plotPtr)
      Tcl_Interp *interp;
      plotWin *plotPtr;
 {
-  free(plotPtr->name);
   free(plotPtr->identifier);
   free(plotPtr->xTitle);
   free(plotPtr->yTitle);
@@ -626,6 +630,7 @@ void freePlot(interp,plotPtr)
   Tcl_DeleteCommand(interp,strTmp);
   sprintf(strTmp,"ptkXYPlotZoomIn%s",plotPtr->name);
   Tcl_DeleteCommand(interp,strTmp);
+  free(plotPtr->name);
 }
 /* Associates dataset with a plot window */
 void assocData(interp,setPtr,plotPtr)
