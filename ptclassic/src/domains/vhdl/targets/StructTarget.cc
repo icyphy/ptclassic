@@ -145,10 +145,6 @@ int StructTarget :: runIt(VHDLStar* s) {
     nfi->genericList->addList(firingGenericList);
     // Add to the port list.
     nfi->portList->addList(firingPortList);
-    // Add to the generic map list.
-    nfi->genericMapList->addList(firingGenericMapList);
-    // Add to the port map list.
-    nfi->portMapList->addList(firingPortMapList);
     // Add to the signal list.
     nfi->signalList->addList(firingSignalList);
     // Add to the declarations.
@@ -173,8 +169,6 @@ int StructTarget :: runIt(VHDLStar* s) {
     fi->starClassName = s->className();
     fi->genericList = firingGenericList.newCopy();
     fi->portList = firingPortList.newCopy();
-    fi->genericMapList = firingGenericMapList.newCopy();
-    fi->portMapList = firingPortMapList.newCopy();
     fi->signalList = firingSignalList.newCopy();
     fi->decls = mainDecls;
     mainDecls.initialize();
@@ -419,8 +413,6 @@ void StructTarget :: trailerCode() {
   ctlerFi->starClassName = "Sequencer";
   ctlerFi->genericList = ctlerGenericList.newCopy();
   ctlerFi->portList = ctlerPortList.newCopy();
-  ctlerFi->genericMapList = ctlerGenericMapList.newCopy();
-  ctlerFi->portMapList = ctlerPortMapList.newCopy();
   ctlerFi->signalList = ctlerSignalList.newCopy();
   ctlerFi->variableList = ctlerVariableList.newCopy();
   ctlerFi->action = ctlerAction;
@@ -622,8 +614,6 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
       if (mySignal) {
 	// mySignal exists with ref as name, so connect to it.
 	newPort->connect(mySignal);
-
-	firingPortMapList.put(newPort->name, "", "", mySignal->name);
       }
       else {
 	// tokenNum is negative, so create a signal to connect to.
@@ -636,8 +626,6 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 	  firingSignalList.put(*mySignal);
 
 	  newPort->connect(mySignal);
-
-	  firingPortMapList.put(newPort->name, "", "", mySignal->name);
 	}
 	// tokenNum not negative: signal should already exist, but doesn't.
 	else {
@@ -658,8 +646,6 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
       firingSignalList.put(*newSignal);
 
       newPort->connect(newSignal);
-
-      firingPortMapList.put(newPort->name, "", "", newSignal->name);
     }
 
     firingPortList.put(*newPort);
@@ -809,8 +795,6 @@ void StructTarget :: registerState(State* state, const char* varName,
 	firingSignalList.put(*inSignal);
 
 	inPort->connect(inSignal);
-
-	firingPortMapList.put(inPort->name, "", "", inSignal->name);
       }
       if (!isFirstStateRef) {
 	// Need to find the previous signal to connect to.
@@ -823,10 +807,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 			  "but can't find any signal created for it");
 	  return;
 	}
-
 	inPort->connect(inSignal);
-
-	firingPortMapList.put(inPort->name, "", "", inSignal->name);
       }
     }
 
@@ -843,8 +824,6 @@ void StructTarget :: registerState(State* state, const char* varName,
 
       outPort->connect(outSignal);
 
-      firingPortMapList.put(outPort->name, "", "", outSignal->name);
-
       if (isFirstStateRef) {
 	// Create a new signal.
 	VHDLSignal* inSignal = new VHDLSignal;
@@ -855,8 +834,6 @@ void StructTarget :: registerState(State* state, const char* varName,
 	firingSignalList.put(*inSignal);
 
 	inPort->connect(inSignal);
-
-	firingPortMapList.put(inPort->name, "", "", inSignal->name);
       }
       if (!isFirstStateRef) {
 	// Need to find the previous signal to connect to
@@ -870,8 +847,6 @@ void StructTarget :: registerState(State* state, const char* varName,
 	}
 
 	inPort->connect(inSignal);
-
-	firingPortMapList.put(inPort->name, "", "", inSignal->name);
       }
 
       topSignalList.put(*outSignal);
@@ -925,18 +900,18 @@ void StructTarget :: connectSource(StringList initVal, VHDLSignal* initSignal)
   StringList name = "Source";
   name << "_" << type;
 
-  VHDLGenericList* genMapList = new VHDLGenericList;
-  VHDLPortList* portMapList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
 
   VHDLGeneric* valueGen = new VHDLGeneric("value", type, "", initVal);
-  genMapList->put(*valueGen);
+  genList->put(*valueGen);
 
   VHDLPort* outPort = new VHDLPort("output", type, "OUT", "", NULL);
   outPort->connect(initSignal);
-  portMapList->put(*outPort);
+  portList->put(*outPort);
 
-  mainCompDeclList.put(label, portMapList, genMapList,
-		       name, portMapList, genMapList);
+  mainCompDeclList.put(label, portList, genList,
+		       name, portList, genList);
 }
 
 // Connect a multiplexor between the given input and output signals.
@@ -979,8 +954,8 @@ void StructTarget :: connectMultiplexor(VHDLSignal* inSignal,
   StringList name = "Mux";
   name << "_" << type;
 
-  VHDLGenericList* genMapList = new VHDLGenericList;
-  VHDLPortList* portMapList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
 
   VHDLPort* inPort = new VHDLPort("input", type, "IN", "", NULL);
   VHDLPort* outPort = new VHDLPort("output", type, "OUT", "", NULL);
@@ -998,10 +973,10 @@ void StructTarget :: connectMultiplexor(VHDLSignal* inSignal,
   initPort->connect(initSignal);
   controlPort->connect(controlSignal);
 
-  portMapList->put(*inPort);
-  portMapList->put(*outPort);
-  portMapList->put(*initPort);
-  portMapList->put(*controlPort);
+  portList->put(*inPort);
+  portList->put(*outPort);
+  portList->put(*initPort);
+  portList->put(*controlPort);
 
   ctlerPortList.put("control", "boolean", "OUT", "control", NULL);
   ctlerPortList.put("system_clock", "boolean", "IN", "system_clock", NULL);
@@ -1014,8 +989,8 @@ void StructTarget :: connectMultiplexor(VHDLSignal* inSignal,
   else {
     systemPortList.put("system_clock", "boolean", "IN");
   }
-  mainCompDeclList.put(label, portMapList, genMapList,
-		       name, portMapList, genMapList);
+  mainCompDeclList.put(label, portList, genList,
+		       name, portList, genList);
 }
 
 // Connect a register between the given input and output signals.
@@ -1055,8 +1030,8 @@ void StructTarget :: connectRegister(VHDLSignal* inSignal,
   StringList name = "Reg";
   name << "_" << type;
 
-  VHDLGenericList* genMapList = new VHDLGenericList;
-  VHDLPortList* portMapList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
 
   VHDLPort* inPort = new VHDLPort("D", type, "IN", "", NULL);
   VHDLPort* outPort = new VHDLPort("Q", type, "OUT", "", NULL);
@@ -1066,9 +1041,9 @@ void StructTarget :: connectRegister(VHDLSignal* inSignal,
   outPort->connect(outSignal);
   clkPort->connect(clkSignal);
 
-  portMapList->put(*inPort);
-  portMapList->put(*outPort);
-  portMapList->put(*clkPort);
+  portList->put(*inPort);
+  portList->put(*outPort);
+  portList->put(*clkPort);
 
 
   ctlerPortList.put(clkSignal->name, "boolean", "OUT", clkSignal->name, NULL);
@@ -1082,8 +1057,8 @@ void StructTarget :: connectRegister(VHDLSignal* inSignal,
   else {
     systemPortList.put("system_clock", "boolean", "IN");
   }
-  mainCompDeclList.put(label, portMapList, genMapList,
-		       name, portMapList, genMapList);
+  mainCompDeclList.put(label, portList, genList,
+		       name, portList, genList);
 }
 
 // Connect a clock generator driving the given signal.
@@ -1150,7 +1125,7 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer,
     return;
   }
   
-  // Construct unique label and signal names and put comp map in main list
+  // Construct unique label and signal names and put comp in main list
   StringList label;
   StringList goName, dataName, doneName;
   StringList rootName = name;
@@ -1446,8 +1421,6 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
   VHDLPortList* masterPortList = new VHDLPortList;
   VHDLGenericList* masterGenericList = new VHDLGenericList;
   VHDLSignalList* masterSignalList = new VHDLSignalList;
-  VHDLPortList* masterPortMapList = new VHDLPortList;
-  VHDLGenericList* masterGenericMapList = new VHDLGenericList;
 
   VHDLFiringListIter nextFiring(*(cl->firingList));
   VHDLFiring* fi;
@@ -1472,20 +1445,6 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
       VHDLSignal* newSignal = new VHDLSignal;
       newSignal = si->newCopy();
       masterSignalList->put(*newSignal);
-    }
-    VHDLPortListIter nextPortMap(*(fi->portMapList));
-    VHDLPort* pm;
-    while ((pm = nextPortMap++) != 0) {
-      VHDLPort* newPortMap = new VHDLPort;
-      newPortMap = pm->newCopy();
-      masterPortMapList->put(*newPortMap);
-    }
-    VHDLGenericListIter nextGenericMap(*(fi->genericMapList));
-    VHDLGeneric* gm;
-    while ((gm = nextGenericMap++) != 0) {
-      VHDLGeneric* newGenericMap = new VHDLGeneric;
-      newGenericMap = gm->newCopy();
-      masterGenericMapList->put(*newGenericMap);
     }
   }
 
@@ -1888,8 +1847,6 @@ void StructTarget :: initVHDLObjLists() {
 
   ctlerGenericList.initialize();
   ctlerPortList.initialize();
-  ctlerGenericMapList.initialize();
-  ctlerPortMapList.initialize();
   ctlerSignalList.initialize();
   ctlerVariableList.initialize();
 
@@ -1900,8 +1857,6 @@ void StructTarget :: initVHDLObjLists() {
 void StructTarget :: initFiringLists() {
   firingGenericList.initialize();
   firingPortList.initialize();
-  firingGenericMapList.initialize();
-  firingPortMapList.initialize();
   firingSignalList.initialize();
   firingVariableList.initialize();
 }

@@ -161,8 +161,6 @@ private:
 	// signals within one firing.
 	VHDLGenericList firingGenericList;
 	VHDLPortList firingPortList;
-	VHDLGenericList firingGenericMapList;
-	VHDLPortList firingPortMapList;
 	VHDLSignalList firingSignalList;
 	VHDLVariableList firingVariableList;
 
@@ -170,8 +168,6 @@ private:
 	// signals having to do with the controller.
 	VHDLGenericList ctlerGenericList;
 	VHDLPortList ctlerPortList;
-	VHDLGenericList ctlerGenericMapList;
-	VHDLPortList ctlerPortMapList;
 	VHDLSignalList ctlerSignalList;
 	VHDLVariableList ctlerVariableList;
 
