@@ -374,7 +374,7 @@ It outputs lines of comments, instead of code.
 						   lang->
 						   slice("b",b_bitlen-1))
 			           << lang->end_statement << endl;
-		    for (int loop=0;loop < pad_B;loop++)
+		    for (loop=0;loop < pad_B;loop++)
 			statements << lang->equals(lang->slice("in_b",loop),"GND")
 			           << lang->end_statement << endl;
 			
