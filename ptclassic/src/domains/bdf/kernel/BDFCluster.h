@@ -49,6 +49,7 @@ in BDFCluster objects.
 #include "BDFScheduler.h"
 
 class BDFCluster;
+class BDFClustPort;
 class BDFClusterBag;
 class ostream;
 
@@ -114,6 +115,9 @@ protected:
 	// merge two clusters, returning the result.
 	BDFCluster* merge(BDFCluster* c1,BDFCluster* c2);
 
+	// do non-integral rate changes, if any
+	int nonIntegralRateChange();
+
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
 
@@ -132,6 +136,10 @@ private:
 	SequentialList stopList;// this list is used by fullSearchMerge.
 };
 
+enum BDFLoopType {
+	DO_ITER, DO_IFTRUE, DO_IFFALSE, DO_UNTILTRUE, DO_UNTILFALSE
+};
+
 // This is the baseclass for BDF cluster objects.  A cluster may have
 // an internal galaxy (if it is an BDFClusterBag); it always has a loop
 // count, indicating how many times it is to be looped.
@@ -139,10 +147,12 @@ private:
 class BDFCluster : public BDFStar {
 protected:
 	int pLoop;		// loop count
-	int visitFlag;		// visit flag
+	BDFClustPort* pCond;	// condition
+	BDFLoopType pType;	// type of "loop"
+	short visitFlag;	// visit flag
 public:
 	// constructor: looping is 1 by default
-	BDFCluster() : pLoop(1) {}
+	BDFCluster() : pLoop(1), pType(DO_ITER), pCond(0), visitFlag(0) {}
 
 	// make destructor virtual
 	virtual ~BDFCluster() {}
@@ -159,6 +169,9 @@ public:
 	// return loop count
 	int loop() const { return pLoop;}
 
+	// return true if I am looped (by iteration or if-ing)
+	int looped() const { return pLoop > 1 || pType != DO_ITER;}
+
 	// cast to a bag (return null if not a bag)
 	virtual BDFClusterBag* asBag() { return 0;}
 
@@ -171,6 +184,18 @@ public:
 	// change the loop value of the cluster, changing repetitions,
 	// token numbers
 	void loopBy(int);
+
+	// create an "if", if possible.  If successful, return the
+	// condition.
+
+	BDFClustPort* tryIfClause(BDFRelation&,ostream*);
+
+	// convert the cluster to a conditional cluster, to be executed
+	// only on the given condition.
+	void ifIze(BDFClustPort* condition,BDFRelation rel,ostream*);
+
+	// create a new arc to pass boolean information
+	BDFClustPort* connectBoolean(BDFClustPort* cond,BDFRelation& rel);
 
 	// undo looping of a cluster, changing repetitions, token numbers
 	int unloop();
@@ -195,6 +220,9 @@ public:
 
 	// generate code
 	virtual void genCode(Target&, int depth) = 0;
+
+	// static function to make temporary names
+	static const char* mungeName(NamedObj&);
 };
 
 // define << operator to use virt fn.
@@ -318,82 +346,6 @@ private:
 	int owner;
 };
 
-class BDFClustPort : public BDFPortHole {
-private:
-	// the real port
-	DFPortHole& pPort;
-
-	// the external link
-	BDFClustPort* pOutPtr;
-
-	// true if I am a bag port
-	unsigned char bagPortFlag;
-
-	// true if I am a feedforward-only port (after marking)
-	unsigned char feedForwardFlag;
-
-	// true if I control some other port
-	unsigned char ctlFlag;
-public:
-	BDFClustPort(DFPortHole& p,BDFCluster* parent = 0,int bagp = 0);
-	~BDFClustPort() {}
-
-	// return what is inside me
-	DFPortHole& real() { return pPort;}
-
-	// these are passthrough functions
-	int isItInput() const { return pPort.isItInput();}
-	int isItOutput() const { return pPort.isItOutput();}
-
-	// set/return the control bit
-	int isControl() const { return ctlFlag;}
-	void setControl(int val) { ctlFlag = val ? 1 : 0;}
-
-	// my assocPort is guaranteed to be a BDFClustPort so this
-	// cast is safe.
-	BDFClustPort* assoc() { return (BDFClustPort*)assocPort();}
-
-	void initGeo();
-	BDFCluster* parentClust() { return (BDFCluster*)parent();}
-	BDFClustPort* far() { return (BDFClustPort*)PortHole::far();}
-	int numIO() const { return numberTokens;}
-	BDFClustPort* outPtr() {
-		return far() ? 0 : pOutPtr;
-	}
-
-	int feedForward() const { return feedForwardFlag;}
-	void markFeedForward() { feedForwardFlag = 1;}
-
-	// return TRUE if there is no sample rate change between me
-	// and who I am connected to
-	int sameRate();
-
-	// return TRUE if there is delay on the arc that may be a
-	// problem for merging, and FALSE otherwise.
-	int fbDelay() const { return (numTokens() > 0 && !feedForward());}
-
-	// return the real far port aliased to bagPorts.
-	// If the bagPort is a port of the outsideCluster, return zero.
-	BDFClustPort* realFarPort(BDFCluster* outsideCluster);
-
-	void makeExternLink(BDFClustPort* val);
-
-	int isBagPort() const { return bagPortFlag;}
-
-	BDFClustPort* inPtr() {
-		return bagPortFlag ? (BDFClustPort*)&pPort : 0;
-	}
-
-	// this one just traverses "inPtr" all the way.
-	BDFClustPort* innermost();
-
-	void setRelation(int r, BDFClustPort* assoc = 0);
-
-	BDFRelation relType() const {
-		return (BDFRelation) assocRelation();
-	}
-};
-
 class BDFClustSched : public BDFScheduler {
 protected:
 	BDFClusterGal* cgal;
@@ -436,25 +388,4 @@ public:
 	GalTopBlockIter::reset;
 };
 
-// special iterator that steps through ports related by BDF_SAME or
-// BDF_COMPLEMENT arcs to the original arc.  The interface is different
-// because as we return each port, we return the relation of that port
-// to the original port (BDF_SAME or BDF_COMPLEMENT).
-
-class BDFClustPortRelIter {
-public:
-	BDFClustPortRelIter(BDFClustPort& p) 
-	: start(&p), pos(&p), justDidFar(0), rev(0) {}
-	BDFClustPort* next(BDFRelation&);
-	void reset() {
-		pos = start;
-		justDidFar = rev = 0;
-	}
-private:
-	BDFClustPort* start;
-	BDFClustPort* pos;
-	// only a bit is needed for the following flags
-	unsigned char justDidFar;
-	unsigned char rev;
-};
 #endif
