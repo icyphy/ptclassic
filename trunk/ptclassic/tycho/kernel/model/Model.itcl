@@ -86,7 +86,7 @@ class ::tycho::Model {
 
     # Manipulate the undo/redo history
     method history {mode args}
-
+    
     # Manipulate a history mark
     method mark {mode args}
 
@@ -813,7 +813,7 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
 body ::tycho::Model::sequence {args} {
     set undo [list sequence]
     foreach cmd $args {
-        lappend undo [eval @scope [info class] $cmd]
+        lappend undo [eval @scope [info class] $this $cmd]
     }
     return $undo
 }
