@@ -189,7 +189,7 @@ symConFunc *confun;		/* Connector creation function  */
  *      creation.
  */
 {
-    octObject *connectors, firstNet, lastNet, ConnBag, cterm;
+    octObject *connectors, firstNet, lastNet, cterm;
 
     if (!confun) confun = symDefConFunc;
     resolve_layers(facet, nl, layers);
@@ -490,7 +490,7 @@ octObject *net;			/* Net (returned)             */
     int last, i;
 
     joined = ALLOC(octObject, num);
-    if (last = symListJoined(term, num, joined)) {
+    if ( (last = symListJoined(term, num, joined)) ) {
 	for (i = 0;  i < last;  i++) {
 	    if (symLocNet(&(joined[i]), &other_net)) {
 		merged = symMergeNets(&other_net, net);
@@ -520,7 +520,6 @@ symConFunc *confun;		/* Connector function    */
  * to the standard connector function if `confun' is zero.
  */
 {
-    octStatus stat;
     octObject old_lyr;
     segTermInfo info[2];
     struct octPoint pnts[2];
@@ -575,6 +574,9 @@ symConFunc *confun;		/* Connector function    */
 	    break;
 	case ADD_CONNECTOR:
 	    inst_term(fct, facts+i);
+	    break;
+        case  SIMPLE_RECONNECT:
+	    /* For completeness*/
 	    break;
 	}
     }
@@ -685,7 +687,6 @@ cs_info *what;			/* What to do (returned) */
  */
 {
     tapLayerListElement elems[2];
-    octObject new_conn, cterm, seg_net;
     char message[SYM_MAX_MSG];
 
     if (!term_ok(term, &(pnts[pid]), new_lyr, new_width)) {
@@ -731,9 +732,6 @@ cs_info *what;			/* What to do           */
  * information for making the new segment is given in `si'.
  */
 {
-    octObject new_seg;
-    struct octPoint *sp;
-
     what->cs_opts.add.pnts = ALLOC(struct octPoint, 2);
     what->cs_opts.add.seg.type = OCT_PATH;
     what->cs_opts.add.seg.contents.path.width = si->width;
@@ -869,13 +867,13 @@ octCoord new_width;		/* New segment width      */
     symInitTerm(term, &gen);
     while (symNextTerm(gen, &lyr, &geo) == OCT_OK) {
 	if ((STRCMP(lyr.contents.layer.name,
-		     new_lyr->contents.layer.name) == 0) &&
+		    new_lyr->contents.layer.name) == 0) &&
 	    (geo.type == OCT_BOX) &&
 	    (POINT_IN_BOX(pnt, &(geo.contents.box))) &&
-	    ((geo.contents.box.upperRight.x -
-	      geo.contents.box.lowerLeft.x) >= new_width) ||
-	    ((geo.contents.box.upperRight.y -
-	      geo.contents.box.lowerLeft.y) >= new_width)) {
+	    (((geo.contents.box.upperRight.x -
+	       geo.contents.box.lowerLeft.x) >= new_width) ||
+	     ((geo.contents.box.upperRight.y -
+	       geo.contents.box.lowerLeft.y) >= new_width))) {
 	    /* It's ok */
 	    symEndTerm(gen);
 	    return 1;
