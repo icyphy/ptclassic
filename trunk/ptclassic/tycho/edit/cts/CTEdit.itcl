@@ -47,6 +47,8 @@ class ::tycho::EditCTS {
     #################################################################
     ####                     public methods                      ####
 
+    # Open my control panel
+    method openControlPanel {graph}
 
     #################################################################
     ####                  protected methods                      ####
@@ -78,6 +80,19 @@ body ::tycho::EditCTS::constructor {args} {
     # be loaded correctly later
     # FIXME: Is this the right place for this?
     $_graph configure -modelmode "cts"
+}
+
+#####################################################################
+#### openControlPanel
+#
+# Open the control panel for running the simulation.
+#
+body ::tycho::EditCTS::openControlPanel {graph} {
+    if { [info which -command $this.runwindow] != "" } {
+	raise [component hull].runwindow
+    } else {
+	::tycho::CTRunWindow [component hull].runwindow -graph $graph
+    }
 }
 
 ###################################################################
@@ -113,7 +128,6 @@ body ::tycho::EditCTS::_initializeBars {menubar statusbar toolbar} {
 # Adds entries to the menu bar specific to this class.
 #
 body ::tycho::EditCTS::_initializeMenubar {menubar} {
-    puts !
     # FIXME FIXME
     # Load the library. Should the library info be in the model?
     library load [file join edit cts stars.tim]
@@ -121,4 +135,11 @@ body ::tycho::EditCTS::_initializeMenubar {menubar} {
             -command "$this newstar stars" \
             -customizecommand "$this _initmenu stars" \
             -types {star}
+
+
+    $menubar add separator develsep3 devel
+
+    $menubar command run devel \
+	    -label "Run..." \
+            -command "$this openControlPanel [model access graph]"
 }
