@@ -72,14 +72,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
 	    bar.setup(this,
-		(char*)label,
+		(const char *) label,
 		input.numberPorts(),
-		(int)number_of_bars,
-		(float)top,
-		(float)bottom,
-		(char*)position,
-		(float)bar_graph_width,
-		(float)bar_graph_height);
+		(int) number_of_bars,
+		(float) top,
+		(float) bottom,
+		(const char *) position,
+		(float) bar_graph_width,
+		(float) bar_graph_height);
 	    count = 0;
 	}
 	go {
