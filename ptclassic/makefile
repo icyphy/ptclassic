@@ -16,7 +16,15 @@ makefiles:		obj.$(ARCH)
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) makefiles
 
 all install clean sources:	obj.$(ARCH)
-	cd obj.$(ARCH); $(MAKE) $(MFLAGS) makefiles $@
+	cd obj.$(ARCH); umask 2; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
+
+interpreter:	obj.$(ARCH)
+		cd obj.$(ARCH); umask 2; $(MAKE) $(MFLAGS) \
+			DIRS="kernel preproc domains interp" install
+
+pigi:		obj.$(ARCH)
+		cd obj.$(ARCH); umask 2; $(MAKE) $(MFLAGS) \
+			DIRS="kernel preproc domains pigiRpc" install
