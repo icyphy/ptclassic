@@ -7,8 +7,19 @@
 # Date of creation: 6/15/92.
 # Written by: J. Buck
 #
-# This file should be included AFTER other symbols are defined,
-# particularly SRCS, OBJS, LIB, DOMAIN, STAR_MK.
+# The following symbols are used by this makefile.  They should be
+# defined by the parent makefile prior to including this makefile:
+# SRCS
+# OBJS
+# LIB
+# DOMAIN, DOMAIN_2
+# STAR_MK	Specifies the name of the star-reference file to build;
+#		both a C-verion (e.g., cgcstars.c) using genStarTable and
+#		a makefile version (e.g., cgcstars.mk) using genStarList 
+#		is built.  The variable "STAR_MK" should be given without
+#		a file suffix (e.g., just "cgcstars").
+# GENSTARVARS	A variable passed to genStarTable to allow stars other
+#		than those defined by PL_SRCS to be generated.
 
 whatToBuild:	all
 
@@ -54,7 +65,7 @@ $(STAR_MK).mk:	make.template
 # Rule for making a star list module for pulling stars out of libraries
 $(STAR_MK).c:	make.template
 		rm -f $(STAR_MK).c
-		cd $(VPATH); genStarTable $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).c
+		cd $(VPATH); genStarTable $(GENSTARVARS) $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).c
 
 $(STAR_MK).o:	$(STAR_MK).c
 
