@@ -41,7 +41,7 @@ HELPDIR=~ptolemy/lib
 LIB=libptolemy.a
 
 # Library sources
-LIBCCSRCS=Architecture.cc AutoForkNode.cc \
+LIBCCSRCS=Animate.cc Architecture.cc AutoForkNode.cc \
  Block.cc Code.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  DataStruct.cc Display.cc Domain.cc Error.cc \
  Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc Histogram.cc InterpGalaxy.cc \
@@ -50,7 +50,8 @@ LIBCCSRCS=Architecture.cc AutoForkNode.cc \
  Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
  checkConnect.cc expandPath.cc int.Vec.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc Animate.cc
+ KnownState.cc State.cc StringState.cc \
+ FloatVecData.cc IntVecData.cc ImageData.cc
 LIBCSRCS=gnulib3a.c
 
 LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
@@ -58,7 +59,7 @@ LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
-HDRS= Architecture.h Attribute.h AutoForkNode.h \
+HDRS= Animate.h Architecture.h Attribute.h AutoForkNode.h \
  Block.h CircularBuffer.h Code.h ComplexSubset.h Connect.h \
  DataStruct.h Display.h Domain.h Error.h Fraction.h Galaxy.h \
  GalIter.h Geodesic.h Histogram.h InterpGalaxy.h \
@@ -66,10 +67,10 @@ HDRS= Architecture.h Attribute.h AutoForkNode.h \
  NamedObj.h Output.h Packet.h Particle.h ParticleQueue.h ParticleStack.h \
  Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
  Universe.h UserOutput.h WormConnect.h Wormhole.h \
- dataType.h int.Vec.h miscFuncs.h type.h \
+ dataType.h int.Vec.h miscFuncs.h type.h isa.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h \
- FloatVecData.h IntVecData.h ImageData.h Animate.h
+ FloatVecData.h IntVecData.h ImageData.h
 
 # Library objects
 LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
