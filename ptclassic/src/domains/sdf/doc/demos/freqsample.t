@@ -13,9 +13,9 @@ The frequency domain specification is given using the
 star, and using some of the more elaborate features of the parameter
 interpreter.
 The filter specification in this demo reads:
-.(c
+.pp
 1 [6] 0.3904 0 [19] 0.3904 1 [5]
-.)c
+.pp
 which translates to six samples with magnitude 1.0, one transition
 sample with magnitude 0.3904, 19 samples with magnitude 0.0,
 the same transition sample again, and five sample with magnitude 1.0.
