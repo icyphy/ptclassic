@@ -457,7 +457,7 @@ body ::tycho::FileBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [::tycho::url join $TYCHO kernel gui doc \
-            usersGuides FileBrowserHelp.html]
+            usersGuides FileBrowserHelp.html] html
 }
 
 ######################################################################

@@ -84,7 +84,8 @@ body ::tycho::EditStack::constructor {args} {
 body ::tycho::EditStack::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel gui doc usersGuides EditStackHelp.html]
+	    [file join $TYCHO kernel gui doc usersGuides \
+	    EditStackHelp.html] html
 
 }
 

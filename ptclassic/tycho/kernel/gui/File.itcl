@@ -641,7 +641,7 @@ body ::tycho::File::evaluate {} {
 body ::tycho::File::help {} {
     global ::TYCHO
     ::tycho::openContext \
-	    [file join $TYCHO kernel gui doc usersGuides FileHelp.html]
+	    [file join $TYCHO kernel gui doc usersGuides FileHelp.html] html
 }
 
 #####################################################################
