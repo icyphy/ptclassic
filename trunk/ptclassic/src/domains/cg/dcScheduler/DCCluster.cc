@@ -185,7 +185,7 @@ void DCCluster::assignP(int procNum) {
 		DCNodeListIter iter(*nodes);
 		DCNode *n;
 		while ((n = iter++) != 0) {
-			n->assignProc(procNum);
+			n->setProcId(procNum);
 		}
 	} else {
 		component1->assignP(procNum);
