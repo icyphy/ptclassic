@@ -20,10 +20,10 @@ CGKERNEL = $(ROOT)/src/domains/cg/kernel
 INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
 
 SRCS =	ParNode.cc ParGraph.cc ParScheduler.cc \
-		UniProcessor.cc CodeGen.cc ParProcessors.cc 
+		UniProcessor.cc CodeGen.cc ParProcessors.cc CGWormStar.cc
 
 HDRS =  ParNode.h ParGraph.h ParScheduler.h \
-		UniProcessor.h ParProcessors.h 
+		UniProcessor.h ParProcessors.h CGWormStar.h
 
 OBJS = $(SRCS:.cc=.o)
 
