@@ -7,27 +7,25 @@ Compare three methods for estimating a power spectrum.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
-.IE "Levinson-Durbin algorithm"
-.IE "Burg's algorithm"
-.IE "system identification"
-.IE "power spectrum"
+.Ir "Levinson-Durbin algorithm"
+.Ir "Burg's algorithm"
+.Ir "system identification"
+.Ir "power spectrum"
 This demo generates a random process that is a real-valued version
 of the test process described in [2] (page 11).
 It consists of three sinusoids, two of which are closely spaced,
 and colored Gaussian noise.
 The power spectrum of this process is estimated using three
 methods, the periodogram,
-.IE periodogram
+.Ir periodogram
 the autocorrelation method
-.IE "autocorrelation method"
+.Ir "autocorrelation method"
 (which uses the Levinson Durbin algorithm),
-.IE "Levinson-Durbin algorithm"
 and the Burg method.
-.IE "Burg's method"
 Since the input process is Gaussian,
 the latter two methods
 produce approximate \fImaximum entropy\fR spectral estimates.
-.IE "maximum entropy spectral estimation"
+.Ir "maximum entropy spectral estimation"
 If the autocorrelation of the input process were known
 exactly, then these methods would produce exact maximum entropy spectra.
 However, the autocorrelation is estimated from observations
@@ -77,6 +75,7 @@ The
 .c FloatPad
 star is used to prepend the AR coefficients with a one, the value of
 the first coefficient, which need not be computed.
+.Se FloatPad
 .pp
 The Burg method does not require first estimating the autocorrelation.
 It estimates the AR parameters directly from the input samples.
