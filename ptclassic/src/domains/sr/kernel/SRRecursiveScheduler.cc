@@ -58,6 +58,7 @@ StringList SRRecursiveScheduler::displaySchedule()
 {
   StringList out;
   out << "{\n  { scheduler \"Recursive SR Scheduler\" }\n"
+      << schedule->printVerbose()
       << "}\n";
   return out;
 }
@@ -68,12 +69,16 @@ SRRecursiveScheduler::SRRecursiveScheduler()
   numInstants = 1;
   schedulePeriod = 10000.0;
   dgraph = NULL;
+  schedule = NULL;
 }
 
 SRRecursiveScheduler::~SRRecursiveScheduler()
 {
   if (dgraph != NULL) {
     delete dgraph;
+  }
+  if ( schedule != NULL ) {
+    delete schedule;
   }
 }
 
@@ -99,6 +104,10 @@ void SRRecursiveScheduler::setup()
 }
 
 // Run (or continue) the simulation
+//
+// @Description Call runOneInstant until numInstants equals
+// numInstantsSoFar, checking SimControl::haltRequested() before each
+// instant.
 int SRRecursiveScheduler::run()
 {
     if (SimControl::haltRequested() || !galaxy()) {
@@ -134,7 +143,7 @@ void SRRecursiveScheduler::runOneInstant()
 
   // Run the schedule
 
-  // TODO: Write this!
+  schedule->runSchedule();
 
   // Finish the instant by calling each star's tick() method
 
@@ -181,28 +190,37 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   dgraph = new SRDependencyGraph( g );
 
-  cout << dgraph->displayGraph();
+  // cout << dgraph->displayGraph();
 
   Set wholeGraph(dgraph->vertices(), 1);
 
-  SRRecursiveSchedule schedule( *dgraph );
+  if ( schedule != NULL ) {
+    delete schedule;
+  }
+  schedule = new SRRecursiveSchedule( *dgraph );
 
   //  cout << "There are " << Set::setcount() << " sets to begin with\n";
 
-  int mc = mincost( wholeGraph, INT_MAX, schedule, 0, 0);
+  int mc = mincost( wholeGraph, INT_MAX, *schedule, 0, 0);
 
   if ( mc == INT_MAX ) {
     cout << "No schedule met the bound\n";
   } else {
     cout << "mincost is " << mc << "\n";
-    cout << "best schedule was " << schedule.print() << '\n';
+    // cout << "best schedule was " << schedule->print() << '\n';
 
-    int cost = schedule.cost();
+    int cost = schedule->cost();
     assert( cost == mc );
 
+    // Merge all the vertices into the best parallel blocks
     for ( int v = 0 ; v < dgraph->vertices() ; v++ ) {      
-      schedule.mergeVertex(v);
+      schedule->mergeVertex(v);
     }
+
+    // Split any erroneous parallel blocks
+    schedule->splitParallelBlocks();
+
+    // cout << "After splitting " << schedule->print() << '\n';
 
   }
 
