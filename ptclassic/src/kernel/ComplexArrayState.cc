@@ -26,7 +26,7 @@ $Id$
 
 **************************************************************************/
 
-const char* ComplexArrayState :: type() const { return "ComplexArray";}
+const char* ComplexArrayState :: type() const { return "COMPLEXARRAY";}
 
 ComplexArrayState :: ~ComplexArrayState () {
 	// ? no Complex destructor: do we want delete [] val, or delete val?
@@ -143,4 +143,4 @@ StringList ComplexArrayState :: currentValue() {
 
 // make knownstate entry
 static ComplexArrayState proto;
-static KnownState entry(proto,"ComplexArray");
+static KnownState entry(proto,"COMPLEXARRAY");
