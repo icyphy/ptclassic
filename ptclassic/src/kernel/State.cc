@@ -21,6 +21,7 @@ $Id$
 #include "Block.h"
 #include "miscFuncs.h"
 #include "Output.h"
+#include "KnownState.h"
 
 extern Error errorHandler;
 
@@ -33,11 +34,11 @@ const int TOKSIZE = 256;
 **************************************************************************/
 
 // small virtual functions in baseclass
-const char* State :: type () { return "STRING";}
+const char* State :: type () const { return "STRING";}
 
-int State :: size () { return 1;}
+int State :: size () const { return 1;}
 
-StringList State :: currentValue () { return initValue;}
+StringList State :: currentValue () const { return initValue;}
 
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
@@ -110,7 +111,7 @@ reparse:
 		}
 	}
 	if (is_idchar(*token)) {
-                State* s = lookup(token,parent()->parent());
+                const State* s = lookup(token,parent()->parent());
 		if (!s) {
 			parseError ("undefined symbol", token);
 			t.tok = T_ERROR;
@@ -140,18 +141,19 @@ reparse:
 	}
 }
 
-State* State :: lookup (char* name, Block* blockIAmIn) {
+const State* State :: lookup (char* name, const Block* blockIAmIn) const {
         while (blockIAmIn) {
                 State* p = blockIAmIn->stateWithName(name);
                 if (p) return p;
                 blockIAmIn = blockIAmIn->parent();
         }
-        return NULL;
+	// not found, consult global symbol list
+        return KnownState::lookup(name);
 }
 
 // put info.
 StringList
-State::printVerbose() {
+State::printVerbose() const {
 	StringList  out;
 	out = readFullName();
 	out += " type: ";
@@ -164,11 +166,23 @@ State::printVerbose() {
         return out;
 };
 
+// change current value.  We use the initialization parser to do the job.
+void
+State::setCurrentValue(const char* newval) {
+	const char* save = initValue;
+	initValue = newval;
+	initialize();
+	initValue = save;
+}
+
+// methods for class StateList
+
 // initialize elements
 void StateList::initElements() {
 	State *p;
+	StateListIter next(*this);
 	for(int i=size(); i>0; i--)  {
-		p  = (State  *)next();
+		p  = next++;
 		p->initialize();
 	};
 };
@@ -176,12 +190,13 @@ void StateList::initElements() {
 // Find a state with the given name and return pointer
 State* StateList::stateWithName(const char* name) {
 	State *sp;
+	StateListIter next(*this);
 	for (int i =  size(); i>0;i--) {
-		sp = (State *) next();
+		sp = next++;
 		if (strcmp(name,sp->readName()) == 0)
 			return  sp;
 	}
-	return  NULL;
+	return NULL;
 }
 
 // complain of parse error
