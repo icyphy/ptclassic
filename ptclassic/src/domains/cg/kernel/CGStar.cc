@@ -398,8 +398,29 @@ int CGStar :: maxComm() {
 // this prevents the resulting fork buffer from being larger than
 // necessary; new tokens are not added until they must be.
 
+// If Forks are cascaded, wait until all cascaded forks are fired.
+// A hack to make all cascade forks fired before any other stars.
+static SequentialList cascadeForks;
+
 int CGStar :: deferrable() {
-	if (isItFork()) return FALSE;
+	if (isItFork()) {
+		if (cascadeForks.remove(this) || (cascadeForks.size() == 0)) {
+			CGStarPortIter nextp(*this);
+			CGPortHole *p;
+			while ((p = nextp++) != 0) {
+				if (p->isItOutput()) {
+				    CGStar* s = (CGStar*) p->far()->parent();
+				    if (s->isItFork()) {
+					cascadeForks.append(s);
+				    }
+				}
+			}
+			return FALSE;
+		} 
+		
+	} 
+	if (cascadeForks.size() > 0) return TRUE;
+
 	CGStarPortIter nextp(*this);
 	CGPortHole *p;
 	while ((p = nextp++) != 0) {
@@ -413,21 +434,29 @@ int CGStar :: deferrable() {
 // and to make it match the rate of its input.
 
 void CGStar :: forkInit(CGPortHole& input,MultiCGPort& output) {
+	// make relation of forkSrc, forkDest between input/output portholes
+	// only once.
+	MPHIter nextp(output);
+	CGPortHole* p;
+	if (isItFork() == FALSE) {
+		cascadeForks.initialize();
+		isaFork();
+		while ((p = (CGPortHole*)nextp++) != 0)
+			p->setForkSource(&input);
+	}
 	isaFork();
 	int n = input.far()->numXfer();
 	input.setSDFParams(n,n-1);
 	output.setSDFParams(n,n-1);
-	int srcDelay = input.numTokens();
-	MPHIter nextp(output);
-	CGPortHole* p;
+	int srcDelay = input.numInitDelays();
 	if (srcDelay > 0) {
 		// move delays from input to outputs
 		PortHole* f = input.far();
 		input.disconnect();
-		input.connect(*f,0);
+		f->connect(input,0);
+		nextp.reset();
 		while ((p = (CGPortHole*)nextp++) != 0) {
-			p->setForkSource(&input);
-			int n = p->numTokens();
+			int n = p->numInitDelays();
 			f = p->far();
 			p->disconnect();
 			p->connect(*f,n+srcDelay);
@@ -439,27 +468,26 @@ void CGStar :: forkInit(CGPortHole& input,MultiCGPort& output) {
 			p->far()->parent()->initialize();
 		}
 	}
-	else {
-		while ((p = (CGPortHole*)nextp++) != 0)
-			p->setForkSource(&input);
-	}
 }
 
 // similar to the above, but for only one output.  Useful in implementing
 // a star as an "identity".
 void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
-	output.setForkSource(&input);
-	isaFork();
+	if (isItFork() == FALSE) {
+		cascadeForks.initialize();
+		output.setForkSource(&input);
+		isaFork();
+	}
 	int n = input.far()->numXfer();
 	input.setSDFParams(n,n-1);
 	output.setSDFParams(n,n-1);
-	int srcDelay = input.numTokens();
+	int srcDelay = input.numInitDelays();
 	if (srcDelay > 0) {
 		// move delays from input to outputs
-		int n = output.numTokens();
+		int n = output.numInitDelays();
 		PortHole* f = input.far();
 		input.disconnect();
-		input.connect(*f,0);
+		f->connect(input,0);
 		f = output.far();
 		output.disconnect();
 		output.connect(*f,n+srcDelay);
