@@ -34,6 +34,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 #include <string.h>
+#ifdef linux
+#include <fpu_control.h>
+#endif
 
 extern ptkConsoleWindow();
 
@@ -54,6 +57,10 @@ main (int argc, char ** argv)
 {
 	pigiFilename = argv[0];
 	KcLoadInit(argv[0]);
+#ifdef linux
+	// Fix for DECalendarQueue SIGFPE under linux.
+	__setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
+#endif
 	KcInitLog("pigiLog.pt");
 	CompileInit();
 	KcCatchSignals();
