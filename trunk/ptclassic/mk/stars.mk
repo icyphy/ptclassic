@@ -937,7 +937,7 @@ ifdef PIGI
 	ifdef PITCL
 		LIBS += version.o $(OBJDIR)/pitcl/ptclInvokeInterp.o -lpitcl
 	else
-		LIBS += version.o $(OBJDIR)/pitcl/ptclInvokeInterp.o -lptcl
+		LIBS += version.o $(OBJDIR)/ptcl/ptclInvokeInterp.o -lptcl
 	endif
 endif
 
