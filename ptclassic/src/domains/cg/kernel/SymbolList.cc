@@ -108,7 +108,7 @@ StringList SymbolStack::pop()
 
 const char* ScopedSymbolList::lookup(const char* scope, const char* name)
 {
-    SymbolList* list = get(scope);
+    SymbolList* list = (SymbolList*)get(scope);
     if (list == NULL)
     {
 	LOG_NEW; list = new SymbolList(separator, counter);
