@@ -127,13 +127,11 @@ public:
 	// for now, we assume each schedule interation takes 1.0
 	// time units.  (Argh).  Deal with roundoff problems.
 	void setStopTime (float limit) { numIters = int(limit + 0.001);}
-	void resetStopTime () { numIters = 1; numItersSoFar = 0;}
+	void resetStopTime (float v) { numIters = 1; numItersSoFar = 0;}
 
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
 
-	// declare "untimed"
-	int amITimed() {return FALSE ;}
 private:
 	// This is a kludge to help integrate SDFScheduler and
 	// DEScheduler together.  numIters says how many times
