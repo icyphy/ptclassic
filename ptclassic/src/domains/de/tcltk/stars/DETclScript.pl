@@ -95,7 +95,7 @@ delim $$
 	defstate {
 		name {tcl_file}
 		type {string}
-		default {"$PTOLEMY/src/domains/de/tcltk/stars/tkScript.tcl"}
+		default {"$PTOLEMY/src/domains/sdf/tcltk/stars/tkScript.tcl"}
 		desc {The file from which to read the Tcl script}
 	}
 	protected {
