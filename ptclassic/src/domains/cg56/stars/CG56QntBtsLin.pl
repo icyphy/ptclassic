@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
         explanation {
 .Id "quantizer"
 Normally, the output is just the two's complement number
@@ -44,6 +44,9 @@ an optional offset can be added to shift the output levels up or down.
 		desc { internal }
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+	constructor {
+		noInternalState();
 	}
         codeblock(std) {
 	move	$ref(input),x0

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 .Id "absolute value"
 The input is moved into accumulator "a", where the "abs" instruction is applied.
@@ -25,6 +25,9 @@ The input is moved into accumulator "a", where the "abs" instruction is applied.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (absblock) {
 	move	$ref(input),a

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 arithmetic library }
+	location { CG56 main library }
 	explanation {
 .Id "negation"
 The input is moved into accumulator "a", where the "neg" instruction is applied.
@@ -25,6 +25,9 @@ The input is moved into accumulator "a", where the "neg" instruction is applied.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (negblock) {
 	move	$ref(input),a

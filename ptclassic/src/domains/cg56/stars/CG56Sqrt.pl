@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 Output is the square root of input. 
 Negative values are equated to zero.
@@ -22,6 +22,9 @@ Negative values are equated to zero.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock(sqrtblock) {
         clr     b               #<$$40,y0

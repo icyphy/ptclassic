@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {The output is the square of the input.}
 	execTime {
 		return 3;
@@ -22,6 +22,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
  	codeblock (std) {
 	move	$ref(input),x0

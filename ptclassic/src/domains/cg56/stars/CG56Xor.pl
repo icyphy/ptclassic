@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 main library }
 	explanation {
 This star outputs the bitwise exclusive-or of \fIinput1\fR and \fIinput2\fR.
 	}
@@ -28,6 +28,9 @@ This star outputs the bitwise exclusive-or of \fIinput1\fR and \fIinput2\fR.
 	output {
 		name {output}
 		type {=input1}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (main) {
 ; read inputs --> x1,a1

@@ -13,7 +13,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 arithmetic library }
+	location { CG56 main library }
 	explanation {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
 The only special case is for a \fIgain\fR of 1.
@@ -25,6 +25,9 @@ We eliminate ourselves from the circuit in that case.
 	setup {
 		identity = (gain.asDouble() >= CG56_ONE);
 		if (identity) forkInit(input,output);
+	}
+	constructor {
+		noInternalState();
 	}
 	execTime {
 		return identity ? 0 : 5;

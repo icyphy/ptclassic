@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	}
@@ -43,6 +43,9 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	        default {15}
 	        attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
+	constructor {
+		noInternalState();
+	}
 	codeblock (Rblock) {
         move    $ref(input),a
         move    #0,r7

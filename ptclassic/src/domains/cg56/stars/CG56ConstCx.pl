@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 signal sources library }
+    location { CG56 main library }
     explanation {
 There are no runtime instructions associated with this star.
 The output buffer is initialized with the specified DC value.
@@ -31,6 +31,9 @@ The output buffer is initialized with the specified DC value.
 	type {float}
 	default {0.0}
 	descriptor { Imaginary part of DC value. }
+    }
+    constructor {
+	noInternalState();
     }
     
     method {

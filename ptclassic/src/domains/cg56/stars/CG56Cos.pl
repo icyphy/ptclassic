@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 .Id "cosine"
 This star computes the cosine of the input, which must be in the range
@@ -30,6 +30,9 @@ The output is in the range $(-1.0, 1.0)$.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
  	codeblock (main) {
 	move    $ref(input),x0

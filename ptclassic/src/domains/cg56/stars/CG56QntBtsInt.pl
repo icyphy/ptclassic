@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
         explanation {
 .Id "quantizer"
 Normally, the \fIoutput\fR is just the two's complement number
@@ -36,6 +36,9 @@ given by the top \fInoBits\fR of the \fIinput\fR (for integer output).
 		desc { internal }
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+	constructor {
+		noInternalState();
 	}
         codeblock(std) {
 	move	$ref(input),x0

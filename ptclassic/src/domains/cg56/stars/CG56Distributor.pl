@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 control library }
+	location { CG56 main library }
 	explanation {
 .Ir "alternating data streams"
 Distributes an input signal among two outputs, alternating samples.
@@ -37,6 +37,9 @@ Distributes an input signal among two outputs, alternating samples.
                 input.setSDFParams(n*bs,n*bs-1);
 		output.setSDFParams(bs,bs-1);
         }
+	constructor {
+		noInternalState();
+	}
 
  	codeblock(loadInputAddress) {
         move    #>$addr(input),r1

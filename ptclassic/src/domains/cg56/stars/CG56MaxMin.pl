@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 If \fIcmpareMagnitude\fR is "no", the star finds from among
 the \fIinput\fR inputs the one with the maximum or minimum value;
@@ -59,6 +59,7 @@ Also, the index of the output is provided (count starts at 0).
 	}    
 
 	setup {
+		noInternalState();
 		input.setSDFParams(int(N),int(N)-1);
 	}		
 	

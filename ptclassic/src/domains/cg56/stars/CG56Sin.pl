@@ -15,7 +15,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 This star computes the sine of the input, which must be in the range
 (-1.0, 1.0).
@@ -44,6 +44,9 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
 		default { "0" }
 		desc { "Munged form of phase." }
 		attributes { A_NONSETTABLE }
+	}
+	constructor {
+		noInternalState();
 	}
  	codeblock (cbPrepare) {
 	move    $ref(input),x0

@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 arithmetic library }
+	location { CG56 main library }
 	explanation {
 .Id "multiplication, integer"
 .Id "integer multiplication"
@@ -29,6 +29,9 @@ Input and output are assumed to be integers (right-justified in word).
 	output {
 		name {output}
 		type {int}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (multblock) {
 	move	$ref(firstInput),x0		; input #1 -> x0
