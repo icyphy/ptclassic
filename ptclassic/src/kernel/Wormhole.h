@@ -2,7 +2,6 @@
 #define _Wormhole_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -92,6 +91,8 @@ protected :
 	// reference to myself as a Star
 	Star& selfStar;
 
+	// reference to my Galaxy part
+	Galaxy& gal;
 private :
 	// flag saying whether to zap event horizons in destructor
 	int dynamicHorizons;
