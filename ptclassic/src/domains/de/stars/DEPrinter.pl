@@ -37,16 +37,15 @@ defstar {
 	}
 	start {
 		output.fileName(fileName);
-		input.reset();
 	}
 
 	go {
 		// detect which input has an event and print out the
 		// value and arrivalTime.
-		input.reset();
+		InDEMPHIter nextp(input);
 		int j = input.numberPorts();
 		for(int i=1; i <= j; i++) {
-			InDEPort& p = (InDEPort&) input();
+			InDEPort& p = *nextp++;
 			if (p.dataNew) {
 				output << "(port#" << i << ") " <<
 				"at time " << arrivalTime << " : value > "
