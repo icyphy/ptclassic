@@ -40,16 +40,15 @@
 # <pre><tcl>
 #     catch {delete object $model}
 #     set model [::tycho::SimpleModel #auto]
-#     $model type configure item -foo bar
+#     $model type configure item -email ""
 #     $model parse {
-#         # An item with no data
-#         item a
-#         # An item with attributes
-#         item b -foo "Hello!" -color green
+#         # Create some items
+#         item john -email johnr@eecs
+#         item christopher -email cxh@eecs -office "493-Cory"
 #         # This item has items inside it
-#         item c -foo "I am nested" {
-#             item x
-#             item y -bar far
+#         item edward -email eal@eecs {
+#             item sato -phone 1-800-BIGDOGGY -color "Grey-ish, I think"
+#             item grendel -color "Black and white"
 #         }
 #     }
 #     $model describe
@@ -71,7 +70,7 @@
 # </tcl></pre>
 # 
 # Tell each instance which model it is viewing. This will cause
-# the view to intialise itself with the data in the model.
+# the view to intialize itself with the data in the model.
 # <pre><tcl>
 #     $view1 configure -model $model
 #     $view2 configure -model $model
@@ -88,16 +87,16 @@
 # </tcl></pre>
 #
 # Now, any changes made to the model via the <b>publish</b> command
-# will be reflected in both views. For example, change the -foo
-# attribute of item <b>a</b>:
+# will be reflected in both views. For example, change the <b>-phone</b>
+# attribute of item <b>John</b>:
 # <pre><tcl>
-#     $model publish attrset item:a -foo Yeehah!
+#     $model publish attrset item:john -phone 3-7683
 # </tcl></pre>
 #
 # What this does is cause the model to look for subscribers
-# interested in item <b>a</b>, Since both views have subscribed
+# interested in item <b>john</b>, Since both views have subscribed
 # to "all" data, both will have their <b>notify</b> methods called
-# with (in this case) the arguments <b>item:a attrset -foo Yeehah!</b>.
+# with (in this case) the arguments <b>item:john attrset -phone 3-7683</b>.
 # The notify method of SimpleView must take appropriate action --
 # in this case, changing the displayed value. You can enter data into
 # either window, and clicking on the "Apply" button will
@@ -106,12 +105,12 @@
 # Any other data-modifying command can be recorded. Delete an
 # item:
 # <pre><tcl>
-#     $model publish delete item:a
+#     $model publish delete item:john
 # </tcl></pre>
 # 
 # Delete an attribute:
 # <pre><tcl>
-#     $model publish attrdel {item:c item:y} -bar
+#     $model publish attrdel {item:edward item:sato} -phone
 # </tcl></pre>
 # 
 # Use the redo and undo buttons to go forwards and backwards
@@ -178,7 +177,7 @@ body ::tycho::SimpleView::constructor {args} {
         undo Undo "$this undo"
         redo Redo "$this redo"
         apply Apply "$this apply"
-        close Close "delete object $this"
+        close Close "destroy [winfo toplevel [string trimleft $this ::]]"
     } {
         itk_component add $button {
             button $itk_component(buttons).$button \
@@ -308,7 +307,7 @@ body ::tycho::SimpleView::_initialize {} {
 #### _additem
 #
 body ::tycho::SimpleView::_additem {item} {
-    # Strip types from the name
+    # Strip types from the name.
     regsub -all {[^: ]+:} $item {} tails
     set name [join $tails .]
     set path $itk_component(data).$name
@@ -346,7 +345,7 @@ body ::tycho::SimpleView::_additem {item} {
 #### _delitem
 #
 body ::tycho::SimpleView::_delitem {item} {
-    # Strip types from the name
+    # Strip types from the name.
     regsub -all {[^: ]+:} $item {} tails
     set name [join $tails .]
 
@@ -358,7 +357,7 @@ body ::tycho::SimpleView::_delitem {item} {
 #### _addattr
 #
 body ::tycho::SimpleView::_addattr {item attr value {row {}}} {
-    # Strip types from the name
+   # Strip types from the name.
     regsub -all {[^: ]+:} $item {} tails
     set name [join $tails .]
     set path $itk_component($name)
@@ -386,7 +385,7 @@ body ::tycho::SimpleView::_addattr {item attr value {row {}}} {
 #### _delattr
 #
 body ::tycho::SimpleView::_delattr {item attr} {
-    # Strip types from the name
+    # Strip types from the name.
     regsub -all {[^: ]+:} $item {} tails
     set name [join $tails .]
     set path $itk_component($name)
@@ -402,7 +401,7 @@ body ::tycho::SimpleView::_delattr {item attr} {
 #### _setattr
 #
 body ::tycho::SimpleView::_setattr {item attr value} {
-    # Strip types from the name
+    # Strip types from the name.
     regsub -all {[^: ]+:} $item {} tails
     set name [join $tails .]
     set path $itk_component($name)
@@ -416,7 +415,7 @@ body ::tycho::SimpleView::_setattr {item attr value} {
 #### _hasattr
 #
 body ::tycho::SimpleView::_hasattr {item attr} {
-    # Strip types from the name
+    # Strip types from the name.
     regsub -all {[^: ]+:} $item {} tails
     set name [join $tails .]
 
