@@ -77,9 +77,10 @@ OCT_DEBUG_FLAGS =
 # but it is unneeded for HPPA CC 3.50.  You can use 'what /usr/bin/CC'
 # to find out what version of HPPA CC you are using.
 # If you are running under HPUX9, then remove -DPTHPUX10
-# We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc
-#ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
-ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10  -D_REENTRANT -D_HPUX_SOURCE
+# We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc and 
+# pigilib/kernelCalls.cc, however, we can't have _CMA_NOWRAPPERS_ defined
+# for octtools/Xpackages/rpc.c and some of the other files in pigilib
+ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 
