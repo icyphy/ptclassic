@@ -49,7 +49,7 @@ extern const char ACSdomainName[] = "ACS";
 class ACSDomain : public Domain {
 public:
 	// constructor
-	ACSDomain() : Domain(ACSdomainName) {}
+	ACSDomain() : Domain(ACSdomainName) {subDomains += "AnyCG";}
 
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
