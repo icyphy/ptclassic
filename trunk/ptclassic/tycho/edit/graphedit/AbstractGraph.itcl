@@ -129,7 +129,7 @@
 # </tcl></pre>
 #
 class ::tycho::AbstractGraph {
-    inherit ::tycho::Model
+    inherit ::tycho::OldModel
 
     constructor {args} {}
     destructor {}
