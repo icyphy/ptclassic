@@ -1,5 +1,5 @@
 defstar {
-	name		{ ZigZagImage }
+	name		{ ZigZagImg }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -125,4 +125,4 @@ This is useful before quantization.
 		doZigZag(*image);
 		Envelope outEnvp(*image); outport%0 << outEnvp;
 	}
-} // end defstar { ZigZag }
+} // end defstar { ZigZagImg }
