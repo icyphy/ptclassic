@@ -36,6 +36,13 @@
 # _AbstractGraph_ superclass with concrete methods for a number
 # of common algorithms on directed graphs.
 #
+# When constructed,  edges do not require that vertices
+# already exist, as this can occur when graphs are automatically
+# generated; once all vertices and edges have been added, the graph
+# can be checked for correctness and "repaired" with the verify{}
+# and repair{} methods. It also makes graph construction somewhat
+# faster as there is less error-checking.
+#
 # Here are some examples of its use; see <a 
 # href="AbstractGraph">AbstractGraph</a> for examples of
 # the basics of graph construction. First, create a graph
@@ -141,11 +148,14 @@ class ::tycho::Digraph {
     # Get the output edges from a subgraph
     method subgraphOutputs {args}
 
+    # Test whether a graph is correctly constructed
+    method verify {}
+
     #################################################################
     ####                   protected methods                     ####
 
     # Return a description of a single item
-    protected method _describeitem {context type tail name {prefix {}}}
+    protected method _describeitem {name {prefix {}}}
 
     # Update the cache
     protected method _updatecache
@@ -276,9 +286,9 @@ body ::tycho::Digraph::delete* {vertex} {
 # already exists, but not if any of the connected vertices do not exist.
 #
 body ::tycho::Digraph::edge {vertex1 vertex2 args} {
-    # Add the edge to the model. We use a slightly weird encoding
-    # to get the names of edges -- this is to make it possible
-    # to implement methods like edge{} using pattern-matching.
+    # Add the edge to the model. We encode the vertex name into the
+    # edge names to make it possible to implement methods like
+    # edges{} using pattern-matching.
     eval add edge:$vertex1^$vertex2 $args
 }
 
@@ -324,8 +334,16 @@ body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
 # list.
 #
 body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
-    _update
-    eval concat [array names _edges [list $pattern1 $pattern2]]
+    # Only use the cached data if the cache is valid
+    if [cache valid] {
+        eval concat [array names _edges [list $pattern1 $pattern2]]
+    } else {
+        set result {}
+        foreach edge [names edge:$pattern1^$pattern2] {
+            eval lappend result [lreplace [split $edge :^] 0 0]
+        }
+        return $result
+    }
 }
 
 ########################################################################
@@ -341,11 +359,16 @@ body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
 # This method cannot be recorded or published.
 #
 body ::tycho::Digraph::repair {} {
-    foreach {src tgt} [edges] {
-	if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
+    # Do not use cached data
+    foreach edge [names edge:*] {
+        set splat [split $edge :^]
+        set src [lindex $splat 1]
+        set tgt [lindex $splat 2]
+
+        if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
             # Delete a disconnected edge
             edgedelete $src $tgt
-	}
+        }
     }
     # Return null so record{} or publish{} will complain.
     return ""
@@ -360,13 +383,11 @@ body ::tycho::Digraph::repair {} {
 # editors more generic.
 #
 body ::tycho::Digraph::subgraphEdges {args} {
-    cache update
+    _update
     set result {}
     foreach u $args {
         foreach v $args {
-            foreach edge [array names _edges [list $u $v]] {
-                lappend result $edge
-            }
+            eval lappend result [array names _edges [list $u $v]]
         }
     }
     return $result
@@ -381,9 +402,10 @@ body ::tycho::Digraph::subgraphEdges {args} {
 # editors more generic.
 #
 body ::tycho::Digraph::subgraphInputs {args} {
+	_update
     set result {}
     foreach v $args {
-        foreach edge [array names _edges [list $v *]] {
+        foreach edge [array names _edges [list * $v]] {
             if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
                 lappend result $edge
             }
@@ -401,15 +423,37 @@ body ::tycho::Digraph::subgraphInputs {args} {
 # editors more generic.
 #
 body ::tycho::Digraph::subgraphOutputs {args} {
+    _update
     set result {}
     foreach v $args {
-        foreach edge [array names _edges [list * $v]] {
+        foreach edge [array names _edges [list $v *]] {
             if { [lsearch -exact $args [lindex $edge 1]] < 0 } {
                 lappend result $edge
             }
         }
     }
     return $result
+}
+
+########################################################################
+#### verify
+#
+# Test whether a graph is properly constructed. This method
+# provides a default implementation that tests for invalid edges; however,
+# subclasses may choose to override this method for efficiency, because
+# it doesn't work with the subclass, or to perform additional tests.
+#
+body ::tycho::Digraph::verify {} {
+    foreach edge [names edge:*] {
+        set splat [split $edge :^]
+        set src [lindex $splat 1]
+        set tgt [lindex $splat 2]
+        
+        if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
+            return 0
+        }
+    }
+    return 1
 }
 
 #####################################################################
@@ -423,28 +467,28 @@ body ::tycho::Digraph::subgraphOutputs {args} {
 # the default method because edges have a different format
 # from the default.
 #
-body ::tycho::Digraph::_describeitem {context type tail name {prefix {}}} {
+body ::tycho::Digraph::_describeitem {name {prefix {}}} {
+    regexp {(.+):(.+)} [lindex $name end] _ type tail
+
     if { $type == "edge" } {
         # Start string with type
         set string $prefix
         append string "edge"
 
-        # Append the edge names and the data
-        eval lappend string [split $tail ^] [itemcget $name]
+        # Append the two vertices and the data
+        eval lappend string [split $tail ^] [itemcget edge:$tail]
 
         append string \n
     } else {
-        chain $context $type $tail $name $prefix
+        chain $name $prefix
     }
 }
 
 ########################################################################
 #### _updatecache
 #
-# Celar the cache and build updated versions of the _parents,
-# _children, and _vertices arrays. This method functions correctly
-# only if the graph is properly constructed -- if in doubt, call
-# repair{} first.
+# Clear the cache and build updated versions of the _parents,
+# _children, _edges and _vertices arrays.
 #
 body ::tycho::Digraph::_updatecache {} {
     # Clear all cached data
@@ -473,13 +517,8 @@ body ::tycho::Digraph::_updatecache {} {
         lappend _parents($tgt) $src
 
         # Regenerate edge array
-        set _edges([list $src $tgt]) [list $src $tgt]
+        set _edges([list $src $tgt]) 1
     }
     # Chain to validate cache
     chain
-
-    puts "children: [array get _children]"
-    puts "parents:  [array get _parents]"
-    puts "vertices: $_vertices"
-    puts "edges:    [array get _edges]"
 }
