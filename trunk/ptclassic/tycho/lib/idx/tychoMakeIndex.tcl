@@ -47,7 +47,7 @@ proc tychoCompareFirst {first second} {
 # The rest of the arguments are any number of file names
 # from which the index should be created.
 #
-proc tychoMkIndex {name filename args} {
+proc tychoMkIndex {name filename prependTYCHO args } {
     set entries {}
     foreach file $args {
 	set fd [open $file r]
@@ -58,7 +58,11 @@ proc tychoMkIndex {name filename args} {
 		!= 0} {
 	    set nm [string range $contents [lindex $matchname 0] \
 		    [lindex $matchname 1]]
-	    set entry [list $nm [file join \$TYCHO $file] $nm]
+	    if { $prependTYCHO != 0} {
+		set entry [list $nm [file join \$TYCHO $file] $nm]
+	    } else {
+		set entry [list $nm $file $nm]
+	    }
 	    lappend entries $entry
 	    set contents [string range $contents [lindex $matchname 1] end]
 	}
@@ -85,7 +89,7 @@ proc tychoMkIndex {name filename args} {
 #
 proc tychoFindAllHTML { {dirname .} {depth 0}} {
     cd $dirname
-    set files [glob -nocomplain {*.html}]
+    set files [glob -nocomplain {*.htm*}]
     foreach name [exec ls] {
 	if [file isdirectory $name] {
 	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
@@ -129,7 +133,40 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 		    $name != {test} && \
 		    $name != {junk} } {
 		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
-			[expr $depth + 1]]
+g			[expr $depth + 1]]
+		cd $dirname
+		foreach file $subfiles {
+		    lappend files [file join $name $file]
+		}
+	    }
+	}
+    }
+    return $files
+}
+
+#### ptolemyFindStarHTML
+# Search the current directory and recursively all subdirectories
+# for files with the extension .html, and return a list of all the file
+# names relative to the current directory.  We only return html files in
+# the codeDoc directory.
+#
+# Note that we don't cd down into directories and then cd back up
+# because if we do, and the directory is a link, we end up somewhere
+# else.
+#
+proc ptolemyFindStarHTML { {dirname .} {depth 0}} {
+    cd $dirname
+    set files [glob -nocomplain [file join codeDoc *.html]]
+    foreach name [exec ls] {
+	if [file isdirectory $name] {
+	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
+	    if {$name != {SCCS} && \
+		    $name != {RCS} && \
+		    $name != {adm} && \
+		    $name != {test} && \
+		    $name != {junk} } {
+		set subfiles [ptolemyFindStarHTML [file join $dirname $name] \
+g			[expr $depth + 1]]
 		cd $dirname
 		foreach file $subfiles {
 		    lappend files [file join $name $file]
@@ -154,7 +191,7 @@ proc tychoStandardIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho index}} \
-    	    [file join $TYCHO lib idx tycho.idx] $files
+    	    [file join $TYCHO lib idx tycho.idx] 1 $files 
     cd $olddir
 }
 
@@ -173,6 +210,25 @@ proc tychoCodeDocIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho Itcl Code Index}} \
-	    [file join $TYCHO lib idx codeDoc.idx] $files
+	    [file join $TYCHO lib idx codeDoc.idx] 1 $files
+    cd $olddir
+}
+
+
+#### ptolemyStarHTMLIndex
+# Update the Tycho code index.
+# All files in the codeDoc directories with the extension .html in the
+# tree rooted at the environment.
+# variable TYCHO are included.
+#
+proc ptolemyStarHTMLIndex {} {
+    global TYCHO
+    set olddir [pwd]
+
+    set files [tychoFindAllHTML .]
+    # cd back in case we have followed links in ptolemyFindStarHTML
+    cd $olddir
+    eval tychoMkIndex {{Ptolemy Star HTML Index}} \
+	    starHTML.idx 0 $files 
     cd $olddir
 }
