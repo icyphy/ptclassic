@@ -49,11 +49,19 @@ XColor *clr;			/* Returned color structure */
  * for the white pixel.
  */
 {
-    static XColor white;
+    static XColor white, exactwhite;
     static int init = 0;
 
     if (!init) {
-	white.pixel = WhitePixel(xv_disp(), xv_scrn());
+        /* Don't call WhitePixel here, instead, get the color by name.
+           The value for WhitePixel apparently is the value for the default
+           colormap.  If we have a TrueColor map, then the value of
+           WhitePixel will be out of range if we use it with a PseudoColor
+           map
+        */
+        
+        XAllocNamedColor(xv_disp(), xv_cmap(), "white", &white, &exactwhite);
+	//white.pixel = WhitePixel(xv_disp(), xv_scrn());
 	XQueryColor(xv_disp(), xv_cmap(), &white);
     }
     if (clr) *clr = white;
