@@ -49,17 +49,14 @@ LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
 SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
-HDRS=dataType.h Block.h Connect.h \
- ComplexArrayState.h ComplexState.h \
- DataStruct.h Domain.h FloatState.h \
- Fraction.h Galaxy.h IntState.h InterpGalaxy.h Interpreter.h \
- KnownBlock.h KnownState.h NamedObj.h Output.h Particle.h PriorityQueue.h \
- Scheduler.h SpaceWalk.h Star.h State.h StringList.h StringState.h \
- FloatArrayState.h IntArrayState.h \
- Tokenizer.h Topology.h Universe.h miscFuncs.h type.h \
- ComplexSubset.h Wormhole.h WormConnect.h \
- Display.h \
- Linker.h Linker.sysdep.h \
+HDRS= Block.h CircularBuffer.h ComplexSubset.h Connect.h DataStruct.h \
+ Display.h Domain.h Fraction.h Galaxy.h Geodesic.h InterpGalaxy.h \
+ Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h NamedObj.h \
+ Output.h Particle.h ParticleStack.h Plasma.h PriorityQueue.h \
+ Scheduler.h SpaceWalk.h Star.h StringList.h Tokenizer.h Topology.h \
+ Universe.h WormConnect.h Wormhole.h dataType.h miscFuncs.h type.h \
+ ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
+ IntArrayState.h IntState.h KnownState.h State.h StringState.h 
 
 # Library objects
 LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o \
@@ -100,10 +97,9 @@ depend:
 		makedepend -I$(GNUINCLUDE) $(SRCS)
 
 makefile:	make.template
-		rm -f makefile
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
 		make -f make.template sources depend
-		ln -s $(VPATH)/makefile makefile
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
