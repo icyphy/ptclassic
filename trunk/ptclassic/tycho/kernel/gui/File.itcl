@@ -533,7 +533,7 @@ body ::tycho::File::constructor {args} {
         $myMenubar add "Guide to $myclass widget" Help -underline 0 \
                 -command "$this help"
         
-        $myMenubar add "Concept Index..." Help -underline 0 \
+        $myMenubar add "Concept Index..." Help -underline 8 \
                 -command {::tycho::File::openContext \
 		[file join \$TYCHO lib idx tycho.idx]}
         
@@ -543,7 +543,7 @@ body ::tycho::File::constructor {args} {
                 -file [file join \$TYCHO lib idx codeDoc.idx] \
                 -width 80; $nm centerOnScreen"
         
-        $myMenubar add "Class Diagram" Help -underline 0 -command \
+        $myMenubar add "Class Diagram" Help -underline 6 -command \
                 {::tycho::File::openContext \
 		[file join \$TYCHO doc tychoClasses.dag]}
 
