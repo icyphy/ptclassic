@@ -338,7 +338,6 @@ body ::tycho::Monitor::autoDestroy { {time 0} } {
 body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
     # By default we see message "Press ENTER ..."
     putStatus ""
-    puts "errorCount=$errorCount errorList=$errorList"
     set errorList {}
     set errorCount -1
     set previousErrorLine -1
