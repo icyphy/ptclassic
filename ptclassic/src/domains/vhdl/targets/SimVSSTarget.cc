@@ -65,8 +65,14 @@ VHDLTarget(name,starclass,desc) {
   needC2Vreal = 0;
   needV2Creal = 0;
 
-  // See if this takes hold, or init in setup
-  pairNumber = 2000;
+  // Use the process id to uniquely name the sockets.
+  int pid = (int) getpid();
+  // Because of the naming style we use and because the
+  // address name (path name) is limited to 14 characters
+  // by socket.h, and because process ids are up to 5 digits,
+  // anything more than an additional character in length will
+  // fail (e.g., multiplying by 100 instead of 10).
+  pairNumber = pid * 10;
 }
 
 // Clone the Target.
@@ -79,14 +85,6 @@ static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
 static KnownTarget entry(proto,"SimVSS-VHDL");
 
 void SimVSSTarget :: setup() {
-/*
-  needC2Vinteger = 0;
-  needV2Cinteger = 0;
-  needC2Vreal = 0;
-  needV2Creal = 0;
-  */
-  // See if this takes hold, or init in setup
-  pairNumber = 1000;
   writeCom = 1;
 
   // Generate the command to set the SIM_ARCH environment variable here.
@@ -117,8 +115,7 @@ void SimVSSTarget :: configureCommPair(CommPair& pair) {
   pair.cgcStar->setState("destDir", hashstring(destDirectory));
   pair.cgcStar->setState("filePre", hashstring(filePrefix));
 
-  int pid = (int) getpid();
-  StringList prNum = pid + pairNumber;
+  StringList prNum = pairNumber;
 
   pair.cgcStar->setState("pairNumber", hashstring(prNum));
   pair.cgStar->setState("pairNumber", hashstring(prNum));
@@ -271,7 +268,6 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
-  printf("needC2Vinteger is %d\n",needC2Vinteger);
   if (needC2Vinteger) {
     code << "\n
 --C2Vinteger.vhdl
@@ -304,7 +300,6 @@ end;
 ";
   }
 
-  printf("needV2Cinteger is %d\n",needV2Cinteger);
   if (needV2Cinteger) {
     code << "\n
 --V2Cinteger.vhdl
@@ -338,7 +333,6 @@ end;
 ";
   }
   
-  printf("needC2Vreal is %d\n",needC2Vreal);
   if (needC2Vreal) {
     code << "\n
 --C2Vreal.vhdl
@@ -371,7 +365,6 @@ end;
 ";
   }
   
-  printf("needV2Creal is %d\n",needV2Creal);
   if (needV2Creal) {
     code << "\n
 --V2Creal.vhdl
@@ -662,7 +655,6 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
   }
   else
     Error::abortRun(*this, dtype, ": type not supported");
-  printf("Vtype is %s\n", (const char*) vtype);
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
@@ -718,7 +710,6 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
   }
   else
     Error::abortRun(*this, dtype, ": type not supported");
-  printf("Vtype is %s\n", (const char*) vtype);
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
