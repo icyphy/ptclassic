@@ -53,8 +53,8 @@ extern const Attribute P_NOINIT = {PB_NOINIT,0};
 int AsmPortHole::circAccess() const {
 	int bsiz = bufSize();
 	if ((attributes() & PB_CIRC) != 0) return TRUE;
-	if (numberTokens > 1 && bsiz % numberTokens != 0) return TRUE;
-	int farTokens = far()->numTokens();
+	if (numXfer() > 1 && bsiz % numXfer() != 0) return TRUE;
+	int farTokens = far()->numXfer();
 	if (farTokens > 1 && bsiz % farTokens != 0) return TRUE;
 	return FALSE;
 }
@@ -98,7 +98,7 @@ ProcMemory* AsmPortHole::memory() const {
 int AsmPortHole::initOffset() {
 	int bsiz = bufSize();
 	if (isItOutput()) {
-		offset = numTokens();
+		offset = numInitDelays();
 		// the following error is already reported by bufSize()
 		if (offset > bsiz) return FALSE;
 		if (offset == bsiz) offset = 0;
