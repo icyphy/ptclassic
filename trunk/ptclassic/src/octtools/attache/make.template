@@ -78,7 +78,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 
 attache:	$(OBJS)
 	$(CLINKER) $(LINKFLAGS) $(OBJS) \
-		-o attache $(LIBS) $(SYSLIBS) -lcurses $(TERMLIB_LIBSPEC) -lm 
+		-o attache $(LIBS) $(CSYSLIBS) -lcurses $(TERMLIB_LIBSPEC)
 
 DESTBIN = $(OCTTOOLS)/bin.$(PTARCH)/attache
 

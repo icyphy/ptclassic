@@ -63,7 +63,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 masters:	$(OBJS)
 	$(CLINKER) $(LINKFLAGS) $(OBJS) \
 		-o masters \
-		$(LIBS) $(SYSLIBS) -lm 
+		$(LIBS) $(CSYSLIBS) 
 
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/masters
 
