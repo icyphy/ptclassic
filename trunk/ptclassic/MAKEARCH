@@ -1,0 +1,24 @@
+#! /bin/csh -f
+# script to make directories and links for an architecture
+# $Id$
+
+cd ~ptolemy
+mkdir bin.$ARCH lib.$ARCH obj.$ARCH
+cd obj.$ARCH
+ln -s ../src/makefile .
+foreach x (interp kernel pigiRpc stars tests xgraph)
+	mkdir $x
+	cd $x
+	ln -s ../../src/$x/makefile .
+	if (-r ../../src/$x/make.template) ln -s ../../src/$x/make.template .
+	cd ..
+end
+
+cd stars
+foreach x (sdf ddf de)
+	mkdir $x
+	cd $x
+	ln -s ../../../src/stars/$x/{make.template,makefile} .
+	cd ..
+end
+
