@@ -64,6 +64,27 @@
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
+  (figureGroupDefault idelay
+      (userData priority 11)
+      (width -2)
+      (color 136 656 136)
+      (fillPattern 1 1 "1")
+      (borderPattern 1 "0")
+  )
+  (figureGroupDefault idelayI
+      (userData priority 12)
+      (width -2)
+      (color 1000 1000 1000)
+      (fillPattern 1 1 "1")
+      (borderPattern 1 "0")
+  )
+  (figureGroupDefault idelayOutline
+      (userData priority 12)
+      (width -2)
+      (color 1000 1000 1000)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
   (figureGroupDefault label
       (userData priority 9)
       (width -2)
