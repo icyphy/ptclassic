@@ -105,7 +105,7 @@ char *s;
     char buf[MSG_BUF_MAX];
 #else
     char buf[1024];
-#endif //OLDNEVER
+#endif /* OLDNEVER */
 #if REPORT_TCL_ERRORS
     char *msg;
 #endif
@@ -144,7 +144,7 @@ char *s;
     char buf[MSG_BUF_MAX];
 #else
     char buf[1024];
-#endif //OLDNEVER
+#endif /* OLDNEVER */
     if (printDebugState) {
 	(void) sprintf(buf, "\0062Debug: %s\n\0060", s);
 	(void) vemMessage(buf, MSG_DISP);
