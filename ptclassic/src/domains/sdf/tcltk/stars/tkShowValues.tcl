@@ -84,7 +84,7 @@ if {![winfo exists $s]} {
 	    tkwait variable tkShowValueWaitTrig
 	    for {set i 0} {$i < $numInputs} {incr i} {
 	        $win.f.m$i configure -bg {AntiqueWhite}
-	        $win.f.m$i configure -activebackground {tan}
+	        $win.f.m$i configure -activebackground {burlywood}
 	    }
 	}
     }

@@ -94,7 +94,7 @@ if {![winfo exists $s]} {
 	    set tkTextWaitTrig 0
 	    tkwait variable tkTextWaitTrig
 	    $win.cont configure -bg {AntiqueWhite}
-	    $win.cont configure -activebackground {tan}
+	    $win.cont configure -activebackground {burlywood}
 	}
     }
 
