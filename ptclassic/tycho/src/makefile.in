@@ -55,10 +55,10 @@ include $(CONFIG)
 EXTRA_SRCS =	configure.in makefile.in
 
 # `make realclean` removes these files
-REALCLEAN_STUFF = java.mk tcl.mk makefile
+REALCLEAN_STUFF = tcl.mk makefile
 
 # `make checkjunk` ignores these files
-MISC_FILES =	java.mk tcl.mk config.cache config.log config.status \
+MISC_FILES =	tcl.mk config.cache config.log config.status \
 		configure $(DIRS)
 
 # We can't place an 'all' rule in corerules.mk, because any makefile that
@@ -75,7 +75,7 @@ all:
 	    fi ; \
 	done
 
-install: $(LIBDIR) $(LIBDIR)/java.mk $(LIBDIR)/tcl.mk
+install: $(LIBDIR) $(LIBDIR)/tcl.mk
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -87,9 +87,6 @@ install: $(LIBDIR) $(LIBDIR)/java.mk $(LIBDIR)/tcl.mk
 
 $(LIBDIR):
 	mkdir $@
-$(LIBDIR)/java.mk:
-	rm -f $@
-	ln -s java.mk $@
 $(LIBDIR)/tcl.mk:
 	rm -f $@
 	ln -s tcl.mk $@
