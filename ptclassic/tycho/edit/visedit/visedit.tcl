@@ -86,14 +86,6 @@ if { [lsearch -exact $auto_path $env(VISEDIT_LIBRARY)] == -1 } {
 	-category "graphics" \
 	-underline 0
 
-# Tcl profiling tool
-::tycho::register mode "profile" \
-	-command {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
-	-label {Tcl Profiler}  \
-	-category "tool" \
-	-underline 4
-
-
 #### HELP MENU ENTRIES
 
 # Tycho class diagram
