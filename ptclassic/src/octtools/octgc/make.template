@@ -1,7 +1,7 @@
-# Makefile for Ptolemy octls
+# Makefile for Ptolemy octgc
 # Version Identification:
-# @(#)make.template	1.14 04/21/98
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -35,15 +35,15 @@
 # root of source tree
 ROOT	      = ../../..
 # VPATH points to the real source directory
-VPATH         = $(ROOT)/src/octtools/octls
+VPATH         = $(ROOT)/src/octtools/octgc
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-HDRS		= 
+HDRS		= octgc.h
 
-LIBCSRCS	= octls.c
+LIBCSRCS	= octgc.c
 
 SRCS = $(LIBCSRCS)
 
@@ -51,7 +51,10 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
-BINARY =	octls$(BINARY_EXT)
+BINARY =	octgc$(BINARY_EXT)
+
+MISC_FILES =	octgc.1
+
 
 all::	 makefile $(BINARY)
 
@@ -73,6 +76,10 @@ install: makefile $(DEST) $(BINDIR)/$(BINARY)
 
 $(BINDIR)/$(BINARY):
 	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
+
+TESTBINARY = ./octgc
+tests: $(TESTBINARY) sample.out
+	$(TESTBINARY) -p sample:physical | cmp -s - sample.out
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
