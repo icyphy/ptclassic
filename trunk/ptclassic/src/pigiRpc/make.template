@@ -50,5 +50,40 @@ include $(CONFIG)
 
 -include override.mk
 
-# Include information on all stars and targets.
-include /users/pino/Ptdesign/mk/pigiRpc.mk
+ifndef BASENAME
+ifndef PIGI
+	ALLBINARIES=1
+	BASENAME=pigiRpc
+endif
+endif
+
+TK=1
+
+PT_DEPEND = pigiMain.o
+
+ADD_SRCS=version.$(PIGI).c palettes.$(PIGI).c
+
+PIGI_OBJS = pigiMain.o -lptcl $(ADD_SRCS:.c=.o)
+
+LIBS += -L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist -ltr -lutility \
+	-lst -lerrtrap -luprintf -lport
+
+LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
+	$(OCTLIBDIR)/liboh.$(LIBSUFFIX) $(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
+	$(OCTLIBDIR)/liblist.$(LIBSUFFIX) \
+	$(OCTLIBDIR)/libtr.$(LIBSUFFIX) $(OCTLIBDIR)/libutility.$(LIBSUFFIX) \
+	$(OCTLIBDIR)/libst.$(LIBSUFFIX) $(OCTLIBDIR)/liberrtrap.$(LIBSUFFIX) \
+	$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX) $(OCTLIBDIR)/libport.$(LIBSUFFIX)
+
+include $(ROOT)/mk/ptbin.mk
+
+palettes.$(PIGI).c: $(PT_DEPEND)
+	echo -n "char* defaultPalettes(){ return " > palettes.$(PIGI).c
+	echo "\"$(PALETTES):./user.pal:./init.pal\";}" | \
+		sed -e 's/PTOLEMY/$$PTOLEMY/g' -e 's/ /:/g' \
+		>> palettes.$(PIGI).c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> palettes.$(PIGI).c
+	$(CC) -c palettes.$(PIGI).c	
+
+
