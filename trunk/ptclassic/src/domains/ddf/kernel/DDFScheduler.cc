@@ -184,8 +184,7 @@ DDFScheduler :: run (Galaxy& galaxy) {
 		case DDF : break;
 		case SDF : 
 			realSched->setStopTime((float) stopTime);
-		default : return(realSched->run(galaxy)); 
-			  break;
+		default : return realSched->run(galaxy); 
 
 	}
 		
