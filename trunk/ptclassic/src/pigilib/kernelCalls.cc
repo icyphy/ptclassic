@@ -11,7 +11,7 @@ Programmer: E. Goei, J. Buck
 */
 
 #include "kernelCalls.h"
-#include "KnownBlock.h"
+#include "InterpUniverse.h"
 #include "StringList.h"
 #include "miscFuncs.h"
 
@@ -73,10 +73,10 @@ extern "C" char* callParseClass (char* name) {
 }
 
 // Find a class.  Handle Printer.input=2.  Fail if the mphname is bogus.
-inline static Block* findClass (const char* name) {
+inline static const Block* findClass (const char* name) {
 	const char* mph;
 	int nP;
-	Block* b = KnownBlock::find (parseClass (name, &mph, nP));
+	const Block* b = KnownBlock::find (parseClass (name, &mph, nP));
 	if (!b || nP == 0) return b;
 	return b->multiPortWithName (mph) ? b : 0;
 }
@@ -95,7 +95,7 @@ static void logDomain() {
 // domain (e.g. SDF in DDF)
 extern "C" char *
 KcDomainOf(char* name) {
-	Block* b = findClass (name);
+	const Block* b = findClass (name);
 	if (!b) {
 		ErrAdd("Unknown block");
 		return NULL;
@@ -242,7 +242,7 @@ Changed to add info on data types, 10/5/90
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
 {
-	Block *block;
+	const Block *block;
 	const char* mphname;
 	const char* cname;
 	int npspec;
@@ -335,22 +335,30 @@ Outputs:
         if the star has any.  Callers can free() memory in ParamList
         array when no longer needed.
 */
-extern "C" boolean
-KcGetParams(char* name, ParamListType* pListPtr)
+// done as separate functions because of a wierd 1.37.1 compiler
+// bug: g++ 1.37.1 won't accept an iterator in an extern "C" function!
+static boolean
+realGetParams(const char* name, ParamListType* pListPtr)
 {
-	Block *block = findClass(name);
+	const Block *block = findClass(name);
 	if (block == 0) {
 		return FALSE;
 	}
 	int n = block->numberStates();
 	pListPtr->length = n;
 	pListPtr->array = new ParamStruct[n];
+	BlockStateIter nexts(*block);
 	for (int i = 0; i < n; i++) {
-		State& s = block->nextState();
+		State& s = *nexts++;
 		pListPtr->array[i].name = s.readName();
 		pListPtr->array[i].value = s.getInitValue();
 	}
 	return TRUE;
+}
+
+extern "C" boolean
+KcGetParams(char* name, ParamListType* pListPtr) {
+	return realGetParams(name, pListPtr);
 }
 
 /*
@@ -361,7 +369,7 @@ Outputs: info = points to info string, free string when done
 extern "C" boolean
 KcInfo(char* name, char** info)
 {
-	Block* b = findClass(name);
+	const Block* b = findClass(name);
 	if (!b) {
 		ErrAdd("Unknown block");
 		return FALSE;
@@ -376,9 +384,11 @@ KcInfo(char* name, char** info)
  Pops up a window displaying the profile and returns true if all goes well,
  otherwise returns false.
 */
+static void displayStates(const Block *b);
+
 extern "C" int
 KcProfile (char* name) {
-	Block* b = findClass (name);
+	const Block* b = findClass (name);
 	if (!b) {
 		ErrAdd ("Unknown block: ");
 		ErrAdd (name);
@@ -426,30 +436,34 @@ KcProfile (char* name) {
 		accum_string ("\n");
 	}
 // now do states
+	displayStates(b);
+	pr_accum_string ();
+	return TRUE;
+}
+
+static void displayStates(const Block *b) {
 	if (b->numberStates()) accum_string ("States:\n");
-	for (i = b->numberStates(); i>0; i--) {
-		State& s = b->nextState();
+	BlockStateIter nexts(*b);
+	State *s;
+	while ((s = nexts++) != 0) {
 		accum_string ("   ");
-		accum_string (s.readName());
+		accum_string (s->readName());
 		accum_string (" (");
-		accum_string (s.type());
+		accum_string (s->type());
 		accum_string ("): ");
-		const char* d = s.readDescriptor();
-		if (d && strcmp (d, s.readName()) != 0) {
+		const char* d = s->readDescriptor();
+		if (d && strcmp (d, s->readName()) != 0) {
 			accum_string (d);
 			accum_string (": ");
 		}
 		accum_string ("default = ");
-		const char* v = s.getInitValue();
+		const char* v = s->getInitValue();
 		if (!v) v = "";
 		if (strlen (v) > 32) accum_string ("\n        ");
 		accum_string (v);
 		accum_string ("\n");
 	}
-	pr_accum_string ();
-	return TRUE;
 }
-
 	
 /* 7/25/90
    Make multiple ports in a star multiporthole
