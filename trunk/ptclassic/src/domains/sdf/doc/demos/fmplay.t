@@ -1,5 +1,5 @@
 .\" $Id$
-.NA fm
+.NA fmplay
 .SD
 Sound generator using FM modulation that plays on the workstation speaker.
 .DE
