@@ -46,7 +46,7 @@
 # without knowing which menu the entry is contained in. This makes
 # it easier for different widgets to manipulate a common set of menus,
 # as well as requiring only one change rather than several if an entry
-# needs to be moved. Third, the methods are somewhat forgiving about "errors":
+# needs to be moved. Third, the methods are little forgiving about "errors":
 # for example, if you try and disable a
 # menu entry that does not exist, then the method silently does
 # absolutely nothing, on the assumption that one piece of code somewhere
@@ -59,7 +59,10 @@
 # Some errors, however, such as attempting to create a menu with a tag
 # that already exists, do generate an error{} call, since not
 # doing so is simply too likely to lead to mysterious errors
-# in the user interface.
+# in the user interface. Note that this class is much less
+# lenient than it used to be, simply because I (hjr) found that
+# failing silently in these sort of cases ended up being
+# much more trouble than it was worth!
 #
 class ::tycho::MenuSupport {
     inherit ::tycho::TWidget
@@ -97,8 +100,8 @@ class ::tycho::MenuSupport {
     # Disable an entry or an entire menu
     method disable {tag}
 
-    # Test if a menu is empty
-    method empty {tag}
+    # Return the entries of a menu
+    method entries {tag}
 
     # Enable an entry or an entire menu
     method enable {tag}
@@ -222,13 +225,13 @@ body ::tycho::MenuSupport::add {type tag inMenu args} {
 
 #####################################################################
 #### clear
-# Clear all entries from a menu. If the menu does not exist, then assume
-# that it was already deleted, and just return.
+# Clear all entries from a menu. If the menu does not exist, then
+# flag an error.
 #
 body ::tycho::MenuSupport::clear {menu} {
     # Check validity
     if { ! [::info exists menupath($menu)] } {
-	return
+	error "Menu $menu does not exist"
     }
 
     # Delete the menu entries. Note: Do in reverse
@@ -272,18 +275,18 @@ body ::tycho::MenuSupport::command {tag inMenu args} {
 #####################################################################
 #### delete
 # Delete a menu or a menu entry. If the specified menu or entry
-# does not exist, assume that it was already deleted and just return.
+# does not exist, flag an error.
 #
 body ::tycho::MenuSupport::delete {tag} {
     # Check validity
     if { ! [::info exists parentmenu($tag)] } {
-	return
+	error "Menu $tag does not exist"
     }
 
     # If it's a submenu, delete it
     if { [::info exists menupath($tag)] } {
 	# Delete nested submenus
-	clear $menupath($tag)
+	clear $tag
 
 	# Delete and forget the menu
 	destroy $menupath($tag)
@@ -330,24 +333,16 @@ body ::tycho::MenuSupport::enable {tag} {
 }
 
 #####################################################################
-#### empty
-# Test if a menu is empty. Flag an error if the menu does not exist.
+#### entries
+# Return the entries of a menu. The returned entries
+# will be in the order in which they appear on the menu.
 #
-body ::tycho::MenuSupport::empty {tag} {
+body ::tycho::MenuSupport::entries {tag} {
     # Check validity
     if { ! [::info exists menupath($tag)] } {
 	error "Menu $tag does not exist"
     }
-    expr { $menuentries($menupath($tag)) == "" }
-}
-
-#####################################################################
-#### exists
-# Test if a menu or an entry exists
-#
-body ::tycho::MenuSupport::exists {tag} {
-    expr {  [::info exists menupath($tag)] \
-	    || [::info exists parentmenu($tag)] }
+    return $menuentries($menupath($tag))
 }
 
 #####################################################################
@@ -379,6 +374,15 @@ body ::tycho::MenuSupport::entryconfigure {tag args} {
 }
 
 #####################################################################
+#### exists
+# Test if a menu or an entry exists
+#
+body ::tycho::MenuSupport::exists {tag} {
+    expr {  [::info exists menupath($tag)] \
+	    || [::info exists parentmenu($tag)] }
+}
+
+#####################################################################
 #### index
 # Given an entry tag, get its Tk index. This is mainly used
 # internal but may also be useful for testing.
@@ -390,6 +394,21 @@ body ::tycho::MenuSupport::index {tag} {
     }
     # Get the index
     lsearch -exact $menuentries($parentmenu($tag)) $tag
+}
+
+#####################################################################
+#### inmenu
+# Return the tag of the menu containing the given menu. This
+# may occasionally be needed.
+#
+body ::tycho::MenuSupport::inmenu {tag} {
+    # Check if the entry exists
+    if { ! [::info exists parentmenu($tag)] } {
+	error "Menu entry $tag does not exist"
+    }
+    set parent [lindex [split $parentmenu($tag) "."] end]
+    regsub {^menu} $parent {} parent
+    return $parent
 }
 
 #####################################################################
@@ -434,21 +453,6 @@ body ::tycho::MenuSupport::insert {type tag before args} {
     	[linsert $menuentries($parentmenu($before)) $idx $tag]
 
     return $tag
-}
-
-#####################################################################
-#### inmenu
-# Return the tag of the menu containing the given menu. This
-# may occasionally be needed.
-#
-body ::tycho::MenuSupport::inmenu {tag} {
-    # Check if the entry exists
-    if { ! [::info exists parentmenu($tag)] } {
-	error "Menu entry $tag does not exist"
-    }
-    set parent [lindex [split $parentmenu($tag) "."] end]
-    regsub {^menu} $parent {} parent
-    return $parent
 }
 
 #####################################################################
