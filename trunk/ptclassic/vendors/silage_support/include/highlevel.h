@@ -1,14 +1,13 @@
-/* $Id$ */
-
+$Id$
 /* highlevel.h -- version 1.12 (IMEC)		last updated: 5/9/89 */
 /* C. Scheers */
 
-#define Sig_Type float
+#define Sig_Type double
+
+#define f2i(x, wx, dx) ((int) x)
 
 #define Float2Fix(x, result, wx, dx)  ((result) = (x))
 #define Fix2Int(x, wx, dx, result)    ((result) = (int) (x))
-#define f2i(x, wx, dx)    ((int) (x))
-#define f2f(x, wx, dx)    (x)
 
 #define FixDisplay(file, name, value, wx, dx)  fprintf (file, "%s :	%f\n", name, value)
 #define IntDisplay(file, name, value)  fprintf (file, "%s :	%d\n", name, value)
@@ -20,20 +19,12 @@
 #define FixNegate(x, result, wx, dx)   		       ((result) = -(x))
 #define FixMult(x, wx, dx, y, wy, dy, result, wr, dr)  ((result) = (x) * (y))
 #define FixDiv(x, wx, dx, y, wy, dy, result, wr, dr)   ((result) = (x) / (y))
-#define FixMin(x, wx, dx, y, wy, dy, result, wr, dr)   ((result) = _Min((x),(y)))
-#define FixMax(x, wx, dx, y, wy, dy, result, wr, dr)   ((result) = _Max((x),(y)))
 #define FixOr(x, wx, dx, y, wy, dy, result, wr, dr) { \
 	   printf ("No equivalent high level operation for | (or).\n"); exit (1);}
-#define FixXor(x, wx, dx, y, wy, dy, result, wr, dr) { \
-   printf ("No equivalent high level operation for ^ (Xor).\n"); exit (1);}
 #define FixAnd(x, wx, dx, y, wy, dy, result, wr, dr) { \
-   printf ("No equivalent high level operation for & (and).\n"); exit (1);}
+	   printf ("No equivalent high level operation for & (and).\n"); exit (1);}
 #define FixNot(x, wx, dx, result, wr, dr) { \
-   printf ("No equivalent high level operation for ! (not).\n"); exit (1);}
-#define FixBitSelect (x, wx, dx, b, w, result, wr, dr) { \
-   printf ("No equivalent high level operation for bitselect.\n"); exit (1);}
-#define FixBitMerge(x, wx, dx, y, wy, dy, result, wr, dr) \
-   printf ("No equivalent high level operation for bitmerge.\n"); exit (1);}
+	   printf ("No equivalent high level operation for ! (not).\n"); exit (1);}
 
 #define FixSR(x, result, wx, dx, n) { \
 	  int qqsr; \
@@ -49,24 +40,36 @@
 	     result = result*2; \
         }
 
-#define FixGT(x, wx, dx, y, wy, dy, result)  ((result) = (x) > (y))
-#define FixEQ(x, wx, dx, y, wy, dy, result)  ((result) = (x) == (y))
-#define FixGTE(x, wx, dx, y, wy, dy, result)  ((result) = (x) >= (y))
-#define FixLT(x, wx, dx, y, wy, dy, result)  ((result) = (x) < (y))
-#define FixLTE(x, wx, dx, y, wy, dy, result)  ((result) = (x) <= (y))
-#define FixNTE(x, wx, dx, y, wy, dy, result)  ((result) = (x) != (y))
+#define FixGT(x, wx, dx, y, wy, dy,result)  \
+		if( (x) > (y)) result = 1; else result=0;
+#define FixEQ(x, wx, dx, y, wy, dy,result)  \
+		if( (x) == (y)) result = 1; else result=0;
+/* defined so in bittrue */
+#define FixGTE(x, wx, dx, y, wy, dy,result)  \
+		if( (x) >= (y)) result = 1; else result=0;
+#define FixGE(x, wx, dx, y, wy, dy,result)  \
+		if( (x) >= (y)) result = 1; else result=0;
+#define FixLT(x, wx, dx, y, wy, dy,result)  {\
+		if( (x) < (y)) result = 1; else result=0;}
+/* defined so in bittrue */
+#define FixLTE(x, wx, dx, y, wy, dy,result)  {\
+		if( (x) <= (y)) result = 1; else result=0;}
+#define FixLE(x, wx, dx, y, wy, dy,result)  {\
+		if( (x) <= (y)) result = 1; else result=0;}
+/* defined so in bittrue */
+#define FixNTE(x, wx, dx, y, wy, dy,result)  {\
+		if( (x) != (y)) result = 1; else result=0;}
+#define FixNE(x, wx, dx, y, wy, dy,result)  {\
+		if( (x) != (y)) result = 1; else result=0;}
 
 #define FixCast(x, wx, dx, result, wr, dr)  ((result) = (x))
 
 
 #define FixSqrt(x, wx, dx, result, wr, dr)             ((result) = (Sig_Type) sqrt ((double)x))
 
-#define FixCos(x, wx, dx, result, wr, dr)             ((result) = (Sig_Type) cos ((double)x))
-
-#define FixSin(x, wx, dx, result, wr, dr)             ((result) = (Sig_Type) sin ((double)x))
-
-#define lookup(table, wt, dt, address, wa, da, result, wr, dr) \
+/*#define lookup(table, wt, dt, address, wa, da, result, wr, dr) \
 					    (*(result) = table[(int) *(address)])
+*/
 
 #define lookup2(table, wt, dt, address1, wa1, da1, address2, wa2, da2, result, wr, dr) \
 			    (*(result) = table[(int) *(address1)][(int) *(address2)])
@@ -85,7 +88,7 @@
 	     *(result) = *(result)/2; \
         }
 
-#define abs(x, wx, dx, result, wr, dr)    *(result) = (*(x)<0)?-(*(x)):*(x)
+/*#define abs(x, wx, dx, result, wr, dr)    *(result) = (*(x)<0)?-(*(x)):*(x)*/
 
 #define addsaturate(x, wx, dw, y, wy, dy, result, wr, dr)  \
 	   *(result) = *(x) + *(y)

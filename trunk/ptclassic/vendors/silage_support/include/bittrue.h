@@ -1,5 +1,4 @@
-/* $Id$ */
-
+$Id$
 /* bittrue.h -- version 1.18 (IMEC)		last updated: 5/9/89 */
 /* C. Scheers */
 
@@ -21,7 +20,7 @@ typedef struct {
       if (dold > dnew) ShiftRight (x, (dold)-(dnew)); \
 		  else ShiftLeft (x, (dnew)-(dold));
 
-extern double d_to_a ();
+/*extern double d_to_a (); */
 int iter;
 Sig_Type tmp;
 
@@ -32,7 +31,10 @@ Sig_Type tmp;
 #define Fix2Int(x, wx, dx, result) \
 	  (result) = (int) d_to_a (x.bs, wx, dx);
 
-#define f2i(x, wx, dx) ((int) d_to_a (x.bs, wx, dx))
+/* removed because complained of too few args, added fix_to_int in show */
+/*#define f2i(x, wx, dx) ((int) d_to_a (x.bs, wx, dx))  */
+
+#define f2i(x, wx, dx) ((int) fix_2_int(x.bs, wx, dx))
 #define f2f(x, wx, dx) ((float) d_to_a (x.bs, wx, dx))
 
 #define FixDisplay(file, name, value, wx, dx) \
@@ -59,6 +61,9 @@ Sig_Type tmp;
 	  AddBits (x.bs, y.bs, result.bs); \
 	  if (dx != dr) CastBits (result.bs, dx, dr); \
 	  co (result.bs, wr, dr);
+
+/*if(typeof y is not fix then a_to_d) 
+	  a_to_d(y,wy,dy); */
 
 #define FixMinus(x, wx, dx, y, wy, dy, result, wr, dr) \
 	  TwoComp (y.bs, tmp.bs); \
@@ -121,18 +126,34 @@ Sig_Type tmp;
 #define FixGTE(x, wx, dx, y, wy, dy, result) \
           ((result) = GreaterEqual(x.bs, y.bs))
 
+/* defined so in highlevel */
+#define FixGE(x, wx, dx, y, wy, dy, result) \
+          ((result) = GreaterEqual(x.bs, y.bs))
+
 #define FixLT(x, wx, dx, y, wy, dy, result) \
           ((result) = Smaller (x.bs, y.bs))
 
 #define FixLTE(x, wx, dx, y, wy, dy, result) \
           ((result) = SmallerEqual (x.bs, y.bs))
 
+/* defined so in highlevel */
+#define FixLE(x, wx, dx, y, wy, dy, result) \
+          ((result) = SmallerEqual (x.bs, y.bs))
+
 #define FixNTE(x, wx, dx, y, wy, dy, result) \
           ((result) = NotEqual (x.bs, y.bs))
 
+/* defined so in highlevel */
+#define FixNE(x, wx, dx, y, wy, dy, result) \
+          ((result) = NotEqual (x.bs, y.bs))
+
+/*
 void co (x, wx, dx)
    BitString x;
    int wx, dx;
+void co (BitString x, int wx, int dx)
+*/
+void co (BitString x, int wx, int dx)
 {
 #ifdef DETOV
    ChkOv (x, wx, dx);
@@ -148,12 +169,13 @@ void co (x, wx, dx)
 
 #define FixSin(x, wx, dx, result, wr, dr) \
 	  printf("FixSin is not implemented\n");
-
+/*
 #define lookup(table, wt, dt, address, wa, da, result, wr, dr) { \
 	  FixAssign (table[(int) d_to_a ((address)->bs, wa, da)], (result)[0]); \
 	  CastBits ((result)->bs, dt, dr); \
 	  co ((result)->bs, wr, dr); \
         }
+*/
 
 #define lookup2(table, wt, dt, address1, wa1, da1, address2, wa2, da2, result, wr, dr) { \
 	  FixAssign (table[(int) d_to_a ((address1)->bs, wa1, da1)] \
@@ -175,11 +197,13 @@ void co (x, wx, dx)
 	  CastBits ((result)->bs, dx, dr); \
         }
 
+/*
 #define abs(x, wx, dx, result, wr, dr) \
 	  if (NegativeBits ((x)->bs) == true) TwoComp ((x)->bs, (result)->bs); \
 	  else FixAssign ((x)[0], (result)[0]); \
 	  if (dx != dr) CastBits ((result)->bs, dx, dr); \
 	  co ((result)->bs, wr, dr);
+*/
 
 #define addsaturate(x, wx, dx, y, wy, dy, result, wr, dr) \
 	  AddBits ((x)->bs, (y)->bs, (result)->bs); \
