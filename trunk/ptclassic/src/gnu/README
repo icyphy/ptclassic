@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Tue Jan  2 16:12:57 1996 by cxh]-
+-*-Mode:text-*- -[Thu Feb  1 11:44:48 1996 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -115,6 +115,19 @@ Solaris
 
 	The fix is to place /bin in your path before /usr/ucb.  This
 	bug will probably be fixed in the next release of libg++
+
+
+	If, while trying to configure make, you get:
+
+checking whether setvbuf arguments are reversed... configure: error: can not run test program while cross compiling
+
+	then check to so if your 'cc' is /usr/ucb/cc.  If it is, and you 
+	have gcc, then do:
+		cd $PTOLEMY/bin.$PTARCH
+		ln -s gcc cc
+	If you don't have gcc, then you can try getting a prebuilt binary
+	from ftp://ptolemy.eecs.berkeley.edu/pub/gnu.  You can then rebuild
+	if necessary.
 
 gcc and Purify
 --------------
