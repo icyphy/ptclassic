@@ -46,6 +46,8 @@ LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  SDFDomain.cc \
  DEConnect.cc DEScheduler.cc DEStar.cc DEWormhole.cc DEWormConnect.cc \
  DEDomain.cc \
+ DDFConnect.cc DDFScheduler.cc DDFStar.cc DDFWormhole.cc DDFWormConnect.cc \
+ DDFDomain.cc \
  gnulib3a.c
 
 # All sources.
@@ -63,6 +65,7 @@ HDRS=dataType.h Block.h Connect.h \
  ComplexSubset.h Wormhole.h WormConnect.h \
  Linker.h Linker.sysdep.h \
  SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h SDFWormhole.h SDFWormConnect.h \
+ DDFConnect.h DDFScheduler.h DDFStar.h DDFUniverse.h DDFWormhole.h DDFWormConnect.h \
  DEConnect.h DEScheduler.h DEStar.h DEUniverse.h DEWormhole.h DEWormConnect.h
 
 # Library objects
@@ -75,6 +78,8 @@ LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o
  FloatArrayState.o IntArrayState.o \
  SDFConnect.o SDFScheduler.o SDFStar.o SDFWormhole.o SDFWormConnect.o \
  SDFDomain.o\
+ DDFConnect.o DDFScheduler.o DDFStar.o DDFWormhole.o DDFWormConnect.o \
+ DDFDomain.o\
  DEConnect.o DEScheduler.o DEStar.o DEWormhole.o DEWormConnect.o DEDomain.o
 
 # Things to make
