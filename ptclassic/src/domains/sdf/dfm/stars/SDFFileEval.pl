@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     desc {
 Evaluate the "command" parameter in Tcl. Inputs are referenced in
 the comand as "input#1", "input#2", etc.  Outputs are file names,
@@ -154,10 +154,10 @@ the name of the file to source is given by the second argument.
 	}
     }
     begin {
-        tcl_file = "$PTOLEMY/src/domains/sdf/dmm/stars/fileeval.tcl";
+        tcl_file = "$PTOLEMY/src/domains/sdf/dfm/stars/fileeval.tcl";
 
 	if (sourceIfNeeded("fileeval_evalneeded",
-	        "$PTOLEMY/src/domains/sdf/dmm/stars/fileevalsupport.tcl")
+	        "$PTOLEMY/src/domains/sdf/dfm/stars/fileevalsupport.tcl")
 		== 0) {
 	    return;
 	}

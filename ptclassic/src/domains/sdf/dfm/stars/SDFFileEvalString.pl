@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     desc {
 This command is just like the FileEval command, but with the addition
 of another set of outputs "strout".  This set of outputs is treated

@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liabi
 lity, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     descriptor {
 Output the given file name on each firing.
 If no name is given, then output a unique name of a temporary file
