@@ -45,7 +45,7 @@ exec tclsh "$0" "$@"
 
 
 # This file can be used as a standalone script, without all of tycho,
-# so it includes ::tycho::expandPath and ::tycho::rm
+# so it includes ::tycho::expandPath
 
 #####################################################################
 #### psConcat
@@ -179,17 +179,26 @@ proc ::tycho::expandPath { path } {
     return $path
 }
 
-##############################################################################
-#### rm
-# Remove a file
-# FIXME: In tcl7.6, this should go away
+#####################################################################
+#### htmlGetTitle
+# Return the HTML title of a file, if it exist.
+# If it does not contain a title, then return the empty string
 #
-proc ::tycho::rm { args } {
-    global tcl_platform
-    if { $tcl_platform(platform) != "windows" } { 
-	# Unix-ism
-	eval exec rm $args
+proc htmlGetTitle {htmlfile} {
+    set fd [open $htmlfile r]
+    while {![eof $fd]} {
+	set line [gets $fd]
+        if [regexp -nocase {<title>(.*)} $line dummy tag ] {
+	    close $fd
+	    if [regexp -nocase {(.*)</title>} $tag dummy newtag ] {
+		return $newtag
+	    } else {
+		return $tag
+	    }
+	}
     }
+    close $fd
+    return {}
 }
 
 #####################################################################
@@ -245,7 +254,7 @@ proc html2ps {filelist} {
 #### htmlLinks
 # Given a html file, return a list of the links
 #
-proc htmlLinks {htmlfile {depth 0}} { 
+proc htmlLinks {htmlfile {depth 0} {dagfd {}}} { 
     global filesSeen
     
     if {$depth > 100} {
@@ -262,13 +271,16 @@ proc htmlLinks {htmlfile {depth 0}} {
         # as the HREF.
         if [regexp {<[Aa] [Hh][Rr][Ee][Ff]="([^\"]*)"} $line dummy tag ] {
             switch -regexp -- $tag \
-                    {^/} {lappend taglist [::tycho::expandPath $tag]} \
-                    {^..} {lappend taglist [::tycho::expandPath [file dirname $htmlfile]/$tag]} \
-                    default {lappend taglist [::tycho::expandPath $tag]}
+                    {^/} { lappend taglist [::tycho::expandPath $tag]} \
+                    {^\.\.} { lappend taglist [::tycho::expandPath [file dirname $htmlfile]/$tag]} \
+                    {^(http|mailto)} { lappend taglist $tag} \
+                    default { lappend taglist [::tycho::expandPath $tag]}
         }
     }
     close $fd
+
     #puts "$htmlfile: $taglist"
+
     foreach tag $taglist {
         # Only search tags that we have not seen, are .html files
         # and are not codeDoc files
@@ -277,10 +289,15 @@ proc htmlLinks {htmlfile {depth 0}} {
                 [file readable $tag] && \
                 ![regexp {/codeDoc/} $tag] \
             } {
+	if { $dagfd != {}} {
+	    addToDAG $dagfd $htmlfile $tag
+	}
+
+
             #puts "About to call htmlLinks $tag"
             lappend filesSeen $tag
             incr depth
-            htmlLinks $tag $depth
+	    htmlLinks $tag $depth $dagfd
             incr depth -1
         }
     }
@@ -324,7 +341,7 @@ proc htmlDir2ps {indexfile psfile} {
     flush stdout
     update
 
-    eval ::tycho::rm -f $pslist
+    eval file delete -force $pslist
     
     puts "About to generate PostScript"
     flush stdout
@@ -336,8 +353,65 @@ proc htmlDir2ps {indexfile psfile} {
     update
     psConcat $psfile $pslist
 
-    eval ::tycho::rm -f $pslist
+    eval file delete -force $pslist
 }
+
+#####################################################################
+#### addToDAG
+# Add the links
+proc addToDAG {dagfd htmlfile link} {
+    global daglist
+    lappend daglist($link) $htmlfile
+    #puts "--$htmlfile, $daglist($link), $link--"
+}
+
+#####################################################################
+#### html2DAG
+# Given a html file, generate a Directed Acyclic Graph (DAG) that 
+# consists of all of the files that have links to them.
+#
+proc html2DAG {indexfile dagfile} {
+    global filesSeen
+    set filesSeen {}
+
+    puts "About to traverse all local files linked from\n $indexfile"
+    puts " and generate $dagfile"	
+    flush stdout
+    update
+
+    # If the file exists and is not writable, then remove it,
+    # it might be a link to the master tree.
+    if {[file exists $dagfile] && \
+	    ! [file writable $dagfile]} {
+	file delete -force $dagfile
+    }
+    set dagfd [open $dagfile w]
+    puts $dagfd "{configure -canvasheight 600} {configure -canvaswidth 800}"
+    puts $dagfd "{titleSet title {HTML links for [file dirname $indexfile]}}"
+    puts $dagfd "{titleSet subtitle {created: [clock format [clock clicks]]}}"
+
+    # Don't cd until after the output file is open
+    cd [file dirname $indexfile]
+    # Start at depth 0, generate a dag
+    puts [htmlLinks $indexfile 0 $dagfd]
+#    puts $dagfd "\{add \{[::tycho::expandPath $indexfile]\} \
+#	    \{label \{[::tycho::expandPath $indexfile]\}\} \{\}\}"
+
+
+    global daglist
+    foreach dagitem [array names daglist] {
+	set title [htmlGetTitle $dagitem]
+	if { $title == {} } {
+	    set title [file tail $dagitem]
+	}
+	puts $dagfd "\{add \{$dagitem\} \{label \{$title\} \
+	    link \{$dagitem \{\}\}\} \{$daglist($dagitem)\}\}"
+    }
+    
+    close $dagfd
+}
+
+ 
 
 #####################################################################
 #### html2psProcessArgs
@@ -346,24 +420,51 @@ proc htmlDir2ps {indexfile psfile} {
 proc html2psProcessArgs {} {
     global argc argv env
     set error 0
-    if {$argc != 2} {
+    if {$argc < 2 || $argc > 3} {
 	puts "html2ps: wrong number of arguments"
 	set error 1
-    } elseif {! ([file readable [lindex $argv 0]] && \
-	    ("file" == [file type [lindex $argv 0]]))} {
-	puts "mkPtolemyTree: [lindex $argv 0] unreadable"
+    } 
+    if { $argc == 3 } {
+	set commandarg [lindex $argv 0]
+	set indexfile [lindex $argv 1]
+	set outputfile [lindex $argv 2]
+    } else {
+	set indexfile [lindex $argv 0]
+	set outputfile [lindex $argv 1]
+    }
+    if {! ([file readable $indexfile] && \
+	    ("file" == "[file type $indexfile]" )) } {
+	puts "html2ps: $indexfile is not readable"
 	set error 1
     }    
+
+    # Check for -d in the first arg
+    if { $argc == 3 && $commandarg != "-d" } {
+	puts "html2ps: $commandarg not understood, it must be -d"
+	set error 1
+    }
+
     if {$error} {
-	puts "Usage: html2ps <html file> <PostScript File to be generated>"
+	puts "Usage: html2ps [-d] <html file> <outputfile>"
 	puts " This script uses netscape to convert an html tree to PostScript"
-	puts " All of the local links in the html file are followed,"
+	puts " or it can generate a Tycho Directed Acyclic Graph (DAG)."
+	puts " If the -d option is present, then a DAG is produced, if the"
+	puts " -d option is not present, then all of the local links" 
+	puts " in the html file are followed,"
 	puts " and added to the PostScript file."
-	puts " This script is useful for printing of directories that contain"
-	puts " multiple html files"
+	puts " This options is useful for printing of directories that contain"
+	puts " multiple html files into one PostScript file."
 	exit
     }
-    htmlDir2ps [lindex $argv 0] [lindex $argv 1]
+    switch $argc {
+	2 { htmlDir2ps $indexfile $outputfile }
+	3 { 
+	    if {"$commandarg" == "-d" } {
+		html2DAG $indexfile $outputfile
+	    }
+	}
+	default { error "html2ps: internal error, can't handle $argc args"}
+    }
 }
 
 # If we are not in an interactive tclsh, then call processArgs
