@@ -15,4 +15,13 @@ PTOLEMY=${PTOLEMY:-~/ptolemy}
 PTARCH=`$PTOLEMY/bin/ptarch`
 ganttscript=$PTOLEMY/lib/tcl/gantt.tcl
 ptolemywish=$PTOLEMY/bin.$PTARCH/itkwish
+TCL_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl/tcl
+TK_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl/tk
+ITCL_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl/itcl
+ITK_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl/itk
+IWIDGETS_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl/iwidgets
+export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY
+export ITK_LIBRARY IWIDGETS_LIBRARY
+TYCHO=$PTOLEMY/tycho
+export TYCHO
 exec $ptolemywish $ganttscript "$@"
