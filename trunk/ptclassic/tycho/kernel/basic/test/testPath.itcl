@@ -252,7 +252,7 @@ test Path-8.1 {Test out expandPathSplit} {
 
 
 #######################################################################
-#### ::tycho::parseFileHeader
+#### ::tycho::readFileHeader
 #
 set i 0
 foreach {c t} {
@@ -261,7 +261,7 @@ foreach {c t} {
 	"Mode only, with tabs" "-*-\tthemode\t-*-"
 	"Variables, no spaces" {-*-mode:themode;other:theother-*-}
 	"Variables, with spaces" {-*- mode : themode ; other : theother -*-}
-	"Variables, with tabs" {-*-\tmode\t:\tthemode\t;\tother\t:\ttheother\t-*-}
+	"Variables, with tabs" "-*-\tmode\t:\tthemode\t;\tother\t:\ttheother\t-*-"
 	"Variables, extra semicolon" {-*- mode: themode; other: theother ; -*-}
 } r {
 	{mode themode}
@@ -273,9 +273,10 @@ foreach {c t} {
 	{mode themode other theother}
 } {
 	incr i
-	test Path-::tycho::parseFileHeader-$i "Parse file header: $c" {
-		::tycho::parseFileHeader $t arr
-		array get arr
+	test Path-::tycho::parseHeaderString-$i "Parse file header: $c" {
+            catch {unset arr}
+            ::tycho::parseHeaderString $t arr
+            array get arr
 	} $r
 }
 
