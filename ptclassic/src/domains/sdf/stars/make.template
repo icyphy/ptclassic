@@ -35,6 +35,7 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) -I$(VPATH)
 # source files for all stars, using preprocessor
 SRCS= \
  SDFAutocor.pl \
+ SDFAverage.pl \
  SDFBiQuad.pl \
  SDFBitsToInt.pl \
  SDFBlackHole.pl \
@@ -43,6 +44,7 @@ SRCS= \
  SDFBurg.pl \
  SDFBusToNum.pl \
  SDFCommutator.pl \
+ SDFComplexAverage.pl \
  SDFComplexDC.pl \
  SDFComplexFFT.pl \
  SDFComplexFIR.pl \
