@@ -59,7 +59,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	      out << "$ref(input, 0)";
 	    }
 	    else {
-	      out << double(fill);
+	      out << (strcmp(input.resolvedType(),INT)==0?
+		      int(fill):double(fill));
 	      // yes, the previous statement really does work correctly
 	      // even if the type of the output is resolved to COMPLEX
 	      // or INT.  The appropriate conversion is performed.
@@ -69,3 +70,5 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addCode(out);
 	}
 }
+
+
