@@ -46,6 +46,8 @@ int MotorolaTarget :: setup(Galaxy& g) {
 }
 
 void MotorolaTarget :: wrapup () {
+	myCode += procCode;
+	procCode.initialize();
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
 	AsmTarget::wrapup();
