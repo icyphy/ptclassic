@@ -135,7 +135,9 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 // create the directory if necessary (-p)
     if (onHostMachine(hname)) {
 	if (access(directory, W_OK) == -1) {
-	    mkdir << "mkdir " << directory;
+	    // -p flag is necessary because it might be a nested directory
+	    // where one of the parent directories does not exist
+	    mkdir << "mkdir -p " << directory;
 	    if (system(mkdir)) return FALSE;
 	}
     }
