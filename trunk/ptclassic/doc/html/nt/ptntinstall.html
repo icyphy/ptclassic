@@ -179,11 +179,15 @@ PTARCH nt4
 PTOLEMY \users\ptolemy
 CC gcc
 </pre>
-Set your <CODE>PATH</CODE> to include
+
+In the NT System Environment control panel, set your <CODE>PATH</CODE>
+to include
+
 <pre>
 %PTOLEMY%\bin:%PTOLEMY%\bin.nt4
 </pre>
-
+Note that if you are setting variables directly in bash, then you should
+not use the DOS <CODE>%foo%</CODE> syntax, instead use <CODE>$foo</CODE>.
 
 <li> If you have <a href="http://samba.anu.edu.au/samba/">Samba</a>
 setup, then start up <CODE>bash</CODE> and cd to the tree with something like: 
