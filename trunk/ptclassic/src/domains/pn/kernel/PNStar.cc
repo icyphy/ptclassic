@@ -32,21 +32,21 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFStar.h"
+#include "PNStar.h"
 
-extern const char MTDFdomainName[];
+extern const char PNdomainName[];
 
 // Class identification.
-ISA_FUNC(MTDFStar,DataFlowStar);
+ISA_FUNC(PNStar,DataFlowStar);
 
 // Domain identification.
-const char* MTDFStar::domain() const
+const char* PNStar::domain() const
 {
-    return MTDFdomainName;
+    return PNdomainName;
 }
 
 // Execute the Star.
-int MTDFStar::run()
+int PNStar::run()
 {
     BlockPortIter portIter(*this);
     DFPortHole* port;

@@ -33,35 +33,35 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFTarget.h"
-#include "MTDFScheduler.h"
-#include "MTDFThread.h"
-#include "MTDFMonitor.h"
+#include "PNTarget.h"
+#include "PNScheduler.h"
+#include "PNThread.h"
+#include "PNMonitor.h"
 
-static MTDFMonitor prototype;
+static PNMonitor prototype;
 
 // Constructor.
-MTDFTarget::MTDFTarget() : Target("default-MTDF", "MTDFStar",
-	"Schedule dataflow systems using Sun's lightweight process library.")
+PNTarget::PNTarget() : Target("default-PN", "DataFlowStar",
+	"Schedule dataflow systems as process networks.")
 {
 }
 
 // Destructor.
-MTDFTarget::~MTDFTarget()
+PNTarget::~PNTarget()
 {
     delSched();
 }
 
-// Make a new MTDFTarget object.
-Block* MTDFTarget::makeNew() const
+// Make a new PNTarget object.
+Block* PNTarget::makeNew() const
 {
-    LOG_NEW; return new MTDFTarget;
+    LOG_NEW; return new PNTarget;
 }
 
 // Initialization.
-void MTDFTarget::setup()
+void PNTarget::setup()
 {
-    LOG_NEW; setSched(new MTDFScheduler);
+    LOG_NEW; setSched(new PNScheduler);
 
     // Enable all registered PtGates before additional threads are created.
     GateKeeper::enableAll(prototype);
@@ -69,12 +69,12 @@ void MTDFTarget::setup()
     Target::setup();
 }
 
-void MTDFTarget::wrapup()
+void PNTarget::wrapup()
 {
     Target::wrapup();
 
     // Uninitialize the thread library.
-    MTDFThread::wrapup();
+    PNThread::wrapup();
 
     // Disable all registered PtGates after threads have been deleted.
     GateKeeper::disableAll();

@@ -31,8 +31,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
     source.
 */
 
-#ifndef _MTDFGeodesic_h
-#define _MTDFGeodesic_h
+#ifndef _PNGeodesic_h
+#define _PNGeodesic_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -42,14 +42,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class PtCondition;
 
-class MTDFGeodesic : public Geodesic
+class PNGeodesic : public Geodesic
 {
 public:
     // Class identification.
     /*virtual*/ int isA(const char*) const;
 
     // Constructor.
-    MTDFGeodesic();
+    PNGeodesic();
 
     // Notify when not empty.
     /*virtual*/ void slowPut(Particle*);
