@@ -208,6 +208,9 @@ class ::tycho::Model {
     # Add or change default attributes of a link type
     method configureLinkType {type args}
     
+    # Define the attributes of the model
+    method defineAttributes {args}
+    
     # Add a new type of entity to the model
     method defineEntityType {type args}
     
@@ -225,12 +228,18 @@ class ::tycho::Model {
     
     # Add to the model from a state file or a string
     method internalize {type data}
-    
+
     # Load data into the object
     method load {args}
 
     # Get or set a mark in the undo history
     method mark {{markname {}} {position current}}
+
+    # Configure attributes of this model
+    method modelconfigure {args}
+
+    # Get an attribute of this model
+    method modelcget {name}
 
     # Notify all subscribers of a change in data
     method notify {command pattern args}
@@ -383,6 +392,10 @@ body ::tycho::Model::constructor {args} {
     if { $modelname == "" } {
 	set modelname [::info namespace tail $this]
     }
+
+    # All models share a standard set of attributes. Subclasses
+    # can add additional attributes.
+    defineAttributes -title {} -author {} -version {}
 }
 
 ########################################################################
@@ -638,6 +651,16 @@ body ::tycho::Model::configureLinkType {type args} {
     }
     set _typeinfo($type,defaults) [array get temp]
     return ""
+}
+
+########################################################################
+#### defineAttributes
+#
+# Add new attributes to the model. See the comment for
+# _defineattribute{} in the Interchange class.
+#
+body ::tycho::Model::defineAttributes {args} {
+    eval _defineattributes $args
 }
 
 ########################################################################
@@ -922,6 +945,24 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 	# Set a mark
 	set historyMark($markname) $historyMark($position)
     }
+}
+
+########################################################################
+#### modelconfigure
+#
+# Configure attributes of the model and return the inverse command.
+#
+body ::tycho::Model::modelconfigure {args} {
+    eval _modelconfigure $args
+}
+
+########################################################################
+#### modelcget
+#
+# Get an attributes of the model.
+#
+body ::tycho::Model::modelcget {name} {
+    _modelcget $name
 }
 
 ########################################################################
