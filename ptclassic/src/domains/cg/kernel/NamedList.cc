@@ -45,7 +45,7 @@ NamedNode::NamedNode(Pointer objt, const char* name)
 
 NamedNode::~NamedNode()
 {
-    LOG_DEL; delete nm;
+    LOG_DEL; delete [] nm;
 }
 
 // Next object in the list, not the next NamedNode.
