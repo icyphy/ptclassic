@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -83,7 +83,7 @@ test Digraph-1.7 {Get number of edges} {
 # Test set 2: Adding and deleting vertices and edges
 test Digraph-2.1 {Delete single vertex, test return value} {
     digraph vertexdelete a
-} {vertex a -description {} -label {First vertex}}
+} {vertex a -label {First vertex} -description {}}
 
 test Digraph-2.1a {Make sure edges not touched} {
     digraph edges
