@@ -70,7 +70,7 @@ class ::tycho::GanttView {
     itk_option define -dag dag DAG ""
 
     # Specify the visualization state machine
-    itk_option define -vsm vsm VSM ""
+    itk_option define -df df DF ""
 
     ###################################################################
     ####                         public methods                    ####
@@ -169,18 +169,18 @@ configbody ::tycho::GanttView::dag {
 }
 
 #######################################################################
-#### -vsm configuration
+#### -df configuration
 # Set the visualization state machine
 #
-configbody ::tycho::GanttView::vsm {
+configbody ::tycho::GanttView::df {
 
-    set myVSM $itk_option(-vsm)
+    set myDF $itk_option(-df)
     
-    if {$myVSM !=""} {
-        set data(MKSPAN) [$myVSM getMakespan]
-        set data(NPROCS) [$myVSM getNumProcs]
-        set data(HIER) [$myVSM create]
-	set schedName [$myVSM getSchedName]
+    if {$myDF !=""} {
+        set data(MKSPAN) [$myDF getMakespan]
+        set data(NPROCS) [$myDF getNumProcs]
+        set data(HIER) [$myDF create]
+	set schedName [$myDF getSchedName]
 
 	# If we happen to have nested schedules, we should find
 	# out how many levels of nesting we have
@@ -734,7 +734,7 @@ body ::tycho::GanttView::save {} {
 	    }
 	}
 
-	# Use the GanttVSM to interpret the graphical display of schedule
+	# Use the GanttDF to interpret the graphical display of schedule
 	# to write out the schedule file specified.
     }	
 }
