@@ -97,7 +97,8 @@ class ::tycho::Axis {
     ####                       protected variables                 ####
 
     # The font to use for the tick font
-    protected common tickfont [::tycho::font helvetica 9]
+    protected common tickfont \
+	    -adobe-helvetica-medium-r-normal-*-*-100-75-75-*-*-iso8859-*
 
     ###################################################################
     ####                         private procs                     ####

@@ -91,7 +91,7 @@ class ::tycho::Shades {
 		# Create the default color object if necessary
 		#
 		if { ! [info exists colorobjects($defaultcolor)] } {
-		    set defaultcolorobject [info context]::[Shades #auto]
+		    set defaultcolorobject [info context]::[::tycho::Shades #auto]
 		    $defaultcolorobject color $defaultcolor
 		    set colorobjects($defaultcolor) $defaultcolorobject
 		}
@@ -102,7 +102,7 @@ class ::tycho::Shades {
 	    #
 	    # Otherwise, create the color object, record it, and return it
 	    #
-	    set object [info context]::[Shades #auto]
+	    set object [info context]::[::tycho::Shades #auto]
 	    $object color $color
 	    set colorobjects($color) $object
 	}

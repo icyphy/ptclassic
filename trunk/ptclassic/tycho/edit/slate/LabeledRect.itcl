@@ -31,11 +31,7 @@
 
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
-namespace ::tycho {
-    if { [::info classes LabeledItem] == "" } {
-        uplevel #0 {source $env(SLATE_LIBRARY)/LabeledItem.itcl}
-    }
-}
+::tycho::slateLoadSuper LabeledItem
 
 ##########################################################################
 ## LabeledRect
@@ -145,7 +141,7 @@ class ::tycho::LabeledRect {
     set optiondefault(-outline) "black"
     set optiondefault(-shape)   rectangle
     set optiondefault(-width)   "1"
-}
+}   
 
 ##########################################################################
 ## -fill option configuration

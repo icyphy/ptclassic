@@ -189,18 +189,16 @@ class ::tycho::ComplexItem {
 
     ###################################################################
     ####                       class initialization                ####
-
     #### Set method table
     set methodtable(_shape)        ::tycho::ComplexItem::_shape
     set methodtable(construct)     ::tycho::ComplexItem::construct
     set methodtable(coords)        ::tycho::ComplexItem::coords
     set methodtable(itemcget)      ::tycho::ComplexItem::itemcget
     set methodtable(itemconfigure) ::tycho::ComplexItem::itemconfigure
-
+    
     #### Set option defaults
-    set optiondefault(-shape) point
+    set optiondefault(-shape) rectangle
 }
-
 
 ##########################################################################
 #### -shape option configuration
@@ -226,6 +224,11 @@ body ::tycho::ComplexItem::_shape {id canvas slate shape} {
 # zero or more option-value pairs.
 # 
 body ::tycho::ComplexItem::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt value} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $value
+    }
+
     # Create the primary component for the outline coordinates.
     # Because this item is completely blank, it will actually respond to
     # events inside it -- I don't know if this is good or bad, but that's

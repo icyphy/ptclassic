@@ -30,7 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
 #######################################################################
 ## slate pathName args
 #
@@ -240,17 +239,8 @@ class ::tycho::Slate {
     ###################################################################
     ####                       public procs                        ####
 
-    # Create a sample slate for testing, tutorials, etc
-    proc sample {} {
-        uplevel #0 {
-            catch {delete object .t}
-            ::tycho::Displayer .t
-            ::tycho::slate .t.s
-            pack .t.s -fill both -expand on
-            .t centerOnScreen
-            return .t.s
-        }
-    }
+    # Create a sample slate
+    proc demoslate {}
 
     ###################################################################
     ####                    protected methods                      ####
@@ -272,6 +262,18 @@ class ::tycho::Slate {
 
     # The reshaping interactor
     private variable _reshaper ""
+}
+
+#######################################################################
+#### demoslate
+# Create a sample slate for testing, tutorials, etc.
+#
+body ::tycho::Slate::demoslate {} {
+    global env
+    uplevel #0 {
+	source [file join $env(SLATE_LIBRARY) demo init.tcl]
+	::tycho::demo::newslate
+    }
 }
 
 #######################################################################
@@ -1333,7 +1335,7 @@ body ::tycho::Slate::shapecall {tag method args} {
     # Get the Shape class
     set class ::tycho::[::tycho::capitalize [eval [list shape* $tag] $args]]
     # Call the procedure
-    eval $class::_$method $tag $canvas $this $args
+    eval ${class}::_$method $tag $canvas $this $args
 }
 
 #######################################################################
