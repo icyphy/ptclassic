@@ -48,6 +48,8 @@ INCL = -I$(KERNDIR)
 HDRS= DEPortHole.h DEScheduler.h DEStar.h \
  DEWormhole.h DERepeatStar.h EventQueue.h DETarget.h \
  CalendarQueue.h CQEventQueue.h CQScheduler.h \
+ LinkedList.h PendingEventList.h \
+ MutableCalendarQueue.h MutableCQEventQueue.h MutableCQScheduler.h \
  NetworkCell.h SeqATMCell.h BaseImage.h GrayImage.h \
  DCTImage.h MVImage.h
 
