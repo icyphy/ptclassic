@@ -19,8 +19,8 @@
 if {![info exists putInCntrPan]} {set putInCntrPan 1}
 
 if {$putInCntrPan} \
-   { set s .run_[curuniverse].low.${uniqueSymbol}label } \
-   { set s .run_[curuniverse].${uniqueSymbol}label }
+   { set s $ptkControlPanel.low.${uniqueSymbol}label } \
+   { set s $ptkControlPanel.${uniqueSymbol}label }
 
 
 # If a window with the right name already exists, we assume it was
@@ -30,9 +30,10 @@ if {$putInCntrPan} \
 if {![winfo exists $s]} {
 
     proc tkShowValueMakeWindow {putInCntrPan win label numInputs univ} {
+	global ptkControlPanel
         if {$putInCntrPan} {
 	    frame $win
-	    pack append .run_[curuniverse].low $win top
+	    pack append $ptkControlPanel.low $win top
         } {
             toplevel $win
             wm title $win "Bar Meters"
