@@ -29,16 +29,24 @@ $Id$
 class Profile;
 class ParNode;
 class ParProcessors;
+class SDFStar;
 
 class BaseMultiTarget : public CGTarget {
 
 public:
         BaseMultiTarget(const char* name, const char* starclass, const char* desc);
 
+	// Resolve the parameter conflicts based on priorities
+	void initState();
+
 	// redefine the run() function
 	int run();
 
 	int getIters() { return iters; }
+
+	// create Send and Receive Star
+	virtual SDFStar* createReceive(int from, int to, int num);
+	virtual SDFStar* createSend(int from, int to, int num);
 
 	// set current child.
 	void setCurChild(int i) { curChild = i; }
@@ -51,6 +59,16 @@ public:
 
 	// Return true, if it inherits the child targets from the parent.
 	int inherited() { return int(inheritProcessors); }
+
+	// get the OSOP requirement flag : all invocations of a star
+	// should be assigned to the same processor
+	int getOSOPreq() { return int(oneStarOneProc); }
+
+	// get the manualAssignment parameter
+	int assignManually() { return int(manualAssignment); }
+
+	// get the adjustSchedule parameter
+	int overrideSchedule() { return int(adjustSchedule); }
 
         // Inherit the child targets from a given BaseMultiTarget.
         // If the number of child targets is greater than that of a given
@@ -91,12 +109,27 @@ public:
 	virtual void clearCommPattern();
 
 	// schedule communication link.
-	virtual int scheduleComm(ParNode*, int);
+	virtual int scheduleComm(ParNode*, int, int limit = 0);
+
+	// For a given communication node, find a comm. node scheduled
+	// just before the argument node on the same communication resource.
+	virtual ParNode* backComm(ParNode*);
 
 protected:
-	IntState nprocs;
-	IntState inheritProcessors;
-	IntState sendTime;
+	IntState nprocs;		// number of processors
+	IntState inheritProcessors;	// Inside the wormhole, use the
+					// same processors as the outside.
+	IntState sendTime;		// Communication to send a unit data.
+					// To be more elaborated.
+
+	// direct the scheduling procedure
+	IntState manualAssignment;	// assign stars manually
+	IntState adjustSchedule;	// After a scheduling is performed,
+					// the use may want to adjust the
+					// schedule manually.
+	IntState oneStarOneProc;	// all invocations of a star should
+					// be assigned to a single PE.
+
 	int curChild;
 	int nChildrenAlloc;
 private:
