@@ -481,7 +481,7 @@ int PTcl::seed(int argc,char ** argv) {
 // animation control
 int PTcl::animation (int argc,char** argv) {
 	const char* t = "";
-	int c;
+	int c = 1;
 	if (argc == 2) t = argv[1];
 	if (argc > 2 ||
 	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
