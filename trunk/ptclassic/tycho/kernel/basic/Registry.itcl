@@ -207,7 +207,13 @@ ensemble ::tycho::registered {
 # <dd>
 # Return the default file mode registered with a given path name.
 # See <a href="Registry.html#registeredFileMode proc of ::tycho::Registry class">
-# ::tycho::Registry::registeredFileMode</a>.
+# <dt><b>files</b>
+# <dd>
+# Return a list of open files. Note that this really returns the list of
+# tags used to register windows, but most of them are file names
+# so it works OK. You will, however, get things like {Tycho Console}
+# appearing in the list. If necessary, these can be filtered out
+# with <b>::tycho::url exists</b>.
 #
 # <dt><b>isopen</b> _tag_ ?_window_?
 # <dd>
@@ -260,6 +266,13 @@ ensemble ::tycho::registered {
 ensemble ::tycho::registry {
     option filemode {filename} {
 	::tycho::Registry::registeredFileMode $filename
+    }
+    option files {} {
+	set result {}
+	foreach v [@scope ::tycho::Registry array names _windows] {
+	    lappend result [lindex [split $v #] 1]
+	}
+	return $result
     }
     option isopen {tag {window {}}} {
 	if { $window != {} } {
