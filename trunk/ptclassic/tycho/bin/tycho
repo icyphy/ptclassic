@@ -28,6 +28,9 @@ endif
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4/lib/tcl7.4
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0/lib/tk4.0
 
+# Not all shells and platforms set $PWD, so we use our own
+setenv PTPWD `pwd`
+
 # To get tcl/tk man pages before corresponding unix man pages
 setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$MANPATH
 
