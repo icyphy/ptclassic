@@ -105,6 +105,7 @@ static void reportErrors (const char* text) {
 		*p = 0;
 	}
 	win_msg (buf);
+	ErrAdd ("Compilation failed");
 	unlink (tmpFileName);
 }
 
@@ -157,6 +158,17 @@ KcLoadInit (const char* argv0) {
 	Linker::init (argv0);
 }
 
+extern "C" void KcLog();
+
+// Load an object file (local only)
+static int
+linkObject (const char* ofile) {
+	char buf[512];
+	sprintf (buf, "(link %s)\n", ofile);
+	KcLog (buf);
+	return Linker::linkObj (ofile);
+}
+
 // Here is the function that loads in a star!
 // name = username of the star
 // idomain = domain of the star
@@ -191,13 +203,13 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 			reportErrors ("errors from make");
 			return FALSE;
 		}
-		return Linker::linkObj (oName);
+		return linkObject (oName);
 	}
 // No makefile.  If object is younger than source, assume it's good.
 // It also must be younger than the Ptolemy image.
 	if (exists (oName) && isYounger (oName, sourceFile) &&
 	    isYounger (oName, Linker::imageFileName()))
-		return Linker::linkObj (oName);
+		return linkObject (oName);
 // Preprocess if need be.
 	if (preproc && (!exists (ccName) || isYounger (plName, ccName))) {
 		sprintf (cmd, "cd %s; ptlang %s%s.pl >& %s",
@@ -221,7 +233,7 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 // now compile.
 	if (!compile (name, idomain, srcDir, objDir)) return FALSE;
 // finally incremental link.
-	return Linker::linkObj (oName);
+	return linkObject (oName);
 }
 
 // Here is the pigi interface used by make-star.  It looks for a .pl
