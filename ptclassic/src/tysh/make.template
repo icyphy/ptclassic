@@ -46,12 +46,12 @@ VPATH =		$(ROOT)/src/tycho/kernel
 CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-# To use Tcl 7.4b3 and tk4.0b3, set the following
+# To use Tcl 7.4 and tk4.0, set the following
 # FIXME: The version should not be hardwired in this way.
-TCL_INCDIR=$(TCL_ROOT)/tcl7.4b3/include
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4b3.$(ARCH)/lib -ltcl
-TK_INCDIR=$(TCL_ROOT)/tk4.0b3/include
-TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0b3.$(ARCH)/lib -ltk #-lXpm
+TCL_INCDIR=$(TCL_ROOT)/tcl7.4/include
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4.$(ARCH)/lib -ltcl
+TK_INCDIR=$(TCL_ROOT)/tk4.0/include
+TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0.$(ARCH)/lib -ltk #-lXpm
 
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = $(ROOT)/src/ptklib
