@@ -39,9 +39,7 @@
 #### TWidget
 # This class is the base class for most widgets in Tycho. It provides a
 # set of useful methods and a frame within which to insert other widgets.
-# The frame is an itk component called "childsite".  It also implements
-# a focus model by binding the event "Enter" to cause the method
-# <code>focusin</code> to be invoked.
+# The frame is an itk component called "childsite".
 #
 class ::tycho::TWidget {
     inherit ::itk::Widget
@@ -58,7 +56,7 @@ class ::tycho::TWidget {
     # Invoke a command on the context-sensitive popup menu.
     method contextmenu {cmd args}
 
-    # Give the window or a subwindow the focus and set the menu bar (if any).
+    # Take the focus.
     method focusin {}
 
     # Open a file and go to its internal point identified by name.
@@ -134,7 +132,8 @@ body ::tycho::TWidget::constructor {args} {
     eval itk_initialize $args
     eval preference exclude $this $args
 
-    ::bind $itk_component(hull) <Enter> "$this focusin"
+    # This is not a good idea because some widgets don't want the focus:
+    # ::bind $itk_component(hull) <Enter> "$this focusin"
 }
 
 #######################################################################
