@@ -137,7 +137,7 @@ if ( ! $?nocmdfile ) then
     endif
 endif
 
-$PTOLEMY/bin.$ARCH/vem -G 600x150+0+0 -F ${cell}:schematic -G +0+160 -R $PTOLEMY/lib/pigiRpcShell
+$PTOLEMY/bin.$ARCH/vem -G 600x150+0+0 -F ${cell}:schematic -G +0+200 -R $PTOLEMY/lib/pigiRpcShell
 
 catch:
 
