@@ -131,7 +131,7 @@ realclean:	clean_itcl
 # Configure itcl
 FORCE:
 $(PTOLEMY)/src/tcltk/tcl_shared: FORCE
-	chmod a+x $@
+	-chmod a+x $@
 
 $(ITCL_OBJ)/config.status: config_itcl
 
@@ -230,7 +230,7 @@ fixlinks:
 		rm -f `cd itcl && echo *.h`; ln -s itcl/*.h .)
 
 ######################################################
-# Tcl8.0/Tk8.0
+# Tcl8/Tk8
 # This is experimental, and should go away when Itcl3.0 is out
 
 TCLTK8_VERSION = 8.0
@@ -284,8 +284,8 @@ $(TCL8_INDEPENDENT_DEST): $(TCLTK_DEST)
 ######################################################
 # TclBlend
 
-TCLBLEND_MAJOR_VERSION = 1.0
-TCLBLEND_MINOR_VERSION = b1up2
+TCLBLEND_MAJOR_VERSION = 1.0up1
+TCLBLEND_MINOR_VERSION = 
 TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
 TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
@@ -324,7 +324,6 @@ time_tclblend:
 
 $(TCLBLEND_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
-
 
 ######################################################
 # Jacl
