@@ -159,7 +159,7 @@ configbody ::tycho::View::readonly {
 #
 body ::tycho::View::constructor {args} {
     # Figure out whether I'm in a displayer, and if so, set myDisplayer.
-    set top [winfo toplevel $prefix]
+    set top [winfo parent $prefix]
     set cmd [winfo command $top]
     if ![catch {set disp [$cmd isa ::tycho::Displayer]}] {
         if $disp {
@@ -224,7 +224,7 @@ body ::tycho::View::displayer {{method {}} args} {
 #
 body ::tycho::View::focusin {} {
     ::tycho::TWidget::focusin
-    displayer setCurrentView $viewName
+    displayer setCurrentView $this
 }
 
 #####################################################################
