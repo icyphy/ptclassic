@@ -244,7 +244,9 @@ body ::tycho::ToolBar::enable {tag} {
 # NEW: By default, the entry will replace an entire line with a
 # Tk <b>label</b> and an entry box. But if the argument contains 
 # "-command {any_cmd_here}", the entire line will be a
-# Tk <b>button</b> and an entry box.
+# Tk <b>button</b> and an entry box.  In addition, if the argument
+# contains "-underline int", then int specifies which character of
+# the button label to underline (starting with 0).
 # <br><br>
 # The entry widget has a "click to focus" model.  When the user types
 # a return in the widget, the contents of the entry box are appended
@@ -252,6 +254,7 @@ body ::tycho::ToolBar::enable {tag} {
 #
 body ::tycho::ToolBar::entry {tag label default command args} {
     array set option {-command {}}
+    array set option {-underline {}}
     array set option {-foreground {}}
     array set option $args
 
@@ -261,6 +264,10 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     # Rest go to label (ie. textvariable, etc)
     if {$option(-command)!={}} {
         set option(-command) "-command \{$option(-command)\}"
+        if {$option(-underline)!={}} {
+            set option(-command) \
+                    "$option(-command) -underline \{$option(-underline)\}"
+        }
     }
     if {$option(-foreground)!={}} {
         set option(-foreground) "-foreground $option(-foreground)"
