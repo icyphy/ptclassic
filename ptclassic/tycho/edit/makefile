@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = textedit visedit slate
+DIRS = textedit visedit slate graphedit
 
 # Root of Tycho directory
 ROOT =		..
