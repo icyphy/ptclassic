@@ -44,6 +44,8 @@
 # the server.
 
 
+puts !!!$argv
+
 # Ugly nasty global variable for the command read from the socket
 # so far
 set _JRPC_command_ ""
@@ -96,8 +98,10 @@ proc _JRPCServer_ReadOrClose {fd} {
 
     # Check for cookie and execute command if one was got
     if { $line == "_JRPC_EndCommand_Cookie_" } {
-        # puts "JRPCServer: \"[string trimright $_JRPC_command_ \n]\""
-
+	global debug
+	if $debug {
+	    puts "JRPCServer: \"[string trimright $_JRPC_command_ \n]\""
+	}
         if [catch {uplevel #0 $_JRPC_command_} result] {
             puts $fd [list 1 $result]
             flush $fd
@@ -129,6 +133,9 @@ if {[lsearch [package names] java] != -1} {
         set portnum [lindex $argv 2]
     } else {
         set portnum 19876
+    }
+    if { [llength $argv] >= 3 } {
+	set debug [lindex $argv 3]
     }
     JRPCServer_CreateServer $portnum
 }
