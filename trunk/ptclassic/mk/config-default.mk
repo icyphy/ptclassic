@@ -104,6 +104,8 @@ GPPFLAGS = $(MEMLOG)
 # C compiler flags.  Defined by the arch-config mk.
 CFLAGS =
 
+# Archive tool to use
+AR = ar
 # command to use when getting files from SCCS (Gnu make)
 GET=safe-get
 
