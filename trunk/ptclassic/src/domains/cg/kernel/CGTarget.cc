@@ -120,7 +120,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 // destructor
 CGTarget::~CGTarget() {
 	delSched();
-	LOG_DEL; delete schedFileName;
+	LOG_DEL; delete [] schedFileName;
 }
 
 
@@ -149,10 +149,12 @@ void CGTarget::setup() {
 		LOG_NEW; setSched(new SDFScheduler);
 		break;
 	    case 1:
+		delete [] schedFileName;
 		schedFileName = writeFileName("schedule.log");
 		LOG_NEW; setSched(new SDFClustSched(schedFileName));
 		break;
 	    case 2:
+		delete [] schedFileName;
 		schedFileName = writeFileName("schedule.log");
 		LOG_NEW; setSched(new LoopScheduler(schedFileName));
 		break;
