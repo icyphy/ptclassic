@@ -526,7 +526,7 @@ body ::tycho::File::constructor {args} {
     # Help menu contents
     #
     itk_component add helpMenu {
-	menu $itk_component(helpMenuButton).menu
+	menu $itk_component(helpMenuButton).menu -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
