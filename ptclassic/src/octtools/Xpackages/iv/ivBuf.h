@@ -27,10 +27,26 @@
 
 #ifndef IV_BUF
 #define IV_BUF
-typedef struct s_Buf {
+#include "ansi.h"
+#include "iv.h"
+/*typedef struct s_Buf {
     char* buf;
     int count;
     int size;
 } ivBuf;
+*/
+void ivBufInit
+	ARGS((ivBuf *buf, int size, Display* disp));
+void ivBufClear
+	ARGS((ivBuf* buf));
+void ivBufAddString
+	ARGS((ivBuf* buf, char* s));
+void ivBufAddChar
+	ARGS((ivBuf* buf, char c));
+
+void ivBufDelChar
+	ARGS((ivBuf* buf));
+void ivBufDelWord
+	ARGS((ivBuf* buf));
 
 #endif
