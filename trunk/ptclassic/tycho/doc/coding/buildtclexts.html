@@ -155,13 +155,16 @@ and add the makefile to the <CODE>AC_OUTPUT()</CODE> macro.
 
 <LI> Edit the <CODE>makefile.in</CODE> appropriately. 
 <MENU>
-<LI> Substitute in the name of your <CODE>.c</CODE> file
+	<LI> Substitute in the name of your <CODE>.c</CODE> file
 
-<LI> Modify the name of the library to be produced.  It is best 
-if the shared object that is produced starts with <CODE>lib</CODE>.  
-The <A HREF="../../kernel/doc/usersGuides/Loader.html">Tycho Loader</A> searches
-for shared objects that begin with <CODE>lib</CODE>.
+	<LI> Modify the name of the library to be produced.  It is
+	best if the shared object that is produced starts with
+	<CODE>lib</CODE>.  The <A
+	HREF="../../kernel/doc/usersGuides/Loader.html">Tycho
+	Loader</A> searches for shared objects that begin with
+	<CODE>lib</CODE>.
 
+</MENU>
 
 <LI> Add the <CODE>makefile.in</CODE> of your extension to <A
 HREF="../../makefile"><CODE>$TYCHO/makefile</CODE></A> so that when
@@ -174,7 +177,6 @@ cd $TYCHO
 make tclexts
 </PRE>
 
-</MENU>
 
 </OL>
 
