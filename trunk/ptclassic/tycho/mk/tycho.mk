@@ -73,6 +73,9 @@ JDOCFLAGS = 	-author -version # -doctype MIF
 # The jar command, used to produce jar files, which are similar to tar files
 JAR =		jar
 
+# The 'java' interpreter
+JAVA =		java
+
 # Script to run tclBlend
 JTCLSH =	jtclsh
 
