@@ -52,6 +52,9 @@ public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
 	/*virtual*/ Block* makeNew() const;
 
+	// Class identification.
+	/*virtual*/ int isA(const char*) const;
+
 	/*virtual*/ int compileCode();
 	/*virtual*/ int runCode();
 

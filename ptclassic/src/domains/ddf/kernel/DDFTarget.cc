@@ -77,3 +77,5 @@ DDFTarget::~DDFTarget() {
 	delSched();
 }
 
+const char* DDFTarget::className() const { return "DDFTarget";}
+ISA_FUNC(DDFTarget,Target);
