@@ -1454,12 +1454,14 @@ int POct::ptkOpenFacet (int aC, char** aV) {
     // Try to open the facet at least read only first.  This will work
     // if there already is a facet to read, but will fail if the facet
     // doesn't already exist
-    octObjectClass facet;
-    octStatus status = OpenFacet(facet, aV[1], viewType, facetType, "r");
+    // do not use octObjectClass for facet, because destructor causes
+    // "freeing non-heap memory" error in Purify
+    octObject facet = {OCT_UNDEFINED_OBJECT};
+    octStatus status = OpenFacet(&facet, aV[1], viewType, facetType, "r");
     if (status == OCT_NO_EXIST) {
 	// Create a new facet
         // note that the new facet must be a contents facet
-        status = OpenFacet(facet, aV[1], viewType, "contents", "a");
+        status = OpenFacet(&facet, aV[1], viewType, "contents", "a");
         if (status <= 0) {
 	    // Could not create new facet
 	    Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
@@ -1467,12 +1469,15 @@ int POct::ptkOpenFacet (int aC, char** aV) {
         } else if (status == OCT_NEW_FACET) {
 	    // Do not free prop; otherwise, get freeing non-heap memory
 	    octObject prop = {OCT_UNDEFINED_OBJECT};
-            GetOrCreatePropStr(facet, &prop, "TECHNOLOGY", UTechProp);
-            GetOrCreatePropStr(facet, &prop, "VIEWTYPE", "SCHEMATIC");
+            GetOrCreatePropStr(&facet, &prop, "TECHNOLOGY", UTechProp);
+	    FreeOctMembers(&prop);
+            GetOrCreatePropStr(&facet, &prop, "VIEWTYPE", "SCHEMATIC");
+	    FreeOctMembers(&prop);
             // If facet is schematic:contents then use schematic editstyle,
             if ( (strcmp(facetType, "contents") == 0) && 
                  (strcmp(viewType, "schematic") == 0) ) {
-                GetOrCreatePropStr(facet, &prop, "EDITSTYLE", "SCHEMATIC");
+                GetOrCreatePropStr(&facet, &prop, "EDITSTYLE", "SCHEMATIC");
+	        FreeOctMembers(&prop);
             }
         }
     } else if (status <= 0) {
@@ -1483,8 +1488,9 @@ int POct::ptkOpenFacet (int aC, char** aV) {
 
     // Convert the new Facet into a string Oct ID Handle
     char facetHandle[POCT_FACET_HANDLE_LEN];
-    ptkOctObj2Handle(facet, facetHandle);
+    ptkOctObj2Handle(&facet, facetHandle);
     Tcl_AppendResult(interp, facetHandle, " ", NULL );
+    FreeOctMembers(&facet);
 
     return TCL_OK;
 
