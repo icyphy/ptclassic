@@ -622,12 +622,12 @@ body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
 # <dt><b>data</b> _subscriber_ ?_name_? ?_command_?
 # <dd>
 # Subscribe to a change in data. This is the same as for 
-# <a href="Model.html">Model</a>.
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
 #
 # <dt><b>event</b> _subscriber_ _event_ ?_command_?
 # <dd>
 # Subscribe to a an "event" on the model. This is the same as for 
-# <a href="Model.html">Model</a>.
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
 #
 # <dt><b>options</b> _subscriber_ ?_option_ _name_ ...?
 # <dd>
@@ -701,12 +701,12 @@ body ::tycho::StyleSheet::synchronize {master} {
 # <dt><b>data</b> _subscriber_ ?_name_?
 # <dd>
 # Unsubscribe from data changes. This is the same as for 
-# <a href="Model.html">Model</a>.
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
 #
 # <dt><b>event</b> _subscriber_ ?_event_?
 # <dd>
 # Unsubscribe from an "event" on the model. This is the same as for 
-# <a href="Model.html">Model</a>.
+# <a href="../../../model/doc/codeDoc/Model.html">Model</a>.
 #
 # <dt><b>options</b> _subscriber_ ?_option_ ...?
 # <dd>
