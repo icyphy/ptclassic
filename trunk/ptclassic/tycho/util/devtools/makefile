@@ -55,7 +55,8 @@ ITCL_SRCS = \
 	EditDiff.itcl \
 	Glimpse.itcl \
 	ItclClassList.itcl \
-	JRPC.itcl
+	JRPC.itcl \
+	ProfileJava.itcl
 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
