@@ -116,12 +116,57 @@ PTcl::~PTcl() {
 ////                     Itcl callable public methods                    ////
 
 ///////////////////////////////////////////////////////////////////////////
-//// block
-// Create a new instance of star, galaxy, or wormhole within the
-// current galaxy.
-int PTcl::block(int argc,char** argv) {
-    if (argc != 3) return usage("block <name> <class>");
-    if (!currentGalaxy->addStar(argv[1], argv[2])) return TCL_ERROR;
+//// addBlock
+// Create a new instance of star, galaxy, or wormhole. The
+// specified block name may be absolute or relative to the current
+// galaxy, unless it is a universe, in which case it must be absolute.
+// I.e., it must begin with a leading period.
+// The galaxy within which the block is to be created must exist or an
+// error is triggered.  An error is also triggered if the block already
+// exists.
+//
+int PTcl::addBlock(int argc,char** argv) {
+    if (argc != 3) return usage("addBlock <name> <class>");
+    InterpGalaxy* saveGal = currentGalaxy;
+    currentGalaxy = getParentGalaxy(argv[1]);
+    if (currentGalaxy) {
+        const char* root = rootName(argv[1]);
+        if (currentGalaxy->blockWithName(root)) {
+            InfString msg = "Block ";
+            msg << root << " already exists in " << fullName(currentGalaxy);
+            result(msg);
+            currentGalaxy = saveGal;
+            return TCL_ERROR;
+        }
+        if (!currentGalaxy->addStar(root, argv[2])) {
+            currentGalaxy = saveGal;
+            return TCL_ERROR;
+        }
+    } else {
+        currentGalaxy = saveGal;
+        return TCL_ERROR;
+    }
+    currentGalaxy = saveGal;
+    return TCL_OK;
+}
+
+///////////////////////////////////////////////////////////////////////////
+//// addUniverse
+// Create a new, empty universe.  The name can begin with
+// a period (as in ".foo") or can omit the period (as in "foo").  In either
+// case, the full name of the resulting universe has a leading period (".foo").
+// If a universe with the given name already exists, it is cleared.
+// The second argument, if given, is the domain of the new universe.
+// This defaults to the current domain.
+//
+int PTcl::addUniverse(int argc,char** argv) {
+    if (argc > 3 || argc < 2)
+    return usage("newuniverse <name> ?<dom>?");
+    if (argc == 3) curDomain = hashstring(argv[2]);
+    const char* nm = argv[1];
+    if (*nm == '.') nm++;
+    const char* name = hashstring(nm);
+    newUniv(name, curDomain);
     return TCL_OK;
 }
 
@@ -168,16 +213,137 @@ int PTcl::blocks (int argc,char ** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// connect
+// Usage:
+// connect ?-bus _buswidth_? ?-note _annotation_? _srcport dstport_
+//
+// Form a connection between two ports.  The ports are given by dotted
+// names that can be absolute (beginning with a period) or relative to the
+// current galaxy.
+// If a _buswidth_ option is given, then it specifies the number of parallel
+// connections to make.  If the _annotation_ option is given, the annotation
+// is recorded on the connection.  Such annotations are used, for example,
+// in dataflow domains to specify the number and values of initial tokens that
+// are put on an arc.  For such domains, the _annotation_ argument
+// is a list giving the values of initial tokens that will be put on the arc.
+//
+int PTcl::connect(int argc,char** argv) {
+    char* bus=NULL;
+    char* annotation="";
+    char* nmargs[2];
+    int j=0;
+    int err=0;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-bus") == 0) {
+            bus = argv[++i];
+            if (i>=argc) err=1;
+        } else if (strcmp(argv[i],"-note") == 0) {
+            annotation = argv[++i];
+            if (i>=argc) err=1;
+        } else if (j <= 1) {
+            nmargs[j++] = argv[i];
+        } else {
+            err=1;
+        }
+    }
+    if (err) return usage ("connect ?-bus <buswidth>? ?-note <annotation>? <srcport> <dstport>");
+
+    const Block* src = getParentBlock(nmargs[0]);
+    const Block* dst = getParentBlock(nmargs[1]);
+    if (!src || !dst) return TCL_ERROR;
+    Block* parent = src->parent();
+    if (!parent || parent != dst->parent() || !parent->isA("InterpGalaxy")) {
+        InfString msg = "Invalid connect command: ";
+        msg << "source " << fullName(src) << " and destination " 
+                << fullName(dst) 
+                << " must be in a galaxy (and the same galaxy).";
+        result(msg);
+        return TCL_ERROR;
+    }
+    InterpGalaxy* parentg = (InterpGalaxy*)parent;
+    // NOTE: The interface really should take over the functionality
+    // of InterpGalaxy, in which case this will be of type Galaxy.
+    if (bus==NULL) {
+        if (!parentg->connect(src->name(), rootName(nmargs[0]),
+                dst->name(), rootName(nmargs[1]),
+                annotation)) return TCL_ERROR;
+    } else {
+        if (!parentg->busConnect(src->name(), rootName(nmargs[0]),
+                dst->name(), rootName(nmargs[1]),
+                bus, annotation)) return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// connected
+// Return a list of ports to which the given port is connected, or an empty
+// list if it is not connected.  The full name of each port is returned.
+// If the -deep option is given, then a star port is always returned,
+// never a galaxy port.  That is, the port that the galaxy port is aliased
+// to is returned. If the name of a multiport is given, this method returns
+// a list of all the ports connected to the multiport.
+//
+int PTcl::connected(int argc,char** argv) {
+    int deep=0;
+    char* portname=NULL;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-deep") == 0) deep = 1;
+        else if (portname != NULL)
+               return usage ("connected ?-deep? <portname>");
+        else portname = argv[i];
+    }
+    if (portname == NULL)
+            return usage ("connected ?-deep? <portname>");
+
+    GenericPort* gp = getPort(portname,1);
+    if (!gp) return TCL_ERROR;
+
+    // FIXME: What does this do if we are connected to a node?
+    if (gp->isItMulti()) {
+        // The port is a multiport.  Iterate over its constituent ports.
+        MPHIter next(*((MultiPortHole*) gp));
+        PortHole* ph;
+        while ((ph = next++) != 0) {
+            const GenericPort* f = ph->far();
+            if (f) {
+                if (!deep) {
+                    const GenericPort* galport = f->aliasFrom();
+                    if (galport) f=galport;
+                }
+                InfString res = fullName(f);
+                addResult(res);
+            }
+        }
+    } else {
+        // The port is a simple port.
+        // NOTE: The following cast assumes that only PortHole and
+        // MultiPortHole are derived from GenericPort.
+        const GenericPort* f = ((PortHole*)gp)->far();
+        if (f) {
+            if (!deep) {
+                const GenericPort* galport = f->aliasFrom();
+                if (galport) f=galport;
+            }
+            InfString res = fullName(f);
+            result(res);
+        }
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// curgalaxy
-// Return name of current galaxy or universe if no argument is given.
-// If a name is given and a galaxy or universe exists with that name,
-// make that the current galaxy. If there is no such galaxy, return an
-// error.
+// Return the full name of current galaxy or universe if no argument is
+// given. If a name is given and a galaxy or universe exists with that
+// name, make that the current galaxy. If there is no such galaxy,
+// return an error.
 //
 int PTcl::curgalaxy(int argc,char** argv) {
     if (argc == 1) {
         if (currentGalaxy != NULL) {
-            Tcl_AppendResult(interp,currentGalaxy->name(),(char*)NULL);
+            InfString nm = fullName(currentGalaxy);
+            result(nm);
         }
         return TCL_OK;
     } else if (argc == 2) {
@@ -210,53 +376,21 @@ int PTcl::curgalaxy(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//// remove
-// Delete the specified block.
+//// getAnnotation
+// Return the annotation created with the *-note* option for a given port.
+// If no annotation was specified, return an empty string.
 //
-int PTcl::remove(int argc,char** argv) {
-    if (argc != 2) return usage("remove <name>");
-    const Block* b = getBlock(argv[1]);
-    Block* parent = b->parent();
-    if (parent) {
-        if (!parent->isA("InterpGalaxy")) {
-            InfString msg = "Unexpected error: ";
-            msg << fullName(parent) << " is a parent but not an InterpGalaxy.";
-            result(msg);
-            return TCL_ERROR;
-        }
-        if (!((InterpGalaxy*)parent)->delStar(b->name())) return TCL_ERROR;
-    } else {
-        // Make sure we don't end up without a current universe.
-        // If we are deleting the current universe, set a flag.
-        int delcurrent = (b == universe);
-        int delmain = (strcmp(b->name(),"main") == 0);
-        if (!univs.delUniv(b->name())) {
-            InfString msg = "Unexpected error: ";
-            msg << fullName(b) << " has no parent but is not a universe.";
-            result(msg);
-            return TCL_ERROR;
-        }
-        if (delcurrent) {
-            if (delmain) {
-                // Deleted "main", remake it.
-                newUniv("main", curDomain);
-            } else {
-                // Make "main" the current universe.
-                const InterpUniverse* u = univs.univWithName("main");
-                if (!u) {
-                    // This shouldn't happend, but if main has been deleted,
-                    // remake it.
-                    newUniv("main", curDomain);
-                    result("main universe somehow got deleted!  Recreating");
-                    return TCL_ERROR;
-                } else {
-                    currentGalaxy = (InterpGalaxy*) u;
-                    curDomain = currentGalaxy->domain();
-                    currentTarget = u->myTarget();
-                }
-            }
-        }
+// NOTE: If a multiport is passed in, this method returns an empty string,
+// indicating no annotation. Is this what we want?
+//
+int PTcl::getAnnotation(int argc,char** argv) {
+    if (argc != 2) {
+        return usage ("getAnnotation <portname>");
     }
+    GenericPort* gp = getPort(argv[1], 1);
+    if (!gp) return TCL_ERROR;
+
+    // FIXME: finish this.
     return TCL_OK;
 }
 
@@ -297,11 +431,27 @@ int PTcl::getDescriptor(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// getDomain
+// Return the domain of the specified block, or if none is
+// specified, of the current galaxy.
+//
+int PTcl::getDomain(int argc,char** argv) {
+    if (argc > 2) return usage("getDomain ?<blockname>?");
+    const Block* b;
+    if (argc == 1)
+        b = getBlock("this");
+    else
+        b = getBlock(argv[1]);     
+    if (!b) return TCL_ERROR;
+    return result(b->domain());
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// getFullName
-// Return the full dotted name of the specified block, or if none is
-// specified, of the current galaxy. The full dotted name begins with a
-// dot, then the universe name, and then lists all parent galaxies,
-// separated by periods, and finally the block name.
+// Return the full name of the specified block, or if none is
+// specified, of the current galaxy.  The full name begins with a period,
+// followed by the universe name, followed by parent galaxy names separated
+// by periods, followed by the final block name.
 //
 int PTcl::getFullName(int argc,char** argv) {
     if (argc > 2) return usage("getFullName ?<blockname>?");
@@ -309,10 +459,45 @@ int PTcl::getFullName(int argc,char** argv) {
     if (argc == 1)
         b = getBlock("this");
     else
-        b = getBlock(argv[1]);     
+        b = getBlock(argv[1]);
     if (!b) return TCL_ERROR;
     InfString res = fullName(b);
     return result(res);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// getParent
+// Return the full name of the parent of the specified block, or if
+// none is specified, of the current galaxy. If the specified block is
+// an instance of a star or galaxy, then the full name begins with a
+// period, followed by the universe name, followed by parent galaxy
+// names separated by periods, followed by the final block name. If the
+// specified block is a universe, then return ".". If the specified
+// block is a master star or galaxy, then return the empty string. If
+// the specified block does not exist, then return an error.
+//
+int PTcl::getParent(int argc,char** argv) {
+    if (argc > 2) return usage("getParent ?<blockname>?");
+    const Block* b;
+    if (argc == 1)
+        b = getBlock("this");
+    else
+        b = getBlock(argv[1]);
+    if (!b) return TCL_ERROR;
+
+    if (b->parent() == NULL) {
+        // The block is either a master or a universe.
+        if (b->isA("InterpUniverse")) {
+            // must be a universe.
+            return(result("."));
+        } else {
+            // must be a master.
+            return(result(""));
+        }
+    } else {
+        InfString name = fullName(b->parent());
+        return(result(name));
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -414,6 +599,80 @@ int PTcl::ports(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// remove
+// Delete the specified block.
+//
+int PTcl::remove(int argc,char** argv) {
+    if (argc != 2) return usage("remove <name>");
+    const Block* b = getBlock(argv[1]);
+    if (!b) {
+        InfString msg = "No such block: ";
+        msg << argv[1];
+        return TCL_ERROR;
+    }
+    Block* parent = b->parent();
+    if (parent) {
+        if (!parent->isA("InterpGalaxy")) {
+            InfString msg = "Unexpected error: ";
+            msg << fullName(parent) << " is a parent but not an InterpGalaxy.";
+            result(msg);
+            return TCL_ERROR;
+        }
+        if (!((InterpGalaxy*)parent)->delStar(b->name())) return TCL_ERROR;
+    } else {
+        // Make sure we don't end up without a current universe.
+        // If we are deleting the current universe, set a flag.
+        int delcurrent = (b == universe);
+        int delmain = (strcmp(b->name(),"main") == 0);
+        if (!univs.delUniv(b->name())) {
+            // If the block has no parent, but is not a universe, then
+            // it is a master.
+            InfString msg = "Cannot remove a master block: ";
+            msg << fullName(b);
+            result(msg);
+            return TCL_ERROR;
+        }
+        if (delcurrent) {
+            if (delmain) {
+                // Deleted "main", remake it.
+                newUniv("main", curDomain);
+            } else {
+                // Make "main" the current universe.
+                const InterpUniverse* u = univs.univWithName("main");
+                if (!u) {
+                    // This shouldn't happend, but if main has been deleted,
+                    // remake it.
+                    newUniv("main", curDomain);
+                    result("main universe somehow got deleted!  Recreating");
+                    return TCL_ERROR;
+                } else {
+                    currentGalaxy = (InterpGalaxy*) u;
+                    curDomain = currentGalaxy->domain();
+                    currentTarget = u->myTarget();
+                }
+            }
+        }
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// univlist
+// Return a list of the names of the known universes.
+// Each name begins with a dot, and hence is absolute.
+//
+int PTcl::univlist(int argc,char **) {
+    if (argc > 1) return usage("univlist");
+    IUListIter next(univs);
+    InterpUniverse* u;
+    while ((u = next++) != 0) {
+        InfString nm = fullName(u);
+        addResult(nm);
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 ////                     auxiliary public methods                       ////
 
@@ -430,18 +689,32 @@ PTcl* PTcl::findPTcl(Tcl_Interp* arg) {
 
 /////////////////////////////////////////////////////////////////////////////
 //// fullName
-// Return the full name of the specified block.
-// Use this instead of block->fullName() because it prepends a leading period.
-// WARNING: The resturned result needs to be assigned to an InfString
+// Return the full name of the specified block, port, or state. Use
+// this instead of block->fullName() because it prepends a leading
+// period if the object is an instance. The leading period is not
+// prepended for a block that is a master, nor an object that is an
+// instance within a master galaxy.
+//
+// WARNING: The returned result needs to be assigned to an InfString
 // before it can be used.  Thus, "result(fullName(b))" will fail.
 // Use "InfString res = fullName(b); result(res)".
 //
-InfString PTcl::fullName(const Block* block) {
-    InfString name = ".";
-    name << block->fullName();
-    return name;
-}
+InfString PTcl::fullName(const NamedObj* obj) {
+    const NamedObj* top = obj;
+    // Get the top-level parent.
+    while (top->parent() != NULL) {
+        top = top->parent();
+    }
 
+    // If the obj is within a universe, prepend a period.
+    if (top->isA("InterpUniverse")) {
+        InfString name = ".";
+        name << obj->fullName();
+        return name;
+    }
+    // Otherwise, do not prepend a period.
+    return obj->fullName();
+}
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -458,12 +731,41 @@ void PTcl::addResult(const char* value) {
     Tcl_AppendElement(interp, (char*)value);
 }
 
+///////////////////////////////////////////////////////////////////////////
+//// galTopBlockIter
+// Iterate over the blocks inside a galaxy, adding them
+// to the Tcl result as list elements.  If the block given
+// as an argument is atomic, do nothing.  If the second
+// argument is non-zero, then recursively descend into
+// galaxies, adding their blocks to the list, rather than
+// listing the galaxy.  Thus, all blocks returned will be stars.
+// If the third argument is non-zero, return the full name of
+// each block.
+//
+void PTcl::galTopBlockIter(const Block* b, int deep, int fullname) {
+    if (b->isItAtomic()) return;
+    CGalTopBlockIter nextb(b->asGalaxy());
+    const Block* bb;
+    while ((bb = nextb++) != 0) {
+        if (!deep || bb->isItAtomic()) {
+            if (fullname) {
+                InfString res = fullName(bb);
+                addResult(res);
+            } else {
+                addResult(bb->name());
+            }
+        } else {
+            galTopBlockIter(bb,deep,fullname);
+        }
+    }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //// getBlock
 // Given a name, find a block with that name and return a pointer to
 // it. If the name is "this", return the current galaxy. If the name is
 // "target" return the current target. Otherwise, the name can be
-// simple or dotted, and if dotted, where a dotted name has the form
+// simple or dotted, where a dotted name has the form
 // _name1.name2...nameN_ or _.name1.name2...nameN_. If the name is
 // simple, first search the current galaxy, then the known list (which
 // contains all the master stars and galaxies), then the universe list,
@@ -521,22 +823,17 @@ const Block* PTcl::getBlock(const char* name) {
         firstname = name;
     }
     const Block* b = NULL;
-    // If not dotted, search the known list, universe list, and targets.
-    if (!dotted) {
+    // If not absolute, search the current galaxy, the known list,
+    // and the targets, in that order.
+    if (!absolute) {
         b = currentGalaxy->blockWithName(firstname);
         if (!b) b = KnownBlock::find(firstname, curDomain);
-        if (!b) b = univs.univWithName(firstname);
+        // Used to search universes also.  Now require absolute name.
+        // if (!b) b = univs.univWithName(firstname);
         if (!b) b = KnownTarget::find(firstname);
     } else {
-        // Name is dotted.  See whether there is a leading dot.
-        if (absolute) {
-            // Leading dot.  Look for a universe name.
-            if (!b) b = univs.univWithName(firstname);
-        } else {
-            // No leading dot, so give preference to local blocks.
-            b = currentGalaxy->blockWithName(firstname);
-            if (!b) b = univs.univWithName(firstname);
-        }
+        // Look for a universe name.
+        if (!b) b = univs.univWithName(firstname);
     }
     if (b && dotted) {
         // Descend to find subblocks.
@@ -549,6 +846,98 @@ const Block* PTcl::getBlock(const char* name) {
         return NULL;
     }
     return b;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// getParentBlock
+// Given a dotted name for a port or state, return a pointer to the parent
+// block within which the port or state would appear. The port or state
+// need not exist. If the name begins with a period, then it is assumed
+// to be absolute. Otherwise, it is assumed to be relative the current
+// galaxy. If there is no period in the name, then return the current
+// galaxy. If the desired block does not exist, register an error message
+// with Tcl and return a null pointer.
+//
+const Block* PTcl::getParentBlock(const char* name) {
+    // Return immediately on problem cases.
+    if (!name || *name == 0) {
+        result("getParentBlock method must be given a port or state name");
+        return NULL;
+    }
+
+    // Find the last occurrence of a period in the name.
+    const char* p = strrchr (name, '.');
+    if (p == NULL) {
+        // No dot in the name.  Current galaxy is the context.
+        return currentGalaxy;
+    }
+    // Copy all but the last dot and name into a buffer.
+    // The input buffer is always long enough.
+    char buf[strlen(name)];
+    int n = p - name;
+    strncpy (buf, name, n);
+    buf[n] = 0;
+    return (getBlock(buf));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// getParentGalaxy
+// Given a dotted name for a block, return a pointer to the parent
+// (galaxy or universe) within which the block would appear. The block
+// need not exist. If the name begins with a period, then it is assumed
+// to be absolute. Otherwise, it is assumed to be relative the current
+// galaxy. If the name is a universe, return a pointer to the universe.
+// If the desired galaxy does not exist, register an error message and
+// return a null pointer.
+//
+InterpGalaxy* PTcl::getParentGalaxy(const char* name) {
+    const Block* b = getParentBlock(name);
+    if (!b) return NULL;
+    if (!b->isA("InterpGalaxy")) {
+        StringList msg;
+        msg << "Not a galaxy: " << name;
+        result(msg);
+        return NULL;
+    }
+    return (InterpGalaxy*)b;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// getPort
+// Given a name, find a port with that name and return a pointer to it.
+// The port may be a multiport or a simple port.
+// The name has the form _name1.name2...nameN_ (relative) or
+// _.name1.name2...nameN_ (absolute). If the name is simple (no dots at
+// all), search the ports of the current galaxy. If the name is dotted
+// relative, the name is relative to the current galaxy. If the _deep_
+// argument is non-zero, then return a pointer to a star port, never a
+// galaxy port. In other words, if the port name is that of a galaxy,
+// return the star port that it is aliased to. If the port
+// is not found, register an error message with Tcl and return a null
+// pointer.
+//
+GenericPort* PTcl::getPort(const char* portname, int deep) {
+    const Block* b = getParentBlock(portname);
+    if (!b) return NULL;
+    // FIXME: in Ptolemy kernel: Block::portWithName is not const (why??)
+    // Should probably have a const version of it!  See PortHole::portWithName.
+    // Thus, we need the following cast.
+    Block* bnc = (Block*)b;
+    GenericPort* p = bnc->genPortWithName(rootName(portname));
+    if (!p) {
+        InfString msg = "No such port: ";
+        msg << portname;
+        return NULL;
+    }
+    InfString result;
+    if (deep) {
+        GenericPort* galport = p->alias();
+        if (galport) return galport;
+    } else {
+        GenericPort* galport = p->aliasFrom();
+        if (galport) return galport;
+    }
+    return p;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -602,6 +991,21 @@ int PTcl::result(const char *str) {
     // if the StringList is deleted soon.
     Tcl_SetResult(interp, (char*)str, TCL_VOLATILE);
     return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// rootName
+// Return the name after the final period in the given name.
+// If the given name has no period, return the given name.
+//
+const char* PTcl::rootName(const char* name) {
+    // Find the last occurrence of a period in the name.
+    const char* p = strrchr (name, '.');
+    if (p == NULL) {
+        return name;
+    }
+    p++;
+    return p;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -678,25 +1082,6 @@ const Block* PTcl::getSubBlock(const char* name, const Block* gal) {
 
 
 
-
-// connect:
-int PTcl::connect(int argc,char** argv) {
-    if (argc != 5 && argc != 6)
-    return usage("connect <src> <port> <dst> <port> ?<delay>?");
-    if (!currentGalaxy->connect(argv[1],argv[2],argv[3],argv[4],argv[5]))
-    return TCL_ERROR;
-    return TCL_OK;
-}
-
-// busconnect
-int PTcl::busconnect(int argc,char** argv) {
-    if (argc != 6 && argc != 7)
-    return usage("busconnect <src> <port> <dst> <port> <width> ?<delay>?");
-    if (!currentGalaxy->busConnect(argv[1],argv[2],argv[3],
-    argv[4],argv[5],argv[6]))
-    return TCL_ERROR;
-    return TCL_OK;
-}
 
 int PTcl::alias(int argc,char** argv) {
     if (argc != 4)
@@ -1151,27 +1536,13 @@ int PTcl::listobjs (int argc,char ** argv) {
     return TCL_OK;
 }
 
+// FIXME: This should be renamed "clear", and "reset" should
+// invoke InterpGalaxy->reset(), which re-executes the action list.
 int PTcl::reset(int argc,char** argv) {
     if (argc > 2)
     return usage ("reset ?<name>?");
     const char* nm = "main";
     if (argc == 2) nm = hashstring(argv[1]);
-    newUniv(nm, curDomain);
-    return TCL_OK;
-}
-
-// Create a new, empty universe named <name> (default main) and make it
-// the current  universe with domain <dom> (default current domain).  If
-// there was previously a universe with this name, it is deleted.
-// Whatever universe was previously the current universe is not affected,
-// unless it was named <name>. 
-
-int PTcl::newuniverse(int argc,char** argv) {
-    if (argc > 3)
-    return usage("newuniverse ?<name>? ?<dom>?");
-    if (argc == 3) curDomain = hashstring(argv[2]);
-    const char* nm = "main";
-    if (argc > 1) nm = hashstring(argv[1]);
     newUniv(nm, curDomain);
     return TCL_OK;
 }
@@ -1199,16 +1570,6 @@ int PTcl::renameuniv(int argc,char ** argv) {
     }
     univs.delUniv(newname);
     u->setNameParent(hashstring(newname),0);
-    return TCL_OK;
-}
-
-int PTcl::univlist(int argc,char **) {
-    if (argc > 1) return usage("univlist");
-    IUListIter next(univs);
-    InterpUniverse* u;
-    while ((u = next++) != 0) {
-        addResult(u->name());
-    }
     return TCL_OK;
 }
 
@@ -1568,35 +1929,6 @@ int PTcl::cancelAction(int argc, char** argv) {
     return TCL_OK;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//// galTopBlockIter
-// Iterate over the blocks inside a galaxy, adding them
-// to the Tcl result as list elements.  If the block given
-// as an argument is atomic, do nothing.  If the second
-// argument is non-zero, then recursively descend into
-// galaxies, adding their blocks to the list, rather than
-// listing the galaxy.  Thus, all blocks returned will be stars.
-// If the third argument is non-zero, return the full name of
-// each block.
-//
-void PTcl::galTopBlockIter(const Block* b, int deep, int fullname) {
-    if (b->isItAtomic()) return;
-    CGalTopBlockIter nextb(b->asGalaxy());
-    const Block* bb;
-    while ((bb = nextb++) != 0) {
-        if (!deep || bb->isItAtomic()) {
-            if (fullname) {
-                InfString res = fullName(bb);
-                addResult(res);
-            } else {
-                addResult(bb->name());
-            }
-        } else {
-            galTopBlockIter(bb,deep,fullname);
-        }
-    }
-}
-
 /////////////////////////////////////////////////////////////////////////////
 //				Function table
 /////////////////////////////////////////////////////////////////////////////
@@ -1628,13 +1960,14 @@ static InterpTableEntry funcTable[] = {
     ENTRY(monitorOn),
     ENTRY(monitorOff),
     ENTRY(abort),
+    ENTRY(addBlock),
+    ENTRY(addUniverse),
     ENTRY(alias),
     ENTRY(animation),
-    ENTRY(block),
     ENTRY(blocks),
-    ENTRY(busconnect),
     ENTRY(cancelAction),
     ENTRY(connect),
+    ENTRY(connected),
     ENTRY(cont),
     ENTRY(curgalaxy),
     ENTRY(defgalaxy),
@@ -1643,9 +1976,12 @@ static InterpTableEntry funcTable[] = {
     ENTRY(domain),
     ENTRY(domains),
     ENTRY(exit),
+    ENTRY(getAnnotation),
     ENTRY(getClassName),
     ENTRY(getDescriptor),
+    ENTRY(getDomain),
     ENTRY(getFullName),
+    ENTRY(getParent),
     ENTRY(halt),
     ENTRY(initialize),
     ENTRY(isgalaxy),
@@ -1657,7 +1993,6 @@ static InterpTableEntry funcTable[] = {
     ENTRY(mathematica),
     ENTRY(multilink),
     ENTRY(newstate),
-    ENTRY(newuniverse),
     ENTRY(node),
     ENTRY(nodeconnect),
     ENTRY(numports),
