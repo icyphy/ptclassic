@@ -47,12 +47,12 @@ void VHDLPortHole :: initialize() {
 	CGPortHole :: initialize();
 }
 
-// setup ForkDests
+// setup VHDLForkDests
 void VHDLPortHole :: setupForkDests() {
 	SequentialList temp;
 	temp.initialize();
 
-	ForkDestIter next(this);
+	VHDLForkDestIter next(this);
 	VHDLPortHole *outp, *inp;
 	while ((outp = next++) != 0) {
 		//  check wormhole boundary
@@ -66,7 +66,7 @@ void VHDLPortHole :: setupForkDests() {
 	while ((inp = (VHDLPortHole*) nextPort++) != 0) {
 		inp->setupForkDests();
 		forkDests.remove(inp->far());
-		ForkDestIter realNext(inp);
+		VHDLForkDestIter realNext(inp);
 		while ((outp = realNext++) != 0)
 			forkDests.put(outp);
 	}
@@ -94,6 +94,37 @@ void VHDLPortHole :: setGeoName(char* n) {
 const char* VHDLPortHole :: getGeoName() const {
 	if (bufName) return bufName;
 	return geo().getBufName();
+}
+
+// Return the VHDL port direction corresponding to the port direction.
+StringList VHDLPortHole :: direction() const {
+  StringList direction;
+  int in, out;
+
+  direction.initialize();
+  in = this->isItInput();
+  out = this->isItOutput();
+  
+  if (in && out) direction = "INOUT";
+  else if (in) direction = "IN";
+  else if (out) direction = "OUT";
+  else Error::error(*this, " is neither input nor output");
+
+  return direction;
+}
+
+// Return the VHDL datatype corresponding to the port type.
+StringList VHDLPortHole :: dataType() const {
+  StringList type;
+  DataType dtyp = this->resolvedType();
+
+  type.initialize();
+  
+  if (dtyp == INT) type << "INTEGER";
+  else if (dtyp == COMPLEX) type << "complex";
+  else type << "REAL";
+
+  return type;
 }
 
 // Dummy

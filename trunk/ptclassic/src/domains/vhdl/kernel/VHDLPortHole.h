@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGPortHole.h"
 
 class VHDLPortHole : public CGPortHole {
-friend class ForkDestIter;
+friend class VHDLForkDestIter;
 public:
 	VHDLPortHole() : bufName(0) {}
 	~VHDLPortHole();
@@ -64,7 +64,7 @@ public:
 	void setupForkDests();
 
 	// name the porthole in the data structure.
-	void setGeoName(char* n);
+	void setGeoName(char*);
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
@@ -75,6 +75,12 @@ public:
 	// const version
 	const VHDLGeodesic& geo() const {
 		return *(const VHDLGeodesic*)myGeodesic;}
+
+        // Return the VHDL port direction corresponding to the port direction.
+	StringList direction() const;
+
+        // Return the VHDL datatype corresponding to the port type.
+	StringList dataType() const;
 
 private:
 	char* bufName;		// set if no geodesic is assigned.
@@ -111,9 +117,9 @@ public:
 	PortHole& newPort();
 };
 
-class ForkDestIter : private ListIter {
+class VHDLForkDestIter : private ListIter {
 public:
-	ForkDestIter(VHDLPortHole* p) : ListIter(p->myDest()) {}
+	VHDLForkDestIter(VHDLPortHole* p) : ListIter(p->myDest()) {}
 	VHDLPortHole* next() { return (VHDLPortHole*) ListIter::next(); }
 	VHDLPortHole* operator++ (POSTFIX_OP) { return next(); }
 	ListIter::reset;

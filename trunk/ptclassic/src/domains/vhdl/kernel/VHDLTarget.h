@@ -45,16 +45,59 @@ public:
 	VHDLTarget(const char* name, const char* starclass, const char* desc);
 	/*virtual*/ Block* makeNew() const;
 
+	// Keep this at the top of this file to please the compiler.
+	// Add code to the beginning of a CodeStream instead of the end.
+	void prepend(StringList, CodeStream&);
+
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
+
+	// Main routine.
+	virtual int runIt(VHDLStar*);
 
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
 
+	// Compile, run the code.
 	/*virtual*/ int compileCode();
+
+	// Generate a comment.
+	/*virtual*/ StringList comment(const char* text,
+				       const char* begin=NULL,
+				       const char* end=NULL,
+				       const char* cont=NULL);
+
+	// Generate code to begin an iterative procedure.
+	/*virtual*/ void beginIteration(int, int);
+
+	// Generate code to end an iterative procedure.
+	/*virtual*/ void endIteration(int, int);
+
+	// Run the code.
 	/*virtual*/ int runCode();
 
+	// Assign names for each geodesic according to port connections.
+	void setGeoNames(Galaxy&);
+
+	// Declare PortHole buffer.
+	StringList declBuffer(const VHDLPortHole*);
+
+	// Declare State variable.
+	StringList declState(const State*, const char*);
+
 protected:
+	CodeStream entity_declaration;
+	CodeStream architecture_body_opener;
+	CodeStream mainInit;
+	CodeStream mainDecls;
+	CodeStream architecture_body_closer;
+
+	// virtual function to add additional codeStreams.
+	virtual void addCodeStreams();
+
+	// virtual function to initialize codeStreams.
+	virtual void initCodeStreams();
+
 	/*virtual*/ void setup();
 
 	// code generation init routine; compute offsets, generate initCode
@@ -66,6 +109,15 @@ protected:
 
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
+
+	// Generate declarations and initialization code for
+	// Star PortHoles and States.
+	virtual void declareGalaxy(Galaxy&);
+	virtual void declareStar(VHDLStar*);
+
+  	// The only reason for redefining this from HLLTarget
+ 	// is to change the separator from "." to "_".
+ 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
 
 private:
 };
