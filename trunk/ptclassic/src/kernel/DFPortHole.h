@@ -56,6 +56,10 @@ class DFPortHole : public PortHole
 public:
 	DFPortHole();
 
+        // redefine setPort
+	PortHole& setPort(const char* portName, Block* parent,
+		DataType type = FLOAT, unsigned numTokens = 1);
+
 	// farSidePort is always DFPortHole or derived.  This
 	// overrides PortHole::far.
 	DFPortHole* far() const { return (DFPortHole*)farSidePort;}
@@ -92,6 +96,7 @@ public:
 
 	// is the port dynamic? (default: return 0)
 	virtual int isDynamic() const;
+	int isVarying() { return varying; }
 
 	// The number of repetitions of the parent star, valid only
 	// after the schedule is computed.
@@ -99,6 +104,7 @@ public:
 protected:
 	int maxBackValue;	// maximum % argument allowed
 	/* virtual */ int allocatePlasma(); // use local plasma
+	int varying;		// flag to be set if varying
 };
 
 class MultiDFPort : public MultiPortHole {
@@ -117,6 +123,10 @@ public:
                           Block* parent,
                           DataType type = FLOAT,        // defaults to FLOAT
                           unsigned numTokens = 1);      // defaults to 1
+
+	// redefine
+	PortHole& installPort(DFPortHole& p);
+
 protected:
         // The number of Particles consumed
         unsigned numberTokens;

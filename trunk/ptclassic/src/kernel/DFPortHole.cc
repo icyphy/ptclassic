@@ -53,12 +53,23 @@ int DFPortHole :: assocRelation() const { return -1;}
 int DFPortHole :: isDynamic() const { return FALSE;}
 
 // constructor for DFPortHole ... default maxBackValue is 0
-DFPortHole :: DFPortHole() : maxBackValue(0) {}
+DFPortHole :: DFPortHole() : maxBackValue(0), varying(0) {}
 
 // number of repetitions of parent
 int DFPortHole :: parentReps() const {
 	DataFlowStar * parStar = (DataFlowStar*)parent();
 	return parStar->reps();
+}
+
+PortHole& DFPortHole :: setPort(const char* portName, Block* parent,
+				DataType type, unsigned numTokens) {
+	if (numTokens == 0) {
+		varying = 1;
+		numberTokens = 1;
+	} else {
+		numberTokens = numTokens;
+	}
+	return PortHole :: setPort(portName, parent, type, numberTokens);
 }
 
 // Function to alter only numTokens and delay.
@@ -98,6 +109,17 @@ MultiPortHole& MultiDFPort :: setPort (const char* s,
         MultiPortHole::setPort(s,parent,t);
         numberTokens = numTokens;
         return *this;
+}
+
+PortHole& MultiDFPort :: installPort(DFPortHole& p) {
+	ports.put(p);
+	parent()->addPort(p.setPort(newName(), parent(), type(),numberTokens));
+ // for ANYTYPE multiportholes, all ports are resolved to be the same type.
+	if (type() == ANYTYPE)
+		p.inheritTypeFrom(*this);
+	// we can do the following as a friend function
+	letMeKnownToChild(p);
+	return p;
 }
 
 // Function to alter only numTokens and delay.
