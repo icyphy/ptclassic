@@ -317,5 +317,8 @@ void XGraph :: terminate () {
 	ng = 0;
         cmd += ")";
         cmd += "&";
-        system(cmd);
+        if (system(cmd)) {  
+            Error::abortRun("The pxgraph command:\n", cmd, 
+                    "\nfailed.\n The window where you started up Ptolemy might have the error message."  );
+        }
 }
