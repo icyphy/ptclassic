@@ -147,19 +147,13 @@ int ArchTarget :: runIt(VHDLStar* s) {
     // We found a firing with the same name.
     // Presume it to be a send/receive star, since only those
     // have non-unique names from firing to firing.
-    // Add to the generic list.
+    // Add to the lists.
     existFiring->genericList->addList(firingGenericList);
-    // Add to the port list.
     existFiring->portList->addList(firingPortList);
-    // Add to the signal list.
     existFiring->signalList->addList(firingSignalList);
-    // Add to the declarations.
     existFiring->decls << mainDecls;
-    // Add to the local variable declarations.
     existFiring->decls << addVariableDecls(&localVariableList, 0, 1);
-    // Add to the variable list.
     existFiring->variableList->addList(firingVariableList);
-    // Add to the action list.
     StringList naction = "";
     naction << preSynch;
     naction << firingAction;
