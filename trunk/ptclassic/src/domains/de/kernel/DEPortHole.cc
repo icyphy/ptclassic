@@ -53,30 +53,71 @@ PortHole& DEPortHole :: setPort (
 
 Particle& InDEPort :: get() 
 {
-// Return a current Particle 
-	dataNew = FALSE;
-	return *(Particle *) *(myBuffer->here());
+// Return an input Particle
+	if ((!inQue) || dataNew == FALSE) {
+		dataNew = FALSE;
+		return *(Particle *) *(myBuffer->here());
+	} else {
+		Particle** myP = myBuffer->next();
+		myPlasma->put(*myP);
+		Particle* p = (Particle*) inQue->get();
+		*myP = p; 
+		if (inQue->length() == 0)
+			dataNew = FALSE;
+		return (**myP);
+	}
 }
 
 void InDEPort :: getSimulEvent()
 {
-	if (moreData) {
-		DEScheduler* sched = (DEScheduler*) parent()->mySched();
-		sched->fetchEvent(this, timeStamp);
-	} else {
-		dataNew = FALSE;
-	}
-}	
+        if (moreData > 1) {
+                DEScheduler* sched = (DEScheduler*) parent()->mySched();
+		int store = moreData;
+		moreData = 0;
+                if (sched->fetchEvent(this, timeStamp)) {
+			// offset the increase from "grabData()" method.
+			moreData = store - 1;
+		} else {
+			moreData = 0;
+			dataNew = FALSE;
+		}
+        } else if (!inQue) {
+                dataNew = FALSE;
+        }
+}
 
-void InDEPort :: grabData (Particle* p)
+int InDEPort :: grabData (Particle* p)
 {
-	// get the particle from the event queue
-	Particle** myP = myBuffer->next();
-	myPlasma->put(*myP);
-	*myP = p; 
-
-	dataNew = TRUE;
+	// get an event from the global queue into either porthole or
+	// inQue depending on whether inQue exists or not.
+	// inQue is created when mode of the DEstar is set to "PHASE".
 	timeStamp = ((DEStar*) parent())->arrivalTime;
+	dataNew = TRUE;
+	if (!inQue) {
+		if (moreData) {
+			moreData++;
+			return FALSE;
+		}
+		Particle** myP = myBuffer->next();
+		myPlasma->put(*myP);
+		*myP = p; 
+		moreData++;
+	} else {
+		inQue->put(p);
+	} 
+	return TRUE;
+}
+
+// clean it for the next firing
+void InDEPort :: cleanIt()
+{
+	if (!inQue) moreData = 0;
+	else {
+		while (inQue->length() > 0) {
+			Particle* p = inQue->get();
+			myPlasma->put(p);
+		}
+	}
 }
 
 void InDEPort :: triggers (GenericPort& op)
