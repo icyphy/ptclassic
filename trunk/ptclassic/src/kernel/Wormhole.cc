@@ -233,10 +233,24 @@ void Wormhole :: setStopTime(double) {
 // return the scheduler of the outer domain.
 Scheduler* Wormhole :: outerSched() { return selfStar.parent()->scheduler(); }
 
+// The following three methods of the Wormhole class define the default,
+// common behavior of the "setup", "begin", and "go" methods of the
+// XXXWormhole classes.  Those methods of the XXXWormhole classes should
+// be defined to invoke these methods, augmented with domain-specific
+// code if necessary.
+
+// Default, common behavior of XXXWormhole::setup()
 void Wormhole :: setup() {
 	initTarget();
 }
 
+// Default, common behavior of XXXWormhole::begin()
+void Wormhole :: begin() {
+	if (myTarget())
+		myTarget()->begin();
+}
+
+// Default, common behavior of XXXWormhole::go()
 int Wormhole :: run() {
 	if (!checkReady()) return TRUE;
 	setStopTime(1.0);		// 1.0 is dummy value.
