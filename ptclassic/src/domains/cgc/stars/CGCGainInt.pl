@@ -43,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			reg <<= 1;
 		}
 
-		StringList code = "$ref(output) = ";
+		StringList code = "\t$ref(output) = ";
 		if ( found ) {
 			if ( i == 0 ) code << "$ref(input)";
 			else code << "$ref(input) << " << i;
