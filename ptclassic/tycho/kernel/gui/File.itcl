@@ -965,14 +965,15 @@ body ::tycho::File::openContext {filename} {
 	set ext [file extension $filename]
 	set base [file tail $filename]
 	if {[info exists editors] && [info exists editors($ext)]} {
-	    set name [uplevel #0 $editors($ext) [autoName .file] \
-		    -file $filename]
+	    set name [uplevel #0 [list \
+		    $editors($ext) [autoName .file] -file $filename]]
 	} elseif {[info exists editorsBase] && [info exists \
 		editorsBase($base)]} {
-	    set name [uplevel #0 $editorsBase($base) [autoName .file] \
-		    -file $filename]
+	    set name [uplevel #0 [list \
+		    $editorsBase($base) [autoName .file] -file $filename]]
 	} else {
-	    set name [uplevel #0 Edit [autoName .edit] -file $filename]
+	    set name [uplevel #0 [list \
+		    Edit [autoName .edit] -file $filename]]
 	}
 	$name busy
 	$name centerOnScreen
