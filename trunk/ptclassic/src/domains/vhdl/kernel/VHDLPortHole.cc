@@ -118,17 +118,13 @@ StringList VHDLPortHole :: direction() const {
 
 // Return the VHDL datatype corresponding to the port type.
 StringList VHDLPortHole :: dataType() const {
-  StringList type;
+  StringList type = "";
 
-// May not want to resolve the type here...causes unwanted type changes in code
+  // FIXME: May want to reconsider resolving the type here.
   DataType dtyp = this->resolvedType();
 
-// Old way of doing things for brute-force simplicity.  
-//  DataType dtyp = this->type();
-
-  type.initialize();
-  
   if (dtyp == INT) type << "INTEGER";
+  else if (dtyp == FIX) type << "FIX";
   else if (dtyp == COMPLEX) type << "REAL";
   else type << "REAL";
 

@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLGeodesic.h"
 #include "CGPortHole.h"
+#include "PrecisionState.h"
 
 class VHDLPortHole : public CGPortHole {
 friend class VHDLForkDestIter;
@@ -90,9 +91,15 @@ public:
         // Get the offset pointer to the queue of connected geodesic.
 	int getOffset();
 
+	// Get the precision of the port (FIX type only).
+	Precision getPrecision() { return precision; }
+	// Set the precision of the port (FIX type only).
+	setPrecision(Precision newPrecision) { precision = newPrecision; }
+
 private:
 	char* bufName;		// set if no geodesic is assigned.
-
+        Precision precision;	// used to hold the precision of FIX ports.
+					       
 	SequentialList& myDest() { return forkDests; }
 
 };
