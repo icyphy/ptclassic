@@ -40,8 +40,19 @@ include $(CONFIG)
 
 MISC_FILES =	README.files copyright
 
-makefiles all install clean depend realclean checkjunk sccsinfo itcldocs \
+makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
 extraclean:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in tycho/lib/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+
+install: subinstall itcldocs tycho.idx
+subinstall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
