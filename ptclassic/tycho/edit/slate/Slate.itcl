@@ -206,10 +206,10 @@ class ::tycho::Slate {
     method reshapeclick {id x y args}
 
     # Continue a reshape interaction sequence
-    method reshapedrag {id x y}
+    method reshapedrag {id x y args}
 
     # Terminate a reshape interaction sequence
-    method reshaperelease {id x y}
+    method reshaperelease {id x y args}
 
     # Reshape by moving an aspect to an absolute location
     method reshapeto {tag x y aspect}
@@ -744,7 +744,8 @@ body ::tycho::Slate::reshape {id x y args} {
 # (_x_, _y_). Additional arguments include various flags that may
 # be supplied by the interactors that the slate uses to affect
 # the behavior of items, such as *-ghost*, which says that an
-# item is to be moved or reshaped using a "ghost" outline.
+# item is to be moved or reshaped using a "ghost" outline, and
+# the aspects to be reshaped.
 #
 body ::tycho::Slate::reshapeclick {id x y args} {
     eval [shape $id reshapeclick] $id $canvas $this $x $y $args
@@ -754,10 +755,11 @@ body ::tycho::Slate::reshapeclick {id x y args} {
 #### reshapedrag
 #
 # Continue a reshape interaction sequence with 
-# (_x_, _y_) as the new cursor position. There are no additional
-# arguments supplied.
+# (_x_, _y_) as the new cursor position. Additional
+# arguments can be supplied but are _ignored_ -- this
+# is simply to make it easy to implement constraints.
 #
-body ::tycho::Slate::reshapedrag {id x y} {
+body ::tycho::Slate::reshapedrag {id x y args} {
     eval [shape $id reshapedrag] $id $canvas $this $x $y
 }
 
@@ -766,10 +768,11 @@ body ::tycho::Slate::reshapedrag {id x y} {
 #
 # Terminate the interaction sequence at 
 # coordinates (_x_, _y_), _x_ and _y_ will usually be the same as
-# the last coordinates passed to the drag mode. There are no additional
-# arguments supplied.
+# the last coordinates passed to the drag mode. Additional
+# arguments can be supplied but are _ignored_ -- this
+# is simply to make it easy to implement constraints.
 #
-body ::tycho::Slate::reshaperelease {id x y} {
+body ::tycho::Slate::reshaperelease {id x y args} {
     eval [shape $id reshapedrag] $id $canvas $this $x $y
 }
 
