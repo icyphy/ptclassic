@@ -908,7 +908,7 @@ proc ed_ConfigCanvas {top facet number} {
     set intWidth \
 	[expr ($buttonWidth > $canvWidth) ? $buttonWidth : $canvWidth]
     if [winfo exist $top.f.vscroll] {
-	set intWidth [expr $intWidth+[winfo reqWidth $top.f.vscroll]]
+	set intWidth [expr $intWidth+[winfo reqwidth $top.f.vscroll]]
     }
     if {[string first . $intWidth] != -1} {
 	    scan $intWidth "%d." intWidth
