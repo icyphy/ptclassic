@@ -33,8 +33,9 @@ PTINY_LIBS =		$(PTINY_STAR_LIBS) -lptolemy $(TCL_LIBSPEC) \
 			$(SYSLIBS) $(LIB_FLUSH_CACHE)
 LIBS = $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
 
-PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) $(LIBDIR)/libptolemy.a 
-LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.a
+PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
+				$(LIBDIR)/libptolemy.$(LIBSUFFIX)  
+LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.$(LIBSUFFIX) 
 
 # first star determines default domain as a rule
 PTINY_STARS =		$(PTINY_SDFSTARS) $(DESTARS)
