@@ -130,6 +130,9 @@ class ::tycho::HTML {
     # Prompt the user for a file name and load in place of the current file.
     method altFile {}
 
+    # Start up appletviewer on the current file.
+    method appletViewer {}
+
     # Go back to the previous view.
     method back {}
 
@@ -267,6 +270,12 @@ body ::tycho::HTML::constructor {args} {
 
     eval itk_initialize $args
 
+    # Setup Special menu
+    menubar addMenu Special left {} -underline 0
+
+    menubar addMenuItem "Appletviewer" Special -underline 0 \
+            -command "$this appletViewer"
+
     if {$itk_option(-directory) == {}} {
         configure -directory [file dirname $file]
     }
@@ -358,6 +367,15 @@ body ::tycho::HTML::altFile {} {
     if {$filename != {}} {
 	hyperJump $filename
     }
+}
+#####################################################################
+#### appletViewer
+# Start up appletviewer on the current file
+#
+body ::tycho::HTML::appletViewer {} {
+     set w [::tycho::autoName .appletViewer]
+     ::tycho::Exec $w -command "appletviewer $file" -dir [file dirname $file]
+     $w centerOnScreen
 }
 
 #####################################################################
