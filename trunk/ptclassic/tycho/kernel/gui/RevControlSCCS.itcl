@@ -298,7 +298,6 @@ body ::tycho::RevControlSCCS::compareVersion {} {
         }
     }
 
-    puts "$tmpFile1   $tmpFile2"
     # We have the files! Now safely invoke diffWidget
     set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32 \
             -filename1 $tmpFile1 -filename2 $tmpFile2]
