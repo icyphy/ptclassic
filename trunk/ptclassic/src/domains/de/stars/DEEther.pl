@@ -184,10 +184,12 @@ But another implementation might use arbitrary ASCII strings.
 	    med->receiversInitialized = 0;
 	}
 	destructor {
-	    med->starCount--;
-	    if (med->starCount == 0) {
-		medList.remove(medium);
-		LOG_DEL; delete med;
+	    if (med) {
+		med->starCount--;
+		if (med->starCount == 0) {
+		   medList.remove(medium);
+		   LOG_DEL; delete med;
+		}
 	    }
 	}
 }
