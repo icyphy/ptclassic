@@ -581,10 +581,9 @@ octObject *facetPtr;
     /* First check to see whether the Ptolemy image exists */
     name = BaseName(facetPtr->contents.facet.cell);
     TCL_CATCH_ERR2(
-	Tcl_VarEval(ptkInterp, "ptkGetRunFlag ", name, (char*) NULL),
+	Tcl_VarEval(ptkInterp, "ptkHasRun ", name, (char*) NULL),
 	TRUE);
-    if ((*(ptkInterp->result) == '1') ||
-	(*(ptkInterp->result) == '0')) return (TRUE);
+    if (*(ptkInterp->result) == '0') return (TRUE);
 
     if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) != OCT_OK) {
 	return (TRUE);
