@@ -1,10 +1,11 @@
-#ifndef _EventQueue_h
-#define _EventQueue_h 1
+#ifndef _CQEventQueue_h
+#define _CQEventQueue_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 #include "CalendarQueue.h"
+#include "EventQueue.h"
 
 class Particle;
 class PortHole;
@@ -13,17 +14,7 @@ class PortHole;
         // class Event and EventQueue
         //////////////////////////////////////////
 
-class Event
-{
-public:	
-	PortHole* dest;		// destination PortHole
-	Particle* p;		// particle or event
-	Event*	  next;		// form a event-list
-
-	Event() : next(0) {}
-};
-
-class EventQueue : public CalendarQueue
+class CQEventQueue : public CalendarQueue
 {
 public:
 	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
@@ -49,7 +40,7 @@ public:
  // directly without going thru pushHead. In that case it is called
  // with three arguments and dest must be internallu calculated.
 
-	CqLevelLink* levelput(Pointer a, double v, double fv) {
+	LevelLink* levelput(Pointer a, double v, double fv) {
 	     Star *dest= NULL;
 	     PortHole* tl = 0;
 	     if (fv != 0) {
@@ -72,8 +63,8 @@ public:
 	// put the residual events and particles into the free stores.
 	void initialize();
 
-	EventQueue() : freeEventHead(0) {}
-	~EventQueue();
+	CQEventQueue() : freeEventHead(0) {}
+	~CQEventQueue();
 private:
 	Event*  freeEventHead;
 	Event*  getEvent(Particle*, PortHole*);

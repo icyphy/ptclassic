@@ -1,7 +1,7 @@
-static const char file_id[] = "EventQueue.cc";
+static const char file_id[] = "$RCSfile$";
 /**************************************************************************
 Version identification:
-@(#)EventQueue.cc	2.4	11/25/92
+$Id$
 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -38,10 +38,10 @@ This file contains member functions for EventQueue..
 #pragma implementation
 #endif
 
-#include "EventQueue.h"
+#include "CQEventQueue.h"
 #include "Particle.h"
 
-Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
+Event* CQEventQueue:: getEvent(Particle* p, PortHole* ph) {
 	Event* temp;
 	// a free event instance
 	if (freeEventHead) {
@@ -57,7 +57,7 @@ Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
 }
 
 // delete the free events.
-void EventQueue:: clearFreeEvents() {
+void CQEventQueue:: clearFreeEvents() {
 	if (!freeEventHead) return;
 	while (freeEventHead->next) {
 		Event* temp = freeEventHead;
@@ -69,7 +69,7 @@ void EventQueue:: clearFreeEvents() {
 }
 
 // Put the unused particles into the plasmas.
-void EventQueue:: clearParticles() {
+void CQEventQueue:: clearParticles() {
 	Event* temp = freeEventHead;
 	while (temp) {
 		if (temp->p) temp->p->die();
@@ -77,7 +77,7 @@ void EventQueue:: clearParticles() {
 	}
 }
 
-void EventQueue:: putFreeLink(CqLevelLink* p) {
+void CQEventQueue:: putFreeLink(CqLevelLink* p) {
 	if (p->fineLevel) {
 		Event* temp = (Event*) p->e;
 		putEvent(temp);
@@ -85,14 +85,14 @@ void EventQueue:: putFreeLink(CqLevelLink* p) {
 	CalendarQueue:: putFreeLink(p);
 }
 
-void EventQueue :: initialize() {
+void CQEventQueue :: initialize() {
 	// first maintain free links and free events.
 	clearFreeEvents();
 	CalendarQueue :: initialize();
 	clearParticles();
 }
 
-EventQueue :: ~EventQueue() {
+CQEventQueue :: ~CQEventQueue() {
 	initialize();
 	clearFreeEvents();
 }
