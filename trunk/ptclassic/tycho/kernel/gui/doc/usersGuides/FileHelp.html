@@ -23,7 +23,7 @@ the derived classes are the ones actually used.
 <p>
 <h2><a name="file access">File Access Commands</a></h2>
 <p>
-The following commands are available in the File menu as well
+The following commands are available in the <CODE>File</CODE> menu as well
 through <a name="bindings, file access">key bindings</a>.
 <dl COMPACT>
 <dt><CODE>C-x C-f</CODE><dd>open a file
@@ -39,7 +39,7 @@ through <a name="bindings, file access">key bindings</a>.
 <dt><CODE>C-x C-c</CODE><dd>exit the program
 </dl>
 <p>
-In addition to the above, the File menu provides the following
+In addition to the above, the <CODE>File</CODE> menu provides the following
 command without any key binding:
 <dl>
 <dt><CODE>Revert</CODE>
@@ -58,8 +58,8 @@ The <a name="version control">version control</a> or
 the File class interfaces to either <a name="SCCS">SCCS</a>,
 a Unix "source code control system", or
 <a name="RCS">RCS</a>, a public domain improvement.
-When the "Revision Control" command in the File menu is
-invoked, then if the file is already under version control
+When the <CODE>Revision Control</CODE> command in the <CODE>File</CODE>
+menu is invoked, then if the file is already under version control
 by either SCCS or RCS, a control panel will appear that permits
 the user to check out the file (if it is not checked out),
 check in the file (if it is checked out), examine the
@@ -71,14 +71,14 @@ Double clicking on an older version will cause that version
 to be displayed in a new window.
 <p>
 If the file is not currently under revision control,
-then invoking the "Revision Control" command will query
+then invoking the <CODE>Revision Control</CODE> command will query
 the user about whether the file should be placed under revision
 control.  The list of revision control systems presented to the
 user can be set as an option, but currently includes only SCCS
 and RCS, with SCCS being the default.
 <p>
 Revision control is also used by the
-<a name="toggle read-only command">"Toggle read-only"</a>
+<a name="toggle read-only command"><CODE>Toggle read-only</CODE></a>
 command, if the file is already under revision control.
 If it is not, then the read-only permissions are simply changed
 without the intervention of any revision control system.
@@ -105,9 +105,9 @@ are listed.  This makes it easier to find editors that may have been
 buried by other windows on the screen.
 Note that if the editor is open in another screen of a virtual window
 manager, it will not appear when you issue the command in the Window
-menu.  Also, if an editor has the name "NoName" associated with it,
+menu.  Also, if an editor has the name <CODE>NoName</CODE> associated with it,
 it does not appear in the Window menu.  To give it a name, use SaveAs
-(in the File menu).
+(in the <CODE>File</CODE> menu).
 <h3>Window Control Commands</h3>
 <p>
 A few window control menu commands and associated key bindings
@@ -115,6 +115,7 @@ are provided for convenience.
 <dl>
 <dt><CODE>C-x 0</CODE><dd>iconify the window
 <dt><CODE>C-x 1</CODE><dd>full size
+<dt><CODE>C-x 2</CODE><dd>half size
 <dt><CODE>C-x 6</CODE><dd>original size
 </dl>
 <p>
@@ -130,27 +131,27 @@ Tycho is easy.  Just issue the following command:
 <pre>
 ::tycho::File::registerEditor {.foo} ::tycho::EditFoo {Foo editor}
 </pre>
-The first argument, "{.foo}" gives zero or more filename extensions
-that will cause your editor to be used in place of the default editor.
-The second argument is the name of the editor class to use.
-The third argument is the text that will be inserted into the Window menu.
-With the above example, a Tycho "Open File" command on a file
-called "file.foo" will cause an instance of ::tycho::EditFoo to
-be created.  The syntax of the command that creates the instance
-will be:
+The first argument, <CODE>{.foo}</CODE> gives zero or more filename
+extensions that will cause your editor to be used in place of the
+default editor.  The second argument is the name of the editor class
+to use.  The third argument is the text that will be inserted into the
+<CODE>Window</CODE> menu.  With the above example, a Tycho <CODE>Open
+File</CODE> command on a file called <CODE>file.foo</CODE>
+will cause an instance of <CODE>::tycho::EditFoo</CODE> to be created.
+The syntax of the command that creates the instance will be:
 <pre>
 ::tycho::EditFoo .some_name -file file.foo
 </pre>
 The name is generated automatically.  The 
-<a name="-file option">-file option</a> must (obviously)
+<a name="-file option"><CODE>-file</CODE> option</a> must (obviously)
 be understood by the editor.  But that is the only constraint on the editor.
 <p>
 <h2><a name="Help menu">Help Menu</a></h2>
 <p>
 The Help menu provides access to the on-line documentation for Tycho.
-The "User's Guide" entry in the menu will bring up a user's guide
+The <CODE>User's Guide</CODE> entry in the menu will bring up a user's guide
 for the widget in which you invoke the command, if one exists.
-The "Index" entry will bring up the master Tycho index.
+The <CODE>Index</CODE> entry will bring up the master Tycho index.
 <p>
 <h2><a name="keyboard traversal of menus">Keyboard
 Traversal of the Menus</a></h2>
@@ -163,15 +164,16 @@ the Tk man pages, written by John Ousterhout.
 "Alt Graph") together with the underlined character
 in the menu title.  Once the menu is posted, typing
 the underlined character in a menu item will invoke it.
-The F10 key will post the "File" menu.
+The F10 key will post the <CODE>File</CODE> menu.
 <p>
 <h2><a name="autosave">Autosave</a> and
 <a name="crash recovery">Crash Recovery</a></h2>
 <p>
-Periodically, if its data has been modified, a File object will save
+
+
 the data to a file with the same name as the current file but with the
-prefix "#auto#".  This file is automatically removed when you save the
-modified data.
+prefix <CODE>#auto#</CODE>.  This file is automatically removed when
+you save the modified data.
 <p>
 If you are running <a href="../../../doc/tyunix.html#Ptolemy with Tycho">
 Ptolemy with Tycho</a>, then Tycho will also attempt to save modified
@@ -179,7 +181,7 @@ data when the program crashes.  This is important because Ptolemy
 is fundamentally an extensible system, into which users routinely
 add their own code, so it is not uncommon in the process of doing
 code development to get crashes.  The crash recovery files have
-the prefix "#crash".  There is no guarantee that their contents
+the prefix <CODE>#crash</CODE>.  There is no guarantee that their contents
 will be correct, since often the crash occurs due to corrupted data.
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
