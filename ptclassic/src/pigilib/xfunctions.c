@@ -45,6 +45,7 @@ Converted to Tcl/Tk by Kennard White and Edward Lee.
 #include "xfunctions.h"
 #include "ptk.h"
 #include "vemInterface.h"
+#include "err.h"
 
 /*******************************************************************
 
