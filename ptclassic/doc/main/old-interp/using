@@ -44,24 +44,30 @@ to the known list.
 .pp
 The interpreter also has a
 .i "current galaxy" .
-Normally, this is
+Normally, this is set to be the
 .c mainGalaxy .
 During the execution of a
 .c defgalaxy
-command, however, the current galaxy
-is the one being defined, not the
+command, however, the 
+.i "current galaxy"
+is set to be the galaxy being defined.
+After the last parenthesis of the
+.c defgalaxy
+command, the 
+.i "current galaxy"
+is reset to be the
 .c mainGalaxy .
 .pp
-This description of commands is current for version 2.2 of
+This description of commands is current for version 2.11 of
 the interpreter \(em commands are being added all the time.
 .H2 "Commands for Defining the Simulation"
 .pp
 This section describes commands that build the
-simulation, adding
+simulation and add
 .c Star s,
 .c Galaxy s,
 .c State s,
-and connections among them.
+and the connections among them.
 .H3 "Setting the Domain"
 .pp
 .IE "domain command"
@@ -346,7 +352,7 @@ It can be used in three contexts:
 .BU
 Change the value of a
 .c State
-for
+for a 
 .c Star
 within the current
 galaxy.
