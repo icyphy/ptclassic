@@ -9,7 +9,7 @@ These domains can be mixed arbitrarily to compose a complicated
 system.  Any wormhole may contain any other wormhole
 to make a hierarchical structure.
 Two domains are to be added in the near future : THOR, and MQ.
-Currently, the DE domain s the only timed domain.  After the THOR domain
+Currently, the DE domain is the only timed domain.  After the THOR domain
 is incorporated, our scheme of timing management will be rigorously
 tested.  The timed nature of the SDF domain has proven 
 well behaved with the DE domain.
