@@ -97,11 +97,17 @@ public:
     // of performing an SDF scheduler for a uni-processor target
     void copySchedule(SDFSchedule&);
     
-	// return the pointer of a code StringList given its name.  If it is 
-	// not found, This method allows stars to access a code StringList by 
-	// name.  If stream is not found, return NULL.
-	StringList* getStream(const char* name);
+    // return the pointer of a code StringList given its name.  If it is 
+    // not found, This method allows stars to access a code StringList by 
+    // name.  If stream is not found, return NULL.
+    StringList* getStream(const char* name);
 	
+    // methods for generating code for reading and writing
+    // wormhole ports.  Argument is the "real port" of the interior
+    // star that is attached to an event horizon.
+    virtual void wormInputCode(PortHole&);
+    virtual void wormOutputCode(PortHole&);
+
 protected:
     // Add a code StringList to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
@@ -156,12 +162,6 @@ protected:
     // loop that reads input wormholes, runs the schedule, and writes
     // output wormholes, forever.
     virtual int wormCodeGenerate(Galaxy&);
-
-    // methods for generating code for reading and writing
-    // wormhole ports.  Argument is the "real port" of the interior
-    // star that is attached to an event horizon.
-    virtual void wormInputCode(PortHole&);
-    virtual void wormOutputCode(PortHole&);
 
     // The following method downloads code for the inside of a wormhole
     // and starts it executing.
