@@ -11,7 +11,7 @@
 # maintained.
 
 
-DIRS = sdf de ddf
+DIRS = sdf de ddf capsim
 
 MAKEVARS = "ARCH=$(ARCH)"
 
