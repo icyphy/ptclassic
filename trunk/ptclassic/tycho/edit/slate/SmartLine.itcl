@@ -88,6 +88,9 @@ namespace ::tycho {
 # The preferred distance between vertices that "wrap" back
 # in the opposite direction.
 #
+# <li><b>-capstyle</b>:
+# The capstyle of the line: butt, projecting, or round. Default is butt.
+#
 # <li><b>-end</b>:
 # The direction of the line end-point. Can be one of the
 # four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
@@ -95,6 +98,9 @@ namespace ::tycho {
 #
 # <li><b>-fill</b>:
 # The color of the line. Black by default.
+#
+# <li><b>-joinstyle</b>:
+# The joinstyle of the line: bevel, miter, or round. Default is miter.
 #
 # <li><b>-smooth</b>:
 # A flag controlling whether the line is
@@ -188,11 +194,17 @@ class ::tycho::SmartLine {
     # Update the *-beta* option
     proc _beta {id canvas slate beta}
 
+    # Update the *-capstyle* option
+    proc _capstyle {id canvas slate style}
+
     # Update the *-end* option
     proc _end {id canvas slate end}
 
     # Update the *-fill* option
     proc _fill {id canvas slate fill}
+
+    # Update the *-joinstyle* option
+    proc _joinstyle {id canvas slate style}
 
     # Update the *-smooth* option
     proc _smooth {id canvas slate smooth}
@@ -460,11 +472,14 @@ class ::tycho::SmartLine {
     set methodtable(_arrow)	::tycho::SmartLine::_arrow
     set methodtable(_autoshape)	::tycho::SmartLine::_autoshape
     set methodtable(_beta)	::tycho::SmartLine::_beta
+    set methodtable(_capstyle)	::tycho::SmartLine::_capstyle
     set methodtable(_end)	::tycho::SmartLine::_end
     set methodtable(_fill)      ::tycho::SmartLine::_fill
+    set methodtable(_joinstyle)	::tycho::SmartLine::_joinstyle
     set methodtable(_smooth)	::tycho::SmartLine::_smooth
     set methodtable(_state)	::tycho::SmartLine::_state
     set methodtable(_start)	::tycho::SmartLine::_start
+    set methodtable(_width)	::tycho::SmartLine::_width
 
     set methodtable(construct)  ::tycho::SmartLine::construct
     set methodtable(coords)     ::tycho::SmartLine::coords
@@ -478,10 +493,12 @@ class ::tycho::SmartLine {
 
     set optiondefault(-autoshape) 1
     set optiondefault(-alpha)	  12
-    set optiondefault(-arrow)     last
+    set optiondefault(-arrow)     none
     set optiondefault(-beta)	  30
+    set optiondefault(-capstyle)  butt
     set optiondefault(-end)	  "e"
     set optiondefault(-fill)	  black
+    set optiondefault(-joinstyle) miter
     set optiondefault(-shape)     line
     set optiondefault(-smooth)    off
     set optiondefault(-start) 	  "e"
@@ -539,6 +556,14 @@ body ::tycho::SmartLine::_beta {id canvas slate beta} {
 }
 
 ##########################################################################
+## -capstyle option configuration
+#
+body ::tycho::SmartLine::_capstyle {id canvas slate style} {
+    set option(capstyle$id) $style
+    $canvas itemconfigure $primary($id) -capstyle $style
+}
+
+##########################################################################
 ## -end option configuration
 #
 body ::tycho::SmartLine::_end {id canvas slate end} {
@@ -554,6 +579,14 @@ body ::tycho::SmartLine::_end {id canvas slate end} {
 body ::tycho::SmartLine::_fill {id canvas slate fill} {
     set option(fill$id) $fill
     $canvas itemconfigure $primary($id) -fill $fill
+}
+
+##########################################################################
+## -joinstyle option configuration
+#
+body ::tycho::SmartLine::_joinstyle {id canvas slate style} {
+    set option(joinstyle$id) $style
+    $canvas itemconfigure $primary($id) -joinstyle $style
 }
 
 ##########################################################################
@@ -599,8 +632,11 @@ body ::tycho::SmartLine::_construct {id canvas slate tags args} {
     # Create the primary component -- the line
     set primary($id) [eval $canvas create line $args [list \
             -arrow   $option(arrow$id) \
+            -width   $option(width$id) \
             -fill    $option(fill$id) \
             -smooth  $option(smooth$id) \
+            -capstyle  $option(capstyle$id) \
+            -joinstyle $option(joinstyle$id) \
             -tags $tags]]
 
     # Call redraw to reshape it
@@ -615,6 +651,8 @@ body ::tycho::SmartLine::construct {id canvas slate tags args} {
     if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
 	set options [lrange $args $t end]
 	set args [lreplace $args $t end]
+    } else {
+	set options {}
     }
 
     # Initialize the options
