@@ -137,7 +137,9 @@ if ( ! $?nocmdfile ) then
     endif
 endif
 
-$PTOLEMY/bin.$ARCH/vem -G 600x150+0+0 -F ${cell}:schematic -G +0+200 -R $PTOLEMY/lib/pigiRpcShell
+if ( ! $?VEMBINARY) setenv VEMBINARY $PTOLEMY/bin.$ARCH/vem 
+
+$VEMBINARY -G 600x150+0+0 -F ${cell}:schematic -G +0+200 -R $PTOLEMY/lib/pigiRpcShell
 
 catch:
 
