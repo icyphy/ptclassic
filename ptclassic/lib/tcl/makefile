@@ -55,6 +55,7 @@ ptkPrfacet.tcl \
 ptkRunAllDemos.tcl \
 ptkRunDesignMaker.tcl \
 ptkStarIndex.tcl \
+tkMathematica.tcl \
 tkoct.tcl \
 topgetopt.tcl \
 utilities.tcl
