@@ -80,9 +80,8 @@ Tcl_Interp *ptkInterp;
  * The following variable is a special hack that is needed in order for
  * Sun shared libraries to be used for Tcl.
  */
-#ifdef PT_NT4VC
+#if !defined(PT_NT4VC)
 #define matherr _matherr
-#endif
 
 EXTERN int matherr();
 
@@ -90,6 +89,7 @@ EXTERN int matherr();
  *  warning: pointer to function cast to pointer to non-function (149)
  */
 int *tclDummyMathPtr = (int *) matherr;
+#endif /* PT_NT4VC */
 
 #if TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION >= 5
 #ifdef TCL_TEST
