@@ -47,7 +47,7 @@ public:
 	<T>ArrayState &	operator = (const <T>ArrayState & v) ;
 
 	// Size
-	int size(); // { return nElements;}
+	int size() const; // { return nElements;}
 
 	// Array element 
 	<C> & operator [] (int n) {
@@ -58,10 +58,10 @@ public:
 	operator <C>* () { return val; }
 
 	// The type
-	const char* type();
+	const char* type() const;
 
         // the value as a string
-        StringList currentValue();
+        StringList currentValue() const;
 
 	// Parse initValue to set Value
 	void initialize();
@@ -70,7 +70,7 @@ public:
 	ParseToken evalExpression(Tokenizer&);
 
 	// clone method
-	State* clone(); // {return new <T>ArrayState;}
+	State* clone() const; // {return new <T>ArrayState;}
 };
 
 #endif
