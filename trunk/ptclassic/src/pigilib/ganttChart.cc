@@ -30,72 +30,38 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
  */
-#include "sol2compat.h"
 
-#include "local.h"
-#include "err.h"
-#include "vemInterface.h"
-#include "xfunctions.h"
 #include "PTcl.h"
+#include "ganttChart.h"
 
-extern PTcl *ptcl;
-
-/* See libgantt/gantt_main.c */
-extern "C" int display_schedule( /* char *display_name, int PIGI_present,
-				char *input_file, char *output_file */);
-
-
-extern "C" {
-boolean
-displayGanttChart(char* fileName)
-{
-		return (TRUE);
-}
-}
-
-/* 8/12/89
-Save the error message for GGI and exit from display_schedule().
-*/
-extern "C" {
-void
-GanttErr(char* msg)
-{
-}
-}
-
-extern "C" {
-int
-GanttMan(char* name)			/* ARGSUSED */
-{
-    return 0;
-}
-}
-
-/* functions added to handle ptcl and pigi compatability */
+/* functions added to handle PTcl and pigi compatability */
 /* needed to avoid interp calls in cg domain */
 
-extern void beginGantt(ostream& out, char *argstring) {
+void
+GanttChart::beginGantt(ostream& out, char *argstring) {
 
-	Tcl_Eval(ptcl->activeInterp, argstring);
+	Tcl_Eval(PTcl::activeInterp, argstring);
 
 }
 
-extern void writeGanttLabel(ostream& out, char *argstring) {
+void
+GanttChart::writeGanttLabel(ostream& out, char *argstring) {
 
-	Tcl_Eval(ptcl->activeInterp, argstring);
+	Tcl_Eval(PTcl::activeInterp, argstring);
 }
 
-extern void writeGanttBindings(ostream& out, char *argstring) {
+void
+GanttChart::writeGanttBindings(ostream& out, char *argstring) {
 
-	Tcl_Eval(ptcl->activeInterp, argstring);
+	Tcl_Eval(PTcl::activeInterp, argstring);
 }
 
-extern void endGantt(ostream& out) {
+void
+GanttChart::endGantt(ostream& out) {
 }
 
-extern void writeGanttProc(ostream& out, char *argstring) {
-
-	Tcl_Eval(ptcl->activeInterp, argstring);
+void
+GanttChart::writeGanttProc(ostream& out, char *argstring) {
+  
+  	Tcl_Eval(PTcl::activeInterp, argstring);
 }
-
-
