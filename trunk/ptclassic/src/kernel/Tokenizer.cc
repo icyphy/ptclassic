@@ -66,7 +66,7 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 // This one reads from stdin (cin)
 Tokenizer::Tokenizer() {
 	special = "()";
-	strm = cin;
+	strm = &cin;
 	whitespace = defWhite;
 	curfile = "<stdin>";
 	init ();
@@ -114,7 +114,7 @@ Tokenizer::pop() {
 	if (depth == 0) return;
 	TokenContext* t = stack;
 	delete strm;
-	delete curfile;
+	delete (char*)curfile;
 	strm = t->savestrm;
 	curfile = t->filename;
 	line_num = t->line_num;
@@ -128,9 +128,9 @@ Tokenizer::pop() {
 // for success, 0 for failure.
 int
 Tokenizer::fromFile(const char *filename) {
-	FILE *stdstrm = fopen (expandPathName(filename), "r");
-	if (stdstrm == NULL) return 0;
-	push (new istream(stdstrm),filename);
+	int fd = open(expandPathName(filename), 0);
+	if (fd < 0) return 0;
+	push (new istream(fd),filename);
 	return 1;
 }
 
