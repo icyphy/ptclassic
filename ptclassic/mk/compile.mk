@@ -165,6 +165,10 @@ realclean:
 		TAGS starHTML.idx starHTML.idx.fst\
 		$(REALCLEAN_STUFF)
 
+# Remove the sources too, so that we can get them back from sccs
+extraclean: realclean
+	rm -f $(SRCS) $(HDRS)
+
 # The depend, makefile and makefiles rules are duplicated in
 # src/pitcl/make.template, so if you make changes below, please
 # change that file too.
