@@ -68,48 +68,19 @@ public:
     int nrows; int ncols;
 
     // Constructor
-    SimpleIntMatrix (int nr=1, int nc=1) : nrows(nr), ncols(nc) {
-	m = new int *[nr];
-	for (int i=0; i<nr; i++) {
-	    m[i] = new int[nc];
-	    for (int j=0; j<nc; j++) m[i][j] = 0;
-        }
-    }
+    SimpleIntMatrix (int nr=1, int nc=1);
 
     // Destructor
-    ~SimpleIntMatrix() {
-	for(int i=0;i<nrows;i++) delete [] m[i];
-	delete m;
-    }
+    ~SimpleIntMatrix();
 
     // Resize the matrix
-    void resize(int nr, int nc) {
-	SimpleIntMatrix tmp(nr,nc);
-	*this = tmp;
-    }
+    void resize(int nr, int nc);
 
     // equality operator
-    SimpleIntMatrix& operator=(const SimpleIntMatrix& a) {
-	for(int i=0; i<nrows; i++) delete m[i];
-	delete m;
-	m = new int *[nrows=a.nrows];
-	ncols=a.ncols;
-	for (i=0; i<nrows; i++) {
-	    m[i] = new int[ncols];
-	    for (int j=0; j<ncols; j++) m[i][j] = a.m[i][j];
-	}
-	return *this;
-    }
+    SimpleIntMatrix& operator=(const SimpleIntMatrix& a);
 
     // Copy constructor
-    SimpleIntMatrix(const SimpleIntMatrix& a) {
-	m = new int *[nrows=a.nrows];
-	ncols=a.ncols;
-	for(int i=0;i<nrows;i++) {
-	    m[i] = new int[ncols];
-	    for(int j=0;j<ncols;j++) m[i][j]=a.m[i][j];
-	}
-    }
+    SimpleIntMatrix(const SimpleIntMatrix& a);
 };
 
 ostream& operator << (ostream& o, const SimpleIntMatrix& a);
@@ -141,7 +112,7 @@ class AcyLoopScheduler : public SDFScheduler {
 public:
 
 	// constructor
-	AcyLoopScheduler();
+	AcyLoopScheduler(const char* log=0);
 
 	// destructor
 	~AcyLoopScheduler();
@@ -244,6 +215,8 @@ protected:
 	int addTopLevelCluster(Galaxy* gal);
 
 private:
+	// log file where all output from here is written to if specified
+	const char* logFile;
 
 	// Incidence matrix
 	SimpleIntMatrix incMatrix;
