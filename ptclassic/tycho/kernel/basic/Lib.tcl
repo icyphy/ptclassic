@@ -217,7 +217,8 @@ if $ptolemyfeature(ptolemyinstalled) {
 
 ############# text editing modes
 ::tycho::register extensions "c" .sched .c .y
-::tycho::register extensions "c++" .C .cc .h .H
+# .js is JavaScript
+::tycho::register extensions "c++" .C .cc .h .H .js
 ::tycho::register extensions "esterel" .strl
 ::tycho::register extensions "forest" .fst
 ::tycho::register extensions "html" .html .htm .htl
