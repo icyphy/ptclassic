@@ -55,7 +55,5 @@ extern void CompileInit();
 extern void CompileEnd();
 extern int RpcRunAllDemos ARGS((RPCSpot *spot, lsList cmdList,
 				long userOptionWord));
-extern int RpcRunDesignMaker ARGS((RPCSpot *spot, lsList cmdList,
-				long userOptionWord));
 
 #endif /* _COMPILE_H */
