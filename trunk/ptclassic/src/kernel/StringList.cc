@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation "InfString.h"
 #endif
 
+#include <ctype.h>
 #include <stream.h>
 #include "StringList.h"
 #include "InfString.h"
@@ -176,8 +177,26 @@ StringList :: operator << (double f)
 {
 	char buf[SMALL_STRING];
         sprintf(buf,"%.15g",f);
-	if (strchr(buf,'e') == NULL && strchr(buf,'.') == NULL)
-		strcat(buf,".0");
+
+	// If the ASCII result looks like an integer, add ".0" so that it
+	// doesn't look like an integer anymore.
+
+	int looksLikeInt = 1;
+	for (register char *p = buf; *p != 0; p++) {
+		// If there is a decimal point, or an alphabetic
+		// character such as the 'e' in scientific notations
+		// or the special values "NaN", "Infinity", etc., then
+		// it doesn't looks like an integer.
+		if ((*p == '.') || (isalpha((unsigned char) *p))) {
+			looksLikeInt = 0;
+			break;
+		}
+	}
+	if (looksLikeInt) {
+		p[0] = '.';
+		p[1] = '0';
+		p[2] = 0;
+	}
 	return *this << buf;
 }
 
