@@ -66,6 +66,9 @@ protected:
 
         // virtual function to initialize strings
         /*virtual*/ void initCodeStrings();
+
+	// String state for specifying tcl/tk start command.
+  	StringState startCommand;
 };
 
 #endif
