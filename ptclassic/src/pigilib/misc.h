@@ -10,4 +10,6 @@ extern int RpcPlot();
 extern int RpcLoadStars();
 extern int RpcLoad();
 extern int RpcCompileStar();
+extern int ERFilterDesign();
+extern int WFilterDesign();
 extern int RpcParamCheck();
