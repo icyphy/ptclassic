@@ -71,6 +71,7 @@ PL_SRCS= \
  SDFRGBToYUV.pl \
  SDFRunLenImg.pl \
  SDFRunLenImgInv.pl \
+ SDFSunVideo.pl \
  SDFYUVToRGB.pl \
  SDFZigZagImg.pl \
  SDFZigZagImgInv.pl
