@@ -117,11 +117,12 @@ Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 				Error::warn(*this,
 				 "Cannot open saveTapsFile for writing: ",
 				 saveFileName, ". Taps not saved.");
-			} else
+			} else {
 				for (int i = 0; i < taps.size(); i++)
 					fprintf(fp, "%d %g\n", i, taps[i]);
+			}
 			fclose(fp);
-			LOG_DEL; delete saveFileName;
+			LOG_DEL; delete [] saveFileName;
 		}
 	}
 }
