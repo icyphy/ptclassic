@@ -41,21 +41,21 @@
 # if there was no header or it was malformed.
 #
 proc ::tycho::readFileHeader {filename var} {
-	upvar $var v
+    upvar $var v
 	
-	set fo [::tycho::resource new $filename]
-	$fo open
+    set fo [::tycho::resource new $filename]
+    $fo open
+    set string [$fo gets]
+    while { string != "" } {
 	set string [$fo gets]
-	while { string != "" } {
-		set string [$fo gets]
-	}
-	$fo close
-	delete object $fo
-	if [regexp {-\*-.*-\*-} $string header]
-		return ::tycho::parseHeaderString $string v
-	} else {
-		return ""
-	}
+    }
+    $fo close
+    delete object $fo
+    if [regexp {-\*-.*-\*-} $string header] {
+	return ::tycho::parseHeaderString $string v
+    } else {
+	return ""
+    }
 }
 
 #####################################################################
@@ -399,13 +399,13 @@ ensemble ::tycho::url {
 # files.
 #
 proc ::tycho::urlPathSearch {name searchpath} {
-	set f [split $name /]
-	foreach p $searchpath {
-		set file [::tycho::url join [concat $p $f]]
-		if [::tycho::resource exists $file] {
-			return $file
-		}
+    set f [split $name /]
+    foreach p $searchpath {
+	set file [::tycho::url join [concat $p $f]]
+	if [::tycho::resource exists $file] {
+	    return $file
 	}
-	return ""
+    }
+    return ""
 }
 
