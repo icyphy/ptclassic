@@ -259,9 +259,7 @@ char* option;
 
   fprintf( fp, "\n      /* Variables  taken from DEPolis.pl */ \n");
   fprintf( fp, "    double now;\n" );
-  fprintf( fp, "    double timeOfArrival;\n");
   fprintf( fp, "    double clkFreq; /* perhaps make private ? */\n");
-  fprintf( fp, "    int priority;\n");
   fprintf( fp, "    int resourceId;\n");
   fprintf( fp, "    int needResource;\n");
 /*  fprintf( fp, "    char resource[1024];\n"); 
@@ -325,8 +323,6 @@ net_node_t *node;
 {
   fprintf( fp, "  protected {\n" );
   fprintf( fp, "    TclStarIfc tcl;\n" );
-  fprintf( fp, "    SequentialList* emittedEvents;\n" );
-  fprintf( fp, "    double _delay;\n" );
   
   fprintf( fp, "  }\n" );
   fprintf( fp, "  hinclude { \"TclStarIfc.h\" }\n" );
@@ -507,29 +503,6 @@ int autotick, unittime;
   fprintf( fp, "      }\n" );  
   fprintf( fp, "    }\n" );
   fprintf( fp, "  }\n" );
-
-
-  fprintf( fp, "  method {\n" );
-  fprintf( fp, "    name { getEvents }\n" );
-  fprintf( fp, "    access { public }\n" );
-  fprintf( fp, "    type { \"SequentialList*\" }\n" );
-  fprintf( fp, "    code {\n" );
-  fprintf( fp, "      if ( emittedEvents->size() == 0) {\n" );
-  fprintf( fp, "           return 0; // check for this in Resource!\n");
-  fprintf( fp, "      }\n" ); 
-  fprintf( fp, "      return emittedEvents;\n"); 
-  fprintf( fp, "    }\n" );
-  fprintf( fp, "  }\n" );
-
-  fprintf( fp, "  method {\n" );
-  fprintf( fp, "    name { getDelay }\n" );
-  fprintf( fp, "    access { public }\n" );
-  fprintf( fp, "    type { void }\n" );
-  fprintf( fp, "    code {\n" );
-  fprintf( fp, "      return _delay;\n"); 
-  fprintf( fp, "    }\n" );
-  fprintf( fp, "  }\n" );
-
 }
 
 static void pl_print_code( fp, root_node, node, option, trace, autotick, unittime )
@@ -688,7 +661,6 @@ int autotick, unittime;
   /* agghhhhh.....*/
   fprintf( fp, "\n    DE%s%s* ", model_name, option );
   fprintf( fp, "%s%s_Star;\n", model_name, option );
-  fprintf( fp, "\n    double _delay = 0.0;\n");
 
   /* Define debugging procedure, if -g was selected */
   if ( trace ) {
