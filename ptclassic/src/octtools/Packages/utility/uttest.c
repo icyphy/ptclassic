@@ -28,7 +28,10 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "utility.h"
 
+void test_resolve();
+
 /*ARGSUSED*/
+int
 main(argc, argv)
 int argc;
 char **argv;
@@ -125,17 +128,18 @@ char **argv;
 
     (void) util_csystem("who");
 
-    if ((file = util_file_search("uttest.c", "/tmp:..:../utility:.:/usr/tmp", "r")) == NIL(char)) {
-	fprintf(stderr, "could not find uttest.c\n");
-    }
-    fprintf(stderr, "file is %s\n", file);
-    if (util_file_search("BigWillyWasHere", "/usr/tmp/:/tmp:.", "r") != NIL(char)) {
+    if ((file = util_file_search("makefile", "/tmp:..:../utility:.:/usr/tmp", "r")) == NIL(char))
+      fprintf(stderr, "could not find makefile\n");
+    else
+      fprintf(stderr, "file is %s\n", file);
+
+    if (util_file_search("BigWillyWasHere", "/usr/tmp/:/tmp:.", "r")
+	!= NIL(char))
 	fprintf(stderr, "found BigWillyWasHere\n");
-    }
-    if ((file = util_path_search("make")) == NIL(char)) {
-	fprintf(stderr, "could not find make\n");
-    }
-    fprintf(stderr, "program is %s\n", file);
+    if ((file = util_path_search("make")) == NIL(char))
+      fprintf(stderr, "could not find make\n");
+    else
+      fprintf(stderr, "program is %s\n", file);
 
     /* test pipefork */
     args[0] = util_strsav("sort");
@@ -174,10 +178,10 @@ char **argv;
     }
 
     time = util_cpu_time();
-    fprintf(stderr, "time is %d / %s\n", time, util_print_time(time));
+    fprintf(stderr, "time is %ld / %s\n", time, util_print_time(time));
 
     test_resolve();
 
-    exit(0);
+    return 0;
 }
 
