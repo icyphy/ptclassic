@@ -33,7 +33,6 @@ Block& DEStar :: setBlock(char* s, Block* parent = NULL) {
 	// Then, perform the DE specific initialization.
 	completionTime = 0.0;
 	arrivalTime = 0.0;
-	depth = 0;
 
 	return *this;
 }
@@ -42,7 +41,6 @@ Block& DEStar :: setBlock(char* s, Block* parent = NULL) {
 void DEStar :: prepareForScheduling() {
 	arrivalTime = 0.0;
 	completionTime = 0.0;
-	depth = 0;
 }
 
 void DEStar :: fire() {
@@ -63,6 +61,7 @@ DERepeatStar :: DERepeatStar() {
 
 	// make a feedback connection
 	feedbackOut.connect(feedbackIn, 0);
+	feedbackIn.depth = -1;
 }
 
 void DERepeatStar :: refireAtTime(float when) {
