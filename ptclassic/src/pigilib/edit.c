@@ -17,7 +17,6 @@ $Id$
 #include "octIfc.h"
 #include "exec.h"
 
-
 #define dmWidth 40
 #define dmIncrement 20
 
@@ -26,7 +25,8 @@ Edit the delay value associated with a delay instance.
 Inputs: instPtr = delay instance pointer.
 Outputs: return = TRUE if no error.
 */
-static boolean
+
+static boolean			   
 EditDelayParams(instPtr)
 octObject *instPtr;
 {
@@ -47,6 +47,30 @@ octObject *instPtr;
     }
     delayProp.contents.prop.value.integer = (long) n;
     (void) octModify(&delayProp);
+    return(TRUE);
+}
+
+static boolean			   
+EditBusParams(instPtr)
+octObject *instPtr;
+{
+    octObject busProp;
+    static dmTextItem item = {"Bus Width", 1, 10, NULL, NULL};
+    int n;
+    char buf[100];
+
+    GetOrInitBusProp(instPtr, &busProp);
+    item.value = sprintf(buf, "%ld", busProp.contents.prop.value.integer);
+    if (dmMultiText("Edit Bus Width", 1, &item) != VEM_OK) {
+	PrintCon("Aborted entry");
+        return(TRUE);
+    }
+    if ((n = atoi(item.value)) <= 0) {
+	ErrAdd("Invalid entry: number must be > 0");
+        return(FALSE);
+    }
+    busProp.contents.prop.value.integer = (long) n;
+    (void) octModify(&busProp);
     return(TRUE);
 }
 
@@ -114,7 +138,7 @@ char* dmTitle;
 	place->value = items[i].value;
 	place++;
     }
-    free(items);
+    free((char *)items);
     return(TRUE);
 }
 
@@ -139,7 +163,7 @@ octObject *galFacetPtr;
         PrintErr("Galaxy or Universe has no parameters");
         return(1);
     }
-    items = (dmTextItem *) calloc(pList.length, sizeof(dmTextItem));
+    items = (dmTextItem *) calloc((unsigned)pList.length, sizeof(dmTextItem));
     place = pList.array;
     width = 0;
     maxwidth = 0;
@@ -173,7 +197,7 @@ octObject *galFacetPtr;
 	place++;
     }
 
-    free(items);
+    free((char *)items);
 
     ERR_IF1(!SetFormalParams(galFacetPtr, &pList));
     return(1);
@@ -203,7 +227,7 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
 
     /* put formal params (if any) into item list */
     itemsN = (pList.length + 1) * 3;
-    items = (dmTextItem *) calloc(itemsN, sizeof(dmTextItem));
+    items = (dmTextItem *) calloc((unsigned)itemsN, sizeof(dmTextItem));
     place = pList.array;
     j = 0;
     for (i = 0 ; i < pList.length; i++) {
@@ -335,6 +359,8 @@ long userOptionWord;
 	/* cursor is over some type of instance... */
 	if (IsDelay(&inst)) {
 	    status2 = EditDelayParams(&inst);
+	} else if (IsBus(&inst)) {
+	    status2 = EditBusParams(&inst);
 	} else if (IsGal(&inst) || IsStar(&inst)) {
 	    /* inst is a sog... */
 	    status2 = EditSogParams(&inst);

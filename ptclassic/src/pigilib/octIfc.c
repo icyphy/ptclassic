@@ -73,6 +73,20 @@ octObject *instPtr;
     return(strcmp(BaseName(instPtr->contents.instance.master), "%dDelay") == 0);
 }
 
+boolean
+IsBus(instPtr)
+octObject *instPtr;
+{
+    return(strcmp(BaseName(instPtr->contents.instance.master), "%dBus") == 0);
+}
+
+boolean
+IsMarker(instPtr)
+octObject *instPtr;
+{
+    return(strncmp(BaseName(instPtr->contents.instance.master), "%d", 2) == 0);
+}
+
 boolean 
 IsGal(instPtr)
 octObject *instPtr;
@@ -448,6 +462,18 @@ octObject *instPtr, *propPtr;
 {
     propPtr->type = OCT_PROP;
     propPtr->contents.prop.name = "delay";
+    propPtr->contents.prop.type = OCT_INTEGER;
+    propPtr->contents.prop.value.integer = 1;
+    (void) octGetOrCreate(instPtr, propPtr);
+}
+
+/* same, for bus width */
+void
+GetOrInitBusProp(instPtr, propPtr)
+octObject *instPtr, *propPtr;
+{
+    propPtr->type = OCT_PROP;
+    propPtr->contents.prop.name = "buswidth";
     propPtr->contents.prop.type = OCT_INTEGER;
     propPtr->contents.prop.value.integer = 1;
     (void) octGetOrCreate(instPtr, propPtr);
