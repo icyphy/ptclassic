@@ -61,7 +61,6 @@ if {![winfo exists $s]} {
             set in [lindex $inputVals $i]
             $win.f.m$i configure -text $in
 	}
-        update
     }
 
     proc tkShowValueWait {flag starID numInputs win} {

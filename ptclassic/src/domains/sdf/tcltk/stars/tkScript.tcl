@@ -68,7 +68,6 @@ if {![winfo exists $s] || ![info exists ballId_$starID]} {
         set x2 [expr $x1+2*$ballRadius]
         set y2 [expr $y1+2*$ballRadius]
         after 15
-        update
         $c coords [set ballId_$starID] ${x1}c ${y1}c ${x2}c ${y2}c
     }
 

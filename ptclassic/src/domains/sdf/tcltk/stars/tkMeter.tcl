@@ -48,7 +48,6 @@ if {![winfo exists $s]} {
             set in [lindex $inputVals $i]
             ptkSetMeter $win.f m$i $in
 	}
-        update
     }
 
     proc callTcl_$starID {starID} "
