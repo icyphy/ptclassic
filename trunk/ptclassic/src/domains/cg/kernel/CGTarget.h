@@ -59,7 +59,7 @@ public:
     /*virtual*/ Block* makeNew() const;
 
     // write the generated code to files
-    virtual void writeCode();
+    virtual void writeCode(const char* name = NULL);
 
     // methods to compile and run the target.
     // check access privilege later.
