@@ -71,7 +71,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	outmulti {
 		name {output}
 		type {float}

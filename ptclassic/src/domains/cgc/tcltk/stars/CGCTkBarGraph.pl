@@ -7,14 +7,14 @@ The first 12 input signals will be assigned distinct colors. After that,
 the colors are repeated. The colors can be controlled using X resources.
 	}
 	version { $Id$ }
-	author { E. A. Lee, Jose Luis Pino }
+	author { Edward A. Lee and Jose Luis Pino }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	inmulti {
 		name {input}
 		type {float}
