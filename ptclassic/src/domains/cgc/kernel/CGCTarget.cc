@@ -260,6 +260,9 @@ StringList CGCTarget::pragma (const char* parentname,
     return "";
 }
 
+static char* cgcmodmacro =
+"\n#define CGC_MOD(a,b) ((a)>=(b) ? (a-b) : (a))\n";
+
 static char* complexDecl =
 "\n/* Define a complex data type if one has not been defined */\n"
 "#if !defined(COMPLEX_DATA)\n"
@@ -301,7 +304,7 @@ void CGCTarget::headerCode() {
 
 void CGCTarget::trailerCode()
 {
-    include << trueFalseDecl << complexDecl;
+    include << trueFalseDecl << complexDecl << cgcmodmacro;
 
     if (galaxy() && !SimControl::haltRequested()) {
 	declareGalaxy(*galaxy());

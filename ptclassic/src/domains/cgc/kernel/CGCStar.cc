@@ -334,13 +334,16 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 	    // generate expression for index
 	    else
 	    {
-		ref << '(';
+		if (!port->linearBuf()) // use circular addressing
+			ref << "CGC_MOD(";
+		else
+			ref << '(';
 		if (port->staticBuf()) ref << port->bufPos();
 		else ref << ptSanitize(starSymbol.lookup(port->name()));
 		ref << "-(" << offset << ')';
 		if (!port->linearBuf())	// use circular addressing
 		{
-		    ref << '+' << port->bufSize() << ")%" << port->bufSize();
+		    ref << '+' << port->bufSize() << "," << port->bufSize() << ")";
 		}
 		else ref << ')';
 	    }
