@@ -91,7 +91,7 @@ be a parameter.
 		if (!strm) return;
 		// Scale by gain and convert to an integer
 		int data = int(double(input%0) * double(gain));
-		putc(Ptdsp_Linear16ToMuLaw8(data), strm);
+		putc(Ptdsp_LinearToPCMMuLaw(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
 // closes file and runs the command.
