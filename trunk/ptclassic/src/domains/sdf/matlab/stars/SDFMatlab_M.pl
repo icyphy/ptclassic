@@ -50,8 +50,8 @@ The pound characters are used to maintain compatibility with Ptolemy syntax.
 		type { string }
 		default { "" }
 		desc {
-The Matlab command to execute during the setup procedure of the Matlab star.
-During the setup procedure, there is no data passing into or out of the star.
+The Matlab command to execute during the begin method of the Matlab star.
+During the begin procedure, there is no data passing into or out of the star.
 }
 	}
 	defstate {
@@ -109,8 +109,29 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	}
 
 	setup {
-		// run the setup method of the base star (start Matlab, etc.)
+		// run the setup method of the base star
 		SDFMatlab::setup();
+
+		// set the number of input and output ports
+		numInputs = input.numberPorts();
+		numOutputs = output.numberPorts();
+
+		// check data type of output ports
+		if ( numOutputs > 0 ) {
+		  DataType outType = output.type();
+		  if ( outType != FLOAT_MATRIX_ENV &&
+		       outType != COMPLEX_MATRIX_ENV ) {
+		    Error::abortRun(*this,
+				    "The output ports may only support float",
+				    "matrix or complex matrix envelopes, not",
+				    output.type());
+		  }
+		}
+	}
+
+	begin {
+		// run the begin method of the base star (start Matlab, etc.)
+		SDFMatlab::begin();
 
 		// free any existing memory
 		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
@@ -128,22 +149,6 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		matlabInterface->FreeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
 		matlabOutputNames = 0;
-
-		// set the number of input and output ports
-		numInputs = input.numberPorts();
-		numOutputs = output.numberPorts();
-
-		// check data type of output ports
-		if ( numOutputs > 0 ) {
-		  DataType outType = output.type();
-		  if ( outType != FLOAT_MATRIX_ENV &&
-		       outType != COMPLEX_MATRIX_ENV ) {
-		    Error::abortRun(*this,
-				    "The output ports may only support float",
-				    "matrix or complex matrix envelopes, not",
-				    output.type());
-		  }
-		}
 
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
@@ -172,9 +177,8 @@ During the wrapup procedure, there is no data passing into or out of the star.
 			matlabInputNames, numInputs,
 			(const char *) MatlabFunction,
 			matlabOutputNames, numOutputs);
-	}
 
-	begin {
+		// evaluate the MatlabSetUp if provided
 		const char* setupCommand = (const char*) MatlabSetUp;
 		if ( setupCommand && *setupCommand ) {
 		  InfString matlabCommand = setupCommand;

@@ -18,7 +18,7 @@ limitation of liability, and disclaimer of warranty provisions.
 .Ir "Matlab interface"
 .Ir "Eddins, S."
 All instances of Matlab stars share one Matlab process.
-A Matlab kernel is started during the setup phase if a kernel has not
+A Matlab kernel is started during the begin phase if a kernel has not
 yet been started, i.e., if only one instance of this base star exists.
 The Unix command executed to start Matlab is simply "matlab".
 If "matlab" is not on your path as defined by your .cshrc file,
@@ -82,7 +82,7 @@ when the run panel in the graphical interface is closed.
 		delete matlabInterface;
 	}
 
-	setup {
+	begin {
 		if ( matlabInterface == 0 ) {
 		    matlabInterface = new MatlabIfc;
 		}
@@ -99,5 +99,4 @@ when the run panel in the graphical interface is closed.
 		matlabInterface->SetScriptDirectory( scriptDir );
 		matlabInterface->SetFigureHandle( fullName() );
 	}
-
 }
