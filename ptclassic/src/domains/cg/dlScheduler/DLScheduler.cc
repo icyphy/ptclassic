@@ -137,6 +137,7 @@ StringList DLScheduler :: displaySchedule() {
 	return out;
 }
 
-void DLScheduler :: createSubGals() {
-	if (!wormFlag) ParScheduler :: createSubGals();
+int DLScheduler :: createSubGals() {
+	if (!wormFlag) return ParScheduler :: createSubGals();
+	else return FALSE;
 }
