@@ -47,6 +47,154 @@ proc ::tycho::color {color {alternate {}}} {
     eval ::tycho::ColorManager::getColor $color $alternate
 }
 
+###########################################################################
+#### updateTkPalette
+#
+# Update the Tk color palette from values obtained from the "tkpalette"
+# group of tycho preferences.
+#
+proc ::tycho::updateTkPalette {args} {
+    set arglist {}
+    foreach pref {
+	activeBackground
+	activeForeground
+	background
+	disabledForeground
+	foreground 
+	highlightBackground
+	highlightColor
+	insertBackground
+	selectColor
+	selectBackground
+	selectForeground
+	troughColor
+    } {
+	set color [::tycho::preference get tkpalette $pref]
+	if { $color != "" } {
+	    lappend arglist $pref $color
+	}
+    }
+    eval tk_setPalette $arglist
+}
+
+###########################################################################
+#### subscribeTkPalette
+#
+# Turn on subscription of the Tk palette to the Tycho preferences.
+# Change made to the "tkpalette" preference group will update the
+# palette.
+#
+proc ::tycho::subscribeTkPalette {} {
+    foreach name  {
+	activeBackground
+	activeForeground
+	background
+	disabledForeground
+	foreground 
+	highlightBackground
+	highlightColor
+	insertBackground
+	selectColor
+	selectBackground
+	selectForeground
+	troughColor
+    } {
+	::tycho::preference subscribe tkpalette "tkpalette" $name \
+		::tycho::updateTkPalette
+    }
+}
+
+###########################################################################
+#### unsubscribeTkPalette
+#
+# Turn off subscription of the Tk palette to the Tycho preferences.
+# Change made to the "tkpalette" preference group will no longer
+# affect the palette.
+#
+proc ::tycho::unsubscribeTkPalette {} {
+    foreach name  {
+	activeBackground
+	activeForeground
+	background
+	disabledForeground
+	foreground 
+	highlightBackground
+	highlightColor
+	insertBackground
+	selectColor
+	selectBackground
+	selectForeground
+	troughColor
+    } {
+	::tycho::preference unsubscribe tkpalette "tkpalette" $name
+    }
+}
+
+###########################################################################
+#### resetTkPalette
+#
+# A utility procedure to set the Tk palette to either the old
+# bisque color-scheme or the grey color scheme. To make this
+# run at a reasonable spped, it disables the color subscriptions
+# first, resets the palette, change the preferences, and then
+# reenables the subscription.
+#
+proc ::tycho::resetTkPalette {{style grey}} {
+    ::tycho::unsubscribeTkPalette
+
+    if { $style == "bisque" } {
+	# For the record, here is what the binary values are.
+	# They're slightly different, but close enough.
+	# activeBackground    #e6ceb1 
+	# activeForeground    black 
+	# background          #ffe4c4 
+	# disabledForeground  #b0b0b0 
+	# foreground          black 
+	# highlightBackground #ffe4c4 
+	# highlightColor      black 
+	# insertBackground    black 
+	# selectColor         #b03060 
+	# selectBackground    #e6ceb1 
+	# selectForeground    black 
+	# troughColor         #cdb79e
+	foreach {name color} {
+	    activeBackground    bisque2
+	    activeForeground    black
+	    background          bisque1
+	    disabledForeground  grey69
+	    foreground          black
+	    highlightBackground bisque1
+	    highlightColor      black
+	    insertBackground    black 
+	    selectColor         maroon
+	    selectBackground    bisque2
+	    selectForeground    black
+	    troughColor         bisque3
+	} {
+	    ::tycho::preference assign tkpalette $name $color
+	}
+    } else {
+	foreach {name color} {
+	    activeBackground    grey92
+	    activeForeground    black
+	    background          grey85
+	    disabledForeground  grey64
+	    foreground          black
+	    highlightBackground grey85
+	    highlightColor      black
+	    insertBackground    black 
+	    selectColor         maroon
+	    selectBackground    grey76
+	    selectForeground    black
+	    troughColor         grey76
+	} {
+	    ::tycho::preference assign tkpalette $name $color
+	}
+    }
+    ::tycho::updateTkPalette
+    ::tycho::subscribeTkPalette
+}	    
+
 #########################################################################
 #### ColorManager
 # Manage color selection. This is a "non-instantiable" class.
