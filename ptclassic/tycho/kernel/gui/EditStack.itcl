@@ -30,32 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditStack.textWidth 80 widgetDefault
-option add *EditStack.textHeight 30 widgetDefault
-option add *EditStack.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditStack.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditStack.fillMaxLineLength 70 widgetDefault
-option add *EditStack.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditStack.textfont [.tychoFonts defaultFont fixed]
-option add *EditStack.relief raised widgetDefault
-option add *EditStack.selectColor [ptkColor yellow white] widgetDefault
-
-# new options
-
-option add *EditStack.errorColor \
-	[ptkColor red black] widgetDefault
-option add *EditStack.commentColor \
-	[ptkColor forestGreen black] widgetDefault
-option add *EditStack.titleColor \
-	[ptkColor black black] widgetDefault
-option add *EditStack.linkColor \
-	[ptkColor blue black] widgetDefault
 
 #######################################################################
 #### EditStack
@@ -133,7 +107,7 @@ body ::tycho::EditStack::parseNow {start stop} {
     # The first line is always a title
     $text tag add title 1.0 "0.0 lineend"
     $text tag configure title -foreground \
-	    [option get $hull titleColor EditStack]
+	    [preference get stacktrace titleColor]
 
     set comments {while executing|invoked from within|\(while constructing [^)]*\)|\(command bound to event\)}
     set point $start
@@ -164,9 +138,9 @@ body ::tycho::EditStack::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure error -foreground \
-	    [option get $hull errorColor EditStack]
+	    [preference get stacktrace errorColor]
     $text tag configure comment -foreground \
-	    [option get $hull commentColor EditStack]
+	    [preference get stacktrace commentColor]
     $text tag configure link -foreground \
-	    [option get $hull linkColor EditStack]
+	    [preference get stacktrace linkColor]
 }

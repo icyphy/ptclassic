@@ -37,15 +37,6 @@
 #   It should not be modal.
 
 
-# Default options for the "sccs admin" command force there to be ID
-# keywords in the file, and also indicate that %Q% should be replaced with
-# the current year. (Use clock here, as it is much faster than exec date)
-option add *RevControlSCCS.adminOptions \
-	"-fq[clock format [clock seconds] -format %Y] -fi " widgetDefault
-
-option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
-option add *RevControlSCCS.commentColor [ptkColor firebrick black] widgetDefault
-
 #######################################################################
 #### RevControlSCCS
 # This class defines how revision control will be handled when using 
@@ -201,7 +192,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
     }   
 
     # Run sccs admin
-    set opts [option get $itk_component(hull) adminOptions RevControlSCCS]
+    set opts [preference get sccs adminOptions]
     if [catch {eval exec sccs admin $opts $basefile} output] {
 	error "Failed to run 'sccs admin $opts $basefile:\
 		$output."
@@ -385,9 +376,9 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
     $text insert insert "\n\n"
 
     set commentColor \
-	    [option get $itk_component(hull) commentColor RevControlSCCS]
+	    [preference get sccs commentColor]
     set versionColor \
-	    [option get $itk_component(hull) versionColor RevControlSCCS]
+	    [preference get sccs versionColor]
 
     # Skip first two lines
     foreach line [lrange $lines 2 end] {

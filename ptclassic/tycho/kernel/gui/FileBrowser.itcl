@@ -37,23 +37,6 @@
 # aesthetic reasons, settling on this simpler browser.  This one is
 # fashioned after the file browser in FrameMaker.
 
-# Options from the derived class
-option add *FileBrowser*entryWidth 30 widgetDefault
-
-option add *FileBrowser*entryBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *FileBrowser*entryForeground \
-	[ptkColor black black] widgetDefault
-
-option add *FileBrowser*textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *FileBrowser*textForeground \
-	[ptkColor black black] widgetDefault
-
-option add *FileBrowser.entryfont \
-	[.tychoFonts defaultFont fixed] widgetDefault
-option add *FileBrowser.width 30 widgetDefault
-option add *FileBrowser.height 12 widgetDefault
 
 ##########################################################################
 #### filename
@@ -177,6 +160,11 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    # Subscribe to the preference set
+    preference subscribe filebrowser $this \
+	    -width width \
+	    -height height
 
     # In case updateListbox inserts into the entry; to avoid repetition
     clear entry

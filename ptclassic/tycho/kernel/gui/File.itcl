@@ -36,9 +36,6 @@ catch {delete class ::tycho::File}
 
 #### Options
 
-#### autoSaveInterval option
-# The auto-save interval in minutes.  A value of zero means no auto-save.
-option add *File.autoSaveInterval 5 widgetDefault
 
 #######################################################################
 #### File
@@ -535,6 +532,10 @@ body ::tycho::File::constructor {args} {
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
+
+    # Subscribe to the preference set
+    preference subscribe global $this \
+	    -autosaveinterval autoSaveInterval
 
     # Identify the object for crash recovery
     set fileObjects($this) $this
