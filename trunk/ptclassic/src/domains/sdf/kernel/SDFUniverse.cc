@@ -1,11 +1,12 @@
-#include "Universe.h"
+#include "SDFUniverse.h"
 #include "StringList.h"
 
 
 // SCCS version identification
 // $Id$
 
-SDFUniverse :: operator StringList () {
+StringList
+SDFUniverse :: printVerbose () {
 	StringList out;
 	out = "SYNCHRONOUS DATAFLOW UNIVERSE: ";
 	out += readFullName ();
@@ -15,7 +16,7 @@ SDFUniverse :: operator StringList () {
 	out += "\n";
 	out += "CONTENTS:\n";
 
-	out += StringList(*myTopology);
+	out += myTopology->printVerbose();
 
 	return out;
 }
