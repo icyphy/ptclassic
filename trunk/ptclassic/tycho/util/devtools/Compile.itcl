@@ -33,8 +33,7 @@
 ##############################################################################
 #### compileC
 # Invoke an external program using compileCTcl.
-# The format of the command is exactly that of the Tcl "exec" command,
-# with colorization (parseError function called).
+# The format of the command is exactly that of the Tcl "exec" command.
 #
 set compiler {}
 proc ::tycho::compileC { args } {
@@ -97,15 +96,6 @@ class ::tycho::Compile {
     # Compile and run in each file in the list of filenames.
     public method compileAndRun { filenames}
 
-    # If the editor widget exists, then jump to the next error
-    public method jumpToLine {cLineNum eLineNum fname}
-
-    # Jump to the next error when the "Next Error" button is clicked
-    public method jumpNextError {} 
-
-    # Set the error count so that jumpNextError will jump correctly.
-    public method setErrorCount {num}
-    
     # Compile the file.
     method compileFiles {}
 
@@ -116,15 +106,8 @@ class ::tycho::Compile {
     # Check the source files for necessary features.
     protected method checkSourceFiles {}
 
-    # Parse the error message, determine action (language dependent)
-    # This is always called by compileFiles. It's generic here
-    protected method parseError {results } {}
-
     # Create a makefile.
     protected method createMakefile {}
-
-    # Jump to line number in the Edit class, used by parseError only.
-    protected method jumpToParent {line Edit} {}
 
     # Initialize variables from the filename list.
     protected method initialize {filenames}
@@ -224,126 +207,6 @@ body ::tycho::Compile::compileAndRun {filenames} {
     ###################################################################
     ####                      protected methods                    ####
 
-#####################################################################
-#### parseError
-#
-# Parse the error output from a compiler. Although this function is
-# generic, it works for many different compilers such as gcc,
-# javac, etc.
-#
-# The convention is:
-# ::parseError {result}
-# Where result is in the following form "status EditWidget_name"
-#
-# The output of an error message must be in the following:
-# file_name:line_number: Error message here
-#
-body ::tycho::Compile::parseError {results} {
-    # Default is that we don't have an error
-    set errorCount -1
-
-    # Simple parse the results here.
-    set editorName [$this cget -view]
-    set text $compileWidget.history.text
-
-    # Set the next button so it calls to our nextError function
-    $compileWidget.bbox buttonconfigure next \
-            -command "$this jumpNextError"
-
-    # puts "editorName=$editorName, compileWidget=$compileWidget, text=$text, this=$this"
-    set eLineNum -1     ;# We haven't read the line number yet
-    set cLineNum 0      ;# Compiler's line starts at 0
-    set errorCount 0    ;# If errorCount==-1, then we have no error
-    set errorList {}    ;# Default is that our list is empty
-
-    # Get the output of the compiler
-    set output [$results.history get 0.0 end]
-    set output [split $output "\n"]
-    foreach line $output {
-        incr cLineNum
-        # The text index starts off on 1, the lindex starts off on 0
-        #set line [lindex $output [expr $i-1]]
-
-        # Does it match the format? "test.cc:15: Error message here"
-        # Does it match the format? "test.cc:15: warning: Error_msg_here"
-        if {[regexp {([^:]+):([0-9]+): (.+)} $line tmp fname tmpeLineNum msg]\
-                && $tmpeLineNum!=$eLineNum} {
-            incr errorCount
-            # This ensures only one line per many lines of error output
-            set eLineNum $tmpeLineNum
-            if {[regexp {(warning): (.+)} $msg]} {
-                #FIXME: Change me to preference
-                set color {purple}
-            } else {
-                #FIXME: Change me to preference
-                set color {red}
-                lappend errorList [list $cLineNum $eLineNum $fname]
-            }
-            $text tag add error$errorCount $cLineNum.0 $cLineNum.end
-            $text tag configure error$errorCount -foreground $color -underline 0
-            # Two actions to the error binding:
-            # 1) jump to the lines (and highlight)
-            # 2) update internal count, so Next button will know where to jump
-            $text tag bind error$errorCount <Double-Button-1> \
-                    "$this jumpToLine $cLineNum $eLineNum $fname ;\
-                    $this setErrorCount $errorCount"
-        }
-    }
-    # If we have detected an error, then we want to start from the beginning
-    if {$errorCount!=-1} {set errorCount 0}
-}
-
-body ::tycho::Compile::setErrorCount {count} {
-    set errorCount $count
-}
-
-#######################################################################
-#### jumpNextError
-# Make sure we don't jump too far. errorList has the following format:
-# { {cLineNum eLineNum} {cLineNum eLineNum} ... }
-# Where cLinNum is the compiler's line number, along with
-# eLineNum, which is the editor's line number.
-#
-body ::tycho::Compile::jumpNextError {} {
-    # NOTE: errorCount=$errorCount   errorList=$errorList
-    if {$errorCount!=-1 && $errorCount<[llength $errorList]} {
-        # Find out where in the list my information is located.
-        # This has the format {{1 2 asdf.cc} {5 10 fdsa.cc} ...}
-        set entry [lindex $errorList $errorCount]
-        set cLineNum [lindex $entry 0]
-        set eLineNum [lindex $entry 1]
-        set fname [lindex $entry 2]
-        jumpToLine $cLineNum $eLineNum $fname
-        incr errorCount
-    } else {
-        set errorCount 0
-    }
-
-}
-
-# This will open file context, and jump to entry number.
-# eLineNum = editor's line number (where error occured)
-# cLineNum = compiler's line number (where error reported)
-# fname = filename of the error source code.
-body ::tycho::Compile::jumpToLine {cLineNum eLineNum fname} {
-    # Name of our editor/viewer
-    # FIXME: directory could potentially be anywhere, specified in Makefile.
-    set editorName [::tycho::File::openContext [file join $dirname $fname]]
-    set editorName [string trim $editorName :]
-
-    # Jump to the line in editor
-    $editorName seeFragment "line $eLineNum"
-
-    # Jump to the line in the compile/exec widget
-    set history $compileWidget.history
-    if {[winfo exists $history]} {
-        $history seeFragment "line $cLineNum"
-    } else {
-        error "Compile/Exec widget doesn't exist."
-    }
-}
-
-
 
 #######################################################################
 #### checkSourceFiles
@@ -393,7 +256,6 @@ body ::tycho::Compile::compileFiles {} {
         if {$autostart} {
             #$compileWidget execProcessInMonitor
             $compileWidget getStatusWait
-            parseError $compileWidget
         } else {
             # Raise current window back, since default is not autostart
             set editorName [$this cget -view]
@@ -406,7 +268,6 @@ body ::tycho::Compile::compileFiles {} {
         # Colorize our monitor
         $compileWidget execProcessInMonitor
         $compileWidget getStatusWait
-        parseError $compileWidget
     }
 
 
