@@ -195,8 +195,8 @@ body ::tycho::IconFrame::construct {id canvas slate tags x y args} {
 	    $id $canvas $slate [list $tags] $coords
 
     # Create the input and output ports
-    ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
-    ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
+    # ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
+    # ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
 }
 
 ##########################################################################
@@ -222,4 +222,5 @@ body ::tycho::IconFrame::coords {id canvas slate args} {
 #
 body ::tycho::IconFrame::highlight {id canvas slate args} {
     eval $canvas create rectangle [$canvas bbox $primary($id)] $args
+    $slate lower highlight.$id $id
 }
