@@ -76,6 +76,9 @@ public:
     // Generate code.
     virtual void generateCode();
 
+    // Generate code streams.
+    virtual void generateCodeStreams();
+
     // Save the generated code to a file.  This method usually calls
     // the target protected method rcpWriteFile.
     virtual void writeCode();
@@ -100,12 +103,12 @@ public:
     virtual int insertGalaxyCode(Galaxy* g, SDFScheduler*);
 
     // Support methods for loops.
-    /* virtual */ void beginIteration(int,int);
-    /* virtual */ void endIteration(int,int);
+    /*virtual*/ void beginIteration(int,int);
+    /*virtual*/ void endIteration(int,int);
 
     // Generate loop initialization code for stars.
-    /* virtual */ void genLoopInit(Star& s, int reps);
-    /* virtual */ void genLoopEnd(Star& s);
+    /*virtual*/ void genLoopInit(Star& s, int reps);
+    /*virtual*/ void genLoopEnd(Star& s);
 
     // methods for generating code for reading and writing
     // wormhole ports.  Argument is the "real port" of the interior
@@ -150,8 +153,6 @@ public:
     virtual int systemCall(const char*cmd,const char* error=NULL,
 	const char* host="localhost");
 
-    // return the pointer of a code StringList given its name.  If it is 
-    // not found, This method allows stars to access a code StringList by 
     // Write a file in the 'destDirectory' on the 'targetHost'.  If the
     // directory does not exist, it is created.  The code is optionally
     // displayed, if you want to optionally let the user display the
@@ -166,8 +167,19 @@ public:
     // of performing an SDF scheduler for a uni-processor target
     void copySchedule(SDFSchedule&);
     
+    // return the pointer of a code StringList given its name.  If it is 
+    // not found, This method allows stars to access a code StringList by 
     // name.  If stream is not found, return NULL.
     CodeStream* getStream(const char* name);
+
+    // Add a CodeStream to the target.  This allows stars to access this
+    // stream by name.  This method should be called in the the target's
+    // constructor.  If a target tries to add a stream where another stream
+    // with the same name already exists, Error::abortRun is called.
+    void addStream(const char* name,CodeStream* slist);
+
+    // Create a new CodeStream for the target.
+    CodeStream* newStream(const char* name) { return codeStringLists.newStream(name); }
 
     // separator for symbols, <name><separator><unique number>
     char separator;
@@ -188,11 +200,18 @@ public:
     virtual int execTime(DataFlowStar* s, CGTarget* t = 0)
 	{ return s->myExecTime(); }
 
-protected:
-
     // Additional initialization (invoked by initialize method).
     // If within a WormHole, generate, compile, load, and run code.
     /*virtual*/ void setup();
+
+    // Combine all sections of code.
+    virtual void frameCode();
+
+    // Compute buffer sizes and allocate memory.
+    // Return FALSE on error.
+    virtual int allocateMemory();
+
+protected:
 
     // Initialization for code generation.
     // The default version does nothing.
@@ -203,19 +222,6 @@ protected:
     virtual void mainLoopCode();
     virtual void trailerCode();
 
-    // Combine all sections of code.
-    virtual void frameCode();
-
-    // Compute buffer sizes and allocate memory.
-    // Return FALSE on error.
-    virtual int allocateMemory();
-
-    // Add a CodeStream to the target.  This allows stars to access this
-    // stream by name.  This method should be called in the the target's
-    // constructor.  If a target tries to add a stream where another stream
-    // with the same name already exists, Error::abortRun is called.
-    void addStream(const char* name,CodeStream* slist);
- 
     // method for supervising all code generation for the case of
     // a wormhole.  The default implementation generates an infinite
     // loop that reads input wormholes, runs the schedule, and writes
