@@ -185,9 +185,6 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	}
 
 	go {
-		// call the go method of the parent star
-		SDFMatlab::go();
-
 		// convert Ptolemy input matrices to Matlab matrices
 		processInputMatrices();
 
