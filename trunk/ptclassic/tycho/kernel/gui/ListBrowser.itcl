@@ -385,14 +385,10 @@ body ::tycho::ListBrowser::complete {{case 0}} {
 	set uselastpattern 1
 
         # Set the entry widget to the longest common string among all the
-        # matches. If no common initial string (example: *blue), use the 
-        # first match.
+        # matches. If no common initial string (example: *blue), clear the
+        # entry.
         set compMatch [lsubstring $matches]
-        if {$compMatch != {}} {
-            setEntry $compMatch
-        } else {
-            setEntry [lindex $matches 0]
-        }
+        setEntry $compMatch
 	bell
     }
     # The two commands below attempt to put the entire range in view,
