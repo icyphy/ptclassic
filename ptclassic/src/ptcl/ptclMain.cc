@@ -311,7 +311,7 @@ extern "C" int displayGanttChart(const char* file) {
 // in term load the startup tcl code.
 
 static void loadStartup(Tcl_Interp* interp) {
-	const char *pt = getenv("PTOLEMY");
+	char *pt = getenv("PTOLEMY");
 	int newmemory = FALSE;
 	if (!pt) {
 	    pt = expandPathName("~ptolemy");

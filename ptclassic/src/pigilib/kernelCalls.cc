@@ -962,7 +962,7 @@ KcDefTarget(const char* domain) {
 }
 
 ///////////////////////////////////////////////////////////////////////
-extern "C" const char*
+extern "C" char*
 KcExpandPathName(const char* name) {
     return expandPathName(name);
 }

@@ -61,7 +61,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 // lastName is used to remember the filename for the reporting of errors.
-static const char* lastName = 0;
+static char* lastName = 0;
 
 inline const char* expand(const char * name) {
 	delete [] lastName;

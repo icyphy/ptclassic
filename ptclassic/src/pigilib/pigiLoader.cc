@@ -298,7 +298,7 @@ extern "C" void
 KcLoadInit (const char* argv0) {
 	ptolemyRoot = hashstring(getenv("PTOLEMY"));
 	if (ptolemyRoot == 0) {
-		const char* expandedName = expandPathName("~ptolemy");
+		char* expandedName = expandPathName("~ptolemy");
 		ptolemyRoot = hashstring(expandedName);
 		delete [] expandedName;
 	}
@@ -363,8 +363,8 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 		int preproc, int permB, const char* linkArgs) {
 
 	// Determine and save the source and object directory names
-	const char* expandedSrcDir = expandPathName(srcDirStr);
-	const char* expandedObjDir = genObjDir(expandedSrcDir);
+	char* expandedSrcDir = expandPathName(srcDirStr);
+	char* expandedObjDir = genObjDir(expandedSrcDir);
 	StringList srcDir = expandedSrcDir;
 	StringList objDir = expandedObjDir;
 	delete [] expandedSrcDir;
@@ -478,8 +478,8 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
 		ErrAdd ("Loader disabled");
 		return FALSE;
 	}
-// form the source file name
-	const char* eDir = expandPathName (srcDir);
+	// form the source file name
+	char* eDir = expandPathName(srcDir);
 	char fName[512];
 	int preproc = FindStarSourceFile(eDir, idomain, name, fName);
 	delete [] eDir;
@@ -506,7 +506,7 @@ KcLoad (const char* iconNameStr, int permB, const char* linkArgs) {
 	}
 	char codeName[512], base[128], domain[64], dir[512];
 
-	const char* iconName = expandPathName(iconNameStr);
+	char* iconName = expandPathName(iconNameStr);
 	int retval = IconFileToSourceFile(iconName, codeName, domain);
 	delete [] iconName;
 	if ( ! retval ) {

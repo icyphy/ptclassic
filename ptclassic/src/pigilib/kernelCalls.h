@@ -78,7 +78,7 @@ extern int KcNodeConnect ARGS((const char* inst, const char* term, const char* n
 extern int KcDomainTargets ARGS((const char* domain, const char** names, int nMax));
 extern int KcSetTarget ARGS((const char* targetName));
 extern const char* KcDefTarget ARGS((const char* domain));
-extern const char* KcExpandPathName ARGS((const char* name));
+extern char* KcExpandPathName ARGS((const char* name));
 extern void KcCatchSignals();
 extern int KcEventLoopActive();
 extern void KcSetEventLoop ARGS((int on));

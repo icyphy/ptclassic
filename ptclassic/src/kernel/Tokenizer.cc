@@ -188,7 +188,7 @@ Tokenizer::pop() {
 
 int
 Tokenizer::fromFile(const char *filename) {
-    const char* expandedFileName = expandPathName(filename);
+    char* expandedFileName = expandPathName(filename);
     LOG_NEW; ifstream* s = new ifstream(expandedFileName);
     LOG_DEL; delete [] expandedFileName;
     if (s == 0) {

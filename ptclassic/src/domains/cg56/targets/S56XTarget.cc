@@ -73,7 +73,7 @@ void S56XTarget :: headerCode () {
 	aioCmds.initialize();
 	shellCmds.initialize();
 	CG56Target :: headerCode();
-	const char *path = expandPathName("$PTOLEMY/lib/cg56/s56x.asm");
+	char *path = expandPathName("$PTOLEMY/lib/cg56/s56x.asm");
 	myCode << "\tinclude '" << path << "'\n";
 	interruptFlag = TRUE;
 	delete [] path;

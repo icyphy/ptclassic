@@ -47,7 +47,7 @@ repeated, or the file contents can be padded with zeros.
 
     protected {
 	istream* input;
-	const char* expandedFileName;
+	char* expandedFileName;
     }
 
     constructor {

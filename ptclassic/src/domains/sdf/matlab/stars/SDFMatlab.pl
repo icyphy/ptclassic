@@ -270,7 +270,7 @@ extern "C" {
 		static InfString lastdirname;
                 int retval = 0;
 		if ( dirname[0] != 0 ) {
-		  const char *fulldirname = expandPathName(dirname);
+		  char *fulldirname = expandPathName(dirname);
 		  struct stat stbuf;
 		  if ( stat(fulldirname, &stbuf) == -1 ) {
 		    if ( strcmp((char *) lastdirname, fulldirname) != 0 ) {
@@ -388,8 +388,7 @@ extern "C" {
 		}
 
 		// add the PTOLEMY_MATLAB_DIRECTORY to the Matlab path
-		const char *fulldirname =
-				expandPathName(PTOLEMY_MATLAB_DIRECTORY);
+		char *fulldirname = expandPathName(PTOLEMY_MATLAB_DIRECTORY);
 		InfString command = "path(path, '";
 		command << fulldirname;
 		command << "');";
