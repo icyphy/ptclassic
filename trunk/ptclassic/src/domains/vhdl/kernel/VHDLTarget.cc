@@ -42,6 +42,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGUtilities.h"
 #include "ConversionTable.h"
 
+// Defined in VHDLDomain.cc
+extern const char VHDLdomainName[];
+
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -920,7 +923,6 @@ StringList VHDLTarget :: addVariableDecls(VHDLVariableList* variableList,
     all << variable->name;
     all << ": ";
     all << variable->type;
-    //    if ((variable->initVal).numPieces() > 0) {
     if ((variable->initVal).length() > 0) {
       all << " := ";
       all << variable->initVal;
@@ -929,4 +931,8 @@ StringList VHDLTarget :: addVariableDecls(VHDLVariableList* variableList,
     level--;
   }
   return all;
+}
+
+const char* VHDLTarget :: domain() {
+  return galaxy() ? galaxy()->domain() : VHDLdomainName;
 }
