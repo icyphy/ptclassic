@@ -3,7 +3,7 @@ defstar {
 	domain { SDF }
 	desc {
 The input is quantized to the number of levels given by the "levels"
-parameter.  The quantization levels are uniformly spaced between "low"
+parameter plus 1.  The quantization levels are uniformly spaced between "low"
 and "high" inclusive.  Rounding down is performed, so that output level
 will equal "high" only if the input level equals or exceeds "high".
 If the input is below "low", then the quantized output will equal "low".
