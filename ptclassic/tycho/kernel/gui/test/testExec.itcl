@@ -37,11 +37,10 @@ if {[string compare test [info procs test]] == 1} then {
 
 test Exec-1.1 {run make} {
     catch {destroy .exec}
-    ::tycho::Exec .exec -command {make test_exec_msg} -dir [pwd]
-    .exec centerOnScreen
-    .exec invoke ok
+    catch {delete object .exec}
+    ::tycho::Exec .exec {make test_exec_msg} -dir [pwd]
     sleep [expr {$duration / 1000}]
-    after $longDuration .exec invoke cancel
+    #after $longDuration .exec invoke cancel
     puts "about to do getHistory"
     flush stdout
     set history [.exec getHistory 1.0]
