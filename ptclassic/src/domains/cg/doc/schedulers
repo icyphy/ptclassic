@@ -1,0 +1,217 @@
+.\" $Id$
+.H1 "Schedulers"
+.pp
+.Id "schedulers, CG domain"
+Given a Universe of functional blocks to be scheduled and a Target 
+describing the topology and characteristics of the single- or 
+multiple-processor system for which code is generated, it 
+is the responsibility of the Scheduler object to perform some or 
+all of the following functions:
+.ip
+Determine which processor a given invocation of a given Block is 
+executed on (for multiprocessor systems);
+.ip
+Determine the order in which actors are to be executed on a processor;
+.ip
+Arrange the execution of actors into standard control structures, 
+like nested loops.
+
+.H2 "Single-Processor Schedulers"
+.pp
+For targets consisting of a single processor, we provide three different
+scheduling techniques. The user can select the most appropriate scheduler
+for a given application by setting the
+.c loopingLevel
+.Id "loopingLevel, target parameter"
+target parameter.
+.pp
+In the first approach (loopingLevel = 0), which is the default SDF scheduler,
+we conceptually construct the acyclic precedence graph (APG) corresponding 
+to the system, and generate a schedule that is consistent with that 
+precedence graph. There are many possible 
+schedules for all but the most trivial graphs; the schedule chosen 
+takes resource costs, such as the necessity of flushing registers and 
+the amount of buffering required, into account. The Target then 
+generates code by executing the actors in the sequence defined by 
+this schedule. This is a quick and efficient approach unless 
+there are large sample rate changes, in which case it corresponds to 
+completely unrolling all loops, so results in huge code size. 
+.pp
+The second approach we call /fIJoe's/fR scheduling. In this approach
+.Id "Joe's scheduling"
+(loopingLevel = 1), actors that have the same sample rate are merged 
+(wherever this will not cause deadlock) and loops are introduced to 
+match the sample rates. The result is a hierarchical clustering; 
+within each cluster, the techniques described above can be used to 
+generate a schedule. The code then contains nested loop constructs 
+together with sequences of code from the actors. 
+.pp
+Since the second approach uses a conservative approach, there are some
+cases, if rare, in which some looping possibilities are undetected. 
+By setting the loopingLevel to 2, we can choose the third approach,
+called SJS (Shuvra-Joe-Soonhoi) scheduling after the inventor's
+.Id "SJS scheduling"
+first names. After performing Joe's scheduling at the front end,
+it attacks the remaining graph with more complicated approach.
+.pp
+In the second or third approach is taken, the code size is drastically
+reduced when there are large sample rate changes in the application.
+On the other hand, we sacrifice some efficient buffer management schemes.
+For example, suppose that star A produces 5 samples to star B which consumes
+1 sample at a time. If we take the first approach, we schedule this
+graph as ABBBBB and assign a buffer of size 5 between star A and B.
+Since all invocations of star B knows which sample to consume from the
+allocated buffer, each B invocation can read the sample directly for the
+buffer. If we choose the second or third approach, the scheduling result
+will be A5(B). Since the body of star B is included inside a loop of
+factor 5, we have to use an indirect addressing for star B to read 
+a sample from the buffer. Therefore, we need an additional buffer
+pointer for star B (memory overhead), and one more level of memory
+access (runtime overhead) for indirect addressing. 
+
+.H2 "Multiple-Processor Schedulers"
+.pp
+.Id "multiple-processor schedulers"
+.Id "parallel schedulers"
+A key idea in Ptolemy is that there is no single scheduler that 
+is expected to handle all situations. Users can write schedulers and 
+can use them in conjunction with schedulers we have written. 
+As with the rest of Ptolemy, schedulers are written following 
+object-oriented design principals. Thus a user would never have to 
+write a scheduler from ground up, and in fact the user 
+is free to derive the new scheduler from even our most 
+advanced schedulers. We have designed a suite of specialized schedulers 
+that can be mixed and matched for specific applications. After the 
+scheduling is performed, each processor is assigned 
+a set of blocks to be executed in a scheduler-determined order. 
+.pp
+We have implemented three scheduling techniques that map 
+SDF graphs onto multiple-processors with various interconnection 
+topologies: Hu's level-based list scheduling, Sih's dynamic level 
+scheduling [1], and Sih's declustering scheduling [2]. 
+The target architecture is described by its Target object, derived from 
+.c CGMultiTarget . 
+The Target class provides the scheduler with the necessary information 
+on interprocessor communication to enable both scheduling and code 
+synthesis. 
+.pp
+Targets also have parameters that allow the user to select the 
+type of schedule, and (where appropriate) to experiment with the 
+effect of altering the topology or the communication 
+costs. The parameters are
+.c ignoreIPC ,
+.Id "ignoreIPC, target parameter"
+.c overlapComm ,
+.Id "overlapComm, target parameter"
+and 
+.c useCluster .
+.Id "useCluster, target parameter"
+There is priority between these parameter. If the
+.c ignoreIPC
+is set to 
+.c YES ,
+we use Hu's level-based list scheduler. Otherwise, we check whether
+the
+.c overlapComm
+parameter is set or not. This parameter is set when the target
+processor has different modules for communication and computation,
+so can execute both at the same time. We haven`t yet tested any target 
+that has this feature. After the 
+.c overlapComm
+parameter is proved to be
+.c NO ,
+the third parameter,
+.c useCluster ,
+is examined. If that parameter is set, the Sih's declustering scheduling
+scheme is used. Otherwize, the modified version of Sih's dynamic level
+scheduling is used.
+.pp 
+Whichever scheduler is used, we schedule communication nodes
+in the generated code. For example, we use the Hu's level-based list
+scheduler, we ignore communication overhead when assigning stars
+to processors. Hence, it is likely to have a code that contains
+more communication stars than what the other schedulers would result in.
+.pp
+There are another set of target parameter to direct the scheduling
+procedure. If parameter
+.c manualAssignment
+.Id "manualAssignment, target parameter"
+is set to 
+.c YES ,
+the default parallel scheduler does not perform star assignment. Instead,
+it checks the processor assignment of all stars (
+.c procId
+.Id "procId, CG star state"
+state of CG stars). By default, the procId state is set to -1, which is
+an illegal assignment since the child target is numbered from 0.
+If there exists any star, except
+.c Fork
+star, that has an illegal
+.c procId
+state, an error is generated saying that manual scheduling is faild.
+Otherwise, we invoke a list scheduling based on the manual assignment
+to determine the order of execution of blocks on each processor.
+We do not support the case in which a block requires more than
+one processors to be assigned on. This option automatically sets
+the
+.c oneStarOneProc
+.Id "oneStarOneProc, target parameter"
+state to be discussed next.
+.pp
+If there are sample rate changes, a star in the program graph
+may be invoked multiple times for each iteration. These invocations
+may be assigned to multiple processors by default. We can prevent it
+by setting the
+.c oneStarOneProc
+star to 
+.c YES .
+Then, all invocations of a star are enforced to be assigned to the same
+processor regardless of whether they are parallelizable ot not.
+The advantage of doing this is its simplicity of code generation since we
+do not need 
+.c Spread/Collect
+stars, which will be discussed in a later section.
+Also, it provides us another possibility of scheduling option:
+.c adjustSchedule .
+.Id "adjustSchedule, target parameter"
+The main disadvantage is performance loss of not exploiting parallelism.
+It is most severe if Sih's declustering algorithm is used. Therefore,
+it is not recommended to use Sih's declustering algorithm with this option.
+.pp
+In this paragraph, we describe a future scheduling option which
+this release does not support yet.
+Once an automatic scheduling (with oneStarOneProc option set) is performed,
+the processor assignment of each star is determined. After examining
+the
+assignment, the user may want to override the scheduling decision
+manually. It can be done by setting the
+.c adjustSchedule
+.Id "adjustSchedule, target parameter"
+parameter. If that parameter is set, after the automatic scheduling
+is performed, the 
+.c procId
+state of each star is automatically updated with the assigned processorr. 
+The programmer override the scheduling decision by setting that state.
+The
+.c adjustSchedule
+can not be YES before any scheduling decision is made previously.
+Again, this option is not supported in this release.
+.pp
+The multiple-processor scheduler produces a list of single 
+processor schedules, copying them to the child targets. 
+Given these single-processor schedules, the same schemes as discussed 
+above are re-used to generate the code for each child processor target. 
+.UH "References"
+.ip [1]
+G. C. Sih and
+E. A. Lee,
+"A Compile-Time Scheduling Heuristic for Interconnection-Constrained
+Heterogeneous Processor Architecture", 
+to appear \fIIEEE Trans. on
+Parallel and Distributed Systems\fR, 1992.
+.ip [2]
+G. C. Sih and
+E. A. Lee,
+"Declustering: A New Multiprocessor Scheduling Technique",
+to appear \fIIEEE Trans. on
+Parallel and Distributed Systems\fR, 1992.
