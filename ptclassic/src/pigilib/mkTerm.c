@@ -123,9 +123,13 @@ Shape boxShape = {
 /* FIXME: packetColor should become messageColor!!! */
 
 static octObject *facetPtr, wiringLayer;
-static octObject floatColorLayer, intColorLayer, complexColorLayer,
-		 anytypeColorLayer, packetColorLayer, fixColorLayer,
-		 labelLayer;
+static octObject floatColorLayer = {OCT_UNDEFINED_OBJECT},
+		 intColorLayer = {OCT_UNDEFINED_OBJECT},
+		 complexColorLayer = {OCT_UNDEFINED_OBJECT},
+		 anytypeColorLayer = {OCT_UNDEFINED_OBJECT},
+		 packetColorLayer = {OCT_UNDEFINED_OBJECT},
+		 fixColorLayer = {OCT_UNDEFINED_OBJECT},
+		 labelLayer = {OCT_UNDEFINED_OBJECT};
 
 /* 
  * terminalPath 12/21/91 - by Edward A. Lee
@@ -165,7 +169,7 @@ MkTermLabel(name, input, position, totalNumber)
 	int position;
 	int totalNumber;
 {
-    octObject label;
+    octObject label = {OCT_UNDEFINED_OBJECT};
     int llx, lly, urx, ury, len;
     
     static struct octBox labelBox;
@@ -289,7 +293,9 @@ MkTerm(name, input, type, multiple, position, totalNumber)
 {
     struct octPoint translation;
     Shape *path;
-    octObject dummy, box, term;
+    octObject dummy = {OCT_UNDEFINED_OBJECT},
+	      box = {OCT_UNDEFINED_OBJECT},
+	      term = {OCT_UNDEFINED_OBJECT};
     struct octPoint arrowTranslate;
     octObject *layerPtr;
     boolean thick = FALSE;

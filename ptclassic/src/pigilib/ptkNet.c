@@ -155,7 +155,7 @@ loop:
 
             /* special case demon functions */
             if (functionNumber == RPC_DEMON_FUNCTION) {
-                octObject changeList;
+                octObject changeList = {OCT_UNDEFINED_OBJECT};
                 long id;
                 void (*ptr)();                /* was char *ptr */
                 void (*func)();

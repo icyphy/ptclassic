@@ -118,7 +118,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     char facetHandle[16]; 
 
     ViInit("find-name");
@@ -179,7 +179,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet, inst;
+    octObject facet = {OCT_UNDEFINED_OBJECT},
+	      inst = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
     char facetHandle[16], instanceHandle[16];
 
@@ -225,7 +226,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet, inst;
+    octObject facet = {OCT_UNDEFINED_OBJECT},
+	      inst = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
     char facetHandle[16], instanceHandle[16];
 
@@ -353,7 +355,7 @@ lsList cmdList;
 long userOptionWord;
 {
     int i;
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
 
     ViInit("open-palette");
     ErrClear();
@@ -382,7 +384,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet, obj;
+    octObject facet = {OCT_UNDEFINED_OBJECT},
+	      obj = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
     char facetHandle[16];
 
@@ -425,7 +428,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     char facetHandle[16];
 
     ViInit("edit-domain");
@@ -471,7 +474,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     char facetHandle[16];
 
     ViInit("edit-target");

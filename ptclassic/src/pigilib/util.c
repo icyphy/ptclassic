@@ -379,7 +379,7 @@ char *
 getDomainS(spot)
 RPCSpot *spot;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     char *domain, *oldDomain;
 
     oldDomain = curDomainName();
@@ -457,7 +457,7 @@ char *
 getDomainInst(instPtr)
 octObject *instPtr;
 {
-    octObject mFacet;
+    octObject mFacet = {OCT_UNDEFINED_OBJECT};
     static char domain[32];
     char srcName[512], *fullName;
     if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr))
