@@ -18,7 +18,7 @@ onintr catch
 # File structure information:
 set dirheader = ~ptolemy/doc/headers
 set printcommand = ditroff
-set printoptions = "-me -tbl -eqn"
+set printoptions = "-me -tbl -eqn -t"
 set contentscmd = ~ptolemy/doc/bin/contents
 set files = ""
 
@@ -35,9 +35,9 @@ while ($#argv)
 	endsw
 end
 
-soelim $dirheader/shared $files > /tmp/pt$$
-xtroff -command "$printcommand $printoptions -Ppsc /tmp/pt$$"
-/bin/rm /tmp/pt$$
+soelim $dirheader/shared $dirheader/domain $files | \
+	$printcommand $printoptions -Ppsc | \
+	xditview -
 exit 0
 
 catch:
