@@ -8,7 +8,7 @@ static char SccsId[]="$Id$";
  *     (Original by George Carvalho)
  *     (Prof. E. S. Kuh)
  *
- * Copyright (C) 1988 Regents of the University of California
+ * Copyright (C) 1988-1994 Regents of the University of California
  * All rights reserved.
  */
 
@@ -26,7 +26,7 @@ static char rcsid[] = "$Header$";
 #include "cursor.bitmap.11"
 #include "iv.h"
 
-#if defined(hpux)
+#if defined(hpux) || defined(SYSV)
 #include <termios.h>
 #endif
 
@@ -51,7 +51,7 @@ char ezQuitChar;                    /* users quit character                 */
 
 int ivTextInit( )
 {
-#if defined(hpux)
+#if defined(hpux) || defined(SYSV)
     struct termios tty;
 
     if ( tcgetattr( fileno(stdin), &tty) < 0 ) {
