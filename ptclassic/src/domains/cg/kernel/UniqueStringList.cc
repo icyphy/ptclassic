@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
-static const char* file_id = "$RCSfile$";
+static const char SccsId [] = "$Id$";
 
 #ifdef __GNUG__
 #pragma implementation
