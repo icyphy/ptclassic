@@ -178,7 +178,8 @@ xv_bin: $(OBJARCH)/xv
 xv_install: $(OBJARCH)/xv $(XV_DEST)/bin.$(PTARCH)
 	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(PTARCH)/xv)
 	chmod a+rx $(PTOLEMY)/bin.$(PTARCH)/xv
-	strip $(PTOLEMY)/bin.$(PTARCH)/xv
+	# HPUX strip will fail if we have already stripped
+	-strip $(PTOLEMY)/bin.$(PTARCH)/xv
 
 $(XV_DEST)/bin.$(PTARCH):
 	if [ ! -d $(XV_DEST)/bin.$(PTARCH) ]; then \
