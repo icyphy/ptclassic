@@ -83,10 +83,26 @@ The template has the following features:
 <MENU>
 <LI> The first line contains SCCS keywords 
 <LI> The head includes a title, and sets the background color 
-<LI> The footer includes the UC Copyright, a date when the file was
-last modified, and an author.  The footer also closes the <CODE>body</CODE>
-and <CODE>html</CODE>
+<LI> The footer includes
+	<MENU>
+
+	<LI> A relative link to <CODE>doc/index.html</CODE>.  This
+	link should not use <CODE>$TYCHO</CODE> so that it can be
+	browsed with a non-tycho html browser.
+
+	<LI> The UC Copyright
+
+	<LI> A date when the file was last modified.  The date
+	is automatically updated when the file is checked in.
+
+	<LI> An author.
+
+	<LI> The footer also closes the <CODE>body</CODE>
+	and <CODE>html</CODE> tags.
+	</MENU>
+
 </MENU>
+
 A documentation directory should have the following elements:
 <MENU>
 <LI> A <CODE>makefile</CODE> that includes all of the <CODE>*.html</CODE>
