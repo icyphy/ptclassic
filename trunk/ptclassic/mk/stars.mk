@@ -460,7 +460,7 @@ ifdef CGC
 		ifdef CGCVISTK
 			CUSTOM_DIRS += $(CGCDIR)/vis/tcltk/stars
 			LIBS += -lcgcvistcltk
-			LIBFILES += $(LIBDIR)libcgctcltk.$(LIBSUFFIX)
+			LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
 		endif
 	endif
 	# Tcl/Tk
