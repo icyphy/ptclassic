@@ -270,6 +270,7 @@ if [file exists [file join $TYCHO edit pn]] {
 
 package require tycho.util.devtools
 package require tycho.util.tydoc
+package require tycho.util.idoc
 
 # Load ptolemy packages if they are present
 if [file exists [file join $TYCHO typt kernel]] {
@@ -284,7 +285,6 @@ if [file exists [file join $TYCHO typt edit]] {
 # The following are for backwards-compatibility only
 # and will disappear when all packages are completed
 uplevel #0 {
-    set ::auto_path [linsert $auto_path 0 [file join $tycholib iwidgets generic ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
