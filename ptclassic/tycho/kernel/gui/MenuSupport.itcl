@@ -87,6 +87,9 @@ class ::tycho::MenuSupport {
     # Clear all entries from a menu (but don't delete the menu)
     method clear {menu}
 
+    # Add a command menu entry to a menu
+    method command {name inMenu args}
+
     # Delete a menu or menu entry
     method delete {name}
 
@@ -123,9 +126,6 @@ class ::tycho::MenuSupport {
 
     ##########################################################################
     ####                         protected variables                      ####
-
-    # Each menu and menu entry has a type
-    protected variable itemtype
 
     # Each menu has an access path
     protected variable menupath
@@ -174,11 +174,7 @@ body ::tycho::MenuSupport::constructor {args} {
 #
 # Any other options understood by the *add* method of the Tk menu widget
 # can be given, except for *-menu* and *-label*. If there is already
-# an entry with the specified name, this method silently replaces the old
-# entry with the new entry. Note that the options apply only to the
-# newly created entry -- if creating a submenu, this means that only
-# the options to the entry, not the menu itself, are set: use the
-# menuconfigure{} method to set the options of the submenu.
+# an entry with the specified name, an error is generated.
 #
 body ::tycho::MenuSupport::add {name inMenu args} {
     # Check if the menu exists
@@ -186,14 +182,9 @@ body ::tycho::MenuSupport::add {name inMenu args} {
 	error "Menu $inMenu does not exist"
     }
 
-    # If the entry already exists, delete it so the new one "replaces" it
+    # If the entry already exists, complain
     if { [::info exists entrypath($name)] } {
-	set before [$entrypath($name) entrycget \
-		[expr [$entrypath($name) index $name] + 1] \
-		-label]
-	$this delete $name
-	eval $this insert [list $name] [list $before] $args
-	return
+	error "Menu $name already exists"
     }
 
     # Read the "type" option
@@ -213,20 +204,15 @@ body ::tycho::MenuSupport::add {name inMenu args} {
 	} {
 	    keep -background -cursor -font
 	}
-	set itemtype($name) "cascade"
-
 	eval $menupath($inMenu) add cascade $args \
 		-label [list $name] \
 		-menu $menupath($name)
     } else {
 	# Create some other type of menu entry
 	set entrypath($name) $menupath($inMenu)
-	set itemtype($name) $type
-
 	eval $menupath($inMenu) add $type $args -label [list $name]
     }
 }
-
 
 #####################################################################
 #### addSeparator
@@ -270,7 +256,6 @@ body ::tycho::MenuSupport::clear {menu} {
 	    default {
 		set name [$menupath($menu) entrycget $i -label]
 		$menupath($menu) delete $i
-		unset itemtype($name)
 		unset entrypath($name)
 	    }
 	}
@@ -278,6 +263,28 @@ body ::tycho::MenuSupport::clear {menu} {
     }
 }
 
+#####################################################################
+#### command
+#
+# Add a "command" menu entry to the end of a menu. This is a version
+# of the add{} method that is streamlined for the most common type
+# of menu entry: command entries.
+#
+body ::tycho::MenuSupport::command {name inMenu args} {
+    # Check if the menu exists
+    if { ! [::info exists menupath($inMenu)] } {
+	error "Menu $inMenu does not exist"
+    }
+
+    # If the entry already exists, complain
+    if { [::info exists entrypath($name)] } {
+	error "Menu $name already exists"
+    }
+
+    # Create the menu entry
+    set entrypath($name) $menupath($inMenu)
+    eval $menupath($inMenu) add command $args -label [list $name]
+}
 
 #####################################################################
 #### delete
@@ -286,7 +293,7 @@ body ::tycho::MenuSupport::clear {menu} {
 #
 body ::tycho::MenuSupport::delete {name} {
     # Check validity
-    if { ! [::info exists itemtype($name)] } {
+    if { ! [::info exists entrypath($name)] } {
 	return
     }
 
@@ -302,10 +309,8 @@ body ::tycho::MenuSupport::delete {name} {
 
     # Remove the entry from the menu
     $entrypath($name) delete $name
-    unset itemtype($name)
     unset entrypath($name)
 }
-
 
 #####################################################################
 #### disable
@@ -322,7 +327,6 @@ body ::tycho::MenuSupport::disable {name} {
     $entrypath($name) entryconfigure $name -state disabled
 }
 
-
 #####################################################################
 #### enable
 # Enable a menu or a menu entry. Do nothing if the menu or entry
@@ -338,7 +342,6 @@ body ::tycho::MenuSupport::enable {name} {
     $entrypath($name) entryconfigure $name -state normal
 }
 
-
 #####################################################################
 #### empty
 # Test if a menu is empty. Flag an error if the menu does not exist.
@@ -350,7 +353,6 @@ body ::tycho::MenuSupport::empty {name} {
     }
     return [string match [$menupath($name) index last] "none"]
 }
-
 
 #####################################################################
 #### entrycget
@@ -414,7 +416,6 @@ body ::tycho::MenuSupport::insert {name before args} {
 	set menupath($name) [menu $entrypath($before).[string tolower \
 		[join $name ""]] \
 		-tearoff 0]
-	set itemtype($name) "cascade"
 
 	eval $entrypath($before) insert [list $before] cascade $args \
 		-label [list $name] \
@@ -422,8 +423,6 @@ body ::tycho::MenuSupport::insert {name before args} {
     } else {
 	# Create some other type of menu entry
 	set entrypath($name) $entrypath($before)
-	set itemtype($name) $type
-
 	eval $entrypath($before) insert [list $before] \
 		$type $args -label [list $name]
     }
