@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 #include <stdlib.h>
-#include "../tytimer/tyTimer.h"
+#include "../tytimer/tytimer.h"
 
 
 /*
