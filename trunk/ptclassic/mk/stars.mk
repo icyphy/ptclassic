@@ -389,9 +389,19 @@ ifdef ACS
 	# kernel and stars
 	CUSTOM_DIRS += $(ACSDIR)/kernel $(ACSDIR)/stars
 	STARS +=  $(LIBDIR)/acsstars.o
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		LIBS += -lacstargets
+		LIBFILES += $(LIBDIR)/libacstargets.$(LIBSUFFIX)
+	else
+		#FIXME - add more targets
+		TARGETS += $(ACST)/CGCUnixSend.o
+	endif
+
 	LIBS += -lacsstars -lacs
 	LIBFILES += $(LIBDIR)/libacsstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libacs.$(LIBSUFFIX)
+	# dependencies
+	CG = 1
 endif
 
 ifdef DDF
