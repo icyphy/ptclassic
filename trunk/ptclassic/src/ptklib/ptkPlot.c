@@ -62,8 +62,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *         call once to free allocated memory.
  *
  * Error handling is as follows:
- * The routines ptkCreatePlot and ptkPlotPoint will return 0 if an error occured,
- * and one otherwise.  The error message is then obtained by calling ptkPlotErrorMsg.
+ * The routines ptkCreatePlot and ptkPlotPoint will return 0 if an error
+ * occurred, and 1 otherwise.  The error message is then obtained by
+ * calling ptkPlotErrorMsg.
  *
  * For each plot, a set of Tcl routines is created:
  *    ptkXYPlotRedrawXXX
@@ -71,14 +72,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *    ptkXYPlotZoomOriginalXXX
  *    ptkXYPlotResizeXXX x1 y1 x2 y2
  *    ptkXYPlotZoomXXX factor
- * where "XXX" is the name of the plot.  Error handling for these routines is through
- * the normal Tcl management.  The arguments to the resize command are the X and Y
- * coordinates (in pixels) of the lower left and upper right of the desired plot area.
- * The argument to the Zoom command is the zoom-out factor.  A factor smaller than one
- * will zoom in.
+ * where "XXX" is the name of the plot.  Error handling for these routines
+ * is through the normal Tcl management.  The arguments to the resize command
+ * are the X and Y coordinates (in pixels) of the lower left and upper right
+ * of the desired plot area.  The argument to the Zoom command is the
+ * zoom-out factor.  A factor smaller than one will zoom in.
  */
 
-/* Global scract buffer used for constructing Tcl commands */
+/* Global scratch buffer used for constructing Tcl commands */
 static char strTmp[SCRATCH_STRING_SIZE];
 
 static char *errmsg = "";
@@ -88,7 +89,7 @@ static char *errmsg = "";
  */
 /* Note that non-ansi C does not have const defined, so we use a macro
  * here, included from somewhere.  Otherwise this file won't compile under
- * sunOS4.1.3 cc
+ * sunos4.1.3 cc
  */
 CONST char *ptkPlotErrorMsg() {
   return errmsg;
@@ -149,7 +150,7 @@ static int drawAxes(interp,plotPtr)
     int intTmp;
     int canvWidth, canvHeight;
     char *name;
-    int xExp, yExp;          /* the exponent factor of the x, y-axes scales, resp. */
+    int xExp, yExp;          /* exponent factor of x and y-axes scales, resp. */
     /* Space for a pair of integers in ASCII form */
     static char xExpStr[INT_STRING_SIZE];
     static char yExpStr[INT_STRING_SIZE];
@@ -159,7 +160,7 @@ static int drawAxes(interp,plotPtr)
     double xStep, yStep, xStart, yStart = 0.0, doubleTmp, doubleNum;
     double xCoord1, xCoord2, yCoord1, yCoord2, tickLength;
     double xLabelYCoord, yLabelXCoord;
-    static Tcl_DString ds;   /* dynamic string used to build Tcl commands */
+    Tcl_DString ds;          /* dynamic string used to build Tcl commands */
 
     name = plotPtr->name;
     win = plotPtr->win;
@@ -174,7 +175,8 @@ static int drawAxes(interp,plotPtr)
     canvHeight = Tk_Height(canvWin);
 
     /* Get the font size information for the standard font */
-    if ((fontPtr = Tk_GetFontStruct(interp,*win,Tk_GetUid(STD_FONT))) == NULL) {
+    fontPtr = Tk_GetFontStruct(interp,*win,Tk_GetUid(STD_FONT));
+    if (fontPtr == NULL) {
         errmsg = "Cannot retrieve font";
 	return 0;
     }
@@ -184,7 +186,8 @@ static int drawAxes(interp,plotPtr)
     Tk_FreeFontStruct(fontPtr);
 
     /* Get the font size information for the title font */
-    if ((fontPtr = Tk_GetFontStruct(interp,*win,Tk_GetUid(TITLE_FONT))) == NULL) {
+    fontPtr = Tk_GetFontStruct(interp,*win,Tk_GetUid(TITLE_FONT));
+    if (fontPtr == NULL) {
         errmsg = "Cannot retrieve font";
 	return 0;
     }
@@ -354,9 +357,11 @@ static int drawAxes(interp,plotPtr)
     /* Finally, evaluate the tcl script we have just built */
     if (Tcl_Eval(interp,Tcl_DStringValue(&ds)) != TCL_OK) {
 	errmsg = "Failed to build plot labels";
+	Tcl_DStringFree(&ds);
 	return 0;
     }
 
+    Tcl_DStringFree(&ds);
     return 1;
 }
 
@@ -961,7 +966,7 @@ int ptkPlotPoint(interp,plotPtr,setnum,xval,yval)
     }
     /* It's not clear why it speeds things up to plot in batches, since */
     /* exactly the same number of calls to exactly the same function are made. */
-    /* Maybe it has to do with caching? */
+    /* Maybe it has to do with cacheing? */
     for (point = lower; point <= upper; point++) {
       if (!displayPoint(interp,plotPtr,setPtr,point)) return 0;
     }
