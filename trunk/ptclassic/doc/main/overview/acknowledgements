@@ -14,7 +14,8 @@ authored both the interpreter and the ptlang preprocessor.
 Other key contributors to the kernel include Soonhoi Ha
 and Ichiro Kuroda.
 Soonhoi Ha authored both the DDF and DE domains, including
-many of the basic stars, while Ichiro Kuroda contributed
+many of the basic stars and the basic domain interface,
+while Ichiro Kuroda contributed
 to the development of the state handling mechanism.
 The graphical interface
 was written by Edwin Goei, and has been enhanced by several
@@ -33,13 +34,10 @@ Ptolemy is very much an ongoing project, with current efforts
 expected to be included in future releases.
 Participants in those efforts will be acknowledged when their
 work is included in a release.
-.SH SUPPORT
+.H1 SUPPORT
 The Ptolemy project started in late 1989.
 A variety of sponsors have directly or indirectly supported
 the effort.  Most notably, these include:
-.sp 0.5
-.na
-.in +0.5i
 DARPA,
 the Semiconductor Research Corporation (SRC),
 the National Science Foundation,
