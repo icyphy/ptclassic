@@ -46,6 +46,7 @@ PL_SRCS= \
  C50Const.pl \
  C50ConstCx.pl \
  C50ConstInt.pl \
+ C50Sin.pl \
  C50Cos.pl \
  C50CxToFix.pl \
  C50CxToInt.pl\
@@ -102,7 +103,6 @@ PL_SRCS= \
  C50Sgn.pl \
  C50SgnInt.pl \
  C50Shifter.pl \
- C50Sin.pl \
  C50Skew.pl \
  C50Sqr.pl \
  C50Sqrt.pl \
