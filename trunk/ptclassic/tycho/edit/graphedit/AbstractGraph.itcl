@@ -42,7 +42,7 @@
 #
 # AbstractGraph is a subclass of Model: vertices and edges are items
 # with no value and no default attributes (these can be added with
-# the attrconfigure{} method).
+# <b>type configure</b>).
 #
 # Here are some examples illustrating the methods in this class.
 # Because an AbstractGraph can't actually do anything useful, we'll
@@ -53,8 +53,8 @@
 # <pre><tcl quiet>
 #     catch {delete object $graph}
 #     set graph [::tycho::Digraph [::tycho::autoName graph]]
-#     $graph attrconfigure vertex label
-#     $graph attrconfigure edge weight -default 0
+#     $graph type configure vertex -label {}
+#     $graph type configure edge -weight 0
 # </tcl></pre>
 #
 # Now load the graph with some data:
@@ -229,7 +229,7 @@ body ::tycho::AbstractGraph::constructor {args} {
     eval configure $args
 
     # Define the "vertex" entity
-    definetype vertex \
+    type define vertex \
 	    -leafonly 0
 }
 

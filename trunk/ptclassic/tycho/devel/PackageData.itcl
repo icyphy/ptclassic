@@ -289,7 +289,7 @@ body ::tycho::PackageData::constructor {args} {
     eval configure $args
 
     # Define the package type
-    definetype package \
+    type define package \
 	    -strict 1 \
 	    -leafonly 1 \
 	    -description "" \
@@ -300,7 +300,7 @@ body ::tycho::PackageData::constructor {args} {
 	    -version 0.0
 
     # Define the dependency type
-    definetype dependency \
+    type define dependency \
 	    -strict 1 \
 	    -leafonly 1 \
 	    -enabled 1 \
