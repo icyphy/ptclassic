@@ -98,7 +98,9 @@ void OutDEPort :: sendData ()
 	// If the port lies on the Wormhole boundary, skip. Otherwise,
 	// generate an event into the event queue.
 	if (farSidePort->isItInput() == TRUE) {
-	    ((DEStar *)parent())->eventQ->levelput(farSidePort, timeStamp);
+		Star& s = parent()->asStar();
+		DEStar* dp = (DEStar*) &s;
+		dp->eventQ->levelput(farSidePort, timeStamp);
 	}
 	
 	dataNew = FALSE;
