@@ -166,7 +166,7 @@ clean_ftp_txt:
 #FTPSITE=/vol/ptolemy/pt0/ftp/pub/ptolemy/ptolemy$(VERSION)
 FTPSITE=/vol/ptolemy/pt0/ftp/pub/ptolemy/ptolemy$(VERSION)
 diff_OBTAINING_PTOLEMY: $(OBTAINING_PTOLEMY) 
-	diff $(FTPSITE)/$(OBTAINING_PTOLEMY) $(OBTAINING_PTOLEMY) 
+	-diff $(FTPSITE)/$(OBTAINING_PTOLEMY) $(OBTAINING_PTOLEMY) 
 diff_INSTALL: $(INSTALL) 
 	-diff $(FTPSITE)/$(INSTALL) $(INSTALL) 
 diff_TROUBLE_SHOOTING: $(TROUBLE_SHOOTING)
