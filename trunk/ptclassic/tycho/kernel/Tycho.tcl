@@ -277,12 +277,12 @@ package require tycho.util.tydoc
 package require tycho.util.idoc
 
 # Load ptolemy packages if they are present
-#if [file exists [file join $TYCHO typt kernel]] {
-#    package require tycho.typt.kernel
-#}
-#if [file exists [file join $TYCHO typt edit]] {
-#    package require tycho.typt.edit
-#}
+if [file exists [file join $TYCHO typt kernel]] {
+    package require tycho.typt.kernel
+}
+if [file exists [file join $TYCHO typt edit]] {
+    package require tycho.typt.edit
+}
 
 ::tycho::_announce "Loaded packages"
 
