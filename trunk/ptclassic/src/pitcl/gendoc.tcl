@@ -43,7 +43,8 @@ proc convertline {line} {
         if [string match {Usage:*} $line] {
             regsub -all {<} $line {<i>} line
             regsub -all {([^<][^i])>} $line {\1</i>} line
-            regsub {Usage:} $line {<b>Usage:</b>} line
+            regsub {Usage:} $line {<b>Usage:</b> <code>} line
+	    set line "$line</code>"
         }
         regsub -all {\*([^* ]+)\*} $line {<code>\1</code>} line
         regsub -all {(^| )_([^_ ]+)_( |$)} $line {<i>\2</i>} line
