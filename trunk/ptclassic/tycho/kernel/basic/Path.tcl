@@ -361,7 +361,7 @@ proc ::tycho::parseHeaderString {string var} {
     }
 
     # Parse name-value
-    while { [regexp {^([^:;]+) *: *([^:;]+)(.*)$} \
+    while { [regexp "^(\[^:; \t\]+)\[ \t\]*:\[ \t\]*(\[^:; \t\]+)(.*)\$" \
             $string _ name value string] } {
         set v($name) $value
         set string [string trimleft $string " \t;"]
