@@ -34,7 +34,8 @@ that file to be opened. (If the file is not an HTML file, it will be
 opened in the appropriate editor -- for example, a Tcl file will be
 opened in a new Tcl editor window.) The entered name can also start
 with a protocol name. For example, entering <code><a
-href="http://ptolemy.eecs.berkeley.edu/index.html">http://ptolemy.eecs.berkeley.edu/index.html</a></code>
+href="http://ptolemy.eecs.berkeley.edu/index.html">
+http://ptolemy.eecs.berkeley.edu/index.html</a></code>
 and pressing Return will open the Ptolemy home page. The ftp protocol
 is also supported -- entering <code><a
 href="ftp://ptolemy.eecs.berkeley.edu/">ftp://ptolemy.eecs.berkeley.edu/</a></code> will open a directory
@@ -45,6 +46,23 @@ protocol. Either <code><a
 href="file:/users/ptolemy">file:/users/ptolemy</a></code> or <code><a
 href="file:///users/ptolemy">file:///users/ptolemy</a></code> will open
 the indicated file.
+
+<p>The viewer supports the common hyperlink conventions: clicking
+on a hyperlink with button 1 opens the linked file in the same viewer, and
+clicking on a hyperlink with button 2 opens the linked file in
+a new viewer window.
+
+<p>There are some special key-bindings in the viewer:
+
+<dl COMPACT>
+
+<dt><CODE>Alt-Left, Meta-Right, Ctrl-Left</CODE><dd>Go
+back to the previously-open file
+
+<dt><CODE>Alt-Right, Meta-Right, Ctrl-Right</CODE><dd>Go forward to the
+next file (that was previously opened)
+
+</dl>
 
 <p>
 The <CODE>Special</CODE> menu includes an <CODE>Appletviewer</CODE> choice that
