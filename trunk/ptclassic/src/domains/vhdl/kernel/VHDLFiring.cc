@@ -55,6 +55,7 @@ VHDLFiring :: VHDLFiring() {
   noSensitivities = 0;
   noOutclocking = 0;
   groupNum = 999;
+  latency = 1;
   VHDLObj::initialize();
 }
 
