@@ -341,6 +341,8 @@ PortHole& GalMultiPort :: newPort() {
     PortHole& newAliasPort = alias()->newPort();
     LOG_NEW; return installPort(*new GalPort(newAliasPort));
   } else {
+    // FIXME: Memory leak
+    // Must get a porthole somehow so we don't dump core.
     Error::abortRun(*this,
 		    "Attempt to create a new GalPort when there is no alias");
     LOG_NEW; return installPort(*new GalPort());
@@ -713,8 +715,8 @@ Particle& PortHole ::  operator % (int delay)
 			     : myBuffer->here();
 	if(p == NULL || *p == NULL) {
 		Error::abortRun(*this,CircularBuffer::errMsg());
-		// kludge -- gotta get a particle somehow so we don't
-		// dump core.
+		// FIXME: memory leak
+		// Must get a particle somehow so we don't dump core.
 		return *myPlasma->get();
 	}
         return **p;
