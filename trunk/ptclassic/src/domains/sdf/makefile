@@ -12,7 +12,7 @@
 
 include ../../../topdomain.mk
 
-DIRS = kernel stars expgraph loopScheduler dsp image targets
+DIRS = kernel stars loopScheduler dsp image targets
 
 ME = sdf
 
