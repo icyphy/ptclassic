@@ -62,6 +62,10 @@ public:
 class PriorityQueue
 {
 	int numberNodes;
+	LevelLink* freeLinkHead;
+	int  	   numFreeLinks;		// mainly for debugging.
+
+protected:
 
 	// Store head of the queue, lastNode->next is head of queue
 	LevelLink* lastNode;
@@ -71,11 +75,9 @@ class PriorityQueue
 
 	// To avoid memory (de)allocation overhead at each push/pop, we
 	// store the freeLinks once created.
-	LevelLink* freeLinkHead;
 	LevelLink* getFreeLink();
 	void 	   putFreeLink(LevelLink*);
 	void 	   clearFreeList();
-	int  	   numFreeLinks;		// mainly for debugging.
 
 public:
 	// Add element to the queue sorted by its level...
