@@ -572,6 +572,12 @@ int l_width;			/* Brush size for outlines      */
     atrInternal *new_internal;
     int selreturn;
 
+				/* If we are on black and white, then
+				 * xor will not work when we draw lines
+				 */
+    if (xv_depth() ==  1)
+      return VEM_OK;
+
     new_internal = VEMALLOC(atrInternal);
     new_internal->atrFlags = ATR_SELECT;
     switch (selreturn = sel_resolve(col, &(new_internal->pix_or_offset))) {
