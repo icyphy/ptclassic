@@ -8,13 +8,26 @@ $Id$
  Programmer:  J. Buck
  Date of creation: 7/30/90
 
- This file implements support for incremental linking.  It is quite
- g++-specific.  It takes an .o file and loads it; the code it generates
- to call constructors will only work if the .o file is a definition of
- a Ptolemy star (using ptlang, preferably).
+ This file implements support for incremental linking.  It works both
+ for g++ and for Sun C++ (a port of AT&T cfront v2.1).  It should port
+ easily to other Unix ports of cfront; all the implementation-specific
+ stuff is in Linker.sysdep.h.
 
- The linked-in code must not call any functions that are not already
+ The code can deal with two object-file formats: BSD-ish (Sun-3, Sparc, Vax)
+ and COFF (mips).
+
+ It takes an .o file, does an incremental link with respect to the
+ running binary, links it in and calls the constructors for any
+ global or file-static objects in the file.
+
+ There are some restrictions:
+
+ 1. The linked-in code must not call any functions that are not already
  part of the executable program.
+
+ 2. The linked-in code must have at least one global or static object
+ with a constructor.  Since the only access to the code that is loaded
+ consists of calling these constructors, this is vital.
 
 **************************************************************************/
 
@@ -191,13 +204,6 @@ int Linker::linkObj (const char* objName) {
 	return TRUE;
 }
 
-// This function contains major hackery and is very G++-specific.
-// It is known to work on Sun-3, Sun-4, and Vax with g++ 1.37.1.
-// It also works on DecStations (with the Mips chip) using the OSF
-// (based on g++ 1.37.2) compiler.
-
-// The nm command is used to search for a symbol of the right form.
-
 // find the first occurrence of subString in line.
 static char* match(char* line, char* subString) {
 	if (*subString == 0) return line;
@@ -213,6 +219,15 @@ static char* match(char* line, char* subString) {
 }
 
 const int LINELEN = 128;
+
+// This function contains a bit of hackery.  It scans an object file
+// looking for a global symbol of a particular form, and creates a
+// small assembly language model that refers to that name.  This
+// technique of providing a hook to call the constructor works for
+// g++ and for Sun's port of cfront.  For compilers that use a
+// completely different method, you'll need to reimplement this.
+
+// The nm command is used to search for a symbol of the right form.
 
 const char*
 Linker::genHeader (const char* objName) {
