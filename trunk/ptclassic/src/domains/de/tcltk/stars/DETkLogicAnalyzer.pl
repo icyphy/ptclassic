@@ -35,7 +35,7 @@ the time represented by the width of the plot window.
 <p>
 The <i>position</i> parameter is a string which specifies the size and
 location of the window, in standard geometry flag format.  The format
-is <i>width\Rx<i>height</i>[+-]<i>x-position</i>[+-]<i>y-position</i>.
+is <i>width</i>x<i>height</i>[+-]<i>x-position</i>[+-]<i>y-position</i>.
 The default leaves out the size specification and simply indicates the
 initial position should be +0+0.
 <p>
