@@ -349,6 +349,8 @@ body ::tycho::TclShell::destructor {} {
     if $itk_option(-stdout) {
         configure -stdout 0
     }
+    # Unsubscribe from all preferences
+    preference unsubscribe console $this
     set menulabel "[info class] $this"
     windowMenuRemoveAll $menulabel
 }

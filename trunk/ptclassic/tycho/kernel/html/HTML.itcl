@@ -365,6 +365,9 @@ body ::tycho::HTML::constructor {args} {
 ###################################################################
 #
 body ::tycho::HTML::destructor {} {
+    # Unsubscribe from all preferences
+    preference unsubscribe htmlview $this
+
     stopRendering
     if [sourcewinIsMine] {
 	# Schedule this for after destruction is complete because the
