@@ -450,11 +450,27 @@ unset tychoWelcomeWindow tychoConsoleWindow \
 
 # tycho -tty uses this to provide a command loop
 if ![info exists tk_version] {
+    set _tychoTtyCommand ""
     while 1 {
 	puts -nonewline "ty% "
 	flush stdout
-	if [catch {puts [eval [gets stdin]]} msg] {
-	    puts stderr $msg
+	set _tychoTtyCommand [gets stdin]
+	while { ![info complete $_tychoTtyCommand] \
+		|| [regexp {\\$} $_tychoTtyCommand] } {
+	    if { [regexp {\\$} $_tychoTtyCommand] } {
+		set _tychoTtyCommand \
+			[string range $_tychoTtyCommand 0 [expr \
+			[string length $_tychoTtyCommand] -2]]
+	    } else {
+		append _tychoTtyCommand \n
+	    }
+	    puts -nonewline "> "
+	    flush stdout
+	    append _tychoTtyCommand [gets stdin]
+	}
+	if [catch {puts [eval $_tychoTtyCommand]} msg] {
+	    # puts stderr $msg
+	    puts stderr $errorInfo
 	}
     }
 }
