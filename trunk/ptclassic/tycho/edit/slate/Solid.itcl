@@ -59,33 +59,22 @@ class ::tycho::Solid {
     ###################################################################
     ## Private methods
 
-    method _answer {option} {}
-
     private method _borderwidth {args} {}
     private method _fill        {args} {}
     private method _relief      {args} {}
 
     private method adjust {name shade coords} {}
-}
 
 
+    ###################################################################
+    ####                       answer scripts                      ####
 
-## _answer
-#
-# Supply an answer to some query.
-#
-body ::tycho::Solid::_answer {option} {
-    switch -exact $option {
-	"shape" {
-	    return "polygon"
-	}
-	"ghost" {
+    # Create the ghost
+    set classanswers(ghost) {
+	1 {
 	    eval $canvas create polygon \
 		    [$this coords] \
 		    {-outline grey -fill "" -smooth $smooth}
-	}
-	default {
-	    return -1
 	}
     }
 }
