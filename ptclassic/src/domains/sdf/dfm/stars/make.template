@@ -49,7 +49,7 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(SDFTCLTKDIR) -I$(TYCHODIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libsdfdfmstars.$(LIBSUFFIX)
+PTLIB=libsdfdfmstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
