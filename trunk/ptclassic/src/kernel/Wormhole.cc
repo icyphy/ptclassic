@@ -290,12 +290,15 @@ Galaxy* Wormhole :: explode() {
 		PortHole* inP = eveP->ghostAsPort()->far();
 		if (tempP) tempP->disconnect(1);
 		if (inP) inP->disconnect(1);
+x
+		// relink any aliases pointing at me to point to inner galaxy.
+		if (inP) p->moveMyAliasesTo(*inP);
 
 		// remove parent pointers, so portholes won't try to
 		// remove themselves from their parent.
 		eveP->ghostAsPort()->setPort("",0);
 		eveP->asPort()->setPort("",0);
-		// now remove the event horizon pair.
+		// now delete the event horizon pair.
 		LOG_DEL; delete eveP;
 		ports.remove();
 		
@@ -304,9 +307,6 @@ Galaxy* Wormhole :: explode() {
 			inP->connect(*tempP, numDelays, delayValues);
 		else if (tempP)
 			tempP->connect(*inP, numDelays, delayValues);
-
-		// relink any aliases pointing at me to point to inner galaxy.
-		p->moveMyAliasesTo(*inP);
 	}
 
 	// Set the inner galaxy name to the wormhole selfStar name.
