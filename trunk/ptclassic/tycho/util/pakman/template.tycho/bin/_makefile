@@ -39,5 +39,7 @@ all: sources $(MISC_SRCS)
 
 install: all tybin_install
 
+.PHONY: all install tybin_install
+
 include $(ROOT)/mk/tycommon.mk
 
