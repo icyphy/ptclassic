@@ -50,6 +50,7 @@ typedef int boolean;
 extern "C" {
 extern boolean KcInitLog(const char* file);
 extern void KcLog(const char* str);
+extern void KcFlushLog();
 extern void testParse(const char* name);
 extern const char* callParseClass (char* name);
 extern const char * KcDomainOf(char* name);
@@ -63,7 +64,6 @@ extern const char*curDomainName();
 extern boolean KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget);
 extern boolean KcEndDefgalaxy(const char* outerDomain);
 extern void KcSetDesc(const char* desc);
-extern boolean KcRun(int n);
 extern boolean KcDisplaySchedule();
 extern void KcEditSeed(int n);
 extern boolean KcIsKnown(char *className);
