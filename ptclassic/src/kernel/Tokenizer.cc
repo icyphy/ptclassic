@@ -63,11 +63,7 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 // istream constructor calls the second argument "char" even though it
 // is not changed.  A cast to get around this.
 	char* p = (char*) buffer;
-#ifdef IOSTREAMS
 	LOG_NEW; strm = new istrstream(p, strlen(p));
-#else
-	LOG_NEW; strm = new istream(strlen(p), p);
-#endif
 	myStrm = 1;
 	init ();
 }
@@ -140,14 +136,16 @@ Tokenizer::pop() {
 	depth--;
 }
 
-// Open a new file.
-// We use stdio to open the file to avoid error messages.  Return 1
-// for success, 0 for failure.
+// Open a new file.  Return 1 for success, 0 for failure.
+
 int
 Tokenizer::fromFile(const char *filename) {
-	int fd = open(expandPathName(filename), O_RDONLY);
-	if (fd < 0) return 0;
-	LOG_NEW; push (new ifstream(fd),filename);
+	LOG_NEW; ifstream* s = new ifstream(expandPathName(filename));
+	if (!*s) {
+		LOG_DEL; delete s;
+		return 0;
+	}
+	push (s, filename);
 	return 1;
 }
 
