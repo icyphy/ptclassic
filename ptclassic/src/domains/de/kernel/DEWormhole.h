@@ -4,7 +4,7 @@
 #pragma interface
 #endif
 
-
+#include "DETarget.h"
 #include "Wormhole.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
@@ -51,7 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DEWormhole : public Wormhole, public DEStar {
 public:
-	void begin() { Wormhole::begin(); }
+	void begin();
 	void wrapup();
 
 	// prepare for a new phase of firing
