@@ -355,8 +355,8 @@ TermList *termsPtr;
 
     termsPtr->in_n = 0;
     termsPtr->out_n = 0;
-    inPtr = &termsPtr->in[0];
-    outPtr = &termsPtr->out[0];
+    inPtr = termsPtr->in;
+    outPtr = termsPtr->out;
     (void) octInitGenContents(galFacetPtr, OCT_TERM_MASK, &genTerm);
     while (octGenerate(&genTerm, &fTerm) == OCT_OK) {
 	ERR_IF1(!StrDup(&name, fTerm.contents.term.name));
@@ -380,6 +380,7 @@ TermList *termsPtr;
 	    termsPtr->out_n++;
 	}
     }
+    octFreeGenerator(&genTerm);
     return(TRUE);
 }
 
