@@ -116,13 +116,38 @@ class ::tycho::ColorBrowser {
 body ::tycho::ColorBrowser::constructor {args} {
     # Frame for displaying colors
     itk_component add color {
-	frame $itk_component(hull).color -height 1c -relief raised \
-                -borderwidth 5
+	frame $itk_component(hull).color \
+                -borderwidth 1 -relief sunken
     } {
 	keep -cursor
     }
     pack $itk_component(color) -side top -anchor nw\
-	    -expand yes -fill x -after $itk_component(querysite)
+	    -expand yes -fill x -after $itk_component(querysite) \
+            -padx 8 -pady 8
+
+    # The text samples
+    itk_component add blacktext {
+        label $itk_component(color).blacktext \
+                -text "Black text" \
+                -foreground black \
+                -font [::tycho::font Times 36 Bold] \
+                -anchor e
+    } {
+        keep -cursor
+    }
+    itk_component add whitetext {
+        label $itk_component(color).whitetext \
+                -text "White text" \
+                -foreground white \
+                -font [::tycho::font Times 36 Bold] \
+                -anchor w
+    } {
+        keep -cursor
+    }
+    pack $itk_component(blacktext) \
+            -side top -expand yes -fill x -padx 12
+    pack $itk_component(whitetext) \
+            -side top -expand yes -fill x -padx 12
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
@@ -175,6 +200,9 @@ body ::tycho::ColorBrowser::updateListbox {} {
 body ::tycho::ColorBrowser::setEntry {string} {
     chain $string
     if {$string != {}} {
-        $itk_component(color) configure -background [::tycho::color $string]
+        set color [::tycho::color $string]
+        $itk_component(color) configure -background $color
+        $itk_component(blacktext) configure -background $color
+        $itk_component(whitetext) configure -background $color
     }
 }
