@@ -135,11 +135,13 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	             taps.resize(tapsNum+interpolation-modtemp);
 		     tapsNum=taps.size();
 	      }
-              StringList permuted ="";
+	      // FIXME: this should NOT be done this way (converted to
+	      // ASCII and back)!!!
+              StringList permuted;
               for (int i=interpolation-1; i> -1; i--) {
                     int j=i;
                     while(j<tapsNum) {
-		            permuted +=taps[j];
+		            permuted += double(taps[j]);
 			    permuted +=" ";
                             j +=interpolation;
 		    }
