@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee and J. T. Buck
+ Programmer: Edward A. Lee and J. T. Buck
 
  This is the baseclass for stars that generate VHDLB language code
 
@@ -40,7 +40,9 @@ protected:
 	// same method in CGStar.
 
         virtual StringList expandRef(const char* name);
+/*
         virtual StringList expandRef(const char* name, const char* offset);
+*/
 
 	// If "name" is a state, and is not already on the list
 	// referencedStates, add it.

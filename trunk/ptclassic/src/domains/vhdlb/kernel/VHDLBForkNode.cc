@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee
+ Programmer: Edward A. Lee
 
  This class is an auto-forking version of VHDLBGeodesic.  It is to
  VHDLBGeodesic as AutoForkNode is to Geodesic.  A template could be

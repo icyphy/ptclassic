@@ -5,7 +5,7 @@ defstar {
 Output a constant signal with value level (default 0.0).
 	}
         version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.

@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee
+ Programmer: Edward A. Lee
 
  Basic target for VHDLB code generation.
 

@@ -7,7 +7,7 @@ Latch out a new output byte every eight clock cycles.
 Shift the bits in (starting with the lowest) one per clock cycle.
 	}
         version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.

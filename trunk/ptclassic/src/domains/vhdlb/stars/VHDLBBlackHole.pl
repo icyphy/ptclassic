@@ -5,7 +5,7 @@ defstar {
 Discards all inputs
 	}
         version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.

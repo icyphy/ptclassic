@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee
+ Programmer: Edward A. Lee
 
  geodesics for VHDLB stars.
 
