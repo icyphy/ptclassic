@@ -222,6 +222,32 @@ Tokenizer::skipwhite () {
 	return;
 }
 
+// clearwhite -- Since the function "skipwhite" does not adequately
+// skip over blanks, etc. in the top level file, this new function
+// will.  Note that I could not change "skipwhite" as it is used by
+// the interpreter.cc code.  - Alan Kamas, 6/17/94
+void
+Tokenizer::clearwhite () {
+top:	
+        while (get()) {
+                if (!strchr (whitespace, c)) break;
+        }
+// Quit if eof
+        if (strm->eof()) {
+                return;
+        }
+// if c is the comment character, dump the line and start over
+        if (c == comment_char) {
+                do { get(); } while (c != '\n');
+                goto top;
+        }
+// put back last character
+	ungot = c;
+	return;
+}
+
+
+
 // EOF check
 int
 Tokenizer::eof () const {
@@ -234,22 +260,16 @@ Tokenizer&
 Tokenizer::operator >> (char *s) {
 // note: we always read into c, so it will save the last character read
 // skip whitespace, if any
-top:
-	while (get()) {
-		if (!strchr (whitespace, c)) break;
-	}
-// Return null token on eof
+	clearwhite();
+        // Return null token on eof
 	if (strm->eof()) {
 		*s = 0;
 		return *this;
 	}
-// if c is the comment character, dump the line and start over
-	if (c == comment_char) {
-		do { get(); } while (c != '\n');
-		goto top;
-// if c is the quote character, grab text until closequote
-	}
-	else if (c == quote_char) {
+// check the first character after the whitespace
+	get();
+// special case: first character is special.
+	if (c == quote_char) {
 		while (get()) {
 			if (c == escape_char) {
 				get();

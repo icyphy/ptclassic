@@ -39,6 +39,7 @@ This type of State is an array of strings.
 
 #include <std.h>
 #include "StringArrayState.h"
+#include "State.h"
 #include "Tokenizer.h"
 #include "KnownState.h"
 
@@ -113,19 +114,35 @@ void StringArrayState  :: initialize() {
 	if (inival == 0 || *inival == 0) return;
 	char* buf[MAXLEN];
 	char tokbuf[MAXSTRINGLEN];
-	const char* specialChars = "{[]}";
+	const char* specialChars = "<{[]}";
 	Tokenizer lexer(inival,specialChars);
 
 	int i = 0, err = 0;
 	int numRepeats;
 	char* saveValue = 0;
 	ParseToken t;
-	lexer.skipwhite();
+	lexer.clearwhite();
 	while(!lexer.eof() && i < MAXLEN && err == 0) {
 		lexer >> tokbuf;
 		char c = tokbuf[0];
 		if (c != 0 && tokbuf[1]) c = 0;
 		switch (c) {
+		case '<':
+			 char filename[MAXLEN];
+// temporarily disable special characters, so '/' (for instance)
+// does not screw us up.
+                	const char* tc = lexer.setSpecial ("");
+                	lexer >> filename;
+// put special characters back.
+                	lexer.setSpecial (tc);
+                	if (!lexer.fromFile(filename)) {
+                        	StringList msg;
+                        	msg << filename << ": " << why();
+                        	parseError ("can't open file ", msg);
+				err = 1;
+				break;
+                	}
+			break;
 		case '[':
 			t = evalIntExpression(lexer);
 			if (t.tok != T_Int) {
@@ -190,7 +207,7 @@ void StringArrayState  :: initialize() {
 			buf[i++] = savestring(tokbuf);
 		}
 		saveValue = buf[i-1];
-		lexer.skipwhite();
+		lexer.clearwhite();
 	}
 	if (!err) {
 		nElements  = i;
