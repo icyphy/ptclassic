@@ -77,14 +77,17 @@ for a complete explanation of the options.
 		default {"STDIO"}
 		desc {Resources required by star.}
 	}
+	defstate {
+		name {count}
+		type {int}
+		default { 0 }
+		desc {Samplecounter}
+		attributes {A_NONSETTABLE|A_NONCONSTANT}
+	}
 	ccinclude { "Target.h" }
 
 	setup {
 		index = xInit;
-		count = 0;
-	}
-	protected {
-		int count;
 	}
 	initCode {
                 addDeclaration("    FILE* $starSymbol(fp);");
@@ -103,12 +106,66 @@ codeblock (err) {
     }
 }
 		
+	// escape any double quotes in a string that is to be inserted into
+	// a constant C string in the generated code;
+	// the returned value resides in a static buffer and is whiped out
+	// on each invocation
+	method {
+		// I'd like to declare this as a static function, but there
+		// seems to be no way to achieve this with ptlang.
+		name { sanitizeString }
+		type { "const char*" }
+		arglist { "(StringList s)" }
+		access { protected }
+		code {
+			// quick implementation of a string buffer
+			static class Buffer {
+			   public:
+				Buffer()  { buf = NULL; vsize = psize = 0; }
+			// omitting the destructor since GCC 2.5.8 reports an internal
+			// compiler error
+			//	~Buffer() { if (buf)  free(buf); }
+
+				void initialize() {
+				    if (buf)  free(buf), buf = NULL;
+				    vsize = psize = 0;
+				}
+
+				void append(char c) {
+				    if (vsize >= psize)
+					    buf = (char*) (buf ? realloc(buf, psize += 1024)
+							       : malloc(psize += 1024));
+				    buf[vsize++] = c;
+				}
+
+				operator const char* ()
+				{
+				    if (vsize == 0 || buf[vsize-1])
+					append('\0');
+				    return buf;
+				}
+			   private:
+				// the string buffer
+				char* buf;
+				// virtual/physical buffer size
+				int vsize, psize;
+			} buffer;
+
+			buffer.initialize();
+				
+			for (const char* sp=s; *sp; sp++) {
+			    if (*sp == '\"')
+				    buffer.append('\\');
+			    buffer.append(*sp);
+			}
+			return (const char*) buffer;
+		}
+	}
+
 	go {
-		count++;
-		if (count <= int(ignore)) return;
-		addCode(
-"\tfprintf($starSymbol(fp),\"%g %g\\n\",$ref(index),$ref(input));\n");
-		addCode("\t$ref(index) += $val(xUnits);\n");
+@	if (++$ref(count) >= $val(ignore)) 
+@		fprintf($starSymbol(fp),"%g %g\n",$ref(index),$ref(input));
+@	$ref(index) += $val(xUnits);
 	}
 
 codeblock(closeFile) {
@@ -162,7 +219,7 @@ codeblock(closeFile) {
 
 		cmd << ") &";
 		StringList out = "    system(\"";
-		out << cmd << "\");\n";
+		out << sanitizeString(cmd) << "\");\n";
 		addCode(out);
 	}
 	exectime {
