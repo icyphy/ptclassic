@@ -3,8 +3,6 @@
 
 #include "NamedObj.h"
 #include "DataStruct.h"
-#include "Particle.h"
-#include "type.h"
 #include "Connect.h"
 
 #define grabData beforeGo
@@ -22,8 +20,8 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  Soonhoi Ha
- Date of creation: 5/31/89
- Date of revision: 6/15/89
+ Date of creation: 5/31/90
+ Date of revision: 6/15/90
  Revisions:
 	EventHorizon is defined.
 	EventHorizon is PortHole associated with Wormholes.

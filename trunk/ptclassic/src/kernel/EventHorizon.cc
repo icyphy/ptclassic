@@ -3,6 +3,7 @@
 #include "StringList.h"
 #include "Output.h"
 #include "Wormhole.h"
+#include "Particle.h"
  
 /**************************************************************************
 Version identification:
