@@ -76,7 +76,7 @@ ifdef FULL
 	CG56 =		1
 	CGCFULL =	1
 	DDF =		1
-	DE =		1
+	DEFULL =	1
 	FSM = 		1
 	HOF =		1
 	IPUS =		1
