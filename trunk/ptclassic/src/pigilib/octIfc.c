@@ -93,7 +93,7 @@ char *f, *m;
     t->contents.facet.facet = f;
     t->contents.facet.version = OCT_CURRENT_VERSION;
     t->contents.facet.mode = m;
-    CK_OCT(octOpenRelative(&rfacet, t, OCT_SIBLING));
+    CK_OCT(octOpenRelative(&rfacet, t, OCT_SIBLING));  /* FIXME: Memory leak */
 
     FreeOctMembers(&rfacet);
 
@@ -514,7 +514,7 @@ ParamListType *pListPtr;
     prop.contents.prop.type = OCT_NULL;
 
     /* If no parameters, return default list */
-    /* FIXME: Memory leak */
+    /* FIXME: Memory leak in octGetByName and not in pigilib -BLE */
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
 	retval = SetSogParams(instPtr, pListPtr);
     }
