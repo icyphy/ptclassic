@@ -208,8 +208,18 @@ public:
     void addStream(const char* name,CodeStream* slist);
 
     // Create a new CodeStream for the target.
-    CodeStream* newStream(const char* name) { return codeStringLists.newStream(name); }
+    inline CodeStream* newStream(const char* name) { return codeStringLists.newStream(name); }
 
+    // Change the default stream into which code is generated into.
+    // This method first returns a reference to the current defaultStream and
+    // then changes it to the one specified.  It is up to the caller
+    // of this method to restore the defaultStream if appropriate.
+    inline CodeStream& switchDefaultStream(CodeStream& newDefault) {
+	CodeStream* oldDefault = defaultStream;
+	defaultStream = &newDefault;
+	return *oldDefault;
+    }
+	 
     // Return a pointer to the counter to make symbols unique.  If their
     // is a CGTarget parent, return its counter
     int* symbolCounter();
