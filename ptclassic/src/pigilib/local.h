@@ -41,6 +41,7 @@ This is a local include file for useful macros and definitions.
 #else
 #define RAW_PTR char *
 #endif /* hpux */
+#endif /* HAS_STDARG */
 
 #define TRUE	1
 #define FALSE	0
