@@ -126,11 +126,23 @@ class ::tycho::ResourceWELD {
     ###################################################################
     ####                          private variables                ####
     
-    # The current channel (file) ID
-    private variable fileid ""
-    
+    # The Java object representing the WELD server directory
+    private common javaDirectory ""
+
+    # The Java object representing an object on the WELD server
+    private variable javaFile ""
+
     # True if the file is open
     private variable fileIsOpen 0
+
+    ###################################################################
+    ####                        class initialization               ####
+
+    # Create the Weld Java directory object
+    set javaDirectory \
+	    [uplevel #0 \
+	    ::java::new weld.persistent.TclWeldDirectory \
+	    [::tycho::autoName weldDir]]
 }
 
 
@@ -139,6 +151,13 @@ class ::tycho::ResourceWELD {
 #
 body ::tycho::ResourceWELD::constructor {args} {
     eval configure $args
+
+    # Create the Weld file object
+    set javaFile \
+	    [uplevel #0 \
+	    ::java::new weld.persistent.TclWeldFile \
+	    [::tycho::autoName weldFile]]
+    ::puts "$javaDirectory $javaFile"
 }
 
 #######################################################################
@@ -148,6 +167,8 @@ body ::tycho::ResourceWELD::destructor {} {
     if [isopen] {
 	close
     }
+    # FIXME: ::java::delete is not implemented yet
+    # ::java::delete $javaFile
 }
 
 #########################################################################
@@ -160,7 +181,6 @@ body ::tycho::ResourceWELD::close {} {
     if { $fileid != "" } {
 	::close $fileid
     }
-    set fileid ""
     set fileIsOpen 0
 }
 
@@ -191,7 +211,7 @@ body ::tycho::ResourceWELD::eof {} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    ::eof $fileid
+    $javaFile eof
 }
 
 #####################################################################
@@ -201,24 +221,24 @@ body ::tycho::ResourceWELD::gets {{varName {}}} {
 	error "File \"$this\" is not open"
     }
     if { $varName == "" } {
-	::gets $fileid
+	$javaFile gets
     } else {
 	upvar $varName v
-	uplevel ::get $fileid v
+	set v [$javaFile gets]
+	llength $v
     }
 }
 
 #####################################################################
 #### open
 body ::tycho::ResourceWELD::open {{mode "r"}} {
-    if $fileIsOpen {
-	$this close
+    set wrl [path]
+    if { ! [exists $wrl] } {
+	error "File $wrl does not exist"
     }
-    set path [path]
-    regsub {^file:} $path {} path
-    set fileid [::open $path $mode]
+
     set fileIsOpen 1
-    return 1
+    $javaFile open $mode
 }
 
 #####################################################################
@@ -233,7 +253,7 @@ body ::tycho::ResourceWELD::puts {string} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    ::puts $fileid $string
+    $javaFile puts $string
 }
 
 #####################################################################
@@ -242,7 +262,7 @@ body ::tycho::ResourceWELD::read {} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-	::read $fileid
+    $javaFile read
 }
 
 #####################################################################
@@ -257,7 +277,7 @@ body ::tycho::ResourceWELD::write {data} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    ::puts -nonewline $fileid $data
+    $javaFile write $data
 }
 
 
@@ -268,17 +288,13 @@ body ::tycho::ResourceWELD::write {data} {
 #####################################################################
 #### chmod
 body ::tycho::ResourceWELD::chmod {path permissions} {
-    # NOTE: Unix-dependent implementation
-    regsub {^file:} $path {} path
-    exec chmod $permissions $path
+    error "Not implemented"
 }
 
 #####################################################################
 #### delete
 body ::tycho::ResourceWELD::delete {path} {
-    # FIXME: Check if file is open?
-    regsub {^file:} $path {} path
-    ::file delete $path
+    error "Not implemented"
 }
 
 #####################################################################
@@ -289,31 +305,27 @@ body ::tycho::ResourceWELD::delete {path} {
 # in a similar fashion to ls -F.
 #
 body ::tycho::ResourceWELD::dirlist {path} {
-    regsub {^file:} $path {} path
-    set result {}
-    foreach f [::glob [file join $path *]] {
-	if [::file isdirectory $f] {
-	    lappend result [file tail $f]/
-	} else {
-	    lappend result [file tail $f]
-	}
+    # If a non-existent directory, return nothing
+    if { ! [exists $path] } {
+	return {}
     }
-    # Sort and return
-    lsort $result
+    # If for some reason it's not a directory, return it
+    if { ! [query $path isdirectory] } {
+	return [list $path]
+    }
+    $javaDirectory dirlist [::tycho::url path $path]
 }
 
 #####################################################################
 #### exists
 body ::tycho::ResourceWELD::exists {path} {
-    regsub {^file:} $path {} path
-    ::file exists $path
+    $javaDirectory exists [::tycho::url path $path]
 }
 
 #####################################################################
 #### mkdir
 body ::tycho::ResourceWELD::mkdir {path} {
-    regsub {^file:} $path {} path
-    ::file mkdir $path
+    error "Not implemented"
 }
 
 #####################################################################
@@ -325,31 +337,52 @@ body ::tycho::ResourceWELD::new {path} {
 #####################################################################
 #### query
 body ::tycho::ResourceWELD::query {path option} {
-    # Check for "isremote"
-    if { $option == "isremote" } {
-	return 0
-    }
-    # Check for valid option
-    if { [lsearch {executable exists isdirectory \
-	    isfile readable writable} $option] >= 0 } {
-	regsub {^file:} $path {} path
-	::file $option $path
+    switch -exact -- $option {
+	"executable" {
+	    # FIXME: Do directories need to be executable to read them?
+	    if [query $path isdirectory] {
+		return 1
+	    } else {
+		return 0
+	    }
+	}
+	"exists" {
+	    exists $path
+	}
+	"isdirectory" {
+	    $javaDirectory isdirectory [::tycho::url path $path]
+	}
+	"isfile" {
+	    # A URL is a file if it exists and is not a directory
+	    if [exists $path] {
+		return [expr { ! [query $path isdirectory] }]
+	    }
+	    return 0
+	}
+	"readable" {
+	    exists $path
+	}
+	"isremote" {
+	    return 1
+	}
+	"writable" {
+	    # FIXME: for now
+	    return 0
+	}
+	default {
+	    error "Unknown option \"$option\" on $path"
+	}
     }
 }
 
 #####################################################################
 #### source
 body ::tycho::ResourceWELD::source {path} {
-    regsub {^file:} $path {} path
-    ::source $path
+    error "Not implemented"
 }
 
 #####################################################################
 #### stat
 body ::tycho::ResourceWELD::stat {path varName} {
-    regsub {^file:} $path {} path
-    if [::file exists $path] {
-	upvar $varName v
-	::file stat $path v
-    }
+    error "Not implemented"
 }
