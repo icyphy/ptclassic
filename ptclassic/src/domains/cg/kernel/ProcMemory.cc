@@ -263,9 +263,13 @@ DualMemory:: DualMemory(const char* nm,		// name
 DualMemory::~DualMemory() { reset(); }
 
 int DualMemory::allocReq(AsmPortHole& p) {
-	if (p.resolvedType() == COMPLEX ) {
-		p.setAttributes(A_SYMMETRIC);
-	}
+	//complex numbers are handled: 
+	// on TITarget::Setup for the C50 domain
+	// on MotorolaTarget::Setup for the CG56 domain
+	//if (p.resolvedType() == COMPLEX ) {
+	//	p.setAttributes(A_SYMMETRIC);
+	//}
+
 	if (!LinProcMemory::allocReq(p))
 	    if (!x.allocReq(p))
 		return y.allocReq(p);
