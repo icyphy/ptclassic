@@ -18,14 +18,28 @@ limitation of liability, and disclaimer of warranty provisions.
 	    StringList sdfPortName;
 	    int numXfer;
 	    int maxDelay;
+
+	    /*virtual*/ Block* clone() const {
+		CGCSDFBase* newStar = (CGCSDFBase*) CGCStar::clone();
+		newStar->sdfPortType = sdfPortType;
+		newStar->sdfPortName = sdfPortName;
+		newStar->numXfer = numXfer;
+		newStar->maxDelay = maxDelay;
+		newStar->fixName = fixName;
+		newStar->portPrecision = portPrecision;
+		return newStar;
+	    }
 	}
+
 	protected {
 	    StringList fixName;
 	    Precision portPrecision;
 	}
+
 	codeblock(sdfParams,"") {
 	    @(sdfPortName).setSDFParams(@(numXfer),@(maxDelay));
 	}
+
 	initCode {
 	    if (numXfer > 1) addCode(sdfParams(),"starSetup");
 	    if (sdfPortType == FIX) {

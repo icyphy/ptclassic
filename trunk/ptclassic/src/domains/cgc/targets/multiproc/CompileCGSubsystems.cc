@@ -231,6 +231,7 @@ void CompileCGSubsystems::pairSendReceive(DataFlowStar* oldSend,
     receive << "Receive_" << link;
     newSend->setName(savestring(send));
     newReceive->setName(savestring(receive));
+    CGSharedBus::pairSendReceive(newSend,newReceive);
 }
 
 int CompileCGSubsystems::runCode() {	
@@ -244,7 +245,7 @@ const char* CompileCGSubsystems::className() const {
     return "CompileCGSubsystems";
 }
 
-int CompileCGSubsystems::childIsA(const char* type) const {
+int CompileCGSubsystems::childIsA(const char* /*type*/) const {
     return TRUE;
     // FIXME - this doesn't work - the name given by type is not
     // always the name the target is registered under
