@@ -44,7 +44,10 @@ proc ::tycho::foo {} {
 
     # FIXME: Where should this go??     
     $nm library load editors/graphedit/stars.tim
-    $nm library addtomenu stars stars -command "$nm newstar stars"
+    $nm library addtomenu stars stars \
+            -command "$nm newstar stars" \
+            -customizecommand "$nm _initmenu stars" \
+            -types {star}
 
     return $nm
 }
@@ -66,6 +69,12 @@ class ::tycho::DFGEditor {
 
     #################################################################
     ####                     public methods                      ####
+
+    # Initialize a new star menu
+    method _initmenu {args}
+
+    # Create an icon palette
+    method _iconpalette {library context}
 
     # Clear all data
     method clear {}
@@ -144,6 +153,12 @@ class ::tycho::DFGEditor {
 
     # Initialize the menubar
     private method _initializeMenubar {menubar}
+
+    #################################################################
+    ####                 private variables                       ####
+
+    # The icon palettes
+    private common _palettes
 
     #################################################################
     ####                  FIXME FIXME FIXME                      ####
@@ -289,6 +304,58 @@ body ::tycho::DFGEditor::constructor {args} {
     $selector delegate $follower disconnected -button 1
     $selector delegate $follower disconnected -button 1 \
             -modifiers shift
+}
+
+########################################################################
+#### _initmenu
+#
+# Initialize a new menu.
+#
+body ::tycho::DFGEditor::_initmenu {libname menuname context} {
+    set mb [menubar]
+    set lib [library access $libname]
+    
+    # Add a palette entry only if there are items at this level
+    if { [$lib match star $context] != "" } {
+        $mb command $menuname.palette $menuname \
+                -label "Palette..." \
+                -command "$this _iconpalette $libname $context"
+        $mb separator $menuname.separator $menuname
+    }
+}
+
+########################################################################
+#### _iconpalette
+#
+# Create a palette of icons.
+#
+body ::tycho::DFGEditor::_iconpalette {libname context} {
+    set lib [library access $libname]
+    set palettename [concat $libname $context]
+
+    # Raise the window if it already exists
+    if [::info exists _palettes($palettename)] {
+        if { [info which -command $_palettes($palettename)] != "" } {
+            raise [winfo toplevel $_palettes($palettename)]
+            return
+        } else {
+            unset _palettes($palettename)
+        }
+    }
+    # Otherwise create a new one
+    set nm [::tycho::view IconPalette]
+    set _palettes($palettename) $nm
+    set icons {}
+    foreach star [$lib match star $context] {
+        set star [concat $context $star]
+        # Make sure the star has an icon
+        # FIXME: use default icon if none specified
+        if [$lib exists $star -icon] {
+            lappend icons [$lib attrget $star -icon]
+        }
+    }
+    # Now get the palette to paint itself
+    eval $nm loadIcons $icons
 }
 
 ########################################################################
