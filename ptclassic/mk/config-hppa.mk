@@ -26,7 +26,7 @@ OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 
 
 #
@@ -68,6 +68,15 @@ X11_LIBSPEC =	-L/usr/sww/X11R5/lib -lX11
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 #X11EXT_LIBSPEC=-lXext -lSM -lICE
 X11EXT_LIBSPEC=-lXext
+
+# Variables for Pure Inc tools (purify, purelink, quantify)
+COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/hppa1.1-hp-hpux/2.6.3/ld
+
+# Purelink is not available on hppa
+PURELINK =
+PURIFY =	purelink $(COLLECTOR) purify
+QUANTIFY =	purelink $(COLLECTOR) quantify
+PURECOV = 	purecov $(COLLECTOR)
 
 # S56 directory is only used on sun4.
 S56DIR =
