@@ -89,6 +89,11 @@ char *message;			/* Message itself       */
     case VULCAN_SEVERE:
 	symMsg(SYM_ERR, "vulcan: %s\n", message);
 	break;
+    case VULCAN_FATAL:
+	/* For completeness */
+	symMsg(SYM_ERR, "vulcan: (fatal): %s\n", message);
+	break;
+	
     }
 }
 
