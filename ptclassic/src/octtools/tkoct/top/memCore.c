@@ -39,7 +39,12 @@ static char SccsId[] = "$Id$";
 #include "memCore.h"
 #include "memStats.h"
 
+#if defined(PTNT) && !defined(PT_NT4VC)
+/* GCC extension, wildly unportable, but it works */
+extern int end asm("end");
+#else
 extern int end;
+#endif
 
 /*global*/ TOPLogical _MemInitedB = TOP_FALSE;
 /*global*/ MEMCore _MemCore;
