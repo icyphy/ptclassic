@@ -253,6 +253,11 @@ class ::tycho::Interactor {
 	KeyPress           key
 	KeyRelease         key
     }       
+
+    # Debugging only
+    method debug {args} {
+	eval $args
+    }
 }
 
 
@@ -291,7 +296,7 @@ body ::tycho::Interactor::activate {t x y args} {
 }
 
 #######################################################################
-#### bind target
+#### bind
 #
 # ``Bind'' an interactor to an item or to a tag. This creates a binding
 # to the specified item or tag so that, when the appropriate event
