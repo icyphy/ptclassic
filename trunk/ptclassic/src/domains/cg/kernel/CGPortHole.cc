@@ -65,17 +65,6 @@ void CGPortHole::advance() {
 	if (offset >= sz) offset -= sz;
 }
 
-// allocate a CGGeodesic.  Use hashstring for the name since we expect
-// repeated names to occur (lots of Node_input and Node_output, for example)
-Geodesic* CGPortHole::allocateGeodesic() {
-        char nm[80];
-        strcpy (nm, "Node_");
-        strcat (nm, name());
-        LOG_NEW; Geodesic *g = new CGGeodesic;
-        g->setNameParent(hashstring(nm), parent());
-        return g;
-}
-
 // make me a fork destination; set my source.
 void CGPortHole::setForkSource(CGPortHole * p) {
 	forkSrc = p;

@@ -66,18 +66,6 @@ int AsmPortHole::location() {
 	return n;
 }
 
-// allocate an AsmGeodesic.  Use hashstring for the name since we expect
-// repeated names to occur (lots of Node_input and Node_output, for example)
-
-Geodesic* AsmPortHole::allocateGeodesic() {
-	char nm[80];
-	strcpy (nm, "Node_");
-	strcat (nm, name());
-	LOG_NEW; Geodesic *g = new AsmGeodesic;
-	g->setNameParent(hashstring(nm), parent());
-	return g;
-}
-
 void AsmPortHole::assignAddr(ProcMemory& m, unsigned a) {
 	geo().assignAddr(m,a);
 }

@@ -58,9 +58,6 @@ class AsmGeodesic;
 class AsmPortHole : public CGPortHole {
 	friend class AsmGeodesic;
 public:
-	// Allocate a geodesic and give it a name
-	Geodesic* allocateGeodesic();
-
 	// Return the geodesic connected to this PortHole.
 	// This is typesafe because allocateGeodesic
 	// makes myGeodesic of this type.

@@ -97,8 +97,8 @@ public:
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
-	// This is typesafe because allocateGeodesic
-	// makes myGeodesic of this type.
+	// This is typesafe ONLY when CGC stars are used in the CGC domain.
+	// Will this be a problem?
 	CGCGeodesic& geo() { return *(CGCGeodesic*)myGeodesic;}
 
 	// const version
@@ -127,9 +127,6 @@ public:
 	// Currently, Complex and float/int type data are converted.
 	int isConverted();
 	
-	// allocate a geodesic
-	/* virtual */ Geodesic* allocateGeodesic();
-
 	// determine the property of the buffer associated with this port.
 	void setFlags();
 
