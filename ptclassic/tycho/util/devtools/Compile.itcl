@@ -198,15 +198,16 @@ body ::tycho::Compile::compile {filenames {args {}}} {
     checkSourceFiles
     set makefile [makefileName]
     createMakefile
-    # Make sure we pass on arguments down to compileFiles
-    compileFiles $args
+
+    eval compileFiles $args
 }
+
 #######################################################################
 #### compileAndLoad
 # Compile and load in each file in the list of filenames.
 #
 body ::tycho::Compile::compileAndLoad {filenames {args {}}} {
-    compile $filenames $args
+    eval compile $filenames $args
     loadFiles
 }
 #######################################################################
@@ -242,14 +243,21 @@ body ::tycho::Compile::compileFiles {{args {}}} {
     # FIXME: compileString should be a preference.
     # FIXME: dirname should be a preference.
     
-    # get rid of braces {}
-    set args [lindex $args 0]
-
     # Our basic functions:
-    array set option {-autodestroy 0}
-    array set option {-autostart 0}
-    array set option {-modal 0}
-    array set option $args
+    array set option {-autodestroy 0 \
+	    -autostart 0 \
+	    -modal 0}
+    if { $args != {} } {
+	array set option $args
+    }
+
+    # Make sure we pass on arguments down to compileFiles
+    global testsuite
+    if [info exists testsuite] {
+	array set option {-autodestroy 1 \
+		-autostart 1 \
+		-modal 1}
+    }
 
     #putStatus "About to make shared object, when complete, be sure to \
     #        close the Exec window to continue."
