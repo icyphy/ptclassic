@@ -5,6 +5,14 @@
 # Test star library for CTS
 
 group source -label {Source Stars} {
+   
+    star const \
+            -class {Const} \
+            -label {Const} \
+            -icon {edit/cts/icons.tim#source.const} {
+        attribute value -default 1.0 -type number -label Value
+        port output -datatype float
+    }
     star ramp \
             -class {Ramp} \
             -label {Ramp} \
@@ -13,21 +21,14 @@ group source -label {Source Stars} {
         attribute slope -default 1.0 -type number -label value
         port output -datatype float
     }
-    star const \
-            -class {Const} \
-            -label {Const} \
-            -icon {edit/cts/icons.tim#source.const} {
-        attribute value -default 1.0 -type number -label Value
-        port output -datatype float
-    }
-    star impulse \
-            -class {Impulse} \
-            -label {Impulse} \
-            -icon {edit/cts/icons.tim#source.impulse} {
-        attribute amplitude -default 1.0 -type number -label Amplitude
-        attribute atTime -default 0.0 -type number -label "At Time"
-        port output -datatype float
-    }
+#    star impulse \
+#            -class {Impulse} \
+#            -label {Impulse} \
+#            -icon {edit/cts/icons.tim#source.impulse} {
+#        attribute amplitude -default 1.0 -type number -label Amplitude
+#        attribute atTime -default 0.0 -type number -label "At Time"
+#        port output -datatype float
+#    }
     star squarewave \
             -class {SquareWave} \
             -label {SquareWave} \
@@ -47,6 +48,16 @@ group sink -label {Sink Stars} {
             -icon {edit/cts/icons.tim#sink.plot} {
         attribute YMin -default "-1.0" -label "Y minimum" -type number
         attribute YMax -default "1.0" -label "Y maximum" -type number
+        port input -datatype float
+    }
+    star XY_plot \
+            -class {XYPlot} \
+            -label {2D-Plotter} \
+            -icon {edit/cts/icons.tim#sink.xyplot} {
+        attribute XMin -default "-1.0" -label "X minimum" -type number
+        attribute XMax -default "1.0" -label "X maximum" -type number
+        attribute YMin -default "-1.0" -label "Y minimum" -type number
+        attribute YMax -default "1.0" -label "Y maximum" -type number        
         port input -datatype float
     }
 }
@@ -77,33 +88,34 @@ group arithmetic -label {Basic Arithmetic} {
         port input -composite 1
         port output -composite 0
     }
-#    star multiply \
-#            -label Multiply \
-#            -icon {edit/graphedit/icons.tim#arithmetic.multiply} {
-#        port in -composite 1
-#        port out -composite 0
-#    }
+    star multiply \
+            -class {Multiply} \
+            -label Multiply \
+            -icon {edit/graphedit/icons.tim#arithmetic.multiply} {
+        port in -composite 1
+        port out -composite 0
+    }
 #    star subtract \
 #            -label Subtract \
 #            -icon {edit/graphedit/icons.tim#arithmetic.subtract} {
 #        port in -composite 1
 #        port out -composite 0
 #    }
-    star gain_left \
+    star gain \
             -class {Gain} \
-            -label Gain_Left \
-            -icon {edit/cts/icons.tim#arithmetic.gain_left} {
+            -label Gain \
+            -icon {edit/cts/icons.tim#arithmetic.gain} {
         attribute gain -default "1.0" -type number -label Gain
         port input -composite 0
         port output -composite 0
     }
-    star gain_right \
-            -class {Gain} \
-            -label Gain_Right \
-            -icon {edit/cts/icons.tim#arithmetic.gain_right} {
-        attribute gain -default "1.0" -type number -label Gain
-        port input -composite 0
-        port output -composite 0
-    }
+#    star gain_right \
+#            -class {Gain} \
+#            -label Gain_Right \
+#            -icon {edit/cts/icons.tim#arithmetic.gain_right} {
+#        attribute gain -default "1.0" -type number -label Gain
+#        port input -composite 0
+#        port output -composite 0
+#    }
 
 }
