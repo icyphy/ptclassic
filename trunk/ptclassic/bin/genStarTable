@@ -40,23 +40,17 @@ cp /dev/null /tmp/$$.p1
 echo 'static char** nm_table[] = {' > /tmp/$$.p2
 
 for makevar in $makevarlist ; do
-	sed -n	-e "s/^[ ]*$1/STR star_nm_${1}/g" \
-		-e "s/^[ ]*$pp/STR star_nm_${pp}/g" \
-		-e "s/^[ ]*$d3/STR star_nm_${d3}/g" \
-		-e "s/[ ]+$1/STR star_nm_${1}/g" \
-		-e "s/[ ]+$pp/STR star_nm_${pp}/g" \
-		-e "s/[ ]+$d3/STR star_nm_${d3}/g" \
+	sed -n	-e "s/[ ]$1/ STR star_nm_${1}/g" \
+		-e "s/[ ]$pp/ STR star_nm_${pp}/g" \
+		-e "s/[ ]$d3/ STR star_nm_${d3}/g" \
 		-e "s?${makevar}.*?/\* declare ${makevar} symbols \*/?" \
 		-e "s/\.[a-z]*/;/g" \
 		-e 's/\\$//' \
 		-e "/^.. declare/,/^\$/p" make.template >> /tmp/$$.p1
 
-	sed -n	-e "s/^[ ]*$1/\&star_nm_${1}/g" \
-		-e "s/^[ ]*$pp/\&star_nm_${pp}/g" \
-		-e "s/^[ ]*$d3/\&star_nm_${d3}/g" \
-		-e "s/[ ]+$1/\&star_nm_${1}/g" \
-		-e "s/[ ]+$pp/\&star_nm_${pp}/g" \
-		-e "s/[ ]+$d3/\&star_nm_${d3}/g" \
+	sed -n	-e "s/[ ]$1/ \&star_nm_${1}/g" \
+		-e "s/[ ]$pp/ \&star_nm_${pp}/g" \
+		-e "s/[ ]$d3/ \&star_nm_${d3}/g" \
 		-e "s?^${makevar}.*=?/\* reference ${makevar} symbols \*/?" \
 		-e "s/\.[a-z]*/,/g" \
 		-e 's/\\$//' \
