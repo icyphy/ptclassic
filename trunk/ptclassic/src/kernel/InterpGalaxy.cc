@@ -48,17 +48,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 #include "Domain.h"
 #include "Plasma.h"
+#include "KnownBlock.h"
+#include "KnownState.h"
 #include "IntState.h"
 #include <ctype.h>
 
-// constructor: makes an empty galaxy
-InterpGalaxy::InterpGalaxy() : myClassName("InterpGalaxy")
-{ setDescriptor("An interpreted galaxy");}
-
-// constructor: sets the class name
-InterpGalaxy::InterpGalaxy(const char* c) {
+// constructor: sets the class name and domain.
+InterpGalaxy::InterpGalaxy(const char* c, const char* dom) {
 	setDescriptor("An interpreted galaxy");
-	myClassName = c;
+	if (c) 	myClassName = c;
+	setDomain(dom);
 }
 
 // Report an error: no such star or porthole
@@ -220,7 +219,7 @@ InterpGalaxy::busConnect(const char* srcStar,const char* srcPipe,
 // Add a star to the galaxy.
 int
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
-	Block *src = KnownBlock::clone(starclass);
+	Block *src = KnownBlock::clone(starclass,domain());
 	if (src == 0) return FALSE;
 	addBlock(src->setBlock(hashstring(starname),this));
 //add action to list
@@ -294,7 +293,7 @@ int
 InterpGalaxy::addNode (const char* nodename) {
 	nodename = hashstring (nodename);
 	// get a geodesic appropriate for the current domain, add to list
-	Geodesic& geo = Domain::named(KnownBlock::domain())->newNode();
+	Geodesic& geo = Domain::named(domain())->newNode();
 	geo.setNameParent (nodename, this);
 	nodes.put(geo);
 	// make actionList entry
@@ -447,17 +446,20 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 // modify the domain within the galaxy (for wormholes)
 int
 InterpGalaxy::setDomain (const char* name) {
-	name = hashstring(name);
-	actionList += "D";
-	actionList += name;
-	Galaxy::setDomain(name);
-	// if we're already in the given domain, do nothing and return true
-	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
-	if (numberBlocks() > 0) {
-		Error::error ("Can't change domain, non-empty galaxy");
+	if (name == 0) {
+		Error::error("InterpGalaxy::setDomain: null domain!");
 		return FALSE;
 	}
-	if (!KnownBlock::setDomain (name)) return FALSE;
+	// if we're already in the given domain, do nothing and return true
+	if (strcmp (name, domain()) != 0) {
+		if (numberBlocks() > 0) {
+			Error::error ("Can't change domain, non-empty galaxy");
+			return FALSE;
+		}
+		// OK, do it.
+		name = hashstring(name);
+		Galaxy::setDomain(name);
+	}
 	return TRUE;
 }
 
@@ -481,9 +483,9 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 // make a new interpreted galaxy!  We do this by processing the action
 // list.
 	setDescriptor(g.descriptor());
+	setDomain(g.domain());
 	myClassName = g.myClassName;
 	setNameParent(g.name(), NULL);
-	const char* oldDom = NULL; // old domain
 
 // process the action list
 	int nacts = g.actionList.numPieces();
@@ -593,21 +595,11 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			numPorts (a, b, atoi (c));
 			nacts -= 4;
 			break;
-
-		case 'D':	// change the domain
-			oldDom = KnownBlock::domain();
-			a = next++;
-			setDomain (a);
-			nacts -= 2;
-			break;
-
-		default:
+			
+		default: // impossible (?)
 			Error::abortRun ("Internal error in InterpGalaxy");
 		}
 	}
-
-// if we're producing a wormhole, change the domain back
-	if (oldDom) KnownBlock::setDomain (oldDom);
 
 // copy the initialization list.
 	StringListIter nextI(g.initList);
@@ -636,11 +628,10 @@ InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
 	Domain* od = Domain::named(outerDomain);
 
 	if (innerTarget || od->isGalWorm() ||
-	    strcmp (outerDomain, KnownBlock::domain()) != 0) {
+	    strcmp (outerDomain, domain()) != 0) {
 		Star& s = od->newWorm(*this,innerTarget);
 		setBlock (myName, &s);
 		KnownBlock::addEntry (s, myName, 1);
-		KnownBlock::setDomain (outerDomain);
 	}
 // If not, ordinary galaxy
 	else {
