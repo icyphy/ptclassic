@@ -42,7 +42,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 		name {options}
 		type {string}
-		default {""}
+		default {"-bb =800x400"}
 		desc { Command line options for pxgraph.}
 	}
 	protected {
