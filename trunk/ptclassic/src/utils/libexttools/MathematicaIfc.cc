@@ -24,11 +24,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Programmer: Steve X. Gu and Brian L. Evans
 Date of creation: 01/13/96
 
-Base class for the Ptolemy interface to Mathematica via MathLink.
+General base class for an interface to Mathematica via MathLink.
 
-Based on a Tcl/Tk interface to Mathematica by John M. Novak of
-Wolfram Research Inc., but this file is an abstraction that does
-not know what tools it will interface with.
+OpenStaticMathLink and CloseStaticMathLink methods are adapted from [1].
+
+The SendToMathLink method is based on a Tcl/Tk interface to Mathematica
+written by John M. Novak of Wolfram Research Inc., but this version
+is an abstraction that does not know with which tool(s) it will interface.
 
 References:
 
@@ -49,9 +51,65 @@ References:
 // count how many instances of this class have been created
 static int mathematicaStarsCount = 0;
 
-// Ptolemy-controlled Mathematica process
+
+// Begin: STATIC CONTROL OF THE MATHEMATICA PROCESS
+
+// Status of static connection
 static MLINK gMathLink = 0;
 static MLEnvironment env = 0;
+
+// Open the static connection
+int MathematicaIfc::OpenStaticMathLink(int argc, char **argv) {
+    // If already open, return TRUE; otherwise, initialize static data
+    if ( env && gMathLink ) return TRUE;
+    CloseStaticMathLink();
+
+    InfString errMsg;
+    int retval = FALSE;
+
+    // Initialize the MathLink library, open a link to Mathematica,
+    // verify the link, and initialize Mathematica
+    if ( (env = MLInitialize(NULL)) == NULL ) {
+        errMsg = "Cannot initialize MathLink.";
+    }
+    else if ( (gMathLink = MLOpen(argc, argv)) == NULL ) {
+	errMsg = "Cannot open a MathLink connection to Mathematica.";
+    }
+    else if ( ! MLConnect(gMathLink) ) {
+	errMsg = "Cannot verify the MathLink connection to Mathematica. ";
+    }
+    else if ( ! InitXWindows(gMathLink) ) {
+	errMsg = "Cannot initialize X windows graphics in Mathematica.";
+    }
+    else {
+	retval = TRUE;
+    }
+
+    // If an error occurred, then store the error message and close the link
+    if (! retval) {
+	errMsg << " Mathematica may not be licensed to run on this machine.";
+	SetErrorString(errMsg);
+	CloseStaticMathLink();
+    }
+
+    return retval;
+}
+
+// Close the static connection
+int MathematicaIfc::CloseStaticMathLink() {
+    if (gMathLink) {
+	MLClose(gMathLink);
+	gMathLink = 0;
+    }
+    if (env) {
+	MLDeinitialize(env);
+	env = 0;
+    }
+    return TRUE;
+}
+
+// End: STATIC CONTROL OF THE MATHEMATICA PROCESS
+
 
 // Debugging functions
 
@@ -115,18 +173,21 @@ static void printPacketType(int packetType, int currentFlag) {
 #endif
 
 // Constructor
-MathematicaIfc::MathematicaIfc() {
-    mathematicaStarsCount++;
-    returnType = ILLEGALPKT;
+MathematicaIfc::MathematicaIfc(const char* name, int restrictContextFlag) :
+	mathlink(0), environment(0) {
+    instanceNumber = mathematicaStarsCount++;
+    contextFlag = restrictContextFlag;
+    context = name;
+    context << instanceNumber << "`";
+    prolog = "Begin[\"";
+    prolog << context << "\"]";
+    epilog = "End[]";
 }
 
 // Destructor
 MathematicaIfc::~MathematicaIfc() {
     mathematicaStarsCount--;
-
-    if ( mathematicaStarsCount == 0 ) {
-	KillMathematica();
-    }
+    KillMathematica();
 }
 
 // Methods to access data members
@@ -162,9 +223,13 @@ const char* MathematicaIfc::GetWarningString() {
     return warningString;
 }
 
+const char* MathematicaIfc::GetHandle() {
+    return context;
+}
+
 // get static data
 MLINK MathematicaIfc::GetCurrentLink() {
-    return gMathLink;
+    return mathlink;
 }
 
 int MathematicaIfc::GetMathematicaIfcInstanceCount () {
@@ -176,58 +241,32 @@ int MathematicaIfc::GetMathematicaIfcInstanceCount () {
 // A. low-level interfaces
 
 int MathematicaIfc::OpenMathLink(int argc, char **argv) {
-    InfString errMsg;
-    int retval = FALSE;
+    if ( environment && mathlink ) return TRUE;
+    CloseMathLink();
 
-    // Initialize static data
-    env = 0;
-    gMathLink = 0;
-
-    // Initialize the MathLink library, open a link to Mathematica,
-    // verify the link, and initialize Mathematica
-    if ( (env = MLInitialize(NULL)) == NULL ) {
-        errMsg = "Cannot initialize MathLink.";
+    // Open static MathLink connection and set static variables env & gMathLink
+    int retval = OpenStaticMathLink(argc, argv);
+    if ( retval ) {
+	environment = env;
+	mathlink = gMathLink;
     }
-    else if ( (gMathLink = MLOpen(argc, argv)) == NULL ) {
-	errMsg = "Cannot open a MathLink connection to Mathematica.";
-    }
-    else if ( ! MLConnect(gMathLink) ) {
-	errMsg = "Cannot verify the MathLink connection to Mathematica. ";
-    }
-    else if ( ! InitXWindows(gMathLink) ) {
-	errMsg = "Cannot initialize X windows graphics in Mathematica.";
-    }
-    else {
-	retval = TRUE;
-    }
-
-    // If an error occurred, then store the error message and close the link
-    if (! retval) {
-	errMsg << " Mathematica may not be licensed to run on this machine.";
-	SetErrorString(errMsg);
-	CloseMathLink();
-    }
-
     return retval;
 }
 
 // CloseMathLink:
 int MathematicaIfc::CloseMathLink() {
-  if (gMathLink) {
-    MLClose(gMathLink);
-    gMathLink = 0;
-  }
-  if (env) {
-    MLDeinitialize(env);
-    env = 0;
-  }
-  return TRUE;
+    int retval = TRUE;
+    environment = 0;
+    mathlink = 0;
+    if (mathematicaStarsCount == 0) retval = CloseStaticMathLink();
+    return retval;
 }
 
 // Expect a specific return packet from MathLink
 // -- set the data member returnType as a side effect
 // -- assumes that data exists on the link
-int MathematicaIfc::ExpectPacket(MLINK linkp, int discardFlag) {
+int MathematicaIfc::ExpectPacket(
+		MLINK linkp, int discardFlag, int& returnType) {
     returnType = ILLEGALPKT;
     if ( MLError(linkp) == MLEOK ) {
 	MLFlush(linkp);
@@ -239,23 +278,37 @@ int MathematicaIfc::ExpectPacket(MLINK linkp, int discardFlag) {
 
 // LoopUntilPacket loops until an error occurs or until a packet of
 // of type packetType is found (sets returnType)
-int MathematicaIfc::LoopUntilPacket(MLINK linkp, int packetType) {
+int MathematicaIfc::LoopUntilPacket(
+		MLINK linkp, int packetType, int& returnType) {
     int retval = TRUE;
     do {
-	retval = ExpectPacket(linkp, TRUE);  // set returnType; discard packet
+	retval = ExpectPacket(linkp, TRUE, returnType);  // discard packet
     } while ( retval && ( returnType != packetType ) );
     if (! retval) SetErrorString("Error reading results from Mathematica.");
     return retval;
 }
 
+// Evaluate a command that does not go into the user history by
+// bypassing the Mathematica parser
+int MathematicaIfc::EvaluatePrivateCommand(MLINK linkp, char* command) {
+    int retval = TRUE;
+    if ( command && *command ) {
+	MLPutFunction(linkp, "EvaluatePacket", 1);
+	MLPutFunction(linkp, "ToExpression", 1);
+	MLPutString(linkp, command);
+	MLEndPacket(linkp);
+
+	// Expect a Return Packet back
+	int returnType = ILLEGALPKT;
+	retval = LoopUntilPacket(linkp, RETURNPKT, returnType);
+    }
+    return retval;
+}
+
 // Initialize Mathematica to use X windows for graphics
 int MathematicaIfc::InitXWindows(MLINK linkp) {
-    // Evaluate the command and expect a Return Packet back
-    MLPutFunction(linkp, "EvaluatePacket", 1);
-    MLPutFunction(linkp, "Get", 1);
-    MLPutString(linkp, "Motif.m");
-    MLEndPacket(linkp);
-    return LoopUntilPacket(linkp, RETURNPKT);
+    // Initialize X/Motif graphics by having Mathematica evaluate Motif.m
+    return EvaluatePrivateCommand(linkp, "Get[\"Motif.m\"]");
 }
 
 // SendToMathLink
@@ -263,6 +316,7 @@ int MathematicaIfc::InitXWindows(MLINK linkp) {
 // a string to the Mathematica kernel.
 int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
   int retval = TRUE;
+  int returnType = ILLEGALPKT;
   InfString completeReturnString, previousReturnString;
 
   // Return an error if Mathematica is not running
@@ -271,10 +325,15 @@ int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
     return FALSE;
   }
 
+  if ( command == 0 || *command == 0 ) {
+    SetErrorString("empty Mathematica command.");
+    return FALSE;
+  }
+
   // Check to see if the link has something to read from it.
   // If so, skip up to and including the first Input Name Packet we receive
   if ( MLReady(linkp) ) {
-    if ( ! LoopUntilPacket(linkp, INPUTNAMEPKT) ) return FALSE;
+    if ( ! LoopUntilPacket(linkp, INPUTNAMEPKT, returnType) ) return FALSE;
   }
 
   // Put the Mathematica command on the link
@@ -283,7 +342,7 @@ int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
   MLEndPacket(linkp);
 
   // Process packets until INPUTNAMEPK, OUTPUTNAMEPKT, SYNTAXPKT, or TEXTPKT
-  ExpectPacket(linkp, FALSE);
+  ExpectPacket(linkp, FALSE, returnType);
   while (returnType != INPUTNAMEPKT &&
          returnType != OUTPUTNAMEPKT &&
          returnType != SYNTAXPKT &&
@@ -300,15 +359,15 @@ int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
 	previousReturnString << returnString;
 	MLDisownString(linkp, returnString);
 	returnString = 0;
-	ExpectPacket(linkp, TRUE);
-	ExpectPacket(linkp, FALSE);
+	ExpectPacket(linkp, TRUE, returnType);
+	ExpectPacket(linkp, FALSE, returnType);
 	break;
 
       case DISPLAYPKT:
       case DISPLAYENDPKT:
       default:
 	MLNewPacket(linkp);
-	ExpectPacket(linkp, FALSE);
+	ExpectPacket(linkp, FALSE, returnType);
 	break;
     }
   }
@@ -372,14 +431,6 @@ int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
 }
 
 
-// B. higher-level interfaces to the Mathematica process
-
-// EvaluateOneCommand:
-int MathematicaIfc::EvaluateOneCommand(char* command) {
-    return SendToMathLink(gMathLink, command);
-}
-
-
 // C. highest-level interface to the Mathematica process
 
 // StartMathematica: set default link options for typical Unix MathLink session
@@ -413,12 +464,15 @@ int MathematicaIfc::StartMathematica(int oargc, char** oargv) {
 
 // MathematicaIsRunning
 int MathematicaIfc::MathematicaIsRunning() {
-    return ( env != 0 && gMathLink != 0 );
+    return ( environment && mathlink );
 }
 
 // EvaluateUserCommand
 int MathematicaIfc::EvaluateUserCommand(char* command) {
-    return EvaluateOneCommand(command);
+    if ( contextFlag ) EvaluateUnrecordedCommand(prolog);
+    int retval = EvaluateOneCommand(command);
+    if ( contextFlag ) EvaluateUnrecordedCommand(epilog);
+    return retval;
 }
 
 // CloseMathematicaFigures:  Mathematica does not have a mechanism to tag
