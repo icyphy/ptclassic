@@ -60,6 +60,11 @@ class VHDLCluster : public VHDLObj
 
   VHDLCluster* newCopy();
 
+  // Return a generic list built from all the firings in the cluster.
+  VHDLGenericList* genericList();
+  // Return a port list built from all the firings in the cluster.
+  VHDLPortList* portList();
+
  protected:
  private:
 };

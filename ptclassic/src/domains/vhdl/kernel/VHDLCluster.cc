@@ -56,6 +56,40 @@ VHDLCluster* VHDLCluster :: newCopy() {
   return newCluster;
 }
 
+// Return a generic list built from all the firings in the cluster.
+VHDLGenericList* VHDLCluster :: genericList() {
+  VHDLGenericList* clusterGenericList = new VHDLGenericList;
+
+  VHDLFiringListIter nextFiring(*(this->firingList));
+  VHDLFiring* nFiring;
+  while ((nFiring = nextFiring++) != 0) {
+    VHDLGenericListIter nextGeneric(*(nFiring->genericList));
+    VHDLGeneric* nGeneric;
+    while ((nGeneric = nextGeneric++) != 0) {
+      clusterGenericList->put(*nGeneric);
+    }
+  }
+
+  return clusterGenericList;
+}
+
+// Return a port list built from all the firings in the cluster.
+VHDLPortList* VHDLCluster :: portList() {
+  VHDLPortList* clusterPortList = new VHDLPortList;
+
+  VHDLFiringListIter nextFiring(*(this->firingList));
+  VHDLFiring* nFiring;
+  while ((nFiring = nextFiring++) != 0) {
+    VHDLPortListIter nextPort(*(nFiring->portList));
+    VHDLPort* nPort;
+    while ((nPort = nextPort++) != 0) {
+      clusterPortList->put(*nPort);
+    }
+  }
+
+  return clusterPortList;
+}
+
 // Class identification.
 const char* VHDLCluster :: className() const { return "VHDLCluster"; }
 
