@@ -40,7 +40,6 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
-	testDefs.tcl
 
 SIMPLE_TESTS = \
 	testCacheManager.itcl \
