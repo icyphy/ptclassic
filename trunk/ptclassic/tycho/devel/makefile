@@ -62,7 +62,8 @@ ITCL_SRCS = \
 	SlateView.itcl \
 	Interchange.itcl \
 	testInterchange.itcl \
-	Model.itcl
+	Model.itcl \
+	PersistentModel.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
