@@ -119,7 +119,7 @@ X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 COLLECTOR =
 
 PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	purify -automount-prefix=/tmp_mnt:/vol
+PURIFY =	purify -automount-prefix=/tmp_mnt:/vol -best-effort
 QUANTIFY =	quantify
 
 
