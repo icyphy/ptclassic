@@ -36,7 +36,7 @@ You may use tilde characters and environment variables in the directory name.
 }
 	}
 
-	hinclude { <sys/types.h>, "miscFuncs.h" }
+	hinclude { <sys/types.h>, <sys/stat.h>, "miscFuncs.h" }
 
 	header{
 // Matlab interface library and Matlab data types (clash with COMPLEX)
