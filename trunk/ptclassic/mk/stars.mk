@@ -801,19 +801,20 @@ endif
 CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
 	$(CROOT)/mk $(CROOT)/src/tysh $(CROOT)/src/pigiExample
 
-# Under some architectures, we need to use static libraries or we get
-# GateKeeper errors.
-ifdef USE_CORE_STATIC_LIBS
-	ifdef PITCL
+ifdef PITCL
+	# Under some architectures, we need to use static libraries or we get
+	# GateKeeper errors.
+	ifdef USE_CORE_STATIC_LIBS
 		LIBPTCL = $(LIBDIR)/libpitcl.a
 	else
-		LIBPTCL = $(LIBDIR)/libptcl.a
+		LIBPTCL = $(LIBDIR)/libpitcl.so
 	endif
 else
-	ifdef PITCL
-		LIBPTCL = $(LIBDIR)/libpitcl.$(LIBSUFFIX)
+	# Use libptcl, not libpitcl
+	ifdef USE_CORE_STATIC_LIBS
+		LIBPTCL = $(LIBDIR)/libptcl.a
 	else
-		LIBPTCL = $(LIBDIR)/libptcl.$(LIBSUFFIX)
+		LIBPTCL = $(LIBDIR)/libptcl.so
 	endif
 endif
 
@@ -831,7 +832,11 @@ endif
 # this would not be defined if we are making a small stand-alone 
 # Program to test the ptolemy libraries, see standalone.mk
 ifdef PIGI
-	LIBS += version.o -lptcl
+	ifdef PITCL
+		LIBS += version.o -lpitcl
+	else
+		LIBS += version.o -lptcl
+	endif
 endif
 
 # External C library of Ptolemy DSP C routines
