@@ -209,7 +209,7 @@ body ::tycho::StatusBar::constructor {args} {
     itk_component add mainStatus {
 	label $itk_interior.mainStatus \
 		-anchor w -justify left \
-		-font [.tychoFonts getFont Helvetica 12] \
+		-font [::tycho:font helvetica 12] \
 		-borderwidth 1 \
 		-relief raised
     } {
