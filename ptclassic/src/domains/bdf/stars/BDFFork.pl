@@ -1,7 +1,7 @@
 defstar {
 	name {Fork}
 	domain {BDF}
-	desc { Copies input particles to each output. }
+	desc { Copy the input particle to each output. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {
@@ -16,7 +16,7 @@ This star is functionally identical to the SDF Fork star.  However,
 it indicates to the BDF scheduler that the various output signals
 are logically the same as the input signal, and this is necessary
 to construct logically consistent schedules when Booleans are present.
-As for Fork in other domains,  It will be automatically inserted
+As with Fork in other domains,  It will be automatically inserted
 when multiple inputs are connected to the same output using the graphical
 interface, or when the "nodeconnect" command is used in the interpreter.
 	}

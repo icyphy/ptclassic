@@ -11,9 +11,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	author { J. T. Buck }
 	location { BDF main library }
 	desc {
-If the value on the 'control' line is nonzero, input is copied to output;
-otherwise, the control token is just eaten.  This is effectively one half
-of a Select gate.
+If the value on the "control" input is nonzero, the input particle
+is copied to output. Otherwise, no input is consumed (except the control
+particle) and no output is produced.  This is effectively one half
+of a Select.
 	}
 	input {
 		name { input }

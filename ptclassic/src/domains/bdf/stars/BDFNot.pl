@@ -7,7 +7,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	desc { A logical inverter: output is NOT of input }
+	desc { Output the logical inverse of the Boolean input }
 	version { $Id$ }
 	location { BDF main library }
 	explanation {
