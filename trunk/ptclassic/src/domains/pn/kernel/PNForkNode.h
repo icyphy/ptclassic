@@ -56,7 +56,7 @@ public:
     int isItPersistent () const;
 
     // Make a new source connection.
-    PortHole* setSourcePort (GenericPort &, int delay = 0);
+    PortHole* setSourcePort (GenericPort &, int delay = 0, char* values = 0);
 
     // Make a new destination connection.
     PortHole* setDestPort (GenericPort &);
