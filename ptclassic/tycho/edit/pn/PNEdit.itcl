@@ -90,7 +90,7 @@ body ::tycho::PNEdit::constructor {args} {
 body ::tycho::PNEdit::openControlPanel {graph} {
     set tl [[displayer] component hull].runwindow
 
-    if { [info which -command $tl] != "" } {
+    if { [infoWhichCommand $tl] != "" } {
 	raise $tl
     } else {
 	# Generate a "random" port number. This is awful!
