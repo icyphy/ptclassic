@@ -433,6 +433,8 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 	if [catch {uplevel \#0 $_progressCommand} progress] {
 	    # The evaluation failed: display the bar in red
 	    _drawprogess 1 red
+	    # Make sure to release the mode
+	    _unlock
 	} else {
 	    # Draw the progress bar with the returned value
 	    _drawprogress $progress
