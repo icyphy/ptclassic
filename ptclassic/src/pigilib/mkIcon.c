@@ -30,26 +30,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 
-/* Includes */
+/* Standard includes */
 #include "local.h"
 #include <stdio.h>
 #include <sys/file.h>
+
+/* Octtools includes */
+#include "oct.h"		/* define octObject */
+#include "list.h"
 #include "rpc.h"
+#include "oh.h"
+
+/* Pigilib includes */
+#include "mkIcon.h"
 #include "err.h"
 #include "mkTerm.h"
 #include "octIfc.h"
 #include "octMacros.h"
 #include "util.h"
-#include "oh.h"
 #include "vemInterface.h"
-#include "list.h"
 #include "compile.h"
-#include "kernelCalls.h"
-
-/* Following template not defined anywhere above. */
-char* callParseClass();
-
-#include "mkIcon.h"
+#include "kernelCalls.h"	/* define callParseClass */
 
 #define ERRBUF_MAX 1000
 
@@ -403,7 +404,8 @@ octObject *iconFacetPtr;
 {
     TermList terms;
     char buf[MSG_BUF_MAX];
-    char *fileName, *name;
+    char *fileName;
+    const char *name;
     octObject iconConFacet = {OCT_UNDEFINED_OBJECT},
 	      prop = {OCT_UNDEFINED_OBJECT};
     int maxNumTerms, size;
