@@ -14,6 +14,7 @@ $Id$
 #pragma implementation
 #endif
 
+#include "Target.h"
 #include <signal.h>
 
 // the following should really, I suppose, be #ifdef cfront
@@ -42,6 +43,14 @@ const char* Scheduler::domain() const {
         return "Undefined";
 }
 
+void Scheduler::setTarget(Target& t) {
+	myTarget = &t;
+}
+
+Target& Scheduler::getTarget() {
+	return *myTarget;
+}
+
 // Interrupt handling stuff.  Currently, all interrupts that we catch
 // are handled the same way.
 
@@ -65,4 +74,11 @@ void Scheduler::catchInt(int signo, int always) {
 void Scheduler::reportInterrupt() {
 	Error::abortRun ("execution halted by user interrupt");
 	interrupt = FALSE;
+}
+
+// Return a StringList with code that can be executed to
+// effect a run.  In the base class, this just causes an error.
+StringList Scheduler::compileRun() {
+	Error::abortRun ("This scheduler doesn't know how to compile.");
+	return "\nERROR: This scheduler doesn't know how to compile.\n";
 }
