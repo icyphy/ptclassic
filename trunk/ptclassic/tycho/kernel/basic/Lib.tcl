@@ -89,3 +89,38 @@ namespace ::tycho {
     # ::tycho::File::registerEditor {.std} ::tycho::EditMoore {State transition diagram editor}
     ::tycho::File::registerEditor {.idx} ::tycho::IndexBrowser {}
 }
+
+# FIXME: This entry binding patch may not be needed in the future.
+# The following patch is contributed by Eric H. Herrin II.
+#
+# override some default Entry bindings for speed; 
+# Itcl 2.0 seems *way* too slow using the defaults... 
+#
+bind Entry <KeyPress> {
+    if {"%A" != "{}"} {
+        set insert [%W index insert]
+        catch {
+            if {([%W index sel.first] <= $insert)
+            && ([%W index sel.last] >= $insert)} {
+                %W delete sel.first sel.last
+            }
+        }
+        %W insert insert %A
+        incr insert
+        set left [%W index @0]
+        if {$left > $insert} {
+            %W xview $insert
+            return
+        }
+        set x [winfo width %W]
+        set right [%W index @$x]
+        incr right -1
+        if {$right < $insert} {
+            while {$right < $insert} {
+                incr left
+                incr right
+            }
+            %W xview $left
+        }
+    }
+}
