@@ -267,7 +267,7 @@ class ::tycho::EditDAG {
     ####                   protected methods                       ####
 
     # Configure the popup menu depending on the current context
-    protected method configurePopup {}
+    protected method configureContextMenu {}
 
     # convert the contents of a node into an array.
     protected method contentsToArray {node arrayname defaults}
@@ -399,16 +399,8 @@ body ::tycho::EditDAG::constructor {args} {
     bind $slate <KeyRelease-Shift_R> "@scope ::tycho::EditDAG \
 	    [list $this showCurrentNodeInfo %s 1]"
 
-    # Create and configure the context-sensitive popup menu
-    # FIXME: Is this the right place for this code?
-    set myContextmenu [::tycho::PopupMenu .#auto \
-	    -command "@scope ::tycho::EditDAG [list $this configurePopup]"]
-
-    # Entries for developer information FIXME
-    contextmenu add {Name this widget...} -command \
-	    "::tycho::post $itk_component(slate)"
-
-    bind $itk_component(slate) <Button-3> "$this contextmenu post %X %Y"
+    # Create the context-sensitive popup menu
+    contextmenu create $itk_component(slate)
 
     # The following is done once in the constructor because it's fairly
     # expensive.
@@ -888,12 +880,12 @@ body ::tycho::EditDAG::verify {{repair {}}} {
     ####                      protected methods                    ####
 
 #####################################################################
-#### configurePopup
+#### configureContextMenu
 # Configure the popup menu according to context. For the Graphics widget,
 # this method looks to find out if the mouse is over a node, and creates
 # menu entries accordingly.
 #
-body ::tycho::EditDAG::configurePopup {} {
+body ::tycho::EditDAG::configureContextMenu {} {
     set item [$slate find withtag current]
     contextmenu clear
     if { $item != "" } {
@@ -914,8 +906,8 @@ body ::tycho::EditDAG::configurePopup {} {
     # Add the default entry back into the menu.
     # FIXME: This is bogus: we need a way to clear the menu
     # _except for this entry.
-    contextmenu add {Name this widget...} -command \
-	    "::tycho::post $itk_component(slate)"
+    contextmenu add {Name of this widget...} -command \
+	    "::tycho::post $this"
 
 }
 
