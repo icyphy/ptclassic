@@ -11,10 +11,10 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel preproc domains interp pigiRpc xgraph tests
+DIRS = kernel preproc domains interp pigiRpc xgraph
 
 # directories with a make.template
-MTDIRS = kernel pigiRpc tests
+MTDIRS = kernel pigiRpc
 
 # "leaf" directories with no make.template
 LDIRS = preproc interp xgraph
