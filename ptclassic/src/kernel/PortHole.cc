@@ -1056,29 +1056,56 @@ Geodesic* PortHole :: allocateGeodesic () {
 
 void PortHole :: getParticle()
 {
-// It is assumed this routine is called before a Star executes...
-// It gets numberTokens Particles from the Geodesic and stores them
-// in the buffer, then setting current time to the last Particle input
+  Particle** pOld;
+  Particle* pNew;
 
-	for(int i = numberTokens; i>0; i--)
-	{
-		// Move the current time pointer in the buffer
-		// Get a pointer to the next Particle* in the buffer.
-		Particle** pOld = myBuffer->next();
+  // It is assumed this routine is called before a Star executes...
+  // It gets numberTokens Particles from the Geodesic and stores them
+  // in the buffer, then setting current time to the last Particle input
 
-		// Get another Particle from the Geodesic.
-		Particle* pNew = myGeodesic->get();
+  for(int i = numberTokens; i>0; i--)
+    {
+      // Move the current time pointer in the buffer
+      // Get a pointer to the next Particle* in the buffer.
+      if (!myBuffer) {
+	Error::abortRun(*this,
+			"has a NULL myBuffer in PortHole::getParticle()");
+	return;
+      }
+      else {
+	pOld = myBuffer->next();
+      }
+
+      // Get another Particle from the Geodesic.
+      if (!myGeodesic) {
+	Error::abortRun(*this,
+			"has a NULL myGeodesic in PortHole::getParticle()");
+	return;
+      }
+      else {
+	pNew = myGeodesic->get();
+      }
 		
-		if (!pNew) {
-			Error::abortRun(*this,
-					"Attempt to read from empty geodesic");
-			return;
-		}
-		// Recycle the old particle by putting it into the Plasma.
-		myPlasma->put(*pOld);
-		// Put the new particle into the buffer.
-		*pOld = pNew;
-	}
+      // Safety check for NULL pNew.
+      if (!pNew) {
+	Error::abortRun(*this, "Attempt to read from empty geodesic",
+			" in PortHole::getParticle()");
+	return;
+      }
+
+      // Recycle the old particle by putting it into the Plasma.
+      if (!myPlasma) {
+	Error::abortRun(*this,
+			"has a NULL myPlasma in PortHole::getParticle()");
+	return;
+      }
+      else {
+	myPlasma->put(*pOld);
+      }
+
+      // Put the new particle into the buffer.
+      *pOld = pNew;
+    }
 }
 
 void PortHole :: clearParticle()
@@ -1105,36 +1132,86 @@ void PortHole :: clearParticle()
 
 void PortHole :: putParticle()
 {
-	Particle** p;
+  Particle** p;
 
-// This method is called after go(); the buffer now contains numberTokens
-// Particles that are to be send to the output Geodesic
+  // This method is called after go(); the buffer now contains
+  // numberTokens Particles that are to be sent to the output Geodesic.
 
-	if (numberTokens == 1) {
-		// fast case for when moving one particle
-		// most common case.
-		p = myBuffer->here();
-		myGeodesic->put(*p);
-		*p = myPlasma->get();
-		return;
-	}
-	// slow case for multiple particles.
-	// Back up in the buffer by numberTokens
-	myBuffer->backup(numberTokens);
+  if (numberTokens == 1) {
+    // fast case for when moving one particle
+    // most common case.
 
-	// Now move forward numberTokens times, sending copy of
-	// Particle to Geodesic
-	for(int i = numberTokens; i>0; i--) {
-		// get next particle from my buffer
-		p = myBuffer->next();
-		
-		// launch it into the geodesic
-		myGeodesic->put(*p);
+    if (!myBuffer) {
+      Error::abortRun(*this,
+		      "has a NULL myBuffer in PortHole::putParticle()");
+      return;
+    }
+    else {
+      p = myBuffer->here();
+    }
 
-		// Get Particle from Plasma
-		// Put it my buffer, replacing the used-up particle.
-		*p = myPlasma->get();
-	}
+    if (!myGeodesic) {
+      Error::abortRun(*this,
+		      "has a NULL myGeodesic in PortHole::putParticle()");
+      return;
+    }
+    else {
+      myGeodesic->put(*p);
+    }
+
+    if (!myPlasma) {
+      Error::abortRun(*this,
+		      "has a NULL myPlasma in PortHole::putParticle()");
+      return;
+    }
+    else {
+      *p = myPlasma->get();
+    }
+
+    return;
+  }
+  // slow case for multiple particles.
+  // Back up in the buffer by numberTokens
+  if (!myBuffer) {
+    Error::abortRun(*this,
+		    "has a NULL myBuffer in PortHole::putParticle()");
+    return;
+  }
+  else {
+    myBuffer->backup(numberTokens);
+  }
+  // Now move forward numberTokens times, sending copy of
+  // Particle to Geodesic
+  for(int i = numberTokens; i>0; i--) {
+    // get next particle from my buffer
+    if (!myBuffer) {
+      Error::abortRun(*this,
+		      "has a NULL myBuffer in PortHole::putParticle()");
+      return;
+    }
+    else {
+      p = myBuffer->next();
+    }
+    // launch it into the geodesic
+    if (!myGeodesic) {
+      Error::abortRun(*this,
+		      "has a NULL myGeodesic in PortHole::putParticle()");
+      return;
+    }
+    else {
+      myGeodesic->put(*p);
+    }
+    // Get Particle from Plasma
+    // Put it my buffer, replacing the used-up particle.
+    if (!myPlasma) {
+      Error::abortRun(*this,
+		      "has a NULL myPlasma in PortHole::putParticle()");
+      return;
+    }
+    else {
+      *p = myPlasma->get();
+    }
+  }
 }
 
 // isa functions
