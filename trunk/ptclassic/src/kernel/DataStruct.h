@@ -1,4 +1,3 @@
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -39,6 +38,11 @@ class SingleLink
 
 class SingleLinkList
 {
+public:
+	~SingleLinkList()  { initialize(); }
+	SingleLinkList() { lastNode = 0; }
+	SingleLinkList(Pointer);
+
 protected:
 
 	void insert(Pointer a);	// Add at head of list
@@ -53,10 +57,6 @@ protected:
         // Reset the last reference pointer so that accesses start
         // at the head of the list
         void reset() { lastReference = lastNode; }
-
-	SingleLinkList() { lastNode = 0; }
-	SingleLinkList(Pointer);
-	~SingleLinkList()  { initialize(); }
 
 private:
 
