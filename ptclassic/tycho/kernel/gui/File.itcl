@@ -541,7 +541,12 @@ body ::tycho::File::constructor {args} {
     $itk_component(helpMenu) add command \
 	    -label "User's Guide" \
 	    -underline 0 \
-	    -command "$this help"
+	    -command [code $this help]
+
+    $itk_component(helpMenu) add command \
+	    -label "Index" \
+	    -underline 0 \
+	    -command {::tycho::File::openContext $TYCHO/tycho.idx}
     
     # Bindings
     bind $prefix <Control-x><Control-f> "File::openWin; break"
@@ -662,7 +667,7 @@ body ::tycho::File::getReadonly {} {
 #
 body ::tycho::File::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/FileHelp.html
+    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/FileHelp.html
 }
 
 #####################################################################
@@ -916,10 +921,12 @@ body ::tycho::File::emergencySave {} {
 # the corresponding file, and call "seeName $point".
 #
 body ::tycho::File::hyperJump {filename point} {
-    set obj [uplevel #0 [list File::openContext $filename]]
-    tkwait visibility [$obj windowName]
+    set obj [uplevel #0 [list ::tycho::File::openContext $filename]]
     if {$point != {}} {
-	uplevel #0 [list $obj seeName $point]
+	# The seeName call is postponed to give time for the widget
+	# to be created. The catch is in case it is immediately deleted.
+	after idle [list catch \
+		[list $obj seeName $point]]
     }
 }
 
@@ -943,7 +950,7 @@ body ::tycho::File::newEditor {editor} {
 #
 body ::tycho::File::openWin {} {
     DialogWindow::new FileBrowser [autoName .fileBrowser] \
-	    -command "File::openContext " \
+	    -command "::tycho::File::openContext " \
 	    -text "Open File:"
 }
 
@@ -987,16 +994,17 @@ body ::tycho::File::openContext {filename} {
 
 #####################################################################
 #### registerEditor
-# Register a context-sensitive editor by file extension(s), or base 
-# filename. This means means that an open-file command (via the 
-# openContext procedure in this class) will recognize the file 
-# extension, or base filename and open the specified editor. The editor 
-# is assumed to be a class derived from File, or at least to have a 
-# -file option. Note that the leading period is considered part of 
-# the extension, as in ".itcl".  If a third argument is given, then 
-# the editor will be added to the Window menu of all File objects opened 
-# in the future using the value of the third argument as the menu label. 
-# This permits the user to open a new blank editor of the given class.
+# Register a context-sensitive editor by file extension(s), or base
+# filename. This means means that an open-file command (via the
+# openContext procedure in this class) will recognize the file
+# extension, or base filename and open the specified editor. The editor
+# is assumed to be a class derived from File, or at least to have a
+# -file option and a "busy" method (to mark it busy). Note that the
+# leading period is considered part of the extension, as in ".itcl". If
+# a third argument is given, then the editor will be added to the
+# Window menu of all File objects opened in the future using the value
+# of the third argument as the menu label. This permits the user to
+# open a new blank editor of the given class.
 #
 body ::tycho::File::registerEditor {extensions editorClass {description {}} \
 	{baseFilename {}}  } {
@@ -1073,6 +1081,7 @@ body ::tycho::File::autoSave {} {
 	set filename [format "#auto#%s" $filename]
 	set filename [format "%s/%s" [file dirname $file] $filename]
 	save $filename
+	markModified
     }
     set interval [expr int(60000*$itk_option(-autosaveinterval))]
     if {$interval < 0 || $interval > 7200000} {
