@@ -42,6 +42,8 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
+# We only link against libptmatlab if matlab cannot be found at link time.
+# See $PTOLEMY/mk/matlab.mk and $PTOLEMY/bin/matlabRootDir.
 LIB =	libptmatlab.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
