@@ -36,7 +36,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g) : selfStar(s),
 		 Domain::domainOf(g)->domainName(),&g)
 {
 	// set up the parent pointer of inner Galaxy
-	g.setNameParent("innerGal", &s);
+	g.setNameParent(g.readName(), &s);
 
 	dynamicHorizons = FALSE;
 }
