@@ -46,6 +46,7 @@ libPar.exp\
 libatm.exp\
 libbdf.exp\
 libbdfstars.exp\
+libcephes.exp\
 libcg.exp\
 libcg56.exp\
 libcg56dspstars.exp\
