@@ -116,6 +116,14 @@ option add *Graphics.versionColor black widgetDefault
 # <code>centeredText</code> method can be used to create titles, subtitles,
 # author information, etc.  These can be specified or edited interactively.
 # <p>
+# The widget supports a set of default interaction mechanisms using
+# tags. Drawn items tagged with "selectable" can be selected with button
+# 1; items also tagged with "movable" can be selected and moved freely, and
+# text items tagged with "editable" can be edited in-place by clicking on
+# them with the button 2. Button 1 can also be used to "drag-select" one
+# or more items. If the shift key is pressed when selecting an item or when
+# starting drag-selecting, items are toggled in and out of the selection set.
+# <p>
 # This class is a base class for more interesting graphical displays
 # and editors. It is not meant to be used on its own. Derived classes
 # may create objects in the canvas without using the <code>create</code>
@@ -230,7 +238,7 @@ class ::tycho::Graphics {
     method select {{append 0}}
 
     # Return a list of the ids of selected objects.
-    method selected {} {return $selection}
+    method selected {} {return [$selector contents]}
 
     # Clear the selection.
     method selectionClear {}
@@ -286,8 +294,17 @@ class ::tycho::Graphics {
     # The name of the Tk canvas as a variable, for convenience.
     protected variable canvas {}
 
+    # An object that manages dragging and selecting of items
+    protected variable dragselector
+
     # Flag indicating whether undo and automatic updates are enabled.
     protected variable interactiveEnabled 0
+
+    # An object that manages editing of text items
+    protected variable lineeditor
+
+    # An object that manages selection of items
+    protected variable selector
 
     ###################################################################
     ####                   private methods                         ####
@@ -311,7 +328,7 @@ class ::tycho::Graphics {
     private variable itemEdit
 
     # A list of the currently selected objects.
-    private variable selection {}    
+#    private variable selection {}    
 
     # The redo buffer
     private variable redoCommands {}
@@ -348,7 +365,6 @@ body ::tycho::Graphics::constructor {args} {
     # Create a top frame to contain both the canvas and vertical 
     # scrollbar and a bottom frame to hold the horizontal scrollbar and 
     # some filler.
-
     itk_component add top {
 	frame $itk_component(childsite).top
     } {
@@ -418,6 +434,7 @@ body ::tycho::Graphics::constructor {args} {
     }
     pack $itk_component(info) -expand no -fill x
 
+    # Create and configure the widget's menu bar
     menubar addMenu Edit left Window -underline 0
 
     menubar addMenuItem {Undo} Edit -underline 0 -accelerator "z" \
@@ -456,8 +473,8 @@ body ::tycho::Graphics::constructor {args} {
 
     eval itk_initialize $args
 
-    bind $canvas <Button-1> "$this select"
-    bind $canvas <Shift-Button-1> "$this select 1"
+    # bind $canvas <Button-1> "$this select"
+    # bind $canvas <Shift-Button-1> "$this select 1"
 
     # Prevent shadowing of bindings in the File class.
     bind $canvas <Control-x> { }
@@ -469,22 +486,22 @@ body ::tycho::Graphics::constructor {args} {
 
     # Simpler bindings provided because this is not a text editor.
     # These are fashioned after the Macintosh commands
-    bind $canvas <Key-z> "$this undo; break"
-    bind $canvas <Key-d> "$this redo; break"
-    bind $canvas <Key-x> "$this modify cut; break"
-    bind $canvas <Key-c> "$this copy; break"
-    bind $canvas <Key-v> "$this modify paste; break"
-    bind $canvas <Key-e> "$this edit; break"
+    bind $canvas <Meta-z> "$this undo; break"
+    bind $canvas <Meta-d> "$this redo; break"
+    bind $canvas <Meta-x> "$this modify cut; break"
+    bind $canvas <Meta-c> "$this copy; break"
+    bind $canvas <Meta-v> "$this modify paste; break"
+    bind $canvas <Meta-e> "$this edit; break"
 
     # Specialized bindings.
-    bind $canvas <Key-T> "$this titleAdd; break"
+    bind $canvas <Meta-T> "$this titleAdd; break"
 
     # Bindings provided for compatibility with emacs conventions.
     # These must be specified after the simpler bindings above.
-    bind $canvas <Meta-x> { }
+#    bind $canvas <Meta-x> { }
     bind $canvas <Control-x><u> "$this undo; break"
     bind $canvas <Control-w> "$this modify cut; break"
-    bind $canvas <Meta-w> "$this copy; break"
+#    bind $canvas <Meta-w> "$this copy; break"
     bind $canvas <Control-y> "$this modify paste; break"
 
     # Bind configure events to update the display.
@@ -493,6 +510,47 @@ body ::tycho::Graphics::constructor {args} {
             "$this updateScrollbars; $this dependenceUpdate resize"
 # FIXME:
 #            $this interactiveEnable 1
+
+    # Create the selector. Shift-click toggles selected items.
+    set selector [$canvas interact create Selector \
+	    -dragcolor grey60 -highlightcolor black -highlightwidth 1]
+    $selector bind selectable -button 1
+    $selector bind selectable -button 1 -modifiers shift -toggle
+
+    # Move selected items only if all are tagged "moveable"
+    $selector configure -movepredicate \
+	    "lnull \[lsubtract \[$selector contents\] \[$canvas find withtag moveable\]\]"
+
+    # Create the background item used for drag-selecting
+    $canvas create rect 0 0 0 0 -outline "" -tags background
+    ::bind $canvas <Configure> \
+	    "$canvas coords background 0 0 \
+	        \[winfo width $canvas\] \[winfo height $canvas\]"
+
+    # Create the drag-selector. Shift-click or button 2 toggles items
+    set dragselector [$canvas interact create Follower]
+    $dragselector bind background -button 1
+    $dragselector bind background -button 1 -modifiers shift -toggle
+    $dragselector cascade $selector
+
+    # Create an editor for text items. Button 2 activates
+    set lineeditor [$canvas interact create Editor]
+    $lineeditor bind editable -button 2
+
+    # Starting editing clears all selected items and prevents
+    # selection on the text item
+    $lineeditor configure -activatecommand \
+	    "$selector clear; $canvas dtag \[$lineeditor target\] selectable"
+
+    # Stopping editing makes the text item selectable again
+    $lineeditor configure -deactivatecommand \
+	    "$canvas addtag selectable withtag \[$lineeditor target\]"
+
+    # Selecting or deselecting an item deactivates the text editor
+    $selector configure -selectcommand "$lineeditor stop"
+
+    # Using the drag-selector deactivates the text editor
+    $dragselector configure -activatecommand "$lineeditor stop"
 }
 
 #######################################################################
@@ -517,7 +575,11 @@ body ::tycho::Graphics::destructor {} {
 #
 body ::tycho::Graphics::clear {} {
     if [getReadOnly] {bell; return}
-    [canvasName] delete all
+    
+    # Delete all items on the slate _except_ the background
+    $canvas addtag temp all
+    $canvas dtag background temp
+    $canvas delete temp
 }
 
 # NOTE: The following implementation assumes that the visible portion
@@ -532,7 +594,8 @@ body ::tycho::Graphics::clear {} {
 # wider than the window. The remaining arguments are optional, although
 # if any one of them is given, then the ones before it must also be
 # given. The second argument is a tag to assign to the text (in
-# addition to "selectable", which is always assigned). If any items
+# addition to "selectable" and "editable", which are always assigned).
+# If any items
 # already exist with this tag, then they are deleted.  The third
 # argument is a list of tags identifying tagged items in the canvas
 # below which the text will be placed. If the tag is given, and this
@@ -544,7 +607,8 @@ body ::tycho::Graphics::clear {} {
 # font in a form accepted by the <code>findFont</code> method of the
 # <code>FontManager</code> class. If the color and font are not
 # specified, then the text is black using the default variable font.
-# The text is tagged "selectable," and the id of the text object is
+# The text is tagged "selectable" and "editable," and the id of the
+# text object is
 # returned. If the text is an empty string and the tag is given, then
 # items with that tag are simply deleted and a null string is returned.
 # The action is registered for undoing, and <code>dependenceUpdate</code>
@@ -586,7 +650,7 @@ body ::tycho::Graphics::centeredText \
                 -anchor n \
                 -fill $usecolor \
                 -text $text \
-                -tag selectable \
+                -tags {selectable editable moveable} \
                 -font $usefont]
         if {$tag != {}} {
             $canvas addtag $tag withtag $id
@@ -1234,7 +1298,7 @@ body ::tycho::Graphics::scrollSet {dialog} {
 #######################################################################
 #### select
 # Select all objects under the current mouse position that have the tag
-# "selectable".  If there are none, the clear any selection.
+# "selectable".  If there are none, then clear any selection.
 # If the argument is non-zero, then append to the selection rather than
 # replacing it.
 #
@@ -1244,9 +1308,9 @@ body ::tycho::Graphics::select {{append 0}} {
     }
     set objs [findAll current selectable]
     foreach obj $objs {
-        lappend selection $obj
-        set bbox [component canvas bbox $obj]
-        eval component canvas create rectangle $bbox -tags selectbox
+	if { ! [$selector selected $obj] } {
+	    $selector select $obj
+	}
         # FIXME: Put into the Tk clipboard?
     }
 }
@@ -1256,8 +1320,7 @@ body ::tycho::Graphics::select {{append 0}} {
 # Clear the selection.
 #
 body ::tycho::Graphics::selectionClear {} {
-    component canvas delete selectbox
-    set selection {}
+    $selector clear
 }
 
 #####################################################################
