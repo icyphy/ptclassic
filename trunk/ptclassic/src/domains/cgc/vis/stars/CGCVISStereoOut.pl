@@ -58,11 +58,12 @@ provisions.
 	/* Take data from Input and put it in buffer */
 	/* Data in buffer is alternate left and right channels */
 	for (i = 0; i < ($val(blockSize)/8); i ++) {
+	  j = 4 * i;
 	  $starSymbol(unpackit).regvaluedbl = $ref(leftright,i);
-	  $starSymbol(buf)[4*i] = $starSymbol(unpackit).regvaluesh[0];
-	  $starSymbol(buf)[4*i+1] = $starSymbol(unpackit).regvaluesh[1];
-	  $starSymbol(buf)[4*i+2] = $starSymbol(unpackit).regvaluesh[2];
-	  $starSymbol(buf)[4*i+3] = $starSymbol(unpackit).regvaluesh[3];
+	  $starSymbol(buf)[j] = $starSymbol(unpackit).regvaluesh[0];
+	  $starSymbol(buf)[j+1] = $starSymbol(unpackit).regvaluesh[1];
+	  $starSymbol(buf)[j+2] = $starSymbol(unpackit).regvaluesh[2];
+	  $starSymbol(buf)[j+3] = $starSymbol(unpackit).regvaluesh[3];
 	}
     }
 
@@ -73,6 +74,7 @@ provisions.
       
     initCode {
       CGCStereoBase::initCode();
+      addInclude("<vis_types.h>");
       addGlobal(globalDecl,"CGCVISStereoOut_globalDecl");
       addDeclaration(mainDecl);
       if (standardIO) {
@@ -95,7 +97,7 @@ provisions.
     }
 
     go {
-      addDeclaration("int i;");
+      addDeclaration("int i, j;");
       addCode(convert);
       addCode(write);
     }

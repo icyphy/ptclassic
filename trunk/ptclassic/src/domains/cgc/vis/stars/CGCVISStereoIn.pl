@@ -48,12 +48,12 @@ provisions.
     codeblock (convert) {
       /* Convert data in buffer to Output format */
 
-      for (i=0; i <($val(blockSize)/8);
-	   i++) {
-	$starSymbol(packit).regvaluesh[0] = $starSymbol(buf)[4*i];
-	$starSymbol(packit).regvaluesh[1] = $starSymbol(buf)[4*i+1];
-	$starSymbol(packit).regvaluesh[2] = $starSymbol(buf)[4*i+2];
-	$starSymbol(packit).regvaluesh[3] = $starSymbol(buf)[4*i+3];
+      for (i=0; i <($val(blockSize)/8); i++) {
+	j = 4*i;
+	$starSymbol(packit).regvaluesh[0] = $starSymbol(buf)[j];
+	$starSymbol(packit).regvaluesh[1] = $starSymbol(buf)[j+1];
+	$starSymbol(packit).regvaluesh[2] = $starSymbol(buf)[j+2];
+	$starSymbol(packit).regvaluesh[3] = $starSymbol(buf)[j+3];
 
 	$ref(leftright,i) = $starSymbol(packit).regvaluedbl;	
       }
@@ -66,6 +66,7 @@ provisions.
 
     initCode {
       CGCStereoBase::initCode();
+      addInclude("<vis_types.h>");
       addGlobal(globalDecl,"CGCVISStereoIn_globalDecl");
       addDeclaration(mainDecl);
       if (standardIO) {
@@ -87,7 +88,7 @@ provisions.
     }
 
     go {
-      addDeclaration("int i;");
+      addDeclaration("int i, j;");
       addCode(read);
       addCode(convert);
     }
