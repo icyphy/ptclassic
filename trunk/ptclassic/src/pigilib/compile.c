@@ -830,7 +830,7 @@ octObject *facetPtr;
 	/* universe already xfered to kernel and is unchanged */
 	sprintf(buf, "curuniverse %s\n", name);
 	KcLog(buf);
-	Tcl_VarEval(ptkInterp, buf);
+	Tcl_VarEval(ptkInterp, buf, (char *) NULL);
 	return (TRUE);
     }
 
