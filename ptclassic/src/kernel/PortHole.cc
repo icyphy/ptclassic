@@ -205,8 +205,16 @@ void GenericPort :: connect(GenericPort& destination, int numberDelays,
 	if (geo == NULL) geo = realDestination.allocateGeodesic();
 	if (geo != NULL)
 	{
-	    geo->setSourcePort(realSource, numberDelays, initDelayValues);
-	    geo->setDestPort(realDestination);
+	    if (realSource.isItOutput())	// Yes, it is a source.
+	    {
+		geo->setSourcePort(realSource, numberDelays, initDelayValues);
+		geo->setDestPort(realDestination);
+	    }
+	    else	// The destination is really the source.
+	    {
+		geo->setSourcePort(realDestination, numberDelays, initDelayValues);
+		geo->setDestPort(realSource);
+	    }
 	}
 	else Error::abortRun(realSource,
 		"could not allocate geodesic for connection.");
