@@ -4,7 +4,7 @@ defstar {
 	derivedFrom { Chop }
 	author { G. S. Walter, E. A. Lee }
 	version { $Id$ }
-	location { SDF control palette }
+	location { SDF main library }
 	copyright { 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.

@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF logic library }
+	location { SDF main library }
 	desc {
 This star compares its two inputs "upper" and "lower".
 The test "condition" can be any one of {EQ NE GT GE},

@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF logic library }
+	location { SDF main library }
 	desc {
 This star applies a logical operation to any number of inputs.
 The inputs are integers interpreted as Boolean values,

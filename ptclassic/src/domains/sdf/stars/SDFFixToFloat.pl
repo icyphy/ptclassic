@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF conversion palette }
+	location { SDF main library }
 	desc { Convert a fixed-point input to a floating-point output. }
 	input {
 		name { input }

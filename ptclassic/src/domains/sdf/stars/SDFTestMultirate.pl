@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF library }
+	location { SDF main library }
 	inmulti {
 		name { input }
 		type { float }
