@@ -335,7 +335,7 @@ int
 InterpGalaxy::addNode (const char* nodename) {
 	nodename = hashstring (nodename);
 	// get a geodesic appropriate for the current domain, add to list
-	Geodesic& geo = Domain::named(domain())->newNode();
+	Geodesic& geo = Domain::named(domain())->newGeo(TRUE);
 	geo.setNameParent (nodename, this);
 	nodes.put(geo);
 	// make actionList entry
