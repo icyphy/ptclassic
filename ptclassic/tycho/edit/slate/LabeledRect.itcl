@@ -92,21 +92,6 @@ namespace ::tycho {
 class ::tycho::LabeledRect {
     inherit ::tycho::LabeledItem
 
-    # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-
-    ###################################################################
-    ####                            options                        ####
-
-    # The fill color of the rectangle
-    common _fill
-
-    # The outline color of the rectangle
-    common _outline
-
-    # The width of the rectangle outline
-    common _width
-
     ###################################################################
     ####                     option update procs                   ####
 
@@ -121,6 +106,12 @@ class ::tycho::LabeledRect {
 
     ###################################################################
     ####                         public procs                      ####
+
+    # Create a new item with options already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     # Set or get the item's coordinates
     proc coords {id canvas slate args}
@@ -184,14 +175,9 @@ body ::tycho::LabeledRect::_width {id canvas slate width} {
 }
 
 ##########################################################################
-#### construct
+#### _construct
 #
-body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
-    # Initialize the options
-    foreach {opt val} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $val
-    }
-
+body ::tycho::LabeledRect::_construct {id canvas slate tags x0 y0 x1 y1} {
     # Create the primary component. This is the displayed rectangle.
     set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
 	    -fill $option(fill$id) -outline $option(outline$id) \
@@ -200,6 +186,18 @@ body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Create the graphics and text label -- do not change the order!
     _text     $id $canvas $slate $option(text$id)
     _graphics $id $canvas $slate $option(graphics$id)
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
+    }
+    # Call the proc to do the real work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
 }
 
 ##########################################################################
