@@ -42,6 +42,7 @@ set alltestslist [list \
 	[file join editors visedit test alltests.itcl] \
 	[file join editors slate test alltests.itcl]]
 
+global ptolemyfeature
 if { $ptolemyfeature(ptcl) || $ptolemyfeature(pitcl)} {
     puts "Ptolemy seems to be present, so we will run the Ptolemy tests"
     lappend alltestslist \
