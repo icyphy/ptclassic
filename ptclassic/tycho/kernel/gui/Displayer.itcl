@@ -150,30 +150,19 @@ proc ::tycho::view {view args} {
 
     # Deiconify the displayer and return the view name
     if { ! $withdrawn } {
-	wm deiconify $wname
+        # Perform an update idletasks to make sure that the
+        # window is properly constructed.
+        update idletasks
+
+        # Make sure the window still exists, and abort if not
+        if { [info which -command $wname] == "" } {
+            ::tycho::silentError
+        } else {
+            wm deiconify $wname
+        }
     }
     return $wname.v
 }
-
-# ## OLD VERSION
-# # proc ::tycho::view {view {viewoptions {}} \
-# #         {displayer {Displayer}} {dispoptions {}}} {
-# #     if ![string match {::*} $view] {
-# #         set view "::tycho::$view"
-# #     }
-# #     if ![string match {::*} $displayer] {
-# #         set displayer "::tycho::$displayer"
-# #     }
-# #     set wname [::tycho::autoName .displayer]
-# #     uplevel #0 $displayer $wname $dispoptions
-# #     uplevel #0 $view $wname.v $viewoptions
-# #     $wname attachView  $wname.v
-# #     $wname showView $wname.v
-# #
-# #     wm deiconify $wname
-# #     return $wname.v
-# # }
-
 
 #######################################################################
 #### Displayer
