@@ -75,7 +75,7 @@ class ::tycho::DirectedAcyclicGraph {
     method add {nodename contents {parents {}} {children {}}}
 
     # Add an arc between existing nodes, if it does not already exist.
-    method addArc {parent child}
+    method addArc {parent child {nocheck 0}}
 
     # Return a list that describes the graph.
     method describe {}
@@ -108,20 +108,26 @@ body ::tycho::DirectedAcyclicGraph::add \
 #######################################################################
 #### addArc
 # Add an arc between existing nodes, if it doesn't already exist.
-# If it does exist, ignore.
+# If it does exist, ignore.  The arguments are the parent and child
+# node names.  It is an error if either of these nodes does not exist.
+# It is also an error if the arc introduces a cycle in the graph.
+# If an optional third argument is given and is nonzero, the skip
+# the check for cycles, which can be moderately expensive.
 #
-body ::tycho::DirectedAcyclicGraph::addArc {parent child} {
+body ::tycho::DirectedAcyclicGraph::addArc {parent child {nocheck 0}} {
     verify $parent
     verify $child
     if {[lsearch -exact $childrennames($parent) $child] < 0} {
         # The arc does not exist.
-        # First verify that adding this arc will not create a cycle.
-        foreach node [describeSubgraph [list $child]] {
-            set name [lindex $node 0]
-            if {$name == $parent} {
-                error "Creating an arc between $parent and $child will result \
-                        in a directed loop, which is not allowed in a \
-                        directed acyclic graph."
+        if !$nocheck {
+            # First verify that adding this arc will not create a cycle.
+            foreach node [describeSubgraph [list $child]] {
+                set name [lindex $node 0]
+                if {$name == $parent} {
+                    error "Creating an arc between $parent and $child will \
+                            result in a directed loop, which is not allowed \
+                            in a directed acyclic graph."
+                }
             }
         }
         # Add the arc.
