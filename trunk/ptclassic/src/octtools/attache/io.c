@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -46,7 +46,7 @@ IOinit()
 	 * was invoked in another program. */
 	errRaise(optProgName, 0, "can't initialize curses");
     }
-#if defined(hpux)
+#if defined(hpux) || defined(SYSV)
     nonl();
     cbreak();
     noecho();
