@@ -13,38 +13,42 @@ delim off
 delim $$
 .EN
 .LD
-.IE "spread spectrum phase shit keying"
-This demo comprised of a
+.IE "spread spectrum phase shift keying"
+This demo comprised of
 .c xmit2spread
 and 
 .c rec2spread 
 galaxies illustrates a spread spectrum application using a binary
-phase shift keying technique. At the top level two parameters are 
-edited SamplingRate and PulseDurationInsample. Default SamplingRate
-is 8Khz. The carrier frequency is parameterized using the SamplingRate.
+phase shift keying technique.
+The top-level parameters are \fISamplingRate\fR and
+\fIPulseDurationInSample\fR.
+The default \fISamplingRate\fR is 8 kHz.
+The carrier frequency is parameterized using the SamplingRate.
 .EQ
 frequency = 2/(31/SamplingRate)
 .EN 
-where 31 is the PulseDurationInSample.
+where 31 is the pseudo-noise sequence length.
 .pp
-In the transmitter, the PulseDurationInSample is used to stretch the 
-bit duration as to make the modulation possible. In the receiver, the 
-PulseDurationInSample is used to down sample to the appropriate levels.
+In the transmitter, the \fIPulseDurationInSample\fR is used to stretch the 
+bit duration to make the modulation possible. In the receiver, the 
+\fIPulseDurationInSample\fR is used to downsample to the original bit
+stream sampling rate.
 .pp
 The
 .c Spread
 and
 .c DeSpreader
-galaxies are frame synchronized direct-sequence. That means that the pseudo
-noise generated in the transmitter and the receiver must be synchronized.
+galaxies are frame-synchronized direct-sequence systems.
+That means that the pseudo-noise generated in the transmitter and
+the receiver must be synchronized.
 The
 .c Spreader
 and 
 .c DeSpreader
-modulates the input binary bits with the pseudo noise generator. The maximum
-length of the
+modulates the input binary bits with the pseudo noise generator.
+The maximum length of the
 .c PseudoNoise 
-galaxy is set to 31, which matches the PulseDurationInSample.
+galaxy is harcoded to 31.
 .UH REFERENCES
 .ip [1]
 Edward A. Lee and David G. Messerschmitt, \fIDigital Communication\fR,
@@ -56,9 +60,9 @@ Wiley & Sons, 3rd ed., 1994, ISBN 0-471-57176-8.
 Leon W. Couch II, \fIDigital and Analog Communication Systems\fR,
 Macmillan, 4th ed., 1993, ISBN 0-02-325281-2.
 .SA
-xmit2spread,
 rec2spread,
 scrambler,
-Spread,
-DeSpread.
+xmit2spread,
+DeSpread,
+Spread.
 .ES
