@@ -85,7 +85,7 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 $(LIB):	$(OBJS)
 	rm -f $(LIB)
 	ar cq $(LIB) $(OBJS)
-	ranlib $(LIB)
+	$(RANLIB) $(LIB)
 
 # Rule for installing a library
 $(LIBDIR)/$(LIB):	$(LIB)
