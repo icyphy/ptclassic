@@ -513,6 +513,36 @@ char *domain;
     return (TRUE);
 }
 
+/* 1/28/91, EAL
+*/
+boolean
+GOCArchProp(facetPtr, archPtr, defaultArch)
+octObject *facetPtr;
+char **archPtr;
+char *defaultArch;
+{
+    octObject prop;
+
+    CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "architecture", defaultArch));
+    *archPtr = prop.contents.prop.value.string;
+    return (TRUE);
+}
+
+/* 1/28/91, EAL
+*/
+boolean
+SetArchProp(facetPtr, arch)
+octObject *facetPtr;
+char *arch;
+{
+    octObject prop;
+
+    CK_OCT(ohCreateOrModifyPropStr(facetPtr, &prop, "architecture", arch));
+    return (TRUE);
+}
+
+/* 1/28/91, EAL
+
 /*****  5/2/90 10/23/89
 Iterate prop stores the number of iterations for a universe.
 */
