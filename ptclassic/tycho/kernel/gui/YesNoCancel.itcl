@@ -68,7 +68,7 @@ body ::tycho::YesNoCancel::constructor {args} {
     # Pack the cancel button
     addButton cancel -text "Cancel <Esc>" \
 	    -command "$this execCommand -cancelcommand; \
-	    $this nextWindow;
+	    $this prevWindow;
 	    delete object $this"
 
     # Change the keyboard accelerator for the No button.

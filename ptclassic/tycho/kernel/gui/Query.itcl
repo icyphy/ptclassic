@@ -459,7 +459,7 @@ body ::tycho::Query::constructor {args} {
 	    -command "$this ok"
     addButton cancel -text "Cancel <ESC>" \
 	    -command "$this execCommand -cancelcommand; \
-	    $this nextWindow; \
+	    $this prevWindow; \
 	    delete object $this"
 
     # Enable <Return> binding if there are no multi-line text entry widgets.
@@ -1004,7 +1004,7 @@ body ::tycho::Query::names {} {
 # 
 body ::tycho::Query::ok {} {
     execCommand -okcommand
-    nextWindow
+    prevWindow
     delete object $this
 }
 

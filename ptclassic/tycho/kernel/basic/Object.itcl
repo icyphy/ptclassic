@@ -74,7 +74,7 @@ body ::tycho::Object::constructor {args} {
 body ::tycho::Object::destructor {} {
     if $disableDestruction {
         # Schedule a future attempt at destruction.
-        after 1000 "$this nextWindow; delete object $this"
+        after 1000 "$this prevWindow; delete object $this"
         ::tycho::silentError
     }
 }
