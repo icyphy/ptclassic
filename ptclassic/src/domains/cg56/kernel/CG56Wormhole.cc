@@ -109,10 +109,16 @@ void CG56fromUniversal :: sendData ()
 	transferData();
 
 	if (tokenNew) {
-		// 2. put data
+		// 2. put data to the CG56 geodesic
 //		putData();
 
 	} 
+	else if (CG56fromUniversal::isItOutput()) {
+                // 2. inside domain does not generate enough number of tokens,
+                //    which is error.
+                Error::abortRun(*this, "not enough output tokens ",
+                                "at CG56 wormhole boundary");
+	}
 
 	// no timeMark business since CG56 is "untimed" domain.
 }
@@ -122,10 +128,13 @@ void CG56fromUniversal :: sendData ()
 
 int CG56fromUniversal :: ready() {
 	DFPortHole *pFar = (DFPortHole*)far();
-	int target = pFar->numXfer() * pFar->parentReps();
-	if (numTokens() >= target) {
-		// yes, enough tokens
+	// FIXME: We did not have to check for null pointers in SDF version
+	if (pFar) {
+	    // Check to see if there are enough tokens
+	    int target = pFar->numXfer() * pFar->parentReps();
+	    if (numTokens() >= target) {
 		return TRUE;
+	    }
 	}
 	return FALSE;
 }
