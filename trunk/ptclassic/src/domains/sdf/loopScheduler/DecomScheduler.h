@@ -67,6 +67,9 @@ public:
 	// Display the schedule
 	StringList displaySchedule(int depth);
 
+	// default (for SDFScheduler::displaySchedule override)
+	StringList displaySchedule() { return displaySchedule(0);}
+
 	// Generate code using the Target to produce the right language.
 	StringList genCode(Target&, int depth);
 };
