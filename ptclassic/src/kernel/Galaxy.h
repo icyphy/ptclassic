@@ -94,6 +94,7 @@ public:
 	inline Block* next() { return (Block*)NamedObjListIter::next();}
 	inline Block* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
+	NamedObjListIter::remove;
 };
 
 	////////////////////////////////////
@@ -163,6 +164,19 @@ public:
 	void deleteBlockAfterInit(Block& b);
 
     	/* virtual */ int setTarget(Target*);
+
+        // empty all the blocks from the galaxy - they are not
+        // deallocated. 
+        inline void empty();
+    
+	// Move blocks to parent(default) or specified galaxy and
+        // We can optionally remove and delete the
+        // galaxy from the parent list (TRUE by default).  We may
+        // not want to do this for effeciency purposes - instead it is
+        // possible to use ListIter::remove.   Be careful, if FALSE is
+        // specified, we'll be left with a dangling pointer.
+	virtual int flatten(Galaxy* = NULL, int = TRUE);
+
 protected:
 
 	// Add blocks to the list
@@ -204,6 +218,7 @@ protected:
 
 	// delete sub-blocks
 	inline void deleteAllBlocks() { blocks.deleteAll();}
+    
 private:
 	// Keep a list of component Blocks
 	BlockList	blocks;

@@ -49,30 +49,33 @@ class CIterContext;
 
 class GalAllBlockIter {
 public:
-	GalAllBlockIter(Galaxy& g);
-	~GalAllBlockIter();
-	Block* next();
+	inline GalAllBlockIter(Galaxy& g);
+	inline ~GalAllBlockIter();
+	inline Block* next();
 	inline Block* operator++(POSTFIX_OP) { return next();}
-	void reset();
+	inline void reset();
+        // remove the currently pointed to Block and update the
+        // internal iterators
+        inline void remove();
 protected:
 	GalTopBlockIter *thisLevelIter;
 	IterContext *stack;
-	void push(Galaxy&);
-	void pop();
+	inline void push(Galaxy&);
+	inline void pop();
 };
 
 class CGalAllBlockIter {
 public:
-	CGalAllBlockIter(const Galaxy& g);
-	~CGalAllBlockIter();
-	const Block* next();
+	inline CGalAllBlockIter(const Galaxy& g);
+	inline ~CGalAllBlockIter();
+	inline const Block* next();
 	inline const Block* operator++(POSTFIX_OP) { return next();}
-	void reset();
+	inline void reset();
 protected:
 	CGalTopBlockIter *thisLevelIter;
 	CIterContext *stack;
-	void push(const Galaxy&);
-	void pop();
+	inline void push(const Galaxy&);
+	inline void pop();
 };
 
 // GalStarIter essentially uses a GalAllBlockIter and skips the
@@ -80,25 +83,38 @@ protected:
 
 class GalStarIter : private GalAllBlockIter {
 public:
-	GalStarIter(Galaxy& g);
-	Star* next();
+	inline GalStarIter(Galaxy& g);
+	inline Star* next();
 	inline Star* operator++(POSTFIX_OP) { return next();}
-	void reset() {	GalAllBlockIter::reset();}
+	inline void reset() {	GalAllBlockIter::reset();}
 
+        // remove the currently pointed to Block and update the
+        // internal iterators
+        inline void remove();
 	// need a public destructor because of private derivation
-	~GalStarIter() {}
+	inline ~GalStarIter() {}
 };
 
 
 class CGalStarIter : private CGalAllBlockIter {
 public:
-	CGalStarIter(const Galaxy& g);
-	const Star* next();
+	inline CGalStarIter(const Galaxy& g);
+	inline const Star* next();
 	inline const Star* operator++(POSTFIX_OP) { return next();}
 	inline void reset() {	CGalAllBlockIter::reset();}
 
 	// need a public destructor because of private derivation
-	~CGalStarIter() {}
+	inline ~CGalStarIter() {}
+};
+
+class GalGalaxyIter : private GalAllBlockIter {
+public:
+    inline GalGalaxyIter(Galaxy& g):GalAllBlockIter(g) {};
+    inline Galaxy* next();
+    inline Galaxy* operator++(POSTFIX_OP) { return next();}
+    GalAllBlockIter::reset;
+    virtual ~GalGalaxyIter() {};
+    inline void remove();
 };
 
 #endif

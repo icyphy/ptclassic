@@ -104,6 +104,16 @@ void Wormhole :: buildEventHorizons () {
 		PortHole& realGalp = (PortHole&) galp.realPort();
 		DataType type = realGalp.type();
 		int numToken = realGalp.numXfer();
+
+		// We may be converting a Galaxy whose contents are
+		// already connected to the outside.  If so, we need to
+		// connect the wormhole to the outside.  An example of
+		// this is with Clusters.
+		PortHole* far =  realGalp.far();
+		int numDelays = realGalp.numInitDelays();
+		const char* delayValues = realGalp.initDelayValues();
+		if (far) realGalp.disconnect();
+		
 // separate rules for connecting inputs and outputs.
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
@@ -122,6 +132,8 @@ void Wormhole :: buildEventHorizons () {
 			from.asPort()->inheritTypeFrom (realGalp);
 			to.asPort()->inheritTypeFrom (*(from.asPort()));
 			from.asPort()->connect(realGalp,0);
+			if (far)
+			    far->connect(*to.asPort(),numDelays,delayValues);
 		}
 		else {
 			EventHorizon& to = inSideDomain->newTo();
@@ -140,6 +152,8 @@ void Wormhole :: buildEventHorizons () {
 			to.asPort()->inheritTypeFrom (realGalp);
 			from.asPort()->inheritTypeFrom (*(to.asPort()));
 			realGalp.connect(*(to.asPort()),0);
+			if (far)
+			    from.asPort()->connect(*far,numDelays,delayValues);
 		}
 	}
 // Take care of galaxy multi porthole
@@ -263,10 +277,10 @@ void Wormhole :: sumUp() {}
 
 // explode myself to expose the inside Galaxy.
 Galaxy* Wormhole :: explode() {
-	BlockPortIter nextp(selfStar);
+	BlockPortIter ports(selfStar);
 	PortHole* p;
 
-	while((p = nextp++) != 0) {
+	while((p = ports++) != 0) {
 		int numDelays = p->numInitDelays();
 		const char* delayValues = p->initDelayValues();
 		PortHole* tempP = p->far();
@@ -282,7 +296,8 @@ Galaxy* Wormhole :: explode() {
 		eveP->asPort()->setPort("",0);
 		// now remove the event horizon pair.
 		LOG_DEL; delete eveP;
-
+		ports.remove();
+		
 		// make new connection
 		if (tempP && tempP->isItInput())
 			inP->connect(*tempP, numDelays, delayValues);

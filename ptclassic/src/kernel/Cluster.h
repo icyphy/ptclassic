@@ -34,213 +34,248 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmers : Jose Luis Pino & T. M. Parks
- Date of Creation : 6/10/90
+ Programmers : Jose Luis Pino
+ Date of Creation : 11/9/95
 	
 ********************************************************************/
 
-#include "Block.h"
-#include "GalIter.h"
 #include "DynamicGalaxy.h"
-#include "Scheduler.h"
-class Star;
-class ClusterPort;
+#include "GraphUtils.h"
 
-class Cluster {
-friend class ClusterIter;
-friend class CClusterIter;
-friend class ClusterPortIter;
+class Scheduler;
+
+/**********************************************************************
+			  ClusterPort Class
+
+   The big difference between GalPorts and ClusterPorts is that
+   ClusterPorts maintain a notion of a farPort.  If we did not
+   maintain the far port, we'd have to translate aliases everytime
+   we wanted to see how a cluster is connected to another cluster.
+   So, it is for efficiency - we also do not use geodesics.
+ **********************************************************************/
+class ClusterPort : public GalPort {
+public:
+    inline ClusterPort(GenericPort&);
+    inline ~ClusterPort();
+    
+    // Called after the galaxy is first converted to a clustering
+    // hierarchy.  The inner-most ports are initialized first.
+    inline virtual void initializeClusterPort();
+
+    // Called after a merge/absorb operation
+    inline virtual void update();
+};
+
+class Cluster : public DynamicGalaxy {
 public:
 
-    Cluster(Star& self,const char* domain);
+    /******************************************************************
+		      Constructors & Destructors
+     ******************************************************************/
+    inline Cluster():sched(0) {};
+    inline ~Cluster() { setScheduler(NULL); }
 
-    void clearMaster() { master = NULL; }
-    
-    virtual ~Cluster();
-    // set the master and build cluster
-    virtual void setMasterBlock(Block* master,PortHole** newPorts = NULL);
-    
-    // Set the scheduler of the Cluster
-    void setInnerSched(Scheduler* s);
+    /******************************************************************
+			 Class Identification
+     ******************************************************************/
+    /*virtual*/ int isA(const char*) const;
+    /*virtual*/ const char* className() const;
 
-    void setStopTime(double limit) {
-	sched->setStopTime(limit);
+    /******************************************************************
+			   Make new methods
+     ******************************************************************/
+    /*virtual*/ Block* makeNew() const { return new Cluster; }
+    inline virtual ClusterPort* makeNewPort(GenericPort& p) {
+	return new ClusterPort(p);
     }
+    // Calls makeNewPort and adds it to this cluster
+    inline ClusterPort* addNewPort(PortHole&);
+    
+    /******************************************************************
+			Absorb & Merge methods
+			
+       These methods can optially delete the absorbed/merged block
+       (and do so by default) from the original parent galaxy.
 
-    double getStopTime() {
-	return sched->getStopTime();
+       The default mode (TRUE) operational cost of the methods is
+       on order of:
+			     O(N + Et*Ec)
+		Where: N = nodes in the parent galaxy
+	               Et = number of edges of 'this' cluster
+		       Ec = number of edges of the cluster to
+		            absorb/merge
+		       
+       There are two possibly more efficient ways of updating the
+       original parent galaxy, which can reduce this cost to O(Et*Ec).
+       
+       The first method is if the block to absorb/merge was found
+       using a GalTopBlockIter (or derived iterator class) on the
+       parent galaxy, then the iterator's remove method can be used.
+
+       Alternatively, if we are assured
+       method could be used for a more effecient absorb/merge
+       operation.  This will yield a unit time operation versus a
+       time dependent on the number of blocks in the parent galaxy.
+       Be careful, if FALSE is specified, we'll be left with a
+       dangling pointer until ListIter::remove is called.
+     ******************************************************************/
+    // absorbs the specified block into this cluster
+    virtual int absorb(Cluster&, int /*removeFlag*/= TRUE);    
+
+    // moves blocks and appropriate ports into this galaxy and
+    // deletes the galaxy that was absorbed
+    virtual int merge(Cluster&, int /*removeFlag*/= TRUE);
+
+    inline void inheritNameParent(Block& b) {
+	if (b.parent()) b.parent()->asGalaxy().addBlock(*this,b.name());
+	else setName(b.name());
     }
     
-    Galaxy* galaxy() { return &gal;}
+    // Make sure a merge/absorb operation will not yield atomic actors
+    // at the current clustering hierarchy level.  
+    inline void makeNonAtomic();
+    /******************************************************************
+		      Cluster scheduler methods
+     ******************************************************************/
+    // Return the internal scheduler for the cluster if there is any
+    /*virtual*/ Scheduler* scheduler() const { return sched; }
 
-    int isClusterAtomic() const;
+    inline void setScheduler(Scheduler*);
 
-    // Add a cluster into the internal galaxy of this cluster.
-    void addCluster(Cluster*);
-
-    void addGalaxy(Galaxy*,PortHole**);
-
-    void initMaster();
-
-    void compileRun() { innerSched()->compileRun(); }
-
-    Scheduler* outerSched() {
-	return star().scheduler()?star().scheduler():master->scheduler();
-    }
+    /*virtual*/ int setTarget(Target*);
     
-    Scheduler* innerSched() { return sched;} 
+    /******************************************************************
+		 Methods to convert a user-specified
+	       galaxy hierarchy to a cluster hierarchy
+     ******************************************************************/
+    void initializeForClustering(Galaxy&);
 
-//	void merge(Cluster*);
-//	void absorb(Cluster*);
+    void initTopBlocksForClustering(BlockList&,Galaxy&);
 
-    int run();
+    inline virtual int flattenTest(Galaxy&) { return TRUE; }
 
-    virtual PortHole* clonePort(PortHole*,Star* parent=NULL) = 0;
-
-    // By default the domain is set to the same as this cluster.
-    virtual Cluster* newCluster(Block* s = NULL,const char* domain = NULL)
-	 const = 0;
-
-    virtual int flattenGalaxy(Galaxy*) {return FALSE;}
+    virtual Cluster* convertGalaxy(Galaxy&);
     
-    Star& star() const { return selfStar; }
-    StringList displaySchedule();
-    
-    /* Generate the schedules of the nested clusters recursively.
-       It first calls generateSubSchedules() to generate the internal
-       cluster schedules, then schedules itself. */
-    
-    virtual int generateSchedule();
+    virtual Cluster* convertStar(Star&);
 
-    virtual Block* cloneCluster()  const;
-
-    const char* myDomain;
-
-    Block* masterBlock() const { return master; }
-
-    // Add a spliced star to this cluster
-    virtual int addSplicedStar(Star&);
-
-protected:
-    // The Star part of the Cluster.
-    Star& selfStar;
-
-    Block* master;
-
-    DynamicGalaxy gal;
+private:
     Scheduler* sched;
 
-    // Generate the schedules of all the internal clusters.
-    virtual int generateSubSchedules();
+};
 
-    // Has this cluster been scheduled?
-    int scheduled;
+/**********************************************************************
+		       Cluster Iterator Classes
 
+   The cluster iterator classes assumes that all top blocks are
+   Clusters.  This property is TRUE assuming that
+   Cluster::initializeForClustering has been called for interpreted
+   Galaxy.
+
+   These iterators also ignore pointers to bogus blocks which could
+   have been left in the Galaxy using merge/absorb with the removeFlag
+   set to FALSE.
+
+   It would be nice to automatically cleanup the Galaxy that we are
+   iterating over - but it would be dangerous.  This could cause a
+   core dump if given a nested Cluster Iterator inside of another -
+   where both are iterating over the same galaxy and one iterator
+   removes a bogus entry which the other is currently pointing to.
+ **********************************************************************/
+class ClusterIter: private GalTopBlockIter {
+public:
+    inline ClusterIter(Galaxy& g):GalTopBlockIter(g),prnt(g) {};
+    inline Cluster* next();
+    inline Cluster* operator++(POSTFIX_OP) { return next();}
+    GalTopBlockIter::reset;
+    GalTopBlockIter::remove;
 private:
-    // Connect two Cluster PortHoles together
-    void connect(PortHole* source, PortHole* destination);
-
-    PortList dummyPorts;
+    Block& prnt;
 };
 
-// An iterator for ClusterList.
-class ClusterIter : private GalStarIter {
+class SuccessorClusterIter: private SuccessorIter {
 public:
-    ClusterIter(Cluster& n):GalStarIter(n.gal) {};
-
-    Cluster* next() {
-	Star* star = GalStarIter::next();
-	return star? star->asCluster(): (Cluster*)NULL;
-    }
-
-    Cluster* operator++(POSTFIX_OP) { return next();}
-    GalStarIter::reset;
-};
-
-class CClusterIter : private CGalStarIter {
-public:
-    CClusterIter(const Cluster& n):CGalStarIter(n.gal) {};
-
-    const Cluster* next() {
-	const Star* star = CGalStarIter::next();
-	return star? star->asCluster(): (Cluster*)NULL;
-    }
-
-    const Cluster* operator++(POSTFIX_OP) { return next();}
-    CGalStarIter::reset;
-};
-
-class ClusterPort {
-public:
-    ClusterPort(PortHole& self, PortHole& p, Star* parent);
-    PortHole& real() const { return master; }
-    PortHole& asPort() const { return selfPort;}
-    int isItInput() const {
-	return real().isItInput();
-    }
-    int isItOutput() const {
-	return real().isItOutput();
-    }
-
-    void setClusterAlias(PortHole* np) { clusterAliasedTo = np;} 
-
-    PortHole* clusterAlias() const { return clusterAliasedTo; }
-
-    PortHole* realClusterPort();
+    inline SuccessorClusterIter(Block&b):SuccessorIter(b),prnt(b.parent()) {};
+    inline virtual ~SuccessorClusterIter() {};
+    inline Cluster* next();
+    inline Cluster* operator++(POSTFIX_OP) { return next();}
+    SuccessorIter::reset;
 private:
+    Block* prnt;
+};
+
+class PredecessorClusterIter: private PredecessorIter {
+public:
+    inline PredecessorClusterIter(Block&b):
+    PredecessorIter(b),prnt(b.parent()) {};
     
-    // selfPort is a reference to the PortHole side of a ClusterPort
-    PortHole& selfPort;
-
-    // clusterAliased much like aliases used in Galaxy ports, points to
-    // the actual clusterPort.
-    PortHole* clusterAliasedTo;
-
-    // master is a reference to the original PortHole that this
-    // porthole represents.
-    PortHole& master;
+    inline virtual ~PredecessorClusterIter() {};
+    inline Cluster* next();
+    inline Cluster* operator++(POSTFIX_OP) { return next();}
+    PredecessorIter::reset;
+private:
+    Block* prnt;
 };
 
+/**********************************************************************
+		     ClusterPort Iterator Classes
+ **********************************************************************/
 class ClusterPortIter : private BlockPortIter {
 public:
-    ClusterPortIter(Cluster& n):BlockPortIter(n.star()) {};
-
-    ClusterPort* next() {
-	PortHole* port = BlockPortIter::next();
-	return port? port->asClusterPort(): (ClusterPort*)NULL;
+    inline ClusterPortIter(Block&b):BlockPortIter(b) {};
+    inline ClusterPort* next() {
+	return (ClusterPort*)BlockPortIter::next();
     }
-
-    ClusterPort* operator++(POSTFIX_OP) { return next();}
+    inline ClusterPort* operator++(POSTFIX_OP) {
+	return ClusterPortIter::next();
+    }
     BlockPortIter::reset;
+    BlockPortIter::remove;
 };
 
-class ClusterIterContext;
-
-class AllClusterIter {
+class ClusterOutputIter: private BlockOutputIter {
 public:
-    AllClusterIter(Cluster&);
-    ~AllClusterIter();
-    Cluster* next();
-    Cluster* operator++(POSTFIX_OP) { return next();}
-    void reset();
-protected:
-    ClusterIter *thisLevelIter;
-    ClusterIterContext *stack;
-    void push(Cluster&);
-    void pop();
+    inline ClusterOutputIter(Block& b):BlockOutputIter(b) {};
+    inline ClusterPort* next() {
+	return (ClusterPort*)BlockOutputIter::next();
+    }
+    inline ClusterPort* operator++(POSTFIX_OP) {
+	return ClusterOutputIter::next();
+    }
+    BlockPortIter::reset;
+    BlockPortIter::remove;
 };
 
-class FatClusterIter : private AllClusterIter {
+class ClusterInputIter: private BlockInputIter {
 public:
-    FatClusterIter(Cluster&);
-    Cluster* next();
-    Cluster* operator++(POSTFIX_OP) { return next();}
-    void reset() { AllClusterIter::reset();}
-
-    // need a public destructor because of private derivation
-    ~FatClusterIter(){}
+    inline ClusterInputIter(Block& b):BlockInputIter(b) {};
+    inline ClusterPort* next() {
+	return (ClusterPort*)BlockInputIter::next();
+    }
+    inline ClusterPort* operator++(POSTFIX_OP) {
+	return ClusterInputIter::next();
+    }
+    BlockPortIter::reset;
+    BlockPortIter::remove;
 };
 
+/**********************************************************************
+		   Miscellaneous Cluster Functions
+ **********************************************************************/
+
+// A cluster is defined as valid if is both nonempty and the cluster's
+// parent is equal to that specified in this function's prnt argument.
+int isValidCluster(Cluster&, Block* /*prnt*/);
+
+// Remove all bogus clusters - optionally do this recursively.
+// It is not necessary to do this recursively if you have only done
+// merges and aborbs at the top level of the give Galaxy.
+void cleanupAfterCluster(Galaxy&,int /*recursive*/ = FALSE);
+
+// This method returns a StringList that describes the Cluster
+// interconnection inside a give Galaxy in dotty format.  To find out
+// more about this format refer to the URL:
+// http://www.research.att.com/orgs/ssr/book/reuse.
+StringList printClusterDot(Galaxy&);
 #endif
 
 

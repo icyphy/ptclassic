@@ -51,7 +51,6 @@ class Target;
 
 
 class Star : public Block  {
-friend class Cluster;
 public:
 // The writer of a Star code has the option to
 // provide the methods setup, begin, go, and wrapup.
@@ -73,13 +72,6 @@ public:
 	/* virtual */ Star& asStar();
 	/* virtual */ const Star& asStar() const;
 
-        // Return myself as a Cluster
-        virtual Cluster* asCluster();
-        virtual const Cluster* asCluster() const;
-
-	Cluster* parentCluster() { return prntCluster; }
-        void setParentCluster(Cluster* cluster) { prntCluster = cluster; }
-    
 	// Return my indexValue.
 	int index() const { return indexValue;}
 
@@ -88,7 +80,7 @@ public:
 	int hasInternalState() { return inStateFlag; }
 
 	// constructor
-	Star() : indexValue(-1), inStateFlag(TRUE), prntCluster(0) {}
+	Star() : indexValue(-1), inStateFlag(TRUE) {}
 
 	// class identification
 	/* virtual */ int isA(const char*) const;
@@ -110,7 +102,6 @@ private:
 	int indexValue;
 	int inStateFlag; // indicate there are internal states (default)
 	friend setStarIndices(Galaxy&);
-        Cluster* prntCluster;
 };
 
 int setStarIndices(Galaxy&);

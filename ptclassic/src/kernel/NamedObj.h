@@ -167,6 +167,7 @@ public:
 	inline NamedObj* next() { return (NamedObj*)ListIter::next();}
 	inline NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
+	ListIter::remove;
 };
 
 // an iterator for NamedObjList, const form
