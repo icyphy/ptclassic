@@ -269,7 +269,7 @@ class ::tycho::Edit {
     ####                  protected methods and procedures                ####
 
     # Configure the popup menu depending on the current context
-    protected method configurePopup {}
+    protected method configureContextMenu {}
 
     # Return the region of text tagged with the given tag within which
     # the "current" mark sits.
@@ -660,20 +660,16 @@ body ::tycho::Edit::constructor {args} {
     set maxLineLength \
             [preference get fillColumn]
 
-    # Create and configure the context-sensitive popup menu
-    # FIXME: Is this the right place for this code?
-    set myContextmenu [::tycho::PopupMenu .#auto \
-	    -command "@scope ::tycho::Edit [list $this configurePopup]"]
+    # Create the context-sensitive popup menu
+    contextmenu create $itk_component(text) 
 
     # Entries for cross-linking
     contextmenu add {Open source} -type cascade -state disabled
     contextmenu add {Open documentation} -type cascade -state disabled
 
     # Entries for developer information FIXME
-    contextmenu add {Name this widget...} -command \
-	    "::tycho::post $itk_component(text)"
-
-    bind $itk_component(text) <Button-3> {%Q contextmenu post %X %Y}
+    contextmenu add {Name of this widget...} -command \
+	    "::tycho::post $this"
 }
 
 
@@ -1879,12 +1875,12 @@ body ::tycho::Edit::writeSpellText {filename} {
 
 
 #####################################################################
-#### configurePopup
+#### configureContextMenu
 # Configure the popup menu according to context. For the Edit widget,
 # this method enables the hyperlink entries and the evaluate
 # entry if there is a selection, and disables them otherwise.
 #
-body ::tycho::Edit::configurePopup {} {
+body ::tycho::Edit::configureContextMenu {} {
     if { [$itk_component(text) tag ranges sel] == "" } {
 	# No selection, so disable entries
 	contextmenu disable {Open source}
