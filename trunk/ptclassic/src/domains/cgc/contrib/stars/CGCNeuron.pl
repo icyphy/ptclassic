@@ -17,10 +17,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
 	codeblock(final) {
-	  $ref(output) = double(out);
+	  $ref(output) = out;
 	}
 	go {
 	    CGCNeuronBase::go();
 	      addCode(final);
         }
-}	
+}
