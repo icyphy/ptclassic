@@ -156,10 +156,10 @@ class ::tycho::EditDiff {
 
     method insertFile {} {
         set okayToCompare false
-        #set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
-        #set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
-        set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
-        set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
+        set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
+        set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
+        #set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
+        #set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
 
 
         set flag 1
