@@ -66,6 +66,9 @@ class ::tycho::EditJava {
 
     # Generate and display a doc file from the current buffer
     method gendocBuffer {}
+
+    # Generate and display an IDoc file from the current buffer
+    method genidocBuffer {}
  
     # Open a help window.
     method help {}
@@ -276,6 +279,25 @@ body ::tycho::EditJava::gendocBuffer {} {
     set window [::tycho::File::openContext $htmlFile]
     $window reload
     return $window
+}
+
+###################################################################
+#### genidocBuffer
+# Generate and display an idoc file from the current file.
+# If the idoc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+body ::tycho::EditJava::genidocBuffer {} {
+    return [ ::tycho::EditProgram::gendocBufferInternal \
+        [list set docfile [file join doc codeDoc \
+                [info namespace tail [getClassName]].idoc]] \
+    {
+        set debug 0
+        set generateIndex 0
+        file delete -force $docfile
+        ::tycho::IDocSys::generateIDoc \
+                $debug $generateIndex {A Java Class} $tail
+    }]
 }
 
 ###################################################################
@@ -565,11 +587,14 @@ body ::tycho::EditJava::initializeMenubar {menubar} {
 
     $menubar addSeparator Special
 
-    $menubar add "Appletviewer" Special -underline 0 \
-            -command "$this execProcess appletviewer"
-
     $menubar add "Generate doc" Special -underline 0 \
             -command "$this gendocBuffer"
+
+    $menubar add "Generate idoc" Special -underline 9 \
+            -command "$this genidocBuffer"
+
+    $menubar add "Appletviewer" Special -underline 0 \
+            -command "$this execProcess appletviewer"
 
     if {$tcl_platform(platform) == "macintosh"} {
 	$menubar disable "Generate doc"
