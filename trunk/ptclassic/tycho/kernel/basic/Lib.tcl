@@ -251,7 +251,7 @@
 
 # Tycho Builder Tool
 ::tycho::register mode "builder" \
-	-command {::tycho::view BuilderDialog} \
+	-command {::tycho::view BuilderDialog -toolbar 1} \
 	-label {Tycho Builder}  \
 	-category "tool" \
 	-underline 6
