@@ -65,7 +65,7 @@ proc ::tycho::htmlOutline {{file {}} args} {
 # It can be used to create the document and maintain its structure
 # without having to mess around with HTML links and stuff.
 #
-# The <i>HTMLOutline</i> model has the following options:
+# The HTMLOutline model has the following options:
 #
 # <dl>
 #   <dt><b>-bgcolor</b> _color_
@@ -129,7 +129,7 @@ proc ::tycho::htmlOutline {{file {}} args} {
 #
 # </dl>
 #
-# The <i>HTMLOutline</i> model has the following types:
+# The HTMLOutline model has the following types:
 #
 # <dl>
 # <dt><b>section</b> _name_
@@ -154,6 +154,8 @@ proc ::tycho::htmlOutline {{file {}} args} {
 #   The section title.
 #
 #   </dl>
+#
+# </dl>
 #
 class ::tycho::HTMLOutline {
     inherit ::tycho::DataModel
