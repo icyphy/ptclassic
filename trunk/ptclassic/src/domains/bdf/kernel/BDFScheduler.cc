@@ -1,13 +1,3 @@
-static const char file_id[] = "BDFScheduler.cc";
-#include "type.h"
-#include "BDFScheduler.h"
-#include "BDFStar.h"
-#include "BDFSchList.h"
-#include "FloatState.h"
-#include "Geodesic.h"
-#include "GalIter.h"
-#include "ConstIters.h"
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -41,6 +31,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
  BDF Scheduler methods
 
 **************************************************************************/
+
+static const char file_id[] = "BDFScheduler.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "type.h"
+#include "BDFScheduler.h"
+#include "BDFStar.h"
+#include "BDFSchList.h"
+#include "FloatState.h"
+#include "Geodesic.h"
+#include "GalIter.h"
+#include "ConstIters.h"
 
 extern const char BDFdomainName[];
 

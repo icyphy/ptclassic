@@ -31,6 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "BDFStar.h"
 #include "BDFPortHole.h"
 #include "SimControl.h"

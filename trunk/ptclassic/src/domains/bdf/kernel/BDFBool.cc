@@ -32,6 +32,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // methods for BoolTerm and BoolFraction.
 
 *****************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "BDFBool.h"
 #include "StringList.h"
 #include <stream.h>
