@@ -109,12 +109,8 @@ class ::tycho::Repeater {
 body ::tycho::Repeater::activate {t x y args} {
     # Set the target. If the target argument is
     # in fact a tag, get the current picture from the slate.
-    if { [isObject $t] } {
-	target $t
-    } else {
-	target [$slate find withtag current]
-    }
-
+    target [$slate find withtag current]
+    
     # Set up the bindings.
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] \
