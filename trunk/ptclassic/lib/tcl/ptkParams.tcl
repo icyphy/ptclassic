@@ -293,7 +293,10 @@ proc ed_AddParam {facet number name type value} {
 #	}
 #    }
 
+    
     ed_MkEntryButton $f.par.f$count $name
+    ptkRecursiveBind $f.par.f$count <Return> "ed_Apply $facet $number
+                                $top.b.close invoke"
     
     bind $f.par.f$count.entry <Any-Leave> \
 	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
@@ -356,7 +359,7 @@ proc ed_RestoreCursor w {
 # Loops to check whether an entry has been destroyed.
 # Focus has been eliminated during removal so the evident operation is
 #  to click the mouse to select a parameter to remove
-# Buttons in the same window as "Click Remove" button are rebound
+# Buttons in the same window as "Remove Parameter" button are rebound
 #  to have cancellation as the top priority.
 
 proc ed_RemoveParam {facet number top button} {
@@ -482,36 +485,47 @@ proc ptkEditParams {facet number} {
     frame $top.f -relief raised -bd 2
     label $top.header -font -Adobe-times-medium-r-normal--*-180* \
 	-relief	raised -text "Edit $editType"
+
     pack append $top $top.header {top fillx} \
-	$top.f {bottom expand fill}
+	$top.f {top expand fill}
 
     set c $top.f.c
-    set u $top.f.b
-    frame $u -bd 2
     canvas $c
-    pack append $top.f $u {bottom fillx} $c {bottom expand fill}
+
+    set u $top.b
+    frame $u -bd 5
+    pack append $top.f $u {bottom expand fill} \
+		$c {bottom expand fill}
 
     pack append $u \
-	   [button $u.ok -text "OK <Return>" -command \
-		"catch \"unset paramArray($facet,$number) \ \
-		paramArrayBAK($facet,$number\"; destroy $top"] \
-		{left expand fillx} \
-	   [button $u.q -text "Cancel <M-Delete>" -command \
-	        "ed_RestoreParam $facet $number
-		catch \"unset paramArray($facet,$number) \
-		paramArrayBAK($facet,$number\"; destroy $top"] \
-		{left expand fillx}
+	   [frame $u.okfr -relief sunken -bd 2] \
+		{left expand fill} \
+	   [button $u.apply -text "     Apply     " -command \
+		"ed_Apply $facet $number"] \
+		{left expand fill} \
+	   [button $u.close -text "     Close      " \
+		-command "catch \"unset paramArray($facet,$number) \
+			      paramArrayBAK($facet,$number\"; destroy $top"] \
+		{left expand fill} \
+	   [button $u.q -text "     Cancel      " -command \
+	        "ed_RestoreParam $facet $number; $u.close invoke"] \
+		{left expand fill}
+
+    pack append $u.okfr \
+	[button $u.okfr.ok -text "       OK       " -relief raised \
+		-command "ed_Apply $facet $number
+				$u.close invoke"] {expand fill}
 
 #    {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])}
     if {$number == "NIL"} {
 	pack append $u \
-	   [button $u.add -text "Add parameter <M-a>" -command \
-		"ed_AddParamDialog $facet $number"] {left expand fillx} \
-	   [button $u.remove -text "Remove parameter <M-r>" -command \
+	   [button $u.add -text " Add parameter " -command \
+		"ed_AddParamDialog $facet $number"] \
+		{left expand fill} \
+	   [button $u.remove -text "Remove parameter" -command \
 		"$u.remove config -relief sunken
 		ed_RemoveParam $facet $number $top $u
-		$u.remove config -relief raised"] \
-		{left expand fillx}
+		$u.remove config -relief raised"] {left padx 2m}
     }
 
     set f $c.f
@@ -554,8 +568,8 @@ proc ptkEditParams {facet number} {
 	set value [lindex $param 2]
 
 	ed_MkEntryButton $f.par.f$count $name
-	bind $f.par.f$count.entry <Any-Leave> \
-		"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+#	bind $f.par.f$count.entry <Any-Leave> \
+#		"ed_UpdateParam $facet $number [list $name] \[%W get\]"
 	bind $f.par.f$count.entry <Tab> "ed_NextEntry $count \
 		$f.par $facet $number"
 	bind $f.par.f$count.entry <Control-n> "ed_NextEntry $count \
@@ -572,10 +586,12 @@ proc ptkEditParams {facet number} {
 #    bind $c <Configure> "ed_ConfigFrame $top"
     bind $f.par <Configure> "ed_ConfigCanvas $top $facet $number"
 
-    ptkRecursiveBind $top <Return> "ed_UpdateOnMReturn $facet $number
-		catch \"unset paramArray($facet,$number) \
-			      paramArrayBAK($facet,$number\"
-					    destroy $top"
+    ptkRecursiveBind $top <Return> "ed_Apply $facet $number
+                                $u.close invoke"
+#    ptkRecursiveBind $top <Return> "ed_UpdateOnMReturn $facet $number
+#		catch \"unset paramArray($facet,$number) \
+#			      paramArrayBAK($facet,$number\"
+#					    destroy $top"
     ptkRecursiveBind $top <M-Delete> \
 	        "ed_RestoreParam $facet $number
 		catch \"unset paramArray($facet,$number) \
@@ -606,13 +622,62 @@ proc ed_UpdateOnMReturn {facet number} {
     }
 }
 
+proc ed_Apply {facet number} {
+    global ed_ToplevelNumbers paramArray
+    set changeFlag 0
+    set top .o$ed_ToplevelNumbers($facet,$number)
+    set w $top.f.c.f.par
+
+    set newParamArray {}
+    for {set curr 0} \
+	{ $curr < $ed_ToplevelNumbers($facet,$number,count)} \
+	{ incr curr } {
+	    if [winfo exists $w.f$curr.entry] {
+		set name [list $ed_ToplevelNumbers($facet,$number,$curr)]
+		set contents [list [$w.f$curr.entry get]]
+		if {[llength $contents] == 2} {
+		    set value [lindex $contents 1]
+		    set type [list [lindex $contents 0]]
+		} else {
+		    set value [lindex $contents 0]
+		}
+		set count 0
+		foreach param $paramArray($facet,$number) {
+		   if {[listEq [lindex $param 0] $name]} {
+			if  {[lindex $param 2] != $value} {
+				set okay 1
+			} else { set okay 0 }
+			if {[llength $contents] == 2} {
+				if {[lindex $param 1] != $type} {
+					set okay 1
+				}
+			} else { set type [lindex $param 1] }
+			if {$okay} {
+				set param [lreplace $param 1 2 $type $value]
+			}
+			break
+		   }
+		   incr count
+		}
+		if $okay {set changeFlag 1}
+	        lappend newParamArray $param
+	    }
+	}
+
+   if $changeFlag {
+	ptkSetParams $facet $number $newParamArray
+	set paramArray($facet,$number) $newParamArray
+	puts "New: $newParamArray"
+   } else {puts "Old: $newParamArray"}
+}
+
 # **ed_NextEntry
 # Procedure for moving from one entry to the next in the edit parameters box
 
 proc ed_NextEntry {current w facet number} {
     global ed_ToplevelNumbers
     set foundNext 0
-    ed_UpdateOnMReturn $facet $number
+#    ed_UpdateOnMReturn $facet $number
     for {set curr [expr $current+1]} \
 	{ $curr < $ed_ToplevelNumbers($facet,$number,count)} \
 	{ incr curr } {
@@ -639,7 +704,7 @@ proc ed_NextEntry {current w facet number} {
 proc ed_PrevEntry {current w facet number} {
     global ed_ToplevelNumbers
     set foundNext 0
-    ed_UpdateOnMReturn $facet $number
+#    ed_UpdateOnMReturn $facet $number
     for {set curr [expr $current-1]} \
 	{ $curr >= 0 } \
 	{ incr curr -1 } {
