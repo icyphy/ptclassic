@@ -36,11 +36,15 @@ extern void set_X();		/* Initializes X device    */
 /* To make lint happy */
 extern char *malloc();
 extern char *realloc();
+#ifdef USG
+extern int sprintf();
+#else
 extern char *sprintf();
+#endif
 extern char *strcpy();
 extern char *strcat();
-extern char *rindex();
-extern char *index();
+extern char *strrchr();
+extern char *strchr();
 extern void exit();
 extern void free();
 extern double atof();
