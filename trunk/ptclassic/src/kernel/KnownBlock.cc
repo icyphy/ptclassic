@@ -50,7 +50,7 @@ int KnownBlock::domainIndex (Block& block) {
 	if (!block.isItAtomic()) {
 		Galaxy& g = block.asGalaxy();
 		if (g.numberBlocks() == 0) {
-			errorHandler.error ("empty galaxy");
+			// indeterminate domain
 			return -1;
 		}
 		else return domainIndex (g.nextBlock());
@@ -60,23 +60,35 @@ int KnownBlock::domainIndex (Block& block) {
 
 // Constructor.  Add a block to the appropriate known list
 
+// We have a trick to add dynamic galaxies that are initially
+// empty: an empty galaxy is added to the same domain as the
+// most recently added star.
+
 KnownBlock::KnownBlock (Block& block, const char* name) {
+	static int lastDomain = 0;
+
 	// set my name
 	block.setBlock (name, NULL);
-	// get domain index
+
+	// get domain index.  If undefined use lastDomain
 	int idx = domainIndex (block);
+	if (idx < 0) idx = lastDomain;
+
 	// see if defined; if so, replace
 	KnownListEntry* kb = findEntry (block.readName(), allBlocks[idx]);
 	if (kb) {
 		delete kb->b;
 		kb->b = &block;
 	}
+
+	// otherwise create a new entry
 	else {
 		KnownListEntry* nkb = new KnownListEntry;
 		nkb->b = &block;
 		nkb->next = allBlocks[idx];
 		allBlocks[idx] = nkb;
 	}
+	lastDomain = idx;
 }
 
 // Find a known list entry
