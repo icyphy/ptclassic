@@ -83,23 +83,20 @@ XGraph :: XGraph () : blockIamIn(0), ng(0), strm(0), tmpFileNames(0), count(0),
 
 // close all files, and remove any files that might be open
 void XGraph :: zapFiles () {
-	for (int i = 0; i<ng; i++) {
-	    if (strm) {
-		if (strm[i]) {
-			fclose (strm[i]);
-		}
-	    }
+	for (int i = 0; i < ng; i++) {
+	    if (strm && strm[i]) fclose(strm[i]);
 	    if (tmpFileNames) {
-		char *name = tmpFileNames[i];
-		if (name) {
-			unlink(name);
-		}
+		char* name = tmpFileNames[i];
+		if (name) unlink(name);
 		LOG_DEL; delete [] name;
 	    }
 	}
 	LOG_DEL; delete [] strm;
+	strm = 0;
 	LOG_DEL; delete [] tmpFileNames;
+	tmpFileNames = 0;
 	LOG_DEL; delete [] count;
+	count = 0;
 	ng = 0;
 	dataToPlot = FALSE;
 }
@@ -111,22 +108,21 @@ void XGraph :: initialize(Block* parent,
 			  const char* saveFile,
 			  int ignore)
 {
-	StringList msg;
-
 	// just in case initialize is called twice.
 	zapFiles();
 
+	// save argument values in data members
 	blockIamIn = parent;
 	opt = options;
 	ttl = title;
 	nIgnore = ignore;
 	sf = saveFile;
 	ng = noGraphs;
-	dataToPlot = FALSE;
 
+	dataToPlot = FALSE;
 	index = 0;
 
-	if(ng > MAX_NO_GRAPHS) {
+	if (ng > MAX_NO_GRAPHS) {
 		Error::abortRun (*blockIamIn, "Too many xgraph inputs");
 		return;
 	}
@@ -137,16 +133,16 @@ void XGraph :: initialize(Block* parent,
 	LOG_NEW; count = new int[ng];
 
 	// write data in ASCII if saveFile is specified.
-	ascii = (saveFile != 0 && *saveFile != 0);
+	ascii = (saveFile && *saveFile);
 
-	for (int i = 0; i<ng; i++) {
+	for (int i = 0; i < ng; i++) {
 	    tmpFileNames[i] = tempFileName();
 	    count[i] = 0;
 	    // open and make sure the file is writable
-	    if ((strm[i] = fopen (tmpFileNames[i], "w")) == NULL) {
-		msg += "Can't open temporary file for writing:";
-		msg += tmpFileNames[i];
-		Error::abortRun (*blockIamIn, msg);
+	    if ((strm[i] = fopen(tmpFileNames[i], "w")) == NULL) {
+		StringList msg = "Can't open temporary file for writing: ";
+		msg << tmpFileNames[i];
+		Error::abortRun(*blockIamIn, msg);
 	    }
 	}
 }
@@ -157,36 +153,36 @@ static char* ordinal(int n) {
 	int ldig = n%10;
 	const char* format;
 	switch (ldig) {
-	case 1:
+	    case 1:
 		format = "%dst";
 		break;
-	case 2:
+	    case 2:
 		format = "%dnd";
 		break;
-	case 3:
+	    case 3:
 		format = "%drd";
 		break;
-	default:
+	    default:
 		format = "%dth";
 	}
-	static char buf[10];
-	sprintf (buf, format, n);
+	static char buf[16];
+	sprintf(buf, format, n);
 	return buf;
 }
 
 void XGraph :: fcheck(double y, int set) {
 	if (IsNANorINF(y)) {
-		char buf[128];
-		sprintf (buf, "in the %s value on input stream %d",
-			 ordinal(count[set-1]), set);
-		Error::abortRun(*blockIamIn, "Overflow or divide by zero\n",
-				buf);
+		StringList msg = "Overflow or divide by zero\nin the ";
+		msg << ordinal(count[set-1])
+		    << " value on input stream "
+		    << set;
+		Error::abortRun(*blockIamIn, msg);
 		zapFiles();
 	}
 }
 
 void XGraph :: addPoint(float y) {
-	addPoint (0, float(index), y);
+	addPoint(0, float(index), y);
 	index++;
 	dataToPlot = TRUE;
 }
@@ -205,7 +201,7 @@ void XGraph :: addPoint (int dataSet, float x, float y) {
 		float v[2];
 		v[0] = x;
 		v[1] = y;
-		putc('d',strm[didx]);
+		putc('d', strm[didx]);
 		fwrite((char*)v, sizeof v[0], 2, strm[didx]);
 	    }
 	}
@@ -226,29 +222,27 @@ void XGraph :: newTrace(int dataSet) {
 
 void XGraph :: terminate () {
 	for (int i = 0; i<ng; i++)
-	   if (strm[i]) {
-		fclose (strm[i]);
-		strm[i] = NULL;
-	   }
-        StringList cmd;
-
-        cmd += "( ";
-
-        if (sf != NULL && *sf != 0) {
+	if (strm[i]) {
+		fclose(strm[i]);
+		strm[i] = 0;
+	}
+        StringList cmd = "( ";
+        if (sf && *sf) {
             char* saveFileName = expandPathName(sf);
 
             // Easiest way to check to see whether the file can be
             // written is to call creat and then close the file.
             // This has the side benefit of zeroing out the file if it exists.
-            int tempFileDesc;
-            if ((tempFileDesc = creat(saveFileName,0644)) == -1) {
+            int tempFileDesc = creat(saveFileName, 0644);
+            if (tempFileDesc == -1) {
                 // File is not writable
-		    Error::warn (*blockIamIn, "No write permission on file: ",
-				 saveFileName, ". Data not saved.");
-            } else {
+		Error::warn(*blockIamIn, "No write permission on file: ",
+			    saveFileName, ". Data was not saved.");
+            }
+	    else {
                 // File is OK.  Close it, then write to it.
                 close(tempFileDesc);
-                for (i = 0; i<ng; i++) {
+                for (i = 0; i < ng; i++) {
                     cmd += "/bin/cat ";
                     cmd += tmpFileNames[i];
                     cmd += " >> ";
@@ -268,42 +262,37 @@ void XGraph :: terminate () {
 	    // The path is set by the pigi script, so at least with pigi,
 	    // this is safe.
             cmd += "pxgraph ";
-	    if (!ascii)
-		cmd += "-binary ";
+	    if (!ascii) cmd += "-binary ";
 
 	    // put title on command line
-
             if (ttl && *ttl) {
 		if (strchr(ttl,'\'')) {
-			cmd += "-t \""; cmd += ttl; cmd += "\" ";
+			cmd << "-t \"" << ttl << "\" ";
 		}
 		else {
-			cmd += "-t '"; cmd += ttl; cmd += "' ";
+			cmd << "-t '" << ttl << "' ";
 		}
             }
 
 	    // put options on the command line
 
             if (opt && *opt) {
-                cmd += opt;
-                cmd += " ";
+                cmd << opt << " ";
             }
 
 	    // put filenames on the command line
-            for (i = 0; i<ng; i++) {
-                cmd += tmpFileNames[i];
-                cmd += " ";
+            for (i = 0; i < ng; i++) {
+                cmd << tmpFileNames[i] << " ";
             }
 	} else {
-	    cmd += "echo \"no data to plot\" ";
-	    Error::warn(*blockIamIn,"No data to plot");
+	    cmd << "echo \"no data to plot\" ";
+	    Error::warn(*blockIamIn, "No data to plot");
 	}
 
         // issue commands to remove temporary files
-        for (i = 0; i<ng; i++) {
+        for (i = 0; i < ng; i++) {
 		char* name = tmpFileNames[i];
-		cmd += "; /bin/rm -f ";
-		cmd += name;
+		cmd << "; /bin/rm -f " << name;
 		// remove the filenames so we won't zap them later.
 		LOG_DEL; delete [] name;
 		tmpFileNames[i] = 0;
@@ -311,5 +300,5 @@ void XGraph :: terminate () {
 	ng = 0;
         cmd += ")";
         cmd += "&";
-        system (cmd);
+        system(cmd);
 }
