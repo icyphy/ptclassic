@@ -847,7 +847,7 @@ char *fct_spec;
 	strcpy(cell_name,fct->contents.facet.cell);
 	lib_name[0]='\0';
     }
-    for (i=0,j=0,escape=0; i<strlen(format_string), j<MAX_CHAR; i++) {
+    for (i=0,j=0,escape=0; i<strlen(format_string) && j<MAX_CHAR; i++) {
 	if (escape) {
 	    temp_string[j]='\0';
 	    switch (format_string[i]) {
