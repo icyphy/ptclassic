@@ -30,36 +30,42 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 .pl.h:
 	cd $(VPATH); ptlang $<
 
-SRCS=DEDelay.cc DEPoisson.cc Record.cc DESampler.cc \
-	DEXgraph.cc DEBlackHole.cc EvenSpacer.cc DEFloatDC.cc DEFloatRamp.cc \
-	DEFork.cc DEPrServer.cc SpaceConst.cc SpaceUniform.cc Synch.cc \
+SRCS=DEDelay.pl DEPoisson.pl DESampler.pl DEQueue.pl DEImpulse.pl \
+	DEXMgraph.pl DEXgraph.pl DEBlackHole.pl DEFloatDC.pl DEFloatRamp.pl \
+	DEFork.pl DEPrQueue.pl DEExpServer.pl DEUniServer.pl \
+	DESwitch.pl DEMerge.pl DERouter.pl DEServer.pl DEExpDelay.pl \
+	DEUniDelay.pl DEClock.pl DEFilter.pl
+
+CCS=DEDelay.cc DEPoisson.cc DESampler.cc DEQueue.cc DEImpulse.cc \
+	DEXMgraph.cc DEXgraph.cc DEBlackHole.cc DEFloatDC.cc DEFloatRamp.cc \
+	DEFork.cc DEPrQueue.cc DEExpServer.cc DEUniServer.cc \
 	DESwitch.cc DEMerge.cc DERouter.cc DEServer.cc DEExpDelay.cc \
-	DEUniDelay.cc DEClock.cc
+	DEUniDelay.cc DEClock.cc DEFilter.cc
 
-OBJS=DEDelay.o DEPoisson.o Record.o DESampler.o \
-	DEXgraph.o DEBlackHole.o EvenSpacer.o DEFloatDC.o DEFloatRamp.o \
-	DEFork.o DEPrServer.o SpaceConst.o SpaceUniform.o Synch.o \
+OBJS=DEDelay.o DEPoisson.o DESampler.o DEQueue.o DEImpulse.o \
+	DEXMgraph.o DEXgraph.o DEBlackHole.o DEFloatDC.o DEFloatRamp.o \
+	DEFork.o DEPrQueue.o DEExpServer.o DEUniServer.o \
 	DESwitch.o DEMerge.o DERouter.o DEServer.o DEExpDelay.o \
-	DEUniDelay.o DEClock.o
+	DEUniDelay.o DEClock.o DEFilter.o
 
-HDRS=DEDelay.h DEPoisson.h Record.h DESampler.h \
-	DEXgraph.h DEBlackHole.h EvenSpacer.h DEFloatDC.h DEFloatRamp.h \
-	DEFork.h DEPrServer.h SpaceConst.h SpaceUniform.h Synch.h \
+HDRS=DEDelay.h DEPoisson.h DESampler.h DEQueue.h DEImpulse.h \
+	DEXMgraph.h DEXgraph.h DEBlackHole.h DEFloatDC.h DEFloatRamp.h \
+	DEFork.h DEPrQueue.h DEExpServer.h DEUniServer.h \
 	DESwitch.h DEMerge.h DERouter.h DEServer.h DEExpDelay.h \
-	DEUniDelay.h DEClock.h
+	DEUniDelay.h DEClock.h DEFilter.h
 
-all:		$(SRCS) makefile $(OBJS)
+all:		$(SRCS) $(CCS) makefile $(OBJS)
 
 # nothing to install -- use it where it lies
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(HDRS) make.template
+sources:	make.template $(CCS) $(HDRS)
 
 clean:
 		rm -f *.o core *~ *#
-depend:
-		makedepend -I$(DEDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
+depend:		$(CCS)
+		makedepend -I$(DEDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(CCS)
 
 makefile:	make.template
 		rm -f makefile
