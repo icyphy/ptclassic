@@ -106,6 +106,21 @@ void Galaxy :: initialize() {
 }
 
         ////////////////////////////////////
+        // wrapup()
+        ////////////////////////////////////
+
+// Wrapup myself and all sub-blocks.
+// Stop the wrapup if an error occurs.
+
+void Galaxy :: wrapup() {
+	Block::wrapup();
+	GalTopBlockIter next(*this);
+	Block* b;
+	while ((b = next++) != 0 && !Scheduler::haltRequested())
+		b->wrapup();
+}
+
+        ////////////////////////////////////
         // initState()
         ////////////////////////////////////
 
