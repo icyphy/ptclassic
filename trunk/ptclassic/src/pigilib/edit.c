@@ -222,7 +222,7 @@ long userOptionWord;
 /* Structures to store palette list and dialog box */
 static char **palettes;
 static int palettes_n;
-static char *defaultPalettes = "~ptolemy/lib/sdf/icon/sdf.pal:./user.pal:./init.pal";
+static char *defaultPalettes = "~ptolemy/src/domains/sdf/icons/sdf.pal:./user.pal:./init.pal";
 static dmWhichItem *items;
 
 /* ListLength  4/28/88
