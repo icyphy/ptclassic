@@ -197,15 +197,19 @@ and disclaimer of warranty provisions, push the button below. "
 
     pack .version.msg.at.copyright -side bottom -fill x
 
-    global ptolemy
-    image create photo ptolemygif -palette 4/4/3  \
-	-file $ptolemy/lib/tcl/ptolemyWelcome.gif
-    set height [image height ptolemygif]
-    set width [image width ptolemygif]
-    pack [canvas .version.gif -height $height -width $width -bg \
-	[ptkColor bisque] ] -side left
-    .version.gif create image [expr $width/2] [expr $height/2] \
-	-image ptolemygif
+    global gSlowX11Link
+    if { $gSlowX11Link != 1 } {
+	# If we are not on a slow X11 link, then bring up Mr. Ptolemy
+	global ptolemy
+	image create photo ptolemygif -palette 4/4/3  \
+	    -file $ptolemy/lib/tcl/ptolemyWelcome.gif
+	set height [image height ptolemygif]
+	set width [image width ptolemygif]
+	pack [canvas .version.gif -height $height -width $width -bg \
+		  [ptkColor bisque] ] -side left
+	.version.gif create image [expr $width/2] [expr $height/2] \
+	    -image ptolemygif
+    }
 
     wm geometry . +200+300
     tkwait visibility .
