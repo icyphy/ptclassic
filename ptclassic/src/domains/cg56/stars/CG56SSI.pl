@@ -151,99 +151,106 @@ various ports (in order to make input-only, output-only, or mono stars).
     }
     state {
 	    name { hardware }
-	    type { string }
+	    type { STRING }
 	    desc { Name of physical hardware attached to SSI. }
 	    default { "PROPORT" }		
     }
     state {
 	    name { symmetricBuffers }
-	    type { int }
+	    type { INT }
 	    desc { If TRUE use symmetric queuing, else use dual buffering. }
 	    default { "YES" }		
     }
     state {
 	    name { queueSize }
-	    type { int }
+	    type { INT }
 	    desc { Length of interupt queue (0==>polling). }
 	    default { 4 }
     }
     state {
 	    name { abortOnRealTimeError }
-	    type { int }
+	    type { INT }
 	    desc { If TRUE, abort on real time violation. }
 	    default { "YES" }
     }
     state {
 	    name { cra }
-	    type { int }
+	    type { INT }
 	    desc { Port C SSI control register A (custom hardware only). }
 	    default { 0 }
     }
     state {
 	    name { crb }
-	    type { int }
+	    type { INT }
 	    desc { Port C SSI control register B (custom hardware only). }
 	    default { 0 }
     }
     state {
 	    name { bufLen }
-	    type { int }
+	    type { INT }
 	    desc { internal }
 	    default { 4 }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT }
     }
     state {
 	    name { intrAbort }
-	    type { int }
+	    type { INT }
 	    desc { Integer form of abortOnRealTimeError (for macros). }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT }
 	    default { 1 }
     }
     state {
 	    name { dualbufFlag }
-	    type { int }
+	    type { INT }
 	    desc { state version of !doSymmetric }
 	    default { 0 }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT }
     }
     state {
+	    name { missCnt }
+	    type { INT }
+	    desc { Count of missed interupt samples. }
+	    default { 0 }
+	    attributes { A_NONSETTABLE|A_NONCONSTANT|A_YMEM }
+    }
+    state {
 	    name { buffer }
-	    type { fixarray }
+	    type { FIXARRAY }
 	    desc { internal }
 	    default { "0" }
 	    attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_SYMMETRIC|A_RAM|A_NOINIT}
     }
     state {
 	    name { recvStarPtr }
-	    type { int }
+	    type { INT }
 	    desc { internal }
 	    default { 0 }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT }
     }
     state {
 	    name { xmitStarPtr }
-	    type { int }
+	    type { INT }
 	    desc { internal }
 	    default { 0 }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
     }
     state {
 	    name { recvIntrPtr }
-	    type { int }
+	    type { INT }
 	    desc { internal }
 	    default { 0 }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT }
     }
     state {
 	    name { xmitIntrPtr }
-	    type { int }
+	    type { INT }
 	    desc { internal }
 	    default { 0 }
 	    attributes {A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
     } 	
     state {
 	    name { saveReg }
-	    type { fixarray }
+	    type { FIXARRAY }
 	    desc { internal }
 	    default { "0" }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
@@ -514,7 +521,10 @@ $starSymbol(ssi)_intr
 	  ; just drop recv sample in y0
 	  move	y:-(r0),y0		; go back two (stereo): prev tx sample
 	  move	y:-(r0),y0
+	  move	$ref(missCnt),r0
 	  move	y0,x:m_tx
+	  move	(r0)+
+	  move	r0,$ref(missCnt)
 	  jmp	$label(done)
 	ENDIF
 $label(doRecv)
@@ -550,7 +560,10 @@ $label(rx_done)
 	ELSE
 	  move	y:-(r0),y0		; go back two (stereo): prev tx sample
 	  move	y:-(r0),y0
+	  move	$ref(missCnt),r0
 	  move	y0,x:m_tx
+	  move	(r0)+
+	  move	r0,$ref(missCnt)
 	  jmp	$label(tx_done)
 	ENDIF
 $label(doXmit)
