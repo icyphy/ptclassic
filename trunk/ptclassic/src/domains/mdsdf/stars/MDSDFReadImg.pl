@@ -1,5 +1,5 @@
 defstar {
-  name  	{ ReadImage }
+  name  	{ ReadImg }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ Mike J. Chen, derived from SDFReadImage by Paul Haskell }
@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Read a sequence of images in Portable GrayMap (PGM) format from
 different files and send them out as a FloatMatrix.
 
-This star does not support frame numbers.  See ReadImage2.
+This star does not support frame numbers.  See ReadImg2.
   }
   explanation {
 .Ir "PGM image format"
@@ -105,4 +105,4 @@ This star does not support frame numbers.  See ReadImage2.
     delete imgData;
     fclose(fp);
   } // end go{}
-} // end defstar{ ReadImage }
+} // end defstar{ ReadImg }
