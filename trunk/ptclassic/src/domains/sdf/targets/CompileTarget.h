@@ -40,8 +40,12 @@ a universe.
 #pragma interface
 #endif
 
-#include "HLLTarget.h"
+#include "StringList.h"
 #include "IntState.h"
+#include "Block.h"
+#include "Star.h"
+#include "PortHole.h"
+#include "HLLTarget.h"
 
 class CompileTarget : public HLLTarget {
 public:
