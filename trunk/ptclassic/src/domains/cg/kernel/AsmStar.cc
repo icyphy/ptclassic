@@ -168,6 +168,8 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s = lookupMem(id);
 	} else if (strcasecmp(func, "fullname") == 0) {
 		s = readFullName();
+	} else if (strcasecmp(func, "starname") == 0) {
+		s = readName();
 	} else if ((strcasecmp(func, "label") == 0) ||
 		   (strcasecmp(func, "codeblockSymbol") == 0)) {
 		s = codeblockSymbol.lookup(id);
