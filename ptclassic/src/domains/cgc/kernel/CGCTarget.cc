@@ -47,9 +47,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFScheduler.h"
 #include "compat.h"		// Pickup symlink()
 
-// Utility functions.
-extern const char* whichType(DataType);
-
 // Add code to the beginning of a CodeStream instead of the end.
 void prepend(StringList code, CodeStream& stream)
 {
@@ -753,16 +750,5 @@ void CGCTarget :: compileRun(SDFScheduler* s) {
 /////////////////////////////////////////
 // Utilities
 /////////////////////////////////////////
-
-const char* whichType(DataType s) {
-	if ((strcmp(s, INT) == 0) || (strcmp(s, "INTARRAY") == 0)) 
-		return "int";
-	else if ((strcmp(s, COMPLEX) == 0) || (strcmp(s, "COMPLEXARRAY") == 0)) 
-		return "complex";
-	else if ((strcmp(s, FIX) == 0) || (strcmp(s, "FIXARRAY") == 0)) 
-		return "fix";
-	else if (strcmp(s, "STRING") == 0) return "char*";
-	return "double";
-}
 
 ISA_FUNC(CGCTarget,HLLTarget);
