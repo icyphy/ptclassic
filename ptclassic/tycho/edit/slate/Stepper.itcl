@@ -30,13 +30,14 @@
 #######################################################################
 #### Stepper
 #
-# A class that implements quantized moving behavior. Unlike the
-# <a href="Gridder.html"><i>Gridder</i></a> class, _Stepper_
-# just quantizes the cursor movement, rather than snapping it to
-# the grid.
+# An interactor that implements quantized moving behavior. In its default
+# mode of operation, the interactor quantizes movement to the option
+# *-stepsize*. Setting the *-gridded* option to true will, however,
+# cause movement to be quantized such that the _cursor position_
+# is a multiple of the step size.
 #
 class ::tycho::Stepper {
-    inherit ::tycho::Gridder
+    inherit ::tycho::Follower
 
     constructor {{s {}} {c {}} args} {
 	set slate $s
@@ -47,29 +48,100 @@ class ::tycho::Stepper {
     destructor {}
 
     ###################################################################
+    ####                            options                        ####
+
+    # Make movement snap to a grid
+    public variable gridded 0
+    
+    # The size of steps
+    public variable stepsize 12
+    
+    ###################################################################
     ####                         public methods                    ####
 
     # Start interaction sequence
     method click {x y args} {}
 
+    # Continue interaction sequence
+    method drag {x y} {}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The output position of the cursor
+    protected variable actualX
+    protected variable actualY
 }
 
 #######################################################################
 #### click
 #
-# Start the interaction. The behavior of this method is the same as that
-# of the superclass, Gridder, except that the ``actual'' and ``slip''
-# variables are set to the current coordinates and zero rather than
-# to the nearest grid point and the distance from it -- the effect is
-# to quantize the cursor to the gridsize rather than to the actual
-# grid coordinates.
+# Start the interaction. The behavior of this method depends on whether
+# the *-gridded* option is set. If not (the default), the ``actual'' and
+# variables are initialized to the current coordinates,
+# which causes subsequent _movements_ to be quantized to the step size.
+# If  *-gridded* option is set, the ``actual'' variables
+# are initialized to the nearest grid point,
+# which causes the _cursor_ position to be quantized to a multiple
+# of the step size.
 #
 body ::tycho::Stepper::click {x y args} {
-    eval ::tycho::Interactor::click $x $y $args
+	# Initialize the "actual" variables according to mode
+	if { $gridded } {
+   		set actualX [roundTo $x $stepsize]
+    	set actualY [roundTo $y $stepsize]
+	} else {
+	    set actualX $x
+	    set actualY $y
+	}
+	
+	# Forward the click
+    eval ::tycho::Interactor::click $actualX $actualY $args
+}
 
-    set actualX $x
-    set actualY $y
+#######################################################################
+#### drag
+#
+# Continue an interaction sequence. If the mouse has moved more than
+# step size (if not in gridded mode) or over a grid line (if in gridded
+# mode) in either axis, then forward the drag command to the proxy
+# with some multiple of the step size as the movement.
+#
+body ::tycho::Stepper::drag {x y} {
+	# By default, we don't move in either axis
+    set moveX 0
+    set moveY 0
 
-    set slopX 0
-    set slopY 0
+	# The difference between where we were and where we are
+    set deltaX [expr $x - $actualX]
+    set deltaY [expr $y - $actualY]
+
+	# A fudge factor to make snapping "feel" more natural
+    set threshold [expr 3 * $stepsize / 4]
+
+	# If we have moved far enough in the x axis, quantize the movement
+    if { $deltaX >= $threshold } {
+		set moveX [roundTo $deltaX $stepsize]
+    } elseif { $deltaX <= -$threshold } {
+		set moveX [roundTo $deltaX $stepsize]
+    } else {
+		set moveX 0
+    }
+
+	# Same in the y axis
+    if { $deltaY >= $threshold } {
+		set moveY [roundTo $deltaY $stepsize]
+    } elseif { $deltaY <= -$threshold } {
+		set moveY [roundTo $deltaY $stepsize]
+    } else {
+		set moveY 0
+    }
+
+	# As long as we have moved in at least one axis, forward the movement
+    if { $moveX != 0  || $moveY != 0 } {
+		set actualX [expr $actualX + $moveX]
+		set actualY [expr $actualY + $moveY]
+
+		::tycho::Interactor::drag $actualX $actualY
+    }
 }
