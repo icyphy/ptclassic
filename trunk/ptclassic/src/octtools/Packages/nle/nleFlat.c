@@ -670,8 +670,9 @@ octObject *Net2P;
     /* Which net should be retained ? The one with the shortest name  */
     /* unless the name has 0 length */
 
-    if (strlen(Net1P->contents.net.name) < strlen(Net2P->contents.net.name) && 
-        strlen(Net1P->contents.net.name) > 0 ) {
+    if ((int)strlen(Net1P->contents.net.name) <
+	(int)strlen(Net2P->contents.net.name) && 
+        (int)strlen(Net1P->contents.net.name) > 0 ) {
         octObject *tmp;        /* Swapping temporary variable */
         tmp = Net1P ; 
         Net1P = Net2P ; 
