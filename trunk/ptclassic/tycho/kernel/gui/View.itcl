@@ -39,7 +39,7 @@
 #### View
 # This class is the base class for most graphical and textual widgets
 # in Tycho. It is designed to be inserted into a <a href="Displayer.html">
-# Displayer</a> # window, although it can be used alone as an ordinary widget.
+# Displayer</a> window, although it can be used alone as an ordinary widget.
 # Subclasses of the View class display text or graphics, and may
 # choose to contain "subviews" within themselves. (The protocols
 # and functionality needed to properly implemented nested views
@@ -57,13 +57,6 @@
 # that has been attached to a displayer must only be destroyed by
 # calling the <code>destroyView</code> method of the displayer, or
 # otherwise the displayer will be unaware that the view is gone.
-# <p>
-# Here is an example:
-# <tcl><pre>
-# ::tycho::Displayer .d
-# ::tycho::View .d.v
-# wm deiconify .d
-# </pre></tcl>
 #
 class ::tycho::View {
     inherit ::tycho::TWidget
