@@ -81,6 +81,10 @@ public:
 	/* virtual */ int isA(const char*) const;
 	/* virtual */ const char* className() const;
 
+	// make a duplicate Star.  This will call Block::clone 
+	// and then set Star specific data members such as targetPtr.
+	/* virtual */ Block* clone () const;
+
 protected:
 	// User supplied method.
 	// Run the simulation, accessing Particles on the

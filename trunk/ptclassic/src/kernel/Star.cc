@@ -73,6 +73,14 @@ int Star :: run() {
 Star& Star :: asStar () { return *this;}
 const Star& Star :: asStar () const { return *this;}
 
+// make a duplicate Star.  This will call Block::clone 
+// and then set Star specific data members such as targetPtr.
+/* virtual */ Block* Star::clone () const {
+	Star* star = (Star*)Block::clone();
+	if (star) star->targetPtr = targetPtr;
+	return star;
+}
+
 // set the target for the star.
 void Star :: setTarget(Target* t) { 
 	targetPtr = t;
