@@ -166,8 +166,6 @@ class ::tycho::DataModel {
     private common defaulttypeoptions {
         -leafonly 0
         -override 0
-    	-strict 0
-    	-valued 0
     }
 
     # The safe interpreter provided for safe parsing
@@ -185,10 +183,8 @@ class ::tycho::DataModel {
     #    _typeinfo($scope)                -> List of types in order defined
     #    _typeinfo($scope,$type)          -> $type
     #    _typeinfo($scope,$type,defaults) -> Class-wide attribute defaults
-    #    _typeinfo($scope,$type,leafonly) -> Must be a leaf?
+    #    _typeinfo($scope,$type,leafonly) -> Can be a leaf only?
     #    _typeinfo($scope,$type,override) -> Use a method to parse items?
-    #    _typeinfo($scope,$type,strict)   -> Are attributes checked strictly?
-    #    _typeinfo($scope,$type,valued)   -> Has a value?
     # </pre>
     private common _typeinfo
 
@@ -232,16 +228,12 @@ body ::tycho::DataModel::destructor {} {
 #### add
 #
 # Add a new item. _name_ is its full name including types. Following
-# arguments are option-value pairs. Note that the *-valued* attribute (as
-# declared in a call to definetype{}) is ignored -- if the item
-# is valued, the value can be specified as an option named
-# *-value*. Raise an error if the item already exists.
-# Return the undo command.
+# arguments are option-value pairs. If the item already exists,
+# then its new value will overwrite its old value. (Note: the old
+# data will not be merged.) Children will also be overwritten,
+# but no children will be deleted.
 #
 body ::tycho::DataModel::add {name args} {
-    if [@scope $scope ::info exists [set modelname]($name)] {
-        error "An item \"$name\" already exists in $modelname"
-    }
 
     # Invalidate cache
     @scope $scope set [set modelname]._cachevalid 0
@@ -422,10 +414,9 @@ body ::tycho::DataModel::itemcget {name {attribute {}}} {
 #### itemconfigure
 #
 # Configure the item specified by _name_. Following arguments
-# are an attribute-value list. If the *-strict* attribute of the item's type
-# is set, then each attribute must have been defined in a call to definetype{}
-# or an error will be raised. Otherwise, any attribute can be given to
-# the item. Raise an error if the item does not exist. 
+# are an attribute-value list. Attributes are arbitrary -- there is
+# no checking in this method that attributes match those defined
+# with <b>type define</b>. Raise an error if the item does not exist. 
 # Return the undo command.
 #
 body ::tycho::DataModel::itemconfigure {name args} {
@@ -435,19 +426,9 @@ body ::tycho::DataModel::itemconfigure {name args} {
     # Get defaults as an array
     array set opts $_attrinfo($type)
 
-    if { ! $_typeinfo($scope,$type,strict) } {
-        # If checking is turned off, just add the new attributes
-        array set opts $args
-    } else {
-        # Flag an error if a given attribute is not already there
-        foreach {attribute value} $args {
-            if { ! [::info exists opts($attribute)] } {
-                # Error
-                error "Unknown attribute $attribute in $modelname"
-            }
-            set opts($attribute) $value
-        }
-    }
+    # Add the new attributes
+    array set opts $args
+
     # Set result and return undo command
     set data [@scope $scope set [set modelname]($name)]
     @scope $scope set [set modelname]($name) [array get opts]
@@ -522,12 +503,9 @@ body ::tycho::DataModel::names {{pattern *}} {
 #
 # Read data from a string containing a TIM representation of a
 # model. Each non-comment line must start with the name of a type
-# defined for this model. The item name follows, then the item value
-# if it is a valued type, then attributes, and then nested items
-# within curly braces. This method can be called even if the model
-# already contains data -- however, an error will be generated if data
-# with the same name as existing data is added. This method is not
-# undoable.
+# defined for this model. The item name follows, then attribute-value
+# pairs, and then nested items within curly braces. _This method does
+# not generate an undo command._
 #
 body ::tycho::DataModel::parse {data} {
     global _current_ _context_ _object_
@@ -536,6 +514,8 @@ body ::tycho::DataModel::parse {data} {
     set _object_ $this
     
     $safeinterp eval [list @scope $scope $data]
+
+    # Can't record this method.
     return ""
 }
 
@@ -607,27 +587,14 @@ body ::tycho::DataModel::sort {type {context {}} args} {
 # on the target object. This can be used if models need to do
 # additional processing when items are parsed.
 #
-# <dt><b>-strict</b> _bool_
-# <dd>
-# If true, the options of this type
-# are limited to those that are declared with definetype{}.
-# If not true, any options can be given to items of this type.
-# The default is false.
-#
-# <dt><b>-valued</b> _bool_
-# <dd>
-# If true, items of this type have
-# a value. If not true, no value will be parsed or printed in the
-# external format. The default is false.
-#
 # </dl>
 #
 # Any other specified attributes are treated as type-value attributes.
 # For example, the call
 # <pre>
-#     $NewInterchange type defined foo -valued 1 -bar hello
+#     $NewInterchange type defined foo -leafonly 1 -bar hello
 # </pre>
-# will create the type <b>foo</b> and give it valued.
+# will create the type <b>foo</b> and declare it to only be a leaf item.
 # In addition, any item of type <b>foo</b> can accept the option
 # </b>-bar</b>, which will have the default value "hello."
 #
@@ -711,24 +678,14 @@ body ::tycho::DataModel::_describeitem {name {prefix {}}} {
     set string $prefix$type
     lappend string $tail
 
-    # If this type has a value, append that
-    if { $_typeinfo($scope,$type,valued) } {
-        array set t [@scope $scope set [set modelname]($name)]
-        lappend string $data(-value)
-        unset t(-value)
-        set attributes [array get t]
-    } else {
-    	set attributes [@scope $scope set [set modelname]($name)]
-    }
-
     # Get default attributes
     array set dflt $_attrinfo($type)
 
     # Print my attributes
-    foreach {opt val} $attributes {
+    foreach {opt val} [@scope $scope set [set modelname]($name)] {
         if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
             lappend string $opt $val
-            # FIXME: Add line wrapping here
+            # FIXME: Add line wrapping here?
         }
     }
     
@@ -927,8 +884,6 @@ body ::tycho::DataModel::_mkparseproc {type args} {
     set proc "proc $scope::__parse_$type "
     if $opts(-override) {
         append proc "{args}"
-    } elseif $opts(-valued) {
-        append proc "{name value args}"
     } else {
         append proc "{name args}"
     }
@@ -969,12 +924,6 @@ body ::tycho::DataModel::_mkparseproc {type args} {
 
             global $_current_._cachevalid
             set $_current_._cachevalid 0
-        }
-        # Set the value
-        if $opts(-valued) {
-            append proc {
-                lappend [set _current_]($index) -value $value
-            }
         }
         # Parse contents
         if !$opts(-leafonly) {
