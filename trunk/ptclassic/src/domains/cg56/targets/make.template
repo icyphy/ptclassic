@@ -55,6 +55,9 @@ INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
 EXTRA_SRCS = $(PL_SRCS)
 
+# Used by make checkjunk
+OTHERSRCS = XCPeek XCPoke XPeek XPoke
+
 # objects to make
 OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o \
 	CGCS56XTarget.o S56XTargetWH.o \
