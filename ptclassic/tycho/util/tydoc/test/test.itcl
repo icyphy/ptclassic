@@ -155,7 +155,9 @@ proc testHTMLDocSys {filename} {
     puts "Producing documentation for $filename"
     ::tycho::HTMLDocSys .HTMLDocSys
     .HTMLDocSys readFile $filename
-    .HTMLDocSys generateHTML
+    .HTMLDocSys generateClassHTML
+    .HTMLDocSys generateOutsideClassHTML
+    .HTMLDocSys resetOutsideClassComment
     .HTMLDocSys generateHTMLIndex
     delete object .HTMLDocSys
 }
