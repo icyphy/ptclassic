@@ -232,6 +232,12 @@ class ::tycho::IDoc {
     # Display the contents of $myClass($mainClass) in contents widget.
     private method display {}
 
+    # Display the constructor(s) in the contents widget.
+    private method displayCon {}
+    
+    # Displayer the destructor(s) in the contents widget.
+    private method displayDes {}
+
     # Display the proper methods/procedures in the contents widget.
     private method displayMeth {protection}
 
@@ -240,7 +246,7 @@ class ::tycho::IDoc {
 
     # Display the proper variables in the contents widget.
     private method displayVar {protection}
-
+    
     # Format the explanation of the given item in HTML.
     private method formatExpl {class item type}
 
@@ -258,6 +264,9 @@ class ::tycho::IDoc {
 
     # Setup the resizing handles to behave properly.
     private method setupHandles {}
+
+    # Remove the argument list from a unique name
+    private method fixName {name {short 1}}
 }
 
 #########################################################################
@@ -790,6 +799,8 @@ body ::tycho::IDoc::bindDesc {class item label} {
         "\m" {set type method}
         "\v" {set type variable}
         "\r" {set type method}
+        "\c" {set type Constructor}
+        "\d" {set type Destructor}
         default {set type {}}
     }
 
@@ -826,6 +837,8 @@ body ::tycho::IDoc::bindExpl {class item label} {
         "\m" {set type method}
         "\v" {set type variable}
         "\r" {set type method}
+        "\c" {set type Constructor}
+        "\d" {set type Destructor}
         default {set type {}}
     }
 
@@ -874,10 +887,24 @@ body ::tycho::IDoc::display {} {
     update idletasks
 
     # insert the class name
-    $myContents appendlabel class \
-            -text $mainClass \
-            -font [$this cget -headfont] \
-            -fg [$this cget -publiccolor]
+    switch $language {
+        Java {
+            set package [$classModel modelcget -package]
+            if {$package != {}} {
+                set className $package.$mainClass
+            }
+            $myContents appendlabel class \
+                    -text $className \
+                    -font [$this cget -headfont] \
+                    -fg [$this cget -publiccolor]
+        }
+        default {
+            $myContents appendlabel class \
+                    -text $mainClass \
+                    -font [$this cget -headfont] \
+                    -fg [$this cget -publiccolor]
+        }
+    }
 
     $myContents bind class <Button-1> \
             [code "$this putHtml \
@@ -899,7 +926,20 @@ body ::tycho::IDoc::display {} {
     }
     
     # insert each type (Protected Method, etc.) by protection order
-    foreach protection {public protected private} {
+    switch {$language} {
+        "Java" {set protections "public protected package private"}
+        default {set protections "public protected private"}
+    }
+
+    putStatus "Displaying constructors."
+    update idletasks
+    displayCon
+
+    putStatus "Displaying destructors."
+    update idletasks
+    displayDes
+
+    foreach protection $protections {
         # Variables        
         putStatus "Displaying $protection variables."
         update idletasks
@@ -910,6 +950,130 @@ body ::tycho::IDoc::display {} {
         displayMeth $protection
     }
     putStatus ""
+}
+
+#####################################################################
+#### displayCon
+# Display the constructor(s) in the myContents
+# widget according to the $language variable.
+#
+body ::tycho::IDoc::displayCon {} {
+    set classModel $myClass($mainClass)
+
+    switch $language {
+        Itcl {
+            set subnames {}
+            foreach Constructor [$classModel Constructors] {
+                # put label into contents widget
+                $myContents appendlabel $Constructor\c \
+                        -text $Constructor \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -publiccolor]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $Constructor $Constructor\c
+                bindExpl $mainClass $Constructor $Constructor\c
+                lappend subnames $Constructor\c
+            }
+            
+            # No inherited (overloading) constructors
+            
+            # insert panel if a Constructor found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                $myContents append Constructor\c "$subnames" \
+                        -text "Constructor" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -publiccolor]
+            }
+        }
+        Java {
+            set subnames {}
+            foreach Constructor [$classModel Constructors] {
+                # put label into contents widget
+                $myContents appendlabel $Constructor\c \
+                        -text [fixName $Constructor 0] \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -publiccolor]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $Constructor $Constructor\c
+                bindExpl $mainClass $Constructor $Constructor\c
+                lappend subnames $Constructor\c
+            }
+            
+            # No inherited (overloading) constructors
+            
+            # insert panel if a Constructor found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                $myContents append Constructor\c "$subnames" \
+                        -text "Constructors" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -publiccolor]
+            }
+        }
+    }
+}
+
+#####################################################################
+#### displayDes
+# Display the destructor(s) in the myContents
+# widget according to the $language variable.
+#
+body ::tycho::IDoc::displayDes {} {
+    set classModel $myClass($mainClass)
+
+    switch $language {
+        Itcl {
+            set subnames {}
+            foreach Destructor [$classModel Destructors] {
+                # put label into contents widget
+                $myContents appendlabel $Destructor\d \
+                        -text $Destructor \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -publiccolor]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $Destructor $Destructor\d
+                bindExpl $mainClass $Destructor $Destructor\d
+                lappend subnames $Destructor\d
+            }
+            
+            # No inherited (overloading) destructors
+            
+            # insert panel if a Destructor found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                $myContents append Destructor\d "$subnames" \
+                        -text "Destructor" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -publiccolor]
+            }
+        }
+        Java {
+            set subnames {}
+            foreach Destructor [$classModel Destructors] {
+                # put label into contents widget
+                $myContents appendlabel $Destructor\d \
+                        -text [fixName $Destructor 0] \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -publiccolor]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $Destructor $Destructor\d
+                bindExpl $mainClass $Destructor $Destructor\d
+                lappend subnames $Destructor\d
+            }
+            
+            # No inherited (overloading) destructors
+            
+            # insert panel if a Destructor (finalizer) found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                $myContents append Destructor\d "$subnames" \
+                        -text "Finalizers" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -publiccolor]
+            }
+        }
+    }
 }
 
 #####################################################################
@@ -1011,6 +1175,105 @@ body ::tycho::IDoc::displayMeth {protection} {
                 set subnames [lsort $subnames]
                 $myContents append $protection\p "$subnames" \
                         -text "$temp Procs" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
+            }   
+        }
+        Java {
+            # It's convenient to separate static methods from others.
+            
+            # Instance methods
+            set subnames {}
+            foreach method [$classModel methods \
+                    -protection $protection -scope instance] {
+                # put label into contents widget
+                $myContents appendlabel $method\m \
+                        -text [fixName $method 0] \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $method $method\m
+                bindExpl $mainClass $method $method\m
+                lappend subnames $method\m
+            }
+
+            # check for inherited methods
+            # FIXME: account for package as well
+            if {$protection == "public" || $protection == "protected"} {
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach method [$currentModel methods \
+                            -protection $protection -scope instance] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$method\m"] == -1} {
+                            $myContents appendlabel $method\m \
+                                    -text [fixName $method 0] \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $method $method\m
+                            bindExpl $class $method $method\m
+                            lappend subnames $method\m
+                        }
+                    }
+                }
+            }
+
+            # insert panel if any methods found
+            if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
+                set subnames [lsort $subnames]
+                $myContents append $protection\m "$subnames" \
+                        -text "$temp Methods" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
+            }
+
+            # Static Methods
+            set subnames {}
+            foreach method [$classModel methods \
+                    -protection $protection -scope class] {
+                # put label into contents widget
+                $myContents appendlabel $method\p \
+                        -text [fixName $method 0] \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $method $method\p
+                bindExpl $mainClass $method $method\p
+                lappend subnames $method\p
+            }
+
+            # check for inherited procs
+            # FIXME: package vis?
+            if {$protection == "public" || $protection == "protected"} {
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach method [$currentModel methods \
+                            -protection $protection -scope class] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$method\p"] == -1} {
+                            $myContents appendlabel $method\p \
+                                    -text [fixName $method 0] \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $method $method\p
+                            bindExpl $class $method $method\p
+                            lappend subnames $method\p
+                        }
+                    }
+                }
+            }
+
+            # insert panel if any procs found
+            if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
+                set subnames [lsort $subnames]
+                $myContents append $protection\p "$subnames" \
+                        -text "$temp Static Methods" \
                         -font [$this cget -headfont] \
                         -foreground [$this cget -$protection\color]
             }   
@@ -1185,6 +1448,105 @@ body ::tycho::IDoc::displayVar {protection} {
                         -foreground [$this cget -$protection\color]
             }
         }
+        Java {
+            # It's convenient to separate static variables from others
+           
+            # Instance variables
+            set subnames {}
+            foreach variable [$classModel variables \
+                    -protection $protection -scope instance] {
+                # put label into contents widget   
+                $myContents appendlabel $variable\v \
+                        -text $variable \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $variable $variable\v
+                bindExpl $mainClass $variable $variable\v
+                lappend subnames $variable\v
+            }
+
+            # check for inherited instance variables
+            # FIXME: need to check for inherited package variables as well
+            if {$protection == "public" || $protection == "protected"} {
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach variable [$currentModel variables \
+                            -protection $protection -scope instance] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$variable\v"] == -1} {
+                            $myContents appendlabel $variable\v \
+                                    -text $variable \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $variable $variable\v
+                            bindExpl $class $variable $variable\v
+                            lappend subnames $variable\v
+                        }
+                    }
+                }
+            }
+
+            # insert panel if any instance variables found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                set temp [::tycho::capitalize $protection]
+                $myContents append $protection\v "$subnames" \
+                        -text "$temp Variables" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
+            }
+
+            # Static variables
+            set subnames {}
+            foreach variable [$classModel variables \
+                    -protection $protection -scope class] {
+                # put label into contents widget
+                $myContents appendlabel $variable\v \
+                        -text $variable \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -optioncolor]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc $mainClass $variable $variable\v
+                bindExpl $mainClass $variable $variable\v
+                lappend subnames $variable\v
+            }
+            
+            # Check for inherited static variables
+            # FIXME: need to check for inherited package variables as well
+            if {$protection == "public" || $protection == "protected"} {
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach variable [$currentModel variables \
+                            -protection $protection -scope class] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$variable\v"] == -1} {
+                            $myContents appendlabel $variable\v \
+                                    -text $variable \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $variable $variable\v
+                            bindExpl $class $variable $variable\v
+                            lappend subnames $variable\v
+                        }
+                    }
+                }
+            }
+            
+            # insert panel if any static variables found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                set temp [::tycho::capitalize $protection] 
+                $myContents append $protection\i "$subnames" \
+                        -text "Static $temp Variables" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -optioncolor]
+            }            
+        }
         default { 
             # NOTE: for documentation, mainly. Does not implement inheritance.
             set subnames {}
@@ -1217,7 +1579,7 @@ body ::tycho::IDoc::displayVar {protection} {
 # Format the explanation of the given item in HTML. This is usually
 # bound to a button 1 click on an item in the contents widget.
 # An item may not have an explanation, but _must_ have a description.
-#
+# 
 body ::tycho::IDoc::formatExpl {class item type} {
     set classModel $myClass($class)
 
@@ -1225,26 +1587,104 @@ body ::tycho::IDoc::formatExpl {class item type} {
         set expl [$classModel get annotation $item.description $type]
     }
     
-    set paramlist {}
-    if {$type == "method"} {
-        foreach parameter [$classModel parameters $item] {
-            set default [$classModel itemcget parameter \
-                    $item.$parameter -default $type]
-            if {$default == {}} {
-                lappend paramlist $parameter
-            } else {
-                lappend paramlist "$parameter $default"
+    switch $language {
+        Itcl {
+            set other {}
+
+            if {$type == "method" || $type == "Constructor"} {
+
+                # Get method parameters and their defaults
+                # NOTE: Itcl destructors don't have parameters
+                set paramlist {}
+                foreach parameter [$classModel parameters $item] {
+                    set default [$classModel itemcget parameter \
+                            $item.$parameter -default $type]
+                    if {$default == {}} {
+                        lappend paramlist $parameter
+                    } else {
+                        lappend paramlist "$parameter $default"
+                    }
+                }
+                if {$paramlist != {}} {
+                    set other $paramlist
+                }
+            } elseif {$type == "variable"} {
+                                
+                # Get the variable's default value
+                set default [$classModel itemcget variable $item -default]
+                if {$default != {}} {
+                    set other $default
+                }
+            }
+
+            # Format HTML
+            set html "<b>$item</b> <i>$other</i><p> $expl"
+
+            # Add footer for inherited items
+            if {$class != $mainClass && $class != "related"} {
+                append html "<br><br><br><hr>\
+                        <a href=\"[docFile $class]\">$class</a>"
             }
         }
-    }
+        Java {
+            set other {}
+            set exceptions {}
 
-    set html "<b>$item</b> <i>$paramlist</i><p> $expl"
-    
-    if {$class != $mainClass && $class != "related"} {
-        set html "$html<br><br><br><hr>\
-                <a href=\"[docFile $class]\">$class</a>"
-    }
+            if {$type == "method" || $type == "Constructor" \
+                    || $type == "Destructor"} {
 
+                # Get method parameters and their types
+                set paramlist "("
+                foreach parameter [$classModel parameters $item] {
+                    set paramtype [$classModel itemcget parameter \
+                            $item.$parameter -type $type]
+                    append paramlist $paramtype " " $parameter ", "
+                }
+                # Remove extra comma
+                set other [string trimright $paramlist " ,"])
+            
+                # Get exceptions
+                set exceptions [$classModel itemcget $type $item -exceptions]
+                
+                # Format exceptions
+                if {$exceptions != {}} {
+                    set temp ""
+                    append temp "throws "
+                    foreach exception $exceptions {
+                        append temp "$exception, "
+                    }
+                    set exceptions [string trimright $temp ", "]
+                }
+            } elseif {$type == "variable"} {
+                
+                # Get the default value
+                set default [$classModel itemcget variable $item -default]
+                if {$default != {}} {
+                    set other "= $default"
+                }
+            }
+            
+            set shortname [fixName $item]
+            set modifiers [$classModel itemcget $type $item -modifiers]
+            # Constructors don't have an explicit type
+            if {$type != "Constructor"} {
+                # Remove signature portion of item name
+                set shortname [fixName $item]
+                set itemtype [$classModel itemcget $type $item -type]
+            } {
+                set shortname "$mainClass"
+                set itemtype ""
+            }
+
+            # Format HTML
+            if {$modifiers != {} || $itemtype != {}} {
+                set html "$modifiers $itemtype <b>$shortname</b> "
+            } {
+                set html "<b>$shortname</b> "
+            }
+            append html "<i>$other</i> $exceptions<p> $expl"            
+        }
+    }
     return $html
 }
 
@@ -1365,5 +1805,45 @@ body ::tycho::IDoc::setupHandles {} {
     bind $leftright <ButtonRelease-1> {
         %Q resizeFrame 1 "%x"
         %Q ghostHandle 1 0
+    }
+}
+
+#####################################################################
+#### fixName
+# A ::tycho::Class model requires unique names for its entities (including
+# methods). Because some languages support method overloading, their
+# method names are stored as their signatures: i.e. name(argtype1, argtype2...).
+# 
+# When short is set, this method (proc?) removes the trailing portion of 
+# the unique name.
+#
+# If short is unset, it just beautifies the name, changing char<> to char[], 
+# (Itcl has problems with string matching brackets.) and foo(int,int) to 
+# foo (int, int)
+#
+body ::tycho::IDoc::fixName {name {short 1}} {
+
+    if {$short} {
+        regexp {^(.*)[(]} $name dmy name
+        return $name
+    } {
+        set retval ""
+        set index 0
+        set length [string length $name]
+        for {} {$index < $length} {incr index} {
+            set letter [string index $name $index]
+            if {$letter == "\<"} {
+                append retval \[
+            } elseif {$letter == "\>"} {
+                append retval \]
+            } elseif {$letter == "\("} {
+                append retval " ("
+            } elseif {$letter == ","} {
+                append retval ", "
+            } {
+                append retval $letter
+            }
+        }
+        return $retval
     }
 }
