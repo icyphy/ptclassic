@@ -1,9 +1,10 @@
 # Makefile for Ptolemy Tycho system, editors/textedit directory.
 #
-# $Id$
-# Makefile author: Christopher Hylands
+# @Author: Christopher Hylands
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Version: $Id$
+#
+# @Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
