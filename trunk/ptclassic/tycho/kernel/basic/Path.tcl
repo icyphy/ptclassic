@@ -217,7 +217,15 @@ proc ::tycho::pathEnvSearch {filename} {
 # directory where it was found.  If it is not found, return the empty 
 # string
 #
-proc ::tycho::pathSearch {filename path} {
+proc ::tycho::pathSearch {filename {path {}}} {
+    if {$path == {} } {
+	global env tcl_platform
+	switch $tcl_platform(platform) {
+	    unix {set path [split $env(PATH) :]}
+	    default {error "Don't know how to handle paths on \
+		    $tcl_platform(platform) yet. env(PATH) = $env(PATH)"}
+	}
+    }  
     foreach dir $path {
 	if [file executable [file join $dir $filename]] {
 	    return $dir
