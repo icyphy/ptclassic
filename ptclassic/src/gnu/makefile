@@ -26,7 +26,7 @@
 # 						COPYRIGHTENDKEY
 #
 
-# This makefile has only been tested with Solaris2.4, and HPUX10.20.
+# This makefile has only been tested with Solaris2.5.1, and HPUX10.20.
 # It may work on other platforms, but we have not tried.
 
 # This makefile will install the GNU tools for non-hp and hp platforms.
@@ -62,7 +62,7 @@ GNU_PREFIX=$(GNU_DEST)/common
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=egcs-2.90.29
+GCC_VERSION=egcs-2.91.57
 
 # If you are trying to build GNU for Linux, you may want to uncomment
 # the next line and comment out the following line
