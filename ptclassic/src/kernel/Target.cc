@@ -212,7 +212,7 @@ void Target::deleteChildren() {
 	nChildren = 0;
 }
 
-char* Target::writeDirectoryName(char* dirName) {
+char* Target::writeDirectoryName(const char* dirName) {
 
    if(dirName && *dirName) {
 	const char* dir;
@@ -247,18 +247,18 @@ char* Target::writeDirectoryName(char* dirName) {
 // It is up to the user to delete the memory when no longer needed.
 // If dirFullName or fileName is NULL then it returns a
 // pointer to a new copy of the string "/dev/null".
-char* Target::writeFileName(char* fileName) {
+char* Target::writeFileName(const char* fileName) {
 	if(dirFullName && *dirFullName && fileName && *fileName) {
 		StringList fullName = dirFullName;
 		fullName += "/";
 		fullName += fileName;
-		return savestring((char*)fullName);
+		return fullName.newCopy();
 	}
 	return savestring("/dev/null");
 }
 
 // Routines for writing code: schedulers may call these
-StringList Target::beginIteration(int repetitions, int depth) {
+StringList Target::beginIteration(int repetitions, int) {
 	StringList out;
 	out = "REPEAT ";
 	out += repetitions;
@@ -266,13 +266,13 @@ StringList Target::beginIteration(int repetitions, int depth) {
 	return out;
 }
 
-StringList Target::endIteration(int repetitions, int depth) {
+StringList Target::endIteration(int, int) {
 	StringList out;
 	out = "}\n";
 	return out;
 }
 
-StringList Target::writeFiring(Star& s, int depth) {
+StringList Target::writeFiring(Star& s, int) {
 	StringList out;
 	out = s.readFullName();
 	out += "\n";
