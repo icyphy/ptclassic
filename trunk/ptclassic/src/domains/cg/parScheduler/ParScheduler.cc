@@ -40,7 +40,7 @@ Date of last revision:
 #include "ParGraph.h"
 #include "GalIter.h"
 #include "UniProcessor.h"
-#include "CGWormhole.h"
+#include "CGWormBase.h"
 #include "StringList.h"
 #include "streamCompat.h"
 
@@ -57,6 +57,7 @@ ParScheduler :: ParScheduler(MultiTarget* t, const char* logName) {
 	logstrm = 0;
 	exGraph = 0;
 	inUniv = TRUE;
+	EGcreated = 0;
 }
 
 ParScheduler :: ~ParScheduler() {
@@ -96,20 +97,20 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 		int flag =  SDFScheduler :: computeSchedule(g);
 
 		// total work computation. set targets.
-		oldRoutine = TRUE;
 		int sum = 0;
 		DFGalStarIter nextStar(*galaxy());
 		DataFlowStar* s;
+		Target* t = mtarget->child(0);
 		while ((s = nextStar++) != 0) {
 			sum += s->myExecTime() * s->reps();
-			if (s->isItWormhole()) oldRoutine = FALSE;
+			s->setTarget(t);
 		}
 		totalWork = sum;
 		return flag;
 	}
 
 	if (overrideSchedule()) {
-		if (!exGraph) {
+		if (!EGcreated) {
 			Error::abortRun("We can not override an empty",
 			"schedule.");
 			return FALSE;
@@ -132,6 +133,8 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 		invalid = TRUE;
 		return FALSE;
 	}
+	EGcreated = TRUE;
+
 	// compute the total (expected) workload with a single processor.
 	totalWork = exGraph->getExecTotal();
 
@@ -148,27 +151,13 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 	}
 
 	// finalize the schedule of wormholes.
-	if (inUniv) {
-		finalSchedule();
+	if (inUniv && (!assignManually())) {
+		if (!finalSchedule()) {
+			invalid = TRUE;
+			return FALSE;
+		}
 	}
  
-	// explicit set the OSOP request flag by looking at the schedule
-	// result if possible to avoid Spread/Collect stars as much as
-	// possible
-	if (OSOPreq() != TRUE) mtarget->setOSOPreq(isaOSOPschedule(g));
-
-	// targetPtr setup for each processor
-	parProcs->mapTargets();
-
-	// sub-universe creation.
-	// In case of CGDDFWormhole, we resort to the old routine.
-	oldRoutine = createSubGals();
-
-	if (logstrm && (oldRoutine == TRUE)) {
-		*logstrm << parProcs->displaySubUnivs();
-		logstrm->flush();
-	}
-
         return TRUE;
 }
 
@@ -182,9 +171,24 @@ void ParScheduler :: setUpProcs(int num) {
 	avail.create(numProcs);
 }
 
-int ParScheduler :: createSubGals() {
+// sub-universe creation.
+
+int ParScheduler :: createSubGals(Galaxy& g) {
+	// explicit set the OSOP request flag by looking at the schedule
+	// result if possible to avoid Spread/Collect stars as much as
+	// possible
+	if (OSOPreq() != TRUE) mtarget->setOSOPreq(isaOSOPschedule(g));
+
+	// main routine
 	exGraph->restoreHiddenGates();
 	parProcs->createSubGals();
+
+	// log the created subgals.
+	if (logstrm) {
+		*logstrm << parProcs->displaySubUnivs();
+		logstrm->flush();
+	}
+
 	return TRUE;
 }
 
@@ -207,6 +211,10 @@ int ParScheduler :: mainSchedule() {
 // saveProcIds
 /////////////////////////////
 
+// after automatic scheduling is performed, we save the procId of
+// ParNode class to stars. Later we allow the user to override
+// the automatic scheduling results.
+
 void ParScheduler :: saveProcIds() {
 	GalStarIter iter(*galaxy());
 	CGStar* s;
@@ -216,6 +224,10 @@ void ParScheduler :: saveProcIds() {
 	}
 }
 
+// Processor id of Fork star is  determined by the ancestor.
+// If the ancestor is a wormhole, the procId of the Fork should be given
+// explicitly.
+
 int procIdOfFork(CGStar* s) {
 	BlockPortIter piter(*s);
 	PortHole* p;
@@ -224,7 +236,7 @@ int procIdOfFork(CGStar* s) {
 	CGStar* farS = (CGStar*) p->far()->parent();
 	if (farS->isItFork()) {
 		s->setProcId(procIdOfFork(farS));
-	} else {
+	} else if (!farS->isItWormhole()) {
 		s->setProcId(farS->getProcId());
 	}
 	return  s->getProcId();
@@ -233,6 +245,9 @@ int procIdOfFork(CGStar* s) {
 /////////////////////////////
 // scheduleManually
 /////////////////////////////
+
+// When assignement of all stars are given by user,
+// just perform the list scheduling based on that assignment.
 
 int ParScheduler :: scheduleManually() {
 	// Make sure all stars are assigned to processors.
@@ -254,9 +269,17 @@ int ParScheduler :: scheduleManually() {
 		} else {
 			// set procId of all invocations of the star
 			ParNode* n = (ParNode*) s->myMaster();
+
+			// for parallel stars, set up profile of ParNode.
+			Profile* pf = s->getProfile();
+			if (s->isItWormhole()) {
+				CGWormBase* worm = s->myWormhole();
+				pf = worm->manualSchedule(s->reps());
+			}
 			while (n) {
 				n->assignProc(s->getProcId());
 				n->setProcId(s->getProcId());
+				n->withProfile(pf);
 				n = (ParNode*) n->getNextInvoc();
 			}
 		}
@@ -275,72 +298,75 @@ int ParScheduler :: scheduleManually() {
 // virtual methods
 /////////////////////////////
 
-int ParScheduler :: preSchedule() { return TRUE; }
+// main automatic scheduling routine.
 int ParScheduler :: scheduleIt() { return FALSE; }
 
-/////////////////////////////
-// runOnce
-/////////////////////////////
-
-void ParScheduler::oldRun() {
-// If numProc == 1, be special.
-	if (numProcs == 1) {
-		SDFSchedIter next(mySchedule);
-		CGStar* s;
-		while ((s = (CGStar*) next++) != 0) {
-			if (s->isItWormhole()) {
-				CGWormhole* worm = s->myWormhole();
-				worm->downLoadCode(0);
-			} else {
-				CGTarget* t = (CGTarget*) mtarget->child(0);
-				s->setTarget(t);
-				mtarget->writeFiring(*s,1);
-			}
+//
+// After repetition counters of the stars are determined,
+// set up the assignedId field of the wormhole profile.
+// 
+int ParScheduler :: preSchedule() { 
+	// setup profiles of wormholes before main scheduling begins.
+	GalStarIter next(*galaxy());
+	CGStar* s;
+	while ((s = (CGStar*) next++) != 0) {
+		if (s->isItWormhole()) {
+			CGWormBase* worm = s->myWormhole();
+			worm->setupProfile(s->reps());
 		}
-		return;
 	}
-
-// run the schedule for each target
-	for (int i = 0; i < mtarget->nProcs(); i++) {
-		mtarget->setCurChild(i);
-		parProcs->getProc(i)->run();
-	}
+	return TRUE; 
 }
 
-void ParScheduler :: compileRun() {
-	// sub-universe creation.
-	if (!oldRoutine) {
-		// in case of wormhole, we resort to the old routine.
-		// we will remove this later.
-		oldRun();
-		return;
-	}
+/////////////////////////////
+// compileRun
+/////////////////////////////
 
-	// If numProc == 1, be special.
+void ParScheduler :: compileRun() {
+	// If numProc == 1, 0, be special.
 	if (numProcs == 1) {
 		CGTarget* t = (CGTarget*) mtarget->child(0);
 		t->setGalaxy(*galaxy());
+		t->scheduler()->setGalaxy(*galaxy());
+		t->copySchedule(mySchedule);
 		t->generateCode();
 		mtarget->addProcessorCode(0,(*t->getStream("code")));
+		return;
+	} else if (numProcs == 0) {
+		SDFScheduler :: compileRun();
+		return;
+	}
+
+	// targetPtr setup for each processor
+	mapTargets();
+
+	// sub-universe creation.
+	if (!createSubGals(*galaxy())) {
+		invalid = TRUE;
 		return;
 	}
 
 	// prepare code generation for each processing element:
 	// galaxy initialize, copy schedule, and simulate the schedule.
 	parProcs->prepareCodeGen();
+	if (haltRequested()) { invalid = TRUE; return; }
 
 	// make parallel target intervene here to do something necessary
 	// by default, do nothing
 	mtarget->prepareCodeGen();
+	if (haltRequested()) { invalid = TRUE; return; }
 	
 	// run sub-universe in each processor to generate the code
 	parProcs->generateCode();
+	if (haltRequested()) { invalid = TRUE; return; }
 }
 
 /////////////////////////////
 // setProfile
 /////////////////////////////
-
+//
+// copy the scheduling results to the argument "profile".
+// 
 void ParScheduler :: setProfile(Profile* profile) {
 
 	// special for numProcs == 1
@@ -349,6 +375,13 @@ void ParScheduler :: setProfile(Profile* profile) {
 		profile->setStartTime(0,0);
 		profile->setFinishTime(0,getTotalWork());
 		profile->summary();
+		if (EGcreated) {
+			int temp = exGraph->pairDistance();
+			if (temp < 0) temp = profile->getMakespan();
+			profile->setMinDisplacement(temp);
+		} else {
+			profile->setMinDisplacement(0);
+		}
 		return;
 	}
 
@@ -363,25 +396,31 @@ void ParScheduler :: setProfile(Profile* profile) {
 		if (!(proc->getAvailTime())) effNum--;
 	}
 	profile->setEffP(effNum);
-	profile->setMinDisplacement(exGraph->pairDistance());
 	profile->summary();
+	int temp = exGraph->pairDistance();
+	if (temp < 0) temp = profile->getMakespan();
+	profile->setMinDisplacement(temp);
 }
 
 /////////////////////////////
 // finalSchedule
 /////////////////////////////
+//
+// At the last stage of scheduling, make the final schedule
+// for wormholes.
 
-void ParScheduler :: finalSchedule() {
+int ParScheduler :: finalSchedule() {
 
 	// detect the wormholes, and finalize their schedule.
 	GalStarIter next(*galaxy());
 	CGStar* s;
 	while ((s = (CGStar*) next++) != 0) {
 		if (s->isItWormhole()) {
-			CGWormhole* worm = s->myWormhole();
-			worm->insideSchedule();
+			CGWormBase* worm = s->myWormhole();
+			if (!worm->insideSchedule()) return FALSE;
 		}
 	}
+	return TRUE;
 }
 
 /////////////////////////////
@@ -400,7 +439,7 @@ StringList ParScheduler :: displaySchedule() {
 	while ((s = (CGStar*) next++) != 0) {
 		if (s->isItWormhole()) {
 			out += "-------- \n\n";
-			CGWormhole* worm = s->myWormhole();
+			CGWormBase* worm = s->myWormhole();
 			out += worm->displaySchedule();
 		}
 	}
@@ -429,5 +468,18 @@ void ParScheduler::writeGantt(ostream& o) {
 	o << "optimum " << float(p) << "\n";
 	o << "runtime " << total << "\n";
 	o.flush();
+}
+
+/////////////////////////////
+// Utilities
+/////////////////////////////
+
+int ParScheduler::withParallelStar() {
+	DFGalStarIter nextStar(*galaxy());
+	CGStar* s;
+	while ((s = (CGStar*) nextStar++) != 0) {
+		if (s->isParallel()) return TRUE;
+	}
+	return FALSE;
 }
 
