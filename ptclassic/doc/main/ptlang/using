@@ -31,7 +31,7 @@ The documentation
 file
 can be printed out using the command ~ptolemy/doc/bin/printpage.
 By convention, the documentation file has the name
-XXXyyy.t, where XXX is the domain name and yyy is the star name.
+XXXYYY.t, where XXX is the domain name and YYY is the star name.
 The printpage command assumes your PRINTER environment variable is set
 to the printer of choice.  The following line in your .cshrc file,
 for example, will ensure this:
