@@ -41,157 +41,445 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Plasma.h"
 #include "Error.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// Helper functions - operators between 2 Matrices.
-/////////////////////////////////////////////////////////////////////////////
+#define SMALL_STRING 32   // should be same as for StringList.cc
 
+/**************************************************************************
+ Global operators, not members of the various Matrix classes.
+ It is possible to define some of these functions in terms of others,
+ for example:
+
+  Matrix operator + (const Matrix& src1, const Matrix& src2) {
+    Matrix result(src1);
+    result += src2;
+    return result;
+  }
+  Matrix& operator += (const Matrix& src2) {
+    // do add stuff
+  }
+
+ or defining += in terms of the binary +, but it is most efficient to
+ have the full operations defined in each function because copying the
+ results is too expensive.
+**************************************************************************/
+
+// Add two matricies
 ComplexMatrix operator+ (const ComplexMatrix& src1,const ComplexMatrix& src2) {
-  if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matrices with incompatible dimensions.\n"); 
+  if((src1.nRows != src2.nRows) || (src1.nCols != src2.nCols)) {
+    Error::abortRun("addition used on matricies of different dimensions\n");
     return src1;
   }
-  ComplexMatrix result(src1);   // Make a copy of src1
-  result += src2;
+  ComplexMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) + src2.entry(i);
   return result;
 }
 
+// Pre-add matrix with a scalar
+ComplexMatrix operator+ (const Complex& scalar,const ComplexMatrix& matrix) {
+  ComplexMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) + scalar;
+  return result;
+}
+
+// Post-add matrix with a scalar
+ComplexMatrix operator+ (const ComplexMatrix& matrix,const Complex& scalar) {
+  return (scalar + matrix);
+}
+
+// Subtract two matricies
 ComplexMatrix operator- (const ComplexMatrix& src1,const ComplexMatrix& src2) {
-  if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matrices with incompatible dimensions.\n"); 
+  if((src1.nRows != src2.nRows) || (src1.nCols != src2.nCols)) {
+    Error::abortRun("subtraction used on matricies of different dimensions\n");
     return src1;
   }
-  ComplexMatrix result(src1);   // Make a copy of src1
-  result -= src2;
+  ComplexMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) - src2.entry(i);
   return result;
 }
 
+// Pre-subtract matrix with a scalar
+ComplexMatrix operator- (const Complex& scalar,const ComplexMatrix& matrix) {
+  return ((-scalar) + matrix);
+}
+
+// Post-subtract matrix with a scalar
+ComplexMatrix operator- (const ComplexMatrix& matrix,const Complex& scalar) {
+  return ((-scalar) + matrix);
+}
+
+// Multiply two matricies, true matrix multiply, this is a fairly fast
+// algorithm, especially when optimized by the compiler.
 ComplexMatrix operator* (const ComplexMatrix& src1,const ComplexMatrix& src2) {
   ComplexMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
     return result;
   }
   
-  result = 0;
+  Complex temp;
   for(int i = 0; i < src1.nRows; i++)
-    for(int j = 0; j < src2.nCols; j++)
-      for(int k = 0; k < src1.nCols; k++)
-        result[i][j] += src1[i][k] * src2[k][j];
+    for(int j = 0; j < src2.nCols; j++) {
+      temp = src1[i][0] * src2[0][j];
+      for(int k = 1; k < src1.nCols; k++)
+        temp += src1[i][k] * src2[k][j];
+      result[i][j] = temp;
+    }
   return result;
 }
 
+// Pre-multiply matrix with a scalar element wise
+ComplexMatrix operator* (const Complex& scalar,const ComplexMatrix& matrix) {
+  ComplexMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) * scalar;
+  return result;
+}
+
+// Post-multiply matrix with a scalar element wise
+ComplexMatrix operator* (const ComplexMatrix& matrix,const Complex& scalar) {
+  return (scalar * matrix);
+}
+
+// Multiply two matricies, and put result in the third.  This is similar to
+// the binary operator * but faster because by passing the reference to the
+// result, we avoid an extra copy constructor step.
+ComplexMatrix& multiply (const ComplexMatrix& left,const ComplexMatrix& right,
+                         ComplexMatrix& result) {
+  if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
+     (right.nCols != result.nCols)) {
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    return result;
+  }
+  
+  Complex temp;
+  for(int i = 0; i < left.nRows; i++)
+    for(int j = 0; j < right.nCols; j++) {
+      temp = left[i][0] * right[0][j];
+      for(int k = 1; k < left.nCols; k++)
+        temp += left[i][k] * right[k][j];
+      result[i][j] = temp;
+    }
+  return result;
+}
+
+// Add two matricies
 FixMatrix operator + (const FixMatrix& src1, const FixMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("addition used on matricies of different dimensions.\n"); 
     return src1;
   }
-  FixMatrix result(src1);   // Make a copy of src1
-  result += src2;
+  FixMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) + src2.entry(i);
   return result;
 }
 
+// Pre-add matrix with a scalar
+FixMatrix operator+ (const Fix& scalar,const FixMatrix& matrix) {
+  FixMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) + scalar;
+  return result;
+}
+
+// Post-add matrix with a scalar
+FixMatrix operator+ (const FixMatrix& matrix,const Fix& scalar) {
+  return (scalar + matrix);
+}
+
+// Subtract two matricies
 FixMatrix operator - (const FixMatrix& src1, const FixMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("subtraction used on matricies of different dimensions\n");
     return src1;
   }
-  FixMatrix result(src1);   // Make a copy of src1
-  result -= src2;
+  FixMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) - src2.entry(i);
   return result;
 }
 
+// Pre-subtract matrix with a scalar
+// Note this takes scalar by value because unary operator - on Fix is
+// destructive (i.e. replaces the Fix with its complement).
+FixMatrix operator- (Fix scalar,const FixMatrix& matrix) {
+  return ((-scalar) + matrix);
+}
+
+// Post-subtract matrix with a scalar
+// Note this takes scalar by value because unary operator - on Fix is
+// destructive (i.e. replaces the Fix with its complement).
+FixMatrix operator- (const FixMatrix& matrix,Fix scalar) {
+  return ((-scalar) + matrix);
+}
+
+// Multiply two matricies, true matrix multiply, this is a fairly fast
+// algorithm, especially when optimized by the compiler.
 FixMatrix operator * (const FixMatrix& src1, const FixMatrix& src2) {
   FixMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n"); 
     return result;
   }
   
-  result = Fix(double(0));
-
+  Fix temp;
   for(int i = 0; i < src1.nRows; i++)
-    for(int j = 0; j < src2.nCols; j++)
-      for(int k = 0; k < src1.nCols; k++)
-        result[i][j] += src1[i][k] * src2[k][j];
+    for(int j = 0; j < src2.nCols; j++) {
+      temp = src1[i][0] * src2[0][j];
+      for(int k = 1; k < src1.nCols; k++)
+        temp += src1[i][k] * src2[k][j];
+      result[i][j] = temp;
+    }
   return result;
 }
 
+// Pre-multiply matrix with a scalar element wise
+FixMatrix operator* (const Fix& scalar,const FixMatrix& matrix) {
+  FixMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) * scalar;
+  return result;
+}
+
+// Post-multiply matrix with a scalar element wise
+FixMatrix operator* (const FixMatrix& matrix,const Fix& scalar) {
+  return (scalar * matrix);
+}
+
+// Multiply two matricies, and put result in the third.  This is similar to
+// the binary operator * but faster because by passing the reference to the
+// result, we avoid an extra copy constructor step.
+FixMatrix& multiply (const FixMatrix& left,const FixMatrix& right,
+                     FixMatrix& result) {
+  if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
+     (right.nCols != result.nCols)) {
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    return result;
+  }
+  
+  Fix temp;
+  for(int i = 0; i < left.nRows; i++)
+    for(int j = 0; j < right.nCols; j++) {
+      temp = left[i][0] * right[0][j];
+      for(int k = 1; k < left.nCols; k++)
+        temp += left[i][k] * right[k][j];
+      result[i][j] = temp;
+    }
+  return result;
+}
+
+// Add two matricies
 FloatMatrix operator + (const FloatMatrix& src1, const FloatMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("addition used on matricies of different dimensions.\n"); 
     return src1;
   }
-  FloatMatrix result(src1);   // Make a copy of src1
-  result += src2;
+  FloatMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) + src2.entry(i);
   return result;
 }
 
+// Pre-add matrix with a scalar
+FloatMatrix operator+ (double scalar,const FloatMatrix& matrix) {
+  FloatMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) + scalar;
+  return result;
+}
+
+// Post-add matrix with a scalar
+FloatMatrix operator+ (const FloatMatrix& matrix,double scalar) {
+  return (scalar + matrix);
+}
+
+// Subtract two matricies
 FloatMatrix operator - (const FloatMatrix& src1, const FloatMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("subtraction used on matricies of different dimensions\n");
     return src1;
   }
-  FloatMatrix result(src1);   // Make a copy of src1
-  result -= src2;
+  FloatMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) - src2.entry(i);
   return result;
 }
 
+// Pre-subtract matrix with a scalar
+FloatMatrix operator- (double scalar,const FloatMatrix& matrix) {
+  return ((-scalar) + matrix);
+}
+
+// Post-subtract matrix with a scalar
+FloatMatrix operator- (const FloatMatrix& matrix,double scalar) {
+  return ((-scalar) + matrix);
+}
+
+// Multiply two matricies, true matrix multiply, this is a fairly fast
+// algorithm, especially when optimized by the compiler.
 FloatMatrix operator * (const FloatMatrix& src1, const FloatMatrix& src2) {
   FloatMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n");
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
     return result;
   }
   
-  result = 0;
+  double temp;
   for(int i = 0; i < src1.nRows; i++)
-    for(int j = 0; j < src2.nCols; j++)
-      for(int k = 0; k < src1.nCols; k++)
-        result[i][j] += src1[i][k] * src2[k][j];
+    for(int j = 0; j < src2.nCols; j++) {
+      temp = src1[i][0] * src2[0][j];
+      for(int k = 1; k < src1.nCols; k++)
+        temp += src1[i][k] * src2[k][j];
+      result[i][j] = temp;
+    }
   return result;
 }
 
+// Pre-multiply matrix with a scalar element wise
+FloatMatrix operator* (double scalar,const FloatMatrix& matrix) {
+  FloatMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) * scalar;
+  return result;
+}
+
+// Post-multiply matrix with a scalar element wise
+FloatMatrix operator* (const FloatMatrix& matrix,double scalar) {
+  return (scalar * matrix);
+}
+
+// Multiply two matricies, and put result in the third.  This is similar to
+// the binary operator * but faster because by passing the reference to the
+// result, we avoid an extra copy constructor step.
+FloatMatrix& multiply (const FloatMatrix& left,const FloatMatrix& right,
+                       FloatMatrix& result) {
+  if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
+     (right.nCols != result.nCols)) {
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    return result;
+  }
+  
+  double temp;
+  for(int i = 0; i < left.nRows; i++)
+    for(int j = 0; j < right.nCols; j++) {
+      temp = left[i][0] * right[0][j];
+      for(int k = 1; k < left.nCols; k++)
+        temp += left[i][k] * right[k][j];
+      result[i][j] = temp;
+    }
+  return result;
+}
+
+// Add two matricies
 IntMatrix operator + (const IntMatrix& src1, const IntMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("addition used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("addition used on matricies of different dimensions.\n"); 
     return src1;
   }
-  IntMatrix result(src1);   // Make a copy of src1
-  result += src2;
+  IntMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) + src2.entry(i);
   return result;
 }
 
+// Pre-add matrix with a scalar
+IntMatrix operator+ (int scalar,const IntMatrix& matrix) {
+  IntMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) + scalar;
+  return result;
+}
+
+// Post-add matrix with a scalar
+IntMatrix operator+ (const IntMatrix& matrix,int scalar) {
+  return (scalar + matrix);
+}
+
+// Subtract two matricies
 IntMatrix operator - (const IntMatrix& src1, const IntMatrix& src2) {
   if((src1.nRows != src2.nRows)||(src1.nCols != src2.nCols)) {
-    Error::abortRun("subtraction used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("subtraction used on matricies of different dimensions\n");
     return src1;
   }
-  IntMatrix result(src1);   // Make a copy of src1
-  result -= src2;
+  IntMatrix result(src1.nRows,src1.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = src1.entry(i) - src2.entry(i);
   return result;
 }
 
+// Pre-subtract matrix with a scalar
+IntMatrix operator- (int scalar,const IntMatrix& matrix) {
+  return ((-scalar) + matrix);
+}
+
+// Post-subtract matrix with a scalar
+IntMatrix operator- (const IntMatrix& matrix,int scalar) {
+  return ((-scalar) + matrix);
+}
+
+// Multiply two matricies, true matrix multiply, this is a fairly fast
+// algorithm, especially when optimized by the compiler.
 IntMatrix operator * (const IntMatrix& src1, const IntMatrix& src2) {
   IntMatrix result(src1.nRows, src2.nCols);
 
   if(src1.nCols != src2.nRows) {
-    Error::abortRun("multiplication used on matrices with incompatible dimensions.\n"); 
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n"); 
     return result;
   }
   
-  result = 0;
+  int temp;
   for(int i = 0; i < src1.nRows; i++)
-    for(int j = 0; j < src2.nCols; j++)
-      for(int k = 0; k < src1.nCols; k++)
-        result[i][j] += src1[i][k] * src2[k][j];
+    for(int j = 0; j < src2.nCols; j++) {
+      temp = src1[i][0] * src2[0][j];
+      for(int k = 1; k < src1.nCols; k++)
+        temp += src1[i][k] * src2[k][j];
+      result[i][j] = temp;
+    }
+  return result;
+}
+
+// Pre-multiply matrix with a scalar element wise
+IntMatrix operator* (int scalar,const IntMatrix& matrix) {
+  IntMatrix result(matrix.nRows,matrix.nCols);
+  for(int i = 0; i < result.totalDataSize; i++)
+    result.entry(i) = matrix.entry(i) * scalar;
+  return result;
+}
+
+// Post-multiply matrix with a scalar element wise
+IntMatrix operator* (const IntMatrix& matrix,int scalar) {
+  return (scalar * matrix);
+}
+
+// Multiply two matricies, and put result in the third.  This is similar to
+// the binary operator * but faster because by passing the reference to the
+// result, we avoid an extra copy constructor step.
+IntMatrix& multiply (const IntMatrix& left,const IntMatrix& right,
+                     IntMatrix& result) {
+  if((left.nCols != right.nRows) || (left.nRows != result.nRows) ||
+     (right.nCols != result.nCols)) {
+    Error::abortRun("multiplication used on matricies with incompatible dimensions.\n");
+    return result;
+  }
+  
+  int temp;
+  for(int i = 0; i < left.nRows; i++)
+    for(int j = 0; j < right.nCols; j++) {
+      temp = left[i][0] * right[0][j];
+      for(int k = 1; k < left.nCols; k++)
+        temp += left[i][k] * right[k][j];
+      result[i][j] = temp;
+    }
   return result;
 }
 
 /////////////////////////////////////////////////////////////
-// Complex Matrix Message Classe - holds data of type Complex
+// Complex Matrix Message Class - holds data of type Complex
 /////////////////////////////////////////////////////////////
 
 // Constructor: make an unitialized matrix with no data
@@ -273,32 +561,44 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
       (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
 }
 
-// Prints matrices in standard row column form.
+// Prints matricies in standard row column form.
 StringList ComplexMatrix::print() const {
+  char buf[SMALL_STRING];
   StringList out = "ComplexMatrix: (";
-  out += nRows;
-  out += ",";
-  out += nCols;
-  out += ")\n";
+  out << nRows;
+  out << ",";
+  out << nCols;
+  out << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      out += real((*this)[row][col]);
-      out += "+";
-      out += imag((*this)[row][col]);
-      out += "j ";
+      sprintf(buf,"%22.15g", real((*this)[row][col]));
+      out << buf;
+      out << "+";
+      sprintf(buf,"%22.15g", imag((*this)[row][col]));
+      out << buf;
+      out << "j ";
     }
-    out += "\n";
+    out << "\n";
   }
   return out;
 }
 
-int ComplexMatrix::operator == (const ComplexMatrix& src) {
+int ComplexMatrix::operator == (const ComplexMatrix& src) const {
   if((nRows != src.nRows) || (nCols != src.nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
     if(entry(i) != src.entry(i))
       return 0;
   return 1;
+}
+
+int ComplexMatrix::operator != (const ComplexMatrix& src) const {
+  if((nRows != src.nRows) || (nCols != src.nCols))
+    return 1;
+  for(int i = 0; i < totalDataSize; i++)
+    if(entry(i) != src.entry(i))
+      return 1;
+  return 0;
 }
 
 // cast conversion operators
@@ -323,9 +623,9 @@ ComplexMatrix::operator IntMatrix () const {
   return result;
 }
 
-// destructive manipulations
+// destructive replacement operators
 ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& src) {
-// WARNING: any SubMatrices refering to the data in this matrix 
+// WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(totalDataSize != src.totalDataSize) {
     LOG_DEL; delete[] data;
@@ -339,7 +639,7 @@ ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& src) {
   return *this;
 }
 
-ComplexMatrix& ComplexMatrix::operator = (Complex value) {
+ComplexMatrix& ComplexMatrix::operator = (const Complex& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
   return *this;
@@ -347,7 +647,7 @@ ComplexMatrix& ComplexMatrix::operator = (Complex value) {
 
 ComplexMatrix& ComplexMatrix::operator += (const ComplexMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matrices of different dimensions\n");
+    Error::abortRun("+= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -355,7 +655,7 @@ ComplexMatrix& ComplexMatrix::operator += (const ComplexMatrix& src) {
   return *this;
 }
 
-ComplexMatrix& ComplexMatrix::operator += (Complex value) {
+ComplexMatrix& ComplexMatrix::operator += (const Complex& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) += value;
   return *this;
@@ -363,7 +663,7 @@ ComplexMatrix& ComplexMatrix::operator += (Complex value) {
 
 ComplexMatrix& ComplexMatrix::operator -= (const ComplexMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matrices of different dimensions\n");
+    Error::abortRun("-= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -371,13 +671,84 @@ ComplexMatrix& ComplexMatrix::operator -= (const ComplexMatrix& src) {
   return *this;
 }
 
-ComplexMatrix& ComplexMatrix::operator -= (Complex value) {
+ComplexMatrix& ComplexMatrix::operator -= (const Complex& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) -= value;
   return *this;
 }
 
-// non-destructive manipulations
+// Note: this is element-wise multiplication and not regular matrix multiply
+ComplexMatrix& ComplexMatrix::operator *= (const ComplexMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("*= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= src.entry(i);
+  return *this;
+}
+
+ComplexMatrix& ComplexMatrix::operator *= (const Complex& value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= value;
+  return *this;
+}
+
+ComplexMatrix& ComplexMatrix::operator /= (const ComplexMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("/= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= src.entry(i);
+  return *this;
+}
+
+ComplexMatrix& ComplexMatrix::operator /= (const Complex& value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= value;
+  return *this;
+}
+
+// Initialize this into an identity matrix, this does not have to be square.
+ComplexMatrix& ComplexMatrix::identity() {
+  for(int row = 0; row < nRows; row++)
+    for(int col = 0; col < nCols; col++) {
+      if(row == col)
+        (*this)[row][col] = 1;
+      else
+        (*this)[row][col] = 0;
+    }
+}
+
+// non-destructive operators, returns new Matricies
+// Return a new matrix that is element-wise the negative of this.
+ComplexMatrix ComplexMatrix::operator - () const {
+  ComplexMatrix result(nRows,nCols);
+  for(int i = 0; i < totalDataSize; i++)
+    result.entry(i) = -entry(i);
+}
+
+// Calculate the powers of a square matrix
+ComplexMatrix ComplexMatrix::operator ^ (int exponent) const {
+  if(nRows != nCols) {
+    Error::abortRun("attempt to take the power of a non-square matrix\n");
+    return *this;
+  }
+  if(exponent < 0)
+    return (!(*this^(-exponent)));  // invert the power at the end
+  if(exponent == 0) {               // matrix to zero-th power is identity
+    ComplexMatrix result(nRows,nCols);
+    return result.identity();
+  }
+  if(exponent == 1)
+    return *this;
+  if(exponent % 2 == 1)             // matrix to odd power
+    return (*this * (*this^(exponent - 1)));
+  else                              // matrix to even power
+    return ((*this^(exponent/2)) * (*this^(exponent/2)));
+}
+
 ComplexMatrix ComplexMatrix::transpose() const {
   ComplexMatrix result(nCols,nRows);
   for(int i = 0; i < nCols; i++)
@@ -387,7 +758,17 @@ ComplexMatrix ComplexMatrix::transpose() const {
   return result;
 }
 
-// Hermitian transpose
+// complex conjugate
+ComplexMatrix ComplexMatrix::conjugate() const {
+  ComplexMatrix result(nRows,nCols);
+  for(int i = 0; i < nRows; i++)
+    for(int j = 0; j < nCols; j++)
+      result[i][j] = conj((*this)[i][j]);
+
+  return result;
+}
+
+// Hermitian transpose, i.e. conjugate transpose
 ComplexMatrix ComplexMatrix::hermitian() const {
   ComplexMatrix result(nCols,nRows);
   for(int i = 0; i < nCols; i++)
@@ -406,13 +787,10 @@ ComplexMatrix ComplexMatrix::inverse() const {
 
   ComplexMatrix work(*this);                  // make a working copy of this
   Complex temp;
+  int row, col;
 
   // set result to be the identity matrix
-  int row, col;
-  for(row = 0; row < nRows; row++)
-    for(col = 0; col < nRows; col++)
-      if(col == row) result[row][col] = 1;
-      else result[row][col] = 0;
+  result.identity();
 
   for(int i = 0; i < nRows; i++) {
     // check that the element in (i,i) is not zero
@@ -471,7 +849,8 @@ FixMatrix::FixMatrix() {
   nRows = nCols = totalDataSize = 0;
 }
 
-// Constructor: make an unitialized matrix with the given dimensions
+// Constructor: make an unitialized matrix with the given dimensions,
+// using Fix elements of the default size as defined in the Fix class
 FixMatrix::FixMatrix(int numRow, int numCol) {
   nRows = numRow;
   nCols = numCol;
@@ -479,8 +858,22 @@ FixMatrix::FixMatrix(int numRow, int numCol) {
   LOG_NEW; data = new Fix[totalDataSize];
 }
 
+// Constructor: make an unitialized matrix with the given dimensions,
+// using Fix elements of the given length "ln" and number of integer
+// bits "ib"
+FixMatrix::FixMatrix(int numRow, int numCol, int ln, int ib) {
+  nRows = numRow;
+  nCols = numCol;
+  totalDataSize = nRows * nCols;
+  LOG_NEW; data = new Fix[totalDataSize];
+  for(int i = 0; i < totalDataSize; i++)
+    data[i] = Fix(ln,ib);
+}
+
+
 // constructor:
-// initialized with the data given in the Particles of the PortHole
+// initialized with the data given in the Particles of the PortHole,
+// using Fix elements of the default size as defined in the Fix class
 FixMatrix::FixMatrix(int numRow, int numCol, PortHole& ph) {
   nRows = numRow;
   nCols = numCol;
@@ -490,6 +883,21 @@ FixMatrix::FixMatrix(int numRow, int numCol, PortHole& ph) {
   // Load the data from the PortHole into the matrix.
   for(int i = 0; i < totalDataSize; i++)
     data[i] = Fix(ph%(totalDataSize - i - 1));
+}
+
+// Constructor: 
+// initialized with the data given in the Particles of the PortHole,
+// using Fix elements of the given length "ln" and number of integer
+// bits "ib"
+FixMatrix::FixMatrix(int numRow, int numCol, int ln, int ib, PortHole& ph) {
+  nRows = numRow;
+  nCols = numCol;
+  totalDataSize = nRows * nCols;
+  LOG_NEW; data = new Fix[totalDataSize];
+
+  // Load the data from the PortHole into the matrix.
+  for(int i = 0; i < totalDataSize; i++)
+    data[i] = Fix(ln,ib,ph%(totalDataSize - i - 1));
 }
 
 // constructor:
@@ -510,6 +918,28 @@ FixMatrix::FixMatrix(int numRow, int numCol, FixArrayState& dataArray)
   // Load the data from the dataArray FixArrayState into the matrix.
   for(int i = 0; i < totalDataSize; i++)
     data[i] = dataArray[i];
+}
+
+// constructor:
+// initialized with the data given in a dataArray FixArrayState
+// using Fix elements of the given length "ln" and number of integer
+// bits "ib"
+FixMatrix::FixMatrix(int rows,int cols,int ln,int ib,FixArrayState& dataArray)
+{
+  nRows = rows;
+  nCols = cols;
+  totalDataSize = nRows * nCols;
+
+  if(dataArray.size() < totalDataSize) {
+    Error::abortRun ("not enough arguments in FixArrayState input",
+                     " to the constructor\n");
+    return;
+  }
+  LOG_NEW; data = new Fix[totalDataSize];
+
+  // Load the data from the dataArray FixArrayState into the matrix.
+  for(int i = 0; i < totalDataSize; i++)
+    data[i] = Fix(ln,ib,dataArray[i]);
 }
 
 // Copy Constructor
@@ -546,30 +976,41 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
       (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
 }
 
-// Prints matrices in standard row column form.
+// Prints matricies in standard row column form.
 StringList FixMatrix::print() const {
+  char buf[SMALL_STRING];
   StringList out = "FixMatrix: (";
-  out += nRows;
-  out += ",";
-  out += nCols;
-  out += ")\n";
+  out << nRows;
+  out << ",";
+  out << nCols;
+  out << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      out += (double)(*this)[row][col];
-      out += " ";
+      sprintf(buf,"%22.15g", (double)(*this)[row][col]);
+      out << buf;
+      out << " ";
     }
-    out += "\n";
+    out << "\n";
   }
   return out;
 }
 
-int FixMatrix::operator == (const FixMatrix& src) {
+int FixMatrix::operator == (const FixMatrix& src) const {
   if((nRows != src.nRows) || (nCols != src.nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
     if(entry(i) != src.entry(i))
       return 0;
   return 1;
+}
+
+int FixMatrix::operator != (const FixMatrix& src) const {
+  if((nRows != src.nRows) || (nCols != src.nCols))
+    return 1;
+  for(int i = 0; i < totalDataSize; i++)
+    if(entry(i) != src.entry(i))
+      return 1;
+  return 0;
 }
 
 // cast conversion operators
@@ -594,9 +1035,9 @@ FixMatrix::operator IntMatrix () const {
   return result;
 }
 
-// destructive manipulations
+// destructive replacement operators
 FixMatrix& FixMatrix::operator = (const FixMatrix& src) {
-// WARNING: any SubMatrices refering to the data in this matrix 
+// WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(totalDataSize != src.totalDataSize) {
     LOG_DEL; delete[] data;
@@ -610,7 +1051,7 @@ FixMatrix& FixMatrix::operator = (const FixMatrix& src) {
   return *this;
 }
 
-FixMatrix& FixMatrix::operator = (Fix value) {
+FixMatrix& FixMatrix::operator = (const Fix& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
   return *this;
@@ -618,7 +1059,7 @@ FixMatrix& FixMatrix::operator = (Fix value) {
 
 FixMatrix& FixMatrix::operator += (const FixMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matrices of different dimensions\n");
+    Error::abortRun("+= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -626,7 +1067,7 @@ FixMatrix& FixMatrix::operator += (const FixMatrix& src) {
   return *this;
 }
 
-FixMatrix& FixMatrix::operator += (Fix value) {
+FixMatrix& FixMatrix::operator += (const Fix& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) += value;
   return *this;
@@ -634,7 +1075,7 @@ FixMatrix& FixMatrix::operator += (Fix value) {
 
 FixMatrix& FixMatrix::operator -= (const FixMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matrices of different dimensions\n");
+    Error::abortRun("-= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -642,13 +1083,84 @@ FixMatrix& FixMatrix::operator -= (const FixMatrix& src) {
   return *this;
 }
 
-FixMatrix& FixMatrix::operator -= (Fix value) {
+FixMatrix& FixMatrix::operator -= (const Fix& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) -= value;
   return *this;
 }
 
-// non-destructive manipulations
+// Note: this is element-wise multiplication and not regular matrix multiply
+FixMatrix& FixMatrix::operator *= (const FixMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("*= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= src.entry(i);
+  return *this;
+}
+
+FixMatrix& FixMatrix::operator *= (const Fix& value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= value;
+  return *this;
+}
+
+FixMatrix& FixMatrix::operator /= (const FixMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("/= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= src.entry(i);
+  return *this;
+}
+
+FixMatrix& FixMatrix::operator /= (const Fix& value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= value;
+  return *this;
+}
+
+// Initialize this into an identity matrix, this does not have to be square.
+FixMatrix& FixMatrix::identity() {
+  for(int row = 0; row < nRows; row++)
+    for(int col = 0; col < nCols; col++) {
+      if(row == col)
+        (*this)[row][col] = double(1);
+      else
+        (*this)[row][col] = double(0);
+    }
+}
+
+// non-destructive operators, returns new Matricies
+// Return a new matrix that is element-wise the negative of this.
+FixMatrix FixMatrix::operator - () const {
+  FixMatrix result(nRows,nCols);
+  for(int i = 0; i < totalDataSize; i++)
+    result.entry(i) = -entry(i);
+}
+
+// Calculate the powers of a square matrix
+FixMatrix FixMatrix::operator ^ (int exponent) const {
+  if(nRows != nCols) {
+    Error::abortRun("attempt to take the power of a non-square matrix\n");
+    return *this;
+  }
+  if(exponent < 0)
+    return (!(*this^(-exponent)));  // invert the power at the end
+  if(exponent == 0) {               // matrix to zero-th power is identity
+    FixMatrix result(nRows,nCols);
+    return result.identity();
+  }
+  if(exponent == 1)
+    return *this;
+  if(exponent % 2 == 1)             // matrix to odd power
+    return (*this * (*this^(exponent - 1)));
+  else                              // matrix to even power
+    return ((*this^(exponent/2)) * (*this^(exponent/2)));
+}
+
 FixMatrix FixMatrix::transpose() const {
   FixMatrix result(nCols,nRows);
   for(int i = 0; i < nCols; i++)
@@ -666,13 +1178,10 @@ FixMatrix FixMatrix::inverse() const {
   }
   FixMatrix work(*this);                  // make a working copy of this
   Fix temp;
+  int row, col;
 
   // set result to be the identity matrix
-  int row, col;
-  for(row = 0; row < nRows; row++)
-    for(col = 0; col < nRows; col++)
-      if(col == row) result[row][col] = Fix(double(1)); // make a one
-      else result[row][col] = Fix(double(0));          // make a zero
+  result.identity();
 
   for(int i = 0; i < nRows; i++) {
     // check that the element in (i,i) is not zero
@@ -806,30 +1315,41 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
       (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
 }
 
-// Prints matrices in standard row column form.
+// Prints matricies in standard row column form.
 StringList FloatMatrix::print() const {
+  char buf[SMALL_STRING];
   StringList out = "FloatMatrix: (";
-  out += nRows;
-  out += ",";
-  out += nCols;
-  out += ")\n";
+  out << nRows;
+  out << ",";
+  out << nCols;
+  out << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      out += (*this)[row][col];
-      out += " ";
+      sprintf(buf,"%22.15g", (*this)[row][col]);
+      out << buf;
+      out << " ";
     }
-    out += "\n";
+    out << "\n";
   }
   return out;
 }
 
-int FloatMatrix::operator == (const FloatMatrix& src) {
+int FloatMatrix::operator == (const FloatMatrix& src) const {
   if((nRows != src.nRows) || (nCols != src.nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
     if(entry(i) != src.entry(i))
       return 0;
   return 1;
+}
+
+int FloatMatrix::operator != (const FloatMatrix& src) const {
+  if((nRows != src.nRows) || (nCols != src.nCols))
+    return 1;
+  for(int i = 0; i < totalDataSize; i++)
+    if(entry(i) != src.entry(i))
+      return 1;
+  return 0;
 }
 
 // cast conversion operators
@@ -854,9 +1374,9 @@ FloatMatrix::operator IntMatrix () const {
   return result;
 }
 
-// destructive manipulations
+// destructive replacement operators
 FloatMatrix& FloatMatrix::operator = (const FloatMatrix& src) {
-// WARNING: any SubMatrices refering to the data in this matrix 
+// WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(totalDataSize != src.totalDataSize) {
     LOG_DEL; delete[] data;
@@ -870,7 +1390,7 @@ FloatMatrix& FloatMatrix::operator = (const FloatMatrix& src) {
   return *this;
 }
 
-FloatMatrix& FloatMatrix::operator = (float value) {
+FloatMatrix& FloatMatrix::operator = (double value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
   return *this;
@@ -878,7 +1398,7 @@ FloatMatrix& FloatMatrix::operator = (float value) {
 
 FloatMatrix& FloatMatrix::operator += (const FloatMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matrices of different dimensions\n");
+    Error::abortRun("+= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -886,7 +1406,7 @@ FloatMatrix& FloatMatrix::operator += (const FloatMatrix& src) {
   return *this;
 }
 
-FloatMatrix& FloatMatrix::operator += (float value) {
+FloatMatrix& FloatMatrix::operator += (double value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) += value;
   return *this;
@@ -894,7 +1414,7 @@ FloatMatrix& FloatMatrix::operator += (float value) {
 
 FloatMatrix& FloatMatrix::operator -= (const FloatMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matrices of different dimensions\n");
+    Error::abortRun("-= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -902,13 +1422,84 @@ FloatMatrix& FloatMatrix::operator -= (const FloatMatrix& src) {
   return *this;
 }
 
-FloatMatrix& FloatMatrix::operator -= (float value) {
+FloatMatrix& FloatMatrix::operator -= (double value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) -= value;
   return *this;
 }
 
-// non-destructive manipulations
+// Note: this is element-wise multiplication and not regular matrix multiply
+FloatMatrix& FloatMatrix::operator *= (const FloatMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("*= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= src.entry(i);
+  return *this;
+}
+
+FloatMatrix& FloatMatrix::operator *= (double value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= value;
+  return *this;
+}
+
+FloatMatrix& FloatMatrix::operator /= (const FloatMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("/= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= src.entry(i);
+  return *this;
+}
+
+FloatMatrix& FloatMatrix::operator /= (double value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= value;
+  return *this;
+}
+
+// Initialize this into an identity matrix, this does not have to be square.
+FloatMatrix& FloatMatrix::identity() {
+  for(int row = 0; row < nRows; row++)
+    for(int col = 0; col < nCols; col++) {
+      if(row == col)
+        (*this)[row][col] = 1;
+      else
+        (*this)[row][col] = 0;
+    }
+}
+
+// non-destructive operators, returns new Matricies
+// Return a new matrix that is element-wise the negative of this.
+FloatMatrix FloatMatrix::operator - () const {
+  FloatMatrix result(nRows,nCols);
+  for(int i = 0; i < totalDataSize; i++)
+    result.entry(i) = -entry(i);
+}
+
+// Calculate the powers of a square matrix
+FloatMatrix FloatMatrix::operator ^ (int exponent) const {
+  if(nRows != nCols) {
+    Error::abortRun("attempt to take the power of a non-square matrix\n");
+    return *this;
+  }
+  if(exponent < 0)
+    return (!(*this^(-exponent)));  // invert the power at the end
+  if(exponent == 0) {               // matrix to zero-th power is identity
+    FloatMatrix result(nRows,nCols);
+    return result.identity();
+  }
+  if(exponent == 1)
+    return *this;
+  if(exponent % 2 == 1)             // matrix to odd power
+    return (*this * (*this^(exponent - 1)));
+  else                              // matrix to even power
+    return ((*this^(exponent/2)) * (*this^(exponent/2)));
+}
+
 FloatMatrix FloatMatrix::transpose() const {
   FloatMatrix result(nCols,nRows);
   for(int i = 0; i < nCols; i++)
@@ -927,13 +1518,10 @@ FloatMatrix FloatMatrix::inverse() const {
 
   FloatMatrix work(*this);                  // make a working copy of this
   double temp;
+  int row, col;
 
   // set result to be the identity matrix
-  int row, col;
-  for(row = 0; row < nRows; row++)
-    for(col = 0; col < nRows; col++)
-      if(col == row) result[row][col] = 1;
-      else result[row][col] = 0;
+  result.identity();
 
   for(int i = 0; i < nRows; i++) {
     // check that the element in (i,i) is not zero
@@ -1067,30 +1655,41 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
       (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
 }
 
-// Prints matrices in standard row column form.
+// Prints matricies in standard row column form.
 StringList IntMatrix::print() const {
+  char buf[SMALL_STRING];
   StringList out = "IntMatrix: (";
-  out += nRows;
-  out += ",";
-  out += nCols;
-  out += ")\n";
+  out << nRows;
+  out << ",";
+  out << nCols;
+  out << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      out += (*this)[row][col];
-      out += " ";
+      sprintf(buf,"%11d", (*this)[row][col]);
+      out << buf;
+      out << " ";
     }
-    out += "\n";
+    out << "\n";
   }
   return out;
 }
 
-int IntMatrix::operator == (const IntMatrix& src) {
+int IntMatrix::operator == (const IntMatrix& src) const {
   if((nRows != src.nRows) || (nCols != src.nCols))
     return 0;
   for(int i = 0; i < totalDataSize; i++)
     if(entry(i) != src.entry(i))
       return 0;
   return 1;
+}
+
+int IntMatrix::operator != (const IntMatrix& src) const {
+  if((nRows != src.nRows) || (nCols != src.nCols))
+    return 1;
+  for(int i = 0; i < totalDataSize; i++)
+    if(entry(i) != src.entry(i))
+      return 1;
+  return 0;
 }
 
 // cast conversion operators
@@ -1115,9 +1714,9 @@ IntMatrix::operator FloatMatrix () const {
   return result;
 }
 
-// destructive manipulations
+// destructive replacement operators
 IntMatrix& IntMatrix::operator = (const IntMatrix& src) {
-// WARNING: any SubMatrices refering to the data in this matrix 
+// WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(totalDataSize != src.totalDataSize) {
     LOG_DEL; delete[] data;
@@ -1139,7 +1738,7 @@ IntMatrix& IntMatrix::operator = (int value) {
 
 IntMatrix& IntMatrix::operator += (const IntMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("+= used on matrices of different dimensions\n");
+    Error::abortRun("+= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1155,7 +1754,7 @@ IntMatrix& IntMatrix::operator += (int value) {
 
 IntMatrix& IntMatrix::operator -= (const IntMatrix& src) {
   if((nRows != src.nRows) || (nCols != src.nCols)) {
-    Error::abortRun("-= used on matrices of different dimensions\n");
+    Error::abortRun("-= used on matricies of different dimensions\n");
     return *this;
   }
   for(int i = 0; i < totalDataSize; i++)
@@ -1169,7 +1768,78 @@ IntMatrix& IntMatrix::operator -= (int value) {
   return *this;
 }
 
-// non-destructive manipulations
+// Note: this is element-wise multiplication and not regular matrix multiply
+IntMatrix& IntMatrix::operator *= (const IntMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("*= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= src.entry(i);
+  return *this;
+}
+
+IntMatrix& IntMatrix::operator *= (int value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) *= value;
+  return *this;
+}
+
+IntMatrix& IntMatrix::operator /= (const IntMatrix& src) {
+  if((nRows != src.nRows) || (nCols != src.nCols)) {
+    Error::abortRun("/= used on matricies of different dimensions\n");
+    return *this;
+  }
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= src.entry(i);
+  return *this;
+}
+
+IntMatrix& IntMatrix::operator /= (int value) {
+  for(int i = 0; i < totalDataSize; i++)
+    entry(i) /= value;
+  return *this;
+}
+
+// Initialize this into an identity matrix, this does not have to be square.
+IntMatrix& IntMatrix::identity() {
+  for(int row = 0; row < nRows; row++)
+    for(int col = 0; col < nCols; col++) {
+      if(row == col)
+        (*this)[row][col] = 1;
+      else
+        (*this)[row][col] = 0;
+    }
+}
+
+// non-destructive operators, returns new Matricies
+// Return a new matrix that is element-wise the negative of this.
+IntMatrix IntMatrix::operator - () const {
+  IntMatrix result(nRows,nCols);
+  for(int i = 0; i < totalDataSize; i++)
+    result.entry(i) = -entry(i);
+}
+
+// Calculate the powers of a square matrix
+IntMatrix IntMatrix::operator ^ (int exponent) const {
+  if(nRows != nCols) {
+    Error::abortRun("attempt to take the power of a non-square matrix\n");
+    return *this;
+  }
+  if(exponent < 0)
+    return (!(*this^(-exponent)));  // invert the power at the end
+  if(exponent == 0) {               // matrix to zero-th power is identity
+    IntMatrix result(nRows,nCols);
+    return result.identity();
+  }
+  if(exponent == 1)
+    return *this;
+  if(exponent % 2 == 1)             // matrix to odd power
+    return (*this * (*this^(exponent - 1)));
+  else                              // matrix to even power
+    return ((*this^(exponent/2)) * (*this^(exponent/2)));
+}
+
 IntMatrix IntMatrix::transpose() const {
   IntMatrix result(nCols,nRows);
   for(int i = 0; i < nCols; i++)
@@ -1179,6 +1849,9 @@ IntMatrix IntMatrix::transpose() const {
   return result;
 }
 
+// Note, if A is the original matrix and !A is its inverse as an IntMatrix,
+//   then A * !A does not necessarily equal the identity matrix because
+//   A's inverse might not be representable as an IntMatrix.
 IntMatrix IntMatrix::inverse() const {
   IntMatrix result(nRows,nRows);
   if(nRows != nCols) {
@@ -1187,13 +1860,10 @@ IntMatrix IntMatrix::inverse() const {
   }
   IntMatrix work(*this);                  // make a working copy of this
   int temp;
+  int row, col;
 
   // set result to be the identity matrix
-  int row, col;
-  for(row = 0; row < nRows; row++)
-    for(col = 0; col < nRows; col++)
-      if(col == row) result[row][col] = 1;
-      else result[row][col] = 0;
+  result.identity();
 
   for(int i = 0; i < nRows; i++) {
     // check that the element in (i,i) is not zero
@@ -1245,7 +1915,7 @@ IntMatrix::~IntMatrix() {
 }
 
 /****************************************************************************
- MatrixEnvParticles, used to hold envelopes which hold the actual matrices.
+ MatrixEnvParticles, used to hold envelopes which hold the actual matricies.
 *****************************************************************************/
 extern const DataType COMPLEX_MATRIX_ENV = "COMPLEX_MATRIX_ENV";
 extern const DataType FIX_MATRIX_ENV = "FIX_MATRIX_ENV";
@@ -1272,9 +1942,9 @@ StringList MatrixEnvParticle::print() const { return data.print(); }
 
 int MatrixEnvParticle::errorConvert(const char* arg) const {
   StringList msg = "Message type, '";
-  msg += type();
-  msg += "': invalid conversion to ";
-  msg += arg;
+  msg << type();
+  msg << "': invalid conversion to ";
+  msg << arg;
   Error::abortRun(msg);
   return 0;
 }
@@ -1330,6 +2000,54 @@ ComplexMatrixEnvParticle::ComplexMatrixEnvParticle() {}
 
 DataType ComplexMatrixEnvParticle::type() const { return COMPLEX_MATRIX_ENV;}
 
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols (A[0][0].real,A[0][0].imag) (A[0][1].real,A[0][1].imag), ... A[0][ncols-1] A[1][0] ... (A[nrows][ncols].real,A[nrows][ncols].imag)"
+int ComplexMatrixEnvParticle::initParticleStack(Block* parent,
+                                                ParticleStack& pstack,
+                                                Plasma* myPlasma,
+                                                const char* delay)  {
+  ComplexArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on ComplexMatrix arc");
+    return 0;
+  }
+  int numRows = int(initDelays[0].real());
+  int numCols = int(initDelays[1].real());
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on ComplexMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  ComplexMatrix *matrix = new ComplexMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    ComplexMatrix *matrix = new ComplexMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
+
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
 
@@ -1375,8 +2093,8 @@ void ComplexMatrixEnvParticle::die() {
 
 void ComplexMatrixEnvParticle::errorAssign(const char* argType) const {
  StringList msg = "Attempt to assign type ";
-  msg += argType;
-  msg += " to a ComplexMatrixEnvParticle";
+  msg << argType;
+  msg << " to a ComplexMatrixEnvParticle";
   Error::abortRun(msg);
 }
 
@@ -1394,6 +2112,54 @@ FixMatrixEnvParticle::FixMatrixEnvParticle(const Envelope& p) { data = p; }
 FixMatrixEnvParticle::FixMatrixEnvParticle() {}
 
 DataType FixMatrixEnvParticle::type() const { return FIX_MATRIX_ENV;}
+
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+int FixMatrixEnvParticle::initParticleStack(Block* parent,
+                                            ParticleStack& pstack,
+                                            Plasma* myPlasma, 
+                                            const char* delay) {
+  FixArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on FixMatrix arc");
+    return 0;
+  }
+  int numRows = int(initDelays[0]);
+  int numCols = int(initDelays[1]);
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on FixMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  FixMatrix *matrix = new FixMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    FixMatrix *matrix = new FixMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
 
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
@@ -1440,8 +2206,8 @@ void FixMatrixEnvParticle::die() {
 
 void FixMatrixEnvParticle::errorAssign(const char* argType) const {
   StringList msg = "Attempt to assign type ";
-  msg += argType;
-  msg += " to a FixMatrixEnvParticle";
+  msg << argType;
+  msg << " to a FixMatrixEnvParticle";
   Error::abortRun(msg);
 }
 
@@ -1459,6 +2225,55 @@ FloatMatrixEnvParticle::FloatMatrixEnvParticle(const Envelope& p) { data = p; }
 FloatMatrixEnvParticle::FloatMatrixEnvParticle() {}
 
 DataType FloatMatrixEnvParticle::type() const { return FLOAT_MATRIX_ENV;}
+
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+int FloatMatrixEnvParticle::initParticleStack(Block* parent,
+                                              ParticleStack& pstack,
+                                              Plasma* myPlasma, 
+                                              const char* delay) {
+                                              
+  FloatArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on FloatMatrix arc");
+    return 0;
+  }
+  int numRows = int(initDelays[0]);
+  int numCols = int(initDelays[1]);
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on FloatMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  FloatMatrix *matrix = new FloatMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    FloatMatrix *matrix = new FloatMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
 
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
@@ -1505,8 +2320,8 @@ void FloatMatrixEnvParticle::die() {
 
 void FloatMatrixEnvParticle::errorAssign(const char* argType) const {
   StringList msg = "Attempt to assign type ";
-  msg += argType;
-  msg += " to a FloatMatrixEnvParticle";
+  msg << argType;
+  msg << " to a FloatMatrixEnvParticle";
   Error::abortRun(msg);
 }
 
@@ -1524,6 +2339,54 @@ IntMatrixEnvParticle::IntMatrixEnvParticle(const Envelope& p) { data = p; }
 IntMatrixEnvParticle::IntMatrixEnvParticle() {}
 
 DataType IntMatrixEnvParticle::type() const { return INT_MATRIX_ENV;}
+
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+int IntMatrixEnvParticle::initParticleStack(Block* parent,
+                                            ParticleStack& pstack,
+                                            Plasma* myPlasma, 
+                                            const char* delay) {
+  IntArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on IntMatrix arc");
+    return 0;
+  }
+  int numRows = initDelays[0];
+  int numCols = initDelays[1];
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on IntMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  IntMatrix *matrix = new IntMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    IntMatrix *matrix = new IntMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
 
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
@@ -1570,8 +2433,8 @@ void IntMatrixEnvParticle::die() {
 
 void IntMatrixEnvParticle::errorAssign(const char* argType) const {
   StringList msg = "Attempt to assign type ";
-  msg += argType;
-  msg += " to a IntMatrixEnvParticle";
+  msg << argType;
+  msg << " to a IntMatrixEnvParticle";
   Error::abortRun(msg);
 }
 
