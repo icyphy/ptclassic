@@ -8,7 +8,7 @@
 The Ptolemy NT Installation is more tricky than it should be,
 we hope to fix this soon.  
  <p><B>These instructions are in the process of being updated for
-new versions of cygiwn and egcs.  The instructions below may
+new versions of cygwin and egcs.  The instructions below may
 not
 work with Ptolemy 0.7.1.  If you are attempting to install Ptolemy 0.7.1,
 please see the instructions in $PTOLEMY/doc/html/nt.
@@ -76,7 +76,7 @@ from <CODE>GetTildePath()</CODE> when trying to create an icon.
 (Reported by Sascha Schwarz &lt;saschas@natasha.auslabs.lucent.com&gt;)
 
 <li> Download X11 for b20 from 
-<a href="http://www.parallax.co.uk/~andyp/"><CODE>http://www.parallax.co.uk/~andyp/</CODE></a>
+<a href="http://www.xemacs.freeserve.co.uk/"><CODE>http://www.xemacs.freeserve.co.uk/</CODE></a>
 
  <br> Below are other possibilities:
 <menu>
@@ -92,8 +92,8 @@ The <CODE>bunzip2</CODE> executable is included in the Cygwin distribution.
 <pre>
 mkdir /usr
 cd /usr
-bunzip2 /tmp/x11-b20_tar.bz2
-tar -xf /tmp/x11-b20_tar
+bunzip2 /tmp/cygwin-b20-x11_tar.bz2
+tar -xf /tmp/cygwin-b20-x11_tar
 </pre>
 
 
@@ -169,19 +169,19 @@ rm -rf $PTOLEMY/obj.nt4/tcltk $PTOLEMY/obj.nt4/octtools
 follow these conventions:
 	<menu>
 	<li> The value should not contain a colon '<CODE>:</CODE>'.
-	 <brp>For example, <CODE>D:/users/ptolemy</CODE> is incorrect.
+	 <brp>For example, <CODE>D:\users\ptolemy</CODE> is incorrect.
 	<li> Do not use multiple slashes.  
-	 <br>For example, <CODE>//D/users/ptolemy</CODE> is incorrect.
+	 <br>For example, <CODE>\\D\users\ptolemy</CODE> is incorrect.
 	</menu>
 The values to set are:
 <pre>
 PTARCH nt4
-PTOLEMY /users/ptolemy
+PTOLEMY \users\ptolemy
 CC gcc
 </pre>
 Set your <CODE>PATH</CODE> to include
 <pre>
-%PTOLEMY%/bin:%PTOLEMY%/bin.nt4
+%PTOLEMY%\bin:%PTOLEMY%\bin.nt4
 </pre>
 
 
@@ -218,39 +218,6 @@ command as above.
 environment variable:
 <pre>
 unset LIB
-</pre>
-
-<li> In the System control panel, set the <CODE>CC</CODE>
-environment variable to <CODE>gcc</CODE>.  If you don't then
-you will get errors while configuring Itcl.
-
-
-<li> Edit the file <CODE>$PTOLEMY/tycho/util/tydoc/tydoc.tcl</CODE>,
-inserting in line 92 the following:
-<pre>
- set retval ""
-</pre>
-so that it will look like this:
-<pre>
-    set generateIndex 1
-    set errorInfo ""
-    set retval ""
-    if [catch {set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug \
-</pre>
-
-
-<li>  Download and ungzip
-<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/reimer0898/pt0.7.1p1.ptclInvokeInterp.patch.gz"><CODE>pt0.7.1p1.ptclInvokeInterp.patch.gz</CODE></a>
-      Type:
-<pre>
- cd $PTOLEMY
- patch -p1 &lt; pt0.7.1p1.ptclInvokeInterp.patch
-
-</pre>
-       If the message occurs that hunk#4 failed, then do:
-<pre>
-cd $PTOLEMY/src/ptcl
-make depend
 </pre>
 
 <li> To do the actual build, do
