@@ -223,8 +223,14 @@ int CGMultiTarget::modifyGalaxy() {
 }
 
 inline int hierSchedulerTest(const char* c) {
-    if (strlen(c) < 2) return FALSE;
-    return *(c+1) == 'I' || *(c+1) == 'i';
+    // HPUX10 hppa.cfront can't handle inline functions that have statments
+    // after 'return', so we use a temporary variable.
+    int tmpVal; 
+    if (strlen(c) < 2)
+      tmpVal = FALSE;
+    else  
+      tmpVal = (*(c+1) == 'I' || *(c+1) == 'i');
+    return tmpVal;
 }
 
 void CGMultiTarget :: prepareChildren() {
