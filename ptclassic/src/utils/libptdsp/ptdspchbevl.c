@@ -34,9 +34,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * SYNOPSIS:
  *
  * int N;
- * double x, y, coef[N], chebevl();
+ * double x, y, coef[N], PTDSPchebevl();
  *
- * y = chbevl( x, coef, N );
+ * y = PTDSPchbevl( x, coef, N );
  *
  *
  *
@@ -106,17 +106,15 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "cephes.h"
+#include "PTDSPcephes.h"
 
-double chbevl( double x, double array[], int n )
+double PTDSPchbevl( double x, double array[], int n )
 {
-double b0, b1, b2, *p;
-int i;
+double b0, b1 = 0.0, b2;
+double *p = array;
+int i = n - 1;
 
-p = array;
 b0 = *p++;
-b1 = 0.0;
-i = n - 1;
 
 do {
 	b2 = b1;
