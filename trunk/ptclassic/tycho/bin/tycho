@@ -16,7 +16,7 @@
 # on Ptolemy.
 
 
-set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-bak] [file...]"
+set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-bak] [file...]"
 
 set argError = "Usage: $0 -ptiny, -ptrim, -pigi and -bin xxx are mutually exclusive"
 
@@ -35,7 +35,10 @@ while ($#argv)
 			echo " -pigi         Big version, many domains"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -bak           Run a .bak binary"
-			echo " file           File to open"
+			echo " -nowelcome     No welcome window"
+			echo " -noconsole     No console window"
+			echo " -bak           Run a .bak binary"
+			echo " files...       Files to open"
 			exit 0
 		case -debug:
 			set tychodebug
@@ -76,6 +79,12 @@ while ($#argv)
 		case -bak:
 			set tychobak
 			breaksw
+		case -nowelcome:
+			set nowelcome
+			breaksw
+		case -noconsole:
+			set noconsole
+			breaksw
 		case -*:
 			echo Bad option: $argv[1]
 			echo "$usagestring"
@@ -92,10 +101,16 @@ while ($#argv)
 	shift
 end
 
-if ( ! $?TYCHO ) setenv TYCHO ~ptolemy/tycho
+if ( ! $?TYCHO ) then
+	if ( $?PTOLEMY ) then
+		setenv TYCHO $PTOLEMY/tycho
+	else
+		setenv TYCHO ~ptolemy/tycho
+	endif
+endif
 
 if ( ! -d $TYCHO) then
-	echo "The directory $TYCHO does not exist!  exiting."
+	echo "The directory $TYCHO does not exist!  Cannot find Tycho."
 	exit 2
 endif
 
@@ -140,7 +155,7 @@ else
 	    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
 	endif
 
-	# For now, look for the executable in obj.$PTARCH, rather thn bin.$ARCH
+	# For now, look for the executable in obj.$PTARCH, rather than bin.$ARCH
 	set bindir = $PTOLEMY/obj.$PTARCH
 
 	if ( ! $?prog ) then
@@ -195,6 +210,10 @@ if ( "$1" =~ "-*" ) then
     echo "${0}: Bad option: $1"
     exit 1
 endif
+
+# Add in options that are passed directly to Tycho.
+if ( $?nowelcome ) set prog = ($prog -nowelcome)
+if ( $?noconsole ) set prog = ($prog -noconsole)
 
 # If neither tyedit or selectPtolemy are set then we are just running itkwish
 if (! -x $prog[1] && ($?tyedit || $?selectPtolemy)) then
