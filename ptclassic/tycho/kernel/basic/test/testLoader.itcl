@@ -50,6 +50,7 @@ test Loader-1.1 {load up the profile command} {
     set profileobjdir [file join $TYCHO obj.$env(PTARCH) profile]
     set profileobj [file join $profileobjdir \
 	    tclXprofile[info sharedlibextension]]
+    file delete -force $profileobjdir
     if ![file exists $profileobj] {
 	puts "About to run make tclexts"
 	::tycho::execModal {make tclexts} $TYCHO
