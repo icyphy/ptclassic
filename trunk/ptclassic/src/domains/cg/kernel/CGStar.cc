@@ -122,11 +122,17 @@ void CGStar :: setTarget(Target* t)
 }
 
 // Add a string to the Target code.
-void CGStar::addCode (const char* string,const char* stream)
+void CGStar::addCode (const char* string,const char* stream, const char* name)
 {
 	CodeStream* c;
 	if (stream == NULL) *myCode << processCode(string);
-	else if (c = getStream(stream)) *c << processCode(string);
+	else if (c = getStream(stream)) {
+		StringList foo = processCode(string);
+		if (name == NULL) *c << foo;
+		else c->put(foo,name);
+	} else {
+		Error::abortRun(*this, " unknown stream: ", stream);
+	}
 }
 
 // Add a procedure to the target procedure stream.
