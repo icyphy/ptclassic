@@ -52,7 +52,6 @@ EXTRA_SRCS =	authors.html \
 		itcllinks.html \
 		overview.html \
 		policies.html \
-		ranking.html \
 		rationale.html \
 		releasenotes.html \
 		releasenotes0.1.html \
