@@ -130,29 +130,25 @@ For more information about polyphase filters, see F. J. Harris,
 		if ((taps.size() % i) != 0) phaseLength++;
 	}
 	go {
-	    int phase, tapsIndex;
 	    int Interp = interpolation;
 	    int Decim = decimation;
-	    int outCount = Interp-1;
-	    double out, tap;
+	    int outCount = Interp - 1;
 	
-	    // phase keeps track of which phase of the filter coefficients are used.
-	    // Starting phase depends on the decimationPhase state.
-	    phase = Decim - int(decimationPhase) - 1;   
+	    // phase keeps track of which phase of the filter coefficients
+	    // are used. Starting phase depends on the decimationPhase state.
+	    int phase = Decim - int(decimationPhase) - 1;   
 	
 	    // Interpterate once for each input consumed
 	    for (int inC = 1; inC <= Decim; inC++) {
 		// Produce however many outputs are required
 		// for each input consumed
 		while (phase < Interp) {
-		   out = 0.0;
+		   double out = 0.0;
 		   // Compute the inner product.
 		   for (int i = 0; i < phaseLength; i++) {
-			tapsIndex = i * Interp + phase;
-			if (tapsIndex >= taps.size())
-			    tap = 0.0;
-			else
-			    tap = taps[tapsIndex];
+			int tapsIndex = i * Interp + phase;
+			double tap = 0.0;
+			if (tapsIndex < taps.size()) tap = taps[tapsIndex];
 			out += tap * double(signalIn%(Decim - inC + i));
 		   }
 		   // note: output%0 is the last output chronologically
