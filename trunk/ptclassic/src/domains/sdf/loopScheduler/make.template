@@ -22,10 +22,10 @@ DESTDIR=$(ROOT)/lib.$(ARCH)
 GPPFLAGS = -g
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
-
+INC =-I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL)
 .SUFFIXES: .cc 
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL) -c  $<
+	$(GNU) $(GPPFLAGS) $(INC) -c $<
 
 OBJS = $(SOURCES:.cc=.o)
 LIB = libLS.a
@@ -52,12 +52,12 @@ clean:
 sources:	$(SOURCES) $(HEADERS) make.template
 
 depend:		$(SOURCES)
-	makedepend -I$(KERNEL) -I$(SDFKERNEL) -I$(GNUINCLUDE) \
-		-I$(LSKERNEL) -I$(EGKERNEL) $(SOURCES)
+		cd $(VPATH); \
+		g++ -MM $(INC) $(SOURCES) | cat make.template - > makefile.n
+		mv -f makefile.n makefile
 
 makefile:	make.template
-		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		make -f make.template sources depend
+		cd $(VPATH); make -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
