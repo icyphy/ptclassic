@@ -64,8 +64,8 @@ The impulse response of the square-root raised cosine pulse is given by
 .EQ
 h(n) ~=~ {4 alpha} over {pi sqrt T} cdot
 { cos ( (1 ~+~ alpha ) pi n / T ) ~+~
-{ T sin ((1 ~-~ alpha ) pi t/T) } over {4 alpha t}} over
-{1 ~-~ (4 alpha t/T) sup 2 } ~.
+{ T sin ((1 ~-~ alpha ) pi n/T) } over {4 alpha n/T}} over
+{1 ~-~ (4 alpha n/T) sup 2 } ~.
 .EN
 This impulse response convolved with itself will, in principle, be equal
 to a raised cosine pulse.  However, because of the abrupt rectangular
