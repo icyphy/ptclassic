@@ -16,12 +16,12 @@ Date of last revision: 5/92
 
 #include "DCParProcs.h"
 #include "DCGraph.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 
 			/////////////////////
 			///  Constructor  ///
 			/////////////////////
-DCParProcs::DCParProcs(int n, BaseMultiTarget* t) : ParProcessors(n,t) {
+DCParProcs::DCParProcs(int n, MultiTarget* t) : ParProcessors(n,t) {
 	LOG_NEW; schedules = new DCUniProc[n];
 }
 
@@ -215,8 +215,10 @@ void DCParProcs :: finalizeGalaxy(DCGraph* graph) {
 		} else {
 			ParDescendantIter descs(n);
 			ParNode* destN = descs++;
-			n->removeDescs(destN);
-			n->connectedTo(destN);
+			if (destN) {
+				n->removeDescs(destN);
+				n->connectedTo(destN);
+			}
 		}
 	}
 }
