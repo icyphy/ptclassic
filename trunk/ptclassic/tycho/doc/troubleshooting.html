@@ -95,6 +95,35 @@ to create a new one.  <CODE>tylndir</CODE> is documented in <A
 HREF="coding/directories.html#tylndir and private trees"><CODE>$TYCHO/doc/coding/directories.html</CODE></A>
 
 </OL>
+<H2><A NAME="debugging hints">Debugging hints</A></H2>
+
+You can start Tycho by hand by starting up <A NAME="itkwish: starting
+tycho"><CODE>itkwish</CODE></A> and then sourcing
+<CODE>$TYCHO/kernel/Tycho.tcl</CODE>.
+
+ <P>If the tcl variable <A NAME="tyDebug variable"><CODE>tyDebug</CODE></A>
+ is set to <CODE>1</CODE>,
+then <CODE>Tycho.tcl</CODE> will print out status messages as it
+starts up.  Also, if <CODE>tyDebug</CODE> is set to <CODE>1</CODE>, then
+tycho will not automatically exit if there is an error.
+ <P> The example below shows how it is possible to start up tycho from <CODE>itkwish</CODE>
+<PRE>
+cxh@watson 357% setenv TYCHO ~/pt/tycho
+cxh@watson 358% cd $TYCHO/kernel
+cxh@watson 359% itkwish
+% set tyDebug 1
+1
+% source Tycho.tcl
+TYCHO=/users/cxh/pt/tycho
+Set auto_path
+About to source FontManager.itcl
+Sourced ErrorMessage.itcl
+Handled preferences
+Processed argv
+About to create a TclConsole
+% exit
+cxh@watson 360% 
+</PRE>
 
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
