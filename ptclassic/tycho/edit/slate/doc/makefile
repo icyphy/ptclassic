@@ -30,24 +30,25 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
+ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/slate/doc
+VPATH =		$(ROOT)/editors/slate/doc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS = 
+EXTRA_SRCS =  \
+	index.html
 
-MISC_FILES = tutorial
+MISC_FILES = codeDoc internals usersGuides
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
 # Sub directories to run make in.
-DIRS =          tutorial
+DIRS =          internals usersGuides
  
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
