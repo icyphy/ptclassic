@@ -56,12 +56,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #if defined(netbsd_i386) || defined(freebsd)
 extern const int sys_nerr;
 extern const char *const sys_errlist[];
+extern int errno;
 #else
+#ifdef PT_SYS_NERR_STDLIB
+#include <stdlib.h>
+#else 
 extern int sys_nerr;
 extern char *sys_errlist[];
+extern int errno;
+#endif
 #endif
 
-extern int errno;
 
 
 class Block;
