@@ -57,7 +57,7 @@ extern "C" {
 #pragma interface
 #endif
 
-class POct : TclObj {
+class POct : public TclObj {
 
 public:
         // the active Tcl interpreter, for error reporting.
