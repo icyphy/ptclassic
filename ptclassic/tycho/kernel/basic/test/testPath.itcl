@@ -133,4 +133,15 @@ test Path-4.1 {Test out relativePath} {
 	    \$TYCHO/editors/visedit/doc/codeDoc/EditForest.html]
     list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10 $r11
 } {../../h/i ../../h/i . .. ../a e c/d/e ../../.. /a/b a/b/../c}
+
+test Path-5.1 {Test out pathEnvSearch} {
+    set isexecutable [file executable [::tycho::pathEnvSearch itclsh]]
+    set nonexistant [::tycho::pathEnvSearch NoWayWillThisFileBeExecutable]
+    # Unset the PATH so we get the error message
+    set savePATH $env(PATH)
+    unset env(PATH)
+    catch {::tycho::pathEnvSearch itclsh} msg1
+    set env(PATH) $savePATH
+    list $isexecutable $nonexistant $msg1
+} {1 {} {pathEnvSearch: $PATH is not set!}}
 doneTests
