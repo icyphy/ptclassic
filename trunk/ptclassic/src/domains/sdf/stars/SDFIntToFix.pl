@@ -24,8 +24,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
         defstate {
                 name { OutputPrecision }
-                type { string }
-                default { "16.0" }
+                type { precision }
+                default { 16.0 }
                 desc {
 Precision of the output in bits.
 The integer number is cast to a double and then converted to this precision.
