@@ -152,9 +152,9 @@ double MDSDFGeodesic::getFloatInput(int rowFiringIndex,int colFiringIndex,
 // Accessing submatrices of the mothermatrix, used by stars to read and
 // write directly into the mothermatrix buffer
 // NOTE: Star should delete submatrix when done
-Matrix* MDSDFGeodesic::getInput(int rowFiringIndex,int colFiringIndex,
+PtMatrix* MDSDFGeodesic::getInput(int rowFiringIndex,int colFiringIndex,
 				int rowDelay, int colDelay) {
-  Matrix* result;
+  PtMatrix* result;
   int destRows = ((MDSDFPortHole*)destinationPort)->numRowXfer();
   int destCols = ((MDSDFPortHole*)destinationPort)->numColXfer();
   rowFiringIndex = (rowFiringIndex+rowDelay)*destRows;
@@ -177,10 +177,10 @@ Matrix* MDSDFGeodesic::getInput(int rowFiringIndex,int colFiringIndex,
   return result;
 }
 
-Matrix* MDSDFGeodesic::getOutput(int rowFiringIndex, int colFiringIndex) {
+PtMatrix* MDSDFGeodesic::getOutput(int rowFiringIndex, int colFiringIndex) {
   int srcRows = ((MDSDFPortHole*)originatingPort)->numRowXfer();
   int srcCols = ((MDSDFPortHole*)originatingPort)->numColXfer();
-  Matrix* result;
+  PtMatrix* result;
  
   result=motherParticle->subMatrix(rowFiringIndex*srcRows+rowDelays,
 				   (colFiringIndex*srcCols+colDelays)%mNumCols,
