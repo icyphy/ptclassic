@@ -4,7 +4,7 @@ defstar {
   version { $Id$ }
   author { Paul Haskell }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -67,13 +67,9 @@ output.
   // CODE
   hinclude { "Matrix.h", "Error.h", "ptdspRunLength.h" }
 
-  code {
-    const float StartOfBlock = 524288.0;
-    const float StartOfRun = 1048576.0;
-  }
   protected {
-    float thresh;    
-    float *outDc, *outAc;
+    double thresh;    
+    double *outDc, *outAc;
     int indxDc, indxAc;
   }
 
@@ -83,37 +79,43 @@ output.
   }
 
   setup {
-    thresh = float(fabs(double(Thresh)));
+//    thresh = float(fabs(double(Thresh)));
+  }
+
+  method { // Do the run-length coding.
+    name { doRunLen }
+    type { "void" }
+    access { protected }
+    arglist { "(const FloatMatrix& inImage)" }
+    code {
+      // Initialize.
+      int size = inImage.numCols() * inImage.numRows();
+
+      // set inImagePtr pointing to the array representing the FloatMatrix itself
+      const double * inImagePtr = inImage[0];
+
+      Ptdsp_RunLengthEncode(inImagePtr, size, int(BlockSize), HiPri,
+			   (double)Thresh, &outDc, &outAc, &indxDc, &indxAc); 
+    }
   }
 
   go {
     // Read input.
     Envelope inEnvp;
     (inport%0).getMessage(inEnvp);
-    FloatMatrix& inImage = *(FloatMatrix *) inEnvp.myData();
+    const FloatMatrix& inImage = *(const FloatMatrix *) inEnvp.myData();
 
     if (inEnvp.empty()) {
       Error::abortRun(*this, "Input is a dummyMessage.");
       return;
     }
 
-    // transfer matrix information from FloatMatrix to Ptdsp_FloatMatrix_t,
-    // before passing to Ptdsp_RunLengthEncode
-    Ptdsp_FloatMatrix_t inImageMatrix;
-
-    inImageMatrix = Ptdsp_FloatMatrixAllocRows (inImage.numRows(), inImage.numCols());
-    // copy each row pointer over, not entire contents of the matrix
-    for (int i = 0; i < inImage.numRows(); i++) {
-      inImageMatrix.matrix[i] = inImage[i];
-    }
-
     // Do processing and send out.
-    Ptdsp_RunLengthEncode (inImageMatrix, BlockSize, HiPri, thresh, &outDc, &outAc, 
-			   &indxDc, &indxAc);
+    doRunLen(inImage);
 
     // Copy the data to the output images.
     FloatMatrix& dcImage = *(new FloatMatrix(1,indxDc));
-    for ( i = 0; i < indxDc; i++) {
+    for(int i = 0; i < indxDc; i++) {
       dcImage.entry(i) = outDc[i];
     }
 
