@@ -11,8 +11,14 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
- Date of creation: 1/17/89
+ Date of creation: 1/17/90
  Revisions:
+	3/19/90 - J. Buck
+		Changes required by the interpreter:
+		1) add saveMPH to save a pointer to a contained MultiPortHole.
+		   addPort(MultiPortHole& p) sets it.
+		2) add the virtual method "clone".
+		3) add the method "portWithName" (defined in Block.cc)
 
  Block is the basic unit of computation...it is an abstraction that has
  inputs and outputs and certain generic methods common to all
@@ -57,6 +63,7 @@ public:
 	Block() {name = "noName";
 		 descriptor = "noDescriptor";
 		 blockIamIn = NULL;
+		 saveMPH = NULL;
 		}
 
 	// Method to set the parameters of the block
@@ -67,6 +74,13 @@ public:
 	// blocks that can be seen from the outside.
 	// i.e., it is true for stars and wormholes, false for galaxies.
 	virtual int isItAtomic () {return TRUE;}
+
+	// virtual method to make a new object of the same type.  This
+	// version should never be called; stars and galaxies should 
+	// redefine it as
+	// virtual Block* clone () {return new MyType;}
+	// We return NULL instead of "new Block" here to avoid errors.
+	virtual Block* clone () {return NULL;}
 
 	// Method to print out a description of the block
 	// Note that this function flattens the profile of a galaxy,
@@ -79,6 +93,9 @@ public:
 	// classes derived therefrom.
 	addPort(PortHole& p) {ports.put(p);}
 
+	// Retrieve the PortHole with the given name
+	PortHole *portWithName(char* name);
+
 protected:
 	// Database for this block
 
@@ -86,15 +103,18 @@ protected:
 	char* descriptor;
 	PortList ports;
 	
-	// If given a MultiPortHole, this function does nothing,
-	// because there are no real ports until the connect command.
-	// The dummy expression prevents a compiler warning.
-	addPort(MultiPortHole& p) {p;}
+	// This function saves the given MultiPortHole so portWithName
+	// can find it; this current implementation only allows for
+	// one MultiPortHole per block; fix later.
+	addPort(MultiPortHole& p) {saveMPH = &p;}
 
 private:
 	// Name is private, because it should be set only by setBlock()
 	// and not changed again.
         char* name;
+
+	// This may be changed to a structure holding multiple MultiPortHoles.
+	MultiPortHole *saveMPH;
 };
 
 #endif
