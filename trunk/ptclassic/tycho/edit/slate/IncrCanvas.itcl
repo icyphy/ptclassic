@@ -183,6 +183,9 @@ class ::tycho::IncrCanvas {
     # Get the hierarchy tags of an item
     method gethtags {id}
 
+    # Test if an item has a given tag
+    method hastag {id tag}
+
     # Set the insertion cursor
     method icursor {id index} {
 	$canvas icursor $id $index
@@ -234,9 +237,7 @@ class ::tycho::IncrCanvas {
     method search {mode tag x0 y0 x1 y1}
 
     # Manipulate the selection
-    method select {option {id {}} {index {}}} {
-	eval $canvas select $option $id $index
-    }
+    method select {option {id {}} {index {}}}
 
     # Return the item type
     method type {id}
@@ -885,6 +886,21 @@ body ::tycho::IncrCanvas::gethtags {id} {
     }
 }
 
+#######################################################################
+#### hastag
+#
+# Return true if the item has the given tag. The first argument
+# must be an item ID -- it cannot be another tag.
+#
+body ::tycho::IncrCanvas::hastag {id tag} {
+    # If a complex item, get the primary ID
+    if { [string match {_*} $id] } {
+	set id [@scope ::tycho::ComplexItem [list set primary($id)]]
+    }
+    # Test if the tag is in its tags
+    expr [lsearch -exact [$canvas gettags $id] $tag] >= 0
+}
+
 ##########################################################################
 #### itemcget
 #
@@ -1274,6 +1290,46 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 
     # Return a pair of lists
     return [list [array get covered] [array get uncovered]]
+}
+
+#######################################################################
+#### select
+#
+# Manipulate the selection. Same as the standard Tk canvas method,
+# but complex items can override if the _mode_ is <b>adjust</b>,
+# <b>from</b>, or <b>to</b>.
+#
+body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
+    switch -exact $mode {
+	"clear" -
+	"item" {
+	    eval $canvas select $mode
+	}
+	default {
+	    # If it's a tag, get the first item
+	    if { ! [string match {[_0-9]*} $id] } {
+		set items [find withtag $tag]
+		if { $items == "" } {
+		    return ""
+		}
+		set id [lindex $items 0]
+	    }
+	    # If it's a complex item and has a select{} method, call that
+	    if { [string match {_*} $id] } {
+		if { [@scope ::tycho::$itemClass($id) \
+			[list ::info exists methodtable(highlight)]] } {
+		    @scope ::tycho::$itemClass($id) \
+			    [list eval \[set methodtable(highlight)\] \
+			    $id $canvas $this]
+		} else {
+		    error "Item $id does not support select"
+		}
+	    } else {
+		# If a simple item, just call the canvas
+		eval $canvas select $mode $id $index
+	    }
+	}
+    }
 }
 
 #######################################################################
