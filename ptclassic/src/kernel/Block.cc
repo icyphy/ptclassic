@@ -112,12 +112,11 @@ void Block::setScope(Scope* s) { scp = s; }
 
 /*virtual*/ StringList Block :: fullName () const
 {
-  StringList out;
-  if(scope() != NULL)
-    out << scope()->fullName() << "." << name();
-  else
-    out << NamedObj::fullName();
-  return out;
+	StringList out;
+	if(scope() != NULL)
+		out << scope()->fullName() << ".";
+	out << NamedObj::fullName();
+	return out;
 }
 
 StringList
@@ -316,6 +315,8 @@ const Galaxy& Block::asGalaxy () const {
 Galaxy& Block::asGalaxy() {
 	return *(Galaxy*)bomb(this, "Galaxy");
 }
+
+void Block::preinitialize () {}
 
 // small virtual functions
 void Block::setup () {}
