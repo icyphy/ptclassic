@@ -245,26 +245,26 @@ private:
 
 	// Add in sensitivity list of input ports.
 	// Do this explicitly for sake of synthesis.
-	void addSensitivities(VHDLCluster*, int);
+	StringList addSensitivities(VHDLCluster*, int);
 
 	// Add in wait statement with list of input ports.
 	// Do this explicitly for sake of simulation.
-	void addWaitStatement(VHDLCluster*, int);
+	StringList addWaitStatement(VHDLCluster*, int);
 
 	// Add in variable refs here from variableList.
-	void addVariableRefs(VHDLCluster*, int);
+	StringList addVariableRefs(VHDLCluster*, int);
 
 	// Add in port to variable transfers here from portVarList.
-	void addPortVarTransfers(VHDLCluster*, int);
+	StringList addPortVarTransfers(VHDLCluster*, int);
 
 	// Add in firing declarations here.
-	void addDeclarations(VHDLCluster*, int);
+	StringList addDeclarations(VHDLCluster*, int);
 
 	// Add in firing actions here.
-	void addActions(VHDLCluster*, int);
+	StringList addActions(VHDLCluster*, int);
 
 	// Add in variable to port transfers here from varPortList.
-	void addVarPortTransfers(VHDLCluster*, int);
+	StringList addVarPortTransfers(VHDLCluster*, int);
 
 	// Register compDecls and compMaps and merge signals.
 	void registerAndMerge(VHDLCluster*);
