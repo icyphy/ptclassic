@@ -51,7 +51,7 @@ FILE **fromCommand;			/* pointer to the reading stream */
 int *pid;
 {
 #ifdef unix
-    int forkpid, waitPid=0;
+    int forkpid, waitPid;
     int topipe[2], frompipe[2];
     char buffer[1024];
 #if defined(hpux) || defined(SYSV)
@@ -88,7 +88,7 @@ int *pid;
     }
 
 #ifdef SYSV
-    if (waitpid((pid_t) -1, &status, WNOHANG) == -1)
+    if ( (waitPid = waitpid((pid_t) -1, &status, WNOHANG)) == -1)
       perror("waitPid");
 #else
     waitPid = wait3(&status, WNOHANG, 0);
