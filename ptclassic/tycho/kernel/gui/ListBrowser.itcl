@@ -37,17 +37,21 @@
 # the -command option is specified, then the value of the option is
 # taken as a command to execute when the user has selected an item from
 # the list. Before executing the command, the item selected by the user
-# is appended to the command as an argument. If no -command option is
+# is appended to the command as an argument. If no <code>-command</code>
+# option is
 # specified, then the default behavior is to return the selected item
 # when the <code>ListBrowser</code> is waited for using
 # <code>::tycho::Dialog::wait</code>
 # procedure.
 # <p>
 # When the user has selected an item, the <code>processItem</code>
-# protected method is consulted. If this method return 1, then the
+# protected method is consulted. If this method return 1, and the
+# <code>-closewindow</code> option is set (the default), then the
 # list browser is destroyed. However, this method could change the
 # contents of the list browser and return 0, in which case the user can
-# make another selection.
+# make another selection. If <code>-closewindow</code> is
+# zero, then the window is not closed regardless of the return
+# value. 
 # <p>
 # For example, the following command will query the user to select an
 # item from a list, and then post that item in top-level window:
