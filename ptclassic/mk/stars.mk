@@ -362,7 +362,9 @@ ifdef CM5
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
 endif
 
-ifdef NOWAM
+ifdef NOWAM # Networks Of Workstations Active Messages
+     # NOWam only supported under sol2 and sol2.cfront
+     ifneq (,$(filter sol%,$(PTARCH)))
 	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam
 	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/libudpam
 	CGC = 1
@@ -376,6 +378,7 @@ ifdef NOWAM
 			$(CGCT)/NOWam/NOWam/CGCNOWamSend.o \
 			$(CGCT)/NOWam/NOWam/CGCNOWamTarget.o
 	endif
+     endif #sol2 and sol2.cfront
 endif
 
 
