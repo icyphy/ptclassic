@@ -31,7 +31,7 @@ EGNode *DCGraph::newNode(SDFStar *s, int i)
 // 2) DCNodeList : The list of DCNodes sorted largest static level first 
 // 3) BranchNodes : A list of DCNodes with more than one descendant
 // 4) MergeNodes : A list of DCNodes with more than one ancestor
-// 5) InitNodes : A list of the initially runnable DCNodes
+// 5) runnableNodes : A list of the initially runnable DCNodes
 //
 // and the following properties for each node in the graph:
 // 1) StaticLevel : The longest path in execution time from the node
@@ -49,7 +49,7 @@ int DCGraph::initializeGraph() {
 	ExecTotal = 0;
 
 	cutArcs.initialize();
-	InitNodes.initialize();
+	findRunnableNodes();
 
 	// Remove the arcs with delay from the ancestors and descendants
 	removeArcsWithDelay();
@@ -59,7 +59,6 @@ int DCGraph::initializeGraph() {
 
         // Set the levels for each node
         while ((src = (DCNode*)nxtSrc++) != 0) {
-		sortedInsert(InitNodes, src, 1);  // Sort highest SL first
                 if(SetNodeSL(src) < 0) return FALSE;
         }
 
@@ -165,19 +164,6 @@ void DCGraph :: mergeClosure(DCNodeList& first, DCNodeList& second) {
 		sortedInsert(first, pnode, 1);
 }
 
-			///////////////////
-			///  replenish  ///
-			///////////////////
-// Replenishes the tempAncs and tempDescs for each node in the DCGraph.
-
-void DCGraph::replenish(int flag) {
-	DCIter Noditer(*this);	// Attach iterator to the DCGraph
-	DCNode *nodep;
-	while ((nodep = Noditer++) != 0) {
-		nodep->copyAncDesc(this, flag);
-	}
-}
-
 			//////////////////
 			///  copyInfo  ///
 			//////////////////
@@ -228,10 +214,10 @@ StringList DCGraph::display() {
 	out += ExpandedGraph :: display();
 
 	out += "\nThe DCGraph has initNodes\n";
-	DCNodeListIter nextSource(this->InitNodes);
+	EGNodeListIter nextSource(this->runnableNodes);
 	DCNode *source;
 
-	while ((source = nextSource++) != 0) {
+	while ((source = (DCNode*) nextSource++) != 0) {
     		out += source->print();
   	}
 
