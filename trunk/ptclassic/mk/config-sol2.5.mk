@@ -35,7 +35,7 @@ ARCHFLAGS =	-DPTSOL2_5
 include $(ROOT)/mk/config-sol2.mk
 
 
-CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront -I$(ROOT)/gnu/common/include/g++-3/
+CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront  -isystem $(ROOT)/gnu/common/include/g++-3/ 
 
 
 # Wildforce Directory
@@ -57,4 +57,4 @@ CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
 
 # system libraries (libraries from the environment)
 # No need to include -lg++ under egcs
-SYSLIBS=$(CSYSLIBS)
+SYSLIBS=-lstdc++ $(CSYSLIBS)
