@@ -128,7 +128,8 @@ void StringArrayState  :: initialize() {
 		if (c != 0 && tokbuf[1]) c = 0;
 		switch (c) {
 		case '<':
-			 char filename[MAXLEN];
+		       {
+			char filename[MAXLEN];
 // temporarily disable special characters, so '/' (for instance)
 // does not screw us up.
                 	const char* tc = lexer.setSpecial ("");
@@ -140,9 +141,9 @@ void StringArrayState  :: initialize() {
                         	msg << filename << ": " << why();
                         	parseError ("can't open file ", msg);
 				err = 1;
-				break;
                 	}
-			break;
+		       }
+		       break;
 		case '[':
 			t = evalIntExpression(lexer);
 			if (t.tok != T_Int) {
