@@ -43,12 +43,23 @@ typedef int (*SimHandlerFunction)();
 
 class SimControl {
 	friend class SimControlOwner;
+private:
+	// must appear before functions that use it for g++ 2.2's
+	// inlining to work correctly.
+	static int haltStatus () {
+		return (flags & halt) != 0;
+	}
 public:
 	enum flag_bit {
 		halt = 1,
 		error = 2,
 		interrupt = 4,
 		poll = 8 };
+
+	static int haltRequested () {
+		if (flags != 0) processFlags();
+		return haltStatus();
+	}
 
 	// Execute all pre-actions for a particular Star.
 	// return TRUE if no halting condition arises, FALSE
@@ -99,20 +110,11 @@ public:
 		flags = 0;
 	}
 
-	static int haltRequested () {
-		if (flags != 0) processFlags();
-		return haltStatus();
-	}
-
 	static unsigned int flagValues() { return flags;}
 
 	static void catchInt(int signo = -1, int always = 0);
 
 private:
-	static int haltStatus () {
-		return (flags & halt) != 0;
-	}
-
 	static void intCatcher(int);
 
 	static void processFlags();
