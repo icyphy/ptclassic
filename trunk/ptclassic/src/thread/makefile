@@ -46,17 +46,7 @@ endif
 
 # sun4
 ifneq (,$(filter sun%,$(PTARCH)))
-DIRS = Awesime awe lwp posix
-endif
-
-# cfront
-ifeq (cfront,$(PTARCH))
-DIRS = lwp posix
-endif
-
-# mips
-ifeq (mips,$(PTARCH))
-DIRS = Awesime awe
+DIRS = posix
 endif
 
 MAKEVARS = "PTARCH=$(PTARCH)"
