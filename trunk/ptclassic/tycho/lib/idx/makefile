@@ -77,10 +77,10 @@ tycho.idx: FORCE
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
+		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
 	else \
 		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO $(TYCHO); source tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
+		echo "set TYCHO \"$(TYCHO)\"; source tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
 	fi
 
 # Create a tycho code index file
@@ -92,10 +92,10 @@ codeDoc.idx: FORCE
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
+		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
 	else \
 		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO $(TYCHO); source tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
+		echo "set TYCHO \"$(TYCHO)\"; source tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
 	fi
 
 # We don't include common.mk since we don't use the compiler here
