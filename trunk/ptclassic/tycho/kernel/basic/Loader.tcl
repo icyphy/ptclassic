@@ -31,56 +31,13 @@
 #######################################################################
 
 
-catch {delete class ::tycho::Loader}
-#######################################################################
-#### Loader
-# This class is an Interface to the tcl dynamic loader.  The tcl 
-# dynamic loader can load in shared libraries and objects that contain
-# C code that implement new tcl commands.
-# <p>
-# Here is an example of how to use the Loader:
-# <tcl><pre>
-#     ::tycho::Loader .x
-# </pre></tcl>
-#
-class ::tycho::Loader {
-
-    constructor {args} {}
-    destructor {}
-    
-    ###################################################################
-    ####                         public methods                    ####
-
-    # # Load 'package' if 'command' is not present.
-    method loadIfNotPresent {command package}
-
-}
-
-#######################################################################
-#### constructor
-#
-body ::tycho::Loader::constructor {args} {
-}
-
-
-#######################################################################
-#### destructor
-#
-body ::tycho::Loader::destructor {} {
-}
-
-
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
-
 #######################################################################
 #### loadIfNotPresent
 # Load 'package' if 'command' is not present.
 # If we can't load package, then search first in the Ptolemy tcl tree,
 # Then prompt the user for the file to be loaded.
 # If the package still cannot be loaded, return an error.
-body ::tycho::Loader::loadIfNotPresent {command package} {
+proc ::tycho::loadIfNotPresent {command package} {
     global PTOLEMY env
 
     # "info procs" does not work in itcl, so we use "info which"
@@ -124,12 +81,10 @@ body ::tycho::Loader::loadIfNotPresent {command package} {
 			-text \
 			"Enter the name of the library that contains the\n command `$command' in the package `$package'" ]
 
-		puts $loadLibPath
 		load $loadLibPath
 	
 		if {[info which -command $command] != {}} {
 		    # We loaded the command so exit the while loop
-		    puts "----[info which -command $command]"
 		    break
 		}
 		# That didn't work, try again
