@@ -135,6 +135,10 @@ class ::tycho::Subpanel {
     # The procedure should return the name of a widget to pack into the panel
     itk_option define -opencallback openCallback OpenCallback ""
    
+    # Specify the line to execute when opening subpanel;
+    # The procedure doesn't have to return anything.
+    itk_option define -execute execute ExeCute ""
+
     # Specify the state of the subpanel, either open or closed
     itk_option define -state state State closed
 
@@ -155,6 +159,7 @@ class ::tycho::Subpanel {
      
     private variable closecmd ""
     private variable opencmd ""
+    private variable execcmd ""
     private variable previousChildwidget ""
 }
 
@@ -215,6 +220,15 @@ configbody ::tycho::Subpanel::indentwidth {
 configbody ::tycho::Subpanel::opencallback {
     set opencmd $itk_option(-opencallback)
 }
+
+#######################################################################
+#### -execute configuration
+# Set the command to execute when subpanel is opened
+# 
+configbody ::tycho::Subpanel::execute {
+    set execcmd $itk_option(-execute)
+}
+
 
 #######################################################################
 #### -state configuration
@@ -373,6 +387,9 @@ body ::tycho::Subpanel::open {} {
     # then execute and pack the returned widget into the subpanel.  Flag
     # an error if the command does not return a widget.
     set currentChildwidget ""
+
+    if {$execcmd != ""} {eval $execcmd}
+
     if {$opencmd != ""} {
 	set currentChildwidget [$opencmd]
 	if {$currentChildwidget != ""} {
