@@ -53,6 +53,17 @@
 # I have about 100MB and it just sneaks by.
 # Use "vnconfig" to swap to a file if you don't have enough.
 
+# Running edit-label may result in the following X server error
+# when OK is pressed:
+#  A Fatal Xt Toolkit Error has occurred:
+#   Attempt to unmanage a child when parent is not Composite
+#   Type 'y' to continue, 'n' to exit, 'a' to abort
+#   (continuing may have unpredictable consequences):
+#
+# This message is known from Linux and XFree86 Version 3.1. It's
+# probably a bug in the X-Release and has gone with the upgrade
+# to XFree86 3.2.
+
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
