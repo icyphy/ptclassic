@@ -77,9 +77,8 @@ proc testIndexBrowserSetup {} {
 }
 
 proc testIndexBrowserCloseFile {filename} {
-    set displayer [::tycho::registry::isopen $filename]
-    if {$displayer != {}} {
-        delete object [$displayer displayer]
+    if  [::tycho::registry isopen $filename] {
+        delete object [::tycho::registry windows $filename]
     }
 }
 
@@ -91,7 +90,8 @@ test IndexBrowser-1.1 {Bring up a index, select an simple node} {
     set tychoHomePage [file join $TYCHO doc index.html]
     testIndexBrowserCloseFile $tychoHomePage
     update idletasks
-    set retval1 [::tycho::File::isFileOpen $tychoHomePage]
+    set retval1 [::tycho::registry isopen \
+            [::tycho::expandPath $tychoHomePage]]
 
     # Bring up the browser, open the home page
     set win [::tycho::File::openContext IndexBrowser.idx]
@@ -101,11 +101,12 @@ test IndexBrowser-1.1 {Bring up a index, select an simple node} {
     $win ok
 
     # Did we open the home page?
-    set retval2 [expr {[::tycho::File::isFileOpen $tychoHomePage] != {}}]
+    set retval2 [::tycho::registry isopen \
+            [::tycho::expandPath $tychoHomePage]]
 
     testIndexBrowserCloseFile [file join $TYCHO doc index.html]
     list $retval1 $retval2
-} {{} 1}
+} {0 1}
 
 ######################################################################
 #### 
