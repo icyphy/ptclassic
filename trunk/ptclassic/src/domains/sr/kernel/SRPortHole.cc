@@ -1,6 +1,6 @@
 static const char file_id[] = "SRPortHole.cc";
 
-/*  Version @(#)SRPortHole.cc	1.5 5/7/96
+/*  $Id$
 
 Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
@@ -53,7 +53,7 @@ ISA_FUNC(SRPortHole,PortHole);
 
 void SRPortHole::connect(GenericPort& destination,
 				 int,
-				 const char* = 0)
+				 const char *)
 {
   SRPortHole & nearPort = (SRPortHole &) newConnection();
   SRPortHole & farPort = (SRPortHole &) destination.newConnection();
@@ -311,13 +311,20 @@ Particle & InSRPort::get() const
   if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
     return farPort->get();
   } else {
-    Error::abortRun("Attempted to get a particle from unconnected port ", name());
+    Error::abortRun("Attempted to get a particle from unconnected port ",
+		    name());
   }
 
   // A kludge--return some particle to avoid a core dump.
   // This leaks memory!
   return *myPlasma->get();
 
+}
+
+// Clear the isIndependent flag
+void InSRPort::initialize()
+{
+  isIndependent = FALSE;
 }
 
 // Make the particle absent
