@@ -101,7 +101,7 @@ extern char *tcl_RcFileName;
 
 
 /* This defines the default domain for ptcl. */
-char DEFAULT_DOMAIN[] = "SDF";
+extern char DEFAULT_DOMAIN[];
 
 /*
  *----------------------------------------------------------------------
