@@ -46,7 +46,10 @@ DIRS =	bin demo doc test
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	RunPanel.itcl \
+	RunWindow.itcl \
+	Simulation.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	ptsim.tcl \
