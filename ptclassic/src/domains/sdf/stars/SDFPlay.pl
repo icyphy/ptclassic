@@ -54,7 +54,7 @@ be a parameter.
 		delFile = FALSE;
 	}
 	start {
-		fileName = saveFile;
+		fileName = savestring(saveFile);
 		if (fileName == NULL || *fileName == 0) {
 			fileName = tempFileName();
 			delFile = TRUE;
