@@ -446,8 +446,9 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
       if (p->isItInput()) {
 	// Create temporary StringLists so as to allow
 	// safe (const char*) casts.
-	StringList sl = sanitizedFullName(*p);
-	p->setGeoName(savestring(sl));
+	StringList sym,sl = sanitizedFullName(*p);
+	sym << symbol(sl);
+	p->setGeoName(sym);
       }
     }
   }
@@ -466,24 +467,6 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
   }
 }
   
-// The only reason for redefining this from HLLTarget
-// is to change the separator from "." to "_".
-StringList VHDLTarget :: sanitizedFullName (const NamedObj& obj) const {
-  StringList out;
-  if(obj.parent() != NULL) {
-    Block* b = obj.parent();
-    if (b->isItWormhole() == 0) {
-      out = sanitizedFullName(*obj.parent());
-      out += "_";
-    }
-    out += sanitizedName(obj);
-  }
-  else {
-    out = sanitizedName(obj);
-  }
-  return out;
-}
-
 // Merge the Star's variable list with the Target's variable list.
 void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
   VHDLVariableListIter starVariableNext(*starVariableList);
@@ -559,7 +542,7 @@ void VHDLTarget :: wrapAround(StringList* codeList) {
 }
 
 // Register the State reference.
-void VHDLTarget :: registerState(State* state, int thisFiring/*=-1*/,
+void VHDLTarget :: registerState(State* state, int /*thisFiring =-1*/,
 				 int pos/*=-1*/) {
   StringList temp = sanitizedFullName(*state);
   StringList ref = sanitize(temp);
