@@ -53,12 +53,12 @@ public:
 		       scheduler->stopBeforeDeadlocked = FALSE ;}
 
 	void run() { if (!checkReady()) return;
-		     setStopTime();
+		     setStopTime(1.0);		// 1.0 is dummy value.
 		     Runnable :: run(); 
 		     sumUp();}
 
 	// redefine setStopTime()
-	void setStopTime();
+	void setStopTime(float stamp);
 
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
