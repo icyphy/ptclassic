@@ -115,6 +115,12 @@ tclexts: config_tclexts all_tclexts install_tclexts
 # Run configure
 # You can pass arguments to configure like so:
 # make tclexts CONFIGURE_ARGS=--with-tclsrc=/users/cxh/pt/src/tcltk/itcl2.2/tcl7.6
+# If you don't have Java, then do 
+# make tclexts CONFIGURE_ARGS=--without-java
+#
+# If you are trying to build with Java on the HP, see
+# tyjava/tcljava/makefile.in
+#
 # If you add an Tcl extension, add the makefile.in to the list of dependencies
 # so that it will be retrieved when others do 'make sources'.
 config_tclexts: obj.$(PTARCH) src/configure mk/tcl.mk.in mk/java.mk.in \
