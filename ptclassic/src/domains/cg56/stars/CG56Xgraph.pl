@@ -63,14 +63,14 @@ for a complete explanation of the options.
 		desc { For labeling, horizontal value of the first sample. }
 	}
 
-	codeblock(xgraph,"const char* outfile") {
+	codeblock(xgraph, "const char* outfile, const char* iofile, const char* deleteCommand") {
 /bin/rm -f @outfile
 
-tail +$val(ignore) $starSymbol(cgwritefile).io | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
+tail +$val(ignore) @iofile | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
 
-/bin/rm -f $starSymbol(cgwritefile).io
+/bin/rm -f @iofile
 
-(pxgraph -t "$val(title)" $val(options) @outfile ; @(saveFile.null()?"":"/bin/rm -f  $starSymbol(cgxgraph)")) &
+(pxgraph -t "$val(title)" $val(options) @outfile; @deleteCommand) &
 	}
 
 constructor {
@@ -78,16 +78,21 @@ constructor {
 }
 
 initCode {
-	StringList outfile;
+	StringList iofile = logFileNameString;
+	StringList deleteCommand, outfile;
 	if ( saveFile.null() ) {
-		outfile << "$starSymbol(cgxgraph)";
+		outfile << "$starSymbol(cgxgraph)" << "_$$$$";
+		deleteCommand = "/bin/rm -f ";
+		deleteCommand << outfile;
 	}
 	else {
 		char *expandedName = expandPathName(saveFile);
 		outfile << expandedName;
 		delete [] expandedName;
+		deleteCommand = "";
 	}
-	addCode(xgraph(outfile), "shellCmds");
+	iofile << ".io";
+	addCode(xgraph(outfile,iofile,deleteCommand), "shellCmds");
 	CG56WrtFile::initCode();
 }
 
