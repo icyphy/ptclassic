@@ -29,7 +29,7 @@
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src.  Instead
-# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
@@ -47,7 +47,7 @@ SDIRS = thread domains
 # directories to build TAGS tables in
 TDIRS = kernel domains
 
-MAKEVARS = "ARCH=$(ARCH)"
+MAKEVARS = "ARCH=$(PTARCH)"
 
 # This target makes sure all the makefiles are current
 makefiles:
