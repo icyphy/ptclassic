@@ -464,6 +464,7 @@ ifdef SDF
 		STARS += $(MATLABSTARS_DOT_O)
 		LIBS += $(MATLABSTAR_LIB) $(MATLABEXT_LIB)
 		LIBFILES += $(MATLABSTAR_LIBFILE)
+		EXTERNALTOOLSLIB = 1
 	endif
 	ifdef SDFCONTRIB
 		CUSTOM_DIRS += $(SDFDIR)/contrib/stars
@@ -500,6 +501,11 @@ endif
 ifdef CEPHESLIB
 	LIBS += -lcephes
 	LIBFILES += $(LIBDIR)/libcephes.$(LIBSUFFIX)
+endif
+
+ifdef EXTERNALTOOLSLIB
+	LIBS += -lexttools
+	LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
 endif
 
 ifdef BDFLIB
