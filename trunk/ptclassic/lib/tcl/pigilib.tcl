@@ -74,3 +74,6 @@ source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
 source $ptolemy/lib/tcl/ptkParams.tcl
 source $ptolemy/lib/tcl/ptkBarGraph.tcl
 source $ptolemy/lib/tcl/ptkPrfacet.tcl
+
+# Gantt chart support
+source $ptolemy/lib/tcl/ptkGantt.tcl
