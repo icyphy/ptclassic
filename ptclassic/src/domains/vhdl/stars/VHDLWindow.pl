@@ -34,7 +34,7 @@ Kluwer Academic Publishers, ISBN 0-89838-276-9, 1989.
 	author { Michael C. Williamson and Kennard White }
 	acknowledge { William Chen and Brian Evans }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
