@@ -1,4 +1,4 @@
-<!--  -->
+<!--  $Id$ -->
 <html>
 <head>
 <title>Tycho 0.1.1 Release Notes </title>
@@ -14,13 +14,14 @@ The editors for textual syntaxes are modeled after
 <a name=emacs>emacs</a> in
 the sense the emacs key bindings are used when possible.
 Editors for visual syntaxes will be more diverse.
+	
 The system documentation is integrated, using a hypertext
 system compatible with the worldwide web.
 Tycho has been designed primarily for use with the
 Ptolemy system, a heterogeneous design environment
 from U.C. Berkeley, but it is also useful on its own.
 <p>
-Version 0.1.1 is the first public release of Tycho as a stand-alone system.
+Version 0.1.1 is the second public release of Tycho as a stand-alone system.
 It runs under the vanilla Itcl 2.1 with no changes to the executable.
 (Note that Ptolemy0.6 was shipped with Itcl2.0.  Tycho0.1.1 will not
 work with Itcl2.1.1)
@@ -52,8 +53,8 @@ A shell-like console for interacting with Tcl with a thorough
 history mechanism fashioned after the Unix tcsh.
 <li>
 An integrated documentation system based on HTML with automatic
-index generation and an index search mechanism.
-<li>
+index generation and an index search mechanism.<
+li>
 Support for hyperlinks from any Tycho editor or display to any other Tycho
 editor or display.
 <li>
@@ -64,6 +65,10 @@ Interfaces to SCCS and RCS revision control systems.
 <li>
 A font management system that includes an interactive dialog for
 selecting fonts.
+<li> 
+A user preferences system.
+<li>
+A Glimpse index browser.
 <li>
 Error handling with a stack display.
 <li>
@@ -75,10 +80,12 @@ Some elementary data structures: Stack, CircularList, Graph,
 DirectedAcyclicGraph, Forest.
 </ul>
 <p>
-<h3>Editors and Shells</h3>
+<h3>Textual Editors and Shells</h3>
 <p>
-In addition to the basic emacs-like text editor described above
-and the Tcl shell, a number of additional editors and shells have been designed.
+
+In addition to the basic emacs-like text editor described above and
+the Tcl shell, a number of additional editors and shells have been
+designed.
 The editors provide capabilities similar to those of emacs modes,
 although the potential goes beyond what emacs can do because of
 the future inclusion of graphical elements.
@@ -86,31 +93,132 @@ the future inclusion of graphical elements.
 The editors and shells included in release 0.1.1 are:
 <p>
 <ul>
-<li>
-C and C++ editors.  These 
-color and fill comments and handle indentation.
-<li>
-HTML editor.  This editor parses HTML commands, supports
-hyperlinks, and provides a command to check the validity of hyperlinks.
-<li>
-Itcl and Tcl editors.
-These editors color and fill comments, handle indentation, and color class,
-procedure, and method names.  They also support "evaluate" commands,
-where either a selected region or the entire file can be evaluated.
-<li>
-Makefile editor.
-This editor colors comments, variable definitions, variable
-references, rules, and various directives.
-<li>
-Ptlang editor.
-This is an editor for designing blocks in Ptolemy.
-<li>
-Matlab and Mathematica consoles.  These will only appear if
-the appropriate Tcl extensions for interaction with Matlab and
-Mathematica have been installed.
+	<li> C and C++ editors.  These color and fill comments and
+	handle indentation.
+
+	<li> HTML editor.  This editor parses HTML commands, supports
+	hyperlinks, and provides a command to check the validity of
+	hyperlinks.
+
+	<li> HTML viewer.  This viewer is based on Stephen Uhler's
+	html_library3.0, but has been tuned for performance.  The HTML
+	viewer will start netscape if it is passed a non-local URL.
+	
+	<li> Itcl and Tcl editors.  These editors color and fill
+	comments, handle indentation, and color class, procedure, and
+	method names.  They also support "evaluate" commands, where
+	either a selected region or the entire file can be evaluated.
+	
+	<li> Makefile editor.  This editor colors comments, variable
+	definitions, variable references, rules, and various
+	directives.
+	
+	<li> Ptlang editor.  This is an editor for designing blocks in
+	Ptolemy.
+	
+	<li> Ptlang editor.  This is an editor for designing universes in
+	Ptolemy.
+
+	<li> Java editor.  This editor is new in 0.1.1.  It includes a
+	menu choice that will run <CODE>appletviewer</CODE>.
+	
+	<li> Esterel editor. 
+	
+	<li> Matlab and Mathematica consoles.  These will only appear
+	if the appropriate Tcl extensions for interaction with Matlab
+	and Mathematica have been installed.
+	
+	<li> CommandShell console.  This tool allows the user to type
+	commands at their shell (sh, tcsh etc.).  The CommandShell is
+	new in 0.1.1 is a prototype and has serious bugs.
+	
 </ul>
+<H3>Graphical Editors</H3>
+<MENU>
+	<LI> EditBubbleAndArc
+	<LI> EditDAG - Directed Acyclic Graph Editor
+	<LI> EditForest - Forest Editor (a forest is a collection of trees)
+	<LI> EditPalette - Prototype of a Ptolemy Palette editor
+	<LI> EditSTD - State Transition Diagram editor
+	<LI> GanttView - Gantt Chart Viewer
+	<LI> ProfileTcl - Tcl Profiler that uses the TclX profiler
+	A patch to make tclXProfiler.c Itcl aware is included.
+	<LI> SlateView - Slate viewer
+</MENU>
+	
 <h3><code>tydoc</code> - The Tycho documentation system</h3>
-Tycho0.1.1 also includes <code>tydoc</code>, a script that converts itcl to html. 
+
+Tycho0.1.1 also includes <code>tydoc</code>, a script that converts
+itcl to html.
+
+<H2>Changes between Tycho0.1 and Tycho0.1.1</H2>
+
+<MENU>
+<LI> 0.1.1 has the following new functionality in the Tycho kernel:
+	<MENU>
+	
+	<LI> View/Displayer In this architecture, the Display always
+	provides the top-level window, the View provides a widget that
+	displays or edits data, and a Filter connects a view to the
+	underlying data structures.
+	
+	<LI> Popup menus
+	<LI> Menubar
+	<LI> Glimpse Index Browser
+	<LI> Graphical Itcl Class browser
+	<LI> Preferences
+	<LI> Exec class which can be used to run remote programs like
+	 <CODE>make</CODE>
+	<LI> Print Dialog
+	</MENU>
+
+
+<LI> 0.1.1 includes Slate, an infrastructure for visual programming.
+<LI> 0.1.1 includes Graphical editors.
+
+<LI> The following text editors are new in 0.1.1:
+	<MENU>
+	<LI> CommandShell - A prototype of a shell interface
+	<LI> Java mode
+	</MENU>
+
+
+<LI> The HTML viewer has been tuned for performance.
+	
+<LI> 0.1.1 has been modified to be less Unix-centric.
+	Tycho0.1.1 runs under NT, but not all features work underNT.
+	0.1.1 has been started up on the Mac, but the Itcl2.1 port
+	to the Mac is substantially incomplete.
+	
+<LI> 0.1.1 has the following new features that are related to Ptolemy
+	<MENU>
+	<LI> Graphical Domain Retargetting tool.
+	<LI> Primitive graphical palette viewer.
+	<LI> Star/Demo Cross/reference browser.
+	<LI> Tycho0.1.1 can use <CODE>octtools</CODE> to convert
+	a Ptolemy Oct universe to ptcl and then display the ptcl in a text
+	editor	
+	</MENU>
+
+<LI> 0.1.1 can handle hierarchical index, so a key in an index can have more
+	than one hyperlink.
+	
+<LI> 0.1.1 has more tests.
+</MENU>
+
+<H2>Backward compatiblity issues between 0.1 and 0.1.1</H2>
+
+<MENU>
+<LI> 0.1.1 will not work under Itcl2.0, you must have Itcl2.1.
+
+<LI> 0.1.1 uses the View and Displayer classes to implement Tycho specific
+mega-widgets.  The <CODE>*Text</CODE> classes found in 0.1 have been removed.
+
+<LI> The Dismiss and the TychoWidget classes have been removed.
+
+<LI> TclConsole has been renamed TclShell.
+</MENU>
+
 <p>
 <A HREF="bugs0.1.1.html">Tycho 0.1.1 Limitations and Bugs</A>
 <p>
