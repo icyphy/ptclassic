@@ -249,7 +249,6 @@ static void pl_print_public( fp, node, option )
     fprintf( fp, "    double now;\n" );
     fprintf( fp, "    double clkFreq; /* perhaps make private ? */\n");
     fprintf( fp, "    int resourceId;\n");
-    fprintf( fp, "    int schedPolicy;\n");
     fprintf( fp, "    // Pointers to the event queues of the PolisScheduler controlling the simulation;\n");
     
     /* should this be here??? 
@@ -354,9 +353,9 @@ static void pl_print_state( fp, node, compat, unittime )
     fprintf( fp, "    desc { resource to be used for simulation }\n" );
     fprintf( fp, "  }\n" );
     fprintf( fp, "  state {\n" );
-    fprintf( fp, "    name { schedulingPolicy }\n" );
+    fprintf( fp, "    name { policy }\n" );
     fprintf( fp, "    type { string }\n" );
-    fprintf( fp, "    default { \"NonPreemptive\" }\n" );
+    fprintf( fp, "    default { \"{SCHEDULER}\" }\n" );
     fprintf( fp, "    desc {Scheduling Policy to be used for simulation }\n" );
     fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
     fprintf( fp, "  }\n" );
@@ -480,14 +479,14 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
     fprintf( fp, "        newEvent->realTime = emitTime; \n");
     fprintf( fp, "        if (isDummy) { \n");
-    fprintf( fp, "           // set fine level to -0.5 for scheduling in Q \n"); 
-    fprintf( fp, "         interruptQ->levelput(newEvent, emitTime, -0.5, (DEStar*)this); \n");
+    fprintf( fp, "            // set fine level to -0.5 for scheduling in Q \n"); 
+    fprintf( fp, "            interruptQ->levelput(newEvent, emitTime, -0.5, (DEStar*)this); \n");
     fprintf( fp, "        } else { \n");
     fprintf( fp, "            interruptQ->levelput(newEvent, emitTime, ((DEPortHole*)newEvent->dest)->depth, ((DEStar*)&newEvent->dest->parent()->asStar())); \n");
     fprintf( fp, "        }\n");
     fprintf( fp, "        emittedEvents->prepend(newEvent); \n");
-    fprintf( fp, "     }\n");
-    fprintf( fp, "   }\n  }\n\n");
+    fprintf( fp, "      }\n");
+    fprintf( fp, "    }\n  }\n\n");
  
 
    
@@ -851,7 +850,7 @@ static void pl_print_begin( fp, node, option, trace )
     fprintf( fp, "    InfString name;\n\n" );
     /* set variables which reflect Star parameters, and others*/
     fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
-    fprintf( fp, "    strcpy( stemp, schedulingPolicy); \n");
+    fprintf( fp, "    strcpy( stemp, policy); \n");
     fprintf( fp, "    if(!strcmp(\"RoundRobin\", stemp)) schedPolicy = 0;\n");
     fprintf( fp, "    else if(!strcmp(\"NonPreemptive\", stemp)) schedPolicy = 1;\n"); 
     fprintf( fp, "    else if(!strcmp(\"Preemptive\", stemp)) schedPolicy = 2;\n");
