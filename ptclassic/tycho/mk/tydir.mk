@@ -31,7 +31,7 @@
 # Author: Christopher Hylands
 
 all makefiles install clean sources depend realclean checkjunk sccsinfo \
-sccsclean itcldocs javadocs extraclean tests weblint idocs dists:
+sccsclean itcldocs javadocs extraclean tests weblint idocs dists jsall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
