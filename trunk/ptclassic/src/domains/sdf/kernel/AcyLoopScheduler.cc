@@ -57,9 +57,14 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #include <limits.h>
 
 // The following macros are used for Blocks
-#define PARTITION(pp) ((pp)->flags[2])
-#define TMP_PARTITION(pp) ((pp)->flags[1])
-#define NODE_NUM(pp) ((pp)->flags[0])
+#define NODE_NUM_FLAG_LOC 0
+#define TMP_PARTITION_FLAG_LOC 1
+#define PARTITION_FLAG_LOC 2
+
+#define PARTITION(pp) ((pp)->flags[PARTITION_FLAG_LOC])
+#define TMP_PARTITION(pp) ((pp)->flags[TMP_PARTITION_FLAG_LOC])
+#define NODE_NUM(pp) ((pp)->flags[NODE_NUM_FLAG_LOC])
+
 
 // The following macros are used for Galaxies
 #define GALAXY_PARTITION(gg) ((gg).flags[2])
@@ -114,27 +119,32 @@ O(|E|*N+|V|*N) = O(N^3) in general.
 <p>
 However, most practical acyclic SDF graphs are sparse; hence, O(N^2)
 is more realistic.
+<p>
+NOTE: This function assumes that the blocks inside the Galaxy have been
+numbered at NODE_NUM_FLAG_LOC (=0 for this file).
 
 @SideEffects
 Creates <code>reachMatrix</code> a class data member.
-Also, uses <code>flags[1]</code> for marking nodes.
+Also, uses <code>flags[TMP_PARTITION_FLAG_LOC]</code> for marking nodes.
+TMP_PARTITION_FLAG_LOC = 1 in this file.
+
 
 ****/
-
 void AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
 {
     Block *s;
     // reset flags[1] to 0 for all blocks in gal
-    resetFlags(gal, 1, 0);
+    resetFlags(gal, TMP_PARTITION_FLAG_LOC, 0);
     graphSize = gal.numberBlocks();
     reachMatrix.resize(graphSize, graphSize);
-    GalTopBlockIter nextStar(gal);
-    while ((s=nextStar++) != NULL) {
-	if (s->flags[1]) continue;
+    GalTopBlockIter nextBlock(gal);
+    while ((s=nextBlock++) != NULL) {
+	if (s->flags[TMP_PARTITION_FLAG_LOC]) continue;
 	if (!visitSuccessors(s,1)) return;
     }
 }
 
+// Called by <code>createReachabilityMatrix</code>; this does the actual DFS.
 int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc)
 {
     Block *succ;
@@ -309,16 +319,20 @@ hierarchy, and several class data members are created.
 int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 {
     DataFlowStar *d;
-    int i = 0, rpmc, apgan, rpmcDppo, apganDppo;
+    int i = 0, rpmcDppo, apganDppo;
     SequentialList wellOrderedList;
-    AcyCluster *clusterGraph=0;
+
     graphSize = gal.numberBlocks();
+
     delete [] RPMCTopSort;
     RPMCTopSort = new int[graphSize];
+
     delete [] APGANTopSort;
     APGANTopSort = new int[graphSize];
+
     delete [] topInvSort;
     topInvSort = new int[graphSize];
+
     if (!isAcyclic(&gal,0)) {
 	StringList message;
 	message << "Graph is not acyclic; this loop scheduler cannot be used. "
@@ -328,7 +342,10 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	return FALSE;
     }
 
-    numberBlocks(gal,0);  // Numbers top-level blocks in galaxy at flags[0]
+    // Number the top-level blocks in galaxy at flags[0]
+    numberBlocks(gal,NODE_NUM_FLAG_LOC);
+
+    // createIncidenceMatrix requires the above node numbering
     createIncidenceMatrix(gal);
 
     if (isWellOrdered(&gal, wellOrderedList)) {
@@ -344,57 +361,17 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	rpmcDppo = DPPO();
     }
     else {
-	// Generate a topological sort.  The costs rpmc, apgan are irrelevant
-	// here since DPPO will give the actual cost.
 
-	// Reachability matrix is needed by APGAN.
-	createReachabilityMatrix(gal);
-
-	// Prepare the galaxy for clustering
-	AcyCluster dummy;
-	dummy.initializeForClustering(gal);
-
-	// Add a top level cluster inside the galaxy to hold all the
-	// clusters inside.  This is needed because gal is of type
-	// galaxy and everything inside is of type cluster.  Since
-	// many routines here work recursively from the top, it doesn't
-	// make sense to have a dichotomy between the top level and everything
-	// below it.
-
-	if (!addTopLevelCluster(&gal)) return FALSE;
-
-	clusterGraph = (AcyCluster*)(gal.head());
-	clusterGraph->settnob(-1);
-	PARTITION(clusterGraph) = 0;
-
-	// The following function is a hack; see its comments for more info.
-	if (!clusterSplicedStars(clusterGraph)) return FALSE;
-
-	// First of the two main heuristics
-	rpmc = RPMC(clusterGraph);
-	if (rpmc < 0) return FALSE;
-	topSort = RPMCTopSort;
-	rpmcDppo = DPPO();
+	// First of the two heuristics
+	rpmcDppo = callRPMC(gal);
 	if (rpmcDppo < 0) return FALSE;
 
 	// save results for rpmc
 	SimpleIntMatrix RPMCGcdMatrix = gcdMatrix;
 	SimpleIntMatrix RPMCSplitMatrix = splitMatrix;
 
-	// Flatten everything for the second heuristic
-	dummy.initializeForClustering(gal);
-	GALAXY_PARTITION(gal) = 0;
-
-	// APGAN requires the node numbers in the clusters as well; hence,
-	// copy those numbers to the constituent clusters.  RPMC did not
-	// want this so wasn't done before.
-	copyFlagsToClusters(&gal,0);
-
-	// Second of the two main heuristics
-	apgan = APGAN(&gal);
-	if (apgan < 0) return FALSE;
-	topSort = APGANTopSort;
-	apganDppo = DPPO();
+	// Second of the two heuristics
+	apganDppo = callAPGAN(gal); 
 	if (apganDppo < 0) return FALSE;
 
 	// Compare the two and use the better one.
@@ -419,6 +396,152 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     return TRUE;
 }
 
+// This function just sets up executes everything needed to run RPMC.
+int AcyLoopScheduler :: callRPMC(Galaxy& gal)
+{
+    int rpmc, rpmcDppo;
+    AcyCluster* clusterGraph=0;
+
+    // Prepare the galaxy for clustering
+    AcyCluster dummy;
+    dummy.initializeForClustering(gal);
+
+    // Add a top level cluster inside the galaxy to hold all the
+    // clusters inside.  This is needed because gal is of type
+    // galaxy and everything inside is of type cluster.  Since
+    // RPMC works recursively from the top, it doesn't
+    // make sense to have a dichotomy between the top level and everything
+    // below it.
+
+    if (!addTopLevelCluster(&gal)) return -1;
+
+    clusterGraph = (AcyCluster*)(gal.head());
+    clusterGraph->settnob(-1);
+    PARTITION(clusterGraph) = 0;
+
+    // The following function is a hack needed by RPMC; see its
+    // comments for more info.
+    if (!clusterSplicedStars(clusterGraph)) return -1;
+
+    // topSort should point to RPMCTopSort
+    topSort = RPMCTopSort;
+
+    // call RPMC
+    rpmc = RPMC(clusterGraph);
+    if (rpmc < 0) return -1;
+
+    // now build up the topSort array
+    if (!buildTopsort(clusterGraph,0)) return -1;
+    //check if topSort is valid
+    if (!checkTopsort()) return -1;
+
+    // Call DPPO
+    rpmcDppo = DPPO();
+
+    return rpmcDppo;
+}
+
+// This function just sets up and executes everything needed to run APGAN 
+int AcyLoopScheduler :: callAPGAN(Galaxy& gal)
+{
+    int apgan, apganDppo;
+    AcyCluster* superOmega;
+
+    // Flatten everything
+    AcyCluster dummy;
+    dummy.initializeForClustering(gal);
+    GALAXY_PARTITION(gal) = 0;
+
+    // APGAN requires the node numbers in the clusters as well; hence,
+    // copy those numbers to the constituent clusters.  RPMC did not
+    // want this so wasn't done before.
+    copyFlagsToClusters(&gal,0);
+
+    // Reachability matrix is needed by APGAN.  Note that copyFlagsToClusters
+    // should be invoked before this since the following function depends
+    // on the clusters having the node numbers.
+    createReachabilityMatrix(gal);
+
+    topSort = APGANTopSort;
+    apgan = APGAN(&gal);
+    if (apgan < 0) return -1;
+    // Since apgan >= 0, gal has just one cluster when APGAN finishes.
+    superOmega = (AcyCluster*)(gal.head());
+    if (!buildTopsort(superOmega, 0)) return -1;
+
+    if (!checkTopsort()) return -1;
+    apganDppo = DPPO();
+    return apganDppo;
+}
+
+/****
+This function checks whether a topological sort is valid or not.
+
+@Description
+Does two things: verifies whether the elements of topSort are a permutation
+of the integers in [0,graphSize-1], and verifies whether the elements respect
+the precedence constraints (ignoring arcs that have sufficient delays)
+
+@SideEffects fills up topInvSort
+
+@Returns Int: TRUE or FALSE
+
+****/
+int AcyLoopScheduler :: checkTopsort()
+{
+    // First check that every element of topSort is unique and is
+    // less than graphSize.
+    DataFlowStar *nodei;
+    Block *pn;
+    SynDFClusterPort *p;
+    int flag;
+    for (int i=0; i<graphSize; i++) topInvSort[i] = -1;
+    for (i = 0; i < graphSize; i++) {
+	if (topInvSort[topSort[i]] == -1) {
+	    topInvSort[topSort[i]] = i;
+	} else {
+	    StringList message;
+	    message << "AcyLoopScheduler::topSort is not valid. "
+		    << "There could be several reasons for this: "
+		    << "the node numbering might be wrong, RPMC or "
+		    << "APGAN constructed an invalid topSort, or other "
+		    << "reasons.  Aborting...";
+	    Error :: abortRun(message);
+	    return FALSE;
+	}
+    }
+    for (i = 0; i < graphSize; i++) {
+	// for each topSort[i], verify that all of i's predecessors appear
+	// before i in topSort
+	flag = 0;
+	nodei = nodelist[topSort[i]];
+	PredecessorIter predNode(*nodei);
+	while ((pn = predNode++) != NULL) {
+	    if (topInvSort[NODE_NUM(pn)] > i) {
+	   	// verify that every arc between pn and nodei has
+		// enough delays.
+		SynDFClusterOutputIter nextO(*pn);
+		while ((p = nextO++) != NULL) {
+		    if (p->far() && p->far()->parent() == nodei) {
+			if (p->numInitDelays() < p->far()->numXfer() * 
+				nodei->reps()) {flag = 1; break;}
+		    }
+		}
+	    }
+	}
+        if (flag) break;
+    }
+    if (flag) {
+	StringList message;
+	message << "topSort array is invalid; precedence constraints"
+		<< " violated.";
+	Error::abortRun(message);
+	return FALSE;
+    }
+    return TRUE;
+}
+
+
 /****
 Add a top level cluster under the galaxy.  So gal will have just one cluster.
 
@@ -434,7 +557,6 @@ topmost level structure as a Galaxy instead of a Cluster.
 else inside it.
 
 ****/
-
 int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 {
     AcyCluster* c, *b;
@@ -525,9 +647,6 @@ int AcyLoopScheduler::clusterSplicedStars(AcyCluster* gr)
 	    b = (AcyCluster*)p->far()->parent();
 	    if (!b) continue;
 	    if ((sdfParam=p->numXfer()) == p->far()->numXfer()) {
-		// Now determine whether p is an input or output,
-		// and correspondingly, whether b has the right number
-		// of inputs or outputs.
 		if (p->isItInput()) {
 		    // b is a candidate for being clustered into
 		    // the sink of this edge.  Hence, either b should only
@@ -616,12 +735,12 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	AcyClusterIter nextClust(*gr);
 	while ((c = nextClust++) != NULL && lflag+rflag < 2) {
 	    // first start with some cluster in the left partition
-	    if (PARTITION(c) == PARTITION(c->parent()) && lflag == 0) {
+	    if (PARTITION(c) == 0 && lflag == 0) {
 		leftSubGraph = c;
 		lflag = 1;
 		continue;
 	    }
-	    if (PARTITION(c) != PARTITION(c->parent()) && rflag == 0) {
+	    if (PARTITION(c) == 1 && rflag == 0) {
 		rightSubGraph = c;
 		rflag = 1;
 	    }
@@ -631,7 +750,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	nextClust.reset();
 	while ((c = nextClust++) != NULL) {
 	    if (c == leftSubGraph || c == rightSubGraph) continue;
-	    if (PARTITION(c) == PARTITION(c->parent())) {
+	    if (PARTITION(c) == 0) {
 		leftGroup.append(c);
 	    } else {
 		rightGroup.append(c);
@@ -642,7 +761,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    c = (AcyCluster*)nextLeft++;
 	    newL = (AcyCluster*)(leftSubGraph->group(*c));
 	    if (!newL) return -1;
-	    PARTITION(newL) = PARTITION(leftSubGraph);
+	    PARTITION(newL) = 0;
 	    while ((c = (AcyCluster*)nextLeft++) != NULL) {
 		if (!newL->absorb(*c)) return -1;
 	    }
@@ -652,7 +771,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    c = (AcyCluster*)nextRight++;
 	    newR = (AcyCluster*)(rightSubGraph->group(*c));
 	    if (!newR) return -1;
-	    PARTITION(newR) = PARTITION(rightSubGraph);
+	    PARTITION(newR) = 1;
 	    while ((c = (AcyCluster*)nextRight++) != NULL) {
 		if (!newR->absorb(*c)) return -1;
 	    }
@@ -662,7 +781,11 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	rightCost = RPMC(newR);
 	if (leftCost < 0 || rightCost < 0) return -1;
 	totalCost = leftCost + cost + rightCost;
-    } else {
+    }
+    return totalCost;
+}
+
+/*
 	// Else, there is only one node and its PARTITION() value the same as
 	// it ever was.  So add it's PARTITION() value to top sort.
 	// NOTE!!! Here we assume that the numbering produced by 
@@ -670,9 +793,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	// earlier is still valid.
 	
 	RPMCTopSort[PARTITION(gr)] = NODE_NUM(gr->head());
-    }
-    return totalCost;
-}
+*/
 
 /****
 
@@ -708,11 +829,14 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
     // cluster the spliced-in stars with their sources/sinks since
     // the APGAN algorithm, by its very nature, will keep spliced actors
     // together with their source/sink in the same innermost loop always.
-    int N, rho, flag, tmp, i;
+    int N, rho, flag, tmp, i, cost = 0;
     SynDFClusterPort *p, *clusterEdge = 0;
     AcyCluster *src, *snk, *clusterSrc = 0, *clusterSnk = 0,
-	       *omega, *superOmega;
+	       *omega;
+    // create the edge list; this list will contain all the output ports
+    // in gal.
     createEdgelist(gal);
+    resetFlags(*gal, PARTITION_FLAG_LOC, 0);
     while ((N=gal->numberBlocks()) > 1) {
 	// explore each edge in the graph.
 	rho = 1;
@@ -722,6 +846,7 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 		nextEdge.remove();
 		continue;
 	    }
+	    // p is an output port since edgelist only has output ports
 	    src = (AcyCluster*)p->parent();
 	    snk = (AcyCluster*)p->far()->parent();
 	    // first check whether this arc is part of a multiarc that
@@ -752,15 +877,17 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	// matrix and the edge list.  The edgelist is updated next time around;
 	// now it is simply marked to be deleted.
 	omega = (AcyCluster*)(clusterSrc->group(*clusterSnk));
+	cost += clusterSrc->loopFactor() * clusterEdge->numXfer() /
+		omega->loopFactor();
 	NODE_NUM(omega) = NODE_NUM(clusterSrc);
 	// the following two statements are to make it easy to determine
 	// which way the arc is going between clusterSrc and clusterSnk.
 	// Even though it is obvious here, it won't be obvious when we
 	// retrieve the clusters from omega using ClusterIter.  Then, rather
 	// than physically checking which direction the arcs are going, we
-	// can just look at TMP_PARTITION()
-	TMP_PARTITION(clusterSrc) = 0;
-	TMP_PARTITION(clusterSnk) = 1;
+	// can just look at PARTITION()
+	PARTITION(clusterSrc) = 0;
+	PARTITION(clusterSnk) = 1;
 	// mark this edge (that we just clustered) for deletion
 	clusterEdge->DELETE = 1;
 	// mark all the output ports from clusterSrc and clusterSnk
@@ -805,8 +932,7 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	Error::abortRun("Bug in APGAN implementation; didn't cluster properly.");
 	return -1;
     }
-    superOmega = (AcyCluster*)gal->head();
-    return buildAPGANTopsort(superOmega, 0);
+    return cost;
 }
 
 /****
@@ -821,7 +947,7 @@ nodes should be scheduled.
 @SideEffects APGANTopSort gets filled with node numbers.
 
 ****/
-int AcyLoopScheduler::buildAPGANTopsort(AcyCluster* gr, int ti)
+int AcyLoopScheduler::buildTopsort(AcyCluster* gr, int ti)
 {
     AcyCluster *tmp,*leftOmega, *rightOmega;
     int lt, rt;
@@ -834,14 +960,14 @@ int AcyLoopScheduler::buildAPGANTopsort(AcyCluster* gr, int ti)
     else if (gr->numberBlocks() == 1) {
 	// Atomic block; hence, a leaf node in the schedule tree.  We can
 	// label its PARTITION() flag by its index in the toplogical sort.
-	PARTITION(gr->head()) = ti;
-	APGANTopSort[ti++] = NODE_NUM(gr->head());
+	//PARTITION(gr->head()) = ti;
+	topSort[ti++] = NODE_NUM(gr->head());
 	return ti;
     }
     else {
 	AcyClusterIter nextClust(*gr);
 	tmp = nextClust++;
-	if (TMP_PARTITION(tmp)) {
+	if (PARTITION(tmp)) {
 	    rightOmega = tmp;
 	    leftOmega = nextClust++;
 	}
@@ -849,8 +975,8 @@ int AcyLoopScheduler::buildAPGANTopsort(AcyCluster* gr, int ti)
 	    leftOmega = tmp;
 	    rightOmega = nextClust++;
 	}
-	lt = buildAPGANTopsort(leftOmega, ti);
-	rt = buildAPGANTopsort(rightOmega, lt);
+	lt = buildTopsort(leftOmega, ti);
+	rt = buildTopsort(rightOmega, lt);
 	return rt;
     }
 }
@@ -932,8 +1058,11 @@ int AcyLoopScheduler::DPPO()
 		// since this is a feedback arc
 		if (tmpDel2 < tmpInc2*reps[ke]) {
 		    StringList message;
-		    message << "Topological sort constructed by RPMC or APGAN "
+		    message << "DPPO thinks that the topological sort "
+			    << "constructed by RPMC or APGAN "
 		            << "has reverse arcs with insufficient delay. "
+			    << "This could happen if the topSort array "
+			    << "is filled incorrectly.  "
 			    << "Either that or there is a bug in the DPPO "
 			    << "function where this message is being generated";
 		    Error::abortRun(message);
@@ -1015,7 +1144,7 @@ void AcyLoopScheduler::runOnce()
 
 /****
 
-Special runOnce to run the schedule determined by this scheduler.
+This <code>runOnce(int,int,int)</code> actually does the work.
 
 @Description Recursively traverse the splitMatrix and run the stars according
 to the schedule.
@@ -1154,7 +1283,7 @@ Fills the <code>topsort</code> list with the topological ordering of the nodes
 ****/
 int AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
 {
-    int flagLoc = 0, numPasses=0;
+    int flagLoc = TMP_PARTITION_FLAG_LOC, numPasses=0;
     resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
     SequentialList sources;
     findSources(g,flagLoc, sources, 0);
@@ -1214,6 +1343,7 @@ void AcyLoopScheduler::printStarNumbers()
     cout << "\n";
 }
 
+// define << operator for SimpleIntMatrices
 ostream& operator << (ostream& o, const SimpleIntMatrix& a)
 {
     StringList sl;
@@ -1228,141 +1358,8 @@ ostream& operator << (ostream& o, const SimpleIntMatrix& a)
     return o;
 }
 
-/*
-// Done by computing breath first search (bfs) on g.
-// passNum keeps track of the total number of passes through
-// the graph.  Each pass starts by doing bfs on the graph starting
-// from a node that has not been ever visited in previous passes.
-// During the bfs, we add nodes that have never been visited before
-// to the nodesTobeVisited list.  If we encounter a node that has been
-// visited already on this pass, then we have found a cycle and return
-// FALSE.  If we encounter a node that was visited in a previous pass,
-// we do nothing and continue the search since all output edges from
-// that node would have been explored on the previous pass.
-// The flags[flagLoc] flag is set to passNum whenever it is visited
-// for the first time.
-// If ignoreDelayTags is 1, then every arc is taken into account.
-// if ignoreDelayTags is 0, then arcs that have been tagged (at
-// location flags[ignoreDelayTags-1]) non-zero are ignored as precedence
-// arcs.
-static int isAcyclic(Galaxy* g, int ignoreDelayTags)
-{
-    int flagLoc = 0, passNum=0;
-    Block *node, *succ, *nextNode;
-    resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
-    GalTopBlockIter nextBlock(*g);
-    SequentialList nodesTobeVisited;
-    while ( (node=nextBlock++) != NULL && !node->flags[flagLoc]) {
-	nodesTobeVisited.append(node);
-	passNum++;
-	while ((nextNode = (Block*)nodesTobeVisited.getAndRemove()) != NULL ) {
-	    nextNode->flags[flagLoc] = passNum;
-	    SuccessorIter nextSucc(*nextNode);
-	    if (ignoreDelayTags) {
-		succ = nextSucc.next(ignoreDelayTags-1, TRUE);
-	    } else {
-		succ = nextSucc++;
-	    }
-	    while (succ != NULL){
-		if (succ->flags[flagLoc] == 0) {
-		    nodesTobeVisited.append(succ);
-		} else {
-		    if (succ->flags[flagLoc] == passNum) {
-			return FALSE; // Cycle found; not acyclic
-		    }
-		}
-		if (ignoreDelayTags) {
-		    succ = nextSucc.next(ignoreDelayTags-1, TRUE);
-		} else {
-		    succ = nextSucc++;
-		}
-	    }
-	}
-    }
-    return TRUE;
-}
 
-// nodes marked.  This method is used in order to simulate
-// the removal of nodes from the graph; a node is "removed"
-// by marking it at flags[flagLoc] (by the function that calls
-// this function).  If no node is marked, then this function will
-// return the sources in the graph.  If nodes are marked, then
-// the list returned by the function represents the sources
-// in the graph that would result from removing the marked nodes
-// and all their edges from the graph.
-// If deletedNode is specified, then the algorithm will assume that
-// the only node deleted from the graph (from the last time this function
-// was called ) was deletedNode and explore
-// only the edges going out of deletedNode.  This will make this computation
-// much more efficient when it is used in conjunction with isWellOrdered
-// because isWellOrdered deletes one node at a time and calls findSources
-// after each deletion.  IN THIS CASE NOTE THAT THE FUNCTION WILL ONLY
-// RETURN THOSE SOURCES FORMED BY THE DELETION OF deletedNode AND NOT
-// ALL SOURCES IN THE GRAPH.
-// To generalize this function, we could give a
-// list of deleted nodes (instead of just one) and only explore the edges
-// out of those from the list. 
-// Worst case running time: O(E) (when deletedNode is specified)
-static void findSources(Galaxy* g, int flagLoc,
-			SequentialList& sources, Block* deletedNode)
-{
-    // A source node here is any node that has all of its input
-    Block *pred, *node;
-    int notSource;
-    if (deletedNode) {
-	SuccessorIter nextNeigh(*deletedNode);
-	while ((node = nextNeigh++) != NULL) {
-	    notSource = 0;
-	    PredecessorIter nextPred(*node);
-	    while ((pred=nextPred++) != NULL) {
-		if (!pred->flags[flagLoc]) {notSource = 1; break;}
-	    }
-	    if (!notSource) sources.append(node);
-	}
-    }
-    else {
-	GalTopBlockIter nextBlock(*g);
-	while ((node = nextBlock++) != NULL && !node->flags[flagLoc]) {
-	    notSource = 0;
-	    PredecessorIter nextPred(*node);
-	    while ((pred=nextPred++) != NULL) {
-		if (!pred->flags[flagLoc]) {notSource = 1; break; }
-	    }
-	    if (!notSource) sources.append(node);
-	}
-    }
-}
-
-void findSinks(Galaxy* g, int flagLoc,
-	       SequentialList& sinks, Block* deletedNode)
-{
-    // symmetric to findSources; see comments therein
-    // FIXME: Make this like findSources above after everything's been debugged
-    Block *succ, *node;
-    int notSink;
-    if (deletedNode) {
-	PredecessorIter nextNeigh(*deletedNode);
-	while ((node = nextNeigh++) != NULL) {
-	    notSink = 0;
-	    SuccessorIter nextSucc(*node);
-	    while ((succ=nextSucc++) != NULL) {
-		if (!succ->flags[flagLoc]) notSink = 1;
-	    }
-	    if (!notSink) sinks.append(node);
-	}
-    } else {
-	GalTopBlockIter nextBlock(*g);
-	while ((node=nextBlock++) != NULL && !node->flags[flagLoc]) {
-	    notSink = 0;
-	    SuccessorIter nextSucc(*node);
-	    while ((succ=nextSucc++) != NULL) {
-		if (!succ->flags[flagLoc]) notSink = 1;
-	    }
-	    if (!notSink) sinks.append(node);
-	}
-    }
-}
-
+/****
 // old one with BFS
 
 // We use a very simple algorithm to compute this matrix here; there
