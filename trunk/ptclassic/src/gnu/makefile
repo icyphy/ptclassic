@@ -204,9 +204,9 @@ hp_configure: $(GNU_OBJ)
 	@echo "We could try installing GNU make first, but HPs hate it when"
 	@echo "try to move a running binary, so installing make a second"
 	@echo "time could fail."
-	-(cd $(GNU_OBJ)/bfd; ln -s $(HP_GNU_SRC)/bfd/*.c .)
-	-(cd $(GNU_OBJ)/opcodes; ln -s $(HP_GNU_SRC)/opcodes/*.c .)
-	-(cd $(GNU_OBJ)/binutils; ln -s $(HP_GNU_SRC)/binutils/*.c .)
+	#-(cd $(GNU_OBJ)/bfd; ln -s $(HP_GNU_SRC)/bfd/*.c .)
+	#-(cd $(GNU_OBJ)/opcodes; ln -s $(HP_GNU_SRC)/opcodes/*.c .)
+	#-(cd $(GNU_OBJ)/binutils; ln -s $(HP_GNU_SRC)/binutils/*.c .)
 	-(cd $(GNU_OBJ)/make; ln -s $(HP_GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.c .)
@@ -240,7 +240,7 @@ hp_configure: $(GNU_OBJ)
 
 # Set up links for GNU as.
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
-	if [ ! -d $(GNU_OBJ)/gas; ] then mkdir $(GNU_OBJ)/gas; fi
+	if [ ! -d $(GNU_OBJ)/gas ] then mkdir $(GNU_OBJ)/gas; fi
 	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
 	-ln -s $(GNU_OBJ)/gas/as.new $(GNU_OBJ)/gas/as
 	-chmod a+x $(GNU_OBJ)/gas/as.new
