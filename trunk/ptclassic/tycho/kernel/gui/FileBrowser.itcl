@@ -163,7 +163,6 @@ body ::tycho::FileBrowser::constructor {args} {
     pack $itk_component(dir) -side top -fill x
     
     # Listbox for files and directories.
-    global topLevelClass
     itk_component add listbox {
 	listbox $itk_component(listscroll).listbox -relief sunken \
 		-yscroll "$itk_component(listscroll).scroll set" \
