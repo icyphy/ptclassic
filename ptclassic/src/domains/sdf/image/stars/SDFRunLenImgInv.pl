@@ -76,7 +76,7 @@ Check to make sure we don't write past unallocated memory.
         // Handle a non-zero run.
 	while ((indx1 < size) && (inData.entry(indx1) != int(meanVal))
 		&& (indx2 < fullFrame)) {
-	  ptr2[indx2++] = inData.entry(indx1++);
+	  ptr2[indx2++] = (unsigned char)(inData.entry(indx1++));
 	}
       }
 
