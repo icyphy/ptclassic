@@ -31,8 +31,8 @@ public:
 	// This is public so that CGCTarget and other targets can access it.
 	StateList referencedStates;
 
-	// start method clears out referencedStates list
-	void start();
+	// initialize method clears out referencedStates list
+	void initialize();
 
 	// my domain
 	const char* domain() const;
@@ -89,7 +89,7 @@ private:
 	int emptyFlag;
 
 	// declare PortHoles and States
-	virtual StringList declarePortHole(const CGCPortHole* p);
+	virtual StringList declarePortHole(CGCPortHole* p);
 	virtual StringList declareOffset(const CGCPortHole* p);
 	virtual StringList declareState(const State* p);
 
