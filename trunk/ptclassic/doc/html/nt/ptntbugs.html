@@ -142,6 +142,10 @@ is unlikely to build and has not been tested.
 <li> Compiling with Cygwin32 is slow.  This is because Cygwin32
 adds a layer to file access and other operations.
 
+<li> Linking pigiRpc and ptcl can take a long time.
+This is mostly due to the fact that the Cygwin port is using
+static libraries.  Compiling without debugging (<CODE>-g</CODE>) 
+might help
 
 <li> <CODE>make</CODE> fails with
 <pre>
