@@ -74,6 +74,9 @@ public:
 	// as EventHorizon
 	EventHorizon* asEH();
 
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return ToEventHorizon::allocateGeodesic(); }
+
 protected:
 	StringList sanitize(const char* s) const;
 	StringList sanitizeGhost(const char* s) const;
@@ -109,6 +112,9 @@ public:
         
 	// as EventHorizon
 	EventHorizon* asEH();
+
+	/*virtual*/ Geodesic* allocateGeodesic()
+	{ return FromEventHorizon::allocateGeodesic(); }
 
 protected:
 	StringList sanitize(const char* s) const;
