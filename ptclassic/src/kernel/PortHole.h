@@ -107,6 +107,12 @@ extern const Attribute P_VISIBLE;// make the porthole visible.
 class GenericPort : public NamedObj
 {
 public:
+	// Constructor
+	GenericPort ();
+
+	// Destructor
+	~GenericPort();
+
         // Determine whether the port is an input or output.
         // For class PortHole, it is unspecified, so both
         // functions return FALSE.
@@ -119,18 +125,7 @@ public:
 	// print info on the PortHole
 	/* virtual*/ StringList print (int verbose = 0) const;
 
-	// virtual function used for new connections.
-	// PortHole uses this one unchanged; MultiPortHole has to create
-	// a new Port.
-	virtual PortHole& newConnection();
-
-	GenericPort& realPort() {
-		return *translateAliases();
-	}
-
-	// this one permits use in const expressions
-	const GenericPort& realPort() const;
-
+	// Initialize porthole properties.
 	GenericPort& setPort(const char* portName, Block* blk, DataType typ=FLOAT) {
 		setNameParent (portName, blk);
 		myType = typ;
@@ -142,10 +137,8 @@ public:
 	// symmetric constraint.
 	void inheritTypeFrom(GenericPort& p);
 
-	// function to connect two portholes
-	// 3/2/94 changed to support initDelayValues
-	virtual void connect(GenericPort& destination,int numberDelays,
-			     const char* initDelayValues = 0);
+	// return typePortPtr
+	inline GenericPort* typePort() const { return typePortPtr;}
 
 	// return my declared type
 	// caution: declared type may not be the particle type actually in use!
@@ -153,15 +146,6 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-
-	inline GenericPort* alias() const { return aliasedTo;}
-	inline GenericPort* aliasFrom() const { return aliasedFrom;}
-
-	// Constructor
-	GenericPort ();
-
-	// Destructor
-	~GenericPort();
 	
 	// attributes
 	inline bitWord attributes() const { return attributeBits;}
@@ -170,34 +154,65 @@ public:
 		return attributeBits = attr.eval(attributeBits);
 	}
 
-	// return typePortPtr
-	inline GenericPort* typePort() const { return typePortPtr;}
+	// function to connect two portholes
+	// 3/2/94 changed to support initDelayValues
+	virtual void connect(GenericPort& destination,int numberDelays,
+			     const char* initDelayValues = 0);
 
-	// set up alias pointers in pairs.  Public so that InterpGalaxy
-	// can set aliases.  Use with care, since derived types may
-	// want to restrict who can alias
-	void setAlias (GenericPort& gp);
+	// Get a porthole suitable for connecting to (never an alias).
+	// PortHole just returns its realPort (bottom alias);
+	// MultiPortHole has to create a new Port in the bottom alias MPH.
+	virtual PortHole& newConnection() = 0;
 
         // Return a PortHole.  For single portholes, it just returns
 	// a reference to itself.  For multiporthole, it creates a new one.
-        virtual PortHole& newPort() { return (PortHole&)(*this); }
+        virtual PortHole& newPort() = 0;
 
-	// Remove me from a chain of aliases
+	// Get the bottommost/innermost port of an alias chain.
+	// In non-error cases, this will be a "real" port not an alias port.
+	// For historical reasons it's called "realPort" not "getBottomAlias".
+	GenericPort& realPort();
+
+	// Same for use in const expressions
+	const GenericPort& realPort() const;
+
+	// Get the topmost/outermost port of an alias chain.
+	// If an unaliased porthole is given, the same port is returned.
+	GenericPort& getTopAlias();
+
+	// Same for use in const expressions
+	const GenericPort& getTopAlias() const;
+
+	// Obtain immediate neighbors in alias chain, if any.
+	// alias() is the next inner port, aliasFrom() the next outer.
+	inline GenericPort* alias() const { return aliasedTo;}
+	inline GenericPort* aliasFrom() const { return aliasedFrom;}
+
+	// Delink me from any alias chain I may be in
 	void clearAliases();
 
 protected:
-	// Translate aliases, if any.
-	GenericPort* translateAliases();
+	// Make this port an alias for the specified port.
+	// This is protected so that it cannot be used willy-nilly.
+	// The public versions are exported by PortHole and MultiPortHole,
+	// and are typed to enforce the constraint that a PortHole can
+	// only alias to a PortHole and a MultiPortHole to a MultiPortHole.
+	void setAlias (GenericPort& gp);
+
+	// Relink any alias chain pointing to me to point to the given port
+	// (adding it to the top of any extant chain for the port).
+	// As above, type-safe versions are exported by PortHole/MultiPortHole.
+	void moveMyAliasesTo (GenericPort& gp);
 
 private:
 	// Declared datatype of this porthole (may be ANYTYPE).
 	// This is not necessarily what the connection will resolve to!
 	DataType myType;
 
-	// PortHole this is aliased to
+	// PortHole this is aliased to, if any (next inner alias-chain member)
 	GenericPort* aliasedTo;
 
-	// Name of a PortHole that is aliased to me (a back-pointer)
+	// PortHole aliased to me, if any (next outer alias-chain member)
 	GenericPort* aliasedFrom;
 
 	// My type matches type of this port.
@@ -274,16 +289,21 @@ public:
         // Return the number of physical port currently allocated
         inline int numberPorts() const {return ports.size();}
 
+	// Return a new port for connections
+	/* virtual */ PortHole& newConnection();
+
         // Add a new physical port to the MultiPortHole list
         /* virtual */ PortHole& newPort();
 
 	// set alias for MultiPortHole
-	inline void setAlias (MultiPortHole &blockPort) {
+	inline void setAlias (MultiPortHole& blockPort) {
 		GenericPort::setAlias (blockPort);
 	}
 
-	// Return a new port for connections
-	virtual PortHole& newConnection();
+	// move alias for MultiPortHole
+	inline void moveMyAliasesTo (MultiPortHole& blockPort) {
+		GenericPort::moveMyAliasesTo (blockPort);
+	}
 
         // Print a description of the MultiPortHole
 	/* virtual */ StringList print (int verbose = 0) const;
@@ -306,17 +326,6 @@ protected:
 
 	// delete all contained portholes
 	void delPorts();
-
-private:
-
-	// peer multiporthole in a bus connection
-	MultiPortHole* peerMPH;
-
-	// number of delays on portholes in a bus connection
-	int numDelaysBus;
-
-	// inital values of delays in a bus connection, 3/2/94 added
-	const char* initDelayValuesBus;
 };
 
         //////////////////////////////////////////
@@ -368,15 +377,29 @@ public:
 	// geodesics.
 	virtual void disconnect(int delGeo = 1);
 
+	// Find the porthole that a connection to me should really connect to.
+	/* virtual */ PortHole& newConnection();
+
+        // Return a PortHole.
+	// For simple PortHoles, just return a reference to self.
+        /* virtual */ PortHole& newPort() { return *this; }
+
 	// Return the porthole we are connected to (see below).
 	inline PortHole* far() const { return farSidePort;}
 
         // Print a description of the PortHole
 	/* virtual */ StringList print (int verbose = 0) const;
 
-	// set the alias
-	void setAlias (PortHole& blockPort);
-    
+	// set alias for PortHole
+	inline void setAlias (PortHole& blockPort) {
+		GenericPort::setAlias (blockPort);
+	}
+
+	// move alias for PortHole
+	inline void moveMyAliasesTo (PortHole& blockPort) {
+		GenericPort::moveMyAliasesTo (blockPort);
+	}
+
 	// class identification
 	int isA(const char*) const;
 
@@ -568,7 +591,7 @@ inline int PortList::remove(PortHole* p) { return NamedObjList::remove(p);}
 
 class GalPort : public PortHole {
 public:
-	GalPort(GenericPort& a);
+	GalPort(PortHole& a);
 	GalPort() {}
 	~GalPort();
 	int isItInput() const;
@@ -597,7 +620,7 @@ public:
 class GalMultiPort : public MultiPortHole {
 public:
 	// a GalMultiPort always has an alias
-	GalMultiPort(GenericPort& a);
+	GalMultiPort(MultiPortHole& a);
 
 	// If you want to defer creating the alias to an alias() call
 	GalMultiPort() {}
@@ -609,7 +632,7 @@ public:
 	int isItOutput() const;
 
 	// when making a new port, create it both locally and in the
-	// alias and connect the two together.
+	// next lower alias, and connect the two together.
 	/* virtual */ PortHole& newPort();
 };
 

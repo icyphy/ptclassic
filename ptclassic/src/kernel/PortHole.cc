@@ -111,41 +111,77 @@ int GenericPort :: isItInput () const { return FALSE;}
 int GenericPort :: isItOutput () const { return FALSE;}
 int GenericPort :: isItMulti () const { return FALSE;}
 
-GalPort :: ~GalPort() {}
-GalMultiPort :: ~GalMultiPort() {}
 
-void GenericPort::setAlias (GenericPort& gp) {
-    // We allow inserting an alias within an existing chain.
-    // For robustness, we must check if gp.aliasedFrom == this
-    // which would create a loop of aliases.  This could happen,
-    // if the user called alias twice.
-    if (gp.aliasedFrom && gp.aliasedFrom != this) {
-	aliasedFrom = gp.aliasedFrom;
-	aliasedFrom->aliasedTo = this;
-    }
-    aliasedTo = &gp;
-    gp.aliasedFrom = this;
+// Alias manipulation stuff
+
+// Make this port an alias for the specified port.
+void GenericPort :: setAlias (GenericPort& gp) {
+  // Don't complain if same alias command is issued twice (is this necessary?)
+  if (aliasedTo == &gp && gp.aliasedFrom == this)
+    return;
+  // For robustness, ignore any attempt to alias a port to itself
+  if (&gp == this)
+    return;
+  // Otherwise, I must not already be aliased to anything.
+  if (aliasedTo) {
+    Error::abortRun(*this, "setAlias applied to already-aliased porthole");
+    // delink from old aliasee to avoid corrupting the chain
+    aliasedTo->aliasedFrom = 0;
+    aliasedTo = 0;
+  }
+  // If the port already has aliases, attach myself at the outer end of the
+  // chain (this is not obviously right, but for known uses it is correct).
+  GenericPort& topgp = gp.getTopAlias();
+  aliasedTo = &topgp;
+  topgp.aliasedFrom = this;
 }
 
-PortHole& GenericPort :: newConnection () {
-	// first resolve aliases.
-	GenericPort& real = realPort();
-	if (!real.isItMulti()) return (PortHole&)real;
-	// Alias points to a MPH.  Use its newConnection method.
-	return real.newConnection();
+// Relink any alias chain pointing to me to point to the given port
+// (adding it to the top of any extant chain for the port).
+void GenericPort :: moveMyAliasesTo (GenericPort& gp) {
+    // Nothing to do if no aliases.
+    GenericPort* myAlias = aliasedFrom;
+    if (myAlias == NULL)
+      return;
+    // Delink myself from chain above me.
+    aliasedFrom->aliasedTo = 0;
+    aliasedFrom = 0;
+    // And relink chain to target.
+    myAlias->setAlias(gp);
 }
 
-// translate aliases, if any.
-GenericPort* GenericPort :: translateAliases() {
+// Delink me from any alias chain I may be in
+void GenericPort :: clearAliases() {
+	if (aliasedFrom) aliasedFrom->aliasedTo = aliasedTo;
+	if (aliasedTo) aliasedTo->aliasedFrom = aliasedFrom;
+	aliasedFrom = aliasedTo = 0;
+}
+
+// Get the bottommost/innermost port of an alias chain.
+GenericPort& GenericPort :: realPort() {
 	GenericPort* p = this;
 	while (p->aliasedTo) p = p->aliasedTo;
-	return p;
+	return *p;
 }
 
-// really the same as translateAliases; works on const objects
+// Same for use in const expressions
 const GenericPort& GenericPort :: realPort() const {
 	const GenericPort* p = this;
 	while (p->aliasedTo) p = p->aliasedTo;
+	return *p;
+}
+
+// Get the topmost/outermost port of an alias chain.
+GenericPort& GenericPort :: getTopAlias() {
+	GenericPort* p = this;
+	while (p->aliasedFrom) p = p->aliasedFrom;
+	return *p;
+}
+
+// Same for use in const expressions
+const GenericPort& GenericPort :: getTopAlias() const {
+	const GenericPort* p = this;
+	while (p->aliasedFrom) p = p->aliasedFrom;
 	return *p;
 }
 
@@ -223,12 +259,6 @@ GenericPort :: ~GenericPort () {
 	q->typePortPtr = typePortPtr;
 }
 
-void GenericPort :: clearAliases() {
-	if (aliasedFrom) aliasedFrom->aliasedTo = aliasedTo;
-	if (aliasedTo) aliasedTo->aliasedFrom = aliasedFrom;
-	aliasedFrom = aliasedTo = 0;
-}
-
 // The connect method
 // This method is virtual and may be overridden
 // 3/2/94 changed to add initDelayValues
@@ -301,6 +331,15 @@ void PortHole :: disconnect(int delGeo) {
 	myPreferredType = 0;
 }
 
+PortHole& PortHole :: newConnection () {
+	// first resolve aliases.
+	GenericPort& real = realPort();
+	if (!real.isItMulti()) return (PortHole&)real;
+	// Alias points to a MPH.  Use its newConnection method.
+	// Perhaps we should report an error instead?
+	return real.newConnection();
+}
+
 // Porthole constructor.
 PortHole :: PortHole () : myGeodesic(0), farSidePort(0), 
 myPlasma(0), myBuffer(0), myResolvedType(0), myPreferredType(0),
@@ -325,8 +364,11 @@ PortHole :: ~PortHole() {
 void PortHole :: receiveData () { return;}
 void PortHole :: sendData () { return;}
 
+GalPort :: ~GalPort() {}
+GalMultiPort :: ~GalMultiPort() {}
+
 // GalPort constructor
-GalPort :: GalPort(GenericPort& a) { GenericPort::setAlias(a);}
+GalPort :: GalPort(PortHole& a) { setAlias(a); }
 
 // get answer by asking the alias.
 int GalPort :: isItInput() const { 
@@ -339,7 +381,7 @@ int GalPort :: isItOutput() const {
 }
 
 // constructor: a GalMultiPort always has an alias
-GalMultiPort ::	GalMultiPort(GenericPort& a) { GenericPort::setAlias(a);}
+GalMultiPort ::	GalMultiPort(MultiPortHole& a) { setAlias(a); }
 
 // get answer by asking the alias.
 int GalMultiPort :: isItInput() const { 
@@ -448,11 +490,6 @@ StringList PortHole :: print(int) const {
     return out << "\n\n";
 }
 
-// set the alias and fix the far pointers
-void PortHole::setAlias(PortHole& blockPort) {
-    GenericPort::setAlias (blockPort);
-}
-
 // sets the index values of each porthole of each star in the galaxy.
 // Returns the total number of portholes.
 int setPortIndices(Galaxy& g) {
@@ -491,30 +528,20 @@ int MultiPortHole :: isItMulti() const { return TRUE;}
 void MultiPortHole :: initialize() {}
 
 // MPH constructor
-// 3/2/94 changed to add initDelayValues
-MultiPortHole :: MultiPortHole() : peerMPH(0), numDelaysBus(0),
-                                   initDelayValuesBus(0) {}
+MultiPortHole :: MultiPortHole() {}
 
 // MPH destructor
 
 MultiPortHole :: ~MultiPortHole() { delPorts();}
 
-// delete and reinitialize the porthole list.  Any bus connection is
-// broken as well.
+// delete and reinitialize the porthole list.
 void MultiPortHole :: delPorts () {
 	ports.deleteAll();
-	if (peerMPH) {
-		peerMPH->peerMPH = 0;
-		peerMPH = 0;
-	}
 }
 
 StringList MultiPortHole :: print (int verbose) const {
     StringList out;
     out << GenericPort::print(verbose);
-    if (peerMPH) {
-	out << "\tbus connection to multiporthole " << peerMPH->fullName();
-    }
     out << "This MultiPortHole contains " << numberPorts() <<" PortHoles.\n\n";
 // We don't add stuff on the PortList, since that will be printed
 // out by the enclosing Block::printPorts.
@@ -1110,7 +1137,7 @@ PortHole& MultiPortHole :: newPort() {
 PortHole& MultiPortHole :: newConnection() {
 	// first resolve aliases.
 	GenericPort& real = realPort();
-	// check for being aliased to a single porthole (is this possible?)
+	// check for being aliased to a single porthole (should not happen)
 	if (!real.isItMulti()) return (PortHole&)real;
 	MultiPortHole& realmph = (MultiPortHole&)real;
 	// find an unconnected porthole in the real port
@@ -1118,7 +1145,8 @@ PortHole& MultiPortHole :: newConnection() {
 	PortHole* p;
 	while ((p = next++) != 0) {
 		// do the right thing if a member of realmph is an alias.
-		// I think this is not really possible, but play it safe.
+		// This could happen if an MPH alias chain has been broken;
+		// realmph would then be pointing at some alias MPH.
 		PortHole& realp = p->newConnection();
 		// realp is disconnected iff it has no far()
 		if (realp.far() == NULL) return realp;
@@ -1135,24 +1163,16 @@ PortHole& MultiPortHole :: newConnection() {
 
 // Create a bus connection between two multiportholes.
 // any pre-existing connection to either is broken.
-// if bus already exists we can efficiently do nothing or widen it.
-// 3/2/94 changed to add initDelayValues
+// Any supplied delay values are attached to *each* individual connection.
+// NOTE: there really isn't any notion of a "bus connection" in the
+// porthole data structures; this is just a shorthand for making the
+// right number of individual portholes and connecting them together.
 void MultiPortHole::busConnect (MultiPortHole& peer, int width, int numDelays,
 				const char* initDelayValues) {
-	if (peerMPH == &peer && numDelays == numDelaysBus &&
-	    initDelayValues == initDelayValuesBus && width >= numberPorts()) {
-		// fast way: do nothing or widen existing bus
-		for (int i = numberPorts(); i < width; i++)
-			connect (peer, numDelays, initDelayValues);
-		return;
-	}
-	// slow way: disconnect, build the bus.
 	delPorts();
 	peer.delPorts();
 	for (int i = 0; i < width; i++)
 		connect (peer, numDelays, initDelayValues);
-	numDelaysBus = numDelays;
-	initDelayValuesBus = initDelayValues;
 }
 
 // Get the domain of the galaxy that the parent star is in.
