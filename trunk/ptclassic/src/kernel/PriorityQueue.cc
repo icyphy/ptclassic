@@ -109,6 +109,46 @@ void PriorityQueue :: levelput(Pointer a, float v, float fv = 1.0)
 	return;
 }
 
+// highest level first, highest fineLevel first.
+
+void PriorityQueue :: leveltup(Pointer a, float v, float fv = 1.0)
+{
+	numberNodes++;			// increment numberNodes
+
+	if (lastNode == 0) {		// List is empty
+		lastNode = getFreeLink()->setLink(a, v, fv, 0, 0);
+		lastNode->next = lastNode;
+		lastNode->before = lastNode;
+		lastReference = lastNode;
+		return;
+	} 
+
+	LevelLink *l = lastNode->next;		// Head of the queue
+
+	while (l != lastNode) {			// compare but last
+		if (v < l->level || (v == l->level && fv < l->fineLevel)) {
+		   l->before->next = l->before = 
+				getFreeLink()->setLink(a,v,fv,l,l->before);
+		   lastReference = lastNode;
+		   return;
+		}
+		l = l->next;
+	}
+
+	// compare with the lastNode last
+	if (v > l->level || (v == l->level && fv >= l->fineLevel)) {
+		lastNode = getFreeLink()->setLink(a,v,fv,l->next,l);
+		l->next->before = lastNode;
+		l->next = lastNode;
+		lastReference = lastNode;
+		return;
+	} 
+	l->before->next = l->before = 
+		getFreeLink()->setLink(a,v,fv,l,l->before);
+	lastReference = lastNode;
+	return;
+}
+
 void PriorityQueue :: pushBack(LevelLink* a) {
 	if (!lastNode) {
 		lastNode = a;

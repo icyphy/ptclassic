@@ -74,12 +74,14 @@ protected:
 	// To avoid memory (de)allocation overhead at each push/pop, we
 	// store the freeLinks once created.
 	LevelLink* getFreeLink();
-	void 	   putFreeLink(LevelLink*);
-	void 	   clearFreeList();
+	virtual void 	   clearFreeList();
 
 public:
-	// Add element to the queue sorted by its level...
+	// Add element to the queue sorted by its level from the tail.
 	void levelput(Pointer a, float v, float fv = 1.0);
+
+	// Add element to the queue sorted by its level from the head.
+	void leveltup(Pointer a, float v, float fv = 1.0);
 
 	// append the link to the end of the queue (ignore levels).
 	void put(Pointer a, float v = 0);
@@ -108,6 +110,9 @@ public:
 	// clear the queue...
 	// move all Links into the free List.
 	void initialize();
+
+	// put the link into the pool of free links.
+	virtual void 	   putFreeLink(LevelLink*);
 
 	// Constructor
 	PriorityQueue() : freeLinkHead(0), numberNodes(0), 
