@@ -79,6 +79,7 @@ class ::tycho::Node {
 
     proc aspect   {id canvas args}
     proc coords   {id canvas args}
+    proc component {id canvas {name {}}}
     proc font     {id canvas fo}
     proc inputs   {id canvas in}
     proc intype   {id canvas in}
@@ -131,6 +132,7 @@ class ::tycho::Node {
 
     set methodtable(aspect)      ::tycho::Node::aspect
     set methodtable(construct)   ::tycho::Node::construct
+    set methodtable(component)   ::tycho::Node::component
     set methodtable(coords)      ::tycho::Node::coords
     set methodtable(icontype)    ::tycho::Node::icontype
     set methodtable(inputs)      ::tycho::Node::inputs
@@ -194,11 +196,16 @@ body ::tycho::Node::construct {id tags canvas x0 y0 x1 y1 args} {
 #
 # FIXME: Make more efficient.
 #
+# FIXME: Do we really need this? Terminal positions can be found
+# more easily by using component and then calling aspects on those.
+# Plus it doesn't assume that the ports have an aspect called
+# "terminal."
+#
 body ::tycho::Node::aspect {id canvas args} {
     set result {}
     set slate [canvasslate $canvas]
 
-    # If there are no args, return a list of valid aspects
+    # If there are no args, return a list of aspect names
     if { $args == "" } {
 	loop [llength $inports($id)] -counter n {
 	    lappend result input-$n
@@ -209,7 +216,7 @@ body ::tycho::Node::aspect {id canvas args} {
 	return $result
     }
     
-    # If there are args, return a list of aspects
+    # If there are args, return the aspect coordinates
     foreach aspect $args {
 	set splut [split $aspect "-"]
 	switch -exact [lindex $splut 0] {
@@ -231,6 +238,33 @@ body ::tycho::Node::aspect {id canvas args} {
     return $result
 }
 
+
+##########################################################################
+#### component
+#
+# Return a component of a node. Component names are of the form *input-*_n_
+# or $output-*_n_.
+#
+body ::tycho::Node::component {id canvas {name {}}} {
+    # If there is no component argument, return a list of components
+    if { $name == "" } {
+	return [aspect $id $canvas]
+    }
+    
+    # Otherwise, get the specified component
+    set splut [split $name "-"]
+    switch -exact [lindex $splut 0] {
+	"input" {
+	    return [lindex $inports($id) [lindex $splut 1]]
+	}
+	"output" {
+	    return [lindex $outports($id) [lindex $splut 1]]
+	}
+	default {
+	    error "unknown component $name"
+	}
+    }
+}
 
 ##########################################################################
 #### coords

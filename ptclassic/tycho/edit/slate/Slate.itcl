@@ -173,6 +173,9 @@ class ::tycho::Slate {
     # Set or get the coordinates of an item or pict
     method coords {id args}
 
+    # Access a component of a picture
+    method component {id args}
+
     # Create a new item or pict
     method create {type args}
 
@@ -206,17 +209,17 @@ class ::tycho::Slate {
 
     # Set the insertion cursor
     method icursor {id index} {
-	 $canvas icursor $id $index
+	$canvas icursor $id $index
     }
 
     # Return the numerical value of a symbolic index
     method index {id index} {
-	 $canvas index $id $index
+	$canvas index $id $index
     }
 
     # Insert text at the insertion cursor
     method insert {id beforeThis string} {
-	 $canvas insert $id $beforeThis $string
+	$canvas insert $id $beforeThis $string
     }
 
     # Interact with pictures
@@ -419,19 +422,6 @@ body ::tycho::Slate::addtag {add mode args} {
 }
 
 #######################################################################
-#### bbox
-#
-# Return the bounding box of any number of items or picts, as a four-list.
-# Each argument can be an item, a pict, or a tag. If there are no pictures
-# matching the tags, return the null string -- the caller must check for
-# this condition. (This behavior matches
-# that of the canvas).
-#
-body ::tycho::Slate::bbox {args} {
-    eval $canvas bbox $args
-}
-
-#######################################################################
 #### aspect
 #
 # Return the value of one or more "aspects" of a picture. An aspect
@@ -469,7 +459,7 @@ body ::tycho::Slate::aspect {id args} {
     if { [string match {_*} $id] } {
 	if { [@scope ::tycho::$picttype($id) [list \
 		::info exists methodtable(aspect)]] } {
-		    return [@scope ::tycho::$picttype($id) [list \
+	    return [@scope ::tycho::$picttype($id) [list \
 		    eval \[set methodtable(aspect)\] $id $canvas $args]]
 	}
     }
@@ -519,6 +509,19 @@ body ::tycho::Slate::aspect {id args} {
 	    error "Unsupported item shape $shape"
 	}
     }
+}
+
+#######################################################################
+#### bbox
+#
+# Return the bounding box of any number of items or picts, as a four-list.
+# Each argument can be an item, a pict, or a tag. If there are no pictures
+# matching the tags, return the null string -- the caller must check for
+# this condition. (This behavior matches
+# that of the canvas).
+#
+body ::tycho::Slate::bbox {args} {
+    eval $canvas bbox $args
 }
 
 #######################################################################
@@ -576,6 +579,71 @@ body ::tycho::Slate::canvasx {screenx {gridspacing {}}} {
 #
 body ::tycho::Slate::canvasy {screeny {gridspacing {}}} {
     eval $canvas canvasy $screeny $gridspacing
+}
+
+#######################################################################
+#### component
+#
+# Access a component of a picture. Pictures only support components
+# if they have been explicitly declared as such in the "components"
+# variable in the picture class.
+#
+# With one argument, return the names of the components of this
+# picture. With two arguments, return the specified component. With
+# more than two arguments, call the specified method on the
+# component and return its result.
+#
+# Since this method shadows the default itk method of the same name,
+# this one checks for the argument "canvas" and returns the canvas
+# name if it matches -- using component to access the canvas inside
+# the slate thus still works as expected.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag.
+#
+body ::tycho::Slate::component {id {component {}} {method {}} args} {
+    # Check for "component canvas"
+    if { $id == "canvas" } {
+	return $canvas
+    }
+
+    # If there's a component method on the picture, just call that
+    if { [@scope ::tycho::$picttype($id) \
+	    [list ::info exists methodtable(component)]] } {
+	set component [@scope ::tycho::$picttype($id) \
+		[list eval \[set methodtable(component)\] \
+		$id $canvas $component]]
+    } else {
+	# Check for no component arg
+	if { $component == "" } {
+	    return [@scope ::tycho::$picttype($id) [list set components]]
+	}
+
+	# Check for a valid component
+	if { ! [@scope ::tycho::$picttype($id) \
+		[list ::info exists components]] \
+		|| ! [lmember [@scope ::tycho::$picttype($id) \
+		[list set components]] $component] } {
+	    error "unknown component $component"
+	}
+
+	# Finally, read its value
+	if { [@scope $picttype($id) \
+		[list ::info exists [set component]($id)]] } {
+	    set component [@scope $picttype($id) \
+		    [list [set [set component]($id)]]]
+	} else {
+	    set component {}
+	}
+    }
+
+    # Call a method on the component
+    # FIXME: Should this deal with multiple items returned?
+    if { $method == {} } {
+	return $component
+    } else {
+	return [eval $this $method $component $args]
+    }
 }
 
 #######################################################################
@@ -1162,7 +1230,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 		# Set the tags of the picture. Figure out the differences.
 		set tags [$canvas gettags \
 			[@scope ::tycho::$picttype($id) \
-			    [list set primary($id)]]]
+			[list set primary($id)]]]
 
 		
 		set new [lsubtract $value $tags]
@@ -1210,7 +1278,7 @@ body ::tycho::Slate::lower {id {belowThis {}}} {
 # can either be a tag or an id.
 #
 body ::tycho::Slate::move {tag xAmount yAmount} {
-     $canvas move $tag $xAmount $yAmount
+    $canvas move $tag $xAmount $yAmount
 }
 
 #######################################################################
@@ -1218,7 +1286,7 @@ body ::tycho::Slate::move {tag xAmount yAmount} {
 #
 # Move one or more pictures to an absolute location. The point
 # of the picture that is moved to the specified location is
-# specified by the forth argument, the aspect. If omitted, this
+# specified by the fourth argument, the aspect. If omitted, this
 # argument defaults to center.
 #
 # If a tag is specified and the tag denotes more than one picture,
@@ -1253,6 +1321,9 @@ body ::tycho::Slate::moveto {tag x y {aspect center}} {
 #### picture
 # Manipulate pictures. This is a "safe" interface to some of the
 # picture manipulation methods used within the slate.
+#
+# <b>Note</b>: The functionality of the method is still evolving,
+# and much of it may end up in other methods, such as component{}.
 #
 body ::tycho::Slate::picture {mode args} {
     switch -exact $mode {
@@ -1475,9 +1546,9 @@ proc canvasslate {canvas} {
 }
 
 
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####
+###################################################################
+###################################################################
+####                      private methods                      ####
 
 
 #######################################################################
