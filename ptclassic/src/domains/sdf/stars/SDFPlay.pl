@@ -57,7 +57,7 @@ be a parameter.
 		char* fileName;		// name of file to use (on heap)
 	}
 	hinclude { <stdio.h> }
-	ccinclude { "miscFuncs.h", "paths.h", "ptdspMuLaw.h", <std.h> }
+	ccinclude { "miscFuncs.h", "paths.h", "ptdspMuLaw.h", <std.h>, <unistd.h> }
 	constructor {
 		strm = 0;
 		delFile = FALSE;
