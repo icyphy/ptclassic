@@ -28,7 +28,7 @@
 #
 # Makefile to make symbols externally visible under AIX
 
-.SUFFIXES:    .o .cc .h .pl .chdl .exp
+.SUFFIXES:    .o .cc .h .pl .chdl .is .exp
 
 .a.exp:
 	${PTOLEMY}/mk/mkexps $< > $*.exp
