@@ -6,44 +6,16 @@ widgettree \- Create and manipulate a widgettree widget
 .SH SYNOPSIS
 \fBwidgettree\fI \fIpathName\fR \fR?\fIoptions\fR?
 .SH "INHERITANCE"
-itk::Widget <- Labeledwidget <- Scrolledwidget <- Widgettree
+itk::Widget <- Widgettree
 .SH "STANDARD OPTIONS"
 .LP
 .nf
 .ta 4c 8c 12c
-\fBactiveBackground\fR	\fBactiveForeground\fR	\fBbackground\fR	\fBborderWidth\fR
-\fBcursor\fR	\fBdisabledForeground\fR	\fBforeground\fR	\fBhighlightColor\fR
-\fBhighlightThickness\fR	\fBrelief\fR	
+\fBbackground\fR	\fBcursor\fR	\fBfont\fR	\fBdisabledForeground\fR
+\fBforeground\fR	\fBhighlightColor\fR	\fBhighlightThickness\fR
 .fi
 .LP
 See the "options" manual entry for details on the standard options.
-.SH "ASSOCIATED OPTIONS"
-.LP
-.nf
-.ta 4c 8c 12c
-\fBactiveRelief\fR	\fBelementBorderWidth\fR	\fBjump\fR	\fBtroughColor\fR
-.fi
-.LP
-See the "scrollbar" widget manual entry for details on the above
-associated options.
-.LP
-.nf
-.ta 4c 8c 12c
-\fBspacing1\fR	\fBspacing2\fR	\fBspacing3\fR	\fBtabs\fR
-.fi
-.LP
-See the "text" widget manual entry for details on the above
-associated options.
-.SH "INHERITED OPTIONS"
-.LP
-.nf
-.ta 4c 8c 12c
-\fBlabelBitmap\fR	\fBlabelFont\fR	\fBlabelImage\fR	\fBlabelMargin\fR
-\fBlabelPos\fR	\fBlabelText\fR	\fBlabelVariable\fR
-.fi
-.LP
-See the "labeledwidget" class manual entry for details on the
-inherited options.
 .SH "WIDGET-SPECIFIC OPTIONS"
 .LP
 .nf
@@ -52,10 +24,9 @@ Class:	\fBIcon\fR
 Command-Line Switch:	\fB-closedicon\fR
 .fi
 .IP
-Specifies the name of an existing closed icon image to be used in the 
-widgettree before those nodes that are collapsed.  Should one not be 
-provided, then a folder icon will be generated, pixmap if possible, 
-bitmap otherwise.
+Specifies the name of an image to be used in the widgettree before
+those nodes that are closed. The default icon is called "openNode,"
+which is automatically generated.
 .LP
 .nf
 Command-Line Switch:	\fB-closecommand\fR
@@ -63,7 +34,7 @@ Command-Line Switch:	\fB-closecommand\fR
 .IP
 The command to execute when a node of the tree is closed.
 If this command is null, clicking on the open-close button will
-close the node; if not, the node tag is appended
+close the node; if not, the node id is appended
 to the command and the command is executed at the global scope,
 and the node will not close automatically.
 .LP
@@ -72,7 +43,7 @@ Command-Line Switch:	\fB-createcommand\fR
 .fi
 .IP
 The command to execute when a node of the tree is opened
-if the node does not currently contain any widgets. The node tag is appended
+if the node does not currently contain any widgets. The node id is appended
 to the command and the command is executed at the global scope.
 The command should use the <b>add</b> method to create the contents of
 the node. If the command is null, the node is opened but
@@ -94,33 +65,21 @@ reasonable way to avoid this, since that's how Tk's grid manager
 works.) The default value is 24 pixels.
 .LP
 .nf
-Name:	\fBnodeIcon\fR
-Class:	\fBIcon\fR
-Command-Line Switch:	\fB-nodeicon\fR
-.fi
-.IP
-Specifies the name of an existing node icon image to be used in the 
-widgettree before those nodes that are leafs.  Should one not be provided, 
-then a dog-eared page icon will be generated, pixmap if possible, bitmap 
-otherwise.
-.LP
-.nf
 Name:	\fBopenIcon\fR
 Class:	\fBIcon\fR
 Command-Line Switch:	\fB-openicon\fR
 .fi
 .IP
-Specifies the name of an existing open icon image to be used in the 
-widgettree before those nodes that are expanded.  Should one not be provided, 
-then an open folder icon will be generated, pixmap if possible, bitmap 
-otherwise.
+Specifies the name of an image to be used in the widgettree before
+those nodes that are open. The default icon is called "openNode,"
+which is automatically generated.
 .LP
 .nf
 Command-Line Switch:	\fB-opencommand\fR
 .fi
 .IP
 The command to execute when a node of the tree is opened
-and the node already has children. The node tag is appended
+and the node already has children. The node id is appended
 to the command and the command is executed at the global scope.
 The node is opened after the command returns.
 .LP
@@ -132,8 +91,10 @@ Command-Line Switch:	\fB-padx\fR
 .IP
 The horizontal padding to use when gridding leaf widgets. By default,
 all leaves are packed with the same padding. If needed, the Tk
-\fBgrid configure\fR command can be used with to override this
-default.
+\fBgrid configure\fR command can be used to override this
+default -- note, however, that reconfiguring this option after
+widgets have been created will return all widgets to the new
+value of \fB-pady\fR.
 .LP
 .nf
 Name:	\fBpadY\fR
@@ -143,8 +104,10 @@ Command-Line Switch:	\fB-pady\fR
 .IP
 The vertical padding to use when gridding leaf widgets. By default,
 all leaves are packed with the same padding. If needed, the Tk
-\fBgrid configure\fR command can be used with to override this
-default.
+\fBgrid configure\fR command can be used to override this
+default -- note, however, that reconfiguring this option after
+widgets have been created will return all widgets to the new
+value of \fB-pady\fR.
 .LP
 .BE
 
@@ -155,11 +118,11 @@ with a button at each node to open and close the node. The widget is
 designed for implementing unfolding preference and dialog boxes as
 well as viewers of tree-like structures.
 .PP
-Each item in the tree is referenced by a tag, which is constructed
+Each item in the tree is referenced by a unique id, which is constructed
 in the same manner as hierarchical Tk widget names, but without
 the leading period. For example, a node at the top level may
-have the tag <code>foo</code>, and a widget contained within that
-node the tag <code>foo.bar</code>. Widgets and nodes are added to
+have the id <code>foo</code>, and a widget contained within that
+node the id <code>foo.bar</code>. Widgets and nodes are added to
 the tree with the \fBadd\fR method.
 .PP
 Widgets can be added to the tree either when the Widgettree is
@@ -209,38 +172,41 @@ operations on the widget.  It has the following general form:
 determine the exact behavior of the command.  The following
 commands are possible for widgettree widgets:
 
-.SH "ASSOCIATED METHODS"
-.LP
-.nf
-.ta 4c 8c 12c
-\fBbbox\fR	\fBcompare\fR	\fBdebug\fR	\fBdelete\fR	
-\fBdlineinfo\fR	\fBdump\fR	\fBget\fR	\fBindex\fR
-\fBinsert\fR	\fBscan\fR	\fBsearch\fR	\fBsee\fR
-\fBtag\fR	\fBwindow\fR	\fBxview\fR	\fByview\fR
-.fi
-.LP
-See the "text" manual entry for details on the standard methods.
-
 .SH "WIDGET-SPECIFIC METHODS"
 .TP
-\fIpathName\fR \fBadd\fR \fItype\fR \fItag\fR ?\fIarg\fR ...?
+\fIpathName\fR \fBadd\fR \fItype\fR \fIid\fR ?\fIarg\fR ...?
 
 Add a new widget to the tree. The first argument is the widget type,
-and the second is a tag to give it. Raise an error if an item with
-\fItag\fR already exists. Tags are hierarchical, as in
+and the second is its unique id. Raise an error if an item with
+\fIid\fR already exists. IDs are hierarchical, as in
 <code>foo.bar</code> -- the parent node must already exist
 (<code>foo</code>, in this case). The special type \fBnode\fR is used
 to create a new node, in which case options are passed directly to the
 constructor of the node label, which is a Tk label. Usually, the
 options will include at least the \fB-text\fR option.
 .IP
-Any other value of \fItype\fR is assumed to be the type of the widget
-to create. The optional arguments comprise an option-value list which
-can contain any valid options for \fItype\fR. By default, the widget's
-options are integrated into the mega-widgets option-list with the
-\fBusual\fR option handling. If this is not correct, then this
-behaviour can be overridden for each \fItype\fR by using the
-\fBoptions\fR method.  The return value is the tag.
+Any other value of \fItype\fR is assumed to be the type of the widget to 
+create.  The optional arguments comprise an option-value list which can 
+contain any valid options for \fItype\fR.  By default, the widget's options 
+are integrated into the mega-widgets option-list with the \fBusual\fR 
+option handling, which will cause the following   option-handling
+commands to be used:
+.DS
+    keep -font -background -cursor -disabledforeground -foreground \
+    	-highlightthickness -highlightcolor
+	rename -labelfont -font font Font
+.DE
+To override this behaviour, the \fIoptioncmds\fR argument 
+can be appended to the option list.  This is in the same form as the second 
+argument to the \fBitk_component add\fR method of \fBitk::Archetype\fR.  
+For example, we could add an entry widget to the tree and rename its 
+background to a new option called \fB-entrybackground\fR:
+.DS
+  $widgettree add entry {
+      usual
+      rename -background -entrybackground entryBackground Background
+  }
+.DE
 .TP
 \fIpathName\fR \fBcget\fR \fIoption\fR
 
@@ -248,15 +214,15 @@ Returns the current value of the configuration option given by
 \fIoption\fR.  \fIOption\fR may have any of the values accepted by the
 \fBwidgettree\fR command.
 .TP
-\fIpathName\fR \fB close\fR  \fItag\fR
+\fIpathName\fR \fB close\fR  \fInodeid\fR
 
 Close a node of the tree. If the node is already closed, this method
 does nothing. If the \fB-closecommand\fR option is not null, append
-the tag and evaluate the command in the global scope. In this case,
+the id and evaluate the command in the global scope. In this case,
 the node is not closed -- the close command must explicitly close it
 with the \fBhide\fR method. If the \fB-closecommand\fR option is null,
 the node is just closed.  Raise an error if the node does not exist or
-if \fItag\fR is a leaf.
+if \fInodeid\fR is a leaf.
 .TP
 \fIpathName\fR\fR \fBconfigure\fR ?\fIoption\fR? ?\fIvalue option value ...\fR?
 
@@ -272,105 +238,101 @@ modifies the given widget option(s) to have the given value(s); in
 this case the command returns an empty string.  \fIOption\fR may have
 any of the values accepted by the \fBwidgettree\fR command.
 .TP
-\fIpathName\fR \fBdelete\fR \fItag\fR
+\fIpathName\fR \fBdelete\fR \fIid\fR
 
 Delete an item from the tree. If the item is a node, then all
 descendents are deleted too. Raise an error if the item does not
 exist. Note that the grid rows occupied by the item are not reclaimed,
 but this should not be visible.
 .TP
-\fIpathName\fR \fBhide\fR \fItag\fR
+\fIpathName\fR \fBdisable\fR \fInodeid\fR
+
+Disable a node. Raise an error if the node does not
+exist or \fInodeid\fR is not a node.  The open-close button is disabled,
+and the label foreground changed to the value given by the 
+\fB-disabledforeground\fR option.
+.TP
+\fIpathName\fR \fBenable\fR \fInodeid\fR
+
+Enable a node. Raise an error if the node does not
+exist or \fInodeid\fR is not a node.  The open-close button is enabled,
+and the label foreground changed to the value given by the 
+\fB-foreground\fR option.
+.TP
+\fIpathName\fR \fBhide\fR \fInodeid\fR
 
 Unconditionally close a node of the tree, without checking the
 \fB-closecommand\fR option. If the node is already closed, this method
 does nothing. Raise an error if the node does not exist or if
-\fItag\fR is a leaf.
+\fInodeid\fR is a leaf.
 .TP
-\fIpathName\fR \fBitemcget\fR \fItag\fR \fIoption\fR
+\fIpathName\fR \fBitemcget\fR \fIid\fR \fIoption\fR
 
 Return a configuration option of an item. Raise an error if the item
 does not exist or if the option is invalid. Legal options are exactly
 those described for the \fBadd\fR method.
 .TP
-\fIpathName\fR \fBitemconfigure\fR \fItag\fR ?\fIoption\fR? ?\fIarg\fR ...?
+\fIpathName\fR \fBitemconfigure\fR \fIid\fR ?\fIoption\fR? ?\fIarg\fR ...?
 
-Configure options of an item. If only \fItag\fR is supplied, return
+Configure options of an item. If only \fIid\fR is supplied, return
 the list of options of that item. If \fIoption\fR is supplied, return
 that option. If additional arguments are supplied, configure each
 option with the given value. Raise an error if the item does not exist
 or an invalid option is supplied. Legal options are exactly those
 described for the \fBadd\fR method.
 .TP
-\fIpathName\fR \fBlocate\fR \fIx\fR \fIy\fR ?\fItag\fR?
+\fIpathName\fR \fBlocate\fR \fIx\fR \fIy\fR ?\fIid\fR?
 
-Return the tag of the item at the given \fIx\fR and \fIy\fR
-coordinates. If the \fItag\fR argument is given, it must be a node,
+Return the id of the item at the given \fIx\fR and \fIy\fR
+coordinates. If the \fIid\fR argument is given, it must be a node,
 and the \fIx\fR and \fIy\fR coordinates are relative to the interior
 of that node. If \fIx\fR is negative, then the \fIx\fR coordinate is
 ignored in figuring out which item is under the mouse -- this is most
 useful when drag-selecting a region of the tree. If \fIx\fR is
-non-negative, then a tag is returned only if the mouse is actually
+non-negative, then an id is returned only if the mouse is actually
 over an item.
 .TP
-\fIpathName\fR \fBnames\fR ?\fItag\fR?
+\fIpathName\fR \fBnames\fR ?\fInodeid\fR?
 
-Return the tags of items at a given level of the tree. If the
-\fItag\fR argument is not supplied, return the list of items at the
-top level of the tree. If \fItag\fR is supplied, it must be a node or
+Return the ids of children of a node. If the
+\fInodeid\fR argument is not supplied, return the list of items at the
+top level of the tree. If \fInodeid\fR is supplied, it must be a node or
 an error is raised. The result in this case will be a list of children
 of that item.
 .TP
-\fIpathName\fR \fBopen\fR \fItag\fR
+\fIpathName\fR \fBopen\fR \fInodeid\fR
 
 Open a node of the tree. If the node is already open, do nothing. If
 the node has no children and \fB-createcommand\fR is not null, append
-the tag and evaluate at the global scope. If the node has children and
-\fB-opencommand\fR is not null, append the tag and evaluate at the
+the id and evaluate at the global scope. If the node has children and
+\fB-opencommand\fR is not null, append the id and evaluate at the
 global scope. Raise an error if the node does not exist or if
-\fItag\fR is not a node.
+\fInodeid\fR is not a node.
 .TP
-\fIpathName\fR \fBoptions\fR \fItype\fR ?\fIoptioncmds\fR?
+\fIpathName\fR \fBtoggle\fR \fInodeid\fR
 
-Query or specify option commands for a type that can be passed to
-\fBadd\fR. By default, an added widget's options are integrated into
-the option list with the \fBusual\fR option handling mechanism. If
-this is not correct -- for example, the widget may require that some
-options be renamed -- then this method can be called to override the
-default behavior. The \fItype\fR is a widget type that can be passed
-to the \fBadd\fR method.  The \fIoptioncmds\fR argument is a list of
-option commands in the same format as the second argument to the
-\fBitk_component add\fR method of <code>itk::Archetype</code>. If
-\fIoptioncmds\fR is not supplied, return the option commands for the
-specified \fItype\fR.
-.IP
-For example, we could specify that each time we add a radiobox to a
-query widget, we want its \fB-labelfont\fR option to integrate with
-the \fB-font\fR option of the widget tree:
-.DS
-  $widgettree options radiobox {
-      usual
-      rename -labelfont -font font Font
-  }
-.DE
+Toggle the state of a node of the tree: if the node is open, close it;
+if it is closed, open it. The effects of this operation are as described
+for the \fBopen\fR and \fBclose\fR methods.
 .TP
-\fIpathName\fR \fBtraverse\fR \fImode\fR ?\fItag\fR?
+\fIpathName\fR \fBtraverse\fR \fImode\fR ?\fInodeid\fR?
 
 Traverse the tree. This method is provided because Tk's default Tab
 traversal doesn't give the user enough control over where the
 traversal goes. The \fImode\fR controls the traversal operation, while
-the \fItag\fR is the tag of the button that currently has the
-focus. If \fItag\fR is null or not supplied, then no button has the
-focus. To aid construction of call-backs, the \fItag\fR can either be
-a tag or a widget path. \fImode\fR is case-insensitive, and can be one
+the \fInodeid\fR is the id of the button that currently has the
+focus. If \fInodeid\fR is null or not supplied, then no button has the
+focus. To aid construction of call-backs, the \fInodeid\fR can either be
+a node id or a widget path. \fImode\fR is case-insensitive, and can be one
 of \fBdown\fR, \fBreturn\fR, \fBup\fR, \fBleft\fR, or \fBright\fR,
-with the effect described for the deffault bindings. It can also be
+with the effect described for the default bindings. It can also be
 \fBto\fR, which moves the focus to the given node.  If the
 \fB-traversal\fR option is false, the method returns without doing
 anything.
 .TP
-\fIpathName\fR \fBtype\fR \fItag\fR
+\fIpathName\fR \fBtype\fR \fIid\fR
 
-Return the type of \fItag\fR. The type will be value of the \fItype\fR
+Return the type of \fIid\fR. The type will be value of the \fItype\fR
 argument passed to the \fBadd\fR method when the item was created.
 Raise an error if the item does not exist.
  
@@ -379,24 +341,24 @@ Raise an error if the item does not exist.
 and nodes are added to the tree.
 .LP
 .nf
-Name:	\fItag\fR
+Name:	\fIid\fR
 Class:	\fIwidgetclass\fR
 .fi
 .IP
-A leaf item of the tree. The \fItag\fR item is the tag passed to the
+A leaf item of the tree. The \fIid\fR item is the id passed to the
 \fBadd\fR method when the item was created.
 .LP
 .nf
-Name:	\fItag\fR
+Name:	\fInodeid\fR
 Class:	\fBFrame\fR
 .fi
 .IP
-A frame containing the children of a tree node.  This frame is not
+A frame containing the children of a tree node.  The frame is not
 created until a child is added to that node with the \fBadd\fR method.
 See the "frame" widget manual entry for details.
 .LP
 .nf
-Name:	\fItag\fR\fBbutton\fR
+Name:	\fIid\fR\fBbutton\fR
 Class:	\fBButton\fR
 .fi
 .IP
@@ -404,7 +366,7 @@ The button of a tree node. See the "button" widget manual entry for
 details.
 .LP
 .nf
-Name:	\fItag\fR\fBlabel\fR
+Name:	\fIid\fR\fBlabel\fR
 Class:	\fBLabel\fR
 .fi
 .IP
@@ -417,7 +379,7 @@ details.
 FIXME
 .DE
 .SH AUTHOR
-H. John Reekie
+John Reekie,  johnr@eecs.berkeley.edu
 
 .SH ACKNOWLEDGMENTS
 Widgettree is inspired by the SubPanel and MultiPanel widgets written by 
