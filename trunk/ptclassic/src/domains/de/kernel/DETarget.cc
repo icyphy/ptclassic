@@ -47,7 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char DEdomainName[];
 
 DETarget :: DETarget() : 
-Target("default-DE","DEStar","default DE target") {
+Target("default-DE", "DEStar", "default DE target", DEdomainName) {
 	addState(timeScale.setState("timeScale",this,"1.0",
 	    "Relative time scale for interface with another timed domain"));
 	addState(syncMode.setState("syncMode",this,"YES",
@@ -93,7 +93,3 @@ Block* DETarget :: makeNew() const  {
 }
 
 DETarget :: ~DETarget() { delSched();}
-
-const char* DETarget :: domain() {
-	return galaxy() ? galaxy()->domain() : DEdomainName;
-}

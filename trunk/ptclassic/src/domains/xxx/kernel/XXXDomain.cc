@@ -57,10 +57,10 @@ public:
 	}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new XXXfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new XXXfromUniversal; }
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new XXXtoUniversal;}
+	EventHorizon& newTo() { LOG_NEW; return *new XXXtoUniversal; }
 };
 
 // declare a prototype
@@ -75,10 +75,12 @@ public:
 			     "default XXX target", XXXdomainName) {}
 
 	// Destructor
-	~XXXTarget() { delSched();}
+	~XXXTarget() { delSched(); }
 
 	// Return a copy of itself
-	/*virtual*/ Block* makeNew() const { LOG_NEW; return new XXXTarget;}
+	/*virtual*/ Block* makeNew() const {
+		LOG_NEW; return new XXXTarget;
+	}
 
 protected:
 	void setup() {
@@ -88,4 +90,4 @@ protected:
 };
 
 static XXXTarget defaultXXXtarget;
-static KnownTarget entry(defaultXXXtarget,"default-XXX");
+static KnownTarget entry(defaultXXXtarget, "default-XXX");

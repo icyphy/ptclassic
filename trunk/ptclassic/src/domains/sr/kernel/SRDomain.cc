@@ -68,18 +68,14 @@ static SRDomain proto;
 class SRTarget : public Target {
 public:
 	// Constructor
-	SRTarget() : Target("default-SR", "SRStar", "default SR target"){}
+	SRTarget() : Target("default-SR", "SRStar", "default SR target",
+			    SRdomainName) {}
 
 	// Destructor
 	~SRTarget() { delSched(); }
 
 	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const { LOG_NEW; return new SRTarget;}
-
-	// Return the domain of the galaxy if it exists and "SR" otherwise
-	/*virtual*/ const char* domain() {
-		return galaxy() ? galaxy()->domain() : SRdomainName;
-	}
 
 protected:
 	void setup() {
@@ -97,7 +93,8 @@ class SRStaticTarget : public Target {
 public:
 	// Constructor
 	SRStaticTarget() : Target("static-SR", "SRStar",
-				  "SR target with static scheduling") {}
+				  "SR target with static scheduling",
+				  SRdomainName) {}
 
 	// Destructor
 	~SRStaticTarget() { delSched(); }
@@ -105,11 +102,6 @@ public:
 	// Return a copy of itself
 	Block* makeNew() const { LOG_NEW; return new SRStaticTarget;}
 
-	// Return the domain of the galaxy if it exists and "SR" otherwise
-	/*virtual*/ const char* domain() {
-		return galaxy() ? galaxy()->domain() : SRdomainName;
-	}
-  
 protected:
 	void setup() {
 		if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }

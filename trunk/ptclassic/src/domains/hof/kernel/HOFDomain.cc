@@ -1,9 +1,6 @@
 static const char file_id[] = "HOFDomain.cc";
 /**********************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
+ Version: @(#)XDomain.ccP	1.15	7/30/96
 
  WARNING -- XDomain.ccP is a template file that is used to generate
  domain description modules.  If the name of this file is not XDomain.ccP,
@@ -41,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Domain.h"
 #include "Target.h"
+#include "Galaxy.h"
 #include "KnownTarget.h"
 #include "HOFScheduler.h"
 #include "HOFWormhole.h"
@@ -49,19 +48,19 @@ extern const char HOFdomainName[] = "HOF";
 
 class HOFDomain : public Domain {
 public:
+	// constructor
+	HOFDomain() : Domain(HOFdomainName) {}
+
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new HOFWormhole(innerGal,innerTarget);
 	}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new HOFfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new HOFfromUniversal; }
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new HOFtoUniversal;}
-
-	// constructor
-	HOFDomain() : Domain("HOF") {}
+	EventHorizon& newTo() { LOG_NEW; return *new HOFtoUniversal; }
 };
 
 // declare a prototype
@@ -71,17 +70,24 @@ static HOFDomain proto;
 
 class HOFTarget : public Target {
 public:
-	HOFTarget() : Target("default-HOF","HOFStar","default HOF target"){}
-	Block* makeNew() const { LOG_NEW; return new HOFTarget;}
-	~HOFTarget() { delSched();}
+	// Constructor
+	HOFTarget() : Target("default-HOF", "HOFStar",
+			     "default HOF target", HOFdomainName) {}
+
+	// Destructor
+	~HOFTarget() { delSched(); }
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const {
+		LOG_NEW; return new HOFTarget;
+	}
 
 protected:
-	void setup()
-	{
+	void setup() {
 		if (!scheduler()) { LOG_NEW; setSched(new HOFScheduler); }
 		Target::setup();
 	}
 };
 
 static HOFTarget defaultHOFtarget;
-static KnownTarget entry(defaultHOFtarget,"default-HOF");
+static KnownTarget entry(defaultHOFtarget, "default-HOF");
