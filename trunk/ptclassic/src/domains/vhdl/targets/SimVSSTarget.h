@@ -41,11 +41,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLCompDecl.h"
 #include "VHDLCompMap.h"
 #include "VHDLSignal.h"
-//#include "VHDLState.h"
-//#include "VHDLPortVar.h"
-//#include "VHDLCluster.h"
-//#include "VHDLFiring.h"
-//#include "Attribute.h"
+#include "VHDLCSend.h"
+#include "VHDLCReceive.h"
+#include "CGCVSend.h"
+#include "CGCVReceive.h"
 
 class SimVSSTarget : public VHDLTarget {
 public:
@@ -126,6 +125,8 @@ private:
 	// Method called by V2C star to place important code into structure.
 	void registerV2C(int pairid, int numxfer);
 
+	int needC2V;
+	int needV2C;
 	int pairNumber;
 	void configureCommPair(CommPair&);
 };

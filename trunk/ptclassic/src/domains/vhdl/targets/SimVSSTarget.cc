@@ -57,6 +57,9 @@ VHDLTarget(name,starclass,desc) {
 
   addStream("preSynch", &preSynch);
   addStream("postSynch", &postSynch);
+  needC2V = 0;
+  needV2C = 0;
+  pairNumber = 0;
 }
 
 // Clone the Target.
@@ -65,11 +68,13 @@ Block* SimVSSTarget :: makeNew() const {
 }
 
 void SimVSSTarget :: setup() {
+  needC2V = 0;
+  needV2C = 0;
   pairNumber = 0;
   VHDLTarget :: setup();
 }
 
-static SimVSSTarget proto("SimVSS-VHDL", "CGStar",
+static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
 			 "VHDL code generation target for Synopsys simulation");
 static KnownTarget entry(proto,"SimVSS-VHDL");
 
@@ -89,8 +94,8 @@ CommPair SimVSSTarget :: toCGC(PortHole&) {
 
 void SimVSSTarget :: configureCommPair(CommPair& pair) {
   StringList prNum = pairNumber;
-  pair.cgcStar->setState("pairNumber", prNum);
-  pair.cgStar->setState("pairNumber", prNum);
+  pair.cgcStar->setState("pairNumber", hashstring(prNum));
+  pair.cgStar->setState("pairNumber", hashstring(prNum));
   pairNumber++;
 }
 
@@ -110,7 +115,8 @@ void SimVSSTarget :: frameCode() {
   CodeStream code;
   code << headerComment();
 
-  StringList galName = galaxy()->name();
+//  StringList galName = galaxy()->name();
+  StringList galName = filePrefix;
   StringList topName = galName;
   topName << "_top";
 
@@ -118,6 +124,7 @@ void SimVSSTarget :: frameCode() {
   top_uses << "library SYNOPSYS,IEEE;\n";
   top_uses << "use SYNOPSYS.ATTRIBUTES.all;\n";
   top_uses << "use IEEE.STD_LOGIC_1164.all;\n";
+  top_uses << "use std.textio.all;\n";
 
   top_entity << "-- top-level entity\n";
   top_entity << "entity ";
@@ -181,10 +188,14 @@ void SimVSSTarget :: frameCode() {
   top_configuration << indent(1) << "for all:" << galName;
   top_configuration << " use entity work." << galName;
   top_configuration << "(behavior); end for;\n";
+  if (needC2V) {
   top_configuration << indent(1) << "for all:C2V use entity work.C2V";
   top_configuration << "(CLI); end for;\n";
+}
+  if (needV2C) {
   top_configuration << indent(1) << "for all:V2C use entity work.V2C";
   top_configuration << "(CLI); end for;\n";
+}
   top_configuration << "end for;\n";
   top_configuration << "end parts;\n";
 
@@ -513,6 +524,7 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
+  needC2V = 1;
   // Construct unique label and signal names and put comp map in main list
   StringList label;
   StringList name;
@@ -554,6 +566,7 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
 
 // Method called by V2C star to place important code into structure.
 void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
+  needV2C = 1;
   // Construct unique label and signal names and put comp map in main list
   StringList label;
   StringList name;
