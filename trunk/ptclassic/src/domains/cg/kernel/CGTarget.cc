@@ -100,8 +100,13 @@ typeConversionTableRows(0)
 	    destDirName, "Directory to write to"));
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));
-	addState(loopingLevel.setState("Looping Level",this, "1",
-	    "Specify whether to use loop scheduler and in what level."));
+	addState(loopingLevel.setState
+		("Looping Level(DEF,CLUST,SJS,ACYLOOP)",this,"ACYLOOP",
+		"SDF Schedulers:\n"
+		"\tDEF - The default SDF scheduler\n"
+		"\tCLUST - J. Buck's loop scheduler\n"
+		"\tSJS - Shuvra/Joe/Soonhoi's loop scheduler\n"
+		"\tACYLOOP - P. Murthy/S. Bhattacharyya's loop scheduler\n"));
 	addState(displayFlag.setState("display?", this, "YES",
 	    "Enable displaying of code."));
 	addState(compileFlag.setState("compile?", this, "YES",
@@ -209,34 +214,9 @@ void CGTarget::setup() {
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
 
-	// Full path name of the log file
-	StringList logPath = logFilePathName(destDirectory, "schedule.log");
 
-	if (!scheduler()) {
-	    switch (int(loopingLevel)) {
-	      case 0:
-		LOG_NEW; setSched(new SDFScheduler);
-		break;
-	      case 1:
-		delete [] schedFileName;
-		schedFileName = logPath.newCopy();
-		LOG_NEW; setSched(new SDFClustSched(schedFileName));
-		break;
-	      case 2:
-		delete [] schedFileName;
-		schedFileName = logPath.newCopy();
-		LOG_NEW; setSched(new LoopScheduler(schedFileName));
-		break;
-	      case 3:
-		delete [] schedFileName;
-		schedFileName = logPath.newCopy();
-		LOG_NEW; setSched(new AcyLoopScheduler(schedFileName));
-		break;
-	      default:
-		Error::abortRun(*this, "Unknown scheduler");
-		break;
-	    }
-	}
+	if (!scheduler()) chooseScheduler();
+
 	if (!galaxySetup()) return;
 	if (haltRequested()) return;
 	if (filePrefix.null() && galaxy()) filePrefix = galaxy()->name();
@@ -286,6 +266,58 @@ void CGTarget::setup() {
 		Error::abortRun(*this, "could not compile!");
 	    }
 	}
+}
+
+void CGTarget :: chooseScheduler() {
+
+    const char* sname = loopingLevel;
+
+    // Full path name of the log file
+    StringList logPath = logFilePathName(destDirectory, "schedule.log");
+
+    if (strcasecmp(sname,"ACYLOOP") == 0) {
+	// Determine if the graph is acyclic.  It not, use
+	// another loop scheduler.
+	// FIXME:
+	// NOTE: Error::message will halt the simulation
+	// till the message is dismissed.  This will be fixed
+	// later on when we use something to post messages that
+	// does not require dismissal.
+	if (galaxy()) {
+	    if (!isAcyclic(galaxy(), 0)) {
+		StringList message;
+		message << "The scheduler option that you selected, "
+		<< "ACYLOOP, "
+		<< "in the SDFTarget parameters represents a "
+		<< "loop scheduler that only works on acyclic "
+		<< "graphs.  Since this graph is not acyclic "
+		<< "the scheduler SJS will be used "
+		<< "(corresponding to old option 2).\n";
+		Error::message(message);
+		loopingLevel.setCurrentValue("SJS");
+	    }
+	}
+    }
+    if (strcasecmp(sname,"DEF")==0 || strcmp(sname,"0")==0 ||
+		strcasecmp(sname,"NO") == 0) {
+	setSched(new SDFScheduler);
+    } else if (strcasecmp(sname,"CLUST")==0 || strcmp(sname,"1")==0) {
+	delete [] schedFileName;
+	schedFileName = logPath.newCopy();
+	setSched(new SDFClustSched(schedFileName));
+    } else if (strcasecmp(sname,"SJS") == 0 || strcmp(sname,"2")==0 ||
+		strcasecmp(sname,"YES")==0 ) {
+	delete [] schedFileName;
+	schedFileName = logPath.newCopy();
+	setSched(new LoopScheduler(schedFileName));
+    } else if (strcasecmp(sname,"ACYLOOP") == 0) {
+	delete [] schedFileName;
+	schedFileName = logPath.newCopy();
+	setSched(new AcyLoopScheduler(schedFileName));
+    } else {
+	Error::abortRun(*this, "Unknown scheduler.");
+	return;
+    }
 }
 
 /*virtual*/ int CGTarget::schedulerSetup() {
