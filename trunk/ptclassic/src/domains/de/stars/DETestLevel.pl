@@ -61,7 +61,7 @@ the input exceeds the threshold.
 		completionTime = arrivalTime;
 
 		// compare the input value with the "threshold"
-		if (int(input%0) < int(threshold)) {
+		if (double(input%0) < double(threshold)) {
 		   if (int(crossingsOnly)) {
 			if (flag == TRUE) {
 				flag = FALSE;
