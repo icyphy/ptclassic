@@ -78,14 +78,14 @@ No decimation or interpolation is supported.
 	    fdbkDelayLine = 0;
 	}
 	destructor {
-	    LOG_DEL; delete taps;
-	    LOG_DEL; delete fdbkDelayLine;
+	    LOG_DEL; delete [] taps;
+	    LOG_DEL; delete [] fdbkDelayLine;
 	}
 	setup {
 	// delete and remake arrays if a different size is being used.
 	    if (int(order) != M) {
-		LOG_DEL; delete taps;
-		LOG_DEL; delete fdbkDelayLine;
+		LOG_DEL; delete [] taps;
+		LOG_DEL; delete [] fdbkDelayLine;
 		M = int(order);
 		LOG_NEW; taps = new double[M];
 		LOG_NEW; fdbkDelayLine = new double[M];
