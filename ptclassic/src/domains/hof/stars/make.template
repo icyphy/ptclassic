@@ -1,0 +1,83 @@
+# Makefile for Ptolemy HOF stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/hof/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# Turn off optimization for debugging
+OPTIMIZER  =
+
+# HOFDIR is the directory containing HOF domain support
+HOFDIR = $(ROOT)/src/domains/hof/kernel
+PIGIDIR = $(ROOT)/src/pigilib
+INCL = -I$(HOFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(TCL_INCDIR) \
+ -I$(TK_INCDIR)
+
+# Library name
+LIB=libhofstars.a
+
+# source files for all stars, using preprocessor
+# base classes/stars go in the front of the list
+PL_SRCS= \
+ HOFBaseHiOrdFn.pl \
+ HOFBusMerge.pl \
+ HOFBusSplit.pl \
+ HOFChain.pl \
+ HOFDelayedMap.pl \
+ HOFIfThenElse.pl \
+ HOFIfThenElseGr.pl \
+ HOFMap.pl \
+ HOFMapGr.pl \
+ HOFNop.pl \
+ HOFParSources.pl \
+ HOFParSourcesCx.pl \
+ HOFParSourcesInt.pl \
+ HOFParSourcesFix.pl \
+ HOFParSources_M.pl \
+ HOFParSourcesCx_M.pl \
+ HOFParSourcesInt_M.pl \
+ HOFParSourcesFix_M.pl \
+ HOFParSourcesGr.pl \
+ HOFParSourcesGrCx.pl \
+ HOFParSourcesGrInt.pl \
+ HOFParSourcesGrFix.pl \
+ HOFParSourcesGr_M.pl \
+ HOFParSourcesGrCx_M.pl \
+ HOFParSourcesGrFix_M.pl \
+ HOFParSourcesGrInt_M.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=hofstars
+DOMAIN=HOF
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
