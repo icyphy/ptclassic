@@ -410,7 +410,7 @@ void ParScheduler::writeGantt(ostream& out) {
 	InfString tmpbuf;
 	tmpbuf = "ptkGanttDisplay ";
 	tmpbuf << universe;
-	beginGantt(out, (char *)tmpbuf);
+	GanttChart::beginGantt(out, (char *)tmpbuf);
 	int total = 0;
 	for (int i = 0; i < numProcs; i++) {
 		UniProcessor* proc = parProcs->getProc(i);
@@ -422,11 +422,11 @@ void ParScheduler::writeGantt(ostream& out) {
 	tmpbuf = "ptkGantt_MakeLabel ";
 	tmpbuf << universe;
 	tmpbuf << " " << span << " " << span << " " << p << " " << p;
-	writeGanttLabel(out, (char *)tmpbuf);
+	GanttChart::writeGanttLabel(out, (char *)tmpbuf);
 	tmpbuf = "ptkGantt_Bindings ";
 	tmpbuf << universe << " " << numProcs;
-	writeGanttBindings(out, (char *)tmpbuf);
-	endGantt(out);
+	GanttChart::writeGanttBindings(out, (char *)tmpbuf);
+	GanttChart::endGantt(out);
 }
 
 /////////////////////////////
