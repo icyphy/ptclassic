@@ -19,11 +19,11 @@ defstar {
 	name {Server}
 	domain {DE}
 	desc {
-	   "This star emulates a server."
-	   "If input events arrive when it is not busy,"
- 	   "it delays them by the service time."
-	   "If they arrive when it is busy,"
- 	   "it delays them by more."
+	   "This star emulates a server.\n"
+	   "If input events arrive when it is not busy,\n"
+ 	   "it delays them by the service time (constant).\n"
+	   "If they arrive when it is busy,\n"
+ 	   "it delays them by more.\n"
 	   "It must become free, and then serve them."
 	}
 	input {
