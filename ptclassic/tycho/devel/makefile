@@ -50,6 +50,8 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	Displayer.itcl \
+	GanttView.itcl \
+	GanttVSM.itcl \
 	Graphics.itcl \
 	Options.tcl \
 	Preferences.itcl \
