@@ -17,6 +17,10 @@ Block.h, Connect.h, State.h, or Galaxy.h.
 **************************************************************************/
 #ifndef _ConstIters_h
 #define  _ConstIters_h 1
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "Block.h"
 #include "Connect.h"
 #include "State.h"

@@ -21,6 +21,9 @@ addressing) containing pointers to Particles.  It is used to store
 Particle*s corresponding to past input or output Particles.
 
 ******************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 class Particle;
 
