@@ -37,7 +37,6 @@
 # Todo:
 #   Check out with compile-sdf
 #   Build Shared itcl libraries
-#   Test out pigiRpc.cp
 #   Make a non-shared library
 #
 # To create a custom executable, you should define a file named override.mk
@@ -118,6 +117,7 @@ endif
 ifdef PTCP
 	PIGI =		$(BASENAME).ptcp
 	VERSION_DESC =	'With DE, and CP domain only, on the sun4 only'
+	DEFAULT_DOMAIN = CP
 	DE =		1
 	HOF =		1
 	CP =		1
