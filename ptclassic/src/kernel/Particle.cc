@@ -3,7 +3,7 @@ static const char file_id[] = "Particle.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,8 +26,8 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
- Date of creation: 1/17/89
+ Programmer:  E. A. Lee, J. Buck, and D. G. Messerschmitt
+ Date of creation: 1/17/90
  Revisions:
 
  Definition of some methods in Particle.h
@@ -36,8 +36,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #ifdef __GNUG__
 #pragma implementation
-#pragma implementation "ParticleStack.h"
-#pragma implementation "Plasma.h"
 #endif
 
 #include "Particle.h"
@@ -57,6 +55,12 @@ static Plasma intPlasma(iproto);
 static Plasma floatPlasma(fproto);
 static Plasma complexPlasma(cproto);
 static Plasma fixPlasma(xproto);
+
+// Create locks for the global Plasmas.
+static PlasmaGate intGate(intPlasma);
+static PlasmaGate floatGate(floatPlasma);
+static PlasmaGate complexGate(complexPlasma);
+static PlasmaGate fixGate(fixPlasma);
 
 	///////////////////////////////////////
 	// class Particle
@@ -116,7 +120,7 @@ IntParticle :: operator Fix () const {return Fix(double(data));}
 StringList IntParticle :: print () const { return StringList(data);}
 
 	// Wash the Particle
-void IntParticle :: initialize() {data=0;}
+Particle& IntParticle :: initialize() {data=0; return *this;}
 
 	// Load up with data
 void IntParticle :: operator << (int i) {data=i;}
@@ -172,8 +176,8 @@ StringList FloatParticle :: print () const { return StringList(data);}
 
  
         // Initialize the Particle
-void FloatParticle :: initialize() {data=0.0;}
- 
+Particle& FloatParticle :: initialize() {data=0.0; return *this;}
+
         // Load up with data
 void FloatParticle :: operator << (int i) {data=i;}
 void FloatParticle :: operator << (double f) {data=f;}
@@ -237,7 +241,7 @@ StringList ComplexParticle :: print () const {
 }
  
         // Initialize the Particle
-void ComplexParticle :: initialize() {data=0.0;}
+Particle& ComplexParticle :: initialize() {data=0.0; return *this;}
 
         // Load up with data
 void ComplexParticle :: operator << (int i) {data=Complex(i);}
@@ -301,60 +305,13 @@ StringList FixParticle :: print () const
 }
 
         // Wash the Particle
-void FixParticle :: initialize() {data.initialize();}
+Particle& FixParticle :: initialize() {data.initialize(); return *this;}
 
         // Load up with data
 void FixParticle :: operator << (int i) {data = double(i);}
 void FixParticle :: operator << (double f) {data = f;}
 void FixParticle :: operator << (const Complex& c) {data = double(abs(c));}
 void FixParticle :: operator << (const Fix& x) {data = x;}
-
-
-// ParticleStack methods
-// Destructor -- deletes all Particles EXCEPT the last one
-// we don't delete the last one because it's the "reference"
-// particle (the first one); it normally isn't a dynamically
-// created object.
-
-ParticleStack :: ~ParticleStack () {
-	if (!pHead) return;
-	Particle* p;
-	while (pHead->link) {
-		p = pHead;
-		pHead = pHead->link;
-		LOG_DEL; delete p;
-	}
-}
-
-// freeup -- returns all Particles to their Plasma (including
-// the last one)
-void ParticleStack :: freeup () {
-	Particle* p;
-	while (pHead) {
-		p = pHead;
-		pHead = pHead->link;
-		p->die();
-	}
-}
-
-Plasma* Plasma :: getPlasma(DataType t)
-{
-	Plasma* p = plasmaList;
-
-	while (p) {
-		DataType dt = p->type();
-		if (t == dt) return p;
-		p = p->nextPlasma;
-	}
-	if(t == ANYTYPE)
-		Error::abortRun("can't create Plasma with type ANYTYPE");
-	else {
-		StringList msg = "unknown Particle type: ";
-		msg += t;
-		Error::abortRun(msg);
-	}
-	return 0;
-}
 
 // Error catcher for attempts to retrieve a Message from a different
 // type of particle
