@@ -38,13 +38,13 @@ of the items in question.  It outputs
 directives so the C++ compiler will print error messages, if any, with
 respect to the original source file.
 It also makes no attempt to parse information in the
-.c explanation { }
+.c explanation
 directive, so arbitrary troff formatting commands can be inserted.
 .pp
 To make things clearer, let's
 start with an example, the file
 .c SDFFloatRect.pl :
-.(c
+.(d
 ident {
 /*  Anything put here will appear verbatim in the .cc and .h files
     so please note that comments must be delimited, as done here.
@@ -58,7 +58,7 @@ defstar {
 Generates a rectangular pulse of height "height" (default 1.0).
 with width "width" (default 8).
 	}
-	version {$Revision$ $Date$}
+	version {%\&W\&% %\&G\&%}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
@@ -96,7 +96,7 @@ If needed, a longer explanation would go here.
 		output%0 << t;
 	}
 }
-.)c
+.)d
 .pp
 Running the preprocessor on the above file produces the three files
 .c SDFFloatRect.h,

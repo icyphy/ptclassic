@@ -436,6 +436,9 @@ method, which is called every time the simulation is restarted.  Syntax:
 .(c
 start { \fIbody\fP }
 .)c
+It is common for this method to set parameters of input and output
+portholes, and to initialize states.
+The code syntax for doing this is explained below.
 .UH go
 .pp
 .IE "go { }"
@@ -444,6 +447,8 @@ Syntax:
 .(c
 go { \fIbody\fP }
 .)c
+The go methods will typically read input particles and write outputs.
+The code syntax for doing this is explained below.
 .UH wrapup
 .pp
 .IE "wrapup { }"
@@ -453,6 +458,8 @@ method, which is called at the completion of a simulation.  Syntax:
 .(c
 wrapup { \fIbody\fP }
 .)c
+The wrapup methods might display or store final state values.
+The code syntax for doing this is explained below.
 .UH "public, protected, private"
 .pp
 .IE "public { }"

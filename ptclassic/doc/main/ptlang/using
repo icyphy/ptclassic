@@ -24,10 +24,12 @@ With this policy, the makefiles can contain the default rules
 See the makefile in ~ptolemy/src/example or ~ptolemy/src/domains/sdf/stars
 for how this can be made to work ``in context''.
 .pp
-The documentation (
-.c .t)
-file can be printed out using the command ~ptolemy/doc/bin/printstar.
-This command assumes your PRINTER environment variable is set
+The documentation
+file
+can be printed out using the command ~ptolemy/doc/bin/printpage.
+By convention, the documentation file has the name
+XXXyyy.t, where XXX is the domain name and yyy is the star name.
+The printpage command assumes your PRINTER environment variable is set
 to the printer of choice.  The following line in your .cshrc file,
 for example, will ensure this:
 .(c
