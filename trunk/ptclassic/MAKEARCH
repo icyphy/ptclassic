@@ -130,7 +130,7 @@ cd ..
 # cg-ddf should be removed from any released versions of this file.
 set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf hof ipus)
 set EXPEXTRAS=(cg56/targets cg96/targets silage/targets \
-		ipus/cat ipus/cat2 ipus/targets ipus/tcltk)
+		ipus/cat ipus/cat2 ipus/targets ipus/tcltk ipus/icp)
 set EXPSUBEXTRAS=(ipus/tcltk/kernel ipus/tcltk/stars ipus/icp/kernel)
 set ALLDOMAINS=(sdf ddf de thor bdf cg $EXPDOMAINS)
 
