@@ -177,6 +177,49 @@ void CGMultiTarget::setup() {
     }
 }
 
+int recursiveModifyGalaxy(Galaxy& gal) {
+    GalStarIter nextStar(gal);
+    CGStar* s;
+    while ((s = (CGStar*)nextStar++) != 0) {
+	if (s->isItWormhole()) {
+	    Target* innerTarget = s->asWormhole()->myTarget();
+	    if (!innerTarget->isA("CGTarget")) continue;
+	    CGTarget* cgTarget = (CGTarget*) innerTarget;
+ 	    if(!cgTarget->modifyGalaxy()) return FALSE;
+	    if (!recursiveModifyGalaxy(s->asWormhole()->insideGalaxy()))
+		return FALSE;
+	}
+    }
+    return TRUE;
+}
+
+class DummyGalaxy:public Galaxy {
+public:
+    DummyGalaxy(Galaxy& g):gal(g) {};
+    /*virtual*/ const char* domain() const {return gal.domain();}
+private:	
+    Galaxy& gal;
+};
+
+int CGMultiTarget::modifyGalaxy() {
+    Star& dummyStar =
+	Domain::of(*galaxy())->newWorm(*new DummyGalaxy(*galaxy()));
+    int i;
+    for (i = 0 ; i < nProcs() ; i++) {
+	if (child(i)->support(&dummyStar)) {
+	    if (cgChild(i)) {
+		cgChild(i)->setGalaxy(*galaxy());
+		galaxy()->setTarget(cgChild(i));
+		if (!cgChild(i)->modifyGalaxy()) return FALSE;
+		cgChild(i)->clearGalaxy();
+		break;
+	    }
+	}
+    }
+    delete &dummyStar;
+    return TRUE;
+}
+
 inline int hierSchedulerTest(const char* c) {
     if (strlen(c) < 2) return FALSE;
     return *(c+1) == 'I' || *(c+1) == 'i';
@@ -186,7 +229,6 @@ inline int hierSchedulerTest(const char* c) {
     int status = MultiTarget::schedulerSetup();
     return status;
 }    
-
 
 void CGMultiTarget :: prepareChildren() {
     deleteChildren();
