@@ -81,6 +81,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	sharedSymbol.setCounter(symbolCounter());
 
 	starTypes += "HOFStar";
+	starTypes += "AnyCGStar";
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
@@ -140,6 +141,8 @@ int CGTarget :: runCode() { return TRUE; }
 
 void CGTarget::setup() {
 	myCode.initialize();
+	makefile.initialize();
+	makeAllList.initialize();
 	procedures.initialize();
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
@@ -182,7 +185,8 @@ void CGTarget::setup() {
 
 	// be sure that this routine does not initialize the galaxy if it
 	// is a child target. It is already initialized, and done more!
-	if (!modifyGalaxy()) return;
+	if (!parent())
+	    if (!modifyGalaxy()) return;
 
 	if (!noSchedule) {
 		if(!schedulerSetup()) return;
