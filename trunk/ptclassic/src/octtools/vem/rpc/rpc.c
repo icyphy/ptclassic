@@ -1370,7 +1370,7 @@ RPCatof(p)
 register char *p;
 {
 	extern double ldexp();
-	register c, exp = 0, eexp = 0;
+	register int c, exp = 0, eexp = 0;
 	double fl = 0, flexp = 1.0;
 	int bexp, neg = 1, negexp = 1;
 
