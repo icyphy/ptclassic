@@ -87,12 +87,17 @@ static StringList ptclGalaxyCode(Galaxy* localGalaxy) {
 	BlockPortIter nextPort(*star);
 	PortHole* port;
 	while ((port = nextPort++) != NULL) {
-	    if (port->isItOutput())
-		ptclCode << "\tconnect" << starName
-			 << " \"output#" << portNumber[port->index()]
-			 << "\" \"" << port->far()->parent()->fullName()
-			 << "\" \"input#" << portNumber[port->far()->index()]
-			 << "\"\n";
+	    if (port->isItOutput()) {
+	        if (port->far() == NULL) {
+	           ptclCode << "\n # Warning port->far() == NULL!\n";
+                } else {
+		   ptclCode << "\tconnect" << starName
+			    << " \"output#" << portNumber[port->index()]
+			    << "\" \"" << port->far()->parent()->fullName()
+			    << "\" \"input#" << portNumber[port->far()->index()]
+			    << "\"\n";
+		}
+	    }
 	}
     }
 
