@@ -561,6 +561,8 @@ void CGCTarget :: addSpliceStars() {
 int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	CGCStar* cs = (CGCStar*) s;
+	cs->setTarget(this);
+
 	if (!flag) {
 		// run the star
 		switchCodeStream(cs, getStream("code"));
