@@ -108,10 +108,11 @@ shift right (asr) because in that case, -1 divided by 2 would still be -1.
 	clr	b	#$val(divisor),x0	a,y0
 	mpy	x0,y0,a			; integer multiplication
 	asr	a
-	cmp	x1,a	#$$FF,y1
-	tlt	y1,b
+	cmp	x1,a	#$$FFFF,y1
+	tgt	y1,b
+	move	y0,a
 	add	b,a
-	move	a0,$ref(output)
+	move	a1,$ref(output)
 	}
 	codeblock(writeOutput) {
 	move	a,$ref(output)
@@ -136,7 +137,7 @@ shift right (asr) because in that case, -1 divided by 2 would still be -1.
 		}
 	}
 	exectime {
-		if ( CG56DIVBYINT_POSTTEST() ) return 10;
+		if ( CG56DIVBYINT_POSTTEST() ) return 11;
 		return 4;
 	}
 }
