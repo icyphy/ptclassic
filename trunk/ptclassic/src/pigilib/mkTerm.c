@@ -134,9 +134,9 @@ MkTermInit(CurrentFacetPtr)
 octObject *CurrentFacetPtr;
 {
     facetPtr = CurrentFacetPtr;
-    CK_OCT(GetOrCreateLayer(facetPtr, &blueOutlineLayer, "blueOutline"));
-    CK_OCT(GetOrCreateLayer(facetPtr, &blueSolidLayer, "blueSolid"));
-    CK_OCT(GetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &blueOutlineLayer, "blueOutline"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &blueSolidLayer, "blueSolid"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
     return(TRUE);
 }
 
@@ -210,7 +210,7 @@ enum Position_e position;
 	&boxTranslates[(int) position]));
     if (multiple) {
 /* this is obsolete now (eeg 8/27/89)
-	(void) CreatePropStr(&term, &dummy, "multiple", "");
+	(void) ohCreatePropStr(&term, &dummy, "multiple", "");
 */
 	if (input) {
 	    /* multiple input: add arrow to the right */
@@ -227,13 +227,13 @@ enum Position_e position;
 	}
     } else {
 /* this is obsolete now (eeg 8/27/89)
-	(void) CreatePropStr(&term, &dummy, "single", "");
+	(void) ohCreatePropStr(&term, &dummy, "single", "");
 */
     }
     if (input) {
-	(void) CreatePropStr(&term, &dummy, "input", "");
+	(void) ohCreatePropStr(&term, &dummy, "input", "");
     } else {
-	(void) CreatePropStr(&term, &dummy, "output", "");
+	(void) ohCreatePropStr(&term, &dummy, "output", "");
     }
     return(TRUE);
 }
