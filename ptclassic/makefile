@@ -55,7 +55,7 @@ sources depend TAGS: obj.$(PTARCH)
 	cd doc/html; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
-	csh -f MAKEARCH
+	sh MAKEARCH
 
 # This rule builds and installs everything but the gnu tools.
 # tcltk, octtools, and gthreads source are distributed
