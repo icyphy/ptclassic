@@ -62,7 +62,7 @@ signalIn samples should be processed for each set of coefficients.
 			LOG_DEL; delete b;
 			LOG_NEW; b = new double[lastM];
 			LOG_DEL; delete f;
-			LOG_NEW; f = new double[lastM];
+			LOG_NEW; f = new double[lastM+1];
 			LOG_DEL; delete reflectionCoefs;
 			LOG_NEW; reflectionCoefs = new double[lastM];
 		}
