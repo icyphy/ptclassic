@@ -28,7 +28,12 @@
 # 
 # Makefile for vhdl/tcltk
 
-include ../../../../mk/subdomain.mk
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/vhdl/tcltk
+
+include $(ROOT)/mk/subdomain.mk
 
 DIRS = targets
 
