@@ -124,13 +124,6 @@ void CG56MultiSimTarget :: prepareCodeGen() {
 	}
 }
 
-			///////////////////
-			// wrapup
-			///////////////////
-
-void CG56MultiSimTarget :: wrapup() {
-	if (galaxy()->parent() == 0)		 wormLoadCode();
-}
 // -----------------------------------------------------------------------------
 
 void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
@@ -150,21 +143,6 @@ void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
 	cmd << "load " << (const char*) filePrefix << i << "\n";
 	cmd << "go \n";
 	LOG_DEL; delete cmdFileName;
-}
-
-			///////////////////
-			// wormLoadCode
-			///////////////////
-
-int CG56MultiSimTarget::wormLoadCode() {
-
-    if (SimControl::haltRequested()) return FALSE;
-
-    if (compileCode()) runCode();
-
-    // done
-    if(SimControl::haltRequested()) return FALSE;
-    return TRUE;
 }
 
 // -----------------------------------------------------------------------------
