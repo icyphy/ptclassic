@@ -53,17 +53,24 @@ class ::tycho::EditJava {
     itk_option define -filetemplate fileTemplate FileTemplate \
 	    $TYCHO/editors/textedit/templates/JavaTemplate.java {}
 
+    # Pathname to the java distribution
+    itk_option define -javahome javaHome JavaHome \
+	    /opt/SUNWjws/JDK
+
     constructor {args} {}
     destructor {}
 
     ##########################################################################
     ####                         public methods                           ####
 
+    # Insert a body template
+    method bodyTemplate {}
+
     # Execute the Java code in the selection (or the entire text widget).
     method evaluate {}
 
     # Generate and display a doc file from the current buffer
-    method gendoc {}
+    method gendocBuffer {}
  
     # Guess about the class name from the filename
     public method getClassName {}
@@ -76,6 +83,12 @@ class ::tycho::EditJava {
 
     # Tag identifiers in the file that are defined elsewhere.
     method tagLinks {}
+
+    ##########################################################################
+    ####                         public procedures                        ####
+
+    # Fix the links in the Java documentation html files in directory dirname. 
+    proc fixJavaHTMLFiles {javaHTMLDir dirname}
 
     ####################################################################
     ####                    protected methods                       ####
@@ -99,10 +112,16 @@ class ::tycho::EditJava {
 body ::tycho::EditJava::constructor {args} {
     global tcl_platform
     eval itk_initialize $args
-    
+
+    preference subscribeoptions $this \
+	    -javahome javaHome
+
     # Set the fill prefix to be the comment character for Java.
     set fillPrefix "//"
     menubar addMenu Special -underline 0
+
+    menubar add "Body Template" Special -underline 0 \
+	    -command "$this bodyTemplate"
 
     menubar add "File Template" Special -underline 0 \
 	    -command "$this fileTemplate $itk_option(-filetemplate) \
@@ -117,11 +136,33 @@ body ::tycho::EditJava::constructor {args} {
     }
 
     menubar add "Generate doc" Special -underline 0 \
-            -command "$this gendoc"
+            -command "$this gendocBuffer"
 
     if {$tcl_platform(platform) == "macintosh"} {
 	menubar disable "Generate doc"
     }
+}
+
+#####################################################################
+#### bodyTemplate
+# Insert a body template
+#
+body ::tycho::EditJava::bodyTemplate {} {
+
+    set template "
+    /** A Public Method
+	@see full-classname#method-name
+	@param parameter-name description
+	@param parameter-name description
+	@return description
+	@exception full-classname description
+     */	
+    public AMethod() {
+    }
+"
+
+    insertData $template
+    markModified
 }
 
 #####################################################################
@@ -152,22 +193,28 @@ body ::tycho::EditJava::evaluate {} {
 }
 
 ###################################################################
-#### gendoc
-# Generate and display a doc file.
+#### gendocBuffer
+# Generate and display a doc file from the current file.
 # If the doc file already exists and is newer than the source file,
 # then it is simply displayed, not regenerated.
-# NOTE: This is a Unix-specific implementation, since "exec" is used
-# to invoke "ptlang".
 #
-body ::tycho::EditJava::gendoc {} {
+#
+body ::tycho::EditJava::gendocBuffer {} {
     global tcl_platform
     if {$tcl_platform(platform) == "macintosh"} {
 	error "Sorry, the gendoc method is not supported on the Macintosh,\nit\
 		calls the tcl exec command."
     }
-    return [::tycho::EditProgram::gendoc {set docfile $root.htm} \
-            { exec javadoc $tail}] 
+    set docDir [file join doc codeDoc]
+    if {![file exists $docDir]} {
+        file mkdir $docDir
+    }
+    ::tycho::EditProgram::gendocBufferInternal \
+            {set docfile $root.htm} \
+            {exec javadoc -d [file join doc codeDoc] $tail}
 
+    fixJavaHTMLFiles [preference get javaHTMLDir] $docDir
+    return [::tycho::File::openContext [file join doc codeDoc $className.html]]
 }
 
 #####################################################################
@@ -334,6 +381,38 @@ body ::tycho::EditJava::tagLinks {} {
 	    }
 	    # The following appears to be needed to prevent infinite loops.
 	    if [$text compare $next >= end] {break}
+	}
+    }
+}
+
+####################################################################
+####################################################################
+####                    public procedures                       ####
+
+#####################################################################
+#### fixJavaHTMLFiles
+# Fix the links in the Java documentation html files in directory dirname. 
+# Too bad javadoc is so lame that this hack is necessary.
+#
+body ::tycho::EditJava::fixJavaHTMLFiles {javaHTMLDir dirname} {
+    # We fix the java and images links
+
+    set fileList [glob [file join $dirname *]]
+    foreach file $fileList {
+	if [file writable $file] {
+	    set fd [open $file r]
+	    set fileContents [read $fd]
+	    close $fd
+
+	    regsub -all {<a href="java} $fileContents \
+		    "<a href=\"$javaHTMLDir/java" \
+		    $newFileContents
+	    regsub -all {<img src="images/} $newFileContents \
+		    "<img src="$javaHTMLDir/images/" \
+		    $fileContents
+	    set fd [open $file w]
+	    puts $fd $fileContents 
+	    close $fd
 	}
     }
 }
