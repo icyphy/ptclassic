@@ -1,5 +1,5 @@
 defstar {
-	name { PolarRect }
+	name { PolarToRect }
 	domain { SDF }
 	desc { Convert magnitude and phase to rectangular form. }
 	version {$Id$}

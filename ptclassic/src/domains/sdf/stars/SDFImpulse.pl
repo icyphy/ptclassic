@@ -1,5 +1,5 @@
 defstar {
-	name { FloatImpulse }
+	name { Impulse }
 	domain { SDF }
 	desc {
 Generates a stream of impulses of size "level" (default 1.0).

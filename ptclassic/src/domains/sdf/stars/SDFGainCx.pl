@@ -1,5 +1,5 @@
 defstar {
-	name { CxGain }
+	name { GainCx }
 	domain { SDF }
 	desc {
 Amplifier: output is input times "gain" (default 1.0).  Input, output,

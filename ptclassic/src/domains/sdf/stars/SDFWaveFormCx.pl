@@ -1,5 +1,5 @@
 defstar {
-	name { CxWaveForm }
+	name { WaveFormCx }
 	domain { SDF }
 	desc {
 Output a complex waveform as specified by the array state "value"

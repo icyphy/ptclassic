@@ -1,5 +1,5 @@
 defstar {
-	name { ComplexAverage }
+	name { AverageCx }
 	domain { SDF }
 	desc {
 Averages some number of input samples or blocks of input samples.

@@ -1,5 +1,5 @@
 defstar {
-	name { FloatRamp }
+	name { Ramp }
 	domain { SDF }
 	desc {
 Generates a ramp signal, starting at "value" (default 0)

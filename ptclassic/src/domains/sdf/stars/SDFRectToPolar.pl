@@ -1,5 +1,5 @@
 defstar {
-	name { RectPolar }
+	name { RectToPolar }
 	domain { SDF }
 	desc {
 Convert two numbers to magnitude and phase.

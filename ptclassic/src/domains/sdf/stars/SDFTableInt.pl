@@ -1,5 +1,5 @@
 defstar {
-	name { IntTable }
+	name { TableInt }
 	domain { SDF }
 	desc {
 Implements a integer-valued lookup table.  The "values" state contains the

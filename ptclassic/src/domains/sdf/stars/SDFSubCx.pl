@@ -1,5 +1,5 @@
 defstar {
-	name { CxDiff }
+	name { SubCx }
 	domain { SDF }
 	desc { Output the "pos" input minus the "neg" input, a complex value. }
 	version {$Id$}
