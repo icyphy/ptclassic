@@ -23,7 +23,7 @@ PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
-	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS) -I$(CGDDFKERNEL)
+	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
 
 PL_SRCS = \
 	CGCUnixSend.pl \
@@ -31,7 +31,7 @@ PL_SRCS = \
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS=CGCMultiTarget.cc CGCDDFTarget.cc CGCBDFTarget.cc $(PLSRC) 
+SRCS=CGCMultiTarget.cc CGCBDFTarget.cc $(PLSRC) 
 EXTRA_SRCS = $(PL_SRCS)
 
 HDRS=$(SRCS:.cc=.h)
