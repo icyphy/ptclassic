@@ -1,0 +1,12 @@
+.\" $Id$
+.(b C
+.sp 0.5i
+.sz 100
+\f6The
+.sp 0.5i
+Almagest
+.sz 40
+.sp 1i
+Manual for \*(PT
+version \*(PV
+.)b
