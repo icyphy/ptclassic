@@ -47,7 +47,6 @@ TCL_SRCS = \
   
 ITCL_SRCS = \
 	CircularList.itcl \
-	Console.itcl \
 	ConsoleText.itcl \
 	DialogWindow.itcl \
 	DirectedAcyclicGraph.itcl \
@@ -77,6 +76,7 @@ ITCL_SRCS = \
 	RevControlRCS.itcl \
 	Stack.itcl \
 	Subpanel.itcl \
+	TclConsole.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
 	TychoWidget.itcl \
