@@ -27,7 +27,7 @@ static char SccsId[]="$Id$";
 /*LINTLIBRARY*/
 #include "copyright.h"
 #include "port.h"
-  
+#include "appNet.h"  
 /*
  * RPC user routines for the application
  *
@@ -165,6 +165,7 @@ int status;
 
 void
 RPCExit(status)
+int status;
 {
     (void) RPCDoExit(status);
     return;
