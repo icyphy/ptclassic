@@ -61,7 +61,6 @@ ITCL_SRCS = \
 	LabeledLine.itcl \
 	LabeledOval.itcl \
 	LabeledRect.itcl \
-	Layout.itcl \
 	Line.itcl \
 	TextItemEdit.itcl \
 	Oval.itcl \
@@ -73,7 +72,6 @@ ITCL_SRCS = \
 	Shades.itcl \
 	Shape.itcl \
 	Slate.itcl \
-	SlateView.itcl \
 	Slider.itcl \
 	SmartLine.itcl \
 	Solid.itcl \
