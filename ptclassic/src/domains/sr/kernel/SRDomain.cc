@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Domain.h"
 #include "Target.h"
 #include "Galaxy.h"
-#include "Geodesic.h"
+#include "SRGeodesic.h"
 #include "KnownTarget.h"
 #include "StringState.h"
 #include "SRScheduler.h"
@@ -58,22 +58,6 @@ extern const char SRdomainName[] = "SR";
  system, and schedulers use an iterative relaxation scheme to approach
  this least fixed point.
 
- <P> Here are some known problems:
- <OL>
- <LI> By default, Ptolemy flattens hierarchy by always resolving
-      "name aliases" (i.e., when a port on the outside of a galaxy
-      is called something different on the inside).  Unfortunately,
-      InterpGalaxy's nodeConnect uses Block::portWithName
-      to resolve connection names, which flattens these aliases and
-      nothing along the way is virtual.  The net effect of this is that
-      node-based connections through InterpGalaxy don't do the right
-      thing in the SR domain.
-
-      <P> Fortunately, the point-to-point connection scheme (i.e.,
-      through <TT>connect</TT> uses "newConnection" to resolve this,
-      which I've overridden to not resolve aliases.
-  </OL>
-
 **********************************************************************/
 class SRDomain : public Domain {
 public:
@@ -92,11 +76,9 @@ public:
   EventHorizon& newTo() { LOG_NEW; return *new SRtoUniversal;}
 
   // Allocate a new geodesic
-  // @Description This function is here to override auto-forking,
-  // which is unnecessary in the SR domain
-  // Geodesic & newGeo(int = FALSE) {
-  //  LOG_NEW; return *(Geodesic *) new SRGeodesic;
-  // }
+  Geodesic & newGeo(int = FALSE) {
+    LOG_NEW; return *(Geodesic *) new SRGeodesic;
+  }
 
 };
 
