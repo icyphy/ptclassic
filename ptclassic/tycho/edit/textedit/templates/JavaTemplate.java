@@ -27,8 +27,8 @@
 
 package MyPackageName;
 
-//#######################################################################
-//#### ClassName
+//////////////////////////////////////////////////////////////////////////
+//// ClassName                                                        ////
 /** 
  @author
  @version $Id$
@@ -38,7 +38,7 @@ package MyPackageName;
  */
 public class ClassName {
     /** Constructor
-     @see full-classname#method-name
+     @see full-classname/method-name
      @param parameter-name description
      @param parameter-name description
      @return description
@@ -47,11 +47,11 @@ public class ClassName {
     public ClassName() {
     }
 
-    //########################################################################
-    //##                         public methods                           ####
+    //////////////////////////////////////////////////////////////////////////
+    ////                         public methods                           ////
 
     /** Description
-      @see full-classname#method-name
+      @see full-classname/method-name
       @param parameter-name description
       @param parameter-name description
       @return description
@@ -62,11 +62,11 @@ public class ClassName {
     }
 
 
-    //########################################################################
-    //##                         protected methods                        ####
+    //////////////////////////////////////////////////////////////////////////
+    ////                         protected methods                        ////
 
     /** Description
-     @see full-classname#method-name
+     @see full-classname/method-name
      @param parameter-name description
      @param parameter-name description
      @return description
@@ -76,18 +76,18 @@ public class ClassName {
         return 1;
     }
 
-    //########################################################################
-    //##                         protected variables                      ####
+    //////////////////////////////////////////////////////////////////////////
+    ////                         protected variables                      ////
 
     /** Description */
     protected int aProtectedVariable;
 
-    //########################################################################
-    //##                         private methods                          ####
+    //////////////////////////////////////////////////////////////////////////
+    ////                         private methods                          ////
 
     /* Private methods should not have doc comments, they should
 	have regular comments.
-     @see full-classname#method-name
+     @see full-classname/method-name
      @param parameter-name description
      @param parameter-name description
      @return description
@@ -97,8 +97,8 @@ public class ClassName {
         return 1;
     }
 
-    //########################################################################
-    //##                         private variables                        ####
+    //////////////////////////////////////////////////////////////////////////
+    ////                         private variables                        ////
 
     /* Private variables should not have doc comments, they should
        have regular comments.
