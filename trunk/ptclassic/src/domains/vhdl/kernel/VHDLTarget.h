@@ -56,12 +56,22 @@ public:
 	// Main routine.
 	virtual int runIt(VHDLStar*);
 
+	// Method called by C2V star to place important code into structure.
+	virtual void registerC2V(int, int) {}
+
+	// Method called by V2C star to place important code into structure.
+	virtual void registerV2C(int, int) {}
+
 	// Redefined from CGTarget to avoid cout messages.
 	/*virtual*/ sendWormData(PortHole&);
 	/*virtual*/ receiveWormData(PortHole&);
 
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
+
+	// Change all double underscores to single ones to ensure
+	// proper identifiers.
+	void singleUnderscore();
 
 	// Compile, run the code.
 	/*virtual*/ int compileCode();
