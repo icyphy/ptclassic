@@ -4,7 +4,7 @@ defstar {
 	version		{ $Id$ }
 	author		{ E. A. Lee, Paul Haskell }
 	copyright	{ 1992 The Regents of the University of California }
-	location	{ ~haskell/Ptolemy }
+	location	{ SDF dsp library }
 	derivedFrom { LMS }
 	desc {
 An LMS-based adaptive filter in which the step size is input (to the
