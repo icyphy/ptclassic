@@ -85,6 +85,9 @@ protected:
 	// Temproary variable reference.
 	StringList expandTemp(const char*, const char*);
 
+	// Constant variable reference.
+	StringList expandDefine(const char*, const char*, const char*);
+
 	// Update the offset read and write pointers to the porthole queues.
 	void updateOffsets();
 

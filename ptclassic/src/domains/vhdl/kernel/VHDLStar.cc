@@ -78,6 +78,7 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	StringListIter arg(argList);
 	const char* arg1 = arg++;
 	const char* arg2 = arg++;
+	const char* arg3 = arg++;
 
 	// ref2 provided for backward compatibility
 	if (matchMacro(func, argList, "ref2", 2))
@@ -104,6 +105,8 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	  s = expandAssign(arg1);
 	else if (matchMacro(func, argList, "temp", 2))
 	  s = expandTemp(arg1, arg2);
+	else if (matchMacro(func, argList, "define", 3))
+	  s = expandDefine(arg1, arg2, arg3);
 	else macroError(func, argList);
 
 	return s;
@@ -388,6 +391,35 @@ StringList VHDLStar :: expandTemp(const char* name, const char* type) {
   }
 
   return temp;
+}
+
+// Constant variable reference.
+StringList VHDLStar :: expandDefine(const char* name, const char* type,
+				    const char* init) {
+  StringList define;
+  State* state;
+  VHDLPortHole* port;
+  StringList portName = expandPortName(name);
+
+  define.initialize();
+  
+  // Check if it's a State reference.
+  if ((state = stateWithName(name)) != 0) {
+    codeblockError(name, " is already defined as a state");
+  }
+
+  // Check if it's a PortHole reference.
+  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+    codeblockError(name, " is already defined as a port");
+  }
+
+  // Register it as temporary storage.
+  else {
+    define = starSymbol.lookup(name);
+    targ()->registerDefine(define, type, init);
+  }
+
+  return define;
 }
 
 // Perform initialization.

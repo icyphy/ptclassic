@@ -102,6 +102,9 @@ public:
 	// Register the temporary storage reference.
 	virtual void registerTemp(const char*, const char*);
 
+	// Register the constant storage reference.
+	virtual void registerDefine(const char*, const char*, const char*);
+
 	// Register the State reference.
 	virtual void registerState(State*, const char*, int=-1, int=-1);
 

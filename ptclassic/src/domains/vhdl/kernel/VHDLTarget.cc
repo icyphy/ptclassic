@@ -647,6 +647,21 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   firingVariableList.put(*newvar);
 }
 
+// Register the constant storage reference.
+void VHDLTarget :: registerDefine(const char* define, const char* type,
+				  const char* init) {
+  StringList ref = sanitize(define);
+
+  if (firingVariableList.inList(ref)) return;
+  
+  // Allocate memory for a new VHDLVariable and put it in the list.
+  VHDLVariable* newvar = new VHDLVariable;
+  newvar->name = ref;
+  newvar->type = sanitizeType(type);
+  newvar->initVal = init;
+  firingVariableList.put(*newvar);
+}
+
 // Return the assignment operator for States.
 const char* VHDLTarget :: stateAssign() {
   const char* assign = ":=";
