@@ -256,6 +256,7 @@ proc tychoMergeIndices {title outputfilename args} {
     # Open up each file and stick the contents into a list
     # Update the forest file too.
     foreach file $args {
+	set isfilefst [file readable $file.fst ]
 	set fd [open $file r]
 	set contents [read $fd]
 	close $fd
@@ -265,9 +266,10 @@ proc tychoMergeIndices {title outputfilename args} {
 		    Should contain the form: name { items }"
 	}
 	set subtitle [lindex $contents 0]
-        puts $forestfd \
+	if {!$isfilefst} {
+	    puts $forestfd \
 		"\{add $file \{label \{$subtitle\} link \{$file \{\}\}\} $outputfilename \}"
-
+	}
 	set items {}
 	set count 1
 	foreach item [lindex $contents 1] {
@@ -281,6 +283,38 @@ proc tychoMergeIndices {title outputfilename args} {
 	    set filename [lindex $item 1]
 	    set point [lindex $item 1]
 	    lappend entries [list $name "$CWD/$filename" "$CWD/$point"]
+	}
+
+	# If there is a Forest file, then merge that too
+	if {$isfilefst} {
+	    set fd [open $file.fst r]
+	    set contents [read $fd]
+	    close $fd
+
+	    foreach item $contents {
+		if {[lindex $item 0] == "add"} {
+		    set operator [lindex $item 0]
+		    set nodename [lindex $item 1]
+		    set contents [lindex $item 2]
+		    set parent [lindex $item 3]
+		    
+		    # Assume that contents is 'label xxx link xxx'
+		    set label [lindex $contents 1]
+		    set link [lindex $contents 3]
+		    set linkfile [lindex $link 0] 
+		    set linkpoint [lindex $link 1] 
+
+		    if {$parent == {} } {
+			set newparent $outputfilename
+		    } else {
+			set newparent $CWD/$parent
+		    }
+
+		    # Write the new node
+		    puts $forestfd \
+			    "\{add $CWD/$nodename \{label \{$label\} link \{$CWD/$linkfile \{$linkpoint\}\}\} $newparent \}"
+		}
+	    }
 	}
     }
     close $forestfd
