@@ -106,6 +106,7 @@ MDSDFDIR = $(CROOT)/src/domains/mdsdf
 PNDIR = $(CROOT)/src/domains/pn
 SDFDIR = $(CROOT)/src/domains/sdf
 SRDIR = $(CROOT)/src/domains/sr
+SRCGCDIR = $(CROOT)/src/domains/srcgc
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
 VHDLDIR = $(CROOT)/src/domains/vhdl
 FSMDIR = $(CROOT)/src/domains/fsm
@@ -136,6 +137,21 @@ ifndef TK
 	SDFTK=
 	SDFDFM=
 	VHDLTK=
+endif
+
+# Synchronous/Reactive C code generation domain
+
+ifdef SRCGC
+        # star icons
+        PALETTES += PTOLEMY/src/domains/srcgc/icons/srcgc.pal
+        # domain kernel and stars
+        STARS += $(LIBDIR)/srcgcstars.o
+        CUSTOM_DIRS += $(SRCGCDIR)/stars $(SRCGCDIR)/kernel
+        LIBS += -lsrcgcstars -lsrcgc
+        LIBFILES += $(LIBDIR)/libsrcgcstars.$(LIBSUFFIX) \
+                $(LIBDIR)/libsrcgc.$(LIBSUFFIX)
+	# SRCGC needs SR
+	SR = 1
 endif
 
 # Synchronous/Reactive domain
