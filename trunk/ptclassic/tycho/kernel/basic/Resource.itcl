@@ -77,9 +77,8 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 #####################################################################
 #### openResource
 # Open a new resource. Returns the new resource object if successful,
-# or null if it failed. Note that some errors in opening the resource
-# may cause a stack trace, but others (like time-outs) will just
-# cause a null string to be returned.
+# or null if it failed. (Some errors in opening the resource
+# may cause a stack trace.)
 #
 proc ::tycho::openResource {path {mode "r"}} {
     if { [regexp {^http://} $path] } {
@@ -98,13 +97,18 @@ proc ::tycho::openResource {path {mode "r"}} {
 #### ::tycho::resource
 #
 # Access a resource by URL-like name.
+#
 ensemble ::tycho::resource {
     # Change access permissions of a resource
     option chmod {path mode} {
 	::tycho::resourceClass $path chmod $mode
     }
-    # Get the directory name -- needed because Tcl's file{}
-    # proc trashes the second slash after http:/
+    # Get a directory listing in ls -F style format
+    option dirlist {path} {
+	::tycho::resourceClass $path dirlist
+    }
+    # Get the directory name -- needed because Tcl's <code>file 
+    # dirname</code> trashes the second slash after http:/
     option dirname {path} {
 	if [regexp {^([a-z]+://)(.*)$} $path dummy protocol filename] {
 	    return $protocol[::file dirname $filename]
@@ -119,10 +123,6 @@ ensemble ::tycho::resource {
     # Test if a resource exists.
     option exists {path} {
 	::tycho::resourceClass $path exists
-    }
-    # Get files relative to this path
-    option glob {path} {
-	::tycho::resourceClass $path glob
     }
     # Test if a resource path is a directory
     option isdirectory {path} {
@@ -147,8 +147,8 @@ ensemble ::tycho::resource {
 	return $results(mtime)
     }
     # Get a new resource object
-    option new {path} {
-	::tycho::resourceClass $path new
+    option new {path args} {
+	eval ::tycho::resourceClass [list $path] new $args
     }
     # Read from a resource.
     option read {path} {
@@ -163,7 +163,7 @@ ensemble ::tycho::resource {
     option readable {path} {
 	::tycho::resourceClass $path query readable
     }
-    # Test if a resource path is remote
+    # Test if a resource is remote
     option remote {path} {
 	::tycho::resourceClass $path query remote
     }
@@ -171,7 +171,7 @@ ensemble ::tycho::resource {
     option source {path} {
 	set resource [::tycho::resourceClass $path new]
 	$resource open $path "r"
-	set result [$resource source $path]
+	set result [$resource source]
 	$resource close
 	delete object $resource
 	return $result
@@ -230,7 +230,7 @@ class ::tycho::Resource {
     method flush {}
 
     # Read a string from a streamable resource 
-    method gets {}
+    method gets {{varName {}}}
 
     # Open the resource
     method open {path {mode "r"}}
@@ -243,6 +243,9 @@ class ::tycho::Resource {
 
     # Return a string containing the data in a streamable resource 
     method read {}
+
+    # Source the resource as Tcl
+    method source {}
 
     # Return 1 if this resource is streamable
     method streamable {}
@@ -259,26 +262,23 @@ class ::tycho::Resource {
     # Delete a resource
     proc delete {path}
 
+    # Get a directory listing
+    proc dirlist {pattern}
+
     # Test if a given resource exists
     proc exists {path}
-
-    # Return files at a given path
-    proc glob {pattern}
 
     # Create a new directory
     proc mkdir {path}
 
     # Create a new resource object
-    proc new {path}
+    proc new {path args}
 
     # Query properties of a file
     proc query {path option}
 
     # Test if a given resource is remote
     proc remote {path}
-
-    # Source the resource as Tcl
-    proc source {path}
 
     # Get the status of a resource
     proc stat {path varName}
@@ -342,7 +342,7 @@ body ::tycho::Resource::flush {} {
 
 #####################################################################
 #### gets
-body ::tycho::Resource::gets {} {
+body ::tycho::Resource::gets {{varName {}}} {
     ::tycho::abstractMethod gets
 }
 
@@ -354,12 +354,14 @@ body ::tycho::Resource::open {path {mode "r"}} {
 
 #####################################################################
 #### path
+# Return the path most-recently opened by this object.
 body ::tycho::Resource::path {} {
     return $currentFile
 }
 
 #####################################################################
 #### puts
+# FIXME: Support -nonewline option.
 body ::tycho::Resource::puts {string} {
     ::tycho::abstractMethod puts
 }
@@ -368,6 +370,18 @@ body ::tycho::Resource::puts {string} {
 #### read
 body ::tycho::Resource::read {} {
     ::tycho::abstractMethod read
+}
+
+#####################################################################
+#### source
+# Source the resource as Tcl. It must be streamable and already
+# open. Subclasses only need to override this method if they
+# have a better way of doing it.
+body ::tycho::Resource::source {} {
+    if !$fileIsOpen {
+    	error "File [path] is not open"
+    }
+    uplevel [read]
 }
 
 #####################################################################
@@ -400,15 +414,15 @@ body ::tycho::Resource::delete {path} {
 }
 
 #####################################################################
-#### exists
-body ::tycho::Resource::exists {path} {
-    ::tycho::abstractProc exists
+#### dirlist
+body ::tycho::Resource::dirlist {path} {
+    ::tycho::abstractProc dirlist
 }
 
 #####################################################################
-#### glob
-body ::tycho::Resource::glob {pattern} {
-    ::tycho::abstractProc glob
+#### exists
+body ::tycho::Resource::exists {path} {
+    ::tycho::abstractProc exists
 }
 
 #####################################################################
@@ -419,7 +433,7 @@ body ::tycho::Resource::mkdir {path} {
 
 #####################################################################
 #### new
-body ::tycho::Resource::new {path} {
+body ::tycho::Resource::new {path args} {
     ::tycho::abstractProc new
 }
 
@@ -427,12 +441,6 @@ body ::tycho::Resource::new {path} {
 #### query
 body ::tycho::Resource::query {path option} {
     ::tycho::abstractProc query
-}
-
-#####################################################################
-#### source
-body ::tycho::Resource::source {path} {
-    ::tycho::abstractProc source
 }
 
 #####################################################################
