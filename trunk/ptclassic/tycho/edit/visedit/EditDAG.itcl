@@ -275,6 +275,9 @@ class ::tycho::EditDAG {
     # Draw a line from the specified node to one or all of its parents.
     protected method drawParentLines {node {parent {}}}
 
+    # Show information about the current node, if any
+    protected method showCurrentNodeInfo {state {invert 0}}
+
     # Return the name of the data structure class being edited.
     protected method structClass {} {return ::tycho::DirectedAcyclicGraph}
 
@@ -378,6 +381,20 @@ body ::tycho::EditDAG::constructor {args} {
     bind $slate <Key-A> {%Q addArc; break}
     bind $slate <Key-R> {%Q addRoot; break}
     bind $slate <Key-C> {%Q addChild; break}
+
+    # Bindings for enter and leave
+    $slate bind node <Enter> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s]"
+    $slate bind node <Leave> "$this putStatus {}"
+
+    bind $slate <KeyPress-Shift_L> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 1]"
+    bind $slate <KeyRelease-Shift_L> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 1]"
+    bind $slate <KeyPress-Shift_R> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 1]"
+    bind $slate <KeyRelease-Shift_R> "@scope ::tycho::EditDAG \
+	    [list $this showCurrentNodeInfo %s 1]"
 
     # The following is done once in the constructor because it's fairly
     # expensive.
@@ -915,15 +932,9 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     set nametable($id) $node
     if {$cnt(link) != {}} {
         $slate bind $id <Double-Button-1> "$this hyperJump $cnt(link)"
-	$slate bind $id <Enter> "$this putStatus [lindex $cnt(link) 0]"
-	$slate bind $id <Leave> "$this putStatus {}"
-	$slate bind $id <Shift-Enter> {}
-	$slate bind $id <Shift-Leave> "$this putStatus {}"
     }
     if {$cnt(altlink) != {}} {
         $slate bind $id <Shift-Double-Button-1> "$this hyperJump $cnt(altlink)"
-	$slate bind $id <Shift-Enter> "$this putStatus [lindex $cnt(altlink) 0]"
-	$slate bind $id <Shift-Leave> "$this putStatus {}"
     }
     if {$cnt(html) != {}} {
         $slate bind $id <Double-Button-1> \
@@ -970,6 +981,7 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
     } {
         set parents $parent
     }
+    set linecolor [option get $itk_component(hull) lineColor EditDAG]
     foreach par $parents {
         set bbox [$mygraph attribute bbox $par]
         set x1 [lindex $bbox 0]
@@ -986,12 +998,37 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
             set parentx $x2
             set parenty [expr ($y1+$y2)/2]
         }
-
-        $slate create line \
+	# Draw directly on the canvas for "efficiency"
+        $canvas create line \
                 $parentx $parenty \
                 $childx $childy \
-                -tags line -fill \
-                [option get $itk_component(hull) lineColor EditDAG]
+                -tags line -fill $linecolor
+    }
+}
+
+#######################################################################
+#### showCurrentNodeInfo
+# Show information about the current node. The argument must be the
+# state field from a Tk event. If the second argument is supplied
+# and is true, then the shift value of the state field is taken to
+# from before an event that swapped it.
+#
+body ::tycho::EditDAG::showCurrentNodeInfo {state {invert 0}} {
+    putStatus ""
+    set item [$slate find withtag current]
+    if { $item != "" } {
+	if { [lmember [$slate gettags $item] node] } {
+	    set shift [expr ($state & 1) ^ $invert]
+	    set node $nametable($item)
+	    set contents [$mygraph contents $node]
+
+	    foreach {attr value} $contents {
+		if { $attr == "link" && ! $shift \
+			|| $attr == "altlink" && $shift } {
+		    putStatus "[lindex $value 0]"
+		}
+	    }
+	}
     }
 }
 
