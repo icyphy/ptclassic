@@ -74,6 +74,16 @@ protected:
 	// After each firing, update the offset pointers
 	virtual void updateOffsets();
 
+	// Before firing that star, we may need to move the input data from the
+	// shared buffer to the private buffer in case of embedding: when the
+	// input needs past samples or delays.
+	void moveDataFromShared();
+
+	// After firing that star, we may need to move the input data between
+	// shared buffers (for example, Spread/Collect) since these movements
+	// are not visible from the user.
+	void moveDataBetweenShared();
+
 private:
 	// define and initialize variables for C program.
 	// Note that CGCTarget is a friend class to access these methods
@@ -87,7 +97,7 @@ private:
 	virtual StringList declareState(const State* p);
 
 	// initialize PortHoles and States
-	virtual StringList initializeBuffer(const CGCPortHole* p);
+	virtual StringList initializeBuffer(CGCPortHole* p);
 	virtual StringList initializeOffset(const CGCPortHole* p);
 	virtual StringList initializeState(const State* p);
 
