@@ -47,11 +47,10 @@ HDRS		= iv.h \
 LIBCSRCS	= iv.c \
 		ivBuf.c \
 		ivGetLine.c \
-		test.c \
 		timer.c \
 		xformatevent.c
 
-OTHERSRCS	= test.c
+OTHERSRCS	= iv_test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -65,7 +64,7 @@ DRIVER =	iv_test
 
 KRUFT =		$(DRIVER)
 
-DRVROBJ = 	test.o
+DRVROBJ = 	iv_test.o
 
 DRVRLIBS =	-lkd -lport -lerrtrap -luprintf -lX11
 
