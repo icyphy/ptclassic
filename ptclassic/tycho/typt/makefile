@@ -46,5 +46,10 @@ include $(CONFIG)
 
 EXTRA_SRCS = pkgIndex.tcl
 
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+# Do make sources so that we ensure that the subdirectories are checked out
+all: sources $(MISC_SRCS) tclIndex
+
+install: all
+
+include $(ROOT)/mk/no-compile.mk
+
