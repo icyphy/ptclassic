@@ -76,3 +76,6 @@ LINKFLAGS_D=-L$(LIBDIR) -static
 # Since we are compiling octtools with gcc, we don't want the 
 # -lmm library linked in
 OCTTOOLS_MM_LIB=
+
+# Used by cgwork.mk
+INC_LINK_FLAGS =	-fPIC

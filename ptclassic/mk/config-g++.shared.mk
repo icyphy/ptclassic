@@ -29,7 +29,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  Christopher Hylands
+# Programmers:  Christopher Hylands, Jose Pino
 
 # Using GNU make conditionals causes havoc while bootstrapping gcc,
 # so we don't use them here, however, this is what the code would look like
@@ -53,6 +53,9 @@ SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 
 # Command to build shared libraries (Not really supported yet)
 SHARED_LIBRARY_COMMAND = g++ -shared $(SHARED_COMPILERDIR_FLAG) -o
+
+# Used by incremental linking (sometimes)
+INC_LINK_FLAGS =	-shared $(SHARED_COMPILERDIR_FLAG)
 
 # List of libraries to search, obviating the need to set LD_LIBRARY_PATH
 # See the ld man page for more information.
