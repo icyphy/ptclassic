@@ -122,7 +122,9 @@ LIBCPPSRCS    = kernelCalls.cc \
 		PVem.cc \
 		TclStarIfc.cc \
 		BarGraph.cc \
-		XYPlot.cc
+		XYPlot.cc \
+		ganttChart.cc
+
 
 
 
