@@ -57,17 +57,23 @@ class ::tycho::VertexController {
     # Add a vertex and icon
     method add {libname starname}
 
-    # Delete a vertex
-    method delete {name}
-
     # Process a click event
     method click {tag x y args}
 
     # Initialize the context-sensitive popup menu
     method contextmenu {item type}
 
+    # Delete a vertex
+    method delete {name}
+
     # Process a motion event
     method drag {tag x y}
+
+    # Edit parameters of the given vertices
+    method editparameters {tag}
+
+    # Initialize the popup menu
+    method initPopup {name}
 
     # Add an icon at the specified location
     method place {iconlib iconname starname x y}
@@ -250,7 +256,8 @@ body ::tycho::VertexController::delete {vertex} {
             [$graph edges $vertex *]] {
         $edgecontroller disconnect $edge -from
     }
-    # Delete the vertex and icon
+    # Delete the vertex and icon, making sure it's clean first
+    $layout clean $vertex
     $layout publish delete $vertex
     $graph publish delete $vertex
 
@@ -285,11 +292,81 @@ body ::tycho::VertexController::drag {tag x y} {
 }
 
 ########################################################################
+#### editparameters
+#
+body ::tycho::VertexController::editparameters {tag} {
+    # FIXME: The parameter editing window must include the whole
+    # path name of the model
+    set items [$slateview find withtag $tag]
+    foreach i $items {
+	# Filter out non-vertices
+        # FIXME FIXME FIXME (access to slate)
+        set id [$slateview slateid $i]
+        set sl [$slateview component slate]
+	if ![$sl hastag $id "vertex"] {
+	    continue
+	}
+        # Get the name of the item
+        # FIXME FIXME FIXME
+        set foo [$graph attrget $i -icon]
+        set bar [split $foo #]
+        set baz [lindex $bar end]
+        set itemname [split $baz "."]
+
+        # Produce a name for the window
+        set dialogname [$slateview component hull].
+        regsub -all {\.} $baz "_" nm
+        set dialogname [$slateview component hull].$nm
+puts "item $i; window name $dialogname"
+
+        if { [::info which -command $dialogname] != "" } {
+            # Already exists
+            wm deiconify $dialogname
+            raise $dialogname
+        } else {
+            # Create the dialog box
+            uplevel #0 [list ::tycho::ParameterDialog $dialogname \
+                    -command "::tycho::post \[$dialogname get\]"]
+
+            # Get the library.
+            # FIXME: un-hardwire library name
+            set lib [$slateview library access "stars"]
+            $dialogname edit $lib $itemname $graph $i vertex
+            wm deiconify $dialogname
+        }
+    }
+}
+
+########################################################################
+#### initPopup
+#
+# Initialise popup menu for vertices.
+#
+body ::tycho::VertexController::initPopup {name} {
+    $slateview popup add $name command editparameters \
+	    -command "$this editparameters current" \
+	    -label "Parameters..."
+
+    # Add a cascade for debugging type stuff
+    $slateview popup add $name separator sepdebug
+    $slateview popup add $name cascade debug -label "Debug"
+    $slateview popup add $name command describeItem debug \
+	    -command "::tycho::post \[$slateview describe graph current\]" \
+	    -label "Describe item"
+    $slateview popup add $name command describeLayout debug \
+	    -command "::tycho::post \[$slateview describe layout current\]" \
+	    -label "Describe layout"
+}
+
+########################################################################
 #### place
 #
 # Place an icon at the specified location.
 #
 body ::tycho::VertexController::place {iconlib iconname starname x y} {
+    # Mark the history
+    $layout mark set vertex
+
     # Place the icon into the layout model, giving it the
     # same name as the vertex in the graph.
     $iconlib instantiate $iconname $layout \
@@ -304,6 +381,10 @@ body ::tycho::VertexController::place {iconlib iconname starname x y} {
     set dx [expr $x - [lindex $current 0]]
     set dy [expr $y - [lindex $current 1]]
     $layout publish move $starname $dx $dy
+
+    # Compact the history and replace the undo command
+    $layout history compact vertex current
+    $layout history undo current "delete $starname"
 }
 
 ########################################################################

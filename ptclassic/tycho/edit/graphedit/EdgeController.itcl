@@ -68,6 +68,9 @@ class ::tycho::EdgeController {
 
     # Process a motion event
     method drag {id x y}
+ 
+    # Initialize the popup menu
+    method initPopup {name}
 
     # Test if a junction will accept a connection
     method junctionaccepts {name id tag}
@@ -232,6 +235,9 @@ body ::tycho::EdgeController::click {id x y} {
             $slateview select clear
         }
     }
+    # Mark the histories so that it can be compacted later
+    $graph mark set edge
+    $layout mark set edge
 }
 
 ########################################################################
@@ -244,7 +250,8 @@ body ::tycho::EdgeController::delete {edge} {
     set id [slateid $edge]
     $slate delete grapple.$id
 
-    # Delete the edge
+    # Delete the edge, making sure it's clean first
+    $layout clean $edge
     $layout publish delete $edge
     $graph publish delete $edge
 
@@ -357,6 +364,21 @@ body ::tycho::EdgeController::drag {id x y} {
 }
 
 ########################################################################
+#### initPopup
+#
+# Initialise popup menu for edges.
+#
+body ::tycho::EdgeController::initPopup {name} {
+    $slateview popup add $name cascade debug -label "Debug"
+    $slateview popup add $name command describeItem debug \
+	    -command "::tycho::post \[$slateview describe graph current\]" \
+	    -label "Describe item"
+    $slateview popup add $name command describeLayout debug \
+	    -command "::tycho::post \[$slateview describe layout current\]" \
+	    -label "Describe layout"
+}
+
+########################################################################
 #### junctionaccepts
 #
 # Test if a junction will accept a connection.
@@ -461,13 +483,16 @@ body ::tycho::EdgeController::release {args} {
 	# subscriber to the graph
 	$graph notify event "modified"
     }
-    # FIXME FIXME: Force the edge to be "dirty", just so that
-    # saving works properly
-    $layout publish reshape $_edgename 0 0 end
+    # Force the edge to be "dirty", so that saving works properly
+    $layout dirty $_edgename
 
     _cleanup
 
-    # Finally, if we get to here then the edge has moved, even
+    # Compact the histories
+    $layout history compact edge current
+    $graph history compact edge current
+
+    # If we get to here then the edge has moved, even
     # if the graph hasn't changed, so notify any views subscribed
     # to the layout
     $layout notify event "modified"
