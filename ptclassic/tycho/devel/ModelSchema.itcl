@@ -267,7 +267,7 @@ body ::tycho::ModelSchema::constructor {args} {
 #
 body ::tycho::ModelSchema::attribute {name value args} {
     _verifynot attribute name
-    _entity attribute {} $name [concat [list $value] $args]
+    _entity attribute {} $name $value $args
 }
 
 ########################################################################
@@ -301,7 +301,7 @@ body ::tycho::ModelSchema::attributeget {name} {
 #
 body ::tycho::ModelSchema::attributein {context name value args} {
     _verifynotin attribute $context name
-    _entity attribute $context $name [concat [list $value] $args]
+    _entity attribute $context $name $value $args
 }
 
 ########################################################################
@@ -383,7 +383,7 @@ body ::tycho::ModelSchema::entities {} {
 #
 body ::tycho::ModelSchema::link {name args} {
     _verifynot link $name
-    _entity link {} $name $args
+    _entity link {} $name {} $args
 }
 
 ########################################################################

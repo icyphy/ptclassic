@@ -195,7 +195,7 @@ body ::tycho::Index::children {name} {
 #
 body ::tycho::Index::entry {name value args} {
     _verifynot entry $name
-    _entity entry {} $name [concat [list $value] $args]
+    _entity entry {} $name $value $args
 }
 
 ########################################################################
@@ -252,7 +252,7 @@ body ::tycho::Index::entrydelete {name} {
 #
 body ::tycho::Index::entryin {context name value args} {
     _verifynotin entry $context $name
-    _entity entry $context $name [concat [list $value] $args]
+    _entity entry $context $name $value $args
 }
 
 ########################################################################

@@ -329,7 +329,7 @@ body ::tycho::HyperGraph::connectdelete {vertex key hyperedge} {
 #
 body ::tycho::HyperGraph::hyperedge {name args} {
     _verifynot hyperedge $name
-    _entity hyperedge {} $name $args
+    _entity hyperedge {} $name {} $args
 }
 
 ########################################################################

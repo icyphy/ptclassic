@@ -317,7 +317,7 @@ body ::tycho::Schedule::constructor {args} {
 #
 body ::tycho::Schedule::annotation {name value args} {
     _verifynot annotation name
-    _entity annotation {} $name [concat [list $value] $args]
+    _entity annotation {} $name $value $args
 }
 
 ########################################################################
@@ -384,7 +384,7 @@ body ::tycho::Schedule::annotationget {name} {
 #
 body ::tycho::Schedule::annotationin {context name value args} {
     _verifynotin annotation $context name
-    _entity annotation $context $name [concat [list $value] $args]
+    _entity annotation $context $name $value $args
 }
 
 ########################################################################
@@ -494,7 +494,7 @@ body ::tycho::Schedule::children {type context} {
 #
 body ::tycho::Schedule::resource {name args} {
     _verifynot resource $name
-    _entity resource {} $name $args
+    _entity resource {} $name {} $args
 }
 
 ########################################################################
@@ -550,7 +550,7 @@ body ::tycho::Schedule::resourcedelete {name} {
 #
 body ::tycho::Schedule::resourcein {context name args} {
     _verifynotin resource $context $name
-    _entity resource $context $name $args
+    _entity resource $context $name {} $args
 }
 
 ########################################################################
@@ -571,7 +571,7 @@ body ::tycho::Schedule::roots {type} {
 #
 body ::tycho::Schedule::task {name args} {
     _verifynot task $name
-    _entity task {} $name $args
+    _entity task {} $name {} $args
 }
 
 ########################################################################
@@ -627,7 +627,7 @@ body ::tycho::Schedule::taskdelete {name} {
 #
 body ::tycho::Schedule::taskin {context name args} {
     _verifynotin task $context $name
-    _entity task $context $name $args
+    _entity task $context $name {} $args
 }
 
 #########################################################################

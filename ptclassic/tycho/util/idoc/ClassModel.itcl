@@ -342,7 +342,7 @@ body ::tycho::Class::constructor {args} {
 #
 body ::tycho::Class::annotation {name value args} {
     _verifynot annotation name
-    _entity annotation {} $name [concat [list $value] $args]
+    _entity annotation {} $name $value $args
 }
 
 ########################################################################
@@ -399,7 +399,7 @@ body ::tycho::Class::annotationget {name} {
 #
 body ::tycho::Class::annotationin {context name value args} {
     _verifynotin annotation $context name
-    _entity annotation $context $name [concat [list $value] $args]
+    _entity annotation $context $name $value $args
 }
 
 ########################################################################
@@ -482,7 +482,7 @@ body ::tycho::Class::methods {args} {
 #
 body ::tycho::Class::parameter {name args} {
     _verifynot parameter $name
-    _entity parameter {} $name $args
+    _entity parameter {} $name {} $args
 }
 
 ########################################################################
@@ -528,7 +528,7 @@ body ::tycho::Class::parameterdelete {name} {
 #
 body ::tycho::Class::parameterin {context name args} {
     _verifynotin parameter $context $name
-    _entity parameter $context $name $args
+    _entity parameter $context $name {} $args
 }
 
 ########################################################################
@@ -549,7 +549,7 @@ body ::tycho::Class::parameters {method} {
 #
 body ::tycho::Class::variable {name args} {
     _verifynot variable $name
-    _entity variable {} $name $args
+    _entity variable {} $name {} $args
 }
 
 ########################################################################

@@ -453,7 +453,7 @@ body ::tycho::KeyedDigraph::keyin {vertex key args} {
     _verifynot key [list $vertex $key]
     
     # Record the key and return the inverse
-    _entity key $vertex $key $args
+    _entity key $vertex $key {} $args
 }
 
 ########################################################################
