@@ -13,4 +13,5 @@ foo addArc d e
 # Posts: {{d dd a e} {e ee {a d} {c f}} {a aa {} {c d e}} {f ff e a} {c cc a {}}}
 
 # The following should return nothing, but not trigger an error.
-foo verify
+foo verifyAll
+
