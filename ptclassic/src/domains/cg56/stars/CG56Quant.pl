@@ -8,6 +8,7 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
+.Id "quantizer"
 Normally, the output is just the two's complement number
 given by the top noBits of the input, but
 an optional offset can be added to shift the output levels up or down.
