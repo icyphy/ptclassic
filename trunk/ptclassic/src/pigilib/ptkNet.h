@@ -32,4 +32,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "rpcApp.h"
 
-extern int ptkRPCFileHandler ARGS((RPCFunction funcArray[], long size));
+extern rpcStatus ptkRPCFileHandler ARGS((RPCFunction funcArray[], long size));
+extern rpcStatus RPCApplicationProcessEvents ARGS((RPCFunction funcArray[], long size));
+
