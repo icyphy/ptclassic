@@ -48,7 +48,7 @@ include $(CONFIG)
 
 EXTRA_SRCS =
 
-MISC_FILES =
+MISC_FILES =	codeDoc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
