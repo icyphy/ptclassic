@@ -41,7 +41,6 @@ F_SRC|F_DEST:
 
 #include "CGGeodesic.h"
 #include "Error.h"
-#include "SDFStar.h"
 #include <builtin.h>
 
 void CGGeodesic :: initialize() {
@@ -116,8 +115,7 @@ int CGGeodesic :: internalBufSize() const {
 	if (numInit() > 0 || dest->usesOldValues()) {
 		// cannot determine size without schedule.
 		if (maxNumParticles == 0) return 0;
-		SDFStar* dstStar = (SDFStar*)dest->parent();
-		int total = dstStar->reps() * dest->numXfer();
+		int total = dest->parentReps() * dest->numXfer();
 		if (total >= bsiz) {
 			// return the smallest factor of total
 			// that is >= size

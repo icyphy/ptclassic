@@ -57,8 +57,7 @@ int AsmGeodesic :: internalBufSize() const {
 	CGPortHole* src = (CGPortHole*)originatingPort;
 	if ((numInit() > 0 || dest->usesOldValues()) &&
 	    !hasCirc(dest) && !hasCirc(src)) {
-		SDFStar* srcStar = (SDFStar*)src->parent();
-		int total = srcStar->reps() * src->numXfer();
+		int total = src->parentReps() * src->numXfer();
 		if (total < size)
 			Error::abortRun (*destinationPort,
 		 "maximum buffer size exceeds number of particles produced\n",

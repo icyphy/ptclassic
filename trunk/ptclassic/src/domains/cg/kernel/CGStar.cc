@@ -37,7 +37,7 @@ CGStar :: CGStar() : forkId(0) {
 
 // firing CG star : generate code.
 int CGStar :: run() {
-	// No need to grab data, so just use Star::run, not SDFStar::run.
+	// No need to grab data, so just use Star::run, not DataFlowStar::run.
 	int status = Star::run();
 	// Advance the offset in the PortHoles
 	advance();
@@ -394,7 +394,7 @@ int CGStar :: deferrable() {
 		if (p->isItOutput() && p->cgGeo().forkType() == F_SRC)
 			return TRUE;
 	}
-	return SDFStar::deferrable();
+	return DataFlowStar::deferrable();
 }
 
 // Code to shift delays from a fork's input port to its output port,
@@ -468,4 +468,6 @@ const char* CGStar :: domain () const { return CGdomainName;}
 
 // isa
 
-ISA_FUNC(CGStar, SDFStar);
+ISA_FUNC(CGStar, DataFlowStar);
+
+int CGStar :: isSDF() const { return TRUE;}

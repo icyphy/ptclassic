@@ -27,13 +27,6 @@ class StringList;
 // don't know how generally it is available.
 extern "C" int strcasecmp(const char* s1, const char* s2);
 
-	////////////////////////////////////
-	// class CGCodeBlock
-	////////////////////////////////////
-
-// In this generic architecture, a code block is identical to the base class
-#define CGCodeBlock CodeBlock
-
 class CGTarget;
 class CGWormhole;
 
@@ -41,7 +34,10 @@ class CGWormhole;
 	// class CGStar
 	////////////////////////////////////
 
-class CGStar : public SDFStar  {
+// by deriving from DataFlowStar rather than from SDFStar, and setting
+// isSDF to return TRUE, we permit non-SDF CGStars later on.
+
+class CGStar : public DataFlowStar {
 
 public:
 	// Constructor
@@ -56,8 +52,10 @@ public:
 	// Generate code.  No data is grabbed or put onto geodesics.
 	int run();
 
-	 // Pointer to target
-	 CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+	// Pointer to target
+	CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+
+	int isSDF() const;
 
 	// class identification
 	int isA(const char*) const;
@@ -82,7 +80,7 @@ public:
 	
 protected:
 	// Process code, expanding macros.
-	StringList processCode(CGCodeBlock&);
+	StringList processCode(CodeBlock&);
 	StringList processCode(const char*);
 
 	SymbolList codeblockSymbol;
