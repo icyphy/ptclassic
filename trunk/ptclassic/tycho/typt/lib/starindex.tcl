@@ -400,7 +400,7 @@ proc starindex_WriteDemoIndex { domainname } {
 	if { [llength $treelist ] > 2} {
 	    # We have a recursive index, that is an index that has
 	    # one key, and multiple entries.
-	    puts $fd "\{\{$starname, $ucdomainname users\} \{"
+	    puts $fd "\{\{$starname facet, $ucdomainname users\} \{"
 	    puts $fd " \{Users of $starname\} \{"
 	    foreach demo [lrange $treelist 1 end]  {
 		# Keep track of each demo we see for the demo.idx
@@ -410,7 +410,8 @@ proc starindex_WriteDemoIndex { domainname } {
 	    puts $fd "  \}\n \}\n\}"
 	} else {
 	    # We have a simple index entry, a key and a value
-	    puts $fd "\{\{$starname, $ucdomainname user\} [lindex $treelist 1] \{\}\}"
+	    puts $fd "\{\{$starname facet, $ucdomainname user\} \
+		    [lindex $treelist 1] \{\}\}"
    	    set demoArray([lindex $treelist 1]) 1
 	}
     }
@@ -425,7 +426,14 @@ proc starindex_WriteDemoIndex { domainname } {
     set header "$lcdomainname demos and palettes"
     puts $fd "\{$header\}\n \{"
     foreach el [lsort [array names demoArray]] {
-	puts $fd "{[file tail $el] $el {}}"
+	set facetName [file tail $el]
+	if {[file extension $facetName] == ".pal"} {
+	    puts $fd "{[list "$facetName palette, $ucdomainname domain"]\
+		    $el {}}"
+	} else {
+	    puts $fd "{[list "$facetName universe, $ucdomainname domain"]\
+		    $el {}}"
+	}
     }
 
     puts $fd "\}"
