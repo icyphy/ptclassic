@@ -86,7 +86,7 @@ namespace ::tycho {
     # ::tycho::File::registerEditor {.vhdl .VHDL} ::tycho::EditVHDL {VHDL editor}
     # ::tycho::File::registerEditor {.fsm} ::tycho::EditFSM \
     #   {Finite state machine editor}
-    ::tycho::File::registerEditor {.std} ::tycho::EditMoore {State transition diagram editor}
+    ::tycho::File::registerEditor {.std} ::tycho::EditSTD {State transition diagram editor}
     ::tycho::File::registerEditor {.idx} ::tycho::IndexBrowser {}
 }
 
