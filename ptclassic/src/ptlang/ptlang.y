@@ -2,7 +2,6 @@
 /************************************************************************
  Version identification:
  $Id$
-
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
@@ -1620,7 +1619,10 @@ char* in;
 	int l = strlen (in);
 	if (l <= 2 || *in != QUOTE) return in;
 	out = malloc((unsigned)l-1);
-	return strncpy(out,in+1,l-2);
+	strncpy(out,in+1,l-2);
+	/* strncpy does not necessarily null-terminate the string */
+	out[l-2] = 0;
+	return out;
 }
 
 /* make sure a function is a valid arglist */
