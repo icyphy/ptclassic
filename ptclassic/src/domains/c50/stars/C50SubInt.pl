@@ -72,7 +72,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		if ( int(saturation)) time++;
 		time += 7;
 		if ( int(neg.numberPorts() > 2))
-			time += (2*(int(neg.numberPorts) - 2));
+			time += (2*(int(neg.numberPorts()) - 2));
 		return time;
 	}
 }
