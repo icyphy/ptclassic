@@ -34,9 +34,11 @@ public:
 	InterpGalaxy() { descriptor = "An interpreted galaxy";}
 
 // set the descriptor
+	void
 	setDescriptor(const char* dtext) { descriptor = dtext;}
 
 // add a new star to the galaxy
+	void
 	addStar(const char* starname, const char* starclass);
 
 // add a connection
@@ -44,13 +46,20 @@ public:
 	connect(const char* srcstar, const char* srcport, const char* dststar,
 		const char* dstport, int delay = 0);
 // add an alias
+	void
 	alias(const char* galport, const char* star, const char *starport);
 
 // add a state
+	void
         addState(const char* statename, const char* stateclass, const char* statevalue);
 
 // set a state
+	void
         setState(const char* blockname, const char* statename, const char* statevalue);
+
+/// make portholes with a multiporthole
+	void
+	numPorts(const char* starname, const char* portname, int numP);
 
 // Make a new, identical galaxy
 	virtual Block *clone();
