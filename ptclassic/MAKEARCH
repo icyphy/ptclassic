@@ -81,6 +81,17 @@ foreach x (optfir wfir)
 end
 cd ..
 
+# Make subdirectories of galileo
+cd galileo
+foreach x (kernel)
+	optmkdir $x
+	cd $x
+	optlink ../../../src/galileo/$x make.template
+	optlink ../../../src/galileo/$x makefile
+	cd ..
+end
+cd ..
+
 cd utils
 foreach x (libgslider ptplay)
 	optmkdir $x
