@@ -185,8 +185,8 @@ public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth) = 0;
 
-	// generate code
-	virtual StringList genCode(Target&, int depth) = 0;
+	// generate code using target methods
+	virtual void genCode(Target&, int depth) = 0;
 };
 
 // define << operator to use virt fn.
@@ -220,7 +220,7 @@ public:
 	StringList displaySchedule(int depth);
 
 	// code generation
-	StringList genCode(Target&, int depth);
+	void genCode(Target&, int depth);
 };
 
 // An SDFBagScheduler is a modified SDFScheduler that lives in
@@ -240,7 +240,7 @@ public:
 	StringList displaySchedule() { return displaySchedule(0);}
 
 	// code generation
-	virtual StringList genCode(Target&, int depth);
+	virtual void genCode(Target&, int depth);
 };
 
 // An SDFClusterBag is a composite object.  In some senses it is like
@@ -283,7 +283,7 @@ public:
 	StringList displaySchedule(int depth);
 
 	// code generation
-	StringList genCode(Target&, int depth);
+	void genCode(Target&, int depth);
 
 	// run the cluster, the number of times indicated by the loop
 	// factor.
@@ -359,7 +359,7 @@ public:
 	StringList displaySchedule();
 
 	// Generate code using the Target to produce the right language.
-	StringList compileRun();
+	void compileRun();
 };
 
 class SDFClustPortIter : public BlockPortIter {

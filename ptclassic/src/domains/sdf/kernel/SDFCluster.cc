@@ -953,47 +953,40 @@ StringList SDFBagScheduler::displaySchedule(int depth) {
 
 // The following functions are used in code generation.  Work is
 // distributed among the two scheduler and two cluster classes.
-StringList SDFClustSched::compileRun() {
-	StringList code;
+void SDFClustSched::compileRun() {
 	Target& target = getTarget();
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*)next++) != 0) {
-		code += c->genCode(target,1);
+		c->genCode(target,1);
 	}
-	return code;
 }
 
-StringList SDFAtomCluster::genCode(Target& t, int depth) {
+void SDFAtomCluster::genCode(Target& t, int depth) {
 	if (loop() > 1) {
-		StringList out = t.beginIteration(loop(), depth);
-		out += t.writeFiring(real(), depth+1);
-		out += t.endIteration(loop(), depth);
-		return out;
+		t.beginIteration(loop(), depth);
+		t.writeFiring(real(), depth+1);
+		t.endIteration(loop(), depth);
 	}
-	else return t.writeFiring(real(), depth);
+	else t.writeFiring(real(), depth);
 }
 
-StringList SDFClusterBag::genCode(Target& t, int depth) {
-	StringList out;
+void SDFClusterBag::genCode(Target& t, int depth) {
 	if (loop() > 1) {
-		out += t.beginIteration(loop(), depth);
+		t.beginIteration(loop(), depth);
 		depth++;
 	}
-	out += sched->genCode(t, depth);
+	sched->genCode(t, depth);
 	if (loop() > 1) {
 		depth--;
-		out += t.endIteration(loop(), depth);
+		t.endIteration(loop(), depth);
 	}
-	return out;
 }
 
-StringList SDFBagScheduler::genCode(Target& t, int depth) {
-	StringList out;
+void SDFBagScheduler::genCode(Target& t, int depth) {
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*)next++) != 0) {
-		out += c->genCode(t, depth);
+		c->genCode(t, depth);
 	}
-	return out;
 }
