@@ -38,6 +38,7 @@ static const char file_id[] = "$RCSfile$";
 
 #include "Clock.h"
 #include "type.h"
+#include "compat.h"
 
 #if !defined(PTSOL2_4)
 extern "C" int gettimeofday(timeval *, struct timezone *);
