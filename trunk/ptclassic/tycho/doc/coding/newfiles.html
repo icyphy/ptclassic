@@ -1,0 +1,44 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Creating New Class Files</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1><A NAME="new files, creating">Creating New Class Files</A></h1>
+
+When creating new Java or Itcl class files please be sure that they
+will compile or source before adding them to the
+<CODE>makefile</CODE>. This ensures that make still works for others
+working on files in the same directory.
+
+<OL>
+<LI> Create a new class file and enter the minimum stuff
+necessary to make it compile or source.
+
+<LI> Check out the <CODE>makefile</CODE> and add the new file to it.
+You can use the <CODE>Revision Control</CODE> menu choice under the
+<CODE>File </CODE> menu to do this.
+
+<LI> If the file is a Java file, run <CODE>make</CODE> and make sure
+that the new class compiles.  If the file is a Itcl file, source the
+file to be sure that it has no source-time errors.
+
+<LI> Check the class file into version control with the <CODE>Revision
+Control</CODE> menu choice.
+	
+<LI> Check the <CODE>makefile</CODE> back in.
+
+<LI> Check the new class out of version control and keep working on it.
+
+</OL>
+
+ <P>
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
