@@ -48,7 +48,7 @@
 # control widgets to callback names.
 # </ol>
 #
-# See the <a href="../controls"><code>$TYCHO/typt/controls</code></a>
+# See the <a href="../../../typt/controls/"><code>$TYCHO/typt/controls/</code></a>
 # directory for examples of sub-panels.
 #
 class ::tycho::ControlSubpanel {
