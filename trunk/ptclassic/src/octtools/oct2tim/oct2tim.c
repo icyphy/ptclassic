@@ -177,8 +177,8 @@ struct dLayer {
 char facetType[32];
 char *techDirRoot;
 char fontName[32];
-int plotFormals = 0;
-int plotActuals = 0;
+int plotFormals = 1;
+int plotActuals = 1;
 int plotConnectors = 0;
 int plotCellLabel = 0;
 int plotLabels = 0;
@@ -862,8 +862,8 @@ int level;
 	      "can not start the instance generator");
 
     if STREQ(facetType, "bb") {
-	(void) printf("gsave\n");
-	(void) printf("lfont\n");
+/* 	(void) printf("gsave\n"); */
+/* 	(void) printf("lfont\n"); */
 	
 	if (plotConnectors == 0) {
 	    connectors.type = OCT_BAG;
@@ -958,13 +958,16 @@ int level;
 	    tr_push(stack);
 	    tr_add_transform(stack, &inst.contents.instance.transform, 0);
 	    processTerminals(&master, ACTUAL, STREQ(facetType, "bb") ? 1 : 0);
+	    printf("    }\n");
+	    printClosers=0;
+
 	    tr_pop(stack);
 	}
     }
 
-    if STREQ(facetType, "bb") {
-	(void) printf("grestore\n");
-    }
+/*     if STREQ(facetType, "bb") { */
+/* 	(void) printf("grestore\n"); */
+/*     } */
 
     
     /*
@@ -1293,15 +1296,18 @@ int level;
      * of the top level cell
      */
 
+    if (printClosers==1) {
+	printf("\t}\n",level); 
+    }
     if ((plotFormals == 1) && (level == 1)) {
 	processTerminals(facet, FORMAL, 0);
     }
-
-    /* grestore to old font */
-    if (printClosers==1) {
-	printf("\t}\n    }\n");    
+    if (level ==2  && plotFormals != 1) {
+	printf("    }\n"); 
 	printClosers=0;
     }
+
+    /* grestore to old font */
 /*     (void) fprintf(stderr, "#  processCell: dbg: grestore\n"); */
 
     return;
@@ -1379,28 +1385,37 @@ int bbp;			/* 0 - normal, 1 - font already in effect */
 	    BOXNORM(bb);
 		
 	    if ((fontset == 0) && (bbp == 0)) {
-		(void) printf("gsave\n");
-		(void) printf("lfont\n");
+/* 		(void) printf("gsave\n"); */
+/* 		(void) printf("lfont\n"); */
 		fontset = 1;
 	    }
 		
-	    (void) printf("%d %d %d %d (%s) %s\n",
-		   (int)bb.lowerLeft.x,
-		   (int)bb.lowerLeft.y,
-		   (int)bb.upperRight.x,
-		   (int)bb.upperRight.y,
-		   term.contents.term.name,
-		   (type == FORMAL) ? "ft" : "at");
+	    /* FIXME, we need to figure out if it is an input or output
+	     * port.
+	     */
+ 	    (void) printf("\tport %s Terminal -anchor {%d %d} -direction {1 0}\\\n ",
+			  term.contents.term.name,
+			  (int)bb.lowerLeft.x,
+			  (int)bb.lowerLeft.y);
+	    (void) printf("\t    -type input -style blob\n");
+
+/* 	    (void) printf("%d %d %d %d (%s) %s\n", */
+/* 		   (int)bb.lowerLeft.x, */
+/* 		   (int)bb.lowerLeft.y, */
+/* 		   (int)bb.upperRight.x, */
+/* 		   (int)bb.upperRight.y, */
+/* 		   term.contents.term.name, */
+/* 		   (type == FORMAL) ? "ft" : "at"); */
 	}
 
 	tr_pop(stack);
 	
     }
 
-    if ((fontset == 1) && (bbp == 0)) {
-	(void) printf("grestore\n");
-	fontset = 0;
-    }
+/*     if ((fontset == 1) && (bbp == 0)) { */
+/* 	(void) printf("grestore\n"); */
+/* 	fontset = 0; */
+/*     } */
 
     return;
 }
@@ -1998,8 +2013,8 @@ int outlinep, fillp;
 	    /* Non-manhattan corner type (circle is drawn) */
 	    if (widthOverTwo > 0) {
 			
-		(void) printf("gsave\n");
-		(void) printf("newpath\n");
+/* 		(void) printf("gsave\n"); */
+/* 		(void) printf("newpath\n"); */
 	    
 		(void) printf("%d %d %d 0 360 arc\n",
 			      (int)points[index].x,
