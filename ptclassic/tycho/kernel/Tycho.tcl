@@ -337,7 +337,7 @@ if {$tychoWelcomeWindow != 0} {
 
 
 # FIXME: Workaround for bug on the Mac under itcl2.2
-if [info exists $tyMacBug] {
+if [info exists tyMacBug] {
     return
 }
 
