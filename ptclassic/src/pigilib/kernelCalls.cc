@@ -240,11 +240,10 @@ static boolean checkFields(const Block* b,
 		if (findMPH(b,names[i])) isMPH[i] = 1;
 		else if (findState(b,names[i])) isMPH[i] = 0;
 		else {
-			char buf[80];
-			sprintf (buf,
-			  "No multiport or state named '%s' in class '%s'",
-				 names[i], b->className());
-			ErrAdd (buf);
+			StringList buf = "No multiport or state named '";
+			buf << names[i] << "' in class '"
+			    << b->className() << "'";
+			ErrAdd(buf);
 			return FALSE;
 		}
 	}
@@ -551,10 +550,9 @@ KcGetTerms(char* name, TermList* terms)
 	
 	if (!cname || (block = findClass(name)) == 0 ||
 	    !checkFields(block,(const char **)mphname,nf,isMPH)) {
-		char buf[80];
-		sprintf (buf, "Invalid Galaxy Name '%s' (interpreted as '%s')",
-			name, cname);
-		ErrAdd (buf);
+		StringList buf = "Invalid galaxy name '";
+		buf << name << "' (interpreted as '" << cname << "')";
+		ErrAdd(buf);
 		return FALSE;
 	}
 	const char *names[MAX_NUM_TERMS];
@@ -587,18 +585,17 @@ KcGetTerms(char* name, TermList* terms)
 			mphType = types[n+position];
 			dir = isOut[n+position];
 		} else {
-			char buf[80];
-			sprintf (buf, "No multiport named '%s' in class '%s'",
-				mphname[j], cname);
-			ErrAdd (buf);
+			StringList buf = "No multiport named '";
+			buf << mphname[j] << "' in class '" << cname << "'";
+			ErrAdd(buf);
 			return FALSE;
 		}
 		// Create the new names
 		int np = atoi(npspec[j]);
 		for (int i = 1; i <= np; i++) {
-			char buf[128];
-			sprintf (buf, "%s#%d", mphName, i);
-			newNames[newNameCount] = savestring (buf);
+			StringList buf;
+			buf << mphName << "#" << i;
+			newNames[newNameCount] = savestring(buf);
 			newIsOut[newNameCount] = dir;
 			newTypes[newNameCount++] = mphType;
 		}
