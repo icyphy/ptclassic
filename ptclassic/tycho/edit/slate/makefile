@@ -72,6 +72,7 @@ ITCL_SRCS = \
 	Shades.itcl \
 	Shape.itcl \
 	Slate.itcl \
+	SlateView.itcl \
 	Slider.itcl \
 	SmartLine.itcl \
 	Solid.itcl \
