@@ -30,19 +30,19 @@
 
 
 #######################################################################
-#### Editor
+#### TextItemEdit
 #
 # An interactor for "editing" items. This provides the basic functionality
 # needed for labels and short text fields. More complex editing
 # interactions can be built by cascading editors.
 #
 # <p> The Tk canvas (and thus the Slate) provides no in-built editing
-# capabilities for text. The <i>Editor</i> interactor encapsulates the 
+# capabilities for text. The <i>TextItemEdit</i> interactor encapsulates the 
 # code needed by the Slate to support basic interactive editing on text 
 # items. Note that this is intended only for editing small
 # items like labels in diagrams.
 #
-# <p> The <i>Editor</i> interactor adds no configuration options to
+# <p> The <i>TextItemEdit</i> interactor adds no configuration options to
 # those inherited from the <a href="Interactor.html">Interactor</a>
 # superclass.
 #
@@ -50,7 +50,7 @@
 # <code>bind</code> command (as usual).  Once activated, the insertion 
 # cursor remains in the text item until the <code>stop</code> method is 
 # called.  How this method is called depends on the client -- it will 
-# usually be by the user clicking on a different object.  (The 
+# usually be by the user clicking on a different item.  (The 
 # usual click-drag-release sequence <i>is</i> used in this interactor, but 
 # to drag-select text.)
 #
@@ -93,7 +93,7 @@
 #
 # <ol>
 # <li>This interactor should probably be renamed
-# <i>LineEditor</i>.
+# <i>LineTextItemEdit</i>.
 # <li>Double-click and dragging does not quite work: 
 # the selection moves from the start of the first selected word, not 
 # from the farthest end.
@@ -112,7 +112,7 @@
 # <li><a href="index.html">Class documentation index</a>
 # </ul>
 #
-class ::tycho::Editor {
+class ::tycho::TextItemEdit {
     inherit ::tycho::Interactor
 
     constructor {{s {}} {c {}} args} {
@@ -123,11 +123,10 @@ class ::tycho::Editor {
     }
     destructor {}
 
-
     ###################################################################
     ####                         public methods                    ####
 
-    # Attach the interactor to the current picture
+    # Attach the interactor to the current item
     method activate {t x y args}
 
     # Click on a position in the text item.
@@ -136,7 +135,7 @@ class ::tycho::Editor {
     # Double-click on the text item.
     method dbclick {}
 
-    # Remove the interactor from the current picture
+    # Remove the interactor from the current item
     method deactivate {args}
 
     # Drag the mouse to select.
@@ -173,9 +172,9 @@ class ::tycho::Editor {
 #######################################################################
 #### activate target x y
 #
-# Activate the interactor on a picture object.
+# Activate the interactor on an item.
 # 
-body ::tycho::Editor::activate {t x y args} {
+body ::tycho::TextItemEdit::activate {t x y args} {
     # If already editing another item, deactivate from it first
     if { $target != "" } {
 	deactivate
@@ -183,7 +182,7 @@ body ::tycho::Editor::activate {t x y args} {
 
     # Set the target. The client can modify its options later
     # with -activatecommand if desired. If the target argument is
-    # in fact a tag, get the current picture from the slate.
+    # in fact a tag, get the current item from the slate.
     if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
 	target $t
     } else {
@@ -228,7 +227,7 @@ body ::tycho::Editor::activate {t x y args} {
 # point under the mouse. We assume that the item already has the
 # focus and the key insertion bindings.
 #
-body ::tycho::Editor::click {x y args} {
+body ::tycho::TextItemEdit::click {x y args} {
     # Clear the selection
     select clear
 
@@ -255,7 +254,7 @@ body ::tycho::Editor::click {x y args} {
 # Double-click on a text item. This selects the word underneath
 # and sets the mode for word-dragging.
 #
-body ::tycho::Editor::dbclick {} {
+body ::tycho::TextItemEdit::dbclick {} {
     # Set this for word-mode dragging
     set wordmode 1
 
@@ -278,7 +277,7 @@ body ::tycho::Editor::dbclick {} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 # 
-body ::tycho::Editor::deactivate {args} {
+body ::tycho::TextItemEdit::deactivate {args} {
     # Remove the focus
     $slate focus ""
     ::bind $slate <Key> {}
@@ -307,7 +306,7 @@ body ::tycho::Editor::deactivate {args} {
 #
 # Drag-select a text region.
 #
-body ::tycho::Editor::drag {x y} {
+body ::tycho::TextItemEdit::drag {x y} {
     select adjust @$x,$y
 
     # Forward to a proxy if there is one
@@ -334,7 +333,7 @@ body ::tycho::Editor::drag {x y} {
 # <li><i>index</i>: Move to <i>index</i>
 # </ul>
 #
-body ::tycho::Editor::icursor {mode} {
+body ::tycho::TextItemEdit::icursor {mode} {
     switch -exact /$mode {
 	"/start" {
 	    $slate icursor $target 0
@@ -370,7 +369,7 @@ body ::tycho::Editor::icursor {mode} {
 # Process a key press. If the key is a return, terminate the
 # interaction.
 #
-body ::tycho::Editor::key {key keysym state args} {
+body ::tycho::TextItemEdit::key {key keysym state args} {
 
     # Get flags to indicate modifiers
     set shift   [expr $state & 1]
@@ -526,7 +525,7 @@ body ::tycho::Editor::key {key keysym state args} {
 #######################################################################
 #### release
 #
-body ::tycho::Editor::release {} {
+body ::tycho::TextItemEdit::release {} {
     set wordmode 0
 
     # Clear the motion and double-click events
@@ -539,7 +538,7 @@ body ::tycho::Editor::release {} {
 #######################################################################
 #### stop
 #
-body ::tycho::Editor::stop {} {
+body ::tycho::TextItemEdit::stop {} {
     if { $target != "" } {
 	$this deactivate
     }
@@ -550,7 +549,7 @@ body ::tycho::Editor::stop {} {
 #
 # Manipulate the selection in useful ways.
 #
-body ::tycho::Editor::select {mode args} {
+body ::tycho::TextItemEdit::select {mode args} {
     switch -exact $mode {
 	"adjust" {
 	    # Move the end of the selection to the given index
