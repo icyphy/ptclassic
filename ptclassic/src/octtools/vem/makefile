@@ -227,7 +227,7 @@ SRCS =		$(OBJECTS:.o=.c)
 lint: $(SRCS) 
 	lint -u -Iinclude -Ibitmaps -I../include -I$(OCTTOOLS)/include $^ > lint
 
-sources depend sccsinfo clean ::
+sources depend checkjunk sccsinfo clean ::
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
