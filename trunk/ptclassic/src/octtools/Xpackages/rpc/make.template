@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -70,21 +70,21 @@ EXPHDR =	rpc.h
 header:: $(OCTTOOLS)/include/rpcApp.h $(OCTTOOLS)/include/rpcInternal.h \
 	../../include/rpcApp.h 	../../include/rpcInternal.h
 
-../../include/rpcApp.h: rpcApp.h
+../../include/rpcApp.h: rpcApp.h $(OCTTOOLS) $(OCTTOOLS)/include
 	rm -f $@ 
-	cp $? $@ 
+	cp $< $@ 
 
-../../include/rpcInternal.h: rpcInternal.h
+../../include/rpcInternal.h: rpcInternal.h $(OCTTOOLS) $(OCTTOOLS)/include
 	rm -f $@ 
-	cp $? $@ 
+	cp $< $@ 
 
-$(OCTTOOLS)/include/rpcApp.h: rpcApp.h
+$(OCTTOOLS)/include/rpcApp.h: rpcApp.h $(OCTTOOLS) $(OCTTOOLS)/include
 	rm -f $@
-	cp $? $@
+	cp $< $@
 
-$(OCTTOOLS)/include/rpcInternal.h: rpcInternal.h
+$(OCTTOOLS)/include/rpcInternal.h: rpcInternal.h $(OCTTOOLS) $(OCTTOOLS)/include
 	rm -f $@
-	cp $? $@
+	cp $< $@
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk

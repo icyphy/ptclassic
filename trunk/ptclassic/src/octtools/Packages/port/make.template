@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,7 +32,7 @@
 # This will add the dependencies to the makefile.
 #
 # root of source tree
-ROOT	      = ../../../../
+ROOT	      = ../../../..
 # VPATH points to the real source directory
 VPATH         = $(ROOT)/src/octtools/Packages/port
 
@@ -81,13 +81,13 @@ EXPHDR =	port.h
 # pigilib needs the octtools copyright.h and ansi.h
 header:: $(OCTTOOLS)/include/copyright.h $(OCTTOOLS)/include/ansi.h
 
-$(OCTTOOLS)/include/copyright.h: copyright.h
+$(OCTTOOLS)/include/copyright.h: copyright.h $(OCTTOOLS) $(OCTTOOLS)/include
 	rm -f $@
-	cp $? $@
+	cp $< $@
 
-$(OCTTOOLS)/include/ansi.h: ansi.h
+$(OCTTOOLS)/include/ansi.h: ansi.h $(OCTTOOLS) $(OCTTOOLS)/include
 	rm -f $@
-	cp $? $@
+	cp $< $@
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
