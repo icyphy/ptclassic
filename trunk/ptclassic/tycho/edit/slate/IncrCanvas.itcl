@@ -142,6 +142,9 @@ class ::tycho::IncrCanvas {
     # Get the children of an item
     method children {tag}
 
+    # Access a component of a complex item
+    method component {tag {component {}} {method {}} args}
+
     # Set or get the coordinates of an item
     method coords {tag args}
 
@@ -226,6 +229,9 @@ class ::tycho::IncrCanvas {
 
     # Get the parent of an item
     method parent {tag}
+
+    # Get the primary component of an item
+    method primary {tag}
 
     # Generate postscript
     method postscript {args}
@@ -376,7 +382,7 @@ body ::tycho::IncrCanvas::addtag {add mode args} {
 	} else {
 	    # Complex item
 	    set tags [$canvas gettags \
-		    [@scope ::tycho::ComplexItem [list set primary($id)]]]
+		    [@scope ::tycho::ComplexItem set primary($id)]]
 	    set root [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
 	    
  	    if { $root == $id } {
@@ -463,8 +469,8 @@ body ::tycho::IncrCanvas::bind {tag {sequence {}} args} {
 # code here is "in-lined."
 #
 body ::tycho::IncrCanvas::call {id method args} {
-    @scope ::tycho::$itemClass($id) [list \
-	    eval \[set methodtable($method)\] $id $canvas $this $args]
+    eval [@scope ::tycho::$itemClass($id) set methodtable($method)] \
+            $id $canvas $this $args
 }
 
 #######################################################################
@@ -511,6 +517,67 @@ body ::tycho::IncrCanvas::children {tag} {
 }
 
 #######################################################################
+#### component
+#
+# Access a component of a complex item. Pictures only support components
+# if they have been explicitly declared as such in the "components"
+# variable in the ComplexItem class.
+#
+# With one argument, return the names of the components of this
+# complex item. With two arguments, return the specified component. With
+# more than two arguments, call the specified method on the
+# component and return its result.
+#
+# Since this method shadows the default itk method of the same name,
+# this one checks for the argument "canvas" and returns the canvas
+# name if it matches -- using component to access the canvas inside
+# the slate thus still works as expected.
+#
+body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
+    # Check for "component canvas"
+    if { $tag == "canvas" } {
+	return $canvas
+    }
+
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Check for no component arg
+    if { $component == "" } {
+        set result {}
+        foreach i [@scope ::tycho::ComplexItem array names component *$id] {
+            regsub $id\$ $i {} i
+            lappend result $i
+        }
+        return $result
+    } elseif { [@scope ::tycho::ComplexItem \
+            ::info exists methodtable(component)] } {
+        # If there's a component method on a complex item, just call that
+        set item [[@scope ::tycho::ComplexItem set methodtable(component)] \
+                $id $canvas $this $component]
+    } else {
+        # Finally, read its value
+	set item [@scope ::tycho::ComplexItem set component([set component]$id)]
+    }
+
+    # Call a method on the component
+    # FIXME: Should this deal with multiple items returned?
+    if { $method == {} } {
+	return $item
+    } else {
+	return [eval $this $method $item $args]
+    }
+}
+
+#######################################################################
 #### coords
 #
 # Get or set the coordinates of an item. If only the first
@@ -538,8 +605,8 @@ body ::tycho::IncrCanvas::coords {tag args} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas coords $id $args
     } elseif { [string match {_*} $id] } {
-	@scope ::tycho::$itemClass($id) [list \
-		eval \[set methodtable(coords)\] $id $canvas $this $args]
+	eval [@scope ::tycho::$itemClass($id) set methodtable(coords)] \
+                $id $canvas $this $args
     }
 }
 
@@ -882,8 +949,7 @@ body ::tycho::IncrCanvas::gettags {tag} {
 # the createchild*{} method.
 #
 body ::tycho::IncrCanvas::getchildtags {id} {
-    $canvas gettags \
-            [@scope ::tycho::ComplexItem [list set primary($id)]]
+    $canvas gettags [@scope ::tycho::ComplexItem set primary($id)]
 }
 
 #######################################################################
@@ -897,7 +963,7 @@ body ::tycho::IncrCanvas::getchildtags {id} {
 body ::tycho::IncrCanvas::getrootchildtags {id} {
     set tags {}
     foreach tag [$canvas gettags \
-            [@scope ::tycho::ComplexItem [list set primary($id)]]] {
+            [@scope ::tycho::ComplexItem set primary($id)]] {
         if { [string match {[!_]*} $tag] } {
             lappend tags $tag
         }
@@ -914,7 +980,7 @@ body ::tycho::IncrCanvas::getrootchildtags {id} {
 body ::tycho::IncrCanvas::hastag {id tag} {
     # If a complex item, get the primary ID
     if { [string match {_*} $id] } {
-	set id [@scope ::tycho::ComplexItem [list set primary($id)]]
+	set id [@scope ::tycho::ComplexItem set primary($id)]
     }
     # Test if the tag is in its tags
     expr [lsearch -exact [$canvas gettags $id] $tag] >= 0
@@ -944,9 +1010,9 @@ body ::tycho::IncrCanvas::itemcget {tag option} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas itemcget $tag $option
     } else {
-	@scope ::tycho::$itemClass($id) [list \
-		eval \[set methodtable(itemcget)\] $id $canvas $this \
-		::tycho::$itemClass($id) $option]
+	[@scope ::tycho::$itemClass($id) set methodtable(itemcget)] \
+                $id $canvas $this \
+		::tycho::$itemClass($id) $option
     }
 }
 
@@ -983,9 +1049,9 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas itemconfigure $id $args
     } else {
-	@scope ::tycho::$itemClass($id) [list \
-		eval \[set methodtable(itemconfigure)\] $id $canvas $this \
-		::tycho::$itemClass($id) $args]
+	set class ::tycho::$itemClass($id)
+	eval [@scope $class set methodtable(itemconfigure)] \
+                $id $canvas $this $class $args
     }
 }
 
@@ -1073,6 +1139,26 @@ body ::tycho::IncrCanvas::parent {tag} {
 }
 
 #######################################################################
+#### primary
+#
+# Get the primary component of a complex item. Note that calling
+# a method directly on the primary is not supported.
+#
+body ::tycho::IncrCanvas::primary {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+    @scope ::tycho::ComplexItem set primary($id)
+}
+
+#######################################################################
 #### postscript
 #
 body ::tycho::IncrCanvas::postscript {args} {
@@ -1137,7 +1223,7 @@ body ::tycho::IncrCanvas::root {id} {
     } elseif { [string match {_*} $id] } {
 	# A complex item ID. Use the primary tags to find the item to return
 	set tags [$canvas gettags \
-		[@scope ::tycho::ComplexItem [list set primary($id)]]]
+		[@scope ::tycho::ComplexItem set primary($id)]]
     	return [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
     } else {
 	error "Argument ($id) is not an item ID"
@@ -1160,7 +1246,7 @@ body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
 	if { [string match {_*} $id] } {
 	    set newcoords {}
 	    set coords [$canvas coords \
-		    [@scope ::tycho::ComplexItem [list set primary($id)]]]
+		    [@scope ::tycho::ComplexItem set primary($id)]]
 	    foreach {a b} $coords {
 		lappend newcoords \
 			[expr $xOrigin + $xScale * ($a - $xOrigin)] \
@@ -1361,11 +1447,10 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 	    }
 	    # If it's a complex item and has a select{} method, call that
 	    if { [string match {_*} $id] } {
-		if { [@scope ::tycho::$itemClass($id) \
-			[list ::info exists methodtable(highlight)]] } {
-		    @scope ::tycho::$itemClass($id) \
-			    [list eval \[set methodtable(highlight)\] \
-			    $id $canvas $this]
+                set class ::tycho::$itemClass($id)
+		if { [@scope $class ::info exists methodtable(highlight)] } {
+		    [@scope $class set methodtable(highlight)] \
+                            $id $canvas $this
 		} else {
 		    error "Item $id does not support select"
 		}
@@ -1435,10 +1520,9 @@ body ::tycho::IncrCanvas::delete_ {id} {
     }
 
     # Call its destruct method
-    if { [@scope ::tycho::$itemClass($id) \
-	    [list ::info exists methodtable(destruct)]] } {
-	@scope ::tycho::$itemClass($id) [list \
-		eval \[set methodtable(destruct)\] $id $canvas $this]
+    set class ::tycho::$itemClass($id)
+    if { [@scope $class ::info exists methodtable(destruct)] } {
+	[@scope $class set methodtable(destruct)] $id $canvas $this
     }
 
     # Delete complex item components
@@ -1477,7 +1561,7 @@ body ::tycho::IncrCanvas::findall {} {
     # Find complex roots
     foreach id [array names itemClass] {
 	set tags [$canvas gettags \
-		[@scope ::tycho::ComplexItem [list set primary($id)]]]
+		[@scope ::tycho::ComplexItem set primary($id)]]
 	set root [string range \
 		[lindex $tags [lsearch $tags {!*}]] 1 end]
 	# If the item is not invisible and not found, mark as found
