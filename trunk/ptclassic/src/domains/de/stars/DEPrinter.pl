@@ -3,9 +3,9 @@ defstar {
 	domain { DE }
 	desc {
 Print the value of each arriving event, together with its time of arrival.
-The "fileName" parameter specifies the file to be written;
-the special names <stdout> and <cout> (specifying the standard output stream),
-and <stderr> and <cerr> specifying the standard error stream, are also supported.
+The "fileName" parameter specifies the file to be written; the special
+names <stdout> and <cout> (specifying the standard output stream), and
+<stderr> and <cerr> specifying the standard error stream, are also supported.
 	}
 	version { $Id$}
 	author { Soonhoi Ha and J. Buck}
@@ -17,11 +17,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	explanation {
-The input may be a particle of any type.  The print() method
-of the particle is used to generate the output.
+The input may be a particle of any type.
+The print() method of the particle is used to generate the output.
 If output is directed to a file, flushing does not occur until the
-wrapup method is called.  Before the first data are flushed, the file
-will not even exist.  This is normal.
+wrapup method is called.
+Before the first data are flushed, the file will not even exist.
+This is normal.
 	}
 	inmulti {
 		name { input }
@@ -35,7 +36,7 @@ will not even exist.  This is normal.
 	}
 	hinclude { "pt_fstream.h" }
 	protected {
-		pt_ofstream *p_out;
+		pt_ofstream* p_out;
 	}
 	constructor {
 		p_out = 0;
@@ -53,13 +54,14 @@ will not even exist.  This is normal.
 		// detect which input has an event and print out the
 		// value and arrivalTime.
 		InDEMPHIter nextp(input);
-		int j = input.numberPorts();
-		for(int i=1; i <= j; i++) {
-			InDEPort& p = *nextp++;
-			if (p.dataNew) {
-				output << "(port#" << i << ") " <<
-				"at time " << arrivalTime << " : value > "
-				<< (p.get()).print() << "\n";
+		int numports = input.numberPorts();
+		for(int port = 1; port <= numports; port++) {
+			InDEPort& iport = *nextp++;
+			if (iport.dataNew) {
+				output << "(port#" << port << ") "
+				       << "at time " << arrivalTime
+				       << " : value > "
+				       << (iport.get()).print() << "\n";
 			}
 		}
 	}
