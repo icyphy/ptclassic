@@ -36,10 +36,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #include "ptk.h"
+#include "ptcl.h"
+
 extern "C" {
 #include "ptkRegisterCmds.h"
 }
 
+/* global */ 
+PTcl *ptcl;
+
 void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin)
 {
+
+   // Construct the global PTcl object.  This should be done once only.
+   ptcl = new PTcl(ip);
+
 }
