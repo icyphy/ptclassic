@@ -20,7 +20,7 @@ Thomas M. Parks}
 
 \cindex{White, K.}
 
-\date{$Date$}
+\date{2/25/94}
 
 The \dfn{CGC domain} of Ptolemy generates code
 for the \code{C} programming language.
@@ -208,6 +208,39 @@ This string is appended to the names in \var{machineNames} to form the
 fully qualified host names.
 
 \end{indexlist}
+
+\node Command-line Argument
+\subsection{Setting Parameters Using Command-line Arguments}
+
+This is a new feature and has not been extensively tested yet.
+Currently, it is only supported for \code{scalar parameters} with
+\code{FLOAT} and \code{INT} values. Also, it is only working for
+\code{parameters} of \code{Stars} at the top level, i.e. it will
+not work with \code{Galaxies}' and \code{Universes}' \code{parameters},
+or \code{parameters} of \code{Stars} in \code{Galaxies}.
+
+To specify a \code{parameter} for setting via the command-line,
+place the cursor over the \code{Star} and invoke the ``edit-pragmas''
+command (``a''). In the dialog box, enter the name of the
+\code{parameter} to be made settable, follow by white space, then
+the name of the command-line option with which to set the \code{parameter}.
+This \code{parameter}/option-name pair should be entered for each
+of the required \code{parameters}, with each pairs being separated by
+white spaces:
+
+\begin{figure}
+\centering
+\ \psfig{figure=\CGC/icons/pragma-dial.ps}
+\end{figure}
+
+Now, the generated program will take the new options each
+followed by a value with which to set the corresponding \code{parameters}.
+If the command-line \code{option} is not specified for a parameter, it
+will be initialized to its default value, which will be the value set
+by the ``edit-params'' command (``e''). In addition, if the '-h',
+'-help' or '-HELP' option is specified, the program will print the
+option-names corresponding to the settable \code{parameters} with
+their default values.
 
 \node CGC Star Overview
 \section{An Overview of CGC Stars}
@@ -560,6 +593,11 @@ The other demos in this palette are described briefly below.
 This simple system plots four nonlinear functions over the range
 1.0 to 1.99.  The four functions are exponential, natural logarithm,
 square root, and reciprocal.
+
+\block{commandline}
+This demo is a slight modification of the \code{nonlinear} demo. It
+uses the \code{pragma} mechanism to indicate the \code{parameters}
+that are to be made settable from the command-line.
 
 \block{typeConversion}
 This simple demo tests the automatic splicing in of type conversion stars.
