@@ -48,8 +48,9 @@ PortHole* AutoForkNode::setSourcePort (GenericPort &sp) {
 		forkOutput = (MultiPortHole *)&sp;
 		if (destinationPort) {
 			forkOutput->connect(*destinationPort,0);
+			PortHole* result = destinationPort->far();
 			destinationPort = 0;
-			return destinationPort->far();
+			return result;
 		}
 		else return &sp.newConnection();
 	}
