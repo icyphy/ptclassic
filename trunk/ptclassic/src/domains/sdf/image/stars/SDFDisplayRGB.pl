@@ -11,18 +11,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Accept three ColorImages (Red, Green, and Blue) from three input
-float matrix and generate a color image file in Portable Pixmap (PPM) format.
-Send the filename to a user-specified command 
-(by default,
-.EQ
-delim off
-.EN
-"xv"
-.EQ
-delim $$
-.EN
-is used).
+Accept three color images (red, green, and blue) from three input
+floating-point matrices and generate a color image file in Portable
+Pixmap (PPM) format.  Send the filename to a user-specified command 
+(by default, xv).
 
 The user can set the root filename of the displayed image (which will
 probably be printed in the image display window title bar) and

@@ -3,10 +3,9 @@ defstar {
     domain {SDF}
     desc {
 Generate standard window functions or periodic repetitions of standard
-window functions.
-The possible functions are: Rectangle, Bartlett, Hanning, Hamming,
-Blackman, Kaiser, and SteepBlackman.
-One period of samples is produced at each firing.
+window functions.  The possible windows are Rectangle, Bartlett,
+Hanning, Hamming, Blackman, SteepBlackman, and Kaiser.  One period of
+samples is produced at each firing.
     }
     explanation {
 .lp
