@@ -78,67 +78,9 @@ octObject *obj;
 /***** End Ess routines (Error Select Set) */
 
 
-/***** Begin Emit routines... */
-
-static char emitTmpName[32];
-static FILE *emitTmpFile;
-static boolean emitFileEmpty;  /* tells if tmp file is empty */
-
-/*  5/16/89 2/21/89
-*/
-static boolean
-EmitInit()
-{
-    FILE *fopen();
-    char buf[512];
-
-    sprintf(emitTmpName, "/tmp/%s%d", UAppName, getpid());
-    /* remove temporary file if it exists */
-    ERR_IF2(unlink(emitTmpName) != 0 && errno != ENOENT,
-	"EmitInit: unlink() failed");
-    if ((emitTmpFile = fopen(emitTmpName, "w")) == NULL) {
-	ErrAdd(sprintf(buf, "EmitInit#1: unable to open file = %.100s",
-	    emitTmpName));
-	return(FALSE);
-    }
-    emitFileEmpty = TRUE;
-    return (TRUE);
-}
-
-static void
-EmitClose()
-{
-    fclose(emitTmpFile);
-}
-
-static void
-EmitUnlink()
-{
-    unlink(emitTmpName);
-}
-
-static boolean
-EmitLoad()
-{
-    if (!emitFileEmpty) {
-	ERR_IF1(!KcLoad(emitTmpName));
-    }
-    return (TRUE);
-}
-
-static boolean
-Emit(buf)
-char *buf;
-{
-    fprintf(emitTmpFile, buf);
-    emitFileEmpty = FALSE;
-    return (TRUE);
-}
-
-/***** End Emit routines */
-
-
-/* clean this up later */
+/* currently, all galaxy parameters are type "float".  We need to fix
+   this.
+ */
 static boolean
 ProcessFormalParams(galFacetPtr)
 octObject *galFacetPtr;
@@ -146,137 +88,29 @@ octObject *galFacetPtr;
     ParamListType pList;
     ParamType *p;
     int i;
-    char buf[4096];
 
     ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
     for (i = 0, p = pList.array; i < pList.length; i++, p++) {
-	(void) sprintf(buf, "(param %s %s)\n", p->name, p->value);
-	ERR_IF1(!Emit(buf));
+	ERR_IF1(!KcMakeState(p->name, "float", p->value));
     }
     return(TRUE);
 }
 
-#define COMMANDLEN 4096
-#define PARAMLEN 1024
-/* fix later: use dynamic alloc */
-static boolean
-EmitDefstar(name, ako, pListPtr)
-char *name, *ako;
-ParamListType *pListPtr;
-{
-    char commandBuf[COMMANDLEN];
-    char paramBuf[PARAMLEN];
-    int i;
-    ParamType *place;
-
-    sprintf(commandBuf, "(defstar %s (ako %s)", name, ako);
-    place = pListPtr->array;
-    for (i = 0; i < pListPtr->length; i++) {
-	sprintf(paramBuf, " (param %s %s)", place->name, place->value);
-	strcat(commandBuf, paramBuf);
-	place++;
-    }
-    strcat(commandBuf, ")\n");
-    ERR_IF1(!Emit(commandBuf));
-    ERR_IF1(!KcInstance(name, ako, pListPtr));
-    return(TRUE);
-}
-#undef COMMANDLEN
-#undef PARAMLEN
-
-#define COMMANDLEN 4096
-/* 10/23/89 6/13/89
+/* 7/25/90
 Add new fork star names here for auto-fork.
+This code depends on the Fork class name being "Fork" and the
+output MultiPortHole name being "output".
 */
 static boolean
 EmitDefstarFork(name, outputsN)
 char *name;
 int outputsN;
 {
-    char commandBuf[COMMANDLEN];
-
-    ErrAdd("Auto-forking not implemented yet");
-    return (FALSE);
-
-/*  Not yet implemented, wait until methods in kernel are defined
-    sprintf(commandBuf, "(defstar %s (ako %s) (param N %d))\n", name, 
-	emitForkStar, outputsN);
-    ERR_IF1(!Emit(commandBuf));
-    return (TRUE);
-*/
-}
-#undef COMMANDLEN
-
-#define COMMANDLEN 4096
-#define PARAMLEN 1024
-/* fix later: use dynamic alloc */
-static boolean
-EmitDefgalaxy(name, ako, pListPtr)
-char *name, *ako;
-ParamListType *pListPtr;
-{
-    char commandBuf[COMMANDLEN];
-    char paramBuf[PARAMLEN];
-    int i;
-    ParamType *place;
-
-    sprintf(commandBuf, "(defgalaxy %s (ako %s)", name, ako);
-    place = pListPtr->array;
-    for (i = 0; i < pListPtr->length; i++) {
-	sprintf(paramBuf, " (param %s %s)", place->name, place->value);
-	strcat(commandBuf, paramBuf);
-	place++;
-    }
-    strcat(commandBuf, ")\n");
-    ERR_IF1(!Emit(commandBuf));
-    ERR_IF1(!KcInstance(name, ako, pListPtr));
-    return(TRUE);
-}
-#undef COMMANDLEN
-#undef PARAMLEN
-
-static boolean
-EmitConnect(sog1, term1, sog2, term2, delay)
-char *sog1, *term1, *sog2, *term2;
-int delay;
-{
-    char buf[1000];
-
-    if (delay == 0) {
-	sprintf(buf, "(connect ((%s %s) (%s %s)))\n", sog1, term1,
-	    sog2, term2);
-    } else {
-	sprintf(buf, "(connect ((%s %s) (%s %s) %d))\n", sog1, term1,
-	    sog2, term2, delay);
-    }
-    ERR_IF1(!Emit(buf));
-    ERR_IF1(!KcConnect(sog1, term1, sog2, term2, delay));
+    ERR_IF1(!KcInstance (name, "Fork", (ParamListType *)0));
+    ERR_IF1(!KcNumPorts (name, "output", outputsN));
     return (TRUE);
 }
 
-static boolean
-EmitInput(inName, sog, term)
-char *inName, *sog, *term;
-{
-    char buf[1000];
-
-    sprintf(buf, "(input %s (%s %s))\n", inName, sog, term);
-    ERR_IF1(!Emit(buf));
-    ERR_IF1(!KcAlias(inName, sog, term));
-    return (TRUE);
-}
-
-static boolean
-EmitOutput(outName, sog, term)
-char *outName, *sog, *term;
-{
-    char buf[1000];
-
-    sprintf(buf, "(output %s (%s %s))\n", outName, sog, term);
-    ERR_IF1(!Emit(buf));
-    ERR_IF1(!KcAlias(outName, sog, term));
-    return (TRUE);
-}
 
 static boolean
 ProcessSubGals(facetPtr)
@@ -402,14 +236,14 @@ octObject *facetPtr;
 		ERR_IF1((name = UniqNameGet(akoName)) == NULL);
 		inst.contents.instance.name = name;
 		ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
-		ERR_IF1(!EmitDefgalaxy(name, akoName, &pList));
+		ERR_IF1(!KcInstance(name, akoName, &pList));
 	    } else {
 		/* assume inst is a star... */
 		akoName = AkoName(inst.contents.instance.master);
 		ERR_IF1((name = UniqNameGet(akoName)) == NULL);
 		inst.contents.instance.name = name;
 		ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
-		ERR_IF1(!EmitDefstar(name, akoName, &pList));
+		ERR_IF1(!KcInstance(name, akoName, &pList));
 	    }
 	}
     }
@@ -536,9 +370,9 @@ octObject *outTermPtr;
 	    EssAddObj(&outInst);
 	    return (FALSE);
 	}
-	ERR_IF1(!EmitInput(fTerm.contents.term.name, name, forkInName));
+	ERR_IF1(!KcAlias(fTerm.contents.term.name, name, forkInName));
     } else {
-	ERR_IF1(!EmitConnect(
+	ERR_IF1(!KcConnect(
 	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
 	    name, forkInName, 0)
 	);
@@ -569,9 +403,9 @@ octObject *inTermPtr;
 	    EssAddObj(&inInst);
 	    return (FALSE);
 	}
-	ERR_IF1(!EmitOutput(fTerm.contents.term.name, name, buf));
+	ERR_IF1(!KcAlias(fTerm.contents.term.name, name, buf));
     } else {
-	ERR_IF1(!EmitConnect(
+	ERR_IF1(!KcConnect(
 	    name, buf, 
 	    inInst.contents.instance.name, inTermPtr->contents.term.name, 0)
 	);
@@ -598,7 +432,7 @@ int delay;
 
     if (!inIsConn && !outIsConn) {
 	/* 2 sogs connected */
-	ERR_IF1(!EmitConnect(
+	ERR_IF1(!KcConnect(
 	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
 	    inInst.contents.instance.name, inTermPtr->contents.term.name, delay)
 	);
@@ -609,7 +443,7 @@ int delay;
 	    EssAddObj(&outInst);
 	    return (FALSE);
 	}
-	ERR_IF1(!EmitInput(fTerm.contents.term.name,
+	ERR_IF1(!KcAlias(fTerm.contents.term.name,
 	    inInst.contents.instance.name, inTermPtr->contents.term.name));
     } else if (inIsConn && !outIsConn) {
 	if (octGenFirstContainer(inTermPtr, OCT_TERM_MASK, &fTerm) !=OCT_OK) {
@@ -617,7 +451,7 @@ int delay;
 	    EssAddObj(&inInst);
 	    return (FALSE);
 	}
-	ERR_IF1(!EmitOutput(fTerm.contents.term.name,
+	ERR_IF1(!KcAlias(fTerm.contents.term.name,
 	    outInst.contents.instance.name, outTermPtr->contents.term.name));
     } else {
 	ErrAdd("JoinOrdinary: cannot connect input port directly to output port");
@@ -751,14 +585,11 @@ octObject *galFacetPtr;
     }
     sprintf(msg, "CompileGal: facet = %s", name);
     PrintDebug(msg);
-    sprintf(buf, "(defgalaxy %s\n", name);
-    ERR_IF2(!Emit(buf), msg);
     ERR_IF1(!KcDefgalaxy(name));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
     ERR_IF2(!DefAutoForkPass(galFacetPtr), msg);
     ERR_IF2(!ConnectPass(galFacetPtr), msg);
-    ERR_IF2(!Emit(")\n"), msg);
     ERR_IF1(!KcEndDefgalaxy());
     ERR_IF2(!DupSheetAdd(&traverse, name), msg);
     ERR_IF2(!ClearDirty(galFacetPtr), msg);
@@ -783,7 +614,6 @@ octObject *facetPtr;
 	return (TRUE);
     }
     PrintDebug("CompileUniv");
-    ERR_IF1(!Emit("(clear universe)\n"));
     KcClearUniverse();
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!DefAutoForkPass(facetPtr));
@@ -808,8 +638,6 @@ octObject *facetPtr;
 {
     static octId lastFacetId = OCT_NULL_ID;
 
-    ERR_IF1(!EmitInit());
-
     /* if this is not the same facet as last time... */
     if (!octIdsEqual(lastFacetId, facetPtr->objectId)) {
 	/* Different facet, so compile everything */
@@ -821,7 +649,6 @@ octObject *facetPtr;
     DupSheetClear(&traverse);
     if (IsGalFacet(facetPtr)) {
 	if (!CompileGal(facetPtr)) {
-	    EmitClose();
 	    return (FALSE);
 	}
     } else if (IsPalFacet(facetPtr)) {
@@ -829,11 +656,9 @@ octObject *facetPtr;
 	return (FALSE);
     } else {
 	if (!CompileUniv(facetPtr)) {
-	    EmitClose();
 	    return (FALSE);
 	}
     }
-    EmitClose();
     lastFacetId = facetPtr->objectId;  /* remember this facet */
     return (TRUE);
 }
@@ -874,5 +699,4 @@ CompileInit()
 CompileEnd()
 {
     /* clean up tmp file before exiting */
-    EmitUnlink();
 }
