@@ -41,7 +41,6 @@
 #
 # See the BuilderDialog class for a graphical interface
 #
-# FIXME: there should be a proc to build tclIndex files.
 #
 # FIXME: it would be nice if we could parse makefiles to get variables.
 #
@@ -65,11 +64,17 @@ class ::tycho::Builder {
     # Create the class diagram 
     proc classDiagram {}
 
+    # Create glimpse files
+    proc glimpse {}
+
     # Create the concept and code Indices
     proc indices {}
 
     # Create itcldocs in the subdirectories
     proc itcldocs {}
+
+    # Create tclIndex files
+    proc tclIndex {}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -119,10 +124,11 @@ body ::tycho::Builder::build {} {
 
 #######################################################################
 #### buildSubDirectories
-# Create the concept and code Indices
+# Run build in subdirectories
 #
 body ::tycho::Builder::buildSubDirectories {} {
-    puts "Running buildSubDirectories"
+    # FIXME: buildSubDirectories is not implemented yet
+    error "Running buildSubDirectories"
 }
 
 #######################################################################
@@ -139,6 +145,14 @@ body ::tycho::Builder::classDiagram {} {
     cd [file join $TYCHO doc]
 
     tychoStandardDAG
+}
+
+#######################################################################
+#### glimpse
+# Create glimpse files
+#
+body ::tycho::Builder::glimpse {} {
+    ::tycho::Glimpse::updateTychoDatabase
 }
 
 #######################################################################
@@ -185,4 +199,13 @@ body ::tycho::Builder::itcldocs {} {
 	    puts $retval
 	}
     }
+}
+
+#######################################################################
+#### tclIndex
+# Create tclIndex
+#
+body ::tycho::Builder::tclIndex {} {
+    # FIXME: tclIndex is not implemented yet
+    error "Sorry, not implemented yet"
 }
