@@ -63,6 +63,7 @@ to become a permanent part of the system.
 #include "StringList.h"
 #include "pt_fstream.h"
 #include <ctype.h>
+#include "paths.h"
 
 // static data objects
 int Linker::activeFlag = 0;
@@ -92,30 +93,11 @@ void Linker::adjustMemory() {
 	}
 }
 
-const char*
-pathSearch (const char* name, const char* path) {
-// if name has slashes it must be exact
-	if (strchr (name, '/')) {
-		return access(name, 0) == 0 ? hashstring(name) : 0;
-	}
-	char nameBuf[512];
-// build the next candidate name
-	while (*path) {
-		char* q = nameBuf;
-		while (*path && *path != ':') *q++ = *path++;
-		*q++ = '/';
-		strcpy (q, name);
-		if (access (nameBuf, 0) == 0) return hashstring(nameBuf);
-		if (*path == ':') path++;
-	}
-	return 0;
-}
-
 void Linker::init (const char* myName) {
 // locate the ptolemy binary that is currently running.
 // main should call this with argv[0] as an argument.
 // We believe argv[0] without checking if it begins with '/'
-	ptolemyName = pathSearch (myName, getenv("PATH"));
+	ptolemyName = pathSearch (myName);
 	if (!ptolemyName)
 		Error::abortRun (
 "Cannot locate the running binary! Incremental linking disabled");
