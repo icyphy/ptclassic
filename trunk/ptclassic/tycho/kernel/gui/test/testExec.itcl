@@ -34,11 +34,11 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-
 test Exec-1.1 {run make} {
     catch {destroy .exec}
     catch {delete object .exec}
     ::tycho::Exec .exec
+    
     .exec execProcess {make test_exec_msg} [file join $TYCHO kernel test]
 
     # Wait for return
@@ -46,7 +46,12 @@ test Exec-1.1 {run make} {
     set history [.exec getHistory]
     set results {}
     regexp {>>([^<]+)<<} $history match results
-    list $status $results
+
+    # Strip out lines like 'make[1] entering directory foo'
+    set removemake "make\[^\n\]*\n"
+    regsub -all $removemake $results {} newresults
+
+    list $status $newresults
 } {normal {
 This message is used to test the Exec class
 
