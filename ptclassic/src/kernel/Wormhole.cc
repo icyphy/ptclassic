@@ -37,8 +37,17 @@ extern Error errorHandler;
 // SDFWormhole::SDFWormhole(Galaxy&g) : Wormhole(g,this)
 // { buildEventHorizons();}
 
-Wormhole::Wormhole(Star& s,Galaxy& g) : selfStar(s),
-	Runnable(&Domain::domainOf(g)->newSched(),g.domain(),&g)
+Wormhole::Wormhole(Star& s,Galaxy& g,const char* targetName) : selfStar(s),
+	Runnable(targetName,g.domain(),&g)
+{
+	// set up the parent pointer of inner Galaxy
+	g.setNameParent(g.readName(), &s);
+
+	dynamicHorizons = FALSE;
+}
+
+Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : selfStar(s),
+	Runnable(innerTarget,g.domain(),&g)
 {
 	// set up the parent pointer of inner Galaxy
 	g.setNameParent(g.readName(), &s);
@@ -158,7 +167,7 @@ int Wormhole :: checkReady() const {
 
 // set scheduler stop time.  By default, argument is ignored.
 void Wormhole :: setStopTime(float) {
-	scheduler->resetStopTime(getStopTime());
+	target->resetStopTime(getStopTime());
 }
 
 // arrange things after run
@@ -168,3 +177,4 @@ void Wormhole :: sumUp() {}
 // use abstract virtual method by some strange reason (compiler bug!) 
 // for now.
 float Wormhole :: getStopTime() { return 0 ;}
+

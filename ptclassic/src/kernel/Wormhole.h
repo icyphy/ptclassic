@@ -25,7 +25,7 @@
 
 	Wormholes are defined in this file.
 	A Wormhole is a Star with a pointer to a component Galaxy,
-	and a Scheduler to fire the blocks in the Galaxy.
+	and a Target to fire the blocks in the Galaxy.
 	From the outside, #in%_Wormhole looks exactly like a % Star.
 
 	Wormhole differs from "Universe" in that it needs interface
@@ -49,8 +49,7 @@ public:
 		from.ghostConnect(to);
 	}
 
-	void setup() { initSched(); 
-		       scheduler->stopBeforeDeadlocked = FALSE ;}
+	void setup() { initSched(); }
 
 	void run() { if (!checkReady()) return;
 		     setStopTime(1.0);		// 1.0 is dummy value.
@@ -63,9 +62,11 @@ public:
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
 	// here we do
-	// SDFWormhole::SDFWormhole(Galaxy& g) : Wormhole(this,g) {...}
+	// SDFWormhole::SDFWormhole(Galaxy& g,Target* t) :
+	//	Wormhole(this,g,t) {...}
 
-	Wormhole(Star& self, Galaxy& g);
+	Wormhole(Star& self, Galaxy& g, const char* targetName = 0);
+	Wormhole(Star& self, Galaxy& g, Target* innerTarget = 0);
 
 	// function to connect inner galaxy ports to outside through
 	// event horizons of proper type
