@@ -936,7 +936,7 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
     }
     # Unsubscribe it
     if { $name != "" } {
-        if [::info exists _subs([list $mode $name $subscriber]) {
+        if [::info exists _subs([list $mode $name $subscriber])] {
             unset _subs([list $mode $name $subscriber])
         }
     } else {
