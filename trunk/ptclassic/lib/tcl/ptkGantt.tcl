@@ -114,7 +114,6 @@ proc ptkGantt_Zoom { universe num_procs period dir } {
     # set new scrollregion
     set new_width [expr [expr [lindex [$chartName.mbar.zoomindex configure \
 	    -text] 4] * $period] + 2]
-    puts $new_width
     $chartName.chart.graph configure -scrollregion \
 	    "0 0 ${new_width}c ${num_procs}i"
     $chartName.chart.ruler configure -scrollregion "0 0 ${new_width}c 1.5c"
@@ -123,9 +122,7 @@ proc ptkGantt_Zoom { universe num_procs period dir } {
 	set star_name [string range [lindex [$chartName.chart.graph gettags \
 		$box] [lsearch -glob [$chartName.chart.graph gettags $box] \
 		"star_*"]] 5 end]
-	puts $star_name
 	set coords [$chartName.chart.graph coords $box]
-	puts $coords
 	if {[expr [string length $star_name] * 10] <= [expr [lindex $coords 2]\
 		- [lindex $coords 0]] } {
 	    set proc [string range [lindex [$chartName.chart.graph gettags \
