@@ -109,7 +109,19 @@ body ::tycho::EditPtcl::constructor {args} {
     
     addMenu Special left Window -underline 0
     addMenuItem "Retarget" Special -underline 0 \
-	    -command "::tycho::inform \[$this component text\]"
+	    -command "set w \[::tycho::Retarget .rtrg#auto -edit \
+                      \[$this component text\]\]; \$w centerOnScreen"
+
+    addMenuItem "List Stars" Special -underline 0 \
+            -command "::tycho::inform \
+        \"Stars used: \[\[$this component text\] stars\]\""
+
+    addMenuItem "Ptolemy Universes" Special -underline 0 \
+            -command "::tycho::File::openContext \[file join \$env(PTOLEMY) tycho typt lib PtolemyFacets.fst\]"
+
+    addMenuItem "Universe Name" Special -underline 0 \
+            -command "::tycho::inform \
+            \" Universe: \[\[$this component text\] universeName\]\""
 
     addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
