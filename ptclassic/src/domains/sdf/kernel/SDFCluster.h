@@ -121,8 +121,13 @@ protected:
 
 	// interior portions of loop pass
 	int integralLoopPass(int doAnyLoop);
-	int nonIntegralLoopPass();
+	int loopTwoClusts();
 
+	// pass to do non-integral rate changes if structure is a tree.
+	int tryTreeLoop();
+
+	// predicate to determine whether cluster has a tree topology
+	int isTree();
 private:
 	int bagNumber;		// number for generating bag names
 	SequentialList stopList;// this list is used by fullSearchMerge.
