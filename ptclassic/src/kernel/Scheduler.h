@@ -1,5 +1,10 @@
 #ifndef _Scheduler_h
 #define _Scheduler_h 1
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 #include "StringList.h"
 
 /**************************************************************************
@@ -40,13 +45,13 @@ public:
 	virtual void setStopTime(float limit) = 0;
 
 	// hack method to set stopping time of wormhole
-	virtual void resetStopTime(float limit) {setStopTime(limit) ;}
+	virtual void resetStopTime(float limit);
 
 	// set the currentTime 
-	virtual void setCurrentTime(float val) {currentTime = val ;}
+	virtual void setCurrentTime(float val);
 
 	// display schedule
-	virtual StringList displaySchedule() { return "not implemented\n";}
+	virtual StringList displaySchedule();
 
 	// make destructor virtual
 	virtual ~Scheduler() {}
@@ -65,7 +70,7 @@ public:
 	int stopBeforeDeadlocked;
 
 	// identify itself
-	virtual const char* domain() const { return "UnDecided" ;}
+	virtual const char* domain() const;
 protected:
 
 	// request flag for halting -- schedulers must poll and reset

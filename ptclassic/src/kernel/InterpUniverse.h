@@ -20,23 +20,23 @@ $Id$
 *******************************************************************/
 #ifndef _InterpUniverse_h
 #define _InterpUniverse_h 1
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "Universe.h"
 #include "InterpGalaxy.h"
 #include "KnownBlock.h"
-
 
 class InterpUniverse : public InterpGalaxy, public Runnable {
 public:
         InterpUniverse (const char* name = "mainGalaxy") :
 		Runnable(KnownBlock::newSched(), KnownBlock::domain(),this)
         { setBlock(name,NULL);}
-        void newSched() {
-                delete scheduler;
-                scheduler = KnownBlock::newSched();
-                type = KnownBlock::domain();
-        }
-
-	Scheduler* mySched() const { return scheduler;}
+        void newSched();
+	Scheduler* mySched() const;
 };
 
 #endif
