@@ -38,12 +38,38 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLGeodesic.h"
 #include "VHDLPortHole.h"
+#include "Error.h"
+#include <ostream.h>
 
 ISA_FUNC(VHDLGeodesic,CGGeodesic);
 
 // Return the name assigned to the buffer.
 // If I am a fork destination, my buffer name is that of the source.
-char* VHDLGeodesic::getBufName() const {
-	const VHDLPortHole* p = (const VHDLPortHole*)src();
-	return p ? p->geo().getBufName() : bufName;
+char* VHDLGeodesic :: getBufName() const {
+  const VHDLPortHole* p = (const VHDLPortHole*)src();
+  return p ? p->geo().getBufName() : bufName;
+}
+
+// Initialize the geodesic.
+void VHDLGeodesic :: initialize() {
+  nextIn = 1;
+  nextOut = 1;
+  CGGeodesic::initialize();
+}
+
+// Update token put position by specified number of tokens.
+void VHDLGeodesic :: putTokens(int num) {
+  cout << getBufName() << " nextIn from " << nextIn << " to ";
+  nextIn += num;
+  cout << nextIn << "\n";
+}
+
+// Update token get position by specified number of tokens.
+void VHDLGeodesic :: getTokens(int num) {
+  cout << getBufName() << " nextOut from " << nextOut << " to ";
+  nextOut += num;
+  cout << nextOut << "\n";
+  if (nextOut > nextIn) {
+    Error::error("Read from geodesic beyond available tokens");
+  }
 }

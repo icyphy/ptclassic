@@ -51,11 +51,31 @@ public:
 	void setBufName(char* n) {bufName = n;}
 	char* getBufName() const;
 
+	// Initialize the geodesic.
+	void initialize();
+
+	// Update token put position by specified number of tokens.
+	void putTokens(int);
+
+	// Update token get position by specified number of tokens.
+	void getTokens(int);
+
+	// Return the counter for the next token addition to the queue.
+	int nextPut() { return nextIn; }
+
+	// Return the counter for the next token removal from the queue.
+	int nextGet() { return nextOut; }
+
 protected:
 
 private:
 	// Name of the VHDL object used as a buffer
 	char* bufName;
+
+	// Counter for next reference to a token placed on the queue.
+	int nextIn;
+	// Counter for next reference to a token removed from the queue.
+	int nextOut;
 };
 
 #endif

@@ -34,7 +34,8 @@ LIB=libvhdl.$(LIBSUFFIX)
 # Header files
 HDRS= VHDLPortHole.h VHDLStar.h VHDLTarget.h VHDLGeodesic.h VHDLForkNode.h \
 	VHDLWormhole.h VHDLObj.h VHDLObjList.h VHDLPort.h  \
-	VHDLGeneric.h VHDLVariable.h
+	VHDLGeneric.h VHDLVariable.h VHDLSignal.h \
+	VHDLPortMap.h VHDLGenericMap.h VHDLCompDecl.h VHDLCompMap.h
 
 # Library objects
 OBJS= $(HDRS:.h=.o) VHDLDomain.o
