@@ -33,6 +33,7 @@ static char SccsId[]="$Id$";
 #include "harpoon.h"
 #include "tap.h"
 #include "th.h"
+#include "errtrap.h"
 #include "pepint.h"
 
 #define PROPEQ(p,s) (!strcmp((p)->contents.prop.value.string,(s)))
@@ -45,7 +46,7 @@ double pepBoxCap( box, layer )
 {
     double w,h;
     double area_cap, perim_cap;
-    double perim;
+    double perim = 0.0;
 
     double unit_area_cap = thGetAreaCap( layer );
     double unit_perim_cap = thGetPerimCap( layer );
@@ -233,4 +234,5 @@ double pepCapacitance( obj )
 	errRaise( PEP_PKG_NAME, 1, "Cannot measure cap on %s", ohFormatName( obj ) );
 	
     }
+    return 0.0;
 }
