@@ -1,0 +1,40 @@
+.\" $Id$
+.TH PRFACET 1 "22 March 1993"
+.SH NAME
+prfacet \- send PostScript version of a facet to a printer.
+.SH SYNOPSIS
+.B prfacet
+[
+options
+]
+.I "facet name"
+.SH DESCRIPTION
+.I Prfacet
+uses the
+.I oct2ps
+OCTTOOLS program to send the PostScript
+version of a facet to a printer.
+The printer must be specified in the user's PRINTER
+environment variable.
+.PP
+The last command-line option must be the pathname of the
+facet to be printed.
+All other command-line options are passed to oct2ps.
+(See
+.I "man oct2ps"
+for more information.)
+.PP
+The
+.I prfacet
+utility may be invoked from within the
+.I pigi
+Ptolemy graphical interface.
+.PP
+Also, see the manual page for
+.I facet2ps,
+which saves the PostScript representation of a facet to
+a file.
+.SH ENVIRONMENT
+.TP 10
+PRINTER
+Selects printer to be used.
