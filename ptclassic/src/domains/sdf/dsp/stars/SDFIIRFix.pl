@@ -145,8 +145,8 @@ The input particles are only cast to this precision if the parameter
 	constructor {
 		fdbckCoefs = fwdCoefs = state = NULL;
 	}
-        begin {
-            SDFFix::begin();
+        setup {
+            SDFFix::setup();
 
 	    int numNumer = numerator.size();
 	    int numDenom = denominator.size();

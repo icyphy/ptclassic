@@ -170,8 +170,8 @@ The input particles are only cast to this precision if the parameter
 		Fix Accum, fixIn, out, tap;
                 int phaseLength;
         }
-        begin {
-                SDFFix::begin();
+        setup {
+                SDFFix::setup();
 
                 int d = decimation;
                 int i = interpolation;
