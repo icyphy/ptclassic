@@ -173,7 +173,7 @@ test Follower-basic-4 {Basic interaction sequence, by tag, button 2} {
 
 } {90.0 90.0 130.0 130.0}
 
-test Follower-basic-4 {Basic interaction sequence, by tag, button 3, modifiers} {
+test Follower-basic-5 {Basic interaction sequence, by tag, button 3, modifiers} {
     _followeditems
 
     # Create follower and bind to tag
