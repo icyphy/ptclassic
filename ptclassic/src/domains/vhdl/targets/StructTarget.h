@@ -40,8 +40,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTarget.h"
 #include "VHDLStar.h"
 #include "VHDLCompDecl.h"
-#include "VHDLSignal.h"
 #include "VHDLCompMap.h"
+#include "VHDLSignal.h"
+#include "VHDLState.h"
+#include "VHDLPortVar.h"
 
 class StructTarget : public VHDLTarget {
 public:
@@ -52,12 +54,22 @@ public:
 	/*virtual*/ int isA(const char*) const;
 
 	// The following are for keeping track of components and signals.
+	VHDLPortList firingPortList;
+	VHDLGenericList firingGenericList;
+	VHDLPortMapList firingPortMapList;
+	VHDLGenericMapList firingGenericMapList;
+	VHDLSignalList firingSignalList;
+	VHDLVariableList firingVariableList;
+	VHDLPortVarList firingPortVarList;
+	VHDLPortVarList firingVarPortList;
+
 	VHDLCompDeclList compDeclList;
 	VHDLSignalList signalList;
 	VHDLCompMapList compMapList;
+	VHDLStateList stateList;
 
 	// Main routine.
-	virtual int runIt(VHDLStar*);
+	/*virtual*/ int runIt(VHDLStar*);
 
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
@@ -84,10 +96,10 @@ public:
 	void setGeoNames(Galaxy&);
 
 	// Declare PortHole buffer.
-	StringList declBuffer(const VHDLPortHole*);
+	/*virtual*/ StringList declBuffer(const VHDLPortHole*);
 
 	// Declare State variable.
-	StringList declState(const State*, const char*);
+	/*virtual*/ StringList declState(const State*, const char*);
 
 	// Register component declaration.
 	void registerCompDecl(StringList name,
@@ -103,7 +115,20 @@ public:
 			     VHDLGenericMapList* genMapList);
 
 	// Return the VHDL type corresponding to the State type.
-	StringList stateType(const State* st);
+	/*virtual*/ StringList stateType(const State* st);
+
+	// Register the temporary storage reference.
+	/*virtual*/ void registerTemp(const char*, const char*);
+
+	// Register the State reference.
+	/*virtual*/ void registerState(State*, int=-1);
+
+	// Register PortHole reference.
+	/*virtual*/ void registerPortHole(VHDLPortHole*, int=-1);
+
+  	// The only reason for redefining this from HLLTarget
+ 	// is to change the separator from "." to "_".
+ 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
 
 protected:
 	CodeStream component_declarations;
@@ -111,7 +136,10 @@ protected:
 	CodeStream component_mappings;
 	CodeStream starDecls;
 	CodeStream starInit;
+//	CodeStream firingVarDecls;
+//	CodeStream firingPreAction;
 	CodeStream firingAction;
+//	CodeStream firingPostAction;
 
 	// virtual function to add additional codeStreams.
 	virtual void addCodeStreams();
@@ -135,12 +163,8 @@ protected:
 	// Star PortHoles and States.
 /*
 	virtual void declareGalaxy(Galaxy&);
-*/
 	virtual void declareStar(VHDLStar*);
-
-  	// The only reason for redefining this from HLLTarget
- 	// is to change the separator from "." to "_".
- 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
+*/
 
 private:
 };
