@@ -1,20 +1,17 @@
-ident {
-// $Id$
-// Joseph T. Buck
-
-// This atrocity sends files to a program that plays files over the
-// SparcStation speaker.  Needless to say, you have to be on the
-// SparcStation and you need to have the right program and files.
-// The files are from a "speaking clock" program, which is why
-// it only really works for 0-59 (though I fake it up to 100).
-}
-
 defstar {
 	name { SayDigit }
 	domain { SDF }
+	version { $Id$ }
 	desc {
 	"Speak the input integer values on the SparcStation speaker.\n"
 		"Only works for 0 <= n <= 99."
+	}
+	explanation {
+This atrocity sends files to a program that plays files over the
+SparcStation speaker.  Needless to say, you have to be on the
+SparcStation and you need to have the right program and files.
+The files are from a "speaking clock" program, which is why
+it only really works for 0-59 (though I fake it up to 100).
 	}
 	input {
 		name { input }
@@ -23,40 +20,29 @@ defstar {
 	ccinclude { "stream.h",  "std.h" }
 	code {
 // Start of code block to put in the SayDigit.cc file
-#ifndef PLAYCMD
-#define PLAYCMD "/usr/local/sound/bin/play"
-#endif
-
 #ifndef PLAYDIR
 #define PLAYDIR "/usr/local/sound/lib/saytime"
 #endif
-static const char* pcmd = PLAYCMD;
-static const char* pdir = PLAYDIR;
 
 // Function to say a file.
-static say (char* file) {
-	system (form ("%s %s/%s", pcmd, pdir, file));
+static void say (const char* file) {
+	char buf[256];
+	sprintf (buf, "play %s/%s", PLAYDIR, file);
+	system (buf);
 }
 
 // Function to say two files (both numeric)
-static say2 (int n1, int n2) {
-	if (n2 == 0) {
-		system (form ("cat %s/%d.au %s/oh.au | %s",
-			      pdir, n1, pdir,pcmd));
-		return;
-	}
-	system (form ("cat %s/%d.au %s/%d.au | %s",
-		      pdir, n1, pdir, n2, pcmd));
+static void say2 (int n1, int n2) {
+	char buf[256];
+	if (n2 == 0)
+		sprintf ("cat %s/%d.au %s/oh.au | play",
+			 PLAYDIR, n1, PLAYDIR);
+	else
+		sprintf ("cat %s/%d.au %s/%d.au | play",
+			 PLAYDIR, n1, PLAYDIR, n2);
+	system (buf);
 }
 // end of code block
-	}
-
-// startup function: make sure the program exists
-	start {
-		if (access (pcmd, 1) == 0) return;
-		cerr << "Can't find " << pcmd << "!\n";
-		cerr << "The SayDigit star requires this program.\n";
-		exit (1);
 	}
 
 // go function: say the input
