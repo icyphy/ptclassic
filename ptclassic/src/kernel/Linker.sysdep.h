@@ -61,6 +61,8 @@ const int linkingNotSupported =
 #define USE_DLSYM
 #if defined(__GNUG__)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
+#else // __GNUG__
+#define SHARED_OBJECT_COMMAND "CC -G -o"
 #endif // __GNUG__
 #endif
 
@@ -222,7 +224,6 @@ struct flock;
 extern "C" {
 #ifdef hpux
 #include <a.out.h>
-#include <fcntl.h>
 #else
 #ifdef mips
 #define COFF
@@ -233,6 +234,14 @@ extern "C" {
 #endif /*SOL2*/
 #endif
 }
+
+#if defined(hpux) || defined(SOL2) || defined(SYSV) || defined(SVR4)
+#include <fcntl.h>
+#endif
+
+#if defined(SOL2)
+#include <unistd.h>
+#endif
 
 // Sun4: don't include nlist.h after a.out.h, or nlist will be
 // multiply defined.
