@@ -44,7 +44,9 @@ extern "C" int gettimeofday(timeval *, struct timezone *);
 extern "C" int select(size_t, int*, int*, int*, const timeval*);
 #else
 #include <sys/types.h>
+#ifdef __GNUG__
 extern "C" int select(int, fd_set*, fd_set*, fd_set*, timeval*);
+#endif
 #endif
 
 Clock::Clock()
