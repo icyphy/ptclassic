@@ -31,10 +31,29 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+# FIXME: Many features are missing.
+# Perhaps the most important and relatively easy to support:
+# - forms
+# - a forward button
+# - hotlist support
+
 #######################################################################
 #### HTML
-# This window contains a text widget that displays HTML using the
-# library by Stephen Uhler.
+# A window containing a text widget that displays HTML using the
+# HTML library by Stephen Uhler.  The HTML may be specified directly
+# using the -data option or indirectly using the -file option, or
+# may be inserted using any of a number of methods.
+# An interface to an HTML editor is provided through the "Open Source"
+# menu command.  Buttons are provided for frequently executed commands.
+# <p>
+# This class is meant to provide an integrated documentation system,
+# not to replace standard Web browsers.  In fact, it does not at this
+# time have HTTP capability, so it will not read files off the Web.
+# <p>
+# This HTML parser is a bit slow,
+# and does not include most features of HTML beyond version 2.0.
+# Nonetheless, it is small, simple, and easily extended, so it serves
+# our purposes well.
 # 
 class ::tycho::HTML {
     inherit ::tycho::File
@@ -45,7 +64,7 @@ class ::tycho::HTML {
     ###################################################################
     ####                       options                             ####
 
-    # Offset from 14 points for the font sizes.
+    # Offset from the nominal 14 points for the font sizes.
     itk_option define -sizeadjustment sizeAdjustment SizeAdjustment 2
 
     ###################################################################
@@ -54,7 +73,7 @@ class ::tycho::HTML {
     # Prompt the user for a file name and load in place of the current file.
     method altFile {}
 
-    # Call this to give the text subwindow the focus.
+    # Give the text subwindow the focus.
     method focusin {}
 
     # Open a help window.
@@ -66,7 +85,7 @@ class ::tycho::HTML {
     # Open the source file using an HTML editor.
     method openSource {}
 
-    # Raise the HTML broswer window and the source window (if any).
+    # Raise the HTML browser window and the source window (if any).
     method raiseWindow {}
 
     # Clear the current text and reload from the source file.
@@ -82,7 +101,7 @@ class ::tycho::HTML {
     ####                   protected methods                             ####
 
     # Add a button to the toolbar.
-    method addTool {name label command}
+    protected method addTool {name label command}
 
     # Return the name of the type of text widget to use.
     protected method textWidget {} {return ::tycho::HTMLText}
@@ -223,9 +242,9 @@ body ::tycho::HTML::constructor {args} {
 }
 
 ###################################################################
-# The destructor needs to ensure that after this object is gone, if the
-# corresponding source file is still open, that it will appear in the
-# Window menu.
+# Ensure that after this object is gone, if the
+# corresponding source file is still open, it will appear in the
+# "Window" menu.
 #
 body ::tycho::HTML::destructor {} {
     if [sourcewinIsMine] {
@@ -242,7 +261,8 @@ body ::tycho::HTML::destructor {} {
 
 ###################################################################
 #### altFile
-# Query the user for a filename, insert it in place of the current file.
+# Query the user for a filename, insert its contents in place of the
+# currently displayed HTML.
 #
 body ::tycho::HTML::altFile {} {
     set filename [::tycho::DialogWindow::newModal FileBrowser \
@@ -262,7 +282,7 @@ body ::tycho::HTML::focusin {} {
 
 #########################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 #
 body ::tycho::HTML::help {} {
     global ::TYCHO
@@ -271,7 +291,7 @@ body ::tycho::HTML::help {} {
 
 #####################################################################
 #### insertData
-# Insert the specified data.
+# Insert the specified data, which should be HTML.
 #
 body ::tycho::HTML::insertData {data} {
     component text configure -html $data
@@ -279,7 +299,7 @@ body ::tycho::HTML::insertData {data} {
 
 #####################################################################
 #### openSource
-# Open the source file using an HTML editor.
+# Open the source file using an editor specialized for editing HTML.
 #
 body ::tycho::HTML::openSource {} {
     # If a source window already exists, just raise it.
@@ -295,8 +315,7 @@ body ::tycho::HTML::openSource {} {
 
 #####################################################################
 #### raiseWindow
-# Overload the base class raiseWindow to raise the source window also,
-# if it is open.
+# Raise this window and also the source window, if it is open.
 #
 body ::tycho::HTML::raiseWindow {} {
     if [sourcewinIsMine] {
@@ -328,7 +347,7 @@ body ::tycho::HTML::seeName {name} {
 # Switch to a different HTML file. Special care is required
 # here because there might be a source file open for either the old
 # or the new file. If there is a source file for the old HTML file,
-# it should now appear in the Window menu.  If there is one for the
+# it will now appear in the "Window" menu.  If there is one for the
 # new file, it should now be removed from the Window menu (the HTML
 # browser widget will take its place).  This method essentially
 # accomplishes the same functions as configuring the -file option,
