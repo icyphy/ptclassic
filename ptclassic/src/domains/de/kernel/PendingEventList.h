@@ -57,7 +57,7 @@ public:
 
 	// Destructor
 	// FIXME: Fill this in!
-	// ~PendingEventList();
+	~PendingEventList();
 
 	// Append to tail and return pointer to element
 	Link * appendGet( CqLevelLink * obj ); 
