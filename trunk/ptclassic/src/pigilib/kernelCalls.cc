@@ -21,7 +21,7 @@ Programmer: J. Buck, E. Goei
 #include "Target.h"
 #include "KnownTarget.h"
 #include "ConstIters.h"
-#include "UserOutput.h"
+#include "pt_fstream.h"
 #include <ACG.h>
 #include <signal.h>
 #include <ctype.h>
@@ -35,28 +35,25 @@ static Target *galTarget = NULL;	 // target for a galaxy
 
 // Define a stream for logging -- log output to pigiLog.pt
 
-UserOutput LOG;
+pt_ofstream LOG;
 
 extern "C" boolean
 KcInitLog(const char* file) {
-	if (!LOG.fileName(file)) {
-		LOG.fileName("/dev/null");
-		return FALSE;
-	}
-	return TRUE;
+	LOG.open(file);
+	return LOG ? TRUE : FALSE;
 }
 
 // a SafeTcl is just a const char* with a different way of printing.
 class SafeTcl {
-	friend UserOutput& operator<<(UserOutput&,const SafeTcl&);
+	friend ostream& operator<<(ostream&,const SafeTcl&);
 private:
 	const char* str;
 public:
 	SafeTcl(const char* s) : str(s) {}
 };
 
-// Write a string to the log file so it remains as "one thing"
-UserOutput& operator<<(UserOutput& o,const SafeTcl& stcl) {
+// Write a string to a stream so it remains as "one thing"
+ostream& operator<<(ostream& o,const SafeTcl& stcl) {
 	const char* str = stcl.str;
 	if (!str || *str == 0) { return o << "\"\"";}
 	// check if we need {} or "".
