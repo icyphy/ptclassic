@@ -64,7 +64,10 @@ proc tkMathematicaWindow {name} {
 		-text Quit \
 		-command "destroy $w
 			  incr tkMathematica(Count) -1
-			  unset tkMathematica_$name"
+			  unset tkMathematica_$name
+			  if { $tkMathematica(Count) == 0 } {
+				mathematica end tkMathematica
+			  }"
 
 	  button $w.buttons.clearEntry -text "Clear Entry" \
 	  	-command "$w.entry delete @0 end"
@@ -106,7 +109,7 @@ proc tkMathematicaWindow {name} {
 proc tkMathematicaSend {count input window} {
 	# Check the connection to Mathematica
 	if { [mathematica status] } {
-		mathematica start
+		mathematica start tkMathematica
 		if { [mathematica status] } {
 			error "Error: Cannot start Mathematica"
 			return -code error
