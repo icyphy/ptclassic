@@ -185,6 +185,14 @@ long userOptionWord;
     	ViDone();
     }
 
+    /* Set the current domain.  Note that the old domain need not be
+       restored later, so it is not saved */
+    KcSetKBDomain(DEFAULT_DOMAIN);
+    if(setCurDomainF(&facet) == NULL) {
+        PrintErr("Domain error in facet.");
+        ViDone();
+    }
+
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
@@ -222,7 +230,9 @@ long userOptionWord;
 /* Structures to store palette list and dialog box */
 static char **palettes;
 static int palettes_n;
-static char *defaultPalettes = "~ptolemy/src/domains/sdf/icons/sdf.pal:./user.pal:./init.pal";
+static char *defaultPalettes =
+  "~ptolemy/src/domains/sdf/icons/sdf.pal:~ptolemy/src/domains/ddf/icons/ddf.pal:~ptolemy/src/domains/de/icons/de.pal:./user.pal:./init.pal";
+
 static dmWhichItem *items;
 
 /* ListLength  4/28/88
@@ -370,5 +380,59 @@ long userOptionWord;
 	PrintErr(ErrGet());
         ViDone();
     }
+    ViDone();
+}
+
+/* Declare the functions in kernelCalls that this uses */
+int numberOfDomains();
+char* nthDomainName();
+
+int
+RpcEditDomain(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    dmWhichItem *items;
+    octObject facet;
+    char *domain, buf[MSG_BUF_MAX];
+    int i, which, nDomains;
+
+    ViInit("edit-domain");
+    ErrClear();
+    /* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+        PrintErr(octErrorString());
+        ViDone();
+    }
+    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
+        PrintErr(ErrGet());
+        ViDone();
+    }
+
+    nDomains = numberOfDomains();
+
+    /* init data structure for dialog box... */
+    items = (dmWhichItem *) malloc(nDomains * sizeof(dmWhichItem));
+    for (i = 0; i < nDomains; i++) {
+        items[i].itemName = nthDomainName(i);
+        items[i].userData = NULL;
+        items[i].flag = 0;
+    }
+
+    sprintf(buf, "domain = '%s'", domain);
+    if (dmWhichOne(buf, nDomains, items, &which, NULL, NULL) != VEM_OK
+        || which == -1) {
+        PrintCon("Aborted entry");
+        ViDone();
+    }
+    domain = nthDomainName(which);
+    if (!SetDomainProp(&facet, domain)) {
+        PrintErr(ErrGet());
+        ViDone();
+    }
+    PrintCon(sprintf(buf, "domain = '%s'", domain));
+    free(items);
     ViDone();
 }
