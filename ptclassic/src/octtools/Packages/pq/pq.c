@@ -225,7 +225,7 @@ char *key;
 {
     int k;
 
-    if(k = heap_get_index(heap, key, 1)) 
+    if( (k = heap_get_index(heap, key, 1)) ) 
 	return(&HEAP_GET(heap->data, k));
     else return NIL(pq_entry_t);
 }
@@ -327,6 +327,7 @@ pq_t *queue;
     FREE(queue);
 }
 
+int
 pq_find_entry(queue, key, value)
 register pq_t *queue;
 register char *key;
@@ -379,6 +380,7 @@ char *value, *key;
 /* Insert an entry into the queue under key key.  This permits insertion of
    duplicate items */
 
+int
 pq_insert(queue, key, value)
 register pq_t *queue;
 register char *key;
@@ -429,7 +431,7 @@ char *value;
 /* Insert an entry into the queue under key key.  This does not permit
    insertion of duplicate items */
 
-
+int
 pq_insert_unique(queue, key, value)
 register pq_t *queue;
 register char *key;
@@ -464,6 +466,7 @@ char *value;
     }
 }
 
+int
 pq_delete(queue, key, value)
 pq_t *queue;
 char *key;
@@ -475,7 +478,7 @@ char *value;
     
     SANITY_CHECK(queue, pq_delete);
 
-    if(k = heap_get_index(queue->heap, key, 1)) {
+    if( (k = heap_get_index(queue->heap, key, 1)) ) {
 	entry = &HEAP_GET(queue->heap->data, k);
 	for(i = 0; i < (entry->num_records); ++i)
 	    if(value == *daGet(char *, entry->records, i)) {
@@ -498,6 +501,7 @@ char *value;
 }
     
 
+int
 pq_delete_key(queue, key)
 pq_t *queue;
 char *key;
@@ -508,7 +512,7 @@ char *key;
     SANITY_CHECK(queue, pq_delete_key);
 
 
-    if(k = heap_get_index(queue->heap, key, 1)) {
+    if( (k = heap_get_index(queue->heap, key, 1)) ) {
 	entry = HEAP_GET(queue->heap->data, k);
 	(queue->num_entries) -= (entry.num_records);
 	heap_remove(queue->heap, k);
@@ -517,6 +521,7 @@ char *key;
     } else return 0;
 }
 
+int
 pq_count(queue)
 pq_t *queue;
 {
@@ -525,6 +530,7 @@ pq_t *queue;
 }
 
 
+int
 pq_count_under_key(queue, key)
 pq_t *queue;
 char *key;
@@ -539,6 +545,7 @@ char *key;
     else return 0;
 }
 
+int
 pq_empty(queue)
 pq_t *queue;
 {
@@ -548,6 +555,7 @@ pq_t *queue;
 }
 
     
+int
 pq_pop(queue, result)
 register pq_t *queue;
 char **result;
@@ -571,6 +579,7 @@ char **result;
 }
 
     
+int
 pq_maximal_key(queue, key)
 register pq_t *queue;
 char **key;
@@ -612,6 +621,7 @@ pq_t *old_queue;
 	
 
 /* Standard comparison functions */
+int
 pq_numcmp(x, y)
 char *x;
 char *y;
@@ -619,6 +629,7 @@ char *y;
     return PQ_NUMCMP(x, y);
 }
 
+int
 pq_ptrcmp(x, y)
 char *x;
 char *y;
@@ -626,6 +637,7 @@ char *y;
     return PQ_NUMCMP(x, y);
 }
 
+int
 pq_rev_numcmp(x, y)
 char *x;
 char *y;
@@ -633,6 +645,7 @@ char *y;
     return -1 * PQ_NUMCMP(x, y);
 }
 
+int
 pq_rev_ptrcmp(x, y)
 char *x;
 char *y;
@@ -640,6 +653,7 @@ char *y;
     return -1 * PQ_NUMCMP(x, y);
 }
 
+int
 pq_rev_strcmp(x, y)
 char *x;
 char *y;
@@ -678,7 +692,7 @@ pq_next1(gen, key, value)
 pq_gen_t *gen;
 char **key, **value;
 {
-    if((gen->continue_loop) = (++gen->recordnum < gen->keynum)) {
+    if( ((gen->continue_loop) = (++gen->recordnum < gen->keynum)) ) {
 	*key = gen->heapcopy[gen->recordnum].key;
 	*value = gen->heapcopy[gen->recordnum].data;
 	return 1;
