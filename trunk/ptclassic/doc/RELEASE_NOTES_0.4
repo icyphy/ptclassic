@@ -78,11 +78,22 @@ or copying oct facets. It is much easier to use.
 
 CHANGES:  From the 0.3 version to the 0.4 version of Ptolemy
 
-A ptolemy account is no longer required; the PTOLEMY environment variable
-may be used instead to specify the location of the PTOLEMY directory tree.
-Note that this change is reflected in the documentation.  References to
-this file in the 0.3 document would be: "~ptolemy/doc/RELEASE_NOTES_0.4"
-but in the new 0.4 document would be "$PTOLEMY/doc/RELEASE_NOTES_0.4"
+It is no longer necessary to create a user called "ptolemy" in order
+to install the software.  You can instead use an environment variable
+"PTOLEMY" pointing to the home directory of the Ptolemy installation.
+However, we still strongly recommend that you create the user "ptolemy".
+This user is properly configured to run Ptolemy, and having it set up
+can be a great aid in debugging an installation.  Note that if you do not
+create the "ptolemy" user, then every Ptolemy user must set the PTOLEMY
+environment variable, and set it in such a way that all processes,
+including rsh processes, inherit it.  For csh users, this means
+setting it in your .cshrc file.  This is not required if you install
+Ptolemy in ~ptolemy.
+
+Note that this change is reflected in the documentation.  Whereas the
+documentation used to refer to locations of files relative to the home
+directory ~ptolemy of the ptolemy user, as in "~ptolemy/doc/RELEASE_NOTES_0.4",
+now it uses "$PTOLEMY/doc/RELEASE_NOTES_0.4".
 
 Several stars that were included in the 0.3.1 have been renamed. The
 objective was to adopt a consistent naming policy across all domains. One
