@@ -353,26 +353,76 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		// note: we can get a minus if 2nd time in loop and value of
 		// substituted state was negative.
 		if (isdigit(*token) || *token == '.' || *token == '-' )  {
-		        if (stateType == T_Float) {
-		                // possible scientific notation if ending in e or E.
-			        // Eliminate + and - as special if so, and append
-			        // to token.  Ugly hack.
-			        int l = strlen(token);
-			        if (token[l-1] == 'e' || token[l-1] == 'E') {
-				    const char* tc = lexer.setSpecial("*()/[],^");
-				    lexer >> token + l;
-				    lexer.setSpecial(tc);
+			// Handle scientific notation.
+			// If '+' or '-' is a special char then the number
+			// could be as many as three lexer tokens
+			// (consider "1.23e-10" == "1.23e","-","10").
+			// To deal with this, we check to see if the next
+			// token is '+' or '-', and if so append it and the
+			// following token to our work buffer.  We will push
+			// back whatever isn't consumed by strtod.
+			// Ugly, but it works.
+			int l = strlen(token);
+			if (token[l-1] == 'e' || token[l-1] == 'E') {
+				lexer >> token + l;
+				if ((token[l] == '+' || token[l] == '-') &&
+				    token[l+1] == 0) {
+					lexer >> token + (l+1);
+				} else {
+					// Not '+' or '-' next, so toss it
+					// right back.  This is necessary
+					// to avoid doing the wrong thing
+					// with "0xe 22"; we do not want
+					// to merge two tokens into one.
+					lexer.pushBack(token + l);
+					token[l] = 0;
 				}
-
-				t.tok = T_Float;
-				t.doubleval = atof(token);
+			}
+			// We want to support floating notation as well as
+			// C-style hex and octal integer notation.  Note that
+			// we must accept float input format even for int
+			// states, because substitution of a state's value
+			// uses currentValue() which can produce, eg, "10.0".
+			// So, we try both strtod() and strtol(), using
+			// whichever one parses a longer substring.
+			// A freebie side benefit is that hex/octal notation
+			// works in float states.
+			char *endptr, *endptrI;
+			double doubleval = strtod(token, &endptr);
+			long longval = strtol(token, &endptrI, 0);
+			if (endptrI >= endptr) {
+				// note: must believe strtol in a tie
+				// if we want "077" to parse as octal.
+				doubleval = double(longval);
+				endptr = endptrI;
+			}
+			// Push back whatever wasn't consumed by strtod
+			// or strtol.  This ensures that our idea of a
+			// number is exactly a valid number, even though
+			// our lexer is far too dumb to get it right.
+			if (*endptr) {
+				lexer.pushBack(endptr);
+			}
+			// They should've consumed something, however.
+			if (endptr == token) {
+				parseError ("invalid number: ", token);
+				t.tok = T_ERROR;
 				return t;
+			}
+			// Return the result in the desired format.
+			if (stateType == T_Float) {
+				t.tok = T_Float;
+				t.doubleval = doubleval;
 			}
 			else {
 				t.tok = T_Int;
-				t.intval = int(strtol(token,0,0));
-				return t;
+				// make sure C rounds to nearest integer.
+				if (doubleval >= 0.0)
+					t.intval = int(doubleval + 0.5);
+				else
+					t.intval = - int(-doubleval + 0.5);
 			}
+			return t;
 		}
 		if (is_idchar(*token)) {
 			const State* s = lookup(token,parent()->parent());
