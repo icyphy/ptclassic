@@ -112,6 +112,7 @@ CCS_WITH_H_FILES=\
  ProfileTimer.cc \
  PtGate.cc \
  Scheduler.cc \
+ Scope.cc \
  SimControl.cc \
  Star.cc \
  State.cc \
