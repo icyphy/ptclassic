@@ -169,6 +169,11 @@ linkObject (const char* ofile) {
 	return Linker::linkObj (ofile);
 }
 
+// tables for suffixes and preprocessors
+const int N_PREPROCS = 2;
+static char *preprocSuffix[] = { "", "pl", "chdl" };
+static char *preprocProg[] = { "", "ptlang", "pepp" };
+
 // Here is the function that loads in a star!
 // name = username of the star
 // idomain = domain of the star
@@ -181,7 +186,8 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 	char plName[512], oName[512], ccName[512], cmd[512];
 
 // form the source file name
-	sprintf (plName, "%s/%s%s.pl", srcDir, idomain, name);
+	sprintf (plName, "%s/%s%s.%s", srcDir, idomain, name,
+		 preprocSuffix[preproc]);
 	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
 	char *sourceFile = preproc ? plName : ccName;
 // check existence of file.
@@ -212,8 +218,9 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 		return linkObject (oName);
 // Preprocess if need be.
 	if (preproc && (!exists (ccName) || isYounger (plName, ccName))) {
-		sprintf (cmd, "cd %s; ptlang %s%s.pl >& %s",
-			 srcDir, idomain, name, tmpFileName);
+		sprintf (cmd, "cd %s; %s %s%s.%s >& %s",
+			 srcDir, preprocProg[preproc], idomain, name,
+			 preprocSuffix[preproc], tmpFileName);
 		PrintDebug (cmd);
 		if (util_csystem (cmd)) {
 			reportErrors (cmd);
@@ -236,8 +243,27 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 	return linkObject (oName);
 }
 
+// This function searches for a source file, first looking for preprocessor
+// source, then .cc source.
+// The return value is 0 if only a .cc is found, a + integer for a preprocessor
+// source file, and -1 if nothing is found.  The final argument points to
+// a buffer that is filled with the full filename (the .cc filename if no
+// match is found).
+
+extern "C" int
+FindStarSourceFile(const char* dir,const char* dom,const char* base,
+		   char* buf) {
+	for (int i = 1; i <= N_PREPROCS; i++) {
+		sprintf (buf, "%s/%s%s.%s", dir, dom, base,
+			 preprocSuffix[i]);
+		if (exists(buf)) return i;
+	}
+	sprintf (buf, "%s/%s%s.cc", dir, dom, base);
+	return (exists(buf) ? 0 : -1);
+}
+
 // Here is the pigi interface used by make-star.  It looks for a .pl
-// or a .cc file and does what's needed.
+// or a .cc file (or other preprocessor file) and does what's needed.
 
 extern "C" int
 KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
@@ -248,18 +274,13 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 // form the source file name
 	const char* eDir = expandPathName (srcDir);
 	char fName[512];
-	int preproc = 1;
-	sprintf (fName, "%s/%s%s.pl", eDir, idomain, name);
-	if (!exists (fName)) {
-		preproc = 0;
-		sprintf (fName, "%s/%s%s.cc", eDir, idomain, name);
-		if (!exists (fName)) {
-			StringList msg = "Loader: can't find ";
-			msg += fName;
-			msg += " or .pl";
-			ErrAdd (msg);
-			return FALSE;
-		}
+	int preproc = FindStarSourceFile(eDir, idomain, name, fName);
+	if (preproc < 0) {
+		StringList msg = "Loader: can't find ";
+		msg += fName;
+		msg += " or .*";
+		ErrAdd (msg);
+		return FALSE;
 	}
 	return compileAndLink (name, idomain, srcDir, preproc);
 }
@@ -295,12 +316,20 @@ KcLoad (const char* iconName) {
 		ErrAdd(msg);
 		return FALSE;
 	}
-// b has a suffix ".pl" or ".cc"; zap it; tell KcCompileAndLink which one.
+// b has a suffix ".pl", ".chdl", or ".cc"; zap it; tell KcCompileAndLink
+// which one.
 	strcpy (base, b + l);
 	char* p = strrchr (base, '.');
 	int preproc = 0;
-	if (p && strcmp (p, ".pl") == 0) preproc = 1;
-	else if (p && strcmp (p, ".cc") != 0) {
+	if (p) {
+		for (int i = 1; i <= N_PREPROCS; i++) {
+			if (strcmp(p+1, preprocSuffix[i]) == 0) {
+				preproc = i;
+				break;
+			}
+		}
+	}
+	if (p && preproc == 0 && strcmp (p, ".cc") != 0) {
 		StringList msg = "Loader: unknown file type: ";
 		msg += base;
 		ErrAdd (msg);
