@@ -109,6 +109,9 @@ class ::tycho::EditJava {
     # Counter for hyperlinks.
     protected variable hypcount 0
 
+    # Compile widget
+    protected variable compileWidget {}
+
     # The name of the java package in this file.
     protected variable packageName {}
 }
@@ -149,6 +152,13 @@ body ::tycho::EditJava::constructor {args} {
     }
 }
 
+###################################################################
+#
+body ::tycho::EditJava::destructor {args} {
+    if {$compileWidget != {}} {
+        delete object $compileWidget
+    }
+}
 #####################################################################
 #### bodyTemplate
 # Insert a body template
@@ -170,32 +180,22 @@ body ::tycho::EditJava::bodyTemplate {} {
     insertData $template
     markModified
 }
-
 #####################################################################
 #### evaluate
-# Evaluate the contents of the text window as Java commands
-# in the global context.  Display and return the result of the evaluation.
+# Save the buffer if necessary, compile it and load it back into
+# Tcl.  If necessary, add a initialization procedure so that the 
+# Tcl load command will work.  If there is no makefile present in the
+# current directory, then create a makefile with a name based on the
+# current file.
 #
 body ::tycho::EditJava::evaluate {} {
-    set code [getSelection]
-    if { $code == {} } {
-	set code [get 1.0 end]
-	set type "File"
-    } else {
-	set type "String"
+    global env tycho
+    saveQuery
+    if {$compileWidget == {} } {
+        set compileWidget [::tycho::CompileJava [::tycho::autoName .editJava]]
+        $compileWidget configure -view $this
     }
-
-    set ret [uplevel #0 $code]
-    if {$ret != {}} {
-	puts $ret
-	putStatus "$type evaluated"
-	safeEval ::tycho::inform "$type evaluation returned:\n$ret"
-	putStatus ""
-    } {
-        putStatus "$type evaluated (empty result)"
-    }
-    focusin
-    return $ret
+    $compileWidget compileAndRun [list [filename]]
 }
 
 #####################################################################
