@@ -82,7 +82,7 @@ available from the ILP office at the following address:
 The current price is $25. US, but that is subject to change.
 Contact them for the exact fee.
 .pp
-A second source is the "ptolemy-hackers@ohm.berkeley.edu" mailing list.  
+A second source is the "ptolemy-hackers@ohm.eecs.berkeley.edu" mailing list.  
 This list provides a forum for ptolemy questions and issues.  
 Users of the current release 
 who have a Ptolemy question, comment, 
@@ -90,12 +90,12 @@ or think they've found a bug should send mail to ptolemy-hackers.
 .pp
 To join ptolemy-hackers, send mail to
 .br
-"ptolemy-hackers-request@ohm.berkeley.edu
+"ptolemy-hackers-request@ohm.eecs.berkeley.edu
 .br
 with the Subject "ADD ME."
 .pp
 Another source is the Ptolemy ftp archive.  To access this, use
-anonymous FTP to ptolemy.berkeley.edu.
+anonymous FTP to ptolemy.eecs.berkeley.edu.
 .EQ
 delim $$
 .EN
