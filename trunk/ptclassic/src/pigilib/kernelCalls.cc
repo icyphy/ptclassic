@@ -489,6 +489,11 @@ static void displayStates(const Block *b);
 extern "C" int
 KcProfile (char* name) {
 	const Block* b = findClass (name);
+	int tFlag = 0;
+	if (!b) {
+		tFlag = 1;
+		b = KnownTarget::find (name);
+	}
 	if (!b) {
 		ErrAdd ("Unknown block: ");
 		ErrAdd (name);
@@ -496,9 +501,15 @@ KcProfile (char* name) {
 	}
 	clr_accum_string ();
 	// if dynamically linked, say so
-	if (KnownBlock::isDynamic (b->readName()))
+	if (tFlag && KnownTarget::isDynamic(b->readName())
+	    || !tFlag && KnownBlock::isDynamic (b->readName()))
 		accum_string ("Dynamically linked ");
-	if (b->isItAtomic ()) {
+	if (tFlag) {
+		accum_string ("Target: ");
+		accum_string (name);
+		accum_string ("\n");
+	}
+	else if (b->isItAtomic ()) {
 		accum_string ("Star: ");
 		accum_string (name);
 		accum_string (" (");
