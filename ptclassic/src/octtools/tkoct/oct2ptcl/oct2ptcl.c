@@ -614,8 +614,8 @@ _otpXlateInstName( OTPFacetInfo *pCxt, octObject *pInst, char *masterName) {
     if ( instName==NULL || instName[0]=='\0' || strcmp(instName,"*")==0 ) {
 	char	buf[OTP_NAMELEN];
 	TOPStrLenType	len;
-        if ( strncmp(masterName, PT_PERCENT, strlen(PTPERCENT)) == 0)
-                masterName += strlen(PTPERCENT);
+        if ( strncmp(masterName, PT_PERCENT, strlen(PT_PERCENT)) == 0)
+                masterName += strlen(PT_PERCENT);
 	len = (dotPtr = strchr(masterName,'.')) == NULL ? strlen(masterName)
 	  : dotPtr - masterName;
 	strncpy(buf,masterName,len);
@@ -742,7 +742,7 @@ otpXlateInsts( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr) {
 	Tcl_HashEntry	*instEntry;
 	int		newB;
 
-        if ( strncmp(mInfo-facetName, PT_PERCENT, strlen(PTPERCENT)) == 0) {
+        if ( strncmp(mInfo->facetName, PT_PERCENT, strlen(PT_PERCENT)) == 0) {
 	    if ( strcmp(mInfo->facetName, PT_PERCENT "dDelay")==0
 		|| strcmp(mInfo->facetName, PT_PERCENT "dDelay2")==0
 		|| strcmp(mInfo->facetName, PT_PERCENT "dBus")==0 ) {
@@ -839,7 +839,7 @@ _otpSetFacetType( OTPFacetInfo *pInfo, octObject *pXface, octObject *pConts) {
     char	*cellbase;
 
     cellbase = topBasename( pXface->contents.facet.cell);
-    if ( strncmp(cellBase, PT_PERCENT, strlen(PTPERCENT)) == 0) {
+    if ( strncmp(cellbase, PT_PERCENT, strlen(PT_PERCENT)) == 0) {
 	pInfo->type = OTP_FtMarker;
 	return;
     }
