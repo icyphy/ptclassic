@@ -121,9 +121,7 @@ class ::tycho::Slate {
     method bbox {args}
 
     # Bind a command to an item, picture, or tag
-    method bind {id args} {
-	eval $canvas bind $id $args
-    }
+    method bind {id {sequence {}} args}
 
     # Call a "method" on a picture
     method call {picture method args}
@@ -342,13 +340,13 @@ body ::tycho::Slate::addtag {add mode args} {
 	    if { $tag == "all" || $tag == "current" } {
 		eval $this tagadd $add [eval $this find withtag $tag]
 
-	    } elseif { [string match {[0-9]*} $add] } {
+	    } elseif { [string match {[0-9]*} $tag] } {
 		# Hey, this is just an item ID
 		$canvas addtag $tag withtag $add
 
-	    } elseif { [string match {_*} $add] } {
+	    } elseif { [string match {_*} $tag] } {
 		# Hey, this is just a picture ID
-		$canvas addtag $tag withtag $add
+		$canvas addtag $add withtag $tag
 
 		if { ! [::info exists tagged($add)] } {
 		    set tagged($add) [list $tag]
@@ -378,6 +376,19 @@ body ::tycho::Slate::addtag {add mode args} {
 #
 body ::tycho::Slate::bbox {args} {
     eval $canvas bbox $args
+}
+
+#######################################################################
+#### bind
+#
+body ::tycho::Slate::bind {id {sequence {}} args} {
+    if { $sequence == "" } {
+	return [$canvas bind $id]
+    } elseif { $args == {} } {
+	return [$canvas bind $id $sequence]
+    } else {
+	$canvas bind $id $sequence [lindex $args 0]
+    }
 }
 
 #######################################################################
