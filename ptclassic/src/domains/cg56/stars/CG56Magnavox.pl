@@ -35,9 +35,11 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 	}
         state {
 		name { interruptBufferSize }
-                type { string }
-                desc { size of interrupt buffer }
-             	default { "default" }
+                type { int }
+                desc {
+	    size of interrupt buffer, presently does not support repetition.
+	        }
+             	default { 4 }
  	}
 	state {
 		name { abortOnRealTimeError }
@@ -270,6 +272,7 @@ $label(empty)
         rti
         }        
         start {
+        bufLen=interruptBufferSize;
         saveReg.resize(3);
 	inIntBuffer.resize(bufLen);
 	outIntBuffer.resize(bufLen);
