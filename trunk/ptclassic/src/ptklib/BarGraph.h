@@ -94,7 +94,7 @@ protected:
 	// A static variable used to create names that are
 	// guaranteed to be unique.  After each use, it should
 	// be incremented.
-	static unique;
+	static int unique;
 
 	// A unique string for each instance of this object identifies
 	// the star within which it sits for the benefit of Tcl routines.
