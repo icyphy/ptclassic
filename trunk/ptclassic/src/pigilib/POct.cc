@@ -58,6 +58,7 @@ extern "C" {
 #include "icon.h"
 #include "compile.h"
 #include "octIfc.h"
+#include "octMacros.h"    // For GetOrCreatePropStr
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -703,8 +704,69 @@ int POct::ptkGetMaster (int aC,char** aV) {
     return TCL_OK;
 }
 
+// ptkOpenFacet <file_name_of_cell> [view] [facet]
+// If no view is specified, the default "schematic" is used.
+// If no facet is specified, the default "contents" is used.
+// Returns the Oct ID of the requested facet.  If the facet
+// does not exist, it creates a new facet and returns the 
+// Oct ID of the new facet.
+// Note that this code is a modified version of the code
+// in misc.c: RpcOpenFacet
+// - Alan Kamas 9/93
+//
+int POct::ptkOpenFacet (int aC,char** aV) {
 
-// Basic Vem Facet Type checking command
+    if ( (aC != 2) & (aC != 3) & (aC != 4) ) return
+          usage ("ptkOpenFacet <file_name_of_cell> [view] [facet]");
+
+    // fill in default values
+    char viewType[32], facetType[32];
+    if (aC < 3) strcpy(viewType, "schematic");
+    else strcpy(viewType, aV[2]);
+    if (aC < 4) strcpy(facetType, "contents");
+    else strcpy(facetType, aV[3]);
+
+    // Try to open the facet at least read only first.  This will work
+    // if there already is a facet to read, but will fail if the facet
+    // doesn't already exist
+    octObject facet;
+    octStatus status;
+    status = OpenFacet(&facet, aV[1], viewType, facetType, "r");
+    if (status == OCT_NO_EXIST) {
+	// Create a new facet
+        // note that the new facet must be a contents facet
+        status = OpenFacet(&facet, aV[1], viewType, "contents", "a");
+        if (status <= 0) {
+	    // Could not create new facet
+	    Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
+            return TCL_ERROR;
+        } else if (status == OCT_NEW_FACET) {
+	    octObject prop;
+            GetOrCreatePropStr(&facet, &prop, "TECHNOLOGY", UTechProp);
+            GetOrCreatePropStr(&facet, &prop, "VIEWTYPE", "SCHEMATIC");
+            // If facet is schematic:contents then use schematic editstyle,
+            if ( (strcmp(facetType, "contents") == 0) && 
+                 (strcmp(viewType, "schematic") == 0) ) {
+                GetOrCreatePropStr(&facet, &prop, "EDITSTYLE", "SCHEMATIC");
+            }
+        }
+    } else if (status <= 0) {
+	// Unexpected Oct error when trying to open the facet
+        Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Convert the new Facet into a string Oct ID Handle
+    char facetHandle[16];
+    ptkOctObj2Handle ( &facet, facetHandle );
+    Tcl_AppendResult(interp, facetHandle, " ", NULL );
+
+    return TCL_OK;
+
+}
+
+    
+// Basic Oct Facet Type checking command
 int POct::ptkIsStar (int aC,char** aV) {
     octObject facet;
 
@@ -843,6 +905,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkSetParams),
 	ENTRY(ptkFacetContents),
 	ENTRY(ptkGetMaster),
+	ENTRY(ptkOpenFacet),
 	ENTRY(ptkIsStar),
 	ENTRY(ptkIsGalaxy),
 	ENTRY(ptkIsBus),
