@@ -334,7 +334,6 @@ ifdef DE
 		LIBS += -ldeatmstars
 		LIBFILES += $(LIBDIR)/libdeatmstars.$(LIBSUFFIX)
 	endif
-	IMAGE = 1
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/de/icons/de.pal
 	STARS += $(LIBDIR)/destars.o
@@ -497,7 +496,6 @@ ifdef SDF
 	endif
 	ifdef SDFIMAGE
 		CUSTOM_DIRS += $(SDFDIR)/image/stars
-		IMAGE = 1
 		STARS += $(LIBDIR)/sdfimagestars.o
 		LIBS += -lsdfimagestars
 		LIBFILES += $(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) 
@@ -528,12 +526,6 @@ ifdef SDF
 	LIBS += -lsdfstars
 	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX)	
 	SDFLIB = 1
-endif
-
-ifdef IMAGE
-	CUSTOM_DIRS += $(SDFDIR)/image/kernel
-	LIBS +=  -lImage
-	LIBFILES += $(LIBDIR)/libImage.$(LIBSUFFIX)
 endif
 
 ifdef ATM
