@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/csh -f
 #
 # Script to find the root (installation) Matlab directory.  Used by
 # makefiles to determine the location of the external interface library.
