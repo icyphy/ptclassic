@@ -33,7 +33,7 @@ char *codeDir, **iconDir;
 
     strcpy(dir, codeDir);
     DirName(dir);
-    sprintf(buf, "%s/icon", dir);
+    sprintf(buf, "%s/icons", dir);
     ERR_IF1(!StrDup(iconDir, buf));
     return (TRUE);
 }
@@ -181,10 +181,6 @@ static dmTextItem items[] = {
 	PrintErr("Star src directory must begin with '~user'");
 	ViDone();
     }
-    if (strcmp(BaseName(items[1].value), "src") != 0) {
-	PrintErr("Star src directory must end with '/src'");
-	ViDone();
-    }
     if (!MkStar(items[0].value, items[1].value)) {
 	PrintErr(ErrGet());
 	ViDone();
@@ -223,6 +219,15 @@ char *tPath;
     ERR_IF2((pwent = getpwuid(uid)) == NULL,
 	"GetTildePath: Cannot get password entry");
 
+    n = strlen(pwent->pw_dir);
+
+    /* If the fullName begins with the absolute path name of the user's
+       home directory, convert to ~user format. */
+    if (strncmp(fullName, pwent->pw_dir, n) == 0) {
+	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
+	return (TRUE);
+    }
+
     /* In case pw entry is not a real directory, but rather is connected
        via symbolic links to a real directory, expand it.  */
     ERR_IF2((AbsPath(pwent->pw_dir, expanded_path) < 0),
@@ -242,6 +247,13 @@ char *tPath;
     ERR_IF2((pwent = getpwnam(UToolName)) == NULL,
         "GetTildePath: Cannot get password entry for 'ptolemy'");
 
+    n = strlen(pwent->pw_dir);
+
+    if (strncmp(fullName, pwent->pw_dir, n) == 0) {
+	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
+	return (TRUE);
+    }
+
     /* In case entry is not a real directory, but rather is connected
        via symbolic links to a real directory, expand it.  */
     ERR_IF2((AbsPath(pwent->pw_dir, expanded_path) < 0),
@@ -251,19 +263,6 @@ char *tPath;
 
     if (strncmp(fullName, expanded_path, n) == 0) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
-	return (TRUE);
-    }
-
-    /***** Hack Alert  Hack Alert  Hack Alert  Hack Alert *****
-    Handles the special case of ptolemy directory structure on ohm.
-    Sorry, I don't know any other ways of fixing this problem right now.
-    NOTE: THIS CAN BE DELETED AS SOON AS WE GET AWAY FROM THIS FILE
-    ORGANIZATION AN HAVE EVERYTHING UNDER ~ptolemy.
-    */
-    kludge = "/home/ohm0/tools/share/ptolemy";
-    n = strlen(kludge);
-    if (strncmp(fullName, kludge, n) == 0) {
-	sprintf(tPath, "~ptolemy%s", fullName + n);
 	return (TRUE);
     }
 
@@ -365,6 +364,8 @@ static dmTextItem item = {"Palette", 1, dmWidth, "./user.pal", NULL};
     ViDone();
 }
 
+char* callParseClass();
+
 int 
 RpcLookInside(spot, cmdList, userOptionWord)
 RPCSpot *spot;
@@ -405,14 +406,17 @@ long userOptionWord;
 	        /* Figure out file names */
 	        strcpy(dir, fullName);
 	        DirName(dir);
-	        base = BaseName(fullName);
+
+		/* The following supports names like Fork.output=2
+		   using only the "Fork" part.  */
+	        base = callParseClass(BaseName(fullName));
 
 	        /* First the .h file */
-	        sprintf(codeFile, "%s/../src/%s.h", dir, base);
+	        sprintf(codeFile, "%s/../stars/%s.h", dir, base);
 	        ERR_IF1(!LookAtFile(codeFile));
 
 	        /* Then the .cc file */
-	        sprintf(codeFile, "%s/../src/%s.cc", dir, base);
+	        sprintf(codeFile, "%s/../stars/%s.cc", dir, base);
 	        ERR_IF1(!LookAtFile(codeFile));
 		ViDone();
 	    } else {
