@@ -15,6 +15,8 @@ $Id$
 
 #include "Attribute.h"
 #include "AsmConnect.h"
+// FixSample is included so AsmStars can use FIX-type ports
+#include "FixSample.h"
 
 // Define attribute bit masks for code generation states
 const bitWord AB_MEMORY = 0x20;	// state is in memory
