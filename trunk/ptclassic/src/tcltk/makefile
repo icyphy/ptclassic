@@ -43,7 +43,7 @@ TCLTK_OBJ=$(PTOLEMY)/obj.$(ARCH)/tcltk
 
 # Version numbers
 TCL_VERSION =	tcl7.3
-TK_VERSION =	tk3.6p1-TkPixmap3.6a
+TK_VERSION =	tk3.6p1-TkPixmap3.6e
 
 # Location of the tcl source
 TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)
