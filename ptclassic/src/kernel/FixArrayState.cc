@@ -111,10 +111,11 @@ void FixArrayState  :: initialize() {
                                 err = 1;
                                 break;
                         }
-                        while ( numRepeats != 0) {
+                        while ( numRepeats > 0) {
                                 buf[i++] = saveValue;
                                 numRepeats--;
                         }
+			if (t.intval == 0) i--;
                         t = getParseToken(lexer);
                         if (t.tok != ']') {
                                 parseError ("expected ']'");
@@ -164,7 +165,7 @@ void FixArrayState  :: initialize() {
                         parseError ("syntax error in FixArray state");
                         err = 1;
                 }
-                saveValue = buf[i-1];
+		if(i > 0) saveValue = buf[i-1];
         }
         if (!err) {
                 nElements  = i;

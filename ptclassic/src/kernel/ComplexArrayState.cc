@@ -108,10 +108,15 @@ void ComplexArrayState  :: initialize() {
 				return;
 			}
 			numRepeats = t.intval - 1;
-			while (numRepeats != 0) {
+			if (i + numRepeats > MAXLEN) {
+				parseError ("too many elements!");
+				return;
+			}
+			while (numRepeats > 0) {
 				buf[i++] = Complex(realval,imagval);
 				numRepeats--;
 			}
+			if (t.intval == 0) i--;
 			t = getParseToken(lexer);
 			if (t.tok != ']') {
 				parseError ("expected ']'");
