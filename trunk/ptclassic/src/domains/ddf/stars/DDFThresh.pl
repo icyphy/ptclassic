@@ -10,7 +10,7 @@ THIS STAR IS MEANT FOR TESTING SCHEDULERS ONLY. OTHERWISE,
 IT SERVES NO USEFUL FUNCTION.
 	}
 	version { $Id$ }
-	author { E. A. Lee, Chris Scannell, Dick Stevens }
+	author { Edward A. Lee, Chris Scannell, Dick Stevens }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -23,21 +23,21 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { ANYTYPE }
 		num { 0 }
 	}
-	state {
-	  name { threshold }
-	  type { int }
-	  default { 1 }
-	  descriptor { number of tokens needed at my input to fire. }
-	}
-	state {
-	  name { numconsumed }
-	  type { int }
-	  default { 1 }
-	  descriptor { number of tokens consumed when I fire. }
-	}
 	output {
 		name { output }
 		type { ANYTYPE }
+	}
+	state {
+		name { threshold }
+		type { int }
+		default { 1 }
+		descriptor { number of tokens needed at the input to fire. }
+	}
+	state {
+		name { numconsumed }
+		type { int }
+		default { 1 }
+		descriptor { number of tokens consumed when star fires. }
 	}
 	method {
 		name { readTypeName }
@@ -48,21 +48,32 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		output.inheritTypeFrom(input);
 	}
+	setup {
+		if ( int(numconsumed) <= 0 ) {
+			StringList msg = "Number of tokens consumed must be ";
+			msg << "positive, instead of " << int(numconsumed);
+			Error::abortRun(*this, msg);
+		}
+		if ( int(threshold) <= 0 ) {
+			StringList msg = "Threshold must be ";
+			msg << "positive, instead of " << int(threshold);
+			Error::abortRun(*this, msg);
+		}
+	}
 	begin {
-	  waitFor(input,(int)threshold);
+		waitFor(input, (int)threshold);
 	}
 	go {
-	  for (int i = (int)numconsumed; i > 0; i--)
-	    input.receiveData();
+		for (int i = (int)numconsumed; i > 0; i--) {
+			input.receiveData();
+		}
 
-	  // copy last input to output
-	  output%0 = input%0;
+		// copy last input to output
+		output%0 = input%0;
 
-	  // generate output, and get ready for next firing
-	  output.sendData();
+		// generate output, and get ready for next firing
+		output.sendData();
 
-	  waitFor(input, (int)threshold);
+		waitFor(input, (int)threshold);
 	}
 }
-
-
