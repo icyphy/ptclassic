@@ -86,7 +86,7 @@ SDFSchedule :: printVerbose () const {
 int SDFScheduler :: run () {
 	if (invalid) {
 		Error::abortRun(*galaxy(),
-				"SDF schedule is invalid; can't run");
+				"Error during setup - can't run");
 		return FALSE;
 	}
 	if (haltRequested()) {
