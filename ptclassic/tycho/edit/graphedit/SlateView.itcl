@@ -43,23 +43,23 @@ class ::tycho::SlateView {
     #################################################################
     ####                        options                          ####
 
-    # The layout model
-    public variable layout ""
-    
     #################################################################
     ####                     public methods                      ####
 
     # Set or get the coordinates of an item
     method coords {name args}
 
-    # Load items from the model into the slate
-    method load {layout {item {}}}
-
     # Find items.
     method find {mode args}
 
     # Get the id of an item given its name
     method id {name}
+
+    # Manipulate the layout model
+    method layout {mode args}
+
+    # Manipulate libraries for placed items 
+    method library {mode args}
 
     # Get or set the name of an item given its id
     method name {id}
@@ -122,11 +122,23 @@ class ::tycho::SlateView {
     ####                  protected variables                    ####
     
     # The slate
-    protected variable slate
+    protected variable _slate
+
+    # The layout model
+    protected variable _layout ""
+    
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Load items from the model into the slate
+    private method _loadlayout {{item {}}}
 
     #################################################################
     ####                   private variables                     ####
     
+    # The loaded libraries
+    private variable _library
+
     # The mapping from item names to item IDs
     private variable _itemid
 
@@ -147,8 +159,8 @@ body ::tycho::SlateView::constructor {args} {
         rename -height -canvasheight canvasHeight CanvasHeight
         rename -width -canvaswidth canvasWidth CanvasWidth
     }
-    set slate $itk_component(slate)
-    pack $slate -expand yes -fill both -side left
+    set _slate $itk_component(slate)
+    pack $_slate -expand yes -fill both -side left
 
     # Evaluate options
     eval configure $args
@@ -160,7 +172,21 @@ body ::tycho::SlateView::constructor {args} {
 # Set or get coordinates of an item.
 #
 body ::tycho::SlateView::coords {name args} {
-    eval $slate coords $_itemid($name) $args
+    eval $_slate coords $_itemid($name) $args
+}
+
+
+########################################################################
+#### find
+#
+# Find items.
+#
+body ::tycho::SlateView::find {mode tag} {
+    set result {}
+    foreach id [$_slate find $mode $tag] {
+	lappend result $_nameof($id)
+    }
+    return $result
 }
 
 ########################################################################
@@ -179,26 +205,200 @@ body ::tycho::SlateView::id {name} {
 }
 
 ########################################################################
-#### load
+#### layout
 #
-# Load items from a layout model into the slate.
+# Manipulate the layout model. This method is intended for low-level
+# initialization and maintenance. It has several forms, depending on
+# the value of the _mode_ argument:
+# <dl>
+# <dt><b>load</b> ?_item_?
+# <dd>
+# Load the current layout model into the slate.
 #
-body ::tycho::SlateView::load {layout {item {}}} {
-	if { $item != "" } {
-		_add $item [$layout itemcget $item]
-	}
-	foreach i [$layout listing item $item] {
-		load $layout $i
-	}
+# <dt><b>clear</b>
+# <dd>
+# Clear the layout model and the slate.
+#
+# <dt><b>set</b> _layout_
+# <dd>
+# Set the current layout model to a new model.
+#
+# <dt><b>delete</b> _layout_
+# <dd>
+# Delete the current layout model.
+#
+# </dl>
+#
+body ::tycho::SlateView::layout {mode args} {
+    switch -exact $mode {
+        "load" {
+            _loadlayout
+        }
+        "clear" {
+            ;#
+        }
+        "set" {
+            set _layout [lindex $args 0]
+        }
+        "delete" {
+            delete object $layout
+        }
+        default {
+            error "Invalid mode \"$mode\": must be one of\
+                    load, clear, set, or delete"
+        }
+    }
 }
 
 ########################################################################
+#### library
+#
+# Manipulate libraries. This command has several forms, depending
+# on the value of the _mode_ argument:
+# <dl>
+# <dt><b>load</b> _path_ ?_libname_?
+# <dd>
+# Load a library. The _path_ can either be an absolute
+# path, or a path relative to the TIM_PATH. (Not implemented yet).
+# If the library has already been loaded into memory (by some
+# other client), then this widget links to it; otherwise it loads
+# it into memory and links to it. _libname_ is a name with which
+# to access the liibrary in future calls to this method. If none
+# is supplied, the name will be the root of the file name -- for
+# example, the library "stars.tim" will be accessible as library
+# "stars." An error wil be generated if there is alaready a
+# library with the specified or default name.
+#
+# <dt><b>unload</b> ?_libname_ ...?
+# <dd>
+# Unload each listed library. Each library is dereferenced
+# with <b>::tycho::model unlink</b>, so that the library will
+# be removed from memory if no other objects are referencing
+# it. If no library names are supplied, dereference all
+# loaded libraries.
+#
+# <dt><b>addtomenu</b> _libname_ _menuname_ ?_option value_ ... ?
+# <dd>
+# Add items in a library to a menu. _menuname_ is the name of
+# an existing menu in this widget's menubar.  Each menu entry is
+# formed by dot-concatenating the library name and the item
+# name. For example, item <b>{foo bar}</b> from library stars
+# will be added as item <b>stars.foo.bar</b>. This is the
+# name that is appended to the <b>-menucommand</b> option.
+# The <b>group</b> type is used to construct hierarchical menus.
+# The following options are recognized:
+#
+# <dt><b>-entities</b> _typelist_
+# <dd>
+# Specify the types of entity that are added into the menu.
+# If not supplied, the types will be given by the <b>-entities<b>
+# configuration option of the library, if there is one. If not
+# supplied and the library has no <b>-entities<b> option, then
+# all types except <b>attribute</b>, <b>group</b>, and <b>xref</b>
+# will be added. 
+#
+# <dt><b>-command</b> _command_
+# <dd>
+# Specify a command prefix to evaluate when a library item is
+# added. When a menu entry is selected, the menu name will be
+# appended to this command and evaluated at the global scope.
+#
+# </dl>
+#
+# <dt><b>names</b>
+# <dd>
+# Return a list of all loaded libraries.
+#
+# <dt><b>access</b> _libname_ ?_arg arg_ ...?
+# <dd>
+# Access a loaded library. If only _libname_ is supplied,
+# return the corresponding model object. If additional arguments
+# are supplied, they are assumed to be a method name and
+# arguments, which are called on the corresponding model object.
+# Raise an error if the given library is not loaded.
+#
+# </dl>
+#
+body ::tycho::SlateView::library {mode args} {
+    switch -exact $mode {
+        "access" {
+            # Extract args
+            set libname [lindex $args 0]
+            if ![::info exists _library($libname)] {
+                error "Unknown library \"$libname\""
+            }
+            if { [llength $args] > 1 } {
+                eval $_library($libname) [lreplace $args 0 0]
+            } else {
+                return $_library($libname)
+            }
+        }
+        "addtomenu" {
+            # Extract args
+            set libname [lindex $args 0]
+            set menuname [lindex $args 1]
+            array set opts {-entities "" -command ""}
+            array set opts [lreplace $args 0 1]
+            if ![::info exists _library($libname)] {
+                error "Unknown library \"$libname\""
+            }
+            set lib $_library($libname)
+
+            # Get types to add
+            if { $opts(-entities) == "" } {
+                set opts(-entities) [$lib cget -entities]
+            }
+            if { $opts(-entities) == "" } {
+                set opts(-entities) [::tycho::lsubtract \
+                        [$lib type configure] {attribute group xref}]
+            }
+            # Add to menubar
+            set mb [menubar]
+            if { $mb != "" } {
+                $lib makemenu $opts(-entities) $mb $menuname $opts(-command)
+            }
+        }
+        "load" {
+            # Extract args
+            set path [lindex $args 0]
+            if { [llength $args] > 1 } {
+                set libname [lindex $args 1]
+            } else {
+                set libname [::file rootname [::file tail $path]]
+            }
+            # Get the library model
+	    set path [::tycho::model load $path]
+	    set _library($libname) [::tycho::model link $path $this]
+        }
+        "names" {
+            array names _library
+        }
+        "unload" {
+            # Extract args
+            if { $args == "" } {
+                set args [array names _library]
+            }
+            # Unload each library
+            # FIXME: unlink
+            foreach lib $args {
+                ::tycho::unlink [$_library($lib) cget -modelpath] $this
+                unset _library($lib)
+            }
+        }
+        default {
+            error "Invalid mode \"$mode\": should be one of\
+                    access, addtomenu, load, names. or unload"
+        }
+    }
+}
+
+#########################################################################
 #### name
 #
 # Get the name of an item from its slate id.
 #
 body ::tycho::SlateView::name {id} {
-	return $_itemid($name)
+    return $_itemid($name)
 }
 
 ########################################################################
@@ -231,12 +431,12 @@ body ::tycho::SlateView::_add {name args} {
 
     if { [llength $name] == 1 } {
 	# Root item
-	set id [eval $slate create $type $coords $args]
+	set id [eval $_slate create $type $coords $args]
     	set _itemid($name) $id
     	set _nameof($id) $name
     } else {
 	set parent $_itemid([lreplace $name end end])
-	set id [eval $slate createrootchild $parent $type $coords $args]
+	set id [eval $_slate createrootchild $parent $type $coords $args]
 	set _itemid($name) $id
 	set _nameof($id) $name
     }
@@ -249,7 +449,7 @@ body ::tycho::SlateView::_add {name args} {
 #
 body ::tycho::SlateView::_addtag {tag args} {
     foreach name $args {
-	$slate addtag $tag withtag $_itemid($name)
+	$_slate addtag $tag withtag $_itemid($name)
     }
 }
 
@@ -261,7 +461,7 @@ body ::tycho::SlateView::_addtag {tag args} {
 body ::tycho::SlateView::_clear {} {
     catch {unset _itemid}
     catch {unset _nameof}
-    $slate delete all
+    $_slate delete all
 }
 
 ########################################################################
@@ -270,7 +470,7 @@ body ::tycho::SlateView::_clear {} {
 # Set coordinates of an item.
 #
 body ::tycho::SlateView::_coords {name args} {
-    eval $slate coords $_itemid($name) $args
+    eval $_slate coords $_itemid($name) $args
 }
 
 ########################################################################
@@ -279,7 +479,7 @@ body ::tycho::SlateView::_coords {name args} {
 # Delete an item.
 #
 body ::tycho::SlateView::_delete {name} {
-    $slate delete $_itemid($name)
+    $_slate delete $_itemid($name)
     unset _nameof(_itemid($name))
     unset _itemid($name)
 }
@@ -290,7 +490,7 @@ body ::tycho::SlateView::_delete {name} {
 # Delete a tag from all items.
 #
 body ::tycho::SlateView::_dtag {tag {delete {}}} {
-    eval $slate dtag $tag $delete
+    eval $_slate dtag $tag $delete
 }
 
 ########################################################################
@@ -299,13 +499,13 @@ body ::tycho::SlateView::_dtag {tag {delete {}}} {
 # Configure an item.
 #
 body ::tycho::SlateView::_itemconfigure {name args} {
-	array set opts $args
-	if [::info exists opts(-coords)] {
-		eval $slate coords $_itemid($name) $opts(-coords)
-		unset opts(-coords)
-		set args [array get opts]
-	}
-    eval $slate itemconfigure $_itemid($name) $args
+    array set opts $args
+    if [::info exists opts(-coords)] {
+        eval $_slate coords $_itemid($name) $opts(-coords)
+        unset opts(-coords)
+        set args [array get opts]
+    }
+    eval $_slate itemconfigure $_itemid($name) $args
 }
 
 ########################################################################
@@ -313,9 +513,9 @@ body ::tycho::SlateView::_itemconfigure {name args} {
 #
 body ::tycho::SlateView::_move {tag x y} {
     if { [::info exists _itemid($tag)] } {
-        $slate move $_itemid($tag) $x $y
+        $_slate move $_itemid($tag) $x $y
     } else {
-        $slate move $tag $x $y
+        $_slate move $tag $x $y
     }
 }
 
@@ -324,9 +524,9 @@ body ::tycho::SlateView::_move {tag x y} {
 #
 body ::tycho::SlateView::_moveclick {tag x y} {
     if { [::info exists _itemid($tag)] } {
-        eval $slate moveclick $_itemid($tag) $x $y
+        eval $_slate moveclick $_itemid($tag) $x $y
     } else {
-        eval $slate moveclick $tag $x $y
+        eval $_slate moveclick $tag $x $y
     }
 }
 
@@ -335,9 +535,9 @@ body ::tycho::SlateView::_moveclick {tag x y} {
 #
 body ::tycho::SlateView::_movedrag {tag x y} {
     if { [::info exists _itemid($tag)] } {
-        $slate movedrag $_itemid($tag) $x $y
+        $_slate movedrag $_itemid($tag) $x $y
     } else {
-        $slate movedrag $tag $x $y
+        $_slate movedrag $tag $x $y
     }
 }
 
@@ -346,9 +546,9 @@ body ::tycho::SlateView::_movedrag {tag x y} {
 #
 body ::tycho::SlateView::_moverelease {tag} {
     if { [::info exists _itemid($tag)] } {
-        $slate moverelease $_itemid($tag)
+        $_slate moverelease $_itemid($tag)
     } else {
-        $slate moverelease $tag
+        $_slate moverelease $tag
     }
 }
 
@@ -356,28 +556,28 @@ body ::tycho::SlateView::_moverelease {tag} {
 #### _reshape
 #
 body ::tycho::SlateView::_reshape {name x y args} {
-    eval $slate reshape $_itemid($name) $x $y $args
+    eval $_slate reshape $_itemid($name) $x $y $args
 }
 
 ########################################################################
 #### _reshapeclick
 #
 body ::tycho::SlateView::_reshapeclick {name x y args} {
-    eval $slate reshapeclick $_itemid($name) $x $y $args
+    eval $_slate reshapeclick $_itemid($name) $x $y $args
 }
 
 ########################################################################
 #### _reshapedrag
 #
 body ::tycho::SlateView::_reshapedrag {name x y} {
-    $slate reshapedrag $_itemid($name) $x $y
+    $_slate reshapedrag $_itemid($name) $x $y
 }
 
 ########################################################################
 #### _reshaperelease
 #
 body ::tycho::SlateView::_reshaperelease {name} {
-    $slate reshaperelease $_itemid($name)
+    $_slate reshaperelease $_itemid($name)
 }
 
 ########################################################################
@@ -388,26 +588,33 @@ body ::tycho::SlateView::_reshaperelease {name} {
 body ::tycho::SlateView::_selection {mode {name {}}} {
     switch -exact $mode {
     	"add" {
-	    $slate selection add $_itemid($name)
+	    $_slate selection add $_itemid($name)
     	}
     	"remove" {
-	    $slate selection add $_itemid($name)
+	    $_slate selection add $_itemid($name)
     	}
     	"clear" {
-	    $slate selection clear
+	    $_slate selection clear
     	}
     }
 }
 
-########################################################################
-#### find
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+#######################################################################
+#### _loadlayout
 #
-# Find items.
+# Load the layout model into the slate. If _item_ is provided, lkoad
+# just that item.
 #
-body ::tycho::SlateView::find {mode tag} {
-    set result {}
-    foreach id [$slate find $mode $tag] {
-	lappend result $_nameof($id)
+body ::tycho::SlateView::_loadlayout {{item {}}} {
+    if { $item != "" } {
+        _add $item [$_layout itemcget $item]
     }
-    return $result
+    foreach i [$_layout match item $item] {
+        load [concat $item $i]
+    }
 }
+
