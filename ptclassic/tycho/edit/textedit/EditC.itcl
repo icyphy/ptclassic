@@ -77,6 +77,11 @@ class ::tycho::EditC {
 
     # If the selection is exactly a comment, remove the comment symbols.
     method uncommentSelection {}
+
+    ##########################################################################
+    ####                         private methods                          ####
+
+    private variable compiler {}
 }
 
 ###################################################################
@@ -107,11 +112,30 @@ body ::tycho::EditC::constructor {args} {
 #
 body ::tycho::EditC::compileAndLoad {} {
     global env tycho
-    saveQuery
-    set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
-    $compiler configure -view $this
+    #saveQuery
+    #set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+    #$compiler configure -view $this
+    evaluate
     $compiler compileAndLoad [list $file]
-    delete object $compiler
+    #delete object $compiler
+}
+
+#####################################################################
+#### evaluate
+# Save the buffer if necessary, compile it. If there is no makefile
+# present in the current directory, then create a makefile with a
+# name based on the current file.
+#
+body ::tycho::EditC::evaluate {} {
+    global env tycho
+    saveQuery
+
+    if {$compiler == {}} {
+        set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+    }
+    $compiler configure -view $this
+    $compiler compile [list $file]
+    #delete object $compiler
 }
 
 #####################################################################
@@ -137,21 +161,6 @@ body ::tycho::EditC::commentSelection {} {
 	markModified
 	parseRegion sel.first sel.last
     }
-}
-
-#####################################################################
-#### evaluate
-# Save the buffer if necessary, compile it. If there is no makefile
-# present in the current directory, then create a makefile with a
-# name based on the current file.
-#
-body ::tycho::EditC::evaluate {} {
-    global env tycho
-    saveQuery
-    set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
-    $compiler configure -view $this
-    $compiler compile [list $file]
-    delete object $compiler
 }
 
 ###################################################################
