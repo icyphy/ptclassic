@@ -1,7 +1,7 @@
 # Makefile for Ptolemy library and main module for interpreter
 # Version identification:
 # $Id$
-# Copyright (c) 1990 The Regents of the University of California.
+# Copyright (c) 1990-1993 The Regents of the University of California.
 #                       All Rights Reserved.
 # Date of creation: 3/19/90
 #
@@ -48,9 +48,9 @@ CCS_WITH_H_FILES=\
  DynamicGalaxy.cc \
  Error.cc \
  EventHorizon.cc \
- FixSample.cc \
- FixState.cc \
+ Fix.cc \
  FixArrayState.cc \
+ FixState.cc \
  FloatArrayState.cc \
  FloatState.cc \
  FloatVecData.cc \
