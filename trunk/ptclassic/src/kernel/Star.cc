@@ -58,6 +58,11 @@ int Star :: fire() {
 Star& Star :: asStar () { return *this;}
 const Star& Star :: asStar () const { return *this;}
 
+// set the target for the star.
+virtual void Star :: setTarget(Target* t) { 
+	targetPtr = t;
+}
+
 // sets the index values of each star in the galaxy.  Returns the
 // total number of stars.
 int setStarIndices(Galaxy& g) {
