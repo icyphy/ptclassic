@@ -39,11 +39,13 @@ PL_SRCS= \
  SDFDisplayVideo.pl \
  SDFDPCMImage.pl \
  SDFDPCMImageInv.pl \
+ SDFImageToMx.pl \
  SDFImageToPix.pl \
  SDFMakeSeqATMCell.pl \
  SDFMedianImage.pl \
  SDFMotionCmp.pl \
  SDFMotionCmpInv.pl \
+ SDFMxToImage.pl \
  SDFPixToImage.pl \
  SDFReadImage.pl \
  SDFReadRGB.pl \
