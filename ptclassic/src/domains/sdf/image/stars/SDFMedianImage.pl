@@ -37,14 +37,23 @@ Pixels at the image boundaries are copied and not median filtered.
 		name	{ FilterWidth }
 		type	{ int }
 		default { 3 }
-		desc	{ Size of median filter window (should be odd number). }
+		desc	{
+Size of median filter window in each dimension (should be odd number). }
+	}
+
+	defstate {
+		name	{ RankOrder }
+		type	{ int }
+		default { 0 }
+		desc	{
+Which ordered sample is chosen from each neighborhood of pixels,
+0, 1, ... FilterWidth^2 - 1.
+		}
 	}
 
 	ccinclude { "GrayImage.h", <std.h> }
 
 	code {
-#define INT_DIVIDE_BY_TWO(d) ((d) >> 1)
-
 	    // Function to sort unsigned char's.
 	    // These types and casts are required to satisfy cfront's
 	    // ridiculously strict rules.
@@ -60,19 +69,32 @@ Pixels at the image boundaries are copied and not median filtered.
 	}
 
 	protected {
-		int width, height, size;
-		int halfNeighborhoodSize, neighborhoodSize;
+		int halfsize, height, neighborhoodSize, rankIndex, size, width;
 		unsigned char* buf;
 	}
 
-	constructor { buf = 0; }
+	constructor {
+		buf = 0;
+		RankOrder.clearAttributes(A_SETTABLE);
+	}
 
 	setup {
+		// Define the size of neighborhood in each dimension
 		size = int(FilterWidth);
 		if (size <= 0) { size = 3; }
 		size = 1 + 2*(size/2);		// an odd number for sure
-		neighborhoodSize = size*size;
-		halfNeighborhoodSize = neighborhoodSize/2;
+		FilterWidth = size;
+		halfsize = size/2;
+
+		// In a size x size neighborhood of pixels, data is
+		// written into the one-dimensional buffer buf, which
+		// is indexed from 0 ... (neighborhoodSize - 1).
+		// Median value at middle index, (neighborhoodSize - 1)/2
+		rankIndex = (size*size - 1)/2;
+		RankOrder = rankIndex;
+
+		// Define the size of the two-dimensional neighborhood
+		neighborhoodSize = size * size;
 		delete [] buf;
 		buf = new unsigned char[neighborhoodSize];
 	}
@@ -80,7 +102,7 @@ Pixels at the image boundaries are copied and not median filtered.
 	destructor { delete [] buf; }
 
 	method {
-		name	{ retMedian }
+		name	{ retRankedElement }
 		access	{ protected }
 		type	{ "unsigned char" }
 		arglist { "(unsigned const char* p, int pi, int pj)" }
@@ -90,11 +112,10 @@ Pixels at the image boundaries are copied and not median filtered.
 		    // We want to copy pixel values at p[i][j] where
 		    //   i = (pi - halfsize) ... pi ... (pi + halfsize)
 		    //   j = (pj - halfsize) ... pj ... (pj + halfsize)
-		    // where halfsize = halfNeighborhoodSize
-		    int maxi = pi + halfNeighborhoodSize;
-		    int pjstart = pj - halfNeighborhoodSize;
+		    int maxi = pi + halfsize;
+		    int pjstart = pj - halfsize;
 		    unsigned char *bufp = buf;
-		    for (int i = pi - halfNeighborhoodSize; i <= maxi; i++) {
+		    for (int i = pi - halfsize; i <= maxi; i++) {
 			// pijptr begins at p[i][pj - halfsize]
 			unsigned const char *pijptr = &p[i * width + pjstart];
 			for (int k = 0; k < size; k++) {
@@ -105,11 +126,8 @@ Pixels at the image boundaries are copied and not median filtered.
 		    // Sort data
 		    qsort(buf, neighborhoodSize, sizeof(unsigned char), sortUC);
 
-		    // Data indexed from 0 ... (neighborhoodSize - 1)
-		    // Median value at middle index, (neighborhoodSize - 1)/2
-		    // Because neighborhoodSize is odd, we can just use
-		    // neighborhoodSize/2
-		    return buf[ halfNeighborhoodSize ];
+		    // Return ranked data elemented 
+		    return buf[ rankIndex ];
 		}
 	}
 
@@ -131,7 +149,6 @@ Pixels at the image boundaries are copied and not median filtered.
 		GrayImage* outImage = (GrayImage*) inImage->clone(1);
 		unsigned char* outptr = outImage->retData();
 		unsigned const char* inptr = inImage->constData();
-		int halfsize = halfNeighborhoodSize;
 		for (int i = 0; i < height; i++) {
 		    int j = 0;
 		    if ( (halfsize <= i) && (i < height - halfsize) ) {
@@ -141,7 +158,7 @@ Pixels at the image boundaries are copied and not median filtered.
 			}
 			// Median filter
 			for ( ; j < width - halfsize; j++) {
-			    *outptr++ = retMedian(inptr, i, j);
+			    *outptr++ = retRankedElement(inptr, i, j);
 			    inptr++;
 			}
 			// Just copy the boundary pixels
