@@ -103,6 +103,7 @@ body ::tycho::EditItcl::gendoc {} {
 	    [info namespace tail [[$this component text] getClassName]].html]
     set fulldoc [file join $dir $docfile]
     if {![file exists $fulldoc] || \
+	    [isModified] || \
             [file mtime $filename] > [file mtime $fulldoc]} {
         # Need to regenerate the doc.  Check permissions first.
         # It is sufficient for the directory to be writable.
