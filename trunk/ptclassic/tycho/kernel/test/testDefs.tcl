@@ -203,15 +203,16 @@ proc openAllFiles {args} {
 ############################################################################
 #### doneTests
 # Call this at the bottom of each test file
+# If reallyExit exists and is not set to 1, then don't exist
 #
 proc doneTests {args} {
-    global PASSED FAILED duration
+    global PASSED FAILED duration reallyExit
     puts stderr \
 	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
-    #after [expr {2 * $duration}] ::tclexit
+    if {[info exists reallyExit] && $reallyExit == 1} {
+	after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
+	#after [expr {2 * $duration}] ::tclexit
+    }
 }
-
- 
