@@ -89,7 +89,9 @@ const int linkingNotSupported =
 #ifdef hpux
 inline size_t getpagesize() { return 4096;}
 #else
+#ifdef __GNUG__
 extern "C" size_t getpagesize(void);
+#endif
 #endif
 
 // Prefix for constructor-calling symbols
