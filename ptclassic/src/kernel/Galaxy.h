@@ -22,6 +22,9 @@ $Id$
 	Add Galaxy::blockWithName and BlockList::blockWithName.
  	Make KnownBlock (see KnownBlock.h) a friend of BlockList.
 
+    4/20/90 - J. Buck
+	Revised; now PortHole and MultiPortHole come from GenericPort.
+
 Definition of the Galaxy class, together with the BlockList class.
 
 **************************************************************************/
@@ -48,7 +51,7 @@ class BlockList : SequentialList
 
 	// Find a block with the given name and return pointer; NULL if not found
 protected:
-	Block* blockWithName (char* name);
+	Block* blockWithName (const char* name);
 };
 
 	////////////////////////////////////
@@ -66,9 +69,12 @@ protected:
 	// Add blocks to the list
 	void addBlock(Block& b) {blocks.put(&b);}
 
+	// Add block and call setBlock for it
+	void addBlock(Block& b,const char* bname) {addBlock(b.setBlock(bname,this));}
+
 	// Connect sub-blocks with a delay (default to zero delay)
 	// Returns a reference to the Geodesic it created.
-	Geodesic& connect(PortHole& source, PortHole& destination,
+	Geodesic& connect(GenericPort& source, GenericPort& destination,
 			  int numberDelays = 0);
 
 	// TO BE DONE:
@@ -87,7 +93,7 @@ protected:
 	}
 
 	// support blockWithName message to access internal block list
-	Block* blockWithName (char* name) {return blocks.blockWithName(name);}
+	Block* blockWithName (const char* name) {return blocks.blockWithName(name);}
 public:
 	// Return the number of blocks in the galaxy.
 	int numberBlocks() {return blocks.size();}
@@ -96,11 +102,11 @@ public:
 	Block& nextBlock() {return blocks++;}
 
 	// Print a description of the galaxy
-	virtual operator char* ();
+	virtual operator StringList ();
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
-	virtual int isItAtomic () {return FALSE;}
+	virtual int isItAtomic () const {return FALSE;}
 };
 
 

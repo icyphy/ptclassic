@@ -28,7 +28,7 @@ Methods for class Galaxy
 
 // Need to add error checking
 
-Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
+Geodesic& Galaxy :: connect (GenericPort& source, GenericPort& destination,
 			int numberDelays = 0) {
 
 	// Resolve any aliases and MultiPortHole stuff:
@@ -37,7 +37,7 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 	PortHole& realSource = source.newConnection();
 	PortHole& realDest = destination.newConnection();
 
-	Geodesic* geo = source.allocateGeodesic();
+	Geodesic* geo = realSource.allocateGeodesic();
 	geo->originatingPort = &realSource;
 	geo->destinationPort = &realDest;
 	realSource.myGeodesic = geo;
@@ -64,11 +64,11 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 
 
 	////////////////////////////////////
-	// operator char* ()
+	// operator StringList ()
 	////////////////////////////////////
 
 
-Galaxy :: operator char* () {
+Galaxy :: operator StringList () {
 	StringList out;
 	out = "GALAXY: ";
 	out += readFullName();
@@ -81,16 +81,16 @@ Galaxy :: operator char* () {
 	out += "\n";
 	if (numberPorts()>0) out += "Ports in the Galaxy:\n";
 	   for(int i = numberPorts(); i>0; i--)
-		out += nextPort();
+		out += StringList(nextPort());
 
 	out += "Blocks in the Galaxy:----------------------------------\n";
 	for(i = numberBlocks(); i>0; i--)
-		out += nextBlock();
+		out += StringList(nextBlock());
 	return out;
 }
 
 Block *
-BlockList::blockWithName (char *ident) {
+BlockList::blockWithName (const char* ident) {
 	Block *p;
 	for (int i = size();i>0;i--) {
 		p = (Block *)next();
