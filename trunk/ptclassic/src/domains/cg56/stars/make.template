@@ -118,7 +118,7 @@ all:		$(SRCS) makefile $(OBJS)
 
 STAR_MK=cg56stars
 DOMAIN=CG56
-EXTRA_SRCS= $(STAR_MK) $(PL_SRCS)
+EXTRA_SRCS= $(STAR_MK).mk $(PL_SRCS)
 
 # nothing to install -- use it where it lies
 install:	all
