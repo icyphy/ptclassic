@@ -218,3 +218,9 @@ else
 MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
 MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 endif
+
+# We build to libraries one for use if matlab is present, one for use if
+# matlab is not present.  See sdf/matlab
+ifeq ($(DONT_USE_MATLAB),yes)
+MATLABDIR= $(ROOT)/src/compat/matlab
+endif
