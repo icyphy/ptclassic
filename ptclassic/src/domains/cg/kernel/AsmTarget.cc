@@ -125,6 +125,11 @@ AsmTarget::allocReq(AsmStar& star) {
 	AsmPortHole* p;
 	while ((p = nextPort++) != 0) {
 		if (p->isItOutput() && p->far()->isItInput()) continue;
+
+		// If schedule has not been computed, the bufSize == 0
+		// bufSize, calls Error::abortRun
+		if (!p->bufSize()) return FALSE;
+		
 		if ((p->bufSize() > star.reps()*p->numXfer()) && 
 		    !(p->attributes() & PB_CIRC)) {
 			Error::abortRun(*p, "Dynamic addressing required for the buffer size returned by scheduler.  This is not supported yet."); 
@@ -185,104 +190,103 @@ extern int warnIfNotConnected (Galaxy&);
 
 // Here's the main guy.
 int AsmTarget::modifyGalaxy() {
-	Galaxy& g = *galaxy();
-	const char* dom = g.domain();
-	if (!int(loopingLevel)) return TRUE;
-	// init and call start methods.  We must do this so that
-	// the numberTokens values will be correct.
-	if (warnIfNotConnected(g)) return FALSE;
-	g.initialize();
+    Galaxy& g = *galaxy();
+    const char* dom = g.domain();
+    // if (!int(loopingLevel)) return TRUE;
+    // init and call start methods.  We must do this so that
+    // the numberTokens values will be correct.
+    if (warnIfNotConnected(g)) return FALSE;
+    g.initialize();
 
-	// compute repetitions.
-	SDFScheduler* sched = (SDFScheduler*) scheduler();
-	sched->setGalaxy(g);
-	sched->repetitions();
+    // compute repetitions.
+    SDFScheduler* sched = (SDFScheduler*) scheduler();
+    sched->setGalaxy(g);
+    sched->repetitions();
 
-	if (Scheduler::haltRequested()) return FALSE;
-	int status = TRUE;
-	GalStarIter nextStar(g);
-	Star* s;
-	while ((s = nextStar++) != 0) {
-		BlockPortIter nextPort(*s);
-		DFPortHole* p;
-		while ((p = (DFPortHole*) nextPort++) != 0 && status) {
-			int nread;
-			int nwrite;
-			int boundaryFlag = 0;
-			if (p->atBoundary()) {
-				if (p->parentReps() == 0) continue;
-				boundaryFlag = 1;
-				if (p->isItOutput()) {
-					nread = p->numXfer() * 
-						p->parentReps();
-					nwrite = p->far()->numXfer();
-				} else {
-					nread = p->far()->numXfer();
-					nwrite = p->numXfer() * 
-						p->parentReps();
-				}
-				if (nread == nwrite) continue;
-			} else if (p->isItOutput() || 
-			    p->numXfer() == p->far()->numXfer()) {
-				continue;
-			} else {
-				nread = p->numXfer();
-				nwrite = p->far()->numXfer();
-			}
-
-			// we have a rate conversion.
-			if (nread < nwrite && nwrite%nread == 0) {
-				// I run more often than my writer.
-				// must have P_CIRC but writer does not
-				// need it.
-				if (!hasCirc(p)) {
-					Star* newb = (Star*)
-					   spliceStar(p, "CircToLin",0,dom);
-					if (!newb) return FALSE;
-					newb->setTarget(this);
-					PortHole* newP = 
-						newb->portWithName("input");
-					if (boundaryFlag) {
-					    p->aliasFrom()->setAlias(*newP);
-					}
-				}
-			}
-			else if (nread > nwrite && nread%nwrite == 0) {
-				// My writer runs more often than me.
-				// It needs PB_CIRC, I do not.
-				if (!hasCirc(p->far())) {
-					Star* newb =  (Star*)
-					   spliceStar(p, "LinToCirc",1,dom);
-					if (!newb) return FALSE;
-					newb->setTarget(this);
-					PortHole* newP = 
-						newb->portWithName("output");
-					if (boundaryFlag) {
-					    p->aliasFrom()->setAlias(*newP);
-					}
-				}
-			}
- 			else {
-				// nonintegral rate conversion, both need
-				// PB_CIRC
-				Star* newb;
-				PortHole* newP = p;
-				if (!hasCirc(newP)) {
-					newb = (Star*) spliceStar(newP, "CircToLin", 0,dom);
-					if (!newb) return FALSE;
-					newb->setTarget(this);
-					newP = newb->portWithName("input");
-					if (!newP) return FALSE;
-				}
-				if (!hasCirc(newP->far())) {
-					newb = (Star*) spliceStar(newP, "LinToCirc", 1,dom);
-					if (!newb) return FALSE;
-					newb->setTarget(this);
-				}
-			}
+    if (Scheduler::haltRequested()) return FALSE;
+    int status = TRUE;
+    GalStarIter nextStar(g);
+    Star* s;
+    while ((s = nextStar++) != 0) {
+	BlockPortIter nextPort(*s);
+	DFPortHole* p;
+	while ((p = (DFPortHole*) nextPort++) != 0 && status) {
+	    int nread;
+	    int nwrite;
+	    int boundaryFlag = 0;
+	    if (p->atBoundary()) {
+		if (p->parentReps() == 0) continue;
+		boundaryFlag = 1;
+		if (p->isItOutput()) {
+		    nread = p->numXfer() * 
+			p->parentReps();
+		    nwrite = p->far()->numXfer();
+		} else {
+		    nread = p->far()->numXfer();
+		    nwrite = p->numXfer() * 
+			p->parentReps();
 		}
+		if (nread == nwrite) continue;
+	    } else if (p->isItOutput() || 
+		       p->numXfer() == p->far()->numXfer()) {
+		continue;
+	    } else {
+		nread = p->numXfer();
+		nwrite = p->far()->numXfer();
+	    }
+
+	    // we have a rate conversion.
+	    if (nread < nwrite && nwrite%nread == 0) {
+		// I run more often than my writer.
+		// must have P_CIRC but writer does not
+		// need it.
+		if (!hasCirc(p)) {
+		    Star* newb = (Star*) spliceStar(p, "CircToLin",0,dom);
+		    if (!newb) return FALSE;
+		    newb->setTarget(this);
+		    PortHole* newP = 
+			newb->portWithName("input");
+		    if (boundaryFlag) {
+			p->aliasFrom()->setAlias(*newP);
+		    }
+		}
+	    }
+	    else if (nread > nwrite && nread%nwrite == 0) {
+		// My writer runs more often than me.
+		// It needs PB_CIRC, I do not.
+		if (!hasCirc(p->far())) {
+		    Star* newb =  (Star*)
+			spliceStar(p, "LinToCirc",1,dom);
+		    if (!newb) return FALSE;
+		    newb->setTarget(this);
+		    PortHole* newP = 
+			newb->portWithName("output");
+		    if (boundaryFlag) {
+			p->aliasFrom()->setAlias(*newP);
+		    }
+		}
+	    }
+	    else {
+		// nonintegral rate conversion, both need
+		// PB_CIRC
+		Star* newb;
+		PortHole* newP = p;
+		if (!hasCirc(newP)) {
+		    newb = (Star*) spliceStar(newP, "CircToLin", 0,dom);
+		    if (!newb) return FALSE;
+		    newb->setTarget(this);
+		    newP = newb->portWithName("input");
+		    if (!newP) return FALSE;
+		}
+		if (!hasCirc(newP->far())) {
+		    newb = (Star*) spliceStar(newP, "LinToCirc", 1,dom);
+		    if (!newb) return FALSE;
+		    newb->setTarget(this);
+		}
+	    }
 	}
-	return status;
+    }
+    return status;
 }
 
 void AsmTarget::disableInterrupts() {}
@@ -330,6 +334,7 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
         // Generate Code.  Iterate an infinite number of times if
         // target is inside a wormhole
         int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+	defaultStream = &myCode;
         beginIteration(iterations,0);
 	myCode << mainLoop;
         endIteration(iterations,0);
