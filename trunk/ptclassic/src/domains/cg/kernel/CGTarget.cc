@@ -112,7 +112,7 @@ void CGTarget::generateCode() {
 	headerCode();
 	if(!allocateMemory() || !codeGenInit()) return;
 	mainLoopCode();
-	galaxy()->wrapup();
+	Target :: wrapup();
 	trailerCode();
 	frameCode();
 	if (!parent()) writeCode();
