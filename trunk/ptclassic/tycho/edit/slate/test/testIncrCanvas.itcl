@@ -631,10 +631,17 @@ test IncrCanvas-type.2 {Complex item by ID} {
     .c type $f
 } {Frame}
 
-test IncrCanvas-type.2 {Any tag} {
-    catch {.c type foo} result
-    set result
-} {foo is not a valid item ID}
+test IncrCanvas-type.3 {Simple item by tag} {
+    .c type foo
+} {rectangle}
+
+test IncrCanvas-type.4 {Complex item by tag} {
+    .c type bar
+} {Frame}
+
+test IncrCanvas-type.5 {No match} {
+    .c type nothing
+} {}
 
 ############################################################################
 ####
