@@ -158,8 +158,7 @@ int sign;
 	while (--i > 0)
 	    *dst_r++ = (FIX_WORD) ~0;
 
-	dst_r[-1] &= ~(FIX_WORD)0 
-	    << FIX_BITS_PER_WORD -(dst_l%FIX_BITS_PER_WORD);
+	dst_r[-1] &= ~(FIX_WORD)0 << dst_l%FIX_BITS_PER_WORD;
 
 	while (j-- > 0)
 	    *dst_r++ = (FIX_WORD) 0;
