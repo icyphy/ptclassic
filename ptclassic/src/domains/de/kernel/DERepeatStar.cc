@@ -54,6 +54,5 @@ int DERepeatStar :: canGetFired() {
 
 void DERepeatStar :: start() {
 	feedbackOut.put(completionTime) << float(0.0);
-	feedbackOut.sendData();
 }
 
