@@ -488,7 +488,7 @@ body ::tycho::EditPtcl::initializeMenubar {menubar} {
 
     # Stuff for the help menu
     # Moved to the special menu -- johnr
-    $menubar separator specialsep2 special
+    $menubar separator specialsep3 special
     $menubar command ptuniverses special \
 	    -label "Ptolemy Universes" -underline 0 \
             -command "::tycho::File::openContext \
