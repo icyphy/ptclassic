@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class HierCluster : public Cluster {
 public:
 
-    HierCluster():Cluster(), repetitions(0) {};
+    HierCluster():Cluster(), repetitions(0), execTime(0) {};
 
     /*virtual*/ Block* makeNew() const { return new HierCluster; }
     
@@ -55,7 +55,6 @@ public:
     /*virtual*/ int flattenTest(Galaxy&);
 
     /*virtual*/ Cluster* convertGalaxy(Galaxy&);
-
     /*virtual*/ Cluster* convertStar(Star&);
 
     // The number of repetitions of the cluster in a periodic
@@ -63,6 +62,7 @@ public:
     // value by clustering.
     int repetitions;
 
+    int execTime;
 private:
     void adjustRepetitions(HierCluster& /*clusterToMerge*/);
     int adjustRepetitions(int /*newRepetitionCount*/);
