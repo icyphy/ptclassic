@@ -30,7 +30,7 @@
 # Root of Ptolemy directory
 ROOT=../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cgc/targets/main
+VPATH = $(ROOT)/src/domains/cgc/targets/multiprocessor
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
@@ -54,18 +54,15 @@ INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 
 
 PL_SRCS = \
-	CGCSDFBase.pl \
-	CGCSDFSend.pl \
-	CGCSDFReceive.pl \
 	CGCUnixSend.pl \
 	CGCUnixReceive.pl
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS =	CreateSDFStar.cc CompileCGSubsystems.cc \
-	CGCMultiTarget.cc CGCBDFTarget.cc \
-	CGCDDFCode.cc CGCMacroStar.cc \
-	CGCMakefileTarget.cc \
+SRCS =	CompileCGSubsystems.cc \
+	CGCMultiTarget.cc \
+	CGCDDFCode.cc \
+	CGCMacroStar.cc \
 	$(PLSRC) 
 
 EXTRA_SRCS = $(PL_SRCS)
@@ -78,7 +75,7 @@ ifeq ($(USE_SHARED_LIBS),yes)
 
 # If we are building shared libraries, then we can put all the targets in
 # a shared library.
-LIB = 		libcgctargets.$(LIBSUFFIX)
+LIB = 		libcgcmultitargets.$(LIBSUFFIX)
 all:		$(SRCS) makefile $(OBJS) $(LIB)
 install:	all $(LIBDIR)/$(LIB)
 
