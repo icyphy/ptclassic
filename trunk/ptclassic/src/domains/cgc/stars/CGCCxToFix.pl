@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC conversion palette }
+	location { CGC main library }
 	desc { Convert a complex input to a fixed-point output. }
 	explanation {
 This star converts a complex value to a fix value with the specified precision
