@@ -682,14 +682,14 @@ realclean:
 		done ; \
 	fi
 	rm -f $(CRUD) configure $(REALCLEAN_STUFF) 
-	rm -f doc/codeDoc/* $(OPTIONAL_FILES) $(HTMLCHEKOUT)*
+	-rm -f doc/codeDoc/* $(OPTIONAL_FILES) $(HTMLCHEKOUT)*
 
 
 
 # Remove the sources too, so that we can get them back from sccs
 extraclean:
 	rm -f $(CRUD) $(REALCLEAN_STUFF) $(EXTRA_SRCS) $(JSRCS)
-	rm -rf doc/codeDoc/*
+	-rm -f doc/codeDoc/* $(OPTIONAL_FILES) $(HTMLCHEKOUT)*
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
