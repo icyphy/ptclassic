@@ -60,11 +60,6 @@ obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
 everything: obj.$(PTARCH) install_tcltk install_octtools install_xv \
 	install_gthreads install
 
-# Like make everything, but build shared tcltk libraries.  Shared tcltk
-# libraries have not been extensively tested
-everything_shared: obj.$(PTARCH) install_tcltk install_tcltk_shared \
-	install_octtools install_xv install_gthreads install
-
 everything_clean: clean_tcltk clean_octtools clean_xv clean_gthreads clean
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
@@ -119,13 +114,6 @@ install_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
 clean_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_clean
-
-# Not all architectures support shared libraries.  sol2 w/ gcc-2.7.0 does.
-# Shared tcltk libraries have not been extensively tested
-install_tcltk_shared:
-	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all_shared
-clean_tcltk_shared:
-	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_clean_shared
 
 # Usually rebuilding vem and the octtools library is not done everytime.
 # Note that the octtools source is distributed as a separate tar file.
