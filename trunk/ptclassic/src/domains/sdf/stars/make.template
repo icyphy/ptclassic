@@ -140,6 +140,7 @@ SRCS= \
  SDFUpSample.pl \
  SDFWaterfall.pl \
  SDFWaveForm.pl \
+ SDFWindow.pl \
  SDFXMgraph.pl \
  SDFXYgraph.pl \
  SDFXgraph.pl \
