@@ -40,6 +40,21 @@ static void noInstance(const char* star,const char* gal) {
 	Error::abortRun (msg);
 }
 
+// Find a port or multiport without resolving aliases
+GenericPort *
+InterpGalaxy::findGenPort (const char* star,const char* port) {
+	Block *st = blockWithName(star);
+	if (st == NULL) {
+		noInstance (star, readName());
+		return 0;
+	}
+	GenericPort *ph = st->multiPortWithName(port);
+	if (ph) return ph;
+	ph = st->genPortWithName(port);
+	if (ph == NULL) noInstance (port, star);
+	return ph;
+}
+
 // Find a port or multiport -- preserve its "identity" -- things
 // can call isItMulti on the result, say
 GenericPort *
@@ -147,7 +162,7 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 		    const char* portname) {
 	galportname = hashstring (galportname);
 // first get the portname for the contained star
-	GenericPort *ph = findGenericPort (starname, portname);
+	GenericPort *ph = findGenPort (starname, portname);
 	if (ph == NULL) return FALSE;
 	portname = hashstring (portname);
 	starname = hashstring (starname);
