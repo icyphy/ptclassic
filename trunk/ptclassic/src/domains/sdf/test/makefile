@@ -41,13 +41,19 @@ include $(CONFIG)
 
 TCL_SRCS =
 
+# testSDFStars.tcl should be first, since it instantiates one of every star.
 SIMPLE_TESTS = \
-	testSDFArith.tcl
+	testSDFStars.tcl \
+	testSDFArith.tcl \
+	testSDFConv.tcl \
+	testSDFDSP.tcl
 
-GRAPHICAL_TESTS =
+GRAPHICAL_TESTS = \
+	dummy
 
+# Don't include GRAPHICAL_TESTS until we actually have some
 ITCL_SRCS =	\
-	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	$(SIMPLE_TESTS) \
 	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
