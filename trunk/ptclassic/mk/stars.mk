@@ -40,7 +40,9 @@ PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
 ifdef S56DIR
 S56WH_LIB= -lqckMon
 S56WH_LIBDIR= -L$(S56DIR)/lib
-S56WH_O= $(CG56T)/S56XTargetWH.o
+S56WH_O= $(CG56T)/S56XTargetWH.o $(CG56T)/CG56S56XCGCReceive.o \
+         $(CG56T)/CG56S56XCGCSend.o $(CG56T)/CGCS56XReceive.o \
+         $(CG56T)/CGCS56XSend.o $(CG56T)/CGCS56XTarget.o
 endif
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
