@@ -42,10 +42,17 @@ include $(CONFIG)
 TCL_SRCS =
 
 SIMPLE_TESTS = \
-	testBlock.itcl \
-	testMisc.itcl \
-	testPorts.itcl \
-	testRemove.itcl
+	all.itcl \
+	addBlock.itcl \
+	blocks.itcl \
+	connect.itcl \
+	connected.itcl \
+	descriptor.itcl \
+	galaxyPort.itcl \
+	name.itcl \
+	ports.itcl \
+	predicates.itcl \
+	remove.itcl
 
 GRAPHICAL_TESTS =
 
