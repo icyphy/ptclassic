@@ -10,6 +10,14 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
+# We need to see if $(INCLUDE_IPUS_DOMAIN) is set
+# Root of Ptolemy directory
+ROOT =		../..
+
+# get configuration info
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
 
