@@ -66,28 +66,24 @@ ifdef PTCL
 	TK =
 endif
 
+# Note that some of these settings will be filtered out by stars.mk
 ifdef FULL
 	PIGI = 		$(BASENAME)
 	VERSION_DESC =	'With All Common Domains'
 	BDF =		1
 	C50 =		1
+	CGFULL =	1
 	CG56 =		1
 	CGCFULL =	1
-	CGFULL =	1
-	CODESIGN =	1
 	DDF =		1
 	DE =		1
 	FSM = 		1
-	ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
-		# Non G++ compilers fail to compile IPUS' templates
-		IPUS =		1
-	endif
 	HOF =		1
+	IPUS =		1
 	MDSDF =		1
-	ifeq ($(INCLUDE_PN_DOMAIN),yes)
-		PN =		1
-	endif
+	PN =		1
 	SDFFULL =	1
+#	SR =		1
 	VHDL =		1
 	VHDLB =		1
 endif
