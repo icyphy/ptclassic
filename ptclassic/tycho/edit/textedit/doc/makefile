@@ -43,7 +43,7 @@ EXTRA_SRCS = \
 	index.html \
 	shells.html
 
-MISC_FILES =	codeDoc internals templates usersGuides
+MISC_FILES =	codeDoc internals usersGuides
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
