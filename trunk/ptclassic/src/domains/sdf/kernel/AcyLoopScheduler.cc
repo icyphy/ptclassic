@@ -766,6 +766,7 @@ of this function, gr will have only two clusters in it.
 int AcyLoopScheduler::RPMC(AcyCluster* gr)
 {
     int cost = 0, leftCost = 0, rightCost = 0, totalCost = 0;
+    int cost1, cost2;
     int N, lflag = 0, rflag = 0;
     AcyCluster *c, *leftSubGraph = 0, *rightSubGraph = 0, *newL = 0, *newR = 0;
     SequentialList leftGroup, rightGroup;
@@ -789,6 +790,23 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    }
 	    gr = (AcyCluster*)gr->head();
 	}
+	cost1 = gr->legalCutIntoBddSets(3*N/4);
+	cost2 = gr->legalCutIntoBddSets(N-1);
+	if (cost1 != -1) {
+	    if (cost1 < cost2) {
+		// call again for now to re-mark the first marking.
+		cost = gr->legalCutIntoBddSets(3*N/4);
+		cout << "Used 3N/4.\n";
+	    } else {
+		cost = cost2;
+	    }
+	    if (cost1 > cost2) cout << "Used N-1.\n";
+	    if (cost1 == cost2) cout << "Both 3N/4 and N-1 the same.\n";
+	} else {
+	    cost = cost2;
+	    cout << "Used N-1.\n";
+	}
+	/*
 	if ( (cost=gr->legalCutIntoBddSets(3*N/4)) == -1) {
 	    // Means that a bounded cut was not found; call again
 	    // relaxing the bound.  Note that the splitter returns
@@ -796,6 +814,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    // However, with a bound of N-1, a cut should always be found.
 	    cost = gr->legalCutIntoBddSets(N-1);
 	}
+	*/	
 
 	if (cost == -1) {
 	    // Something is wrong.  We have this check for debugging
@@ -810,8 +829,6 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    Error::abortRun(message);
 	    return -1;
 	}
-
-	if (gr->loopFactor() > 0) cost /= gr->loopFactor();
 
 	// Now build up the right and left subgraphs.
 	AcyClusterIter nextClust(*gr);
@@ -1212,9 +1229,11 @@ void AcyLoopScheduler::fixBufferSizes(int i, int j) {
     // or APGAN+DPPO
     int N = j-i+1;
     int g_ij = gcdMatrix.m[i][j];
-    int split, repsij;
-    DataFlowStar *s, *t;
+    int split, repsij, delays;
+    DataFlowStar *s;
+    Block *t;
     DFPortHole *p;
+    Geodesic* geod;
     if (N > 1) {
 	split = splitMatrix.m[i][j];
 	// fix buffer sizes for all arcs crossing this split
@@ -1223,11 +1242,22 @@ void AcyLoopScheduler::fixBufferSizes(int i, int j) {
 	    repsij = (s->reps())/g_ij;
 	    DFStarPortIter nextPort(*s);
 	    while ((p=nextPort++) != NULL) {
-		t = (DataFlowStar*)p->far()->parent();
-		if(t && topInvSort[NODE_NUM(t)] > split
-		     && topInvSort[NODE_NUM(t)] <= j) {
-		    if (p->geo())
-		    p->geo()->setMaxArcCount(repsij*(p->numXfer()));
+		if (p->far() && (t=p->far()->parent()) && 
+			topInvSort[NODE_NUM(t)] > split &&
+			topInvSort[NODE_NUM(t)] <= j ) {
+		    // t is on the other side of the split.
+		    geod = p->geo();
+		    if (!geod) {
+			Error::abortRun(*p, "has no geodesic.\n");
+			return;
+		    }
+		    delays = p->numInitDelays();
+		    if (p->isItInput()) {
+			// A reverse arc
+			geod->setMaxArcCount(delays);
+		    } else {
+		        geod->setMaxArcCount(repsij*(p->numXfer())+delays);
+		    }
 		}
 	    }
 	}
