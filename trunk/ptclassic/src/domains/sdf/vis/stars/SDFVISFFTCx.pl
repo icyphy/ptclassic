@@ -75,9 +75,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	  static double mult4x4(double mult1,double mult2)
 	    { 
-	      double mult1hi,mult1lo,mult2hi,mult2lo;
+
 	      double prodhihi,prodhilo,prodlohi,prodlolo;
 	      double prodhi,prodlo,product;
+	      float mult1hi,mult1lo,mult2hi,mult2lo;
 	      float packhi,packlo;
 
 	      mult1hi = vis_read_hi(mult1);
@@ -95,6 +96,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	      packhi = vis_fpackfix(prodhi);
 	      packlo = vis_fpackfix(prodlo);
 	      return product = vis_freg_pair(packhi,packlo);
+	    }
+	  static float mult2x2(float mult1,float mult2)
+	    {
+	      double resultu,resultl,result;
+	      float product;
+
+	      resultu = vis_fmuld8sux16(mult1,mult2);
+	      resultl = vis_fmuld8ulx16(mult1,mult2);
+	      result = vis_fpadd32(resultu,resultl);
+	      return product = vis_fpackfix(result);
 	    }
 	  static void reorderfft(short *s1,short *s2, int nn)
 	    {
@@ -158,8 +169,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {	
 	  double ExpofW,reindtmp,imagindtmp;
 	  double xtcd,ytsd,xtsd,ytcd;
-	  double CSd,SCd,xtcminusyts,xtsaddytc;
-	  double reinrepeat,iminrepeat,xtcxts,ytsytc;
 	  float xtcf,ytsf,xtsf,ytcf;
 	  float *splitf_rein,*splitf_imin;
 	  float reinftmp,imaginftmp;
@@ -213,32 +222,30 @@ limitation of liability, and disclaimer of warranty provisions.
 	  calcTwSinCos(Twsine,Twcosine,ExpofW,N2);
 	  Cf=(float *) Twcosine;
 	  Sf=(float *) Twsine;
-	  CSd = vis_freg_pair(*Cf,*Sf);
-	  SCd = vis_freg_pair(*Sf,*Cf);
-	  for(i=0;i<N/2;i+=N1/2){
-	    reinftmp=vis_fpsub16s(splitf_rein[i+1],splitf_rein[i]);
-	    imaginftmp=vis_fpsub16s(splitf_imin[i+1],splitf_imin[i]);
-	    reinrepeat=vis_freg_pair(reinftmp,reinftmp);
-	    iminrepeat=vis_freg_pair(imaginftmp,imaginftmp);
-	    splitf_rein[i+1]=vis_fpadd16s(splitf_rein[i+1],splitf_rein[i]);
-	    splitf_imin[i+1]=vis_fpadd16s(splitf_imin[i+1],splitf_imin[i]);
-	    xtcxts=mult4x4(reinrepeat,CSd);
-	    ytsytc=mult4x4(iminrepeat,SCd);
-	    xtcminusyts=vis_fpsub16(xtcxts,ytsytc);
-	    xtsaddytc=vis_fpadd16(xtcxts,ytsytc);
-	    splitf_rein[i]=vis_read_hi(xtcminusyts);
-	    splitf_imin[i]=vis_read_lo(xtsaddytc);
+	  j=0;
+	  for(i=0;i<N/4;i++){
+	    reinftmp=vis_fpsub16s(splitf_rein[j+1],splitf_rein[j]);
+	    imaginftmp=vis_fpsub16s(splitf_imin[j+1],splitf_imin[j]);
+	    splitf_rein[j+1]=vis_fpadd16s(splitf_rein[j+1],splitf_rein[j]);
+	    splitf_imin[j+1]=vis_fpadd16s(splitf_imin[j+1],splitf_imin[j]);
+	    xtcf=mult2x2(reinftmp,*Cf);
+	    xtsf=mult2x2(reinftmp,*Sf);
+	    ytsf=mult2x2(imaginftmp,*Sf);
+	    ytcf=mult2x2(imaginftmp,*Cf);
+	    splitf_rein[j]=vis_fpsub16s(xtcf,ytsf);
+	    splitf_imin[j]=vis_fpadd16s(xtsf,ytcf);
+	    j+=2;
 	  }
 	  //last stage of the fft
 	  i=0;
 	  for(j=0;j<N/2;j++){
+	    reinstmp=splits_rein[i+1]-splits_rein[i];
+	    imaginstmp=splits_imin[i+1]-splits_imin[i];
+	    splits_rein[i+1]=splits_rein[i]+splits_rein[i+1];
+	    splits_imin[i+1]=splits_imin[i]+splits_imin[i+1];
+	    splits_rein[i]=reinstmp;
+	    splits_imin[i]=imaginstmp;
 	    i+=2;
-	    reinstmp=splits_rein[i-1]-splits_rein[i-2];
-	    imaginstmp=splits_imin[i-1]-splits_imin[i-2];
-	    splits_rein[i-1]=splits_rein[i-2]+splits_rein[i-1];
-	    splits_imin[i-1]=splits_imin[i-2]+splits_imin[i-1];
-	    splits_rein[i-2]=reinstmp;
-	    splits_imin[i-2]=imaginstmp;
 	  }	
 	  reorderfft(splits_rein,splits_imin,sizeoffft);
 	  //output the results
