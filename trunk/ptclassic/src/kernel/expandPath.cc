@@ -1,3 +1,4 @@
+static const char file_id[] = "expandPath.cc";
 /**************************************************************************
 Version identification:
 $Id$

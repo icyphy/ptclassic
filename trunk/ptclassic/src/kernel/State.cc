@@ -1,3 +1,4 @@
+static const char file_id[] = "State.cc";
 /**************************************************************************
 Version identification:
 $Id$

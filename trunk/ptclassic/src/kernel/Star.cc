@@ -1,3 +1,4 @@
+static const char file_id[] = "Star.cc";
 /******************************************************************
 Version identification:
 $Id$

@@ -1,3 +1,4 @@
+static const char file_id[] = "Fraction.cc";
 #include "Fraction.h"
 #include "StringList.h"
 

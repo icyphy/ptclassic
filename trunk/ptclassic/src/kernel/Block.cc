@@ -1,3 +1,4 @@
+static const char file_id[] = "Block.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
