@@ -114,7 +114,7 @@ limitation of liability, and disclaimer of warranty provisions.
       /* file and strip of the header */
       if (($starSymbol(file) = open("$val(fileName)",O_RDONLY,0666)) == -1)
 	{
-	  perror("$val(fileName): Error opening read-file");
+	  perror("$val(fileName): Error opening read-file, exiting . . .");
 	  exit(1);
 	}	
       /* To remove the header from the audio file */
@@ -124,7 +124,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  /* check whether file is in Sun audio format */
 	  if($starSymbol(header).magic != 0x2e736e64)
 	    {
-	      perror("$val(fileName): File not in Sun audio format. Please refer to the star Profile.");
+	      perror("$val(fileName): File not in Sun audio format. Please refer to the star Profile.  exiting . . .");
 	      exit(1);
 	    }
 	  /* set the corresponding defstates using info in the header */
@@ -145,7 +145,7 @@ limitation of liability, and disclaimer of warranty provisions.
       /* the values for the fields will be taken from the parameters */
       if (($starSymbol(file) = open("$val(fileName)",O_WRONLY|O_CREAT,0666)) == -1)
 	{
-	  perror("$val(fileName): Error opening write-file");
+	  perror("$val(fileName): Error opening write-file, exiting. . .");
 	  exit(1);
 	}	
       /* Attach the header to the generated audio file */
@@ -188,7 +188,7 @@ limitation of liability, and disclaimer of warranty provisions.
       /* Write blockSize bytes to file */
       if (write($starSymbol(file), $starSymbol(bufferptr), $val(blockSize)) != $val(blockSize))
 	{
-	  perror("$val(fileName): Error writing to file.");
+	  perror("$val(fileName): Error writing to file. exiting . . .");
 	  exit(1);
 	}
     }
@@ -196,7 +196,7 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock(closeFile) {
       /* Close file */
       if (close($starSymbol(file)) != 0) {
-	perror("$val(fileName): Error closing file");
+	perror("$val(fileName): Error closing file. exiting. . . ");
 	exit(1);
       }
     }
@@ -240,7 +240,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  channels = 1;
 
 	} else {
-	  perror("Audio encoding parameter must be \"linear16\" or \"ulaw8\"");
+	  perror("Audio encoding parameter must be \"linear16\" or \"ulaw8\". exiting . . .");
 	  exit(1);
 	}
 
