@@ -25,7 +25,7 @@
 #
 # Config file to build on Linux
 #
-# @(#)config-linux.mk	1.29 05/28/96
+# $Id$
 
 # Author:  Alberto Vignani, FIAT Research Center, TORINO
 # Modified by: 	Neal Becker (neal@ctd.comsat.com)
