@@ -41,9 +41,12 @@ $Id$
 #include "err.h"
 #include "util.h"
 #include "ganttIfc.h"
+#include "kernelCalls.h"
 
 #include "ptk.h"  /* Interpreter name, window name, etc.  aok */
 #include "handle.h"
+
+#include "exec.h"
 
 /* The vars below store the state of the last run command for re-runs */
 octObject lastFacet = {OCT_UNDEFINED_OBJECT};
