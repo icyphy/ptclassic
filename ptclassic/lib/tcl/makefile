@@ -48,7 +48,7 @@ EXTRA_SRCS = esterel2pl.tcl \
 	ptkStarIndex.tcl tkoct.tcl topgetopt.tcl utilities.tcl
 
 MISC_FILES = Ptolemy.xbm left.xbm ptolemySmall.gif ptolemyWelcome.gif \
-	right.xbm
+	ptolemyWelcome.gif.xmas right.xbm
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
