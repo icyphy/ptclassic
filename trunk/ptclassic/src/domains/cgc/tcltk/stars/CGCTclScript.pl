@@ -126,9 +126,28 @@ limitation of liability, and disclaimer of warranty provisions.
             BlockStateIter nextState(*this);
             State* state;
             while ((state = nextState++) !=NULL ) {
-                char* expandedVal = expandPathName(state->currentValue());
-                addCode(exportState(state->name(),expandedVal),"tkSetup");
-                delete [] expandedVal;
+		// It would be good to be able to use the Tokenizer
+		// class here - but we can because it strips out " characters
+		// FIXME
+
+		// We escape $ with $$ and " with \".
+		// $ is escaped so that the expandMacro
+		// code will ignore embedded $ in state values.
+		// " is escaped so that we can embed the entire string
+	        // in "" in CGCTclScript::exportState
+
+                StringList& currentValue = state->currentValue();
+		const char* p = currentValue;
+		StringList escapedCurrentValue;
+		while (*p) {
+		    if (*p == '\"') escapedCurrentValue << '\\';
+                    else if (*p == '$') escapedCurrentValue << '$';
+                    escapedCurrentValue << *p;
+                    p++;
+                }
+
+                addCode(exportState(state->name(),escapedCurrentValue),
+                        "tkSetup");
             }
 
             // Create setOutputs tcl command
@@ -154,7 +173,8 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    StringList out;
 	    if (int(numOutputs) > 0)
-	        out << "\tfloat $starSymbol(outs)[" << int(numOutputs) << "];\n";
+	        out << "\tfloat $starSymbol(outs)[" << int(numOutputs)
+                    << "];\n";
 	    if (int(numInputs) > 0)
 	        out << "\tfloat $starSymbol(ins)[" << int(numInputs) << "];\n";
 	    addGlobal((const char*) out);
