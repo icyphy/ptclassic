@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
 
- Programmer:  Soonhoi Ha
+ Programmer:  Soonhoi Ha and Edward A. Lee
  The authors gratefully acknowledge the contributions of Richard Stevens
  Date of creation (simpler version): 7/20/94
 
@@ -127,6 +127,7 @@ public:
 	// Need to redefine clone() to copy the firings table
 	// (a private member, see below).
 	/* virtual */ Block* clone () const;
+
 private:
 	// The following table is used to keep track of pragmas.
 	TextTable* firings;
