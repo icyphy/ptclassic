@@ -185,4 +185,7 @@ delim $$
 	   // Invoke the Tcl script (Tcl will call back to get input values)
 	   tcl.go();
 	}
+	wrapup {
+	   tcl.wrapup();
+        }
 }
