@@ -201,6 +201,11 @@ body ::tycho::Shape::_moveclick {tag canvas slate x y args} {
     } else {
 	set scratch(ghost.$unique) 0
     }
+    # Add a temporary tag to all highlights and grapples
+    foreach id [$slate find withtag $tag] {
+        $slate addtag moveable.$unique withtag highlight.$id
+        $slate addtag moveable.$unique withtag grapple.$id
+    }
 }
 
 #######################################################################
@@ -208,18 +213,18 @@ body ::tycho::Shape::_moveclick {tag canvas slate x y args} {
 #
 body ::tycho::Shape::_movedrag {tag canvas slate x y} {
     set unique $tag.[$slate uniqueid]
+    set deltax [expr $x - $scratch(prevX.$unique)]
+    set deltay [expr $y - $scratch(prevY.$unique)]
 
-    # If there's a ghost, move it, else move the item.
+    # If there's a ghost, move it, else move the item, highlights, and
+    # grapples. Note that we use the IncrCanvas method here, to avoid
+    # doubly moving highlights
     if $scratch(ghost.$unique) {
-	set movethis ghost.$tag
+	$slate ::tycho::IncrCanvas::move ghost.$tag $deltax $deltay
     } else {
-	set movethis $tag
+	$slate ::tycho::IncrCanvas::move $tag $deltax $deltay
+	$slate ::tycho::IncrCanvas::move moveable.$unique $deltax $deltay
     }
-
-    # Move is a delta operation.
-    $slate move $movethis \
-	    [expr $x - $scratch(prevX.$unique)] \
-	    [expr $y - $scratch(prevY.$unique)]
 
     # Remember the new position
     set scratch(prevX.$unique) $x
@@ -232,16 +237,18 @@ body ::tycho::Shape::_movedrag {tag canvas slate x y} {
 body ::tycho::Shape::_moverelease {tag canvas slate} {
     set unique $tag.[$slate uniqueid]
 
-    # If there's a ghost, move the complex item to its
-    # position and then delete it
+    # If there's a ghost, move the item, with an tags and grapples,
+    # to its position and then delete the ghost. Again note the use
+    # of the IncrCanvas version of move{}.
     if $scratch(ghost.$unique) {
-	::tycho::assign a b $scratch(start.$unique)
+        ::tycho::assign a b $scratch(start.$unique)
+        set deltax [expr $scratch(prevX.$unique) - $a]
+        set deltay [expr $scratch(prevY.$unique) - $b]
 
-	$slate move $tag \
-                [expr $scratch(prevX.$unique) - $a] \
-                [expr $scratch(prevY.$unique) - $b]
+	$slate ::tycho::IncrCanvas::move $tag $deltax $deltay
+	$slate ::tycho::IncrCanvas::move moveable.$unique $deltax $deltay
+ 
 	$slate delete ghost.$tag
-
 	unset scratch(start.$unique)
     }
 
@@ -249,6 +256,8 @@ body ::tycho::Shape::_moverelease {tag canvas slate} {
     unset scratch(ghost.$unique)
     unset scratch(prevX.$unique)
     unset scratch(prevY.$unique)
+
+    $slate dtag moveable.$unique
 }
 
 #######################################################################
