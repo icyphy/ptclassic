@@ -1,7 +1,4 @@
 /**************************************************************************
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,9 +24,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
+Author:	  Joseph T. Buck
+Created:  7/6/92
+Version:  $Id$
+
 This file defines all the classes for a clustering BDF scheduler.
-This one is a modified copy of SDFCluster.cc, later we will merge
-them.
+This one is a modified copy of SDFCluster.cc, later we will merge them.
 
 Given a galaxy, we create a parallel hierarchy called an BDFClusterGal.
 In the parallel hierarchy, objects of class BDFAtomCluster correspond
@@ -106,7 +106,6 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 		// FIXME: Memory leak
 		BDFCluster* c = new BDFAtomCluster(*s,this);
 		addBlock(*c);
-		dynamicClusterList.append(c);
 		BDFClustPortIter nextPort(*c);
 		BDFClustPort *p;
 		while ((p = nextPort++) != 0) {
@@ -157,13 +156,15 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 // The clusters may be of derived classes, but the virtual
 // destructor of the BDFCluster class will do the right thing
 BDFClusterGal::~BDFClusterGal() {
+fprintf(stderr, "Number of dynamic clusters = %d\n", dynamicClusterList.size());
 	BDFCluster* c;
+	int i = 0;
 	while ((c = (BDFCluster *)dynamicClusterList.getAndRemove()) != 0) {
-		Block* b = (Block *)c;
 		// It is possible that the BDFCluster was moved into another
 		// galaxy and not deleted from the dynamicClusterList
-		if ( removeBlock(*b) ) delete c;
+		if ( DynamicGalaxy::removeBlock(*c) ) { i++; delete c; }
 	}
+fprintf(stderr, "Number deleted = %d\n", i);
 }
 
 // remove blocks from this galaxy without deallocating the blocks.
@@ -173,7 +174,6 @@ void BDFClusterGal::orphanBlocks() {
 	BDFCluster* c;
 	while ((c = nextC++) != 0) {
 		removeBlock(*c);
-		dynamicClusterList.remove(c);
 		nextC.reset();
 	}
 }
@@ -343,10 +343,10 @@ void BDFClusterGal::makeWhile(BDFClustPort* ctl, BDFRelation rel) {
 	BDFCluster* c_in = ctl->parentClust();
 	BDFCluster* c_new = new BDFWhileLoop(rel,ctl,c_in);
 	addBlock(c_new->setBlock(genBagName(),this));
-	dynamicClusterList.append(c_new);
-	if (logstrm)
+	if (logstrm) {
 		*logstrm << "Created while loop around " << c_in->name()
 			 << ": " << *c_new << "\n";
+	}
 }
 
 void showBDFg(BDFClusterGal* g) {
@@ -366,7 +366,7 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 		BDFClustPort *p;
 		while ((p = nextPort++) != 0) {
 			if (p->far() == 0) continue;
-			BDFCluster *peer = p->far()->parentClust();
+			BDFCluster* peer = p->far()->parentClust();
 			// check requirement 1: same rate and no delay
 			// also, do not try to merge with myself.
 			if (peer != c && !p->fbDelay() && p->sameRate()) {
@@ -486,7 +486,7 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	int ifInstead = TRUE;
 
 	while ((p = nexta++) != 0 || (p = nextb++) != 0) {
-		BDFClustPort *pFar = p->far();
+		BDFClustPort* pFar = p->far();
 		if (!pFar || pFar->parentClust() == a ||
 		    pFar->parentClust() == b) continue;
 		// OK, p is external.  Must be conditional.
@@ -501,13 +501,13 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 			// they must be opposite and the relTypes are also
 			// opposite.  Otherwise return.
 			switch (ssig) {
-			case BDF_SAME:
+			    case BDF_SAME:
 				if (p->relType() != desrel) return 0;
 				break;
-			case BDF_COMPLEMENT:
+			    case BDF_COMPLEMENT:
 				if (p->relType() == desrel) return 0;
 				break;
-			default:
+			    default:
 				return 0;
 			}
 		}
@@ -545,7 +545,6 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 				 << ": doing loop merge, result:\n";
 		BDFCluster* c = new BDFWhileLoop(desrel,condSrc,a,b);
 		addBlock(c->setBlock(genBagName(),this));
-		dynamicClusterList.append(c);
 		if (logstrm) *logstrm << *c << "\n";
 		return c;
 	}
@@ -1168,6 +1167,7 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 		// FIXME: Memory leak
 		BDFClusterBag* bag = new BDFClusterBag;
 		addBlock(bag->setBlock(genBagName(),this));
+
 		// FIXME: Memory leak
 		bag->absorb(c1,this);
 		// FIXME: Memory leak
@@ -1214,6 +1214,9 @@ static int leaveSelfLoop(BDFClustPort* a,BDFClustPort* b) {
 }
 
 // move c from its current galaxy par to my galaxy gal
+// we do not have to worry whether BDFCluster* c was dynamically allocated
+// by par because the destructor for the galaxy gal will deallocate all of
+// its blocks, and the virtual destructors will do the right thing. -ble
 void BDFClusterBag::moveClusterInto(BDFCluster* c, BDFClusterGal* par) {
 	par->removeBlock(*c);
 	gal->addBlock(*c, c->name());
@@ -1258,7 +1261,7 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 }
 
 // this function merges two bags.
-void BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
+void BDFClusterBag::merge(BDFClusterBag* b, BDFClusterGal* par) {
 	if (b == 0 || par == 0) return;
 	if (b->size() == 0) return;
 	if (!gal) createInnerGal();
@@ -1296,7 +1299,8 @@ void BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	BDFClusterBagIter nextC(*b);
 	BDFCluster* c;
 	while ((c = nextC++) != 0) {
-		gal->addBlock(*c,c->name());
+		gal->addBlock(*c, c->name());
+		nextC.remove();
 	}
 	BDFClustPortIter nextP(*b);
 	while ((p = nextP++) != 0) {
@@ -1306,8 +1310,6 @@ void BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	}
 	// get rid of b.
 	par->removeBlock(*b);	// remove from parent galaxy
-	b->gal->orphanBlocks();	// b's galaxy's blocks no longer owned by b
-	b->gal->orphanPorts();	// b's galaxy's ports no longer owned by b
 	delete b;		// zap the shell
 	adjustAssociations();
 }
