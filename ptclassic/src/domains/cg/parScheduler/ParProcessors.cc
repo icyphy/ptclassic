@@ -60,7 +60,7 @@ void ParProcessors :: removeCommNodes() {
 	SCommNodes.initialize();
 }
 
-UniProcessor* ParProcessors :: getProc(int num) { return 0; }
+UniProcessor* ParProcessors :: getProc(int) { return 0; }
 
 // map targets for each processing element
 void ParProcessors :: mapTargets() {
@@ -123,7 +123,7 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 	// find communication nodes and insert them into the graph.
 	findCommNodes(graph, readyNodes);
 
-	while (readyNodes.mySize() > 0) {
+	while (readyNodes.size() > 0) {
 		ParNode* node = (ParNode*) readyNodes.takeFromFront();
 		UniProcessor* p = getProc(node->whichProc());
 
@@ -156,8 +156,8 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 // Makes send and receive ParNodes for each interprocessor communication.
 // Want to splice these into tempAncs and tempDescs for list scheduling.
 
-void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
-
+void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& /*readyNodes*/)
+{
 	// Make sure the list of communication nodes is clear
 	removeCommNodes();
 	int hidden = FALSE;
@@ -220,7 +220,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 	   }
 	}
 	// Set the communcation node count for the schedule
-	commCount = (int)(SCommNodes.mySize() / 2);
+	commCount = (int)(SCommNodes.size() / 2);
 }
 
 ParNode*  ParProcessors :: createCommNode(int i) {
@@ -266,7 +266,7 @@ StringList ParProcessors :: display (NamedObj* galaxy) {
 
 	// title and number of processors.
 	out += "** Parallel schedule of \"";
-	out += galaxy->readFullName();
+	out += galaxy->fullName();
 	out += "\" on ";
 	out += numProcs;
 	out += " processors.";

@@ -124,10 +124,10 @@ void DCGraph::SingleNodeTC(DCNode *node, int direction) {
         while ((pnode = diter++) != 0) {
 
 		if (direction == 1) {
-			if (pnode->RTClosure.mySize())
+			if (pnode->RTClosure.size())
 			    mergeClosure(node->RTClosure, pnode->RTClosure);
 		} else {
-			if (pnode->TClosure.mySize())
+			if (pnode->TClosure.size())
 			    mergeClosure(node->TClosure, pnode->TClosure);
 		}
 
@@ -182,11 +182,11 @@ void DCGraph::sortDCNodes() {
 		sortedInsert(sortedNodes, pg, 1);
 
 		// Branchnodes are sorted smallest StaticLevel first
-		if (((pg->descendants).mySize()) > 1)
+		if (((pg->descendants).size()) > 1)
 			sortedInsert(BranchNodes, pg, 0); // Branch node
 
 		// MergeNodes are sorted largest StaticLevel first
-		if (((pg->ancestors).mySize()) > 1) 
+		if (((pg->ancestors).size()) > 1) 
 			sortedInsert(MergeNodes, pg, 1); // Merge node
 		 
 	}
@@ -489,7 +489,7 @@ void DCGraph::removeCutArcs(DCNodeList& elist) {
 	DCNode *node;
 	while ((node = niter++) != 0) {
 		node->resetVisit();		// clear the visit flag.
-		if (node->tempAncs.mySize() == 0)
+		if (node->tempAncs.size() == 0)
 			elist.append(node);
 	}
 }

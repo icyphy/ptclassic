@@ -54,7 +54,7 @@ is repeated inline so may not be efficient for large N.
 	}
 	initCode { gencode(init);}
 	go {
-		gencode(setup);
+		gencode(setupC);
 		for (int j = 0; j < n; j++) {
 			i = j;
 			gencode(one);
@@ -71,7 +71,7 @@ is repeated inline so may not be efficient for large N.
 	move	x0,$ref(ptr)
 	}
 
-	codeblock(setup) {
+	codeblock(setupC) {
 	move	#$size(output)-1,m0
 	move	$ref(ptr),r0
 	}

@@ -17,7 +17,7 @@ $Id$
 #endif
 
 #include "CGCGeodesic.h"
-#include "CGCConnect.h"
+#include "CGCPortHole.h"
 #include "Error.h"
 
 ISA_FUNC(CGCGeodesic,CGGeodesic);

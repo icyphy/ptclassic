@@ -82,7 +82,7 @@ public:
 	// Insert a DCArc into the front of the list
 	void insert(DCArc *arc) {
 		arc->parent = this;
-		SequentialList::tup(arc);
+		SequentialList::prepend(arc);
 	}
 
 	// Append a DCArc into the back of the list

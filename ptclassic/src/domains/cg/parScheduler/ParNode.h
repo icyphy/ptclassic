@@ -125,7 +125,7 @@ public:
 
 	// indicate how many tokens it is waiting.
 	// note that it works for homogeneous graph.
-	void resetWaitNum() { waitNum = ancestors.mySize(); }
+	void resetWaitNum() { waitNum = ancestors.size(); }
 
 	// Return whether or not this node is presently fireable.
 	int fireable() { waitNum--;

@@ -18,9 +18,7 @@ $Id$
 #endif
 
 #include "CGStar.h"
-#include "CGCConnect.h"
-#include "CGCTarget.h"
-#define CGCCodeBlock CodeBlock
+#include "CGCPortHole.h"
 
 class CGCStar : public CGStar {
 friend class CGCTarget;
@@ -37,12 +35,17 @@ public:
 	// my domain
 	const char* domain() const;
 
-	int fire();
+	int run();
 
 	// class identification
 	int isA(const char*) const;
 
 protected:
+	// access to target (cast is safe: always a CGCTarget)
+	CGCTarget* target() {
+		return (CGCTarget*)myTarget();
+	}
+
 	// Virtual functions. Expand State or PortHole reference macros.
 	// If "name" is a state, add it to the list of referenced states.
 	StringList expandRef(const char* name);
@@ -53,30 +56,20 @@ protected:
 	void registerState(const char* name);
 
 	// Add lines to be put at the beginning of the code file
-	void addInclude(const char* decl) {
-		((CGCTarget*)myTarget())->addInclude(decl);
-	}
+	void addInclude(const char* decl);
 
 	// Add declarations, to be put at the beginning of the main section
-	void addDeclaration(const char* decl) {
-		((CGCTarget*)myTarget())->addDeclaration(decl);
-	}
+	void addDeclaration(const char* decl);
 
 	// Add global declarations, to be put ahead of the main section
-	void addGlobal(const char* decl) {
-		((CGCTarget*)myTarget())->addGlobal(decl);
-	}
+	void addGlobal(const char* decl);
 
 	// Add procedures, to be put ahead of the main section
-	void addProcedure(const char* decl) {
-		((CGCTarget*)myTarget())->addProcedure(decl);
-	}
+	void addProcedure(const char* decl);
 
 	// Add main initializations, to be put at the beginning of the main 
 	// section
-	void addMainInit(const char* decl) {
-		((CGCTarget*)myTarget())->addMainInit(decl);
-	}
+	void addMainInit(const char* decl);
 
 	// After each firing, update the offset pointers
 	virtual void updateOffsets();

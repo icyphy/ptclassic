@@ -22,7 +22,7 @@ special routines to generate the sub universes.
 #include "CGSpread.h"
 #include "CGCollect.h"
 #include "KnownBlock.h"
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 #include "Geodesic.h"
 #include "ConstIters.h"
 
@@ -46,7 +46,7 @@ SDFStar* cloneStar(SDFStar* org) {
 	BlockMPHIter piter(*org);
 	MultiPortHole* p;
 	while ((p = piter++) != 0) {
-		MultiPortHole* cP = newS->multiPortWithName(p->readName());
+		MultiPortHole* cP = newS->multiPortWithName(p->name());
 		for (int i = p->numberPorts(); i > 0; i--)
 			cP->newPort();
 	}
@@ -56,7 +56,7 @@ SDFStar* cloneStar(SDFStar* org) {
 PortHole* clonedPort(SDFStar* s, PortHole* p) {
 	ParNode* n = (ParNode*) s->myMaster();
 	SDFStar* copyS = n->getCopyStar();
-	return copyS->portWithName(p->readName());
+	return copyS->portWithName(p->name());
 }
 
 			//////////////////////
@@ -68,7 +68,7 @@ void UniProcessor :: createSubGal() {
 	// create data structure
 	LOG_DEL; delete subGal;
 	LOG_NEW; subGal = new DynamicGalaxy;
-	subGal->setNameParent(targetPtr->readName(), 0);
+	subGal->setNameParent(targetPtr->name(), 0);
 
 	// maintain the list of the SDF stars which we have considered
 	SequentialList touchedStars;
@@ -91,7 +91,7 @@ void UniProcessor :: createSubGal() {
 		// If already dealt with, continue.
 		if (touchedStars.member(org)) continue;
 		// We believe temporal locality
-		touchedStars.tup(org);
+		touchedStars.prepend(org);
 
 		ParNode* smallest = (ParNode*) org->myMaster();
 		while (smallest && (smallest->getProcId() != myId()))
@@ -108,7 +108,7 @@ void UniProcessor :: createSubGal() {
 		assignedFirstInvocs.put(smallest);
 
 		// add to the galaxy
-		subGal->addBlock(*copyS, org->readName());
+		subGal->addBlock(*copyS, org->name());
 
 		// Set the pointer of the invocations to the cloned star.
 		while ((smallest = (ParNode*) smallest->getNextInvoc()) != 0) 
@@ -131,7 +131,7 @@ void UniProcessor :: createSubGal() {
 			if (p->atBoundary()) {
 				PortHole* cp = clonedPort(org, p);
 				PortHole* evep = p->far();
-				p->myGeodesic->disconnect(*evep);
+				p->geo()->disconnect(*evep);
 				if (p->isItInput()) {
 					evep->connect(*cp,p->numTokens());
 				} else {
@@ -181,7 +181,7 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* farS,
 			// makeGenConnect
 			///////////////////////////////
 
-void UniProcessor :: makeGenConnect(PortHole* p, ParNode* pn, SDFStar* org,
+void UniProcessor :: makeGenConnect(PortHole* p, ParNode* pn, SDFStar*,
 			  SDFStar* farS, SequentialList& touchedStars) {
 
 	ParNode* farN = 0;
@@ -248,7 +248,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 		EGGate* g;
 		while ((g = ancs++) != 0) {
 			if (g->samples() == 0) continue;
-			if (strcmp(g->readName(), ref->readName())) continue;
+			if (strcmp(g->name(), ref->name())) continue;
 			
 			// get the partner node.
 			partner = (ParNode*) g->farEndNode();
@@ -282,7 +282,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGate* g;
 			while ((g = descs++) != 0) {
 				if (g->samples() == 0) continue;
-				if (strcmp(g->readName(),farP->readName()))
+				if (strcmp(g->name(),farP->name()))
 					continue;
 				partner = (ParNode*) g->farEndNode();
 				if (partner->getProcId() == myId()) {
@@ -309,11 +309,11 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 	SDFStar* src = 0;
 	PortHole* srcP = 0;
 	SDFStar* dest = dN->getCopyStar();
-	PortHole* destP = dest->portWithName(ref->readName());
+	PortHole* destP = dest->portWithName(ref->name());
 
 	if (sN) {
 		src = sN->getCopyStar();
-		srcP = src->portWithName(farP->readName());
+		srcP = src->portWithName(farP->name());
 	}
 	
 	// STEP2: create Spread and Collect star if necessary and make
@@ -349,7 +349,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGate* g;
 			while ((g = descs++) != 0) {
 				if (g->samples() == 0) continue;
-				if (strcmp(g->readName(),farP->readName()))
+				if (strcmp(g->name(),farP->name()))
 					continue;
 				partner = (ParNode*) g->farEndNode();
 				int parId = partner->getProcId();
@@ -387,7 +387,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGate* g;
 			while ((g = ancs++) != 0) {
 				if (g->samples() == 0) continue;
-				if (strcmp(g->readName(),ref->readName()))
+				if (strcmp(g->name(),ref->name()))
 					continue;
 				numDel += g->delay();
 				partner = (ParNode*) g->farEndNode();
@@ -433,7 +433,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGate* g;
 			while ((g = descs++) != 0) {
 				if (g->samples() == 0) continue;
-				if (strcmp(g->readName(),farP->readName()))
+				if (strcmp(g->name(),farP->name()))
 					continue;
 				partner = (ParNode*) g->farEndNode();
 				int parId = partner->getProcId();
@@ -485,7 +485,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 					else startFlag = FALSE;
 				}
 				if (g->samples() == 0) continue;
-				if (strcmp(g->readName(),ref->readName()))
+				if (strcmp(g->name(),ref->name()))
 					continue;
 				if ((count == 0) && (g == firstGate)) {
 					// jump out of the two loops, as if:
@@ -557,7 +557,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 // create a Receive star or a Send star and connect it to the specified port.
  
 void 
-UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
+UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode*,
 			    EGGate* g, PortHole* orgP) {
 	int numSample = rP->numXfer();
 	
@@ -580,7 +580,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
 
 // Note that the delay is attached in the receiver part if any.
 void UniProcessor :: makeSend(int pindex, PortHole* sP, 
-			      ParNode* n, EGGate* g, PortHole* orgP) {
+			      ParNode*, EGGate* g, PortHole* orgP) {
 	int numSample = sP->numXfer();
 	
 	// create target specific Send star
@@ -652,7 +652,7 @@ void UniProcessor :: makeBoundary(ParNode* sN, PortHole* ref) {
 		EGGate* g;
 		while ((g = descs++) != 0) {
 			if (g->samples() == 0) continue;
-			if (strcmp(g->readName(), ref->readName())) continue;
+			if (strcmp(g->name(), ref->name())) continue;
 			partner = (ParNode*) g->farEndNode();
 			sG = g;
 			count++;
@@ -663,7 +663,7 @@ void UniProcessor :: makeBoundary(ParNode* sN, PortHole* ref) {
 
 M:
 	SDFStar* src = sN->getCopyStar();
-	PortHole* srcP = src->portWithName(ref->readName());
+	PortHole* srcP = src->portWithName(ref->name());
 
 	SDFStar* newSpread = 0;
 	if (count > 1) {
@@ -685,7 +685,7 @@ M:
 		EGGate* g;
 		while ((g = descs++) != 0) {
 			if (g->samples() == 0) continue;
-			if (strcmp(g->readName(), ref->readName())) continue;
+			if (strcmp(g->name(), ref->name())) continue;
 			partner = (ParNode*) g->farEndNode();
 
 			PortHole* sP = findPortHole(newSpread, "output", 

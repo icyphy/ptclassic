@@ -62,6 +62,10 @@ A delay star of parameter total_delay unit delays.
         move    y0,$ref(output)
         move    #-1,m0
         }
+	codeblock(zero) {
+	move	$ref(input),a
+	move	a,$ref(output)
+	}
         start {
                 delayBuf.resize(totalDelay);
         }		
@@ -69,13 +73,17 @@ A delay star of parameter total_delay unit delays.
                 gencode(block);
 	}
         go {
-                if(totalDelay==1)
+		if(totalDelay==0)
+		     gencode(zero);
+                else if(totalDelay==1)
 	             gencode(one);
 		else     
                      gencode(std);
         }		
 
 	execTime { 
-                 return 8;
+		if (totalDelay==0) return 2;
+		else if (totalDelay==1) return 5;
+		else return 8;
 	}
 }

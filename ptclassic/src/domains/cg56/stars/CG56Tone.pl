@@ -53,7 +53,7 @@ defstar {
 		// maximum fixed point value
 		double twoPiF = 2.0 * M_PI * double(frequency);
 		X = cos(twoPiF);
-		if (double(X) > double(ONE)) X = double(ONE);
+		if (double(X) > CG56_ONE) X = CG56_ONE;
 		const char* p = calcType;
 		switch (*p) {
 		case 's':	// sine

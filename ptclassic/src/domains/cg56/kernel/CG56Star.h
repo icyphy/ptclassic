@@ -19,18 +19,17 @@ $Id$
 #endif
 
 #include "AsmStar.h"
-#include "CG56Connect.h"
+#include "CG56PortHole.h"
 #include "MotorolaAttributes.h"
-#include "FixState.h"
 
 #define CG56CodeBlock CodeBlock
 
+const double CG56_ONE = 1.0 - 1.0/double(1<<23);
 
 class CG56Star : public AsmStar {
 protected:
-	FixState ONE;
+	static StringList ONE;
 public:
-	CG56Star();
 	// my domain
 	const char* domain() const;
 

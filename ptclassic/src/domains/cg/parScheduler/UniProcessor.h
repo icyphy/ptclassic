@@ -72,10 +72,10 @@ private:
 
 // This class simulates a single processor.
 
-class UniProcessor : public DoubleLinkList {
+class UniProcessor : private DoubleLinkList {
 
 friend class ParProcessors;
-
+friend class ProcessorIter;
 public:
 	// constructor
 	UniProcessor() : availTime(0), curSchedule(0), numFree(0), parent(0),
@@ -92,8 +92,9 @@ public:
 	// create the galaxy
 	void createSubGal();
 
-	// return the size of the node
-	int size() { return mySize(); }
+	// return the size of the node (export baseclass fn)
+	DoubleLinkList::size;
+
 	int myId() { return index; }
 
 	// schedule a Communication node
@@ -119,7 +120,7 @@ public:
 
   	// display the schedule
 	StringList display(int makespan);
-	StringList displaySubUniv() { return subGal->printRecursive(); }
+	StringList displaySubUniv() { return subGal->print(1); }
 
 	// write Gantt chart
 	int writeGantt(ostream&);
@@ -157,6 +158,11 @@ public:
 
 
 protected:
+	// let derived classes remove links
+	void removeLink(NodeSchedule* x) {
+		DoubleLinkList::removeLink(x);
+	}
+
 	// The time when the processor available
 	int availTime;
 

@@ -57,10 +57,10 @@ See the SDFRaisedCos star.
 		// XXX: DONT do this...not implemented in CG56FIR
 		// XXX: decimationPhase.clearAttributes(A_SETTABLE);
 	}
-	start {
+	setup {
 		taps.resize (N);
 		int center = int(N)/2;
-		double maxval = double(ONE);
+		double maxval = CG56_ONE;
 		for (int i = 0; i < int(N); i++) {
 			double coef = rcos(i - center, P, excessBW);
 			if ( coef > maxval )	coef = maxval;
@@ -68,7 +68,7 @@ See the SDFRaisedCos star.
 			taps[i] = coef;
 			// cerr << "Tap %d" << coef << "\n";
 		}
-		CG56FIR :: start();
+		CG56FIR :: setup();
 	}
 }
 

@@ -71,10 +71,8 @@ int CGSharedBus::scheduleComm(ParNode *cNode, int when, int limit) {
 // 	and one unused processor. (to reduce scheduling time)
 // Same as default method defined in CGQuasiTarget.cc
 
-Block* CGSharedBus::clone() const {
-	LOG_NEW; CGSharedBus *t = 
-		new CGSharedBus(readName(),starType(),readDescriptor());
-	return &t->copyStates(*this);
+Block* CGSharedBus::makeNew() const {
+	LOG_NEW; return	new CGSharedBus(name(),starType(),descriptor());
 }
 
 			//////////////////

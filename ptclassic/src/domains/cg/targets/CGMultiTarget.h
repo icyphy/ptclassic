@@ -31,12 +31,11 @@ class CGFullConnect : public BaseMultiTarget {
 public:
 	CGFullConnect(const char* name,const char* sClass,const char* desc);
 	~CGFullConnect();
-	void start();
+	void setup();
 	int run();
-	int setup(Galaxy&);
 	void wrapup();
 
-	void setStopTime(float);
+	void setStopTime(double);
 
 	void addCode(const char*);
 
@@ -55,7 +54,7 @@ public:
 	// total work load
 	int totalWorkLoad();
 
-	Block* clone() const;
+	Block* makeNew() const;
 
 	// communication cost
 	int commTime(int,int,int,int);
@@ -64,7 +63,7 @@ public:
 	IntArray* candidateProcs(ParProcessors*);
 
 	// resource management
-	int scheduleComm(ParNode* comm, int when, int limit = 0) 
+	int scheduleComm(ParNode* /*comm*/, int when, int /*limit*/ = 0) 
 		{ return when; }
 
 	// For a given communication node, find a comm. node scheduled
@@ -75,8 +74,8 @@ public:
 	SDFStar* createSend(int from, int to, int num);
 	SDFStar* createReceive(int from, int to, int num);
 
-	// display Gantt chart
-	void displaySchedule(ParScheduler* );
+	// generate Gantt chart
+	void writeSchedule();
 
 protected:
 	StringState childType;
@@ -103,7 +102,7 @@ protected:
 
 	// Redefine: call wormOutputCode after scheduling and sub-galaxy
 	// generation is done and before each processor generates code.
-	int wormCodeGenerate(Galaxy&);
+	int wormCodeGenerate();
 
 	// parallel processors
 	ParProcessors* parProcs;

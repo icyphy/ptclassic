@@ -50,15 +50,13 @@ public:
 	MotorolaTarget(const char* nam, const char* desc, const char* stype);
 	// copy constructor
 	MotorolaTarget(const MotorolaTarget&);
-	Block* clone() const;
-	int setup(Galaxy &g);
+	Block* makeNew() const;
+	void setup();
 	void wrapup();
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
-	const char* readClassName() const{return "MotorolaTarget";}
-	virtual double limitFix(double val) { 
-		return (val==1 ? 1.0 - 1.0/double(1<<23) : val);
-	}
+	const char* className() const;
+	virtual double limitFix(double val);
 	~MotorolaTarget();
 };
 

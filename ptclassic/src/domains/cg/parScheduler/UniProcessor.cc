@@ -37,7 +37,7 @@ StringList UniProcessor :: display(int makespan)
 			sumIdle += obj->getDuration();
 		} else {
 			if (node->myStar())
-				out += node->myStar()->readName();
+				out += node->myStar()->name();
 			else if (node->getType() == -1)
 				out += "send";
 			else
@@ -84,7 +84,7 @@ int UniProcessor :: writeGantt(ostream& o) {
 			char tmpbuf[160];
 			const char* starName;
 			if (!nType) 
-				starName = node->myStar()->readName();
+				starName = node->myStar()->name();
 			else if (nType == -1)
 				starName = "snd";
 			else
@@ -93,7 +93,7 @@ int UniProcessor :: writeGantt(ostream& o) {
                                          starName,
                                          node->invocationNumber(),
                                          start, fin);
-			revList.tup(savestring(tmpbuf));
+			revList.prepend(savestring(tmpbuf));
 			start = fin;
 		} else { // Idle node
 			start += obj->getDuration();
@@ -139,7 +139,7 @@ int UniProcessor :: filledInIdleSlot(ParNode* node, int start, int limit) {
 
 	int load = node->getExTime();
 	int curTime = getAvailTime();
-	NodeSchedule* obj = (NodeSchedule*) myTail();
+	NodeSchedule* obj = (NodeSchedule*) tail();
 	ParNode* temp;
 	int prevTime = -1;
 	if (limit >= curTime) prevTime = curTime;
@@ -171,7 +171,7 @@ int UniProcessor :: filledInIdleSlot(ParNode* node, int start, int limit) {
 int UniProcessor :: schedInMiddle(ParNode* pd, int when, int leng) {
 
 	int curTime = getAvailTime();
-	NodeSchedule* obj = (NodeSchedule*) myTail();
+	NodeSchedule* obj = (NodeSchedule*) tail();
 	ParNode* temp = obj->getNode();
 
 	while (obj) {
@@ -341,7 +341,8 @@ StringList UniProcessor :: generateCode() {
 
 	// now, call the child target routines to generate code
 	// as well as memory assignment
-	return targetPtr->generateCode(*subGal);
+	targetPtr->setGalaxy(*subGal);
+	return targetPtr->generateCode();
 }
 	
 void UniProcessor :: convertSchedule() {

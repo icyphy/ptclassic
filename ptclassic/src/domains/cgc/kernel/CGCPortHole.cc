@@ -1,4 +1,4 @@
-static const char file_id[] = "CGCConnect.cc";
+static const char file_id[] = "CGCPortHole.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -15,7 +15,7 @@ $Id$
 #pragma implementation
 #endif
 
-#include "CGCConnect.h"
+#include "CGCPortHole.h"
 #include "CGCGeodesic.h"
 #include "SDFStar.h"
 #include "Error.h"
@@ -51,6 +51,14 @@ int CGCPortHole :: initOffset() {
 		return FALSE;
 	}
 	return TRUE;
+}
+
+// return the buffer requirements. Indicates whether static buffering
+// is achieved or not.
+// return 1 if on the wormhole boundary
+int CGCPortHole :: maxBufReq() const {
+	if (atBoundary()) return 1;
+	return isItOutput()? maxBuf: realFarPort()->maxBufReq();
 }
 
 // Decide the buffer size finally

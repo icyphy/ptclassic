@@ -1,4 +1,4 @@
-static const char file_id[] = "CG56Connect.cc";
+static const char file_id[] = "CG56PortHole.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -15,7 +15,7 @@ $Id$
 #pragma implementation
 #endif
 
-#include "CG56Connect.h"
+#include "CG56PortHole.h"
 
 int InCG56Port :: isItInput() const { return TRUE; }
 int OutCG56Port :: isItOutput() const { return TRUE; }

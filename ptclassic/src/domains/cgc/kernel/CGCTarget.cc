@@ -22,7 +22,7 @@ $Id$
 #include "GalIter.h"
 #include "miscFuncs.h"
 #include "dataType.h"
-#include "WormConnect.h"
+#include "EventHorizon.h"
 
 extern const char* whichType(DataType);
 
@@ -58,7 +58,7 @@ StringList CGCTarget::offsetName(const CGCPortHole* p) {
 
 void CGCTarget :: headerCode () {
         StringList code = "Generated C code for target ";
-        code += readFullName();
+        code += fullName();
 	StringList tmp = sectionComment(code);
 	staticDeclarations = tmp;
 }
@@ -76,7 +76,7 @@ int CGCTarget :: galDataStruct(Galaxy& galaxy, int) {
 int CGCTarget :: starDataStruct(CGCStar* block, int) {
     
     StringList tmp = "Star: ";
-    tmp += block->readFullName();
+    tmp += block->fullName();
 
     StringList out = sectionComment(tmp);
 
@@ -102,14 +102,10 @@ int CGCTarget :: starDataStruct(CGCStar* block, int) {
     return(TRUE);
 }
 
-void CGCTarget :: start() {
-	galId = 0;
-	wormIn.initialize();	// should be initialize here.
-	wormOut.initialize();
-	CGTarget :: start();
-}
-
-int CGCTarget :: setup (Galaxy& g) {
+void CGCTarget :: setup() {
+    galId = 0;
+    wormIn.initialize();	// should be initialize here.
+    wormOut.initialize();
 
     // Initializations
     include = "";
@@ -120,17 +116,15 @@ int CGCTarget :: setup (Galaxy& g) {
 
     includeFiles.initialize();
     globalDecls.initialize();
-
-    setStarIndices(g); 
-
-    return CGTarget::setup(g);
+    if (galaxy()) setStarIndices(*galaxy()); 
+    CGTarget::setup();
 }
 
 void CGCTarget :: frameCode () {
-
+    Galaxy* gal = galaxy();
     // Data structure declaration
     StringList leader = "Code from Universe: ";
-    leader += gal->readFullName();
+    leader += gal->fullName();
     staticDeclarations += sectionComment(leader);
     staticDeclarations += sectionComment("Data structure declations");
     galDataStruct(*gal,1);
@@ -149,8 +143,8 @@ void CGCTarget :: frameCode () {
     myCode = runCode;
 }
 
-StringList CGCTarget :: generateCode(Galaxy& g) {
-	setup(g);
+StringList CGCTarget :: generateCode() {
+	setup();
 	run();
 	myCode += "}\n";
 	return myCode;
@@ -205,15 +199,8 @@ int CGCTarget :: runCode() {
 	cmd += (const char*)destDirectory;
 	cmd += "; mv -f code.c ";
 	const char* ch = (const char*) saveFileName;
-	if (ch && strcmp(ch, "")) {
-		cmd += (const char*) saveFileName;
-		cmd += ".c; mv a.out ";
-		cmd += (const char*) saveFileName;
-	} else {
-		cmd += gal->readName();
-		cmd += ".c; mv a.out ";
-		cmd += gal->readName();
-	}
+	if (ch == 0 || *ch == 0) ch = galaxy()->name();
+	cmd << ch << ".c; mv a.out " << ch;
 	system(cmd);
 	return TRUE;
 }
@@ -244,15 +231,15 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
 
 void CGCTarget :: wormInputCode(PortHole& p) {
 	wormIn << "\t/* READ from wormhole port " 
-		<< p.readFullName() << " */\n";
+		<< p.fullName() << " */\n";
 }
 
 void CGCTarget :: wormOutputCode(PortHole& p) {
 	wormOut << "\t/* WRITE to wormhole port " 
-		<< p.readFullName() << " */\n";
+		<< p.fullName() << " */\n";
 }
 
-void CGCTarget :: endIteration(int reps, int depth) {
+void CGCTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << wormOut;
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
@@ -306,11 +293,8 @@ void CGCTarget :: addMainInit(const char* decl) {
 
 
 // clone
-Block* CGCTarget :: clone () const {
-	LOG_NEW; 
-	CGCTarget* t = new CGCTarget(readName(),starType(),readDescriptor());
-	t->copyStates(*this);
-	return t;
+Block* CGCTarget :: makeNew () const {
+	LOG_NEW; return new CGCTarget(name(),starType(),descriptor());
 }
 
 void CGCTarget :: setGeoNames(Galaxy& galaxy) {
@@ -336,7 +320,8 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
 // note that we allow the C compiler to do the actual allocation;
 // this routine just determines the buffer sizes.
 
-int CGCTarget :: allocateMemory(Galaxy& g) {
+int CGCTarget :: allocateMemory() {
+	Galaxy& g = *galaxy();
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
 	
@@ -371,10 +356,10 @@ void CGCTarget :: setupForkDests(Galaxy& g) {
 // codeGenInit
 /////////////////////////////////////////
 
-int CGCTarget :: codeGenInit(Galaxy& g) {
+int CGCTarget :: codeGenInit() {
 
         // initialize the porthole offsets, and do all initCode methods.
-        GalStarIter nextStar(g);
+        GalStarIter nextStar(*galaxy());
         CGCStar* s;
         while ((s = (CGCStar*)nextStar++) != 0) {
                 BlockPortIter next(*s);
@@ -388,7 +373,7 @@ int CGCTarget :: codeGenInit(Galaxy& g) {
 	// used as the C object representing the buffer.  That name will
 	// be of the form "universe.gal1.gal2.star.output", which designates
 	// the output port that actually produces the data.
-	setGeoNames(*gal);
+	setGeoNames(*galaxy());
 
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
