@@ -21,31 +21,38 @@ $Id$
 // Note: all components of a StringList are in dynamic memory,
 // and are deleted by the StringList destructor
 
+// Assignment operator
+StringList&
+StringList :: operator = (const StringList& sl) {
+	// check for assignment to self and do nothing
+	if (this != &sl) {
+		if (size()) {
+			deleteAllStrings();
+			initialize ();
+		}
+		totalSize = sl.totalSize;
+		put(sl.newCopy());
+	}
+	return *this;
+}
+
 // Add another StringList to the StringList
 StringList&
-StringList :: operator += (StringList& l) {
-// Modified version: always consolidate left arg.
-	if (l.size() == 0) return *this;
-	if (l.size() > 1)
-		l.consolidate();
-	l.reset();
-// Only one string to process
-	char* s = l.next();
-	char* n = new char[strlen(s)+1];
-	strcpy(n,s);
-	put(n);
-	totalSize += l.totalSize;
+StringList :: operator += (const StringList& l) {
+// We always add the new argument as a single string, using newCopy.
+	if (l.totalSize > 0) {
+		char* c = l.newCopy();
+		put(c);
+		totalSize += l.totalSize;
+	}
 	return *this;
 }
 
 // Add in a char*
 StringList&
 StringList :: operator += (const char* s) {
-	int nadd = strlen(s);
-	char* n = new char[nadd+1];
-	strcpy(n,s);
-	put(n);
-	totalSize+=nadd;
+	put(savestring(s));
+	totalSize+=strlen(s);
 	return *this;
 }
 
@@ -67,48 +74,66 @@ StringList :: operator += (double f)
 	return *this += buf;
 }
 
+// Make a new (concatenated together) copy of the StringList string.
+char*
+StringList :: newCopy () const {
+	char* s = new char[totalSize+1];
+	char* out = s;
+	StringListIter next(*this);
+	char* p;
+	while ((p = next++) != 0) {
+		// copy string including terminator
+		while (*s++ = *p++);
+		// advanced too far; back up by one
+		s--;
+	}
+	return out;
+}
+
 // This method consolidates all strings into one string and returns the
 // memory.  It is used in the cast to char*.
 char*
 StringList :: consolidate () {
 	// Handle empty StringList
-	if (totalSize == 0)
+	if (totalSize == 0 || size() == 0)
 		return 0;
 	// If already one segment, handle it w/o work
-	if (size() <= 1) return next();
+	if (size() <= 1) return head();
 	// Allocate new memory
-	char* s = new char[totalSize+1];
-	int totalSoFar = 0;
-	reset();
-	for(int i = size(); i > 0; i--) {
-		char* ss = next();
-		strcpy(s+totalSoFar,ss);
-		totalSoFar += strlen(ss);
-		delete ss;
-	}
+	char* s = newCopy();
+	deleteAllStrings();
 	initialize();
 	put(s);
-// error check
-	if (totalSize != totalSoFar) {
-		fprintf (stderr, "Inconsistency in StringList::consolidate:"
-			 " totalSize = %d, totalSoFar = %d\n",
-			 totalSize, totalSoFar);
-		exit (1);
-	}
 	return s;
 }
 
-// destructor: delete all substrings
+// for use in destructor: delete all substrings
 // we don't delete the nodes because the base class destructor does that.
 
-StringList::~StringList() {
-	for (int i=size(); i > 0; i--)
-		delete next();
+void StringList::deleteAllStrings() {
+	totalSize = 0;
+	StringListIter next(*this);
+	for (int i=size(); i > 0; i--) {
+		delete next++;
+	}
+}
+
+// print a StringList on a UserOutput
+
+UserOutput& operator << (UserOutput& o, const StringList& sl) {
+	StringListIter next(sl);
+	char* s;
+	while ((s = next++) != 0)
+		o << s;
+	return o;
 }
 
 // print a StringList on a stream
 
-ostream& operator << (ostream&o, StringList& sl) {
-	o << (char*)sl;
+ostream& operator << (ostream&o, const StringList& sl) {
+	StringListIter next(sl);
+	char* s;
+	while ((s = next++) != 0)
+		o << s;
 	return o;
 }
