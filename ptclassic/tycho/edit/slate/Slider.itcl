@@ -258,7 +258,7 @@ configbody ::tycho::Slider::resolution {
 	    ::set offset [expr $sliderbottom - \
 		    [lindex [$itk_component(slate) coords $bar] 1] \
 		    - $barheight/2 ]
-	    ::set offsetdash [roundTo $offset $stepsize]
+	    ::set offsetdash [::tycho::roundTo $offset $stepsize]
 	    $itk_component(slate) move $bar 0 [expr $offset - $offsetdash]
 
 	    # Get the value represented by the slider
@@ -335,17 +335,17 @@ body ::tycho::Slider::constructor {args} {
 
 
     # Create the interactors
-    ::set bounder [$itk_component(slate) control interactor Bounder \
+    ::set bounder [$itk_component(slate) interactor Bounder \
 	    -constrain y \
 	    -dragcommand [list @scope [info class] "$this updatevalue"]]
 
-    ::set repeater [$itk_component(slate) control interactor Repeater]
+    ::set repeater [$itk_component(slate) interactor Repeater]
 
-    ::set shifter [$itk_component(slate) control interactor Bounder \
+    ::set shifter [$itk_component(slate) interactor Bounder \
 	    -constrain y \
 	    -dragcommand [list @scope [info class] "$this updatevalue"]]
 
-    ::set stepper [$itk_component(slate) control interactor Stepper]
+    ::set stepper [$itk_component(slate) interactor Stepper]
 
     # Initialize options.
     eval itk_initialize $args
@@ -519,7 +519,7 @@ body ::tycho::Slider::set {x} {
     }
 
     if { $itk_option(-resolution) != 0 } {
-	::set x [roundTo $x $itk_option(-resolution)]
+	::set x [::tycho::roundTo $x $itk_option(-resolution)]
     }
 
     # Calculate the corresponding bar position and move the
