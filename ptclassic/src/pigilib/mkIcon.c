@@ -91,6 +91,7 @@ octObject *destPtr, *srcPtr;
 	ERR_IF1(!DeepCopyObjs(&destItem, &srcItem));
     }
     CK_OCT(status);  /* check in case of OCT_ERROR */
+    octFreeGenerator(&gen);
     return (TRUE);
 }
 

@@ -148,9 +148,11 @@ octObject *facetPtr;
     octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &gen);
     while (octGenerate(&gen, &inst) == OCT_OK) {
 	if (IsCursor(&inst)) {
+	    octFreeGenerator(&gen);
 	    return (TRUE);
 	}
     }
+    octFreeGenerator(&gen);
     return (FALSE);
 }
 
@@ -513,6 +515,7 @@ char **typeNamePtr;
 	/* return as default type "float" */
 	StrDup(typeNamePtr, "float");
     }
+    octFreeGenerator(&gen);
 }
 
 /* GetGalTerms  2/4/89
