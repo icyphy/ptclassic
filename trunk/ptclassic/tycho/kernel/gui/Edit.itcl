@@ -5,7 +5,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,8 +30,6 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #######################################################################
-
-catch {delete class ::tycho::Edit}
 
 # FIXME: To do
 #   - Calls to warn, etc., in the constructor never return.  Why?
@@ -295,6 +293,9 @@ class ::tycho::Edit {
 
     # Return the column number of the insertion mark.
     private method columnNumber {}
+
+    # Initialize the menubar
+    private method initializeMenubar {}
 
     # Set up the undo buffer for an insertion at position index.
     private method prepareInsert {index} {}
@@ -610,82 +611,16 @@ body ::tycho::Edit::constructor {args} {
 	bind $itk_component(text) <KP_Home> [code "%Q undoBoundary"]
     }
 
-    # Insert items in the menu bar.
-    # NOTE: For efficiency, avoid "menubar" method.
+    # Insert items in the menu bar. This is in a separate method
+    # because this constructor is so long. As it turns out, it's
+    # faster as well.
     if {$myMenubar != {}} {
-         $myMenubar insert "Compile" "Evaluate" -underline 2 \
-                 -command "$this execProcess make"
-          
-	# This causes us to require that Exec.itcl be read in at startup
-	if ![::tycho::Exec::execWidgetIsSupported] {
-	    $myMenubar disable Compile
-	}
-
-	# Add an Edit menu
-        $myMenubar addMenu Edit -before Window -underline 0
-        
-        $myMenubar command {Undo/Redo} Edit -accelerator "C-x u" \
-                -underline 0 -command "$this undo"
-        
-        $myMenubar addSeparator Edit
-        
-        $myMenubar command Cut Edit -underline 0 -accelerator "C-w" \
-                -command "$this cut"
-        
-        $myMenubar command Copy Edit -underline 1 -accelerator "M-w" \
-                -command "$this copy"
-        
-        $myMenubar command Paste Edit -underline 0 -accelerator "C-y" \
-                -command "$this paste"
-        
-        $myMenubar addSeparator Edit
-        
-        $myMenubar command "Select All" Edit -underline 0 \
-                -accelerator "C-/" -command "$this selectRange 1.0 end"
-        
-        $myMenubar command "Unselect" Edit -underline 0 \
-                -accelerator "C-\\" -command "$this unselectRange 1.0 end"
-        
-        $myMenubar command "Find/Change..." Edit -underline 0 \
-                -accelerator "C-s" -command "$this search"
-        
-        $myMenubar command "Spelling..." Edit -underline 2 \
-                -accelerator "M-$" -command "$this spellCheck"
-	if {$tcl_platform(platform) == "macintosh"} {
-	    $myMenubar disable "Spelling..."
-	}
-
-        $myMenubar command {Goto Line...} Edit -underline 0 \
-                -accelerator "C-c C-g" -command "$this gotoLine"
-        
-        # Add a Format menu
-        $myMenubar addMenu Format -underline 1
-        
-        $myMenubar addSeparator Format
-        
-        $myMenubar command "Fill Region" Format -underline 2 \
-                -accelerator "M-q" -command "$this busy $this fillSelection"
-        
-        $myMenubar command "Right Fill Column" Format -underline 2 \
-                -accelerator "C-x f" -command "$this queryFillColumn"
-        
-        $myMenubar command "Set Fill Prefix" Format -underline 1 \
-                -accelerator "C-x ." -command "$this queryFillPrefix"
-
-        $myMenubar addSeparator Format
-
-        $myMenubar command "Capitalize" Format -underline 0 \
-                -accelerator "M-C" -command "$this capitalize"
-
-        $myMenubar command "Lower Case" Format -underline 0 \
-                -accelerator "M-l" -command "$this lowerCase"
-
-        $myMenubar command "Upper Case" Format -underline 0 \
-                -accelerator "M-u" -command "$this upperCase"
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Edit::initializeMenubar
     }
 
-    insertInDisplay
-
+    # Initialize options and tell preferences manager to ignore them
     eval itk_initialize $args
     eval preference excludeoptions $this $args
 
@@ -1349,7 +1284,7 @@ body ::tycho::Edit::findOne \
 #
 body ::tycho::Edit::focusin {} {
     focus $itk_component(text)
-    displayer setCurrentView $viewName
+    displayer setCurrentView $this
 }
 
 #####################################################################
@@ -2047,6 +1982,87 @@ body ::tycho::Edit::columnNumber {} {
     set str [$itk_component(text) get "insert linestart" insert]
     regsub -all "\t" $str "        " str
     return [string length $str]
+}
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar. Adds entries specific to this class.
+#
+body ::tycho::Edit::initializeMenubar {} {
+    global tcl_platform
+
+    # Insert items in the menu bar.
+#    $myMenubar insert "Compile" "Evaluate" -underline 2 \
+#	    -command "$this execProcess make"
+    
+    # This causes us to require that Exec.itcl be read in at startup
+    # FIXME: Exec is a subclass, and we shouldn't be referring
+    # to it here!
+    if ![::tycho::Exec::execWidgetIsSupported] {
+	$myMenubar disable Compile
+    }
+
+    # Add an Edit menu
+    $myMenubar addMenu Edit -before Window -underline 0
+    
+    $myMenubar command {Undo/Redo} Edit -accelerator "C-x u" \
+	    -underline 0 -command "$this undo"
+    
+    $myMenubar addSeparator Edit
+    
+    $myMenubar command Cut Edit -underline 0 -accelerator "C-w" \
+	    -command "$this cut"
+    
+    $myMenubar command Copy Edit -underline 1 -accelerator "M-w" \
+	    -command "$this copy"
+    
+    $myMenubar command Paste Edit -underline 0 -accelerator "C-y" \
+	    -command "$this paste"
+    
+    $myMenubar addSeparator Edit
+    
+    $myMenubar command "Select All" Edit -underline 0 \
+	    -accelerator "C-/" -command "$this selectRange 1.0 end"
+    
+    $myMenubar command "Unselect" Edit -underline 0 \
+	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
+    
+    $myMenubar command "Find/Change..." Edit -underline 0 \
+	    -accelerator "C-s" -command "$this search"
+    
+    $myMenubar command "Spelling..." Edit -underline 2 \
+	    -accelerator "M-$" -command "$this spellCheck"
+    if {$tcl_platform(platform) == "macintosh"} {
+	$myMenubar disable "Spelling..."
+    }
+
+    $myMenubar command {Goto Line...} Edit -underline 0 \
+	    -accelerator "C-c C-g" -command "$this gotoLine"
+    
+    # Add a Format menu
+    $myMenubar addMenu Format -underline 1
+    
+    $myMenubar addSeparator Format
+    
+    $myMenubar command "Fill Region" Format -underline 2 \
+	    -accelerator "M-q" -command "$this busy $this fillSelection"
+    
+    $myMenubar command "Right Fill Column" Format -underline 2 \
+	    -accelerator "C-x f" -command "$this queryFillColumn"
+    
+    $myMenubar command "Set Fill Prefix" Format -underline 1 \
+	    -accelerator "C-x ." -command "$this queryFillPrefix"
+
+    $myMenubar addSeparator Format
+
+    $myMenubar command "Capitalize" Format -underline 0 \
+	    -accelerator "M-C" -command "$this capitalize"
+
+    $myMenubar command "Lower Case" Format -underline 0 \
+	    -accelerator "M-l" -command "$this lowerCase"
+
+    $myMenubar command "Upper Case" Format -underline 0 \
+	    -accelerator "M-u" -command "$this upperCase"
 }
 
 #####################################################################
