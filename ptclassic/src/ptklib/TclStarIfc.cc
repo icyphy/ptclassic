@@ -50,6 +50,19 @@ static int grabInputs(
 	return TCL_OK;
 }
 
+// Define the callback procedure used by Tcl to get the state of
+// the inputs.
+static int grabInputsState(
+    ClientData tcl,                     // Pointer to the Tcl interface
+    Tcl_Interp*,                 	// Current interpreter
+    int,                           	// Number of arguments
+    char*[]                         	// Argument strings
+) {
+	InfString inputs = ((TclStarIfc*)tcl)->getInputsState();
+	Tcl_SetResult(ptkInterp,(char*)inputs, TCL_VOLATILE);
+	return TCL_OK;
+}
+
 // Define the callback procedure used by Tcl to set the value of
 // the outputs.
 static int setOutputs(
@@ -105,6 +118,9 @@ TclStarIfc::~TclStarIfc() {
 	buf = "grabInputs_";
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
+	buf = "grabInputsState_";
+	buf += starID;
+	Tcl_DeleteCommand(ptkInterp, (char*)buf);
 	buf = "setOutputs_";
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
@@ -142,6 +158,13 @@ int TclStarIfc::setup (Block* star,
 		buf += starID;
 	        Tcl_CreateCommand(ptkInterp, (char*)buf,
 		    grabInputs, (ClientData)this, NULL);
+	}
+
+	if (numInputs > 0) {
+		buf = "grabInputsState_";
+		buf += starID;
+	        Tcl_CreateCommand(ptkInterp, (char*)buf,
+		    grabInputsState, (ClientData)this, NULL);
 	}
 
 	if (numOutputs > 0) {
@@ -285,10 +308,19 @@ InfString TclStarIfc::getInputs () {
 	InfString result;
 	while ((p = nexti++) != 0) {
 	    // return a quoted string for Tcl consumption
+	    if (p->isItOutput()) continue;
 	    result += "{";
 	    result += ((*p)%0).print();
 	    result += "} ";
 	}
+	return result;
+}
+
+// Convert values on input to strings; works for all Ptolemy domains
+InfString TclStarIfc::getInputsState () {
+    	InfString result;
+	for (int i = 0; i<inputArraySize; i++)
+	    result << inputNewFlags[i] << " ";
 	return result;
 }
 
