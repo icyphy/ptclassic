@@ -30,10 +30,10 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
+ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/test
+VPATH =		$(ROOT)/kernel/gui/test
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
