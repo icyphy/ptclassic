@@ -55,8 +55,8 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=(cg-ddf cg56 cgc)
-set EXPEXTRAS=(cg56/targets cg-ddf/constructs)
+set EXPDOMAINS=(cg-ddf cg56 cgc cg96)
+set EXPEXTRAS=(cg56/targets cg96/targets cg-ddf/constructs)
 
 cd domains
 foreach x (sdf ddf de thor cg $EXPDOMAINS)
