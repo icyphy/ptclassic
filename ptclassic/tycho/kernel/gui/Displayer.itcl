@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 # 
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -33,41 +33,104 @@
 #######################################################################
 #### view
 # This is a shortcut procedure for opening a Displayer/View combination.
-# It takes up to four arguments, only the first of which is required.
+# The first argument is the name of a class derived from <code>View</code>,
+# an instance of which will be created and placed into a subclass of
+# <code>Displayer</code>. Following arguments are configuration options.
+# The options include:
 # <ul>
-# <li> <i>view</i> is the name of a class derived from <code>View</code>.
-# <li> <i>viewoptions</i> is a list of options to pass to the view constructor.
-# <li> <i>displayer</i> is the name of a class derived from 
-#      <code>Displayer</code>.
-# <li> <i>dispoptions</i> is a list of options to pass to the displayer
-#      constructor.
+# <li><b>-displayer</b>: A class that descended from Displayer, into
+# which the view will be placed. Default is "Displayer."
+# <li><b>-withdrawn</b>: If set, the window will not be deiconifies
+# but will remain withdrawn. This is useful if you want to call
+# <code>centerOnScreen</code>, for example.
+# <li><b>-prefix</b>: The prefix of the created window name.
+# <li><b>-geometry</b>: The window geometry, as for regular Tk
+# top-level windows.
+# <li><b>-height</b>: The height of the window in pixels.
+# <li><b>-title</b>: The title string placed into the window head.
+# <li><b>-toolbar</b>: If true, the Displayer will create and display
+# a toolbar.
+# <li><b>-width</b>: The width of the window in pixels.
 # </ul>
-# The default options are empty lists.  The default displayer is
-# <code>Displayer</code>. If either the <i>view</i> or
-# <i>displayer</i> argument does not begin with "::", then "::tycho::"
+# If either the <i>view</i> argument or
+# <i>-displayer</i> option does not begin with "::", then "::tycho::"
 # is prepended to the classname. Thus, classes in the tycho namespace
 # can be specified without specifying the namespace. All other classes
 # must be fully specified. Classes in the global namespace should have
-# a simple "::" prefix.  The name of the view subwindow that is created
-# is returned.
+# a simple "::" prefix.  The procedure returns the name of the new
+# subwindow -- to get the top-level window, use "winfo toplevel".
 #
-proc ::tycho::view {view {viewoptions {}} \
-        {displayer {Displayer}} {dispoptions {}}} {
+proc ::tycho::view {view args} {
+    # Figure out options for displayer
+    array set temp $args
+    set options {}
+    foreach opt {-geometry -height -master -title -toolbar -width} {
+	if { [::info exists temp($opt)] } {
+	    lappend options $opt $temp($opt)
+	    unset temp($opt)
+	}
+    }
+
+    # Get correct class names
     if ![string match {::*} $view] {
         set view "::tycho::$view"
+    }
+    if { [::info exists temp(-displayer)] } {
+	set displayer $temp(-displayer)
+	unset temp(-displayer)
+    } else {
+	set displayer "::tycho::Displayer"
     }
     if ![string match {::*} $displayer] {
         set displayer "::tycho::$displayer"
     }
-    set wname [::tycho::autoName .view]
-    uplevel #0 $displayer $wname $dispoptions
-    uplevel #0 $view $wname.v $viewoptions
-    wm deiconify $wname
+
+    # Get the flag saying whether to withdraw
+    if { [::info exists temp(-withdrawn)] } {
+	set withdrawn $temp(-withdrawn)
+	unset temp(-withdrawn)
+    } else {
+	set withdrawn 0
+    }
+    
+    # Create the displayer and view, and attach and show the view
+    if { [::info exists temp(-prefix)] } {
+	set prefix $temp(-prefix)
+	unset temp(-prefix)
+    } else {
+	set prefix .displayer
+    }
+    set wname [::tycho::autoName $prefix]
+    uplevel #0 $displayer $wname $options
+    uplevel #0 $view $wname.v [array get temp]
+    $wname showView $wname.v
+
+    # Deiconify the displayer and return the view name
+    if { ! $withdrawn } {
+	wm deiconify $wname
+    }
     return $wname.v
 }
 
-# For debugging.
-catch {delete class ::tycho::Displayer}
+# ## OLD VERSION
+# # proc ::tycho::view {view {viewoptions {}} \
+# #         {displayer {Displayer}} {dispoptions {}}} {
+# #     if ![string match {::*} $view] {
+# #         set view "::tycho::$view"
+# #     }
+# #     if ![string match {::*} $displayer] {
+# #         set displayer "::tycho::$displayer"
+# #     }
+# #     set wname [::tycho::autoName .displayer]
+# #     uplevel #0 $displayer $wname $dispoptions
+# #     uplevel #0 $view $wname.v $viewoptions
+# #     $wname attachView  $wname.v
+# #     $wname showView $wname.v
+# #
+# #     wm deiconify $wname
+# #     return $wname.v
+# # }
+
 
 #######################################################################
 #### Displayer
@@ -103,11 +166,11 @@ class ::tycho::Displayer {
     ###################################################################
     ####                         public methods                    ####
 
-    # Register a view with the displayer and create menu and status bars for it.
-    method attachView {window viewName}
+    # Register a view and create its menu and status bars
+    method attachView {view}
 
     # Destroy a view, removing it from the display.
-    method destroyView {viewName {selfDestruct 1}}
+    method destroyView {view}
 
     # Give the focus to the current view.
     method focusin {}
@@ -119,7 +182,7 @@ class ::tycho::Displayer {
     method halfHeight {}
 
     # Hide the given view without destroying it.
-    method hideView {viewName}
+    method hideView {view}
 
     # Resize the window to the original requested size.
     method originalSize {}
@@ -128,10 +191,13 @@ class ::tycho::Displayer {
     method saveCrash {}
 
     # Show the menu and status bars for the specified view, or the default.
-    method setCurrentView {{viewName {}}}
+    method setCurrentView {view}
+
+    # Show the menu and status bars for the empty view
+    method setEmptyView {}
 
     # Display the specified view inside the displayer.
-    method showView {viewName args}
+    method showView {view args}
     
     #################################################################
     ####                   public procedures                     ####
@@ -143,7 +209,7 @@ class ::tycho::Displayer {
     ####                   protected methods                     ####
 
     # Check to see whether the specified view is attached with the Displayer.
-    protected method verifyView {viewName}
+    protected method verifyView {view {method {}}}
 
     #################################################################
     ####                   protected variables                   ####
@@ -160,14 +226,12 @@ class ::tycho::Displayer {
     # If 1, C-x C-c will be bound in future instances to exit the program.
     protected common normalexit 1
 
-    # An array of view window names, indexed by their names.
-    protected variable viewWindow
-
-    # An array of view commands, indexed by their names.
-    protected variable viewCommand
+    # An array mapping view window paths to a name for making components
+    # This array can be used to get the names of all views.
+    protected variable _viewtag
 
     # An array of views with value indicating whether it is displayed.
-    protected variable viewShowing
+    protected variable _showing
 
     # Keep tack of the vertical window position for screen placement.
     protected common vertpos {+}
@@ -187,7 +251,7 @@ configbody ::tycho::Displayer::master {
     } {
         set closetxt "Close"
     }
-    foreach view [array names viewCommand] {
+    foreach view [array names _viewtag] {
         $itk_component(status$view) configure -closetext $closetxt
     }
 }
@@ -196,7 +260,8 @@ configbody ::tycho::Displayer::master {
 #### -toolbar configuration
 # If the value of this option is "1", show the toolbar for each widget.
 # Otherwise, hide the toolbar.
-#
+# FIXME: This should create and destroy toolbars when the value
+# is changed.
 configbody ::tycho::Displayer::toolbar {
     if $itk_option(-toolbar) {
         # The frame is packed "-before" the childsite to prevent the
@@ -266,22 +331,14 @@ body ::tycho::Displayer::constructor {args} {
             -before $itk_component(childsite)
 
     # Create the default menubar at the global scope.
-    # FIXME: remove once upgraded to Tk 4.3
+    # This also creates some options needed by preferences.
     itk_component add menubar {
 	uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar
     } {
-        # NOTE: keep more options?
 	keep -background -cursor -font
 	rename -padx -menupadx menuPadX MenuPadX
 	rename -pady -menupady menuPadY MenuPadY
     }
-
-    # Add  a File menu with a close command so that when there are 
-    # no views, the display doesn't look empty.
-    $itk_component(menubar) addMenu File -underline 0
-    $itk_component(menubar) add Close File \
-	    -command "$this nextWindow; delete object $this" \
-            -underline 0
 
     # Create the default status bar at the global scope.
     itk_component add status {
@@ -295,7 +352,6 @@ body ::tycho::Displayer::constructor {args} {
 	rename -padx -buttonpadx buttonPadX ButtonPadX
 	rename -pady -buttonpady buttonPadY ButtonPadY
     }
-    pack $itk_component(status) -fill x -expand 0 -side bottom
     
     eval itk_initialize $args
     eval preference excludeoptions $this $args
@@ -312,8 +368,10 @@ body ::tycho::Displayer::constructor {args} {
         $itk_component(status) configure -closetext "Close"
     }
 
-    setCurrentView
+    # Show just the default status bar
+    setEmptyView
 
+    # Response to crash recovery
     wm protocol $prefix WM_SAVE_YOURSELF "$this saveCrash"
 }
 
@@ -344,8 +402,7 @@ body ::tycho::Displayer::destructor {} {
     }
     # Destroy all the registered views.
     foreach view [array names viewCommand] {
-        # Prevent self destruction here.
-        destroyView $view 0
+        destroyView $view
     }
     # NOTE: The following appears to not be necessary anymore.
     #     if {[info exists prefix] && [winfo ismapped $prefix]} {
@@ -354,48 +411,46 @@ body ::tycho::Displayer::destructor {} {
 }
 
 
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
+###################################################################
+###################################################################
+####                      public methods                       ####
 
 
 #######################################################################
 #### attachView
-# Register a view with the DisplayerTool and create menu, tool, and
-# status bars for it. The arguments are: the window name of the view
-# and a symbolic name to use for the view. A list of three items is
-# returned, the name of the menu bar widget, the status bar widget, and
-# the tool bar widget. A call to this method is made in the constructor
-# of a view, which can then insert menu buttons and items into the menu
-# bar, tool bar, and status bar. The view is not initially packed into
-# the display. Call <code>showView</code> to do this.
+# Register a view with the Displayer and create menu, tool, and
+# status bars for it. The first argument is the window name of the
+# view. This method calls the protected methods initializeMenubar{},
+# initializeToolbar{}, and initializeStatusbar{} of the view. The
+# view is not displayed -- call <code>showView</code> to do this.
 #
-body ::tycho::Displayer::attachView {window viewName} {
-    if [::info exists viewWindow($viewName)] {
-        error "View $viewName already exists in Displayer $this"
+body ::tycho::Displayer::attachView {view} {
+    set view [::info namespace tail $view]
+
+    if [::info exists _viewtag($view)] {
+	error "View $view already exists in Displayer $this"
     }
 
     # Add the view to the list of views
-    set viewWindow($viewName) $window
-    set viewCommand($viewName) [winfo command $window]
-    set viewShowing($viewName) 0
+    set tag [::tycho::autoName ""]
+    set _viewtag($view) $tag
+    set _showing($view) 0
 
     # Create the menubar at the global scope.
-    itk_component add menubar$viewName {
-        uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar$viewName
+    itk_component add menubar$tag {
+	uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar$tag
     } {
-        # NOTE: Should we keep more options here?
-        keep -background -cursor -font
+	keep -background -cursor -font
 	rename -padx -menupadx menuPadX MenuPadX
 	rename -pady -menupady menuPadY MenuPadY
     }
 
     # Create the status bar
-    itk_component add status$viewName {
- 	uplevel #0 ::tycho::StatusBar \
-                 $itk_component(statusFrame).status$viewName \
+    itk_component add status$tag {
+	uplevel #0 ::tycho::StatusBar \
+		$itk_component(statusFrame).status$tag \
 		-closetext $closetxt \
- 		-closecommand [list "$this nextWindow; delete object $this"]
+		-closecommand [list "$this nextWindow; delete object $this"]
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
@@ -403,64 +458,68 @@ body ::tycho::Displayer::attachView {window viewName} {
 	rename -padx -buttonpadx buttonPadX ButtonPadX
 	rename -pady -buttonpady buttonPadY ButtonPadY
     }
-    
-    # Create the tool bar.
-    itk_component add toolbar$viewName {
-        uplevel #0 ::tycho::ToolBar \
-                $itk_component(toolFrame).toolbar$viewName \
-                -statusbar $itk_component(status$viewName)
-    } {
-        # NOTE: Should we keep more options here?
-        keep -background -cursor -font
-	rename -padx -buttonpadx buttonPadX ButtonPadX
-	rename -pady -buttonpady buttonPadY ButtonPadY
+
+    # Create a tool bar if -toolbar is set
+    if { $itk_option(-toolbar) } {
+	itk_component add toolbar$tag {
+	    uplevel #0 ::tycho::ToolBar \
+		    $itk_component(toolFrame).toolbar$tag \
+		    -statusbar $itk_component(status$tag)
+	} {
+	    keep -background -cursor -font
+	    rename -padx -buttonpadx buttonPadX ButtonPadX
+	    rename -pady -buttonpady buttonPadY ButtonPadY
+	}
     }
 
-    return [list $itk_component(menubar$viewName) \
-            $itk_component(status$viewName) \
-            $itk_component(toolbar$viewName)]
+    # Return the view's menubar, status bar, and tool bar, so
+    # it can initialize them.
+    if { $itk_option(-toolbar) } {
+        return [list $itk_component(menubar$tag) \
+                $itk_component(status$tag) \
+                $itk_component(toolbar$tag)]
+    } else {
+        return [list $itk_component(menubar$tag) \
+                $itk_component(status$tag) \
+                {}]
+    }
 }
 
 #######################################################################
 #### destroyView
-# Remove a view from the display and destroy it.
-# If the optional second argument is not given or has value 1, then
-# if there are no more views remaining in the display, then self-destruct.
+# Remove a view from the display and destroy it. If there are no
+# more attached views, display the default menubar and status bar.
 #
-body ::tycho::Displayer::destroyView {viewName {selfDestruct 1}} {
+body ::tycho::Displayer::destroyView {view} {
+    set view [::info namespace tail $view]
+    verifyView $view detachView
 
-    verifyView $viewName
-
-    # Destroy the view and its menubar and status bar.
+    # Destroy the view, its menubar, status bar, and toolbar
     # The view is destroyed first because the destruction might be
     # cancelled by triggering an error.
-    delete object $viewCommand($viewName)
-    delete object $itk_component(menubar$viewName)
-    delete object $itk_component(status$viewName)
-    delete object $itk_component(toolbar$viewName)
+    set tag $_viewtag($view)
+    delete object [winfo command $view]
+    delete object $itk_component(menubar$tag)
+    delete object $itk_component(status$tag)
+    catch {delete object $itk_component(toolbar$tag)}
 
     # De-register the view
-    unset viewWindow($viewName)
-    unset viewCommand($viewName)
-    unset viewShowing($viewName)
+    unset _viewtag($view)
+    unset _showing($view)
 
     # Give focus to some other view that is showing, if there is one.
-    set newviewName {}
-    foreach view [array names viewShowing] {
-        if $viewShowing($view) {
-            set newviewName $view
+    set newview {}
+    foreach view [array names _viewtag] {
+        if $_showing($view) {
+            set newview $view
             break
         }
     }
-    if {$newviewName == {}} {
-        # No views are showing.
-        if {$selfDestruct} {
-            after idle delete object $this
-        } {
-            setCurrentView
-        }
+    if {$newview == {}} {
+	# Display empty view if no other views
+	setEmptyView
     } else {
-        $newviewName focusin
+	$newview focusin
     }
 }
 
@@ -470,7 +529,7 @@ body ::tycho::Displayer::destroyView {viewName {selfDestruct 1}} {
 #
 body ::tycho::Displayer::focusin {} {
     if {$currentView != {}} {
-        $viewCommand($currentView) focusin
+	[winfo command $currentView] focusin
     }
 }
 
@@ -532,34 +591,35 @@ body ::tycho::Displayer::halfHeight {} {
 # The view can be re-inserted in the display by calling <code>showView</code>.
 # If the view is not in the display, do nothing.
 #
-body ::tycho::Displayer::hideView {viewName} {
-
-    if {![info exists viewWindow($viewName)] || !$viewShowing($viewName)} {
+body ::tycho::Displayer::hideView {view} {
+    set view [::info namespace tail $view]
+    if { ! [info exists _viewtag($view)] || !! $_showing($view) } {
         return
     }
 
     # Remove menubar, status bar, and view
-    pack forget $itk_component(menubar$viewName)
-    pack forget $itk_component(status$viewName)
-    pack forget $itk_component(toolbar$viewName)
-    pack forget $viewWindow($viewName)
+    set tag $_viewtag($view)
+    pack forget $itk_component(menubar$tag)
+    pack forget $itk_component(status$tag)
+    catch {pack forget $itk_component(toolbar$tag)}
+    pack forget $view
     
     # Indicate that view is no longer showing.
-    set viewShowing($viewName) 0
+    set _showing($view) 0
     
     # Give focus to some other view that is showing, if there is one.
-    set newviewName {}
-    foreach view [array names viewShowing] {
-        if $viewShowing($view) {
-            set newviewName $view
+    set newview {}
+    foreach view [array names _viewtag] {
+        if $_showing($view) {
+            set newview $view
             break
         }
     }
-    if {$newviewName == {}} {
-        # No views are showing; use the default menu.
-	setCurrentView
+    if {$newview == {}} {
+	# No views are _showing; use the default menu.
+	setEmptyView
     } else {
-        $newviewName focusin
+	$newview focusin
     }
 }
 
@@ -578,10 +638,12 @@ body ::tycho::Displayer::originalSize {} {
 # Attempt to save the data of child views of type File.
 #
 body ::tycho::Displayer::saveCrash {} {
-    foreach view [array names viewCommand] {
-        if [$viewCommand($view) isa ::tycho::File] {
-            $viewCommand($view) saveCrash
-        }
+    foreach view [array names _viewtag] {
+	# Really, we shouldn't be testing for membership of
+	# the subclass File here! FIXME
+	if [[winfo command $view] isa ::tycho::File] {
+	    [winfo command $view] saveCrash
+	}
     }
 }
 
@@ -592,93 +654,123 @@ body ::tycho::Displayer::saveCrash {} {
 # and status bar. The most recent call to this method determines the
 # currentView.
 # 
-body ::tycho::Displayer::setCurrentView {{viewName {}}} {
+body ::tycho::Displayer::setCurrentView {view} {
+    set view [::info namespace tail $view]
 
     # Only pack new menubar and status bar if different from previous
-    if {$viewName != $currentView} {
+    if {$view != $currentView} {
+	verifyView $view setCurrentView
 
-        if {$viewName == {}} {
-            set bar $itk_component(menubar)
-            set status $itk_component(status)
-        } {
-            verifyView $viewName
-            set bar $itk_component(menubar$viewName)
-            set status $itk_component(status$viewName)
-            set tbar $itk_component(toolbar$viewName)
-        }
-
-	# If there is already a menubar then unpack it
-	# Leave deletion to creator of the menubar widget
-        # NOTE: this will not be needed once Tk 4.3 is available
-        pack forget $itk_component(menubar$currentView)
-        pack forget $itk_component(status$currentView)
-        if {$currentView != {}} {
-            pack forget $itk_component(toolbar$currentView)
-        }
-
-	# Pack the menu bar and status bar into the window
-	if {$bar != {}} {
-	    pack $bar \
-		    -in $itk_component(menuFrame) \
-		    -side top \
-		    -fill x \
-                    -expand 0
+	# Unpack existing components
+	if { $currentView == "" } {
+	    set tag ""
+	} else {
+	    set tag $_viewtag($currentView)
 	}
-	if {$status != {}} {
-	    pack $status \
-		    -in $itk_component(statusFrame) \
-		    -side top \
+	catch {pack forget $itk_component(menubar$tag)}
+	catch {pack forget $itk_component(status$tag)}
+	catch {pack forget $itk_component(toolbar$tag)}
+
+	# Pack the menu bar, status bar, and toolbar into the window
+	set tag $_viewtag($view)
+	pack $itk_component(menubar$tag) \
+		-in $itk_component(menuFrame) \
+		-fill x \
+		-expand 0
+
+	pack $itk_component(status$tag) \
+		-in $itk_component(statusFrame) \
+		-fill x \
+		-expand 0
+
+	if { $itk_option(-toolbar) } {
+	    pack $itk_component(toolbar$tag) \
+		    -in $itk_component(toolFrame) \
 		    -fill x \
-                    -expand 0
+		    -expand 0
 	}
-        if {$viewName != {}} {
-            pack $tbar \
-                    -in $itk_component(toolFrame) \
-                    -side top \
-                    -fill x \
-                    -expand 0
-        }
-        set currentView $viewName
+	set currentView $view
     }
+}
+
+#######################################################################
+#### setEmptyView
+# Show the default status bar, and nothing else.
+# 
+body ::tycho::Displayer::setEmptyView {} {
+    # Unpack existing components
+    if { $currentView == "" } {
+	set tag ""
+    } else {
+	set tag $_viewtag($currentView)
+    }
+    catch {pack forget $itk_component(menubar$tag)}
+    catch {pack forget $itk_component(status$tag)}
+    catch {pack forget $itk_component(toolbar$tag)}
+
+    # Pack the default menu bar
+    pack $itk_component(menubar) \
+	    -in $itk_component(menuFrame) \
+	    -fill x \
+	    -expand 0
+
+    # Pack the default status bar
+    pack $itk_component(status) \
+	    -in $itk_component(statusFrame) \
+	    -fill x \
+	    -expand 0
+
+    # The current view is blank
+    set currentView {}
 }
 
 #######################################################################
 #### showView
 # Display the given view inside the displayer. The first argument is
 # the name of the view. The view must have been attached to the
-# Displayer. The remaining arguments, if any, are passed to the Tk pack
-# command. For example, arguments "-expand true -fill both -side
-# bottom" would inform the packer that the view should be expanded if
+# Displayer. If the view is already showing in
+# the display, then this method gives it the focus and returns.
+# If not, the view is packed using the Tk pack command
+# with the default options <code>-fill both -expand true -side bottom</code>,
+# meaning that the view should be expanded if
 # the window is expanded, that the view should fill available space in
 # both in the horizontal and vertical direction, and that it should be
-# put at the bottom of the window. If the view is already showing in
-# the display, then this method gives it the focus and returns.
+# put at the bottom of the window. 
+# If additional arguments are given, these also are passed to the
+# pack command, and override the default options.
 #
-body ::tycho::Displayer::showView {viewName args} {
-
-    verifyView $viewName
+body ::tycho::Displayer::showView {view args} {
+    set view [::info namespace tail $view]
+    verifyView $view showView
 
     # If view is already visible, give it the focus and return.
-    if $viewShowing($viewName) {
-        $viewCommand($viewName) focusin
+    if $_showing($view) {
+	[winfo command $view] focusin
 	return
     }
 
-    # pack into the view frame in the window childsite
-    eval pack $viewWindow($viewName) -in $itk_component(childsite) $args
+    # Pack into the view frame in the window childsite. Allow
+    # caller-specified options to override default options.
+    array set temp {-fill both -expand true -side bottom}
+    array set temp $args
+    eval pack $view \
+	    -in $itk_component(childsite) \
+	    [array get temp]
 
     # Install the appropriate menu and status bars
-    setCurrentView $viewName
+    # setCurrentView $view
+    set _showing($view) 1
 
-    set viewShowing($viewName) 1
-
-    # Defer this in case the object is not fully constructed.
-    after idle [code $viewCommand($viewName) focusin]
+    # This used to be deferred because this code was being executed
+    # while still in the View constructor. Deferment is no longer
+    # needed because showView is called after the constructor returns.
+    # after idle [code [winfo command $view] focusin]
+    [winfo command $view] focusin
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      public procedures                    ####
+###################################################################
+###################################################################
+####                      public procedures                    ####
 
 ###################################################################
 #### normalExit
@@ -696,17 +788,17 @@ body ::tycho::Displayer::normalExit {{enable {}}} {
     return $normalexit
 }
 
-    #################################################################
-    #################################################################
-    ####                   private methods                       ####
+#################################################################
+#################################################################
+####                   private methods                       ####
 
 #######################################################################
 #### verifyView
 # Check to see whether the specified view is attached with the Displayer.
 # If not, trigger an error.  Otherwise, return.
 # 
-body ::tycho::Displayer::verifyView {viewName} {
-    if ![::info exists viewWindow($viewName)] {
-	error "View $viewName is not attached to display $this."
+body ::tycho::Displayer::verifyView {view {method {}}} {
+    if ![::info exists _viewtag($view)] {
+	error "::tycho::Displayer::$method: View $view is not attached to display $this."
     }
 }
