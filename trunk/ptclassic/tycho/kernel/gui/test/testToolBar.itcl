@@ -41,7 +41,7 @@ if {[string compare test [info procs test]] == 1} then {
 # Test ToolBar
 test ToolBar-1.1 {Test out buttons} {
    catch {delete object [$editor displayer]}
-   set editor [::tycho::view Edit -toolbar -1]
+   set editor [::tycho::view Edit -toolbar 1]
 
    $editor toolbar button foo -text Foo -command {set invokeResults "Foo!"}
    $editor toolbar button bar -text Bar -command {set invokeResults "Bar!"}
@@ -89,7 +89,7 @@ test ToolBar-1.1 {Test out buttons} {
 #
 test ToolBar-2.1 {Test out entries} {
    catch {delete object [$editor displayer]}
-   set editor [::tycho::view Edit -toolbar -1]
+   set editor [::tycho::view Edit -toolbar 1]
    $editor toolbar entry location Location \
 	   {The location entry contains this text} {puts}
    $editor toolbar entry location2 Location2 \
@@ -123,7 +123,7 @@ test ToolBar-2.1 {Test out entries} {
 #
 test ToolBar-3.1 {Test out entryforeground, entrybackground} {
    catch {delete object [$editor displayer]}
-   set editor [::tycho::view Edit -toolbar -1]
+   set editor [::tycho::view Edit -toolbar 1]
 
    $editor toolbar configure \
 	   -entryforeground red \
