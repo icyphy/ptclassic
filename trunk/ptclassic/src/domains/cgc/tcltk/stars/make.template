@@ -58,7 +58,8 @@ PL_SRCS= \
  CGCTkImpulse.pl \
  CGCTkSlider.pl \
  CGCTkXYPlot.pl \
- CGCTkRadioButton.pl
+ CGCTkRadioButton.pl \
+ CGCTkCheckButton.pl
 
 TCL_SRCS= \
  tkBall.tcl \
@@ -67,7 +68,8 @@ TCL_SRCS= \
  tkBallAsync.tcl \
  tkKeypad.tcl \
  tkUniverse.tcl \
- tkRadioButton.tcl
+ tkRadioButton.tcl \
+ tkCheckButton.tcl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
