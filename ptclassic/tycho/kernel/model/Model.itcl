@@ -366,20 +366,28 @@ body ::tycho::Model::history {mode args} {
 	    if { [llength $args] != 0 } {
 		error "wrong # args: should be \"history get\""
 	    }
-	    list [array get _redo] [array get _undo]
+            # Although not really necessary, we do a little formatting
+            # on the history list to make diagnostics easier
+            set result {}
+            foreach index [lsort -integer [array names _redo]] {
+                append result $index
+                append result "\n\{" [::tycho::breakLines $_redo($index) \
+                        -length 60 -substring " -"] "\}"
+                append result "\n\{" [::tycho::breakLines $_undo($index) \
+                        -length 60 -substring " -"] "\}\n"
+            }
+	    return $result
+            #list [array get _redo] [array get _undo]
 	}
 	"set" {
 	    if { [llength $args] != 1 } {
 		error "wrong # args: should be \"history set data\""
 	    }
 	    set data [lindex $args 0]
-	    if { [llength $data] != 2 \
-		    || [llength [lindex $data 0]] & 1 \
-		    || [llength [lindex $data 1]] & 1 } {
-		error "Invalid data: $data"
-	    }
-	    array set _redo [lindex $data 0]
-	    array set _undo [lindex $data 1]
+            foreach {index redo undo} $data {
+                set _redo($index) $redo
+                set _undo($index) $undo
+            }
 	}
 	"replace" {
 	    if { [llength $args] != 3 } {
