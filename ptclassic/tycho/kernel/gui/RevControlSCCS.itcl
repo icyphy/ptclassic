@@ -1,6 +1,7 @@
 # Definition of the class which handles revision control using SCCS.
 #
 # @Authors: Joel King and Edward A. Lee
+# @Contributor: Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -226,11 +227,24 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
     set olddir [eval pwd]
     cdDir $dir
 
-    # SCCS redirects the version info to stderr, so we redirect stderr.
-    # Unfortunately, this means there is no way to report errors.
-    set text [exec sccs get -p -r$version $basefile 2> /dev/null]
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile] \
+            [file extension $basefile]]
 
-    ::tycho::File::displayData $text $file 
+
+    # In sccs get, -s means silent, -p means to stdout.
+    if [catch {exec sccs get -p -s -r$version $basefile > $tmpFile} output ] {
+        error "Problem executing:\n\
+                `sccs get -p -s -r$version $basefile > $tmpFile':\n\ $output"
+    }
+
+    set myView [::tycho::File::openContext $tmpFile]
+    # FIXME: we should be able to set tmpfile without knowning that
+    # openContext returns a window that has a .v in it.
+    $myView.v configure -tmpfile 1
+
     cd $olddir
 }
 
