@@ -7,7 +7,7 @@ static const char file_id[] = "Fix.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -46,6 +46,8 @@ variable.
 
 #include "Fix.h"
 #include "Error.h"
+#include <stream.h>
+#include <std.h>
 #include <string.h>
 #include <math.h>
 
@@ -56,7 +58,7 @@ variable.
 const int    BITS_PER_WORD      =  16;
 const int    FIX_DEF_LENGTH     =  24;   // The default length in bits
 const int    FIX_MAX_LENGTH     =  WORDS_PER_FIX * BITS_PER_WORD;
-mask_func_pointer     MASK      =  mask_truncate;
+mask_func_pointer Fix::MASK     =  Fix::mask_truncate;
 
 /////////////////////////////
 // Library Internal Functions
@@ -66,7 +68,7 @@ mask_func_pointer     MASK      =  mask_truncate;
 // find the maximum and the minimum values that can be 
 // represented. 
 
-double find_max(int ln, int ib)
+static double find_max(int ln, int ib)
 {
   double r = 0.0, l = 0.0;
   for (int i=0; i <(ib - 1); i++) r += pow(2.0,i);
@@ -76,7 +78,7 @@ double find_max(int ln, int ib)
   return r;
 }
 
-double find_min(int ln, int ib)
+static double find_min(int ln, int ib)
 {
   double max,r;
   max = find_max(ln, ib);
@@ -88,7 +90,7 @@ double find_min(int ln, int ib)
 // Find the number of words (elements in array "Bits" of class Fix) 
 // needed to represent a Fix variable given its length in bits. 
 
-int find_words(int ln)
+static int find_words(int ln)
 {
   int n = ln + 15;
   n = n / BITS_PER_WORD;
@@ -99,7 +101,7 @@ int find_words(int ln)
 //////////////////////////////////////////////////////////
 // Find the number of bits needed to represent the integer "num" 
 
-int find_intBits(int num)
+static int find_intBits(int num)
 {
    int qt = num, count = 1; 
    if (num == 0) count = 0;
@@ -114,7 +116,7 @@ int find_intBits(int num)
 // bits "ib". The bit pattern is based on the 2's complement
 // notation. 
 
-void make_bit_pattern(int ln, int ib, double d, uint16* bits)
+void Fix::make_bit_pattern(int ln, int ib, double d, uint16* bits)
 {
   double x = d;
   double max_value = find_max(ln, ib);
@@ -140,7 +142,7 @@ void make_bit_pattern(int ln, int ib, double d, uint16* bits)
 // Shift the bit pattern stored in "bits" by "nbits". Shift
 // right if positive, shift left otherwise.
 
-void shift_bit_pattern(int nbits, uint16* bits)
+static void shift_bit_pattern(int nbits, uint16* bits)
 { 
   uint16 temp16_1, temp16_2, temp16_3 =0;
   uint16 tempbits[WORDS_PER_FIX];
@@ -177,7 +179,7 @@ void shift_bit_pattern(int nbits, uint16* bits)
 
 // Arithmatic shift. (same as shift_bit_pattern, only saves the sign bit)
 
-void ashift_bit_pattern(int nbits, uint16* bits)
+static void ashift_bit_pattern(int nbits, uint16* bits)
 {
    int sign = bits[0] & 0x8000;
    if (nbits >= 0) {
@@ -633,7 +635,7 @@ Fix operator ~ (const Fix& x)
 {   
     Fix r = x;
     for (int i=0; i < x.words(); i++) r.Bits[i] = ~r.Bits[i];
-    mask_truncate(r.length, r.Bits);
+    Fix::mask_truncate(r.length, r.Bits);
     return r;
 }
 
@@ -643,7 +645,7 @@ Fix operator << (const Fix& x, int n)
     ashift_bit_pattern(-n, r.Bits);
     if (n < r.intBits) r.intBits -= n;
     else               r.intBits  = 1;
-    mask_truncate(r.length, r.Bits);
+    Fix::mask_truncate(r.length, r.Bits);
     return r;
 }
 
@@ -653,7 +655,7 @@ Fix operator >> (const Fix& x, int n)
     ashift_bit_pattern(n, r.Bits);
     if (n <= (r.length - r.intBits)) r.intBits += n;
     else                             r.intBits  = r.length;
-    mask_truncate(r.length, r.Bits);
+    Fix::mask_truncate(r.length, r.Bits);
     return r;
 }
 
@@ -738,7 +740,7 @@ ostream& operator << (ostream& s, const Fix& x)
 // masking functions
 ////////////////////
 
-void mask_truncate (int ln, uint16* bits)
+void Fix::mask_truncate (int ln, uint16* bits)
 {
   int NO_OF_WORDS = find_words(ln);
   for (int i = NO_OF_WORDS; i < WORDS_PER_FIX; i++) bits[i] = 0;
@@ -747,7 +749,7 @@ void mask_truncate (int ln, uint16* bits)
 }
 
 ////////////////////////////////////////////////////////////////
-void mask_truncate_round (int ln, uint16* bits)
+void Fix::mask_truncate_round (int ln, uint16* bits)
 {
   int NO_OF_WORDS = find_words(ln);
   for (int i = NO_OF_WORDS; i < WORDS_PER_FIX; i++) bits[i] = 0;
@@ -787,7 +789,7 @@ void overflow_handler (Fix& l, const Fix& r)
           l.Bits[0] = 0x7fff;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0xffff; }
      }
-     mask_truncate(l.length, l.Bits); }
+     Fix::mask_truncate(l.length, l.Bits); }
 
   else if (l.overflow() == 1)                // zero_saturate
      for (int i=0; i < WORDS_PER_FIX; i++)  l.Bits[i] = 0; 
@@ -808,7 +810,7 @@ void overflow_handler (Fix& l, const Fix& r)
           l.Bits[0] = 0x7fff;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0xffff; }
      }
-     mask_truncate(l.length, l.Bits); }
+     Fix::mask_truncate(l.length, l.Bits); }
 
   else if (l.overflow() == 3) {             // warning
      Error::abortRun(" Fix : overflow error"); }
@@ -829,7 +831,7 @@ void overflow_handler (Fix& l, const double& d)
 
 // Extract the integer part of character string "p"
 
-int get_intBits(const char *p)
+int Fix::get_intBits(const char *p)
 {
    int intBits = atoi(p);
    return intBits;
@@ -841,7 +843,7 @@ int get_intBits(const char *p)
 // that 2 bits to the left and 14 bits to the right of binary point),
 // find the total word length.
 
-int get_length(const char *p)
+int Fix::get_length(const char *p)
 {
    char rdigits[6];
    int i = 0;
@@ -853,7 +855,7 @@ int get_length(const char *p)
    return length;
 }
 
-mask_func_pointer Set_MASK(mask_func_pointer new_func) {
+mask_func_pointer Fix::Set_MASK(mask_func_pointer new_func) {
   mask_func_pointer old_func = MASK;
   MASK = new_func;
   return old_func;
