@@ -67,6 +67,11 @@ int ptkRPCInit(int argc, char **argv);
 int main(int argc, char** argv)
 {
 	pigiFilename = argv[0];
+
+#if TK_MAJOR_VERSION >= 8
+        Tcl_FindExecutable(argv[0]);
+#endif
+
 	KcLoadInit(argv[0]);
 #ifdef linux
 	// Fix for DECalendarQueue SIGFPE under linux.
