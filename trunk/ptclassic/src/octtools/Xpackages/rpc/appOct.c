@@ -992,6 +992,7 @@ struct octTransform *xform;
 	RPCASSERT(RPCSendOctPoint(&pts[i], RPCSendStream));
     }
     RPCASSERT(RPCSendOctTransform(xform, RPCSendStream));
+    RPCFLUSH(RPCSendStream);
     for (i = 0; i < n_pts; i++) {
 	RPCASSERT(RPCReceiveOctPoint(&pts[i], RPCReceiveStream));
     }
