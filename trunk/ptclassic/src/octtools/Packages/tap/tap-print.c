@@ -28,6 +28,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "utility.h"
 #include "errtrap.h"
+#include "ansi.h"
 #include "oct.h"
 #include "oh.h"
 #include "tap.h"
@@ -63,62 +64,21 @@ optionStruct optionList[] = {
 #define DO_PALATTES	0x008
 #define DO_CONNECTORS	0x010
 #define DO_QUERY_CONN	0x020
-
-main(argc, argv)
-int argc;
-char *argv[];
-{
-    octObject facet;
-    int options;
-    char *pkg, *msg;
-    int code;
-    extern int optind;
 
-    options = parseOptions(argc, argv);
+void printProp
+	ARGS((octObject *propPtr));
+void printRuleValue
+	ARGS((octCoord val, octCoord lambda));
+int countObjects
+	ARGS((octObject *containerPtr, octObjectMask mask));
+int eatSpace();
+void eatAll();
+void getString
+	ARGS((char *str));
+void getNumber
+	ARGS((int *numPtr));
 
-    if (argc != optind+2) optUsage();
 
-    octBegin();
-
-    /* get the technology facet directly */
-    ERR_IGNORE(tapOpenTechFacet(argv[optind], argv[optind+1], &facet, "r"));
-    if (errStatus(&pkg, &code, &msg)) {
-	(void) fprintf(stderr,
-		    "can't find facet for ``%s'' technology, viewtype ``%s''\n",
-		    argv[optind], argv[optind+1]);
-	(void) fprintf(stderr, "%s\n", msg);
-	exit(1);
-    }
-
-    /* keep the facet open even if tap flushes its caches and closes it */
-    facet.contents.facet.mode = "r";
-    if (octOpenFacet(&facet) != OCT_ALREADY_OPEN) {
-	(void) fprintf(stderr,
-		    "can't reopen technology facet %s:%s:%s???\n",
-		    facet.contents.facet.cell, facet.contents.facet.view,
-		    facet.contents.facet.facet);
-	exit(1);
-    }
-
-    printGeneralInfo(&facet);
-
-    if (options & DO_LAYER_PROPS) printLayerProps(&facet);
-
-    if (options & DO_DES_RULES) printDesignRules(&facet);
-
-    if (options & DO_LAYER_LOOKS) printLayerLooks(&facet);
-
-    if (options & DO_PALATTES) printPalettes(&facet);
-
-    if (options & DO_CONNECTORS) printConnectors(&facet);
-
-    if (options & DO_QUERY_CONN) queryConnectors(&facet);
-
-    octEnd();
-
-    exit(0);
-}
-
 int parseOptions(argc, argv)
 int argc;
 char *argv[];
@@ -162,11 +122,12 @@ char *argv[];
 
     return(allOptions);
 }
-
+
+void
 printGeneralInfo(facetPtr)
 octObject *facetPtr;
 {
-    char *str, *pkg, *msg;
+    char *str=(char *)NULL, *pkg, *msg;
     int code;
     octGenerator gen;
     octStatus status;
@@ -199,7 +160,8 @@ octObject *facetPtr;
     OH_ASSERT(status);
     (void) printf("\n\n");
 }
-
+
+void
 printLayerProps(facetPtr)
 octObject *facetPtr;
 {
@@ -233,6 +195,7 @@ octObject *facetPtr;
     (void) printf("\n\n");
 }
 
+void
 printProp(propPtr)
 octObject *propPtr;
 {
@@ -273,15 +236,16 @@ octObject *propPtr;
 			(int) propPtr->contents.prop.type);
     }
 }
-
+
+void
 printDesignRules(facetPtr)
 octObject *facetPtr;
 {
     octGenerator gen, gen2;
     octStatus status;
     octObject layer, layer2;
-    octCoord rule;
-    int err;
+    octCoord rule = (octCoord)0;
+    int err = 0;
     char *pkg, *msg;
     int code;
     int lambda = 20;
@@ -363,6 +327,7 @@ octObject *facetPtr;
     (void) printf("\n");
 }
 
+void
 printRuleValue(val, lambda)
 octCoord val;
 octCoord lambda;
@@ -378,10 +343,11 @@ octCoord lambda;
 	(void) printf("%4.1f", (double)val / (double)lambda );
     }
 }
-
+
 #define STIPPLE_TYPE(flg)	((flg) == TAP_EMPTY ? "empty" : \
 				 (flg) == TAP_STIPPLED ? "stippled" : \
 				 (flg) == TAP_SOLID ? "solid" : "???")
+void
 printLayerLooks(facetPtr)
 octObject *facetPtr;
 {
@@ -482,14 +448,15 @@ octObject *facetPtr;
     }
     OH_ASSERT(status);
 }
-
+
+void
 printPalettes(facetPtr)
 octObject *facetPtr;
 {
     octObject palette;
     int numPalettes, i;
     char **paletteNames;
-    int stat;
+    int stat = 0;
     char *pkg, *msg;
     int code;
 
@@ -540,7 +507,8 @@ octObject *facetPtr;
 
     (void) printf("\n");
 }
-
+
+int
 countObjects(containerPtr, mask)
 octObject *containerPtr;
 octObjectMask mask;
@@ -557,7 +525,8 @@ octObjectMask mask;
     OH_ASSERT(stat);
     return(count);
 }
-
+
+void
 printConnectors(facetPtr)
 octObject *facetPtr;
 {
@@ -610,12 +579,12 @@ octObject *facetPtr;
 			connPtr->nLayers, connPtr->area / lambda2);
 	for (i = 0; i < techPtr->layerCount; i++) {
 	    if (connPtr->layerDescList[i].isUsed) {
-		(void) printf("%15s r(%2d) t(%2d) l(%2d) b(%2d)\n",
-			    techPtr->layerList[i].techLayer.contents.layer.name,
-			    connPtr->layerDescList[i].widthArray[0]/lambda,
-			    connPtr->layerDescList[i].widthArray[1]/lambda,
-			    connPtr->layerDescList[i].widthArray[2]/lambda,
-			    connPtr->layerDescList[i].widthArray[3]/lambda);
+		(void) printf("%15s r(%2ld) t(%2ld) l(%2ld) b(%2ld)\n",
+		    techPtr->layerList[i].techLayer.contents.layer.name,
+		      (long)connPtr->layerDescList[i].widthArray[0]/lambda,
+		      (long)connPtr->layerDescList[i].widthArray[1]/lambda,
+		      (long)connPtr->layerDescList[i].widthArray[2]/lambda,
+		      (long)connPtr->layerDescList[i].widthArray[3]/lambda);
 	    }
 	}
     }
@@ -623,12 +592,13 @@ octObject *facetPtr;
 
     (void) printf("\n");
 }
-
+
 char *transformName[] = {
 	"no transform",		"mirror X",		"mirror Y",
 	"rotate 90",		"rotate 180",		"rotate 270",
 	"mirror X, rot 90",	"mirror Y, rot 90",	"full transform" };
 
+void
 queryConnectors(facetPtr)
 octObject *facetPtr;
 {
@@ -637,9 +607,10 @@ octObject *facetPtr;
     int numLayers;
     octObject instance;
     char tempString[50];
-    int stat;
+    int stat = 0;
     char *pkg, *msg;
     int code;
+    int temp;
 
     (void) printf("Layer-name width direction[ahvlrtb] ...\n");
 
@@ -662,7 +633,9 @@ octObject *facetPtr;
 		numLayers = 0;
 		break;
 	    }
-	    getNumber(&layerList[numLayers].width);
+	    getNumber(&temp);
+	    layerList[numLayers].width = temp;
+
 	    layerList[numLayers].width *= 20;
 	    if (! eatSpace()) {
 		(void) printf("Bad input line\n");
@@ -720,7 +693,8 @@ octObject *facetPtr;
 	}
     }
 }
-
+
+int
 eatSpace()
 {
     int ch;
@@ -733,11 +707,13 @@ eatSpace()
     return(1);
 }
 
+void
 eatAll()
 {
     while (getchar() != '\n') ;
 }
 
+void
 getString(str)
 char *str;
 {
@@ -750,11 +726,67 @@ char *str;
     (void) ungetc(ch, stdin);
 }
 
-getNumber(numPtr)
+void getNumber(numPtr)
 int *numPtr;
 {
     char string[100];
 
     getString(string);
     *numPtr = atoi(string);
+}
+
+int
+main(argc, argv)
+int argc;
+char *argv[];
+{
+    octObject facet;
+    int options;
+    char *pkg, *msg;
+    int code;
+    extern int optind;
+
+    options = parseOptions(argc, argv);
+
+    if (argc != optind+2) optUsage();
+
+    octBegin();
+
+    /* get the technology facet directly */
+    ERR_IGNORE(tapOpenTechFacet(argv[optind], argv[optind+1], &facet, "r"));
+    if (errStatus(&pkg, &code, &msg)) {
+	(void) fprintf(stderr,
+		    "can't find facet for ``%s'' technology, viewtype ``%s''\n",
+		    argv[optind], argv[optind+1]);
+	(void) fprintf(stderr, "%s\n", msg);
+	exit(1);
+    }
+
+    /* keep the facet open even if tap flushes its caches and closes it */
+    facet.contents.facet.mode = "r";
+    if (octOpenFacet(&facet) != OCT_ALREADY_OPEN) {
+	(void) fprintf(stderr,
+		    "can't reopen technology facet %s:%s:%s???\n",
+		    facet.contents.facet.cell, facet.contents.facet.view,
+		    facet.contents.facet.facet);
+	exit(1);
+    }
+
+    printGeneralInfo(&facet);
+
+    if (options & DO_LAYER_PROPS) printLayerProps(&facet);
+
+    if (options & DO_DES_RULES) printDesignRules(&facet);
+
+    if (options & DO_LAYER_LOOKS) printLayerLooks(&facet);
+
+    if (options & DO_PALATTES) printPalettes(&facet);
+
+    if (options & DO_CONNECTORS) printConnectors(&facet);
+
+    if (options & DO_QUERY_CONN) queryConnectors(&facet);
+
+    octEnd();
+
+    return 0;
 }
