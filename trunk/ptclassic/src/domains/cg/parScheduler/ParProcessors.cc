@@ -44,7 +44,6 @@ Date of last revision:
 ParProcessors :: ParProcessors(int pNum, MultiTarget* t) : mtarget(t) {
 	numProcs = pNum;
 	pIndex.create(pNum);
-	pId.create(pNum); 
 	SCommNodes.initialize();
 	commCount = 0;
 }
@@ -57,7 +56,6 @@ void ParProcessors :: initialize()
 {
 	for (int i = 0; i < numProcs; i++) {
 		pIndex[i] = i;
-		pId[i] = i;
 	}
 
 	// reset the pattern of processor availability.
@@ -84,9 +82,14 @@ void ParProcessors :: removeCommNodes() {
 UniProcessor* ParProcessors :: getProc(int) { return 0; }
 
 // map targets for each processing element
-void ParProcessors :: mapTargets() {
+// If the argument is non-zero pointer, the array contains the mapping
+// information.
+void ParProcessors :: mapTargets(IntArray* a) {
 	for (int i = 0; i < numProcs; i++) {
-		getProc(i)->targetPtr = (CGTarget*) mtarget->child(i);
+		int ix;
+		if (a && (i < a->size())) ix = a->elem(i);
+		else ix = i;
+		getProc(i)->targetPtr = (CGTarget*) mtarget->child(ix);
 	}
 }
 
@@ -155,6 +158,8 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 		// to see if there are any constraints
 		if (node->getType() < 0) {
 			p->scheduleCommNode(node, start);
+		} else if (node->amIBig()) {
+			scheduleParNode(node);
 		} else {
 			// schedule a regular node
 			p->addNode(node, start);
@@ -169,6 +174,51 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 		}
 	}
 	return getMakespan();
+}
+
+			////////////////////////
+			///  scheduleParNode ///
+			////////////////////////
+
+void ParProcessors :: scheduleParNode(ParNode* node) {
+	Profile* pf = node->profile();
+	int num =  pf->getEffP();
+	int invocNum = node->invocationNumber();
+
+	// Compare the processor availability and the startTime profile
+	int tempIx;
+	int tempMax, refMin = -1;
+	for (int i = 0; i < num; i++) {
+		if (pf->getStartTime(i) == 0) {
+			tempIx = pf->assignedTo(invocNum,i);
+			tempMax = getProc(tempIx)->getAvailTime();
+			if ((refMin < 0) || (refMin < tempMax)) {
+				refMin = tempMax;
+			} 
+		}
+	}
+
+	// compute the shift.
+	int shift = 0;
+	for (i = 0; i < num; i++) {
+		tempIx = pf->assignedTo(invocNum,i);
+		tempMax = getProc(tempIx)->getAvailTime() - refMin -
+			  pf->getStartTime(i);
+		if (tempMax > shift) shift = tempMax;
+	}
+
+	// schedule the node
+	int saveFinish = 0;
+	for (i = 0; i < num; i++) {
+		tempIx = pf->assignedTo(invocNum,i);
+		UniProcessor* proc = getProc(tempIx);
+		int leng = pf->getFinishTime(i) - pf->getStartTime(i);
+		int when = refMin + shift + pf->getStartTime(i);
+		proc->schedAtEnd(node, when, leng);
+		if (saveFinish < when + leng) saveFinish = when + leng;
+	}
+	node->setScheduledTime(refMin + shift);
+	node->setFinishTime(saveFinish);
 }
 
 			///////////////////////
@@ -207,6 +257,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& /*readyNodes*/)
 				// 2. make send and receive nodes
 				ParNode* snode = createCommNode(-1);
 				snode->assignProc(from);
+				snode->setProcId(from);
 				snode->setOrigin(g);
 				if (hidden) {
 					// can be done later.
@@ -218,6 +269,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& /*readyNodes*/)
 				
 				ParNode* rnode = createCommNode(-2);
 				rnode->assignProc(to);
+				rnode->setProcId(to);
 				rnode->setOrigin(g->farGate()); 
 				if (hidden) {
 					// can be done later
@@ -322,24 +374,6 @@ StringList ParProcessors :: display (NamedObj* galaxy) {
 /*****************************************************************
 		sort the processors 
  ****************************************************************/
-
-void ParProcessors :: sortWithFinishTime() {
-
-	// insertion sort
-        for (int i = 1; i < numProcs; i++) {
-                int j = i - 1;
-		UniProcessor* up = getProc(i);
-                int x = up->getAvailTime();
-                int temp = pId[i];
-                while (j >= 0) {
-			if (x > getProc(j)->getAvailTime()) break;
-                        pId[j+1] = pId[j];
-                        j--;
-                }
-                j++;
-                pId[j] = temp;
-        }
-}
 
 // sort the processor ids with available times.
 void ParProcessors :: sortWithAvailTime(int guard) {
