@@ -557,7 +557,7 @@ static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
 	BDFClustPort* a;
 	BDFCluster* cpar = cond->parentClust();
 	if (!in) {
-		LOG_NEW; a = new BDFClustPort(*cond,cpar,BCP_DUP);
+		LOG_NEW; a = new BDFClustPort(cond->real(),cpar,BCP_DUP);
 		a->setPort(name,cpar,INT);
 	}
 	else {
@@ -593,7 +593,7 @@ BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
 	// condition and the inner port is cond->innermost(), so
 	// we will not be effected when outer bag ports are zapped.
 	LOG_NEW; BDFClustPort *b =
-		new BDFClustPort(*(cond->innermost()),this,BCP_DUP_IN);
+		new BDFClustPort(cond->innermost()->real(),this,BCP_DUP_IN);
 	b->setPort(cond->name(),this,INT);
 	addPort(*b);
 	b->setRelation(BDF_NONE);
@@ -1037,23 +1037,23 @@ static const char* do_conds[] = { 0, "if(", "if(!", "until(", "until(!" };
 
 // return the bag's schedule.
 StringList BDFClusterBag::displaySchedule(int depth) {
+	int close = 0;
 	if (sched == 0) genSched();
 	StringList sch;
 	if (loop() > 1) {
-		sch += tab(depth);
-		sch += loop();
-		sch += "*{\n";
-		depth++;
+		sch << tab(depth) << loop() << "*{\n";
+		close = 1;
 	}
 	else if (pType != DO_ITER) {
-		sch << do_conds[pType] << pCond->name() << ") {";
-		depth++;
+		sch << tab(depth) << do_conds[pType]
+		    << pCond->name() << ") {\n";
+		close = 1;
 	}
-	sch += sched->displaySchedule(depth);
-	if (loop() > 1 || pType != DO_ITER) {
+	depth += close;
+	sch << sched->displaySchedule(depth);
+	if (close) {
 		depth--;
-		sch += tab(depth);
-		sch += "}\n";
+		sch << tab(depth) << "}\n";
 	}
 	return sch;
 }
@@ -1334,14 +1334,12 @@ ostream& BDFAtomCluster::printOn(ostream& o) {
 StringList BDFAtomCluster::displaySchedule(int depth) {
 	StringList sch = tab(depth);
 	if (loop() > 1) {
-		sch += loop();
-		sch += "*";
+		sch << loop() << "*";
 	}
 	else if (pType != DO_ITER) {
 		sch << do_conds[pType] << pCond->name() << ") ";
 	}
-	sch += real().fullName();
-	sch += "\n";
+	sch << real().fullName() << "\n";
 	return sch;
 }
 
@@ -1398,7 +1396,7 @@ StringList BDFClustSched::displaySchedule() {
 	SDFSchedIter next(*this);
 	BDFCluster* c;
 	while ((c = (BDFCluster*)next++) != 0) {
-		sch += c->displaySchedule(0);
+		sch << c->displaySchedule(0);
 	}
 	return sch;
 }
@@ -1408,7 +1406,7 @@ StringList BDFBagScheduler::displaySchedule(int depth) {
 	SDFSchedIter next(*this);
 	BDFCluster* c;
 	while ((c = (BDFCluster*)next++) != 0) {
-		sch += c->displaySchedule(depth);
+		sch << c->displaySchedule(depth);
 	}
 	return sch;
 }
