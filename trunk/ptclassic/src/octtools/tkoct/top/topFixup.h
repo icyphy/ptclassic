@@ -47,7 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define _INCLUDE_POSIX_SOURCE
 #endif
 
-#if defined(PTHPPA_CFRONT)  || defined(PTSOL2_CFRONT)
+#if defined(PTHPPA_CFRONT)  || defined(PTSOL2_CFRONT) || defined(PTIRIX6_32_CFRONT)
 /* memCore.c needs sbrk() */
 #include <sys/unistd.h>
 extern void *sbrk(int);
