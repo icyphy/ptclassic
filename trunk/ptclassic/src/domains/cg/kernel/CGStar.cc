@@ -336,7 +336,7 @@ StringList CGStar::expandMacro(const char* func, const StringList& argList)
 	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg1);
 	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg1);
 	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg1);
-	else if (matchMacro(func, argList, "sharedSymbol", 2)) s = lookupSharedSymbol(arg1,arg1);
+	else if (matchMacro(func, argList, "sharedSymbol", 2)) s = lookupSharedSymbol(arg1, arg2);
 	else macroError(func, argList);
 
 	return s;
