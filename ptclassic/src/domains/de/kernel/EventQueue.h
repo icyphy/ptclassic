@@ -19,7 +19,6 @@ This file contains definitions of two DE-specific classes:
 #ifndef _EventQueue_h
 #define _EventQueue_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

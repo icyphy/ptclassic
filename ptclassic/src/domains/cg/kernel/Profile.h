@@ -1,7 +1,6 @@
 #ifndef _Profile_h
 #define _Profile_h
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
