@@ -71,8 +71,7 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 		"define the relative time scales of child targets"));
 	filePrefix.setAttributes(A_SETTABLE);
         addState(schedName.setState("schedName(DL,HU,DC,MACRO,CGDDF)",this,"DL",
-           "schedulers: DL - dynamic level \n\t HU - ignore IPC \n\t DC - cluste
-ring \n\t MACRO - parallel task\n\t CGDDF - dynamic constructs \n"));
+           "schedulers: DL - dynamic level \n\t HU - ignore IPC \n\t DC - clustering \n\t MACRO - parallel task\n\t CGDDF - dynamic constructs \n"));
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
