@@ -967,6 +967,113 @@ proc ptkFormatCmd {cmd radioVarName} {
                                                                             #
 #############################################################################
 
+
+#############################################################################
+# ptkEditStrings is an improved version of the ptkEditValues
+# it takes its name value pairs as a true list, instead of using
+# the special "args" variable.  This allows the output of a tcl
+# function to provide the name/value list.
+# Additionally, the output format is now flexible.  If the the
+# last arguement if "Params" then the output is given in name/value
+# pairs.  If there is no last argument, or the last arguement is 
+# not the value "Params" then only a list of values (no names) is
+# given as the output.
+# NOTE: this function replaces ptkEditValues.  All references to 
+# ptkEditValues should be replaced by calls to ptkEditStrings.
+#      - Alan Kamas 1/94
+#
+#############################################################################
+# Given a list of name-value arguments, this procedure lets the
+# user modify values.
+# Author: Wei-Jen Huang
+#         with Alan Kamas
+#
+# The argument "instr" is a label (anchored west) used to decorate the
+#  top of the window and can be used as an instruction.
+# The argument "pairs" is a list of (a list of) name-value pairs.
+#  eg., { {name1 value1} {name2 value2} }
+# If a name-value pair consists of only one element, then the value is
+#  initialized to the null string (which is the entry widget contents
+#  default)
+# Above caveat holds: names of name-value pairs will be used in window
+#  names; as such, names may not start with '.'
+# if a final arguement has the value "Params" then name/value pairs
+# are output.  Otherwise, only the values are output.
+
+proc ptkEditStrings {instr cmd pairs args} {
+   global unique
+  
+   set w .ptkEditStrings$unique
+   incr unique
+
+   toplevel $w
+
+   #FIXME: Have more informative title and icon decorations
+   wm title $w ptolemyWindow
+   wm iconname $w ptolemyWindow
+
+   set nmFrame [frame $w.f -bd 3 -relief raised]
+   pack [label $w.label -text $instr -relief raised \
+        -font [option get . mediumfont Pigi]] \
+        -side top -fill x -expand 1
+   foreach name_value $pairs {
+    set name [lindex $name_value 0]
+    ed_MkEntryButton $nmFrame.name_$name $name
+    $nmFrame.name_$name.entry config -width 32
+    if {[llength $name_value] == 2} {
+        $nmFrame.name_$name.entry insert 0 [lindex $name_value 1]
+    }
+    pack $nmFrame.name_$name -side top -fill x -expand 1
+   }
+   pack $nmFrame -side top -fill x -expand 1
+
+   if {$args == "Params"} {
+      ptkOkCancelButtons [frame $w.okcancel -bd 1] \
+        "ed_GetAndExecuteNames \"$cmd\" $nmFrame [list $pairs]; destroy $w"\
+        "destroy $w"
+   } else {
+      ptkOkCancelButtons [frame $w.okcancel -bd 1] \
+        "ed_GetAndExecute \"$cmd\" $nmFrame [list $pairs]; destroy $w"\
+        "destroy $w"
+   }
+
+   pack $w.okcancel -side top -fill x
+
+
+# For the widget bindings to take effect, the focus must be within
+# FIXME? Restore old focus?
+
+   ptkRecursiveBind $w <Any-Enter> {focus %W}
+   ptkRecursiveBind $w <Return> "$w.okcancel.f.ok invoke"
+}
+
+# This procedure is used within ptkEditStrings for retrieving values
+#  given a list of names.
+
+proc ed_GetAndExecuteNames {cmd frame pairs} {
+   set newList ""
+   foreach arg $pairs {
+        set name [lindex $arg 0]
+        lappend newList \
+                "[list $name] [list [$frame.name_$name.entry get]]"
+   }
+   eval [format $cmd $newList]
+}
+
+# This procedure is used within ptkEditStrings for retrieving values
+# without printing out the names. 
+
+proc ed_GetAndExecute {cmd frame pairs} {
+   set newList ""
+   foreach arg $pairs {
+        set name [lindex $arg 0]
+        lappend newList [$frame.name_$name.entry get]
+   }
+   eval [format $cmd $newList]
+}
+
+
+# NOTE: this function should be phased out in favor of ptkEditSrings
 #############################################################################
 # Given a list of name-value arguments, this procedure lets the
 # user modify values.
