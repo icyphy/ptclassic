@@ -1,34 +1,30 @@
-/* Misc. stuff to manage locks, FIFOS, lists for NOW */
-/******************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1995-%Q%  The Regents of the University of California.
-All Rights Reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
-
- Programmer: The NOW Project, UC Berkeley
-*******************************************************************/
-
+/*
+ * misc.h:  Header for misc UDPAM stuff 
+ *
+ * "Copyright (c) 1995 by Brent N. Chun and The Regents of the University 
+ * of California.  All rights reserved."
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation for any purpose, without fee, and without written agreement is
+ * hereby granted, provided that the above copyright notice and the following
+ * two paragraphs appear in all copies of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+ * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+ * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
+ * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
+ * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
+ *
+ * Author:              Brent N. Chun
+ * Version:             $Revision$
+ * Creation Date:       Sat Nov  4 17:25:01 PST 1995
+ * Filename:            misc.h
+ */
 #ifndef _MISC_H
 #define _MISC_H   "$Id$"
 
@@ -78,13 +74,27 @@ extern void RemoveTimeout(ea_t endpoint, UDPAM_Buf *buf);
 extern void MoveToTailTimeout(ea_t endpoint, 
 			      struct timeout_elem *timeout_elem);
 
-/* Routine to handle timeouts and events */
+/*
+ * Miscellaneous Functions:
+ *   GlobalToIndex(endpoint,global): Global to index in translation table
+ *   BuildToken(token,....):  Builds a token 
+ *   BuildArgBlock(argblock,...): Constructs an argblock to pass to err handler
+ */
+extern int  GlobalToIndex(ea_t endpoint, struct sockaddr_in *global);
+extern void BuildToken(Token *token, struct sockaddr_in *sender, int buf_id, 
+		       int seq_num, tag_t tag, ea_t dest_ep);
+extern void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint, 
+			  int reply_endpoint, Token *token, handler_t handler, 
+			  void *source_addr, void *dest_addr, int nbytes, 
+			  int dest_offset, int source_offset, int arg0, 
+			  int arg1, int arg2, int arg3, int arg4, int arg5, 
+			  int arg6, int arg7, int buf_id,int seq_num);
+
+/* Function to handle timeouts and events */
 void *TimeoutThread(void *bundle);
 
-#define QUANTA                2    /* Initial Tout in secs */
+#define QUANTA                2    /* Initial Timeout Value in Seconds */
 #define UDPAM_MAX_RETRIES     3    /* Max Number of Retries */
-#define MESSAGES_PER_ENDPOINT 5
-/* #define DEBUG2  */
 
 typedef enum {FALSE, TRUE} Bool;
 
@@ -95,9 +105,9 @@ typedef enum {FALSE, TRUE} Bool;
 #define DPRINTF(string)        printf string;  \
                                fflush(stdout);
 
-#define ASSERT(condition)   \
-  if (!(condition)) { \
-    fprintf(stderr, "\nAssertion Failed: %s Line %d\n", __FILE__, __LINE__); \
+#define ASSERT(n)   \
+  if (!(n)) { \
+    fprintf(stderr, "\nAssertion Failed: %s, Line %d\n", __FILE__, __LINE__); \
     fflush(stderr); \
     abort(); \
   }
