@@ -10,7 +10,7 @@
 
  Copyright (c) 1990 The Regents of the University of California.
 			All Rights Reserved.
- Programmer:  Edward A. Lee
+ Programmer:  Edward A. Lee and J. Buck
  Date: 12/7/89
 
  This class represents fractions using integers for the numerator
@@ -61,7 +61,9 @@ public:
 				       denominator(a.denominator) {}
 
 	// Cast to type double:
-	operator double() { return (double)numerator/(double)denominator; }
+	operator double() const {
+		return double(numerator)/double(denominator);
+	}
 
 	// Assignment operators
 	Fraction& operator += (const Fraction& f);
@@ -82,7 +84,7 @@ public:
 	void simplify();
 
 	// Compute gcd,lcm of numerator, denominator
-	GcdLcm computeGcdLcm() { return GcdLcm(*this);}
+	GcdLcm computeGcdLcm() const { return GcdLcm(*this);}
 };
 
 // Notice: these functions don't have to be friends!

@@ -62,14 +62,14 @@ public:
 	// virtual destructor
 	virtual ~DoubleLinkList() { initialize(); }
 
-	// constructor
-	DoubleLinkList() : head(0), tail(0), size(0) {}
-	DoubleLinkList(Pointer* e) { firstNode(createLink(e)); }
-
 	// create link
 	DoubleLink* createLink(Pointer e) {
 		INC_LOG_NEW; return new DoubleLink(e, 0, 0);
 	}
+
+	// constructor
+	DoubleLinkList() : head(0), tail(0), size(0) {}
+	DoubleLinkList(Pointer* e) { firstNode(createLink(e)); }
 
         // Insert at the head of the list
         void insertLink(DoubleLink *x);  

@@ -312,6 +312,10 @@ void MultiPortHole :: initialize() {}
 // MPH constructor
 MultiPortHole :: MultiPortHole() : peerMPH(0), busDelay(0) {}
 
+// MPH destructor
+
+MultiPortHole :: ~MultiPortHole() { delPorts();}
+
 // delete and reinitialize the porthole list.  Any bus connection is
 // broken as well.
 void MultiPortHole :: delPorts () {

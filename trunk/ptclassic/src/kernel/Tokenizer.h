@@ -70,7 +70,7 @@ private:
 public:
 	// the "default whitespace characters" string (it includes
 	// space, newline and tab)
-	static const char defWhite[];
+	static const char *defWhite;
 
 	// Status info funcs
 	const char* current_file() const { return curfile;}
