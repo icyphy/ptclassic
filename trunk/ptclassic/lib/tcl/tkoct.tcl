@@ -100,9 +100,9 @@ source $ptolemy/lib/tcl/ptkOptions.tcl
 
 # Other Pigi procedures
 #source $ptolemy/lib/tcl/message.tcl
-#source $ptolemy/lib/tcl/utilities.tcl
+source $ptolemy/lib/tcl/utilities.tcl
 source $ptolemy/lib/tcl/dialog.tcl
-#source $ptolemy/lib/tcl/ptkBind.tcl
+source $ptolemy/lib/tcl/ptkBind.tcl
 #source $ptolemy/lib/tcl/ptkControl.tcl
 #source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
 source $ptolemy/lib/tcl/ptkParams.tcl
@@ -127,7 +127,8 @@ proc tkoct_bind_class {} {
     bind XPGedWidget <Shift-B2-Motion> {%W scan stretchto %x %y}
 
     bind XPGedWidget f {tkoctViewFull %W}
-    bind XPGedWidget F {tkoctOpen %W}
+    # Strip off the .main.ged part
+    bind XPGedWidget F {tkoctOpen [file rootname [file rootname %W]] }
     bind XPGedWidget i {tkoctInside %W %x %y contents}
     bind XPGedWidget I {tkoctInside %W %x %y interface}
 
@@ -189,6 +190,9 @@ proc tkoctMotion { wd px py cycleB } {
     set wmi $wvars(w).main.info
     $wmi.type conf -text "[lindex $fmt 1]"
     $wmi.tw delete 1.0 end
+
+    #foreach item $fmt { $wmi.tw insert end "$item\n"}
+
     switch [lindex $fmt 1] {
       FACET {
         $wmi.tw insert end "Cell:\t[file tail [lindex $fmt 4]]\n"
@@ -230,11 +234,12 @@ proc tkoctInside {wd px py facetType} {
 
 
     if {"[set instId [_tkoctGetInst $wd $px $py]]"=="" } return
-    #puts "tkoctInside: $wd $px $py $facetType, $instId"
+#puts "tkoctInside: wd=$wd px=$px py=$py facetType=$facetType, instId=$instId"
     if [catch {toct_get "$instId > master ::$facetType"} masterId] {
       puts stdout "get master failed: $masterId"
 	return
     }
+#puts "tkoctInside: masterId=$masterId"
     if [ catch {tkoct_window .ged[gensym] -facet $masterId}] {
       tkoctInspectFile $masterId
     }
@@ -249,7 +254,9 @@ proc tkoctInspectFile {facet} {
   set facetFmt [toct_fmt "facet $facet"]
   set facetCell [lindex $facetFmt 4]
   set domainDir [file dirname [file dirname $facetCell]]
+  
   set fileName "$domainDir/stars/[string toupper [file tail $domainDir]][file tail $facetCell].pl"
+  puts "tkoctInspectFile $facet"
   set command [format $env(PT_DISPLAY) $fileName]
   eval exec $command &
 }
@@ -339,11 +346,11 @@ proc tkoctOpen { w } {
     tkwait variable openfacetName
     set ofn $openfacetName
 
-
+    puts stdout "tkoctOpen $w $ofn"
     if { "$ofn"=="" } { return }
     $w.main.ged conf -facet $ofn
     tkoctFacetChange $w
-#puts stdout "tkoctOpen $ofn"
+
 }
 # FIXME: pigilib/POct.cc defines ptkOpenFacet too!, but we can't use it
 # ptkOpenFacet <file_name_of_cell> [view] [facet]
@@ -453,7 +460,7 @@ proc tkoct_window { w args} {
     } else {
       # From tkAux, we need to fix this
       #focus_goTo $w.main.ged
-      bind $w.main.ged <Enter> {focus %W}
+      bind $w.main.ged <Enter> {focus %W} 
       focus $w.main.ged
     }
     return $w
