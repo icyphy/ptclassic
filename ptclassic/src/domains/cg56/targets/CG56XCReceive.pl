@@ -42,7 +42,7 @@ $label(WHL)
 	    PortHole* input = cgcSide->portWithName("input");
 	    DataType inputType = input->resolvedType();
 	    if (strcmp(inputType,FLOAT) == 0) {
-		    output.setPort("output",this,FIX);
+		    output.setPort("output",this,FIX,numXfer);
 	    }
 	}
 	go {
