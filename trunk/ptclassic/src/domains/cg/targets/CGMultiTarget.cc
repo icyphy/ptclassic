@@ -35,7 +35,7 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 {
 	addState(childType.setState("childType",this,"default-CG",
 				    "child proc type"));
-	addState(filePrefix.setState("filePrefix",this,"code.p",
+	addState(filePrefix.setState("filePrefix",this,"code_proc",
 				    "prefix for output code files"));
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
@@ -102,10 +102,14 @@ void CGMultiTarget :: prepareChildren() {
 		deleteChildren();
 		nChildrenAlloc = nprocs;
 		strcpy (oldChildType, childType);
+		StringList tname;
 		for (int i = 0; i < nChildrenAlloc; i++) {
 			Target* t = createChild();
 			if (!t) return;
 			addChild(*t);
+			tname.initialize();
+			tname << (const char*) filePrefix << i;
+			t->setNameParent(hashstring(tname),this);
 		}
 	   }
 	   for (int i = 0; i < nChildrenAlloc; i++) {
