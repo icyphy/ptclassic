@@ -21,9 +21,9 @@ DLKERNEL = $(ROOT)/src/domains/cg/dlScheduler
 
 INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(DLKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
 
-SRCS =	HuNode.cc HuGraph.cc HuScheduler.cc HuUniProc.cc HuParProcs.cc
+SRCS =	HuNode.cc HuGraph.cc HuScheduler.cc HuParProcs.cc
 
-HDRS =  HuNode.h HuGraph.h HuScheduler.h HuUniProc.h HuParProcs.h
+HDRS =  HuNode.h HuGraph.h HuScheduler.h HuParProcs.h
 
 OBJS = $(SRCS:.cc=.o)
 
