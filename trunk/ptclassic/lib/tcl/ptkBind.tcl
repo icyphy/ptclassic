@@ -71,7 +71,7 @@
 	focus %W
     }
     bind Text <Any-Enter> {
-	selection own %W
+	#selection own %W
 	focus %W
     }
 
