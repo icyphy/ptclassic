@@ -406,6 +406,8 @@ compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 	    if (Tcl_GlobalEval(ptkInterp, buf) != TCL_OK) {
 	      sprintf(buf, "Cannot compile in '%s'", name);
 	      ErrAdd(buf);
+	      sprintf(buf, ptkInterp->result);
+	      ErrAdd(buf);
 	      return (FALSE);
 	    }
 	    return (TRUE);
