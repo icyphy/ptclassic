@@ -99,11 +99,46 @@ proc ::tycho::slate {pathName args} {
 # a component named say .foo.bar; unlike Tk widgets, .foo.bar
 # does not necessarily denote a unique item, but could denote
 # a number of canvas items. Canvas items and 'pictures' are more
-# intergrated in this design: .foo.bar could itself have a
+# integrated in this design: .foo.bar could itself have a
 # component named, say, .foo.bar.fred.
 #
-# The Slate will soon have all the same fancy interaction mechanisms
-# as the Slate, at which time it will be renamed Slate.
+# In addition to the Slate class itself, there are a number of
+# other classes that work with the slate to implement its full
+# functionality. These classes are grouped into several categories,
+# according to their function in the slate:
+# <dl>
+#
+# <dt><a href="index.html"><b>kernel</b></a> <dd>The kernel classes,
+# including this one (Slate) and the core classes that implement
+# hierarchical pictures (Picture, Primitive, and Composite).
+#
+# <dt><a
+# href="../../../pictures/doc/codeDoc/index.html"><b>pictures</b></a>
+# <dd>A set of classes that implement picture in addition to the Tk
+# canvas items, including things like , ``3D'' rectangles and
+# polygons, and ``smart'' objects like self-routing lines.
+#
+# <dt><a href="../../../shapes/doc/codeDoc/index.html"><b>shapes</b></a> 
+# <dd>A class hierarchy that manages picture ``shapes.'' Shape
+# object are what gives pictures knowledge of key coordinates
+# such as where their corners or the location of a point on
+# a circumference), and the ability to reshape themselves.
+#
+# <dt><a href="../../../interactors/doc/codeDoc/index.html">
+#       <b>interactors</b></a> 
+# <dd>A class hierarchy that manages user interaction with pictures
+# on the slate. Interactors provide a pwoerful mechanism
+# for capturing and reusing standard patterns of interaction.
+# </dl>
+#
+# To create a slate, do not call the constructor directly, but call
+# the procedure <code>::tycho::slate</code>:
+#
+# <tcl><pre>
+#     ::tycho::slate .s
+#     pack .s -fill both -expand on
+#     wm deiconify .
+# </pre></tcl>
 #
 class ::tycho::Slate {
     inherit itk::Widget
@@ -116,6 +151,9 @@ class ::tycho::Slate {
 
     # Add a tag to picts using a search spec
     method addtag {tag searchSpec args}
+
+    # Get aspects of a picture
+    method aspect {id args}
 
     # Get the bounding box of one or more picts or items
     method bbox {args}
@@ -150,7 +188,7 @@ class ::tycho::Slate {
     method describe {id args}
 
     # Delete a tag from items
-    method dtag {id {tagToDelete {}}}
+    method dtag {tag {tagToDelete {}}}
 
     # Find picts according to a search spec
     method find {searchSpec args}
@@ -194,7 +232,10 @@ class ::tycho::Slate {
     method lower {id {belowThis {}}}
 
     # Move items or picts
-    method move {id xAmount yAmount}
+    method move {tag xAmount yAmount}
+
+    # Move to an absolute location
+    method moveto {tag x y {aspect center}}
 
     # Manipulate pictures
     method picture {mode args}
@@ -381,20 +422,70 @@ body ::tycho::Slate::addtag {add mode args} {
 #######################################################################
 #### bbox
 #
+# Return the bounding box of any number of items or picts, as a four-list.
+# Each argument can be an item, a pict, or a tag. If there are no pictures
+# matching the tags, return the null string -- the caller must check for
+# this condition. (This behavior matches
+# that of the canvas).
+#
 body ::tycho::Slate::bbox {args} {
     eval $canvas bbox $args
 }
 
 #######################################################################
+#### aspect
+#
+# Return the value of one or more "aspects" of a picture. An aspect
+# is a point on the picture, such as its center or north-east corner.
+# The returned value is a list of coordinates, two (x and y) for each
+# given aspect.
+#
+# The aspects supported depends on the type (or more specifically,
+# the shape type -- see the type{} method) of the picture. All picture
+# support at least the aspects _c_ or _center_, and the eight compass
+# points: _n_, _s_, _e_, _w_, _ne_, _nw_, _se_, and _sw_. If the picture
+# is not rectangular, then these eight aspects will denote the corners
+# of the picture's _region_ (see the region{} method).
+#
+# If there are no arguments, return the list of valid aspects for
+# this picture.
+#
+# FIXME: Currently only the center and compass aspects are supported.
+#
+body ::tycho::Slate::aspect {id args} {
+    if { $args == "" } {
+	return {c n s e w ne nw se sw}
+    } else {
+	return [eval rectAspect [list [$this region $id]] $args]
+    }
+}
+
+#######################################################################
 #### bind
 #
-body ::tycho::Slate::bind {id {sequence {}} args} {
+# Bind a command to an item, picture, or tag. The command accepts the 
+# following argument formats:
+#
+# <ul>
+# <li>_tagOrID_: Return the events for which _tagOrID_ has a binding.
+# <li>_tagOrID_ _event_: Return the binding on _tagOrID_ for _event_.
+# <li>_tagOrID_ _event_ _command_: Bind _command_ to the _tagOrID_
+# for _event_
+# </ul>
+#
+# <b>Caveat</b>: The bind{} command dpes not work properly on
+# hierarchical pictures yet. There are
+# some interactions with canvas bindings, multiple bindings on the
+# same tag/object, and hierarchical pictures that need to be
+# explored and clarified.
+#
+body ::tycho::Slate::bind {tag {sequence {}} args} {
     if { $sequence == "" } {
-	return [$canvas bind $id]
+	return [$canvas bind $tag]
     } elseif { $args == {} } {
-	return [$canvas bind $id $sequence]
+	return [$canvas bind $tag $sequence]
     } else {
-	$canvas bind $id $sequence [lindex $args 0]
+	$canvas bind $tag $sequence [lindex $args 0]
     }
 }
 
@@ -429,6 +520,11 @@ body ::tycho::Slate::canvasy {screeny {gridspacing {}}} {
 #######################################################################
 #### coords
 #
+# Get or set the coordinates of an item or pict.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag.
+#
 body ::tycho::Slate::coords {id args} {
 
     # If this is not a picture, just call the canvas
@@ -443,9 +539,16 @@ body ::tycho::Slate::coords {id args} {
 
 #######################################################################
 #### create
+#
 # Create a canvas item or a picture. If the _type_ arg starts
 # with a lower-case letter, create an item; if not, create a
-# picture.
+# picture. In either case, _args_ is the coordinates
+# and options used to create the picture. See the canvas documentation
+# for primitive canvas items; see the
+# <a> href="../../../pictures/doc/codeDoc/index.html"><b>pictures</b></a>
+# hierarchy for pictures implemented by the slate.
+#
+# FIXME: Explain how to create hierarchical pictures.
 #
 body ::tycho::Slate::create {type args} {
     if { [string match {[a-z]*} $type] } {
@@ -579,8 +682,12 @@ body ::tycho::Slate::describe {id args} {
 #######################################################################
 #### dtag
 #
-body ::tycho::Slate::dtag {id {delete {}}} {
-    if { [string match {[0-9]*} $id] } {
+# Delete tags from items. If _delete_ is not given, delete _tag_
+# from all items; if it is, delete the tag _delete_ from all
+# items tagged with _tag_.
+# 
+body ::tycho::Slate::dtag {tag {delete {}}} {
+    if { [string match {[0-9]*} $tag] } {
 	# A canvas item.
 	eval $canvas dtag $id $delete
     } elseif { [string match {_*} $id] } {
@@ -809,8 +916,6 @@ body ::tycho::Slate::find {mode args} {
 #     $slate focusin
 # </pre>
 #
-# If using Tk's default focus model, this is not needed.
-#
 body ::tycho::Slate::focusin {} {
     uplevel #0 "focus $canvas"
 }
@@ -818,7 +923,14 @@ body ::tycho::Slate::focusin {} {
 #######################################################################
 #### gettags
 #
-body ::tycho::Slate::gettags {id} {
+# Returns the tags of an item or pict. The slate does not
+# attempt to hide its internal tags, so they are all returned by
+# this method in addition to any "user-specified" tags.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag.
+#
+#body ::tycho::Slate::gettags {id} {
     # If a picture, get the primary
     if { [string match {_*} $id] } {
 	set id [@scope ::tycho::Picture [list set primary($id)]]
@@ -900,7 +1012,10 @@ body ::tycho::Slate::interact {mode id args} {
 ##########################################################################
 #### itemcget
 #
-# Read a configuration option
+# Read a configuration option.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag
 #
 body ::tycho::Slate::itemcget {id option} {
     if { ! [string match {_*} $id] } {
@@ -925,13 +1040,14 @@ body ::tycho::Slate::itemcget {id option} {
 #######################################################################
 #### itemconfigure
 #
-# Set a configuration option. There is a special caveat related
-# to tags: they must not be altered directly with this method,
-# but can only be changed indirectly using the picture{} method.
+# Set configuration option.
 #
 # Note also that dtag{}, gettags{}, and addtag{} are faster (and safer)
 # ways of manipulating tags and should be used in preference to
 # itemcget{} and itemconfigure{}.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag
 #
 body ::tycho::Slate::itemconfigure {id args} {
 
@@ -1000,6 +1116,12 @@ body ::tycho::Slate::itemconfigure {id args} {
 #######################################################################
 #### lower
 #
+# Lower the specified picture or item to the bottom of, or below
+# a specified picture or tag in the display list.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag
+#
 body ::tycho::Slate::lower {id {belowThis {}}} {
     eval $canvas lower $id $belowThis
 }
@@ -1007,8 +1129,47 @@ body ::tycho::Slate::lower {id {belowThis {}}} {
 #######################################################################
 #### move
 #
-body ::tycho::Slate::move {id xAmount yAmount} {
-     $canvas move $id $xAmount $yAmount
+# Move one or more picts the specified amount. The first argument
+# can either be a tag or an id.
+#
+body ::tycho::Slate::move {tag xAmount yAmount} {
+     $canvas move $tag $xAmount $yAmount
+}
+
+#######################################################################
+#### moveto
+#
+# Move one or more pictures to an absolute location. The point
+# of the picture that is moved to the specified location is
+# specified by the forth argument, the aspect. If omitted, this
+# argument defaults to center.
+#
+# If a tag is specified and the tag denotes more than one picture,
+# then the pictures are moved so that the indicated point on the
+# region covered by those pictures is at the specified location.
+#
+body ::tycho::Slate::moveto {tag x y {aspect center}} {
+    # Get the current location of the aspect
+    if { ! [string match {[!_]*} $tag] } {
+	# A tag is specified. See if there's just one item
+	set items [$this find withtag $tag]
+	if { [llength $items] == 1 } {
+	    # it is, so act as though that item was specified
+	    set current [$this aspect $items $aspect]
+	} else {
+	    # it wasn't so use the region
+	    # FIXME: Use the region, not the bounding box
+	    set current [rectAspect [$this bbox $tag]]
+	}
+    } else {
+	# Just get the aspect of the item
+	set current [$this aspect $tag $aspect]
+    }
+
+    # Move the item
+    set x [expr $x - [lindex $current 0]]
+    set y [expr $y - [lindex $current 1]]
+    $canvas move $tag $x $y
 }
 
 #######################################################################
@@ -1058,6 +1219,12 @@ body ::tycho::Slate::postscript {args} {
 #######################################################################
 #### raise
 #
+# Raise the specified pict or item to the top of, or above
+# a specified picture or tag in the display list.
+#
+# <b>Note</b>: Unlike the canvas version, the first argument cannot
+# be an arbitrary tag
+#
 body ::tycho::Slate::raise {id {aboveThis {}}} {
     eval $canvas raise $id $aboveThis
 }
@@ -1071,15 +1238,16 @@ body ::tycho::Slate::raise {id {aboveThis {}}} {
 # A number of options can modify this behavior (these options do not
 # have to be used, but are really just short-cuts to save other calls:
 # <ul>
-# <li>*-place* _aspect_ _x y_: Place the given _aspect_ at (_x_,_y_).
-# <li>*-in* _id_: Make the picture a child of the picture _id.
+# <li>*-move* _x y_: Move the new picture relative to the described
+# potision.
+# <li>*-at* _x y_ ?_aspect_?: Place the given _aspect_ at (_x_,_y_).
+# The aspect default to center.
 # <li>*-coords* _x0 y0_ ...: Use these coordinates instead of the ones
 # given by the description.
+# <li>*-in* _id_: Make the picture a child of the picture _id.
 # </ul>
 #
-# *-place* and *-coords* are mutually exclusive.
-#
-# FIXME: -place is not implemented yet.
+# *-move*, *-at* and *-coords* are mutually exclusive.
 #
 body ::tycho::Slate::recreate {description args} {
     # What we'll do is just create the item in the default mode,
@@ -1088,22 +1256,27 @@ body ::tycho::Slate::recreate {description args} {
     # description string _before_ applying it
     set id [apply $description $this]
 
-    # -place option
-    set place [readoption place args]
-    if { $place != "" } {
-	set aspect [lindex $place 0]
-	set x [lindex $place 1]
-	set y [lindex $place 2]
-	
-	puts "recreate -place $aspect $x $y not supported yet"
-
-	# $this moveTo $id $aspect $x $y
-    }
-
-    # -coords option
-    set coords [readoption coords args]
-    if { $coords != "" } {
-	eval $this coords $id $coords
+    # -move option
+    set move [readoption move args]
+    if { $move != "" } {
+	$this move $id [lindex $move 0] [lindex $move 1]
+    } else {
+	# -at option
+	set at [readoption at args]
+	if { $at != "" } {
+	    if { [llength $at] > 2 } {
+		set aspect [lindex $at 2]
+	    } else {
+		set aspect center
+	    }
+	    $this moveto $id [lindex $at 0] [lindex $at 1] $aspect
+	} else {
+	    # -coords option
+	    set coords [readoption coords args]
+	    if { $coords != "" } {
+		eval $this coords $id $coords
+	    }
+	}
     }
 
     # -in option
