@@ -34,7 +34,7 @@ MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
 #  Under gcc-2.5.8 on Irix5.2, -g is not supported
 GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 
-#     -cckr   The traditional K&R/Version7 C with SGI extensions
+#     -cckr  The traditional K&R/Version7 C with SGI extensions
 # Note that -cckr will not work with gcc
 #CFLAGS =	-G 0 -cckr $(OPTIMIZER)
 CFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
