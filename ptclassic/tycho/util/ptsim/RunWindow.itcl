@@ -382,10 +382,10 @@ body ::tycho::RunWindow::simulation {mode args} {
 		set _scriptFile "[file root $f]Init.tcl"
 		# puts "Script file is $_scriptFile"
 		if [file exists $_scriptFile] {
-		    namespace _temp_ "set runWindow $this"
-		    namespace _temp_ "set simulation $_simulation"
-		    namespace _temp_ "source $_scriptFile"
-		    delete namespace _temp_
+		    namespace eval _temp_ "set runWindow $this"
+		    namespace eval _temp_ "set simulation $_simulation"
+		    namespace eval _temp_ "source $_scriptFile"
+		    namespace delete _temp_
 		} else {
 		    set _scriptFile ""
 		}

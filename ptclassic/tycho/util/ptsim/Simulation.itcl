@@ -168,7 +168,7 @@ configbody ::tycho::Simulation::portnum {
 #### constructor
 #
 body ::tycho::Simulation::constructor {args} {
-    set simulationName [info namespace tail $this]
+    set simulationName [namespace tail $this]
 
     # Initialize args
     eval configure $args
