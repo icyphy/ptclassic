@@ -131,6 +131,12 @@ namespace ::tycho {
     #        {::tycho::view CommandShell -file {%s}} \
     #        {Command shell} "tools"
 
+    ::tycho::File::registerExtensions {} \
+            {set w [::tycho::autoName .builder]; \
+            ::tycho::BuilderDialog $w;\
+            $w centerOnScreen} \
+            {Build Tycho} "tools"
+
     if {$tcl_platform(platform) != "macintosh"} {
 	::tycho::File::registerExtensions {} \
 		{::tycho::view EditDiff -toolbar 1} \
