@@ -9,88 +9,83 @@ Some code borrowed from Interpreter.cc, see this file for more info.
                        All Rights Reserved.
 */
 
-#include "Universe.h"
-#include "InterpGalaxy.h"
+#include "kernelCalls.h"
 #include "KnownBlock.h"
-#include "Block.h"
 #include "StringList.h"
-#include "State.h"
 #include "miscFuncs.h"
 
-/* boolean data type for pigi */
-typedef int boolean;
-#ifndef TRUE
-#define TRUE	(1)
-#define FALSE	(0)
-#endif
-
-/* error handling function for pigi */
-extern "C" void ErrAdd(char*);
-
-// Terminal data structs pigi
-#define TERM_ARR_MAX 14  /* max # I/O terms = max # positions */
-struct Term {
-    char *name;
-    boolean multiple;
-};
-
-struct TermList {
-    Term in[TERM_ARR_MAX];
-    int in_n;
-    Term out[TERM_ARR_MAX];
-    int out_n;
-};
-
-// Parameter structs for pigi
-struct ParamStruct {
-    const char *name;
-    const char *value;
-};
-typedef struct ParamStruct ParamType;
-
-struct ParamListStruct {
-    int length; /* length of array */
-    ParamType *array; /* points to first element */
-};
-typedef struct ParamListStruct ParamListType;
-
-// An InterpUniverse is an Universe with an interpreted galaxy
-// in it.  This is accomplished by making it Runnable and an InterpGalaxy.
-
-class InterpUniverse : public InterpGalaxy, public Runnable {
-public:
-        InterpUniverse () : Runnable(KnownBlock::newSched(),
-                                     KnownBlock::domain(),this)
-        { setBlock("mainGalaxy",NULL);}
-        void newSched() {
-                delete scheduler;
-                scheduler = KnownBlock::newSched();
-                type = KnownBlock::domain();
-        }
-};
 
 PlasmaList plasmaList;  // This global is needed for the kernel
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 
+// Parse a classname
+// We allow classnames to be specified as, say
+// Printer:input=2
+// This means to make a Printer star and to create two portholes
+// within the MultiPortHole named "input".  For now, there may
+// be only one multiporthole name specified.
+//
+// The returned name and mphname are in static buffers and will be
+// overwritten by the next call.
+
+static const char* parseClass (const char* name, const char** mph, int& nP) {
+	static char buf[128], buf2[128];
+	char *p;
+	p = buf;
+	*mph = buf2;
+	nP = 0;
+
+	buf2[0] = 0;
+	while (*name && *name != ':') *p++ = *name++;
+	*p = 0;
+	if (*name == 0) return buf;
+// we have a : field.
+	name++;
+	p = buf2;
+	while (*name && *name != '=')
+		*p++ = *name++;
+	*p = 0;
+// do we have a = field?
+	if (*name == '=') {
+		name++;
+		nP = atoi (name);
+	}
+	return buf;
+}
+
+// Find a class.  Handle Printer:input=2.  Fail if the mphname is bogus.
+inline static Block* findClass (const char* name) {
+	const char* mph;
+	int nP;
+	Block* b = KnownBlock::find (parseClass (name, &mph, nP));
+	if (!b || nP == 0) return b;
+	return b->multiPortWithName (mph) ? b : 0;
+}
+
 // Delete the universe and make another
 extern "C" void
 KcClearUniverse() {
-    delete universe;
-    universe = new InterpUniverse;
-    currentGalaxy = universe;
+	delete universe;
+	universe = new InterpUniverse;
+	currentGalaxy = universe;
 }
 
 // Create a new instance of star or galaxy and set params for it
 extern "C" boolean
 KcInstance(char *name, char *ako, ParamListType* pListPtr) {
-    if (!currentGalaxy->addStar(name, ako))
-	return FALSE;
-    if (!pListPtr || pListPtr->length == 0) return TRUE;
-    for (int i = 0; i < pListPtr->length; i++) {
-	if(!currentGalaxy->setState(name, pListPtr->array[i].name,
-				    pListPtr->array[i].value)) return FALSE;
+	int nP;
+	const char* mph;
+	const char* cname = parseClass (ako, &mph, nP);
+	if (!currentGalaxy->addStar(name, cname))
+		return FALSE;
+	if (nP && !currentGalaxy->numPorts (name, mph, nP))
+		return FALSE;
+	if (!pListPtr || pListPtr->length == 0) return TRUE;
+	for (int i = 0; i < pListPtr->length; i++) {
+		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
+					    pListPtr->array[i].value)) return FALSE;
     }
     return TRUE;
 }
@@ -99,47 +94,47 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 // create a new state for the galaxy
 extern "C" boolean
 KcMakeState(char *name, char *type, char *initVal) {
-    return currentGalaxy->addState(name, type, initVal);
+	return currentGalaxy->addState(name, type, initVal);
 }
 
 // connect
 extern "C" boolean
 KcConnect(char *inst1, char *t1, char *inst2, char *t2, int delay) {
-    return currentGalaxy->connect(inst1, t1, inst2, t2, delay);
+	return currentGalaxy->connect(inst1, t1, inst2, t2, delay);
 }
 
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
-    return currentGalaxy->alias(fterm, inst, aterm);
+	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
 // start a galaxy definition
 extern "C" boolean
 KcDefgalaxy(char *galname) {
-    saveGalaxy = currentGalaxy;
-    currentGalaxy = new InterpGalaxy;
-    currentGalaxy->setBlock(galname, saveGalaxy);
-    return (TRUE);
+	saveGalaxy = currentGalaxy;
+	currentGalaxy = new InterpGalaxy;
+	currentGalaxy->setBlock(galname, saveGalaxy);
+	return TRUE;
 }
 
 extern "C" boolean
 KcEndDefgalaxy() {
 // add to the knownlist for the current domain
-    currentGalaxy->addToKnownList(KnownBlock::domain());
-    currentGalaxy = saveGalaxy;
-    return (TRUE);
+	currentGalaxy->addToKnownList(KnownBlock::domain());
+	currentGalaxy = saveGalaxy;
+	return TRUE;
 }
 
 // Run the universe
 extern "C" boolean
 KcRun(int n) {
-    if (!universe->initSched())
-	return FALSE;
-    universe->setStopTime(n);
-    universe->run();
-    universe->endSimulation();
-    return (TRUE);
+	if (!universe->initSched())
+		return FALSE;
+	universe->setStopTime(n);
+	universe->run();
+	universe->endSimulation();
+	return TRUE;
 }
 
 /* 5/17/90
@@ -147,8 +142,8 @@ Inputs: name = name of star or galaxy (sog)
 Outputs: return = whether name is known
 */
 extern "C" boolean
-KcIsKnown(char *class) {
-    return ((KnownBlock::find(class) == 0) ? FALSE : TRUE);
+KcIsKnown(char *className) {
+	return findClass(className) ? TRUE : FALSE;
 }
 
 /* 5/17/90
@@ -161,26 +156,58 @@ Changed to support multiPortHoles, 7/24/90
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
 {
-    Block *block;
-    if ((block = KnownBlock::find(name)) == 0) {
-	return (FALSE);
-    }
-    char *names[TERM_ARR_MAX];
-    int isOut[TERM_ARR_MAX];
-    int n = block->portNames(names, isOut, TERM_ARR_MAX);
-    int nm = block->multiPortNames(names+n, isOut+n, TERM_ARR_MAX-n);
-    terms->in_n = 0;
-    terms->out_n = 0;
-    for (int i=0; i < n + nm; i++) {
-	if (isOut[i]) {
-	    terms->out[terms->out_n].name = names[i];
-	    terms->out[terms->out_n++].multiple = (i >= n);
-	} else {
-	    terms->in[terms->in_n].name = names[i];
-	    terms->in[terms->in_n++].multiple = (i >= n);
+	Block *block;
+	const char* mphname;
+	const char* cname;
+	int npspec;
+
+	cname = parseClass (name, &mphname, npspec);
+
+	if ((block = findClass(name)) == 0) {
+		return FALSE;
 	}
-    }
-    return (TRUE);
+	char *names[TERM_ARR_MAX];
+	int isOut[TERM_ARR_MAX];
+	int n = block->portNames(names, isOut, TERM_ARR_MAX);
+	int nm = block->multiPortNames(names+n, isOut+n, TERM_ARR_MAX-n);
+	if (npspec) {
+		if (nm == 0 || nm == 1 && strcmp (names[n], mphname) != 0) {
+			char buf[80];
+			sprintf (buf, "No multiport named '%s' in class '%s'",
+				 mphname, cname);
+			ErrAdd (buf);
+			return FALSE;
+		}
+		else if (nm > 1) {
+			ErrAdd ("Case not yet implemented: more than one MPH");
+			return FALSE;
+		}
+		else {
+			char* mphname = names[n];
+			int dir = isOut[n];
+			for (int i = 1; i <= npspec; i++) {
+				char buf[128];
+				sprintf (buf, "%s#%d", mphname, i);
+				names[n+i-1] = savestring (buf);
+				isOut[n+i-1] = dir;
+			}
+			n += npspec;
+			nm = 0;
+		}
+	}
+	terms->in_n = 0;
+	terms->out_n = 0;
+	for (int i=0; i < n + nm; i++) {
+		if (isOut[i]) {
+			terms->out[terms->out_n].name = names[i];
+			terms->out[terms->out_n++].multiple = (i >= n);
+		}
+		else {
+			terms->in[terms->in_n].name = names[i];
+			terms->in[terms->in_n++].multiple = (i >= n);
+		}
+	}
+	return TRUE;
 }
 
 /* 7/31/90
@@ -189,9 +216,9 @@ Ask if a porthole within a named block is a multiporthole.
 extern "C" boolean
 KcIsMulti(char* blockname, char* portname)
 {
-    Block *block = currentGalaxy->blockWithName(blockname);
-    if (block == 0) return (FALSE);
-    return block->multiPortWithName(portname) ? TRUE : FALSE;
+	Block *block = currentGalaxy->blockWithName(blockname);
+	if (block == 0) return FALSE;
+	return block->multiPortWithName(portname) ? TRUE : FALSE;
 }
 
 /*
@@ -210,19 +237,19 @@ Outputs:
 extern "C" boolean
 KcGetParams(char* name, ParamListType* pListPtr)
 {
-    Block *block = KnownBlock::find(name);
-    if (block == 0) {
-	return (FALSE);
-    }
-    int n = block->numberStates();
-    pListPtr->length = n;
-    pListPtr->array = new ParamStruct[n];
-    for (int i = 0; i < n; i++) {
-	    State& s = block->nextState();
-	    pListPtr->array[i].name = s.readName();
-	    pListPtr->array[i].value = s.getInitValue();
-    }
-    return (TRUE);
+	Block *block = findClass(name);
+	if (block == 0) {
+		return FALSE;
+	}
+	int n = block->numberStates();
+	pListPtr->length = n;
+	pListPtr->array = new ParamStruct[n];
+	for (int i = 0; i < n; i++) {
+		State& s = block->nextState();
+		pListPtr->array[i].name = s.readName();
+		pListPtr->array[i].value = s.getInitValue();
+	}
+	return TRUE;
 }
 
 /*
@@ -233,13 +260,13 @@ Outputs: info = points to info string, free string when done
 extern "C" boolean
 KcInfo(char* name, char** info)
 {
-    Block* b = KnownBlock::find(name);
-    if (!b) {
-	ErrAdd("Unknown block");
-	return (FALSE);
-    }
-    *info = savestring((char *)b->printVerbose());
-    return (TRUE);
+	Block* b = findClass(name);
+	if (!b) {
+		ErrAdd("Unknown block");
+		return FALSE;
+	}
+	*info = savestring((char *)b->printVerbose());
+	return TRUE;
 }
 	
 /* 7/25/90
@@ -247,7 +274,7 @@ KcInfo(char* name, char** info)
  */
 extern "C" boolean
 KcNumPorts (char* starname, char* portname, int numP) {
-    return currentGalaxy->numPorts(starname, portname, numP);
+	return currentGalaxy->numPorts(starname, portname, numP);
 }
 
 /*
@@ -256,6 +283,6 @@ Load object file dynamically into kernel.
 extern "C" boolean
 KcLoad(char* file)
 {
-    ErrAdd("Load not implemented yet");
-    return (FALSE);
+	ErrAdd("Load not implemented yet");
+	return FALSE;
 }
