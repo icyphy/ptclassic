@@ -53,6 +53,7 @@ void AsmTarget :: initStates() {
 int AsmTarget :: setup(Galaxy& g) {
 	runCmds.initialize();
  	miscCmds.initialize();
+	procCode.initialize();
 	LOG_DEL; delete uname; uname = 0;
 	uname = makeLower(g.readName());
 	return CGTarget::setup(g);
@@ -363,11 +364,16 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 }
 
 void AsmTarget :: wrapup() {
-	if (int(displayFlag) && !haltRequested())
+	myCode += procCode;
+	procCode.initialize();
+	if (int(displayFlag) && !haltRequested()) {
 		if (!genDisFile(myCode,uname,asmSuffix())) return;
-	else
+	} else {
 		if (!genFile(myCode,uname,asmSuffix())) return;
-	if (int(runFlag) && !haltRequested())
-		if (compileCode() && !haltRequested()) 
+	}
+	if (int(runFlag) && !haltRequested()) {
+		if (compileCode() && !haltRequested()) {
 			if (loadCode() && !haltRequested()) runCode();
+		}
+	}
 }
