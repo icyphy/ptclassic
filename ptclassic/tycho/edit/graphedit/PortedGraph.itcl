@@ -101,7 +101,7 @@
 #             port in
 #         }
 #         edge x -from {a out} -to {c in-0} -initialdelay 1
-#         edge y -from {b out} -to {c in-1]
+#         edge y -from {b out} -to {c in-1}
 #         edge z -from {b out} -to {d in}
 #     }
 #     $graph describe
@@ -403,8 +403,17 @@ body ::tycho::PortedGraph::verify {} {
 body ::tycho::PortedGraph::_updatecache {} {
     # Do superclass first
     ::tycho::AbstractGraph::_updatecache
-	catch {unset _edges}
-	
+    catch {unset _edges}
+
+    # Regenerate vertex list
+    set _vertices [match vertex]
+
+    # Have to make sure that arrays are initialized...
+    foreach v $_vertices {
+        set _parents($v) {}
+        set _children($v) {}
+    }
+
     # Regenerate parent-children
     foreach edge [match edge] {
         set src [attrget $edge -from]
@@ -413,8 +422,8 @@ body ::tycho::PortedGraph::_updatecache {} {
 
         set src [lindex $src 0]
         set tgt [lindex $tgt 0]
-		lappend _parents($src) $tgt
-		lappend _children($tgt) $src
+        lappend _parents($src) $tgt
+        lappend _children($tgt) $src
     }
     foreach {v list} [array get _parents] {
     	set _parents($v) [::tycho::lnub $list]
@@ -422,8 +431,6 @@ body ::tycho::PortedGraph::_updatecache {} {
     foreach {v list} [array get _children] {
     	set _children($v) [::tycho::lnub $list]
     }
-    # Regenerate vertex list
-    set _vertices [match vertex]
 
     # Validate cache
     cache validate
