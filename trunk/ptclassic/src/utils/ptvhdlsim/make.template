@@ -77,36 +77,36 @@ CLISocket.o: CLISocket.c CLISocket.h
 v2cinteger: V2Cinteger.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
-	cli -nc -add -cv V2Cinteger V2Cinteger
+	cli -nc -add -cvl V2Cinteger V2Cinteger PTVHDLSIM
 	touch v2cinteger
 c2vinteger: C2Vinteger.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
-	cli -nc -add -cv C2Vinteger C2Vinteger
+	cli -nc -add -cvl C2Vinteger C2Vinteger PTVHDLSIM
 	touch c2vinteger
 v2creal: V2Creal.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
-	cli -nc -add -cv V2Creal V2Creal
+	cli -nc -add -cvl V2Creal V2Creal PTVHDLSIM
 	touch v2creal
 c2vreal: C2Vreal.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
-	cli -nc -add -cv C2Vreal C2Vreal
+	cli -nc -add -cvl C2Vreal C2Vreal PTVHDLSIM
 	touch c2vreal
 
 C2VINTEGER.sim: C2Vinteger.vhdl
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
-	vhdlan -nc $<
+	vhdlan -nc -w PTVHDLSIM $<
 V2CINTEGER.sim: V2Cinteger.vhdl
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
-	vhdlan -nc $<
+	vhdlan -nc -w PTVHDLSIM $<
 C2VREAL.sim: C2Vreal.vhdl
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
-	vhdlan -nc $<
+	vhdlan -nc -w PTVHDLSIM $<
 V2CREAL.sim: V2Creal.vhdl
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
-	vhdlan -nc $<
+	vhdlan -nc -w PTVHDLSIM $<
 
 libsynsock.a: CLISocket.o
 	ar cr libsynsock.a CLISocket.o
