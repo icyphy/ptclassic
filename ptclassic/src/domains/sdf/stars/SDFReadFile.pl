@@ -56,16 +56,7 @@ defstar
 
     go
     {
-	double x;
-
-	if (input->eof())	// pad output with zeros
-	    x = 0.0;
-	else			// get next value
-	{
-	    (*input) >> x;
-	    eatwhite(*input);
-	}
-	output%0 << x;
+	double x = 0.0;
 
 	if (input->eof())
 	{
@@ -76,8 +67,16 @@ defstar
 		input->close();
 		delete input;
 		input = new istream(expandPathName(fileName),"r");
+		(*input) >> x;		// get next value
+		eatwhite(*input);
 	    }
 	}
+	else			// get next value
+	{
+	    (*input) >> x;
+	    eatwhite(*input);
+	}
+	output%0 << x;
     }
 
     wrapup
