@@ -254,7 +254,7 @@ void CGMultiTarget :: prepareChildren() {
 	  s->setInitValue(childFilePrefix);
 	}
 	else {
-	  Error::warn(*t, "No state with given name", "file");
+	  Error::warn(*t, "No state with given name: ", "file");
 	}
 	if ((s = t->stateWithName("directory")) != NULL) {
 	  char* expandedPathName =
@@ -263,21 +263,20 @@ void CGMultiTarget :: prepareChildren() {
 	  delete [] expandedPathName;
 	}
 	else {
-	  Error::warn(*t, "No state with given name", "directory");
+	  Error::warn(*t, "No state with given name: ", "directory");
 	}
 	if ((s = t->stateWithName("display?")) != NULL) {
 	  s->setInitValue(displayFlag.initValue());
 	}
 	else {
-	  Error::warn(*t, "No state with given name", "display?");
+	  Error::warn(*t, "No state with given name: ", "display?");
 	}
 	if ((s = t->stateWithName("Looping Level(DEF,CLUST,SJS,ACYLOOP)"))
 	    != NULL) {
 	  s->setInitValue(hashstring("0"));
 	}
 	else {
-	  Error::warn(*t, "No state with given name",
-		      "Looping Level(DEF,CLUST,SJS,ACYLOOP)");
+	  Error::warn(*t, "No state with given name: ", "Looping Level");
 	}
       }
     }
