@@ -18,7 +18,7 @@ $Id$
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
  Revisions: If the galaxy inside a Wormhole has a output data, stop the
-	DE scheduler if "stopAfterOutput" flag is set to do that(10/24/90).
+	DE scheduler if "stopAfterOutput" flag is set(10/24/90).
 
 Code for functions declared in DEConnect.h
 
@@ -82,9 +82,9 @@ void OutDEPort :: sendData ()
 	// If the port lies on the Wormhole boundary, just inform timeStamp.
 	// Otherwise, generate an event into the event queue.
 	if (farSidePort->isItInput() == TRUE) {
-		Star& s = parent()->asStar();
+		Star& s = far()->parent()->asStar();
 		DEStar* dp = (DEStar*) &s;
-		dp->eventQ->levelput(farSidePort, timeStamp);
+		dp->eventQ->levelput(farSidePort, timeStamp, float(dp->depth));
 	} else {
 		EventHorizon* p = (EventHorizon *) farSidePort;
 		p->timeStamp = timeStamp;
