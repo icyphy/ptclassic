@@ -47,6 +47,9 @@ public:
 	// hack method to set stopping time
 	virtual void setStopTime(float limit) = 0;
 
+	// method to retrieve stopping time
+	virtual float getStopTime() = 0;
+
 	// hack method to set stopping time of wormhole
 	virtual void resetStopTime(float limit);
 
@@ -75,9 +78,10 @@ public:
 	// get the target
 	Target& getTarget ();
 
-	// Return a StringList with code that can be executed to
-	// effect a run.  In the base class, this just causes an error.
-	virtual StringList compileRun();
+	// Call code-generation functions in the Target to generate
+	// code for a run.
+	// In the base class, this just causes an error.
+	virtual void compileRun();
 
 	// The following functions now forward requests to SimControl,
 	// which is responsible for controlling the simulation.
