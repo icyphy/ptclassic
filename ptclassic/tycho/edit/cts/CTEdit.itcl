@@ -30,24 +30,6 @@
 
 
 ##########################################################################
-#### cts
-#
-# Procedure to create a test CTS editor
-#
-proc ::tycho::cts {} {
-    set nm [::tycho::view EditCTS]
-
-    # FIXME: Where should this go??
-    $nm library load edit/cts/stars.tim
-    $nm library addtomenu stars stars \
-            -command "$nm newstar stars" \
-            -customizecommand "$nm _initmenu stars" \
-            -types {star}
-
-    return $nm
-}
-
-##########################################################################
 #### EditCTS
 #
 # _EditCTS_ is an editor for the _GraphLayout_ model. It edits
@@ -86,7 +68,18 @@ class ::tycho::EditCTS {
 #### constructor
 #
 body ::tycho::EditCTS::constructor {args} {
-    ;# Nothing here yet
+    # Set the "mode" of the graph model so it will
+    # be loaded correctly later
+    # FIXME: Is this the right place for this?
+    $_graph configure -modelmode "cts"
+
+    # FIXME FIXME
+    # Load the library. Should the library info be in the model?
+    library load [file join edit cts stars.tim]
+    library addtomenu stars stars \
+            -command "$this newstar stars" \
+            -customizecommand "$this _initmenu stars" \
+            -types {star}
 }
 
     #####################################################################
