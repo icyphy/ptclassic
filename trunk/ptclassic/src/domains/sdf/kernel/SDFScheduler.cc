@@ -313,16 +313,25 @@ int SDFScheduler::computeSchedule(Galaxy& g)
 void SDFScheduler::reportDeadlock (DFGalStarIter& next) {
 	next.reset();
 	DataFlowStar *s;
+	StringList starList;
+
+	// Generate a list of stars that are deadlocked
+	while ((s = next++) != 0)
+	  if (s->notRunnable() == 1)
+	    starList << s->fullName() << " is deadlocked\n";
+	next.reset();
+
         if (Error::canMark()) {
                 while ((s = next++) != 0)
                         if (s->notRunnable() == 1) Error::mark(*s);
-                Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
+                Error::abortRun (
+			 "DEADLOCK: the indicated stars cannot be run:\n",
+				 starList);
         }
         else {
-		Error::abortRun ("DEADLOCK: the following stars cannot be run");
-		while ((s = next++) != 0)
-			if (s->notRunnable() == 1)
-				Error::message(*s, "is deadlocked");
+                Error::abortRun (
+			 "DEADLOCK: the following stars cannot be run:\n",
+				 starList);
 	}
         invalid = TRUE;
 }
