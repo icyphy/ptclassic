@@ -1,0 +1,8 @@
+#!/bin/sh
+# Script to find javastudio
+# FIXME: we should search for 'js' in the user's path etc.
+
+target=$PTOLEMY/vendors/sun/Java-Studio1.0/JS/classes
+if [ -d $target ]; then
+	echo " --with-studio=$target"
+fi
