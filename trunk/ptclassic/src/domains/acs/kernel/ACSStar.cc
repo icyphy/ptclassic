@@ -24,8 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Author:	T.M. Parks
-    Created:	5 January 1992
+    Author:	Eric Pauer (Sanders) and Christopher Hylands
+    Created:	15 January 1998
 
 */
 
