@@ -29,7 +29,7 @@
 ##########################################################################
 
 
-DIRS = kernel editors lib domains slate devel #bin doc 
+DIRS = kernel editors lib domains slate devel doc #bin
 
 # Root of Ptolemy directory
 ROOT =		..
