@@ -194,7 +194,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 			  }
                           else if(tp-2==1) 
 			      addCode(grep);
-		          else if(interpolation-2>0) 
+		          else /*if(interpolation-2>0) is this needed*/
 		              addCode(repGreater);
 
                           addCode(gcont);

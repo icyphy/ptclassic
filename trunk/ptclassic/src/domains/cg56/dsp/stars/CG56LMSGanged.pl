@@ -72,14 +72,6 @@ error samples.
                 attributes { A_NONCONSTANT|A_XMEM }
         }
         state {
-                name { coefLen }
-                type { int }
-                desc { number of coef. }
-                default { 8 }
-                attributes { A_NONSETTABLE|A_NONCONSTANT }
-        }        
-
-        state {
                 name { delayLineAdp }
                 type { intarray }
                 desc { internal }
@@ -107,26 +99,10 @@ error samples.
                 default { 0 }
                 attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 	}
-        state {
-                name { delayLineAdpSize }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-        state {
-                name { delayLineFIRSize }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-
-       
         codeblock(init) {
 ; delayLineAdp memory
         org     $ref(delayLineAdp)
-        bsc     $val(delayLineAdpSize),0
+        bsc     $size(delayLineAdp),0
         org     p:
 
 ; pointer to adapt delay line into memory
@@ -136,7 +112,7 @@ error samples.
     
 ; delayLineFIR memory
         org     $ref(delayLineFIR)
-        bsc     $val(delayLineFIRSize),0
+        bsc     $size(delayLineFIR),0
         org     p:
       
 ; pointer to FIR delay line into memory
@@ -146,7 +122,7 @@ error samples.
         }
 
         codeblock(first) {
-        move    #$val(coefLen)+$val(errorDelay)-2,m5
+        move    #$size(coef)+$val(errorDelay)-2,m5
         }
         codeblock(errorDelayGtOne) {
         move    #$val(errorDelay)-1,n5
@@ -157,14 +133,14 @@ error samples.
 ; load the address of the oldest sample into r5
         move    $ref(delayLineAdpStart),r5
 ; load the address of the last coefficient into r3
-        move    #$addr(coef)+$val(coefLen)-1,r3
+        move    #$addr(coef)+$size(coef)-1,r3
 ; multiply the error by the stepSize
         mpyr    x0,x1,a         y:(r5)+,y0
         move    a,x0
         move    x:(r3),b
         }
         codeblock(coefLenTwo) {
-        do      #$val(coefLen)-2,$label(loop)
+        do      #$size(coef)-2,$label(loop)
         macr    x0,y0,b
         move    b,x:(r3)-
         move    x:(r3),b        y:(r5)+,y0
@@ -190,21 +166,21 @@ $label(loop)
 ; now compute output.
         }    
         codeblock(cont1) {
-        move    #$addr(coef)+$val(coefLen)-1,r3
+        move    #$addr(coef)+$size(coef)-1,r3
         clr     a
         move    x:(r3)-,x0      y:(r5)+,y0
-        do      #$val(coefLen)-1,$label(loop1)
+        do      #$size(coef)-1,$label(loop1)
         mac     x0,y0,a         x:(r3)-,x0      y:(r5)+,y0
 $label(loop1)
         macr    x0,y0,a
         move    a,$ref(outputAdapt)
 ; compute output of parallel fir filter
-        move    #$val(coefLen)-2,m5
+        move    #$size(coef)-2,m5
         move    $ref(delayLineFIRStart),r5
-        move    #$addr(coef)+$val(coefLen)-1,r3
+        move    #$addr(coef)+$size(coef)-1,r3
         clr     a
         move    x:(r3)-,x0      y:(r5)+,y0
-        do      #$val(coefLen)-2,$label(loop3)
+        do      #$size(coef)-2,$label(loop3)
         mac     x0,y0,a         x:(r3)-,x0      y:(r5)+,y0
 $label(loop3)
         move    $ref(inputFIR),y1
@@ -216,12 +192,8 @@ $label(loop3)
         }
 
         setup {
-                coefLen=coef.size();
-                delayLineAdpSize=errorDelay-1+coefLen;
-		delayLineAdp.resize(delayLineAdpSize);
-
-                delayLineFIRSize=coefLen-1;
-		delayLineFIR.resize(delayLineFIRSize);
+		delayLineAdp.resize(errorDelay - 1 + coef.size());
+		delayLineFIR.resize(coef.size()-1);
         }
         initCode  {
 	        addCode(init);
@@ -230,7 +202,7 @@ $label(loop3)
                 addCode(first);
 		if (errorDelay>1) addCode(errorDelayGtOne);
                 addCode(main);
-		if (coefLen>2)
+		if (coef.size()>2)
 	             addCode(coefLenTwo);
 		else
 	             addCode(std);
@@ -247,9 +219,9 @@ $label(loop3)
 
 	execTime { 
               if(int(errorDelay)>1)
-	           return 33+5 * int(coefLen);
+	           return 33+5 * coef.size();
               else
-                   return 30+5 * int(coefLen);
+                   return 30+5 * coef.size();
         }
 }   
 
