@@ -3,7 +3,7 @@ static const char file_id[] = "SynthArchTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -46,14 +46,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 SynthArchTarget :: SynthArchTarget(const char* name,const char* starclass,
 			 const char* desc) :
 ArchTarget(name,starclass,desc) {
-  addState(analyze.setState("analyze",this,"YES",
-			    "switch for analyzing code into Synopsys."));
   addState(elaborate.setState("elaborate",this,"YES",
 			    "switch for elaborating design into structure."));
   addState(compile.setState("compile",this,"YES",
 			    "switch for compiling structure into gates."));
-  addState(report.setState("report",this,"YES",
-			    "switch for generating area & timing reports."));
 }
 
 // Clone the Target.
@@ -180,7 +176,7 @@ int SynthArchTarget :: compileCode() {
 
 // Run the code.
 int SynthArchTarget :: runCode() {
-  if (int(analyze)) {
+  if (analyze) {
     // Startup Synopsys design_analyzer with the command script file here.
     StringList command = "";
     if (progNotFound("design_analyzer")) return FALSE;
