@@ -28,4 +28,4 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Version: $Id$
 */
 
-static int ptkRPCFileHandler (/*RPCFunction funcArray[], long size */);
+int ptkRPCFileHandler (/*RPCFunction funcArray[], long size */);
