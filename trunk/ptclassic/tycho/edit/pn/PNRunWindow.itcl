@@ -63,17 +63,15 @@ class ::tycho::PNRunWindow {
 #### constructor
 #
 body ::tycho::PNRunWindow::constructor {args} {
-    # Create the widgets shared by all simulations
-    set junk {
-	itk_component add time {
-	    ::tycho::PNTimePanel $itk_interior.time
-	} {
-	    keep -background -cursor -font
-	}
-	pack $itk_component(time) -side left -expand no \
-		-padx 2 -pady 4 \
-		-anchor n
+    # Create the widgets shared by all PN simulations
+    itk_component add count {
+        ::tycho::PNMainPanel $itk_interior.count
+    } {
+        keep -background -cursor -font
     }
+    pack $itk_component(count) -side left -expand no \
+            -padx 2 -pady 4 \
+            -anchor n
 
     # Initialize options
     eval itk_initialize $args
@@ -84,14 +82,10 @@ body ::tycho::PNRunWindow::constructor {args} {
 # Set simulation time parameters and start
 #
 body ::tycho::PNRunWindow::start {} {
-    set starttime [$itk_component(time) get main.start]
-    set stoptime [$itk_component(time) get main.stop]
-    set timestep [$itk_component(time) get main.step]
+    set count [$itk_component(count) get main.count]
 
-    # FIXME: call through parameter est method of Simulation
-    $_simulation send "\$exec setStartTime $starttime"
-    $_simulation send "\$exec setStopTime $stoptime"
-    $_simulation send "\$exec setStepSize $timestep"
+    # FIXME: call through parameter set method of Simulation
+    $_simulation send "\$univ setCycles $count"
 
     # Do main start method
     chain
