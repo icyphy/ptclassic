@@ -197,9 +197,9 @@ public:
 
 	// fill in remaining functions for Particle classes
 
-	MessageParticle(const Envelope& p) : data(p) {}
-	MessageParticle() {}
-	void initialize();
+	MessageParticle(const Envelope& p);
+	MessageParticle();
+	Particle& initialize();
 
 	// load with data -- these cause errors except for a Envelope argument.
 
