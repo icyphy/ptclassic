@@ -49,8 +49,10 @@ typedef struct UType {
 	struct UType *nxt;	/* linked list */
 } UType;
 
-extern int 	yy_yys[], *yys;
-extern YYSTYPE 	yy_yyv[], *yyv;
+
+// extern int 	yy_yys[], *yys;
+// extern YYSTYPE 	yy_yyv[], *yyv;
+
 /* extern int	yymaxdepth; */
 extern int	Level, GenCode, IsGuard, TestOnly;
 extern int	Tj, Jt, LastGoto;
@@ -175,8 +177,8 @@ spin_memList=NULL;
 for(i=0;i<=Nhash;i++) symtab_sym[i]=NULL;
 for(i=0;i<=Nhash;i++) symtab_tl[i]=NULL;
 spin_init2();
-yys = yy_yys;
-yyv = yy_yyv;
+// yys = yy_yys;
+// yyv = yy_yyv;
 /* yymaxdepth = 150; */
 X   = (RunList  *) 0;
 spin_run = (RunList  *) 0;
