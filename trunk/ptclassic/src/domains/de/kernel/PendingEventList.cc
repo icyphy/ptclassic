@@ -54,7 +54,6 @@ PendingEventList::PendingEventList(MutableCQEventQueue *eventQueue) {
 	    return;
 	}
 	myQueue = eventQueue;
-	LinkedList::LinkedList();
 }
 
 PendingEventList::~PendingEventList() {
