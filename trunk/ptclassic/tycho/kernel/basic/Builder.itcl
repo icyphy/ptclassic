@@ -121,10 +121,10 @@ class ::tycho::Builder {
 	    [file join \$TYCHO kernel model] \
 	    [file join \$TYCHO kernel gui] \
 	    [file join \$TYCHO kernel html] \
-	    [file join \$TYCHO editors textedit] \
-	    [file join \$TYCHO editors slate] \
-	    [file join \$TYCHO editors visedit] \
-	    [file join \$TYCHO editors graphedit] \
+	    [file join \$TYCHO edit textedit] \
+	    [file join \$TYCHO edit slate] \
+	    [file join \$TYCHO edit visedit] \
+	    [file join \$TYCHO edit graphedit] \
 	    [file join \$TYCHO typt kernel] \
 	    [file join \$TYCHO typt edit]]
 }
@@ -391,7 +391,8 @@ body ::tycho::Builder::tclexts {} {
 # See $TYCHO/doc/coding/testing.html for more information.
 #
 body ::tycho::Builder::testAll {} {
-    global TYCHO
+    global TYCHO reallyExit
+    set reallyExit 0
     set savedir [pwd]
     cd $TYCHO
     source [file join kernel gui test alltychotests.tcl]
@@ -403,7 +404,8 @@ body ::tycho::Builder::testAll {} {
 # Run all the Tycho tests in a directory
 #
 body ::tycho::Builder::testDir { dir {testfile alltests.itcl}} {
-    global TYCHO
+    global TYCHO reallyExit
+    set reallyExit 0
     set savedir [pwd]
     cd $dir
     uplevel #0 source $testfile
