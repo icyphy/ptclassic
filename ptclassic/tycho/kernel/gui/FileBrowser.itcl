@@ -274,7 +274,7 @@ body ::tycho::FileBrowser::ok {} {
 body ::tycho::FileBrowser::open {name} {
     update idletasks
     if [checkFile $name] {
-	nextWindow
+	#nextWindow
 	delete object $this
     }
 }
