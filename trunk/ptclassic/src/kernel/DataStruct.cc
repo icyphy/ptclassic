@@ -35,7 +35,7 @@ inline anyway).
 
 **************************************************************************/
 #ifdef __GNUG__
-#pragma interface
+#pragma implementation
 #endif
 
 #include "DataStruct.h"
