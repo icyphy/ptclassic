@@ -38,16 +38,25 @@ PL_SRCS= \
  C50Add.pl \
  C50AddCx.pl \
  C50AddInt.pl \
+ C50BitsToInt.pl \
  C50CircToLin.pl \
  C50Chop.pl \
+ C50ChopVarOffset.pl \
  C50Commutator.pl \
  C50Const.pl \
  C50ConstCx.pl \
  C50ConstInt.pl \
  C50Cos.pl \
+ C50CxToFix.pl \
+ C50CxToInt.pl\
+ C50CxToRect.pl \
  C50Delay.pl \
+ C50DeMux.pl \
  C50Distributor.pl \
+ C50DivByInt.pl \
  C50DownSample.pl \
+ C50FixToCx.pl \
+ C50FixToInt.pl \
  C50Fork.pl \
  C50Gain.pl \
  C50GainInt.pl \
@@ -55,10 +64,15 @@ PL_SRCS= \
  C50IIDUniform.pl \
  C50Impulse.pl \
  C50Intgrtr.pl \
+ C50IntToBits.pl \
+ C50IntToCx.pl \
+ C50IntToFix.pl \
  C50LinToCirc.pl \
  C50Limit.pl \
  C50LookupTbl.pl \
+ C50Logic.pl \
  C50MaxMin.pl \
+ C50ModuloInt.pl \
  C50Mpy.pl \
  C50MpyCx.pl \
  C50MpyInt.pl \
@@ -67,10 +81,14 @@ PL_SRCS= \
  C50Neg.pl \
  C50OrderTwoInt.pl \
  C50Pad.pl \
+ C50Pulse.pl \
+ C50QntBtsInt.pl \
+ C50QntBtsLin.pl \
  C50QuantRange.pl \
  C50Quant.pl \
  C50QuantIdx.pl \
  C50Ramp.pl \
+ C50RampInt.pl \
  C50ReadFile.pl \
  C50ReadFileInt.pl \
  C50Rect.pl \
@@ -81,15 +99,19 @@ PL_SRCS= \
  C50SgnInt.pl \
  C50Shifter.pl \
  C50Sin.pl \
+ C50Skew.pl \
  C50Sqr.pl \
+ C50Sqrt.pl \
  C50Sub.pl \
  C50SubCx.pl \
  C50SubInt.pl \
  C50Table.pl \
  C50TableInt.pl \
+ C50Test.pl \
  C50Tone.pl \
  C50UpSample.pl \
  C50VarDelay.pl \
+ C50VarQuasar.pl \
  C50WasteCycles.pl \
  C50WaveForm.pl \
  C50Xgraph.pl \
