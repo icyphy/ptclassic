@@ -144,9 +144,9 @@ int *socket;                    /* socket selected on, for file event */
 	}
 
 	nfound = select(RPCLargestFD + 1,
-			mask,
-			RPCNIL(rpc_fd_set),
-			RPCNIL(rpc_fd_set),
+			(fd_set *)mask,
+			(fd_set *)RPCNIL(rpc_fd_set),
+			(fd_set *)RPCNIL(rpc_fd_set),
 			RPCNIL(struct timeval));
 	
 	/* select error condition */
@@ -286,8 +286,7 @@ int *port;
 
     length = sizeof(sin);
     
-    /* XXX should be (struct sockaddr *) */
-    if (getsockname(s, (char *) &sin, &length) < 0) {
+    if (getsockname(s, (struct sockaddr *) &sin, &length) < 0) {
 	vemMessage("Vem RPC Error: getsockname failed\n", 0);
 	return(-1);
     }
