@@ -24,7 +24,7 @@ ln -s ../../src/xgraph/Makefile .
 cd ..
 
 cd domains
-foreach x (sdf ddf de)
+foreach x (sdf ddf de capsim)
 	mkdir $x
 	cd $x
 	ln -s ../../../src/domains/$x/makefile .
@@ -37,3 +37,5 @@ foreach x (sdf ddf de)
 	cd ..
 end
 
+# This is for the makefile
+touch obj.$ARCH
