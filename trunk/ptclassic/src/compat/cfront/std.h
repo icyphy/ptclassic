@@ -60,7 +60,11 @@ inline void srandom(int seed) { srand48(seed);}
 #else
 // SunOS4.1 CC
 #include <stdlib.h>
+
+#ifndef PT_EGCS
 #include <sysent.h>
+#endif // PT_EGCS
+
 #include "../../kernel/miscFuncs.h"
 // we could include <strings.h> too, but Sun Cfront 2.1 has an
 // incorrect prototype for strcasecmp.
