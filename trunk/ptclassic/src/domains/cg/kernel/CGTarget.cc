@@ -62,9 +62,8 @@ extern const char* PROCEDURE = "procedure";
 
 // Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
-	StringList out;
-	out = "";
-	for(int i=0; i<depth; i++) {
+	StringList out = "";
+	for(int i = 0; i < depth; i++) {
 		out += "    ";
 	}
 	return out;
@@ -87,12 +86,12 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
-	addState(destDirectory.setState("directory", this, "$HOME/PTOLEMY_SYSTEMS",
-	    "Directory to write to"));
+	addState(destDirectory.setState("directory", this,
+	    "$HOME/PTOLEMY_SYSTEMS", "Directory to write to"));
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));
-	addState(loopingLevel.setState("Looping Level",this,"1",
-		"Specify whether to use loop scheduler and in what level."));
+	addState(loopingLevel.setState("Looping Level",this, "1",
+	    "Specify whether to use loop scheduler and in what level."));
 	addState(displayFlag.setState("display?", this, "YES",
 	    "Enable displaying of code."));
 	addState(compileFlag.setState("compile?", this, "YES",
@@ -105,9 +104,8 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 		 ("write schedule?", this,"NO",
 		  "Write the resultant schedule to a file."));
 
-	/* Hide parameters by making them nonsettable.
-	   Derived Targets can re-enable those that are appropriate.
-	*/
+	// Hide parameters by making them nonsettable.
+	// Derived Targets can re-enable those that are appropriate.
 	targetHost.clearAttributes(A_SETTABLE);
 	filePrefix.clearAttributes(A_SETTABLE);
 	displayFlag.clearAttributes(A_SETTABLE);
@@ -115,11 +113,17 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	loadFlag.clearAttributes(A_SETTABLE);
 	runFlag.clearAttributes(A_SETTABLE);
 
+	// Initialize code streams and the code string list
 	procedures.initialize();
+        myCode.initialize();
+	makefile.initialize();
+	makeAllList.initialize();
+	codeStringLists.initialize();
 
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
 	counter = 0;
+	spliceList.initialize();
 }
 
 // destructor
@@ -407,10 +411,7 @@ void CGTarget :: addStream(const char* name, CodeStream* code)
 // Lookup a CodeStream by name.
 CodeStream* CGTarget :: getStream(const char* name)
 {
-    CodeStream* stream;
-
-    if (name == NULL) stream = defaultStream;
-    else stream  = codeStringLists.get(name);
+    CodeStream* stream = name ? codeStringLists.get(name) : defaultStream;
 
     if (stream == NULL) {
 	Error::abortRun(*this, "getStream: could not find ", name);
