@@ -172,14 +172,14 @@ pxgraph:	$(OBJS)
 	$(CC) @LD_FLAGS@ -o $@ $(OBJS) $(LIBS)
 
 config.status: $(SRC_DIR)/makefile.in $(SRC_DIR)/configure
-	./configure
+	$(SRC_DIR)/configure
 
 makefile: config.status
 	$(SHELL) config.status	
 
 install:	makefile
 	$(INSTALL_PROGRAM) pxgraph $(BIN_DIR)/pxgraph
-	$(INSTALL_DATA) pxgraph.man $(MAN1_INSTALL_DIR)/pxgraph.1
+	$(INSTALL_DATA) $(SRC_DIR)/pxgraph.man $(MAN1_INSTALL_DIR)/pxgraph.1
 
 # "make clean" removes .o files and other cruft
 clean:
