@@ -218,12 +218,11 @@ public:
     int connect(int argc,char** argv);
     int connected(int argc,char** argv);
     int cont(int argc,char** argv);
-    int curgalaxy(int argc,char** argv);
-    int defgalaxy(int argc,char** argv);
+    int currentGalaxy(int argc,char** argv);
+    int defGalaxy(int argc,char** argv);
+    int defWormhole(int argc,char** argv);
     int delnode(int argc,char** argv);
     int disconnect(int argc,char** argv);
-    int domain(int argc,char** argv);
-    int domains(int argc,char** argv);
     int exit(int argc,char** argv);
     int galaxyPort(int argc,char** argv);
     int getAnnotation(int argc,char** argv);
@@ -237,7 +236,8 @@ public:
     int isGalaxy(int argc,char** argv);
     int isMultiPort(int argc,char** argv);
     int isWormhole(int argc,char** argv);
-    int knownlist(int argc,char** argv);
+    int knownBlocks(int argc,char** argv);
+    int knownDomains(int argc,char** argv);
     int link(int argc,char** argv);
     int listobjs(int argc,char** argv);
     int matlab(int argc,char** argv);
@@ -369,13 +369,13 @@ private:
     InterpUniverse* universe;
 
     // The current domain.
-    const char* curDomain;
+    const char* curdomain;
     
     // The current galaxy or universe.
-    InterpGalaxy* currentGalaxy;
+    InterpGalaxy* curgalaxy;
     
     // Target for the current galaxy or universe.
-    Target* currentTarget;
+    Target* curtarget;
     
     // The Tcl interpreter associated with this object.
     Tcl_Interp* interp;

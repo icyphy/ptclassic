@@ -50,6 +50,7 @@ SIMPLE_TESTS = \
 	descriptor.itcl \
 	galaxyPort.itcl \
 	name.itcl \
+	partial.itcl \
 	ports.itcl \
 	predicates.itcl \
 	remove.itcl

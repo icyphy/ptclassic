@@ -46,11 +46,11 @@ set reallyExit 0
 
 test connect.0 {create a test universe} {
     namespace ::pitcl {
-        defgalaxy y {
+        defGalaxy y SDF {
             addBlock z Ramp
             galaxyPort out z.output
         }
-        addUniverse x
+        addUniverse x SDF
         addBlock a y
         addBlock b Ramp
         addBlock c Add
@@ -62,7 +62,7 @@ test connect.0 {create a test universe} {
 #### connect
 
 test connect.1 {connection of galaxy port to multiport, relative naming} {
-    ::pitcl::curgalaxy .x
+    ::pitcl::currentGalaxy .x
     ::pitcl::connect a.out c.input
     list \
             [::pitcl::connected c.input#1] \
@@ -71,7 +71,7 @@ test connect.1 {connection of galaxy port to multiport, relative naming} {
 } {.x.a.out .x.c.input#1 .x.a.z.output}
 
 test connect.2 {connection of star port to multiport, absolute naming} {
-    ::pitcl::curgalaxy .main
+    ::pitcl::currentGalaxy .main
     ::pitcl::connect .x.b.output .x.c.input
     list \
             [::pitcl::connected .x.c.input#2] \

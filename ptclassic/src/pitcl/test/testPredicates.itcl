@@ -46,14 +46,11 @@ set reallyExit 0
 
 test predicates.0 {create a test universe} {
     namespace ::pitcl {
-        domain SDF
-        defgalaxy ym {
-            domain DE
+        defWormhole ym SDF DE {
             addBlock z PulseGen
             galaxyPort out z.output
         }
-        domain SDF
-        defgalaxy zm {
+        defGalaxy zm SDF {
             addBlock e XMgraph
             galaxyPort in e.input
         }
