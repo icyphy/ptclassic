@@ -79,9 +79,6 @@ class ::tycho::Index {
     # Get the children of an entry
     method children {name {select all}}
     
-    # Delete an entry
-    method delete {name}
-
     # Add an entry to the array
     method entry {name data args}
     
@@ -94,6 +91,9 @@ class ::tycho::Index {
     # Configure the entry with one or more options
     method entryconfigure {name args}
     
+    # Delete an entry
+    method entrydelete {name}
+
     # Test if an entry is present
     method exists {name}
 
@@ -154,17 +154,6 @@ body ::tycho::Index::children {name {select all}} {
 }
 
 ########################################################################
-#### delete
-#
-# Delete an entry. Flag an error if the entry does not exist.
-# Return the inverse command.
-#
-body ::tycho::Index::delete {name} {
-    _verify entry $name
-    _delete entry $name
-}
-
-########################################################################
 #### entry
 #
 # Add a new entry to the array. Flag an error if the entry
@@ -215,6 +204,17 @@ body ::tycho::Index::entrycget {name option} {
 body ::tycho::Index::entryconfigure {name args} {
     _verify entry $name
     eval _configure entry $name $args
+}
+
+########################################################################
+#### entrydelete
+#
+# Delete an entry. Flag an error if the entry does not exist.
+# Return the inverse command.
+#
+body ::tycho::Index::entrydelete {name} {
+    _verify entry $name
+    _delete entry $name
 }
 
 ########################################################################
