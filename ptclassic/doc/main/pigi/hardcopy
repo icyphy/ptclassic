@@ -19,11 +19,13 @@ Then, keeping the mouse in the facet,
 .IE "printing facets"
 invoke the "print facet" command from the "Other" pigi menu.
 You must have the environment variable PRINTER set to point to
-a valid postscript printer. You can do this, for example, by executing
-the following command in any terminal window:
+a valid postscript printer. You can do this by putting the following
+line in your .cshrc file:
 .(c
 	setenv PRINTER \fIprintername\fP
 .)c
+You will have to restart pigi for this change to be registered.
+.pp
 Upon running the print facet command under pigi,
 a dialog box appears into which options may be entered.
 The following options may prove useful:
@@ -86,21 +88,15 @@ there are facilities for capturing screen images.
 These can be used directly with \*(PT.
 However, colors that work well on the screen are not always ideal
 for hardcopy.  For this reason, two sets of alternative colors
-have been devised.  The first works well with color printers.
+have been devised.  The default works well with color printers.
 The second works well with black and white printers.
-To use the colors for a color printer, run pigi with the environment
-variable "PIGICP" set, as shown below:
-.(c
-setenv PIGICP
-pigi
-.)c
-To get only dark and light colors,
+For black and white printers, set the PIGIBW environment variable
+before running pigi, as in:
 .(c
 setenv PIGIBW
 pigi
 .)c
 .IE "PIGIBW"
-.IE "PIGICP"
 Now, the screen capture command can be used effectively.
 For example, under X11R4 or X11R5, 
 the following command will print a window on a
@@ -136,16 +132,14 @@ lables in pigi before capturing the image, and then to use the document
 editor itself to annotate the image.  The fonts then will be printer fonts
 rather than screen fonts.  To turn off the labels, execute the Vem
 command "layer-display" under the Vem "Options" menu.
-You may want to turn off both labels and colors used for annotations,
-such as "whiteSolid".
+FrameMaker can also, in principle, import postscript files generated
+in the process of executing the ``print facet'' command.
+However, the results are not usually satisfactory, so this method
+is discouraged.
 .pp
 To restore normal color, simply exit pigi, and unset the environment variable:
 .(c
 unsetenv PIGIBW
-.)c
-or
-.(c
-unsetenv PIGICP
 .)c
 Next time you run pigi, it will have whatever colors you originally
 specified in your X resources file, or if none, the default colors.
