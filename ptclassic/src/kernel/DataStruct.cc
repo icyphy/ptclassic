@@ -23,7 +23,6 @@ void SingleLinkList :: insert(Pointer a)
 	else	{	// List empty
 		lastNode = new SingleLink(a,0);
 		lastNode->next = lastNode;
-		lastReference = lastNode;
 	}
 }
 
@@ -34,7 +33,6 @@ void SingleLinkList :: append(Pointer a)
 	else {		// List empty
 		lastNode = new SingleLink(a,0);
 		lastNode->next = lastNode;
-		lastReference = lastNode;
 	}
 }
 
@@ -89,7 +87,7 @@ int SingleLinkList::remove (Pointer x) {
 		if (lastNode->e != x) return 0;
 		// only element matches, zero the list
 		delete lastNode;
-		lastNode = lastReference = 0;
+		lastNode = 0;
 		return 1;
 	}
 	// general case
@@ -99,7 +97,6 @@ int SingleLinkList::remove (Pointer x) {
 		if (f->e == x) {
 			g->next = f->next;
 			if (f == lastNode) lastNode = g;
-			if (f == lastReference) lastReference = g;
 			delete f;
 			return 1;
 		}
