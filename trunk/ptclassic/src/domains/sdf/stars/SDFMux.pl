@@ -45,18 +45,22 @@ limitation of liability, and disclaimer of warranty provisions.
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
 	go {
-	    int n = int(control%0);
-	    MPHIter nexti(input);
-	    PortHole* p;
-	    for (int i = 0; i < input.numberPorts(); i++) {
-		p = nexti++;
-		if (i == n) {
-		    for (int j = int(blockSize)-1; j >= 0; j--)
-		        output%j = (*p)%j;
-		    return;
+		int numports = input.numberPorts();
+		int n = int(control%0);
+		if (n < 0 || n >= numports) {
+		    StringList msg = "Control input ";
+		    msg << n << " is out of the range [0,"
+			<< (numports - 1) << "]";
+		    Error::abortRun(*this, msg);
 		}
-	    }
-	    Error::abortRun(*this,
-		"Invalid control input to Mux - out of range");
+
+		MPHIter nexti(input);
+		PortHole* p = 0;
+		for (int i = 0; i < n; i++) {
+			p = nexti++;
+		}
+		for (int j = int(blockSize)-1; j >= 0; j--) {
+			output%j = (*p)%j;
+		}
 	}
 }
