@@ -254,6 +254,8 @@ typedef struct RPCSpot RPCSpot;
 
 #define VEM_COMPLETE_FUNCTION			(long) 3
 
+#define VEM_LOCKING_FUNCTION			(long) 4
+
 #define VEM_MESSAGE_FUNCTION			(long) 10
 #define VEM_PROMPT_FUNCTION			(long) 11
 #define VEM_COMMAND_FUNCTION			(long) 12
@@ -325,7 +327,11 @@ typedef struct RPCSpot RPCSpot;
 #define RPC_EXIT_VEM_FUNCTION			(long) 83
 #define RPC_REGISTER_DEMON_FUNCTION		(long) 84
 
+/*
+ * special-case function numbers sent to the remote application
+ */
 #define RPC_DEMON_FUNCTION			(long) -1
+#define RPC_LOCK_RESPONSE_FUNCTION		(long) -2
   
 #define VEM_MAX_FUNCTION			(long) 200
 
