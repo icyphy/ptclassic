@@ -3,7 +3,9 @@ defstar {
 	domain { SDF }
 	version { $Id$ }
 	desc {
-Play a stereo input stream on the workstation speaker.
+Play a stereo AIFF input stream on the workstation speaker.
+}
+	htmldoc {
 The "gain" state (default 10000.0) multiplies the input streams
 before they are written.  The inputs should be in the range 
 of -32000.0 to 32000.0.  The file is played at a fixed sampling 
@@ -11,6 +13,14 @@ rate entered in the dialog box.  Sampling rate is in samples/second
 and the default is 44100.  When the wrapup method is called, a file of 
 samples is handed to a program named "ptaiffplay" which plays the file.
 The "ptaiffplay" program must be in your path.
+ptaiffplay is a simple
+shell script:
+<pre>
+#!/bin/csh
+/usr/sbin/sfplay $1
+</pre>
+/usr/sbin/sfplay is present under SGI Irix.  Under other operating
+systems try the AudioFile program.
 	}
 	author { Charles B. Owen }
 	copyright {
