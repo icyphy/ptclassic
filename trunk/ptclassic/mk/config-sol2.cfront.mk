@@ -1,4 +1,5 @@
-# Configuration makefile for Sun running Solaris2.3 and Sun CC3.0
+# Configuration makefile for Sun running Solaris2.3 and Sun CC3.0, CC4.0
+# (Note that CC4.0 is not a cfront style compiler, it is native.)
 #
 # $Id$
 # Copyright (c) 1994 The Regents of the University of California.
@@ -72,9 +73,9 @@ SYSLIBS =	-lsocket -lnsl -ldl -lm
 
 # Can't use -Bstatic here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
+LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)	
+LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)	
 
 #
 # Directories to use
@@ -82,6 +83,7 @@ LINKFLAGS_D=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH)
 X11_INCSPEC =	-I/usr/openwin/include
 X11_LIBDIR =	/usr/openwin/lib
 X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
+X11EXT_LIBSPEC = -L$(X11_LIBDIR) -lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR =
