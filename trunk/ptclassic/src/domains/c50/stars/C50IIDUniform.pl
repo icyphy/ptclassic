@@ -22,13 +22,16 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { output }
 		type { fix }
 	}
+	// FIXME: This state is incompatible with the SDF version.
+	// The SDF version uses lower and upper as the states, so
+	// this star is only valid when -lower = upper = range < 1.0
 	defstate {
 		name { range }
 		type { fix }
 		default { ONE }
 		desc { range of random number generator is [-range,+range] }
 		attributes { A_UMEM|A_NOINIT|A_NONSETTABLE}	
-}
+	}
 	defstate {
 		name { seed }
 		type { int }
@@ -37,14 +40,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 		addCode(initSeed);
-	}
-	go {
-		addCode(random);
-		if (range.asDouble() < C50_ONE) addCode(rangeScale);
-		else addCode (range1);
-	}
-	execTime {
-		return (range.asDouble() < C50_ONE) ? 32 : 27;
 	}
 // "code" to initialize the seed
 	codeblock(initSeed) {
@@ -70,8 +65,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 // case where range=1: write state and output
 	codeblock(range1) {
-        mar	*,AR7			
-       	sach	*,1
+	mar	*,AR7			
+	sach	*,1
 	}
 // case where range < 1: write state and scale output
 	codeblock(rangeScale) {
@@ -81,10 +76,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	pac
 	sach	*,1
 	}
+	go {
+		addCode(random);
+		if (range.asDouble() < C50_ONE) addCode(rangeScale);
+		else addCode (range1);
+	}
+	execTime {
+		return (range.asDouble() < C50_ONE) ? 32 : 27;
+	}
 }
-
-
-
-
-
-
