@@ -82,8 +82,8 @@ SMTLIB        = -Xlinker -bI:/usr/lpp/X11/bin/smt.exp
 # Directories to use
 #
 X11_INCSPEC =  -I/usr/lpp/X11/include
-# Some AIX X11 installations need to use the pthread library
-X11_LIBSPEC =  $(SMTLIB) -L/usr/lib -lIM -L/usr/lpp/X11/lib -lX11 # -lpthread
+# Some AIX X11 installations need to use the pthreads library
+X11_LIBSPEC =  $(SMTLIB) -L/usr/lib -lIM -L/usr/lpp/X11/lib -lX11 # -lpthreads
 X11EXT_LIBSPEC=-lXext
 
 VEM_X11_LIBSPEC = \
