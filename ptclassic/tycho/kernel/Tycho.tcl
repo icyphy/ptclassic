@@ -427,7 +427,7 @@ if {$tychoOpenFiles == 0} {
 	::tycho::_announce "About to create a TclShell"
 	uplevel #0 {
 	    ::tycho::view TclShell \
-		    -geometry +0+0 \
+		    -geometry -0+0 \
 		    -master 1 \
 		    -name   .mainConsole \
 		    -stdout 1 \
