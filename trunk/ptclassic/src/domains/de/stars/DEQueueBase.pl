@@ -63,6 +63,10 @@ Arrival data that can not be queued due to capacity limit.
 		demand.triggers(size);
 		inData.triggers(overflow);
 
+		// simultaneous inData events should be available in the
+		// same firing with demand events
+		inData.before(demand);
+
 		// Following the general rule that if an input can trigger
 		// an output with the same time stamp, we should identify
 		// a trigger relationship:
