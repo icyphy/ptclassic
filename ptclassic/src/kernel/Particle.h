@@ -340,7 +340,7 @@ public:
         FixParticle(int len, int intBits);
         FixParticle(double& d);
         FixParticle(int len, int intBits, double& d);
-        FixParticle(FixParticle& x);
+        FixParticle(const FixParticle& x);
         FixParticle(int len, int intBits, FixParticle& x);
 
         // Wash the Particle
