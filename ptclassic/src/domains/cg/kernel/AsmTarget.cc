@@ -201,9 +201,9 @@ int AsmTarget::modifyGalaxy() {
     g.initialize();
 
     // compute repetitions.
-    SDFScheduler* sched = (SDFScheduler*) scheduler();
-    sched->setGalaxy(g);
-    sched->repetitions();
+    SDFScheduler dummySched;
+    dummySched.setGalaxy(g);
+    dummySched.repetitions();
 
     if (Scheduler::haltRequested()) return FALSE;
     int status = TRUE;
