@@ -27,17 +27,7 @@ public:
 	void wrapup ();
 	CompileTarget(const char* nam,const char* stype,const char* desc) :
 		HLLTarget(nam,stype,desc) {}
-	Block* makeNew() const {
-		LOG_NEW; return new CompileTarget(name(),
-						  starType(), descriptor());
-	}
-	// FIXME: eliminate after HLLTarget is fixed.
-	Block* clone() const {
-		LOG_NEW; CompileTarget* t = new CompileTarget(name(),
-						  starType(), descriptor());
-		t->copyStates(*this);
-		return t;
-	}
+	Block* makeNew() const;
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
 
