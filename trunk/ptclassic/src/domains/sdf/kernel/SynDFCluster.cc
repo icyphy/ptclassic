@@ -3,7 +3,7 @@ static const char file_id[] = "SynDFCluster.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -69,6 +69,26 @@ void SynDFClusterPort :: initializeClusterPort()
     // and not from DFPortHole.
 }
 
+// This updates the numberTokens parameter
+void SynDFClusterPort :: updateNumxfer()
+{
+    int farClustLoopFac, myClustLoopFac;
+    if (farSidePort && farSidePort->parent()) {
+	farClustLoopFac = ((SynDFCluster*)farSidePort->parent())->loopFactor();
+	myClustLoopFac = ((SynDFCluster*)parent())->loopFactor();
+	if (myClustLoopFac == 0) {
+	    StringList message;
+	    message << "This SynDFCluster has a loopFac of 0.  This could "
+	    	    << "mean that it does not contain a valid DataFlowStar "
+	    	    << "inside.\n";
+	    Error::abortRun(*(parent()), message);
+	    return;
+	}
+	numberTokens = (farSidePort->numXfer() * farClustLoopFac) / 
+			myClustLoopFac;
+    }
+}
+
 /****
 
 This updates ports after clustering operations typically.
@@ -83,22 +103,10 @@ clusters <code>loopFac</code> (i.e, its repetitions).
 ****/
 void SynDFClusterPort :: update()
 {
-    int farClustLoopFac, myClustLoopFac;
     ClusterPort :: update();
-    if (farSidePort && farSidePort->parent()) {
-	farClustLoopFac = ((SynDFCluster*)farSidePort->parent())->loopFactor();
-	myClustLoopFac = ((SynDFCluster*)parent())->loopFactor();
-	if (myClustLoopFac == 0) {
-	    StringList message;
-	    message << "This SynDFCluster has a loopFac of 0.  This could";
-	    message << "mean that it does not contain a valid DataFlowStar";
-	    message << "inside.";
-	    Error::abortRun(*(parent()), message);
-	    return;
-	}
-	numberTokens = (farSidePort->numXfer() * farClustLoopFac) / 
-			myClustLoopFac;
-    }
+    updateNumxfer();
+    DFPortHole& insidePort = (DFPortHole&)realPort();
+    myGeodesic = insidePort.geo();
 }
 
 /****
@@ -134,12 +142,14 @@ void SynDFCluster::setTotalNumberOfBlocks()
 {
     SynDFClusterIter nextClust(*this);
     SynDFCluster *c;
+    Block* b;
     tnob = 0;
 
-    // we assume that if there is only one cluster inside us, then that
-    // cluster is a star.
     if (numberBlocks() == 1) {
-	tnob = 1;
+	// check if it is a star or galaxy
+	b = head();
+	if (b->isItAtomic()) tnob = 1;
+	else tnob += ((SynDFCluster*)b)->totalNumberOfBlocks();
     } else {
 	while ((c=nextClust++) != NULL)	tnob += c->totalNumberOfBlocks();
     }
@@ -162,12 +172,23 @@ Again, just updates <code>loopFac, tnob</code> after <code>Cluster::absorb</code
 ****/
 int SynDFCluster::absorb(Cluster& c, int removeFlag)
 {
+    SynDFClusterPort *p;
     setLoopFac(gcd(loopFactor(), ((SynDFCluster&)c).loopFactor()));
     // attempt to keep tnob consistent if it is defined for this
     // cluster already.  If not, do nothing; let it be computed
     // when something else requires it.
     if (tnob != -1) tnob += ((SynDFCluster&)c).totalNumberOfBlocks();
-    return Cluster::absorb(c, removeFlag);
+    if (!Cluster::absorb(c, removeFlag)) return FALSE;
+    // Now we need to update the numberTokens on all our portholes.
+    // Recall that Cluster::absorb will only call update() on those
+    // ports that are added to this cluster after the absorb; namely,
+    // input and output ports of c that do not connect to ports in this
+    // cluster.
+    SynDFClusterPortIter nextPort(*this);
+    while ((p=nextPort++) != NULL) {
+	p->updateNumxfer();	
+    }
+    return TRUE;
 }
 
 /****
@@ -176,12 +197,18 @@ Again, just updates <code>loopFac, tnob</code> after <code>Cluster::absorb</code
 ****/
 int SynDFCluster::merge(Cluster& c, int removeFlag)
 {
+    SynDFClusterPort *p;
     setLoopFac(gcd(loopFactor(), ((SynDFCluster&)c).loopFactor()));
     // attempt to keep tnob consistent if it is defined for this
     // cluster already.  If not, do nothing; let it be computed
     // when something else requires it.
     if (tnob != -1) tnob += ((SynDFCluster&)c).totalNumberOfBlocks();
-    return Cluster::merge(c, removeFlag);
+    if (!Cluster::merge(c, removeFlag)) return FALSE;
+    SynDFClusterPortIter nextPort(*this);
+    while ((p=nextPort++) != NULL) {
+	p->updateNumxfer();	
+    }
+    return TRUE;
 }
 
 // constructor
