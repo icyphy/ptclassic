@@ -1,4 +1,7 @@
 /*
+Version:
+$Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
