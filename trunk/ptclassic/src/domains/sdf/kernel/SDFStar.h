@@ -36,6 +36,7 @@ class EGNode;
 class DataFlowStar : public Star {
 public:
 	int isA(const char*) const;
+	int isSDF() const;
 };
 
 	////////////////////////////////////
@@ -66,6 +67,9 @@ public:
 
         // set the expanded graph master
         void setMaster(EGNode *m) {master = m;}
+
+	// identify self as SDF
+	int isSDF() const;
 
 	// my domain
 	const char* domain() const;
@@ -109,6 +113,9 @@ public:
 
 	// Execution time, for schedulers that use it
 	virtual int myExecTime();
+
+	// Number of times this star is executed in the schedule
+	int reps() const { return int(double(repetitions));}
 };
 
 class SDFStarPortIter : public BlockPortIter {
