@@ -156,7 +156,7 @@ protected:
 	ParseToken getParseToken(Tokenizer&, int = T_Float);
 
 	// lookup state from name
-	const State* lookup(char*, const Block*) const;
+	const State* lookup(const char*, Block*);
 
 	// complain of parse error
 	void parseError (const char*, const char* = "");
@@ -209,7 +209,7 @@ public:
 // an iterator for StateList
 class StateListIter : private ListIter {
 public:
-	StateListIter(const StateList& sl) : ListIter (sl) {}
+	StateListIter(StateList& sl) : ListIter (sl) {}
 	State* next() { return (State*)ListIter::next();}
 	State* operator++() { return next();}
 	ListIter::reset;
