@@ -31,8 +31,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 #include "rpc.h"
 #include "err.h"
 #include "octMacros.h"

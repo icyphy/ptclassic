@@ -29,11 +29,11 @@ Utility functions.
 */
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <strings.h>
 #include <pwd.h>
 #include <search.h>
-#include "local.h"
 #include "err.h"
 #include "util.h"
 #include "rpc.h"
@@ -55,8 +55,6 @@ UMalloc(outPtr, bytes)
 char **outPtr;
 int bytes;
 {
-    extern char *malloc();
-
     ERR_IF2((*outPtr = (char *) malloc(bytes)) == NULL, 
 	"UMalloc: malloc() failed");
     return(TRUE);
@@ -75,8 +73,6 @@ boolean
 StrDup(outPtr, in)
 char **outPtr, *in;
 {
-    extern char *malloc();
-
     ERR_IF2((*outPtr = (char *) malloc(strlen(in) + 1)) == NULL, 
 	"StrDup: malloc() failed");
     (void) strcpy(*outPtr, in);
@@ -94,6 +90,7 @@ char *string;
     return(strcpy((char *) calloc(strlen(string)+1, sizeof(char)), string));
 }
 
+extern char* KcExpandPathName();
 
 /*
 Use the ptolemy kernel expansion call -- kennard
@@ -275,6 +272,7 @@ DupSheetInit(ds)
 DupSheet *ds;
 {
     *ds = NULL;
+    return TRUE;
 }
 
 boolean

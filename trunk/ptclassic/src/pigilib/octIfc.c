@@ -29,10 +29,10 @@ Useful higher level OCT interface functions.
 */
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <strings.h>
 #include <ctype.h>
-#include "local.h"
 #include "rpc.h"
 #include "paramStructs.h"
 #include "err.h"
@@ -43,6 +43,8 @@ Useful higher level OCT interface functions.
 #include "region.h"
 #include "oct.h"
 #include "mkTerm.h"
+
+static boolean SetParamProp();
 
 /* 8/14/89
 Opens the master of an instance, but allows you to choose which facet.
@@ -282,6 +284,7 @@ ParamListType *pListPtr;
 	return SetParamProp(instPtr,pListPtr,"params");
 }
 
+boolean
 SetTargetParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
@@ -533,6 +536,7 @@ int len;
 /* get delay, buswidth, or some other property as a string using
  * Stringize -- empty string and return of false if not set.
  */
+boolean
 GetStringizedProp(objPtr, name, dest, dlen)
 octObject *objPtr;
 char *name, *dest;

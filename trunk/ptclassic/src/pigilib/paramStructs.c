@@ -35,9 +35,9 @@ Updates: 4/14/89 to PStrToPList()
 
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <strings.h>
-#include "local.h"
 #include "util.h"
 #include "err.h"
 #include "paramStructs.h"

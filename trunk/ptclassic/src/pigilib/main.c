@@ -29,8 +29,8 @@ Initialization code for pigiRpc.
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 #include "rpc.h"
 #include "vemInterface.h"
 #include "compile.h"
@@ -97,6 +97,7 @@ long userOptionWord;
 {
     CompileEnd();
     RPCExit(0);
+    return 0;
 }
 
 
@@ -134,6 +135,8 @@ RPCFunction CommandArray[] = {
     {Version, "Other", "version"},
     {ExitApp, "Other", "exit-pigi"}
 };
+
+static void welcome_window();
 
 long
 UserMain(display, spot, cmdList, userOptionWord, array) /* ARGSUSED */
@@ -177,7 +180,7 @@ RPCFunction **array;
 
 void pr_accum_string();
 
-welcome_window ()
+static void welcome_window ()
 {
 	accum_string ("Ptolemy Interactive Graphics Interface\n");
 	accum_string (pigiVersion);

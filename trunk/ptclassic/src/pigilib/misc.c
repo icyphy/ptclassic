@@ -28,9 +28,9 @@ $Id$
 */
 
 /* Includes */
+#include "local.h"
 #include <stdio.h>
 #include <strings.h>
-#include "local.h"
 #include "rpc.h"
 #include "vemInterface.h"
 #include "util.h"
@@ -47,6 +47,7 @@ char* callParseClass();
 
 /* uses the ptman script to print it out the man page for the given
    star or galaxy */
+boolean
 ManPage(starName)
 char *starName;
 {
@@ -254,6 +255,8 @@ long userOptionWord;
     ViDone();
 }
 
+static void AdjustScalePan();
+
 /* 6/27/89 = tries to open facet read-only first */
 int 
 RpcOpenFacet(spot, cmdList, userOptionWord) /* ARGSUSED */
@@ -272,7 +275,7 @@ long userOptionWord;
     RPCArg *theArg;
     Window newWindow;  /* the vem window looking at facet */
     octBox bbox;  /*  an argument to octBB, return value not used */
-    void AdjustScalePan(); /* this function is right after RpcOpenFacet */
+
 
     ViInit("open-facet");
     ErrClear();

@@ -94,11 +94,11 @@ EditBusParams(instPtr)
 octObject *instPtr;
 {
     octObject busProp;
-    static dmTextItem item = {"Bus Width", 1, 10, NULL, NULL};
-
     GetOrInitBusProp(instPtr, &busProp);
     return editBusOrDelay(&busProp,"Bus Width","Edit Bus Width");
 }
+
+static boolean EditParamList();
 
 /* EditSogParams  5/27/88
 Outputs: return = TRUE if no error.
@@ -181,10 +181,8 @@ int
 EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-    ParamType *place;
-    int i, width, maxwidth;
+    int i;
     ParamListType pList;
-    dmTextItem *items;
 
     ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
 
@@ -410,7 +408,7 @@ Caveats: Should only be called once at the beginning of the program.
 boolean
 OpenPaletteInit()
 {
-    char *a, *b, *copy, *techDir, buf[FILENAME_MAX];
+    char *a, *b, *copy, *techDir, buf[MAXPATHLEN];
     int i;
 
 /* dots in resource names no longer work??? */

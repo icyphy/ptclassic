@@ -29,8 +29,8 @@ Error handling functions.
 */
 
 /* Includes */
-#include <stdio.h>
 #include "local.h"
+#include <stdio.h>
 
 #define ERR_BUF_N 1000
 
