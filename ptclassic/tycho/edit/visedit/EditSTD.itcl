@@ -116,8 +116,8 @@ class ::tycho::EditSTD {
     protected variable portNames
 
     # Store the value used in makeIcon last time.
-    protected common makeIconSrcDir {$PTOLEMY/src/domains/fsm/demo}
-    protected common makeIconPaletteName "./user.pal"
+    protected common makeIconSrcDir {[file join $PTOLEMY src domains fsm demo]}
+    protected common makeIconPaletteName "user.pal"
 }
 
 ##########################################################################

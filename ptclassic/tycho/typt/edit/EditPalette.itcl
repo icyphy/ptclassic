@@ -75,14 +75,7 @@ configbody ::tycho::EditPalette::facet {
     set facet $itk_option(-facet)
     if {$facet != "" } {
 	set facet [::tycho::expandPath $facet]
-	# temporary name
-	# FIXME: Unix-ism here, /tmp is not portable
-	set facetTmpFile /tmp/[file tail $facet][::tycho::autoName a].fst
-	while {[file exists $facetTmpFile]} {
-	    # Danger: we could go into a tight loop here
-	    set facetTmpFile /tmp/[file tail $facet][::tycho::autoName a].pt
-	}
-
+	set facetTmpFile ::tycho::tmpFileName [file tail $facet] .fst
         set recurse 0
 	ptolemyMkFacetGraph [list [list $facet]] $facetTmpFile $recurse $facet
 
@@ -106,5 +99,6 @@ body ::tycho::EditPalette::constructor {args} {
 # Open a help window.
 #
 body ::tycho::EditPalette::help {} {
-    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditPaletteHelp.html" {}
+    hyperJump [file join \$TYCHO editors visedit doc \
+	    usersGuides EditPaletteHelp.html] {}
 }
