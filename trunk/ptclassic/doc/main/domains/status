@@ -1,13 +1,20 @@
 .\" $Id$
 .H1 "Status
 .pp
-Currently, we have at least five domains in \*(PT : SDF, DE, DDF, THOR, and CG.
+Five domains are included in the
+0.3
+release of \*(PT :
+SDF, DE, DDF, THOR, and CG
+(we have developed other experimental domains that are not part of
+the distribution).
 The source code, demos, and documentation for these domains is contained
 in ~ptolemy/src/domains/xxx, where ``xxx'' is the domain name (in lower
 case letters).
 These domains can be mixed arbitrarily to compose a complicated
 system.  Any wormhole may contain any other wormhole
-to make a hierarchical structure.
+to make a hierarchical structure (exception: it is not currently
+possible to define a wormhole whose outer domain is CG and whose
+inner domain is something else).
 Combinations of the two timed domains, DE and THOR, have rigorously tested
 our method of mixing timed domains.
 The timed nature of the SDF domain has proven 
