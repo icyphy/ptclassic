@@ -1,17 +1,18 @@
 #!/bin/sh
 #
 # Version: $Id$
+# Usage:   undel-hunks <log_file>
 #
 # This script can be used to track down memory leaks in Ptolemy.  In
-# theory if MEMORYLOG is defined during compile time, then LOG_NEW and
-# LOG_DEL should produce memory usage log messages.  To define MEMORYLOG,
-# add -DMEMORYLOG to GPPFLAGS in # $PTOLEMY/mk/config-$PTARCH. -cxh
-#
-# If MEMORYLOG is defined, it is the name of a file.  Each new and delete
-# adds a line to the file due to the LOG_NEW and LOG_DELETE macros.
-# The undel-hunks script processes this file (undel-hunks logfile) and
-# reports all lines corresponding to memory that is allocated and never
-# freed. -jtb
+# theory, if MEMORYLOG is a defined symbol during compile time, then the
+# LOG_NEW and LOG_DELETE macrocs will produce code to log memory usage
+# messages to the file given by the _environment_ variable MEMORYLOG.
+# To define MEMORYLOG as a symbol, add -DMEMORYLOG to GPPFLAGS in
+# $PTOLEMY/mk/config-$PTARCH.  Before running the compiled program, make
+# sure that the environment variable MEMORYLOG is set correctly.  If it
+# is not set, then no log file will get created.  The undel-hunks script
+# processes the log file and reports all lines corresponding to memory
+# that is allocated and never freed. -jtb/cxh
 #
 # Note that the LOG_NEW/LOG_DELETE and Purify definitions of a leak differ
 # (Purify is a commercial tool).  Purify says something is a leak if there
