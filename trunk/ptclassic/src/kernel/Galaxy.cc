@@ -1,5 +1,5 @@
 #include "Star.h"
-#include <String.h>
+#include "StringList.h"
 #include "Galaxy.h"
 #include "Block.h"
 
@@ -55,7 +55,7 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 
 
 Galaxy :: operator char* () {
-	String out;
+	StringList out;
 	out = "GALAXY: ";
 	out += readFullName();
 	out += "\n";

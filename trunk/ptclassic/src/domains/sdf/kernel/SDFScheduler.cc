@@ -6,8 +6,7 @@
 #include "Scheduler.h"
 #include "Fraction.h"
 #include "Output.h"
-#include <String.h>
-#include <stream.h>
+#include "StringList.h"
 
 extern Error errorHandler;
 
@@ -22,7 +21,7 @@ extern Error errorHandler;
 // Display a schedule
 
 SDFSchedule :: operator char* () {
-	String out;
+	StringList out;
 	out = "SDF SCHEDULE:\n";
 	reset();
 	for (int i = size(); i>0; i--) {
