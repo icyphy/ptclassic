@@ -36,7 +36,7 @@ PL_SRCS= \
  C50Comb.pl \
  C50LMS.pl \
  C50LMSGanged.pl \
- C50RaisedCos.pl \
+ C50RaisedCosine.pl \
  C50Window.pl
 
 # The .cc files
