@@ -16,7 +16,8 @@ KERNDIR = $(ROOT)/src/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 GPPFLAGS = -g
 GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
+GNULIB = /usr/gnu/lib
+GNUINCLUDE = $(GNULIB)/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
