@@ -89,6 +89,7 @@ You can preview the document on the screen.  For instance,
 % cd ~ptolemy/doc/main
 % make preview
 .)c
+.Ir "previewing documents"
 You can pass options to ditroff.  For instance, suppose you wish
 to print only pages 48 through the end of section 1.
 Then use
