@@ -128,40 +128,35 @@ int CGStar :: setTarget(Target* t)
 
 // Add a string to the Target code.
 // Expand macros in code and name.
-int CGStar::addCode (const char* string,const char* stream, const char* name)
-{
-	CodeStream* cs = getStream(stream);
-	if (cs != NULL)
-	{
-	    StringList code = processCode(string);
-	    if (name != NULL)
-	    {
-		StringList nm = processCode(name);
-		return cs->put(code, nm);
-	    }
-	    else return cs->put(code);
+int CGStar::addCode (const char* string,const char* stream, const
+		     char* name) {
+    CodeStream* cs = getStream(stream);
+    if (cs != NULL) {
+	if (name != NULL) {
+	    StringList nm;
+	    processCode(nm,name);
+	    if (!cs->sharedNames.isUnique(nm)) return FALSE;
 	}
-	else
-	{
-	    return FALSE;
-	}
+	return processCode(*cs,string);
+    }
+    else {
+	return FALSE;
+    }
 }
 
 // Add a procedure to the target procedure stream.
-int CGStar::addProcedure(const char* string, const char* name)
-{
-    CodeStream* proc = getStream(PROCEDURE);
-    if (proc != NULL)
-    {
-	StringList code = processCode(string);
-	if (name != NULL)
-	{
-	    StringList nm = processCode(name);
-	    return proc->put(code,nm);
-	}
-	else return proc->put(code);
-    }
-    else return FALSE;
+int CGStar::addProcedure(const char* string, const char* name) {
+   CodeStream* proc = getStream(PROCEDURE);
+   if (proc != NULL) {
+       if (name != NULL) {
+	   StringList nm;
+	   processCode(nm,name);
+	   if (!proc->sharedNames.isUnique(nm)) return FALSE;
+       }
+       return processCode(*proc,string);
+   }
+   else
+       return FALSE;
 }
 
 // Add a comment to a target stream.
@@ -173,17 +168,15 @@ void CGStar::outputComment (const char* msg,const char* stream)
 
 // Process a CodeBlock, expanding macros.
 // Return empty StringList on error.
-StringList CGStar::processCode(CodeBlock& block)
-{
+int CGStar::processCode(StringList& list, CodeBlock& block) {
     const char* text = block.getText();
-    return processCode(text);
+    return processCode(list,text);
 }
 
 // Parse text expanding macros
-StringList CGStar::processCode(const char* text)
+int CGStar::processCode(StringList& list, const char* text)
 {
-    StringList out="";
-    if (text == NULL) return out;
+    if (text == NULL) return TRUE;
     // Reset the local labels
     resetCodeblockSyms();
 
@@ -191,17 +184,14 @@ StringList CGStar::processCode(const char* text)
     while (*text != 0)
     {
 	// parse eventually nested macro invocations
-	out << processMacro(text);
+	if (!processMacro(list,text)) return FALSE;
     }
-    return out;
+    return TRUE;
 }
 
 // Parse macro including macro header and arguments;
 // update text pointer t to point after the end of the argument list.
-StringList CGStar::processMacro(const char*& t)
-{
-    StringList out;
-    out.initialize();
+int CGStar::processMacro(StringList& list, const char*& t) {
 
     // copy any character before the macro header unchanged
     while (*t != '\0') {
@@ -212,7 +202,7 @@ StringList CGStar::processMacro(const char*& t)
 	    if (t++, *t == substChar())
 	    {
 		t++;
-		out << substChar();
+		list << substChar();
 		continue;
 	    }
 
@@ -228,7 +218,7 @@ StringList CGStar::processMacro(const char*& t)
 	    if (*t++ != '(')
 	    {
 		codeblockError ("expecting '('", " after macro call");
-		return out;
+		return FALSE;
 	    }
 
 	    // skip any white space
@@ -256,7 +246,8 @@ StringList CGStar::processMacro(const char*& t)
 			    t++; // skip this character, copy next
 			else {
 			    // nested macro invocation
-			    StringList list = processMacro(t);
+			    StringList list;
+			    if (!processMacro(list,t)) return FALSE;
 			    const char* s = list;
 			    while (*s)  *p++ = *s++;
 			}
@@ -272,8 +263,7 @@ StringList CGStar::processMacro(const char*& t)
 		if (p == arg) // null arguments are not allowed
 		{
 		    codeblockError ("null argument");
-		    out.initialize();
-		    return out;
+		    return FALSE;
 		}
 
 		// back up to remove any trailing white space
@@ -291,27 +281,39 @@ StringList CGStar::processMacro(const char*& t)
 		    if (*t == ')')	// final null argument
 		    {
 			codeblockError ("null argument");
-			out.initialize();
-			return out;
+			return FALSE;
 		    }
 		}
 	    }
 	    t++;	// skip ')' at end of argument list
 
-	    out << expandMacro(func, argList);
-	    return out;
+	    list << expandMacro(func, argList);
+	    return TRUE;
 	}
 	else	// not a macro call
 	{
-	    out << *t++;
+	    const char* start = t;
+	    int length = 0;
+	    while (*t != '\0' && *t != substChar()) {
+		length++;
+		t++;
+	    }
+	    if (*t == '\0')
+		list << start;
+	    else {
+		char temp[length+1];
+		temp[length] = '\0';
+		strncpy(temp,start,length);
+	    	list << temp;
+	    }
 	}
     }
-    if (out.length())
+    if (list.length())
     {
-	const char* string = out;
-	if(string[out.length()-1] != '\n') out << '\n';
+	const char* string = list;
+	if(string[list.length()-1] != '\n') list << '\n';
     }
-    return out;
+    return TRUE;
 }
 
 // The default substitution character is '$'.  Some assembly

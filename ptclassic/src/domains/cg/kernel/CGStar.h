@@ -130,10 +130,6 @@ public:
 	int setDynamicExecution(int);
 
 protected:
-	// Process code, expanding macros.
-	StringList processCode(CodeBlock&);
-	StringList processCode(const char*);
-
 	SymbolList codeblockSymbol;
 	SymbolList starSymbol;
 
@@ -245,8 +241,12 @@ private:
 	// Reset local codeblock labels
 	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
 
+	// Process code, expanding macros.
+	int processCode(StringList&, CodeBlock&);
+	int processCode(StringList&, const char*);
+
  	// parse macro invocation until after the end of the argument list
- 	StringList processMacro(const char*& text);
+ 	int processMacro(StringList&, const char*& text);
 
 	// indicate if a fork star
 	int forkId;
