@@ -50,6 +50,7 @@ DEMerge.pl \
 DENull.pl \
 DEOr.pl \
 DEPSServer.pl \
+DEPacketize.pl \
 DEPoisson.pl \
 DEPrQueue.pl \
 DEPrinter.pl \
@@ -63,6 +64,7 @@ DEStopTimer.pl \
 DESwitch.pl \
 DEThreshold.pl \
 DEUDCounter.pl \
+DEUnPacketize.pl \
 DEVarDelay.pl \
 DEVarServer.pl \
 DEXMgraph.pl \
