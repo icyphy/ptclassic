@@ -41,15 +41,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 
         //////////////////////////////
-        // VHDWormhole
+        // VHDLWormhole
         //////////////////////////////
 
 class VHDLWormhole : public CGWormBase, public VHDLStar {
 
 public:
-	void setup();
-	void go();
-	void wrapup() { /* target->wrapup(); */ }
+//	void setup();
+//	void go();
+//	void wrapup() { /* target->wrapup(); */ }
 
 	// Constructor
 	VHDLWormhole(Galaxy& g, Target* t = 0);
@@ -82,7 +82,7 @@ public:
 	void initState() { gal.initState() ;}
 
 	// return myself
-	CGWormBase* myWormhole();
+//	CGWormBase* myWormhole();
 
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}

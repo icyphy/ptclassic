@@ -118,9 +118,10 @@ StringList VHDLPortHole :: dataType() const {
   StringList type;
 
 // May not want to resolve the type here...causes unwanted type changes in code
-//  DataType dtyp = this->resolvedType();
+  DataType dtyp = this->resolvedType();
 
-  DataType dtyp = this->type();
+// Old way of doing things for brute-force simplicity.  
+//  DataType dtyp = this->type();
 
   type.initialize();
   

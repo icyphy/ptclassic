@@ -50,7 +50,9 @@ VHDLObj :: VHDLObj(const char* n, Block* p, const char* d) : NamedObj(n,p,d) {
 VHDLObj :: ~VHDLObj() {}
 
 // Initializer.
-void VHDLObj :: initialize() {}
+void VHDLObj :: initialize() {
+  name = "";
+}
 
 // Class identification.
 const char* VHDLObj :: className() const { return "VHDLObj"; }
