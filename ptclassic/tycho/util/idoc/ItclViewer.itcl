@@ -445,9 +445,9 @@ body ::tycho::ItclViewer::_displayVariables {protection} {
 body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
     set classModel $_classmodels($class)
 
-    set expl [$classModel attrset $type:$item -explanation]
+    set expl [$classModel attrget $type:$item -explanation]
     if { $expl == "" } {
-        set expl [$classModel attrset $type:$item -description]
+        set expl [$classModel attrget $type:$item -description]
     }
 
     set other {}
@@ -458,7 +458,7 @@ body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
 	# NOTE: Itcl destructors don't have parameters
 	set arglist {}
 	foreach arg [$classModel match argument $type:$item] {
-	    set default [$classModel attrset \
+	    set default [$classModel attrget \
 	    		[concat $type:$item argument:$arg] -default]
 	    if {$default == {}} {
 		lappend arglist $arg
@@ -472,7 +472,7 @@ body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
     } elseif {$type == "variable"} {
 	
 	# Get the variable's default value
-	set default [$classModel attrset variable:$item -default]
+	set default [$classModel attrget variable:$item -default]
 	if {$default != {}} {
 	    set other $default
 	}
@@ -548,7 +548,7 @@ body ::tycho::ItclViewer::_generateHtmlBody {} {
     
     # Check for constructor
     if [$classModel exists constructor:constructor] {
-	if {$verbose || [$classModel attrset constructor:constructor \
+	if {$verbose || [$classModel attrget constructor:constructor \
 			-description] != { }} {
 	    append html "<H2><a name=\"constructor $of_class\"\
 		    >Constructor</a></H2>\n<dl>"
@@ -562,7 +562,7 @@ body ::tycho::ItclViewer::_generateHtmlBody {} {
     
     # Check for destructor
     if [$classModel exists destructor:destructor]  {
-	if {$verbose || [$classModel attrset destructor:destructor \
+	if {$verbose || [$classModel attrget destructor:destructor \
                 -description] != { }} {
 	    append html "<H2><a name=\"destructor $of_class\"\
 		    >Destructor</a></H2>\n<dl>"
@@ -695,7 +695,7 @@ body ::tycho::ItclViewer::_generateHtmlContents {} {
     # Check for constructor
     set constructor [$classModel match constructor]
     if {$constructor != {}} {
-	if {$verbose || [$classModel attrset constructor:$constructor \
+	if {$verbose || [$classModel attrget constructor:$constructor \
 			-description] != { }} {
 	    append html "<a href=\"#constructor $of_class\"\
 		    >constructor</a> -\n"
@@ -705,7 +705,7 @@ body ::tycho::ItclViewer::_generateHtmlContents {} {
     # Check for destructor
     set destructor [$classModel match destructor]
     if {$destructor != {}} {
-	if {$verbose || [$classModel attrset destructor:$destructor \
+	if {$verbose || [$classModel attrget destructor:$destructor \
 			-description] != { }} {
 	    append html "<a href=\"#destructor $of_class\"\
 		    >destructor</a> -\n"
@@ -763,7 +763,7 @@ body ::tycho::ItclViewer::_hyperLink \
 	set text "<a href = \
 		\"[$classModel cget -sourcefile]#body [$classModel \
 		cget -classname]::$item\">$text</a>"
-    } elseif {$type == "variable" && [$classModel attrset \
+    } elseif {$type == "variable" && [$classModel attrget \
 	    variable:$item -modifiers] != "itk_option"} { 
 	set text "<a href = \
 		\"[$classModel cget -sourcefile]#variable $item\">\

@@ -263,7 +263,7 @@
 #
 # Return the explanation of a method:
 # <pre><tcl>
-#     $class attrset method:bar -explanation
+#     $class attrget method:bar -explanation
 # </tcl></pre>
 #
 # Return the arguments of a method:
