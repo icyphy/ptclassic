@@ -241,9 +241,7 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
     }
 
     set myView [::tycho::File::openContext $tmpFile]
-    # FIXME: we should be able to set tmpfile without knowning that
-    # openContext returns a window that has a .v in it.
-    $myView.v configure -tmpfile 1
+    $myView configure -tmpfile 1
 
     cd $olddir
 }

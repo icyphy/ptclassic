@@ -388,8 +388,7 @@ body ::tycho::TopLevel::hyperJump {file {point {}}} {
         if {$point != {}} {
             # The seePoint call is postponed to give time for the widget
             # to be created. The catch is in case it is immediately deleted.
-            # FIXME: we should not be using .v here
-            after 200 [list catch [list $obj.v seePoint $point]]
+            after 200 [list catch [list $obj seePoint $point]]
         }
     } {
         seePoint $point
