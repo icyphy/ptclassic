@@ -1,5 +1,6 @@
 static const char file_id[] = "InterpGalaxy.cc";
-/******************************************************************
+/****************************************************************** 
+
 Version identification:
 $Id$
 
@@ -571,8 +572,14 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 	setNameParent(g.name(), NULL);
 
 // process the action list
-	int nacts = g.actionList.numPieces();
-	StringListIter next(g.actionList);
+	processActionList(g.actionList);
+}
+
+void
+InterpGalaxy::processActionList(const StringList& actionListToProcess) {
+// process the action list
+	int nacts = actionListToProcess.numPieces();
+	StringListIter next(actionListToProcess);
 
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
@@ -752,6 +759,12 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 	return ((InterpGalaxy&)b->asGalaxy()).blockWithDottedName (p + 1);
 }
 
+void InterpGalaxy :: reset() {
+	StringList actionListOriginal = actionList;
+	zero();
+	processActionList(actionListOriginal);
+}	
+	
 // Destructor -- we have to wipe out all the manually added things.
 // We don't need to do this for compiled Galaxys because the blocks,
 // ports, and states are members.

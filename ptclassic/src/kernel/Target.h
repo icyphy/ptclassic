@@ -196,6 +196,12 @@ public:
 	// virtual method: do I support the given star type?
 	virtual int support(Star* s); 
 
+        // With these methods, we enable a scheduler or a target to
+	// reset the target & galaxy description back to that stored
+	// in the action list.  See InterpUniverse::initTarget and
+	// InterpGalaxy::reset for more details
+	void requestReset();
+	int resetRequested();
 protected:
 
 	// initialization for the target (called by initialize)
@@ -243,6 +249,8 @@ protected:
 	char* writeFileName(const char* fileName = 0);
 
 private:
+        // reset target/galaxy flag
+        int resetFlag;
 	// name of class of star this target supports
 	const char* supportedStarClass;
 	// points to a linked list of children
