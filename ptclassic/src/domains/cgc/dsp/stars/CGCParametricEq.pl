@@ -224,9 +224,12 @@ and Hipass types.
 	      filtercoeff[4] = a2/b2;
 	    }
 	}
+
 	codeblock(setfiltertaps){
-	  static void $sharedSymbol(CGCParamBiquad,setfiltertaps)(parametric_t *parametric,
-			double *filtercoeff, double *filtertaps) {
+	  static void $sharedSymbol(CGCParamBiquad,setfiltertaps)
+	    (parametric_t *parametric, double *filtercoeff, double
+	     *filtertaps)
+	    {
 	    if (parametric->gainflag == 1){
 	      filtertaps[0]=filtercoeff[2];
 	      filtertaps[1]=filtercoeff[3];	      
@@ -243,6 +246,33 @@ and Hipass types.
 	    }
 	  }
 	}
+	
+	codeblock(selectFilter) {
+	  /* This procedure is for the Tk star. Its a common	*/
+	  /* procedure called to update changes in gain, center */
+	  /* freq., bandwidth, and passband freq, in the Tk star*/
+
+	  static void $sharedSymbol(CGCParamBiquad,selectFilter)
+	    (parametric_t *parametric, double *filtercoeff, 
+	     double *filtertaps, char *filtername)
+	    {
+	      if (strcasecmp(filtername, "LOW") == 0){
+		$sharedSymbol(CGCParamBiquad,lowpass)
+		  (parametric, filtercoeff);
+	      }
+	      else if (strcasecmp(filtername, "HI") == 0){
+		$sharedSymbol(CGCParamBiquad,hipass)
+		  (parametric, filtercoeff);
+	      }
+	      else if (strcasecmp(filtername, "BAND") == 0){
+		$sharedSymbol(CGCParamBiquad,bandpass)
+		  (parametric, filtercoeff);
+	      }
+	      $sharedSymbol(CGCParamBiquad,setfiltertaps)
+		(parametric, filtercoeff, filtertaps);
+	    }
+	}
+	
 	codeblock(globalDecl){
 	  typedef struct parametric_band {
 	    double omegac;
@@ -273,6 +303,7 @@ and Hipass types.
 	  addProcedure(hipass, "CGCParamBiquad_hipass");
 	  addProcedure(bandpass, "CGCParamBiquad_bandpass");
 	  addProcedure(setfiltertaps, "CGCParamBiqaud_setfiltertaps");
+	  addProcedure(selectFilter, "CGCParamBiquad_selectFilter");
 	  addCode("$starSymbol(setparams)(&$starSymbol(parametric));");
 	  if (strcasecmp(filtertype, "LOW") == 0){
 	    addCode("$sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
