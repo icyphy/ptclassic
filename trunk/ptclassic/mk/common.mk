@@ -143,16 +143,10 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 .pl.cc: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
-	-if [ -w $(STARDOCDIR) ] ; then \
-		 ( cd $(VPATH); mv -f $*.t $*.htm $(STARDOCDIR)/. ) \
-	fi ;
 
 .pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
-	-if [ -w $(STARDOCDIR) ] ; then \
-		( cd $(VPATH); mv -f $*.t $*.htm $(STARDOCDIR)/. ) \
-	fi ;
 
 # Rules for running the islang processor
 # Make sure we always run the preprocessor in the source directory
@@ -161,12 +155,10 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 .is.cc: $(ISLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(ISLANG) $<
 	@$(STARDOCRULE)
-	-cd $(VPATH)
 
 .is.h: $(ISLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(ISLANG) $<
 	@$(STARDOCRULE)
-	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 # Rule for the thor preprocessor
 # Make sure we always run the preprocessor in the source directory
