@@ -89,8 +89,6 @@ protected:
 	void setWriteCom();
 
 private:
-//	CodeStream preSynch;
-//	CodeStream postSynch;
 	CodeStream cli_models;
 	CodeStream cli_comps;
 	CodeStream cli_configs;

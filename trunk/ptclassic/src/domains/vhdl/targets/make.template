@@ -51,8 +51,8 @@ PL_SRCS = CGCVSynchComm.pl CGCVSend.pl CGCVReceive.pl \
 	VHDLCSynchComm.pl VHDLCSend.pl VHDLCReceive.pl
 EXTRA_SRCS = $(PL_SRCS)
 
-SRCS = StructTarget.cc SynthTarget.cc SimTarget.cc SimMTTarget.cc \
-	SimVSSTarget.cc $(PL_SRCS:.pl=.cc)
+SRCS = StructTarget.cc SynthTarget.cc SimVSSTarget.cc SimMTTarget.cc \
+	$(PL_SRCS:.pl=.cc)
 
 HDRS = $(SRCS:.cc=.h)
 OBJS = $(SRCS:.cc=.o) $(LIBSRCS:.cc=.o) 

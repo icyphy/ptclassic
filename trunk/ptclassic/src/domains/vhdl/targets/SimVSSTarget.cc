@@ -85,7 +85,7 @@ Block* SimVSSTarget :: makeNew() const {
 }
 
 static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
-  "VHDL code generation target for Synopsys simulation");
+			  "VHDL code generation target for Synopsys simulation");
 static KnownTarget entry(proto,"SimVSS-VHDL");
 
 void SimVSSTarget :: setup() {
@@ -254,6 +254,7 @@ void SimVSSTarget :: writeCode() {
   if (writeCom) {
     writeComFile();
   }
+  singleUnderscore();
 }
 
 // Write the command log to a file.
@@ -283,10 +284,12 @@ int SimVSSTarget :: runCode() {
       (void) systemCall(command, error, targetHost);
     }
     else {
+/*
       StringList comCode = "";
       comCode << "run\n";
       comCode << "quit\n";
       writeFile(comCode, ".com", 0);
+      */
       command << "ptvhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
       StringList error = "";
       error << "Could not simulate " << filePrefix << ".vhdl";
