@@ -39,8 +39,8 @@ if { "$tcl_platform(platform)" != "mac"} {
     # to save work.
     #
     rename ::exit ::tclexit
-    proc ::exit {{queryUser 1}} {
-	::tycho::TopLevel::exitProgram $queryUser
+    proc ::exit {} {
+	::tycho::TopLevel::exitProgram
     }
 }
 
@@ -149,7 +149,7 @@ class ::tycho::TopLevel {
     ####                   public procedures                     ####
 
     # Exit the program
-    public proc exitProgram {{queryUser 1}} {}
+    public proc exitProgram {} {}
 
     # Return 1 if we are in the process of exiting, 0 otherwise.
     public proc returnExitCon {} {}
@@ -503,8 +503,8 @@ body ::tycho::TopLevel::raiseWindow {} {
 # it will return 0 if the user canceled the exit, and 1 if the exit
 # is in progress.
 #
-body ::tycho::TopLevel::exitProgram {{queryUser 1}} {
-    if {$queryUser == 1} {
+body ::tycho::TopLevel::exitProgram {} {
+    if { [::preference get misc confirmOnExit] } {
 	set response [::tycho::askuser "OK to exit the program?"]
     } else {
 	set response 1
