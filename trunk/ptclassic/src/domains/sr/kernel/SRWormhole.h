@@ -87,7 +87,7 @@ public:
   // constructor
   SRtoUniversal() : ToEventHorizon(this) {}
 
-  // redefine
+  // Put incoming particles into myBuffer
   void receiveData();
 
   void initialize();
@@ -102,8 +102,6 @@ public:
     return ToEventHorizon::allocateGeodesic();
   }
 
-  void transferParticle();
-
   /*virtual*/ int onlyOne() const;
 
 };
@@ -111,11 +109,12 @@ public:
 class SRfromUniversal : public FromEventHorizon, public OutSRPort {
 public:
 
-  // constructor
   SRfromUniversal() : FromEventHorizon(this) {}
 
-  // redefine
+  // Emit particles in myBuffer
   void sendData();
+
+  void transferParticle();
 
   void initialize();
 
