@@ -1,6 +1,6 @@
 # $Id$
 #
-# Makefile for changeIconMasters document
+# Makefile for masters document
 #
 
 PTOLEMY       = /usr/users/ptolemy

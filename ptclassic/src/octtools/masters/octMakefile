@@ -3,7 +3,7 @@
 #  Octtools Makefile -- MODIFIED FOR USE WITH PTOLEMY
 #  This is a first-cut makefile.  Needs alot of work.
 #
-#  changeIconMasters - change the pointers to icon masters in one or more
+#  masters - list and change the pointers to icon masters in one or more
 #		       oct facets.
 #
 #  Makefile created by hand
@@ -47,7 +47,7 @@ BUILD = ${OCTTOOLS}/bin/create-octtools-makefile
 #   setenv PARALLEL 8; make P="&" install
 P = 
 
-NAME	= changeIconMasters
+NAME	= masters
 
 # packages required for this package/tool
 REQUIRE	= options utility oct oh mm port
@@ -55,9 +55,9 @@ REQUIRE	= options utility oct oh mm port
 # tools required for this tool
 TOOLREQUIRE = 
 
-SRC	= changeIconMasters.c
-LSRC	= changeIconMasters.c
-OBJ	= changeIconMasters.o
+SRC	= masters.c
+LSRC	= masters.c
+OBJ	= masters.o
 HDR	= 
 
 CADBIN	= ${OCTTOOLS}/bin
