@@ -60,7 +60,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 st_table *get_facet_changelistid_table_addr();
 
-static drsLastWasUndo = 0;
+static int drsLastWasUndo = 0;
 
 void
 drsLastCommandWasUndo()
