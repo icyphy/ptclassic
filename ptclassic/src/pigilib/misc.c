@@ -96,6 +96,11 @@ long userOptionWord;
 	PrintErr(octErrorString());
     	ViDone();
     }
+/* set current domain.  This will change to use the domain of the star */
+    if(setCurDomainF(&facet) == NULL) {
+        PrintErr("Domain error in facet.");
+        ViDone();
+    }
 
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
@@ -108,25 +113,19 @@ long userOptionWord;
 	    PrintCon("Aborted entry");
 	    ViDone();
 	}
-	if (!KcInfo(item.value, &info)) {
+	if (!KcProfile(item.value)) {
 	    PrintErr(ErrGet());
-	    ViDone();
 	}
-	PrintCon(info);
-	free(info);
 	ViDone();
     } else if (IsDelay(&inst)) {
 	/* delay inst is under cursor */
-	PrintCon("Cursor must be over a star");
+	PrintErr("Cursor must be over a star");
 	ViDone();
     } else {
 	/* assume inst is a star... */
-	if (!KcInfo(AkoName(inst.contents.instance.master), &info)) {
+	if (!KcProfile(AkoName(inst.contents.instance.master))) {
 	    PrintErr(ErrGet());
-	    ViDone();
 	}
-	PrintCon(info);
-	free(info);
 	ViDone();
     }
 }
