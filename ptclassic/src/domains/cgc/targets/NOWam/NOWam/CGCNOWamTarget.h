@@ -46,7 +46,6 @@ class CGCTarget;
 
 class VirtualInfo {
 friend class CGCNOWamTarget;
-	int pairs;	// number of send/receive pairs
 	unsigned long inetAddr; // internet address
 	int virtNode;	// active message virtual node
 	const char* nm;		// machine name
@@ -100,6 +99,9 @@ private:
 
 	// information on the machines
 	VirtualInfo* machineInfo;
+
+	// number of send/receive pairs
+	int pairs;	
 
 	// identify machines
 	int identifyMachines();
