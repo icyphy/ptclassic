@@ -59,7 +59,6 @@ static char SccsId[] = "$Id$";
 
 #include "oct2ptcl.h"
 
-int octoptind = 0;
 /*global*/ char _OtpPackage[] = "otp";
 #define SPKG _OtpPackage
 
@@ -1119,7 +1118,10 @@ otpXlateDesignByName( char *facetName, int flags) {
 };
 
 int
-main( int argc, char **argv) {
+main( int argc, char **argv)
+{
+    extern int  octoptind;
+
     int		designFlags = 0;
     int		option;
 
