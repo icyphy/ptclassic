@@ -57,11 +57,25 @@ INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 LIB=libvhdl.$(LIBSUFFIX)
 
 # Header files
-HDRS= VHDLPortHole.h VHDLStar.h VHDLTarget.h VHDLGeodesic.h VHDLForkNode.h \
-	VHDLWormhole.h VHDLObj.h VHDLObjList.h VHDLPort.h  VHDLState.h \
-	VHDLGeneric.h VHDLVariable.h VHDLSignal.h VHDLArc.h VHDLPortVar.h \
-	VHDLPortMap.h VHDLGenericMap.h VHDLCompDecl.h VHDLCompMap.h \
-	VHDLCluster.h VHDLFiring.h
+HDRS= \
+	VHDLArc.h \
+	VHDLCluster.h \
+	VHDLCompDecl.h \
+	VHDLFiring.h \
+	VHDLForkNode.h \
+	VHDLGeneric.h \
+	VHDLGeodesic.h \
+	VHDLObj.h \
+	VHDLPort.h  \
+	VHDLPortHole.h \
+	VHDLPortVar.h \
+	VHDLSignal.h \
+	VHDLStar.h \
+	VHDLState.h \
+	VHDLTarget.h \
+	VHDLTypedObj.h \
+	VHDLVariable.h \
+	VHDLWormhole.h \
 
 # Library objects
 OBJS= $(HDRS:.h=.o) VHDLDomain.o
