@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 		       
- Programmer:  J. T. Buck, Brian Evans, and E. A. Lee
+ Programmer:  E. A. Lee, J. T. Buck, Brian Evans
  Date of creation: 2/97
 
 This file implements a class that adds Ptolemy-specific Itcl commands to
@@ -57,6 +57,7 @@ class Target;
 class Block;
 class StringList;
 class InfString;
+class GenericPort;
 
 /////////////////////////////////////////////////////////////////////
 //// IUList
@@ -154,17 +155,36 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////
 //// PTcl
-// This class is the main interface between the Ptolemy kernel and Itcl.
-// Commands in this class should not be used directly.  Instead, the
-// classes defined in the ::ptolemy namespace should be used.
+// This class is the main interface between the Ptolemy kernel and
+// Itcl. Commands in this class should not be used directly. Instead,
+// the classes defined in the ::ptolemy namespace should be used.
 // Because interaction with Itcl is not as rich as it might be, this
-// implementation preserves from its predecessor the notion of a current
-// galaxy and current universe.  This seems to be the simplest approach,
-// and is hidden from the user by the classes in the ::ptolemy namespace.
-// For commands that operate on a block, the block can be a star, galaxy,
-// universe, wormhole, or target.  Name conflicts are resolved in that order.
-// Moreover, the name can be absolute or relative to the current galaxy.
-// See the documentation with the *getBlock* method for details.
+// implementation preserves from its predecessor the notion of a
+// current galaxy and current universe. This seems to be the simplest
+// approach, and is hidden from the user by the classes in the
+// ::ptolemy namespace. For commands that operate on a block, the block
+// can usually be a star, galaxy, universe, wormhole, or target. Names
+// of blocks can take any of the following forms:
+// <ol>
+// <li> _name_
+// <li> _name1.name2_
+// <li> _name1.name2...nameN_
+// <li> _.name_
+// <li> _.name1.name2_
+// <li> _.name1.name2...nameN_
+// <li> this
+// <li> target
+// </ol>
+// The first can specify a member of the current galaxy, a master star,
+// a master galaxy, or a target (names conflicts are resolved in that order).
+// The second can specify a star within a galaxy within the current galaxy,
+// or a star or galaxy within a master galaxy.
+// The third is just the obvious generalization of this.
+// The fourth specifies a universe.
+// The fifth specifies a block (star or galaxy) within a universe.
+// The sixth is the obvious generalization.
+// The seventh specifies the current galaxy, and the last specifies
+// the current target.
 //
 class PTcl {
 
@@ -187,13 +207,14 @@ public:
     // of several auxiliary methods provided below.
 
     int abort(int argc,char** argv);
+    int addBlock(int argc,char** argv);
+    int addUniverse(int argc,char** argv);
     int alias(int argc,char** argv);
     int animation(int argc,char** argv);
-    int block(int argc,char** argv);
     int blocks(int argc,char** argv);
-    int busconnect(int argc,char** argv);
     int cancelAction(int argc,char** argv);
     int connect(int argc,char** argv);
+    int connected(int argc,char** argv);
     int cont(int argc,char** argv);
     int curgalaxy(int argc,char** argv);
     int defgalaxy(int argc,char** argv);
@@ -202,9 +223,12 @@ public:
     int domain(int argc,char** argv);
     int domains(int argc,char** argv);
     int exit(int argc,char** argv);
+    int getAnnotation(int argc,char** argv);
     int getClassName(int argc,char** argv);
     int getDescriptor(int argc,char** argv);
+    int getDomain(int argc,char** argv);
     int getFullName(int argc,char** argv);
+    int getParent(int argc,char** argv);
     int halt(int argc,char** argv);
     int initialize(int argc,char** argv);
     int isgalaxy(int argc,char** argv);
@@ -222,7 +246,6 @@ public:
     
     int multilink(int argc,char** argv);
     int newstate(int argc,char** argv);
-    int newuniverse(int argc,char** argv);
     int node(int argc,char** argv);
     int nodeconnect(int argc,char** argv);
     int numports(int argc,char** argv);
@@ -260,7 +283,7 @@ public:
     static PTcl* findPTcl(Tcl_Interp*);
     
     // Return the full name of the specified block with a leading period.
-    static InfString fullName(const Block*);
+    static InfString fullName(const NamedObj*);
 
     // If there is a universe by the given name in this PTcl object,
     // return it.  Otherwise return NULL.
@@ -283,6 +306,15 @@ protected:
 
     // Return a pointer to a block given its name.
     const Block* getBlock(const char*);
+
+    // Return a pointer to the block containing the named port or state.
+    const Block* getParentBlock(const char*);
+    
+    // Return a pointer to the galaxy within which the named block would be.
+    InterpGalaxy* getParentGalaxy(const char*);
+    
+    // Return a pointer to a port with the given name.
+    GenericPort* getPort(const char*, int);
     
     // Add this object to the table of PTcl objects.
     void makeEntry();
@@ -296,6 +328,9 @@ protected:
     // Return a const char* or a StringList result to Tcl.
     int result(const char* str);
     
+    // Return the name after the last period.
+    const char* rootName(const char*);
+
     // Return a static string (quoted constant) to Tcl.
     int staticResult(const char*);
     
