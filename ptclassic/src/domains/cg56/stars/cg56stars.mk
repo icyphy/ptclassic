@@ -7,9 +7,9 @@
 
 CG56STARS = \
  $(CG56)/CG56Abs.o \
- $(CG56)/CG56ACOS.o \
+ $(CG56)/CG56ACos.o \
  $(CG56)/CG56Add.o \
- $(CG56)/CG56ASIN.o \
+ $(CG56)/CG56ASin.o \
  $(CG56)/CG56BiQuad.o \
  $(CG56)/CG56BlackHole.o \
  $(CG56)/CG56Commutator.o \
