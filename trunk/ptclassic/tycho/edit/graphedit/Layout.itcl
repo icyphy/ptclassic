@@ -86,6 +86,9 @@ class ::tycho::Layout {
     # Set attributes of an item
     method attrset {name args}
 
+    # "Clean" an item
+    method clean {{item {}}}
+    
     # Clear data from the model
     method clear {}
 
@@ -95,6 +98,9 @@ class ::tycho::Layout {
     # Get a description of the layout or an item
     method describe {{item {}} {prefix {}}}
 
+    # "Dirty" an item
+    method dirty {item}
+    
     # Forward a query to a subscriber view
     method forward {method name args}
     
@@ -188,10 +194,10 @@ body ::tycho::Layout::add {type item args} {
 # the inherited method to deal with the coordinates.
 #
 body ::tycho::Layout::attrget {item {attribute {}}} {
-    # Update coordinates
-    if [::info exists _dirty($item)] {
-        attrset $item -coords [forward coords $item]
-    }
+    # Clean it first
+    clean $item
+
+    # Get the attribute
     chain $item $attribute
 }
 
@@ -206,12 +212,46 @@ body ::tycho::Layout::attrset {item args} {
     if { [lsearch -exact $args -slatetype] != -1 } {
         error "Attribute \"-slatetype\" is read-only"
     }
-    if { [lsearch -exact $args -coords] != -1 } {
-        catch {unset _dirty($item)}
-    }
+    #if { [lsearch -exact $args -coords] != -1 } {
+    #    catch {unset _dirty($item)}
+    #}
     eval chain $item $args
 }
 
+########################################################################
+#### clean
+#
+# "Clean" a dirty item or all items. The data in this model is
+# updated to reflect the true state of the item as obtained from
+# a canvas contained in one of the subscribers. If an item is
+# supplied, clean it; if no item is supplied, clean all dirty
+# items. This is a necessary prerequisite to describing
+# the model, and to certain other operations...
+#
+body ::tycho::Layout::clean {{item {}}} {
+    if { $item == "" } {
+	# Clean all dirty items. This in inefficient, but I can't
+	# think of a better way of doing it...
+	foreach i [array names _dirty] {
+	    set attrs [list -coords [forward coords $i]]
+	    foreach {opt _ _ _ val} [eval concat [forward itemconfigure $i]] {
+		lappend attrs $opt $val
+	    }
+	    eval attrset [list $i] $attrs
+	}
+	catch {unset _dirty}
+
+    } elseif [info exists _dirty($item)] {
+	# Clean just one item
+	set attrs [list -coords [forward coords $item]]
+	foreach {opt _ _ _ val} [eval concat [forward itemconfigure $item]] {
+	    lappend attrs $opt $val
+	}
+	eval attrset [list $item] $attrs
+	unset _dirty($item)
+    }
+}
+	
 ########################################################################
 #### clear
 #
@@ -249,22 +289,31 @@ body ::tycho::Layout::coords {item args} {
 # See the docs in the DataModel superclass.
 #
 body ::tycho::Layout::describe {{item {}} {prefix {}}} {
-    if { $item == "" } {
-	# Update all coords
-	foreach i [array names _dirty] {
-	    set attrs [list -coords [forward coords $i]]
-	    foreach {opt _ _ _ val} [forward itemconfigure $i] {
-		lappend attrs $opt $val
-	    }
-	    eval attrset [list $i] $attrs
- 	    # puts !$attrs
-	}
-    } elseif [info exists _dirty($item)] {
-	attrset $item -coords [forward coords $item]
-    }
+    clean $item
     chain $item $prefix
 }
 	
+########################################################################
+#### dirty
+#
+# Mark an item as "dirty." This means that its coordinates and/or
+# attributes in the model are out of sync with the coordinates
+# and attributes in the actual slates on which ths item is drawn.
+# We have to do this because this model is not a "real" model -- most
+# of the work is done in the Tk canvas itself. If the item is not
+# a real item, then it is assumed to be a tag, and all items with
+# that tag are made dirty.
+#
+body ::tycho::Layout::dirty {item} {
+    if [exists $item] {
+	set _dirty($item) 1
+    } else {
+	foreach i [find withtag $item] {
+	    set _dirty($i) 1
+	}
+    }
+}
+
 #######################################################################
 #### forward
 #
@@ -290,19 +339,12 @@ body ::tycho::Layout::forward {method name args} {
 # command in the history if currently recording.
 #
 body ::tycho::Layout::move {tag x y} {
-    # If not recording, set the dirty flag of each item.
-    if !$recording {
+    # Set the dirty flag of each item.
+    dirty $tag
+
+    # If recording, add to the history as well
+    if $recording {
         if [exists $tag] {
-            set _dirty($tag) 1
-        } else {
-            foreach item [find withtag $tag] {
-                set _dirty($item) 1
-            }
-        }
-    } else {
-        # If recording, add to the history as well
-        if [exists $tag] {
-            set _dirty($tag) 1
             history append \
                     "move $tag $x $y" \
                     "move $tag [expr -$x] [expr -$y]"
@@ -310,7 +352,6 @@ body ::tycho::Layout::move {tag x y} {
             set redo _compound
             set undo _compound
             foreach item [find withtag $tag] {
-                set _dirty($item) 1
                 lappend redo "move $item $x $y"
                 lappend undo "move $item [expr -$x] [expr -$y]"
             }
@@ -369,11 +410,13 @@ body ::tycho::Layout::moverelease {tag} {
 # command in the history if currently recording.
 #
 body ::tycho::Layout::reshape {item x y args} {
+    # Set the dirty flag
+    dirty $item
+
     # puts "reshape $item $x $y $args"
     if ![exists $item] {
         error "Cannot reshape \"$item\""
     }
-    set _dirty($item) 1
     if $recording {
         history append \
                 "reshape $item $x $y $args" \
@@ -523,6 +566,7 @@ body ::tycho::Layout::_describeitem {item {prefix {}}} {
     _describe $item $prefix
 }
 
+#######################################################################
 ########################################################################
 #### find
 #
