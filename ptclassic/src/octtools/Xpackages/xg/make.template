@@ -57,9 +57,20 @@ LIB = 		libxg.$(LIBSUFFIX)
 
 EXPHDR =	xg.h
 
+DRIVER =	xg_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ = 	testxg.o
+
+DRVRLIBS =	-lst -lutility -lxpa -lport -lerrtrap -luprintf $(X11_LIBSPEC) $(X11EXT_LIBSPEC) -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	@echo "run $(DRIVER) by hand."
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
