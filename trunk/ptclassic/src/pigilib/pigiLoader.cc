@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <std.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "compat.h"
 #include "Linker.h"
 #include "Error.h"
 #include "Domain.h"
@@ -47,7 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include <ctype.h>
 #include "pt_fstream.h"
-#if (defined(hppa) && ! defined(__GNUG__)) || defined(SOL2) || defined(SVR4) || defined(SYSV)
+#if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV)
 #include <fcntl.h>		// For open().
 #endif /*hppa GNUG SOL2*/
 
@@ -63,26 +64,48 @@ extern char *sys_errlist[];
 #define CPLUSPLUS "CC"
 #endif
 
-// architecture-specific stuff
-#if defined(__sun__) || defined(sun)
+// Architecture-specific stuff.  The PTFOO defs come from compat.h
+
+#ifdef PTALPHA
+#define ARCH "alpha"
+#endif
+
+#ifdef PTHPPA
+#define ARCH "hppa"
+#endif
+
+#ifdef PTHPPA_CFRONT
+#undef ARCH
+#define ARCH "hppa.cfront"
+#endif
+
+#ifdef PTIRIX5
+#define ARCH "irix5"
+#endif
+
+#ifdef PTLINUX
+#define ARCH "linux"
+#endif
+
+#ifdef PTULTRIX
+#define ARCH "mips"
+#endif
+
 #ifdef __mc68000__
 #define ARCH "sun3"
 #endif
-#if defined(__sparc__) || defined(sparc)
-#if defined(__svr4__) || defined(SVR4) || defined(SYSV)
-#if defined(__GNUG__)
-#define ARCH "sol2"
-#else
-#define ARCH "sol2.cfront"
-#endif /* __GNUG__ */
-#else
-#define ARCH "sun4"
-#endif /* __svr4__ etc */
-#endif /* __sparc__ */
-#endif /* __sun__ */
 
-#ifdef linux
-#define ARCH "linux"
+#ifdef PTSOL2
+#define ARCH "sol2"
+#endif
+
+#ifdef PTSOL2_CFRONT
+#undef ARCH
+#define ARCH "sol2.cfront"
+#endif
+
+#ifdef PTSUN4
+#define ARCH "sun4"
 #endif
 
 #ifdef vax
@@ -90,11 +113,6 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef mips
-#if defined(__sgi__) || defined(sgi)
-#define ARCH "irix5"
-#else
-#define ARCH "mips"
-#endif // __sgi__ sgi
 #define EXTRAOPTS "-G 0"
 #else
 #ifndef __GNUG__
@@ -105,10 +123,7 @@ extern char *sys_errlist[];
 #endif /* ! __GNUG__ */
 #endif /* mips */
 
-// __hppa__ is not defined under hppa cfront
-#if defined(hppa)  || defined(__hppa__)
-#define ARCH "hppa"
-#endif
+
 
 // root of Ptolemy source/lib directory
 static const char* ptolemyRoot;
