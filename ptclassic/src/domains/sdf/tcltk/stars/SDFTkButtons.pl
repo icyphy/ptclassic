@@ -4,7 +4,7 @@ defstar {
 	derivedFrom { TclScript }
 	desc {
 This star outputs the value 0.0 on all outputs unless the correspoding
-button is pushed.  When the button is pused, the output takes the value
+button is pushed.  When the button is pushed, the output takes the value
 given by the parameter "value".  If "synchronous" is YES, then outputs
 are produced only when some button is pushed.  I.e., the star waits for
 a button to be pushed before its go method returns.
