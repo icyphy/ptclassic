@@ -59,9 +59,9 @@ option add *FontManager.variableItalic \
 #### FontManager
 # This class supports font selection. Instances of this class are
 # dialog windows that permit the user to select a font. If the instance
-# is created using the DialogWindow::newModal procedure, the procedure
-# will return either a valid font name selected by the user or the null
-# string (if the user cancels).
+# is created using the ::tycho::DialogWindow::newModal procedure, the
+# procedure will return either a valid font name selected by the user
+# or the null string (if the user cancels).
 #
 # One instance of this class called .tychoFonts is created and left
 # unmapped at all times. This instance can be used by any widget to
@@ -171,27 +171,26 @@ configbody ::tycho::FontManager::initialfont {
 #
 body ::tycho::FontManager::constructor {args} {
 
-    # Pack the OK button.
+    # Add the OK button.
     addButton ok -text "OK <Ret>" -command \
-	    [code "$this execCommand -okcommand; \
-	    $this nextWindow; \
+	    [code "$this execCommand -okcommand; $this nextWindow; \
 	    delete object $this"]
     default ok
 
-    # Pack the Cancel button.
+    # Add the Cancel button.
     addButton cancel -text "Cancel <Esc>" -command \
-	    "$this clearFont; $this nextWindow; delete object $this"
+	    [code "$this clearFont; $this nextWindow; delete object $this"]
 
-    bind $prefix <Escape> "$this invoke cancel"
+    bind $prefix <Escape> [code "$this invoke cancel"]
 
     # Set up the menubar
     itk_component add menuFrame {
-	frame $itk_interior.m -relief raised -bd 2
+	frame $itk_component(childsite).m -relief raised -bd 2
     } {
 	keep -background -cursor
     }
     pack $itk_component(menuFrame) -side top -fill x \
-	    -before $itk_component(childsite)
+	    -before $itk_component(top)
 
     # Insert items in the menubar.
     # First, a selector for miscellaneous fonts
@@ -291,7 +290,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(familyMenu) add radio \
 		-label $family \
 		-variable [scope familySelection] \
-		-command "$this setCurrentFont"
+		-command [code "$this setCurrentFont"]
     }
 
     itk_component add sizeMenu {
@@ -305,7 +304,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(sizeMenu) add radio \
 		-label $size \
 		-variable [scope sizeSelection] \
-		-command "$this setCurrentFont"
+		-command [code "$this setCurrentFont"]
     }
 
     itk_component add weightMenu {
@@ -319,7 +318,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(weightMenu) add radio \
 		-label $weight \
 		-variable [scope weightSelection] \
-		-command "$this setCurrentFont"
+		-command [code "$this setCurrentFont"]
     }
 
     itk_component add styleMenu {
@@ -333,7 +332,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(styleMenu) add radio \
 		-label $style \
 		-variable [scope styleSelection] \
-		-command "$this setCurrentFont"
+		-command [code "$this setCurrentFont"]
     }
 
     itk_component add miscMenu {
@@ -346,7 +345,7 @@ body ::tycho::FontManager::constructor {args} {
     foreach font [option get $itk_component(hull) specialFonts FontManager] {
 	$itk_component(miscMenu) add command \
 		-label $font \
-		-command "$this tryFont $font"
+		-command [code "$this tryFont $font"]
     }
 
     ##################################################################
@@ -365,11 +364,10 @@ body ::tycho::FontManager::constructor {args} {
 	    -command \
 	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
     
-    # FIXME: help command not implemented. Should be a proc.
     $itk_component(helpMenu) add command \
 	    -label "User's Guide" \
 	    -underline 0 \
-	    -command "$this help"
+	    -command [code "$this help"]
 
     set sample "
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -384,7 +382,8 @@ abcdefghijklmnopqrstuvwxyz
 		-foreground -highlightbackground
 	rename -font -displayfont displayFont DisplayFont
     }
-    pack $itk_component(sampler) -fill both -expand yes
+    pack $itk_component(sampler) -fill both -expand yes \
+	    -after $itk_component(top)
 
     itk_component add fontname {
 	label $itk_component(childsite).label
@@ -393,7 +392,8 @@ abcdefghijklmnopqrstuvwxyz
 		-foreground -highlightbackground
 	rename -font -displayfont displayFont DisplayFont
     }
-    pack $itk_component(fontname) -fill both -expand yes    
+    pack $itk_component(fontname) -fill both -expand yes \
+	    -after $itk_component(sampler)
 
     $itk_component(fontname) configure -text \
 	    [$itk_component(fontname) cget -font]
@@ -533,7 +533,7 @@ body ::tycho::FontManager::getValidSize {proposed} {
 # Open a window with help on the current widget.
 #
 body ::tycho::FontManager::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	$TYCHO/kernel/doc/usersGuides/FontManagerHelp.html
 }
