@@ -26,6 +26,9 @@ Date of last revision:
 ///////////////////////////
 
 class QuasiScheduler : public ParScheduler {
+	// temporal hack to prevent createSubGals if wormhole exists
+	int wormFlag;
+
 	QSGraph* myGraph;
 
 protected:
@@ -51,6 +54,9 @@ public:
 
   	// main body of the schedule
   	int scheduleIt();
+
+	// temporal hack
+	void createSubGals();
 };
 
 #endif
