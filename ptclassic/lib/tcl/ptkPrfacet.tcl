@@ -36,13 +36,9 @@
 # Initialize the global variables.
 # Note that this is done here so that the user's configuration is remembered
 # across multiple invocations of the print command
-#
+# Note that the size and offsets are saved in the facets
 set ptkPortrait 1
 set ptkPrintToFile 0
-set ptkPrHeight 4
-set ptkPrWidth 4
-set ptkPrVertOffset 1
-set ptkPrHorOffset 1
 set ptkPrlabels 1
 set ptkPrBW 0
 set ptkPrPS 1
@@ -164,6 +160,9 @@ proc ptkPrintFacet {name} {
     frame .print.size.c
     frame .print.size.d
 
+    # Get the height, width and offsets from the facet
+    ptkPrfacetGetState $name
+
     # Height
     pack [label .print.size.b.hlabel -text "Max. height (inches):" -width 21] \
 	 -side left -fill none -anchor nw
@@ -259,6 +258,9 @@ proc ptkPrfacet {name} {
 
     append command " " $name
 
+    # Save the height, width and offsets to the facet
+    ptkPrfacetSetState $name
+
     puts $command
     uplevel exec "$command"
     destroy .print
@@ -274,4 +276,59 @@ proc ptkPrfacetEPSI {} {
 	regsub "\.ps$" $ptkPrFileName ".epsi" ptkPrFileName
 }
 
+#########################################################################
+# Get the size and offset for facet name.
+#
+proc ptkPrfacetGetState {name} {
+    global ptkPrHeight ptkPrWidth ptkPrVertOffset ptkPrHorOffset
 
+    # Open the facet
+    set myOctHandle [ptkOpenFacet $name]
+
+    # For each property we want, see if it is set in the facet
+    # if it is set, then update the global variable.  If it is not set
+    # then set the globabl variable to its initial default
+    # We don't use a for look here because we need to handle the defaults
+    set tmp [ptkGetStringProp $myOctHandle ptkPrHeight]
+    if  {$tmp != ""} {
+	set ptkPrHeight $tmp
+    } else {
+	set ptkPrHeight 4
+    }
+    set tmp [ptkGetStringProp $myOctHandle ptkPrWidth] 
+    if  {$tmp != ""} {
+	set ptkPrWidth $tmp
+    } else {
+	set ptkPrWidth 4
+    }
+    set tmp [ptkGetStringProp $myOctHandle ptkPrVertOffset]
+    if  {$tmp != ""} {
+	set ptkPrVertOffset $tmp
+    } else {
+	set ptkPrVertOffset 1
+    }
+    set tmp [ptkGetStringProp $myOctHandle ptkPrHorOffset]
+    if  {$tmp != ""} {
+	set ptkPrHorOffset $tmp
+    } else {
+	set ptkPrHorOffset 1
+    }
+    ptkCloseFacet $myOctHandle
+
+}
+
+#########################################################################
+# Set the size and offset for facet name.
+#
+proc ptkPrfacetSetState {name} {
+    global ptkPrHeight ptkPrWidth ptkPrVertOffset ptkPrHorOffset
+
+    # Open the facet
+    set myOctHandle [ptkOpenFacet $name]
+
+    foreach prop {ptkPrHeight ptkPrWidth ptkPrVertOffset ptkPrHorOffset} {
+	ptkSetStringProp $myOctHandle $prop [set $prop]
+    }
+    ptkCloseFacet $myOctHandle
+
+}
