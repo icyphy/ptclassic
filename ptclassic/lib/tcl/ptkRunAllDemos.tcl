@@ -32,8 +32,7 @@
 # Procedure to bring up the control panel for run-all-demos
 #
 proc ptkRunAllDemos {name octHandle} {
-    global ptkControlPanel ptkOctHandles
-    set ptkOctHandles($name) $octHandle
+    global ptkControlPanel
     set ptkControlPanel .run_all_demos_$octHandle
     
     if {[winfo exists $ptkControlPanel]} {
@@ -45,7 +44,7 @@ proc ptkRunAllDemos {name octHandle} {
 
     catch {destroy $ptkControlPanel}
     # Sets the Class of the Window.  This is used to set all options
-    #   for widgets used in the Contol window
+    # for widgets used in the Control window
     toplevel $ptkControlPanel -class PigiControl
     wm title $ptkControlPanel "Run-all-demos $name"
     wm iconname $ptkControlPanel "Run-all-demos $name"
@@ -65,8 +64,9 @@ proc ptkRunAllDemos {name octHandle} {
     # to stars to insert custom controls into the control panel.
     # By convention, we tend to use "high" for entries, "middle"
     # for buttons, and "low" for sliders.  The full name for the
-    # frame is $ptkControlPanel.$position, where $name is the name of the
-    # universe, and $position is "high", "middle", or "low".
+    # frame is $ptkControlPanel.$position, where ptkControlPanel is
+    # a global variable available to the stars, and $position is "high",
+    # "middle", or "low".
     frame $ptkControlPanel.high
     frame $ptkControlPanel.middle
     frame $ptkControlPanel.low
@@ -81,6 +81,9 @@ proc ptkRunAllDemos {name octHandle} {
     pack $ptkControlPanel.panel.abortAll -side left -fill both -expand yes
     pack $ptkControlPanel.panel.abortCurrent -side right \
 	-fill both -expand yes
+
+    # Event loop is on by default
+    ptkSetEventLoop on
 
     # Animation is off by default
     ptkGrAnimation 0
@@ -104,19 +107,16 @@ proc ptkRunAllDemos {name octHandle} {
     wm geometry $ptkControlPanel +400+400
     focus $ptkControlPanel
     wm protocol $ptkControlPanel WM_DELETE_WINDOW \
-	"ptkRunAllDemosDel $name $ptkControlPanel $octHandle"
+	"ptkRunAllDemosDel $name $octHandle"
 }
 
 
 #######################################################################
 # Procedure to delete a run-all-demos control window
 #
-proc ptkRunAllDemosDel { name window octHandle } {
-    global ptkOctHandles
-    catch {unset ptkOctHandles($name)}
-
-    # most important thing: destroy the window
-    catch {destroy $window}
+proc ptkRunAllDemosDel { name octHandle } {
+    # destroy the window
+    catch {destroy .run_all_demos_$octHandle}
 }
 
 
@@ -130,17 +130,13 @@ proc ptkDelLite { name octHandle } {
 	# Assume the universe has been deleted already and ignore command
 	return
     }
-    if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
-	ptkStop $name 
-	update
+    # Assertion: universe should have stopped already.
+    if ![regexp {^FINISHED$|^ERROR$} $ptkRunFlag($name)] {
+	puts stderr "Universe \"$name\" hasn't stopped already when we try to delete it.\nSomething went wrong.  Please report this bug."
+	# Still go on and delete the universe.
     }
-    if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
-	# If the universe hasn't stopped already, try again later
-	after 200 ptkDelLite $name $octHandle
-	return
-    }
-    catch {unset ptkRunFlag($name)}
-    catch {unset ptkOctHandles($name)}
+    unset ptkRunFlag($name)
+    unset ptkOctHandles($name)
     $ptkControlPanel.panel.abortCurrent configure -command ""
     deluniverse $name
 }
@@ -150,10 +146,7 @@ proc ptkDelLite { name octHandle } {
 # A blend of ptkRunControl (everything without the control panel part)
 # and ptkGo.  No debugging, animation.
 proc ptkCompileRun {name octHandle} {
-    global ptkRunFlag ptkOctHandles
-    set ptkOctHandles($name) $octHandle
-
-    set ptkRunFlag($name) IDLE
+    global ptkRunFlag ptkOctHandles ptkControlPanel
 
     # For now, we allow only one run at a time.
     set univ [curuniverse]
@@ -164,7 +157,8 @@ proc ptkCompileRun {name octHandle} {
 	    return
     }
 
-    global ptkControlPanel
+    set ptkOctHandles($name) $octHandle
+    set ptkRunFlag($name) IDLE
 
     # So that error highlighting, etc. works
     if {$univ != $name} {ptkSetHighlightFacet $octHandle}
@@ -173,7 +167,7 @@ proc ptkCompileRun {name octHandle} {
     if {[catch {
 	$ptkControlPanel.univName configure -text "Compiling universe $name"
 	$ptkControlPanel.iter configure -text ""
-	update
+	update idletasks
         ptkCompile $octHandle
 
 	set ptkRunFlag($name) ACTIVE
