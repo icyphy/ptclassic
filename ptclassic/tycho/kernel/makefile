@@ -62,5 +62,5 @@ all: sources $(MISC_SRCS) tclIndex
 
 install:
 
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
