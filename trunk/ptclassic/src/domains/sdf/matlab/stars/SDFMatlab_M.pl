@@ -79,7 +79,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	hinclude { "dataType.h", "Matrix.h", "StringList.h" }
 
 	// Matlab interface includes
-	hinclude { "MatlabIfc.h", "MatlabIfcFuns.h" }
+	hinclude { "MatlabPtIfc.h", "MatlabIfcFuns.h" }
 
 	header { typedef Matrix* MatrixPtr; }
 
