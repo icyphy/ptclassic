@@ -79,10 +79,6 @@ makefile:	make.template
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
-DDFDomain.cc :  $(KERNDIR)/XDomain.ccP
-        cd $(VPATH); rm -f DDFDomain.cc; \
-        sed 's/<T>/DDF/g' $(KERNDIR)/XDomain.ccP > DDFDomain.cc
-
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
