@@ -110,6 +110,7 @@ public:
 	int exit(int argc,char** argv);
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
+	int multilink(int argc,char** argv);
 	int newstate(int argc,char** argv);
 	int node(int argc,char** argv);
 	int nodeconnect(int argc,char** argv);
