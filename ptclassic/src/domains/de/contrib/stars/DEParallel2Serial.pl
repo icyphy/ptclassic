@@ -73,7 +73,6 @@ defstar {
 		    }
 		}
                 // reset the list
-                this->setup; 
 		demand.dataNew = FALSE;
 	    } 
 	}
