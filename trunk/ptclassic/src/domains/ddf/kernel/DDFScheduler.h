@@ -98,29 +98,20 @@ public:
 	StringList displaySchedule() ;
 
 	// Constructor sets default options
-	DDFScheduler () { stopTime = 1;
-			 canDom = UnKnown;
-			 numOverlapped = 1; 
-			 restructured = FALSE;
-			 schedulePeriod = 10000.0; }
+	DDFScheduler ();
 
-	// setStopTime, for compatibility with DE scheduler.
-	// for now, we assume each schedule interation takes 1.0
-	// time units.  (Argh).  Deal with roundoff problems.
-	void setStopTime (float limit) { stopTime = int(limit + 0.001) ;}
-	void resetStopTime (float v) { stopTime = 1; numFiring = 0; }
+	// Timing control funcs
+	void setStopTime (float limit);
+	void resetStopTime (float v);
 
 	// scheduler Period : interface with timed domain.
 	float schedulePeriod;
 
 	// check whether the domain is predefined construct or not.
-	int isSDFType()	{ int flag = 1;
-			  if (canDom == DDF) flag = 0;
-			  else if (canDom == SDF) flag = 2;
-			  return flag; }
+	int isSDFType()	;
 
 	// reset "restructured" flag for DDFSelf star
-	void resetFlag() { restructured = FALSE ;}
+	void resetFlag();
 };
 
 #endif
