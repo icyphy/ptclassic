@@ -62,7 +62,8 @@ const double StartOfRun = 1048576.0;
 		value less than "thresh" are set to 0.0, to help
 		improve compression.  Runlengths are coded with a
 		"start of run" symbol and then an (integer) run-length. ]
-  SideEffects []
+  SideEffects [ The integer values at addresses indxDc and indxAc and
+                the double arrays at address outDc and outAc are set. ]
   SeeAlso     [ Ptdsp_RunLengthInverse ]
 ******************************************************************************/
 void 
@@ -126,7 +127,7 @@ Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
 		encoding, and outputs the resulting image. </p>
 		Protection is built in to avoid crashing even if some
 		of the coded input data is affected by loss. ]
-  SideEffects []
+  SideEffects [ The double array outPtr is modified. ]
   SeeAlso     [ Ptdsp_RunLengthEncode ]
 ******************************************************************************/
 void 
