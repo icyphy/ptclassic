@@ -1,5 +1,5 @@
 defstar {
-	name { FixSum }
+	name { Add }
 	domain { CG56 }
 	desc { Add any number of inputs, producing an output. }
 	version { $Id$ }

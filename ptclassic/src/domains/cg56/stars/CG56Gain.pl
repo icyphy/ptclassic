@@ -1,5 +1,5 @@
 defstar {
-	name { FixGain }
+	name { Gain }
 	domain { CG56 }
 	desc {
 The output is set to the input multiplied by a gain term.  The gain must

@@ -1,5 +1,5 @@
 defstar {
-	name { FixDC }
+	name { Const }
 	domain { CG56 }
 	desc { Constant source }
 	version { $Id$ }

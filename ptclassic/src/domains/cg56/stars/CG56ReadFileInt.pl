@@ -1,5 +1,5 @@
 defstar {
-	name { IntReadFile }
+	name { ReadFileInt }
 	domain { CG56 }
 	desc { Reads data from file for use by simulator.}
 	version { $Id$ }

@@ -1,5 +1,5 @@
 defstar {
-	name { FixRamp }
+	name { Ramp }
 	domain { CG56 }
 	desc {
 Generates a ramp signal, starting at "value" (default 0.0)
