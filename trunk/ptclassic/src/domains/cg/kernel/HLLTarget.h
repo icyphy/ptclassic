@@ -59,8 +59,6 @@ public:
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
 
-protected:
-
 	// return a name that can be used as C++ identifiers, derived
 	// from the actual name.
 	StringList sanitize(const char* s) const;
