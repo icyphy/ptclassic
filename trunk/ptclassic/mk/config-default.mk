@@ -74,6 +74,12 @@ CURSES_LIBSPEC = -lcurses
 # hppa.cfront has problems linking vem with -g, so we override this
 OCT_DEBUG_FLAGS = -g
 
+# OCTTOOLS_ATTACHE_DIR is usually set to attache in
+# $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile attache because of curses issues
+OCTTOOLS_ATTACHE_DIR = attache
+
 # OCTTOOLS_IV_DIR is usually set to iv in $PTOLEMY/mk/config-default.mk
 # but config-nt4.mk overrides it and sets it to nothing because Cygwin
 # cannot compile iv because of signal issues.
