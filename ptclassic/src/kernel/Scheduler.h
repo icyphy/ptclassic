@@ -1,7 +1,6 @@
 #ifndef _Scheduler_h
 #define _Scheduler_h 1
-
-#include "SpaceWalk.h"
+#include "StringList.h"
 
 /**************************************************************************
 Version identification:
@@ -66,10 +65,6 @@ public:
 	int stopBeforeDeadlocked;
 
 protected:
-	// The following member is used to visit all atomic blocks
-	// (stars and wormholes) in the galaxy exacly once each
-	// It must be initialized in the setup() method.
-	SpaceWalk alanShepard;
 
 	// request flag for halting -- schedulers must poll and reset
 	static int haltRequestFlag;
