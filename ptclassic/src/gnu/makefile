@@ -233,6 +233,24 @@ hp_post_install:
 
 
 ############################################################
+# dejaGNU
+# dejaGNU is the GNU test suite system.  We don't ship it yet.
+# Note that dejaGNU uses tcl and expect, but since it uses tcl7.3, we 
+# let dejaGNU install its own tcl rather than using tcl7.4 or tcl7.5
+
+configure_dejagnu: $(GNU_OBJ)
+	-mkdir $(GNU_OBJ)/dejagnu
+	(cd $(GNU_OBJ)/dejagnu; \
+	$(GNU_SRC)/dejagnu/configure --srcdir=$(GNU_SRC)/dejagnu \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+bin_dejagnu:
+	(cd $(GNU_OBJ)/dejagnu; $(MAKE) )
+
+install_dejagnu:
+	(cd $(GNU_OBJ)/dejagnu; $(MAKE) install)
+
+############################################################
 # Create various directories
 
 $(GNU_OBJ): $(OBJ_DIR) 
