@@ -44,7 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "LoopScheduler.h"
 #include "SDFCluster.h"
-#include "CGDisplay.h"
 #include "miscFuncs.h"
 #include "CGUtilities.h"
 #include "pt_fstream.h"
@@ -144,6 +143,8 @@ int CGTarget :: runCode() { return TRUE; }
 void CGTarget::setup() {
 	myCode.initialize();
 	procedures.initialize();
+	// This only initializes the streams owned by 'codeStringLists'
+	codeStringLists.initialize();
 	if (!scheduler()) {
 		int lv = int(loopingLevel);
 		if(lv > 0) {
@@ -237,18 +238,22 @@ void CGTarget :: wrapup()
 }
 
 void CGTarget::generateCode() {
-	CGTarget* parT = (CGTarget*) parent();
-	if (parT) { 
-		setup();
-		symbolCounter = parT->symbolCounter;
-	}
-	if (SimControl::haltRequested()) return;
-	headerCode();
+	if (parent()) setup();
 	if(!allocateMemory()) 
 	{
 		Error::abortRun(*this,"Memory allocation error");
 		return;
 	}
+	generateCodeStreams();
+	frameCode();
+	if (!parent()) writeCode();
+}
+
+void CGTarget::generateCodeStreams() {
+	CGTarget* parT = (CGTarget*) parent();
+	if (parT) symbolCounter = parT->symbolCounter;
+	if (SimControl::haltRequested()) return;
+	headerCode();
 	if (!codeGenInit())
 	{
 		Error::abortRun(*this,"codeGenInit error");
@@ -257,8 +262,6 @@ void CGTarget::generateCode() {
 	mainLoopCode();
 	Target :: wrapup();
 	trailerCode();
-	frameCode();
-	if (!parent()) writeCode();
 	if (parT) parT->symbolCounter = symbolCounter;
 }
 
@@ -295,9 +298,9 @@ void CGTarget :: compileRun(SDFScheduler* s) {
 	s->compileRun();
 }
 
-void CGTarget :: addStream(const char* name, CodeStream* slist)
+void CGTarget :: addStream(const char* name, CodeStream* code)
 {
-	int flag = codeStringLists.add(name,slist);
+	int flag = codeStringLists.append(code,name);
 	if (flag == FALSE)
 	{
 		StringList message;
