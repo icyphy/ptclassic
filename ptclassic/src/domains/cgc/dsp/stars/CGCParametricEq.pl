@@ -70,7 +70,7 @@ and Hipass types.
 	}
 
 	codeblock(setparams) {
-	  static void $sharedSymbol(CGCParamBiquad,setparams)(parametric_t *parametric){
+	  static void $starSymbol(setparams)(parametric_t *parametric){
 	    double gaintmp, t0, invf1prime;
 
 	    parametric->T = 1/$val(sampleFreq);
@@ -239,32 +239,36 @@ and Hipass types.
 	  }
 	}
 	codeblock(globalDecl){
-typedef struct parametric_band {
-  double omegac;
-  double omegap;
-  double omegabw;
-  double T;
-  double lineargain;
-  int gainflag;
-} parametric_t;
+	  typedef struct parametric_band {
+	    double omegac;
+	    double omegap;
+	    double omegabw;
+	    double T;
+	    double lineargain;
+	    int gainflag;
+	  } parametric_t;
+
+
 
 #define PI (M_PI)
 	}
-	codeblock(mainDecl){
-	parametric_t $starSymbol(parametric);
-	double $starSymbol(filtercoeff)[5];
+	codeblock(declarations){
+	  parametric_t $starSymbol(parametric);
+	  double $starSymbol(filtercoeff)[5]; 
 	}
+ 
 	initCode {
-	  CGCBiquad::initCode();
+	  addInclude("<string.h>");
 	  addGlobal(globalDecl, "global");
-          addDeclaration(mainDecl);
-	  addProcedure(setparams, "CGCParamBiquad_setparams");
-          addProcedure(constbw, "CGCParamBiquad_constbw");
+	  addGlobal(declarations);
+	  CGCBiquad::initCode();
+	  addProcedure(setparams);
+          addProcedure(constbw, "CGCParamBiquad_setparams");
 	  addProcedure(lowpass, "CGCParamBiquad_lowpass");
 	  addProcedure(hipass, "CGCParamBiquad_hipass");
 	  addProcedure(bandpass, "CGCParamBiquad_bandpass");
-	  addProcedure(setfiltertaps, "CGCParamBiquad_setfiltertaps");
-	  addCode("$sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));");
+	  addProcedure(setfiltertaps, "CGCParamBiqaud_setfiltertaps");
+	  addCode("$starSymbol(setparams)(&$starSymbol(parametric));");
 	  if (strcasecmp(filtertype, "LOW") == 0){
 	    addCode("$sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
 	  }
