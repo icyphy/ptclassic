@@ -72,7 +72,9 @@ protected:
 	// splice in a new star, returning a pointer to its input
 	// porthole.  Spliced stars are assumed to have one input
 	// named "input" and one output named "output".
-	PortHole* spliceStar(PortHole*, const char*, int delayBefore);
+	// dom is the domain of the new star.
+	PortHole* spliceStar(PortHole*, const char* name, int delayBefore,
+			     const char* dom);
        
 	virtual void doInitialization(CGStar&);
 
