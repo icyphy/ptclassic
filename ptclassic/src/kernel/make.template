@@ -33,11 +33,11 @@ LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  Fraction.cc Galaxy.cc \
  InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
- Tokenizer.cc Universe.cc expandPath.cc \
+ Tokenizer.cc Universe.cc expandPath.cc Wormhole.cc WormConnect.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
  KnownState.cc State.cc StringState.cc \
- SDFConnect.cc SDFScheduler.cc SDFStar.cc \
- DEConnect.cc DEScheduler.cc DEStar.cc
+ SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFWormhole.cc SDFWormConnect.cc \
+ DEConnect.cc DEScheduler.cc DEStar.cc DEWormhole.cc DEWormConnect.cc
 
 # All sources.
 # (do not try to put SDFDomain and DEDomain in the library -- they
@@ -53,19 +53,19 @@ HDRS=Block.h Connect.h \
  Scheduler.h SpaceWalk.h Star.h State.h StringList.h StringState.h \
  FloatArrayState.h IntArrayState.h \
  Tokenizer.h Topology.h Universe.h miscFuncs.h type.h \
- ComplexSubset.h \
- SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h \
- DEConnect.h DEScheduler.h DEStar.h DEUniverse.h
+ ComplexSubset.h Wormhole.h WormConnect.h \
+ SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h SDFWormhole.h SDFWormConnect.h \
+ DEConnect.h DEScheduler.h DEStar.h DEUniverse.h DEWormhole.h DEWormConnect.h
 
 # Library objects
 LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o \
  InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
  PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
- expandPath.o \
+ expandPath.o Wormhole.o WormConnect.o \
  FloatState.o IntState.o KnownState.o State.o StringState.o \
  FloatArrayState.o IntArrayState.o \
- SDFConnect.o SDFScheduler.o SDFStar.o  \
- DEConnect.o DEScheduler.o DEStar.o
+ SDFConnect.o SDFScheduler.o SDFStar.o SDFWormhole.o SDFWormConnect.o \
+ DEConnect.o DEScheduler.o DEStar.o DEWormhole.o DEWormConnect.o
 
 # Things to make
 TOMAKE=$(LIB) interpmain.o SDFDomain.o DEDomain.o
