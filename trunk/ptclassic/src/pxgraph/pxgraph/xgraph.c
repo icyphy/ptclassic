@@ -226,6 +226,7 @@ typedef struct local_win {
     double YUnitsPerPixel;	/* Y Axis scale factor                  */
     xgOut dev_info;		/* Device information                   */
     Window close, hardcopy;	/* Buttons for closing and hardcopy     */
+    Window about;		/* Version information                  */
     int flags;			/* Window flags                         */
 } LocalWin;
 
@@ -615,21 +616,22 @@ void *info;			/* User Information */
     return XTB_HANDLED;
 }
 
-#ifdef NEVER
 static 
 /*ARGSUSED*/
 xtb_hret abt_func(win, bval, info)
 Window win;			/* Button window    */
 int bval;			/* Button value     */
-char *info;			/* User information */
+void *info;			/* User information */
 {
     static char *msg_fmt =
 "Version %s\n\
-David Harrison\n\
-University of California, Berkeley\n\
-Send comments or suggestions to:\n\
-(davidh@ic.Berkeley.EDU or \n\
-...!ucbvax!ucbic!davidh)";
+David Harrison created the original xgraph.\n\
+Joe Buck extended xgraph with binary capabilities.\n\
+Christopher Hylands ANSI-fied and packaged the code.\n\
+All of this work was done at the\n\
+University of California, Berkeley.\n\
+For updates, including a Java version, see\n\
+http://ptolemy.eecs.berkeley.edu/other/pxgraph.htm";
     static int active = 0;
     char msg_buf[1024];
 
@@ -644,7 +646,6 @@ Send comments or suggestions to:\n\
     return XTB_HANDLED;
 }
 
-#endif
 
 #define NORMSIZE	600
 #define MINDIM		100
@@ -744,7 +745,7 @@ double asp;			/* Aspect ratio       */
 
 
     if (new_window) {
-	xtb_frame cl_frame, hd_frame;
+	xtb_frame cl_frame, hd_frame, ab_frame;
 
 	XStoreName(disp, new_window, progname);
 	XSetIconName(disp, new_window, progname);
@@ -776,6 +777,12 @@ double asp;			/* Aspect ratio       */
 	XMoveWindow(disp, new_info->hardcopy,
 		    (int) (BTNPAD + cl_frame.width + BTNINTER),
 		    BTNPAD);
+	xtb_bt_new(new_window, "About", abt_func,
+		   (xtb_data) new_window, &ab_frame);
+	new_info->about = ab_frame.win;
+	XMoveWindow(disp, new_info->about,
+		    (int) (BTNPAD + cl_frame.width + BTNINTER +
+			   hd_frame.width + BTNINTER), BTNPAD);
 
 	new_info->flags = 0;
 	XSelectInput(disp, new_window,
@@ -812,6 +819,7 @@ LocalWin *win_info;		/* Local Info */
     XDeleteContext(disp, win, win_context);
     xtb_bt_del(win_info->close, &info);
     xtb_bt_del(win_info->hardcopy, &info);
+    xtb_bt_del(win_info->about, &info);
     free((char *) win_info);
     XDestroyWindow(disp, win);
     Num_Windows -= 1;
