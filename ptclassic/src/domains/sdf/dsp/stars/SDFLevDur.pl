@@ -139,7 +139,7 @@ defstar {
 		// Compute and output the reflection coefficient
 		// (which is also equal to the last AR parameter)
 		aP[M+1] = gamma = -deltaM/P;
-		refl%(int(order)-M-1) << double(gamma);
+		refl%(int(order)-M-1) << - double(gamma);
 
 		for (m = 1; m < M+1; m++) {
 		    aP[m] = a[m] + gamma*a[M+1-m];

@@ -126,7 +126,7 @@ defstar {
 		    dsum += f[i]*f[i] + b[i-1]*b[i-1];
 		}
 		gamma = -2*nsum/dsum;
-		refl%(int(order)-m) << gamma;
+		refl%(int(order)-m) << - gamma;
 
 		// update the forward and backward predictor errors
 		for (i = int(numInputs)-1; i >= m; i--) {
