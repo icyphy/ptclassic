@@ -788,11 +788,6 @@ ifdef SDFLIB
 	endif
 endif
 
-# HOF stars can be used in pigiRpc but not ptcl.
-# The HOF base classes call Tk_DoOneEvent so that if you accidentally
-# specify an infinite recursion (easy to do with HOF), you can hit the
-# STOP button and abort the run.  But Tk is not linked into ptcl, so
-# this call cannot be done.
 ifdef HOF
 	CUSTOM_DIRS += $(HOFDIR)/kernel $(HOFDIR)/stars
 	STARS += $(LIBDIR)/hofstars.o
