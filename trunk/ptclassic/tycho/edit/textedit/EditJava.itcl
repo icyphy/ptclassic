@@ -54,10 +54,13 @@ option add *EditJava.commentColor [ptkColor firebrick black] widgetDefault
 option add *EditJava.fixmeColor [ptkColor red black] widgetDefault
 option add *EditJava.stringColor [ptkColor gray50 black] widgetDefault
 
-# new options
 
-option add *EditJava.procColor [ptkColor blue black] widgetDefault
+# New options for this class:
 
+option add *EditJava.classColor [ptkColor blue black] startupFile
+option add *EditJava.methodColor [ptkColor purple black] startupFile
+option add *EditJava.variableColor [ptkColor forestGreen black] startupFile
+#option add *EditJava.optionColor [ptkColor DeepPink black] startupFile
 
 #######################################################################
 #### EditJava
@@ -181,8 +184,13 @@ body ::tycho::EditJava::help {} {
 # "NOTE" and "FIXME".  Then tag and color procedure names.
 #
 body ::tycho::EditJava::parseNow {start stop} {
+    # To get C style comments:
+    EditC::parseNow $start $stop
 
+    # To get C++ style comments:
     EditProgram::parseNow $start $stop
+   
+
     set text $itk_component(text)
 
     # Remove tags first, if necessary
@@ -192,31 +200,46 @@ body ::tycho::EditJava::parseNow {start stop} {
     set ind $start
     set endc $stop
     set spaces "\[ \t\]"
-    set procregexp "^$spaces*(public$spaces+|protected$spaces+|private$spaces+)?proc$spaces+(\[^ \t\]*)"
+    set procregexp "^$spaces*(public$spaces+|protected$spaces+|private$spaces+)\[^()]*$spaces+(\[^ \t()\]+)$spaces*\(.*\)\[^;\]$spaces*$"
+    puts $procregexp
     while {[set ind [$text search -count len -regexp $procregexp \
 	    $ind $stop]] != {}} {
 
 	set endc [$text index "$ind + $len chars"]
 	set line [$text get $ind $endc]
-	
-	# Procedures
-	if [regexp -indices $procregexp $line match access procName] {
-	    # Procedure definitions. Tag the procedure name.
-	    # Note that we support Java qualifiers here.
-	    # Should they be colored too?
-	    set first [lindex $procName 0]
-	    set last [lindex $procName 1]
-	    $text tag add procname "$ind + $first chars" \
+        puts $line
+	if [regexp -indices "$spaces*\(public|private|protected\)$spaces+class$spaces\(\[^ \t\]*\)" \
+		$line match access classNameIndices] {
+	    # Class definitions. Tag and save the class name.
+	    set first [lindex $classNameIndices 0]
+	    set last [lindex $classNameIndices 1]
+	    set className [string range $line $first $last]
+	    $text tag add classname "$ind + $first chars" \
 		    "$ind + $last chars +1 char"
-	}
+        }
+        # Methods
+        if [regexp {\(.*\)} $line] {
+            if [regexp -indices $procregexp $line match access methodName] {
+                # Method definitions. Tag the method name.
+                # Note that we support Java qualifiers here.
+                # Should they be colored too?
+                set first [lindex $methodName 0]
+                set last [lindex $methodName 1]
+                $text tag add methodname "$ind + $first chars" \
+                        "$ind + $last chars +1 char"
+            }
+        }
         set ind $endc
 	# The following appears to be needed to prevent infinite loops.
 	if [$text compare $ind >= end] {break}
     }
     
     # Set the visual characteristics of the tagged text
-    $text tag configure procname -foreground \
-	    [option get $itk_component(hull) procColor EditJava]
+    set hull $itk_component(hull)
+    $text tag configure classname -foreground \
+	    [option get $hull classColor EditJava]
+    $text tag configure methodname -foreground \
+	    [option get $hull methodColor EditJava]
 }
 
 #### tagLinks
