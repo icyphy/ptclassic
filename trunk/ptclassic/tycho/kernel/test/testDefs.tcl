@@ -54,6 +54,10 @@
 #
 
 
+# Define testsuite in the global context so that we can check to
+# see if it is set inside functions that use dialog boxes.
+set testsuite 1
+
 if [info exist env(PTOLEMY)] {
     set TYCHO $env(PTOLEMY)/tycho
 }
