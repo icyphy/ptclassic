@@ -46,20 +46,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MotorolaTarget.h"
 
 class MotorolaSimTarget : public virtual MotorolaTarget {
-protected:
-	IntState interactiveFlag;
-	StringList dspType;		// either 56000 or 96000
-	StringList startAddress;
-	StringList endAddress;
-	/*virtual*/ void headerCode();
-	/*virtual*/ void trailerCode();
-
 public:
-	MotorolaSimTarget(const char* nam,const char* desc,
-		  const char* sclass) : MotorolaTarget(nam,desc,sclass) {}
-	MotorolaSimTarget(const MotorolaSimTarget& arg) 
-	: MotorolaTarget(arg) {}
-	void initStates(const char* dsp,const char* start, const char* end);
+	MotorolaSimTarget(const char* nam, const char* desc,
+			  const char* sclass, const char* assocDomain) :
+		MotorolaTarget(nam,desc,sclass,assocDomain) {}
+	MotorolaSimTarget(const MotorolaSimTarget& arg) :
+		MotorolaTarget(arg) {}
+
+	void initStates(const char* dsp, const char* start, const char* end);
+
 	/*virtual*/ int compileCode();
 	/*virtual*/ int loadCode();
 	/*virtual*/ int runCode();
@@ -71,6 +66,14 @@ public:
 
         // Indicate whether target can compute execution time
 	int canComputeExecutionTime() { return TRUE; }
+
+protected:
+	IntState interactiveFlag;
+	StringList dspType;		// either 56000 or 96000
+	StringList startAddress;
+	StringList endAddress;
+	/*virtual*/ void headerCode();
+	/*virtual*/ void trailerCode();
 
 private:
 	// stream for writeFile stars
