@@ -431,7 +431,7 @@ buildjdist:
 	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2 JFLAGS=-O
 	$(MAKE) install
 	$(MAKE) jhtml
-	$(MAKE) jdist
+	$(MAKE) dists
 
 # Create a distribution and install it.
 # This rule is particular to our local installation
