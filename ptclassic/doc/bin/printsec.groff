@@ -38,7 +38,7 @@ set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempNroffFile = $tempdir/pt$$.n
-set tempFiles = $tempTroffFile $tempIndexFile $tempNroffFile
+set tempFiles = ($tempTroffFile $tempIndexFile $tempNroffFile)
 
 # Variables
 set indexonly = 0
