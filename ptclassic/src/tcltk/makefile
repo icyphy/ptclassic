@@ -332,6 +332,8 @@ TCLBLEND_OBJ =	$(TCLTK_OBJ)/tclBlend$(TCLBLEND_VERSION)
 TCLBLEND_DEST =	$(ITCL_DEST)
 TCLBLEND_INDEPENDENT_DEST =	$(ITCL_INDEPENDENT_DEST)
 
+# Uncomment this line to build the Tcl Bean
+#JAVA_STUDIO_CONFIG= --with-studio=/users/ptdesign/vendors/sun/Java-Studio1.0/JS/classes
 all_tclblend: config_tclblend tclblend install_tclblend
 config_tclblend: $(TCLBLEND_OBJ)
 	@echo "Configuring tclblend"
@@ -341,6 +343,7 @@ config_tclblend: $(TCLBLEND_OBJ)
 		--with-tcl=$(TCL_OBJ)/unix \
 		--prefix=$(TCLBLEND_INDEPENDENT_DEST) \
 		--exec-prefix=$(TCLBLEND_DEST) \
+		$(JAVA_STUDIO_CONFIG) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
 tclblend: $(TCLBLEND_OBJ)/pkgIndex.tcl
