@@ -207,6 +207,9 @@ body ::tycho::TWidget::getClipboard {} {
 body ::tycho::TWidget::setClipboard {text} {
     # set clipboard $text
     clipboard clear
+    # On Windows XP, the following line is needed as well, for
+    # no apparent reason.
+    selection clear -selection CLIPBOARD -displayof .
     clipboard append -- $text
 }
 
