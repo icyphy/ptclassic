@@ -9,9 +9,7 @@
 # limitation of liability, and disclaimer of warranty provisions.
 #
 
-if {[set ${starID}(put_in_control_panel)]} \
-   { set s $ptkControlPanel.low.slider_$starID } \
-   { set s $ptkControlPanel.slider_$starID }
+set s $ptkControlPanel.slider_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -21,7 +19,7 @@ if {![winfo exists $s]} {
 
     if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
-	pack append $ptkControlPanel.low $s top
+	pack after $ptkControlPanel.low $s top
     } {
         toplevel $s
         wm title $s "Sliders"
@@ -40,6 +38,15 @@ if {![winfo exists $s]} {
 	([set ${starID}(high)]-[set ${starID}(low)]))}]
     ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
     pack append $s $s.f top
+
+    proc destructorTcl_$starID {starID} {
+	global $starID
+	if {[set ${starID}(put_in_control_panel)]} {
+	    # Remove the slider from the control panel, if it still exists
+	    global ptkControlPanel
+	    destroy $ptkControlPanel.slider_$starID
+	}
+    }
 
     tkwait visibility $s
 }
