@@ -234,7 +234,7 @@ group dynamic -label {Dynamic Icons} {
             -graphics {
         polygon 30 50 50 15 \
                 70 50 50 85  -fill black -outline yellow
-    }
+    }   
     icon corba \
             -slatetype IconFrame \
             -label {Corba} \
@@ -266,6 +266,16 @@ group dynamic -label {Dynamic Icons} {
         oval 15 70 30 85 -fill yellow
         oval 70 42 85 57 -fill yellow
 	line 30 23 70 49 -width 4
+    }   
+
+    icon sieve \
+            -slatetype IconFrame \
+            -label {Sieve} \
+            -text Sieve \
+            -color lightblue \
+	    {
+	terminal input -coords {0 50} -direction w \
+		-style circle -fill blue
     }
 }
 
