@@ -71,10 +71,15 @@ public:
 		   double xMax,         // Max X range value
 		   char*  yTitle,       // Title for Y-axis
 		   double yMin,	        // minimum Y range value
-		   double yMax);        // max Y range value 
+		   double yMax,         // max Y range value 
+		   int    numSets = 1,  // number of datasets
+		   int    style = 0);   // plot style
 
 	// Write inputs to the XY Plot
-	int addPoint (double x, double y);
+	int addPoint (double x, double y, int set = 1);
+
+	// Break the line in a continuous line-drawing plot
+	int breakPlot (int set = 1);
 		   
 	// Window name to use
 	InfString winName;
@@ -95,8 +100,6 @@ protected:
 	InfString starID;
 
 	// Hold all the persistent data associated with the graph
-	plotWin plot;
-	plotDataset dataset;
-
+	ptkPlotWin plot;
 };
 #endif

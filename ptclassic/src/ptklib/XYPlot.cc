@@ -48,18 +48,13 @@ extern "C" {
 XYPlot::XYPlot () {
 	starID = "ptkXYPlot";
 	starID += unique++;
-	// Make sure the pointers to dynamically allocated structures
-	// start with zero.
-	dataset.xvec = 0;
-	dataset.yvec = 0;
-	dataset.id = 0;
+
+	ptkInitPlot(&plot);
 
 	// If it has not already happened, source the Tcl file corresponding
-	// to this class.  This is done on the second call to the constructor
-	// because the first call occurs when the static prototype is created
-	// for the KnownList, and this occurs before the Tcl interpreter has
-	// started.
-	if (unique == 2) {
+	// to this class.  We test ptkInterp because some instances of this
+	// class may be created before the Tcl interpreter has started.
+	if (ptkInterp) {
 	  char sourceCmd[100];
 	  strncpy(sourceCmd,"source $env(PTOLEMY)/src/ptklib/ptkPlot.tcl",100);
 	  if (Tcl_GlobalEval(ptkInterp, sourceCmd) != TCL_OK) {
@@ -68,13 +63,10 @@ XYPlot::XYPlot () {
 	}
 }
 
-// destructor: currently empty, but we anticipate
-// wanting it as the XYPlot widget is improved.
 XYPlot::~XYPlot() {
 	// avoid core dump if interpreter did not set up right
 	if (!ptkInterp) return;
-	freeDataset(&dataset);
-	freePlot(ptkInterp,&plot);
+	ptkFreePlot(ptkInterp,&plot);
 }
 
 int XYPlot::windowExists () {
@@ -91,7 +83,9 @@ int XYPlot::setup (Block* star,         // The star I am in
 		   double xMax,         // Max X range value
 		   char*  yTitle,       // Title for Y-axis
 		   double yMin,	        // minimum Y range value
-		   double yMax)         // max Y range value 
+		   double yMax,         // max Y range value 
+		   int    numSets = 1,  // number of datasets
+		   int    style = 0)    // plot style
 {
 
   const char * XYPlot_window_base = ".xyPlot";
@@ -111,23 +105,30 @@ int XYPlot::setup (Block* star,         // The star I am in
     winName += starID;
   }
 
-  if(createPlot(ptkInterp, &plot, &ptkW, (char *)winName, desc,
-	     geometry, xTitle, yTitle, xMin, xMax, yMin, yMax) == 0) {
-    Error::abortRun("XYPlot class: failed to create plot window");
+  if(ptkCreatePlot(ptkInterp, &plot, &ptkW, (char *)winName, desc,
+		   geometry, xTitle, yTitle, xMin, xMax, yMin, yMax,
+		   numSets, refresh, style, persistence) == 0) {
+    Error::abortRun(ptkPlotErrorMsg());
     return FALSE;
   }
 
-  if(createDataset(ptkInterp, &dataset, &ptkW,
-		   persistence,refresh) == 0) {
-    Error::abortRun("XYPlot class: failed to create dataset");
-    return FALSE;
-  }
-  assocData(ptkInterp, &dataset, &plot);
   return TRUE;
 }
 
-int XYPlot::addPoint(double x, double y) {
-  return (plotPoint(ptkInterp, &dataset, x, y));
+int XYPlot::addPoint(double x, double y, int set = 1) {
+  if (!ptkPlotPoint(ptkInterp, &plot, set, x, y)) {
+    Error::abortRun(ptkPlotErrorMsg());
+    return 0;
+  }
+  return 1;
+}
+
+int XYPlot::breakPlot(int set = 1) {
+  if (!ptkPlotBreak(ptkInterp, &plot, set)) {
+    Error::abortRun(ptkPlotErrorMsg());
+    return 0;
+  }
+  return 1;
 }
 
 // Initialize the static counter for unique names,
