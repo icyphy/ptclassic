@@ -20,24 +20,26 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This two-pole, one-zero IIR filter has a transfer function of
 <pre>
-{1 ~+~ z sup -1} over
-{1 ~-~ 2 cos ( {2 pi} over {N} k ) z sup -1 ~+~ sup -2} ~.
+           1 + z<sup>-1</sup>
+    ---------------------------
+    1 - 2cos(2pik/N)z<sup>-1</sup> + z<sup>-2</sup>
+
 </pre>
 This filter is a biquad filter with
 <p>
 <ul>
-<li> n0 = 1
-<li> n1 = 1
-<li> n2 = 0
-<li> d1 = -2 cos(2 pi k / N)
-<li> d2 = 1
+<li> n<sub>0</sub> = 1
+<li> n<sub>1</sub> = 1
+<li> n<sub>2</sub> = 0
+<li> d<sub>1</sub> = -2 cos(2 pi k / N)
+<li> d<sub>2</sub> = 1
 </ul>
 <p>
 This implementation efficiently implements the biquad section based
-on the values of these coefficients, and computes d1 from the
+on the values of these coefficients, and computes d<sub>1</sub> from the
 parameters k and N.
-It is implemented in direct form II, and requires three additions,
-one multiply,
+It is implemented in direct form II, and requires three additions and
+one multiply.
 <h3>References</h3>
 <p>[1]  
 A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
