@@ -34,4 +34,8 @@
 #  make diff | $PTOLEMY/src/tst/sbin/plotdiff > /tmp/doit
 #  sh /tmp/doit
 
-awk '$1 == "Binary" {print "pxgraph -binary ", $3, $5}'
+awk '$1 == "Binary" {
+			print "ls -l", $3, $5
+			print "pxgraph -binary ", $3, $5
+		     
+		    }'
