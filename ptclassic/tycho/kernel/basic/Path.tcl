@@ -161,6 +161,18 @@ proc ::tycho::expandPath { path } {
 # COMPATIBILITY procedure.  Use <code>::tycho::expandPath</code>.
 proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 
+########################################################################
+#### expandPathSplit
+# Given a colon separated list of pathnames, expand each path, 
+# reassemble the colon separated list and return it.
+#
+proc ::tycho::expandPathSplit {inputPathList} {
+    foreach inputPath [split $inputPathList :] {
+	lappend outputList [::tycho::expandPath $inputPath]
+    }
+    return [join $outputList :]
+}
+
 ##############################################################################
 #### isRelative
 # Return true if the the pathname is not an absolute pathname, and
