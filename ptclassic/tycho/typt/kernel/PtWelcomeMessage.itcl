@@ -107,7 +107,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
     }
     if {$itk_option(-executable) != {}} {
 	append html \
-		{<p>Executable you are running:<br>} \
+		{<br>Executable you are running:<br>} \
 		$itk_option(-executable)
     }
     append html "<p>" \
