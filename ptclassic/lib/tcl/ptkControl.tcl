@@ -1,9 +1,8 @@
 # Definition of a bunch of control panels for the tcl/tk Ptolemy interface
 # Author: Edward A. Lee
-#         Interactive command added by Alan Kamas
 # Version: $Id$
 #
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -113,15 +112,11 @@ proc ptkRunControl { name octHandle } {
 	checkbutton $ptkControlPanel.options.debug -text "Debug" \
 	    -variable ptkDebug($name) -relief flat \
 	    -command "ptkSetOrClearDebug $name $octHandle"
-	checkbutton $ptkControlPanel.options.event -text "Interactive" \
-	    -variable ptkRunEventLoop($name) -relief flat \
-	    -command "ptkSetRunInteractivity $name $octHandle"
 	checkbutton $ptkControlPanel.options.script -text "Script" \
 	    -variable ptkScriptOn($name) -relief flat \
 	    -command "ptkToggleScript $name $octHandle"
 	pack append $ptkControlPanel.options \
 	    $ptkControlPanel.options.debug {right padx 20} \
-	    $ptkControlPanel.options.event {right padx 20} \
 	    $ptkControlPanel.options.script {right padx 20}
 
     # Define the entry that controls the number of iterations
@@ -243,6 +238,7 @@ proc ptkRunControl { name octHandle } {
 
 #######################################################################
 # Procedure to turn on or off the event loop during a run
+#     - Alan Kamas
 #
 proc ptkSetRunInteractivity { name octHandle } {
     global ptkDebug ptkRunEventLoop ptkRunFlag
