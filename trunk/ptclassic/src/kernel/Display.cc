@@ -41,10 +41,10 @@ void XGraph :: zapFiles () {
 			fclose (strm[i]);
 			strm[i] = 0;
 		}
-		const char *name = tmpFileNames[i];
+		char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
-			delete (char*)name;
+			delete name;
 		}
 	}
 }
@@ -97,9 +97,24 @@ void XGraph :: initialize(Block* parent,
 #define IsNANorINF(X) 0
 #endif
 
+// function to print "1st, 2nd, 23rd", etc.  Return value is in a static
+// buffer and is wiped out by subsequent calls.
 static char* ordinal(int n) {
 	int ldig = n%10;
-	char* format = ldig == 1 ? "%dst" : (ldig == 2 ? "%dnd" : "%dth");
+	const char* format;
+	switch (ldig) {
+	case 1:
+		format = "%dst";
+		break;
+	case 2:
+		format = "%dnd";
+		break;
+	case 3:
+		format = "%drd";
+		break;
+	default:
+		format = "%dth";
+	}
 	static char buf[10];
 	sprintf (buf, format, n);
 	return buf;
