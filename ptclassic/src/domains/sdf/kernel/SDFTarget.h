@@ -70,7 +70,7 @@ public:
 
 protected:
 	StringState logFile;
-	IntState loopScheduler;
+	StringState loopScheduler;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
