@@ -258,8 +258,8 @@ Galaxy* Wormhole :: explode() {
 		EventHorizon* eveP = p->asEH();
 		PortHole* inP = eveP->ghostAsPort()->far();
 		GenericPort* alp = p->aliasFrom();
-		tempP->disconnect(1);
-		inP->disconnect(1);
+		if (tempP) tempP->disconnect(1);
+		if (inP) inP->disconnect(1);
 
 		// remove parent pointers, so portholes won't try to
 		// remove themselves from their parent.
@@ -269,9 +269,9 @@ Galaxy* Wormhole :: explode() {
 		LOG_DEL; delete eveP;
 
 		// make new connection
-		if (tempP->isItInput())
+		if (tempP && tempP->isItInput())
 			inP->connect(*tempP, numDelays, delayValues);
-		else
+		else if (tempP)
 			tempP->connect(*inP, numDelays, delayValues);
 
 		// update aliase pointer if necessary.
@@ -283,3 +283,4 @@ Galaxy* Wormhole :: explode() {
 	return &gal;
 }
 		
+
