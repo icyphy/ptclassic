@@ -29,7 +29,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
-	  static int count;
+	  static int count;	// for assigning unique identifiers
 	  Block* myblock;
 	}
 	code {
@@ -41,19 +41,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	ccinclude { "InfString.h" }
 	ccinclude { "KnownBlock.h" }
 	ccinclude { "ptk.h" }
-	ccinclude { "SimControl.h" }
-	setup {
-	    // Since it is so easy to get into an infinite loop
-	    // (just name as your block a galaxy that you are within),
-	    // process Tk events, and check for a halt request.
-            // Formerly, we called Tk_DoOneEvent() here, but with
-            // Tcl7.5, we can call Tcl_DoOneEvent()
-	    Tcl_DoOneEvent(TCL_DONT_WAIT|TCL_ALL_EVENTS);
-	    if (SimControl::haltRequested()) {
-		Error::abortRun(*this, "Initialization aborted");
-		return;
+	// Since block states are not yet initialized during the preinitialize
+	// pass, any HOF star that wants to access state values should be sure
+	// to call this.
+	method {
+	    name { preinitialize }
+	    access { public }
+	    code {
+		initState();
 	    }
 	}
+
 	method {
 	    name { idParent }
 	    type { "Galaxy*" }
@@ -70,29 +68,55 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	}
 	// The following must be called by any HOF star (except Nop) on any
-	// multiPortHoles so that if any HOF star is connected to the multiPortHole,
-	// its reconnections get done before the HOF star proceeds.
+	// multiPortHole if the HOF star's behavior depends on the number of
+	// connections in the multiPortHole.  We preinitialize (and thus
+	// self-destruct) any HOFNop attached to the MPH.  This is necessary
+	// since HOFNop might increase the number of connections, and we can't
+	// be sure that the preinitialize pass will visit HOFNop first.
 	// Yes, this is a violation of information hiding.  But I believe that
-	// the functionality of the Nop star justifies it.
-	ccinclude { "HOFNop.h" }
+	// the functionality of the Nop star justifies it.  A perhaps logically
+	// cleaner solution would involve trying to preinitialize the far end
+	// whether it was a Nop or not, but that would require some scheme to
+	// prevent infinite recursion.
+	//
+	// However, we do *not* preinitialize the far end HOFNop if it is
+	// inside a different galaxy (ie, a subgalaxy).  That would cause our
+	// aliased connection to it to be converted into multiple connections
+	// to elements of the subgalaxy, and Ptolemy's current aliasing scheme
+	// is too simplistic to allow us to cope.  This means that the number
+	// of connections to a subgalaxy's multiport must be specified by an
+	// explicit bus marker in our galaxy, even when it might have been
+	// deducible by expanding a HOFNop just inside the subgalaxy boundary.
+	// Fixing this looks like much more trouble than it's worth.
 	method {
 	    name { initConnections }
 	    type { "void" }
 	    access { protected }
 	    arglist { "(MultiPortHole &mph)" }
 	    code {
-	      MPHIter next(mph);
-	      PortHole *p, *farsideport;
-	      Block *farstar;
-	      while ( (p = next++) ) {
-		if ((farsideport = p->far()) &&
-		    (farstar = farsideport->parent()) &&
-		    (farstar->isA("HOFNop"))) {
-		      ((HOFNop*)farstar)->reconnect();
+		// When we find a HOFNop at the far end, we preinitialize it,
+		// then break out of the inner loop and re-execute the search
+		// from the top.  It is not safe to continue the inner loop
+		// since the current MPH list entry has been deleted.
+		// This implies that HOFNop *MUST* delete its old connection!
+		PortHole *p;
+		do {
+		    MPHIter next(mph);
+		    while ( (p = next++) != 0 ) {
+			PortHole *farsideport;
+			Block *farstar;
+			if ((farsideport = p->far()) &&
+			    (farstar = farsideport->parent()) &&
+			    (farstar->parent() == parent()) &&
+			    (farstar->isA("HOFNop"))) {
+				farstar->preinitialize();
+				break;
+			}
 		    }
-	      }
+		} while (p);
 	    }
-	  }
+	}
+
 	virtual method {
 	    name { createBlock }
 	    type { "Block*" }
@@ -125,20 +149,29 @@ limitation of liability, and disclaimer of warranty provisions.
 		Block *block = KnownBlock::clone(blockname, mom.domain());
 		if (!block) {
 		    Error::abortRun(*this,
-			"Unable to create an instance of block: ",
-			blockname);
+				    "Unable to create an instance of block: ",
+				    blockname);
 		    return NULL;
 		}
-		// Set the target
+		// Set the target in the new block.
+		// This may no longer be necessary, but it can't hurt.
 		if (target()) block->setTarget(target());
 
-		// Choose a name for the block
+		// Choose a unique name for the block
 	        StringList instancename = "HOF_";
 		instancename += blockname;
 	        instancename += count++;
+		// The following amounts to a small memory leak.
+		// FIXME: could reduce leakage by not insisting on *global*
+		// uniqueness of the generated name.  What about using my
+		// own block's name plus a local counter?? 
 	        const char* instance = hashstring(instancename);
 
+		// Add to parent galaxy.  Note that since new blocks are
+		// added at the end of the block list, this block will get
+		// a preinitialize call later on.
 		mom.addBlock(*block,instance);
+
 		return block;
 	    }
 	}
@@ -155,31 +188,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	    code {
 		GenericPort *gp = aliasPointingAt(pi);
 
-		const char* initDelayVals;
 		PortHole* farside = pi->far();
 		if (!farside) {
 		  Error::abortRun(*this,"Star is not fully connected");
 		  return 0;
 		}
 		int numdelays = pi->numInitDelays();
-		initDelayVals = pi->initDelayValues();
+		const char* initDelayVals = pi->initDelayValues();
 		farside->disconnect();
 
-		farside->connect(*dest,numdelays,initDelayVals);
-		if(parent()->isA("InterpGalaxy") && 
-		   ((numdelays > 0) || (initDelayVals && *initDelayVals))) {
-		  ((InterpGalaxy*)parent())->registerInit("C",
-							  farside->parent()->name(),
-							  farside->name(),
-							  initDelayVals,
-							  dest->parent()->name(),
-							  dest->name());
-		}
+		connectPorts(*farside,*dest,numdelays,initDelayVals);
 		fixAliases(gp,pi,dest);
-
-		// Since output portholes are responsible for initializing
-		// the geodesics, call initialize for the farside port
-		farside->initialize();
 		return 1;
 	    }
 	}
@@ -196,33 +215,44 @@ limitation of liability, and disclaimer of warranty provisions.
 	    code {
 		GenericPort *gp = aliasPointingAt(po);
 
-		const char* initDelayVals;
 		PortHole* farside = po->far();
 		if (!farside) {
 		  Error::abortRun(*this,"Star is not fully connected");
 		  return 0;
 		}
 		int numdelays = po->numInitDelays();
-		initDelayVals = po->initDelayValues();
+		const char* initDelayVals = po->initDelayValues();
 		farside->disconnect();
 
-		source->connect(*farside,numdelays,initDelayVals);
-		if(parent()->isA("InterpGalaxy") && 
-		   ((numdelays > 0) || (initDelayVals && *initDelayVals))) {
-		  ((InterpGalaxy*)parent())->registerInit("C",
-							  source->parent()->name(),
-							  source->name(),
-							  initDelayVals,
-							  farside->parent()->name(),
-							  farside->name());
-		}
+		connectPorts(*source,*farside,numdelays,initDelayVals);
 		fixAliases(gp,po,source);
 		return 1;
 	    }
 	}
+	// Make a connection between two portholes.
+	// Register the connection with the parent galaxy so that delays get
+	// initialized when the galaxy is reinitialized.
+	method {
+	    name { connectPorts }
+	    access { protected }
+	    arglist { "(GenericPort& source, GenericPort& sink, int numberDelays, const char* initDelayValues)" }
+	    code {
+		source.connect(sink,numberDelays,initDelayValues);
+		if (parent()->isA("InterpGalaxy") && 
+		    ((numberDelays > 0) ||
+		     (initDelayValues && *initDelayValues))) {
+			((InterpGalaxy*)parent())->registerInit("C",
+				source.parent()->name(),
+				source.name(),
+				initDelayValues,
+				sink.parent()->name(),
+				sink.name());
+		}
+	    }
+	}
 	// Find a port (if any) with an alias pointing to po.
 	// If there is none, check to see whether po is a port in
-	// in a MultiPortHole that has an alias pointing to it.
+	// a MultiPortHole that has an alias pointing to it.
 	// Return a pointer to the generic port with the alias, or zero.
 	method {
 	  name { aliasPointingAt }
@@ -234,7 +264,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if (gp == 0) {
 	      // Check for a multiporthole alias
 	      MultiPortHole *mph = po->getMyMultiPortHole();
-	      if (mph != 0) gp = mph->aliasFrom();
+	      if (mph != 0)
+		gp = mph->aliasFrom();
 	    }
 	    return gp;
 	  }
@@ -356,8 +387,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		// This might be a galaxy porthole, which should return something,
 		// but doesn't.  Find the corresponding real porthole.
 		GenericPort &gp = p->realPort();
-		if (gp.isA("PortHole")) p = (PortHole*)(&gp);
-		far = p->far();
+		if (gp.isA("PortHole")) { // is this test necessary?
+		  p = (PortHole*)(&gp);
+		  far = p->far();
+		}
 	      }
 	      // Ignore the porthole if far is still NULL,
 	      // or if the porthole is hidden
@@ -388,7 +421,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	      gp = ph;
 	    }
 	    // Get the top-level port that we are connected to
-
 	    while ( (gpt = gp->aliasFrom()) ) {
 	      gp = gpt;
 	    }
