@@ -46,7 +46,9 @@ cd ..
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
+
+# interp used to be in the line below, as of 0.5.1, it is no longer.
+foreach x (domains ptcl kernel pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -111,6 +113,8 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
+
+# cg-ddf should be removed from any released versions of this file.
 set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf hof)
 set EXPEXTRAS=(cg56/targets cg96/targets silage/targets)
 
