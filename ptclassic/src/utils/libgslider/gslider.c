@@ -30,11 +30,10 @@ static	char	SccsId[] = "$Id$";
 
 #include <stdio.h>
 #include <malloc.h>
+#include <stdlib.h>		/* Define atof */
+#include <strings.h>		/* Define index */
 #include "compat.h"
 #include "gslider.h"
-
-extern	char	*index();
-extern	double	atof();
 
 static	char	*strdup();
 static	Gslider	*gsl_parse();
