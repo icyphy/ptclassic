@@ -34,6 +34,9 @@ are too large to efficiently inline (formerly they were declared
 inline anyway).
 
 **************************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "DataStruct.h"
 
