@@ -43,6 +43,7 @@ CGGeodesic.h \
 CGStar.h \
 CGSymbol.h \
 CGTarget.h \
+CGUtilities.h \
 CGWormhole.h \
 IntArray.h \
 MReq.h \
