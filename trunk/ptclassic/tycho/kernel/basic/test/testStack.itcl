@@ -37,7 +37,7 @@ if {[string compare test [info procs test]] == 1} then {
 # If necessary load up the class definitions
 if {[namespace tycho {info classes Stack}] == {} } {
     namespace tycho
-    source [file join $TYCHO kernel Stack.itcl]
+    source [file join ..  Stack.itcl]
 }
 
 test Stack-1.1 {Build a Stack} {
