@@ -145,6 +145,11 @@ The input particles are only cast to this precision if the parameter
 	constructor {
 		fdbckCoefs = fwdCoefs = state = NULL;
 	}
+	destructor {
+	    LOG_DEL; delete [] fdbckCoefs;
+	    LOG_DEL; delete [] fwdCoefs;
+	    LOG_DEL; delete [] state;
+	}
         setup {
             SDFFix::setup();
 
@@ -262,7 +267,7 @@ The input particles are only cast to this precision if the parameter
 		checkOverflow(out);
 		signalOut%0 << out;
 	     }
-	 }
+	}
         // A wrap-up method is inherited from SDFFix
         // If you defined your own, you should call SDFFix::wrapup()
 }
