@@ -181,7 +181,7 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   dgraph = new SRDependencyGraph( g );
 
-  cout << dgraph->displayGraph();
+  // cout << dgraph->displayGraph();
 
   Set wholeGraph(dgraph->vertices(), 1);
 
@@ -196,11 +196,11 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
   } else {
     cout << "mincost is " << mc << "\n";
     cout << "best schedule was " << schedule.print() << '\n';
+
+    int cost = schedule.cost();
+    assert( cost == mc );
+
   }
-
-  int cost = schedule.cost();
-
-  assert( cost == mc );
 
   // cout << "There are " << Set::setcount() << " sets finally\n";
 
