@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -34,6 +34,11 @@ static char SccsId[]="$Id$";
  *
  */
 
+#ifdef SYSV
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 #include <X11/Xlib.h>
 #include "xvals.h"
 #include "general.h"
@@ -58,6 +63,9 @@ lsList RPCDemonList;
 void
 rpcInit()
 {
+#ifdef SYSV
+    struct rlimit	rlp;
+#endif
     /*
      * allow selection on the X file descriptor
      */
@@ -70,7 +78,12 @@ rpcInit()
     RPC_FD_ZERO(RPCSelectRequest);
     RPC_FD_ZERO(RPCSelectAccept);
     RPC_FD_ZERO(RPCFileRequest);
+#ifdef SYSV
+    getrlimit(RLIMIT_NOFILE, &rlp);
+    RPCFileDescriptors = RPCARRAYALLOC(int, rlp.rlim_cur - 1);
+#else
     RPCFileDescriptors = RPCARRAYALLOC(int, getdtablesize());
+#endif
     RPC_FD_SET(Xfd, RPCSelectRequest);
     RPCLargestFD = MAX(RPCLargestFD, Xfd);
 
