@@ -112,7 +112,13 @@ int Cluster::absorb(Cluster& cluster, int removeFlag) {
     Block* clusterParent =  cluster.parent();
     cout << "Absorbing " << cluster.name() << " into "
 	 << name() << ".\n";
-    
+    // Make sure we are not absorbing ourselves
+    if (this == &cluster) {
+    StringList message;
+    message << "Can't absorb a cluster into itself.  Aborting.";
+    Error::abortRun(*this, message);
+    return FALSE;
+    }
     // First we must make sure that both clusters share the
     // same parent
     if (clusterParent != parent()) {
