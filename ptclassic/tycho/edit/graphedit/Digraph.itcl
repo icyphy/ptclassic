@@ -339,7 +339,7 @@ body ::tycho::Digraph::_addedge {vertex1 vertex2 args} {
 # Return a string describing an edge.
 #
 body ::tycho::Digraph::_describeedge {name {prefix {}}} {
-    return "${prefix}edge [lrange [split $name :^] 1 2] [assign $name]\n"
+    return "${prefix}edge [lrange [split $name :^] 1 2] [itemset $name]\n"
 }
 
 ########################################################################

@@ -382,7 +382,7 @@ body ::tycho::PortedDigraph::_addedge {v1 p1 v2 p2 args} {
 # Return a string describing an edge.
 #
 body ::tycho::PortedDigraph::_describeedge {name {prefix {}}} {
-    return "${prefix}edge [lrange [split $name :^.] 1 4] [assign $name]\n"
+    return "${prefix}edge [lrange [split $name :^.] 1 4] [itemset $name]\n"
 }
 
 ########################################################################

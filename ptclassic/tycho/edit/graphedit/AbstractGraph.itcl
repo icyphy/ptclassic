@@ -74,8 +74,8 @@
 #
 # Change an attribute of an edge and query it again:
 # <pre><tcl>
-#     $graph itemconfigure edge:a^b -weight 2
-#     $graph itemcget edge:a^b -weight
+#     $graph attrset edge:a^b -weight 2
+#     $graph attrset edge:a^b -weight
 # </tcl></pre>
 #
 # Display a TIM representation of the graph
