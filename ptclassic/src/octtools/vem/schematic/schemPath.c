@@ -45,9 +45,6 @@ static char SccsId[]="$Id$";
 #include "symbolic.h"
 #include "se.h"
 
-/* Forward and extern */
-static vemStatus ckLines();
-
 static int schemDCF(nLayers, layerList, inst, why, data)
 int nLayers;			/* Number of connections */
 tapLayerListElement *layerList;	/* Layers themselves     */
@@ -74,8 +71,9 @@ char *data;			/* User data (not used)  */
 	inst->objectId = oct_null_id;
 	(void) sprintf(why, "No appropriate connector found: %d layers\n", nLayers);
 	for ( i = 0; i < nLayers; i++ ) {
-	    (void) sprintf( buf, "%s(%d) ", layerList[i].layer.contents.layer.name,
-			   layerList[i].width );
+	    (void) sprintf( buf, "%s(%ld) ",
+			   layerList[i].layer.contents.layer.name,
+			   (long)layerList[i].width );
 	    (void) strcat( why, buf );
 	}
 	return 0;
@@ -97,12 +95,6 @@ lsList cmdList;			/* Argument list            */
  */
 {
     octObject target_fct, pathLayer;
-    octCoord width;
-    struct octPoint *pnts;
-    lsGen gen;
-    int i;
-    vemOneArg *arg;
-    vemStatus rt;
 
     /* All arguments should be in same buffer */
     if (vuCkBuffer(cmdList, &(target_fct.objectId)) != VEM_OK) return VEM_ARGRESP;
