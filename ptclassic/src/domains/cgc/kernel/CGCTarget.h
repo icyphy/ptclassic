@@ -154,11 +154,12 @@ protected:
 
 	// Stages of code generation.
 	/*virtual*/ void headerCode();
+        /*virtual*/ void mainLoopCode();
 	/*virtual*/ void trailerCode();
 
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
-
+    
 	// redefine compileRun() method to switch the code streams stars refer
 	// to.
 	/*virtual*/ void compileRun(SDFScheduler*);
@@ -192,6 +193,9 @@ protected:
 
 	// splice copy stars or type conversion stars if necessary.
 	void addSpliceStars();
+
+        virtual CodeStream mainLoopBody();
+	CodeStream mainLoop;
 
 private:
 	// setup forkDests list for all Fork input portholes
