@@ -1,0 +1,16 @@
+#!/bin/sh
+#%w%	$Date$
+#usage vendorexec.s56dsp relpath args
+
+export S56DSP
+if test ! "$S56DSP"
+then
+	S56DSP=`dirname $0`/s56dsp
+fi
+temp=`/usr/etc/modstat | grep s56dsp`
+if test "$temp"
+then
+	exec `dirname $0`/vendorexec $*
+else
+	echo "`basename $1` : s56dsp driver not loaded, try running on bennett, carson, or gammow"
+fi
