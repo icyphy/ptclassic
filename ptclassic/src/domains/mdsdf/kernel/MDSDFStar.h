@@ -64,13 +64,14 @@ class MDSDFStar : public SDFStar {
     // Domain-specific function to test if a star is runnable
     /* virtual */ int notRunnable();
 
-    // Domain-specific function to fire a star
-//    /* virtual */ int run();
-//  DataFlowStar::run;
-
     // inherited from DataFlowStar
     // Fraction repetitions;
     // unsigned noTimes;  // number of times star has fired
+
+    // Resolve ANYSIZE rows and columns for inputs and outputs, 
+    // called during scheduling
+    int resolveANYSIZErows();
+    int resolveANYSIZEcols();
 
     // During scheduling, the scheduler must keep track of how many times
     // it has scheduled a star in each dimension.  This is a convenient
@@ -80,9 +81,6 @@ class MDSDFStar : public SDFStar {
 
     Fraction rowRepetitions;  // the number of row and column firings for
     Fraction colRepetitions;  // this star per iteration
-
-//    Fraction initRowRepetitions;  // the number of row and column firings for
-//    Fraction initColRepetitions;  // for this star on its initial iteration
 
     int startRowIndex;  // the current row and column firing index for this
     int startColIndex;  // star

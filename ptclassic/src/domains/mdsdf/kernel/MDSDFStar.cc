@@ -137,6 +137,90 @@ int MDSDFStar::notRunnable() {
   return 0; // star is runnable
 }
 
+// Resolve ANYSIZE inputs and outputs.  Function is called during
+// scheduling.  Returns 0 if there is an error, such as when
+// there are ANYSIZE outputs but no ANYSIZE input, or if there are
+// multiple inputs with ANYSIZE specifications.  Otherwise, returns
+// the number of rows that all ANYSIZE inputs and outputs are set to.
+int MDSDFStar::resolveANYSIZErows() {
+  if(numInputs()) {
+    BlockPortIter nextp(*this);
+    PortHole* p;
+    MDSDFPortHole* input = 0;
+    int resolvedSize;
 
+    // find the single input that is of type ANYSIZE, if multiple
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numRowXfer() == ANYSIZE && mp->isItInput()) {
+	if(input == 0)
+	  input = mp;
+        else return 0;  // multiple inputs with ANYSIZE rows
+      }
+    }
+    if(input == 0)
+      return 0;         // no input with ANYSIZE rows
+    // at this point, we should have only one input with ANYSIZE rows
+    resolvedSize = ((MDSDFPortHole*)(input->far()))->numRowXfer();
+    if(resolvedSize == ANYSIZE) {
+      resolvedSize = ((MDSDFStar*)(input->parent()))->resolveANYSIZErows();
+      if(resolvedSize == 0)
+	return 0;
+    }
+    // at this point, we have a valid resolved row size, set the input
+    // and all outputs with ANYSIZE rows to be this size;
+    nextp.reset();
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numRowXfer() == ANYSIZE)
+	mp->setRowXfer(resolvedSize);
+    }
+    return resolvedSize;
+  }
+  return 0;
+}
+
+// Resolve ANYSIZE inputs and outputs.  Function is called during
+// scheduling.  Returns 0 if there is an error, such as when
+// there are ANYSIZE outputs but no ANYSIZE input, or if there are
+// multiple inputs with ANYSIZE specifications.  Otherwise, returns
+// the number of columns that all ANYSIZE inputs and outputs are set to.
+int MDSDFStar::resolveANYSIZEcols() {
+  if(numInputs()) {
+    BlockPortIter nextp(*this);
+    PortHole* p;
+    MDSDFPortHole* input = 0;
+    int resolvedSize;
+
+    // find the single input that is of type ANYSIZE, if multiple
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numColXfer() == ANYSIZE && mp->isItInput()) {
+	if(input == 0)
+	  input = mp;
+        else return 0;  // multiple inputs with ANYSIZE columnss
+      }
+    }
+    if(input == 0)
+      return 0;         // no input with ANYSIZE columns
+    // at this point, we should have only one input with ANYSIZE columnss
+    resolvedSize = ((MDSDFPortHole*)(input->far()))->numColXfer();
+    if(resolvedSize == ANYSIZE) {
+      resolvedSize = ((MDSDFStar*)(input->parent()))->resolveANYSIZEcols();
+      if(resolvedSize == 0)
+	return 0;
+    }
+    // at this point, we have a valid resolved column size, set the input
+    // and all outputs with ANYSIZE columns to be this size;
+    nextp.reset();
+    while((p = nextp++) != 0) {
+      MDSDFPortHole* mp = (MDSDFPortHole*)p;
+      if(mp->numColXfer() == ANYSIZE)
+	mp->setColXfer(resolvedSize);
+    }
+    return resolvedSize;
+  }
+  return 0;
+}
 
 
