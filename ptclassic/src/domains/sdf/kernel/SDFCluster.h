@@ -324,11 +324,14 @@ private:
 };
 
 class SDFClustPort : public SDFPortHole {
+	friend class SDFCluster;
 private:
 	SDFPortHole& pPort;
 	SDFClustPort* pOutPtr;
 	unsigned char bagPortFlag;
 	unsigned char feedForwardFlag;
+	void loopBy(int fac) { numberTokens *= fac;}
+	void unloopBy(int fac) { numberTokens /= fac;}
 public:
 	SDFClustPort(SDFPortHole& p,SDFCluster* parent = 0,int bagp = 0);
 	~SDFClustPort() {}

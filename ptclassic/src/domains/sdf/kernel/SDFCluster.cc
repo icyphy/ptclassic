@@ -472,7 +472,7 @@ void SDFCluster::loopBy(int fac) {
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0)
-		p->numberTokens *= fac;
+		p->loopBy(fac);
 }
 
 // unloop a cluster.  Return old loop factor.  This undoes the effect
@@ -484,7 +484,7 @@ int SDFCluster::unloop() {
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0)
-		p->numberTokens /= fac;
+		p->unloopBy(fac);
 	return fac;
 }
 
@@ -881,7 +881,7 @@ SDFClustPort::SDFClustPort(SDFPortHole& port,SDFCluster* parent, int bp)
 	const char* name = bp ? port.readName() : mungeName(port);
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
-	numberTokens = port.numberTokens;
+	numberTokens = port.numXfer();
 }
 
 void SDFClustPort::initGeo() { myGeodesic->initialize();}
