@@ -49,8 +49,7 @@ varList *pbf = (varList *) 0, *pvf = (varList *) 0;
 char spinfname[255];
 int SIP_ID = 0, currentMaxID = 0;
 
-double DESiPStar::
-RunSpin(RunList * runProc, double nowTime)
+double DESiPStar::RunSpin(RunList * runProc, double nowTime)
 {
   Symbol *r;
   double suspendedTime = 0.0;
@@ -84,8 +83,7 @@ RunSpin(RunList * runProc, double nowTime)
   return suspendedTime;
 }
 
-void DESiPStar::
-GlobalUpdate(void)
+void DESiPStar::GlobalUpdate(void)
 {
   static char tmps[1024];
   PXPStarList *Xp, *tmp;
@@ -536,8 +534,7 @@ copyGlobal(char *scp, FILE * f1, FILE * f2)
   return gotProc;
 }
 
-void DESiPStar::
-outputPML(int assignScope, const char *pplpath, const char *s1, const char *s2, const char *s3, const char *s4)
+void DESiPStar::outputPML(int assignScope, const char *pplpath, const char *s1, const char *s2, const char *s3, const char *s4)
 {
   char ss[255], starname[255], starnamei[255], starfull[255];
   char longscope[255], starscope[255];
@@ -605,8 +602,7 @@ outputPML(int assignScope, const char *pplpath, const char *s1, const char *s2, 
   fclose(fini);
 }
 
-void DESiPStar::
-unregisterPXPStar(void)
+void DESiPStar::unregisterPXPStar(void)
 {
   // Remove myself from PXPStarList
   PXPStarList *Xp, *tmp = NULL;
@@ -625,8 +621,7 @@ unregisterPXPStar(void)
   }
 }
 
-void DESiPStar::
-registerPXPStar(void)
+void DESiPStar::registerPXPStar(void)
 {
   //Register myself to PXPStarList
   PXPStarList *Xp;
@@ -645,8 +640,7 @@ registerPXPStar(void)
   }
 }
 
-void DESiPStar::
-setNextFiring(void)
+void DESiPStar::setNextFiring(void)
 {
   // Next Firing Preparation
   if (NxtFireDur == 0.0)
@@ -664,13 +658,13 @@ setNextFiring(void)
 }
 
 // DESiPStar constructor
-DESiPStar: :DESiPStar()
+DESiPStar::DESiPStar()
 {
   setMode(PHASE);
 }
 
 // Destructor.
-DESiPStar: :~DESiPStar()
+DESiPStar::~DESiPStar()
 {
 }
 
