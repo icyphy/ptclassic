@@ -52,14 +52,14 @@ namespace ::tycho
 # Files that we are going to need right away, so there is no
 # point in deferring them to auto-loading.
 uplevel #0 {
-    source $tychokernel/Color.tcl
-    source $tychokernel/TopLevel.itcl
-    source $tychokernel/TychoWidget.itcl
-    source $tychokernel/Dismiss.itcl
-    source $tychokernel/DialogWindow.itcl
-    source $tychokernel/FontManager.itcl
-    source $tychokernel/Message.itcl
-    source $tychokernel/ErrorMessage.itcl
+    source [file join $tychokernel Color.tcl]
+    source [file join $tychokernel TopLevel.itcl]
+    source [file join $tychokernel TychoWidget.itcl]
+    source [file join $tychokernel Dismiss.itcl]
+    source [file join $tychokernel DialogWindow.itcl]
+    source [file join $tychokernel FontManager.itcl]
+    source [file join $tychokernel Message.itcl]
+    source [file join $tychokernel ErrorMessage.itcl]
 }
 
 # Register the standard context-sensitive editors
