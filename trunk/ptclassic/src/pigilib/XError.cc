@@ -41,6 +41,11 @@ extern "C" {
 	void FindClear();
 }
 
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "compat.h"
+
 #include <stream.h>
 #include "Error.h"
 #include "Scheduler.h"

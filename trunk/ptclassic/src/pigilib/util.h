@@ -28,6 +28,11 @@ $Id$
 Header file for util.c
 */
 
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "compat.h"
+
 #define UToolName "ptolemy"
     /* name of the tool that this RPC application is for */
 #define UTechProp "ptolemy"  /* name of technology in technology directory */
