@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF tcltk library }
 	desc {
 Invoke a Tcl script that can optionally define a procedure that is
-invoked every time the star fires. That procedure can read the star’s
+invoked every time the star fires. That procedure can read the star's
 inputs and update the value of the outputs.
 	}
 	explanation {
