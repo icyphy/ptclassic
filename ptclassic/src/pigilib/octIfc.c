@@ -33,7 +33,7 @@ Useful higher level OCT interface functions.
 /* Includes */
 
 /* Standard include files */
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -733,7 +733,7 @@ boolean
 GetStringProp(objPtr, propName, valuePtr)
 octObject *objPtr;
 char  *propName;
-char **valuePtr;
+const char **valuePtr;
 {
     octObject prop = {OCT_UNDEFINED_OBJECT};
 
@@ -779,8 +779,8 @@ char  *value;
 boolean
 GOCDomainProp(facetPtr, domainPtr, defaultDomain)
 octObject *facetPtr;
-char **domainPtr;
-char *defaultDomain;
+const char **domainPtr;
+const char *defaultDomain;
 {
     octObject prop = {OCT_UNDEFINED_OBJECT};
     CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
@@ -806,8 +806,8 @@ char *domain;
 boolean
 GOCTargetProp(facetPtr, targetPtr, defaultTarget)
 octObject *facetPtr;
-char **targetPtr;
-char *defaultTarget;
+const char **targetPtr;
+const char *defaultTarget;
 {
     octObject prop = {OCT_UNDEFINED_OBJECT};
     prop.objectId = 0;
@@ -929,11 +929,11 @@ int i;
 boolean
 GetOrCreatePropStr(c, t, s, s1)
 octObject *c,*t;
-char *s, *s1;
+const char *s, *s1;
 {
-    t->type=OCT_PROP;
+    t->type = OCT_PROP;
     t->objectId = 0;
-    t->contents.prop.name=s;
+    t->contents.prop.name = s;
     t->contents.prop.type = OCT_STRING;
     t->contents.prop.value.string = s1;
     return octGetOrCreate(c, t);
