@@ -25,6 +25,18 @@
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
+#################################################################
+#
+# Note that this loginfo file controls cvs files that have /home/cvs
+# as their repository
+#
+# Chess files with /home/cvs_chess are controlled by
+# /home/cvs_chess/CVSROOT/loginfo
+#
+# See http://www.gigascale.org/infrax/faq/120.html
+#
+#################################################################
+
 CVSROOT/.* mailx -s \"%s\" root@gigasource.eecs.berkeley.edu
 
 collabrador/.* mailx -s \"%s\" collabrador-cvs@gigascale.org
@@ -41,6 +53,3 @@ panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
 
 # Temporarily notify allenh about changes to php:
 php /home/allenh/bin/cvs-log $CVSROOT/CVSROOT/commitlog $USER %{sVv}
-
-reap/.* mailx -s \"%s\" reap-cvs@chess.eecs.berkeley.edu
-
