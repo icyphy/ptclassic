@@ -112,7 +112,8 @@ proc makeOrderedPairs {args} {
 # Function: max
 
 add_to_help max {<x1> <x2> ...} {
-Computes the maximum of the arguments according to the > operator.
+Computes the maximum of the arguments according to the > operator,
+which also compares strings.
 }
 
 proc max {a args} {
