@@ -34,6 +34,9 @@ VPATH = $(ROOT)/src/compat/X11R5
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# Dummy variable to avoid make warnings about duplicate commands
+LIBR = dummylib
+
 HDRS = 	X.h Xfuncproto.h Xlib.h Xos.h Xosdefs.h Xutil.h cursorfont.h
 
 MISC_FILES =
