@@ -40,6 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
+	LoaderHelp.html \
 	exec.html \
 	index.html \
 	path.html
