@@ -44,7 +44,7 @@ PL_SRCS= \
  CG56IIDUniform.pl \
  CG56Impulse.pl \
  CG56Integrator.pl \
- CG56Interpolator.pl \
+ CG56IntegratorR.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56LocateMax.pl \
@@ -55,6 +55,7 @@ PL_SRCS= \
  CG56MagnavoxOut.pl \
  CG56Mpy.pl \
  CG56MpyInt.pl \
+ CG56MpyShift.pl \
  CG56Neg.pl \
  CG56Pad.pl \
  CG56Peak.pl \
@@ -74,6 +75,7 @@ PL_SRCS= \
  CG56Rect.pl \
  CG56Repeat.pl \
  CG56Reverse.pl \
+ CG56SSI.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
  CG56Sin.pl \
