@@ -56,7 +56,7 @@ cd $PTOLEMY/obj.$PTARCH
 optlink ../src makefile
 
 # interp used to be in the line below, as of 0.5.1, it is no longer.
-foreach x (domains ptcl kernel tysh pigiRpc pigilib ptlang pxgraph ptklib octtools pigiExample)
+foreach x (domains ptcl pitcl kernel tysh pigiRpc pigilib ptlang pxgraph ptklib octtools pigiExample)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
