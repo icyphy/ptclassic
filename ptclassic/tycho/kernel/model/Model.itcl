@@ -221,7 +221,7 @@ class ::tycho::Model {
     method describeState {{mode all}}
 
     # Externalize the model into a state file
-    method externalize {fd {mode all}}
+    method externalize {fd {mode {}}}
     
     # Add to the model from a state file or a string
     method internalize {type data}
