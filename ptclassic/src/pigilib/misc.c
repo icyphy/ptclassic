@@ -35,15 +35,19 @@ $Id$
         - aok  2/22/93
 */
 
-/* Includes */
-#include "local.h"
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 #include <string.h>
 
-/* Include list.h and rpc.h */
-/* Defines lsList and RPC data structures, respectively */
-#include "misc.h"
+/* Octtools includes */
+#include "oct.h"		/* define octObject */
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
+#include "utility.h"		/* define util_csystem */
 
+/* Pigilib includes */
+#include "misc.h"
 #include "vemInterface.h"
 #include "util.h"
 #include "octIfc.h"
@@ -52,7 +56,6 @@ $Id$
 #include "compile.h"
 #include "kernelCalls.h"
 #include "icon.h"
-#include "utility.h"
 #include "xfunctions.h"
 
 /* for ShowFacetNum */

@@ -30,23 +30,22 @@ $Id$
 */
 
 
-/* Includes */
-#if defined(PTSVR4)
-#include <sys/types.h>
-#endif /* PTSVR4 */
-
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <string.h>
 #include <sys/file.h>
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
-#include "edit.h"
-
+/* Octtools includes */
+#include "oct.h"		/* define octObject */
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define RPC data structures */
 #include "oh.h"
+
+/* Pigilib includes */
+#include "edit.h"
+#include "util.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
-#include "util.h"
 #include "err.h"
 #include "octIfc.h"
 #include "exec.h"
