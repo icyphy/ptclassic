@@ -24,7 +24,7 @@ $Id$
 #include "Error.h"
 #include "Connect.h"
 #include "Geodesic.h"
-#include "string.h"
+#include <string.h>
 #include "Domain.h"
 
 // Report an error: no such star or porthole
