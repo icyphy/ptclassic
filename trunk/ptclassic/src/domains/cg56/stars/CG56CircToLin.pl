@@ -69,7 +69,7 @@ is repeated inline so may not be efficient for large N.
 
 
 	codeblock(init) {
-	move	#$addr(input),x0
+	move	#>$addr(input),x0
 	move	x0,$ref(ptr)
 	}
 
