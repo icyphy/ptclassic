@@ -17,7 +17,7 @@ $Id$
 #pragma interface
 #endif
 
-#include "BaseCTarget.h"
+#include "HLLTarget.h"
 #include "StringState.h"
 #include "IntState.h"
 
@@ -25,7 +25,7 @@ class CGCPortHole;
 class EventHorizon;
 class CGCStar;
 
-class CGCTarget : public BaseCTarget {
+class CGCTarget : public HLLTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
 	Block* makeNew() const;
@@ -53,11 +53,12 @@ public:
 	void addMainInit(const char* decl);
 
 	// name the offset of portholes
-	StringList offsetName(const CGCPortHole*);
+	StringList offsetName(const CGCPortHole* p); 
 
 	// make public this method
 	StringList correctName(const NamedObj& p) 
 		{return  sanitizedFullName(p); }
+	StringList appendedName(const NamedObj& p, const char* s);
 
 	// compile and run the code
 	int compileCode();
@@ -118,6 +119,10 @@ private:
 	virtual int galDataStruct(Galaxy& galaxy, int level=0);
 	virtual int starDataStruct(CGCStar* block, int level=0);
 	void setGeoNames(Galaxy& galaxy);
+
+	// Update the copy-offset (for embedded portholes) after
+	// run before wrap-up stage.
+	StringList updateCopyOffset();
 
 	// setup forkDests list for all Fork input portholes
 	// This complete list is needed to decide the buffer size computation.

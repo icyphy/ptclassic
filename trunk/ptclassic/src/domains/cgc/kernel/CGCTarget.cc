@@ -28,7 +28,7 @@ extern const char* whichType(DataType);
 
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
-                   const char* desc) : BaseCTarget(name,starclass,desc) {
+                   const char* desc) : HLLTarget(name,starclass,desc) {
 	addState(staticBuffering.setState("staticBuffering",this,"YES",
                         "static buffering is enforced between portholes."));
 	addState(funcName.setState("funcName",this,"main",
@@ -41,6 +41,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "options to be specified for linking."));
 	addState(saveFileName.setState("saveFileName",this,"",
                         "file name to save the generated code."));
+	wormIn.initialize();	
+	wormOut.initialize();
 }
 
 StringList CGCTarget :: sectionComment(const StringList s) {
@@ -48,12 +50,6 @@ StringList CGCTarget :: sectionComment(const StringList s) {
 	out += s;
 	out += " ******/\n";
 	return out;
-}
-
-StringList CGCTarget::offsetName(const CGCPortHole* p) {
-        StringList out = sanitizedFullName(*p);
-        out += "_ix";
-        return out;
 }
 
 void CGCTarget :: headerCode () {
@@ -104,8 +100,6 @@ int CGCTarget :: starDataStruct(CGCStar* block, int) {
 
 void CGCTarget :: setup() {
     galId = 0;
-    wormIn.initialize();	// should be initialize here.
-    wormOut.initialize();
 
     // Initializations
     include = "";
@@ -141,11 +135,12 @@ void CGCTarget :: frameCode () {
     runCode += myCode;
     
     myCode = runCode;
+    myCode += updateCopyOffset();
 }
 
 StringList CGCTarget :: generateCode() {
 	setup();
-	run();
+	if (galaxy()->parent() == 0) run();
 	myCode += "}\n";
 	return myCode;
 }
@@ -226,6 +221,7 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
                 myCode += "++) {\n";
         }
 	myCode += wormIn;
+	wormIn.initialize();
         return;
 }
 
@@ -242,6 +238,7 @@ void CGCTarget :: wormOutputCode(PortHole& p) {
 void CGCTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << wormOut;
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
+	wormOut.initialize();
 }
 
 void CGCTarget :: addInclude(const char* inc) {
@@ -385,6 +382,35 @@ int CGCTarget :: codeGenInit() {
         return TRUE;
 }
 
+/////////////////////////////////////////
+// updateCopyOffset
+/////////////////////////////////////////
+
+StringList CGCTarget :: updateCopyOffset() {
+	StringList out;
+	
+	GalStarIter nextStar(*galaxy());
+	CGCStar* s;
+	while ((s = (CGCStar*) nextStar++) != 0) {
+		if (s->isItFork()) continue;
+		BlockPortIter next(*s);
+		CGCPortHole* p;
+		while ((p = (CGCPortHole*) next++) != 0) {
+			if (p->isItOutput()) continue;
+			CGCPortHole* f = (CGCPortHole*) p->far();
+			if ((f->embedded() && f->bufType() == OWNER) ||
+			    (f->embedding() && f->bufType() == COPIED)) {
+				out << "    ";
+				out << appendedName(*p, "copy_ix");
+				out << " = (" << f->numXfer() << " + ";
+				out << appendedName(*p, "copy_ix");
+				out << ") % " << p->bufSize() << ";\n";
+			}
+		}
+	}
+	return out;
+}
+			
 StringList CGCTarget :: sanitizedFullName (const NamedObj& obj) const {
 	StringList out;
 	out << 'g' << galId << '_';
@@ -393,6 +419,17 @@ StringList CGCTarget :: sanitizedFullName (const NamedObj& obj) const {
 	out << '_' << s->index() << '_';
 	out += sanitizedName(obj);
 	return out;
+}
+
+StringList CGCTarget :: appendedName (const NamedObj& p, const char* s) {
+	StringList out = sanitizedFullName(p);
+	out += '_';
+	out += s;
+	return out;
+}
+
+StringList CGCTarget :: offsetName(const CGCPortHole* p) {
+	return appendedName(*p, "ix");
 }
 
 const char* whichType(DataType s) {
