@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -707,6 +707,13 @@ octObject *galFacetPtr;
     return CompileGal(galFacetPtr);
 }
 
+/*
+ * The following flag is used to determine whether any subgalaxy of
+ * a universe has been recompiled.  If it has, the universe has to
+ * be recompiled.
+ */
+static boolean recompileFlag;
+
 /* compile a galaxy. */
 
 boolean
@@ -788,6 +795,7 @@ octObject *galFacetPtr;
     if (!xferedBool) {
 	ERR_IF2(!DupSheetAdd(&xfered, name), msg);
     }
+    recompileFlag = 1;
     return (TRUE);
 }
 
@@ -813,9 +821,10 @@ octObject *facetPtr;
     TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "reset; domain ",
 		   domain, (char*) NULL));
 
+    recompileFlag = 0;
     ERR_IF1(!ProcessSubGals(facetPtr));
     xferedBool = DupSheetIsDup(&xfered, name);
-    if (xferedBool && !IsDirtyOrGone(facetPtr)) {
+    if (xferedBool && !IsDirtyOrGone(facetPtr) && !recompileFlag) {
 	/* universe already xfered to kernel and is unchanged */
 	Tcl_VarEval(ptkInterp, "curuniverse ", name, (char *) NULL);
 	return (TRUE);
