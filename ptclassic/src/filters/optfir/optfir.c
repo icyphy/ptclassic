@@ -31,6 +31,8 @@ Converted from Fortran by f2c, cleaned up by Christopher Hylands
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "compat.h"
+
 #define log10e 0.43429448190325182765
 
 /* Common Block Declarations */
