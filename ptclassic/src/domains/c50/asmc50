@@ -1,36 +1,38 @@
-#!/bin/csh
+#!/bin/sh
 # Version: $Id$
 # Copyright (c) 1996 The Regents of the University of California.
-# 	All Rights Reserved.
+# All Rights Reserved.
 #
 # asmc50
 # script to assemble files with TI's DSK assembler(dsk5a.exe)
 # Uses dosemu to run dsk5a.exe.  The person running it must be root to
 # mount/unmount the dos partition.
-# This script was tested on a machine running linux(red-hat 3.0.3 
-# diistribution) with dosemu-0.63.1.33 installed.
+# This script was tested on a machine running linux (red-hat 3.0.3 
+# distribution) with dosemu-0.63.1.33 installed.
+#
 # Written by Luis Gutierrez.
+# Converted from csh to sh by Brian L. Evans
 
 # User's home directory.
-set homedir = /root
+homedir=/root
 
 # User's dos partition.
-set dospartition = /dos/c
+dospartition=/dos/c
 
 # The root path of DOS drive where DSK files and DOS binaries are stored.
-set dosroot = c:
+dosroot=c:
 
 # The DOS directory(relative to dosroot)where the *.asm and *.dsk files 
 # are stored. Replace the \ in the DOS path with \\.
-set dsksrc = dsk\\src
+dsksrc=dsk\\src
 
 # The DOS directory(relative to dosroot) where the DSK 
 # executables(dsk5a.exe, dsk5l.exe) are stored.  
 # Replace the \ in the DOS path with \\.
-set dskbin = dsk
+dskbin=dsk
 
 # The file used to temporarily save autoexec.emu.
-set autoexecsave = autoexec.bak
+autoexecsave=autoexec.bak
 
 cd $dospartition
 mv autoexec.emu $autoexecsave
@@ -38,10 +40,10 @@ mv autoexec.emu $autoexecsave
 # The text between the first xxxx and the second xxxx will be
 # piped to unix2dos and will end up in autoexec.emu.
 
-unix2dos  > $dospartition/autoexec.emu << xxxx
+unix2dos > $dospartition/autoexec.emu << xxxx
 path $dosroot\\$dskbin;$dosroot\\dos
 cd $dosroot\\$dsksrc
-dsk5a.exe  $1:t
+dsk5a.exe $1:t
 exitemu
 xxxx
 cd $homedir
