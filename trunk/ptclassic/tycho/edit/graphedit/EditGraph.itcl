@@ -263,21 +263,15 @@ body ::tycho::EditGraph::constructor {args} {
     $slate configure -highlightcolor azure2 -highlightwidth 4
 
     # Enable selection with button 1; shift-click toggles
-    $slate selector bind click vertex -button 1
-    $slate selector bind click vertex -button 1 \
-            -modifiers shift -toggle 1
-
-    # Enable drag-selection with button 1; shift-click toggles
-    $slate selector bind drag "#background" -button 1
-    $slate selector bind drag "#background" -button 1 \
+    $slate selector bind vertex -button 1
+    $slate selector bind vertex -button 1 \
             -modifiers shift -toggle 1
 
     # Create the interactor to move selected items
     set follower [$slate interactor Follower]
-    $slate selector delegate immediate selected $follower vertex \
-	    -button 1
-    $slate selector delegate immediate selected $follower vertex \
-	    -button 1 -modifiers shift
+    $slate selector delegate $follower vertex -button 1
+    $slate selector delegate $follower vertex -button 1 \
+            -modifiers shift
 
     # Now for some tricky stuff: we want the follower to send
     # the interaction to the model, rather than to the slate.
