@@ -43,7 +43,7 @@ the output is the input truncated to this many significant bits
 	mar	*,ar0
 	lacc	*,0,ar1
 	and	#65535,@(16 - int(noBits))
-	sach	*,0
+	sacl	*,0
 	}
 
         go { 
