@@ -58,6 +58,9 @@ public:
 
 	virtual ~ParScheduler();
 
+	// return my expanded graph
+	ParGraph* myEG() {return exGraph;}
+
 	// redefine "compileRun"
         /*virutal*/ void compileRun();
 
