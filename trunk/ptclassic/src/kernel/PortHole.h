@@ -4,6 +4,7 @@
 #include "NamedObj.h"
 #include "DataStruct.h"
 #include "dataType.h"
+#include "Particle.h"
 #include "type.h"
 
 /**************************************************************************
@@ -50,17 +51,14 @@ Plasma: The place where Particles reside in transit back.
 Particles: Defined in Particle.h
 ******************************************************************/
 
-class Particle;
-
 	/////////////////////////////////////////
 	// class CircularBuffer
 	/////////////////////////////////////////
 
 /*
 class CircularBuffer manages a circular buffer
-(array with modulo addressing) containing Pointer's
-
-It is used to store Particle*'s corresponding to past
+(array with modulo addressing) containing pointers to Particles.
+It is used to store Particle*s corresponding to past
 input or output Particles
 */
 
@@ -78,27 +76,31 @@ public:
 	void initialize();
 
         // Return current Pointer on the buffer
-        Pointer* here() const;
+        Particle** here() const;
 
         // Return next Pointer on the buffer
-        Pointer* next();
+        Particle** next();
 
         // Back up one Pointer on the buffer
-        Pointer* last();
+        Particle** last();
  
         // Access buffer relative to current
-        Pointer* previous(int) const;
+        Particle** previous(int) const;
  
         // Size of the buffer
         int size() const {return dimen;}
- 
+
+	// last error msg
+	static const char* errMsg() { return errMsgString;}
 private:
         // Number of Pointers on the buffer
         int dimen;
         // Index of the current Pointer
         int current;
         // Pointer array
-        Pointer* buffer;
+        Particle** buffer;
+	// An error string for the class
+	static const char* errMsgString;
 };
 
 class Geodesic;
