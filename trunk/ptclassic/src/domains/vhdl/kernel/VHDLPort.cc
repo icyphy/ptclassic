@@ -47,6 +47,7 @@ VHDLPort :: VHDLPort() {
   signal = NULL;
   variable = NULL;
   firing = NULL;
+  token = NULL;
   VHDLTypedObj::initialize();
 }
 
@@ -56,7 +57,7 @@ VHDLPort :: ~VHDLPort() {}
 // Return a pointer to a new copy of the VHDLPort.
 VHDLPort* VHDLPort :: newCopy() {
   VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal,
-				   variable, firing);
+				   variable, firing, token);
   return newPort;
 }
 
@@ -110,8 +111,9 @@ void VHDLPortList :: put(StringList name, StringList type,
 			 StringList mapping/*=""*/,
 			 VHDLSignal* signal/*=NULL*/,
 			 VHDLVariable* variable/*=NULL*/,
-			 VHDLFiring* firing/*=NULL*/) {
+			 VHDLFiring* firing/*=NULL*/,
+			 VHDLToken* token/*=NULL*/) {
   VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal,
-				   variable, firing);
+				   variable, firing, token);
   this->put(*newPort);
 }
