@@ -107,6 +107,7 @@ CCS_WITH_H_FILES=\
  NamedObj.cc \
  Particle.cc \
  ParticleQueue.cc \
+ ParticleVector.cc \
  Plasma.cc \
  PrecisionState.cc \
  PriorityQueue.cc \
