@@ -384,9 +384,8 @@ body ::tycho::IconLibrary::instantiate {icon layout args} {
 
     # Get the full name
     if { $itemname == "" } {
-        set itemname [::tycho::autoName $itemtype]
+	set itemname [uniqueid [concat $itemcontext $itemname]]
     }
-    set itemname [concat $itemcontext $itemname]
 
     # Check and get attributes
     array set attrs [attrget $icon]

@@ -354,9 +354,8 @@ body ::tycho::Library::instantiate {item datamodel args} {
 
     # Get the full name
     if { $itemname == "" } {
-        set itemname [::tycho::autoName $itemtype]
+        set itemname [$datamodel uniqueid [concat $itemcontext $itemtype]]
     }
-    set itemname [concat $itemcontext $itemname]
 
     # Get the item type
     if { $itemtype == "" } {
