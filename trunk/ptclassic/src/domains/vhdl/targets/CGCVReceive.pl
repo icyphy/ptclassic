@@ -21,6 +21,14 @@ defstar {
   setup {
     classname = "CGCVReceive";
     sndrcv = "rcv";
+
+    if (strcmp(output.resolvedType(), "INT") == 0) 
+      format = "%d";
+    else if (strcmp(output.resolvedType(), "FLOAT") == 0) 
+      format = "%f";
+    else
+      Error::abortRun(*this, output.resolvedType(), ": type not supported");
+
     numXfer = output.numXfer();
     CGCVSynchComm::setup();
   }
@@ -39,8 +47,14 @@ defstar {
       perror($starSymbol(dummy));
     }
     else {
-      (void) sscanf($starSymbol(buffer), \"%d\", &$ref(output));
-    }
+");
+
+    StringList oneline = "      (void) sscanf($starSymbol(buffer), \"";
+    oneline << format;
+    oneline << "\", &$ref(output));";
+    addCode(oneline);
+		    
+    addCode("    }
   }
 ");
   }
