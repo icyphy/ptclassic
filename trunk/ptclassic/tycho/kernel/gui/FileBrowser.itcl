@@ -263,7 +263,7 @@ body ::tycho::FileBrowser::processItem {filename} {
     if {[file isdir $file]} {
 	if {[file readable $file] && [file executable $file]} {
 	    
-            set CWD $file
+            set CWD [::tycho::expandPath $file]
             $itk_component(dir) config -text $CWD
             set localCWD $CWD
             set fileLastOpened ""
