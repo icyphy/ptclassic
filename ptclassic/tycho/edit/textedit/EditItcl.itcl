@@ -234,7 +234,7 @@ body ::tycho::EditItcl::evaluate {} {
 	if [regexp {^(((::[^:]*)*)(::))?([^:]*)$} $class \
 		match junk1 space junk2 junk3 class] {
 	    if {$space != {}} {
-		namespace $space "
+		namespaceEval $space "
 		    if {\[infoClasses $class\] != {}} {
 			delete class $class
 		    }
@@ -293,7 +293,7 @@ body ::tycho::EditItcl::gendocBuffer {} {
 # then it is simply displayed, not regenerated.
 #
 body ::tycho::EditItcl::genidocBuffer {} {
-    package require tycho.util.tydoc
+    package require tycho.util.idoc
 
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
