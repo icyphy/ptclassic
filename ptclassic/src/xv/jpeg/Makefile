@@ -34,7 +34,7 @@ LN= $(CC)
 # file deletion command
 RM= rm -f
 # library (.a) file creation command
-AR= ar rc
+AR= ar
 # second step in .a creation (use "touch" if not needed)
 AR2= ranlib
 
@@ -107,7 +107,7 @@ djpeg: ansi2knr $(DOBJECTS)
 # program; you'd include it in your link, rather than the individual modules.
 libjpeg.a: ansi2knr $(LIBOBJECTS)
 	$(RM) libjpeg.a
-	$(AR) libjpeg.a  $(LIBOBJECTS)
+	$(AR) rc libjpeg.a  $(LIBOBJECTS)
 	$(AR2) libjpeg.a
 
 clean:
