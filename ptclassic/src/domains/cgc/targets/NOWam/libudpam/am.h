@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: Brent Chun 
  Creation Date: Sat Nov  4 17:25:01 PST 1995
 */
- * 
+
 #ifndef _AM_H
 #define _AM_H   
 
