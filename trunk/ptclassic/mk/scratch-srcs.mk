@@ -105,14 +105,28 @@ xv_all: xv_configure xv_bin xv_install
 
 .PHONY: xv_configure xv_bin xv_install
 
-# For hppa, undefine the following:
-#XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-#INSTALL=bsdinst
-#CC_STATIC=-Wl,-a,archive
 
-# For sun4
+
+# The following is a GNU make extension
+# Some day, these defines could be moved into config-$(ARCH).mk
+ifeq ($(ARCH),hppa)
+XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
+INSTALL=bsdinst
+CC_STATIC=-Wl,-a,archive
+endif
+
+ifeq ($(ARCH),mips)
+XV_RAND=
+CC_STATIC=
+INSTALL=install
+endif
+
+ifeq ($(ARCH),sun4)
+XV_RAND=
 CC_STATIC=-Bstatic
 INSTALL=install
+endif
+
 xv_configure: $(OBJARCH)/xv \
 		$(OBJARCH)/xv/jpeg $(OBJARCH)/xv/jpeg/Makefile \
 		$(OBJARCH)/xv/tiff $(OBJARCH)/xv/tiff/Makefile	\
@@ -144,7 +158,6 @@ xv_bin: $(OBJARCH)/xv
 xv_install: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
-		VPATH=../../src/xv \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		INSTALL=$(INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
