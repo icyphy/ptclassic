@@ -1,4 +1,4 @@
-# Package index for the tycho.typt.editors package
+# Package index for the tycho.typt.edit package
 #
 # @Author: John Reekie
 #
