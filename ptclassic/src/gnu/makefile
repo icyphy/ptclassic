@@ -51,7 +51,7 @@ GNU_OBJ=$(OBJ_DIR)/gnu
 # Machine independent files
 GNU_PREFIX=$(GNU_DEST)/common
 
-GCC_VERSION=2.5.8
+GCC_VERSION=2.6.3
 
 # Machine dependent files
 GNU_EXEC_PREFIX=$(GNU_DEST)/$(ARCH)
@@ -67,7 +67,6 @@ BINDIR=$(PTOLEMY)/bin.$(ARCH)
 all: configure bin install
 .PHONY:	configure bin install
 
-# mach-vars is a simple script that returns the 'right' value for a machine
 MACH=`$(GNU_SRC)/gcc/config.guess`
 
 # Minor fixes to the configure procedure.  These changes
@@ -90,12 +89,13 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
 	-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(GNU_SRC)/libiberty/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
-	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
 	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.c .)
 	# Don't link the .h files, or cp/call.c won't compile
 	#-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.h .)
+	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
+	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
+	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
+
 
 $(GNU_OBJ): $(OBJ_DIR) 
 	-mkdir "$(GNU_OBJ)"
@@ -112,6 +112,7 @@ GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 
 
 bin:
+	echo $$PATH
 	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
 	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
 
@@ -135,71 +136,112 @@ install_bootstrap_gcc:
 # See src/gnu/INSTALL for the details, but basically, we install a special
 # GNU assembler so the the -g flag will work.
 HP_GAS_SRC=$(PTOLEMY)/src/gnu/hp/gas-2.2.u2
-hp_all: hp_gas_configure hp_gas_bin hp_gas_install hp_configure \
-		hp_gas_pregcc_install bin install
+HP_GNU_SRC=$(PTOLEMY)/src/gnu/src.hp
 
-hp_gas_configure: $(GNU_OBJ) $(GNU_OBJ)/hp
-	(cd $(GNU_OBJ)/hp; \
-	$(HP_GAS_SRC)/configure $(MACH) --srcdir=$(HP_GAS_SRC) \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
-	-(cd $(GNU_OBJ)/hp/gas; ln -s $(HP_GAS_SRC)/gas/*.c .)
-	-(cd $(GNU_OBJ)/hp/gas; ln -s $(HP_GAS_SRC)/gas/*.h .)
-	-(cd $(GNU_OBJ)/hp/libiberty; ln -s $(HP_GAS_SRC)/libiberty/*.c* .)
-	-(cd $(GNU_OBJ)/hp/bfd; ln -s $(HP_GAS_SRC)/bfd/*.c .)
-	-(cd $(GNU_OBJ)/hp/bfd; ln -s $(HP_GAS_SRC)/bfd/*.h .)
-	-(cd $(GNU_OBJ)/hp/opcodes; ln -s $(HP_GAS_SRC)/opcodes/*.c .)
-	-(cd $(GNU_OBJ)/hp/opcodes; ln -s $(HP_GAS_SRC)/opcodes/*.h .)
-	-(cd $(GNU_OBJ)/hp/texinfo/makeinfo; ln -s $(HP_GAS_SRC)/texinfo/makeinfo/*.c .)
-	-(cd $(GNU_OBJ)/hp/texinfo/makeinfo; ln -s $(HP_GAS_SRC)/texinfo/makeinfo/*.h .)
-	-(cd $(GNU_OBJ)/hp/texinfo/info; ln -s $(HP_GAS_SRC)/texinfo/info/*.c .)
-	-(cd $(GNU_OBJ)/hp/texinfo/info; ln -s $(HP_GAS_SRC)/texinfo/info/*.h .)
-	-(cd $(GNU_OBJ)/hp/texinfo/util; ln -s $(HP_GAS_SRC)/texinfo/util/*.c .)
-	-(cd $(GNU_OBJ)/hp/texinfo/util; ln -s $(HP_GAS_SRC)/texinfo/util/*.h .)
-$(GNU_OBJ)/hp:
-	mkdir $(GNU_OBJ)/hp
+# See $PTOLEMY/src/gnu/src.hp/gcc/INSTALL for more info
+#HP_MACH=`$(HP_GNU_SRC)/gcc/config.guess`
+HP_MACH=hppa1.1-hp-hpux
 
-hp_gas_bin:
-	(cd $(GNU_OBJ)/hp; $(MAKE) MAKE=$(GMAKE) )
+hp_all: hp_configure hp_pregcc_install hp_bin install hp_all_gdb
 
-hp_gas_install: $(BINDIR)
-	(cd $(GNU_OBJ)/hp; $(MAKE) MAKE=$(GMAKE) MAKEINFO="$(MAKEINFO)" install)
 
-HP_MACH=`$(GNU_SRC)/gcc/config.guess`
 hp_configure: $(GNU_OBJ)
 	@echo "Configure everything, then go back and reconfigure gcc"
 	@echo "The top level configure does not pass things down properly"
 	(cd $(GNU_OBJ); \
-	$(GNU_SRC)/configure hppa1.1-hp-hpux --srcdir=$(GNU_SRC) \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) --with-gnu-as)
+	$(HP_GNU_SRC)/configure $(HP_MACH) --srcdir=$(HP_GNU_SRC) \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		--with-gnu-as)
 	@echo "Now reconfigure gcc with -gas"
 	(cd $(GNU_OBJ)/gcc; \
-	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+	$(HP_GNU_SRC)/gcc/configure --srcdir=$(HP_GNU_SRC)/gcc \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		--with-gnu-as hppa1.1-hp-hpux)
 	@echo "Make links for the source files.  Some makes are not smart"
 	@echo " enough to handle vpath"
-	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
-	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
-	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
-	-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
-	-(cd $(GNU_OBJ)/libiberty; ln -s $(GNU_SRC)/libiberty/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
-	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
-	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.c .)
+	@echo "We could try installing GNU make first, but HPs hate it when"
+	@echo "try to move a running binary, so installing make a second"
+	@echo "time could fail."
+	-(cd $(GNU_OBJ)/bfd; ln -s $(HP_GNU_SRC)/bfd/*.c .)
+	-(cd $(GNU_OBJ)/opcodes; ln -s $(HP_GNU_SRC)/opcodes/*.c .)
+	-(cd $(GNU_OBJ)/binutils; ln -s $(HP_GNU_SRC)/binutils/*.c .)
+	-(cd $(GNU_OBJ)/gas; ln -s $(HP_GNU_SRC)/gas/*.c .)
+	-(cd $(GNU_OBJ)/mmalloc; ln -s $(HP_GNU_SRC)/mmalloc/*.c .)
+	-(cd $(GNU_OBJ)/mmalloc; ln -s $(HP_GNU_SRC)/mmalloc/*.h .)
+	-(cd $(GNU_OBJ)/readline; ln -s $(HP_GNU_SRC)/readline/*.c .)
+	-(cd $(GNU_OBJ)/readline; ln -s $(HP_GNU_SRC)/readline/*.h .)
+	-(cd $(GNU_OBJ)/make; ln -s $(HP_GNU_SRC)/make/*.c .)
+	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.h .)
+	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.c .)
+	-(cd $(GNU_OBJ)/libio; ln -s $(HP_GNU_SRC)/libio/*.c* .)
+	-(cd $(GNU_OBJ)/libiberty; ln -s $(HP_GNU_SRC)/libiberty/*.c* .)
+	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.c* .)
+	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.h .)
+	-(cd $(GNU_OBJ)/libg++/gperf/src; \
+		ln -s $(HP_GNU_SRC)/libg++/gperf/src/*.c* .)
+	-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.c .)
 	# Don't link the .h files, or cp/call.c won't compile
-	#-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.h .)
+	#-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.h .)
+	-mkdir $(GNU_OBJ)/gcc/objc
+	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.c .)
+	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.h .)
+	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.m .)
+	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.c .)
+	-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.c .)
+	-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.h .)
+	# Building libg++ requires as to bin in gcc so -B arg will work
+	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_OBJ/gas/gas as)
+	-(cd $(GNU_OBJ)/librx; ln -s $(GNU_OBJ/librx/*.c)
+	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_OBJ/libstdc++/*.cc)
+	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_OBJ/libstdc++/stl/*.cc)
 
-hp_gas_pregcc_install:
+# Set up links for GNU as.
+hp_pregcc_install: $(GNU_DEST)/$(ARCH)
 	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
-	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
+	-ln -s $(GNU_OBJ)/gas/as.new $(GNU_OBJ)/gas/as
+	-chmod a+x $(GNU_OBJ)/gas/as.new
+	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
 
+$(GNU_DEST)/$(ARCH):
+	if [ ! -d $@ ]; then \
+		mkdir $@; \
+	fi
+
+# We must use gas with hp, so we change the path so the GNU as is first
+hp_bin:
+	#(cd $(GNU_OBJ); $(MAKE) -f $(PTOLEMY)/src/gnu/makefile bin)
+	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
+
+# Install HP GDB
+# We have a separate directory in part because the bfd directories 
+# from gdb and binutils are not easily shareable.
+hp_all_gdb: hp_configure_gdb hp_bin_gdb hp_install_gdb
+
+HP_GDB_SRC=$(HP_GNU_SRC)/gdb-4.13.u4
+
+hp_configure_gdb: $(GNU_OBJ)/gdb
+	(cd $(GNU_OBJ)/gdb; \
+	$(HP_GDB_SRC)/configure $(HP_MACH) --srcdir=$(HP_GDB_SRC) \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		--with-gnu-as)
+$(GNU_OBJ)/gdb:
+	if [ ! -d $@ ]; then \
+		mkdir $@; \
+	fi
+
+# We assume you have GNU make installed here, otherwise you won't find alloca.c
+hp_bin_gdb:
+	cd $(GNU_OBJ)/gdb; $(GMAKE) $(MFLAGS) CC="$(CC)"
+
+hp_install_gdb:
+	cd $(GNU_OBJ)/gdb; $(GMAKE) $(MFLAGS) CC="$(CC)" install
 
 # In gcc-2.5.8, collect2 is not automagically installed.  The symptom
 # of this is that ptcl says that there is no SDF domain, and that perhaps
 # constructors are not being called
 install-collect2:	
 	(cd $(GNU_OBJ)/gcc; $(MAKE) install-collect2)
+
 irix5_all: all install-collect2
 
 clean:
