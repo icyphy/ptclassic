@@ -164,7 +164,7 @@ body ::tycho::EditSTD::constructor {args} {
 
     # Need the data in the file right away to decide if there is a machine 
     # type or not, so couldn't wait for the delay reload in File::constructor.
-    code evalIfExists $this reload
+    [code evalIfExists $this reload]
 
     # If no machine type is specified yet, initialize it.
     if {![info exists machineType]} {
