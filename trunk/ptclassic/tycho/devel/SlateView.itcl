@@ -35,9 +35,8 @@
 #
 # 1. If the window is resized from the left, the user is can scroll
 #    to negative coordinates.  Need a fix in scrollSlate method.
+# 2. Update this code to reflect more efficient code (see iwidgets 2.1)
 
-# FIXME: LIST OF FEATURES TO BE ADDED:
-#
 
 #######################################################################
 # options
@@ -55,7 +54,7 @@ option add *SlateView.width 200 widgetDefault
 # the abstract View class.
 # The design of this class is based on the scrolled canvas by 
 # Mark Ulferts and Sue Yockey.  Instead of using the canvas, we use 
-# our in-house slate.
+# our in-house slate and we do not inherit from the labeled widget.
 #
 # FIXME: Fill in the documentation here
 #
@@ -78,6 +77,10 @@ class ::tycho::SlateView {
     ###################################################################
     ####                            options                        ####
 
+    # Margin between edges of the slate and the bounding box containing
+    # all items on the slate
+    itk_option define -automargin autoMargin AutoMargin 10
+
     # Allow the scrollbars to adjust automatically when new widgets added
     itk_option define -autoresize autoResize AutoResize 1
 
@@ -88,7 +91,7 @@ class ::tycho::SlateView {
     # disappears when not required).
     itk_option define -hscrollmode hscrollMode HScrollMode static
 
-    # Size of scroll margin 
+    # Size of space between the scroll bars and the slate 
     itk_option define -scrollmargin scrollMargin ScrollMargin 2
 
     # Dynamic or static vertical scrollbars
@@ -104,7 +107,7 @@ class ::tycho::SlateView {
     method addMyMenus {}
 
     # Get a handle to the slate drawing surface
-    method childSite {} {return $childsite}
+    method childsite {} {return $childsite}
  
     # Get help on using the slate view
     # method help {}
@@ -120,9 +123,6 @@ class ::tycho::SlateView {
 
     # Save the contents of the slate view to a file
     # method save {filename}
-
-    # Handle map events 
-    method scMapEventHandler {}
 
     # Scroll the slate
     method scrollSlate {wid first last}
@@ -187,6 +187,26 @@ class ::tycho::SlateView {
 	eval "$itk_component(slateview) yview $args"
     }
 
+    ###################################################################
+    ####                       protected methods                   ####
+
+    # Update the filler when size of slate changes
+    protected method updateFiller {}
+
+    # Set up for an update of the filler
+    protected method configureFiller {}
+
+    ###################################################################
+    ####                      protected variables                  ####
+
+    # Vertical scroll mode
+    protected variable vmode off
+
+    # Horizontal scroll mode
+    protected variable hmode off
+
+    # flag to indicate whether reconfigure is pending
+    protected variable reconfigPlanned ""
 
     ###################################################################
     ####                         private methods                   ####
@@ -200,6 +220,12 @@ class ::tycho::SlateView {
 
     # Enable or disable the vertical scrollbar
     private method verticalScrollbarDisplay {mode} 
+
+    ###################################################################
+    ####                       private variables                   ####
+
+    # Initialization flag
+    private variable initialized 0
 }
 
 #######################################################################
@@ -210,31 +236,22 @@ class ::tycho::SlateView {
 # 
 configbody ::tycho::SlateView::autoresize {
 
-    # if the slate is mapped and autoresizing is on, then
-    # cover all items in the bounding box.
-    if {[winfo ismapped $itk_component(hull)]} {
-	if {$itk_option(-autoresize)} {
-	    set slatebbox [$itk_component(slateview) bbox all]
-	    if {$slatebbox == {}} {
-		set swidth [winfo width $itk_component(slateview)]
-		set sheight [winfo height $itk_component(slateview)]
-	    } else {
-		if {[lindex $slatebbox 2] > \
-			[winfo width $itk_component(slateview)]} {
-		    set swidth [lindex $slatebbox 2]
-		} else {
-		    set swidth [winfo width $itk_component(slateview)]
-		}
-		if {[lindex $slatebbox 3] > \
-			[winfo height $itk_component(slateview)]} {
-		    set sheight [lindex $slatebbox 3]
-		} else {
-		    set sheight [winfo height $itk_component(slateview)]
-		}
-	    }
-	    $itk_component(slateview) configure \
-		    -scrollregion "0 0 $swidth $sheight"
+    # if autoresizing is on, then cover all items in the bounding box.
+    if {$itk_option(-autoresize)} {
+	set slatebbox [$itk_component(slateview) bbox all]
+	
+	if {$slatebbox != {}} {
+	    set marg $itk_option(-automargin)
+	    set slatebbox [lreplace $slatebbox 0 0 \
+		    [expr [lindex $slatebbox 0] - $marg]]
+	    set slatebbox [lreplace $slatebbox 1 1 \
+		    [expr [lindex $slatebbox 1] - $marg]]
+	    set slatebbox [lreplace $slatebbox 2 2 \
+		    [expr [lindex $slatebbox 2] + $marg]]
+	    set slatebbox [lreplace $slatebbox 3 3 \
+		    [expr [lindex $slatebbox 3] + $marg]]
 	}
+	$itk_component(slateview) configure -scrollregion $slatebbox
     }
 }
 
@@ -278,23 +295,25 @@ configbody ::tycho::SlateView::hscrollmode {
 # 
 configbody ::tycho::SlateView::scrollmargin {
 
-    # Set the distance between the slate and the scrollbars
-    set pixels [winfo pixels $itk_component(hmargin) \
-	    $itk_option(-scrollmargin)]
-    set itk_option(-scrollmargin) $pixels
+    if {$initialized} {
+	# Set the distance between the slate and the scrollbars
+	set pixels [winfo pixels $itk_component(hmargin) \
+		$itk_option(-scrollmargin)]
+	set itk_option(-scrollmargin) $pixels
 
-    # if the horizontal scrollbar is mapped then set the margin
-    if {[winfo ismapped $itk_component(hsb)]} {
-	$itk_component(hmargin) configure -width 1 -height $pixels
+	# if the horizontal scrollbar is mapped then set the margin
+	if {$hmode == "on"} {
+	    $itk_component(hmargin) configure -width 1 -height $pixels
+	}
+
+	# if the vertical scrollbar is mapped then set the margin
+	if {$vmode == "on"} {
+	    $itk_component(vmargin) configure -width $pixels -height 1
+	}
+
+	# Set the filler size appropriately
+	$itk_component(filler) configure -width [fillerWidth] -height 1
     }
-
-    # if the vertical scrollbar is mapped then set the margin
-    if {[winfo ismapped $itk_component(vsb)]} {
-	$itk_component(vmargin) configure -width $pixels -height 1
-    }
-
-    # Set the filler size appropriately
-    $itk_component(filler) configure -width [fillerWidth] -height 1
 }
 
 #######################################################################
@@ -346,17 +365,17 @@ body ::tycho::SlateView::constructor {args} {
     itk_component add main {
 	frame $itk_interior.main
     } {
-	keep -background -cursor -width -height
+	keep -background -cursor
     }
     pack $itk_component(main) -fill both -expand true
-    
-    # create frame to hold slate and vertical scrollbar
-    itk_component add top {
-	frame $itk_component(main).top
+  
+    # frame for horizontal scrollbar and some filler
+    itk_component add bottom {
+	frame $itk_component(main).bottom
     } {
 	keep -background -cursor
     }
-    pack $itk_component(top) -fill both -expand true
+    pack $itk_component(bottom) -fill x -side bottom 
 
     # frame for horizontal margin between scrolled area and scrollbar
     itk_component add hmargin {
@@ -364,29 +383,39 @@ body ::tycho::SlateView::constructor {args} {
     } {
 	keep -background -cursor
     }
-    pack $itk_component(hmargin)
+    pack $itk_component(hmargin) -side bottom
     
-    # frame for horizontal scrollbar
-    itk_component add bottom {
-	frame $itk_component(main).bottom
+    # create frames to hold the slate and the vertical scrollbar
+    itk_component add top {
+	frame $itk_component(main).top
     } {
 	keep -background -cursor
     }
-    pack $itk_component(bottom) -fill x 
+    pack $itk_component(top) -fill both -expand true
 
+    # create frame around the slate 
+    itk_component add slateFrame {
+	frame $itk_component(top).slateFrame
+    } {
+	keep -background -cursor -borderwidth -relief \
+		-highlightthickness -highlightcolor
+	rename -highlightbackground -background background Background
+    }
+    
     # create a basic slate
     itk_component add slateview {
-	::tycho::slate $itk_component(top).slateview  \
+	::tycho::slate $itk_component(slateFrame).slateview  \
 		-height 30 \
 		-width 30 \
 		-scrollregion "0 0 30 30" \
-		-borderwidth 2 \
-		-relief raised \
+		-borderwidth 3 \
+		-relief sunken \
 		-yscrollcommand \
-		"$this scrollSlate $itk_component(top).vsb" \
+		[code $this scrollSlate $itk_component(top).vsb] \
 		-xscrollcommand \
-		"$this scrollSlate $itk_component(bottom).hsb"
+		[code $this scrollSlate $itk_component(bottom).hsb]
     } {
+	keep -cursor
     }
     pack $itk_component(slateview) -expand true -fill both -side left
     set itk_interior $itk_component(slateview)
@@ -398,31 +427,30 @@ body ::tycho::SlateView::constructor {args} {
     } {
 	keep -background -cursor
     }
-    pack $itk_component(vmargin) -side left
 
     # create vertical scrollbar
     itk_component add vsb {
 	scrollbar $itk_component(top).vsb \
 		-orient vertical \
-		-command "$itk_component(slateview) yview"
+		-relief sunken \
+		-command [code $itk_component(slateview) yview]
     } {
-	keep -activebackground -activerelief -background \
-		-borderwidth -cursor -highlightcolor -highlightthickness \
-		-relief -repeatdelay -repeatinterval -troughcolor
-	rename -width -sbwidth sbWidth SbWidth
+	keep -activebackground -background -highlightcolor \
+		-troughcolor -cursor 
     }
     pack $itk_component(vsb) -side right -fill y
+    pack $itk_component(vmargin) -side right
+    pack $itk_component(slateFrame) -fill both -expand yes -side left
 
     # create horizontal scrollbar
     itk_component add hsb {
 	scrollbar $itk_component(bottom).hsb \
 		-orient horizontal \
-		-command "$itk_component(slateview) xview"
+		-relief sunken \
+		-command [code $itk_component(slateview) xview]
     } {
-	keep -activebackground -activerelief -background \
-		-borderwidth -cursor -highlightcolor -highlightthickness \
-		-relief -repeatdelay -repeatinterval -troughcolor
-	rename -width -sbwidth sbWidth SbWidth
+	keep -activebackground -background -highlightcolor \
+		-troughcolor -cursor
     }
     pack $itk_component(hsb) -side left -fill x -expand true
 
@@ -434,17 +462,26 @@ body ::tycho::SlateView::constructor {args} {
     }
     pack $itk_component(filler) -side right
 
-    ::bind $itk_component(hull) <Map> "$this scMapEventHandler"
-    ::bind $itk_component(hull) <Configure> "$this scMapEventHandler"
-
     # evaluate specified options
     eval itk_initialize $args
+
+    ::bind $itk_component(hmargin) <Configure> [code $this configureFiller]
+    ::bind $itk_component(vsb) <Configure> [code $this configureFiller]
+    ::bind $itk_component(vmargin) <Configure> [code $this configureFiller]
+    ::bind $itk_component(hsb) <Configure> [code $this configureFiller]
+
+    set initialized 1
+    configure -scrollmargin $itk_option(-scrollmargin)
 }
 
 #######################################################################
 #### destructor
 #
 body ::tycho::SlateView::destructor {} {
+
+    if {$reconfigPlanned != ""} {
+	after cancel $reconfigPlanned
+    }
 }
 
     ###################################################################
@@ -484,7 +521,7 @@ body ::tycho::SlateView::addMyMenus {} {
 # This method returns the path name of the child site widget which is
 # just the slate drawing surface.
 # 
-body ::tycho::SlateView::childSite {} {
+body ::tycho::SlateView::childsite {} {
 
     return $itk_component(slateview)
 }
@@ -497,23 +534,6 @@ body ::tycho::SlateView::insertInDisplay {} {
     
    # insert the view into the displayer
    $myDisplayer setView $itk_component(hull)
-   # FIXME: this is a temporary fix to get the scrollbars to adjust
-   #        properly to the size of the slate once it is packed into
-   #        the displayer.  Not sure why this is required.
-   $this scMapEventHandler
-}
-
-#######################################################################
-#### scMapEventHandler
-# Performs the necessary operations following a map even, including
-# configuring the scroll margin appropriately.
-#
-body ::tycho::SlateView::scMapEventHandler {} {
-    
-    configure -vscrollmode $itk_option(-vscrollmode)
-    configure -hscrollmode $itk_option(-hscrollmode)
-    configure -scrollmargin $itk_option(-scrollmargin)
-    configure -autoresize $itk_option(-autoresize)
 }
 
 #######################################################################
@@ -532,21 +552,57 @@ body ::tycho::SlateView::scrollSlate {wid first last} {
     if {$wid == $itk_component(vsb)} {
 	if {$itk_option(-vscrollmode) == "dynamic"} {
 	    if {($first == 0) && ($last == 1)} {
-		verticalScrollbarDisplay off
+		if {$vmode != "off"} {
+		    verticalScrollbarDisplay off
+		}
 	    } else {
-		verticalScrollbarDisplay on
+		if {$vmode != "on"} {
+		    verticalScrollbarDisplay on
+		}
 	    }
-	} elseif {$wid == $itk_component(hsb)} {
-	    if {$itk_option(-hscrollmode) == "dynamic"} {
-		if {($first == 0) && ($last == 1)} {
-		    horizontalScrollbarDisplay off 
-		} else {
+	}
+    } elseif {$wid == $itk_component(hsb)} {
+	if {$itk_option(-hscrollmode) == "dynamic"} {
+	    if {($first == 0) && ($last == 1)} {
+		if {$hmode != "off"} {
+		    horizontalScrollbarDisplay off
+		} 
+	    } else {
+		if {$hmode != "on"} {
 		    horizontalScrollbarDisplay on
 		}
 	    }
 	}
     }
 }
+
+    ###################################################################
+    ###################################################################
+    ####                      protected  methods                   ####
+
+#######################################################################
+#### configureFiller
+# Set up to do an update of the filler if one is not already planned
+#
+body ::tycho::SlateView::configureFiller {} {
+    if {$reconfigPlanned == ""} {
+	set reconfigPlanned [after idle [code $this updateFiller]]
+    }
+}
+
+#######################################################################
+#### updateFiller
+# Update the width of the filler following a configure even on a 
+# scrollbar or margin
+#
+body ::tycho::SlateView::configureFiller {} {
+    
+    $itk_component(filler) config -width [fillerWidth] -height 1
+
+    set reconfigPlanned ""
+}
+	
+
 
     ###################################################################
     ###################################################################
@@ -559,10 +615,14 @@ body ::tycho::SlateView::scrollSlate {wid first last} {
 # 
 body ::tycho::SlateView::fillerWidth {} {
 
-    # figure out the width and return it. 
-    set width [expr [winfo reqwidth $itk_component(vsb)] + \
-	    [winfo reqwidth $itk_component(vmargin)]]
-    return $width
+    if {$vmode == "on"} {
+	# figure out the width and return it. 
+	set width [expr [winfo reqwidth $itk_component(vsb)] + \
+		[winfo reqwidth $itk_component(vmargin)]]
+	return $width
+    } else {
+	return 1
+    }
 }
 
 #######################################################################
@@ -574,15 +634,16 @@ body ::tycho::SlateView::horizontalScrollbarDisplay {mode} {
 
     switch $mode {
 	on {
+	    set hmode on
+
 	    $itk_component(hmargin) configure \
 		    -width $itk_option(-scrollmargin) \
 		    -height 1
 	    pack $itk_component(hsb) -side left -fill x -expand yes
-	    $itk_component(filler) configure \
-		    -width [fillerWidth] \
-		    -height 1
 	}
 	off {
+	    set hmode off
+
 	    pack forget $itk_component(hsb)
 	    
 	    $itk_component(hmargin) configure -width 1 -height 1
@@ -603,15 +664,21 @@ body ::tycho::SlateView::verticalScrollbarDisplay {mode} {
 
     switch $mode {
 	on {
+	    set vmode on
 	    $itk_component(vmargin) configure \
 		    -width $itk_option(-scrollmargin) \
 		    -height 1
+
+	    pack forget $itk_component(slateFrame)
+	    pack forget $itk_component(vmargin)
+	   
 	    pack $itk_component(vsb) -side right -fill y
-	    $itk_component(filler) configure \
-		    -width [fillerWidth] \
-		    -height 1
+	    pack $itk_component(vmargin) -side right
+	    pack $itk_component(slateFrame) -fill both -expand yes -side left
 	}
 	off {
+	    set vmode off
+
 	    pack forget $itk_component(vsb)
 	    
 	    $itk_component(vmargin) configure -width 1 -height 1
