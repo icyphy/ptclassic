@@ -88,7 +88,7 @@ proc tychoMkClassGraph {name filename args} {
 	set htmlfile [eval file join \
 		[lreplace $path end end doc codeDoc $htmlfile]]
 
-        puts $fd "\{add $nm \{label \{$sname\} link \{$classfile($nm) \{$rxp\}\} altlink \{$htmlfile \{\}\}\} \{$pnt\}\}"
+        puts $fd "\{add $nm \{label \{$sname\} altlink \{$classfile($nm) \{$rxp\}\} link \{$htmlfile \{\}\}\} \{$pnt\}\}"
     }
     close $fd
 }
