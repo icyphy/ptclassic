@@ -102,7 +102,7 @@ body ::tycho::StarLibrary::constructor {args} {
     eval configure $args
 
     # The star entity type
-    type define star -leafonly 1
+    type define star :leafonly 1
 }
 
 ########################################################################

@@ -230,7 +230,7 @@ body ::tycho::AbstractGraph::constructor {args} {
 
     # Define the "vertex" entity
     type define vertex \
-	    -leafonly 0
+	    :leafonly 0
 }
 
 ###################################################################

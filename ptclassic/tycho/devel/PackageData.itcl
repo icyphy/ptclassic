@@ -290,7 +290,7 @@ body ::tycho::PackageData::constructor {args} {
 
     # Define the package type
     type define package \
-	    -leafonly 1 \
+	    :leafonly 1 \
 	    -description "" \
 	    -directory {$TYCHO} \
 	    -installed 0 \
@@ -300,7 +300,7 @@ body ::tycho::PackageData::constructor {args} {
 
     # Define the dependency type
     type define dependency \
-	    -leafonly 1 \
+	    :leafonly 1 \
 	    -enabled 1 \
 	    -from "" \
 	    -fromversion 0.0 \
