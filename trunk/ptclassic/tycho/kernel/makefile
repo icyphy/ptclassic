@@ -73,6 +73,7 @@ ITCL_SRCS = \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
+	Parameters.itcl \
 	Preferences.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
