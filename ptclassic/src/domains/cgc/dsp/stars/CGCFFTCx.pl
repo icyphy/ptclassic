@@ -172,7 +172,7 @@ int nn, isign;
 		fftSize = temp;
 
 		// add fft routine
-		addProcedure(fftRoutine);
+		addProcedure(fftRoutine, "fft_rif");
 	}
 
 	codeblock(loadCode) {
