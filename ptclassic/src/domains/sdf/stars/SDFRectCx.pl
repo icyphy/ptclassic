@@ -111,49 +111,53 @@ for Doppler effects.
 	defstate {
 		name { count }
 		type { int }
-		default { 0 }	}
+		default { 0 }
+		desc { Internal state }
+		attributes { A_SETTABLE|A_NONCONSTANT }
+	}
 	defstate {
 		name { dopplercount }
 		type { int }
-		default { 0 }	}
+		default { 0 }
+		desc { Internal state }
+		attributes { A_SETTABLE|A_NONCONSTANT }
+	}
 	hinclude { <math.h> }
+	setup {
+		count = 0;
+		dopplercount = 0;
+	}
 	go {
-		double r = 0.0;
-		double i = 0.0;
-	        double arg  = 0.0;
-		double arg1 = 0.0;
-		double arg2 = 0.0;
-		double amp  = 0.0;
-		double doparg = 0.0;
+		double real = 0.0, imag = 0.0;
 
 		if ( int(count) < int(width) ) {
+		  double k_minus_kd = int(count) - double(sdelay);
 
 		  // Definition arg1= B.(k-kd)^2/(Te.Fsimu^2)
-	          arg1 = (double(count)-sdelay)*(double(count)-double(sdelay));
-		  arg1 = double(bandwidth)*arg1;
-		  arg1 = arg1/(double(Te)*double(Fsimu)*double(Fsimu));
+		  double arg1 = k_minus_kd * k_minus_kd;
+		  arg1 *= double(bandwidth);
+		  arg1 /= double(Te) * double(Fsimu) * double(Fsimu);
 
-		  // Definition arg2= 2.fpor.(k-kd)
-	          arg2 =  2.0*double(Fpor)*(double(count)-double(sdelay));
-	          arg2 = arg2/double(Fsimu);
+		  // Definition arg2 = 2.fpor.(k-kd)
+	          double arg2 = 2.0 * double(Fpor) * k_minus_kd / double(Fsimu);
 
 		  // Definition doppler effect doparg
-		  doparg =4.0*double(vn)*double(Fe)*double(Tp)/double(c);
-		  doparg = doparg * double(dopplercount);
+		  double doparg = 4.0 * double(vn) * double(Fe) * double(Tp);
+		  doparg *= double(dopplercount)/double(c);
 
-	          arg = M_PI * (arg1 + arg2 + doparg) ;
+	          double arg = M_PI * (arg1 + arg2 + doparg) ;
+		  double amp = double(SqrPthn) * pow(10.0,(double(SNRn)/20.0));
 
-		  amp = double(SqrPthn) * pow(10.0,(double(SNRn)/20.0) );
-
-	          r = amp * cos(arg);
-	          i = amp * sin(arg);
+	          real = amp * cos(arg);
+	          imag = amp * sin(arg);
 		}
-		output%0 << Complex( r, i);
+
+		output%0 << Complex(real, imag);
 
 		count = int(count) + 1;
 		if ( int(period) > 0 && int(count) >= int(period) ) {
 		  count = 0;
-		  dopplercount = int(dopplercount) +1;
+		  dopplercount = int(dopplercount) + 1;
 		  if ( int(Np) > 0 && int(dopplercount) >= int(Np))
 		    dopplercount = 0;
 		}
