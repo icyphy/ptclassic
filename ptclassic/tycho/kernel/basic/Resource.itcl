@@ -57,14 +57,20 @@ class ::tycho::Resource {
     # Close the resource
     method close {}
 
+    # Return the content type of the current file
+    method contenttype {}
+
     # Make a duplicate of the contents of this resource
     method copy {target}
 
     # Delete this resource
     method delete {}
 
-    # Test if a given resource is openable by this object
-    method exists {}
+    # Test if a given resource exists
+    method exists {path}
+
+    # Return the current file type 
+    method filetype {}
 
     # Flush buffered output to a streamable resource 
     method flush {}
@@ -72,23 +78,23 @@ class ::tycho::Resource {
     # Read a string from a streamable resource 
     method gets {}
 
-    # Return files relative to the current directory 
-    method glob {{pattern *}}
+    # Return files at a given path
+    method glob {path}
 
-    # Return true if the current resource is a file 
-    method isfile {{name ""}}
+    # Return true if a given path is a file
+    method isfile {path}
 
     # Create a new directory
-    method mkdir {name}
-
-    # Get the current full resource name
-    method name {}
+    method mkdir {path}
 
     # Open a new resource
-    method new {{name {}}}
+    method new {{path {}}}
 
     # Open the resource
-    method open {name {mode "r+"}}
+    method open {path {mode "r"}}
+
+    # Get the current full resource path
+    method path {}
 
     # Write a string to a streamable resource 
     method puts {}
@@ -96,20 +102,20 @@ class ::tycho::Resource {
     # Return a string containing the data in a streamable resource 
     method read {}
 
-    # Return true if the resource is readable
-    method readable {{name ""}}
+    # Return true if a given resource is readable
+    method readable {path}
 
     # Source a streamable resource as a Tcl script
-    method source {}
+    method source {{path {}}}
 
     # Get the status of a resource
-    method stat {}
+    method stat {path varName}
 
-    # Return 1 if a resource is streamable
+    # Return 1 if this resource is streamable
     method streamable {}
 
-    # Return true if the resource is writable
-    method writeable {{name ""}}
+    # Return true if a resource is writable
+    method writeable {{path {}}}
 
     # Write a string to a streamable resource
     method write {}
@@ -117,8 +123,8 @@ class ::tycho::Resource {
     ###################################################################
     ####                           public procs                    ####
 
-	# Create and open a new resource
-	proc openResource {name}
+    # Create and open a new resource
+    proc openResource {path}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -126,17 +132,14 @@ class ::tycho::Resource {
     ###################################################################
     ####                        protected variables                ####
 
-	# The access mode
-	protected variable accessMode
+    # The access mode
+    protected variable accessMode
 
-	# The name of the current directory
-	protected variable currentDirectory
+    # The full name of the current file (or directory)
+    protected variable currentFile
 
-	# The name of the current file (relative to the directory)
-	protected variable currentFile
-
-	# True if a file is open
-	protected variable fileIsOpen
+    # True if a file is open
+    protected variable fileIsOpen
 
     ###################################################################
     ####                         private variables               ####
@@ -164,144 +167,156 @@ body ::tycho::Resource::destructor {} {
 #####################################################################
 #### close
 body ::tycho::Resource::close {} {
-	::tycho::abstractMethod close
+    ::tycho::abstractMethod close
+}
+
+#####################################################################
+#### contenttype
+body ::tycho::Resource::contenttype {} {
+    ::tycho::abstractMethod contenttype
 }
 
 #####################################################################
 #### copy
 body ::tycho::Resource::copy {} {
-	::tycho::abstractMethod clocopyse
+    ::tycho::abstractMethod clocopyse
 }
 
 #####################################################################
 #### delete
 body ::tycho::Resource::delete {} {
-	::tycho::abstractMethod delete
+    ::tycho::abstractMethod delete
 }
 
 #####################################################################
 #### exists
-body ::tycho::Resource::exists {} {
-	::tycho::abstractMethod exists
+body ::tycho::Resource::exists {[ath} {
+    ::tycho::abstractMethod exists
+}
+
+#####################################################################
+#### filetype
+body ::tycho::Resource::filetype {} {
+    ::tycho::abstractMethod filetype
 }
 
 #####################################################################
 #### flush
 body ::tycho::Resource::flush {} {
-	::tycho::abstractMethod flush
+    ::tycho::abstractMethod flush
 }
 
 #####################################################################
 #### gets
 body ::tycho::Resource::gets {} {
-	::tycho::abstractMethod gets
+    ::tycho::abstractMethod gets
 }
 
 #####################################################################
 #### glob
-body ::tycho::Resource::glob {{pattern *}} {
-	::tycho::abstractMethod glob
+body ::tycho::Resource::glob {path} {
+    ::tycho::abstractMethod glob
 }
 
 #####################################################################
 #### isfile
-body ::tycho::Resource::isfile {{name {}}} {
-	::tycho::abstractMethod isfile
+body ::tycho::Resource::isfile {path} {
+    ::tycho::abstractMethod isfile
 }
 
 #####################################################################
 #### mkdir
-body ::tycho::Resource::mkdir {name} {
-	::tycho::abstractMethod mkdir
-}
-
-#####################################################################
-#### name
-body ::tycho::Resource::name {} {
-	join [list $currentDirectory $currentFile] "/"
+body ::tycho::Resource::mkdir {path} {
+    ::tycho::abstractMethod mkdir
 }
 
 #####################################################################
 #### new
-body ::tycho::Resource::new {{name {}}} {
-	set new [[info class] [::tycho::autoName resource]]
-	if { $name == "" } {
-		$new open $currentDirectory/$currentFile
-	} else {
-		$new open $currentDirectory/$name
-	}
-	return $new
+body ::tycho::Resource::new {{path {}}} {
+    set new [[info class] [::tycho::autoName resource]]
+    if { $path == "" } {
+	$new open $currentFile
+    } else {
+	$new open $path
+    }
+    return $new
 }
 
 #####################################################################
 #### open
-body ::tycho::Resource::open {name {mode "w+"}} {
-	::tycho::abstractMethod open
+body ::tycho::Resource::open {path {mode "r"}} {
+    ::tycho::abstractMethod open
+}
+
+#####################################################################
+#### path
+body ::tycho::Resource::path {} {
+    return $currentPath
 }
 
 #####################################################################
 #### puts
 body ::tycho::Resource::puts {string} {
-	::tycho::abstractMethod puts
+    ::tycho::abstractMethod puts
 }
 
 #####################################################################
 #### read
 body ::tycho::Resource::read {} {
-	::tycho::abstractMethod read
+    ::tycho::abstractMethod read
 }
 
 #####################################################################
 #### readable
-body ::tycho::Resource::readable {{name {}}} {
-	return 0
+body ::tycho::Resource::readable {{path {}}} {
+    return 1
 }
 
 #####################################################################
 #### source
-body ::tycho::Resource::source {{name {}}} {
-	::tycho::abstractMethod source
+body ::tycho::Resource::source {{path {}}} {
+    ::tycho::abstractMethod source
 }
 
 #####################################################################
 #### stat
-body ::tycho::Resource::stat {} {
-	::tycho::abstractMethod stat
+body ::tycho::Resource::stat {path varName} {
+    ::tycho::abstractMethod stat
 }
 
 #####################################################################
 #### streamable
-body ::tycho::Resource::streamable {{name {}}} {
-	return 0
+body ::tycho::Resource::streamable {} {
+    return 1
 }
 
 #####################################################################
 #### writable
-body ::tycho::Resource::writable {} {
-	return 0
+body ::tycho::Resource::writable {{path {}}} {
+    return 0
 }
 
 #####################################################################
 #### write
 body ::tycho::Resource::write {data} {
-	::tycho::abstractMethod write
-}
-
-#####################################################################
-#### openResource
-body ::tycho::Resource::openResource {name} {
-	if { [regexp {$http://} $name] } {
-		set new [::tycho::HTTPFile [::tycho::autoName httpfile]]
-	} else {
-		set new [::tycho::LocalFile [::tycho::autoName localfile]]
-	}
-	$new open $name
-	return $new
+    ::tycho::abstractMethod write
 }
 
 #########################################################################
 #########################################################################
 ####                        public procs                             ####
+
+#####################################################################
+#### openResource
+body ::tycho::Resource::openResource {path} {
+    if { [regexp {$http://} $path] } {
+	set new [::tycho::HTTPFile [::tycho::autoName httpfile]]
+    } else {
+	set new [::tycho::LocalFile [::tycho::autoName localfile]]
+    }
+    $new open $path 
+    return $new
+}
 
 #########################################################################
 #########################################################################
