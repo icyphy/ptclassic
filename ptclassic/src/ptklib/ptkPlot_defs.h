@@ -44,8 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <string.h>
 #include "tk.h"
 
-#define PTK_CONTROL_PANEL_INIT "global ptkControlPanel;set ptkControlPanel"
-
 #define PLOT_PREFIX "plot_"
 #define DATASET_PREFIX "dataset_"
 #define STD_FONT "-Adobe-Helvetica-Bold-R-Normal--*-140-*"
