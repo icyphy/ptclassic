@@ -34,10 +34,16 @@
 #######################################################################
 #### KeyedGraph
 #
-# A mixin class that makes connections between edges and vertices in
-# a graph "keyed" -- that is, indexed by name. This is used for
+# This class supports what I have dubbed a
+# "weld": a named connection between an edge and a vertex. A weld
+# is a combination of a vertex name and a "key" that uniquely identifies
+# an edge connected to the vertex. Welds are used in
 # graphs in which the different edges to each vertex need to be
-# ordered or otherwise uniquely distinguished,.
+# ordered or otherwise uniquely distinguished -- this is very useful
+# in applications
+# like dataflow and so on. If the concrete subclass supports welds,
+# then edges join two welds rather than two vertices. A weld is
+# assumed to have the syntax _vertex_._key_.
 #
 class ::tycho::KeyedGraph {
 
@@ -170,7 +176,6 @@ body ::tycho::AbstractGraph::keys {vertex} {
 # Attach welds to a vertex. The arguments are a list of keys.
 #
 # FIXME: Return the inverse command.
-# FIXME: _vertices is not accessible in this class!
 #
 body ::tycho::AbstractGraph::weld {vertex args} {
 	#
