@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
   creates the RPC connection from Tcl to RPC - Alan Kamas
 */
    
+#include <stdio.h>
 #include "ptk.h"
 #include "ptkRegisterCmds.h"
 #include "ptkNet.h"
