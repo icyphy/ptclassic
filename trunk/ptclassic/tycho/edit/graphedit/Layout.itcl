@@ -271,7 +271,7 @@ body ::tycho::Layout::clear {} {
 #
 body ::tycho::Layout::coords {item args} {
     if { $args == "" } {
-        forward coords $item -coords
+        forward coords $item
     } else {
         if $recording {
             history append \
