@@ -111,9 +111,7 @@ PIGI_OBJS += 	-ltycho version.o
 
 INSTALL += 	$(LIBDIR)/$(LIB)
  
-
-all:	makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
-
+# ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
 
 # include common definitions, rules
