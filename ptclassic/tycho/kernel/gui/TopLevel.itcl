@@ -312,7 +312,8 @@ body ::tycho::TopLevel::destructor {} {
 
     if $disableDestruction {
         # Schedule a future attempt at destruction.
-        after 1000 "$this nextWindow; delete object $this"
+        after 1000 "::tycho::TWidget::evalIfExists $this nextWindow; \
+                delete object $this"
         ::tycho::silentError
     }
 
@@ -459,8 +460,8 @@ body ::tycho::TopLevel::hyperJump {file {point {}}} {
 # If the focus is not currently in this window, ignore.
 #
 body ::tycho::TopLevel::nextWindow {{raise 0}} {
-    # NOTE: Is this update safe?  Needed for focus to settle.
-    update idletasks
+    # Needed for focus to settle.
+    safeUpdate $this
     if ![string match "$prefix*" [focus]] {return}
     foreach win [$topLevelWindows elements $prefix] {
 	if {$win == $prefix} {continue}
