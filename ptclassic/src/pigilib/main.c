@@ -1,6 +1,6 @@
 /*  main.c  edg  5/9/90
 Version identification:
-$Id$
+@(#)main.c	1.2	7/25/90
 Initialization code for pigiRpc.
 */
 
@@ -70,7 +70,6 @@ long userOptionWord;
 
 RPCFunction CommandArray[] = {
     {EditParams, "Edit", "edit-params", "e", 0},
-    {RpcEditDomain, "Edit", "edit-domain", "d", 0},
     {RpcEditComment, "Edit", "edit-comment", ";", 0},
     {RpcFindName, "Edit", "find-name"},
     {ClearMarks, "Edit", "clear-marks"},
@@ -81,12 +80,12 @@ RPCFunction CommandArray[] = {
     {RpcRun, "Exec", "run", "R", 0},
     {RpcReRun, "Exec", "re-run", "!", 0},
     {RpcCompileFacet, "Exec", "compile-facet"},
-    {RpcMkSchemIcon, "Extend", "make-schem-icon","@",0},
-    {RpcMkStar, "Extend", "make-star","*",0},
+    {RpcMkSchemIcon, "Extend", "make-schem-icon"},
+    {RpcMkStar, "Extend", "make-star"},
     {RpcLoadStars, "Extend", "load-stars"},
     {RpcLoad, "Extend", "load"},
-    {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
-    {WFilterDesign, "Filter", " window FIR", ">", 0},
+    {ERFilterDesign, "Filter", " equirriple FIR", "d", 0},
+    {WFilterDesign, "Filter", " window FIR", "w", 0},
     {Man, "Other", "man"},
     {Profile, "Other", "profile"},
     {Options, "Other", "options"},
