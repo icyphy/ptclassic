@@ -30,7 +30,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* LINTLIBRARY */
 #include <pwd.h>
 
+#ifndef _POSIX_SOURCE
 #define _POSIX_SOURCE		/* Argh!  IBM strikes again... */
+#endif /* _POSIX_SOURCE */
 #include "copyright.h"
 #include "port.h"
 #include "st.h"
