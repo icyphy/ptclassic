@@ -1,3 +1,4 @@
+static const char file_id[] = "StringState.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -36,7 +37,7 @@ $Id$
 void StringState  :: initialize() {
 	char buf[2048];
 	// cast is because cfront doesn't want to delete pointers to const
-	delete val;
+	LOG_DEL; delete val;
 	const char* p = initValue;
 	char *q = buf;
 	while (*p) {
@@ -85,7 +86,11 @@ StringList StringState :: currentValue() const {
 }
 
 State* StringState :: clone() const {
-	return new StringState;
+	LOG_NEW; return new StringState;
+}
+
+StringState :: ~StringState() {
+	delete val;
 }
 
 // make known state entry
