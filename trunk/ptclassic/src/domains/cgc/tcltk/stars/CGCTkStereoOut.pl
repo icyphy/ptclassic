@@ -46,7 +46,14 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid volume");
                 return TCL_ERROR;
             }
-            $starSymbol(set_parameters) ();
+	    /* set_parameters function defined in base class */
+	    $sharedSymbol(CGCStereoBase,set_parameters)
+	      ($starSymbol(ctlfile),
+	       "$val(encodingType)",
+	       "$val(outputPort)",
+	       $ref (volume),
+	       $ref (balance),
+	       0);    
 	    sprintf(buf, "%5d%%", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
             return TCL_OK;
@@ -65,7 +72,14 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid balance");
                 return TCL_ERROR;
             }
-            $starSymbol(set_parameters) ();
+	    /* set_parameters function defined in base class */
+	    $sharedSymbol(CGCStereoBase,set_parameters)
+	      ($starSymbol(ctlfile),
+	       "$val(encodingType)",
+	       "$val(outputPort)",
+	       $ref (volume),
+	       $ref (balance),
+	       0);   
 	    sprintf(buf, "%5d%%", $ref(balance));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
             return TCL_OK;

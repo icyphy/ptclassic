@@ -40,7 +40,14 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid volume");
                 return TCL_ERROR;
             }
-            $starSymbol(set_parameters) ();
+	    /* set_parameters function defined in base class */
+	    $sharedSymbol(CGCStereoBase,set_parameters)
+	      ($starSymbol(ctlfile),
+	       "$val(encodingType)",
+	       "$val(inputPort)",
+	       $ref (volume),
+	       $ref (balance),
+	       1);
 	    sprintf(buf, "%5d%%", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
             return TCL_OK;
