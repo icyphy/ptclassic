@@ -78,9 +78,10 @@ void StringState :: initialize() {
 
 	// Parse the initial string
 	// -- Substitute parameters that fall in between curly braces {}
-	// -- Zero out the white space characters so string info is unaltered
+	// -- Zero out the white space characters so string info is unaltered,
+	//    but Tokenizer assumes that the white space string is not empty
 	const char* specialChars = "!{}";
-	const char* whiteSpace = "";
+	const char* whiteSpace = "\002";
 	Tokenizer lexer(initString, specialChars, whiteSpace);
 	char unprintableChar = ASCII_CONTROL_B_CHAR;
 	StringList parsedString = "";
@@ -94,12 +95,22 @@ void StringState :: initialize() {
 	//    e.g. input#1
 	lexer.setCommentChar(unprintableChar);
 
+	int errorFlag = FALSE;
 	while (TRUE) {
         	ParseToken t = getParseToken(lexer, T_STRING);
-		if (t.tok == T_EOF || t.tok == T_ERROR) break;
+		if (t.tok == T_EOF || t.tok == T_ERROR) {
+			errorFlag = ( t.tok == T_ERROR );
+			break;
+		}
 		parsedString << t.sval;
 		delete [] t.sval;
 	}
+	if ( errorFlag ) {
+		StringList msg = "Error parsing the string state: ";
+		msg << "parsed up to '" << parsedString << "' successfully";
+		parseError(msg);
+	}
+
 	val = savestring(parsedString);
 }
 
