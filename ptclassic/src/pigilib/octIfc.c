@@ -510,6 +510,7 @@ ParamListType *pListPtr;
 
     /* Don't free prop with FreeOctMembers: contents.prop.name is static */
     prop.contents.prop.name = "params";
+    prop.contents.prop.type = OCT_NULL;
 
     /* If no parameters, return default list */
     /* FIXME: Memory leak */
@@ -518,7 +519,9 @@ ParamListType *pListPtr;
 	return(TRUE);
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
-	free(prop.contents.prop.value.string);
+	if (prop.contents.prop.type == OCT_STRING) {
+	    free(prop.contents.prop.value.string);
+	}
 	return(FALSE);
     }
  
@@ -528,7 +531,9 @@ ParamListType *pListPtr;
     }
 
     /* Free memory */
-    free(prop.contents.prop.value.string);	/* allocated by octGetByName */
+    if (prop.contents.prop.type == OCT_STRING) {
+	free(prop.contents.prop.value.string);	/* allocated by octGetByName */
+    }
     free(tempList.array);			/* allocated by PStrToPList */
 
     return(TRUE);
@@ -562,7 +567,9 @@ ParamListType *pListPtr;
 	return(TRUE);
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
-	free(prop.contents.prop.value.string);
+	if (prop.contents.prop.type == OCT_STRING) {
+	    free(prop.contents.prop.value.string);
+	}
 	return(FALSE);
     }
 
@@ -572,7 +579,9 @@ ParamListType *pListPtr;
     }
 
     /* Free memory */
-    free(prop.contents.prop.value.string);	/* allocated by octGetByName */
+    if (prop.contents.prop.type == OCT_STRING) {
+	free(prop.contents.prop.value.string);	/* allocated by octGetByName */
+    }
     free(tempList.array);			/* allocated by PStrToPList */
 
     return(TRUE);
