@@ -142,16 +142,16 @@ public:
 
 	// Function called to begin an iteration (default version
 	// does nothing)
-	virtual void beginIteration(int repetitions, int depth) {}
+	virtual void beginIteration(int repetitions, int depth);
 
 	// Function called to end an iteration (default version
 	// does nothing)
-	virtual void endIteration(int repetitions, int depth) {}
+	virtual void endIteration(int repetitions, int depth);
 
 	// Function called to generate code for the star the way
 	// this target wants (default version does nothing)
 
-	virtual void writeFiring(Star& s, int depth) {}
+	virtual void writeFiring(Star& s, int depth);
 
         // resource management
         virtual int commTime(int sender,int receiver,int nUnits, int type);
@@ -160,11 +160,6 @@ public:
 	int isA(const char*) const;
 	const char* readClassName() const {return "Target";}
 
-	// functions to construct appropriate EventHorizon objects
-	// for communication with the target.  Default implementations
-	// forward to the Domain object for my galaxy's domain.
-	virtual EventHorizon& newFrom();
-	virtual EventHorizon& newTo();
 };
 
 
