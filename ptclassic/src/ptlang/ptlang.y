@@ -1300,6 +1300,7 @@ void genDef ()
 	char baseClass[SMALLBUFSIZE];
 	char fullClass[SMALLBUFSIZE];
 	char descriptString[MEDBUFSIZE];
+        char *derivedSimple;
 
 /* temp, until we implement this */
 	if (galDef) {
@@ -1641,7 +1642,7 @@ void genDef ()
 
 /* Name */
 	fprintf (fp,
-        "<h1><a name=\"%s star in %s domain\">%s star in %s domain</a></h1>\n",
+        "<h1><a name=\"%s star, %s domain\">%s star in %s domain</a></h1>\n",
         objName, domain, objName, domain);
 
 /* short descriptor */
@@ -1666,18 +1667,22 @@ void genDef ()
 		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
 			sprintf (baseClass, "%s%s", galDef ? "" : domain,
 				 derivedFrom);
-		}
-		else
+                        derivedSimple = derivedFrom;
+		} else {
 			(void) strcpy (baseClass, derivedFrom);
+                        derivedSimple = derivedFrom + strlen(domain);
+                }
+                /* Put in a hyperlink to the domain index */
+                fprintf (fp, "<b>Derived from:</b> <a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a><br>\n", cvtToLower(domain), derivedSimple, baseClass);
 	}
 	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
-	else if (galDef)
+	else if (galDef) {
 		(void)strcpy (baseClass, "Galaxy");
-	else
+                fprintf (fp, "<b>Derived from:</b> Galaxy");
+        } else {
 		sprintf (baseClass, "%sStar", domain);
-
-        /* FIXME: Should have a hyperlink to the base class */
-	fprintf (fp, "<b>Derived from:</b> %s<br>\n", baseClass);
+                fprintf (fp, "<b>Derived from:</b> %sStar", domain);
+        }
 
 /* location */
 	if (objLocation)
@@ -1723,15 +1728,20 @@ void genDef ()
 /* ID block (will appear in .h and .cc files only. */
 
 /* See Also list */
-	if (nSeeAlso > 0) fprintf (fp, "<h2>See Also</h2>\n");
+	if (nSeeAlso > 0) fprintf (fp, "<p><b>See also:</b>");
 	if (nSeeAlso > 2) {
 	    checkSeeAlsos(nSeeAlso);
-            /* FIXME: Put in hyperlinks. */
 	    for (i = 0; i < (nSeeAlso - 2); i++)
-		fprintf (fp, "%s,\n", seeAlsoList[i]);
+                fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a>,\n", cvtToLower(domain), seeAlsoList[i], seeAlsoList[i]);
 	}
-	if (nSeeAlso > 1) fprintf (fp, "%s and\n", seeAlsoList[nSeeAlso-2]);
-	if (nSeeAlso > 0) fprintf (fp, "%s.\n<p>\n", seeAlsoList[nSeeAlso-1]);
+	if (nSeeAlso > 1) fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a> and\n", cvtToLower(domain), seeAlsoList[nSeeAlso-2], seeAlsoList[nSeeAlso-2]);
+	if (nSeeAlso > 0) fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a>.\n<br>\n", cvtToLower(domain), seeAlsoList[nSeeAlso-1], seeAlsoList[nSeeAlso-1]);
+
+/* Hyperlink to the source code.  Note that this assumes the source */
+/* is in a directory called "stars". */
+        fprintf(fp,
+                "<br><b>See:</b> <a href=\"../stars/%s%s.pl>source code</a>",
+                domain, objName);
 
 /* copyright */
 	if (objCopyright) {
