@@ -92,7 +92,10 @@ HTML like:
 Tycho's HTML viewer doesn't deal with the double &lt;dd&gt;
 (Netscape does, BTW).
 <li>The HTML parser is quite slow.
-<li>In "img" directives, align="right" causes an error.
+<li>In "img" directives, align="right" causes an error and size
+    directives (width and height) are ignored.
+<li>A construct like "&lt;center$gt; &lt;img ... &gt; &lt;/center&gt;"
+    results in an in-line image rather than a centered image.
 <li>A &lt;p&gt; after an image is ignored.
 <li>If you have the source code for an HTML file open, and you try to open
     with HTML file with the "Back" command, you get an error message that
