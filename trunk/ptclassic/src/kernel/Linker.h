@@ -30,7 +30,7 @@ public:
 // get name of executable image file (for make-like checking)
 	static const char* imageFileName() { return ptolemyName;}
 private:
-	static const char* genHeader(const char*);
+	static char* genHeader(const char*);
 	static const char* ptolemyName;
 	static int pid;
 	static int activeFlag;
