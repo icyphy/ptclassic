@@ -3,7 +3,7 @@ static const char file_id[] = "Matrix.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -719,6 +719,7 @@ ComplexMatrix& ComplexMatrix::identity() {
       else
         (*this)[row][col] = 0;
     }
+  return *this;
 }
 
 // non-destructive operators, returns new Matricies
@@ -727,6 +728,7 @@ ComplexMatrix ComplexMatrix::operator - () const {
   ComplexMatrix result(nRows,nCols);
   for(int i = 0; i < totalDataSize; i++)
     result.entry(i) = -entry(i);
+  return result;
 }
 
 // Calculate the powers of a square matrix
@@ -896,8 +898,10 @@ FixMatrix::FixMatrix(int numRow, int numCol, int ln, int ib, PortHole& ph) {
   LOG_NEW; data = new Fix[totalDataSize];
 
   // Load the data from the PortHole into the matrix.
-  for(int i = 0; i < totalDataSize; i++)
-    data[i] = Fix(ln,ib,ph%(totalDataSize - i - 1));
+  for(int i = 0; i < totalDataSize; i++) {
+    double ph_data = ph%(totalDataSize - i - 1);
+    data[i] = Fix(ln,ib,ph_data);
+  }
 }
 
 // constructor:
@@ -1171,6 +1175,7 @@ FixMatrix& FixMatrix::identity() {
       else
         (*this)[row][col] = double(0);
     }
+  return *this;
 }
 
 // non-destructive operators, returns new Matricies
@@ -1179,6 +1184,7 @@ FixMatrix FixMatrix::operator - () const {
   FixMatrix result(nRows,nCols);
   for(int i = 0; i < totalDataSize; i++)
     result.entry(i) = -entry(i);
+  return result;
 }
 
 // Calculate the powers of a square matrix
@@ -1510,6 +1516,7 @@ FloatMatrix& FloatMatrix::identity() {
       else
         (*this)[row][col] = 0;
     }
+  return *this;
 }
 
 // non-destructive operators, returns new Matricies
@@ -1518,6 +1525,7 @@ FloatMatrix FloatMatrix::operator - () const {
   FloatMatrix result(nRows,nCols);
   for(int i = 0; i < totalDataSize; i++)
     result.entry(i) = -entry(i);
+  return result;
 }
 
 // Calculate the powers of a square matrix
@@ -1850,6 +1858,7 @@ IntMatrix& IntMatrix::identity() {
       else
         (*this)[row][col] = 0;
     }
+  return *this;
 }
 
 // non-destructive operators, returns new Matricies
@@ -1858,6 +1867,7 @@ IntMatrix IntMatrix::operator - () const {
   IntMatrix result(nRows,nCols);
   for(int i = 0; i < totalDataSize; i++)
     result.entry(i) = -entry(i);
+  return result;
 }
 
 // Calculate the powers of a square matrix
@@ -1966,7 +1976,6 @@ extern const DataType INT_MATRIX_ENV = "INT_MATRIX_ENV";
 // MatrixEnvParticle Base Class
 ///////////////////////////////
 
-Message Envelope::dummyMessage;
 static Envelope dummy;
 
 MatrixEnvParticle::operator int() const { return errorConvert("int");}
