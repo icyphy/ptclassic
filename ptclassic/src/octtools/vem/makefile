@@ -134,7 +134,7 @@ $(VEMOBJECTS):
 
 VEMLIBS = rpc/librpcserver.$(LIBSUFFIX) dialogs/libdialogs.$(LIBSUFFIX) \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
-	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
+	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -lvov -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
 	-lTgl -lutility -lport -lerrtrap -luprintf -lst $(OCTTOOLS_MM_LIB)  \
 	$(X11_LIBSPEC) -lXaw -lXt -lXmu -lXext -lX11 $(SYSLIBS)
@@ -229,9 +229,10 @@ install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 # These should rely on OCTBINDIR etc, but the relative paths make life
 # difficult.
 $(BINDIR)/vem:
-	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/vem .)
+	(cd $(BINDIR); rm -f vem; ln -s ../octtools/bin.$(ARCH)/vem .)
 $(BINDIR)/vem.debug:
-	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/vem.debug .)
+	(cd $(BINDIR); rm -f vem.debug; \
+		ln -s ../octtools/bin.$(ARCH)/vem.debug .)
 
 
 clean::
