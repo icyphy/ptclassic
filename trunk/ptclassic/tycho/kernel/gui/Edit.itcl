@@ -1616,7 +1616,7 @@ body ::tycho::Edit::seePoint {point} {
         # A delay seems to be needed here to ensure that the target is seen.
         # The moving of the insertion index is also delayed in case the
         # binding that triggered this also involves the insertion cursor.
-	after 200 [list catch "$this \
+	after 200 [list catch "$text \
                 mark set insert $sidx; 	\
                 selection clear -displayof $text; $this center"]
         after 8000 [list catch [list $text tag delete hypertarget]]
