@@ -13,12 +13,17 @@ This is an asynchronous source star (like the Const star) with a particular
 graphical user interface.  The star always outputs one of a finite number
 of values: the output is controled by the user selecting one of several
 buttons.  Exactly one button in the group is on.
+.LP
+The \fIpairs\fP parameter defines a set of pairs.  Each pair should be
+enclosed in double-quotes.  Each pair consists of two words: a one word
+label and a value.  The value most be either a FIX or INT.  The value
+is not checked at compile time: it is literally passed to qdm.
     }
     state {
-	    name { pairs }
-	    type { STRING }
-	    desc { Name and value pairs. }
-	    default { "" }
+	name { pairs }
+	type { STRING }
+	desc { Name and value pairs. }
+	default { "" }
     }
     codeblock(cbMultiButtonAio) {
 aio_multibutton $ref(value) $fullname() {$val(label)} {$val(pairs)}

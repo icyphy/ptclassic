@@ -21,40 +21,57 @@ is output, otherwise \fIoffVal\fP.
 The \fBcheckbutton\fP widget is either on or off; pressing it toggles
 between on and off.  When on, the \fIonVal\fP state is output,
 otherwise \fIoffVal\fP is output.
+.LP
+The \fIoffVal\fP and \fIonVal\fP should be either FIX or INT type.  They
+are not examined at compile-time: they are passed literally to qdm (via
+the aio file) and to the asembler (via the initial value).  Note
+that there is a big difference between "1" and "1.0".
     }
     state {
-	    name { buttonType }
-	    type { STRING }
-	    desc { Type of button: pushbutton, checkbutton. }
-	    default { "pushbutton" }
+	name { buttonType }
+	type { STRING }
+	desc { Type of button: pushbutton, checkbutton. }
+	default { "pushbutton" }
     }
     state {
-	    name { canonicalWidget }
-	    type { STRING }
-	    desc { Canonical form of widget name. }
-	    default { "xxx" }
-	    attributes { A_NONSETTABLE }
+	name { canonicalWidget }
+	type { STRING }
+	desc { Canonical form of widget name. }
+	default { "xxx" }
+	attributes { A_NONSETTABLE }
     }
     state {
-	    name { offVal }
-	    type { FIX }
-	    desc { Value to output when button off/not pressed. }
-	    default { "0" }
+	name { offVal }
+	type { STRING }
+	desc { "Value to output when button off/not pressed (either FIX or INT)." }
+	default { "0.0" }
     }
     state {
-	    name { onVal }
-	    type { FIX }
-	    desc { Value to output when button on/pressed. }
-	    default { ONE }
+	name { onVal }
+	type { STRING }
+	desc { "Value to output when button on/pressed (either FIX or INT)." }
+	default { "1.0" }
     }
     state {
-	    name { initiallyOn }
-	    type { INT }
-	    desc { "Boolean: Initial state is on? (checkbutton only)" }
-	    default { 0 }
+	name { initiallyOn }
+	type { INT }
+	desc { "Boolean: Initial state is on? (checkbutton only)" }
+	default { 0 }
+    }
+    state {
+	name { initValStr }
+	type { STRING }
+	desc { "String form of initial value." }
+	default { "0" }
+	attributes { A_NONSETTABLE }
     }
     codeblock(cbButtonAio) {
 $val(canonicalWidget) $ref(value) $fullname() {$val(label)} $val(offVal) $val(onVal) $val(initiallyOn)
+    }
+    codeblock(cbInitValue) {
+	org	$ref(value)
+	dc	$val(initValStr)
+	org	p:
     }
     start {
 	const char *wn = buttonType;
@@ -62,17 +79,20 @@ $val(canonicalWidget) $ref(value) $fullname() {$val(label)} $val(offVal) $val(on
 		 || strcmp(wn,"commandbutton")==0 ) {
 	    canonicalWidget = "aio_pushbutton";
 	    initiallyOn = 0; // param not really used
-	    value = double(offVal);
+	    initValStr = (const char*) offVal;
 	} else if ( strcmp(wn,"checkbutton")==0 ) {
 	    canonicalWidget = "aio_checkbutton";
 	    initiallyOn = int(initiallyOn) ? 1 : 0;
-	    value = int(initiallyOn) ? double(onVal) : double(offVal);
+	    initValStr = int(initiallyOn) 
+	      ? (const char*) onVal : (const char*) offVal;
 	} else {
 	    Error::abortRun(*this,"Unknown button type.");
 	    return;
 	}
+	value.setAttributes(A_NOINIT);
     }
     initCode {
     	addCode(cbButtonAio,"aioCmds");
+    	addCode(cbInitValue);
     }
 }
