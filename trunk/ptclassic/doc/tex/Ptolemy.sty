@@ -25,21 +25,45 @@
     \vspace{\baselineskip} }
 
 %
-% A list environment for states.
+% A list environment for blocks (stars, galaxies, universes).
+% The parameter specifies a suffix to be added after item names
+% for index entries.
+%
+% The \block command generates a list item.
+% The first argument is the name of the block.
+%
+\newenvironment{blocklist}[1]%
+    {\begin{description}\def\@indexsuffix{#1}}%
+    {\end{description}}
+\newcommand{\block}[1]{\item[\code{#1}]\tpindexbold{#1 \@indexsuffix}}
+
+%
+% A list environment for states (or parameters).
+% The parameter specifies a suffix to be added after item names
+% for index entries.
 %
 % The \state command generates a list item.  The first argument is the
 % data type.  The second argument is the name of the state.  The third
 % argument is the default value.
 %
-\newenvironment{statelist}{\begin{description}}{\end{description}}
-\newcommand{\state}[3]{\item[#2](\code{#1}) Default = \samp{#3}\\}
+\newenvironment{statelist}[1]%
+    {\begin{description}\def\@indexsuffix{#1}}%
+    {\end{description}}
+
+\newcommand{\state}[3]{\item[\code{#2}](\code{#1}) Default = \samp{#3}\\
+    \vrindexbold{#2 \@indexsuffix}}
 
 %
 % A list environment for ports.
+% The parameter specifies a suffix to be added after item names
+% for index entries.
 %
 % The \port command generates a list item.  The first argument is the
 % data type.  The second argument is the name of the port.
 %
-\newenvironment{portlist}{\begin{description}}{\end{description}}
-\newcommand{\port}[2]{\item[#2](\code{#1})\\}
+\newenvironment{portlist}[1]%
+    {\begin{description}\def\@indexsuffix{#1}}%
+    {\end{description}}
+\newcommand{\port}[2]{\item[\code{#2}](\code{#1})\\
+    \vrindexbold{#2 \@indexsuffix}}
 
