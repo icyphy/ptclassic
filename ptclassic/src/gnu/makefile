@@ -115,8 +115,10 @@ bin_make:
 
 # Build gcc with itself.  See src/gnu/src/gcc/INSTALL for more info.
 # Use the gcc '-v ' flag to see whether your gcc was compiled with cc or gcc
+# We pass CC down in case we are trying to avoid using /usr/bin/cc under
+# Solaris.
 bin_gcc:
-	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make bootstrap)
+	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make CC=$(CC) bootstrap)
 
 install_gcc: $(BINDIR)
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
