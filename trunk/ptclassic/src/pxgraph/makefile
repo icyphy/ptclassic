@@ -36,12 +36,17 @@ include $(CONFIG)
 
 MISC_FILES = README.txt
 all:
-	@echo "Nothing to be done in this directory,"
-	@echo " we now use the Java version of pxgraph"
+	@echo "There are two versions of pxgraph:"
+	@echo "the older one that uses X11 sources"
+	@echo "   $$PTOLEMY/src/pxgraph/pxgraph"
+	@echo "the newer one that is implemented in Java "
+	@echo "   $$PTOLEMY/tycho/java/ptolemy/plot"
+	@echo " The default is to use the Java version."
 	@echo " If you want to use the X11 version,"
-	@echo " see $PTOLEMY/src/pxgraph/README.txt"
+	@echo " see $$PTOLEMY/src/pxgraph/README.txt"
+	cd pxgraph; $(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS)"
 
-install: $(BINDIR)/pxgraph $(BINDIR)/pxgraph.x11
+install: $(BINDIR)/pxgraph.x11 $(BINDIR)/pxgraph 
 
 $(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptolemy/plot/pxgraph
 	rm -f $@
@@ -50,22 +55,25 @@ $(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptolemy/plot/pxgraph
 FORCE:
 $(BINDIR)/pxgraph.x11: FORCE
 	rm -f $@
-	@if [ -f pxgraph/pxgraph ]; then \
-	       echo "Installing src/pxgraph/pxgraph as $(BINDIR)/pxgraph.x11";\
-		(cd $(BINDIR); cp ../src/pxgraph/pxgraph/pxgraph \
-			 pxgraph.x11); \
+	@if [ -f pxgraph/pxgraph$(BINARY_EXT) ]; then \
+		echo "Now installing pxgraph/pxgraph.x11";\
+		cp pxgraph/pxgraph$(BINARY_EXT) $(BINDIR)/pxgraph.x11;\
 	else \
-		echo "pxgraph/pxgraph does not exist, so we will use the";\
-		echo "Java version of pxgraph.  If you want to use the";\
+		echo "pxgraph/pxgraph$(BINARY_EXT) does not exist,";\
+		echo "so we will use the Java version of pxgraph.";\
+		echo "If you want to use the";\
 		echo "X11 version of pxgraph, see";\
 		echo "$$PTOLEMY/src/pxgraph/README.txt";\
 	fi;
 
 makefiles:
 sources: makefile $(MISC_FILES)
-	(cd pxgraph; make sources)
+	@if [ ! -d pxgraph ]; then echo "making pxgraph dir"; mkdir pxgraph; fi
+	cd pxgraph; ../$(VPATH)/pxgraph/configure \
+		--srcdir=../$(VPATH)/pxgraph
 
 clean:
+	cd pxgraph; $(MAKE) clean
 depend:
 	echo no dependencies to make in this directory
 
