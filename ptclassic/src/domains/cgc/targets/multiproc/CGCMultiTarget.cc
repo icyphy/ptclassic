@@ -72,7 +72,7 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 	// specify machine names
 	addState(machineNames.setState("machineNames",this,"herschel",
 		"machine names (separated by a comma)"));
-	addState(nameSuffix.setState("nameSuffix",this,".berkeley.edu",
+	addState(nameSuffix.setState("nameSuffix",this,"",
 		"common suffix of machine names(e.g. .berkeley.edu)"));
 
 	// make some states invisible
