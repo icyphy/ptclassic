@@ -486,7 +486,9 @@ body ::tycho::DialogWindow::newModal {class instance args} {
     }
     if {[lsearch -exact $args {-geometry}] >= 0} {
 	update idletasks
-	wm deiconify $instance
+	if [winfo exists $instance] {
+	    wm deiconify $instance
+	}
     } {
 	$instance centerOnScreen
     }
