@@ -4,8 +4,10 @@
 #endif
 
 #include <std.h>
+#include <math.h>
 #include "<T>State.h"
 #include "Tokenizer.h"
+#include "miscFuncs.h"
 
 /**************************************************************************
 Version identification:
@@ -103,14 +105,6 @@ ParseToken State :: eval<T>Term(Tokenizer& lexer) {
 		}
 	}
 } 
-
-// this function is used if we are IntState.cc.
-
-inline int pow(int base,int exp) {
-	int r = 1;
-	while (exp > 0) { r *= base; exp--;}
-	return r;
-}
 
 // a factor is either an atom or a series of atoms with intervening
 // '^' signs for exponentiation
