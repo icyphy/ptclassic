@@ -1,5 +1,5 @@
-#ifndef _MotorolaConnect_h
-#define _MotorolaConnect_h 1
+#ifndef _MotorolaPortHole_h
+#define _MotorolaPortHole_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -15,8 +15,8 @@ $Id$
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "SDFConnect.h"
-#include "AsmConnect.h"
+
+#include "AsmPortHole.h"
 #include "MotorolaAttributes.h"
 
 class ProcMemory;
