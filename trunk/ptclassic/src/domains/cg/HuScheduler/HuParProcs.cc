@@ -96,7 +96,7 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 		// get the canProc or the earliest available time
 		int pix = pd->getPreferredProc();
 		earliest = costAssignedTo(pd, pix, targetTime);
-		if (earliest == targetTime) {
+		if ((earliest == targetTime) && (isCandidate(pix))) {
 			canProc = pix;
 		} else {
 			int bound = candidate->size();
@@ -187,7 +187,7 @@ int HuParProcs :: decideStartingProc(DLNode* node, int* earliest) {
 
 	int pix = pd->getPreferredProc();
 	*earliest = getProc(pix)->getAvailTime();
-	if ((*earliest) <= targetTime) {
+	if (((*earliest) <= targetTime) && isCandidate(pix)) {
 		canProc = pix;
 	} else {
 		int bound = candidate->size();
@@ -205,3 +205,11 @@ int HuParProcs :: decideStartingProc(DLNode* node, int* earliest) {
 	return canProc;
 }
 
+int HuParProcs :: isCandidate(int proc) {
+	
+	int isAcandidate = 0;
+	
+	for (int i = 0; i < candidate->size(); i++) 
+		if (candidate->elem(i) == proc) isAcandidate = 1;
+	return isAcandidate;
+}
