@@ -1,0 +1,83 @@
+# Makefile for BDF domain support
+# Version identification:
+# $Id$
+# Copyright (c) 1990 The Regents of the University of California.
+#                       All Rights Reserved.
+# Date of creation: 1/8/91
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/bdf/kernel
+# Kernel directory
+KERNDIR=$(ROOT)/src/kernel
+# SDF domain
+SDFDIR=$(ROOT)/src/domains/sdf/kernel
+# Where to install the libraries
+DESTDIR=$(ROOT)/lib.$(ARCH)
+
+GPPFLAGS = -g
+GNU = g++
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+# Rule for compiling with g++
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFDIR) -c $<
+
+# Library name
+LIB=libbdf.a
+
+# Library sources
+SRCS= \
+ BDFBool.cc BDFConnect.cc BDFScheduler.cc BDFStar.cc BDFWormhole.cc \
+ BDFWormConnect.cc BDFDomain.cc BDFSchList.cc
+
+# Header files
+HDRS= BDFBool.h BDFConnect.h BDFGeodesic.h BDFScheduler.h BDFStar.h \
+ BDFUniverse.h BDFWormhole.h BDFWormConnect.h BDFSchList.h
+
+# Library objects
+OBJS= $(SRCS:.cc=.o)
+
+all:	makefile $(LIB)
+
+$(LIB):	$(OBJS)
+	rm -f $(LIB)
+	ar cq $(LIB) $(OBJS)
+	ranlib $(LIB)
+
+# "make install" puts things in the official place
+install:	makefile $(DESTDIR)/$(LIB)
+
+$(DESTDIR)/$(LIB):	$(LIB)
+		rm -f $(DESTDIR)/$(LIB)
+		cp $(LIB) $(DESTDIR)
+		ranlib $(DESTDIR)/$(LIB)
+
+# "make clean" removes .o files and other cruft
+clean:
+		rm -f *.o core *~ *.bak *#
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+sources:	$(SRCS) $(HDRS) make.template
+
+depend:	
+		makedepend -I$(KERNDIR) -I$(SDFDIR) -I$(GNUINCLUDE) $(SRCS)
+
+makefile:	make.template
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
