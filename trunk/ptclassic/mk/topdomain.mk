@@ -103,7 +103,7 @@ doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
 
 starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
 	@if [ -f doc/stars/starHTML.idx ]; then \
-		@echo "Updating $@"; \
+		echo "Updating $@"; \
 		rm -f $@; \
 		if [ "$(SUBDOMAINDIRS)" != "." ]; then \
 			subdirs="$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS))"; \
