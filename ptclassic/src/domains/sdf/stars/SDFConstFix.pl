@@ -50,7 +50,7 @@ number with 1 sign bit, 1 integer bit, and 22 fractional bits.
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		   Error::abortRun( *this, "Invalid OverflowHandler" );
-		out.set_rounding( ((int) RoundFix) );
+		out.set_rounding( int(RoundFix) );
         }
 	go {
 		out = 0.0;
