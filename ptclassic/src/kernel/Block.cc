@@ -8,7 +8,7 @@ $Id$
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
-
+		       
  Programmer:  E. A. Lee and D. G. Messerschmitt
  Date of creation: 1/17/90
  Revisions:
@@ -16,9 +16,32 @@ $Id$
 		  add method Block::portWithName
 		  returns a pointer to the PortHole with the given name
 
- Routines implementing class Block methods
-
+Routines implementing class Block methods
+ 
 **************************************************************************/
+     
+StringList
+Block :: printPorts (const char* type) {
+	StringList out;
+// first the ports
+	
+	out += "Ports in the ";
+	out += type;
+	out += ":\n";
+	for(int i = numberPorts(); i>0; i--)
+		out += (StringList) nextPort();
+// Now do the multiports
+	int nmph = multiports.size();
+	if (nmph) {
+		out += "MultiPortHoles in the ";
+		out += type;
+		out += "\n";
+	}
+	for (i = nmph; i> 0; i--) {
+		out += (StringList) multiports++;
+	}
+	return out;
+}
 
 Block :: operator StringList ()
 {
@@ -29,15 +52,7 @@ Block :: operator StringList ()
 	out += "Descriptor: ";
 	out += readDescriptor();
 	out += "\n";
-
-	out += "Ports in the block:\n";
-	for(int i = numberPorts(); i>0; i--)
-		out += (StringList) nextPort();
-// This will change when we have multiple MultiPortHoles supported better
-	if (saveMPH) {
-		out += "MultiPortHoles in the block:\n";
-		out += (StringList) *saveMPH;
-	}
+	out += printPorts("block");
 	return out;
 }
 
@@ -55,14 +70,16 @@ PortHole *
 Block::portWithName (const char* name) {
 	// If the MultiPortHole name matches, return that
 	// (this will create a new connection)
-	if (saveMPH && strcmp (name,saveMPH->readName()) == 0)
-		return &saveMPH->newConnection();
+	for (int i = multiports.size(); i>0; i--) {
+		MultiPortHole& mpt = multiports++;
+		if (strcmp (name, mpt.readName()) == 0)
+			return &(mpt.newConnection());
+	}
 	// Not found, search the port list
-	else for (int i=numberPorts(); i>0; i--) {
-		PortHole *pt;
-		pt = &nextPort();
-		if (strcmp (name, pt->readName()) == 0)
-			return &(pt->newConnection());
+	for (i=numberPorts(); i>0; i--) {
+		PortHole& pt = ports++;
+		if (strcmp (name, pt.readName()) == 0)
+			return &(pt.newConnection());
 	}
 	// Still not found, return NULL
 	return NULL;
@@ -79,3 +96,30 @@ Block* Block::clone() {
 	errorHandler.error(msg);
 	return 0;
 }
+
+// Return the names of the ports within the block.
+int
+Block::portNames (const char** names, int* io, int nMax) {
+	int n = ports.size();
+	if (n > nMax) n = nMax;
+	for (int i = n; i>0; i--) {
+		PortHole& p = ports++;
+		*names++ = p.readName();
+		*io++ = p.isItOutput();
+	}
+	return ports.size();
+}
+
+// Return the names of the multiports within the block.
+int
+Block::multiPortNames (const char** names, int* io, int nMax) {
+	int n = multiports.size();
+	if (n > nMax) n = nMax;
+	for (int i = n; i>0; i--) {
+		MultiPortHole& p = multiports++;
+		*names++ = p.readName();
+		*io++ = p.isItOutput();
+	}
+	return multiports.size();
+}
+

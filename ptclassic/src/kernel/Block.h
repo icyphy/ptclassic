@@ -50,12 +50,10 @@ public:
 	}
 
 	// Constructor
-	Block() { saveMPH = 0;}
+	Block() {}
 
 	// Another constructor
-	Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {
-		saveMPH = 0;
-	}
+	Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {}
 
 	// Method to reply "false" if the block contains component
 	// blocks that can be seen from the outside.
@@ -83,6 +81,15 @@ public:
 	// Retrieve the PortHole with the given name
 	PortHole *portWithName(const char* name);
 
+	// Get a list of contained PortHole names
+	int portNames (const char** names, int* io, int nMax);
+
+	// Get a list of contained MultiPortHole names
+	int multiPortNames (const char** names, int* io, int nMax);
+
+	// print portholes as part of the info-printing method
+	StringList printPorts(const char* type);
+
 protected:
 	// Database for this block
 
@@ -90,13 +97,12 @@ protected:
 	PortList ports;
 	
 	// This function saves the given MultiPortHole so portWithName
-	// can find it; this current implementation only allows for
-	// one MultiPortHole per block; fix later.
-	addPort(MultiPortHole& p) {saveMPH = &p;}
+	// can find it.
+	addPort(MultiPortHole& p) {multiports.put(p);}
 
 private:
-	// This may be changed to a structure holding multiple MultiPortHoles.
-	MultiPortHole *saveMPH;
+	// This is a list of multiportholes in the block.
+	MPHList multiports;
 };
 
 #endif
