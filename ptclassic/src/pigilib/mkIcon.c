@@ -472,14 +472,21 @@ octObject *iconFacetPtr;
     /* nameplus may have extensions for the number of ports, etc. */
     /* Here, we find the class name. */
     name = callParseClass(nameplus);
-    sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)",
-	    name);
-    ERR_IF2(!KcIsKnown(name), buf);
-    sprintf(buf, "Making star icon for '%s'", name);
-    PrintDebug(buf);
-    ERR_IF1(!ConcatDirName(dir, nameplus, &fileName));
-    ERR_IF1(!AskAboutIcon(fileName));
-    ERR_IF1(!MkGetTerms(nameplus, &terms));
+    if (!strcmp(domain,NODOMAIN)) {
+	terms.in_n = 0;
+	terms.out_n = 0;
+	ERR_IF1(!ConcatDirName(dir, nameplus, &fileName));
+	ERR_IF1(!AskAboutIcon(fileName));
+    } else {
+        sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)",
+		name);
+        ERR_IF2(!KcIsKnown(name), buf);
+	sprintf(buf, "Making star icon for '%s'", name);
+	PrintDebug(buf);
+	ERR_IF1(!ConcatDirName(dir, nameplus, &fileName));
+	ERR_IF1(!AskAboutIcon(fileName));
+	ERR_IF1(!MkGetTerms(nameplus, &terms));
+    }
     ERR_IF1(!MkStarConFacet(&iconConFacet, fileName, &terms));
     if (terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
     else maxNumTerms = terms.in_n;
