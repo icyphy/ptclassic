@@ -77,5 +77,15 @@ same packet is routed through a delay-free path and also a path with delay.
 		firstArrivalQ.levelput(newp, arrivalTime);
 
 	}
+	// remove leftover particles from queue
+	wrapup {
+		while (firstArrivalQ.length() > 0) {
+			Particle* p = (Particle*)firstArrivalQ.getFirstElem();
+			p->die();
+		}
+	}
+	destructor {
+		wrapup();	// in case it was not called before
+	}
 }
 
