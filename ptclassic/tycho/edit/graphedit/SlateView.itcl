@@ -64,8 +64,8 @@ class ::tycho::SlateView {
     # Manipulate models 
     method model {mode args}
 
-    # Get the name of an item given its slate id
-    method itemname {slateid}
+    # Get or changed the name of an item given its slate id
+    method itemname {slateid {newname {}}}
 
     # Handle change notification from the layout model
     method notify {method args}
@@ -200,12 +200,21 @@ body ::tycho::SlateView::find {mode tag} {
 #
 # Get the name of an item from its slate id. If the argument is
 # not a valid id, return it on the assumption that it's a tag.
+# If a second argument is given, rename the item with the given
+# id to the new name.
 #
-body ::tycho::SlateView::itemname {slateid} {
+body ::tycho::SlateView::itemname {slateid {newname {}}} {
     if ![::info exists _nameof($slateid)] {
         return $slateid
     } else {
-        return $_nameof($slateid)
+        if { $newname == "" } {
+            return $_nameof($slateid)
+        } else {
+            set oldname $_nameof($slateid)
+            set _nameof($slateid) $newname
+            unset _itemid($oldname)
+            set _itemid ($newname) $slateid
+        }
     }
 }
 
@@ -576,7 +585,7 @@ body ::tycho::SlateView::_coords {name args} {
 #
 body ::tycho::SlateView::_delete {name} {
     $_slate delete $_itemid($name)
-    unset _nameof(_itemid($name))
+    unset _nameof($_itemid($name))
     unset _itemid($name)
 }
 
