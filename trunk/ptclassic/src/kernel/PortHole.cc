@@ -101,8 +101,8 @@ extern const Attribute P_HIDDEN = {PB_HIDDEN,0};
 extern const Attribute P_VISIBLE = {0,PB_HIDDEN};
 
 // constructor
-GenericPort :: GenericPort () : myType(ANYTYPE),aliasedTo(0),typePortPtr(0),
-	aliasedFrom(0), attributeBits(0), myResolvedType(0) {}
+GenericPort :: GenericPort () : myResolvedType(0), myType(ANYTYPE),
+              aliasedTo(0), aliasedFrom(0), typePortPtr(0), attributeBits(0) {}
 
 // Small virtual methods
 int GenericPort :: isItInput () const { return FALSE;}
