@@ -41,7 +41,7 @@ public:
 	operator StringList ();
 
 	// Display the schedule
-	StringList displaySchedule() {scheduler.displaySchedule();}
+	StringList displaySchedule() {return scheduler.displaySchedule();}
 
 	// Define clone() for convenience so Universe writers don't need to
 	// Since it returns NULL, clone will fail unless redefined.
