@@ -458,7 +458,7 @@ body ::tycho::File::constructor {args} {
 	    -label Quit \
 	    -underline 0 \
 	    -accelerator "C-x C-c" \
-	    -command "$this nextWindow; delete object $this"
+	    -command "::tycho::TopLevel::exitProgram"
     
     # Undo the binding in the base class, where Return dismisses
     # the window.
