@@ -105,7 +105,6 @@ class ::tycho::Edit {
     # Return the name of the type of text widget to use. It must be
     # derived from EditText.
     method textWidget {} {return ::tycho::EditText}
-
 }
 
 ###################################################################
@@ -115,7 +114,7 @@ body ::tycho::Edit::constructor {args} {
     # The text widget.
     itk_component add text {
 	[textWidget] $itk_component(childsite).text \
-		-markmodified "$this markModified"
+		-markmodified [code "$this markModified"]
     } {
 	keep -text -readonly -width -height -background \
 		-highlightbackground -highlightcolor -selectforeground \
@@ -150,7 +149,7 @@ body ::tycho::Edit::constructor {args} {
 	    -label {Undo/Redo} \
 	    -accelerator "C-x u" \
 	    -underline 0 \
-	    -command "$itk_component(text) undo"
+	    -command [code "$itk_component(text) undo"]
     
     $itk_component(editMenu) add separator
     
@@ -158,19 +157,19 @@ body ::tycho::Edit::constructor {args} {
 	    -label Cut \
 	    -underline 0 \
 	    -accelerator "C-w" \
-	    -command "$itk_component(text) cut"
+	    -command [code "$itk_component(text) cut"]
     
     $itk_component(editMenu) add command \
 	    -label Copy \
 	    -underline 1 \
 	    -accelerator "M-w" \
-	    -command "$itk_component(text) copy"
+	    -command [code "$itk_component(text) copy"]
     
     $itk_component(editMenu) add command \
 	    -label Paste \
 	    -underline 0 \
 	    -accelerator "C-y" \
-	    -command "$itk_component(text) paste"
+	    -command [code "$itk_component(text) paste"]
     
     $itk_component(editMenu) add separator
     
@@ -178,31 +177,31 @@ body ::tycho::Edit::constructor {args} {
 	    -label "Select All" \
 	    -underline 0 \
 	    -accelerator "C-/" \
-	    -command "$itk_component(text) selectAll"
+	    -command [code "$itk_component(text) selectAll"]
     
     $itk_component(editMenu) add command \
 	    -label "Unselect" \
 	    -underline 0 \
 	    -accelerator "C-\\" \
-	    -command "$itk_component(text) unselectAll"
+	    -command [code "$itk_component(text) unselectAll"]
     
     $itk_component(editMenu) add command \
 	    -label "Find/Change..." \
 	    -underline 0 \
 	    -accelerator "C-s" \
-	    -command "$itk_component(text) search"
+	    -command [code "$itk_component(text) search"]
     
     $itk_component(editMenu) add command \
 	    -label "Spelling..." \
 	    -underline 2 \
 	    -accelerator "M-$" \
-	    -command "$itk_component(text) spellCheck"
+	    -command [code "$itk_component(text) spellCheck"]
     
     $itk_component(editMenu) add command \
 	    -label {Goto Line...}\
 	    -underline 0 \
 	    -accelerator "C-c C-g" \
-	    -command "$itk_component(text) gotoLine"
+	    -command [code "$itk_component(text) gotoLine"]
 
     # Add a Format menu
     itk_component add formatMenuButton {
@@ -228,7 +227,7 @@ body ::tycho::Edit::constructor {args} {
     $itk_component(formatMenu) add command \
 	    -label "Font..." \
 	    -underline 0 \
-	    -command "$this setFont"
+	    -command [code "$this setFont"]
  
     $itk_component(formatMenu) add separator
 
@@ -236,19 +235,19 @@ body ::tycho::Edit::constructor {args} {
 	    -label "Fill Region" \
 	    -accelerator "M-q" \
 	    -underline 2 \
-	    -command "$itk_component(text) fillSelection"
+	    -command [code "$itk_component(text) busy fillSelection"]
     
     $itk_component(formatMenu) add command \
 	    -label "Right Fill Column" \
 	    -accelerator "C-x f" \
 	    -underline 2 \
-	    -command "$itk_component(text) queryFillColumn"
+	    -command [code "$itk_component(text) queryFillColumn"]
     
     $itk_component(formatMenu) add command \
 	    -label "Set Fill Prefix" \
 	    -accelerator "C-x ." \
 	    -underline 1 \
-	    -command "$itk_component(text) queryFillPrefix"
+	    -command [code "$itk_component(text) queryFillPrefix"]
     
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -277,7 +276,7 @@ body ::tycho::Edit::focusin {} {
 # This should be redefined in derived classes.
 #
 body ::tycho::Edit::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/EditHelp.html
 }
 
@@ -295,8 +294,8 @@ body ::tycho::Edit::insertData {data} {
 # insert the contents of that file at the insertion cursor.
 #
 body ::tycho::Edit::insertFile {} {
-    set filename [DialogWindow::newModal FileBrowser [autoName .filebr] \
-	    -text {File to Insert}]
+    set filename [::tycho::DialogWindow::newModal FileBrowser \
+	    [::tycho::autoName .filebr] -text {File to Insert}]
     $itk_component(text) readFile $filename
     markModified
 }
@@ -329,32 +328,38 @@ body ::tycho::Edit::loadFile {loadfile} {
 ###################################################################
 #### reload
 # Reload the current file. If the contents are modified, then we 
-# ask the user if they want to proceed.
+# ask the user if they want to proceed. The text is reparsed for
+# coloration, etc.
 #
 body ::tycho::Edit::reload {} {
     if {$file == "NoName" || $file == ""} {
 	return 
     }
+    set hull $itk_component(hull)
+    set text $itk_component(text)
+
     # Save the position of the cursor.
-    set ins [$itk_component(text) returnInsert]
+    set ins [$text returnInsert]
     if {$modified} {
-	if {![askuser "This file has been modified. Proceed anyway?"]} {
+	if {![::tycho::askuser \
+		"This file has been modified. Proceed anyway?"]} {
 	    return 
 	}
     }
-    $itk_component(hull) configure -readonly 0
-    $itk_component(text) deleteRange 1.0 end
-    $this loadFile $file
-    $itk_component(text) setInsert $ins
-    $itk_component(text) center
+    $hull configure -readonly 0
+    $text deleteRange 1.0 end
+    loadFile $file
+    $text setInsert $ins
+    $text center
     markUnmodified
     if {[file writable $file]} {
-	$itk_component(hull) configure -readonly 0
+	$hull configure -readonly 0
     } else {
-	$itk_component(hull) configure -readonly 1
+	$hull configure -readonly 1
     }
     # change title 
-    wm title $itk_component(hull) $file 
+    wm title $hull $file
+    $text parseRegion 1.0 end
 }
 
 ###################################################################
@@ -406,7 +411,7 @@ body ::tycho::Edit::seeName {regexpr} {
 #
 body ::tycho::Edit::setFont {} {
     set ifont [cget -textfont]
-    set wname [autoName $itk_component(hull).font]
+    set wname [::tycho::autoName $itk_component(hull).font]
     ::tycho::DialogWindow::new FontManager $wname \
 	    -initialfont $ifont \
 	    -okcommand [code \
