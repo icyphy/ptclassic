@@ -1,4 +1,4 @@
-# Makefile for Ptolemy CG stars
+# Makefile for Ptolemy Motorola 56000 CG stars
 # $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -18,9 +18,8 @@ include $(CONFIG)
 CG56DIR = $(ROOT)/src/domains/cg56/kernel
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
-SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(CG56DIR) -I$(CGDIR) -I$(KERNDIR)
 
 LIB = libcg56stars.a
 STAR_MK=cg56stars
