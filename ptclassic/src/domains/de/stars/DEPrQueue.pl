@@ -103,6 +103,7 @@ defstar {
 		for(int i=(inData.numberPorts()-1); i>=0; i--)
 		    queue[i] = new Queue;
 	   }
+	   demand.dataNew = TRUE;
 
 	}
 
