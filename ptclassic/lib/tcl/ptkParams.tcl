@@ -521,7 +521,7 @@ proc ed_RemoveParam {facet number top button} {
 
   set oldFocus [focus]
   grab $top
-  focus none
+  focus ""
 
   $button.q config -command {set ed_EntryDestroyFlag 1}
   $button.okfr.ok config -command {set ed_EntryDestroyFlag 1}
