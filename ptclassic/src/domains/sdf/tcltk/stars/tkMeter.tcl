@@ -17,7 +17,7 @@
 #	high
 # where the last three are given values corresponding to parameter values.
 
-set s .${uniqueSymbol}meter
+set s .run_[curuniverse].${uniqueSymbol}meter
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
@@ -40,7 +40,7 @@ if {![winfo exists $s]} {
     # In the following procedure, all variables are passed, so
     # there is no need to evaluat any values when the file is sourced.
     proc tkMeterSetValues {uniqueSymbol numInputs} {
-        set s .${uniqueSymbol}meter
+        set s .run_[curuniverse].${uniqueSymbol}meter
         set c $s.f
         set inputVals [${uniqueSymbol}grabInputs]
 	for {set i 0} {$i < $numInputs} {incr i} {
