@@ -122,6 +122,14 @@ int StructTarget :: runIt(VHDLStar* s) {
   fi->signalList = firingSignalList.newCopy();
   fi->decls = mainDecls;
   mainDecls.initialize();
+
+  // If there are local/temporary variables, put them into
+  // mainDecls here.  Then clear the localVariableList.
+  printf("Name: %s\n", (const char*) fiName);
+  printf("LocalVars?: %d\n", localVariableList.size());
+  fi->decls << addVariableDecls(&localVariableList);
+  localVariableList.initialize();
+
   fi->variableList = firingVariableList.newCopy();
   fi->portVarList = firingPortVarList.newCopy();
   fi->action = firingAction;
@@ -206,7 +214,7 @@ void StructTarget :: trailerCode() {
       initName << "_Init";
 
       mainSignalList.put(initName, state->type, "", "");
-      //      connectRegister(state->lastRef, tempName, "iter_clock", state->type);
+      //      connectRegister(state->lastRef, tempName, "feedback_clock", state->type);
       //      connectMultiplexor(tempName, state->firstRef, initName, state->type);
       connectMultiplexor(state->lastRef, state->firstRef, initName, state->type);
       connectSource(state->initVal, initName, state->type);
@@ -244,8 +252,8 @@ void StructTarget :: trailerCode() {
       destName << "_sink";
 
       // sourceName is input to register, destName is output of register.
-      //      connectRegister(sourceName, destName, "iter_clock", "INTEGER");
-      connectRegister(sourceName, destName, "iter_clock", arc->type);
+      //      connectRegister(sourceName, destName, "feedback_clock", "INTEGER");
+      connectRegister(sourceName, destName, "feedback_clock", arc->type);
 
       // Must also create signals for those lines which are neither read nor
       // written by a $ref() - e.g. if more delays than tokens read.
@@ -797,29 +805,7 @@ void StructTarget :: registerMultiplexor(StringList type/*="INTEGER"*/) {
 void StructTarget :: connectRegister(StringList inName, StringList outName,
 				     StringList clkName, StringList type) {
   // Add the clock to the list of clocks to be triggered.
-  const char* clock = clkName;
-  if (clockList.tail()) {
-    if (strcmp(clockList.tail(),clock)) {
-      clockList << clock;
-      ctlerAction << "     -- Toggle " << clkName << "\n";
-      ctlerAction << "wait until "
-		  << "system_clock'event and system_clock = TRUE;\n";
-      ctlerAction << clkName << " <= TRUE;\n";
-      ctlerAction << "wait until "
-		  << "system_clock'event and system_clock = TRUE;\n";
-      ctlerAction << clkName << " <= FALSE;\n";
-    }
-  }
-  else {
-    clockList << clock;
-    ctlerAction << "     -- Toggle " << clkName << "\n";
-    ctlerAction << "wait until "
-		<< "system_clock'event and system_clock = TRUE;\n";
-    ctlerAction << clkName << " <= TRUE;\n";
-    ctlerAction << "wait until "
-		<< "system_clock'event and system_clock = TRUE;\n";
-    ctlerAction << clkName << " <= FALSE;\n";
-  }
+  addClock(clkName);
 
   registerRegister(type);
   StringList label = outName;
@@ -1089,12 +1075,15 @@ StringList StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
 StringList StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
   StringList all;
   if ((*(cl->firingList)).head()) {
-    StringList body;
+    //    StringList body;
 
     VHDLFiringListIter nextFiring(*(cl->firingList));
     VHDLFiring* nfiring;
-    int varCount = 0;
+    //    int varCount = 0;
     while ((nfiring = nextFiring++) != 0) {
+      all << addVariableDecls(nfiring->variableList);
+
+      /*
       VHDLVariableListIter nextVar(*(nfiring->variableList));
       VHDLVariable* nvar;
       while ((nvar = nextVar++) != 0) {
@@ -1108,11 +1097,14 @@ StringList StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
 	varCount++;
 	level--;
       }
+      */
     }
     
+    /*Don't use varcount anymore
     if (varCount) {
       all << body;
     }
+    */
   }
   return all;
 }
@@ -1390,29 +1382,41 @@ void StructTarget :: buildConfigurationDeclaration(int level) {
 
 // Generate the clock generator entity and architecture.
 StringList StructTarget :: clockGenCode() {
+  // This comes from CGTarget::mainLoopCode() since it isn't exported
+  // out of there, but beginIteration is called from there.
+  // We may need to change the in-wormhole behavior sometime.
+  int repetitions = inWormHole()? -1 : (int)scheduler()->getStopTime();
+
   StringList codeList;
   codeList << "\n";
   codeList << "     -- ClockGen : clock generator\n";
   codeList << "entity ClockGen is\n";
   codeList << "     port (system_clock: out boolean;\n";
-  codeList << "           iter_clock: in boolean);\n";
+  codeList << "           iter_clock: in boolean;\n";
+  codeList << "           iter_count: inout integer);\n";
   codeList << "end ClockGen;\n";
   codeList << "\n";
   codeList << "architecture behavior of ClockGen is\n";
   codeList << "begin\n";
   codeList << "     main: process\n";
   codeList << "     	variable internal: boolean := FALSE;\n";
-  codeList << "     	variable loop_count: integer := 0;\n";
   codeList << "     begin\n";
-  codeList << "		if loop_count <= 70 then\n";
+  codeList << "		if iter_count < " << repetitions << " then\n";
   codeList << "         	wait for 1 ps;\n";
   codeList << "         	internal := not internal;\n";
   codeList << "         	system_clock <= internal;\n";
-  codeList << "     		loop_count := loop_count + 1;\n";
   codeList << "     	else\n";
   codeList << "     		wait;\n";
   codeList << "     	end if;\n";
   codeList << "     end process main;\n";
+  codeList << "\n";
+  codeList << "     count: process\n";
+  codeList << "     	variable internal: integer := 0;\n";
+  codeList << "     begin\n";
+  codeList << "		wait until iter_clock'event and iter_clock = TRUE;\n";
+  codeList << "		internal := internal + 1;\n";
+  codeList << "         iter_count <= internal;\n";
+  codeList << "     end process count;\n";
   codeList << "end behavior;\n";
   codeList << "\n";
   return codeList;
@@ -1508,6 +1512,49 @@ void StructTarget :: beginIteration(int /*repetitions*/, int /*depth*/) {
 
 // Generate code to end an iterative procedure
 void StructTarget :: endIteration(int /*reps*/, int /*depth*/) {
+  addClock("iter_clock");
+  ctlerPortList.put("iter_clock", "OUT", "boolean");
+  ctlerPortMapList.put("iter_clock", "iter_clock");
+  ctlerSignalList.put("iter_clock", "boolean", "", "");
+}
+
+// Add the clock to the clock list and generate code to toggle it.
+void StructTarget :: addClock(const char* clock) {
+  // Pulse it HI-LO if it isn't already at the end of the list.
+  if (!(clockList.tail()) || (strcmp(clockList.tail(),clock))) {
+    clockList << clock;
+    ctlerAction << "     -- Toggle " << clock << "\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clock << " <= TRUE;\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clock << " <= FALSE;\n";
+  }
+  /*
+  if (clockList.tail()) {
+    if (strcmp(clockList.tail(),clock)) {
+      clockList << clock;
+      ctlerAction << "     -- Toggle " << clock << "\n";
+      ctlerAction << "wait until "
+		  << "system_clock'event and system_clock = TRUE;\n";
+      ctlerAction << clock << " <= TRUE;\n";
+      ctlerAction << "wait until "
+		  << "system_clock'event and system_clock = TRUE;\n";
+      ctlerAction << clock << " <= FALSE;\n";
+    }
+  }
+  else {
+    clockList << clock;
+    ctlerAction << "     -- Toggle " << clock << "\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clock << " <= TRUE;\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clock << " <= FALSE;\n";
+  }
+  */
 }
 
 int StructTarget :: codeGenInit() {
