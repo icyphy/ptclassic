@@ -1,6 +1,6 @@
 #########################################################################
 # @Version: $Id$
-# @Author: H. John Reekie
+# @Author: Edward A. Lee, H. John Reekie
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
@@ -30,24 +30,235 @@
 
 
 #####################################################################
-#### openContext
-# Open a file based on its extension, name, or header.
-# If an editor has been registered for the file or directory, use it to
-# open the file or directory. Otherwise, if it is a file, open a plain
-# text editor and return the name of the editor object. If a window
-# already exists editing this file, simply raise it instead. New
-# windows are always opened at the global scope. File names are
-# expanded using <code>::tycho::expandPath</code>, making them absolute
-# and unique.
+#### register
+# Register information. This is the prime interface to the
+# Registry class and should be used instead of direct access
+# to its procedures. Options are:
 #
-body ::tycho::openContext {filename args} {
-    ::tycho::File::openContext $filename
+# <ul>
+# <li><b>category</b> _type_ _name__ ?_option value_ ...?:
+# Create a new category of editor. The category of an editor
+# is as indicated by the *-category* option to the *mode*
+# option of this procedure. The second argument is the
+# category name. The first is its "type" -- it can be
+# either "new" or "open". Following arguments will be
+# used to construct a cascade menu entry in the Window menu
+# to create a new editor or to raise an existing editor,
+# according to the _type_.
+#
+# <li><b>contents</b> _mode_ ?_arg_ ...?:
+# Register directory contents with the given file mode.
+# By "directory contents" we mean a list of file or directory names
+# that may exist inside a directory. Th first argument is the
+# mode, and all following arguments are the directory contents.
+# The purpose of this method is to
+# define a file mode for relatively complicated data that is
+# stored in multiple files inside a directory. When a mode
+# is registered by this method, then any future open-file
+# command (via the <code>::tycho::openContext</code> procedure)
+# will recognize a directory that contains the given contents and invoke
+# the command corresponding to that mode. The directory must
+# contain <i>all</i> of the specified contents items to be recognized.
+#
+# <li><b>filenames</b> _mode_ ?_arg_ ...?:
+# Register one or more file names with a given file mode.
+# Any future open-file command (via the <code>::tycho::openContext</code>
+# procedure) will recognize a file that has one of the
+# given names and will use the command associated with the
+# given mode to open it. The first argument is the mode; all following
+# arguments are files that are to be opened (by default) in that
+# mode.
+#
+# <li><b>extensions</b> _mode_ ?_arg_ ...?:
+# Register one or more file extensions for a given mode. The
+# mode is the first argument; all following arguments are valid
+# file extensions.  Note that the leading
+# period is considered part of the extension, as in ".itcl".
+#
+# <li><b>help</b> _name_ ?_option value_ ...?:
+# Register an entry for the Help menus.
+# See <a href="Registry.html#registerHelp proc of class Registry">
+# ::tycho::Registry::registerHelp</a>.
+#
+# <li><b>menubar</b> _menubar_ ?_owner_?:
+# Register a menubar containing Window and Help menus.
+# See <a href="Registry.html#registerMenubar proc of class Registry">
+# ::tycho::Registry::registerMenubar</a>.
+#
+# <li><b>mode</b> _mode_ ?_option value_ ...?:
+# Register a new file mode.
+# See <a href="Registry.html#registerMode proc of class Registry">
+# ::tycho::Registry::registerMode</a>.
+#
+# <li><b>window</b> _window_ _tag_ ?_option value_ ...?:
+# Register a viewer widget.
+# See <a href="Registry.html#registerWindow proc of class Registry">
+# ::tycho::Registry::registerWindow</a>.
+#
+# </ul>
+#
+ensemble ::tycho::register {
+    option category {type name args} {
+	@scope ::tycho::Registry set _windowmenus($type$name) $args
+	@scope ::tycho::Registry lappend _windowmenus($type) $name
+    }
+    option contents {mode args} {
+    	@scope ::tycho::Registry set _contentsmap($args) $mode
+    }
+    option extensions {mode args} {
+	foreach extension $args {
+	    @scope ::tycho::Registry set _extensionmap($extension) $mode
+    	}
+    }
+    option filenames {mode args} {
+	foreach filename $args {
+	    @scope ::tycho::Registry set _filenamemap($filename) $mode
+    	}
+    }
+    option help {name args} {
+	eval ::tycho::Registry::registerHelp $name $args
+    }
+    option menubar {menubar {owner {}}} {
+	::tycho::Registry::registerMenubar $menubar $owner
+    }
+    option mode {modename args} {
+	eval ::tycho::Registry::registerMode $modename $args
+    }
+    option window {window tag args } {
+	eval [list ::tycho::Registry::registerWindow $window $tag] $args
+    }
+}
+
+#####################################################################
+#### deregister
+# De-register something...
+#
+ensemble ::tycho::deregister {
+    option window {tag {window *}} {
+	::tycho::Registry::deregisterWindow $tag $window
+    }
+    option menubar {menubar} {
+	::tycho::Registry::deregisterMenubar $menubar
+    }
+}
+
+#####################################################################
+#### registry
+# Query for registered information. Options are:
+#
+# <ul>
+# <li><b>filemode</b> _filename_:
+# Return the default file mode registered with a given path name.
+# See <a href="Registry.html#registeredFileMode proc of class Registry">
+# ::tycho::Registry::registeredFileMode</a>.
+#
+# <li><b>isopen</b> _tag_ ?_window_?:
+# See if the tag was previously registered with
+# <code>::tycho::register window</code>. If the _window_ argument
+# is supplied, the tag and window together are tested, otherwise
+# any entry that matches the tag is returned. The name of this option
+# reflects the fact that tags are usually file names.
+#
+# <li><b>modecget</b> _mode_ _option_:
+# Get an option of a mode, as passed to
+# <code>::tycho::register mode</code>.
+#
+# <li><b>modecconfigure</b> _mode_ ?_option_ _value_...?:
+# Configure options of a mode.
+#
+# <li><b>viewmode</b> _class_:
+# Given a class, as passed as the *-class* option to
+# <code>::tycho::register mode</code>, return the mode
+# to which it was registered. Null if the class was not
+# registered.
+#
+# <li><b>windowcget</b> _tag_ _window_ _option_:
+# Get an option of a window, as passed to
+# <code>::tycho::register window</code>.
+#
+# <li><b>windowconfigure</b> _tag_ _window_ ?_option_ _value_...?:
+# Configure options of a window.
+#
+# <li><b>windows</b> _tag_:
+# Return all windows registered with the given _tag_.
+#
+# </ul>
+#
+ensemble ::tycho::registry {
+    option filemode {filename} {
+	::tycho::Registry::registeredFileMode $filename
+    }
+    option isopen {tag {window {}}} {
+	if { $window != {} } {
+	    @scope ::tycho::Registry ::info exists _windows($window#$tag)
+	} else {
+	    expr { [@scope ::tycho::Registry array get _windows *#$tag] != "" }
+	}
+    }
+    option modecget {mode prop} {
+	if ![@scope ::tycho::Registry ::info exists _modeinfo($mode)] {
+	    error "Unregistered mode \"$mode\""
+	}
+	array set props [@scope ::tycho::Registry set _modeinfo($mode)]
+	if ![::info exists props($prop)] {
+	    error "Unknown property \"$prop\""
+	}
+	return $props($prop)
+    }
+    option modeconfigure {mode args} {
+	if ![@scope ::tycho::Registry ::info exists _modeinfo($mode)] {
+	    error "Unregistered mode \"$mode\""
+	}
+	array set opts [@scope ::tycho::Registry set _modeinfo($mode)]
+	foreach {opt val} $args {
+	    set opts($opt) $val
+	}
+	@scope ::tycho::Registry array set _modeinfo($mode) [array get opts]
+    }
+    option viewmode {viewclass} {
+	foreach {mode options} [@scope ::tycho::Registry array get _modeinfo] {
+	    array set opts $options
+	    if { $opts(-viewclass) == $viewclass } {
+		return $mode
+	    }
+	}
+	return ""
+    }
+    option windowcget {tag window prop} {
+	if ![@scope ::tycho::Registry ::info exists _windows($window#$tag)] {
+	    error "Unregistered window tag \"$window#$tag\""
+	}
+	array set props [@scope ::tycho::Registry set _windows($window#$tag)]
+	if ![::info exists props($prop)] {
+	    error "Unknown property \"$prop\""
+	}
+	return $props($prop)
+    }
+    option windowconfigure {tag window args} {
+	if ![@scope ::tycho::Registry ::info exists _windows($window#$tag)] {
+	    error "Unregistered window tag \"$window#$tag\""
+	}
+	array set opts [@scope ::tycho::Registry set _windows($window#$tag)]
+	foreach {opt val} $args {
+	    set opts($opt) $val
+	}
+	@scope ::tycho::Registry array set _windows($window#$tag) \
+		[array get opts]
+    }
+    option windows {tag} {
+	set result {}
+	foreach v [@scope ::tycho::Registry array names _windows *#$tag] {
+	    array set opts [@scope ::tycho::Registry set _windows($v)]
+	    lappend result $opts(-window)
+	}
+	return $result
+    }
 }
 
 ##########################################################################
 ## Registry
 #
-# The Registry class implements Tycho's global name service. It is
+# The Registry class implements Tycho's global naming service. It is
 # an uninstantiable class -- in other words, a collection of
 # procedures. Some of the services it provides have a more convenient
 # interface provided by <a href="Registry_rel.html">non-class
@@ -59,61 +270,332 @@ body ::tycho::openContext {filename args} {
 # in menubars (such as the Help menu), and providing widgets
 # with the support needed to open files correctly.
 #
-# Currently this class has very little functionality, and mainly
-# functions as a place-holder.
-#
 class ::tycho::Registry {
     inherit ::tycho::Uninstantiable
 
     ###################################################################
     ####                            public procs                   ####
 
-    # Open a TIM model file and return the model
-    proc openModel {path}
+    # Return the default mode of a file or directory name.
+    proc registeredFileMode {name}
+
+    # Deregister a menubar
+    proc deregisterMenubar {menubar}
+
+    # Deregister a viewer widget
+    proc deregisterWindow {tag {window *}}
+
+    # Is the file already open? if YES, then return the window name,
+    # if NO, then return 0.
+    proc isFileOpen {filename} {}
 
     # Link to an open model
     proc linkModel {path key}
+
+    # Open a TIM model file and return the model
+    proc openModel {name {path {}}}
+
+    # Raise a widget, testing for various nasty conditions
+    proc raiseWindow {tag window}
+
+    # Register a help entry
+    proc registerHelp {name args}
+
+    # Register a new menu bar
+    proc registerMenubar {menubar {owner {}}}
+
+    # Register a mode
+    proc registerMode {modename args}
+
+    # Register a viewer widget
+    proc registerWindow {tag window args}
 
     # Unlink from an open model
     proc unlinkModel {path key}
 
     ###################################################################
-    ####                           protected procs                 ####
+    ####                           private procs                   ####
+
+    # Initialize a new Window menu
+    private proc initWindowMenu {menubar}
+
+    # Initialize a new Help menu
+    private proc initHelpMenu {menubar {owner {}}}
 
     ###################################################################
-    ####                         protected variables               ####
+    ####                          private variables                ####
+
+    # The mapping from TIM submode to Model class 
+    private common _timMapping
+    array set _timMapping {
+    	{} text
+    }
 
     # The array of open models 
-    protected common _openModels
+    private common _openModels
 
     # The array of linked clients 
-    protected common _linkedClients
+    private common _linkedClients
+
+    # The array of menubars to keep updated
+    private common _menubars
+
+    # The array of registered modes
+    private common _modeinfo
+
+    # The help entry info
+    private common _helpentries
+
+    # The mapping from extensions to modes
+    private common _extensionmap
+
+    # The mapping from contents to modes
+    private common _contentsmap
+
+    # The mapping from filenames to modes
+    private common _filenamemap
+
+    # An array of tag-optionlist pairs for the Window menu submenus
+    private common _windowmenus
+
+    # This array stores object names indexed by file names so that
+    # if the same file is opened a second time, we can just raise
+    # the window.
+    private common _windows
+}
+
+#####################################################################
+#### registeredFileMode
+# Given a file or directory name, return its default mode.
+# Note that the returned mode is based solely upon the
+# file name (or contents if a directory), and does not
+# attempt to read a header string from the file.
+# The search for a mode proceeds as follows:
+# <ol>
+# <li>If the filename is a directory and the contents of the
+# directory exactly matches a mode registered with
+# <code>::tycho::register contents</code>, return that mode.
+# <li>If the file extension matches an extension registered with
+# <code>::tycho::register extensions</code>, return the
+# corresponding mode.
+# <li>If the file name, without leading directory path, matches a
+# file name registered with
+# <code>::tycho::register filenames</code>, return the
+# corresponding mode.
+# </ol>
+#
+# If none is found, return null.
+#
+body ::tycho::Registry::registeredFileMode {name} {
+    set ITHINKTHISISWRONG {
+	if {[::tycho::url protocol $name]=="http"} {
+	    # EXCEPTION: If something's on HTTP, it is ***ALWAYS*** a HTML file.
+	    set ext ".html"
+	    if {[info exists editorsExtension] && \
+		    [info exists editorsExtension($ext)]} {
+		return $editorsExtension($ext)
+	    } else {
+		error "HTML protocol is gone! Assertion failed."
+	    }
+	} elseif {}
+    }
+    if [::tycho::resource isdirectory $name] {
+        # FIXME: For now, do not try and do this test
+        # on remote directories. The test for a VEM
+        # facet (schematic) every time I access a remote
+        # directory is a complete pain...
+        if [::tycho::resource isremote $name] {
+            return ""
+        }
+        # Try and match a directory against the contents list
+        if {[info exists _contentsmap]} {
+            set fname [::tycho::expandPath $name]
+            foreach f [array names _contentsmap] {
+                set recognized 1
+                foreach file $f {
+                    if ![::tycho::resource exists \
+			    [::tycho::url join $fname $file]] {
+                        set recognized 0
+                        break
+                    }
+                }
+                if $recognized {
+                    return $_contentsmap($f)
+                }
+            }
+        }
+        return {}
+    } {
+	set ext [::tycho::url extension $name]
+	set base [::tycho::url tail $name]
+        if {[info exists _extensionmap] && \
+                [info exists _extensionmap($ext)]} {
+            return $_extensionmap($ext)
+	} elseif {[info exists _filenamemap] && \
+                [info exists _filenamemap($base)]} {
+            return $_filenamemap($base)
+	} else {
+            return ""
+        }
+    }
+}
+
+#####################################################################
+#### deregisterMenubar
+# Deregister a menubar
+#
+body ::tycho::Registry::deregisterMenubar {menubar} {
+    if ![::info exists _menubars($menubar)] {
+	# FIXME: Should remove this later...
+	puts "Menubar \"$menubar\" has not been registered..."
+    }   
+    unset _menubars($menubar)
+}
+
+#####################################################################
+#### deregisterWindow
+# Deregister a window. This removes the specified window from the
+# Window menu of all menu bars. If the _window_ argument is not
+# given, all entries that match the _tag_ are removed, otherwise
+# only the entry matching the specified _window_ and _tag_
+# are removed. The _tag_ must match
+# exactly the tag given in the call to <code>::tycho::register window</code>
+# that created the entry in the first place.
+#
+body ::tycho::Registry::deregisterWindow {tag {window *}} {
+    # puts "deregisterWindow $tag $window"
+    if ![info exists _windows] {
+	return
+    }
+    foreach v [array names _windows $window#$tag] {
+	# Remove from all registered menu bars
+	array set opts $_windows($v)
+	foreach mb [array names _menubars] {
+	    # Make sure the menu bar still exists
+	    if { [::info which -command $mb] == "" } {
+		unset _menubars($mb)
+		continue
+	    }
+	    # Delete the entry
+	    $mb delete $v
+	    # Disable the submenu if it's empty
+	    if { [$mb entries open$opts(-category)] == "" } {
+		$mb disable open$opts(-category)
+	    }
+	}
+	# Delete the file info
+	unset _windows($v)
+    }
 }
 
 ##########################################################################
-## openModel
+## initHelpMenu
 #
-# Open a TIM model file and return the model. If the model already
-# exists, just return it. The link count of the model is
-# not altered. The argument is the path to the model,
-# <i>relative to the TIM_PATH preference</i>. Clients should be sure
-# to perform a linkModel if this is the first time they have
-# accessed this model.
+# Initialize a new Help menu.
 #
-body ::tycho::Registry::openModel {path} {
-    if [::info exists _openModels($path)] {
-        # Already open, so return
-        return $_openModels($path)
-    } else {
-        # Not open, so open it....
-        foreach tp [::tycho::preference get config TIM_PATH] {
-            set fullpath [::tycho::url join $tp $path]
-            if [::tycho::resource exists $fullpath] {
-                # OK, found the file, so read the class name
-                # ?????
+body ::tycho::Registry::initHelpMenu {menubar {owner {}}} {
+    foreach entry $_helpentries() {
+	array set opts $_helpentries($entry)
+	# Substitute the owner for %Q. If owner is null
+	# and the substitution succeeds, disable the entry.
+	set disable [regsub -all {%Q} $opts(-command) $owner opts(-command)]
+	set disable [expr { $disable && $owner == "" }]
+	eval $menubar command $entry help [array get opts]
+	if $disable {
+	    $menubar disable $entry
+	}
+    }
+}
 
-            }
-        }
+##########################################################################
+## initWindowMenu
+#
+# Initialize a new Window menu.
+#
+body ::tycho::Registry::initWindowMenu {menubar} {
+    # Create the submenus for new editors
+    foreach tag $_windowmenus(new) {
+	eval $menubar add cascade new$tag window $_windowmenus(new$tag)
+    }
+    $menubar separator windowsep1 window
+    
+    # Create the submenus for open files
+    foreach tag $_windowmenus(open) {
+	eval $menubar add cascade open$tag window \
+		$_windowmenus(open$tag) \
+		-state disabled
+    }
+
+    # Construct menu entries for registered commands.
+    # We include a little hack here to make the plain text appear
+    # first in the list.
+    # Do the text mode, assuming it exists OK
+    array set opts $_modeinfo(text)
+    # Put NoName in place of the filename
+    set command [format $opts(-command) NoName]
+    if { $opts(-label) != "" } {
+	if { $opts(-category) != "" } {
+	    # Add to a sub-menu
+	    $menubar command text new$opts(-category) \
+		    -label $opts(-label) \
+		    -command $command
+	    $menubar separator textsep new$opts(-category)
+	}
+    }
+    # Do all other modes...
+    foreach index [lsort [::tycho::ldelete [array names _modeinfo] text]] {
+	array set opts $_modeinfo($index)
+	# Put NoName in place of the filename
+	set command [format $opts(-command) NoName]
+	if { $opts(-label) != "" } {
+	    if { $opts(-category) != "" } {
+		# Add to a sub-menu
+		$menubar command $index new$opts(-category) \
+			-label $opts(-label) \
+			-command $command
+	    } else {
+		# Add to the end of the main menu
+		# FIXME -- this is bogus
+		$menubar command $index window \
+			-label $opts(-label) \
+			-command $command
+	    }
+	}
+    }
+    
+    # Construct menu entries for registered files
+    # FIXME: how can we make the files always appear in
+    # the same order in every menu?
+    foreach tag [lsort [array names _windows]] {
+	array set opts $_windows($tag)
+	if { $opts(-category) != "" } {
+	    # Add to a cascade menu
+	    $menubar command $tag open$opts(-category) \
+		    -label $opts(-label) \
+		    -command [list ::tycho::Registry::raiseWindow \
+		    $opts(-tag) $opts(-window)]
+	    $menubar enable open$opts(-category)
+	} else {
+	    # Add to the end of the main menu
+	    $menubar command $tag window \
+		    -label $opts(-label) \
+		    -command [list ::tycho::Registry::raiseWindow \
+		    $opts(-tag) $opts(-window)]
+	}
+    }
+}
+
+#####################################################################
+#### isFileOpen
+# Check if the file is already open, if YES, then return the window name,
+# if NO, then return empty string.
+#
+body ::tycho::Registry::isFileOpen {filename} {
+    set filename [::tycho::expandPath $filename]
+    if { [array names _windows *#$filename] != "" } {
+	return [lindex [array names $_windows *#$filename] 0]
+    } else {
+	return ""
     }
 }
 
@@ -136,6 +618,279 @@ body ::tycho::Registry::linkModel {path key} {
         error "Model $path is already linked by $key"
     }
     set _linkedClients($path,$key) 1
+}
+
+##########################################################################
+## openModel
+#
+# Open a TIM model file and return the model. The first argument
+# is the file name, either absolute or relative to the TIM_PATH
+# preference. If the second argument is supplied and not null,
+# it is prepended to the search path. If the model already
+# exists, just return it. The link count of the model is
+# not altered. The argument is the path to the model,
+# <i>relative to the TIM_PATH preference</i>. Clients should be sure
+# to perform a linkModel if this is the first time they have
+# accessed this model. Returns null if the file was not found.
+#
+body ::tycho::Registry::openModel {name {path {}}} {
+    if [::info exists _openModels($name)] {
+        # Already open, so return
+        return $_openModels($name)
+    } else {
+        # Get the default suffix-based mode and sub-mode
+        ::tycho::Registry::registeredMode $name hdr
+        
+        # Find the file
+	set file [::tycho::urlPathSearch $name \
+		[concat $path [::tycho::splitPath \
+		[::tycho::preference get config TIM_PATH]]]]
+
+        # Read the actual file header to override defaults
+        ::tycho::readFileHeader $file hdr
+        
+        # If not a TIM file, abort
+        if { [string tolower $hdr(mode)] != "tim" } {
+	    error "$file is not a TIM file"
+        }
+        
+        # The sub-mode determines what to do with the file
+        if ![::info exists hdr(submode)] {
+	    set hdr(submode) {}
+        }
+        if ![::info exists _timMapping($hdr(submode))] {
+	    error "Unknown TIM type: $hdr(submode)"
+        }
+        
+        FIXME: Unfinished
+    }
+}
+
+#####################################################################
+#### raiseWindow
+# Raise a window or widget to the top. This procedure is provided
+# to make it easier to construct menu callbacks for open files.
+# If the widget no longer exists, then it is removed from
+# the menus. Otherwise it's top-level window is raised
+# to the top.
+#
+# Note: The raiseWindow{} method of View could be used instead, but
+# the problem with that is that a) not all windows are subclasses
+# of View, and b) we want to catch an attempt to raise a dead
+# and remove it from the menus.
+#
+body ::tycho::Registry::raiseWindow {tag window} {
+    set w [string trimleft $window :]
+
+    # Check for existence
+    if { [::info which -command $w] == "" } {
+	# Oops... there's some bug or something.... Try and clean
+	# up by just removing the offending window from all
+	# menubars
+	puts "!!! Deleting $window#$tag !!!"
+	foreach mb [array names _menubars] {
+	    # Make sure the menu bar still exists
+	    if { [::info which -command $mb] == "" } {
+		unset _menubars($mb)
+		continue
+	    }
+	    # Delete the entry
+	    catch {$mb delete $window#$tag}
+	}
+    }
+   
+    # OK
+    raise [winfo toplevel $w]
+}
+
+#####################################################################
+#### registerHelp
+# Register an entry for the Help menus. The _name_ is a tag that
+# will be used to construct an entry in the Help menu. The
+# option-value pairs will be passed directly to the command{}
+# method of MenuBar, with the exception of the *-before*
+# option. If *-before* is in the argument list, the entry
+# will be inserted into the help menus before the given entry,
+# instead of being appended at the end. Also, the
+# *-command* option will have the name of the widget that
+# owns the menubar
+# substituted for each occurrence of the string *%Q*.
+# Note that any existing help menus will not be updated with
+# the new entry -- this procedure is intended for calling before
+# any menubars are registered.
+# 
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#::tycho::register">
+# <code>::tycho::register</code></a>.
+#
+body ::tycho::Registry::registerHelp {name args} {
+    if [::info exists _helpentries($name)] {
+	error "Help entry \"$name\" has already been registered"
+    }
+    # Check for -before
+    # BTW: _helpentries() holds the ordering list
+    array set opts $args
+    if [::info exists opts(-before)] {
+    	set t [lsearch -exact $_helpentries() $name]
+    	if { $t >= 0 } {
+	    set $_helpentries() [linsert $_helpentries() $t $name]
+    	} else {
+	    lappend _helpentries() $name
+    	}
+    	unset opts(-before)
+    } else {
+    	lappend _helpentries() $name
+    }
+    set _helpentries($name) [array get opts]
+}
+
+#####################################################################
+#### registerMenubar
+# Register a new menu bar. Registered menubars will have menus
+# menus tagged <code>window</code> and <code>help</code> maintained
+# automatically. Note that the menubar does not have to have these
+# menus -- if not, nothing will happen. The <code>window</code> menu
+# will be given a set of drop-down menus containing a) entries
+# to open a new blank viewer and b) entries for currently
+# registered files. The help menu will be given a default
+# set of menu entries, as well as any additional menu entries
+# registered with the <code>::tycho::register helpentry</code>.
+#
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#::tycho::register">
+# <code>::tycho::register</code></a>.
+#
+body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
+    set _menubars($menubar) 1
+
+    initWindowMenu $menubar
+    initHelpMenu $menubar $owner
+}
+
+#####################################################################
+#### registerMode
+# Register a new file mode. The file mode governs how a file is
+# opened. By default, the mode is obtained from its extension,
+# name, or contents, as registered with the 
+# <code>::tycho::register</code> procedure. The default mode
+# can be overridden by other mechanisms, such as a header
+# string in the file or the content type as returned by
+# a remote server.
+# If only the mode is supplied, return the options
+# attached to this mode. Otherwise set the parameters of this
+# mode as given by the arguments. Parameters allowed are:
+# <ul>
+#
+# <li><b>-command</b> _script_: The script to execute when a file of
+# this mode is opened. Any "%s" in the command string
+# is replaced with the file name before invoking the command,
+# using the Tcl <code>format</code>command. For example, if the command is
+# "::tycho::view EditItcl -file {%s}", then the Tycho
+# <code>::tycho::view</code>
+# procedure will be used to open the file using an
+# <code>EditItcl</code> view object. The braces around the "%s" allow
+# the file name to have spaces.
+#
+# <li><b>-viewclass</b> _classname_: If supplied, this mode will be
+# returned by <code>::tycho::registry classmode</code>. This
+# argument is thuis used to give a mapping from class names
+# to the mode they implement. Be careful not to pass the same
+# class name to more than one mode or result will be unpredictable.
+# (I'm by no means certain that this is the right way to do this.
+# We could, for example, have a <code>::tycho::register class</code>
+# option, which would be more transparent but seems a bit
+# redundant...)
+#
+# <li><b>-label</b> _string_: If not null, then an entry will be
+# added to the "Window" menu of all menu bars registered in the
+# future, with a command to execute the command with the
+# filename "NoName." This permits the user to open a new blank editor
+# in the given mode.
+#
+# <li><b>-category</b> _categeory_: If not null, this value
+# selects the sub-menu into which the entry to open a blank
+# editor will be placed. By default, this category will also be
+# used for open files. Legal values are
+# "html," "text", "graphics", and "tools".
+# </ul>
+#
+# If the mode is already registered, flag an error. (Or
+# should it just overwrite the parameters?) Note that a mode
+# can be registered even the command does not operate on a file.
+# The *%s* substitution will still be performed, but as long
+# as the command does not contain a mode, it doesn't matter.
+#
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#::tycho::register">
+# <code>::tycho::register</code></a>.
+#
+body ::tycho::Registry::registerMode {mode args} {
+    if { $args == "" } {
+	if [::info exists _modeinfo($mode)] {
+	    return $_modeinfo($mode)
+	} else {
+	    return ""
+	}
+    }
+
+    if [::info exists _modeinfo($mode)] {
+	# Do we want an error here?
+	error "Mode \"$mode\" is already registered"
+    }
+    array set opts {-command "" -label "" -viewclass text -category ""}
+    array set opts $args
+    set _modeinfo($mode) [array get opts]
+}
+
+#####################################################################
+#### registerWindow
+# Register a viewer window. This will cause an entry to be placed
+# in the Window menu of registered menubars. It can also
+# be used to prevent a file from being opened a second time -- instead,
+# the widget will just be raised. The first argument is an identifier tag,
+# the second is the widget name,
+# and following arguments are option-value pairs. Legal options
+# are:
+# <ul>
+# <li><b>-category</b>: The category which governs which
+# sub-menu to place the file into.
+# <li><b>-label</b>: The label that will appear in the Window menus.
+# If omitted, the _tag_ will be used.
+# <li><b>-mode</b>: The mode in which the file was opened.
+# This will be used to find which sub-menu to place the file
+# into if *-category* is not supplied.
+# </ul>
+#
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#::tycho::register">
+# <code>::tycho::register</code></a>.
+#
+body ::tycho::Registry::registerWindow {tag window args} {
+    # puts "::tycho::Registry::registerWindow $tag $window $args"
+
+    if [::info exists _windows($window#$tag)] {
+	error "View \"$tag\" has already been registered"
+    }   
+
+    # Figure out the label and category
+    array set opts [list -label $tag -mode text -category ""]
+    array set opts [list -window $window -tag $tag]
+    array set opts $args
+    if { $opts(-category) == "" } {
+	array set m [concat {-category text} $_modeinfo($opts(-mode))]
+	set opts(-category) $m(-category)
+    }
+    # Remember the window and its options
+    set _windows($window#$tag) [array get opts]
+
+    # Add to the correct sub-menu of all registered menu bars
+    foreach mb [array names _menubars] {
+	$mb command $window#$tag open$opts(-category) \
+		-label $opts(-label) \
+		-command [list ::tycho::Registry::raiseWindow \
+		$opts(-tag) $opts(-window)]
+	$mb enable open$opts(-category)
+    }
 }
 
 ##########################################################################
