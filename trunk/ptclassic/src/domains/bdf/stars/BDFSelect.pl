@@ -36,17 +36,17 @@ is copied to the output; otherwise, falseInput is.
 	}
 	go {
 	// get control Particles from Geodesic
-		control.grabData();	
+		control.receiveData();	
 		
 		// read control value, and route input to output
 		// depending on it.
 		if ((int) (control%0)) {
 			// route true-side to the output
-			trueInput.grabData();
+			trueInput.receiveData();
 			output%0 = trueInput%0;
 		} else {
 			// route false-side to the output
-			falseInput.grabData();
+			falseInput.receiveData();
 			output%0 = falseInput%0;
 		}
 		output.sendData();

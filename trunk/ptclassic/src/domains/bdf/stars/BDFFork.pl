@@ -36,15 +36,10 @@ interface, or when the "nodeconnect" command is used in the interpreter.
 			p->setRelation(BDF_SAME,&input);
 	}
 	go {
-		// note that explicit grabData and sendData are needed
-		// since this is BDF.
 		MPHIter nextp(output);
 		PortHole* p;
-		input.grabData();
-		while ((p = nextp++) != 0) {
+		while ((p = nextp++) != 0)
 			(*p)%0 = input%0;
-			p->sendData();
-		}
 	}
 }
 
