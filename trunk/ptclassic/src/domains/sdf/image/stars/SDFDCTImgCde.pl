@@ -53,14 +53,14 @@ output.
   defstate {
     name	{ Thresh }
     type	{ float }
-    default { 0 }
+    default { 12.0 }
     desc	{ Threshold for run-length coding. }
   }
 
   defstate {
     name	{ HiPri }
     type	{ int }
-    default { 1 }
+    default { 3 }
     desc { Number of DCT coefficients per block sent to 'hiport'. }
   }
 
