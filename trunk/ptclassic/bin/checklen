@@ -1,0 +1,39 @@
+#! /bin/sh
+# $Id$
+# print out the names of any files that are not significant in the first
+# 13 characters.  Linux has this problem with GNU ar.
+# Return a 0 if everything is 0k, otherwise return 1.
+
+tmpfile=/tmp/checklen.$
+
+awk '
+	{ 
+		# For each .cc or .c file, check  the first 13 chars against
+		# other files with an asociative array
+		# Print out an header line with the first error.
+		for(i=1;i<=NF;i++) {
+			if ($i ~ /.cc$/ || $i ~ /.c$/ ) {
+				shortname=substr($i,1,13)
+				if (length(files[shortname]) > 0 ) {
+					# Have we printed the header yet?
+					if (printedprefix == 0  && length(prefix) >0 ) {
+						print prefix >tmpfile
+						printedprefix=1
+					}							
+					print $i, " conflicts with" files[shortname] >tmpfile
+				}
+				files[shortname] = $i	
+		
+			}
+		}
+	}' prefix="$*" tmpfile=${tmpfile} -
+
+retval=0
+if [ -f $tmpfile ]; then
+	retval=1
+fi
+
+cat $tmpfile
+rm -f $tmpfile
+
+exit $retval
