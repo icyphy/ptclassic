@@ -58,12 +58,16 @@ const char* SRScheduler::domain() const
 // Initialize the galaxy
 void SRScheduler::setup()
 {
-    if (!galaxy()) {
-	Error::abortRun(domain(), " scheduler has no galaxy.");
-	return;
-    }
 
-    galaxy()->initialize();
+  numInstants = 1;
+  numInstantsSoFar = 0;
+
+  if (!galaxy()) {
+    Error::abortRun(domain(), " scheduler has no galaxy.");
+    return;
+  }
+
+  galaxy()->initialize();
 }
 
 // Run (or continue) the simulation
