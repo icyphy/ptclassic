@@ -82,7 +82,7 @@ void DEWormhole :: go()
         if (myTarget()->selfFiringRequested()) {
                 DEBaseSched* sched = (DEBaseSched*) outerSched();
                 DEStar* me = this;
-                sched->queue()->levelput(me, (sched->now())+(myTarget()->nextFiringTime()), 0);
+                sched->queue()->levelput(me, myTarget()->nextFiringTime(), 0);
         }
  
 	// run the inner scheduler.
@@ -109,11 +109,14 @@ LOG_NEW; return new DEWormhole(gal.makeNew()->asGalaxy(), myTarget()->cloneTarge
 // sumUp();  If the inner domain is timed and stopBeforeDeadlocked,
 // put the wormhole into the process queue.
 void DEWormhole :: sumUp() {
+/*
+// Instead of here, use selfFiringRequested() and nextFiringTime() to refire
 	if (scheduler()->stopBeforeDeadlocked()) {
 		DEBaseSched* sched = (DEBaseSched*) outerSched();
 		DEStar* me = this;
 		sched->queue()->levelput(me, sched->now(), 0);
 	}
+*/
 }
 		
 // getStopTime() ; gives the stopTime to the inner domain.

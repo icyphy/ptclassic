@@ -53,6 +53,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Target.h"
 #include "IntState.h"
 #include "FloatState.h"
+#include "DEScheduler.h"
 
 class DETarget : public Target {
 public:
@@ -70,6 +71,21 @@ public:
 
 	// Return TRUE if the MutableCalendarQueue is being used
 	int isMutable();
+
+        // Let outside domain know whether to refire.
+	/*virtual*/ int selfFiringRequested() {
+            // Invoke scheduler to decide.
+            DEBaseSched* sched = (DEBaseSched*)scheduler();
+            return sched->selfFiringRequested();
+        }
+	
+	// If selfFiringRequested returns TRUE, return the time at which
+	// this firing is requested.
+	/*virtual*/ double nextFiringTime () {
+            // Invoke scheduler to decide.
+            DEBaseSched* sched = (DEBaseSched*)scheduler();
+            return sched->nextFiringTime();
+        }
 
 protected:
 	void setup();
