@@ -100,7 +100,7 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #### Exec
 # This is the basic non-graphical based Exec.
 #
-# See <a href="../internals/exec.html">$TYCHO/kernel/basic/doc/internals/exec.html</a>
+# See <a href="../../../basic/doc/internals/exec.html">$TYCHO/kernel/basic/doc/internals/exec.html</a>
 # for further documentation.
 #
 # Here is a quick mini-tutorial to get familiar with this 
