@@ -309,6 +309,10 @@ class ::tycho::File {
     # Register file extensions and an associated editor class.
     proc registerEditor {extensions editorClass {description {}} \
 	    {baseFilename {}}} {}
+
+    # Is the file already open? if YES, then return the window name,
+    # if NO, then return 0.
+    proc isFileOpen {filename} {}
 	
     ##########################################################################
     ####                  protected methods                               ####
@@ -1292,6 +1296,21 @@ body ::tycho::File::registerEditor {extensions editorClass {description {}} \
     }
 }
 
+#####################################################################
+#### isFileOpen
+# Check if the file is already open, if YES, then return the window name,
+# if NO, then return 0.
+#
+body ::tycho::File::isFileOpen {filename} {
+    set filename [::tycho::expandPath $filename]
+    if {[info exists filesOpen($filename)]} {
+	set winName $filesOpen($filename)
+    } else {
+	set winName 0
+    }
+    return $winName
+}
+
 #########################################################################
 #########################################################################
 ####                          protected methods                      ####
@@ -1373,7 +1392,7 @@ body ::tycho::File::addMenuItem {itemName inMenu args} {
 	
     } {
 	# if it does then link it to cmd
-	eval $itk_component(menu$inMenu) entryconfigure "$itemName" $args
+	eval $itk_component(menu$inMenu) entryconfigure \"$itemName\" $args
     }
 }
 
