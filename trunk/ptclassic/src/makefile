@@ -101,8 +101,8 @@ ptcl/ptcl.ptiny:
 	(cd ptcl; $(MAKE) ptcl.ptiny)
 
 # Quick way to build a small fast pigiRpc
-pigiRpc/pigiRpc.ptiny: ptcl/ptcl.ptiny
+pigiRpc/ptinyRpc: ptcl/ptcl.ptiny
 	(cd pigilib; $(MAKE) install)
 	(cd ptklib; $(MAKE) install)
 	(cd libgantt; $(MAKE) install)
-	(cd pigiRpc; $(MAKE) pigiRpc.ptiny)
+	(cd pigiRpc; $(MAKE) ptinyRpc)
