@@ -45,6 +45,14 @@ public:
 	// Initialize the data structures
 	void initialize();
 
+	// User-specified additional initialization
+	// By default, it does nothing.
+	virtual void start() {}
+
+	// User-specified end of simulation
+	// again, does nothing by default.
+	virtual void wrapup() {}
+
 	// Methods making ports available on the outside;
 	// can be read but not set
 	int numberPorts() const {return ports.size();}
