@@ -127,21 +127,40 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     cout.flush();
 
 //  write file to local machine 
-    pt_ofstream o(tmpFile ? tmpFile : fileName);
-    if (o) {
+    // cfront1.0 barfs because there is not StringList ? operand, so
+    // don't use it.  However, this is a poor solution.
+    if (tmpFile) {
+      pt_ofstream o(tmpFile);
+      if (o) {
 	if (text != NULL) o << text;  // if text is null create empty file
 	o.flush();
-    }
-    else {
+      }
+      else {
+	if (tmpFile) {LOG_DEL; delete [] tmpFile;}
+		return FALSE;
+      }
+
+    } else {
+      pt_ofstream o(fileName);
+      if (o) {
+	if (text != NULL) o << text;  // if text is null create empty file
+	o.flush();
+      }
+      else {
 	if (tmpFile) {LOG_DEL; delete [] tmpFile;}
 	return FALSE;
+    }
+
     }
 
 //  chmod to appropriate mode.  Since we use the -p flag on rcp
 //  the mode settings will be copied as well if we are writing to
 //  a external host
     if (mode != -1) {
-        chmod((const char*)(tmpFile?tmpFile:fileName),mode);
+        if(tmpFile)
+	  chmod((const char*)tmpFile,mode);
+	else
+	  chmod((const char*)fileName,mode);
     }
 
 //  rcp the file to another machine if necessary
@@ -159,8 +178,10 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     if (displayFlag) {
 	const char* disp = getenv ("PT_DISPLAY");
 	char cmdbuf[256];
-	sprintf(cmdbuf,(disp?disp:defaultDisplay),
-	       (tmpFile?tmpFile:fileName) );
+	if(tmpFile)
+	  sprintf(cmdbuf,(disp?disp:defaultDisplay), tmpFile);
+	else 
+	  sprintf(cmdbuf,(disp?disp:defaultDisplay), fileName);
 	StringList displayCommand;
 	if (tmpFile) displayCommand << "(";
 	displayCommand << cmdbuf;
