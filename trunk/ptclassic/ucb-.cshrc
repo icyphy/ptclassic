@@ -90,6 +90,6 @@ setenv S56DSP /users/ptdesign/vendors/s56dsp
 setenv QCKMON qckMon5
 setenv VSDKHOME /opt/SUNWvsdk
 setenv INCASHOME /opt/SUNWincas
-if ( "$PTARCH" !~ hppa* ) then
+if ( $?LD_LIBRARY_PATH ) then
        setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${S56DSP}/lib
 endif
