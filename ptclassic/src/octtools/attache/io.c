@@ -31,6 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <termio.h>
 #endif
 
+#ifdef __NetBSD__
+#include <termios.h>
+#endif
+
 #include <curses.h>		    /* Include this first, as port.h
 				       also defines TRUE and FALSE. */
 #include "copyright.h"
