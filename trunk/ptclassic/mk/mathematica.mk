@@ -59,23 +59,29 @@ endif
 # matlabRootDir traverses the user's path, so we only run it when
 # we really need it.
 ifdef NEED_MATHEMATICADIR
-	MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
-	MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
-	ifeq ("$(MATHEMATICADIR)","")
-	MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
-	MATHEMATICAEXT_LIB = 	-lptmathematica
+	ifeq ("$(INCLUDE_MATHEMATICA)","no")
+		MATHEMATICADIR = 	$(ROOT)\src\compat\mathematica
+		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)\Source\Includes
+		MATHEMATICAEXT_LIB = 	-lptmathematica
 	else
-	ifeq ($(wildcard $(MATHEMATICADIR)/Bin/MathLink),)
-		# Mathematica3.x
-		MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions \
+		MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
+		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
+		ifeq ("$(MATHEMATICADIR)","")
+		MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
+		MATHEMATICAEXT_LIB = 	-lptmathematica
+		else
+		ifeq ($(wildcard $(MATHEMATICADIR)/Bin/MathLink),)
+			# Mathematica3.x
+			MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions \
 					-l$(MATHLINKLIBNAME)
 
-		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions
-	else
-		# Mathematica2.x
-		MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
-					-l$(MATHLINK2LIBNAME)
-	endif
+			MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions
+		else
+			# Mathematica2.x
+			MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
+						-l$(MATHLINK2LIBNAME)
+		endif
+		endif
 	endif
 endif
 
