@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StringList.h"
+#include "StringState.h"
 #include "CGCTarget.h"
 
 class CGCTychoTarget : public CGCTarget {
@@ -51,6 +52,8 @@ public:
  
 protected:
 	StringState skeletonMakefile;
+        StringState scriptFile;
+
 	// generate the code for the main loop.
 	/*virtual*/ CodeStream mainLoopBody();
 
@@ -61,6 +64,8 @@ protected:
         void addStaticDecls( StringList &, const char * );
 	
         CodeStream mainLoopTerm;
+        CodeStream tychoSetup;
+	CodeStream tkSetup;
 
         // virtual function to initialize strings
         /*virtual*/ void initCodeStrings();
