@@ -85,8 +85,8 @@ itcldocs:
 		echo "$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS)"; \
 	 	$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS); \
 	else \
-		echo "$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
-		$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
+		echo "$(ROOT)/lib/tydoc/tydoc -t \"$(TYDOC_DESC)\" $(ITCL_SRCS)"; \
+		$(ROOT)/lib/tydoc/tydoc -t \"$(TYDOC_DESC)\" $(ITCL_SRCS); \
 	fi
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
