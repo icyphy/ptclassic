@@ -28,8 +28,7 @@
 #define OCT_FILES_H
 #include "ansi.h"
 octStatus oct_make_key
-	ARGS((struct octFacet *user_facet, char **file_desc, struct facet *parent));
-int location;
+	ARGS((struct octFacet *user_facet, char **file_desc, struct facet *parent, int location));
 
 octStatus oct_save_key
 	ARGS((char *file_desc, char **copy_desc));
