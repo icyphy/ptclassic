@@ -5,7 +5,7 @@
 #                       All Rights Reserved.
 
 ROOT = ../..
-VPATH = $(ROOT)/src/preproc
+VPATH = $(ROOT)/src/ptlang
 BINDIR = $(ROOT)/bin.$(ARCH)
 YFLAGS =
 CFLAGS = -O
