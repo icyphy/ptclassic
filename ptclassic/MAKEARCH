@@ -178,7 +178,7 @@ foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler \
 	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk \
 	cg56/dsp cg96/dsp \
-	sdf/atm sdf/contrib sdf/dsp sdf/dmm sdf/image \
+	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
 	sdf/matrix sdf/matlab \
 	cgc/rtlib \
 	mdsdf/tcltk de/atm cg/hierScheduler $EXPEXTRAS )
@@ -200,7 +200,7 @@ cd ../..
 foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	sdf/atm/kernel sdf/atm/stars sdf/contrib/kernel sdf/contrib/stars \
 	sdf/dsp/stars sdf/image/stars sdf/tcltk/stars \
-	sdf/dmm/stars sdf/matrix/stars sdf/matlab/stars \
+	sdf/dfm/stars sdf/matrix/stars sdf/matlab/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \

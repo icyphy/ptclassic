@@ -22,7 +22,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Makefile for Ptolemy DMM stars (SDF stars operating on files)
+# Makefile for Ptolemy DFM stars (SDF stars operating on files)
 # $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -33,7 +33,7 @@
 # This will add the dependencies to the makefile.
 
 ROOT = ../../../../..
-VPATH = $(ROOT)/src/domains/sdf/dmm/stars
+VPATH = $(ROOT)/src/domains/sdf/dfm/stars
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
@@ -49,7 +49,7 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(SDFTCLTKDIR) -I$(TYCHODIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libsdfdmmstars.$(LIBSUFFIX)
+LIB=libsdfdfmstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
@@ -75,7 +75,7 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-STAR_MK=sdfdmmstars
+STAR_MK=sdfdfmstars
 DOMAIN=SDF
 EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(TCL_SRCS)
 

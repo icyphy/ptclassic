@@ -77,7 +77,6 @@ ifdef FULL
 		# Non G++ compilers fail to compile IPUS' templates
 		IPUS =		1
 	endif
-	DMM = 		1
 	HOF =		1
 	MDSDF =		1
 	ifeq ($(INCLUDE_PN_DOMAIN),yes)
@@ -99,7 +98,7 @@ ifdef PTINY
 	SDF =		1
 	SDFTK =		1
 	SDFDSP =	1
-	SDFDMM =	1
+	SDFDFM =	1
 	SDFMATRIX =	1
 	SDFMATLAB =	1
 endif
@@ -128,10 +127,8 @@ endif
 ifndef TK
 	# Don't need Higher Order Functions.  ptcl does not need HOF
 	HOF=
-	# DMM needs Oct.
-	DMM=
-	# SDFDMM uses TclScript
-	SDFDMM =
+	# SDFDFM uses TclScript
+	SDFDFM =
 endif
 
 include $(ROOT)/mk/stars.mk

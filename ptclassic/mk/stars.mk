@@ -480,7 +480,7 @@ ifdef SDFFULL
 	SDFDSP = 1
 	ifdef TK
 		SDFTK = 1
-		SDFDMM = 1
+		SDFDFM = 1
 	endif
 endif
 
@@ -495,11 +495,11 @@ ifdef SDF
 		LIBS += -lsdfatmstars
 		LIBFILES += $(LIBDIR)/libsdfatmstars.$(LIBSUFFIX)
 	endif
-	ifdef SDFDMM
-		CUSTOM_DIRS += $(SDFDIR)/dmm/stars
-		STARS += $(LIBDIR)/sdfdmmstars.o
-		LIBS += -lsdfdmmstars
-		LIBFILES += $(LIBDIR)/libsdfdmmstars.$(LIBSUFFIX)
+	ifdef SDFDFM
+		CUSTOM_DIRS += $(SDFDIR)/dfm/stars
+		STARS += $(LIBDIR)/sdfdfmstars.o
+		LIBS += -lsdfdfmstars
+		LIBFILES += $(LIBDIR)/libsdfdfmstars.$(LIBSUFFIX)
 		SDFTK = 1
 	endif
 	ifdef SDFTK

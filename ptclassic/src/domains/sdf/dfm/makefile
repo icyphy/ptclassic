@@ -13,5 +13,5 @@ include ../../../../mk/subdomain.mk
 
 DIRS = stars
 
-ME = sdf/dmm
+ME = sdf/dfm
 
