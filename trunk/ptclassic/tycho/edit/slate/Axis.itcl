@@ -48,22 +48,18 @@
 # length of the tick marks in pixels.  The beginning and end of the 
 # axis can also be specified using the -from and -to options. 
 #
-# FIXME: Needs lots more features. (We're working on it...)
-# 
-# <p>
 # Here is an example on how to use it:
-# <tcl><pre>
-# ::tycho::slate .s
-# pack .s
-# # Create the axis
-# set axis [.s create Axis 50 50 -length 100 -from 0.0 -to 100 -digits 1]
-# # Move the axis
-# $axis coords 10 100
-# # Change the length
-# $axis configure -length 50
+# <tcl quiet><pre>
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   $slate create Axis 50 50 -length 100 -from 0.0 -to 100 -digits 1
+#   $slate create Axis 50 100 -length 250 -from -5 -to 5 -digits 2
 # </pre></tcl>
 #
-# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
 #
 # <b>Note</b>: This is an experimental class.
 #
@@ -259,16 +255,20 @@ body ::tycho::Axis::redrawTicks {id canvas x0 y0} {
     $canvas delete $id.tick $id.label
     
     # Find label width -- HACK!
-    set t [$canvas create text 0 0 -text [format %.$option(digits$id)f $option(from$id)]]
-    set labelwidth [::rectWidth [$canvas bbox $t]]
+    set t [$canvas create text 0 0 \
+            -text [format %.$option(digits$id)f $option(from$id)]]
+    set bb [$canvas bbox $t]
+    set labelwidth [expr [lindex $bb 2] - [lindex $bb 0]]
     $canvas delete $t
 
     # Calculate axis increment locations
-    set increment [::axisIncrement $option(from$id) \
+    set increment [::tycho::axisIncrement $option(from$id) \
 	    $option(to$id) $option(length$id) \
 	    $labelwidth 10]
-    set axisValues [::rangeValues $option(from$id) $option(to$id) $increment]
-    set axisLocations [::mapRange $option(from$id) $option(to$id) \
+    set axisValues [::tycho::rangeValues \
+            $option(from$id) $option(to$id) $increment]
+    set axisLocations [::tycho::mapRange \
+            $option(from$id) $option(to$id) \
 	    $axisValues \
 	    $x0 [expr $x0 + $option(length$id)]]
 
