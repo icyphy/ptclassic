@@ -2,7 +2,7 @@ defstar {
 	name { HostOut }
 	domain { CG56 }
 	desc { Data output. }
-	version { @(#)CG56HostOut.pl	1.4 6/25/92 }
+	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
