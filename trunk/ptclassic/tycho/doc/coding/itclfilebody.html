@@ -43,9 +43,9 @@ creating definition bodies.
 
 <H3><A NAME="the order of elements">The order of elements</A></H3>
 	
-The Itcl file body  consists of the following element.
-Note that the order of tags should strictly followed for
-consistency between files.
+The Itcl file body  consists of the following elements.
+Note that the order of tags should bestrictly followed for
+consistency among files.
 	
 <H2><A NAME="itcl class comments">Itcl class comments</A></H2>
 
@@ -93,6 +93,7 @@ Class comments have the following elements:
 	Note that the <CODE>pre</CODE> block is nested inside the
 	<CODE>tcl</CODE> block.
 
+
 	<LI> The last line of the class comment, located right before
 	the actual class definition should be a blank comment line, consisting
 	of only a single hashmark.
@@ -110,10 +111,10 @@ Class comments have the following elements:
 <H2><A NAME="itcl class declaration body">Itcl class declaration body</A></H2>
 
 In itcl, the class declaration body defines the interface to the
-class.  The actual definition can be either included in the class
-declaration body, or after the class declaration body in a series of
+class.  The actual definition can be either be included in the class
+declaration body, or put after the class declaration body in a series of
 <CODE>body</CODE> statements.  However, the Tycho convention
-<B>require</B> that methods and procedures that are longer than one
+<B>requires/B> that methods and procedures that are longer than one
 line be in separate <CODE>body</CODE> statements after the class body
 itself.  This makes the file more readable.
 
