@@ -233,6 +233,7 @@ public:
     int getDomain(int argc,char** argv);
     int getFullName(int argc,char** argv);
     int getParent(int argc,char** argv);
+    int getTarget(int argc,char** argv);
     int halt(int argc,char** argv);
     int initBlock(int argc,char** argv);
     int initState(int argc,char** argv);
@@ -241,16 +242,13 @@ public:
     int isWormhole(int argc,char** argv);
     int knownBlocks(int argc,char** argv);
     int knownDomains(int argc,char** argv);
+    int knownTargets(int argc,char** argv);
     int knownUniverses(int argc,char** argv);
     int link(int argc,char** argv);
     int matlab(int argc,char** argv);
     int mathematica(int argc,char** argv);
-    
-    // added to support tycho - eal
-    int monitorOff(int argc,char** argv);
-    int monitorOn(int argc,char** argv);
+    int monitor(int argc,char** argv);
     int monitorPtcl(int argc,char** argv);
-    
     int multilink(int argc,char** argv);
     int node(int argc,char** argv);
     int nodeconnect(int argc,char** argv);
@@ -268,11 +266,10 @@ public:
     int schedule(int argc,char** argv);
     int seed(int argc,char** argv);
     int setState(int argc,char** argv);
+    int setTarget(int argc,char** argv);
     int states(int argc,char** argv);
     int stateValue(int argc,char** argv);
-    int target(int argc,char** argv);
     int targetparam(int argc,char** argv);
-    int targets(int argc,char** argv);
     int wrapup(int argc,char** argv);
 
 
@@ -304,9 +301,6 @@ protected:
     // Append a string to the Tcl result as a list element.
     void addResult(const char*);
     
-    // Compute the schedule for the current universe.
-    int computeSchedule();
-
     // Iterate over the blocks inside a galaxy, adding names to the result.
     void galTopBlockIter (const Block* b, int deep, int fullname);
 
@@ -360,6 +354,12 @@ private:
     // Recursively descend within the galaxy to get a block with dotted name.
     const Block* getSubBlock(const char*, const Block*);
 
+    // Initialize a universe or wormhole.
+    int initBlockInternal(Block*);
+
+    // Return true if the target targetName is a legal target.
+    int legalTarget(const char*, const char*);
+
     // Function to register extensions with the Tcl interpreter.
     void registerFuncs();
     
@@ -397,7 +397,7 @@ private:
 
     // If set, call the tcl procedure monitorPtcl every time a ptcl
     // command is invoked.
-    static int monitor;
+    static int monitorFlag;
 
     // Flag to indicate that interp is owned by me.
     short myInterp;
