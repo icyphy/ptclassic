@@ -18,6 +18,7 @@ $Id$
 #include "Star.h"
 #include "StringList.h"
 #include "GalIter.h"
+#include "Animate.h"
 #include <ACG.h>
 
 // common random number generator for all Star classes.
@@ -50,7 +51,14 @@ Star :: printVerbose () const {
 void Star :: go () {}
 
 // default fire() function
-void Star :: fire() { go() ;}
+void Star :: fire() {
+	if(Animate::enabledFlag) {
+		Animate::highlight(*this);
+		go();
+		Animate::clearHighlight(*this);
+	} else
+		go();
+}
 
 // return myself as a Star.
 Star& Star :: asStar () const { return *this;}
