@@ -52,11 +52,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 	  int mask;
 	}
-	code {
-	  extern "C" {
-	    int ffs(int i);
-	  }
-	}
 	setup {
 	  // Should check that generator polynomial does not exceed 31 bits. How?
 	  mask = int(polynomial);
@@ -76,14 +71,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int masked = mask & reg;
 	  // Now we need to find the parity of "masked".
 	  int parity = 0;
-	  int lob;
-	  // Find the lowest order bit that is set and shift it out
-	  // "ffs" is a c library function does this. It returns zero when
-	  // there are no more bits set.
-	  while (lob = ffs(masked)) {
-	    masked = masked >> lob;
-	    // toggle the parity bit
-	    parity = parity ^ 1;
+	  // Calculate the parity of the masked word.
+	  while (masked > 0) {
+	    parity = parity ^ (masked & 1);
+	    masked = masked >> 1;
 	  }
 	  output%0 << parity;
 	  shiftReg = reg;
