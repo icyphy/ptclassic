@@ -82,8 +82,9 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 #
 # system libraries (libraries from the environment) for c++ files
 # No need to include -lg++ under egcs
-# GCC-2.95.2 does need to include -lg++ (Christian Sgraja)
-LIBGPP=-lg++
+# gcc-2.95.2 does need to include -lg++ (Christian Sgraja), so
+# Uncomment the next line if you are using gcc-2.95.2	
+#LIBGPP=-lg++
 SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(LIBGPP) -lstdc++ -lsocket -lnsl -ldl  $(SHARED_SYSLIBS) -lm
 
 # system libraries for linking .o files from C files only
