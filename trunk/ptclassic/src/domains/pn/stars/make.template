@@ -30,6 +30,7 @@ PL_SRCS= \
  PNEndCase.pl \
  PNFilter.pl \
  PNLastOfN.pl \
+ PNMerge.pl \
  PNSift.pl
 
 # The .cc files
