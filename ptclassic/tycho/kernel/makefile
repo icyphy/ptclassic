@@ -95,7 +95,8 @@ REALCLEAN_STUFF =			tclIndex
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
-all install: tclIndex $(MISC_SRCS)
+# Do make sources so that we ensure that the subdirectories are checked out
+all install: tclIndex $(MISC_SRCS) sources
 
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
