@@ -104,7 +104,7 @@ body ::tycho::EditTcl::constructor {args} {
 
     menubar insert "Select Body" "Unselect"  -command "$this selectConstruct"
     menubar insert "Evaluate Body" "Reload" \
-            -accelerator "C-R" \
+            -accelerator "C-x C-R" \
             -command "$this evaluateConstruct"
 
     bind $itk_component(text) <Control-x><Control-Shift-R> \
@@ -226,6 +226,9 @@ body ::tycho::EditTcl::selectConstruct {} {
     }
     selectRange [lindex $start 0] \
             [$itk_component(text) index "[lindex $stop 0] +1 char"]
+    # Move the insertion cursor back to where we started, the selectRange
+    # command moved it on us.
+    seeFragment [list range $idx $idx]
 }
 
 #########################################################################
