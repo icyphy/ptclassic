@@ -13,11 +13,11 @@ SRCS =	userMan.tex \
 	cgc.tex \
 	cp.tex
 
-CLEAN = $(SRCS:.tex=.clean)
+CLEAN = $(SRCS:.tex=.clean) index.clean
 
 all:	userMan.ps userMan.info
 
 clean:	$(CLEAN)
 
-userMan.ps:	$(SRCS) userMan.aux userMan.cps
+userMan.dvi:	$(SRCS) userMan.toc userMan.cps
 userMan.info:	$(SRCS)
