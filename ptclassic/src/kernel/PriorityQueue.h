@@ -83,9 +83,11 @@ protected:
 
 public:
 	// Add element to the queue sorted by its level from the tail.
+	// (i.e., highest level is at the tail)
 	LevelLink* levelput(Pointer a, float v, float fv = 1.0);
 
 	// Add element to the queue sorted by its level from the head.
+	// (i.e., highest level is at the head)
 	LevelLink* leveltup(Pointer a, float v, float fv = 1.0);
 
 	// append the link to the end of the queue (ignore levels).
