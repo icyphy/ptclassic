@@ -716,7 +716,7 @@ int POct::ptkGetStringProp (int aC,char** aV) {
         Tcl_AppendResult(interp, "", (char *) NULL);
     } else {
         // return the value as a list element to preserve whitespace
-        Tcl_AppendResult(interp, value);
+        Tcl_AppendResult(interp, value, (char *) NULL);
     }
 
     return TCL_OK;
