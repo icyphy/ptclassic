@@ -43,7 +43,7 @@ public:
 	NodeListIter(const NodeList& n) : ListIter(n) {}
 	Geodesic* next() { return (Geodesic*) ListIter::next();}
 	Geodesic* operator++() { return next();}
-	ListIter::reset();
+	ListIter::reset;
 };
 
 class InterpGalaxy: public Galaxy {
