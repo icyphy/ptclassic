@@ -467,12 +467,15 @@ int Linker::multiLink (int argc, char** argv) {
 	// The sgi uses sgidlopen() which does not need the
 	// RTLD_GLOBAL flag.
 	  
+	dynLinkFlag = TRUE;
 	if ( (dlhandle = DLOPEN(objName, DLOPEN_FLAGS)) == NULL) {
+	  dynLinkFlag = FALSE;
 	  StringList msg = "Error linking file";
 	  msg << objName << " dlopen: " << dlerror();
 	  Error::abortRun(msg);
 	  return FALSE;
 	}
+	dynLinkFlag = FALSE;
 
 // flag for permanent-link or not
 	int perm = (argv[0][0] == 'p');	// KLUDGE!
