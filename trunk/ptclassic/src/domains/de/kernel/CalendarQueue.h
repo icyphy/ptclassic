@@ -36,15 +36,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DataStruct.h"
 
-/**************************************************************************
 
- Modifier : Soonhoi Ha
+#define MAX_BUCKET     1024*4
+#define QUEUE_SIZE     (MAX_BUCKET*3)/2
+#define HALF_MAX_DAYS  1024*2  
+#define MINI_CQ_INTERVAL  0.2
 
-Modification - To implement a priority-queue, I add another basic
-container which includes *before* pointer as well as *next*, and *level*
-field for its priority.
 
-**************************************************************************/
+
 
 //
 // The basic container for priority queue...
@@ -85,17 +84,6 @@ public:
 	// (i.e., highest level is at the tail)
 	LevelLink* levelput(Pointer a, double v, double fv = 1.0);
 
-	// Add element to the head of the queue and sort it by its level (v)
-	// first and its fineLevel (fv) second.
-	// Numerically smaller number represents the higher priority.
-	// (i.e., highest level is at the head)
-	LevelLink* leveltup(Pointer a, double v, double fv = 1.0);
-
-	// append the link to the end of the queue (ignore levels).
-	// Value v is necessary to fill a link (the fineLevel of the link is
-	// set to 1.0 -- default value).
-	void put(Pointer a, double v = 0);
-
 	// Push back the link just gotten.
 	void pushBack(LevelLink*);
 
@@ -106,14 +94,6 @@ public:
 	// WARNING -- Must call putFreeLink() after finishing with it.
 	// Use getFirstElem() to get and free in one step.
 	LevelLink* get();
-
-	// Remove and return link from the tail of the queue...
-	Pointer getLastElem();
-
-	// Remove and return link from the tail of the queue...
-	// WARNING -- Must call putFreeLink() after finishing with it.
-	// Use getLastElem() to get and free in one step.
-	LevelLink* teg();
 
 	// Return the next node on list, relative to the last reference
 	LevelLink* next();
@@ -137,15 +117,27 @@ public:
 	// put the link into the pool of free links.
 	virtual void 	   putFreeLink(LevelLink*);
 
+// FIXME
 	// Constructor
-	CalendarQueue() : freeLinkHead(0), numberNodes(0), 
-			  lastNode(0), numFreeLinks(0) {}
-	CalendarQueue(Pointer a, double v, double fv) ;
+	CalendarQueue() : freeLinkHead(0), numberNodes(0), numFreeLinks(0), 
+			  cq_resizeEnabled(1) 
+        { LocalInit(0, 2, 1.0, 0.0); }
 	virtual ~CalendarQueue();
 
 protected:
-	// Store head of the queue, lastNode->next is head of queue
-	LevelLink* lastNode;
+	LevelLink **cq_bucket;
+
+	int cq_resizeEnabled;  
+	int cq_lastBucket;      /* bucket number last event was dequeued */
+	double cq_bucketTop;    /* priority at the top of that bucket    */
+	double cq_lastTime;     /* priority of last dequeued event       */
+
+	int cq_bottomThreshold, cq_topThreshold;  
+	int cq_bucketNum;       /* number of buckets                     */
+	int cq_eventNum;               /* number of events in calendar queue    */
+	double cq_interval;        /* size of intervals of each bucket      */
+	int cq_firstSub;
+	LevelLink* CalendarQ[QUEUE_SIZE];
 
 	// Store last access to the list for sequential access
 	LevelLink* lastReference;
@@ -154,6 +146,12 @@ protected:
 	// store the freeLinks once created.
 	LevelLink* getFreeLink();
 	virtual void 	   clearFreeList();
+
+	void LocalInit(int qbase, int nbuck, double startInterval, double lastTime);
+	void InsertEventInBucket(LevelLink **bucket, LevelLink *event);
+	LevelLink* NextEvent();
+	void Resize(int newSize);
+	double NewInterval();
 
 private:
 	int numberNodes;
