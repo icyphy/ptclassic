@@ -542,9 +542,10 @@ class ::tycho::LabeledGrid {
     method group   {id args}
     method hskip   {{group {}} args}
     method names   {{group {}}}
+    method reset   {group row column}
     method type    {id}
     method vskip   {{group {}} args}
-    
+
     proc newtype {type args} {}   ;# add a new type
     
     ###################################################################
@@ -867,6 +868,7 @@ body ::tycho::LabeledGrid::assign {id args} {
 # deletion is not supported for its type.
 #
 body ::tycho::LabeledGrid::delete {id} {
+    puts "delete $id"
     if ![::info exists _type($id)] {
 	error "Unknown id: \"$id\""
     }
@@ -875,7 +877,7 @@ body ::tycho::LabeledGrid::delete {id} {
 	    delete $t
 	}
     }
-    _do delete $id
+    ####_do delete $id
     
     catch {destroy $itk_component($id)}
     catch {destroy $itk_component(${id}label)}
@@ -900,10 +902,12 @@ body ::tycho::LabeledGrid::delete {id} {
         unset _curcol($id)
         unset _childspan($id)
     }
-    unset _columnspan($id)
-    unset _rowspan($id)
+    ####unset _columnspan($id)
+    ####unset _rowspan($id)
     
-    if [regexp {^((([^\.]+).)*)[^\.]+$} $id _ _ par] {
+    unset _type($id)
+
+    if [regexp {^((.*)\.)?[^\.]+$} $id _ _ par] {
         set t [lsearch -exact $_children($par) $id]
         set _children($par) [lreplace $_children($par) $t $t]
     }
@@ -1090,6 +1094,18 @@ body ::tycho::LabeledGrid::names {{group {}}} {
 	lappend result [lindex [split $c .] end]
     }
     return $result
+}
+
+#########################################################################
+## reset group row column
+#
+# Reset the grid counters in the given group. To reset the top-level
+# counters, supply the group "". This method must be used with
+# caution.
+#
+body ::tycho::LabeledGrid::reset {group row column} {
+    set _currow($group) $row
+    set _curcol($group) $column
 }
 
 #########################################################################
