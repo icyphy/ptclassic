@@ -49,7 +49,7 @@ connectControl (char *galaxyname, char *starname,
   char command[200];
 
   /* Register the callback function with Tcl */
-  sprintf(callbackname, "::tycho::ptolemy.%s.%s.%s",
+  sprintf(callbackname, "::tycho::%s.%s.%s",
 	  galaxyname, starname, ctrlname);
   Tcl_CreateCommand (interpreter, callbackname, callback,
 		     (ClientData) 0, (void (*)()) NULL);
@@ -58,9 +58,7 @@ connectControl (char *galaxyname, char *starname,
   sprintf(command,
 	  "::tycho::ControlPanel::starConnect %s %s %s %s",
 	  galaxyname, starname, ctrlname, callbackname);
-  if(Tcl_Eval(interpreter, command) != TCL_OK) {
-    printf("Cannot connect control %s.%s\n", starname, ctrlname);
-  }
+  Tcl_Eval(interpreter, command);
 }
 
 /*
