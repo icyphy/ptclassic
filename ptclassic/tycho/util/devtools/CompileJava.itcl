@@ -116,10 +116,10 @@ body ::tycho::CompileJava::constructor {args} {
 #### destructor
 #
 body ::tycho::CompileJava::destructor {} {
-    if {$compileWidget != {} && \
-            [info object ::tycho::$compileWidget] != {}} {
-        $compileWidget markUnmodified
-        catch {delete object $compileWidget}
+    if {$monitorWidget != {} && \
+            [info object ::tycho::$monitorWidget] != {}} {
+        $monitorWidget markUnmodified
+        catch {delete object $monitorWidget}
     }
     if {$appletviewerWidget != {} && \
             [info object ::tycho::$appletviewerWidget] != {}} {
@@ -161,17 +161,14 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         set runAppletViewer 1
     }
 
-    # Compile.  If we already have a compileWidget, reuse it. 
-    if {![winfo exists $compileWidget] && \
-            [info object $compileWidget] == {}} {
-        #set compileWidget [$this cget -view].compile
-        #::tycho::Monitor $compileWidget
-        #set retList [::tycho::execModal $compileString $dirname $compileWidget]
+    # Compile.  If we already have a monitorWidget, reuse it. 
+    if {![winfo exists $monitorWidget] && \
+            [info object $monitorWidget] == {}} {
         set retList [::tycho::execModal $compileString $dirname]
     } else {
-        set retList [::tycho::execModal {} {} $compileWidget]
+        set retList [::tycho::execModal {} {} $monitorWidget]
     }
-    set compileWidget [lindex $retList 1]
+    set monitorWidget [lindex $retList 1]
 
     # If necessary, run the appletviewer.
     # If there is already an appletviewer widget, reuse it.
