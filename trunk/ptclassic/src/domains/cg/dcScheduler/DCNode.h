@@ -91,12 +91,8 @@ public:
         // The highest-level cluster the node currently belongs to
         DCCluster *cluster;
 
-	// get and set the temporary processor id.
-	void assignProc(int n) { tempProcId = n; }
-	int whichProc(){ return tempProcId; }
-
-	// Saves tempProcId into procId.
-	void saveInfo() { procId = tempProcId; bestStart = scheduledTime; 
+	// Saves times.
+	void saveInfo() { bestStart = scheduledTime; 
 			  bestFinish = finishTime; }
 
 	// get the bestStart and bestFinish
