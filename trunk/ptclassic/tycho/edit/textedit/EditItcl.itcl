@@ -234,7 +234,9 @@ body ::tycho::EditItcl::fileTemplate {} {
 
     # The location of the template file.  Non-UCB users might want
     # to edit this file for their own use.
-    set filename $TYCHO/doc/coding/template.itcl
+    # FIXME: The directory that contains the templates should be
+    # a textedit preference.
+    set filename $TYCHO/editors/textedit/templates/ItclTemplate.html
 
     # Save the className before we insert the template, or getClassName
     # will return the class name in the template, which is incorrect.
