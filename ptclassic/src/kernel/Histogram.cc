@@ -19,6 +19,9 @@ $Id$
 #include <minmax.h>
 #include "miscFuncs.h"
 
+// resize causes the intVec to grow or shrink.  The data are reallocated
+// and copied.
+
 void intVec::resize(int newSize) {
 	if (newSize == xsize) return;
 	int* oldData = data;
@@ -28,13 +31,15 @@ void intVec::resize(int newSize) {
 		data[i] = oldData[i];
 	for (i = ncopy; i < newSize; i++)
 		data[i] = 0;
-	LOG_DEL; delete oldData;
+	LOG_DEL; delete [] oldData;
 	xsize = newSize;
 }
 
 const int growStep = 16;
 
 // increment a bin in the intVec, growing the vector as needed.
+// we grow a bit extra because we expect larger samples later on.
+
 inline static void incBin(intVec& v, int bin) {
 	if (v.capacity() <= bin) v.resize(bin+growStep);
 	v.elem(bin) += 1;
@@ -49,14 +54,24 @@ void Histogram::addCount(int bin) {
 	if (bin > maxBin) maxBin = bin;
 }
 
-void Histogram::add(double x) {
-	int absbin = round (x / binWidth);
-	if (nSamples == 0) {
-		centerRef = absbin;
-		incBin(zpos,0);
-		nSamples = 1;
+// convert value to equivalent histogram bin.
+// limit the number of bins generated so there are never more than
+// maxNoBins bins.
+int Histogram::valueToBin(double x) const {
+	if (nSamples == 0) return 0;
+	else {
+		int v = round(x / binWidth) - centerRef;
+		int loLimit = maxBin - maxNoBins + 1;
+		if (v < loLimit) return loLimit;
+		int hiLimit = maxNoBins - minBin - 1;
+		if (v >= hiLimit) return hiLimit;
+		return v;
 	}
-	else addCount(absbin - centerRef);
+}
+
+void Histogram::add(double x) {
+	if (nSamples == 0) centerRef = round(x / binWidth);
+	addCount(valueToBin(x));
 	sum += x;
 	sumsq += x*x;
 }
@@ -77,13 +92,14 @@ XHistogram :: XHistogram () {
 }
 
 void XHistogram :: initialize(Block* parent, double binW, const char* options,
-			      const char* title, const char* saveFile) {
+			      const char* title, const char* saveFile,
+			      int maxBins) {
 	char buf[100];
 	sprintf (buf, "-bar -nl -brw %g %s", binW/2, options);
 	optstring = savestring(buf);
 	display->initialize(parent, 1, optstring, title, saveFile);
 	LOG_DEL; delete hist;
-	LOG_NEW; hist = new Histogram(binW);
+	LOG_NEW; hist = new Histogram(binW,maxBins);
 }
 
 void XHistogram :: addPoint(float y) {
