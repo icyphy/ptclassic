@@ -121,7 +121,7 @@ Pointer DoubleLinkList :: takeFromFront() {
 	DoubleLink* tmp = getHeadLink();
 	if (!tmp) return 0;
 	Pointer t = tmp->e;
-	INC_LOG_DEL; delete tmp;
+	LOG_DEL; delete tmp;
 	return t; 
 }
 
@@ -129,7 +129,7 @@ Pointer DoubleLinkList :: takeFromBack() {
 	DoubleLink* tmp = getTailLink();
 	if (!tmp) return 0;
 	Pointer t = tmp->e;
-	INC_LOG_DEL; delete tmp;
+	LOG_DEL; delete tmp;
 	return t; 
 }
 

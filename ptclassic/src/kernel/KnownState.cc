@@ -127,8 +127,8 @@ public:
 	// the destructor otherwise.
 	KnownStateOwner () {}
 	~KnownStateOwner () {
-		delete KnownState::allStates;
-		delete KnownState::allGlobals;
+		LOG_DEL; delete KnownState::allStates;
+		LOG_DEL; delete KnownState::allGlobals;
 	}
 };
 
