@@ -114,6 +114,9 @@ class ::tycho::MenuSupport {
     # Insert a separator before the specified entry
     method insertSeparator {before}
 
+    # Invoke the action for the menu entry
+    method invoke {inMenu name} {}
+
     # Return the menu in which an entry is contained
     method menuname {name}
 
@@ -436,6 +439,19 @@ body ::tycho::MenuSupport::insertSeparator {before} {
     }
 
     $entrypath($before) insert $before separator
+}
+
+#####################################################################
+#### invoke
+# Invoke the action for the menu entry.
+#
+body ::tycho::MenuSupport::invoke {inMenu name} {
+    # Check if the menu exists
+    if { ! [::info exists menupath($inMenu)] } {
+	error "Menu $inMenu does not exist"
+    }
+
+    eval $menupath($inMenu) invoke $name
 }
 
 #####################################################################
