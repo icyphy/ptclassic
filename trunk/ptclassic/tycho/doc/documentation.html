@@ -67,6 +67,14 @@ appears as follows in a document:
 Double clicking on this script will execute it if you are
 viewing the document under Tycho.
 <p>
+In addition, Tycho expands hypertext references that begin with
+a dollar sign ($).  The characters up to the first slash (or up to then
+end if there are no slashes) are taken to be the name of an environment
+variable or a Tcl global variable.  The value of the variable is
+substituted.  Also, on Unix systems, filenames beginning with a tilde
+(~) specify files relative to a user's home directory, in the usual
+Unix fashion.
+<p>
 <a name="indexing documents">
 <h2>Indexing Documents</h2>
 </a>
