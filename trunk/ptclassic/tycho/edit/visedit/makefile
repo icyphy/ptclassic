@@ -51,6 +51,7 @@ ITCL_SRCS = \
 	GanttView.itcl \
 	GanttDF.itcl \
 	Graphics.itcl \
+	ItclClassDiagram.itcl \
 	ProfileTcl.itcl \
 	SlateView.itcl 
 
