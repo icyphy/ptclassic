@@ -34,6 +34,7 @@ This is a local include file for useful macros and definitions.
 */
 
 #include "ansi.h"
+#include "compat.h"
 #ifdef HAS_STDARG
 #include <stddef.h>
 #define RAW_PTR void *
@@ -51,7 +52,7 @@ This is a local include file for useful macros and definitions.
 #define EOS '\0' /* end of string */
 
 /* Sun CC (SC1.0) defines __cplusplus */
-#if !defined(__cplusplus)
+#if !defined(__cplusplus) && !defined(PTAIX_XLC)
 extern RAW_PTR calloc ARGS((size_t,size_t));
 extern RAW_PTR malloc ARGS((size_t));
 #endif /* __cplusplus */
@@ -59,7 +60,7 @@ extern RAW_PTR malloc ARGS((size_t));
 
 #include <sys/param.h>
 
-#ifdef hpux
+#ifdef PTHPPA
 extern char *getcwd ARGS((char *,size_t));
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else
