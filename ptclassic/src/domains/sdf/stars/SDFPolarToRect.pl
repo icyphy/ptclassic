@@ -2,7 +2,7 @@ defstar {
 	name { PolarToRect }
 	domain { SDF }
 	desc { Convert magnitude and phase to rectangular form. }
-	version {$Id$}
+	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	explanation {
 .Id "polar to rectangular conversion"
-.Id "format conversion, polar to recangular"
+.Id "format conversion, polar to rectangular"
 .Ir "magnitude"
 .Ir "phase"
 .Ir "Cartesian coordinates"
