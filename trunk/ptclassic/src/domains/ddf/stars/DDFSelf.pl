@@ -9,7 +9,7 @@ expect it to be either efficient or bug-free.
 The star "represents" the galaxy given by the parameter "recurGal",
 which must be above it in the hierarchy.  That is, when the Self
 star fires, it actually invokes the galaxy that it represents.
-Since that galaxy is above the Self star in the hiearchy, it
+Since that galaxy is above the Self star in the hierarchy, it
 contains the Self star somewhere within it.  Thus, this star
 implements recursion.  Since the Self star takes an argument
 ("recurGal") that specifies the function to invoke, it is itself
