@@ -207,7 +207,7 @@ Particle& ComplexParticle :: operator = (const Particle& p)
 
 int ComplexParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
-	return data == Complex(p);
+	return data == (Complex)p;
 }
 
 DataType ComplexParticle :: type() const {return COMPLEX;}
