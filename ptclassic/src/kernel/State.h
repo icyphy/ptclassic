@@ -63,9 +63,14 @@ extern int errno;
 #ifdef PT_SYS_NERR_STDLIB
 #include <stdlib.h>
 #else /* PT_SYS_NERR_STDLIB */
+#if defined (__GLIBC__) && (__GLIBC__ >= 2)
+#include <errno.h>
+#include <stdio.h>
+#else
 extern int sys_nerr;
 extern char *sys_errlist[];
 extern int errno;
+#endif /* __GLIBC__ */
 #endif /* PT_SYS_NERR_STDLIB */
 #endif /* freebsd */
 #endif /* netbsd_i386 */
