@@ -27,8 +27,11 @@ vem*menu*item*background: #eeeee0
 vem*button*foreground: IndianRed
 vem*title*foreground: black
 #else
-*Background:    white
-*Foreground:    black
+vem.background.color: white
+vem*menu*background: black
+vem*menu*item*background: white
+*Background: white
+*Foreground: black
 #endif
 
 ! Ptolemy resources for xterm windows
