@@ -63,11 +63,10 @@ defstar{
     } 
     destructor  {          
         while(list_h) {  
-            mob_count=mobile=interferer=list_h;
+            interferer=list_h;
             list_h=list_h->next;
-            delete mob_count;
-            delete mobile;
             delete interferer;
+ 	    interferer = 0;
         }
     }
     begin { 
@@ -78,11 +77,10 @@ defstar{
     }
     wrapup {
         while(list_h) {  
-            mob_count= mobile= interferer= list_h;
+            interferer= list_h;
             list_h= list_h->next;
-            delete mob_count;
-            delete mobile;
             delete interferer;
+            interferer = 0;
         }
     }
     method {
