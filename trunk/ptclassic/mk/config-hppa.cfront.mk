@@ -159,6 +159,9 @@ SYSLIBS =	$(LIBGCC_SPEC) -lm -L/opt/dce/lib/libcma.a -lcma /opt/langtools/lib/en
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
 
+# ptlang uses this library to find alloca()
+PTLANGLIB= -lPW
+
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
 #      +A   Cause the linker ld(1) to use only archive libraries for all
