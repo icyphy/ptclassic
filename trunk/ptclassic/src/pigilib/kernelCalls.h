@@ -32,7 +32,7 @@ $Id$
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.  See octtools/include/port.h
  */
-#include "compat.h"
+#include "sol2compat.h"
 
 #ifdef __cplusplus
 

@@ -31,7 +31,7 @@ Header file for util.c
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
  */
-#include "compat.h"
+#include "sol2compat.h"
 
 #define UToolName "ptolemy"
     /* name of the tool that this RPC application is for */
