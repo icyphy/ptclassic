@@ -32,7 +32,9 @@ PL_SRCS= \
  CGSink.pl \
  CGVarTime.pl \
  CGSend.pl \
- CGReceive.pl 
+ CGReceive.pl \
+ CGSpread.pl \
+ CGCollect.pl 
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
