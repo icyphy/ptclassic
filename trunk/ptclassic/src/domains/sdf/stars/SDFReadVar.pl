@@ -1,6 +1,14 @@
 defstar {
   name { ReadVar }
   domain { SDF }
+  version { $Id$ }
+  author { Stefan De Troch (IMEC) }
+  copyright{ 
+Copyright (c) 1994 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+}
   derivedfrom {SDFSharedMem}
   desc {}
   output
