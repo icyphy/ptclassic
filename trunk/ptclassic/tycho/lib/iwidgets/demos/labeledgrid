@@ -43,154 +43,172 @@ raise .
 # This is the proc that create the queries when panels are opened.
 
 proc createQuery {win tag} {
+    # So we can play the widgets later
+    global a b c d e
     switch -exact $tag {
         "simple" {
-            $win add labeledgrid simple.q -columnspan 4 -childspan 3 -labelcolor blue
-            set q [$win component simple.q]
+            $win add labeledgrid simple.q -labelforeground blue
+            set a [$win component simple.q]
 
-            $q add entry foo -label "An entry" -initial "Some text"
-            $q add entry oof -label "Another entry" -initial "Some more text"
+            $a add entry foo -label "An entry" -initial "Some text"
+            $a add entry oof -label "Another entry" -initial "Some more text"
 
-            $q add checkbutton baz -label "A checkbutton" \
-                    -onvalue On -offvalue Off \
-                    -initial On -text "Check me!"
+	    $a vskip -minsize 4
+	    $a add text t -label "A text widget" \
+		    -initial "This\nis\na\nsmall\ntext\nwidget\n" \
+		    -height 60
+	    $a vskip -minsize 4
 
-            $q group gee -label "Groupies" -rowspan 4 -initial foo \
+            $a add optionmenu option -label "An option menu" \
+		    -items {Unix VMS Linux OS/2 {Windows NT} DOS} \
+		    -initial DOS
+
+            $a add checkbutton baz -label "A checkbutton" \
+                    -initial 1 -text "Check me!"
+
+            $a group gee -label "Groupies" -rowspan 4 -initial foo \
                     -rowspan 2
-            $q add radiobutton gee.a -text Foo -value foo
-            $q add radiobutton gee.b -text Bar -value bar
-            $q add radiobutton gee.c -text Baz -value baz
-            $q add radiobutton gee.d -text Goo -value goo
-            $q add radiobutton gee.e -text Boo -value boo
-            $q add radiobutton gee.f -text "A longer name" -value loo
+            $a add radiobutton gee.a -text Foo -value foo
+            $a add radiobutton gee.b -text Bar -value bar
+            $a add radiobutton gee.c -text Baz -value baz
+            $a add radiobutton gee.d -text Goo -value goo
+            $a add radiobutton gee.e -text Boo -value boo
+            $a add radiobutton gee.f -text "A longer name" -value loo
         }
         "double" {
-            $win add labeledgrid double.q -columnspan 8 -childspan 3 -labelcolor blue
-            set q [$win component double.q]
+            $win add labeledgrid double.q -columnspan 8 -childcolumnspan 4 \
+		    -labelforeground blue
+            set b [$win component double.q]
 
-            $q add entry foo -label "An entry" -initial "Some text"
-            $q add entry oof -label "Another entry" -initial "Some more text"
-            $q add entry bar -label "And so on..."
-            $q add entry rab -label "And so on"
+            $b add entry foo -label "An entry" -initial "Some text"
+            $b add entry oof -label "Another entry" -initial "Some more text"
+            $b add entry bar -label "And so on..."
+            $b add entry rab -label "And so on"
 
-  	    $q group gee -label "Groupies" -rowspan 2 -initial foo 
-            $q add radiobutton gee.a -text Foo -value foo
-            $q add radiobutton gee.b -text Bar -value bar
-            $q add radiobutton gee.c -text Baz -value baz
-            $q add radiobutton gee.d -text Goo -value goo
-            $q add radiobutton gee.e -text Boo -value boo
-            $q add radiobutton gee.f -text "A longer name" -value loo
+  	    $b group gee -label "Groupies" -rowspan 2 -initial foo 
+            $b add radiobutton gee.a -text Foo -value foo
+            $b add radiobutton gee.b -text Bar -value bar
+            $b add radiobutton gee.c -text Baz -value baz
+            $b add radiobutton gee.d -text Goo -value goo
+            $b add radiobutton gee.e -text Boo -value boo
+            $b add radiobutton gee.f -text "A longer name" -value loo
 
-            $q group checkies -label Checkies -rowspan 2 -columnspan 1
-            $q add checkbutton checkies.a -label "A checkbutton" \
+            $b group checkies -label Checkies -rowspan 2 -columnspan 1
+            $b add checkbutton checkies.a -label "A checkbutton" \
                     -initial 1 -text "Check me!"
-            $q add checkbutton checkies.b -label "Another" \
+            $b add checkbutton checkies.b -label "Another" \
                     -text "Me too!"
         }
         "mixed" {
             # Layout from page 164 of Mullet and Sano
-            $win add labeledgrid mixed.q -columnspan 4 -childspan 1 -labelcolor blue
-	    set q [$win component mixed.q]
+            $win add labeledgrid mixed.q -columnspan 4 -childcolumnspan 2 \
+		    -labelforeground blue
+	    set c [$win component mixed.q]
 
-            $q add entry name -label "Name:" -columnspan 3
-            $q add entry street -label "Street:" -columnspan 3
-            $q add entry city -label "City/State:" -columnspan 2
-            $q add entry state -style plain
-            $q add entry zip -label "ZIP:"
-            $q vskip
-            $q add entry phone -label "Phone/FAX:"
-            $q add entry fax -style plain
-            $q vskip
-            $q add entry email -label "E-mail:" -columnspan 2
-            $q vskip
-            $q vskip -minsize 12
+            $c add entry name -label "Name:" -columnspan 4
+            $c add entry street -label "Street:" -columnspan 4
+            $c add entry city -label "City/State:" -columnspan 3
+            $c add entry state -style plain -columnspan 1
+            $c add entry zip -label "ZIP:"
+            $c vskip
+            $c add entry phone -label "Phone/FAX:"
+            $c add entry fax -style plain -columnspan 1
+            $c vskip
+            $c add entry email -label "E-mail:" -columnspan 3
+            $c vskip
+            $c vskip -minsize 12
 
-            $q group interests -label "Interests:" -columnspan 3
-            $q add checkbutton interests.compilers -text "Compilers"
-            $q add checkbutton interests.databases -text "Databases" \
+            $c group interests -label "Interests:" -columnspan 4
+            $c add checkbutton interests.compilers -text "Compilers"
+            $c add checkbutton interests.databases -text "Databases" \
                     -initial 1
-            $q add checkbutton interests.productivity -text "Productivity"
-            $q add checkbutton interests.prototyping -text "Prototyping"
-            $q add checkbutton interests.teamware -text "Teamware" \
+            $c add checkbutton interests.productivity -text "Productivity"
+            $c add checkbutton interests.prototyping -text "Prototyping"
+            $c add checkbutton interests.teamware -text "Teamware" \
                     -initial 1
-            $q add checkbutton interests.networking -text "Networking"
+            $c add checkbutton interests.networking -text "Networking"
         }
         "boxed" {
-            $win add labeledgrid boxed.q -columnspan 8 -childspan 3 \
-                    -childstyle boxed -labelcolor blue
-            set q [$win component boxed.q]
+            $win add labeledgrid boxed.q -columnspan 8 -childcolumnspan 5 \
+                    -childstyle boxed -labelforeground blue
+            set d [$win component boxed.q]
 
-            $q group entries -label "Enter here" -rowspan 2 -colspan 2 \
-                    -childspan 2 -childstyle simple
+            $d group entries -label "Enter here" -rowspan 4 \
+                    -childcolumnspan 3 -childstyle simple
 
-            $q add entry entries.foo -label "An entry" \
+            $d add entry entries.foo -label "An entry" \
                     -initial "Some text"
-            $q add entry entries.oof -label "Another entry" \
+            $d add entry entries.oof -label "Another entry" \
                     -initial "Some more text"
 
-            $q group checks -label "Check here" -rowspan 2 -columnspan 1
-            $q add checkbutton checks.a -label "A checkbutton" \
+            $d group checks -label "Check here" -rowspan 4 -columnspan 3
+            $d add checkbutton checks.a -label "A checkbutton" \
                     -onvalue On -offvalue Off \
                     -initial On -text "Check me!"
-            $q add checkbutton checks.b -label "Another" \
+            $d add checkbutton checks.b -label "Another" \
                     -onvalue On -offvalue Off \
                     -initial On -text "Check me too!"
 
-            $q group gee -label "Group here" \
-                    -rowspan 2 -childspan 3 -childstyle simple
+            $d group gee -label "Group here" \
+                    -rowspan 4 -childcolumnspan 3 -childstyle simple
 
-            $q group gee.a -label "Choose one" -initial foo
-            $q add radiobutton gee.a.a -text Foo -value foo
-            $q add radiobutton gee.a.b -text Bar -value bar
+            $d group gee.a -label "Choose one" -initial foo
+            $d add radiobutton gee.a.a -text Foo -value foo
+            $d add radiobutton gee.a.b -text Bar -value bar
 
-            $q group gee.b -label "Choose another" -initial goo
-            $q add radiobutton gee.b.a -text Goo -value goo
-            $q add radiobutton gee.b.b -text Boo -value boo
+            $d group gee.b -label "Choose another" -initial goo
+            $d add radiobutton gee.b.a -text Goo -value goo
+            $d add radiobutton gee.b.b -text Boo -value boo
 
-            $q group radio -label "Radio here" -rowspan 2 -columnspan 1 \
-                    -initial A
-            $q add radiobutton radio.a -value M -text "Mars calling"
-            $q add radiobutton radio.b -value E -text "Earth calling"
+            $d group radio -label "Radio here" -rowspan 4 -columnspan 3 \
+                    -initial M
+            $d add radiobutton radio.a -value M -text "Mars calling"
+            $d add radiobutton radio.b -value E -text "Earth calling"
         }
        "separated" {
             $win add labeledgrid separated.q  -columnspan 3 \
-                    -childstyle separated -childspan 3 -labelcolor blue
-            set q [$win component separated.q]
+                    -childstyle separated \
+		    -labelforeground blue \
+		    -labelanchor w
+            set e [$win component separated.q]
 
-            $q group entries -label "Enter here" -rowspan 2 \
-                    -childspan 3 -childstyle simple
+	   $e group entries -label "Enter here" -rowspan 2 \
+                    -childcolumnspan 3 -childstyle simple
 
-            $q add entry entries.foo -label "An entry" \
+            $e add entry entries.foo -label "An entry" \
                     -initial "Some text"
-            $q add entry entries.oof -label "Another entry" \
+            $e add entry entries.oof -label "Another entry" \
                     -initial "Some more text"
 
-            $q group checks -label "Check here" -rowspan 2
-            $q add checkbutton checks.a -text "Check me!"
-            $q vskip
-            $q add checkbutton checks.b -text "Me too!"
+            $e group checks -label "Check here" -rowspan 2
+            $e add checkbutton checks.a -text "Check me!"
+            $e vskip checks
+            $e add checkbutton checks.b -text "Me too!"
             
-            $q vskip
- 	    $q group gee -label "Group here" -rowspan 4 -initial foo \
+            $e vskip
+ 	    $e group gee -label "Group here" -rowspan 4 -initial foo \
                     -rowspan 2
-            $q add radiobutton gee.a -text Foo -value foo
-            $q add radiobutton gee.b -text Bar -value bar
-            $q add radiobutton gee.c -text Baz -value baz
-            $q add radiobutton gee.d -text Goo -value goo
-            $q add radiobutton gee.e -text Boo -value boo
-            $q add radiobutton gee.f -text "A longer name" -value loo
-        }
+            $e add radiobutton gee.a -text Foo -value foo
+            $e add radiobutton gee.b -text Bar -value bar
+            $e add radiobutton gee.c -text Baz -value baz
+            $e add radiobutton gee.d -text Goo -value goo
+            $e add radiobutton gee.e -text Boo -value boo
+            $e add radiobutton gee.f -text "A longer name" -value loo
+
+ 	    $e add text ranting -label "Write here" \
+		    -initial "This is a text widget."
+       }
     }
 }
 
 set junk {
     $win add labeledgrid boxed.q \
-	    -columnspan 8 -childspan 3 \
-            -childstyle boxed -labelcolor blue {
+	    -columnspan 8 -childcolumnspan 3 \
+            -childstyle boxed -labelforeground blue {
 	
 	group entries -label "Enter here" \
 		-rowspan 2 -colspan 2 \
-                -childspan 2 -childstyle simple {
+                -childcolumnspan 2 -childstyle simple {
 	    
 	    add entry foo -label "An entry" -initial "Some text"
 	    add entry oof -label "Another entry" -initial "Some more text"
@@ -200,7 +218,7 @@ set junk {
 	add checkbutton b -label "Another" -initial 1 -text "Check me too!"
     }
     group gee -label "Group here" \
-	    -rowspan 2 -childspan 3 -childstyle simple {
+	    -rowspan 2 -childcolumnspan 3 -childstyle simple {
 
 	group a -label "Choose one" -initial foo {
 	    add radiobutton a -text Foo -value foo
