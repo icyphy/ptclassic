@@ -156,8 +156,8 @@ int Wormhole :: checkReady() const {
 	return flag;
 }
 
-// set scheduler stop time
-void Wormhole :: setStopTime(float stamp) {
+// set scheduler stop time.  By default, argument is ignored.
+void Wormhole :: setStopTime(float) {
 	scheduler->resetStopTime(getStopTime());
 }
 
