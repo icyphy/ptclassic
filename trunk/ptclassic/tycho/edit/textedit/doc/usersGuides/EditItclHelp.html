@@ -15,7 +15,7 @@ Itcl is an object-oriented extension to the Tcl language
 that was developed by Michael McLennan of AT&T Bell Labs.
 (Itk is the associated extension to Tk).
 The <a name="EditItcl class">EditItcl class</a> is derived from the
-<a href=EditTclHelp.html>EditTcl class</a>, and
+<a href="EditTclHelp.html">EditTcl class</a>, and
 therefore inherits all of its features.
 It colors certain Itcl constructs, such as comments
 and class and method definitions.
@@ -53,6 +53,32 @@ from the syntax of the file what classes are actually being defined
 (it depends on what namespace the file is evaluated in).
 If the class name is not fully specified, we assume it is defined
 in the global namespace only.
+<p>
+
+The <A NAME="Itcl Editor Method Template">"Method Template" command</A> in
+the "Special" menu places a method template at the current point in the buffer.
+<P>
+
+The <A NAME="Itcl Editor File Template">"File Template" command</A> in
+the "Special" menu copies the file <A
+HREF="../../../../doc/coding/template.itcl"><CODE>$TYCHO/doc/coding/template.itcl</CODE></A>
+into the editor and substitutes in a class name based on the file
+name.  For example, if the file is named <CODE>Elvis.itcl</CODE>, then
+the class name <CODE>Elvis</CODE> will be substituted in.
+ <P>
+
+The <A NAME="Itcl Editor Generate HTML">"Generate HTML" command</A> in
+the "Special" menu saves the contents of the editor if necessary and
+then runs the <A
+HREF="../../../../lib/tydoc/doc/introduction.html">Tydoc</A> itcl to
+HTML converter on the file and displays the results.  Tydoc produces a
+HTML file at
+<CODE>doc/codeDoc/</CODE><I>clasName</I><CODE>.html</CODE>.  The
+<CODE>index.html</CODE> file in <CODE>doc/codeDoc</CODE> is not
+updated by "Generate HTML", since we are only passing one file to the
+Tydoc system.  To update <CODE>index.html</CODE>, usually one runs
+<CODE>make itcldocs</CODE>.
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
