@@ -1,4 +1,4 @@
-# A Resource for sending out mail using mail daemon on port 25
+# A Resource for receiving on FTP daemon on default port 21
 # 
 # @Author: Kevin Chang
 #
@@ -31,9 +31,9 @@
 #######################################################################
 
 #######################################################################
-#### ResourceMail
+#### ResourceFTP
 #
-class ::tycho::ResourceMail {
+class ::tycho::ResourceFTP {
     inherit ::tycho::Resource
 
     constructor {args} {}
@@ -42,50 +42,66 @@ class ::tycho::ResourceMail {
     #####################################################################
     ####                          options                            ####
 
-    # Command to execute on each line received. It need not invoke
-    # any kind of updates to keep the user interface "live", but
-    # it doesn't matter if it does.
-    public variable notifycommand ""
-
     ###################################################################
     ####                         public methods                    ####
 
-    # Close the resource. Calls mailinitiate to send out the message.
+    # Close the resource. Calls ftpinitiate to send out the message.
     method close {}
+
+    # Return the eof of file status
+    method eof {}
 
     # Read a string from a streamable resource
     method gets {{varName {}}}
     
-    # Get the progress of sending mail
-    method getprogress {} {return $progress}
-
     # Not open by default
     method isopen {} {return 0}
 
-    # if there's timeout on protocol, we can't connect to the mail server.
-    method mailtimeout {oldstate}
+    # if there's timeout on protocol, we can't connect to the ftp server.
+    method ftptimeout {oldstate}
 
     # Open the resource. Enable puts.
     method open {{path {}}}
+
+    # Get the progress of sending ftp
+    method progress {} {return $progress}
 
     # Write a string to a streamable resource.
     # Can't write into HTTP file! Read permission of off
     method puts {string}
 
-    # Return a string containing the data in a streamable resource 
-    method read {}
+    # Get a cached copy of the data
+    method cachefile {}
 
     ###################################################################
     ####                           public procs                    ####
 
+    # Change the permissions of a resource
+    proc chmod {permissions path}
+
+    # Return the content type of the current file
+    proc contenttype {path}
+
+    # Delete a resource
+    proc delete {path}
+
+    # Return a directory listing
+    proc dirlist {path}
+
     # See if the server or hostname exists
     proc exists {path}
+
+    # Create a new directory
+    proc mkdir {path}
 
     # Create a new resource object
     proc new {path args}
 
-    # Split up URL
-    proc splitURL {path}
+    # Get the status of a resource
+    proc stat {path varName}
+
+    # Return the type of a given file
+    proc type {path}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -93,15 +109,18 @@ class ::tycho::ResourceMail {
     # Puts a string to console of the debug option is set
     protected method debugputs {string}
 
-    # Initiate a connection on the mail server. Called by close.
-    protected method mailinitiate {{url {}}}
+    # Initiate a connection on the FTP server. Called by open.
+    public method ftpinitiate {{url {}}}
 
-    # File event handler for mail server. Called by mailinitiate.
-    protected method mailhandler {}
+    # Protocol handler for ftp server. Called by ftpinitiate. 
+    public method ftphandler {}
 
-    # File event handler for mail server. Called by mailinitiate.
-    protected method mailabort {message}
+    # Abort in the middle of ftphandler transaction.
+    public method ftpabort {message}
 
+    # DATA port to receive. This includes LIST and RETR
+    public method ftpreceiveinit {}
+    public method ftpreceive {}
 
     ###################################################################
     ####                        protected commons                  ####
@@ -109,34 +128,36 @@ class ::tycho::ResourceMail {
     ###################################################################
     ####                        protected variables                ####
 
-    # The progress, can be used with the statusbar
-    protected variable progress 0.0
-
     # The url this object is accessing
     protected variable currentURL {}
 
-    # The socket id used to open the mail port
-    protected variable socketid {}
+    # The progress, can be used with the statusbar
+    protected variable progress 0.0
 
-    # The state of transfer during the upload connection on port 25.
-    # The variable could be any of the following:
-    # <tt>DISCONNECTED, HELO, MAILFROM, RCPTTO, DATA1, DATA2 and QUIT.</tt>
-    #
-    # The names are derived from mail daemon (ESMTP Sendmail 8.8.5)
+    # The state of transfer 
     protected variable state {DISCONNECTED}
 
-    # The content of mail to be sent.
-    protected variable mailbuffer {}
+    # By all UNIX default (/etc/services), 21 is the port to open.
+    protected variable socketid {}
 
-    # Attribute of the recipient
-    protected variable username
-    protected variable hostname
-    protected variable port
+    # Attribute of the FTP server.
+    protected variable ftpserver {}
+    protected variable ftpport "21"
+    protected variable ftppath /
+    protected variable ftpfile {}
 
-    # FIXME: Attribute of the user. This is set inside the constructor,
-    # but should be moved to toplevel Tycho!
-    protected variable myname {}
-    protected variable myhost {}
+    # Transfer could be either file or directory (two distince FTP commands).
+    protected variable ftptype {directory}
+
+    # Attribute of myself (FTP client)
+    protected variable myusername {anonymous}
+    protected variable mypassword {tycho@}
+
+    # Attribute of the current connection (FTP client). Attributes
+    # are set after "fconfigure socketid -sockname", which returns:<br>
+    # <tt>n1.n2.n3.n4  client_name  unique_16_bit_client_socket</tt>
+    protected variable myport 0
+    protected variable myaddr 127.0.0.1
 
     ###################################################################
     ####                         private variables               ####
@@ -157,30 +178,15 @@ class ::tycho::ResourceMail {
 #
 # For each HTTP GET, an object is created and destroyed.
 #
-body ::tycho::ResourceMail::constructor {args} {
+body ::tycho::ResourceFTP::constructor {args} {
     eval configure $args
 
-    # FIXME: This is very system dependent!
-    # FIXME: Following is for UNIX
-    if [info exists env(USER)] {set myname $env(USER)}
-    if [info exists env(HOST)] {set myhost $env(HOST)}
-    catch {set myname [exec whoami]}
-    catch {set myhost [lindex [exec uname -a] 1]}
-
-    # FIXME: Following is for NT
-    if [info exists env(USERNAME)] {set myname $env(USERNAME)}
-    if [info exists env(USERDOMAIN)] {set myhost $env(USERDOMAIN)}
-
-    if {$myname=={} || $myhost=={}} {
-        error "Sorry, I cannot detect your username or hostname. \
-                Mail will not run on this platform."
-    }
 }
 
 #######################################################################
 #### destructor
 #
-body ::tycho::ResourceMail::destructor {} {
+body ::tycho::ResourceFTP::destructor {} {
     # If we're still loading, forget it
 }
 
@@ -190,24 +196,19 @@ body ::tycho::ResourceMail::destructor {} {
 
 #####################################################################
 #### close
-body ::tycho::ResourceMail::close {} {
+body ::tycho::ResourceFTP::close {} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open."
     }
 
-    # Initiate sending to the server
-    mailinitiate
-
-    # FIXME: This should return a status of sending mail!
-    # Do a tkwait on a global variable.
-    return 0
+    return 1
 }
 
 #####################################################################
 #### open
-# Open a connection for mail on port 25.
+# Open a connection for ftp on port 21.
 #
-body ::tycho::ResourceMail::open {{path {}}} {
+body ::tycho::ResourceFTP::open {{path {}}} {
     if {$path=={}} {
         set currentURL [path]
     }
@@ -216,19 +217,18 @@ body ::tycho::ResourceMail::open {{path {}}} {
 	error "File $url does not exist"
     }
 
-    if { $fileIsOpen} {error "File is already open!"}
+    if {$fileIsOpen} {error "File is already open!"}
 
     set fileIsOpen 1
-    set mailbuffer {}
     set progress 0.0
     return 1
 }
 
 #####################################################################
 #### puts
-body ::tycho::ResourceMail::puts {string} {
+body ::tycho::ResourceFTP::puts {string} {
     if {!$fileIsOpen} {error "File is not open."}
-    lappend mailbuffer $string
+    lappend ftpbuffer $string
 }
 
 #########################################################################
@@ -243,7 +243,7 @@ body ::tycho::ResourceMail::puts {string} {
 # Returns 0 if the server cannot be accessed or if the file
 # does not exist on the server.
 #
-body ::tycho::ResourceMail::exists {url} {
+body ::tycho::ResourceFTP::exists {url} {
     # Do we already know if it exists?
     return 1
 }
@@ -252,10 +252,10 @@ body ::tycho::ResourceMail::exists {url} {
 #### new
 # Create a new HTTP object.
 #
-body ::tycho::ResourceMail::new {path args} {
-    #::puts "::tycho::ResourceMail::new $path $args"
-    uplevel #0 ::tycho::ResourceMail [::tycho::autoName ResourceMail] \
-	    $args
+body ::tycho::ResourceFTP::new {path args} {
+    #::puts "::tycho::ResourceFTP::new $path $args"
+    uplevel #0 ::tycho::ResourceFTP [::tycho::autoName ResourceFTP] \
+	    $args -debug 1
 }
 
 #########################################################################
@@ -266,223 +266,191 @@ body ::tycho::ResourceMail::new {path args} {
 #### debugputs
 # Puts a string to the console if the *-debug* option is set.
 #
-body ::tycho::ResourceMail::debugputs {string} {
+body ::tycho::ResourceFTP::debugputs {string} {
     if $debug {
 	::puts $string
     }
 }
 
 #########################################################################
-#### mailinitiate
-# Opening a mail connection, and set the fileevent.
+#### ftpinitiate
+# Opening a ftp connection, and set the fileevent.
 #
-body ::tycho::ResourceMail::mailinitiate {{url {}}} {
+body ::tycho::ResourceFTP::ftpinitiate {{url {}}} {
     # Parse URL into hostname, port, and path
     if {$url!={}} {set currentURL $url}
 
-    ::tycho::assign username hostname port [splitURL $currentURL]
+    # Setup destination according to url:
+    #       server             path        file
+    #       v                  v           v
+    # ftp://www.servername.com/path1/path2/file.tar.gz
+    set ftpserver [::tycho::url server $url]
+    set ftpport   [lindex [split $ftpserver :] 1]
+    set ftpserver [lindex [split $ftpserver :] 0]
+    if {$ftpport=={}} {set ftpport 21}
+    set ftppath   [::tycho::url path $url]
+    set ftpfile   [::tycho::url tail $url]
 
-    if {[catch {socket -async $hostname $port} socketid]} {
+    # The following is needed because path returns the following:
+    #   tycho::url path ftp://server.com/p1/p2/file1 == p1/p2/file1
+    #
+    # The correct path is:
+    #   tycho::url path ftp://server.com/p1/p2/file1 == p1/p2/
+    regsub [::tycho::url tail $url] $ftppath {} ftppath
+
+    ::puts "$ftpserver:$ftpport   path:$ftppath   file:$ftpfile"
+
+    # Connect to server
+    if {[catch {socket -async $ftpserver $ftpport} socketid]} {
 	catch {unset $socketid}
-	error "Can't open $hostname, $port"
+	error "Can't open $ftpserver, $ftpport"
     }
 
-    # <tt>DISCONNECTED, HELO, MAILFROM, RCPTTO, DATA1, DATA2 and QUIT.</tt>
-    set state CONNECT
+    # Set my port information
+    set myinfo [fconfigure $socketid -sockname]
+    set myaddr [lindex $myinfo 0]
+    set myport [lindex $myinfo 2]
+
+    set state USER
 
     # Set up the file events for incoming data
     ::fileevent $socketid w {}
     ::fileevent $socketid readable \
-	    "@scope ::tycho::ResourceMail [list $this mailhandler]"
+	    "@scope ::tycho::ResourceFTP [list $this ftphandler]"
 
     ::fconfigure $socketid -blocking no    ;#-translation crlf
     ::fconfigure $socketid -translation auto
+
 }
 
-
-
 #########################################################################
-#### mailhandler
+#### ftphandler
 # The following is the handshake protocol between the client and
-# the server. When the mailhandler gets the expected state from
+# the server. When the ftphandler gets the expected state from
 # the server, it'll send out the right data.
-# <pre>State          Expect from Server             Send/"Action"
+# <pre>
+# State          Expect from Server             Send/"Action"
 # -----          ------------------             -----------
 #
 # </pre>
-body ::tycho::ResourceMail::mailhandler {} {
+body ::tycho::ResourceFTP::ftphandler {} {
     if {[::eof $socketid] && $state!="DISCONNECTED"} {
-        error "Handshaking failed"
-	return
+        error "FTP handshaking failed"
     }
     # Line will contain the status
     ::gets $socketid line
+    debugputs "$state $line"
 
     # This returns the status number. 200-299 is okay (just like HTTP)
-    set status [lindex $line 0]
-
-    if {$status>=400} {
-        error "Error on mailto:$username@$hostname, $line, socket($socketid)"
+    # Need to use regexp instead of lindex because some servers return
+    # number followed by - (ie. 200- This is just a comment).
+    if {![regexp {([0-9]+ ).*} $line]} {
+        return
     }
 
-    debugputs "$state $line"
+    if {$status >= 400} {ftpabort "$state: Protocol failed"}
 
     # The following is a state machine
     switch -- $state {
         DISCONNECTED {
-            mailabort "DISCONNECTED: Error, should not expect incoming message"
+            ftpabort "DISCONNECTED: Error, should not expect incoming message"
             set progress -1
         }
 
-        CONNECT {
-            # 220 = "okay to transmit, protocol good"
-            #
-            #Sample: 
-            #220-hofmann.CS.Berkeley.EDU Sendmail 8.6.11/8.6.6.Beta11 
-            #                 ready at Tue, 3 Jun 1997 10:10:17 -0700
+        USER {
+            # 220 messier.eecs.berkeley.edu FTP server
             if [regexp -nocase {^22[0-9] .*} $line] {
-                ::puts $socketid "HELO $myhost"
-                set state HELO
-                after $timeout "eval $this mailtimeout $state"
-            } elseif {$status<200 || $status>=300} {
-                mailabort "CONNECT: Protocol failed"
+                ::puts $socketid "USER $myusername"
+                set state PASS
+                after $timeout "eval $this ftptimeout $state"
             }
             set progress 0.1
         }
 
-        HELO {
-            #250 hofmann.CS.Berkeley.EDU Hello tycho.EECS.Berkeley.EDU 
-            #                    [128.32.240.250], pleased to meet you
-            if [regexp -nocase {^25[0-9] .*Hello ([^\ ^\,]+).*} \
-                    $line _ myhost] {
-                # FIXME need to check for myhost!!!
-                ::puts $socketid "MAIL FROM: $myname@$myhost"
-                set state MAILFROM
-                after $timeout "eval $this mailtimeout $state"
-            } elseif {$status<200 || $status>=300} {
-                mailabort "HELO"
-            }
-            set progress 0.2
-        }
-        
-        MAILFROM {
-            #250 kchang@tycho.EECS.Berkeley.EDU... Sender ok
-            if [regexp {^25[0-9] .+Sender ok} $line] {
-                ::puts $socketid "RCPT TO: $username"
-                set state RCPTTO
-                after $timeout "eval $this mailtimeout $state"
-            } elseif {$status<200 || $status>=300} {
-                mailabort "MAILFROM:"
-            }
-            set progress 0.3
-        }
-
-        RCPTTO {
-            #250 <user>... Recipient ok
-            if [regexp -nocase {^25[0-9] .+Recipient ok} $line] {
-                ::puts $socketid "DATA"
-                set state DATA1
-                # FIXME: This will give an error because sending the entire
-                # text takes a while on a slow network
-                #after $timeout "eval $this mailtimeout $state"
-            } elseif {$status<200 || $status>=300} {
-                mailabort "RCPTTO"
-            }
-            set progress 0.4
-        }
-
-        DATA1 {
-            #354 Enter mail, end with "." on a line by itself
-            if [regexp -nocase {^35[0-9] Enter mail} $line] {
-                set bufferlines [llength $mailbuffer]
-                set line 0
-                # Dump the mail buffer to data
-                foreach i $mailbuffer {
-                    incr line
-                    ::puts $socketid $i
-                    set progress [expr 0.4 + (($line/$bufferlines)/2.5)]
-                }
-                ::puts $socketid "."
-                set state DATA2
-                after $timeout "eval $this mailtimeout $state"
-            } else {
-                mailabort "DATA1"
+        PASS {
+            # 331 Guest login ok, send ident as password.
+            if [regexp -nocase {33[0-9] .*} $line] {
+                ::puts $socketid "PASS $mypassword"
+                set state PWD
+                after $timeout "eval $this ftptimeout $state"
             }
         }
 
-        DATA2 {
-            #250 LAA14447 Message accepted for delivery
-            if [regexp -nocase {^25[0-9] .+Message accept} $line] {
-                ::puts $socketid "QUIT"
-                set state QUIT
-                after $timeout "eval $this mailtimeout $state"
-            } else {
-                mailabort "DATA2"
+        PWD {
+            # 230 Guest login ok, access restrictions apply.
+            if [regexp -nocase {23[0-9] .*} $line] {
+                ::puts $socketid "PWD"
+                set state PASV
+                after $timeout "eval $this ftptimeout $state"
             }
-            set progress 0.9
         }
 
-        QUIT {
-            set fileIsOpen 0
-            set state DISCONNECTED
-            ::fileevent $socketid readable {}
-            ::close $socketid
-            set progress 1.0
-            return
-        }
+        PASV {
+            # 257 "/" is current directory.
+            if [regexp -nocase {25[0-9] .*} $line] {
+
+
+
+                ::puts $socketid "PORT "
+                set state 
+
+
+
+
+
     }
     # The following is required because Tcl will buffer all output
     ::flush $socketid
 }
 
 #########################################################################
-#### mailtimeout
+#### ftpreceiveinit
+# Open up a socket (client) so that server can send data into
+# the socket. The socket number is determined by 
+# (the current socket connecting to the server) + 1 + (n tries)
+#
+#
+# Return 1 if successfully opened up a socket. 0 if failed n times.
+body ::tycho::ResourceFTP::ftpreceiveinit {} {
+    # Try to open up socket 10 times.
+    set n 10
+
+    set iamount 1
+    while {$n > 0} {
+        set newport [expr $myport + $iamount]
+        if {![catch "socket -server ftpreceive $newport" receiveid]} {
+            fileevent $receiveid w {}
+            fileevent $receiveid r {}
+
+            
+            return 1
+        }
+        incr n -1
+        incr iamount 1
+    }
+    return 0
+}
+
+#########################################################################
+#### ftptimeout
 # After certain amount of time, we hope that the state has transitioned.
 # Otherwise, there's a timeout on the network or on the server, and
 # we have to stop the transaction. This method will compare the oldstate
 # with the current state.
 #
-body ::tycho::ResourceMail::mailtimeout {oldstate} {
+body ::tycho::ResourceFTP::ftptimeout {oldstate} {
     if {$oldstate==$state} {
-        error "Timeout on mailto:$username@$hostname"
+        error "Timeout on ftpto:$username@$hostname"
     }
 }
 
 #########################################################################
-#### mailabort
+#### ftpabort
 # When the protocol fails, output an error message, and close socket
 #
-body ::tycho::ResourceMail::mailabort {message} {
+body ::tycho::ResourceFTP::ftpabort {message} {
     catch {::close $socketid}
     set state DISCONNECTED
     set fileIsOpen 0
     error $message
 }
-
-#########################################################################
-#### splitURL
-# Parse a url into the hostname, port, and return them
-# as a three-element list.
-#
-body ::tycho::ResourceMail::splitURL {url} {
-    set _username {}
-    set _hostname {}
-    set _port 25
-
-    # The following parses the url into hostname, port, and username
-    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    if {[regexp -nocase \
-            {^mailto:(/+)?([0-9a-z\-]+)@([a-z0-9\.\-]+)(:([0-9]+))?} \
-            $url _ _ \
-	    usertmp hosttmp _ porttmp]} {
-	if {$hosttmp!={}} {set _hostname $hosttmp}
-	if {$porttmp!={}} {set _port $porttmp}
-	if {$usertmp!={}} {set _username $usertmp}
-    }
-    return [list $_username $_hostname $_port]
-}
-
-
-
-
-
