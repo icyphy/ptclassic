@@ -1075,7 +1075,37 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
 # item with that tag.
 #
 body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
-    eval $canvas lower $tag $belowThis
+    # FIXME FIXME FIXME
+    # For some reason, I removed the code below and replaced
+    # it with this line:
+    #    eval $canvas lower $tag $belowThis
+    # The SCCS comments was "Simplified and fixed." Unfortunately,
+    # I also broke calls such as "$slate raise current". Presumably
+    # the code below is broken in some way, so it needs to figured
+    # out and fixed PROPERLY! (raise{}, too)
+
+    # Figure out which item we're talking about
+    set items [find withtag $tag]
+    if { $items == "" } {
+	return ""
+    } else {
+	set id [lindex $items 0]
+
+	if { $belowThis == "" } {
+	    $canvas lower $id
+	} elseif { [string match {[_0-9]*} $belowThis] } {
+	    # Got an item, so use it
+	    $canvas lower $id $belowThis
+	} else {
+	    # Got a id, so use the first matching item
+	    set items [find withtag $belowThis]
+	    if { $items == "" } {
+		$canvas lower $id
+	    } else {
+		$canvas lower $id [lindex $items 0]
+	    }
+	}
+    }
 }
 
 #######################################################################
@@ -1154,7 +1184,37 @@ body ::tycho::IncrCanvas::postscript {args} {
 # with that tag.
 #
 body ::tycho::IncrCanvas::raise {tag {aboveThis {}}} {
-    eval $canvas raise $tag $aboveThis
+    # FIXME FIXME FIXME
+    # For some reason, I removed the code below and replaced
+    # it with this line:
+    #    eval $canvas raise $tag $aboveThis
+    # The SCCS comments was "Simplified and fixed." Unfortunately,
+    # I also broke calls such as "$slate raise current". Presumably
+    # the code below is broken in some way, so it needs to figured
+    # out and fixed PROPERLY! (lower{}, too)
+
+    # Figure out which item we're talking about
+    set items [find withtag $tag]
+    if { $items == "" } {
+	return ""
+    } else {
+	set id [lindex $items 0]
+
+	if { $aboveThis == "" } {
+	    $canvas raise $id
+	} elseif { [string match {[_0-9]*} $aboveThis] } {
+	    # Got an item, so use it
+	    $canvas raise $id $aboveThis
+	} else {
+	    # Got a id, so use the first matching item
+	    set items [find withtag $aboveThis]
+	    if { $items == "" } {
+		$canvas raise $id
+	    } else {
+		$canvas raise $id [lindex $items 0]
+	    }
+	}
+    }
 }
 
 #######################################################################
