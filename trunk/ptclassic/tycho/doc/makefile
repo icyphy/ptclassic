@@ -83,10 +83,10 @@ tychoClasses.dag: FORCE
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
+		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
 	else \
 		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO $(TYCHO);  source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
+		echo "set TYCHO \"$(TYCHO)\"; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
 	fi
 
 # Traverse all the html files (except the codedoc files) and produce PostScript
