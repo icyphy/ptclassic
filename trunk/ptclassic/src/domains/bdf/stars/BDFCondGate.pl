@@ -1,5 +1,5 @@
 defstar {
-	name { True }
+	name { CondGate }
 	domain { BDF }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
