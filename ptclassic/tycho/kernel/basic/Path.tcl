@@ -181,15 +181,66 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 
 ########################################################################
 #### expandPathSplit
-# Given a colon separated list of pathnames, expand each path, 
-# reassemble the colon separated list and return it.
+# Given a system-standard (usually colon) separated list of pathnames, 
+# expand each path, reassemble the (usually colon) separated list and 
+# return it.
 #
 proc ::tycho::expandPathSplit {inputPathList} {
     set outputList {}
-    foreach inputPath [split $inputPathList :] {
+    set separator [::tycho::pathSeparator]
+    foreach inputPath [split $inputPathList $separator] {
 	lappend outputList [::tycho::expandPath $inputPath]
     }
-    return [join $outputList :]
+    return [join $outputList $separator]
+}
+
+########################################################################
+#### directoryParent
+# Return the directory parent string for the current system (i.e. Unix = ../)
+#
+proc ::tycho::directoryParent {} {
+    global env tcl_platform
+    
+    switch $tcl_platform(platform) {
+        unix {
+            return {../}
+        }
+        windows {
+            #This works better than "..\" in Tcl
+            return {../}
+        } 
+        macintosh {
+            return {..:}
+        }
+        default {error "Don't know the directory separator on \
+                $tcl_platform(platform) yet.}
+    }
+}    
+
+########################################################################
+#### directorySeparator
+# Return the directory separator for the current system (i.e. Unix = /)
+#
+# NOTE: This returns / for Windows because Tcl supports the forward slash
+# under Windows better than the Windows standard backslash.
+#
+proc ::tycho::directorySeparator {} {
+    global env tcl_platform
+    
+    switch $tcl_platform(platform) {
+        unix {
+            return {/}
+        }
+        windows {
+            #This works better than "\" in Tcl
+            return {/}
+        } 
+        macintosh {
+            return {:}
+        }
+        default {error "Don't know the directory separator on \
+                $tcl_platform(platform) yet.}
+    }
 }
 
 ##############################################################################
@@ -231,15 +282,8 @@ proc ::tycho::pathEnvSearch {filename} {
     if ![info exists env(PATH)] {
 	error "pathEnvSearch: \$PATH is not set!"
     }
-    switch $tcl_platform(platform) {
-        unix {
-            return [::tycho::pathSearch $filename [split $env(PATH) :]]
-        }
-        windows {
-            return [::tycho::pathSearch $filename [split $env(PATH) ";"]]
-        }
-        default { return {}}
-    }
+    return [::tycho::pathSearch $filename \
+            [split $env(PATH) [::tycho::pathSeparator]]]
 }
 
 ##############################################################################
@@ -251,11 +295,10 @@ proc ::tycho::pathEnvSearch {filename} {
 proc ::tycho::pathSearch {filename {path {}}} {
     if {$path == {} } {
 	global env tcl_platform
-	switch $tcl_platform(platform) {
-	    unix {set path [split $env(PATH) :]}
-	    default {error "Don't know how to handle paths on \
-		    $tcl_platform(platform) yet. env(PATH) = $env(PATH)"}
-	}
+        if ![info exists env(PATH)] {
+            error "pathSearch: \$PATH is not set!"
+        }
+        set path [split $env(PATH) [::tycho::pathSeparator]]
     }  
     foreach dir $path {
 	if [file executable [file join $dir $filename]] {
@@ -263,6 +306,25 @@ proc ::tycho::pathSearch {filename {path {}}} {
 	}
     }
     return {}
+}
+
+##############################################################################
+#### pathSeparator
+# Return the path separator for the current system. FIXME: Macintosh is ?
+#
+proc ::tycho::pathSeparator {} {
+    global env tcl_platform
+    
+    switch $tcl_platform(platform) {
+        unix {
+            return {:}
+        }
+        windows {
+            return {;}
+        }
+        default {error "Don't know the path separator on \
+                $tcl_platform(platform) yet.}
+    }
 }
 
 ##############################################################################
