@@ -53,6 +53,20 @@ public:
         Particle** last() { if (--current < 0) current = dimen - 1;
 			    return here();}
  
+	// Back up the buffer by n positions.  Will not work correctly
+	// if n is larger than dimen.  n is assumed positive.
+	void backup(int n) {
+		current -= n;
+		if (current < 0) current += dimen;
+	}
+
+	// Advance the buffer by n positions.  Will not work correctly
+	// if n is larger than dimen.  n is assumed positive.
+	void advance(int n) {
+		current += n;
+		if (current >= dimen) current -= dimen;
+	}
+
         // Access buffer relative to current
         Particle** previous(int) const;
  
