@@ -102,6 +102,10 @@ class ::tycho::Monitor {
     # We want to make sure that only private function can write
     public method insertLine {line} {}
 
+    # Save the settings, such as autostart, autodestroy
+    # so that we'll remember the setting next time we start up
+    public method saveSetting {} {}
+
     ###################################################################
     ####                            options                        ####
 
@@ -128,7 +132,10 @@ body ::tycho::Monitor::constructor {args} {
     configure -queries [list \
             {line commandToExec {Command to Exec:} make } \
             {line dirToExecFrom {Directory to Exec from:} {}} \
-            {radio autoDestroy {Close window automatically:} {Yes No} No}]
+            {radio autoDestroy {Close window automatically:} {Yes No} No}\
+            "radio autoStart {Start execution automatically:} {Yes No} No \
+            -command \"$this saveSetting\""]
+
 
     eval itk_initialize $args
 
@@ -190,6 +197,8 @@ body ::tycho::Monitor::constructor {args} {
         $this execProcessInMonitor
     }
 
+    configure -autostart 
+
     return $this
 }
 
@@ -212,6 +221,23 @@ body ::tycho::Monitor::destructor {} {
     }
     catch {unset ::tycho::Monitor::$statusVariableName}
 }
+
+body ::tycho::Monitor::saveSetting {} {
+    if {[$this get autoStart]=="No"} {
+        catch {[eval exec rm [file join $itk_option(-dir) .autostart]]}
+    } else {
+        catch {[eval exec touch [file join $itk_option(-dir) .autostart]]}
+    }
+
+    if {[$this get autoDestroy]=="No"} {
+        catch {[eval exec rm \
+                [file join $itk_option(-dir) .autodestroy]]}
+    } else {
+        catch {[eval exec touch \
+                [file join $itk_option(-dir) .autodestroy]]}
+    }
+}
+
 
 body ::tycho::Monitor::insertLine {line} {
     # Need to lock up the output of the executable
@@ -249,6 +275,17 @@ configbody ::tycho::Monitor::autodestroy {
         insert autoDestroy No
     } else {
         insert autoDestroy Yes
+    }
+}
+
+#######################################################################
+#### -autostart configuration
+# 
+configbody ::tycho::Monitor::autostart {
+    if {$itk_option(-autostart)==0} {
+        insert autoStart No
+    } else {
+        insert autoStart Yes
     }
 }
 
