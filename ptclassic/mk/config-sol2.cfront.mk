@@ -186,6 +186,9 @@ MATARCH = sol2
 # Mathematica MathLink library
 MATHLINKLIBNAME = MLelf
 
+# Mathematica architecture
+MATHEMATICAARCH = Solaris
+
 # Ipus uses templates in a way that is compatible with g++, but not sol2.cfront
 INCLUDE_IPUS_DOMAIN = no
 
