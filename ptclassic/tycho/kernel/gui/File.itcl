@@ -1024,6 +1024,8 @@ body ::tycho::File::callAutoSave {obj} {
 # a blank editor of a given type.
 #
 body ::tycho::File::displayData {data filename} {
+    error \
+      "Sorry, ::tycho::File::displayData is obsolete, use a tmp file instead"
     set reg [registeredCommands $filename]
     if {$reg != {}} {
         if [catch {
@@ -1154,6 +1156,7 @@ body ::tycho::File::openContext {filename} {
                 set saveInfo $errorInfo
                 error "Registered command failed on $filename:\n$msg" $saveInfo
             }
+            return $result
         } {
             return [eval newEditor Displayer Edit -file $filename]
         }
