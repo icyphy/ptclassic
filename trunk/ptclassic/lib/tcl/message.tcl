@@ -109,12 +109,12 @@ Ptolemy Interactive Graphical Interface }
     append text $pigiVersion {
 } {
 Ptolemy executable you are running:
-} $pigiFilename {
+} $pigiFilename "
 
-Copyright (c) 1990-1993 Regents of the University of California
+Copyright \251 1990-1993 Regents of the University of California
 - All rights reserved -
 For copyright notice, limitation of liability,
-and disclaimer of warranty provisions, push the button below. }
+and disclaimer of warranty provisions, push the button below. "
     message $w.f.msg.msg2 -font -Adobe-times-medium-r-normal--*-180* \
 	-justify center -text $text -width 20c
     button $w.f.msg.copyright -command "ptkDisplayCopyright" \
