@@ -59,29 +59,6 @@ int DFPortHole :: parentReps() const {
 	return parStar->reps();
 }
 
-PortHole& DFPortHole :: setPort (
-			     const char* s,
-                             Block* parent,
-                             DataType t,
-                             unsigned numTokens,
-			     unsigned delay)
-{
-	// Initialize PortHole
-        PortHole::setPort(s,parent,t);
-
-	// Based on the delay, we allocate a Buffer assuming no
-	// past Particles are allocated
-        numberTokens = numTokens;
-	maxBackValue = delay;
-	// The number of Particles the buffer has to hold is:
-	//		numberTokens current and future Particles
-	//		delay past Particles
-	if ( numberTokens > int(delay)) bufferSize = numberTokens;
-	else bufferSize = delay + 1;
-
-        return *this;
-}
-
 // Function to alter only numTokens and delay.
 // We re-do porthole initialization if bufferSize changes
 PortHole& DFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
@@ -93,6 +70,10 @@ PortHole& DFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
 		initialize();
 	return *this;
 }
+
+// DFPortHoles use local Plasmas.
+int DFPortHole :: allocatePlasma() { return allocateLocalPlasma();}
+
 
 // functions to manipulate the count of maximum buffer size.
 void DFPortHole :: incCount(int n) { myGeodesic->incCount(n);}

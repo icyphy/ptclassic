@@ -51,8 +51,6 @@ domains.
 
 class DFPortHole : public PortHole
 {
-protected:
-	int maxBackValue;	// maximum % argument allowed
 public:
 	DFPortHole();
 
@@ -93,20 +91,12 @@ public:
 	// is the port dynamic? (default: return 0)
 	virtual int isDynamic() const;
 
-        // The setPort function is redefined to take one more optional
-        // argument, the number of Particles consumed/generated
-        PortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,
-			  // Number Particles consumed/generated
-                          unsigned numTokens = 1,
-			  // Maximum delay the Particles are accessed
-			  unsigned maxPctValue = 0);
-
 	// The number of repetitions of the parent star, valid only
 	// after the schedule is computed.
 	int parentReps() const;
-
+protected:
+	int maxBackValue;	// maximum % argument allowed
+	/* virtual */ int allocatePlasma(); // use local plasma
 };
 
 class MultiDFPort : public MultiPortHole {
