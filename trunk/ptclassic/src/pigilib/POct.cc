@@ -61,17 +61,18 @@ extern "C" {
 #include "icon.h"
 #include "compile.h"
 #include "octMacros.h"    // For GetOrCreatePropStr
+//#include "kernelCalls.h"
 void win_msg(const char*);  // for error dialog box.  FIXME: formalize this
 /* Declare the functions in kernelCalls used by ptkGetTargetNames */
-int KcDomainTargets(); 
-char* KcDefTarget(); 
+extern int KcDomainTargets(const char* domain, const char** names, int nMax);
+extern const char*KcDefTarget(char *domain);
 /* Declare the functions in kernelCalls used by ptkGetDomainNames */
-int numberOfDomains();
-char* nthDomainName();
+extern int numberOfDomains();
+extern const char* nthDomainName(int n);
 /* Declare the functions in kernelCalls used by ptkSetSeed */
-void KcEditSeed();
+extern void KcEditSeed(int n);
 /* Declare the functions in kernelCalls used by ptkSetRunUniverse */
-boolean KcSetKBDomain();
+extern boolean KcSetKBDomain(const char* domain);
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -199,7 +200,10 @@ int POct::SetBusParams( octObject *instPtr, ParamListType *pList) {
 
     // Fill in the props new value
     prop.contents.prop.type = OCT_STRING;
-    ((const char*)(prop.contents.prop.value.string)) = pList->array->value;
+
+    // The line below will not compile under cfront 1.0
+    //((const char*)(prop.contents.prop.value.string)) = pList->array->value;
+    prop.contents.prop.value.string = (char *)pList->array->value;
 
     // Save this new delay vaule;
     IntizeProp(&prop);
@@ -221,7 +225,9 @@ int POct::SetDelayParams( octObject *instPtr, ParamListType *pList) {
 
     // Fill in the props new value
     prop.contents.prop.type = OCT_STRING;
-    ((const char*)(prop.contents.prop.value.string)) = pList->array->value;
+    // The line below will not compile under cfront1.0
+    //((const char*)(prop.contents.prop.value.string)) = pList->array->value;
+    prop.contents.prop.value.string = (char *)pList->array->value;
 
     // Save this new delay vaule;
     IntizeProp(&prop);
@@ -648,7 +654,7 @@ int POct::ptkSetRunUniverse (int aC,char** aV) {
                          (char *) NULL);
         return TCL_ERROR;
     }
-    if (! KcSetKBDomain(DEFAULT_DOMAIN)) {
+    if (! KcSetKBDomain((const char *)DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, "Failed to set default domain.",
                          (char *) NULL);
         return TCL_ERROR;
@@ -836,10 +842,10 @@ int POct::ptkGetMkStar (int aC,char** aV) {
     // Note: if any of the titles (ie "Star name") change, that
     //       change must be reflected in ptkSetMkStar
     Tcl_AppendResult(interp, 
-                     "{{Star name} {", (char *)MkStarName, "}} ",
-                     "{{Domain} {", (char *)MkStarDomain, "}} ",
-                     "{{Star src directory} {", (char *)MkStarDir, "}} ", 
-                     "{{Pathname of Palette} {", (char *)MkStarPalette, "}}", 
+                     "{{Star name} {", (const char *)MkStarName, "}} ",
+                     "{{Domain} {", (const char *)MkStarDomain, "}} ",
+                     "{{Star src directory} {", (const char *)MkStarDir, "}} ", 
+                     "{{Pathname of Palette} {", (const char *)MkStarPalette, "}}", 
                      (char *) NULL);
     return TCL_OK;
 }
@@ -903,7 +909,7 @@ int POct::ptkGetSeed (int aC,char** aV) {
     
     buf = OldRandomSeed;
 
-    Tcl_AppendResult(interp, (char *)buf , (char *) NULL);
+    Tcl_AppendResult(interp, (const char *)buf , (char *) NULL);
 
     return TCL_OK;
 }
@@ -985,7 +991,7 @@ int POct::ptkGetDomainNames (int aC,char** aV) {
 
     if (nDomains == 1) {
 	// Only one element means that no ordering need be done.
-	Tcl_AppendElement ( interp, nthDomainName(0) );
+	Tcl_AppendElement ( interp, (char *)nthDomainName(0) );
 	return TCL_OK;
     }
 
@@ -1000,7 +1006,7 @@ int POct::ptkGetDomainNames (int aC,char** aV) {
     for (i = 0; i < nDomains; i++) {
         // Only add it if it has not already been used
         if (strcmp(nthDomainName(i), domain)!=0) {
-            Tcl_AppendElement(interp, nthDomainName(i) );
+            Tcl_AppendElement(interp, (char *)nthDomainName(i) );
         }
     }   
     return TCL_OK;
@@ -1080,7 +1086,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
 	    nChoices = nTargets + 1;
     }
     else {
-            defaultTarget = KcDefTarget(domain);
+            defaultTarget = (char *)KcDefTarget(domain);
 	    nChoices = nTargets;
     }
 
@@ -1173,9 +1179,9 @@ int POct::ptkGetTargetParams (int aC,char** aV) {
     if (pList.length == 0) return result("NIL");
     for (int i=0; i<pList.length; i++) {
 	Tcl_AppendResult(interp, "{", (char *) NULL);
-        Tcl_AppendElement(interp, pList.array[i].name);
-        Tcl_AppendElement(interp, pList.array[i].type);
-        Tcl_AppendElement(interp, pList.array[i].value);
+        Tcl_AppendElement(interp, (char *)pList.array[i].name);
+        Tcl_AppendElement(interp, (char *)pList.array[i].type);
+        Tcl_AppendElement(interp, (char *)pList.array[i].value);
 	Tcl_AppendResult(interp, " } ", (char *) NULL);
     }
 
@@ -1333,7 +1339,7 @@ int POct::ptkGetMaster (int aC,char** aV) {
     octObject instance;
     octObject facet;
 
-    if ( (aC != 2) & (aC != 3) ) return 
+    if ( (aC != 2) && (aC != 3) ) return 
           usage ("ptkGetMaster <OctInstanceHandle> [contents|interface]");
 
     // "NIL" instances have "NIL" masters.  Hope this is what the
@@ -1377,7 +1383,7 @@ int POct::ptkGetMaster (int aC,char** aV) {
 //
 int POct::ptkOpenFacet (int aC,char** aV) {
 
-    if ( (aC != 2) & (aC != 3) & (aC != 4) ) return
+    if ( (aC != 2) && (aC != 3) && (aC != 4) ) return
           usage ("ptkOpenFacet <file_name_of_cell> [view] [facet]");
 
     // fill in default values
