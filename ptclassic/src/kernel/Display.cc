@@ -47,8 +47,7 @@ const int MAX_NO_GRAPHS = 64;
 #include "Error.h"
 #include "StringList.h"
 #include "Block.h"
-#include "UserOutput.h"
-#include <std.h>
+#include "miscFuncs.h"
 #include <math.h>
 #include "streamCompat.h"
 
