@@ -27,6 +27,9 @@
 #                                                         COPYRIGHTENDKEY
 ###########################################################################
 
+#### FIXME: To do:
+# - We need a way to request fonts that are convertible to postscript fonts.
+
 option add *FontManager.preferredFoundries {adobe b&h *} widgetDefault
 option add *FontManager.preferredResolutions {75 *} widgetDefault
 option add *FontManager.preferredEncodings {iso8859 *} widgetDefault
