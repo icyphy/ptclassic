@@ -55,6 +55,13 @@ for example.
 #pragma implementation "SimAction.h"
 #endif
 
+#ifdef hppa
+#ifndef __GNUG__
+// cfront on the hp
+typedef void (*SIG_PF)(int);
+#endif /* ! __GNUG__ */
+#endif /* hppa */
+
 #ifdef __GNUG__
 #ifndef sgi /* For use with cc -cckr Irix4.0.5H */
 typedef void (*SIG_PF)(int);
