@@ -202,15 +202,26 @@ else
 		AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
 	fi
 
+	case "`uname -s" in
+		HP-UX) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/osfport
+		echo "To build tcljava under HPUX, see tyjava/tcljava/makefile"
+		;;
+		Linux) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/linux;;
+		SunOS) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/solaris;;
+		*)TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/idontknow;;
+	esac
 	#
 	# User specified Java architecture, used to find the jdk include files
 	#
 	AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR          use Java arch dependent includes from DIR],
-	        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$JAVAHOME/include/solaris")
+	        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$TMP_JAVA_ARCH_INCLUDE")
 	if test ! -d $JAVA_ARCH_INCLUDE; then
 	    AC_MSG_ERROR(Java directory $JAVA_ARCH_INCLUDE doesn't exist)
 	fi
-	if test ! -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
+	AC_MSG_CHECKING([for the java oobj_md.h include file])
+	if test -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
+		AC_MSG_RESULT($JAVA_ARCH_INCLUDE/oobj_md.h)
+	else
 	    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
 	fi
 fi
