@@ -39,7 +39,7 @@ Distributes an input signal among two outputs, alternating samples.
         }
 
  	codeblock(loadInputAddress) {
-        move    #$addr(input),r1
+        move    #>$addr(input),r1
 	nop
         }
 

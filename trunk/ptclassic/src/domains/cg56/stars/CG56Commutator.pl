@@ -44,7 +44,7 @@ the next B particles from the next input, etc.
 		output.setSDFParams(n*bs,n*bs-1);
         }
  	codeblock(loadOutputAddress) {
-        move    #$addr(output),r1
+        move    #>$addr(output),r1
         }
         codeblock(moveBlock,"int inputNum") {
 @(int(blockSize)!= 1 ? "\tdo\t#$val(blockSize),$label(txBlock)\n":"")\

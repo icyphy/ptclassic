@@ -42,9 +42,9 @@ most significant bit first.
 	output.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	move    #$addr(output)+$val(nBits)-1,r0
+	move    #>($addr(output)+$val(nBits)-1),r0
 	move    $ref(input),a1
-	move	#1,x0
+	move	#>1,x0
         do      #$val(nBits),$label(decompress)
 	clr	b
         lsr     a
