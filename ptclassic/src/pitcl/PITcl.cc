@@ -401,7 +401,8 @@ int PTcl::schedtime(int argc,char **argv) {
 			State* s = universe->myTarget()->stateWithName
 				("schedulePeriod");
 			if (s) {
-				time /= atof(s->currentValue());
+				StringList value = s->currentValue();
+				time /= atof(value);
 			}
 		}
 		sprintf (interp->result, "%g", time);
