@@ -15,9 +15,9 @@ static	char	*strdup();
 static	Gslider	*gsl_parse();
 
 /*
- * Read in the a slider configuration file.  Format:
+ * Read in the async i/o configuration file.  Format:
  *
- * label hostmin hostmax hostinit dspmin dspmax dspinit rep descriptor
+ * label name slider hostmin hostmax hostinit dspmin dspmax dspinit rep descriptor
  */
 
 Gslider *
@@ -71,6 +71,7 @@ gsl_parse(line)
 	int	ret;
 	char	*next;
 	char	*rep;
+	char	*type;
 
 	sp = (Gslider *)malloc(sizeof (*sp));
 	if (sp == NULL) {
@@ -78,9 +79,23 @@ gsl_parse(line)
 		return (NULL);
 	}
 
-	ret = gsl_field(line, &next, &sp->dsplabel, STRING);
+	ret = gsl_field(line, &next, &type, STRING);
+	if (ret < 0) {
+		ERROR("gsl_parse: missing type\n");
+	}
+	/* ignore ones that aren't sliders */
+	if (strcmp(type, "slider") != 0) {
+		(void) free(type);
+		(void) free(sp);
+		return (NULL);
+	}
+	ret = gsl_field(next, &next, &sp->dsplabel, STRING);
 	if (ret < 0) {
 		ERROR("gsl_parse: missing DSP label\n");
+	}
+	ret = gsl_field(next, &next, &sp->name, STRING);
+	if (ret < 0) {
+		ERROR("gsl_parse: missing name\n");
 	}
 	ret = gsl_field(next, &next, &sp->hostmin, DOUBLE);
 	if (ret < 0) {
@@ -114,8 +129,10 @@ gsl_parse(line)
 		ERROR("gsl_parse: unknown representation field\n");
 	}
 	free(rep);
-
-	sp->descr = strdup(next);
+	ret = gsl_field(next, &next, &sp->descr, STRING);
+	if (ret < 0) {
+		ERROR("gsl_parse: missing description field\n");
+	}
 	sp->user = NULL;
 
 	return (sp);
@@ -126,7 +143,11 @@ gsl_parse(line)
 		;
 
 #define	SKIP_NWS(line, cp) \
-	for (cp = start; *cp && *cp != ' ' && *cp != '\t'; cp++) \
+	for (cp = line; *cp && *cp != ' ' && *cp != '\t'; cp++) \
+		;
+
+#define	SKIP_TOQUOTE(line, cp) \
+	for (cp = line; *cp && *cp != '"'; cp++) \
 		;
 
 /*
@@ -147,7 +168,12 @@ gsl_field(start, next, vp, type)
 	SKIP_WS(start, s);
 	if (*s == '\0')
 		return (-1);
-	SKIP_NWS(s, e);
+	if (*s == '"')  {
+		s++;
+		SKIP_TOQUOTE(s, e);
+	} else {
+		SKIP_NWS(s, e);
+	}
 	if (*e == '\0')
 		eol++;
 	*e++ = '\0';
