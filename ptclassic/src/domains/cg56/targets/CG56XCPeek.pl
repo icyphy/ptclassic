@@ -6,10 +6,10 @@ defstar {
     author { Jose Luis Pino }
     derivedFrom {XCAsynchComm}
     copyright {
-	   Copyright (c) 1994,1993 The Regents of the University of California.
-	   All rights reserved.
-	   See the file $PTOLEMY/copyright for copyright notice,
-	   limitation of liability, and disclaimer of warranty provisions.
+Copyright (c) 1993-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 Target Directory }
     explanation {
