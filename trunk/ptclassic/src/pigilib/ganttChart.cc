@@ -1,4 +1,8 @@
+static const char file_id[] = "ganttChart.cc";
 /* 
+SCCS Version identification :
+$Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -23,11 +27,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-*/
-/* Routines for talking to the Gantt chart display */
-/* $Id$ */
 
-/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ Programmer: Matt T. Tavis
+ Created: 8/4/95
+
+Routines for talking to the Gantt chart display
+*/
+
+/*
+ * Do the right thing for sol2 boolean defs.  compat.h must be included
  * first so sys/types.h is included correctly.
  */
 
