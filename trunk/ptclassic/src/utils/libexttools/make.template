@@ -44,6 +44,10 @@ include $(CONFIG)
 # Library name
 LIB=libexttools.$(LIBSUFFIX)
 
+# Used to create .dlls under nt4.vc
+DLLDEPS = ..\..\kernel\libptolemy.lib \
+	..\libptmathematica\libptmathematica.lib
+
 # Put the Ptolemy kernel directory in the include path
 INCL = -I$(KERNDIR) $(PTCOMPAT_INCSPEC) \
 	$(MATLAB_INCSPEC) -I$(PTMATLABLIB) \
