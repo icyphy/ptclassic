@@ -49,6 +49,8 @@ class VHDLSignal : public VHDLObj
  public:
   // Constructors.
   VHDLSignal();
+  VHDLSignal(const char* n, const char* t, VHDLPort* s)
+    : type(t), source (s) { setName(n); }
 
   // Destructor.
   ~VHDLSignal();
@@ -66,8 +68,10 @@ class VHDLSignal : public VHDLObj
   VHDLSignal* newCopy();
 
   void setType(const char* newType) { type = newType; }
+  StringList getType() { return type; }
   void setSource(VHDLPort* newSource) { source = newSource; }
   VHDLPort* getSource() { return source; }
+  void disconnect() { source = NULL; }
 
  protected:
  private:
@@ -104,7 +108,7 @@ class VHDLSignalList : public VHDLObjList
   VHDLSignalList* newCopy();
 
   // Allocate memory for a new VHDLSignal and put it in the list.
-  void put(StringList, StringList);
+  void put(StringList, StringList, VHDLPort* =NULL);
 };
 
 class VHDLSignalListIter : public VHDLObjListIter {
