@@ -71,7 +71,7 @@ CircularBuffer :: ~CircularBuffer()
 		Particle* q = *next();
 		if (q) q->die();
 	}
-        LOG_DEL; delete buffer;
+        LOG_DEL; delete [] buffer;
 }
 
 // Find the position in the buffer i in the past relative to current
@@ -192,10 +192,8 @@ void PortHole :: setDelay (int delays) {
 // a multiporthole is ambiguous.  Since fancier geodesics work differently,
 // this is virtual -- redefined for some domains.
 void PortHole :: disconnect(int delGeo) {
-	farSidePort = 0;
-	if (!myGeodesic) return;
 
-	if (delGeo) {
+	if (myGeodesic && delGeo) {
 		// remove the connection on the geodesic end too
 		myGeodesic->disconnect(*this);
 
@@ -203,6 +201,13 @@ void PortHole :: disconnect(int delGeo) {
 		if (!myGeodesic->isItPersistent()) {
 			LOG_DEL; delete myGeodesic;
 		}
+	}
+	// if my peer points to me, (this happens only for persistent geos)
+	// disconnect the peer.
+	if (farSidePort) {
+		if (farSidePort->farSidePort == this)
+			farSidePort->farSidePort = 0;
+		farSidePort = 0;
 	}
 	myGeodesic = 0;
 	return;
@@ -577,9 +582,10 @@ PortHole& MultiPortHole :: newPort() {
 // unconnected PortHole.  If there are none, we make a new one.
 
 PortHole& MultiPortHole :: newConnection() {
-
-	// find an unconnected porthole
-	MPHIter next(*this);
+	// first resolve aliases.
+	MultiPortHole& real = realPort();
+	// find an unconnected porthole in the real port
+	MPHIter next(real);
 	PortHole* p;
 	while ((p = next++) != 0) {
 		// work right even for GalMultiPortHole
@@ -591,7 +597,7 @@ PortHole& MultiPortHole :: newConnection() {
 	}
 
 	// no disconnected ports, make a new one.
-	return newPort();
+	return real.newPort();
 }
 
 // Create a bus connection between two multiportholes.
