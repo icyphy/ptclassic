@@ -1542,7 +1542,7 @@ proc HMtag_/sup {win param text} {
 #######################################################################
 #### HMwent_to
 # Override the library function to put the start of the named region
-# at the top of the window and to temporarily change the backgound color.
+# at the top of the window and to temporarily change the background color.
 #
 proc HMwent_to {win where {count 0} {color {}}} {
     if {![winfo exists $win]} {return}
