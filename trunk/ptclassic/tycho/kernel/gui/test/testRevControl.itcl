@@ -34,8 +34,6 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-set testsuite 1
-
 
 proc testRevControl {versionControlSystem} {
     if { "$versionControlSystem" == "SCCS" } {
@@ -77,15 +75,16 @@ proc testRevControl {versionControlSystem} {
     ::tycho::safeUpdate $myEditView.revcontrol
 
     # This is a proc, not a test body, so it is not executed in the global
-    # scope, so we need to declare TY_TEST_SCRIPT as global
-    global TY_TEST_SCRIPT
+    # scope, so we need to declare TY_TEST_MODAL as global
+    global TY_TEST_MODAL
     # This script is executed inside Dialog::wait by getComment
-    set TY_TEST_SCRIPT {
-	%0 insert body "This is a message"
-	update idletasks
-	after 500
-        %0 ok
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 insert body "This is a message"
+	    update idletasks
+	    after 500
+	    %0 ok
+	}
     }
 
     # Press the 'Checkin' button

@@ -235,17 +235,19 @@ test YesNoQuery-1.1 {Test YesNoQuery} {
 
 # Here we test Dialog::wait, too.  See $TYCHO/doc/coding/testing.html
 test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
-    set TY_TEST_SCRIPT {
-        %0 invoke yes
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+        {
+	    %0 invoke yes
+	}
     }
     ::tycho::askuser "Are you awake?"
 } 1
 
 test YesNoQuery-2.2 {Test the modal ::tycho::askuser proc} {
-    set TY_TEST_SCRIPT {
-        %0 invoke no
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 invoke no
+	}
     }
     ::tycho::askuser "Are you awake?"
 } 0

@@ -177,13 +177,14 @@ test File-saveAs-1 {Query and save with a new file} {
     after 1000
     # To simulate the user selection of the new filename,
     # perform the modal-dialog-workaround-dance
-    set TY_TEST_SCRIPT {
-        %0 clear
-        %0 insert entry [file join $TYCHO kernel test testFile.knuj]
-	update
-	after 1000
-        %0 ok
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 clear
+	    %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+	    update
+	    after 1000
+	    %0 ok
+	}
     }
     set result [.f saveAs]
     list $result [_rdfile $bar]
@@ -199,7 +200,7 @@ test File-saveAs-2 {Query and save with a new file in given directory} {
     after 1000
     # To simulate the user selection of the new filename,
     # perform the modal-dialog-workaround-dance
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry testFile.knuj
@@ -222,7 +223,7 @@ test File-saveAs-3 {Query and try and save as "NoName"} {
     after 1000
     # To simulate the user selection of the new filename,
     # perform the modal-dialog-workaround-dance
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry NoName
@@ -248,7 +249,7 @@ test File-saveAs-4 {Query and cancel} {
     after 1000
     # To simulate the user selection of the new filename,
     # perform the modal-dialog-workaround-dance
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             update
             after 1000
@@ -269,7 +270,7 @@ test File-saveAs-5 {Query and overwrite an existing file} {
     after 1000
     # To simulate the user selection of the new filename,
     # perform the modal-dialog-workaround-dance
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry [file join $TYCHO kernel test testFile.knuj]
@@ -295,7 +296,7 @@ test File-saveAs-6 {Query and cancel overwrite of an existing file} {
     after 1000
     # To simulate the user selection of the new filename,
     # perform the modal-dialog-workaround-dance
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry [file join $TYCHO kernel test testFile.knuj]
@@ -334,7 +335,7 @@ test File-save-2 {Insert data and save new file} {
     update
     after 500
     # Script to select a filename
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry [file join $TYCHO kernel test testFile.junk]
@@ -354,7 +355,7 @@ test File-save-3 {Insert data and overwrite existing file} {
     _file
     .f insertData {Magic! she thought.}
     # Script to select a filename
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry [file join $TYCHO kernel test testFile.junk]
@@ -379,7 +380,7 @@ test File-save-4 {Don't overwrite existing file} {
     update
     after 500
     # Script to select a filename
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 clear
             %0 insert entry [file join $TYCHO kernel test testFile.junk]
@@ -408,7 +409,7 @@ test File-save-5 {Save an auto-save file} {
     update
     after 500
      # Script to select a filename
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             update
             after 1000
@@ -429,7 +430,7 @@ test File-save-6 {Cancel saving an auto-save file} {
     update
     after 500
      # Script to select a filename
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             update
             after 1000
@@ -450,7 +451,7 @@ test File-save-7 {Save a NoName auto-save file} {
     update
     after 500
     # Script to select a filename
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             set result1 [%0 get entry]
             %0 insert entry [file join $TYCHO kernel test testFile.junk]
@@ -494,7 +495,7 @@ test File-saveQuery-2 {If modified, answer yes} {
     update
     after 500
    # Script to answer dialog
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 invoke yes
         }
@@ -518,7 +519,7 @@ test File-saveQuery-3 {If modified, answer no} {
     update
     after 500
     # Script to answer dialog
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 invoke no
         }
@@ -544,7 +545,7 @@ test File-saveQuery-4 {If modified, cancel} {
     update
     after 500
     # Script to answer dialog
-    set TY_TEST_SERIES {
+    set TY_TEST_MODAL {
         {
             %0 invoke cancel
         }
@@ -557,3 +558,9 @@ test File-saveQuery-4 {If modified, cancel} {
 } {1 silent {}}
 # So we can delete it...
 .f save
+
+########################################################################
+## CLEAN UP
+catch {file delete [file join $TYCHO kernel test testFile.junk]}
+catch {file delete [file join $TYCHO kernel test testFile.knuj]}
+
