@@ -10,9 +10,16 @@ Copyright (c) 1989 The Regents of the University of California.
 
 #define TERM_ARR_MAX 14  /* max # I/O terms = max # positions */
 
+#ifndef __cplusplus
+#ifndef const
+#define const /* nothing */
+#endif
+#endif
+
 struct Term_s {
-    char *name;
-    boolean multiple;
+    const char *name;		/* terminal name */
+    const char *type;		/* terminal datatype */
+    boolean multiple;		/* true if multiporthole */
 };
 typedef struct Term_s Term;
 
