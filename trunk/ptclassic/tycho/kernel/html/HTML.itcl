@@ -79,7 +79,7 @@ body ::tycho::HTML::constructor {args} {
     } {
 	keep -background -cursor
     }
-    pack $itk_component(acc) -expand yes -fill x
+    pack $itk_component(acc) -expand no -fill x
 
     # The text widget.
     itk_component add text {
@@ -101,6 +101,20 @@ body ::tycho::HTML::constructor {args} {
 		-foreground -highlightcolor -highlightbackground
     }
     pack $itk_component(back) -side left
+
+    # FIXME: Temporary for demos.
+    itk_component add big {
+	button $itk_component(acc).big \
+		-text Big \
+		-command \
+		"HMset_state [$itk_component(text) textWinName] -size 12; \
+		$itk_component(text) render"
+    } {
+	keep -background -font -activebackground -cursor \
+		-highlightthickness -activeforeground \
+		-foreground -highlightcolor -highlightbackground
+    }
+    pack $itk_component(big) -side left
 
     eval itk_initialize $args
     eval configure $args
