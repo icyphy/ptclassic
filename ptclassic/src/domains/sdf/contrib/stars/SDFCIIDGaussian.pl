@@ -23,14 +23,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  desc{ Variance of distribution. }
 	}
 	hinclude { <Normal.h> }
-	ccinclude { <ACG.h> }
+	header {
+#include <ACG.h>
+extern ACG* gen;
+	}
 	protected {
 	  Normal *random;
 	}
-	ccinclude{ "SharedRNG.h" }
-	
 	constructor {
-	  random = NULL;
+	  random = 0;
 	}
 	destructor {
 	  LOG_DEL; delete random;
