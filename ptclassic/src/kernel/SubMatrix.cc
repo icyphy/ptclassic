@@ -44,7 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Plasma.h"
 #include "Error.h"
 
-#define SMALL_STRING 32
+// Must be greater than the maximum number of characters in the %22.15g format
+#define SMALL_STRING_SIZE 32
 
 /////////////////////////////////////
 // Helper functions
@@ -55,7 +56,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ///////////////////////////////////////////////////////
 // Prints matrices in standard row column form.
 StringList ComplexSubMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "ComplexSubMatrix: (";
   strm << nRows;
@@ -173,7 +174,7 @@ void ComplexSubMatrix::operator << (ComplexArrayState& src) {
 ////////////////////////////////////////////////
 // Prints matrices in standard row column form.
 StringList FixSubMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "FixSubMatrix: (";
   strm << nRows;
@@ -288,7 +289,7 @@ void FixSubMatrix::operator << (FixArrayState& src) {
 ///////////////////////////////////////////////////////
 // Prints matrices in standard row- column form.
 StringList FloatSubMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "FloatSubMatrix: (";
   strm << nRows;
@@ -403,7 +404,7 @@ void FloatSubMatrix::operator << (FloatArrayState& src) {
 /////////////////////////////////////////////////
 // Prints matrices in standard row-column form.
 StringList IntSubMatrix::print() const {
-  char buf[SMALL_STRING];
+  char buf[SMALL_STRING_SIZE];
   StringList strm;
   strm << "IntSubMatrix: (";
   strm << nRows;
