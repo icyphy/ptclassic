@@ -61,8 +61,10 @@ public:
     // Class identification.
     /*virtual*/ int isA(const char*) const;
 
+    // Accessor for core category.
    const char* getCoreCategory() { return coreCategory; }
 
+   // Allows Fixed-point simulation to change Plasma type.
    virtual DataType mapType(DataType);
 
     /* virtual */ void setup();
@@ -70,13 +72,14 @@ public:
     /* virtual */ void wrapup();
 
 protected:
-
+    // From SDF default Target
     StringState coreCategory;
     StringState logFile;
 
     // schedulePeriod for interface with a timed domain.
     FloatState schedulePeriod;
 
+    // determines if this is a Fixed-point simulation.
     virtual int isFixedPoint() { return (ACSKnownCategory::find(coreCategory))->isFixedPoint(); }
 
 };
