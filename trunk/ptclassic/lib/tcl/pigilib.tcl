@@ -36,11 +36,15 @@ proc pigilib_init_env {} {
 	set env(PTOLEMY) [glob ~ptolemy]
     }
     set ptolemy $env(PTOLEMY)
-    set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
-    set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
+    #set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
+    #set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
+    set env(TCL_LIBRARY) $env(PTOLEMY)/tcltcl/tcl/lib
+    set env(TK_LIBRARY) $env(PTOLEMY)/tcltk/tk/lib
     set tk_library $env(TK_LIBRARY)
-    uplevel #0 source $env(PTOLEMY)/tcl/tcl[info tclversion]/lib/init.tcl
-    uplevel #0 source $env(PTOLEMY)/tcl/tk$tk_version/lib/tk.tcl
+    #uplevel #0 source $env(PTOLEMY)/tcl/tcl[info tclversion]/lib/init.tcl
+    #uplevel #0 source $env(PTOLEMY)/tcl/tk$tk_version/lib/tk.tcl
+    uplevel #0 source $env(PTOLEMY)/tcltk/tcl/lib/init.tcl
+    uplevel #0 source $env(PTOLEMY)/tcltk/tk/lib/tk.tcl
 
     set tcl_prompt1 "puts -nonewline stdout {pigi> }"
     set tcl_prompt2 "puts -nonewline stdout {pigi? }"
