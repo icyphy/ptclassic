@@ -28,10 +28,10 @@
 
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/ptplay
-BINDIR = $(ROOT)/bin.$(ARCH)
+BINDIR = $(ROOT)/bin.$(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SRCS = 	ptplay.sol2.c
@@ -46,12 +46,12 @@ LIB = foo
 
 all:	makefile ptplay
 
-ifeq ($(basename $(ARCH)),sol2)
+ifeq ($(basename $(PTARCH)),sol2)
 ptplay: ptplay.sol2
 	cp ptplay.sol2 ptplay
 else
-ptplay: ptplay.$(ARCH) 
-	@if [ $(ARCH) = "mips" ]; then \
+ptplay: ptplay.$(PTARCH) 
+	@if [ $(PTARCH) = "mips" -o $(PTARCH) = "unixware" ]; then \
 		echo "mips architecture does not have a ptplay (yet)."; \
 	else \
 		echo "Copying $^ to $@"; \
@@ -73,12 +73,14 @@ ptplay.hppa.cfront: ptplay.hppa
 	ln -s $^ $@ 
 ptplay.mips:
 	@echo "mips architecture does not have a ptplay (yet)."
+ptplay.unixware:
+	@echo "unixware architecture does not have a ptplay (yet)."
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
 ptplay.sol2 ptplay.sol2.cfront: ptplay.sol2.o
 
 $(BINDIR)/ptplay:	ptplay
-	@if [ $(ARCH) = "mips" ]; then \
+	@if [ $(PTARCH) = "mips" -o $(PTARCH) = "unixware" ]; then \
 		echo "mips architecture does not have a ptplay (yet)."; \
 	else \
 		echo "Linking ptplay into $(BINDIR)"; \
