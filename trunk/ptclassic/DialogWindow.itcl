@@ -477,11 +477,12 @@ body ::tycho::DialogWindow::newModal {class instance args} {
     # Do not continue in this thread until the window is dismissed.
     if [winfo exists $instance] {
 	grab set $instance
-	# FIXME: We would like to wait here for the window to be deleted,
-	# but this causes the X server to hang when tycho runs under
-	# Ptolemy.  Apparently, it interferes with the Rpc connection
+	# NOTE: We wait here for the window to be deleted.
+	# This is actually quite risky.  If called from within Ptolemy
+	# in certain circumstances, this causes the X server to hang.
+	# Apparently, it interferes with the Rpc connection
 	# to vem.  Why?  Should we implement our own version of tkwait?
-	# tkwait window $instance
+	tkwait window $instance
     }
     set returnVal $commandResult($instance)
     unset commandResult($instance)
