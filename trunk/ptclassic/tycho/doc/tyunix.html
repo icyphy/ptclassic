@@ -80,7 +80,7 @@ than one version installed on your system.
 To use Tycho standalone (independent of Ptolemy),
 the command-line syntax is:
 <pre>
-    tycho [-nowelcome] [-noconsole] [-debug] [file...]
+    tycho [-nowelcome] [-noconsole] [-debug] [-tty] [file...]
 </pre>
 
 All arguments and options are optional.
@@ -96,15 +96,22 @@ This console window also captures
 <a name="standard output">standard output</a> generated with the
 Tcl <a name="puts command"><CODE>puts</CODE> command</a>, unless that
 output is directed to a file.
-If you give the -nowelcome option, then you will not get the startup
-<a name="welcome window">welcome window</a>.
+<DL>
+<DT> <A NAME="-nowelcome tycho option"><CODE>-nowelcome</CODE></A>
+<DD> Start Tycho without displaying the <a name="welcome window">welcome window</a>.
 This is particularly useful if you are running
 over a slow X connection (like a modem) and do not wish to waste
 the bandwidth.
+The <A NAME="slow network preference">slow network preference</A> can
+also be set to modify the behaviour of Tycho over a slow network.
+<DT> <a name="-debug tycho option"><CODE>-debug</CODE></a>
+<DD> Start <CODE>itkwish</CODE> inside the Gnu <CODE>gdb</CODE> debugger.
+<DL>
+<DT> <A NAME="-tty tycho option"><CODE>-tty</CODE></A>
+<DD> Start a non-graphical version of Tycho that has a tty prompt.
+</DL>
 
-The <a name="-debug tycho option">-debug</a> option will bring up
-<CODE>itkwish</CODE> inside the Gnu GDB debugger.
-
+</DL>
 <p>
 <h2><a name="Ptolemy with Tycho">Executing Tycho with Ptolemy</a></h2>
 <p>
@@ -142,16 +149,20 @@ Open the specified files after starting the program.
 </dl>
 <p>
 Notice that the <CODE>-ptiny</CODE>, <CODE>-ptrim</CODE>,
-<CODE>-pigi</CODE>, and <CODE>-bin</CODE>
+<CODE>-pigi</CODE>, <CODE>-bin</CODE>
 options are mutually
 exclusive.
-If no files are specified, then the program opens with a Tcl console
+ <P>In Ptolemy 0.7 and later, <CODE>-pigi</CODE>, <CODE>-ptrim</CODE>, 
+<CODE>-ptiny</CODE> uses the pitcl interface to the kernel rather than the 
+ptcl interface.  See the <A HREF="../typt/kernel/internals/pitcl.html">pitcl documentation</A> for further information.
+
+ <P>If no files are specified, then the program opens with a Tcl console
 window into which you can type Tcl, Tk, or Itcl commands.
 Exiting this console window will exit the program (after confirmation).
 If you do specify files, then closing all open windows will exit
 the program.
-In either case, you can also exit the program with the "Quit"
-command in any File menu.
+In either case, you can also exit the program with the <CODE>Quit</CODE>
+command in any <CODE>File</CODE> menu.
 <p>
 The directory <A HREF="../typt"><CODE>$TYCHO/typt</CODE></A>
 contains the Ptolemy specific Tycho features.  The <A
@@ -182,6 +193,10 @@ directory.  That file will automatically be sourced on startup.  Note
 that the <CODE>.Tycho</CODE> directory is used to store other state
 information for Tycho, such as your personal dictionary for spelling
 checks.
+
+<P>Note that <CODE>ptcl</CODE> sources
+<A NAME=".ptclrc"><CODE>~/.ptclrc</CODE></A> and
+<CODE>pigi</CODE> sources <A NAME=".ptkrc"><CODE>~/.ptkrc</CODE></A>.
 
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
