@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StringList.h"
+#include "MatlabIfcFuns.h"
 
 #define MATLAB_BUFFER_LEN        1023
 #define MATLAB_ERR_STR           "\x07???"
@@ -87,14 +88,14 @@ public:
 
 	// manage Matlab process (low-level methods)
 	// derived class must override these methods
-	char* MatlabEngineOpen(char* unixCommand);
-	int MatlabEngineSend(char* enginePtr, char* command);
-	int MatlabEngineOutputBuffer(char* enginePtr,
+	Engine* MatlabEngineOpen(char* unixCommand);
+	int MatlabEngineSend(Engine* enginePtr, char* command);
+	int MatlabEngineOutputBuffer(Engine* enginePtr,
 				     char* buffer,
 				     int buferLength);
-	char* MatlabEngineGetMatrix(char* enginePtr, char* name);
-	char* MatlabEnginePutMatrix(char* enginePtr, char* matrix);
-	int MatlabEngineClose(char* enginePtr);
+	Matrix* MatlabEngineGetMatrix(Engine* enginePtr, char* name);
+	int MatlabEnginePutMatrix(Engine* enginePtr, Matrix* matrixPtr);
+	int MatlabEngineClose(Engine* enginePtr);
 
         // higher-level interfaces to the Matlab process
 	int EvaluateOneCommand(char* command);
@@ -111,12 +112,6 @@ public:
 	int KillMatlab();
 
 private:
-	// counts how many instances of this class have been created
-	static int matlabStarsCount;
-
-	// keeps track of the lone Ptolemy-controlled Matlab process running
-	static char* matlabEnginePtr;
-
 	// indicate whether or not to delete created figures upon destruction
 	int deleteFigures;
 
