@@ -58,7 +58,9 @@ the xfered list or if it has been changed since the last transfer.
 #include "octMacros.h"
 #include "ptk.h"
 
-void KcSetDesc();
+extern void KcLog();
+extern void KcFlushLog();
+extern void KcSetDesc();
 
 #define TERMS_MAX 50  /* maximum number of actual terms allowed on a net */
 
@@ -727,7 +729,6 @@ octObject *galInstPtr, *parentFacetPtr;
     }
 
     /* now do the compile */
-    ERR_IF1(!UniqNameInit());
     ERR_IF1(!MyOpenMaster(&galFacet, galInstPtr, "contents", "r"));
     return CompileGal(&galFacet);
 }
@@ -752,7 +753,6 @@ octObject *galFacetPtr;
         PrintErr("Domain error in galaxy or wormhole.");
         return (FALSE);
     }
-    ERR_IF1(!UniqNameInit());
     return CompileGal(galFacetPtr);
 }
 
@@ -836,6 +836,9 @@ octObject *galFacetPtr;
     KcSetDesc(desc);
     ERR_IF1(!ProcessTargetParams(galTarget,galFacetPtr));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
+    /* Initialize instance name generation of blocks and nodes
+       within the galaxy. */
+    ERR_IF1(!UniqNameInit());
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
     ERR_IF2(!ConnectPass(galFacetPtr), msg);
     ERR_IF1(!KcEndDefgalaxy(oldDomain));
@@ -845,6 +848,7 @@ octObject *galFacetPtr;
 	ERR_IF2(!DupSheetAdd(&xfered, name), msg);
     }
     recompileFlag = 1;
+    KcFlushLog();
     return (TRUE);
 }
 
@@ -899,12 +903,16 @@ octObject *facetPtr;
     TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
     ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessFormalParams(facetPtr));
+    /* Initialize instance name generation of blocks and nodes
+       within the universe. */
+    ERR_IF1(!UniqNameInit());
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
     ERR_IF1(!ClearDirty(facetPtr));
     if (!xferedBool) {
 	ERR_IF1(!DupSheetAdd(&xfered, name));
     }
+    KcFlushLog();
     return (TRUE);
 }
 
@@ -919,7 +927,6 @@ boolean
 CompileFacet(facetPtr)
 octObject *facetPtr;
 {
-    ERR_IF1(!UniqNameInit());
     DupSheetClear(&traverse);
     if (IsGalFacet(facetPtr)) {
 	if (!CompileGal(facetPtr)) {
