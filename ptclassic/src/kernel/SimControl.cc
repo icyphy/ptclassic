@@ -95,7 +95,7 @@ SimAction* SimControl::registerAction(SimActionFunction action, int pre,
 }
 
 int SimControl::cancel(SimAction* a) {
-	int status;
+	int status = FALSE;
 	if (preList->member(a)) {
 		preList->remove(a);
 		status = TRUE;
@@ -113,15 +113,18 @@ int SimControl::cancel(SimAction* a) {
 }
 
 void SimControl::processFlags() {
-	int status;
 	if ((flags & interrupt) != 0) {
 		flags &= ~interrupt;
-		if (onInt) status = onInt();
-		if (status) flags |= error;
+		// if onInt is set, call the on-interrupt function.
+		// optionally set error bit.
+		if (onInt && onInt()) 
+			flags |= error;
 	}
 	if ((flags & poll) != 0) {
-		if (onPoll) status = onPoll();
-		if (!status) flags &= ~poll;
+		// if onPoll is set, call the polling function.
+		// optionally turn polling off.
+		if (onPoll && !onPoll())
+			flags &= ~poll;
 	}
 }
 
