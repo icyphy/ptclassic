@@ -964,12 +964,12 @@ void describePort ()
             destHTML = inoutDescHTML;
         } else if (portDir==1) {
             dest = outputDescriptions;
-            color = firebrick;
+            color = "firebrick";
             destHTML = outputDescHTML;
         } else {
             dest = inputDescriptions;
             color = forestGreen;
-            destHTML = inputDescHTML;
+            destHTML = "inputDescHTML";
         }
 	if (portMulti) {
 	    sprintf(str1,".NE\n\\fI%s\\fR (multiple), (%s)",portName,portType);
