@@ -37,7 +37,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSCore.h"
 
 // constructor takes a reference to a Corona
-ACSCore::ACSCore(ACSCorona & corona_) : _corona(corona_) {};
+ACSCore::ACSCore(ACSCorona & corona_, const char *category_) : corona(corona_)
+{
+  category = category_;
+};
 
 // The following is defined in ACSDomain.cc -- this forces that module
 // to be included if any ACS stars are linked in.
@@ -46,6 +49,4 @@ extern const char ACSdomainName[];
 const char* ACSCore :: domain () const { return ACSdomainName;}
 
 // isA
-ISA_FUNC(ACSCore, CGStar);
-
-
+ISA_FUNC(ACSCore, ACSStar);
