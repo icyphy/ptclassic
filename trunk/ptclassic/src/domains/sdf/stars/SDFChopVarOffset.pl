@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	desc {
 This star has the same functionality as the
-CutAndPaste star except now the offset parameter is
+Chop star except now the offset parameter is
 determined at run time through a control input.
 	}
 
@@ -23,6 +23,6 @@ determined at run time through a control input.
 
 	go {
 		offset = int( offsetCntrl%0 );
-		SDFCutAndPaste :: go();
+		SDFChop :: go();
 	}
 }
