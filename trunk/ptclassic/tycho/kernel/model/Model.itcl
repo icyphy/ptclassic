@@ -29,6 +29,100 @@
 ##########################################################################
 
 
+#####################################################################
+#### model
+# Perform operations on models. This procedure provides a number of
+# of useful access funcitons to models, to support things like
+# relative model paths, reference counting, and so on.
+#
+# <dl>
+# <dt><b>link</b> _path_ _key_
+# <dd>
+# Link a client to the model. A model remains in memory for as
+# long as there are clients with links to it. The _key_ argument
+# is used only to unlink from the model later -- usually, you can
+# use the name of the calling object. This method raises an error
+# if the key has already been used to link to the model. Linking
+# and unlinking uses keys because it's likely to be more reliable
+# than a simple link count.
+#
+# <dt><b>open</b> _name_ ?_path_?
+# <dd>
+# Open a TIM model file and return the model. The first argument
+# is the file name, either absolute or relative to the TIM_PATH
+# preference. If the second argument is supplied and not null,
+# it is prepended to the search path. If the model already
+# exists, just return it. The link count of the model is
+# not altered. The argument is the path to the model,
+# <i>relative to the TIM_PATH preference</i>. Clients should be sure
+# to perform a linkModel if this is the first time they have
+# accessed this model. Returns null if the file was not found.
+#
+# <dt><b>unlink</b> _path_ _key_
+# <dd>
+# Unlink from a model. The key must be a key that was previously
+# used to link to the model, or an error is raised.
+# </dl>
+#
+ensemble ::tycho::model {
+    # Link a client to the model
+    option link {path key} {
+	if ![::info exists _openModels($path)] {
+	    error "Model $path is not open"
+	}
+	if [::info exists _linkedClients($path,$key)] {
+	    error "Model $path is already linked by $key"
+	}
+	set _linkedClients($path,$key) 1
+    }
+
+    # Open a TIM model file and return the model
+    option open {name {path {}}} {
+	if [::info exists _openModels($name)] {
+	    # Already open, so return
+	    return $_openModels($name)
+	} else {
+	    # Get the default suffix-based mode and sub-mode
+	    ::tycho::Registry::registeredMode $name hdr
+	    
+	    # Find the file
+	    set file [::tycho::urlPathSearch $name \
+		    [concat $path [::tycho::splitPath \
+		    [::tycho::preference get config TIM_PATH]]]]
+
+	    # Read the actual file header to override defaults
+	    ::tycho::readFileHeader $file hdr
+	    
+	    # If not a TIM file, abort
+	    if { [string tolower $hdr(mode)] != "tim" } {
+		error "$file is not a TIM file"
+	    }
+	    
+	    # The sub-mode determines what to do with the file
+	    if ![::info exists hdr(submode)] {
+		set hdr(submode) {}
+	    }
+	    if ![::info exists _timMapping($hdr(submode))] {
+		error "Unknown TIM type: $hdr(submode)"
+	    }
+	    
+	    FIXME: Unfinished
+	}
+    }
+
+    # Unlink from a model
+    option unlink {path key} {
+	if ![::info exists _linkedClients($path,$key)] {
+	    error "Model $path is not linked by $key"
+	}
+	unset _linkedClients($path,$key)
+	if { [array names _linkedClients($path,*)] == "" } {
+	    delete object $_openModels($path)
+	    unset openModels($path)
+	}
+    }
+}
+
 ##########################################################################
 #### Model
 #
@@ -117,6 +211,9 @@ class ::tycho::Model {
     #################################################################
     ####                protected methods                        ####
 
+    # Configure the -modelname option
+    protected method _modelname {} {}
+
     # Execute a sequence of commands in a list
     protected method _compound {cmdlist}
 
@@ -162,6 +259,18 @@ class ::tycho::Model {
     method debug {args} {
 	eval $args
     }
+
+    #################################################################
+    ####                private common variables                 ####
+
+    # The array of open models 
+    private common _openModels
+
+    # The mapping from TIM submode to Model class 
+    private common _timMapping
+    array set _timMapping {
+    	{} text
+    }
 }
 
 #########################################################################
@@ -172,12 +281,13 @@ class ::tycho::Model {
 #### -modelname configuration
 # Set the name of the model. This name can be used to provide models
 # with meaningful names. If no name is supplied when the model
-# is create, the name will be set to the tail of the object name.
+# is created, the name will be set to the tail of the object name.
 # Model names must be unique. The name should not be changed after the
-# model has been constructed.
+# model has been constructed. Subclasses can change the behaviour when
+# the model name is set by overriding <b>_modelname</b>.
 #
 configbody ::tycho::Model::modelname {
-    ;#
+    _modelname
 }
 
 ########################################################################
