@@ -3,7 +3,7 @@
 
 #include "NamedObj.h"
 #include "DataStruct.h"
-#include "Particle.h"
+#include "dataType.h"
 #include "type.h"
 
 /**************************************************************************
@@ -49,6 +49,8 @@ Plasma: The place where Particles reside in transit back.
 
 Particles: Defined in Particle.h
 ******************************************************************/
+
+class Particle;
 
 	/////////////////////////////////////////
 	// class CircularBuffer
@@ -191,8 +193,11 @@ public:
 	// Initialize when starting a simulation
 	void initialize();
 
+	// Remove a connection
+	virtual void disconnect();
+
 	// Return the porthole we are connected to (see below)
-	PortHole* far() { return farSidePort;}
+	PortHole* far() const { return farSidePort;}
 
         // Print a description of the PortHole
 	StringList printVerbose ();
@@ -235,6 +240,8 @@ public:
 	PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
 		      myBuffer(0) {}
 	
+	// Destructor
+	~PortHole ();
 protected:
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
@@ -418,6 +425,12 @@ public:
         Geodesic() { originatingPort = NULL;
                      destinationPort = NULL;
 		     numInitialParticles = 0;}
+
+	// Destructor -- frees up all particles first
+	~Geodesic() {
+		numInitialParticles = 0;
+		initialize();
+	}
 
 	// initialize() for Geodesic initializes the number of Particles
 	// to that given by the numInitialParticles field, and
