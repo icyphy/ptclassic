@@ -25,8 +25,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-                                                PT_COPYRIGHT_VERSION_2
-                                                COPYRIGHTENDKEY
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Raza Ahmed
  Date of creation: 07/09/96
@@ -83,34 +83,40 @@ int CGCostTarget::run() {
     const Block* origStarBlock;
     while((origStarBlock = (Block*)nextBlock++) != 0) { 
 	// If the block is a star, then iterate through the portholes 
-        if (origStarBlock->isItAtomic()) {       
+	if (origStarBlock->isItAtomic()) {       
 
-            // Declaring another dummy galaxy which consists of the stars form 
-            // the dummyGlobalGalaxy which are then padded up
-            Galaxy* dummyGalaxy = new Galaxy;
+	    // Declaring another dummy galaxy which consists of the stars form 
+	    // the dummyGlobalGalaxy which are then padded up
+	    Galaxy* dummyGalaxy = new Galaxy;
 	    Block* starBlock = origStarBlock->clone();
 	    addTempBlock(starBlock);
-            dummyGalaxy->addBlock(*starBlock, "starBlock"); 
+	    dummyGalaxy->addBlock(*starBlock, "starBlock"); 
 
-            // Following code handles any multiports
-            MultiPortHole* starBlockMport;
-            BlockMPHIter nextstarBlockMport(*starBlock);
-            while((starBlockMport = nextstarBlockMport++) != 0) {
-		selectConnectStarBlock(dummyGalaxy, starBlockMport);
-            }
+	    // Following code handles any multiports
+	    MultiPortHole* starBlockMport;
+	    BlockMPHIter nextstarBlockMport(*starBlock);
+	    while((starBlockMport = nextstarBlockMport++) != 0) {
+		if (!selectConnectStarBlock(dummyGalaxy, starBlockMport)) {
+		    Error::warn("CGCostTarget cannot create a test universe ",
+				"for the star ", origStarBlock->name());
+		}
+	    }
 
 	    // Following code handles single ports
-            PortHole* starBlockport;
-            BlockPortIter nextstarBlockport(*starBlock);
-            while((starBlockport = nextstarBlockport++) != 0) {
-                selectConnectStarBlock(dummyGalaxy,
-				       (MultiPortHole*)starBlockport);
+	    PortHole* starBlockport;
+	    BlockPortIter nextstarBlockport(*starBlock);
+	    while((starBlockport = nextstarBlockport++) != 0) {
+		if (!selectConnectStarBlock(dummyGalaxy,
+					    (MultiPortHole*)starBlockport)) {
+		    Error::warn("CGCostTarget cannot create a test universe ",
+				"for the star ", origStarBlock->name());
+		}
 	    }
 
 	    printGalaxy(dummyGalaxy);
 	    delete dummyGalaxy;
 	    deleteTempBlocks();
-         }
+	 }
     }
     return TRUE;
 }
