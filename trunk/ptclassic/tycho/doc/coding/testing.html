@@ -63,13 +63,13 @@ files.  <CODE>$TYCHO/makefile</CODE> has two rules:
 	<DD> Run all the tests in a <CODE>tycho -ptiny</CODE>
 
 	</DL>
-If you are on a machine that does not have make, you can try
+If you are on a machine that does not have <CODE>make</CODE>, you can try
 <tcl><pre>
 source [file join $TYCHO kernel test alltychotests.tcl]
 </pre></tcl>
 <LI> The tests can also be run by changing to a <CODE>test</CODE>
 directory and typing <CODE>make</CODE> from a shell.  To try this out,
-click on the tcl code below:
+click on the Tcl code below:
 <tcl><pre>
 ::tycho::execModal {make} "[file join $TYCHO kernel test]"
 </pre></tcl>
@@ -147,7 +147,7 @@ test testExample-1.1 {This is the first test example, it does very little} {
 <H3>Parts of a test file</H3>
 Test files should be located in the <CODE>test</CODE> directory.
  <P>The EditItcl class has a test file template menu choice under
-the <CODE>Special</CODE> emy.  The template is located at
+the <CODE>Special</CODE> menu.  The template is located at
 
 <A HREF="../../editors/textedit/templates/testTemplate.itcl"><CODE>$TYCHO/editors/textedit/templates/testTemplate.itcl</CODE></A>
 
@@ -257,7 +257,7 @@ test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
 <H3>Using <CODE>event generate</CODE></H3>
 
 The <CODE>event generate</CODE> command is very handy for testing
-widgets! These tests are doing an <CODE>&lt;Enter&gt;</CODE> and
+widgets The tests below are doing an <CODE>&lt;Enter&gt;</CODE> and
 <CODE>&lt;Leave&gt;</CODE> of a button and checking the text placed
 into a status bar:
 
@@ -367,7 +367,7 @@ grep mystring `find . -name "*.html" -print`
 </PRE>
 
 <H3>Spellchecking</H3>
-Checking the spelling in the HMLT files can be done with:
+Checking the spelling in the HTML files can be done with:
 <PRE>
 cd $TYCHO
 spell `find . -name "*.html" -print`
@@ -384,7 +384,7 @@ moused on, the embedded Tcl code is executed.
 <CODE>tclpre.html</CODE> file that contains all of the embedded Tcl.
 This script is not shipped with Tycho.
 
- <P>After running <CODE>chktclpre</CODE>, start up tycho, view
+ <P>After running <CODE>chktclpre</CODE>, start up Tycho, view
 <CODE>tclpre.html</CODE> and mouse on each block of embedded Tcl code.
 Note that some blocks depend on the widgets created in earlier blocks.
 If you run into problems, you can follow the hyperlink in
@@ -394,19 +394,20 @@ If you run into problems, you can follow the hyperlink in
 <H3>Checking for bogus copyright SCCS keywords</H3>
 
 Run <CODE>~ptdesign/adm/copyright/chkq $TYCHO</CODE> to print out
-the names of files that might have bogus percentQpercent values.
+the names of files that might have bogus <CODE>&#37;Q&#37;</CODE> values.
  <P>
 Then run <CODE>~ptdesign/adm/bin/sccsadmin</CODE> on each file that
-has no value for &#37;Q&#37; substituted in.
+has no value for <CODE>&#37;Q&#37;</CODE>
+substituted in.
 
 <H3>Check the distribution for bogus files</H3>
-Run the following makefile rules and commands
+Run the following makefile rules and commands:
 <DL>
 <DT> <CODE>make realclean</CODE>
 
 <DD> This will remove the <CODE>tclIndex</CODE> files and the files in
 <CODE>doc/codeDoc</CODE>.  The reason to remove the
-<CODE>codeDoc</CODE> files is so that we don't ship html files for any
+<CODE>codeDoc</CODE> files is so that we don't ship HTML files for any
 classes that have been removed.
 
 <DT> <CODE>make install</CODE>
@@ -417,7 +418,7 @@ classes that have been removed.
 <DD> Look for files in the distribution that should not be there.
 
 <DT> <CODE>adm/bin/chkgifs</CODE>
-<DD> This file looks for gif files that are not used by html files
+<DD> This file looks for gif files that are not used by HTML files
 in the distribution.
 
 </DL> 
