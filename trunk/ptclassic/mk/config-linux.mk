@@ -68,7 +68,7 @@ CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 # Variables for the linker
 #
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lm
+SYSLIBS=-lg++ -lieee -lm
 
 LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker #-x -static
 LINKFLAGS_D=-L$(LIBDIR) -g -static
