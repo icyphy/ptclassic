@@ -75,8 +75,11 @@ class ::tycho::Glimpse {
     # Update the glimpse_index entry widget
     method updateGlimpseIndex {}
 
+    ###################################################################
+    ####                         public procs                      ####
+
     # Update the Tycho glimpse database
-    method updateTychoDatabase {}
+    proc updateTychoDatabase {}
 
     ###################################################################
     ####                         private variables                 ####
@@ -257,6 +260,11 @@ body ::tycho::Glimpse::updateGlimpseIndex {} {
     }
 }
 
+    ###################################################################
+    ###################################################################
+    ####                      public procs                         ####
+
+#####################################################################
 #####################################################################
 #### updateTychoDatabase
 # Update $TYCHO/.glimpse_index by running 'make glimpse'
