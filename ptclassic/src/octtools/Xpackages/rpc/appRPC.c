@@ -78,7 +78,7 @@ void (*function)();		/* function to call			*/
 }
 
 
-#defined(FIOASYNC) && defined(SIOCSPGRP)
+#if defined(FIOASYNC) && defined(SIOCSPGRP)
 /* Cygnus cygwin32 does not defined SIOCSPGRP */
 void
 RPCsigio(fd, func)
