@@ -2,11 +2,8 @@
 Version identification:
 $Id$
 
- Copyright (c) 1992, 1993 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. Buck
- Date of creation: 9/10/92
+Copyright (c) 1990-1994 The Regents of the University of California.
+All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this

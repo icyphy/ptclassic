@@ -9,7 +9,7 @@ Author: Edward A. Lee
 Defines a simple interface for stars that call Tcl functions.
 Makes the star parameters available to Tcl scripts.
 
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
