@@ -12,28 +12,15 @@
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
-<h3><a href="$TYCHO/kernel/Glimpse.itcl">Glimpse</a></h3>
-<ul>
-<li>Glimpse should not freeze Tycho while running. Searching
-through say the Ptolemy tree can take a very long time.
-<li>Glimpse.itcl should probably not be in the kernel.
-</ul>
-
 <h3><a href="$TYCHO/kernel/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
-<li>Core dump: Hitting return quickly in a search window can cause two
-    dialogs to appear asking if it's OK to start again at the top.
-    Answering yes to both causes a core dump.
 <li>Need multiple undo.
-<li>Meta-f, Meta-d do not skip over white space.
-<li>Copy and paste using the left and middle mouse buttons
-does not work.
-</ul>
-
-<h3><a href="$TYCHO/kernel/TclShell.itcl">TclShell</a></h3>
-<ul>
-<li>
+<li>Meta-f, Meta-d do not skip over white space (a Tk "feature" -- need to
+    override it).
+<li>Selecting text does not automatically put it into the clipboard.
+After it's deselected, then it cannot be "stuffed" elsewhere from the
+clipboard.
 </ul>
 
 <h3><a href="$TYCHO/kernel/EditSearch.itcl">EditSearch</a></h3>
@@ -48,31 +35,38 @@ does not work.
 <li>Spelling checker should ignore single letter words.
 </ul>
 
+<h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
+<ul>
+<li>Key-driven posting of menus does not work.  Displayer needs to
+    bind Alt and F-10 to post the menus.
+    Also, the Edit widget should not mark modified when the Alt key is hit.
+    The menu buttons created in MenuSupport and MenuBar may need to be
+    made global (with an uplevel #0).
+</ul>
+
+<h3><a href="$TYCHO/kernel/Glimpse.itcl">Glimpse</a></h3>
+<ul>
+<li>Glimpse should not freeze Tycho while running. Searching
+through say the Ptolemy tree can take a very long time.
+<li>Glimpse.itcl should probably not be in the kernel.
+</ul>
+
 <h3><a href="$TYCHO/kernel/HTML.itcl">HTML</a></h3>
 <ul>
-<li>Bulleted lists are not very well aligned on the left when there is
-    more than one line.
-    See surfit for alternative implementation.
+<li>The HTML parser is quite slow.
 <li>In "img" directives, align="right" causes an error.
 <li>A &lt;p&gt; after an image is ignored.
 <li>If you have the source code for an HTML file open, and you try to open
     with HTML file with the "Back" command, you get an error message that
     is basically wrong, since there is no problem.
-<li>The following is not formatted correctly:
-<pre>
-&lt;dt&gt;Raza Ahmed
-&lt;dt&gt;&lt;a href="http://ptolemy.eecs.berkeley.edu/~sunil"&gt;Sunil Bhave&lt;/A&gt;
-&lt;dt&gt;&lt;a href="http://ptolemy.eecs.berkeley.edu/~wtc"&gt;Wan-Teh Chang&lt;/a&gt;
-</pre>
 <li>    If I have two HTML viewers open and if in one of them I click on
     a link that references the file open in the other, the other
     one is brought to the font and the one I am looking at doesn't
-    change. This isn't what you'd expect.
-<li>    If you click on a link to a non-existent file you get a blank
-page. It should just print a status message.
+    change. This isn't what some people would expect.
 <li>    There should be a menu entry to hide the toolbar and location.
-<li>    All toolbar commands are not available from menus.
+<li>    Not all toolbar commands are available from menus.
 <li>    There are no key bindings for toolbar commands.
+<li>    The print command prints only a crude facsimile of the document.
 </ul>
 
 <h3><a href="$TYCHO/kernel/ListBrowser.itcl">ListBrowser</a></h3>
@@ -87,28 +81,22 @@ page. It should just print a status message.
 <li>Name completion does not work through directories.
 </ul>
 
-<h3><a href="$TYCHO/kernel/Query.itcl">Query</a></h3>
+<h3><a href="$TYCHO/kernel/TclShell.itcl">TclShell</a></h3>
 <ul>
-<li>choice method fails.  E.g.
-    <tcl><pre>
-::tycho::Query .bb
-.bb choice drink {Drink:} {Coke Snapple Lemmonade} Coke
-.bb choice chips {Chips:} {None Potato Plantain} None
-::tycho::Dialog::wait .bb
-    </pre></tcl>
-
- <P> (This "bug" is because of the auto-raise behavior of
-::tycho::Dialog::wait, which raises the dialog window above
-the popup menu. You can turn it off by supplying an extra
-"0" argument to ::tycho::Dialog::wait.)
+<li> When a TclShell is displaying stdout on its last line, typed
+commands are not always interpreted correctly.
+</ul>
 
 </ul>
 
 <h3><a href="$TYCHO/kernel/WelcomeWindow.itcl">WelcomeWindow</a></h3>
 <ul>
-<li> Mike Williamson pointed out that if your pigi binary has a long name,
+<li> If your ptolemy binary has a long name,
 	then the welcome window is cropped at the bottom, and there
-	is no scrollbar.
+	is no scrollbar.  We don't generally want a scrollbar here,
+        and either the space bar or C-x v will scroll down (or the
+ 	page down or down arrow buttons), so it's not clear this is a
+	bug.
 </ul>
 
 <h1><a name="bugs in text editors">Bugs in text editors</a></h1>
@@ -133,8 +121,12 @@ the popup menu. You can turn it off by supplying an extra
 <h1><a name="bugs in visual editors">Bugs in visual editors</a></h1>
 There are lots of bugs to be fixed in the visual editors, here are 
 some of the biggies.
+<h3><a href="$TYCHO/editors/visedit/Graphics.itcl">Graphics</a></h3>
 <ul>
 <li> Cut and past does not work in the Graphics widget.
+<li> Moved titles new position is not saved.
+<li> Moving or adding titles does not mark the buffer modified.
+<li> Most bindings in the File menu do not work.
 </ul>
 
 <p>
