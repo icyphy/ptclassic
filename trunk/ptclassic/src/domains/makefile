@@ -40,6 +40,7 @@ makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	    fi ; \
 	done
 
+.PHONY:	TAGS
 TAGS:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
