@@ -57,12 +57,11 @@ complete filename of the displayed image.
 		const char* saveMe = saveImage;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256];
-		if (!(const char*) imageName) {
-			strcpy(fileName, tempFileName());
-		} else {
-			strcpy(fileName, imageName);
+		char fileName[256];		fileName[0] = '\000';
+		if ((const char*) imageName) {
+			strcpy(fileName, (const char*) imageName);
 		}
+		if (fileName[0] == '\000'){ strcpy(fileName, tempFileName()); }
 		char numstr[16];
 		sprintf(numstr, ".%d", imD->retId());
 		strcat(fileName, numstr);
