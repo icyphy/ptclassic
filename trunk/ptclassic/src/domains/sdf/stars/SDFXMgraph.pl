@@ -26,7 +26,7 @@ defstar {
 	desc { "Generate a multi-signal plot with the xgraph program." }
 	inmulti {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
@@ -63,7 +63,7 @@ defstar {
 
 	go {
 		for (int i = 1; i <= input.numberPorts(); i++) {
-			graph.addPoint(i, float(index), double(input()%0));
+			graph.addPoint(i, float(index), float(input()%0));
 		}
 		index++;
 	}

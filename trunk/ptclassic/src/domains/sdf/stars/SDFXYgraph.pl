@@ -26,9 +26,9 @@ defstar {
 	}
 	input {
 		name { xInput }
-		type { float }
+		type { anytype }
 	}
 	go {
-		graph.addPoint(double(xInput%0), double(input%0));
+		graph.addPoint(float(xInput%0), float(input%0));
 	}
 }

@@ -24,7 +24,7 @@ defstar {
 	desc { "Generate a plot with the xgraph program." }
 	input {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
