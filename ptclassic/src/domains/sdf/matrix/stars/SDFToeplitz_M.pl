@@ -15,17 +15,17 @@ Put a sequence of real-valued samples into a rectangular Toeplitz matrix.
     }
 	htmldoc {
 <a name="Toeplitz matrix"></a>
-Generate a floating-point data matrix X, with dimensions
-<i>numRows</i></b> x <i>numCols</i></b>, from a stream of
-<i>numRows</i></b> + <i>numCols</i></b> - 1 input particles.
+Generate a complex data matrix <i>X</i>, with dimensions
+<i>numRows</i> &#215; <i>numCols</i>, from a stream of
+<i>numRows</i> + <i>numCols</i> - 1 input particles.
 The data matrix is a Toeplitz matrix such that the first row is
 [ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(1) ],
 and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ], where
-<i>numRows</i></b> = <i>N-M+</i>1<i></i> and <i>numCols</i></b> = <i>M</i>.
+<i>numRows</i> = <i>N-M+</i>1<i></i> and <i>numCols</i></b> = <i>M</i>.
 <a name="singular-value decomposition"></a>
 This is the form of the matrix that is required by the singular-value
 decomposition star
-<tt>SVD_M ,</tt>
+<tt>SVD_M</tt>,
 among others.
     } 
     defstate {
