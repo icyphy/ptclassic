@@ -182,7 +182,6 @@ st_table *at_table;		/* Hash table of terminals */
 {
     st_generator *gen = st_init_gen(at_table), *lg;
     st_table *layers;
-    char **ary;
     char *key, *value;
     ntInfo *new_info;
     int i;
@@ -239,9 +238,10 @@ char *arg;			/* Unused             */
  */
 {
     struct nt_info *info = (struct nt_info *) value;
-    int i;
 
 #ifdef NOTDEF
+    int i;
+
     for (i = 0;  i < info->l_count;  i++) {
 	FREE(info->l_ary[i]);
     }
@@ -396,7 +396,6 @@ struct octBox *new_impl;	/* New terminal implementation */
     int32 np = MAXP;
     struct octPoint pnts[MAXP];
     struct octPoint i_center;
-    struct octBox bb;
     int min_dist, dist, i, idx;
 
     i_center.x = (new_impl->lowerLeft.x + new_impl->upperRight.x)/2;
