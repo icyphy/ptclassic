@@ -52,6 +52,15 @@ is unlikely to build and has not been tested.
 adds a layer to file access and other operations.
 
 
+<li> <CODE>make</CODE> fails with
+<pre>
+making install in kernel
+../../mk/compile.mk:95: *** missing separator.  Stop.
+</pre>
+Be sure that you do not have the <CODE>LIB</CODE> environment
+variable set in bash.  Try typing:
+<CODE>unset LIB</CODE>
+
 <li> <CODE>make</CODE> failed with
 <pre>
 c:/tycho0.3.devel/mk/tycommon.mk:276: *** target pattern contains no `%'.
