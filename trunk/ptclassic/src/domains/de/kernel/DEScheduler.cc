@@ -13,8 +13,10 @@ $Id$
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
  Revisions:
+	6/20/90 -- no longer call initialize() and start() on each
+	Star.  Galaxy::initialize does this now.
 
- Modification : implement DE scheduler
+These are the methods for the discrete event scheduler.
 
 **************************************************************************/
 
@@ -27,22 +29,11 @@ extern Error errorHandler;
 
 
 	////////////////////////////
-	// wrapup
-	////////////////////////////
-
-int DEScheduler :: wrapup (Block& block) {
-	Galaxy& galaxy = block.asGalaxy();
-	// Run the termination routines of all the atomic stars.
-	for (int i = alanShepard.totalSize(galaxy); i>0; i--)
-		alanShepard.nextStar().wrapup();
-}
-
-	////////////////////////////
 	// displaySchedule
 	////////////////////////////
 
 StringList DEScheduler :: displaySchedule (Block& galaxy) {
-	return "not yet implemented";
+	return "DE schedule is computed at run-time\n";
 }
 
 
@@ -68,9 +59,9 @@ int DEScheduler :: setup (Block& b) {
 		DEStar& star = (DEStar&)alanShepard.nextStar();
 
 		star.eventQ = &eventQ;
-		star.initialize();
-		star.start();
 	}
+	galaxy.initialize();
+	return TRUE;
 }
 
 	////////////////////////////
