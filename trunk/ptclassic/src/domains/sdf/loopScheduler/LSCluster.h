@@ -88,7 +88,8 @@ public:
 	// simulate execution for schedule generation.  We also
 	// call simRunStar on the "real" star, so info like the
 	// maximum # of tokens on each arc will get set right.
-	void simRunRealStars();
+	// FIXME: this may not be right.
+	void fixBufferSizes(int);
 
 private:
 	SDFFiring* firing;	// local schedule
