@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MotorolaTarget.h"
 
 Sim56Target :: Sim56Target(const char* nam, const char* desc) :
-	MotorolaTarget(nam,desc,"CG56Star"),CG56Target(nam,desc),MotorolaSimTarget(nam,desc,"CG56Star")
+	MotorolaTarget(nam,desc,"CG56Star","CG56"),CG56Target(nam,desc),MotorolaSimTarget(nam,desc,"CG56Star","CG56")
 {
 	initStates();
 }

@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MotorolaTarget.h"
 
 Sub56Target :: Sub56Target(const char* nam, const char* desc) :
-	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star")
+	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star","CG56")
 {
 	initStates();
 }
