@@ -288,7 +288,9 @@ body ::tycho::TclShell::constructor {args} {
     bind $itk_component(text) <Meta-b> "%Q backWord; break"
     bind $itk_component(text) <Key-Escape><Key-b> "%Q backWord; break"
     bind $itk_component(text) <Control-p> "%Q backCommand 1; break"
-    bind $itk_component(text) <Control-n> "%Q backCommand -1; break"
+    bind $itk_component(text) <Control-n> "%Q backCommand -1; break" 
+    bind $itk_component(text) <Up> "%Q backCommand 1; break"
+    bind $itk_component(text) <Down> "%Q backCommand -1; break"
     bind $itk_component(text) <Control-u> "%Q killLine; break"
     
     # Modify search to not allow changing the text
