@@ -52,9 +52,22 @@ typedef int vemStatus;		/* Status codes          */
 #define VEMALLOC(type)	(type *) VEMALLOCNAME(sizeof(type))
 #define VEMARRAYALLOC(type, count) \
 	(type *) VEMALLOCNAME((unsigned)(sizeof(type) * (count)))
+
+
+#ifdef NEVER
+/* If VEMREALLOCNAME is realloc, then convert the 3 arg macro to a 2
+ * arg call.
+ */
 #define VEMREALLOC(type, ptr, newcount) \
 	(type *) VEMREALLOCNAME((char *) ptr, \
 				(unsigned) (sizeof(type) * (newcount)))
+#else
+/* Substitute in the REALLOC call here, see Packages/utility/utility.h */
+#define VEMREALLOC(type, ptr, newcount) \
+             VEMREALLOCNAME(type, ptr, newcount)
+
+#endif
+
 #define VEMFREE(ptr)	VEMFREENAME((char *) (ptr)) 
 
 #define VEMSTRCOPY(s)	STRMOVE(VEMALLOCNAME((unsigned) (STRLEN(s) + 1)), (s))
