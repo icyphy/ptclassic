@@ -1,7 +1,7 @@
 defstar {
 	name { SubInt }
 	domain { SDF }
-	desc { Output the "pos" input minus all "neg" inputs. }
+	desc { Output the pos input minus all neg inputs. }
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
