@@ -127,7 +127,11 @@ body ::tycho::ErrorMessage::constructor {args} {
 body ::tycho::ErrorMessage::stackTrace {} {
     global errorInfo
     if {$errorInfo != ""} {
-	post "The most recent stack trace found is:\n$errorInfo"
+	set nm [autoName .stack]
+	EditStack $nm \
+		-text "The most recent stack trace found is:\n$errorInfo"
+	$nm configure -readonly 1
+	$nm centerOnScreen
     } {
 	warn "No stack trace found"
     }
