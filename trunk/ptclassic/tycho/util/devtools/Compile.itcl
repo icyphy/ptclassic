@@ -60,16 +60,12 @@ proc ::tycho::compileC {filename args} {
         set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
     }
 
-    eval $compiler compile $filename $args
-#     if [catch {eval $compiler compile $filename $args} msg] {
-#        # The command failed.  It would be nice to check to see
-#         # whether the program exists, and generate a suitable message,
-#         # but it's not clear how to do this.
-#         error "The following command invocation failed:\n \
-#                 $filename\n \
-#                 Is the program [lindex $filename 0] \
-#                 installed and in your path?\n $msg"
-#     }
+    if [catch {eval $compiler compile $filename $args} msg] {
+        # The command failed.  It would be nice to check to see
+        # whether the program exists, and generate a suitable message,
+        # but it's not clear how to do this.
+        error "$filename failed to compile.  Be sure that the file exists"
+     }
 }
 
 
