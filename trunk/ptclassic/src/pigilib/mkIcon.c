@@ -346,7 +346,7 @@ octObject *galFacetPtr, *iconFacetPtr;
     TermList terms;
     char buf[MSG_BUF_MAX];
     octObject prop;
-    char *name = galFacetPtr->contents.facet.cell;
+    char *name = BaseName(galFacetPtr->contents.facet.cell);
 
     sprintf(buf, "Making galaxy icon for '%s'", name);
     PrintDebug(buf);
@@ -355,7 +355,7 @@ octObject *galFacetPtr, *iconFacetPtr;
     ERR_IF1(!CompileGalStandalone(galFacetPtr));
     ERR_IF1(!KcGetTerms(name, &terms));
     ERR_IF1(!MkBaseIcon(iconFacetPtr, galFacetPtr->contents.facet.cell, gal));
-    ERR_IF1(!MkLabel(iconFacetPtr, BaseName(galFacetPtr->contents.facet.cell)));
+    ERR_IF1(!MkLabel(iconFacetPtr, name));
     ERR_IF1(!MkTerms(iconFacetPtr, &terms));
     CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
