@@ -77,6 +77,7 @@ class Profile;
 
 class CGStar : public DynDFStar {
 friend class CGTarget;
+friend class CGCPortHole;
 public:
 	// Constructor
 	CGStar();
@@ -238,6 +239,9 @@ protected:
 private:
 	// Reset local codeblock labels
 	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
+
+ 	// parse macro invocation until after the end of the argument list
+ 	StringList processMacro(const char*& text);
 
 	// indicate if a fork star
 	int forkId;
