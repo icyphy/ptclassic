@@ -101,10 +101,10 @@ namespace ::tycho {
     # ::tycho::File::registerExtensions {.fsm} \
     #       {::tycho::view EditFSM -file {%s}} \
     #       {Finite state machine editor}
-    # Not ready for release -- hjr
-    #::tycho::File::registerExtensions {.graph} \
-    #        {::tycho::view EditGraph -file {%s}} \
-    #        {Graph editor} "graphics"
+
+    ::tycho::File::registerExtensions {.graph} \
+            {::tycho::view EditGraph -file {%s}} \
+            {Graph editor} "graphics"
     if !$ptolemyfeature(octtools) {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
