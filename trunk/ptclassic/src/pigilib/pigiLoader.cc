@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+#define NEED_SYS_ERRLIST	// compat.h uses this.
 #include <std.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,11 +54,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV)
 #include <fcntl.h>		// For open().
 #endif /*hppa GNUG SOL2*/
-
-// FIXME: required to fix a bug in the Sun4 errno.h file
-//      remove when Sun fixes it.
-extern char *sys_errlist[];
-
 
 // choose compiler to use
 #ifdef __GNUG__
