@@ -7,10 +7,11 @@
 PTOLEMY       = ../../..
 DOCBIN	      = $(PTOLEMY)/doc/bin
 PRINTSEC      = printsec
+OPTIONS	      = 
 
 print:
-	$(DOCBIN)/$(PRINTSEC) -H standalone overall
+	$(DOCBIN)/$(PRINTSEC) -H standalone $(OPTIONS) overall
 
 preview:
-	$(DOCBIN)/$(PRINTSEC) -preview -H standalone overall
+	$(DOCBIN)/$(PRINTSEC) -preview -H standalone $(OPTIONS) overall
 
