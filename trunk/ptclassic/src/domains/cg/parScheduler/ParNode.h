@@ -118,8 +118,7 @@ public:
 	void resetWaitNum() { waitNum = ancestors.size(); }
 
 	// Return whether or not this node is presently fireable.
-	int fireable() { waitNum--;
-			 return (waitNum > 0)? FALSE : TRUE ; }
+	int fireable() { return ((--waitNum) <= 0); }
 
 	// print outs.
 	StringList print();	// Prints star name and invocation
