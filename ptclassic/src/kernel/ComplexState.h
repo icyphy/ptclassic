@@ -33,10 +33,10 @@ public:
         void initialize();
 
         // the type
-	const char* type(); // { return "COMPLEX";}
+	const char* type() const; // { return "COMPLEX";}
 
         // the value as a string
-	StringList currentValue();
+	StringList currentValue() const;
 
         // assignment from a Complex
         Complex& operator=(const Complex& rvalue) { return val = rvalue;}
@@ -45,7 +45,7 @@ public:
         operator Complex() { return val;}
 
 
-	State* clone ();//  {return new ComplexState;}
+	State* clone () const;//  {return new ComplexState;}
 
 private:
 	// Evaluate expression  in string
