@@ -168,6 +168,9 @@ class ::tycho::IDoc {
     # Return the filename of the documentation of the given class.
     public method docFile {classname}
 
+    # Return the filename of the documentation related to the given class.
+    public method relFile {classname}
+
     ###################################################################
     ####                      protected variables                  ####
     # The name of the currently displayed class (others are related to this)
@@ -225,6 +228,9 @@ class ::tycho::IDoc {
 
     # Display the proper methods/procedures in the contents widget.
     private method displayMeth {protection}
+
+    # Display the related procs in the contents widget.
+    private method displayRel {}
 
     # Display the proper variables in the contents widget.
     private method displayVar {protection}
@@ -591,6 +597,14 @@ body ::tycho::IDoc::insertData {data} {
     set language [$tempClass modelcget -language]
     set mainClass [$tempClass modelcget -name]
     set myClass($mainClass) $tempClass
+    
+    # get the related file, if it exists
+    set relfile [relFile $mainClass]
+    if {$relfile != {}} {
+        set myClass(related) [::tycho::Class [::tycho::autoName class]]
+        $myClass(related) read file $relfile
+    }
+
     display
     putHtml $mainClass [$tempClass get annotation explanation]
 }
@@ -608,6 +622,7 @@ body ::tycho::IDoc::putHtml {class data {top 1}} {
                <title>Class [$myClass($class) modelcget -name]</title>
                </head>
                <body bgcolor=\"$itk_option(-bgcolor)\">
+               <h1>Class [$myClass($class) modelcget -name]</h1>
                $data
                </body>
                </html>"
@@ -680,6 +695,29 @@ body ::tycho::IDoc::docFile {classname} {
     return "$docfile"
 }
 
+#####################################################################
+#### relFile
+# FIXME: this is a hack and not valid under all (many) cases 
+#
+body ::tycho::IDoc::relFile {classname} {
+    set relname "[info namespace tail $classname]_rel.idoc"
+
+    lappend dirs {$TYCHO/kernel}
+    lappend dirs {$TYCHO/editors/textedit}
+    lappend dirs {$TYCHO/editors/slate}
+    lappend dirs {$TYCHO/editors/visedit}
+    lappend dirs {$TYCHO/lib/tydoc}
+    
+    foreach dir $dirs {
+        set findfile [file join $dir doc codeDoc $relname]
+        set findfile [::tycho::expandPath $findfile]
+        set relfile [glob -nocomplain $findfile]
+        if {$relfile != {}} {
+            break
+        }
+    }
+    return "$relfile"
+}
 
     ###################################################################
     ###################################################################
@@ -712,10 +750,11 @@ body ::tycho::IDoc::bindDesc {class item label} {
         "\p" {set type method}
         "\m" {set type method}
         "\v" {set type variable}
+        "\r" {set type method}
         default {set type {}}
     }
 
-    if {$class != $mainClass} {
+    if {$class != $mainClass && $class != "related"} {
         # Don't display class it's from if it's from this class.
         set class "<$class> "
     } {
@@ -747,6 +786,7 @@ body ::tycho::IDoc::bindExpl {class item label} {
         "\p" {set type method}
         "\m" {set type method}
         "\v" {set type variable}
+        "\r" {set type method}
         default {set type {}}
     }
 
@@ -776,10 +816,8 @@ body ::tycho::IDoc::deleteClasses {{all 1}} {
         unset myClass
     } else {
         # Only delete inherited classes
-        foreach class [array names myClass] {
-            if {$class != $mainClass} {
-                catch {delete object $myClass($class)}
-            }
+        foreach class $myHeritage {
+            catch {delete object $myClass($class)}
         }
     }
     set myHeritage ""
@@ -812,6 +850,10 @@ body ::tycho::IDoc::display {} {
         $myContents bind class <Leave> [code \
                 "$this putStatus {}"]
     }
+
+    if [info exists myClass(related)] {
+        displayRel
+    } 
 
     # FIXME in general, insert class parameters here
 
@@ -955,9 +997,47 @@ body ::tycho::IDoc::displayMeth {protection} {
 }
 
 #####################################################################
+#### displayRel
+# Display the related procs (only) to the current class in the myContents 
+# widget according to the $language variable. NOTE: only Itcl supported
+# here.
+body ::tycho::IDoc::displayRel {} {
+    set classModel $myClass(related)
+    
+    switch $language {
+        "Itcl" {
+            set subnames {}
+            foreach method [$classModel methods \
+                    -protection public -scope class] {
+                # put label into contents widget
+                $myContents appendlabel $method\r \
+                        -text $method \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -publiccolor]
+                # setup bindings on <Enter> and <B1-Click>
+                bindDesc related $method $method\r
+                bindExpl related $method $method\r
+                lappend subnames $method\r
+            }
+            # insert panel if any procs found
+            if {$subnames != {}} {
+                set subnames [lsort $subnames]
+                $myContents append RelatedProcs "$subnames" \
+                        -text "Related Procs" \
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -publiccolor]
+            }   
+           
+        }
+        default {}
+    }
+}
+
+
+#####################################################################
 #### displayVar
 # Display the variables of the given protection in the myContents
-# widget in according to the $language variable.
+# widget according to the $language variable.
 #
 body ::tycho::IDoc::displayVar {protection} {
     set classModel $myClass($mainClass)
@@ -1114,7 +1194,7 @@ body ::tycho::IDoc::formatExpl {class item type} {
 
     set html "<b>$item</b> <i>$paramlist</i><p> $expl"
     
-    if {$class != $mainClass} {
+    if {$class != $mainClass && $class != "related"} {
         set html "$html<br><br><br><hr>\
                 <a href=\"[docFile $class]\">$class</a>"
     }
