@@ -1,8 +1,5 @@
 static const char file_id[] = "CGCNOWamTarget.cc";
 /******************************************************************
-Version identification:
-$Id$
- 
 Copyright (c) 1995-%Q%  The Regents of the University of California.
 All Rights Reserved.
  
@@ -26,53 +23,73 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
  
- Programmer: Patrick Warner
+Programmer: Patrick Warner
+Version: $Id$
  
-*******************************************************************/
+This file is modelled after CGCMultiTarget.cc.
 
+*******************************************************************/
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "pt_fstream.h"
-#include "Error.h"
+// Ptolemy kernel include files
+#include "pt_fstream.h"         // define pt_ofstream class
+#include "StringList.h"         // define StringList class
+#include "Error.h"              // define Error class
+#include "Block.h"              // needed for KnownTarget.h
+#include "Target.h"             // needed for KnownTarget.h
+#include "KnownTarget.h"        // define KnownTarget to register target
+
+// Ptolemy domain include files
 #include "CGUtilities.h"
 #include "CGCStar.h"
-#include "KnownTarget.h"
 #include "CGCNOWamTarget.h"
 #include "CGCTarget.h"
 #include "CGCSpread.h"
 #include "CGCCollect.h"
 #include "CGCNOWamSend.h"
 #include "CGCNOWamRecv.h"
-#include <ctype.h>
+
+// Standard include files
+#include <ctype.h>		// define isspace macro
 #include <stdio.h>
 #include <sys/types.h>
-#include <netdb.h>
-#include <netinet/in.h>
+#include <netdb.h>		// define gethostbyname and struct hostent
 #include <arpa/inet.h>		// Sol2 needs this for inet_addr()
 
-// stream for logging information.  It is opened by the setup method.
+extern "C" {
+#include <netinet/in.h>                 // for struct in_addr
+char* inet_ntoa(struct in_addr);
+}
 
+// stream for logging information.  It is opened by the setup method.
 static pt_ofstream feedback;
 
-// -----------------------------------------------------------------------------	
+// Defined in CGCDomain.cc
+extern const char CGCdomainName[];
+
+// Constructor
 CGCNOWamTarget::CGCNOWamTarget(const char* name,const char* starclass,
 		   const char* desc) : CGMultiTarget (name,starclass,desc) {
 
 	// specify machine names
-	addState(machineNames.setState("machineNames",this,"lucky, babbage", "machine names (separated by a comma)"));
+	addState(machineNames.setState("machineNames", this, "lucky, babbage",
+		"machine names (separated by commas)"));
 	addState(nameSuffix.setState("nameSuffix",this,"",
-		"common suffix of machine names(e.g. .berkeley.edu)"));
+		"common suffix of machine names such as .berkeley.edu"));
 
-	// make some states invisible
+        // override target parameter values
+	destDirName = destDirectoryName(CGCdomainName);
+	destDirectory.setInitValue(destDirName);
 	childType.setInitValue("default-CGC");
 	compileFlag.setInitValue("NO");
 	runFlag.setInitValue("NO");
 	displayFlag.setInitValue("YES");
 	resources.setInitValue("");
 
+	// Initialize data members
 	machineInfo = 0;
 	pairs = 0;
 	baseNum = 0;
@@ -86,7 +103,6 @@ CGCNOWamTarget :: ~CGCNOWamTarget() {
 //	}
 }
 
-// -----------------------------------------------------------------------------
 DataFlowStar* CGCNOWamTarget :: createSend(int, int, int) {
 	LOG_NEW; CGCNOWamSend* s = new CGCNOWamSend;
 	return s;
@@ -107,7 +123,7 @@ DataFlowStar* CGCNOWamTarget :: createCollect() {
 
 void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	feedback << "\tpairing " << s->fullName() << " --> " << r->fullName()
-		<< "\n"; feedback.flush();
+		 << "\n"; feedback.flush();
 	CGCNOWamSend* cs = (CGCNOWamSend*) s;
 	CGCNOWamRecv* cr = (CGCNOWamRecv*) r;
         int pnum = (int)nprocs;
@@ -143,7 +159,8 @@ void CGCNOWamTarget :: setMachineAddr(CGStar* s, CGStar* r) {
 			CGTarget* temp = (CGTarget*) child(mapArray->elem(i));
 			if (temp == sg) {
 				six = i; numMatch++;
-			} else if (temp == tg) {
+			}
+			else if (temp == tg) {
 				rix = i; numMatch++;
 			}
 			if (numMatch >= 2) break;
@@ -175,11 +192,7 @@ int CGCNOWamTarget :: machineId(Target* t) {
 	return -1;
 }
 	
-// -----------------------------------------------------------------------------
-			///////////////////
-			// setup
-			///////////////////
-
+// setup
 void CGCNOWamTarget :: setup() {
 //	if (inherited()) {
 //		CGCNOWamTarget* orgT = (CGCNOWamTarget*) child(0)->parent();
@@ -190,7 +203,14 @@ void CGCNOWamTarget :: setup() {
 
 	// all runs will append to the same file.
 	// FIXME: should not be done this way.
-	if (!feedback) feedback.open("CGCNOWam_log");
+	if (!feedback) {
+                // Put the log file in the destination directory
+                StringList pathname = (const char*) destDirectory;
+                pathname << "/" << "CGCNOWam_log";
+
+                // Expand environment variables in pathname and open the file
+                feedback.open(pathname);
+	}
 	if (!feedback) return;
 
 	// machine idetifications
@@ -257,32 +277,28 @@ int CGCNOWamTarget :: identifyMachines() {
 	return TRUE;
 }
 
-// -----------------------------------------------------------------------------
+// Return a copy of itself
 Block* CGCNOWamTarget :: makeNew() const {
 	LOG_NEW; return new CGCNOWamTarget(name(),starType(),descriptor());
 }
-// -----------------------------------------------------------------------------
-			/////////////////////////////
-			// wormhole interface method
-			/////////////////////////////
 
+// wormhole interface method
 int CGCNOWamTarget :: receiveWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	cp.forceSendData();
 	return TRUE;
 }
-// -----------------------------------------------------------------------------
+
+// wormhole interface method
 int CGCNOWamTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	cp.forceGrabData();
 	return TRUE;
 }
 
-// -----------------------------------------------------------------------------
 ISA_FUNC(CGCNOWamTarget,CGMultiTarget);
 
 static CGCNOWamTarget targ("CGCNOWam","CGCStar",
 "A NOW target for parallel C code generation");
 
 static KnownTarget entry(targ,"CGCNOWam");
-
