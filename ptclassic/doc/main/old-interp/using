@@ -65,6 +65,7 @@ simulation, adding
 and connections among them.
 .H3 "Setting the Domain"
 .pp
+.IE "domain command"
 \*(PT supports multiple simulation domains, and so does the \*(PT
 interpreter.  Before creating a simulation environment and running
 it, it is necessary to establish the domain.  Currently, three domains
@@ -106,6 +107,7 @@ The command
 .(c
 (star \fIname class\fP)
 .)c
+.IE "star command"
 creates a new instance of a
 .c Star
 or
@@ -137,6 +139,7 @@ The synonym
 .(c
 (galaxy \fIname\fP \fIclass\fP)
 .)c
+.IE "galaxy command"
 is also provided to create an instance of a
 .c Galaxy .
 .H3 "Connecting Stars and Galaxys
@@ -145,6 +148,7 @@ The next step is to connect the blocks so that they can
 pass data among themselves using the
 .c connect
 command.
+.IE "connect command"
 This forms a connection between two 
 .c Star s
 (or
@@ -185,6 +189,7 @@ command creates a node:
 .)c
 The
 .c nodeconnect
+.IE "nodeconnect command"
 command connects a porthole to a node:
 .(c
 (nodeconnect (\fIstarname portname\fP) \fInodename\fP)
@@ -198,6 +203,7 @@ there are typically external connections to that
 that need to be connected through to internal blocks.
 The
 .c input
+.IE "input command"
 command is used to add an input porthole to the current
 .c Galaxy ,
 and associate it with an input porthole of one of the contained
@@ -221,6 +227,7 @@ to a
 .pp
 The
 .c output
+.IE "output command"
 command is analogous to
 .c input ,
 except that it's for output portholes.  Example:
@@ -245,6 +252,7 @@ allowing you to customize the behavior of blocks within the
 .pp
 The
 .c state
+.IE "state command"
 command adds a
 .c State
 of the given
@@ -305,6 +313,7 @@ names (enclosed in quotes).
 .pp
 The
 .c setstate
+.IE "setstate command"
 command is used to change the value of a
 .c State.
 It can be used in three contexts:
@@ -390,6 +399,7 @@ below.
 .pp
 The
 .c initstate
+.IE "initstate command"
 command (which takes no arguments) causes all states in the universe
 to be initialized (all the initial-value strings are parsed and interpreted).
 Note that this action is automatically taken whenever a universe is
@@ -408,6 +418,7 @@ which is a string that briefly describes the purpose of that block.
 The
 .c descriptor
 command changes the descriptor for the current
+.IE "descriptor command"
 .c Galaxy ,
 which is
 by default "An interpreted galaxy".  Example:
@@ -427,6 +438,7 @@ rather than the
 itself.
 The
 .c numports
+.IE "numports command"
 command applies to
 .c Star s
 that contain
@@ -477,6 +489,7 @@ Here is an example:
 .pp
 The
 .c defgalaxy
+.IE "defgalaxy command"
 command allows the user to define a new class of
 .c Galaxy .
 The syntax is
@@ -566,6 +579,7 @@ of the interpreter.
 .pp
 The
 .c knownlist
+.IE "knownlist command"
 command displays the classes of
 .c Star s
 and
@@ -589,6 +603,7 @@ domain.
 .pp
 If invoked without an argument, the
 .c show
+.IE "show command"
 command displays information on the current
 .c Galaxy.
 If invoked with an argument, the argument
@@ -613,6 +628,7 @@ The syntax is
 .pp
 The
 .c dump
+.IE "dump command"
 command is similar to
 .c show ,
 except that it is recursive; it shows in detail the structure of
@@ -647,6 +663,7 @@ simulation.
 .pp
 The
 .c schedule
+.IE "schedule command"
 command generates and prints the schedule (the order in
 which
 .c Star s
@@ -660,6 +677,7 @@ DE schedule as there is for SDF).  Syntax:
 .pp
 The
 .c run
+.IE "run command"
 command generates the schedule and runs it
 .i n
 times, where
@@ -681,6 +699,7 @@ Syntax:
 .pp
 The
 .c  cont
+.IE "cont command"
 command continues the simulation for
 .i n
 additional steps, or time units.  If the argument is omitted,
@@ -696,6 +715,7 @@ The syntax is
 .pp
 The
 .c wrapup
+.IE "wrapup command"
 command calls the wrapup method of each
 .c Star ,
 signaling the end of the simulation run.
@@ -711,6 +731,7 @@ have built with previous commands.
 .pp
 The
 .c reset
+.IE "reset command"
 command replaces
 .c mainGalaxy
 by an empty
@@ -726,6 +747,7 @@ The syntax is
 .pp
 The
 .c delstar
+.IE "delstar command"
 command removes the named Star from the current galaxy.
 The syntax is
 .(c
@@ -738,6 +760,7 @@ is the name of the star.
 .pp
 The
 .c disconnect
+.IE "disconnect command"
 command reverses the effect of a previous
 .c connect
 or
@@ -757,6 +780,7 @@ connection.
 .pp
 The
 .c delnode
+.IE "delnode command"
 command removes a node from the current galaxy.  Syntax:
 .(c
 (delnode \fInode\fP)
@@ -785,6 +809,7 @@ and
 .pp
 The
 .c load
+.IE "load command"
 command reads interpreter commands from the named file, until
 end of file or a syntax error occurs.  The # character indicates
 that the rest of the line is a comment.  By convention, files
@@ -801,6 +826,7 @@ example, try
 .pp
 The
 .c chdir
+.IE "chdir command"
 command changes the interpreter's idea of the current directory.
 For example,
 .(c
@@ -823,10 +849,13 @@ object files that have already been compiled.  The syntax is
 .(c
 (link "\fIobject-file-name\fP")
 .)c
+.IE "link command"
+.IE "dynamic linking"
 .H3 "Messages to the User
 .pp
 The
 .c echo
+.IE "echo command"
 command prints its arguments, like the Unix echo command.
 Arguments may be quoted or unquoted.  It's primarily useful in
 interpreter files.  Examples would be
@@ -838,6 +867,7 @@ interpreter files.  Examples would be
 .pp
 The
 .c exec
+.IE "exec command"
 command executes a Unix shell command.  Example:
 .(c
 (exec "ls *.pt")
@@ -846,6 +876,7 @@ command executes a Unix shell command.  Example:
 .pp
 The
 .c quit
+.IE "quit command"
 command exits the interpreter.
 The syntax is
 .(c
@@ -856,6 +887,7 @@ The syntax is
 .pp
 The
 .c help
+.IE "help command"
 command prints help information (a summary of what you see here),
 using the Unix
 .i more
@@ -886,6 +918,8 @@ get an error message and you may then add the missing connections
 and run again.
 .H2 "A Wormhole example"
 .pp
+.IE "wormholes in the interpreter"
+.IE "domains in the interpreter"
 Here is an example of a simulation that contains both an SDF portion
 and a DE portion.  The FloatRamp star generates samples 0, 1, 2, ...
 The CoinFlip star generates either 0 or 1, with equal probability.
