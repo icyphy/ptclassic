@@ -135,7 +135,7 @@ public:
 
 	void setCopyStar(DataFlowStar* s, ParNode* prevN);
 
-        inline void replaceCopyStar (DataFlowStar& /*newStar*/);
+        void replaceCopyStar (DataFlowStar& /*newStar*/);
     
 	DataFlowStar* getCopyStar() { return clonedStar; }
 	ParNode* getNextNode() { return nextNode; }
