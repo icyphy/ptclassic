@@ -29,8 +29,9 @@ ROOT=../..
 # Where to install the libraries
 DESTDIR=$(ROOT)/lib.$(ARCH)
 
-# Where to install the help file(s)
-HELPDIR=../../lib
+# Where to install the help file(s).  This MUST be an absolute path
+# or the (help) interpreter command will not work.
+HELPDIR=~ptolemy/lib
 
 # Library name
 LIB=libptolemy.a
