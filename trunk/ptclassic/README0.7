@@ -1,0 +1,158 @@
+Ptolemy 0.7 Release Notes
+
+Ptolemy0.7 is scheduled for final release in May, 1997.
+
+This document can be found online at
+http://ptolemy.eecs.berkeley.edu/ptolemy0.7
+
+The Ptolemy0.7 release includes more complete documentation of new work in
+$PTOLEMY/demo/whats_new/whats_new0.7/index.html.
+
+
+Significant New Work
+--------------------
+
+Further integrations of Tycho into Ptolemy.
+     Edward A. Lee, John Reekie, Kevin Chang, Christopher Hylands and many
+     others.
+        o The Java/Tycho interface, including a Process Networks Sieve of
+          Eratosthenes demo.
+        o Compilation and dynamic loading of C modules at runtime.
+        o Improved preferences manager.
+        o An interface that allows the user to jump to C,C++ and Java
+          compiler errors.
+        o Ptolemy Retargetting Tool.
+Finite State Machine (FSM) domain
+     Bilung Lee
+Synchronous/Reactive (SR) Domain
+     Stephen Edwards
+Code Generation for the TMS320C50 DSP Domain
+     Luis Gutierrez, Brian L. Evans (UT Austin)
+Type System Modifications
+     Tom Lane (Structured Software Systems), Christopher Hylands, José Luis
+     Pino (HP EEsof)
+UltraSparc C Code Generation
+     William Chen (Columbia University), John Reekie
+AcyLoopScheduler
+     This scheduler does joint code/data minimization; it generates single
+     appearance schedules optimized for buffer memory usage. Very useful in
+     code generation, especially in assembly language code generation for
+     embedded signal processors which have limited program and data memory.
+     Praveen Murthy
+HTML documentation of stars.
+     ptlang has been modified to create HTML documentation instead of troff
+     documentation. A new ptlang keyword named htmldoc has been added to
+     ptlang.
+     The explanation sections in the Ptolemy builtin stars have been
+     converted to htmldoc sections. The HTML star documentation is viewable
+     outside Ptolemy and Tycho with a standard HTML viewer. The HTML star
+     documentation is also viewable as a hierarchical table of contents with
+     Tycho.
+     Edward A. Lee, Christopher Hylands
+
+
+Minor Changes
+-------------
+
+Galaxy Recursion Tests
+     Compiling recursive galaxies are warned against.
+     Tom Lane (Structured Software Systems), Christopher Hylands
+New Audio Infrastructure
+     New Stars that can use the linear16 audio capabilities of the
+     UltraSparc.
+     Sunil Bhave, William Chen (Columbia University)
+Neural Network Demonstrations
+     Demonstrations of logic functions using classical artificial neurons
+     and McCulloch-Pitts neurons Biao Lu, Brian L. Evans (The University of
+     Texas at Austin)
+TychoTarget C Code Generation Target
+     The TychoTarget generates output that can be compiled and loaded into
+     Tycho. It support creation of customized control panels using Tycho.
+     John Reekie, Sunil Bhave
+ptcl can handle HOF stars.
+     Christopher Hylands
+Ptolemy0.7 will use Itcl 2.2, which runs under Tcl 7.6 and Tk4.2.
+     The Itcl installation will use shared libraries, where available.
+     Christopher Hylands
+Ptolemy0.7 can run Matlab on a remote machine
+     The PTMATLAB_REMOTE_HOST environment variable if set specifies the name
+     of the remote machine. The Ptolemy console (ptcl) command "matlab
+     start" supports additional arguments that allows the control from Tcl
+     of multiple, distributed Matlab processes.
+     Brian Evans (UT Austin), Xavier Warzee (Thomson CSF)
+Improved consistency between simulation domains and the CGC domain
+     Ptolemy 0.7 has a new Digital Signal Processing (DSP) library in C
+     located at $PTOLEMY/src/utils/libptdsp. These routines are used by both
+     the simulation and code generation in C domains to provide consistent
+     behavior. The DSP functions in the new library include (1) arithmetic
+     operations of extended gcd, gcd, lcm, and Smith Form decompositions,
+     (2) data conversion operations of PCM Mu law conversion and conversion
+     between RGB and YUV color spaces, (3) numeric DSP operations of Fast
+     Fourier Transforms, raised cosine functions, sinc functions, and
+     windowing functions, and (4) image processing operations such as
+     codebook training, histogram, nearest neighbor search, run-length
+     coding, and zig-zag scanning.
+Implementation cost returned by code generation targets
+     The CG56 Simulation target will return the implementation cost of a
+     software synthesized for a Motorola 56000 board in terms of program
+     size, data size, and execution time. The infrastructure to return
+     implementation costs for an entire system or for every block in a
+     system now exists in all code generation targets, but returning
+     implementation costs is only implemented for the CG56 Simulation
+     target.
+     Brian L. Evans (UT Austin)
+Cadence Leapfrog VHDL Target
+     Xavier Warzee (Thomson CSF), Michael C. Williamson
+
+Backward Compatibility Issues
+-----------------------------
+
+Recompilation will be necessary.
+     As always, if you upgrade from 0.6 to 0.7, you will need to recompile
+     any user designed stars.
+Type system changes
+     The type system has been changed. Some CGC universes may need explicit
+     conversion stars to properly compile.
+htmldoc is a new keyword that has been added to ptlang.
+     ptlang no longer generates troff output and instead generates html.
+Certain CGC DSP stars have been moved.
+     To support retargeting demonstrations and galaxies from SDF to CGC,
+     Brian L. Evans (UT Austin) moved the CGC stars that implemented DSP
+     functions from the cgc/stars directory to the cgc/dsp/stars directory
+     and set symbolic links from cgc/icons to cgc/dsp/icons for those stars
+     for backwards compatibility. Users should run masters on their own CGC
+     demos in order for look-inside to work.
+     Affected stars: DTMFPostTest, Dirichlet, FFTCx, FIR, FIRFix, GAL, GGAL,
+     Goertzel, GoertzelBase, GoertzelPower, IIR, LMS, LMSOscDet,
+     RaisedCosine, Sinc, Window.
+The cgc/targets/main directory has been split.
+     To separate the uniprocessor and multiprocessor CGC targets, Brian L.
+     Evans (UT Austin) split the CGC targets/main directory into
+     targets/uniproc and targets/multiproc
+Structure of directories under PTOLEMY_SYSTEMS has been changed.
+     To support portability between operating systems, Brian L. Evans (UT
+     Austin) changed the destination directory in the Ptolemy targets and
+     demonstrations to $HOME/PTOLEMY_SYSTEMS/domain. For mixed-domain demos,
+     the domain was set to MIXED; otherwise, the domain was set to SDF, CGC,
+     etc. Note that $HOME is used instead of ~ because POSIX-compliant Unix
+     operating systems always define the HOME environment variable but do
+     not always support ~. Also, it is possible to define environment
+     variables on Macs and PCs.
+Certain audio stars have been removed.
+     Sunil Bhave removed the old PCMread/write and SunSound stars from
+     ptdesign. Instead you can use the new MonoIn/Out stars, which have been
+     added to the cgc palettes. The TkSunSound star has also been removed.
+
+----------------------------------------------------------------------------
+
+Tentative Release schedule
+
+      Fri, May 7  Ptolemy0.7beta release
+      Fri, May 23 Ptolemy0.7 final release.
+
+Delivery Platforms
+------------------
+We plan on shipping binaries for SunOS4.1.3, Solaris2.5.1 and HPUX10.20. We
+will also provide binaries created by offsite users for other platforms.
+These binaries will probably include Linux, HPUX9.x, Solaris2.4 and DEC
+Alpha.
