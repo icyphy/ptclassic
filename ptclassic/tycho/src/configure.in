@@ -209,7 +209,7 @@ else
 		AC_MSG_CHECKING([that you have the right javac in your path.])
 	        AC_PATH_PROG(JAVAC, javac)
 		if test "$JAVAHOME/bin/javac" = "$JAVAC"; then
-			AC_MSG_RESULT(Everything is fine, $JAVAHOME/bin/javac == $JAVAC)
+			AC_MSG_RESULT([  You have the right javac in your path, $JAVAHOME/bin/javac == $JAVAC])
 		else
 			AC_MSG_WARN($JAVAHOME/bin/java is not the same as $JAVAC. Be sure that you don't have a mismatch in JDK versions. )
 			
