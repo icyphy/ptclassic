@@ -47,51 +47,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define STD_FONT "-Adobe-Helvetica-Bold-R-Normal--*-140-*"
 #define TITLE_FONT "-Adobe-Helvetica-Bold-R-Normal--*-180-*"
 
-/* STRDUP from Xgraph (David Harrison) */
-#define STRDUP(xx)              (strcpy((char *)malloc((strlen(xx)+1)), (xx)))
 #define MAX(xx,yy)			((xx) > (yy) ? (xx) : (yy))
 #define MIN(xx,yy)			((xx) < (yy) ? (xx) : (yy))
 #define LOG10(xx)               (xx == 0.0 ? 0.0 : log10(xx) + 1e-15)
 #define INCR_ALLOC_PTS 128
 #define LARGE_ENOUGH 10000000
 
-/*FIXME: x and y ranges virtually constant, precompute for efficiency */
 #define MAPX(xx)		(plotPtr->llx+ \
-				 (plotPtr->urx-plotPtr->llx)* \
-				 ((xx)-plotPtr->xMin)/(plotPtr->xMax- \
-						       plotPtr->xMin))
+				 ((xx)-plotPtr->xMin)*plotPtr->scalex)
 #define MAPY(xx)		(plotPtr->lly- \
-				 (plotPtr->lly-plotPtr->ury)* \
-				 ((xx)-plotPtr->yMin)/(plotPtr->yMax- \
-						       plotPtr->yMin))
-#define MKPLOTSTR(xx)           (char *)(strcat(strcpy((char *) \
-                                       malloc((strlen(PLOT_PREFIX)+ \
-                                       strlen(xx)+1)), \
-                                       PLOT_PREFIX),(xx)))
+				 ((xx)-plotPtr->yMin)*plotPtr->scaley)
 
-#define MKDATASETSTR(xx)        (char *)(strcat(strcpy((char *) \
-                                       malloc((strlen(DATASET_PREFIX)+ \
-                                       strlen(xx)+1)), \
-                                       DATASET_PREFIX),(xx)))
+#define INVMAPX(xx)             (plotPtr->xMin+ \
+				 ((xx)-plotPtr->llx)/plotPtr->scalex)
+#define INVMAPY(xx)             (plotPtr->yMin+ \
+				 (plotPtr->lly-(xx))/plotPtr->scaley)
 
-struct plotWin;
+struct pktPlotWin;
 
-typedef struct plotDataset {
-  Tcl_Interp *interp;		/* Tcl interpreter */
-  Tk_Window *win;		/* Tcl main window */
-  int persistence;		/* the number of points to show */
-  int refreshBatch;             /* points are buffered and drawn in batches */
-  int batchCounter;             /* determines when to do the drawing */
+typedef struct ptkPlotDataset {
+  int color;                    /* specifies the color of the plot (starting with one) */
   int idx;			/* the current index for the next point to plot */
+  int beenOnceThrough;          /* indicator that we've created all the graphical objects */
+  int batchCounter;             /* determines when to do the drawing */
   double *xvec;	                /* vector of x position for points */
   double *yvec;			/* vector of y position for points */
   int *id;			/* vector of Tk IDs for the points */
-  struct plotDataset *prevSetPtr;
-  struct plotDataset *nextSetPtr;
-  struct plotWin *curPlot;	/* the plot window associated with the dataset */
-} plotDataset;
+  int *connect;                 /* indicator of whether to connect to the previous point */
+  double prevX, prevY;          /* most recently plotted point */
+} ptkPlotDataset;
 
-typedef struct plotWin {
+typedef struct ptkPlotWin {
   Tcl_Interp *interp;		/* Tcl interpreter */
   Tk_Window *win;		/* Tcl main window */
   char *name;            	/* Tk name to use for the window */
@@ -101,11 +87,14 @@ typedef struct plotWin {
   char *xTitle, *yTitle;	/* title for x and y axes */
   double xMin, xMax;		/* range for x */
   double yMin, yMax;		/* range for y */
-  double xMinPoint, xMaxPoint;  /* largest and smallest values seen */
-  double yMinPoint, yMaxPoint;  /* largest and smallest values seen */
-  struct plotWin *parentPlotPtr;
-  struct plotWin *childPlotPtr;
-  plotDataset *firstSetPtr;	/* pointer to dataset linked list */
-} plotWin;
+  double origXmin, origXmax;    /* original range for x (at create time) */
+  double origYmin, origYmax;    /* original range for y (at create time) */
+  double scalex, scaley;        /* scaling factors for points to plot */
+  int persistence;		/* the number of points to show */
+  int refreshBatch;             /* points are buffered and drawn in batches */
+  int style;                    /* specifies the style of the plot */
+  ptkPlotDataset *sets;       	/* array of datasets, which are dynamically allocated */
+  int numsets;                  /* the number of datasets allocated */
+} ptkPlotWin;
 
 #endif
