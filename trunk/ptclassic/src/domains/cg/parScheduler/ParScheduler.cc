@@ -41,9 +41,9 @@ Date of last revision:
 #include "GalIter.h"
 #include "UniProcessor.h"
 #include "StringList.h"
+#include "InfString.h"
+#include "ganttChart.h"
 #include "streamCompat.h"
-#include "../../../pigilib/ptk.h"
-#include <tcl.h>
 
 void ParScheduler::setup() {
     	// compute repetitions, schedule (by calling computeSchedule)
@@ -404,25 +404,29 @@ int ParScheduler :: finalSchedule() { return TRUE; }
 // write Gantt chart
 /////////////////////////////
 
-void ParScheduler::writeGantt(ostream& o) {
+void ParScheduler::writeGantt(ostream& out) {
 	int span = parProcs->getMakespan();
 	const char* universe = this->exGraph->myGalaxy()->name();
-	char tmpbuf[160];
-	sprintf(tmpbuf, "ptkGanttDisplay %s", universe);
-	Tcl_Eval(ptkInterp, tmpbuf);
+	InfString tmpbuf;
+	tmpbuf = "ptkGanttDisplay ";
+	tmpbuf << universe;
+	beginGantt(out, (char *)tmpbuf);
 	int total = 0;
 	for (int i = 0; i < numProcs; i++) {
 		UniProcessor* proc = parProcs->getProc(i);
-		total += proc->writeGantt(universe, numProcs, span);
+		total += proc->writeGantt(out, universe, numProcs, span);
 	}
 
 	// this stuff is not right
-	double p = (100.0 * total) / double(span * numProcs);;
-	sprintf(tmpbuf, "ptkGantt_MakeLabel %s %d %d %f %f", universe,
-			span, span, p, p);
-	Tcl_Eval(ptkInterp, tmpbuf);
-	sprintf(tmpbuf, "ptkGantt_Bindings %s %d", universe, numProcs);
-	Tcl_Eval(ptkInterp, tmpbuf);
+	double p = (100.0 * total) / double(span * numProcs);
+	tmpbuf = "ptkGantt_MakeLabel ";
+	tmpbuf << universe;
+	tmpbuf << " " << span << " " << span << " " << p << " " << p;
+	writeGanttLabel(out, (char *)tmpbuf);
+	tmpbuf = "ptkGantt_Bindings ";
+	tmpbuf << universe << " " << numProcs;
+	writeGanttBindings(out, (char *)tmpbuf);
+	endGantt(out);
 }
 
 /////////////////////////////
