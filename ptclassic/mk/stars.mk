@@ -436,19 +436,21 @@ ifdef DE
 		LIBS += -ldeatmstars
 		LIBFILES += $(LIBDIR)/libdeatmstars.$(LIBSUFFIX)
 	endif
+	# Contributed stars by third-party users
+	ifdef DECONTRIB
+		# The contrib stars use Tcl/Tk
+		TK = 1
+		CUSTOM_DIRS += $(DEDIR)/contrib/stars
+		STARS += $(LIBDIR)/decontribstars.o
+		LIBS += -ldecontribstars
+		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
+	endif
 	# Tcl/Tk stars
 	ifdef TK
 		CUSTOM_DIRS += $(DEDIR)/tcltk/stars
 		STARS += $(LIBDIR)/detclstars.o
 		LIBS += -ldetclstars
 		LIBFILES += $(LIBDIR)/libdetclstars.$(LIBSUFFIX)
-	endif
-	# Contributed stars by third-party users
-	ifdef DECONTRIB
-		CUSTOM_DIRS += $(DEDIR)/contrib/stars
-		STARS += $(LIBDIR)/decontribstars.o
-		LIBS += -ldecontribstars
-		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
 	endif
 	# kernel and stars
 	CUSTOM_DIRS += $(DEDIR)/stars $(DEDIR)/kernel 
