@@ -150,7 +150,7 @@ public:
 	int computeSchedule(Galaxy& g);
 
 	// return TRUE if graph is well-ordered
-	void isWellOrdered(Galaxy* g, SequentialList& topsort);
+	int isWellOrdered(Galaxy* g, SequentialList& topsort);
 
 	// compute optimal loop hierarchy
 	int DPPO();
@@ -188,6 +188,7 @@ public:
 
 	// this one prints out the node number corresponding to each star
 	void printStarNumbers();
+
 protected:
 	// This one actually does the work for displaySchedule()
 	StringList dispNestedSchedules(int depth, int i, int j, int g);
@@ -206,7 +207,7 @@ protected:
 	void createReachabilityMatrix(Galaxy& gal);
 
 	// This is used by <code>createReachabilityMatrix</code>
-	int visitSuccessors(Block* s, int flagLoc, int cnt);
+	int visitSuccessors(Block* s, int flagLoc);
 
 	// Called from SDFScheduler::run
 	/* virtual */ void runOnce();
