@@ -6,7 +6,7 @@ Generate a pseudoRandom sequence of zeros and ones
 .LO "~ptolemy/src/domains/sdf/demo"
 .DM SDF Universe
 .IE psuedoRandom
-.SV $Id$
+.SV $Revision$	$Date$
 .AL "E. A. Lee"
 .LD
 .Ir "Pseudo-random sequences"
