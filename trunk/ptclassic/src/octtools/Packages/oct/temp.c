@@ -28,6 +28,8 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 
+#include "oct_utils.h"
+
 void 
 octMarkTemporary(object)
 octObject *object;
