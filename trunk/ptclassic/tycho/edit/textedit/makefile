@@ -56,6 +56,7 @@ ITCL_SRCS = \
 	EditPtcl.itcl \
 	EditPtlang.itcl \
 	EditTcl.itcl \
+	ItclClassList.itcl \
 	Matlab.itcl \
 	Mathematica.itcl
 
