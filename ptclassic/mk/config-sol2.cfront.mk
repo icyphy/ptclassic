@@ -77,9 +77,14 @@ CDEBUGFLAGS =	-g
 OPTIMIZER =
 # Define PTSOL2_4 if you are on Solaris2_4
 LOCALFLAGS =	-DPTSOL2_4
-GPPFLAGS =	-DSYSV -DSOL2 $(OPTIMIZER) $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP= $(LOCACLFLAGS)
+GPPFLAGS =	-DSYSV -DSOL2 $(OPTIMIZER) $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP= $(LOCALFLAGS)
 CFLAGS = 	-DSYSV -DSOL2 $(OPTIMIZER) $(CDEBUGFLAGS) $(LOCALFLAGS)
-DEPEND =	CC -M
+
+# CC does not recognize the "-M" option.
+# "makedepend" is part of X11
+DEPEND =	makedepend
+# common.mk looks for USE_MAKEDEPEND
+USE_MAKEDEPEND =	yes
 
 #
 # Variables for the linker
