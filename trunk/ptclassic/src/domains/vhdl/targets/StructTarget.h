@@ -39,6 +39,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLTarget.h"
 #include "VHDLStar.h"
+#include "VHDLCompDecl.h"
+#include "VHDLCompMap.h"
 
 class StructTarget : public VHDLTarget {
 public:
@@ -47,6 +49,10 @@ public:
 
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
+
+	// The following are for keeping track of components.
+	VHDLCompDeclList compDeclList;
+	VHDLCompMapList compMapList;
 
 	// Main routine.
 	virtual int runIt(VHDLStar*);
@@ -80,6 +86,16 @@ public:
 
 	// Declare State variable.
 	StringList declState(const State*, const char*);
+
+	// Register component declaration.
+	void registerCompDecl(StringList name,
+			      VHDLPortList* portList,
+			      VHDLGenericList* genList);
+
+	// Register component mapping.
+	void registerCompMap(StringList label, StringList name,
+			     VHDLPortMapList* portMapList,
+			     VHDLGenericMapList* genMapList);
 
 protected:
 	CodeStream component_declarations;
