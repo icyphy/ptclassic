@@ -8,6 +8,7 @@ The butterfly curves.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
+.Ir "butterfly curve"
 This system computes and plots a curve known as the butterfly curve [1].
 In polar form, the magnitude $r$ is given as a function of the phase
 $theta$ by the equation
