@@ -38,13 +38,16 @@ static char SccsId[]="$Id$";
  * application main. Good for C programs.
  */
 
+#include "ansi.h"
+int RPCMain
+	ARGS((int argc, char **argv));
+
+int 
 main(argc, argv)
 int argc;
 char **argv;
 {
-    RPCMain( argc, argv );
-
-    exit( 0 );
+  return RPCMain( argc, argv );
 }
 
 #endif /* VAXLISP */
