@@ -56,7 +56,8 @@
 # For example, the following command will query the user to select an
 # item from a list, and then post that item in top-level window:
 # <tcl><pre>
-# ::tycho::ListBrowser .w -command ::tycho::post -items {a b c d}
+# ::tycho::ListBrowser .w -command ::tycho::post
+# .w appendItems {a b c d}
 # .w centerOnScreen
 # </pre></tcl>
 # <p>
@@ -77,13 +78,13 @@ class ::tycho::ListBrowser {
     # Specify the command to execute on an item when one is chosen.
     itk_option define -default default Default {}
 
-    # The list to display
-    itk_option define -items items Items {}
-
     constructor {args} {}
 
     ##################################################################
     ####                     public methods                       ####
+
+    # Append items to the listbox.
+    method appendItems {items {suffix {}}}
 
     # Break the interpretation of a sequence of Tabs to scroll over matches.
     method breakCompleteSequence {}
@@ -91,8 +92,11 @@ class ::tycho::ListBrowser {
     # Copy an item from the listbox to the entry box.
     method chooseItem {lb ypos}
 
+    # Clear all items from the listbox.
+    method clearListbox {}
+    
     # Clear any selections made by item completion.
-    method clearselection {}
+    method clearSelection {}
 
     # Complete the partially entered item.
     method complete {{case 0}}
@@ -105,6 +109,9 @@ class ::tycho::ListBrowser {
 
     # Select the item specified in the entry box.
     method ok {}
+
+    # Make the listbox reload its contents
+    method reload {}
 
     # Move up or down a number of pages or units in the listbox or selection.
     method scroll {num what}
@@ -140,14 +147,6 @@ configbody ::tycho::ListBrowser::default {
     if {$itk_option(-default) != {}} {
         setEntry $itk_option(-default)
     }
-}
-
-#########################################################################
-#### -items option configuration
-# Specify items in the listbox.
-# 
-configbody ::tycho::ListBrowser::items {
-    updateListbox
 }
 
 ######################################################################
@@ -217,7 +216,7 @@ body ::tycho::ListBrowser::constructor {args} {
     # bind $itk_component(hull) <Escape><v> {%Q scroll -1 pages}
 
     bind $itk_component(hull) <Control-v> {%Q scroll 1 pages}
-    bind $itk_component(hull) <Control-backslash> {%Q clearselection}
+    bind $itk_component(hull) <Control-backslash> {%Q clearSelection}
     bind $itk_component(hull) <Control-p> {%Q scroll -1 selection}
     bind $itk_component(hull) <Control-n> {%Q scroll 1 selection}
 
@@ -261,6 +260,22 @@ body ::tycho::ListBrowser::constructor {args} {
     ####                     public methods                       ####
 
 ######################################################################
+#### appendItems
+# Append a list of items to the listbox. The first argument is the
+# list of items. The second, if not null, is a suffix to be appended
+# to each item when it is inserted into the listbox.
+#
+body ::tycho::ListBrowser::appendItems {items {suffix {}}} {
+    if { $suffix == "" } {
+	eval $itk_component(listbox) insert end $items
+    } else {
+	foreach item $items {
+	    $itk_component(listbox) insert end $item$suffix
+	}
+    }
+}
+
+######################################################################
 #### breakCompleteSequence
 # Break the interpretation of a sequence of Tabs to scroll over matches.
 # This is bound to every key other than Tab.
@@ -288,10 +303,18 @@ body ::tycho::ListBrowser::chooseItem {lb ypos} {
 }
 
 ######################################################################
-#### clearselection
+#### clearListbox
+# Clear all items from the listbox.
+#
+body ::tycho::ListBrowser::clearListbox {} {
+    $itk_component(listbox) delete 0 end
+}
+
+######################################################################
+#### clearSelection
 # Clear any selections made by item completion.
 #
-body ::tycho::ListBrowser::clearselection {} {
+body ::tycho::ListBrowser::clearSelection {} {
     $itk_component(listbox) selection clear 0 end
 }
 
@@ -440,6 +463,16 @@ body ::tycho::ListBrowser::ok {} {
 }
 
 ######################################################################
+#### reload
+# Make the listbox reload its contents. This should be called after
+# changing any configuration options that might change the displayed
+# list.
+#
+body ::tycho::ListBrowser::reload {} {
+    updateListbox
+}
+
+######################################################################
 #### select
 # Invoke <code>processItem</code> on the item specified in the argument,
 # then self-destruct.
@@ -547,19 +580,13 @@ body ::tycho::ListBrowser::setEntry {string} {
 
 ######################################################################
 #### updateListbox
-# This procedure fills the listbox with items. By default, it just
-# uses the -items option.
+# This procedure fills the listbox with items. The default method
+# does nothing -- subclasses must override this method to
+# get the list items and add them to the listbox. In general,
+# this method will also need to be called from within the constructor
+# of the subclass to initialize the listbox when this widget is
+# is created.
 #
 body ::tycho::ListBrowser::updateListbox {} {
-    
-    # clear the list box
-    $itk_component(listbox) delete 0 end
-    
-    # Get a list of items in the -items option.
-    set items $itk_option(-items)
-
-    # Insert items into the listbox
-    eval $itk_component(listbox) insert end $items
-
-    clear entry
+    ;# By default, do nothing
 }
