@@ -74,6 +74,8 @@ namespace ::tycho {
     ::tycho::File::registerEditor .tcl ::tycho::EditTcl {Tcl editor}
     ::tycho::File::registerEditor .pl ::tycho::EditPtlang {Ptlang editor}
     ::tycho::File::registerEditor {} ::tycho::TclConsole {Tcl console}
+    ::tycho::File::registerEditor {} ::tycho::ProfileTcl {Tcl profiler}
+
     if {[uplevel #0 info commands matlab] != {}} {
 	::tycho::File::registerEditor {} ::tycho::Matlab {Matlab console}
     }
