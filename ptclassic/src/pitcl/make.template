@@ -20,17 +20,17 @@ OBJDIR=..
 VPATH = $(ROOT)/src/ptcl
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
+INCL=-I$(KERNDIR) -I$(TCL_INCDIR)
 
 # Include information on all stars and targets.
 
-include $(ROOT)/stars.mk
+include $(ROOT)/mk/stars.mk
 
 # libraries
-LIBS= $(STAR_LIBS) -lptolemy -ltcl $(SYSLIBS)
+LIBS= $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS)
 
 LIBFILES=$(STAR_LIBFILES) $(LIBDIR)/libptolemy.a
 
@@ -39,6 +39,8 @@ ALLSTARS = $(SDFSTARS) $(CGCSTARS) $(CG96STARS) $(CG56STARS) $(CGSTARS) \
 	$(DDFSTARS) $(CGDDFSTARS) $(THORSTARS) $(DESTARS) $(BDFSTARS)
 ALLTARGETS =	$(SDFTARGETS) $(CGTARGETS) $(CGCTARGETS) \
 	$(CG56TARGETS) $(CG96TARGETS) $(BDFTARGETS)
+
+PTCL_MODS = $(OBJS) $(ALLSTARS) $(ALLTARGETS) $(LIBS)
 
 # Sources
 SRCS= PTcl.cc ptclMain.cc ptclError.cc
@@ -54,13 +56,11 @@ all:	makefile ptcl
 
 ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f ptcl
-		$(LINKER) $(LINKFLAGS) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
-			$(ALLTARGETS) $(LIBS) -o ptcl
+		$(LINKER) $(LINKFLAGS) $(PTCL_MODS) -o ptcl
 
 ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f ptcl.debug
-		$(LINKER) $(LINKFLAGS_D) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
-			$(ALLTARGETS) $(LIBS) -o ptcl.debug
+		$(LINKER) $(LINKFLAGS_D) $(PTCL_MODS) -o ptcl.debug
 
 
 
@@ -77,7 +77,7 @@ REALCLEAN_STUFF=ptcl ptcl.debug
 
 LIB=dummy		# required since no LIB
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 
 # Don't add anything after the next line; makedepend will zap it.
