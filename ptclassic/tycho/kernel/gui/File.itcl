@@ -1034,19 +1034,27 @@ body ::tycho::File::toggleReadOnly {} {
         }
     } {
         # NOTE: Unix-only implementation here.
-        if {![file writable [filename]]} {
-            exec chmod +w [filename]
-	    configure -readonly 0
-        } {
-            if {$modified} {
-                if [safeEval ::tycho::askuser \
-                        "Save modifications before making file read-only?"] {
-                    # update changes since last save
-                    save
+        if ![file exists [filename]] {
+            saveQuery
+        }
+        if [file exists [filename]] {
+            if ![file writable [filename]] {
+                exec chmod +w [filename]
+                configure -readonly 0
+            } {
+                if {$modified} {
+                    if [safeEval ::tycho::askuser \
+                            "Save modifications before making \
+                            file read-only?"] {
+                        # update changes since last save
+                        save
+                    }
                 }
+                exec chmod -w [filename]
+                configure -readonly 1
             }
-            exec chmod -w [filename]
-	    configure -readonly 1
+        } {
+            bell
         }
     }
     focusin
