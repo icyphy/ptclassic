@@ -8,7 +8,7 @@
 # Root of Ptolemy directory
 ROOT=../../..
 # Where we are
-VPATH = ../../../src/ged/top
+VPATH = ../../../src/tkvem/top
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
@@ -34,9 +34,9 @@ all: 		makefile $(LIB)
 
 install:	makefile $(OUT)
 
-# top is a package used by ged
+# top is a package used by tkvem
 TOPDIR = $(VPATH)/../top
-TKGRAPHDIR = $(VPATH)		#ged uses tkgraph
+TKGRAPHDIR = $(VPATH)		#tkvem uses tkgraph
 EEMDIR = $(VPATH)/../eem	#tkgraph uses eem
 
 C_INCL = -I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TKGRAPHDIR) -I$(EEMDIR) -I$(TK_INCDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
