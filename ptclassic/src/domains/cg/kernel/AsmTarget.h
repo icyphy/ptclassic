@@ -51,12 +51,18 @@ class AsmStar;
 
 class AsmTarget : public CGTarget {
 public:
-	AsmTarget(const char* nam, const char* desc,
-		  const char* stype, ProcMemory* m = 0);
+	// Constructor
+	AsmTarget(const char* nam, const char* desc, const char* stype,
+		  const char* assocDomain = "AnyAsm", ProcMemory* m = 0);
 
+	// Destructor
 	AsmTarget::~AsmTarget();
-	Block* makeNew() const { return new AsmTarget(name(),starType(),
-					descriptor());}
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const {
+		return new AsmTarget(name(),starType(), descriptor(),
+				     getAssociatedDomain());
+	}
 
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;

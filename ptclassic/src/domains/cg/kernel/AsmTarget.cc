@@ -50,13 +50,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "pt_fstream.h"
 #include "checkConnect.h"
 
-
 const Attribute ANY = {0,0};
 
 // constructor
-AsmTarget :: AsmTarget(const char* nam, const char* desc,
-    const char* stype, ProcMemory* m) :
-    CGTarget(nam,stype,desc), interruptFlag(FALSE), mem(m) { 
+AsmTarget :: AsmTarget(const char* nam, const char* desc, const char* stype,
+		       const char* assocDomain, ProcMemory* m) :
+CGTarget(nam,stype,desc,assocDomain), interruptFlag(FALSE), mem(m) { 
 	initStates();
 	addStream("mainLoop",&mainLoop);
 	addStream("trailer",&trailer);

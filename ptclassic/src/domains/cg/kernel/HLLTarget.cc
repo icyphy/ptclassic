@@ -48,7 +48,8 @@ static const char file_id[] = "HLLTarget.cc";
 
 // constructor
 HLLTarget::HLLTarget(const char* nam, const char* startype,
-	const char* desc) : CGTarget(nam, startype, desc)
+		     const char* desc, const char* assocDomain) :
+CGTarget(nam, startype, desc, assocDomain)
 {
 }
 

@@ -67,25 +67,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/types.h>
 #include <sys/stat.h>			// define stat structure
 
-// Defined in CGDomain.cc
-extern const char CGdomainName[];
-
 extern const char* CODE = "code";
 extern const char* PROCEDURE = "procedure";
 
-// Return a string for indenting to the given depth
-StringList CGTarget::indent(int depth) {
-	StringList out = "";
-	for(int i = 0; i < depth; i++) {
-		out += "    ";
-	}
-	return out;
-}
-
 // constructor
-CGTarget::CGTarget(const char* name,const char* starclass,
-		   const char* desc, char sep)
-: Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0),typeConversionTable(0),typeConversionTableRows(0)
+CGTarget::CGTarget(const char* name, const char* starclass,
+		   const char* desc, const char* assocDomain, char sep) :
+Target(name, starclass, desc, assocDomain), defaultStream(&myCode),
+schedFileName(0), noSchedule(0), typeConversionTable(0),
+typeConversionTableRows(0)
 {
 	counter = 0;
 	spliceList.initialize();
@@ -102,7 +92,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	// The value of the destination directory must be stored in a data
 	// member.  If it were a local variable, then its contents would be
 	// deleted when the constructor finishes.
-	destDirName = destDirectoryName(CGdomainName);
+	destDirName = destDirectoryName(assocDomain);
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
@@ -155,6 +145,14 @@ CGTarget::~CGTarget() {
 	LOG_DEL; delete [] schedFileName;
 }
 
+// Return a string for indenting to the given depth
+StringList CGTarget::indent(int depth) {
+	StringList out = "";
+	for(int i = 0; i < depth; i++) {
+		out += "    ";
+	}
+	return out;
+}
 
 // Methods used in setup(), run(), wrapup(), and generateCode().
 // The default versions do nothing.
@@ -472,7 +470,8 @@ void CGTarget :: copySchedule(SDFSchedule& s) {
 }
 
 Block* CGTarget :: makeNew() const {
-	LOG_NEW; return new CGTarget(name(),starType(),descriptor());
+	LOG_NEW; return new CGTarget(name(), starType(), descriptor(),
+				     getAssociatedDomain());
 }
 
 void CGTarget :: headerCode () {
@@ -823,10 +822,6 @@ int CGTarget::needsTypeConversionStar(PortHole& port) {
 		return TRUE;
 	}
 	return FALSE;
-}
-
-const char* CGTarget::domain() {
-	return galaxy() ? galaxy()->domain() : CGdomainName;
 }
 
 StringList destDirectoryName(const char* subdir) {
