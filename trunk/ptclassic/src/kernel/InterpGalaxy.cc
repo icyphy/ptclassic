@@ -31,6 +31,16 @@ $Id$
 #include "IntState.h"
 #include <ctype.h>
 
+// constructor: makes an empty galaxy
+InterpGalaxy::InterpGalaxy() : myClassName("InterpGalaxy")
+{ setDescriptor("An interpreted galaxy");}
+
+// constructor: sets the class name
+InterpGalaxy::InterpGalaxy(const char* c) {
+	setDescriptor("An interpreted galaxy");
+	myClassName = c;
+}
+
 // Report an error: no such star or porthole
 
 static void noInstance(const char* star,const char* gal) {
