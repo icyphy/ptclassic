@@ -155,6 +155,9 @@ void Fix::makeBits(double d, int round) {
     double min_value = find_min(length, intBits);
     // extract an extra bit if we are going to round
     int nwords = wordsIncludingRound(round);
+    // be careful not to write into word after bit field
+    if (nwords > WORDS_PER_FIX)  nwords--;
+ 
     if ( x > max_value) {
 	errors = err_ovf;
 	x = max_value;
@@ -838,6 +841,10 @@ void Fix::applyMask (int round)
 {
 // nwords may need to include an extra bit for rounding
     int nwords = wordsIncludingRound(round);
+    // if the word is at maximum precision, nwords may too large.
+    // no need to do any masking in this case.
+    if (nwords > WORDS_PER_FIX)  return;
+
     for (int i = nwords; i < WORDS_PER_FIX; i++) Bits[i] = 0;
     int m = length & 0x0f;
     if (!m && !round) return;
