@@ -218,10 +218,11 @@ extern "C" size_t getpagesize(void);
 #endif
 #endif
 
-#if defined(PTSOL2) && ! defined(__GNUG__)
+#if defined(PTSOL2)
 // Don't call InvokeConstructors if gcc-2.5.8 has Ron Guilmette's SVR4
 // patches, or if we are using CC.  Right now we only use this code
 // with CC. gcc-2.6.0 seems to require that InvokeConstructors be run.
+// but gcc-2.7.2.1 does not requre it
 //
 // This is still experimental.  If this works, then there will be no
 // need to call dlsym().
