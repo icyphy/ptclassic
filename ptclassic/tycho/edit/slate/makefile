@@ -46,9 +46,11 @@ ITCL_SRCS = \
 	Axis.itcl \
 	Bounder.itcl \
 	ComplexItem.itcl \
+	Connectible.itcl \
 	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
+	IconFrame.itcl \
 	Interactor.itcl \
 	IncrCanvas.itcl \
 	LabeledFrame.itcl \
@@ -57,7 +59,6 @@ ITCL_SRCS = \
 	LabeledOval.itcl \
 	LabeledRect.itcl \
 	Line.itcl \
-	Node.itcl \
 	Oval.itcl \
 	Point.itcl \
 	Polygon.itcl \
