@@ -27,11 +27,11 @@ whatToBuild:	all
 
 # Rule for compiling C++ files
 .cc.o:
-	$(CPLUSPLUS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
+	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
 
 # Rule for compiling with cc
 .c.o:
-	$(CC) $(CFLAGS) $(C_INCL) -c $<
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
@@ -82,11 +82,16 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 	cd $(VPATH); pepp $<
 
 # Rule for building a library
+# We use a GNU make conditional here
 $(LIB):	$(OBJS)
+ifeq ($(USE_SHARED_LIBS),yes) 
+	rm -f $(LIB) 
+	$(SHARED_LIBRARY_COMMAND) $(LIB) $(OBJS) 
+else
 	rm -f $(LIB)
 	ar cq $(LIB) $(OBJS)
 	$(RANLIB) $(LIB)
-
+endif
 # Rule for installing a library
 $(LIBDIR)/$(LIB):	$(LIB)
 		rm -f $(LIBDIR)/$(LIB)
