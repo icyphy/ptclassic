@@ -33,6 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
                 type{float}
                 default {"1.0"}
                 desc {Full scale on the tap display}
+		attributes { A_GLOBAL }
         }
 	defstate {
                 name {geometry}
@@ -64,6 +65,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 default {"10"}
                 desc {Number of invocations between display updates.}
         }
+	setup {
+	    taps.setAttributes(A_GLOBAL);
+	    stepSize.setAttributes(A_GLOBAL);
+	    CGCLMS::setup();
+	}
 	initCode {
             addGlobal("int $starSymbol(invCount);");
             addGlobal("int $starSymbol(ids)[$val(tapSize)];");

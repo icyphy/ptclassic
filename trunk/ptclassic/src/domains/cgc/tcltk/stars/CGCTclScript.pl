@@ -90,7 +90,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {numOutputs}
 		type {int}
 		default {0}
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_GLOBAL }
 	}
 	defstate {
 		name {numInputs}
