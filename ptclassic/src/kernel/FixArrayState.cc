@@ -225,9 +225,20 @@ void FixArrayState  :: initialize() {
 					err = 1;
 				      break;
 				}
-			   else if ((getParseToken(lexer).tok == ')') &&
-				    (getParseToken(lexer).tok == T_EOF))
+/* The following code breaks on the alpha - gcc-2.6.3 */
+#ifdef NEVER_THIS_IS_AN_ALPHA_BUG	
+		   else if ((getParseToken(lexer).tok == ')') &&
+			    (getParseToken(lexer).tok == T_EOF))
 					break;
+#else
+				else {
+				  t = getParseToken(lexer);
+				  if (t.tok == ')') {
+				    t = getParseToken(lexer);
+				    if( t.tok == T_EOF) break;
+				  }
+				}
+#endif
 			}
                 default:
                         parseError ("syntax error in FixArray state");
