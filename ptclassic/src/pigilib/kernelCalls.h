@@ -12,19 +12,13 @@ typedef int boolean;
 /* error handling function for pigi */
 extern "C" void ErrAdd(char*);
 
-// Terminal data structs pigi
-#define TERM_ARR_MAX 14  /* max # I/O terms = max # positions */
-struct Term {
-    char *name;
-    boolean multiple;
-};
+#include "mkIcon.h"
 
-struct TermList {
-    Term in[TERM_ARR_MAX];
-    int in_n;
-    Term out[TERM_ARR_MAX];
-    int out_n;
-};
+extern "C" {
+	void clr_accum_string();
+	void accum_string (const char*);
+	void pr_accum_string();
+}
 
 // Parameter structs for pigi
 struct ParamStruct {
