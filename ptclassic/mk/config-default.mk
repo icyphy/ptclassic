@@ -133,14 +133,6 @@ ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
 # Location of the itcl library, needed for itcl_mkindex
 ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
 
-# For shared libraries, if we use them
-TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
-	-ltcl$(TCL_VERSION_NUM)
-TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
-	-ltk$(TK_VERSION_NUM)
-ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
-	-litcl$(ITCL_VERSION_NUM)
-
 #-----------------------------------------------------------------------
 # 		Global options to use
 #-----------------------------------------------------------------------
