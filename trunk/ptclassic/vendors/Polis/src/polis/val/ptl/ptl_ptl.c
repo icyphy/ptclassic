@@ -219,27 +219,16 @@ static void pl_print_private( fp, node )
 FILE *fp;
 net_node_t *node;
 {
-  net_var_t *var, *pvar;
+ /* net_var_t *var, *pvar; */
 
-  fprintf( fp, "  private {\n" );
+  fprintf( fp, "\n  private {\n" );
   fprintf( fp, "    int nemitevent;\n" );
   fprintf( fp, "    double min_time;\n" );
   fprintf( fp, "    double end_time;\n" );
-  fprintf( fp, "    static double _delay;\n" ); 
+ /* fprintf( fp, "    static double _delay;\n" ); move to code */
   fprintf( fp, "    FILE *fpfire;\n" );
   fprintf( fp, "    FILE *fpover;\n" );
-  
-
-  /* Output event time schedules */
-  fprintf( fp, "    /* Output event time schedules */\n" );
-  foreach_net_node_fanout( node, var ) {
-    pvar = isOutputEvent( var, node );
-    if ( pvar == NULL ) pvar = isIntOutput( var, node );
-    if ( pvar != NULL ) {
-      fprintf( fp, "    double %s_time;\n", util_make_valid_name( pvar ));
-    }
-  } end_foreach_net_node_fanout;
-  fprintf( fp, "  }\n" );
+  fprintf( fp, "  }\n\n" );
 }
 
 static void pl_print_public( fp, node, option )
@@ -262,15 +251,13 @@ char* option;
   fprintf( fp, "    double clkFreq; /* perhaps make private ? */\n");
   fprintf( fp, "    int resourceId;\n");
   fprintf( fp, "    int needResource;\n");
-/*  fprintf( fp, "    char resource[1024];\n"); 
-  fprintf( fp, "    Resource* resourcePointer;\n"); */
   fprintf( fp, "    // Pointers to the event queues of the PolisScheduler controlling the simulation;\n");
   fprintf( fp, "    PolisEventQ* waitingQ;\n");
   fprintf( fp, "    PolisEventQ* interruptQ;\n");
 
-  /* should this be here??? */
-  fprintf( fp, "\n    DE%s%s* ", model_name, option );
-  fprintf( fp, "%s%s_Star;\n", model_name, option );
+  /* should this be here??? 
+  fprintf( fp, "\n    static DE%s%s* ", model_name, option );
+  fprintf( fp, "%s%s_Star;\n", model_name, option ); */
 
 
   /* Input event flags */
@@ -413,7 +400,6 @@ FILE *fp;
 net_node_t *node;
 {
     fprintf( fp, "\n\n  constructor {\n    delayType = TRUE;\n" );
-    /* FIXME: add in drive star init */
     fprintf( fp, "  }\n" );
 }
 
@@ -453,7 +439,7 @@ int autotick, unittime;
     /* added stuff */
     fprintf( fp, "      double emitTime; \n\n");
     fprintf( fp, "      PolisEvent *newEvent = new PolisEvent(); \n");
-    fprintf( fp, "      newEvent->src = (DEPolis*)this; \n");
+    fprintf( fp, "      newEvent->src = this; \n");
     fprintf( fp, "      newEvent->isDummy = isDummy; \n");
     fprintf( fp, "      switch( outputPort ) {\n" );
     foreach_net_node_fanout( node, var ) {
@@ -659,9 +645,9 @@ int autotick, unittime;
   fprintf( fp, "\n" );
 
   /* agghhhhh.....*/
-  fprintf( fp, "\n    DE%s%s* ", model_name, option );
-  fprintf( fp, "%s%s_Star;\n", model_name, option );
-
+  fprintf( fp, "\n    static DE%s%s* ", model_name, option );
+  fprintf( fp, "%s%s_Star = NULL;\n", model_name, option );
+  fprintf( fp, "    static double _delay = 0.0;\n" );
   /* Define debugging procedure, if -g was selected */
   if ( trace ) {
     fprintf( fp, "static int grabDebugInfo( ClientData, Tcl_Interp*, " );
@@ -768,6 +754,7 @@ char *option;
   fprintf( fp, "    char stemp[1024];\n" );
   fprintf( fp, "    InfString name;\n" );
   fprintf( fp, "    int saveimpl;\n\n" );
+  fprintf( fp, "      %s%s_Star = this;\n", model_name, option );
 
   /* set variables which reflect Star parameters, and others*/
   fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
@@ -778,7 +765,7 @@ char *option;
   fprintf( fp, "    _delay = 0.0;\n");
 
   fprintf( fp, "    if ( needResource < 2 ) {\n" );
-  fprintf( fp, "      %s%s_Star = this;\n", model_name, option );
+  
 
   /* State and output variables initialization */
   fprintf( fp, "      /* State and output variables initialization */\n" );   
@@ -836,10 +823,13 @@ char *option;
   fprintf( fp, "      strcpy( stemp, overname );\n" );
   fprintf( fp, "      fpover = Openoverflow( stemp );\n" );
   fprintf( fp, "      now = -1.0;\n" );
+
+  /* FIXME : do we need these?  
+
   fprintf( fp, "      saveimpl = needResource;\n" );
   fprintf( fp, "      needResource = 0;\n" );
   fprintf( fp, "      _t_%s(0,0);\n", util_map_pathname( node_name ));
-  fprintf( fp, "      needResource = saveimpl;\n" );
+  fprintf( fp, "      needResource = saveimpl;\n" );*/
   
   if ( trace ) {
     fprintf( fp, "      if ( debug ) {\n" );
@@ -932,7 +922,7 @@ int autotick, unittime;
   fprintf( fp, "    StringList name;\n" );
   fprintf( fp, "    now = arrivalTime;\n" );
   fprintf( fp, "    name = Block::fullName();\n" );
-  fprintf( fp, "    %s%s_Star = this;\n", model_name, option );
+/*  fprintf( fp, "    %s%s_Star = this;\n", model_name, option ); */
   fprintf( fp, "\n    /* Now empty the list of events from previous firing */\n");
   fprintf( fp, "    while (emittedEvents->getAndRemove() != 0) { };\n");
   
@@ -944,7 +934,7 @@ int autotick, unittime;
               fprintf( fp, "    if ( %s.dataNew ) {\n", st );
               fprintf( fp, "        if ( fpover ) {\n" );
               fprintf( fp, "          if ( %s.numSimulEvents() > 0 || %s_flag ) {\n", st, st );
-              fprintf( fp, "            sprintf( stemp, \"%%s: %%d %s\\n\", ", st );
+              fprintf( fp, "            sprintf( stemp, \"%%s: %%f %s\\n\", ", st );
               fprintf( fp, "(const char*) name, now);\n" );       
               fprintf( fp, "            Printoverflow( stemp );\n" );
               fprintf( fp, "          }\n" );
@@ -978,7 +968,7 @@ int autotick, unittime;
   /* output eachh CFSM firing to the firing file */
   fprintf( fp, "\n    // write to firing file \n");
   fprintf( fp, "    if ( fpfire && needResource) {\n" );
-  fprintf( fp, "      sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
+  fprintf( fp, "      sprintf( stemp, \"%%s: %%f %%d start\\n\", " );
   fprintf( fp, "(const char*) name, now, priority);\n" );
   fprintf( fp, "      Printfiring( stemp );\n" );
   fprintf( fp, "    }\n" );
