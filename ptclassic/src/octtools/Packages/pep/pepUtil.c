@@ -34,6 +34,7 @@ static char SccsId[]="$Id$";
 #include "harpoon.h"
 #include "tap.h"
 #include "th.h"
+#include "errtrap.h"
 #include "pepint.h"
 
 #define MAX_NUM_ID 1000
@@ -71,9 +72,10 @@ pepBox     *pbb;
 	OH_ASSERT(octInitGenContents(obj, OCT_TERM_MASK, &Gener));
 	if((octGenerate(&Gener, &term1) != OCT_OK) ||
 	   (octGenerate(&Gener, &term2) != OCT_OK)) {
-	    fprintf(stderr, "FATAL ERROR: Wrong path implementation in (%d,%d)-(%d,%d)\n",
-		    pbb->bb.lowerLeft.x, pbb->bb.lowerLeft.y,
-		    pbb->bb.upperRight.x, pbb->bb.upperRight.y);
+	    fprintf(stderr,
+            "FATAL ERROR: Wrong path implementation in (%ld,%ld)-(%ld,%ld)\n",
+		    (long)pbb->bb.lowerLeft.x, (long)pbb->bb.lowerLeft.y,
+		    (long)pbb->bb.upperRight.x, (long)pbb->bb.upperRight.y);
 	    exit( 1 );
 	}
 	octFreeGenerator(&Gener);
@@ -246,7 +248,6 @@ double coord;
 {
     octPoint center;
     octBox bb;
-    double x, y;
 
     ohTerminalBB(term, &bb);
     center.x = (octCoord)((bb.lowerLeft.x + bb.upperRight.x)/(2*coord)) ;
