@@ -346,7 +346,7 @@ body ::tycho::DialogWindow::addButton {args} {
 #
 body ::tycho::DialogWindow::default {id} {
     eval [list $itk_component(bbox) default $id]
-    bind $itk_component(hull) <Return> "$prefix invoke $id; break"
+    bind $itk_component(hull) <Return> "code $prefix invoke $id; code break"
 }
 
 ######################################################################
