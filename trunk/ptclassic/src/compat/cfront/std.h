@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define _std_h
 /*  _std_h     is defined by the g++ std.h file */
 
-#if defined(hppa) || defined(SYSV) || defined (SVR4)
+#if defined(PTHPPA) || defined(SYSV) || defined (SVR4)
 #include <stdlib.h>
 #include <unistd.h>
 #include "../../kernel/miscFuncs.h"
@@ -47,4 +47,10 @@ inline void srandom(int seed) { srand48(seed);}
 // incorrect prototype for strcasecmp.
 extern "C" int strcasecmp(const char*, const char*);
 #endif
+#ifdef PTAIX_XLC
+#include <stdlib.h>
+#include <iostream.h>
+#include <stdio.h>
+#endif
+
 #endif /* _std_h */
