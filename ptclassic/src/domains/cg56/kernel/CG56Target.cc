@@ -116,7 +116,7 @@ void CG56Target :: wrapup () {
 
 int CG56Target :: assembleCode() {
 	if (!genFile(assembleCmds,uname,".mk","u+x")) return FALSE;
-	if (rshSystem("localhost",fileName(uname,".mk"),dirFullName) != 0 ) {
+	if (rshSystem("localhost",fullFileName(uname,".mk"),dirFullName)!=0 ) {
 		StringList asmError ="Errors in assembly of ";
 		asmError += uname; 
 		asmError += " universe";
@@ -128,7 +128,7 @@ int CG56Target :: assembleCode() {
 
 int CG56Target :: downloadCode() {
 	if (!genFile(downloadCmds,uname,NULL,"u+x")) return FALSE;
-	if (rshSystem(targetHost,uname,dirFullName) != 0 ) {
+	if (rshSystem(targetHost,fullFileName(uname)) != 0 ) {
 		StringList dError = "Errors in loading ";
 		dError += uname;
 		dError += " universe on ";
