@@ -70,11 +70,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
         }
 	initCode {
-	    addGlobal("int $starSymbol(invCount);");
 	    addGlobal("int $starSymbol(ids)[$val(number_of_bars)];");
 	    addGlobal("double $starSymbol(buffer)[$val(number_of_bars)];");
 	    addGlobal("double* $starSymbol(buffer_ptr);");
-	    addDeclaration("int $starSymbol(count) = 0;");
+	    addDeclaration("int $starSymbol(count);");
 	    addGlobal("int* $starSymbol(ids_ptr);");
 	    addCode("$starSymbol(buffer_ptr)=$starSymbol(buffer);","tkSetup");
 	    addCode("$starSymbol(ids_ptr) = $starSymbol(ids);","tkSetup");
@@ -82,17 +81,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	    addCode("$ref(bottom) = $val(bottom);\n","tkSetup");
 	    addCode(makeGraph,"tkSetup");
 	    addCode(procDefs,"procedure");
+	    addCode("$starSymbol(count) = 0;");
 	}
 	go {
 	    addCode(updateDisplay);
 	}
 	codeblock (updateDisplay) {
 	    $starSymbol(buffer)[$starSymbol(count)++] = $ref(input);
-	    if ($starSymbol(count) == $val(number_of_bars))
+	    if ($starSymbol(count) == $val(number_of_bars)) {
 		    $starSymbol(count) = 0;
-	    if ($starSymbol(invCount)++ == $val(number_of_bars)) {
-		$starSymbol(invCount) = 0;
-		if(ptkSetBarGraph(interp, &w,
+		    if(ptkSetBarGraph(interp, &w,
 			    "$starSymbol(.bar)",
 			    &$starSymbol(buffer_ptr),
 			    1,
@@ -120,7 +118,6 @@ limitation of liability, and disclaimer of warranty provisions.
 			 $val(bar_graph_width),	/* width, in cm */
 			 $val(bar_graph_height)) == 0)
 		errorReport("Cannot create bar chart");
-	    $starSymbol(invCount) = 0;
 	    Tcl_CreateCommand(interp, "$starSymbol(.bar)redraw",
 			$starSymbol(redraw),
 			(ClientData) 0, (void (*)()) NULL);
