@@ -98,6 +98,10 @@ char inputDescriptions[MEDBUFSIZE];
 char outputDescriptions[MEDBUFSIZE];
 char inoutDescriptions[MEDBUFSIZE];
 char stateDescriptions[MEDBUFSIZE];
+char inputDescHTML[MEDBUFSIZE];
+char outputDescHTML[MEDBUFSIZE];
+char inoutDescHTML[MEDBUFSIZE];
+char stateDescHTML[MEDBUFSIZE];
 char ccCode[BIGBUFSIZE];
 char hCode[BIGBUFSIZE];
 char miscCode[BIGBUFSIZE];
@@ -162,7 +166,8 @@ char* objDesc;			/* descriptor of star or galaxy */
 char* objAuthor;		/* author of star or galaxy */
 char* objAcknowledge;		/* acknowledgements (previous authors) */
 char* objCopyright;		/* copyright */
-char* objExpl;			/* long explanation */
+char* objExpl;			/* long explanation for troff formatting */
+char* objHTMLdoc;		/* long explanation for HTML formatting */
 char* objLocation;		/* location string */
 int   galDef;			/* true if obj is a galaxy */
 char* domain;			/* domain of object (if star) */
@@ -259,7 +264,7 @@ typedef char * STRINGVAL;
 %token INMULTI OUTMULTI INOUTMULTI
 %token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP TICK CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
-%token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
+%token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE HTMLDOC
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
 %token CODEBLOCK EXECTIME PURE INLINE STATIC HEADER INITCODE START
 %%
@@ -326,6 +331,10 @@ sgitem:
 					  bodyMode = 0;}
 |	EXPLANATION '{'			{ bodyMode = 1; docMode = 1;}
 		BODY			{ objExpl = $4;
+					  bodyMode = 0;
+					  docMode = 0;}
+|	HTMLDOC '{'			{ bodyMode = 1; docMode = 1;}
+		BODY			{ objHTMLdoc = $4;
 					  bodyMode = 0;
 					  docMode = 0;}
 |	SEEALSO '{' seealso '}'		{ }
@@ -682,7 +691,7 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |TYPE
 |DEFAULT|BEGIN|SETUP|GO|WRAPUP|TICK|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
-|EXPLANATION|START
+|EXPLANATION|HTMLDOC|START
 |SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE|STATIC
 ;
 
@@ -712,11 +721,14 @@ int g;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
 	objName = objVer = objDesc = domain = derivedFrom =
-		objAuthor = objCopyright = objExpl = objLocation = NULL;
+		objAuthor = objCopyright = objExpl = objHTMLdoc =
+                objLocation = NULL;
 	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 	inputDescriptions[0] = outputDescriptions[0] = inoutDescriptions[0] = 0;
 	stateDescriptions[0] = 0;
+	inputDescHTML[0] = outputDescHTML[0] = inoutDescHTML[0] = 0;
+	stateDescHTML[0] = 0;
 	nCcInclude = nHInclude = nSeeAlso = 0;
 	pureFlag = 0;
 	for (i = 0; i < N_FORMS; i++) {
@@ -862,6 +874,7 @@ void describeState ()
 {
 	char descriptString[MEDBUFSIZE];
 
+        /* troff version */
 	sprintf(str1,".NE\n\\fI%s\\fR (%s)",stateName,stateClass);
 	strcat(stateDescriptions,str1);
 	if (stateDesc) {
@@ -875,6 +888,23 @@ void describeState ()
 		sprintf(str1,".DF %s\n",stateDef);
 	}
 	strcat(stateDescriptions,str1);
+
+        /* html version */
+	sprintf(str1,"<tr>\n<td><i>%s</i></td><td>%s</td>\n",
+                 stateName,stateClass);
+	strcat(stateDescHTML,str1);
+	if (stateDesc) {
+	    if(unescape(descriptString, stateDesc, MEDBUFSIZE))
+		yywarn("warning: Descriptor too long. May be truncated.");
+	    sprintf(str1,"<td>%s</td>\n",descriptString);
+            strcat(stateDescHTML,str1);
+	}
+	if (stateDef) {
+            sprintf(str1,"<td>%s</td>\n",stateDef);
+            strcat(stateDescHTML,str1);
+	}
+        sprintf(str1,"</tr>\n");
+	strcat(stateDescHTML,str1);
 }
 
 /* set up for port definition */
@@ -925,24 +955,39 @@ void genPort ()
 
 void describePort ()
 {
-	char *dest;
+	char *dest, *destHTML;
 	char descriptString[MEDBUFSIZE];
 	dest = portDir==2 ? inoutDescriptions 
 	  : (portDir==1 ? outputDescriptions : inputDescriptions);
+	destHTML = portDir==2 ? inoutDescHTML 
+	  : (portDir==1 ? outputDescHTML : inputDescHTML);
 	if (portMulti) {
 	    sprintf(str1,".NE\n\\fI%s\\fR (multiple), (%s)",portName,portType);
+            strcat(dest,str1);
+	    sprintf(str1,"<tr>\n<td><i>%s</i> (multiple)</td><td>%s</td>\n",
+                    portName,portType);
+            strcat(destHTML,str1);
 	} else {
 	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
+            strcat(dest,str1);
+	    sprintf(str1,"<tr>\n<td><i>%s</i></td><td>%s</td>\n",
+                    portName,portType);
+            strcat(destHTML,str1);
 	}
-	strcat(dest,str1);
 
 	if (portDesc) {
 	    if(unescape(descriptString, portDesc, MEDBUFSIZE))
 		yywarn("warning: Descriptor too long. May be truncated.");
 	    sprintf(str1,": %s\n",descriptString);
-	} else
+            strcat(dest,str1);
+	    sprintf(str1,"<td>%s</td>\n",descriptString);
+            strcat(destHTML,str1);
+	} else {
 	    sprintf(str1,"\n");
-	strcat(dest,str1);
+            strcat(dest,str1);
+        }
+        sprintf(str1,"</tr>\n");
+        strcat(destHTML,str1);
 }
 
 /* set up for user-supplied method */
@@ -1448,7 +1493,7 @@ void genDef ()
 	(void) fclose(fp);
 
 /**************************************************************************
-		CREATE THE DOCUMENTATION FILE
+		CREATE THE TROFF DOCUMENTATION FILE
 */
 
 	sprintf (fname, "%s.t", fullClass);
@@ -1567,6 +1612,131 @@ void genDef ()
 
 /* close the file */
 	(void) fclose (fp);
+
+/**************************************************************************
+		CREATE THE HTML DOCUMENTATION FILE
+*/
+
+	sprintf (fname, "%s.htm", fullClass);
+	if ((fp = fopen (fname, "w")) == 0) {
+		perror (fname);
+		exit (1);
+	}
+
+	fprintf (fp, "<!-- documentation file generated from %s by %s -->\n",
+		 inputFile, progName);
+	fprintf (fp, "<html>\n<head>\n<title>%s %s star</title>\n</head>\n",
+                 domain, objName);
+/* Background color */
+        fprintf (fp, "<body bgcolor=#ffdead>\n");
+
+/* Name */
+	fprintf (fp,
+        "<h1><a name=\"%s star in %s domain\">%s star in %s domain</a></h1>\n",
+        objName, domain, objName, domain);
+
+/* short descriptor */
+	fprintf (fp, "<p>\n");
+	if (objDesc) {
+		/*
+		 * print descriptor with "\n" replaced with NEWLINE,
+		 * and "\t" replaced with a tab.
+		 * Any other escaped character will be printed as is.
+		 */
+		if(unescape(descriptString, objDesc, MEDBUFSIZE))
+		    yywarn("warning: Descriptor too long. May be truncated.");
+		fprintf (fp, "%s\n", descriptString);
+	}
+	fprintf (fp, "<p>\n");
+
+/* base class and domain */
+	/* For stars, we append the domain name to the beginning of the name,
+	   unless it is already there */
+	if (derivedFrom) {
+		if (domain &&
+		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
+			sprintf (baseClass, "%s%s", galDef ? "" : domain,
+				 derivedFrom);
+		}
+		else
+			(void) strcpy (baseClass, derivedFrom);
+	}
+	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
+	else if (galDef)
+		(void)strcpy (baseClass, "Galaxy");
+	else
+		sprintf (baseClass, "%sStar", domain);
+
+        /* FIXME: Should have a hyperlink to the base class */
+	fprintf (fp, "<b>Derived from:</b> %s<br>\n", baseClass);
+
+/* location */
+	if (objLocation)
+		fprintf (fp, "<b>Location:</b> %s<br>\n", objLocation);
+
+/* version */
+	if (objVer && objDate)
+		fprintf (fp, "<b>Version:</b> %s %s<br>\n", objVer, objDate);
+
+/* author */
+	if (objAuthor)
+		fprintf (fp, "<b>Author:</b> %s<br>\n", objAuthor);
+
+/* acknowledge */
+	if (objAcknowledge)
+		fprintf (fp, "<b>Acknowledgements:</b> %s<br>\n",
+                objAcknowledge);
+
+/* inputs */
+	if ((int)strlen(inputDescHTML) > 0)
+            fprintf (fp, "<h2>Inputs</h2>\n<table BORDER=\"1\">\n%s</table>\n",
+            inputDescHTML);
+
+/* outputs */
+	if ((int)strlen(outputDescHTML) > 0)
+            fprintf (fp, "<h2>Outputs</h2>\n<table BORDER=\"1\">\n%s</table>\n",
+            outputDescHTML);
+
+/* inouts */
+	if ((int)strlen(inoutDescHTML) > 0)
+            fprintf (fp, "<h2>InOut Ports</h2>\n<table BORDER=\"1\">\n%s</table>\n",
+            inoutDescHTML);
+
+/* states */
+	if ((int)strlen(stateDescHTML) > 0)
+            fprintf (fp, "<h2>States</h2>\n<table BORDER=\"1\">\n%s</table>\n",
+            stateDescHTML);
+
+/* htmldoc */
+	if (objHTMLdoc)
+		fprintf (fp, "<h2>Details</h2><p>\n%s\n<p>\n", objHTMLdoc);
+
+/* ID block (will appear in .h and .cc files only. */
+
+/* See Also list */
+	if (nSeeAlso > 0) fprintf (fp, "<h2>See Also</h2>\n");
+	if (nSeeAlso > 2) {
+	    checkSeeAlsos(nSeeAlso);
+            /* FIXME: Put in hyperlinks. */
+	    for (i = 0; i < (nSeeAlso - 2); i++)
+		fprintf (fp, "%s,\n", seeAlsoList[i]);
+	}
+	if (nSeeAlso > 1) fprintf (fp, "%s and\n", seeAlsoList[nSeeAlso-2]);
+	if (nSeeAlso > 0) fprintf (fp, "%s.\n<p>\n", seeAlsoList[nSeeAlso-1]);
+
+/* copyright */
+	if (objCopyright) {
+		char* p = objCopyright;
+                fprintf (fp, "<p><hr><p>\n");
+		while (*p) {
+			while (*p && *p != NEWLINE) fputc(*p++,fp);
+			if (*p == NEWLINE) fputc(*p++,fp);
+		}
+		fputc(NEWLINE,fp);
+	}
+
+/* close the file */
+	(void) fclose (fp);
 }
 
 
@@ -1611,6 +1781,7 @@ struct tentry keyTable[] = {
 	{"go", GO},
 	{"header", HEADER},
 	{"hinclude", HINCLUDE},
+	{"htmldoc", HTMLDOC},
 	{"ident", ID},
 	{"initCode", INITCODE},
 	{"initcode", INITCODE},
