@@ -184,7 +184,7 @@ body ::tycho::Edit::currentPoint {} {
 # Hand the focus to the text window.
 #
 body ::tycho::Edit::focusin {} {
-    focus [$itk_component(text) textWinName]
+    $itk_component(text) focusin
 }
 
 ###################################################################
