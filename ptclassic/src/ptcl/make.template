@@ -25,20 +25,6 @@ include $(CONFIG)
 
 INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
 
-SDF=$(OBJDIR)/domains/sdf/stars
-DDF=$(OBJDIR)/domains/ddf/stars
-DE =$(OBJDIR)/domains/de/stars
-Thor=$(OBJDIR)/domains/thor/stars
-CG=$(OBJDIR)/domains/cg/stars
-CGDDF=$(OBJDIR)/domains/cg-ddf/stars
-
-SDFSRC=$(ROOT)/src/domains/sdf/stars
-DDFSRC=$(ROOT)/src/domains/ddf/stars
-DESRC =$(ROOT)/src/domains/de/stars
-ThorSRC=$(ROOT)/src/domains/thor/stars
-CGSRC=$(ROOT)/src/domains/cg/stars
-CGDDFSRC=$(ROOT)/src/domains/cg-ddf/stars
-
 # libraries
 LIBS=-lcgddf -lddf -ldycon -lDC -lHu -lDL -lPar -lLS -lEG -lcg -lsdf \
 	-lde -lthor -lptolemy -lImage -ltcl $(SYSLIBS)
@@ -54,22 +40,15 @@ LIBFILES=\
  $(LIBDIR)/libthor.a \
  $(LIBDIR)/libptolemy.a
 
-# include files for star names.  These define the symbols SDFSTARS, DESTARS,
-# DDFSTARS, ThorSTARS, and CGSTARS.
 
-include $(SDFSRC)/sdfstars.mk
-include $(DESRC)/destars.mk
-include $(DDFSRC)/ddfstars.mk
-include $(ThorSRC)/thorstars.mk
-include $(CGSRC)/cgstars.mk
-include $(CGDDFSRC)/cgddfstars.mk
+include $(ROOT)/stars.mk
 
-# Extra targets
-CGT = $(OBJDIR)/domains/cg/targets
-SDFT = $(OBJDIR)/domains/sdf/targets
+ALLTARGETS = $(CGTARGETS)
 
-TARGETS = $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
-	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o $(SDFT)/CompileTarget.o 
+# the LAST star linked in determines the default domain
+ALLSTARS =	$(CGSTARS) $(CGDDFSTARS) \
+		$(ThorSTARS) $(DESTARS) $(DDFSTARS) \
+		$(SDFSTARS) $(SDF_DSPSTARS) $(SDF_IMAGESTARS)
 
 # Sources
 SRCS= PTcl.cc ptclMain.cc ptclError.cc
@@ -82,18 +61,16 @@ OBJS= $(SRCS:.cc=.o)
 
 all:	makefile ptcl
 
-# note that the LAST star linked in determines the default domain
-ALLSTARS=$(CGDDFSTARS) $(CGSTARS) $(ThorSTARS) $(DESTARS) $(DDFSTARS) $(SDFSTARS)
 
-ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
+ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f ptcl
 		$(LINKER) $(LINKFLAGS) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
-			$(TARGETS) $(LIBS) -o ptcl
+			$(ALLTARGETS) $(LIBS) -o ptcl
 
-ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
+ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f ptcl.debug
 		$(LINKER) $(LINKFLAGS_D) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
-			$(TARGETS) $(LIBS) -o ptcl.debug
+			$(ALLTARGETS) $(LIBS) -o ptcl.debug
 
 
 
