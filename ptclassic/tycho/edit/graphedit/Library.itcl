@@ -32,16 +32,79 @@
 ##########################################################################
 #### Library
 #
-# A _Library_ is a model containing a collection of items that are
+# A <i>Library</i> is a model containing a collection of items that are
 # accessed by other models and widgets. This class is an abstract class
-# for applications-specific libraries, and contains support for
-# grouping items in the library, access to meta-data for viewing and
-# editing, and facilities for building menus for accessing the library.
-# In the future, it may also support transparent access to larger
-# libraries spread over many files.
+# for applications-specific libraries, which must define the types
+# that actually contains data, such as, for example, <i>icon</i>.
+#
+# _Library_ contains support for structuring, organizing, and
+# accessing items. This support includes support for building menus,
+# for cross-referencing other libraries, and for building composite
+# libraries out of smaller libraries. Because libraries often contain
+# metadata (items in other models are created from a description in a
+# library model), the Library model includes support for metadata, most
+# notably the _attribute_ item type and associated methods.
 #
 # This model has the following types:
 # <dl>
+# <dt><b>attribute</b> _name_
+# <dd>
+# Meta-data describing an attribute
+# of an item. Attribute meta-data must be contained within a 
+# <b>metadata</b> item. This information in this type is used to build new
+# item from meta-data, and by editors and viewers of model. As an example,
+# the "icon" metadata would contain an attribute called "background."
+# Attributes can have the following attributes:
+#   <dl>
+#   <dt><b>-default</b> _value_
+#   <dd>
+#   The default value of this attribute. The default default is the null
+#   string.
+#
+#   <dt><b>-description</b> _html-string_
+#   <dd>
+#   An HTML description of the attribute. For
+#   example, this could be an HTML string that describes what the
+#   effect the background attribute is. The default is a null string.
+#
+#   <dt><b>-label</b> <i>label</i>
+#   <dd>
+#   A brief string describing the attribute. This string is typically used
+#   by model viewers and editors as the label in widgets that allow 
+#   attributes to be changed. By convention, model viewers and editors
+#   do not display attributes with a null label. The default is a null string.
+#
+#   <dt><b>-readonly</b> _boolean_
+#   <dd>
+#   If true, model editors will not allow the attribute to be changed. The
+#   default is false.
+#
+#   <dt><b>-type</b> <i>type</i>
+#   <dd>
+#   The "type" of the attribute. This is used by model viewers and
+#   editors to decide how to display and edit the attribute. Legal types are:
+#   <ul>
+#     <li><b>string</b>: Can be any arbitrary value. This is the default.
+#     <li><b>number</b>: A number.
+#     <li><b>integer</b>: An integer.
+#     <li><b>boolean</b>: A boolean value.
+#     <li><b>choice</b>: A small set of (arbitrary) possible values. These
+#     are intended for display by radiobuttons.
+#     <li><b>set</b>: A larger set of (arbitrary) possible values. These
+#     are intended for display by an option menu.
+#     <li><b>font</b>: A font value, specified as a list {_family_ _size_
+#     _style_}. The second and third elements can be omitted -- see
+#     FontManager for details.
+#     <li><b>color</b>: A symbolic color value.
+#   </ul>
+#
+#   <dt><b>-values</b> <i>value-list</i>
+#   <dd>
+#   A list containing the set of legal values of the parameter. Valid for
+#   the _choice_ and _set_ types only. The default is the null list.
+#
+#   </dl>
+#
 # <dt><b>group</b> _name_
 # <dd>
 # A group of items. This is a structuring mechanism for the library.
@@ -57,7 +120,7 @@
 #   <dt><b>-description</b> _html-string_
 #   <dd>
 #   An HTML description of the purpose or contents of the group. This
-#   attribute is genreally used by help viewers.
+#   attribute is generally used by help viewers.
 #
 #   </dl>
 #
@@ -86,17 +149,8 @@ class ::tycho::Library {
     #################################################################
     ####                     public methods                      ####
 
-    # Create an editor on this library
-    method edit {command}
-
-    # Create a modal editor on this library
-    method editModal {}
-
-    # Create an editor on an item in this library
-    method edititem {item command}
-
-    # Create a modal editor on an item in this library
-    method edititemModal {item}
+    # Instantiate meta-data into an attribute list
+    method instantiate {item}
 
     # Create a menu with items in this library
     method makemenu \
@@ -120,62 +174,6 @@ body ::tycho::Library::constructor {args} {
     	:leafonly 1
 }
 
-########################################################################
-#### edit
-#
-# Create a graphical editor for this library. The _command_
-# argument is a script to evaluate when the user elects
-# to update changes made in the editor. The returned value
-# is the created editing widget.
-#
-body ::tycho::Library::edit {command} {
-	error "not implemented"
-}
-
-########################################################################
-#### editModal
-#
-# Create a modal graphical editor for this library. The returned 
-# result is a list of _changed_ parameter name and 
-# corresponding value.
-#
-body ::tycho::Library::editModal {} {
-	error "Not implemented"
-}
-
-########################################################################
-#### edititem
-#
-# Create a graphical editor for an item. The _command_
-# argument is a script to evaluate when the user elects
-# to update changes made in the editor. The returned value
-# is the created editing widget.
-#
-body ::tycho::Library::edititem {item command} {
-    regsub -all {\.} $item "_" nm
-    set nm .$nm
-    if { [::info which -command $nm] != "" } {
-        # Already exists
-        wm deiconify $nm
-        raise $nm
-     } else {
-        uplevel #0 [list ::tycho::ParameterEdit $nm -command $command]
-        $nm edit $this $item
-        wm deiconify $nm
-    }
-    return $nm
-}
-
-########################################################################
-#### edititemModal
-#
-# Create a modal graphical editor for an item. The returned 
-# result is a list of _changed_ parameter name and 
-# corresponding value.
-#
-body ::tycho::Library::edititemModal {item} {
-	error "Not implemented"
-}
 
 ########################################################################
 #### makemenu
