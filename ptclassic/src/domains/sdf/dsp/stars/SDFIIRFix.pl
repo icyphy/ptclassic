@@ -233,12 +233,14 @@ The input particles are only cast to this precision if the parameter
 	    out.set_rounding( int(RoundFix) );
 	}
         go {
+	    // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	    Fix tmpA = (signalIn%0);
             if ( numState == 1 ) {
                 // Actually, this means no state; just feed through
 		if ( int(ArrivingPrecision) )
-		    out = fwdCoefs[0] * (const Fix&)(signalIn%0);
+		    out = fwdCoefs[0] * tmpA;
 		else {
-		    fixIn = (const Fix&)(signalIn%0);
+		    fixIn = tmpA;
 		    out = fwdCoefs[0] * fixIn;
 		}
 		checkOverflow(out);
@@ -253,9 +255,9 @@ The input particles are only cast to this precision if the parameter
 		    checkOverflow(fwdAccum);
 		}
 		if ( int(ArrivingPrecision) )
-		    fdbckAccum += (const Fix&)(signalIn%0);
+		    fdbckAccum += tmpA;
 		else {
-		    fixIn = (const Fix&)(signalIn%0);
+		    fixIn = tmpA;
 		    fdbckAccum += (const Fix&)fixIn;
 		}
 		checkOverflow(fdbckAccum);

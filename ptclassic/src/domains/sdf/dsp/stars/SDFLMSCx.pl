@@ -87,12 +87,15 @@ will be stored there after the run has completed.
 				      + taps.size());
 	}
 	go {
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmpA = (error%0);
 		// First update the taps
-		Complex e = (const Complex&)(error%0) * double(stepSize);
+		Complex e = tmpA * double(stepSize);
 		int index = int(errorDelay)*int(decimation) + int(decimationPhase);
 		// adjustment is e times the conjugate of the output
 		for (int i = 0; i < taps.size(); i++) {
-			taps[i] = taps[i] + e * conj((const Complex&)(signalIn%index));
+			Complex tmpB = (signalIn%index);
+			taps[i] = taps[i] + e * conj(tmpB);
 			index++;
 		}
 		
