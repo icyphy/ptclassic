@@ -90,7 +90,7 @@ void MVImage::assemble(const BaseImage* bi)
 	if (size != fullSize) {
 		char* tmpH = new char[fullSize];
 		char* tmpV = new char[fullSize];
-		for(int t = 0; t < fullSize; t++) { tmpH = tmpV = (char) 0; }
+		for(int t = 0; t < fullSize; t++) {tmpH[t] = tmpV[t] = (char)0;}
 		copy(size, (unsigned char*) tmpH+startPos,
 				(unsigned char*) horzData);
 		copy(size, (unsigned char*) tmpV+startPos,
