@@ -36,12 +36,18 @@ const char* BaseSymbolList::append(const char* name)
     else return NULL;
 }
 
+/*********************
+TEMPORARY FIX:
+Use unique names for prepend.
+NamedList should allow duplicate names for prepend.
+*********************/
+
 // Put a named symbol at the head of the list.
 // Return NULL on error.
 const char* BaseSymbolList::prepend(const char* name)
 {
     char* sym = savestring(symbol(name));
-    if (NamedList::prepend(sym, name)) return sym;
+    if (NamedList::prepend(sym, sym)) return sym;
     else return NULL;
 }
 
