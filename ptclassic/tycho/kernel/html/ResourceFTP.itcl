@@ -867,6 +867,7 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
     } elseif {$ftptype=="directory"} {
         # Setup basic relationship
         set _forward([string trimright $tmpURL /]) [string trimright $tmpURL /]/
+        set _exists([string trimright $tmpURL /]) 1
         set _exists([string trimright $tmpURL /]/) 1
         # Need to parse the contents of the listing
         # dr-xr-xr-x   2 root     other        512 Jun  5  1995 dev
