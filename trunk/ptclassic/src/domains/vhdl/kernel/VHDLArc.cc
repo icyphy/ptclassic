@@ -41,8 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLArc :: VHDLArc() {
-  VHDLObj::initialize();
-  type = "";
+  VHDLTypedObj::initialize();
 }
 
 // Destructor.
@@ -50,21 +49,15 @@ VHDLArc :: ~VHDLArc() {}
 
 // Return a pointer to a new copy of the VHDLArc.
 VHDLArc* VHDLArc :: newCopy() {
-  VHDLArc* newArc = new VHDLArc;
-  newArc->setName(this->name);
-  newArc->type = this->type;
-  newArc->lowWrite = this->lowWrite;
-  newArc->highWrite = this->highWrite;
-  newArc->lowRead = this->lowRead;
-  newArc->highRead = this->highRead;
-
+  VHDLArc* newArc = new VHDLArc(name, type, lowWrite, highWrite, lowRead,
+				highRead);
   return newArc;
 }
 
 // Class identification.
 const char* VHDLArc :: className() const { return "VHDLArc"; }
 
-ISA_FUNC(VHDLArc,VHDLObj);
+ISA_FUNC(VHDLArc,VHDLTypedObj);
 
 // Use the name as a key to find the arc.
 VHDLArc* VHDLArcList :: arcWithName(const char* name) {

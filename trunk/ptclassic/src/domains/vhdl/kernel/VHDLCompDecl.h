@@ -39,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLObj.h"
-#include "VHDLObjList.h"
 #include "VHDLPort.h"
 #include "VHDLGeneric.h"
 
@@ -48,6 +47,10 @@ class VHDLCompDecl : public VHDLObj
  public:
   // Constructors.
   VHDLCompDecl();
+  VHDLCompDecl(const char* n, VHDLPortList* pl, VHDLGenericList* gl,
+	       const char* t, VHDLPortList* pml, VHDLGenericList* gml)
+    : VHDLObj(n), portList(pl), genList(gl), type(t), portMapList(pml),
+    genMapList(gml) {}
 
   // Destructor.
   ~VHDLCompDecl();

@@ -42,7 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Constructors.
 VHDLGeneric :: VHDLGeneric() {
   defaultVal = "";
-  VHDLObj::initialize();
+  mapping = "";
+  VHDLTypedObj::initialize();
 }
 
 // Destructor.
@@ -50,19 +51,14 @@ VHDLGeneric :: ~VHDLGeneric() {}
 
 // Return a pointer to a new copy of the VHDLGeneric.
 VHDLGeneric* VHDLGeneric :: newCopy() {
-  VHDLGeneric* newGeneric = new VHDLGeneric;
-  newGeneric->setName(this->name);
-  newGeneric->type = this->type;
-  newGeneric->defaultVal = this->defaultVal;
-  newGeneric->mapping = this->mapping;
-
+  VHDLGeneric* newGeneric = new VHDLGeneric(name, type, defaultVal, mapping);
   return newGeneric;
 }
 
 // Class identification.
 const char* VHDLGeneric :: className() const { return "VHDLGeneric"; }
 
-ISA_FUNC(VHDLGeneric,VHDLObj);
+ISA_FUNC(VHDLGeneric,VHDLTypedObj);
 
 // Return a pointer to a new copy of the list.
 VHDLGenericList* VHDLGenericList :: newCopy() {
@@ -83,10 +79,6 @@ VHDLGenericList* VHDLGenericList :: newCopy() {
 void VHDLGenericList :: put(StringList name, StringList type,
 			    StringList defaultVal/*=""*/,
 			    StringList mapping/*=""*/) {
-  VHDLGeneric* newGeneric = new VHDLGeneric;
-  newGeneric->setName(name);
-  newGeneric->type = type;
-  newGeneric->defaultVal = defaultVal;
-  newGeneric->mapping = mapping;
+  VHDLGeneric* newGeneric = new VHDLGeneric(name, type, defaultVal, mapping);
   this->put(*newGeneric);
 }

@@ -39,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLObj.h"
-#include "VHDLObjList.h"
 #include "VHDLFiring.h"
 
 class VHDLCluster : public VHDLObj

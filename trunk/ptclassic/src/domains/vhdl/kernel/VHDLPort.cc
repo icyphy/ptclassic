@@ -42,7 +42,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLPort :: VHDLPort() {
-  VHDLObj::initialize();
+  direction = "UNINITIALIZED";
+  mapping = "UNINITIALIZED";
+  signal = NULL;
+  VHDLTypedObj::initialize();
 }
 
 // Destructor.
@@ -50,13 +53,7 @@ VHDLPort :: ~VHDLPort() {}
 
 // Return a pointer to a new copy of the VHDLPort.
 VHDLPort* VHDLPort :: newCopy() {
-  VHDLPort* newPort = new VHDLPort;
-  newPort->setName(this->name);
-  newPort->direction = this->direction;
-  newPort->type = this->type;
-  newPort->mapping = this->mapping;
-  newPort->signal = this->signal;
-
+  VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal);
   return newPort;
 }
 
@@ -87,7 +84,7 @@ void VHDLPort :: connect(VHDLSignal* newSignal) {
 // Class identification.
 const char* VHDLPort :: className() const { return "VHDLPort"; }
 
-ISA_FUNC(VHDLPort,VHDLObj);
+ISA_FUNC(VHDLPort,VHDLTypedObj);
 
 // Return a pointer to a new copy of the list.
 VHDLPortList* VHDLPortList :: newCopy() {
@@ -109,11 +106,6 @@ void VHDLPortList :: put(StringList name, StringList type,
 			 StringList direction,
 			 StringList mapping/*=""*/,
 			 VHDLSignal* signal/*=NULL*/) {
-  VHDLPort* newPort = new VHDLPort;
-  newPort->setName(name);
-  newPort->type = type;
-  newPort->direction = direction;
-  newPort->mapping = mapping;
-  newPort->signal = signal;
+  VHDLPort* newPort = new VHDLPort(name, type, direction, mapping, signal);
   this->put(*newPort);
 }

@@ -38,26 +38,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
 #include "VHDLSignal.h"
 
 class VHDLSignal;
 
-class VHDLPort : public VHDLObj
+class VHDLPort : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLPort();
   VHDLPort(const char* n, const char* t, const char* d,
 	   const char* m, VHDLSignal* s)
-    : type(t), direction(d), mapping(m), signal(s) { setName(n); }
+    : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s) {}
 
   // Destructor.
   ~VHDLPort();
 
-  // Data type.
-  StringList type;
   // Data direction.
   StringList direction;
   // Map binding.
@@ -72,8 +69,6 @@ class VHDLPort : public VHDLObj
   // Return a pointer to a new copy of the VHDLPort.
   VHDLPort* newCopy();
 
-  void setType(const char* newType) { type = newType; }
-  StringList getType() { return type; }
   void setDirec(const char* newDirec) { direction = newDirec; }
   StringList getDirec() { return direction; }
 
@@ -83,31 +78,31 @@ class VHDLPort : public VHDLObj
  private:
 };
 
-class VHDLPortList : public VHDLObjList
+class VHDLPortList : public VHDLTypedObjList
 {
   friend class VHDLPortListIter;
 
  public:
   // Add VHDLPort to list.
-  void put(VHDLPort& v) { VHDLObjList::put(v); }
+  void put(VHDLPort& v) { VHDLTypedObjList::put(v); }
 
   // Return first VHDLPort on list (const, non-const forms).
-  VHDLPort* head() { return (VHDLPort*) VHDLObjList::head(); }
+  VHDLPort* head() { return (VHDLPort*) VHDLTypedObjList::head(); }
   const VHDLPort* head() const {
-    return (const VHDLPort*) VHDLObjList::head();
+    return (const VHDLPort*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLPort from the list.
   // Note:  the VHDLPort is not deleted.
-  int remove (VHDLPort* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLPort* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLPort with given name (const, non-const forms).
   VHDLPort* vhdlPortWithName(const char* name) {
-    return (VHDLPort*) vhdlObjWithName(name);
+    return (VHDLPort*) vhdlTypedObjWithName(name);
   }
 
   const VHDLPort* vhdlPortWithName(const char* name) const {
-    return (const VHDLPort*) vhdlObjWithName(name);
+    return (const VHDLPort*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
@@ -118,12 +113,12 @@ class VHDLPortList : public VHDLObjList
 	   VHDLSignal* =NULL);
 };
 
-class VHDLPortListIter : public VHDLObjListIter {
+class VHDLPortListIter : public VHDLTypedObjListIter {
  public:
-  VHDLPortListIter(VHDLPortList& l) : VHDLObjListIter(l) {}
-  VHDLPort* next() { return (VHDLPort*) VHDLObjListIter::next(); }
+  VHDLPortListIter(VHDLPortList& l) : VHDLTypedObjListIter(l) {}
+  VHDLPort* next() { return (VHDLPort*) VHDLTypedObjListIter::next(); }
   VHDLPort* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif

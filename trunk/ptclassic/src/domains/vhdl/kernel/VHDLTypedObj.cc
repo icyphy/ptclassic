@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLTypedObj :: VHDLTypedObj() {
+  type = "";
   VHDLObj::initialize();
 }
 
@@ -49,11 +50,7 @@ VHDLTypedObj :: ~VHDLTypedObj() {}
 
 // Return a pointer to a new copy of the VHDLTypedObj.
 VHDLTypedObj* VHDLTypedObj :: newCopy() {
-  //  VHDLTypedObj* newTypedObj = new VHDLTypedObj;
-  //  newTypedObj->setName(this->name);
-  VHDLTypedObj* newTypedObj = (VHDLTypedObj*) VHDLObj::newCopy();
-  newTypedObj->type = this->type;
-
+  VHDLTypedObj* newTypedObj = new VHDLTypedObj(name, type);
   return newTypedObj;
 }
 
@@ -79,8 +76,6 @@ VHDLTypedObjList* VHDLTypedObjList :: newCopy() {
 
 // Allocate memory for a new VHDLTypedObj and put it in the list.
 void VHDLTypedObjList :: put(StringList name, StringList type) {
-  VHDLTypedObj* newTypedObj = (VHDLTypedObj*) new VHDLObj(name);
-  //  newTypedObj->setName(name);
-  newTypedObj->type = type;
+  VHDLTypedObj* newTypedObj = new VHDLTypedObj(name, type);
   this->put(*newTypedObj);
 }

@@ -42,8 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Constructors.
 VHDLSignal :: VHDLSignal() {
   setSource(NULL);
-
-  VHDLObj::initialize();
+  VHDLTypedObj::initialize();
 }
 
 // Destructor.
@@ -51,18 +50,14 @@ VHDLSignal :: ~VHDLSignal() {}
 
 // Return a pointer to a new copy of the VHDLSignal.
 VHDLSignal* VHDLSignal :: newCopy() {
-  VHDLSignal* newSignal = new VHDLSignal;
-  newSignal->setName(this->name);
-  newSignal->type = this->type;
-  newSignal->source = this->source;
-
+  VHDLSignal* newSignal = new VHDLSignal(name, type, source);
   return newSignal;
 }
 
 // Class identification.
 const char* VHDLSignal :: className() const { return "VHDLSignal"; }
 
-ISA_FUNC(VHDLSignal,VHDLObj);
+ISA_FUNC(VHDLSignal,VHDLTypedObj);
 
 // Return a pointer to a new copy of the list.
 VHDLSignalList* VHDLSignalList :: newCopy() {
@@ -82,9 +77,6 @@ VHDLSignalList* VHDLSignalList :: newCopy() {
 // Allocate memory for a new VHDLSignal and put it in the list.
 void VHDLSignalList :: put(StringList name, StringList type,
 			   VHDLPort* source/*=NULL*/) {
-  VHDLSignal* newSignal = new VHDLSignal;
-  newSignal->setName(name);
-  newSignal->type = type;
-  newSignal->source = source;
+  VHDLSignal* newSignal = new VHDLSignal(name, type, source);
   this->put(*newSignal);
 }

@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Edward A. Lee, Michael C. Williamson
 
- Methods for VHDL objects.
+ Methods for VHDL objects and VHDL object lists.
 
 *******************************************************************/
 #ifdef __GNUG__
@@ -49,7 +49,13 @@ VHDLObj :: ~VHDLObj() {}
 
 // Initializer.
 void VHDLObj :: initialize() {
-  name = "XXX";
+  name = "UNINITIALIZED";
+}
+
+// Return a pointer to a new copy of the VHDLObj.
+VHDLObj* VHDLObj :: newCopy() {
+  VHDLObj* newObj = new VHDLObj(this->name);
+  return newObj;
 }
 
 // Set the name.
@@ -61,3 +67,45 @@ void VHDLObj :: setName(const char* newName) {
 const char* VHDLObj :: className() const { return "VHDLObj"; }
 
 ISA_FUNC(VHDLObj,NamedObj);
+
+// Constructors.
+VHDLObjList :: VHDLObjList() {
+  initialize();
+}
+
+// Destructor.
+VHDLObjList :: ~VHDLObjList() {}
+
+// Initializer.
+void VHDLObjList :: initialize() {
+  myTable.clear();
+  NamedObjList::initialize();
+}
+
+// Add VHDLObj to list.
+void VHDLObjList :: put(VHDLObj& v) {
+  if (this->inList(&v)) return;
+  else {
+    NamedObjList::put(v);
+    myTable.insert(v.name, &v);
+  }
+}
+
+// Add a VHDLObjList to this one, one VHDLObj at a time.
+void VHDLObjList :: addList(VHDLObjList& from) {
+  VHDLObjListIter nextObj(from);
+  VHDLObj* nObj;
+  while ((nObj = nextObj++) != 0) {
+    this->put(*nObj);
+  }
+}
+
+// Check to see if an item with the given name is in the list.
+int VHDLObjList :: inList(VHDLObj* item) {
+  return myTable.hasKey(item->name);
+}
+
+// StringList argument version.
+int VHDLObjList :: inList(StringList item) {
+  return myTable.hasKey(item);
+}

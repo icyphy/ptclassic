@@ -39,12 +39,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "NamedObj.h"
+#include "HashTable.h"
 
 class VHDLObj : public NamedObj
 {
  public:
   // Constructors.
   VHDLObj();
+  VHDLObj(const char* n) { setName(n); }
 
   // Destructor.
   ~VHDLObj();
@@ -66,8 +68,83 @@ class VHDLObj : public NamedObj
   // Return a pointer to a new copy of the VHDLObj.
 //  virtual VHDLObj* newCopy() {return new VHDLObj;};
 
+  // Return a pointer to a new copy of the VHDLObj.
+  virtual VHDLObj* newCopy();
+
  protected:
  private:
+};
+
+class VHDLObjList : public NamedObjList
+{
+  friend class VHDLObjListIter;
+
+public:
+  // Constructor.
+  VHDLObjList();
+
+  // Destructor.
+  ~VHDLObjList();
+
+  // Initializer.
+  void initialize();
+
+  // Add VHDLObj to list.
+  void put(VHDLObj&);
+
+  // Add a VHDLObjList to this one, one VHDLObj at a time.
+  void addList(VHDLObjList&);
+
+  // Return first VHDLObj on list (const, non-const forms).
+  VHDLObj* head() { return (VHDLObj*) NamedObjList::head(); }
+  const VHDLObj* head() const {
+    return (const VHDLObj*) NamedObjList::head();
+  }
+
+  // Remove a VHDLObj from the list.
+  // Note:  the VHDLObj is not deleted.
+  int remove (VHDLObj* v) { return NamedObjList::remove(v); }
+
+  // Find VHDLObj with given name (const, non-const forms).
+  VHDLObj* vhdlObjWithName(const char* name) {
+    // NOTE: The following doesn't work because I don't use
+    // the same name() facility in VHDLObj's.  I re-implement this.
+    //    return (VHDLObj*) objWithName(name);
+    NamedObjListIter nextObj(*this);
+    VHDLObj* vObj;
+    while ((vObj = (VHDLObj*) nextObj++) != 0) {
+      // NOTE: I use vObj->name and not vObj->name()
+      if (!strcmp(name,(vObj->name))) {
+	return vObj;
+      }
+    }
+    return NULL;
+  }
+
+  const VHDLObj* vhdlObjWithName(const char* name) const {
+    return (const VHDLObj*) objWithName(name);
+  }
+
+  // Check to see if an item with the given name is in the list.
+  int inList(VHDLObj*);
+
+  // StringList argument version.
+  int inList(StringList);
+
+ protected:
+  HashTable myTable;
+
+ private:
+
+};
+
+// An iterator class for VHDLObjList.
+class VHDLObjListIter : public NamedObjListIter {
+ public:
+  VHDLObjListIter(VHDLObjList& l) : NamedObjListIter(l) {}
+  VHDLObj* next() { return (VHDLObj*) NamedObjListIter::next(); }
+  VHDLObj* operator++(POSTFIX_OP) { return next(); }
+  NamedObjListIter::reset;
 };
 
 #endif

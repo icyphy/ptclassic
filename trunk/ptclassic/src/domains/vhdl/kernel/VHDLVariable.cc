@@ -41,7 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLVariable :: VHDLVariable() {
-  VHDLObj::initialize();
+  initVal = "";
+  VHDLTypedObj::initialize();
 }
 
 // Destructor.
@@ -49,18 +50,14 @@ VHDLVariable :: ~VHDLVariable() {}
 
 // Return a pointer to a new copy of the VHDLVariable.
 VHDLVariable* VHDLVariable :: newCopy() {
-  VHDLVariable* newVariable = new VHDLVariable;
-  newVariable->setName(this->name);
-  newVariable->type = this->type;
-  newVariable->initVal = this->initVal;
-
-  return newVariable;
+  VHDLVariable* newVar = new VHDLVariable(name, type, initVal);
+  return newVar;
 }
 
 // Class identification.
 const char* VHDLVariable :: className() const { return "VHDLVariable"; }
 
-ISA_FUNC(VHDLVariable,VHDLObj);
+ISA_FUNC(VHDLVariable,VHDLTypedObj);
 
 // Return a pointer to a new copy of the list.
 VHDLVariableList* VHDLVariableList :: newCopy() {
@@ -80,9 +77,6 @@ VHDLVariableList* VHDLVariableList :: newCopy() {
 // Allocate memory for a new VHDLVariable and put it in the list.
 void VHDLVariableList :: put(StringList name, StringList type,
 			     StringList initVal) {
-  VHDLVariable* newVar = new VHDLVariable;
-  newVar->setName(name);
-  newVar->type = type;
-  newVar->initVal = initVal;
+  VHDLVariable* newVar = new VHDLVariable(name, type, initVal);
   this->put(*newVar);
 }
