@@ -73,9 +73,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		     "gain",
 		     $starSymbol(setGain));
 
-      connectControl("$val(starName)",
+      connectControl2("$val(starName)",
 		     "frequency",
-		     $starSymbol(setcenterFreq));
+		     $starSymbol(setcenterFreq2));
     }
     codeblock(tkSetupband) {
       /* "tkband" is  a local variable which scales the    */
@@ -170,6 +170,30 @@ limitation of liability, and disclaimer of warranty provisions.
         }
     }
     
+    codeblock (setcenterFreqDef2) {
+        static int $starSymbol(setcenterFreq2)(dummy, interp, argc, argv)
+            ClientData dummy;                   /* Not used. */
+            Tcl_Interp *interp;                 /* Current interpreter. */
+            int argc;                           /* Number of arguments. */
+            char **argv;                        /* Argument strings. */
+        {
+	    static char buf[20];
+            if(sscanf(argv[1], "%lf", &$ref(centerFreq)) != 1) {
+                errorReport("Invalid center freq");
+                return TCL_ERROR;
+            }
+	    /* procedure calls to update; defined in base class */	    
+	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCParametricEq,selectFilter)
+	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
+	       $starSymbol(filtertaps), "$val(filtertype)");
+
+	    sprintf(buf, "%.2f", $ref(centerFreq));
+	    displaySliderValue(".middle", "$starSymbol(scale2)", buf);
+            return TCL_OK;
+        }
+    }
+    
     codeblock (setBandwidthDef) {
         static int $starSymbol(setBandwidth)(dummy, interp, argc, argv)
             ClientData dummy;                   /* Not used. */
@@ -241,6 +265,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
         addCode(setGainDef, "procedure");
 	addCode(setcenterFreqDef, "procedure");
+	addCode(setcenterFreqDef2, "procedure");
 
     }
 }
