@@ -183,6 +183,23 @@ test SDFMAverageCx { SDFAverageCx} {
 (75.5,0.0)	
 }}
 
+######################################################################
+#### test SDFAverageCx
+# 
+test SDFMAverageCx { SDFAverageCx, Complex input} {
+    sdfTest1In1Out AverageCx 1.1 Complex
+} {{(3.85,1.75)	
+(12.65,5.75)	
+(21.45,9.75)	
+(30.25,13.75)	
+(39.05,17.75)	
+(47.85,21.75)	
+(56.65,25.75)	
+(65.45,29.75)	
+(74.25,33.75)	
+(83.05,37.75)	
+}}
+
 # Fix one input stars
 
 ######################################################################
@@ -380,6 +397,24 @@ test SDFAddCx2 { SDFAddCx.input=2} {
 }}
 
 ######################################################################
+#### SDFAddCx.input=2
+# 
+test SDFAddCx3 { SDFAddCx.input=2, Complex inputs} {
+    sdfTestArithmetic2input AddCx Complex
+} {{(0.0,0.0)	
+(3.0,0.75)	
+(6.0,1.5)	
+(9.0,2.25)	
+(12.0,3.0)	
+(15.0,3.75)	
+(18.0,4.5)	
+(21.0,5.25)	
+(24.0,6.0)	
+(27.0,6.75)	
+}}
+
+
+######################################################################
 #### SDFSubCx.input=2
 # 
 test SDFSubCx2 { SDFSubCx.input=2} {
@@ -397,6 +432,24 @@ test SDFSubCx2 { SDFSubCx.input=2} {
 }}
 
 ######################################################################
+#### SDFSubCx.input=2
+# 
+test SDFSubCx3 { SDFSubCx.input=2, Complex inputs} {
+    sdfTestArithmetic2input SubCx Complex
+} {{(0.0,0.0)	
+(-1.0,0.25)	
+(-2.0,0.5)	
+(-3.0,0.75)	
+(-4.0,1.0)	
+(-5.0,1.25)	
+(-6.0,1.5)	
+(-7.0,1.75)	
+(-8.0,2.0)	
+(-9.0,2.25)	
+}}
+
+
+######################################################################
 #### SDFMpyCx.input=2
 # 
 test SDFMpyCx2 { SDFMpyCx.input=2} {
@@ -412,6 +465,24 @@ test SDFMpyCx2 { SDFMpyCx.input=2} {
 (64.0,0.0)	
 (81.0,0.0)	
 }}
+
+######################################################################
+#### SDFMpyCx.input=2
+# 
+test SDFMpyCx2 { SDFMpyCx.input=2, Complex input} {
+    sdfTestArithmetic2input MpyCx Complex
+} {{(0.0,0.0)	
+(1.875,1.25)	
+(7.5,5.0)	
+(16.875,11.25)	
+(30.0,20.0)	
+(46.875,31.25)	
+(67.5,45.0)	
+(91.875,61.25)	
+(120.0,80.0)	
+(151.875,101.25)	
+}}
+
 
 # Two input Fix stars
 
@@ -451,6 +522,23 @@ test SDFSubFix2 { SDFSubFix.input=2} {
 }}
 
 ######################################################################
+#### SDFSubFix.input=2
+# 
+test SDFSubFix3 { SDFSubFix.input=2, Fix inputs} {
+    sdfTestArithmetic2input SubFix Fix
+} {{0.0	
+0.0	
+0.0	
+0.5	
+1.0	
+1.0	
+1.0	
+1.5	
+1.5	
+1.5	
+}}
+
+######################################################################
 #### SDFMpyFix.input=2
 # 
 test SDFMpyFix2 { SDFMpyFix.input=2} {
@@ -465,6 +553,23 @@ test SDFMpyFix2 { SDFMpyFix.input=2} {
 49.0	
 64.0	
 81.0	
+}}
+
+######################################################################
+#### SDFMpyFix.input=2
+# 
+test SDFMpyFix3 { SDFMpyFix.input=2, Fix input} {
+    sdfTestArithmetic2input MpyFix Fix
+} {{0.0	
+0.0	
+0.0	
+0.0	
+0.0	
+0.0	
+0.0	
+-0.5	
+-0.5	
+-0.5	
 }}
 
 # Two input Int stars
