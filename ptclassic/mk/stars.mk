@@ -548,7 +548,7 @@ ifdef CG
 	# star icons
 	PALETTES += PTOLEMY/src/domains/cg/icons/cg.pal
 	# special targets
-	# TARGETS += $(CGT)/CGCostTarget.o
+	TARGETS += $(CGT)/CGCostTarget.o
 	ifdef CGPAR
 		CUSTOM_DIRS += $(CGDIR)/HuScheduler $(CGDIR)/ddfScheduler \
 			$(CGDIR)/macroScheduler $(CGDIR)/dcScheduler  \
