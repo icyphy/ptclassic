@@ -30,16 +30,17 @@ $Id$
 */
 
 
-/* Includes */
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+/* Octtools includes */
+#include "oct.h"
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+/* Pigilib includes */
+#include "exec.h"		/* define RunUniverse */
 #include "utilities.h"
-
-#include "exec.h"
-
 
 /* Invoke a standard facet to plot a signal */
 int 
