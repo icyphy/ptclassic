@@ -1,0 +1,29 @@
+#! /bin/sh
+# usage: pigiRpcDebug.hppa <vem-args>
+# $Id$
+
+# Use xdb as a debugger instead of gdb.
+# hppa.cfront requires this
+
+dbgcmdfile=$HOME/.xdbrc
+
+if [ -f $dbgcmdfile && ! -f $dbgcmdfile.bak ]; then
+	cp $dbgcmdfile $dbgcmdfile.bak
+fi
+
+cat > $dbgcmdfile <<EOF
+apm ../../src/pigilib $PTOLEMY/src/pigilib
+apm ../../src/pigiRpc $PTOLEMY/src/pigiRpc
+b main
+r $*
+EOF
+
+echo "xdb command file is:"
+echo "------start----"
+cat $dbgcmdfile
+echo "------end----"
+
+xterm -display $DISPLAY -title "pigiRpc xdb debug window" -bg black -fg green \
+	-e xdb -d $PTOLEMY/src/pigilib $PIGIRPC &
+
+
