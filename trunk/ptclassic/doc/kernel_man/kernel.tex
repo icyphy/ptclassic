@@ -4976,7 +4976,7 @@ This permits loops like
 
 @example
 Tokenizer tin;
-while (tin) @{ ... do stuff ... }@
+while (tin) @{ ... do stuff ... @}
 @end example
 
 FIXME: more to write here.
@@ -4991,18 +4991,26 @@ int fromFile(const char* name);
 @end example
 
 @example
-int readingFromFile() const { return depth > 0 ? 1 : 0;}
+int readingFromFile() const;
 @end example
+
+Returns true (1) if the Tokenizer is reading from an include file,
+false (0) if not.
 
 @example
 int eof() const;
 @end example
 
+Returns true if the end of file or end of input has been reached on
+the Tokenizer.  It is possible that there is nothing left in the input
+but write space, so in many situations @code{skipwhite} should be called
+before making this test.
+
 @example
 void skipwhite();
 @end example
 
-Skip whitespace (closing include file if no more space)
+Skip whitespace (closing include file if no more space).
 
 @example
 void flush();
@@ -5097,7 +5105,7 @@ void addPoint(float @var{x}, float @var{y});
 Add the point (@var{x}, @var{y}) to the first data set.
 
 @example
-void addPoint(int @example{dataSet}, float @var{x}, float @var{y});
+void addPoint(int @var{dataSet}, float @var{x}, float @var{y});
 @end example
 
 Add the point (@var{x}, @var{y}) to the data set indicated by
@@ -5224,7 +5232,7 @@ are needed for Fraction but are generally useful.
 @example
 Fraction ();
 Fraction (int @var{num}, int @var{den}=1);
-@example
+@end example
 
 The default constructor produces a fraction with numerator 0 and
 denominator 1.  The other constructor allows the numerator and
