@@ -84,7 +84,7 @@ LIBCSRCS      = main.c \
 		options.c
 
 
-LIBCPPSRCS    = kernelCalls.cc XOutput.cc pigiLoader.cc
+LIBCPPSRCS    = kernelCalls.cc XError.cc pigiLoader.cc
 
 
 LIBSRCS = $(LIBCSRCS) $(LIBCPPSRCS)
