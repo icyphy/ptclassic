@@ -23,13 +23,19 @@ Initialization code for pigiRpc.
 /* Global Vars */
 
 char *xDisplay;  /* display name passed by vem */
+char *pigiFilename = NULL;	/* initialized by pigiMain */
 extern char *pigiVersion;
 
 
 static void
 PrintVersion()
 {
+    char buf[200];
     PrintCon(pigiVersion);
+    if ( pigiFilename == NULL )
+	pigiFilename = "pigiRpc";
+    sprintf( buf, "Running %s, %d", pigiFilename, getpid());
+    PrintCon(buf);
 }
 
 int
