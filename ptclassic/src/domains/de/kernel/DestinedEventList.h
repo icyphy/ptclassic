@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "type.h"
 #include "LinkedList.h"
 
 class DestinedEventList : public LinkedList {
