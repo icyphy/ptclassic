@@ -53,10 +53,13 @@ EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 
 DIRS =		bin demo doc test
 
-MISC_FILES =	tclIndex $(DIRS) adm
+MISC_FILES =	tclIndex $(DIRS)
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex *.html
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES = adm
 
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/typt/edit
