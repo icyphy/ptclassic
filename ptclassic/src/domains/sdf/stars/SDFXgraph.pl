@@ -14,8 +14,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-The input signal is plotted using the \fIxgraph\fR program.
-This program must be in your path, or this star will not work!
+The input signal is plotted using the \fIpxgraph\fR program which
+is provided with the Ptolemy distribution.
+Note that pxgraph is a specially modified version of xgraph.
 The \fItitle\fR parameter specifies a title for the plot.
 The \fIsaveFile\fR parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
