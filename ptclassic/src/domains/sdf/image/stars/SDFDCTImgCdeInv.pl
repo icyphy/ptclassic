@@ -62,6 +62,15 @@ input data is affected by loss.
     code {
       // Initialize.
       const int fullFrame = width * height;
+
+      // FIXME
+      // Sets hiImagePtr and loImagePtr to the vector representing the
+      // respective FloatMatrix.
+      // This only works because in the underlying implementation of FloatMatrix,
+      // hiImage[0], which returns the 1st row, also returns the entire vector
+      // representing the matrix. 
+      // A method should be added to the FloatMatrix class to do this instead
+      // of relying on this current operation
       const double* hiImagePtr = hiImage[0];
       const double* loImagePtr = loImage[0];
 
