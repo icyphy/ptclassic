@@ -85,7 +85,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * to the makefile or just copy it over to the remote machine.  In the
  * default situation, appendToMakefile is true and we append our rules
  * to makefile_C.mk
- *  
+ *
+ * If the parent target parameter 'compileOptions' is set, then we 
+ * process any environment variables in that string, and then add it to
+ * the end of the generated makefile as part of 'OTHERCFLAGS='.  In a similar
+ * fashion, the parent target parameter 'linkOptions' ends up as part
+ * of the right hand side of 'LOADLIBES='
+ * 
  */
 #ifdef __GNUG__
 #pragma implementation
@@ -147,9 +153,18 @@ void CGCMakefileTarget :: writeCode()
     makefileName << filePrefix << ".mk";
 
     if ( appendToMakefile ) {
-				// Append append rules to the makefile
-      
-				// Copy the makefile to our generated makefile
+      // We have two streams, compileOptionsStream and
+      // linkOptionsStream.  For each stream, we check to see if
+      // CreateSDFStar wants to add to the stream.  If it does, then
+      // we print out the appropriate lhs, either 'OTHERCFLAGS=' or
+      // 'LOADLIBES=', and then we print out the data that
+      // CreateSDFStar has added to the stream.
+      //
+      // The Makefile_C target has two states, compileOptions and
+      // loadOptions that then get printed out if necessary.  Before
+      // printing these, we need to optionally print the appropriate
+      // makefile lhs.
+
       // FIXME: is there a better way to read in a file and copy it to
       // a stream?
 
@@ -168,12 +183,16 @@ void CGCMakefileTarget :: writeCode()
 	  generatedMakefile << expandedCompileOptionsStream << ' ';
 	  delete [] expandedCompileOptionsStream;
       }
+				// Now process the parent target compileOptions
       if(strlen((const char*) compileOptions) > 0) {
+	  char* expandedCompileOptionsStream =
+	      expandPathName(compileOptionsStream);
 				// If we have not printed OTHERCFLAGS yet,
 				// then do it now
 	  if (!compileOptionsStream.numPieces())
 	     generatedMakefile << "OTHERCFLAGS= ";
-	  generatedMakefile << (const char *)compileOptions;
+	  generatedMakefile << expandedCompileOptionsStream;
+	  delete [] expandedCompileOptionsStream;
       }
       generatedMakefile << "\n";
 
@@ -192,12 +211,16 @@ void CGCMakefileTarget :: writeCode()
 	  generatedMakefile << expandedLinkOptionsStream << ' ';
 	  delete [] expandedLinkOptionsStream;
       }     
+				// Now process the parent target linkOptions
       if(strlen((const char*) linkOptions) > 0) {
-	  if (!linkOptionsStream.numPieces())
+	  char* expandedLinkOptionsStream =
+	      expandPathName(linkOptionsStream);
 				// If we have not printed LOADLIBES= yet,
 				// then do it now.
+	  if (!linkOptionsStream.numPieces())
 	     generatedMakefile << "LOADLIBES= ";
-	  generatedMakefile << (const char *)linkOptions;
+	  generatedMakefile << expandedLinkOptionsStream;
+	  delete [] expandedLinkOptionsStream;
       }
       generatedMakefile << "\n";
       
