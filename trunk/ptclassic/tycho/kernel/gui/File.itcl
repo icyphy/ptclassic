@@ -209,12 +209,6 @@ class ::tycho::File {
     # Open a new editor of the specified class.
     proc newEditor {displayer viewer args} {}
 
-    # Open a Ptolemy Octtools facet
-    proc openFacet {} {}
-
-    # Similar to openContext below, except we create a empty facet
-    proc openFacetOrContext {filename} {}
-
     # Open a file browser, and then open an editor for the file.
     proc openWin {} {}
 
@@ -1195,35 +1189,6 @@ body ::tycho::File::newEditor {displayer viewer args} {
     uplevel #0 [normalizeClassname $viewer] $name.v $args
     wm deiconify $name
     return $name
-}
-
-#####################################################################
-#### openFacet
-# Open a file browser, and then open an editor for the facet
-# If the file does not exist, then we create a Ptolemy Octtools facet.
-# The editor is chosen based on the file extension, if the extension
-# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
-# ordinary text editor.
-#
-body ::tycho::File::openFacet {} {
-    ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
-	    -command "::tycho::File::openFacetOrContext " \
-	    -text "Open Facet:"
-
-}
-
-#####################################################################
-#### openFacetOrContext
-# openFacetOrContext is like openContext, except if the file
-# does not exist we create a facet.
-#
-body ::tycho::File::openFacetOrContext {filename} {
-    global ptolemypresent
-    if { $ptolemypresent == 1 && ! [ file exists $filename]} {
-	::pvOpenWindow [::ptkOpenFacet $filename schematic contents]
-    } else {
-	::tycho::File::openContext $filename
-    }
 }
 
 #####################################################################
