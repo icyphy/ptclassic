@@ -44,7 +44,7 @@ LIB = foo
 KRUFT = rman
 
 MISC_FILES =	Copyright MANIFEST Makefile.dist README-rman contrib \
-		rman.1 rman.html
+		rman.1 rman.html Makefile.mac getopt.c macish.c
 
 # Special to rman
 VOLLIST = "1:2:3:4:5:6:7:8:9:o:l:n:p"

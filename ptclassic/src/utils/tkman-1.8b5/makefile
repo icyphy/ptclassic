@@ -40,7 +40,8 @@ KRUFT =
 
 MISC_FILES = 	Copyright MANIFEST Makefile.dist README-tkman contrib \
 		searchbox.tcl taputils.tcl tkman-help.html tkman-help.tcl \
-		tkman.1 tkman.tcl
+		tkman.1 tkman.tcl \
+		ANNOUNCE-tkman CHANGES backslash face.xbm
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
