@@ -128,5 +128,6 @@ CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
 	 	$(CG56T)/CGCXSBase.o $(CG56T)/CG56XCSBase.o \
 		$(CG56T)/CGCXABase.o $(CG56T)/CG56XCABase.o \
 		$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
+CG96TARGETS =	$(CG96T)/Sim96Target.o
 CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
