@@ -10,7 +10,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 nonlinear functions library }
 	explanation {
 If \fIcmpareMagnitude\fR is ``no'',
 the star finds from among the \fIinput\fR inputs the one with

@@ -13,7 +13,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 arithmetic library }
 	explanation {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
 The only special case is for gain 1.  We eliminate ourselves from the circuit
