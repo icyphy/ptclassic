@@ -54,9 +54,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* kludge - due to moving target, handled in -I on compile */
 /* KERNEL define to stop recursive inclusion of time.h in BSD and SUN */
+#if defined(sun) || defined(vax)
 #define KERNEL
-#include "time.h"
+#include <time.h>
 #undef KERNEL
+#else
+#include <time.h>
+#endif
 
 #include <sys/socket.h>
 #include <netinet/in.h>
