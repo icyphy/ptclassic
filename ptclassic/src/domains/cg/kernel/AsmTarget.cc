@@ -148,7 +148,7 @@ extern int warnIfNotConnected (Galaxy&);
 // Here's the main guy.
 int AsmTarget::modifyGalaxy() {
 	Galaxy& g = *galaxy();
-	if (!int(loopScheduler)) return TRUE;
+	if (!int(loopingLevel)) return TRUE;
 	// init and call start methods.  We must do this so that
 	// the numberTokens values will be correct.
 	if (warnIfNotConnected(g)) return FALSE;

@@ -30,7 +30,7 @@ MultiTarget::MultiTarget(const char* name,const char* starclass,
 	nChildrenAlloc(0), curChild(0), iters(0)
 {
 	// loop scheduler makes no sense for a multitarget
-	loopScheduler.setAttributes(A_NONSETTABLE);
+	loopingLevel.setAttributes(A_NONSETTABLE);
         addState(nprocs.setState("nprocs",this,"2","number of processors"));
         addState(inheritProcessors.setState(
 	     "inheritProcessors",this,"NO","If yes, inherit child targets"));
