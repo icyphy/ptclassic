@@ -34,7 +34,9 @@ int AutoForkNode::isItPersistent () {
 // make a new source connection
 PortHole* AutoForkNode::setSourcePort (GenericPort &sp) {
 	if (originatingPort) {
-		Error::abortRun (*this, " already has a source port");
+		StringList msg = readFullName();
+		msg += " already has a source port";
+		Error::abortRun (msg);
 		return 0;
 	}
 // MultiPortHole: in this case the Geodesic is really not used, we
@@ -42,7 +44,9 @@ PortHole* AutoForkNode::setSourcePort (GenericPort &sp) {
 // forkOutput to be equal to it.
 	if (sp.isItMulti()) {
 		if (forkOutput) {
-			Error::abortRun(*this,"Multiport input must be first");
+			StringList msg = readFullName();
+			msg += ": Multiport input must be first";
+			Error::abortRun(msg);
 			return 0;
 		}
 		forkOutput = (MultiPortHole *)&sp;
@@ -82,8 +86,13 @@ PortHole* AutoForkNode::setDestPort (GenericPort &gp) {
 		if ((forkStar = KnownBlock::clone("Fork")) == 0 ||
 		    (forkOutput = forkStar->multiPortWithName("output")) == 0
 		    || (forkInput = forkStar->portWithName("input")) == 0) {
-			Error::abortRun (*this, "can't create Fork star");
-			if (forkStar) { delete forkStar; forkStar = 0;}
+			StringList msg = readFullName();
+			msg += ": can't create Fork star";
+			Error::abortRun (msg);
+			if (forkStar) {
+				delete forkStar;
+				forkStar = 0;
+			}
 			return 0;
 		}
 
