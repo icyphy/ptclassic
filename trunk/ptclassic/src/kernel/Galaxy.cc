@@ -112,12 +112,10 @@ void Galaxy :: initSubblocks() {
 	// In the following, we carefully get the pointer to the next
 	// item in the iterator before calling the initialize(), in case
 	// as part of the initialization, the block deletes itself.
-	if (b) {
-	    do {
+	while (b && !Scheduler::haltRequested()) {
 		b2 = next++;
 		b->initialize();
 		b = b2;
-	    } while (b && !Scheduler::haltRequested());
 	}
 }
 
