@@ -83,15 +83,17 @@ $label(l3)
 	              gencode(yeshostBlock);
 		else
 	              gencode(elsehostBlock);
-		}
+	}	
         else {
                if (p[0]=='n' || p[0]== 'N')
 	              gencode(nohostBlock);
 	       else
 	              gencodeblock(done);
- 	}
+       }
+       }
 
 	execTime { 
 		return 2;
 	}
- }
+    }
+ 
