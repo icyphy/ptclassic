@@ -94,13 +94,13 @@ void MatlabTcl::sethandle() {
 }
 
 // start a Matlab process if one is not running already
-int MatlabTcl::init() {
+int MatlabTcl::init(char* command) {
     if (matlabInterface == 0) {
 	matlabInterface = new MatlabIfc;
 	matlabInterface->SetDeleteFigures(TRUE);
     }
     if (! matlabInterface->MatlabIsRunning()) {
-	if (! matlabInterface->StartMatlab() ) {
+	if (! matlabInterface->StartMatlab(command) ) {
 	    return FALSE;
 	}
     }
@@ -328,8 +328,10 @@ int MatlabTcl::set(int argc, char** argv) {
 
 // start a Matlab process if one is not running already
 int MatlabTcl::start(int argc, char** argv) {
-    if (argc < 2 || argc > 3) return usage("matlab start ?<identifier>?");
-    if (! init()) return error("Could not start matlab");
+    if (argc < 2 || argc > 4) 
+        return usage("matlab start ?<identifier>? ?<start_command>?");
+    char* startCommand = (argc == 4) ? argv[3] : 0;
+    if (! init(startCommand)) return error("Could not start matlab");
     char* id = (argc == 3) ? argv[2] : 0;
     manager.add(tclinterp, id);
     return TCL_OK;
