@@ -36,7 +36,9 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual makefile.
 
-DIRS = profile tksteal tytimer tytest tycgc @TYJAVA@
+# We don't ship tksteal right now.  To build tksteal, uncomment it below
+# edit configure.in, run autoconf and then configure.
+DIRS = profile tytimer tytest tycgc @TYJAVA@ #tksteal
 
 srcdir = 	@srcdir@
 
