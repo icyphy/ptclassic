@@ -34,8 +34,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "logNew.h"
 #include "PosixMonitor.h"
+#include "logNew.h"
 
 // Constructor.
 PosixMonitor::PosixMonitor()
@@ -55,24 +55,18 @@ PosixMonitor::PosixMonitor()
     LOG_NEW; return new PosixMonitor;
 }
 
-// Cleanup fucntion to unlock the mutex if a thread gets cancelled.
-static void cleanup(pthread_mutex_t* m)
-{
-    pthread_mutex_unlock(m);
-}
-
 // Obtain exclusive use of the lock.
 /*virtual*/ void PosixMonitor::lock()
 {
     pthread_mutex_lock(&mutex);
 
     // Guarantee that the mutex will not remain locked by a cancelled thread.
-    pthread_cleanup_push(cleanup, &mutex);
+    pthread_cleanup_push((void (*)(void *))pthread_mutex_unlock, &mutex);
 }
 
 // Release the lock.
 /*virtual*/ void PosixMonitor::unlock()
 {
-    // Remove cleanup handler and execute.
+    // Remove cleanup handler and unlock.
     pthread_cleanup_pop(TRUE);
 }
