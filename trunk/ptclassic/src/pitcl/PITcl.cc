@@ -57,7 +57,7 @@ static const char file_id[] = "PTcl.cc";
 #include "Scheduler.h"
 #include "InfString.h"
 
-#include "pitclDescription.h"
+#include "ptclDescription.h"
 
 // "matlab" ptcl command -BLE
 // we make matlabtcl a static instance of the MatlabTcl class instead of
