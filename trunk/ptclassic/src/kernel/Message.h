@@ -23,7 +23,7 @@ $Id$
 #include "Particle.h"
 #include "StringList.h"
 
-extern const dataType PACKET;
+extern const DataType PACKET;
 
 class PacketData {
 	friend class Packet;
@@ -53,7 +53,15 @@ public:
 	// clone the packet.  MUST BE REDEFINED by each derived class!
 	// don't forget the "const" keyword when you do so!
 	virtual PacketData* clone() const;
+
+	// type checking: isA returns true if given the name of
+	// the class or the name of any baseclass.  Exception:
+	// the baseclass function returns FALSE to everything
+	// (as it has no data at all).
+	virtual int isA(const char*) const;
 };
+
+#include "isa.h"
 
 // A Packet is simply a way of making a single PacketData look like
 // multiple objects.
@@ -83,6 +91,7 @@ public:
 		p.d->refCount++;
 		unlinkData();
 		d = p.d;
+		return *this;
 	}
 	// destructor.  Wipe out the PacketData when the last
 	// link is removed.
@@ -94,7 +103,7 @@ public:
 
 	// type check: checks PacketData type
 	int typeCheck(const char* type) const {
-		return strcmp(dataType(), type) == 0;
+		return d->isA(type);
 	}
 
 	// type error message generation
@@ -120,7 +129,7 @@ public:
 // A Particle class to transmit Packets
 class PacketSample : public Particle {
 public:
-	dataType readType() const;
+	DataType readType() const;
 
 	operator int () const;
 	operator float () const;
@@ -157,5 +166,12 @@ private:
 	void errorAssign(const char*) const;
 	Packet data;
 };
+
+// function and macro to ease type checking in stars.  badType is always
+// OK.  TYPE_CHECK is assumed to be called in a member function of a star.
+class NamedObj;
+int badType(NamedObj& n,Packet& p,const char* typ);
+
+#define TYPE_CHECK(pkt,type) if (badType(*this,pkt,type)) return
 
 #endif
