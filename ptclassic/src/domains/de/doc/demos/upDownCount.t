@@ -17,8 +17,8 @@ and the \fIcountDown\fR input is fed by another clock signal
 block is disclosed at the demand input.  
 We merge two input events to the demand input to display the
 count at every input.
-The count state is resetted
-at the reset input.  In this demo, no event is delivered to the reset
+The count state is reset
+by the reset input.  In this demo, no event is delivered to the reset
 input, so connected to the
 .c Null
 block.  

@@ -64,7 +64,7 @@ order predictor, so it is simply the estimate of the power of the
 input signal.  The predictor error power fails to decrease further
 when the order exceeds two, which again is reassuring because
 of the order of the input process.
-The last plot is the autocorrelation estimate used in teh Levinson-Durbin
+The last plot is the autocorrelation estimate used in the Levinson-Durbin
 algorithm.  Note that the center lag is the estimate of the power
 of the input process, and hence is equal to the zero sample
 of the prediction error power.

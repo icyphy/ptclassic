@@ -9,7 +9,7 @@ Demonstrates the use of the FIFOQueue and Stack blocks together with Servers.
 .IE FIFOQueue
 .IE queue
 .IE Server
-A regular sequence of input events with intevals 1.0 arrive at a
+A regular sequence of input events with interval 1.0 arrive at a
 .c FIFOQueue
 and
 .c Stack.
