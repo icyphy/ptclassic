@@ -161,18 +161,18 @@ body ::tycho::Stepper::drag {x y} {
     
     # If we have moved far enough in the x axis, quantize the movement
     if { $deltaX >= $threshold } {
-        set moveX [roundTo $deltaX $stepsize]
+        set moveX [::tycho::roundTo $deltaX $stepsize]
     } elseif { $deltaX <= -$threshold } {
-        set moveX [roundTo $deltaX $stepsize]
+        set moveX [::tycho::roundTo $deltaX $stepsize]
     } else {
         set moveX 0
     }
     
     # Same in the y axis
     if { $deltaY >= $threshold } {
-        set moveY [roundTo $deltaY $stepsize]
+        set moveY [::tycho::roundTo $deltaY $stepsize]
     } elseif { $deltaY <= -$threshold } {
-        set moveY [roundTo $deltaY $stepsize]
+        set moveY [::tycho::roundTo $deltaY $stepsize]
     } else {
         set moveY 0
     }
