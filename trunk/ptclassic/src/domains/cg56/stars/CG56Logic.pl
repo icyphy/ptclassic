@@ -85,37 +85,60 @@ non-zero integer (not necessarily 1).
 		else Error::abortRun(*this, "Unrecognized test.");
 	}
 
+	codeblock(inverter) {
+	clr	b	$ref(input#1),a		; set b = 0, read input to a
+	tst	a	#1,y1			; test a, set y1 = 1
+	teq	y1,b				; if a = 0, then b = y1 = 1
+	move	b,$ref(output)			; output = b
+	}
+
 	codeblock(loadAccumulator,"int i") {
-		move	$ref(input#@i),a	a,x0	; read input, save a
+	move	$ref(input#@i),a	; read input to accumulator a
+	}
+
+	codeblock(testAccumulator) {
+	tst	a			; test accumulator a
+	}
+
+	codeblock(testAndLoadAccumulator,"int i") {
+	tst	a	$ref(input#@i),a	; test a, read input into a
+	}
+
+	codeblock(loadx0,"int i") {
+	move	$ref(input#@i),x0	; read input into register x0
 	}
 
         codeblock(saveStatus) {
-		movec   sr,a    ; save status register (has condition codes)
+	movec   sr,a    	; save status register (has condition codes)
 	}
 
 	codeblock(invert) {
-		and	#0x04,a		; test Z bit (returns true if zero)
+	and	#4,a		; returns true if zero (test the Z bit)
 	}
 
 	codeblock(branchIfZero) {
-		jeq	$label(_logic_end)	; branch if input is zero
+	jeq	$label(_logic_end)	; branch if input is zero
 	}
 
 	codeblock(endAnd) {
-		move	#1,a		; return TRUE
+	move	#1,a		; return TRUE
 $label(_logic_end)
 	}
 
 	codeblock(logicOrOp) {
-		or	x0,a
+	or	x0,a
 	}
 
 	codeblock(logicOrOpAndLoad,"int i") {
-		or	x0,a	$ref(input#@i),x0
+	or	x0,a	$ref(input#@i),x0
+	}
+
+	codeblock(beginXor) {
+	clr	b	$ref(input#1),a
 	}
 
         codeblock(saveResult) {
-		move    a,$ref(output)
+	move    a,$ref(output)
 	}
 
 	go {
@@ -126,13 +149,14 @@ $label(_logic_end)
 
 		// The inverter (not) star is the simplest case
 		if ( input.numberPorts() == 1 ) {
-			addCode(loadAccumulator(1));
 			if ( test == NOTID || test == NANDID ||
 			     test == NORID || test == XNORID ) {
-				addCode(saveStatus);
-				addCode(invert);
+				addCode(inverter);
 			}
-			addCode(saveResult);
+			else {
+				addCode(loadAccumulator(1));
+				addCode(saveResult);
+			}
 			return;
 		}
 
@@ -146,36 +170,53 @@ $label(_logic_end)
 		    case NANDID:
 			implementationComment << "positive logic";
 			addCode(implementationComment);
-			for (i = 1; i < input.numberPorts(); i++ ) {
-				addCode(loadAccumulator(i));
+			addCode(loadAccumulator(1));
+			addCode(testAccumulator);
+			for (i = 2; i < input.numberPorts(); i++ ) {
 				addCode(branchIfZero);
+				addCode(testAndLoadAccumulator(i));
 			}
+			addCode(branchIfZero);
 			addCode(endAnd);
+			if ( test == NANDID ) addCode("\ttst	a");
 			break;
 		    case ORID:
 		    case NORID:
 			implementationComment << "positive logic";
 			addCode(implementationComment);
 			addCode(loadAccumulator(1));
-			addCode(loadAccumulator(2));
-			for (i = 2; i < input.numberPorts(); i++ ) {
+			addCode(loadx0(2));
+			// Use the repeat instruction if input ports > 4
+			// because the logicOrOpAndLoad code is 1 instruction
+			if ( input.numberPorts() > 4 ) {
+				StringList repeat = "\t\trep\t#";
+				repeat << ( input.numberPorts() - 2 );
+				addCode(repeat);
 				addCode(logicOrOpAndLoad(i));
+			}
+			else {
+				for (i = 3; i < input.numberPorts(); i++ ) {
+					addCode(logicOrOpAndLoad(i));
+				}
 			}
 			addCode(logicOrOp);
 			break;
 		    case XORID:
 		    case XNORID:
+			// FIXME: Broken
 			implementationComment << "negative logic";
 			addCode(implementationComment);
-			addCode(loadAccumulator(1));
-			addCode(saveStatus);
-			addCode(invert);
+			addCode(beginXor);
 			for (i = 2; i < input.numberPorts(); i++ ) {
-				addCode(loadAccumulator(i));
+				addCode(testAndLoadAccumulator(i));
 				addCode(saveStatus);
 				addCode(invert);
 				addCode(logicOrOp);
 			}
+			addCode(testAccumulator);
+			addCode(saveStatus);
+			addCode(invert);
+			addCode(logicOrOp);
 			break;
 		}
 
@@ -195,17 +236,23 @@ $label(_logic_end)
 		    test += 4;
 		    break;
 
-		  case ANDID:
 		  case NANDID:
+		    test += 4;
+		    // fall through
+		  case ANDID:
 		    test += 4 + 6*input.numberPorts();
 		    break;
 
-		  case ORID:
 		  case NORID:
+		    test += 4;
+		    // fall through
+		  case ORID:
 		    test += 2 + 2*input.numberPorts();
 		    break;
 
 		  case XORID:
+		    test += 4;
+		    // fall through
 		  case XNORID:
 		    test += 4 + 8*input.numberPorts();
 		    break;
