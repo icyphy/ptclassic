@@ -50,11 +50,18 @@ if ( ! $?S56DSP ) then
 	setenv S56DSP /users/ptdesign/vendors/s56dsp
 endif
 
-if ( ! $?LD_LIBRARY_PATH ) then
-	# Save the LD_LIBRARY_PATH in case we are called with -bak
-	setenv S_LD_LIBRARY_PATH yes
-    setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
+if ($PTARCH =~ hppa?*) then
+	if ( ! $?SHLIB_PATH ) then
+		setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib
+	endif
+else
+	if ( ! $?LD_LIBRARY_PATH ) then
+		# Save the LD_LIBRARY_PATH in case we are called with -bak
+		setenv S_LD_LIBRARY_PATH yes
+		setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:${PTX11DIR}/lib
+	endif
 endif
+
 
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
