@@ -32,7 +32,7 @@ ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
 EXPDOMAINS += ipus
 endif
 
-DOMAINS = sdf hof de ddf bdf thor cg cgc c50 cg56 vhdlb \
+DOMAINS = sdf hof de ddf bdf cg cgc c50 cg56 vhdlb \
           vhdl mdsdf $(EXPDOMAINS) 
 
 MAKEVARS = "PTARCH=$(PTARCH)"
