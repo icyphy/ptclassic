@@ -24,35 +24,43 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /*
  * $Id$
  *
- * Provide a dummy header that mimics "engine.h" that comes with Matlab.
+ * Provide a dummy C include header file that mimics "engine.h" that
+ * comes with Matlab.
  *
  */
 
 #ifndef engine_h
 #define engine_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "matrix.h"
 
 typedef char Engine;
 
-inline Engine *engOpenPtError()
-{
-	Error::abortRun( "The external interface to Matlab has not been ",
-			 "compiled into Ptolemy." );
-	return( (Engine *) 0 );
-}
+extern int engEvalString ARGS((Engine* enginePtr, char* command));
+extern Engine* engOpen ARGS((char* unixCommand));
+extern int engClose ARGS((Engine* enginePtr));
+extern Matrix* engGetMatrix ARGS((Engine* enginePtr, char* name));
+extern int engPutMatrix ARGS((Engine* enginePtr, Matrix* matrixPtr));
+extern int engGetFull ARGS((Engine* enginePtr, char* name,
+			    int* numrows, int* numcols,
+			    Real** realPartPtr, Real** imagePartPtr));
+extern int engPutFull ARGS((Engine* enginePtr, char* name,
+			    int numrows, int numcols,
+			    Real* realPartPtr, Real* imagePartPtr));
+extern int engOutputBuffer ARGS((Engine* enginePtr, char* buffer,
+				 int bufferlen));
 
-#define engEvalString(ep,string)	1
-#define engOpen(s)			engOpenPtError()
-#define engClose(ep)			1
-#define engGetMatrix(ep,name)		0
-#define engPutMatrix(ep,mp)		1
-#define engGetFull(ep,name,m,n,pr,pl)	1
-#define engPutFull(ep,name,m,n,pr,pl)	1
-#define engOutputBuffer(ep,b,len)
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* engine_h */
