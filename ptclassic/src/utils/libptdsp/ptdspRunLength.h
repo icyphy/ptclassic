@@ -38,6 +38,9 @@ extern "C" {
 extern void Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
 				    int HiPri, double thresh, double **outDc,
 				    double **outAc, int *indxDc, int *indxAc); 
+extern void Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
+				    double * outPtr, int origSize, int bSize, 
+				    int loSize, int HiPri);
 
 #ifdef __cplusplus
 }

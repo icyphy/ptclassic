@@ -4,9 +4,7 @@
 
   PackageName [ ptdsp ]
 
-  Synopsis    [ required ]
-
-  Description [ optional ]
+  Synopsis    [ Routines for run length encoding and decoding ]
 
   Author      [ Paul Haskell ]
 
@@ -46,11 +44,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <malloc.h>
 #include "ptdspRunLength.h"
 
-const float StartOfBlock = 524288.0;
-const float StartOfRun = 1048576.0;
+const double StartOfBlock = 524288.0;
+const double StartOfRun = 1048576.0;
 
-int larger (const float fl, const float in) {
-  return (fabs((double)fl) >= (double)in); 
+int larger (const double fl, const double in) {
+  return (fabs(fl) >= in); 
 }
 
 /*---------------------------------------------------------------------------*/	
@@ -59,7 +57,7 @@ int larger (const float fl, const float in) {
 
 /**Function*******************************************************************
   Synopsis    [ Run length encodes a DCT image ]
-  Description [ This function takes a float array which represents a
+  Description [ This function takes a double array which represents a
                 DCT image, inserts "start of block" markers,
 		run-length encodes it, and outputs the modified image. </p>
 		For the run-length encoding, all values with absolute
@@ -123,5 +121,67 @@ Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
       (*outAc)[(*indxAc)++] = (double)zeroRunLen;
     }
   }
+}
+
+/**Function*******************************************************************
+  Synopsis    [ Inverts run length encoding on a DCT image ]
+  Description [ This function reads 2 double array, representing two
+                coded DCT images (one high priority and one
+		low-priority), inverts the run-length
+		encoding, and outputs the resulting image. </p>
+		Protection is built in to avoid crashing even if some
+		of the coded input data is affected by loss. ]
+  SideEffects []
+  SeeAlso     [ Ptdsp_RunLengthEncode ]
+******************************************************************************/
+void 
+Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
+			double * outPtr, int origSize, 
+			int bSize,  int loSize, int HiPri) {
+  /* Initialize. */
+  int i, j, k, l, blk, runLen;
+
+  /* Do DC image first. */
+  i = 0;
+  for(j = 0; j < origSize; j += bSize * bSize) {
+    for(k = 0; k < HiPri; k++) {
+      outPtr[j + k] = hiImage[i++];
+    }	
+  }
+  
+  /* While still low priority input data left... */
+  i = 0;
+  while (i < loSize) {
+    
+    /* Process each block, which starts with "StartOfBlock". */
+    while ((i < loSize) && (loImage[i] != StartOfBlock)) {
+      i++;
+    }	
+    if (i < loSize-2) {
+      i++;
+      blk = (int)loImage[i++];
+      blk *= bSize*bSize;
+      if ((blk >= 0) && (blk < origSize)) {
+	blk += HiPri;
+	k = 0;
+	while ((i < loSize) && (k < bSize*bSize - HiPri)
+	       && (loImage[i] != StartOfBlock)) {
+	  if (loImage[i] == StartOfRun) {
+	    i++;
+	    if (i < loSize) {
+	      runLen = (int)loImage[i++];
+	      for( l = 0; l < runLen; l++ ) {
+		outPtr[blk+k] = 0.0;
+		k++;
+	      }
+	    }
+	  } else {
+	    outPtr[blk+k] = loImage[i++];
+	    k++;
+	  }
+	}
+      } /* if (blk OK) */
+    }
+  } /* end while (indx < loSize) */
 }
 
