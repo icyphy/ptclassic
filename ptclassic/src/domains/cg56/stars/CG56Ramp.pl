@@ -1,10 +1,7 @@
 defstar {
 	name { Ramp }
 	domain { CG56 }
-	desc {
-Generates a ramp signal, starting at "value" (default 0.0)
-with step size "step" (default 0.001).
-	}
+	desc {Ramp generator}
 	version {$Id$}
 	author { Chih-Tsung Huang }
 	copyright {
@@ -15,7 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	explanation {
-.Id "ramp generator"
+Generates a ramp signal, starting at "value" (default 0.0)
+with step size "step" (default 0.001).
 	}
 	output {
 		name { output }
