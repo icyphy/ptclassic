@@ -568,21 +568,6 @@ body ::tycho::Selector::unbind {mode tag args} {
 body ::tycho::Selector::refresh {} {
     bindDelegates
 }
-body ::tycho::Slate::selector {args} {
-    # If there's no selector, create one. Note that some options
-    # are given directly to the selector.
-    if { ! [::info exists selector] } {
-	set selector [interactor Selector]
-    }
-
-    # Return the selector or evaluate a command on it
-    if { $args == "" } {
-	return $selector
-    } else {
-    	uplevel #0 $selector $args
-    }
-}
-
 
 #####################################################################
 #####################################################################
