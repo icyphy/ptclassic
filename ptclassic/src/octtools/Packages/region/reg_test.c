@@ -81,7 +81,7 @@ char *argv[];
 	ohUnpackDefaults(&f, "r", ":physical:contents");
 	if ((ohUnpackFacetName(&f, argv[1]) != OCT_OK) ||
 	    (octOpenFacet(&f) < OCT_OK)) {
-	    Fprintf(stderr, "%s: unable to open facet `%s'\n",
+	    Fprintf(stderr, "%s: unable to open facet `%s'\n", argv[0],
 		    ohFormatName(&f));
 	    exit(1);
 	}
