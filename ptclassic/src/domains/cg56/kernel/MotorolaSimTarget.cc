@@ -62,7 +62,8 @@ void MotorolaSimTarget :: initStates(
 
 int MotorolaSimTarget::compileCode() {
 	StringList assembleCmds = "asm";
-	assembleCmds << dspType << " " << assemblerOptions << " " << filePrefix;
+	assembleCmds << dspType << " " << assemblerOptions << " " 
+		     << filePrefix<<".asm";
 	return !systemCall(assembleCmds, "Errors in assembly");
 }
 
