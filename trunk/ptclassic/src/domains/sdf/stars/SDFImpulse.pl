@@ -5,7 +5,8 @@ defstar {
 Generate a single impulse or an impulse train.  The impulse(s) have
 amplitude "level" (default 1.0).  If "period" (default 0) is equal to 0,
 then only a single impulse is generated; otherwise, it specifies the
-period of the impulse train.
+period of the impulse train.  The impulse or impulse train is delayed 
+by the amount specified by "delay".
 	}
 	version { $Id$ }
 	author { J. T. Buck }
