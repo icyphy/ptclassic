@@ -36,8 +36,11 @@ This is a local include file for useful macros and definitions.
 #include <stddef.h>
 #define RAW_PTR void *
 #else
+#ifdef hpux /* hppa.cfront requires this */
+#define RAW_PTR void *
+#else
 #define RAW_PTR char *
-#endif
+#endif /* hpux */
 
 #define TRUE	1
 #define FALSE	0
