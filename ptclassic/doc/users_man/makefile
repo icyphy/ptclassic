@@ -20,10 +20,10 @@ cgc.dvi:	cgc.tex chapter.tex other.tex
 	$(ROOT)/doc/tex/mkchap $(TEX) cgc null 10
 	mv -f chapter.dvi cgc.dvi
 
-cgc.contents:	chapter.toc
+cgc.contents:	cgc.dvi
 	$(ROOT)/doc/tex/mktoc chapter 10 > cgc.contents
 
-cgc.index:	chapter.cp chapter.tp chapter.fn
+cgc.index:	cgc.dvi
 	$(ROOT)/doc/tex/mkindex chapter 10 > cgc.index
 
 # Update all of the Framemaker cross references.
