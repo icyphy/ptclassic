@@ -173,6 +173,14 @@ void Target::begin() {
 	GalStarIter nextStar(*gal);
 	Star *s;
 	while ((s = nextStar++) != 0) s->begin();
+
+	// If we have child targets - invoke begin methods
+	if (!nChildren) return;
+
+	int i;
+	for (i = 0; i < nProcs() ; i++) {
+	    child(i)->begin();
+	}
 }
 
 // default run: run the scheduler
