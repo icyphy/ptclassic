@@ -68,11 +68,15 @@ test ToolBar-1.1 {Test out buttons} {
    # Try running entry methods on buttons
    set retval4 [list [.t clear foo] [.t get bar]]
 
-   # This should not be an error, we should be able to change a button
+   # Try updating the button with insert, which is an error
    catch {.t insert foo "This is a foo"} retval5
 
-   list $retval1 $retval2 $retval3 $retval4 $retval5
-} {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!} {{} {}} {can't read "tagsinsert(foo)": no such element in array}}
+   # Use the parent buttonconfigure method to change the text
+   .t buttonconfigure foo -text "New foo text"
+   set retval6 [.t buttoncget foo -text]
+
+   list $retval1 $retval2 $retval3 $retval4 $retval5 $retval6
+} {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!} {{} {}} {can't read "tagsinsert(foo)": no such element in array} {New foo text}}
 
 
 test ToolBar-2.1 {Test out entries} {
