@@ -80,6 +80,7 @@ PL_SRCS= \
  SDFIIR.pl \
  SDFIIRFix.pl \
  SDFKalman_M.pl \
+ SDFLMSOscDet.pl \
  SDFLMSPlot.pl \
  SDFLMSPlotCx.pl \
  SDFLMSLeak.pl \
