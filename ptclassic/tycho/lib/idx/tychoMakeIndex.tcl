@@ -58,6 +58,7 @@ proc tychoCompareNocase {first second} {
 proc tychoMkIndex {name filename prependTYCHO nested args } {
     #puts "name=$name, filename=$filename files=$args"
     foreach file $args {        
+	update
         if ![file readable $file] {
             continue
         }
@@ -67,6 +68,7 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
 	set nameexp "<\[ \t\]*a\[ \t\]+name\[ \t\]*=\[ \t\]*\"?(\[^>\"\]*)\"?>"
 	while {[regexp -nocase -indices $nameexp $contents matchvar matchname] \
 		!= 0} {
+	    update
 	    set nm [string range $contents [lindex $matchname 0] \
 		    [lindex $matchname 1]]
 	    set ix [lindex $nm 0]
@@ -99,6 +101,7 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
     } else {
 	foreach entry [lsort -command tychoCompareFirst [array names entries]] {
 	    foreach item $entries($entry) {
+		update
 		puts $fd [list $item]
 	    }
 	}
@@ -120,7 +123,7 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
 # from which the index should be created.  If any of these files
 # is missing or is not readable, then that file is ignored.
 #
-# This proc will onyl work is Tycho is running! If not, then the
+# This proc will only work is Tycho is running! If not, then the
 # following piece of code will need to be executed:
 # <tcl><pre>
 # if { [uplevel #0 info namespace all tycho] == {} } {
@@ -142,6 +145,7 @@ proc tychoMkTIMIndex {name filename prependTYCHO nested args } {
     $index modelconfigure -directory [file dirname $filename]
 
     foreach file $args {
+	update
 	if $prependTYCHO {
 	    $index parseFile [file join \$TYCHO $file]
 	} else {
@@ -205,6 +209,7 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 			[expr $depth + 1]]
 		cd $dirname
 		foreach file $subfiles {
+		    update
 		    lappend files [file join $name $file]
 		}
 	    }
@@ -257,6 +262,7 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 			[expr $depth + 1]]
 		cd $dirname
 		foreach file $subfiles {
+		    update
 		    lappend files [file join $name $file]
 		}
 	    }
@@ -451,6 +457,7 @@ proc tychoMergeIndices {title outputfilename args} {
 	set items {}
 	set count 1
 	foreach item [lindex $contents 1] {
+	    update
 	    # We have two styles of index items, two entry and three entry
 	    if {[llength $item] == 2 } {
 		# Two entry index items are recursive items
@@ -473,6 +480,7 @@ proc tychoMergeIndices {title outputfilename args} {
 	    close $fd
 
 	    foreach item $contents {
+		update
 		if {[lindex $item 0] == "add"} {
 		    set operator [lindex $item 0]
 		    set nodename [lindex $item 1]
