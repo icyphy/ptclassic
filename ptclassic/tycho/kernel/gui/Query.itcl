@@ -691,7 +691,7 @@ body ::tycho::Query::lines {tag label default lines args} {
                 -relief sunken] \
                 $args
     } {
-        rename -background -entrybackground \
+        rename -textbackground -entrybackground \
                 entryBackground EntryBackground
         rename -textforeground -entryforeground \
                 entryForeground EntryForeground
