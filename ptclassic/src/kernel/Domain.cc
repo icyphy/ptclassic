@@ -17,6 +17,7 @@ $Id$
 #include "Domain.h"
 #include "Star.h"
 #include "Galaxy.h"
+#include "Scheduler.h"
 
 int Domain::numDomains = 0;
 
@@ -38,11 +39,7 @@ Domain* Domain::named(const char* nm) {
 
 Domain* Domain::domainOf (Block& b) {
 	Block *pb = &b;
-	while (!pb->isItAtomic()) {
-		Galaxy& g = pb->asGalaxy();
-		if (g.numberBlocks() == 0) return 0;
-		pb = &g.nextBlock();
-	}
-	return named(pb->asStar().domain());
+	if (pb->isItAtomic()) return named(pb->asStar().domain());
+	return named(pb->asGalaxy().myDomain);
 }
 
