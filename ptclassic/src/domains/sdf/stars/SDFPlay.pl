@@ -57,13 +57,17 @@ be a parameter.
 		char* fileName;	// name of file to use (on heap)
 	}
 	hinclude { <stdio.h> }
-	ccinclude { "miscFuncs.h" ,  <std.h> }
+	ccinclude { "miscFuncs.h", "paths.h", <std.h> }
 	constructor {
 		strm = NULL;
 		delFile = FALSE;
 		fileName = 0;
 	}
-	start {
+	setup {
+		// check for required program.
+		if (progNotFound("play",
+			"Sound files cannot be played without it."))
+			return;
 		const char* sf = saveFile;
 		// if name is empty, use a temp file.
 		if (sf == NULL || *sf == 0) {
