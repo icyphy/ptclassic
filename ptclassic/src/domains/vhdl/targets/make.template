@@ -26,7 +26,7 @@ INCL = -I$(VHDLKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 SRCS = StructTarget.cc SynthTarget.cc SimTarget.cc
 HDRS = $(SRCS:.cc=.h)
 OBJS = StructTarget.o SynthTarget.o SimTarget.o $(LIBSRCS:.cc=.o)
-LIB = libvhdltargets.a
+LIB = libvhdltargets.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 
