@@ -36,7 +36,8 @@
 # a simple color browser, and returns only when that browser is dismissed.
 # The returned string is the name of a color.  This name should be passed
 # to <code>ptkColor</code> before being used, to convert it to a standard
-# color format recognized by all installations.  If an argument is given,
+# color format recognized by all installations.  One argument is required:
+# a string that labels the query.  If a second argument is given,
 # it is the default color in the entry box.
 # <p>
 # This procedure indirectly calls <code>update</code>, a Tk utility
@@ -52,9 +53,9 @@
 # Tcl procedure that is not itself called from within an Itcl object,
 # then there is no cause for worry.
 #
-proc ::tycho::querycolor {{default {}}} {
+proc ::tycho::querycolor {string {default {}}} {
     set name [autoName .color]
-    uplevel #0 ::tycho::ColorBrowser $name
+    uplevel #0 ::tycho::ColorBrowser $name -text $string
     if {$default != {}} {
         $name configure -default $default
     }
