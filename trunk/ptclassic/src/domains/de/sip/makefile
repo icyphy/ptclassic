@@ -1,5 +1,5 @@
 # Makefile for domains/de/sip
-# Copyright (c) 1997-$Date$ The Regents of the University of California.
+# Copyright (c) 1997-%Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # $Id$
