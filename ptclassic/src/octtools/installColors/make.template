@@ -38,7 +38,14 @@ VPATH         = $(ROOT)/src/octtools/installColors
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS = fill_pat.h general.h message.h scan.h str.h tech.h
+HDRS = 		clean_tap.h \
+		fill_pat.h \
+		general.h \
+		message.h \
+		process.h \
+		scan.h \
+		str.h \
+		tech.h 
 
 SRCS = fill_pat.c installColors.c process.c scan.c tech.c cleantap.c
 
@@ -56,7 +63,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 
 installColors:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
-  		-o installColors \
+		-o installColors \
 		$(LIBS) $(X11_LIBSPEC) -lm 
 
 DEST = $(OCTTOOLS)/bin.$(ARCH)/installColors
@@ -67,7 +74,7 @@ $(DEST):	installColors
 		ln installColors $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/installColors
-	
+
 $(BINDIR)/installColors:
 	(cd $(BINDIR); rm -f installColors; \
 		ln -s ../octtools/bin.$(ARCH)/installColors .)
