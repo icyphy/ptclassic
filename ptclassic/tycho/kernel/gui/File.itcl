@@ -97,6 +97,11 @@ class ::tycho::File {
     ##########################################################################
     ####                         public methods                           ####
 
+    #### altFile
+    # Query the user for a filename, then load its contents into the current
+    # editor.
+    method altFile {}
+
     #### evaluate
     # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
@@ -128,6 +133,10 @@ class ::tycho::File {
     #### revert
     # Revert to previously saved file.  The default behavior is an error.
     method revert {}
+
+    #### reload
+    # Reload the current file. The default behavior is an error.
+    method reload {}
 
     #### save
     # Save to a given filename, or if none is given, to the name given by
@@ -401,6 +410,12 @@ body ::tycho::File::constructor {args} {
 	    -command "File::openWin"
     
     $itk_component(fileMenu) add command \
+	    -label "Alt File"\
+	    -underline 4 \
+	    -accelerator "C-x C-v" \
+	    -command "$this altFile"
+    
+    $itk_component(fileMenu) add command \
 	    -label {Insert}\
 	    -underline 0 \
 	    -accelerator "C-x i" \
@@ -434,6 +449,11 @@ body ::tycho::File::constructor {args} {
 	    -label Revert \
 	    -underline 0 \
 	    -command "$this revert"
+    
+    $itk_component(fileMenu) add command \
+	    -label Reload \
+	    -underline 1 \
+	    -command "$this reload"
     
     $itk_component(fileMenu) add separator
     
@@ -505,6 +525,7 @@ body ::tycho::File::constructor {args} {
     # Bindings
     bind $prefix <Control-x><Control-f> "File::openWin; break"
     bind $prefix <Control-x><Control-s> "$this save; break"
+    bind $prefix <Control-x><Control-v> "$this altFile; break"
     bind $prefix <Control-x><Control-w> "$this saveAs; break"
     bind $prefix <Control-x><Key-i> "$this insertFile; break"
     bind $prefix <Control-x><Key-p> "$this print; break"
@@ -570,6 +591,14 @@ body ::tycho::File::destructor {} {
 #########################################################################
 #########################################################################
 ####                          public methods                         ####
+
+#####################################################################
+#### altFile
+# Query the user for a filename, insert it into the current editor.
+#
+body ::tycho::File::altFile {} {
+    error "Sorry, insert file not implemented yet."
+}
 
 #####################################################################
 #### evaluate
@@ -642,6 +671,14 @@ body ::tycho::File::print {} {
 #
 body ::tycho::File::revert {} {
     error "Sorry, revert not implemented yet."
+}
+
+#####################################################################
+#### reload
+# Reload the current file.
+#
+body ::tycho::File::reload {} {
+    error "Sorry, reload not implemented yet."
 }
 
 #####################################################################
