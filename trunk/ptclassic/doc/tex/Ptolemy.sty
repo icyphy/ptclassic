@@ -25,45 +25,50 @@
     \vspace{\baselineskip} }
 
 %
-% A list environment for blocks (stars, galaxies, universes).
-% The parameter specifies a suffix to be added after item names
-% for index entries.
+% A list environment for making index entries.
+% Different item types will use \@indexKey differently.
 %
-% The \block command generates a list item.
-% The first argument is the name of the block.
-%
-\newenvironment{blocklist}[1]%
-    {\begin{description}\def\@indexsuffix{#1}}%
-    {\end{description}}
-\newcommand{\block}[1]{\item[\code{#1}]\tpindexbold{#1 \@indexsuffix}}
-
-%
-% A list environment for states (or parameters).
-% The parameter specifies a suffix to be added after item names
-% for index entries.
-%
-% The \state command generates a list item.  The first argument is the
-% data type.  The second argument is the name of the state.  The third
-% argument is the default value.
-%
-\newenvironment{statelist}[1]%
-    {\begin{description}\def\@indexsuffix{#1}}%
+\newenvironment{indexlist}[1]%
+    {\begin{description}\def\@indexKey{#1}}%
     {\end{description}}
 
-\newcommand{\state}[3]{\item[\var{#2}](\code{#1}) Default = \samp{#3}\\
-    \vrindexbold{#2 \@indexsuffix}}
+% A list item for functions.
+% \@indexKey is used as an optional suffix.
+% \function{type}{name}{args}
+\newcommand{\function}[3]{\item[\code{#1 #2}\fnindexbold{#2\@indexKey}]
+    \code{#3}\hspace*{\fill}\\}
 
-%
-% A list environment for ports.
-% The parameter specifies a suffix to be added after item names
-% for index entries.
-%
-% The \port command generates a list item.  The first argument is the
-% data type.  The second argument is the name of the port.
-%
-\newenvironment{portlist}[1]%
-    {\begin{description}\def\@indexsuffix{#1}}%
-    {\end{description}}
-\newcommand{\port}[2]{\item[\var{#2}](\code{#1})\\
-    \vrindexbold{#2 \@indexsuffix}}
+% A list item for variables.
+% \@indexKey is used as an optional suffix.
+% \variable{type}{name}
+\newcommand{\variable}[2]{\item[\code{#1 #2}\vrindexbold{#2\@indexKey}]
+    \hspace*{\fill}\\}
 
+% A list item for C++ class member functions (methods).
+% \@indexKey is used as the class name.
+% \method{type}{name}{args}
+\newcommand{\method}[3]{\item[\code{#1 #2}\fnindexbold{#2!\@indexKey\space method}\fnindexbold{\@indexKey\space class!#2 method}]
+    \code{#3}\hspace*{\fill}\\}
+
+% A list item for C++ class data members.
+% \@indexKey is used as the class name.
+% \member{type}{name}
+\newcommand{\member}[2]{\item[\code{#1 #2}\vrindexbold{#2!\@indexKey\space member}\vrindexbold{\@indexKey\space class!#2 member}]
+    \hspace*{\fill}\\}
+
+% A list item for blocks (stars, galaxies, universes).
+% \@indexKey is used as an optional suffix.
+% \block{name}
+\newcommand{\block}[1]{\item[\code{#1}\tpindexbold{#1\@indexKey}]}
+
+% A list item for states.
+% \@indexKey is used as an optional suffix.
+% \state{type}{name}{default}
+\newcommand{\state}[3]{\item[\var{#2}\vrindexbold{#2\@indexKey}](\code{#1})
+    Default = \samp{#3}\hspace*{\fill}\\}
+
+% A list item for ports.
+% \@indexKey is used as an optional suffix.
+% \port{type}{name}
+\newcommand{\port}[2]{\item[\var{#2}\vrindexbold{#2\@indexKey}]
+    (\code{#1})\hspace*{\fill}\\}
