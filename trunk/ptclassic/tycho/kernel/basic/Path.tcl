@@ -161,6 +161,11 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 # error message if the "exec" fails.
 #
 proc ::tycho::invoke { args } {
+    global tcl_platform
+    if {$tcl_platform(platform) == macintosh} {
+	error "Sorry, the tcl \"exec\" command is not supported on the\
+		Macintosh.\nThe command:\n$args\ncannot be executed"
+    }
     # NOTE: Unix-ism.
     if [catch {eval exec $args} msg] {
         # The command failed.  It would be nice to check to see
