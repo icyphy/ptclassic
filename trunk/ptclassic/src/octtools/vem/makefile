@@ -180,13 +180,15 @@ linkvem.cc.debug: $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
  		VPATH=../../../../src/octtools/vem/main version.o)
-	$(CC) $(CC_STATIC) -g -o vem.debug main/version.o $(OBJECTS) $(VEMLIBS)
+	$(CC) $(CC_STATIC) $(OCT_DEBUG_FLAGS) \
+		-o vem.debug main/version.o $(OBJECTS) $(VEMLIBS)
 
 linkvem.cc: $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
  		VPATH=../../../../src/octtools/vem/main version.o)
-	$(CC) $(CC_STATIC) -o vem main/version.o main/version.o \
+	$(CC) $(CC_STATIC) $(OCT_DEBUG_FLAGS) \
+		-o vem main/version.o main/version.o \
 		$(OBJECTS) $(VEMLIBS)
 
 linkvem.debug:$(VEMOBJECTS)
