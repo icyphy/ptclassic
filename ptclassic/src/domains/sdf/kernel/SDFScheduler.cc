@@ -31,6 +31,7 @@ $Id$
 #include "StringList.h"
 #include "FloatState.h"
 #include "GalIter.h"
+#include "Target.h"
 #include <std.h>
 
 extern const char SDFdomainName[];
@@ -640,4 +641,19 @@ void SDFScheduler::setStopTime (float limit) {
 
 void SDFScheduler::resetStopTime (float) {
 	numIters = 1; numItersSoFar = 0;
+}
+
+StringList SDFScheduler::compileRun () {
+    // assume the schedule has been set by the setup member
+    Target& tar = getTarget();
+
+    SDFSchedIter nextStar(mySchedule);
+    SDFStar* star;
+    StringList out = "";
+    while ((star = nextStar++) != 0) {
+	// Fire the next star in the list
+	out += tar.writeFiring(*star, 1);
+	if (haltRequested()) { invalid = TRUE; return out; }
+    }
+    return out;
 }
