@@ -30,14 +30,16 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.gui
 
-source [file join $TYCHO kernel gui test FileTester.itcl]
-set foo [file join $TYCHO kernel gui test test.junk]
-set autofoo [file join $TYCHO kernel gui test #auto#test.junk]
-set bar [file join $TYCHO kernel gui test test.knuj]
+# We also have to load this helper file
+source [file join $env(GUI_LIBRARY) test FileTester.itcl]
+
+set foo [file join $env(GUI_LIBRARY) test test.junk]
+set autofoo [file join $env(GUI_LIBRARY) test #auto#test.junk]
+set bar [file join $env(GUI_LIBRARY) test test.knuj]
 
 #set VERBOSE 1
 
