@@ -66,9 +66,11 @@ HDRS= \
 	VHDLForkNode.h \
 	VHDLGeneric.h \
 	VHDLGeodesic.h \
+	VHDLMux.h \
 	VHDLObj.h \
 	VHDLPort.h  \
 	VHDLPortHole.h \
+	VHDLReg.h \
 	VHDLSignal.h \
 	VHDLStar.h \
 	VHDLState.h \
