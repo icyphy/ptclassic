@@ -81,6 +81,9 @@ during the simulation.
 	}
 
 	initCode {
+		// No need to add addInclude("<stdio.h>") here, 
+		// addFixedPointSupport includes CGCrtlib.c,
+		// which includes stdio.h
 		addFixedPointSupport();
 	}
 
