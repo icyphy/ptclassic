@@ -47,7 +47,7 @@ EXTRA_SRCS = $(SCRIPT_SRCS) \
 
 # Don't include xpole-1.4.6 here, as we don't ship it.
 
-MISC_FILES = 	Vem Vem-8.1 Vem-8.2 bw_patterns \
+MISC_FILES = 	bw_patterns \
 		cg56 cgc colors defaultContent \
 		mathematica matlab rename tcl tech technology vem
 LIBR = dummy
