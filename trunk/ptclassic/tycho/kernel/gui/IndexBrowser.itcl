@@ -157,7 +157,8 @@ body ::tycho::IndexBrowser::constructor {args} {
 #
 body ::tycho::IndexBrowser::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/IndexBrowserHelp.html
+    ::tycho::File::openContext \
+	    $TYCHO/kernel/doc/usersGuides/IndexBrowserHelp.html
 }
 
     ##################################################################
