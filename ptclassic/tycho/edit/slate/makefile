@@ -47,10 +47,10 @@ ITCL_SRCS = \
 	Axis.itcl \
 	Bounder.itcl \
 	ComplexItem.itcl \
-	Connectible.itcl \
 	DragDropper.itcl \
 	Follower.itcl \
 	Frame.itcl \
+	Iconic.itcl \
 	IconFrame.itcl \
 	IconOval.itcl \
 	Interactor.itcl \
