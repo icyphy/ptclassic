@@ -93,8 +93,9 @@ void PVem::removeEntry() {
 
 
 // constructor
-PVem::PVem(Tcl_Interp* i) : interp(i)
+PVem::PVem(Tcl_Interp* i) 
 {
+        interp = i;
 	// FIXME:  check for validity of interpreter here
 	//         may want to create interp if pointer invalid
         //         if so, set myInterp True

@@ -57,7 +57,7 @@ extern "C" {
 #pragma interface
 #endif
 
-class PVem : TclObj {
+class PVem : public TclObj {
 
 public:
 	// the active Tcl interpreter, for error reporting.
