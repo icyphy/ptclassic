@@ -423,7 +423,8 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 		Tcl_AppendResult(interp, "Error in defining galaxy ", galname,
 	   		(char*) NULL);
 	}
-	else currentGalaxy->addToKnownList(outerDomain,currentTarget);
+	else currentGalaxy->addToKnownList("ptcl defgalaxy command",
+					   outerDomain,currentTarget);
 	currentGalaxy = universe;
 	currentTarget = universe->myTarget();
 	definingGal = FALSE;
