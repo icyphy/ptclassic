@@ -155,7 +155,7 @@ EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
     int i;
-    ParamListType pList;
+    ParamListType pList = {0, 0};
 
     ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
 
