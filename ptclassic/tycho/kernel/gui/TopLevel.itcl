@@ -64,6 +64,27 @@ proc ::exit {{queryUser 1}} {
 }
 
 ##########################################################################
+#### saferUpdate
+# Calling update or even "update idletasks" within a method of any Itcl
+# object is very dangerous.  The itcl object may be deleted during the
+# update, so when the update returns, you will be trying to execute a
+# method for an object that no longer exists.  At least in version 2.0,
+# it seems to be safe to test a return value and exit the method, even
+# if the object no longer exists.  Thus, if you really have to call update
+# inside a method, call saferUpdate instead and return immediately if
+# it returns 0.
+#
+proc ::tycho::saferUpdate {obj} {
+    update
+    if {[info objects $obj] != {}} {
+	return 1
+    } {
+	return 0
+    }
+}
+
+
+##########################################################################
 #### TopLevel
 # This class creates a top-level window with nothing in it, and provides
 # a repository for common functions on windows, such as centering them
