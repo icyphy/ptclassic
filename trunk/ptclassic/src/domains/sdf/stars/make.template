@@ -52,7 +52,6 @@ PL_SRCS= \
  SDFCxDiff.pl \
  SDFCxGain.pl \
  SDFCxLMS.pl \
- SDFCxLMSLeak.pl \
  SDFCxLMSPlot.pl \
  SDFCxRaisedCos.pl \
  SDFCxTable.pl \
@@ -97,6 +96,7 @@ PL_SRCS= \
  SDFIntToBits.pl \
  SDFIntegrator.pl \
  SDFLMS.pl \
+ SDFLMSLeak.pl \
  SDFLMSPlot.pl \
  SDFLattice.pl \
  SDFLevDur.pl \
