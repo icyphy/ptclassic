@@ -16,5 +16,7 @@ public:
 	static void init(const char* myName);
 	static int linkObj(const char* objName);
 private:
+	static const char* genHeader(const char*);
 	static const char* ptolemyName;
+	static int pid;
 };
