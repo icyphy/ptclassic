@@ -174,10 +174,6 @@ class ::tycho::Model {
     # A script saying how to parse data from a "source" file
     public variable parsescript {}
 
-    # The separator character for hierarchical models. If 
-    # null, do not execute code that assumes hierarchy.
-    public variable separator "."
-
     # The immutable file that this data is based on
     public variable sourcefile {}
 
@@ -354,21 +350,6 @@ class ::tycho::Model {
 #
 configbody ::tycho::Model::strictoptions {
     set _strictoptions $strictoptions
-}
-
-#########################################################################
-#### -separator configuration
-# This option provides external access to the _separator variable
-# in the _Interchange_ superclass, which specifies the separator
-# character used to separator hierarchy levels. It is null if the
-# model does not support hierarchy. The separator cannot be changed
-# if the model already contains data.
-#
-configbody ::tycho::Model::separator {
-    if { [array names _info] != "" } {
-	error "Model $modelname already contains data"
-    }
-    set _separator $separator
 }
 
 ########################################################################
