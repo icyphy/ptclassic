@@ -166,17 +166,17 @@ itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
 	fi
 
-# Generate idoc files from itcl files, requires itclsh and tycho
+# Generate idoc files from itcl and java files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
 IDOC=$(ROOT)/lib/tydoc/idoc
-idocs: $(ITCL_SRCS) $(TCL_SRCS)
+idocs: $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
-		echo "$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
-	 	$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
+		echo "$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS)"; \
+	 	$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS); \
 	else \
-		echo "$(IDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
-		$(IDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
+		echo "$(IDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS)"; \
+		$(IDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS); \
 	fi
 
 # Create tclIndex from .tcl and .itcl files
