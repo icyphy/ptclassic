@@ -48,20 +48,20 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the SSI and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the buffer size non-zero.
-The interrupt buffer holds at least \fIqueueSize\fP samples; the length
+The interrupt buffer holds at least \fIqueueSize\fR samples; the length
 of the queue will be adjusted upward according to the number of schedule
 repetitions of the star.
-If \fIqueueSize\fP is negative, the negative of \fIqueueSize\fP is used
+If \fIqueueSize\fR is negative, the negative of \fIqueueSize\fR is used
 directly without adjusting it for the number of star repetitions.
 If stereo activity is occurring, the queue length will be doubled.
 .PP
 .Ir "realtime violation"
-If a realtime violation occurs and the parameter \fIabortOnRealtimeError\fP
+If a realtime violation occurs and the parameter \fIabortOnRealtimeError\fR
 is TRUE, execution will abort and one of the following error codes will
 be left in register y0:
-.ip "\fB123062\fP"
+.ip "\fB123062\fR"
 An interrupt occurred and the receive buffer was full.
-.ip "\fB123063\fP"
+.ip "\fB123063\fR"
 An interrupt occurred and the transmit buffer was empty.
 .UH "INTERUPTS: QUEUES:"
 .pp

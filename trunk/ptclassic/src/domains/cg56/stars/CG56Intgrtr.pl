@@ -17,14 +17,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 nonlinear functions library }
 	explanation {
 .Id "filter, integrator"
-.pp
-Leakage is controlled by the \fPfeedbackGain\fP state (default 1.0).
+Leakage is controlled by the \fIfeedbackGain\fR state (default 1.0).
 The output is the data input plus feedbackGain*state, where state is the
 previous output.
 .pp
-Overflow is controlled by the \fIonOverflow\fP state (default wrap around.
-The integrator can either be set to wrap around (default), saturate or
-reset.
+Overflow is controlled by the \fIonOverflow\fR state (default wrap around).
+The integrator can either be set to wrap around (default), saturate or reset.
 	}
 	input {
 		name { input }

@@ -22,20 +22,20 @@ a particular X windows graphical interface on the host.
 It is indended that this star be used with a graphical target monitor
 (.e.g., qdm_s56x).
 .LP
-The \fBslider\fP widget presents the user with a "ruler" along which
+The \fBslider\fR widget presents the user with a "ruler" along which
 the user may slide a marker.  The value output corresponds to the
 current location of the slider.
-The \fIdspMin\fP and \fIdspMax\fP states control the range of values
+The \fIdspMin\fR and \fIdspMax\fR states control the range of values
 that will be output on the DSP.
-The \fIhostMin\fP and \fIhostMax\fP states control the range of values
+The \fIhostMin\fR and \fIhostMax\fR states control the range of values
 the user sees (the limits of the "ruler"),
-and \fIhostInitVal\fP is the initial value in the host coordinate set.
-The host values are \fBalways\fP linearly mapped onto the dsp values.
-The \fIscale\fP parameter controls how host values are displayed to
+and \fIhostInitVal\fR is the initial value in the host coordinate set.
+The host values are \fBalways\fR linearly mapped onto the dsp values.
+The \fIscale\fR parameter controls how host values are displayed to
 the user (linear,logrithmic,db10,db20).  It is important to note that
 this controls only the values displayed and not the mapping from host
 values to dsp values.
-.UH IMPLEMENTATION:
+.UH IMPLEMENTATION
 .pp
 This is a Ptolemy replacement for Gabriel host slider system.
 Unlike the Gabriel system, there is no need to specify a "command" to execute

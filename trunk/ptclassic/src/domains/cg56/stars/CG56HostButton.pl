@@ -18,16 +18,16 @@ This is an asynchronous source star (like the Const star) with a particular
 graphical user interface.
 The star always outputs one of two values; which value is output is
 controlled by a button.
-There are two types of buttons: \fBpushbutton\fPs and \fBcheckbutton\fPs.
+There are two types of buttons: \fBpushbutton\fRs and \fBcheckbutton\fRs.
 Both presents a single button to the user that may be "pressed" with the mouse.
 The buttons differ in the semantics of the push.
-When the \fBpushbutton\fP is pressed, the \fIonVal\fP state
-is output, otherwise \fIoffVal\fP.
-The \fBcheckbutton\fP widget is either on or off; pressing it toggles
+When the \fBpushbutton\fR is pressed, the \fIonVal\fR state
+is output, otherwise \fIoffVal\fR.
+The \fBcheckbutton\fR widget is either on or off; pressing it toggles
 between on and off.
-When on, the \fIonVal\fP state is output, otherwise \fIoffVal\fP is output.
+When on, the \fIonVal\fR state is output; otherwise \fIoffVal\fR is output.
 .LP
-The \fIoffVal\fP and \fIonVal\fP should be either FIX or INT type.
+The \fIoffVal\fR and \fIonVal\fR should be either FIX or INT type.
 They are not examined at compile-time: they are passed literally to qdm
 (via the aio file) and to the assembler (via the initial value).
 Note that there is a big difference between "1" and "1.0".
