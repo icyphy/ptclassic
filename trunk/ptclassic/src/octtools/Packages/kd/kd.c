@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -43,6 +43,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "kd.h"
 #include "errtrap.h"
+#include "utility.h"
 
 #define MAXINT	2147483647
 #define MININT	-2147483647
@@ -55,26 +56,39 @@ static char SccsId[]="$Id$";
 #define MAX(a, b)	((a) > (b) ? (a) : (b))
 #endif
 
+#ifndef ABS
 #define ABS(a)		((a) < 0 ? -(a) : (a))
+#endif
 
 char *kd_pkg_name = "kd";
 
 static char *mem_ret;		/* Memory allocation */
 
 /* Note: these are NOT multi-callable */
+#define KDALLOC(type) \
+((mem_ret = malloc(sizeof(type))) ? (type *) mem_ret : (type *) kd_fault(KDF_M))
+
+#ifdef NEVER
 #define ALLOC(type) \
 ((mem_ret = malloc(sizeof(type))) ? (type *) mem_ret : (type *) kd_fault(KDF_M))
+#endif
 
 #define MULTALLOC(type, num) \
 ((mem_ret = malloc((unsigned) (sizeof(type) * (num)))) ? \
  (type *) mem_ret : (type *) kd_fault(KDF_M))
 
+#define KDREALLOC(type, ptr, newsize) \
+((mem_ret = (char *) (REALLOC(type, (ptr), (newsize)))) ? \
+ (type *) mem_ret : (type *) kd_fault(KDF_M))
+
+#ifdef NEVER
+/* Old krufty definitions.  Use stuff from utility.h instead */
 #define REALLOC(type, ptr, newsize) \
 ((mem_ret = realloc((char *) ptr, (unsigned) (sizeof(type) * (newsize)))) ? \
  (type *) mem_ret : (type *) kd_fault(KDF_M))
 
 #define FREE(ptr)		free((char *) ptr)
-
+#endif
 #define BOXINTERSECT(b1, b2) \
   (((b1)[KD_RIGHT] >= (b2)[KD_LEFT]) && \
    ((b2)[KD_RIGHT] >= (b1)[KD_LEFT]) && \
@@ -207,7 +221,7 @@ KDElem *loson, *hison;		/* Sons           */
 {
     KDElem *newElem;
 
-    newElem = ALLOC(KDElem);
+    newElem = KDALLOC(KDElem);
     newElem->item = item;
     newElem->size[0] = size[0];
     newElem->size[1] = size[1];
@@ -236,7 +250,7 @@ kd_tree kd_create()
 {
     KDTree *newTree;
 
-    newTree = ALLOC(KDTree);
+    newTree = KDALLOC(KDTree);
     newTree->tree = (KDElem *) 0;
     newTree->item_count = newTree->dead_count = 0;
     return (kd_tree) newTree;
@@ -262,11 +276,11 @@ typedef struct kd_list_defn {
 
 static kd_list *kd_tmp_ptr;
 
-#define NIL			(kd_list *) 0
+#define KDNIL			(kd_list *) 0
 #define CAR(list)		(list)->data
-#define CDR(list)		(list ? (list)->next : NIL)
+#define CDR(list)		(list ? (list)->next : KDNIL)
 #define CONS(item, list) \
-  (kd_tmp_ptr = ALLOC(kd_list), \
+  (kd_tmp_ptr = KDALLOC(kd_list), \
    kd_tmp_ptr->data = (kd_generic) (item),   \
    kd_tmp_ptr->next = (list),   \
    kd_tmp_ptr)
@@ -277,7 +291,7 @@ static kd_list *kd_tmp_ptr;
  */
 #define CMV(list1, list2) \
   (kd_tmp_ptr = CDR(list1),                 \
-   (list1 ? (list1)->next = (list2) : NIL), \
+   (list1 ? (list1)->next = (list2) : KDNIL), \
    (list2) = (list1),                       \
    (list1) = kd_tmp_ptr)
 /*
@@ -354,7 +368,7 @@ int *length;			/* List length (returned)   */
     extent[KD_LEFT] = extent[KD_BOTTOM] = MAXINT;
     extent[KD_RIGHT] = extent[KD_TOP] = MININT;
     for (;;) {
-	new_item = ALLOC(kd_info);
+	new_item = KDALLOC(kd_info);
 	if ((*itemfunc)(arg, &new_item->item, new_item->bb)) {
 	    if (!new_item->item) add_flag = 0;
 	    if (add_flag) {
@@ -486,7 +500,7 @@ kd_list **hi;			/* Returned items larger than `k'th */
 	idx = CDR(idx);
     }
     /* Now divide based on median */
-    *lo = *eq = *hi = NIL;
+    *lo = *eq = *hi = KDNIL;
     idx = items;
     while (idx) {
 	cmp_val = KD_SIZE(CAR(idx))[disc] - KD_SIZE(CAR(median))[disc];
@@ -520,9 +534,9 @@ kd_list **hi;			/* Returned items larger than `k'th */
     int lo_val;
 
     idx = items;
-    *lo = *eq = *hi = NIL;
+    *lo = *eq = *hi = KDNIL;
     lo_val = MAXINT;
-    median = NIL;
+    median = KDNIL;
     while (idx) {
 	/* Check to see if new median */
 	cmp_val = KD_SIZE(CAR(idx))[disc] - k;
@@ -570,7 +584,7 @@ int disc;
     int cur_disc, val;
 
     others = CDR(*eq);
-    RCDR(*eq, NIL);
+    RCDR(*eq, KDNIL);
     while (others) {
 	cur_disc = NEXTDISC(disc);
 	while (cur_disc != disc) {
@@ -716,7 +730,7 @@ if (path_reset) { path_length = 0;  path_reset = 0; } \
 if (path_length >= path_alloc) { \
    if (path_alloc == 0) path_alloc = PATH_INIT; \
    else path_alloc += PATH_INCR; \
-   path_to_item = REALLOC(KDElem *, path_to_item, path_alloc); \
+   path_to_item = KDREALLOC(KDElem *, path_to_item, path_alloc); \
  } \
 path_to_item[path_length++] = (elem)
 
@@ -940,7 +954,7 @@ short disc;			/* Discriminator   */
     /* Allocate more space if necessary */
     if (gen->top_index >= gen->stack_size) {
 	gen->stack_size += KD_GROWSIZE(gen->stack_size);
-	gen->stk = REALLOC(KDSave, gen->stk, gen->stack_size);
+	gen->stk = KDREALLOC(KDSave, gen->stk, gen->stack_size);
     }
     gen->stk[gen->top_index].disc = disc;
     gen->stk[gen->top_index].state = KD_THIS_ONE;
@@ -955,7 +969,7 @@ short disc;			/* Discriminator   */
 #define KD_PUSH(gen, elem, dk) \
     if ((gen)->top_index >= (gen)->stack_size) {                     \
 	(gen)->stack_size += KD_GROWSIZE((gen)->stack_size);	     \
-	(gen)->stk = REALLOC(KDSave, (gen)->stk, (gen)->stack_size); \
+	(gen)->stk = KDREALLOC(KDSave, (gen)->stk, (gen)->stack_size); \
     }								     \
     (gen)->stk[(gen)->top_index].disc = (dk);		     	     \
     (gen)->stk[(gen)->top_index].state = KD_THIS_ONE;		     \
@@ -978,7 +992,7 @@ kd_box area;			/* Area to search 	 */
     KDState *newState;
     int i;
 
-    newState = ALLOC(KDState);
+    newState = KDALLOC(KDState);
 
     for (i = 0;  i < KD_BOX_MAX;  i++) newState->extent[i] = area[i];
 
