@@ -199,7 +199,7 @@ void CreateSDFStar::writeCode() {
 	     << "ROOT = " << getenv("PTOLEMY") << "\n"
 	     << "WORM_INCL = " << (const char *) compileOptions << " ";
     if (compileOptionsStream.numPieces()) {
-	const char* expandedCompileOptionsStream =
+	char* expandedCompileOptionsStream =
 	    expandPathName(compileOptionsStream);
 	makefile << expandedCompileOptionsStream;
 	delete [] expandedCompileOptionsStream;
