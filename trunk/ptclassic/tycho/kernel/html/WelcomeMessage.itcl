@@ -35,31 +35,12 @@
 # For convenience, a procedure to create a Tycho welcome message.
 #
 proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
-    if [winfo exists .welcome] {
-	.welcome raiseWindow
-    } {
-	# FIXME: Get version and executable information.
-	uplevel #0 [list ::tycho::WelcomeMessage .welcome \
-		-version $version \
-		-executable $binary \
-		-persistent 0]
-	.welcome centerOnScreen
-    }
-}
-
-# COMPATIBILITY procedures.  The following procedure emulates the behavior
-# of a similarly named procedure in pigi, the predecessor to Tycho.
-#
-proc ::ptkStartupMessage {version executable} {
-    if [winfo exists .welcome] {
-	.welcome raiseWindow
-    } {
-	::tycho::WelcomeMessage [::tycho::autoName .welcome] \
-		-version $version \
-		-executable $executable \
-		-persistent 0
-	.welcome centerOnScreen
-    }
+    set nm [::tycho::autoName .welcome]
+    uplevel #0 [list ::tycho::WelcomeMessage $nm \
+            -version $version \
+            -executable $binary \
+            -persistent 0]
+    $nm centerOnScreen
 }
 
 ##########################################################################
@@ -142,5 +123,3 @@ body ::tycho::WelcomeMessage::constructor {args} {
     configure -html $html
     configure -scrollbar 0
 }
-
-
