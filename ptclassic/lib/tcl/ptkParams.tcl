@@ -1,11 +1,21 @@
-# $Id$
-
-# Edit-Parameters Dialog Box
-
+# Ptolemy edit-parameters dialog box--tcl routines
+# Author: Wei-Jen Huang
+# Version: $Id$
+#
+# Copyright (c) 1990-1993 The Regents of the University of California.
+# All rights reserved.
+#
 # For storage, there exist two global array--one which stores lists of
 # current parameter-type-value triplets and the other which (upon
 # invocation of an edit-parameters command) stores the original triplet
 # values as back-ups.
+
+# Entry bindings specific to the edit-parameters box include:
+# 		Focus on next entry
+# 		Focus on previous entry
+# Tab		Focus on next entry
+# Return	Update parameter value
+# Any-leave	Update parameter value
 
 # Width of entry in average-sized chars of font
 set ed_MaxEntryLength 60
@@ -16,71 +26,6 @@ set ed_EntryDestroyFlag 0
 
 # Global variable containing the number for a toplevel window
 set ed_ToplevelNumbers(ed_Num) 0
-
-# Entry Bindings in addition to the start-up bindings defined
-#  in tk.tcl: , , , ,  + various mouse-related bindings
-# Old bindings if any are overwritten
-
-# Emacs/shell type bindings include:
-#   Kill line
-#   Kill word
-#   Forward one character
-#   Backward one character
-#   Goto beginning of line
-#   Goto EOL
-#   Kill to EOL
-#   Delete insertion point character
-
-# Useless bindings:
-#    bind Entry <Control-Key> "+ [bind Entry <Any-Key>]"
-#    bind Entry <Control-t> {ed_AddScroll %W}
-
-    bind Entry <Control-f> {
-	%W icursor [expr [%W index insert]+1]; tk_entrySeeCaret %W
-    }
-    bind Entry <Control-b> {
-	%W icursor [expr [%W index insert]-1]; tk_entrySeeCaret %W
-    }
-    bind Entry <Control-a> {
-	%W icursor 0; tk_entrySeeCaret %W
-    }
-    bind Entry <Control-e> {
-	%W icursor end; tk_entrySeeCaret %W
-    }
-    bind Entry <Control-k> {
-	%W delete insert end; tk_entrySeeCaret %W
-    }
-    bind Entry <Control-d> {
-	%W delete insert; tk_entrySeeCaret %W
-    }
-    bind Entry <Any-Enter> {
-	focus %W
-    }
-# Appropriate?  Might need some refinement
-
-    bind Entry <3> "[bind Entry <2>]"
-    bind Entry <B3-Motion> "[bind Entry <B2-Motion>]"
-    #binds third mouse button to scanning
-
-    bind Entry <2> {%W insert insert [selection get]; tk_entrySeeCaret %W}
-    bind Entry <B2-Motion> ""
-    #binds second mouse button to selection insertion
-
-# An attempt at binding <space> to deleting the current selection
-#    bind Entry <space> {
-#	if {([selection own] != "") && \
-#		([%W index sel.first] != [%W index sel.last])} {
-#		%W delete sel.first sel.last
-#		%W select clear; selection clear %W
-#	} else {
-#		if {"%A" != ""} {
-#			%W insert insert %A
-#			tk_entrySeeCaret %W
-#			ed_CheckForChange %W
-#			%W select clear; selection clear %W
-#		}
-#	}
-#    }
 
 # **ed_RestoreParam
 # Discards all changes
@@ -97,22 +42,59 @@ proc ed_RestoreParam {facet number} {
 #  argument.
 
 proc ed_SetEntryButtons {frame numStor numPossVis leftIdx rightIdx} {
-    if {$leftIdx > 0} {
 	$frame.left config -fg black
-    } else { $frame.left config -fg [lindex [$frame.left config -bg] 4] }
+    if {$leftIdx > 0} {
+	$frame.left config -state normal -fg black
+	bind $frame.left <Button-1> "tk_butDown %W
+		$frame.entry view \[expr \[$frame.entry index @0\]-1\]
+		after 200 ed_ShiftButtonViewLeft %W $frame.entry"
+    } else {
+	set bgColor [lindex [$frame.left config -bg] 4]
+	$frame.left config -state disabled -fg $bgColor \
+		-disabledforeground $bgColor
+	bind $frame.left <Button-1> "ed_Dummy"
+    }
     if {$rightIdx < [expr $numStor-1]} {
-	$frame.right config -fg black
-    } else { $frame.right config -fg [lindex [$frame.right config -bg] 4] }
-}	
+	$frame.right config -state normal -fg black
+	bind $frame.right <Button-1> "tk_butDown %W
+		$frame.entry view \[expr \[$frame.entry index @0\]+1\]
+		after 200 ed_ShiftButtonViewRight %W $frame.entry"
+    } else {
+	set bgColor [lindex [$frame.right config -bg] 4]
+	$frame.right config -state disabled -fg $bgColor \
+		-disabledforeground $bgColor
+	bind $frame.right <Button-1> "ed_Dummy"
+    }
+}
+
+proc ed_ShiftButtonViewLeft {button entry} {
+    if {[lindex [$button config -relief] 4] == "sunken"} {
+	$entry view [expr [$entry index @0]-1]
+	after 50 "ed_ShiftButtonViewLeft $button $entry"
+    }
+}
+
+proc ed_ShiftButtonViewRight {button entry} {
+    if {[lindex [$button config -relief] 4] == "sunken"} {
+	$entry view [expr [$entry index @0]+1]
+	after 50 "ed_ShiftButtonViewRight $button $entry"
+    }
+}
 
 proc ed_MkEntryButton {frame label} {
-	global ed_MaxEntryLength
+	global ptolemy ed_MaxEntryLength
 	pack append [frame $frame -bd 2] \
 	   [label $frame.label -text "$label:  " -anchor w] left \
-[button $frame.right -bitmap @~whuang/but_entry/right -relief flat -command \
-	     "$frame.entry view \[expr \[$frame.entry index @0\]+1\]"] right \
-[button $frame.left -bitmap @~whuang/but_entry/left -relief flat -command \
-	     "$frame.entry view \[expr \[$frame.entry index @0\]-1\]"] right
+[button $frame.right -bitmap @$ptolemy/tcl/lib/right.xbm -relief flat] right \
+[button $frame.left -bitmap @$ptolemy/tcl/lib/left.xbm -relief flat] right
+    bind $frame.left <Button-1> "tk_butDown %W
+      $frame.entry view \[expr \[$frame.entry index @0\]-1\]
+      after 200 ed_ShiftButtonViewLeft %W $frame.entry"
+    bind $frame.right <Button-1> "tk_butDown %W
+      $frame.entry view \[expr \[$frame.entry index @0\]+1\]
+      after 200 ed_ShiftButtonViewRight %W $frame.entry"
+    bind $frame.left <ButtonRelease-1> "catch {tk_butUp %W}"
+    bind $frame.right <ButtonRelease-1> "catch {tk_butUp %W}"
 	pack before $frame.left \
 	   [entry $frame.entry -scroll "ed_SetEntryButtons $frame" \
 		-relief sunken -width $ed_MaxEntryLength] {right}
@@ -126,28 +108,32 @@ proc ed_MkEntryButton {frame label} {
 
 }
 
-# Procedure to check whether the entry has overflowed.  Appends a '*' to the
-#  label if this is the case.
-# Need to bind all editing keys in each entry to execute this procedure.
-#proc ed_CheckForChange e {
-#	set label [file root $e].l
-#	set name [lindex [$label config -text] 4]
-#	set numChars [$e index end]
-#	set lastIndex [$e index @[winfo width $e]]
-#	set firstIndex [$e index @0]
-#	if {[regsub {\*$} "$name" {} ltext]==1} {
-#		if {(($lastIndex == $numChars) && ($firstIndex == 0)) || \
-#			([expr $lastIndex-$firstIndex] > $numChars) } {
-#			$label config -text $ltext
-#		}
-#		ed_AddScroll $e
-#	} else {
-#		if {($firstIndex > 0) || ($numChars > $lastIndex)} {
-#			ed_AddScroll $e
-#			$label config -text "${name}*"
-#		}
-#	}
-#}
+proc listEq {list1 list2} {
+    set max [llength $list1]
+    if {[llength $list2] != $max} {
+	return 0
+    }
+    for {set i 0} {$i < $max} {incr i} {
+	set subList1 [lindex $list1 $i]
+	set subList2 [lindex $list2 $i]
+	set length1 [llength $subList1]
+	set length2 [llength $subList2]
+	if {$length1 == 1 && $length2 == 1} {
+		if {$subList1 != $subList2} {
+			return 0
+		}
+	} elseif {!($length1 == 0 && $length2 == 0)} {
+		if {$length1 != $length2} {
+			return 0
+		} else {
+			if {![listEq $subList1 $subList2]} {
+				return 0
+			}
+		}
+	}
+    }
+    return 1
+}
 
 # **ed_UpdateParam
 # Compares with previous parameter types and values; if they differ,
@@ -155,6 +141,10 @@ proc ed_MkEntryButton {frame label} {
 
 proc ed_UpdateParam {facet number name args} {
    global paramArray
+#puts "facet: $facet"
+#puts "number: $number"
+#puts "name: $name"
+#puts "args: $args"
    if {[llength $args] == 2} {
 	set value [lindex $args 1]
 	set type [list [lindex $args 0]]
@@ -163,7 +153,7 @@ proc ed_UpdateParam {facet number name args} {
    }
    set count 0
    foreach param $paramArray($facet,$number) {
-        if {[lindex $param 0] == $name} {
+        if {[listEq [lindex $param 0] $name]} {
                 if {[lindex $param 2] != $value} {
 		   set okay 1
 		} else {set okay 0}
@@ -200,38 +190,46 @@ proc ed_AddParamDialog {facet number} {
     wm title $ask "Add parameter"
     message $ask.m -font -Adobe-times-medium-r-normal--*-180* -relief raised\
 	-width 400 -bd 1 -text "Enter the name, type and value below."
-    pack append [frame $ask.fname] \
-	[label $ask.fname.l -text "Name:" -anchor w] {top expand fillx} \
-	[scrollbar $ask.fname.s -relief sunken -orient horiz -command \
-		"$ask.fname.e view"] {bottom fillx} \
-	[entry $ask.fname.e -width $ed_MaxEntryLength -relief sunken \
-		-scroll "$ask.fname.s set"] bottom
-    pack append [frame $ask.ftype] \
-	[label $ask.ftype.l -text "Type:" -anchor w] {top expand fillx} \
-	[scrollbar $ask.ftype.s -relief sunken -orient horiz -command \
-		"$ask.ftype.e view"] {bottom fillx} \
-	[entry $ask.ftype.e -width $ed_MaxEntryLength -relief sunken \
-		-scroll "$ask.ftype.s set"] bottom
-    pack append [frame $ask.fval] \
-	[label $ask.fval.l -text "Value:" -anchor w] {top expand fillx} \
-	[scrollbar $ask.fval.s -relief sunken -orient horiz -command \
-		"$ask.fval.e view"] {bottom fillx} \
-	[entry $ask.fval.e -width $ed_MaxEntryLength -relief sunken \
-		-scroll "$ask.fval.s set"] bottom
+    ed_MkEntryButton $ask.fname name
+    ed_MkEntryButton $ask.ftype type
+    ed_MkEntryButton $ask.fvalue value
+
+    bind $ask.fname.entry <Tab> "focus $ask.ftype.entry"
+    bind $ask.fname.entry <Control-n> "focus $ask.ftype.entry"
+    bind $ask.fname.entry <Control-p> "focus $ask.fvalue.entry"
+
+    bind $ask.ftype.entry <Tab> "focus $ask.fvalue.entry"
+    bind $ask.ftype.entry <Control-n> "focus $ask.fvalue.entry"
+    bind $ask.ftype.entry <Control-p> "focus $ask.fname.entry"
+
+    bind $ask.fvalue.entry <Tab> "focus $ask.fname.entry"
+    bind $ask.fvalue.entry <Control-n> "focus $ask.fname.entry"
+    bind $ask.fvalue.entry <Control-p> "focus $ask.ftype.entry"
+
     pack append [frame $ask.b] \
-	[button $ask.b.dismiss -text Dismiss -command \
+	[button $ask.b.dismiss -text "OK <Return>" -command \
 		"ed_AddParam $facet $number \
-		\[$ask.fname.e get\] \[$ask.ftype.e get\] \[$ask.fval.e get\]
+		\[$ask.fname.entry get\] \
+		\[$ask.ftype.entry get\] \
+		\[$ask.fvalue.entry get\]
 		destroy $ask"] {left expand fill} \
-	[button $ask.b.done -text Done -command \
+	[button $ask.b.done -text "Done <M-space>" -command \
 		"$ask.b.dismiss invoke; destroy $top"] {left expand fill} \
-	[button $ask.b.cancel -text Cancel -command "destroy $ask"] \
-		{left expand fill}
+	[button $ask.b.cancel -text "Cancel <M-Delete>" \
+		-command "destroy $ask"] {left expand fill}
     pack append $ask $ask.m {top fillx} $ask.fname {top fillx} \
-	$ask.ftype {top fillx} $ask.fval {top fillx} $ask.b {top fillx}
+	$ask.ftype {top fillx} $ask.fvalue {top fillx} $ask.b {top fillx}
+    ptkRecursiveBind $ask <Return> \
+		"ed_AddParam $facet $number \
+		\[$ask.fname.entry get\] \
+		\[$ask.ftype.entry get\] \
+		\[$ask.fvalue.entry get\]
+		destroy $ask"
+    ptkRecursiveBind $ask <M-space> "$ask.b.dismiss invoke; destroy $top"
+    ptkRecursiveBind $ask <M-Delete> "destroy $ask"
 
     grab $ask
-    focus $ask.fname.e
+    focus $ask.fname.entry
 }
 
 # **ed_YesNoDialog
@@ -303,8 +301,12 @@ proc ed_AddParam {facet number name type value} {
     
     bind $f.par.f$count.entry <Any-Leave> \
 	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
-    bind $f.par.f$count.entry <Return> \
-	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+    bind $f.par.f$count.entry <Tab> "ed_NextEntry $count \
+		$f.par $facet $number"
+    bind $f.par.f$count.entry <Control-n> "ed_NextEntry $count \
+		$f.par $facet $number"
+    bind $f.par.f$count.entry <Control-p> "ed_PrevEntry $count \
+		$f.par $facet $number"
     $f.par.f$count.entry insert 0 "$value"
 
     pack append $f.par $f.par.f$count {top expand fillx pady 1m}
@@ -495,25 +497,27 @@ proc ptkEditParams {facet number} {
     pack append $top.f $u {bottom fillx} $c {bottom expand fill}
 
     pack append $u \
-	   [button $u.ok -text Dismiss -command \
+	   [button $u.ok -text "OK <Return>" -command \
 		"catch \"unset paramArray($facet,$number) \ \
 		paramArrayBAK($facet,$number\"; destroy $top"] \
 		{left expand fillx} \
-	   [button $u.q -text Cancel -command \
+	   [button $u.q -text "Cancel <M-Delete>" -command \
 	        "ed_RestoreParam $facet $number
 		catch \"unset paramArray($facet,$number) \
 		paramArrayBAK($facet,$number\"; destroy $top"] \
 		{left expand fillx}
+
     if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
 	pack append $u \
-	   [button $u.add -text "Add parameter" -command \
+	   [button $u.add -text "Add parameter <M-a>" -command \
 		"ed_AddParamDialog $facet $number"] {left expand fillx} \
-	   [button $u.remove -text "Click Remove" -command \
+	   [button $u.remove -text "Remove parameter <M-r>" -command \
 		"$u.remove config -relief sunken
 		ed_RemoveParam $facet $number $top $u
 		$u.remove config -relief raised"] \
 		{left expand fillx}
     }
+
     set f $c.f
     frame $f
     frame $f.par -bd 10
@@ -556,18 +560,109 @@ proc ptkEditParams {facet number} {
 	ed_MkEntryButton $f.par.f$count $name
 	bind $f.par.f$count.entry <Any-Leave> \
 		"ed_UpdateParam $facet $number [list $name] \[%W get\]"
-	bind $f.par.f$count.entry <Return> \
-		"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+	bind $f.par.f$count.entry <Tab> "ed_NextEntry $count \
+		$f.par $facet $number"
+	bind $f.par.f$count.entry <Control-n> "ed_NextEntry $count \
+		$f.par $facet $number"
+	bind $f.par.f$count.entry <Control-p> "ed_PrevEntry $count \
+		$f.par $facet $number"
 	$f.par.f$count.entry insert 0 "$value"
 	pack append $f.par $f.par.f$count {top fillx expand \
 		pady  1m}
     }
-#    grab $top
-    if [winfo exists $f.par.f0.e] {focus $f.par.f0.e}
+    if [winfo exists $f.par.f0.e] { focus $f.par.f0.e }
     $c create window 0 0 -anchor nw -window $f -tags frameWindow
     set mm [winfo fpixels $c 1m]
 #    bind $c <Configure> "ed_ConfigFrame $top"
     bind $f.par <Configure> "ed_ConfigCanvas $top $facet $number"
+
+    ptkRecursiveBind $top <Return> "ed_UpdateOnMReturn $facet $number
+		catch \"unset paramArray($facet,$number) \
+			      paramArrayBAK($facet,$number\"
+					    destroy $top"
+    ptkRecursiveBind $top <M-Delete> \
+	        "ed_RestoreParam $facet $number
+		catch \"unset paramArray($facet,$number) \
+		paramArrayBAK($facet,$number\"; destroy $top"
+    if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
+	ptkRecursiveBind $top <M-a> "ed_AddParamDialog $facet $number"
+	ptkRecursiveBind $top <M-r> \
+		"$u.remove config -relief sunken
+		ed_RemoveParam $facet $number $top $u
+		$u.remove config -relief raised"
+    }
+}
+
+proc ed_UpdateOnMReturn {facet number} {
+    global ed_ToplevelNumbers
+    set top .o$ed_ToplevelNumbers($facet,$number)
+    set focus [focus]
+    if {$focus != "none" && [winfo toplevel $focus] == $top && \
+	[winfo class $focus] == "Entry"} {
+	if {[regsub {.*.f([0-9]+).entry} $focus {\1} count] != 1} {
+	   ptkImportantMessage .error "Inappropriate entry: $focus"
+	   return
+	}
+	ed_UpdateParam $facet $number \
+		$ed_ToplevelNumbers($facet,$number,$count) \
+		[$focus get]
+#puts "$ed_ToplevelNumbers($facet,$number,$count)] [$focus get] hello: $count"
+    }
+}
+
+# **ed_NextEntry
+# Procedure for moving from one entry to the next in the edit parameters box
+
+proc ed_NextEntry {current w facet number} {
+    global ed_ToplevelNumbers
+    set foundNext 0
+    ed_UpdateOnMReturn $facet $number
+    for {set curr [expr $current+1]} \
+	{ $curr < $ed_ToplevelNumbers($facet,$number,count)} \
+	{ incr curr } {
+	    if [winfo exists $w.f$curr.entry] {
+		focus $w.f$curr.entry
+		set foundNext 1
+		break
+	    }
+	}
+        if {! $foundNext} {
+		for {set curr 0} {$curr < $current} \
+			{incr curr} {
+				if [winfo exists $w.f$curr.entry] {
+					focus $w.f$curr.entry
+					break
+				}
+			}
+	}
+}
+
+# **ed_PrevEntry
+# Procedure for moving from one entry to the next in the edit parameters box
+
+proc ed_PrevEntry {current w facet number} {
+    global ed_ToplevelNumbers
+    set foundNext 0
+    ed_UpdateOnMReturn $facet $number
+    for {set curr [expr $current-1]} \
+	{ $curr >= 0 } \
+	{ incr curr -1 } {
+	    if [winfo exists $w.f$curr.entry] {
+		focus $w.f$curr.entry
+		set foundNext 1
+		break
+	    }
+	}
+        if {! $foundNext} {
+		for {set curr $ed_ToplevelNumbers($facet,$number,count)} \
+			{$curr > $current} \
+			{incr curr -1} {
+				if [winfo exists $w.f$curr.entry] {
+					focus $w.f$curr.entry
+					break
+				}
+			}
+	}
 }
 
 ## **ed_ConfigFrame
