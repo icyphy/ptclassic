@@ -74,7 +74,7 @@ public:
 			width(a), height(b), frameId(c)
 			{ startPos = 0; size = fullSize = width*height; }
 
-	BaseImage(const BaseImage& bi, int = 0):
+	BaseImage(const BaseImage& bi, int a = 0):
 			width(bi.width), height(bi.height), frameId(bi.frameId),
 			startPos(bi.startPos), size(bi.size), fullSize(bi.fullSize)
 			{ }
