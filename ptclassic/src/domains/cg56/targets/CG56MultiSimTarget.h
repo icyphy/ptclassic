@@ -62,6 +62,9 @@ public:
 	// allocate the shared memory
 	/*virtual*/ void prepareCodeGen();
 
+	// write the .asm and .cmd files
+	/*virtual*/ void writeCode();
+
 protected:
 	/*virtual*/ void setup();
 
