@@ -37,7 +37,7 @@ Date of last revision:
 #endif
 
 #include "HuScheduler.h"
-#include "CGWormhole.h"
+#include "CGWormBase.h"
 #include "Error.h"
 
 /////////////////////////////
@@ -62,28 +62,28 @@ HuScheduler :: ~HuScheduler() {
 
 int HuScheduler :: scheduleIt()
 {
-	wormFlag = FALSE;
-	parSched->initialize((HuGraph*) myGraph);
+	parSched->initialize(myGraph);
 
 	// reset the graph for the new parallel schedule
 	myGraph->resetGraph();
 
 	// schedule the runnable nodes until there is no more unscheduled node
 	// or the graph is deadlocked.
-	while (myGraph->numUnschedNodes() > 0) {
-	   HuNode* node;
-	   while ((node = (HuNode*) myGraph->fetchNode()) != 0) {
+	HuNode* node;
+	while ((node = (HuNode*) myGraph->fetchNode()) != 0) {
 
 		// read the star
 		CGStar* obj = node->myStar();
 
 		// check the atomicity of the star
-		if (obj->isItWormhole()) {
-			wormFlag = TRUE;
-			CGWormhole* worm = obj->myWormhole();
+		if (obj->isItWormhole() && node->invocationNumber() > 1) {
+			node->withProfile(obj->getProfile(numProcs));
+			parSched->copyBigSchedule(node, avail);
 
+		} else if (obj->isParallel()) {
 			// determine the pattern of processor availability.
-			parSched->determinePPA(avail);
+			int when = parSched->determinePPA(node, avail);
+			if (when < 0) continue;
 
 			// compute the work-residual which can be scheduled in 
 			// parallel with this construct.  
@@ -93,41 +93,49 @@ int HuScheduler :: scheduleIt()
 			int resWork = myGraph->sizeUnschedWork() - 
 				myGraph->workAfterMe(node);
 
-			// Possible future revision: decide optimal number of 
-			// processors by an iterative procedure.
-			// calculate the optimal number of processors taking 
-			// the "front-idle-time" into account.
-			worm->computeProfile(numProcs, resWork, &avail);
+			if (obj->isItWormhole()) {
+				CGWormBase* worm = obj->myWormhole();
 
-			parSched->scheduleBig(node, numProcs, avail);
+				// Possible revision: decide optimal number of 
+				// processors by an iterative procedure.
+				// calculate the optimal number of processors 
+				// talking the "front-idle-time" into account.
+				worm->computeProfile(numProcs,resWork,&avail);
+				if (haltRequested()) return FALSE;
+
+			} else {
+				// TO_DO:
+				// for data parallel star, obtain the best
+				// profile.
+			}
+
+			node->withProfile(obj->getProfile(numProcs));
+			parSched->scheduleBig(node, when, avail);
 
 		} else {
 			// schedule the object star.
 			parSched->scheduleSmall(node);	
 		}
-	   }
+		if (haltRequested()) {
+			Error::abortRun("schedule error");
+			return FALSE;
+		}
+	}
 
-	   // increase the global clock and put some idle time if there
-	   // is no runnble nodes until all processors finish the
-	   // current execution.
-	   if(!parSched->scheduleIdle()) {
+	if(myGraph->numUnschedNodes()) {
 		// deadlock condition is met
 		Error::abortRun("Parallel scheduler is deadlocked!");
 		return FALSE;
-	   }
 	}
 
-  // Hu's level scheduling algorithm produces node assignments.
-  // Based on that assignment, we proceed list scheduling including
-  // communication.
-  // Currently, we do not allow wormholes for this
-  if (!wormFlag) {
+	// Hu's level scheduling algorithm produces node assignments.
+	// Based on that assignment, we proceed list scheduling including
+	// communication.
 	mtarget->clearCommPattern();
 	myGraph->resetGraph();
 	parSched->initialize(myGraph);
 	parSched->listSchedule(myGraph);
-  }
-  return TRUE;
+	return TRUE;
 }
 
 /////////////////////////////
@@ -145,7 +153,3 @@ StringList HuScheduler :: displaySchedule() {
 	return out;
 }
 
-int HuScheduler :: createSubGals() {
-	if (!wormFlag) return ParScheduler :: createSubGals();
-	else return FALSE;
-}

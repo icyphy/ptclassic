@@ -63,21 +63,12 @@ public:
   	// main body of the schedule
   	int scheduleIt();
 
-	// temporal hack
-	int createSubGals();
-
 protected:
    	// The aggregate firing that represents the
    	// schedule.
    	HuParProcs* parSched;
 
-	// makespan
-	int getMakespan();
-
 private:
-	// temporal hack to prevent createSubGals if wormhole exists
-	int wormFlag;
-
 	HuGraph* myGraph;
 };
 
