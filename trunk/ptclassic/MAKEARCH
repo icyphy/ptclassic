@@ -204,7 +204,6 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	de/atm/stars \
 	de/tcltk/stars \
 	cgc/targets/main cgc/targets/cm5 \
-	cgc/targets/NOWam cgc/targets/libudpam \
 	cgc/tcltk/stars cgc/tcltk/targets \
 	$EXPSUBEXTRAS )
 	optmkdir $x
@@ -212,6 +211,14 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	optlink ../../../../../src/domains/$x make.template
 	optlink ../../../../../src/domains/$x makefile
 	cd ../../..
+end
+
+foreach x ( cgc/targets/NOWam/NOWam cgc/targets/NOWam/libudpam )
+	optmkdir $x
+	cd $x
+	optlink ../../../../../../src/domains/$x make.template
+	optlink ../../../../../../src/domains/$x makefile
+	cd ../../../..
 end
 
 # Start of octtools section
