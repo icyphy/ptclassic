@@ -133,6 +133,24 @@ subinstall:
 		done ; \
 	fi
 
+# Install links for scripts in $PTOLEMY/bin and $TYCHO/bin
+tybin_install:
+	@if [ "x$(EXTRA_SRCS)" != "x" ]; then \
+		set $(EXTRA_SRCS); \
+		for f do \
+			if [ -w "$(PTOLEMY)/bin" ]; then \
+				echo "Installing $$f in $(PTOLEMY)/bin";\
+				rm -f $(PTOLEMY)/bin/$$f; \
+				ln $$f $(PTOLEMY)/bin; \
+			fi; \
+			if [ -w "$(TYCHO)/bin" ]; then \
+				echo "Installing $$f in $(TYCHO)/bin";\
+				rm -f $(TYCHO)/bin/$$f; \
+				ln $$f $(TYCHO)/bin; \
+			fi; \
+		done ; \
+	fi
+
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources::	$(SRCS) $(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 	@if [ "x$(DIRS)" != "x" ]; then \
