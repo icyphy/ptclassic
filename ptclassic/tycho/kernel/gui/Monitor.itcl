@@ -350,6 +350,7 @@ body ::tycho::Monitor::execProcessInMonitor {} {
     # Initially we don't have error
     set errorCount 0
     set errorList {}
+    set previousErrorLine -1
 
     # Clear both history logs before executing
     $itk_component(history) configure -readonly 0
