@@ -82,6 +82,16 @@ public:
 	// get MachineInfo
 	MachineInfo* getMachineInfo() { return machineInfo; }
 	int* getPortNumber() { return currentPort; }
+	void setMachineAddr(CGStar*, CGStar*);
+	
+	// CGDDF support.
+	// In case of code replication into the different set of target,
+	// we need to modify the target dependent code especially for
+	// communication stars: UnixSend and UnixReceive
+	void prepCode(Profile*, int, int);
+
+	// signal TRUE when replication begins, or FALSE when ends
+	void signalCopy(int flag) { replicateFlag = flag; }
 
 protected:
 	void setup();
@@ -104,6 +114,7 @@ protected:
 private:
 	// state to disallow compiling code.
 	IntState doCompile;
+	IntState doRun;
 
 	// states indicate which machines to use.
 	StringState machineNames;
@@ -114,6 +125,12 @@ private:
 	// for each pair of send/receive stars
 	IntState portNumber;
 	int* currentPort;
+
+	// In case, the cody body is replicated as in "For" and "Recur"
+	// construct, save this information to be used in getMachineAddr().
+	IntArray* mapArray;
+	int baseNum;
+	int replicateFlag;
 
 	// information on the machines
 	MachineInfo* machineInfo;
