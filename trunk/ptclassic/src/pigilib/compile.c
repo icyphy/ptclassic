@@ -47,13 +47,17 @@ CompileFacet is called.  xfered never gets re-initialized.
 */
 
 /* Includes */
+
 #include "local.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "oct.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "compile.h"
+
 #include "oh.h"
-#include "rpc.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
 #include "util.h"
@@ -64,7 +68,6 @@ CompileFacet is called.  xfered never gets re-initialized.
 #include "ptk.h"
 #include "kernelCalls.h"
 #include "handle.h"
-#include "compile.h"
 
 static boolean RunAll();
 

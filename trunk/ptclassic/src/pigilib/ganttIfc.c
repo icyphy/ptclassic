@@ -32,13 +32,13 @@ $Id$
 /* Includes */
 #include "local.h"
 #include <stdio.h>
+#include "oct.h"		/* define octObject data structure */
 #include "rpc.h"
 #include "err.h"
 #include "ganttIfc.h"
 #include "oh.h"
-#include "vemInterface.h"
 #include "octIfc.h"		/* Pick up MyOpenMaster */
-#include "ptk.h"  /* Interpreter name, window name, etc.  aok */
+#include "ptk.h"		/* Interpreter name, window name, etc. -aok */
 #include "handle.h"
 
 /* MAX_DEPTH

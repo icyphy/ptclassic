@@ -31,8 +31,13 @@ $Id$
 
 
 /* Includes */
-#include "rpc.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "utilities.h"
+
 #include "exec.h"
+
 
 /* Invoke a standard facet to plot a signal */
 int 

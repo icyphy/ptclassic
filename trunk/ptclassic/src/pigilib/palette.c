@@ -33,8 +33,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 /* Includes */
+
 #include "local.h"
 #include <stdio.h>
+
+#include "palette.h"
+
+#include "oct.h"
 #include "rpc.h"
 #include "oh.h"
 #include "octMacros.h"

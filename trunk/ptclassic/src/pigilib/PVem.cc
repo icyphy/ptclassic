@@ -48,12 +48,13 @@ a Tcl interpreter.
 #include "PVem.h"
 
 extern "C" {
-#define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
-#include "oct.h"			/* define octObject data structure */
-#include "rpc.h"			/* define remote procedure calls */
+/* rpc.h and type.h define Pointer which conflict */
+#define Pointer screwed_Pointer
+#include "oct.h"		  /* define octObject data structure */
+#include "list.h"		  /* define lsList data structure */
+#include "rpc.h"		  /* define vemCommand & remote proc. calls */
 #include "octIfc.h"
 #include "handle.h"
-#include "vemInterface.h"
 #include "octMacros.h"
 #undef Pointer
 }

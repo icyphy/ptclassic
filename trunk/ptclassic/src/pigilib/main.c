@@ -35,7 +35,11 @@ Initialization code for pigiRpc.
 #include <stdio.h>
 #include <stdlib.h>
 #include "compat.h"
-#include "rpc.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "main.h"
+
 #include "vemInterface.h"
 #include "compile.h"
 #include "edit.h"
@@ -52,7 +56,7 @@ Initialization code for pigiRpc.
 
 /* Global Vars */
 
-char *xDisplay;  /* display name passed by vem */
+char *xDisplay;		/* display name passed by vem */
 
 int
 Version(spot, cmdList, userOptionWord) /* ARGSUSED */

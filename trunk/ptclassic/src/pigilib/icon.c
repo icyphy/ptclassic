@@ -38,7 +38,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/stat.h>
 #include <pwd.h>
 #include <unistd.h>
-#include "rpc.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "icon.h"
+
 #include "util.h"
 #include "err.h"
 #include "vemInterface.h"
@@ -46,18 +50,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "main.h"
 #include "ptk.h"
 #include "octIfc.h"
-#include "kernelCalls.h"
+#include "kernelCalls.h"	/* define callParseClass and KcDomainOf */
 #include "pigiLoader.h"
 #include "handle.h"
-#include "utility.h"		/* Pick up util_csystem() */
+#include "utility.h"		/* pick up util_csystem() */
 
-#include "icon.h"
-
-#define DM_WIDTH 80  /* dialog entry width */
-#define EDIT_ICON_SNAP 5 /* snap size of vem window for edit-icon */
-
-char* callParseClass();
-char* KcDomainOf();
+#define DM_WIDTH 80		/* dialog entry width */
+#define EDIT_ICON_SNAP 5	/* snap size of vem window for edit-icon */
 
 /*  5/9/90
 Takes the code directory of a star and returns it's icon directory.
