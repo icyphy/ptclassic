@@ -701,10 +701,16 @@ body ::tycho::JavaDocSys::parseExtends {class extends} {
 
     if [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ ]+(.*)$} \
             $extends dmy parent other] {
-        # Extends a class
+        # Extends a class and more
         $classModel parent $parent -inheritance implementation
         set extends [string trimleft $other " \t"]
+    } elseif [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ 	]*$} \
+            $extends dmy parent] {
+        # Extends a class and that's it
+        $classModel parent $parent -inheritance implementation
+        return
     }
+
     if [regexp {^[ ]*implements[ ]+(.*)$} $extends dmy parents] {
         # Implements a class
         while {$parents != ""} {
