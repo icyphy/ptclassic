@@ -378,6 +378,13 @@ configbody ::tycho::File::file {
             windowMenuAddAll $file
             set previousfile $file
         }
+	# Remove Control-X from the <<Cut>> event 
+	# In Itcl2.2, we have virtual events, so Control-Key-x is bound to
+	#<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
+	# bound to reload.
+	if {[namespace ::itcl {set version}] > 2.1 } {
+	    event delete <<Cut>> <Control-Key-x>
+	}
     }
     focusin
 }
