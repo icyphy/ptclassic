@@ -589,14 +589,23 @@ body ::tycho::Class::methods {args} {
 ########################################################################
 #### parameter
 #
-# Add a parameter to a method. This method is provided for
-# convenience -- it is not used by the TIM file parser.
+# Add a parameter to a method, Constructor, or Destructor. 
+# This method is provided for convenience -- it is not used 
+# by the TIM file parser. 
 # Additional arguments are a flat attribute-value list for the
 # parameter. Flag an error if the parameter already exists. 
 #
 body ::tycho::Class::parameter {method name args} {
     set fullmethod [fullName method $method]
     set fullname [fullName parameter $name]
+
+    # Create correct fullname if it's a Constructor or Destructor 
+    if {![exists method $fullmethod]} {
+        set fullmethod [fullName Constructor $method]
+        if {![exists Constructor $fullmethod]} {
+            set fullmethod [fullName Destructor $method]
+        }
+    }
 
     _verifynot parameter $fullmethod $fullname $fullmethod$separator$fullname
     _addentity parameter $fullmethod $fullname \
@@ -609,10 +618,20 @@ body ::tycho::Class::parameter {method name args} {
 ########################################################################
 #### parameters
 #
-# Get the parameters of a method.
+# Get the parameters of a method, Constructor, or Destructor. If they
+# have the same name, returns the first it finds in order of method,
+# Constructor, Destructor.
 #
 body ::tycho::Class::parameters {method} {
     set fullmethod [fullName method $method]
+
+    # Create correct fullname if it's a Constructor or Destructor 
+    if {![exists method $fullmethod]} {
+        set fullmethod [fullName Constructor $method]
+        if {![exists Constructor $fullmethod]} {
+            set fullmethod [fullName Destructor $method]
+        }
+    }
 
     set prms {}
     set prm_prms [_children parameter $fullmethod]
