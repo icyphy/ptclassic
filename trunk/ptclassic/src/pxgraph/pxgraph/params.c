@@ -477,7 +477,8 @@ void param_dump()
 }
 
 
-#ifdef NEED_STRICMP
+/* Cygwin b19 #defines stricmp to strcasecmp */
+#if defined(NEED_STRICMP) && ! defined(stricmp)
 int stricmp(a, b)
 register char *a, *b;
 /*
