@@ -24,11 +24,23 @@ $Id$
 #include "KnownState.h"
 #include "StringList.h"
 
+// class for a list of Geodesics (or nodes)
+class NodeList : SequentialList {
+public:
+	void put(Geodesic& g) { SequentialList::put(&g);}
+	SequentialList::size;
+	SequentialList::reset;
+	Geodesic& operator ++ () { return *(Geodesic*) next();}
+	Geodesic* nodeWithName (const char* name);
+};
+
 class InterpGalaxy: public Galaxy {
 
 private:
 	StringList actionList;	// saves actions used in building galaxy
 	PortHole* findPortHole(const char* star,const char* port);
+	GenericPort* findGenericPort(const char* star,const char* port);
+	NodeList nodes;
 public:
 // constructor: makes an empty galaxy
 	InterpGalaxy() { descriptor = "An interpreted galaxy";}
@@ -41,13 +53,26 @@ public:
 	int
 	addStar(const char* starname, const char* starclass);
 
-// add a connection
+// add a connection (point-to-point)
 	int
 	connect(const char* srcstar, const char* srcport, const char* dststar,
 		const char* dstport, int delay = 0);
+
+// disconnect a porthole (works for point-to-point or netlist connections)
+	int
+	disconnect(const char* star, const char* port);
+
 // add an alias
 	int
 	alias(const char* galport, const char* star, const char *starport);
+
+// add a node
+	int
+	addNode(const char* nodename);
+
+// connnect a porthole to a node
+	int
+	nodeConnect(const char* star, const char* port, const char* node);
 
 // add a state
 	int
