@@ -7,6 +7,7 @@
 
 #include "State.h"
 #include "Fix.h"
+#include "PrecisionState.h"
 
 /**************************************************************************
 Version identification:
@@ -50,7 +51,7 @@ class FixState : public State
 {
 public:
         // constructor
-        FixState() { val = 0.0;}
+        FixState();
 
         // parses initValue to set value
         void initialize();
@@ -74,6 +75,17 @@ public:
 	// convert to double (not done as cast because of ambiguity)
 	double asDouble() const { return double(val);}
 
+	// Return the precision of the Fix values;
+	// the precision may contain symbolic expressions if it has been set by
+	// the setPrecision() method; otherwise it will only consist of integer
+	// constants.
+	Precision precision() const;
+
+	// Explicitly set the precision;
+	// if overrideable is FALSE the symbolic expressions can not be redefined
+	// in the future.
+	void setPrecision(const Precision&, int overrideable=TRUE);
+
 	// set init value
 	void setInitValue(const Fix& arg);
 
@@ -89,6 +101,11 @@ public:
 private:
 	// the actual data
 	Fix val;
+
+	// symbolic representation of the fixed-point precision
+	char *symbolic_length, *symbolic_intBits;
+	// flag that indicates whether the symbolic representation is changeable
+	int overrideablePrecision;
 };
 
 
