@@ -58,7 +58,7 @@ void DEWormhole :: setup()
 void DEWormhole :: go()
 {
 	// synchronize the two domains
-	target->setCurrentTime(arrivalTime);
+	myTarget()->setCurrentTime(arrivalTime);
 
 	// run the inner scheduler.
 	Wormhole::run();
@@ -66,7 +66,7 @@ void DEWormhole :: go()
 
 void DEWormhole :: wrapup()
 {
-	target->wrapup();
+	myTarget()->wrapup();
 }
 
 // new phase
@@ -85,13 +85,13 @@ void DEWormhole :: startNewPhase()
 // cloner -- clone the inside and make a new wormhole from that.
 Block* DEWormhole :: clone() const
 {
-LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
+LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
 }
 
 // makeNew, analogous to clone.
 Block* DEWormhole :: makeNew() const
 {
-LOG_NEW; return new DEWormhole(gal.makeNew()->asGalaxy(), target->cloneTarget());
+LOG_NEW; return new DEWormhole(gal.makeNew()->asGalaxy(), myTarget()->cloneTarget());
 }
 
 // sumUp();  If the inner domain is timed and stopBeforeDeadlocked,
