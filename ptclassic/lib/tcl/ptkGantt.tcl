@@ -1,4 +1,4 @@
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -22,7 +22,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Version: @(#)ptkGantt.tcl	1.10	1/22/96
+# Version: $Id$
 # Programmer: Matt Tavis
 #           : John Reekie
 #
@@ -136,6 +136,74 @@ proc ptkGantt_Print { chartName } {
     close $OUTPUT
 }
 
+
+proc ptkGantt_SaveChart { chartName } {
+    global PTOLEMY
+    # check to make sure that Tycho.tcl has been sourced
+    if {"" == [info classes ::tycho::File]} {
+	# this sourcing wants to bring up tycho so we supress console and 
+	# welcome windows
+	set tychoWelcomeWindow 0
+	set tychoConsoleWindow 0
+	set tychoExitWhenNoMoreWindows 0
+	source $PTOLEMY/tycho/kernel/Tycho.tcl
+    }
+
+    # create instance of the FileBrowser class
+    set filename [DialogWindow::newModal FileBrowser [format "%s%s" . [string \
+	    trimleft $chartName .gantt_]] -text "Save As File:"]
+    if {$filename == {NoName}} {
+	error {Cannot use name NoName.}
+    }
+    # Ignore if the user cancels
+    if {$filename != {}} {
+	return [ptkGantt_SaveFile $chartName $filename]
+    }
+}
+
+proc ptkGantt_SaveFile {chartName filename} {
+    global ptkGantt_Layout ptkGantt_Data
+    # check to see if file exists
+    if {[file exists $filename]} {
+	if ![askuser "File \"$filename\" exists.  Overwrite?"] {
+	    error {Did not save file.}
+	}
+    }
+    # open file and begin writing
+    set FILEOUT [open $filename w]
+
+    # first write out period and # of processors
+    puts $FILEOUT "no_processors $ptkGantt_Layout($chartName.numprocs)"
+    puts $FILEOUT "period $ptkGantt_Layout($chartName.period)"
+
+    # throw in an extra return
+    puts $FILEOUT "\n"
+
+    # now with a foreach loop write each of the processors
+    for {set i 1} { $i <= $ptkGantt_Layout($chartName.numprocs)} { incr i} {
+	# another for loop for the individual stars of the processor
+	for {set k [llength $ptkGantt_Data($chartName.$i)]} {$k > 0} \
+		{incr k -1} {
+	    # write a tab, processor name followed by a "{0}"
+	    # this bit of info was never used by the original gantt chart
+	    set procStarList [lindex $ptkGantt_Data($chartName.$i) \
+		    [expr $k - 1]]
+	    puts -nonewline $FILEOUT "\t[lindex $procStarList 0] {0} "
+	    # write start and finish times of star
+	    puts $FILEOUT "([lindex $procStarList 1] [lindex \
+		    $procStarList 2])"
+	}
+	puts $FILEOUT "\$end proc\$"
+    }
+    # place min., percentage and optimum at bottom of file
+    puts $FILEOUT "min $ptkGantt_Data($chartName.min)"
+    puts $FILEOUT "percentage $ptkGantt_Data($chartName.prcent)"
+    puts $FILEOUT "optimum $ptkGantt_Data($chartName.opt)"
+    puts $FILEOUT "runtime $ptkGantt_Data($chartName.runtime)"
+
+    # close file 
+    close $FILEOUT
+}
 
 proc ptkGantt_HelpButton {} {
     ptkMessage {
@@ -274,6 +342,7 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 
     if ![winfo exists ${chartName}.canvas] {
 
+
 	# first we add the zoom buttons...not done earlier because we need
 	# to pass tons of variables not yet set earlier
 	button $chartName.mbar.zoomin \
@@ -393,6 +462,12 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 	# interface to the Gantt chart is badly in need of an overhaul...
 	#
 	ptkGantt_MoveMarker $chartName 0
+
+	# add dismiss button
+	button $chartName.dismiss -relief raised -text "DISMISS" -command \
+		"ptkClearHighlights; destroy $chartName; ptkGanttExit"
+	pack $chartName.dismiss -before $chartName.scroll -side bottom -fill x
+
     }
 
     #
@@ -738,7 +813,8 @@ proc ptkGantt_SetRuntime { num } {
     set ptkGantt_Runtime $num
 }
 
-proc ptkGantt_MakeLabel {universe period min prcent opt} {
+proc ptkGantt_MakeLabel {universe period min prcent opt {runtime 0}} {
+    global ptkGantt_Data
 
     set chartName .gantt_${universe}
     set prcent [format %.5f $prcent]
@@ -747,6 +823,12 @@ proc ptkGantt_MakeLabel {universe period min prcent opt} {
 	    -text [format "Period = %d (vs. PtlgMin %d), busy time =\
 	    %.2f%% (vs. max %.2f%%)" \
 	    $period $min $prcent $opt]
+
+    # place all these datum in ptkGantt_Data array
+    set ptkGantt_Data($chartName.min) $min
+    set ptkGantt_Data($chartName.prcent) $prcent
+    set ptkGantt_Data($chartName.opt) $opt
+    set ptkGantt_Data($chartName.runtime) $runtime
 
 #     set chartName .gantt_${universe}
 #     set prcent [format %.5f $prcent]
@@ -806,8 +888,9 @@ proc ptkGantt_Bindings {universe num_procs} {
 	    [concat ptkGantt_Redraw $chartName {%w %h}]
 }
 
-proc ptkGanttDisplay { universe {inputFile ""} } {
+proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
 
+    global ptkGantt_Data ptkGantt_Layout
     set ganttChartName .gantt_${universe}
     toplevel $ganttChartName
 
@@ -827,8 +910,12 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
     menu $ganttChartName.mbar.file.menu -tearoff 0
     $ganttChartName.mbar.file.menu add command -label "Print Chart..." \
 	    -command "ptkGantt_PrintChart $ganttChartName"
-
+    if { ! $standalone } {
+    $ganttChartName.mbar.file.menu add command -label "Save..." \
+	    -command "ptkGantt_SaveChart $ganttChartName"
+    }
     set exitcommand "ptkClearHighlights; destroy $ganttChartName; ptkGanttExit"
+    $ganttChartName.mbar.file.menu add separator
     $ganttChartName.mbar.file.menu add command -label "Exit" \
 	    -command $exitcommand -accelerator "Ctrl+d"
 
@@ -847,28 +934,40 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
 	    set NUMCHARS [gets $GFILE_ID LINEARR]
 	    if (!$NUMCHARS) continue;
 	    switch [lindex $LINEARR 0] {
-		no_processors { set num_procs [lindex $LINEARR 1];
+		no_processors { set ptkGantt_Layout($ganttChartName.numprocs)\
+			[lindex $LINEARR 1];
 			continue}
-		period { set period [lindex $LINEARR 1];
+		period { set ptkGantt_Layout($ganttChartName.period) \
+			[lindex $LINEARR 1];
 			continue}
-		min { set min [lindex $LINEARR 1];
+		min { set ptkGantt_Data($ganttChartName.min) \
+			[lindex $LINEARR 1];
 			continue}
-		percentage { set prcent [lindex $LINEARR 1];
+		percentage { set ptkGantt_Data($ganttChartName.prcent) \
+			[lindex $LINEARR 1];
 			continue}
-		optimum { set opt [lindex $LINEARR 1];
+		optimum { set ptkGantt_Data($ganttChartName.opt) \
+			[lindex $LINEARR 1];
 			continue}
-		runtime { set runtime [lindex $LINEARR 1]l
+		runtime { set ptkGantt_Data($ganttChartName.runtime) \
+			[lindex $LINEARR 1]l
 			continue}
 	    	\$end { incr proc_num ; continue}
-		default { ptkGantt_DrawProc $universe $num_procs $period \
+		default { ptkGantt_DrawProc $universe \
+			$ptkGantt_Layout($ganttChartName.numprocs) \
+			$ptkGantt_Layout($ganttChartName.period) \
 			$proc_num [lindex $LINEARR 0] [string trimleft \
 			[lindex $LINEARR 2] (] [string trimright \
 			[lindex $LINEARR 3] )]}
 	    }
 	}   
 	close $GFILE_ID
-	ptkGantt_MakeLabel $universe $period $min $prcent $opt
-	ptkGantt_Bindings $universe $num_procs
+	ptkGantt_MakeLabel $universe $ptkGantt_Layout($ganttChartName.period) \
+		$ptkGantt_Data($ganttChartName.min) \
+		$ptkGantt_Data($ganttChartName.prcent) \
+		$ptkGantt_Data($ganttChartName.opt) \
+		$ptkGantt_Data($ganttChartName.runtime)
+	ptkGantt_Bindings $universe $ptkGantt_Layout($ganttChartName.numprocs)
     }
 }
 
