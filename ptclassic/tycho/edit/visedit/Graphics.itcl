@@ -584,7 +584,7 @@ body ::tycho::Graphics::constructor {args} {
 
     # Set up export commands.  The mac does not have exec, so we 
     # can't do everything.
-    if {$tcl_platform(platform) == macintosh} {
+    if {$tcl_platform(platform) == "macintosh"} {
 	array set fileformats {
 	    eps exportEps
 	}
@@ -1087,7 +1087,7 @@ body ::tycho::Graphics::export {} {
 #
 body ::tycho::Graphics::exportGif {filename} {
     global tcl_platform
-    if {$tcl_platform(platform) === macintosh} {
+    if {$tcl_platform(platform) == "macintosh"} {
 	error "Sorry, the Graphics exportGif method is not supported on\
 		the mac.\n  This method uses the tcl \"exec\" command\
 		which is not available on the mac."
@@ -1167,7 +1167,7 @@ body ::tycho::Graphics::exportEps \
 #
 body ::tycho::Graphics::exportXwd {filename} {
     global tcl_platform
-    if {$tcl_platform(platform) === macintosh} {
+    if {$tcl_platform(platform) == "macintosh"} {
 	error "Sorry, the Graphics exportXwd method is not supported on\
 		the mac.\n  This method uses the tcl \"exec\" command\
 		which is not available on the mac."

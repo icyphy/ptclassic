@@ -33,7 +33,7 @@ method and call <CODE>error</CODE> with an informative error message.
 <PRE>
 body ::tycho::MyClass::myMethod {} {
 	global tcl_platform
-	if {$tcl_platform(platform) == macintosh} {
+	if {$tcl_platform(platform) == "macintosh"} {
 		error "Sorry, the myMethod method in MyClass is not\
 			supported on the Macintosh as it\ncalls the\
 			tcl \"exec\" command which is not available." 
