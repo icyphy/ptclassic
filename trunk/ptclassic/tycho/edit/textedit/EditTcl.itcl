@@ -44,12 +44,9 @@ class ::tycho::EditTcl {
     ###################################################################
     ####                     public methods                        ####
 
-    #### evaluate
-    # Evaluate the contents of the text window as Tcl commands
-    # in the global context.
+    # Evaluate a region in the global context.
     method evaluate {}
 
-    #### help
     # Open a help window.
     method help {}
 
@@ -59,9 +56,8 @@ class ::tycho::EditTcl {
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditTclText}
+    # Return the name of the type of text widget to use (EditTclText).
+    protected method textWidget {} {return ::tycho::EditTclText}
 }
 
 ###################################################################

@@ -33,8 +33,15 @@
 #######################################################################
 #### EditProgram
 # This class defines a window that provides an emacs-like editor
-# specialized for editing program files. It colorizes the code, identifying
-# comments, automatically indents the code, and fills blocks of comments.
+# specialized for editing program files. It colorizes the code,
+# identifying comments, automatically indents the code, and fills
+# blocks of comments. Derived classes are specialized to particular
+# programming languages. This class provides a common infrastructure.
+# In particular, it provides a common mechanism for handling
+# line-oriented comments, and indentation driven by brackets, braces,
+# and parentheses. It also tags and colors colors comments and the
+# strings "FIXME" and "NOTE", provides infrastructure for tagging and
+# coloring keywords, and provides a method for commenting out a region.
 #
 class ::tycho::EditProgram {
     inherit ::tycho::Edit
@@ -45,16 +52,14 @@ class ::tycho::EditProgram {
     constructor {args} {}
     destructor {}
 
-    #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditProgramText}
+    # Return the name of the type of text widget to use (EditProgramText).
+    protected method textWidget {} {return ::tycho::EditProgramText}
 }
 
 ###################################################################

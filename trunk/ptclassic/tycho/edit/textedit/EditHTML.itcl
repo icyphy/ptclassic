@@ -38,23 +38,20 @@
 class ::tycho::EditHTML {
     inherit ::tycho::Edit
 
-    #### evaluate
     # Evaluate the HTML.
     method evaluate {}
 
-    #### help
     # Open a help window.
     method help {}
 
     constructor {args} {}
     destructor {}
 
-    #########################################################################
-    #### protected methods
+    ###############################################################
+    ####                  protected methods                    ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditHTMLText}
+    # Return the name of the type of text widget to use (EditHTMLText).
+    protected method textWidget {} {return ::tycho::EditHTMLText}
 }
 
 ###################################################################

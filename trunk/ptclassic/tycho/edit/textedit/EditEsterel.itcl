@@ -45,16 +45,14 @@ class ::tycho::EditEsterel {
     constructor {args} {}
     destructor {}
 
-    #### help
     # Open a help window.
     method help {}
 
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditEsterelText}
+    # Return the name of the type of text widget to use (EditEsterelText).
+    protected method textWidget {} {return ::tycho::EditEsterelText}
 }
 
 ###################################################################

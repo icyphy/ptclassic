@@ -42,16 +42,14 @@ class ::tycho::EditMake {
     constructor {args} {}
     destructor {}
 
-    #### help
     # Open a help window.
     method help {}
 
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditMakeText}
+    # Return the name of the type of text widget to use (EditMakeText).
+    protected method textWidget {} {return ::tycho::EditMakeText}
 }
 
 ###################################################################

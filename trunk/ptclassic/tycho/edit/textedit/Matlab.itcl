@@ -39,13 +39,11 @@
 class ::tycho::Matlab {
     inherit ::tycho::Console
 
-    #### help
     # Open a help window.
     method help {}
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::MatlabText}
+    # Return the name of the type of text widget to use (MatlabText).
+    protected method textWidget {} {return ::tycho::MatlabText}
 }
 
 ###################################################################

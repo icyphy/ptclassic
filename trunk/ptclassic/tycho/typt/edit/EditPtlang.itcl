@@ -36,7 +36,8 @@
 # specialized for editing ptlang files. Ptlang is the preprocessor
 # language used to define stars in Ptolemy. This class colorizes the
 # code, identifying comments and ptlang keywords, automatically indents
-# the code, and fills blocks of comments.
+# the code, and fills blocks of comments.  It is derived from the C++
+# editor, and hence inherits all its features.
 #
 class ::tycho::EditPtlang {
     inherit ::tycho::EditCpp
@@ -44,16 +45,14 @@ class ::tycho::EditPtlang {
     constructor {args} {}
     destructor {}
 
-    #### help
     # Open a help window.
     method help {}
 
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditPtlangText}
+    # Return the name of the type of text widget to use (EditPtlangText).
+    protected method textWidget {} {return ::tycho::EditPtlangText}
 }
 
 ###################################################################
