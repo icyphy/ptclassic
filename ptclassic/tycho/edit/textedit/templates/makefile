@@ -40,7 +40,7 @@ include $(CONFIG)
 
 EXTRA_SRCS = \
 	HTMLTemplate.html \
-	ItclTemplate.html
+	ItclTemplate.itcl
 
 MISC_FILES =
 
