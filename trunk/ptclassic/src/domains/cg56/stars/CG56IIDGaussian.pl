@@ -8,9 +8,12 @@ defstar {
 	location { CG56 demo library }
         explanation {
 .PP
+.Id "Gaussian noise"
+.Id "noise, Gaussian"
 This star generates a sequence of random output samples with a Gaussian
 distribution (mean = 0, standard deviation = 0.1).
 .PP
+.Ir "central limit theorem"
 According to the central limit theorem, the sum of N random variables
 approaches a Gaussian distribution as N approaches infinity.
 This star generates an output number by summing \fIno_uniforms\fR uniform

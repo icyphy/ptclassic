@@ -8,6 +8,10 @@ defstar {
 	location { CG56 demo library }
 	explanation {
 .PP
+.Id "arccosine"
+.Id "cosine, inverse"
+.Id "inverse cosine"
+.Ir "power series"
 A power series expansion is used to compute the arc cosine of the input,
 which is in the range -1.0 to 1.0.  The output is in the principle range of
 0 to pi, scaled down by a factor of pi for the fixed point device.

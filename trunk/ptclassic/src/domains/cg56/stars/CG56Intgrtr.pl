@@ -5,27 +5,27 @@ defstar {
 An integrator with leakage and limits.  With the default parameters,
 input samples are simply accumulated, and the running sum is the
 output.  If there is an overflow, the integrator will wrap around.
-
-Limits are controlled by the "top" and "bottom" parameters.  If top <=
-bottom, no limiting is performed (default).  Otherwise, the output is
-kept between "bottom" and "top".  If "saturate" = YES, saturation is
-performed.  If "saturate" = NO, wrap-around is performed (default).
-Limiting is performed before output.
-
-Leakage is controlled by the "feedbackGain" state (default 1.0).  The
-output is the data input plus feedbackGain*state, where state is the
-previous output.
-
-Overflow is controlled by the onOverflow state (default wrap around.
-The integrator can either be set to wrap around (default), saturate or
-reset.
 	}
 	version { $Id$ }
 	author { J. Pino, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-
+.Id "filter, integrator"
+Limits are controlled by the \fItop\fP and \fIbottom\fP parameters.
+If top <= bottom, no limiting is performed (default).
+Otherwise, the output is kept between \fIbottom\fP and \fItop\fP.
+If \fIsaturate\fP = YES, saturation is performed.
+If \fIsaturate\fP = NO, wrap-around is performed (default).
+Limiting is performed before output.
+.pp
+Leakage is controlled by the \fPfeedbackGain\fP state (default 1.0).
+The output is the data input plus feedbackGain*state, where state is the
+previous output.
+.pp
+Overflow is controlled by the \fIonOverflow\fP state (default wrap around.
+The integrator can either be set to wrap around (default), saturate or
+reset.
 	}
 	input {
 		name { input }

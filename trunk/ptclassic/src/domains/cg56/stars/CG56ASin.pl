@@ -7,6 +7,10 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Id "arcsine"
+.Id "sine, inverse"
+.Id "inverse sine"
+.Ir "power series"
 Arc Sine function using power series approximation.  
 The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	seealso { ACos, Cos, Sin }

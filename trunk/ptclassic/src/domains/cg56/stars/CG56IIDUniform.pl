@@ -3,13 +3,15 @@ defstar {
 	domain {CG56}
 	desc {
 Generate pseudo-IID-uniform random variables.  The values range from
--range to range where range is a parameter.
+-range to range where "range" is a parameter.
 	}
 	version { $Id$ }
 	author { J. Buck, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Id "uniform noise"
+.Id "noise, uniform"
 This needs to be filled in.  For now, there is no seed parameter; the
 default seed parameter from Gabriel is always used.  We'd really need
 to use a 48-bit integer to get the same functionality.  This can be

@@ -7,11 +7,16 @@ Calculation by table lookup.  Input range of (-1,1) scaled by pi.
 	}
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
-	author { J. Pino, ported from Gabriel }
+	author { J. Pino (ported from Gabriel) }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-
+.Id "cosine"
+This star computes the cosine of the input, which must be in the range
+(-1.0, 1.0).
+The output equals cos($~pi~cdot~$\fIin\fR), so the input range is 
+effectively (-$~pi$, $pi~$).
+The output is in the range (-1.0, 1.0).
 	}
 	input {
 		name {input}
