@@ -923,7 +923,7 @@ typedef struct lbl_desc {
 /* Maintains space for decomposing labels into lines */
 static dary lblInfo = (dary) 0;	/* Type is (lblDesc) */
 
-static int prep_line(count)
+static void prep_line(count)
 int count;
 /*
  * Sets up the `count' line in the global dary `lblInfo'.
@@ -1057,12 +1057,12 @@ int opt;			/* Options                */
  */
 {
     int idx;
-    int diff, lines;		/* Finding font */
+    int lines;		/* Finding font */
     int maxwidth, maxheight;	/* Size of text */
     int regwidth, regheight;	/* Region size  */
     int found = 0;
-    int x, y, margin;
-    XFontStruct *font, *lastFont;
+    int x = 0, y = 0, margin = 0;
+    XFontStruct *font, *lastFont = (XFontStruct *)NULL;
     lsGen gen;
     lsStatus stat;
     int apply_boundbox;
@@ -1267,8 +1267,9 @@ int opt;			/* Options                */
 {
 
     if (opt & DSP_XMARK) {
+#ifdef NOTDEF
 	XSegment segs[2];
-
+#endif
 	XFillRectangle(_AGC.disp, theWin ? theWin : dspInfo.dsp_drawable,
 		       _AGC.solid_gc, thePoint->x - HALF_X,
 		       thePoint->y - HALF_X, SIZE, SIZE);
@@ -1327,7 +1328,7 @@ struct octPoint *point2;	/* Second point        */
  * coordinate space.
  */
 {
-    int code1, code2, cd, x, y;
+    int code1, code2, cd, x = 0, y = 0;
     XRectangle rect;		/* In case its manhattan */
 
     /* Copy into drawing vector */
