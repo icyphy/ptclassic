@@ -30,8 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-option add *RevControlRCS.versionColor [ptkColor blue black] widgetDefault
-option add *RevControlRCS.commentColor [ptkColor firebrick black] widgetDefault
 
 #######################################################################
 #### RevControlRCS
@@ -387,9 +385,9 @@ body ::tycho::RevControlRCS::parseHistory {history text} {
     }
 
     set commentColor \
-	    [option get $itk_component(hull) commentColor RevControlRCS]
+	    [preference get revcontrol commentColor]
     set versionColor \
-	    [option get $itk_component(hull) versionColor RevControlRCS]
+	    [preference get revcontrol versionColor]
 
     foreach line [lrange $lines 0 end] {
 	if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {

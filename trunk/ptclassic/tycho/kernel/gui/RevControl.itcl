@@ -30,11 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Types of revision control software, in order of preference.
-# It is assumed that for each type listed, there is a class defined
-# called RevControl$type, where $type is the type, and that this
-# class is derived from RevControl.
-option add *revisionControlTypes {SCCS RCS} widgetDefault
 
 #######################################################################
 #### RevControl
@@ -306,7 +301,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	return
     }
 
-    set pref [option get . revisionControlTypes Tycho]
+    set pref [preference get revcontrol revisionControlTypes]
     set revclass [whichRevClass $editorObj]
 
     # If the file is not under revision control, query the user
@@ -347,7 +342,7 @@ body ::tycho::RevControl::whichRevClass {obj} {
     if {![$obj isa ::tycho::File]} {
         error "Cannot check revision control for $obj: Not a ::tycho::File."
     }
-    set pref [option get . revisionControlTypes Tycho]
+    set pref [preference get revcontrol revisionControlTypes]
     set filename [$obj filename]
     set revclass {}
 

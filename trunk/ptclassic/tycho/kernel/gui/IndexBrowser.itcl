@@ -30,23 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Options from the derived class
-option add *IndexBrowser*entryWidth 30 widgetDefault
-
-option add *IndexBrowser*entryBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *IndexBrowser*entryForeground \
-	[ptkColor black black] widgetDefault
-
-option add *IndexBrowser*textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *IndexBrowser*textForeground \
-	[ptkColor black black] widgetDefault
-
-option add *IndexBrowser.entryfont \
-	[.tychoFonts defaultFont fixed] widgetDefault
-option add *IndexBrowser.width 30 widgetDefault
-option add *IndexBrowser.height 20 widgetDefault
 
 ##########################################################################
 #### IndexBrowser
@@ -160,10 +143,13 @@ configbody ::tycho::IndexBrowser::file {
 ######################################################################
 #
 body ::tycho::IndexBrowser::constructor {args} {
-
-
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    # Subscribe to the preference set
+    preference subscribe indexbrowser $this \
+	    -width width \
+	    -height height
 }
 
 
