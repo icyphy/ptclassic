@@ -38,7 +38,7 @@ extern int Frame(char *stars[]);
 extern int ClearFrames();
 extern int DestroyFrames();
 /* following is not used */
-/* extern void FindAndMarkError(/* octObject *facetP, char *name */); */
+/* extern void FindAndMarkError( octObject *facetP, char *name ); */
 
 extern boolean FindNameSet(/* octObject *facetPtr, char *name */);
 /* FIXME:  These functions are not in ganttIfc.h */
@@ -76,12 +76,5 @@ typedef struct RgbValue_s {
     unsigned short green;
     unsigned short blue;
 } RgbValue;
-
-/* Functions added to allow cross compile with ptcl and pigi */
-extern void beginGantt();
-extern void writeGanttLabel();
-extern void writeGanttBindings();
-extern void endGantt();
-extern void writeGanttProc();
 
 #endif /* GANTTIFC_H */
