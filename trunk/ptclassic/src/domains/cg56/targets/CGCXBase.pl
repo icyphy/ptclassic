@@ -96,9 +96,6 @@ initCode {
 	addInclude("<qckMon.h>");
 	addInclude("<stdio.h>");
 	addGlobal("    QckMon* dsp;","dsp");
-}
-
-wrapup {
 	// We do this here so that all the stars can do there initialization
 	// before starting the DSP
        	const char *s56path = getenv("S56DSP");
@@ -110,6 +107,9 @@ wrapup {
 #else
 	addMainInit(signalSUN4,"s56signal");
 #endif
+}
+
+wrapup {
 	addMainInit(startDSP,"s56start");
 	addCode("qckDetach(dsp);dsp=0;\n","mainClose","qckDetach");
 }
