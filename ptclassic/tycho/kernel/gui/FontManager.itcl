@@ -35,7 +35,7 @@
 # Manage font selection. Instances of this class are dialog windows
 # that permit the user to select a font. If the creator makes the font
 # manager modal using the
-# <code>::tycho::DialogWindow::getResult</code> procedure, then
+# <code>::tycho::DialogWindow::wait</code> procedure, then
 # that procedure will return either a valid font name selected by the
 # user or the null string (if the user cancels).
 # <p>
@@ -438,7 +438,7 @@ body ::tycho::FontManager::findFont {specs} {
 # Return 0 if the specified font is not available on the current
 # system, otherwise return 1. If the font is valid, the commandResult
 # variable is set to the name of the font. This determines the value
-# returned by the <code>getResult</code> method. This font name is
+# returned by the <code>wait</code> procedure. This font name is
 # also displayed in the window.
 #
 body ::tycho::FontManager::fontValid {font} {
@@ -474,7 +474,7 @@ body ::tycho::FontManager::getCurrentFont {} {
 # family is not optional. If the font is found, set the variable
 # commandResult to the name of this font. Otherwise, set commandResult
 # to the empty string. This determines the value returned by the
-# <code>getResult</code> procedure.
+# <code>wait</code> procedure.
 #
 body ::tycho::FontManager::getFont \
 	{family {size 14} {weight medium} {style r}} {
@@ -546,7 +546,7 @@ body ::tycho::FontManager::setCurrentFont {} {
 # Attempt to set the font specified by the argument.
 # If the font is not valid, report an error.  If the font is valid,
 # set the commandResult variable to the font name.  This determines
-# the value returned by the <code>getResult</code> procedure.
+# the value returned by the <code>wait</code> procedure.
 #
 body ::tycho::FontManager::tryFont {font} {
     if [fontValid $font] {
