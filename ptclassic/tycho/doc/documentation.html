@@ -117,17 +117,18 @@ will have broken links.  If the documentation uses relative references,
 then remote users will be able to view the documentation.
 </MENU>
 
-<P> The text that makes up a HTML link should be on one line, some of the
-HTML tools will not process HTML <CODE>&lt;A HREF="..."&gt;...&lt;/A&gt;</CODE>
+<P> The text that makes up a HTML link should be on one line, as some of the
+HTML tools such as <CODE>htmlchek</CODE>
+will not process HTML <CODE>&lt;A HREF="..."&gt;...&lt;/A&gt;</CODE>
 links that are split over multiple lines.
 
 <p>
 <h2><a name="formatting documentation">Formatting Documentation</a></h2>
 
-The Tycho documentation have a consistent look and feel.
-<DL>
-<DT> Capitalization
-<DD> Emacs, Macintosh, Tcl, Tk, Itcl, Itk, Iwidgets, Tycho, Unix and Windows 
+The Tycho documentation has a consistent look and feel.
+
+<H3>Capitalization</H3>
+Emacs, Macintosh, Tcl, Tk, Itcl, Itk, Iwidgets, Tycho, Unix and Windows 
 should usually be capitalized.  For example
 <BLOCKQUOTE>
 Tycho0.1.1 will not work with Itcl2.0. 
@@ -138,23 +139,20 @@ individually should have all the letters capitalized.  Words such as
 Tcl, where one says, "Tickle" should only have the first letter
 capitalized.  Michael McLennan prefers that the software he has written
 be referred to as:
-<DL COMPACT>
-<DT> [incr Tcl] 
-<DD> Itcl
-<DT> [incr Tk] 
-<DD> Itk
-<DT> [incr Widgets]
-<DD> Iwidgets
-</DL>
+ <br>[incr Tcl] or Itcl
+ <br>[incr Tk] or Itk
+ <br>[incr Widgets] or Iwidgets
+
 
  <P>In general, it is best to avoid use of capital letters in the middle
 of a word.  Exceptions to this rule are classnames, such as EditTcl
 and the word "PostScript".
 
-<DT> Filenames, Environment variables, HTML examples, Key bindings,
+<H3>Fixed Width Fonts</H3>
+Filenames, Environment variables, HTML examples, Key bindings,
 Menu names, Menu choices.
 
-<DD> Anything that the user is expected to type should be wrapped in
+Anything that the user is expected to type should be wrapped in
 <CODE>&lt;CODE&gt;. . . &lt;/CODE&gt;</CODE>.  Please avoid wrapping
 things in "quotes".  If you must use quotes, then use double quotes,
 not single quotes.
@@ -173,8 +171,9 @@ The main program in the Tycho system is the <CODE>tycho</CODE> script.
  <P>When quoting material written by others, follow the original font
 usage and capitalization.
 
-<DT> <CODE>&lt;DL&gt; . . . <CODE>&lt;/DL&gt;</CODE></CODE>
-<DD> Use Display Lists for describing Tcl proc args and listing 
+<H3>Display Lists</H3>
+Use Display Lists (<CODE>&lt;DL&gt; . . . <CODE>&lt;/DL&gt;</CODE></CODE>)
+for describing Tcl proc args and listing 
 key bindings.  When discussing a Tcl proc argument that is not a literal
 name, wrap it in
 <CODE>&lt;CODE&gt;&lt;I&gt; . . . &lt;/I&gt;&lt;/CODE&gt;</CODE>
@@ -186,6 +185,8 @@ name, wrap it in
 </PRE>
 
 </DL>
+
+<H3>HTML Template File</H3>
 
  <P>The
 HTML editor has a <CODE>File Template</CODE> choice under the
@@ -207,7 +208,7 @@ The template has the following features:
 	<LI> The UC Copyright, if applicable.
 
 	<LI> A date when the file was last modified.  The date
-	is automatically updated when the file is checked in with SCCS&gt;
+	is automatically updated when the file is checked in with SCCS.
 
 	<LI> An author.
 
@@ -246,14 +247,17 @@ For example, the source for the previous sentence is
 </pre>
 When an index is created from this document, the value of the name
 attribute will appear in the index with a pointer to precisely
-this point in the document.  Thus, for example, the Tycho master
+this point in the document.  Thus, for example, the Tycho concept
 index has a pointer to the above sentence under both "anchors"
 and "name attribute".  Try it:
 <tcl><pre>
     ::tycho::File::openContext $TYCHO/lib/idx/tycho.idx
 </pre></tcl>
-Notice that the name attribute can (and often should) have spaces in it.
-It must be surrounded by quotation marks if it has spaces in it.
+Notice that this index is also accessible through the <CODE>Help</CODE>
+menu.
+Notice also that the name attribute can (and often should) have
+spaces in it.  It must be surrounded by quotation marks if it has
+spaces in it.
 <p>
 Given one or more HTML documents, you can create an index for them
 using the <code><a name="tychoMkIndex">tychoMkIndex</a></code> Tcl
@@ -278,7 +282,9 @@ will be opened using an
 <a href="../kernel/doc/usersGuides/IndexBrowserHelp.html"> index browser</a>.
 <p>
 The <A HREF="troubleshooting.html#Problems creating indices">Troubleshooting Guide</A> has hints about problems creating indices.
-Tycho can also generate <A HREF="tychoClasses.html">Tycho Class Diagrams</A>.
+The <A HREF="tychoClasses.html">Tycho Class Diagram</A> guide has information
+about generating graphical class diagrams.
+
 <p>
 <h2><a name="tydoc - The Tycho documentation system">
 <code>tydoc</code> - The Tycho documentation system</a></h2>
@@ -310,7 +316,7 @@ External HTML documentation for packages such as Itcl and
 <A NAME="java documentation">Java</A> can be downloaded and installed 
 in specific locations so that Tycho can find the documentation.
 <H3>Itcl</H3>
-The Itcl2.2 included HTML documentation in <CODE>itcl2.2/html</CODE>.
+The Itcl2.2 includes HTML documentation in <CODE>itcl2.2/html</CODE>.
 
 If you link <A HREF="itclhtml"><CODE>$TYCHO/doc/itclhtml</CODE></A> 
 to the <CODE>itcl2.2/html</CODE> directory, then the links within the docs and 
