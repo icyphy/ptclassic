@@ -132,6 +132,10 @@ body ::tycho::EditPtlang::constructor {args} {
             -command "::tycho::EditPtlang::gendoc $file"
 }
 
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
 ###################################################################
 #### help
 # Open a window with help on the current widget.
@@ -141,6 +145,10 @@ body ::tycho::EditPtlang::help {} {
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditPtlangHelp.html
 }
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
 
 ###################################################################
 #### gendoc
@@ -162,6 +170,14 @@ body ::tycho::EditPtlang::gendoc {filename} {
         # Need to regenerate the doc.  Check permissions first.
         # It is sufficient for the directory to be writable.
         if {[file writable $dir]} {
+	    # Save the file if it has not been saved
+	    if {[isModified] == 1} {
+		if {[::tycho::askuser \
+			"File $filename has not been saved, Save it now?"]} {
+		    save
+		}
+	    }
+
             set savedir [pwd]
             cd $dir
             exec rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"
