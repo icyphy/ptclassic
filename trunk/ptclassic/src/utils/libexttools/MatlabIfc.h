@@ -33,8 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of creation: 11/6/95
  Revisions:
 
- Base class for the Ptolemy interface to Matlab.
- Only once Matlab process is run and is shared by all of Ptolemy.
+ Base class for an external interface to Matlab.
+ Only one Matlab process is run and is shared by all of Ptolemy.
 
 **************************************************************************/
 
@@ -45,8 +45,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <string.h>
 #include "StringList.h"
 #include "InfString.h"
-#include "Particle.h"
-#include "Matrix.h"
 #include "MatlabIfcFuns.h"
 
 #define MATLAB_ERR_STR           "\x07???"
@@ -134,16 +132,6 @@ public:
 
 	//    4. name a Matlab matrix in memory
 	void NameMatlabMatrix(Matrix* matrixPtr, const char *name);
-
-	// B. specific to Ptolemy
-	//    1. convert Ptolemy particles to Matlab matrices
-	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
-				int* errflag);
-
-	//    2. convert Matlab matrices to Ptolemy particles
-	int MatlabToPtolemy(Particle& particle, DataType portType,
-			    Matrix* matlabMatrix, int* warnflag,
-			    int* errflag);
 
 	// Methods for interface to/from another scripting language (e.g. Tcl)
 	// Use FreeStringArray to deallocate realPartStrings/imagPartStrings
