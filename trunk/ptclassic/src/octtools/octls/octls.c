@@ -13,6 +13,10 @@
 #include "oh.h"
 #include <sys/file.h>
 
+#ifdef (linux)
+#include <unistd.h>
+#endif
+
 optionStruct optionList[] = {
     {"c",       0,              "check masters"},
     {"f",       0,              "full master name"},
