@@ -91,6 +91,9 @@ class ::tycho::IDoc {
     # The background color of the HTML documents.
     itk_option define -bgcolor bgColor BgColor white
 
+    # The color of inherited entities.
+    itk_option define -inheritcolor inheritColor InheritColor grey
+
     # The color of Itcl options.
     itk_option define -optioncolor optionColor OptionColor black
   
@@ -127,6 +130,13 @@ class ::tycho::IDoc {
 
     ###################################################################
     ####                      public methods                       ####
+
+    public method debug {} {
+        foreach class [array names myClass] {
+            puts $class
+        }
+        puts "MH: $myHeritage"
+    }
     
     # Return a description of the main or given class.
     public method describe {{class {}}}
@@ -136,6 +146,9 @@ class ::tycho::IDoc {
 
     # Place a ghost handle a certain number of pixels from the actual one.
     public method ghostHandle {horizontal pixels}
+
+    # Import the main class' parents, the parents' parents, etc.
+    public method inheritAll {}
 
     # Insert the specified data.
     public method insertData {data}
@@ -163,6 +176,9 @@ class ::tycho::IDoc {
 
     # Array of ::tycho::Class objects indexed by class -> myClass(::foo::bar)
     protected variable myClass
+
+    # List of classes in myClass() in inheritance order.
+    protected variable myHeritage ""
    
     # Internal contents widget
     protected variable myContents
@@ -198,7 +214,7 @@ class ::tycho::IDoc {
     private method bindExpl {class item label}
 
     # Delete the classes in the myClass array and unset the array.
-    private method deleteClasses {}
+    private method deleteClasses {{all 1}}
 
     # Display the contents of $myClass($mainClass) in contents widget.
     private method display {}
@@ -405,6 +421,9 @@ body ::tycho::IDoc::constructor {args} {
         # Add a way to get the text description.
         $myMenubar command Describe Special \
                 -underline 0 -command "::tycho::inform \[$this describe\]"
+
+        $myMenubar command Inherit Special \
+                -underline 0 -command "$this inheritAll"
        
         $myMenubar addMenu Format -after Special -underline 0
         # Add font size control
@@ -429,7 +448,8 @@ body ::tycho::IDoc::constructor {args} {
             -publiccolor publicColor \
             -protectedcolor protectedColor \
             -privatecolor privateColor \
-            -optioncolor optionColor 
+            -optioncolor optionColor  \
+            -inheritcolor inheritColor
 
     # Bindings
     # font size control
@@ -504,6 +524,50 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
         
     }
 
+}
+
+#######################################################################
+#### inheritAll
+# Load the current mainClass' parents, then recurse until no new classes
+# need to be loaded. Inherited methods are placed properly in the 
+# hierarchy according to language and protection levels. (Parent classes
+# _must_ of course be the same language as the current class. This is not
+# explicitly checked here.)
+#
+body ::tycho::IDoc::inheritAll {} {
+    set classModel $myClass($mainClass)
+
+    # clear inherited classes
+    deleteClasses 0
+
+    set parents [$classModel parents]
+        
+    while {[llength $parents] != 0} {
+        set parent [lindex $parents 0]
+        set parents [lreplace $parents 0 0]
+        
+        if [info exists myClass($parent)] {
+            catch {delete object $myClass($parent)}
+            unset myClass($parent)
+        }
+        
+        # Create a new class model if the parent can be found.
+        set parentFile [docFile $parent]
+        if {$parentFile != {}} {
+            # NOTE: parents which aren't loaded aren't part of myHeritage
+            lappend myHeritage $parent
+
+            set myClass($parent) [::tycho::Class [::tycho::autoName class]]
+            $myClass($parent) read file $parentFile
+            
+            # Load my parents too.
+            set newparents [$myClass($parent) parents]
+            set parents "$parents $newparents"
+        } else {
+            puts "$parent idoc file not found"
+        }
+    }
+    display
 }
 
 
@@ -583,10 +647,30 @@ body ::tycho::IDoc::upSize {} {
 
 #####################################################################
 #### docFile
-# 
+# FIXME: this is a hack and not valid under all (many) cases 
 #
 body ::tycho::IDoc::docFile {classname} {
-    return [$this cget -file]
+    if {$classname == $mainClass} {
+        return [$this cget -file]
+    }
+
+    set docname "[info namespace tail $classname].idoc"
+
+    lappend dirs {$TYCHO/kernel}
+    lappend dirs {$TYCHO/editors/textedit}
+    lappend dirs {$TYCHO/editors/slate}
+    lappend dirs {$TYCHO/editors/visedit}
+    lappend dirs {$TYCHO/lib/tydoc}
+    
+    foreach dir $dirs {
+        set findfile [file join $dir doc codeDoc $docname]
+        set findfile [::tycho::expandPath $findfile]
+        set file [glob -nocomplain $findfile]
+        if {$file != {}} {
+            break
+        }
+    }
+    return "$file"
 }
 
     ###################################################################
@@ -610,13 +694,20 @@ body ::tycho::IDoc::bindDesc {class item label} {
         default {set type {}}
     }
 
+    if {$class != $mainClass} {
+        # Don't display class it's from if it's from this class.
+        set class "<$class> "
+    } {
+        set class ""
+    }
+
    if ![catch {set desc [$classModel get annotation $item.description $type]}] {
         $myContents bind $label <Enter> \
-                [code "$this putStatus \{$desc\}"]
+                [code "$this putStatus \{$class$desc\}"]
         $myContents bind $label <KeyRelease-Shift_L> \
-                [code "$this putStatus \{$desc\}"]
+                [code "$this putStatus \{$class$desc\}"]
         $myContents bind $label <KeyRelease-Shift_R> \
-                [code "$this putStatus \{$desc\}"]
+                [code "$this putStatus \{$class$desc\}"]
         $myContents bind $label <Leave> \
                 [code "$this putStatus {}"]
     }   
@@ -648,17 +739,29 @@ body ::tycho::IDoc::bindExpl {class item label} {
 
 ###########################################################################
 #### deleteClasses
-# Unset the array of classes and delete each class object.
+# Unset the array of classes and delete each class object if all is set. If 
+# all is 0, delete only the inherited classes. Either way, set myHeritage to
+# an empty string.
 #
-body ::tycho::IDoc::deleteClasses {} {
+body ::tycho::IDoc::deleteClasses {{all 1}} {
     if ![info exists myClass] {
         return
     }
 
-    foreach class [array names myClass] {
-        catch {delete object $myClass($class)}
+    if {$all} {
+        foreach class [array names myClass] {
+            catch {delete object $myClass($class)}
+        }
+        unset myClass
+    } else {
+        # Only delete inherited classes
+        foreach class [array names myClass] {
+            if {$class != $mainClass} {
+                catch {delete object $myClass($class)}
+            }
+        }
     }
-    unset myClass
+    set myHeritage ""
 }
 
 ###########################################################################
@@ -674,7 +777,8 @@ body ::tycho::IDoc::display {} {
     # insert the class name
     $myContents appendlabel class \
             -text $mainClass \
-            -font [$this cget -headfont]
+            -font [$this cget -headfont] \
+            -fg [$this cget -publiccolor]
 
     $myContents bind class <Button-1> \
             [code "$this putHtml \
@@ -726,12 +830,39 @@ body ::tycho::IDoc::displayMeth {protection} {
                 bindExpl $mainClass $method $method\m
                 lappend subnames $method\m
             }
+            # check for inherited methods
+            if {$protection == "public" || $protection == "private"} {
+                if {$protection == "public"} {
+                    set inprotection "public"
+                } {
+                    set inprotection "protected"
+                }
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach method [$currentModel methods \
+                            -protection $inprotection -scope instance] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$method\m"] == -1} {
+                            $myContents appendlabel $method\m \
+                                    -text $method \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $method $method\m
+                            bindExpl $class $method $method\m
+                            lappend subnames $method\m
+                        }
+                    }
+                }
+            }
             # insert panel if any methods found
             if {$subnames != {}} {
                 set temp [::tycho::capitalize $protection]
                 $myContents append $protection\m "$subnames" \
                         -text "$temp Methods" \
-                        -font [$this cget -headfont]
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
             }
 
             # Procs
@@ -748,15 +879,43 @@ body ::tycho::IDoc::displayMeth {protection} {
                 bindExpl $mainClass $method $method\p
                 lappend subnames $method\p
             }
+            # check for inherited procs
+            if {$protection == "public" || $protection == "private"} {
+                if {$protection == "public"} {
+                    set inprotection "public"
+                } {
+                    set inprotection "protected"
+                }
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach method [$currentModel methods \
+                            -protection $inprotection -scope class] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$method\p"] == -1} {
+                            $myContents appendlabel $method\p \
+                                    -text $method \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $method $method\p
+                            bindExpl $class $method $method\p
+                            lappend subnames $method\p
+                        }
+                    }
+                }
+            }
             # insert panel if any procs found
             if {$subnames != {}} {
                 set temp [::tycho::capitalize $protection]
                 $myContents append $protection\p "$subnames" \
                         -text "$temp Procs" \
-                        -font [$this cget -headfont]
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
             }   
         }
         default {
+            # NOTE: mainly for documentation purposes, does not do inheritance
             set subnames {}
             foreach method [$classModel methods \
                     -protection $protection] {
@@ -775,7 +934,8 @@ body ::tycho::IDoc::displayMeth {protection} {
                 set temp [::tycho::capitalize $protection]
                 $myContents append $protection\p "$subnames" \
                         -text "$temp Methods" \
-                        -font [$this cget -headfont]
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
             }
         }   
     }
@@ -806,11 +966,35 @@ body ::tycho::IDoc::displayVar {protection} {
                 bindExpl $mainClass $variable $variable\v
                 lappend subnames $variable\v
             }
+            
+            # check for inherited itk_options
+            if {$protection == "public"} {
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach variable [$currentModel variables \
+                            -protection $protection -modifiers itk_option] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$variable\v"] == -1} {
+                            $myContents appendlabel $variable\v \
+                                    -text $variable \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $variable $variable\v
+                            bindExpl $class $variable $variable\v
+                            lappend subnames $variable\v
+                        }
+                    }
+                }
+            }
+
             # insert panel if any itk_options found
             if {$subnames != {}} {
                 $myContents append $protection\i "$subnames" \
                         -text "Itk Options" \
-                        -font [$this cget -headfont]
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -optioncolor]
             }
             
             # do other variables
@@ -827,15 +1011,46 @@ body ::tycho::IDoc::displayVar {protection} {
                 bindExpl $mainClass $variable $variable\v
                 lappend subnames $variable\v
             }
+
+            # check for inherited variables
+            if {$protection == "public" || $protection == "private"} {
+                if {$protection == "public"} {
+                    set inprotection "public"
+                } {
+                    set inprotection "protected"
+                }
+                foreach class $myHeritage {
+                    set currLabels [$myContents labels]
+                    set currentModel $myClass($class)
+                    foreach variable [$currentModel variables \
+                            -protection $inprotection -modifiers {}] {
+                        # put label into contents widget if not there
+                        if {[lsearch -exact $currLabels "$variable\v"] == -1} {
+                            $myContents appendlabel $variable\v \
+                                    -text $variable \
+                                    -font [$this cget -bodyfont] \
+                                    -fg [$this cget -inheritcolor]
+                            # setup bindings on <Enter> and <B1-Click>
+                            bindDesc $class $variable $variable\v
+                            bindExpl $class $variable $variable\v
+                            lappend subnames $variable\v
+                        }
+                    }
+                }
+            }
+
+
             # insert panel if any variables found
             if {$subnames != {}} {
                 set temp [::tycho::capitalize $protection]
                 $myContents append $protection\v "$subnames" \
                         -text "$temp Variables" \
-                        -font [$this cget -headfont]
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
             }
         }
         default { 
+            # NOTE: for documentation, mainly. Does not implement inheritance.
             set subnames {}
             foreach variable [$classModel variables \
                     -protection $protection] {
@@ -854,7 +1069,8 @@ body ::tycho::IDoc::displayVar {protection} {
                 set temp [::tycho::capitalize $protection]
                 $myContents append $protection\v "$subnames" \
                         -text "$temp Variables" \
-                        -font [$this cget -headfont]
+                        -font [$this cget -headfont] \
+                        -foreground [$this cget -$protection\color]
             }
         }
     }
@@ -885,7 +1101,15 @@ body ::tycho::IDoc::formatExpl {class item type} {
             }
         }
     }
+
     set html "<b>$item</b> <i>$paramlist</i><p> $expl"
+    
+    if {$class != $mainClass} {
+        set html "$html<br><br><br><hr>\
+                <a href=\"[docFile $class]\">$class</a>"
+    }
+
+    return $html
 }
 
 #####################################################################
