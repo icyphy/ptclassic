@@ -140,7 +140,7 @@ class ::tycho::LabeledOval {
 
     set optiondefault(-fill)    ""
     set optiondefault(-outline) "black"
-    set optiondefault(-width)   "1"
+    set optiondefault(-width)   "2"
 }
 
 ##########################################################################
