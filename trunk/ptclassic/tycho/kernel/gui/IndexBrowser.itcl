@@ -284,7 +284,7 @@ body ::tycho::IndexBrowser::destructor {} {
 # from which the index should be created.  If any of these files
 # is missing or is not readable, then that file is ignored.
 #
-proc ::tycho::IndexBrowser::makeIndexFile \
+body ::tycho::IndexBrowser::makeIndexFile \
         {name filename prependTYCHO nested args} {
     set index [::tycho::HyperlinkIndex [::tycho::autoName index] \
 	    -datafile $filename \
