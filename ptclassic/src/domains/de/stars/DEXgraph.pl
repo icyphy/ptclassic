@@ -12,10 +12,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	htmldoc {
-Draws a graph with the xgraph function.  It is assumed that "xgraph"
+Draws a graph with the pxgraph program.  It is assumed that "pxgraph"
 is on your path, or this will not work!!!
 	}
-	seealso {XMgraph xgraph Xhistogram }
+	seealso {XMgraph $PTOLEMY/src/pxgraph/pxgraph.htm Xhistogram }
 	input {
 		name { input }
 		type { anytype }

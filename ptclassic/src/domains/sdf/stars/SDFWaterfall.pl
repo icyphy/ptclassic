@@ -18,7 +18,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	seealso {Xgraph XMgraph XYgraph xgraph Xhistogram timeVarSpec}
+	seealso {Xgraph XMgraph XYgraph
+		   $PTOLEMY/src/pxgraph/pxgraph.htm
+		   Xhistogram timeVarSpec}
 	defstate {
 		name {traceLength}
 		type {int}
