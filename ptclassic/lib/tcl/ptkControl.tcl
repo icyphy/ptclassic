@@ -403,9 +403,34 @@ proc ptkGrAnimation { on} {
 #######################################################################
 # Procedure to light up a star.
 #
-proc ptkHighlightStar { star } {
+proc ptkHighlightStar { star args } {
+    global ptkColorList
+
     ptkClearHighlights
-    ptkHighlight $star
+    if {([llength $args] == 1)} {
+	if {[lsearch [array names ptkColorList] [lindex $args 0]] == -1} {
+	    return "Invalid color specification"
+	}
+	set tcl_col [ptkColor [lindex $args 0]]
+	set red [format "%d" [format "0x%s" [string range $tcl_col 1 2]]]
+	set green [format "%d" [format "0x%s" [string range $tcl_col 3 4]]]
+	set blue [format "%d" [format "0x%s" [string range $tcl_col 5 6]]]
+	# these colors are weak in intensity, here we multiply them
+	set red [expr $red * 256]
+	set green [expr $green * 256]
+	set blue [expr $blue * 256]
+    } else {
+	if {[llength $args] >= 1} {
+	    set red [lindex $args 0]
+	} else { set red 65535 }
+	if {[llength $args] >= 2} {
+	    set green [lindex $args 1]
+	} else { set green 0 }
+	if {[llength $args] >= 3} {
+	    set blue [lindex $args 2]
+	} else { set blue o }
+    }
+    ptkHighlight $star $red $green $blue
 }
 
 #######################################################################
