@@ -175,19 +175,24 @@ void PVem::AdjustScalePan(Window window, octId facetId) {
 // Opens a new Vem window for the passed Oct Obj. 
 // This code is modified from misc.c RpcOpenFacet
 // - Alan Kamas 9/93
-int PVem::pvOpenWindow (int aC,char** aV) {
+int PVem::pvOpenWindow (int aC, char** aV) {
 
     if (aC != 2) return usage ("pvOpenWindow <OctInstanceHandle>");
 
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    // Create uninitialized facet
+    // cfront compiler doesn't support
+    // octObject facet = {OCT_UNDEFINED_OBJECT};
+    octObject facet;
+    facet.type = OCT_UNDEFINED_OBJECT;
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
     }
 
-    Window newWindow;  // the vem window looking at facet 
-    newWindow = vemOpenWindow(&facet, NULL);
+    // vem window looking at facet 
+    Window newWindow = vemOpenWindow(&facet, NULL);
+
     // if the facet has no bounding box, that means it has no geometry
     // to define a bounding box, then we zoom-out to the appropriate scale
     // and pan to let the X-Y axes disappearing from the window.
@@ -195,6 +200,7 @@ int PVem::pvOpenWindow (int aC,char** aV) {
     if (octBB(&facet, &bbox) == OCT_NO_BB) { 
        AdjustScalePan(newWindow, facet.objectId);
     }
+
     FreeOctMembers(&facet);
     return TCL_OK;
 }
