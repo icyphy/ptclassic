@@ -1,10 +1,10 @@
-This program is a version of octmvlib that has been customized for use
-with Ptolemy.  To modify and remake this program, you need to have the
-octtools installed in ~octtools.  This may be fixed sometime in the future
-when we update the makefiles.
+-*-Mode: text-*- -[Sat Jan 22 11:37:16 1994 by cxh]-
 
-To make masters, in a C shell, type "setenv OCTTOOLS ~octtools".
-Then "make".
+This program is a version of octmvlib that has been customized for use
+with Ptolemy.  Formerly, to modify and remake this program, you need
+to have the octtools installed in ~octtools.  Now, you need to have
+the octtools libraries installed in $PTOLEMY/octtools/lib.$ARCH and
+the include files must be available in $PTOLEMY/src/vem/include.
 
 The program should be used whenever icons used in a particular facet
 have been moved.  For instance, if after developing a useful star,
