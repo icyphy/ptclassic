@@ -94,6 +94,14 @@ then
 	dst="$dst"/`basename $src`
 fi
 
+# cygwin32 hack.  If $src does not exist, but $src.exe does, then
+# use src.exe
+if [ -f $src  -a -f ${src}.exe ]
+then
+	src=${src}.exe
+	dst=${dst}.exe
+fi
+
 # Make a temp file name in the proper directory.
 
 dstdir=`dirname $dst`
