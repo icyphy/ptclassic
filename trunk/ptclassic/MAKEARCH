@@ -374,3 +374,5 @@ cd $PTOLEMY/obj.$PTARCH
 # This is for the makefile
 cd $PTOLEMY
 touch $PTOLEMY/obj.$PTARCH
+
+return 0
