@@ -62,7 +62,7 @@ octObject *facetPtr, *instPtr;
     ERR_IF1(!GetOrInitSogParams(instPtr, &pList));
 
     if (pList.length == 0) {
-	PrintCon("Star or galaxy has no parameters");
+	PrintErr("Star or galaxy has no parameters");
 	return(TRUE);
     }
     items = (dmTextItem *) calloc(pList.length, sizeof(dmTextItem));
@@ -203,7 +203,7 @@ long userOptionWord;
 	if (IsGalFacet(&facet)) {
 	    status2 = EditFormalParams(&facet);
 	} else {
-	    PrintCon("Cursor must be over an instance or a galaxy schematic");
+	    PrintErr("Cursor must be over an instance or a galaxy schematic");
 	    ViDone();
 	}
     } else {
@@ -214,7 +214,7 @@ long userOptionWord;
 	    /* inst is a sog... */
 	    status2 = EditSogParams(&facet, &inst);
 	} else {
-	    PrintCon("Cursor must be over a star, galaxy, or delay instance");
+	    PrintErr("Cursor must be over a star, galaxy, or delay instance");
 	    ViDone();
 	}
     }
@@ -230,8 +230,7 @@ long userOptionWord;
 /* Structures to store palette list and dialog box */
 static char **palettes;
 static int palettes_n;
-static char *defaultPalettes =
-  "~ptolemy/src/domains/sdf/icons/sdf.pal:~ptolemy/src/domains/ddf/icons/ddf.pal:~ptolemy/src/domains/de/icons/de.pal:./user.pal:./init.pal";
+char *defaultPalettes();
 
 static dmWhichItem *items;
 
@@ -268,7 +267,7 @@ OpenPaletteInit()
 
     sprintf(buf, "%s.palettes", UAppName);
     if ((b = RPCXGetDefault("vem", buf)) == NULL) {
-	b = defaultPalettes;
+	b = defaultPalettes();
     }
     palettes_n = ListLength(b) + 1;
     palettes = (char **) malloc(palettes_n * sizeof(char *));
@@ -383,9 +382,33 @@ long userOptionWord;
     ViDone();
 }
 
-/* Declare the functions in kernelCalls that this uses */
+/* Declare the functions in kernelCalls that the next two funcs use */
 int numberOfDomains();
 char* nthDomainName();
+
+/* This function builds the default palettes list.  It has one entry
+ * for each domain, plus the user.pal and init.pal palettes and */
+static char *defaultPalettes () {
+    static char buf[1024];
+    char line[128];
+    int i, j, nDomains = numberOfDomains();
+    buf[0] = 0;
+    for (i = 0; i < nDomains; i++) {
+	char* dn = nthDomainName(i);
+	/* convert domain name to lowercase */
+	char* ldn;
+	for (j = 0; dn[j]; j++) {
+		char c = dn[j];
+		if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+		ldn[j] = c;
+	}
+	ldn[j] = 0;
+	sprintf (line, "~ptolemy/src/domains/%s/icons/%s.pal:", ldn, ldn);
+	strcat (buf, line);
+    }
+    strcat (buf, "./user.pal:./init.pal");
+    return buf;
+}
 
 int
 RpcEditDomain(spot, cmdList, userOptionWord)
