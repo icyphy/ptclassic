@@ -116,9 +116,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define ARCH "sol2.cfront"
 #endif
 
+
 #ifdef PTSUN4
 #define ARCH "sun4"
 #endif
+
+#ifdef PTSVR4
+#undef ARCH
+#define ARCH "unixware"
+#ifdef __GNUG__
+#define EXTRAOPTS "-fPIC"
+#else
+#define EXTRAOPTS "-KPIC"
+#endif /* __GNUG__ */
+#endif /* PTSVR4 */
 
 #ifdef vax
 #define ARCH "vax"
