@@ -29,5 +29,23 @@ Version identification:
 $Id$
 */
 
-extern octObject homeFacet;  /* facet where GGI gets invoked */
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
+
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
+
 extern char *xDisplay;
+
+extern int Version ARGS((RPCSpot *spot, lsList cmdList,
+			 long userOptionWord));
+extern int ClearMarks ARGS((RPCSpot *spot, lsList cmdList,
+			    long userOptionWord));
+extern int ExitApp ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+extern long UserMain ARGS((char *display, RPCSpot *spot, lsList cmdList,
+			   long userOptionWord, RPCFunction **array));
+
