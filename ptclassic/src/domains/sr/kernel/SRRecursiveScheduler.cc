@@ -187,6 +187,8 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   SRRecursiveSchedule schedule( *dgraph );
 
+  //  cout << "There are " << Set::setcount() << " sets to begin with\n";
+
   int mc = mincost( wholeGraph, INT_MAX, schedule, 0);
 
   if ( mc == INT_MAX ) {
@@ -195,6 +197,8 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
     cout << "mincost is " << mc << "\n";
     cout << "best schedule was " << schedule.print() << '\n';
   }
+
+  // cout << "There are " << Set::setcount() << " sets finally\n";
 
   return 0;
 }
@@ -267,6 +271,19 @@ SRRecursiveScheduler::SCCsOf(Set & subgraph /* Vertices in the subgraph of the
 
   return SCCs;
 
+}
+
+// Delete a SequentialList of SCCs
+void SRRecursiveScheduler::destroySCCs( SequentialList * SCCs )
+{
+  Set * SCC;
+  ListIter next(*SCCs);
+
+  while ( (SCC = (Set *)(next++)) != NULL ) {
+    delete SCC;
+  }
+
+  delete SCCs;
 }
 
 // Try to visit a node in the subgraph of forward edges
@@ -384,6 +401,7 @@ SRRecursiveScheduler::mincost(
     }
 
     if ( bound < SCCsize[i] ) {
+      destroySCCs( SCCs );
       return INT_MAX;		// Bound cannot possibly be met
     }
 
@@ -452,6 +470,7 @@ SRRecursiveScheduler::mincost(
       }
 
       if ( actual == INT_MAX ) {
+	destroySCCs( SCCs );
 	return INT_MAX;		// no considered partition could meet this
       }
 
@@ -464,6 +483,7 @@ SRRecursiveScheduler::mincost(
     i++;
   }
 
+  destroySCCs( SCCs );
   return max-remaining;
 
 }
