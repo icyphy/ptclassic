@@ -29,7 +29,7 @@ Third data memory is prealigned for faster performance.
 		type { float }
        		desc { Output float type }
 	}
-	ccinclude {<vis_proto.h>}
+	hinclude {<vis_types.h>}
 	defstate {
 	        name { scaledown }
 		type { float }
@@ -37,33 +37,41 @@ Third data memory is prealigned for faster performance.
 		desc { Output scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
+	defstate {
+	        name { forward }
+		type { int }
+		default { FALSE }
+		desc { forward = TRUE unpacks with most current sample at
+		       position 0; forward = FALSE unpacks with most
+		       current sample at position 3 }
+		attributes { A_CONSTANT|A_SETTABLE }
+	}
 	code {
-#define NumOut (4)
+#define NUMOUT (4)
 	}
 	protected{
-	  double *packedin;
+	  union inoverlay {
+	    vis_d64 invaluedbl;
+	    vis_s16 invaluesh[4];
+	  } packedin;
 	}
-	constructor{
-	  packedin = 0;
-	}
-	destructor{
-	  if (packedin) free(packedin);
-       	}
 	setup {
-	  out.setSDFParams(NumOut,NumOut-1);
-	}
-	begin {
-	  if (packedin) free(packedin);
-	  packedin = (double *) memalign(sizeof(double),sizeof(double));
+	  out.setSDFParams(NUMOUT,NUMOUT-1);
 	}
 	go {
-	  *packedin = double(in%0);
-	  short* invalue = (short *) packedin;
+	  packedin.invaluedbl = double(in%0);
 
-	  // scale down and unpack input
-	  out%0 << (double) (scaledown * (double) invalue[0]);
-	  out%1 << (double) (scaledown * (double) invalue[1]);
-	  out%2 << (double) (scaledown * (double) invalue[2]);
-	  out%3 << (double) (scaledown * (double) invalue[3]);
+	  if (!forward) {
+	    out%0 << (double) scaledown * packedin.invaluesh[0];
+            out%1 << (double) scaledown * packedin.invaluesh[1];
+	    out%2 << (double) scaledown * packedin.invaluesh[2];
+	    out%3 << (double) scaledown * packedin.invaluesh[3];
+	  }
+	  else {
+	    out%0 << (double) scaledown * packedin.invaluesh[3];
+            out%1 << (double) scaledown * packedin.invaluesh[2];
+	    out%2 << (double) scaledown * packedin.invaluesh[1];
+	    out%3 << (double) scaledown * packedin.invaluesh[0];
+	  }
 	}
 }

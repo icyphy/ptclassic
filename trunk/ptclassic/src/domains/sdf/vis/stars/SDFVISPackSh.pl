@@ -29,7 +29,7 @@ Third data memory is prealigned for faster performance.
 		type { float }
 		desc { Output float type }
 	}
-        ccinclude { <vis_proto.h> }
+	hinclude {<vis_types.h>}
 	defstate {
 	        name { scale }
 		type { float }
@@ -37,34 +37,42 @@ Third data memory is prealigned for faster performance.
 		desc { Input scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
+	defstate {
+	        name { forward }
+		type { int }
+		default { FALSE }
+		desc { forward = TRUE unpacks with most current sample at
+			 position 0; forward = FALSE unpacks with most
+		       current sample at position 3 }
+		attributes { A_CONSTANT|A_SETTABLE }
+	}
 	code {
-#define NumIn (4)
+#define NUMIN (4)
 	}
 	protected{
-	  short *packedout;
-	}
-	constructor{
-	  packedout = 0;
-	}
-	destructor{
-	  if (packedout) free(packedout);
+	  union outoverlay {
+	    vis_d64 outvaluedbl;
+	    vis_s16 outvaluesh[4];
+	  } packedout;
 	}
         setup {
-	  in.setSDFParams(NumIn,NumIn-1);
+	  in.setSDFParams(NUMIN,NUMIN-1);
 	}
-	begin {
-	  if (packedout) free(packedout);
-	  packedout = (short *) memalign(sizeof(double),sizeof(short)*NumIn);
-        }
-	go {
+	go {	  
 	  // scale, cast, and pack input
-	  packedout[0] = (short) (scale * double(in%0));
-	  packedout[1] = (short) (scale * double(in%1));
-	  packedout[2] = (short) (scale * double(in%2));
-	  packedout[3] = (short) (scale * double(in%3));
-
+          if (!forward) {
+	    packedout.outvaluesh[0] = (short) (scale * double(in%0));
+	    packedout.outvaluesh[1] = (short) (scale * double(in%1));
+	    packedout.outvaluesh[2] = (short) (scale * double(in%2));
+	    packedout.outvaluesh[3] = (short) (scale * double(in%3));
+	  }
+	  else {
+	    packedout.outvaluesh[0] = (short) (scale * double(in%3));
+	    packedout.outvaluesh[1] = (short) (scale * double(in%2));
+	    packedout.outvaluesh[2] = (short) (scale * double(in%1));
+	    packedout.outvaluesh[3] = (short) (scale * double(in%0));
+	  }
 	  //output packed double	  
-	  double* outvalue = (double *) packedout;
-	  out%0 << *outvalue;
+	  out%0 << packedout.outvaluedbl;
 	}
 }
