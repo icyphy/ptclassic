@@ -65,11 +65,13 @@ PortHole& MDSDFPortHole::setMDSDFParams(unsigned rowDimensions,
 }
 
 int MDSDFPortHole::rowFiringsPerIteration() {
-  return int(((MDSDFStar*)parent())->rowRepetitions);
+  // Use a two casts because Fraction does not have a direct cast to int.
+  return int( double( ((MDSDFStar*)parent())->rowRepetitions ));
 }
 
 int MDSDFPortHole::colFiringsPerIteration() {
-  return int(((MDSDFStar*)parent())->colRepetitions);
+  // Use a two casts because Fraction does not have a direct cast to int.
+  return int( double( ((MDSDFStar*)parent())->colRepetitions ) );
 }
 
 PtMatrix* MDSDFPortHole::getInput(int, int) {
