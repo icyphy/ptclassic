@@ -16,7 +16,7 @@ ROOT=../..
 # Where we are
 VPATH = ../../src/kernel
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # Library name
