@@ -76,11 +76,17 @@ private:
 	// bookkeeping function to zap the PacketData when done
 	void unlinkData();
 public:
-	// constructor
-	Packet(PacketData& dat = dummyPacket) {
-		d = &dat;
+	// "cheater constructor": we allow the refCount field to be
+	// changed even in const PacketData objects.  Ideally, if the
+	// "~const" proposal is accepted by the ANSI C++ committee,
+	// then refCount can be made a ~const field and this will be
+	// possible without casts.
+
+	Packet(const PacketData& dat = dummyPacket) {
+		d = (PacketData*)&dat;
 		d->refCount++;
 	}
+
 	// copy constructor
 	Packet(const Packet& p) {
 		d = p.d;
