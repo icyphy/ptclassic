@@ -1,4 +1,4 @@
-# Ptolemy Retargetting mechanism: Display about domains
+# Ptolemy Retargetting mechanism: Display information about domains
 #
 # @Author: Christopher Hylands
 #
@@ -30,7 +30,7 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 catch {delete  class EditRetarg}
-catch {delete object .t}
+
 #######################################################################
 #### EditRetarg
 # Display Ptolemy Retargetting information.
@@ -65,6 +65,11 @@ body ::tycho::EditRetarg::constructor {args} {
     ###################################################################
     ####                      public methods                       ####
 
+#######################################################################
+#### compareDomains
+# Determine what stars are in two domains and compare them by plotting
+# the information as a Forest.
+#
 body ::tycho::EditRetarg::compareDomains {} {
    set arglist [DialogWindow::newModal EntryQuery .e2 -queries {
        {domainA {Domain A:} {CG56}}
@@ -96,6 +101,3 @@ body ::tycho::EditRetarg::compareDomains {} {
 
     component graphics redrawGraph
 }
-
-#::tycho::EditRetarg .t
-#.t centerOnScreen
