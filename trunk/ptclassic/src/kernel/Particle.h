@@ -14,7 +14,7 @@
 
 class ParticleStack;
 class Plasma;
-class block;
+class Block;
 
 /**************************************************************************
 Version identification:
