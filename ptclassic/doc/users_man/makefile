@@ -29,6 +29,7 @@ chapter12.dvi:	cp.tex
 cp.dvi:		chapter12.dvi
 		mv -f chapter.dvi cp.dvi
 
+
 # Update all of the Framemaker cross references.
 update_book: update.fmb
 	fmbatch -v update.fmb
@@ -44,8 +45,12 @@ update.fmb:
 DOCS=bdf.doc cg.doc cg56.doc cg96.doc ddf.doc de.doc documents.doc domains.doc filter.doc installation.doc mq.doc obtainPtolemy.doc overview.doc pigi.doc ptcl.doc ptglossary.doc references.doc sdf.doc silage.doc sproc.doc thor.doc title.doc troubleshooting.doc users_manIX.doc users_manLOM.doc users_manTOC.doc vem.doc x.doc xgraph.doc
 
 # Update all the cross references and then Create postscript files
+# Script to fix up cg56.ps and cg96.ps postscript
+FIXPS=/users/ptdesign/bin/fixPS
 fm2ps: update_book
 	fmprint2ps $(DOCS)
+	$(FIXPS) cg56.ps
+	$(FIXPS) cg96.ps
 
 # Produce the obtainPtolemy docs in ascii format
 /tmp/obtainPtolemy.txt: obtainPtolemy.doc /tmp/fmobtainPtolemy.fmb
