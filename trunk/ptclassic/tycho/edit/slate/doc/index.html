@@ -4,95 +4,115 @@
 <title>The Tycho Slate</title>
 </head>
 <body bgcolor="#faf0e6">
+<blockquote>
 <H1><A NAME="Tycho Slate">The Tycho Slate</A></H1>
 <HR>
 
- <P>
+<p>
+This release: <b>3.0 alpha</b>. See also the
+<a href="internals/bugs.html">Bugs and Caveats</a> page.
 
-The Slate is an [incr Tcl] megawidget layered over the Tcl/Tk canvas.
-It contains features that we believe to be necessary or useful for
-implementing complex graphical editing and visualization widgets.  The
-key features of the Slate are:
+ <P>
+The Tycho Slate is a Tcl/Tk package that implements a useful layer of
+abstraction over the regular Tk canvas. The Slate is part of the Tycho
+user interface system, but can be installed and used by itself as
+well. It runs with either:
+
+<ul>
+<li> Tcl 8.0; or
+<li> [incr Tcl] 3.0
+</ul>
+
+In the [incr Tcl] version, a slate is an [incr Tk] megawidget that
+contains a Tk canvas. In the Tcl version, a slate is a "faked"
+mega-widget, that can be invoked with an object-oriented style of
+interface or a Tcl-like procedural style of interface.
+
+<p>The Slate contains a number of features that we believe make the Tk
+canvas more useful. We wrote it to help us implement graphical editors
+and visualization widgets.  The key features of the Slate are:
 
 <dl>
-<dt>A visual hierarchy
+<dt>User-defined item types
 
-<dd> The Slate implements a straight-forward visual hierarchy, as is
-common in many graphics packages. We are able to define new kinds of
-graphical items that are composed of simpler items. All of the canvas
-methods are rewritten to handle hierarchical items.
+<dd> You can define you own item types, which can be manipulated in
+the same manner as regular canvas items. For example, in our graphical
+editors we have items for icons, for "smart" self-routing lines, and
+so on. Items can be composed into ever-more-complex items.
 
  <P>
-<dt>Item shapes
+<dt>Shapes and features
 
-<dd> Every item has a shape, such as <i>point</i>, <i>rectangle</i>,
-<i> polygon</i>, or a custom-designed shape. Items can be queried for
-the coordinates of an <i>aspect</i>, such as the north-east corner or
-the second vertex. Items can be requested to move one or more aspects,
-reshaping the item.
+<dd> We added a neat feature to all items (canvas and user-defined).
+Each item has a shape, such as <i>point</i>, <i>rectangle</i>, <i>
+polygon</i>, or a custom-designed shape. Items can be queried for the
+coordinates of a <i>feature</i>, such as the north-east corner or the
+second vertex.
 
- <P><dt>Interactors
+ <P>
+<dt>Events and interactors
 
-<dd> Event-handlers can be bound to any level of the visual
-hierarchy. In addition, we implemented a more abstract and much more
-powerful user interaction framework, in which a particular sequence of
-user interactions is abstracted into objects called
-<i>interactors</i>.
+<dd> Event scripts can be bound to user-defined items just as for
+regular canvas items. We also added a new kind of interaction
+technique called <i>interactors</i>.  For instance, say you want to
+make an item draggable with the mouse -- all you do is create a
+Follower interactor and attach it to the item or a tag, and the
+event-binding is all done for you.
 
 </dl>
 
-The Slate also contains other useful methods, such as highlighting and
-selection.  To see an example of an editor
-and some widgets created with the Slate, see the
-<A HREF="http://ptolemy.eecs.berkeley.edu/~johnr/research/ct-demo.html">Continuous time simulation demo</A> screen-shot page.
+The Slate also contains other useful methods, such as item
+highlighting, selection, and so on.  To see an example of an editor
+and some widgets created with the Slate, see the <A
+HREF="http://ptolemy.eecs.berkeley.edu/~johnr/research/ct-demo.html">Continuous
+time simulation demo</A> screen-shot page.
 
  <P>Documentation available:
 
 <dl>
+<dt><A HREF="install.html">Installation</A>
+
+<dd> How to download and install the Slate. If you already have Tycho
+installed, then everything should be running already, but you might
+like to check this page if you have problems running the demos.
+
+<dt><A HREF="demos.html">The Slate demos</A>
+
+<dd> An overview of the Slate demo programs, and how to run them. The
+demos show off some of the features of the Slate and might also be a
+useful source of example code.
+
 <dt><A HREF="tutorial/index.html">A short tutorial</A>
 
-<dd> If
-you are reading this in the Tycho HTML browser, you can double-click
-on the Tcl code to execute it. Otherwise, you can copy and
-paste, or just read it.
+<dd> An interactive tutorial on the Slate. If you read this in the
+Tycho HTML browser, you can double-click on the Tcl code to execute
+it. Otherwise, you can copy and paste, type, or just read!
 
 <dt><A HREF="internals/index.html">The programmer's guide</A>
 
-<dd> A somewhat-disorganized guide to the internals of the Slate,
-the available classes and features, and a programmer's
-FAQ.
+<dd> A guide to the internals of the Slate, the available classes and
+features, and a programmer's FAQ.
 
 <dt><A HREF="codeDoc/index.html">Class documentation</A>
 
 <dd> Documentation for the Slate classes, generated from the source
 code by the <CODE>tydoc</CODE> utility.
 
-</dL>
+<dt><A HREF="sources/">Source code</A>
 
-<!--
-
- <P>The downloads available are:
-
-<dl>
-
-<dt><A HREF="distribution.html">The distribution page</A>
-
-<dd>The unofficial distribution of the Slate. This contains the
-latest unreleased version of the Slate and supporting software.
-
-<dt><A
-HREF="http://ptolemy.eecs.berkeley.edu/tycho/">The Tycho distribution site</A>
-
-<dd>This is the official release of Tycho, which includes the Slate.
-The official release is very out of date.
+<dd> The source code. (This link works only if you are
+looking at the home page on <code>ptolemy.eecs.berkeley.edu</code>.)
 
 </dl>
-
--->
 
  <P> Some other useful links:
 
 <dl>
+<dt><A
+HREF="http://ptolemy.eecs.berkeley.edu/tycho/">The Tycho home page</A>
+
+<dd>This is the official home page of Tycho.
+
 <dt><A HREF="http://ptolemy.eecs.berkeley.edu/papers/98/slate/"><I>The Tycho Slate: Complex Drawing and Editing in Tcl/Tk</I></A>
 
 <dd>A paper about the Slate, which will appear in the Tcl/Tk
@@ -112,5 +132,6 @@ All rights reserved.
 Last updated: 05/07/98,
 comments to: <A HREF="mailto:johnr@eecs.berkeley.edu"><author>johnr@eecs.berkeley.edu</author></A>
 
+</blockquote>
 </body>
 </html>
