@@ -147,7 +147,7 @@ int FSMScheduler::run() {
     // For highlighting star in graphic debug mode.
     if (!SimControl::doPreActions(curState)) return FALSE;
 
-    // Grab input data and get internal events.
+    // Grab inputs and clear outputs.
     if (!receiveData()) return FALSE;
 
     int transNum;
@@ -162,6 +162,10 @@ int FSMScheduler::run() {
     }
     // Do the action for the next transition corresponding to "transNum".
     if (!curState->execAction(transNum))    return FALSE;
+
+    // clear those internal events that are not emitted by the slave
+    // and the triggered action indexed by "actNum".
+    if (!curState->clearIntlEvent(transNum))    return FALSE;
 
     // Send output data.
     if (!sendData())    return FALSE;
