@@ -7,7 +7,7 @@
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cg/quasiScheduler
+VPATH = $(ROOT)/src/domains/cg/HuScheduler
 
 # get configuration info
 CONFIG=$(ROOT)/config-$(ARCH).mk
@@ -21,13 +21,13 @@ DLKERNEL = $(ROOT)/src/domains/cg/dlScheduler
 
 INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(DLKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
 
-SRCS =	QSNode.cc QSGraph.cc QuasiScheduler.cc QSUniProc.cc QSParProcs.cc
+SRCS =	HuNode.cc HuGraph.cc HuScheduler.cc HuUniProc.cc HuParProcs.cc
 
-HDRS =  QSNode.h QSGraph.h QuasiScheduler.h QSUniProc.h QSParProcs.h
+HDRS =  HuNode.h HuGraph.h HuScheduler.h HuUniProc.h HuParProcs.h
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libQS.a
+LIB = libHu.a
 
 all:	makefile $(LIB)
 
