@@ -76,7 +76,7 @@ public:
 	// Add an indexed element
 	const CodeBlockList* elem (int index) {
 		while (dimension() <= index) {
-			put(new CodeBlockList);
+			INC_LOG_NEW; put(new CodeBlockList);
 		}
 		return((CodeBlockList*)Vector::elem(index));
 	}

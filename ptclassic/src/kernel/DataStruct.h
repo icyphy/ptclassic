@@ -47,7 +47,7 @@ public:
 	// constructor, with argument
 	SingleLinkList(Pointer a)
 	{
-		lastNode= new SingleLink(a,0);
+		INC_LOG_NEW; lastNode= new SingleLink(a,0);
 		lastNode->next=lastNode;
 	}
 

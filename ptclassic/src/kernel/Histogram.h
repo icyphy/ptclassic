@@ -16,6 +16,8 @@ $Id$
 
 **************************************************************************/
 
+#include "logNew.h"
+
 inline int round(double x) { return x > 0 ? int(x+0.5) : -int(0.5-x); }
 
 // a simple integer vector class
@@ -25,7 +27,7 @@ private:
 	int xsize;
 public:
 	intVec() : xsize(0), data(0) {}
-	~intVec() { delete data; }
+	~intVec() { INC_LOG_DEL; delete data; }
 	int& elem(int i) { return data[i];}
 	int& operator[](int i) { return elem(i);}
 	int capacity() const { return xsize;}

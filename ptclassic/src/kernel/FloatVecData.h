@@ -36,7 +36,7 @@ public:
 
 	// constructor: makes an uninitialized array
 	FloatVecData(int l) : len(l) {
-		data = new float[l];
+		INC_LOG_NEW; data = new float[l];
 	}
 
 	// constructor: makes an initialized array from a float array
@@ -47,7 +47,7 @@ public:
 
 	// constructor: makes an initialized array from a double array
 	FloatVecData(int l,const double *srcData) : len(l) {
-		data = new float[l];
+		INC_LOG_NEW; data = new float[l];
 		for (int i = 0; i < l; i++)
 			data[i] = *srcData++;
 	}

@@ -17,6 +17,7 @@ $Id$
 #ifndef _miscFuncs_h
 #define _miscFuncs_h 1
 #include <std.h>
+#include "logNew.h"
 
 extern "C" {
 char*     strcat(char*, const char*);
@@ -44,7 +45,7 @@ char*     rindex(const char*, int);
 const char* expandPathName(const char*);
 
 inline char* savestring (const char* txt) {
-	return strcpy (new char[strlen(txt)+1], txt);
+	INC_LOG_NEW; return strcpy (new char[strlen(txt)+1], txt);
 }
 
 const char* hashstring(const char*);
