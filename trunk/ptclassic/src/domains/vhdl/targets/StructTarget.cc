@@ -277,10 +277,11 @@ void StructTarget :: trailerCode() {
       StringList tempName = state->name;
       tempName << "_Temp";
       mainSignalList.put(tempName, state->type);
+
       StringList initName = state->name;
       initName << "_Init";
-
       mainSignalList.put(initName, state->type);
+
       connectMultiplexor(state->lastRef, state->firstRef, initName,
 			 state->type);
       connectSource(state->initVal, initName, state->type);
@@ -311,11 +312,12 @@ void StructTarget :: trailerCode() {
 	destName << "_N" << (-ix);
       }
 
+      // NEWER: Commenting these suckers out as of 7/24/96.
       // NEW: Even though these are "source" and "dest", the naming
       // convention is that any latched output of an exu is being
       // called "sink" (for now). 4/12/96.
-      sourceName << "_sink";
-      destName << "_sink";
+      //      sourceName << "_sink";
+      //      destName << "_sink";
 
       // sourceName is input to register, destName is output of register.
       connectRegister(sourceName, destName, "feedback_clock", arc->type);
@@ -373,7 +375,7 @@ void StructTarget :: trailerCode() {
 	  */
 	  poMap = fi->portMapList->vhdlPortWithName(poName);
 	  if (!poMap) {
-	    Error::abortRun("poMap is null.");
+	    Error::abortRun(poName, ": port not in firing's PortMapList.");
 	    return;
 	  }
 	  oldMapping = poMap->mapping;
@@ -658,18 +660,16 @@ void StructTarget :: registerState(State* state, const char* varName,
     }
     
     // Contstruct the name of the last ref to the state.
-    StringList temp_state = root;
-    temp_state << "_F" << listState->lastFiring << "_Out";
-    temp_state << "_sink";
-    StringList temp_out = refOut;
-    temp_out << "_source";
+    StringList state_in = root;
+    state_in << "_F" << listState->lastFiring;
+    StringList state_out = root;
+    state_out << "_F" << thisFiring;
 
     VHDLPort* inPort = new VHDLPort;
     inPort->setName(refIn);
     inPort->setType(stType);
     inPort->setDirec("IN");
 
-    //    firingPortList.put(refIn, "IN", stType);
     firingPortList.put(*inPort);
 
     firingVariableList.put(ref, stType, "");
@@ -682,34 +682,32 @@ void StructTarget :: registerState(State* state, const char* varName,
 	inSignal->setName(root);
 	inSignal->setType(stType);
 
-	inPort->connect(inSignal);
-
-	//	firingSignalList.put(root, stType);
 	topSignalList.put(*inSignal);
 	firingSignalList.put(*inSignal);
 
-	firingPortMapList.put(refIn, "", "", root);
+	inPort->connect(inSignal);
+
+	firingPortMapList.put(inPort->name, "", "", inSignal->name);
       }
       if (!isFirstStateRef) {
 	// Need to find the previous signal to connect to
 	// That signal should have been created during the previous firing's
 	// first reference to the state.
 	// HEY! won't find it in mainSignalList, that doesn't go until trailerCode()!
-	VHDLSignal* inSignal =  topSignalList.vhdlSignalWithName(root);
+	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(root);
 	if (!inSignal) {
 	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
 	  return;
 	}
 
-	inPort->connect(inSignal);
-
-	//	firingSignalList.put(root, stType);
+	// FIXME: Should be able to comment these two out:
         topSignalList.put(*inSignal);
         firingSignalList.put(*inSignal);
 
-	firingPortMapList.put(refIn, "", "", root);
-      }
+	inPort->connect(inSignal);
 
+	firingPortMapList.put(inPort->name, "", "", inSignal->name);
+      }
     }
 
     if (!(constState)) {
@@ -720,10 +718,13 @@ void StructTarget :: registerState(State* state, const char* varName,
       outPort->setDirec("OUT");
 
       VHDLSignal* outSignal = new VHDLSignal;
-      outSignal->setName(temp_out);
+      outSignal->setName(state_out);
       outSignal->setType(stType);
 
       outPort->connect(outSignal);
+
+      firingPortMapList.put(outPort->name, "", "", outSignal->name);
+      //      firingPortMapList.put(refOut, "", "", state_out);
 
       if (isFirstStateRef) {
 	// Create a new signal.
@@ -731,19 +732,18 @@ void StructTarget :: registerState(State* state, const char* varName,
 	inSignal->setName(refIn);
 	inSignal->setType(stType);
 
-	inPort->connect(inSignal);
-
-	//	firingSignalList.put(refIn, stType);
 	topSignalList.put(*inSignal);
 	firingSignalList.put(*inSignal);
 
-	firingPortMapList.put(refIn, "", "", refIn);
-	firingPortMapList.put(refOut, "", "", temp_out);
+	inPort->connect(inSignal);
+
+	firingPortMapList.put(inPort->name, "", "", inSignal->name);
+	//	firingPortMapList.put(refIn, "", "", refIn);
       }
       if (!isFirstStateRef) {
 	// Need to find the previous signal to connect to
 	// FIXME: Still don't like this, depends on knowing the name already!!
-	VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(temp_state);
+	VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(state_in);
 	if (!inSignal) {
 	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
 	  return;
@@ -751,18 +751,14 @@ void StructTarget :: registerState(State* state, const char* varName,
 
 	inPort->connect(inSignal);
 
-	//	firingSignalList.put(temp_state, stType);
-
-	firingPortMapList.put(refIn, "", "", temp_state);
-	firingPortMapList.put(refOut, "", "", temp_out);
+	firingPortMapList.put(inPort->name, "", "", inSignal->name);
+	//	firingPortMapList.put(refIn, "", "", state_in);
       }
-      //      firingSignalList.put(temp_out, stType);
+
       topSignalList.put(*outSignal);
       firingSignalList.put(*outSignal);
 
-      //      firingPortList.put(refOut, "OUT", stType);
       firingPortList.put(*outPort);
-
       firingVarPortList.put(refOut, ref);
 
       // Data clock name.  Needs to be the name of the firing, not the star.
@@ -775,7 +771,7 @@ void StructTarget :: registerState(State* state, const char* varName,
     }
 
     // Reset state's lastRef name.
-    listState->lastRef = temp_out;
+    listState->lastRef = state_out;
   }
 
   // Reset state's lastFiring tag just before exiting.
@@ -998,30 +994,68 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   StringList ref = dataName;
   ref << part;
 
-  // Data source signal name.
-  StringList sourceName = ref;
-  sourceName << "_source";
-  // Data sink signal name.
-  StringList sinkName = ref;
-  sinkName << "_sink";
   // Data clock name.  Needs to be the name of the firing, not the star.
   StringList clockName = sanitize(port->parent()->fullName());
   clockName << "_F" << firing;
   clockName << "_clk";
 
-  // Create a port and a port mapping for this firing entity.
-  /*
-  // (What if this isn't the first reference?)
-  VHDLPort* newPort = new VHDLPort;
-  newPort->setName(ref);
-  newPort->setType(port->dataType());
-  newPort->setDirec(port->direction());
+  // Look for a port with the given name already in the list.
+  VHDLPort* existPort = firingPortList.vhdlPortWithName(ref);
+  if (!existPort) {
+    // Create a port and a port mapping for this firing entity.
+    VHDLPort* newPort = new VHDLPort;
+    newPort->setName(ref);
+    newPort->setType(port->dataType());
+    newPort->setDirec(port->direction());
 
-  newPort->connect(mySignal);
-  */
+    // If it's an input port, find the signal generating the data.
+    if (!strcmp(newPort->direction,"IN")) {
+      VHDLSignal* mySignal = topSignalList.vhdlSignalWithName(ref);
+      // Check for signal already existing.
+      if (mySignal) {
+	// mySignal exists with ref as name, so connect to it.
+	newPort->connect(mySignal);
 
-  firingPortList.put(ref, port->direction(), port->dataType());
-  firingPortMapList.put(ref, "", "", sinkName);
+	firingPortMapList.put(newPort->name, "", "", mySignal->name);
+      }
+      else {
+	// tokenNum is negative, so create a signal to connect to.
+	if (tokenNum < 0) {
+	  mySignal = new VHDLSignal;
+	  mySignal->setName(ref);
+	  mySignal->setType(port->dataType());
+
+	  topSignalList.put(*mySignal);
+	  firingSignalList.put(*mySignal);
+
+	  newPort->connect(mySignal);
+
+	  firingPortMapList.put(newPort->name, "", "", mySignal->name);
+	}
+	// tokenNum not negative: signal should already exist, but doesn't.
+	else {
+	  Error::abortRun(ref, ": Need to connect to signal for data which hasn't",
+			  " been generated yet - firing order error?");
+	  return;
+	}
+      }
+    }
+    // If it's an output port, create a new output signal.
+    if (!strcmp(newPort->direction,"OUT")) {
+      VHDLSignal* newSignal = new VHDLSignal;
+      newSignal->setName(ref);
+      newSignal->setType(port->dataType());
+
+      topSignalList.put(*newSignal);
+      firingSignalList.put(*newSignal);
+
+      newPort->connect(newSignal);
+
+      firingPortMapList.put(newPort->name, "", "", newSignal->name);
+    }
+
+    firingPortList.put(*newPort);
+  }
 
   // Only provide a toggled clock for firing if data is output.
   if (port->isItOutput()) {
@@ -1030,15 +1064,17 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
   // For wormhole inputs, create a system port.
   // But for delayed values of wormhole inputs, do not create another port.
-  // For local inputs, create a signal.
   if ((port->atBoundary()) && (tokenNum >= 0)) {
     // Signal an error: we won't support wormholes for now:
     Error::error(*port, "is at a wormhole boundary: Not currently supported");
     // Port at wormhole boundary, so create a system port instead of a signal.
     //    systemPortList.put(ref, port->direction(), port->dataType());
   }
+  // For local inputs, create a signal.
   else {
-    firingSignalList.put(sinkName, port->dataType());
+    // The following is commented out: we only create and register
+    // a new signal when the port that generates the data is created.
+    //    firingSignalList.put(sinkName, port->dataType());
   }
 }
 
