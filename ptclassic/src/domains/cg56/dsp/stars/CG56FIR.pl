@@ -42,14 +42,6 @@ Decimation parameters > 1 reduces sample rate.
 		default {1}
 		desc {Interpolation ratio.}
 	}
-
-//	state {
-//		name {constant}
-//		type {fixarray}
-//		default {"0"}
-//		desc { internal }
-//              attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
-//	}
 	state {
 		name {oldsample}
 		type {fixarray}
@@ -102,52 +94,35 @@ Decimation parameters > 1 reduces sample rate.
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	    
 
-	codeblock(block) {
-; initialize FIR
-; state variables
-        org     $ref(oldsample)
-        bsc     $val(oldsampleSize),0
-        org     p:
-
-; pointer to state variable buffer
-
-        org     $ref(oldsampleStart)
-        dc      $addr(oldsample)
-        org     p:
-        }
-
 	start {
-               coefNum=coef.size();
-
-               coef.resize(int(int(coefNum/interpolation)*int(interpolation)));
-
-               if (int(-(int(decimation)-int(coefNum))/int(interpolation))>0)
+              coefNum=coef.size();
+              if (int(-(int(decimation)-int(coefNum))/int(interpolation))>0)
                    oldsample.resize(int(-(int(decimation)-int(coefNum))/int(interpolation)));
-		else
-	             oldsample.resize(0);
+              else
+                   oldsample.resize(0);
 
 
-                int modtemp=coefNum%interpolation;
-		input.setSDFParams(decimation, decimation-1);
-		output.setSDFParams(interpolation, interpolation-1);
+              int modtemp=coefNum%interpolation;
+              input.setSDFParams(decimation, decimation-1);
+	      output.setSDFParams(interpolation, interpolation-1);
 
-                if (decimation>1 && interpolation>1) 
-		     Error::abortRun (*this, ": Cannot both interpolate and decimate.");
+              if (decimation>1 && interpolation>1) 
+	              Error::abortRun (*this, ": Cannot both interpolate and decimate.");
                 
-                if (modtemp !=0) {
+              if (modtemp !=0) {
 	             coef.resize(coefNum+interpolation-modtemp);
 		     coefNum=coef.size();
-		}
-                StringList permuted ="";
-                for (int i=interpolation-1; i> -1; i--) {
-                     int j=i;
-                     while(j<coefNum) {
+	      }
+              StringList permuted ="";
+              for (int i=interpolation-1; i> -1; i--) {
+                    int j=i;
+                    while(j<coefNum) {
 		            permuted +=coef[j];
 			    permuted +=" ";
                             j +=interpolation;
-		     }
-                }
-		coef.setCurrentValue(permuted);
+		    }
+              }
+	      coef.setCurrentValue(permuted);
                
         }
 
@@ -176,7 +151,7 @@ Decimation parameters > 1 reduces sample rate.
 		     if(taps<2) gencode(lessTwo);
 		}
 // decimation
-                if(dec>1) {
+                else if(dec>1) {
                      gencode(decmust);
 	             if(taps > (1+dec)) gencode(decgreater);
 		     if(taps == (1+dec)) gencode(decequal);
@@ -222,6 +197,20 @@ Decimation parameters > 1 reduces sample rate.
 		    }
                }
 	}
+
+	codeblock(block) {
+; initialize FIR
+; state variables
+        org     $ref(oldsample)
+        bsc     $val(oldsampleSize),0
+        org     p:
+
+; pointer to state variable buffer
+
+        org     $ref(oldsampleStart)
+        dc      $addr(oldsample)
+        org     p:
+        }
 
         codeblock(first) {
         move    #<$val(taps)*$val(interpolation)+$addr(coef)-1,r0
