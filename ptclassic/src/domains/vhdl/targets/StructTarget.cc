@@ -111,6 +111,8 @@ int StructTarget :: runIt(VHDLStar* s) {
   fi->genericMapList = firingGenericMapList.newCopy();
   fi->portMapList = firingPortMapList.newCopy();
   fi->signalList = firingSignalList.newCopy();
+  fi->decls = mainDecls;
+  mainDecls.initialize();
   fi->variableList = firingVariableList.newCopy();
   fi->portVarList = firingPortVarList.newCopy();
   fi->action = firingAction;
@@ -233,7 +235,8 @@ void StructTarget :: trailerCode() {
       destName << "_sink";
 
       // sourceName is input to register, destName is output of register.
-      connectRegister(sourceName, destName, "iter_clock", "INTEGER");
+      //      connectRegister(sourceName, destName, "iter_clock", "INTEGER");
+      connectRegister(sourceName, destName, "iter_clock", arc->type);
 
       // Must also create signals for those lines which are neither read nor
       // written by a $ref() - e.g. if more delays than tokens read.
@@ -242,10 +245,12 @@ void StructTarget :: trailerCode() {
 
       // If no system port by the given name, go ahead and make the signal.
       if (sx < arc->lowWrite) {
-	mainSignalList.put(sourceName, "INTEGER", "", "");
+	//	mainSignalList.put(sourceName, "INTEGER", "", "");
+	mainSignalList.put(sourceName, arc->type, "", "");
       }
       if (ix < arc->lowWrite) {
-	mainSignalList.put(destName, "INTEGER", "", "");
+	//	mainSignalList.put(destName, "INTEGER", "", "");
+	mainSignalList.put(destName, arc->type, "", "");
       }
     }
   }
@@ -290,6 +295,9 @@ void StructTarget :: trailerCode() {
   while ((cl = nextCluster++) != 0) {
     // Begin constructing the cluster's code in myCode.
     myCode << "\n\t-- Cluster " << cl->name << "\n";
+    myCode << "\n";
+    myCode << useLibs;
+    myCode << "\n";
     myCode << "entity " << cl->name << " is\n";
 
     //    addGenericRefs(cl, level);
@@ -305,6 +313,7 @@ void StructTarget :: trailerCode() {
     myCode << "process\n";
 
     addSensitivities(cl, level);
+    addDeclarations(cl, level);
     addVariableRefs(cl, level);
 
     myCode << "begin\n";
@@ -408,7 +417,14 @@ void StructTarget :: writeCode() {
   printf("%s", (const char*) ctlerCode);
   ////////////////////////////////////////////
 
+  SimVSSTarget::writeCode();
+  /*
   writeFile(myCode,".vhdl",displayFlag);
+  if (writeCom) {
+    writeComFile();
+  }
+  singleUnderscore();
+  */
 }
 
 // Compile the code.
@@ -968,6 +984,25 @@ void StructTarget :: addPortVarTransfers(VHDLCluster* cl, int /*level*/) {
     }
     
     if (portVarCount) {
+      myCode << body;
+    }
+  }
+}
+
+// Add in firing declarations here.
+void StructTarget :: addDeclarations(VHDLCluster* cl, int /*level*/) {
+  if ((*(cl->firingList)).head()) {
+    StringList body;
+
+    VHDLFiringListIter nextFiring(*(cl->firingList));
+    VHDLFiring* nfiring;
+    int declsCount = 0;
+    while ((nfiring = nextFiring++) != 0) {
+      body << nfiring->decls;
+      declsCount++;
+    }
+    
+    if (declsCount) {
       myCode << body;
     }
   }
