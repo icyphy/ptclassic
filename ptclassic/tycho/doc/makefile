@@ -59,7 +59,9 @@ EXTRA_SRCS =	abbreviations.html \
 		sponsors.html \
 		troubleshooting.html \
 		tymac.html \
+		tychoFaq.html \
 		tynt.html
+
 
 MISC_FILES =		coding img tychoClasses.dag
 
