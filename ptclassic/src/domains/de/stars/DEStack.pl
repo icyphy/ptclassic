@@ -144,8 +144,21 @@ after processing all inputs is sent to the "size" output.
 		    return stack.size();
 		}
 	}
+	method {
+		name { zapStack }
+		code {
+			while (Qsize() > 0) {
+				Particle* pp = (Particle*) stack.popTop();
+				pp->die();
+			}
+			stack.initialize();
+		}
+	}
 	start {
 		DEQueueBase::start();
-		stack.initialize();
+		zapStack();
+	}
+	destructor {
+		zapStack();
 	}
 }

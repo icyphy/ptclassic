@@ -140,8 +140,21 @@ after processing all inputs is sent to the "size" output.
 		    return queue.length();
 		}
 	}
+	method {
+		name { zapQueue }
+		code {
+			while (Qsize() > 0) {
+				Particle* pp = (Particle*) queue.get();
+				pp->die();
+			}
+			queue.initialize();
+		}
+	}
 	start {
 		DEQueueBase::start();
-		queue.initialize();
+		zapQueue();
+	}
+	destructor {
+		zapQueue();
 	}
 }
