@@ -40,17 +40,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class ACSPortHole : public DFPortHole
 {
 public:
+
     // Class identification.
     virtual int isA(const char* className) const;
+
 protected:
+
+    // Allows Target to change Plasma type for fixed-point simulation.
     /* virtual */ int allocatePlasma();
 };
 
 class InACSPort : public ACSPortHole
 {
 public:
+
     // Input/output identification.
     virtual int isItInput() const;
+
+	// Particle I/O for simulation.
 	virtual void receiveData();
 
 };
@@ -61,6 +68,8 @@ class OutACSPort : public ACSPortHole
 public:
     // Input/output identification.
     virtual int isItOutput() const;
+
+	// Particle I/O for simulation.
 	virtual void receiveData();
 	virtual void sendData();
 };
