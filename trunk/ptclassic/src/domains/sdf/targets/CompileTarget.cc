@@ -24,6 +24,7 @@ a universe.
 #include "GalIter.h"
 #include "Geodesic.h"
 #include "ConstIters.h"
+#include <ctype.h>
 
 class CompileTarget : public CGTarget {
 private:
@@ -32,11 +33,18 @@ private:
 	// given PortHole, if there is such a thing.  If not, the pointer
 	// to the PortHole is returned as pointer to a GenericPort.
 	GenericPort* findMasterPort(const PortHole* p) const;
-	// Returns the sanitized name of an ordinary porthole, or
+	// Returns the name of an ordinary porthole, or
 	// "name.newPort()" for a MultiPortHole.
 	StringList expandedName(const GenericPort* p) const;
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
-	int writeGalDef(Galaxy& galaxy, const char* className);
+	int writeGalDef(Galaxy& galaxy, const StringList className);
+
+	// return a name that can be used as C++ identifiers, derived
+	// from the actual name.
+	StringList sanitize(const char* s) const;
+	StringList sanitizedName(NamedObj &b) const;
+	StringList sanitizedFullName(NamedObj &b) const;
+
 protected:
 	StringState destDirectory;
 	IntState loopScheduler;
@@ -85,16 +93,22 @@ void CompileTarget::start() {
     }
 }
 
-int CompileTarget::writeGalDef(Galaxy& galaxy, const char* className) {
+int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
     // First generate the files that define the galaxies
     GalTopBlockIter next(galaxy);
     Block* b;
     while ((b = next++) != 0) {
-	if(!b->isItAtomic()) writeGalDef(b->asGalaxy(), b->readClassName());
+	// Note the galaxy class name may not be a legal C++ identifier
+	// since the class is really InterpGalaxy, and the className gets
+	// set to equal the name of the galaxy, which is any Unix directory
+	// name.
+	if(!b->isItAtomic())
+		writeGalDef(b->asGalaxy(), sanitize(b->readClassName()));
     }
 
     // prepare the output file for writing
-    StringList galFileName = className;
+    // Use the original class name, not the sanitized class name
+    StringList galFileName = galaxy.readClassName();
     galFileName += ".h";
     char* codeFileName = writeFileName(galFileName);
     UserOutput codeFile;
@@ -119,15 +133,16 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, const char* className) {
 }
 
 int CompileTarget::run() {
-    StringList universeClassName = gal->sanitizedName();
+    StringList universeClassName = sanitizedName(*gal);
     universeClassName += "Class";
-    StringList universeName = gal->sanitizedName();
+    StringList universeName = sanitizedName(*gal);
 
     // First generate the files that define the galaxies
     GalTopBlockIter next(*gal);
     Block* b;
     while ((b = next++) != 0) {
-	if(!b->isItAtomic()) writeGalDef(b->asGalaxy(), b->readClassName());
+	if(!b->isItAtomic())
+		writeGalDef(b->asGalaxy(), sanitize(b->readClassName()));
     }
 
     // Generate the C++ code file
@@ -227,15 +242,15 @@ void CompileTarget::wrapup() {
     cmd = "cd ";
     cmd += (char*)destDirectory;
     cmd += "; mv -f code ";
-    cmd += gal->sanitizedName();
+    cmd += gal->readName();
     cmd += "; cp code.cc ";
-    cmd += gal->sanitizedName();
+    cmd += gal->readName();
     cmd += ".cc; ";
     cmd += "rm -f code.o; ";
     cmd += "strip ";
-    cmd += gal->sanitizedName();
+    cmd += gal->readName();
     cmd += "; ";
-    cmd += gal->sanitizedName();
+    cmd += gal->readName();
     system(cmd);
 }
 
@@ -269,7 +284,7 @@ StringList CompileTarget::endIteration(int repetitions, int depth) {
 StringList CompileTarget::writeFiring(Star& s, int depth) {
 	StringList out;
 	out = indent(depth);
-	out += s.sanitizedFullName();
+	out += sanitizedFullName(s);
 	out += ".fire();\n";
 	return out;
 }
@@ -284,14 +299,14 @@ GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
 StringList CompileTarget::expandedName(const GenericPort* p) const {
     StringList out;
     if(p->isItMulti()) {
-	out = p->sanitizedName();
+	out = sanitizedName(*p);
     } else {
 	MultiPortHole* g;
 	if(g = ((PortHole*)p)->getMyMultiPortHole()) {
-		out = g->sanitizedName();
+		out = g->readName();
 		out += ".newPort()";
 	} else {
-		out = p->sanitizedName();
+		out = p->readName();
 	}
     }
     return out;
@@ -331,9 +346,10 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     while ((b = next++) != 0) {
 	// Declare the stars and galaxies used
 	runCode += indent(1);
-	runCode += b->readClassName();
+	// Have to sanitize below because the class may be an InterpGalaxy
+	runCode += sanitize(b->readClassName());
 	runCode += " ";
-	runCode += b->sanitizedName();
+	runCode += sanitizedName(*b);
 	runCode += ";\n";
     }
     // Generate galaxy port declarations, MultiPortHoles first
@@ -345,12 +361,12 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     while ((mph = galMPHIter++) != 0) {
 	runCode += indent(1);
 	runCode += "GalMultiPort ";
-	runCode += mph->sanitizedName();
+	runCode += sanitizedName(*mph);
 	runCode += ";\n";
 	galSetPorts += indent(1);
-	galSetPorts += mph->sanitizedName();
+	galSetPorts += sanitizedName(*mph);
 	galSetPorts += ".setPort(\"";
-	galSetPorts += mph->sanitizedName();
+	galSetPorts += sanitizedName(*mph);
 	galSetPorts += "\", this, ";
 	galSetPorts += mph->myType();
 	galSetPorts += ");\n";
@@ -359,11 +375,11 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	GenericPort* mpha = mph->alias();
 	portAliases += indent(1);
 	portAliases += "alias(";
-	portAliases += mph->sanitizedName();
+	portAliases += sanitizedName(*mph);
 	portAliases += ", ";
-	portAliases += mpha->parent()->sanitizedName();
+	portAliases += sanitizedName(*(mpha->parent()));
 	portAliases += ".";
-	portAliases += mpha->sanitizedName();
+	portAliases += sanitizedName(*mpha);
 	portAliases += ");\n";
     }
     CBlockPortIter galPortIter(*galaxy);
@@ -373,12 +389,12 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	if(!ph->getMyMultiPortHole()) {
 	    runCode += indent(1);
 	    runCode += "GalPort ";
-	    runCode += ph->sanitizedName();
+	    runCode += sanitizedName(*ph);
 	    runCode += ";\n";
 	    galSetPorts += indent(1);
-	    galSetPorts += ph->sanitizedName();
+	    galSetPorts += sanitizedName(*ph);
 	    galSetPorts += ".setPort(\"";
-	    galSetPorts += ph->sanitizedName();
+	    galSetPorts += sanitizedName(*ph);
 	    galSetPorts += "\", this, ";
 	    galSetPorts += ph->myType();
 	    galSetPorts += ");\n";
@@ -388,9 +404,9 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	    const GenericPort* pha = ph->alias();
 	    portAliases += indent(1);
 	    portAliases += "alias(";
-	    portAliases += ph->sanitizedName();
+	    portAliases += sanitizedName(*ph);
 	    portAliases += ", ";
-	    portAliases += ph->alias()->parent()->sanitizedName();
+	    portAliases += sanitizedName(*(ph->alias()->parent()));
 	    portAliases += ".";
 	    portAliases += expandedName(pha);
 	    portAliases += ");\n";
@@ -403,7 +419,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	runCode += indent(1);
 	runCode += galState->readClassName();
 	runCode += " ";
-	runCode += galState->sanitizedName();
+	runCode += sanitizedName(*galState);
 	runCode += ";\n";
     }
     runCode += "\n// constructor\n";
@@ -421,9 +437,9 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     while ((galState = galStateIter++) != 0) {
 	runCode += indent(1);
 	runCode += "addState(";
-	runCode += galState->sanitizedName();
+	runCode += sanitizedName(*galState);
 	runCode += ".setState(\"";
-	runCode += galState->sanitizedName();
+	runCode += galState->readName();
 	runCode += "\", this, \"";
 	runCode += galState->getInitValue();
 	runCode += "\"));\n";
@@ -433,9 +449,9 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	// Add the stars and galaxies used to the knownblock list
 	runCode += indent(1);
 	runCode += "addBlock(";
-	runCode += b->sanitizedName();
+	runCode += sanitizedName(*b);
 	runCode += ",\"";
-	runCode += b->sanitizedName();
+	runCode += sanitizedName(*b);
 	runCode += "\");\n";
     }
     runCode += galSetPorts;
@@ -448,9 +464,9 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	const State* s;
 	while ((s = nextState++) != 0) {
 	    runCode += indent(1);
-	    runCode += b->sanitizedName();
+	    runCode += sanitizedName(*b);
 	    runCode += ".setState(\"";
-	    runCode += s->sanitizedName();
+	    runCode += s->readName();
 	    runCode += "\",\"";
 	    // Want to get initial value here -- before processing
 	    runCode += s->getInitValue();
@@ -482,7 +498,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		if(!g->aliasFrom()) {
 		    runCode += indent(1);
 		    runCode += "connect(";
-		    runCode += b->sanitizedName();
+		    runCode += sanitizedName(*b);
 		    runCode += ".";
 		    runCode += expandedName(p);
 		    runCode += ", ";
@@ -502,7 +518,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    // Work up to top level of aliases
 		    GenericPort* gp = farPort;
 		    while(gp->aliasFrom()) { gp = gp->aliasFrom(); }
-		    runCode += gp->parent()->sanitizedName();
+		    runCode += sanitizedName(*(gp->parent()));
 		    runCode += ".";
 		    runCode += expandedName(gp);
 		    runCode += ", ";
@@ -515,6 +531,44 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     runCode += "}\n";
     return runCode;
 }
+
+// This method creates a name derived from the name of the object
+// where all characters in the name that are not alphanumeric are
+// changed to '_' so that the resulting name is a legitimate C++
+// identifier.  For all names that begin with a numeric character,
+// the character 'x' is prepended.
+StringList CompileTarget :: sanitizedName (NamedObj& obj) const {
+        const char *s = obj.readName();
+	return sanitize(s);
+}
+
+
+StringList CompileTarget :: sanitize(const char* s) const {
+        char *snm = new char [strlen(s) + 2];
+        char *n = snm;
+	if(isdigit(*s)) *(n++) = 'x';
+        while (*s != 0) {
+            if(isalnum(*s)) *(n++) = *(s++);
+            else { *(n++) = '_'; s++; }
+        }
+        *n = 0;
+        StringList out(snm);
+        delete snm;
+        return out;
+}
+
+StringList CompileTarget :: sanitizedFullName (NamedObj& obj) const {
+        StringList out;
+        if(obj.parent() != NULL) {
+                out = sanitizedFullName(*obj.parent());
+                out += ".";
+                out += sanitizedName(obj);
+        } else {
+                out = sanitizedName(obj);
+        }
+        return out;
+}
+
     
 
 static CompileTarget compileTargetProto;
