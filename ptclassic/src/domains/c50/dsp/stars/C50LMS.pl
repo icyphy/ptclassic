@@ -22,8 +22,8 @@ the same as the default coefficients of the \fIFIR\fP star.
 .PP
 The \fIstepSize\fP parameter specifies the rate of adaptation.
 .PP
-The \fIerrorDelay\fP parameter specifies the relative delay between the output
-samples and the input error samples.  There must be at least
+The \fIerrorDelay\fP parameter specifies the relative delay between the
+output samples and the input error samples.  There must be at least
 a delay of one (you must add the delay in your system) because
 the path from the output to the error forms a closed feedback loop.
 You can insert more delays if you wish (you may have to decrease
@@ -120,7 +120,7 @@ error samples.
 	lar    	AR3,#$addr(coef)		;Address coef		=>AR3
 	lar    	AR4,#$addr(delayLineStart)	;Address Delay Pointer	=>AR4
 	lar	AR5,*,AR0 			;Delay Pointer		=>AR5
-	lar	AR7,#$addr(output)          	;Address output		=>AR7
+	lar	AR7,#$addr(signalOut)          	;Address signalOut	=>AR7
 	lt	*,AR1				;TREG0 = error
 	mpy    	*,AR3				;error*stepSize
 	sph	TREG0				;TREG0=error*stepSize
@@ -150,9 +150,9 @@ $label(end)
         mpya	*,AR3				;error*stepSize*val(k)
 	apac					;Accu=coef(i+1)+er*stSi*val(k)
 	sach	*,1,AR5				;Accu => new coef(i+1)
-	lmmr	BMAR,#$addr(input)		;Address input => BMAR
+	lmmr	BMAR,#$addr(signalIn)		;Address signalIn => BMAR
 	lmmr	AR5,#$addr(delayLineStart)	;Address delayLine Pointer AR5
-        bldd	BMAR,*,AR4			;input => newest delay value
+        bldd	BMAR,*,AR4			;signalIn => newest delay value
         sar	AR5,*,AR5			;update delayLine pointer.
 	zap					;clear P-Reg. and Accu
 	splk	#$addr(coef),BMAR		;BMAR= address first coef	       }
@@ -169,7 +169,7 @@ $label(end)
         codeblock(end) {
         apac					;last addition
 	mar	*,AR7
-        sach	*,1				;result => output
+        sach	*,1				;result => signalOut
         apl	#0fff7h,CBCR			;disable circ. buffer 1
 	}
        
