@@ -182,7 +182,7 @@ void CG56Target::endIteration(int repetitions, int) {
 	}
 	else {				// iterate finitely
 		out = targetNestedSymbol.pop();
-		out += "\n";
+		out += "\n\tnop\t\t; prevent two endloops in a row\n";
 	}
 	addCode(out);
 }
