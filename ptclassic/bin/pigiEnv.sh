@@ -125,10 +125,10 @@ done
 # If we are running with -debug, try looking for .debug images
 
 if [ -z "$PIGIBASE" ]; then
-     case $progname in
-	ptiny)  
+     case $0 in
+	*ptiny)  
 	    PIGIBASE=pigiRpc.ptiny;;
-	ptrim)
+	*ptrim)
 	    PIGIBASE=pigiRpc.ptrim;;
 	*)
 	    PIGIBASE=pigiRpc;;
@@ -250,7 +250,7 @@ else
     fi
 fi
 
-export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD LD_LIBRARY_PATH TYCHO OCTTOOLS COMMAND
+export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD LD_LIBRARY_PATH TYCHO OCTTOOLS TAILARGS COMMAND
 
 VEMBINARY=${VEMBINARY:=$PTOLEMY/bin.$PTARCH/vem} 
 
