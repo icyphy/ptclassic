@@ -52,17 +52,8 @@ void BaseMultiTarget :: initState() {
 	if (int(manualAssignment)) oneStarOneProc = TRUE;
 }
 	
-// args are from, to, and number transferred
-SDFStar* BaseMultiTarget :: createSend(int, int, int) {
-	LOG_NEW; return new SDFStar;
-}
-
-// args are from, to, and number transferred
-SDFStar* BaseMultiTarget :: createReceive(int, int, int) {
-	LOG_NEW; return new SDFStar;
-}
-
-void BaseMultiTarget :: pairSendReceive(SDFStar*, SDFStar*) {}
+// associate send and receive stars.  Do nothing by default.
+void BaseMultiTarget :: pairSendReceive(DataFlowStar*, DataFlowStar*) {}
 
 void BaseMultiTarget :: setProfile(Profile*) {}
 void BaseMultiTarget :: prepareCodeGen() {}
@@ -113,3 +104,13 @@ its parent target: ", father->name());
 	return TRUE;
 }
 
+// FIXME: the following two functions will go away (become pure virtual)
+
+DataFlowStar* BaseMultiTarget::createReceive(int from, int to, int num) {
+	Error::abortRun(*this, "createReceive not implemented");
+	return 0;
+}
+DataFlowStar* BaseMultiTarget::createSend(int from, int to, int num) {
+	Error::abortRun(*this, "createSend not implemented");
+	return 0;
+}

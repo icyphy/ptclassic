@@ -7,8 +7,9 @@ $Id$
 
  Programmer: Soonhoi Ha
 
- Scheduler indepedent Baseclass for all multi-processor code generation
+ Scheduler-independent Baseclass for all multi-processor code generation
  targets.
+
  Virtual methods may be provided for proper wormhole interface.
  If there is no wormhole interface stuff, inherited CGTarget class alone
  should be enough as the scheduler-indepedent Baseclass.
@@ -29,7 +30,7 @@ $Id$
 class Profile;
 class ParNode;
 class ParProcessors;
-class SDFStar;
+class DataFlowStar;
 
 class BaseMultiTarget : public CGTarget {
 
@@ -41,11 +42,16 @@ public:
 
 	int getIters() { return iters; }
 
-	// create Send and Receive Star
-	virtual SDFStar* createReceive(int from, int to, int num);
-	virtual SDFStar* createSend(int from, int to, int num);
-	// pair them
-	virtual void pairSendReceive(SDFStar* s, SDFStar* r);
+	// create Send and Receive Star.  "from" and "to" are the processor
+	// ID numbers.  "num" is the number of tokens moved.
+	// FIXME: want the following functions to be pure virtual
+	virtual DataFlowStar* createReceive(int from, int to, int num);
+	virtual DataFlowStar* createSend(int from, int to, int num);
+
+	// pairSendReceive causes the send and receive stars to be associated
+	// with each other, and should be called after they are created
+	// with the above methods.  The default implementation does nothing.
+	virtual void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 	// set current child.
 	void setCurChild(int i) { curChild = i; }

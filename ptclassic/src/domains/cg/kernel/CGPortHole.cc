@@ -3,7 +3,6 @@ static const char file_id[] = "CGPortHole.cc";
 #include "CGPortHole.h"
 #include "CircularBuffer.h"
 #include "CGGeodesic.h"
-#include "SDFStar.h"
 
 /**************************************************************************
 Version identification:
@@ -69,21 +68,15 @@ void MultiCGPort :: forkProcessing (CGPortHole& p) {
 // this avoids having cfront generate many copies of the destructor
 MultiCGPort :: ~MultiCGPort() {}
 
-// ug-lee!!!!
-static int parentReps(const PortHole* p) {
-	SDFStar* s = (SDFStar*)(p->parent());
-	return s->reps();
-}
-
 int CGPortHole :: bufSize() const {
 	if (atBoundary())
-		return parentReps(this)*numberTokens;
+		return parentReps()*numberTokens;
 	else return cgGeo().bufSize();
 }
 
 int CGPortHole :: localBufSize() const {
 	if (atBoundary())
-		return parentReps(this)*numberTokens;
+		return parentReps()*numberTokens;
 	else return cgGeo().localBufSize();
 }
 
