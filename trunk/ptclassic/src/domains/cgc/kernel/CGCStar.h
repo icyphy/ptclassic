@@ -99,7 +99,6 @@ public:
 	StringList setargStates(Attribute a=ANY);	
 	StringList setargStatesHelps(Attribute a=ANY);	
 
-
 	// add a splice star to the spliceClust list.  If atEnd
 	// is true, append it to the end, otherwise prepend it.
 	void addSpliceStar(CGCStar* s, int atEnd);
@@ -109,6 +108,10 @@ public:
 	// are not regular stars
 	// If Spread, redefine to return -1, if Collect, return 1, otherwise 0.
 	virtual int amISpreadCollect() {return 0; }
+
+	// include a module from the Ptolemy DSP library
+	void addModuleFromLibrary(const char* basename,
+		const char* subdirectory, const char* libraryname);
 
 protected:
 	// main routine.
@@ -126,11 +129,12 @@ protected:
 
 	// Expand a $precision macro to a reference of a precision variable for
 	// ports/states of type FIX/FIXARRAY with attribute A_VARPREC (it is an
-	// error to ask for the precision of other ports or states).
-	// The variable is of type fix_prec, a structure containing the tags "len"
+	// error to ask for the precision of other ports or states).  The
+	// variable is of type fix_prec, a structure containing the tags "len"
 	// and "intb" that hold the actual precision of the associated fix.
 	StringList expandFixPrecisionMacro(const char* label);
-	// for ports or array with offset specification
+
+	// Expand $precision macro for ports or array with offset specification
 	StringList expandFixPrecisionMacro(const char* label, const char* offset);
 
 	// Virtual functions. Expand State or PortHole reference macros.
@@ -154,6 +158,15 @@ protected:
 
 	// Add options to be used when linking a C program
 	int addLinkOption(const char*);
+
+	// Add options to be used when linking a C program on the local machine
+	int addLocalLinkOption(const char*);
+
+	// Add options to be used when linking a C program on a remote machine
+	int addRemoteLinkOption(const char*);
+
+	// Add a file to be copied over the remote machine
+	int addRemoteFile(const char*);
 
 	// Add declarations, to be put at the beginning of the main section
 	int addDeclaration(const char* decl, const char* name = NULL) {
@@ -184,6 +197,9 @@ protected:
 
 	// construct symbolic precision for state or port with given name
 	Precision newSymbolicPrecision(int length,int intBits, const char* name);
+
+	// add the fixed-point supporting routines
+	void addFixedPointSupport();
 
 private:
 	// Generate declarations for PortHoles and States.

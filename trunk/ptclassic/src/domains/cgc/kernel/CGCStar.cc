@@ -1446,6 +1446,10 @@ StringList CGCStar::initCodeState(const State* state)
 	    // initialize bit arrays
 	    FixInitializer initializer(code,name,p);
 
+	    // the FixInitializer::declare method generates code that uses
+	    // the FIX_DoubleAssign routine that is defined by CGCrtlib.h
+	    addFixedPointSupport();
+
 	    for (int i = 0; i < size; i++) {
 		StringList value = (double)fa_state[i];
 		initializer.addInitialization(value);
@@ -1476,6 +1480,10 @@ StringList CGCStar::initCodeState(const State* state)
 	    const FixState& f_state = *(const FixState*)state;
 	    const Precision p = f_state.precision();
 
+	    // the fixed-point routines FIX_SetToZero and FIX_DoubleAssign
+	    // used below are defined by CGCrtlib.h
+	    addFixedPointSupport();
+
 	    // initialize associated precision variable
 	    if (state->attributes() & AB_VARPREC)
 		code << name << "p.len = "  << p.len()  << ", "
@@ -1499,9 +1507,9 @@ StringList CGCStar::initCodeState(const State* state)
 
 // Add lines to be put at the beginning of the code file
 int CGCStar :: addInclude(const char* decl) {
-	StringList temp = "#include ";
-	temp << decl << "\n";
-	return addCode(temp, "include", decl);
+    StringList temp = "#include ";
+    temp << decl << "\n";
+    return addCode(temp, "include", decl);
 }
 
 // Add options to be used when compiling a C program
@@ -1525,4 +1533,63 @@ int CGCStar::addLinkOption(const char* decl) {
     return linkOptions->put(temp,decl);
 }
 
+// Add options to be used when linking a C program on the local machine.
+// We don't run process code on this - it would add a \n
+int CGCStar::addLocalLinkOption(const char* decl) {
+    CodeStream *linkOptions;
+    if ((linkOptions = getStream("localLinkOptions")) == FALSE) return FALSE;
+    StringList temp;
+    temp << " " << decl << " ";
+    return linkOptions->put(temp,decl);
+}
 
+// Add options to be used when linking a C program on a remote machine.
+// We don't run process code on this - it would add a \n
+int CGCStar::addRemoteLinkOption(const char* decl) {
+    CodeStream *linkOptions;
+    if ((linkOptions = getStream("remoteLinkOptions")) == FALSE) return FALSE;
+    StringList temp;
+    temp << " " << decl << " ";
+    return linkOptions->put(temp,decl);
+}
+
+// Add a file that will be copied over to a remote machine
+int CGCStar::addRemoteFile(const char* filename) {
+    CodeStream *remoteFiles;
+    if ((remoteFiles = getStream("remoteFiles")) == FALSE) return FALSE;
+    StringList temp = filename;
+    temp << "\n";
+    return remoteFiles->put(temp,filename);
+}
+
+// Pull in a supporting C module from a library
+void CGCStar::addModuleFromLibrary(
+	const char* module, const char* subdirectory,
+	const char* libraryName) {
+    StringList cFile, cPath, includeDir, includeFile, includePath,
+	       includeDirSpec, libSpec, path, ptolemyLibDirSpec;
+    char* ptolemy = getenv("PTOLEMY");
+    char* ptarch = getenv("PTARCH");
+    cFile << module << ".c";
+    includeFile << "\"" << module << ".h\"";
+    includeDir << ptolemy << "/" << subdirectory;
+    includeDirSpec << "-I" << includeDir;
+    ptolemyLibDirSpec << "-L" << ptolemy << "/lib." << ptarch;
+    libSpec << "-l" << libraryName;
+    path << ptolemy << "/" << subdirectory << "/";
+    includePath << path << includeFile;
+    cPath << path << cFile;
+
+    addInclude(includeFile);
+    addCompileOption(includeDirSpec);
+    addLocalLinkOption(ptolemyLibDirSpec);
+    addLocalLinkOption(libSpec);
+    addRemoteLinkOption(cFile);
+    addRemoteFile(cPath);
+    addRemoteFile(includePath);
+}
+
+// Pull in a supporting C module from a library
+void CGCStar::addFixedPointSupport() {
+    addModuleFromLibrary("CGCrtlib", "src/domains/cgc/rtlib", "CGCrtlib");
+}
