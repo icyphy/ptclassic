@@ -39,3 +39,8 @@ CC =		$(PTOLEMY)/gnu/egcs/sol2.5/bin/gcc
 
 CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ -I$(ROOT)/src/compat/cfront
 
+# system libraries (libraries from the environment)
+SYSLIBS=-lstdc++ $(CSYSLIBS)
+
+# where the Gnu library is
+GNULIB=$(PTOLEMY)/gnu/egcs/sol2.5/lib
