@@ -436,7 +436,7 @@ body ::tycho::TArchetype::seeFragment {point} {
 #####################################################################
 #### stylesheet
 # Access stylesheets of this widget. This method should be used
-# to set widget option preferences instead of direct access using the
+# to access widget option preferences instead of direct access using the
 # *::tycho::stylesheet* procedure, since it ensures that user-set
 # options are not overridden by style-sheets. The method has several
 # forms, depending on the value of the _mode_ argument:
@@ -520,6 +520,10 @@ body ::tycho::TArchetype::stylesheet {mode args} {
 		eval ::tycho::stylesheet subscribe $this $sheet $opts
 	    }
 	}
+        default {
+            error "Invalid mode \"$mode\": must be one of \
+                    get, list, remove, or subscribe"
+        }
     }
 }
 
