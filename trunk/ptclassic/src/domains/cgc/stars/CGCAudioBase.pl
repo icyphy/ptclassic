@@ -11,25 +11,12 @@ defstar
 	name { fileName }
 	type { string }
 	default { "/dev/audio" }
-	desc { File for PCM data.  If blank, use standard io. }
+	desc { File for PCM data.  If blank, use standard IO. }
     }
 
     protected
     {
-	static SymbolList sharedSymbols;
-	const char *share;
 	int standardIO:1;
-    }
-
-    constructor
-    {
-	addSharedSymbolList(&sharedSymbols, "PCM");
-	share = lookupSharedSymbol("PCM","mulaw");
-    }
-
-    code
-    {
-	SymbolList CGCPCM::sharedSymbols;
     }
 
     setup
@@ -87,7 +74,7 @@ defstar
 	addInclude("<math.h>");
 	addInclude("<stdio.h>");
 	addDeclaration(declarations);
-	if (addGlobal(sharedDeclarations, share))
+	if (addGlobal(sharedDeclarations, "$sharedSymbol(PCM,PCM)"))
 	    addCode(sharedInit);
     }
 }
