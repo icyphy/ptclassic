@@ -47,6 +47,7 @@ StructTarget :: StructTarget(const char* name,const char* starclass,
 			 const char* desc) :
 VHDLTarget(name,starclass,desc) {
   regsUsed = 0;
+  selsUsed = 0;
   addCodeStreams();
   initCodeStreams();
 }
@@ -268,7 +269,22 @@ void StructTarget :: headerCode() {
 
 // Trailer code (done last).
 void StructTarget :: trailerCode() {
-
+/*
+  // Iterate through the state list and connect registers and
+  // initial value selectors for each referenced state.
+  VHDLStateListIter nextState(stateList);
+  VHDLState* state;
+  while ((state = nextState++) != 0) {
+    // Need to connect a reg and a mux between the lastRef
+    // to the state and the firstRef to the state.
+    connectReg(state->lastRef, state->firstRef, state->type);
+//    StringList tempName = state->name;
+//    tempName << "_Temp";
+//    signalList.put(tempName, state->Type, "", "");
+//    connectReg(state->lastRef, tempName, state->Type);
+//    connectSelect(tempName, state->firstRef, state->initVal, state->Type);
+  }
+  */
   
 // ** CONSTRUCTION SECTION - START
   cout << "#############################\n";
@@ -314,10 +330,12 @@ void StructTarget :: trailerCode() {
 
       // If no system port by the given name, go ahead and make the signal.
       if (sx < arc->lowWrite) {
-	signalListPut(&signalList, sourceName, "INTEGER", "", "");
+	signalList.put(sourceName, "INTEGER", "", "");
+//	signalListPut(&signalList, sourceName, "INTEGER", "", "");
       }
       if (ix < arc->lowWrite) {
-	signalListPut(&signalList, destName, "INTEGER", "", "");
+	signalList.put(destName, "INTEGER", "", "");
+//	signalListPut(&signalList, destName, "INTEGER", "", "");
       }
     }
   }
@@ -506,7 +524,7 @@ void StructTarget :: frameCode() {
     myCode << "\n";
   }
   
-  if (initials()) {
+  if (selectors()) {
     myCode << "\n";
     myCode << "     -- initial : initial value selector\n";
     myCode << "entity initial is\n";
@@ -715,9 +733,10 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
     // WARNING: The following is dangerous unless you know
     // that state has a big enough array and that pos is valid!
 //    initVal << state[pos].initValue();
+    initVal << "NOT_IMPLEMENTED";
   }
   else {
-//    initVal << state->initValue();
+    initVal << state->initValue();
   }
   
   // Root is ref, without marking for any particular firing.
@@ -738,6 +757,10 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
     // Allocate memory for a new VHDLState and put it in the list.
     VHDLState* newState = new VHDLState;
     newState->name = root;
+    newState->firstRef = refIn;
+    newState->lastRef = refOut;
+    newState->initVal = initVal;
+    newState->type = stType;
     newState->lastFiring = -1;
     stateList.put(*newState);
   }
@@ -763,17 +786,15 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
 
     // If it's the first firing to refer to this state,
     if (isFirstStateRef) {
-      // make regi, map it to IN and OUT
+      // Make regi, map it to IN and OUT
       connectReg(refOut, refIn, stType);
-//	StringList TEMP = refIn;
-//	TEMP << "_Temp";
-//      connectReg(refOut, TEMP, stType);
-//      connectInit(TEMP, refIn, initVal, stType);
-//      signalListPut(&signalList, TEMP, stType, "", "");
 
-      signalListPut(&firingSignalList, refIn, stType, "", refIn);
-      portMapListPut(&firingPortMapList, refIn, refIn);
-      portMapListPut(&firingPortMapList, refOut, refOut);
+      firingSignalList.put(refIn, stType, "", refIn);
+      firingPortMapList.put(refIn, refIn);
+      firingPortMapList.put(refOut, refOut);
+//      signalListPut(&firingSignalList, refIn, stType, "", refIn);
+//      portMapListPut(&firingPortMapList, refIn, refIn);
+//      portMapListPut(&firingPortMapList, refOut, refOut);
     }
 
     // If this isn't the first firing to refer to this state,
@@ -784,9 +805,12 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
       StringList stateSignal = root;
       stateSignal << "_" << listState->lastFiring << "_Out";
 
-      signalListPut(&firingSignalList, stateSignal, stType, stateSignal, refIn);
-      portMapListPut(&firingPortMapList, refIn, stateSignal);
-      portMapListPut(&firingPortMapList, refOut, refOut);
+      firingSignalList.put(stateSignal, stType, stateSignal, refIn);
+      firingPortMapList.put(refIn, stateSignal);
+      firingPortMapList.put(refOut, refOut);
+//      signalListPut(&firingSignalList, stateSignal, stType, stateSignal, refIn);
+//      portMapListPut(&firingPortMapList, refIn, stateSignal);
+//      portMapListPut(&firingPortMapList, refOut, refOut);
       
       // Get the register port map from the port map list and re-map it.
       VHDLCompMapListIter compMapNext(compMapList);
@@ -812,26 +836,87 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
       }
     }
 
-    signalListPut(&firingSignalList, refOut, stType, refOut, "");
-    variableListPut(&firingVariableList, ref, stType, "");
-    portVarListPut(&firingPortVarList, refIn, ref);
-    portVarListPut(&firingVarPortList, refOut, ref);
-    portListPut(&firingPortList, refIn, "IN", stType);
-    portListPut(&firingPortList, refOut, "OUT", stType);
+    firingSignalList.put(refOut, stType, refOut, "");
+    firingVariableList.put(ref, stType, "");
+    firingPortVarList.put(refIn, ref);
+    firingVarPortList.put(refOut, ref);
+    firingPortList.put(refIn, "IN", stType);
+    firingPortList.put(refOut, "OUT", stType);
+//    signalListPut(&firingSignalList, refOut, stType, refOut, "");
+//    variableListPut(&firingVariableList, ref, stType, "");
+//    portVarListPut(&firingPortVarList, refIn, ref);
+//    portVarListPut(&firingVarPortList, refOut, ref);
+//    portListPut(&firingPortList, refIn, "IN", stType);
+//    portListPut(&firingPortList, refOut, "OUT", stType);
   }
 
+  // Reset state's lastRef name.
+  listState->lastRef = refOut;
   // Reset state's lastFiring tag just before exiting.
   listState->lastFiring = thisFiring;
+}
+
+// Connect a selector between the given input and output signals.
+void StructTarget :: connectSelect(StringList inName, StringList outName,
+				   StringList initVal, StringList type) {
+      registerSelector("INTEGER");
+      StringList label = outName;
+      label << "_SEL";
+      StringList name = "Sel";
+//      name << "_" << type;
+      name << "_" << "INT";
+
+      VHDLPortMapList* portMapList = new VHDLPortMapList;
+      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
+      portMapList->initialize();
+      genMapList->initialize();
+      
+      portMapList->put("input", inName);
+      portMapList->put("output", outName);
+      portMapList->put("init_val", initVal);
+      systemPortList.put("control", "IN", "boolean");
+//      portMapListPut(portMapList, "input", inName);
+//      portMapListPut(portMapList, "output", outName);
+//      portMapListPut(portMapList, "init_val", initVal);
+//      portListPut(&systemPortList, "control", "IN", "boolean");
+      registerCompMap(label, name, portMapList, genMapList);
+}
+
+// Add a selector component declaration.
+void StructTarget :: registerSelector(StringList type) {
+  // Set the flag indicating registers are needed.
+  setSelectors();
+
+  StringList name = "Sel";
+//  name << "_" << type;
+  name << "_" << "INT";
+
+  VHDLPortList* portList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  portList->initialize();
+  genList->initialize();
+  
+//  portList->put("init_val", "IN", type);
+//  portList->put("input", "IN", type);
+//  portList->put("output", "OUT", type);
+  portList->put("init_val", "IN", "INTEGER");
+  portList->put("input", "IN", "INTEGER");
+  portList->put("output", "OUT", "INTEGER");
+  portList->put("control", "IN", "boolean");
+//  portListPut(portList, "init_val", "IN", "INTEGER");
+//  portListPut(portList, "input", "IN", "INTEGER");
+//  portListPut(portList, "output", "OUT", "INTEGER");
+//  portListPut(portList, "control", "IN", "boolean");
+
+  registerCompDecl(name, portList, genList);
 }
 
 // Connect a register between the given input and output signals.
 void StructTarget :: connectReg(StringList inName, StringList outName,
 				StringList type) {
       registerRegister("INTEGER");
-      
       StringList label = outName;
       label << "_REG";
-      
       StringList name = "Reg";
 //      name << "_" << type;
       name << "_" << "INT";
@@ -841,22 +926,24 @@ void StructTarget :: connectReg(StringList inName, StringList outName,
       portMapList->initialize();
       genMapList->initialize();
       
-      portMapListPut(portMapList, "D", inName);
-      portMapListPut(portMapList, "Q", outName);
-      portMapListPut(portMapList, "C", "clock");
-      
-      portListPut(&systemPortList, "clock", "IN", "boolean");
-      
+      portMapList->put("D", inName);
+      portMapList->put("Q", outName);
+      portMapList->put("C", "clock");
+      systemPortList.put("clock", "IN", "boolean");
+//      portMapListPut(portMapList, "D", inName);
+//      portMapListPut(portMapList, "Q", outName);
+//      portMapListPut(portMapList, "C", "clock");
+//      portListPut(&systemPortList, "clock", "IN", "boolean");
       registerCompMap(label, name, portMapList, genMapList);
 }
 
 // Add a register component declaration.
-void StructTarget :: registerRegister(StringList regType) {
+void StructTarget :: registerRegister(StringList type) {
   // Set the flag indicating registers are needed.
   setRegisters();
 
   StringList name = "Reg";
-//  name << "_" << regType;
+//  name << "_" << type;
   name << "_" << "INT";
 
   VHDLPortList* portList = new VHDLPortList;
@@ -864,11 +951,14 @@ void StructTarget :: registerRegister(StringList regType) {
   portList->initialize();
   genList->initialize();
   
-//  portListPut(portList, "D", "IN", regType);
-//  portListPut(portList, "Q", "OUT", regType);
-  portListPut(portList, "D", "IN", "INTEGER");
-  portListPut(portList, "Q", "OUT", "INTEGER");
-  portListPut(portList, "C", "IN", "boolean");
+//  portList->put("D", "IN", type);
+//  portList->put("Q", "OUT", type);
+  portList->put("D", "IN", "INTEGER");
+  portList->put("Q", "OUT", "INTEGER");
+  portList->put("C", "IN", "boolean");
+//  portListPut(portList, "D", "IN", "INTEGER");
+//  portListPut(portList, "Q", "OUT", "INTEGER");
+//  portListPut(portList, "C", "IN", "boolean");
 
   registerCompDecl(name, portList, genList);
 }
@@ -895,18 +985,22 @@ void StructTarget :: registerPortHole(VHDLPortHole* port,
     ref << "_N" << (-tokenNum);
   }
   
-  portListPut(&firingPortList, ref, port->direction(), port->dataType());
-  portMapListPut(&firingPortMapList, ref, ref);
+  firingPortList.put(ref, port->direction(), port->dataType());
+  firingPortMapList.put(ref, ref);
+//  portListPut(&firingPortList, ref, port->direction(), port->dataType());
+//  portMapListPut(&firingPortMapList, ref, ref);
 
   // For wormhole inputs, create a system port.
   // But for delayed values of wormhole inputs, do not create another port.
   // For local inputs, create a signal.
   if ((port->atBoundary()) && (tokenNum >= 0)) {
     // Port at wormhole boundary, so create a system port instead of a signal.
-    portListPut(&systemPortList, ref, port->direction(), port->dataType());
+    systemPortList.put(ref, port->direction(), port->dataType());
+//    portListPut(&systemPortList, ref, port->direction(), port->dataType());
   }
   else {
-    signalListPut(&firingSignalList, ref, port->dataType(), ref, ref);
+    firingSignalList.put(ref, port->dataType(), ref, ref);
+//    signalListPut(&firingSignalList, ref, port->dataType(), ref, ref);
   }
 }
 
@@ -962,6 +1056,7 @@ void StructTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   }
 }
 
+/*
 // Allocate memory for a new VHDLSignal and put it in the list.
 void StructTarget :: signalListPut(VHDLSignalList* nlist, StringList nname,
 				   StringList ntype, StringList nfrom,
@@ -974,7 +1069,8 @@ void StructTarget :: signalListPut(VHDLSignalList* nlist, StringList nname,
   newSignal->to = nto;
   nlist->put(*newSignal);
 }
-
+*/
+/*
 // Allocate memory for a new VHDLPort and put it in the list.
 void StructTarget :: portListPut(VHDLPortList* list, StringList name,
 				 StringList direction, StringList type) {
@@ -985,7 +1081,8 @@ void StructTarget :: portListPut(VHDLPortList* list, StringList name,
   newPort->type = type;
   list->put(*newPort);
 }
-
+*/
+/*
 // Allocate memory for a new VHDLPortMap and put it in the list.
 void StructTarget :: portMapListPut(VHDLPortMapList* list, StringList name,
 				    StringList mapping) {
@@ -995,8 +1092,8 @@ void StructTarget :: portMapListPut(VHDLPortMapList* list, StringList name,
   newPortMap->mapping = mapping;
   list->put(*newPortMap);
 }
-
-
+*/
+/*
 // Allocate memory for a new VHDLVariable and put it in the list.
 void StructTarget :: variableListPut(VHDLVariableList* list, StringList name,
 				     StringList type, StringList initVal) {
@@ -1007,7 +1104,8 @@ void StructTarget :: variableListPut(VHDLVariableList* list, StringList name,
   newVar->initVal = initVal;
   list->put(*newVar);
 }
-
+*/
+/*
 // Allocate memory for a new VHDLPortVar and put it in the list.
 void StructTarget :: portVarListPut(VHDLPortVarList* list, StringList name,
 				    StringList variable) {
@@ -1017,3 +1115,4 @@ void StructTarget :: portVarListPut(VHDLPortVarList* list, StringList name,
   portVar->variable = variable;
   list->put(*portVar);
 }
+*/

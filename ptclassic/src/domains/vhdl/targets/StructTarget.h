@@ -114,9 +114,14 @@ public:
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, int=-1, int=-1);
 
+	// Connect a selector between the given input and output signals.
+	void connectSelect(StringList, StringList, StringList, StringList);
+
+	// Add a selector component declaration.
+	void registerSelector(StringList type);
+
 	// Connect a register between the given input and output signals.
-	void connectReg(StringList inName, StringList outName,
-				StringList type);
+	void connectReg(StringList, StringList,	StringList type);
 
 	// Add a register component declaration.
 	void registerRegister(StringList);
@@ -131,22 +136,22 @@ public:
 	// Register a read or write to an arc and the offset.
 	void registerArcRef(VHDLPortHole*, int);
 
-	// Allocate memory for a new VHDLSignal and put it in the list.
-	void signalListPut(VHDLSignalList*, StringList, StringList, StringList,
-			   StringList);
+//	// Allocate memory for a new VHDLSignal and put it in the list.
+//	void signalListPut(VHDLSignalList*, StringList, StringList, StringList,
+//			   StringList);
 
-	// Allocate memory for a new VHDLPort and put it in the list.
-	void portListPut(VHDLPortList*, StringList, StringList, StringList);
+//	// Allocate memory for a new VHDLPort and put it in the list.
+//	void portListPut(VHDLPortList*, StringList, StringList, StringList);
 
-	// Allocate memory for a new VHDLPortMap and put it in the list.
-	void portMapListPut(VHDLPortMapList*, StringList, StringList);
+//	// Allocate memory for a new VHDLPortMap and put it in the list.
+//	void portMapListPut(VHDLPortMapList*, StringList, StringList);
 
-	// Allocate memory for a new VHDLVariable and put it in the list.
-	void variableListPut(VHDLVariableList*, StringList, StringList,
-			     StringList);
+//	// Allocate memory for a new VHDLVariable and put it in the list.
+//	void variableListPut(VHDLVariableList*, StringList, StringList,
+//			     StringList);
 
-	// Allocate memory for a new VHDLPortVar and put it in the list.
-	void portVarListPut(VHDLPortVarList*, StringList, StringList);
+//	// Allocate memory for a new VHDLPortVar and put it in the list.
+//	void portVarListPut(VHDLPortVarList*, StringList, StringList);
 
 
 protected:
@@ -188,14 +193,14 @@ private:
 	// Return the condition indicating if registers are needed.
         int registers() { return regsUsed; }
 
-	// Flag indicating if initials are needed.
-        int initsUsed;
+	// Flag indicating if selectors are needed.
+        int selsUsed;
 
-	// Set the condition indicating initials are needed.
-	void setInitials() { initsUsed = 1; }
+	// Set the condition indicating selectors are needed.
+	void setSelectors() { selsUsed = 1; }
 
-	// Return the condition indicating if initials are needed.
-        int initials() { return initsUsed; }
+	// Return the condition indicating if selectors are needed.
+        int selectors() { return selsUsed; }
 };
 
 #endif
