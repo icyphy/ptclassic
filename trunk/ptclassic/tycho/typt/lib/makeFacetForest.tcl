@@ -47,8 +47,9 @@ proc ptolemyMkFacetGraph {name filename recurse parentPalette} {
     set outfd [open $filename w]
     # Put in titles and a reasonable default size.
     puts $outfd "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
-    puts $outfd "\{centeredText \{$name\} title \{\} black \{\{helvetica 24 bold i\} \{times 24 bold i\}\}\}"
-    puts $outfd "\{centeredText \{created: [clock format [clock seconds]]\} subtitle title firebrick \{\{helvetica 16 bold i\} \{times 16 bold i\}\}\}"
+    puts $outfd "\{configure -orientation vertical\}"
+    puts $outfd "\{titleSet title \{Ptolemy Palette\}\}"
+    puts $outfd "\{titleSet subtitle \{$name\ncreated: [clock format [clock seconds]]\}\}"
 
     ptolemyMkFacet [lindex $parentPalette 0] $outfd $recurse $parentPalette
     close $outfd
