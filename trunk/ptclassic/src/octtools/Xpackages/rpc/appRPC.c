@@ -160,7 +160,7 @@ int
 RPCDoExit(status)
 int status;
 {
-    extern main();
+    extern int main();
 
     RPCASSERT(RPCSendLong(RPC_CLEAN_EXIT_FUNCTION, RPCSendStream));
     RPCASSERT(RPCSendLong((long) status, RPCSendStream));
