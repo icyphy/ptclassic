@@ -173,6 +173,7 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tycholib widgets ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib util ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
     source [file join $tychokernel Lib.tcl]
 }
