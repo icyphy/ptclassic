@@ -345,15 +345,21 @@ int compat, unittime;
   fprintf( fp, "    desc { Priority: 0 -> lower }\n" );
   fprintf( fp, "  }\n" );
   fprintf( fp, "  state {\n" );
+  fprintf( fp, "    name { Clock_freq }\n" );
+  fprintf( fp, "    type { float }\n" );
+  fprintf( fp, "    default{ Clock_freq }\n" );
+  fprintf( fp, "    desc { CPU Clock frequency }\n" );
+  fprintf( fp, "  }\n" );
+  fprintf( fp, "  state {\n" );
   fprintf( fp, "    name { resourceName }\n" );
   fprintf( fp, "    type { string }\n" );
-  fprintf( fp, "    default { NULL }\n" );
+  fprintf( fp, "    default {\"HW\"}\n" );
   fprintf( fp, "    desc { resource to be used for simulation }\n" );
   fprintf( fp, "  }\n" );
   fprintf( fp, "  state {\n" );
   fprintf( fp, "    name { scheduler }\n" );
   fprintf( fp, "    type { string }\n" );
-  fprintf( fp, "    default { \"{SCHEDULER}\" }\n" );
+  fprintf( fp, "    default { \"{NonPremptive }\n" );
   fprintf( fp, "    desc { Scheduler to be used for simulation }\n" );
   fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
   fprintf( fp, "  }\n" );
@@ -369,13 +375,6 @@ int compat, unittime;
   fprintf( fp, "    type { string }\n" );
   fprintf( fp, "    default { \"{Overflowfile}\" }\n" );
   fprintf( fp, "    desc { File to write overflow information }\n" );
-  fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
-  fprintf( fp, "  }\n" );
-  fprintf( fp, "  state {\n" );
-  fprintf( fp, "    name { Clock_freq }\n" );
-  fprintf( fp, "    type { float }\n" );
-  fprintf( fp, "    default{ Clock_freq }\n" );
-  fprintf( fp, "    desc { CPU Clock frequency }\n" );
   fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
   fprintf( fp, "  }\n" );
 
@@ -400,6 +399,7 @@ FILE *fp;
 net_node_t *node;
 {
     fprintf( fp, "\n\n  constructor {\n    delayType = TRUE;\n" );
+    fprintf( fp, "_delay = 0.0;\n");
     fprintf( fp, "  }\n" );
 }
 
@@ -468,6 +468,24 @@ int autotick, unittime;
     fprintf( fp, "      }\n");
     fprintf( fp, "      emittedEvents->prepend(newEvent); \n");
     fprintf( fp, "   }\n}\n}\n\n");
+
+  fprintf( fp, "  method {\n" );
+  fprintf( fp, "    name { getDelay }\n");
+  fprintf( fp, "    access { public }\n" );
+  fprintf( fp, "    type { double }\n" );
+  fprintf( fp, "    arglist { \"()\" }\n" );
+  fprintf( fp, "    code {\n" );
+  fprintf( fp, "      return _delay/clkFreq;\n" );
+  fprintf( fp, "    }\n}\n\n");
+
+  fprintf( fp, "  method {\n" );
+  fprintf( fp, "    name { getEvents }\n");
+  fprintf( fp, "    access { public }\n" );
+  fprintf( fp, "    type { \"SequentialList*\" }\n" );
+  fprintf( fp, "    arglist { \"()\" }\n" );
+  fprintf( fp, "    code {\n" );
+  fprintf( fp, "      return emittedEvents;\n" );
+  fprintf( fp, "    }\n}\n\n");
 
 
   /*
@@ -643,11 +661,11 @@ int autotick, unittime;
     }
   } end_foreach_net_node_trans_out;
   fprintf( fp, "\n" );
+  fprintf( fp, "    double _delay;\n" );
 
   /* agghhhhh.....*/
   fprintf( fp, "\n    static DE%s%s* ", model_name, option );
   fprintf( fp, "%s%s_Star = NULL;\n", model_name, option );
-  fprintf( fp, "    static double _delay = 0.0;\n" );
   /* Define debugging procedure, if -g was selected */
   if ( trace ) {
     fprintf( fp, "static int grabDebugInfo( ClientData, Tcl_Interp*, " );
@@ -730,8 +748,6 @@ net_node_t *node;
 int compat;
 {
     fprintf( fp, "  setup {\n" );
-    fprintf( fp, "    if (resource == NULL) needResource = 0;\n" );
-    fprintf( fp, "    else needResource = 1;\n" );
     fprintf( fp, "      timeOfArrival = -1;\n" );
     fprintf( fp, "      Closeflow();\n" );
     fprintf( fp, "  }\n" );
@@ -753,7 +769,10 @@ char *option;
   fprintf( fp, "  begin {\n" );
   fprintf( fp, "    char stemp[1024];\n" );
   fprintf( fp, "    InfString name;\n" );
-  fprintf( fp, "    int saveimpl;\n\n" );
+  fprintf( fp, "    strcpy(resource, resourceName); \n\n" );
+  fprintf( fp, "    if (!strcmp(resource, \"HW\")) needResource = 0;\n");
+  fprintf( fp, "    else needResource = 1; \n");
+  fprintf( fp, "    \n" );
   fprintf( fp, "      %s%s_Star = this;\n", model_name, option );
 
   /* set variables which reflect Star parameters, and others*/
