@@ -40,24 +40,8 @@ Date of last revision: 5/92
 #include "DCGraph.h"
 #include "MultiTarget.h"
 
-			/////////////////////
-			///  Constructor  ///
-			/////////////////////
-DCParProcs::DCParProcs(int n, MultiTarget* t) : ParProcessors(n,t) {
-	LOG_NEW; schedules = new DCUniProc[n];
-}
-
-UniProcessor* DCParProcs :: getProc(int num) { return getSchedule(num); }
 ParNode* DCParProcs :: createCommNode(int i) {
 	LOG_NEW; return new DCNode(i);
-}
-
-			////////////////////
-			///  Destructor  ///
-			////////////////////
-
-DCParProcs::~DCParProcs() {
-	LOG_DEL; delete [] schedules;
 }
 
 			//////////////////
@@ -108,12 +92,12 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 
 	// Find the lowest index proc which finishes exactly at the makespan
 	for (int curProc = 0; curProc < numProcs; curProc++) {
-		if ((getSchedule(curProc)->getAvailTime() == time))
+		if ((getProc(curProc)->getAvailTime() == time))
 			break;
 	}
 
 	// Keep tracing the path.
-	NodeSchedule* ns = getSchedule(curProc)->getCurSchedule();
+	NodeSchedule* ns = getProc(curProc)->getCurSchedule();
 	while (time != 0) {
 		DCNode* curNode = (DCNode*) ns->getNode();
 		if (curNode->getType() <= 0) {
@@ -153,7 +137,7 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 			Error::abortRun("Backtracking error in SLP");
 			return FALSE;
 		} else {
-			ns = getSchedule(curProc)->getNodeSchedule(commNode);
+			ns = getProc(curProc)->getNodeSchedule(commNode);
 			if (!ns) {
 				Error::abortRun("can't find node schedule");
 				return FALSE;
@@ -180,7 +164,7 @@ void DCParProcs::categorizeLoads(int* procs) {
         int maxload = 0;
 
         for (int i = 0; i < numProcs; i++) {
-                DCUniProc* sch = getSchedule(i);
+                UniProcessor* sch = getProc(i);
                 int load = sch->computeLoad();
                 if (load > maxload) maxload = load;
         }
@@ -192,7 +176,7 @@ void DCParProcs::categorizeLoads(int* procs) {
 	do {
 		int seenIdle = 0;
 		for (i = 0; i < numProcs; i++) {
-			int temp = getSchedule(i)->getLoad();
+			int temp = getProc(i)->getLoad();
 			if (temp > threshold) {
 				procs[i] = 1;
 			} else {
