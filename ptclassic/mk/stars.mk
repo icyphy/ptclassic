@@ -164,7 +164,7 @@ ifdef CG56
 			$(CG56T)/CG56XCAsynchComm.o \
 			$(CG56T)/CGCXBase.o  
 	endif
-	# Window and RaisedCosine stars in cg56/dsp/stars need Cephes Library
+	# Window and RaisedCosine stars in cg56/dsp/stars need ptdsp Library
 	PTDSPLIB = 1
 	# CG56 targets need CGCStar
 	CGCLIB = 1
@@ -191,7 +191,7 @@ ifdef C50
 		TARGETS += $(C50T)/DSKC50Target.o \
 			$(C50T)/SubC50Target.o
 	endif
-	# Window and RaisedCosine star in c50/dsp/stars need Cephes Library
+	# Window and RaisedCosine star in c50/dsp/stars need ptdsp Library
 	PTDSPLIB = 1
 	# C50 targets need CGCStar
 	# CGCLIB = 1
@@ -272,7 +272,7 @@ ifdef VHDL
 			$(VHDLT)/VHDLCSynchComm.o
 	endif
 
-	# Window star in vhdl/stars needs the Cephes Library
+	# Window star in vhdl/stars needs the ptdsp Library
 	PTDSPLIB = 1
 endif
 
@@ -450,7 +450,7 @@ ifdef CGC
 	LIBS += -lcgcdspstars -lcgcstars
 	LIBFILES += $(LIBDIR)/libcgcdspstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcgcstars.$(LIBSUFFIX)
-	# Window and RaisedCos DSP stars need the Cephes Library
+	# Window and RaisedCos DSP stars need the ptdsp Library
 	PTDSPLIB = 1
 endif
 
@@ -561,7 +561,7 @@ ifdef SDF
 		STARS += $(LIBDIR)/sdfdspstars.o
 		LIBS += -lsdfdspstars
 		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
-		# Cephes library is used by the Window and RaiseCosine stars
+		# ptdsp library is used by the Window and RaiseCosine stars
 		PTDSPLIB = 1
 	endif
 	ifdef SDFMATRIX 
@@ -609,18 +609,14 @@ ifdef SDF
 	LIBS += -lsdfstars
 	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX)	
 	SDFLIB = 1
+	# ptdsp library is used by the Play star
+	PTDSPLIB = 1
 endif
 
 ifdef ATM
 	CUSTOM_DIRS += $(SDFDIR)/atm/kernel
 	LIBS += -latm
 	LIBFILES += $(LIBDIR)/libatm.$(LIBSUFFIX)
-endif
-
-ifdef PTDSPLIB
-	CUSTOM_DIRS += $(CROOT)/src/utils/libptdsp
-	LIBS += -lptdsp
-	LIBFILES += $(LIBDIR)/libptdsp.$(LIBSUFFIX)
 endif
 
 ifdef BDFLIB
@@ -631,10 +627,9 @@ endif
 
 ifdef SDFLIB
 	CUSTOM_DIRS += $(SDFDIR)/kernel $(SDFDIR)/loopScheduler
-
-		LIBS += -lLS -lsdf
-		LIBFILES += $(LIBDIR)/libLS.$(LIBSUFFIX) \
-			$(LIBDIR)/libsdf.$(LIBSUFFIX)
+	LIBS += -lLS -lsdf
+	LIBFILES += $(LIBDIR)/libLS.$(LIBSUFFIX) \
+		    $(LIBDIR)/libsdf.$(LIBSUFFIX)
 	ifneq ($(USE_SHARED_LIBS),yes) 
 		TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o
 	endif
@@ -715,9 +710,16 @@ PT_DEPEND += $(LIBPTCL) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS) $(TARGETS)
 
 # this would not be defined if we are making a small stand-alone 
-# program to test the ptolemy libraries, see standalone.mk
+# Program to test the ptolemy libraries, see standalone.mk
 ifdef PIGI
 	LIBS += version.o -lptcl 
+endif
+
+# External C library of Ptolemy DSP C routines
+ifdef PTDSPLIB
+	CUSTOM_DIRS += $(CROOT)/src/utils/libptdsp
+	LIBS += -lptdsp
+	LIBFILES += $(LIBDIR)/libptdsp.$(LIBSUFFIX)
 endif
 
 # External interface support - we need to expand libexttools, because it
