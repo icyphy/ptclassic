@@ -233,8 +233,10 @@ _otpNetErr( OTPNetInfo *pInfo, char *fmt, ...) {
     }
     for (i=0; i < pInfo->numIn; i++) {
 	OTPPortInfo *pPI = & pInfo->outPorts[i];
-	fprintf( stderr, "%s.%s(%s) ", pPI->instName ? pPI->instName : "formal",
-	  pPI->portName, pPI->flags & OTP_PifIn ? "in" : "out");
+	fprintf( stderr, "%s.%s(%s) ",
+		pPI->instName ? pPI->instName : "formal",
+		pPI->portName ? pPI->portName : "NULL",
+		pPI->flags & OTP_PifIn ? "in" : "out");
     }
     fprintf(stderr,"\n");
 }
