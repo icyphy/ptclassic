@@ -8,7 +8,7 @@ E. A. Lee \\
 T. M. Parks}
 \date{$Date$}
 
-The \dfn{CGC domain} of \Ptolemy\ generates code
+The \dfn{CGC domain} of Ptolemy generates code
 for the \code{C} programming language.
 \cindex{code generation in C}
 \cindex{C code generation}
@@ -32,107 +32,52 @@ single-processors include \code{default-CGC}, \code{TclTk_Target}, and
 
 For an overview of CGC stars and demos, please refer to the star atlas.
 
-\node Single-Processor Targets
+\node CGC Single-Processor Targets
 \section{Single-Processor Targets}
 
 The single-processor targets of the CGC domain
 generate \code{C} code from dataflow program graphs.
-All code is written
-to and compiled and run on the computer specified by the \var{host}
-parameter.  If a remote computer is specified by \var{host} then
-\code{rsh} commands will be used to place files on that compuer and to
-invoke the compiler.  You should verify that your \file{.rhosts} file
-is properly configured so that \code{rsh} will work.
-The code is placed in the directory specified by the \var{directory}
-parameter, in files named according to the \var{file} parameter.  The
-command used to compile the code is determined by the
+Code generation is controlled by the \var{host}, \var{directory}, and
+\var{file} paramteres as described in \nxref{CG Domain}.
+\vrindex{host, parameter}
+\vrindex{directory, parameter}
+\vrindex{file, parameter}
+The command used to compile the code is determined by the
 \var{compileCommand}, \var{compileOptions}, and \var{linkOptions}
 parameters.
-
-The parameters \var{display?}, \var{compile?}, and \var{run?} are
-provided for debugging and development.  For example, during
-development you may want to set \var{display?} to \samp{TRUE} and set
-\var{compile?} to \samp{FALSE}.  This would allow you to view the
-generated code without compiling it.  Later you may want to set
-\var{compile?} back to \samp{TRUE} but set \var{run?} to
-\samp{FALSE}.  This would allow you to
-verify that the generated code compiles correctly
-without attempting to run the program.  (If compilation
-fails, then the program will not be run regardless of the state of
-\var{run?}.)  Once everything works, you may want to set
-\var{display?} to \code{FALSE} to avoid the annoyance of having the code
-displayed for every run.
-
-The complete list of parameters common to the single-processor targets
-of the CGC domain is given below.
+Compilation and execution are controlled by the
+\var{display?}, \var{compile?}, and \var{run?}
+parameters, also described in \nxref{CG Domain}.
+The parameters common to the CGC targets are listed below.
 
 \begin{statelist}
-\state{host}{STRING}{}
-The name of the computer where programs will be compiled and run.  If
-the name is blank, which is the default, then programs will be compiled
-and run on the same computer where \Ptolemy\ is running.
-
-\state{directory}{STRING}{PTOLEMY_SYSTEMS}
-The destination directory for files created in the code
-generation process.  If the directory does not already exist,
-it will be created.  All files are written into this directory on the
-\var{host} computer.
-
-\state{file}{STRING}{}
-The base name for files created in the code generation process.
-If the name is blank, which is the default, then a suitable name will be
-generated automatically.
-The \file{.c} extension is automatically added to this name to form the
-complete file name.
-
-\state{display?}{INT}{TRUE}
-Controls the display of the generated code.
-
-\state{compile?}{INT}{TRUE}
-Controls the invokation of the compiler after code generation.
-
-\state{run?}{INT}{TRUE}
-Controls the running of the program after compilation.
-
-\state{staticBuffering}{INT}{TRUE}
+\state{INT}{staticBuffering}{TRUE}
 If \samp{TRUE}, then attempt to static, compile-time addressing of data
 buffers between stars.  Otherwise, use dynamic, run-time addressing.
 
-\state{funcName}{STRING}{main}
+\state{STRING}{funcName}{main}
 The name of the main function.  The default value of \samp{main} is suitable
 for generating stand-alone programs.  Choose another name if you wish to use
 the generated code as a procedure that is called from your own main program.
 
-\state{compileCommand}{STRING}{cc}
+\state{STRING}{compileCommand}{cc}
 Command name of the compiler.
 
-\state{compileOptions}{STRING}{}
+\state{STRING}{compileOptions}{}
 Options passed to the compiler.
 
-\state{linkOptions}{STRING}{-lm}
+\state{STRING}{linkOptions}{-lm}
 Options passed to the linker.
 
-\state{resources}{STRINGARRAY}{STDIO}
+\state{STRINGARRAY}{resources}{STDIO}
 List of abstract resources that the host computer has.
-
 \end{statelist}
 
 \node default-CGC
 \subsection{\protect\code{default-CGC}}
 
 The \code{default-CGC} target generates \code{C} code for a single computer
-from a SDF program graph.  In addition to the common parameters listed in the
-previous section, this target has the following parameters.
-
-\begin{statelist}
-\state{Looping Level}{INT}{0}
-Determines which scheduling algorithm is used.  If set to \samp{0}, an
-in-line schedule will be generated.  If set to \samp{1}, then a
-conservative loop-generating algorithm is used.  If set to \samp{2}, then a
-more exhaustive loop-generating algorithm is used.  The loop-generating
-algorithms
-generally produce more compact code but may take longer to run.
-\end{statelist}
+from a SDF program graph.
 
 \node TclTk_Target
 \subsection{\protect\code{TclTk_Target}}
@@ -143,15 +88,15 @@ the program graph.  The parameters differ from those of the
 \code{default-CGC} target only in their default values.
 
 \begin{statelist}
-\state{loopingLevel}{INT}{1}
+\state{INT}{loopingLevel}{1}
 
-\state{funcName}{STRING}{go}
+\state{STRING}{funcName}{go}
 
-\state{compileOptions}{STRING}{-I$PTOLEMY/tcl/tk/src \\
+\state{STRING}{compileOptions}{-I$PTOLEMY/tcl/tk/src \\
     -I$PTOLEMY/tcl/tcl/src \\
     -I$PTOLEMY/src/domains/cgc/tcltk/lib}
 
-\state{linkOptions}{STRING}{-L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
+\state{STRING}{linkOptions}{-L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
     -L$PTOLEMY/tcl/tcl/lib/$ARCH.opt \\
     -L$PTOLEMY/lib.$ARCH \\
     -L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
@@ -171,7 +116,7 @@ The \code{bdf-CGC} target has the same parameters as the \code{default-CGC}
 target (\pxref{default-CGC})
 with the exception that the \var{Looping Level} parameter is absent.
 
-\node Multi-Processor Targets
+\node CGC Multi-Processor Targets
 \section{Multi-Processor Targets}
 
 \node unixMulit_C
@@ -180,12 +125,16 @@ with the exception that the \var{Looping Level} parameter is absent.
 \node CGCcm5
 \subsection{\protect\code{CGCcm5}}
 
-\begin{ignore}
-
-\node Star Overview
+\node CGC Star Overview
 \section{An Overview of CGC Stars}
 
-\node Source Stars
+\begin{figure}
+\begin{center}
+\ \psfig{figure=cgc-stars.ps}
+\end{center}
+\end{figure}
+
+\node CGC Source Stars
 \subsection{Source Stars}
 
 \begin{description}
@@ -200,7 +149,7 @@ with the exception that the \var{Looping Level} parameter is absent.
 \item[TkImpulse]
 \end{description}
 
-\node Sink Stars
+\node CGC Sink Stars
 \subsection{Sink Stars}
 
 \begin{description}
@@ -214,31 +163,36 @@ with the exception that the \var{Looping Level} parameter is absent.
 \item[SunSound]
 \end{description}
 
-\node Arithmetic Stars
+\node CGC Arithmetic Stars
 \subsection{Arithmetic Stars}
 
-\node Nonlinear Stars
+\node CGC Nonlinear Stars
 \subsection{Nonlinear Stars}
 
-\node Control Stars
+\node CGC Control Stars
 \subsection{Control Stars}
 
-\node Conversion Stars
+\node CGC Conversion Stars
 \subsection{Conversion Stars}
 
-\node Signal Processing Stars
+\node CGC Signal Processing Stars
 \subsection{Signal Processing Stars}
 
-\node Dynamic Dataflow Stars
+\node CGC Dynamic Dataflow Stars
 \subsection{Dynamic Dataflow Stars}
 
-\node Boolean-Controlled Dataflow Stars
+\node CGC Boolean-Controlled Dataflow Stars
 \subsection{Boolean-Controlled Dataflow Stars}
 
-\node Tcl/Tk Stars
+\node CGC Tcl/Tk Stars
 \subsection{Tcl/Tk Stars}
 
-\node Demo Overview
+\node CGC Demo Overview
 \section{An Overview of CGC Demos}
 
-\end{ignore}
+\begin{figure}
+\begin{center}
+\ \psfig{figure=cgc-demo.ps}
+\end{center}
+\caption{The top-level palette for CGC demos.}
+\end{figure}
