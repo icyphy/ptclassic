@@ -194,7 +194,8 @@ MultiPortHole :: printVerbose () {
 Plasma*
 PortHole :: setPlasma () {
 	// first case: my type is known, and I'm an input.  Leave alone.
-	if (myPlasma && isItInput()) return myPlasma;
+	if (myPlasma && (isItInput() || (isItInput() == far()->isItInput()))) 
+		return myPlasma;
 	// second case: I've been told where to look for the type
 	if (typePort)
 		myPlasma = typePort->setPlasma();
@@ -344,4 +345,86 @@ void Geodesic :: initialize()
 
 Geodesic* PortHole :: allocateGeodesic () {
 	return new Geodesic;
+}
+
+/*
+ * additional methods for PortHoles
+ */
+
+
+/* Particle movement methods */
+
+
+void PortHole :: getParticle()
+{
+// It is assumed this routine is called before a Star executes...
+// It gets numberTokens Particles from the Geodesic and stores them
+// in the buffer, then setting current time to the last Particle input
+
+	for(int i = numberTokens; i>0; i--)
+		{
+		// Move the current time pointer in the buffer
+		Pointer* p = myBuffer->next();
+
+                // Put current Particle back into Plasma  to be
+		// recycled back to some OutSDFPort
+		myPlasma->put((Particle*)*p);
+ 
+		// Get another Particle from the Geodesic
+        	*p = myGeodesic->get();
+		}
+}
+
+void PortHole :: clearParticle()
+{
+	Pointer* p;
+
+// It is assumed this routine is called before a Star executes....
+// It moves current by numberTokens in the buffer, initializing
+//  each Particle; after the Star executes these Particles will
+//  contain data destined for another Star, and will be launched
+//  into the Geodesic
+
+// After this routine executes, the buffer current will point to
+// the last Particle, so the operator% references Particles relative
+// to this time
+
+	for(int i = numberTokens; i>0; i--) {
+	
+		// Get and initialize next Particle
+        	p = myBuffer->next();
+		((Particle*)*p)->initialize();
+		}
+}
+
+void PortHole :: putParticle()
+{
+	Pointer* p;
+
+// This method is called after go(); the buffer now contains numberTokens
+// Particles that are to be send to the output Geodesic
+// We send copies to prevent the Star from modifying Particles in the
+// Geodesic or InPortHole on the other side
+
+	// Back up in the buffer by numberTokens
+	for(int i = numberTokens; i>0; i--)
+        	p = myBuffer->last();
+
+	// Now move forward numberTokens times, sending copy of
+	// Particle to Geodesic
+	for(i = numberTokens; i>0; i--) {
+		p = myBuffer->next();
+		
+		// Get Particle from Plasma
+		Particle* pp = myPlasma->get();
+
+		// Copy from the buffer to this Particle
+		*pp = *(Particle*)*p;
+
+		// Launch this Particle into the Geodesic
+		myGeodesic->put(pp);
+		}
+
+	// Note that the Particle is left in the buffer to be
+	// accessed as a past Particle
 }
