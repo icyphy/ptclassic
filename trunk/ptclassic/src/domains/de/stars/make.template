@@ -136,6 +136,16 @@ install:	stars_install
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
+# Workaround bug in gcc-2.7.2 optimizer
+ifeq ($(USE_GPLUSPLUS),yes)
+DEEtherRec.o: DEEtherRec.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+DEEtherSend.o: DEEtherSend.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+endif
+
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
