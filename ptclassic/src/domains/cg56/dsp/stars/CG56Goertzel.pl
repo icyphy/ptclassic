@@ -74,14 +74,23 @@ which is a function of k and N
 		negWnReal = -cos(theta);
 		negWnImag = -sin(theta);
 	}
+
+	codeblock(result) {
+; compute complex-valued Goertzel filter output
+; a = real part = state1 - state2*cos(theta)
+; b = imag part = -state2*sin(theta)
+; a already contains the value of state1
+		clr	b		#$val(negWnImag),y1
+		mac	y1,x1,b		#$val(negWnReal),y0
+		mac	x1,y0,a		a,x:$addr(output)
+		move	b,y:$addr(output)
+	}
+
 	go {
 		// Discard all but the last sample
 		CG56GoertzelBase::go();
 
-		// Final value is function of the two real IIR state values
-		Fix s1 = state1;
-		Fix s2 = state2;
-		Complex o(s1 + s2 * Fix(negWnReal), s2 * Fix(negWnImag));
-		// output%0 << o;
+		// Register status after CG56GoertzelBase::go():
+		addCode(result);
 	}
 }
