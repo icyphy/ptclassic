@@ -28,7 +28,10 @@
 #
 # Substitute for xv that saves data into files
 #
-echo "$@"
+# Don't echo the arguments, it will cause the run results to be different
+# between invocations if the args are temporary files.
+#echo "$@"
+
 if [ -f pxfilename ]; then
 	pxfilename=`cat pxfilename`
 else
