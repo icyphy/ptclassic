@@ -11,5 +11,5 @@ to make a hierarchical structure.
 A couple of domains are to be added in the near future : THOR, MQ.
 Currently, the DE domain only is timed.  After the THOR domain
 is incorporated, our scheme of timing management will be rigorously
-tested.  The timed nature of the SDF domain has proven to be
+tested.  The timed nature of the SDF domain has proven 
 well behaved with the DE domain.

@@ -46,28 +46,55 @@ comprises a
 for inner connection and a 
 .c SDFfromUniversal\ EventHorizon
 for outer connection.
-In general, each domain has a pair of derived
-.c EventHorizon
-classes :
-.c (domain-name)toUniversal
-and
-.c (domain-name)fromUniversal .
-The
-.c (domain-name)toUniversal\ class
-receives data packets from its domain and transfers them to the
-counterpart.
-The
-.c (domain-name)fromUniversal\ class
-receives data packets from the counterpart and transfers them to its domain.
-Thus, the data transfer between two domains is the basic functionality
-of the 
-.c EventHorizon s.
 .pp
-It is worth pointing out that data-format conversion is not a task
+The
+.c EventHorizon\ class
+has two derived classes :
+.c FromEventHorizon
+and
+.c ToEventHorizon .
+In general, a domain has a pair of derived
+.c EventHorizon s
+: one from
+.c FromEventHorizon\ class
+(
+.c SDFfromUniversal, DEfromUniversal
+), the other from
+.c ToEventHorizon\ class
+(
+.c SDFtoUniversal, DEtoUniversal
+).
+The \fIgrabData()\fR method of the
+.c ToEventHorizon\ class
+receives data packets from its domain and transfers them to the
+counterpart
+.c FromEventHorizon\ class .
+Similarly, the \fIsendData()\fR method of the
+.c FromEventHorizon\ class
+receives data packets from the counterpart 
+.c ToEventHorizon
+and transfers them to its domain.
+Therefore, the data transfer between domains is performed by
+calling the \fIgrabData()\fR of the
+.c ToEventHorizon
+first, and calling the \fIsendData()\fR of the
+.c FromEventHorizon 
+next regardless of whether they are input ports or output ports
+of the 
+.c Wormhole .
+.pp
+A domain in \*(PT may use a 
+.c Particle
+of special type (for example, MQ domain).  If the domain
+interacts with another domain which is ignorant of the special
+.c Particle ,
+the data-format conversion should take place during the domain interface.
+However, the
+data-format conversion is not a task
 .IE "data-format conversion"
 of 
 .c EventHorizon s
-, opposed to what seems to be.
+, as opposed to what seems to be.
 By the virtue of C++ as an object oriented language,
 data-format conversion takes place whenever necessary 
 by overloaded operator.  In other words, conversion between 
@@ -76,13 +103,13 @@ and a special type
 .c Particle
 is automatically performed by defining the
 appropriate assignment operator in the definition of the special type 
-.c Particle
-,to and from the 
+.c Particle ,
+to and from the 
 .c int
 .c Particle .
 Also, some
 .c Star s
-can be defined to perform data-conversion functions. 
+can be dedicated to perform data-conversion functions. 
 .pp
 If data transfer is the sole purpose of the
 .c EventHorizon s,
@@ -90,8 +117,8 @@ we may have only one
 .c EventHorizon\ class .
 Unfortunately, there are some domain-specific operations we need to
 do in the
-.c EventHorizon s
-for domain interface.  There are two alternatives to
+.c EventHorizon s.
+There are two alternatives to
 perform the domain-specific operations.  First, We may optimize each domain
 interface by defining a 
 .c EventHorizon
@@ -108,13 +135,30 @@ has a pair of
 one for each domain.  Now, we have only $2N$
 .c EventHorizon s
 for $N$ domains, and each domain is totally independent of each other.
-Among domain-specific operations, timing-management is most
-complicated, which will be discussed in the next section.
 .pp
-One example of domain-specific operation can be found in
+While the data transfer between two 
+domains is the basic functionality of the
+.c EventHorizon s,
+there is another common function of them : management of time stamps.  
+.IE "time stamp"
+Some domains in \*(PT associate a time stamp with each data packet
+and other domains not.  Since a domain does not know with which domain
+it is interacted, the
+.c EventHorizon\ class
+of the domain should be associated with a time stamp regardless of the
+domain.  Therefore, the time stamp of a
+.c ToEventHorizon
+is set to be the arrival time of the data packet from its domain, and
+the time stamp of a
+.c FromEventHorizon
+is set equal to that of the paired
+.c ToEventHorizon .
+.pp
+There may be other domain-specific operations.
+One example can be found in
 .c DEfromUniversal\ class .
-The class should not only receives the data packets from the
-counterpart but also put them into the global event queue in the
+The class should not only receives the data packets 
+but also put them into the global event queue in the
 DE domain (refer to the \fBDE Domain\fR chapter in the \fBAlmagest\fR).
 Another example is the \fIready()\fR method in the
 .c FromEventHorizon\ class .
@@ -125,11 +169,12 @@ the inner domain is SDF and the outer
 domain is DE, the inner domain may not be executed until
 all input ports of the
 .c DEWormhole
-have enough data packets. For that purpose, the \fIgo()\fR method
+have enough data packets. For that purpose, the \fIcheckReady()\fR method
 of the
 .c Wormhole
 checks up all 
 .c FromEventHorizon s
 (\fIready()\fR method) of the input ports whether they are ready.
 For other domains, the \fIready()\fR method can be redefined for
-more elaborate synchronization. 
+more elaborate synchronization, or ignored if no synchronization is
+necessary like in DE domain. 
