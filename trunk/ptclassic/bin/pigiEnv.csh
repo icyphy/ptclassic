@@ -12,6 +12,9 @@
 # 	All Rights Reserved.
 #
 
+# On interrupt, remove temporary files
+onintr catch
+
 if ( ! $?DISPLAY ) then
     echo "${0}: Your DISPLAY environment variable must be set"
     exit 1
@@ -103,7 +106,7 @@ if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
 
-set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
+set path = ( $PTOLEMY/octtools/bin.$ARCH $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
 
 set cmdfile = /tmp/pigiCmds.$USER
 /bin/rm -f $cmdfile
@@ -125,6 +128,8 @@ if ( ! $?nocmdfile ) then
 endif
 
 vem -G 600x150+0+0 -F ${cell}:schematic -G +0+160 -R $PTOLEMY/lib/pigiRpcShell
+
+catch:
 
 if ( -r $dbfile ) then
     xrdb $dbfile
