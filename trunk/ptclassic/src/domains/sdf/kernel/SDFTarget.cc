@@ -77,6 +77,9 @@ void SDFTarget::setup() {
 	delSched();
 	SDFScheduler *s;
 
+	// create a file with the schedule in it
+	pt_ofstream o(logFile);
+
 	const char* tmpname = loopScheduler;
 
 	if (strcasecmp(tmpname,"ACYLOOP") == 0) {
@@ -97,7 +100,7 @@ void SDFTarget::setup() {
 		    	    << "graphs.  Since this graph is not acyclic "
 		    	    << "the scheduler CLUST will be used "
 			    << "(corresponding to old option 1).\n";
-		    Error::message(message);
+		    if (o) o << message;
 		    loopScheduler.setCurrentValue("CLUST");
 		}
 	    }
@@ -121,8 +124,6 @@ void SDFTarget::setup() {
 	Target::setup();
 	if (Scheduler::haltRequested() || logFile.null()) return;
 
-	// create a file with the schedule in it
-	pt_ofstream o(logFile);
 	if (o) {
 		o << scheduler()->displaySchedule() << "\n";
 	}
