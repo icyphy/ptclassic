@@ -76,8 +76,9 @@ public:
     // Generate code.
     virtual void generateCode();
 
-    // Save the generated code to a file.
-    virtual void writeCode(const char* fileName = NULL);
+    // Save the generated code to a file.  This method usually calls
+    // the target protected method rcpWriteFile.
+    virtual void writeCode();
 
     // Methods used in stages of a run.
     // The default versions do nothing.
@@ -145,15 +146,26 @@ public:
 
     // system call in destination directory.  If error is specified
     // & the system call is unsuccessful display the error message.
+    // This will return the error code from system. (0 == successful)
     virtual int systemCall(const char*cmd,const char* error=NULL,
 	const char* host="localhost");
+
+    // return the pointer of a code StringList given its name.  If it is 
+    // not found, This method allows stars to access a code StringList by 
+    // Write a file in the 'destDirectory' on the 'targetHost'.  If the
+    // directory does not exist, it is created.  The code is optionally
+    // displayed, if you want to optionally let the user display the
+    // code written set this argument to 'displayFlag'.  The file name
+    // is set to 'filePrefix'suffix, were 'filePrefix' is a target
+    // state.  If unsuccessful, the method calls Error::abortRun and 
+    // returns FALSE.
+    int writeFile(const char* text,const char* suffix="",int display=FALSE,
+		  int mode = -1);
 
     // Copy an SDF schedule from the multiprocessor schedule, instead
     // of performing an SDF scheduler for a uni-processor target
     void copySchedule(SDFSchedule&);
     
-    // return the pointer of a code StringList given its name.  If it is 
-    // not found, This method allows stars to access a code StringList by 
     // name.  If stream is not found, return NULL.
     CodeStream* getStream(const char* name);
 
@@ -229,7 +241,8 @@ protected:
     // Directory to store code files in.
     StringState destDirectory;
 
-    // Prefix for file names.
+    // Prefix for file names.  This is automatically set in the setup
+    // method to the galaxy name if = "".
     StringState filePrefix;
 
     // If we set this state 0, no looping. 1, Joe's looping.
