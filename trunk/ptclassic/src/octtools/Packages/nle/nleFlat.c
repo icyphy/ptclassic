@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -42,16 +42,22 @@ static char SccsId[]="$Id$";
 #include "tr.h"
 #include "oct.h"
 #include "oh.h"
+#include "ansi.h"
 #include "nle.h"
 #include "nleCommon.h"
+#include "nleMisc.h"
 
 /* Forward declaration */
+int nleFlatInstance
+	ARGS((octObject *InstToFlatP, octObject *FlatBagP, int type));
+
 static int FLATprocessInstances();
 static int FLATprocessLocalNets();
 static int FLATprocessCrossingNets();
-static int FLATprocessPaths();
-
-static int FLATprocessGeos();
+static void FLATprocessPaths
+	ARGS((octObject *InstToFlatP, int type));
+static void FLATprocessGeos
+	ARGS((octObject *InstToFlatP, int type));
 static int FLATprocessFormalTerminals();
 
 static int putNetTermsOnChipNet();
@@ -511,7 +517,7 @@ FLATprocessLocalNets(InstToFlatP, type)
 }
 
 /*ARGSUSED*/
-static int
+static void
 FLATprocessPaths(InstToFlatP, type)
 octObject *InstToFlatP;        /* instance to expand */
 int        type;        /* NLE_SOFT or NLE_HARD */
@@ -609,7 +615,7 @@ int        type;        /* NLE_SOFT or NLE_HARD */
 }
 
 /*ARGSUSED*/
-static int
+static void
 FLATprocessGeos(InstToFlatP, type)
 octObject *InstToFlatP;        /* instance to expand */
 int        type;        /* NLE_SOFT or NLE_HARD */
