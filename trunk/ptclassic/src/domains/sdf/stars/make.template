@@ -160,13 +160,10 @@ all:		$(SRCS) makefile $(LIB)
 install:	all $(LIBDIR)/$(LIB)
 		@echo Installation complete.
 
-EXTRA_SRCS=sdfstars.mk $(PL_SRCS)
+STAR_MK=sdfstars
+DOMAIN=SDF
 
-# rule for making star list for makefile inclusion.
-# The definition is extracted from the PL_SRCS definition above.
-sdfstars.mk:	make.template
-		rm -f sdfstars.mk
-		genStarList SDF > sdfstars.mk
+EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
 
 # include common definitions, rules
 include $(ROOT)/common.mk
