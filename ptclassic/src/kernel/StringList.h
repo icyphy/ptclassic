@@ -55,6 +55,9 @@ public:
 	// Copy constructor
 	StringList(const StringList& s);
 
+	// initialize
+	void initialize() { deleteAllStrings();}
+
 	// Assignment operator
 	StringList& operator = (const StringList& sl);
 	StringList& operator = (const char* s);
@@ -64,9 +67,6 @@ public:
 
 	// Destructor
 	~StringList() { deleteAllStrings();}
-
-	// initialize
-	void initialize() { deleteAllStrings();}
 
         // Add a thing to list
         StringList& operator += (const char*);
