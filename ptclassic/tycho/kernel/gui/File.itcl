@@ -172,7 +172,7 @@ class ::tycho::File {
     method saveCrash {}
 
     # If the file is modified, then ask the user if they want to save it
-    method saveQuery { {areyousure {0}}}
+    method saveQuery {}
 
     # Specify whether or not modifications are allowed in the displayed text.
     method setReadOnly {bool}
@@ -501,22 +501,9 @@ body ::tycho::File::constructor {args} {
 # error.  This has the effect of undoing the destruction.
 #
 body ::tycho::File::destructor {} {
-    
-    if {[info exists modified] && $modified} {
-	set title [file tail $file]
 
-	set response [::tycho::DialogWindow::newModal YesNoCancel .filedestr \
-		-text "Save changes to $title before closing?"]
-
-	# If the user hits the cancel button, cancel destruction.
-	# This is done by triggering an error.  I don't know of any
-	# other way.
-	if {$response == -1} {
- 	    ::tycho::silentError
-	}
-	if {$response == 1} {
-	    save
-	}
+    if [info exists modified] {
+	saveQuery
     }
     windowMenuRemoveAll $file
 
@@ -731,11 +718,11 @@ body ::tycho::File::reload {} {
     if {$file == "NoName" || $file == ""} {
 	return 
     }
-    saveQuery 1
+    saveQuery
     set saveclipboard [getClipboard]
     if [file exists $file] {
         if [file readable $file] {
-	    setReadOnly 0
+	    configure -readonly 0
             set point [currentPoint]
             clear
             set fd [open $file r]
@@ -745,16 +732,16 @@ body ::tycho::File::reload {} {
             seePoint $point
             markUnmodified
             if {[file writable $file]} {
-		setReadOnly 0
+		configure -readonly 0
             } else {
-		setReadOnly 1
+		configure -readonly 1
             }
         } {
             error "File $file exists but is not readable"
         }
     } {
         # File does not exist.  Simply clear current data.
-	setReadOnly 0
+	setRead0nly 0
         clear
     }
     setClipboard $saveclipboard
@@ -872,35 +859,29 @@ body ::tycho::File::saveCrash {} {
 # If the file is marked as modified, then ask the user if they want to save it.
 # This method is especially useful if tycho is about to process a file
 # either by checking it in, or running a program on it etc.
-# If the optional argument `areyousure' is 1, and the user does not
-# save the file, then the user is asked if they are sure.  If they say 'no'
-# then a silent error is returned.
 # 
+# If the file was not modified, return a 2.
 # If the file was modified and was saved, return a 1.
 # If the file was modified, but not saved return a 0.
-# If the file was not modified, return a 1.
-# By checking the return value, we can skip processing if the user did
-# not save the file
-body ::tycho::File::saveQuery { {areyousure {0}}} {
-    if {[isModified] == 1} {
-        if {[::tycho::askuser \
-                "File `[filename]' has not been saved, Save it now?"]} {
-            save
-            return 1
-        } else {
-	    if {$areyousure == 0 } {
-		return 0
-	    } else {
-		if [::tycho::askuser \
-			"Are you sure you want to discard your changes (if any)?"] {
-		    return 1
-		} {
-		    ::tycho::silentError
-		}
-	    }
-        }
+# If the user hits cancel, we signal a silentError
+#
+body ::tycho::File::saveQuery {} {
+    if {$modified == 1} {
+	set title [file tail $file]
+	set response [::tycho::DialogWindow::newModal YesNoCancel .filedestr \
+		-text "Save changes to $title before closing?"]
+	# If the user hits the cancel button, cancel destruction.
+	# This is done by triggering an error.  I don't know of any
+	# other way.
+	if {$response == -1} {
+ 	    ::tycho::silentError
+	}
+	if {$response == 1} {
+	    save
+	}
+	return $response
     }
-    return 1
+    return 2
 }
 
 #####################################################################
@@ -913,7 +894,7 @@ body ::tycho::File::saveQuery { {areyousure {0}}} {
 body ::tycho::File::setReadOnly {bool} {
 
     ::tycho::View::setReadOnly $bool
-
+    
 # FIXME:
 #    if [winfo exists $prefix] {
 	if {$bool} {
