@@ -3,8 +3,8 @@ defstar {
 	domain { SDF }
 	derivedFrom { Matlab }
 	desc {
-Evaluate Matlab functions if inputs are given or evaluate
-Matlab commands and scripts if no inputs are given.
+Evaluate a Matlab function if inputs are given or
+evaluate a Matlab command if no inputs are given.
 	}
 	version { $Id$ }
 	author { Brian L. Evans }
@@ -18,10 +18,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 This star converts the matrices/scalars on the input ports to Matlab format,
 passes the Matlab matrices to the \fIMatlabFunction\fR, converts the
-resulting Matlab matrices to Ptolemy format, and outputs the matrices/scalars.
-If there are no inputs, then the \fIMatlabFunction\fR is evaluated as is
-without any arguments being passed to it; e.g., a value of
-"hilb(4)" for \fIMatlabFunction\fR would return a 4 x 4 Hilbert matrix.
+resulting Matlab matrices to Ptolemy matrices, and outputs the matrices.
+If there are no inputs, then the \fIMatlabFunction\fR is treated as a
+Matlab command so no matrix arguments are passed to it.
+For example, a value of "hilb(4)" for \fIMatlabFunction\fR would return
+a 4 x 4 Hilbert matrix.
 The names of the input arguments and output variables for the Matlab function
 are derived from \fImatlabInputName\fR and \fImatlabOutputName\fR,
 respectively.
@@ -42,7 +43,7 @@ the Matlab command "[Pout1, Pout2] = doit(Pin1, Pin2, Pin3);".
 	}
 	outmulti {
 		name { output }
-		type { anytype }
+		type { FLOAT_MATRIX_ENV }
 	}
 	defstate {
 		name { MatlabFunction }
@@ -102,11 +103,26 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	}
 
 	setup {
+		// set the number of input and output ports
+		numInputs = input.numberPorts();
+		numOutputs = output.numberPorts();
+
+		// check data type of output ports
+		if ( numOutputs > 0 ) {
+		  DataType outType = output.type();
+		  if ( outType != FLOAT_MATRIX_ENV &&
+		       outType != COMPLEX_MATRIX_ENV ) {
+		    Error::abortRun(*this,
+				    "The output ports may only support float",
+				    "matrix or complex matrix envelopes, not",
+				    output.type());
+		  }
+		}
+
+		// run the setup method of the base star (start Matlab, etc.)
 		SDFMatlab::setup();
 
-		// establish of number inputs & allocate Matlab matrices &
-		// generate names for Matlab versions of input matrix names
-		numInputs = input.numberPorts();
+		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
 		  LOG_DEL; delete [] matlabInputMatrices;
 		  LOG_NEW; matlabInputMatrices = new MatrixPtr[numInputs];
@@ -117,9 +133,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 				      (char *) MatlabInputVarName );
 		}
 
-		// establish of number outputs & allocate Matlab matrices &
-		// generate names for Matlab versions of output matrix names
-		numOutputs = output.numberPorts();
+		// allocate Matlab output matrices and generate their names
 		if ( numOutputs > 0 ) {
 		  LOG_DEL; delete [] matlabOutputMatrices;
 		  LOG_NEW; matlabOutputMatrices = new MatrixPtr[numOutputs];
@@ -301,12 +315,14 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	  code {
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
-		InfString errstr;
+		InfString merrstr;
 		char *verbstr = "";
-		int fatalErrorFlag = FALSE;
+		int matlabFatalError = FALSE;
+		int incompatibleOutportPort = FALSE;
 		for ( int j = 0; j < numOutputs; j++ ) {
-		  PortHole *oportp = nextp++;  // current output porthole
-		  int matlabMatrixWrongForm = TRUE;
+		  // current output porthole & advance nextp to next porthole
+		  PortHole *oportp = nextp++;
+		  DataType portType = oportp->resolvedType();
 
 		  // create a new Matlab matrix for deallocation and save ref.
 		  Matrix *matlabMatrix =
@@ -319,59 +335,60 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  if ( mxIsFull(matlabMatrix) ) {
 
 		    // for real matrices, imagp will be null
-		    double *realp = mxGetPr( matlabMatrix );
-		    double *imagp = mxGetPi( matlabMatrix );
+		    double *realp = mxGetPr(matlabMatrix);
+		    double *imagp = mxGetPi(matlabMatrix);
 
-		    if ( mxIsComplex(matlabMatrix) ) {
-		      matlabMatrixWrongForm = FALSE;
-		      if ( rows == 1 && cols == 1 ) {
-			(*oportp)%0 << Complex(*realp, *imagp);
-		      }
-		      else {
-			LOG_NEW; ComplexMatrix& Amatrix =
+		    if ( portType == COMPLEX_MATRIX_ENV ) {
+		      LOG_NEW; ComplexMatrix& Amatrix =
 					*(new ComplexMatrix(rows, cols));
-			for ( int jrow = 0; jrow < rows; jrow++ ) {
-			  for ( int jcol = 0; jcol < cols; jcol++ ) {
-			    Amatrix[jrow][jcol] = Complex(*realp++, *imagp++);
-			  }
+		      for ( int jrow = 0; jrow < rows; jrow++ ) {
+			for ( int jcol = 0; jcol < cols; jcol++ ) {
+			  double realValue = *realp++;
+			  double imagValue = ( imagp ) ? *imagp++ : 0.0;
+			  Amatrix[jrow][jcol] = Complex(realValue, imagValue);
 			}
-			// write the matrix to output port j
-			// do not delete Amatrix: particle class handles that
-			(*oportp)%0 << Amatrix;
 		      }
+		      // write the matrix to output port j
+		      // do not delete Amatrix: particle class handles that
+		      (*oportp)%0 << Amatrix;
 		    }
-		    else if ( mxIsDouble(matlabMatrix) ) {
-		      matlabMatrixWrongForm = FALSE;
-		      if ( rows == 1 && cols == 1 ) {
-			(*oportp)%0 << *realp;
-		      }
-		      else {
-			LOG_NEW; FloatMatrix& Amatrix =
+		    else if ( portType == FLOAT_MATRIX_ENV ) {
+		      LOG_NEW; FloatMatrix& Amatrix =
 					*(new FloatMatrix(rows, cols));
-			for ( int jrow = 0; jrow < rows; jrow++ ) {
-			  for ( int jcol = 0; jcol < cols; jcol++ ) {
-			    Amatrix[jrow][jcol] = *realp++;
-			  }
-			}
-			// write the matrix to output port j
-			// do not delete Amatrix: particle class handles that
-			(*oportp)%0 << Amatrix;
+		      if ( mxIsComplex(matlabMatrix) ) {
+			InfString myerrstr;
+			myerrstr = "Imaginary components ignored for the ";
+			myerrstr << "Matlab matrix " << matlabOutputNames[j];
+			myerrstr << " on output port " << j;
+			Error::warn(*this, (char *) myerrstr);
 		      }
+		      for ( int jrow = 0; jrow < rows; jrow++ ) {
+			for ( int jcol = 0; jcol < cols; jcol++ ) {
+			  Amatrix[jrow][jcol] = *realp++;
+			}
+		      }
+		      // write the matrix to output port j
+		      // do not delete Amatrix: particle class handles that
+		      (*oportp)%0 << Amatrix;
+		    }
+		    // this situation should never be encountered since the
+		    // setup method should have checked for output data type
+		    else {
+		      incompatibleOutportPort = TRUE;
 		    }
 		  }
-
-		  if ( matlabMatrixWrongForm ) {
-		    if ( ! fatalErrorFlag ) {
-		      errstr = "For the Matlab command ";
-		      errstr << matlabCommand << ", ";
+		  else {
+		    if ( ! matlabFatalError ) {
+		      merrstr = "For the Matlab command ";
+		      merrstr << matlabCommand << ", ";
 		      verbstr = " is not a full matrix.";
 		    }
 		    else {
-		      errstr << " and ";
+		      merrstr << " and ";
 		      verbstr = " are not full matrices.";
 		    }
-		    errstr << matlabOutputNames[j];
-		    fatalErrorFlag = TRUE;
+		    merrstr << matlabOutputNames[j];
+		    matlabFatalError = TRUE;
 		  }
 
 		  // save the pointer to the new Matlab matrix for deallocation
@@ -387,9 +404,17 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		}
 
 		// close Matlab connection and exit Ptolemy if fatal error
-		if ( fatalErrorFlag ) {
+		if ( matlabFatalError || incompatibleOutportPort ) {
 		  killMatlab();
-		  Error::abortRun(*this, (char *) errstr, verbstr);
+		  if ( incompatibleOutportPort ) {
+		    Error::abortRun(*this,
+			"Output port data type is neither a floating-point",
+			"matrix nor a complex-valued matrix: the setup() ",
+			"method should have flagged this error.");
+		  }
+		  else {
+		    Error::abortRun(*this, (char *) merrstr, verbstr);
+		  }
 		}
 	  }
 	}
