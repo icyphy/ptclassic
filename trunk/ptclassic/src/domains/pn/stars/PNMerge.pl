@@ -31,40 +31,38 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	name { output }
 	type { int }
-    }
-
-    protected
-    {
-	int getA:1;	// Should we get data from port a?
-	int getB:2;	// Should we get data from port b?
+	attributes { P_DYNAMIC }
     }
 
     begin
     {
 	// Read both inputs the first time.
-	getA = getB = TRUE;
+	a.receiveData();
+	b.receiveData();
     }
 
     go
     {
-	if (getA) a.receiveData();
-	if (getB) b.receiveData();
-	getA = getB = FALSE;
+	output.receiveData();	// Initialize the output.
 
 	if (int(a%0) < int(b%0))
 	{
 	    output%0 = a%0;
-	    getA = TRUE;
+	    output.sendData();
+	    a.receiveData();
 	}
 	else if (int(a%0) > int(b%0))
 	{
 	    output%0 = b%0;
-	    getB = TRUE;
+	    output.sendData();
+	    b.receiveData();
 	}
 	else	// Remove duplicates.
 	{
 	    output%0 = a%0;
-	    getA = getB = TRUE;
+	    output.sendData();
+	    a.receiveData();
+	    b.receiveData();
 	}
     }
 }
