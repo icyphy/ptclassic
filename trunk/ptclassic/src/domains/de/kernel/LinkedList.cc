@@ -81,7 +81,7 @@ void LinkedList::directRemove( Link * a ) {
 	 lastNode = 0;
 	 previous = 0;
     }
-    return;
+    return 1;
 }
 
 Link* LinkedList::removeLink(Link& a) {
@@ -120,8 +120,7 @@ void LinkedList :: append(Pointer a)
 {
 	if (dimen > 0) {	// List not empty
 	    LOG_NEW; lastNode = new Link(a,lastNode->next);
-	}
-	else {		        // List empty
+	} else {	        // List empty
 	    LOG_NEW; lastNode = new Link(a,0);
 	}
 	dimen++;
