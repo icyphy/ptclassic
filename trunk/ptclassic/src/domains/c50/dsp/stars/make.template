@@ -22,7 +22,7 @@ C50DSP = $(ROOT)/src/domains/c50/dsp/stars
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR) -I$(C50SDIR) \
- -I$(ROOT)/src/utils/libcephes
+ -I$(ROOT)/src/utils/libptdsp
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
