@@ -25,7 +25,7 @@ const bitWord AB_NOINIT = 0x80;	// don't care about initial value (RAM state)
 const bitWord AB_REVERSE = 0x100;// write out in reverse order
 const bitWord AB_CONSEC = 0x200; // allocate consecutively with next state
 				 // (of same star)
-const bitWord AB_SHARED = 0x400; // allocate in two memories
+const bitWord AB_SYMMETRIC = 0x400; // allocate in two memories
 
 // Define attributes for code generation states
 // note that attributes may combine several attribute bits.
@@ -36,7 +36,7 @@ extern const Attribute A_CIRC; // circular buffer
 extern const Attribute A_NOINIT; // no initialization
 extern const Attribute A_REVERSE; // write in reverse order
 extern const Attribute A_CONSEC;  // write consecutively
-extern const Attribute A_SHARED;  // allocate in two memories
+extern const Attribute A_SYMMETRIC;  // allocate in two memories
 
 #include "CGStar.h"
 
@@ -96,6 +96,10 @@ protected:
 	// Look up the size of a porthole or state
 	int lookupSize(const char* name);
 
+	// compute the address, plus an offset, with buffer wraparound
+	// for accessing an element in a porthole buffer.
+	unsigned addrWithOffset(const char*, const char*);
+
 	// For generation of error messages
 	void codeblockError(const char* p1, const char* p2 = "");
 
@@ -106,7 +110,8 @@ protected:
 	// to $mem(name):$addr(name).  The $val(name) refers to the value
 	// of a State.  The number, names, and meaning of
 	// these functions can be easily redefined in derived classes.
-	virtual StringList processMacro(const char* func, const char* id);
+	virtual StringList processMacro(const char* func, const char* id,
+					const char* arg2);
 
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.
