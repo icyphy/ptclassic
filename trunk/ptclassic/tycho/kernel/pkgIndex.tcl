@@ -30,5 +30,30 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-package ifneeded TychoKernel 0.1 \
+# FIXME: this will go
+package ifneeded tycho.kernel 2.0 \
 	[list source [file join $dir kernel.tcl]]
+
+
+# This is not really a package, but a collection of packages
+# Look for packages inside this package.
+#
+# This code adapted from tclPkgUnknown:
+#
+# Copyright (c) 1991-1993 The Regents of the University of California.
+# Copyright (c) 1994-1996 Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# Find subdirectories with packages
+# We can't use glob in safe interps, so enclose the following
+# in a catch statement
+catch {
+    foreach file [glob -nocomplain [file join $dir * pkgIndex.tcl]] {
+	set dir [file dirname $file]
+	if [catch {source $file} msg] {
+	    catch {puts stderr "error reading package index file $file: $msg"}
+	}
+    }
+}
