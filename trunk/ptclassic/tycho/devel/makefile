@@ -48,10 +48,11 @@ include $(CONFIG)
 
 TCL_SRCS = 
   
+#	GanttView.itcl
+#	GanttVSM.itcl
+
 ITCL_SRCS = \
 	Displayer.itcl \
-	GanttView.itcl \
-	GanttVSM.itcl \
 	Graphics.itcl \
 	Options.tcl \
 	Preferences.itcl \
