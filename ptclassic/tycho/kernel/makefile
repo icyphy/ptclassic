@@ -73,6 +73,7 @@ ITCL_SRCS = \
 	Preferences.itcl \
 	Stack.itcl \
 	TopLevel.itcl \
+	Tycho.tcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
 
