@@ -96,6 +96,7 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
 }
 
 // destructor remove myself from the circle but preserve a smaller circle
+// of typePortPtrs.
 GenericPort :: ~GenericPort () {
 	if (!typePortPtr) return;
 	GenericPort* q = typePortPtr;
@@ -111,21 +112,18 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	// Resolve any aliases and MultiPortHole stuff:
 	// newConnection is a virtual function that does the right
 	// thing for all types of PortHoles.
-	PortHole& realSource = newConnection();
-	PortHole& realDest = destination.newConnection();
-
-	Geodesic* geo = realSource.allocateGeodesic();
-	geo->originatingPort = &realSource;
-	geo->destinationPort = &realDest;
-	realSource.myGeodesic = geo;
-	realDest.myGeodesic = geo;
+	// create Geodesic, wire it up.
+	PortHole* realSource = &newConnection();
+	Geodesic* geo = realSource->allocateGeodesic();
+	geo->setSourcePort(*realSource);
+	PortHole* realDest = geo->setDestPort(destination);
 
 	// Set the farSidePort pointers in both blocks
 	// This information is redundant, since it also appears in the
 	// Geodesic, but to get it from the Geodesic, you have to know
 	// which PortHole is an input, and which is an output.
-	realSource.farSidePort = &realDest;
-	realDest.farSidePort = &realSource;
+	realSource->farSidePort = realDest;
+	realDest->farSidePort = realSource;
 
 	// Set the number of delays
 	geo->numInitialParticles = numberDelays;
@@ -136,13 +134,19 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 // This is not a GenericPort method because the concept of disconnecting
 // a multiporthole is ambiguous.  Since fancier geodesics work differently,
 // this is virtual -- redefined for some domains.
-void PortHole :: disconnect() {
-	if (!farSidePort) return;
-	// free up geodesic
-	farSidePort->myGeodesic = 0;
-	delete myGeodesic;
-	myGeodesic = 0;
+void PortHole :: disconnect(int delGeo) {
 	farSidePort = 0;
+	if (!myGeodesic) return;
+
+	if (delGeo) {
+		// remove the connection on the geodesic end too
+		myGeodesic->disconnect(*this);
+
+		// free up geodesic if it is not persistent
+		if (!myGeodesic->isItPersistent())
+			delete myGeodesic;
+	}
+	myGeodesic = 0;
 	return;
 }
 
@@ -439,36 +443,16 @@ PortHole& MultiPortHole :: newConnection() {
 	return newPort();
 }
 
-Particle* Geodesic::get()
-{
-	if (sz > 0) {
-		sz--;
-		return ParticleStack::get();
-	}
-	else return 0;
-}
 
-void Geodesic :: initialize()
-{
-	// Remove any Particles residing on the Geodesic,
-	// and put them in Plasma
-	freeup();
-
-	// Initialize the buffer to the number of Particles
-	// specified in the connection; note that these Particles
-	// are initialized by Plasma
-	for(int i=numInitialParticles; i>0; i--) {
-		Particle* p = originatingPort->myPlasma->get();
-		putTail(p);
-	}
-	sz = numInitialParticles;
-	// TO DO: Allow Particles in the Geodesic to be
-	// initialized to specific values
-}
-
-
+// allocate a new Geodesic.  Set its name and parent according to the
+// source porthole (i.e. *this).
 Geodesic* PortHole :: allocateGeodesic () {
-	return new Geodesic;
+	char* nm = new char[strlen(readName())+6];
+	strcpy (nm, "Node_");
+	strcat (nm, readName());
+	Geodesic *g = new Geodesic;
+	g->setNameParent(nm, parent());
+	return g;
 }
 
 /*
