@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: J. T. Buck
+ Programmer: J. T. Buck, Jose Luis Pino
  (completely replaces a previous version by E. A. Lee and D. G. Messerschmitt)
  Date of creation: 4/22/90
 
@@ -53,6 +53,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Note: all components of a StringList are in dynamic memory,
 // and are deleted by the StringList destructor
 
+    
 // Assignment operator
 StringList&
 StringList :: operator = (const StringList& sl) {
@@ -288,3 +289,19 @@ void printStringList(const StringList *s, char* delimitter = 0) {
   cout << "\n";
   fflush(stdout);
 }
+
+const char* displayStringListItems(const StringList& theList) {
+    StringListIter nexts(theList);
+    const char* p;
+    StringList contents;
+    while ((p = nexts++) != 0) {
+	contents << p << '\n';
+    }	
+    return (const char*) contents;
+}
+
+const char* displayStringList(const StringList& theList) {
+    StringList contents = theList;
+    return (const char*) contents;
+}
+   
