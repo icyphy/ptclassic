@@ -9,11 +9,9 @@
 #include "IntState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
+#include "defConstructs.h"
 #include <std.h>
 
-#include "CaseScheduler.h"
-#include "ForScheduler.h"
-#include "DoWhileScheduler.h"
 #include "SDFScheduler.h"
 	
 /**************************************************************************
@@ -42,9 +40,6 @@ void fireSource(Star&, int);
 // correct numTokens value for each EventHorizon.
 extern void renewNumTokens(Block* b, int flag);
 
-static CaseScheduler caseSched;
-static ForScheduler  forSched;
-static DoWhileScheduler dowhileSched;
 static SDFScheduler sdfSched;
 	
 /*******************************************************************
@@ -216,20 +211,17 @@ DDFScheduler :: run (Block& block) {
 
 	Galaxy& galaxy = block.asGalaxy();
 
+	// check whether it is a predefined construct or not.
 	switch(canDom) {
-		case Case : return(caseSched.run(galaxy));
-			 break;
-		case For : return(forSched.run(galaxy));
-			 break;
-		case DoWhile : return(dowhileSched.run(galaxy));
-			 break;
-		case Recur : return(recurSched.run(galaxy));
+		case RECUR : return(recurSched.run(galaxy));
 			 break;
 		case SDF : 
 			sdfSched.setStopTime((float) stopTime);
 			return(sdfSched.run(galaxy));
 			break;
-		default : break;
+		case DDF : break;
+		default : return(realSched->run(galaxy)); 
+			break;
 	}
 		
 	// initialize the SpaceWalk member
@@ -525,39 +517,66 @@ const char* DDFScheduler :: domain () const { return DDFdomainName ;}
 	// selectScheduler
 	////////////////////////////
 
-Scheduler* DDFScheduler :: selectScheduler(Galaxy& galaxy) {
+void DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 
 	// select a candidate domain
-	int flag = 1;
-	Scheduler* realSched;
+	detectConstruct(galaxy);
+
+	// set up the right scheduler
 	switch(canDom) {
-		case Case : flag = caseSched.setup(galaxy);
+		// special care for SDF and "Recur" domain.
+		case RECUR : recurSched.setup(galaxy);
 			 break;
-		case For : flag = forSched.setup(galaxy);
-			 break;
-		case DoWhile : flag = dowhileSched.setup(galaxy);
-			 break;
-		case Recur : flag = recurSched.setup(galaxy);
-			 break;
-		case SDF : flag = sdfSched.setup(galaxy);
+		case SDF : sdfSched.setup(galaxy);
 		        if (galaxy.parent()) 
 				renewNumTokens(galaxy.parent(), TRUE);
 			break;
-		default : flag = 0;
+		case Unknown :
+		case DDF : break;
+		default : realSched = getScheduler(canDom);
+			  if (!realSched) {
+				Error::abortRun("Undefined Scheduler for ",
+				nameType(canDom), " construct.");
+				return;
+			  }
+			  realSched->setup(galaxy);
 			  break;
 	}
+}
 
-	if (!flag)
-		canDom = DDF;
+	////////////////////////////
+	// detectConstruct
+	////////////////////////////
+
+void DDFScheduler :: detectConstruct(Galaxy& gal) {
+
+	GalStarIter nextStar(gal);
+	Star* s;
+
+	if ((canDom == DDF) || (canDom == SDF)) return;
+
+	while ((s = nextStar++) != 0) {
+		if (s->isItWormhole()) {
+			const char* dom = s->mySched()->domain();
+			if (strcmp(dom + 1, "DF"))
+				canDom = DDF;
+		} else if (strcmp(s->domain(), DDFdomainName)) {
+			Error::abortRun(*s, " is not a Wormhole.");
+			canDom = Unknown;
+		}
+	}
+
+	canDom = getType(gal);
 }
 
 // constructor: set default options
 
 DDFScheduler::DDFScheduler () {
 	stopTime = 1;
-	canDom = UnKnown;
+	canDom = Unknown;
 	numOverlapped = 1; 
 	restructured = FALSE;
+	realSched = 0;
 	schedulePeriod = 10000.0;
 }
 

@@ -11,6 +11,7 @@
 #include "DataStruct.h"
 #include "IntState.h"
 #include "RecurScheduler.h"
+#include "defConstructs.h"
 
 
 /**************************************************************************
@@ -29,7 +30,6 @@ $Id$
 
 **************************************************************************/
 
-enum CanDom { UnKnown, EndCase, Case, For, DoWhile, Recur, SDF, DDF};
 
 	////////////////////////////
 	// DDFScheduler
@@ -61,10 +61,13 @@ class DDFScheduler : public Scheduler {
 
 // Advanced features ......................
 	// candidate domain
-	CanDom canDom;
+	int canDom;
 
 	// scheduler for recursion construct
 	RecurScheduler recurSched;
+
+	// real scheduler for other constructs
+	Scheduler* realSched;
 
 	// list of newly created wormholes of SDF domain.
 	SequentialList sdfWorms;
@@ -73,8 +76,11 @@ class DDFScheduler : public Scheduler {
 	static int nW;
 	const char* wormName();
 
+	// decide the type of the construct.
+	void detectConstruct(Galaxy&);
+
 	// select scheduler
-	Scheduler* selectScheduler(Galaxy&);
+	void selectScheduler(Galaxy&);
 
 	// modify the topology
 	void makeSDFWormholes(Galaxy&);
