@@ -70,6 +70,10 @@ int ptkPlotBreak(Tcl_Interp *interp,
 
 void ptkFreePlot(Tcl_Interp *interp, ptkPlotWin *plotPtr);
 
-const char *ptkPlotErrorMsg();
+/* Note that non-ansi C does not have const defined, so we use a macro
+ * here, included from somewhere.  Otherwise this file won't compile under
+ * sunOS4.1.3 cc
+ */
+CONST char *ptkPlotErrorMsg();
 
 #endif

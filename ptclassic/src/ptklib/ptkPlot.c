@@ -84,7 +84,11 @@ static char *errmsg = "";
 /* ptkPlotErrorMsg
  * return a pointer to the latest error message.
  */
-const char *ptkPlotErrorMsg() {
+/* Note that non-ansi C does not have const defined, so we use a macro
+ * here, included from somewhere.  Otherwise this file won't compile under
+ * sunOS4.1.3 cc
+ */
+CONST char *ptkPlotErrorMsg() {
   return errmsg;
 }
 
@@ -450,15 +454,13 @@ static int displayPoint(interp,plotPtr,setPtr, point)
     if (!setPtr->beenOnceThrough) {
       if (showsomething && point > 0) {
 	sprintf(strTmp,
-		"%s.pf.c create line %f %f %f %f "
-		"-fill [option get . plotColor%d PlotColor%d] -width 2.0",
+		"%s.pf.c create line %f %f %f %f -fill [option get . plotColor%d PlotColor%d] -width 2.0",
 		plotPtr->name, canvX, canvY, canvPrevX, canvPrevY,
 		setPtr->color, setPtr->color);
       } else {
 	/* create a zero length line so that it exists and can be configured later */
 	sprintf(strTmp,
-		"%s.pf.c create line 0.0 0.0 0.0 0.0 "
-		"-fill [option get . plotColor%d PlotColor%d] -width 2.0",
+		"%s.pf.c create line 0.0 0.0 0.0 0.0 -fill [option get . plotColor%d PlotColor%d] -width 2.0",
 		plotPtr->name, setPtr->color, setPtr->color);
       }
     } else {
@@ -478,15 +480,13 @@ static int displayPoint(interp,plotPtr,setPtr, point)
     if (!setPtr->beenOnceThrough) {
       if (showsomething) {
 	sprintf(strTmp,
-		"%s.pf.c create oval %f %f %f %f "
-		"-fill [option get . plotColor%d PlotColor%d]",
+		"%s.pf.c create oval %f %f %f %f -fill [option get . plotColor%d PlotColor%d]",
 		plotPtr->name, canvX-RADIUS, canvY-RADIUS, canvX+RADIUS, canvY+RADIUS,
 		setPtr->color, setPtr->color);
       } else {
 	/* create a zero-sized circle so it exists and can be configured later */
 	sprintf(strTmp,
-		"%s.pf.c create oval 0.0 0.0 0.0 0.0 "
-		"-fill [option get . plotColor%d PlotColor%d]",
+		"%s.pf.c create oval 0.0 0.0 0.0 0.0 -fill [option get . plotColor%d PlotColor%d]",
 		plotPtr->name, setPtr->color, setPtr->color);
       }
     } else {
