@@ -8,7 +8,6 @@
 CG56STARS = \
  $(CG56)/CG56Abs.o \
  $(CG56)/CG56ACos.o \
- $(CG56)/CG56Add.o \
  $(CG56)/CG56Allpass.o \
  $(CG56)/CG56ASin.o \
  $(CG56)/CG56BiQuad.o \
@@ -17,7 +16,6 @@ CG56STARS = \
  $(CG56)/CG56Comb.o \
  $(CG56)/CG56Commutator.o \
  $(CG56)/CG56Cos.o \
- $(CG56)/CG56DC.o \
  $(CG56)/CG56Delay.o \
  $(CG56)/CG56Distributor.o \
  $(CG56)/CG56DownSample.o \
@@ -32,14 +30,12 @@ CG56STARS = \
  $(CG56)/CG56FixTable.o \
  $(CG56)/CG56FixThresh.o \
  $(CG56)/CG56Fork.o \
- $(CG56)/CG56Gain.o \
  $(CG56)/CG56HostAIN.o \
  $(CG56)/CG56HostIn.o \
  $(CG56)/CG56HostOut.o \
  $(CG56)/CG56HostSlider.o \
  $(CG56)/CG56IIDGaussian.o \
  $(CG56)/CG56IIDUniform.o \
- $(CG56)/CG56Impulse.o \
  $(CG56)/CG56Integrator.o \
  $(CG56)/CG56Interpolator.o \
  $(CG56)/CG56IntMult.o \
@@ -54,15 +50,12 @@ CG56STARS = \
  $(CG56)/CG56Magnavox.o \
  $(CG56)/CG56MagnavoxIn.o \
  $(CG56)/CG56MagnavoxOut.o \
- $(CG56)/CG56Mult.o \
  $(CG56)/CG56Neg.o \
  $(CG56)/CG56Peak.o \
  $(CG56)/CG56Pickmin.o \
  $(CG56)/CG56PickminVal.o \
  $(CG56)/CG56Pulse.o \
  $(CG56)/CG56Quantizer.o \
- $(CG56)/CG56QuantizerInt.o \
- $(CG56)/CG56Quasar.o \
  $(CG56)/CG56QuasarChgPd.o \
  $(CG56)/CG56Reciprocal.o \
  $(CG56)/CG56Repeat.o \
@@ -71,8 +64,6 @@ CG56STARS = \
  $(CG56)/CG56Sin.o \
  $(CG56)/CG56Sqr.o \
  $(CG56)/CG56Sqrt.o \
- $(CG56)/CG56TableLookup.o \
- $(CG56)/CG56Sub.o \
  $(CG56)/CG56Tone.o \
  $(CG56)/CG56UpSample.o \
  $(CG56)/CG56VarDelay.o \
@@ -80,6 +71,5 @@ CG56STARS = \
  $(CG56)/CG56WasteCycles.o \
  $(CG56)/CG56WaveForm.o \
  $(CG56)/CG56WriteFile.o \
- $(CG56)/CG56WriteFileInt.o \
- $(CG56)/CG56ZeroHld.o
+ $(CG56)/CG56WriteFileInt.o 
 

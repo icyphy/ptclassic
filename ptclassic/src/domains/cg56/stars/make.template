@@ -26,7 +26,6 @@ INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 PL_SRCS= \
  CG56Abs.pl \
  CG56ACos.pl \
- CG56Add.pl \
  CG56Allpass.pl \
  CG56ASin.pl \
  CG56BiQuad.pl \
@@ -35,7 +34,6 @@ PL_SRCS= \
  CG56Comb.pl \
  CG56Commutator.pl \
  CG56Cos.pl \
- CG56DC.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
  CG56DSPlayBQ.pl \
@@ -49,7 +47,6 @@ PL_SRCS= \
  CG56FixTable.pl \
  CG56FixThresh.pl \
  CG56Fork.pl \
- CG56Gain.pl \
  CG56DownSample.pl \
  CG56HostAIN.pl \
  CG56HostIn.pl \
@@ -57,7 +54,6 @@ PL_SRCS= \
  CG56HostSlider.pl \
  CG56IIDGaussian.pl \
  CG56IIDUniform.pl \
- CG56Impulse.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
  CG56IntMult.pl \
@@ -72,15 +68,12 @@ PL_SRCS= \
  CG56Magnavox.pl \
  CG56MagnavoxIn.pl \
  CG56MagnavoxOut.pl \
- CG56Mult.pl \
  CG56Neg.pl \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
  CG56Pulse.pl \
  CG56Quantizer.pl \
- CG56QuantizerInt.pl \
- CG56Quasar.pl \
  CG56QuasarChgPd.pl \
  CG56Reciprocal.pl \
  CG56Repeat.pl \
@@ -89,8 +82,6 @@ PL_SRCS= \
  CG56Sin.pl \
  CG56Sqr.pl \
  CG56Sqrt.pl \
- CG56TableLookup.pl \
- CG56Sub.pl \
  CG56Tone.pl \
  CG56UpSample.pl \
  CG56VarDelay.pl \
@@ -98,8 +89,8 @@ PL_SRCS= \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
  CG56WriteFile.pl \
- CG56WriteFileInt.pl \
- CG56ZeroHld.pl
+ CG56WriteFileInt.pl 
+
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
