@@ -18,28 +18,29 @@ operations that rely on integer matrices separable.
 Examples include multidimensional discrete Fourier transforms 
 on an arbitrary sampling grid (hexagonal, etc.) [1],
 multidimensional non-separable up/downsampling [2], and 
-multidimensional non-uniform filter bank design [3-4].
+multidimensional non-uniform filter bank design [3-5].
 .pp
-This function returns the Smith form of an integer matrix S [5].
+This function returns the Smith form of an integer matrix S [6].
 The matrix $S$ is factored into three simpler integer matrices such that
 $S = U D V$.
 Here, $D$ is diagonal and $U$ and $V$ have determinant of $+1$ or $-1$
 (and are called regular unimodular).
 Therefore, $|det S| = |det D|$.
-Note that $S$ is m x n, so $U$ is m x m, $D$ is m x n, and $V$ is n x n.
+Note that $S$ is $m$ x $n$, so $U$ is $m$ x $m$, $D$ is $m$ x $n$, and
+$V$ is $n$ x $n$.
 Hence, $U$ and $V$ are always square.
 .pp
-Smith form decompositions are not unique [4].
+Smith form decompositions are not unique [5-6].
 However, the Smith normal form imposes a canonical structure on $D$
-so that $D$ is unique [5].
+so that $D$ is unique [6].
 The canonical form of $D$ is that each diagonal element is a factor of
 the next diagonal element and the greatest common divisor of two adjacent
 diagonal elements is one.
 Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
 Note that this routine \fIwas not\fR coded to return the Smith normal form
 (although sometimes this will happen).
-Converting a Smith form to a Smith normal form requires an extra n steps
-for an n x n matrix [5].
+Converting a Smith form to a Smith normal form requires an extra $min(m,n)$
+steps for an $m$ x $n$ matrix [6].
 .pp
 Because we have chosen to implement the decomposition using
 integers represented by a computer, the intermediate integer
@@ -50,6 +51,8 @@ As a consequence, we check the decomposition at the end and flag an
 error if it does not give the original matrix.
 .Ir "Guessoum, A."
 .Ir "Vaidyanathan, P."
+.Ir "Allebach, J."
+.Ir "Viscito, E."
 .Ir "Gardos, T."
 .Ir "Nayebi, K."
 .Ir "Mersereau, R."
@@ -59,28 +62,34 @@ error if it does not give the original matrix.
 .Ir "Henry-Labordiere, A."
 .UH REFERENCES
 .ip [1]
-Guessoum, A.,
+A. Guessoum,
 \fIFast Algorithms for the Multidimensional Discrete Fourier Transform\fR,
 Ph. D. Thesis, Georgia Institute of Technology, Atlanta, GA, June, 1984.
 .ip [2]
-Vaidyanathan, P.
+P. P. Vaidyanathan,
 ``The Role of Smith-Form Decomposition of Integer Matrices
 in Multidimensional Multirate Systems,''
 \fIInt. Conf. on Acoustics, Speech, and Signal Processing\fR,
 Toronto, Canada, May, 1991, pp. 1777--1780,
 .ip [3]
-Gardos, T., Nayebi, K., and Mersereau, R.,
+E. Viscito and J. Allebach,
+``The Analysis and Design of Multidimensional {FIR} Perfect
+Reconstruction Filter Banks For Arbitrary Sampling Lattices,''
+\fITransactions on Circuits and Systems\fR,
+vol. 38, no. 1, pp. 29-41, Jan., 1991.
+.ip [4]
+T. Gardos, K. Nayebi, and R. Mersereau,
 ``Analysis and Design of Multi-Dimensional Non-Uniform Band Filter Banks,''
 \fISPIE Proc. Visual Communications and Image Processing\fR,
 Nov., 1992, pp. 49-60.
-.ip [4]
-Evans, B., Gardos, T., and McClellan, J.,
+.ip [5]
+B. Evans, T. Gardos, and J. McClellan,
 ``Imposing Structure on Smith Form Decompositions of
 Rational Resampling Matrices,''
 \fITransactions on Signal Processing\fR,
 vol. 42, April, 1994.
-.ip [5]
-Kaufmann, A., and Henry-Labordiere, A.,
+.ip [6]
+A. Kaufmann and A. Henry-Labordiere,
 \fIInteger and Mixed Programming: Theory and Applications\fR,
 Academic Press, New York, 1977.
 	}
@@ -123,9 +132,11 @@ Academic Press, New York, 1977.
 
 #define INT_IS_ZERO(x)          ( ! (x) )
 #define INT_IS_NOT_ZERO(x)      (x)
+#define INT_SWAP3(a,b,t)	{ t = a; a = b; b = t; }
 	}
 	code {
 
+// Swap rows in a matrix the slow but safe way
 void intSwapRows( IntMatrix mat, int row1, int row2 )
 {
 	int col, numcols, temp;
@@ -133,37 +144,22 @@ void intSwapRows( IntMatrix mat, int row1, int row2 )
 	int *ptr2;
 
 	numcols = mat.numCols();
-	if ( row1 != row2 ) {
-	  ptr1 = &mat[row1][0];
-	  ptr2 = &mat[row2][0];
-	  for ( col = 0; col < numcols; col++ ) {
-	    temp = *ptr1;
-	    *ptr1++ = *ptr2;
-	    *ptr2++ = temp;
-	  }
-	}
+	if ( row1 != row2 )
+	  for ( col = 0; col < numcols; col++ )
+	    INT_SWAP3(mat[row1][col], mat[row2][col], temp);
 
 	return;
 }
 
+// Swap columns in a matrix the slow but safe way
 void intSwapCols( IntMatrix mat, int col1, int col2 )
 {
-	int col, numcols, temp;
-	int *ptr1;
-	int *ptr2;
+	int numrows, row, temp;
 
-	numcols = mat.numCols();
-	if ( col1 != col2 ) {
-	  ptr1 = &mat[0][col1];
-	  ptr2 = &mat[0][col2];
-	  for ( col = 0; col < numcols; col++ ) {
-	    temp = *ptr1;
-	    *ptr1 = *ptr2;
-	    *ptr2 = temp;
-	    ptr1 += numcols;
-	    ptr2 += numcols;
-	  }
-	}
+	numrows = mat.numRows();
+	if ( col1 != col2 )
+	  for ( row = 0; row < numrows; row++ )
+	    INT_SWAP3(mat[row][col1], mat[row][col2], temp);
 
 	return;
 }
@@ -182,8 +178,8 @@ void intSwapCols( IntMatrix mat, int col1, int col2 )
 	  int *nVector;
 	  int endflag;
 
-	  m = numRows;
-	  n = numCols;
+	  m = (int) numRows;	// cast extracts the value of the state numRows
+	  n = (int) numCols;	// cast extracts the value of the state numCols
 
           mVector = (int *) malloc( m * sizeof(int) );
 	  nVector = (int *) malloc( n * sizeof(int) );
