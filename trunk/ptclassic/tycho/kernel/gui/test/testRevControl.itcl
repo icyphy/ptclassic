@@ -97,7 +97,8 @@ proc testRevControl {versionControlSystem} {
     ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'History' button
-    $myEditView.revcontrol invoke history
+    # $myEditView.revcontrol invoke history
+    $myEditView.revcontrol component historypanel open
     ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'unedit' button
