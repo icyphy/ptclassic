@@ -60,6 +60,9 @@ CompileFacet is called.  xfered never gets re-initialized.
 #include "octIfc.h"
 #include "octMacros.h"
 #include "ptk.h"
+#include "kernelCalls.h"
+#include "handle.h"
+#include "compile.h"
 
 extern void KcLog();
 extern void KcFlushLog();
