@@ -25,11 +25,8 @@ $Id$
 const Attribute ANY(0,0);
 
 // constructor
-CGCTarget::CGCTarget() : BaseCTarget("default-CGC","CGCStar",
-"Generate stand-alone C programs and compile them.  The program\n"
-"and associated makefile is written to a directory given as a Target param.\n"
-"Can use either the default SDF scheduler or Joe's loop scheduler.")
-{ }
+CGCTarget::CGCTarget(const char* name,const char* starclass,
+                   const char* desc) : BaseCTarget(name,starclass,desc) {}
 
 StringList CGCTarget :: sectionComment(const StringList s) {
 	StringList out = "\n/****** ";
@@ -122,7 +119,6 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
 	emptyFlag = FALSE;
 
 	// Initialize the state
-	mainInitialization += indent(1);
 	if (s->size() > 1) {
 		FloatArrayState* fs = (FloatArrayState*) s;
 		for (int i = 0; i < s->size(); i++) {
@@ -135,6 +131,7 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
 			mainInitialization += ";\n";
 		}
 	} else {
+		mainInitialization += indent(1);
 		mainInitialization += sanitizedFullName(*s);
 		mainInitialization += " = ";
 		mainInitialization += s->getInitValue();
