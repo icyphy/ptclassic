@@ -115,10 +115,10 @@ body ::tycho::Repeater::activate {t x y} {
     # not to the current object.
     foreach b $button {
 	$slate bind $tag \
-		[eventcode Release -button $b ] \
+		[::tycho::Interactor::event Release -button $b ] \
 		[list @scope [info class] "$this deactivate"]
 	$slate bind $tag \
-		[eventcode Motion -button $b ] \
+		[::tycho::Interactor::event Motion -button $b ] \
 		[list @scope [info class] "$this motion %x %y"]
     }
 
@@ -141,7 +141,7 @@ body ::tycho::Repeater::activate {t x y} {
 body ::tycho::Repeater::bind {t args} {
     foreach b $button {
 	$slate bind $t \
-		[eventcode Click -button $b] \
+		[::tycho::Interactor::event Click -button $b] \
 		[list @scope [info class] "$this activate $t %x %y"]
     }
 }
@@ -168,7 +168,7 @@ body ::tycho::Repeater::deactivate {} {
    # Remove the bindings
     foreach b $button {
 	$slate bind $tag \
-		[eventcode Release -button $b ] \
+		[::tycho::Interactor::event Release -button $b ] \
 		{}
     }
 }
@@ -210,7 +210,7 @@ body ::tycho::Repeater::motion {x y} {
 body ::tycho::Repeater::unbind {t} {
     foreach b $button {
 	$slate bind $t \
-		[eventcode Click -button $b] \
+		[::tycho::Interactor::event Click -button $b] \
 		{}
     }
 }

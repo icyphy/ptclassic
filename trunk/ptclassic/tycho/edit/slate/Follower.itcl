@@ -96,10 +96,10 @@ body ::tycho::Follower::activate {t x y} {
     # not to the current object.
     foreach b $button {
 	$slate bind $tag \
-		[eventcode Motion -button $b ] \
+		[::tycho::Interactor::event Motion -button $b ] \
 		[list @scope [info class] "$this drag %x %y; update idletasks"]
 	$slate bind $tag \
-		[eventcode Release -button $b ] \
+		[::tycho::Interactor::event Release -button $b ] \
 		[list @scope [info class] "$this release; $this deactivate"]
     }
 
@@ -121,7 +121,7 @@ body ::tycho::Follower::activate {t x y} {
 body ::tycho::Follower::bind {t args} {
     foreach b $button {
 	$slate bind $t \
-		[eventcode Press -button $b ] \
+		[::tycho::Interactor::event Press -button $b ] \
 		[list @scope [info class] "$this activate $t %x %y"]
     }
 }
@@ -133,9 +133,9 @@ body ::tycho::Follower::deactivate {} {
     # Remove bindings from the current tag
     foreach b $button {
 	$slate bind $tag \
-		[eventcode Motion -button $b] {}
+		[::tycho::Interactor::event Motion -button $b] {}
 	$slate bind $tag \
-		[eventcode Release -button $b] {}
+		[::tycho::Interactor::event Release -button $b] {}
     }
 
     # Execute the user-specified de-activation command
@@ -149,6 +149,6 @@ body ::tycho::Follower::deactivate {} {
 body ::tycho::Follower::unbind {t} {
     foreach b $button {
 	$slate bind $t \
-		[eventcode Press -button $b] {}
+		[::tycho::Interactor::event Press -button $b] {}
     }
 }
