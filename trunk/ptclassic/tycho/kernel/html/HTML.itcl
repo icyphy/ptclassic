@@ -150,7 +150,7 @@ body ::tycho::HTML::constructor {args} {
     global ::TYCHO
     addTool home Home \
 	    [code $itk_component(text) switchFile \
-	    $TYCHO/doc/introduction.html]
+	    $TYCHO/doc/index.html]
     addTool reload Reload [code $this reload]
     addTool open Open [code $this altFile]
     addTool find Find [code $itk_component(text) search]
