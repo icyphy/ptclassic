@@ -27,8 +27,10 @@ static char SccsId[]="$Id$";
 /*
  * Table testing program
  */
+#define ASCII_STRING
 
 #include <stdio.h>
+#include <port.h>
 #include <X11/StringDefs.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
@@ -85,7 +87,7 @@ Widget parent;
     int arg_len;
     int i, num, snum;
     double sqrt();
-    char *input_string, *malloc();
+    char *input_string;
     static XtCallbackRec callbacks[] = { { ThreePush, NULL }, { NULL, NULL } };
 
     num = sizeof(strs)/sizeof(char *);
@@ -116,11 +118,17 @@ Widget parent;
     input_string = malloc(512);
     XtSetArg(arg_list[arg_len], XtNstring, input_string);	arg_len++;
     XtSetArg(arg_list[arg_len], XtNlength, 512);		arg_len++;
+#ifdef NEVER
     XtSetArg(arg_list[arg_len], XtNtextOptions,
 	     editable|resizeWidth);				arg_len++;
     XtSetArg(arg_list[arg_len], XtNeditType, XttextEdit);	arg_len++;
     input = XtCreateManagedWidget("input", asciiStringWidgetClass,
 				  parent, arg_list, arg_len);
+#else
+    input = XtCreateManagedWidget("input", asciiTextWidgetClass,
+				  parent, arg_list, arg_len);
+#endif
+
 #ifdef HARD_SPEC
     XtTblConfig(input, 0, num/snum+1, snum, 1, 0);
 #endif
@@ -135,6 +143,7 @@ XEvent *event;
     exit(0);
 }
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -164,5 +173,6 @@ char *argv[];
     MakeButtons(table_widget);
     XtRealizeWidget(top_level_widget);
     XtAppMainLoop(context);
+    return 0;
 }
 
