@@ -19,6 +19,8 @@ defstar {
     type {ANYTYPE}
   }
   setup {
+    classname = "CGCVSend";
+    sndrcv = "snd";
     numXfer = input.numXfer();
     CGCVSynchComm::setup();
   }
@@ -44,9 +46,21 @@ defstar {
   int $starSymbol(nbytes) = 12;
   int $starSymbol(nearsock), $starSymbol(xmitsock), $starSymbol(status);
   char $starSymbol(buffer)[BUFFSIZE];
-  char *$starSymbol(dummy) = \"  CGCVSend socket error\";
-  char *$starSymbol(nearstring) = \"/tmp/snd$val(pairNumber)\\0\";
-  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
+");
+
+    StringList oneLine;
+
+    oneLine = "  char *$starSymbol(dummy) = \"  ";
+    oneLine << classname;
+    oneLine << " socket error\";";
+    addDeclaration(oneLine);
+
+    oneLine = "  char *$starSymbol(nearstring) = \"/tmp/";
+    oneLine << sndrcv;
+    oneLine << "$val(pairNumber)\\0\";";
+    addDeclaration(oneLine);
+    
+    addDeclaration("  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
   int $starSymbol(nearnamelen) = strlen($starSymbol(nearstring));
   int $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
   int $starSymbol(nearaddrlen) = sizeof($starSymbol(nearaddr));
