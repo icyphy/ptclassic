@@ -2,7 +2,7 @@ static const char file_id[] = "BaseMultiTarget.cc";
 
 /******************************************************************
 Version identification:
-@(#)BaseMultiTarget.cc	1.1	2/5/92
+$Id$
 
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
