@@ -48,7 +48,7 @@ to plot destination VCI field of incoming VoiceData packets
                 Envelope  inEnv;
                 input.get().getMessage(inEnv);
                 if (!voiceCheck (inEnv, *this)) return;
-                VoiceData*  v = (VoiceData*) inEnv.myData();
+                const VoiceData*  v = (const VoiceData*) inEnv.myData();
                 completionTime = arrivalTime;
 
 		// Send out data if not start-of-transmission nor end-of-

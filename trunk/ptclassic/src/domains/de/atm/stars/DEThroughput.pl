@@ -104,7 +104,7 @@ lines considered as a whole.
 	     OutDEPort *rport;
 
 	     Envelope  inEnv;
-	     VoiceData*  v;
+	     const VoiceData*  v;
       
 	     int  countReal, countNull, count;
 	     countReal = countNull = count = 0;
@@ -114,7 +114,7 @@ lines considered as a whole.
 
 		if (iport->dataNew) {
 		    iport->get().getMessage(inEnv);
-		    v = (VoiceData*) inEnv.myData();
+		    v = (const VoiceData*) inEnv.myData();
 
 		    // update totals as appropiate depending on whether this
 		    // packet is null or not

@@ -122,7 +122,7 @@ trunk lines on "avgLatencyAll" port.
 	     OutDEPort *avgport;
 
 	     Envelope  inEnv;
-	     VoiceData*  v;
+	     const VoiceData*  v;
       
 	     float  del, delayTotal;
 	     int  count, countTotal;
@@ -140,7 +140,7 @@ trunk lines on "avgLatencyAll" port.
 		    // get input packet
 	            iport->get().getMessage(inEnv);
 		    if (!voiceCheck(inEnv,*this)) return;
-		    v = (VoiceData*) inEnv.myData();
+		    v = (const VoiceData*) inEnv.myData();
 
 		    // calculate latency for this packet
 		    del = arrivalTime - (v->retStamp());

@@ -53,7 +53,7 @@ limitation of liability, and disclaimer of warranty provisions.
                   if (iport->dataNew)  {
                     iport->get().getMessage(inEnv);
 		    if (!voiceCheck(inEnv,*this)) return;
-                    VoiceData*  v = (VoiceData*) inEnv.myData();
+                    const VoiceData*  v = (const VoiceData*) inEnv.myData();
                     if (! v->nulltestMessage())
                        oport->put(completionTime) << inEnv;
                   }

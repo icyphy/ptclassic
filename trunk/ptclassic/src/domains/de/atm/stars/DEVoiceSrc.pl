@@ -110,14 +110,14 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                   
                     if (!input.dataNew)  {
                         //  leftover feedback event is possible
-                        Particle& p = feedbackIn.get();
+                        feedbackIn.get();
                         return;
                     }
 
                     //  expect a TRANSMIT packet to begin voice transmission
                     input.get().getMessage(inEnv);
                     if (!voiceCheck (inEnv, *this)) return;
-                    VoiceData*  v = (VoiceData*) inEnv.myData();
+                    const VoiceData*  v = (const VoiceData*) inEnv.myData();
 
                     if (!v->isitTRMessage()) {
                         Error :: abortRun (*this,
@@ -151,7 +151,7 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                         //  transmission interrupted
                         input.get().getMessage(inEnv);
                         if (!voiceCheck (inEnv, *this)) return;
-                        VoiceData*  v1 = (VoiceData*) inEnv.myData();
+                        const VoiceData*  v1 = (const VoiceData*) inEnv.myData();
 
                         if (!v1->isitSTRMessage()) {
                             Error :: abortRun (*this,
