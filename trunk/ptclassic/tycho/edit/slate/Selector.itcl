@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Selector {} {}
 
 #######################################################################
 #### Selector
@@ -110,7 +112,7 @@ class ::tycho::Selector {
 	set slate $s
 	set canvas $c
 
-	eval configure $args
+	eval $this configure $args
 
 	# Create the selection handler
 	# ::selection handle $slate "$this describe"

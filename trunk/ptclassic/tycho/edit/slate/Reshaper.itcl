@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Reshaper {} {}
 
 #######################################################################
 #### Reshaper
@@ -36,10 +38,10 @@
 # items. It is usually bound to grab handles attached to an item,
 # or "grapples." The Slate methods <b>grapple</b> and <b>ungrapple</b>
 # provide this support. When a grapple is clicked-on, the Resizer
-# interactor figures out which aspects of the item are being reshaped,
+# interactor figures out which features of the item are being reshaped,
 # and forwards reshape commands to the slate to reshape the item.
 # It then queries the slate for the coordinates of the changed
-# aspects and moves each grapple to that coordinate.
+# features and moves each grapple to that coordinate.
 #
 # <p><b>Options</b>
 #
@@ -93,8 +95,8 @@ class ::tycho::Reshaper {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
-	configure -action "reshape"
-	eval configure $args
+	$this configure -action "reshape"
+	eval $this configure $args
     }
     destructor {}
 
@@ -119,8 +121,8 @@ class ::tycho::Reshaper {
     ###################################################################
     ####                   protected variables                     ####
 
-    # The aspects being reshaped, indexed by item
-    private variable _aspects
+    # The features being reshaped, indexed by item
+    private variable _features
 
     # The grapple being targets
     private variable _grapple ""
@@ -130,7 +132,7 @@ class ::tycho::Reshaper {
 #### click
 #
 # Start the interaction. Find all items with appropriately-tagged
-# grapples and figure out what aspects are being modified.
+# grapples and figure out what features are being modified.
 #
 body ::tycho::Reshaper::click {x y args} {
     set _grapple $target
@@ -144,15 +146,15 @@ body ::tycho::Reshaper::click {x y args} {
     } else {
 	set selected $target
     }
-    # Get corresponding items and aspects
+    # Get corresponding items and features
     foreach g $selected {
         set i [$slate itemcget $g -item]
-	lappend _aspects($i) [$slate itemcget $g -aspect]
+	lappend _features($i) [$slate itemcget $g -feature]
     }
     # Forward the click for each item
-    foreach {item aspects} [array get _aspects] {
-	target $item
-	eval [list chain $x $y -aspects $aspects] $args
+    foreach {item features} [array get _features] {
+	$this target $item
+	eval [list chain $x $y -features $features] $args
     }
 }
 
@@ -165,15 +167,15 @@ body ::tycho::Reshaper::click {x y args} {
 #
 body ::tycho::Reshaper::drag {x y} {
     # Forward the reshaping interaction
-    foreach item [array names _aspects] {
-	target $item
+    foreach item [array names _features] {
+	$this target $item
 	chain $x $y
     }
 
     # Move all grapples of each item
-    foreach i [array names _aspects] {
+    foreach i [array names _features] {
         foreach g [$slate find withtag grapple.$item] {
-	    set xy [$slate aspect $i [$slate itemcget $g -aspect]]
+	    set xy [$slate feature $i [$slate itemcget $g -feature]]
 	    eval $slate moveto $g $xy "c"
 	}
     }
@@ -189,9 +191,9 @@ body ::tycho::Reshaper::release {} {
     $slate itemconfigure $_grapple -fill cyan3
 
     # Forward the release event
-    foreach i [array names _aspects] {
-	target $i
+    foreach i [array names _features] {
+	$this target $i
 	chain
     }
-    unset _aspects
+    unset _features
 }

@@ -31,6 +31,9 @@
 ##########################################################################
 
 
+# auto_mkindex \
+proc ::tycho::Shades {} {}
+
 ## Shades
 #
 # A color class. Any object that needs a color can ask
@@ -91,7 +94,9 @@ class ::tycho::Shades {
 		# Create the default color object if necessary
 		#
 		if { ! [info exists colorobjects($defaultcolor)] } {
-		    set defaultcolorobject [infoContext]::[::tycho::Shades #auto]
+		    set defaultcolorobject \
+			    [namespace current]::[::tycho::Shades \
+			    [::tycho::autoName shades]]
 		    $defaultcolorobject color $defaultcolor
 		    set colorobjects($defaultcolor) $defaultcolorobject
 		}
@@ -102,7 +107,8 @@ class ::tycho::Shades {
 	    #
 	    # Otherwise, create the color object, record it, and return it
 	    #
-	    set object [infoContext]::[::tycho::Shades #auto]
+	    set object [namespace current]::[::tycho::Shades \
+		    [::tycho::autoName shades]]
 	    $object color $color
 	    set colorobjects($color) $object
 	}

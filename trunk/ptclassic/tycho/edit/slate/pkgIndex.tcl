@@ -30,8 +30,27 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# Package name depends on whether we are running Tycho
+if [info exists ::TYCHO] {
+    package ifneeded tycho.edit.slate 3.0 \
+	    [list source [file join $dir slate.tcl]]
+} else {
+    package ifneeded slate 3.0 \
+	    [list source [file join $dir slate.tcl]]
+}
 
-package ifneeded tycho.edit.slate 2.0 \
-	[list source [file join $dir slate.tcl]]
+# Make sure that the demo package is known about
+if [file exists [file join $dir demo pkgIndex.tcl]] {
+    set olddir $dir
+    set dir [file join $dir demo] ;# $dir is needed by the sourced file
+    source [file join $dir pkgIndex.tcl]
+    set dir $olddir
+}
 
-
+# Make sure that the test package is known about
+if [file exists [file join $dir test pkgIndex.tcl]] {
+    set olddir $dir
+    set dir [file join $dir test] ;# $dir is needed by the sourced file
+    source [file join $dir pkgIndex.tcl]
+    set dir $olddir
+}

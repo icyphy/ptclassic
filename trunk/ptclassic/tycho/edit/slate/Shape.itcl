@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Shape {} {}
 
 #######################################################################
 #### Shape
@@ -53,7 +55,7 @@
 #
 # Each Shape class has two kinds of procedure. The first all start with
 # an underscore: these procedures are called by the slate to implement
-# methods such as aspect{} and reshape{}, or to implement interactive
+# methods such as feature{} and reshape{}, or to implement interactive
 # moving or reshaping{}. The first three arguments to these are always
 # the item ID, the canvas the item is drawn on, and the slate the item
 # is drawn on. The second type of procedure are purely functional
@@ -85,8 +87,8 @@ class ::tycho::Shape {
     ###################################################################
     ####                         public procs                      ####
 
-    # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -100,7 +102,7 @@ class ::tycho::Shape {
     # Terminate a move interaction sequence
     proc _moverelease {tag canvas slate}
 
-    # Reshape one or more aspects of an item
+    # Reshape one or more features of an item
     proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
@@ -138,39 +140,44 @@ class ::tycho::Shape {
 
     ## pi and friends
     protected common pi    3.14159265358979
-    protected common twoPi [expr 2.0*$pi]
-    protected common piOverTwo [expr 0.5*$pi]
-    protected common piOverFour [expr 0.25*$pi]
-    protected common threePiOverTwo [expr 1.5*$pi]
+    protected common twoPi [expr 2.0 * $::tycho::Shape::pi]
+    protected common piOverTwo [expr 0.5 * $::tycho::Shape::pi]
+    protected common piOverFour [expr 0.25 * $::tycho::Shape::pi]
+    protected common threePiOverTwo [expr 1.5 * $::tycho::Shape::pi]
 
     ###################################################################
     ####                   private variables                       ####
 
     # Compass rotation
     private common compassTransformation
-    array set compassTransformation {
-	 cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
-	ccw,n w ccw,ne nw ccw,e n ccw,se ne ccw,s e ccw,sw se ccw,w s ccw,nw sw
-	rev,n s rev,ne sw rev,e w rev,se sw rev,s n rev,sw ne rev,w e rev,nw se
-	 lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
-	 ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
-	   ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
-    }
 
     # Compass as vector
     private common compassToVector
-    array set compassToVector {
-	n {0 -1} s {0 1} e {1 0} w {-1 0} 
-	ne {1 -1} nw {-1 -1} se {1 1} sw {1 -1}
-    }
+}
+
+###################################################################
+####                  class initialization                     ####
+
+array set ::tycho::Shape::compassTransformation {
+    cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
+    ccw,n w ccw,ne nw ccw,e n ccw,se ne ccw,s e ccw,sw se ccw,w s ccw,nw sw
+    rev,n s rev,ne sw rev,e w rev,se sw rev,s n rev,sw ne rev,w e rev,nw se
+    lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
+    ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
+    ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
+}
+
+array set ::tycho::Shape::compassToVector {
+    n {0 -1} s {0 1} e {1 0} w {-1 0} 
+    ne {1 -1} nw {-1 -1} se {1 1} sw {1 -1}
 }
 
 #######################################################################
-#### _aspect
+#### _feature
 #
 # _Abstract procedure._
 #
-body ::tycho::Shape::_aspect {id canvas slate args} {
+body ::tycho::Shape::_feature {id canvas slate args} {
     error "Abstract procedure"
 }
 
@@ -277,7 +284,7 @@ body ::tycho::Shape::_reshape {id canvas slate x y args} {
 # assumes that a release action has been called since previous
 # drag actions. The optional -ghost flag indicates that the item
 # is to be reshaped by dragging a ``ghost'' of the item. One or
-# more aspects can be specified.
+# more features can be specified.
 #
 body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
     error "Abstract procedure"
@@ -287,7 +294,7 @@ body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
 #### _reshapedrag
 #
 # _Abstract procedure._
-# Reshape the aspects previously specified by click{}
+# Reshape the features previously specified by click{}
 # to the specified value. Aspects are modified by the relevant
 # x or y coordinate only.
 # Drag assumes that click has already been called on the item,

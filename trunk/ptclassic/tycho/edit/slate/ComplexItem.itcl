@@ -28,7 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
+# auto_mkindex \
+proc ::tycho::ComplexItem {} {}
 
 ##########################################################################
 ## ComplexItem
@@ -186,9 +187,12 @@ class ::tycho::ComplexItem {
     # its own copy of this array and initialize it with the default 
     # values of the item's options.
     private common optiondefault
+}
 
-    ###################################################################
-    ####                       class initialization                ####
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::ComplexItem {
     #### Set method table
     set methodtable(_shape)        ::tycho::ComplexItem::_shape
     set methodtable(construct)     ::tycho::ComplexItem::construct
@@ -301,6 +305,15 @@ body ::tycho::ComplexItem::coords {id canvas slate args} {
     set xscale [expr double($a1-$a0)/($x1-$x0)]
     set yscale [expr double($b1-$b0)/($y1-$y0)]
 
+    # Hack hack! This prevents the canvas from barfing
+    # on zero scale factor
+    if { $xscale == 0.0 } {
+	set xscale 0.01
+    }
+    if { $yscale == 0.0 } {
+	set yscale 0.01
+    }
+
     # Move and scale each of the components
     foreach pict [$slate children $id] {
 	$slate move  $pict $xdelta $ydelta
@@ -326,7 +339,7 @@ body ::tycho::ComplexItem::itemcget {id canvas slate scope opt} {
     if { ! [string compare $opt -tags] } {
 	# Return the tags
 	$slate gettags $id
-    } elseif { [@scope $scope [list ::info exists optiondefault($opt)]] } {
+    } elseif { [namespace eval $scope [list ::info exists optiondefault($opt)]] } {
 	# Read the value directly from the class
 	return $option([string trimleft $opt -]$id)
     } else {
@@ -343,11 +356,11 @@ body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
 	# the defaultoptions array to get the names of all options,
 	# and read their values.
 	set result {}
-	foreach opt [@scope $scope {array names optiondefault}] {
+	foreach opt [namespace eval $scope {array names optiondefault}] {
 	    # Read its value
 	    set value $option([string trimleft $opt -]$id)
 	    # Read default value
-	    set default [@scope $scope [list set optiondefault($opt)]]
+	    set default [namespace eval $scope [list set optiondefault($opt)]]
 	    # Add to result
 	    lappend result [list $opt {} {} $default $value]
 	}
@@ -359,12 +372,12 @@ body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
 	set opt [lindex $args 0]
 	if { $opt == "-tags" } {
 	    return [list {} {} {} [$slate gettags $id]]
-	} elseif { [@scope $scope \
+	} elseif { [namespace eval $scope \
 		[list ::info exists optiondefault($opt)]] } {
 	    # Read its value
 	    set value $option([string trimleft $opt -]$id)
 	    # Read default value
-	    set default [@scope $scope [list set optiondefault($opt)]]
+	    set default [namespace eval $scope [list set optiondefault($opt)]]
 	    
 	    return [list $opt {} {} $default $value]
 	    
@@ -397,9 +410,9 @@ body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
 		}
 	    } else {
 		# Call the proc on the class to set the option
-		if { [@scope $scope \
+		if { [namespace eval $scope \
 			[list ::info exists optiondefault($opt)]] } {
-                    @scope $scope [list eval \
+                    namespace eval $scope [list eval \
                         \[set methodtable(_[string trimleft $opt -])\] \
                         $id $canvas $slate [list $value]]
 

@@ -144,7 +144,7 @@ class ::tycho::TextItemEdit {
 	set slate $s
 	set canvas $c
 
-	eval configure $args
+	eval $this configure $args
     }
     destructor {}
 

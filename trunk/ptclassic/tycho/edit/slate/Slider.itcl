@@ -29,12 +29,15 @@
 ##########################################################################
 
 
+# auto_mkindex \
+proc ::tycho::Slider {} {}
+
 #
 # Usual options for Slider
 #
-itk::usual Slider {
-    keep -font -background -cursor
-}
+#itk::usual Slider {
+#    keep -font -background -cursor
+#}
 
 #######################################################################
 #### Slider

@@ -30,38 +30,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
-#######################################################################
-## slateLoadSuper
-#
-# Compatibility proc for tcl++.
-#
-proc ::tycho::slateLoadSuper {class} {
-    global tcl_version env
-
-    if { $tcl_version >= 8.0 } {
-	if { $::itcl::version >= 3.0 } {
-	    puts [::itcl::find classes ::tycho::$class]
-	    namespace eval ::tycho [subst -nocommands {
-		if { [::itcl::find classes ::tycho::$class] == "" } {
-		    uplevel #0 "source $env(SLATE_LIBRARY)/${class}.itcl"
-		}
-	    }]
-	} else {
-	    namespace eval ::tycho [subst -nocommands {
-		if { [::info classes ::tycho::$class] == "" } {
-		    uplevel #0 "source $env(SLATE_LIBRARY)/${class}.itcl"
-		}
-	    }]
-	}
-    } else {
-	namespace ::tycho [subst -nocommands {
-	    if { [::info classes $class] == "" } {
-		uplevel #0 "source $env(SLATE_LIBRARY)/$class.itcl"
-	    }
-	}]
-    }
-}
+# auto_mkindex \
+proc ::tycho::IncrCanvas {} {}
 
 #######################################################################
 ## icanvas pathName args
@@ -72,14 +42,17 @@ proc ::tycho::slateLoadSuper {class} {
 proc ::tycho::icanvas {pathName args} {
     uplevel ::tycho::IncrCanvas $pathName $args
 
-    set icanvastags  [bindtags $pathName]
-    set canvastags [bindtags [$pathName component canvas]]
+    # FIXME: probably doesn't work with obstcl
+    if [info exists ::itcl::version] {
+	set icanvastags  [bindtags $pathName]
+	set canvastags [bindtags [$pathName component canvas]]
 
-    bindtags [$pathName component canvas] \
-	    [lreplace $canvastags 1 1 [lindex $icanvastags 1]]
-    bindtags $pathName [lreplace $icanvastags 1 1]
+	bindtags [$pathName component canvas] \
+		[lreplace $canvastags 1 1 [lindex $icanvastags 1]]
+	bindtags $pathName [lreplace $icanvastags 1 1]
 
-    return $pathName
+	return $pathName
+    }
 }
 
 #######################################################################
@@ -368,7 +341,7 @@ body ::tycho::IncrCanvas::constructor {args} {
     incr anothersecretcounter
 
     # Create the canvas and pack it
-    itk_component add canvas {
+    $this itk_component add canvas {
 	# Create at the global scope to avoid calls to unknown{}
 	uplevel #0 canvas $itk_interior.canvas
     } {
@@ -388,7 +361,7 @@ body ::tycho::IncrCanvas::constructor {args} {
     ::bind $canvas <Map> "focus $canvas"
 
     # Initialise options
-    eval itk_initialize $args
+    eval $this itk_initialize $args
 }
 
 #######################################################################
@@ -408,14 +381,13 @@ body ::tycho::IncrCanvas::constructor {args} {
 body ::tycho::IncrCanvas::addtag {add mode args} {
     # Find all items using find{}, and then
     # add the tag to each
-    foreach id [eval find $mode $args] {
+    foreach id [eval $this find $mode $args] {
 	if { [string match {[0-9]*} $id] } {
 	    # Top-level canvas item: just add the tag
 	    $canvas addtag $add withtag $id
 	} else {
 	    # Complex item
-	    set tags [$canvas gettags \
-		    [@scope ::tycho::ComplexItem set primary($id)]]
+	    set tags [$canvas gettags $::tycho::ComplexItem::primary($id)]
 	    set root [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
 	    
  	    if { $root == $id } {
@@ -502,7 +474,7 @@ body ::tycho::IncrCanvas::bind {tag {sequence {}} args} {
 # code here is "in-lined."
 #
 body ::tycho::IncrCanvas::call {id method args} {
-    eval [@scope ::tycho::$itemClass($id) set methodtable($method)] \
+    eval [set ::tycho::$itemClass($id)::methodtable($method)] \
             $id $canvas $this $args
 }
 
@@ -532,7 +504,7 @@ body ::tycho::IncrCanvas::canvasy {screeny {gridspacing {}}} {
 body ::tycho::IncrCanvas::children {tag} {
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return ""
 	}
@@ -584,7 +556,7 @@ body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
 
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return ""
 	}
@@ -596,19 +568,20 @@ body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
     # Check for no component arg
     if { $component == "" } {
         set result {}
-        foreach i [@scope ::tycho::ComplexItem array names component *$id] {
+        foreach i [namespace eval ::tycho::ComplexItem \
+		array names component *$id] {
             regsub $id\$ $i {} i
             lappend result $i
         }
         return $result
-    } elseif { [@scope ::tycho::ComplexItem \
-            ::info exists methodtable(component)] } {
+    } elseif { [::info exists \
+	    ::tycho::$itemClass($id)::methodtable(component)] } {
         # If there's a component method on a complex item, just call that
-        set item [[@scope ::tycho::ComplexItem set methodtable(component)] \
+        set item [[set ::tycho::$itemClass($id)::methodtable(component)] \
                 $id $canvas $this $component]
     } else {
         # Finally, read its value
-	set item [@scope ::tycho::ComplexItem set component([set component]$id)]
+	set item [set ::tycho::ComplexItem::component([set component]$id)]
     }
     if { $method == {} } {
 	# Return the item or list of them
@@ -635,7 +608,7 @@ body ::tycho::IncrCanvas::component {tag {component {}} {method {}} args} {
 body ::tycho::IncrCanvas::coords {tag args} {
     # If the argument is a tag, use the first found item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return ""
 	}
@@ -648,7 +621,7 @@ body ::tycho::IncrCanvas::coords {tag args} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas coords $id $args
     } elseif { [string match {_*} $id] } {
-	eval [@scope ::tycho::$itemClass($id) set methodtable(coords)] \
+	eval [set ::tycho::$itemClass($id)::methodtable(coords)] \
                 $id $canvas $this $args
     }
 }
@@ -749,8 +722,8 @@ body ::tycho::IncrCanvas::createchild {parent type args} {
     } else {
 	set tags {}
     }
-    eval [list createchild* $parent \
-            [getchildtags $parent] $tags $type] $args
+    eval [list $this createchild* $parent \
+            [$this getchildtags $parent] $tags $type] $args
 }
 
 #######################################################################
@@ -797,8 +770,8 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
     } else {
 	set tags {}
     }
-    eval [list createrootchild* $parent \
-    		[getrootchildtags $parent] $tags $type] $args
+    eval [list $this createrootchild* $parent \
+    		[$this getrootchildtags $parent] $tags $type] $args
 }
 
 #######################################################################
@@ -844,14 +817,14 @@ body ::tycho::IncrCanvas::delete {args} {
 	    $canvas delete $id
 	} elseif { [string match {_*} $id] } {
 	    # Delete children and clear arrays
-	    delete_ $id
+	    $this delete_ $id
 
 	    # Delete canvas items
 	    $canvas delete $id
 
 	} else {
 	    # Delete by tag: call myself again for simplicity
-	    eval $this delete [find withtag $id]
+	    eval $this delete [$this find withtag $id]
 	}
     }
 }
@@ -920,7 +893,7 @@ body ::tycho::IncrCanvas::dtag {tag {delete {}}} {
 # </ul>
 #
 body ::tycho::IncrCanvas::find {mode args} {
-    eval find$mode $args
+    eval $this find$mode $args
 }
 
 #######################################################################
@@ -961,7 +934,7 @@ body ::tycho::IncrCanvas::focusin {} {
 body ::tycho::IncrCanvas::gettags {tag} {
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return ""
 	}
@@ -992,7 +965,7 @@ body ::tycho::IncrCanvas::gettags {tag} {
 # the createchild*{} method.
 #
 body ::tycho::IncrCanvas::getchildtags {id} {
-    $canvas gettags [@scope ::tycho::ComplexItem set primary($id)]
+    $canvas gettags $::tycho::ComplexItem::primary($id)
 }
 
 #######################################################################
@@ -1005,8 +978,7 @@ body ::tycho::IncrCanvas::getchildtags {id} {
 #
 body ::tycho::IncrCanvas::getrootchildtags {id} {
     set tags {}
-    foreach tag [$canvas gettags \
-            [@scope ::tycho::ComplexItem set primary($id)]] {
+    foreach tag [$canvas gettags $::tycho::ComplexItem::primary($id)] {
         if { [string match {[!_]*} $tag] } {
             lappend tags $tag
         }
@@ -1023,7 +995,7 @@ body ::tycho::IncrCanvas::getrootchildtags {id} {
 body ::tycho::IncrCanvas::hastag {id tag} {
     # If a complex item, get the primary ID
     if { [string match {_*} $id] } {
-	set id [@scope ::tycho::ComplexItem set primary($id)]
+	set id $::tycho::ComplexItem::primary($id)
     }
     # Test if the tag is in its tags
     expr [lsearch -exact [$canvas gettags $id] $tag] >= 0
@@ -1039,7 +1011,7 @@ body ::tycho::IncrCanvas::hastag {id tag} {
 body ::tycho::IncrCanvas::itemcget {tag option} {
     # If the first argument is a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return
 	} else {
@@ -1053,7 +1025,7 @@ body ::tycho::IncrCanvas::itemcget {tag option} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas itemcget $tag $option
     } else {
-	[@scope ::tycho::$itemClass($id) set methodtable(itemcget)] \
+	[set ::tycho::$itemClass($id)::methodtable(itemcget)] \
                 $id $canvas $this \
 		::tycho::$itemClass($id) $option
     }
@@ -1078,7 +1050,7 @@ body ::tycho::IncrCanvas::itemcget {tag option} {
 body ::tycho::IncrCanvas::itemconfigure {tag args} {
     # If the first argument is a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return
 	} else {
@@ -1093,7 +1065,7 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
 	eval $canvas itemconfigure $id $args
     } else {
 	set class ::tycho::$itemClass($id)
-	eval [@scope $class set methodtable(itemconfigure)] \
+	eval [set ${class}::methodtable(itemconfigure)] \
                 $id $canvas $this $class $args
     }
 }
@@ -1117,7 +1089,7 @@ body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
     # out and fixed PROPERLY! (raise{}, too)
 
     # Figure out which item we're talking about
-    set items [find withtag $tag]
+    set items [$this find withtag $tag]
     if { $items == "" } {
 	return ""
     } else {
@@ -1130,7 +1102,7 @@ body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
 	    $canvas lower $id $belowThis
 	} else {
 	    # Got a id, so use the first matching item
-	    set items [find withtag $belowThis]
+	    set items [$this find withtag $belowThis]
 	    if { $items == "" } {
 		$canvas lower $id
 	    } else {
@@ -1173,7 +1145,7 @@ body ::tycho::IncrCanvas::move {tag x y} {
 body ::tycho::IncrCanvas::parent {tag} {
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return ""
 	}
@@ -1197,7 +1169,7 @@ body ::tycho::IncrCanvas::parent {tag} {
 # a method directly on the primary is not supported.
 #
 body ::tycho::IncrCanvas::primary {id} {
-    @scope ::tycho::ComplexItem set primary($id)
+    set ::tycho::ComplexItem::primary($id)
 }
 
 #######################################################################
@@ -1226,7 +1198,7 @@ body ::tycho::IncrCanvas::raise {tag {aboveThis {}}} {
     # out and fixed PROPERLY! (lower{}, too)
 
     # Figure out which item we're talking about
-    set items [find withtag $tag]
+    set items [$this find withtag $tag]
     if { $items == "" } {
 	return ""
     } else {
@@ -1239,7 +1211,7 @@ body ::tycho::IncrCanvas::raise {tag {aboveThis {}}} {
 	    $canvas raise $id $aboveThis
 	} else {
 	    # Got a id, so use the first matching item
-	    set items [find withtag $aboveThis]
+	    set items [$this find withtag $aboveThis]
 	    if { $items == "" } {
 		$canvas raise $id
 	    } else {
@@ -1273,8 +1245,7 @@ body ::tycho::IncrCanvas::root {id} {
     	}
     } elseif { [string match {_*} $id] } {
 	# A complex item ID. Use the primary tags to find the item to return
-	set tags [$canvas gettags \
-		[@scope ::tycho::ComplexItem set primary($id)]]
+	set tags [$canvas gettags $::tycho::ComplexItem::primary($id)]
     	return [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
     } else {
 	error "Argument ($id) is not an item ID"
@@ -1290,14 +1261,13 @@ body ::tycho::IncrCanvas::root {id} {
 #
 body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
     # Find the matching items
-    set match [find withtag $tag]
+    set match [$this find withtag $tag]
 
     # Scale complex items and tag simple items
     foreach id $match {
 	if { [string match {_*} $id] } {
 	    set newcoords {}
-	    set coords [$canvas coords \
-		    [@scope ::tycho::ComplexItem set primary($id)]]
+	    set coords [$canvas coords $::tycho::ComplexItem::primary($id)]
 	    foreach {a b} $coords {
 		lappend newcoords \
 			[expr $xOrigin + $xScale * ($a - $xOrigin)] \
@@ -1513,14 +1483,14 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
             }
         }
 	"item" {
-	    find withtag [$canvas select item]
+	    $this find withtag [$canvas select item]
 	}
 	"adjust" -
         "from" -
         "to" {
 	    # If it's a tag, get the first item
 	    if { ! [string match {[_0-9]*} $id] } {
-		set items [find withtag $id]
+		set items [$this find withtag $id]
 		if { $items == "" } {
 		    return ""
 		}
@@ -1529,9 +1499,8 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 	    # If it's a complex item and has a select{} method, call that
 	    if { [string match {_*} $id] } {
                 set class ::tycho::$itemClass($id)
-		if { [@scope $class ::info exists methodtable(select)] } {
-		    [@scope $class set methodtable(select)] \
-                            $id $canvas $this
+		if { [::info exists ${class}::methodtable(select)] } {
+		    [set ${class}::methodtable(select)] $id $canvas $this
 		} else {
 		    error "Item $id does not support select"
 		}
@@ -1558,7 +1527,7 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 body ::tycho::IncrCanvas::type {tag} {
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
+	set items [$this find withtag $tag]
 	if { $items == "" } {
 	    return ""
 	}
@@ -1619,13 +1588,13 @@ body ::tycho::IncrCanvas::delete_ {id} {
 
     # Call its destruct method
     set class ::tycho::$itemClass($id)
-    if { [@scope $class ::info exists methodtable(destruct)] } {
-	[@scope $class set methodtable(destruct)] $id $canvas $this
+    if { [::info exists ${class}::methodtable(destruct)] } {
+	[set ${class}::methodtable(destruct)] $id $canvas $this
     }
 
     # Delete complex item components
     foreach {_ pc} [array get parentChild $id,*] {
-	delete_ [lindex $pc 1]
+	$this delete_ [lindex $pc 1]
     }
 
     # Remove the parent link (if there is one)
@@ -1644,7 +1613,7 @@ body ::tycho::IncrCanvas::delete_ {id} {
 #### findabove
 #
 body ::tycho::IncrCanvas::findabove {tag} {
-    root [$canvas find above [findwithtag $tag]]
+    root [$canvas find above [$this findwithtag $tag]]
 }
 
 #######################################################################
@@ -1658,8 +1627,7 @@ body ::tycho::IncrCanvas::findall {} {
 
     # Find complex roots
     foreach id [array names itemClass] {
-	set tags [$canvas gettags \
-		[@scope ::tycho::ComplexItem set primary($id)]]
+	set tags [$canvas gettags $::tycho::ComplexItem::primary($id)]
 	set root [string range \
 		[lindex $tags [lsearch $tags {!*}]] 1 end]
 	# If the item is not invisible and not found, mark as found
@@ -1688,7 +1656,7 @@ body ::tycho::IncrCanvas::findall {} {
 #### findbelow
 #
 body ::tycho::IncrCanvas::findbelow {tag} {
-    root [$canvas find below [findwithtag $tag]]
+    root [$canvas find below [$this findwithtag $tag]]
 }
 
 #######################################################################
@@ -1781,10 +1749,10 @@ body ::tycho::IncrCanvas::findwithtag {tag} {
 	    return ""
 	} elseif { $tag == "all" } {
 	    # Return all items
-	    return [find all]
+	    return [$this find all]
 	} elseif { $tag == "current" } {
 	    # Return the root of the "current" item
-	    return [root [$canvas find withtag current]]
+	    return [$this root [$canvas find withtag current]]
 	}
     } elseif { [string match {[_0-9]*} $tag] } {
 	# An item ID -- just return it. NOTE: if you want to get

@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Stepper {} {}
 
 #######################################################################
 #### Stepper
@@ -83,7 +85,7 @@ class ::tycho::Stepper {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
-	eval configure $args
+	eval $this configure $args
     }
     destructor {}
 

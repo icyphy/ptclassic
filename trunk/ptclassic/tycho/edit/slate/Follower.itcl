@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Follower {} {}
 
 #######################################################################
 #### Follower
@@ -78,7 +80,7 @@ class ::tycho::Follower {
 	set slate $s
 	set canvas $c
 
-	eval configure $args
+	eval $this configure $args
     }
     destructor {}
 
@@ -105,7 +107,7 @@ class ::tycho::Follower {
 body ::tycho::Follower::activate {t x y args} {
     # Set the target. The client can modify its options later
     # with -activatecommand if desired.
-    target $t
+    $this target $t
 
     # Set up the bindings. Do not use the modifiers to the
     # motion and release events, so that the interactor still
@@ -126,7 +128,7 @@ body ::tycho::Follower::activate {t x y args} {
     }
 
     # Start the interaction sequence
-    eval click $x $y $args
+    eval $this click $x $y $args
 }
 
 #######################################################################

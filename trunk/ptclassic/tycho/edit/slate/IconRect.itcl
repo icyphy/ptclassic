@@ -28,11 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
-# Explicitly load the superclass. I don't really know why this is
-# needed, but the common arrays get upset otherwise.
-::tycho::slateLoadSuper IconItem
-::tycho::slateLoadSuper LabeledRect
+# auto_mkindex \
+proc ::tycho::IconRect {} {}
 
 ########################################################################
 ## IconRect
@@ -131,20 +128,22 @@ class ::tycho::IconRect {
 
     # All options have a default value
     private common optiondefault
+}
 
-    ###################################################################
-    ####                       class initialization                ####
+###################################################################
+####                       class initialization                ####
 
+catch {::tycho::LabeledRect}
+namespace eval ::tycho::IconRect {
     #### Set method table
-    array set methodtable [@scope ::tycho::LabeledRect array get methodtable]
+    array set methodtable [array get ::tycho::LabeledRect::methodtable]
     array set methodtable [array get ::tycho::IconItem::methodtable]
 
     set methodtable(_coords)     ::tycho::LabeledRect::coords
     set methodtable(construct)   ::tycho::IconRect::construct
 
     #### Set option defaults
-    array set optiondefault [@scope ::tycho::LabeledRect \
-            array get optiondefault]
+    array set optiondefault [array get ::tycho::LabeledRect::optiondefault]
     array set optiondefault [array get ::tycho::IconItem::optiondefault]
 
     set optiondefault(-fill)  white

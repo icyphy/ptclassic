@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Oval {} {}
 
 #######################################################################
 #### Oval
@@ -56,16 +58,16 @@
 # Acknowledgement: these functions were derived from Wan-teh Chang's
 # finite-state-machine editor code.
 #
-#  <P><b>Primitive aspects</b>
+#  <P><b>Primitive features</b>
 #
 # <ul>
 # <li><B>hradius</B>: The point at the right side of the oval; changing
-# this aspect changes the horizontal width of the oval.
+# this feature changes the horizontal width of the oval.
 # <li><B>vradius</B>: The point at the top side of the oval; changing
-# this aspect changes the vertical height of the oval.
+# this feature changes the vertical height of the oval.
 # </ul>
 #
-# <p><b>Derived aspects</b>
+# <p><b>Derived features</b>
 #
 # <ul>
 # <li><B>c</B> or <B>center</B>: The center of the oval.
@@ -91,13 +93,13 @@ class ::tycho::Oval {
     ###################################################################
     ####                         public procs                      ####
 
-    # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
 
-    # Reshape one or more aspects of an item
+    # Reshape one or more features of an item
     proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
@@ -124,21 +126,21 @@ class ::tycho::Oval {
 
 
 #######################################################################
-#### _aspect
+#### _feature
 #
-# Return the value of an aspect. Valid aspects are "hradius,"
+# Return the value of an feature. Valid features are "hradius,"
 # "vradius," "center," or <code>circumference-</code><i>x-y</i>, where
 # (_x_, _y_) is a vector from the center.
 #
-body ::tycho::Oval::_aspect {id canvas slate args} {
+body ::tycho::Oval::_feature {id canvas slate args} {
     ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     set result {}
 
     if { $args == "" } {
     	return {hradius vradius center circumference-x-y}
     } else {
-	foreach aspect $args {
-		set a [lindex [split $aspect "-"] 0]
+	foreach feature $args {
+		set a [lindex [split $feature "-"] 0]
 	    switch -exact $a {
 		"hradius" {
 		    lappend result $x1 [expr ($y0+$y1)/2]
@@ -152,7 +154,7 @@ body ::tycho::Oval::_aspect {id canvas slate args} {
 		"circumference" {
 		    lappend result ???
 		default {
-		    error "Invalid aspect \"$aspect\" of line shape"
+		    error "Invalid feature \"$feature\" of line shape"
 		}
 	    }
 	}
@@ -163,18 +165,18 @@ body ::tycho::Oval::_aspect {id canvas slate args} {
 #######################################################################
 #### _reshape
 #
-# Reshape one or more aspects of the item by the specified amount.
-# Reshape each aspect by the specified _x_ and _y_ relative
+# Reshape one or more features of the item by the specified amount.
+# Reshape each feature by the specified _x_ and _y_ relative
 # values. Aspects are only affected by the appropriate _x_ or _y_
-# value -- for example, if the "e" (east) aspect is specified, it
+# value -- for example, if the "e" (east) feature is specified, it
 # is moved only by the _x_ amount.
 #
 body ::tycho::Oval::_reshape {id canvas slate x y args} {
     # Get the current coordinates
     ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     
-    # For each of the two possible aspects, see if it is present in
-    # the aspects list, and if it is, alter the appropriate coordinates
+    # For each of the two possible features, see if it is present in
+    # the features list, and if it is, alter the appropriate coordinates
     if { [lsearch -exact $args hradius] >= 0 } {
 	set x0 [expr $x0 - $x]
 	set x1 [expr $x1 + $x]
@@ -195,14 +197,14 @@ body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
     set unique $id.[$slate uniqueid]
 
     # Extract options
-    array set opts {-ghost 0 -aspects {}}
+    array set opts {-ghost 0 -features {}}
     array set opts $args
-    if { $opts(-aspects) == "" } {
-        error "Empty aspect list"
+    if { $opts(-features) == "" } {
+        error "Empty feature list"
     }
 
     # Remember how I am now.
-    set scratch(aspects.$unique) $args
+    set scratch(features.$unique) $args
     set scratch(prevX.$unique) $x
     set scratch(prevY.$unique) $y
 
@@ -233,8 +235,8 @@ body ::tycho::Oval::_reshapedrag {id canvas slate x y} {
     set scratch(prevX.$unique) $x
     set scratch(prevY.$unique) $y
 
-    # For each of the two possible aspects, see if it is present in
-    # the aspects list, and if it is, alter the appropriate coordinates
+    # For each of the two possible features, see if it is present in
+    # the features list, and if it is, alter the appropriate coordinates
     if { [lsearch -exact $args hradius] >= 0 } {
 	set x0 [expr $x0 - $x]
 	set x1 [expr $x1 + $x]
