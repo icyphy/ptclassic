@@ -55,7 +55,8 @@ class ::tycho::RevControlRCS {
     # Unedit the file associated with this class.
     method unedit {}
 
-    # View or close the version control history.
+    # View or close the version control history. Translate from RCS->SCCS
+    # format
     method viewHistory {}
 
     ###################################################################
@@ -81,9 +82,6 @@ class ::tycho::RevControlRCS {
 
     ###################################################################
     ####             private methods and procs                     ####
-
-    # Parse the history information and insert a synopsis into the text window.
-    private method parseHistory {history text}
 
     # Get rlog information about a file and check for the  "locks" field.
     private proc getRlog {file} {}
@@ -149,11 +147,8 @@ body ::tycho::RevControlRCS::retrieveVersion {version} {
                 `cp -q -p$version $basefile > $tmpFile':\n\ $output"
     }
 
-    set myView [::tycho::File::openContext $tmpFile]
-
-    $myView configure -tmpfile 1
-
     cd $olddir
+    return $tmpFile
 }
 
 #####################################################################
@@ -228,8 +223,36 @@ body ::tycho::RevControlRCS::viewHistory {} {
 	pack $itk_component(history) -expand yes -fill both
 	$itk_component(history) configure -readonly 1
 
+
+        # Translate the RCS format to SCCS format:
+        set version ERROR
+        set history2 "\n\n"
+        foreach line [split $history \n] {
+            if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
+                regexp -nocase \
+                        {^date: ([0-9/]+) ([0-9:]+);  author: ([a-z]*);} \
+                        $line match date time user
+                append history2 "\n"
+                append history2 "D $version $date $time $user ? ? ?\n"
+                append history2 "MRs:\n"
+                append history2 "COMMENTS:\n"
+                set prevline $line
+            } elseif {[regexp {^revision} $line] && \
+                    $prevline == "----------------------------"} {
+                regexp {^revision ([0-9.]*)} $line match version
+                set prevline $line
+            } elseif {[regexp {^----------------------------} $line] \
+                    || [regexp {^============================} $line]} {
+                set prevline $line	    
+            } else {
+                # Comment lines here
+                append history2 "$line\n"
+                set prevline $line	    
+            }
+        }
+
 	# Parse the history
-	parseHistory $history [$itk_component(history) textWinName]
+	parseHistory $history2 [$itk_component(history) textWinName]
 
 	# FIXME: Delay or the focus command is ignored.  Tk bug?
 	#after 500 "focus [$itk_component(history) textWinName]"
@@ -369,56 +392,6 @@ body ::tycho::RevControlRCS::updateHistory {} {
     ###################################################################
     ####               private methods and procs                   ####
 
-#####################################################################
-#### parseHistory
-# Parse the history information and insert a synopsis into the text window.
-# 
-body ::tycho::RevControlRCS::parseHistory {history text} {
-    set lines [split $history "\n"]
-
-    if {$history == ""} {
-	$text insert insert "This file does not yet have any log messages."
-	return
-    }
-
-    if [isCheckedOut] {
-	$text insert insert "The file is currently checked out\n\n"
-    }
-
-    set commentColor [preference get commentColor]
-    set versionColor [preference get versionColor]
-
-    foreach line [lrange $lines 0 end] {
-	if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
-	    regexp -nocase {^date: ([0-9/]+) ([0-9:]+);  author: ([a-z]*);} \
-		$line junk date time user
-	    set start [$text index insert]
-	    $text insert insert "$version $date, checked in by $user\n"
-	    $text tag add v$version $start insert
-	    $text tag configure v$version -foreground \
-		    $versionColor -underline 1
-	    $text tag bind v$version <Double-Button-1> \
-		    "$this retrieveVersion $version"
-	    set prevline $line
-	} elseif {[regexp {^revision} $line] && 
-	    $prevline == "----------------------------"} {
-	    regexp {^revision ([0-9.]*)} $line junk version
-	    set prevline $line
-	} elseif [regexp {^----------------------------} $line] {
-	    set prevline $line	    
-	} elseif [regexp {^=============================================================================} $line] {
-	    # we are done parsing
-	} else {
-	    set start [$text index insert]
-	    $text insert insert "$line\n"
-	    $text tag add comment $start insert
-	    $text tag configure comment -foreground $commentColor
-	    $text tag configure comment -lmargin1 0.5c
-	    $text tag configure comment -lmargin2 0.5c
-	    set prevline $line	    
-	}
-    }
-}
 
 #####################################################################
 #### getRlog
