@@ -31,7 +31,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Version: $Id$
 
 ***********************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
-class ACSCore {
+
+#include "CGStar.h"
+
+class ACSCore : public CGStar {
 public:
+
+        // constructor takes a reference to a Corona
+        Core(Corona &);
+
+        // my domain
+        const char* domain() const;
+
+        // class identification
+        int isA(const char*) const;
+
+	// pure virtual
+	void go() = 0;
+
+protected:
+
+	// returns reference to the core's corona
+	inline Corona & corona() const { return corona };
+
+private:
+
+        Corona & corona;
+
 }

@@ -30,4 +30,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 
+// The following is defined in CGCDomain.cc -- this forces that module
+// to be included if any CGC stars are linked in.
+extern const char CGCdomainName[];
 
+const char* ACSCore :: domain () const { return ACSdomainName;}
+
+// isA
+ISA_FUNC(ACSCore, CGStar);
+
+// constructor takes a reference to a Corona
+Core::Core(Corona &corona_) : corona(corona_) {};
