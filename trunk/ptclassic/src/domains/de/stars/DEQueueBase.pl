@@ -3,12 +3,13 @@ defstar {
 	domain {DE}
 	desc {
 Base class for FIFO and LIFO queues.
-This star is not intended to be used except to derive useful stars from.
+This star is not intended to be used except to serve as a model from which
+to derive useful stars.
 All inputs are simply routed to the "overflow" output.  None are stored.
 	}
 	version { $Id$}
 	author { Soonhoi Ha and E. A. Lee }
-	acknowledge { Incorporates design ideas from Philip Bitar }
+	acknowledge { Incorporates design ideas from Philip Bitar. }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -38,7 +39,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {overflow}
 		type {=inData}
 		desc {
-Arrival data that can not be queued due to capacity limit.
+Arrival data that cannot be queued due to capacity limit.
 		}
 	}
 	protected {
