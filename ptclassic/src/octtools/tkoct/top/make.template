@@ -32,7 +32,7 @@ ROOT=		../../../..
 # Where we are
 VPATH =		../../../../src/octtools/tkoct/top
 # Get configuration info
-CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Since top is for testing only, make it a non shared library

@@ -32,7 +32,7 @@ ROOT =		../../../..
 # Where we are
 VPATH = 	../../../../src/octtools/tkoct/tkgraph
 # Get configuration info
-CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Don't use shared libraries here, because otherwise we need a whole raft

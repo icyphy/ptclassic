@@ -28,7 +28,7 @@
 # 						COPYRIGHTENDKEY
 
 # Important!  Do not run this makefile while in ~ptolemy/src/octtools/tkoct.
-# Instead run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# Instead run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
@@ -41,7 +41,7 @@ DIRS = 		tkgraph top tkoct oct2ptcl
 PTOLEMY = 	../../..
 
 MAKEVARS =	\
-		"ARCH=$(ARCH)" 
+		"ARCH=$(PTARCH)" 
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
