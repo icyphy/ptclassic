@@ -50,7 +50,8 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	EditBubbleAndArc.itcl \
-	EditFSM.itcl
+	EditFSM.itcl \
+	EditMoore.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
