@@ -19,19 +19,10 @@ include $(CONFIG)
 CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-.SUFFIXES: .o .cc .h .pl
-.cc.o:
-	$(GNU) $(GPPFLAGS) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
-
-# Make sure we always run the preprocessor in the source directory
-.pl.cc:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
-
-.pl.h:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+INCL = -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # source files for all stars, using preprocessor
-SRCS= \
+PL_SRCS= \
  CGRateChange.pl \
  CGMultiIn.pl \
  CGMultiInOut.pl \
@@ -44,35 +35,26 @@ SRCS= \
  CGReceive.pl 
 
 # The .cc files
-CCSRCS=$(SRCS:.pl=.cc)
+SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.pl=.o)
+OBJS= $(SRCS:.cc=.o)
 
 # header files for all stars
-HDRS= $(SRCS:.pl=.h)
+HDRS= $(SRCS:.cc=.h)
 
 all:		$(CCSRCS) makefile $(OBJS)
+
+EXTRA_SRCS=cgstars.mk $(PL_SRCS)
 
 # nothing to install -- use it where it lies
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template cgstars.mk
+LIB=none        # required by common.mk
 
-clean:
-		rm -f *.o core *~ *#
-depend:
-		cd $(VPATH); \
-		$(DEPEND) -I$(CGDIR) -I$(KERNDIR) -I$(SDFDIR) $(CCSRCS)|\
-			cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
