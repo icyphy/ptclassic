@@ -1,14 +1,9 @@
-# Makefile for MTDF domain support
+# Makefile for MTDF domain kernel
 # Version $Id$
 # Copyright 1992 The Regents of the University of California.
 #                       All Rights Reserved.
-# Date of creation: 6 February 1992
-#
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
+# Author:	T. M. Parks
+# Created:	6 February 1992
 
 ROOT=../../../..
 # True source directory
@@ -18,13 +13,13 @@ VPATH=$(ROOT)/src/domains/mtdf/kernel
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
-# Library name
-LIB=libmtdf.a
-
-THREADDIR=$(ROOT)/src/thread
+THREADDIR=$(ROOT)/src/lwp
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 
 INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR)
+
+# Library name
+LIB=libmtdf.a
 
 # Library sources
 CC_WITH_H=\
@@ -52,9 +47,3 @@ install:	makefile $(LIBDIR)/$(LIB)
 EXTRA_SRCS=
 
 include $(ROOT)/common.mk
-
-# Commands to make some sources from templates
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-
