@@ -1,19 +1,35 @@
+% Version $Id$
+
+\begin{ifhtml}
+\documentstyle[Ptolemy]{book}
+\htmldirectory{.}
+\htmlname{cp}
+\htmltitle{Ptolemy User's Manual}
+\htmlpanel{0}
+\end{ifhtml}
+
 \newcommand{\CP}{\PTOLEMY/src/domains/cp}
 \newcommand{\IP}{\CP/infopad}
 
-\node CP Domain
-\chapter{CP Domain}
-\Author{Seungjun Lee}
-\cindex{Lee, S.}
-\Contrib{Thomas M. Parks \\ Sangjin Hong}
-\cindex{Parks, T.}
-\cindex{Hong, S.}
+\begin{ifhtml}
+\begin{document}
+\topnode{The Almagest}
+\end{ifhtml}
 
-\date{$Date$}
+\chapter{CP Domain}
+\label{CP Domain}
+\Author{Seungjun Lee}
+\index{Lee, S.}
+
+\Contrib{Thomas M. Parks \\ Sangjin Hong}
+\index{Parks, T.}
+\index{Hong, S.}
+
+% \date{$Date$}
 
 The Communicating Processes (CP) domain
-\cindex{Communicating processes domain}
-\cindex{CP domain}
+\index{Communicating processes domain}
+\index{CP domain}
 in Ptolemy is a
 process-oriented domain.  The model of computation is an extension of
 \emph{Communicating Sequential Processes (CSP)} proposed by Hoare
@@ -23,12 +39,12 @@ message passing.  Blocks represent autonomous processes.  Each block is
 converted into an independent process once the simulation begins, and
 each process keeps running until the end of simulation.  The CP domain
 is timed, i.e.\ it has the notion of time.
-\cindex{timed domain}
+\index{timed domain}
 The scheduler maintains the global clock and manages the execution of
 blocks to be synchronized with the clock.
 
 The primary application of the CP domain is system modeling
-\cindex{system modeling} at an early
+\index{system modeling} at an early
 design stage where the system is partitioned into large subblocks with
 complex behavior.  Consequently, a CP block tends to show very
 complicated and application-specific behavior, and users are expected
@@ -37,24 +53,24 @@ sources and monitoring blocks, which are  provided in the library.
 Many useful constructs are provided to ease the task of describing the
 complex behavior of large blocks.
 
-\node The CP Scheduler
 \section{The Scheduler}
+\label{The CP Scheduler}
 
-\cindex{CP scheduler}
+\index{CP scheduler}
 The ordinary role of the scheduler in Ptolemy is to determine the order
 of execution of each block.  But in the CP domain, all the blocks are
 presumably running all the time so that there is no need of scheduling
 in that sense.  The task of the CP scheduler, instead, is to synchronize
 the execution of concurrent processes
-\cindex{concurrent processes} while they compete with each
+\index{concurrent processes} while they compete with each
 other for the CPU.  It keeps the global clock and a waiting list of
 suspended processes, and manages all the processes to proceed in
 lock-step fashion.
 
-\node Process Scheduling
 \subsection{Process Scheduling}
+\label{Process Scheduling}
 
-Process scheduling \cindex{process scheduling}
+Process scheduling \index{process scheduling}
 in the CP domain is based on priority and is
 preemptive.   The scheduler is just another process but it has a higher
 priority than the blocks.  When the simulation starts, the scheduler
@@ -65,7 +81,7 @@ the CPU and goes to sleep.
 The blocks execute one at a time until the execution is either blocked
 or suspended.  While blocks are executing, the scheduler sleeps and the
 global clock does not advance.  Hence, all the execution of blocks is
-considered to happen instantaneously.  \cindex{instantaneous execution}
+considered to happen instantaneously.  \index{instantaneous execution}
 A block must be explicitly suspended in order to model execution delay
 and to allow the global clock to advance.
 When there are no more runnable processes, the scheduler wakes up and
@@ -76,23 +92,23 @@ returns and the simulation ends.  Otherwise, the scheduler resumes all
 the suspended processes scheduled at that time slot and goes back to
 sleep.
 
-\node Simultaneous Events and Non-Determinism
 \subsection{Simultaneous Events and Non-Determinism}
+\label{Simultaneous Events and Non-Determinism}
 
-Handling simultaneous events \cindex{simultaneous events}
+Handling simultaneous events \index{simultaneous events}
 in a consistent and predictable way is not
 an easy task for event-driven simulation.
-\cindex{event-driven simulation} When there are simultaneous
+\index{event-driven simulation} When there are simultaneous
 events, they have to be handled sequentially in a uni-processor
 environment.  The result may show non-deterministic behavior depending
-\cindex{non-deterministic behavior}
+\index{non-deterministic behavior}
 on the order they are processed.  The problem stems from the existence
 of zero-delay blocks.  This problem has been thought out in the
-implementation of the scheduler for the discrete-event domain
-(see chapter\tie\ref{DE Domain}),
-\cindex{DE scheduler}
-\cindex{DE domain}
-\cindex{Discrete-event domain}
+implementation of the scheduler for the
+\xlink{discrete-event domain}[(see chapter~\ref{DE.Domain})]{de.html},
+\index{DE scheduler}
+\index{DE domain}
+\index{Discrete-event domain}
 and many schemes have been devised to
 help a user avoid unexpected behavior.
 
@@ -102,19 +118,19 @@ existence of zero-delay blocks is not completely ruled out, which may
 result in non-deterministic behavior of the system.   A zero-delay
 path from an input to an output within a block is equally dangerous.
 
-\node Inter-Process Communication
 \section{Inter-Process Communication}
+\label{Inter-Process Communication}
 
 Blocks communicate with each other by passing messages through
-portholes.  \cindex{message passing}
+portholes.  \index{message passing}
 Each block may have several input and output portholes.  A
 channel connects an output porthole to an input porthole.  Only
 one-to-one connections are allowed.  That implies that \emph{auto-forking}
-\cindex{auto-forking}
+\index{auto-forking}
 is not supported in this domain.
 
-\node Communication Channels
 \subsection{Communication Channels}
+\label{Communication Channels}
 
 Channels can be either buffered or unbuffered.  A buffered channel
 is implemented as a FIFO queue and the capacity of the queue can be
@@ -122,7 +138,7 @@ either finite or infinite.  The default action of connecting an output
 porthole to an input porthole is to create an unbuffered channel, and
 the communication through that connection becomes synchronous.  
 
-\begin{ignore}
+\begin{ifhtml}
 Two types of queue object are available in the library to implement
 buffered channel.  One is a simple FIFO queue and the other is a FIFO
 queue with a monitor.  The monitor records the variation of the queue
@@ -131,13 +147,13 @@ is finished.  The maximum capacity of the queue is parameterized so
 that it can be arbitrarily set at run-time.   The capacity of -1 is
 interpreted as an infinite buffer.  In that case the queue can grow
 without limit, and the sender to this queue will never block.
-\end{ignore}
+\end{ifhtml}
 
-\node Communication Protocols
 \subsection{Communication Protocols}
+\label{Communication Protocols}
 
 A porthole is characterized by a data type and a port protocol.
-\cindex{port protocol} \cindex{communication protocol, port}
+\index{port protocol} \index{communication protocol, port}
 The port protocol specifies the behavior when a channel is
 full or empty.  Four different protocols are supported for each input
 and output porthole.  For an output porthole, it can be \emph{block on
@@ -146,30 +162,32 @@ on full}.  For an input porthole, it can be \emph{block on empty,
 block on empty with timeout, previous on empty,} and \emph{ignore on
 empty}.  The default protocol is \emph{block on full/empty}.
 
-\node CP Star Overview
 \section{An Overview of CP Stars}
+\label{CP Star Overview}
 
-Figure\tie\ref{figure CP stars} shows the top-level palette of blocks
+\link{Figure}[~\Ref]{figure CP stars} shows the top-level palette of blocks
 included in the CP domain.  Only the blocks used in the demos are
 included here.  Most blocks in the CP domain will be application
 specific, and so they will be written by the user.
 
 \begin{figure}
+\begin{gif}{cp-fig1}
 \begin{center}
 \ \psfig{figure=\CP/icons/cp.pal.ps}
 \end{center}
 \caption{Top-level palette of stars in the CP domain.}
 \label{figure CP stars}
+\end{gif}
 \end{figure}
 
-\node CP Basic Stars
 \subsection{Basic Stars}
+\label{CP Basic Stars}
 
-The first row of icons in figure\tie\ref{figure CP stars} shows the
+The first row of icons in \link{figure}[~\Ref]{figure CP stars} shows the
 basic stars included in the CP domain.  These stars can be used to
 model simple network queueing systems.  The other icon is the palette
-for InfoPad stars (\pxref{CP InfoPad Stars}
-and figure\tie\ref{figure CP infopad stars}).
+for InfoPad stars (\link{see section}[~\Ref]{CP InfoPad Stars}
+and \link{figure}[~\Ref]{figure CP infopad stars}).
 
 \begin{indexlist}{ (CP block)}
 
@@ -184,18 +202,20 @@ Implement a FIFO queue with either finite or infinite length.
 
 \end{indexlist}
 
-\node CP InfoPad Stars
 \subsection{InfoPad Stars}
+\label{CP InfoPad Stars}
 
-Figure\tie\ref{figure CP infopad stars} shows the InfoPad
-\cindex{InfoPad} stars available in the CP domain.
+\link{Figure}[~\Ref]{figure CP infopad stars} shows the InfoPad
+\index{InfoPad} stars available in the CP domain.
 
 \begin{figure}
+\begin{gif}{cp-fig2}
 \begin{center}
 \ \psfig{figure=\IP/icons/infopad.pal.ps}
 \end{center}
 \caption{Palette of InfoPad stars in the CP domain.}
 \label{figure CP infopad stars}
+\end{gif}
 \end{figure}
 
 \begin{indexlist}{ (CP block)}
@@ -241,33 +261,37 @@ Receive compressed video data and displays the image in an X window.
 
 \end{indexlist}
 
-\node CP Demo Overview
 \section{An Overview of CP Demos}
+\label{CP Demo Overview}
 
-Figure\tie\ref{figure CP demos} shows the top-level palette of demos
+\link{Figure}[~\Ref]{figure CP demos} shows the top-level palette of demos
 available in the CP domain.
 
 \begin{figure}
+\begin{gif}{cp-fig3}
 \begin{center}
 \ \psfig{figure=\CP/demo/init.pal.ps}
 \end{center}
 \caption{Top-level palette of demos in the CP domain.}
 \label{figure CP demos}
+\end{gif}
 \end{figure}
 
-\node CP Basic Demos
 \subsection{Basic Demos}
+\label{CP Basic Demos}
 
-Figure\tie\ref{figure CP basic demos} shows the palette of basic demos
+\link{Figure}[~\Ref]{figure CP basic demos} shows the palette of basic demos
 available in the CP domain.  Currently there is only a simple network
 queueing demo.
 
 \begin{figure}
+\begin{gif}{cp-fig4}
 \begin{center}
 \ \psfig{figure=\CP/demo/basic.pal.ps}
 \end{center}
 \caption{Palette of basic demos in the CP domain.}
 \label{figure CP basic demos}
+\end{gif}
 \end{figure}
 
 \begin{indexlist}{ (CP demo)}
@@ -280,21 +304,23 @@ the last argument is the number of the servers.
 \end{tex}
 \end{indexlist}
 
-\node CP InfoPad Demos
 \subsection{InfoPad Demos}
+\label{CP InfoPad Demos}
 
-Figure\tie\ref{figure CP infopad demos} shows the InfoPad
-\cindex{InfoPad} demos available in the CP domain.  The demos are
+\link{Figure}[~\Ref]{figure CP infopad demos} shows the InfoPad
+\index{InfoPad} demos available in the CP domain.  The demos are
 simulations of communication between a base station and a hand-held
 voice/video terminal.  Each demo models the system at a different level
 of detail.
 
 \begin{figure}
+\begin{gif}{cp-fig5}
 \begin{center}
 \ \psfig{figure=\IP/demo/init.pal.ps}
 \end{center}
 \caption{Palette of InfoPad demos in the CP domain.}
 \label{figure CP infopad demos}
+\end{gif}
 \end{figure}
 
 \begin{indexlist}{ (CP demo)}
@@ -312,27 +338,31 @@ model is used.
 
 \end{indexlist}
 
-\node Installing the CP Domain
 \section{Installing the CP Domain}
+\label{Installing the CP Domain}
 
 By default, the CP domain is not compiled into the Ptolemy
-\code{pigiRpc} program. \pindex{pigiRpc} Only the necessary libraries
+\code{pigiRpc} program. \index{pigiRpc} Only the necessary libraries
 are built.  It is necessary to build a special version of the program,
 \code{pigiRpc.cp}.  To do this, issue the command \samp{make
-pigiRpc.cp} in the \file{$PTOLEMY/obj.$ARCH/pigiRpc} directory.  To use this
+pigiRpc.cp} in the \file{\$PTOLEMY/obj.\$ARCH/pigiRpc} directory.  To use this
 program when you run \code{pigi}, set the \code{PIGIRPC} variable:
 \begin{example}
-setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/pigiRpc.cp
+setenv PIGIRPC \$PTOLEMY/obj.\$ARCH/pigiRpc/pigiRpc.cp
 \end{example}
 Or use the \samp{-rpc} option for \code{pigi}:
 \begin{example}
-pigi -rpc $PTOLEMY/obj.$ARCH/pigiRpc/pigiRpc.cp
+pigi -rpc \$PTOLEMY/obj.\$ARCH/pigiRpc/pigiRpc.cp
 \end{example}
 
 Because of conflicts between Sun's lightweight process library and the
 SDF domain, the dataflow domains (SDF, DDF, BDF, CG, CGC, etc.) are
 excluded from \code{pigiRpc.cp}.  To include one or more of these
 domains in \code{pigiRpc.cp}, change the definition of
-\code{PTCP_STARS} in the \file{makefile} for \code{pigiRpc}.
+\code{PTCP\_STARS} in the \file{makefile} for \code{pigiRpc}.
 If you do, then you will get a core dump every time you
 quit.  You may also get core dumps when running some systems.
+
+\begin{ifhtml}
+\end{document}
+\end{ifhtml}
