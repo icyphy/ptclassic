@@ -33,9 +33,19 @@ static char SccsId[]="$Id$";
  */
 
 #include "rpcApp.h"
+#include "ansi.h"
+octStatus
+vemInitializeApplication
+	ARGS((char **display, RPCSpot *spot, lsList *cmdList, long
+	      *userOptionWord)); 
+rpcStatus RPCApplicationFunctionComplete();
+octStatus vemSendMenu
+	ARGS((RPCFunction array[], long count));
+
 
 extern long UserMain();
 
+int
 RPCMain(argc, argv)
 int argc;
 char **argv;
