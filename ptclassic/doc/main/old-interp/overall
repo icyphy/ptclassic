@@ -15,7 +15,7 @@ Joseph Buck
 The \*(PT interpreter provides a textual interface for constructing
 systems and performing simulations.
 This interface is more convenient than the graphical interface
-when large complex universes or being created automatically
+when large complex universes are being created automatically
 by some other program.  It is also more convenient when using
 a symbolic debugger to debug a new piece of code linked to \*(PT.
 .so starting
