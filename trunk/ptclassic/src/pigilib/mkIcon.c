@@ -83,24 +83,35 @@ octObject *destPtr, *srcPtr;
     octStatus status;
     int32 num;
 
-    octInitGenContents(srcPtr, OCT_ALL_MASK, &gen);
+    octInitGenContentsSpecial(srcPtr, OCT_ALL_MASK, &gen);
     while ((status = octGenerate(&gen, &srcItem)) == OCT_OK) {
 	destItem = srcItem;
-	CK_OCT(octCreate(destPtr, &destItem));
+	if (octCreate(destPtr, &destItem) < OCT_OK) {
+	    octFreeGenerator(&gen);
+	    ErrAdd(octErrorString());
+	    return FALSE;
+	}
 	/* copy points of paths and polygons... */
 	if (srcItem.type == OCT_PATH || srcItem.type == OCT_POLYGON) {
 
 /* This temporary fix is limited to 32 points: 10/18/89 */
 	    octPoint points[32];
 	    num = 32;
-	    CK_OCT(octGetPoints(&srcItem, &num, points));
+	    if (octGetPoints(&srcItem, &num, points) < OCT_OK) {
+		octFreeGenerator(&gen);
+		ErrAdd(octErrorString());
+		return FALSE;
+	    }
 	    octGetPoints(&srcItem, &num, points);
 	    octPutPoints(&destItem, num, points);
 
 /*  This is the way it should work but it doesn't work all the time:
 	    num = 0;
 	    if (octGetPoints(&srcItem, &num, points) == OCT_TOO_SMALL) {
-		ERR_IF1(!UMalloc(&points, num * sizeof(octPoint)));
+		if (!UMalloc(&points, num * sizeof(octPoint))) {
+		    octFreeGenerator(&gen);
+		    return FALSE;
+		}
 		octGetPoints(&srcItem, &num, points);
 		octPutPoints(&destItem, num, points);
 	    } else {
@@ -111,10 +122,13 @@ octObject *destPtr, *srcPtr;
 	    }
 */
 	}
-	ERR_IF1(!DeepCopyObjs(&destItem, &srcItem));
+	if (!DeepCopyObjs(&destItem, &srcItem)) {
+	    octFreeGenerator(&gen);
+	    return FALSE;
+	}
     }
-    CK_OCT(status);  /* check in case of OCT_ERROR */
     octFreeGenerator(&gen);
+    CK_OCT(status);  /* check in case of OCT_ERROR */
     return (TRUE);
 }
 
