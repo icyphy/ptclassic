@@ -114,9 +114,8 @@ tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 
 install: tclIndex
 
-LIB=dummy		# required since no LIB
-# include common definitions, rules
-include $(ROOT)/mk/common.mk
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
