@@ -108,19 +108,6 @@ proc dotests {file args} {
 
 # Below here we have Tycho Specific extensions
 
-
-############################################################################
-#### doneTests
-# Call this at the bottom of each test file
-#
-proc doneTests {args} {
-    global PASSED FAILED
-    puts stderr \
-	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
-    flush stderr
-}
-
- 
 ############################################################################
 #### removeobj
 # This procedure removes an object if it exists.
@@ -133,6 +120,7 @@ proc removeobj {name} {
 
 # How long windows are kept around, in milliseconds
 set duration 4000
+set longDuration 8000
 
 ############################################################################
 #### openAllFiles 
@@ -156,3 +144,18 @@ proc openAllFiles {args} {
     }
 
 }
+
+############################################################################
+#### doneTests
+# Call this at the bottom of each test file
+#
+proc doneTests {args} {
+    global PASSED FAILED duration
+    puts stderr \
+	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
+    flush stderr
+    update
+    #after [expr {2 * $duration}] ::tclexit
+}
+
+ 
