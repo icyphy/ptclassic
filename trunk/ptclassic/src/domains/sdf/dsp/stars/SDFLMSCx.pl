@@ -116,6 +116,7 @@ will be stored there after the run has completed.
 							taps[i].imag());
 			}
 			fclose(fp);
+			delete [] saveFileName;
 		}
 	}
 }

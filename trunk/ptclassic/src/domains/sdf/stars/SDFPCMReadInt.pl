@@ -85,7 +85,9 @@ periodically repeated, or the file contents can be padded with zeros.
 	{
 		LOG_DEL; delete input; input = 0;
 		// open input file
-		int fd = open(expandPathName(fileName), O_RDONLY);
+		char *expandedFileName = expandPathName(fileName);
+		int fd = open(expandedFileName, O_RDONLY);
+		delete [] expandedFileName;
 		if (fd < 0) {
 			Error::abortRun(*this, fileName, ": can't open file: ",
 					sys_errlist[errno]);

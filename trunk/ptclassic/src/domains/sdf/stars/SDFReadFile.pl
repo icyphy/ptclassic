@@ -56,7 +56,9 @@ repeated, or the file contents can be padded with zeros.
     setup {
 	// open input file
 	LOG_DEL; delete input;
-	LOG_NEW; input = new ifstream(expandPathName(fileName));
+	char *expandedFileName = expandPathName(fileName);
+	LOG_NEW; input = new ifstream(expandedFileName);
+	delete [] expandedFileName;
 	if (!(*input))
 		Error::abortRun(*this, "can't open file ", fileName);
     }
