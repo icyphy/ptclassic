@@ -798,6 +798,7 @@ vemTechLayer *ptr;
 /* Frees the storage associated with 'ptr' */
 {
     VEMFREE(ptr);
+    return 1;
 }
 
 vemStatus remTech(tech)
@@ -853,5 +854,6 @@ STR file;			/* in: File to save it in */
     /* Note: not implemented yet */
     (void) vemMessage("Saving technologies is not implemented yet.\n",
 	       MSG_DISP);
+    return 1;
 }
 
