@@ -93,13 +93,13 @@ test MenuSupport-constructor-3 \
 } {0}
 
 ############################################################################
-# add{}, empty{}, exists{}
+# add{}, entries{}, exists{}
 #
 _menu
 .m post
-test MenuSupport-empty-1 {Menu is empty} {
-    .m empty top
-} {1}
+test MenuSupport-entries-1 {Menu is empty} {
+    .m entries top
+} {}
 test MenuSupport-exists-1 {Menu entry does not exist} {
     .m exists bogus
 } {0}
@@ -111,9 +111,9 @@ test MenuSupport-add-1 {Insert a command entry} {
 } {command-entry}
 update
 
-test MenuSupport-empty-2 {Menu is not empty} {
-    .m empty top
-} {0}
+test MenuSupport-entries-2 {Menu is not empty} {
+    .m entries top
+} {command-entry}
 test MenuSupport-exists-2 {Menu entry exists} {
     .m exists command-entry
 } {1}
@@ -174,14 +174,14 @@ update
 _stdmenu
 test MenuSupport-delete-1 {Delete entry} {
     .m delete foo
-    list [.m empty cascade-entry-3] [.m exists foo] [.m exists bar]
-} {0 0 1}
+    list [.m entries cascade-entry-3] [.m exists foo] [.m exists bar]
+} {bar 0 1}
 update
 
 test MenuSupport-delete-2 {Delete another entry} {
     .m delete bar
-    list [.m empty cascade-entry-3] [.m exists foo] [.m exists bar]
-} {1 0 0}
+    list [.m entries cascade-entry-3] [.m exists foo] [.m exists bar]
+} {{} 0 0}
 update
 
 test MenuSupport-delete-3 {Delete an empty cascade entry} {
@@ -192,8 +192,8 @@ update
 
 test MenuSupport-delete-4 {Delete a non-empty cascade entry} {
     .m delete cascade-entry
-    list [.m exists cascade-entry]
-} {0}
+    list [.m exists cascade-entry] [.m exists cascade-entry-1]
+} {0 0}
 update
 
 ############################################################################
@@ -202,14 +202,14 @@ update
 _stdmenu
 test MenuSupport-clear-1 {Clear menu} {
     .m clear cascade-entry-3
-    list [.m empty cascade-entry-3] [.m exists foo] [.m exists bar]
-} {1 0 0}
+    list [.m entries cascade-entry-3] [.m exists foo] [.m exists bar]
+} {{} 0 0}
 update
 
 test MenuSupport-clear-2 {Clear top-level menu} {
     .m clear top
-    list [.m empty top] [.m exists cascade-entry]
-} {1 0}
+    list [.m entries top] [.m exists cascade-entry]
+} {{} 0}
 update
 
 ############################################################################
@@ -220,25 +220,25 @@ test MenuSupport-separator-1 {Add a separator} {
     .m separator bazsep top
 } {bazsep}
 update
-after 500
+after 250
 
 test MenuSupport-command-1 {Add a command} {
     .m command baz top -label "A new command entry"
 } {baz}
 update
-after 500
+after 250
 
 test MenuSupport-separator-2 {Add a separator} {
     .m separator zazsep cascade-entry
 } {zazsep}
 update
-after 500
+after 250
 
 test MenuSupport-command-2 {Add a command} {
     .m command zaz cascade-entry -label "Another new command entry"
 } {zaz}
 update
-after 500
+after 250
 
 ############################################################################
 # disable{}, enable{}
@@ -249,21 +249,21 @@ test MenuSupport-disable-1 {Disable an entry} {
     .m entrycget command-entry -state
 } {disabled}
 update
-after 500
+after 250
 
 test MenuSupport-enable-1 {Enable an entry} {
     .m enable command-entry
     .m entrycget command-entry -state
 } {normal}
 update
-after 500
+after 250
 
 test MenuSupport-disable-2 {Disable a cascaded menu} {
     .m disable cascade-entry
     .m entrycget cascade-entry -state
 } {disabled}
 update
-after 500
+after 250
 
 test MenuSupport-enable-2 {Enable a cascaded menu} {
     .m enable cascade-entry
@@ -271,7 +271,7 @@ test MenuSupport-enable-2 {Enable a cascaded menu} {
 } {normal}
 update
 .m post cascade-entry
-after 500
+after 250
 
 ############################################################################
 # entrycget{}, entryconfigure{}
@@ -287,7 +287,7 @@ foreach {option value} {
 } {
     test MenuSupport-entryconfigure-$i "Configure and get option $option" {
         update
-        after 500
+        after 250
         incr i
         .m entryconfigure command-entry -$option $value
         .m entrycget command-entry -$option
@@ -415,7 +415,7 @@ foreach menu {top cascade-entry cascade-entry-3} {
             .m menuconfigure $menu -$option $value
             .m unpost
             .m post $menu
-            after 500
+            after 250
             .m menucget $menu -$option
         } $value
     }
@@ -461,5 +461,5 @@ test MenuSupport-unpost-2 {Unpost bottom-level menu} {
 
 ########################################################################
 ## CLEAN UP
-after 500
+after 250
 catch {delete object .m}
