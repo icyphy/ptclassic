@@ -182,7 +182,7 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
 
     # Get my hierarchy tags
     set htags [$canvas gettags $primary($id)]
-puts "htags = $htags"
+
     # Draw each item at full scale
     set tags [concat graphics.$id [$canvas gettags $primary($id)]]
     foreach spec [split $graphics ";\n"] {
