@@ -52,12 +52,12 @@ ident {
 #define DUMMY 0
 }
 defstar {
-        name { FloatRect }
-        domain { SDF }
+	name { FloatRect }
+	domain { SDF }
 	desc {
 Generates a rectangular pulse of height "height" (default 1.0).
 with width "width" (default 8).
-        }
+	}
 	version {$Revision$ $Date$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
@@ -65,36 +65,36 @@ with width "width" (default 8).
 	explanation {
 If needed, a longer explanation would go here.
 	}
-        defstate {
-                name { height }
-                type { float }
-                default { 1.0 }
-                desc { Height of the rectangular pulse. }
-        }
-        defstate {
-                name { width }
-                type { int }
-                default { 8 }
-                desc { Width of the rectangular pulse. }
-        }
-        defstate {
-                name { count }
-                type { int }
-                default { 0 }
-                desc { Internal counting state. }
+	defstate {
+		name { height }
+		type { float }
+		default { 1.0 }
+		desc { Height of the rectangular pulse. }
+	}
+	defstate {
+		name { width }
+		type { int }
+		default { 8 }
+		desc { Width of the rectangular pulse. }
+	}
+	defstate {
+		name { count }
+		type { int }
+		default { 0 }
+		desc { Internal counting state. }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
-        }
-        output {            // the output port
-                name { output }
-                type { float }
+	}
+	output {		// the output port
+		name { output }
+		type { float }
 		desc { The output pulse. }
-        }
-        go {                // the run-time function
-                double t = 0.0;
-                if (count < width) t = height;
-                count = int(count) + 1;
-                output%0 << t;
-        }
+	}
+	go {			// the run-time function
+		double t = 0.0;
+		if (count < width) t = height;
+		count = int(count) + 1;
+		output%0 << t;
+	}
 }
 .)c
 .pp
