@@ -18,6 +18,20 @@ $Id$
 #include "Universe.h"
 #include "StringList.h"
 #include "GalIter.h"
+#include "KnownTarget.h"
+#include "miscFuncs.h"
+
+Runnable :: Runnable (const char* targetname, const char* dom, Galaxy* g) :
+type(dom), gal(*g) {
+	if (!targetname) targetname = KnownTarget::defaultName(dom);
+	target = KnownTarget::clone(targetname);
+}
+
+Runnable :: Runnable (Target* tar, const char* dom, Galaxy* g) :
+target(tar), type(dom), gal(*g) {
+	if (!target)
+		target = KnownTarget::clone(KnownTarget::defaultName(type));
+}
 
 StringList
 Universe :: print (int recursive) const {
@@ -40,14 +54,7 @@ Universe :: print (int recursive) const {
 
 // setting the stopping condition
 void Runnable :: setStopTime (float stamp) {
-	scheduler->setStopTime(stamp) ;
-}
-
-// complete the simulation
-void Runnable::wrapupGal (Galaxy& g) {
-	GalAllBlockIter next(g);
-	Block* b;
-	while ((b = next++) != 0) b->wrapup();
+	target->setStopTime(stamp) ;
 }
 
 // isa
