@@ -82,7 +82,7 @@ class ::tycho::HTML {
     method help {}
 
     # Open a file and go to its internal point identified by name.
-    method hyperJump {filename point {push 1}}
+    method hyperJump {filename {point {}} {push 1}}
 
     # Insert the specified data.
     method insertData {data}
@@ -169,7 +169,7 @@ body ::tycho::HTML::constructor {args} {
     # FIXME: should the user be allowed to change the home window?
     global ::TYCHO
     addTool home Home \
-	    "$this hyperJump $TYCHO/doc/index.html {}"
+	    "$this hyperJump $TYCHO/doc/index.html"
     addTool reload Reload "$this reload"
     addTool open Open "$this altFile"
     addTool find Find "$itk_component(text) search"
@@ -252,7 +252,7 @@ body ::tycho::HTML::altFile {} {
     set filename [::tycho::DialogWindow::newModal FileBrowser \
 	    [::tycho::autoName .fileBrowser] -text "Alternate file to load:"]
     if {$filename != {}} {
-	hyperJump $filename {}
+	hyperJump $filename
     }
 }
 
@@ -326,7 +326,7 @@ body ::tycho::HTML::help {} {
 # argument, which is optional, has value 0, then the jump is not
 # recorded for backtracking.
 #
-body ::tycho::HTML::hyperJump {filename point {push 1}} {
+body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
         set char [string index $filename 0]
         if {$char != "/" && $char != "~" && $char != "\$"} {

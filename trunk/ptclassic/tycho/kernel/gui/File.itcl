@@ -143,7 +143,7 @@ class ::tycho::File {
     method help {}
 
     # Open a file and go to its internal point identified by name.
-    method hyperJump {filename point}
+    method hyperJump {filename {point {}}}
 
     # Insert the specified data.  Redefine in derived classes.
     method insertData {data}
@@ -726,7 +726,7 @@ body ::tycho::File::help {} {
 # <i>start</i> and <i>end</i> have the form
 # <i>linenumber.characternumber</i>.
 #
-body ::tycho::File::hyperJump {filename point} {
+body ::tycho::File::hyperJump {filename {point {}}} {
     if {$filename != {}} {
         set char [string index $filename 0]
         if {$char != "/" && $char != "~" && $char != "\$"} {
