@@ -405,6 +405,9 @@ protected:
     int typeConversionTableRows;
     virtual int needsTypeConversionStar(PortHole& port);
     
+    // Dynamic copy of default value of the destination directory
+    StringList destDirName;
+
 private:
     // Counter used to make symbols unique.
     int counter;
