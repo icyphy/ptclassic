@@ -344,13 +344,13 @@ body ::tycho::RevControlRCS::checkOut {object} {
 # Check out the most recent file, then remove it from history.
 # In SCCS, the command is simply "sccs fix <filename>",
 # but in RCS, this is:
-# 1) co <file>
-# 2) cp <file> <tmp>
-# 3) rcs -u <file>
-#    rm -f <file>
-# 4) rcs -o[recent_version] <file>
-# 5) co <file>
-# 6) cp <tmp> <file>
+# 1) co <i>file</i>
+# 2) cp <i>file</i> <i>tmp</i>
+# 3) rcs -u <i>file</i>
+#    rm -f <i>file</i>
+# 4) rcs -o[recent_version] <i>file</i>
+# 5) co <i>file</i>
+# 6) cp <i>tmp</i> <i>file</i>
 #
 body ::tycho::RevControlRCS::fixRecent {object version} {
     ::tycho::RevControl::checkOut $object
