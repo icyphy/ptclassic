@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Sun Feb 23 15:27:29 1997 by cxh]-
+-*-Mode:text-*- -[Sun Feb 23 15:40:37 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -139,7 +139,7 @@ SunOS4.1.3
 		gcc -fpic -shared -o libstdc++.so.2.7.2 `cat piclist` 
 		collect2: ld returned 4 exit status
 		ld: ../libiberty/pic/strtoul.o: can't mix pic and PIC .o
-	The fix we did in the sources was to edit libg++/config/mh-sparcpic
+	The fix we did in the sources was to edit libg++/config/mt-sparcpic
 	and change -fpic to -fPIC.
 
 	libg++/config/ChangeLog says:
