@@ -177,7 +177,7 @@ class ::tycho::AbstractGraph {
     # Configure the vertex with one or more attributes
     method vertexconfigure {vertex args}
 
-   	# Remove a vertex (but not adjacent edges) from the graph
+    # Remove a vertex (but not adjacent edges) from the graph
     method vertexdelete {vertex}
 
     # Return vertices matching a pattern
@@ -240,10 +240,75 @@ body ::tycho::AbstractGraph::constructor {args} {
 ########################################################################
 #### acyclic
 #
-# Test if the graph is acyclic. <i>Abstract method</i>.
+# Test if the graph is acyclic. This is a based on Tarjan's
+# algorithm for strongly-connected components (simplified a lot!).
+# See Sedgewick.
 #
 body ::tycho::AbstractGraph::acyclic {} {
-    abstractMethod acyclic
+    _update
+
+    # Don't traverse if we don't have to
+    if { [cache exists acyclic] } {
+	return [cache get acyclic]
+    }
+
+    # The mark for each vertex is initialized to 0
+    foreach v $_vertices {
+	set _visited($v) 0
+    }
+
+    # Initialize the traversal stack with the roots of the graph
+    set stack [roots]
+    
+    # Initialize the vertex counter
+    set count 0
+
+    # A larger number than the counter can reach
+    set N [expr [llength $_vertices] + 1]
+
+    # Keep processing vertices until there are none left
+    while { $stack != "" } {
+	# Read the vertex on the top of the stack
+	set current [lindex $stack end]
+
+	switch -exact $_visited($current) {
+	    "0" {
+		# The vertex has not been seen, so mark it but leave
+		# it on the stack
+		incr count
+		set _visited($current) $count
+		
+		# Check the children
+		foreach child [children $current] {
+		    if { ! $_visited($child) } {
+			# If not seen, put it on the stack
+			lappend stack $child
+		    } else {
+			# If its index is lower, we have a cycle
+			if { $_visited($child) <= $count } {
+			    cache set acyclic 0
+			    return 0
+			}
+		    }
+		}
+	    }
+	    $N {
+		# This vertex has already been processed, by some other
+		# path through the graph. Remove it from the stack.
+		set stack [lreplace $stack end end]
+	    }
+	    default {
+		# This vertex is still on the stack. Remove
+		# it from the stack and mark it as "done."
+		set stack [lreplace $stack end end]
+		set _visited($current) $N
+	    }
+	}
+    }
+    
+    # If we get to here, we have no cycles
+    cache set acyclic 1
+    return 1
 }
 
 ########################################################################
