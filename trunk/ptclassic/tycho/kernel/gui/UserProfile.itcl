@@ -69,11 +69,12 @@ ensemble ::tycho::userprofile {
     # Register a user profile
     option register {filename} {
 	set filename [::tycho::expandPath $filename]
-	# Create the object
-	set profile [uplevel #0 ::tycho::UserProfile #auto \
-		[list \
+
+	# Create and configure the object
+        set profile [::tycho::UserProfile::instance]
+        $profile configure \
 		-modelname "user profile" \
-		-filename $filename]]
+		-filename $filename
 
 	# Load it
 	if [::file exists $filename] {
@@ -144,10 +145,15 @@ class ::tycho::UserProfile {
     method registerstyle {stylesheet style {class {}}}
 
     #################################################################
-    ####                   private variables                     ####
+    ####                     public procs                      ####
 
-    # The single profile object
-    private common _profile
+    # Get the unique instance
+    proc instance {} {
+        if { [info which ::tycho::userProfile] == "" } {
+            uplevel #0 ::tycho::UserProfile ::tycho::userProfile
+        }
+        return ::tycho::userProfile
+    }
 
     #################################################################
     #### TEMPORARY
@@ -222,13 +228,13 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}}} {
 #
 body ::tycho::UserProfile::registerstyle {stylesheet style {class {}}} {
     if { $class == {} } {
-		set name global
+        set name global
     } else {
-		set name $class
+        set name $class
     }
     # Create the item if it doesn't exist
     if ![exists $name] {
-		add $name
+        add preference $name
     }
     # Add the preference
     attrset $name -$stylesheet $style
