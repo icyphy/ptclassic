@@ -47,10 +47,9 @@ class Target;
 	// class Star
 	////////////////////////////////////
 
-class Cluster;
 
 class Star : public Block  {
-
+friend class Cluster;
 public:
 // The writer of a Star code has the option to
 // provide the methods setup, begin, go, and wrapup.
@@ -75,31 +74,29 @@ public:
 	// Return my indexValue.
 	int index() const { return indexValue;}
 
-	// set the Target
-	virtual void setTarget(Target* t);
-
 	// Check whether invocations are parallelizable or not.
 	void noInternalState() { inStateFlag = FALSE; }
 	int hasInternalState() { return inStateFlag; }
 
 	// constructor
-	Star() : targetPtr(0), indexValue(-1), inStateFlag(TRUE) {}
+	Star() : indexValue(-1), inStateFlag(TRUE) {}
 
 	// class identification
 	/* virtual */ int isA(const char*) const;
 	/* virtual */ const char* className() const;
 
 	// make a duplicate Star.  This will call Block::clone 
-	// and then set Star specific data members such as targetPtr.
+    	// and then set Star specific data members such as the
+    	// target pointer.
 	/* virtual */ Block* clone () const;
+
+	/* virtual */ int setTarget(Target*);
 
 protected:
 	// User supplied method.
 	// Run the simulation, accessing Particles on the
 	// input PortHoles, generating Particles on the output PortHoles
         virtual void go();
-
-	Target* targetPtr;
 private:
 	int indexValue;
 	int inStateFlag; // indicate there are internal states (default)

@@ -55,6 +55,7 @@ Domain :: Domain (const char* domname) {
 	index = numDomains++;
 	allDomains[index] = this;
 	myName = domname;
+	subDomains += "HOF";
 }
 
 // return ptr to domain matching given name

@@ -42,7 +42,8 @@ int DFCluster::run() {
 }
 
 // Constructors
-DFCluster::DFCluster(const char* domain):DataFlowStar(),Cluster(*this,domain)
+DFCluster::DFCluster(const char* domain):
+DataFlowStar(),DFClusterBase(*this,domain)
 {};
 
 DFClusterPort::DFClusterPort(const PortHole* master, Star* parent)
@@ -65,35 +66,6 @@ Cluster* DFCluster::newCluster(Block* master,const char* domain) const {
     return cluster;
 }
 
-int DFCluster::isSDFinContext() const {
-    
-    if (isClusterAtomic())
-	return Cluster::master?((DataFlowStar*)Cluster::master)->isSDFinContext():TRUE;
-    GalStarIter nextStar(gal);
-    DataFlowStar* s;
-    while ((s = (DataFlowStar*) nextStar++) != 0)
-	if (!s->isSDFinContext()) return FALSE;
-    return TRUE;
-}
 
-/*virtual*/ void DFCluster::setMasterBlock(Block*master,PortHole**newPorts) {
-    Cluster::setMasterBlock(master,newPorts);
-    if (master->isItAtomic())
-	this->repetitions = ((DataFlowStar*)master)->repetitions;
-}
 
-/*virtual*/ int DFCluster::generateSchedule() {
-    if (isClusterAtomic()) return TRUE;
-    if (!Cluster::generateSchedule()) return FALSE;
-    // Now we must adjust all external Cluster porthole parameters
-    BlockPortIter clusterPorts(*this);
-    DFClusterPort* port;
-    while((port = (DFClusterPort*) clusterPorts++) != NULL) {
-	DFClusterPort* realPort=(DFClusterPort*)port->asClusterPort()->clusterAlias();
-	DFCluster* star = (DFCluster*) realPort->parent();
-	int reps = star->reps();
-	port->setSDFParams(realPort->numXfer()*reps,realPort->maxDelay()*reps);
-    }
-    return TRUE;
-}
 

@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 
 class Scheduler;
+class Target;
 
 	//////////////////////////////
 	// Runnable
@@ -60,29 +61,34 @@ public:
 	Runnable(const char* targetname, const char* dom, Galaxy* g);
 
 	// initialize and/or generate schedule
-	virtual void initTarget() {
-		target->setGalaxy(*galP);
-		target->initialize();
-	}
+	virtual void initTarget();
 
 	// run, until stopping condition
-	int run() { return target->run();}
+	int run();
 
 	// set the stopping condition.  A hack.
 	virtual void setStopTime(double stamp);
 
 	// display schedule
-	StringList displaySchedule() {return target->displaySchedule();}
+	StringList displaySchedule();
 
 	// destructor: deletes scheduler
 
-	virtual ~Runnable() { INC_LOG_DEL; delete target;}
+	virtual ~Runnable() { INC_LOG_DEL; delete pTarget;}
+
+	// return the target pointer.  we call this 'myTarget'
+	// so that it will not conflict with the target() method
+	// in the Block classes
+	Target* myTarget() const { return pTarget; }
 
 protected:
 	const char* type;
-	Target* target;
 	Galaxy* galP;
+
+	// set the target pointer
+	void setMyTarget(Target* t) { pTarget = t; }
 private:
+	Target* pTarget;
 	void wrapupGal (Galaxy& g);
 };
 
@@ -104,7 +110,7 @@ public:
 	void initTarget();
 
 	// return my scheduler
-	Scheduler* scheduler() const { return target->scheduler();}
+	Scheduler* scheduler() const;
 
 	// class identification
 	int isA(const char*) const;

@@ -48,6 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class Star;
 class Galaxy;
 class Scheduler;
+class Target;
 
 class Block : public NamedObj
 {
@@ -190,6 +191,9 @@ public:
 	int isA(const char*) const;
 	const char* className() const;
 
+	virtual int setTarget(Target*);
+	Target* target() const;
+
 protected:
 	// User-specified additional initialization
 	// By default, it does nothing.  It is called by initialize
@@ -222,6 +226,8 @@ private:
 
 	// This is a list of multiportholes in the block.
 	MPHList multiports;
+
+	Target* pTarget;
 };
 
 // Iterator classes associated with Block

@@ -48,10 +48,25 @@ Routines implementing class Block methods
 
 // constructor
 
-Block :: Block() {}
+Block :: Block() : pTarget(0) {}
+
+int Block :: setTarget(Target* t) {
+    if (t) {
+	pTarget = t;
+	return TRUE;
+    }
+    else {
+	Error::abortRun(*this,"Target pointer set to null");
+	return FALSE;
+    }
+}
+
+Target* Block :: target() const {
+    return pTarget;
+}
 
 // alternate constructor
-Block :: Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {}
+Block::Block(const char* n,Block* p,const char* d):NamedObj(n,p,d),pTarget(0){}
 
 // print all port names in the block, omitting hidden ports
 
