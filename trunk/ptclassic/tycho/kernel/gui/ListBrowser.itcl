@@ -489,7 +489,7 @@ body ::tycho::ListBrowser::selectItem {name} {
         error $msg $saveInfo
     }
     if { $complete && $itk_option(-closewindow) } {
-        nextWindow
+        prevWindow
         delete object $this
         return
     }

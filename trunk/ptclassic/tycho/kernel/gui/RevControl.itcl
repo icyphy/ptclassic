@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -216,7 +216,7 @@ body ::tycho::RevControl::constructor {args} {
     addButton unedit -text "Unedit <u>" -command "$this unedit"
     addButton help -text "Help <h>" -command "$this help"
     addButton cancel -text "Close <Esc>" -command \
-            "$this nextWindow; delete object $this"
+            "$this prevWindow; delete object $this"
 
     # This contains frame for the help panel and the history log
     itk_component add historyframe {
@@ -552,16 +552,16 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
                     -text "Yes ($type)" -command \
 		    [code "::tycho::RevControl::makeRev \
                     ::tycho::RevControl$type $editorWin \
-		    $editorObj; $dlg nextWindow; delete object $dlg"]
+		    $editorObj; $dlg prevWindow; delete object $dlg"]
 	    if {$default == {}} {
 		$dlg default $bnm
 		set default $type
 	    }
 	}
 	$dlg addButton no -text "No <Esc>" -command \
-                [code "$dlg nextWindow; delete object $dlg"]
+                [code "$dlg prevWindow; delete object $dlg"]
 	bind $dlg <Escape> \
-                [code "$dlg nextWindow; delete object $dlg"]
+                [code "$dlg prevWindow; delete object $dlg"]
 	return [::tycho::Dialog::wait $dlg]
     } else {
 	return [::tycho::RevControl::makeRev $revclass $editorWin $editorObj]

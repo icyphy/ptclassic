@@ -135,5 +135,5 @@ body ::tycho::Message::constructor {args} {
 #### destructor
 #
 body ::tycho::Message::destructor {} {
-    catch {nextWindow}
+    catch {prevWindow}
 }
