@@ -110,6 +110,22 @@ void MotorolaTarget :: setup() {
 	}
 
 	AsmTarget::setup();
+
+	// complex numbers in the CG56 domain are allocated two words of
+	// memory at the same address but different memory banks.  Thus
+	// set the A_SYMMETRIC attribute here
+
+	GalStarIter nextStar(*galaxy());
+	AsmStar * s;
+	while((s = (AsmStar*)nextStar++) != 0){
+	    BlockPortIter next(*s);
+	    AsmPortHole  * p;
+	    while((p = (AsmPortHole*) next++) != 0) {
+	      if (p->resolvedType() == COMPLEX ){
+		  p->setAttributes(A_SYMMETRIC);
+	      }
+	    }
+	}
 }
 
 MotorolaTarget :: ~MotorolaTarget () {
