@@ -12,11 +12,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
 	desc { 
-Multiplies the four 16-bit short integers concatenated in a 64-bit float
-particle to the corresponding 16-bit shorts in another 64-bit float particle.
-The result is four 16-bit signed shorts that is returned as a single
-floating point number.  Each multiplication results in a 32-bit result,
-which is then rounded to 16 bits.
+Multiply the corresponding 16-bit fixed point numbers of two
+partitioned float particles.  Four signed 16-bit fixed point
+numbers of a partitioned 64-bit float particle are multiplied to
+those of another 64-bit float particle.  Each multiplication produces 
+a 32-bit result, which is then truncated to 16 bits.  The final result 
+is four 16-bit fixed point numbers that are returned as a single 
+float particle.
 	}
 	input {
 	  name { inA }
