@@ -998,8 +998,10 @@ genDef ()
 	if (protectedMembers[0])
 		fprintf (fp, "protected:\n%s\n", protectedMembers);
 	fprintf (fp, "public:\n\t%s();\n", fullClass);
-        fprintf (fp, "\tconst char* readClassName() const {return \"%s\";}\n",
-		fullClass);
+        fprintf (fp, "\tconst char* readClassName() const;\n");
+/* The clone function: only if the class isn't a pure virtual */
+	if (!pureFlag)
+		fprintf (fp, "\tBlock* clone() const;\n");
 	sprintf (destNameBuf, "~%s", fullClass);
 	for (i = C_EXECTIME; i <= C_DEST; i++) {
 		if (codeBody[i])
@@ -1011,11 +1013,7 @@ genDef ()
 	if (publicMembers[0])
 		fprintf (fp, "%s\n", publicMembers);
 	for (i=0; i<numBlocks; i++)
-		fprintf (fp, "\tstatic %sCodeBlock %s;\n",domain,blockNames[i]);
-/* The clone function: only if the class isn't a pure virtual */
-	if (!pureFlag)
-		fprintf (fp, "\tBlock* clone() const { LOG_NEW; return new %s;}\n",
-			 fullClass);
+		fprintf (fp, "\tstatic CodeBlock %s;\n",blockNames[i]);
 /* that's all, end the class def and put out an #endif */
 	fprintf (fp, "};\n#endif\n");
 	(void) fclose (fp);
@@ -1047,6 +1045,17 @@ genDef ()
 	fprintf (fp, "#include \"%s.h\"\n", fullClass);
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
+/* generate readClassName and (optional) clone function */
+        fprintf (fp, "\nconst char* %s :: readClassName() const {return \"%s\";}\n",
+		fullClass, fullClass);
+	if (!pureFlag) {
+		fprintf (fp, "\nBlock* %s :: clone() const { LOG_NEW; return new %s;}\n",
+			 fullClass, fullClass);
+	}
+/* generate the CodeBlock constructor calls */
+	for (i=0; i<numBlocks; i++)
+		fprintf (fp, "\nCodeBlock %s :: %s (\n%s);\n",
+			fullClass,blockNames[i],codeBlocks[i]);
 /* prefix code and constructor */
 	fprintf (fp, "\n%s%s::%s ()", ccCode, fullClass, fullClass);
 	if (consCalls[0])
@@ -1065,10 +1074,6 @@ genDef ()
 	}
 	if (miscCode[0])
 		fprintf (fp, "%s\n", miscCode);
-	/* generate the CodeBlock constructor calls */
-	for (i=0; i<numBlocks; i++)
-		fprintf (fp, "%sCodeBlock %s :: %s (\n%s);\n",
-			domain,fullClass,blockNames[i],codeBlocks[i]);
 	if (pureFlag) {
 		fprintf (fp,
 			 "\n// %s is an abstract class: no KnownBlock entry\n",
