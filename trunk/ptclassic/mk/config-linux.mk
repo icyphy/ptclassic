@@ -128,7 +128,8 @@ OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
 WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
-ARCHFLAGS =	-Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
+# utils/rman-2.4/rman.c wants -DI_UNISTD to find getopt()
+ARCHFLAGS =	-DI_UNISTD -Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
 LOCALCCFLAGS =	-fno-for-scope
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
