@@ -142,7 +142,7 @@ clean_gthreads:
 ############################################################################
 # Things to do everynight
 #
-nightly: glimpse public_html/star-demo-index
+nightly: glimpse src/domains/domain.idx public_html/star-demo-index 
 
 # Glimpse is a tool that prepares an index of a directory tree.
 # glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
@@ -156,6 +156,9 @@ glimpse: src/.glimpse_exclude
 	$(GLIMPSEINDEX) -H "$(PTOLEMY)/src" "$(PTOLEMY)/src" "$(PTOLEMY)/lib/tcl" "$(PTOLEMY)/tycho"; \
 	chmod a+r src/.glimpse_*; \
 	rm -f src/glimpse_exclude
+
+src/domains/domain.idx: MYFORCE
+	(cd src/domains; rm -f domain.idx; make domain.idx)
 
 public_html/star-demo-index: MYFORCE
 	@if [ ! -d public_html ]; then mkdir public_html; fi
