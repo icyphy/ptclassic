@@ -212,7 +212,6 @@ proc ptkPrfacet {name} {
 
     append command " " $name
 
-    if {$ptkPrintToFile} {append command " > " [.print.file get]}
     puts $command
     uplevel exec "$command"
     destroy .print
