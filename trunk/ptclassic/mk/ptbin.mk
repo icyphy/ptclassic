@@ -247,7 +247,8 @@ $(BASENAME).ptiny.debug:
 
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
+		$(BASENAME).debug.purify
 
 $(BASENAME).ptrim.debug.purify:
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
@@ -257,7 +258,8 @@ $(BASENAME).ptiny.debug.purify:
 
 
 $(BASENAME).debug.quantify: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
+		$(BASENAME).debug.quantify
 
 $(BASENAME).ptrim.debug.quantify: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
@@ -267,7 +269,8 @@ $(BASENAME).ptiny.debug.quantify:
 
 
 $(BASENAME).debug.purecov: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
+		$(BASENAME).debug.purecov
 
 $(BASENAME).ptrim.debug.purecov: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
