@@ -33,7 +33,9 @@ They are registered with Tcl calling registerTclFns().
 #include "ptk.h"
 #include "local.h"
 #include "rpc.h"
-
+#include "exec.h"
+#include "ganttIfc.c"
+#include "handle.h"
 /*******************************************************************
  * Command to highlight an object given its name. Call as
  *	ptkHighlight <fullName>
