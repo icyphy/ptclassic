@@ -27,6 +27,7 @@ Star :: operator StringList () {
 	out += readDescriptor();
 	out += "\n";
 	out += printPorts ("star");
+        out += printStates("star");
 	return out;
 }
 

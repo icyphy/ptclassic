@@ -48,6 +48,9 @@ public:
 
 	// Method to print out description
 	operator StringList ();
+
+        // initialize states
+        void initState() { Block::initState();}
 };
 
 #include "Fraction.h"
