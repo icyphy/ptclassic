@@ -54,9 +54,9 @@ VERSION=0.5-development
 .cc.o:
 	$(CPLUSPLUS) $(GPPFLAGS) $(INCL) -c $<
 
-all: makefiles include _vem linkvem linkvem.debug
-vem: makefiles include _vem linkvem
-vem.debug: makefiles include _vem linkvem.debug
+all: vem vem.debug
+vem: include $(OBJECTS) linkvem
+vem.debug: include $(OBJECTS) linkvem.debug
 
 DIRS=bags buffers dialogs dispatch doc drawing drs lib main \
 	options patterns physical properties rpc schematic select strings \
@@ -114,11 +114,23 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	windows/queue.o windows/table.o windows/titlebar.o \
 	windows/trans.o windows/wininternal.o
 
+# This rule uses GNU make specific directives $(@D) $(@F) 
+$(OBJECTS):
+	(cd $(@D); \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) \
+		VPATH=../../../../src/vem/vem/$(@D) $(@F)  ;\
+	)
+
+# If, under gcc, you link with -lmm, then you will probably get bus errors
+# If you are compiling with gcc, don't include -lmm
+# try 'make CC="gcc -traditional" OCTTOOLS_MM_LIB= '
+OCTTOOLS_MM_LIB = -lmm
+
 VEMLIBS = -Lrpc -Ldialogs -lrpcserver -ldialogs \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
-	-lTgl -lutility -lport -lerrtrap -luprintf -lst -lmm \
+	-lTgl -lutility -lport -lerrtrap -luprintf -lst $(OCTTOOLS_MM_LIB)  \
 	-L/usr/X11/lib -lXaw -lXt -lXmu -lXext -lX11 -lm
 
 
@@ -147,8 +159,6 @@ include:
 	done
 	@echo done
 
-# If, under gcc, you link with -lmm, then you will probably get bus errors
-
 _vem: 
 	@for x in $(DIRS); do \
 		cd $$x ; \
@@ -160,24 +170,29 @@ _vem:
 
 
 linkvem.debug:
-	#$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
+
 	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
 linkvem:
-	#$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
 	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
 
-DESTBIN = $(BINDIR)/vem
-DESTBIN_D = $(BINDIR)/vem.debu
+linkvem.debug.gcc:
+	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
+linkvem.gcc:
+	$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
 
-$(BINDIR):
+OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
+DESTBIN =	$(OCTBINDIR)/vem
+DESTBIN_D =	$(OCTBINDIR)/vem.debug
+
+$(OCTBINDIR):
 	mkdir $@
 
-$(DESTBIN):	vem $(BINDIR)
+$(DESTBIN):	vem $(OCTBINDIR)
 		@echo Installing vem
 		rm -f $(DESTBIN)
 		cp vem $(DESTBIN)
 
-$(DESTBIN_D):	vem $(BINDIR)
+$(DESTBIN_D):	vem $(OCTBINDIR)
 		@echo Installing vem
 		rm -f $(DESTBIN_D)
 		cp vem $(DESTBIN_D)
