@@ -58,6 +58,9 @@ class ::tycho::EditMake {
     ##########################################################################
     ####                         protected methods                        ####
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Access the "editmake" preferences
     protected method preference {mode args}
 }
@@ -180,6 +183,21 @@ body ::tycho::EditMake::parseNow {start stop} {
     $text tag lower include comment
     $text tag lower variable comment
     $text tag lower refvar comment
+}
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditMake::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+    #NOTE: not actually necessary because no changes are made to the bars here
 }
 
 #####################################################################
