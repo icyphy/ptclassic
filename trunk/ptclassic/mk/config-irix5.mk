@@ -74,7 +74,8 @@ LINKFLAGS_D =	-L$(LIBDIR) -G 0
 # Directories to use
 #
 X11_INCSPEC = -I/usr/X11/include
-X11_LIBSPEC = -L/usr/X11/lib -lX11
+# Some AIX X11 installations need to use the pthread library
+X11_LIBSPEC = -L/usr/X11/lib -lX11 # -lpthread
 
 # Variables for local Matlab installation
 # -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
