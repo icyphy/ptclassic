@@ -69,7 +69,12 @@ static int loadStartup(Tcl_Interp* interp) {
 	return TCL_OK;
 }
 
-static PTcl *ptcl;
+// Delete a PTcl object.
+static void PTclDeleteProc(ClientData clientData, Tcl_Interp *interp)
+{
+    PTcl *ptcl = (PTcl *) clientData;
+    delete ptcl;
+}
 
 /*
  *----------------------------------------------------------------------
@@ -101,7 +106,9 @@ extern "C" int Ptcl_Init(Tcl_Interp *interp)
     __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
 #endif
 
-    ptcl = new PTcl(interp);
+    PTcl *ptcl = new PTcl(interp);
+    Tcl_CallWhenDeleted(interp, PTclDeleteProc, (ClientData) ptcl);
+
     if (isatty(0)) {		// set up interrupt handler
 	SimControl::catchInt();
     }
