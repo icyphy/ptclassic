@@ -77,6 +77,8 @@ class VHDLFiring : public VHDLObj
   VHDLPortMapList* portMapList;
   // Signal list.
   VHDLSignalList* signalList;
+  // Extra variable declarations.
+  StringList decls;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;

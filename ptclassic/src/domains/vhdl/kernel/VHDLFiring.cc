@@ -54,6 +54,7 @@ VHDLFiring* VHDLFiring :: newCopy() {
   newFiring->starClassName = this->starClassName;
   newFiring->genericList = this->genericList->newCopy();
   newFiring->portList = this->portList->newCopy();
+  newFiring->decls = this->decls;
   newFiring->variableList = this->variableList->newCopy();
   newFiring->portVarList = this->portVarList->newCopy();
   newFiring->action = this->action;
