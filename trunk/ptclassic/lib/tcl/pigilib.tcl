@@ -30,7 +30,7 @@
 
 proc pigilib_init_env {} {
     global env tcl_prompt1 tcl_prompt2 tk_library tk_version
-    global ptolemy
+    global ptolemy PTOLEMY
 
     if { ![info exist env(PTOLEMY)] } {
 	set env(PTOLEMY) [glob ~ptolemy]
