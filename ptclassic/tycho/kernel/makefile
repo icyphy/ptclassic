@@ -46,13 +46,7 @@ TCL_SRCS = \
 
 ITCL_SRCS = \
 	AbstractGraph.itcl \
-	ButtonBox.itcl \
-	BuilderDialog.itcl \
 	CacheManager.itcl \
-	CircularList.itcl \
-	ColorBrowser.itcl \
-	ColorManager.itcl \
-	ColorPicker.itcl \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	CompileJava.itcl \
@@ -61,67 +55,24 @@ ITCL_SRCS = \
 	Digraph.itcl \
 	DirectedAcyclicGraph.itcl \
 	DirSearch.itcl \
-	Displayer.itcl \
-	Edit.itcl \
-	EditSearch.itcl \
-	EditSpell.itcl \
-	EditStack.itcl \
-	ErrorMessage.itcl \
-	Exec.itcl \
-	File.itcl \
-	FileBrowser.itcl \
-	FontManager.itcl \
-	FontDialog.itcl \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
-	HTML.itcl \
-	HTMLMessage.itcl \
-	IndexBrowser.itcl \
 	JRPC.itcl \
 	Library.itcl \
-	ListBrowser.itcl \
-	MenuBar.itcl \
-	MenuSupport.itcl \
-	Message.itcl \
 	Model.itcl \
 	ModelRegistry.itcl \
 	ModelViewer.itcl \
-	Monitor.itcl \
 	MultiPanel.itcl \
 	PackageData.itcl \
 	PopupMenu.itcl \
 	PortedGraph.itcl \
-	StyleChooser.itcl \
-	StyleEditor.itcl \
-	Query.itcl \
-	Registry.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
-	ResourceRemote.itcl \
-	ResourceFTP.itcl \
-	ResourceHTTP.itcl \
-	ResourceMail.itcl \
 	ResourceWELD.itcl \
-	RevControl.itcl \
-	RevControlSCCS.itcl \
-	RevControlRCS.itcl \
-	Shortcuts.itcl \
 	Stack.itcl \
-	StatusBar.itcl \
-	StyleSheet.itcl \
 	Subpanel.itcl \
-	TArchetype.itcl \
-	TclShell.itcl \
-	TextModel.itcl \
-	ToolBar.itcl \
-	TopLevel.itcl \
-	TWidget.itcl \
-	UserProfile.itcl \
-	View.itcl \
-	WelcomeMessage.itcl \
-	YesNoCancel.itcl \
-	YesNoQuery.itcl
+	TextModel.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) kernel.tcl pkgIndex.tcl
 
