@@ -43,7 +43,7 @@ variable $starSymbol(aline): line;
 variable $starSymbol(icount): integer := 0;
 	}
 	codeblock (graph) {
-(pxgraph -t "$val(title)" $val(options) $starSymbol(xgraph).dat ; rm -f $starSymbol(xgraph).dat) &
+! (pxgraph -t "$val(title)" $val(options) $starSymbol(xgraph).dat ; rm -f $starSymbol(xgraph).dat) &
 	}
 	initCode {
 	  addCode(uses, "useLibs", "textio");
@@ -77,6 +77,6 @@ variable $starSymbol(icount): integer := 0;
 	    cmd << "; ";
 	  addCode(cmd, "sysWrapup");
 	  */
-	  addCode(graph, "sysWrapup");
+	  addCode(graph, "simWrapup");
 	}
 }
