@@ -10,9 +10,11 @@ $Id$
 
 The KnownBlock class.
 
-This class provides a list of all known blocks.
-The data structure used to reference the list may be
-changed.
+This class provides a list of all known blocks.  There is a separate
+list for each domain (corresponding to blocks that may be run by
+a specific scheduler).
+
+This class also provides a list of all known schedulers.
 
 The idea is that each star or galaxy that is "known to the system"
 should add an instance of itself to the known list by code something
@@ -22,7 +24,12 @@ static MyType proto;
 static KnownBlock entry(proto,"MyType");
 
 Then the static method KnownBlock::clone(name) can produce a new
-instance of class name.
+instance of class name.  Similarly, schedulers do the exact same
+thing:
+
+static MySched proto;
+static KnownBlock entry(proto,"MyDomain");
+
 *******************************************************************/
 #ifndef _KnownBlock_h
 #define  _KnownBlock_h 1
@@ -31,29 +38,67 @@ instance of class name.
 #include "Galaxy.h"
 #include "StringList.h"
 
+class Scheduler;
+
+class KnownListEntry {
+	friend class KnownBlock;
+	Block* b;
+	KnownListEntry *next;
+};
+
+const int NUMDOMAINS = 10;
+
 class KnownBlock {
-// The known block list.  It's a pointer only so we can control when
-// the constructor is called.  Yuk.
-	static BlockList *allBlocks;
-	static int numBlocks;
+private:
+// The known block lists, one per domain
+	static KnownListEntry* allBlocks[NUMDOMAINS];
+// The set of domain names
+	static const char* domainNames[NUMDOMAINS];
+// A scheduler for each domain
+	static Scheduler* allSchedulers[NUMDOMAINS];
+
+	static int currentDomain;
+	static int numDomains;
+
+	static StringList nameListForDomain(int idx);
+	static int domainIndex (const char* dom, int addIfNotFound = 0);
+	static int domainIndex (Block& block);
+	static KnownListEntry* findEntry (const char*, KnownListEntry*);
 public:
 // The constructor takes a block and a name, and adds a corresponding
 // entry to the known list.
 	KnownBlock (Block &block, const char* name);
 
+// Alternate constructor, creates a scheduler entry.
+	KnownBlock (Scheduler& sched, const char* domain);
+
 // The find method returns a pointer the appropriate block in
-// allstars.
+// the current domain.
 	static Block* find (const char* name);
 
 // The clone method takes a string, finds the appropriate block in
-// allstars, and returns a clone of that block.
+// the current domain, and returns a clone of that block.
 	static Block* clone (const char* name);
 
-// Return the names of all the known blocks.
+// The newSched method takes a string and returns a scheduler of the
+// given type.
+	static Scheduler* newSched (const char* name);
+
+// Argument-less version gives the one for the current domain.
+	static Scheduler* newSched ();
+
+// Return the names of known blocks in the current domain.
 	static StringList nameList();
 
-// Return the number of known blocks.
-	static int nKnown() { return numBlocks;}
+// Return the names of knownn blocks in the given domain.
+	static StringList nameList (const char* domain);
+
+// Return the current domain name.
+	static const char* domain() { return domainNames[currentDomain];}
+
+// Change the current domain.  Return TRUE if it worked, FALSE for bad name.
+	static int setDomain (const char* newDom);
+
 };
 
 #endif
