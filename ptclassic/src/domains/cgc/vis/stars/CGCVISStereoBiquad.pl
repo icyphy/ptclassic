@@ -55,7 +55,16 @@ A two-pole, two-zero IIR filter.
                 type { float }
                 default { "32767.0" }
         }
-
+	defstate {
+	  name {scalefactor}
+	  type {int}
+	  default {"2"}
+	  desc {
+2^scalefactor is used to scale down the magnitude of the numerator and
+denominator coefficients between 0 and 1.
+          }
+	  attributes{ A_CONSTANT|A_SETTABLE }
+	}
 	codeblock(quadmult) {
 vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) { 
 	vis_d64 prodhi, prodlo, product;
@@ -70,17 +79,19 @@ vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	}
 
         codeblock(mainDecl){
-	  vis_s16 $starSymbol(filtertaps)[5];
+	  vis_s16 $starSymbol(filtertaps)[5],$starSymbol(scaledown);
 	  vis_f32 $starSymbol(repeatd1),$starSymbol(repeatd2);
 	  vis_f32 $starSymbol(repeatn0),$starSymbol(repeatn1),$starSymbol(repeatn2);
 	  vis_f32 $starSymbol(repeatstate1),$starSymbol(repeatstate2);
 	}
 	codeblock(settapDef){
-	  $starSymbol(filtertaps)[0]=$val(scale)*$val(d1);
-	  $starSymbol(filtertaps)[1]=$val(scale)*$val(d2);
-	  $starSymbol(filtertaps)[2]=$val(scale)*$val(n0);
-	  $starSymbol(filtertaps)[3]=$val(scale)*$val(n1);
-	  $starSymbol(filtertaps)[4]=$val(scale)*$val(n2);
+	  $starSymbol(scaledown) = 1<< $val(scalefactor);
+
+	  $starSymbol(filtertaps)[0]=$val(scale)/$starSymbol(scaledown)*$val(d1);
+	  $starSymbol(filtertaps)[1]=$val(scale)/$starSymbol(scaledown)*$val(d2);
+	  $starSymbol(filtertaps)[2]=$val(scale)/$starSymbol(scaledown)*$val(n0);
+	  $starSymbol(filtertaps)[3]=$val(scale)/$starSymbol(scaledown)*$val(n1);
+	  $starSymbol(filtertaps)[4]=$val(scale)/$starSymbol(scaledown)*$val(n2);
 
 	  $starSymbol(repeatd1) =
 	    vis_to_float($starSymbol(filtertaps)[0]<<16|$starSymbol(filtertaps)[0]);
@@ -105,13 +116,13 @@ vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	}
 	codeblock(localDecl){
 	  vis_f32 inhi,inlo,topbranch,bottbranch;
-	  vis_f32 nextstate,statetmp,outtmp,outhi,outlo;
+	  vis_f32 repeatnextstate,nextstate,statetmp,outtmp,outhi,outlo;
 	}
         codeblock(iirfilter){
-	  vis_write_gsr(8);
+	  vis_write_gsr(($val(scalefactor)+1)<<3);
 
-	  inhi = vis_readhi($ref(input));
-	  inlo = vis_readlo($ref(input));
+	  inhi = vis_read_hi($ref(input));
+	  inlo = vis_read_lo($ref(input));
 
 	  /* filter first stereo pair*/
 	  topbranch =
@@ -119,11 +130,11 @@ vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	  bottbranch =
 	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)($starSymbol(repeatstate2),$starSymbol(repeatd2));
 
-	  statetmp = vis_fsub16s(inhi,topbranch);
-	  repeatnextstate = vis_fsub16s(statetmp,bottbranch);
+	  statetmp = vis_fpsub16s(inhi,topbranch);
+	  repeatnextstate = vis_fpsub16s(statetmp,bottbranch);
 
 	  statetmp =
-	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)($starSymbol(repeatnextstate),$starSymbol(repeatn0));
+	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(repeatnextstate,$starSymbol(repeatn0));
 	  topbranch = 
 	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)($starSymbol(repeatstate1),$starSymbol(repeatn1));
 	  bottbranch = 
@@ -141,11 +152,11 @@ vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	  bottbranch =
 	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)($starSymbol(repeatstate2),$starSymbol(repeatd2));
 
-	  statetmp = vis_fsub16s(inlo,topbranch);
-	  repeatnextstate = vis_fsub16s(statetmp,bottbranch);
+	  statetmp = vis_fpsub16s(inlo,topbranch);
+	  repeatnextstate = vis_fpsub16s(statetmp,bottbranch);
 
 	  statetmp =
-	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)($starSymbol(repeatnextstate),$starSymbol(repeatn0));
+	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(repeatnextstate,$starSymbol(repeatn0));
 	  topbranch = 
 	    $sharedSymbol(CGCVISStereoBiquad,mult2x2d)($starSymbol(repeatstate1),$starSymbol(repeatn1));
 	  bottbranch = 
