@@ -65,6 +65,7 @@ public:
 			     "default DDF target") {
 		LOG_NEW; setSched(new DDFScheduler);
 	}
+	~DDFTarget() { LOG_DEL; delSched();}
 	Block* clone() const;
 };
 
