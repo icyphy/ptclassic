@@ -35,40 +35,40 @@ SRCS=DEDelay.pl DEPoisson.pl DESampler.pl DEQueue.pl DEImpulse.pl \
 	DEFork.pl DEPrQueue.pl DEExpServer.pl DEUniServer.pl \
 	DESwitch.pl DEMerge.pl DERouter.pl DEServer.pl DEExpDelay.pl \
 	DEUniDelay.pl DEClock.pl DEFilter.pl \
-	DEMeasureDelay.pl DEBlockingAsk.pl DEBlockingAccept.pl \
+	DEMeasureDelay.pl \
 	DEXhistogram.pl DEPSServer.pl DEDiscard.pl \
 	DENull.pl DEPrinter.pl DERanGen.pl DEStatistics.pl \
-	DEStopTimer.pl DEUDCounter.pl
+	DEStopTimer.pl DEUDCounter.pl DEGate.pl DEThreshold.pl
 
 CCS=DEDelay.cc DEPoisson.cc DESampler.cc DEQueue.cc DEImpulse.cc \
 	DEXMgraph.cc DEXgraph.cc DEBlackHole.cc DEFloatDC.cc DEFloatRamp.cc \
 	DEFork.cc DEPrQueue.cc DEExpServer.cc DEUniServer.cc \
 	DESwitch.cc DEMerge.cc DERouter.cc DEServer.cc DEExpDelay.cc \
 	DEUniDelay.cc DEClock.cc DEFilter.cc \
-	DEMeasureDelay.cc DEBlockingAsk.cc DEBlockingAccept.cc \
+	DEMeasureDelay.cc \
 	DEXhistogram.cc DEPSServer.cc DEDiscard.cc \
 	DENull.cc DEPrinter.cc DERanGen.cc DEStatistics.cc \
-	DEStopTimer.cc DEUDCounter.cc
+	DEStopTimer.cc DEUDCounter.cc DEGate.cc DEThreshold.cc
 
 OBJS=DEDelay.o DEPoisson.o DESampler.o DEQueue.o DEImpulse.o \
 	DEXMgraph.o DEXgraph.o DEBlackHole.o DEFloatDC.o DEFloatRamp.o \
 	DEFork.o DEPrQueue.o DEExpServer.o DEUniServer.o \
 	DESwitch.o DEMerge.o DERouter.o DEServer.o DEExpDelay.o \
 	DEUniDelay.o DEClock.o DEFilter.o \
-	DEMeasureDelay.o DEBlockingAsk.o DEBlockingAccept.o \
+	DEMeasureDelay.o \
 	DEXhistogram.o DEPSServer.o DEDiscard.o \
 	DENull.o DEPrinter.o DERanGen.o DEStatistics.o \
-	DEStopTimer.o DEUDCounter.o
+	DEStopTimer.o DEUDCounter.o DEGate.o DEThreshold.o
 
 HDRS=DEDelay.h DEPoisson.h DESampler.h DEQueue.h DEImpulse.h \
 	DEXMgraph.h DEXgraph.h DEBlackHole.h DEFloatDC.h DEFloatRamp.h \
 	DEFork.h DEPrQueue.h DEExpServer.h DEUniServer.h \
 	DESwitch.h DEMerge.h DERouter.h DEServer.h DEExpDelay.h \
 	DEUniDelay.h DEClock.h DEFilter.h \
-	DEMeasureDelay.h DEBlockingAsk.h DEBlockingAccept.h \
+	DEMeasureDelay.h \
 	DEXhistogram.h DEPSServer.h DEDiscard.h \
 	DENull.h DEPrinter.h DERanGen.h DEStatistics.h \
-	DEStopTimer.h DEUDCounter.h
+	DEStopTimer.h DEUDCounter.h DEGate.h DEThreshold.h
 
 all:		$(SRCS) $(CCS) makefile $(OBJS)
 
