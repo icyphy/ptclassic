@@ -240,7 +240,8 @@ int DEScheduler :: setDepth(DEStar* s) {
 
 				// 6. detect the delay-free loop.
 				if (dp->depth > 0) {
-					StringList msg = dp->readFullName();
+					StringList msg = "Warning :: ";
+					StringList msg += dp->readFullName();
 					msg += " lies on a delay-free loop";
 					errorHandler.error(msg);
 					val = 0;
