@@ -234,8 +234,6 @@ void CGCTychoTarget :: frameCode() {
 	<<"\""
 	<< galaxy()->name()
 	<<"\", tclinterface, (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);\n"
-        << comment("Call tychoSetup to initialize control connections")
-        << "tychoSetup();\n"
 	<<"return TCL_OK;\n}\n";
 
   char* tclifpath = expandPathName("$PTOLEMY/tycho/src/tycgc/tclif.c");
