@@ -348,10 +348,9 @@ limitation of liability, and disclaimer of warranty provisions.
       unsigned $starSymbol(count) = 0;
     }
 
-    codeblock (sync) {
+    codeblock (syncUlaw) {
       {
 	/* Hack for Sun only */
-	/* Used only in MonoOut star */
 	/* Wait for samples to drain */
 	audio_info_t info;
 	/* Wait for some samples to drain */
@@ -361,6 +360,21 @@ limitation of liability, and disclaimer of warranty provisions.
         } while ((int) ($starSymbol(count) - info.play.samples) > 
 		 $val(aheadLimit));
         $starSymbol(count) += $val(blockSize);
+      }
+    }
+
+    codeblock (syncLinear16) {
+      {
+	/* Hack for Sun only */
+	/* Wait for samples to drain */
+	audio_info_t info;
+	/* Wait for some samples to drain */
+	do {
+	  /* the cast below is to prevent warnings */
+	  ioctl($starSymbol(file), AUDIO_GETINFO, (caddr_t)(&info));
+        } while ((int) ($starSymbol(count) - info.play.samples) > 
+		 $val(aheadLimit));
+        $starSymbol(count) += $val(blockSize)/2;
       }
     }
 
