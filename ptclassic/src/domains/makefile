@@ -35,9 +35,15 @@ endif
 DOMAINS = sdf hof de ddf bdf thor cg cgc c50 cg56 vhdlb \
           vhdl mdsdf $(EXPDOMAINS) 
 
+# Remove thor, add starHTML.idx, add the VPATH.
+ALLDOMAINIDXS =	$(addprefix $(VPATH)/, \
+			$(addsuffix /domain.idx, \
+				$(filter-out thor, $(DOMAINS))))
+
+
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles all install clean depend realclean clean_indices checkjunk sccsinfo:
+makefiles all install clean depend realclean clean_indices checkjunk sccsinfo domain.idx:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -61,7 +67,7 @@ subsources:
 	done
 
 # Remove thor, add starHTML.idx, add the VPATH.
-ALLDOMAINIDXS =	$(addprefix $(VPATH)/, \
+ALLSTARHTMLIDXS =	$(addprefix $(VPATH)/, \
 			$(addsuffix /starHTML.idx, \
 				$(filter-out thor, $(DOMAINS))))
 
@@ -71,7 +77,7 @@ $(VPATH)/starHTML.idx: domainstarHTML
 	@rm -f $@
 	@echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoVpathMergeIndices {} $@ $(VPATH)/ $(ALLDOMAINIDXS)" \
+		tychoVpathMergeIndices {} $@ $(VPATH)/ $(ALLSTARHTMLIDXS)" \
 		| itclsh
 
 domainstarHTML:
@@ -86,8 +92,31 @@ domainstarHTML:
 	    fi ; \
 	done
 
+# Remove thor, add starHTML.idx, add the VPATH.
+ALLDEMOIDXS =	$(addprefix $(VPATH)/, \
+			$(addsuffix /starDemo.idx, \
+				$(filter-out thor, $(DOMAINS))))
 
+# Star index of all the star index files
+$(VPATH)/starDemo.idx: domainstardemoidx
+	@echo "Merging $@"
+	@rm -f $@
+	@echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		tychoVpathMergeIndices {} $@ $(VPATH)/ $(ALLDEMOIDXS)" \
+		| itclsh
 
+domainstardemoidx:
+	@for x in $(DOMAINS); do \
+	    if [ -w $$x/ ] ; then \
+		( cd $$x ; \
+		  echo making demo/demo.idx in domains/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../src/domains/$$x 	\
+			starDemo.idx ; \
+		) \
+	    fi ; \
+	done
 
 .PHONY:	TAGS
 TAGS:
