@@ -39,6 +39,8 @@ Utility functions.
 #include "rpc.h"
 #include "octIfc.h"
 #include "vemInterface.h"
+#include "kernelCalls.h"
+#include "icon.h"
 
 /* UMalloc  12/10/88
 Allocate using malloc.
