@@ -17,15 +17,19 @@ $Id$
 *******************************************************************/
 
 #include "CGTarget.h"
+#include "IntState.h"
+#include "StringState.h"
 #include "SDFScheduler.h"
 
 class ProcMemory;
 class AsmStar;
+class AsmTargetPtr;
 
 class AsmTarget : public CGTarget {
 private:
 	const char* starClass;
 	SequentialList spliceList;
+	void initStates();
 protected:
 	ProcMemory* mem;
 
@@ -49,14 +53,52 @@ protected:
        
 	void doInitialization(CGStar&);
 
+	// host through which the target should be accessed.
+	StringState targetHost;
+
+	// if state displayFlag=TRUE then display generated code.
+	IntState displayFlag;
+
+	// if state runFlag=TRUE compile & run code
+	IntState runFlag;		
+
+	// 'uname' points to the universe name in all lowercase letters.
+	// This is typically used for the base name for a file produced
+	// by the target
+	char* uname;
+
+	// The filename for the assembly code produced is specified 
+	// by 'uname'asmSuffix().
+	virtual const char* asmSuffix() const {return ".asm";}
+
+	// 'runCmds' stores commands that are to be executed at run
+	// time.  It's use is strictly defined in the child domain's
+	// target & stars.  'miscCmds' stores misc commands specific
+	// to a child target.  To augment these strings use the
+	// addRunCmd & addMiscCmd methods.
+	// To augment these 
+	StringList runCmds;
+	StringList miscCmds;
+	
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0) :
-		CGTarget(nam,stype,desc), mem(m) {}
+		CGTarget(nam,stype,desc), mem(m) { initStates();}
 
 	~AsmTarget();
 
+	// Execute system call on host, with DISPLAY variables
+	// set and inside the destDirectory.  If err is specified,
+	// err is displayed if system call is unsuccessful.
+	virtual int hostSystemCall(const char*,const char* err = NULL);
+
 	Block* clone() const = 0;
+
+	int setup(Galaxy &g);
+
+	// methods to compile and run the target.
+	virtual int compileTarget();
+	virtual int runTarget();
 
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
@@ -118,10 +160,13 @@ public:
 	//restore program counter
 	virtual void restoreProgramCounter();
 
-	//Derived AsmTargets should call this headercode at the 
-	//beginning to insure that interrupts are turned off
-	//prior to all the header code and init code
-	void headerCode() {disableInterrupts();}
+	void headerCode();
+
+	void wrapup();
+
+	// commands to augment the runCmds & miscCmds StringLists
+	void  addRunCmd(const char* cmd) { runCmds += cmd;}
+	void addMiscCmd(const char* cmd) {miscCmds += cmd;}
 };
 
 #endif

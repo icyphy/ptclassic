@@ -21,6 +21,7 @@ $Id$
 #include "Target.h"
 #include "IntState.h"
 #include "StringState.h"
+#include "CGSymbol.h"
 
 class CGStar;
 
@@ -28,6 +29,9 @@ class UserOutput;
 
 class CGTarget : public Target {
 protected:
+	NestedSymbol targetNestedSymbol;
+
+	// myCode contains the code generated for the target
 	StringList myCode;
 
 	StringState destDirectory;
@@ -118,6 +122,10 @@ public:
 	// dummy beginIteration and endIteration
 	void beginIteration(int,int);
 	void endIteration(int,int);
+
+	// system call in destination directory.  If error is specified
+	// & the system call is unsuccessful display the error message.
+	virtual int systemCall(const char*,const char* error=NULL);
 };
 
 #endif

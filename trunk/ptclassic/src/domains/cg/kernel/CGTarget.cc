@@ -17,7 +17,6 @@ $Id$
 #endif
 
 #include "CGTarget.h"
-#include "CGSymbol.h"
 #include "CGStar.h"
 #include "GalIter.h"
 #include "Error.h"
@@ -73,7 +72,11 @@ void CGTarget :: initStars(Galaxy& g) {
 int CGTarget::setup(Galaxy& g) {
 	// reset the label counter
 	numLabels = 0 ;
+
 	gal = &g;
+
+	targetNestedSymbol.initialize();
+	targetNestedSymbol.setTarget(this);
 
 	if (!modifyGalaxy(g)) return FALSE;
 
@@ -156,4 +159,14 @@ void CGTarget :: outputComment (const char* msg) {
         code += msg;
         code += " */\n";
         addCode(code);
+}
+
+int CGTarget :: systemCall(const char* command, const char* error=NULL) {
+	StringList cmd = "cd ";
+	cmd += dirFullName;
+	cmd += ";";
+	cmd += command;
+	int i = system(cmd);
+	if(i != 0 && error != NULL) Error::abortRun(error);
+	return i;
 }

@@ -20,8 +20,61 @@ $Id$
 #include "ProcMemory.h"
 #include "UserOutput.h"
 #include "CGDisplay.h"
+#include "CGUtilities.h"
 #include "KnownBlock.h"
 #include "miscFuncs.h"
+
+void AsmTarget :: initStates() {
+	uname = 0;
+	StringList hostPrompt,hostDes,runPrompt,runDes;
+	hostPrompt = "Host for "; hostPrompt += readClassName();
+	hostDes= "Host on which "; hostDes+=readClassName();
+	hostDes+=" is installed";
+	runPrompt = "Run "; runPrompt += readClassName(); runPrompt += "?";
+	runDes = "Download and run on "; runDes += readClassName();
+ 	addState(displayFlag.setState("Display code?",this,"YES",
+		"display code if YES."));
+	addState(runFlag.setState(savestring(runPrompt),this,"NO",
+		savestring(runDes), A_NONSETTABLE|A_NONCONSTANT));
+	addState(targetHost.setState(savestring(hostPrompt),this, 
+		"localhost", savestring(hostDes), 
+		A_NONSETTABLE|A_NONCONSTANT));
+	// change default value of destDirectory
+	destDirectory.setValue("~/DSPcode");
+}
+
+int AsmTarget :: setup(Galaxy& g) {
+	runCmds.initialize();
+ 	miscCmds.initialize();
+	LOG_DEL; delete uname; uname = 0;
+	uname = makeLower(g.readName());
+	return CGTarget::setup(g);
+}
+
+int AsmTarget :: compileTarget() {
+	Error::
+	  abortRun("No compileTarget method defined for current target");
+	return FALSE;
+}
+
+int AsmTarget :: runTarget() {
+	Error::
+	  abortRun("No runTarget method defined for current target");
+	return FALSE;
+}
+
+int AsmTarget :: hostSystemCall(const char* cmd, const char* err=NULL) {
+	int val = rshSystem(targetHost,cmd,dirFullName);
+	if (err != NULL && val != 0) Error::abortRun(err);
+	return val;
+}
+
+void AsmTarget :: headerCode() {
+	StringList code = "generated code for target ";
+        code += readFullName();
+	outputComment (code);
+	disableInterrupts();
+}
 
 int AsmTarget::allocateMemory(Galaxy& g) {
 // clear the memory
@@ -41,7 +94,6 @@ int AsmTarget::allocateMemory(Galaxy& g) {
 }
 
 int AsmTarget :: codeGenInit(Galaxy& g) {
-
 	// initialize the porthole offsets, and do all initCode methods.
 	GalStarIter nextStar(g);
 	AsmStar* s;
@@ -204,6 +256,7 @@ PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
 }
 
 AsmTarget::~AsmTarget() {
+	LOG_DEL; delete uname; uname = 0;
 	ListIter next(spliceList);
 	Block* b;
 	while ((b = (Block*)next++) != 0) {
@@ -312,4 +365,13 @@ void AsmTarget::saveProgramCounter() {
 
 void AsmTarget::restoreProgramCounter() {
 	outputComment("Restore program counter");
+}
+
+void AsmTarget :: wrapup() {
+	if (int(displayFlag))
+		if (!genDisFile(myCode,uname,asmSuffix())) return;
+	else
+		if (!genFile(myCode,uname,asmSuffix())) return;
+	if (int(runFlag))
+		if (!compileTarget()) runTarget();
 }

@@ -68,6 +68,8 @@ public:
 	// equal to the address.
 	ProcMemory* lookupEntry(const char*,unsigned&);
 
+	int fire();
+
 protected:
 	// Get one of my ports, which is always an AsmPortHole
 	AsmPortHole* asmPortWithName(const char* name) {
@@ -120,6 +122,13 @@ protected:
 	// Special method for limiting and printing fixedpoint values
 	// baseclass method does not limit.
 	virtual StringList printFixValue(double) const;
+
+	// add runCmds or miscCmds to the target streams.  cmd2 is
+	// supported to allow for individual command separators.
+	void addRunCmd(const char*,const char* cmd2=NULL);
+	void addMiscCmd(const char*,const char* cmd2=NULL);
+	void genRunCmd(CodeBlock&);
+	void genMiscCmd(CodeBlock&);
 
 private:
 	// State entry list.  This stores the addresses allocated to each
