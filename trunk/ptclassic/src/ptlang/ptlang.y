@@ -990,6 +990,7 @@ genDef ()
 		perror (ccname);
 		exit (1);
 	}
+	fprintf (fp, "static const char file_id[] = \"%s\";\n", inputFile);
 	fprintf (fp, "// .cc file generated from %s by %s\n",
 		 inputFile, progName);
 /* copyright */
