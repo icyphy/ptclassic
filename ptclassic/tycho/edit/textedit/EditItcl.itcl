@@ -290,7 +290,6 @@ body ::tycho::EditItcl::gendocBuffer {} {
 # then it is simply displayed, not regenerated.
 #
 body ::tycho::EditItcl::genidocBuffer {} {
-puts !
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
                 [info namespace tail [getClassName]].idoc]] \
