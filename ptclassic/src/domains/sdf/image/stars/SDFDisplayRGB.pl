@@ -89,19 +89,16 @@ to produce the full filename of the displayed image.
 		const char* saveMe = saveColor;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256];
-		fileName[0] = '\000';
+		StringList fileName;
 		if ((const char*) imageName) {
-		  strcpy(fileName, (const char*) imageName);
+		  fileName = (const char*) imageName;
 		}
-		if (fileName[0] == '\000') {
+		else {
 		  char* nm = tempFileName();
-		  strcpy(fileName, nm);
+		  fileName = nm;
 		  LOG_DEL; delete [] nm;
 		}
-		char numtmp[16];
-		sprintf(numtmp, ".%d", imgR->retId());
-		strcat(fileName, numtmp);
+		fileName << "." << imgR->retId();
 
 		FILE* fptr = fopen(fileName, "w");
 		if (fptr == (FILE*) NULL) {
@@ -129,7 +126,8 @@ to produce the full filename of the displayed image.
 				rgbfp[temp3] = rdata[temp2];
 				rgbfp[temp3+1] = gdata[temp2];
 				rgbfp[temp3+2] = bdata[temp2];
-		}	}
+			}
+		}
 
 		// Write the PPM header and then the data.
 		fprintf(fptr, "P6\n %d %d 255\n", Width, Height);
@@ -139,14 +137,13 @@ to produce the full filename of the displayed image.
 
 		LOG_DEL; delete [] rgbfp;
 
-		char buf[256];
-		sprintf (buf, "(%s %s", (const char*) command, fileName);
+		// Build up Unix command to display the image
+		StringList buf = "(";
+		buf << (const char*) command << fileName;
 		if (del) {
-			strcat(buf, "; rm -f ");
-			strcat(buf, fileName);
+			buf << "; rm -f " << fileName;
 		}
-		// Run command in the background
-		strcat (buf, ")&");
-		system (buf);
+		buf << ")&";		// Run command in the background
+		system(buf);
 	} // end go{}
 } // end defstar { DisplayRgb }
