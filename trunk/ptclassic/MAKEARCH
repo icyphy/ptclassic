@@ -209,7 +209,7 @@ dirs="cg/targets sdf/image sdf/targets \
 	c50/dsp cg56/dsp \
 	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
 	sdf/matrix sdf/matlab sdf/vis \
-	cgc/dsp cgc/rtlib \
+	cgc/contrib cgc/dsp cgc/rtlib \
 	acs/targets \
 	vhdl/targets vhdl/tcltk \
 	mdsdf/tcltk de/atm de/contrib de/java cg/hierScheduler $EXPEXTRAS "
@@ -237,6 +237,7 @@ dirs="c50/dsp/stars cg56/dsp/stars \
 	de/java/stars \
 	de/tcltk/stars \
 	vhdl/tcltk/targets \
+	cgc/contrib/stars \
 	cgc/dsp/stars \
 	cgc/targets/uniproc cgc/targets/multiproc cgc/targets/NOWam \
 	cgc/tcltk/stars cgc/tcltk/targets cgc/vis/stars cgc/vis/targets \
