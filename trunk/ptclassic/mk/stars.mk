@@ -102,6 +102,7 @@ HOFDIR = $(CROOT)/src/domains/hof
 IPUSDIR = $(CROOT)/src/domains/ipus
 MDSDFDIR = $(CROOT)/src/domains/mdsdf
 PNDIR = $(CROOT)/src/domains/pn
+RTGDIR = $(CROOT)/src/domains/rtg
 SDFDIR = $(CROOT)/src/domains/sdf
 SRDIR = $(CROOT)/src/domains/sr
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
@@ -380,6 +381,17 @@ ifdef PN
 	endif
 	# dependencies
 	SDFLIB = 1
+endif
+
+ifdef RTG
+	# star icons
+	PALETTES += PTOLEMY/src/domains/rtg/icons/rtg.pal
+	# kernel and stars
+	CUSTOM_DIRS += $(RTGDIR)/kernel $(RTGDIR)/stars
+	STARS +=  $(LIBDIR)/rtgstars.o
+	LIBS += -lrtgstars -lrtg
+	LIBFILES += $(LIBDIR)/librtgstars.$(LIBSUFFIX) \
+		$(LIBDIR)/librtg.$(LIBSUFFIX)
 endif
 
 ifdef DDF
