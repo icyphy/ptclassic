@@ -40,6 +40,7 @@ Date of last revision:
 #include "ParGraph.h"
 #include "StringList.h"
 #include "SimControl.h"
+#include "GalIter.h"
 
 ParProcessors :: ParProcessors(int pNum, MultiTarget* t) :
 moveStars(0), mtarget(t) {
@@ -454,7 +455,13 @@ void ParProcessors :: createSubGals() {
 	
 	// empty the galaxy if we are moving the stars
 	if (moveStars) {
-	    mtarget->galaxy()->empty();
+	    // must remove all the stars from the galaxies - because
+	    // they have been MOVED.  We can't call empty on the
+	    // Galaxy or we'll leak the Galaxy memory
+	    GalStarIter stars(*mtarget->galaxy());
+	    Star* star;
+	    while ((star = stars++) != NULL)
+		stars.remove();
 	    mtarget->requestReset();
 	}
 }
