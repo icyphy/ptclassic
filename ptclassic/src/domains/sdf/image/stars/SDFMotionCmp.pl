@@ -103,8 +103,8 @@ can be added or reduced-search motion compensation can be performed.
 			LOG_NEW; diffArr = new int[bs2*bs2];
 
 // Set difference values for each offset
-			for(deli = 0; deli < bs2; deli++) {
-				for(delj = 0; delj < bs2; delj++) {
+			for(deli = 0; deli <= bs2; deli++) {
+				for(delj = 0; delj <= bs2; delj++) {
 					tmp3 = deli*bs2 + delj;
 					diffArr[tmp3] = 0;
 					for(i = 0; i < blocksize; i++) {
