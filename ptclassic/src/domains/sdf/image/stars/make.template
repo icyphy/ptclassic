@@ -77,13 +77,13 @@ PL_SRCS= \
  SDFZigZagImgInv.pl
 
 # The .cc files
-SRCS=$(PL_SRCS:.pl=.cc)
+SRCS=$(PL_SRCS:.pl=.cc) rtvc.cc
 
 # object files for all stars
-OBJS= $(SRCS:.cc=.o)
+OBJS= $(SRCS:.cc=.o) 
 
 # header files for all stars
-HDRS= $(SRCS:.cc=.h)
+HDRS= $(SRCS:.cc=.h) rtvc.h
 
 STAR_MK=sdfimagestars
 DOMAIN=SDF_IMAGE
