@@ -45,7 +45,7 @@ CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
 INCL = 		-I$(ACSDIR) -I$(CGKERNEL) -I$(KERNDIR)
 
 # Library name
-LIB=libacsstars.$(LIBSUFFIX)
+PTLIB =		libacsstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
