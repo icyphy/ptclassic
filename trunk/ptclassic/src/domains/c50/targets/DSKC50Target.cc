@@ -44,25 +44,33 @@ ENHANCEMENTS, OR MODIFICATIONS.
 DSKC50Target :: DSKC50Target(const char* nam, const char* desc) :
 	C50Target(nam,desc),TITarget(nam,desc,"C50Star") {
 	initStates();
+	addStream("shellCmds",&shellCmds);
 }
 
 DSKC50Target::DSKC50Target(const DSKC50Target& arg) :
 	C50Target(arg),TITarget(arg) {
 	initStates();
 	copyStates(arg);
+	addStream("shellCmds",&shellCmds);
 }
 
 void DSKC50Target :: initStates() {
 
 	// ROM tables: Block B1 512 words and User Data (u) 8704 words
 	bMemMap.setInitValue("768-1279");
-	uMemMap.setInitValue("2432-9999");
-	bMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
-	uMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
+	uMemMap.setInitValue("2432-6848");
+	// the u and b memory maps should be settable since
+	// u/b memory are the same as far as teh assembler is
+	// concerned so if there's not enough room in one
+	// the program can use the other
+	// FIXME: Should this be automated?
+	bMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	uMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
 	runFlag.setInitValue("YES");
 	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	compileFlag.setInitValue("YES");
+	compileFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
 	targetHost.setAttributes(A_SETTABLE|A_NONCONSTANT);
-	addStream("shellCmds",&shellCmds);
 }
 
 void DSKC50Target :: headerCode () {
@@ -84,21 +92,40 @@ void DSKC50Target :: trailerCode () {
 }
 
 int DSKC50Target :: compileCode() {
-	StringList assembleCmds;
-	assembleCmds << "assembl " << filePrefix << ".asm";
-	if (systemCall(assembleCmds,"Errors in assembly")!=0)
-		return FALSE;
+
+ 	StringList assembleCmds;
+  	assembleCmds << "assembl " << filePrefix << "DSK.asm";
+  	if (systemCall(assembleCmds,"Errors in assembly")!=0)
+  		return FALSE;
 	return TRUE;
 }
 
 // generate the .asm file (and optionally display it)
 void DSKC50Target :: writeCode() {
+
     C50Target :: writeCode();
+
+  // DSK assembler doesn't seem to like lines longer than 80 characters
+  // so make a new file that's the original file with each line truncated
+  // to 80 characters.
+
+	StringList postProcessCmd;
+	postProcessCmd.initialize();
+	postProcessCmd <<"cut -c 1-79 "
+		 <<filePrefix<<".asm > "
+		 <<filePrefix<<"DSK.asm";
+	systemCall(postProcessCmd,"Post-processing of  asm file failed; 
+			code might still compile");
+
+  // Compile the code if requested. Note that even if compilation is not
+  // wanted the user might want to keep *DSK.asm file to use it later so
+  // the compile method should be called but the compilation not executed
+
 }
 
 int DSKC50Target :: runCode() {
 	StringList runCmd;
-	runCmd << "loader " << filePrefix << ".dsk";
+	runCmd << "loader " << filePrefix << "DSK.dsk";
 	if ( systemCall(runCmd,
 			"Problems running code onto TMS320C5x",
 			targetHost) != 0 )
@@ -114,3 +141,9 @@ ISA_FUNC(DSKC50Target, C50Target);
 
 // make an instance
 static DSKC50Target proto("DSKC50", "run code on the DSK TMS320C5x card");
+
+static KnownTarget entry(proto, "DSKC50");
+
+
+
+
