@@ -118,6 +118,9 @@ GNULIB=
 LINKER =	CC
 # startup module
 CRT0 =
+
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lsocket -lnsl -ldl -lm
 # system libraries (libraries from the environment)
 # Note that -lucb lib is needed to get bcopy and bzero for libMLelf.a
 #  The current release of Mathematica uses these obsolete functions
@@ -125,9 +128,7 @@ CRT0 =
 #  in libg++, so we don't need to include -lucb.
 # Note that the Solaris ucb library is really broken, so it should be last
 # in the list of libraries, or you may see really serious problems.
-SYSLIBS =	-lsocket -lnsl -ldl -lm -L/usr/ucblib -lucb
-# system libraries for linking .o files from C files only
-CSYSLIBS =	$(SYSLIBS)
+SYSLIBS =	$(CSYSLIBS) -L/usr/ucblib -lucb
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
