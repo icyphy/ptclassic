@@ -35,6 +35,16 @@ This file is the header file for commands in the "utilities" menu,
 each of which invokes a predefined universe.
 */
 
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
+
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
+
 extern int RpcPlotSignal ARGS((RPCSpot *spot, lsList cmdList,
 			       long userOptionWord));
 extern int RpcPlotCxSignal ARGS((RPCSpot *spot, lsList cmdList,
