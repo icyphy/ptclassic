@@ -226,18 +226,18 @@ Data_M
 *   kat3@ihlpe.att.com.
 */
 
-        int i,j,k,l = 0,its;        /* Mostly loop variables */
-        double tol = 1.0e-22;   /* tells about machine tolerance */
-        double c,f,g,h,s,x,y,z; /* Temporaries */
+        int i, j, k, l = 0;             // Mostly loop variables
+        double tol = 1.0e-22;           // tells about machine tolerance
+        double c, f, g, h, s, x, y, z;  // Temporaries
 
         int numRows = A.numRows();
         int numCols = A.numCols();
 
+        // Create a temporary working array
+        double *temp = new double[numCols];
+
         // Copy A to U
         U = A;
-
-        // Create a temporary working array
-        double temp[numCols];
 
         // Reduce the U matrix to bidiagonal form with Householder transforms.
 
@@ -344,7 +344,7 @@ Data_M
 
         threshhold = threshhold * x;
         for (k = numCols - 1; k >= 0; k--) {
-          for( its = 0; its < (int)max_iterations; its++) {
+          for( int its = 0; its < (int)max_iterations; its++) {
             // test splitting 
             for (l = k; l >= 0; l--) {
               if (fabs(temp[l]) <= threshhold) 
@@ -451,6 +451,7 @@ Data_M
             W.entry(k) = x;
           } // end test splitting iteration loop
         }  // end k loop
+	delete [] temp;
       } // close code
     } // end method
 } // end defstar
