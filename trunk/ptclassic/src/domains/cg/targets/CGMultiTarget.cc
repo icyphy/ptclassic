@@ -96,6 +96,17 @@ void CGFullConnect :: chooseScheduler() {
 	}
 }
 
+void CGFullConnect :: setStopTime(float f) {
+	Target::setStopTime(f);
+
+	// For child targets
+	if (!inherited()) {
+		for (int i = 0; i < nChildrenAlloc; i++) {
+			child(i)->setStopTime(f);
+		}
+	}
+}
+
 int CGFullConnect::setup(Galaxy& gal) {
 	if (gal.parent()) {
 		((ParScheduler*) mySched())->ofWorm();
