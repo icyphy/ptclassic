@@ -44,7 +44,7 @@ INCL = -I$(KERNDIR)
 LIB=libsr.$(LIBSUFFIX)
 
 # Header files
-HDRS= SRPortHole.h SRScheduler.h SRStar.h SRWormhole.h
+HDRS= SRPortHole.h SRScheduler.h SRStar.h SRNonStrictStar.h SRWormhole.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) SRDomain.cc
