@@ -66,7 +66,7 @@ option add *ListBrowser.entryfont \
 # For example, the following command will query the user to select an
 # item from a list, and then post that item in top-level window:
 # <tcl><pre>
-# ListBrowser .w -command post -items {a b c d}
+# ::tycho::ListBrowser .w -command ::tycho::post -items {a b c d}
 # .w centerOnScreen
 # </pre></tcl>
 #
@@ -163,12 +163,12 @@ body ::tycho::ListBrowser::constructor {args} {
     
     # Frame for listbox for listing items.
     itk_component add listscroll {
-	frame $itk_interior.childsite.listscroll
+	frame $itk_component(childsite).listscroll
     } {
 	keep -background -cursor
     }
     pack $itk_component(listscroll) -side top \
-	    -expand yes -fill both -padx 5
+	    -expand yes -fill both -padx 5 -after $itk_component(radiosite)
     
     # Listbox for items.
     itk_component add listbox {
@@ -186,7 +186,7 @@ body ::tycho::ListBrowser::constructor {args} {
     # Scrollbar for items.
     itk_component add scroll {
 	scrollbar $itk_component(listscroll).scroll \
-		-command "$itk_component(listscroll).listbox yview" \
+		-command [code "$itk_component(listscroll).listbox yview"] \
 		-relief sunken
     } {
 	keep -background -cursor
@@ -195,11 +195,11 @@ body ::tycho::ListBrowser::constructor {args} {
 
     # Extra buttonbox above the usual DialogWindow button box.
     itk_component add buttons {
-	buttonbox $itk_interior.buttons
+	buttonbox $itk_component(childsite).buttons
     } {
 	keep -background -cursor
     }
-    pack $itk_component(buttons) -expand no -before $itk_interior.bbox
+    pack $itk_component(buttons) -expand no -before $itk_component(bbox)
 
     $itk_component(buttons) add help -text "    Help    " \
 	    -command [code $this help]
@@ -381,7 +381,7 @@ body ::tycho::ListBrowser::goto {item} {
 # Open a help window.
 #
 body ::tycho::ListBrowser::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext $TYCHO/kernel/doc/ListBrowserHelp.html
 }
 
