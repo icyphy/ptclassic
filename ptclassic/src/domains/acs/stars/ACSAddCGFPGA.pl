@@ -7,7 +7,7 @@ defcore {
 	    Sums two inputs
 	    Only the first two connections are used for hardware
 	    }
-	version {$Id$}
+	version {@(#)ACSAddCGFPGA.pl	1.7 09/13/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
@@ -83,11 +83,18 @@ It outputs lines of comments, instead of code.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -135,19 +142,42 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_cost}
 	    access {public}
-	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file)" }
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 		// BEGIN-USER CODE
 		cost_file << "wl=max(msbranges(1:2)'*ones(1,size(insizes,2))-insizes+1);" << endl;
 		cost_file << "wu=max(msbranges(1:2)');" << endl;
 		cost_file << "cost=ceil((wu-wl+1)/2);" << endl;
-		numsim_file << "y=sum(x);" << endl;
+		cost_file << " if sum(numforms)>0 " << endl;
+		cost_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+		cost_file << " end " << endl;
+
+		//  numsim_file << "y=sum(x);" << endl; 
+		numsim_file <<  " y=cell(1,size(x,2));" << endl;
+		numsim_file <<  " for k=1:size(x,2) " << endl;
+		numsim_file <<  "   y{k}=x{1,k}+x{2,k}; " << endl;
+		numsim_file <<  " end " << endl;
+		numsim_file <<  " " << endl;
+
 		rangecalc_file << "orr=sum(inputrange);" << endl;
 
 		natcon_file << "wi=min(msbranges(1:2)'*ones(1,size(insizes,2)) -insizes+1);" << endl;
 		natcon_file << "wo=msbranges(3)-outsizes+1;" << endl;
 		natcon_file << "yesno=(wo>=wi);" << endl;
+		natcon_file << "yesno=yesno & (max(insizes)<33) & (min(insizes)>1);" << endl;
+
+		// this is ok because adder latency does not depend on wordlength
+		schedule_file << " vl1=veclengs(1); " << endl;
+		schedule_file << " racts1=[0 1 vl1-1 ;0 1 vl1-1; 1 1 vl1];" << endl;
+		schedule_file << " racts=cell(1,size(insizes,2));" << endl;
+		schedule_file << " racts(:)=deal({racts1});" << endl;
+		schedule_file << " minlr=vl1*ones(1,size(insizes,2)); " << endl;
+		schedule_file << " if sum(numforms)>0 " << endl;
+		schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+		schedule_file << " end " << endl;
+	
+
 		// END-USER CODE
 
 		// Return happy condition
@@ -160,10 +190,11 @@ It outputs lines of comments, instead of code.
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-                int S_bitlen=0;
 		//
 		// Calculate BW
 		//
+		int S_bitlen=0;
+
 		if (pins->query_preclock(2)==UNLOCKED)
 		{
 		    int A_majorbit=pins->query_majorbit(0);
@@ -177,20 +208,19 @@ It outputs lines of comments, instead of code.
 		    
 		    // Set
 		    pins->set_precision(2,S_majorbit,S_bitlen,lock_mode);
-
 		}
+
+		//
+		// Calculate CLB sizes
+		//
+		resources->set_occupancy(S_bitlen/2,1);
+
+		// Calculate pipe delay
+		acs_delay=1;
 			    
-                //
-                // Calculate CLB sizes
-                //
-                resources->set_occupancy(S_bitlen/2,1);
-
-                // Calculate pipe delay
-                acs_delay=1;
-
 		// Return happy condition
 		return(1);
-            }
+		}
 	}
         method {
 	    name {sg_setup}
@@ -306,8 +336,8 @@ It outputs lines of comments, instead of code.
 
 		    
 		    // Generate new port definition
-		    new_pins=new Pin;
-		    *new_pins=*pins;  // Copy existing parameters
+		    // from existing parameters
+                    new_pins=dup_pins();  
 		    new_pins->set_precision(0,MSB,adder_length,LOCKED);
 		    new_pins->set_precision(1,MSB,adder_length,LOCKED);
 		    new_pins->set_precision(2,MSB+1,adder_length+1,LOCKED);
@@ -348,7 +378,7 @@ It outputs lines of comments, instead of code.
 		    statements << lang->equals(lang->slice("in_a",
 							   pad_A+a_bitlen-1,
 							   pad_A),
-					       pins->retrieve_pinname(0))
+					       pins->query_pinname(0))
 			       << lang->end_statement << endl;
                     int loop;
 		    for (loop=0;loop < extend_A;loop++)
@@ -368,7 +398,7 @@ It outputs lines of comments, instead of code.
 		    statements << lang->equals(lang->slice("in_b",
 							   pad_B+b_bitlen-1,
 							   pad_B),
-					       pins->retrieve_pinname(1))
+					       pins->query_pinname(1))
 			       << lang->end_statement << endl;
 		    for (loop=0;loop < extend_B;loop++)
 			statements << lang->equals(lang->
@@ -382,7 +412,7 @@ It outputs lines of comments, instead of code.
 			
 			
 		    // Correct Output S
-		    statements << lang->equals(pins->retrieve_pinname(2),
+		    statements << lang->equals(pins->query_pinname(2),
 					       lang->slice("out_s",S_bitlen-1,0))
 			       << lang->end_statement << endl;
 			

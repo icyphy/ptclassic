@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Buffer a line
 	}
-	version {$Id$}
+	version {@(#)ACSBufferCGFPGA.pl	1.4 09/08/99}
 	author { K. Smith}
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
@@ -58,11 +58,18 @@ This star exists only for demoing the generic CG domain.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -99,24 +106,42 @@ This star exists only for demoing the generic CG domain.
 		return(NULL);
 	    }
 	}
-	method {
+ 	method {
 	    name {sg_cost}
 	    access {public}
-	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& 
-rangecalc_file, ofstream& natcon_file)" }
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 		// BEGIN-USER CODE
 		cost_file << "cost=0" << endl;
-		numsim_file << "y=x;" << endl;
+
+		// numsim_file << "y=x;" << endl;
+                numsim_file <<  " y=cell(1,size(x,2));" << endl;
+                numsim_file <<  " for k=1:size(x,2) " << endl;
+                numsim_file <<  "   y{k}=x{k};" << endl;
+                numsim_file <<  " end " << endl;
+                numsim_file <<  " " << endl;
+
 		rangecalc_file << "orr=inputrange;" << endl;
+
+                // this is ok because buffer latency does not depend on wordlength
+                schedule_file << " vl1=veclengs(1); " << endl;
+                schedule_file << " racts1=[0 1 vl1-1 ; 0 1 vl1-1 ];" << endl;
+                schedule_file << " racts=cell(1,size(outsizes,2));" << endl;
+                schedule_file << " racts(:)=deal({racts1});" << endl;
+                schedule_file << " minlr=vl1*ones(1,size(outsizes,2)); " << endl;
+                schedule_file << " if sum(numforms)>0 " << endl;
+                schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                schedule_file << " end " << endl;
+
+
 		// END-USER CODE
 
 		// Return happy condition
 		return(1);
 	    }
 	}
-        method {
+       method {
 	    name {sg_resources}
 	    access {public}
 	    arglist { "(int lock_mode)" }
@@ -235,17 +260,17 @@ rangecalc_file, ofstream& natcon_file)" }
 		if ((src_mbit==snk_mbit) &&
 		    (src_len==snk_len))
 		{
-		    out_fstr << lang->equals(pins->retrieve_pinname(1),
-					     pins->retrieve_pinname(0))
+		    out_fstr << lang->equals(pins->query_pinname(1),
+					     pins->query_pinname(0))
 			     << lang->end_statement << endl;
 		}
 		else
 		{
 		    if (src_len < snk_len)
 		    {
-			out_fstr << lang->equals(lang->slice(pins->retrieve_pinname(1),
+			out_fstr << lang->equals(lang->slice(pins->query_pinname(1),
 							     src_len-1,0),
-						 pins->retrieve_pinname(0))
+						 pins->query_pinname(0))
 			         << lang->end_statement << endl;
 			char* extend_name=new char[MAX_STR];
 			if (sign_convention==UNSIGNED)
@@ -254,13 +279,13 @@ rangecalc_file, ofstream& natcon_file)" }
 			{
 			    ostrstream expression;
 			    if (src_len==1)
-				expression << pins->retrieve_pinname(0) << ends;
+				expression << pins->query_pinname(0) << ends;
 			    else
-				expression << lang->slice(pins->retrieve_pinname(0),src_len-1) << ends;
+				expression << lang->slice(pins->query_pinname(0),src_len-1) << ends;
 			    strcpy(extend_name,expression.str());
 			}
 			for (int extend_loop=src_len;extend_loop<=snk_len-1;extend_loop++)
-			    out_fstr << lang->equals(lang->slice(pins->retrieve_pinname(1),extend_loop),extend_name)
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),extend_loop),extend_name)
 				     << lang->end_statement << endl;
 							
 			// Cleanup
@@ -271,14 +296,14 @@ rangecalc_file, ofstream& natcon_file)" }
 			if (bitslice_strategy==PRESERVE_MSB)
 			{
 			    // Preserve MSB
-			    out_fstr << lang->equals(pins->retrieve_pinname(1),
-						     lang->slice(pins->retrieve_pinname(0),src_len-1,src_len-snk_len));
+			    out_fstr << lang->equals(pins->query_pinname(1),
+						     lang->slice(pins->query_pinname(0),src_len-1,src_len-snk_len));
 			}
 			else
 			{
 			    // Preseve LSB
-			    out_fstr << lang->equals(pins->retrieve_pinname(1),
-						     lang->slice(pins->retrieve_pinname(0),snk_len-1,0));
+			    out_fstr << lang->equals(pins->query_pinname(1),
+						     lang->slice(pins->query_pinname(0),snk_len-1,0));
 			}
 			out_fstr << lang->end_statement << endl;
 		    }
@@ -294,29 +319,29 @@ rangecalc_file, ofstream& natcon_file)" }
 			if (test_result & SRC_LARGER)
 			{
 			    // FIX:Ok for now, but what about dangles?
-			    out_fstr << lang->equals(pins->retrieve_pinname(1),
-						     lang->slice(pins->retrieve_pinname(0),
+			    out_fstr << lang->equals(pins->query_pinname(1),
+						     lang->slice(pins->query_pinname(0),
 								 snk_mbit,
 								 snk_mbit-snk_len+1))
 				     << lang->end_statement << endl;
 			}
 			else
 			{
-			    out_fstr << lang->equals(lang->slice(pins->retrieve_pinname(1),
+			    out_fstr << lang->equals(lang->slice(pins->query_pinname(1),
 								src_mbit,
 								src_mbit-src_len+1),
-						     pins->retrieve_pinname(0))
+						     pins->query_pinname(0))
 				     << lang->end_statement << endl;
 
 			    // Trailers?
 			    if ((src_mbit-src_len) > (snk_mbit-snk_len))
-				out_fstr << lang->tie_it(pins->retrieve_pinname(1),
+				out_fstr << lang->tie_it(pins->query_pinname(1),
 							 src_mbit-src_len,
 							 snk_mbit-snk_len+1,
 							 "GND");
 
 			    if (sign_convention==UNSIGNED)
-				out_fstr << lang->tie_it(pins->retrieve_pinname(1),
+				out_fstr << lang->tie_it(pins->query_pinname(1),
 							 snk_mbit,
 							 src_mbit+1,
 							 "GND");
@@ -324,11 +349,11 @@ rangecalc_file, ofstream& natcon_file)" }
 			    {
 				ostrstream expression;
 				if (src_len==1)
-				    expression << pins->retrieve_pinname(0) << ends;
+				    expression << pins->query_pinname(0) << ends;
 				else
-				    expression << lang->slice(pins->retrieve_pinname(0),src_len-1)
+				    expression << lang->slice(pins->query_pinname(0),src_len-1)
 					<< ends;
-				out_fstr << lang->tie_it(pins->retrieve_pinname(1),
+				out_fstr << lang->tie_it(pins->query_pinname(1),
 							 snk_mbit,
 							 src_mbit+1,
 							 expression.str());

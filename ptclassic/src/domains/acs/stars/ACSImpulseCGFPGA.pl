@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generic code generator source star.
 	}
-        version {$Id$}
+        version {@(#)ACSImpulseCGFPGA.pl	1.2 09/08/99}
         author { Eric K. Pauer }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California
@@ -38,23 +38,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	    default {"None"}
 	}
 	defstate {
-	    name {address}
+	    name {address_start}
 	    type {int}
 	    desc {address for source variable}
 	    default {"-1"}
 	}
 	defstate {
-	    name {row_size}
+	    name {address_step}
 	    type {int}
-	    desc {row size of source variable}
-	    default {1}
-	}
-	defstate {
-	    name {column_size}
-	    type {int}
-	    desc {column size of source variable}
-	    default {1}
-	    attributes {A_CONSTANT|A_NONSETTABLE}
+	    desc {skip amount between addresses}
+	    default {"1"}
 	}
 	defstate {
 	    name {Domain}
@@ -62,13 +55,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
-	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
-	}
         defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
+	defstate {
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
+	}
+       defstate {
 	    name {Language}
 	    type {string}
 	    desc {What language should this function be described in (e.g, VHDL, C, XNF)}

@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Core for the unirate sequencer
 	}
-	version {$Id$}
+	version {@(#)ACSUniSeqCGFPGA.pl	1.3 09/08/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 The Regents of the University of California
@@ -77,19 +77,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		// Bidir port definitions
 
 		// Control port definitions
-		pins->add_pin("MemBusGrant_n",INPUT_PIN_MEMOK);
-		pins->add_pin("Reset",INPUT_PIN_RESET);
-		pins->add_pin("WC_Carry",INPUT_PIN_WC);
-//		pins->add_pin("XbarData_InReg",INPUT_PIN_EXTCTRL);
-		pins->add_pin("Go",INPUT_PIN_EXTCTRL);
-		pins->add_pin("Clock",INPUT_PIN_CLK);
-		pins->add_pin("MemBusReq_n",OUTPUT_PIN_MEMREQ);
-		pins->add_pin("Done",OUTPUT_PIN_DONE);
-		pins->add_pin("WC_MUX",OUTPUT_PIN_WCMUX);
-		pins->add_pin("WC_CE",OUTPUT_PIN_WCCE);
-		pins->add_pin("ADDR_CE",OUTPUT_PIN_ADDRCE);
-		pins->add_pin("ADDR_CLR",OUTPUT_PIN_ADDRCLR);
-
 
 		if (sg_language==VHDL_BEHAVIORAL)
 		{
@@ -104,29 +91,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		    // Bidir port definitions
 		    
 		    // Control port_definitions
-		    pins->set_datatype(0,STD_LOGIC);
-		    pins->set_datatype(1,STD_LOGIC);
-		    pins->set_datatype(2,STD_LOGIC);
-		    pins->set_datatype(3,STD_LOGIC);
-		    pins->set_datatype(4,STD_LOGIC);
-		    pins->set_datatype(5,STD_LOGIC);
-		    pins->set_datatype(6,STD_LOGIC);
-		    pins->set_datatype(7,STD_LOGIC);
-		    pins->set_datatype(8,STD_LOGIC);
-		    pins->set_datatype(9,STD_LOGIC);
-		    pins->set_datatype(10,STD_LOGIC);
-
-		    pins->set_precision(0,0,1,LOCKED);
-		    pins->set_precision(1,0,1,LOCKED);
-		    pins->set_precision(2,0,1,UNLOCKED);
-		    pins->set_precision(3,0,1,LOCKED);
-		    pins->set_precision(4,0,1,LOCKED);
-		    pins->set_precision(5,0,1,LOCKED);
-		    pins->set_precision(6,0,1,LOCKED);
-		    pins->set_precision(7,0,1,LOCKED);
-		    pins->set_precision(8,0,1,LOCKED);
-		    pins->set_precision(9,0,1,LOCKED);
-		    pins->set_precision(10,0,1,LOCKED);
 		    
 		}
 		else

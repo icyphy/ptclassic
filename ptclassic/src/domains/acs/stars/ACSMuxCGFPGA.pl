@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generates a 2,3, and 4-input MUX 
 	}
-	version {$Id$}
+	version {@(#)ACSMuxCGFPGA.pl	1.4 09/10/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
@@ -59,11 +59,18 @@ This star exists only for demoing the generic CG domain.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -284,16 +291,16 @@ This star exists only for demoing the generic CG domain.
 			    int ind=loop+total_count+1;
 			    sprintf(sel_slice,"sel(%d)",loop);
 			    merge_expr << lang->equals(sel_slice,
-						       pins->retrieve_pinname(ind))
+						       pins->query_pinname(ind))
 				<< lang->end_statement << endl;
 			}
 		    else
 		    {
 			int ind=total_count+1;
 			merge_expr << lang->equals("sel",
-						   pins->retrieve_pinname(ind))
+						   pins->query_pinname(ind))
 			           << lang->end_statement << endl;
-			switch_sensies->add(pins->retrieve_pinname(ind));
+			switch_sensies->add(pins->query_pinname(ind));
 		    }
 			
 		    delete []sel_slice;
@@ -326,9 +333,9 @@ This star exists only for demoing the generic CG domain.
 				   << lang->then_statement << endl
 				   << "\t";
 			    select << lang->equals("o",pins->
-						   retrieve_pinname(line))
+						   query_pinname(line))
 				   << lang->end_statement << endl;
-			    switch_sensies->add(pins->retrieve_pinname(line));
+			    switch_sensies->add(pins->query_pinname(line));
 			    if ((bidir_flag) && (!outsens_flag))
 			    {
 				switch_sensies->add("o");
@@ -362,15 +369,15 @@ This star exists only for demoing the generic CG domain.
 			    select << lang->test("sel",sel_char)
 				   << lang->then_statement << endl
 				   << "\t";
-			    select << lang->equals(pins->retrieve_pinname(line),"o")
+			    select << lang->equals(pins->query_pinname(line),"o")
 				   << lang->end_statement << endl;
 			    select << lang->else_statement << endl
 				   << "\t";
 			    if (bidir_flag)
-				select << lang->equals(pins->retrieve_pinname(line),"(others=>'Z')")
+				select << lang->equals(pins->query_pinname(line),"(others=>'Z')")
 				   << lang->end_statement << endl;
 			    else
-				select << lang->equals(pins->retrieve_pinname(line),"(others=>'0')")
+				select << lang->equals(pins->query_pinname(line),"(others=>'0')")
 				    << lang->end_statement << endl;
 				
 			    select << lang->endif_statement 

@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces the sine of the input, that is assumed to be in radians
 	}
-	version {$Id$}
+	version {@(#)ACSSinCGFPGA.pl	1.4 09/10/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
@@ -67,11 +67,18 @@ It outputs lines of comments, instead of code.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}
@@ -118,7 +125,7 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_cost}
 	    access {public}
-	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file)" }
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
 		// BEGIN-USER CODE
@@ -140,11 +147,36 @@ It outputs lines of comments, instead of code.
 		    << "cost(t)=4*m(t)+6+(m(t)+1)/2;" << endl
 		    << "t=find(insizes==10);" << endl
 		    << "cost(t)=8*m(t)+6+(m(t)+1)/2;" << endl;
-		numsim_file << "y=sin(x);" << endl;
+
+		// numsim_file << "y=sin(x);" << endl;
+                numsim_file <<  " y=cell(1,size(x,2));" << endl;
+                numsim_file <<  " for k=1:size(x,2) " << endl;
+                numsim_file <<  "   y{k}=sin(x{k}); " << endl;
+                numsim_file <<  " end " << endl;
+                numsim_file <<  " " << endl;
+
  	        rangecalc_file << "orr=[-1.0 1.0];" << endl;
                 natcon_file 
 		    << "yesno=(insizes>=3 & insizes<=10 & outsizes>=4 & outsizes<=16);"
 		    << endl;
+
+                schedule_file << "outdel= ones(1,size(insizes,2)); " << endl;
+                schedule_file << "t=find(insizes(2,:)>4); " << endl;
+                schedule_file << "outdel(t)=outdel(t)+1; " << endl;
+                schedule_file << "t=find(insizes(2,:)>5); " << endl;
+                schedule_file << "outdel(t)=outdel(t)+1; " << endl;
+                schedule_file << "vl1=veclengs(1); " << endl;
+                schedule_file << "racts=cell(1,size(insizes,2));" << endl;
+                schedule_file << "for k=1:size(insizes,2)" << endl;
+                schedule_file << "  racts1=[0 1 vl1-1; outdel(k) 1 vl1-1+outdel(k)];" << endl;
+                schedule_file << "  racts{k}=racts1;" << endl;
+                schedule_file << "end"  << endl;
+                schedule_file << "minlr=vl1*ones(1,size(insizes,2)); " << endl;
+                schedule_file << "if sum(numforms)>0 " << endl;
+                schedule_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                schedule_file << "end " << endl;
+
+
 		// END-USER CODE
 
 		// Return happy condition

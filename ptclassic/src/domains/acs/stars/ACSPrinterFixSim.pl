@@ -8,7 +8,7 @@ state specifies the file to be written; the special names
 &lt;stdout&gt; and &lt;cout&gt;, which specify the standard output
 stream, and &lt;stderr&gt; and &lt;cerr&gt;, which specify the
 standard error stream, are also supported. }
-    version { $Id$}
+    version { @(#)ACSPrinterFixSim.pl	1.6 09/08/99}
     author { James Lundblad, Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California
@@ -18,6 +18,14 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { ACS main library }
+	defstate {
+	    name { LockInput }
+	    type {int}
+	    default {"NO"}
+	    desc { 
+Flag that indicates that the specified input precision should be used 
+rather than modified by wordlength analysis in the FPGA domain }
+	}
 
 	defstate {
 		name { fileNameFix }

@@ -7,7 +7,7 @@ defcore {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {$Id$}
+	version {@(#)ACSNonBiMemCGFPGA.pl	1.3 09/08/99}
 	author { K. Smith}
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
@@ -191,23 +191,23 @@ This star exists only for demoing the generic CG domain.
 
 		// BEGIN-USER CODE
 		out_fstr << lang->if_statement 
-		         << lang->test(pins->retrieve_pinname(3),"'1'")
+		         << lang->test(pins->query_pinname(3),"'1'")
 			 << lang->then_statement << endl
 			 << "\t" 
-			 << lang->equals(pins->retrieve_pinname(2),
-					 pins->retrieve_pinname(0))
+			 << lang->equals(pins->query_pinname(2),
+					 pins->query_pinname(0))
 			 << lang->end_statement << endl
 			 << "\t" 
-			 << lang->equals(pins->retrieve_pinname(1),
+			 << lang->equals(pins->query_pinname(1),
 					 "(others=>'Z')")
 			 << lang->end_statement << endl
 			 << lang->else_statement << endl
 			 << "\t"
-			 << lang->equals(pins->retrieve_pinname(2),"(others=>'Z')")
+			 << lang->equals(pins->query_pinname(2),"(others=>'Z')")
 			 << lang->end_statement << endl
 			 << "\t" 
-			 << lang->equals(pins->retrieve_pinname(1),
-					 pins->retrieve_pinname(2))
+			 << lang->equals(pins->query_pinname(1),
+					 pins->query_pinname(2))
 			 << lang->end_statement << endl
 			 << lang->endif_statement 
 			 << lang->end_statement << endl;
