@@ -2,7 +2,7 @@ defstar {
 	name { BlockAllPole }
 	domain { SDF }
 	version {$Id$}
-	desc { An all pole filter with coefficients externally supplied. }
+	desc { An all-pole filter whose coefficients are externally supplied. }
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -13,20 +13,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 .pp
-This star implements an all pole filter with coefficients that
+This star implements an all-pole filter with coefficients that
 are periodically updated
-.Id "allpole filter, block"
-.Id "filter, allpole, block"
+.Id "all-pole filter, block"
+.Id "filter, all-pole, block"
 .Id "filter, IIR, block"
-from the outside.  The \fIblockSize\fR parameter tells how often
-the updates occur.  It is an integer specifying how may input samples
+from the outside.  The \fIblockSize\fR parameter tells how often the
+updates occur.  This integer parameter specifies how may input samples
 should be processed using each set of coefficients.  The \fIorder\fR
 parameter tells how many coefficients there are.
 The transfer function of the filter is
 .EQ
 H(z) ~=~ 1 over { 1 ~-~ z sup -1 D(z) }
 .EN
-where $D(z)$ is the specified by the externally supplied coefficients.
+where $D(z)$ is specified by the externally supplied coefficients.
 Let
 .EQ
 D(z) ~=~ d sub 1 ~+~ d sub 2 z sup -1 ~+~ ... ~+~ d sub M z sup M-1 ~.
