@@ -23,6 +23,8 @@ $Id$
 #include "Fraction.h"
 #include "DDFConnect.h"
 
+class DDFWormhole;
+
 	////////////////////////////////////
 	// class DDFStar
 	////////////////////////////////////
@@ -55,6 +57,10 @@ public:
 
 	// is it recursion star?
 	virtual int isItSelf();
+
+        // virtual method to return this pointer if it is a wormhole.
+        // Return NULL if not.
+        virtual DDFWormhole* myWorm();
 
 	virtual const char* readClassName() const;
 };
