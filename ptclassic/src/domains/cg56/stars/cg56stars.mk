@@ -8,5 +8,4 @@
 CG56STARS = \
  $(CG56)/CG56Abs.o \
  $(CG56)/CG56BlackHole.o \
- $(CG56)/CG56DC.o \
- $(CG56)/CG56FIR.o
+ $(CG56)/CG56DC.o
