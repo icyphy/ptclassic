@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,40 +29,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Bilung Lee
 
-*/
+       Function definition for Ptdsp_Histogram
 
-
-/**CFile***********************************************************************
-
-  FileName    [ ptdspHistogram.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_Histogram ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include <string.h>
 #include "ptdspNearestNeighbor.h"
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Generates histogram of an image ]
-  Description [ This function takes a integer array which represents
-                an image and computes the histogram of that
-		image. This is useful for contrast enhancement. ]
-  SideEffects [ The histogram buffer hist is modified. ]
-******************************************************************************/
+/* Generates histogram of an image.
+   This function takes integer array "matrix" which represents an
+   image and computes the histogram of that image. This is useful for
+   contrast enhancement. 
+   
+   The return histogram is stored in the integer array hist.
+*/
 void
 Ptdsp_Histogram (const int* matrix, int size, int* hist, int min, int max) {
   /* Initialize the histogram buffer to zero */

@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,32 +29,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Stephen L. Moshier
 
-*/
+       Function definition for Ptdsp_i0.
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspi0.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_i0 ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspcephes.h"
 
 /* Chebyshev coefficients for exp(-x) I0(x)
- * in the interval [0,8].
- *
- * lim(x->0){ exp(-x) I0(x) } = 1.
- */
+   in the interval [0,8].
+ 
+   lim(x->0){ exp(-x) I0(x) } = 1.
+*/
 
 static double A[] =
 {
@@ -91,10 +76,10 @@ static double A[] =
 };
 
 /* Chebyshev coefficients for exp(-x) sqrt(x) I0(x)
- * in the inverted interval [8,infinity].
- *
- * lim(x->inf){ exp(-x) sqrt(x) I0(x) } = 1/sqrt(2pi).
- */
+   in the inverted interval [8,infinity].
+ 
+   lim(x->inf){ exp(-x) sqrt(x) I0(x) } = 1/sqrt(2pi).
+*/
 
 static double B[] =
 {
@@ -125,18 +110,9 @@ static double B[] =
    8.04490411014108831608E-1
 };
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Modified Bessel function of order zero ]
-  Description [ Returns modified Bessel function of order zero of the
-                argument. ]
-  SideEffects []
-******************************************************************************/
 /*
  * SYNOPSIS:
+ *		Modified Bessel function of order zero.
  *
  * double x, y, Ptdsp_i0();
  *

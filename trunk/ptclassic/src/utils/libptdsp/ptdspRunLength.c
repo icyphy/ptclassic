@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,24 +29,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Paul Haskell
 
-*/
+       Routines for run length encoding and decoding.
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspRunLength.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Routines for run length encoding and decoding ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include <math.h>
 #include <malloc.h>
@@ -57,23 +42,19 @@ const double StartOfRun = 1048576.0;
 
 #define larger(fl,in) (fabs(fl) >= (in))
 
-/*---------------------------------------------------------------------------*/	
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
+/* Run length encodes a DCT image.
+   This function takes a double array which represents a DCT image,
+   inserts "start of block" markers, run-length encodes it, and
+   outputs the modified image.
 
-/**Function*******************************************************************
-  Synopsis    [ Run length encodes a DCT image ]
-  Description [ This function takes a double array which represents a
-                DCT image, inserts "start of block" markers,
-		run-length encodes it, and outputs the modified image. </p>
-		For the run-length encoding, all values with absolute
-		value less than "thresh" are set to 0.0, to help
-		improve compression.  Runlengths are coded with a
-		"start of run" symbol and then an (integer) run-length. ]
-  SideEffects [ The integer values at addresses indxDc and indxAc and
-                the double arrays at address outDc and outAc are set. ]
-  SeeAlso     [ Ptdsp_RunLengthInverse ]
-******************************************************************************/
+   For the run-length encoding, all values with absolute value less
+   than "thresh" are set to 0.0, to help improve compression.
+   Runlengths are coded with a "start of run" symbol and then an
+   (integer) run-length. 
+
+   The integer values at addresses indxDc and indxAc and the double
+   arrays at address outDc and outAc are set. 
+*/
 void 
 Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
 			int HiPri, double thresh, double **outDc,
@@ -127,17 +108,16 @@ Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
   }
 }
 
-/**Function*******************************************************************
-  Synopsis    [ Inverts run length encoding on a DCT image ]
-  Description [ This function reads 2 double array, representing two
-                coded DCT images (one high priority and one
-		low-priority), inverts the run-length
-		encoding, and outputs the resulting image. </p>
-		Protection is built in to avoid crashing even if some
-		of the coded input data is affected by loss. ]
-  SideEffects [ The double array outPtr is modified. ]
-  SeeAlso     [ Ptdsp_RunLengthEncode ]
-******************************************************************************/
+/* Inverts run length encoding on a DCT image.
+   This function reads 2 double array, representing two coded DCT
+   images (one high priority and one low-priority), inverts the
+   run-length encoding, and outputs the resulting image.
+
+   Protection is built in to avoid crashing even if some of the coded
+   input data is affected by loss. 
+
+   The double array outPtr is modified to store the resulting image. 
+*/
 void 
 Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
 			double * outPtr, int origSize, 

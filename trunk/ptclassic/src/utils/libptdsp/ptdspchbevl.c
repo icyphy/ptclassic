@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,37 +29,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Stephen L. Moshier
 
-*/
+       Function definition for Ptdsp_chbevl.
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspchbevl.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_chbevl ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspcephes.h"
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Evaluate Chebyshev series ]
-  SideEffects []
-******************************************************************************/
 /*
  * SYNOPSIS:
+ *		Evaluate the Chebyshev series
  *
  * int N;
  * double x, y, coef[N], Ptdsp_chebevl();

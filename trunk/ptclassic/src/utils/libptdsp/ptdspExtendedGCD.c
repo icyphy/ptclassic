@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,43 +29,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Brian L. Evans
 
-*/
+      Greatest common divisor and least common multiple routines
 
-/**CFile*********************************************************************
-
-  FileName    [ ptdspExtendedGCD.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Greatest common divisor and least common multiple routines ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspExtendedGCD.h"
 
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-
-  Synopsis    [ Greatest common divisor function ]
-
-  Description [ If the second arg is negative, result is negative.
-	        Magnitude of result equals gcd(abs(a),abs(b)). ]
-
-  SideEffects []
-
-******************************************************************************/
+/* Greatest common divisor function
+   If the second arg is negative, result is negative.
+   Magnitude of result equals gcd(abs(a),abs(b)).
+*/
 int
 Ptdsp_GCD(int a, int b) {
   int sign = 1;
@@ -91,36 +66,25 @@ Ptdsp_GCD(int a, int b) {
   return b*sign;
 }
 
-/**Function*******************************************************************
-
-  Synopsis    [ Least common multiple function]
-
-  Description [ Order of the multiplication and division is chosen to
-                avoid overflow in cases where a*b > MAXINT but
-		lcm(a,b) < MAXINT.  The division always goes evenly.
-		This routines returns 0 for the lcm of 0 and 1. ]
-
-  SideEffects []
-
-******************************************************************************/
+/* Least common multiple function.
+   Order of the multiplication and division is chosen to avoid
+   overflow in cases where a*b > MAXINT but lcm(a,b) < MAXINT.  The
+   division always goes evenly.
+   This routines returns 0 for the lcm of 0 and 1.
+*/
 int 
 Ptdsp_LCM(int a, int b) { 
   return a == b ? a : a * (b / Ptdsp_GCD(a,b));
 }
 
-/**Function*******************************************************************
+/* Extended greatest common divisor function.
+   Solves the Bezout identity
+       alpha a + beta b == 1
+  over the integers given the values for a and b.
 
-  Synopsis    [ Extended greatest common divisor function ]
-
-  Description [ Solves the Bezout identity
-                alpha a + beta b == 1
-	        over the integers given the values for a and b. ]
-
-  SideEffects [ Sets the values at addresses alpha and beta. ]
-
-  SeeAlso     [ Ptdsp_GCD ]
-
-******************************************************************************/
+  The values at addresses alpha and beta are set to store the return
+  values.
+*/ 
 int
 Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap) {
   int mu, lambda;

@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,47 +29,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Kennard White and Brian Evans
 
-*/
+       Contains function for specifying standard window functions and
+       for generating them .
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspWindow.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Functions for standard window function ]
-
-  Description [ Contains function for specifying standard window
-                functions and  for generating them ]
-
-  Copyright   [
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include <string.h>
 #include <math.h>
 #include "ptdspcephes.h"
 #include "ptdspWindow.h"
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Returns the window identification number of a window name ]
-  Description [ The window name is passed in as a char string, and this
-                function returns the window indentification number as defined 
-	        in ptdspWindow.h. The possible windows are Rectangle, 
-		Bartlett, Hanning, Hamming, Blackman, SteepBlackman,
-		and Kaiser ]
-  SeeAlso     [ Ptdsp_Window ]
-  SideEffects []
-******************************************************************************/
+/* Returns the window identification number of a window name.
+   The window name is passed in as a char string, and this function
+   returns the window indentification number as defined in
+   ptdspWindow.h. 
+   The possible windows are Rectangle, Bartlett, Hanning, Hamming,
+   Blackman, SteepBlackman, and Kaiser.
+*/
 int 
 Ptdsp_WindowNumber(const char* wn) {
   int winType = PTDSP_WINDOW_TYPE_NULL;
@@ -91,17 +67,16 @@ Ptdsp_WindowNumber(const char* wn) {
   return winType;
 }	
 
-/**Function*******************************************************************
-  Synopsis    [ Produces a standard windowing function ]
-  Description [ The possible windows are Rectangle, Bartlett, Hanning,
-                Hamming, Blackman, SteepBlackman, and Kaiser, as
-		defined by winType, according to what
-		ptdsp_WindowNumber returns. realLen specifies the
-		length of the window. The parameters argument is
-		accessed only for the Kaiser window ]
-  SideEffects [ The double array window is modified. ]
-  SeeAlso     [ Ptdsp_WindowNumber ]
-******************************************************************************/
+/* Produces a standard windowing function.
+   The possible windows are Rectangle, Bartlett, Hanning, Hamming,
+   Blackman, SteepBlackman, and Kaiser, as defined by winType,
+   according to what ptdsp_WindowNumber returns. 
+   "realLen" specifies the length of the window. 
+   The parameters argument is accessed only for the Kaiser window.
+   Returns 1  if there is an error.
+
+   The double array "window" holds the return window.
+*/
 int 
 Ptdsp_Window(double* window, int realLen, int winType, double* parameters) {
   double alpha = 0.0;
