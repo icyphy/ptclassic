@@ -14,6 +14,10 @@ set REPORT_TCL_ERRORS 1
 source [info library]/init.tcl
 source $tk_library/tk.tcl
 
+###################################################################
+# Destroy a window if it exists
+proc ptkSafeDestroy {win} {if {[winfo exists $win]} {destroy $win}}
+
 # Procedure to expand a filename that might begin with
 # an environment variable.  For example, if the value of
 # of the environment variable PTOLEMY is /usr/tools/ptolemy, then 
@@ -33,53 +37,63 @@ proc expandEnvVars { path } {
 }
 
 # Read Ptolemy color settings from the Ptolemy Library
-source [expandEnvVars \$PTOLEMY/tcl/lib/ptkColor.tcl]
+source [expandEnvVars \$PTOLEMY/lib/tcl/ptkColor.tcl]
 
 # Read Ptolemy options settings from the Ptolemy Library
-source [expandEnvVars \$PTOLEMY/tcl/lib/ptkOptions.tcl]
+source [expandEnvVars \$PTOLEMY/lib/tcl/ptkOptions.tcl]
 
 # Read utilities from Ptolemy library
-source [expandEnvVars \$PTOLEMY/tcl/lib/ptkBarGraph.tcl]
+source [expandEnvVars \$PTOLEMY/lib/tcl/ptkBarGraph.tcl]
 
-message .header -relief raised \
-	-width 400 -borderwidth 1 -text "Control panel for $applicationName"
+set ptkControlPanel .
+proc curuniverse {} {
+    return cgc_prog
+}
 
-# stop/start control
-button .go -text " GO <Return> "
-bind .go <ButtonRelease-1> "go"
+proc makeRunWindow {} {
+    global numIterations
 
-button .pause -text "PAUSE <Space>"
-bind .pause <ButtonRelease-1> "pause"
+    message .header -relief raised \
+	-width 400 -borderwidth 1 -text "Control panel"
 
-button .stop -text "STOP <Escape>" -command "stop"
+    # stop/start control
+    frame .control -borderwidth 10
+    frame .control.gofr -relief sunken -bd 2
+    button .control.gofr.go -text " GO <Return> "
+    bind .control.gofr.go <ButtonRelease-1> "ptkGo"
+    pack append .control.gofr .control.gofr.go {expand fill}
 
-frame .control -borderwidth 10
-pack append .control .go {left expand fill} \
-	    .pause {left expand fill} \
-	    .stop {right expand fill}
+    button .control.pause -text "PAUSE <Space>"
+    bind .control.pause <ButtonRelease-1> "ptkPause"
 
-# number of iterations control
-frame .numberIters -bd 10
-entry .numberIters.entry -relief sunken -width 10 -insertofftime 0
-label .numberIters.label
-pack append .numberIters .numberIters.label left .numberIters.entry right
-.numberIters.label config -text "Number of Iterations:"
-.numberIters.entry insert 0 $numIterations
+    button .control.stop -text "STOP <Escape>" -command "ptkStop cgc_prog"
 
-# star entry section, empty by default
-frame .high -bd 10
+    pack append .control .control.gofr {left expand fill} \
+	    .control.pause {left expand fill} \
+	    .control.stop {right expand fill}
 
-# star button section, empty by default
-frame .middle -bd 10
+    # number of iterations control
+    frame .numberIters -bd 10
+    entry .numberIters.entry -relief sunken -width 10 -insertofftime 0
+    label .numberIters.label
+    pack append .numberIters .numberIters.label left .numberIters.entry right
+    .numberIters.label config -text "Number of Iterations:"
+    .numberIters.entry insert 0 $numIterations
 
-# star slider section, empty by default
-frame .low -bd 10
+    # star entry section, empty by default
+    frame .high -bd 10
 
-# quit button
-button .quit -text QUIT -command "stop; destroy ."
+    # star button section, empty by default
+    frame .middle -bd 10
 
-# overall structure
-pack append . \
+    # star slider section, empty by default
+    frame .low -bd 10
+
+    # quit button
+    button .quit -text QUIT -command "ptkStop cgc_prog; destroy ."
+
+    # overall structure
+    pack append . \
 	.header {top fill} \
 	.control {top expand fill} \
 	.numberIters {top expand fill} \
@@ -88,31 +102,32 @@ pack append . \
 	.low {top expand fill} \
 	.quit {bottom expand fill}
 
-# return causes a run
-bind . <Return> "go"
-bind . <space> "pause"
-bind .numberIters.entry <Return> "focus .; go"
-bind .numberIters.entry <Escape> "stop"
-bind . <Escape> "stop"
+    # return causes a run
+    bind . <Return> "ptkGo"
+    bind . <space> "ptkPause"
+    bind .numberIters.entry <Return> "focus .; ptkGo"
+    bind .numberIters.entry <Escape> "ptkStop cgc_prog"
+    bind . <Escape> "ptkStop cgc_prog"
+}
 
 # procedure to stop a run
-proc stop {} {
+proc ptkStop {name} {
 	stopCmd
-	.go configure -relief raised
-	.pause configure -relief raised
+	.control.gofr.go configure -relief raised
+	.control.pause configure -relief raised
 }
 
 # procedure to pause a run
-proc pause {} {
-	.pause configure -relief sunken
-	.go configure -relief raised
+proc ptkPause {} {
+	.control.pause configure -relief sunken
+	.control.gofr.go configure -relief raised
 	pauseCmd
 }
 
 #procedure to go
-proc go {} {
-	.go configure -relief sunken
-	.pause configure -relief raised
+proc ptkGo {} {
+	.control.gofr.go configure -relief sunken
+	.control.pause configure -relief raised
 	goCmd
 }
 
@@ -125,28 +140,32 @@ proc updateIterations {} {
 
 # procedure to issue an error message
 proc popupMessage {w text} {
-#   catch {destroy $w}
+    ptkSafeDestroy $w
     toplevel $w
     wm title $w "Message box"
     wm iconname $w "Message"
 
     button $w.ok -text "OK <Return>" -command "destroy $w"
-    message $w.msg -width 5i -text $text
+    message $w.msg -width 5i -text $text -justify left
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
 
     wm geometry $w +300+300
     tkwait visibility $w
+    bind $w <Key> "ptkSafeDestroy $w"
+    bind $w <ButtonPress> "ptkSafeDestroy $w"
+    bind $w.msg <Button> "ptkSafeDestroy $w"
+    set prevFocus [focus]
     focus $w
     grab $w
-    bind $w <Return> "destroy $w"
     tkwait window $w
+    focus $prevFocus
 }
 
 # procedure to issue an error message from any internal tk error
 proc tkerror message {
-    popupMessage .error "Background error in Tk"
-    global REPORT_TCL_ERRORS
-    if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
+     popupMessage .error "Background error in Tk"
+     global REPORT_TCL_ERRORS
+     if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
 }
 
 # procedure to make an entry for a star parameter in the master control panel
@@ -165,7 +184,7 @@ proc makeEntry {win name desc default callback} {
     $s.entry insert 0 $default
     bind $s.entry <Return> \
 	"$callback \[$win.$name.entry get\]; focus ."
-    bind $s.entry <Escape> "stop"
+    bind $s.entry <Escape> "ptkStop"
 }
 
 # procedure to make a button for a star parameter in the master control panel
@@ -206,3 +225,4 @@ proc makeScale {win name desc position callback} {
     pack append $win $s {top fill}
 }
 
+makeRunWindow
