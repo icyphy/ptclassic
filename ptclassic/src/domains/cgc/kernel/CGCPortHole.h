@@ -52,6 +52,7 @@ friend class ForkDestIter;
 public:
 	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), bufName(0),
 			hasStaticBuf(1), myType(NA), converted(-1) {}
+	~CGCPortHole();
 
 	void initialize();
 
@@ -126,6 +127,9 @@ public:
 	// Currently, Complex and float/int type data are converted.
 	int isConverted();
 	
+	// allocate a geodesic
+	/* virtual */ Geodesic* allocateGeodesic();
+
 protected:
 	// determine the property of the buffer associated with this port.
 	void setFlags();
