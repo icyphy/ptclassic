@@ -30,6 +30,7 @@ LIB=libhofstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
+ HOFBase.pl \
  HOFBaseHiOrdFn.pl \
  HOFBusMerge.pl \
  HOFBusSplit.pl \
