@@ -45,9 +45,14 @@ StringList CGCStar::expandRef(const char* name)
     else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
     {
 	ref << port->getGeoName();
-	if (port->maxBufReq() > 1)
-	{
-	    ref << '[' << ((CGCTarget*)myTarget())->offsetName(port) << ']';
+	if (port->maxBufReq() > 1) {
+		ref << '[';
+		if (port->staticBuf() == FALSE) {
+	    		ref << ((CGCTarget*)myTarget())->offsetName(port);
+		} else {
+			ref << port->bufPos();
+		}
+		ref << ']';
 	}
     }
     else
@@ -92,17 +97,21 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
     else if (port = (CGCPortHole*)genPortWithName(portName))
     {
 	ref << port->getGeoName();
-	if (port->maxBufReq() > 1)
-	{
-	    ref << "[(" << ((CGCTarget*)myTarget())->offsetName(port);
-	    ref << " - (" << offset << ")";
-	    if (port->staticBuf() == 0) {
-	    	ref << " + " << port->maxBufReq() << ") % " 
-			<< port->maxBufReq();
-	    } else {
-		ref << ")";
-	    }
-	    ref << ']';
+	if (port->maxBufReq() > 1) {
+		ref << "[(";
+		if (port->staticBuf() == FALSE) {
+	    		ref << ((CGCTarget*)myTarget())->offsetName(port);
+		} else {
+			ref << port->bufPos();
+		}
+	    	ref << " - (" << offset << ")";
+	    	if (port->linearBuf() == 0) {
+	    		ref << " + " << port->maxBufReq() << ") % " 
+				<< port->maxBufReq();
+	    	} else {
+			ref << ")";
+	    	}
+	    	ref << ']';
 	}
     }
     return ref;
@@ -132,8 +141,8 @@ void CGCStar::registerState(const char* name) {
 	}
 }
 
-void CGCStar::start() {
-	CGStar::start();
+void CGCStar::initialize() {
+	CGStar::initialize();
 	referencedStates.initialize();
 }
 
@@ -167,7 +176,7 @@ void CGCStar :: updateOffsets() {
 	BlockPortIter next(*this);
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*) next++) != 0) {
-		if (p->maxBufReq() > 1) {
+		if ((p->maxBufReq() > 1) && (p->staticBuf() == FALSE)) {
 			if (p->numberTokens == p->maxBufReq()) continue;
 			code2 += "\t";
 			code2 += t->offsetName(p);
@@ -193,7 +202,7 @@ void CGCStar :: updateOffsets() {
 	/////////////////////////////////////////////
 
 // Define variables only for each output port, except outputs of forks
-StringList CGCStar :: declarePortHole(const CGCPortHole* p) {
+StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 	StringList out;
 	if (p->isItOutput()) {
 		emptyFlag = FALSE;
@@ -208,6 +217,9 @@ StringList CGCStar :: declarePortHole(const CGCPortHole* p) {
 			out += "]";
 		}
 		out += ";\n";
+
+		// declare ownership of the buffer
+		p->becomeOwner();
 	}
 	return out;
 }
@@ -215,7 +227,7 @@ StringList CGCStar :: declarePortHole(const CGCPortHole* p) {
 // declare offset 
 StringList CGCStar :: declareOffset(const CGCPortHole* p) {
 	StringList out;
-	if (p->maxBufReq() > 1) {
+	if ((p->maxBufReq() > 1) && (p->staticBuf() == FALSE)) {
 		emptyFlag = FALSE;
 		out += "    ";
 		out += "int ";
@@ -262,7 +274,7 @@ StringList CGCStar :: initializeBuffer(const CGCPortHole* p) {
 
 StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
 	StringList out;
-	if (p->maxBufReq() > 1) {
+	if ((p->maxBufReq() > 1) && (p->staticBuf() == FALSE)) {
 		out = ((CGCTarget*)myTarget())->offsetName(p);
 		out += " = ";
 		out += p->bufPos();
