@@ -541,8 +541,8 @@ KcIsCompiledInStar(const char *className) {
 static boolean
 isStringInList(const char* string, const char* list[],
 		int listLen, int &position) {
-	for(int i=0; i < listLen; i++) {
-		if(strcmp(string, list[i]) == 0) {
+	for(int i = 0; i < listLen; i++) {
+		if (strcmp(string, list[i]) == 0) {
 			position = i;
 		 	return TRUE;
 		}
@@ -553,14 +553,13 @@ isStringInList(const char* string, const char* list[],
 ///////////////////////////////////////////////////////////////////////
 // Get information about the portholes of a sog.
 // Inputs: name = name of sog
-// Outputs: newNamesArray, newTypes, newIsOut, numOrdPortsPtr, newNameCountPtr
+// Outputs: newNames, newTypes, newIsOut, numOrdPortsPtr, newNameCountPtr
 // See MkGetTerms in mkIcon.c.
 extern "C" boolean
-KcCheckTerms(const char* name, char** newNamesArray,
-	     const char** newTypes, int* newIsOut,
-	     int* numOrdPortsPtr, int* newNameCountPtr)
+KcCheckTerms(const char* name, const char** newNames, const char** newTypes,
+	     int* newIsOut, int* numOrdPortsPtr, int* newNameCountPtr)
 {
-	const Block *block = (const Block *)NULL;
+	const Block* block = 0;
 	char* mphname[MAX_NUM_FIELDS];
 	char* npspec[MAX_NUM_FIELDS];
 	int isMPH[MAX_NUM_FIELDS];
@@ -570,37 +569,39 @@ KcCheckTerms(const char* name, char** newNamesArray,
 	cname = parseClass(name, nf, mphname, npspec);
 
 	if (!cname || (block = findClass(name)) == 0 ||
-	    !checkFields(block,(const char **)mphname,nf,isMPH)) {
+	    !checkFields(block, (const char**)mphname, nf, isMPH)) {
 		StringList buf = "Invalid galaxy name '";
 		buf << name << "' (interpreted as '" << cname << "')";
 		ErrAdd(buf);
 		return FALSE;
 	}
-	const char *names[MAX_NUM_TERMS];
-	const char *newNames[MAX_NUM_TERMS];
-	const char *types[MAX_NUM_TERMS];
+
+	const char* names[MAX_NUM_TERMS];
+	const char* types[MAX_NUM_TERMS];
 	int isOut[MAX_NUM_TERMS];
 
 	int n = block->portNames(names, types, isOut, MAX_NUM_TERMS);
 	int nm = block->multiPortNames(names+n, types+n,
 				       isOut+n, MAX_NUM_TERMS-n);
 	int numOrdPorts = n;
+
 	// Copy all the names of the ordinary portHoles
 	int newNameCount = 0;
-	for(int j = 0; j < numOrdPorts; j++) {
+	for (int j = 0; j < numOrdPorts; j++) {
 		newNames[newNameCount] = names[j];
 		newTypes[newNameCount] = types[j];
 		newIsOut[newNameCount++] = isOut[j];
 	}
 
 	// For each multiPortHole, create newNames
-	for(j=0; j < nf; j++) {
-	    const char *mphName, *mphType;
+	for (j = 0; j < nf; j++) {
+	    const char* mphName;
+	    const char* mphType;
 	    int dir;
 	    if (isMPH[j]) {
 		// Check that the block has a mph with name mphname[j]
 		int position = 0;
-		if(isStringInList(mphname[j], &(names[n]), nm, position)) {
+		if (isStringInList(mphname[j], &(names[n]), nm, position)) {
 			mphName = names[n+position];
 			mphType = types[n+position];
 			dir = isOut[n+position];
@@ -613,8 +614,8 @@ KcCheckTerms(const char* name, char** newNamesArray,
 		// Create the new names
 		int np = atoi(npspec[j]);
 		for (int i = 1; i <= np; i++) {
-			StringList buf;
-			buf << mphName << "#" << i;
+			StringList buf = mphName;
+			buf << "#" << i;
 			newNames[newNameCount] = savestring(buf);
 			newIsOut[newNameCount] = dir;
 			newTypes[newNameCount++] = mphType;
@@ -628,19 +629,18 @@ KcCheckTerms(const char* name, char** newNamesArray,
 
 	// Now look for any multiPortHoles that were not converted
 	for (int mphNum = 0; mphNum < nm; mphNum++) {
-	    int mpos;
-	    if (isStringInList(names[n+mphNum], (const char **)mphname,
-			       nf, mpos) && npspec[mpos])
-		continue;
-	    newNames[newNameCount] = names[n+mphNum];
-	    newTypes[newNameCount] = types[n+mphNum];
-	    newIsOut[newNameCount++] = isOut[n+mphNum];
+	    int mpos = 0;
+	    if (!isStringInList(names[n+mphNum], (const char**)mphname,
+			        nf, mpos) && npspec[mpos]) {
+		newNames[newNameCount] = names[n+mphNum];
+		newTypes[newNameCount] = types[n+mphNum];
+		newIsOut[newNameCount++] = isOut[n+mphNum];
+	    }
 	}
 
 	// Return values
 	*numOrdPortsPtr = numOrdPorts;
 	*newNameCountPtr = newNameCount;
-	memcpy(newNamesArray, newNames, newNameCount * sizeof(const char*));
 
 	return TRUE;
 }
@@ -650,7 +650,7 @@ KcCheckTerms(const char* name, char** newNamesArray,
 extern "C" boolean
 KcIsMulti(char* blockname, char* portname)
 {
-	Block *block = ptcl->currentGalaxy->blockWithName(blockname);
+	Block* block = ptcl->currentGalaxy->blockWithName(blockname);
 	if (block == 0) return FALSE;
 	return block->multiPortWithName(portname) ? TRUE : FALSE;
 }
@@ -788,10 +788,10 @@ KcInfo(const char* name, char** info)
 
 static void displayStates(const Block *b,char** names,int n_names);
 
-extern void
+extern "C" int
 KcPrintTerms(const char* name) {
 	TermList terms;
-	MkGetTerms(name, &terms);
+	if (!MkGetTerms(name, &terms)) return FALSE;
 	if (terms.in_n) accum_string ("Inputs:\n");
 	for (int i = 0; i < terms.in_n; i++) {
 		accum_string ("   ");
@@ -810,23 +810,24 @@ KcPrintTerms(const char* name) {
 		accum_string (terms.out[i].type);
 		accum_string ("\n");
 	} // end forloop
+	return TRUE;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // Input: the name of a star in the current domain
-// Pops up a window displaying the profile and returns true if all goes well,
-// otherwise returns false.
+// Pops up a window displaying the profile and returns TRUE if all goes well,
+// otherwise returns FALSE.
 extern "C" int
 KcProfile (const char* name) {
 	char* fieldnames[MAX_NUM_FIELDS];
 	int n_fields = 0;
 	const Block* b = findClass (name);
-	int tFlag = 0;
+	int isTargetFlag = 0;
 	if (b) {
-		parseClass(name,n_fields,fieldnames);
+		parseClass(name, n_fields, fieldnames);
 	}
 	else {
-		tFlag = 1;
+		isTargetFlag = 1;
 		b = KnownTarget::find (name);
 	}
 	if (!b) {
@@ -836,10 +837,10 @@ KcProfile (const char* name) {
 	}
 	clr_accum_string ();
 	// if dynamically linked, say so
-	if (tFlag && KnownTarget::isDynamic(b->name())
-	    || !tFlag && KnownBlock::isDynamic (b->name(), ptcl->curDomain))
+	if (isTargetFlag && KnownTarget::isDynamic(b->name()) ||
+	    !isTargetFlag && KnownBlock::isDynamic(b->name(), ptcl->curDomain))
 		accum_string ("Dynamically linked ");
-	if (tFlag) {
+	if (isTargetFlag) {
 		accum_string ("Target: ");
 		accum_string (name);
 		accum_string ("\n");
@@ -854,29 +855,36 @@ KcProfile (const char* name) {
 			accum_string (msg);
 			accum_string (" ");
 		}
-		else accum_string ("Wormhole: ");
+		else
+			accum_string ("Wormhole: ");
 		LOG_DEL; delete [] msg;
 		accum_string (name);
 		accum_string ("\n");
 	}
-	accum_string(b->isItAtomic() ? "Star: " : "Galaxy: ");
+	accum_string (b->isItAtomic() ? "Star: " : "Galaxy: ");
 	accum_string (name);
 	accum_string (" (");
 	accum_string (b->domain());
 	accum_string (")\n");
 	const char* desc = b->descriptor();
 	accum_string (desc);
-// some descriptors don't end in '\n'
-	if (desc[strlen(desc)-1] != '\n')
-		accum_string ("\n");
-// get termlist
-	if (!tFlag) {
-		KcPrintTerms(name);
+
+	// some descriptors don't end in '\n'
+	if (desc[strlen(desc)-1] != '\n') accum_string ("\n");
+
+	// get termlist
+	if (!isTargetFlag) {
+		if (!KcPrintTerms(name)) {
+			ErrAdd(name);
+			ErrAdd(" does not have valid input/output terminals");
+			return FALSE;
+		}
 	}
 
-// now do states
-	displayStates(b,fieldnames,n_fields);
+	// now do states
+	displayStates(b, fieldnames, n_fields);
 	pr_accum_string ();
+
 	return TRUE;
 }
 
