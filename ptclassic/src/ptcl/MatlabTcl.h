@@ -82,6 +82,9 @@ protected:
 	// display an error message in the Tcl interpreter
 	int error(const char* msg);
 
+	// set Matlab figure handle
+	void sethandle();
+
 	// the current Tcl interpeter
 	Tcl_Interp* tclinterp;
 
