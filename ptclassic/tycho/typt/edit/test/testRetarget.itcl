@@ -45,9 +45,108 @@
 # Currently, the defaults are set to compare CG56 and C50.  I chose these
 # domains because they are fairly small and should be fairly similar.
 
-catch {delete class ::tycho::DomainInfo}
-source ../../kernel/DomainInfo.itcl
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
-catch {delete class ::tycho::Retarget}
-source ../Retarget.itcl
-::tycho::view Retarget -toolbar 1
+# Uncomment this to get a full report, or set in your Tcl shell window.
+# set VERBOSE 1
+
+# If necessary load up the class definitions
+if {[namespace ptolemy {info classes DomainInfo}] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt editors]] 
+    }
+    if {[namespace ptolemy {info classes Object}] == {} } {
+	uplevel #0 {
+	    set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+	}
+    }
+}
+
+######################################################################
+#### Create a Retarget object
+#
+test Retarget::constructor-1.1 {Create a Retarget window, do some things} {
+    set retarget [::tycho::view Retarget -toolbar 1]
+
+    # Choose DE domain for Domain A
+    set TY_TEST_SCRIPT {
+	%0 select DE
+        unset TY_TEST_SCRIPT
+    }
+    $retarget toolbar invoke domainAButton
+
+    # Choose SDF domain for Domain B
+    set TY_TEST_SCRIPT {
+	%0 select HOF
+        unset TY_TEST_SCRIPT
+    }
+    $retarget toolbar invoke domainBButton
+
+    # Compare the two domains
+    $retarget toolbar invoke newDomains
+
+    # Get the contents of the HOF Base node
+    set baseContents [[$retarget graph] contents Base]
+    set htmlMessage [eval [lindex $baseContents 1]]
+    $htmlMessage invoke ok
+    
+    # We don't want to save this, so mark it as unmodified
+    $retarget markUnmodified
+
+    # Close up shop
+    delete object [$retarget displayer]
+
+    list $baseContents
+} {{tcl {::tycho::Retarget::printStars Base "{HOF Only}"  DE HOF}}}
+
+
+######################################################################
+#### Open a ptcl file, check it
+#
+test Retarget::universe-1.1 {Check a current universe} {
+
+    set ptclEditor [::tycho::view EditPtcl \
+	    -facet [file join $PTOLEMY src domains sdf demo butterfly ]]
+
+    # Wait for the ptcl editor to be created
+    update idletasks
+    set retarget [$ptclEditor menubar invoke Special Retarget]
+
+    # Choose SDF domain for Domain A
+    set TY_TEST_SCRIPT {
+	%0 select SDF
+        unset TY_TEST_SCRIPT
+    }
+    $retarget toolbar invoke domainAButton
+
+    # Choose DE domain for Domain B
+    set TY_TEST_SCRIPT {
+	%0 select DE
+        unset TY_TEST_SCRIPT
+    }
+    $retarget toolbar invoke domainBButton
+
+    # Compare the two domains
+    $retarget toolbar invoke newDomains
+
+
+    # Check the Universe
+    $retarget toolbar invoke checkUniverse
+
+    # Get the contents of the Ramp node
+    set rampContents [[$retarget graph] contents Ramp]
+    #set htmlMessage [eval [lindex $rampContents 1]]
+    #$htmlMessage invoke ok
+    
+    # We don't want to save this, so mark it as unmodified
+    $retarget markUnmodified
+
+    # Close up shop
+    delete object [$retarget displayer]
+    delete object [$ptclEditor displayer]
+
+    list $rampContents
+} {{tcl {::tycho::Retarget::printStars Ramp "{Different Ports}"  SDF DE}}}
