@@ -1,5 +1,5 @@
 .\" $Id$
-.VR 0.$Revision$ "November 16, 1990"
+.VR 0.$Revision$ "February 4, 1991"
 .TI "DE Domain"
 .AU
 Soonhoi Ha
@@ -319,7 +319,7 @@ we dedicate some
 .c DE\ Star s, 
 so-called \fIdelay-star\fRs,
 .IE "delay-star, de"
-to the task of time-management (\fIDelay, ExpDelay, UniDelay\fR).
+to the task of time-management (\fIDelay, Server\fR).
 The other 
 .c Star s,
 so-called \fIfunctional-star\fRs,
@@ -349,24 +349,19 @@ A delay-star of \fIpure-delay\fR type is that the output
 event is generated a user-given latency after the input
 event comes.  The following example will help the understanding.
 It is the preprocessor format of the
-.c ExpDelay\ Star 
+.c Delay\ Star 
 in the \*(DO domain.  For more details on the preprocessor,
 look at the document, "\fBThe Ptolemy Preprocessor Language\fR".
 .(c
-ident {
-/**************************************************************************
-
- This star delays its input by random amount according to an
- exponential random variable with parameter mean.
-
-**************************************************************************/
-}
 defstar {
-	name {ExpDelay}
+	name {Delay}
 	domain {DE}
+	version { @(#)DEDelay.pl	1.3	1/28/91}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	desc {
-	   "Delays its input by random amount according to an\n"
-	   "exponential random variable with parameter mean."
+Delays its input by an amount given by the delay parameter.
 	}
 	input {
 		name {input}
@@ -377,36 +372,17 @@ defstar {
 		type {anytype}
 	}
 	defstate {
-		name {mean}
+		name {delay}
 		type {float}
 		default {"1.0"}
-		desc { "Amount of time delay" }
-	}
-	hinclude { <NegativeExpntl.h> }
-	ccinclude { <ACG.h> }
-	protected {
-		NegativeExpntl *random;
-	}
-// declare the static random-number generator in the .cc file
-	code {
-		extern ACG gen;
+		desc { Amount of time delay. }
 	}
 	constructor {
 		input.inheritTypeFrom(output);
 		delayType = TRUE;
-		random = new NegativeExpntl(double(mean),&gen);
-	}
-	destructor {
-		delete random;
-	}
-	start {
-		random->mean(double(mean));
 	}
 	go {
-	   // Generate a exponential random variable.
-	   double p = (*random)();
-	   // add to completionTime
-	   completionTime = arrivalTime + p;
+	   completionTime = arrivalTime + double(delay);
 	   Particle& pp = input.get();
            output.put(completionTime) = pp;
 	}
@@ -414,31 +390,7 @@ defstar {
 .)c
 Inside the \fIgo()\fR method description, the \fIcompletionTime\fR
 is determined by the arrival time of the current event plus
-a random delay which is exponentially distributed.  
-We use the gnu library for random number generation.
-.IE "random number generation"
-The
-.c ACG\ class
-.IE "ACG class"
-generates a sequence of uniformly distributed random numbers 
-between $0$ and $1$.  
-In \*(PT, we have only one instance of
-.c ACG\ class
-which is defined in the kernel.  Hence, an instance of the
-.c ACG\ class
-(\fIgen\fR) is declared as an external variable.
-The gnu library provides a set of classes for random number
-generations.   The
-.c NegativeExpntl\ class
-is one of them to generate a sequence of exponentially distributed
-random numbers.  The arguments of the class constructor are
-the mean value and the 
-.c ACG\ class 
-instance.
-Other examples of the classes for random number generations are
-.c Normal ,
-.c Uniform ,
-etc.
+a \fIdelay\fR.
 The last two lines will be explained in subsection 4.2.
 .pp
 The other type is a \fIserver\fR.  
