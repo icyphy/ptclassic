@@ -201,7 +201,7 @@ static void andNotGeoList
 
 
 static void message
-	ARGS((...));
+	ARGS((va_alist));
 
 /*
  *	vulcanParameterized -- full form of interface generator
