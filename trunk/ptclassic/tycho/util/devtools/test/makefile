@@ -53,7 +53,8 @@ ITCL_SRCS =	\
 SIMPLE_TESTS =
 
 GRAPHICAL_TESTS = \
-	testDirSearch.itcl
+	testDirSearch.itcl \
+	testItclClassList.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
