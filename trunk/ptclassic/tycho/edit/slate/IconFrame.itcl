@@ -46,7 +46,6 @@ namespace ::tycho {
 # <i>IconFrame</i> is a Frame with connecting terminals on it, intended
 # for use as an icon in block diagrams and the like. It has just two
 # coordinates, which are the _x_ and _y_ coordinates of its anchor point.
-# Currently, the anchor point can only be in the center of the icon.
 # 
 # <p><b>Options</b>:
 # 
