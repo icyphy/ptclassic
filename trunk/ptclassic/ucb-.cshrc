@@ -11,8 +11,7 @@ umask 02
 # Get software warehouse in the path, however this will mean that
 #  gcc uses gnm from sww/bin, so when building a ptolemy to distribute
 #  don't include gcc in the path
-set path = ( /usr/kerb.local/bin \
-		$path \
+set path = ( 	$path \
 		/usr/sww/bin )
 
 
@@ -77,7 +76,7 @@ endif
 setenv PRINTER sp524
 
 # For FrameMaker
-setenv FMHOME /opt/frame-5.1
+setenv FMHOME /opt/frame-5.5
 setenv FM_FLS_HOST brahe.eecs.berkeley.edu
 set path = ($path $FMHOME/bin /usr/sww/urt/bin)
 
