@@ -694,9 +694,12 @@ body ::tycho::RevControl::parseHistory {history text} {
     }
 
     # FIXME: The editcolors style is not in ther kernel!
-    set commentColor [stylesheet get editcolors commentColor]
-    set versionColor [stylesheet get editcolors versionColor]
-    
+    # Because of that, just hard-wire them to the defaults
+    # set commentColor [stylesheet get editcolors commentColor]
+    # set versionColor [stylesheet get editcolors versionColor]
+    set commentColor firebrick
+    set versionColor blue
+
     # Diff list is currently empty (nothing in revision control yet)
     set filelist {}
     set uniqueID [join [split [string tolower $basefile] .] ""]
