@@ -153,7 +153,8 @@ proc tychoStandardIndex {} {
     set files [tychoFindAllHTML $TYCHO]
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
-    eval tychoMkIndex {{Tycho index}} tycho.idx $files
+    eval tychoMkIndex {{Tycho index}} \
+    	    [file join $TYCHO lib idx tycho.idx] $files
     cd $olddir
 }
 
@@ -171,6 +172,7 @@ proc tychoCodeDocIndex {} {
     set files [tychoFindCodeDocHTML $TYCHO]
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
-    eval tychoMkIndex {{Tycho Itcl Code Index}} codeDoc.idx $files
+    eval tychoMkIndex {{Tycho Itcl Code Index}} \
+	    [file join $TYCHO lib idx codeDoc.idx] $files
     cd $olddir
 }
