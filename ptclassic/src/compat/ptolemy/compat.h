@@ -291,12 +291,14 @@ extern int vfprintf(FILE *, const char *, char *);
 
 #if !defined(PTIRIX5) && !defined(PTHPPA) && ! defined(PTALPHA) && !defined(PTLINUX)
 				/* thor/kernel/rpc.c use bind2(), listen(). */
-#if defined(PTFREEBSD) || defined(PTSOL2_6)
+#if defined(PTFREEBSD) || defined(PTSOL2_6) && ! defined(PTSOL7)
 /* Under linux and libc-5.2.18, bind() takes a const second arg */
 extern int bind(int, const struct sockaddr *, int);
-#else /* PTFREEBSD */
+#else /* PTFREEBSD || PTSOL2_6 && ! PTSOL7 */
+#if ! defined(PTSOL7)
 extern int bind(int, struct sockaddr *, int);
-#endif  /* PTFREEBSD */
+#endif /* ! PTSOL7 */
+#endif /* PTFREEBSD || PTSOL2_6 && ! PTSOL7 *//
 #endif /* ! PTIRIX5 && ! PTHPPA && ! PTALPHA && ! PTLINUX*/
 
 extern void endpwent();		/* octtools/Packages/fc/fc.c and
