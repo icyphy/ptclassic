@@ -34,7 +34,7 @@ provisions.
       type { float }
       desc { Right channel output }
     }
-
+	
     defstate {
        name { inputPort }
        type { string }
@@ -75,10 +75,12 @@ provisions.
       addCode(openCrtlfile);
 
       /* Update parameters */
-      StringList updateParameters = "$starSymbol(set_parameters)";
+      StringList updateParameters = "$sharedSymbol(CGCStereoBase,set_parameters)";
       updateParameters << "($starSymbol(ctlfile), "
 		       << "\"" << encodingType << "\", "
 		       << "\"" << inputPort << "\", "
+		       <<  volume << ", " 
+		       <<  balance << ", " 
 		       << "1);\n";
       addCode(updateParameters);
     }
@@ -97,3 +99,4 @@ provisions.
       return int(blockSize)*28;
     }
 }
+
