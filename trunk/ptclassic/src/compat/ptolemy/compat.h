@@ -48,7 +48,11 @@ extern int fclose (FILE *);
 extern int fflush (FILE *);
 extern int fprintf (FILE *, const char *, ...);
 extern int fscanf (FILE *, const char *, ...);
+extern void perror (const char *);
 extern int printf (const char *, ...);
+extern int putenv (char *);
+extern int puts (const char *);
+extern int sscanf (const char *, const char *, ...);
 extern int unlink(const char *);
 #endif /* __GNUC__ */
 
