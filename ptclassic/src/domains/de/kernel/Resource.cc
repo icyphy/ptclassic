@@ -1,9 +1,9 @@
 static const char file_id[] = "Resource.cc";
 /**************************************************************************
 Version identification:
-@(#)Resource.cc	1.55     12/12/97
+@(#)Resource.cc	$Id$
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -72,13 +72,15 @@ Resource::Resource(const char* n, int policy, PolisScheduler* sched)
     timeWhenFree = -1;
 }
 
-/* When the next event to be executed comes from the interruptQ,
-   then either 
-   - the event is signalling that the current Star is 
-   finished using the resource
-   - or it is an output event of the currently executing Star, which 
-   must be placed in the appropriate other queue ie eventQ or eventQ.
-*/
+////////////////////////////////////////////////////////////////////////
+// When the next event to be executed comes from the interruptQ,
+// then either 
+// - the event is signalling that the current Star is 
+// finished using the resource
+// - or it is an output event of the currently executing Star whose time
+// of emission has arrived, and so must be emitted by the Star
+///////////////////////////////////////////////////////////////////////
+
 void Resource::newEventFromInterruptQ(PolisEvent* e, double now) {
     // first get the priority of the received events source star
     double prio = e->src->priority;
@@ -98,6 +100,7 @@ void Resource::newEventFromInterruptQ(PolisEvent* e, double now) {
             store->prepend((ResLLCell*)p);
         }
         p = (ResLLCell*)intEventList->getAndRemove();
+        assert(p != NULL);
     }
 	
     ListIter storeEvents(*store);   
@@ -106,6 +109,7 @@ void Resource::newEventFromInterruptQ(PolisEvent* e, double now) {
         intEventList->prepend(q);
     }
     store->~SequentialList();
+    // storeEvents->~ListIter;
 
     if (p->event != e) {
         Error::abortRun("Event from IntQ not on Resources Linked List");
@@ -127,20 +131,21 @@ void Resource::newEventFromInterruptQ(PolisEvent* e, double now) {
     return;
 }
 
-/* For the purposes of simulation, each Hardware unit can be considered
- * also as a resource, but with only one CFSM using it.
- * For Resources which have more than one CFSM using them, 
- * it is a bit more complicated, also have to resolve issue of 
- * resource contention.
- * 
- * Note that each hardware resource is used by exactly one Star (CFSM)
- * Any events passed to this function by the scheduler must have a Polis
- * star as destination
- */
+/////////////////////////////////////////////////////////////////////////
+// For the purposes of simulation, each Hardware unit can be considered
+// also as a resource, but with only one CFSM using it.
+// For Resources which have more than one CFSM using them, 
+// it is a bit more complicated, also have to resolve issue of 
+// resource contention.
+// 
+// Note that each hardware resource is used by exactly one Star (CFSM)
+// Any events passed to this function by the scheduler must have a Polis
+// star as destination (this method is only called by DERCScheduler)
+/////////////////////////////////////////////////////////////////////////
 
 void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
     double nextTry;    
-    // first get all events form the eventQ with the current time, 
+    // first get all events from the eventQ with the current time, 
     // for this Resource
     SequentialList* sortList = getOtherEvents(e, now);
         
@@ -154,29 +159,30 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
 
     sortList->~SequentialList();
     
-    if (getPolisStar(e)->needResource) {
-
+    if (getPolisStar(e)->needsSharedResource) {
         //////////////////////////////////////
         // Star is SW!!!
         //////////////////////////////////////
-        // Now obtain the "top" event in the array according to priority,
-        // then timeOfArrival and then precedence
-        // FIXME : does this setup account correctly for RoundRobin scheduling? 
-
-        PolisEvent* topEvent = sortArray[0];
-        int topPrio = getPolisStar(topEvent)->priority;
-        if ((getPolisStar(topEvent)->timeOfArrival) == -1) {
-            (getPolisStar(topEvent))->timeOfArrival = now;
-        }
-        double earliestToA = getPolisStar(topEvent)->timeOfArrival;
-        int indexOftop = 0;
-        
-        /* Now the Events are in an array, sort the events with the highest
-        priority according to timeOfArrival  */
-        for (i=1 ; i<dimen ; i++){
+              
+        // set the timeOfArrival parameter of each Star if it is 
+        // not already set
+        for (i=0 ; i<dimen ; i++){
             if (getPolisStar(sortArray[i])->timeOfArrival == -1){
                 getPolisStar(sortArray[i])->timeOfArrival = now;	
             }
+        }     
+        
+        // Now obtain the "top" event in the array, first according to 
+        // priority, then timeOfArrival and finally port depth(from the 
+        // topological sort)
+        //
+        // FIXME : does this setup account correctly for RoundRobin scheduling?
+        // (perhaps need to switch timeOfArrival & priority)
+        PolisEvent* topEvent = sortArray[0];
+        int topPrio = getPolisStar(topEvent)->priority;
+        double earliestToA = getPolisStar(topEvent)->timeOfArrival;
+        int indexOftop = 0;
+        for (i=1 ; i<dimen ; i++){
             if (getPolisStar(sortArray[i])->priority > topPrio) {
                 topEvent = sortArray[i];
                 topPrio = getPolisStar(topEvent)->priority;
@@ -200,14 +206,14 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
         }
 
         /* Now have the current event of highest priority.    
-        See if this event can access the Resource */
+        /* See if this event can access the Resource           */
         if (!canAccessResource(topEvent)) {
             // Cannot access resource, so reschedule the Events
             for (i=0 ; i<dimen ; i++){
-                if(getPolisStar(topEvent)->needResource) {
+                if(getPolisStar(topEvent)->needsSharedResource) {
                     // Reschedule each event at the appropriate time by 
-                    // looking at the Resources
-                    // Linked List to see all the interrupted Stars ahead of it
+                    // looking at the Resources Linked List to see all
+                    // the interrupted Stars ahead of it
                 
                     double nextTry = -1;   
                     ListIter getAppECT(*intEventList);
@@ -219,6 +225,8 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
                                 Error::abortRun("if resource is using a Preemptive policy, it should not reach here");
                                 return;
                             }
+                            // Try again some time in future, earlist time 
+                            // being when currently executing star is finished
                             nextTry = timeWhenFree;
                             break;
                         }
@@ -229,10 +237,10 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
                         }
                     }
                     if (nextTry == -1) {
-                        Error::abortRun("Event ner got rescheduled in NewEventFromEventQ()");
+                        Error::abortRun("Event never got rescheduled in NewEventFromEventQ()");
                         return;
                     }
-                    getAppECT->~ListIter();
+                    // getAppECT->~ListIter();
                     DEPortHole* destPort = (DEPortHole*)sortArray[i]->dest;
                     eventQ->levelput(sortArray[i], nextTry, destPort->depth);
                 }  
@@ -246,15 +254,15 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
             starUsingResource->startNewPhase();
             
             for (i=0 ; i<dimen ; i++){
-                DEPortHole* tl = (DEPortHole*)(sortArray[i]->dest);
+                DEPortHole* port = (DEPortHole*)(sortArray[i]->dest);
                 dest = getPolisStar(sortArray[i]);
                 if (starUsingResource == dest) {
-                    if (tl->isItOutput()) {
+                    if (port->isItOutput()) {
                         Error::abortRun("Terminal goes to wormhole!!!");
                         return;
                     }
                     else {
-                        int success = ((InDEPort*) tl)->getFromQueue(sortArray[i]->p);
+                        int success = ((InDEPort*) port)->getFromQueue(sortArray[i]->p);
 			// Remove this Event from the Array
 			if (success) sortArray[i] = 0; 
                     }
@@ -277,7 +285,7 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
             }
             this->timeWhenFree = now + updateDelay;
             
-            // then add the new events from that Star firing to the SequentialList
+            // get the new events from the fired Star
             ListIter newEventsList(*(starUsingResource->getEvents()));
 
             // this ListIter should have the events output by the star firing in
@@ -289,15 +297,16 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
                 intEventList->prepend(newCell);
                 ee = (PolisEvent*)newEventsList++;
             }
-            oldEventsList->~ListIter();
-        
+            // oldEventsList->~ListIter();
+            // newEventsList->~ListIter();
+
             // Now reschedule the remaining events that were originally taken 
             // from the eventQ       
             for (i=0 ; i<dimen ; i++){
                 if (sortArray[i] != 0 && indexOftop != i) {
                     // Reschedule each event at the appropriate time by 
-                    // looking at the Resources
-                    // Linked List to see all the interrupted Stars ahead of it
+                    // looking at the Resources Linked List to see all 
+                    // the interrupted Stars ahead of it
                     nextTry = -1;  
                     
                     ListIter getAppECT(*intEventList);
@@ -341,17 +350,17 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
             
             starUsingResource->startNewPhase();
             for (i=0 ; i<dimen ; i++){
-                DEPortHole* tl = (DEPortHole*)(sortArray[i]->dest);
+                DEPortHole* port = (DEPortHole*)(sortArray[i]->dest);
                 dest = getPolisStar(sortArray[i]);
                 assert(starUsingResource == dest);
-                if (tl->isItOutput()) {
+                if (port->isItOutput()) {
                     Error::abortRun("Terminal goes to wormhole!!!");
                     return;
                 }
                 else {
-                    int success=((InDEPort*)tl)->getFromQueue(sortArray[i]->p);
+                    int success=((InDEPort*)port)->getFromQueue(sortArray[i]->p);
                     if (!success) {
-                         eventQ->levelput(sortArray[i], now, tl->depth);
+                         eventQ->levelput(sortArray[i], now, port->depth);
                      }
 	 	}
             }
@@ -364,15 +373,17 @@ void Resource :: newEventFromEventQ(PolisEvent* e, double now) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////
+// This metheod returns a SequentialList of all other current Events in the
+// eventQ, and the passed event, who also want to access this resource. 
+///////////////////////////////////////////////////////////////////////////
 
-/* This metheod returns a SequentialList of other Events in the eventQ who 
-   also want to access this resource. The Linked List is returned
-   in a form with the Events whose Stars have highest priority at the head.
-*/
 SequentialList* Resource :: getOtherEvents(PolisEvent* e, double now) {
 
     SequentialList* sortList = new SequentialList();
     sortList->prepend(e);
+
+    // First get all current events from the eventQ
     while (TRUE) {
         CqLevelLink *h = eventQ->get();
         if (h == NULL) {
@@ -389,7 +400,7 @@ SequentialList* Resource :: getOtherEvents(PolisEvent* e, double now) {
         sortList->prepend(h->e);
         //eventQ->putFreeLink(h);
     }
-    // Now go through the SequentialList and pushback any events not looking 
+    // Now go through this SequentialList and pushback any events not looking 
     // for this resource. sortList is used for this in a circular fashion,
     // ie set a pointer to the top event and go through list until reach it 
     // again. Any events using this resource get appended to the tail of the 
@@ -399,7 +410,7 @@ SequentialList* Resource :: getOtherEvents(PolisEvent* e, double now) {
     PolisEvent* nextEvent;   
     do {
         nextEvent = (PolisEvent*)sortList->getAndRemove();
-        if ((Resource*)(getPolisStar(nextEvent)->resourcePointer) != (Resource*)this){
+        if (getPolisStar(nextEvent)->resourcePointer) != this){
             // not for this resource, so put back in queue
             DEPortHole* destPort = (DEPortHole*)nextEvent->dest;
             eventQ->levelput(nextEvent, now, destPort->depth);  
@@ -442,6 +453,9 @@ int Resource :: canAccessResource(PolisEvent* newEvent) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// This method is used to reschedule an event in the interruptQ to a later time
+///////////////////////////////////////////////////////////////////////////////
 
 void Resource :: intQupdate(PolisEvent* eventPointer, double newTime, double oldTime) {    
     double fv;
@@ -455,8 +469,9 @@ void Resource :: intQupdate(PolisEvent* eventPointer, double newTime, double old
     interruptQ->levelput(event, newTime, fv);
 }
 
-
+/////////////////////////////////////////////////////////////
 // used to get the destination of the event as a Polis Star
+/////////////////////////////////////////////////////////////
 DEPolis* Resource :: getPolisStar(Event* e) {
     Star* temp = &(e->dest->parent()->asStar());
     DEPolis* tmp = (DEPolis*)temp;
