@@ -78,13 +78,13 @@ C_INCL =	$(PTCOMPAT_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
 # Sources: LIB_SRCS contains the files that make up libpitcl.so.
 # NON_LIB_SRCS contains the files that do not go into libpitcl.so.
 LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PITcl.cc ptclInit.cc \
-		ptclError.cc ptclGantt.cc ptclInvokeInterp.cc \
+		ptclError.cc ptclGantt.cc \
 		ptclDescription.cc
 LIB_CSRCS = 	displayFile.c
 NON_LIB_SRCS =	ptclAppInit.cc
 TCL_SRCS =	gendoc.tcl
 # SRCS are used by make depend, so they should be C/C++ files
-SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) 
+SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) ptclInvokeInterp.cc
 
 EXTRA_SRCS =	$(TCL_SRCS) make.template
 
@@ -115,7 +115,7 @@ else
 	INSTALL = $(LIBDIR)/$(LIBR)
 endif
 
-PT_DEPEND += $(NON_LIB_SRCS:.cc=.o)
+PT_DEPEND += $(NON_LIB_SRCS:.cc=.o) ptclInvokeInterp.o
 
 PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o) 
 
