@@ -35,7 +35,7 @@ static char SccsId[]="$Id$";
  */
 
 #ifdef SERVER  
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "list.h"
 #include "message.h"
 #include "selset.h"

@@ -39,7 +39,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "general.h"		/* General VEM definitions   */
-#include "X11/Xlib.h"		/* C language interface to X */
+#include <X11/Xlib.h>		/* C language interface to X */
 #include "list.h"		/* List handling package     */
 #include "message.h"		/* Message handling system   */
 #include "oct.h"		/* OCT library               */

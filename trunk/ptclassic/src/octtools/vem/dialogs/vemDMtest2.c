@@ -28,8 +28,8 @@ static char SccsId[]="$Id$";
  * Short tester for compatibility package
  */
 
-#include "X11/Intrinsic.h"
-#include "X11/Shell.h"
+#include <X11/Intrinsic.h>
+#include <X11/Shell.h>
 #include "vemDM.h"
 
 #define WW_TEST

@@ -42,7 +42,7 @@
 
 #include "ansi.h"
 #include "port.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "fill_pat.h"
 
 extern char *attr_pkg_name;

@@ -40,7 +40,7 @@
 
 #include "ansi.h"
 #include "general.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 
 /* Can be typedef'ed to void if supported */
 typedef struct fill_dummy_defn {
