@@ -150,9 +150,9 @@ $label(loopTwo)
 $starSymbol(mag)_savereg   equ     $addr(saveReg)
 $starSymbol(mag)_buflen    equ     $val(bufLen)
 $starSymbol(mag)_insptr    equ     $addr(starInBufPtr)
-$starSymbol(mag)_iniptr    equ     $addr(inIntBuffer)
+$starSymbol(mag)_iniptr    equ     $addr(inIntBufferStart)
 $starSymbol(mag)_outsptr   equ     $addr(starOutBufPtr)
-$starSymbol(mag)_outiptr   equ     $addr(outIntBuffer)
+$starSymbol(mag)_outiptr   equ     $addr(outIntBufferStart)
 
 ; Interrupt handler's next-word-to-write pointer
 
