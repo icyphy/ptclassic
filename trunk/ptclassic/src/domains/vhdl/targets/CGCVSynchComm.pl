@@ -148,7 +148,8 @@ defstar {
     StringList command = "";
     command << "cd " << (const char*) destDir;
     command << " ; ";
-    command << "ptvhdlsim -nc -i " << filePre << ".com " << "parts";
+    command << "ptvhdlsim -nc -i " << filePre << ".com " << filePre
+	    << "_parts";
 
     StringList startvss = "";
     startvss << "\n";
