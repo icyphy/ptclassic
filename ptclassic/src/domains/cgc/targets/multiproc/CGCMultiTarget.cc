@@ -106,14 +106,14 @@ void CGCMultiTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	cs->IPCHandlerName.setInitValue(hashstring(handlerName));
 	StringList callHandler;
 	callHandler << handlerName << "();\n";
-	ts->addMainInit((const char*) callHandler);
+	ts->getStream("mainInit")->put((const char*) callHandler);
 	// for receiver
 	handlerName = "ipcHandler";
 	handlerName << '_' << cr->name();
 	cr->IPCHandlerName.setInitValue(hashstring(handlerName));
 	callHandler.initialize();
 	callHandler << handlerName << "();\n";
-	tr->addMainInit((const char*) callHandler);
+	tr->getStream("mainInit")->put((const char*) callHandler);
 
 	// Set the port_number and machine address.
 	// port_number
