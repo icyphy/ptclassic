@@ -88,7 +88,6 @@ ITCL_SRCS = \
 	HTMLMessage.itcl \
 	IconLibrary.itcl \
 	IndexBrowser.itcl \
-	Interchange.itcl \
 	Library.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
@@ -100,12 +99,11 @@ ITCL_SRCS = \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
-	OldModel.itcl \
 	PackageData.itcl \
 	PopupMenu.itcl \
 	PortedDigraph.itcl \
-	PreferenceDialog.itcl \
-	PreferenceEditor.itcl \
+	StyleChooser.itcl \
+	StyleEditor.itcl \
 	Query.itcl \
 	Registry.itcl \
 	Resource.itcl \
@@ -133,13 +131,12 @@ ITCL_SRCS = \
 	UserProfile.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
-	WidgetPreferences.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc img test tclIndex Preferences.tim
+MISC_FILES =		doc img test tclIndex
 
 # Sub directories to run make in.
 DIRS =			doc test styles
