@@ -18,7 +18,7 @@ set path = ( /usr/kerb.local/bin \
 
 # Setup that is specific to certain architectures is in this section
 
-if ( "$PTARCH" =~ sol2?* ) then
+if ( "$PTARCH" =~ sol?* ) then
 	# Needed for SUN CC, may interfere with Synopsys
 	setenv LM_LICENSE_FILE /opt/lm/lmgrd.key
 
