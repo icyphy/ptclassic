@@ -44,8 +44,17 @@ class ::tycho::CTSimulation {
     constructor {args} {}
     destructor {}
 
-    # Generate universe
-    protected method fakeit {}
+    ###################################################################
+    ####                            options                        ####
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    ###################################################################
+    ####                      protected methods                    ####
+
+    # Generate simulation from the current graph
+    protected method _construct {}
 }
 
 ########################################################################
@@ -59,72 +68,145 @@ body ::tycho::CTSimulation::constructor {args} {
     _send {
 	set univ [java::new pt.domains.ct.kernel.CTUniverse]
 	$univ setName Universe
+        set exec [$univ getExecutor]
     }
-
-    # Fake universe creation for now
-    fakeit
 }
 
 ########################################################################
-#### fakeit
+#### _construct
 #
-# Fake, it, baby!
+# Construct a simulation from the current graph.
 #
-body ::tycho::CTSimulation::fakeit {} {
-    _send {
-	set exec [$univ getExecutor]
-	set const [java::new pt.domains.ct.stars.CTConst $univ Const]
-	set add1 [java::new pt.domains.ct.stars.CTAdd $univ Add1]
-	set add2 [java::new pt.domains.ct.stars.CTAdd $univ Add2]
-	set intgl1 [java::new pt.domains.ct.stars.CTIntegraRK4 $univ Integral1]
-	set intgl2 [java::new pt.domains.ct.stars.CTIntegraRK4 $univ Integral2]
-	set gain1 [java::new pt.domains.ct.stars.CTGain $univ Gain1]
-	set gain2 [java::new pt.domains.ct.stars.CTGain $univ Gain2]
-	set gain3 [java::new pt.domains.ct.stars.CTGain $univ Gain3]
-	set gain4 [java::new pt.domains.ct.stars.CTGain $univ Gain4]
-	set plot [java::new pt.domains.ct.stars.CTPlot $univ Plot]
+body ::tycho::CTSimulation::_construct {} {
+    # Generate the stars from vertices
+    foreach v [$_graph vertices] {
+        # Is it a junction or a vertex? Currently, we can
+        # tell only by looking at the name, but this is
+        # obviously lame...
+        # FIXME
+        if [string match {junction*} $v] {
+            # do nothing
 
-	set constout [$const getIOPort output]
-	set add1in [$add1 getIOPort input]
-	set add1out [$add1 getIOPort output]
-	set add2in [$add2 getIOPort input]
-	set add2out [$add2 getIOPort output]
+        } else {
+            # Otherwise assume it represents a star. Get the class name.
+            set type pt.domains.ct.stars.CT[$_graph attrget $v -class]
 
-	set intgl1in [$intgl1 getIOPort input]
-	set intgl1out [$intgl1 getIOPort output]
-	set intgl2in [$intgl2 getIOPort input]
-	set intgl2out [$intgl2 getIOPort output]
-	set gain1in [$gain1 getIOPort input]
-	set gain1out [$gain1 getIOPort output]
-	set gain2in [$gain2 getIOPort input]
-	set gain2out [$gain2 getIOPort output]
-	set gain3in [$gain3 getIOPort input]
-	set gain3out [$gain3 getIOPort output]
-	set gain4in [$gain4 getIOPort input]
-	set gain4out [$gain4 getIOPort output]
-	set plotin [$plot getIOPort input]
+            # Create the star
+            debug "set $v \[java::new $type \$univ $type\]"
+            set result [_send "set $v \[java::new $type \$univ $v\]"]
+            debug " -> $result"
+        }
+    }
 
-	set r1 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $constout $add1in R1]
-	set r2 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $add1out $intgl1in R2]
-	set r3 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $intgl1out $plotin R3]
-	set r4 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain1out $add1in R4]
-	$gain1in link $r3
-	$gain2in link $r3
-	set r5 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain2out $add2in R5]
-	set r6 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain3out $add1in R6]
-	set r7 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $add2out $intgl2in R7]
-	set r8 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $intgl2out $gain3in R8]
-	set r9 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain4out $add2in R9]
-	$gain4in link $r8
+    # Generate the edges
+    foreach e [$_graph edges] {
+        # If the edge is already done, forget it
+        if [info exists done($e)] {
+            continue
+        }
 
-	$exec setSimulationParams 0 500 0.5
-	$const setValue 1
-	$gain1 setGain -0.061803398874499
-	$gain2 setGain 0.19021130325903
-	$gain3 setGain -0.19021130325903
-	$gain4 setGain -0.061803398874499
-	$plot setYMin 0.0
-	$plot setYMax 5.0
+        # Get the names etc
+        set from [$_graph attrget $e -from]
+        set fromname [join $from .]
+        set to [$_graph attrget $e -to]
+        set toname [join $to .]
+        debug "$from -> $to"
+
+        # If the input port is a junction, then it's part
+        # of a complex net, and we ignore it for now
+        if [string match {junction*} $from] {
+            continue
+        }
+
+        # If, however, the output port is a junction, it must
+        # be the first edge in set of junctions and edges
+        # that form a relation. Create a new net, then traverse
+        # the edges and junctions and link all connected ports.
+        if [string match {junction*} $to] {
+            # Create the relation
+            set rname $to
+            debug "set $rname \[\$univ newRelation $rname\]"
+            set result [_send "set $rname \[\$univ newRelation $rname\]"]
+            debug " -> $result"
+
+            # Link the first edge (the only input!)
+            set fromvertex [lindex $from 0]
+            set fromport [lindex $from 1]
+
+            debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
+            set result [_send "set $fromname \[\$[set fromvertex] \
+                    getIOPort $fromport\]"]
+            debug " -> $result"
+
+            debug "\$\{[set fromname]\} link \$[set rname]"
+            set result [_send "\$\{[set fromname]\} link \$[set rname]"]
+            debug " -> $result"
+
+            # Find edges
+            set es {}
+            set js [list $to]
+            while { $js != "" } {
+                set j [lindex $js 0]
+                set js [lreplace $js 0 0]
+                foreach e [$_graph edges $j] {
+                    # If the end is a junction, add to the list
+                    set q [$_graph attrget $e -from]
+                    set r [$_graph attrget $e -to]
+                    if [string match {junction*} $r] {
+                        lappend js $r
+                    } else {
+                        # Any other edges are output edges
+                        lappend es $e
+                    }
+                }
+            }
+
+            # Link each output edge from the relation to its port
+            foreach e $es {
+                set to [$_graph attrget $e -to]
+                set toname [join $to .]
+                set tovertex [lindex $to 0]
+                set toport [lindex $to 1]
+                debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
+                set result [_send "set $toname \[\$[set tovertex] \
+                        getIOPort $toport\]"]
+                debug " -> $result"
+
+                debug "\$\{[set toname]\} link \$[set rname]"
+                set result [_send "\$\{[set toname]\} link \$[set rname]"]
+                debug " -> $result"
+            }
+            continue
+        }
+ 
+        # Otherwise, we are creating a simple link
+        set fromvertex [lindex $from 0]
+        set fromport [lindex $from 1]
+
+        set tovertex [lindex $to 0]
+        set toport [lindex $to 1]
+
+        # Get the actual port names
+        debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
+        set result [_send "set $fromname \
+            \[\$[set fromvertex] getIOPort $fromport\]"]
+        debug " -> $result"
+
+        debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
+        set result [_send "set $toname \[\$[set tovertex] getIOPort $toport\]"]
+        debug " -> $result"
+
+        # Make the connection, dude
+        debug "set $e \[ \
+            \$univ {connect \
+            pt.kernel.IOPort pt.kernel.IOPort \
+            String} \$\{[set fromname]\} \$\{[set toname]\} \
+            $e\]"
+        set result [_send "set $e \[ \
+            \$univ {connect \
+            pt.kernel.IOPort pt.kernel.IOPort \
+            String} \$\{[set fromname]\} \$\{[set toname]\} \
+            $e\]"]
+        debug " -> $result"
     }
 }
-
