@@ -53,8 +53,13 @@
 # <p>
 # Here is an example of how to use the JRPC:
 # <tcl><pre>
-#     set jprc ::tycho::JRPC  
-#     set jprc ::tycho::JRPC  
+#     ::tycho::JRPC .jrpc
+#     # See what packages are loaded.  java should be one of them. 
+#     .jrpc send package names
+#     # Create a Ptolemy II NamedObj.
+#     .jrpc send eval {set n [java::new pt.kernel.NamedObj "My NamedObj"]}
+#     # Get the name of the object we just created.
+#     .jrpc send eval {$n getName}
 # </pre></tcl>
 #
 class ::tycho::JRPC {
@@ -96,6 +101,8 @@ body ::tycho::JRPC::constructor {args} {
 
     set _clientSocket [socket localhost 19876]
     fconfigure $_clientSocket -blocking 0
+
+    .j send set env(TCL_CLASSPATH) $tycho/java
 }
 
 #######################################################################
@@ -122,7 +129,8 @@ body ::tycho::JRPC::send {args} {
     flush $_clientSocket
     # FIXME: this is a busy loop, and it sucks.
     set rl {}
-    while {[llength $rl] != 2} {
+    while {[llength $rl] < 2} {
+	# puts "JRPC send: $rl"
 	append rl [read $_clientSocket]
     }
     if {[lindex $rl 0]} {
