@@ -36,6 +36,11 @@
 # thor/stars/make.template uses -vars option
 #
 # Note that this implementation ignores the optional domain1 domain2 args
+#
+# If you modify this file, make sure you test it by rebuilding all the
+# *stars.c files:
+# cd $PTOLEMY/src/domains; rm */stars/*.c */*/stars/*.c
+# cd $PTOLEMY; make install
 
 # Temporary File to hold the header and parts 1 and 2
 hdr=/tmp/genStarTable$$.hdr
@@ -118,5 +123,5 @@ END   { # Print out leading and trailing lines
 cat $hdr $out1 $out2
 
 # Really we should use catch here to remove these files on interrupt
-#rm -f $hdr $out1 $out2 $mymkfile
+rm -f $hdr $out1 $out2 $mymkfile
 
