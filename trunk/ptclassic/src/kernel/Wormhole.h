@@ -84,21 +84,6 @@ public:
 	// using targetName.
 	Wormhole(Star& self, Galaxy& g, const char* targetName = 0);
 
-	// The following methods define the default, common behavior
-	// of the "setup", "begin", and "go" methods of the XXXWormhole
-	// classes.  Those methods of the XXXWormhole classes should be
-	// defined to invoke these methods, and possibly do some other
-	// domain-specific things.
-
-	// Defines the default, common behavior of XXXWormhole::setup().
-	void setup();
-
-	// Defines the default, common behavior of XXXWormhole::begin().
-	void begin();
-
-	// Defines the default, common behavior of XXXWormhole::go().
-	int run();
-
 	// return the inside domain
 	const char* insideDomain() const { return gal.domain(); }
 
@@ -119,6 +104,21 @@ public:
 	
 
 protected :
+	// The following three methods define the default, common behavior
+	// of the "setup", "begin", and "go" methods of the XXXWormhole
+	// classes.  Those methods of the XXXWormhole classes should be
+	// defined to invoke these methods, and possibly do some other
+	// domain-specific things.
+
+	// Defines the default, common behavior of XXXWormhole::setup().
+	void setup();
+
+	// Defines the default, common behavior of XXXWormhole::begin().
+	void begin();
+
+	// Defines the default, common behavior of XXXWormhole::go().
+	int run();
+
 	// function to connect inner galaxy ports to outside through
 	// event horizons of proper type
 	void buildEventHorizons ();
