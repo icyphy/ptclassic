@@ -33,19 +33,8 @@ $Id$
 void DEStar :: prepareForScheduling() {
 	arrivalTime = 0.0;
 	completionTime = 0.0;
-}
 
-void DEStar :: fire() {
-	Star::fire();
-	BlockPortIter next(*this);
-	for (int k = numberPorts(); k > 0; k--) 
-		(next++)->sendData();
-}
-
-// Set firing mode
-void DEStar :: setMode(FiringMode m) {
-
-	mode = m;
+	// in case of PHASE mode, create internal queue.
 	if (mode == PHASE) {
 		BlockPortIter next(*this);
 		PortHole* p;
@@ -56,6 +45,17 @@ void DEStar :: setMode(FiringMode m) {
 			}
 		}
 	}
+}
+
+void DEStar :: fire() {
+	Star::fire();
+	sendOutput();
+}
+
+void DEStar :: sendOutput() {
+        BlockPortIter next(*this);
+        for (int k = numberPorts(); k > 0; k--)
+                (next++)->sendData();
 }
 
 // new phase
