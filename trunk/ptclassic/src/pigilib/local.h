@@ -34,8 +34,9 @@ $Id$
 This is a local include file for useful macros and definitions.
 */
 
-#include "ansi.h"
-#include "compat.h"
+#include "compat.h"		/* define architecture settings */
+#include "sol2compat.h"		/* define boolean */
+#include "ansi.h"		/* define ARGS, EXTERN, and HAS_STDARG */
 
 #ifdef HAS_STDARG
 #include <stddef.h>
@@ -58,7 +59,6 @@ This is a local include file for useful macros and definitions.
 extern RAW_PTR calloc ARGS((size_t,size_t));
 extern RAW_PTR malloc ARGS((size_t));
 #endif /* __cplusplus */
-
 
 #include <sys/param.h>
 
