@@ -88,7 +88,7 @@ E. A. Lee and D. G. Messerchmitt,
 .ip [2]
 I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
 	}
-	seealso {FIR, Window, raisedCosine}
+	seealso {FIR, Window, pulses}
 	code {
 		// The code is written with integer arguments so that it
 		// can reliably detect the 0/0 condition, avoiding
@@ -156,9 +156,6 @@ I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
 		// fix interpolation default
 		interpolation.setInitValue("16");
-		// make decimation parameters invisible
-		decimation.clearAttributes(A_SETTABLE);
-		decimationPhase.clearAttributes(A_SETTABLE);
 	}
 	setup {
 		if(double(excessBW) < 0.0)
