@@ -1,4 +1,4 @@
- defstar{
+defstar{
 	name { DTMFPostTest }
 	domain { CG56 }
 	version { $Id$ }
@@ -35,12 +35,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { input }
 		type { int }
 	}
-	output {
-		name { output }
-		type { int }
-	}
 	input {
 		name { valid }
+		type { int }
+	}
+	output {
+		name { output }
 		type { int }
 	}
 	state {
@@ -48,14 +48,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { int }
 		default { "-1" }
 		desc { internal }
-		attributes {A_YMEM|A_NONCONSTANT|A_NONSETTABLE}
+		attributes {A_NONCONSTANT|A_NONSETTABLE|A_YMEM}
 	}
 	state{
 		name { secondToLast }
 		type { int }
 		default { "-1" }
 		desc { internal }
-		attributes {A_YMEM|A_NONCONSTANT|A_NONSETTABLE}
+		attributes {A_NONCONSTANT|A_NONSETTABLE|A_YMEM}
 	}
 	state { 
 		name { initialLastInput }
@@ -68,22 +68,20 @@ is set to an integer that does not represent a DTMF digit.
         	}
 	}
 
-	codeblock(block){
+	codeblock(postTest){
 ; Register usage:
-; a = input (from x memory)     y0 = last input (from y memory)
-; b = valid (from x memory)     y1 = second-to-last input (from y memory)
-; x0 = output (either TRUE or FALSE); initially assume a value of zero (FALSE)
-	clr	a	$ref(valid),b		$ref(last),y0
-	tst	b	$ref(input),a		a,x0
-	jeq	$label(not_valid)
-	cmp	y0,a	$ref(secondToLast),y1
-	jeq	$label(not_valid)
-	cmp	y1,a
-	jne	$label(not_valid)
-	move	#$$FF,x0		; output is TRUE
-$label(not_valid)
-	move	x0,$ref(output)		y0,$ref(secondToLast)
-	move	a0,$ref(last)
+; a = input (from x memory)     x1 = last input value (from y memory)
+; b = valid (from x memory)	y1 = second-to-last input value (from y memory)
+; y0 = FALSE
+	clr	a	$ref(valid),b		; b = valid
+	move	$ref(input),a	a,y0		; a = input, y0 = FALSE
+	move	$ref(last),x1		; x1 = last input value
+	cmp	x1,a	$ref(secondToLast),y1		; y1 = 2nd-to-last input 
+	tne	y0,b		; if last != input, then b = y0 = FALSE
+	cmp	y1,a	x1,$ref(secondToLast)		; update second-to-last value
+	teq	y0,b		; if secondTolast = input, then b = y0 = FALSE
+	move	a,$ref(last)		; update last value
+	move	b,$ref(output)		; write output
 	}
 	setup {
 		secondToLast = int(initialLastInput);
@@ -91,9 +89,9 @@ $label(not_valid)
 	}
 
  	go{
-		addCode(block);
+		addCode(postTest);
 	}
 
 	// Return an execution estimate in pairs of cycles
-	exectime{ return 13; }
+	exectime{ return 9; }
 }
