@@ -1,0 +1,15 @@
+#!/bin/csh -f
+# Author: Jose Luis Pino
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# 	All Rights Reserved.
+#
+# usage: tychoSend 
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?PTARCH ) setenv PTARCH `$PTOLEMY/bin/ptarch`
+
+#$PTOLEMY/tycho/lib/
+
+$PTOLEMY/bin.$PTARCH/itkwish -f /users/pino/tychoSend.tcl $argv
