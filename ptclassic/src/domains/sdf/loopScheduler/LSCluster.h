@@ -29,16 +29,17 @@ class ClusterNodeList;
 class SDFFiring {
 friend class LSCluster;
 
-	DataFlowStar* s;
-	int count;
-
-	SDFFiring* next;
-
 public:
 	SDFFiring(DataFlowStar* p, int i) : s(p), count(i), next(0) {}
 	~SDFFiring();
 
 	int getExecTime() { return s->myExecTime() * count; }
+
+private:
+	DataFlowStar* s;
+	int count;
+
+	SDFFiring* next;
 };
 
 //////////////////////
@@ -49,15 +50,8 @@ public:
 // counters.
 
 class LSCluster : public SDFBaseCluster {
-private:
-	SDFFiring* firing;	// local schedule
-	SDFFiring* prev;	// previous firing.
-
-	void determineOrder(LSGraph&, ClusterNodeList*);
-	void addFiring(DataFlowStar*, int);
 
 public:
-	// constructor.
 	LSCluster(LSGraph&, ClusterNodeList*);
 	~LSCluster() { INC_LOG_DEL; delete firing; }
 
@@ -70,6 +64,13 @@ public:
 
 	// generate code
 	void genCode(Target&, int);
+
+private:
+	SDFFiring* firing;	// local schedule
+	SDFFiring* prev;	// previous firing.
+
+	void determineOrder(LSGraph&, ClusterNodeList*);
+	void addFiring(DataFlowStar*, int);
 };
 
 #endif

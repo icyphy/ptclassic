@@ -33,15 +33,7 @@ class DataFlowStar;
 //
 class ClusterNodeList : public SequentialList
 {
-private:
-	// can make a linked list of the ClusterNodeLists.
-	ClusterNodeList* next;
-
-	// set the component stars: first and second
-	void setComponents(LSNode*);
-
 public:
-	// constructor
 	ClusterNodeList(ClusterNodeList* n = NULL) : 
 		next(0),first(0),second(0) { if (n) n->next = this; }	
 	~ClusterNodeList();
@@ -67,6 +59,13 @@ public:
 	// first and second component star
 	DataFlowStar* first;
 	DataFlowStar* second;
+
+private:
+	// can make a linked list of the ClusterNodeLists.
+	ClusterNodeList* next;
+
+	// set the component stars: first and second
+	void setComponents(LSNode*);
 };
 
 ///////////////////////////////
