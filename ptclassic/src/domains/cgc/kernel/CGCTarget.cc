@@ -706,7 +706,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	defaultStream = &MAINCLOSE;
 	cs->wrapup();
-	defaultStream = &myCode;
+	defaultStream = &MYCODE;
 
 	declareStar(cs);
 	return TRUE;
@@ -721,6 +721,7 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 	if (!HLLTarget :: insertGalaxyCode(g, s)) return FALSE;
 	declareGalaxy(*g);
 	galId = saveId;
+	defaultStream = &MYCODE;
 	return TRUE;
 }
 
