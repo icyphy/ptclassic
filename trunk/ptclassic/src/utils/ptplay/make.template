@@ -32,6 +32,8 @@ CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 SRCS = 	ptplay.sun4 ptplay.irix5 ptplay.hppa ptplay.linux
+EXTRA_DESTS =	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
+	ptplay.hppa.cfront
 
 all:	ptplay
 
@@ -71,6 +73,8 @@ depend:
 	echo no dependencies to make in this directory
 
 checkjunk:
+	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) \
+		$(EXTRA_DESTS) makefile SCCS
 
 sccsinfo:
 	@sccs check || true

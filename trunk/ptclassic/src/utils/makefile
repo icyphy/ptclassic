@@ -1,4 +1,4 @@
-# Makefile for utils
+# Makefile for Ptolemy utilities.
 
 # Version Identification:
 # $Id$
@@ -36,7 +36,7 @@ PTOLEMY = ../..
 MAKEVARS =	\
 		"ARCH=$(ARCH)" 
 
-all install clean realclean check sources:
+all install clean realclean check sources checkjunk:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in filters/$$x ; \
