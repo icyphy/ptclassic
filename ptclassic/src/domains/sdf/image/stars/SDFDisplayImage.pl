@@ -13,7 +13,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 Accept a black-and-white input GrayImage and generate
 output in PGM format. Send the output to a user-specified command
-(by default, "$PTOLEMY/bin.$ARCH/xv" is used).
+(by default,
+.EQ
+delim off
+.EN
+"$PTOLEMY/bin.$ARCH/xv"
+.EQ
+delim $$
+.EN
+is used).
 
 The user can set the root filename of the displayed image (which will
 probably be printed in the image display window titlebar) and
