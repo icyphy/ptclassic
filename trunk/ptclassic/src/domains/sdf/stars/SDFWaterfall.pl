@@ -4,12 +4,12 @@ defstar {
 	domain { SDF }
 	desc {
 Plots a series of traces in the style of a "waterfall" plot.
-This is a type of three-dimensional plot used to show the evolution
+This is three-dimensional plot used to show the evolution
 of signals or spectra.  Optionally, each plot can be made opaque, so
 that lines that would appear behind the plot are eliminated.
 The star is derived from Xgraph.
 	}
-	version {$Id$}
+	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -46,7 +46,7 @@ Amount of upward shift of each successive trace, in vertical units.
 		type {int}
 		default {NO}
 		desc {
-Turns on or off hidden-line elimination.
+Flag that turns on or off hidden-line elimination.
 		}
 	}
 	defstate {
@@ -54,7 +54,7 @@ Turns on or off hidden-line elimination.
 		type {int}
 		default {YES}
 		desc {
-Turns on or off display of the plane where y=0.
+Flag that turns on or off the display of the plane where y=0.
 		}
 	}
 	protected {
