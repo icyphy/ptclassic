@@ -48,6 +48,8 @@ ITCL_SRCS = \
 	EditCText.itcl \
 	EditCpp.itcl \
 	EditCppText.itcl \
+	EditEsterel.itcl \
+	EditEsterelText.itcl \
 	EditHTML.itcl \
 	EditHTMLText.itcl \
 	EditItcl.itcl \
