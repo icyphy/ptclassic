@@ -72,6 +72,9 @@ protected:
 	// reset resources
 	virtual void resetResources();
 
+	// parallel processors
+	ParProcessors* parProcs;
+
 private:
 	char oldChildType[40];
 	IntArray canProcs;
