@@ -230,6 +230,9 @@ class ::tycho::Model {
     # Get or set a mark in the undo history
     method mark {{markname {}} {position current}}
 
+    # Notify all subscribers of a change in data
+    method notify {command pattern args}
+
     # Publish a change in data
     method publish {command index args}
 
@@ -898,6 +901,18 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 }
 
 ########################################################################
+#### notify
+#
+# Notify all subscribers of a change in data. This is like
+# publish{} in that the command is forwarded to all subscribers.
+# Unlike publish{}, however, nothing is executed on the model,
+# and nothing is recorded in the undo history.
+#
+body ::tycho::Model::notify {command index args} {
+    eval [list notifyDataChange {} $command $index] $args
+}
+
+########################################################################
 #### publish
 #
 # Publish data. This is the same as recording it, except that 
@@ -944,7 +959,7 @@ body ::tycho::Model::record {command index args} {
     # Execute the command and remember its result (the undo command).
     # If the command causes an error, this method will abort,
     # and neither the command nor its undo command will be recorded.
-    set undo [eval [list $this $command $index] $args]
+    set undo [eval [list $this evalInSpecificContext $command $index] $args]
 
     # If there was no error and the inverse command is not null,
     # record the command and the inverse command
@@ -954,6 +969,9 @@ body ::tycho::Model::record {command index args} {
 	    	$undo \
 	    	0
     }
+
+    # Return the inverse command so publish{} knows what happened
+    return $undo
 }
 
 ########################################################################
@@ -1216,14 +1234,16 @@ body ::tycho::Model::unsubscribe {subscriber {pattern {}}} {
 #
 body ::tycho::Model::update {subscriber command index args} {
     # Record the command
-    eval [list record $command $index] $args
+    set undo [eval [list record $command $index] $args]
 
-    # Mark command as publishable
-    set _publishable($historyMark(current)) 1
-
-    # Remember where it happened
-    set historyMark(published) $historyMark(current)
-
+    # Some actions only occur if the command did not return null
+    if { $undo != "" } {
+        # Mark command as publishable
+        set _publishable($historyMark(current)) 1
+        
+        # Remember where it happened
+        set historyMark(published) $historyMark(current)
+    }
     # Notify subscribers.
     eval [list notifyDataChange $subscriber $command $index] $args
 }
@@ -1336,7 +1356,7 @@ body ::tycho::Model::notifyEvent {event} {
     # Get subscribers with a matching index
     foreach subindex [array names _eventsubscription *,$event] {
 	eval lappend subscribers [split $subindex ","] \
-		[list $_eventsubscription($subindex)]
+                [list $_eventsubscription($subindex)]
     }
 
     # Process each subscriber
