@@ -1,0 +1,26 @@
+.\" $Id$
+.H1 "Adding or modifying stars"
+.pp
+After you create your own star, you can install it into the appropriate
+library in the following procedure:
+.ip 1.
+Make the star icon (refer to the Pigi manual.)
+.ip 2.
+Go to ~ptolemy/src/domains/XXX/stars, and edit XXXstars.mk and make.template,
+adding a line for the star (XXX is the domain name).
+.ip 3.
+Rebuild the system.
+.pp
+Sometimes, you may want to modify an existing star.  Besides modifying
+the code itself, you should reflect your changes in the documents
+which contain that star description and in the demo programs.  
+First of all, using Pigi, correct the demo programs which contain the star.
+To update the documentations, you may want to look at: 
+.ip (1) 
+XXX{star_name}.pl, \fBexplanation\fR item. 
+.ip (2) 
+domains/XXX/doc/demos.  Some demos may use the modified star, and
+have the out-of-dated description.
+.ip (3)
+domains/XXX/doc/overall.  The domain manual may use the modified
+star as an example.
