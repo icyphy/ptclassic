@@ -94,8 +94,8 @@ public:
 	Engine* MatlabEngineOpen(char* unixCommand);
 	int MatlabEngineSend(char* command);
 	int MatlabEngineOutputBuffer(char* buffer, int buferLength);
-	Matrix* MatlabEngineGetMatrix(char* name);
-	int MatlabEnginePutMatrix(Matrix* matrixPtr);
+	mxArray* MatlabEngineGetMatrix(char* name);
+	int MatlabEnginePutMatrix(mxArray* matrixPtr);
 	int MatlabEngineClose();
 
         // B. higher-level interfaces to the Matlab process
@@ -126,10 +126,10 @@ public:
 				char* matlabOutputNames[], int numOutputs);
 
 	//    3. free an array of Matlab matrices
-	void FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices);
+	void FreeMatlabMatrices(mxArray *matlabMatrices[], int numMatrices);
 
 	//    4. name a Matlab matrix in memory
-	void NameMatlabMatrix(Matrix* matrixPtr, const char *name);
+	void NameMatlabMatrix(mxArray* matrixPtr, const char *name);
 
 	// Methods for interface to/from another scripting language (e.g. Tcl)
 	// Use FreeStringArray to deallocate realPartStrings/imagPartStrings
