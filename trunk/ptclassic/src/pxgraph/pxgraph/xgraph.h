@@ -43,12 +43,8 @@ extern char *realloc();
 #ifdef USG
 extern int sprintf();
 #else
-#ifndef sgi
-#ifndef SOL2
-#ifndef ultrix
+#if !defined(sgi) && !defined(SOL2) && !defined(ultrix) && !defined(linux) && !defined(SVR4) && !defined(SYSV)
 extern char *sprintf();
-#endif
-#endif
 #endif
 #endif
 extern char *strcpy();
