@@ -73,6 +73,20 @@ setup {
     CGCXAsynchComm::setup();
 }
 
+initCode {
+  addDeclaration("int $starSymbol(iterationCount) = 0;");
+  CGCXAsynchComm::initCode();
+}
+
+codeblock(updateLink,"const char* code") {
+    if ($starSymbol(iterationCount)++ == $val(updateRate)) {
+	$starSymbol(iterationCount) = 1;
+    	{
+	@code;
+    	}
+    }
+}
+
 go {
     StringList code;
     if (txType == INT)
