@@ -1403,6 +1403,9 @@ genDef ()
 		exit (1);
 	}
 
+	/* Turn eqn delimitters off */
+	fprintf (fp, ".EQ\ndelim off\n.EN\n");
+
 	fprintf (fp, ".\\\" documentation file generated from %s by %s\n",
 		 inputFile, progName);
 
@@ -1487,6 +1490,8 @@ genDef ()
 		fprintf (fp, ".SH\n%s.ET\n", stateDescriptions);
 
 /* explanation */
+	/* Turn eqn delimitters on */
+	fprintf (fp, ".EQ\ndelim $$\n.EN\n");
 	if (objExpl)
 		fprintf (fp, ".LD\n%s\n", objExpl);
 
