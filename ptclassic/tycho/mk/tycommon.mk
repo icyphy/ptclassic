@@ -404,7 +404,7 @@ $(TYDIST_EX): $(ROOT)/mk/tycommon.mk
 
 # Tar file distribution
 $(TYDIST).tar.gz:  $(TYDIST_EX)
-	@if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
+	if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
 		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a tar file"; \
 	else \
 		echo "Building $@"; \
