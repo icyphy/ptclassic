@@ -27,6 +27,11 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "attach.h"
+#include "chain.h"
+#include "change_record.h"
+#include "oct_utils.h"
+
 
 octStatus octUnDetach(container, object)
 struct octObject *container;
@@ -54,6 +59,7 @@ struct octObject *object;
     return retval;
 }
 
+int
 oct_do_undetach(cptr, optr)
 generic *cptr;
 generic *optr;
@@ -100,6 +106,7 @@ struct octObject *object;
     return retval;
 }
 
+int
 oct_do_attach(cptr, optr, only_once)
 generic *cptr;
 generic *optr;
@@ -164,14 +171,14 @@ struct octObject *object;
 	
     cptr = oct_id_to_ptr(container->objectId);
     if (cptr == NIL(generic)) {
-	sprintf(buffer,"octUnAttach: The first argument's id (%d) has been corrupted", container->objectId);
+	sprintf(buffer,"octUnAttach: The first argument's id (%d) has been corrupted", (int)container->objectId);
 	oct_error(buffer);
 	errRaise(OCT_PKG_NAME, OCT_CORRUPTED_OBJECT, octErrorString());
     }
 	
     optr = oct_id_to_ptr(object->objectId);
     if (optr == NIL(generic)) {
-	sprintf(buffer,"octUnAttach: The second argument's id (%d) has been corrupted", object->objectId);
+	sprintf(buffer,"octUnAttach: The second argument's id (%d) has been corrupted", (int)object->objectId);
 	oct_error(buffer);
 	errRaise(OCT_PKG_NAME, OCT_CORRUPTED_OBJECT, octErrorString());
     }
@@ -183,6 +190,7 @@ struct octObject *object;
     return retval;
 }
 
+int
 oct_do_unattach(cptr, optr)
 generic *cptr;
 generic *optr;
@@ -219,14 +227,14 @@ struct octObject *object;
 	
     cptr = oct_id_to_ptr(container->objectId);
     if (cptr == NIL(generic)) {
-	sprintf(buffer,"octDetach: The first argument's id (%d) has been corrupted", container->objectId);
+	sprintf(buffer,"octDetach: The first argument's id (%d) has been corrupted", (int)container->objectId);
 	oct_error(buffer);
 	errRaise(OCT_PKG_NAME, OCT_CORRUPTED_OBJECT, octErrorString());
     }
 	
     optr = oct_id_to_ptr(object->objectId);
     if (optr == NIL(generic)) {
-	sprintf(buffer,"octDetach: The second argument's id (%d) has been corrupted", object->objectId);
+	sprintf(buffer,"octDetach: The second argument's id (%d) has been corrupted", (int)object->objectId);
 	oct_error(buffer);
 	errRaise(OCT_PKG_NAME, OCT_CORRUPTED_OBJECT, octErrorString());
     }
@@ -238,6 +246,7 @@ struct octObject *object;
     return retval;
 }
 
+int
 oct_do_detach(cptr, optr)
 generic *cptr;
 generic *optr;
@@ -278,8 +287,8 @@ oct_undetach_default(cptr, optr)
 generic *cptr;
 generic *optr;
 {
-    int ctype = cptr->flags.type;
-    int otype = optr->flags.type;
+    /* int ctype = cptr->flags.type;*/
+    /* int otype = optr->flags.type;*/
 
     return oct_attach_content(cptr, optr, 0);
 }
