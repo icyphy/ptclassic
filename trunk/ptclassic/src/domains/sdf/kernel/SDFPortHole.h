@@ -67,7 +67,7 @@ public:
 class InSDFPort : public SDFPortHole
 {
 public:
-	int isItInput (); // {return TRUE; }
+	int isItInput () const ; // {return TRUE; }
 
 	// Get Particles from input Geodesic
 	void grabData();
@@ -84,7 +84,7 @@ public:
 class OutSDFPort : public SDFPortHole
 {
 public:
-        int isItOutput (); // {return TRUE; }
+        int isItOutput () const; // {return TRUE; }
 
 	void increment();
 
@@ -129,7 +129,7 @@ public:
  
 class MultiInSDFPort : public MultiSDFPort {
 public:
-        int isItInput (); // {return TRUE; }
+        int isItInput () const; // {return TRUE; }
  
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
@@ -144,7 +144,7 @@ public:
 
 class MultiOutSDFPort : public MultiSDFPort {     
 public:
-        int isItOutput (); // {return TRUE; }
+        int isItOutput () const; // {return TRUE; }
 
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
