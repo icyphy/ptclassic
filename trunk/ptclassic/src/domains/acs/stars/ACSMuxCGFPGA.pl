@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generates a 2,3, and 4-input MUX 
 	}
-	version {$Id$}
+	version {@(#)ACSMuxCGFPGA.pl	1.4 09/10/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -89,60 +89,121 @@ This star exists only for demoing the generic CG domain.
 	    ostrstream output_filename;
 	    int bidir_flag;
 	}
-	method {
-	    name {macro_query}
+        method {
+	    name {sg_cost}
 	    access {public}
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& rangecalc_file, ofstream& natcon_file, ofstream& schedule_file)" }
 	    type {int}
 	    code {
-		// BEGIN-USER CODE
-		return(WHITE_STAR);
-		// END-USER CODE
+		cost_file << "cost=ceil(0.5*outsizes);" << endl;
+		// Just for scheduling
+		numsim_file << "y=cell(1,size(x,2));" << endl;
+		numsim_file << "for k=1:size(x,2)" << endl;
+		// Cheating...
+		numsim_file << "  y{k}=max(";
+		for (int i = 0; i < input_count; i++)
+		{
+		    numsim_file << "x{" << i+1 << ",k}";
+		    if (i==(input_count-1))
+			numsim_file << ");" << endl;
+		    else
+			numsim_file << ",";
+		}
+		numsim_file << "end" << endl;
+
+		rangecalc_file << "orr=[min(inputrange(:,1)) max(inputrange(:,2))];" << endl;
+		natcon_file << "yesno=ones(1,size(insizes,2));" << endl;
+		schedule_file << "vl1=veclengs(1); " << endl;
+		schedule_file << "racts1=[";
+		for (int i = 0; i < input_count; i++)
+		    schedule_file << "0 1 vl1-1;";
+		for (int i = 0; i < control_count; i++)
+		    schedule_file << "0 1 vl1-1;";
+		schedule_file << "0 1 vl1-1];" << endl;
+                schedule_file << "racts=cell(1,size(insizes,2));" << endl;
+                schedule_file << "racts(:)=deal({racts1});" << endl;
+                schedule_file << "minlr=vl1*ones(1,size(insizes,2)); " << endl;
+		
+		// Return happy condition
+		return(1);
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
+
+		// Determine maximum input size
+		// FIX: mbit determination is gross
+		int max_bitlen=0;
+		int max_mbit=0;
+		for (int loop=1;loop<=total_count;loop++)
+		{
+		    if (pins->query_bitlen(loop) > max_bitlen)
+			max_bitlen=pins->query_bitlen(loop);
+		    if (pins->query_majorbit(loop) > max_mbit)
+			max_mbit=pins->query_majorbit(loop);
+		}
+		
+
 		if (pins->query_preclock(0)==UNLOCKED)
 		    pins->set_precision(0,
-					pins->query_bitlen(1)-1,
-					pins->query_bitlen(1),
+//					max_bitlen-1,
+					max_mbit,
+					max_bitlen,
 					UNLOCKED);
 
 		// If output is locked then fix all the input sizes accordingly
-                int loop;
 		if (pins->query_preclock(0)==LOCKED)
-		    for (loop=1;loop<=total_count;loop++)
+		    for (int loop=1;loop<=total_count;loop++)
 			pins->set_precision(loop,
-					    pins->query_bitlen(0)-1,
+//					    pins->query_bitlen(0)-1,
+					    max_mbit,
 					    pins->query_bitlen(0),
 					    lock_mode);
 		
 		// Test if all switchables are locked, if so set & lock output
 		int lock_type=LOCKED;
-		for (loop=1;loop<=total_count;loop++)
+		for (int loop=1;loop<=total_count;loop++)
 		    if (pins->query_preclock(loop)==UNLOCKED)
 			lock_type=UNLOCKED;
 
 		// FIX: Should work with the input balancing routine
 		if (lock_type==LOCKED)
 		    pins->set_precision(0,
-					pins->query_bitlen(1)-1,
-					pins->query_bitlen(1),
+//					max_bitlen-1,
+					max_mbit,
+					max_bitlen,
 					LOCKED);
 
-		// Calculate CLB sizes
-		resources->set_occupancy(1,pins->query_bitlen(0)/2);
-		
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=0;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -260,6 +321,7 @@ This star exists only for demoing the generic CG domain.
 		// BEGIN-USER CODE
 		{
 		    int outsens_flag=0;
+		    int output_len=pins->query_bitlen(0);
 		    ofstream out_fstr(output_filename.str());
 
 		    ctrl_signals->add_pin("sel",
@@ -348,11 +410,23 @@ This star exists only for demoing the generic CG domain.
 				select << lang->else_statement << endl
 				       << "\t";
 				if (bidir_flag)
-				    select << lang->equals("o","(others=>'Z')")
-					<< lang->end_statement << endl;
+				{
+				    if (output_len > 1)
+					select << lang->equals("o","(others=>'Z')")
+					       << lang->end_statement << endl;
+				    else
+					select << lang->equals("o","'Z'")
+					       << lang->end_statement << endl;
+				}
 				else
-				    select << lang->equals("o","(others=>'0')")
-					<< lang->end_statement << endl;
+				{
+				    if (output_len > 1)
+					select << lang->equals("o","(others=>'0')")
+					       << lang->end_statement << endl;
+				    else
+					select << lang->equals("o","'0'")
+					       << lang->end_statement << endl;
+				}
 				select << lang->endif_statement 
 				       << lang->end_statement << endl;
 			    }
@@ -398,6 +472,7 @@ This star exists only for demoing the generic CG domain.
 		    // END-USER CODE
 		    out_fstr << lang->end_scope << lang->end_statement << endl;
 		    out_fstr.close();
+		    printf("Core %s has been built\n",name());
 		}
 		else
 		    return(0);

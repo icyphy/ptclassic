@@ -4,10 +4,10 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { Sub }
 	desc {Differences two inputs}
-	version {$Id$}
+	version {@(#)ACSSubCGFPGA.pl	1.6 09/13/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -69,12 +69,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -112,37 +106,18 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Pos_Major_Bit");
-		input_list->append((Pointer) "Pos_Bit_Length");
-		input_list->append((Pointer) "Neg_Major_Bit");
-		input_list->append((Pointer) "Neg_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Pos_Major_Bit");
+		input_list->add("Pos_Bit_Length");
+		input_list->add("Neg_Major_Bit");
+		input_list->add("Neg_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
 	    }
 	}
 	method {
@@ -191,7 +166,7 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
@@ -208,24 +183,38 @@ It outputs lines of comments, instead of code.
 		    int B_bitlen=pins->query_bitlen(1);
 		    
 		    int S_majorbit=(int) max(A_majorbit,B_majorbit)+1;
-		    S_bitlen=S_majorbit - 
-			(int) min((A_majorbit-A_bitlen),(B_majorbit-B_bitlen));
+		    S_bitlen=(int) abs(S_majorbit - 
+				       min(A_majorbit-A_bitlen,B_majorbit-B_bitlen));
 		    
 		    // Set
 		    pins->set_precision(2,S_majorbit,S_bitlen,lock_mode);
 		}
 
-		//
-		// Calculate CLB sizes
-		//
-		resources->set_occupancy(S_bitlen/2,1);
-			    
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=1;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -253,9 +242,9 @@ It outputs lines of comments, instead of code.
 		
 		// Control port definitions
 		pins->add_pin("c",0,1,INPUT_PIN_CLK);
-		pins->add_pin("ce",0,1,INPUT_PIN_CE);
-		pins->add_pin("ci",0,1,INPUT_PIN_AH);
-		pins->add_pin("clr",0,1,INPUT_PIN_CLR);
+		pins->add_pin("ce",0,1,INPUT_PIN_CE,AH);
+		pins->add_pin("ci",0,1,INPUT_PIN_CARRY,AH);
+		pins->add_pin("clr",0,1,INPUT_PIN_CLR,AL);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");
@@ -317,8 +306,6 @@ It outputs lines of comments, instead of code.
 		if (sg_language==VHDL_BEHAVIORAL)
 		// BEGIN-USER CODE
 		{
-		    constant_signals->add_pin("GND",0,1,STD_LOGIC);
-
 		    Pin* new_pins=NULL;
 		    ostrstream core_entity;
 
@@ -327,6 +314,7 @@ It outputs lines of comments, instead of code.
 		    int A_bitlen=pins->query_bitlen(0);
 		    int B_majorbit=pins->query_majorbit(1);
 		    int B_bitlen=pins->query_bitlen(1);
+		    int S_majorbit=pins->query_majorbit(2);
 		    int S_bitlen=pins->query_bitlen(2);
 
 		    // Calculate sign extensions
@@ -342,9 +330,12 @@ It outputs lines of comments, instead of code.
 		    // Calculate (new?) adder length
 		    int adder_length=MSB-LSB;
 
+		    // Calculate output majorbit correction
+		    int proj_majorbit=(int) max(A_majorbit,B_majorbit)+1;
+//		    int majorbit_offset=proj_majorbit-S_majorbit;
+
 		    
 		    // Generate new port definition
-//		    printf("AcsSubCGFPGA invoking new Pin\n");
 		    new_pins=new Pin;
 		    *new_pins=*pins;  // Copy existing parameters
 		    new_pins->set_precision(0,MSB,adder_length,LOCKED);
@@ -421,9 +412,46 @@ It outputs lines of comments, instead of code.
 			
 			
 		    // Correct Output S
-		    statements << lang->equals(pins->query_pinname(2),
-					       lang->slice("out_s",S_bitlen-1,0))
-			       << lang->end_statement << endl;
+                    if (S_bitlen-1 != adder_length)
+		    {
+			if (S_bitlen-1 > adder_length)
+			{
+			    statements << lang->slice(pins->query_pinname(2),adder_length,0)
+				       << lang->equals() 
+				       << "out_s"
+				       << lang->end_statement << endl;
+			    for (int bloop=adder_length+1;bloop<S_bitlen;bloop++)
+				statements << lang->slice(pins->query_pinname(2),bloop,bloop)
+				           << lang->equals() 
+				           << lang->slice("out_s",adder_length,adder_length)
+				           << lang->end_statement << endl;
+			}
+			else
+			{
+			    if (bitslice_strategy==PRESERVE_LSB)
+				statements << lang->equals(pins->query_pinname(2),
+							   lang->slice("out_s",S_bitlen-1,0))
+				           << lang->end_statement << endl;
+			    else
+				statements << lang->equals(pins->query_pinname(2),
+							   lang->slice("out_s",adder_length,
+								       adder_length-S_bitlen+1))
+				           << lang->end_statement << endl;
+			}
+		    }
+		    else
+			statements << lang->equals(pins->query_pinname(2),"out_s")
+			           << lang->end_statement << endl;
+
+/*
+			    statements << lang->equals(pins->query_pinname(2),
+					       lang->slice("out_s",adder_length-majorbit_offset,
+							   adder_length-majorbit_offset-S_bitlen+1));
+		    else
+			statements << lang->equals(pins->query_pinname(2),
+						   lang->slice("out_s",adder_length,adder_length-S_bitlen+1));
+		    statements << lang->end_statement << endl;
+*/
 			
 		    statements << "U_" << output_filename.str() << ":" 
 			       << core_entity.str() << " port map(" << endl;

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Mpy } 
     desc { Output the product of the inputs, as a floating-point value. }
-    version { $Id$}
+    version { @(#)ACSMpyFPCGC.pl	1.4 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

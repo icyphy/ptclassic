@@ -4,10 +4,10 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { Compare }
 	desc {Compare two inputs}
-	version {$Id$}
+	version {@(#)ACSCompareCGFPGA.pl	1.7 09/13/99}
 	author { P. Fiore }
 	copyright {
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -69,12 +69,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -112,37 +106,18 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Pos_Major_Bit");
-		input_list->append((Pointer) "Pos_Bit_Length");
-		input_list->append((Pointer) "Neg_Major_Bit");
-		input_list->append((Pointer) "Neg_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Pos_Major_Bit");
+		input_list->add("Pos_Bit_Length");
+		input_list->add("Neg_Major_Bit");
+		input_list->add("Neg_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
 	    }
 	}
 	method {
@@ -184,7 +159,7 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
@@ -201,24 +176,38 @@ It outputs lines of comments, instead of code.
 		    int B_bitlen=pins->query_bitlen(1);
 		    
 		    int S_majorbit=(int) max(A_majorbit,B_majorbit)+1;
-		    S_bitlen=S_majorbit - 
-			(int) min((A_majorbit-A_bitlen),(B_majorbit-B_bitlen));
+		    S_bitlen=(int) abs(S_majorbit - 
+				       (int) min(A_majorbit-A_bitlen,B_majorbit-B_bitlen));
 		    
 		    // Set
-		    pins->set_precision(2,S_majorbit,S_bitlen,lock_mode);
+		    pins->set_precision(2,S_majorbit,1,lock_mode);
 		}
 
-		//
-		// Calculate CLB sizes
-		//
-		resources->set_occupancy(S_bitlen/2,1);
-			    
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=1;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -246,9 +235,9 @@ It outputs lines of comments, instead of code.
 		
 		// Control port definitions
 		pins->add_pin("c",0,1,INPUT_PIN_CLK);
-		pins->add_pin("ce",0,1,INPUT_PIN_CE);
-		pins->add_pin("ci",0,1,INPUT_PIN_AH);
-		pins->add_pin("clr",0,1,INPUT_PIN_CLR);
+		pins->add_pin("ce",0,1,INPUT_PIN_CE,AH);
+		pins->add_pin("ci",0,1,INPUT_PIN_CARRY,AH);
+		pins->add_pin("clr",0,1,INPUT_PIN_CLR,AL);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");
@@ -310,8 +299,6 @@ It outputs lines of comments, instead of code.
 		if (sg_language==VHDL_BEHAVIORAL)
 		// BEGIN-USER CODE
 		{
-		    constant_signals->add_pin("GND",0,1,STD_LOGIC);
-
 		    Pin* new_pins=NULL;
 		    ostrstream core_entity;
 
@@ -320,7 +307,10 @@ It outputs lines of comments, instead of code.
 		    int A_bitlen=pins->query_bitlen(0);
 		    int B_majorbit=pins->query_majorbit(1);
 		    int B_bitlen=pins->query_bitlen(1);
-		    int S_bitlen=pins->query_bitlen(2);
+//		    int S_bitlen=pins->query_bitlen(2);
+		    int S_majorbit=pins->query_majorbit(2);
+		    int S_bitlen=(int) abs(S_majorbit - 
+				       (int) min(A_majorbit-A_bitlen,B_majorbit-B_bitlen));
 
 		    // Calculate sign extensions
 		    int MSB=(int) max(A_majorbit,B_majorbit);
@@ -342,7 +332,7 @@ It outputs lines of comments, instead of code.
 		    *new_pins=*pins;  // Copy existing parameters
 		    new_pins->set_precision(0,MSB,adder_length,LOCKED);
 		    new_pins->set_precision(1,MSB,adder_length,LOCKED);
-		    new_pins->set_precision(2,0,1,LOCKED);
+		    new_pins->set_precision(2,MSB+1,adder_length+1,LOCKED);
 
 		    VHDL_LANG* lang=new VHDL_LANG;
 		    ostrstream statements;

@@ -6,10 +6,10 @@ defcore {
 	desc {
 Produces constant coefficient multiply
 	}
-	version {$Id$}
+	version {@(#)ACSIntGainCGFPGA.pl	1.4 09/10/99}
 	author { P. Fiore }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -57,12 +57,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -101,26 +95,16 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
 	    }
 	}
 	method {
@@ -194,34 +178,49 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
 	
-	             // pfiore Thu Aug 26 14:49:05 EDT 1999
-		     // trying to figure out coefficient wordlength (signed coeff)
- 		     int cwidth=2; //coefficient wordlength init
- 		     int gain_amt = (int) (corona.gain);   // the gain amount
-                     if ( gain_amt < -1 |  gain_amt > 0 )
-		     { 
-                        if (gain_amt>0)
-               		  cwidth =(int) floor(log(abs( (double) gain_amt))/log(2.0))+2;
-                        else
-               		  cwidth =(int) ceil(log(abs( (double) gain_amt))/log(2.0))+1;
-		     }
+		// pfiore Thu Aug 26 14:49:05 EDT 1999
+		// trying to figure out coefficient wordlength (signed coeff)
+		int cwidth=2; //coefficient wordlength init
+		int gain_amt = (int) (corona.gain);   // the gain amount
+		if ( gain_amt < -1 |  gain_amt > 0 )
+		{ 
+		    if (gain_amt>0)
+			cwidth =(int) floor(log(abs( (double) gain_amt))/log(2.0))+2;
+		    else
+			cwidth =(int) ceil(log(abs( (double) gain_amt))/log(2.0))+1;
+		}
 
 		int input_majorbit = pins->query_majorbit(0);
 		int input_bitlen = pins->query_bitlen(0);
 
 		pins->set_precision(1, cwidth-2+input_majorbit,  input_bitlen+cwidth, LOCKED);
 
-
-
-		// Calculate CLB sizes
-		    
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		int in_bitlen=pins->query_bitlen(0);
 		if ((in_bitlen >=4) && (in_bitlen <= 5))
@@ -237,7 +236,7 @@ It outputs lines of comments, instead of code.
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}

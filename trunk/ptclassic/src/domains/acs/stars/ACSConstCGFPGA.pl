@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generates a single delay for multiple lines
 	}
-        version { $Id$}
+        version { @(#)ACSConstCGFPGA.pl	1.2 09/08/99}
         author { Ken Smith }
         copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
@@ -40,12 +40,6 @@ This star exists only for demoing the generic CG domain.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -70,7 +64,13 @@ This star exists only for demoing the generic CG domain.
 	    desc {What language should this function be described in (e.g, VHDL, C, XNF)}
 	    default{"VHDL"}
 	}
-        defstate {
+       defstate {
+                name {word_count}
+                type {int}
+                default {1}
+                desc { Number of valid output clock cycles. }
+        }
+         defstate {
 	    name {Comment}
 	    type {string}
 	    desc {A user-specified identifier}
@@ -89,33 +89,14 @@ This star exists only for demoing the generic CG domain.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 		    
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
 	    }
 	}
         method {
@@ -127,18 +108,21 @@ This star exists only for demoing the generic CG domain.
                 // BEGIN-USER CODE
 		int bitlen=0;
 		int majorbits=0;
-		if (Output_Bit_Length==0)
+		if (intparam_query("Output_Bit_Length")==0)
 		{
 		    bitlen=pins->query_bitlen(0);
 		    majorbits=bitlen-1;
 		}
 		else
 		{
-		    bitlen=Output_Bit_Length;
-		    majorbits=Output_Major_Bit;
+		    bitlen=intparam_query("Output_Bit_Length");
+		    majorbits=intparam_query("Output_Major_Bit");
 		}
 
-                cost_file << "cost=0;" << endl;
+                cost_file << "cost=zeros(1,size(insizes,2));" << endl;
+                cost_file << " if sum(numforms)>0 " << endl;
+                cost_file << "  disp('ERROR - use parallel numeric form only' )" << endl;
+                cost_file << " end " << endl;
 
 		// numsim_file << "y=" << sg_constants->query_str(0,majorbits,bitlen) << ";" << endl;
                 numsim_file <<  "t=" << sg_constants->query_str(0,majorbits,bitlen) << ";" << endl;
@@ -172,27 +156,45 @@ This star exists only for demoing the generic CG domain.
             }
         }
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		// Calculate CLB sizes
-		resources->set_occupancy(0,0);
-
 		// Calculate BW
 		if (pins->query_preclock(0)==UNLOCKED)
-		    pins->set_precision(0,0,sg_constants->query_bitsize(0),LOCKED);
+		{
+		    pins->set_precision(0,0,sg_constants->query_bitsize(0,intparam_query("Output_Bit_Length")),LOCKED);
+		}
 		if (DEBUG_STARS)
 		    printf("ACSConstCGFPGA, computed output bandwith to be %d\n",
-			   sg_constants->query_bitsize(0));
+			   sg_constants->query_bitsize(0,intparam_query("Output_Bit_Length")));
 		
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=0;
 		
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -227,7 +229,8 @@ This star exists only for demoing the generic CG domain.
 
 		// Output port definitions
 		pins->add_pin("const","output",OUTPUT_PIN);
-
+                pins->set_wordcount(0,intparam_query("word_count"));
+		
 		// Bidir port definitions
 		
 		// Control port definitions
@@ -294,23 +297,37 @@ This star exists only for demoing the generic CG domain.
 		// implied.
 		int bitlen=0;
 		int majorbits=0;
-		if (Output_Bit_Length==0)
+		if (pins->query_preclock(0)==UNLOCKED)
 		{
-		    bitlen=pins->query_bitlen(0);
-		    majorbits=bitlen-1;
+		    if (intparam_query("Output_Bit_Length")==0)
+		    {
+			bitlen=pins->query_bitlen(0);
+			majorbits=pins->query_majorbit(0);
+		    }
+		    else
+		    {
+			bitlen=intparam_query("Output_Bit_Length");
+			majorbits=intparam_query("Output_Major_Bit");
+		    }
 		}
 		else
 		{
-		    bitlen=Output_Bit_Length;
-		    majorbits=Output_Major_Bit;
+		    bitlen=pins->query_bitlen(0);
+		    majorbits=pins->query_majorbit(0);
 		}
-
+		    
 		char* const_cval=new char[MAX_STR];
+		if (DEBUG_STARS)
+		    printf("Consts star, evaluating constant to precision %d.%d\n",
+			   majorbits,
+			   bitlen);
 		strcpy(const_cval,sg_constants->query_bitstr(0,majorbits,bitlen));
 		out_fstr << lang->equals(pins->query_pinname(0),
 					 lang->val(const_cval))
 		         << lang->end_statement << endl;
 		delete []const_cval;
+		printf("Core %s has been built\n",name());
+
 		// END-USER CODE
 		
 		out_fstr << lang->end_scope << lang->end_statement << endl;

@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Swallows an input sample
 	}
-	version {$Id$}
+	version {@(#)ACSSinkCGFPGA.pl	1.2 09/08/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -31,22 +31,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	    attributes {A_NONCONSTANT|A_SETTABLE}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {address_start}
 	    type {int}
-	    desc {address for sink variable}
+	    desc {address for sink variable, default will cause automatic calcuation}
 	    default {"-1"}
 	}
 	defstate {
 	    name {address_step}
 	    type {int}
-	    desc {skip amount between addresses}
-	    default {"1"}
+	    desc {skip amount between addresses, default will cause automatic calcuation}
+	    default {"-1"}
+	}
+	defstate {
+	    name {word_count}
+	    type {int}
+	    desc {total number of words for this io star, default will cause automatic unirate calcuation}
+	    default {"-1"}
 	}
 	defstate {
 	    name {Domain}
@@ -87,52 +87,50 @@ limitation of liability, and disclaimer of warranty provisions.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list,StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
 		    
 		// Return happy condition
 		return(1);
 	    }
 	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
-	    }
-	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
+		// No output bandwidth
 
-		// Calculate CLB sizes
-		resources->set_occupancy(0,0);
-		
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=0;
 		
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -151,6 +149,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	        // Input port definitions
 		pins->add_pin("A","input",INPUT_PIN);
+		pins->set_wordcount(0,intparam_query("word_count"));
 
 		// Output port definitions
 

@@ -10,7 +10,7 @@ equal to zero 0, then only a single impulse is generated; otherwise,
 it specifies the period of the impulse train.  The impulse or impulse
 train is delayed by the amount specified by "delay".
 }
-    version { $Id$}
+    version { @(#)ACSImpulseFPCGC.pl	1.6 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

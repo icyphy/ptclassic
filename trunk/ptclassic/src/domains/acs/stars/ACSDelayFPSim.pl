@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { Delay } 
     desc { Provides explicit pipeline delay (default 1). }
-    version { $Id$}
+    version { @(#)ACSDelayFPSim.pl	1.3 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999, Sanders, a Lockheed Martin Company
@@ -15,10 +15,11 @@ limitation of liability, and disclaimer of warranty provisions.
     location { ACS main library }
 
         setup {
-                corona.input.setSDFParams(1, 1);
-		corona.input%1 << (double)0.0;
+                corona.input.setSDFParams(1, int(corona.delays));
+		for (int i = 0; i < int(corona.delays); i++)
+		  corona.input%i << (double)0.0;
 	}
 	go {
-		corona.output%0 << (double)(corona.input%1);
+		corona.output%0 << (double)(corona.input%(int(corona.delays)));
 	}
 }

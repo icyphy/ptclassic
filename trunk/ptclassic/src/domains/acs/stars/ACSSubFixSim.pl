@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FixSim }
 	corona { Sub }
 	desc { Output as a fixed-point number the "pos" input minus all "neg" inputs. }
-	version { $Id$ }
+	version { @(#)ACSSubFixSim.pl	1.2 09/08/99 }
 	author { James Lundblad }
         copyright {
 Copyright (c) 1998 The Regents of the University of California.

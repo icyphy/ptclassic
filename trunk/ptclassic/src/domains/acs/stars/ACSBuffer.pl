@@ -4,7 +4,7 @@ defcorona {
 	desc {
 	    Buffers a line
 	}
-	version {$Id$}
+	version {@(#)ACSBuffer.pl	1.4 09/08/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

@@ -7,10 +7,10 @@ defcore {
 	    Sums two inputs
 	    Only the first two connections are used for hardware
 	    }
-	version {$Id$}
+	version {@(#)ACSAddCGFPGA.pl	1.7 09/13/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -72,12 +72,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -115,28 +109,18 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input1_Major_Bit");
-		input_list->append((Pointer) "Input1_Bit_Length");
-		input_list->append((Pointer) "Input2_Major_Bit");
-		input_list->append((Pointer) "Input2_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input1_Major_Bit");
+		input_list->add("Input1_Bit_Length");
+		input_list->add("Input2_Major_Bit");
+		input_list->add("Input2_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 		    
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
 	    }
 	}
 	method {
@@ -185,7 +169,7 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
@@ -203,24 +187,38 @@ It outputs lines of comments, instead of code.
 		    int B_bitlen=pins->query_bitlen(1);
 		    
 		    int S_majorbit=(int) max(A_majorbit,B_majorbit)+1;
-		    S_bitlen=S_majorbit - 
-			(int) min((A_majorbit-A_bitlen),(B_majorbit-B_bitlen));
+		    S_bitlen=(int) abs(S_majorbit - 
+				       min((A_majorbit-A_bitlen),(B_majorbit-B_bitlen)));
 		    
 		    // Set
 		    pins->set_precision(2,S_majorbit,S_bitlen,lock_mode);
 		}
 
-		//
-		// Calculate CLB sizes
-		//
-		resources->set_occupancy(S_bitlen/2,1);
-
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=1;
 			    
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -237,20 +235,43 @@ It outputs lines of comments, instead of code.
 		acs_type=BOTH;
 		acs_existence=HARD;
 
-	        // Input port definitions
-		pins->add_pin("a","input#1",INPUT_PIN);
-		pins->add_pin("b","input#2",INPUT_PIN);
 
-		// Output port definitions
-		pins->add_pin("s","output",OUTPUT_PIN);
+		if (fpga_type()==XC4000)
+		{
+		    // Input port definitions
+		    pins->add_pin("a","input#1",INPUT_PIN);
+		    pins->add_pin("b","input#2",INPUT_PIN);
 
-		// Bidir port definitions
+		    // Output port definitions
+		    pins->add_pin("s","output",OUTPUT_PIN);
+
+		    // Bidir port definitions
 		
-		// Control port definitions
-		pins->add_pin("c",0,1,INPUT_PIN_CLK);
-		pins->add_pin("ce",0,1,INPUT_PIN_CE);
-		pins->add_pin("ci",0,1,INPUT_PIN_AL);
-		pins->add_pin("clr",0,1,INPUT_PIN_CLR);
+		    // Control port definitions
+		    pins->add_pin("c",0,1,INPUT_PIN_CLK);
+		    pins->add_pin("ce",0,1,INPUT_PIN_CE,AH);
+		    pins->add_pin("ci",0,1,INPUT_PIN_CARRY,AL);
+		    pins->add_pin("clr",0,1,INPUT_PIN_CLR,AL);
+		}
+		else if (fpga_type()==VIRTEX)
+		{
+		    // Input port definitions
+		    pins->add_pin("A","input#1",INPUT_PIN);
+		    pins->add_pin("B","input#2",INPUT_PIN);
+
+		    // Output port definitions
+		    pins->add_pin("Q","output",OUTPUT_PIN);
+
+		    // Bidir port definitions
+		
+		    // Control port definitions
+		    pins->add_pin("CLK",0,1,INPUT_PIN_CLK);
+		    pins->add_pin("CE",0,1,INPUT_PIN_CE,AH);
+		    pins->add_pin("C_IN",0,1,INPUT_PIN_CARRY,AL);
+		    pins->add_pin("SCLR",0,1,INPUT_PIN_CLR,AL);
+		}
+		else
+		    fprintf(stderr,"ERROR:ACSAddCGFPGA invoked for unknown fpga type!\n");
 
 		// Capability assignments
 		sg_capability->add_domain("HW");
@@ -300,17 +321,44 @@ It outputs lines of comments, instead of code.
 		return(1);
 	    }
 	}
-        method {
+	method {
+	    name {revisit_pins}
+	    access {public}
+	    type {int}
+	    code {
+		// Should an alternate target implementation be chosen, pins may need to change
+		// ASSUMPTION: Core fpga_type still defaults to XC4000 in constructor
+		if (fpga_type()==VIRTEX)
+		{
+		    pins->change_pinname(0,"A");
+		    pins->change_pinname(1,"B");
+		    pins->change_pinname(2,"Q");
+		    pins->change_pinname(3,"CLK");
+		    pins->change_pinname(4,"CE");
+		    pins->change_pinname(5,"C_IN");
+		    pins->change_pinname(6,"SCLR");
+		}
+		
+		// Return happy condition
+		return(1);
+	    }
+	}        method {
 	    name {acs_build}
 	    access {public}
 	    type {int}
 	    code {
 		// Trap for language and generate appropriate code
+		// if (fpga_type()==XC4000)
+		//{
+		//}
+		// else if (fpga_type()==VIRTEX)
+	        //{
+		//}    
+		// else
+		// fprintf(stderr,"ACSAddCGFPGA::Unknown device targetted\n");
 		if (sg_language==VHDL_BEHAVIORAL)
 		// BEGIN-USER CODE
 		{
-		    constant_signals->add_pin("GND",0,1,STD_LOGIC);
-
 		    Pin* new_pins=NULL;
 		    ostrstream core_entity;
 
@@ -412,20 +460,65 @@ It outputs lines of comments, instead of code.
 			
 			
 		    // Correct Output S
-		    statements << lang->equals(pins->query_pinname(2),
-					       lang->slice("out_s",S_bitlen-1,0))
-			       << lang->end_statement << endl;
+                    if (S_bitlen-1 != adder_length)
+		    {
+			if (S_bitlen-1 > adder_length)
+			{
+			    statements << lang->slice(pins->query_pinname(2),adder_length,0)
+				       << lang->equals() 
+				       << "out_s"
+				       << lang->end_statement << endl;
+			    for (int bloop=adder_length+1;bloop<S_bitlen;bloop++)
+				statements << lang->slice(pins->query_pinname(2),bloop,bloop)
+				           << lang->equals() 
+				           << lang->slice("out_s",adder_length,adder_length)
+				           << lang->end_statement << endl;
+			}
+			else
+			{
+			    if (bitslice_strategy==PRESERVE_LSB)
+				statements << lang->equals(pins->query_pinname(2),
+							   lang->slice("out_s",S_bitlen-1,0))
+				           << lang->end_statement << endl;
+			    else
+				statements << lang->equals(pins->query_pinname(2),
+							   lang->slice("out_s",adder_length,
+								       adder_length-S_bitlen+1))
+				           << lang->end_statement << endl;
+			}
+		    }
+		    else
+			statements << lang->equals(pins->query_pinname(2),"out_s")
+			           << lang->end_statement << endl;
+						   
+
 			
 		    statements << "U_" << output_filename.str() << ":" 
 			       << core_entity.str() << " port map(" << endl;
-		    statements << "a=>in_a," << endl;
-		    statements << "b=>in_b," << endl;
-		    statements << "s=>out_s," << endl;
-		    statements << "c=>c," << endl
-			       << "ce=>ce," << endl
-			       << "ci=>ci," << endl
-			       << "clr=>clr);" << endl;
-			
+
+		    if (fpga_type()==XC4000)
+		    {
+			statements << "a=>in_a," << endl;
+			statements << "b=>in_b," << endl;
+			statements << "s=>out_s," << endl;
+			statements << "c=>c," << endl
+			           << "ce=>ce," << endl
+				   << "ci=>ci," << endl
+				   << "clr=>clr);" << endl;
+		    }
+		    else if (fpga_type()==VIRTEX)
+		    {
+			statements << "A=>in_a," << endl;
+			statements << "B=>in_b," << endl;
+			statements << "Q=>out_s," << endl;
+			statements << "CLK=>CLK," << endl
+			           << "CE=>CE," << endl
+				   << "C_IN=>C_IN," << endl
+				   << "SCLR=>SCLR);" << endl;
+		    }
+		    else
+			statements << "-- ERROR  Unknown fpga type requested" << endl;
+
 		    statements << ends;
 		    patch_fstr << lang->begin_scope << endl;
 		    patch_fstr << statements.str();
@@ -437,12 +530,142 @@ It outputs lines of comments, instead of code.
 		    child_filename << core_entity.str() << ".vhd" << ends;
 		    child_filenames->add(tolowercase(child_filename.str()));
 
+		    // Added .xco for Coregen 2.1+
 		    ostrstream pcore_filename;
 		    pcore_filename << dest_dir 
-			           << tolowercase(core_entity.str()) << ends;
+			           << tolowercase(core_entity.str()) << ".xco" << ends;
 		    ofstream out_core(pcore_filename.str());
 
-		    out_core << "SET SelectedProducts = ImpNetlist VHDLSym VHDLSim" 
+/*
+		    // Needed for Coregen 2.1+
+		    ostrstream corelib_filename;
+		    corelib_filename << dest_dir << "coregen.prj" << ends;
+		    ofstream corelib_fstr(corelib_filename.str());
+		    ostrstream core_edif;
+		    ostrstream core_vho;
+		    ostrstream core_asy;
+		    core_edif << core_entity.str() << ".edn" << ends;
+		    core_vho << core_entity.str() << ".vho" << ends;
+		    core_asy << core_entity.str() << ".asy" << ends;
+
+		    if (fpga_type()==XC4000)
+		    {
+			// Library info
+			corelib_fstr << "Registered_Adder|xilinx|xc4000_all|1.0=active" << endl;
+
+			// Core generator info
+			out_core << "SET BusFormat = BusFormatParen" << endl;
+			out_core << "SET SimulationOutputProducts = VHDL" << endl;
+			out_core << "SET ViewlogicLibraryAlias = primary" << endl;
+			out_core << "SET XilinxFamily = XC4000" << endl;
+			out_core << "SET DesignFlow = VHDL" << endl;
+			out_core << "SET FlowVendor = Synplicity" << endl;
+			out_core << "SELECT Registered_Adder XC4000 Xilinx 1.0" << endl;
+			out_core << "CSET component_name = " << tolowercase(core_entity.str()) << endl;
+			out_core << "CSET input_width = " << adder_length << endl;
+			out_core << "CSET sign = TRUE" << endl;
+			out_core << "GENERATE" << endl;
+		    }
+		    else if (fpga_type()==VIRTEX)
+		    {
+			// Library info
+			corelib_fstr << "Adder_Subtracter|xilinx|virtex_all|1.0=active" << endl;
+
+			// Core generator info
+			out_core << "SET BusFormat = BusFormatParen" << endl;
+			out_core << "SET SimulationOutputProducts = VHDL" << endl;
+			out_core << "SET ViewlogicLibraryAlias = primary" << endl;
+			out_core << "SET XilinxFamily = Virtex" << endl;
+			out_core << "SET DesignFlow = VHDL" << endl;
+			out_core << "SET FlowVendor = Synplicity" << endl;
+			out_core << "SELECT Adder_Subtracter Virtex Xilinx,_Inc. 1.0" << endl;
+			out_core << "CSET synchronous_settings = clear" << endl;
+			out_core << "CSET port_a_sign = signed" << endl;
+			out_core << "CSET port_a_width = " << adder_length << endl;
+			out_core << "CSET port_b_sign = signed" << endl;
+			out_core << "CSET port_b_width = " << adder_length << endl;
+			out_core << "CSET component_name =" << tolowercase(core_entity.str()) << endl;
+			out_core << "CSET carry_borrow_input = TRUE" << endl;
+			out_core << "CSET carry_borrow_output = FALSE" << endl;
+			out_core << "CSET output_options = registered" << endl;
+			out_core << "CSET ce_overrides = sync_controls_override_ce" << endl;
+			out_core << "CSET ce_override_for_bypass = TRUE" << endl;
+			out_core << "CSET sync_init_value = 0" << endl;
+			out_core << "CSET async_init_value = 0" << endl;
+			out_core << "CSET operation = add" << endl;
+			out_core << "CSET bypass_sense = active_high" << endl;
+			out_core << "CSET set_clear_priority = clear_overrides_set" << endl;
+			out_core << "CSET output_width = " << pins->query_bitlen(2) << endl;
+			out_core << "CSET clock_enable = TRUE" << endl;
+			out_core << "CSET bypass = FALSE" << endl;
+			out_core << "CSET asynchronous_settings = none" << endl;
+			out_core << "CSET overflow_output = FALSE" << endl;
+			out_core << "CSET create_rpm = TRUE" << endl;
+			out_core << "CSET port_b_constant = FALSE" << endl;
+			out_core << "GENERATE" << endl;
+		    }
+
+		    corelib_fstr.close();
+		    out_core.close();
+
+//		    if (access(core_edif.str(),0)!=-1)
+                    if (fork()==0)
+		    {
+			chdir(dest_dir);
+			
+			// Coregen cannot overwrite files from previous runs, delete them here
+			if (execlp("rm",
+				   "rm",
+				   core_edif.str(),
+				   (char*) 0)==-1)
+			    printf("ACSAddCGFPGA:Error, unable to remove old edif file\n");
+		    }
+		    else
+			wait ((int*) 0);
+//		    if (access(core_vho.str(),0)!=-1)
+                    if (fork()==0)
+		    {
+			chdir(dest_dir);
+			
+			if (execlp("rm",
+				   "rm",
+				   core_vho.str(),
+				   (char*) 0)==-1)
+			    printf("ACSAddCGFPGA:Error, unable to remove old vho file\n");
+		    }
+		    else
+			wait ((int*) 0);
+                    if (fork()==0)
+		    {
+			chdir(dest_dir);
+			
+			if (execlp("rm",
+				   "rm",
+				   core_asy.str(),
+				   (char*) 0)==-1)
+			    printf("ACSAddCGFPGA:Error, unable to remove old asy file\n");
+		    }
+		    else
+			wait ((int*) 0);
+		    
+		    if (fork()==0)
+		    {
+			chdir(dest_dir);
+			
+			if (execlp("coregen",
+				   "coregen",
+				   "-b",
+				   pcore_filename.str(),
+				   "-p",
+				   ".",
+				   (char*) 0)==-1)
+			    printf("ACSAddCGFPGA:Error, unable to spawn a coregen session\n");
+		    }
+	            else
+			wait ((int*) 0);
+*/		    
+    // Old code for Coregen 1.5, XC4000 only
+	            out_core << "SET SelectedProducts = ImpNetlist VHDLSym VHDLSim" 
 			     << endl;
 		    out_core << "SET XilinxFamily = All_XC4000_Families" << endl;
 		    out_core << "SET BusFormat = BusFormatAngleBracket" << endl;
@@ -456,8 +679,6 @@ It outputs lines of comments, instead of code.
 		    out_core << "GSET Component_Name = " 
 			     << tolowercase(core_entity.str()) << endl;
 		    out_core << "GENERATE" << endl;
-		    out_core.close();
-
 		    if (fork()==0)
 		    {
 			chdir(dest_dir);
