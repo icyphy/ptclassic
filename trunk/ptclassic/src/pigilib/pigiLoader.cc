@@ -163,9 +163,14 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	char domain[32], cmd[512];
 	strcpyLC (domain, idomain);
 	sprintf (cmd, "cd %s; %s %s -c -I%s/src/domains/%s/kernel "
-		 "-I%s/src/domains/%s/stars -I%s/src/kernel "
+		 "-I%s/src/domains/%s/stars "
+		 "-I%s/src/domains/%s/dsp/stars "
+		 "-I%s/src/domains/%s/image/stars "
+		 "-I%s/src/domains/%s/tcltk/stars "
+		 "-I%s/src/kernel "
 		 "-I%s %s/%s%s.cc >& %s", objDir, CPLUSPLUS,
-		 EXTRAOPTS, ptolemyRoot, domain,
+		 EXTRAOPTS, ptolemyRoot, domain, ptolemyRoot,
+		 domain, ptolemyRoot, domain, ptolemyRoot, domain,
 		 ptolemyRoot, domain, ptolemyRoot,
 		 srcDir, srcDir, idomain, name, tmpFileName);
 	PrintDebug (cmd);
