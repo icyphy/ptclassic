@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 //  means that the state is of the same name, type, size.  One example,
 //  of where this is used is with global cg states.
 
-class RepStateList : StateList {
+class RepStateList : public StateList {
 public:
 	State* equivalentState(const State& s) const;
 };
