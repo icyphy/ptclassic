@@ -86,6 +86,14 @@ while ($#argv)
 			breaksw
 		case *:
 			set cell=$1
+			if ( `basename $cell` == "" ) then
+				echo "Warning: pigi can't handle names with" \
+					"trailing slashes"
+				set \
+				 cell=`echo $cell | awk '{print substr($0,1,length($0)-1)}'`
+				echo "Removed the trailing /, so now the" \
+					"pathname is $cell"	
+			endif
 			breaksw
 	endsw
 	shift
