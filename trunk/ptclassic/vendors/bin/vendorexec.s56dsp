@@ -16,11 +16,11 @@ if [ "$2" = "-nocheck" ] ; then
     exec $SELF_DIR/vendorexec $relpath $*
     exit
 fi
-if [ -n "`/usr/etc/modstat | grep s56dsp`" ] ; then
+if [ -n "`/usr/sbin/modinfo | grep SBusDSP`" ] ; then
     exec $SELF_DIR/vendorexec $*
 else
     SELF=`basename $1`
-    USEHOSTS="foucault maury gammow"
+    USEHOSTS="foucault maury hubble"
     echo "$SELF: s56dsp driver not loaded on `hostname`"
     echo "$SELF: ... Try using one of the following: $USEHOSTS"
 fi
