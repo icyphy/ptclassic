@@ -1,6 +1,5 @@
-#
 # Config file to build on sun4 processor (SparcStation) running Solaris2.4
-# with gcc and g++
+# with egcs
 
 # $Id$
 
@@ -36,8 +35,8 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-# Get the g++ definitions; we override some below.
-include $(ROOT)/mk/config-g++.mk
+# Get the egcs definitions; we override some below.
+include $(ROOT)/mk/config-egcs.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
@@ -47,6 +46,7 @@ include $(ROOT)/mk/config-g++.shared.mk
 # Programs to use
 #
 RANLIB = true
+
 # Use gcc everywhere including in octtools
 CC =		gcc
 
@@ -81,7 +81,8 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # Variables for the linker
 #
 # system libraries (libraries from the environment) for c++ files
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lg++ $(SHARED_SYSLIBS) -lm
+# No need to include -lg++ under egcs
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl  $(SHARED_SYSLIBS) -lm
 
 # system libraries for linking .o files from C files only
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lm
