@@ -304,17 +304,29 @@ body ::tycho::FileBrowser::constructor {args} {
 # For example: tycho/ke <Tab> tycho/kernel/ <Tab> (now in kernel directory).
 #
 body ::tycho::FileBrowser::complete {} {
-    if {[file dirname [get entry]] == "."} {
-        return [::tycho::ListBrowser::complete]
+    # check to see if the lastCompletion is valid
+    if [catch {set lastCompletion}] {
+        set lastCompletion {#bogusvalue#}
+    }
+
+    set pattern "[get entry]"
+
+    # check if the file/directory is in the current ListBrowser
+    if {[file dirname "$pattern"] == "."} {
+        set listReturn [::tycho::ListBrowser::complete]
+        # check if completion had already been done and only 1 found
+        if {$pattern == $lastCompletion && $listReturn == 1} {
+            processItem $pattern
+            return 1
+        } {
+            set lastCompletion "[get entry]"
+            return $listReturn
+        }
     }
     
     set case $caseSensitiveCompletion
     
     # not in current ListBrowser. Check if in another directory
-    set pattern "[get entry]"
-    if [catch {set lastCompletion}] {
-        set lastCompletion {#bogusvalue#}
-    }
 
     # check if tab has been hit twice. If so, change directory.
     if {$lastCompletion == $pattern} {
@@ -323,7 +335,7 @@ body ::tycho::FileBrowser::complete {} {
             # it's a complete directory
             processItem [file join $localCWD $pattern]
             setEntry {}
-            return
+            return 1
         } else {
             # it's a directory/something
             processItem [file join $localCWD [file dirname $pattern]]
@@ -349,6 +361,11 @@ body ::tycho::FileBrowser::complete {} {
     set matches {}
     
     set files [glob -nocomplain [file join $localCWD $dir *]]
+    # add parent directory if it exists
+    if {[::tycho::expandPath [file join $localCWD $dir]] != \
+            [::tycho::rootDir $localCWD]} {
+        lappend files "[file join $localCWD $dir $directoryParent]"
+    }
     foreach name "$files" {
         set name [string range $name $dirlen end]
         if $case {
