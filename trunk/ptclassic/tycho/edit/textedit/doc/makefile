@@ -40,7 +40,7 @@ include $(CONFIG)
 
 EXTRA_SRCS = \
 	editors.html \
-	consoles.html
+	shells.html
 
 MISC_FILES =	codeDoc internals usersGuides
 
