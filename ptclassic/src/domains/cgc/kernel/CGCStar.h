@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: S. Ha, E. A. Lee and J. T. Buck
+ Programmer: S. Ha, E. A. Lee, J. T. Buck, and T. M. parks
 
  This is the baseclass for stars that generate C language code
 
@@ -39,12 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "CGCPortHole.h"
+class CGCTarget;
 
 class CGCStar : public CGStar {
-friend class CGCTarget;
 public:
-	CGCStar(): emptyFlag(1) {}
-
 	// List of all states pointed to in the code.
 	// This is public so that CGCTarget and other targets can access it.
 	StateList referencedStates;
@@ -61,6 +59,23 @@ public:
 	// class identification
 	int isA(const char*) const;
 
+	// Generate declarations and initialization code for
+	// PortHoles and States.
+	StringList declarePortHoles();
+	StringList declareStates();
+	StringList initCodePortHoles();
+	StringList initCodeStates();
+
+	// add a splice star to the spliceClust list.  If atEnd
+	// is true, append it to the end, otherwise prepend it.
+	void addSpliceStar(CGCStar* s, int atEnd);
+
+	// unfortunate, but we need to make special treatment for
+	// Spread/Collect stars when splicing. Note that Spread/Collect
+	// are not regular stars
+	// If Spread, redefine to return -1, if Collect, return 1, otherwise 0.
+	virtual int amISpreadCollect() {return 0; }
+
 protected:
 	// main routine.
 	int runIt();
@@ -75,9 +90,8 @@ protected:
 	StringList expandRef(const char* name);
 	StringList expandRef(const char* name, const char* offset);
 
-	// If "name" is a state, and is not already on the list
-	// referencedStates, add it.
-	void registerState(const char* name);
+	// Add a State to the list of referenced States.
+	void registerState(State*);
 
 	// Add lines to be put at the beginning of the code file
 	int addInclude(const char* decl);
@@ -109,43 +123,21 @@ protected:
 	// are not visible from the user.
 	void moveDataBetweenShared();
 
-	// get the actual buffer reference.
-	virtual StringList getActualRef(CGCPortHole* p, const char* offset);
-
-	// unfortunate, but we need to make special treatment for
-	// Spread/Collect stars when splicing. Note that Spread/Collect
-	// are not regular stars
-	// If Spread, redefine to return -1, if Collect, return 1, otherwise 0.
-	virtual int amISpreadCollect() {return 0; }
-
 private:
-	// define and initialize variables for C program.
-	// Note that CGCTarget is a friend class to access these methods
-	// freely.
+	// Generate declarations for PortHoles and States.
+	StringList declareBuffer(const CGCPortHole*);
+	StringList declareOffset(const CGCPortHole*);
+	StringList declareState(const State*);
 
-	// This flag is set when no data structure is needed for this star
-	// code.
-	int emptyFlag;
-
-	// declare PortHoles and States
-	virtual StringList declarePortHole(CGCPortHole* p);
-	virtual StringList declareOffset(const CGCPortHole* p);
-	virtual StringList declareState(const State* p);
-
-	// initialize PortHoles
-	virtual StringList initializeBuffer(CGCPortHole* p);
-	virtual StringList initializeOffset(const CGCPortHole* p);
-
-	// offset initialize
-	void initBufPointer();
+	// Generate initialization code for PortHoles and States.
+	StringList initCodeBuffer(CGCPortHole*);
+	StringList initCodeOffset(const CGCPortHole*);
+	StringList initCodeState(const State*);
 
 	// form a cluster of this star and spliced stars
 	// initially put myself in spliceClust.
 	SequentialList spliceClust;
 
-	// add a splice star to the spliceClust list.  If atEnd
-	// is true, append it to the end, otherwise prepend it.
-	void addSpliceStar(CGCStar* s, int atEnd);
 };
 
 #endif
