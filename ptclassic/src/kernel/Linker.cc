@@ -498,9 +498,12 @@ int Linker::multiLink (int argc, char** argv) {
 	if ( (lib_handle = shl_load(objName, BIND_IMMEDIATE | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
 	  StringList msg = "Error linking file ";
 	  msg << objName << " dlopen: " << strerror (errno);
-	  if (errno == ENOMEM)
-	    msg << "\nNote that HPUX sometimes returns 'Not enough space'"
- 	      " if shl_load() could not find a symbol";
+	  // This is a bug workaround, so we violate our rule of no
+	  // system ifdefs.  Mistake?
+#ifdef PTHPPA
+ 	  msg << "\n(On HPUX 9.x, the above error code is not trustworthy.)";
+#endif
+	  msg << "\nFor more info see the message printed on stderr.";
 	  Error::abortRun(msg);
 	  return FALSE;
 	}
