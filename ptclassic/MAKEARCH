@@ -76,11 +76,13 @@ end
 cd ..
 
 cd utils
-foreach x (libgslider)
+foreach x (libgslider ptplay)
 	optmkdir $x
 	cd $x
-	optlink ../../../src/utils/$x make.template
 	optlink ../../../src/utils/$x makefile
+	if (-r ../../../src/utils/$x/make.template) then
+		optlink ../../../src/utils/$x make.template
+	endif
 	cd ..
 end
 cd ..
