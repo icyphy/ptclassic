@@ -26,6 +26,7 @@ are too large to efficiently inline.
 #include "UserOutput.h"
 #include <std.h>
 #include <math.h>
+#include "streamCompat.h"
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () {
