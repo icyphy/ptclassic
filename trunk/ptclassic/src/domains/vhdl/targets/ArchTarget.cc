@@ -247,17 +247,12 @@ void ArchTarget :: trailerCode() {
 	port->connect(newSignal);
 	// If it's an input, also add a mux.
 	if (port->isItInput()) {
-	  VHDLMux* newMux = new VHDLMux;
 	  StringList muxName = firing->getName();
 	  muxName << "_" << port->getName();
-
-	  newMux->setName(muxName);
-	  newMux->setType(port->getType());
+	  VHDLMux* newMux = new VHDLMux(muxName, port->getType());
 	  newMux->setOutput(newSignal);
-
 	  // Temporary control singal until it gets re-set.
 	  newMux->setControl(newSignal);
-
 	  muxList.put(*newMux);
 	}
       }
@@ -270,10 +265,7 @@ void ArchTarget :: trailerCode() {
   while ((token = nextToken++) != 0) {
     VHDLSignal* newSignal = new VHDLSignal(token->getName(), token->getType(), 0);
     signalList.put(*newSignal);
-
-    VHDLReg* newReg = new VHDLReg;
-    newReg->setName(token->getName());
-    newReg->setType(token->getType());
+    VHDLReg* newReg = new VHDLReg(token->getName(), token->getType());
     newReg->setOutput(newSignal);
 
     VHDLSignal* clockSignal =
@@ -620,9 +612,7 @@ void ArchTarget :: trailerCode() {
       }
       else {
 	// Need to create the reg and set it up appropriately.
-	sourceReg = new VHDLReg;
-	sourceReg->setName(sourceName);
-	sourceReg->setType(arc->getType());
+	sourceReg = new VHDLReg(sourceName, arc->getType());
 	sourceReg->setOutput(sourceSignal);
 	sourceReg->setClock(clockSignal);
 
@@ -643,9 +633,7 @@ void ArchTarget :: trailerCode() {
       }
       else {
 	// Need to create the reg and set it up appropriately.
-	destReg = new VHDLReg;
-	destReg->setName(destName);
-	destReg->setType(arc->getType());
+	destReg = new VHDLReg(destName, arc->getType());
 	destReg->setInput(sourceSignal);
 	destReg->setClock(clockSignal);
 
