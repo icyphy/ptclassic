@@ -377,7 +377,7 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
 proc htmlTree2ps {indexfile psfile args} {
     global filesSeen
     set filesSeen {}
-    sets tartingDir [pwd]
+    set startingDir [pwd]
 
     # If we are printing by directory, set printbydir
     set printbydir 0
