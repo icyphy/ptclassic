@@ -888,9 +888,9 @@ body ::tycho::Edit::del {type} {
     markModified
     
     switch $type {
-	char {deleteRange {insert -1 char} insert}
-	word {deleteRange {insert -1 char wordstart} insert}
-	fchar {deleteRange insert {insert +1 char}}
+	char {deleteRange {insert - 1 char} insert}
+	word {deleteRange "insert - [prevWord] char" insert}
+	fchar {deleteRange insert {insert + 1 char}}
 	fword {deleteRange insert "insert + [nextWord] char"}
     }
 }
