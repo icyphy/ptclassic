@@ -31,9 +31,12 @@ Target("simulate-BDF","DataFlowStar",
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
-	addState(allowDynamic.setState("allowDynamic",this,"YES",
+	addState(allowDynamic.setState("allowDynamic",this,"NO",
 		"Specify whether to try dynamic execution if the graph\n"
 					"cannot be completely clustered"));
+	addState(requireStronglyConsistent.setState(
+		"requireStronglyConsistent",this,"NO",
+		"Enable 'strongly consistent' check: will reject some valid systems"));
 	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
 		"schedulePeriod for interface with a timed domain."));
 }
@@ -47,7 +50,8 @@ BDFTarget::~BDFTarget() {
 }
 
 void BDFTarget::setup() {
-	LOG_NEW; BDFClustSched* s = new BDFClustSched(logFile,allowDynamic);
+	LOG_NEW; BDFClustSched* s = new BDFClustSched(logFile,allowDynamic,
+						      requireStronglyConsistent);
 	setSched(s);
 	s->schedulePeriod = schedulePeriod;
 	Target::setup();

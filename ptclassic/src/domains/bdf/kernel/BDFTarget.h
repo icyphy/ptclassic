@@ -30,6 +30,7 @@ class BDFTarget : public Target {
 protected:
 	StringState logFile;
 	IntState allowDynamic;
+	IntState requireStronglyConsistent;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
