@@ -245,11 +245,11 @@ void ComplexParticle :: operator << (const Complex& c) {data=c;}
 // created object.
 
 ParticleStack :: ~ParticleStack () {
-	if (!head) return;
+	if (!pHead) return;
 	Particle* p;
-	while (head->link) {
-		p = head;
-		head = head->link;
+	while (pHead->link) {
+		p = pHead;
+		pHead = pHead->link;
 		LOG_DEL; delete p;
 	}
 }
@@ -258,9 +258,9 @@ ParticleStack :: ~ParticleStack () {
 // the last one)
 void ParticleStack :: freeup () {
 	Particle* p;
-	while (head) {
-		p = head;
-		head = head->link;
+	while (pHead) {
+		p = pHead;
+		pHead = pHead->link;
 		p->die();
 	}
 }
@@ -270,7 +270,7 @@ Plasma* Plasma :: getPlasma(DataType t)
 	Plasma* p = plasmaList;
 
 	while (p) {
-		DataType dt = p->head->type();
+		DataType dt = p->type();
 		if (t == dt) return p;
 		p = p->nextPlasma;
 	}
