@@ -2,7 +2,7 @@ defstar {
 	name		{ Dct }
 	domain		{ SDF }
 	version		{ $Id$ }
-	author		{ Sun-Inn Shih }
+	author		{ Sun-Inn Shih, Paul Haskell }
 	copyright	{ 1991 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
@@ -27,7 +27,7 @@ cosine transform (DCT) and outputs a DCTImage.
 	}
 
 // CODE
-	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h", "Error.h" }
+	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h" }
 
 	protected {
 		float* cosData;
@@ -64,8 +64,8 @@ cosine transform (DCT) and outputs a DCTImage.
 	method {
 		name { doDCT }
 		type { void }
-		arglist {
-	"(float* out, unsigned char* in, int outw, int outh, int inw, int inh)"
+		arglist { "(float* out, unsigned char* in, int outw, int outh,
+				int inw, int inh)"
 		}
 		code {
 	register int ndx, ndx2, cntr;
@@ -80,9 +80,8 @@ cosine transform (DCT) and outputs a DCTImage.
 				out[ndx+j] = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
 					out[ndx+j] += fwdD(j, cntr) * in[ndx2+cntr];
-				}
-			}
-		}
+		}	}	}
+
 // Handle last (maybe partial) block at end of each row (i.e. zero-pad).
 		ndx  = ii*outw + jj;
 		ndx2 = ii*inw + jj;
@@ -90,9 +89,9 @@ cosine transform (DCT) and outputs a DCTImage.
 			out[ndx+j] = 0.0;
 			for(cntr = 0; cntr < 1 + ((inw-1)%blocksize); cntr++) {
 				out[ndx+j] += fwdD(j, cntr) * in[ndx2+cntr];
-			}
-		}
-	}
+	}	}	}
+
+// Handle rows at the bottom of the array.
 	for(ii = inh; ii < outh; ii++) {
 		ndx = ii*outw;
 		for(j = 0; j < outw; j++) {
@@ -111,9 +110,8 @@ cosine transform (DCT) and outputs a DCTImage.
 				for(cntr = 0; cntr < blocksize; cntr++) {
 					tmpbuf[ii+i] += fwdD(i, cntr) *
 							out[ndx + cntr*outw];
-				}
-			}
-		}
+		}	}	}
+
 // Copy data back to main buffer;
 		for(i = 0; i < outh; i++) {
 			out[i*outw+jj] = tmpbuf[i];
