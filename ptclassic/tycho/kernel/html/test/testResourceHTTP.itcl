@@ -57,9 +57,9 @@ test http-error1 {Make sure that any HTTP write returns error.} {
 
 test http-error2 {Make sure that public proc's error message are correct} {
     set cmd "::tycho::ResourceHTTP"
-    catch {$cmd::chmod a+rx http://noway} a
-    catch {$cmd::delete http://ptolemy.eecs.berkeley.edu} b
-    catch {$cmd::mkdir http://ptolemy.eecs.berkeley.edu/new} c
+    catch {${cmd}::chmod a+rx http://noway} a
+    catch {${cmd}::delete http://ptolemy.eecs.berkeley.edu} b
+    catch {${cmd}::mkdir http://ptolemy.eecs.berkeley.edu/new} c
     list $a $b $c
 } {{Cannot chmod HTTP files}\
         {Cannot delete HTTP files}\
