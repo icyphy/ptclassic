@@ -287,8 +287,8 @@ int onHostMachine(const char* hname) {
 			if (strncmp(myHost, temp, strlen(temp)) == 0) {
 				return TRUE;
 		   	}
-			LOG_DEL; delete temp;
-			LOG_DEL; delete myHost;
+			LOG_DEL; delete [] temp;
+			LOG_DEL; delete [] myHost;
 		}
 	}
 	pclose(fp);
