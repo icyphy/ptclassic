@@ -94,6 +94,11 @@
 #    The coordinates of the terminal, relative to the icon that
 #    it become parts of.
 #
+#   <dt><b>-tags</b> _taglist_
+#   <dd>
+#    The tags which are given to this terminal. This is typically used to
+#    enable various forms of connection. The default is "input."
+#
 #   </dl>
 #
 # <dt><b>termstyle</b>
@@ -122,12 +127,13 @@
 #     set icons [::tycho::IconLibrary [::tycho::autoName icons]]
 #     $icons parse {
 #         termstyle 1-0-east -label "One output, east" {
-#             terminal in -coords {0 50} -direction {-1 0} -style circle
+#             terminal in -coords {0 50} -direction {-1 0} &#92
+#                         -style circle -tags output
 #         }
 #         
 #         termstyle 1-0-west -label "One output, west" {
 #             terminal in -coords {100 50} -direction {1 0} &#92
-#                         -style rectangle -fill magenta
+#                         -style rectangle -fill magenta -tags output
 #         }
 #         
 #         group sample -label {Sample Icons} {
@@ -217,7 +223,7 @@ body ::tycho::IconLibrary::constructor {args} {
 	    :leafonly 1 \
             -slatetype Terminal \
             -coords {0 0} \
-	    -type input
+	    -tags input
 
     # The termstyle type
     type define termstyle \
@@ -305,10 +311,8 @@ body ::tycho::IconLibrary::draw {icon slate x y args} {
         set x [lindex $a(-coords) 0]
         set y [lindex $a(-coords) 1]
         unset a(-coords)
-        # FIXME: the -type to -tags thing is a real hack...
         eval $slate call $id terminal \
-                $term $termtype $x $y [array get a] \
-                -tags [list $a(-type)]
+                $term $termtype $x $y [array get a]
         unset a
     }
     return $id
@@ -425,10 +429,8 @@ body ::tycho::IconLibrary::instantiate {icon layout args} {
     # found for the icon, then terminals will be empty and none
     # will be drawn 
     foreach term $terminals {
-        # FIXME: the -type to -tags thing is a real hack...
-        array set a [attrget [concat $termstyle $term]]
         eval [list $layout publish add item [concat $itemname $term]] \
-                [attrget [concat $termstyle $term]] -tags [list $a(-type)]
+                [attrget [concat $termstyle $term]]
     }
     
     # Return the item name
