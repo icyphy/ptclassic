@@ -12,6 +12,19 @@
 # See the documentation of the TclScript star for an explanation of
 # how the Tcl/Ptolemy interface works.
 
+proc ptkPianoKeyboardBinding {key keyid uniqueSymbol octave freq color} {
+    $key bind $keyid <ButtonPress-1> \
+	"${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
+    $key bind $keyid <ButtonRelease-1> \
+	"${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color"
+# The following two commands, regrettably, do not work in the current
+# version of Tk.
+    $key bind $keyid <Button1-Leave> \
+	"puts leave;${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color"
+    $key bind $keyid <Button1-Enter> \
+	"${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
+}
+
 proc ${uniqueSymbol}createWindow {} {
     global uniqueSymbol
     set s .${uniqueSymbol}keyboard
@@ -47,10 +60,8 @@ proc ${uniqueSymbol}createWindow {} {
 		       -outline black \
 		       -fill white ]
 
-	    $c bind $keyid <ButtonPress-1> \
-	        "${uniqueSymbol}setOutputs 1.0 [expr $octave*[lindex $whitekeys $key]]; $c itemconfigure $keyid -fill gold"
-	    $c bind $keyid <ButtonRelease-1> \
-	        "${uniqueSymbol}setOutputs 0.0 0.0; $c itemconfigure $keyid -fill white"
+	    ptkPianoKeyboardBinding $c $keyid $uniqueSymbol $octave \
+		[lindex $whitekeys $key] white
        }
        set octposition [expr $octposition+7]
     }
@@ -67,10 +78,8 @@ proc ${uniqueSymbol}createWindow {} {
 		       -outline black \
 		       -fill black ]
 
-	   $c bind $keyid <ButtonPress-1> \
-	       "${uniqueSymbol}setOutputs 1.0 [expr $octave*[lindex $blackkeys $key]]; $c itemconfigure $keyid -fill gold"
-	   $c bind $keyid <ButtonRelease-1> \
-	       "${uniqueSymbol}setOutputs 0.0 0.0; $c itemconfigure $keyid -fill black"
+	   ptkPianoKeyboardBinding $c $keyid $uniqueSymbol $octave \
+		[lindex $blackkeys $key] black
 
 	   set x1 [expr $x1+0.75]
 	   if {$key == 0} {set x1 [expr $x1+0.75]}
