@@ -15,7 +15,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { ACS main library }
-	ccinclude { "acs_vhdl_lang.h", "acs_starconsts.h" }
+	ccinclude { "acs_vhdl_lang.h" }
+	ccinclude { "acs_starconsts.h" }
 	defstate {
 	    name {Output_Major_Bit}
 	    type {int}
