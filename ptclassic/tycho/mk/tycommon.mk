@@ -85,6 +85,11 @@
 # JDIST		The name and version of the tar.gz and zip files of the sources
 # JTESTHTML	Test html file for a java class.
 # JTCLSH	TclBlend Tcl/Java interface shell.
+#
+# The variables below are for the SunTest JavaScope code coverage tool
+# See http://www.suntest.com/JavaScope
+# JSINSTR	The 'jsinstr' command, which instruments Java code.
+# JSRESTORE	The 'jsrestore' command which uninstruments Java code.
 
 ##############
 # Under no circumstances should this makefile include 'all', 'install'
@@ -224,7 +229,7 @@ $(LIBDIR)/$(LIB_DEBUG):	$(LIBDIR)/$(LIB)
 .SUFFIXES: .class .java
 .java.class:
 	rm -f `basename $< .java`.class
-	CLASSPATH=$(CLASSPATH) $(JAVAC) $(JFLAGS) $<
+	CLASSPATH=$(CLASSPATH)$(AUXCLASSPATH) $(JAVAC) $(JFLAGS) $<
 
 # Build all the Java class files.
 jclass:	$(JSRCS) $(JCLASS) 
@@ -324,6 +329,30 @@ updatewebsite: $(JDISTS)
 ##############
 # Rules for testing 
 # Most users will not run these rules.
+
+# Instrument Java code for use with JavaScope.
+jsinstr:
+	$(JSINSTR) $(JSRCS)
+# If the jsoriginal directory does not exist, then instrument the Java files.
+jsoriginal:
+	@if [ ! -d jsoriginal ]; then $(JSINSTR) $(JSRCS); fi
+
+# Back out the instrumentation.
+jsrestore:
+	$(JSRESTORE) $(JSRCS)
+# Compile the instrumented Java classes and include JavaScope.zip
+jsbuild:
+	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) jclass
+# Run the test_jsimple rule with the proper classpath  
+jstest_jsimple:
+	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) test_jsimple
+	@echo "To view code coverage results, run javascope or jsreport"
+# If necessary, instrument the classes, then rebuild, then run the tests
+jsall: jsoriginal
+	$(MAKE) clean
+	$(MAKE) jsbuild
+	(cd test; $(MAKE) jstest_jsimple)
+
 
 # Run all the tests
 tests:: makefile
