@@ -9,7 +9,7 @@ export TEXINPUTS
 INFO=	-l $(ROOT)/doc/elisp/default.el -l $(LATEXINFO)/.emacs \
 	-l latexinfo -l latexnfo-mde
 
-all:	ptk.dvi ptk.info ptk.ps.Z
+all:	ptk.info ptk.dvi ptk.ps.Z chapter.dvi chapter.ps.Z
 
 # Update all nodes and menus.
 %.update:	%.tex
@@ -19,22 +19,24 @@ all:	ptk.dvi ptk.info ptk.ps.Z
 		-f save-buffer -kill
 
 # Generate an info file from the LaTeXinfo source.
-ptk.info:	ptk.tex kernel.tex
-	emacs -batch $(INFO) ptk.tex \
+%.info:		%.tex
+	emacs -batch $(INFO) $< \
 		-f latexinfo-format-buffer \
 		-f save-buffer -kill
 
 # Run LaTeX twice to resolve cross references.
-ptk.dvi:	ptk.tex kernel.tex
-		latex ptk
-		latex ptk
-		rm kernel.aux ptk.aux ptk.toc ptk.log
+%.dvi:		%.tex
+		latex $<
+		latex $<
+		rm -f *.aux *.log *.toc
 
-chapter.dvi:	chapter.tex kernel.tex
-		latex chapter
-		latex chapter
-		rm chapter.aux chapter.log
+%.ps.Z:		%.dvi
+		dvips -f $< | compress > $@
 
-ptk.ps.Z:	ptk.dvi
-		dvips -f ptk.dvi | compress > ptk.ps.Z
+SRC=	kernel.tex title.tex copyright.tex
 
+ptk.info:	ptk.tex $(SRC)
+
+ptk.dvi:	ptk.tex $(SRC)
+
+chapter.dvi:	chapter.tex $(SRC)
