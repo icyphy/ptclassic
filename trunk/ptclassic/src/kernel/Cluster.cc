@@ -37,9 +37,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Nebula.h"
 #include "Star.h"
 #include "Galaxy.h"
-#include "Nebula.h"
 #include "SimControl.h"
 #include "Scheduler.h"
 #include "Geodesic.h"
@@ -90,8 +90,8 @@ void Nebula::setMasterBlock(Block* m) {
 		Star* s;
 		while ((s = nextStar++) != 0) {
 			Nebula* c = newNebula(s);
-			gal.addBlock(c->selfStar,c->selfStar.name());
-			BlockPortIter nextPort(c->selfStar);
+			addNebula(c);
+			BlockPortIter nextPort(c->star());
 			PortHole *p;
 			while ((p = nextPort++) != 0) {
 				newPorts[nebulaPort(p)->real().index()]=p;
@@ -114,14 +114,14 @@ void Nebula::setMasterBlock(Block* m) {
 		LOG_DEL; delete newPorts;
 	}
 }
-
+	
 inline void Nebula::initMaster() {
 	if (master) master->initialize();
 	return;
 }
 
 int Nebula::run() {
-	if (!gal.numberBlocks())
+	if (isNebulaAtomic())
 		// Atomic Nebula
 		return master->run();
 	else if (sched)
@@ -133,7 +133,7 @@ int Nebula::run() {
 }
 	
 int Nebula::generateSchedule() {
-	if (master) {
+	if (isNebulaAtomic()) {
 		return TRUE;
 	}
 	else {

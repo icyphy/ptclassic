@@ -37,9 +37,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	
 ********************************************************************/
 
+#include "Block.h"
 #include "GalIter.h"
 #include "DynamicGalaxy.h"
 class Star;
+class NebulaPort;
 
 class Nebula {
     friend class NebulaIter;
@@ -57,6 +59,14 @@ public:
 
 	// Generate the schedules of the nested Nebulas recursively.
 	int generateSchedule();
+
+	int isNebulaAtomic() {
+		return master? master->isItAtomic() : NULL;
+	}
+
+	void addNebula(Nebula* c) {
+		gal.addBlock(c->star(),c->star().name());
+	}
 
 	void initMaster();
 
