@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	7 February 1992
+    Author:	T.M. Parks
+    Created:	7 February 1992
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -34,6 +34,7 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "MTDFStar.h"
+#include "MTDFScheduler.h"
 #include "MTDFThread.h"
 #include "MTDFGeodesic.h"
 
@@ -54,16 +55,13 @@ void MTDFStar::initialize()
     DataFlowStar::initialize();
     if (isSource())
     {
-        BlockPortIter portIter(*this);
-        PortHole* port;
-
+        BlockPortIter next(*this);
         // Limit the capacity of Geodesics.
-        while((port = portIter++) != NULL)
+	for(int i = numberPorts(); i > 0; i--)
         {
-            MTDFGeodesic* geodesic = (MTDFGeodesic*)port->geo();
-	    int capacity = (port->numXfer() > port->far()->numXfer()) ?
-		port->numXfer() : port->far()->numXfer();
-	    geodesic->setCapacity(capacity);
+	    PortHole& port = *next++;
+            MTDFGeodesic& geodesic = *(MTDFGeodesic*)port.geo();
+	    geodesic.setCapacity(port.numXfer());
         }
     }
 }
@@ -71,8 +69,27 @@ void MTDFStar::initialize()
 // Execute the Star.
 int MTDFStar::run()
 {
-    return Star::run();
+    BlockPortIter next(*this);
+
+    // Receive data for synchronous ports.
+    for(int i = numberPorts(); i > 0; i--)
+    {
+	MTDFPortHole& port = *(MTDFPortHole*)next++;
+	if(!port.isDynamic()) port.receiveData();
+    }
+
+    int status = Star::run();
+
+    // Send data for synchronous ports, even on error.
+    next.reset();
+    for(i = numberPorts(); i > 0; i--)
+    {
+	MTDFPortHole& port = *(MTDFPortHole*)next++;
+	if(!port.isDynamic()) port.sendData();
+    }
+    return status;
 }
+
 
 // Associate a Thread with this Star.
 void MTDFStar::setThread(MTDFThread& t)
@@ -84,4 +101,10 @@ void MTDFStar::setThread(MTDFThread& t)
 MTDFThread& MTDFStar::thread()
 {
     return *myThread;
+}
+
+void MTDFStar::sleepUntil(TimeVal wake)
+{
+    MTDFScheduler& sched = *(MTDFScheduler*)scheduler();
+    thread().sleep(sched.delay(wake));
 }
