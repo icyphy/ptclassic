@@ -230,7 +230,13 @@ long userOptionWord;
 /* Structures to store palette list and dialog box */
 static char **palettes;
 static int palettes_n;
+
+/* We put the old defaultPalettes code back for now:
 char *defaultPalettes();
+*/
+static char *defaultPalettes =
+  "~ptolemy/src/domains/sdf/icons/sdf.pal:~ptolemy/src/domains/ddf/icons/ddf.pal:~ptolemy/src/domains/de/icons/de.pal:./user.pal:./init.pal";
+
 
 static dmWhichItem *items;
 
@@ -267,7 +273,7 @@ OpenPaletteInit()
 
     sprintf(buf, "%s.palettes", UAppName);
     if ((b = RPCXGetDefault("vem", buf)) == NULL) {
-	b = defaultPalettes();
+	b = defaultPalettes;	/* defaultPalettes() eventually */
     }
     palettes_n = ListLength(b) + 1;
     palettes = (char **) malloc(palettes_n * sizeof(char *));
@@ -386,6 +392,7 @@ long userOptionWord;
 int numberOfDomains();
 char* nthDomainName();
 
+#ifdef BUG_FIXED		/* comment out for now */
 /* This function builds the default palettes list.  It has one entry
  * for each domain, plus the user.pal and init.pal palettes and */
 static char *defaultPalettes () {
@@ -409,6 +416,7 @@ static char *defaultPalettes () {
     strcat (buf, "./user.pal:./init.pal");
     return buf;
 }
+#endif
 
 int
 RpcEditDomain(spot, cmdList, userOptionWord)
