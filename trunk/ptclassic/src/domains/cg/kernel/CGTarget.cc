@@ -1,3 +1,4 @@
+static const char file_id[] = "CGTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -41,7 +42,9 @@ void CGTarget :: initialize() {
 }
 
 void CGTarget :: start() {
-	if (!mySched() && !parent()) setSched (new SDFScheduler);
+	if (!mySched() && !parent()) {
+		LOG_NEW; setSched (new SDFScheduler);
+	}
 	headerCode();
 }
 
@@ -59,7 +62,7 @@ int CGTarget :: run() {
 }
 
 Block* CGTarget :: clone() const {
-	return new CGTarget(readName(),starType(),readDescriptor());
+	LOG_NEW; return new CGTarget(readName(),starType(),readDescriptor());
 }
 
 void CGTarget :: addCode(const char* code) {

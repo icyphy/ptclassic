@@ -1,3 +1,4 @@
+static const char file_id[] = "AsmTarget.cc";
 /******************************************************************
 Version identification:
 $Id$

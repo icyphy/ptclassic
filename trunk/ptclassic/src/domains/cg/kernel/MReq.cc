@@ -1,3 +1,4 @@
+static const char file_id[] = "MReq.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -50,7 +51,7 @@ void MReqList::zero() {
 	while (first) {
 		MReq* p = first;
 		first = p->next;
-		delete p;
+		LOG_DEL; delete p;
 	}
 }
 

@@ -1,3 +1,4 @@
+static const char file_id[] = "CGDomain.cc";
 /**********************************************************************
 Version identification:
 $Id$
@@ -36,21 +37,21 @@ public:
 		// return *new CGWormhole(innerGal);
 		Error::abortRun("No CG wormhole implemented yet");
 		// Following is a hack
-		return *(new SDFStar);
+		LOG_NEW; return *(new SDFStar);
 	}
 
 	// new input porthole
-	PortHole& newInPort() { return *new InCGPort;}
+	PortHole& newInPort() { LOG_NEW; return *new InCGPort;}
 
 	// new output porthole
-	PortHole& newOutPort() { return *new OutCGPort;}
+	PortHole& newOutPort() { LOG_NEW; return *new OutCGPort;}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
 		// return *new CGfromUniversal;
 		Error::abortRun("No CG EventHorizon implemented yet");
 		// Following is a hack
-		return *(new EventHorizon);
+		LOG_NEW; return *(new EventHorizon);
 	}
 
 	// new toUniversal EventHorizon
@@ -58,11 +59,11 @@ public:
 		// return *new CGtoUniversal;
 		Error::abortRun("No CG EventHorizon implemented yet");
 		// Following is a hack
-		return *(new EventHorizon);
+		LOG_NEW; return *(new EventHorizon);
 	}
 
 	// new node (geodesic)
-	Geodesic& newNode() { return *new AutoForkNode;}
+	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// constructor
 	CGDomain() : Domain("CG") {}

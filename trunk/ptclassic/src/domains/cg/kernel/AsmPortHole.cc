@@ -1,3 +1,4 @@
+static const char file_id[] = "AsmConnect.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -33,12 +34,15 @@ StringList AsmPortHole::location() {
 	return n;
 }
 
+// allocate an AsmGeodesic.  Use hashstring for the name since we expect
+// repeated names to occur (lots of Node_input and Node_output, for example)
+
 Geodesic* AsmPortHole::allocateGeodesic() {
-	char* nm = new char[strlen(readName())+6];
+	char nm[80];
 	strcpy (nm, "Node_");
 	strcat (nm, readName());
-	Geodesic *g = new AsmGeodesic;
-	g->setNameParent(nm, parent());
+	LOG_NEW; Geodesic *g = new AsmGeodesic;
+	g->setNameParent(hashstring(nm), parent());
 	return g;
 }
 
