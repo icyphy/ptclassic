@@ -157,10 +157,12 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	if (ph->isItMulti()) {
 		GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
+		p->setAlias(*ph);
 	}
 	else {
 		GalPort *p = new GalPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
+		p->setAlias(*ph);
 	}
 // add action to list
 	actionList += "A";
@@ -373,6 +375,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 // make a new interpreted galaxy!  We do this by processing the action
 // list.
 	descriptor = g.descriptor;
+	className = g.className;
 	setNameParent(g.readName(), NULL);
 	const char* oldDom = NULL; // old domain
 
