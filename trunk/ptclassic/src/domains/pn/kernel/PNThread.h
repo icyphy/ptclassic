@@ -2,7 +2,7 @@
 #define _PNThread_h
 
 /* 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -33,26 +33,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "AweThread.h"
+#include "PosixThread.h"
+#include "PosixCondition.h"
+#include "PosixMonitor.h"
+
+class PNThread : public PosixThread {};
+
+class PNThreadScheduler : public PosixScheduler {};
+
+class PNMonitor : public PosixMonitor {};
+
+class PNCondition : public PosixCondition
+{
+public:
+    PNCondition(PNMonitor& m) : PosixCondition(m) {}
+};
 
 class DataFlowStar;
 class PtCondition;
-
-class PNThread : public AweThread
-{
-public:
-    // Constructor.
-    PNThread(unsigned int stackSize = defStackSize)
-	: AweThread(stackSize) {}
-};
 
 // A Kahn process for dataflow actors.
 class DataFlowProcess : public PNThread
 {
 public:
     // Constructor.
-    DataFlowProcess(DataFlowStar& s, unsigned int stackSize = defStackSize)
-	: star(s), PNThread(stackSize) {}
+    DataFlowProcess(DataFlowStar& s) : star(s) {}
 
 protected:
     /*virtual*/ void run();
@@ -64,9 +69,8 @@ class SyncDataFlowProcess : public DataFlowProcess
 {
 public:
     // Constructor.
-    SyncDataFlowProcess(DataFlowStar& s, PtCondition& c,
-	unsigned int stackSize = defStackSize)
-	: start(c), DataFlowProcess(s, stackSize) {}
+    SyncDataFlowProcess(DataFlowStar& s, PtCondition& c)
+	: start(c), DataFlowProcess(s) {}
 
 protected:
     /*virtual*/ void run();
