@@ -13,14 +13,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CGC Visual Instruction Set library }
 	desc { 
 A finite impulse response (FIR) filter.  In order to take advantage
-of the 4 by 4 vector multiplies, the VISFIR reformulates the filtering
-operation as a matrix operation (Ax=y).  The matrix A is first constructed 
-from the filter taps.  A row vector is filled out by copying the
-filter taps and zero-padding so that its length is a multiple of 4.  
-The row vector is then repeated four times, and each time it is
-shifted by one to build up the matrix A.  The 16-bit partitioned
-inputs are then grabbed and mutiplied with four of the filter taps.  
-The result is then accumulated to produce a 16-bit partitioned output.
+of the 16-bit partitioned multiplies, the VIS FIR reformulates 
+the filtering operation to that of a matrix operation (Ax=y), 
+where A is a tap matrix, x is an input vector, and y is an output
+vector.  The matrix A is first constructed from the filter taps.  
+Each row is filled by copying the filter taps, zero-padding so that 
+its length is a multiple of 4, and shifting to the right by one.  
+Four of these rows are used to build up matrix A.  The matrix A is 
+then multiplied with the 16-bit partitioned input vector.  This is 
+equivalent to taking four sum of products.  The final result is 
+accumulated in four 16-bit fixed point numbers which are concatenated 
+into a single 64-bit float particle.
         }
 	input {
 	  name { signalIn }
@@ -160,7 +163,7 @@ The result is then accumulated to produce a 16-bit partitioned output.
 	    datalo = vis_read_lo((double) $ref2(signalIn,outerloop));
 	    /* calculate four outputs */
 	    /*
-	     * 0: multiply first row of tap matrix
+	     * 0: multiply first row of tap matrix with the input vector
 	     * 
 	     */
 	    tapvalue = *tapptr0++;
@@ -177,7 +180,7 @@ The result is then accumulated to produce a 16-bit partitioned output.
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair0 = vis_fpadd32(accumpair0,pair);
 	    /*
-	     * 1: multiply second row of tap matrix
+	     * 1: multiply second row of tap matrix with the input vector
 	     * 
 	     */
 	    tapvalue = *tapptr1++;
@@ -194,7 +197,7 @@ The result is then accumulated to produce a 16-bit partitioned output.
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair1 = vis_fpadd32(accumpair1,pair);
 	    /*
-	     * 2: multiply third row of tap matrix
+	     * 2: multiply third row of tap matrix with the input vector
 	     * 
 	     */
 	    tapvalue = *tapptr2++;
@@ -211,7 +214,7 @@ The result is then accumulated to produce a 16-bit partitioned output.
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair2 = vis_fpadd32(accumpair2,pair);
 	    /*
-	     * 3: multiply fourth row of tap matrix
+	     * 3: multiply fourth row of tap matrix with the input vector
 	     * 
 	     */
 	    tapvalue = *tapptr3++;
@@ -230,7 +233,7 @@ The result is then accumulated to produce a 16-bit partitioned output.
 	  }
 	  /*
 	   * sum accumulators and pack outputs into a
-	   * double
+	   * 64-bit float particle
 	   */
 	  splithi = vis_read_hi(accumpair0);
 	  splitlo = vis_read_lo(accumpair0);
