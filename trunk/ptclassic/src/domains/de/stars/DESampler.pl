@@ -33,7 +33,9 @@ defstar {
 		name {output}
 		type {anytype}
 	}
-
+	constructor {
+		input.inheritTypeFrom(output);
+	}
 	go {
 	   // Check to see whether the star was triggered by a clock input
 	   if (clock.dataNew) {
