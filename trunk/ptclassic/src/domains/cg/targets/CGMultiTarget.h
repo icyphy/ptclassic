@@ -35,8 +35,11 @@ public:
 	int run();
 	void wrapup();
 
-	void setStopTime(double);
+	// redefine: generateCode routine generates code if inside a wormhole
+	// in this redefinition.
+	void generateCode();
 
+	void setStopTime(double);
 	void addCode(const char*);
 
 	// compute profile
@@ -79,9 +82,13 @@ public:
 	// generate Gantt chart
 	void writeSchedule();
 
-	// redefine. When nChildrenAlloc = 1, we call the corresponding
+	// redefine. Methods for generating code for reading and writing
+	// wormhole ports.
+	// When nChildrenAlloc = 1, we call the corresponding
 	// methods of the child target.
+	void wormInputCode();
 	void wormInputCode(PortHole&);
+	void wormOutputCode();
 	void wormOutputCode(PortHole&);
 
 protected:
@@ -110,9 +117,10 @@ protected:
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
 
-	// Redefine: call wormOutputCode after scheduling and sub-galaxy
-	// generation is done and before each processor generates code.
-	int wormCodeGenerate();
+	// Redefine for sending and receiving data to a target when run
+	// inside of a wormhole.
+	int sendWormData();
+	int receiveWormData();
 
 	// parallel processors
 	ParProcessors* parProcs;

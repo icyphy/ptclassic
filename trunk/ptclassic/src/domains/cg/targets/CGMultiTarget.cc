@@ -80,7 +80,6 @@ void CGMultiTarget::setup() {
 	// CG stuff
 	writeDirectoryName(destDirectory);
 	myCode.initialize();
-	headerCode();
 
 	if (galaxy()->parent()) {
 		sched->ofWorm();
@@ -89,7 +88,10 @@ void CGMultiTarget::setup() {
 
 	if (!inherited()) {
 		writeSchedule();
-		if (galaxy()->parent()) wormCodeGenerate();
+		if (inWormHole()) {
+			generateCode();
+			wormLoadCode();
+		}
 	}
 }
 
@@ -175,10 +177,8 @@ void CGMultiTarget::wrapup() {
 		// write out generated code.
 		StringList name = (const char*)filePrefix;
 		name += i;
-		pt_ofstream out(name);
-		if (!out) return;
 		CGTarget* nextChild = (CGTarget*)child(i);
-		nextChild->writeCode(out);
+		nextChild->writeCode(name);
 		logMsg += "code for ";
 		logMsg += nextChild->fullName();
 		logMsg += " written to ";
@@ -194,11 +194,16 @@ void CGMultiTarget::wrapup() {
 	/////////////////////
 
 int CGMultiTarget :: run() {
-	if((galaxy()->parent() == 0) || (nChildrenAlloc == 1))
+	if((inWormHole() == FALSE) || (nChildrenAlloc == 1))
 		return CGTarget :: run();
 
 	// if a wormhole, setup already generated code.
 	// We must do the transfer of data to and from the target.
+	if (!sendWormData()) return FALSE;
+	return receiveWormData();
+}
+
+int CGMultiTarget :: sendWormData() {
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -216,7 +221,12 @@ int CGMultiTarget :: run() {
 			}
 		}
 	}
-	nextPort.reset();
+	return !Scheduler::haltRequested();
+}
+
+int CGMultiTarget :: receiveWormData() {
+	BlockPortIter nextPort(*galaxy());
+	PortHole* p;
 	while ((p = nextPort++) != 0) {
 		if (p->isItOutput()) {
 			PortHole& realP = p->newConnection();
@@ -238,18 +248,30 @@ int CGMultiTarget :: run() {
 // default code generation for a wormhole.  This produces an infinite
 // loop that reads from the inputs, processes the schedule, and generates
 // the outputs.
-int CGMultiTarget :: wormCodeGenerate() {
-	if (nChildrenAlloc == 1) return CGTarget :: wormCodeGenerate();
+void CGMultiTarget :: generateCode() {
+	if (nChildrenAlloc == 1) {
+		CGTarget :: generateCode();
+		return;
+	}
 
-	Galaxy& g = *galaxy();
+	if (parent()) setup();		// check later whether this is right.
+
+        beginIteration(-1,0);
+	if (inWormHole()) {
+		wormInputCode();
+		wormOutputCode();	// note the change of calling order.
+	}
+	scheduler()->compileRun();
+        endIteration(-1,0);
+}
+	
+void CGMultiTarget :: wormInputCode() {
 	LOG_NEW; int* iprocs = new int[nChildrenAlloc];
 	for (int i = 0; i < nChildrenAlloc; i++)
 		iprocs[i] = 0;
 
-        BlockPortIter nextPort(g);
+        BlockPortIter nextPort(*galaxy());
         PortHole* p;
-        beginIteration(-1,0);
-
         // generate wormhole inputs
         while ((p = nextPort++) != 0) {
                 if (p->isItInput()) {
@@ -268,12 +290,17 @@ int CGMultiTarget :: wormCodeGenerate() {
 			}
 		}
         }
+	LOG_DEL; delete [] iprocs;
+}
 
-	for (i = 0; i < nChildrenAlloc; i++)
+void CGMultiTarget :: wormOutputCode() {
+	LOG_NEW; int* iprocs = new int[nChildrenAlloc];
+	for (int i = 0; i < nChildrenAlloc; i++)
 		iprocs[i] = 0;
 
-        nextPort.reset();
         // generate wormhole outputs
+        BlockPortIter nextPort(*galaxy());
+        PortHole* p;
         while ((p = nextPort++) != 0) {
                 if (p->isItOutput()) {
 			PortHole& realP = p->newConnection();
@@ -291,11 +318,7 @@ int CGMultiTarget :: wormCodeGenerate() {
 			}
 		}
         }
-
-        scheduler()->compileRun();
-        endIteration(-1,0);
 	LOG_DEL; delete [] iprocs;
-        return wormLoadCode();
 }
 
 // Use for nChildren == 1.
