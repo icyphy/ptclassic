@@ -9,7 +9,7 @@
 
 proc pftUsage { {msg} "Usage Information" } {
     puts stderr $msg
-    puts stderr {usage: ptfixtree [-list] [-v] [+R] [-within path] ... facets ...}
+    puts stderr {usage: ptfixtree [-list] [-v] [+R] [-within path] [-d domain] ... facets ...}
     puts stderr "\t-v\tturns on verbose message."
     puts stderr "\t+R\tturns off recursive traversal of heirarchy."
     puts stderr "\t-within\tspecifies a path which all facets must be within"
@@ -33,12 +33,15 @@ proc pftUsage { {msg} "Usage Information" } {
     puts stderr "would be used to verify that no cells in obscure directories"
     puts stderr "are referenced."
 
+    puts stderr "\nThe -d option specified that all facets visited should"
+    puts stderr "\tbe converted to 'domain'"
+
     puts stderr "\nAdditional (rarely used) options:"
     puts stderr "\t-octls path\tSpecifies location of octls binary"
     puts stderr "\t-octmvlib path\tSpecifies location of octmvlib binary"
     puts stdout "\t\t\tCurrent version uses octfix, not octmvlib"
 
-    puts stderr "\nSend bug reports to kennard@ohm."
+    puts stderr "\nSend bug reports to ptolemy@eecs.berkeley.edu"
     puts stderr "Please include *all* program output."
 
     exit 1
@@ -85,6 +88,25 @@ proc pftOctMvLib { facet oldpat newpat } {
 }
 
 
+proc pftOctReDomain { facet olddomain newdomain } {
+    global path_octredomain do_verbose
+
+    set facet [pftGetFullFacet $facet]
+    puts stdout "    $facet: changing domain to $newdomain"
+    set capnewdomain [string toupper $newdomain]
+    if [catch {exec $path_octredomain -d $capnewdomain $facet} result] {
+	puts stderr "********* octredomain failed ***********"
+	puts stderr "failed on: $facet: $olddomain --> $newdomain"
+	puts stderr "$result"
+	exit 1
+    }
+    if { $do_verbose } {
+        puts stdout "\t\t$result"
+    }
+}
+
+
+
 proc pftGetUniqueList { oldlist } {
     set oldlist [lsort $oldlist]
     set newlist ""
@@ -104,9 +126,10 @@ proc pftOctLs { facet } {
     return [pftGetUniqueList [split $masterlines "\n"]]
 }
 
+# checkcells is an array of cells we still need to check
+# goodcells is an array of cells we have already checked
 proc pftAddCheckCells { cells } {
     global checkcells goodcells
-
     foreach facet $cells {
         set facet [pftGetContentsFacet $facet]
 	if { [info exists goodcells($facet)] } {
@@ -271,32 +294,59 @@ proc pftPromptAndReplace { facet master } {
 
 
 proc pftFixFacet { facet } {
-    global mapcells do_recur do_verbose do_listonly
+    global mapcells do_recur do_verbose do_listonly do_domainchange
 
     if { ![pftIsFacetB $facet why expand] } {
 	puts stdout "\tCan't examine $facet:\n\t$why\n\tSkipping..."
 	return "skip"
     }
     set masters [pftOctLs $facet]
-    foreach master $masters {
-	if { $do_verbose } {
-	    puts stdout "  Verify master $master"
+    if { $do_domainchange != {}} {
+	regsub -all {:} $facet {/} facetpath
+	if [file writable "$facetpath\;"] {
+	    pftOctReDomain $facet "dummy" $do_domainchange
+	} else {
+	    puts "Can't redomain $facet, it is not writable"
 	}
-	set minfo [split $master ":"]
-	if { [pftGetCellMap [lindex $minfo 0]] != "" } {
-	    pftPromptAndReplace $facet $master
-	    return "redo"
-	}
-	if { ![pftIsGoodFacetB $master why] } {
-	    puts stdout "\tBad master:\n\t$why"
-	    if [catch {pftPromptAndReplace $facet $master} why] {
-		if { "$why"==":skip" } {
-		    puts stdout ">>>>> $facet NOT fixed (bad $master) <<<<<"
-		    return "skip"
+	set substr "src/domains/[string tolower $do_domainchange]/"
+	foreach master $masters {
+	    set doit 1
+	    set oldcell [lindex [split $master :] 0]
+	    set newcell [pftGetCellMap $oldcell]
+	    if { "$newcell"=="" } {
+		if { ![regsub {src/domains/[^/]+/} $oldcell $substr newcell]} {
+		    puts "Can't substitute $substr into $master"
+		    set doit 0
+		} else {
+		pftSetCellMap $oldcell $newcell
 		}
-		error $why
 	    }
-	    return "redo"
+	    if {$doit} {
+		pftOctMvLib $facet $oldcell: $newcell
+	    }
+
+	}
+    } else {
+	foreach master $masters {
+	    if { $do_verbose } {
+		puts stdout "  Verify master $master"
+	    }
+	    set minfo [split $master ":"]
+	    if { [pftGetCellMap [lindex $minfo 0]] != "" } {
+		pftPromptAndReplace $facet $master
+		return "redo"
+	    }
+	    if { ![pftIsGoodFacetB $master why] } {
+		puts stdout "\tBad master:\n\t$why"
+		if [catch {pftPromptAndReplace $facet $master} why] {
+		    if { "$why"==":skip" } {
+			puts stdout ">>>>> $facet NOT fixed (bad $master) <<<<<"
+			return "skip"
+		    }
+		    error $why
+		}
+		return "redo"
+	    }
 	}
     }
     if { $do_recur } {
@@ -306,7 +356,7 @@ proc pftFixFacet { facet } {
 }
 
 proc pftListFacet { facet } {
-    global mapcells do_recur do_verbose do_listonly
+    global mapcells do_recur
 
     if { ![pftIsFacetB $facet why expand] } {
 	puts stdout "\tCan't examine $facet:\n\t$why\n\tSkipping..."
@@ -377,18 +427,22 @@ proc pftMainLoop { } {
 
 proc pftProcessArgs { } {
     global argv env checkcells do_recur within_paths do_verbose do_listonly
-    global path_octls path_octmvlib
+    global do_domainchange
+    global path_octls path_octmvlib path_octredomain
     set within_paths ""
     set do_verbose 0
     set do_recur 1
     set do_listonly 0
+    set do_domainchange 0
     set path_octmvlib ""
     set path_octls ""
+    set path_octredomain ""
 
     set argCells [topgetopt {
       {v do_verbose boolean} 
       {R do_recur boolean} 
       {list do_listonly boolean} 
+      {d do_domainchange} 
       {within within_paths append} 
       {octmvlib path_octmvlib} 
       {octls path_octls} 
@@ -396,10 +450,8 @@ proc pftProcessArgs { } {
     if [llength $argCells]==0 {
 	pftUsage "No cells specified."
     }
-#puts stdout "WithinPaths: ``$within_paths''"
     pftAddCheckCells $argCells
 
-#        set path_octmvlib $env(PTOLEMY)/octtools/bin.$env(PTARCH)/octmvlib
     if { $path_octmvlib == "" } {
         set path_octmvlib $env(PTOLEMY)/bin.$env(PTARCH)/octfix
     }
@@ -417,7 +469,17 @@ proc pftProcessArgs { } {
 	puts stderr "(tried $path_octls)"
 	pftUsage "Setup failed."
     }
+
+    if { $path_octredomain == "" } {
+        set path_octredomain $env(PTOLEMY)/bin.$env(PTARCH)/octredomain
+    }
+    if { ![file isfile $path_octredomain] || ![file exec $path_octredomain] } {
+	puts stderr "Can't find octredomain program."
+	puts stderr "(tried $path_octredomain)"
+	pftUsage "Setup failed."
+    }
 }
+
 
 proc pftMain { } {
     global env
@@ -441,4 +503,3 @@ proc pftMain { } {
 }
 
 pftMain
-#destroy .
