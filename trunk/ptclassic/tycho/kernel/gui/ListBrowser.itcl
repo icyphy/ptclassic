@@ -248,10 +248,10 @@ body ::tycho::ListBrowser::constructor {args} {
     eval itk_initialize $args
 
     wm resizable $prefix 1 1
-    # NOTE: There seems to be no way to find out the actual window size at this
-    # point.  The commands "wm reqwidth" and "wm width" return 1, even after
-    # a "tkwait visibility" and an "update".  So we just set some reasonable
-    # minimum size.
+    # NOTE: There seems to be no way to find out the actual
+    # window size at this point.  The commands "wm reqwidth"
+    # and "wm width" return 1, even after a "tkwait visibility"
+    # and an "update".  So we just set some reasonable minimum size.
     wm minsize $prefix 10 10
 }
 
@@ -559,9 +559,7 @@ body ::tycho::ListBrowser::updateListbox {} {
     set items $itk_option(-items)
 
     # Insert items into the listbox
-    foreach item $items {
-	$itk_component(listbox) insert end "$item"
-    }
-    
+    eval $itk_component(listbox) insert end $items
+
     clear entry
 }
