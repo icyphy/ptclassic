@@ -27,6 +27,18 @@
 # src/tcltk/makefile
 # Makefile to build and install tcl/tk
 
+# This file will do several things for you:
+# 1) Build itcl2.0 (which contains tcl and tk). Generic build with static libs
+# 2) Build itcl2.0 with shared libraries
+# 3) Build tcl7.5a2, tk4.1a2
+#
+# The default action is to build itcl2.0 with static libraries
+# To build itcl2.0 with shared libraries, do 'make all_shared'
+# To build tcl7.5a2, tk4.1a2, do 'make all_tcltk'.  To get this to work
+#   right, you may need edit this makefile and change whether 
+#   $PTOLEMY/tcltk/tcl.$PTARCH and $PTOLEMY/tcltk/tk.$PTARCH are links
+#   or directories.
+
 # You should not need to edit this file, merely set the
 # ARCH and PTOLEMY environment variables, for example:
 #	setenv ARCH sun4
@@ -76,9 +88,9 @@ TK_VERSION =		tk4.1a2
 TCL_7_5_HACK=		/unix
 ENABLE_GCC =		--enable-gcc --disable-load
 
-ITCL_MAJOR_VERSION =	itcl-2.0
+ITCL_MAJOR_VERSION =	itcl2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
-ITCL_VERSION =		itcl-2.0
+ITCL_VERSION =		itcl2.0
 
 # Version of tcl and tk shipped with itcl
 ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
@@ -207,14 +219,6 @@ $(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) \
 $(TK_OBJ):
 	mkdir -p $(TK_OBJ)
 
-# This link is necessary for the tk build to find libtcl.a
-#$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION): $(TCL_OBJ)
-#	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_MAJOR_VERSION))
-
-# This link is necessary for the tk build to find libtk.a
-#$(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
-#	(cd $(TCLTK_OBJ); ln -s $(TK_OBJ) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION))
-
 # Build tk
 tk: $(TK_OBJ)/libtk.a 
 $(TK_OBJ)/libtk.a: $(TK_OBJ) #$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION)
@@ -257,7 +261,7 @@ $(TCLTK_OBJ):
 $(ITCL_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
-itcl: $(ITCL_OBJ) $(ITCL_OBJ)/iwidgets/init.iwidgets.in $(ITCL_OBJ)/libitcl.a 
+itcl: $(ITCL_OBJ) $(ITCL_OBJ)/libitcl.a 
 $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ) 
 	@echo "Making all in itcl"
 	(cd  $(ITCL_OBJ); $(MAKE) \
@@ -265,10 +269,6 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
-
-# Bug fix for itcl-2.0b
-$(ITCL_OBJ)/iwidgets/init.iwidgets.in:
-	ln -s $(ITCL_SRC)/iwidgets/init.iwidgets.in $@	
 
 # Install itcl
 install_itcl: $(ITCL_DEST_LIB)/libitcl.a
@@ -367,17 +367,12 @@ $(ITCL_SHARED_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
 itcl_shared: $(ITCL_SHARED_OBJ) \
-		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets.in \
 		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets \
 		$(ITCL_SHARED_OBJ)/tcl/libtcl.so \
 		$(ITCL_SHARED_OBJ)/tk/libtk.so \
 		$(ITCL_SHARED_OBJ)/itcl/libitcl.so \
 		$(ITCL_SHARED_OBJ)/itk/libitk.so
 	@echo "Done making all shared libraries in itcl"
-
-# Bug fix for itcl-2.0b
-$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets.in:
-	ln -s $(ITCL_SRC)/iwidgets/init.iwidgets.in $@	
 
 $(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
 	(cd  $(ITCL_SHARED_OBJ)/iwidgets; $(MAKE) all)
