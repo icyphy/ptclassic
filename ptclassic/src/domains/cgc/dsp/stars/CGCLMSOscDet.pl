@@ -22,7 +22,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 The initial taps of this LMS filter are 1, -2, and 1.  The second tap
 is adapted while the others are held fixed.  The second tap is equal
-to <i>-</i>2<i> a <sub></i>1<i></sub></i>, and its adaptation has the form
+to <i>-</i>2<i>a</i><sub>1</sub>, and its adaptation has the form
 <pre>
 y[n] = x[n] - 2a<sub>1[k]</sub>x[n-1] + x[n-2]a<sub>1[k]</sub> = a<sub>1</sub>[k-1] + 2*mu*e[n]x[n-1]
 </pre>

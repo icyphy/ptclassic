@@ -7,7 +7,7 @@ Adaptive filter using LMS adaptation algorithm.
 Initial coefficients are in the "taps" state variable.
 Default initial coefficients give an 8th order, linear phase
 lowpass filter.  To read default coefficients from a file,
-replace the default coefficients with "<fileName".
+replace the default coefficients with "fileName".
 Supports decimation, but not interpolation.
 	}
 	version {$Id$}
