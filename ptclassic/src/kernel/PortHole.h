@@ -87,7 +87,7 @@ public:
 	// Translate aliases, if any.
 	GenericPort& realPort() const {
 		const GenericPort* p = this;
-		while (p->alias) p = alias;
+		while (p->alias()) p = alias();
 		return *p;
 	}
 
@@ -111,23 +111,36 @@ public:
 	// return my type
 	dataType myType () const { return type;}
 
+	GenericPort* alias() const { return aliasedTo;}
+
 	// Constructor
-	GenericPort () : type(ANYTYPE),alias(0),typePortPtr(0) {}
+	GenericPort () : type(ANYTYPE),aliasedTo(0),typePortPtr(0),aliasedFrom(0) {}
 
 	// Destructor
 	~GenericPort();
-
+	
 protected:
+	// set up alias pointers in pairs.  Protected so derived types may
+	// restrict who can be an alias.
+	void setAlias (GenericPort& gp) {
+		aliasedTo = &gp;
+		gp.aliasedFrom = this;
+	}
+
 	// datatype of particles in this porthole
 	dataType type;
-
-	// PortHole this is aliased to
-	GenericPort* alias;
 
 	// return typePortPtr
 	GenericPort* typePort() const { return typePortPtr;}
 
 private:
+	// PortHole this is aliased to
+	GenericPort* aliasedTo;
+
+	// Name of a PortHole that is aliased to me (a back-pointer)
+	GenericPort* aliasedFrom;
+
+	// My type matches type of this port
 	GenericPort* typePortPtr;
 };
 
@@ -167,7 +180,9 @@ public:
 	StringList printVerbose () const;
 
 	// set the alias
-	setAlias (PortHole& blockPort) { alias = &blockPort; }
+	void setAlias (PortHole& blockPort) {
+		GenericPort::setAlias (blockPort);
+	}
 
 	// Can be used for things like inputing and output
 	//  Particles.  These are currently do-nothing functions
@@ -293,12 +308,7 @@ public:
         //////////////////////////////////////////
                   
 // A MultiPortHole is a collection of an indeterminate number of
-// PortHoles that have no particular ordering.  Because ordering
-// is indeterminate, MultiPortHoles should only be used for commutative
-// functions.  The only output MultiPortHole that makes any sense,
-// therefore, is one that outputs the same data on all connections.
-// Examples of reasonable input MultiPortHoles are summing junctions,
-// or an input where all data samples are multiplied together.
+// PortHoles.
 
 class MultiPortHole: public GenericPort
 {
@@ -328,7 +338,9 @@ public:
 	}
 
 	// set alias for MultiPortHole
-	setAlias (MultiPortHole &blockPort) { alias = &blockPort;}
+	void setAlias (MultiPortHole &blockPort) {
+		GenericPort::setAlias (blockPort);
+	}
 
 	// Return a new port for connections
 	virtual PortHole& newConnection();
