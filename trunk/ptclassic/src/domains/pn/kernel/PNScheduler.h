@@ -25,6 +25,8 @@ class MTDFStar;
 
 class MTDFScheduler : public Scheduler
 {
+    friend void sourceThread(MTDFStar*);
+
 public:
     // Constructor.
     MTDFScheduler();
@@ -33,45 +35,32 @@ public:
     ~MTDFScheduler();
 
     // Domain identification.
-    virtual const char* domain() const;
+    /* virtual */ const char* domain() const;
 
-    // Set up the schedule and initialize all Blocks.
-    // Return TRUE on success.
-    virtual int setup(Galaxy& galaxy);
+    // Initialization.
+    /* virtual */ void setup();
 
     // Run the simulation.
-    virtual int run(Galaxy& galaxy);
+    /* virtual */ int run();
 
     // Set the stopping time.
-    virtual void setStopTime(float limit);
+    /* virtual */ void setStopTime(double);
 
     // Get the stopping time.
-    virtual float getStopTime();
-
-    // Prepare stars for scheduling.
-    void prepareForScheduling(Galaxy& galaxy);
+    /* virtual */ double getStopTime();
 
     // Create threads and build ThreadList.
-    void createThreads(Galaxy& galaxy);
+    void createThreads();
 
     // Delete Threads and clear the ThreadList.
     void deleteThreads();
 
-protected:
-    // Number of iterations completed.
-    unsigned int numIterations;
-
-    // Stopping time.
-    unsigned int stopTime;
-
     // Duration of one schedule period or iteration.
-    float schedulePeriod;
+    double schedulePeriod;
 
-    // Thread for normal Stars.
-    static void starThread(MTDFStar* star);
-
-    // Thread for source Stars.
-    static void sourceThread(MTDFScheduler* sched, MTDFStar* star);
+protected:
+    // Stopping time.
+    double stopTime;
 
     // Thread for main().
     static MTDFThread& main;

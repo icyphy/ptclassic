@@ -1,5 +1,3 @@
-static const char file_id[] = "$RCSfile$";
-
 /*  Version $Id$
 
     Copyright 1992 The Regents of the University of California.
@@ -7,8 +5,9 @@ static const char file_id[] = "$RCSfile$";
 
     Programmer:		T.M. Parks
     Date of creation:	7 February 1992
-
 */
+
+static const char file_id[] = "$RCSfile$";
 
 #ifdef __GNUG__
 #pragma implementation
@@ -32,8 +31,8 @@ MTDFThread& MTDFScheduler::main = (MTDFThread&)Thread::init(maxPriority, stackSi
 // Constructor.
 MTDFScheduler::MTDFScheduler() : starThreads(), monitor(), start(monitor)
 {
-    numIterations = 0;
-    stopTime = 1;
+    currentTime = 0.0;
+    stopTime = 1.0;
     schedulePeriod = 1.0;
 }
 
@@ -49,42 +48,37 @@ const char* MTDFScheduler::domain() const
     return MTDFdomainName;
 }
 
-// Set up the schedule.  Returns TRUE upon success.
-int MTDFScheduler::setup(Galaxy& galaxy)
+// Initialization.
+void MTDFScheduler::setup()
 {
-    GalStarIter starIter(galaxy);
-    MTDFStar* star;
+    if (galaxy() == NULL)
+    {
+	Error::abortRun(domain(), "Scheduler has no galaxy.");
+	return;
+    }
 
-    // Prepare Stars for scheduling.
-    prepareForScheduling(galaxy);
+    currentTime = 0.0;
+    galaxy()->initialize();
 
-    // Initialize Galaxy and all Stars by recursively invoking Star::start().
-    galaxy.initialize();
-
-    // Delete any previous Threads.
+    // Delete any threads from the last run before creating new ones.
     deleteThreads();
-
-    // Create Threads for all the Stars.
-    createThreads(galaxy);
-
-    return !haltRequested();
+    createThreads();
 }
 
-// Run the simulation.
-int MTDFScheduler::run(Galaxy& galaxy)
+// Run (or continue) the simulation.
+int MTDFScheduler::run()
 {
-    numIterations = 0;
-
     // Lower the priority so that the Threads can run.
     main.setPriority(minPriority);
 
-    while((numIterations++ < stopTime) && !haltRequested())
+    while((currentTime < stopTime) && !haltRequested())
     {
 	// Notify all source Threads to start.
 	{
 	    CriticalSection x(monitor);
 	    start.notifyAll();
 	}
+	currentTime += schedulePeriod;
     }
 
     // Raise priority again to prevent Threads from running.
@@ -93,38 +87,18 @@ int MTDFScheduler::run(Galaxy& galaxy)
     return !haltRequested();
 }
 
-// Prepare stars for scheduling.
-void MTDFScheduler::prepareForScheduling(Galaxy& galaxy)
-{
-    GalStarIter starIter(galaxy);
-    MTDFStar* star;
-
-    while((star = (MTDFStar*)starIter++) != NULL)
-    {
-	star->prepareForScheduling();
-    }
-}
-
 // Create threads and build ThreadList.
-void MTDFScheduler::createThreads(Galaxy& galaxy)
+void MTDFScheduler::createThreads()
 {
-    GalStarIter starIter(galaxy);
+    GalStarIter starIter(*galaxy());
     MTDFStar* star;
+    MTDFThread* thread;
 
     // Create Threads for all the Stars.
     while((star = (MTDFStar*)starIter++) != NULL)
     {
-	MTDFThread* t;
-	if(star->isItSource())
-	{
-	    LOG_NEW; t = new MTDFThread(maxPriority, (void(*)(void*,void*))sourceThread, this, star);
-	    starThreads.put(t);
-	}
-	else
-	{
-	    LOG_NEW; t = new MTDFThread(maxPriority, (void(*)(void*))starThread, star);
-	    starThreads.put(t);
-	}
+	LOG_NEW; thread = new MTDFThread(maxPriority, star);
+	starThreads.append(thread);
     }
 }
 
@@ -144,33 +118,12 @@ void MTDFScheduler::deleteThreads()
 }
 
 // Set the stopping time.
-void MTDFScheduler::setStopTime(float limit)
+void MTDFScheduler::setStopTime(double limit)
 {
-    stopTime = (unsigned int)(limit / schedulePeriod);
+    stopTime = limit;
 }
 
-float MTDFScheduler::getStopTime()
+double MTDFScheduler::getStopTime()
 {
-    return stopTime * schedulePeriod;
-}
-
-// Thread for normal Stars.
-void MTDFScheduler::starThread(MTDFStar* star)
-{
-    // Fire the Star ad infinitum.
-    while(TRUE)	star->fire();
-}
-
-// Thread for source Stars.
-void MTDFScheduler::sourceThread(MTDFScheduler* sched, MTDFStar* star)
-{
-    // Wait for notification from the Scheduler, then fire the Star.
-    while(TRUE)
-    {
-	{
-	    CriticalSection x(sched->monitor);
-	    sched->start.wait();
-	}
-	star->fire();
-    }
+    return stopTime;
 }
