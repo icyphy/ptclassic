@@ -14,7 +14,7 @@ signal arrives and there is no data.
 	ccinclude { "FloatVecData.h" }
 	input {
 		name { data }
-		type { message }
+		type { float }
 	}
 	input {
 		name { demand }
