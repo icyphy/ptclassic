@@ -1,0 +1,4355 @@
+\input texinfo.tex
+@c %**start of header
+@setfilename ptk.info
+@settitle The Ptolemy kernel
+@c version: $Id$
+@c %**end of header
+
+@iftex
+@titlepage
+@title The Ptolemy kernel
+@subtitle a programmer's companion for Ptolemy 0.4
+@subtitle November 1992
+@author by Joseph T. Buck
+@end iftex
+
+@node Top, Basic concepts, (dir), (dir)
+
+This document describes the Ptolemy kernel.  It still needs a lot of
+work.  The goal is to explain what the classes are and what their public
+and protected members do.  The principal audience for this document is
+programmers who seek to extend Ptolemy in major ways (e.g. write a new
+domain or a new parallel scheduler), or who seek a deeper understanding
+of how the kernel works.  People who just wish to use Ptolemy, and
+possibly write a star or two, are directed to the Almagest instead.
+
+@iftex
+@end titlepage
+@end iftex
+
+@menu
+* Basic concepts::              Basic concepts and classes
+* Block and related classes::   Block and related classes
+* Control of execution::        Control of execution and error reporting
+* Interfacing domains::         Interfacing domains -- wormholes and related classes
+* connection classes::          Classes for connections between blocks
+* Particles and Messages::      Particles and Messages
+* The incremental linker::      The incremental linker
+* Parameters and States::       Parameters and States
+* known lists::                 Support for known lists and such
+* I/O classes::                 I/O classes
+* Misc::                        Misc
+@end menu
+
+@node Basic concepts, Block and related classes, Top, Top
+@chapter Basic concepts and classes
+
+This section describes some basic classes and low-level concepts that
+are re-used throughout Ptolemy.  There are a number of iterator classes,
+all with the same interface.  A basic linked list class called
+SequentialList is re-used a lot.  Finally, many of the significant
+classes in Ptolemy -- functional blocks, portholes to implement
+connections, parameters -- are derived from NamedObj, the basic object
+for implementing a named object that lives in a hierarchy.
+
+@menu
+* Iterators::                   Iterators
+* Generic Data Structures::     Generic Data Structures
+* class SequentialList::        class SequentialList
+* Doubly linked lists::         Doubly linked lists
+* Other containers::            Other generic container classes
+* class NamedObj::              class NamedObj
+* class NamedObjList::          class NamedObjList
+@end menu
+
+@node Iterators, Generic Data Structures, Basic concepts, Basic concepts
+@section Iterators
+
+Iterators are a very basic and widely used concept in Ptolemy, and are
+used repeatedly in Ptolemy programming in almost any situation where a
+composite object contains other objects.  We have chosen to use a
+consistent interface for all iterator objects.  The typical iterator
+class has the following basic interface (some iterators provide additional
+functions as well):
+
+@example
+class MyIterator @{
+public:
+    // constructor: argument is associated outer object
+    MyIterator(OuterObject&);
+    // next: return a pointer to the next object,
+    // or a null pointer if no more
+    InnerObject* next();
+    // operator form: a synonym for next
+    InnerObject* operator++() @{ return next(); @}
+    // reset the iterator to point to the first object
+    void reset();
+@}
+@end example
+
+A typical programming application for iterators might be something like
+
+@example
+// print the names of all objects in the container
+ListIter nextItem(myList);
+Item *itemP;
+while ((itemP = nextItem++) != 0)
+    cout << itemP->name() << "\n";
+@end example
+
+It is, as a rule, not safe to modify most container classes in parallel
+with the use of an iterator, as the iterator may attempt to access an
+object that does not exist any more.  However, the @code{reset} member
+function will always make the iterator safe to use even if the list has
+been modified (user-written iterators should preserve this property).
+
+@node Generic Data Structures, class SequentialList, Iterators, Basic concepts
+@section Generic Data Structures
+
+Ptolemy does not use templates, since many compilers do not support them
+still and since the implementations of templates that we do have available
+are still unstable.  Therefore our generic lists use the generic pointer
+technique, with
+
+@example
+typedef void * Pointer;
+@end example
+
+The most commonly used generic data structure in Ptolemy is
+@code{SequentialList}.  Other lists are, as a rule, privately inherited
+from this class, so that type safety can be preserved.  It is possible
+to insert and retrieve items at either the head or the tail of the list.
+
+@node class SequentialList, Doubly linked lists, Generic Data Structures, Basic concepts
+@section class SequentialList
+
+This class implements a single linked list with a count of the number of
+elements.  The constructor produces a properly initialized empty list,
+and the destructor deletes the links.  However, the destructor does
+not delete the items that have been added to the list; this is not
+possible because it has only @code{void *} pointers and would not know
+how to delete the items.
+
+There is an associated iterator class for SequentialList called ListIter.
+
+@menu
+* SequentialList information functions::  SequentialList information functions
+* other SequentialList functions::  other SequentialList functions
+* class ListIter::              class ListIter
+@end menu
+
+@node SequentialList information functions, other SequentialList functions, class SequentialList, class SequentialList
+@subsection SequentialList information functions
+
+These functions return information about the SequentialList but do not
+modify it.
+
+@example
+int size() const;
+@end example
+
+Return the size of the list.
+
+@example
+Pointer head() const;
+@end example
+
+Return the first item from the list (0 if the list is empty).  The
+list is not changed.
+
+@example	
+Pointer tail() const;
+@end example
+
+Return the last item from the list (0 if the list is empty).  The
+list is not changed.
+
+@example	
+Pointer elem(int @var{n}) const;
+@end example
+
+Return the @var{n}th item on the list (0 if there are fewer than @var{n} items).
+Note that the time required is proportional to @var{n}.
+
+@example
+int empty() const;
+@end example
+
+Return 1 if the list is empty, 0 if it is not.
+
+@example
+int member(Pointer @var{arg}) const;
+@end example
+
+Return 1 if the list has a Pointer that is equal to @var{arg}, 0 if not.
+
+@node other SequentialList functions, class ListIter, SequentialList information functions, class SequentialList
+@subsection other SequentialList functions
+
+These functions modify the list they are applied to.
+
+@example	
+void prepend(Pointer @var{a});
+@end example
+
+Add an item at the beginning of the list.
+
+@example
+void append(Pointer @var{a});
+@end example
+
+Add an item at the end of the list.
+
+@example
+int remove(Pointer @var{a});
+@end example
+
+Remove the pointer @var{a} from the list if it is present (the test is pointer
+equality).  Return 1 if present, 0 if not.
+
+@example
+Pointer getAndRemove();
+@end example
+
+Return and remove the head of the list.  If the list is empty, return
+a null pointer (0).
+
+@example
+Pointer getTailAndRemove();
+@end example
+
+Return and remove the last item on the list.
+
+@example
+void initialize();
+@end example
+
+Remove all links from the list.  This does not delete the items pointed
+to by the pointers that were on the list.
+
+@node class ListIter,  , other SequentialList functions, class SequentialList
+@subsection class ListIter
+
+ListIter is a standard iterator class for use with objects of class
+SequentialList.  The constructor takes an argument of type
+
+@example
+const SequentialList
+@end example
+
+and the ++ operator (or @code{next} function) returns a @code{Pointer}.
+class ListIter is a friend of class SequentialList.
+In addition to the standard iterator functions @code{next} and
+@code{reset}, this class also provides a function
+
+@example
+void reconnect(const SequentialList& @var{newList});
+@end example
+
+that attaches the ListIter to a different SequentialList.
+
+@node Doubly linked lists, Other containers, class SequentialList, Basic concepts
+@section Doubly linked lists
+
+Support for doubly linked lists is found in "DoubleLink.h".  The class
+DoubleLink implements a baseclass for nodes in the list, class
+DoubleLinkList implements the list itself, and DoubleLinkIter forms an
+iterator.
+
+[ To be done ]
+
+@node Other containers, class NamedObj, Doubly linked lists, Basic concepts
+@section Other generic container classes
+
+The file @code{DataStruct.h} defines two other generic container classes
+that are privately derived from SequentialList: Queue and Stack.
+
+Class Queue may be used to implement a FIFO or a LIFO queue, or a
+mixture.
+
+Class Stack implements a stack.
+
+@menu
+* class Queue::                 class Queue
+* class Stack::                 class Stack
+@end menu
+
+@node class Queue, class Stack, Other containers, Other containers
+@subsection class Queue
+
+The constructor for class Queue builds an empty queue.  The following
+four functions move pointers into or out of the queue:
+
+@example
+void putTail(Pointer @var{p});
+void putHead(Pointer @var{p});
+Pointer getHead();
+Pointer getTail();
+@end example
+
+@code{put} is a synonym for @code{putTail}, and @code{get} is a synonym
+for @code{getHead}.  All these functions are implemented on top of the
+(hidden) SequentialList functions.  The SequentialList functions
+@code{size} and @code{initialize} are re-exported.
+
+@node class Stack,  , class Queue, Other containers
+@subsection class Stack
+
+The constructor for class Stack builds an empty stack.  The following
+functions move pointers onto or off of the stack:
+
+@example
+void pushTop(Pointer p);
+Pointer popTop();
+pushBottom(Pointer p);
+@end example
+
+@code{pushTop} and @code{popTop} are the functions traditionally
+associated with a stack; @code{pushBottom} adds an item at the bottom,
+which is non-traditional.  The following non-destructive function
+also exists:
+
+@example
+Pointer accessTop() const;
+@end example
+
+It accesses but does not remove the element from the top of the stack.
+
+All these functions are implemented on top of the (hidden)
+SequentialList functions.  The SequentialList functions @code{size} and
+@code{initialize} are re-exported.
+
+@node class NamedObj, class NamedObjList, Other containers, Basic concepts
+@section class NamedObj
+
+NamedObj is the baseclass for most of the common Ptolemy objects.  A
+NamedObj is, simply put, a named object; in addition, a NamedObj has a
+pointer to a parent object, which is always a Block (a type of
+NamedObj).  This pointer can be null.  A NamedObj also has a descriptor.
+
+Warning!  NamedObj assumes that the name and descriptor "live" as long
+as the NamedObj does.
+
+@menu
+* NamedObj constructors::       NamedObj constructors and destructors
+* NamedObj public members::     NamedObj public members
+* NamedObj protected members::  NamedObj protected members
+@end menu
+
+@node NamedObj constructors, NamedObj public members, class NamedObj, class NamedObj
+@subsection NamedObj constructors and destructors
+
+All constructors and destructors are public.
+
+NamedObj has a default constructor, which sets the name and
+descriptor to empty strings and the parent pointer to null, and a
+three-argument constructor:
+
+@example        
+NamedObj(const char* @var{name},Block* @var{parent},const char* @var{descriptor})
+@end example
+
+NamedObj's destructor is virtual and does nothing.
+
+@node NamedObj public members, NamedObj protected members, NamedObj constructors, class NamedObj
+@subsection NamedObj public members
+
+@example
+virtual const char* className() const;
+@end example
+
+className returns the name of the class.  It should have a new
+implementation supplied for every derived class (except for abstract
+classes, where this is not necessary).
+
+@example
+const char* name() const;
+@end example
+
+name returns the local portion of the name of the class.
+
+@example
+const char* descriptor() const;
+@end example
+
+descriptor returns the descriptor.
+
+@example
+Block* parent() const;
+@end example
+
+parent returns a pointer to the parent block.
+
+@example
+virtual StringList fullName() const;
+@end example
+
+fullName returns the full name of the object.  The default implementation
+returns names that might look like
+
+@example
+universe.galaxy.star.port
+@end example
+
+for a porthole; the output is the fullName of the parent, plus a period,
+plus the fullName of the NamedObj it is called on.
+
+@example
+void setNameParent (const char* @var{my_name},Block* @var{my_parent})
+@end example
+
+This method changes the name and parent pointer of the object.
+
+@example
+virtual void initialize() = 0;
+@end example
+
+initialize is a pure virtual method.  Its function is to initialize the
+object to prepare for system execution.
+
+@example
+virtual StringList print (int @var{verbose}) const;
+@end example
+
+print returns a verbose description of the object.  If verbose is 0, a
+somewhat more compact form is printed than if verbose is 1.
+
+@example
+virtual int isA(const char* @var{cname}) const;
+@end example
+
+The isA method should be redefined for all classed derived from
+NamedObj.  Its function is to return TRUE if the argument is the name
+either of the class or of one of the baseclasses.  To make this easy to
+implement, a macro @code{ISA_FUNC} is provided; for example, in the
+file @code{Block.cc} we see the line
+
+@example
+ISA_FUNC(Block,NamedObj);
+@end example
+
+which creates the function definition
+
+@example
+int Block::isA(const char* cname) const @{
+        if (strcmp(cname,"Block") == 0) return TRUE;
+        else return NamedObj::isA(cname);
+@}
+@end example
+
+Methods @code{isA} and @code{className} are overriden in derived
+classes; the redefinitions will not be described for each individual
+class.
+
+@node NamedObj protected members,  , NamedObj public members, class NamedObj
+@subsection NamedObj protected members
+
+@example
+void setDescriptor(const char* @var{desc});
+@end example
+
+The descriptor is set to d.  The string pointed to by d must live as
+long as the NamedObj does.
+
+@node class NamedObjList,  , class NamedObj, Basic concepts
+@section class NamedObjList
+
+class NamedObjList is simply a list of objects of class NamedObj.
+It is privately inherited from class SequentialList, and, as a rule,
+other classes privately inherit from it.  It supports only a subset
+of the operations provided by SequentialList; in particular, objects
+are added only to the end of the list.  It provides extra operations,
+like searching for an object by name and deleting objects.
+
+This object enforces the rule that only const pointers to members can
+be obtained if the list is itself const; hence, two versions of some
+functions are provided.
+
+@menu
+* NamedObjList information::    NamedObjList information functions
+* other NamedObjList functions::  other NamedObjList functions
+* NamedObjList iterators::      NamedObjList iterators
+@end menu
+
+@node NamedObjList information, other NamedObjList functions, class NamedObjList, class NamedObjList
+@subsection NamedObjList information functions
+
+The @code{size} and @code{initialize} functions of SequentialList
+are re-exported.  Note that @code{initialize} removes only the links
+to the objects and does not delete the objects.
+
+Here's what's new:
+
+@example
+const NamedObj* objWithName(const char* @var{name}) const;
+NamedObj* objWithName(const char* @var{name});
+@end example
+
+Find the first NamedObj on the list whose name is equal to @var{name},
+and return a pointer to it.  Return 0 if it is not found.
+
+@example
+NamedObj* head();
+const NamedObj* head() const;
+@end example
+
+Return a pointer to the first object on the list (0 if none).  There
+are two forms, one of which can be applied to const NamedObjList objects.
+
+@node other NamedObjList functions, NamedObjList iterators, NamedObjList information, class NamedObjList
+@subsection other NamedObjList functions
+
+@example
+void put(NamedObj& @var{obj})
+@end example
+
+Add a pointer to @var{obj} to the list, at the end.
+
+@example
+void initElements();
+@end example
+
+Apply the @code{initialize} method to each NamedObj on the list.
+
+@example
+int remove(NamedObj* @var{obj});
+@end example
+
+Remove @var{obj} from the list, if present (this does not delete
+@var{obj}).  Return 1 if it was present, 0 if not.
+
+@example
+void deleteAll();
+@end example
+
+Delete all elements from the list, and reset it to be an empty list.
+WARNING: this assumes that the members of the list are on the heap!
+
+@node NamedObjList iterators,  , other NamedObjList functions, class NamedObjList
+@subsection NamedObjList iterators
+
+There are two different iterators associated with NamedObjList;
+class NamedObjListIter and class CNamedObjListIter.  The latter may
+be applied to const NamedObjList objects and returns const NamedObj
+pointers; the former requires non-const NamedObjList objects and
+returns non-const NamedObj pointers.  They obey the standard iterator
+interface (and are privately derived from class ListIter).
+
+@node Block and related classes, Control of execution, Basic concepts, Top
+@chapter Block and related classes
+
+This section describes Block, the basic functional block class, and
+those objects derived from it.  It is Blocks more than anything else
+that a user of Ptolemy deals with: actors as well as collections of
+actors are Blocks.
+
+Although the Target class is derived from class Block, it is documented
+elsewhere, as it falls under control of execution.
+
+@menu
+* class Block::                 class Block
+* class Star::                  class Star
+* class Galaxy::                class Galaxy
+* class DynamicGalaxy::         class DynamicGalaxy
+* class InterpGalaxy::          class InterpGalaxy
+* class Runnable::              class Runnable
+* class Universe::              class Universe
+* class InterpUniverse::        class InterpUniverse
+@end menu
+
+@node class Block, class Star, Block and related classes, Block and related classes
+@section class Block
+
+Block is the basic object for representing an actor in Ptolemy.
+It is derived from NamedObj.
+
+Important derived types of Block are Star, representing an atomic actor;
+Galaxy, representing a collection of actors that can be thought of as
+one actor, and Universe, representing an entire runnable system.
+
+A Block has portholes (connections to other blocks), states (parameters
+and internal states), and multiportholes (organized collections of
+portholes).  While the exact data structure used to represent each is a
+secret of class Block, it is visible that there is an order to each list, in
+that iterators return the contained states, portholes, and
+multiportholes in this order.  Iterators are a set of helper classes
+that step through the states, portholes, or multiportholes that belong
+to the Block, see the menu entry.
+
+Furthermore, Blocks can be cloned, an operation that produces a
+duplicate block.  There are two cloning functions: @code{makeNew},
+which resembles making a new block of the same class, and @code{clone},
+which makes a more exact duplicate (with the same values for states,
+for example).
+
+@menu
+* Block constructors and destructors::  
+* Block public "information" members::  
+* other Block public members::  
+* Block protected members::     
+* Block iterator classes::      
+@end menu
+
+@node Block constructors and destructors, Block public "information" members, class Block, class Block
+@subsection Block constructors and destructors
+
+Block has a default constructor, which sets the name and
+descriptor to empty strings and the parent pointer to null, and a
+three-argument constructor:
+
+@example
+Block(const char* @var{name},Block* @var{parent},const char* @var{descriptor});
+@end example
+
+Block's destructor is virtual and does nothing, except for the standard
+action of destroying the Block's data members.
+
+In addition, Block possesses two types of "virtual constructors", the
+public member functions @code{makeNew} and @code{clone}.
+
+@node Block public "information" members, other Block public members, Block constructors and destructors, class Block
+@subsection Block public "information" members
+
+@example
+int numberPorts() const;
+int numberMPHs() const;
+int numberStates() const;
+@end example
+
+The above functions return the number of ports, or the number of
+multiports, or the number of states, in the Block.
+
+@example
+virtual int isItAtomic() const;
+virtual int isItWormhole() const;
+@end example
+
+These functions return TRUE or FALSE, based on whether the Block is
+atomic or not, or a wormhole or not.  The base implementations return
+TRUE for isItAtomic, FALSE for isItWormhole.
+
+@example
+virtual StringList print(int @var{verbose}) const;
+@end example
+
+Overrides NamedObj::print.  This function gives a basic printout of
+the information in the block.
+
+@example
+GenericPort* genPortWithName(const char* @var{name});
+PortHole* portWithName(const char* @var{name});
+MultiPortHole* multiPortWithName(const char* @var{name});
+virtual State *stateWithName(const char* @var{name});
+@end example
+
+These functions search the appropriate list and return a pointer
+to the contained object with the matching name.  genPortWithName
+searches both the multiport and the regular port lists (multiports
+first).  If a match is found, it returns a pointer to the matching
+object as a @code{GenericPort} pointer.
+
+@example
+int multiPortNames (const char** @var{names}, const char** @var{types},
+                    int* @var{io}, int @var{nMax}) const;
+@end example
+
+Get a list of multiport names.
+
+@example
+StringList printPorts(const char* @var{type}, int @var{verbose}) const;
+@end example
+
+Print portholes as part of the info-printing method.
+
+@example
+virtual Scheduler* scheduler() const;
+@end example
+
+Return the controlling scheduler for this block.  The default
+implementation simply calls @code{scheduler()} on the parent, or returns 0
+if there is no parent.  The intent is that eventually a block with
+a scheduler will be rearched.
+
+@example
+virtual Star& asStar();
+virtual const Star& asStar() const;
+@end example
+
+Return reference to me as a Star, if I am one.  Warning: it is a
+fatal error (the entire program will halt) if this method is invoked
+on a Galaxy!  Check with @code{isItAtomic} before calling it.
+
+@example
+virtual Galaxy& asGalaxy();
+virtual const Galaxy& asGalaxy() const;
+@end example
+
+Return reference to me as a Galaxy, if I am one.  Warning: it is a
+fatal error (the entire program will halt) if this method is invoked
+on a Star!  Check with @code{isItAtomic} before calling it.
+
+@example
+virtual const char* domain() const;
+@end example
+
+Return my domain (e.g. SDF, DE, etc.)
+
+@node other Block public members, Block protected members, Block public "information" members, class Block
+@subsection other Block public members
+
+@example
+virtual void initialize();
+@end example
+
+overrides NamedObj::initialize.  Block::initialize initializes the
+portholes and states belonging to the block, and calls @code{setup()}, which
+is intended to be the "user-supplied" initialization function.
+
+@example
+virtual int run();
+@end example
+
+This function is intended to "run" the block.  The default
+implementation does nothing.
+
+@example
+virtual void wrapup();
+@end example
+
+This function is intended to be run after the completion of execution
+of a universe, and provides a place for wrapup code.  The default does
+nothing.
+
+@example
+virtual Block& setBlock(const char* @var{name},Block* @var{parent}=0);
+@end example
+
+Set the name and parent of a block.
+
+@example
+virtual Block* makeNew() const
+@end example
+
+This is a very important function.  It is intended to be overloaded in
+such a way that calling it produces a newly constructed object of the
+same type.  The default implementation causes an error.  Every derived
+type should redefine this function.  Here is an example implementation
+of an override for this function:
+
+@example
+Block* MyClass::makeNew() const @{ return new MyClass;@}
+@end example
+
+@example
+virtual Block* clone() const
+@end example
+
+The distinction between @code{clone} and @code{makeNew} is that the
+former does some extra copying.  The default implementation calls
+@code{makeNew} and then @code{copyStates}; it may be overridden to
+copy more information.  The intent is that @code{clone} should produce
+an identical object.
+
+@example
+void addPort(PortHole& @var{port})
+void addPort(MultiPortHole& @var{port})
+@end example
+
+Add a porthole, or a multiporthole, to the block's list of known ports
+or multiports.
+
+@example
+int removePort(PortHole& @var{port})
+@end example
+      
+@example
+void addState(State& @var{s});
+
+virtual void initState();
+
+StringList printStates(const char* @var{type},int @var{verbose}) const;
+
+int setState(const char* @var{stateName}, const char* @var{expression});
+@end example
+
+@node Block protected members, Block iterator classes, other Block public members, class Block
+@subsection Block protected members
+
+@example
+virtual void setup();
+@end example
+
+User-specified additional initialization By default, it does nothing.
+It is called by Block::initialize (and should also be called if
+initialize is redefined).
+
+@example
+Block* copyStates(const Block& @var{src});
+@end example
+
+method for copying states during cloning.  It is designed for use
+by clone methods, and it assumes that the src argument has the same
+state list as the "this" object.  
+
+@node Block iterator classes,  , Block protected members, class Block
+@subsection Block iterator classes
+
+There are three types of iterators that may be used on Blocks:
+BlockPortIter, BlockStateIter, and BlockMPHIter.
+Each takes one argument for its constructor, a reference to Block.
+They step through the portholes, states, or multiportholes, of the
+Block, respectively, using the standard iterator interface.
+
+There are also variant versions with a "C" prefix (CBlockPortIter, etc)
+defined in the file "ConstIters.h" that take a reference to const Block
+and return a const pointer.
+
+@node class Star, class Galaxy, class Block, Block and related classes
+@section class Star
+
+Class Star represents the basic executable atomic version of Block.
+It is derived from Block.
+
+Stars have an associated Target (possibly null), and index value,
+and an indication of whether or not there is internal state.
+
+The default constructor sets the target to null, sets the internal
+state flag to TRUE, and sets the index value to -1.
+
+@menu
+* Star public members::         Star public members
+* Star protected members::      Star protected members
+@end menu
+
+@node Star public members, Star protected members, class Star, class Star
+@subsection Star public members
+
+@example
+int run();
+@end example
+
+Execute the Star.  This method also interfaces to the SimControl
+class to provide for control over simulations.  All derived classes
+that override this method must invoke @code{Star::run}.
+
+@example
+StringList print (int @var{verbose} = 0) const;
+@end example
+
+Print out info on the star.
+
+@example
+Star& asStar();
+const Star& asStar() const;
+@end example
+
+These simply return a reference to @code{this}, overriding @code{Block::asStar}.
+
+@example
+int index() const;
+@end example
+
+Return the index value for this star.  Index values are a feature
+that assists with certain schedulers; the idea is to assign a numeric
+index to each star at any level of a particular Universe or Galaxy.
+
+@example
+virtual void setTarget(Target* @var{t});
+@end example
+
+Set the target associated with this star.
+
+@example
+void noInternalState();
+@end example
+
+Declare that this star has no internal state. [ Should this be
+protected?].
+
+@example
+int hasInternalState();
+@end example
+
+Return TRUE if this star has internal state, false if it doesn't.
+Useful in parallel scheduling.
+
+@node Star protected members,  , Star public members, class Star
+@subsection Star protected members
+
+@example
+virtual void go();
+@end example
+
+This is a method that is intended to be overriden to provide the
+principal action of executing this block.  It is protected and is
+intended to be called from the @code{run()} member function.  The
+separation is so that actions common to a domain can be provided
+in the run function, leaving the writer of a functional block to
+only implement @code{go()}.
+
+@example
+Target* targetPtr;
+@end example
+
+This is a public data member, set by the setTarget public member
+function.
+
+@node class Galaxy, class DynamicGalaxy, class Star, Block and related classes
+@section class Galaxy
+
+A Galaxy is a type of Block that has an internal hierarchical structure.
+In particular, it contains other Blocks (some of which may also be
+galaxies).  It is possible to access only the top-level blocks or to
+flatten the hierarchy and step through all the blocks, by means
+of the various iterator classes associated with Galaxy.
+
+While we generally define a different derived type of Star for each
+domain, the same kinds of Galaxy (and derived classes such as
+DynamicGalaxy and InterpGalaxy) are used in each domain.  Accordingly,
+a Galaxy has a data member containing its associated domain (which
+is set to null by the constructor).
+
+PortHoles belonging to a Galaxy are, as a rule, aliased so that they
+refer to PortHoles of an interior Block, although this is not a
+requirement.
+
+@menu
+* Galaxy public members::       Galaxy public members
+* Galaxy protected members::    Galaxy protected members
+* Galaxy iterators::            Galaxy iterators
+@end menu
+
+@node Galaxy public members, Galaxy protected members, class Galaxy, class Galaxy
+@subsection Galaxy public members
+
+@example
+void initialize();
+@end example
+
+System initialize method.  Derived Galaxies should not redefine
+initialize; they should write a @code{setup()} method to do any
+class-specific startup.
+
+@example
+void wrapup();
+@end example
+
+System wrapup method.  Recursively calls wrapup in subsystems
+
+@example
+void addBlock(Block& @var{b},const char* @var{bname});
+@end example
+
+Add block to the galaxy and set its name.
+
+@example
+int removeBlock(Block& @var{b});
+@end example
+
+Remove a block from the list
+
+@example
+virtual void initState();
+@end example
+
+Initialize states.
+
+@example
+int numberBlocks() const;
+@end example
+
+Return the number of blocks in the galaxy.
+
+@example
+StringList print(int @var{verbose}) const;
+@end example
+
+Print a description of the galaxy.
+
+@example
+int isItAtomic () const;
+@end example
+
+Returns FALSE (galaxies are not atomic blocks).
+
+@example
+Galaxy& asGalaxy();
+const Galaxy& asGalaxy() const;
+@end example
+
+These return myself as a Galaxy, overriding @code{Block::asGalaxy}.
+
+@example
+const char* domain () const;
+@end example
+
+Return my domain.
+
+@example
+void setDomain(const char* @var{dom});
+@end example
+
+Set the domain of the galaxy (this may become a protected member
+in the future).
+
+@node Galaxy protected members, Galaxy iterators, Galaxy public members, class Galaxy
+@subsection Galaxy protected members
+
+@example
+void addBlock(Block& @var{b})
+@end example
+
+Add @var{b} to my list of blocks.
+
+@example
+void connect(GenericPort& @var{source}, GenericPort& @var{destination},
+             int @var{numberDelays} = 0)
+@end example
+
+Connect sub-blocks with a delay (default to zero delay).
+
+
+@example
+void alias(PortHole& @var{galPort}, PortHole& @var{blockPort});
+void alias(MultiPortHole& @var{galPort}, MultiPortHole& @var{blockPort});
+@end example
+
+Connect a Galaxy PortHole to a PortHole of a sub-block, or same for
+a MultiPortHole.
+
+
+@example
+Block* blockWithName (const char* @var{name});
+@end example
+
+Support blockWithName message to access internal block list.
+
+@example
+void initSubblocks();
+void initStateSubblocks();
+@end example
+
+Former: Initialize subblocks only.  Latter: initialize states in
+subblocks only.
+
+@node Galaxy iterators,  , Galaxy protected members, class Galaxy
+@subsection Galaxy iterators
+
+There are three types of iterators associated with a Galaxy;
+GalTopBlockIter, GalAllBlockIter, and GalStarIter.  The first
+two iterators return pointers to Block; the final one returns
+a pointer to Star.
+
+As its name suggests, GalTopBlockIter returns only the Blocks
+on the top level of the galaxy.  GalAllBlockIter returns
+Blocks at all levels of the hierarchy, in depth-first order;
+if there is a galaxy inside the galaxy, first it is returned,
+then its contents are returned.  Finally, GalStarIter returns
+only the atomic blocks in the Galaxy, in depth-first order.
+
+There is also a const form of GalTopBlockIter, called CGalTopBlockIter.
+
+Here is a function that prints out the names of all stars at any
+level of the given galaxy onto a given stream.
+
+@example
+void printNames(Galaxy& g,ostream& o) @{
+    GalStarIter nextStar(g);
+    Star* s;
+    while ((s = nextStar++) != 0)
+        o << s->fullName() << "\n";
+@}
+@end example
+
+@node class DynamicGalaxy, class InterpGalaxy, class Galaxy, Block and related classes
+@section class DynamicGalaxy
+
+A DynamicGalaxy is a type of Galaxy for which all blocks, ports, and
+states are allocated on the heap.  When destroyed, it destroys all of
+its blocks, ports, and states in a clean manner.  There's not much
+more to it than that: it provides a destructor, class identification
+functions @code{isA} and @code{className}, and little else.
+
+@node class InterpGalaxy, class Runnable, class DynamicGalaxy, Block and related classes
+@section class InterpGalaxy
+
+InterpGalaxy is derived from DynamicGalaxy.  It is the key workhorse
+for interfacing between user interfaces, such as ptcl or pigi, and
+the Ptolemy kernel, because it has commands for building structures
+given commands specified in the form of text strings.  These commands
+add stars and galaxies of given types and build connections between
+them.  InterpGalaxy interacts with the KnownBlock class to create
+stars and galaxies, and the Domain class to create wormholes.
+
+InterpGalaxy differs from other classes derived from Block in that
+the "class name" (the value returned by @code{className()}) is a
+variable; the class is used to create many different "derived classes"
+corresponding to different topologies.
+
+In order to use InterpGalaxy to make a user-defined galaxy type,
+a series of commands are executed that add stars, connections, and
+other features to the galaxy, and when a complete galaxy has been
+designed, the @code{addToKnownList} member function adds the complete
+object to the known list, an action that has the effect of adding a
+new "class" to the system.
+
+InterpGalaxy methods that return an int return 1 for success and 0
+for failure.  On failure, an appropriate error message is generated
+by means of the Error class.
+
+
+@menu
+* building structures::         building structures with InterpGalaxy
+* deleting InterpGalaxy structures::  deleting InterpGalaxy structures
+* InterpGalaxy and cloning::    InterpGalaxy and cloning
+* other InterpGalaxy functions::  other InterpGalaxy functions
+@end menu
+
+@node building structures, deleting InterpGalaxy structures, class InterpGalaxy, class InterpGalaxy
+@subsection building structures with InterpGalaxy
+
+The no-argument constructor creates an empty galaxy.  There is a
+constructor that takes a single @code{const char *} argument
+specifying the class name (the value to be returned by @code{className()}.
+The copy constructor creates another InterpGalaxy with the identical
+internal structure; there is also an assignment operator that does
+much the same.
+
+@example
+void setDescriptor(const char* @var{dtext})
+@end example
+
+Set the descriptor.  Note that this is public, though the NamedObj
+function is protected. @var{dtext} must live as long as the InterpGalaxy
+does.
+
+@example
+int addStar(const char* @var{starname}, const char* @var{starclass});
+@end example
+
+Add a new star or galaxy with classname @var{starclass} to this
+InterpGalaxy, naming the new instance @var{starname}.  The known block
+list for the current domain is searched to find @var{starclass}.
+Returns 1 on success, 0 on failure.  On failures, an error message
+of the form
+
+@example
+No star/galaxy named '@var{starclass}' in domain '@var{current-domain}'
+@end example
+
+will be produced.  The name is a misnomer since @var{starclass} may
+name a galaxy or a wormhole.
+
+@example
+int connect(const char* @var{srcblock}, const char* @var{srcport},
+            const char* @var{dstblock}, const char* @var{dstport},
+            const char* @var{delay} = 0);
+@end example
+
+This method creates a point-to-point connection between the port
+@var{srcport} in the subblock @var{srcblock} and the port @var{dstport}
+in the subblock @var{dstblock}, with a delay value represented by
+the expression @var{delay}.
+If the delay parameter is omitted there is no delay.
+
+The delay expression has the same form as an initial value for an
+integer state (class IntState), and is parsed in the same way as
+an IntState belonging to a subblock of the galaxy would be.
+
+1 is returned for success, 0 for failure.
+A variety of error messages relating to nonexistent blocks or ports
+may be produced.
+
+@example
+int busConnect(const char* @var{srcblock}, const char* @var{srcport},
+               const char* @var{dstblock}, const char* @var{dstport},
+               const char* @var{width}, const char* @var{delay} = 0);
+@end example
+
+This method creates a point-to-point bus connection between the multiport
+@var{srcport} in the subblock @var{srcblock} and the multiport @var{dstport}
+in the subblock @var{dstblock}, with a width value represented by the
+expression @var{width} and delay value represented by
+the expression @var{delay}.  If the delay parameter is omitted there is
+no delay.
+
+A bus connection is a series of parallel connections: each multiport
+contains @var{width} portholes and all are connected in parallel.
+
+The delay and width expressions have the same form as an initial value for an
+integer state (class IntState), and are parsed in the same way as
+an IntState belonging to a subblock of the galaxy would be.
+
+1 is returned for success, 0 for failure.
+A variety of error messages relating to nonexistent blocks or multiports
+may be produced.
+
+@example
+int alias(const char* @var{galport}, const char* @var{block}, const char *@var{blockport});
+@end example
+
+Create a new port for the galaxy and make it an alias for the porthole
+@var{blockport} contained in the subblock @var{block}.
+
+@example
+int addNode(const char* @var{nodename});
+@end example
+
+Create a node for use in netlist-style connections and name it
+@var{nodename}.
+
+@example
+int nodeConnect(const char* @var{blockname}, const char* @var{portname},
+                const char* @var{node}, const char* @var{delay} = 0);
+@end example
+
+Connect the porthole named @var{blockname} in the subblock named
+@var{portname} to the node named @var{node}.  Return 1 for success,
+0 and an error message for failure.
+
+@example
+int addState(const char* @var{statename}, const char* @var{stateclass},
+             const char* @var{statevalue});
+@end example
+
+Add a new state named @var{statename}, of type @var{stateclass},
+to the galaxy.  Its default initial value is given by @var{statevalue}.
+
+@example
+int setState(const char* @var{blockname}, const char* @var{statename},
+             const char* @var{statevalue});
+@end example
+
+Change the initial value of the state named @var{statename} that belongs
+to the subblock @var{blockname} to the string given by @var{statevalue}.
+As a special case, if @var{blockname} is the string @code{this}, the
+state belonging to the galaxy, rather than one belonging to a subblock,
+is changed.
+
+@example
+int setDomain(const char* @var{newDomain});
+@end example
+
+Change the inner domain of the galaxy to @var{newDomain}.  This is the
+technique used to create wormholes (that are one domain on the outside
+and a different domain on the inside).  It is not legal to call this
+function if the galaxy already contains stars.
+
+@example
+int numPorts(const char* @var{blockname}, const char* @var{portname}, int @var{numP});
+@end example
+
+Here @var{portname} names a multiporthole and @var{blockname} names the
+block containing it.  @var{numP} portholes are created within the
+multiporthole; these become ports of the block as a whole.  The names of
+the portholes are formed by appending @code{#1}, @code{#2}, etc. to the
+name of the multiporthole.
+
+@node deleting InterpGalaxy structures, InterpGalaxy and cloning, building structures, class InterpGalaxy
+@subsection deleting InterpGalaxy structures
+
+@example
+int delStar(const char* @var{starname});
+@end example
+
+Delete the instance named @var{starname} from the current galaxy.
+Ports of other stars that were connected to ports of @var{starname}
+will become disconnected.  Returns 1 on success, 0 on failure.  On
+failure an error message of the form
+
+@example
+No instance of "@var{starname}" in "@var{galaxyname}"
+@end example
+
+will be produced.  The name is a misnomer since @var{starclass} may
+name a galaxy or a wormhole.
+
+@example
+int disconnect(const char* @var{block}, const char* @var{port});
+@end example
+
+Disconnect the porthole @var{port}, in subblock @var{block}, from
+whatever it is connected to.  This works for point-to-point or netlist
+connections.
+
+@example
+int delNode(const char* @var{nodename});
+@end example
+
+Delete the node @var{nodename}.
+
+@node InterpGalaxy and cloning, other InterpGalaxy functions, deleting InterpGalaxy structures, class InterpGalaxy
+@subsection InterpGalaxy and cloning
+
+@example
+Block *makeNew() const;
+Block *clone() const;
+@end example
+
+For InterpGalaxy the above two functions have the same implementation.
+An identical copy of the current object is created on the heap.
+
+@example
+void addToKnownList(const char* @var{outerDomain},Target* @var{innerTarget} = 0);
+@end example
+
+This function adds the galaxy to the known list, completing the
+definition of a galaxy class.  The "class name" is determined by
+the name of the InterpGalaxy (as set, for example, by
+@code{Block::setBlock}.
+
+If @var{outerDomain} is different from the system's current domain (read
+from class KnownBlock), a wormhole will be created.  A wormhole will
+also be created if @var{innerTarget} is specified, or if galaxies for
+the domain @var{outerDomain} are always wormholes (this is determined by
+asking the Domain class).
+
+Once @code{addToKnownList} is called on an InterpGalaxy object,
+that object should not be modified further or deleted.  The KnownBlock
+class will manage it from this point on; it will be deleted if a second
+definition with the same name is added to the known list, or when the
+program exits.
+
+
+@node other InterpGalaxy functions,  , InterpGalaxy and cloning, class InterpGalaxy
+@subsection other InterpGalaxy functions
+
+@example
+const char* className() const
+@end example
+
+Return the current class name (which can be changed).
+
+@example
+void initialize();
+@end example
+
+Overrides @code{Block::initialize()}.  The main extra work is to do
+variable-parameter initializations, such as delays and bus connections
+for which the delay value or bus width is an expression with variables.
+
+@example
+Block* blockWithDottedName(const char* @var{name});
+@end example
+
+Returns a pointer to an inner block, at any depth, whose name matches
+the specification @var{name}.  For example, @code{blockWithDottedName("a.b.c")}
+would look first for a subgalaxy named @code{"a"}, then within that
+for a subgalaxy named @code{"b"}, and finally with that for a subgalaxy
+named @code{"c"}, returning either a pointer to the final Block or a
+null pointer if a match is not found.
+
+@node class Runnable, class Universe, class InterpGalaxy, Block and related classes
+@section class Runnable
+
+The Runnable class is a sort of mixin class intended to be used with
+multiple inheritance to create runnable universes and wormholes.  It
+is defined in the file @code{Universe.h}.
+
+Constructors:
+@example
+Runnable(Target* @var{tar}, const char* @var{ty}, Galaxy* @var{g});
+Runnable(const char* @var{targetname}, const char* @var{dom}, Galaxy* @var{g});
+@end example
+
+@example
+void initTarget();
+@end example
+
+Initialize target and/or generate schedule
+
+@example
+int run();
+@end example
+
+run, until stopping condition reached.
+
+@example
+virtual void setStopTime(double @var{stamp});
+@end example
+
+Set stop time.
+
+@example
+StringList displaySchedule();
+@end example
+
+Display schedule, if appropriate.
+
+@example
+virtual ~Runnable();
+@end example
+
+The destructor deletes the Target.
+
+Protected data members
+
+@example
+const char* type;
+Target* target;
+Galaxy* galP;
+@end example
+
+@node class Universe, class InterpUniverse, class Runnable, Block and related classes
+@section class Universe
+
+Class Universe is inherited from both Galaxy and Runnable.  It is
+intended for use in standalone Ptolemy applications.  For applications
+that use a user interface to dynamically build universes, class
+InterpUniverse is preferable.
+
+In addition to the Runnable and Galaxy functions, it has:
+
+@example
+Universe(Target* @var{s},const char* @var{typeDesc});
+@end example
+
+The constructor specifies the target and the universe type.
+
+@example
+Scheduler* scheduler() const;
+@end example
+
+Returns the scheduler belonging to the universe's target.
+
+@example
+int run();
+@end example
+
+Return Runnable::Run.
+
+@node class InterpUniverse,  , class Universe, Block and related classes
+@section class InterpUniverse
+
+Class InterpUniverse is inherited from both InterpGalaxy and Runnable.
+User interfaces run by building and executing an InterpUniverse.
+
+In addition to the standard InterpGalaxy functions, it provides:
+
+@example
+InterpUniverse (const char* @var{name} = "mainGalaxy");
+@end example
+
+This creates an empty universe with no target and the given name.
+
+@example
+int newTarget(const char* @var{newTargName} = 0);
+@end example
+
+This creates a target of the given name (from the KnownTarget list),
+deleting any existing target.
+
+@example
+const char* targetName() const;
+@end example
+
+Return the name of the current target.
+
+@example
+Scheduler* scheduler() const;
+@end example
+
+return the scheduler belonging to the current target (0 if none).
+
+@example
+Target* myTarget() const;
+@end example
+
+return a pointer to the current target.
+
+@example
+int run();
+@end example
+
+Invokes Runnable::run.
+
+@example
+void wrapup();
+@end example
+
+Invokes wrapup on the target.
+
+@node Control of execution, Interfacing domains, Block and related classes, Top
+@chapter Control of execution and error reporting
+
+The principal classes responsible for control of execution of the
+universe are the Target and the Scheduler.  The Target has high-level
+control over what happens when a user types "run" from the interface;
+Targets take on particular importance in code generation domains where
+they describe all the features of the target of execution, but they
+are used to control execution in simulation domains as well.
+
+Targets use Schedulers to control the order of execution of Blocks under
+their control.  In some domains, the Scheduler does almost everything;
+the Target simply starts it up.  In others, the Scheduler determines
+an execution order and the Target takes care of a whole lot of other
+details, such as generating code in accordance with the schedule,
+downloading the code to an imbedded processor, and executing it.
+
+The Error class provides a means to format error messages and optionally
+to halt execution.  The interface is always the same, but different
+user interfaces typically provide different implementations of the
+methods of this class.
+
+The SimControl class provides a means to register actions for execution
+during a simulation, as well as facilities to cleanly halt execution
+on an error.
+
+@menu
+* class Target::                class Target
+* class Scheduler::             class Scheduler
+* class Error::                 class Error
+* class SimControl::            class SimControl
+@end menu
+
+@node class Target, class Scheduler, Control of execution, Control of execution
+@section class Target
+
+@menu
+* Target public members::       Target public members
+* Target protected members::    Target protected members
+@end menu
+
+@node Target public members, Target protected members, class Target, class Target
+@subsection Target public members
+
+@example
+Target(const char* @var{nam}, const char* @var{starClass},const char* @var{desc} = "");
+@end example
+
+@example
+~Target();
+@end example
+
+@example
+const char* starType() const;
+@end example
+
+Return the supported star class.
+
+@example
+Scheduler* scheduler() const;
+@end example
+
+Return my scheduler.
+
+@example
+Target* cloneTarget() const;
+@end example
+
+This simply returns the result of the @code{clone} function as a Target.
+
+@example
+virtual StringList displaySchedule();
+@end example
+
+@example
+Target* child(int @var{n});
+@end example
+
+Return the @var{n}th child Target, null if no children.
+
+@example
+Target* proc(int @var{n});
+@end example
+
+return the @var{n}th target, where I count as #0 if no children
+
+@example
+int nProcs() const;
+@end example
+
+Return the number of processors (1 if no children, otherwise the
+number of children).
+
+@example
+virtual int hasResourcesFor(Star& @var{s},const char* @var{extra}=0);
+@end example
+
+Determine whether this target has the necessary resources to run the
+given star.  virtual in case later necessary.  default implemenation
+uses "resources" states of the target and the star.
+
+@example
+virtual int childHasResources(Star& @var{s},int @var{childNum});
+@end example
+
+Determine whether a particular child target has resources
+to run the given star.  virtual in case later necessary.
+
+@example
+virtual void setGalaxy(Galaxy& @var{g});
+@end example
+
+Associate a Galaxy with the Target.  The default implementation
+just sets its galaxy pointer @code{gal} to point to it.
+
+@example
+virtual void setStopTime(double @var{when});
+@end example
+
+Set the stopping condition.
+
+@example
+virtual void resetStopTime(double @var{when});
+@end example
+
+Reset the stopping condition (FIXME: why different?).
+
+@example
+virtual void setCurrentTime(double @var{now});
+@end example
+
+Set the current time to @var{now}.
+
+@example
+virtual int run();
+@end example
+
+@example
+virtual void wrapup();
+@end example
+
+The following methods are provided for code generation; schedulers may
+call these.  Perhaps they should really be in CGTarget.
+
+@example
+virtual void beginIteration(int @var{repetitions}, int @var{depth});
+@end example
+
+Function called to begin an iteration (default version
+does nothing).
+
+@example
+virtual void endIteration(int @var{repetitions}, int @var{depth});
+@end example
+
+Function called to end an iteration (default version
+does nothing).
+
+@example
+virtual void writeFiring(Star& @var{s}, int @var{depth});
+@end example
+
+Function called to generate code for the star the way
+this target wants (default version does nothing)
+
+@example
+virtual int commTime(int @var{sender},int @var{receiver},int @var{nUnits}, int @var{type});
+@end example
+
+[ To be written ]
+
+@example
+Galaxy* galaxy();
+@end example
+
+Return my galaxy pointer (0 if it has not been set).
+
+@node Target protected members,  , Target public members, class Target
+@subsection Target protected members
+
+@example
+virtual void setup();
+@end example
+
+This is the main initialization function for the target.  It is called
+by the @code{initialize} function, which by default initializes the
+Target states.
+
+The default implementation does the following: the halt flag of
+SimControl is cleared.  Each star is checked to see if its type is
+supported by the target (because the @code{isA} function reports
+that it is one of the supported star classes).  If a star does not
+match this condition an error is reported.  If all goes well, then
+the @code{setup} member function of the target's Scheduler object
+is called.
+
+@example
+void setSched(Scheduler* @var{sch});
+@end example
+
+The target's scheduler is set to @var{sch}, which must either point to a
+scheduler on the heap or be a null pointer.  Any preexisting scheduler
+is deleted.  Also, the scheduler's @code{setTarget} member is called,
+associating the Target with the Scheduler.
+
+@example
+void delSched();
+@end example
+
+This function deletes the target's scheduler and sets the scheduler
+pointer to null.
+
+@example
+void addChild(Target& @var{child});
+@end example
+
+Add child as a child target.
+
+@example
+void inheritChildren(Target* @var{father}, int @var{start}, int @var{stop});
+@end example
+
+Need an explanation of this.
+
+@example
+void remChildren();
+@end example
+
+remove the "children" list (no effect on children)
+
+@example
+void deleteChildren();
+@end example
+
+Delete all the "children" (for when they are created dynamically)
+
+@example
+virtual const char* auxStarClass() const;
+@end example
+
+auxiliary star class: permits a second type of star in addition
+to supportedStarClass.
+
+@example
+const char* writeDirectoryName(const char* @var{dirName} = 0);
+@end example
+
+Method returns a directory name for writing.
+If the directory does not exist, it attempts create it.
+Returns the fully expanded pathname (which is saved by
+the target).
+
+@example
+const char* workingDirectory() const;
+@end example
+
+Return directory name set by writeDirectoryName.
+
+@example
+char* writeFileName(const char* @var{fileName} = 0);
+@end example
+
+Method to set a file name for writing.  Prepends dirFullName (which was
+set by writeDirectoryName) to fileName with "/" between.  Always returns
+a pointer to a string in new memory.  It is up to the user to delete the
+memory when no longer needed.  If dirFullName or fileName is NULL then
+it returns a pointer to a new copy of the string "/dev/null"
+
+@node class Scheduler, class Error, class Target, Control of execution
+@section class Scheduler
+
+Constructor: just nulls its target, galaxy pointers.  Destructor is
+virtual and do-nothing.
+
+@example
+virtual void setGalaxy(Galaxy& @var{g});
+@end example
+
+@example
+Galaxy* galaxy();
+@end example
+
+@example
+virtual void setup() = 0;
+@end example
+
+@example
+virtual int run() = 0;
+@end example
+
+@example
+virtual void setStopTime(double @var{limit}) = 0;
+@end example
+
+@example
+virtual double getStopTime() = 0;
+@end example
+
+@example
+virtual void resetStopTime(double @var{limit});
+@end example
+
+hack method to set stopping time of wormhole
+
+@example
+virtual void setCurrentTime(double @var{val});
+@end example
+
+set the currentTime 
+
+@example
+virtual StringList displaySchedule();
+@end example
+
+
+@example
+double now() const;
+@end example
+
+Return the current time (the value of the protected member
+@code{currentTime}).
+
+@example
+int stopBeforeDeadlocked() const;
+@end example
+
+Return the value of the @code{stopBeforeDeadFlag} protected member.
+It is set in timed domains to indicate that a scheduler inside a
+wormhole was suspended even though it had more work to do.
+
+@example
+virtual const char* domain() const;
+@end example
+
+@example
+void setTarget(Target& @var{t});
+@end example
+
+@example
+Target& target ();
+@end example
+
+Call code-generation functions in the Target to generate
+code for a run.
+In the base class, this just causes an error.
+
+@example
+virtual void compileRun();
+@end example
+
+The following functions now forward requests to SimControl,
+which is responsible for controlling the simulation.
+
+@example
+static void requestHalt();
+@end example
+
+Calls @code{SimControl::declareErrorHalt}.
+
+NOTE: @code{SimControl::requestHalt} only sets the halt bit,
+not the error bit.
+
+@example
+static int haltRequested();
+@end example
+
+Calls @code{SimControl::haltRequested}.
+
+@example
+static void clearHalt();
+@end example
+
+Calls @code{SimControl::clearHalt}.
+
+The following two data members are protected.
+
+@example
+// current time of the schedule
+double currentTime;
+
+// flag set if stop before deadlocked.
+// for untimed domain, it is always FALSE.
+int stopBeforeDeadlocked;
+@end example
+
+@node class Error, class SimControl, class Scheduler, Control of execution
+@section class Error
+
+Class Error is used for error reporting.  While the interfaces to
+these functions are always the same, different user interfaces provide
+different implementations: @file{ptcl} connects to the Tcl error
+reporting mechanism, @file{pigi} pops up windows containing error
+messages, and @file{interpreter} simply prints messages on the standard
+error stream.  All member functions of Error are static.
+
+There are four "levels" of messages that may be produced by the error
+facility: @code{Error::abortRun} is used to report an error and cause execution
+of the current universe to halt; @code{Error::error} reports an error;
+@code{Error::warn} reports a warning, and @code{Error::message} prints
+an information message that is not considered an error.
+
+Each of these four functions is available with two different signatures;
+for example:
+
+@example
+static void abortRun (const char*, const char* = 0, const char* = 0);
+static void abortRun (const NamedObj& @var{obj}, const char*, const char* = 0,
+                      const char* = 0);
+@end example
+
+The first form produces the error message by simply concatenating its
+arguments (the second and third arguments may be omitted); no space is
+added.
+
+The second form prepends the full name of the @var{obj} argument, a
+colon, and a space to the text provided by the remaining arguments.
+If the implementation provides a marking facility, the object named
+by @var{obj} is marked by the user interface (at present, the interface
+associated with @file{pigi} will highlight the object if its icon
+appears on the screen).
+
+The remaining static Error functions @code{error}, @code{warn}, and
+@code{message} have the same signatures as does @code{abortRun} (there
+are the same two forms for each function).
+
+In addition, the Error class provides access to the marking facility,
+if it exists:
+
+@example
+static int canMark();
+@end example
+
+This function returns TRUE if the interface can mark NamedObj objects
+(generally true for graphic interfaces), and FALSE if it cannot
+(generally true for text interfaces).
+
+@example
+static void mark (const NamedObj& @var{obj});
+@end example
+
+This function marks the object @var{obj}, if marking is implemented for
+this interface.  It is a no-op if marking is not implemented.
+
+@node class SimControl,  , class Error, Control of execution
+@section class SimControl
+
+[ To be written ]
+
+@example
+SimAction /SimAction.h:26:
+SimActionList : public SequentialList /SimAction.h:41:
+SimActionListIter : private ListIter /SimAction.h:49:
+SimControl /SimControl.h:44:
+@end example
+
+@node Interfacing domains, connection classes, Control of execution, Top
+@chapter Interfacing domains -- wormholes and related classes
+
+This section describes the classes that implement the mechanism that
+allows different domains to be interfaced.  It therefore constitutes the
+core of "what makes Ptolemy different".
+
+@menu
+* class Wormhole::              class Wormhole
+* class EventHorizon::          class EventHorizon
+* class ToEventHorizon::        class ToEventHorizon
+* class FromEventHorizon::      class FromEventHorizon
+* class WormMultiPort::         class WormMultiPort
+@end menu
+
+@node class Wormhole, class EventHorizon, Interfacing domains, Interfacing domains
+@section class Wormhole
+
+A wormhole for a domain is much like a star belonging to that domain,
+but it contains pointers to a subsystem that operates in a different
+domain.  The interface to that other domain is through a "universal
+event horizon".  The wormhole design, therefore, does not depend on the
+domain it contains, but only on the domain in which it is used as a
+block.  It must look like a star in that outer domain.
+
+The base Wormhole class is derived from class Runnable, just like the
+class Universe.  Every member of the Runnable class has a pointer to a
+component Galaxy and a Target.  Like a Universe, a Wormhole can perform
+the scheduling actions on the component Galaxy. A Wormhole is different
+from a Universe in that it is not a stand-alone object.  Instead, it is
+triggered from the outer domain to initiate the scheduling.  Also, since
+Wormhole is an abstract baseclass, you cannot create an object of class
+Wormhole; only derived Wormholes can be created.
+
+Each domain has a derived Wormhole class.  For example, the SDF domain
+has class SDFWormhole.  This domain-specific Wormhole is derived from
+not only the base Wormhole class but also from the domain-specific star
+class, SDFStar.  This multiple inheritance realizes the inherent nature
+of the Wormhole.  First, the Wormhole behaves exactly like a Star from
+the outer domain (SDF) since it is derived from SDFStar.  Second,
+internally it can encapsulate an entire foreign domain with a separate
+Galaxy and a separate Target and Scheduler.
+
+@menu
+* Wormhole public members::     Wormhole public members
+* Wormhole protected members::  Wormhole protected members
+@end menu
+
+@node Wormhole public members, Wormhole protected members, class Wormhole, class Wormhole
+@subsection Wormhole public members
+
+@example
+void setup();
+@end example
+
+The default implementation calls @code{initTarget}.
+
+@example
+int run();
+@end example
+
+This function executes the inside of the wormhole for the appropriate
+amount of time.
+
+@example
+const char* insideDomain() const;
+@end example
+
+This function returns the name of the inside domain.
+
+@example
+void setStopTime(double @var{stamp});
+@end example
+
+This function sets the stop time for the inner universe.
+
+@example
+Wormhole(Star& @var{self}, Galaxy& @var{g}, const char* @var{targetName} = 0);
+Wormhole(Star& @var{self}, Galaxy& @var{g}, Target* @var{innerTarget} = 0);
+@end example
+
+The above two signatures represent the constructors provided for class
+Wormhole.  We never use plain Wormholes; we always have objects derived
+from Wormhole and some kind of Star, such as
+
+@example
+class SDFWormhole : public Wormhole, public SDFStar @{
+public:
+    SDFWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t) @{ 
+        buildEventHorizons();
+    @}
+@};
+@end example
+
+The first argument to the constructor should always be a reference to
+the object itself, and represents "the wormhole as a star".  The second
+argument is the inner galaxy.  The third argument describes the target
+of the Wormhole, and may be provided either as a Target object or by
+name, in which case it is created by using the KnownTarget class.
+
+@example
+Scheduler* outerSched();
+@end example
+
+This returns a pointer to the scheduler for the outer domain (the one
+that lives above the wormhole).  The scheduler for the inner domain
+for derived wormhole classes can be obtained from the @code{scheduler()}
+method.
+
+@node Wormhole protected members,  , Wormhole public members, class Wormhole
+@subsection Wormhole protected members
+
+@example
+void buildEventHorizons ();
+@end example
+
+This function creates the EventHorizon objects that connect the inner
+galaxy ports to the outside.  A pair of EventHorizons is created for
+each galaxy port.  It is typically called by the constructor for
+the XXXWormhole.
+
+@example
+void freeContents();
+@end example
+
+This function deletes the event horizons and the inside galaxy.  It
+is intended to be called from XXXWormhole destructors.  It cannot be
+part of the Wormhole constructor due to an ordering problem (we want
+to assure that it is called before the destructor for either of
+XXXWormhole's two baseclasses is called).
+
+@example
+virtual double getStopTime() = 0;
+@end example
+
+Get the stopping condition for the inner domain.  This is a pure
+virtual function and must be redefined in the derived class.
+
+@example
+virtual void sumUp();
+@end example
+
+This function is called by @code{Wormhole::run} after running the
+inner domain.  The default implementation does nothing.  Derived
+wormholes can redefine it to put in any "summing up" work that is
+required after running the inner domain.
+
+@example
+Galaxy& gal;
+@end example
+
+The member @code{gal} is a reference to the inner galaxy of the Wormhole.
+
+@node class EventHorizon, class ToEventHorizon, class Wormhole, Interfacing domains
+@section class EventHorizon
+
+Class EventHorizon is another example of a mixin class; EventHorizon has
+the same relationship to PortHoles as Wormhole has to Stars.  The name
+is chosen from cosmology, representing the point at which an object
+disappears from the outside universe and enters the interior of a black
+hole, which can be thought of as a different universe entirely.
+
+As for wormholes, we never consider objects that are "just an
+EventHorizon"; instead, all objects that are actually used are multiply
+inherited from EventHorizon and from some type of PortHole class.  For
+each type of domain we require two types of EventHorizon; one, derived
+from ToEventHorizon, converts from a format suitable for a particular
+domain to the "universal form"; another, derived from FromEventHorizon,
+converts from the universal form to the domain-specific form.
+
+@menu
+* How EventHorizons are used::  How EventHorizons are used
+* EventHorizon public members::  EventHorizon public members
+* EventHorizon protected members::  EventHorizon protected members
+@end menu
+
+@node How EventHorizons are used, EventHorizon public members, class EventHorizon, class EventHorizon
+@subsection How EventHorizons are used
+
+Generally, EventHorizons are used in pairs; to perform a connection
+across a domain boundary between domain XXX and domain YYY, an object
+of class XXXToUniversal (derived from XXXPortHole and ToEventHorizon)
+and an object of class YYYFromUniversal (derived from YYYPortHole and
+FromEventHorizon) are inserted between the ordinary, domain-specific
+PortHoles.  The @code{far()} member of the XXXToUniversal points
+to the XXXPortHole; the @code{ghostAsPort()} member points to
+the YYYFromUniversal object.  Similarly, for the YYYFromUniveral
+object, @code{far()} points to the YYYPortHole and @code{ghostAsPort()}
+points to the XXXToUniversal object.
+
+These pairs of EventHorizons are created by the
+@code{buildEventHorizons} member function of class Wormhole.
+
+@menu
+* EventHorizon public members::  EventHorizon public members
+* EventHorizon protected members::  EventHorizon protected members
+@end menu
+
+@node EventHorizon public members, EventHorizon protected members, How EventHorizons are used, class EventHorizon
+@subsection EventHorizon public members
+
+@example
+EventHorizon(PortHole* @var{self});
+@end example
+
+The constructor for EventHorizon takes one argument, representing (for
+derived classes that call this constructor from their own), "myself" as
+a PortHole (a pointer to the PortHole part of the object).
+
+The destructor is declared virtual and does nothing.
+
+@example
+PortHole* asPort();
+@end example
+
+This returns "myself as a PortHole".
+
+@example
+PortHole* ghostAsPort();
+@end example
+
+This returns a pointer to the "matching eventhorizon" as a porthole.
+
+@example
+virtual void ghostConnect(EventHorizon& @var{to} );
+@end example
+
+This connects another EventHorizon to myself and makes it my "ghost
+port".
+
+@example
+virtual int isItInput() const;
+virtual int isItOutput() const;
+@end example
+
+Say if I am an input or an output.
+
+@example
+virtual void setEventHorizon(inOutType @var{inOut}, const char* @var{portName},
+     Wormhole* @var{parentWormhole}, Star* @var{parentStar},
+     DataType @var{type} = FLOAT, unsigned @var{numTokens} = 1 );
+@end example
+
+Sets parameters for the EventHorizon.
+
+@example
+double getTimeMark();
+void setTimeMark(double @var{d});
+@end example
+
+Get and set the time mark.
+
+@example
+virtual void initialize();
+@end example
+
+@example
+Scheduler *innerSched();
+Scheduler *outerSched();
+@end example
+
+These methods return a pointer to the scheduler that lives inside the
+wormhole, or outside the wormhole, respectively.
+
+@node EventHorizon protected members,  , EventHorizon public members, class EventHorizon
+@subsection EventHorizon protected members
+
+@example
+void moveFromGhost(EventHorizon& @var{from}, int @var{numParticles});
+@end example
+
+Move @var{numParticles} from the buffer of @var{from}, another
+EventHorizon, to mine (the object on which this function is called).
+This is used to implement @code{ToEventHorizon::transferData}.
+
+@example
+CircularBuffer* buffer();
+@end example
+
+Access the myBuffer of the porthole.
+
+@example
+EventHorizon* ghostPort;
+@end example
+
+This is the peer event horizon.
+	
+@example
+Wormhole* wormhole;
+@end example
+
+This points to the Wormhole I am a member of.
+
+@example
+int tokenNew;
+@end example
+
+@example
+double timeMark;
+@end example
+
+TimeMark of the current data, which is necessary for interface
+of two domains.  [should be private?].
+
+@node class ToEventHorizon, class FromEventHorizon, class EventHorizon, Interfacing domains
+@section class ToEventHorizon
+
+A ToEventHorizon is responsible for converting from a domain-specific
+representation to a universal representation.  It is derived from
+EventHorizon.
+
+@example
+ToEventHorizon(PortHole* @var{p});
+@end example
+
+The constructor simply calls the baseclass constructor, passing along
+its argument.
+
+@example
+void initialize(); 
+@end example
+
+The following members are protected.
+
+@example
+void getData();
+@end example
+
+This transfers data from the outside to the universal eventhorizon
+(myself).
+
+@example
+void transferData();
+@end example
+
+This transfers data from myself to my peer FromEventHorizon (the ghostPort).
+
+@node class FromEventHorizon, class WormMultiPort, class ToEventHorizon, Interfacing domains
+@section class FromEventHorizon
+
+A FromEventHorizon is responsible for converting from a universal
+representation to a domain-specific representation.  It is derived from
+EventHorizon.
+
+@example
+FromEventHorizon(PortHole* @var{p});
+@end example
+
+The constructor simply calls the EventHorizon constructor.
+
+@example
+void initialize(); 
+@end example
+
+The following members are protected.
+
+@example
+void putData();
+@end example
+
+Transfers data from Universal EventHorizon to outside.
+
+@example
+void transferData();
+@end example
+
+Transfers data from peer event horizon to me.
+
+@example
+virtual int ready();
+@end example
+
+make sure this port is ready for inside Galaxy if it is an input.
+if ready, set up the stopping condition for the inner-domain.
+
+
+@node class WormMultiPort,  , class FromEventHorizon, Interfacing domains
+@section class WormMultiPort
+
+The class WormMultiPort, which is derived from MultiPortHole, exists to
+handle the case where a galaxy with a multiporthole is imbedded in a
+wormhole.  Its @code{newPort} function correctly creates a pair of
+EventHorizon objects when a new port is created in the multiporthole.
+Instances of this object are created by Wormhole::buildEventHorizons
+when the inner galaxy has one or more MultiPortHole objects.
+
+@node connection classes, Particles and Messages, Interfacing domains, Top
+@chapter Classes for connections between blocks
+
+This chapter describes the classes that implement connections between
+blocks.  For simulation domains, these classes are responsible for
+moving objects called Particles from one Block to another.  For code
+generation domains, the Particles typically only move during scheduling
+and these objects merely provide information on the topology.
+
+@menu
+* class GenericPort::           class GenericPort
+* class PortHole::              class PortHole
+* class MultiPortHole::         class MultiPortHole
+* AutoFork and AutoForkNode::   AutoFork and AutoForkNode
+* class ParticleStack::         class ParticleStack
+* class Geodesic::              class Geodesic
+* class Plasma::                class Plasma
+* class ParticleQueue::         class ParticleQueue
+* classes for Galaxy ports::    classes for Galaxy ports
+@end menu
+
+@node class GenericPort, class PortHole, connection classes, connection classes
+@section class GenericPort
+
+The class GenericPort is a base class that provides common elements
+between class PortHole and class MultiPortHole.  Any GenericPort object
+can be assumed to be either one or the other; we recommend avoiding
+deriving any new objects directly from GenericPort.
+
+GenericPort is derived from class NamedObj.
+
+GenericPort provides several basic facilities: aliases, which specify
+that another GenericPort should be used in place of this port, types,
+which specify the type of data to be moved by the port, and typePort,
+which specifies that this port has the same type as another port.
+When a GenericPort is destroyed, any alias or typePort pointers are
+automatically cleaned up, so that other GenericPorts are never left
+with dangling pointers.
+
+@menu
+* GenericPort query functions::  GenericPort query functions
+* other GenericPort public members::  other GenericPort public members
+* GenericPort protected members::  GenericPort protected members
+@end menu
+
+@node GenericPort query functions, other GenericPort public members, class GenericPort, class GenericPort
+@subsection GenericPort query functions
+
+@example
+virtual int isItInput () const;
+virtual int isItOutput () const;
+virtual int isItMulti () const;
+@end example
+
+Each of the above functions returns TRUE (1) or FALSE (0).
+
+@example
+StringList print (int @var{verbose} = 0) const;
+@end example
+
+Print human-readable information on the wormhole.
+
+@example
+DataType type () const;
+@end example
+
+Return my DataType.  This may be one of the DataType values associated
+with Particle classes, or the special type @code{ANYTYPE}, which
+indicates that the type will be resolved by the @code{setPlasma}
+function using information from connected ports and @code{typePort} pointers.
+
+@example
+GenericPort* alias() const;
+@end example
+
+Return my alias, or a null pointer if I have no alias.  Generally,
+Galaxy portholes have aliases and Star portholes do not, but this
+is not a strict requirement.
+
+@example
+GenericPort* aliasFrom() const;
+@end example
+
+Return the porthole that I am the alias for (a null pointer if none).
+It is guaranteed that if @code{gp} is a pointer to GenericPort and if
+@code{gp->alias()} is non-null, then the boolean expression
+
+@example
+gp->alias()->aliasFrom() == gp
+@end example
+
+is always true.
+
+@example
+bitWord attributes() const;
+@end example
+
+Return my attributes.  Attributes are a series of bits.
+
+@example
+GenericPort& realPort();
+const GenericPort& realPort() const;
+@end example
+
+Return the real port after resolving any aliases.  If I have no alias,
+then a reference to myself is returned.
+
+@example
+GenericPort* typePort() const;
+@end example
+
+Return another generic port that is constrained to have the same type as
+me (0 if none).  If a non-null value is called, successive calls will
+form a circular linked list that always returns to its starting point;
+that is, the loop
+
+@example
+void printLoop(GenericPort& g) @{
+        if (g->typePort()) @{
+                GenericPort* gp = g;
+                while (gp->typePort() != g) @{
+                        cout << gp->fullName() << "\n";
+                        gp = gp->typePort();
+                @}
+        @}
+@}
+@end example
+
+is guaranteed to terminate and not to dereference a null pointer.
+
+@example
+inline int hidden(const GenericPort& @var{p})
+@end example
+
+IMPORTANT: @code{hidden} is not a member function of GenericPort,
+but is a "plain function".  It returns TRUE if the port in question
+has the HIDDEN attribute.
+
+@node other GenericPort public members, GenericPort protected members, GenericPort query functions, class GenericPort
+@subsection other GenericPort public members
+
+@example
+virtual PortHole& newConnection();
+@end example
+
+Return a reference to a porthole to be used for new connections.
+Class PortHole uses this one unchanged; MultiPortHole has to create
+a new member PortHole.
+
+@example
+GenericPort& setPort(const char* @var{portName}, Block* @var{blk}, DataType @var{typ}=FLOAT);
+@end example
+
+Set the basic PortHole parameters: the name, parent, and datatype.
+
+@example
+void inheritTypeFrom(GenericPort& @var{p});
+@end example
+
+Set up a port for determining the type of @code{ANYTYPE} connections.
+typePort pointers form a circular loop.
+
+@example
+virtual Plasma* setPlasma(Plasma *@var{useType} = NULL) = 0;
+@end example
+
+This function associates the appropriate pool of particles, called a
+Plasma, with the PortHole or MultiPortHole.  The effect is also to
+determine how type conversion will be performed, since the type of
+a porthole is determined by its associated Plasma.
+
+@example
+virtual void connect(GenericPort& @var{destination},int @var{numberDelays});
+@end example
+
+Connect me with the indicated peer.
+
+@example
+bitWord setAttributes(const Attribute& @var{attr});
+@end example
+
+Set my attributes (some bits are turned on and others are turned off).
+
+@example
+void setAlias (GenericPort& @var{gp});
+@end example
+
+Set gp to be my alias.  The aliasFrom pointer of gp is set to
+point to me.
+
+@node GenericPort protected members,  , other GenericPort public members, class GenericPort
+@subsection GenericPort protected members
+
+@example
+GenericPort* translateAliases();
+@end example
+
+The above is a protected function.  If this function is called on
+a port with no alias, the address of the port itself is returned;
+otherwise, @code{translateAliases(*alias())} is returned.
+
+@node class PortHole, class MultiPortHole, class GenericPort, connection classes
+@section class PortHole
+
+PortHole is the means that Blocks use to talk to each other.  It is
+derived from GenericPort; as such, it has a type, an optional alias,
+and is optionally a member of a ring of ports of the same type connected
+by @code{typePort} pointers.  It guarantees that @code{alias()} always
+returns a PortHole.
+
+In addition, a PortHole has a peer (another port that it is connected
+to, which is returned by @code{far()}), a Geodesic (a path along which
+particles travel between the PortHole and its peer), and a Plasma (a
+pool of particles, all of the same type).  In simulation domains,
+during the execution of the simulation objects known as Particles
+traverse a circular path: from an output porthole through a Geodesic to
+an input porthole, and finally to a Plasma, where they are recirculated
+back to the input porthole.
+
+Like all NamedObj-derived objects, a PortHole has a parent Block.  It
+may also be a member of a MultiPortHole, which is a logical group of
+PortHoles.
+
+@menu
+* PortHole public members::     PortHole public members
+* PortHole protected members::  PortHole protected members
+* class CircularBuffer::        CircularBuffer -- a class used to implement PortHole
+@end menu
+
+@node PortHole public members, PortHole protected members, class PortHole, class PortHole
+@subsection PortHole public members
+
+The constructor sets just about everything to null pointers.
+
+The destructor disconnects the PortHole, and if there is a parent Block,
+removes itself from the parent's porthole list.
+
+@example
+PortHole& setPort(const char* @var{portName}, Block* @var{parent},
+                 DataType @var{type} = FLOAT);
+@end example
+
+This function sets the name of the porthole, its parent, and
+its type.
+
+@example
+void initialize();
+@end example
+
+This function is responsible for initializing the internal buffers
+of the porthole in preparation for a run.
+
+@example
+virtual void disconnect(int @var{delGeo} = 1);
+@end example
+
+Remove a connection, and optionally attempt to delete the geodesic.  The
+is set to zero when the geodesic must be preserved for some reason (for
+example, from the Geodesic's destructor).  The Geodesic is deleted only
+if it is "temporary"; we do not delete "persistent" geodesics.
+
+@example
+PortHole* far() const;
+@end example
+
+Return the PortHole we are connected to.
+
+@example
+void setAlias (PortHole& @var{blockPort});
+@end example
+
+Set my alias to @var{blockPort}.
+
+@example
+int atBoundary() const;
+@end example
+
+Return TRUE if this PortHole is at the wormhole boundary (if its peer is
+an inter-domain connection); FALSE otherwise.
+
+@example
+virtual EventHorizon* asEH();
+@end example
+
+Return myself as an EventHorizon, if I am one.  The baseclass returns
+a null pointer.  EventHorizon objects (objects multiply inherited from
+EventHorizon and some type of PortHole) will redefine this
+appropriately.
+
+@example
+virtual void receiveData();
+@end example
+
+Used to receive data in derived classes.  The default implementation
+does nothing.
+
+@example
+virtual void sendData();
+@end example
+
+Used to send data in derived classes.  The default implementation
+does nothing.
+
+@example
+Particle& operator % (int @var{delay});
+@end example
+
+This operator returns a reference to a Particle in the PortHole's
+buffer.  A @var{delay} value of 0 returns the "newest" particle.
+In dataflow domains, the argument represents the delay associated
+with that particular particle.
+
+@example
+void setMaxDelay(int @var{delay});
+@end example
+
+Set the maximum delay that past Particles can be accessed -- defaults to
+zero if never called.
+
+@example
+DataType resolvedType () const;
+@end example
+
+Return the datatype computed by @code{PortHole::initialize} to resolve
+type conversions.  For example, if an INT output porthole is connected
+to a FLOAT input porthole, the resolved type (the type of the Particles
+that travel between the ports) will be FLOAT.  A null pointer will be
+returned if the type has not been set, e.g. before initialization.
+
+@example
+int numXfer() const;
+@end example
+
+Returns the nominal number of tokens transferred per execution of the
+PortHole.  It returns the value of the protected member @code{numberTokens}.
+
+@example
+int numTokens() const;
+@end example
+
+Returns the number of particles on my Geodesic.
+
+@example
+int numInitDelays() const;
+@end example
+
+Returns the number of initial delays on my Geodesic (the initial tokens,
+strictly speaking, are only delays in dataflow domains).
+
+@example
+Geodesic* geo();
+@end example
+
+Return a pointer to my Geodesic.
+
+@example
+Plasma* setPlasma(Plasma *@var{useType} = NULL);
+@end example
+
+Initialize the Plasma, which has the effect of resolving the type, since
+the Particles provided by the Plasma determine the type of data that can
+be transferred.  This function should be protected.
+
+@example
+int index() const;
+@end example
+
+Return the index value.  This is a mechanism for assigning all the
+portholes in a universe a unique integer index, for use in table-driven
+schedulers.
+
+@example
+MultiPortHole* getMyMultiPortHole() const;
+@end example
+
+Return the MultiPortHole that spawned this PortHole, or NULL
+if there is no such MultiPortHole.
+
+@example
+virtual void setDelay (int @var{newDelayValue});
+@end example
+
+Set the delay value for the connection.
+
+@example
+void adjustDelays(int @var{numNewDelays});
+@end example
+
+Adjust the number of delays on the Geodesic: change the number to
+@var{numNewDelays} by using @code{setDelay} and re-initialize to
+put the change into effect (name could be better).
+
+@example
+virtual Geodesic* allocateGeodesic();
+@end example
+
+Allocate a return a Geodesic compatible with this type of PortHole.
+Should this be protected?
+
+@node PortHole protected members, class CircularBuffer, PortHole public members, class PortHole
+@subsection PortHole protected members
+
+@example
+Geodesic* myGeodesic;
+@end example
+
+My geodesic, which connects to my peer.  Initialized to NULL.
+
+@example
+PortHole* farSidePort;
+@end example
+
+The port on the far side of the connection.  NULL for disconnected ports.
+
+@example
+Plasma* myPlasma;
+@end example
+
+Pointer to the Plasma where we get our Particles or replace unused
+Particles.  Initialized to NULL.
+
+@example
+CircularBuffer* myBuffer;
+@end example
+
+Buffer where the Particles are stored.  This is actually a buffer of
+pointers to Particles, not to Particles themselves.
+
+@example
+int bufferSize;
+@end example
+
+This gives the size of the CircularBuffer to allocate.
+
+@example
+void getParticle();
+@end example
+
+Get @code{numberTokens} particles from the Geodesic and move them into
+my CircularBuffer.  Actually, only Particles move.  The same number of
+existing Particles are returned to their Plasma, so that the total
+number of Particles contained in the buffer remains constant.
+
+@example
+void putParticle();
+@end example
+
+Move @code{numberTokens} particles from my CircularBuffer to the
+Geodesic.  Replace them with the same number of Particles from the Plasma.
+
+@example
+void clearParticle();
+@end example
+
+Clear @code{numberTokens} particles in the CircularBuffer.  Leave the
+buffer position pointing to the last one.
+
+@node class CircularBuffer,  , PortHole protected members, class PortHole
+@subsection CircularBuffer -- a class used to implement PortHole
+
+This class is misnamed; it is not a general circular buffer but
+rather an array of pointers to Particle that is accessed in a
+circular manner.  It has a pointer representing the current position.
+This pointer can be advanced or backed up; it wraps around the end
+when this is done.  The class also has a facility for keeping
+track of error conditions.
+
+The constructor takes an integer argument, the size of the buffer.
+It creates an array of pointers of that size and sets them all to
+null.  The destructor returns any Particles in the buffer to their
+Plasma and then deletes the buffer.
+
+@example
+void reset();
+@end example
+
+Set the access pointer to the beginning of the buffer.
+
+@example
+Particle** here() const;
+@end example
+
+Return the access pointer.  Note the double indirection; since the
+buffer contains pointers to Particles, the buffer pointer points
+to a pointer.
+
+@example
+Particle** next();
+@end example
+
+Advance the pointer one position (circularly) and return the new value.
+
+@example
+Particle** last();
+@end example
+
+Back up the pointer one position (circularly) and return the new value.
+ 
+@example
+void advance(int @var{n});
+@end example
+
+Advance the buffer pointer by @var{n} positions.  This will not work correctly
+if @var{n} is larger than the buffer size.  @var{n} is assumed positive.
+
+@example
+void backup(int @var{n});
+@end example
+
+Back up the buffer pointer by @var{n} positions.  This will not work correctly
+if @var{n} is larger than the buffer size.  @var{n} is assumed positive.
+
+@example
+Particle** previous(int @var{offset}) const;
+@end example
+
+Find the position in the buffer @var{offset} positions in the past
+relative to the current position.  The current position is unchanged.
+@var{offset} must not be negative, and must be less than the buffer
+size, or a null pointer is returned an an appropriate error message
+is set; this message can be accessed by the @code{errMsg} function.
+
+@example
+int size() const;
+@end example
+
+Return the size of the buffer.
+
+@example
+static const char* errMsg();
+@end example
+
+Return the last error message (currently, only @code{previous()} sets
+error messages).
+
+@node class MultiPortHole, AutoFork and AutoForkNode, class PortHole, connection classes
+@section class MultiPortHole
+
+A MultiPortHole is an organized connection of related PortHoles.  Any
+number of PortHoles can be created within the PortHole; their names have
+the form @code{@var{mphname}#1}, @code{@var{mphname}#2}, etc., where
+@var{mphname} is replaced by the name of the MultiPortHole.  When a
+PortHole is added to the MultiPortHole, it is also added to the porthole
+list of the Block that contains the MultiPortHole.  As a result, a Block
+that contains a MultiPortHole has, in effect, a configurable number of
+portholes.
+
+A pair of MultiPortHoles can be connected by a "bus connection".  This
+technique creates @var{n} PortHoles in each MultiPortHole and connects
+them all "in parallel".
+
+The MultiPortHole constructor sets the "peer MPH" to 0.  The destructor
+deletes any constituent PortHoles.
+
+@menu
+* MultiPortHole public members::  MultiPortHole public members
+* MultiPortHole protected members::  MultiPortHole protected members
+@end menu
+
+@node MultiPortHole public members, MultiPortHole protected members, class MultiPortHole, class MultiPortHole
+@subsection MultiPortHole public members
+
+@example
+void initialize();
+@end example
+
+Does nothing.
+
+@example
+void busConnect (MultiPortHole& @var{peer}, int @var{width}, int @var{delay} = 0);
+@end example
+
+Makes a bus connection with another multiporthole, @var{peer}, with
+width @var{width} and delay @var{delay}.  If there is an existing bus
+connection, it is changed as necessary; an existing bus connection may
+be widened, or, if connected to a different peer, all constituent
+portholes are deleted and a bus is made from scratch.
+
+@example
+int isItMulti() const;
+@end example
+
+Returns TRUE.
+
+@example
+MultiPortHole& setPort(const char* @var{portName},
+                       Block* @var{parent},DataType @var{type} = FLOAT);
+@end example
+
+@example 
+int numberPorts() const;
+@end example
+
+Return the number of PortHoles in the MultiPortHole.
+
+@example
+virtual PortHole& newPort();
+@end example
+
+Add a new physical port to the MultiPortHole list.
+
+@example
+MultiPortHole& realPort();
+@end example
+
+Return the real MultiPortHole associated with me, translating any
+aliases.
+
+@example
+void setAlias (MultiPortHole &@var{blockPort});
+@end example
+
+Set my alias to @var{blockPort}.
+
+@example
+virtual PortHole& newConnection();
+@end example
+
+Return a new port for connections.  If there is an unconnected porthole,
+return the first one; otherwise make a new one.
+
+@example
+Plasma* setPlasma(Plasma *@var{useType} = NULL);
+@end example
+
+Sets the Plasma for all the portholes in the multiporthole.
+
+@node MultiPortHole protected members,  , MultiPortHole public members, class MultiPortHole
+@subsection MultiPortHole protected members
+
+@example
+PortList ports;
+@end example
+
+The list of portholes (should be protected).
+
+@example
+const char* newName();
+@end example
+
+This function generates names to be used for contained PortHoles.  They
+are saved in the hash table provided by the @code{hashstring} function.
+
+@example
+PortHole& installPort(PortHole& @var{p});
+@end example
+
+This function adds a newly created port to the multiporthole.  Derived
+MultiPortHole classes typically redefine @code{newPort} to create a
+porthole of the appropriate type, and then use this function to register
+it and install it.
+
+@example
+void delPorts();
+@end example
+
+This function deletes all contained portholes.
+
+@node AutoFork and AutoForkNode, class ParticleStack, class MultiPortHole, connection classes
+@section AutoFork and AutoForkNode
+
+AutoForks are a method for implementing netlist-style connections.
+An AutoForkNode is a type of Geodesic built on top of AutoFork.
+The classes are separate to allow a "mixin approach", so that if
+a domain requires special actions in its Geodesics, these special
+actions can be written only once and be implemented in both
+temporary and permanent connections.
+
+The implementation technique used is to automatically insert a Fork
+star to allow the n-way connection; this Fork star is created by
+invoking @code{KnownBlock::makeNew("Fork")}, which works only for
+domains that have a fork star.
+
+@menu
+* class AutoFork::              class AutoFork
+* class AutoForkNode::          class AutoForkNode
+@end menu
+
+@node class AutoFork, class AutoForkNode, AutoFork and AutoForkNode, AutoFork and AutoForkNode
+@subsection class AutoFork
+
+An AutoFork object has an associated Geodesic and possibly an associated
+Fork star (which it creates and deletes as needed).  It is normally used
+in a multiply inherited object, inherited from AutoFork and some kind
+of Geodesic; hence the associated Geodesic is the object itself.
+
+The constructor for class AutoFork takes a single argument, a reference
+to the Geodesic.  It sets the pointer to the fork star to be null.
+
+There are two public member functions, @code{setSource} and
+@code{setDest}.
+
+@example
+PortHole* setSource(GenericPort& @var{port}, int @var{delay} = 0);
+@end example
+
+If there is already an originating port for the geodesic, this method
+returns an error.  Otherwise it connects it to the node.
+
+@example
+PortHole* setDest(GenericPort& @var{port}, int @var{alwaysFork} = 0);
+@end example
+
+This function may be used to add any number of destinations to the
+port.  Normally, when there is more than one output, a Fork star is
+created and inserted to support the multi-way connection, but if there
+is only one output, a direct connection is used.  However, if
+@var{alwaysFork} is true, a Fork is inserted even for the first output.
+When the fork star is created, it is inserted in the block list for
+the parent galaxy (the parent of the geodesic).
+
+Design flaw: if the parent galaxy is not a DynamicGalaxy, there is
+no mechanism to delete the fork star, so it is a memory leak.  In
+current usage, autoforks are only used by InterpGalaxy, which is
+derived from DynamicGalaxy, so this is not a problem.
+
+@node class AutoForkNode,  , class AutoFork, AutoFork and AutoForkNode
+@subsection class AutoForkNode
+
+Class AutoForkNode is multiply inherited from Geodesic and AutoFork.
+It redefined @code{isItPersistent} to return TRUE, and redefines
+@code{setSourcePort} and @code{setDestPort} to call the
+@code{setSource} and @code{setDest} functions of AutoFork.
+The exact same form could be used to generate other types of
+auto-forking nodes (that is, this class could have been done with
+a template).
+
+@node class ParticleStack, class Geodesic, AutoFork and AutoForkNode, connection classes
+@section class ParticleStack
+
+ParticleStack is an efficient baseclass for the implementation of
+structures that organize Particles.  As Particles have a link field,
+ParticleStack is simply implemented as a linked list of Particles.
+
+Strictly speaking, a dequeue is implemented; particles can be inserted
+from either end.  ParticleStack has some odd attributes; it is designed
+for very efficient implementation of Geodesic and Plasma to move around
+large numbers of Particle objects very efficiently.
+
+@example
+ParticleStack(Particle* @var{h});
+@end example
+
+The constructor takes a Particle pointer.  If it is a null pointer an
+empty ParticleStack is created.  Otherwise the stack has one particle.
+Adding a Particle to a ParticleStack modifies that Particle's link
+field; therefore a Particle can belong to only one ParticleStack at a
+time.
+
+@example
+~ParticleStack();
+@end example
+
+The destructor deletes all Particles EXCEPT for the last one; we do
+not delete the last one because it is the "reference" particle (for
+Plasma) and is normally not dynamically created [ this should be the
+Plasma destructor, as this behavior is needed for Plasma ].
+
+@example
+void put(Particle* @var{p});
+@end example
+
+Push @var{p} onto the top (or head) of the ParticleStack.
+
+@example
+Particle* get();
+@end example
+
+Pop the particle off the top (or head) of the ParticleStack.
+
+@example
+void putTail(Particle* @var{p});
+@end example
+
+Add @var{p} at the bottom (or tail) of the ParticleStack.
+
+@example
+int empty() const;
+@end example
+
+Return TRUE (1) if the ParticleStack is empty, otherwise 0.
+
+@example
+int moreThanOne() const;
+@end example
+
+Return TRUE (1) if the ParticleStack has two or more particles,
+otherwise 0.  This is provided to speed up the derived class Plasma a
+bit.
+
+@example
+void freeup();
+@end example
+
+Returns all Particles on the stack to their Plasma (the allocation pool
+for that particle type).
+
+There is one protected data member:
+
+@example
+Particle* head;
+@end example
+
+This is the head of the list (or the top of the stack).
+
+@node class Geodesic, class Plasma, class ParticleStack, connection classes
+@section class Geodesic
+
+A Geodesic implements the connection between a pair, or a larger
+collection, of PortHoles.  A Geodesic may be temporary, in which case it
+is deleted when the connection it implements is broken, or it can be
+permanent, in which case it can live in disconnected form.  As a rule,
+temporary geodesics are used for point-to-point connections and
+permanent geodesics are used for netlist connections.  In the latter
+case, the Geodesic has a name and is a member of a galaxy; hence,
+Geodesic is derived from NamedObj.
+
+The baseclass Geodesic, which is temporary, suffices for most simulation
+and code generation domains.  In fact, in a number of these domains it
+contains unused features, so it is perhaps too "heaviweight" an object.
+A Geodesic contains a ParticleStack member which is used as a queue for
+movement of Particles between two portholes; it also has an "originating
+port" and a "destination port".
+
+A Geodesic can be asked to have a specific number of initial particles.
+When initialized, it creates that number of particles in its
+ParticleStack; these particles are obtained from the Plasma of the
+originating port (so they will be of the correct type).
+
+@menu
+* Geodesic public members::     Geodesic public members
+* Geodesic protected members::  Geodesic protected members
+@end menu
+
+@node Geodesic public members, Geodesic protected members, class Geodesic, class Geodesic
+@subsection Geodesic public members
+
+@example
+virtual PortHole* setSourcePort (GenericPort &@var{src}, int @var{delay} = 0);
+@end example
+
+Set the source port and the number of initial particles.  The actual
+source port is determined by calling @code{newConnection} on @var{src};
+thus if @var{src} is a MultiPortHole, the connection will be made to
+some port withing that MultiPortHole, and aliases will be resolved.
+The return value is the "real porthole" used.
+
+In the default implementation, if there is already a destination port,
+any preexisting connection is broken and a new connection is completed. 
+
+
+@example
+virtual PortHole* setDestPort (GenericPort &@var{dest});
+@end example
+
+Set the destination port to @code{@var{dest}.newConnection()}.  The
+return value is the "real porthole" used.
+
+In the default implementation, if there is already a source port,
+any preexisting connection is broken and a new connection is completed. 
+
+@example
+virtual int disconnect (PortHole & @var{p});
+@end example
+
+In the default implementation, if @var{p} is either the source port or
+the destination port, both the source port and destination port are set
+to null.  This is not enough to break a connection; as a rule,
+@code{disconnect} should be called on the porthole, and that method
+will call this one as part of its work.
+
+@example
+virtual void setDelay (int @var{newDelay});
+@end example
+
+Modify the delay (number of initial tokens) of a connection.  The
+default implementation simply changes a count.
+
+@example
+virtual int isItPersistent() const;
+@end example
+
+Return true if the Geodesic is persistent (may exist in a disconnected
+state) and false otherwise.  The default implementation returns false.
+
+@example
+PortHole* sourcePort () const;
+PortHole* destPort () const;
+@end example
+
+Return my source and destination ports, respectively.
+
+@example
+virtual void initialize();
+@end example
+
+In the default implementation, this function initializes the number of
+Particles to that given by the numInitialParticles field (the value
+returned by @code{numInit()}; these Particles are obtained from the
+Plasma (allocation pool) for the source port.  The particles will
+have zero value for numeric particles, and will hold the "empty message"
+for message Particles.
+
+@example
+void put(Particle* @var{p});
+@end example
+
+Put a particle into the Geodesic (using a FIFO discipline).
+
+@example
+Particle* get();
+@end example
+
+Retrieve a particle from the Geodesic (using a FIFO discipline).
+Return a null pointer if the Geodesic is empty.
+
+@example
+void pushBack(Particle* @var{p});
+@end example
+
+Push a Particle back into the Geodesic (onto the front of the queue,
+instead of onto the back of the queue as @code{put} does).
+
+@example
+int size() const;
+@end example
+
+Return the number of Particles on the Geodesic at the current time.
+
+@example
+int numInit() const;
+@end example
+
+Return the number of initial particles.  This call is valid at any
+time.  Immediately after @code{initialize}, @code{size} and
+@code{numInit} return the same value (and this should be true for
+any derived Geodesic as well), but this will not be true during
+execution (where @code{numInit} stays the same and @code{size}
+changes).
+
+@example
+StringList printVerbose() const;
+@end example
+
+FIXME: should be @code{print(int @var{verbose} = 0) const}.
+
+@example
+virtual void incCount(int);
+virtual void decCount(int);
+@end example
+
+These methods are available for schedulers such as the SDF scheduler to
+simulate a run and keep track of the number of particles on the
+geodesic.  @code{incCount} increases the count, @code{decCount}
+decreases it, They are virtual to allow additional bookkeeping in
+derived classes.
+
+@node Geodesic protected members,  , Geodesic public members, class Geodesic
+@subsection Geodesic protected members
+
+@example
+void portHoleConnect();
+@end example
+
+This function completes a connection once the originating and
+destination ports are set up.
+
+@example
+PortHole *originatingPort;
+PortHole *destinationPort;
+@end example
+
+These protected members point to my neighbors.
+
+@node class Plasma, class ParticleQueue, class Geodesic, connection classes
+@section class Plasma
+
+Class Plasma is a pool for particles.  It is derived from ParticleStack.
+Rather than allocating Particles as needed with @code{new} and freeing
+them with @code{delete}, we instead provide an allocation pool for each
+type of particle, so that very little dynamic memory allocation activity
+will take place during simulation runs.
+
+All Plasma objects known to the system are linked together.  As a rule,
+there is one Plasma for each type of particle; however, each of these
+objects is of type Plasma, not a derived type.  At all times, a Plasma
+has at least one Particle in it; that Particle's virtual functions are
+used to clone other particles as needed, determine the type, etc.
+
+The constructor takes one argument, a reference to a Particle.  It
+creates a one-element ParticleStack, and links the Plasma into a linked
+list of all Plasma objects.
+
+The @code{put} function (for putting a particle into the Plasma) adds
+a particle to the Plasma's ParticleStack.  As a rule, it should not
+be used directly [FIXME: change protection to force this?]; the
+Particle's @code{die} method will automatically add it to the right
+Plasma.
+
+@example
+Particle* get();
+@end example
+
+This function gets a Particle from the Plasma, creating a new one if
+the Plasma has only one Particle on it (we never give away the last
+Particle).
+
+@example
+DataType type();
+@end example
+
+Returns the type of the particles on the list (obtained by asking the
+head Particle).
+
+@example
+static Plasma* getPlasma(DataType @var{type});
+@end example
+
+Searches the list of Plasmas for one whose type matches the argument,
+and returns a pointer to it.  A null pointer is returned if there is
+no match.
+
+@node class ParticleQueue, classes for Galaxy ports, class Plasma, connection classes
+@section class ParticleQueue
+
+Class ParticleQueue implements a queue of Particles.  It uses a member
+of class ParticleStack to store the particles; it is not implemented
+by deriving from ParticleStack.  It can implement a queue with finite
+or unlimited capacity.
+
+Rather than placing user-supplied Particles on the queue and removing
+them directly, it takes over the responsibility for memory management
+by allocating its own Particles from the Plasma and returning them
+as needed.  When a user puts a Particle into the queue, the value of
+the Particle is copied (with the Particle @code{clone} method);
+similarly, when a user gets a Particle from the queue, he or she
+supplies a Particle to received the copied value.  The advantage of
+this is that the user need not worry about lifetimes of Particles --
+when to create them, when it is safe to return them to the Plasma
+or delete them.
+
+The ParticleQueue default constructor forms an empty, unlimited capacity
+queue.  There is also a constructor of the form
+
+@example
+ParticleQueue(unsigned int @var{cap});
+@end example
+
+This creates a queue that can hold at most @var{cap} particles.
+
+The destructor returns all Particles in the queue to their Plasma.
+
+@example
+int empty() const;
+@end example
+
+Return TRUE if the queue is empty, else FALSE.
+
+@example
+int full() const;
+@end example
+
+Return TRUE if the length equals the capacity, else FALSE.
+
+@example
+unsigned int capacity() const;
+@end example
+
+Return the queue's capacity.  If unlimited, the largest possible
+unsigned int on the machine will be returned.
+
+@example
+unsigned int length() const;
+@end example
+
+Return the number of particles in the queue.
+
+@example
+int putq(Particle& @var{p});
+@end example
+
+Put a copy of particle @var{p} into the queue, if there is room.
+Returns TRUE on success, FALSE if the queue is already at capacity.
+
+@example
+int getq(Particle& @var{p});
+@end example
+
+Get a particle from the queue, and copy it into the user-supplied
+particle @var{p}.  This returns TRUE on success, FALSE (and @var{p}
+is unaltered) if the queue is empty.
+
+@example
+void setCapacity(int @var{sz});
+@end example
+
+Modify the capacity to @var{sz}, if @var{sz} is positive or zero.  If
+negative, the capacity becomes infinite.
+
+@example
+void initialize();
+@end example
+
+Free up the queue contents.  Particles are returned to their pools and
+the queue becomes empty.
+
+@example
+void initialize(int @var{n});
+@end example
+
+Equivalent to @code{initialize()} followed by @code{setCapacity(@var{n})}.
+
+@node classes for Galaxy ports,  , class ParticleQueue, connection classes
+@section classes for Galaxy ports
+
+Class GalPort is derived from class PortHole.
+
+Class GalMultiPort is derived from class MultiPortHole.
+
+These classes are used by InterpGalaxy (and in other places) to create
+galaxy ports and multiports that are aliased to some port of a member
+block.  The constructor for each of these classes takes one argument,
+the interior port that is to be the alias.  The @code{isItInput} and
+@code{isItOutput} functions are implemented by forwarding the request
+to the alias.
+
+@node Particles and Messages, The incremental linker, connection classes, Top
+@chapter Particles and Messages
+
+@menu
+* class Particle::              class Particle
+* Particle public members::     Particle public members
+* Arithmetic Particle classes::  Arithmetic Particle classes
+* Messages::                    The Heterogeneous Message Interface
+* Example Message types::       Example Message types
+@end menu
+
+@node class Particle, Particle public members, Particles and Messages, Particles and Messages
+@section class Particle
+
+A Particle is a little package that contains data; they represent the
+principal communication technique that blocks use to pass results
+around.  They move through PortHoles and Geodesics; they are allocated
+in pools called Plasmas.  The class Particle is an abstract base class;
+all real Particle objects are really of some derived type.
+
+All Particles contain a link field that allows queues and stacks of
+Particles to be manipulated efficiently (class ParticleStack is a base
+class for everything that does this).
+
+Particles also contain virtual operators for loading and accessing the
+data in various forms; these functions permit automatic type conversion
+to be easily performed.
+
+@node Particle public members, Arithmetic Particle classes, class Particle, Particles and Messages
+@section Particle public members
+
+@example
+virtual DataType type() const = 0;
+@end example
+
+Return the type of the particle.  DataType is actually just a typedef
+for @code{const char*}, but when we use DataType, we treat it as an
+abstract type.  Furthermore, two DataType values are considered the
+same if they compare equal, which means that we must assure that
+the same string is always used to represent a given type.
+
+@example
+virtual operator int () const = 0;
+virtual operator float () const = 0;
+virtual operator double () const = 0;
+virtual operator Complex () const = 0;
+@end example
+
+These are the virtual casting functions, which convert the data in
+the Particle into the desired form.  The arithmetic Particles support
+all these functions cleanly.  Message particles may return errors for
+some of these functions (they must return a value, but may also call
+@code{Error::abortRun}.
+
+@example
+virtual StringList print () const = 0;
+@end example
+
+Return a printable representation of the Particle's data.
+
+@example
+virtual void initialize() = 0;
+@end example
+
+This function zeros the Particle (where this makes sense), or
+initializes it to some default value.
+
+@example
+virtual void operator << (int @var{arg}) = 0;
+virtual void operator << (double @var{arg}) = 0;
+virtual void operator << (const Complex& @var{arg}) = 0;
+@end example
+
+These functions are, in a sense, the inverses of the virtual casting
+operators.  They load the particle with data from @var{arg}, performing
+the appropriate type conversion.
+
+@example
+virtual Particle& operator = (const Particle& @var{arg}) = 0;
+@end example
+
+Copy a Particle.  As a rule, we permit this only for Particles of the
+same type, and otherwise assert an error.
+
+@example
+virtual int operator == (const Particle&) = 0;
+@end example
+
+Compare two particles.  As a rule, Particles will be equal only if
+they have the same type, and, in a sense that is separately determined
+for each type, the same value.
+
+@example
+virtual Particle* clone() = 0;
+@end example
+
+Produce a second, identical particle (as a rule, one is obtained from
+the Plasma for the particle if possible).  FIXME: should be const
+method.
+
+@example
+virtual Particle* useNew() = 0;
+@end example
+
+This is similar to @code{clone}, except that the particle is allocated
+from the heap rather than from the Plasma.  FIXME: should be const.
+FIXME: should access be restricted to this method?
+
+@example
+virtual void die() = 0;
+@end example
+
+Return the Particle to its Plasma.
+
+@example
+virtual void getMessage (Envelope&);
+virtual void accessMessage (Envelope&) const;
+virtual void operator << (const Envelope&);
+@end example
+
+These functions are used to implement the Message interface.  The
+default implementation returns errors for them; it is only if the
+Particle is really a MessageParticle that they successfully send or
+receive a Message from the Particle.
+
+@node Arithmetic Particle classes, Messages, Particle public members, Particles and Messages
+@section Arithmetic Particle classes
+
+There are three standard arithmetic Particle classes: IntParticle,
+FloatParticle, and ComplexParticle.  As their names suggest, each
+class adds to Particle a private data member of type int, double (not
+float!), and class Complex, respectively.
+
+When a casting operator or "<<" operator is used on a particle of one of
+these types, a type conversion may take place.  If the type of the
+argument of cast matches the type of the particle's data, the data is
+simply copied.  If the requested operation involves a "widening"
+conversion (int to float, double, or Complex; float to double or
+Complex; double to Complex), the "obvious" thing happens.  Conversion
+from double to int rounds to the nearest integer; conversion from
+Complex to double returns the absolute value (not the real part!),
+and Complex to int returns the absolute value, rounded to the nearest
+integer.
+
+@code{initialize} for each of these classes sets the data value to
+zero (for the appropriate domain).
+
+The DataTypes returned by these Particle types are the global symbols
+INT, FLOAT, and COMPLEX, respectively.  They have the string values
+"INT", "FLOAT", and "COMPLEX".
+
+@node Messages, Example Message types, Arithmetic Particle classes, Particles and Messages
+@section The Heterogeneous Message Interface
+
+The heterogeneous message interface is a mechanism to permit messages of
+arbitrary type (objects of some derived type of class Message) to be
+transmitted by blocks.  Because these messages may be very large,
+facilities are provided to permit many references to the same Message;
+Message objects are "held" in another class called Envelope.  As the
+name suggests, Messages are transferred in Envelopes.  When Envelopes
+are copied, both Envelopes refer to the same Message.  A Message will
+be deleted when the last reference to it disappears; this means that
+Messages must always be on the heap.
+
+So that Messages may be transmitted by portholes, there is a class
+MessageParticle whose data field is an Envelope.  This permits it to
+hold a Message just like any other Envelope object.
+
+@menu
+* class Envelope::              class Envelope
+* class Message::               class Message
+* class MessageParticle::       class MessageParticle
+@end menu
+
+@node class Envelope, class Message, Messages, Messages
+@subsection class Envelope
+
+class Envelope has two constructors.  The default constructor constructs
+an "empty" Envelope (in reality, the envelope is not empty but contains
+a special "dummy message" -- more on this later).  There is also a
+constructor of the form
+
+@example
+Envelope(Message& @var{data});
+@end example
+
+This constructor creates an Envelope that contains the Message
+@var{data}, which MUST have been allocated with @code{new}.
+
+Message objects have reference counts; at any time, the reference count
+equals the number of Envelope objects that contain (refer to) the
+Message object.  When the reference count drops to zero (because of
+execution of a destructor or assignment operator on an Envelope object),
+the Message will be deleted.
+
+Class Envelope defines an assignment operator, copy constructor, and
+destructor.  The main work of these functions is to manipulate reference
+counts.  When one Envelope is copied to another, both Envelopes refer
+to the same message.
+
+@example
+int empty() const;
+@end example
+
+Return TRUE if the Envelope is "empty" (points to the dummy message),
+FALSE otherwise.
+
+@example
+const Message* myData() const;
+@end example
+
+Return a pointer to the contained Message.  This pointer must not be
+used to modify the Message object, since other Envelopes may refer to
+the same message.
+
+@example
+Message* writableCopy();
+@end example
+
+This method produces a writable copy of the contained Message, and
+also zeros the Envelope (sets it to the empty message).  If this
+Envelope is the only Envelope that refers to the message, the
+return value is simply the contained message.  If there are multiple
+references to the message, the @code{clone} method is called on the
+Message, making a duplicate, and the duplicate is returned.
+
+The user is now responsible for memory management of the resulting
+Message.  If it is put into another Envelope, that Envelope will
+take over the responsibility, deleting the message when there is
+no more need for it.  If it is not put into another Envelope, the
+user must make sure it is deleted somehow, or else there will be
+a memory leak.
+
+@example
+int typeCheck(const char* @var{type}) const;
+@end example
+
+This member function asks the question "is the contained Message
+of class @var{type}, or derived from @var{type}"?  It is implemented by
+calling @code{isA} on the Message.  Either TRUE or FALSE is returned.
+
+@example
+const char* typeError(const char* @var{expected}) const;
+@end example
+
+This member function may be used to format error messages for when
+one type of Message was expected and another was received.  The
+return value points to a static buffer that is wiped out by subsequent
+calls.
+
+@example
+const char* dataType() const;
+int asInt() const;
+double asFloat() const;
+Complex asComplex() const;
+StringList print() const;
+@end example
+
+All these methods are "passthrough methods"; the return value is the
+result of calling the identically named function on the contained
+Message object.
+
+@node class Message, class MessageParticle, class Envelope, Messages
+@subsection class Message
+
+@node class MessageParticle,  , class Message, Messages
+@subsection class MessageParticle
+
+@node Example Message types,  , Messages, Particles and Messages
+@section Example Message types
+
+@example
+FloatVecData : public Message /FloatVecData.h:22:
+IntVecData : public Message /IntVecData.h:22:
+@end example
+
+These classes are types of Message.
+
+@node The incremental linker, Parameters and States, Particles and Messages, Top
+@chapter The incremental linker
+
+The incremental linker permits user written code to be added to the
+system at runtime.  Two different mechanisms are provided, called
+a temporary link and a permanent link.
+
+@node Parameters and States, known lists, The incremental linker, Top
+@chapter Parameters and States
+
+A State is a data-structure associated with a block, used to remember
+data values from one invocation to the next.
+For example, the gain of an automatic gain control is a state.
+A state need not be dynamic; for instance, the gain of fixed
+amplifier is a state.  A parameter is the initial value of a state.
+
+A State actually has two values: the initial value, which is always
+a character string, and a current value, whose type is different for
+each derived class of State: integer for IntState, an array of real
+values for FloatArrayState, etc.
+
+In addition, states have attributes, which represent logical properties
+the state either has or does not have.
+
+@menu
+* class State::                 class State
+* types of states::             types of states
+@end menu
+
+@node class State, types of states, Parameters and States, Parameters and States
+@section class State
+
+Class State is derived from class NamedObj.
+
+The State baseclass is an abstract class; you cannot create a plain
+State.  The baseclass contains the initial value, which is always
+a @code{const char*}; the derived classes are expected to provide
+current values of appropriate type.
+
+The constructor for class State sets the initial value to a null
+pointer, and sets the state's attributes to a value determined by
+the constant AB_DEFAULT.  The destructor does nothing extra.
+
+@menu
+* State public members::        State public members
+* The State parser::            The State parser and protected members
+@end menu
+
+@node State public members, The State parser, class State, class State
+@subsection State public members
+
+@example
+State& setState(const char* @var{stateName}, Block* @var{parent},
+               const char* @var{initValue}, const char* @var{desc} = NULL);
+@end example
+
+This function sets the name, parent, initial value, and optionally the
+descriptor for a state.  The character strings representing the initial
+value and descriptor must outlive the State.
+
+@example
+State& setState(const char* @var{stateName}, Block* @var{parent},
+               const char* @var{initValue}, const char* @var{desc},
+               Attribute @var{attr});
+@end example
+
+This function is the same as the other @code{setState}, but it also
+sets attributes for the state.  The Attribute object represents a
+set of attribute bits to turn on or off.
+
+@example
+void setInitValue(const char* @var{valueString});
+@end example
+
+This function sets the initial value to @var{valueString}.  This
+string must outlive the State.
+
+@example
+const char* initValue () const;
+@end example
+
+Return the initial value.
+
+@example
+virtual const char* type() const = 0;
+@end example
+
+Return the type name (for use in user interfaces, for example).
+When states are created dynamically (by the KnownState or InterpGalaxy
+class), it is this name that is used to specify the type.
+
+@example
+virtual int size() const;
+@end example
+
+Return the size (number of distinct values) in the state.  The
+default implementation returns 1.  Array state types will return the
+number of elements.
+
+@example
+virtual int isArray() const;
+@end example
+
+Return TRUE if this state is an array, false otherwise.  The default
+implementation returns false.
+
+@example
+virtual void initialize() = 0;
+@end example
+
+Initialize the state.  The @code{initialize} function for a state is
+responsible for parsing the initial value string and setting the current
+value appropriately; errors are signaled using the
+@code{Error::abortRun} mechanism.
+
+@example
+virtual StringList currentValue() const = 0;
+@end example
+
+Return a string representation of the current value.
+
+@example
+void setCurrentValue(const char* @var{newval});
+@end example
+
+Modify the current value, in a type-independent way.  Notice that this
+function is not virtual.  It exploits the semantics of @code{initialize}
+to set the current value using other functions; the initial value is
+not modified (it is saved and restored).
+
+@example
+virtual State* clone() const = 0;
+@end example
+
+Derived state classes override this method to create an identical
+object to the one the method is called on.
+
+@example
+StringList print(int @var{verbose}) const;
+@end example
+
+Output all info.  This is NOT redefined for each type of state.
+
+@example
+bitWord attributes() const;
+@end example
+
+Return my attribute bits.
+
+@example
+bitWord setAttributes(const Attribute& @var{attr});
+bitWord clearAttributes(const Attribute& @var{attr});
+@end example
+
+Set or clear attributes.
+
+@node The State parser,  , State public members, class State
+@subsection The State parser and protected members
+
+Most of class State's protected interface consists of a simple
+recursive-descent parser for parsing integer and floating expressions
+that appear in the initial value string.
+
+class ParseToken represents tokens for this parser; it contains a
+token type (an integer code) and a token value, which is a
+union that represents either a character value, a string value, an
+integer value, a double value, a Complex value, or a State value
+(for use when the initializer references another state).  Token
+types are equal to the ASCII character value for single-character
+tokens; other possible token values are:
+
+@code{T_EOF} for end of file, @code{T_ERROR} for error, @code{T_Float}
+for a floating value, @code{T_Int} for an integer value, @code{T_ID}
+for a reference to a state, and @code{T_STRING} for a string value.
+For most of these, the token value holds the appropriate value.
+
+Most derived State classes use this parser to provide uniformity
+of syntax and error reporting; however, it is not a requirement to
+use it.
+
+Derived State classes are expected to associate a Tokenizer object
+with their initial value string; the functions provided here can
+then be used to parse expressions appearing in that string.
+
+@example
+ParseToken getParseToken(Tokenizer& @var{tok}, int @var{wantedType}= T_Float);
+@end example
+
+This function obtains the next token from the input stream associated
+with the Tokenizer.  If there is a pushback token, that token is
+returned instead.  If it receives a '<' token, it assumes that the
+next whitespace-delimited string is a file and uses Tokenizer's include
+file capability to cause it to read from that file.
+
+It returns a T_EOF token on end of file.  The characters in @code{,[]+*-/()^}
+are considered special and the lexical value is equal to the character
+value.
+
+Integer and floating values are recognized and evaluated to produce
+either T_Int or T_Float tokens.  However, the decision is based on
+the value of @var{wantedType}; if it is T_Float, all numeric values
+are returned as T_Float; if it is T_Int, all numeric values are returned
+as T_Int.
+
+produce T_Int and T_Float tokens.  Names that take the form of a
+C or C++ identifier are assumed to be names of states defined at a
+higher level (states belonging to the parent galaxy or some ancestor
+galaxy).  They are searched for using @code{lookup}; if not found,
+an error is reported using @code{parseError} and an error token is
+returned.  If a State is found, a token of type T_ID is returned if
+it is an array state or COMPLEX; otherwise the state's current value
+is substituted and reparsed as a token.  This means, for example, that
+a name of an IntState will be replaced with a T_Int token with the
+correct value.
+
+@example
+const State* lookup(const char* @var{name}, Block* @var{b});
+@end example
+
+This method searches for a state named @var{name} in Block @var{b} or
+one of its ancestors, and either returns it or a null pointer if
+not found.
+
+@example
+void parseError (const char* @var{part1}, const char* @var{part2} = "");
+@end example
+
+This method produces an appropriately formatted error message with
+the name of the state and the arguments and calls @code{Error::abortRun}.
+
+@example
+static ParseToken pushback;
+@end example
+
+This is the pushback token, for use in parsing.  Notice that it is
+static, which means that the state parser is not reentrant.
+
+@example
+ParseToken evalIntExpression(Tokenizer& @var{lexer});
+ParseToken evalIntTerm(Tokenizer& @var{lexer});
+ParseToken evalIntFactor(Tokenizer& @var{lexer});
+ParseToken evalIntAtom(Tokenizer& @var{lexer});
+@end example
+
+These four functions implement a simple recursive-descent expression
+parser.
+
+An expression is either a term or a series of terms with intervening '+'
+or '-' signs.  
+
+A term is either a factor or a series of factors with interventing '*'
+or '/' signs.
+
+A factor is either an atom or a series of atoms with intervening '^'
+signs for exponentiation.  (Note, C fans!  ^ means exponentiation, not
+exclusive-or!).
+
+An atom is any number of optional unary minus signs, followed either
+by a parenthesized expression or a T_Int token.
+
+If any of these methods reads too far, the pushback token is used.
+All @code{getParseToken} calls use @var{wantedType} T_Int, so any
+floating values in the expression are truncated to integer.
+
+The token types returned from each of these methods will be one of
+T_Int, T_EOF, or T_ERROR.
+
+@example
+ParseToken evalFloatExpression(Tokenizer& @var{lexer});
+ParseToken evalFloatTerm(Tokenizer& @var{lexer});
+ParseToken evalFloatFactor(Tokenizer& @var{lexer});
+ParseToken evalFloatAtom(Tokenizer& @var{lexer});
+@end example
+
+These functions have the identical structure as the corresponding
+Int functions.
+
+The token types returned from each of these methods will be one of
+T_Float, T_EOF, or T_ERROR.
+
+@node types of states,  , class State, Parameters and States
+@section types of states
+
+@example
+ComplexArrayState : public State/ComplexArrayState.h:29:
+ComplexState : public State/ComplexState.h:29:
+FixArrayState : public FloatArrayState /FixArrayState.h:38:
+FixState : public FloatState /FixState.h:31:
+FloatArrayState : public State/FloatArrayState.h:29:
+FloatState : public State/FloatState.h:34:
+IntArrayState : public State/IntArrayState.h:29:
+IntState : public State/IntState.h:34:
+StringArrayState : public State/StringArrayState.h:30:
+StringState : public State/StringState.h:31:
+@end example
+
+@node known lists, I/O classes, Parameters and States, Top
+@chapter Support for known lists and such
+
+Ptolemy is an extensible system, and in quite a few places it must
+create objects given only the name of that object.  There are therefore
+several classes that are responsible for maintaining lists: the list of
+all known domains, of all known blocks, states, targets, etc.  As a
+general rule, these classes support a @code{clone} or @code{makeNew}
+method to create a new object based on its name (you cannot clone a
+domain, however).
+
+@menu
+* class KnownBlock::            class KnownBlock
+* class KnownTarget::           class KnownTarget
+* class Domain::                class Domain
+* class KnownState::            class KnownState
+@end menu
+
+@node class KnownBlock, class KnownTarget, known lists, known lists
+@section class KnownBlock
+
+The KnownBlock class is responsible for keeping a master list of all
+known types of Block objects in the system.  All member functions of
+KnownBlock are static; the only non-static function of KnownBlock is
+the constructor.
+
+The KnownBlock constructor has the form
+
+@example
+KnownBlock(Block& @var{block},const char* @var{name});
+@end example
+
+The only reason for constructing a KnownBlock object is for the side
+effects; the side effect is to add @var{block} to the known block list
+for its domain under the name @var{name}, using @code{addEntry}.
+
+The reason for using a constructor for this purpose is that constructors
+for global objects are called before execution of the main program;
+constructors therefore serve as a mechanism for execution of arbitrary
+initialization code for a module (as used here, "module" is an object
+file).  Hence @file{ptlang}, the Ptolemy star preprocessor, generates
+code like the following for star definitions:
+
+@example
+static XXXMyClass proto;
+static KnownBlock entry(proto,"MyClass");
+@end example
+
+This code adds a prototype entry of the class to the known list.
+
+@example
+static void addEntry (Block &@var{block}, const char* @var{name}, int @var{onHeap});
+@end example
+
+This function actually adds the block to the list.  If @var{onHeap} is true,
+the block will be destroyed when the entry is removed or replaced from
+the list.  Separate lists are maintained for each domain; the block
+is added to the list corresponding to @code{@var{block}.domain()}.
+
+@example
+static const char* domain();
+@end example
+
+Return the current domain name.
+
+@example
+static int setDomain (const char* @var{newDom});
+@end example
+
+Change the current domain.  Return TRUE if it worked, FALSE for an
+unknown domain.  This affects which sublist of blocks is searched by
+subsequent @code{find} and @code{clone} calls.
+
+@example
+static const Block* find (const char* @var{name});
+@end example
+
+The find method returns a pointer the appropriate block in
+the current domain.  A null pointer is returned if no match
+is found.
+
+@example
+static Block* clone (const char* @var{name});
+static Block* makeNew (const char* @var{name});
+@end example
+
+The @code{clone} method takes a string, finds the appropriate block in
+the current domain, and returns a clone of that block (the
+@code{clone} method is called on the block.  This method, as
+a rule, generates a duplicate of the block.
+
+The @code{makeNew} function is similar except that @code{makeNew}
+is called on the found block.  As a rule, @code{makeNew} returns
+an object of the same class, but with default initializations
+(for example, with default state values).
+
+For either of these, an error message is generated (with
+@code{Error::abortRun}) and a null pointer is returned if there is no
+match.
+
+@example
+static StringList nameList();
+static StringList nameList (const char* @var{domain});
+@end example
+
+Return the names of known blocks in the current domain (first form) or
+the given domain (second form).  Names are
+separated by newline characters.
+
+@example
+static int isDynamic (const char* @var{type});
+@end example
+
+Return true if the named block is dynamically linked.
+
+There is an iterator associated with KnownBlock, called
+KnownBlockIter.  It takes as an argument the name of a domain.  The
+argument may be omitted, in which case the current domain is used.
+Its @code{next} function returns the type @code{const Block *}; it
+steps through the blocks on the known list for that domain.
+
+@node class KnownTarget, class Domain, class KnownBlock, known lists
+@section class KnownTarget
+
+The KnownTarget class keeps track of targets in much the same way
+that KnownBlock keeps track of blocks.  There are some differences:
+there is only a single list of targets, not one per domain as for
+blocks.
+
+The constructor works exactly the same way that the constructor for
+KnownBlock works; the code
+
+@example
+static MyTarget proto(@var{args});
+static KnownTarget entry(proto,"MyTarget");
+@end example
+
+adds the prototype instance to the known list with a call to
+@code{addEntry}.
+
+@example
+static void addEntry (Target &@var{target}, const char* @var{name}, int @var{onHeap});
+@end example
+
+This function actually adds the Target to the list.  If @var{onHeap} is true,
+the target will be destroyed when the entry is removed or replaced from
+the list.  There is only one list of Targets.
+
+@example
+static const Target* find (const char* @var{name});
+@end example
+
+The find method returns a pointer the appropriate target.
+A null pointer is returned if no match
+is found.
+
+@example
+static Target* clone (const char* @var{name});
+@end example
+
+The @code{clone} method takes a string, finds the appropriate target on
+the known target list, and returns a clone of that block (the
+@code{clone} method is called on the target.  This method, as
+a rule, generates a duplicate of the target.
+An error message is generated (with @code{Error::abortRun}) and
+a null pointer is returned if there is no match.
+
+@example
+static int getList (const Block& @var{b}, const char** @var{names}, int @var{nMax});
+@end example
+
+This function returns a list of names of targets that are compatible
+with the Block @var{b}.  The return value gives the number of matches.
+The @var{names} array can hold @var{nMax} strings; if there are more,
+only the first @var{nMax} are returned.
+
+@example
+static int getList (const char* @var{dom}, const char** @var{names}, int @var{nMax});
+@end example
+
+This function is the same as above, except that it returns names of
+targets that are compatible with stars of a particular domain.
+
+@example
+static int isDynamic (const char* @var{type});
+@end example
+
+Return true if there is a target on the known list named @var{type}
+that is dynamically linked; otherwise return false.
+
+@example
+static const char* defaultName(const char* @var{dom} = 0);
+@end example
+
+Return the default target name for a domain (default: current domain).
+
+There is an iterator associated with KnownTarget, called
+KnownTargetIter.  Since there is only one known target list, it is
+unusual for an iterator in that it takes no argument for its constructor.
+Its @code{next} function returns the type @code{const Target *}; it
+steps through the targets on the known list.
+
+@node class Domain, class KnownState, class KnownTarget, known lists
+@section class Domain
+
+The Domain class represents the information that Ptolemy needs to know
+about a particular domain so that it can create galaxies, wormholes,
+nodes, event horizons, and such for that domain.  For each domain,
+the designer creates a derived class of Domain and one prototype object.
+Thus the Domain class has two main parts: a static interface, which
+manages access to the list of Domain objects, and a set of virtual
+functions, which provides the standard interface for each domain to
+describe its requirements.
+
+@menu
+* Domain virtual functions::    Domain virtual functions
+@end menu
+
+@node Domain virtual functions,  , class Domain, class Domain
+@subsection Domain virtual functions
+
+@example
+virtual Star& newWorm(Galaxy& @var{innerGal},Target* @var{innerTarget} = 0);
+@end example
+
+This function creates a new wormhole with the given inner galaxy and
+inner target.  The default implementation returns an error.
+
+XXXDomain might override this as follows:
+
+@example
+Star& XXXDomain::newWorm(Galaxy& innerGal,Target* innerTarget)  @{
+        LOG_NEW; return *new XXXWormhole(innerGal,innerTarget);
+@}
+@end example
+
+@example
+virtual EventHorizon& newFrom();
+virtual EventHorizon& newTo();
+@end example
+
+These functions create event horizon objects to represent the
+XXXfromUniversal and XXXtoUniversal functions.  The default
+implementations return an error.
+
+XXXDomain might override these as
+
+@example
+EventHorizon& XXXDomain::newFrom() @{
+    LOG_NEW; return *new XXXfromUniversal;
+@}
+
+EventHorizon& XXXDomain::newTo() @{
+    LOG_NEW; return *new XXXtoUniversal;
+@}
+@end example
+
+@example
+virtual Geodesic& newNode() = 0;
+@end example
+
+This function creates a new permanent node appropriate for netlist
+connections for the domain.  There is no default implementation.
+
+@example
+virtual int isGalWorm();
+@end example
+
+This function returns FALSE by default.  If overridden by a function
+that returns TRUE, a wormhole will be created around every galaxy
+for this domain.
+
+@node class KnownState,  , class Domain, known lists
+@section class KnownState
+
+KnownState manages two lists of states, one to represent the types of
+states known to the system (integer, string, complex, array of floating,
+etc), and one to represent certain predeclared global states.
+
+@node I/O classes, Misc, known lists, Top
+@chapter I/O classes
+
+@menu
+* class StringList::            StringList, a kind of String class
+* class Tokenizer::             Tokenizer, a simple lexical analyzer class
+* augmented fstreams::          pt_ifstream and pt_ofstream: augmented fstream classes
+* class XGraph::                Xgraph, an interface to the xgraph program
+* Histogram classes::           Histogram classes
+@end menu
+
+@node class StringList, class Tokenizer, I/O classes, I/O classes
+@section StringList, a kind of String class
+
+@node class Tokenizer, augmented fstreams, class StringList, I/O classes
+@section Tokenizer, a simple lexical analyzer class
+
+@node augmented fstreams, class XGraph, class Tokenizer, I/O classes
+@section pt_ifstream and pt_ofstream: augmented fstream classes
+
+@node class XGraph, Histogram classes, augmented fstreams, I/O classes
+@section Xgraph, an interface to the xgraph program
+
+@node Histogram classes,  , class XGraph, I/O classes
+@section Histogram classes
+
+@node Misc,  , I/O classes, Top
+@chapter Misc
+
+@menu
+* Mathematical classes::        Mathematical classes
+* IntervalList::                IntervalList
+* Time::                        Time
+@end menu
+
+@node Mathematical classes, IntervalList, Misc, Misc
+@section Mathematical classes
+
+@example
+Complex /ComplexSubset.h:13:
+Fraction/Fraction.h:37:
+@end example
+
+@node IntervalList, Time, Mathematical classes, Misc
+@section IntervalList
+
+@example
+Interval /IntervalList.h:36:
+IntervalList/IntervalList.h:101:
+@end example
+
+@node Time,  , IntervalList, Misc
+@section Time
+
+These classes provide simple means of interacting with the operating
+system's clock -- sleeping until a specified time, timing events, etc.
+
+@example
+Clock/Clock.h:18:
+TimeVal : private timeval/TimeVal.h:18:
+@end example
+
+
+@bye
