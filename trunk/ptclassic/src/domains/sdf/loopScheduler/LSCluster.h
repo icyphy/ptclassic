@@ -65,6 +65,11 @@ public:
 	// generate code
 	void genCode(Target&, int);
 
+	// simulate execution for schedule generation.  We also
+	// call simRunStar on the "real" star, so info like the
+	// maximum # of tokens on each arc will get set right.
+	int simRunStar(int deferFiring);
+
 private:
 	SDFFiring* firing;	// local schedule
 	SDFFiring* prev;	// previous firing.
