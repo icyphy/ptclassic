@@ -1,4 +1,4 @@
-# Definition of Gantt Chart VSM
+# Definition of Gantt Chart data filter
 #
 # @Author: Farhana Sheikh
 #
@@ -32,12 +32,12 @@
 
 
 #######################################################################
-#### GanttVSM
+#### GanttDF
 # This is a visualization state machine that translates a schedule
 # from text form to graphical form
-# create a Gantt VSM to interpret textual description of a 
+# create a Gantt data filter to interpret textual description of a 
 # schedule
-# The Gantt VSM should update the Gantt chart data somehow
+# The Gantt data filter should update the Gantt chart data somehow
 # Initialize the chart layout parameters
 #
 # FIXME: Fill in the documentation here
@@ -45,10 +45,10 @@
 # <p>
 # Here is an example:
 # <tcl><pre>
-# tycho::GanttVSM .ganttvsm
+# tycho::GanttDF .ganttdf
 # </pre></tcl>
 #
-class ::tycho::GanttVSM {
+class ::tycho::GanttDF {
     inherit itk::Widget
 
     constructor {args} {}
@@ -74,7 +74,7 @@ class ::tycho::GanttVSM {
     # graphical annotations for display to render
 
     # Create the hierarchy of nested schedules, each nested schedule
-    # getting an individual state machine; children of this vsm
+    # getting an individual state machine; children of this data filter
     method create {} {return $hierarchy} 
 
     # Return the firing sequence if it exists otherwise list is empty
@@ -104,7 +104,7 @@ class ::tycho::GanttVSM {
     # Return the galaxy or universe name
     method getUtilization {} {return $utilization}
     
-    # Reset a VSM to initial state
+    # Reset a data filter to initial state
     method reset {}
 
 
@@ -137,7 +137,7 @@ class ::tycho::GanttVSM {
 #### -file configuration
 # Set the name of current schedule file
 #
-configbody ::tycho::GanttVSM::file {
+configbody ::tycho::GanttDF::file {
    
     set filename $itk_option(-file)
 
@@ -171,7 +171,7 @@ configbody ::tycho::GanttVSM::file {
 # Give the schedule an optional identifier; useful for clusters and 
 # processor schedules
 #
-configbody ::tycho::GanttVSM::id {
+configbody ::tycho::GanttDF::id {
    
     set identifier $itk_option(-id)
     
@@ -181,7 +181,7 @@ configbody ::tycho::GanttVSM::id {
 #### -schedule configuration
 # Set the schedule information
 #
-configbody ::tycho::GanttVSM::schedule {
+configbody ::tycho::GanttDF::schedule {
    
     # if schedule file not read then prefer to use -schedule option
     if {$filename == ""} {
@@ -193,7 +193,7 @@ configbody ::tycho::GanttVSM::schedule {
 #######################################################################
 #### constructor
 #
-body ::tycho::GanttVSM::constructor {args} {
+body ::tycho::GanttDF::constructor {args} {
 
     eval itk_initialize $args
 }
@@ -201,7 +201,7 @@ body ::tycho::GanttVSM::constructor {args} {
 #######################################################################
 #### destructor
 #
-body ::tycho::GanttVSM::destructor {} {
+body ::tycho::GanttDF::destructor {} {
 }
 
     ###################################################################
@@ -210,9 +210,9 @@ body ::tycho::GanttVSM::destructor {} {
 
 #######################################################################
 #### create
-# Create schedule hierarchy and return names of nested GanttVSMs
+# Create schedule hierarchy and return names of nested GanttDFs
 #
-body ::tycho::GanttVSM::create {} {
+body ::tycho::GanttDF::create {} {
 
     # Create may have already been called once, if so no need to parse
     # again.
@@ -221,7 +221,7 @@ body ::tycho::GanttVSM::create {} {
     }
 
     # Check if we have any nested schedules; if so create corresponding
-    # sub-VSMs
+    # sub-data filters
     set curindex 0
     set name ""
     set hierarchy {}
@@ -236,7 +236,7 @@ body ::tycho::GanttVSM::create {} {
 		    set id [lindex $item 1]
 		}
 		itk_component add $name {
-		    ::tycho::GanttVSM $itk_component(hull).$name \
+		    ::tycho::GanttDF $itk_component(hull).$name \
 			    -schedule $nestedSched \
 			    -id $id
 		} {
@@ -248,7 +248,7 @@ body ::tycho::GanttVSM::create {} {
 		set procNum [lindex $item 1]
 		set name proc$procNum
 		itk_component add $name {
-		    ::tycho::GanttVSM $itk_component(hull).$name \
+		    ::tycho::GanttDF $itk_component(hull).$name \
 			    -schedule $nestedSched \
 			    -id $name
 
@@ -261,7 +261,7 @@ body ::tycho::GanttVSM::create {} {
 		set nestedSched [lindex $item [expr [llength $item] - 1]]
 		set name preamble$curindex
 		itk_component add $name {
-		    ::tycho::GanttVSM $itk_component(hull).$name \
+		    ::tycho::GanttDF $itk_component(hull).$name \
 			    -schedule $nestedSched
 		} {
 		}
@@ -288,7 +288,7 @@ body ::tycho::GanttVSM::create {} {
 #### getDisplayData
 # Get the display data
 #
-body ::tycho::GanttVSM::getDisplayData {} {
+body ::tycho::GanttDF::getDisplayData {} {
     
     set parent [winfo parent $itk_component(hull)]
     set time 0
@@ -322,7 +322,7 @@ body ::tycho::GanttVSM::getDisplayData {} {
 #### getID
 # Get the schedule identifier
 #
-body ::tycho::GanttVSM::getID {} {
+body ::tycho::GanttDF::getID {} {
 
     return $identifier
 }
@@ -331,7 +331,7 @@ body ::tycho::GanttVSM::getID {} {
 #### getMakespan
 # Get the makespan or period of the schedule
 #
-body ::tycho::GanttVSM::getMakespan {} {
+body ::tycho::GanttDF::getMakespan {} {
 
     # check if we've read in a schedule
     if {$schedInfo == {}} {
@@ -354,7 +354,7 @@ body ::tycho::GanttVSM::getMakespan {} {
 #### getNumProcs
 # Get the number of processors
 #
-body ::tycho::GanttVSM::getNumProcs {} {
+body ::tycho::GanttDF::getNumProcs {} {
 
     # check if we've read in a schedule
     if {$schedInfo == {}} {
@@ -378,7 +378,7 @@ body ::tycho::GanttVSM::getNumProcs {} {
 #### getSchedName
 # Get scheduler name 
 #
-body ::tycho::GanttVSM::getSchedName {} {
+body ::tycho::GanttDF::getSchedName {} {
 
     # check if we've read in a schedule
     if {$schedInfo == {}} {
@@ -402,7 +402,7 @@ body ::tycho::GanttVSM::getSchedName {} {
 #### getSchedule
 # Get schedule 
 #
-body ::tycho::GanttVSM::getSchedule {} {
+body ::tycho::GanttDF::getSchedule {} {
     
     return $schedInfo
 }
@@ -411,7 +411,7 @@ body ::tycho::GanttVSM::getSchedule {} {
 #### getTarget
 # Get name of target
 #
-body ::tycho::GanttVSM::getTarget {} {
+body ::tycho::GanttDF::getTarget {} {
 
     # check if we've read in a schedule
     if {$schedInfo == {}} {
@@ -435,7 +435,7 @@ body ::tycho::GanttVSM::getTarget {} {
 #### getUniverse
 # Get name of universe or galaxy
 #
-body ::tycho::GanttVSM::getUniverse {} {
+body ::tycho::GanttDF::getUniverse {} {
 
     # check if we've read in a schedule
     if {$schedInfo == {}} {
@@ -459,7 +459,7 @@ body ::tycho::GanttVSM::getUniverse {} {
 #### getUtilization
 # Get the processor utilization
 #
-body ::tycho::GanttVSM::getUtilization {} {
+body ::tycho::GanttDF::getUtilization {} {
 
     # check if we've read in a schedule
     if {$schedInfo == {}} {
@@ -481,9 +481,9 @@ body ::tycho::GanttVSM::getUtilization {} {
 
 #######################################################################
 #### reset
-# Reset a VSM to its initial state
+# Reset a data filter to its initial state
 #
-body ::tycho::GanttVSM::reset {} {
+body ::tycho::GanttDF::reset {} {
 
 }
 
