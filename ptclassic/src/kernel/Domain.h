@@ -62,8 +62,9 @@ public:
 	virtual EventHorizon& newFrom();
 	virtual EventHorizon& newTo();
 
-	// method for creating "nodes" or permanent geodesics
-	virtual Geodesic& newNode() = 0;
+	// Create a geodesic for a point-to-point connection
+	// or a "node" suitable for multi-point connections.
+	virtual Geodesic& newGeo(int multi = FALSE);
 
 	// return true if wormholes should be made for all galaxies
 	virtual int isGalWorm();
