@@ -66,14 +66,14 @@ oct2ps:	$(OBJS)
   		-o oct2ps \
 		$(LIBS) -lm 
 
-DESTBIN = $(BINDIR)/oct2ps
+DEST = $(ROOT)/octtools/bin.$(ARCH)/oct2ps
 
-$(DESTBIN):	$(ROOT)/octtools/bin.$(ARCH)/oct2ps
+$(DEST):	oct2ps
 		@echo Installing oct2ps
-		rm -f $(DESTBIN)
-		ln oct2ps $(DESTBIN)
+		rm -f $(DEST)
+		ln oct2ps $(DEST)
 
-install: makefile $(DESTBIN) $(ROOT)/lib/oct2ps.pro
+install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro
 	
 	
 $(ROOT)/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
