@@ -77,7 +77,7 @@ be a parameter.
 			delFile = TRUE;
 		}
 		else {
-			fileName = savestring(expandPathName(sf));
+			fileName = expandPathName(sf);
 		}
 
 		// should check if file already exists here
