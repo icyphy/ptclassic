@@ -162,12 +162,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (sourceTclwEnv) {
 	    if(Tcl_Eval(interp, "source [expandEnvVar \\$val(tcl_file)]", 0,
 		(char **) NULL) != TCL_OK)
-		errorReport("Cannot source tcl script for TkScript star");
+		errorReport("Cannot source tcl script for TclScript star");
 	}
 	codeblock (sourceTclwoEnv) {
 	    if(Tcl_Eval(interp, "source [expandEnvVar $val(tcl_file)]", 0,
 		(char **) NULL) != TCL_OK)
-		errorReport("Cannot source tcl script for TkScript star");
+		errorReport("Cannot source tcl script for TclScript star");
 	}
 	codeblock (callTcl) {
 	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl",
