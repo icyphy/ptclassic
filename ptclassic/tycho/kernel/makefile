@@ -40,40 +40,16 @@ VPATH =		$(ROOT)/kernel
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = \
-	JRPCServer.tcl \
-	tychoMakeClassDAG.tcl
+TCL_SRCS = 
 
-ITCL_SRCS = \
-	AbstractGraph.itcl \
-	CacheManager.itcl \
-	Compile.itcl \
-	CompileCTcl.itcl \
-	CompileJava.itcl \
-	Dialog.itcl \
-	Digraph.itcl \
-	DirectedAcyclicGraph.itcl \
-	DirSearch.itcl \
-	Forest.itcl \
-	Glimpse.itcl \
-	Graph.itcl \
-	JRPC.itcl \
-	Library.itcl \
-	MultiPanel.itcl \
-	PackageData.itcl \
-	PortedGraph.itcl \
-	Resource.itcl \
-	ResourceFile.itcl \
-	ResourceWELD.itcl \
-	Stack.itcl \
-	Subpanel.itcl
+ITCL_SRCS =
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) kernel.tcl pkgIndex.tcl
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) kernel.tcl pkgIndex.tcl
 
-MISC_FILES =		demo doc img test styles tclIndex
+MISC_FILES = demo doc img test styles tclIndex html basic gui model
 
 # Sub directories to run make in.
-DIRS =			demo doc test styles
+DIRS = demo doc test styles html basic gui model
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
