@@ -48,8 +48,8 @@ is much faster.  When you access an element in a list, the list must
 be reparsed, whereas arrays use a hash table, so access is nearly O(N).
 
 <LI> <CODE>array names foo {* something *}</CODE> is not only linearly
-with the size of the array, but seems to take about 1ms per element on
-a Sparc20/100.
+growing with the size of the array, but seems to take about 1ms per
+element on a Sparc20/100.
 
 <LI> Iterating through large data structures in Tcl is often slow.
 For each iteration, Tcl reparses the body of the loop or procedure.
