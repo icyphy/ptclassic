@@ -78,6 +78,7 @@ PL_SRCS= \
 
 TCL_SRCS= \
   tkButtons.tcl \
+  tkLogicAnalyzer.itcl \
   $(TCL_SCRIPT_DIR)/tkMeter.tcl \
   $(TCL_SCRIPT_DIR)/tkScript.tcl \
   tkShowEvents.tcl \
