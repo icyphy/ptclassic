@@ -2,7 +2,7 @@
 # $Id$
 # shell script to figure out architecture, using C preprocessor
 # works on the architectures we support.
-/lib/cpp << EOF | grep '^X' | sed s/X//
+arch=`echo "
 #ifdef sun
 #ifdef sparc
 Xsun4
@@ -15,7 +15,7 @@ Xvax
 #endif
 #ifdef mips
 #ifdef sgi
-Xirix5
+Xirix4
 #else
 Xmips
 #endif
@@ -23,4 +23,10 @@ Xmips
 #ifdef hppa
 Xhppa
 #endif
-EOF
+" | /lib/cpp  | grep '^X' | sed s/X// `
+if [ $arch = "irix4" ]; then
+	uname -r | awk '{split($1,f,"."); print "irix"f[1]}'
+else	
+	echo $arch
+fi
+
