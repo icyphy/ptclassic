@@ -1,4 +1,4 @@
-# Definition of a basic window with a menu bar and dismiss button
+# Definition of a basic window with a menu bar and status bar
 #
 # @Author: Edward A. Lee
 # @Contributors: Joel King, Farhana Sheikh
@@ -124,7 +124,7 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 #######################################################################
 #### File
 # This class defines a window that contains a menu bar with associated
-# file commands at the top and a dismiss button at the bottom. It is
+# file commands at the top and a status bar at the bottom. It is
 # designed to be the parent window for any editor that stores its
 # results in files. If the data is marked modified and the object is
 # destroyed, the user is queried to save the file. A safety copy of
@@ -246,6 +246,9 @@ class ::tycho::File {
 
     # Print the contents of the file. The default behavior is an error.
     method print {}
+
+    # Print a status message
+    method putStatus {string}
 
     # Reload from the last saved version of the file.
     method reload {}
@@ -860,7 +863,7 @@ body ::tycho::File::isModified {} {
 #
 body ::tycho::File::markModified {} {
     if {!$modified} {
-	$itk_component(dismiss) configure -text "DISMISS  $myclass  (modified)"
+ 	$itk_component(status) configure -filestatus "modified"	
 	set modified 1
     }
 }
@@ -872,10 +875,9 @@ body ::tycho::File::markModified {} {
 body ::tycho::File::markUnmodified {} {
     if {$modified} {
 	if {$itk_option(-readonly)} {
-	    $itk_component(dismiss) configure -text \
-                    "DISMISS   $myclass  (read only)"
+ 	    $itk_component(status) configure -filestatus "readonly"	    
 	} {
-	    $itk_component(dismiss) configure -text "DISMISS  $myclass"
+	    $itk_component(status) configure -filestatus "readwrite"
 	}
 	set modified 0
     }
@@ -941,6 +943,14 @@ body ::tycho::File::reload {} {
 }
 
 ###################################################################
+#### putStatus
+# Print a status message
+#
+body ::tycho::File::putStatus {string} {
+    $itk_component(status) puts $string
+}
+
+###################################################################
 #### revisionControl
 # Invoke revision control.  If the file is under the control of a
 # recognized revision control system (such as SCCS and RCS), then use
@@ -977,6 +987,7 @@ body ::tycho::File::save {{name ""}} {
 	removeBackupFiles
     }
     markUnmodified
+    putStatus "Saved $filename"
     return 1
 }
 
@@ -1056,12 +1067,11 @@ body ::tycho::File::saveCrash {} {
 body ::tycho::File::setReadOnly {bool} {
     if [winfo exists $prefix] {
 	if {$bool} {
-	    $itk_component(dismiss) configure -text \
-                    "DISMISS  $myclass (read only)"
+	    $itk_component(status) configure -filestatus "readonly"
             disableMenuItem {Insert...} File
             disableMenuItem Save File
 	} {
-	    $itk_component(dismiss) configure -text "DISMISS  $myclass"
+	    $itk_component(status) configure -filestatus "readwrite"
             enableMenuItem {Insert...} File
             enableMenuItem Save File
 	}
