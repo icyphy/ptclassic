@@ -113,7 +113,12 @@ vhdlsim: v2cinteger c2vinteger v2creal c2vreal V2CINTEGER.sim C2VINTEGER.sim \
 		-libs "-lsynsock"
 
 ptvhdlsim: vhdlsim
-	ln vhdlsim ptvhdlsim
+	rm -f $@
+	ln $< $@
+
+$(BINDIR)/ptvhdlsim: ptvhdlsim
+	rm -f $@
+	ln $< $@	
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
