@@ -68,7 +68,9 @@ public:
   PortHole * setOldDestPort( GenericPort & );
 
   PortHole * getReceiver();
-  
+
+  int isItPersistent() const;
+  int disconnect( PortHole & );  
 };
 
 #endif
