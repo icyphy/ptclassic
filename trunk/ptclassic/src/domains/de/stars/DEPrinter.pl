@@ -21,15 +21,16 @@ of the particle is used to generate the output.
 	defstate {
 		name { fileName }
 		type { string }
-		default { "cout" }
-		desc { Filename for output, or "cout" for stdout. }
+		default { "/dev/tty" }
+		desc { Filename for output }
 	}
-	hinclude { "UserOutput.h" }
+	hinclude { "pt_fstream.h" }
 	protected {
-		UserOutput output;
+		pt_ofstream output;
 	}
 	start {
-		output.fileName(fileName);
+		// abortRun is called on open failure
+		output.open(fileName);
 	}
 
 	go {
