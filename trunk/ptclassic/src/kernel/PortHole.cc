@@ -22,11 +22,14 @@ Code for functions declared in Connect.h
 
 // Methods for CircularBuffer
 
+
+const char* CircularBuffer :: errMsgString = "";
+
 CircularBuffer :: CircularBuffer(int i)
 {
         dimen = i;
         current = 0;
-        buffer = new Pointer[dimen];
+        buffer = new Particle*[dimen];
 	for(int j = dimen-1; j>=0; j--)
 		buffer[j] = NULL;
 }
@@ -35,25 +38,25 @@ CircularBuffer :: ~CircularBuffer()
 {
 // If there are any particles, return them to correct Plasma
 	for (int i = size(); i>0; i--) {
-		Particle* q = (Particle*)*next();
+		Particle* q = *next();
 		if (q) q->die();
 	}
         delete buffer;
 }
 
-Pointer* CircularBuffer :: here() const
+Particle** CircularBuffer :: here() const
 {
         return buffer+current;
 }
 
-Pointer* CircularBuffer :: next()
+Particle** CircularBuffer :: next()
 {
 	++current;
 	if (current >= dimen) current = 0;
         return buffer+current;
 }
 
-Pointer* CircularBuffer :: last()
+Particle** CircularBuffer :: last()
 {
 	--current;
 	if (current < 0) current = dimen - 1;
@@ -62,17 +65,18 @@ Pointer* CircularBuffer :: last()
 
 // Find the position in the buffer i in the past relative to current
 // This method does not change current
-Pointer* CircularBuffer :: previous(int i) const
+// Returns NULL on access error
+Particle** CircularBuffer :: previous(int i) const
 {
-        if(i > dimen-1)
-		Error::abortRun(
-                "CircularBuffer: Access with too large a delay\n"
-		);
-	else if(i < 0)
-		Error::abortRun(
-                "CircularBuffer: Access with negative delay\n"
-                );
-	else if(i > current)
+        if (i > dimen-1)  {
+		errMsgString = "Access with too large a delay";
+		return 0;
+	}
+	if (i < 0) {
+		errMsgString = "Access with negative delay";
+		return 0;
+	}
+	if (i > current)
 		// Keep (current-i) from being negative
 		i -= dimen;
 
@@ -179,7 +183,7 @@ void PortHole :: allocateBuffer()
 	// Allocate new buffer, and fill it with initialized Particles
 	myBuffer = new CircularBuffer(bufferSize);
         for(int i = myBuffer->size(); i>0; i--) {
-                Pointer* p = myBuffer->next();
+                Particle** p = myBuffer->next();
                 *p = myPlasma->get();
 	}
 }
@@ -362,11 +366,11 @@ void PortHole :: initialize()
 
 	// initialize buffer
 	for(int i = myBuffer->size(); i>0; i--) {
-		Pointer* p = myBuffer->next();
+		Particle** p = myBuffer->next();
 		// Initialize particles on the buffer, so when we
 		// restart they do not contain old data
-		((Particle*)*p)->initialize();
-		}
+		(*p)->initialize();
+	}
 	// If this is an output PortHole or EventHorizon, initialize myGeodesic
 	if( (isItOutput() || isItInput() == far()->isItInput()) && myGeodesic) 
 		myGeodesic->initialize();
@@ -382,14 +386,14 @@ void PortHole :: setMaxDelay(int delay)
 
 Particle& PortHole ::  operator % (int delay)
 {
-	Pointer* p = myBuffer->previous(delay);
-        if(*p == NULL) {
-		Error::abortRun(*this,
-			  ": Attempt to access nonexistent input Particle");
-// kludge -- gotta get a particle somehow
+	Particle** p = myBuffer->previous(delay);
+	if(p == NULL || *p == NULL) {
+		Error::abortRun(*this,CircularBuffer::errMsg());
+		// kludge -- gotta get a particle somehow so we don't
+		// dump core.
 		return *myPlasma->get();
 	}
-        return *(Particle*)*p;
+        return **p;
 }
 
 MultiPortHole& MultiPortHole :: setPort(const char* s,
@@ -497,22 +501,26 @@ void PortHole :: getParticle()
 // in the buffer, then setting current time to the last Particle input
 
 	for(int i = numberTokens; i>0; i--)
-		{
+	{
 		// Move the current time pointer in the buffer
-		Pointer* p = myBuffer->next();
+		Particle** p = myBuffer->next();
 
                 // Put current Particle back into Plasma  to be
 		// recycled back to some OutSDFPort
-		myPlasma->put((Particle*)*p);
+		myPlasma->put(*p);
  
 		// Get another Particle from the Geodesic
         	*p = myGeodesic->get();
+		if (*p == NULL) {
+			Error::abortRun(*this,"Attempt to read from empty geodesic");
+			return;
 		}
+	}
 }
 
 void PortHole :: clearParticle()
 {
-	Pointer* p;
+	Particle** p;
 
 // It is assumed this routine is called before a Star executes....
 // It moves current by numberTokens in the buffer, initializing
@@ -528,13 +536,13 @@ void PortHole :: clearParticle()
 	
 		// Get and initialize next Particle
         	p = myBuffer->next();
-		((Particle*)*p)->initialize();
-		}
+		(*p)->initialize();
+	}
 }
 
 void PortHole :: putParticle()
 {
-	Pointer* p;
+	Particle** p;
 
 // This method is called after go(); the buffer now contains numberTokens
 // Particles that are to be send to the output Geodesic
@@ -554,7 +562,7 @@ void PortHole :: putParticle()
 		Particle* pp = myPlasma->get();
 
 		// Copy from the buffer to this Particle
-		*pp = *(Particle*)*p;
+		*pp = **p;
 
 		// Launch this Particle into the Geodesic
 		myGeodesic->put(pp);
