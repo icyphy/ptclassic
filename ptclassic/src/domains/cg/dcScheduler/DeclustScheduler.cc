@@ -70,10 +70,19 @@ DeclustScheduler::~DeclustScheduler() {
 			///  preSchedule  ///
 			/////////////////////
 
+// At first, check whether the galaxy contains any wormhole. If yes,
+// return FALSE since this scheduler does not work right for wormholes.
 // prepare scheduline: Here, we do the first two steps of declustering:
 // (1) find elementary clusters and (2) build a cluster hierarchy.
 
 int DeclustScheduler::preSchedule() {
+
+	// check if wormhole exists or not
+	if (withParallelStar()) {
+		Error::abortRun("Declustering algorithm can not handle ",
+			"parallel stars. Please use another scheduler");	
+		return FALSE;
+	}
 
 	if (logstrm)
 		*logstrm << "Created DCGraph, moving to elementary clusters\n";
