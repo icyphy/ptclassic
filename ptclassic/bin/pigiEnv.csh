@@ -119,7 +119,7 @@ if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
 
-set path = ( $path $PTOLEMY/octtools/bin.$ARCH $PTOLEMY/bin.$ARCH $PTOLEMY/bin )
+set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $PTOLEMY/octtools/bin.$ARCH $path )
 
 set cmdfile = /tmp/pigiCmds.$USER
 /bin/rm -f $cmdfile
