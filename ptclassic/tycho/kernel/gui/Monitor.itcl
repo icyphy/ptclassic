@@ -94,7 +94,6 @@ class ::tycho::Monitor {
     constructor {args} {}
     destructor {}
 
-
     ###################################################################
     ####                      public methods                       ####
     public method execProcessInMonitor {} {}
@@ -105,7 +104,6 @@ class ::tycho::Monitor {
     # Save the settings, such as autostart, autodestroy
     # so that we'll remember the setting next time we start up
     public method saveSetting {} {}
-
 
     # If a monitor has error line reported, jump to the editor and its line
     public method jumpToLine {monitorLine editorLine fname} {}
@@ -240,19 +238,7 @@ body ::tycho::Monitor::destructor {} {
 }
 
 body ::tycho::Monitor::saveSetting {} {
-    if {[$this get autoStart]=="No"} {
-        catch {[eval exec rm [file join $itk_option(-dir) .autostart]]}
-    } else {
-        catch {[eval exec touch [file join $itk_option(-dir) .autostart]]}
-    }
-
-    if {[$this get autoDestroy]=="No"} {
-        catch {[eval exec rm \
-                [file join $itk_option(-dir) .autodestroy]]}
-    } else {
-        catch {[eval exec touch \
-                [file join $itk_option(-dir) .autodestroy]]}
-    }
+    # Don't move it to preference.
 }
 
 #######################################################################
@@ -365,6 +351,9 @@ body ::tycho::Monitor::execProcessInMonitor {} {
         if {[$this getStatusWait]=="normal"} {
             # If returned correctly, it's okay to exit this window
             after 2000 delete object $this
+        } else {
+            insertLine "<<NOTE: exit status is [$this getStatusWait],\
+                    will not autodestroy.>>"
         }
     }
 }
