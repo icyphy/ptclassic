@@ -599,8 +599,8 @@ void MatlabIfc :: NameMatlabMatrix(Matrix* matrixPtr, const char *name) {
     mxSetName(matrixPtr, name);
 }
 
-// MatlabSetVariable
-int MatlabIfc :: MatlabSetVariable(const char* name,
+// SetMatlabVariable
+int MatlabIfc :: SetMatlabVariable(const char* name,
 				   int numrows, int numcols,
 				   char** realPartStrings,
 				   char** imagPartStrings) {
@@ -643,8 +643,8 @@ int MatlabIfc :: MatlabSetVariable(const char* name,
     return TRUE;
 }
 
-// MatlabGetVariable
-int MatlabIfc :: MatlabGetVariable(char* name,
+// GetMatlabVariable
+int MatlabIfc :: GetMatlabVariable(char* name,
 				   int* numrows, int* numcols,
 				   char*** realPartStrings,
 				   char*** imagPartStrings) {
@@ -684,6 +684,21 @@ int MatlabIfc :: MatlabGetVariable(char* name,
     }
 
     return retval;
+}
+
+int MatlabIfc :: UnsetMatlabVariable(char* name) {
+    InfString command = "clear ";
+    command << name;
+    return EvaluateOneCommand(command);
+}
+
+int MatlabIfc :: UnsetMatlabVariable(char* name[], int numMatrices) {
+    int errorFlag = FALSE;
+    for (int i = 0; i < numMatrices; i++) {
+      int merror = UnsetMatlabVariable(name[i]);
+      if ( merror ) errorFlag = TRUE;
+    }
+    return errorFlag;
 }
 
 void MatlabIfc :: FreeStringArray(char** strarray, int numstrings) {
