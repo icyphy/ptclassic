@@ -273,6 +273,7 @@ extern VOID_HACK rewind();
 #if defined(__STDC__) || defined(sprite) || defined(__cplusplus)
 #include <stdlib.h>
 #else
+
 #ifdef hpux
 extern int abort();
 extern void free(), exit(), perror();
@@ -281,10 +282,12 @@ extern void free(), exit(), perror();
 extern int abort(), exit();
 extern void free(), perror();
 #else
-#ifndef sgi
+#ifdef sgi
+extern void free();
+#else
 extern VOID_HACK abort(), free(), exit(), perror();
 #endif /*sgi*/
-#endif
+#endif /*_IBMR2*/
 extern char *getenv();
 #ifdef ultrix4
 /* Hack for Ptolemy pigilib/local.h:  skip this if we've seen local.h
@@ -296,6 +299,7 @@ extern void *malloc(), *realloc(), *calloc();
 extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
+
 #if defined(aiws) || defined(hpux)
 extern int sprintf();
 #else
