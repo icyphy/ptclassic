@@ -14,25 +14,25 @@ limitation of liability, and disclaimer of warranty provisions.
     location { C50 control library }
 	htmldoc {
 <a name="multiplex"></a>
-\fIblockSize\fP particles are consumed on each input.
+<i>blockSize</i> particles are consumed on each input.
 But only one of these blocks of particles is copied to the output.
-The one copied is determined by the \fIcontrol\fP input.
-Integers from 0 through <i>N-</i>1 are accepted at the \fIcontrol\fP input,
+The one copied is determined by the <i>control</i> input.
+Integers from 0 through <i>N-</i>1 are accepted at the <i>control</i> input,
 where <i>N</i> is the number of inputs.
-If the \fIcontrol\fR input is outside this range, random data (possibly
+If the <i>control</i> input is outside this range, random data (possibly
 memory mapped devices) will be copied.
 <h3>IMPLEMENTATION:</h3>
 <p>
 There are potentially very many special cases that could be handled
 for increased efficiency: looped vs. non-looped, circular vs. linear,
-and scalars vs vectors (\fIblockSize\fR &gt; 1), uniform inputs vs. non-uniform
+and scalars vs vectors <i>blockSize(/i) &gt; 1, uniform inputs vs. non-uniform
 inputs (port.bufSize()).
 The current implementation handles only some of these cases.
 Use this star at your own risk.
 <p>
 At compile time, the star constructs a table of pointers to each of the
 input blocks.
-The \fIcontrol\fP input is used to index this table, yielding a pointer
+The <i>control</i> input is used to index this table, yielding a pointer
 to the appropriate input block for the firing.
 <p>
 Currently we advance each of the pointers in the table on every firing.
