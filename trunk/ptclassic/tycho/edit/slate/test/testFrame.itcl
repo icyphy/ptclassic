@@ -61,23 +61,45 @@ test Frame-construct-1 {Create a Frame item and check coords} {
     .s coords [.s primary $f]
 } {40.0 40.0 80.0 80.0}
 
-_slate
-test Frame-construct-2 {Create a Frame item and check default options} {
-    set f [.s create Frame 40 40 80 80]
-    .s itemconfigure $f
-} {{-relief {} {} raised raised} {-color {} {} background background} {-shape {} {} rectangle rectangle} {-borderwidth {} {} 2 2} {-tags {} {} {} {}}}
-
-test Frame-construct-3 {Create a Frame item with non-default options} {
-    set f [.s create Frame 140 140 180 180 -relief sunken \
-	    -color green -borderwidth 4 -tags foo]
-    .s itemconfigure $f
-} {{-relief {} {} raised sunken} {-color {} {} background green} {-shape {} {} rectangle rectangle} {-borderwidth {} {} 2 4} {-tags {} {} {} foo}}
 
 #######################################################################
 #### Options
 #
 _slate
 set i 0
+
+set f [.s create Frame 40 40 80 80]
+update
+foreach {opt val} {\
+        -relief raised \
+        -color background \
+        -shape rectangle \
+        -borderwidth 2 \
+        -tags {}} {
+    incr i
+    test Frame-options-$i "Check default option $opt" {
+        .s itemcget $f $opt
+    } $val
+}
+_clean
+
+set f [.s create Frame 140 140 180 180 \
+        -relief sunken \
+        -color green \
+        -borderwidth 4 \
+        -tags foo]
+update
+foreach {opt val} {\
+        -relief sunken \
+        -color green \
+        -borderwidth 4 \
+        -tags foo} {
+    incr i
+    test Frame-options-$i "Check non-default option $opt" {
+        .s itemcget $f $opt
+    } $val
+}
+_clean
 
 _frame
 foreach r {flat raised sunken} \
