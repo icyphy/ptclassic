@@ -58,7 +58,7 @@ This invokes a shell script that starts VEM and the
 associated pigiRpc process.
 VEM is started in general with the following command line options:
 .(c
-vem [-F cell[:view[:facet]]] [-G WxH+X+Y] [-R [host,]path] \\
+vem [-F cell[:view[:facet]]] [-G WxH+X+Y] [-R [host,]path] \\\\
 	[-display host:display] [name=value ...]
 .)c
 .IE "VEM command line"
@@ -68,7 +68,7 @@ if (!($?PIGIRPC)) then
 	setenv PIGIRPC ~ptolemy/bin.$ARCH/pigiRpc
 endif
 xrdb -m ~ptolemy/lib/pigiXRes8
-vem -G 600x150+0+0 -F init.pal:schematic \\
+vem -G 600x150+0+0 -F init.pal:schematic \\\\
 	-G 600x300+0+170 -R $PIGIRPC
 .)c
 The first three lines set the PIGIRPC environment variable to point
