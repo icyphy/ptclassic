@@ -3,7 +3,7 @@
 .SD
 Compare three methods for estimating a power spectrum.
 .DE
-.SV $Revision$ "October 31, 1990"
+.SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
@@ -11,11 +11,11 @@ Compare three methods for estimating a power spectrum.
 .IE "Burg's algorithm"
 .IE "system identification"
 .IE "power spectrum"
-This demo generates a random process that is a real version
+This demo generates a random process that is a real-valued version
 of the test process described in [2] (page 11).
 It consists of three sinusoids, two of which are closely spaced,
 and colored Gaussian noise.
-The power spectrum of this process is then estimated using three
+The power spectrum of this process is estimated using three
 methods, the periodogram,
 .IE periodogram
 the autocorrelation method
@@ -32,6 +32,11 @@ If the autocorrelation of the input process were known
 exactly, then these methods would produce exact maximum entropy spectra.
 However, the autocorrelation is estimated from observations
 of the input, so the two methods yield slightly different results.
+.pp
+The universe parameters are \fIlog2NumInputs\fR,
+the log base 2 of the number of input samples to generate, and \fIorder\fR,
+the order of the AR model to use in the autocorrelation and Burg's method
+estimates.
 .pp
 The periodogram method amounts to computing a direct DFT of the observations
 of the input process.  The number of observations used is 512.
@@ -61,9 +66,6 @@ so the rest of the autocorrelation galaxy is devoted to computing
 this quantity at various values of $omega$.  The number of values
 of $omega$ to use (512, in this case) is specified by the \fIresolution\fR
 parameter of the galaxy.
-Unfortunately, pending improvements in the expression handler
-for parameter values, it is also necessary to specify the log base 2
-of the resolution.
 The final output is scaled by an estimate of the power of the input
 process, extracted from the autocorrelation estimate using the
 .c Cut
@@ -71,6 +73,10 @@ star.
 The
 .c Repeat
 star is needed to maintain consistent sample rates.
+The
+.c FloatPad
+star is used to prepend the AR coefficients with a one, the value of
+the first coefficient, which need not be computed.
 .pp
 The Burg method does not require first estimating the autocorrelation.
 It estimates the AR parameters directly from the input samples.
