@@ -87,17 +87,18 @@ void XGraph :: zapFiles () {
 		if (strm[i]) {
 			fclose (strm[i]);
 		}
-		LOG_DEL; delete [] strm;
 	    }
 	    if (tmpFileNames) {
 		char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
-			LOG_DEL; delete [] name;
 		}
-		LOG_DEL; delete [] tmpFileNames;
+
 	    }
 	}
+	LOG_DEL; delete [] strm;
+	LOG_DEL; delete [] name;
+	LOG_DEL; delete [] tmpFileNames;
 	LOG_DEL; delete [] count;
 	ng = 0;
 	dataToPlot = FALSE;
