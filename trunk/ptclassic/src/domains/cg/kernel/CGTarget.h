@@ -101,8 +101,7 @@ public:
     // Otherwise, generate code.
     /*virtual*/ int run();
 
-    // If within a WormHole, do nothing.
-    // Otherwise, conditionally display, compile, load, and run the code.
+    // Do nothing if in a WormHole; else, display, compile, load, run the code
     /*virtual*/ void wrapup();
 
     // Generate code.
@@ -111,28 +110,26 @@ public:
     // Generate code streams.
     virtual void generateCodeStreams();
 
-    // Save the generated code to a file.  This method usually calls
-    // the target protected method rcpWriteFile.
+    // Save the generated code to a file.
     virtual void writeCode();
 
-    // Methods used in stages of a run.
-    // The default versions do nothing.
-    // Return FALSE on error.
+    // Compile the generated code.  Return FALSE on error.
     virtual int compileCode();
+
+    // Load the generated code.  Return FALSE on error.
     virtual int loadCode();
+
+    // Run the generated code.  Return FALSE on error.
     virtual int runCode();
 
-    // Generate code for a Star firing.
-    // The default version simply fires the star.
+    // Generate code for a Star firing.  By default, execute the star.
     void writeFiring(Star&,int depth);
 
-    // incrementally add a star
-    // If flag is FALSE, just call go() method of the star.
+    // Incrementally add a star.  If flag is FALSE, call the star's go method.
     virtual int incrementalAdd(CGStar* s, int flag = 1);
 
-    // Add code from a galaxy.
-    // The schedule of the galaxy should be provided.
-    virtual int insertGalaxyCode(Galaxy* g, SDFScheduler*);
+    // Add code from a galaxy.  The scheduler s is the galaxy's scheduler.
+    virtual int insertGalaxyCode(Galaxy* g, SDFScheduler* s);
 
     // Support methods for loops.
     /*virtual*/ void beginIteration(int,int);
@@ -175,16 +172,14 @@ public:
     virtual StringList comment(const char* cmt, const char* begin=NULL, 
             const char* end=NULL ,const char* cont=NULL);
 
-    // Return a StringList detailing the user name, time, date, and
-    // target type.
-    // Uses the comment() method.
+    // Returns a comment detailing the user name, time, date, and target type.
     virtual StringList headerComment(const char* begin=NULL,
 	const char* end="", const char* cont=NULL);
 
     // system call in destination directory.  If error is specified
     // and the system call is unsuccessful display the error message.
     // This will return the error code from system. (0 == successful)
-    virtual int systemCall(const char*cmd,const char* error=NULL,
+    virtual int systemCall(const char* cmd, const char* error=NULL,
 	const char* host="localhost");
 
     // Write a file in the 'destDirectory' on the 'targetHost'.  If the
@@ -194,7 +189,7 @@ public:
     // is set to 'filePrefix'suffix, were 'filePrefix' is a target
     // state.  If unsuccessful, the method calls Error::abortRun and 
     // returns FALSE.
-    int writeFile(const char* text,const char* suffix="",int display=FALSE,
+    int writeFile(const char* text, const char* suffix="", int display=FALSE,
 		  int mode = -1);
 
     // Copy an SDF schedule from the multiprocessor schedule, instead
@@ -227,8 +222,7 @@ public:
 	return *oldDefault;
     }
 	 
-    // Return a pointer to the counter to make symbols unique.  If their
-    // is a CGTarget parent, return its counter
+    // Return a pointer to the counter to make symbols unique.
     int* symbolCounter();
 
     // separator for symbols, <name><separator><unique number>
@@ -236,12 +230,10 @@ public:
 
     const char* lookupSharedSymbol(const char* scope, const char* name);
 
-    // virtual method to return the relative execution of a star
-    // by default, it just returns the myExecTime() of the star.
+    // Return the relative execution time estimate of a star
     virtual int execTime(DataFlowStar* s, CGTarget* = 0)
 	{ return s->myExecTime(); }
 
-    // Additional initialization (invoked by initialize method).
     // If within a WormHole, generate, compile, load, and run code.
     /*virtual*/ void setup();
 
@@ -283,22 +275,22 @@ public:
     virtual int modifyGalaxy();
 
     // Return implementation cost information
-    const ImplementationCost* implementationCost() { return 0; }
+    virtual const ImplementationCost* implementationCost() { return 0; }
 
     // Compute implementation cost information
-    int computeImplementationCost() { return FALSE; }
+    virtual int computeImplementationCost() { return FALSE; }
 
     // Displaying implementation cost information
-    const char* describeImplementationCost() { return "not computed"; }
+    virtual const char* describeImplementationCost() { return "not computed"; }
 
     // Resetting implementation cost information
-    void resetImplementationCost() {}
+    virtual void resetImplementationCost() {}
 
     // Indicate whether target can compute memory cost information
-    int canComputeMemoryUsage() { return FALSE; }
+    virtual int canComputeMemoryUsage() { return FALSE; }
 
     // Indicate whether target can compute execution time
-    int canComputeExecutionTime() { return FALSE; }
+    virtual int canComputeExecutionTime() { return FALSE; }
 
     /********************************************************************/
     /*  Below, are the states that may need modification if this target */
@@ -401,10 +393,10 @@ protected:
     Block* spliceStar(PortHole*, const char* name, int delayBefore,
                              const char* domainName);
 
-    ConversionTable *typeConversionTable;
+    ConversionTable* typeConversionTable;
     int typeConversionTableRows;
     virtual int needsTypeConversionStar(PortHole& port);
-    
+ 
     // Copy of default value of the destination directory
     StringList destDirName;
 
@@ -423,8 +415,7 @@ private:
     SequentialList spliceList;
 };
 
-// A utility function to set a state of a AsynchCommPair to a certain
-// value
+// A utility function to set a state of a AsynchCommPair to a certain value
 int setAsynchCommState(AsynchCommPair pair, const char* stateName,
 		     const char* value);
 
