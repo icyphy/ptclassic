@@ -9,7 +9,7 @@ Discards all inputs.
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	explanation {
-A BlackHole accepts input Particles, but doesnt do anything with
+A BlackHole accepts input Particles, but doesn't do anything with
 them.  It is typically used to discard unwanted outputs from other blocks.
 	}
 	inmulti {
