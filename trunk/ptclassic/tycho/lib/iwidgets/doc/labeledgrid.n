@@ -503,37 +503,6 @@ columnconfigure\fR command are supported -- that is, \fB-minsize\fR,
 current column before the skip. Note that these options will affect
 the grid used by all items, not just the grid with the given group.
 .TP
-\fIpathName\fR \fBitemcget\fR \fItag option\fR
-
-Get an option of an item. The options can be any that can be specified
-to \fBadd\fR or \fBgroup\fR. Raise an error if \fItag\fR does not exist.
-.TP
-\fIpathName\fR \fBitemconfigure\fR \fItag\fR ?\fIoption value...\fR?
-
-Configure options of an item. Raise an error if \fItag\fR does not exist.
-If only a single argument is supplied, return the value lists of
-all options. If two arguments are supplied, the second is taken
-to be an option and the value list of that option is returned.
-If more arguments are supplied, each option is set to the specified
-value.
- .IP
-Because Query does not support re-arrangement of the layout, some
-options cannot be specified. For widgets, these are \fB-columnspan\fR,
-\fB-initial\fR, and \fB-style\fR. For groups, these are
-\fB-column\fR, \fB-columnspan\fR,
-\fB-initial\fR, \fB-style\fR
-\fB-row\fR, \fB-rowspan\fR. The \fB-childstyle\fR and
-\fB-childcolumnspan\fR options affect only subsequently-created
-items.
-.TP
-\fIpathName\fR \fBnames\fR ?\fIgroup\fR?
-
-Get a list of names in a group. If \fIgroup\fR is supplied, it must be
-a non-shared group, and this method will return the names within that
-group.  If \fIgroup\fR is not suppled, return the names at the top
-level.  Raise an error if \fIgroup\fR is unknown or is not an unshared
-group.
-.TP
 \fIpathName\fR \fBvskip\fR ?\fIgroup\fR? ?\fIoption value...\fR?
 
 Skip a row. If \fIgroup\fR is supplied, it is the name of the group
