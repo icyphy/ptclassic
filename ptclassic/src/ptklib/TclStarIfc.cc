@@ -78,6 +78,7 @@ static int setOutputs(
 TclStarIfc::TclStarIfc () {
 	starID = "tclStar";
 	starID += unique++;
+	outputValues = NULL;
 }
 
 // destructor
@@ -142,7 +143,8 @@ int TclStarIfc::setup (Block* star,
 	BlockStateIter next(*star);
 	while ((s = next++) != 0) {
 		StringList val = s->currentValue();
-		Tcl_SetVar2(ptkInterp, (char*)starID,(char*)s->name(),
+		StringList name = s->name();
+		Tcl_SetVar2(ptkInterp, (char*)starID, (char*)name,
 			(char*)val, TCL_GLOBAL_ONLY);
 	}
 
@@ -203,8 +205,7 @@ int TclStarIfc::go () {
 		buf += starID;
 		buf += " ";
 		buf += starID;
-		char *dummy = (char*)buf;
-	        if(Tcl_GlobalEval(ptkInterp, dummy) != TCL_OK) {
+	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
 		    char ncstring6[] = "ptkDisplayErrorInfo";
 		    Tcl_GlobalEval(ptkInterp, ncstring6);
 		    Error::abortRun(*myStar, "Failed to run callTcl procedure");
