@@ -27,12 +27,12 @@ if [ "$1" = "-vars" ] ; then
 fi
 
 pp=ZZZ
-if [ $# > 1 ] ; then
+if [ $# -gt 1 ] ; then
     pp=$2
 fi
 
 d3=ZZZ
-if [ $# > 2 ] ; then 
+if [ $# -gt 2 ] ; then 
     d3=$3
 fi
 
