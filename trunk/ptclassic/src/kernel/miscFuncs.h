@@ -55,4 +55,41 @@ const char* hashstring(const char*);
 int power(int base,int exp);
 inline double power(double base,double exp) { return pow(base,exp);}
 
+#ifdef ADD_BUILTIN_INLINES
+// these functions are needed to build with libg++ versions older
+// than 1.39.0.
+
+inline signed char min(signed char a, signed char b) { return (a < b)?a:b;}
+inline unsigned char min(unsigned char a, unsigned char b) {return (a < b)?a:b;}
+
+inline signed short min(signed short a, signed short b) {return (a < b) ?a:b;}
+inline unsigned short min(unsigned short a, unsigned short b) {return (a < b)?a:b;}
+
+inline signed int min(signed int a, signed int b) {return (a < b)?a:b;}
+inline unsigned int min(unsigned int a, unsigned int b) {return (a < b)?a:b;}
+
+inline signed long min(signed long a, signed long b) {return (a < b)?a:b;}
+inline unsigned long min(unsigned long a, unsigned long b) {return (a < b)?a:b;}
+
+inline float min(float a, float b) {return (a < b)?a:b;}
+
+inline double min(double a, double b) {return (a < b)?a:b;}
+
+inline signed char max(signed char a, signed char b) { return (a > b)?a:b;}
+inline unsigned char max(unsigned char a, unsigned char b) {return (a > b)?a:b;}
+
+inline signed short max(signed short a, signed short b) {return (a > b) ?a:b;}
+inline unsigned short max(unsigned short a, unsigned short b) {return (a > b)?a:b;}
+
+inline signed int max(signed int a, signed int b) {return (a > b)?a:b;}
+inline unsigned int max(unsigned int a, unsigned int b) {return (a > b)?a:b;}
+
+inline signed long max(signed long a, signed long b) {return (a > b)?a:b;}
+inline unsigned long max(unsigned long a, unsigned long b) {return (a > b)?a:b;}
+
+inline float max(float a, float b) {return (a > b)?a:b;}
+
+inline double max(double a, double b) {return (a > b)?a:b;}
+#endif
+
 #endif
