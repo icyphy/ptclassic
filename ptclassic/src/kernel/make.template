@@ -11,7 +11,9 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-GPPFLAGS = -g -fminimal-debug
+VPATH = ../../src/kernel
+ARCH = sun4
+GPPFLAGS = -g
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
 # need gcc, not cc, to build gnulib3a
@@ -23,13 +25,13 @@ CC = gcc
 	$(GNU) $(GPPFLAGS) -c  $<
 
 # Root of Ptolemy directory
-ROOT=/usr/tools/ptolemy
+ROOT=../..
 
 # Where to install the libraries
-DESTDIR=$(ROOT)/lib
+DESTDIR=$(ROOT)/lib.$(ARCH)
 
 # Where to install the help file(s)
-HELPDIR=$(ROOT)/help
+HELPDIR=$(ROOT)/lib
 
 # Library name
 LIB=libptolemy.a
@@ -82,10 +84,7 @@ LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o
  DDFDomain.o\
  DEConnect.o DEScheduler.o DEStar.o DEWormhole.o DEWormConnect.o DEDomain.o
 
-# Things to make
-TOMAKE=$(LIB) interpmain.o
-
-all:	makefile $(TOMAKE)
+all:	makefile $(LIB) interpmain.o
 
 $(LIB):	$(LIBOBJS)
 	rm -f $(LIB)
@@ -93,14 +92,21 @@ $(LIB):	$(LIBOBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(TOMAKE) ins_help
-		mv -f $(TOMAKE) $(DESTDIR)
+install:	makefile $(DESTDIR)/$(LIB) $(DESTDIR)/interpmain.o ins_help
+
+$(DESTDIR)/$(LIB):	$(LIB)
+		rm -f $(DESTDIR)/$(LIB)
+		cp -p $(LIB) $(DESTDIR)
+
+$(DESTDIR)/interpmain.o:	interpmain.o
+		rm -f $(DESTDIR)/interpmain.o
+		cp interpmain.o $(DESTDIR)
 
 ins_help:	$(HELPDIR)/interpreter.help
 # install the help file
 $(HELPDIR)/interpreter.help:	interpreter.help
 		rm -f $(HELPDIR)/interpreter.help
-		cp interpreter.help $(HELPDIR)
+		cp $(VPATH)/interpreter.help $(HELPDIR)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -114,14 +120,15 @@ depend:
 
 makefile:	make.template
 		rm -f makefile
-		cp make.template makefile
-		make -f make.template sources depend # use new SRCS list
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		ln -s $(VPATH)/makefile makefile
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
 # Need to define LIBDIR for the interpreter
 Interpreter.o:	Interpreter.cc
-		$(GNU) $(GPPFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
+		$(GNU) $(GPPFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c $(VPATH)/Interpreter.cc
 
 # Commands to make some sources from templates
 
