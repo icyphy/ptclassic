@@ -108,7 +108,6 @@ source $ptolemy/lib/tcl/utilities.tcl
 # Always start tycho
 ptkStartTycho
 
-source $ptolemy/lib/tcl/ptkDialog.tcl
 source $ptolemy/lib/tcl/ptkBind.tcl
 source $ptolemy/lib/tcl/ptkControl.tcl
 source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
