@@ -142,8 +142,7 @@ ensemble ::tycho::deregister {
 #
 ensemble ::tycho::register {
     option category {type name args} {
-	@scope ::tycho::Registry set _windowmenus($type$name) $args
-	@scope ::tycho::Registry lappend _windowmenus($type) $name
+	eval ::tycho::Registry::registerCategory $type $name $args
     }
     option contents {mode args} {
     	@scope ::tycho::Registry set _contentsmap($args) $mode
@@ -385,6 +384,9 @@ class ::tycho::Registry {
     # Raise a widget, testing for various nasty conditions
     proc raiseWindow {tag window}
 
+    # Register a new editor category
+    proc registerCategory {type name args}
+
     # Return the default mode of a file or directory name.
     proc registeredFileMode {name}
 
@@ -451,8 +453,21 @@ class ::tycho::Registry {
     	{} text
     }
 
-    # An array of tag-optionlist pairs for the Window menu submenus
-    private common _windowmenus
+    # Info about window submenus. category' is the category
+    # with "new" or "open" prepended.
+    #     _menus($type)                       -> {category1' category2' ...}
+    #     _menus($type,counter)               -> category-counter
+    #     _menus($category',options)          -> category-options
+    #     _menus($category',accelerator)      -> category-accelerator
+    #     _menus($category',counter)          -> {$tag1 $tag2 ...}
+    #     _menus($category',tags)             -> {$tag1 $tag2 ...}
+    #     _menus($category',$tag,options)     -> entry-options
+    #     _menus($category',$tag,accelerator) -> entry-accelerator
+    private common _menus
+    array set _menus {
+        new,counter 0
+        open,counter 0
+    }
 
     # This array stores object names indexed by file names so that
     # if the same file is opened a second time, we can just raise
@@ -492,27 +507,40 @@ body ::tycho::Registry::deregisterMenubar {menubar} {
 # <code>::tycho::deregister</code></a>.
 #
 body ::tycho::Registry::deregisterWindow {tag {window *}} {
-    # puts "deregisterWindow $tag $window"
     if ![info exists _windows] {
 	return
     }
     foreach v [array names _windows $window#$tag] {
-	# Remove from all registered menu bars
 	array set opts $_windows($v)
+	set cat open$opts(-category)
+
+	# Remove from all registered menu bars
 	foreach mb [array names _menubars] {
 	    # Make sure the menu bar still exists and has a window menu
 	    if { [::info which -command $mb] == "" || ![$mb exists window]} {
 		unset _menubars($mb)
 		continue
 	    }
+	    # Disable the binding to its parent menu
+	    bind [$mb path $cat] <Alt-Key-$_menus($cat,$v,accelerator)> {}
+
 	    # Delete the entry
 	    $mb delete $v
+
 	    # Disable the submenu if it's empty
-	    if { [$mb entries open$opts(-category)] == "" } {
-		$mb disable open$opts(-category)
+	    if { [$mb entries $cat] == "" } {
+		$mb disable $cat
 	    }
 	}
-	# Delete the file info
+	# Remove it from the _menus array
+	set _menus($cat,tags) [::tycho::ldelete $_menus($cat,tags) $v]
+	set _menus($cat,counter) \
+		[linsert $_menus($cat,counter) 0 $_menus($cat,$v,accelerator)]
+
+	unset _menus($cat,$v,options)
+	unset _menus($cat,$v,accelerator)
+
+	# Delete the window info
 	unset _windows($v)
     }
 }
@@ -546,76 +574,54 @@ body ::tycho::Registry::initHelpMenu {menubar {owner {}}} {
 #
 body ::tycho::Registry::initWindowMenu {menubar} {
     # Create the submenus for new editors
-    foreach tag $_windowmenus(new) {
-	eval $menubar add cascade new$tag window $_windowmenus(new$tag)
+    foreach cat $_menus(new) {
+	eval $menubar add cascade $cat window $_menus($cat,options)
     }
     $menubar separator windowsep1 window
     
     # Create the submenus for open files
-    foreach tag $_windowmenus(open) {
-	eval $menubar add cascade open$tag window \
-		$_windowmenus(open$tag) \
-		-state disabled
+    foreach cat $_menus(open) {
+        eval $menubar add cascade $cat window $_menus($cat,options)
     }
 
-    # Construct menu entries for registered commands.
-    # We include a little hack here to make the plain text appear
-    # first in the list.
-    # Do the text mode, assuming it exists OK
-    array set opts $_modes(text)
-    # Put NoName in place of the filename
-    set command [format $opts(-command) NoName]
-    if { $opts(-label) != "" } {
-	if { $opts(-category) != "" } {
-	    # Add to a sub-menu
-	    $menubar command text new$opts(-category) \
-		    -label $opts(-label) \
-		    -command $command
-	    $menubar separator textsep new$opts(-category)
-	}
+    # Construct menu entries for registered commands. Place the text
+    # mode at the top of the text category, if both exist
+    if { [::info exists _menus(newtext,options)] \
+            && [::info exists _menus(newtext,text,options)] } {
+        eval $menubar command _text newtext $_menus(newtext,text,options)
+        $menubar separator textsep newtext
     }
-    # Do all other modes...
-    foreach index [lsort [::tycho::ldelete [array names _modes] text]] {
-	array set opts $_modes($index)
-	# Put NoName in place of the filename
-	set command [format $opts(-command) NoName]
-	if { $opts(-label) != "" } {
-	    if { $opts(-category) != "" } {
-		# Add to a sub-menu
-		$menubar command $index new$opts(-category) \
-			-label $opts(-label) \
-			-command $command
-	    } else {
-		# Add to the end of the main menu
-		# FIXME -- this is bogus
-		$menubar command $index window \
-			-label $opts(-label) \
-			-command $command
-	    }
-	}
+    foreach cat $_menus(new) {
+        set menu [$menubar path $cat]
+        # Make entries
+        foreach mode $_menus($cat,tags) {
+            eval $menubar command $mode $cat $_menus($cat,$mode,options)
+        }
     }
     
-    # Construct menu entries for registered files
-    # FIXME: how can we make the files always appear in
-    # the same order in every menu?
-    foreach tag [lsort [array names _windows]] {
-	array set opts $_windows($tag)
-	if { $opts(-category) != "" } {
-	    # Add to a cascade menu
-	    $menubar command $tag open$opts(-category) \
-		    -label $opts(-label) \
-		    -command [list ::tycho::Registry::raiseWindow \
-		    $opts(-tag) $opts(-window)]
-	    $menubar enable open$opts(-category)
-	} else {
-	    # Add to the end of the main menu
-	    $menubar command $tag window \
-		    -label $opts(-label) \
-		    -command [list ::tycho::Registry::raiseWindow \
-		    $opts(-tag) $opts(-window)]
-	}
-    }
-}
+     # Construct menu entries for registered files
+      set toplevel [winfo toplevel $menubar]
+      foreach cat $_menus(open) {
+	  # Make the short-cut binding: if the sub-menu is empty
+	  # the main menu will be posted anyway
+	  set acc $_menus($cat,accelerator)
+	  bind $toplevel <Alt-Key-$acc> "$menubar post $cat"
+          if { $_menus($cat,tags) != "" } {
+              # Enable menu
+              $menubar enable $cat
+ 
+              # Make entries
+              set menu [$menubar path $cat]
+              foreach tag $_menus($cat,tags) {
+                  eval [list $menubar command $tag $cat] \
+			  $_menus($cat,$tag,options)
+                  set a $_menus($cat,$tag,accelerator)
+                  bind $menu <Alt-Key-$a> \
+			  "$menubar unpost $cat; $menubar invoke [list $tag]"
+              }
+          }
+      }
+  }
 
 ##########################################################################
 ## linkModel
@@ -689,13 +695,9 @@ body ::tycho::Registry::openModel {name {path {}}} {
 # Raise a window or widget to the top. This procedure is provided
 # to make it easier to construct menu callbacks for open files.
 # If the widget no longer exists, then it is removed from
-# the menus. Otherwise it's top-level window is raised
-# to the top.
-#
-# Note: The raiseWindow{} method of View could be used instead, but
-# the problem with that is that a) not all windows are subclasses
-# of View, and b) we want to catch an attempt to raise a dead
-# and remove it from the menus.
+# the menus -- this happens sometimes because of bugs. Otherwise
+# its top-level window is raised using the raiseWindow{}
+# method of the TWidget class.
 #
 body ::tycho::Registry::raiseWindow {tag window} {
     set w [string trimleft $window :]
@@ -717,7 +719,38 @@ body ::tycho::Registry::raiseWindow {tag window} {
 	}
     } else {
         # OK
-        raise [winfo toplevel $w]
+        $w raiseWindow
+    }
+}
+
+#####################################################################
+#### registerCategory
+# Register an editor category.
+# 
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
+# <code>::tycho::register</code></a>.
+#
+body ::tycho::Registry::registerCategory {type name args} {
+    switch -exact $type {
+        "new" {
+	    lappend _menus(new) new$name
+	    set _menus(new$name,tags) {}
+            set _menus(new$name,counter) 0
+            set _menus(new$name,options) $args
+        }
+        "open" {
+	    # For the accelerator "counter" for open file, use a stack
+	    lappend _menus(open) open$name
+	    set _menus(open$name,tags) {}
+            set _menus(open$name,counter) \
+		    {1 2 3 4 5 6 7 8 9 0 q w e r t a s d f z x c v}
+            set _menus(open$name,options) [concat $args -state disabled]
+            set _menus(open$name,accelerator) [incr _menus(open,counter)]
+        }
+        default {
+            error "unknown type: \"$type\""
+        }
     }
 }
 
@@ -879,6 +912,12 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # mode as given by the arguments. Options allowed are:
 # <ul>
 #
+# <li><b>-category</b> _category_: If not null, this value
+# selects the sub-menu into which the entry to open a blank
+# editor will be placed. By default, this category will also be
+# used for open files. Legal values are
+# "html," "text", "graphics", and "tools".
+#
 # <li><b>-command</b> _script_: The script to execute when a file of
 # this mode is opened. Any "%s" in the command string
 # is replaced with the file name before invoking the command,
@@ -889,9 +928,19 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # <code>EditItcl</code> view object. The braces around the "%s" allow
 # the file name to have spaces.
 #
+# <li><b>-label</b> _string_: If not null, then an entry will be
+# added to the "Window" menu of all menu bars registered in the
+# future, with a command to execute the command with the
+# filename "NoName." This permits the user to open a new blank editor
+# in the given mode.
+#
+# <li><b>-underline</b> _integer_: If not null, then the indicated
+# character of the label will be underlined, and will be used
+# to perform menu traversal.
+#
 # <li><b>-viewclass</b> _classname_: If supplied, this mode will be
 # returned by <code>::tycho::register classmode</code>. This
-# argument is thuis used to give a mapping from class names
+# argument is thus used to give a mapping from class names
 # to the mode they implement. Be careful not to pass the same
 # class name to more than one mode or result will be unpredictable.
 # (I'm by no means certain that this is the right way to do this.
@@ -899,17 +948,6 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # option, which would be more transparent but seems a bit
 # redundant...)
 #
-# <li><b>-label</b> _string_: If not null, then an entry will be
-# added to the "Window" menu of all menu bars registered in the
-# future, with a command to execute the command with the
-# filename "NoName." This permits the user to open a new blank editor
-# in the given mode.
-#
-# <li><b>-category</b> _categeory_: If not null, this value
-# selects the sub-menu into which the entry to open a blank
-# editor will be placed. By default, this category will also be
-# used for open files. Legal values are
-# "html," "text", "graphics", and "tools".
 # </ul>
 #
 # If the mode is already registered, flag an error. (Or
@@ -930,13 +968,33 @@ body ::tycho::Registry::registerMode {mode args} {
 	    return ""
 	}
     }
-
     if [::info exists _modes($mode)] {
-	# Do we want an error here?
 	error "Mode \"$mode\" is already registered"
     }
-    array set opts {-command "" -label "" -viewclass text -category ""}
+
+    # Get mode options.
+    array set opts {
+	-command "" 
+	-label "" 
+	-viewclass text 
+	-category ""
+	-underline -1
+    }
     array set opts $args
+
+    # Add entries to the array controlling appearance in the
+    # new editors submenus
+    if { $opts(-category) != "" && $opts(-label) != "" } {
+        set cat new$opts(-category)
+        lappend _menus($cat,tags) $mode
+
+	set _menus($cat,$mode,options) [list \
+		-label $opts(-label) \
+		-underline $opts(-underline) \
+		-command [format $opts(-command) NoName]]
+    }
+
+    # Remember the options for later queries
     set _modes($mode) [array get opts]
 }
 
@@ -963,7 +1021,8 @@ body ::tycho::Registry::registerMode {mode args} {
 # should it just overwrite the options?)
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
+# <a href="Registry_rel.html#register Ensemble associated
+# with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerProtocol {protocol args} {
@@ -991,60 +1050,95 @@ body ::tycho::Registry::registerProtocol {protocol args} {
 
 #####################################################################
 #### registerWindow
-# Register a viewer window. This will cause an entry to be placed
-# in the Window menu of registered menubars. It can also
-# be used to prevent a file from being opened a second time -- instead,
-# the widget will just be raised. The first argument is an identifier tag,
-# the second is the widget name,
-# and following arguments are option-value pairs. Legal options
+# Register a viewer window. The first argument is an identifier tag --
+# typically, this will be the name of the file viewed in the viewer
+# window. The second arguments, _window_, is the name of the viewer
+# widget. Following arguments are option-value pairs. Legal options
 # are:
 # <ul>
 # <li><b>-category</b>: The category which governs which
-# sub-menu to place the file into.
+# sub-menu to place the file into. The window will not appear
+# in any menus if the category is not supplied and one cannot
+# be found from the *-mode* option.
 # <li><b>-label</b>: The label that will appear in the Window menus.
-# If omitted, the _tag_ will be used.
+# If omitted, the _tag_ will be used. If explicitly set to null,
+# the window will not appear in the Window menus.
 # <li><b>-mode</b>: The mode in which the file was opened.
 # This will be used to find which sub-menu to place the file
 # into if *-category* is not supplied.
 # </ul>
+#
+# A registered viewer widget will be placed into the Window
+# menus of all registered menubars, and is kept in the Registry
+# for purposes such as querying whether a window is already open
+# with a given tag and so on.
 #
 # <b>Note</b>: Do not call this procedure directly. Use
 # <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerWindow {tag window args} {
-    # puts "::tycho::Registry::registerWindow $tag $window $args"
-
     if [::info exists _windows($window#$tag)] {
-	error "View \"$tag\" has already been registered"
-    }   
+	error "View \"$tag\" has already been registered with \"$window\""
+    }
 
     # Figure out the label and category
     array set opts [list -label $tag -mode text -category ""]
     array set opts [list -window $window -tag $tag]
     array set opts $args
     if { $opts(-category) == "" } {
-	array set m [concat {-category text} $_modes($opts(-mode))]
+	array set m $_modes($opts(-mode))
 	set opts(-category) $m(-category)
     }
     # Remember the window and its options
     set _windows($window#$tag) [array get opts]
 
-    # Add to the correct sub-menu of all registered menu bars
-    # with a Window menu
-    foreach mb [array names _menubars] {
-	# Check for existence
-	if { [::info which -command $mb] == "" } {
-	    unset _menubars($mb)
-	    continue
+    # Set entries in the _menus array so that the menus listing
+    # open files can be built.
+    if { $opts(-category) != "" && $opts(-label) != "" } {
+        set cat open$opts(-category)
+        lappend _menus($cat,tags) $window#$tag
+
+	# Get the accelerator key
+	set tlacc $_menus($cat,accelerator)
+	if { $_menus($cat,counter) == "" } {
+	    # Oops, none left
+	    set accelerator ""
+	    set accstring ""
+	} else {
+	    set accelerator [lindex $_menus($cat,counter) 0]
+	    set _menus($cat,counter) \
+		    [lreplace $_menus($cat,counter) 0 0]
+	    set accstring "A-$tlacc A-$accelerator"
 	}
-	# Check for window menu
-        if [$mb exists window] {
-            $mb command $window#$tag open$opts(-category) \
-                    -label $opts(-label) \
-                    -command [list ::tycho::Registry::raiseWindow \
-                    $opts(-tag) $opts(-window)]
-            $mb enable open$opts(-category)
+	# Record data
+	set _menus($cat,$window#$tag,accelerator) $accelerator
+	set _menus($cat,$window#$tag,options) [list \
+		-label $opts(-label) \
+		-accelerator $accstring \
+		-command [list ::tycho::Registry::raiseWindow \
+		    $opts(-tag) $opts(-window)]]
+
+	# Add to the Window menu of all registered menu bars
+	foreach mb [array names _menubars] {
+	    # Check for existence
+	    if { [::info which -command $mb] == "" } {
+		unset _menubars($mb)
+		continue
+	    }
+	    # Check for window menu
+	    if [$mb exists window] {
+		if { $accelerator != "" } {
+		    bind [$mb path $cat] <Alt-Key-$accelerator> \
+			    "$mb unpost $cat; $mb invoke [list $window#$tag]"
+		}
+		$mb command $window#$tag $cat \
+			-label $opts(-label) \
+			-accelerator $accstring \
+			-command [list ::tycho::Registry::raiseWindow \
+			$opts(-tag) $opts(-window)]
+		$mb enable $cat
+	    }
         }
     }
 }
