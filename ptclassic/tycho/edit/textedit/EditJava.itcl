@@ -411,9 +411,15 @@ body ::tycho::EditJava::parseNow {start stop} {
 	    [option get $hull classColor EditJava]
     $text tag configure methodname -foreground \
 	    [option get $hull methodColor EditJava]
-    putStatus "Package Name: $packageName  Class Name: $className"
+
+    # Put useful info in the status bar, using the deferred
+    # mechanism to make sure the status bar is mapped correctly
+    set cmd [list puts \
+            "Package Name: $packageName  Class Name: $className"]
+    statusbar whenmapped $cmd
 }
 
+#####################################################################
 #### tagLinks
 # This method tags identifiers in the file that are defined elsewhere
 # and are registered for auto-loading in the global array "auto_index".
