@@ -105,8 +105,8 @@ boolean now;
     char octHandle[POCT_FACET_HANDLE_LEN];
 
     /* Reset lastFacet to the current facet */
-    FreeOctMembers(&lastFacet);
-    octCopyFacet(&lastFacet, facetPtr);
+    if ( lastFacet.objectId != facetPtr->objectId ) FreeOctMembers(&lastFacet);
+    lastFacet = *facetPtr;
     ptkOctObj2Handle(facetPtr, octHandle);
     name = BaseName(facetPtr->contents.facet.cell);
 
@@ -144,12 +144,13 @@ long userOptionWord;
     }
     else if (!IsUnivFacet(&facet)) {
 	PrintErr("Schematic is not a universe");
+	FreeOctMembers(&facet);
     }
     else {
+	/* Do not free facet: it will be saved as lastFacet */
 	ptkRun(&facet, FALSE);
     }
 
-    FreeOctMembers(&facet);
     ViDone();
 }
 
@@ -218,31 +219,35 @@ long userOptionWord;
         if (!IsUnivFacet(&facet))
         {
 		PrintErr("Schematic is not a universe, can't run DesignMaker");
+		FreeOctMembers(&facet);
         }
 	/* check if DMM domain, else prompt user to use R */
 	else if (!GOCDomainProp(&facet, &domainName, DEFAULT_DOMAIN))
         {
 		PrintErr("Domain error in facet");
+		FreeOctMembers(&facet);
         }
         else if (strcmp(domainName,"DMM")!= 0)
         {
 		PrintErr("Domain is not DMM, use regular run control (R)");
+		FreeOctMembers(&facet);
 	}
 	else
 	{
-        	/* set the lastFacet to be this facet */
-		FreeOctMembers(&lastFacet);
-		octCopyFacet(&lastFacet, &facet);
-
-		/* reflect what is done in ptkRun() */
+		/* reflect what is done in ptkRun():
+		   reset lastFacet to the current facet */
+		if ( lastFacet.objectId != facet.objectId ) {
+		    FreeOctMembers(&lastFacet);
+		}
+		lastFacet = facet;
 		name = BaseName(facet.contents.facet.cell);
 		ptkOctObj2Handle(&facet, octHandle);
+
 		/* call ptkRunDesignMaker, which brings up panel */
 		TCL_CATCH_ERR1(
 			Tcl_VarEval(ptkInterp, "ptkRunDesignMaker ",
 				    name, " ", octHandle, 0));
 	}
 
-	FreeOctMembers(&facet);
         ViDone();
 }
