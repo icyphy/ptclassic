@@ -190,6 +190,9 @@ int totalNumber;
 	layerPtr = &anytypeColorLayer;
     } else if (strcmp(type, "packet") == 0 || strcmp(type, "PACKET") == 0) {
 	layerPtr = &packetColorLayer;
+    } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX") == 0) {
+	    /* temporary, should get own color */
+	layerPtr = &floatColorLayer;
     } else {
 	/* print error message, unknown datatype */
 	ErrAdd("Unknown datatype for terminal");
