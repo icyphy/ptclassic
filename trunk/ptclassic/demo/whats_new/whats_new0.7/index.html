@@ -334,6 +334,24 @@ has been changed.
 	The TkSunSound star is also gone.
         In Ptolemy 0.7, the mu law conversion tables are in the 
 	<CODE>libptdsp</CODE> library.  If you use
+
+<DT> A bug in float-to-int particle conversion was fixed by Tom Lane
+<DD> The bug was that documentation said that float-to-int particle conversion
+rounded floats to the nearest int.  In fact, the code was using 
+the <CODE>int()</CODE> cast operator to truncate toward 0 for positive
+values, and to truncate in a machine dependent way for negative values.
+ <br>The fix was to modify the code so that floats are rounded to 
+the nearest integer.
+ <br> We noticed that the DE basic switch demo was
+failing with a message like:
+<PRE>
+Error: switch.Case.output=21: The control value 2 is not in the
+		range [0,1] 
+</PRE>
+Tom Lane's diagnosis was that the last few ramp outputs were rounding
+to 2 instead of truncating to 1, so his fix was to change the lower
+Ramp star from 0.1 to 0.5.
+
 </DL>
 
 <p>
