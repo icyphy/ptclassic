@@ -36,15 +36,22 @@ This class provides a list of all known blocks.  There is a separate
 list for each domain (corresponding to blocks that may be run by
 a specific scheduler).
 
-The idea is that each star or galaxy that is "known to the system"
-should add an instance of itself to the known list by code something
-like
+Each star or galaxy that is defined in C++ code (as opposed to being
+built up by an interpreter) should add an instance of itself to the known
+list by code something like
 
 static MyType proto;
-static KnownBlock entry(proto,"MyType");
+static RegisterBlock entry(proto,"MyType");
 
-Then the static method KnownBlock::clone(name, dom) can produce a new
-instance of the named class in the named domain.  As for blocks,
+The RegisterBlock constructor is just a call to KnownBlock::addEntry.
+
+Dynamically constructed block types, such as interpreted galaxies,
+are added to the known list with a direct call to KnownBlock::addEntry.
+These cases should always supply an appropriate definition-source
+string so that conflicting block type definitions can be detected.
+
+Once a knownlist entry exists, the static method KnownBlock::clone(name, dom)
+can produce a new instance of the named class in the named domain.
 clone copies everything, makeNew just makes a new one.  Recursive
 clone attempts are detected to avoid a crash in the event of a self-
 referential galaxy definition.
@@ -66,10 +73,12 @@ to determine whether a galaxy has been compiled more recently than
 any of its constituent blocks.
 
 KnownBlock also keeps track of the source of the definition of every
-known block type.  The system itself doesn't depend on this information
-at all, but it allows us to generate some helpful warning messages when
+known block type.  This allows compile.c to determine whether an Oct
+facet needs to be recompiled (without the source information, different
+facets that have the same base name could be mistaken for each other).
+This also allows us to generate some helpful warning messages when
 a block name is accidentally re-used.  The source location information
-is currently rather crude for everything except VEM facets, but that's
+is currently rather crude for everything except Oct facets, but that's
 good enough to generate a useful warning in nearly all cases.
 
 *******************************************************************/
@@ -96,9 +105,10 @@ class KnownListEntry {
 	const char* definitionSource;
 	// definitionSource is:
 	// NULL for a built-in block type (anything defined by C++ code);
-	// hashstring'ed pathname of defining Vem facet for a compiled galaxy;
+	// hashstring'ed pathname of defining Oct facet for a compiled galaxy;
 	// or a special case constant string, currently one of
 	// "dynamically linked star" or "ptcl defgalaxy command"
+
 	int cloneInProgress;	// true while trying to clone this block
 	KnownListEntry *next;
 
@@ -127,7 +137,7 @@ public:
 // the block will be destroyed when the entry is removed or replaced from
 // the list.  definitionSource should be NULL for any block type defined
 // by C++ code, or a hashstring'ed path name for a block defined by an
-// identifiable file (such as a Vem facet), or a special case constant
+// identifiable file (such as an Oct facet), or a special case constant
 // string for other cases such as the ptcl defgalaxy command.
 	static void addEntry (Block &block, const char* name, int onHeap,
 			      const char* definitionSource);
@@ -152,6 +162,11 @@ public:
 	static int setDefaultDomain(const char* newval);
 // see if a domain is valid
 	static int validDomain(const char* dom);
+
+// If there is a known block of the given name and domain,
+// return TRUE and pass back its definition source string.
+	static int isDefined (const char* type, const char* dom,
+			      const char* &definitionSource);
 
 // Return true if the named block is dynamically linked.
 	static int isDynamic (const char* type, const char* dom);
