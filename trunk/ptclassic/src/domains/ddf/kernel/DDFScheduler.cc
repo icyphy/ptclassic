@@ -29,11 +29,24 @@ These are the methods for the dynamic dataflow scheduler.
 extern const char DDFdomainName[];
 
 void fireSource(Star&, int);
+
+// melt the SDFinDDFWormholes in a larger one.
 Galaxy* deCrust(Block* dw);
+
+// make a unique portname of an auto-galaxy
 const char* galPortName(const char* starName, const char* portName); 
+
+// expand an auto-galaxy from the "org" block.
 static void expandGal (Galaxy* g, Block* org); 
+
+// make a connection to the porthole(galP)  of an auto-wormhole
 static void reConnect(PortHole* eveP, PortHole* galP); 
+
+// make connection of auto-wormholes
 static void connectWormholes (Galaxy&, Galaxy&);
+
+// special treat of arcs with delays
+static void handleDelays();
 			
 static CaseScheduler caseSched;
 static ForScheduler  forSched;
@@ -246,6 +259,7 @@ DDFScheduler :: run (Block& block) {
 		} else {
 			scanSize--;
 		}
+		// some geodesic is full 
 		if (overFlow)  { 
 			msg += err2_1;
 			msg += maxToken;
@@ -256,6 +270,7 @@ DDFScheduler :: run (Block& block) {
 			Error :: abortRun(*s,msg);
 			return FALSE;
 		}
+		// there is a deadlock condition.
 		if (lazyDepth > galSize) {
 			msg += err1_1;
 			msg += err2_3;
@@ -476,6 +491,8 @@ const char* DDFScheduler::wormName() {
 	return savestring (buf);
 }
 
+// name a porthole of an auto-galaxy with a combination of the star name
+// and a portname.
 const char* galPortName(const char* starName, const char* portName) {
 	char buf[32];
 	int len = strlen(starName);
@@ -486,6 +503,9 @@ const char* galPortName(const char* starName, const char* portName) {
 	strcpy(buf+len, ")"); 
 	return savestring (buf);
 }
+
+// SequentialList for the Geodesic with delays
+SequentialList delayGeos;
 
 	////////////////////////////
 	// makeWormholes
@@ -512,6 +532,7 @@ void DDFScheduler :: makeWormholes (Galaxy& galaxy) {
 		newGal->setBlock(galaxy.readName(), &galaxy);
 	}
 	sdfWorms.initialize();
+	delayGeos.initialize();
 	canDom = UnKnown;
 
 	while ((s = nextStar++) != 0) {
@@ -535,6 +556,7 @@ void DDFScheduler :: makeWormholes (Galaxy& galaxy) {
 			// take off wormhole crust
 		    Galaxy* inG = deCrust(s);
 		    newG->addBlock(*inG, inG->readName());
+		    s->setBlock(s->readName(), newG);
 		    expandGal(newG, inG);
 		} else {
 			newG->addBlock(*s, s->readName());
@@ -589,6 +611,11 @@ void DDFScheduler :: makeWormholes (Galaxy& galaxy) {
 	}	// end of while
 
 	if (canDom == UnKnown)	canDom = DDF;
+
+	// Handle  the arcs of delays.
+	// If the delay is between two different wormholes, create
+	// wormhole portholes for the arc. Otherwise ignore it.
+	handleDelays();
 
 	// Now we have SDF galaxies. Make them as DDF Wormholes.
 	ListIter nextb(sdfWorms);
@@ -666,18 +693,45 @@ void connectWormholes (Galaxy& g, Galaxy& newG) {
 	Star* s;
 
 	while ((s = nextStar++) != 0) {
-	    if ((!s->isItWormhole()) ||
+
+	   if ((!s->isItWormhole()) ||
 			strcmp(s->mySched()->domain(), "SDF")) {
+
 		BlockPortIter nextp(*s);
 		PortHole* p;
 
 		while((p = nextp++) != 0) {
 			PortHole* galP = p->far();
 			// check the connection
-			if (p != galP->far()) 
+			if ( galP && (p != galP->far())) 
 				reConnect(p, galP);	
 		}
 	    }
+	}
+
+	// Now, make connections around each arc with delays if
+	// the arc connects two different auto-wormholes.
+	ListIter nextGeo(delayGeos);
+	Geodesic* geo;
+
+	while ((geo = (Geodesic*) nextGeo++) != 0) {
+		PortHole* src = geo->sourcePort();
+		PortHole* dest = geo->destPort();
+		// if delay between SDF stars or DDFWormhole of SDF domain
+		if ((src->isItInput() == src->far()->isItInput()) &&
+			(dest->isItInput() == dest->far()->isItInput())) {
+			EventHorizon* eS = 
+				((EventHorizon*) src->far())->ghostPort;
+			EventHorizon* dS = 
+				((EventHorizon*) dest->far())->ghostPort;
+			// reuse the old geodesic
+			geo->disconnect(*src);
+			geo->disconnect(*dest);
+			geo->setSourcePort(*eS, geo->numInitialParticles);
+			geo->setDestPort(*dS);
+			eS->initialize();
+			dS->initialize();
+		}
 	}
 }
 
@@ -723,18 +777,37 @@ void expandGal (Galaxy* g, Block* org) {
 		PortHole& realP = p->newConnection();
 		Star* s = (Star*) realP.far()->parent();;
 
-	   if (s->parent() != (Block*) g) {
+		// do not uncover a galaxy if the galaxy is included
+		// in a auto-galaxy already.
+		int touched = 0;
+		Block* sB = (Block*) s;
+		while (sB->parent() && (!sB->isItWormhole())) {
+			sB = sB->parent();
+			if (sB == (Block*) g) { touched++;
+						break;	}
+		}
 
+	   if (!touched) {
+
+		int initNum = realP.myGeodesic->numInitialParticles;
 		if (!s->isItWormhole() && strcmp(s->domain(), DDFdomainName)) {
 			// if SDF star, put it into the galaxy and
 			// call expandGal for this star.
+		   if (!initNum) {
 			g->addBlock(*s, s->readName());
 			expandGal(g, s);
+		   } else {
+			// put the geodesic only once in case there is a delay
+			// on the arc
+			if (realP.isItInput())
+				delayGeos.put(realP.myGeodesic);
+		   }
 		} else if ((!s->isItWormhole()) ||
 			strcmp(s->mySched()->domain(), "SDF") ||
 			(realP.isItInput() == realP.far()->isItInput())) {
-			// if DDF star, create a galaxy porthole
-			// and alias it.
+			// if DDF star, DDFWormhole of non-SDF domain,
+			// or wormhole boundary, 
+			// create a galaxy porthole and alias it.
 			if (realP.isItInput()) {
 				InPortHole* gp = new InPortHole;
 				g->addPort(gp->setPort(
@@ -747,16 +820,68 @@ void expandGal (Galaxy* g, Block* org) {
 				gp->setAlias(realP);
 			}
 		} else {
+		   if (!initNum) {
 			// DDF wormhole of SDF domain
 			// First, take off wormhole crust
 			Galaxy* inG = deCrust(s);
+		    	s->setBlock(s->readName(), g);
 			g->addBlock(*inG, inG->readName());
 			expandGal(g, inG);
+		   } else {
+			// put the geodesic only once in case there is a delay
+			// on the arc
+			if (realP.isItInput())
+				delayGeos.put(realP.myGeodesic);
+		   }
 		}
 	    }
 	}
 }
 			 
+	////////////////////////////
+	// handleDelays
+	////////////////////////////
+
+void handleDelays() {
+	
+	ListIter nextGeo(delayGeos);
+	Geodesic* geo;
+
+	while ((geo = (Geodesic *) nextGeo++) != 0) {
+		PortHole* src = geo->sourcePort();
+		PortHole* dest = geo->destPort();
+
+		Block* sB = src->parent();
+		while (sB->parent() && (!sB->isItWormhole())) {
+			sB = sB->parent();
+			if (!strncmp(sB->readName(), "!worm", 5)) break;
+		}
+		Block* dB = dest->parent();
+		while (dB->parent() && (!dB->isItWormhole())) {
+			dB = dB->parent();
+			if (!strncmp(dB->readName(), "!worm", 5)) break;
+		}
+
+		// compare the name of wormholes
+		// if the geodesic will connect two different wormholes,
+		// create  galaxy portholes.
+		if (strcmp(sB->readName(), dB->readName())) {
+			// if different create galaxy ports.
+			InPortHole* ip = new InPortHole;
+			dB->addPort(ip->setPort( 
+				galPortName(dest->parent()->readName(), 
+				dest->readName()), dB));
+			ip->setAlias(*dest);
+	
+			OutPortHole* op = new OutPortHole;
+			sB->addPort(op->setPort(
+			   	galPortName(src->parent()->readName(), 
+				src->readName()), sB));
+			op->setAlias(*src);
+		}
+	}
+}
+
 	////////////////////////////
 	// deCrust
 	////////////////////////////
