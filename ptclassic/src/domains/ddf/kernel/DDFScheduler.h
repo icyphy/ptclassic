@@ -54,10 +54,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class DDFScheduler : public DynDFScheduler {
 public:
 	// set parameters for scheduler
-	void setParams(int numOver, double pd, int maxbsize, int restructure) {
+	void setParams(int numOver, double pd, int maxbsize, int restruct) {
 		DynDFScheduler::setParams(numOver,pd,maxbsize);
-		restructured = !restructure;
-		if (restructured) canDom = DDF;
+		restructure = restruct;
+		// If restructuring is being requested, flag that we do
+		// know, at this level, whether or not to use a DDF or an
+		// SDF scheduler.
+		if (restruct) candidateDomain = Unknown;
 	}
 	// my domain
 	const char* domain() const ;
@@ -71,6 +74,8 @@ public:
 	~DDFScheduler ();
 
 	// check whether the domain is predefined construct or not.
+	// Returns 0 if candiadateDomain is DDF, 2 if SDF, 1 if other
+	// (like Unknown).
 	int isSDFType()	;
 
 	// reset "restructured" flag for DDFSelf star
@@ -82,7 +87,7 @@ protected:
 	void initStructures();
 private:
 	// candidate domain
-	int canDom;
+	int candidateDomain;
 
 	// real scheduler for other constructs
 	Scheduler* realSched;
@@ -103,7 +108,15 @@ private:
 	// modify the topology
 	void makeSDFWormholes(Galaxy&);
 
-	// flag to be set when restructured.
+	// Parameter to specify whether or not to perform restructuring.
+	// Restructuring is a highly experimental facility that will
+	// take a DDF galaxy and identify SDF subsystems.  The SDF scheduler
+	// is then used on the subsystems.  The idea is to allow for the
+	// efficiency of the SDF scheduler even within a DDF system.
+	short restructure;
+
+	// flag to be set when restructuring has already occured on the
+	// galaxy to which this scheduler applies.
 	short restructured;
 
 };
