@@ -58,33 +58,45 @@ FALSE packs with most current sample at trailing position}
         setup {
 	  in.setSDFParams(PACKIN,PACKIN-1);
 	}
-	codeblock(mainDecl){
-	  union $starSymbol(outoverlay) {
+	codeblock(globalDecl){
+	  union $sharedSymbol(CGCVISPackSh,outoverlay) {
 	    vis_d64 outvaluedbl;
 	    vis_s16 outvaluesh[4];
-	  } $starSymbol(packedout);
+	  };
+	}
+	codeblock(mainDecl){
+	  union $sharedSymbol(CGCVISPackSh,outoverlay) $starSymbol(packedout);
 	}
 	initCode{
 	  CGCVISBase::initCode();
+	  addGlobal(globalDecl);
 	  addDeclaration(mainDecl);
 	  addInclude("<vis_types.h>");
 	}
 	codeblock(packbackwards){
           /*scale and cast input*/
-          $starSymbol(packedout).outvaluesh[0] = (short)($val(scale)*(double)$ref2(in,0));
-          $starSymbol(packedout).outvaluesh[1] = (short)($val(scale)*(double)$ref2(in,1));
-          $starSymbol(packedout).outvaluesh[2] = (short)($val(scale)*(double)$ref2(in,2));
-          $starSymbol(packedout).outvaluesh[3] = (short)($val(scale)*(double)$ref2(in,3));
+          $starSymbol(packedout).outvaluesh[0] =
+	    (short)($val(scale)*(double)$ref2(in,0));
+          $starSymbol(packedout).outvaluesh[1] =
+	    (short)($val(scale)*(double)$ref2(in,1));
+          $starSymbol(packedout).outvaluesh[2] =
+	    (short)($val(scale)*(double)$ref2(in,2));
+          $starSymbol(packedout).outvaluesh[3] =
+	    (short)($val(scale)*(double)$ref2(in,3));
 
 	  /*output packed double*/	  
 	  $ref(out) = $starSymbol(packedout).outvaluedbl;
 	}
 	codeblock(packforwards){
           /*scale and cast input*/
-          $starSymbol(packedout).outvaluesh[0] = (short)($val(scale)*(double)$ref2(in,3));
-          $starSymbol(packedout).outvaluesh[1] = (short)($val(scale)*(double)$ref2(in,2));
-          $starSymbol(packedout).outvaluesh[2] = (short)($val(scale)*(double)$ref2(in,1));
-          $starSymbol(packedout).outvaluesh[3] = (short)($val(scale)*(double)$ref2(in,0));
+          $starSymbol(packedout).outvaluesh[0] =
+	    (short)($val(scale)*(double)$ref2(in,3));
+          $starSymbol(packedout).outvaluesh[1] =
+	    (short)($val(scale)*(double)$ref2(in,2));
+          $starSymbol(packedout).outvaluesh[2] =
+	    (short)($val(scale)*(double)$ref2(in,1));
+          $starSymbol(packedout).outvaluesh[3] =
+	    (short)($val(scale)*(double)$ref2(in,0));
 
 	  /*output packed double*/	  
 	  $ref(out) = $starSymbol(packedout).outvaluedbl;
