@@ -42,7 +42,7 @@ static void pl_print_inputs ARGS(( FILE *, net_node_t *, int ));
 static void pl_print_outputs ARGS(( FILE *, net_node_t *, char *, int ));
 static void pl_print_private ARGS(( FILE *, net_node_t * ));
 static void pl_print_protected ARGS(( FILE *, net_node_t * ));
-static void pl_print_public ARGS(( FILE *, net_node_t * ));
+static void pl_print_public ARGS(( FILE *, net_node_t *, char * ));
 static void pl_print_state ARGS(( FILE *, net_node_t *, int, int ));
 static void pl_print_constructor ARGS(( FILE *, net_node_t * ));
 static void pl_print_method ARGS(( FILE *, net_node_t *, int, int ));
@@ -72,11 +72,11 @@ int trace, compat, autotick, unittime;
   pl_print_defstar( fp, node, outfire );
   pl_print_inputs( fp, node, autotick );
   pl_print_outputs( fp, node, outfire, autotick );
+  pl_print_public( fp, node, outfire);
   pl_print_private( fp, node );
   if ( trace ) {
     pl_print_protected( fp, node );
-  }
-  pl_print_public( fp, node );
+  } 
   pl_print_state( fp, node, compat, unittime );
   pl_print_constructor( fp, node );
   pl_print_method( fp, node, autotick, unittime );
@@ -222,12 +222,13 @@ net_node_t *node;
   net_var_t *var, *pvar;
 
   fprintf( fp, "  private {\n" );
-  fprintf( fp, "    static SequentialList *emittedEvents;\n" ); 
   fprintf( fp, "    int nemitevent;\n" );
   fprintf( fp, "    double min_time;\n" );
   fprintf( fp, "    double end_time;\n" );
+/* fprintf( fp, "    double _delay;\n" ); */
   fprintf( fp, "    FILE *fpfire;\n" );
   fprintf( fp, "    FILE *fpover;\n" );
+  
 
   /* Output event time schedules */
   fprintf( fp, "    /* Output event time schedules */\n" );
@@ -241,19 +242,28 @@ net_node_t *node;
   fprintf( fp, "  }\n" );
 }
 
-static void pl_print_public( fp, node )
+static void pl_print_public( fp, node, option )
 FILE *fp;
 net_node_t *node;
+char* option;
 {
   net_var_t *var, *pvar, *assoc_var;
   st_table *local_vars;
   st_generator *gen;
   char typest[64];
+  char* model_name;
+
+  model_name = net_node_name( net_node_model( node ));
 
   fprintf( fp, "  public {\n" );
   fprintf( fp, "    double now;\n" );
   fprintf( fp, "    int needResource;\n" );
   fprintf( fp, "    int resourceId;\n" );
+/* FIXME
+  fprintf( fp, "\n    DE%s%s* ", model_name, option );
+  fprintf( fp, "%s%s_Star;\n", model_name, option );
+*/
+
 
   /* Input event flags */
   fprintf( fp, "    /* Input event flags */\n" );
@@ -393,9 +403,9 @@ static void pl_print_constructor( fp, node )
 FILE *fp;
 net_node_t *node;
 {
-    fprintf( fp, "  constructor {\n    delayType = TRUE;\n" );
-    fprintf( fp, "    emittedEvents = new SequentialList(); \n" );
-    fprintf( fp, " }\n" );
+    fprintf( fp, "\n\n  constructor {\n    delayType = TRUE;\n" );
+    /* FIXME: add in drive star init */
+    fprintf( fp, "  }\n" );
 }
 
 static void pl_print_method( fp, node, autotick, unittime )
@@ -420,6 +430,7 @@ int autotick, unittime;
     fprintf( fp, "    type { void }\n" );
     fprintf( fp, "    code {\n" );
   
+    output_event_count = 1;
     foreach_net_node_fanout( node, var ) {
         pvar = isOutputEvent( var, node );
         if ( pvar == NULL ) pvar = isIntOutput( var, node );
@@ -446,7 +457,7 @@ int autotick, unittime;
             fprintf( fp, "            break;\n" );
         }
     } end_foreach_net_node_fanout;
-    fprintf( fp, "          default:\n          break;\n" );
+    fprintf( fp, "          default:\n         printf(\"shouldn't reach here!!\");\n          break;\n" );
     fprintf( fp, "      }\n" );
     fprintf( fp, "      if (!needResource) { \n");   
     fprintf( fp, "        emitTime = now + (1/clkFreq); \n");   
@@ -461,7 +472,7 @@ int autotick, unittime;
     fprintf( fp, "         interruptQ->levelput(&newEvent, emitTime, ((DEPortHole*)newEvent.dest)->depth, ((DEPolis*)&newEvent.dest->parent()->asStar())); \n");
     fprintf( fp, "      }\n");
     fprintf( fp, "      emittedEvents->prepend(&newEvent); \n");
-    fprintf( fp, "   }\n}\n}");
+    fprintf( fp, "   }\n}\n}\n\n");
 
 
   /*
@@ -586,11 +597,6 @@ int autotick, unittime;
     }
   } end_foreach_net_node_trans_out;
   
-  fprintf( fp, "\n" );
-  fprintf( fp, "    static DE%s%s* ", model_name, option );
-  fprintf( fp, "%s%s_Star = NULL;\n", model_name, option );
-  fprintf( fp, "    static double _delay = 0.0;\n" );
-
   /*
    * Output event constants
    */
@@ -642,6 +648,11 @@ int autotick, unittime;
     }
   } end_foreach_net_node_trans_out;
   fprintf( fp, "\n" );
+
+  /* agghhhhh.....*/
+  fprintf( fp, "\n    DE%s%s* ", model_name, option );
+  fprintf( fp, "%s%s_Star;\n", model_name, option );
+  fprintf( fp, "\n    static int _delay = 0.0;\n");
 
   /* Define debugging procedure, if -g was selected */
   if ( trace ) {
@@ -727,7 +738,7 @@ int compat;
     fprintf( fp, "  setup {\n" );
     fprintf( fp, "    if (resource == NULL) needResource = 0;\n" );
     fprintf( fp, "    else needResource = 1;\n" );
-    fprintf( fp, "      resetStar();\n" );
+    fprintf( fp, "      timeOfArrival = -1;\n" );
     fprintf( fp, "      Closeflow();\n" );
     fprintf( fp, "  }\n" );
 }
@@ -750,12 +761,13 @@ char *option;
   fprintf( fp, "    InfString name;\n" );
   fprintf( fp, "    int saveimpl;\n\n" );
 
-  /* set variables which reflect Star parameters */
+  /* set variables which reflect Star parameters, and others*/
   fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
   fprintf( fp, "    priority = Priority;\n");
   fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
+  fprintf( fp, "\n    emittedEvents = new SequentialList();");
+  fprintf( fp, "    _delay = 0.0;\n");
 
- 
   fprintf( fp, "    if ( needResource < 2 ) {\n" );
   fprintf( fp, "      %s%s_Star = this;\n", model_name, option );
 
@@ -801,8 +813,9 @@ char *option;
     }
   } end_foreach_net_node_fanin;
   
-  fprintf( fp, "      strcpy( stemp, resource );\n" );
+  
   fprintf( fp, "      if ( needResource ) {\n" );
+  fprintf( fp, "        strcpy( stemp, resource );\n" );
   fprintf( fp, "        if (( resourceId = (int) _cpu_%s( stemp )) == -1 ) {\n", 
            util_map_pathname( node_name ));
   fprintf( fp, "          strcat( stemp, \": not a valid CPU\" );\n" );
@@ -911,6 +924,8 @@ int autotick, unittime;
   fprintf( fp, "    now = arrivalTime;\n" );
   fprintf( fp, "    name = Block::fullName();\n" );
   fprintf( fp, "    %s%s_Star = this;\n", model_name, option );
+  fprintf( fp, "\n    /* Now empty the list of events from previous firing */\n");
+  fprintf( fp, "    while (emittedEvents->getAndRemove() != 0) { };\n");
   
   /* Check input variables and check for missed deadlines */
   foreach_net_node_fanin( node, var ) {
@@ -965,6 +980,7 @@ int autotick, unittime;
   fprintf( fp, "    _delay = 1.0;\n" );
   fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
   fprintf( fp, "    emitEvent(0, _delay, 1);   // emit dummy event \n");
+  fprintf( fp, "    timeOfArrival = -1;// reset this as have finished this firing \n");
   if ( trace ) {
       fprintf( fp, "    if ( debug ) {\n" );
       fprintf( fp, "        tcl.go();\n" );
