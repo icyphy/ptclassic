@@ -1,8 +1,8 @@
 .\" $Id$
 .NA MatrixTest2
 .SD
-This demo shows the use of some simple Matrix stars with
-two inputs.  These include multiply, add, and subtract.
+This demo shows the use of some simple matrix stars with two inputs.
+These include multiply, add, and subtract.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/matrix/demo"
 .DM SDF Universe
