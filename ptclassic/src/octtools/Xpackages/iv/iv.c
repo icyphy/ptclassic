@@ -422,8 +422,12 @@ void ivCreateRow( IVwin, i)
     theEntry->IVWinType = IV_TEXT_WIN;
     theEntry->index = i;
     theEntry->IVwin = IVwin;
+    /* Resist the temptation to use (XPointer) instead of (caddr_t)
+     * as XPointer is not defined under SunOS4.x openwindows.
+     * See /users/ptdesign/adm/Mail/ptolemy-design-log-1994-Jul:Dec
+     */
     XSaveContext( display, IVArray[i].TextWin, globalIvContext,
-		 (XPointer)theEntry);
+		 (caddr_t)theEntry);
     XMapWindow( display, IVArray[i].TextWin);
     
     /* Value window is next */
@@ -445,7 +449,7 @@ void ivCreateRow( IVwin, i)
 	theEntry->index = i; 
 	theEntry->IVwin = IVwin;
 	XSaveContext( display, IVArray[i].ValueWin, globalIvContext,
-		     (XPointer)theEntry ); 
+		     (caddr_t)theEntry ); 
 	XMapWindow( display, IVArray[i].ValueWin );
     }
 
@@ -463,7 +467,7 @@ void ivCreateRow( IVwin, i)
 	theEntry->IVwin = IVwin;
 
 	XSaveContext( display, IVArray[i].ToggleWin, globalIvContext,
-		     (XPointer)theEntry); 
+		     (caddr_t)theEntry); 
 	XMapWindow( display, IVArray[i].ToggleWin );
     } else if ( type != IV_STRING ) {
 	x = x + IVbdrWidth;
@@ -484,14 +488,14 @@ void ivCreateRow( IVwin, i)
 	theEntry->IVwin = IVwin;
 
 	XSaveContext( display, IVArray[i].PlusButton, globalIvContext,
-		     (XPointer)theEntry); 
+		     (caddr_t)theEntry); 
 	theEntry = NEW(IVAssocEntry);
 	theEntry->IVWinType = IV_MINUS_BUTTON;
 	theEntry->index = i; 
 	theEntry->IVwin = IVwin;
 
 	XSaveContext( display, IVArray[i].MinusButton,
-		     globalIvContext, (XPointer) theEntry); 
+		     globalIvContext, (caddr_t) theEntry); 
 	XMapWindow( display, IVArray[i].PlusButton );
 	XMapWindow( display, IVArray[i].MinusButton);
     }
@@ -895,7 +899,7 @@ iv_InitWindow( display, progName, title, maxValChars )
 	theEntry->IVWinType = IV_ROOT_WIN;
 	theEntry->index = IV_ROOT_INDEX;
 	theEntry->IVwin = newIVwin ;
-	XSaveContext( display, w, globalIvContext, (XPointer)theEntry);
+	XSaveContext( display, w, globalIvContext, (caddr_t)theEntry);
 	newIVwin->array = NEWVEC(IVvarType, newIVwin->rows);
 	
     return newIVwin;
