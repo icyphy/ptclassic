@@ -390,9 +390,9 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
 				     int *errflag) {
     // can't use a switch because enumerated data types
     // are assigned to strings and not to integers
-    double *realp = 0;
-    double *imagp = 0;
-    Matrix *matlabMatrix = 0;
+    Real* realp = 0;
+    Real* imagp = 0;
+    Matrix* matlabMatrix = 0;
     if ( portType == INT || portType == FLOAT || portType == FIX ) {
 	matlabMatrix = mxCreateFull(1, 1, MXREAL);
 	realp = mxGetPr(matlabMatrix);
@@ -418,8 +418,8 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	double *realp = mxGetPr(matlabMatrix);
-	double *imagp = mxGetPi(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
+	Real* imagp = mxGetPi(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		Complex temp = Amatrix[irow][icol];
@@ -440,7 +440,7 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	double *realp = mxGetPr(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		*realp++ = double(Amatrix[irow][icol]);
@@ -459,7 +459,7 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	double *realp = mxGetPr(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		*realp++ = Amatrix[irow][icol];
@@ -478,7 +478,7 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
-	double *realp = mxGetPr(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
 	for ( int icol = 0; icol < cols; icol++ ) {
 	    for ( int irow = 0; irow < rows; irow++ ) {
 		*realp++ = double(Amatrix[irow][icol]);
@@ -488,7 +488,7 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
     else {
 	*errflag = TRUE;
 	matlabMatrix = mxCreateFull(1, 1, MXREAL);
-	double *realp = mxGetPr(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
 	*realp = 0.0;
     }
 
@@ -511,8 +511,8 @@ int MatlabIfc :: MatlabToPtolemy(
     if ( mxIsFull(matlabMatrix) ) {
 
 	// for real matrices, imagp will be null
-	double *realp = mxGetPr(matlabMatrix);
-	double *imagp = mxGetPi(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
+	Real* imagp = mxGetPi(matlabMatrix);
 
 	// copy Matlab matrices (in column-major order) to Ptolemy
 	if ( portType == COMPLEX_MATRIX_ENV ) {
@@ -571,4 +571,138 @@ void MatlabIfc :: FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices) 
 
 void MatlabIfc :: NameMatlabMatrix(Matrix* matrixPtr, const char *name) {
     mxSetName(matrixPtr, name);
+}
+
+Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
+					int numrows, int numcols,
+					Real* realPart, Real* imagPart) {
+    int realOrComplex = (imagPart) ? MXCOMPLEX : MXREAL;
+    Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
+
+    // check for memory allocation error
+    if ( newMatlabMatrixPtr == 0 ) return 0;
+
+    // copy real part over to new Matlab matrix
+    // Matlab stores values in column-major order like Fortran
+    Real* realp = mxGetPr(newMatlabMatrixPtr);
+    for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	for ( int jrow = 0; jrow < numrows; jrow++ ) {
+	    realp[jrow * numrows + jcol] = *realPart++;
+	}
+    }
+
+    // copy imag part over to new Matlab matrix (if complex)
+    // Matlab stores values in column-major order like Fortran
+    if ( realOrComplex == MXCOMPLEX ) {
+        Real* imagp = mxGetPi(newMatlabMatrixPtr);
+	for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
+		imagp[jrow * numrows + jcol] = *imagPart++;
+	    }
+        }
+    }
+
+    mxSetName(newMatlabMatrixPtr, name);
+    MatlabEnginePutMatrix(newMatlabMatrixPtr);
+
+    return newMatlabMatrixPtr;
+}
+
+Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
+					int numrows, int numcols,
+					const char** realPartStrings,
+					const char** imagPartStrings) {
+    int realOrComplex = (imagPartStrings) ? MXCOMPLEX : MXREAL;
+    Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
+
+    // check for memory allocation error
+    if ( newMatlabMatrixPtr == 0 ) return 0;
+
+    // copy real part over to new Matlab matrix
+    // Matlab stores values in column-major order like Fortran
+    Real* realp = mxGetPr(newMatlabMatrixPtr);
+    for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	for ( int jrow = 0; jrow < numrows; jrow++ ) {
+	    realp[jrow * numrows + jcol] = atof(*realPartStrings++);
+	}
+    }
+
+    // copy imag part over to new Matlab matrix (if complex)
+    // Matlab stores values in column-major order like Fortran
+    if ( realOrComplex == MXCOMPLEX ) {
+        Real* imagp = mxGetPi(newMatlabMatrixPtr);
+	for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
+		imagp[jrow * numrows + jcol] = atof(*imagPartStrings++);
+	    }
+        }
+    }
+
+    mxSetName(newMatlabMatrixPtr, name);
+    MatlabEnginePutMatrix(newMatlabMatrixPtr);
+
+    return newMatlabMatrixPtr;
+}
+
+Matrix* MatlabIfc :: FetchMatlabMatrix(char* name,
+				       int* numrows, int* numcols,
+				       Real** realPart, Real** imagPart) {
+    Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
+
+    if ( matlabMatrix ) {
+	*numrows = mxGetM(matlabMatrix);
+	*numcols = mxGetN(matlabMatrix);
+	*realPart = mxGetPr(matlabMatrix);
+	*imagPart = mxGetPi(matlabMatrix);
+    }
+    else {
+	*numrows = 0;
+	*numcols = 0;
+	*realPart = 0;
+	*imagPart = 0;
+    }
+
+    return matlabMatrix;
+}
+
+Matrix* MatlabIfc :: FetchMatlabMatrix(char* name,
+				       int* numrows, int* numcols,
+				       char** realPartStrings,
+				       char** imagPartStrings) {
+
+    Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
+
+    if ( matlabMatrix ) {
+	*numrows = mxGetM(matlabMatrix);
+	*numcols = mxGetN(matlabMatrix);
+	Real* realp = mxGetPr(matlabMatrix);
+	Real* imagp = mxGetPi(matlabMatrix);
+	for ( int jcol = 0; jcol < *numcols; jcol++ ) {
+	    for ( int jrow = 0; jrow < *numrows; jrow++ ) {
+		StringList realstring = *realp++;
+		*realPartStrings++ = savestring(realstring);
+		if ( imagp ) {
+		    StringList imagstring = *imagp++;
+		    *imagPartStrings = savestring(imagstring);
+		}
+	    }
+	}
+    }
+    else {
+	*numrows = 0;
+	*numcols = 0;
+	*realPartStrings = 0;
+	*imagPartStrings = 0;
+    }
+
+    return matlabMatrix;
+}
+
+void MatlabIfc :: FreeStringArray(char** strarray, int numstrings) {
+    if ( strarray ) {
+	for ( int k = 0; k < numstrings; k++ ) {
+	    delete [] strarray[k];
+	    strarray[k] = 0;
+	}
+    }
 }
