@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-#include "../tytimer/tyTimer.h"
+#include "../tytimer/tytimer.h"
 
 /*
  * Tytest_TimerTask
