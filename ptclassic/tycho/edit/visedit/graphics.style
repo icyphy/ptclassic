@@ -4,8 +4,8 @@
 #
 # The "graphics" master style-sheet
 #
-modelconfigure -label "Graphics settings"
-modelconfigure -description {
+configure -title "Graphics settings"
+configure -description {
     Settings for the Graphics class.
 }
 
