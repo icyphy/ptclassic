@@ -420,7 +420,7 @@ class ::tycho::Resource {
     ###################################################################
     ####                         public methods                    ####
 
-    # Get a cached copy of the data
+    # Get a cached copy of the data. Here, just return the file name.
     method cachefile {}
 
     # Close the resource
@@ -428,6 +428,12 @@ class ::tycho::Resource {
 
     # Connect a resource to a path name
     method connect {path}
+
+    # Return the end of file status. Here, return eof status of local cache.
+    method eof {} {::tycho::abstractMethod eof}
+
+    # Read a string from a streamable resource. Get from a local cache file.
+    method gets {{varName {}}} {::tycho::abstractMethod gets}
 
     # Test if the resource is currently open
     method isopen {} {::tycho::abstractMethod isopen}
@@ -444,12 +450,21 @@ class ::tycho::Resource {
     # Return the progess indicator, as a decimal number. 1.0 is full.
     method progress {}
 
+    # Write a string to a streamable resource.
+    method puts {string} {::tycho::abstractMethod puts}
+
+    # Return a string containing the data in a streamable resource.
+    method read {} {::tycho::abstractMethod read}
+
     # Source the resource as Tcl
     method source {}
 
     # Return 1 if this object supports the streamable interface
     # (as documented in the class comment), and zero otherwise.
     method streamable {} {::tycho::abstractMethod streamable}
+
+    # Write to the remote file.
+    method write {data} {::tycho::abstractMethod write}
 
     ###################################################################
     ####                           public procs                    ####
