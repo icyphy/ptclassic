@@ -73,8 +73,8 @@ LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
 void DEWormhole :: sumUp() {
 	if (scheduler()->stopBeforeDeadlocked) {
 		DEScheduler* sched = (DEScheduler*) parent()->scheduler();
-		sched->eventQ.levelput(&(this->selfStar), 
-			scheduler()->currentTime ,0);
+		DEStar* me = this;
+		sched->eventQ.levelput(me, scheduler()->currentTime, 0);
 	}
 }
 		
@@ -136,7 +136,7 @@ int DEtoUniversal :: getFromQueue(Particle* p) {
 void DEtoUniversal :: cleanIt() { moreData = 0; }
 
 void DEtoUniversal :: initialize() {
-        InDEPort:: initialize();
+        PortHole :: initialize();
         ToEventHorizon :: initialize();
 }
 
@@ -203,7 +203,7 @@ void DEfromUniversal :: sendData ()
 }
 
 void DEfromUniversal :: initialize() {
-	OutDEPort :: initialize();
+	PortHole :: initialize();
 	FromEventHorizon :: initialize();
 }
 
