@@ -62,7 +62,9 @@ endif
 endif
 
 ifdef PTCL
+ifndef PTCL_WITH_TK
 	TK =
+endif
 endif
 
 # Note that some of these settings will be filtered out by stars.mk
