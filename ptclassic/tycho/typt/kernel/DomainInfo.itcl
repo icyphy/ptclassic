@@ -269,13 +269,13 @@ body ::tycho::DomainInfo::diffStars {domainA domainB} {
                         [$domainB multiports $starA] } { 
                     lappend commonButMultiPortsMismatch $starA
                 } else {
-                    if { [$domainA states $starA] != \
-                            [$domainB states $starA] } { 
+                    if {[$domainA states $starA] != [$domainB states $starA]} {
                         lappend commonButStatesMismatch $starA
+
                     } else {
                         lappend commonStars $starA
                     }
-                } 
+                }
             }
         } else {
             lappend domainAOnly $starA
@@ -396,10 +396,12 @@ States:(.*)
 }]
         foreach state $tmpStateList {
             if { $state != {}} {
-                if {[scan [string trimleft $state] \
-                        "%s type: %s" stateName type] \
-                        == 2} {
-                    lappend stateList [list $stateName $type]
+                if {[regexp {[\t ]*(.*) type: (.*)} $state dummy \
+                        stateName type]} {
+                    if {![regexp {A_NONSETTABLE} $type]} {
+                        # Don't include internal states
+                        lappend stateList [list [string trim $stateName] $type]
+                    }
                 }
             }
         }
