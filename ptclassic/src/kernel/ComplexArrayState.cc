@@ -30,7 +30,24 @@ $Id$
 
 **************************************************************************/
 
+// alternate constructor: size
+ComplexArrayState :: ComplexArrayState (int size) {
+	val = new Complex [nElements = size];
+}
+
+// alternate constructor: size and fill value.
+ComplexArrayState :: ComplexArrayState (int size, const Complex& fill_value) {
+	val = new Complex [nElements = size];
+	Complex * top = &(val[nElements]);
+	Complex * t = val;
+	while (t < top) *t++ = fill_value;
+}
+
 const char* ComplexArrayState :: type() const { return "COMPLEXARRAY";}
+
+int ComplexArrayState :: size() const { return nElements;}
+
+State *ComplexArrayState :: clone() const { return new ComplexArrayState;}
 
 ComplexArrayState :: ~ComplexArrayState () {
 	// ? no Complex destructor: do we want delete [] val, or delete val?
