@@ -20,6 +20,7 @@ $Id$
 ******************************************************************/
 #include "ProcMemory.h"
 #include "AsmStar.h"
+#include "miscFuncs.h"
 
 int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 	MemInterval* p = l;
@@ -167,9 +168,6 @@ int LinProcMemory::performAllocation() {
 	}
 	return TRUE;
 }
-
-inline unsigned max(unsigned a,unsigned b) { return a >= b ? a : b;}
-inline unsigned min(unsigned a,unsigned b) { return a <= b ? a : b;}
 
 static share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 	unsigned s = max(xa,ya);
