@@ -126,9 +126,7 @@ to become a permanent part of the system.
 #ifdef DEBUG
 void DebugMessage(char *str1, char *str2)
 {
-  char buf[2000];
-  sprintf("%s %s\n",str1, str2);
-  Error::message(buf);
+  Error::message(str1, str2);
 }
 // Use this macro for debugging.
 #define D(x) x
@@ -165,10 +163,8 @@ int Linker::isActive() { return activeFlag;}
 
 void Linker::adjustMemory() {
 #if defined(USE_DLOPEN) || defined(USE_SHLLOAD)
-  char buf[1024];
-  sprintf(buf,
+  Error::abortRun(
     "Linker: adjustMemory() not used on architectures that support dlopen()");
-  Error::abortRun(buf);
 #else // USE_DLOPEN || USE_SHLLOAD
 	if (!memBlock) {
 		memBlock = new char[LINK_MEMORY];
@@ -287,7 +283,6 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
   // Generate a temporary name
   sprintf(objName, DLOPEN_TMP_FILE_FORMAT, (int)getpid(), linkSeqNum++); 
 
-
   // Create the command to produce the shared object
   command << " " << objName;
 
@@ -346,16 +341,12 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
 #endif //USE_SHLLOAD
 #ifdef DEBUG
   {
-    char buf[4*PATHNAME_LENGTH];
-    sprintf(buf, "command to create shared object: %s",
-	    (const char *)command);
-    Error::message(buf);
+    Error::message("command to create shared object: ", command);
   }
 #endif // DEBUG
 
   if (system (command)) {
-    Error::abortRun(
-		    "Error in creating shared object, command failed: ",
+    Error::abortRun("Error in creating shared object, command failed: ",
 		    command);
     return (char *) NULL;
   }
@@ -368,14 +359,11 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
 static void cleanupSharedObjects(int linkSeqNum)
 {
   char fileName[PATHNAME_LENGTH];
-  int i;
-  for(i=0;i<linkSeqNum;i++) {
-    sprintf(fileName, DLOPEN_TMP_FILE_FORMAT,(int)getpid(), i);
+  for(int i = 0; i < linkSeqNum; i++) {
+    sprintf(fileName, DLOPEN_TMP_FILE_FORMAT, (int)getpid(), i);
 #ifdef DEBUG    
     {
-      char buf[4*PATHNAME_LENGTH];
-      sprintf(buf, "Linker cleanup: about to remove: %s", fileName);
-      Error::message(buf);
+      Error::message("Linker cleanup: about to remove: ", fileName);
     }
 #endif
     unlink(fileName);
@@ -467,9 +455,9 @@ int Linker::multiLink (int argc, char** argv) {
 	// RTLD_GLOBAL flag.
 	  
 	if ( (dlhandle = DLOPEN(objName, DLOPEN_FLAGS)) == NULL) {
-	  char buf[1024];
-	  sprintf(buf,"Error linking file %s: dlopen: %s", objName,dlerror());
-	  Error::abortRun(buf);
+	  StringList msg = "Error linking file";
+	  msg << objName << " dlopen: " << dlerror();
+	  Error::abortRun(msg);
 	  return FALSE;
 	}
 
@@ -498,9 +486,9 @@ int Linker::multiLink (int argc, char** argv) {
 	    return FALSE;
 	  
 	if ( (lib_handle = shl_load(objName, BIND_DEFERRED | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
-	  char buf[1024];
-	  sprintf(buf,"Error linking file %s: dlopen: %s", objName, strerror (errno));
-	  Error::abortRun(buf);
+	  StringList msg = "Error linking file ";
+	  msg << objName << " dlopen: " << strerror (errno);
+	  Error::abortRun(msg);
 	  return FALSE;
 	}
 
@@ -554,7 +542,7 @@ int Linker::multiLink (int argc, char** argv) {
 	}
 
 // makeExecutable is a do-nothing on many systems.
-	if (makeExecutable(size,pagsiz,availMem) != 0) {
+	if (makeExecutable(size, pagsiz, availMem) != 0) {
 		Error::error ("Linker: Can't make code executable");
 		return FALSE;
 	}
@@ -648,12 +636,12 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 	  nl[0].n_name = symbol;
 	  nl[1].n_name = (char *)NULL;
 
-	  strcpy(tmpname,objName);
+	  strcpy(tmpname, objName);
 
-	  if (nlist(tmpname,nl))
-          {
+	  if (nlist(tmpname,nl)) {
 	     Error::abortRun("nlist failed");
-	  } else {
+	  }
+	  else {
 	     addr = nl[0].n_value;
 	     sprintf(buf, "Nlist found: %s at 0x%x", symbol, addr);
 	     Error::message(buf);
@@ -685,9 +673,7 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 // Now we know what symbol to look for
 #ifdef DEBUG
         {
-	  char buf[256];
-	  sprintf(buf, "Constructor Symbol: %s", ConsName);
-	  Error::message(buf);
+	  Error::message("Constructor Symbol: ", ConsName);
 	}
 #endif
 	shl_t handle = (shl_t)dlhandle;
@@ -719,9 +705,7 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 
 #ifdef DEBUG
         {
-	  char buf[256];
-	  sprintf(buf, "NM Pipe: %s", (const char *)command);
-	  Error::message(buf);
+	  Error::message("NM Pipe: ", command);
 	}
 #endif
 
@@ -779,13 +763,10 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 		// it is a constructor, call it:
 		D( debugInvokeConstructors(symbol, addr, objName);)
 		PointerToVoidFunction fn;
-		if ((fn =
-		     (PointerToVoidFunction)dlsym(dlhandle,symbol))
-		    == NULL) {
-		  char buf[1024];
-		  sprintf(buf,"Error getting address of symbol %s\n\tdlsym:%s",
-			  symbol,  dlerror());
-		  Error::abortRun(buf);
+		if ((fn = (PointerToVoidFunction)dlsym(dlhandle,symbol)) == NULL) {
+		  StringList msg = "Error getting address of symbol ";
+		  msg << symbol << "\n\tdlsym: " << dlerror();
+		  Error::abortRun(msg);
 		  return 0;
 		}
 		D( printf("debug: InvokeConstructors: fn=0x%lx\n",(unsigned long) fn); )
@@ -813,9 +794,9 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 
 size_t Linker::readInObj(const char* objName) {
 #if defined (USE_DLOPEN) || defined (USE_SHLLOAD)
-  char buf[1024];
-  sprintf(buf,"Linker: readInObj(%s) not used on architectures that support dlopen()",objName);
-  Error::abortRun(buf);
+  Error::abortRun("Linker: readInObj(",
+ 		   objName,
+  		  ") not used on architectures that support dlopen()");
   return (size_t) 0;
 #else
 	STRUCT_DEFS;		// macro, defines sys-dependent header structs
