@@ -69,13 +69,16 @@
 class ::tycho::ListBrowser {
     inherit ::tycho::Query
 
+    ##################################################################
+    ####                         options                          ####
+
     # A flag that says whether to close the window after choosing.
     itk_option define -closewindow closeWindow CloseWindow 1
 
     # Specify the command to execute on an item when one is chosen.
     itk_option define -command command Command "::tycho::Dialog::answer"
 
-    # Specify the command to execute on an item when one is chosen.
+    # Specify the text inserted in the entry box.
     itk_option define -default default Default {}
 
     constructor {args} {}
