@@ -120,6 +120,9 @@ public:
     virtual void wormOutputCode(PortHole&);
     virtual void allWormOutputCode();
 
+    // method for preparing a wormhole for code generation
+    virtual void wormPrepare();
+
     // methods for sending and receiving data to a target when
     // run inside of a wormhole. Argument is the "real port" of the 
     // interior star that is attached to an event horizon.  If no argument 
