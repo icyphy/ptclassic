@@ -13,14 +13,14 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
 
-    state {
+    defstate {
 	name { fileName }
 	type { string }
 	default { "/dev/audio" }
 	desc { File for PCM data.  If blank, use standard IO. }
     }
 
-    state {
+    defstate {
 	name { blockSize }
 	type { int }
 	default { 128 }
@@ -64,8 +64,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (read) {
 	/* Read a block of data from the file */
-	if (read($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(b
-lockSize))
+	if (read($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(blockSize))
 	{
 	    perror("$val(fileName)");
 	    exit(1);
