@@ -293,14 +293,20 @@ $(ITCL_DEST_LIB)/libitcl.a: \
 		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).a libitcl.a)
 	@echo "Create unversioned links for arch independent libraries"
 	-(cd $(TCL_INDEPENDENT_DEST)/lib; \
-		rm -f $@; \
+		rm -f tcl; \
 		ln -s tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER) tcl)
 	-(cd $(TK_INDEPENDENT_DEST)/lib; \
-		rm -f $@; \
+		rm -f tk; \
 		ln -s tk$(ITCL_TK_MAJOR_VERSION_NUMBER) tk)
 	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
-		rm -f $@; \
-		ln -s itcl$(ITCL_ITCL_MAJOR_VERSION_NUMBER) itcl)
+		rm -f itcl; \
+		ln -s itcl$(ITCL_MAJOR_VERSION_NUMBER) itcl)
+	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
+		rm -f itk; \
+		ln -s itk$(ITCL_MAJOR_VERSION_NUMBER) itk)
+	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
+		rm -f iwidgets; \
+		ln -s iwidgets$(ITCL_MAJOR_VERSION_NUMBER) iwidgets)
 
 $(ITCL_DEST):
 	mkdir $@
