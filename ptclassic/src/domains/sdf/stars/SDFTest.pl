@@ -11,14 +11,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	desc {
-This star compares its two inputs "upper" and "lower" using the comparison
-test "condition".  The "condition" test can be any one of {EQ NE GT GE},
-or equivalently any one of {== != > >=}, whose elements represent the binary
-operations of equals, not equals, greater than, and greater than or equals,
-respectively.  If the "crossingsOnly" parameter is TRUE, then the output is
-TRUE only when the outcome of the test changes from TRUE to FALSE or FALSE
-to TRUE.  In this case, the first output is always TRUE.  This star outputs
-0 on FALSE and 1 on TRUE.
+This star compares its two inputs "upper" and "lower" using the
+comparison test "condition".  The "condition" test can be any one of
+{EQ NE GT GE}, or equivalently any one of {== != &gt; &gt;=}, whose
+elements represent the binary operations of equals, not equals,
+greater than, and greater than or equals, respectively.  If the
+"crossingsOnly" parameter is TRUE, then the output is TRUE only when
+the outcome of the test changes from TRUE to FALSE or FALSE to TRUE.
+In this case, the first output is always TRUE.  This star outputs 0 on
+FALSE and 1 on TRUE.
 	}
 	htmldoc {
 To implement the tests "&lt;" or "&lt;=", simply reverse the inputs.
