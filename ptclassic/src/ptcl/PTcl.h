@@ -83,6 +83,10 @@ protected:
 
 	// append a value to the result, using Tcl_AppendElement.
 	void addResult(const char*);
+
+	// compute the schedule
+	int computeSchedule();
+
 public:
 // the active Tcl interpreter, for error reporting.
 	static Tcl_Interp* activeInterp;

@@ -320,28 +320,30 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+int PTcl::computeSchedule() {
+	SimControl::clearHalt();
+	universe->initTarget();
+	if (SimControl::haltRequested()) {
+		Error::error("Error setting up the schedule.");
+		return FALSE;
+	}
+	return TRUE;
+}
+
 int PTcl::schedule(int argc,char **) {
 	if (argc > 1)
 		return usage("schedule");
 	// should arrange so that previously computed schedule can
 	// be returned
-	universe->initTarget();
-	if (SimControl::haltRequested()) {
-		Error::error("Error setting up the schedule.");
-		return TCL_ERROR;
-	}
-	return result(universe->displaySchedule());
+	return computeSchedule() ? result(universe->displaySchedule())
+		                 : TCL_ERROR;
 }
 
 int PTcl::run(int argc,char ** argv) {
 	if (argc > 2)
 		return usage("run <stoptime>");
-
-	universe->initTarget();
-	if (SimControl::haltRequested()) {
-		Error::error("Error setting up the schedule.");
+	if (!computeSchedule())
 		return TCL_ERROR;
-	}
 	stopTime = 0.0;
 	lastTime = 1.0;
 	return cont(argc,argv);
