@@ -19,6 +19,11 @@ input interpreted as the x-axis data, and the other input as y-axis data.
 		name { xInput }
 		type { anytype }
 	}
+	constructor {
+		// make xInit and xUnits invisible
+		xUnits.setAttributes(A_NONSETTABLE);
+		xInit.setAttributes(A_NONSETTABLE);
+	}
 	go {
 		graph.addPoint(float(xInput%0), float(input%0));
 	}
