@@ -102,15 +102,16 @@ LevelLink* PriorityQueue :: levelput(Pointer a, float v, float fv)
 	l = l->before;	
 	while (l != lastNode) {			// compare but last
 		if (v > l->level || (v == l->level && fv >= l->fineLevel)) {
-		   l->next->before = l->next = 
-				newLink->setLink(a,v,fv,l->next,l);
+		   LevelLink *tmp = newLink->setLink(a,v,fv,l->next,l);
+		   l->next->before = l->next = tmp;
 		   lastReference = lastNode;
 		   return newLink;
 		}
 		l = l->before;
 	}
 	// at the top of the queue
-	l->next->before = l->next = newLink->setLink(a,v,fv,l->next,l);
+	LevelLink *tmp = newLink->setLink(a,v,fv,l->next,l);
+	l->next->before = l->next = tmp;
 	lastReference = lastNode;
 	return newLink;
 }
@@ -134,8 +135,8 @@ LevelLink* PriorityQueue :: leveltup(Pointer a, float v, float fv)
 
 	while (l != lastNode) {			// compare but last
 		if (v < l->level || (v == l->level && fv < l->fineLevel)) {
-		   l->before->next = l->before = 
-				newLink->setLink(a,v,fv,l,l->before);
+		   LevelLink *tmp = newLink->setLink(a,v,fv,l,l->before);
+		   l->before->next = l->before = tmp;
 		   lastReference = lastNode;
 		   return newLink;
 		}
@@ -150,8 +151,8 @@ LevelLink* PriorityQueue :: leveltup(Pointer a, float v, float fv)
 		lastReference = lastNode;
 		return newLink;
 	} 
-	l->before->next = l->before = 
-		newLink->setLink(a,v,fv,l,l->before);
+	LevelLink *tmp = newLink->setLink(a,v,fv,l,l->before);
+	l->before->next = l->before = tmp;
 	lastReference = lastNode;
 	return newLink;
 }
