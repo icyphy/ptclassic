@@ -294,11 +294,11 @@ body ::tycho::GraphEditor::constructor {args} {
     # Create and initialize the popup menus for the vertices and
     # edges
     popup new "vertex" 
-    popup bind "vertex" "vertex"
+    popup bind "vertex" "vertex" "$vertexcontroller configurePopup vertex"
     $vertexcontroller initPopup "vertex"
 
     popup new "edge"
-    popup bind "edge" "edge"
+    popup bind "edge" "edge" "$edgecontroller configurePopup edge"
     $edgecontroller initPopup "edge"
 }
 
