@@ -15,9 +15,6 @@ Invoke a Tcl script that can optionally define a procedure that is
 invoked every time the star fires.
 	}
 	htmldoc {
-<pre>
-nodelim
-</pre>
 The star reads a file containing Tcl commands.
 It can be used in a huge
 variety of ways, including using Tk to animate or control a simulation.
@@ -62,7 +59,7 @@ The argument list for setOutputs_$starID should contain a
 floating point value for each output of the star.
 The inputs can be of any type.  The print() method of the particle
 is used to construct a string passed to Tcl.
-This mechanism is entirely asychronous, in that the Tcl/Tk script
+This mechanism is entirely asynchronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 <p>
 In synchronous operation,
@@ -72,9 +69,6 @@ The procedure could,
 for example, grab input values and compute output values,
 although it can do anything the designer wishes, even ignoring the input
 and output values.
-<pre>
-delim 
-</pre>
 	}
 	hinclude { "TclStarIfc.h" }
 	outmulti {
