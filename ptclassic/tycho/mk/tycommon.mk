@@ -48,7 +48,7 @@
 # TCL_SRCS	.tcl files
 # HDRS		.h files.
 # JSRCS		.java files
-# JCLASS	.class files
+# JCLASS	.c
 # OBJS		.o files
 # LIBR		The name of the library being created.  We can't just call
 #		this LIB because of problems with the LIB environment variable
@@ -395,6 +395,9 @@ jsoriginal:
 # Back out the instrumentation.
 jsrestore:
 	$(JSRESTORE) $(JSRCS)
+	-rm -f jsoriginal/README
+	-rmdir jsoriginal
+
 # Compile the instrumented Java classes and include JavaScope.zip
 jsbuild:
 	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) jclass
@@ -407,7 +410,11 @@ jstest_jsimple:
 jsall: jsoriginal
 	$(MAKE) clean
 	$(MAKE) jsbuild
-	(cd test; $(MAKE) jstest_jsimple)
+	if [ -w test ] ; then \
+	   (cd test; \
+		$(MAKE) jsinstr AUXCLASSPATH=:$(JSCLASSPATH) jclass \
+		jstest_jsimple); \
+	fi
 
 
 # Run all the tests
@@ -481,8 +488,6 @@ alljtests.tcl: makefile
 			echo "if [ file exists $$x ] {source $$x}" >> $@; \
 		done; \
 	fi
-	echo "# This is to flush the JavaScope code coverage tables" >> $@
-	echo "java::call pt.kernel.test.JavaScopeFlush flush" >> $@
 	echo "doneTests" >> $@
 	echo "exit" >> $@
 
