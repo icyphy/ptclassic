@@ -122,7 +122,8 @@ private:
 	VHDLGenericList mainGenMapList;
 	VHDLPortList mainPortMapList;
 	VHDLSignalList topSignalList;
-	VHDLCompDeclList topCompMapList;
+//	VHDLCompDeclList topCompMapList;
+	VHDLCompDeclList topCompDeclList;
 
 	int pairNumber;
 	int writeCom;
