@@ -62,13 +62,15 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # Here is an example of how to use the Subpanel:
 # <tcl><pre>
 # ::tycho::Displayer .w
+# pack forget .w.childsite
 # frame .w.options
 # checkbutton .w.options.a -text A
 # checkbutton .w.options.b -text B
 # pack .w.options.a
 # pack .w.options.b
 # ::tycho::Subpanel .w.s -text "Options" -childwidget .w.options
-# pack .w.s -anchor w
+# ::tycho::Subpanel .w.t -text "Preferences" -childwidget .w.s
+# pack .w.t -anchor nw
 # wm deiconify .w
 # </pre></tcl>
 # <p>
@@ -369,7 +371,8 @@ body ::tycho::Subpanel::open {} {
 	    -side left \
 	    -anchor nw \
 	    -after $itk_component(spaceFrame) 
-
+    raise $itk_option(-childwidget) [$this windowName]
+       
     configure -state open
 }
 
