@@ -2,7 +2,7 @@ defstar {
 	name { XMgraph }
 	domain { CGC }
 	desc { Generate a multi-signal plot with the pxgraph program. }
-	version {$Id$}
+	version { $Id$ }
 	author { Soonhoi Ha }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
