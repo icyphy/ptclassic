@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee, J. Buck, J. Pino
+ Programmer:  E. A. Lee, J. Buck, J. Pino, T. M. Parks
 
 *******************************************************************/
 
@@ -23,6 +23,10 @@ $Id$
 #include "Code.h"
 #include "CGSymbol.h"
 #include "IntState.h"
+
+// the following function is provided by the SunOS and Ultrix libs.
+// don't know how generally it is available.
+extern "C" int strcasecmp(const char* s1, const char* s2);
 
 	////////////////////////////////////
 	// class CGCodeBlock
@@ -75,12 +79,15 @@ public:
 
 protected:
 
-	// Given a CodeBlock, generate output code. 
-	// Macros referencing states and inputs and outputs are processed here.
-	// The first method processes the codeblock and returns a StringList.
-	// The second method adds the code the target's code using addCode.
-	StringList processCode(CGCodeBlock& block);
-	void gencode(CGCodeBlock& block);
+	// Process code, expanding macros.
+	StringList processCode(CGCodeBlock&);
+	StringList processCode(const char*);
+
+	// Add processed code to the Target.
+	void gencode(CGCodeBlock&);
+	void gencode(const char*);
+
+	// Add a string to the Target code.  (should be private?)
 	void addCode(const char*);
 
 	// Return the special character that introduces a macro
@@ -90,34 +97,44 @@ protected:
 
 	// For generation of error messages
 	void codeblockError(const char* p1, const char* p2 = "");
+	void macroError(const char* func, const StringList& argList);
 
-	// Process the macros that are defined for this star.
-	// These are found by gencode.  In this class, the following
-	// functions are handled:
-	//      $val(name)      Value of state "name"
-	//      $ref(name)      $mem(name):$addr(name)
-	//      $ref2(name,o)   $mem(name):(address with offset)
-	//      $label(name)    unique label for (codeblock,name) pair.
-	//                      If the label does not exist, a new, unique
-	//                      label is created.
-	//	$codeblockSymbol(name)
-	//			Another name for label
-	//	$starSymbol(name)
-	//			Unique symbol for (star, name) pair.
-	// The number, names, and meaning of
-	// these functions can be easily redefined in derived classes.
-	virtual StringList processMacro(const char* func, const char* id,
-				const char* arg2);
+	/* Expand macros that are defined for this star.
+	   The following macros are recognized:
 
-	// The following virtual methods return the substitution strings
-	// for the ref macros.
-	virtual StringList getRef(const char* name);
-	virtual StringList getRef2(const char* name, const char* offset);
+		$val(name)		Value of a state.
+		$size(name)		Size of a state or port.
+		$ref(name)		Reference to a state or port.
+		$ref(name,offset)	Reference with offset.
+		$label(name)		Unique label for codeblock.
+		$codeblockSymbol(name)	Another name for label.
+		$starSymbol(name)	Unique label for star.
 
-	// Look up the value of state and return it as a StringList.
-	// A zero-length StringList is returned if there is no such State.
-	virtual StringList lookupVal(const char* name);
+	   The number, names, and meaning of
+	   these functions can be easily redefined in derived classes.
+	*/
+	virtual StringList expandMacro(const char* func, const StringList& argList);
 
+	// Match macro name and argument count.
+	int matchMacro(const char* func, const StringList& argList, const char* name, int argc)
+	{
+	    return (strcasecmp(func, name) == 0) && (argList.size() == argc);
+	}
+
+	// Evaluate State used as MultiPortHole index.
+	StringList expandPortName(const char*);
+
+	// State or PortHole reference.
+	virtual StringList expandRef(const char*);
+
+	// State or PortHole reference with offset.
+	virtual StringList expandRef(const char* name, const char* offset);
+
+	// State value.
+	virtual StringList expandVal(const char*);
+
+	// Size of State or PortHole.
+	StringList expandSize(const char*);
 
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.
@@ -127,10 +144,6 @@ protected:
 	IntState procId;
 
 private:
-	// List of all local star labels
-/*	StringList codeblockSymbols;
-	StringList starSymbols;*/
-
 	// Reset local codeblock labels
 	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
 };
