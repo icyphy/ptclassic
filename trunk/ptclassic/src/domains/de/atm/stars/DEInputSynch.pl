@@ -2,22 +2,37 @@
 defstar{
        name { InputSynch }
        domain { DE }
-       desc { Synchronize data from input to output.  If there is
-no data packet present at input ports, a "null" packet will be 
-sent to the corresponding output port.  
+
+       desc {
+Synchronizes
+.c VoiceData
+messages from input MPH to output MPH to allow
+interfacing of a DE star to SDF-in-DE wormhole.
        }
 
        version {$Id$}
        author { John Loh and Allen Lao }
 
        copyright { 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
        location {ATM demo library}
+
+       explanation {
+An SDF-in-DE wormhole, in order to fire, requires at least one message
+on each of its input ports.  When connecting a DE networking star to
+an SDF-in-DE wormhole describing a packet switch and triggered on its
+\fIdemand\fR input, this star will accept the first message on each of its
+inputs and pass them through to their respective outputs.  For inputs
+without messages, this star produces a null
+.c VoiceData
+message to send on the corresponding outputs.  Thus, execution requirements
+of the wormhole will always be satisfied.
+       }
 
        hinclude {"VoiceData.h"}
 
