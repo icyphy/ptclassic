@@ -142,9 +142,9 @@ class ::tycho::EditItcl {
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
 
-   # Subscribe to the preference set
-   preference subscribeoptions $this \
-           -optioncolor optionColor
+   # Subscribe to the style parameters
+   stylesheet subscribe \
+           -optioncolor editcolors optionColor
 }
 
 
@@ -211,7 +211,7 @@ body ::tycho::EditItcl::evaluate {} {
     # NOTE: Itcl 2.0 and 2.1 can dump core here if here we delete a class that
     # has objects existing as components of another class.
     if {$itclClasses != {} && \
-            [preference get itclClassRedefinitionWarning] == 1} {
+            [stylesheet get interaction itclClassRedefinitionWarning] == 1} {
         if {![safeEval ::tycho::askuser \
                 "Warning: all objects with the following \
                 classes (and derived classes) will be deleted: \n \

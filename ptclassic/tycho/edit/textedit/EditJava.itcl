@@ -207,7 +207,7 @@ body ::tycho::EditJava::fileTemplate {{newClassName {}}} {
     }
 
     # Fix the author tag by substituting in the author
-    substituteText "@author" "@author [preference get userName]"
+    substituteText "@author" "@author [stylesheet get system userName]"
 
 }
 ###################################################################
@@ -257,7 +257,7 @@ body ::tycho::EditJava::gendocBuffer {} {
             [file join [file dirname [filename]] $docDir]"
     #::tycho::safeUpdate $this
     fixJavaHTMLFiles [file join \
-            [::tycho::preference get java javaHome] docs api] \
+            [stylesheet get java javaHome] docs api] \
             [file join [file dirname [filename]] $docDir]
     putStatus ""
     #::tycho::safeUpdate $this
@@ -314,10 +314,10 @@ body ::tycho::EditJava::help {} {
 # is at jdk1.1.1/docs/index.html
 # contain the Java HTML documentation at java2.2/html/TclTkMainList.html
 #
-# In Tycho, the *javaHome* preference controls what file is opened.
+# In Tycho, the *javaHome* style parameter controls what file is opened.
 #
 body ::tycho::EditJava::openJavaHTMLPage {} {
-    set javaHome [::tycho::preference get java javaHome]
+    set javaHome [stylesheet get java javaHome]
     if { $javaHome != "" } {
 	set javaHome [::tycho::expandPath $javaHome]
     }
@@ -328,7 +328,7 @@ body ::tycho::EditJava::openJavaHTMLPage {} {
     } else {
 	error "Sorry, `$javaHTMLPage' does not exist. The pathname to
 	the Java documentation is generated using the javaHome\
-	Java preference and the path 'docs/index.html'."
+	Java stye parameter and the path 'docs/index.html'."
     }
 }
 
