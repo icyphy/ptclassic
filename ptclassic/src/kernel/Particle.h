@@ -62,6 +62,9 @@ public:
 	// the compiler can't handle this
 	virtual Particle& operator = (const Particle&) = 0;
 
+	// compare two particles
+	virtual int operator == (const Particle&) = 0;
+
 	// clone the Particle, and remove clone
 	virtual Particle* clone() = 0;
 	virtual Particle* useNew() = 0;
@@ -70,15 +73,20 @@ public:
 	// packet interface: these funcs return errors unless
 	// redefined
 	virtual void getPacket (Packet&);
+	virtual void accessPacket (Packet&) const;
 	virtual void operator << (const Packet&);
 
 protected:
+	int typesEqual(const Particle& p) const {
+		return (readType() == p.readType());
+	}
+
 	// Before copying Particles, always compare their types
 	// Otherwise the user could always copy Particles of
 	//  incompatible types between an input and output PortHole
 	// we compare function pointers to be fast.
 	int compareType(const Particle& p) const {
-		if (readType() != p.readType()) {
+		if (!typesEqual(p)) {
 			badCopy(p);
 			return 0;
 		}
@@ -137,6 +145,9 @@ public:
 	// Copy the Particle
 	Particle& operator = (const Particle&);
 
+	// compare particles
+	int operator == (const Particle&);
+
 	// clone the Particle, and remove clone
 	Particle* clone();
 	Particle* useNew();
@@ -178,6 +189,9 @@ public:
 
         // Copy the Particle
         Particle& operator = (const Particle&);
+
+	// compare particles
+	int operator == (const Particle&);
 
 	// clone the Particle, and remove clone
 	Particle* clone();
@@ -222,6 +236,9 @@ public:
 
         // Copy the Particle
         Particle& operator = (const Particle&);
+
+	// compare particles
+	int operator == (const Particle&);
 
 	// clone the Particle, and remove clone
 	Particle* clone();
