@@ -80,7 +80,7 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList n_m1 = o.fullName();
-	n_m1 << ":" << m1;
+	n_m1 << ": " << m1;
 	error(n_m1,m2,m3);
 }
 
