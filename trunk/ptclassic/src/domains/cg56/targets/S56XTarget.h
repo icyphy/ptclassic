@@ -27,6 +27,7 @@ private:
     void initStates();
     CodeStream aioCmds;
     CodeStream shellCmds;
+    StringState monitorProg;
 protected:
         void headerCode();
         void trailerCode();
