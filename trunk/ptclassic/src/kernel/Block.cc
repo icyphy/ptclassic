@@ -272,6 +272,13 @@ int Block::isItWormhole () const { return FALSE;}
 
 void Block::initState () { states.initElements();}
 
+void Block::initPorts () {
+  if(isItAtomic()) {
+    ports.initElements();
+    multiports.initElements();
+  }
+}
+
 // return the scheduler for the Block.  Block derived classes that
 // contain schedulers will redefine this method.
 Scheduler* Block :: scheduler() const {
