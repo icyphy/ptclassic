@@ -109,9 +109,13 @@ body ::tycho::RevControlSCCS::checkIn {} {
     if {[file isdirectory $dir] && [file executable $dir] && \
 	[file writable $dir]} {
 	cd $dir
+    } else {
+	::tycho::inform "Unable to write to the directory that the file\
+		resides in."
+	return 
     }
     set comments [::tycho::queryinfo "Enter comments:" "" 60]
-    catch {exec echo $comments | sccs delget $file} output
+    catch {exec echo $comments | sccs delget $basefile} output
     if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	::tycho::inform "The checkin operation failed with the following\
 		error message: $output"
@@ -138,8 +142,12 @@ body ::tycho::RevControlSCCS::checkOut {} {
 	[file writable $dir]} {
         # Move into the right directory. 
 	cd $dir
+    } else {
+	::tycho::inform "Unable to write to the directory that the file\
+		resides in."
+	return 
     }
-    catch {exec sccs edit $file} output
+    catch {exec sccs edit $basefile} output
     if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	::tycho::inform "The following error was encountered while trying to\
 		checkout the desired file: $output"
@@ -168,6 +176,10 @@ body ::tycho::RevControlSCCS::unedit {} {
 	[file writable $dir]} {
         # Move into the right directory. 
 	cd $dir
+    } else {
+	::tycho::inform "Unable to write to the directory that the file\
+		resides in."
+	return 
     }
     catch {exec sccs unedit $file} output 
     puts "output: $output"
@@ -255,8 +267,8 @@ body ::tycho::RevControlSCCS::checkRevControl {} {
     set dir [file dirname $file]
     set revdir [format "%s/SCCS" $dir]
     set basefile [file tail $file]
-    if {![file exists [format "%s/SCCS/s.%s" $dir $basefile]] && \
-	    ![file exists [format "%s/SCCS/p.%s" $dir $basefile]]} { 
+    if {![file exists [format "%s/s.%s" $revdir $basefile]] && \
+	    ![file exists [format "%s/p.%s" $revdir $basefile]]} { 
 	# File is not currently under revision control.
 	if {![askuser "This file is not currently under revision\
 		control, do you want it to be placed under revision\
@@ -273,13 +285,21 @@ body ::tycho::RevControlSCCS::checkRevControl {} {
 		}   
 		exec mkdir $revdir
 	    }
-	    catch {exec sccs create $file} output
+	    if {[file isdirectory $dir] && [file executable $dir] && \
+		    [file writable $dir]} {
+		# Move into the right directory. 
+		cd $dir
+	    } else {
+		::tycho::inform "Unable to write in the directory that the\
+			file resides in."
+		return 0
+	    }
+	    catch {exec sccs create $basefile} output
 	    if {![regexp "^\[1-9\]+.\[0-9\]+" $output]} {
 		tycho::inform "Unable to place the file under revision\
-			control."
+			control, the error was: $output."
 		return 0
 	    }   
-	    $this checkOut
 	    $object reload 0	    
 	    return 0
 	}	    
