@@ -31,7 +31,7 @@
 #######################################################################
 
 #######################################################################
-#### Idoc
+#### IDoc
 # This class defines a combination of an HTML widget and a text widget
 # which will eventually be used for more efficient class browsing.
 #  
@@ -58,14 +58,14 @@
 # <tcl><pre>
 # catch {destroy .u}
 # ::tycho::Displayer .u
-# ::tycho::Idoc .u.i
+# ::tycho::IDoc .u.i
 # .u showView .u.i
 # .u centerOnScreen
-# .u.i configure -file  $TYCHO/lib/tydoc/test/Idoc.idoc
+# .u.i configure -file  $TYCHO/lib/tydoc/test/IDoc.idoc
 # .u.i reload
 # </tcl></pre>
 #
-class ::tycho::Idoc {
+class ::tycho::IDoc {
     inherit ::tycho::File
 
     ##########################################################################
@@ -112,7 +112,7 @@ class ::tycho::Idoc {
     ####                      protected variables                  ####
   
     # Current document description
-    protected variable myIdoc
+    protected variable myIDoc
  
     # Current class name and html description
     protected variable myClass
@@ -132,7 +132,7 @@ class ::tycho::Idoc {
     # Set the name of the current class.
     private method setClass {args}
     
-    # Display the contents of the myIdoc variable in text widget.
+    # Display the contents of the myIDoc variable in text widget.
     private method display {}
     
     # Verify that the argument is a properly formatted list.
@@ -144,7 +144,7 @@ class ::tycho::Idoc {
 # Parse the given X font to figure out what font family, size,
 # and style to use for the display font
 #
-configbody ::tycho::Idoc::headfont {
+configbody ::tycho::IDoc::headfont {
 
     set f $itk_option(-headfont)
     foreach panel [$myContents panels] {
@@ -158,7 +158,7 @@ configbody ::tycho::Idoc::headfont {
 # Parse the given X font to figure out what font family, size,
 # and style to use for the display font
 #
-configbody ::tycho::Idoc::bodyfont {
+configbody ::tycho::IDoc::bodyfont {
 
     set f $itk_option(-bodyfont)
     foreach label [$myContents labels] {
@@ -169,7 +169,7 @@ configbody ::tycho::Idoc::bodyfont {
 }
 ###################################################################
 #
-body ::tycho::Idoc::constructor {args} {
+body ::tycho::IDoc::constructor {args} {
 
     # Setup a frame for the HTML and contents widgets
     itk_component add mainFrame {
@@ -234,20 +234,20 @@ body ::tycho::Idoc::constructor {args} {
 ###########################################################################
 #### add
 # add a record to the array of lists which describes the current
-# idoc. myIdoc is arranged by type and contains a list of 
+# idoc. myIDoc is arranged by type and contains a list of 
 # name contents pairs
-body ::tycho::Idoc::add {type name contents} {
+body ::tycho::IDoc::add {type name contents} {
     # if it doesn't exist, lappend will still work
-    catch {set tmp [set myIdoc($type)]}
+    catch {set tmp [set myIDoc($type)]}
     lappend tmp "$name $contents"
-    set myIdoc($type) $tmp   
+    set myIDoc($type) $tmp   
 }
 
 ###########################################################################
 #### setClass
 # set the (single) name and HTML description of the current
 # class. Subsequent calls overwrite $myClass
-body ::tycho::Idoc::setClass {name html} {
+body ::tycho::IDoc::setClass {name html} {
     set myClass(name) $name
     set myClass(html) $html
 }
@@ -255,7 +255,7 @@ body ::tycho::Idoc::setClass {name html} {
 ###########################################################################
 #### display
 # display the contents of the myidoc variable in text widget
-body ::tycho::Idoc::display {} {
+body ::tycho::IDoc::display {} {
     
     # clear the contents widget
     $myContents clear
@@ -271,11 +271,11 @@ body ::tycho::Idoc::display {} {
     }
 
     # put in each type (Protected Method, etc.) by array order
-    foreach type [array names myIdoc] {
+    foreach type [array names myIDoc] {
 
         set subnames {}
 
-        foreach item [set myIdoc($type)] {
+        foreach item [set myIDoc($type)] {
             set name [lindex $item 0]
             set contents [lrange $item 1 end]
             
@@ -341,7 +341,7 @@ body ::tycho::Idoc::display {} {
 #### verifycontents
 # Verify that the argument is a properly formatted list.
 #
-body ::tycho::Idoc::verifycontents {contents} {
+body ::tycho::IDoc::verifycontents {contents} {
     if {$contents != {}} {
         if [catch {array set foo $contents}] {
             error "Contents are not formatted as a \
@@ -355,12 +355,12 @@ body ::tycho::Idoc::verifycontents {contents} {
 # Append the specified data to the existing display.
 # The data should be a list of items of the form <i>methodname args</i>,
 # where <i>methodname</i> is a method of this class (i.e. any class
-# derived from <code>Idoc</code>), and <i>args</i> is the
+# derived from <code>IDoc</code>), and <i>args</i> is the
 # set of arguments appropriate for that method.
 #
-body ::tycho::Idoc::insertData {data} {
+body ::tycho::IDoc::insertData {data} {
     if [getReadOnly] {bell; return}
-    catch {unset myIdoc}
+    catch {unset myIDoc}
     foreach command $data {
         if [catch {
             eval $this $command
@@ -377,7 +377,7 @@ body ::tycho::Idoc::insertData {data} {
 #########################################################################
 #### putHtml
 # Load a portion of HTML into the $myHtml widget
-body ::tycho::Idoc::putHtml {data} {
+body ::tycho::IDoc::putHtml {data} {
     $myHtml clear
     $myHtml insertData $data
 }
