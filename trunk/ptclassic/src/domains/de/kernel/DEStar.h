@@ -20,10 +20,6 @@ $Id$
 #include "Output.h"
 #include "Star.h"
 
-// The following is defined in DEScheduler.cc -- this forces that module
-// to be included if any DE stars are linked in.
-extern const char DEdomainName[];
-
 class PriorityQueue;
 
 	////////////////////////////////////
@@ -34,7 +30,7 @@ class DEStar : public Star {
 
 public:
 	// my domain
-	const char* domain() { return DEdomainName;}
+	const char* domain() const;
 
 	// Redefine method setting internal data in the Block
 	// so that various DE-specific initilizations can be performed.
@@ -76,10 +72,7 @@ protected:
 public:
 	// define the common start function for this class
 	// completionTime should be setup beforehand.
-	void start() {
-		feedbackOut.put(completionTime) << 0.0;
-		feedbackOut.sendData();
-	}
+	void start();
 
 	// constructor
 	DERepeatStar();

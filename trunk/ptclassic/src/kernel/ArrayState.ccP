@@ -25,6 +25,55 @@ $Id$
 
 **************************************************************************/
 
+// constructor
+<T>ArrayState :: <T>ArrayState (int size, <C>& fill_value) {
+	val = new <C> [nElements = size];
+	<C> * top = &(val[nElements]);
+	<C> * t = val;
+	while (t < top)
+		*t++ = fill_value;
+}
+
+// destructor
+<T>ArrayState :: ~<T>ArrayState () {delete[nElements] val;}
+
+// assignment operator
+<T>ArrayState &	<T>ArrayState :: operator = (const <T>ArrayState & v) {
+	if (this != &v) {
+		delete[nElements] val;
+		val  = new <C> [nElements = v.nElements];
+		<C>* top = &(val[nElements]);
+		<C>* t = val;
+		<C>* u = v.val;
+		while (t < top) *t++ = *u++;
+	}
+	return *this;
+}
+
+// size (not inline because it's virtual)
+int <T>ArrayState :: size() { return nElements;}
+
+// type (not inline because it's virtual)
+char* <T>ArrayState :: type() { return "<T>Array";}
+
+// the value as a string
+
+StringList <T>ArrayState :: currentValue() { 
+	StringList s; 
+	s =  "\n";
+	for(int i = 0; i<size(); i++) {
+		s += i;
+		s += " ";
+		s += val[i];
+		s += "\n";
+	} 
+	return s;
+}
+
+// clone
+State* <T>ArrayState :: clone() { return new <T>ArrayState;}
+
+// Parse initValue to set value
 void <T>ArrayState  :: initialize() {
 
 	<C> buf[MAXLEN];
@@ -90,6 +139,7 @@ ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn)
         else {t.tok = "ERROR"; return t;}
 	
 }
+
 
 // make knownstate entry
 static <T>ArrayState proto;

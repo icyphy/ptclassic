@@ -28,6 +28,16 @@ Methods for class Galaxy
 #include "Galaxy.h"
 #include "Block.h"
 
+// small virtual functions
+
+// atomic check
+int Galaxy :: isItAtomic () const { return FALSE;}
+
+// return myself as a galaxy
+Galaxy& Galaxy :: asGalaxy () const { return *this;}
+
+// destructor.  Not really do-nothing because members are deleted
+Galaxy :: ~ Galaxy () {}
 
 	////////////////////////////////////
 	// Galaxy::printRecursive()

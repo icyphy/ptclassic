@@ -33,3 +33,15 @@ Star :: printVerbose () {
         out += printStates("star");
 	return out;
 }
+
+// small virtual functions
+
+// default go does nothing
+void Star :: go () {}
+
+// return myself as a Star.
+Star& Star :: asStar () const { return *this;}
+
+// return my domain.  Should this be an error (if noone has redefined
+// this?)
+const char* Star :: domain () const { return "";}

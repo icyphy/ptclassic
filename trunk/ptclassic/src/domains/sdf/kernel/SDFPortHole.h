@@ -73,10 +73,10 @@ public:
 class InSDFPort : public SDFPortHole
 {
 public:
-	int isItInput () {return TRUE; }
+	int isItInput (); // {return TRUE; }
 
 	// Get Particles from input Geodesic
-	void beforeGo() {getParticle() ;}
+	void beforeGo();
 
         // Services of PortHole that are often used: 
         // setPort(dataType d); 
@@ -90,18 +90,18 @@ public:
 class OutSDFPort : public SDFPortHole
 {
 public:
-        int isItOutput () {return TRUE; }
+        int isItOutput (); // {return TRUE; }
 
 	void increment();
 
 	// Move the current Particle in the input buffer -- this
 	// method is invoked by the SDFScheduler before go()
-	void beforeGo() { clearParticle() ;}
+	void beforeGo();
 
 	// Put the Particles that were generated into the
 	// output Geodesic -- this method is invoked by the
 	// SDFScheduler after go()
-	void afterGo() { putParticle() ;}
+	void afterGo();
 
         // Services of PortHole that are often used: 
         // setPort(dataType d); 
@@ -135,7 +135,7 @@ public:
  
 class MultiInSDFPort : public MultiSDFPort {
 public:
-        int isItInput () {return TRUE; }
+        int isItInput (); // {return TRUE; }
  
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
@@ -150,7 +150,7 @@ public:
 
 class MultiOutSDFPort : public MultiSDFPort {     
 public:
-        int isItOutput () {return TRUE; }
+        int isItOutput (); // {return TRUE; }
 
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();

@@ -31,16 +31,16 @@ public:
 	// User supplied method.
 	// Run the simulation, accessing Particles on the
 	// input PortHoles, generating Particles on the output PortHoles
-        virtual void go() {}; 
+        virtual void go();
 
 	// Method to print out description
 	StringList printVerbose ();
 
 	// Return myself as a Star.  Overrides Block::asStar.
-	Star& asStar() const { return *this;}
+	Star& asStar() const;
 
 	// Return my domain (e.g. SDF, DE, etc.)
-	virtual const char* domain() { return "";}
+	virtual const char* domain() const;
 };
 
 #endif

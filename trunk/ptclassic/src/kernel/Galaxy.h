@@ -99,6 +99,8 @@ protected:
 	// support blockWithName message to access internal block list
 	Block* blockWithName (const char* name) {return blocks.blockWithName(name);}
 
+	// destructor
+	~Galaxy ();
 public:
 
 	// system initialize method.  Derived Galaxies should not
@@ -128,10 +130,10 @@ public:
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
-	virtual int isItAtomic () const {return FALSE;}
+	virtual int isItAtomic () const; // {return FALSE;}
 
 	// Return myself as a Galaxy.  Overrides Block::asGalaxy.
-	Galaxy& asGalaxy() const { return *this;}
+	Galaxy& asGalaxy() const; // { return *this;}
 };
 
 
