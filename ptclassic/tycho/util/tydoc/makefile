@@ -43,6 +43,7 @@ include $(CONFIG)
 
 # The variables below are used to create distributions
 TYPACKAGE = 	tycho.util.tydoc
+TYPACKAGE_ROOTDIR = $(ROOT)/..
 TYPACKAGE_DIR = tycho/util/tydoc
 # If you change JVERSION, modify the version numbers in tydoc.tcl
 TYVERSION =	2.0
