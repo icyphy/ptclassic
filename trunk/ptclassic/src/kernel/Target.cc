@@ -296,11 +296,17 @@ char* Target::writeFileName(const char* fileName) {
 	return savestring("/dev/null");
 }
 
-// Small virtual functions
+// Small virtual functions with dummy implementations
 void Target::beginIteration(int,int) {}
 void Target::endIteration(int,int) {}
 void Target::writeFiring(Star&,int) {}
 void Target::genLoopInit(Star&,int) {}
 void Target::genLoopEnd(Star&) {}
+void Target::beginIf(PortHole&,int,int,int) {}
+void Target::beginElse(int) {}
+void Target::endIf(int) {}
+void Target::beginDoWhile(int) {}
+void Target::endDoWhile(PortHole&,int,int) {}
+
 const char* Target::className() const {return "Target";}
 ISA_FUNC(Target,Block);
