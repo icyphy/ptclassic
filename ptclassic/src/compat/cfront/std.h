@@ -33,7 +33,7 @@
 #include <sys/unistd.h>
 #include "../../kernel/miscFuncs.h"
 inline long random() { return lrand48();}
-inline void srandom(int seed) { srandom(seed);}
+inline void srandom(int seed) { srand48(seed);}
 #else
 // Sun
 #include <stdlib.h>

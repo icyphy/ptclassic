@@ -8,11 +8,11 @@
 
 #ifdef hppa
 #ifndef __GNUG__
-extern "C" void srand(unsigned);
+extern "C" void srand48(long int);
 
 class ACG {
 public:
-	ACG(unsigned seed = 1) {srand(seed);}
+	ACG(unsigned seed = 1) {srand48(seed);}
 };
 #endif /* !__GNUG__ */
 #else /* hppa */
