@@ -146,8 +146,9 @@ end
 foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
-	cg56/dsp cg96/dsp sdf/contrib sdf/dsp sdf/image sdf/matrix \
-	sdf/atm mdsdf/tcltk de/atm cg/multiScheduler $EXPEXTRAS )
+	cg56/dsp cg96/dsp \
+	sdf/atm sdf/contrib sdf/dsp sdf/image sdf/matrix \
+	mdsdf/tcltk de/atm cg/multiScheduler $EXPEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
@@ -164,9 +165,9 @@ cd ../..
 # everything must have two slashs (be three levels down)
 
 foreach x ( cg56/dsp/stars cg96/dsp/stars \
+	sdf/atm/kernel sdf/atm/stars sdf/contrib/stars \
 	sdf/dsp/stars sdf/image/kernel sdf/image/stars sdf/tcltk/stars \
 	sdf/matrix/stars \
-	sdf/atm/kernel sdf/atm/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
