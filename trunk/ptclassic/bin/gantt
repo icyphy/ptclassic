@@ -13,4 +13,4 @@ if ( ! $?ARCH ) then
     setenv ARCH `$PTOLEMY/bin/arch`
 endif
 
-$PTOLEMY/bin.$ARCH/gantt $*
+exec $PTOLEMY/bin.$ARCH/gantt $*
