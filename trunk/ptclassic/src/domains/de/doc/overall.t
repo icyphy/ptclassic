@@ -224,7 +224,7 @@ realize a general DE star
 \fIDelay-star\fRs are in charge of time-management task
 in the \*(DO domain.  
 We can classify the delay-stars
-further into two types:  \fIpure-delay\fr, and \fIserver\fR. 
+further into two types:  \fIpure-delay\fR, and \fIserver\fR. 
 A \fIpure-delay\fR type delay star generates an output
 with the same value as the input sample but with a time stamp that 
 is greater than that of the input sample.  The difference
