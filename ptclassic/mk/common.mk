@@ -55,7 +55,7 @@ whatToBuild:	all
 .SUFFIXES:	.o .cc .h .pl .chdl .is
 
 # Include rules for compiling C and C++ code, building libraries, etc.
-include $(ROOT)/mk/compilation.mk
+include $(ROOT)/mk/compile.mk
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
