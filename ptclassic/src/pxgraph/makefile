@@ -1,0 +1,102 @@
+# Ptolemy-style makefile for pxgraph
+# This is a Ptolemy version of xgraph, where the only difference is that
+# it accepts binary input if you use the -binary command line switch.
+# Version identification:
+# @(#)make.template	1.19	06 Oct 1996
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+# Root of Ptolemy directory
+ROOT=../..
+# Where we are
+VPATH = ../../src/pxgraph
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
+ st.o params.o
+
+SRCS = $(OBJS:.o=.c)
+HDRS = dialog.h hard_devices.h params.h plotter.h st.h xgout.h xgraph.h xtb.h
+
+all:	makefile pxgraph
+
+# Use the $(LINKER) so the binary is statically linked for distribution.
+# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
+# here.
+pxgraph:	$(OBJS)
+	rm -f pxgraph
+	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+
+pxgraph.debug:	$(OBJS)
+	rm -f pxgraph
+	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+
+
+OUT = $(BINDIR)/pxgraph
+
+$(OUT):	pxgraph
+	rm -f $(OUT)
+	ln pxgraph $(OUT)
+
+install:	makefile $(OUT)
+
+.c.o:
+	$(CC) $(CFLAGS) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC) -c $<
+
+# "make clean" removes .o files and other cruft
+clean:
+		rm -f *.o core *~ *.bak *#
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+# Don't add pxgraph.htm, since rman might not be built yet
+sources:	$(SRCS) $(HDRS) make.template #pxgraph.htm
+
+# Convert to html using rman
+pxgraph.htm: pxgraph.man
+	nroff -man $^ | rman -f HTML > $@
+
+
+depend:
+		cd $(VPATH); \
+		$(DEPEND) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC) $(SRCS)|cat make.template - > makefile.n;\
+		mv -f makefile.n makefile
+
+makefile:	make.template
+		cd $(VPATH); $(MAKE) -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Rule for detecting junk files
+checkjunk:
+	@checkextra -v $(SRCS) $(HDRS) $(OBJS) \
+		ORIGINAL README.ANNOUNCE README.GENERAL README.HARDCOPY \
+		README.INSTALL TAGS bitmaps examples pxgraph.man \
+		makefile make.template SCCS
+
+sccsinfo:
+		sccs info
