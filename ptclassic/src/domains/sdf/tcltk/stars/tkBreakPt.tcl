@@ -23,11 +23,11 @@ proc goTcl_$starID {starID} {
 	if { [expr [set ${starID}(condition)] ] } {
 	    # Break point has been reached
 	    # implement the action defined in the break point script
-	    set script [set ${starID}(Optional_Script_File)] 
-	    if { ([string length $script] > 0) && [file readable $script] } {
-		source [ptkExpandEnvVar $script]
+	    set script [set ${starID}(Optional_Alternate_Script)] 
+	    if { ([string length $script] > 0) } {
+		eval $script
 	    } else {
-		# No readable file passed:  Default Pause Script. Pause the run
+		# No readable script passed:  Default Script: Pause the run
 		# Highlight myself
 	 	ptkHighlight [set ${starID}(fullName)] 
 		# Put explanation in the control window
@@ -37,12 +37,7 @@ proc goTcl_$starID {starID} {
 		    # make overall, text, and entry frames
 		    frame $s.brpt
 		    frame $s.brpt.e
-		    # check if we got here through an unreadable file
-		    if { ([string length $script] > 0) } {
-		        set messtext "Warning: file $script unreadable - running default"
-		    } else {
-			set messtext "Break Point:"  
-		    }
+		    set messtext "Break Point:"  
 		    # labels are used to get a matching font to control panel
 		    label $s.brpt.m1 -text $messtext
 		    label $s.brpt.m2 -anchor w -text \
