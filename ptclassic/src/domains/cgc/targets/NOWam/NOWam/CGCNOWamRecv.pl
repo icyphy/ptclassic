@@ -72,9 +72,13 @@ typedef union ints_or_double {
 #endif
 	}
 	codeblock (ipcHandler) {
-void $starSymbol(ipc_handler)(void *source_token, void *buf, int nbytes, int d1, int d2, int d3, int d4)
+void $starSymbol(ipc_handler)(void *source_token, int d1, int d2, int d3, int d4)
 {
-        memcpy((void *)&$starSymbol(RecvData), buf, nbytes);
+	convert temp;
+
+	temp.asInt[0] = d1;
+	temp.asInt[1] = d2;
+	$starSymbol(RecvData) = temp.asDouble;
 }
 	}
         codeblock (errorHandler) {
