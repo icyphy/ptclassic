@@ -189,20 +189,21 @@ char* galPortName;		/* name of galaxy port */
 #define C_EXECTIME 1
 #define C_WRAPUP 2
 #define C_INITCODE 3
-#define C_DEST 4
-#define C_SETUP 5
-#define C_GO 6
+#define C_BEGIN 4
+#define C_DEST 5
+#define C_SETUP 6
+#define C_GO 7
 
 
-#define N_FORMS 7
+#define N_FORMS 8
 char* codeBody[N_FORMS];		/* code bodies for each entity */
 int inlineFlag[N_FORMS];		/* marks which are to be inline */
 char destNameBuf[MEDBUFSIZE];		/* storage for destructor name */
 
 /* types and names of standard member funcs */
-char* codeType[] = {"","int ","void ","void ","","void ","void "};
+char* codeType[] = {"","int ","void ","void ","void ","","void ","void "};
 char* codeFuncName[] = {
-"","myExecTime","wrapup","initCode",destNameBuf,"setup","go"};
+"","myExecTime","wrapup","initCode","begin",destNameBuf,"setup","go"};
 
 int methKey;			/* signals which of the standard funcs */
 
@@ -226,7 +227,7 @@ typedef char * STRINGVAL;
 %token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT INOUT ACCESS
 %token INMULTI OUTMULTI INOUTMULTI
-%token TYPE DEFAULT CLASS SETUP GO WRAPUP CONNECT ID
+%token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
@@ -363,6 +364,7 @@ stdmethkey:
 stdkey2:
 	CONSTRUCTOR			{ methKey = C_CONS;}
 |	DESTRUCTOR			{ methKey = C_DEST;}
+|	BEGIN				{ methKey = C_BEGIN;}
 |	SETUP				{ methKey = C_SETUP;}
 |	GO				{ methKey = C_GO;}
 |	WRAPUP				{ methKey = C_WRAPUP;}
@@ -634,7 +636,7 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
 |INPUT|OUTPUT|INOUT|INMULTI|OUTMULTI|INOUTMULTI
 |TYPE
-|DEFAULT|SETUP|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
+|DEFAULT|BEGIN|SETUP|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
 |EXPLANATION|START
 |SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE|STATIC
@@ -1521,6 +1523,7 @@ struct tentry keyTable[] = {
 	"attrib", ATTRIB,
 	"attributes", ATTRIB,
 	"author", AUTHOR,
+	"begin", BEGIN,
 	"ccinclude", CCINCLUDE,
 	"class", CLASS,
 	"code", CODE,
