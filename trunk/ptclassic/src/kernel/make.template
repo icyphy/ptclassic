@@ -11,27 +11,21 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
+# Root of Ptolemy directory
+ROOT=../..
+# Where we are
 VPATH = ../../src/kernel
-GPPFLAGS = -g
-GNU = g++
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
 
-# need gcc, not cc, to build gnulib3a
-CC = gcc
-
-# Rule for compiling with g++
+# Rule for compiling with C++ programs
 .SUFFIXES: .cc
 .cc.o:
 	$(GNU) $(GPPFLAGS) -c  $<
 
-# Root of Ptolemy directory
-ROOT=../..
-
-# Where to install the libraries
-DESTDIR=$(ROOT)/lib.$(ARCH)
-
-# Where to install the help file(s).  This MUST be an absolute path
-# or the (help) interpreter command will not work.
-HELPDIR=~ptolemy/lib
+# need gcc, not cc, to build gnulib3a
+CC = gcc
 
 # Library name
 LIB=libptolemy.a
@@ -94,7 +88,8 @@ LIBCCSRCS=$(CCS_WITH_H_FILES) \
  expandPath.cc
 
 # .c sources used in the library.
-LIBCSRCS=gnulib3a.c
+# (depending on particular configuration, CONSTRUCTOR_HACK may be empty)
+LIBCSRCS=$(CONSTRUCTOR_HACK)
 
 LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 # All sources.
@@ -129,16 +124,16 @@ $(LIB):	$(LIBOBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(DESTDIR)/$(LIB) $(DESTDIR)/interpmain.o
+install:	makefile $(LIBDIR)/$(LIB) $(LIBDIR)/interpmain.o
 
-$(DESTDIR)/$(LIB):	$(LIB)
-		rm -f $(DESTDIR)/$(LIB)
-		cp $(LIB) $(DESTDIR)
-		ranlib $(DESTDIR)/$(LIB)
+$(LIBDIR)/$(LIB):	$(LIB)
+		rm -f $(LIBDIR)/$(LIB)
+		cp $(LIB) $(LIBDIR)
+		ranlib $(LIBDIR)/$(LIB)
 
-$(DESTDIR)/interpmain.o:	interpmain.o
-		rm -f $(DESTDIR)/interpmain.o
-		cp interpmain.o $(DESTDIR)
+$(LIBDIR)/interpmain.o:	interpmain.o
+		rm -f $(LIBDIR)/interpmain.o
+		cp interpmain.o $(LIBDIR)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -149,7 +144,7 @@ sources:	$(SRCS) $(HDRS) make.template XDomain.ccP
 
 depend:
 		cd $(VPATH); \
-		g++ -MM $(SRCS) | cat make.template - > makefile.n; \
+		$(DEPEND) $(SRCS) | cat make.template - > makefile.n; \
 		mv -f makefile.n makefile
 
 makefile:	make.template
