@@ -1,4 +1,4 @@
-/* transport.h:  Macros for transport.c
+/* transport.h:  Macros for transport.c */
 /******************************************************************
 Version identification:
 $Id$
