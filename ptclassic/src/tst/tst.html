@@ -1,13 +1,13 @@
 <html>
 <head>
-<title>Ptolemy test Bed</title>
+<title>Ptolemy test Suite</title>
 </head>
 <body>
 
-<H1>Ptolemy Test Bed</H1>
+<H1>Ptolemy Test Suite</H1>
 Last Modified: %D%
 
-<H2>Overview of the Ptolemy test bed</H2>
+<H2>Overview of the Ptolemy test suite</H2>
 
 There are several different levels of testing that can be done:
 <OL>
@@ -43,14 +43,16 @@ There are several different levels of testing that can be done:
 all the demos from the graphical interface</H2>
 
 	This test is run by hand, and is not directly part of the
-	Ptolemy test bed.  One trick is to run a script that kills any
-	windows that are brought up.  $PTOLEMY/src/tst/killpxgraph
+	Ptolemy test suite.  One trick is to run a script that kills any
+	windows that are brought up.
+	<CODE>$PTOLEMY/src/tst/sbin/killpxgraph</CODE>
 	will run ps and kill pxgraph, xedit and xv processes that
 	start up.
 
 	 <P>Here's the general idea:
 	<OL>
-	<LI> Start up killpxgraph: <CODE>$PTOLEMY/src/tst/killpxgraph &</CODE>
+	<LI> Start up killpxgraph:
+	<CODE>$PTOLEMY/src/tst/sbin/killpxgraph &</CODE>
 
 	<LI> Start up pigi, and when then bring up the Ptolemy menu by
 	depressing shift and the middle-mouse button.  The select the
@@ -81,7 +83,7 @@ all the demos from the graphical interface</H2>
 
 	<CODE>$PTOLEMY/src/tst/incLink</CODE>
 	 contains an incremental linking
-	testsuite.  You can run it by cding to
+	test suite.  You can run it by cding to
 	<CODE>$PTOLEMY/obj.$PTARCH/tst/incLink</CODE>
 	and typing <CODE>make test</CODE>.
 
@@ -90,17 +92,44 @@ all the demos from the graphical interface</H2>
 <H2><A NAME="Run most of the demos with out windows"></A>Run most of
 	the demos with out windows</H2>
 
-	<CODE>$PTOLEMY/src/tst</CODE> contains a testbed that will run
+	<CODE>$PTOLEMY/src/tst</CODE> contains a test suite that will run
 	many of the demos and compare the results against known results.
 	The <CODE>$PTOLEMY/MAKEARCH</CODE> script will produce a directory
 	tree under $PTOLEMY/obj.$PTARCH/tst if $PTOLEMY/src/tst is
 	present when <CODE>MAKEARCH</CODE> is run
 	
-	 <P>Running this testbed is similar to doing a run-all-demos
+	 <P>Running this test suite is similar to doing a run-all-demos
 	as above, but you don't need the window system running.
 	However, not all demos are run.  We use Kennard White's
 	<CODE>oct2ptcl</CODE> program to translate oct facets to ptcl
 	scripts.
+
+	 <P>As of early April, 1996, the test suite only runs the simulation 
+	domains.  The test suite consists of about 150 different universes which
+	use about 350 different galaxies and stars.  
+
+	 <P>Running the demos with ptcl is quite a bit faster than
+	using pigiRpc and run-all-demos. On a Sparc20/712, the
+	the test suite takes about 15 minutes to run, and can be run on
+	multiple machines without user intervention.  To do a run-all-demos
+	with pigi for roughly the same set of demos takes about 23 minutes.
+	(Of course, the test suite does not verify all demo output yet, but it
+	will be able to verify more.  See the bugs section below).
+
+	 <P>When <CODE>tycho</CODE> is further along, it would be
+	really nice if we had a more integrated test suite.  However,
+	I felt that I could not wait, so I developed this rough cut of
+	a test suite.
+
+	 <P>I considered using <CODE>dejagnu</CODE>, but
+	<CODE>dejagnu</CODE> is primarily for testing tools that where
+	you type things at them, and then get output.  Since we have
+	ptcl as a scripting language, we don't really need all of
+	<CODE>dejagnu</CODE>.  Also, I wanted to perturb the Ptolemy
+	system as little as possible, so I wanted pxgraph to run as a
+	separate process, rather than introducing lots of test suite
+	specific graphing stars.
+
 
 <H4>Oct2tpcl limitations</H4>
 
@@ -264,6 +293,10 @@ all the demos from the graphical interface</H2>
 	<LI> If there are two universes in the same palette that have
 	xgraph stars with the same titles, then the data can get mangled.
 	The solution is to change the titles of the graphs.
+
+	<LI> The test suite only handles simulation domains, and not code
+	generation domains.
+
 	</MENU>
 	
 <HR>
