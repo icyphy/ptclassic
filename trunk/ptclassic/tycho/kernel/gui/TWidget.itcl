@@ -205,13 +205,19 @@ body ::tycho::TWidget::busy {args} {
 # reverting to the value decided by the preferences manager -- that
 # is, setting options with this method "overrides" the preferences.
 #
+# This is actually rather slow, since every time a megawidget
+# creates a component that is a megawidget, this method
+# will get called from within the keep{} and rename{}
+# statements. To speed it up, we should keep a record of which
+# options have been subscribed and which haven't...
+#
 body ::tycho::TWidget::configure {args} {
     set temp {}
     foreach {option arg} $args {
  	lappend temp $option
     }
     if { $temp != "" } {
- 	eval ::tycho::preference unsubscribeoptions $this $args
+ 	eval preference unsubscribeoptions $this $temp
     }
     eval ::itk::Archetype::configure $args
 }
