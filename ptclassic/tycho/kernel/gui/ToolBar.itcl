@@ -267,25 +267,67 @@ body ::tycho::ToolBar::enable {tag} {
 # <li>a command to execute when &lt;Return&gt; is typed in the widget,
 # <li>additional arguments to pass to the Tk entry command.
 # </ul>
+# NEW: By default, the entry will replace an entire line with a
+# Tk <b>label</b> and an entry box. But if the argument contains 
+# "-command {any_cmd_here}", the entire line will be a
+# Tk <b>button</b> and an entry box.
+# <br><br>
 # The entry widget has a "click to focus" model.  When the user types
 # a return in the widget, the contents of the entry box are appended
 # to the specified command, which is then invoked.
 #
 body ::tycho::ToolBar::entry {tag label default command args} {
-    # The label.
-    itk_component add label_$tag {
-        # added eval and \" \"
-        eval label $itk_component(entrysite).label_$tag -text "\"$label\"" \
-                $args
-    } {
-        keep -background -cursor -font
-	rename -foreground labelcolor labelColor LabelColor
+    # Preprocess the arguments (overloading arguments):
+    # -command goes to button only
+    # -foreground goes to button and label
+    # Rest go to label (ie. textvariable, etc)
+    set buttonarg {}
+    set labelarg $args
+
+    # Take care of command
+    if {[regexp {(.*)(\-command {.*})(.*)} $labelarg match pre1 cmd pre2]} {
+        set buttonarg " $cmd"
+        set labelarg "$pre1 $pre2"
+    }
+    # Take care of foreground
+    if {[regexp {(.*)(\-foreground [^ \n\\]+)(.*)} \
+            $labelarg match pre1 color pre2]} {
+        append buttonarg " $color"
+    }
+    puts "debug buttonarg: $buttonarg"
+    puts "debug labelarg: $labelarg"
+        
+    # Check to see if the programmer intended a label or a button.
+    # If the programmer used -command, then intention is button.
+    # Otherwise, it's a normal label.
+    if {[regexp {(.*)\-command {(.*)}(.*)} $args]} {
+        # if -command exists, then we want a button
+        itk_component add label_$tag {
+            # added eval and \" \"
+            eval ::button $itk_component(entrysite).label_$tag \
+                    -text {$label} -relief flat $buttonarg
+        } {
+            keep -background -cursor -font
+            rename -foreground labelcolor labelColor LabelColor
+        }
+        # Extract the command, pass the rest of args to entry
+    } else {
+        # if no -command, we just want a regular label
+        itk_component add label_$tag {
+            # added eval and \" \"
+            eval ::label $itk_component(entrysite).label_$tag \
+                    -text {$label} $labelarg
+        } {
+            keep -background -cursor -font
+            rename -foreground labelcolor labelColor LabelColor
+        }
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
+
     
     itk_component add tag_$tag {
         eval ::entry $itk_component(entrysite).tag_$tag \
-                -relief sunken $args
+                -relief sunken $labelarg
     } {
         rename -background -entrybackground \
                 entryBackground EntryBackground
