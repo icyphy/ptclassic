@@ -29,14 +29,14 @@
 ##########################################################################
 
 
-DIRS = bin doc kernel
+DIRS = kernel #bin doc 
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		echo making $@ in tycho/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/tycho/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \
 	done
@@ -47,8 +47,7 @@ TAGS:
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		echo making $@ in tycho/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../src/tycho/$$x $@ ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ; \
 		) \
 	    fi ; \
 	done
