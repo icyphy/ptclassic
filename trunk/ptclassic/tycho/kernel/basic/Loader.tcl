@@ -61,7 +61,7 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
     global PTOLEMY env TYCHO
 
     # "info procs" does not work in itcl, so we use "info which"
-    if {[info which -command $command] == {}} {
+    if {[infoWhichCommand $command] == {}} {
         # Command is not loaded.  Load it.
 	if [catch {package require $package} errMsg] {
 
@@ -171,7 +171,7 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
 		}
 
 		load $loadLibPath
-		if {[info which -command $command] != {}} {
+		if {[infoWhichCommand $command] != {}} {
 		    # We loaded the command so exit the while loop
 		    break
 		}
