@@ -92,7 +92,9 @@ and you will need to update your path.
 <ol>
 
 <LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
-tar file and ungzip and untar the files
+tar file from
+<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html</CODE></a>
+ and ungzip and untar the files
 <PRE>
 tar -ztvf pt0.7.1.src.tar.gz
 tar -ztvf pt0.7.1.other.src.tar.gz
@@ -153,62 +155,22 @@ the Cygwin32 version does.
 have problems with configuring Itcl. Instead use the <CODE>mount</CODE>
 command as above.
 
-<li> Building Itcl2.2:
+<li> To build Octtools, you will need to unset the <CODE>LIB</CODE>
+environment variable:
+<pre>
+unset LIB
+</pre>
 
-<menu>
- <li> The Itcl2.2 sources included in the Ptolemy <CODE>other.src</CODE>
- file have a few modifications necessary for building under NT
- with Cygwin32.  Download that tar file and untar it.
+<li> In the System control panel, set the <CODE>CC</CODE>
+environment variable to <CODE>gcc</CODE>.  If you don't then
+you will get errors while configuring Itcl.
 
- <li> In the System control panel, set the <CODE>CC</CODE>
- environment variable to <CODE>gcc</CODE>.  If you don't then
- you will get errors while configuring.  
- <li> Run
- <pre>
- cd $PTOLEMY/src/tcltk/itcl2.2
- configure --enable-gcc --disable-load --host=i586-CYGWIN32-NT40
- make
- make install
- </pre>
- Below are the changes that were made for Itcl2.2:
- <menu>
- <li> If <CODE>tclEnv.c</CODE> fails to compile with messages about
- <CODE>environ</CODE>, then edit <CODE>tcl7.6/generic/tclPort.h</CODE>.
- Change:
- <pre>
-#if defined(__WIN32__) || defined(_WIN32)
- </pre>
- to
- <pre>
-#if (defined(__WIN32__) || defined(_WIN32)) &amp;&amp; !defined(__CYGWIN32__)
- </pre>
- The above change also needs to be made to 
- <CODE>tk4.2/generic/tkPort.h</CODE> and <CODE>tk4.2/generic/default.h</CODE>
+<li> To do the actual build, do
+<pre>
+cd $PTOLEMY
+make -k everything &gt;&amp; make.out
+</pre>
 
- <li> <CODE>tclUnixTime.c</CODE> fails to compile with messages about
- <CODE>timezone</CODE>.
-  <br>My fix was to edit <CODE>tcl7.6/unix/Makefile</CODE>
- and change <CODE>-DHAVE_TIMEZONE_VAR</CODE> to
- <CODE>-DHAVE_GETTIMEOFDAY</CODE>.
- The real fix was to modify <CODE>configure.in</CODE> so that we
- run the timezone code instead of just compiling it.
-
- <li> Messages at link time about multiple definitions of <CODE>-lc</CODE>
-  <br>Fixed by editing <CODE>tcl7.6/unix/Makefile</CODE> and commenting
- out <CODE>-lc</CODE>
-
- <li> <CODE>unix/tclUnixFCmd.c</CODE>: <CODE>mkinfo()</CODE>
- does not exist.
- <pre>
-    if (/*mkfifo(dst, srcStatBuf.st_mode)*/ -1 &lt; 0) {
- </pre>
-
-  <li> <CODE>unix/tclUnixNotfy.c</CODE>: fix to <CODE>MaskEmpty</CODE>
-The problem was that typing <CODE>R</CODE> to run a Universe never
-brought up the Run Control panel.
-Jan Nijtmans posted a patch to <CODE>comp.lang.tcl</CODE> on 12/18/1996.
- </menu>
- </menu>
 </ol>
 
 <HR>
