@@ -298,7 +298,7 @@ Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 #else // USE_SHLLOAD
 
   for (int i = 1; i < argc; i++) {
-    const char* fullObjName = expandPathName(argv[i]);
+    const char* fullObjName = argv[i];
 
     // If this is a permlink, then save the filenames for later
     if ( permlinkFiles.length() == 0 ) {
