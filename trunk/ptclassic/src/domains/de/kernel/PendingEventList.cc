@@ -50,9 +50,6 @@ PendingEventList::PendingEventList() {}
 
 PendingEventList::~PendingEventList() {
 	initialize();
-	// FIXME: assert( size() != 0 ); 
-	// FIXME: This is only here for testing but 
-        // currently it causes a seg fault.
 }
 
 Link * PendingEventList::appendGet( CqLevelLink * obj ) 
