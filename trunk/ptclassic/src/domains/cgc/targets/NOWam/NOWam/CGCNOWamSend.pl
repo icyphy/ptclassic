@@ -212,6 +212,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addGlobal("#define HARDPORT 61114\n", "hardPort");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
+		addInclude("<thread.h>");
 		addInclude("<udpam.h>");
 		addInclude("<am.h>");
 		addCompileOption(
@@ -244,7 +245,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
 		myData = $ref(input,pos);
-                check = AM_Request4(endpoint, $val(hostAddr), 2, myData, 0, 0, 0);      
+                check = AM_Request4($starSymbol(endpoint), $val(hostAddr), 2, myData, 0, 0, 0);      
 		if (check == -1) {
 			printf("Error in sending data\n");
 		}
