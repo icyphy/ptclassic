@@ -1,7 +1,7 @@
 # Makefile for Ptolemy Tycho system, kernel directory.
 #
 # $Id$
-# Authors: E. A. Lee, Christopher Hylands
+# Authors: E. A. Lee, Christopher Hylands, Jose Luis Pino
 #
 # Copyright (c) 1991-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -46,18 +46,15 @@ VPATH =		$(ROOT)/src/tycho/kernel
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# Directory containing the [incr Tcl] extensions to Tcl
+-include override.mk
 
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = $(ROOT)/src/ptklib
 
-INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
+INCL = 		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
 		-I$(ITCL_INCDIR) -I$(TCL_INCDIR) -I$(ROOT)/src/kernel \
 		-I$(ROOT)/src/compat/ptolemy
-
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
 
 # For development period, disable optimization
 OPTIMIZER=
@@ -75,7 +72,6 @@ SRCS = \
   SetSigHandle.cc \
   SigHandle.cc
 
-
 # Header files
 HDRS = \
   BarGraph.h \
@@ -88,7 +84,7 @@ HDRS = \
   XYPlot.h \
   SetSigHandle.h \
   SigHandle.h 
-  
+
 # Used by make checkjunk
 OTHERSRCS = \
   README
@@ -98,41 +94,27 @@ OBJS =		$(SRCS:.cc=.o)
 
 LIB =		libtycho.$(LIBSUFFIX)
 
-# Set up definitions for ptbin.mk
-BASENAME = 	tycho
-SPECIAL_LIBS =	-L./ -ltycho -lptcl -lptk -lptolemy -lgantt
-# We always depend on libptolemy, so there is no need to add it
-SPECIAL_LIBS_DEPENDS = 	$(LIBDIR)/libptcl.$(LIBSUFFIX) \
-			$(LIBDIR)/libptk.a \
-			$(LIBDIR)/libgantt.$(LIBSUFFIX)
-NEED_PALETTES = no
-NEED_HOF =	yes
-NEED_GRAPHICS =	yes
-MAIN =		
-MAIN_DEPEND =	$(LIB)
+ifndef BASENAME
+ifndef PIGI
+	ALLBINARIES=1
+	BASENAME=tycho
+endif
+endif
 
-# all rule must be before ptbin.mk
-all:	makefile $(LIB) tycho
+TK = 1
 
-# Include variables and rules common to all binaries
+ADD_SRCS=version.$(PIGI).c
+
+PIGI_OBJS = -L./ -ltycho -lptcl version.$(PIGI).o
+
+INSTALL = $(LIBDIR)/$(LIB)
+ 
 include $(ROOT)/mk/ptbin.mk
-
-# Allow for user specified overriding definitions.  Do not declare
-# any variables after this command.  GNU make's earlier that 3.71 may
-# print a warning message.
--include override.mk
-
-# "make install" puts things in the official place
-# FIXME: For now, we just make ptiny
-install:	$(BINDIR)/tycho.ptiny $(LIBDIR)/$(LIB)
-
-# FIXME: For now, we just make ptiny
-$(BINDIR)/tycho.ptiny:	tycho.ptiny
-		rm -f $(BINDIR)/tycho.ptiny
-		ln tycho.ptiny $(BINDIR)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
+
+all:	makefile $(LIB) $(PIGI)
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
