@@ -69,7 +69,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "vov.h"
 
 extern char *ctime();
+#if !defined(PTALPHA) && !defined(PTHPUX10)
 extern long time();
+#endif
 
 extern int octIdCmp(), octIdHash();
 
