@@ -56,7 +56,7 @@ class ::tycho::TWidget {
     method busy {args}
 
     # Invoke a command on the context-sensitive popup menu.
-    method contextmenu {args}
+    method contextmenu {cmd args}
 
     # Give the window or a subwindow the focus and set the menu bar (if any).
     method focusin {}
@@ -91,6 +91,9 @@ class ::tycho::TWidget {
     # Access the preferences associated with this widget -- override
     # to get different preferences.
     protected method preference {mode args}
+
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
 
     ###################################################################
     ####                         protected variables               ####
@@ -191,10 +194,23 @@ body ::tycho::TWidget::busy {args} {
 # Menubar, and return whatever is returned by the command.  Otherwise,
 # return an empty string.
 #
-body ::tycho::TWidget::contextmenu {args} {
-    if {$myContextmenu != {}} {
-        return [eval $myContextmenu $args]
-    } {
+# The command "create" is treated as a special case:
+# the context menu is created. The second argument, if present.
+# is the widget to add the binding for posting the menu. When the
+# menu is posted, the method configureContextMenu{} is called.
+#
+body ::tycho::TWidget::contextmenu {cmd args} {
+    if { $cmd == "create" } {
+	set myContextmenu [::tycho::PopupMenu .#auto \
+		-command "@scope [info class] \
+		    [list $this configureContextMenu]"]
+	if { $args != "" } {
+	    bind [lindex $args 0] <Button-3> \
+		    "$this contextmenu post %X %Y"
+	}
+    } elseif {$myContextmenu != {}} {
+        return [eval $myContextmenu $cmd $args]
+    } else {
         return {}
     }
 }
@@ -271,6 +287,25 @@ body ::tycho::TWidget::setClipboard {text} {
 #####################################################################
 #####################################################################
 ####                   protected methods                         ####
+
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context. By default, this
+# menu simply contains an entry that offers information about
+# the widget.
+#
+# Subclasses that create a context menu (by calling "contextmenu create"
+# on themselves) should override this method.
+#
+body ::tycho::TWidget::configureContextMenu {} {
+    # Clear the menu
+    contextmenu clear {Open documentation}
+
+    # Entries for developer information
+    # FIXME: could be much more useful
+    contextmenu add {Name of this widget...} -command \
+	    "::tycho::post $this"
+}
 
 #####################################################################
 #### safeEval
