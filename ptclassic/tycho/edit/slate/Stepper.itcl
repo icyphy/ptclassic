@@ -126,16 +126,16 @@ class ::tycho::Stepper {
 # of the step size.
 #
 body ::tycho::Stepper::click {x y args} {
-	# Initialize the "actual" variables according to mode
-	if { $gridded } {
-   		set actualX [roundTo $x $stepsize]
-    	set actualY [roundTo $y $stepsize]
-	} else {
-	    set actualX $x
-	    set actualY $y
-	}
-	
-	# Forward the click
+    # Initialize the "actual" variables according to mode
+    if { $gridded } {
+        set actualX [roundTo $x $stepsize]
+        set actualY [roundTo $y $stepsize]
+    } else {
+        set actualX $x
+        set actualY $y
+    }
+    
+    # Forward the click
     eval chain $actualX $actualY $args
 }
 
@@ -148,40 +148,40 @@ body ::tycho::Stepper::click {x y args} {
 # interactor with some multiple of the step size as the movement.
 #
 body ::tycho::Stepper::drag {x y} {
-	# By default, we don't move in either axis
+    # By default, we don't move in either axis
     set moveX 0
     set moveY 0
-
-	# The difference between where we were and where we are
+    
+    # The difference between where we were and where we are
     set deltaX [expr $x - $actualX]
     set deltaY [expr $y - $actualY]
-
-	# A fudge factor to make snapping "feel" more natural
+    
+    # A fudge factor to make snapping "feel" more natural
     set threshold [expr 3 * $stepsize / 4]
-
-	# If we have moved far enough in the x axis, quantize the movement
+    
+    # If we have moved far enough in the x axis, quantize the movement
     if { $deltaX >= $threshold } {
-		set moveX [roundTo $deltaX $stepsize]
+        set moveX [roundTo $deltaX $stepsize]
     } elseif { $deltaX <= -$threshold } {
-		set moveX [roundTo $deltaX $stepsize]
+        set moveX [roundTo $deltaX $stepsize]
     } else {
-		set moveX 0
+        set moveX 0
     }
-
-	# Same in the y axis
+    
+    # Same in the y axis
     if { $deltaY >= $threshold } {
-		set moveY [roundTo $deltaY $stepsize]
+        set moveY [roundTo $deltaY $stepsize]
     } elseif { $deltaY <= -$threshold } {
-		set moveY [roundTo $deltaY $stepsize]
+        set moveY [roundTo $deltaY $stepsize]
     } else {
-		set moveY 0
+        set moveY 0
     }
-
-	# As long as we have moved in at least one axis, forward the movement
+    
+    # As long as we have moved in at least one axis, forward the movement
     if { $moveX != 0  || $moveY != 0 } {
-		set actualX [expr $actualX + $moveX]
-		set actualY [expr $actualY + $moveY]
-
-		chain $actualX $actualY
+        set actualX [expr $actualX + $moveX]
+        set actualY [expr $actualY + $moveY]
+        
+        chain $actualX $actualY
     }
 }
