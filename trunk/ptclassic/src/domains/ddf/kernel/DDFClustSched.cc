@@ -44,6 +44,11 @@ The basic dynamic scheduler is the class DynDFScheduler.
 This derived class adds restructuring code, which clusters the graph
 into SDF clusters.
 
+FIXME: Warning:  This does not yet work completely.  In particular,
+it fails with wormholes because the clustering code does not include
+portholes on wormhole boundaries.  At this time, it issues a warning
+message if it is used.
+
 **************************************************************************/
 	
 ///////////////////////////////////////////////////////////////////////
@@ -75,6 +80,13 @@ static void renewNumTokens (Block* b, int flag) {
 // setup
 //
 void DDFClustSched :: setup () {
+
+  // FIXME: Issue a warning message, since the scheduler does not
+  // completely work yet.
+  Error::warn("The DDFClustSched scheduler is still under development.\n"
+	      "It currently fails to work with wormholes.\n"
+	      "Turn off 'restructure' to avoid using it.");
+
   if (logFile && *logFile) {
     logstrm = new pt_ofstream(logFile);
     if (!*logstrm) {
@@ -183,24 +195,25 @@ DDFClustSched::~DDFClustSched() {
 // pragmaStars list.
 //
 int DDFClustSched :: pragmaRegistered(SDFAtomCluster* as) {
-  // For efficiency, check to see whether as->getIter() returns
+  // For efficiency, check to see whether the iter flag is
   // non-zero.  This means we have already parsed a pragma.
-  if (as->real().getIter() > 0) return 1;
+  if (as->flags[iter] > 0) return 1;
 
   // The following conditional is a hopefully unnecessary precaution,
   // since the star should certainly have a target.
   if (as->real().target()) {
     // The pragma is registered under the parent classname
     // and the name of the star.
-    StringList pragma = as->real().target()->pragma(as->real().parent()->className(),
-						    as->real().name(),
-						    "firingsPerIteration");
+    StringList pragma = as->real().target()->
+      pragma(as->real().parent()->className(),
+	     as->real().name(),
+	     "firingsPerIteration");
     if (pragma.length() != 0) {
       // Store the required number of iterations of the cluster.
       // Note that this will register a zero if no integer is recognized
       // in the specified string.
-      as->real().setIter(atoi((const char*)pragma));
-      pragmaStars.append(&(as->real()));
+      as->flags[iter] = atoi((const char*)pragma);
+      if (as->flags[iter]) pragmaStars.append(as);
       return 1;
     }
   }
@@ -229,16 +242,15 @@ int DDFClustSched :: makeSDFClusters (SDFClusterGal& galaxy) {
 
   SDFCluster* c;
 
-  // Reset visit flag and iteration count.
+  // Reset visit flag and iteration count for each block.
   // The iteration count is used in this scheduler to store the user's
   // requested number of iterations for each star.  It can be nonzero
   // only for atomic clusters.
   while ((c = nextClust++) != 0) {
-    c->setVisit(0);
+    c->flags[visit] = 0;
     if (!c->asBag()) {
-      SDFAtomCluster* as = (SDFAtomCluster*) c;
-      as->real().setIter(0);
-      as->real().resetFirings();
+      c->flags[iter] = 0;
+      c->flags[firings] = 0;
     }
   }
 
@@ -247,7 +259,7 @@ int DDFClustSched :: makeSDFClusters (SDFClusterGal& galaxy) {
 
   nextClust.reset();
   while ((c = nextClust++) != 0) {
-    if (c->asBag() || c->visited()) continue;
+    if (c->asBag() || c->flags[visit]) continue;
 
     SDFAtomCluster* as = (SDFAtomCluster*) c;
     // Skip clustering if either the star is not SDF or a target
@@ -261,7 +273,7 @@ int DDFClustSched :: makeSDFClusters (SDFClusterGal& galaxy) {
 
     // make a cluster.
     SDFClusterBag* curBag = galaxy.createBag();
-    c->setVisit(1);
+    c->flags[visit] = 1;
     if (!expandCluster(c, &galaxy, curBag)) return FALSE;
     curBag->absorb(c, &galaxy);
     nextClust.reset();
@@ -287,13 +299,13 @@ int DDFClustSched :: expandCluster (SDFCluster* c,
   while((p = nextp++) != 0) {
     if (p->numTokens()) continue;	// if there is a delay, skip
     SDFCluster* s = p->far()->parentClust();
-    if (s->visited()) continue;
+    if (s->flags[visit]) continue;
     if (s->asBag()) continue;
     SDFAtomCluster* as = (SDFAtomCluster*) s;
     // Skip clustering if the farside star is not SDF or has a
     // "firingsPerIteration" pragma registered with it.
     if (!as->real().isSDF() || pragmaRegistered(as)) continue;
-    s->setVisit(1);
+    s->flags[visit] = 1;
     if (!expandCluster(s, galaxy, bag)) return FALSE;
     bag->absorb(s, galaxy);
   }
@@ -308,8 +320,8 @@ int DDFClustSched :: expandCluster (SDFCluster* c,
 //
 // One iteration, by default, consists of firing as many enabled
 // and non-deferrable clustered actors as possible without firing any one
-// actor more than once.  A deferrable actor is one whose
-// output arcs all have enough data to satisfy the destination actors.
+// actor more than once.  A deferrable actor is one that has any
+// output arc with enough data to satisfy the destination actors.
 //
 // E = enabled actors
 // D = deferrable enabled actors
@@ -322,7 +334,7 @@ int DDFClustSched :: expandCluster (SDFCluster* c,
 //	F = 0
 //	while (E-D-F != 0) {
 //	  fire (E-D-F)
-//	  F += E-D
+//	  F += E-D-F
 //	  update E,D
 //	}
 //	if (F == 0) {
@@ -369,20 +381,19 @@ int DDFClustSched :: run() {
     nextClust.reset();
     while ((c = nextClust++) != 0) {
       if (!c->asBag()) {
-	SDFAtomCluster* as = (SDFAtomCluster*) c;
-	as->real().resetFirings();
+	c->flags[firings] = 0;
       }
     }
 
     // The following loop might be repeated if any of the stars in
-    // it return zero in the enoughFirings() method.
+    // it do not have enough firings to satisfy the pragma.
     int doAgain;
     do {
       doAgain = FALSE;
 
       // reset visit flag
       nextClust.reset();
-      while ((c = nextClust++) != 0) c->setVisit(0);
+      while ((c = nextClust++) != 0) c->flags[visit] = 0;
 
       // (1) Fire all enabled and non-deferrable actors at most once.
       //     This is done in multiple passes so that the choice of which
@@ -395,11 +406,12 @@ int DDFClustSched :: run() {
 	firedOneInPass = FALSE;
 	nextClust.reset();
 	while ((c = nextClust++) != 0) {
-	  if (c->visited()) continue;
+	  if (c->flags[visit]) continue;
 	  int state = enabledState(c);
 	  if (state == 1) { // enabled and non-deferrable
 	    if (haltRequested() || !c->run()) return FALSE;
-	    c->setVisit(1);
+	    (c->flags[firings])++;
+	    c->flags[visit] = 1;
 	    firedOne = TRUE;
 	    firedOneInPass = TRUE;
 	  } else if (state == 2) { // enabled, deferrable, non-source
@@ -423,7 +435,8 @@ int DDFClustSched :: run() {
 	ListIter next(enabledDefNonSources);
 	while ((c = (SDFCluster*)next++) != 0) {
 	  if (haltRequested() || !c->run()) return FALSE;
-	  c->setVisit(1);
+	  c->flags[visit] = 1;
+	  (c->flags[firings])++;
 	  firedOne = TRUE;
 	}
       }
@@ -436,7 +449,8 @@ int DDFClustSched :: run() {
 	ListIter next(defSources);
 	while ((c = (SDFCluster*)next++) != 0) {
 	  if (haltRequested() || !c->run()) return FALSE;
-	  c->setVisit(1);
+	  c->flags[visit] = 1;
+	  (c->flags[firings])++;
 	  firedOne = TRUE;
 	}
       }
@@ -455,7 +469,7 @@ int DDFClustSched :: run() {
       ListIter ns(pragmaStars);
       DataFlowStar* np;
       while ((np = (DataFlowStar*)ns++) != 0) {
-	if (!np->enoughFirings()) {
+	if (np->flags[firings] < np->flags[iter] ) {
 	  doAgain = TRUE;
 	  break;
 	}
@@ -467,20 +481,22 @@ int DDFClustSched :: run() {
     // end of ONE iteration
     numFiring++;	
 
-    // Check for buffer overflow.
-    // FIXME: This should be optional, for efficiency.
-    nextClust.reset();
-    while ((c = nextClust++) != 0) {
-      SDFClustPortIter nextPort(*c);
-      SDFClustPort *p = 0;
-      while ((p = nextPort++) != 0) {
-	SDFClustPort* inp = p;
-	while (inp->inPtr()) inp = inp->inPtr();
-	if (p->isItInput()) {
-	  int x = inp->real().numTokens();
-	  if (x > maxToken) {
-	    reportArcOverflow(p, maxToken);
-	    return FALSE;
+    // Check for buffer overflow if the maximum
+    // buffer size is set to a positive number
+    if (maxToken > 0) {
+      nextClust.reset();
+      while ((c = nextClust++) != 0) {
+        SDFClustPortIter nextPort(*c);
+        SDFClustPort *p = 0;
+        while ((p = nextPort++) != 0) {
+	  SDFClustPort* inp = p;
+	  while (inp->inPtr()) inp = inp->inPtr();
+	  if (p->isItInput()) {
+	    int x = inp->real().numTokens();
+	    if (x > maxToken) {
+	      reportArcOverflow(p, maxToken);
+	      return FALSE;
+	    }
 	  }
 	}
       }
@@ -575,8 +591,9 @@ int DDFClustSched :: blockedOnInput(SDFCluster* s) {
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Check to see whether all the outputs have enough data already to
-// satisfy downstream arcs.  If there are no outputs, always return FALSE
+// Check to see whether any of the outputs have enough data already to
+// satisfy downstream arcs.  If so, return TRUE, otherwise, return FALSE.
+// If there are no outputs, always return FALSE
 // (this prevents deferring of sink actors).
 //
 int DDFClustSched :: isOutputDeferrable(SDFCluster* s) {
@@ -598,21 +615,20 @@ int DDFClustSched :: isOutputDeferrable(SDFCluster* s) {
 
     DataFlowStar* ds = (DataFlowStar*) far->parent();
     DFPortHole* wp = ds->waitPort();
-    if (wp && (far == (PortHole*) wp)) {
+    if (far == (PortHole*) wp) {
       // The downstream actor is waiting for data on this port.
       // If the number of tokens available is too small...
-      if (wp->numTokens() < ds->waitTokens()) return 0;
+      if (wp->numTokens() >= ds->waitTokens()) return TRUE;
     } else if (wp) {
       // The downstream actor is waiting for data
       // on another port.
-      continue;
+      return TRUE;
     } else {
       // The downstream actor is waiting for data on this
       // and other ports (probably an SDF actor).
-      if (p->far()->numIO() > dp.numTokens()) return 0;
+      if (p->far()->numIO() <= dp.numTokens()) return TRUE;
     }
   }
-  if (outputFound) return 1;
-  else return 0;
+  return FALSE;
 }
 		
