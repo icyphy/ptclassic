@@ -82,12 +82,10 @@ extern char* UniqNameGet ARGS((char *s));
 
 extern void DupSheetInit ARGS((DupSheet *ds));
 extern void DupSheetClear ARGS((DupSheet *ds));
-extern boolean DupSheetAdd ARGS((DupSheet *ds, const char *item));
-extern boolean DupSheetAdd2 ARGS((DupSheet *ds, const char *item,
-				  const char *item2));
-extern boolean DupSheetIsDup ARGS((DupSheet *ds, const char *item));
-extern boolean DupSheetIsDup2 ARGS((DupSheet *ds, const char *item,
-				    const char* item2));
+extern boolean DupSheetAdd ARGS((DupSheet *ds, const char *item,
+				 const char *item2));
+extern boolean DupSheetIsDup ARGS((DupSheet *ds, const char *item,
+				   const char* item2));
 extern const char* getDomainS ARGS((RPCSpot *spot));
 extern const char* setCurDomainS ARGS((RPCSpot *spot));
 extern const char* getDomainF ARGS((octObject *facetPtr));
