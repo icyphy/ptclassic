@@ -121,6 +121,26 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
+/* Given the name of a domain, set
+   the KnownBlocks currentDomain to correspond to the this domain.
+   Returns false if this fails.
+        EAL, 9/23/90
+*/
+extern "C" boolean
+KcSetKBDomain(char* domain) {
+    if (!KnownBlock::setDomain(domain))
+        return FALSE;
+    return TRUE;
+}
+
+/* 9/22/90, by eal
+Return the name of the current domain in KnownBlock
+*/
+extern "C" char*
+curDomainName() {
+        return (char*) KnownBlock::domain();
+}
+
 // start a galaxy definition
 extern "C" boolean
 KcDefgalaxy(char *galname) {
@@ -297,4 +317,20 @@ KcLoad(char* file)
 {
 	ErrAdd("Load not implemented yet");
 	return FALSE;
+}
+
+/* 9/22/90, by eal
+Return the number of domains that the system knows about
+*/
+extern "C" int
+numberOfDomains() {
+        return Domain::numberOfDomains();
+}
+
+/* 9/22/90, by eal
+Return the name of the nth domain in the list of known domains
+*/
+extern "C" char*
+nthDomainName(int n) {
+        return (char*) Domain::nthDomainName(n);
 }
