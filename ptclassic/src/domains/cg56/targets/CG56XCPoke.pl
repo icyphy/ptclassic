@@ -1,5 +1,4 @@
 defstar	{
-
 name { XCASend }
 domain { CG56 }
 desc { S56X to CGC synchronous send star }
@@ -30,8 +29,35 @@ codeblock(sendData) {
 	move x0,$ref(buffer)
 }
 
+codeblock(sendBuffer,"") {
+;	btst	#0,$ref(semaphore)
+;	jcs	$label(bufferLocked)
+	move	#0,a
+	move	$ref(semaphore),x0
+	cmp	x0,a
+	jne	$label(bufferLocked)
+	bset	#1,$ref(semaphore)
+	move	#$addr(input),r0	;read starting input geodesic address
+	move	#$addr(buffer),r1	;read starting buffer address
+	do	#@blockSize,$label(XFR)
+	move	$mem(input):(r0)+,x0
+	move	x0,$mem(buffer):(r1)+
+$label(XFR)
+	nop
+	bclr	#1,$ref(semaphore)
+$label(bufferLocked) 
+}
+
+setup {
+	CG56XCABase::setup();
+	input.setSDFParams(blockSize,blockSize-1);
+}
+
 go {
-	addCode(sendData);
+	if (blockSize > 1)
+		addCode(sendBuffer());
+	else
+		addCode(sendData);
 }
 
 execTime {

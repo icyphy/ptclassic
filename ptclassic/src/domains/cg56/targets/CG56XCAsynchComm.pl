@@ -15,29 +15,54 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 	}
 
-	state {
-		name {value}
-		type {int}
-		default {0}
-		attributes { A_YMEM|A_NOINIT } 
-		desc { The initial value of asynchronous I/O. }
-	}
-
  	state {
  		name { VariableName }
  		type { string }
  		default { "aioVariable" }
 		desc { The name used to identify the asynchronous connection. }
  	}
-
-	codeblock(initValue) {
-	org	$ref(value)
-$val(VariableName)
-	dc	$val(value)
+	
+	state {
+		name { blockSize }
+		type { int }
+		default { 1 }
+		desc { number of tokens to be transfered per firing. }
 	}
 
+	state {
+		name {buffer}
+		type {intarray}
+		default {0}
+		attributes { A_YMEM|A_NOINIT|A_NONSETTABLE } 
+	}
+
+	state {
+		name {semaphore}
+		type {int}
+		default {0}
+		attributes {A_YMEM|A_NOINIT}
+	}
+		
+codeblock(initBuffer) {
+	org	$ref(semaphore)
+$val(VariableName)_sem
+	dc	0
+	org	$ref(buffer)
+$val(VariableName)
+}
+
+setup {
+	if (blockSize > 1) {
+		buffer.resize(blockSize);
+	}
+}
+
 initCode {
-	addCode(initValue);
+	addCode(initBuffer);
+	for (int i = 0 ; i < blockSize ; i++) {
+		addCode("	dc	0\n");
+	}
+	addCode("	org	p:\n");
 }
 
 }
