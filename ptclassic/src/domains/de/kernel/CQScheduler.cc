@@ -1,4 +1,4 @@
-static const char file_id[] = "DEScheduler.cc";
+static const char file_id[] = "$RCSfile$";
 
 // copyright
 
@@ -7,7 +7,7 @@ static const char file_id[] = "DEScheduler.cc";
 #endif
 
 #include "type.h"
-#include "DEScheduler.h"
+#include "CQScheduler.h"
 #include "StringList.h"
 #include "FloatState.h"
 #include "GalIter.h"
@@ -25,7 +25,7 @@ extern const char DEdomainName[];
 	// displaySchedule
 	////////////////////////////
 
-StringList DEScheduler :: displaySchedule () {
+StringList CQScheduler :: displaySchedule () {
 	return "DE schedule is computed at run-time\n";
 }
 
@@ -36,12 +36,12 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-void DEScheduler :: setup () {
+void CQScheduler :: setup () {
 	clearHalt();
 	currentTime = 0;
 
 	if (!galaxy()) {
-		Error::abortRun("DEScheduler: no galaxy!");
+		Error::abortRun("CQScheduler: no galaxy!");
 		return;
 	}
 	GalStarIter next(*galaxy());
@@ -80,7 +80,7 @@ void DEScheduler :: setup () {
 
 //  If output events are generated during the "start" phase, send them
 //  to the global event queue.
-void DEScheduler :: initialFire() {
+void CQScheduler :: initialFire() {
 	GalStarIter nextStar(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) nextStar++) != 0 )
@@ -88,7 +88,7 @@ void DEScheduler :: initialFire() {
 }
 
 // detect the delay free loop.
-int DEScheduler :: checkDelayFreeLoop() {
+int CQScheduler :: checkDelayFreeLoop() {
 	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
@@ -101,7 +101,7 @@ int DEScheduler :: checkDelayFreeLoop() {
 }
 
 // set the depth of the stars...
-int DEScheduler :: computeDepth() {
+int CQScheduler :: computeDepth() {
 	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
@@ -126,7 +126,7 @@ int DEScheduler :: computeDepth() {
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
 
-int DEScheduler :: run () {
+int CQScheduler :: run () {
 
     if (haltRequested()) {
 	    Error::abortRun(*galaxy(),
@@ -171,7 +171,7 @@ int DEScheduler :: run () {
 
 	// check if the normal event is fetched
 	//
-	// For normal events, the fineLevel of the CqLevelLink
+	// For normal events, the fineLevel of the LevelLink
 	// class is negative (which is the minus of the depth of
 	// the destination star)
 	// But, we also put the process-star in the event queue
@@ -263,7 +263,7 @@ int DEScheduler :: run () {
         
         while (store != NULL) {
           CqLevelLink *temp = store;
-          store = store->next;
+          store = (CqLevelLink*)store->next;
           eventQ.pushBack(temp);
         }
 
@@ -286,7 +286,7 @@ return TRUE;
 ////////////////////////////
 
 // fetch an event on request.
-int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) 
+int CQScheduler :: fetchEvent(InDEPort* p, double timeVal) 
 {
 	CqLevelLink *store = NULL;
 	eventQ.DisableResize();
@@ -311,7 +311,7 @@ int DEScheduler :: fetchEvent(InDEPort* p, double timeVal)
 					eventQ.pushBack(h);
 				while (store != NULL) {
 				      CqLevelLink *temp = store;
-				      store = store->next;
+				      store = (CqLevelLink*)store->next;
 				      eventQ.pushBack(temp);
 				}
 				eventQ.EnableResize();
@@ -333,7 +333,7 @@ int DEScheduler :: fetchEvent(InDEPort* p, double timeVal)
 // create a delay-free loop: the programmer is in charge of the
 // possibilities of an infinite loop.
 
-int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
+int CQScheduler :: checkLoop(PortHole* p, DEStar* s) {
 
 DEPortHole* dp = (DEPortHole*) p;
 
@@ -402,7 +402,7 @@ return TRUE;
 // By putting a initial delay on a feedback arc, we can avoid
 // a non-deterministic loop.
 
-int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
+int CQScheduler :: setDepth(PortHole* p, DEStar* s) {
 
 InDEPort* inp = (InDEPort*) p;
 
@@ -481,7 +481,7 @@ else {
 return inp->depth;
 }
 
-int DEScheduler :: errorDelayFree(PortHole* p) {
+int CQScheduler :: errorDelayFree(PortHole* p) {
 StringList msg;
 msg += p->fullName();
 msg += " lies on a delay-free loop";
@@ -490,7 +490,7 @@ Error::abortRun(msg);
 return FALSE;
 }
 
-void DEScheduler :: errorUndefined(PortHole* p) {
+void CQScheduler :: errorUndefined(PortHole* p) {
 StringList msg;
 msg += p->fullName();
 msg += " lies on a non-deterministic loop\n";
@@ -503,4 +503,4 @@ Error::warn(msg);
 }
 
 // my domain
-const char* DEScheduler :: domain() const { return DEdomainName ;}
+const char* CQScheduler :: domain() const { return DEdomainName ;}
