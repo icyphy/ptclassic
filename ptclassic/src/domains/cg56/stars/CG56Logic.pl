@@ -104,7 +104,7 @@ non-zero integer (not necessarily 1).
 	codeblock(twoInputAnd) {
 	move	$ref(input#1),x0			; read input#1 into register x0
 	move	$ref(input#2),x1			; read input#2 into register x1
-	mpy	x0,x1,a			#255,y0		; a = x0 * x1, y0=TRUE
+	mpy	x1,x0,a			#255,y0		; a = x0 * x1, y0=TRUE
 	tst	a					; test a
 	tne	y0,a					; if (a != 0) a = TRUE
 	}
