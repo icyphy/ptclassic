@@ -42,7 +42,7 @@ if {[string compare test [info procs test]] == 1} then {
 # Actual start of the tests.  We use one test per star so that
 # the output is easier to read.
 
-proc sdfTestScheduler {{target loop-SDF} {targetparams {}} {
+proc sdfTestScheduler {{target loop-SDF} {targetparams {}}} {
     set star UpSample
 
     sdfInitUniverse $star
@@ -62,14 +62,108 @@ proc sdfTestScheduler {{target loop-SDF} {targetparams {}} {
 
     connect Rampa output "$star.a" input
     connect "$star.a" output Printa input
-    run 10
+    run 5
     wrapup
-    return [readTmpFile $tmpfile]
-}
+    return [list [readTmpFile $tmpfile] [schedule]]
+} 
 ######################################################################
 #### test UpSample
 #
-test SDFUpSample {based on $PTOLEMY/src/domains/cgc/demo/upsample} {
-    sdfTestScheduler
-} {}
+test UpSample-loop-SDF  {Run the loop-SDF scheduler on a UpSample universe} {
+    sdfTestScheduler loop-SDF
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} \{\n\ \ \{\ scheduler\ \"Bhattacharyya's\ Loop\ SDF\ Scheduler\"\ \}\n\{\ fire\ UpSampleTest.Rampa\ \}\n\{\ fire\ UpSampleTest.UpSample.a\ \}\n\{\ repeat\ 3\ \{\n\ \ \{\ fire\ UpSampleTest.Printa\ \}\n\}\n\}\n}
+
+######################################################################
+#### test UpSample
+#
+test UpSample-default-SDF-1 \
+	{Run the default-SDF scheduler with DEF loopScheduler} {
+    sdfTestScheduler default-SDF {targetparam loopScheduler DEF}
+
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} {{
+  { scheduler "Simple SDF Scheduler" }
+  { fire UpSampleTest.Rampa }
+  { fire UpSampleTest.UpSample.a }
+  { fire UpSampleTest.Printa }
+  { fire UpSampleTest.Printa }
+  { fire UpSampleTest.Printa }
+}
+}}
+
+######################################################################
+#### test UpSample
+#
+test UpSample-default-SDF-2 \
+	{Run the default-SDF scheduler with CLUST loopScheduler} {
+    sdfTestScheduler default-SDF {targetparam loopScheduler CLUST}
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} \{\n\{\ scheduler\ \"Buck\ and\ Bhattacharyya's\ SDF\ Loop\ Scheduler\"\ \}\n\{\ fire\ UpSampleTest.Rampa\ \}\n\{\ fire\ UpSampleTest.UpSample.a\ \}\n\{\ repeat\ 3\ \{\n\ \ \{\ fire\ UpSampleTest.Printa\ \}\n\}\n\}\n}
+
+
+######################################################################
+#### test UpSample
+#
+test UpSample-default-SDF-4 \
+	{Run the default-SDF scheduler with ACYLOOP loopScheduler} {
+    sdfTestScheduler default-SDF {targetparam loopScheduler ACYLOOP}
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} \{\n\{\ scheduler\ \"Murthy\ and\ Bhattacharyya's\ SDF\ Loop\ scheduler\"\ \}\n\{\ fire\ Rampa\ \}\n\{\ fire\ UpSample.a\ \}\n\{\ repeat\ 3\ \{\n\ \ \{\ fire\ Printa\ \}\n\}\n\}\n}
 
