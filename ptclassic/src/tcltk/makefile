@@ -115,8 +115,10 @@ $(ITCL_OBJ)/config.status: config_itcl
 config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)
 	@echo "Configuring itcl"
 	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; \
-	$(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) \
-		--prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST) \
+	$(ITCL_SRC)/configure \
+		--srcdir=$(ITCL_SRC) \
+		--prefix=$(ITCL_INDEPENDENT_DEST) \
+		--exec-prefix=$(ITCL_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
 $(TCLTK_OBJ): 
