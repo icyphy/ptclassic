@@ -41,7 +41,7 @@ beginning with "!" and uses them as commands for the simulator.
 	// outVal state, which works when the buffersize is >= 1.
 
 	codeblock (logOut) {
-!output $ref(outVal) $val(fileName).sim -RF
+@output $ref(outVal) $val(fileName).sim -RF
 }
 	initCode {
                 gencode(logOut);
