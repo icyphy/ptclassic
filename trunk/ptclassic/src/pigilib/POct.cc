@@ -926,7 +926,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkIsDelay),
 	ENTRY(ptkGetRunLength),
 	ENTRY(ptkSetRunLength),
-	0, 0
+	{ 0, 0 }
 };
 
 // register all the functions.
