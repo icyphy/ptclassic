@@ -58,30 +58,11 @@
 # *-toggle*, which causes the binding to toggle items into and out
 # of the selection.
 #
-# The *-dragmode* option controls the style of drag-selection: if
-# it is set to "overlapping," then items are selected (or toggled)
-# if they overlap the drag outline at all; if it is "enclosed,"
-# then the item is selected (or toggled) only if the drag box
-# entirely encloses it. The *-dragcolor* option sets the color of the
-# drag outline box and is by default set to some shade of grey.
-# (Should the drag box be a dashed line?)
-#
-# Once an item is selected, the Selector can bind or activate another
-# interactor on it: in the "immediate" mode an interactor
-# that is to be activated on an item or the selection as soon as it
-# is selected -- this is typically used for moving items, for example.
-# This "delegation" can apply either to a single item or to the whole
-# selection. In "subsequent" mode, an interactor is bound
-# to an item or the selection when it is selected: selecting an item
-# does not activate this interactor, but subsequent mouse events on it
-# _will_ activate it. This is used, for example, to change
-# a selected item into a live editing mode: select the item with say
-# button 1, then use say button 2 to edit it.
-#
-# The Selector interactor is smart enough to know when these delegate
-# interactors need to be unbound. It thus should be used if a Slate is
-# being used for more than simple click-and-move and click-and-select
-# interactions.
+# Once an item is selected, the Selector can activate another
+# interactor on it -- this is specified by the delegate{}
+# method. There are three modes which control how activation
+# takes place, enabling quite complex patterns of modal interaction
+# to be created.
 #
 # <p><b>Options</b>
 #
@@ -138,6 +119,9 @@ class ::tycho::Selector {
 
 	# Create the selection handler
 	# ::selection handle $slate "$this describe"
+
+        # The Escape key clears the selection
+        ::bind $slate <Key-Escape> "$slate selection clear"
     }
     destructor {}
 
@@ -168,6 +152,9 @@ class ::tycho::Selector {
     # Bind the selector to mouse events
     method bind {tagOrID args}
 
+    # Clear the selection.
+    method clear {}
+
     # Start the drag-select interaction sequence.
     method click {x y args}
 
@@ -184,7 +171,7 @@ class ::tycho::Selector {
     method itemclick {tag x y args}
 
     # Notify that the selection has been changed by someone else
-    method refresh {}
+    method refresh {args}
 
     # Terminate the drag-select interaction sequence
     method release {}
@@ -199,16 +186,16 @@ class ::tycho::Selector {
     ####                        protected methods                  ####
 
     # Activate delegate interactors
-    protected method _activate {id x y args}
+    protected method _delegate {mode id x y args}
 
     # Record a single delegate interactor.
-    protected method _attach {tag opts detach}
-
-    # Bind delegate interactors
-    protected method _bind {}
+    protected method _attach {interactor id x y options}
 
     # Clear the selection
     protected method _clear {}
+
+    # Remove an item from the selector.
+    protected method _debind {interactor id}
 
     # Deselect an item
     protected method _deselect {id}
@@ -216,29 +203,35 @@ class ::tycho::Selector {
     # Remove all delegate interactors.
     protected method _detach {}
 
+    # Restore all items to the selector.
+    protected method _rebind {}
+
     # Select an item
     protected method _select {id}
 
     ###################################################################
     ####                    private variables                      ####
 
-    # The drag box
-    private variable dragbox ""
-
-    # The drag box
-    private variable currentBindings ""
-
-    # The current delgates and how to unbind or deactivate them
+    # Currently activated delegates
     private variable _attached
 
+    # Currently debound items
+    private variable _debinded
+
     # The delegate interactors
-    private variable delegates
+    private variable _delegates
 
     # The items currently selected by dragging
     private variable covered ""
 
+    # The drag box
+    private variable dragbox ""
+
+    # The drag box
+    private variable targetTags ""
+
     # A flag saying whether we are toggling
-    private variable toggling
+    private variable toggling 0
 
     # The origin of the drag box
     private variable xOrigin
@@ -289,9 +282,10 @@ body ::tycho::Selector::activate {tag x y args} {
 # on the slate called "#background." The *-background* option
 # can be specified to give a different background item. By default,
 # clicking on an item or the background deselects currently selected
-# items. If, however, the
-# *-toggle* option is specified and true, then clicking and
-# drag-selecting will toggle items into and out of the selection.
+# items. If, however, the *-toggle* option is specified and true,
+# then clicking and drag-selecting will toggle items into and out
+# of the selection. 
+#
 # Other options can also be specified, being the *-buttons*
 # and *-modifiers* options of the <code>::tycho::event</code>
 # procedure. I recommend that a caller _always_ specifies a *-button*
@@ -346,14 +340,18 @@ body ::tycho::Selector::click {x y args} {
 	_clear
     }
 
+    # Give the slate the focus for key events etc
+    $slate focusin
+
     # Detach delegate interactors
     _detach
+    _rebind
 
     # Figure out which tags are valid for selection
-    set currentBindings {}
+    set targetTags {}
     foreach b [array names _bindings] {
 	if { [lreplace $b 0 0] == $args } {
-	    lappend currentBindings [lindex $b 0]
+	    lappend targetTags [lindex $b 0]
 	}
     }
 
@@ -386,22 +384,30 @@ body ::tycho::Selector::deactivate {x y args} {
 #### delegate
 #
 # Specify a "delegate" interactor -- that is, one which will
-# be bound or activate by the Selector of the selected items
-# meet the right conditions. The first two arguments are the
-# interactor and the tag of the items on which it will operate.
-# The option can be:
+# activated by the Selector if the selected items
+# i) all have the given _tag_ and ii) the *-button* and *-modifiers*
+# options match those that apply when the item is clicked-upon.
+# Valid options are:
 # <ul>
-# <li><b>-mode</b> _mode_: The way in which the interactor is
-# delegated. By default, it is "activate," which means that the
-# interactor is activated if the selected items meets the conditions.
-# Otherwise, it should be "bind," in which case the interactor is
-# only bound to the selected items if they meet the right conditions.
+# <li><b>-mode</b> _0|1|+_: This option selects the "mode"
+# in which the delegation takes place. It can be a single
+# mode or a list -- the default is {0 1 +}.
+# The modes are:
+# <ul>
+#  <li><b>0</b>: The interactor will be activated if no
+#  items were previously selected and a single item
+#  becomes selected.
+#  <li><b>1</b>: The interactor will be activated if there
+#  is already a single item selected and it is clicked on
+#  again.
+#  <li><b>+</b>: The interactor will be activated if
+#  there is more than one item in the selection.
+# </ul>
 # <li><b>-oneonly</b> _bool_: Specifies that the interactor will be
 # activated or bound if there is only one selected item, and that
-# item is tagged with
-# _tag_. Otherwise, (the default), the interactor will be bound
-# if all selected items are tagged with _tag_, regardless of how many
-# are selected.
+# item is tagged with _tag_. Otherwise, (the default), the
+# interactor will be bound if all selected items are tagged
+# with _tag_, regardless of how many are selected.
 # <li><b>-button</b> _int_: the *-button* option that will be passed to
 # the interactor when activated or bound.
 # <li><b>-modifiers</b> _modifiers_: the *-modifiers* list that will be
@@ -409,22 +415,15 @@ body ::tycho::Selector::deactivate {x y args} {
 # </ul>
 body ::tycho::Selector::delegate {interactor tag args} {
     # Extract options
-    array set opt [concat {-mode activate -oneonly 0} $args]
+    array set opt [concat {-mode {0 1 +}} $args]
     set mode $opt(-mode)
-    set oneonly $opt(-oneonly)
     unset opt(-mode)
-    unset opt(-oneonly)
     set args [array get opt]
 
     # Remember the delegate
-    set key [list $mode $oneonly $tag $args]
-    if { [::info exists delegates($key)] } {
-	eval lappend tag [lindex $delegates($key) 1]
-    } else {
-    	set tag [list $tag]
-    }    
-    set delegates($key) [list $interactor $tag $args]
-    return
+    foreach m $mode {
+        lappend _delegates([list $m $interactor $args]) $tag
+    }
 }
 
 #######################################################################
@@ -464,16 +463,16 @@ body ::tycho::Selector::drag {x y} {
 	# is selectable if its name is in the binding set, or if
 	# it has a tag that is in the binding set
 	foreach {o tags} $covered {
-	    if { [::tycho::lmember $currentBindings $o] \
-		    || ! [::tycho::ldisjoint $currentBindings $tags] } {
+	    if { [::tycho::lmember $targetTags $o] \
+		    || ! [::tycho::ldisjoint $targetTags $tags] } {
 		# Select it
 		_select $o
 	    }
 	}
     	# Deselect selectable objects that are no longer covered
 	foreach {o tags} $uncovered {
-	    if { [::tycho::lmember $currentBindings $o] \
-		    || ! [::tycho::ldisjoint $currentBindings $tags] } {
+	    if { [::tycho::lmember $targetTags $o] \
+		    || ! [::tycho::ldisjoint $targetTags $tags] } {
 		# Deselect it
 		_deselect $o
 	    }
@@ -483,8 +482,8 @@ body ::tycho::Selector::drag {x y} {
     	foreach {o tags} [concat $covered $uncovered] {
 	    # An object is selectable if its name is in the binding
 	    # set or if it has a tag in the binding set.
-	    if { [::tycho::lmember $currentBindings $o] \
-		    || ! [::tycho::ldisjoint $currentBindings $tags] } {
+	    if { [::tycho::lmember $targetTags $o] \
+		    || ! [::tycho::ldisjoint $targetTags $tags] } {
 		# Test if already selected or not, and act accordingly
 		if { [$slate hastag $o "sel"] } {
 		    # Deselect it
@@ -511,37 +510,90 @@ body ::tycho::Selector::itemclick {tag x y args} {
     # Get the current object
     set current [$slate find withtag current]
 
-    # Process depending on whether this is toggle mode or not
-    array set opt [concat -toggle 0 $args]
-    ::tycho::getflag toggle args
+    # Give the slate the focus for key events etc
+    $slate focusin
 
-    if { ! $opt(-toggle) } {
-	# Select it if it isn't already
+    # Detach delegate interactors
+    _detach
+    _rebind
+
+    # Extract options
+    array set opt [concat -toggle 0 $args]
+    set toggle $opt(-toggle)
+    unset opt(-toggle)
+    set args [array get opt]
+
+    # Number of items currently selected
+    switch [llength [$slate find withtag "sel"]] {
+	0 {
+	    set prior 0
+	}
+	1 {
+	    set prior 1
+	}
+	default {
+	    set prior "+"
+	}
+    }
+
+    # Process depending on whether this is toggle mode or not
+    if { ! $toggle } {
+	# Not toggle mode: select it if it isn't already
 	if { ! [$slate hastag $current "sel"] } {
+	    # Choose the delegation mode
+	    if { $prior == 0 } {
+		set post "0"
+            } elseif { $prior == 1 \
+                    && $current != [$slate find withtag "sel"] } {
+		set post "0"
+            } else {
+                set post "+"
+	    }
 	    # Deselect all currently selected objects
 	    _clear
 
 	    # Select and highlight the current object
 	    _select $current
-	}
-	# Activate a delegate
-	eval $this _activate $current $x $y $args
 
+	} else {
+            # It's already selected, so delegation mode is the same
+	    set post $prior
+        }
     } else {
 	# Toggle the state of the clicked-on item
 	if { [$slate hastag $current "sel"] } {
 	    # The item is selected, so deselect it
 	    _deselect $current
+
+	    # Don't activate delegates
+	    set post {}
+
 	} else {
+	    # Choose the delegation mode
+	    if { $prior == 0 } {
+		set post "0"
+            } else {
+                set post "+"
+	    }
 	    # The item is not selected. Select and highlight it
 	    _select $current
-
-	    # Activate the delegate if there is one
-	    eval $this _activate $current $x $y $args
 	}
     }
-    # Adjust delegate bindings
-    $this _bind
+    # Now activate delegate interactor according to the "mode"
+    if { $post != "" } {
+	eval _delegate $post $current $x $y $args
+    }
+}
+
+#######################################################################
+#### refresh
+#
+# The selection has been changed by someone else. Update the
+# delegate bindings. Arguments are ignored.
+#
+body ::tycho::Selector::refresh {args} {
+    _detach
+    _rebind
 }
 
 #######################################################################
@@ -555,9 +607,6 @@ body ::tycho::Selector::release {} {
 
     # Finish the search
     $slate dtag $this.covered
-
-    # Update delegate bindings for new selection set
-    $this _bind
 }
 
 #######################################################################
@@ -586,19 +635,8 @@ body ::tycho::Selector::resize {} {
 #
 body ::tycho::Selector::unbind {tag args} {
     set event [eval ::tycho::Interactor::event Click $args]
-	unset _bindings([concat $tag $args])
-	$slate bind $tag $event {}
-}
-
-#######################################################################
-#### refresh
-#
-# The selection has been changed by someone else. Update the
-# delegate bindings.
-#
-body ::tycho::Selector::refresh {} {
-    _detach
-    _bind
+    unset _bindings([concat $tag $args])
+    $slate bind $tag $event {}
 }
 
 #####################################################################
@@ -606,56 +644,60 @@ body ::tycho::Selector::refresh {} {
 ####                     protected methods                       ####
 
 #######################################################################
-#### _activate
+#### _delegate
 #
-# Activate delegate interactors when a new item is added to
-# the selection. This method is called whenever a new item
-# is added to the selection by a mouse click.
+# Activate a delegate interactor in a certain mode.
 #
-body ::tycho::Selector::_activate {id x y args} {
-    set selection [$slate find withtag "sel"]
-    set selcount [llength $selection]
-
-    # Process interactors that operate on a single item only
-    if { $selcount == 1 } { 
-	foreach index [array names delegates [list activate 1 * *]] {
-	    # Activate the delegate interactor if that item is in the tags
-	    # or if it has a tag that is in the tags
-	    ::tycho::assign interactor tags options $delegates($index)
-	    if { $selcount == 1 } {
+body ::tycho::Selector::_delegate {mode id x y args} {
+    switch -exact $mode {
+	"0" -
+	"1" {
+	    foreach index [array names _delegates [list $mode * *]] {
+                ::tycho::assign _ interactor options $index
+                set tags $_delegates($index)
+		# Activate the delegate interactor if that item is
+                # in the tags or if it has a tag that is in the tags
 		if { $args == $options } {
 		    if { [::tycho::lmember $tags $id] \
-			    || ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
+			    || ! [::tycho::ldisjoint $tags \
+			    [$slate gettags $id]] } {
 			# Activate it
-			_attach $id $options "$interactor deactivate 0 0 $options"
-			eval $interactor activate $id $x $y $options
+                        _debind $interactor $id
+                        _attach $interactor $id $x $y $options
+			return 1
+		    }
+		}
+	    }
+	}
+	"+" {
+	    # Process interactors that operate on the whole selection
+	    foreach index [array names _delegates [list + * *]] {
+                ::tycho::assign _ interactor options $index
+                set tags $_delegates($index)
+		# Activate a delegate interactor on the whole selection if
+		# every item is either in the interactor's tags or if it
+		# has a tag that is.
+		if { $args == $options } {
+		    set ok 1
+		    foreach item [$slate find withtag "sel"] {
+			if { ! [::tycho::lmember $tags $item] \
+				&& [::tycho::ldisjoint $tags \
+				[$slate gettags $item]] } {
+			    set ok 0
+			    break
+			}
+		    }
+		    if { $ok } {
+			# Activate it
+			_debind $interactor $id
+			_attach $interactor "sel" $x $y $options
+			return 1
 		    }
 		}
 	    }
 	}
     }
-    # Process interactors that operate on the whole selection
-    foreach index [array names delegates [list activate 0 * *]] {
-	# Activate a delegate interactor on the whole selection if
-	# every item is either in the interactor's tags or if it
-	# has a tag that is.
-	::tycho::assign interactor tags options $delegates($index)
-	if { $args == $options } {
-	    set ok 1
-	    foreach item $selection {
-		if { ! [::tycho::lmember $tags $item] \
-			&& [::tycho::ldisjoint $tags [$slate gettags $item]] } {
-		    set ok 0
-		    break
-		}
-	    }
-	    if { $ok } {
-		# Activate it
-		_attach "sel" $options "$interactor deactivate 0 0 $options"
-		eval $interactor activate "sel" $x $y $options
-	    }
-	}
-    }
+    return 0
 }
 
 #######################################################################
@@ -663,58 +705,20 @@ body ::tycho::Selector::_activate {id x y args} {
 #
 # Record a single delegate interactor.
 #
-body ::tycho::Selector::_attach {tag opts detach} {
-    set _attached([concat $tag $opts]) $detach
+body ::tycho::Selector::_attach {interactor id x y options} {
+    set _attached($interactor) [list $id $x $y $options]
+    eval $interactor activate $id $x $y $options
 }
 
 #######################################################################
-#### _bind
+#### _debind
 #
-# Bind or unbind delegate interactors.
+# Record a single delegate interactor.
 #
-# FIXME: If a delegate is bound, then do we have to unbind the selector
-# from that item???
-#
-body ::tycho::Selector::_bind {} {
-    set selection [$slate find withtag "sel"]
-    set selcount [llength $selection]
-
-    # Process interactors that operate on a single item only
-    foreach index [array names delegates [list bind 1 * *]] {
-	::tycho::assign interactor tags options $delegates($index)
-	if { $selcount == 1 } {
-	    set id [lindex $selection 0]
-	    # If there is only one item and it's in that interactor's
-	    # tags or has a tag in that interactor's tags, bind it
-	    if { [::tycho::lmember $tags $id] \
-		    || ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
-		# Bind it
-		_attach $id $options "$interactor unbind $id $options"
-		eval $interactor bind $id $options
-	    }
-	}
-    }
-
-    # Process interactors that operate on the whole selection
-    foreach index [array names delegates [list bind 0 * *]] {
-	# Activate a delegate interactor on the whole selection if
-	# every item is either in the interactor's tags or if it
-	# has a tag that is.
-	::tycho::assign interactor tags options $delegates($index)
-	set ok 1
-	foreach item $selection {
-	    if { ! [::tycho::lmember $tags $item] \
-		    && [::tycho::ldisjoint $tags [$slate gettags $item]] } {
-		set ok 0
-		break
-	    }
-	}
-	if { $ok } {
-	    # Bind it
-	    _attach "sel" $options "$interactor unbind sel $options"
-	    eval $interactor bind "sel" $options
-	} 
-    }
+body ::tycho::Selector::_debind {interactor id} {
+    set _debinded($id) 1
+    debind $id
+    $interactor configure -deactivatecommand "$this refresh"
 }
 
 #######################################################################
@@ -745,10 +749,23 @@ body ::tycho::Selector::_deselect {id} {
 # Remove all delegate interactors.
 #
 body ::tycho::Selector::_detach {} {
-    foreach {_ detach} [array get _attached] {
-	uplevel #0 $detach
+    foreach {interactor info} [array get _attached] {
+        $interactor configure -deactivatecommand ""
+        eval $interactor deactivate $info
     }
     catch {unset _attached}
+}
+
+#######################################################################
+#### _rebind
+#
+# Restore all debound items to the selector.
+#
+body ::tycho::Selector::_rebind {} {
+    foreach id [array names _debinded] {
+        eval $this rebind $id
+    }
+    catch {unset _debinded}
 }
 
 #######################################################################
