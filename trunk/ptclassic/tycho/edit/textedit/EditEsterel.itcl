@@ -120,7 +120,8 @@ body ::tycho::EditEsterel::keywords {} {
 body ::tycho::EditEsterel::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditEsterelHelp.html
+	    [file join $TYCHO editors textedit doc usersGuides \
+	    EditEsterelHelp.html]
 }
 
 ####################################################################

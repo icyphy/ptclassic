@@ -172,5 +172,6 @@ body ::tycho::Matlab::evalTextEntry {} {
 body ::tycho::Matlab::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/MatlabHelp.html
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditMatlabHelp.html]
 }

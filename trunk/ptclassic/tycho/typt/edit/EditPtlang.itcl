@@ -175,7 +175,9 @@ body ::tycho::EditPtlang::gendoc {} {
 body ::tycho::EditPtlang::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditPtlangHelp.html
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditPtlangHelp.html]
+
 }
 
 

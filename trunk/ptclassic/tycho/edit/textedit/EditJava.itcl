@@ -177,7 +177,8 @@ body ::tycho::EditJava::gendoc {} {
 body ::tycho::EditJava::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditJavaHelp.html
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditJavaHelp.html]
 }
 
 #####################################################################

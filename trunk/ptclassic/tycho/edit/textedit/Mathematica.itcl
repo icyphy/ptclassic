@@ -174,5 +174,6 @@ body ::tycho::Mathematica::evalTextEntry {} {
 body ::tycho::Mathematica::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/MathematicaHelp.html
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditMathematicaHelp.html]
 }
