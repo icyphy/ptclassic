@@ -46,6 +46,10 @@ string-valued hash keys.
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Error.h"
 #include <stdio.h>
 #include "miscFuncs.h"

@@ -37,6 +37,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 //
 // Otherwise they are the same as their baseclasses.
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "pt_fstream.h"
 #include "miscFuncs.h"

@@ -31,6 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 DataFlowStar is the baseclass for stars in the various dataflow domains.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
