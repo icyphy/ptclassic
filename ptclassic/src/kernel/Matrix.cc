@@ -524,8 +524,13 @@ ComplexMatrix::ComplexMatrix(int numRow, int numCol, PortHole& ph) {
   LOG_NEW; data = new Complex[totalDataSize];
 
   // Load the data from the PortHole into the matrix.
-  for(int i = 0; i < totalDataSize; i++)
-    entry(i) = Complex((const Complex &)(ph%(totalDataSize - i - 1)));
+  for(int i = 0; i < totalDataSize; i++) {
+      // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+      //entry(i) = Complex((const Complex &) (ph%(totalDataSize - i - 1)));
+      Complex tmp = (ph%(totalDataSize - i - 1));
+      entry(i) = tmp;
+
+  }
 }
 
 // constructor:
@@ -918,8 +923,13 @@ FixMatrix::FixMatrix(int numRow, int numCol, PortHole& ph) {
   LOG_NEW; data = new Fix[totalDataSize];
 
   // Load the data from the PortHole into the matrix.
-  for(int i = 0; i < totalDataSize; i++)
-      data[i] = Fix((const Fix &)(ph%(totalDataSize - i - 1)));
+  for(int i = 0; i < totalDataSize; i++) {
+      // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+      // data[i] = Fix((const Fix &)(ph%(totalDataSize - i - 1)));
+      Fix tmp = (ph%(totalDataSize - i - 1));
+      data[i] = tmp;
+
+  }
 }
 
 // Constructor: 
