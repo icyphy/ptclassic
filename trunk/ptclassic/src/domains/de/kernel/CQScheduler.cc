@@ -3,7 +3,7 @@
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
-$Id$ $Revision$
+$Id$
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
@@ -92,6 +92,7 @@ void CQScheduler :: setup () {
 	}
 
 	galaxy()->initialize();
+	if(SimControl::haltRequested()) return;
 	
 	// Fire source stars to initialize the global event queue.
 	initialFire();
