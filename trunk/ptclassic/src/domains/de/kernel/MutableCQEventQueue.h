@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class Particle;
 class PortHole;
 class PendingEventList;
+class MutableCQScheduler;
 
         //////////////////////////////////////////
         // class Event and EventQueue
@@ -49,6 +50,8 @@ class PendingEventList;
 class MutableCQEventQueue : public MutableCalendarQueue
 {
 	friend PendingEventList;
+	friend MutableCQScheduler;
+
 public:
 	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
             Event* temp = getEvent(p, ph);
