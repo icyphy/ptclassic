@@ -41,7 +41,7 @@ static const char file_id[] = "PTcl.cc";
 #endif
 
 #include "isa.h"		// define the quote macro
-#include "PTcl.h"
+#include "PITcl.h"
 
 #include "InterpUniverse.h"
 #include "Target.h"
@@ -57,7 +57,7 @@ static const char file_id[] = "PTcl.cc";
 #include "Scheduler.h"
 #include "InfString.h"
 
-#include "ptclDescription.h"
+#include "pitclDescription.h"
 
 // "matlab" ptcl command -BLE
 // we make matlabtcl a static instance of the MatlabTcl class instead of
