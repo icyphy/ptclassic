@@ -30,10 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME: The buttons are not evenly spaced. I thought the grid
-# geometry manager would do this but apparently it doesn't.
-# We might have to kludge something up.
-
 #######################################################################
 #### ButtonBox
 # This class implements a reasonably useful button box widget. It is
@@ -43,6 +39,15 @@
 # Note that this widget is fairly simple, and that the following
 # options should not be changed once any buttons have been created:
 # -statusbar, -columns.
+#
+# The buttons are not necessarily evenly spaced. I thought the grid
+# geometry manager would do this but apparently it doesn't.
+# It would be nice if there were an automatic way of getting
+# all buttons the right width, but right now there just isn't...
+#
+# FIXME: Figure out if it's possible to bind to a window mapping
+# event and adjust the column -minsize option based on the measured
+# button widths.
 #
 class ::tycho::ButtonBox {
     inherit ::tycho::TWidget
@@ -73,6 +78,9 @@ class ::tycho::ButtonBox {
 
     # The status bar to print help info to
     itk_option define -statusbar statusBar StatusBar ""
+
+    # The width of the buttons.
+    itk_option define -buttonwidth buttonWidth ButtonWidth 8
 
     ###################################################################
     ####                         public methods                    ####
@@ -203,7 +211,7 @@ body ::tycho::ButtonBox::add {tag args} {
     itk_component add $tag {
 	eval button $itk_component(childsite).$tag \
 		-highlightthickness 0 \
-		[array get buttopts]
+		[array get buttopts] -takefocus 0
     } {
         keep -font -padx -pady
     }
