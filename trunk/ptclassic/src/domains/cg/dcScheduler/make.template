@@ -1,7 +1,7 @@
-# @(#)make.template	1.1	6/16/92
+# $Id$
 # Copyright (c) 1991 The Regents of the University of California.
 #				All Rights Reserved.
-# dynamic level scheduling
+# Gil's declustering algorithm
 
 
 # Root of Ptolemy directory
