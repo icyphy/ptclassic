@@ -42,32 +42,37 @@ limitation of liability, and disclaimer of warranty provisions.
 	  in.setSDFParams(PACKIN,PACKIN-1);
 	}
 	codeblock(mainDecl){
-	  const int NUMIN = 4;
-	  const int UPPERBOUND = 32767;
-	  const int LOWERBOUND = -32768;
-	  int $starSymbol(index);
-	  double $starSymbol(invalue);
-	  double* $starSymbol(outvalue);
-	  short* $starSymbol(packedout) = (short *)memalign(sizeof(double),sizeof(short)*NUMIN);
+	  const int $starSymbol(NUMIN) = 4;
+	  const int $starSymbol(UPPERBOUND) = 32767;
+	  const int $starSymbol(LOWERBOUND) = -32768;
+	  short* $starSymbol(packedout) = (short *)memalign(sizeof(double),sizeof(short)*$starSymbol(NUMIN));
+	}	  
+	initCode{
+	  addDeclaration(mainDecl);
+	}
+	codeblock(localDecl){
+	  int index;
+	  double invalue;
+	  double* outvalue;
 	}
 	codeblock(packit){
 	  /*scale input, check bounds of the input,*/ 
 	  /*and cast each float to short*/
-	      for ($starSymbol(index)=0;$starSymbol(index)<NUMIN;$starSymbol(index)++){
-		$starSymbol(invalue) = (double) $val(scale) * (double) $ref2(in,$starSymbol(index));
-		if ($starSymbol(invalue) <= (double) LOWERBOUND)
-		  $starSymbol(packedout)[$starSymbol(index)] = (short) LOWERBOUND;
-		else if ($starSymbol(invalue) >= (double) UPPERBOUND)
-		  $starSymbol(packedout)[$starSymbol(index)] = (short) UPPERBOUND;
+	      for (index=0;index<$starSymbol(NUMIN);index++){
+		invalue = (double) $val(scale) * (double) $ref2(in,index);
+		if (invalue <= (double) $starSymbol(LOWERBOUND))
+		  $starSymbol(packedout)[index] = (short) $starSymbol(LOWERBOUND);
+		else if (invalue >= (double) $starSymbol(UPPERBOUND))
+		  $starSymbol(packedout)[index] = (short) $starSymbol(UPPERBOUND);
 		else 
-		  $starSymbol(packedout)[$starSymbol(index)] = (short) $starSymbol(invalue);
+		  $starSymbol(packedout)[index] = (short) invalue;
 	      }	
 	  /*output packed double*/	  
-	  $starSymbol(outvalue) = (double *) $starSymbol(packedout);
-	  $ref(out) = *$starSymbol(outvalue);
+	  outvalue = (double *) $starSymbol(packedout);
+	  $ref(out) = *outvalue;
 	}
 	go {
-	  addDeclaration(mainDecl);
+	  addCode(localDecl);
 	  addCode(packit);
 	}
 	wrapup{
