@@ -117,7 +117,9 @@ void SimVSSTarget :: configureCommPair(CommPair& pair) {
   pair.cgcStar->setState("destDir", hashstring(destDirectory));
   pair.cgcStar->setState("filePre", hashstring(filePrefix));
 
-  StringList prNum = pairNumber;
+  int pid = (int) getpid();
+  StringList prNum = pid + pairNumber;
+
   pair.cgcStar->setState("pairNumber", hashstring(prNum));
   pair.cgStar->setState("pairNumber", hashstring(prNum));
   pairNumber++;
