@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #if ITCL_MAJOR_VERSION == 2
 #include <itk.h>
 #endif
+#include <unistd.h>             // getpid()
 #include <stdio.h>
 
 static void SetVersionInfo (Tcl_Interp *ptkInterp, char *Filename)
