@@ -48,6 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Galaxy.h"
 #include "DDFTarget.h"
 #include "DDFScheduler.h"
 #include "DDFClustSched.h"
