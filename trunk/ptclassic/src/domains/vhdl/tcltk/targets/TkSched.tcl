@@ -49,7 +49,7 @@ proc NodeMark { w x y } {
 
     # Set the label text
     set theText [$w itemcget $dot($w,textID) -text]
-    puts "theText:  $theText"
+#    puts "theText:  $theText"
     set dot($w,nodeName) $theText
 }
 
@@ -296,7 +296,7 @@ proc ReadFile { f } {
 	    # the top token list
 	    set topToken [lindex $line 1]
 	    lappend topTokenList $topToken
-	    puts "topToken:  $topToken"
+#	    puts "topToken:  $topToken"
 	}
 	# Test if the line is specifies a bottom token
 	if { [isBottomToken $line] == 1 } {
@@ -304,7 +304,7 @@ proc ReadFile { f } {
 	    # the bottom token list
 	    set bottomToken [lindex $line 1]
 	    lappend bottomTokenList $bottomToken
-	    puts "bottomToken:  $bottomToken"
+#	    puts "bottomToken:  $bottomToken"
 	}
 	# Test if the line is specifies an iter connection
 	if { [isIterConn $line] == 1 } {
@@ -317,7 +317,7 @@ proc ReadFile { f } {
 	    regexp {([^;]*);} [lindex $line 3] match dest
 	    lappend iterConn $dest
 	    lappend iterConnList $iterConn
-	    puts "iterConn: $iterConn"
+#	    puts "iterConn: $iterConn"
 	}
     }
     set dot(nodeList) $nodeList
@@ -451,7 +451,7 @@ proc DisplayGraph {} {
 	Level $node
     }
     foreach node $dot(nodeList) {
-	puts "Leveldone $dot($node,level)"
+#	puts "Leveldone $dot($node,level)"
     }
 
     set x1 0
@@ -567,7 +567,7 @@ proc Level { node } {
     set level [expr $maxPredLevel + 1]
 
     set dot($node,level) $level
-    puts "LEVEL: $node $level"
+#    puts "LEVEL: $node $level"
     return $level
 }
 
