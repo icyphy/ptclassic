@@ -1,3 +1,5 @@
+static const char file_id[] = "fft.cc";
+
 #include <Complex.h>
 #include "fft.h"
 
