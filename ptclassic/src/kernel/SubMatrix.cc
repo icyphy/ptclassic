@@ -104,7 +104,7 @@ ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src ComplexSubMatrix
@@ -208,7 +208,7 @@ FixSubMatrix::FixSubMatrix(const FixSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src FixSubMatrix
@@ -312,7 +312,7 @@ FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src FloatSubMatrix
@@ -417,7 +417,7 @@ IntSubMatrix::IntSubMatrix(const IntSubMatrix& src,
   }
   else nCols = nCol;
   totalDataSize = nRows * nCols;
-  data = &((*parent)[sRow][sCol]);
+  data = &(src[sRow][sCol]);
 }
 
 // Copy Constructor, makes a duplicate of src IntSubMatrix
