@@ -124,7 +124,7 @@ int directive;
 
 
 
-#if defined(ultrix)
+#if defined(ultrix) || defined(hppa)
 #define NEED_STRICMP
 #endif
 
