@@ -1,5 +1,9 @@
+// filename: BitArray.cc
+// SCCS info: $Id$
+//
 // This file contains the member functions of the
 // BitArray class.
+
 static const char file_id[] = "BitArray.cc";
 
 #ifdef __GNUG__
