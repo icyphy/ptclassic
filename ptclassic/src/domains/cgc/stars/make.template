@@ -60,6 +60,7 @@ PL_SRCS= \
  CGCQuant.pl \
  CGCRamp.pl \
  CGCReciprocal.pl \
+ CGCRect.pl \
  CGCRectToCx.pl \
  CGCRectToPolar.pl \
  CGCRepeat.pl \
