@@ -227,7 +227,7 @@ body ::tycho::Library::constructor {args} {
 
     # Add to the list of printable types
     lappend printable \
-	    -entities
+	    -visibletypes
 
     # Define the "attribute" entity
     type define attribute \
@@ -363,12 +363,20 @@ body ::tycho::Library::instantiate {item datamodel args} {
         set itemtype [_type $item]
     }
 
+    # Mark the history
+    $datamodel mark set temp
+
     # Add the item
     eval [list $datamodel publish add $itemtype $itemname] \
-            [attrget $item] [array get opts]
+            [attributes $item] [array get opts]
 
     # Add subitems
     _instantiate $item $datamodel $itemname
+
+    # Compact the history and replace the undo command with a single
+    # delete command
+    $datamodel history compact temp current
+    $datamodel history undo current "delete $itemname"
 
     # Return the new item
     return $itemname
