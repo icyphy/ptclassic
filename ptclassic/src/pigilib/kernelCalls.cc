@@ -149,6 +149,8 @@ ostream& operator<<(ostream& o,const SafeTcl& stcl) {
 // Return value: pointer to the stem, or class name.
 // 0 is returned if there is a syntax error.
 
+// Any future extensions to the name syntax will impact code in ganttIfc.c.
+
 #define MAX_NUM_FIELDS 20
 
 const char quotes[] = "\'\"";
