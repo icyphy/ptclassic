@@ -4,16 +4,19 @@
 #
 
 PTOLEMY       = ../..
-PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
-PRINTTITLE    = $(PTOLEMY)/doc/bin/printtitle
-HEADER        = $(PTOLEMY)/doc/headers/together
+DOCBIN	      = $(PTOLEMY)/doc/bin
+PRINTSEC      = printsec
+PRINTTITLE    = printtitle
 MAINSEC	      = overall
 TMPFILE	      = $$HOME/Almagest.main
+# The following may need to be gsoelim with groff
+SOELIM	      = soelim
 OPTIONS       =
 
 DIRS = overview pigi ptcl ptlang domains documents xgraph filters vem 
 
 MAKEVARS =	\
+		"DOCBIN=$(DOCBIN)" \
 		"PTOLEMY=$(PTOLEMY)" \
 		"PRINTER=$(PRINTER)" \
 		"PRINTSEC=$(PRINTSEC)" \
@@ -23,14 +26,14 @@ $(DIRS):
 	cd $@; $(MAKE) $(MFLAGS) $(MAKEVARS) print
 
 print:
-	$(PRINTTITLE) $(OPTIONS) title
+	$(DOCBIN)/$(PRINTTITLE) $(OPTIONS) title
 	rm -f $(TMPFILE)
 	for x in $(DIRS); do \
 		cd $$x ; \
-		soelim $(MAINSEC) >> $(TMPFILE) ; \
+		$(SOELIM) $(MAINSEC) >> $(TMPFILE) ; \
 		cd .. ; \
 	done
-	$(PRINTSEC) $(OPTIONS) $(HEADER) init $(TMPFILE)
+	$(DOCBIN)/$(PRINTSEC) $(OPTIONS) -H together init $(TMPFILE)
 	
 	$(PRINTTITLE) $(OPTIONS) title
 #	/bin/rm $(TMPFILE)
@@ -39,11 +42,12 @@ preview:
 	rm -f $(TMPFILE)
 	for x in $(DIRS); do \
 		cd $$x ; \
-		soelim $(MAINSEC) >> $(TMPFILE) ; \
+		$(SOELIM) $(MAINSEC) >> $(TMPFILE) ; \
 		cd .. ; \
 	done
-	$(PRINTSEC) -preview $(HEADER) init $(TMPFILE)
+	$(DOCBIN)/$(PRINTSEC) -preview -H together init $(TMPFILE)
 
 # this does preview a second time
 review:
-	$(PRINTSEC) -preview $(HEADER) init $(TMPFILE)
+	$(DOCBIN)/$(PRINTSEC) -preview -H together init $(TMPFILE)
+
