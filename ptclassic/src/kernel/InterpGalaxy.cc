@@ -171,7 +171,7 @@ int
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
 		      const char* initDelayValues) {
-	if ((initDelayValues == 0) || (*initDelayValues == 0)
+	if ((initDelayValues == 0) || (*initDelayValues == 0))
 	    initDelayValues = &emptyDelay;
 // Get the source and destination ports
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
