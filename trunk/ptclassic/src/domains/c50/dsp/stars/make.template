@@ -63,6 +63,7 @@ PL_SRCS= \
  C50Goertzel.pl \
  C50GoertzelBase.pl \
  C50GoertzelPower.pl \
+ C50FFTCx.pl \
  C50IIR.pl \
  C50LMS.pl \
  C50LMSGanged.pl \
