@@ -93,10 +93,43 @@ limitation of liability, and disclaimer of warranty provisions.
 	  short* $starSymbol(shift_taparray) =
 	    (short*)memalign(sizeof(double),sizeof(short)*
 			     $starSymbol(NUMPACK)*$val(tappadlength));
+	  int $starSymbol(taprowindex), $starSymbol(tapcolindex),$starSymbol(numloop);
+	  short *$starSymbol(indexcount),$starSymbol(scaledown);
+	}
+	codeblock(initialize) {
+	  vis_write_gsr(($val(scalefactor)+1)<<3);	  
+	  $starSymbol(scaledown)=(short) 1<<$val(scalefactor);	  
+	  /* initialize shifted taparrays to zero*/
+	       $starSymbol(indexcount) = $starSymbol(shift_taparray);
+	  for($starSymbol(taprowindex)=0;
+	      $starSymbol(taprowindex)<$starSymbol(NUMPACK); $starSymbol(taprowindex)++){
+	    for($starSymbol(tapcolindex)=0;
+		$starSymbol(tapcolindex)<$val(tappadlength); $starSymbol(tapcolindex)++){
+	      *$starSymbol(indexcount)++ = 0;
+	    }
+	  }
+	  /* fill taparrays*/
+	       for($starSymbol(taprowindex)=0;$starSymbol(taprowindex)<$starSymbol(NUMPACK);
+		   $starSymbol(taprowindex)++){
+		 $starSymbol(indexcount) = $starSymbol(shift_taparray) +
+		   ($val(tappadlength)+1)*($starSymbol(taprowindex));
+		 for($starSymbol(tapcolindex)=0
+		       ;$starSymbol(tapcolindex)<$val(taplength); $starSymbol(tapcolindex)++){
+		   /* scale and cast taps to short */
+		     *$starSymbol(indexcount)++ = (short)
+		       $val(scale)/$starSymbol(scaledown)*$ref2(taps,$starSymbol(tapcolindex));
+		 }
+	       }	  	
+	       /* loop once for each set of filter taps*/
+	       if ($val(taplength) == 0)
+		 $starSymbol(numloop) = 0;	
+	       else		
+		 $starSymbol(numloop) = $val(maxpast);	
 	}
 	initCode {
           addInclude("<vis_proto.h>");
 	  addDeclaration(mainDecl);
+	  addCode(initialize);
 	}
 	codeblock(localDecl) {
           double *tapptr[4],tapvalue;
@@ -104,58 +137,24 @@ limitation of liability, and disclaimer of warranty provisions.
           double pairlo,pairhi,pair,packedOut,*packedaccum;
           float packedhi,packedlo,datahi,datalo;
           float tappairhi,tappairlo,splithi,splitlo;
-          int outerloop,innerloop,numloop,genindex;
-	  int taprowindex, tapcolindex;
-	  short *indexcount,scaledown;
+          int outerloop,innerloop,genindex;
 	}
-	codeblock(filter) {
-	  vis_write_gsr(($val(scalefactor)+1)<<3);	  
-	  scaledown=(short) 1<<$val(scalefactor);
-	  
-	  /* initialize shifted taparrays to zero*/
-	       indexcount = $starSymbol(shift_taparray);
-	  for(taprowindex=0;taprowindex<$starSymbol(NUMPACK);taprowindex++){
-	    for(tapcolindex=0;tapcolindex<$val(tappadlength);tapcolindex++){
-	      *indexcount++ = 0;
-	    }
-	  }
-	  
-	  /* fill taparrays*/
-	       for(taprowindex=0;taprowindex<$starSymbol(NUMPACK);
-		   taprowindex++){
-		 indexcount = $starSymbol(shift_taparray) +
-		   ($val(tappadlength)+1)*(taprowindex);
-		 for(tapcolindex=0;tapcolindex<$val(taplength);tapcolindex++){
-		   /* scale and cast taps to short */
-		     *indexcount++ = (short)
-		       $val(scale)/scaledown*$ref2(taps,tapcolindex);
-		 }
-	       }
-
-	       /* loop once for each set of filter taps*/
-	       if ($val(taplength) == 0)
-		 numloop = 0;	
-	       else		
-		 numloop = $val(maxpast);	
-	  
+	codeblock(filter) {	  
 	       /* initialize accumulator to zero*/
 	       for(genindex=0;genindex<$starSymbol(NUMPACK);genindex++){
 		 $starSymbol(accumpair)[genindex] = vis_fzero();
 	       }
-
 	       /*initialize the tapptr to point at the beginning of
 		 each tap array*/
 	       for(genindex=0;genindex<$starSymbol(NUMPACK);genindex++){
 		 tapptr[genindex] = (double *) ($starSymbol(shift_taparray) +
 		   genindex*$val(tappadlength));
 	       }
-
 	       /* filter data*/
-	       for(outerloop=0;outerloop<numloop;outerloop++){
+	       for(outerloop=0;outerloop<$starSymbol(numloop);outerloop++){
 		 /* set up data*/
 		      datahi = vis_read_hi((double) $ref2(signalIn,outerloop));
 		 datalo = vis_read_lo((double) $ref2(signalIn,outerloop));
-
 		 /* calculate four outputs*/
 		      for(innerloop=0;innerloop<$starSymbol(NUMPACK);
 			  innerloop++){
@@ -163,13 +162,11 @@ limitation of liability, and disclaimer of warranty provisions.
 			     tapvalue = *tapptr[innerloop]++;
 			tappairhi = vis_read_hi(tapvalue);
 			tappairlo = vis_read_lo(tapvalue);
-
 			/* take inner products*/
 			     pairlolo = vis_fmuld8sux16(datalo,tappairlo);
 			pairlohi = vis_fmuld8ulx16(datalo,tappairlo);	    
 			pairhilo = vis_fmuld8sux16(datahi,tappairhi);
 			pairhihi = vis_fmuld8ulx16(datahi,tappairhi);
-
 			/* accumulate results*/
 			     pairlo = vis_fpadd32(pairlolo,pairlohi);
 			pairhi = vis_fpadd32(pairhilo,pairhihi);
@@ -178,21 +175,18 @@ limitation of liability, and disclaimer of warranty provisions.
 			  vis_fpadd32($starSymbol(accumpair)[innerloop],pair);
 		      }  
 	       }
-
 	       /* sum accumulators and pack outputs into a double*/
 	       for(genindex=0;genindex<$starSymbol(NUMPACK);genindex++){
 		 splithi = vis_read_hi($starSymbol(accumpair)[genindex]);
 		 splitlo = vis_read_lo($starSymbol(accumpair)[genindex]);
 		 $starSymbol(result)[genindex] =
 		   vis_fpadd32s(splithi,splitlo); 
-	       }
-	  
+	       }	  
 	  packedaccum = (double *) $starSymbol(result);
 	  packedhi = vis_fpackfix(*packedaccum);
 	  packedaccum++;
 	  packedlo = vis_fpackfix(*packedaccum);
-	  packedOut = vis_freg_pair(packedhi,packedlo);
-	  
+	  packedOut = vis_freg_pair(packedhi,packedlo);	  
 	  $ref(signalOut) = packedOut;
 	}
 	go {   
