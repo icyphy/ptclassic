@@ -130,7 +130,7 @@ Error :: message (cc* m1, cc* m2, cc* m3) {
 // marking is not supported in this implementation
 int Error :: canMark() { return 0;}
 
-void Error :: mark(const NamedObj& o) {
+void Error :: mark(const NamedObj& /* o */) {
 //	StringList n = o.fullName();
 //	PigiErrorMark(n);
 }
