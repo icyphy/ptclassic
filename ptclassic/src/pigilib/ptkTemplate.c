@@ -67,7 +67,7 @@ extern long UserMain();
 RPCMain(argc, argv)
 #endif
 #ifdef PTKCODE
-ptkRPCInit(argc, argv)
+int ptkRPCInit(argc, argv)
 #endif
 int argc;
 char **argv;
