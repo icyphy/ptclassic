@@ -457,6 +457,6 @@ body ::tycho::EditHTML::parseLink {dest} {
 # "edithtml" preferences.
 #
 body ::tycho::EditHTML::preference {mode args} {
-    eval ::preference $mode "edithtml" $args
+    eval ::tycho::preference $mode "edithtml" $args
 }
 
