@@ -19,6 +19,7 @@ vem*edit*borderWidth: 3
 #ifdef COLOR
 vem*cursor*color: red
 vem*background: white
+vem*foreground: black
 vem.background.color: #cdcdc1
 vem.grid.zero.color: #cdcdc1
 vem*menu*item*background: #eeeee0
