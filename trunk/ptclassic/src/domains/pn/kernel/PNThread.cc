@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,37 +31,32 @@ static const char file_id[] = "$RCSfile$";
 
 #ifdef __GNUG__
 #pragma implementation
+#pragma implementation "MTDFMonitor.h"
+#pragma implementation "MTDFCondition.h"
 #endif
 
+#include "Star.h"
 #include "MTDFThread.h"
-#include "TimeVal.h"
+#include "MTDFMonitor.h"
+#include "MTDFCondition.h"
 
-#ifdef __GNUG__
-extern "C"
+extern const char MTDFdomainName[];
+
+void MTDFThread::run()
 {
-    int lwp_sleep(timeval*);
+    // Fire the Star ad infinitum.
+    while(star.run());
 }
-#endif
 
-// Constructor.
-MTDFThread::MTDFThread(int priority, void (*thread)(MTDFStar*), MTDFStar* star)
-    : LwpThread(priority, (void(*)(void*))thread, star)
-{ }
-
-// Disable Thread for the specified time.
-int MTDFThread::sleep(double delay)
+void MTDFSourceThread::run()
 {
-    if (delay > 0.0)
+    // Fire the star ad infinitum.
+    do
     {
-	TimeVal t(delay);
-	return lwp_sleep((timeval*)&t);
-    }
-    else
-	return 0;
-}
-
-// New MTDFThread object corresponding to the current thread.
-MTDFThread* MTDFThread::currentThread()
-{
-    return (MTDFThread*)LwpThread::currentThread();
+	// Wait for notification to start.
+	{
+	    CriticalSection region(start.monitor());
+	    start.wait();
+	}
+    } while (star.run());
 }
