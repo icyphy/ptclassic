@@ -63,10 +63,10 @@ public:
 	const char* prepend(const char* name);
 	const char* append(const char* name);
 	int remove(const char* name = NULL);
-private:
+
 	// Make a unique symbol.
 	StringList symbol(const char*);
-
+private:
 	void deleteSymbols();
     	int* counter;
     	char separator;
@@ -81,6 +81,7 @@ public:
 	BaseSymbolList::setSeparator;
 	BaseSymbolList::setCounter;
 	BaseSymbolList::initialize;
+	BaseSymbolList::symbol;
 };
 
 // Class for unique nested symbol generation.
@@ -100,10 +101,8 @@ public:
 	BaseSymbolList::setSeparator;
 	BaseSymbolList::setCounter;
 	BaseSymbolList::initialize;
+	BaseSymbolList::symbol;
 };
-
-// For temporary backward compatibility.
-typedef SymbolStack NestedSymbolList;
 
 // Class for generation of unique symbols with named scope.
 class ScopedSymbolList : private NamedList
