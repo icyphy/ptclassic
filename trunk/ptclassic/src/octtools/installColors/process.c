@@ -5,13 +5,24 @@
 
 #include "copyright.h"
 #include "port.h"
+#include "ansi.h"
 #include "oct.h"
 #include "tech.h"
 #include "tap.h"
+#include "fill_pat.h"
 
 #include "process.h"
 
 #define FPRINTF	(void) fprintf
+
+/* Forward reference */
+int do_transfer
+	ARGS((octObject *tap_facet, vemTech *vem_tech, int chroma));
+int into_layer
+	ARGS((octObject *tap_lyr, vemTechLayer *vem_lyr, int chroma));
+
+octStatus put_str_prop
+	ARGS((octObject *container, char *name, char *value));
 
 void process(pat_file, tech_spec, root_dir, out_tech, out_view,
 	     out_disp, chroma) 
