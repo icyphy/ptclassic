@@ -88,11 +88,15 @@ body ::tycho::WelcomeMessage::constructor {args} {
     }
 
     # Pack the copyright button.
-    addButton copyright -text "Copyright" -command \
+    addButton copyright -text "Copyright" \
+            -underline 0 \
+            -command \
 	    "::tycho::File::openContext \"[file join $TYCHO copyright]\""
 
     # Pack the introduction button.
-    addButton intro -text "Home Page" -command \
+    addButton intro -text "Home Page" \
+            -underline 0 \
+            -command \
 	    "::tycho::File::openContext \"[file join $TYCHO doc index.html]\""
 
     # Process any unevaluated arguments.

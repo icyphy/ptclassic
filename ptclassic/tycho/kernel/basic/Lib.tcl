@@ -162,6 +162,15 @@ if {$tycho_bindings == {unix}} {
 
 ### Global Class Bindings
 #
+# The following ensure that if an entry box or text widget has the
+# focus, and the user types a character, that all that happens is that
+# the character appears in the entry box (simply add a "break" to the
+# standard Tk binding).
+bind Entry <Key> "tkEntryInsert %W %A; break"
+
+# The following is now bound for each Edit widget
+# bind Text <Key> "tkTextInsert %W %A; break"
+
 bind Entry <<ClearToStart>> {
     clipboard clear -displayof %W
     clipboard append -displayof %W [%W get]
@@ -176,7 +185,7 @@ bind Entry <<ClearToEnd>> {
 }
 
 # There are a few bindings that we want to work everywhere
-bind Entry <<Open>> {::tycho::File::openWin %W; break}
+bind all <<Open>> {::tycho::File::openWin %W; break}
 
 # The following totally silly emacs binding interferes with our
 # search mechanism.
@@ -397,6 +406,14 @@ if $ptolemyfeature(ptolemyinstalled) {
 	-category "tool" \
 	-underline 0
 
+# Font picker -- needs refinement
+::tycho::register mode "fontpicker" \
+	-command {::tycho::queryfont} \
+	-viewclass ::tycho::FontDialog \
+	-label {Font Picker}  \
+	-category "tool" \
+	-underline 0
+
 # "Diff" viewer -- will not run on the Macintosh
 if {$tcl_platform(platform) != "macintosh"} {
     ::tycho::register mode "diffviewer" \
@@ -414,7 +431,7 @@ if {$tcl_platform(platform) != "macintosh"} {
 	    wm deiconify $w} \
 	    -label {Directory Search}  \
 	    -category "tool" \
-	    -underline 0
+	    -underline 1
 
 # Monitor window for exec'ed processes -- will not run on the Macintosh
 if {$tcl_platform(platform) != "macintosh"} {

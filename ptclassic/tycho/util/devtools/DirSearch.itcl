@@ -63,7 +63,7 @@ class ::tycho::DirSearch {
     protected method setEntry {string}
 
     # Process a file or directory selection.
-    protected method processItem {filename}
+    protected method processItem {filename {ifdir {}}}
 
     ###################################################################
     ####                   private variables                       ####
@@ -181,9 +181,9 @@ body ::tycho::DirSearch::ok {} {
     set nm [::tycho::autoName .index]
     ::tycho::IndexBrowser $nm \
             -file $egrepOutputFile \
-            -width 100 -closewindow 0
+            -width 100 -closewindow 0 \
+            -text {Refine search:}
     $nm centerOnScreen
-
 }
 
 
@@ -216,8 +216,8 @@ body ::tycho::DirSearch::help {} {
 # the entry is invalid for some reason, the user is warned and the
 # method returns 0.
 #
-body ::tycho::DirSearch::processItem {filename} {
-    ::tycho::FileBrowser::processItem $filename
+body ::tycho::DirSearch::processItem {filename {ifdir {}}} {
+    ::tycho::FileBrowser::processItem $filename $ifdir
     return 0
 }
 

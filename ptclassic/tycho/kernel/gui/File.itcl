@@ -1018,7 +1018,7 @@ body ::tycho::File::saveCrash {} {
 # value 0, return 2 and do nothing.
 # If the file is modified and is saved, return 1.
 # If the file is modified but not saved, return 0.
-# If the user hits cancel, trigger a silentError, which unravels
+# If the user hits cancel or Escape, trigger a silentError, which unravels
 # the calling stack all the way to the top-level.  This has the effect
 # of cancelling the entire operation.
 #
@@ -1029,8 +1029,9 @@ body ::tycho::File::saveQuery { {useSaveAs 0}} {
         uplevel #0 [list ::tycho::YesNoCancel $nm \
 		-text "Save changes to $title?"]
 	set response [safeEval ::tycho::Dialog::wait $nm]
-	# If the user hits the cancel button, trigger a silent error.
-	if {$response == -1} {
+	# If the user hits the cancel button, or dismisses the dialog
+        # with Escape, trigger a silent error.
+	if {$response == -1 || $response == {}} {
  	    ::tycho::silentError
 	}
 	if {$response == 1} {

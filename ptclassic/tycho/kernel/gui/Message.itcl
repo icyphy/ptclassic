@@ -122,10 +122,11 @@ class ::tycho::Message {
 body ::tycho::Message::constructor {args} {
 
     # Pack the OK button.
-    addButton ok -text "OK <Ret>" -command "delete object $this"
+    addButton ok -text "OK" -underline 0 -command "delete object $this"
     default ok
     # For consistency, escape also dismisses dialog.
-    bind $itk_component(hull) <Escape> "$this invoke ok; break"
+    # (now supported in the base class)
+    # bind $itk_component(hull) <Escape> "$this invoke ok; break"
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
@@ -135,5 +136,7 @@ body ::tycho::Message::constructor {args} {
 #### destructor
 #
 body ::tycho::Message::destructor {} {
-    catch {prevWindow}
+    # This causes strange losses of focus.  Instead, call prevWindow
+    # before destroying an object when appropriate.
+    # catch {prevWindow}
 }

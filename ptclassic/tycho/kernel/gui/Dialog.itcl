@@ -39,8 +39,8 @@
 # addButton method. For example,
 # <tcl><pre>
 # ::tycho::Dialog .m -text {A dialog}
-# .m addButton pushme -text {Push Me} -command &#92
-#      {::tycho::post thanks; delete object .m}
+# .m addButton pushme -text {Push Me} -underline 0 &#92
+#      -command {::tycho::post thanks; delete object .m}
 # .m centerOnScreen
 # </pre></tcl>
 # A childsite is provided for additional widgets below the label and
@@ -51,6 +51,11 @@
 # method. The reason for deferring the mapping is to avoid the visually
 # distracting effect of mapping a partial window and then filling it
 # in.
+# <p>
+# The Escape key is bound to dismiss the dialog.
+# If the -underline option is given to the <code>addButton</code> method,
+# then it specifies a character in the text label of the button to underline.
+# The character becomes a shortcut for invoking the button.
 # <p>
 # There are a couple of convenience procedures. The <code>new</code>
 # procedure will create and map a window onto the screen. The
@@ -271,6 +276,9 @@ body ::tycho::Dialog::constructor {args} {
 	# then we never see the buttons
 	freezeWindowSize
     }
+    
+    # Bind Escape to dismiss the dialog.
+    bind $prefix <Escape> "$this prevWindow; delete object $this"
 }
 
 ######################################################################
@@ -281,11 +289,25 @@ body ::tycho::Dialog::constructor {args} {
 #### addButton
 # Add a button to the right of the existing buttons. 
 # The arguments are options understood by the Tk button command. The
-# most useful options are -command, which specified the command to
-# execute, -text, which specifies the label in the button, and -width,
-# which specifies the desired width of the button.  
+# most useful options are -command, which specifies the command to
+# execute, -text, which specifies the label in the button, -width,
+# which specifies the desired width of the button, and -underline,
+# which specifies which character in the text label to underline.
+# In addition, if -underline is given, the specified character is
+# bound to invoke the button.  In addition, the -row and -column options
+# can be used to specify the positioning of the button within a grid.
 body ::tycho::Dialog::addButton {args} {
     eval [concat $itk_component(bbox) add $args]
+    if [::tycho::getopt underline args] {
+        if [::tycho::getopt text args] {
+            set char [string index $text $underline]
+            if {$char != {}} {
+                # Assumes the tag of the button is the first arg.
+                bind $itk_component(hull) <Key-[string tolower $char]> \
+                        "$this invoke [lindex $args 0]; break"
+            }
+        }
+    }
 }
 
 #########################################################################

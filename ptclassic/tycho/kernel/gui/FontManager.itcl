@@ -1,7 +1,7 @@
 # Control the fonts in the Tycho system.
 #
 # @Author: Edward A. Lee, John Reekie
-# @Version: $Id$%
+# @Version: $Id$
 #
 # @Copyright Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -164,7 +164,6 @@ class ::tycho::FontManager {
     # Alternate font family names
     private common alternateFamilyName
     set alternateFamilyName(lucidabright) {lucida bright}
-    set alternateFamilyName(couriernew) {courier new}
     set alternateFamilyName(lucidatypewriter) {lucida sans typewriter}
     set alternateFamilyName(lucidaconsole) {lucida console}
     set alternateFamilyName(lucida) {lucida sans}
@@ -175,17 +174,18 @@ class ::tycho::FontManager {
     private common relatedFamilies
 
     set relatedFamilies(screen) \
-            {couriernew lucidaconsole lucidatypewriter courier}
+            {{courier new} lucidaconsole lucidatypewriter courier}
     set relatedFamilies(courier) \
-            {couriernew lucidaconsole lucidatypewriter screen}
+            {{courier new} lucidaconsole lucidatypewriter screen}
     # By putting screen first below, we get screen fonts under X
     # unless there is a Courier New font.
-    set relatedFamilies(couriernew) \
+    set cn {courier new}
+    set relatedFamilies($cn) \
             {screen courier lucidaconsole lucidatypewriter}
     set relatedFamilies(lucidatypewriter) \
-            {lucidaconsole couriernew courier screen}
+            {lucidaconsole {courier new} courier screen}
     set relatedFamilies(lucidaconsole) \
-            {lucidatypewriter couriernew courier screen}
+            {lucidatypewriter {courier new} courier screen}
 
     set relatedFamilies(times)        {lucidabright palatino}
     set relatedFamilies(lucidabright) {times palatino}
@@ -332,6 +332,11 @@ body ::tycho::FontManager::getFont {family {size 12} {style roman} {shift 0}} {
 	    set weight bold
 	    set style  i
 	}
+        default {
+            # Unrecognized font
+            set weight medium
+            set style r
+        }
     }
 
     # Call the lower-level routine

@@ -111,7 +111,7 @@ class ::tycho::HTML {
 
     # The default constant-width font -- currently an X font, but should
     # be made symbolic in Tk 8.0
-    itk_option define -cwfont cwFont Font [::tycho::font Courier 14]
+    itk_option define -cwfont cwFont Font [::tycho::font {Courier New} 14]
 
     constructor {args} {}
     destructor {}
@@ -306,8 +306,10 @@ configbody ::tycho::HTML::cwfont {
     # Process each tag -- "tcl" is treated specially in HMtag_tcl
     foreach tag {code kbd pre tt} {
 	array set temp $HMtag_map($tag)
-	# Remove spaces from family name
-	set temp(family) [join [lindex $f 0] ""]
+	# Used to remove spaces from family name --
+        # On NT, this turns "courier new" into "couriernew", and the
+        # the latter does not map into a fixed width font!
+	set temp(family) [lindex $f 0]
 	set temp(size) [lindex $f 1]
 	# "kbd" tag is always bold
 	if { $tag != "kbd" } {
@@ -1376,7 +1378,7 @@ body ::tycho::HTML::_initializeMenubar {menubar} {
 
     $menubar insert command opensource saveas \
 	    -label "Open Source" \
-            -underline 1 \
+            -underline 5 \
             -accelerator [::tycho::Shortcuts::getLabel OpenSource] \
             -command "$this openSource"
 
@@ -1461,6 +1463,14 @@ body ::tycho::HTML::_initializeToolbar {toolbar} {
 
     # Add the entry widget displaying the current page
     $toolbar entry location Location [filename] "$this hyperJumpUser"
+
+    # Make sure that Alt-key still brings up the menus, rather than
+    # triggering one of the bindings above. Disable bindings for
+    # control keys while we are at it.
+    foreach key {b w h r o f s} {
+        bind $text <Alt-Key-$key> { }
+        bind $text <Control-Key-$key> { }
+    }
 }
 
 #####################################################################
@@ -1811,7 +1821,6 @@ proc HMparse_html {html {cmd HMtest_parse} {start hmstart}} {
 # procedure called HMtag_$tag, then that procedure is invoked.
 #
 proc HMrender {win tag not param text} {
-# puts HMrender:$win
     # Update the count used to track current progress.
     # This is in a global array because this proc is global...
     uplevel #0 "set HMrender_progress($win) \
@@ -2463,7 +2472,7 @@ proc HMx_font {family size weight style {adjust_size 0}} {
     # I don't know why.  We have to handle that situation.
     if {$size == {}} {return fixed}
     incr size $adjust_size
-    set result [::tycho::xfont $family $size $weight $style]
+    set result [::tycho::FontManager::getXFont $family $size $weight $style]
     set HMx_font_cache($cachename) $result
     return $result
 }

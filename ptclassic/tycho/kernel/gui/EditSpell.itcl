@@ -127,49 +127,44 @@ body ::tycho::EditSpell::constructor {args} {
     eval itk_initialize $args
 
     $itk_component(bbox) buttonconfigure ok \
-	    -text {Next <Ret>} \
+	    -text {Next} \
+            -underline 0 \
 	    -command "$this next"
+    # NOTE: There is not facility in the base classes to remove the
+    # previous binding (to letter "o") to invoke this button and to
+    # add a new binding, so we do it by brute force.  Ugh.
+    bind $itk_component(hull) <Key-o> {}
+    bind $itk_component(hull) <Key-n> "$this invoke ok; break"
 
     addButton clear -text {Clear Marks} \
+            -underline 6 \
 	    -command "$this clearSpellMatch"
 
     addButton recheck -text {Recheck} \
+            -underline 0 \
 	    -command "$this recheck"
 
     if {$itk_option(-nochange) == 0} {
-	addButton replace -text {Change <M-Ret>} \
+	addButton replace -text {Change} \
+                -underline 1 \
 		-command "$this replace"
-	bind $itk_component(hull) <Meta-Return> \
-		"$this replace; break"
     }
 
     # Create a button box for dictionary buttons
-    # FIXME: Layout needs to be improved.
     itk_component add dbox {
  	::tycho::ButtonBox $itk_component(childsite).dbox
     } {
  	keep -background -font -padx -pady
     }
     $itk_component(dbox) add dictionary -text {Dictionary} \
- 	    -command "$this dictionary"
+            -underline 0 \
+            -command "$this dictionary"
+    bind $itk_component(hull) <Key-d> "$this dictionary"
     $itk_component(dbox) add learn -text {Learn} \
+            -underline 0 \
 	    -command "$this learn"
+    bind $itk_component(hull) <Key-l> "$this dictionary"
     pack $itk_component(dbox) -side right -before $itk_component(querysite)
-
-#     itk_component add dbox {
-# 	button $itk_component(childsite).dbox -text {Dictionary}\
-# 		-command "$this dictionary" -pady 5 -padx 5 -width 14
-#     } {
-# 	keep -background -cursor
-#     }
-#     pack $itk_component(dbox) -side right  -before $itk_component(querysite)
-#     itk_component add lbox {
-# 	button $itk_component(childsite).lbox -text {Learn} \
-# 		-command "$this learn" -pady 5 -padx 5 -width 14
-#     } {
-# 	keep -background -cursor
-#     }
-#     pack $itk_component(lbox) -side right -before $itk_component(querysite)
 }
 
 ##################################################################
@@ -248,6 +243,10 @@ body ::tycho::EditSpell::next {} {
 	insert word [$tw getSelection]
 	set upto $end
     }
+    # NOTE: Focus ends up in the text window.  Why?  Very annoying.
+    # The following regrettably returns the focus to the entry
+    # box always.  Also, why does it have to be postponed?  Not clear.
+    after idle "$this focusin"
 }
 
 #####################################################################

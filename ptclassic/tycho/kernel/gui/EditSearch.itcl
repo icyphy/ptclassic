@@ -185,16 +185,12 @@ body ::tycho::EditSearch::constructor {args} {
         }
     }
 
-    bind $itk_component(hull) <Control-s> \
+    # Well, the following are undocumented bindings.  So be it.
+    bind $itk_component(hull) <<Search>> \
 	    "$this configure -backwards 0; $this find"
-    bind $itk_component(hull) <Control-r> \
-	    "$this configure -backwards 1; $this find"
-
-    # Dusplicate these bindings in upper case since that's how this
-    # window is invoked.
-    bind $itk_component(hull) <Control-S> \
+    bind $itk_component(hull) <<Find>> \
 	    "$this configure -backwards 0; $this find"
-    bind $itk_component(hull) <Control-R> \
+    bind $itk_component(hull) <<SearchBackwards>> \
 	    "$this configure -backwards 1; $this find"
 
     # If the findcommand option has not been set, set the default now.
@@ -205,10 +201,17 @@ body ::tycho::EditSearch::constructor {args} {
     }
 
     $itk_component(bbox) buttonconfigure ok \
-	    -text {Find <Ret>} \
+	    -text {Find} \
+            -underline 0 \
 	    -command "$this execCommand -findcommand"
+    # NOTE: There is not facility in the base classes to remove the
+    # previous binding (to letter "o") to invoke this button and to
+    # add a new binding, so we do it by brute force.  Ugh.
+    bind $itk_component(hull) <Key-o> {}
+    bind $itk_component(hull) <Key-f> "$this invoke ok; break"
 
     addButton clearfind -text {Clear Marks} \
+            -underline 6 \
 	    -command "$this clearFindMatch"
 
     if {$itk_option(-nochange) == 0} {
@@ -217,12 +220,12 @@ body ::tycho::EditSearch::constructor {args} {
 	    configure -chfindcommand "$this changeAndFind"
 	}
 
-	addButton change -text {Change<M-%>} \
+	addButton change -text {Change} \
+                -underline 1 \
 		-command "$this change"
-	addButton changeandfind -text {Change&Find} \
+	addButton changeandfind -text {Change & Find} \
+                -underline 2 \
 		-command "$this execCommand -chfindcommand"
-
-	bind $itk_component(hull) <Meta-percent>  "$this change"
 
 	# Add an option to change all matches
 	itk_component add changeall {

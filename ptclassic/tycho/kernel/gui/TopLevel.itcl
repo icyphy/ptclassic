@@ -451,8 +451,8 @@ body ::tycho::TopLevel::busy {args} {
 # should be called after all the widgets have been packed into the
 # window, but before any tkwait visibility.
 # <p>
-# FIXME: This procedure doesn't work with widgets that defer mapping
-# (like most iwidgets, including the only one we use, the buttonbox).
+# NOTE: This procedure doesn't work with widgets that defer mapping
+# (like most iwidgets).
 # The width of the button box is not taken into account despite the fact
 # that everything has been packed into it already. This is because the
 # widget actually defers the packing using an "after" command.
@@ -477,6 +477,7 @@ body ::tycho::TopLevel::centerOnScreen {} {
 	    [winfo vrooty [winfo parent $prefix]]]
     wm geometry $prefix +$x+$y
     wm deiconify $prefix
+    focusin
 }
 
 #####################################################################
