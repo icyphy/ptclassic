@@ -52,5 +52,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		@ @fixName = Fix(@(portPrecision.len()),@(portPrecision.intb()));
 		@ @fixName.set_rounding(1);
 	    }
+	    else if (sdfPortType == COMPLEX) {
+	      StringList declare;
+	      declare << "Complex " << "cxTemp" << ";";
+	      addCode(declare,"mainDecls");
+	    }
 	}
 }

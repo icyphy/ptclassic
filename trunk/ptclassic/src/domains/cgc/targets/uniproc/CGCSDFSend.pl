@@ -40,11 +40,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(tokenXfr,"") {
 	    @(sdfPortName)%0 << $ref(input);
 	}
-	codeblock(fixBlockXfr,"") {
+	codeblock(complexBlockXfr,"") {
 	    for (int $label(i) = 0; $label(i) < @numXfer ; $label(i)++) {
-		@(fixName) = FIX_Fix2Double($ref(input,$label(i)));
-		@(sdfPortName)%$label(i) << @(fixName);
+		cxTemp = Complex($ref(input,$label(i)).real,
+				 $ref(input,$label(i)).imag);
+		@(sdfPortName)%$label(i) << cxTemp;
 	    }    
+	}
+	codeblock(complexTokenXfr,"") {
+	  cxTemp = Complex($ref(input).real,$ref(input).imag);
+	  @(sdfPortName)%0 << cxTemp;
+	}
+	codeblock(fixBlockXfr,"") {
+	  for (int $label(i) = 0; $label(i) < @numXfer ; $label(i)++) {
+	    @(fixName) = FIX_Fix2Double($ref(input,$label(i)));
+	    @(sdfPortName)%$label(i) << @(fixName);
+	  }    
 	}
 	codeblock(fixTokenXfr,"") {
 	    @(fixName) = FIX_Fix2Double($ref(input));
@@ -54,6 +65,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if (sdfPortType == FIX) {
 		if (numXfer > 1) addCode(fixBlockXfr()); 
 		else addCode(fixTokenXfr());
+	    }
+	    if (sdfPortType == COMPLEX) {
+		if (numXfer > 1) addCode(complexBlockXfr()); 
+		else addCode(complexTokenXfr());
 	    }
 	    else {
 		if (numXfer > 1) addCode(blockXfr()); 
