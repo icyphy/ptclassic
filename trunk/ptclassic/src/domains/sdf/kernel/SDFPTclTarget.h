@@ -120,7 +120,8 @@ private:
 };
 
 // Generate the Ptcl description of a galaxy
-StringList ptclDescription(
-	Galaxy* localGalaxy, int addHeader = FALSE, const char* path = 0);
+StringList ptclDescription(Galaxy* localGalaxy, const char* path = 0,
+			   int addHeader = FALSE, const char* preamble = 0,
+			   const char* epilog = 0);
 
 #endif
