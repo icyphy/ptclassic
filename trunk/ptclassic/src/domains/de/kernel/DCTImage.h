@@ -40,7 +40,7 @@ public:
 	virtual	void		assemble(const BaseImage*);
 	float*				retData();
 
-// For const packets.
+// For const images.
 	const float*		constData() const { return DCTData; }
 
 	void				setSize(const int);
@@ -54,10 +54,10 @@ public:
 	inline	int processed() const
 			{ return(upWidth*upHeight != fullSize); }
 
-// PacketData-like stuff
+// Message-like stuff
 	virtual const char* dataType() const;
-	virtual PacketData* clone() const;
-	virtual PacketData* clone(int a) const;
+	virtual Message* clone() const;
+	virtual Message* clone(int a) const;
 	int isA(const char*) const;
 };
 

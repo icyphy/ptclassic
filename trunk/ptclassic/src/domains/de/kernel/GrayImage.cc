@@ -8,8 +8,8 @@ static const char file_id[] = "GrayImage.cc";
 #include <minmax.h>
 
 const char* GrayImage::dataType() const { return "GrayImage";}
-PacketData* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this);}
-PacketData* GrayImage::clone(int a) const { LOG_NEW; return new GrayImage(*this,a);}
+Message* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this);}
+Message* GrayImage::clone(int a) const { LOG_NEW; return new GrayImage(*this,a);}
 ISA_FUNC(GrayImage,BaseImage);
 
 void GrayImage::init()

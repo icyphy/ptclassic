@@ -50,7 +50,7 @@ public:
 	inline	char*	retHorz() { return horzData; }
 	inline	char*	retVert() { return vertData; }
 
-	// versions for const packets
+	// versions for const images
 	inline	const char* constHorz() const { return horzData; }
 	inline	const char* constVert() const { return vertData; }
 
@@ -59,10 +59,10 @@ public:
 	inline	int		bsMatch(MVImage* mv) const
 			{ return (blocksize == mv->blocksize); }
 
-// PacketData-like stuff
+// Message-like stuff
 	virtual const char* dataType() const;
-	virtual PacketData* clone() const;
-	virtual PacketData* clone(int a) const;
+	virtual Message* clone() const;
+	virtual Message* clone(int a) const;
 	int isA(const char*) const;
 };
 

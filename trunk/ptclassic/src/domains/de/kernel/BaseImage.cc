@@ -16,9 +16,9 @@ void BaseImage::assemble(const BaseImage*)
 	{}
 const char* BaseImage::dataType() const
 	{ return "BaseImage";}
-PacketData* BaseImage::clone() const
+Message* BaseImage::clone() const
 	{ LOG_NEW; return new BaseImage(*this); }
-PacketData* BaseImage::clone(int a) const
+Message* BaseImage::clone(int a) const
 	{ LOG_NEW; return new BaseImage(*this, a); }
 
 
@@ -65,4 +65,4 @@ void BaseImage::copy(int len, unsigned char* into,
 	}
 } // end BaseImage::copy()
 
-ISA_FUNC(BaseImage,PacketData);
+ISA_FUNC(BaseImage,Message);

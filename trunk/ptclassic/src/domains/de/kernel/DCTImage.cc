@@ -8,8 +8,8 @@ static const char file_id[] = "DCTImage.cc";
 #include <minmax.h>
 
 const char* DCTImage::dataType() const { return("DCTImage"); }
-PacketData* DCTImage::clone() const { LOG_NEW; return new DCTImage(*this); }
-PacketData* DCTImage::clone(int a) const {LOG_NEW; return new DCTImage(*this,a);}
+Message* DCTImage::clone() const { LOG_NEW; return new DCTImage(*this); }
+Message* DCTImage::clone(int a) const {LOG_NEW; return new DCTImage(*this,a);}
 ISA_FUNC(DCTImage,BaseImage);
 
 
