@@ -138,6 +138,8 @@ PL_SRCS= \
  CG56Sqr.pl \
  CG56Sqrt.pl \
  CG56Sub.pl \
+ CG56Table.pl \
+ CG56TableInt.pl \
  CG56Test.pl \
  CG56Tone.pl \
  CG56UpSample.pl \
