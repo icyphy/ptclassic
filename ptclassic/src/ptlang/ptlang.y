@@ -1050,7 +1050,10 @@ genDef ()
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
 /* generate className and (optional) makeNew function */
-        fprintf (fp, "\nconst char* %s :: className() const {return \"%s\";}\n",
+/* also generate a global identifier with name star_nm_DDDNNN, where DDD is
+   the domain and NNN is the name */
+	fprintf (fp, "\nconst char *star_nm_%s = \"%s\";\n", fullClass, fullClass);
+        fprintf (fp, "\nconst char* %s :: className() const {return star_nm_%s;}\n",
 		fullClass, fullClass);
 	if (!pureFlag) {
 		fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s;}\n",
