@@ -41,6 +41,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
+	JRPCServer.tcl \
 	List.tcl \
 	Loader.tcl \
 	Lib.tcl \
@@ -87,7 +88,6 @@ ITCL_SRCS = \
 	HTMLMessage.itcl \
 	IndexBrowser.itcl \
 	JRPC.itcl \
-	JRPCServer.itcl \
 	Library.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
