@@ -51,7 +51,7 @@ int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 	while (i < argc) {
 		if(stateWithName(argv[i])) {
 			// argument is recognized as a state name
-			char* value = (++i < argc) ? argv[i] : "";
+			char* value = (++i < argc) ? argv[i] : (char *)"";
 			setState(argv[(i++)-1],value);
 		} else {
 			// assume that the argument is the number of iterations
