@@ -200,8 +200,9 @@ and disclaimer of warranty provisions, push the button below. "
     global gSlowX11Link
     if { $gSlowX11Link != 1 } {
 	# If we are not on a slow X11 link, then bring up Mr. Ptolemy
+	# We allocate 3 x 3 x 2 = 18 colors for Mr. Ptolemy
 	global ptolemy
-	image create photo ptolemygif -palette 4/4/3  \
+	image create photo ptolemygif -palette 3/3/2  \
 	    -file $ptolemy/lib/tcl/ptolemyWelcome.gif
 	set height [image height ptolemygif]
 	set width [image width ptolemygif]
