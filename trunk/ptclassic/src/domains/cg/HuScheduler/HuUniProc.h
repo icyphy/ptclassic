@@ -76,6 +76,7 @@ public:
 	// deallocate the links of this list.
 	// reset the members.
 	void initialize() { UniProcessor::initialize();
+			    nextFiringTime = 0; lastFiringTime = 0;
 			    timeFree = 0; }
 
 };
