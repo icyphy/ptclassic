@@ -55,6 +55,7 @@ GRAPHICAL_TESTS = \
 	testExec.itcl \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
+	testMenuBar.itcl \
 	testRevControl.itcl \
 	testToolBar.itcl \
 	testWidgets.itcl \
