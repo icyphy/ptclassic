@@ -116,6 +116,20 @@ cd pxgraph
 optlink ../../src/pxgraph bitmaps
 cd ..
 
+# If tkvem directory exists, then make dirs and do links
+if ( -d $PTOLEMY/src/tkvem ) then
+	optmkdir tkvem
+	cd tkvem
+	foreach x (tkvem tkgraph top)
+		optmkdir $x
+		cd $x
+		optlink ../../../src/tkvem/$x make.template
+		optlink ../../../src/tkvem/$x makefile
+		cd ..
+	end
+	cd ..
+endif
+
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
 
