@@ -42,7 +42,7 @@ The only special case is for gain 1.
 	move	a,$ref(output)
 	}
 	go {
-		if (double(gain) == 1.0) gencode(unity);
+		if (double(gain) == double(ONE)) gencode(unity);
 		else gencode(std);
 	}
 }
