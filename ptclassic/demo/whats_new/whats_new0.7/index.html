@@ -352,6 +352,15 @@ Tom Lane's diagnosis was that the last few ramp outputs were rounding
 to 2 instead of truncating to 1, so his fix was to change the lower
 Ramp star from 0.1 to 0.5.
 
+<DT> * DERepeatStar has been revised to use a delay marker rather than
+setting nonstandard porthole priorities on its feedback arc.  In most
+cases this will give better behavior.  Derived stars that set
+delayType or contain triggers() directives may need to be revised.
+DERepeatStar can also pass a numeric value in each feedback event.
+See section 11.2.6 of the Programmer's Manual for details.
+
+<DD> 
+
 </DL>
 
 <p>
