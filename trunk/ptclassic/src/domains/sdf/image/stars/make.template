@@ -69,7 +69,6 @@ PL_SRCS= \
  SDFEdgeDetect.pl \
  SDFImageToMx.pl \
  SDFImageToPix.pl \
- SDFMakeSeqATMCell.pl \
  SDFMedianImage.pl \
  SDFMotionCmp.pl \
  SDFMotionCmpInv.pl \
