@@ -70,6 +70,10 @@ public:
         // assignment from a <C>
         <C> operator=(<C> rvalue) { return val = rvalue;}
 
+	// assignment between two <T>States
+        <T>State& operator=(const <T>State&  rhs)
+        { this->val=rhs.val; return *this;}
+
         // casting to a <C>
         operator <C>() { return val;}
 
