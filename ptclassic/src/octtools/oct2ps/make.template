@@ -73,9 +73,13 @@ $(DEST):	oct2ps
 		rm -f $(DEST)
 		ln oct2ps $(DEST)
 
-install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro
+install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro $(BINDIR)/oct2ps
 	
 	
+$(BINDIR)/oct2ps:
+	rm -f $@
+	ln -s ../octtools/bin.$(ARCH) $@
+
 $(ROOT)/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
 	rm -f $@
 	cp $? $@
