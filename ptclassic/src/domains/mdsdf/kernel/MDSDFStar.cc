@@ -106,7 +106,9 @@ int MDSDFStar::simRunStar(int rIndex, int cIndex, int deferFiring) {
   return 0;
 }
 
-int MDSDFStar::deferrable() {}
+// For Solaris2.3 CC, functions declared to return an int must return
+// something.
+int MDSDFStar::deferrable() {return 0;}
 
 
 // Result codes when testing if a star is runnable:
