@@ -91,7 +91,7 @@ int DataFlowStar :: run() {
 }
 
 // functions for use with the loop scheduler
-void DataFlowStar::beginLoop(int reps,DFPortHole* cond=0,int relation=0) {}
+void DataFlowStar::beginLoop(int,DFPortHole*,int) {}
 void DataFlowStar::endLoop() {}
 
 // functions for dynamic execution
