@@ -43,22 +43,22 @@ PL_SRCS= \
  HOFMap.pl \
  HOFMapGr.pl \
  HOFNop.pl \
- HOFParSources.pl \
- HOFParSourcesCx.pl \
- HOFParSourcesInt.pl \
- HOFParSourcesFix.pl \
- HOFParSources_M.pl \
- HOFParSourcesCx_M.pl \
- HOFParSourcesInt_M.pl \
- HOFParSourcesFix_M.pl \
- HOFParSourcesGr.pl \
- HOFParSourcesGrCx.pl \
- HOFParSourcesGrInt.pl \
- HOFParSourcesGrFix.pl \
- HOFParSourcesGr_M.pl \
- HOFParSourcesGrCx_M.pl \
- HOFParSourcesGrFix_M.pl \
- HOFParSourcesGrInt_M.pl
+ HOFParSrc.pl \
+ HOFParSrcCx.pl \
+ HOFParSrcInt.pl \
+ HOFParSrcFix.pl \
+ HOFParSrc_M.pl \
+ HOFParSrcCx_M.pl \
+ HOFParSrcInt_M.pl \
+ HOFParSrcFix_M.pl \
+ HOFParSrcGr.pl \
+ HOFParSrcGrCx.pl \
+ HOFParSrcGrInt.pl \
+ HOFParSrcGrFix.pl \
+ HOFParSrcGr_M.pl \
+ HOFParSrcGrCx_M.pl \
+ HOFParSrcGrFix_M.pl \
+ HOFParSrcGrInt_M.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
