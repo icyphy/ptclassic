@@ -57,6 +57,10 @@ INCLUDE_GTHREADS =	no
 # Include the PN domain.
 INCLUDE_PN_DOMAIN =	no
 
+# Solaris 7 does not need uint32_t and int32_t defined for the
+# Wildforce stars, it has them defined in /usr/include/sys/int_types.h
+WILDFORCEDEFINES=
+
 # Dirk Forchel provided the following changes to compile xv:
 # -DATT is needed so we don't try and include sys/dir.h
 # -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
