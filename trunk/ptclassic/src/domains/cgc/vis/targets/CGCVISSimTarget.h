@@ -42,22 +42,33 @@ public:
 	CGCVISSimTarget(const char* name, const char* starclass, const
 		       char* desc, const char* assocDomain = CGCdomainName);
 
+	/*virtual*/ void writeCode();
+	/*virtual*/ int compileCode();
+	/*virtual*/ int loadCode();
+	/*virtual*/ int runCode();
+
+	StringList compileLine(const char* fName);
+	StringList loadLine(const char* fName);
+
+	void writeSimFile();
+
+	// complete list of obj files on which the compilation depends
+	StringList getDependentObjFiles(int expandEnvironmentVars);
+
 	// Generate code for a Star firing.  By default, execute the star.
         void writeFiring(Star&,int depth);
 
-	// Generate code.
-        void generateCode();
-
 	// Generate Timing Functions
-	void genProfileInit(int funcid);
-	void genProfileEnd(int funcid);
-	void generateTimingProc();
+	void genProfile(int funcid);
 
 	Block* makeNew() const;
 
 	int isA(const char*) const;
+
 protected:
-	int compileCode();
+	CodeStream remoteObjFilesStream;
+	StringState linkCommand;
+	IntState simulate;
 	int functionCounter;
 };
 
