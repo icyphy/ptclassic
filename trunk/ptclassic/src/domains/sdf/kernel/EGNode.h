@@ -56,7 +56,6 @@ public:
   	EGNode(SDFStar*, int n = 1);
 	virtual ~EGNode();
 
-	// WARNING! does "delete this"!!!! (questionable practice?)
 	void	deleteInvocChain();
 
 	// print me

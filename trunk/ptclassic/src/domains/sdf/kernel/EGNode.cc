@@ -29,8 +29,10 @@ EGNode :: EGNode(SDFStar* s, int n) : pStar(s), invocation(n), next(0) {
 EGNode :: ~EGNode() {}
 
 void EGNode :: deleteInvocChain() {
-	if (next) next->deleteInvocChain();
-	LOG_DEL; delete this;
+	if (next) {
+		next->deleteInvocChain();
+		LOG_DEL; delete next;
+	}
 }
 
 StringList EGNode :: printMe() {
