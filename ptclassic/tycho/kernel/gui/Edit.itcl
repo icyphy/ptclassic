@@ -575,6 +575,11 @@ body ::tycho::Edit::constructor {args} {
     bind $text <<UpPage2>> "%Q scroll -1; break"
     bind $text <<Center>> "%Q center; break"
     
+    # Regardless of binding preferences, page up and page down
+    # buttons should behave reasonably.
+    bind $text <Next> "%Q scroll 1; break"
+    bind $text <Prior> "%Q scroll -1; break"
+
     # The undo command
     bind $text <<Undo>> "%Q undo; break"
 
@@ -659,19 +664,6 @@ body ::tycho::Edit::constructor {args} {
     bind $text <F11> { }
     bind $text <F12> { }
 
-# FIXME: Are the following needed with emacs bindings?
-# Probably not because the top-level window gets events first.
-#     bind $text <Control-x><0> { }
-#     bind $text <Control-x><k> { }
-#     bind $text <Control-x><o> { }
-#     
-#     bind $text <Control-x><Control-c> { }
-#     bind $text <Control-x><Control-f> { }
-#     bind $text <Control-x><Control-F> { }
-#     bind $text <Control-x><Control-r> { }
-#     bind $text <Control-x><Control-s> { }
-#     bind $text <Control-x><Control-w> { }
-    
     # The following do break a sequence of key entries for
     # the purposes of the undo.  I don't know why some systems
     # require the "KP" prefix, but here it is.
@@ -777,6 +769,7 @@ body ::tycho::Edit::center {} {
 	    index @0,[winfo height $itk_component(text)]])]
     set offset [expr $insertline-int(($botline+$topline)/2)]
     $itk_component(text) yview scroll $offset units
+    parseRegion $topline.0 $botline.0
 }
 
 #####################################################################
@@ -1632,10 +1625,8 @@ body ::tycho::Edit::move {type} {
 	if [$itk_component(text) compare insert == end] {return}
     }
     switch $type {
-        "fword" { $itk_component(text) mark set insert \
-                "insert + [nextWord] char"}
-        "bword" {$itk_component(text) mark set insert \
-                "insert - [prevWord] char"}
+        "fword" { setInsert "insert + [nextWord] char"}
+        "bword" { setInsert "insert - [prevWord] char"}
     }
 }
 
@@ -1662,8 +1653,7 @@ body ::tycho::Edit::openLine {} {
     if $readOnly {bell; return}
     resetUndo
     insertString "insert linestart" "\n"
-    $itk_component(text) mark set insert "insert -1 line"
-	
+    setInsert "insert -1 line"	
 }
 
 #####################################################################
