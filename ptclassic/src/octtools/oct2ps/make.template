@@ -66,13 +66,13 @@ LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-luprintf$(DBGFLAG) -lport$(DBGFLAG) 
 
 oct2ps:	$(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(SYSLIBS) -lm 
+	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
 oct2ps.debug:	$(OBJS)
-	$(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(SYSLIBS) -lm 
+	$(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
 oct2ps.debug.purify:	$(OBJS)
-	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(SYSLIBS) -lm 
+	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
 TESTBINARY = ./oct2ps
 SCMOS_TECH = /usr/eesww/share/octtools/tech

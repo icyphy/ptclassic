@@ -113,7 +113,7 @@ VEMLIBS = -Lrpc -lrpcserver -Ldialogs -ldialogs \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -lvov -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
 	-lTgl -lutility -lport -lerrtrap -luprintf -lst \
-	$(X11_LIBSPEC) -lXaw -lXt -lXmu $(X11EXT_LIBSPEC) -lX11 $(SYSLIBS)
+	$(X11_LIBSPEC) -lXaw -lXt -lXmu $(X11EXT_LIBSPEC) -lX11 $(CSYSLIBS)
 
 all: vem vem.debug
 vem: include $(VEMOBJECTS)

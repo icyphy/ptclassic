@@ -61,7 +61,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 octfix:	$(OBJS)
 	$(CLINKER) $(LINKFLAGS) $(OBJS) \
 		-o octfix \
-		$(LIBS) $(SYSLIBS) -lm 
+		$(LIBS) $(CSYSLIBS) 
 
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/octfix
 

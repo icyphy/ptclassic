@@ -49,11 +49,11 @@ all:	makefile pxgraph
 # here.
 pxgraph:	$(OBJS)
 	rm -f pxgraph
-	$(LINKER) $(LINKFLAGS) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 pxgraph.debug:	$(OBJS)
 	rm -f pxgraph
-	$(LINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 
 OUT = $(BINDIR)/pxgraph
