@@ -43,6 +43,7 @@ include $(CONFIG)
 TCL_SRCS = \
 	Color.tcl \
 	Defaults.tcl \
+	Loader.tcl \
 	Lib.tcl \
 	Path.tcl \
 	tychoMakeClassDAG.tcl
@@ -69,7 +70,6 @@ ITCL_SRCS = \
 	HTMLMessage.itcl \
 	IndexBrowser.itcl \
 	ListBrowser.itcl \
-	Loader.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
