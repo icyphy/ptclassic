@@ -50,8 +50,8 @@ static int grabInputs(
 	return TCL_OK;
 }
 
-// Define the callback procedure used by Tcl to get the value of
-// the inputs.
+// Define the callback procedure used by Tcl to set the value of
+// the outputs.
 static int setOutputs(
     ClientData tcl,                     // Pointer to the Tcl interface
     Tcl_Interp *interp,                 // Current interpreter
@@ -269,7 +269,7 @@ int TclStarIfc::wrapup() {
     else return TRUE;
 }
 
-// Works for all Ptolemy domains
+// Convert values on input to strings; works for all Ptolemy domains
 InfString TclStarIfc::getInputs () {
 	BlockPortIter nexti(*myStar);
 	PortHole *p;
@@ -283,13 +283,13 @@ InfString TclStarIfc::getInputs () {
 	return result;
 }
 
-// Load the local buffer outputValues[] with values supplied by Tcl
-void TclStarIfc::setOneOutput (int outNum, double outValue) {
-	if(outNum >= outputArraySize) {
-	    Error::warn(*myStar,"Too many outputs supplied by Tcl");
+// Sets one element of inputNewFlags array to flag (either TRUE or FALSE)
+void TclStarIfc::setOneNewInputFlag(int inNum, int flag) {
+	if ( (inNum >= inputArraySize) || (inNum < 0) ) {
+	    Error::warn(*myStar, "Input port number is out of range");
 	}
 	else {
-	    outputValues[outNum] = outValue;
+	    inputNewFlags[inNum] = flag;
 	}
 }
 
@@ -299,10 +299,30 @@ void TclStarIfc::setAllNewInputFlags (int flag) {
 	  inputNewFlags[port] = flag;
 }
 
+// Load the local buffer outputValues[] with values supplied by Tcl
+void TclStarIfc::setOneOutput (int outNum, double outValue) {
+	if (outNum >= outputArraySize) {
+	    Error::warn(*myStar, "Too many outputs supplied by Tcl");
+	}
+	else {
+	    outputValues[outNum] = outValue;
+	}
+}
+
 // Sets all elements of outputNewFlags array to flag (either TRUE or FALSE)
 void TclStarIfc::setAllNewOutputFlags (int flag) {
 	for ( int port = 0; port < outputArraySize; port++ )
 	  outputNewFlags[port] = flag;
+}
+
+// Sets one element of outputNewFlags array to flag (either TRUE or FALSE)
+void TclStarIfc::setOneNewOutputFlag(int outNum, int flag) {
+	if ( (outNum >= outputArraySize) || (outNum < 0) ) {
+	    Error::warn(*myStar, "Output port number is out of range");
+	}
+	else {
+	    outputNewFlags[outNum] = flag;
+	}
 }
 
 // Initialize the static counter for unique names.
