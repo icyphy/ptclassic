@@ -42,6 +42,7 @@ include $(CONFIG)
 EXTRA_SRCS =	\
 	fontmanager.html \
 	base.html \
+	compile.html \
 	console.html \
 	decorators.html \
 	dialogclasses.html \
