@@ -1185,8 +1185,12 @@ StringList CGCStar::declareState(const State* state)
     if ((state->isA("FixState") || state->isA("FixArrayState")) &&
 	(state->attributes() & AB_VARPREC))
  	dec << ";  fix_prec " << name << "p";
-    dec << ";\n";
+    // Strings cant just be declared, they have to be initialized as well
+    if (state->isA("StringState"))
+      dec << '=' << '"' << state->currentValue() << '"';
 
+    dec << ";\n";
+    
     return dec;
 }
 
