@@ -48,8 +48,9 @@ TCL_SRCS =
 
 ITCL_SRCS = \
 	PNEdit.itcl \
+	PNMainPanel.itcl \
 	PNRunWindow.itcl \
-	PNSimulation.itcl
+	PNSimulation.itcl 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	pn.tcl \
