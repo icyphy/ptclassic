@@ -109,6 +109,13 @@ _ptkAppInit( ip)
       return TCL_ERROR;
     }
 
+#ifdef ITCL_VERSION
+    /* ITCL2.0 or better */
+    if (Itk_Init(ip) == TCL_ERROR) {
+      return TCL_ERROR;
+    }
+#endif
+
 #if ITCL_MAJOR_VERSION >= 3
     Tcl_StaticPackage(ip, "Itcl", Itcl_Init, Itcl_SafeInit);
     Tcl_StaticPackage(ip, "Itk", Itk_Init, (Tcl_PackageInitProc *) NULL);
@@ -135,12 +142,6 @@ _ptkAppInit( ip)
 #endif /* ITCL_MAJOR_VERSION */
 #endif /* PT_NO_ITCL */
 
-#ifdef ITCL_VERSION
-    /* ITCL2.0 or better */
-    if (Itk_Init(ip) == TCL_ERROR) {
-      return TCL_ERROR;
-    }
-#endif
     ptkRegisterCmds(ip);
     return TCL_OK;
 }
