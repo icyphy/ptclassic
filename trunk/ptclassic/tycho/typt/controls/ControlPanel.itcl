@@ -44,6 +44,39 @@
 # widget is created with this name, and is _not_ packed into
 # a Displayer. (The same name is returned.)
 #
+# This procedure assumes that the loaded package has a single
+# Tcl command with the same name as the package name. For
+# example, the *foo.so* package will implement the procedure
+# *::tycho::foo*. This proc has the following submodes:
+# <ul>
+# <li><b>setup</b>: ...
+# <li> etc...
+# </ul>
+# 
+# The <b>scriptfile</b> mode whould return the name of a file
+# that adds "panels" to a ControlPanel widget called
+# "controlPanel." Each panel should be a subclass of
+# <a href="ControlSubpanel.html">ControlSubpanel</a>.
+# For example, to create a sub-panel with controls for
+# real-time audio, the script contains
+# <pre>
+#     ::tycho::AudioIO controlPanel.io
+#     controlPanel add controlPanel.io -side left
+# </pre>
+# Note that the script does not have to create the control panel,
+# since this is done by the <code>::tycho::controlpanel</code>
+# procedure. Note also that no dollar-sign is required in front
+# of <code>controlPanel</code>: the  <code>::tycho::controlpanel</code>
+# substitutes the name of the actual control panel widget for
+# this string.
+#
+# A useful statement to place in the script file is
+# <pre>
+#     controlPanel debug 1
+# </pre>
+# which makes the ControlPanel widget print out debugging
+# messages.
+#
 proc ::tycho::controlpanel {filename {widgetname {}}} {
     set name [file rootname [file tail $filename]]
     set directory [file dirname $filename]
@@ -115,7 +148,29 @@ proc ::tycho::controlpanel {filename {widgetname {}}} {
 # A <i>ControlPanel</i> is a class that displays a control panel
 # for a Tycho task running in the "background" in Tycho.
 # The task is executed by the _Scheduler_ class, and
-# interleaves execution with other tasks.
+# interleaves execution with other tasks. It manages the
+# call-backs from control widgets to the generated C code.
+#
+# This widget is generally created by the
+# <code>::tycho::controlpanel</code> procedure, which also
+# sources a script file that should configure a control panel
+# named "controlPanel." (See the <a href="ControlPanl_rel.html">
+# <code>::tycho::controlpanel></code</a> proc for more information.)
+# Most of the methods of the ControlPanel widget are used
+# internally, by the <a href="../../../../src/tycgc/doc">tycgc</a>
+# support library, and by the ControlSubPanel class, but the script file
+# writer is likely to use the following:
+# <ul>
+# <li><b>-helpfile</b>: The name of a file containing HTML help
+# text. If this option is set, a help button appears on the
+# control panel.
+# <li><b>-orient</b>: The orientation of the start/stop control 
+# buttons. This can be "vertical" or "horizontal."
+# <li><b>add</b> _subpanel_ ?_option value_?: Add a sub-panel (a sub-class of
+# <a href="ControlSubpanel.html">ControlSubpanel</a>) into the
+# control panel.
+# <li><b>debug</b> _bool_: Turn debugging messages on or off.
+# </ul>
 #
 class ::tycho::ControlPanel {
     inherit ::tycho::View
