@@ -42,6 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGUtilities.h"
 #include "ConversionTable.h"
 
+#define CONVERSION_TABLE_ROWS 15
+
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -50,15 +52,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // So, we create a class and let it do the work.
 class VHDLConversionTable: public ConversionTable {
 public:
-   VHDLConversionTable():ConversionTable(7) {
-     tblRow(  FLOAT, 	COMPLEX,	"FloatToCx"	);
-     tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
-     tblRow(  COMPLEX, 	FLOAT,		"CxToFloat"	);
-     tblRow(  FIX,	COMPLEX,	"FixToCx"	);
-     tblRow(  FIX,	FIX,		"FixToFix"	);
-     tblRow(  FIX,	ANYTYPE,	"FixToFloat"	);
-     tblRow(  ANYTYPE, 	FIX,		"FloatToFix"	);
-   }
+  VHDLConversionTable():ConversionTable(CONVERSION_TABLE_ROWS) {
+    tblRow(  COMPLEX, 	FLOAT,		"CxToFloat"	);
+    tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
+    tblRow(  COMPLEX, 	ANYTYPE,	"CxToFloat"	);
+    tblRow(  FLOAT, 	COMPLEX,	"FloatToCx"	);
+    tblRow(  FLOAT, 	FIX,		"FloatToFix"	);
+    tblRow(  FLOAT, 	INT,		"FloatToInt"	);
+    tblRow(  FIX,	COMPLEX,	"FixToCx"	);
+    tblRow(  FIX,	FLOAT,		"FixToFloat"	);
+    tblRow(  FIX,	FIX,		"FixToFix"	);
+    tblRow(  FIX,	INT,		"FixToInt"	);
+    tblRow(  FIX,	ANYTYPE,	"FixToFloat"	);
+    tblRow(  INT,	FLOAT,		"IntToFloat"	);
+    tblRow(  INT,	FIX,		"IntToFix"	);
+    tblRow(  ANYTYPE, 	COMPLEX,	"FloatToCx"	);  
+    tblRow(  ANYTYPE, 	FIX,		"FloatToFix"	);
+  }
 };
 static VHDLConversionTable vhdlConversionTable;
 
@@ -101,7 +111,7 @@ HLLTarget(name, starclass, desc, assocDomain) {
 
   // Initialize type conversion table
   typeConversionTable = &vhdlConversionTable;
-  typeConversionTableRows = 7;
+  typeConversionTableRows = CONVERSION_TABLE_ROWS;
 }
 
 // Clone
