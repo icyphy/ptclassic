@@ -88,7 +88,7 @@ class ::tycho::EditSTD {
     method setInitialState {tag} 
 
     # Set the machine type.
-#    method setMachineType {type}
+    method setMachineType {type}
 
     # Set the in, out and internal port names.
     method setPortNames {in out internal}
@@ -724,9 +724,9 @@ body ::tycho::EditSTD::setInitialState {tag} {
 #######################################################################
 #### setMachineType
 #
-#body ::tycho::EditSTD::setMachineType {type} {
-#    set machineType $type
-#}
+body ::tycho::EditSTD::setMachineType {type} {
+    set machineType $type
+}
 
 #######################################################################
 #### setPortNames
