@@ -580,12 +580,9 @@ body ::tycho::Slate::ghost {tag args} {
 # slate's option with the same name.
 # </ul>
 #
-# If an item is not highlighted, then new highlight items are
-# created and the return value is a list of the created items.
-# If an item is already highlighted, then the highlight item is
-# adjusted in size and in color and line width, and its id
-# added to the return list. In this case, any tags in the option
-# are ignored.
+# If a highlight already exists on each item, then it is deleted and
+# a new highlight drawn with the given options. The return value is
+# a list of the created highlight items.
 #
 body ::tycho::Slate::highlight {tag args} {
     if { ! [string match {[_0-9]*} $tag] } {
@@ -607,7 +604,8 @@ body ::tycho::Slate::highlight {tag args} {
 	    -highlightwidth $itk_option(-highlightwidth) \
 	    -highlightfill  $itk_option(-highlightfill)]
     array set opts $args
-    
+    lappend opts(-tags) "highlight" "highlight.$tag"
+
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has a highlight{} method,
 	# call that. Note that this method must deal with the
@@ -617,42 +615,63 @@ body ::tycho::Slate::highlight {tag args} {
 	if { [@scope $class ::info exists methodtable(highlight)] } {
 	    return [eval [@scope $class set methodtable(highlight)] \
 		    $tag $canvas $this \
-		    [list -width $opts(-highlightwidth) \
-		    -outline $opts(-highlightcolor) \
-		    -fill $opts(-highlightfill)] \
-		    [list -tags [concat \
-		    "highlight" "highlight.$tag" $opts(-tags)]]]
-    	}
-    }
-
-    # If we get to here, tag represents a single item.
-    # If the item is not already highlighted, draw a box around it.
-    if { [$canvas find withtag highlight.$tag] == "" } {
-	set result [eval $canvas create rectangle \
-		[$canvas bbox $tag] \
-		[list -width $opts(-highlightwidth) \
-		-outline $opts(-highlightcolor) \
-		-fill $opts(-highlightfill)] \
-		[list -tags [concat \
-		"highlight" "highlight.$tag" $opts(-tags)]]]
-
-	# Lower the box to just below the item
-	$canvas lower highlight.$tag $tag
-
+		    [list -highlightwidth $opts(-highlightwidth) \
+		    -highlightcolor $opts(-highlightcolor) \
+		    -highlightfill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+        } else {
+            set primary [@scope ::tycho::ComplexItem set primary($tag)]
+        }
     } else {
-	# It is highlighted, so change the coordinates and
-	# the highlighting colors. Note that tags are not changed.
-	eval $canvas coords highlight.$tag [$canvas bbox $tag]
-	$canvas itemconfigure highlight.$tag \
-		-width $opts(-highlightwidth) \
-		-outline $opts(-highlightcolor) \
-		-fill $opts(-highlightfill)
-	# Return the item
-	set result $tag
+        # Simple item
+        set primary $tag
     }
-
-    # Return it
-    return $result
+    # If we get to here, tag represents a single item. Delete
+    # an existing highlight
+    $canvas delete highlight.$tag
+    
+    # Draw the highlight according to the shape of the item's primary
+    set shape [$canvas type $primary]
+    switch -exact $shape {
+        "rectangle" -
+	"oval" {
+	    set highlight [eval $canvas create $shape \
+		    [eval ::tycho::Rectangle::stretch [$canvas coords $primary] 2] \
+                    [list \
+                    -width $opts(-highlightwidth) \
+                    -outline $opts(-highlightcolor) \
+                    -fill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+        }
+	"polygon" {
+	    set highlight [eval $canvas create polygon \
+		    [::tycho::Polygon::stretch [$canvas coords $primary] 2] \
+                    [list \
+                    -width $opts(-highlightwidth) \
+                    -outline $opts(-highlightcolor) \
+                    -fill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+	}
+	"line" {
+	    set highlight [eval $canvas create line \
+		    [$canvas coords $primary] \
+                    [list \
+                    -arrow [$canvas itemcget $primary -arrow] \
+                    -width [expr $opts(-highlightwidth) * 2] \
+                    -fill $opts(-highlightcolor) \
+                    -tags $opts(-tags)]]
+	}
+	"default" {
+	    set highlight [eval $canvas create rectangle \
+		    [eval ::tycho::Rectangle::stretch [region $tag] 2] \
+                    [list \
+                    -width $opts(-highlightwidth) \
+                    -outline $opts(-highlightcolor) \
+                    -fill $opts(-highlightfill) \
+                    -tags $opts(-tags)]]
+ 	}
+    }
+    $canvas lower $highlight $tag
 }
 
 #######################################################################
