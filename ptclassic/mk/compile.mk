@@ -65,6 +65,7 @@
 # is needed
 #
 # The following files use these two rules:
+#  de/contrib/stars/make.template
 #  de/tcltk/stars/make.template
 #  de/stars/make.template
 #  cg56/stars/make.template
