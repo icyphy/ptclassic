@@ -32,7 +32,7 @@
 ##########################################################################
 #### PortedDigraph
 #
-# The _PortedDigraph_ model extends the _Digraph_ class with the
+# The _PortedDigraph_ model is a directed graph with the
 # notion of "ports" at each vertex. Edges between vertices must
 # connect to a port of a vertex rather than just the vertex.
 # Keys are implemented as an entity nested within
@@ -42,18 +42,14 @@
 # Note, however, that ports are not constrained to be "inputs" or "outputs".
 #
 # Here are some examples of creating and accessing a ported digraph.
-# See the <a href="AbstractGraph.html">AbstractGraph</a> and
-# <a href="Digraph.html">Digraph</a> classes for more information
-# about graphs and directed graphs, and the <a href="Model.html">Model</a> 
-# class for more information about the facilities inherited by this
-# class from Model. Create a graph, give ports and edges some
-# attributes, load data into it, and display it:
-# Load data into the graph and display it again:
+# The graph looks like this:
 # <pre>
 #   a---->c--->
 #         ^
 #   b-----+--->d
 # </pre>
+# Create the graph, configure attributes of edges and vertices,
+# and load data into it:
 # <tcl><pre>
 #     catch {delete object $graph}
 #     set graph [::tycho::PortedDigraph [::tycho::autoName graph]]
@@ -128,7 +124,7 @@
 # </tcl></pre>
 #
 class ::tycho::PortedDigraph {
-    inherit ::tycho::Digraph
+    inherit ::tycho::AbstractGraph
     
     constructor {args} {}
     destructor {}
