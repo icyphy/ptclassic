@@ -86,7 +86,7 @@ public:
 	int createSubGals(Galaxy&);
 
 	// set up processors
-	virtual void setUpProcs(int num);
+	virtual ParProcessors* setUpProcs(int num);
 
 	// map targets of processors
 	void mapTargets() { parProcs->mapTargets(); }

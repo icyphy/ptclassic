@@ -88,9 +88,6 @@ public:
 	CGStar* myStar() { return (CGStar*) myMaster(); }
 	virtual const char* readRealName();
 
-	// check if myStar() is at the boundary
-	int atBoundary() { return atBoundaryFlag; }
-
 	// Is it correponds to a atomic CG star?
 	int amIBig() { return myStar()->isParallel(); }
 
@@ -175,9 +172,6 @@ protected:
 	DataFlowStar* clonedStar;
 
 private:
-	// If the origin star lies at the boundary of a wormhole
-	int atBoundaryFlag;
-
 	// necessary information for sub universe generation
 	ParNode* nextNode;	// next invoc. assigned to the same processor
 	ParNode* firstNode;	// the earliest invoc. assigned.

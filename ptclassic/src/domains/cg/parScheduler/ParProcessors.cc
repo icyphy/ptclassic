@@ -41,7 +41,8 @@ Date of last revision:
 #include "StringList.h"
 #include "SimControl.h"
 
-ParProcessors :: ParProcessors(int pNum, MultiTarget* t) : mtarget(t) {
+ParProcessors :: ParProcessors(int pNum, MultiTarget* t) :
+moveStars(0), mtarget(t) {
 	numProcs = pNum;
 	pIndex.create(pNum);
 	SCommNodes.initialize();
@@ -443,7 +444,18 @@ void ParProcessors :: createSubGals() {
 	// create sub-Universes
 	for (i = 0; i < numProcs; i++) {
 		getProc(i)->createSubGal();
-		if (SimControl::haltRequested()) return;
+		if (SimControl::haltRequested()) break;
+	}
+
+	// We may leak memory here if SimControl::haltRequested()
+	// We could be more careful - if there is an error in building
+	// the subgalaxies - empty them and don't empty the original
+	// galaxy.  FIXME
+	
+	// empty the galaxy if we are moving the stars
+	if (moveStars) {
+	    mtarget->galaxy()->empty();
+	    mtarget->requestReset();
 	}
 }
 

@@ -37,7 +37,6 @@ special routines to generate the sub universes.
 #pragma implementation
 #endif
 
-#include "CGCluster.h"
 #include "UniProcessor.h"
 #include "ParProcessors.h"
 #include "KnownBlock.h"
@@ -45,12 +44,12 @@ special routines to generate the sub universes.
 #include "Geodesic.h"
 #include "ConstIters.h"
 #include "dataType.h"
+#include "Wormhole.h"
 #include <string.h>
 
 PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
 	ParNode* n = (ParNode*) s->myMaster();
  	DataFlowStar* copyS = n->getCopyStar();
-	if (p->asClusterPort()) return &p->asClusterPort()->real();
 	return copyS->portWithName(p->name());
 }
 
@@ -98,26 +97,19 @@ void UniProcessor :: createSubGal() {
 			smallest = (ParNode*) smallest->getNextInvoc();
 
 		DataFlowStar* copyS;
-		// FIXME if cluster, we use stars from original graph
-		
-		if (n->myMaster()->asCluster()) {
+		// FIXME - the moveStar code assumes that each star is
+		// mapped to only one processor.
+		if (parent->moveStars) {
 		    copyS = n->myMaster();
-		    Block* master = copyS->asCluster()->masterBlock();
-		    Block* parentBlock = master->parent();
-		    parentBlock->asGalaxy().removeBlock(*master);
-		    subGal->addBlock(*master, master->name());
-		    master->setTarget(targetPtr);
-		    Scheduler* clusterSched = copyS->asCluster()->innerSched();
-		    if (clusterSched) clusterSched->setTarget(*targetPtr);
 		}
 		else {
 		    copyS = n->copyStar(target(), myId(), 1);
-		    domForClone = copyS->domain();
-		    // add to the galaxy
-		    subGal->addBlock(*copyS, org->name());
-		    copyS->setTarget(targetPtr);
 		}
+		domForClone = copyS->domain();
 		if (SimControl::haltRequested()) return;
+
+		subGal->addBlock(*copyS, org->name());
+		copyS->setTarget(targetPtr);
 
 
 		ParNode* prevN = 0;
@@ -142,59 +134,7 @@ void UniProcessor :: createSubGal() {
 		DataFlowStar* org = pn->myMaster();
 		BlockPortIter piter(*org);
 		PortHole* p;
-		Block* black = 0;
-		Block* cst = 0;
 		while ((p = piter++) != 0) {
-			// wormhole boundary
-			if (p->atBoundary()) {
-			    if (p->far()) {
-				PortHole* cp = clonedPort(org, p);
-				PortHole* evep = p->far();
-				p->geo()->disconnect(*evep);
-				if (p->isItInput()) {
-					evep->connect(*cp,p->numTokens());
-				} else {
-					cp->connect(*evep,p->numTokens());
-				}
-				// add Galaxy porthole
-				LOG_NEW; GalPort* gP = new GalPort(*cp);
-				subGal->addPort(gP->setPort(
-					p->name(),subGal,p->type()));
-				continue;
-			    } else {
-				// make a dummy connection to prevent
-				// error message when code generation
-				if (p->isItOutput()) {
-				   if (!black) {
-				      black = KnownBlock::clone("BlackHole",
-					   domForClone);
-				      if (!black) {
-					Error::abortRun("we need BlackHole",
-				        " star for dummy connection.");
-					return;
-				      }
-				   }
-				   PortHole* destP = 
-					black->portWithName("input");
-			           clonedPort(org,p)->connect(*destP, 0);
-				} else {
-				   cst = KnownBlock::clone("Const",
-					domForClone);
-				   if (!cst) {
-					Error::abortRun("we need Const",
-				        " star for dummy connection.");
-					return;
-				   }
-				   PortHole* srcP = 
-					cst->portWithName("output");
-			           srcP->connect(*(clonedPort(org,p)), 0);
-				}
-					
-				// TRY IT
-				continue;
-			    }
-			}
-
 			DataFlowStar* farS =(DataFlowStar*) p->far()->parent();
 			ParNode* farN = (ParNode*) farS->myMaster();
 			ParNode* myN = (ParNode*) org->myMaster();
@@ -218,8 +158,9 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org,
 	DataFlowStar* farS, SequentialList& touchedStars) {
 
     if (touchedStars.member(farS)) {
-	// if cluster, already connected - we use original stars!!
-	if (farS->asCluster()) return;
+	// if we are moving stars, they are already connected
+	if (parent->moveStars) return;
+	
 	// make connection if it is output
 	if (p->isItOutput()) {
 	    PortHole* destP = clonedPort(farS, p->far());
@@ -227,7 +168,7 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org,
 	}
     } else {
 	ParNode* n = (ParNode*) farS->myMaster();
-	PortHole* cp = clonedPort(org, p);
+	PortHole* cp = parent->moveStars?p:clonedPort(org, p);
 	if (p->isItInput()) {
 	    makeReceive(n->getProcId(),cp,p->numTokens(),0,p);
 	} else {

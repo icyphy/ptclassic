@@ -195,9 +195,10 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 // setUpProcs
 /////////////////////////////
 
-void ParScheduler :: setUpProcs(int num) {
+ParProcessors* ParScheduler :: setUpProcs(int num) {
 	numProcs = num;
 	avail.create(numProcs);
+	return (ParProcessors*) NULL;
 }
 
 // sub-universe creation.
@@ -361,8 +362,6 @@ void ParScheduler :: compileRun() {
 		SDFScheduler :: compileRun();
 		return;
 	}
-	// run sub-universe in each processor to generate the code
-//	parProcs->generateCode();
 	if (haltRequested()) { invalid = TRUE; return; }
 }
 

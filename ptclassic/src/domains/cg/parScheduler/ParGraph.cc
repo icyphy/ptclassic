@@ -102,22 +102,6 @@ int ParGraph :: initializeGraph() {
 		if (SetNodeSL(src) < 0) return FALSE;
 	}
 
-	// Set the level of the nodes on the wormhole boundary large.
-	nxtSrc.reset();
-	while ((src = (ParNode*) nxtSrc++) != 0) {
-		DataFlowStar* s = src->myMaster();
-		if (!s->isSource()) {
-			BlockPortIter nextp(*s);
-			PortHole* p;
-			while ((p = nextp++) != 0) {
-				if (p->atBoundary()) {
-					src->assignSL(ExecTotal);
-					break;
-				}
-			}
-		}
-	}
-			
 	return TRUE;
 }
 

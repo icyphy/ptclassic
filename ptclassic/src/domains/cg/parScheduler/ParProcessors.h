@@ -100,6 +100,14 @@ public:
 	// generation.
 	ParNode* matchCommNodes(DataFlowStar*, EGGate*, PortHole*);
 
+        // Move vs. copy stars when making subgalaxies.  The newer
+        // schedulers such as the HierScheduler use the StateScope
+        // class - so the stars can be moved.  We still support schedulers
+        // that require copying of stars for backwards compatibility.  The
+        // moveStars member should be set to TRUE in the
+        // ParScheduler::setUpProcs virtual method to get the new behavior.
+        int moveStars;
+
 protected:
 	// processors
 	UniProcessor* schedules;
