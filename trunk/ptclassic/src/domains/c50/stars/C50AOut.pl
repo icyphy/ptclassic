@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 io library }
+	location { C50 main library }
 	explanation {
 .PP
 This star is an interrupt driven D/A star for the DSK320 board.
@@ -27,19 +27,19 @@ If this parameter is a number, it will be used for the length
 .PP
 
 	}
-        seealso { AIn }
+	seealso { AIn }
 	input {
 		name {input}
 		type {FIX}
 	}
 
-        state {
+	state {
 		name { interruptBufferSize }
-                type { int }
-                desc {
-	    size of interrupt buffer, presently does not support repetition.
-	        }
-             	default { 4 }
+		type { int }
+		desc {
+size of interrupt buffer, presently does not support repetition.
+		}
+	     	default { 4 }
  	}
 	state {
 		name { bufLen }
@@ -70,7 +70,7 @@ If this parameter is a number, it will be used for the length
  		attributes { A_NONSETTABLE|A_NONCONSTANT|A_BMEM|A_NOINIT }
 	}
 
-        codeblock(interruptInit) {
+	codeblock(interruptInit) {
 	splk	#12h,IMR			; Turn on receive interrupt
 	splk    #20h,TCR
 	splk    #01h,PRD			; 10 MHz Master Clock for AIC 
@@ -84,12 +84,12 @@ If this parameter is a number, it will be used for the length
 	sacl    GREG
 	lar     AR0,#0ffffh
 	rpt     #10000				; and taking it high after 
-	 lacc   *,0,AR0				; 10000 cycles (.5ms at 50 ns)
+	 lacc   *,0,AR0				; 10000 cycles (.5 ms at 50 ns)
 	sach    GREG
 	;
 	setc    SXM				; initialize TA and RA register
-	lacc    #03060h				; for 288kHz SCF clock freq.
-	call    AIC_2ND				; (=> cut freq. 8kHz)
+	lacc    #03060h				; for 288 kHz SCF clock freq.
+	call    AIC_2ND				; (=> cut freq. 8 kHz)
 	;
 	lacc    #0244ah				; initialize TB and TA register
 	call    AIC_2ND				; for sampling freq. 16 kHz
@@ -97,8 +97,8 @@ If this parameter is a number, it will be used for the length
 	lacc    #0067h				; bandpass / synchr. transmit
 	call    AIC_2ND				; gain: input 3V = full scale
 	;
-        }
-        codeblock(interruptOut) {
+	}
+	codeblock(interruptOut) {
 	mar	*,AR6
 	lar	AR6,#$addr(input)		;Address input		=>AR6
 	splk	#12h,IMR			;enable transmit interrupt
@@ -111,7 +111,7 @@ If this parameter is a number, it will be used for the length
 	 idle					;wait for interrupt
 $label(lpOut)
 	splk	#02h,IMR			;disable transmit interrupt
-        }
+	}
 	setup {
 		bufLen = interruptBufferSize;
 		inIntBuffer.resize(bufLen);
@@ -126,55 +126,3 @@ $label(lpOut)
 		return 3+6*int(bufLen);
 	}
 }    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

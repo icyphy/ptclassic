@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
+	location { C50 main library }
 	explanation {
 .PP
 .Id "Gaussian noise"
@@ -98,7 +98,7 @@ random number.
 	 sach	*,1				;new seed
 $label(lpUni)	 				;
 	mar	*,AR0				;Gaussian mean=0 sigma=0.1
-	lar	AR0,#$addr(ravs)		;Adress from first value => AR0
+	lar	AR0,#$addr(ravs)		;Address from 1st value => AR0
 	zap					;clear P-Reg and Accu
 	rpt	#$val(noUniforms)-1		;
 	add	*+,15       			;Accu = sum [ravs(i)]
