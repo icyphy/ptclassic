@@ -1,9 +1,9 @@
 defstar {
-	name {EtherRec}
-	domain {DE}
-	derivedfrom { DEEther }
+	name { EtherRec }
+	domain { DE }
+	derivedfrom { Ether }
 	version { $Id$ }
-	author { E. A. Lee  and T. Parks }
+	author { Edward A. Lee  and Tom M. Parks }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
