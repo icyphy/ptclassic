@@ -183,6 +183,7 @@ extern "C" {
 		}
 
 		// engEvalString is supposed to return 0 on error but does not
+		matlabOutputBuffer[0] = 0;
 		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
 		matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
 
