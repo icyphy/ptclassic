@@ -33,7 +33,6 @@ PL_SRCS= \
 	SRConst.pl \
 	SREnvelopeGen.pl \
 	SRIntToString.pl \
-	SRItcl.pl \
 	SRItclCounter.pl \
 	SRItclDisplay.pl \
 	SRItclDatabase.pl \
@@ -44,7 +43,6 @@ PL_SRCS= \
 	SRItclOut.pl \
 	SRMIDIin.pl \
 	SRMux.pl \
-	SRNop.pl \
 	SRPre.pl \
 	SRPrinter.pl \
 	SRSerialIn.pl \
