@@ -199,9 +199,16 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 # In Itcl3.0, itk.h includes itclInt.h which includes 
 # tclInt.h and tclRegexp.h
 install_itcl: $(ITCL_DEST_LIB)/libitcl.a fixlinks \
+			$(TCL8_INDEPENDENT_DEST)/include/itclInt.h \
 			$(TCL8_INDEPENDENT_DEST)/include/tclInt.h \
 			$(TCL8_INDEPENDENT_DEST)/include/tclRegexp.h
 	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
+
+$(TCL8_INDEPENDENT_DEST)/include/itclInt.h:
+	if [ ! -f $@ ]; then \
+		echo "Copying itclInt.h"; \
+		cp $(ITCL_SRC)/generic/tclInt.h $@; \
+	fi
 
 $(TCL8_INDEPENDENT_DEST)/include/tclInt.h:
 	if [ ! -f $@ ]; then \
@@ -273,8 +280,8 @@ fixlinks:
 ######################################################
 # TclBlend
 
-TCLBLEND_MAJOR_VERSION = 1.1.1
-TCLBLEND_MINOR_VERSION = up1
+TCLBLEND_MAJOR_VERSION = 1.1
+TCLBLEND_MINOR_VERSION = .1
 TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
 TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
@@ -285,7 +292,8 @@ TCLBLEND_INDEPENDENT_DEST =	$(TCL8_INDEPENDENT_DEST)
 # Script that checks for Java Studio
 JAVA_STUDIO_CONFIG=`$(PTOLEMY)/src/tcltk/java_studio`
 
-all_tclblend: configure_tclblend tclblend install_tclblend
+all_tclblend: configure_tclblend tclblend \
+		install_tclblend fixlinks_tclblend
 configure_tclblend: $(TCLBLEND_OBJ)
 	@echo "Configuring tclblend"
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; \
@@ -306,6 +314,9 @@ $(TCLBLEND_OBJ)/pkgIndex.tcl: $(TCLBLEND_SRC)/pkgIndex.tcl
 
 install_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) install)
+
+fixlinks_tclblend:
+	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 
 clean_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) clean)
