@@ -50,8 +50,16 @@ You may use tilde characters and environment variables in the directory name.
 	header{
 // Matlab interface library and Matlab data types (clash with COMPLEX)
 extern "C" {
-#include "matrix.h"
-#include "engine.h"
+// matrix.h and engine.h are not actually system include files, but if
+// we refer to them as "matrix.h" and "engine.h", then make depend
+// will include them in the makefile.  If a user does not have Matlab,
+// then they will have to regenerate a makefile because the makefile
+// refers to Matlab files that they do not have.  A negative side
+// effect of this is that if these files change, then this file will
+// not be automatically recompiled (cxh)
+
+#include <matrix.h>
+#include <engine.h>
 
 // Give Matlab's definition of COMPLEX and REAL different names
 #undef  COMPLEX
