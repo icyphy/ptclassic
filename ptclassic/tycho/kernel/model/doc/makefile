@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: %Wpercent% %Gpercent%
+# @Version: $Id$
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -51,7 +51,7 @@ ITCL_SRCS =
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	index.html
 
-MISC_FILES = 
+MISC_FILES = img
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
