@@ -79,7 +79,7 @@ GetById, CreateInstance2, and CK_OCT.  -BLE
      (tt)->contents.layer.name = (ss),			\
      octGetByName((cc),(tt)))
 
-/*  GetByPropName: used by octIfc.c */
+/*  GetByPropName: used by compile.c, octIfc.c, palette.c */
 #define GetByPropName(cc,tt,ss)				\
     ((tt)->type = OCT_PROP,				\
      (tt)->contents.prop.name = (ss),			\
