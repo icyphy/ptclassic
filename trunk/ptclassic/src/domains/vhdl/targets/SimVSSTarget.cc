@@ -197,7 +197,8 @@ void SimVSSTarget :: frameCode() {
   topName << "_top";
 
   top_uses << "-- top-level use clauses\n";
-  top_uses << "library SYNOPSYS,IEEE,PTVHDLSIM;\n";
+  //  top_uses << "library SYNOPSYS,IEEE,PTVHDLSIM;\n";
+  top_uses << "library SYNOPSYS,IEEE;\n";
   top_uses << "use SYNOPSYS.ATTRIBUTES.all;\n";
   top_uses << "use IEEE.STD_LOGIC_1164.all;\n";
   top_uses << "use std.textio.all;\n";
