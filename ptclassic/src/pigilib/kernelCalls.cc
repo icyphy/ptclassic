@@ -209,17 +209,17 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	const char* cname = parseClass (ako, mph, nP);
 	if (!cname || !currentGalaxy->addStar(name, cname))
 		return FALSE;
- 	LOG << "\tstar " << name << " " << cname << "\n";
+ 	LOG << "\tstar " << SafeTcl(name) << " " << SafeTcl(cname) << "\n";
 	for(int j = 0; j < MAX_NUM_MULTS; j++ ) {
 	    if (nP[j] && !currentGalaxy->numPorts (name, mph[j], nP[j]))
 		return FALSE;
 	    if (nP[j])
-		LOG << "\tnumports " << name << " " << mph[j] << " "
+		LOG << "\tnumports " << SafeTcl(name) << " " << mph[j] << " "
 			<< nP[j] << "\n";
 	}
 	if (!pListPtr || pListPtr->length == 0) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
-		LOG << "\tsetstate " << name << " " <<
+		LOG << "\tsetstate " << SafeTcl(name) << " " <<
 			pListPtr->array[i].name << " " <<
 			SafeTcl(pListPtr->array[i].value) << "\n";
 		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
@@ -242,7 +242,7 @@ KcMakeState(char *name, char *type, char *initVal) {
 		Error::abortRun(*currentGalaxy, msg);
 		return FALSE;
 	}
-	LOG << "\tnewstate " << name << " " << type << " " << 
+	LOG << "\tnewstate " << SafeTcl(name) << " " << type << " " << 
 		SafeTcl(initVal) << "\n";
 	return currentGalaxy->addState(name, type, initVal);
 }
@@ -258,7 +258,8 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
 	else {
 		LOG << "\tconnect ";
 	}
-	LOG << inst1 << " " << t1 << " " << inst2 << " " << t2;
+	LOG << SafeTcl(inst1) << " " << SafeTcl(t1) << " "
+	    << SafeTcl(inst2) << " " << SafeTcl(t2);
 	if (*width)
 		LOG << " " << SafeTcl(width);
  	if (*delay)
@@ -274,7 +275,8 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
-	LOG << "\talias " << fterm << " " << inst << " " << aterm << "\n";
+	LOG << "\talias " << SafeTcl(fterm) << " " << SafeTcl(inst)
+	    << " " << SafeTcl(aterm) << "\n";
 	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
@@ -304,7 +306,8 @@ curDomainName() {
 extern "C" boolean
 KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	logDomain();
-	LOG << "defgalaxy " << galname << " {\n\tdomain " << domain << "\n";
+	LOG << "defgalaxy " << SafeTcl(galname) << " {\n\tdomain "
+	    << domain << "\n";
 	if (innerTarget && strcmp(innerTarget, "<parent>") != 0) {
 		LOG << "target " << innerTarget << "\n";
 		galTarget = KnownTarget::clone(innerTarget);
@@ -356,6 +359,9 @@ KcRun(int n) {
 	return TRUE;
 }
 
+extern "C" boolean LookAtFile(const char*);
+
+// Display the schedule.  Must run the universe first.
 extern "C" boolean
 KcDisplaySchedule() {
  	// LOG << "run " << n << "\nwrapup\n";
@@ -364,8 +370,15 @@ KcDisplaySchedule() {
 	    cerr << "No current target";
 	    return FALSE;
 	}
-	cerr << galTarget->displaySchedule();
-	return TRUE;
+	StringList name;
+	name << "~/schedule." << universe->readName();
+	pt_ofstream str(name);
+	if (str) {
+		str << galTarget->displaySchedule();
+		str.close();
+		return LookAtFile(name);
+	}
+	return FALSE;
 }
 
 // Set the seed for the random number generation.
@@ -609,7 +622,7 @@ KcModTargetParams(ParamListType* pListPtr) {
 	for (int i = 0; i < pListPtr->length; i++) {
 		const char* n = pListPtr->array[i].name;
 		const char* v = pListPtr->array[i].value;
-		LOG << "\ttargetparam " << n << " " << SafeTcl(v) << "\n";
+		LOG << "\ttargetparam " << SafeTcl(n) << " " << SafeTcl(v) << "\n";
 		State* s = galTarget->stateWithName(n);
 		if (s == 0) {
 			Error::abortRun (*galTarget, "no target-state named ", n);
