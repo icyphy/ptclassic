@@ -33,7 +33,14 @@ provisions.
     type { float }
     desc { Right channel input }
   }
-  
+
+  defstate {
+    name {aheadLimit}
+    type{int}
+    default {"-1"}
+    desc {If non-negative, the number of samples ahead that can computed.}
+  }
+
   defstate {
     name { homogeneous }
     type { int }
@@ -95,6 +102,8 @@ provisions.
 
   initCode {
     CGCAudioBase::initCode();
+    /* variable for the sync codeblock below */
+    addDeclaration(syncCounter);
     /* Declare "buffer" to be of type short and blockSize/2 bytes */
     addDeclaration(declarations("short", int(blockSize)/2));
     /* Open file for writing data */
@@ -134,6 +143,7 @@ provisions.
     }
     else {
       addCode(convert);
+      if ((int)aheadLimit >= 0 ) addCode(syncLinear16);
       addCode(setbufptr);
       addCode(write);
     }
