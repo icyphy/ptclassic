@@ -54,10 +54,22 @@ static char SccsId[]="$Id$";
 #include "tap.h"
 #include "nle.h"
 #include "nleCommon.h"
+#include "nleMisc.h"
 #include "vulcan.h"
 
 /* Forward declarations */
-static int doMacroNets();
+static int doMacroNets
+	ARGS((int type));
+void att_freeList
+	ARGS((struct s_attach **list));
+void addFloorplanBag
+	ARGS((octObject *FacetP));
+int promoteInstanceTerm
+	ARGS((octObject *InstTermP, octObject *FTermP));
+void att_add
+	ARGS((struct s_attach **list, char *name, octId id, int type));
+void checkArgumentsForMakeMacro
+	ARGS((octObject *NewFacetP,octObject *ArgBagP,octObject *NewInstanceP,int type));
 
 static int    debug = 0;        /* Debug flag for this file */
 
@@ -91,7 +103,7 @@ static octObject *MacroContentP;     /* Contents facet of new cell */
 static octObject MacroInterface;    /* Interface facet of new cell */
 static octObject MacroInstBag;        /* OSP 'INSTANCES' BAG */
 static octObject MacroConnBag;        /* OSP 'CONNECTOR' BAG */
-static octObject MacroJoinBag;        /* OSP 'JOINEDTERMS' BAG */
+/*static octObject MacroJoinBag;*/        /* OSP 'JOINEDTERMS' BAG */
 static octObject ChipInstBag;        /* OSP 'INSTANCES' BAG */
 
 static octObject DeleteTermsBag;    /*tmp prop of instance-terms that will be deleted */
@@ -188,7 +200,7 @@ processInterface()
     return;
 }
 
-
+int
 nleMakeMacro(NewFacetP, ArgBagP, NewInstanceP, type)
 octObject    *NewFacetP;
 octObject    *ArgBagP;        /* Bag containing all the instances to be merged */
@@ -202,7 +214,7 @@ int        type;            /* soft or hard */
     octObject     MacroFTerm;        /* a formal terminal of the macro cell */
     octObject     MacroNet;        /* a net within the Macro cell */
     octObject     Oterm;            /* generic, in the new cell */
-    octGenerator     genInst, genTerm, genJoin;
+    octGenerator     genInst, genTerm;
     octGenerator     genInstTerm;
     octObject     InstTerm;
     octObject    master;            /* master of the connector */
@@ -388,7 +400,7 @@ int        type;            /* soft or hard */
 
     while (att != NULL) {
         if (debug) (void) fprintf(stderr, "Attachement: term %s , to %d\n",
-        att->termName, att->id);
+        att->termName, (int)att->id);
 
         InstTerm.type = OCT_TERM;
         InstTerm.contents.term.name = att->termName;
@@ -870,7 +882,7 @@ int type;                /* soft or hard */
 
     return(NLE_OK);
 }
-
+int
 promoteInstanceTerm(InstTermP,FTermP)
 octObject *InstTermP;
 octObject *FTermP;
@@ -912,6 +924,7 @@ octObject *FTermP;
     return(NLE_OK);
 }
 
+void
 addFloorplanBag(FacetP)
 octObject *FacetP;
 {
@@ -964,6 +977,7 @@ octObject *FacetP;
 }
 
 
+void
 att_add(list,name,id,type)
 struct s_attach **list;
 char *name;
@@ -980,6 +994,7 @@ int type;
     *list = new;
 }
 
+void
 att_freeList(list)
 struct s_attach **list;
 {
@@ -992,6 +1007,7 @@ struct s_attach **list;
 
 
 /*ARGSUSED*/
+void
 checkArgumentsForMakeMacro(NewFacetP, ArgBagP, NewInstanceP, type)
 octObject    *NewFacetP;
 octObject    *ArgBagP;        /* Bag containing all the instances to be merged */
