@@ -297,13 +297,25 @@ body ::tycho::FileBrowser::complete {{case 0}} {
 
     # check if tab has been hit twice. If so, change directory.
     if {$lastCompletion == $pattern} {
-        set localCWD [file join $localCWD [file dirname $pattern]]
-        updateListbox
-        $itk_component(dir) config -text $localCWD
-        setEntry [file tail $pattern]
-        return [complete $case]        
+        if {[string index $pattern \
+                [expr [string length $pattern] - 1]] == $sep} {
+            # it's a complete directory
+            set localCWD [::tycho::expandPath \
+                    [file join $localCWD $pattern]]
+            updateListbox
+            $itk_component(dir) config -text $localCWD
+            setEntry {}
+            return
+        } else {
+            # it's a directory/something
+            set localCWD [::tycho::expandPath \
+                    [file join $localCWD [file dirname $pattern]]]
+            updateListbox
+            $itk_component(dir) config -text $localCWD
+            setEntry [file tail $pattern]
+            return [complete $case]
+        }
     }
-
 
     set dir [file dirname $pattern]
     set pattern [file tail $pattern]*
