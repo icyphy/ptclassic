@@ -81,7 +81,7 @@ octObject *term;		/* Terminal (returned)  */
 {
     struct octBox extent;
     octObject *aterms, *one_term;
-    int num_terms, i;
+    int num_terms;
     static char *help_buf =
 "The new formal terminal you requested\n\
 has several possible implementations.\n\
@@ -97,7 +97,8 @@ wish to use to implement the terminal.";
     if (num_terms > NONE_FOUND) {
 	/* We found some */
 	if (num_terms > 1) {
-	    if (one_term = seResolveTerms(fct, num_terms, aterms, help_buf)) {
+	    if ( (one_term =
+		  seResolveTerms(fct, num_terms, aterms, help_buf)) ) {
 		*term = *one_term;
 	    }
 	} else {
@@ -162,7 +163,6 @@ char *data;			/* User data (ti *)    */
 {
     seLwInfo *info = (seLwInfo *) data;
     octObject new_conn;
-    int result = 0;
 
     if (symSegConnP(term, info->elem)) {
 	return 1; 
@@ -217,7 +217,7 @@ endpoint for the segment.";
     term->objectId = oct_null_id;
     if (num > 0) {
 	if (num > 1) {
-	    if (reg = seResolveTerms(fct, num, aterms, help_buf)) {
+	    if ( (reg = seResolveTerms(fct, num, aterms, help_buf)) ) {
 		*term = *reg;
 	    } else {
 		num = 0;
@@ -256,7 +256,7 @@ octObject **aterms;		/* Terminals (returned) */
  * should be freed after use.
  */
 {
-    int num_terms, i, j, alloc, idx, rejected;
+    int alloc, idx, rejected;
     symAreaGen gen;
 
     alloc = 5;
