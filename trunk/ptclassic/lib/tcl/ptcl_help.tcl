@@ -151,7 +151,8 @@ or of the current galaxy, if no argument is given.
 
 add_to_help reset {} {
 Replaces the universe "main" by an empty universe.  Any defgalaxy definitions
-you have made are still remembered.
+you have made, or universes with names other than "main", are still remembered.
+Equivalent to "newuniverse main".
 }
 
 add_to_help run {?<n>?} {
@@ -213,6 +214,36 @@ is returned for atomic blocks.
 
 add_to_help wrapup {} {
 Invoke the wrapup command on the universe.
+}
+
+add_to_help curuniverse {?<name>?} {
+With no arguments, print the name of the current universe.  At startup the
+current universe is an empty universe named "main".  With an argument,
+switch the current universe to <name>, which must exist (or else an error
+occurs).  The current domain will switch to that of <name>; each universe
+on the list has its own notion of the current domain.
+}
+
+add_to_help newuniverse {?<name>? ?<dom>?} {
+Create a new, empty universe named <name> with domain <dom>.  Both
+arguments may be omitted, <dom> is the current domain by default and
+<name> is "main" by default.  If <name> is the same as the name of
+an existing universe, that universe is deleted and recreated empty.
+}
+
+add_to_help deluniverse {<name>} {
+Deletes the universe named <name>.  If the argument is omitted, the
+current universe is deleted and the current universe reverts to "main".
+}
+
+add_to_help univlist {} {
+Returns a list of the names of all defined universes.
+}
+
+add_to_help renameuniv {?<oldname>? <newname>} {
+With one argument, rename the current universe to <newname>.  With two
+arguments, rename the universe named <oldname> to <newname>.  Any existing
+universe named <newname> is deleted.
 }
 
 proc help {args} {
