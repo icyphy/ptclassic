@@ -166,6 +166,10 @@ protected:
 	// Method called by comm stars to place important code into structure.
 	/*virtual*/ void registerComm(int, int, int, const char*);
 
+	// Unpack the firegroups from firegroupList and
+	// generate code for each one.
+	StringList addFiregroupCode(VHDLFiregroupList*, int=0);
+
 private:
 	// Pointer to keep track of current firing.
 	VHDLFiring *currentFiring;
@@ -174,6 +178,7 @@ private:
 	StringList clockList;
 
 	// Relevant code streams.
+	CodeStream firegroup_code;
 	CodeStream mux_declarations;
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
@@ -296,14 +301,14 @@ private:
 	// Generate the architecture_body_opener.
 	void buildArchitectureBodyOpener(int);
 
-	// Add in component declarations here from mainCompDeclList.
-	void buildComponentDeclarations(int);
+//	// Add in component declarations here from mainCompDeclList.
+//	void buildComponentDeclarations(int);
 
 	// Generate the architecture_body_closer.
 	void buildArchitectureBodyCloser(int);
 
-	// Add in configuration declaration here from mainCompDeclList.
-	void buildConfigurationDeclaration(int);
+//	// Add in configuration declaration here from mainCompDeclList.
+//	void buildConfigurationDeclaration(int);
 
 	// Generate the clock generator entity and architecture.
 	StringList clockGenCode();

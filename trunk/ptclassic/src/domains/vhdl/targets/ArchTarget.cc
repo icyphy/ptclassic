@@ -858,7 +858,7 @@ void ArchTarget :: frameCode() {
   firegroupList.initialize();
   
   mainCompDeclList.initialize();
-  //  entity_arch.initialize();
+  firegroup_code.initialize();
   entity_declaration.initialize();
   architecture_body_opener.initialize();
   component_declarations.initialize();
@@ -1020,172 +1020,9 @@ void ArchTarget :: frameCode() {
     }
   }
 
-  // Unpack the firegroups from firegroupList and
-  // generate code for each one.
   int level = 0;
-  {
-    int newFireNum = 0;
-    VHDLFiregroupListIter nextFiregroup(firegroupList);
-    VHDLFiregroup* firegroup;
-    while ((firegroup = nextFiregroup++) != 0) {
-      VHDLFiringList* firingList = firegroup->firingList;
 
-      VHDLGenericList* newGenericList = new VHDLGenericList;
-      VHDLPortList* newPortList = new VHDLPortList;
-      VHDLVariableList* newVariableList = new VHDLVariableList;
-
-      VHDLFiringListIter nextFiring(*firingList);
-      VHDLFiring* firing;
-      while ((firing = nextFiring++) != 0) {
-	VHDLGenericListIter nextGeneric(*(firing->genericList));
-	VHDLGeneric* ge;
-	while ((ge = nextGeneric++) != 0) {
-	  VHDLGeneric* newGeneric = new VHDLGeneric;
-	  newGeneric = ge->newCopy();
-	  newGenericList->put(*newGeneric);
-	}
-	VHDLPortListIter nextPort(*(firing->portList));
-	VHDLPort* po;
-	while ((po = nextPort++) != 0) {
-	  VHDLPort* newPort = new VHDLPort;
-	  newPort = po->newCopy();
-	  newPortList->put(*newPort);
-	}
-	VHDLVariableListIter nextVariable(*(firing->variableList));
-	VHDLVariable* va;
-	while ((va = nextVariable++) != 0) {
-	  VHDLVariable* newVariable = new VHDLVariable;
-	  newVariable = va->newCopy();
-	  newVariableList->put(*newVariable);
-	}
-      }
-
-      StringList newFireName = firegroup->getName();
-
-      // Add a port for the control signal to select which firing to do.
-      VHDLPort* controlPort = new VHDLPort;
-      StringList controlName = newFireName;
-      controlName << "_CTL";
-      controlPort->setName(controlName);
-      controlPort->setType("INTEGER");
-      controlPort->setDirec("IN");
-      // FIXME: Connect to the correct control signal.
-      VHDLSignal* iterSignal =
-	signalList.vhdlSignalWithName("FIRST_ITER_DONE");
-      if (!iterSignal) {
-	Error::error("Can't find FIRST_ITER_DONE signal in signalList");
-	return;
-      }
-      controlPort->connect(iterSignal);
-      newPortList->put(*controlPort);
-
-      newFireNum++;
-      VHDLFiring* combinedFiring = new VHDLFiring;
-      combinedFiring->setName(newFireName);
-      combinedFiring->starClassName = "MERGED_FIRING";
-      combinedFiring->portList = newPortList;
-      combinedFiring->genericList = newGenericList;
-      combinedFiring->variableList = newVariableList;
-
-      // Iterate through the firing list.
-      // Generate entity, architecture for each firing.
-
-      // Still keep around nextFiring list iter, as well
-      // as the new combinedFiring, because we really need both.
-
-      nextFiring.reset();
-      while ((firing = nextFiring++) != 0) {
-	// Begin constructing the firing's code in myCode.
-	myCode << "\n-- Firing " << firing->name << "\n";
-      }
-
-      myCode << "\n";
-      myCode << useLibs;
-      myCode << "\n";
-      myCode << "entity " << combinedFiring->name << " is\n";
-
-      myCode << addGenericRefs(newGenericList, level);
-      myCode << addPortRefs(newPortList, level);
-
-      myCode << indent(level) << "end " << combinedFiring->name << ";\n";
-      myCode << "\n";
-      myCode << "architecture " << "behavior" << " of "
-	     << combinedFiring->name << " is\n";
-      myCode << "begin\n";
-      myCode << "process\n";
-
-      // To please the Synopsys synthesis:
-      // it insists on there being a sensitivity list.
-      // FIXME: WAIT! does it?  what is the effect of no sensitivities?
-      myCode << addSensitivities(combinedFiring, level);
-
-      myCode << addDeclarations(combinedFiring, level);
-      myCode << addVariableRefs(combinedFiring, level);
-
-      myCode << "begin\n";
-
-      // To please the Synopsys simulation:
-      // It refuses to initialize ports and variables, and if you
-      // don't put a wait statement at the beginning of a process in lieu
-      // of explicit initialization for everything (which is unsynthesizable)
-      // then you get arithmetic overflow when you hit arithmetic expressions
-      // whose inputs are unitiialized variables.
-      // Currently we are handling this by doing an explicit global
-      // initialization to zero of these values in the simulation
-      // command file.
-
-      //   myCode << addWaitStatement(combinedFiring, level);
-
-      // FIXME: Need to simplify this if there is only one firing
-      // These core operations of each firing need to be separated by firing
-      // and conditioned on the correct control input.
-      nextFiring.reset();
-      int firingCount = 0;
-      VHDLFiring* lastFiring;
-
-      if (firegroup->firingList->size() > 1) {
-	while ((firing = nextFiring++) != 0) {
-	  // Remember the last firing encountered.
-	  lastFiring = firing;
-	  if (!firingCount) {
-	    myCode << "case " << combinedFiring->name << "_CTL" << " is\n";
-	  }
-	  firingCount++;
-	  myCode << "-- SUB-FIRING " << firingCount << ":  ";
-	  myCode << firing->name << "\n";
-	  myCode << "when " << firingCount << " => \n";
-
-	  myCode << addPortVarTransfers(firing, level);
-	  myCode << addActions(firing, level);
-	  myCode << addVarPortTransfers(firing, level);
-	}
-	if (firingCount) {
-	  // Need to cover all cases, so cover others.
-	  myCode << "when " << "others" << " => \n";
-	  myCode << "end case;\n";
-	}
-	myCode << "end process;\n";
-	myCode << "end behavior;\n";
-      }
-      else {
-	while ((firing = nextFiring++) != 0) {
-	  // Remember the last firing encountered.
-	  lastFiring = firing;
-	  firingCount++;
-	  myCode << "-- SUB-FIRING " << firingCount << ":  ";
-	  myCode << firing->name << "\n";
-
-	  myCode << addPortVarTransfers(firing, level);
-	  myCode << addActions(firing, level);
-	  myCode << addVarPortTransfers(firing, level);
-	}
-	myCode << "end process;\n";
-	myCode << "end behavior;\n";
-      }
-
-      registerAndMerge(combinedFiring);
-    }
-  }
+  firegroup_code << addFiregroupCode(&firegroupList, level);
   
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
@@ -1213,30 +1050,19 @@ void ArchTarget :: frameCode() {
   // Combine all sections of code.
   StringList code = headerComment();
 
+  myCode << "\n-- firegroup_code\n";
+  myCode << "\n" << firegroup_code;
+
   myCode << "\n-- mux_declarations\n";
   myCode << "\n" << mux_declarations;
 
-  if (systemClock()) {
-    myCode << clockGenCode();
-  }
-  if (registerInts()) {
-    myCode << regCode("INTEGER");
-  }
-  if (registerReals()) {
-    myCode << regCode("REAL");
-  }
-  if (multiplexorInts()) {
-    myCode << muxCode("INTEGER");
-  }
-  if (multiplexorReals()) {
-    myCode << muxCode("REAL");
-  }
-  if (sourceInts()) {
-    myCode << sourceCode("INTEGER");
-  }
-  if (sourceReals()) {
-    myCode << sourceCode("REAL");
-  }
+  if (systemClock()) { myCode << clockGenCode(); }
+  if (registerInts()) { myCode << regCode("INTEGER"); }
+  if (registerReals()) { myCode << regCode("REAL"); }
+  if (multiplexorInts()) { myCode << muxCode("INTEGER"); }
+  if (multiplexorReals()) { myCode << muxCode("REAL"); }
+  if (sourceInts()) { myCode << sourceCode("INTEGER"); }
+  if (sourceReals()) { myCode << sourceCode("REAL"); }
   
   myCode << "\n-- entity_declaration\n";
   myCode << "\n" << entity_declaration;
@@ -2329,6 +2155,175 @@ void ArchTarget :: buildArchitectureBodyOpener(int /*level*/) {
 			   << (const char*) filePrefix << " is\n";
 }
 
+// Unpack the firegroups from firegroupList and
+// generate code for each one.
+StringList ArchTarget :: addFiregroupCode(VHDLFiregroupList* fgList, int level) {
+  StringList all;
+  {
+    int newFireNum = 0;
+    VHDLFiregroupListIter nextFiregroup(*fgList);
+    VHDLFiregroup* firegroup;
+    while ((firegroup = nextFiregroup++) != 0) {
+      VHDLFiringList* firingList = firegroup->firingList;
+
+      VHDLGenericList* newGenericList = new VHDLGenericList;
+      VHDLPortList* newPortList = new VHDLPortList;
+      VHDLVariableList* newVariableList = new VHDLVariableList;
+
+      VHDLFiringListIter nextFiring(*firingList);
+      VHDLFiring* firing;
+      while ((firing = nextFiring++) != 0) {
+	VHDLGenericListIter nextGeneric(*(firing->genericList));
+	VHDLGeneric* ge;
+	while ((ge = nextGeneric++) != 0) {
+	  VHDLGeneric* newGeneric = new VHDLGeneric;
+	  newGeneric = ge->newCopy();
+	  newGenericList->put(*newGeneric);
+	}
+	VHDLPortListIter nextPort(*(firing->portList));
+	VHDLPort* po;
+	while ((po = nextPort++) != 0) {
+	  VHDLPort* newPort = new VHDLPort;
+	  newPort = po->newCopy();
+	  newPortList->put(*newPort);
+	}
+	VHDLVariableListIter nextVariable(*(firing->variableList));
+	VHDLVariable* va;
+	while ((va = nextVariable++) != 0) {
+	  VHDLVariable* newVariable = new VHDLVariable;
+	  newVariable = va->newCopy();
+	  newVariableList->put(*newVariable);
+	}
+      }
+
+      StringList newFireName = firegroup->getName();
+
+      // Add a port for the control signal to select which firing to do.
+      VHDLPort* controlPort = new VHDLPort;
+      StringList controlName = newFireName;
+      controlName << "_CTL";
+      controlPort->setName(controlName);
+      controlPort->setType("INTEGER");
+      controlPort->setDirec("IN");
+      // FIXME: Connect to the correct control signal.
+      VHDLSignal* iterSignal =
+	signalList.vhdlSignalWithName("FIRST_ITER_DONE");
+      if (!iterSignal) {
+	Error::error("Can't find FIRST_ITER_DONE signal in signalList");
+	return "";
+      }
+      controlPort->connect(iterSignal);
+      newPortList->put(*controlPort);
+
+      newFireNum++;
+      VHDLFiring* combinedFiring = new VHDLFiring;
+      combinedFiring->setName(newFireName);
+      combinedFiring->starClassName = "MERGED_FIRING";
+      combinedFiring->portList = newPortList;
+      combinedFiring->genericList = newGenericList;
+      combinedFiring->variableList = newVariableList;
+
+      // Iterate through the firing list.
+      // Generate entity, architecture for each firing.
+
+      // Still keep around nextFiring list iter, as well
+      // as the new combinedFiring, because we really need both.
+
+      nextFiring.reset();
+      while ((firing = nextFiring++) != 0) {
+	// Begin constructing the firing's code in all.
+	all << "\n-- Firing " << firing->name << "\n";
+      }
+
+      all << "\n";
+      all << useLibs;
+      all << "\n";
+      all << "entity " << combinedFiring->name << " is\n";
+
+      all << addGenericRefs(newGenericList, level);
+      all << addPortRefs(newPortList, level);
+
+      all << indent(level) << "end " << combinedFiring->name << ";\n";
+      all << "\n";
+      all << "architecture " << "behavior" << " of "
+	     << combinedFiring->name << " is\n";
+      all << "begin\n";
+      all << "process\n";
+
+      // To please the Synopsys synthesis:
+      // it gives warnings if there is no sensitivity list.
+      all << addSensitivities(combinedFiring, level);
+
+      all << addDeclarations(combinedFiring, level);
+      all << addVariableRefs(combinedFiring, level);
+
+      all << "begin\n";
+
+      // To please the Synopsys simulation:
+      // It refuses to initialize ports and variables, and if you
+      // don't put a wait statement at the beginning of a process in lieu
+      // of explicit initialization for everything (which is unsynthesizable)
+      // then you get arithmetic overflow when you hit arithmetic expressions
+      // whose inputs are unitiialized variables.
+      // Currently we are handling this by doing an explicit global
+      // initialization to zero of these values in the simulation
+      // command file.
+
+      //   all << addWaitStatement(combinedFiring, level);
+
+      // FIXME: Need to simplify this if there is only one firing
+      // These core operations of each firing need to be separated by firing
+      // and conditioned on the correct control input.
+      nextFiring.reset();
+      int firingCount = 0;
+      VHDLFiring* lastFiring;
+
+      if (firegroup->firingList->size() > 1) {
+	while ((firing = nextFiring++) != 0) {
+	  // Remember the last firing encountered.
+	  lastFiring = firing;
+	  if (!firingCount) {
+	    all << "case " << combinedFiring->name << "_CTL" << " is\n";
+	  }
+	  firingCount++;
+	  all << "-- SUB-FIRING " << firingCount << ":  ";
+	  all << firing->name << "\n";
+	  all << "when " << firingCount << " => \n";
+
+	  all << addPortVarTransfers(firing, level);
+	  all << addActions(firing, level);
+	  all << addVarPortTransfers(firing, level);
+	}
+	if (firingCount) {
+	  // Need to cover all cases, so cover others.
+	  all << "when " << "others" << " => \n";
+	  all << "end case;\n";
+	}
+	all << "end process;\n";
+	all << "end behavior;\n";
+      }
+      else {
+	while ((firing = nextFiring++) != 0) {
+	  // Remember the last firing encountered.
+	  lastFiring = firing;
+	  firingCount++;
+	  all << "-- SUB-FIRING " << firingCount << ":  ";
+	  all << firing->name << "\n";
+
+	  all << addPortVarTransfers(firing, level);
+	  all << addActions(firing, level);
+	  all << addVarPortTransfers(firing, level);
+	}
+	all << "end process;\n";
+	all << "end behavior;\n";
+      }
+      registerAndMerge(combinedFiring);
+    }
+  }
+  return all;
+}
+
+/*
 // Add in component declarations here from mainCompDeclList.
 void ArchTarget :: buildComponentDeclarations(int level) {
   Error::warn("buildComponentDeclarations", ": Don't call me anymore!");
@@ -2399,12 +2394,14 @@ void ArchTarget :: buildComponentDeclarations(int level) {
     }
   }
 }
+*/
 
 // Generate the architecture_body_closer.
 void ArchTarget :: buildArchitectureBodyCloser(int /*level*/) {
   architecture_body_closer << "end structure;\n";
 }
 
+/*
 // Add in configuration declaration here from mainCompDeclList.
 void ArchTarget :: buildConfigurationDeclaration(int level) {
   // HashTable to keep track of which components already configured.
@@ -2443,6 +2440,7 @@ void ArchTarget :: buildConfigurationDeclaration(int level) {
   configuration_declaration << "end " << (const char*) filePrefix << "_parts"
 			    << ";\n";
 }
+*/
 
 // Generate the clock generator entity and architecture.
 StringList ArchTarget :: clockGenCode() {
@@ -2673,6 +2671,7 @@ void ArchTarget :: writeComFile() {
 
 // Add additional codeStreams.
 void ArchTarget :: addCodeStreams() {
+  addStream("firegroup_code", &firegroup_code);
   addStream("entity_declaration", &entity_declaration);
   addStream("architecture_body_opener", &architecture_body_opener);
   addStream("component_declarations", &component_declarations);
@@ -2691,6 +2690,7 @@ void ArchTarget :: addCodeStreams() {
 
 // Initialize codeStreams.
 void ArchTarget :: initCodeStreams() {
+  firegroup_code.initialize();
   entity_declaration.initialize();
   architecture_body_opener.initialize();
   component_declarations.initialize();
