@@ -59,7 +59,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB =		libdialogs.a
+LIB =		libdialogs.$(LIBSUFFIX)
 
 # The clean rule in mk/common.mk will remove KRUFT files.  If 
 # make clean does not remove libdialogs.a then rebuild will not recreate
