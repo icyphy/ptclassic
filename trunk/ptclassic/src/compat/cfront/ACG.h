@@ -34,19 +34,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #if defined(hppa) || defined(SVR4) || defined(SYSV)
 #ifndef __GNUG__
-extern "C" void srand48(long int);
-
+extern "C" {
+  void srand48(long int);
+  long int mrand48(void);
+};
 class ACG {
 public:
 	ACG(unsigned seed = 1) {srand48(seed);}
+	asLong() {return (unsigned long)mrand48();}
 };
 #endif /* !__GNUG__ */
 #else /* hppa */
-extern "C" void srandom(unsigned);
-
+extern "C" {
+  void srandom(unsigned);
+  long random();
+}
 class ACG {
 public:
 	ACG(unsigned seed = 1) {srandom(seed);}
+	unsigned long ACG::asLong() {
+	  long res = random();
+	  if ((random() & 1) != 0) res = ~res; // (not -res, as -0 = 0)
+	    return (unsigned long) res;
+	}
+
 };
 #endif /* hppa */
 #endif
