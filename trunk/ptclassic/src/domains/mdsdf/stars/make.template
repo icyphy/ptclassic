@@ -46,8 +46,8 @@ PL_SRCS= \
  MDSDFInverse.pl \
  MDSDFMult.pl \
  MDSDFQuant.pl \
- MDSDFReadImage.pl \
- MDSDFReadImage2.pl \
+ MDSDFReadImg.pl \
+ MDSDFReadImg2.pl \
  MDSDFRepeat.pl \
  MDSDFTranspose.pl \
  MDSDFXprism3.pl
