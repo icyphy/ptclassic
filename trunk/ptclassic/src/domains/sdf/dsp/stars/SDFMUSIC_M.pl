@@ -90,10 +90,10 @@ and right singular vectors of a data matrix X, where X is a data matrix
     // load matrix of right singular vectors of the noise subspace
     Envelope inputPkt;
     (rsvec%0).getMessage(inputPkt);
-    const FloatMatrix *V = (const FloatMatrix *)inputPkt.myData();
+    const FloatMatrix& V = *(const FloatMatrix *)inputPkt.myData();
     for(int row = 0; row < nrows; row++)
       for(int col = 0; col < numNoise; col++)
-        (*Vn)[row][col] = (*V)[row][col+(2*int(numSignals))];
+        (*Vn)[row][col] = V[row][col+(2*int(numSignals))];
       
     // compute VnVnt = Vn * transpose(Vn)
     *VnVnt = (*Vn) * (~(*Vn));
