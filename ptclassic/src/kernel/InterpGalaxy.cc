@@ -19,6 +19,7 @@ $Id$
 #include "StringList.h"
 #include "Output.h"
 #include "Connect.h"
+#include "Geodesic.h"
 #include "string.h"
 #include "Domain.h"
 
@@ -45,6 +46,24 @@ static void noInstance(const char* star,const char* gal) {
 	errorHandler.error (msg);
 }
 
+// Find a port or multiport -- preserve its "identity" -- things
+// can call isItMulti on the result, say
+GenericPort *
+InterpGalaxy::findGenericPort (const char* star,const char* port) {
+	Block *st = blockWithName(star);
+	if (st == NULL) {
+		noInstance (star, readName());
+		return 0;
+	}
+	GenericPort *ph = st->multiPortWithName(port);
+	if (ph) return ph;
+	ph = st->portWithName(port);
+	if (ph == NULL) noInstance (port, star);
+	return ph;
+}
+
+// Find a port.  If it's really a multiport this ends up returning
+// a port within the multiport.
 PortHole *
 InterpGalaxy::findPortHole (const char* star,const char* port) {
 	Block *st = blockWithName(star);
@@ -57,6 +76,7 @@ InterpGalaxy::findPortHole (const char* star,const char* port) {
 	return ph;
 }
 
+// Form a point-to-point connection.
 int
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
@@ -82,6 +102,7 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	return TRUE;
 }
 
+// Add a star to the galaxy.
 int
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	starname = savestring (starname);
@@ -96,6 +117,7 @@ InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	return TRUE;
 }
 
+// Add a porthole to the galaxy; alias it to a star porthole.
 int
 InterpGalaxy::alias(const char* galportname,const char* starname,
 		    const char* portname) {
@@ -107,24 +129,78 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	starname = savestring (starname);
 // create new galaxy port, add to galaxy, do the alias
 	if (ph->isItInput()) {
-		actionList += "I";
 		InPortHole *p = new InPortHole;
 		addPort(p->setPort(galportname,this));
 		alias (*p, *ph);
 	}
 	else {
-		actionList += "O";
 		OutPortHole *p = new OutPortHole;
 		addPort(p->setPort(galportname,this));
 		alias (*p, *ph);
 	}
 // add action to list
+	actionList += "A";
 	actionList += galportname;
 	actionList += starname;
 	actionList += portname;
 	return TRUE;
 }
 
+// Add a node (that is, a persistent Geodesic) for netlist-style
+// connections.
+int
+InterpGalaxy::addNode (const char* nodename) {
+	nodename = savestring (nodename);
+	// get a geodesic appropriate for the current domain, add to list
+	Geodesic& geo = Domain::named(KnownBlock::domain())->newNode();
+	geo.setNameParent (nodename, this);
+	nodes.put(geo);
+	// make actionList entry
+	actionList += "n";
+	actionList += nodename;
+	return TRUE;
+}
+
+// Connect a porthole to a node.
+int
+InterpGalaxy::nodeConnect (const char* star, const char* port,
+			   const char* node) {
+	GenericPort *ph = findGenericPort (star, port);
+	if (ph == NULL) return FALSE;
+	Geodesic *g = nodes.nodeWithName (node);
+	if (g == NULL) {
+		noInstance (node, readName());
+		return FALSE;
+	}
+	star = savestring (star);
+	port = savestring (port);
+	node = savestring (node);
+	if ((ph->isItOutput() ? g->setSourcePort (*ph) : g->setDestPort (*ph))
+	    == 0) return FALSE;
+	// add to action list
+	actionList += "c";
+	actionList += star;
+	actionList += port;
+	actionList += node;
+}
+
+// disconnect a porthole from whatever it is connected to.
+int
+InterpGalaxy::disconnect (const char* star, const char* port) {
+	PortHole* ph = findPortHole (star, port);
+	if (ph == NULL) return FALSE;
+	star = savestring (star);
+	port = savestring (port);
+	ph->disconnect();
+// add to actionList.  Yes, when we clone, clone will connect and
+// then disconnect.
+	actionList += "d";
+	actionList += star;
+	actionList += port;
+	return TRUE;
+}
+
+// add a state to the galaxy.
 int
 InterpGalaxy::addState (const char* statename, const char* stateclass, const char* statevalue) {
         statename = savestring (statename);
@@ -141,6 +217,7 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
         return TRUE;
 }
 
+// change a value of a state within the galaxy.
 int
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
         blockname = savestring (blockname);
@@ -172,6 +249,7 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
         return TRUE;
 }
 
+// create a specified number of ports in a porthole.
 int
 InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 	Block *st = blockWithName(star);
@@ -208,6 +286,7 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 	return TRUE;
 }
 
+// modify the domain within the galaxy (for wormholes)
 int
 InterpGalaxy::setDomain (const char* name) {
 	myDomain = savestring (name);
@@ -230,6 +309,8 @@ InterpGalaxy::setDomain (const char* name) {
 // If you must print the action list do something like
 // for (i = actionList.size(); i > 0; i--) cout << actionList.next() << "\n";
 
+// This is the key to the works -- the function that makes an identical
+// galaxy, given a galaxy.
 Block* 
 InterpGalaxy::clone() {
 // make a new interpreted galaxy!  We do this by processing the action
@@ -249,12 +330,14 @@ InterpGalaxy::clone() {
 
 		action = actionList.next();
 		switch (action[0]) {
+
 		case 'S':	// make a Star
 			a = actionList.next();
 			b = actionList.next();
 			gal->addStar (a, b);
 			nacts -= 3;
 			break;
+
 		case 'C':	// add an internal connection
 			a = actionList.next();
 			b = actionList.next();
@@ -265,8 +348,8 @@ InterpGalaxy::clone() {
 			gal->connect (a, b, c, d, ndelay);
 			nacts -= 6;
 			break;
-		case 'I':	// add an alias porthole
-		case 'O':
+
+		case 'A':	// add an alias porthole to the galaxy
 			a = actionList.next();
 			b = actionList.next();
 			c = actionList.next();
@@ -274,6 +357,28 @@ InterpGalaxy::clone() {
 			gal->alias (a, b, c);
 			nacts -= 4;
 			break;
+
+		case 'n':	// make a node (Geodesic)
+			a = actionList.next();
+			gal->addNode (a);
+			nacts -= 2;
+			break;
+
+		case 'c':	// connect a port to a node
+			a = actionList.next();
+			b = actionList.next();
+			c = actionList.next();
+			gal->nodeConnect (a, b, c);
+			nacts -= 4;
+			break;
+
+		case 'd':	// disconnect a porthole
+			a = actionList.next();
+			b = actionList.next();
+			gal->disconnect (a, b);
+			nacts -= 3;
+			break;
+
                case 'T':       // add a state
                         a = actionList.next();
                         b = actionList.next();
@@ -317,6 +422,8 @@ InterpGalaxy::clone() {
 	return gal;
 }
 
+// add the galaxy to the known list (completing the definition of a galaxy
+// class)
 void
 InterpGalaxy::addToKnownList(const char* outerDomain) {
 	const char* myName = savestring(readName());
@@ -362,4 +469,18 @@ InterpGalaxy :: ~InterpGalaxy () {
 		delete &nextPort();
 	for (i = numberStates(); i > 0; i--)
 		delete &nextState();
+	for (i = nodes.size(); i > 0; i--)
+		delete &(nodes++);
+}
+
+// function to find Node with given name, or NULL if no match
+Geodesic*
+NodeList::nodeWithName (const char* ident) {
+	Geodesic *g;
+	for (int i = size(); i > 0; i--) {
+		g = (Geodesic*)next();
+		if (strcmp(ident, g->readName()) == 0)
+			return g;
+	}
+	return NULL;
 }
