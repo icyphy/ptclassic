@@ -145,7 +145,7 @@ body ::tycho::RevControl::constructor {args} {
     $this addButton nextaction -text "Next Action" -command "$this nextAction"
 #    $this addButton history -text "History" -command "$this viewHistory"
     $this addButton unedit -text "Unedit" -command "$this unedit"
-    $this addButton cancel -text "Cancel <ESC>" -command \
+    $this addButton cancel -text "Close <ESC>" -command \
 	    "$this unMapWindow"
     $this default nextaction
     bind $itk_component(hull) <Escape> "$this unMapWindow"
