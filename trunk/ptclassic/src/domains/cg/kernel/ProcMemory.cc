@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "dataType.h"
 #include <builtin.h>
 #include <minmax.h>
+#include "SimControl.h"
 
 int LinProcMemory::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 	IntervalListIter nextI(memAvail);
@@ -113,6 +114,7 @@ void LinProcMemory::reset() {
 int LinProcMemory::allocReq(AsmPortHole& p) {
 	if (!match(p)) return FALSE;
 	if (p.localBufSize() == 0) return TRUE;
+	if (SimControl::haltRequested()) return FALSE;
 	LOG_NEW; MPortReq* r = new MPortReq(p);
 	if (r->circ())	circ.appendSorted(*r);
 	else		lin.appendSorted(*r);
