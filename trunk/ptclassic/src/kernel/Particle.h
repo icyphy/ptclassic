@@ -90,8 +90,8 @@ public:
         // obtaining other particles from the given plasma.  Returns
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
-        virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-				   Plasma* myPlasma, const char* delay = 0) {}
+        virtual int initParticleStack(Block*, ParticleStack&, 
+				   Plasma*, const char*) {}
 
 	// Load the Particle with data
 	virtual void operator << (int) = 0;
