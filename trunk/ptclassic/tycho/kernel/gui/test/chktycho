@@ -13,7 +13,7 @@
 # and then automatically exits tycho without user intervention.
 
 # The user's tychorc file.
-tychorc=$HOME/.tycho/tychorc.tcl
+tychorc=$HOME/.Tycho/tychorc.tcl
 
 # Check the tychorc file for the 'chktycho' magic line.
 # If the magic line does not exist, add it
@@ -24,7 +24,7 @@ status=$?
 if [ $status = 1 ]; then
 	echo "Adding line to auto exit tycho to your tychorc file"
 	echo " If you stop execution of this script, then be sure to edit"
-	echo " ~/.tycho/tychorc.tcl by hand and remove the last two lines."
+	echo " ~/.Tycho/tychorc.tcl by hand and remove the last two lines."
 	echo " If let the script run, then the edit will be done for you."
 	echo "$chktychomagic" >> $tychorc
 	echo 'after 8000 ::tycho::TopLevel::exitProgram 1' >> $tychorc
