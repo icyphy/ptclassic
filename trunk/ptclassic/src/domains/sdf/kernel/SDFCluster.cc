@@ -776,13 +776,13 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 	// now zap those that become internal
 	ListIter nextZap(zap);
 	while ((p = (SDFClustPort*)nextZap++) != 0) {
-		SDFClustPort* near = p->inPtr();
-		SDFClustPort* far = p->far()->inPtr();
+		SDFClustPort* nearp = p->inPtr();
+		SDFClustPort* farp = p->far()->inPtr();
 		int numDelays = p->numInitDelays();
 		LOG_DEL; delete p->far();
 		LOG_DEL; delete p;
-		near->connect(*far, numDelays);
-		near->initGeo();
+		nearp->connect(*farp, numDelays);
+		nearp->initGeo();
 	}
 
 	// now we simply combine the remaining bagports and clusters into this.
