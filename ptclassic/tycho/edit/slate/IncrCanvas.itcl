@@ -1161,17 +1161,7 @@ body ::tycho::IncrCanvas::parent {tag} {
 # Get the primary component of a complex item. Note that calling
 # a method directly on the primary is not supported.
 #
-body ::tycho::IncrCanvas::primary {tag} {
-    # If a tag, get the first matching item
-    if { ! [string match {[_0-9]*} $tag] } {
-	set items [find withtag $tag]
-	if { $items == "" } {
-	    return ""
-	}
-	set id [lindex $items 0]
-    } else {
-	set id $tag
-    }
+body ::tycho::IncrCanvas::primary {id} {
     @scope ::tycho::ComplexItem set primary($id)
 }
 
@@ -1483,8 +1473,21 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 #### type
 #
 # Return the type of an item. Note that types are case-sensitive.
+# If the argument is a tag denoting more than one item, get the
+# type of the first in the list. If the tag represents no
+# items, return null.
 #
-body ::tycho::IncrCanvas::type {id} {
+body ::tycho::IncrCanvas::type {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
     if { [string match {[0-9]*} $id] } {
 	$canvas type $id
     } elseif { [string match {_[0-9]*} $id] } {
