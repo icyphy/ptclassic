@@ -407,6 +407,7 @@ configbody ::tycho::File::tmpfile {
 ###################################################################
 #
 body ::tycho::File::constructor {args} {
+    global tcl_platform
 
     # Store my class identifier in a private variable.
     set myclass "[info class]"
@@ -460,10 +461,16 @@ body ::tycho::File::constructor {args} {
         
         $myMenubar add "Toggle Read-Only" File -underline 0 \
                 -accelerator "C-x C-q" -command "$this toggleReadOnly"
-        
+
         $myMenubar add "Revision Control..." File -underline 2 \
                 -accelerator "C-x v" -command "$this revisionControl"
-        
+
+	# Windows might have a chmod and RCS.
+	if {$tcl_platform(platform) == macintosh} {
+	    $myMenubar disable "Toggle Read-Only"
+	    $myMenubar disable "Revision Control..."
+	}
+
         $myMenubar addSeparator File
         
         $myMenubar add Close File -underline 0 -accelerator "C-x k" \
@@ -1025,6 +1032,14 @@ body ::tycho::File::saveQuery { {useSaveAs 0}} {
 # the file.
 #
 body ::tycho::File::toggleReadOnly {} {
+    global tcl_platform
+    # This method will only work under Unix, as it uses the chmod command
+    # (Actually, Windows might have a third party chmod command, but
+    # we can't assume that).
+    if {$tcl_platform(platform) != unix} {
+	return
+    }
+
     set revclass [::tycho::RevControl::whichRevClass $this]
     if {$revclass != {}} {
         if {![file writable [filename]]} {
@@ -1039,7 +1054,7 @@ body ::tycho::File::toggleReadOnly {} {
         }
         if [file exists [filename]] {
             if ![file writable [filename]] {
-                exec chmod +w [filename]
+                catch {exec chmod +w [filename]}
                 configure -readonly 0
             } {
                 if {$modified} {
@@ -1050,7 +1065,7 @@ body ::tycho::File::toggleReadOnly {} {
                         save
                     }
                 }
-                exec chmod -w [filename]
+                catch {exec chmod -w [filename]}
                 configure -readonly 1
             }
         } {
