@@ -218,7 +218,6 @@ for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
 		addCode(timedecls, "mainDecls", "timeDecls");
 		addCode(stardecls, "mainDecls");
                 addCode(timeinit, "mainInit", "timeInit");
-		addCode(openfd, "mainInit", "openFd");
                 addCode(aminit, "mainInit", "amInit");
                 addCode(starinit, "mainInit");
 	}
