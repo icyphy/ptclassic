@@ -41,7 +41,8 @@ command (<CODE>this</CODE> only works for an object).
 The <CODE>code</CODE> or the <CODE>scope</CODE> commands can be used to obtain the second form.
 <p>
 In Itcl, all commands that are executed as a consequence of a keyboard
-or window event are executed at the global scope (in namespace "::").
+or window event are executed at the global scope (in namespace
+<CODE>::</CODE>).
 Also, commands executed in the background using <CODE>after</CODE> are executed
 at the global scope.  To verify this, we can use the
 <a name="info context command"><CODE>info context</CODE> command</a>,
@@ -114,8 +115,8 @@ namespace foo {
 Here, we define a class <CODE>bar</CODE> inside namespace <CODE>foo</CODE> derived from
 an Itk top-level window class.  In the constructor, we pack
 into the window a canvas widget.
-We bind the key <CODE>a</CODE> to simply report the expansion for <CODE>%q<CODE>,
-which will be <CODE>::foo::.y</CODE>.
+We bind the key <CODE>a</CODE> to simply report the expansion for
+<CODE>%q</CODE>, which will be <CODE>::foo::.y</CODE>.
 The key "b" uses this expansion to delete the object.
 Notice that the window specified for the bindings is
 <CODE>itk_component(hull)</CODE>, which will be the top-level window.
