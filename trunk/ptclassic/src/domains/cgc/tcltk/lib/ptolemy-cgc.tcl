@@ -4,7 +4,7 @@
 # Author: Edward A. Lee
 # Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -255,4 +255,7 @@ proc makeScale {win name desc position callback} {
     pack append $win $s {top fill}
 }
 
-makeRunWindow
+### Commented out: Now specified as the default value of the
+### "startCommand" parameter of the CGCTkTarget.
+###
+### makeRunWindow
