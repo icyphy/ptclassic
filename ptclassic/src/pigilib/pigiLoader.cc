@@ -51,13 +51,19 @@ static const char* ptolemyRoot;
 static const char* tmpFileName;
 
 // pigi funcs to call
-extern "C" void PrintDebug(const char*);
-extern "C" void DirName(char*);
-extern "C" char* BaseName(const char*);
-extern "C" int IconFileToSourceFile (const char*, char*, char*);
-extern "C" int util_csystem (const char*);
-extern "C" void win_msg(const char*);
-extern "C" void ErrAdd(const char*);
+extern "C" {
+	void PrintDebug(const char*);
+	void DirName(char*);
+	char* BaseName(const char*);
+	int IconFileToSourceFile (const char*, char*, char*);
+	int util_csystem (const char*);
+	void win_msg(const char*);
+	void ErrAdd(const char*);
+	void KcLog();
+	int KcIsCompiledInStar(const char*);
+	const char* curDomainName();
+	int KcSetKBDomain(const char*);
+};
 
 static void strcpyLC (char* out, const char* in) {
 	char c;
@@ -159,8 +165,6 @@ KcLoadInit (const char* argv0) {
 	tmpFileName = tempFileName();
 	Linker::init (argv0);
 }
-
-extern "C" void KcLog();
 
 // Load an object file (local only)
 static int
@@ -338,5 +342,19 @@ KcLoad (const char* iconName) {
 		return FALSE;
 	}
 	*p = 0;
+// see if the star is already loaded on a different domain list
+	const char* curdom = curDomainName();
+	if (strcmp(curdom, domain) != 0) {
+		KcSetKBDomain(domain);
+		if (KcIsCompiledInStar(base)) {
+			StringList msg = "star '";
+			msg += base;
+			msg += "' belongs to an incompatible domain.";
+			msg += "\nCheck the galaxy's domain using edit-domain";
+			ErrAdd (msg);
+			return FALSE;
+		}
+		KcSetKBDomain(curdom);
+	}
 	return compileAndLink (base, domain, dir, preproc);
 }
