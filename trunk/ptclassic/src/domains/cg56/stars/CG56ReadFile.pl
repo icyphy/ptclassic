@@ -15,7 +15,9 @@ limitation of liability, and disclaimer of warranty provisions.
 .Ir "Motorola DSP56000 simulator"
 .Ir "simulator, Motorola DSP56000"
 .Id "file input"
-Reads data from file for use with Motorola DSP56000 simulator.
+Reads one data value from the \fIfileName\fR for use with the
+Motorola DSP56000 simulator.
+The \fIinVal\fR is used as the storage location of the read data value.
 	}
 	execTime {
 		return 2;
