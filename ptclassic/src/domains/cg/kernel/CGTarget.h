@@ -21,7 +21,7 @@ $Id$
 #include "Target.h"
 #include "IntState.h"
 #include "StringState.h"
-#include "CGSymbol.h"
+#include "SymbolList.h"
 #include "SimControl.h"
 #include "CodeStreamList.h"
 
@@ -109,7 +109,7 @@ protected:
     // with the same name already exists, Error::abortRun is called.
     void addStream(const char* name,StringList* slist);
     
-    NestedSymbolList targetNestedSymbol;
+    SymbolStack targetNestedSymbol;
 
     // myCode contains the code generated for the target
     StringList myCode;
