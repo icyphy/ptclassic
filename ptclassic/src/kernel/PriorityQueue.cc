@@ -35,23 +35,28 @@ void PriorityQueue :: levelput(Pointer a, float v)
 		return;
 	} 
 
-	LevelLink *l = lastNode->next;		// Head of the queue
+	LevelLink *l = lastNode;		// Tail of the queue
+
+	// compare with lastNode first
+	if (v >= l->level) {
+		lastNode = new LevelLink(a,v,l->next,l);
+		l->next->before = lastNode;
+		l->next = lastNode;
+		lastReference = lastNode;
+		return;
+	} 
+	l = l->before;	
 	while (l != lastNode) {			// compare but last
-		if (v < l->level) {
-		   l->before->next = l->before = 
-				new LevelLink(a,v,l,l->before);
+		if (v >= l->level) {
+		   l->next->before = l->next = 
+				new LevelLink(a,v,l->next,l);
 		   lastReference = lastNode;
 		   return;
 		}
-		l = l->next;
+		l = l->before;
 	}
-	if (v < l->level) {
-		l->before->next = l->before = new LevelLink(a,v,l,l->before);
-	} else {				// Append the Node
-		lastNode = new LevelLink(a, v, l->next, l);
-		l->next->before = lastNode;
-		l->next = lastNode;
-	}
+	// at the top of the queue
+	l->next->before = l->next = new LevelLink(a,v,l->next,l);
 	lastReference = lastNode;
 	return;
 }
