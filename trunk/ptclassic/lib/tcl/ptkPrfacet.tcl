@@ -41,8 +41,8 @@ set ptkPortrait 1
 set ptkPrintToFile 0
 set ptkPrHeight 4
 set ptkPrWidth 4
-set ptkPrVertOffset 0
-set ptkPrHorOffset 0
+set ptkPrVertOffset 1
+set ptkPrHorOffset 1
 set ptkPrlabels 1
 set ptkPrBW 0
 set ptkPrPS 1
