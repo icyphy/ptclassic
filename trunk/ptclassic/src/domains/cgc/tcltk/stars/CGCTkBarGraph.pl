@@ -65,7 +65,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Width of the bar graph in centimeters }
 	}
 	setup {
-	    if(float(top) <= float(bottom)) {
+	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
         }
