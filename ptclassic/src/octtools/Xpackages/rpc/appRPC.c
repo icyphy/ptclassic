@@ -34,7 +34,12 @@ static char SccsId[]="$Id$";
  * Rick L Spickelmier, 7/31/86, last modified 3/2/87
  */
 
+#ifndef SYS_SOCKET_H
+#define SYS_SOCKET_H		/* mips Ultrix4.3A requires this
+				   otherwise we get conflicts with compat.h */
 #include <sys/socket.h>
+#endif
+
 #include <sys/ioctl.h>
 #include <sys/signal.h>
 
