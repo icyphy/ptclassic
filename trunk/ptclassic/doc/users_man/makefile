@@ -22,12 +22,12 @@ chapter%.dvi:
 	$(ROOT)/doc/tex/mktoc chapter $* > $(<:.tex=.contents)
 	$(ROOT)/doc/tex/mkindex chapter $* > $(<:.tex=.index)
 
-chapter10.dvi:	cgc.tex
-cgc.dvi:	chapter10.dvi
+chapter13.dvi:	cgc.tex
+cgc.dvi:	chapter13.dvi
 		mv -f chapter.dvi cgc.dvi
 
-chapter9.dvi:	cp.tex
-cp.dvi:		chapter9.dvi
+chapter11.dvi:	cp.tex
+cp.dvi:		chapter11.dvi
 		mv -f chapter.dvi cp.dvi
 
 # Update all of the Framemaker cross references.
