@@ -1,4 +1,4 @@
-static char rcsid[] = "$Header$";
+/*static char rcsid[] = "$Header$";*/
 
 /*
   RosettaMan
@@ -1346,7 +1346,7 @@ int fmanRef=1;	/* valid man ref? */
 void
 HTML(enum command cmd) {
 	static int pre=0;
-	int i,j;
+	int i/*,j*/;
 	int lasttoc;
 	char *p, *p0;
 
@@ -1533,9 +1533,9 @@ HTML(enum command cmd) {
 void
 SGML(enum command cmd) {
 	static int pre=0;
-	int i,j;
-	int lasttoc;
-	char *p, *p0;
+	int i /*,j*/;
+	/*	int lasttoc;*/
+	char *p /*,*p0 */;
 	static int fRefEntry=0;
 	static int fRefPurpose=0;
 	/*static char *bads => SGML doesn't backslash-quote metacharacters */
@@ -1688,14 +1688,14 @@ SGML(enum command cmd) {
 	   case BEGINBOLDITALICS:printf("<CODE>"); break;
 	   case ENDBOLDITALICS:	printf("</CODE>"); break;
 	   case BEGINMANREF:
-/*
-		for (p=hitxt; *p && *p!='('; p++) /* empty * /;
+#ifdef NEVER
+		for (p=hitxt; *p && *p!='('; p++) /* empty */;
 		*p++='\0'; p0=p;
-		for (; *p && *p!=')'; p++) /* empty * /;
+		for (; *p && *p!=')'; p++) /* empty */;
 		*p='\0';
 		if (fmanRef) { printf("<LINK LINKEND=\""); printf(manRef, hitxt, p0); printf("\">"); }
 		else printf("<I>");
-*/
+#endif
 		printf("<Command>");
 		break;
 	   case ENDMANREF:
@@ -1723,8 +1723,8 @@ void
 MIME(enum command cmd) {
 	static int pre=0;
 	int i;
-	int lasttoc;
-	char *p, *p0;
+	/*	int lasttoc;*/
+	/*	char *p, *p0;*/
 
 	/* always respond to these signals */
 	switch (cmd) {
@@ -1850,13 +1850,15 @@ MIME(enum command cmd) {
 	   case ENDBOLDITALICS:	printf("</bold></italics>"); break;
 	   case BEGINMANREF:
 		printf("<x-color><param>blue</param>");
-/* how to make this hypertext?
-		for (p=hitxt; *p && *p!='('; p++) /* empty * /;
+
+#ifdef NEVER
+/* how to make this hypertext? */
+		for (p=hitxt; *p && *p!='('; p++) /* empty */;
 		*p++='\0'; p0=p;
-		for (; *p && *p!=')'; p++) /* empty * /;
+		for (; *p && *p!=')'; p++) /* empty */;
 		*p='\0';
 		printf("<A HREF=\""); printf(manRef, hitxt, p0); printf("\">");
-*/
+#endif
 		break;
 	   case ENDMANREF:
 		printf("</x-color>");
@@ -2270,7 +2272,7 @@ la_gets(char *buf) {
 		while (lookahead!=EOF && (c=getchartab())!='\n' && i<BUFSIZ) { *p++=c; i++; }
 		assert(i<BUFSIZ);
 
-		/*lookahead=ungetc(getchar(), stdin);	/* only looking ahead one character for now */
+		/*lookahead=ungetc(getchar(), stdin);*/	/* only looking ahead one character for now */
 
 		/* very special case: if in SEE ALSO section, re-linebreak so references aren't linebroken
 		   (also do this if fNOHY flag is set) -- doesn't affect lookahead */
