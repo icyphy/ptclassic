@@ -50,6 +50,7 @@ A view is created as a child of the displayer; for example,
 we can create a text editor and place it into its displayer:
 <tcl quiet><pre>
 ::tycho::Edit $myDisplayer.e
+$myDisplayer attachView $myDisplayer.e
 $myDisplayer showView $myDisplayer.e
 </pre></tcl>
 
