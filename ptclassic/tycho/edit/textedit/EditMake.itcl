@@ -282,7 +282,7 @@ body ::tycho::EditMake::genVCMakefile {makefile} {
         regsub {^[ 	]*([A-Za-z0-9_]+)[	 ]*=[ 	]*$} $linein4a \
                 {!undef \1} linein4b
         # Convert dependency rules that refer to .o to .obj
-        regsub {\.o} $linein4b {.obj} linein5
+        regsub -all {\.o} $linein4b {.obj} linein5
         # Strip out leading whitespace in makefile variable assignments
         regsub {^[ 	]+([A-Za-z0-9_]+)[	 ]*=} $linein5 {\1 =} linein5a
         regsub {^[	 ]+([A-Za-z0-9_]+)[ 	]*=} $linein5a {\1 =} linein5b
