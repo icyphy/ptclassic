@@ -153,7 +153,7 @@ glimpse: src/.glimpse_exclude
 	cp src/.glimpse_exclude src/glimpse_exclude
 	rm -f src/.glimpse*
 	cp  src/glimpse_exclude src/.glimpse_exclude
-	$(GLIMPSEINDEX) -H "$(PTOLEMY)/src" "$(PTOLEMY)/src" "$(PTOLEMY)/lib.tcl" "$(PTOLEMY)/tycho"; \
+	$(GLIMPSEINDEX) -H "$(PTOLEMY)/src" "$(PTOLEMY)/src" "$(PTOLEMY)/lib/tcl" "$(PTOLEMY)/tycho"; \
 	chmod a+r src/.glimpse_*; \
 	rm -f src/glimpse_exclude
 
