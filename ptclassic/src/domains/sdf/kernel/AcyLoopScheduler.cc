@@ -56,25 +56,6 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #include <iostream.h>
 #include <limits.h>
 
-// FIXME: conditionally compiled code
-#define ACY_CHECK_FOR_IS_ACYCLIC 0
-#define ACY_CHECK_FOR_FIND_SOURCES 0
-#define ACY_CHECK_FOR_FIND_SINKS 0
-
-#if ACY_CHECK_FOR_IS_ACYCLIC
-static int isAcyclic(Galaxy* g, int ignoreDelayTags);
-#endif
-
-#if ACY_CHECK_FOR_FIND_SOURCES
-static void findSources(Galaxy* g, int flagLoc,
-			SequentialList& sources, Block* deletedNode);
-#endif
-
-#if ACY_CHECK_FOR_FIND_SINKS
-void findSinks(Galaxy* g, int flagLoc,
-	       SequentialList& sinks, Block* deletedNode);
-#endif
-
 // The following macros are used for Blocks
 #define PARTITION(pp) ((pp)->flags[2])
 #define TMP_PARTITION(pp) ((pp)->flags[1])
@@ -342,7 +323,6 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     APGANTopSort = new int[graphSize];
     delete [] topInvSort;
     topInvSort = new int[graphSize];
-#if ACY_CHECK_FOR_IS_ACYCLIC
     if (!isAcyclic(&gal,0)) {
 	StringList message;
 	message << "Graph is not acyclic; this loop scheduler cannot be used. "
@@ -351,7 +331,6 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	Error::abortRun(message);
 	return FALSE;
     }
-#endif
     isWellOrdered(&gal, wellOrderedList);
 
     numberBlocks(gal,0);  // Numbers top-level blocks in galaxy at flags[0]
@@ -1135,18 +1114,14 @@ void AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
     int flagLoc = 0, numPasses=0;
     resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
     SequentialList sources;
-#if ACY_CHECK_FOR_FIND_SOURCES
     findSources(g,flagLoc, sources, 0);
-#endif
     while (numPasses < graphSize) {
 	if (sources.size() == 1) {
 	    DataFlowStar* src = (DataFlowStar*)sources.getAndRemove();
 	    topsort.append(src);
 	    src->flags[flagLoc] = 1;
 	    numPasses++;
-#if ACY_CHECK_FOR_FIND_SOURCES
 	    findSources(g, flagLoc, sources, src);
-#endif
 	} else {
 	    return;
 	}
@@ -1209,7 +1184,7 @@ ostream& operator << (ostream& o, const SimpleIntMatrix& a)
     return o;
 }
 
-#if ACY_CHECK_FOR_IS_ACYCLIC
+/*
 // Done by computing breath first search (bfs) on g.
 // passNum keeps track of the total number of passes through
 // the graph.  Each pass starts by doing bfs on the graph starting
@@ -1262,9 +1237,7 @@ static int isAcyclic(Galaxy* g, int ignoreDelayTags)
     }
     return TRUE;
 }
-#endif
 
-#if ACY_CHECK_FOR_FIND_SOURCES
 // nodes marked.  This method is used in order to simulate
 // the removal of nodes from the graph; a node is "removed"
 // by marking it at flags[flagLoc] (by the function that calls
@@ -1315,9 +1288,7 @@ static void findSources(Galaxy* g, int flagLoc,
 	}
     }
 }
-#endif
 
-#if ACY_CHECK_FOR_FIND_SINKS
 void findSinks(Galaxy* g, int flagLoc,
 	       SequentialList& sinks, Block* deletedNode)
 {
@@ -1347,11 +1318,9 @@ void findSinks(Galaxy* g, int flagLoc,
 	}
     }
 }
-#endif
 
 // old one with BFS
 
-/*
 // We use a very simple algorithm to compute this matrix here; there
 // are probably faster algorithms around (notably, Strassen's algorithm
 // for multiplying 2 NxN matrices in O(N^2.81) time is asymptotically
