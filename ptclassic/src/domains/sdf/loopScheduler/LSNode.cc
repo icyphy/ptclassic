@@ -76,26 +76,29 @@ LSNode* LSNode :: nextConnection(LSNode* model, int flag) {
 	}
 	return 0;
 }
-	
+
 // update outside connection from this node to another node not included
 // in the argument cluster node.
 void LSNode :: updateOutsideConnections(LSNode* cnode) {
+	if (cnode == 0) return;
 
 	// With my ancestors
 	EGGateLinkIter nextGate(ancestors);
 	EGGate* g;
 
 	while ((g = nextGate++) != 0) {
+		// outNode is the parent of g
 		LSNode* outNode = (LSNode*) g->farEndNode();
-		if (!outNode->inActiveCluster()) {
+		if (outNode && !outNode->inActiveCluster()) {
 			int samples = g->samples();
 
 			// remove this intercluster arc
-			LOG_DEL; delete g->farGate();
+			// LOG_DEL; delete g->farGate();
 			LOG_DEL; delete g;
 
 			// insert a link to this outside node
-			outNode->makeArc(cnode,samples,0);
+			// FIXME: memory leak
+			EGGate* newNode = outNode->makeArc(cnode,samples,0);
 		}
 	}
 
@@ -103,13 +106,18 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 	nextGate.reconnect(descendants);
 
 	while ((g = nextGate++) != 0) {
+		// outNode is the parent of g
 		LSNode* outNode = (LSNode*) g->farEndNode();
-		if (!outNode->inActiveCluster()) {
+		if (outNode && !outNode->inActiveCluster()) {
 			int samples = g->samples();
-			LOG_DEL; delete g->farGate();
+
+			// remove this intercluster arc
+			// LOG_DEL; delete g->farGate();
 			LOG_DEL; delete g;
-			// FIXME: The makeArc() call below leaks memory 
-			cnode->makeArc(outNode,samples,0);
+
+			// insert a link to this outside node
+			// FIXME: memory leak
+			EGGate* newNode = cnode->makeArc(outNode,samples,0);
 		}
 	}
 }
