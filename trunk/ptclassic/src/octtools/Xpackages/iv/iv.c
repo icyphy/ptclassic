@@ -35,10 +35,15 @@ static char SccsId[]="$Id$";
  */
 
 #include "port.h"
+#include "ansi.h"
 #include <sys/time.h>
 #include "ualloc.h" 
 #include "iv.h"
+#include "ivGetLine.h"
+#include "ivBuf.h"
+#include <X11/Xresource.h>
 #include <X11/Xutil.h>
+#include "xformatevent.h"
 #include "button.bitmap.11"
 #include "pushed.bitmap.11"
 #include "plus.bitmap.11"
@@ -117,6 +122,12 @@ int	IVtitleHeight;		/*  */
 
 #define IV_MIN_ROWS 1
 #define IV_MAX_ROWS 100
+
+/* Forward decl.  Could this be static? */
+int ivWhichSelect
+	ARGS((IVWindow *IVwin, int index));
+void ReadDefaults
+	ARGS((char* progName, IVWindow *IVwin));
 
 
 void ivError(s)
@@ -401,21 +412,30 @@ void ivCreateRow( IVwin, i)
     theEntry->IVWinType = IV_TEXT_WIN;
     theEntry->index = i;
     theEntry->IVwin = IVwin;
-    XSaveContext( display, IVArray[i].TextWin, globalIvContext, theEntry);
+    XSaveContext( display, IVArray[i].TextWin, globalIvContext,
+		 (XPointer)theEntry);
     XMapWindow( display, IVArray[i].TextWin);
     
     /* Value window is next */
     x = x + IVbdrWidth;
     if ( type != IV_TOGGLE ) {
-	width =  (type == IV_STRING) ?  IVwin->valueWidth + 2 * (IVbuttonWidth+IVbdrWidth) : IVwin->valueWidth;
-	IVArray[i].ValueWin = XCreateSimpleWindow( display, win, x + IVwin->docWidth, y, width, height,
-						  IVbdrWidth, IVwin->bdrPixel, IVwin->editBgPixel );
-	XSelectInput( display, IVArray[i].ValueWin, ExposureMask | KeyPressMask | ButtonPressMask );
+	width =  (type == IV_STRING) ?  IVwin->valueWidth + 2 *
+	  (IVbuttonWidth+IVbdrWidth) : IVwin->valueWidth; 
+	IVArray[i].ValueWin = XCreateSimpleWindow( display, win, x +
+						  IVwin->docWidth, y,
+						  width, height, 
+						  IVbdrWidth,
+						  IVwin->bdrPixel,
+						  IVwin->editBgPixel
+						  ); 
+	XSelectInput( display, IVArray[i].ValueWin, ExposureMask |
+		     KeyPressMask | ButtonPressMask ); 
 	theEntry = NEW(IVAssocEntry);
 	theEntry->IVWinType = IV_VALUE_WIN;
 	theEntry->index = i; 
 	theEntry->IVwin = IVwin;
-	XSaveContext( display, IVArray[i].ValueWin, globalIvContext, theEntry );
+	XSaveContext( display, IVArray[i].ValueWin, globalIvContext,
+		     (XPointer)theEntry ); 
 	XMapWindow( display, IVArray[i].ValueWin );
     }
 
@@ -432,7 +452,8 @@ void ivCreateRow( IVwin, i)
 	theEntry->index = i; 
 	theEntry->IVwin = IVwin;
 
-	XSaveContext( display, IVArray[i].ToggleWin, globalIvContext, theEntry);
+	XSaveContext( display, IVArray[i].ToggleWin, globalIvContext,
+		     (XPointer)theEntry); 
 	XMapWindow( display, IVArray[i].ToggleWin );
     } else if ( type != IV_STRING ) {
 	x = x + IVbdrWidth;
@@ -452,13 +473,15 @@ void ivCreateRow( IVwin, i)
 	theEntry->index = i; 
 	theEntry->IVwin = IVwin;
 
-	XSaveContext( display, IVArray[i].PlusButton, globalIvContext, theEntry);
+	XSaveContext( display, IVArray[i].PlusButton, globalIvContext,
+		     (XPointer)theEntry); 
 	theEntry = NEW(IVAssocEntry);
 	theEntry->IVWinType = IV_MINUS_BUTTON;
 	theEntry->index = i; 
 	theEntry->IVwin = IVwin;
 
-	XSaveContext( display, IVArray[i].MinusButton, globalIvContext, theEntry);
+	XSaveContext( display, IVArray[i].MinusButton,
+		     globalIvContext, (XPointer) theEntry); 
 	XMapWindow( display, IVArray[i].PlusButton );
 	XMapWindow( display, IVArray[i].MinusButton);
     }
@@ -536,7 +559,7 @@ ivPrintLine( IVwin, n, WinMask, rv )
     IVvarType* IVArray = IVwin->array;
 
     register int type;
-    register int enable;
+    register int enable = 0;
     XWindowAttributes IVwin_info;
 
     /* If the window is not mapped, just forget about printing anything */
@@ -749,7 +772,7 @@ void constructIVWindow( IVwin, display )
     IVwin->docLen = 0;
 }
 
-createGCs( IVwin ) 
+void createGCs( IVwin ) 
     IVWindow *IVwin;
 {
     Display *display = IVwin->display;
@@ -862,7 +885,7 @@ iv_InitWindow( display, progName, title, maxValChars )
 	theEntry->IVWinType = IV_ROOT_WIN;
 	theEntry->index = IV_ROOT_INDEX;
 	theEntry->IVwin = newIVwin ;
-	XSaveContext( display, w, globalIvContext,  theEntry);
+	XSaveContext( display, w, globalIvContext, (XPointer)theEntry);
 	newIVwin->array = NEWVEC(IVvarType, newIVwin->rows);
 	
     return newIVwin;
@@ -1129,7 +1152,7 @@ iv_HandleEvent( theEventP )
     int	 button;		/* the button being pressed */
     extern int ivKeyOk();
     extern void Timer();
-    int 		WinType, varType, enable = -1;
+    int 		WinType, varType = 0, enable = -1;
     Window w = theEventP->xany.window;
     Display *display = theEventP->xany.display;
     IVWindow *IVwin;
@@ -1395,12 +1418,12 @@ static int GetColor( display, name)
 
 /* Reads a color default - uses char *value, int temp, and char *progName */
 #define RDCLR(name, pix) \
-    if (value = XGetDefault( display, progName, (name))) \
+    if ( (value = XGetDefault( display, progName, (name))) ) \
     if ((temp = GetColor( display, value)) != NO_COLOR) (pix) = temp
     
     /* Reads an integer default - uses char *value, and char *progName */
 #define RDINT(name, newval) \
-    if (value = XGetDefault( display, progName, (name))) \
+    if ( (value = XGetDefault( display, progName, (name))) ) \
     newval = atoi(value)
 
 /* Reads a font - uses temporary XFontStruct *tempFont - must be fixed width */
@@ -1416,8 +1439,8 @@ static int GetColor( display, name)
     }
 
 #define RDFNT(name, fnt) \
-    if ( value = XGetDefault( display, progName, name)) \
-    if ( tempFont = ivLoadFont( display,  value)) \
+    if ( (value = XGetDefault( display, progName, name)) ) \
+    if ( (tempFont = ivLoadFont( display,  value)) ) \
            (fnt) = tempFont;
 
 /* Reads a flag value (basically whether or not the default is present */
@@ -1428,7 +1451,7 @@ static int GetColor( display, name)
  * Reads X default values which override the hard-coded defaults
  * set up by InitSets.
  */
-int ReadDefaults( progName, IVwin )
+void ReadDefaults( progName, IVwin )
     char* progName;
     IVWindow *IVwin;
 {
@@ -1441,7 +1464,7 @@ int ReadDefaults( progName, IVwin )
     char *value;
     int temp;
     
-    if (value = XGetDefault( display, progName, "iv.EraseValue")) {
+    if ( (value = XGetDefault( display, progName, "iv.EraseValue")) ) {
 	if (!strncmp(value, "on", 2)) {
 	    IVwin->eraseFlag = TRUE;
 	} else {
