@@ -7,7 +7,7 @@ samples, then passes the "decision" input to the output.  Designed
 for use in decision feedback equalizers, but can be used for other
 purposes.
 	}
-	version { $Id$ }
+	version { @(#)CGCTrainer.pl	1.2	1/28/94 }
 	author { S. Ha }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
@@ -49,19 +49,65 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		noInternalState();
 	}
+
 	setup {
 		count = 0;
 	}
-	codeblock(out) {
-	if ($ref(count) < $val(trainLength)) {
-		$ref(output) = $ref(train);
-		$ref(count)++;
-	} else {
-		$ref(output) = $ref(decision);
+
+	begin {
+		// handle precisions for fix types
+		if (train.resolvedType() == FIX) {
+
+			// if the precision for the output port is not defined
+			// by the successor star, the precisions of the input
+			// ports are passed through to the output ports
+
+			if (!output.precision().isValid())
+				output.setAttributes(A_VARPREC);
+		}
 	}
-	}
+
 	go {
-		addCode(out);
+		// check for fix types
+		if (train.resolvedType() == FIX) {
+
+			// if we use variable precision representation,
+			// set the precision of the output port from
+			// the source
+			if (output.attributes() & AB_VARPREC) {
+
+@	if ($ref(count) < $val(trainLength)) {
+@		$precision(output).len  = FIX_GetLength($ref(train));
+@		$precision(output).intb = FIX_GetIntBits($ref(train));
+@		FIX_Assign($ref(output),$ref(train));
+@		$ref(count)++;
+@	} else {
+@		$precision(output).len  = FIX_GetLength($ref(decision));
+@		$precision(output).intb = FIX_GetIntBits($ref(decision));
+@		FIX_Assign($ref(output),$ref(decision));
+@	}
+
+			} else {
+
+@	if ($ref(count) < $val(trainLength)) {
+@		FIX_Assign($ref(output),$ref(train));
+@		$ref(count)++;
+@	} else {
+@		FIX_Assign($ref(output),$ref(decision));
+@	}
+
+			}
+
+		} else {
+
+@	if ($ref(count) < $val(trainLength)) {
+@		$ref(output) = $ref(train);
+@		$ref(count)++;
+@	} else {
+@		$ref(output) = $ref(decision);
+@	}
+
+		}
 	}
 	exectime {
 		return 1;
