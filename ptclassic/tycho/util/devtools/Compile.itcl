@@ -326,7 +326,7 @@ body ::tycho::Compile::compileFiles {} {
             close the Exec window to continue."
 
     # Compile.  If we already have a compileWidget, reuse it. 
-    if {$compileWidget == {}} {
+    if {![winfo exists $compileWidget]} {
         #set compileWidget [$this cget -view].compile
         #::tycho::Monitor $compileWidget
         #set retList [::tycho::execModal $compileString $dirname $compileWidget]
