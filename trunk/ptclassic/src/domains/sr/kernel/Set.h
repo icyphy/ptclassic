@@ -81,8 +81,6 @@ public:
 
   StringList print() const;
 
-  //  static int setcount() { return numsets; }
-
 protected:
 
   // Return the total number of words in the set
@@ -99,10 +97,6 @@ protected:
 
   // Array of integers used to store the bitmask
   int * words;
-
-  // private:
-  // number of active sets
-  // static int numsets;
 
 };
 
