@@ -360,8 +360,10 @@ body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
     toolbar disable commandtoexec
     toolbar disable dirtoexecfrom
 
-    ::tycho::Exec::execProcess \
-            [toolbar get commandtoexec] [toolbar get dirtoexecfrom]
+    if [catch {::tycho::Exec::execProcess \
+            [toolbar get commandtoexec] [toolbar get dirtoexecfrom]} errmsg] {
+        addHistory "<<$errmsg>>"
+    }
     set retstatus [$this getStatusWait]
 
     toolbar disable stop
