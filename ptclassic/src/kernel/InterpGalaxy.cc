@@ -22,15 +22,15 @@ extern Error errorHandler;
 
 // Make a copy of a new string in a safe place.  This is needed because
 // we may be fed strings from an interpreter that are later written over.
-static char *
-savestring (char *txt) {
-	char *s = new char[strlen(txt)+1];
+static char*
+savestring (const char* txt) {
+	char* s = new char[strlen(txt)+1];
 	return strcpy (s, txt);
 }
 
 // Report an error: no such star or porthole
 
-static void noInstance(char *star,char *gal) {
+static void noInstance(const char* star,const char* gal) {
 	StringList msg;
 	msg = "No instance of \"";
 	msg += star;
@@ -41,7 +41,7 @@ static void noInstance(char *star,char *gal) {
 }
 
 PortHole *
-InterpGalaxy::findPortHole (char *star,char *port) {
+InterpGalaxy::findPortHole (const char* star,const char* port) {
 	Block *st = blockWithName(star);
 	if (st == NULL) {
 		noInstance (star, readName());
@@ -53,8 +53,9 @@ InterpGalaxy::findPortHole (char *star,char *port) {
 }
 
 Geodesic &
-InterpGalaxy::connect(char *srcStar,char *srcPipe,char *dstStar,char *dstPipe,
-	int numberDelays=0) {
+InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
+		      const char* dstStar,const char* dstPipe,
+		      int numberDelays=0) {
 // Get the source and destination ports
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
@@ -75,7 +76,7 @@ InterpGalaxy::connect(char *srcStar,char *srcPipe,char *dstStar,char *dstPipe,
 	return connect (*srcP, *dstP, numberDelays);
 }
 
-InterpGalaxy::addStar(char *starname,char *starclass) {
+InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	starname = savestring (starname);
 	starclass = savestring (starclass);
 	Block *src = KnownBlock::clone(starclass);
@@ -88,7 +89,8 @@ InterpGalaxy::addStar(char *starname,char *starclass) {
 	return;
 }
 
-InterpGalaxy::alias(char *galportname,char *starname,char *portname) {
+InterpGalaxy::alias(const char* galportname,const char* starname,
+		    const char* portname) {
 	galportname = savestring (galportname);
 // first get the portname for the contained star
 	PortHole *ph = findPortHole (starname, portname);
@@ -114,7 +116,15 @@ InterpGalaxy::alias(char *galportname,char *starname,char *portname) {
 	actionList += portname;
 }
 
-Block *
+// DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
+// the action strings to be combined into one string.  This will break
+// clone()!!!  Do not do it!  If you must, since StringList's copy
+// constructor does a complete copy, it's safe to do
+//	StringList foo(actionList);
+//	cout << foo;
+// though the result will be hard to read.
+
+Block* 
 InterpGalaxy::clone() {
 // make a new interpreted galaxy!  We do this by processing the action
 // list.
@@ -126,7 +136,7 @@ InterpGalaxy::clone() {
 	actionList.reset();
 
 	while (nacts > 0) {
-		char *a, *b, *c, *d, *action;
+		const char *a, *b, *c, *d, *action;
 		int ndelay;
 
 		action = actionList.next();

@@ -23,27 +23,23 @@ class InterpGalaxy: public Galaxy {
 
 private:
 	StringList actionList;	// saves actions used in building galaxy
-	PortHole *
-	findPortHole(char *star,char *port);
+	PortHole* findPortHole(const char* star,const char* port);
 public:
 // constructor: makes an empty galaxy
 	InterpGalaxy() { descriptor = "An interpreted galaxy";}
 
-// describe: same as Galaxy for now (doesn't print action list)
-	virtual operator char* () { return Galaxy::operator char*(); }
-
 // set the descriptor
-	setDescriptor(char *dtext) { descriptor = dtext;}
+	setDescriptor(const char* dtext) { descriptor = dtext;}
 
 // add a new star to the galaxy
-	addStar(char *starname, char *starclass);
+	addStar(const char* starname, const char* starclass);
 
 // add a connection
 	Geodesic &
-	connect(char *srcstar, char *srcport, char *dststar, char *dstport,
-		int delay = 0);
+	connect(const char* srcstar, const char* srcport, const char* dststar,
+		const char* dstport, int delay = 0);
 // add an alias
-	alias(char *galport, char *star, char *starport);
+	alias(const char* galport, const char* star, const char *starport);
 
 // Make a new, identical galaxy
 	virtual Block *clone();
@@ -52,6 +48,6 @@ public:
 	addToKnownList();
 
 // return a contained star/galaxy (this is protected in Galaxy)
-	Block* blockWithName(char* s) {return Galaxy::blockWithName(s);}
+	Block* blockWithName(const char* s) {return Galaxy::blockWithName(s);}
 };
 #endif
