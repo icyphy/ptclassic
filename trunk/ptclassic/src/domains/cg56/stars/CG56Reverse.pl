@@ -2,10 +2,10 @@ defstar {
 	name { Reverse }
 	domain { CG56 }
 	desc { Reverse a block of input data of length N }
-	version { $Id$ }
+	version { @(#)CG56Reverse.pl	1.10 1/26/96 }
 	author { Chih-Tsung Huang }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -33,11 +33,11 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 
  	codeblock(main) {
-        move    #<$addr(in)+$val(N),r0
-        move    #<$addr(out),r1
+        move    #<$addr(input)+$val(N),r0
+        move    #<$addr(output),r1
         do      #$val(N),$label(loop)
-        move    $mem(in):-(r0),a
-        move    $mem(out),x:(r1)+
+        move    $mem(input):-(r0),a
+        move    a,$mem(output):(r1)+
 $label(loop)
         }
         codeblock(one) {
