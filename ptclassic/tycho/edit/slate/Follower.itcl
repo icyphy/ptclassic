@@ -93,21 +93,11 @@ body ::tycho::Follower::activate {t x y} {
     # Set the target. The client can modify its options later
     # with -activatecommand if desired. If the target argument is
     # in fact a tag, get the current picture from the slate.
-    if { [isObject $t] } {
+    if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
 	target $t
     } else {
+	# FIXME: current{} is not implemented!
 	target [current]
-
-	#
-	# It is possible with the Tk canvas (version 4.0 to click on
-	# an item, and, by the time the canvas is asked for the current
-	# item, for that to become void. (Don't ask me why this happens,
-	# I just know that it does.) To work around this, check whether
-	# the target is null, and if it is, just return.
-	#
-	# if { $target == "" } {
-	#		return
-	# }
     }
 
     # Set up the bindings. Note: the bindings are set to the tag,
@@ -130,7 +120,7 @@ body ::tycho::Follower::activate {t x y} {
     execute $activatecommand $x $y
 
     # Start the interaction sequence
-    click $x $y
+    eval click $x $y $options
 }
 
 
