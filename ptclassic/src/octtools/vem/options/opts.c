@@ -63,7 +63,9 @@ static int spawn_opt_editor();
 static char *gen_title();
 
 static void ch_int();
+#ifdef USE_CH_DBL
 static void ch_dbl();
+#endif
 static void ch_flag();
 
 static void opt_ok();
@@ -114,11 +116,13 @@ static ddsNumber grid_nums[] = {
 static ddsNumber other_nums[] = {
     { "Solid Fill Threshold", 0.0, 5000.0, 1.0, 10.0, "%4.0lf",
 	ch_int, (ddsData) OFFSET(solid_thres) },
+#ifdef USE_CH_DBL
 /* XXX RLS - seems to be a bug with double values - so for the time
    being, skip it
     { "Name Threshold", 0.0, 5.0, 0.1, 1.0, "%1.1lf",
 	ch_dbl, (ddsData) OFFSET(bb_thres) },
  */
+#endif
     { "Bounding Threshold", 0.0, 2000.0, 5.0, 10.0, "%4.0lf",
 	ch_int, (ddsData) OFFSET(bb_min) },
     { "Abstraction Threshold", 0.0, 2000.0, 5.0, 10.0, "%4.0lf",
@@ -327,6 +331,7 @@ ddsHandle num;			/* Number component */
     *value = (int) (data.value + 0.5);
 }
 
+#ifdef USE_CH_DBL
 static void ch_dbl(num)
 ddsHandle num;			/* Number component */
 /*
@@ -342,6 +347,7 @@ ddsHandle num;			/* Number component */
     value = (double *) data.user_data;
     *value = (double) data.value;
 }
+#endif
 
 static void ch_flag(item_list, toggled)
 ddsHandle item_list;		/* Item list modified */
