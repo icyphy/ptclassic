@@ -31,7 +31,8 @@
 
 DIRS = textedit visedit 
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo:
+makefiles all install clean sources depend realclean checkjunk sccsinfo \
+itcldocs:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
