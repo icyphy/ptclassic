@@ -449,22 +449,23 @@ Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer)
 	ParseToken t2 = evalIntExpression(lexer);
 	if (t2.tok != T_Int) return Precision();
 
-	int length, intBits;
+        // Don't hide Precision::length and Precision::intBits
+	int tmplength, tmpintBits;
 
 	if (flag)
-		length  = t.intval + t2.intval,
-		intBits = t.intval;
+		tmplength  = t.intval + t2.intval,
+		tmpintBits = t.intval;
 	else
-		length  = t2.intval,
-		intBits = t2.intval - t.intval;
+		tmplength  = t2.intval,
+		tmpintBits = t2.intval - t.intval;
 
-	return Precision(length,intBits);
+	return Precision(tmplength,tmpintBits);
 }
 
 PrecisionState& PrecisionState :: setState(const char* stateName, 
 			Block* parent ,
 			const char* ivalue,
-			const char* desc = NULL)
+			const char* desc /*= NULL*/)
 {
 	setDescriptor(desc);
 	setNameParent(stateName, parent);
