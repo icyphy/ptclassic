@@ -16,16 +16,16 @@ style default \
     chosen to be a large-ish size on high-resolution screens,
     and use the most commonly available font families.
 } {
-    parameter textFont {Screen 14} \
+    parameter textFont {{Courier New} 12} \
 	    -type font \
 	    -label "Text editor font"
-    parameter labelFont {Helvetica 14} \
+    parameter labelFont {Helvetica 12} \
 	    -type font \
 	    -label "Label font"
-    parameter displayFont {Times 16} \
+    parameter displayFont {Times 14} \
 	    -type font \
 	    -label "Proportional display font"
-    parameter cwFont {Courier 16} \
+    parameter cwFont {{Courier New} 12} \
 	    -type font \
 	    -label "Constant-width display font"
     parameter entryFont {Helvetica 14} \
