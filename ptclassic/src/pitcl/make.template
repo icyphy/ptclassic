@@ -85,7 +85,7 @@ TCL_SRCS =	gendoc.tcl
 SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) $(TCL_SRCS)
 
 # 'make realclean' should remove these
-REALCLEAN_STUFF =	ptcl.html
+REALCLEAN_STUFF =	doc/codeDoc/ptcl.html
 
 # Header files
 HDRS =		displayFile.h \
@@ -115,9 +115,11 @@ PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o)
 # ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
 
-all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim pitcl.html
+all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim doc/codeDoc/pitcl.html
 
-pitcl.html: PITcl.cc gendoc.tcl
+docs: doc/codeDoc/pitcl.html
+
+doc/codeDoc/pitcl.html: PITcl.cc gendoc.tcl
 	@echo "Generating html documentation from PITcl.cc"
 	(cd $(VPATH); \
 	  echo "set PTOLEMY $(PTOLEMY); source $(VPATH)/gendoc.tcl" | $(ISH))
