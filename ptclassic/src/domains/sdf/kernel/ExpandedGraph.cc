@@ -63,6 +63,7 @@ ExpandedGraph :: ~ExpandedGraph() {
 
 	while ((m = nextMaster++) != 0) {
 		m->deleteInvocChain();
+		LOG_DEL; delete m;
 	}
 }
 
