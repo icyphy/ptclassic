@@ -1566,21 +1566,21 @@ int CGCStar::addRemoteFile(const char* filename) {
 void CGCStar::addModuleFromLibrary(
 	const char* module, const char* subdirectory,
 	const char* libraryName) {
-    StringList cFile, cPath, includeDir, includeFile, includePath,
+    StringList cFile, cPath, includeDir, includeFileQuoted, includePath,
 	       includeDirSpec, libSpec, path, ptolemyLibDirSpec;
     char* ptolemy = getenv("PTOLEMY");
     char* ptarch = getenv("PTARCH");
     cFile << module << ".c";
-    includeFile << "\"" << module << ".h\"";
+    includeFileQuoted << "\"" << module << ".h\"";
     includeDir << ptolemy << "/" << subdirectory;
     includeDirSpec << "-I" << includeDir;
     ptolemyLibDirSpec << "-L" << ptolemy << "/lib." << ptarch;
     libSpec << "-l" << libraryName;
     path << ptolemy << "/" << subdirectory << "/";
-    includePath << path << includeFile;
+    includePath << path << module << ".h";
     cPath << path << cFile;
 
-    addInclude(includeFile);
+    addInclude(includeFileQuoted);
     addCompileOption(includeDirSpec);
     addLocalLinkOption(ptolemyLibDirSpec);
     addLocalLinkOption(libSpec);
