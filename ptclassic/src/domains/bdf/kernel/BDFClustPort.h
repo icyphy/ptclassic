@@ -127,6 +127,10 @@ public:
 	// return last Boolean value
 	int lastBool() const { return lastBoolValue;}
 
+	// manipulate ignoreFlag.  Value must be 0 or 1.
+	int ignore() const { return ignoreFlag;}
+	void setIgnore(int val) { ignoreFlag = (val ? 1 : 0);}
+
 	// functions to set and get maximum arc counts for buffer allocation
 	int maxArcCount();
 	void setMaxArcCount(int howMany);
@@ -161,6 +165,9 @@ private:
 
 	// true if output needs to be moved up
 	unsigned char moveupNeeded;
+
+	// true if arc is to be ignored when searching for paths
+	unsigned char ignoreFlag;
 };
 
 // determine whether two signals have a fixed relation or not.  It
