@@ -445,6 +445,9 @@ public:
 
 	// Generate code using the Target to produce the right language.
 	void compileRun();
+
+    StringList displaySchedule();
+
 protected:
 	SDFClusterGal* cgal;
 	const char* logFile;

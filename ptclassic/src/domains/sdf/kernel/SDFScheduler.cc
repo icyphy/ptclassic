@@ -496,7 +496,7 @@ const char* SDFScheduler::domain() const { return SDFdomainName;}
 
 StringList SDFScheduler::displaySchedule() {
     StringList out;
-    out << "Default SDF Scheduler\n" << mySchedule.printVerbose();
+    out << "E.A. Lee's SDF Scheduler\n\n" << mySchedule.printVerbose();
     return out;
 }
 
