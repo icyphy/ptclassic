@@ -993,7 +993,7 @@ common basic random number generation routine which is realized in the
 .pp
 The first example is the part of the DE Poisson star preprocessor file.
 .(c        
-        hinclude { <NegativeExpntl.h> }
+        hinclude { <NegExp.h> }
         ccinclude { <ACG.h> }
         protected {
                 NegativeExpntl *random;
@@ -1021,13 +1021,23 @@ The first example is the part of the DE Poisson star preprocessor file.
 	}
 .)c
 The built-in class for an exponentially distributed random numbers is
-\fBNegativeExpntl\fR.  We include appropriate header files .h and .cc files.  
-The common basic random number generation is
-enforced by declaring the static \fBACG\fR class pointer in the .cc file.
+\fBNegativeExpntl\fR.
+.pp
+The Ptolemy kernel provides a single object to generate a stream of
+random numbers; the global variable
+.i gen
+(a poor choice of name, perhaps, but it's there now) is a pointer to it.
 We define a member of \fBNegativeExpntl\fR class and create
 an instance in the \fBstart()\fR
 method, not in the constructor since Ptolemy allows you to change the
-seed of the random number.  
+seed of the random number.  When the user changes the seed of the
+random number generator, the object pointed to by
+.i gen
+is deleted and re-created, so all objects such as the one pointed
+to by
+.i random
+in this star become invalid.
+.pp
 Finally, we can read a random number of the specific type by calling 
 operator \fB()\fR of the \fBNegativeExpnl\fR class.
 .pp
