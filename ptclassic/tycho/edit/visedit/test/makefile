@@ -49,7 +49,7 @@ ITCL_SRCS = $(GRAPHICAL_TESTS)
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	sample.fst sample.gfk
+MISC_FILES =	sample.fst
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
