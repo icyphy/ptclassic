@@ -72,6 +72,7 @@ void MDSDFGeodesic::initialize() {
   int oNumCols = ((MDSDFPortHole*)originatingPort)->numColXfer();
   mNumRows = destNumRowsPerIter * dNumRows;
   mNumCols = destNumColsPerIter * dNumCols;
+  originalNumCols = mNumCols;
 
   rowDelays = 0;
   colDelays = 0;
@@ -132,6 +133,16 @@ void MDSDFGeodesic::initialize() {
   pstack.putTail(motherParticle);
 
 }
+
+void MDSDFGeodesic::setValid(int row, int col) { 
+  lastRow = row + rowDelays;
+  lastCol = col + colDelays;
+  if(colDelays && lastCol%originalNumCols == 0) {
+    lastRow++;
+    lastCol = colDelays-1;
+  }
+}
+    
 
 // Accessing the location of a single scalar value, no type checking done
 double MDSDFGeodesic::getFloatInput(int rowFiringIndex,int colFiringIndex,
