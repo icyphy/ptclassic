@@ -148,7 +148,8 @@ body tycho::Glimpse::glimpseSearch {} {
 
     # Unix only? exec glimpse and get the output:
     set glimpseIndexDir [file dirname [eval file join $glimpse_index]]
-    set glimpseOut [exec glimpse -n -H $glimpseIndexDir $pattern]
+    # glimpse options: -y = don't prompt -n = show line numbers
+    set glimpseOut [exec glimpse -y -n -H $glimpseIndexDir $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
         regsub {^.*/tycho/(.*)} $glimpseItem {$TYCHO/\1} shortGlimpseItem
