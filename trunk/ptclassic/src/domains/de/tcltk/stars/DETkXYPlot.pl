@@ -6,8 +6,8 @@ Plot Y input(s) vs. X input(s) with dynamic updating.
 Time stamps are ignored.  If there is an event on only
 one of a matching pair of X and Y inputs, then the previously
 received value (or zero if none) is used for the other.
-Two styles are currently supported: style = 0 causes
-points to be plotted, whereas style = 1 causes connected
+Two styles are currently supported: "dot" causes
+points to be plotted, whereas "connect" causes connected
 lines to be plotted. Drawing a box in the plot will
 reset the plot area to that outlined by the box.
 There are also buttons for zooming in and out, and for
@@ -69,9 +69,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 	        name {style}
-		type {int}
-		default {"0"}
-		desc {Plot style (0 for points, 1 for lines)}
+		type {string}
+		default {"dot"}
+		desc {Plot styles are dot or connect}
 	}
 	defstate {
 	        name {updateSize}
@@ -115,6 +115,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this, "yRange parameter values are invalid");
 	  }
 
+	  int plotstyle = 0;
+	  if (strcmp(style,"connect")) plotstyle = 1;
+
 	  // create the XYplot window labeling, scaling,
 	  // and ranging as specified by the parameters
 	  xyplot.setup(this,	   
@@ -129,7 +132,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		                yMin,	     // minimum Y range value
 		                yMax,        // maximum Y range value
 		                Y.numberPorts(),   // The number of data sets
-		       (int)    style);      // the plot style to use
+		       (int)    plotstyle);  // the plot style to use
 
 	}
 	go {
