@@ -139,7 +139,7 @@ boolean
 ViKillBuf(facetPtr)
 octObject *facetPtr;
 {
-    struct RPCSpot tmpSpot;
+    RPCSpot tmpSpot;
     octStatus status;
 
     facetPtr->contents.facet.mode = "a";
@@ -151,7 +151,8 @@ octObject *facetPtr;
 
 	/* See if the kill was successful */
         if ((status = octOpenFacet(facetPtr)) == OCT_ALREADY_OPEN) {
-            ErrAdd("ViKillBuf: Vem buffer not killed. Maybe open facets have icon?");
+            ErrAdd("ViKillBuf: Vem buffer not killed. Maybe open windows have instances of the old icon?\nClose all windows containing the old icons and try again.");
+	    octCloseFacet(facetPtr);
             return (FALSE);
         }
     }
