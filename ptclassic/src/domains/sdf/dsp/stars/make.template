@@ -85,6 +85,7 @@ PL_SRCS= \
  SDFLevDur.pl \
  SDFMuLaw.pl \
  SDFMUSIC_M.pl \
+ SDFNdftVarD.pl \
  SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCosine.pl \
