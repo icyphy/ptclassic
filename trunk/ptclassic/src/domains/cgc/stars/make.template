@@ -43,6 +43,7 @@ PL_SRCS= \
  CGCFork.pl \
  CGCGain.pl \
  CGCIntegrator.pl \
+ CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
  CGCLMS.pl \
  CGCLog.pl \
