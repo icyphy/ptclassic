@@ -53,7 +53,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PtGate.h"
 #include "Scope.h"
 
-#define TOKSIZE 256
+// The TOKSIZE is the size of the token buffer which must be large
+// enough to store tokens that represent numbers, pathnames, and strings.
+// Pathnames in Unix are limited to 256 characters.
+
+#define TOKSIZE 1024
 
 /*************************************************************************
 
