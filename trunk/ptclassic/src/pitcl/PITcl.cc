@@ -355,8 +355,10 @@ int PTcl::schedule(int argc,char **) {
 		return usage("schedule");
 	// should arrange so that previously computed schedule can
 	// be returned
-	return computeSchedule() ? result(universe->displaySchedule())
-		                 : TCL_ERROR;
+	if (computeSchedule()) {
+		return result(universe->displaySchedule());
+	}
+	else return TCL_ERROR;
 }
 
 int PTcl::run(int argc,char ** argv) {
