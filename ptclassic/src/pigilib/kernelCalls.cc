@@ -194,8 +194,12 @@ KcAlias(char *fterm, char *inst, char *aterm) {
    Returns false if this fails.
         EAL, 9/23/90
 */
+
+extern const char DEFAULT_DOMAIN[];
+
 extern "C" boolean
-KcSetKBDomain(char* domain) {
+KcSetKBDomain(const char* domain) {
+	if (!domain) domain = DEFAULT_DOMAIN;
 	return KnownBlock::setDomain(domain) ? TRUE : FALSE;
 }
 
