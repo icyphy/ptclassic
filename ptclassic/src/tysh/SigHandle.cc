@@ -44,7 +44,6 @@ Some refinement by Brian Evans.
 #include <string.h>
 #include <unistd.h>		
 #include "compat.h"
-#include "ptarch.h"
 #include "tcl.h"
 #include "SigHandle.h"
 #include "InfString.h"
@@ -146,12 +145,10 @@ void setStrings(void)
     // file name, e.g., "/bin.sol2/itkwish"
     InfString itcl_path = "/bin.";
     const char* ptarch = getenv("PTARCH");
-    if (ptarch == 0)
-    {
-        itcl_path << PTARCH;
-    }
-    else
-    {
+    if (ptarch == 0) {
+        fprintf(stderr, "The PTARCH environment variable is not set, exiting");
+	exit(1);
+    } else {
         itcl_path << ptarch;
     }  
     itcl_path << "/";
@@ -159,8 +156,7 @@ void setStrings(void)
 
     // 1. Find the value of the PTOLEMY environment variable
     const char* ptolemy = getenv("PTOLEMY");
-    if (ptolemy == 0)
-    {
+    if (ptolemy == 0) {
         ptolemy = "~ptolemy";
     }
 
