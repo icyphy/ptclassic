@@ -432,7 +432,7 @@ int POct::ptkGetParams (int aC, char** aV) {
     }
 
     // Check to see if a valid instance was passed
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     char title[64];
     if (strcmp(aV[2], "NIL") == 0) {
         // If there is no instance, then this must be a Galaxy or Universe
@@ -568,7 +568,7 @@ int POct::ptkSetParams (int aC, char** aV) {
 
     // Covert the parameter List string in the pList structure.
     // Be sure to free pList before returning
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     if (!MakePList(aV[3], &pList)) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
@@ -1225,7 +1225,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     }
 
     // Get the pList form
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     if (!GetTargetParams(target, facet, &pList)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1288,7 +1288,7 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
 
     // Covert the parameter List string into the pList structure.
     // Now that the pList has been made, it should be freed before returning.
-    ParamListType pList = {0, 0};
+    ParamListType pList = {0, 0, 0};
     if (!MakePList(aV[3], &pList)) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
