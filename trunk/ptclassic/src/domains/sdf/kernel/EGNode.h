@@ -22,8 +22,6 @@ derived from SDFStar class.
 #include "EGConnect.h"
 #include "StringList.h"
 
-#define EGNode EGMaster
-
 class EGNodeLink;
 
 //////////////////
