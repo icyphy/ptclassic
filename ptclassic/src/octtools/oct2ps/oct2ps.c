@@ -248,8 +248,7 @@ char **argv;
     extern char *version;
     
     (void) strcpy(facetType, "contents");
-/*    (void) sprintf(prologueFile, "%s/lib/oct2ps.pro", "$OCTTOOLS");*/
-    (void) sprintf(prologueFile, "/users/pino/oct2ps/oct2ps.pro");
+    (void) sprintf(prologueFile, "%s/lib/oct2ps.pro", "$OCTTOOLS");
     techDirRoot = NIL(char);
 
     (void) strcpy(fontName, FONT);
