@@ -138,10 +138,16 @@ realclean:
 DEPEND_INCL=$(INCL) $(C_INCL)
 
 depend:		$(SRCS) $(HDRS)
+# We use a GNU make conditional here
+ifeq ($(USE_MAKEDEPEND),yes) 
+		# HPPA CC does not understand the -M option
+		cd $(VPATH); $(DEPEND) $(DEPEND_INCL) $(SRCS)
+else
 		cd $(VPATH); \
                 $(DEPEND) $(DEPEND_INCL) $(SRCS)|\
                         cat make.template - > makefile.n;\
                 mv -f makefile.n makefile
+endif
 
 makefile:	make.template $(MDEPS)
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
