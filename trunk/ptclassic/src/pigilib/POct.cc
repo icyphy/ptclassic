@@ -419,12 +419,18 @@ int POct::ptkGetParams (int aC,char** aV) {
             return TCL_OK;
         }
     } else {
-        // There was a valid instance passed
+        // There was an instance passed
         if (ptkHandle2OctObj(aV[2], &instance) == 0) {
             Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
 		aV[0], (char *) NULL);
  	    return TCL_ERROR;
 	}
+    
+	// Set the domain to be that of the instance
+	if (!setCurDomainInst(&instance)) {
+            Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
+            return TCL_ERROR;
+        }
 
 	if ( IsDelay(&instance) || IsBus(&instance) ) {
 	    // Parameters are stored differently for delays and buses.
@@ -557,6 +563,13 @@ int POct::ptkSetParams (int aC,char** aV) {
 		aV[0], (char *) NULL);
             return TCL_ERROR;
         }
+
+	// Set the domain to be that of the instance
+	if (!setCurDomainInst(&instance)) {
+            Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
+            return TCL_ERROR;
+        }
+
         if ( IsDelay(&instance) ) {
             // Set Delay Parameters from the pList
             if (SetDelayParams(&instance,&pList) == 0) {
@@ -613,7 +626,7 @@ int POct::ptkSetParams (int aC,char** aV) {
 // TERM NET INSTANCE PROP BAG POLYGON BOX CIRCLE PATH
 // LABEL LAYER POINT EDGE FORMAL CHANGE_LIST CHANGE_RECORD
 // 
-// Thanks to Joe for suggesting this function (and even
+// Thanks to Joe Buck for suggesting this function (and even
 // giving its specifications).
 //
 // Written by Alan Kamas  9/93
