@@ -80,6 +80,7 @@ void CGMultiTarget::setup() {
 	// CG stuff
 	writeDirectoryName(destDirectory);
 	myCode.initialize();
+	headerCode();
 
 	if (galaxy()->parent()) {
 		sched->ofWorm();
