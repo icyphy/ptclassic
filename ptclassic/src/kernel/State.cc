@@ -52,10 +52,11 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
         }
 
         if (*token == '+' || *token == '-' || *token == '*' ||  *token == '/'
-	|| *token == '(' || *token == ')')
+	|| *token == '(' || *token == ')') {
                 t.tok = "OP";
-                t.cval = (char)token;
-
+                t.cval = (char)*token;
+		return t;
+	}
 
         if (isdigit(*token) || *token == '.' )  {
                 if (index (token, '.')) {
