@@ -317,7 +317,6 @@ body ::tycho::VertexController::editparameters {tag} {
         set dialogname [$slateview component hull].
         regsub -all {\.} $baz "_" nm
         set dialogname [$slateview component hull].$nm
-puts "item $i; window name $dialogname"
 
         if { [::info which -command $dialogname] != "" } {
             # Already exists

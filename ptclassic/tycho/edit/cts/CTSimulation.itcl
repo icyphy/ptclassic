@@ -91,9 +91,6 @@ body ::tycho::CTSimulation::startServer {} {
 # Construct a simulation from the current graph.
 #
 body ::tycho::CTSimulation::_construct {} {
-    puts CTSimulation::_construct
-    update
-    
     # Generate the stars from vertices
     foreach v [$_graph vertices] {
         # Is it a junction or a vertex? Currently, we can
