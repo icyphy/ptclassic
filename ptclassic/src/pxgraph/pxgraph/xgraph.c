@@ -433,7 +433,8 @@ char *argv[];
 	    nbytes = XLookupString(&theEvent.xkey, keys, MAXKEYS,
 				   (KeySym *) 0, (XComposeStatus *) 0);
 	    for (idx = 0;  idx < nbytes;  idx++) {
-		if (keys[idx] == CONTROL_D) {
+		if (keys[idx] == CONTROL_D || keys[idx] == 'q' ||
+		    keys[idx] == 'Q') {
 		    /* Delete this window */
 		    DelWindow(theEvent.xkey.window, win_info);
 		} else if (keys[idx] == CONTROL_C) {
