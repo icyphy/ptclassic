@@ -94,6 +94,9 @@ class ::tycho::SlateView {
     # Manipulate context-sensitive (popup) menus
     method popup {mode tag args}
 
+    # Get the contained slate
+    method slate {}
+
     # Get the slate id of an item given its name
     method slateid {name}
 
@@ -210,11 +213,23 @@ body ::tycho::SlateView::constructor {args} {
     } {
         keep -cursor
         rename -background -canvascolor canvasColor CanvasColor
-        rename -height -canvasheight canvasHeight CanvasHeight
+       rename -height -canvasheight canvasHeight CanvasHeight
         rename -width -canvaswidth canvasWidth CanvasWidth
     }
     set _slate $itk_component(slate)
     pack $_slate -expand yes -fill both -side left
+
+    # Create a scrolledslate and see what happens...
+    #itk_component add scrolledslate {
+    #    uplevel #0 ::tycho::ScrolledSlate $itk_interior.scrolledslate
+    #} {
+    #    keep -cursor
+    #    rename -background -canvascolor canvasColor CanvasColor
+    #    rename -height -canvasheight canvasHeight CanvasHeight
+    #    rename -width -canvaswidth canvasWidth CanvasWidth
+    #}
+    #set _slate [$itk_component(scrolledslate) component slate]
+    #pack $itk_component(scrolledslate) -expand yes -fill both -side left
 
     # Modify the binding tags of the canvas so that this megawidget
     # gets events too. This is unfortunate but appears to be necessary
@@ -864,6 +879,15 @@ body ::tycho::SlateView::popup {mode name args} {
 		    or new"
         }
     }
+}
+
+########################################################################
+#### slate
+#
+# Return the slate contained in this view.
+#
+body ::tycho::SlateView::slate {} {
+    return $_slate
 }
 
 ########################################################################
