@@ -24,6 +24,7 @@ and a quote character for strings.
 #include <std.h>
 #include <stdio.h>
 #include <stream.h>
+#include "miscFuncs.h"
 
 // Constructors
 // for some reason, g++ has trouble when these are included in the
@@ -101,7 +102,7 @@ Tokenizer::push(istream* s,const char* f) {
 // save existing context on stack
 	stack = new TokenContext(curfile,strm,line_num,stack);
 // save filename in dynamic memory, and set curfile to it.
-	curfile = strcpy (new char[strlen(f)+1], f);
+	curfile = savestring(f);
 	strm = s;
 	line_num = 1;
 	depth++;
@@ -126,7 +127,7 @@ Tokenizer::pop() {
 // We use stdio to open the file to avoid error messages.  Return 1
 // for success, 0 for failure.
 Tokenizer::fromFile(const char *filename) {
-	FILE *stdstrm = fopen (filename, "r");
+	FILE *stdstrm = fopen (expandPathName(filename), "r");
 	if (stdstrm == NULL) return 0;
 	push (new istream(stdstrm),filename);
 	return 1;
