@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "KnownBlock.h"
 #include "miscFuncs.h"
+#include "Domain.h"
 
 class KnownTargetEntry {
 	friend class KnownTarget;
@@ -140,10 +141,17 @@ void KnownTarget::addEntry (Target& target, const char* name, int isOnHeap) {
 int KnownTarget::getList (const Block& b, const char** names, int nMax) {
 	KnownTargetEntry* l = allTargets;
 	int n = 0;
+	// find any required Target baseclass
+	Domain* d = Domain::of(b);
+	const char* reqBase = d ? d->requiredTarget() : 0;
 	while (l && n < nMax) {
-		Target& curTarg = *l->targ;
-		if (b.isA(curTarg.starType())) {
-			names[n] = curTarg.name();
+		Target& tg = *l->targ;
+		// the block must be compatible with the target.
+		// also, if the domain puts requirements on the target,
+		// these must be satisfied.
+		if (b.isA(tg.starType()) &&
+		    (!reqBase || tg.isA(reqBase) || tg.childIsA(reqBase))) {
+			names[n] = tg.name();
 			n++;
 		}
 		l = l->next;
