@@ -2,8 +2,8 @@
 .H1 "Editing Icons"
 .pp
 Pigi automatically generates icons for stars and galaxies, respectively,
-when you invoke the make-star or
-make-schem-icon command from the Extend menu.
+when you invoke the \fImake-star\fP or
+\fImake-schem-icon\fP command from the Extend menu.
 Pigi puts the new icon in a user-specified palette,
 which by default is user.pal in the directory in which you
 started Pigi.
@@ -62,7 +62,7 @@ Note that when editing an icon, the Vem menu is different than
 when you are editing a schematic.  This is because you are working
 with the physical view of a facet.  You can explore most of the Vem
 commands in the Edit and Selection Vem menus.
-We do not recommend, however, using the create-terminal command.
+We do not recommend, however, using the \fIcreate-terminal\fP command.
 Pigi should have already created all the terminals you will need.
 Most icons can be created
 by experimenting with the following operations:
@@ -70,7 +70,7 @@ by experimenting with the following operations:
 Select the default symbol (a star, galaxy, or cluster of galaxies),
 by drawing a box (drag the left mouse button)
 and typing ``s'' (or using Selection:select-objects in the
-menu).  You can unselect with ``u'' or CNTR-u.
+menu).  You can unselect with ``u'' or control-u.
 An alternative selection method is to place a point and type ``s''.
 This usually provokes a dialog box to resolve ambiguities.
 Delete whatever parts of the icon you don't want using ``D'' or
@@ -107,7 +107,7 @@ explanatory.  The standard Emacs-like editing commands apply.
 .ip 8)
 BE SURE TO SAVE YOUR ICON.  This can be done by typing ``S''
 (System:save-window in the Vem menu).  You can close your window
-with CNTR-d.  Note that Vem buffers the data in the window.
+with control-d.  Note that Vem buffers the data in the window.
 You can close it and reopen it without saving it, as long
 as the session has not been interrupted.
 .pp
@@ -168,7 +168,12 @@ since Unix interprets the semicolon as a command delimiter).
 The standard stars that are normally part of the Ptolemy distribution
 are stored in ~ptolemy/src/domains/xxx, where xxx is the domain
 name such as ``sdf'' or ``de''.
-The icons for the stars are stored in a subdirectory called icons,
-and the icons for demo systems in a subdirectory called demo.
+The icons for the stars are stored in a subdirectory called
+.c icons ,
+the icons for demo systems in a subdirectory called
+.c demo ,
+and the source code for the stars are stored in a subdirectory
+called
+.c stars .
 These are all accessible through the init.pal palette in ~ptolemy/demo.
 Refer to the Oct and Vem manuals for more information [2].
