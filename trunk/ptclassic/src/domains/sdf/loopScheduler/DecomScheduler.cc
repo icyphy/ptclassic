@@ -38,6 +38,7 @@ Loop scheduler
 #pragma implementation
 #endif
 
+#include <fstream.h>		// irix5.cfront needs this
 #include "DecomScheduler.h"
 #include "DecomGal.h"
 #include "LSNode.h"
