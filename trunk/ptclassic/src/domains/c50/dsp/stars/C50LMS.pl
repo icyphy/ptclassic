@@ -132,8 +132,8 @@ error samples.
 		
 		char buf[32];
 		cfs.initialize();
-		
-		for (int i = 0; i< numTaps-1; i++){
+		int i;
+		for (i = 0; i< numTaps-1; i++){
 			temp = double(coef[i]);
 			sprintf(buf,"%.15f",temp);
 			cfs << buf << " ";
