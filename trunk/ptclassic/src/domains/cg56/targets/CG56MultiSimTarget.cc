@@ -68,7 +68,7 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 }
 
 // -----------------------------------------------------------------------------
-Target* CG56MultiSimTarget :: createChild() {
+Target* CG56MultiSimTarget :: createChild(int) {
 	LOG_NEW; return new CG56Target("single-CG56",
 	"56000 code target for a Multiple-Simulator Target.");
 }
@@ -111,7 +111,8 @@ void CG56MultiSimTarget :: setup() {
 }
 
 void CG56MultiSimTarget :: prepareCodeGen() {
-	// allocate the sharedMemory
+
+       	// allocate the sharedMemory
 	sharedMem->performAllocation();
 	Galaxy* g = galaxy();
 	if (g && (g->stateWithName("ONE") == 0)) {
