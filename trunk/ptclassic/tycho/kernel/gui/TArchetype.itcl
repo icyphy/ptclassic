@@ -139,6 +139,12 @@ class ::tycho::TArchetype {
     # Return the type of widget to use for the hull
     protected method _hulltype {} {return "frame"}
 
+    # Test if destruction is disabled
+    protected method destructionDisabled {} {return $_disableDestruction}
+
+    # Evaluatea arguments and ensure that this widget will not be destroyed
+    protected method safeEval {args}
+
     # Register code to be evaluated when the widget has been constructed.
     protected method whenConstructed {command}
 
@@ -159,6 +165,9 @@ class ::tycho::TArchetype {
 
     ###################################################################
     ####                         private variables                 ####
+
+    # If non-zero, disable destruction.
+    private variable _disableDestruction 0
 
     # A flag saying whether this widget is already constructed
     private variable _isConstructed 0
@@ -498,6 +507,33 @@ body ::tycho::TArchetype::stylesheet {mode args} {
 #####################################################################
 #####################################################################
 ####                   protected methods                         ####
+
+
+#####################################################################
+#### safeEval
+# Prevent destruction of this object while evaluating the arguments.
+# Return the result of evaluating the arguments.
+# Destruction will be cancelled by invoking a silent error, and will
+# be scheduled for another attempt in the future.
+# <p>
+# This method is a workaround for a defect in Itcl. If "update",
+# "update idletasks", or "tkwait" is called directly or indirectly from
+# within an Itcl method, and during the update the Itcl object is
+# destroyed, then when update returns, you may get a catastrophic failure
+# of the application (a core dump).
+#
+body ::tycho::TArchetype::safeEval {args} {
+    set _disableDestruction 1
+    set retval {}
+    if [catch {set retval [eval $args]} msg] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+        set _disableDestruction 0
+        error $saveInfo
+    }
+    set _disableDestruction 0
+    return $retval
+}
 
 ########################################################################
 #### whenConstructed
