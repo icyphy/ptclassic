@@ -53,4 +53,4 @@ S56DIR =	$(ROOT)/vendors/s56dsp
 # -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
 #    and MATLABLIBIDR is undefined
 MATLABDIR =	/usr/sww/matlab
-MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
+MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/sun4
