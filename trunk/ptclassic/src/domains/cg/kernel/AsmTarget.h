@@ -129,7 +129,7 @@ public:
 	// NOTE: User must delete the char* returned after use.
 	char* fullFileName(const char* base, const char* suffix=NULL);
 
-	/*virtual*/ void writeCode(const char* name);
+	/*virtual*/ void writeCode(const char* name = NULL);
 
 	// output an "org" directive that switches to the specified
 	// memory and address
