@@ -98,9 +98,11 @@ StringList CGCTarget::comment(const char* text, const char* b,
     const char* begin = "/* ";
     const char* end = " */";
     const char* cont = "   ";
-    if (b != NULL) begin = b;
-    if (e != NULL) end = e;
-    if (c != NULL) cont = c;
+    if (b != NULL) {
+	begin = b; 
+	end = e;
+    	cont = c;
+    }
     return HLLTarget::comment(text, begin, end, cont);
 }
 
