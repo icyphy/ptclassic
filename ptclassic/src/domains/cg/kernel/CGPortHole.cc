@@ -18,6 +18,9 @@ Code for CG-type portholes and multiportholes.
 
 **************************************************************************/
 
+// constructor
+CGPortHole :: CGPortHole() : offset(0), forkSrc(0) {}
+
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {
 	ListIter next(forkDests);
@@ -26,6 +29,16 @@ CGPortHole :: ~CGPortHole() {
 	if (forkSrc)
 		forkSrc->forkDests.remove(this);
 }
+
+// Advance the offset by the number of tokens produced or
+// consumed in this PortHole when the Star fires.
+void CGPortHole::advance() {
+	offset += numberTokens;
+	int sz = bufSize();
+	if (offset >= sz) offset -= sz;
+}
+
+
 // allocate a CGGeodesic.  Use hashstring for the name since we expect
 // repeated names to occur (lots of Node_input and Node_output, for example)
 Geodesic* CGPortHole::allocateGeodesic() {
@@ -54,10 +67,13 @@ void MultiCGPort :: forkProcessing (CGPortHole& p) {
 	}
 }
 
+// this avoids having cfront generate many copies of the destructor
+MultiCGPort :: ~MultiCGPort() {}
+
 // ug-lee!!!!
 static int parentReps(const PortHole* p) {
 	SDFStar* s = (SDFStar*)(p->parent());
-	return int(s->repetitions.numerator);
+	return s->reps();
 }
 
 int CGPortHole :: bufSize() const {

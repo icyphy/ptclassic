@@ -32,13 +32,13 @@ void AsmGeodesic :: assignAddr(ProcMemory& m, unsigned a) {
 // Return the address assigned to the geodesic.
 // if I am a fork destination, my address is that of my source.
 unsigned AsmGeodesic::address() const {
-	const AsmPortHole* p = (AsmPortHole*)src();
+	const AsmPortHole* p = (const AsmPortHole*)src();
 	return p ? p->geo().address() : addr;
 }
 
 
 ProcMemory* AsmGeodesic::memory() const {
-	const AsmPortHole* p = (AsmPortHole*)src();
+	const AsmPortHole* p = (const AsmPortHole*)src();
 	return p ? p->geo().memory() : mem;
 }
 

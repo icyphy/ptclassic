@@ -156,12 +156,6 @@ int LinProcMemory::performAllocation() {
 	return TRUE;
 }
 
-static unsigned symmetric_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
-	unsigned s = max(xa,ya);
-	unsigned end = min(xa+xl,ya+yl);
-	return max(end,s) - s;
-}
-
 StringList LinProcMemory::printMemMap(const char* startString, const char* endString) {
 	StringList l = "";
 	MemMapIter nextItem(map);

@@ -13,6 +13,10 @@ Misc CG routines.
 #ifndef _CGUtilities_h
 #define _CGUtilities_h 1
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "StringList.h"
 
 char* makeLower(const char* name);

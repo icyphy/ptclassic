@@ -20,6 +20,10 @@ $Id$
 // but the allocations don't take place until performAllocation is
 // called.
 ******************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "MReq.h"
 #include "MemMap.h"
 #include "IntervalList.h"

@@ -15,11 +15,14 @@ targets, combining the features they have in common.
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "CGTarget.h"
 #include "SDFScheduler.h"
 #include "StringState.h"
 #include "IntState.h"
-#include "UserOutput.h"
 
 class BaseCTarget : public CGTarget {
 public:

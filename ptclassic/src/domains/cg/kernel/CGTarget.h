@@ -24,7 +24,6 @@ $Id$
 #include "CGSymbol.h"
 
 class CGStar;
-class UserOutput;
 class SDFSchedule;
 
 class CGTarget : public Target {
@@ -139,7 +138,7 @@ public:
 	virtual int runCode();
 
 	// do we need this?
-	virtual void writeCode(UserOutput&);
+	virtual void writeCode(ostream&);
 
 	// generate code for a processor in a multiprocessor system
 	virtual StringList generateCode(Galaxy&);

@@ -7,9 +7,13 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee
+ Programmer:  E. A. Lee, J. Buck, J. Pino
 
 *******************************************************************/
+
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "SDFStar.h"
 #include "Fraction.h"
