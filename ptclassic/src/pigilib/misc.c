@@ -233,45 +233,38 @@ octId facetId;
     return;
 }
 
+/* Load the star pointed to */
 int 
-RpcLoadStars(spot, cmdList, userOptionWord)
+RpcLoadStar(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Directory", 1, 80, "", NULL};
+    octObject inst;
+    vemStatus status;
 
-    ViInit("load-stars");
-    ErrClear();
-    if (dmMultiText("load-stars", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-        ViDone();
+    ViInit("load-star");
+    /* set the current domain */
+    setCurDomainS(spot);
+    /* get name of instance under cursor */
+    status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
+    if (status == VEM_NOSELECT) {
+	PrintCon("Aborted");
+	ViDone();
+    } else if (status != VEM_OK) {
+	PrintErr("Cursor must be over an icon instance");
+	ViDone();
+    } else if (!IsStar(&inst)) {
+	PrintErr("Instance is not a star");
+	ViDone();
+    } else {
+	char *akoName = AkoName(inst.contents.instance.master);
+	if (KcIsCompiledInStar(akoName)) {
+	    PrintErr("Cannot re-load a compiled-in star class");
+	    ViDone();
+        }
+	if (!LoadTheStar(&inst))
+		PrintErr(ErrGet());
+	ViDone();
     }
-    if (FALSE) {
-	ErrAdd("Not yet implemented");
-	PrintErr(ErrGet());
-        ViDone();
-    }
-    ViDone();
-}
-
-int 
-RpcLoad(spot, cmdList, userOptionWord)
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    static dmTextItem item = {"File", 1, 80, "", NULL};
-
-    ViInit("load");
-    ErrClear();
-    if (dmMultiText("load", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-        ViDone();
-    }
-    if (!KcLoad(item.value)) {
-	PrintErr(ErrGet());
-        ViDone();
-    }
-    ViDone();
 }
