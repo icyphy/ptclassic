@@ -9,7 +9,7 @@
 
 #include "tk.h"
 #include "tcl.h"
-#define COMMANDSIZE 512
+#define COMMANDSIZE 1024
 #define REPORT_TCL_ERRORS 1
 
 /*
@@ -53,14 +53,27 @@ void errorReport(message)
 char *message;
 {
     char *msg;
-    sprintf(command, "popupMessage .error {%s}", message);
+    sprintf(command, "popupMessage .error { %s }", message);
     Tcl_Eval(interp, command);
 #if REPORT_TCL_ERRORS
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
     if (msg == NULL) {
         msg = interp->result;
     }
-    sprintf(command, "popupMessage .error {%s}", msg);
+    /* Have to be careful here to backquote curly braces in the string */
+    strcpy(command, "popupMessage .error { ");
+    cmd = command;
+    cmd += strlen(command);
+    if (msg != NULL)
+      while (*msg != NULL) {
+          if (cmd - command > COMMANDSIZE - 5) break;
+          if ((*msg == '{') || (*msg == '}')) *cmd++ = '\\';
+          *cmd++ = *msg++;
+      }
+    *cmd++ = ' ';
+    *cmd++ = '}';
+    *cmd = NULL;
+
     if(Tcl_Eval(interp, command) != TCL_OK)
         fprintf(stderr, "%s\n", msg);
 #endif
