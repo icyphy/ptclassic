@@ -86,6 +86,28 @@
 #
 # </dl>
 #
+# _DataModel_ has the following types:
+# <dl>
+# <dt><b>model</b> _name_
+# <dd>
+# A nested model. Nested models have the following attributes:
+#   <dl>
+#   <dt><b>-data</b> _description_
+#   <dd>
+#   A description of the model. This attribute is generally present
+#   in the external format. By convention, clients that access
+#   a nested model and find the <b>-object</b> attribute empty
+#   use the value of this attribute to construct a new model, and
+#   then clear this attribute.
+#
+#   <dt><b>-object</b> _object-name_
+#   <dd>
+#   The nested model object. This attribute is null in the external
+#   format. Clients that create a sub-model should set this
+#   attribute to point to the new sub-model.
+#   </dl>
+# </dl>
+#
 class ::tycho::DataModel {
     inherit ::tycho::Model
 
@@ -120,7 +142,7 @@ class ::tycho::DataModel {
     method get {{pattern *}}
 
     # Get an attribute or attributes of an item
-    method itemcget {name {attribute {}}}
+    method itemcget {name attribute}
 
     # Configure attributes of an item
     method itemconfigure {name args}
@@ -146,8 +168,17 @@ class ::tycho::DataModel {
     #################################################################
     ####                   protected methods                     ####
 
+    # Add a nested model
+    protected method _addmodel {name args} {eval add $name $args}
+ 
     # Return a description of a single item
-    protected method _describeitem {name {prefix {}}}
+    protected method _describe {name {prefix {}}}
+    
+    # Return a description of the children of an item
+    protected method _describechildren {name {prefix {}}}
+    
+    # Describe a nested model
+    protected method _describemodel {name {prefix {}}}
     
     # Create a header string
     protected method _header {}
@@ -202,9 +233,6 @@ class ::tycho::DataModel {
     #################################################################
     ####                  private variables                    ####
 
-    # The scope in which we store data
-    private variable scope
-
     # Default attributes, indexed by type
     private variable _defaults
 
@@ -234,9 +262,6 @@ class ::tycho::DataModel {
 #
 body ::tycho::DataModel::constructor {args} {
 
-    # Set the scope variable
-    set scope [info class]
-
     # Make sure the namespaces exist in the safe interpreter
     $safeinterp eval namespace ::tycho
     $safeinterp eval namespace $scope
@@ -246,6 +271,13 @@ body ::tycho::DataModel::constructor {args} {
 
     # Initialize the model attributes
     @scope $scope set [set modelname]() {}
+    
+    # Define the "model" type
+    type define model \
+    	:leafonly 1 \
+    	:override 1 \
+    	-data {} \
+    	-model {}
 }
 
 ########################################################################
@@ -261,7 +293,7 @@ body ::tycho::DataModel::destructor {} {
 #
 # Add a new item. _name_ is its full name including types. Following
 # arguments are attribute-value pairs. If the item already exists,
-# raise an error. Return the undo command.
+# raise an error. Append to the history if recording.
 #
 body ::tycho::DataModel::add {name args} {
     if [@scope $scope ::info exists [set modelname]($name)] {
@@ -270,6 +302,11 @@ body ::tycho::DataModel::add {name args} {
 
     # Invalidate cache
     @scope $scope set [set modelname].cachevalid 0
+
+    # Add to history
+    if $recording {
+        history append "add $name $args" "delete $name"
+    }
 
     # Extract type and tail
     regexp {(.+):(.+)} [lindex $name end] _ type tail
@@ -294,42 +331,58 @@ body ::tycho::DataModel::add {name args} {
         set _context_ $name
         $safeinterp eval [list @scope $scope $contents]
     }
-    # Return undo command
-    list delete $name
 }
 
 ########################################################################
 #### assign
 #
 # Set the value of the item named _name_. The special item name
-# <b>{}</b> denotes the model itself. The value must be a list of
-# attribute name-value pairs. If the item does not exist, raise an
-# error. Return the undo command.
+# <b>{}</b> denotes the model itself. If only the _name_ argument is
+# supplied, return the list of attributes previsouly set for this
+# item (analogous to the Tcl <b>set</b> command). Note that this
+# does not include default values, as returned by the <b>itemconfigure</b>
+# if called with no attributes. If a single additional argument is supplied,
+# it is interpreted as a list of attribute name-value pairs, which is
+# assigned to the item. If more than one additional argument is
+# supplied, teh list of arguments is interpreted as a list of
+# attribute-value pairs. If the item does not exist, raise an
+# error. Append to the history if additional arguments are supplied
+# and if currently recording.
 #
-body ::tycho::DataModel::assign {name value} {
+body ::tycho::DataModel::assign {name args} {
     _verify $name
+
+    # Remember the old data
+    set old [@scope $scope set [set modelname]($name)]
+
+    if { $args == "" } {
+        # Return old value
+        return $old
+    } elseif { [llength $args] == 1 } {
+        # Got a single list
+        set data [lindex $args 0]
+    } else {
+        set data $args
+    }
+    
+    # Append to the history
+    if $recording {
+        history append [list assign $name $data] [list assign $name $old]
+    }
 
     # Invalidate cache
     @scope $scope set [set modelname].cachevalid 0
-
-    # Remember the old data
-    set data [@scope $scope set [set modelname]($name)]
-
+        
     # Write the new data
-    @scope $scope set [set modelname]($name) $args
-
-    # Return undo command
-    list assign $name $data
+    @scope $scope set [set modelname]($name) $data
 }
 
 ########################################################################
 #### clear
 #
 # Clear all data from the model and invalidate the cache. The top-level
-# model attributes will not be deleted. This method is not undoable
-# because of the potential size of the undo command. (Clients can still
-# generate an undo command by calling <b>describe</b> and
-# <b>history replace</b> prior to calling this method.
+# model attributes will not be deleted. This method does not append to the
+# history because of the potential size of the undo command.
 #
 body ::tycho::DataModel::clear {} {
     # Invalidate the cache
@@ -348,9 +401,6 @@ body ::tycho::DataModel::clear {} {
     }
     # Restore the top-level attributes
     @scope $scope set [set modelname]() $attributes
-
-    # Return null since this is not undoable.
-    return ""
 }
 
 ########################################################################
@@ -358,7 +408,9 @@ body ::tycho::DataModel::clear {} {
 #
 # Delete the item specified by _name_. Raise an error if
 # the item does not exist.  The item and all child items will
-# be deleted. Return the undo command.
+# be deleted. Append to the history if recording. In order to
+# facilitate deletion of hierarchical items, this method
+# returns a description of the deleted item.
 #
 body ::tycho::DataModel::delete {name} {
     _verify $name
@@ -368,32 +420,34 @@ body ::tycho::DataModel::delete {name} {
     # Invalidate cache
     @scope $scope set [set modelname].cachevalid 0
 
-    # Get a description for the undo command
-    # FIXME: this is horrendously inefficient. We need to
-    # merge the generation of the undo command with the
-    # deletion of children.
-    set desc [_describeitem $name]
-
+    # Append to the history
+    if $recording {
+        set cd [_describechildren $name]
+        if { $cd != "" } {
+            history append "delete $name" "add $name [assign $name] \{\n$cd\}"
+        } else {
+            history append "delete $name" "add $name [assign $name]"
+        }
+    }
     # Remove from the parent list
     @scope $scope set [set modelname]:[set type]($context) \
             [::tycho::ldelete \
             [@scope $scope set [set modelname]:[set type]($context)] $tail]
 
-    # Delete attributes
+    # Delete data
     @scope $scope unset [set modelname]($name)
 
-    # Delete children
-    # FIXME: Generate undo command here.
+    # Delete children, making sure that commands are not recorded
     if !$_leafonly($type) {
+    	set saved $recording
+    	set recording 0
         foreach t $_types($scope) {
             foreach child [listing $t $name] {
                 delete [concat $name $t:$child]
             }
         }
+        set recording $saved    
     }
-
-    # Return the undo command
-    list parse $desc
 }
 
 ########################################################################
@@ -409,17 +463,15 @@ body ::tycho::DataModel::delete {name} {
 body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
     if { $name!= "" } {
         _verify $name
-        _describeitem $name $prefix
+        _describe $name $prefix
 	
     } else {
         set string "# -*- [_header] -*-\n"
+        append string [assign {}]
         foreach type $_types($scope) {
-            # Get the root items of this type
-            set items [listing $type]
-
-            # Append a description of each to the result string
-            foreach n $items {
-                append string [_describeitem $type:$n $prefix]
+            # Describe each root item
+            foreach n [listing $type] {
+                append string [_describe $type:$n $prefix]
             }
         }
         return $string
@@ -455,12 +507,10 @@ body ::tycho::DataModel::get {{pattern *}} {
 #
 # Get an attribute or attributes of the item specified by
 # _name_. The special item name <b>{}</b> denotes top-level attributes
-# of the model. If the _attribute_ argument is supplied, return the
-# value of that attribute. Otherwise return a list containing
-# all attributes and their values. Raise an error if the item
-# does not exist or if the attribute is unknown.
+# of the model. Raise an error if the item does not exist or
+# if the attribute is unknown.
 #
-body ::tycho::DataModel::itemcget {name {attribute {}}} {
+body ::tycho::DataModel::itemcget {name attribute} {
     _verify $name
 
     # If an item name is supplied, merge with defaults
@@ -470,16 +520,11 @@ body ::tycho::DataModel::itemcget {name {attribute {}}} {
     }
     array set data [@scope $scope set [set modelname]($name)]
 
-    if { $attribute == "" } {
-        # Get the list of attributes
-	array get data
-    } else {
-        # Get a single attribute
-        if { ! [::info exists data($attribute)] } {
-            error "Unknown attribute $attribute in $modelname"
-        }
-        return $data($attribute)
+    # Get a single attribute
+    if { ! [::info exists data($attribute)] } {
+        error "Unknown attribute $attribute in $modelname"
     }
+    return $data($attribute)
 }
 
 ########################################################################
@@ -487,9 +532,11 @@ body ::tycho::DataModel::itemcget {name {attribute {}}} {
 #
 # Configure attributes of the item specified by _name_. The special
 # item name <b>{}</b> denotes top-level attributes of the model. Following
-# arguments are an attribute-value list. The new attributes are
-# merged with the existing attributes. Raise an error if the item
-# does not exist. Return the undo command.
+# arguments are an attribute-value list, which are merged with the
+# existing attributes. Append to the history if recording. If no
+# attributes are suypplied, return the list of attributes and values
+# and do not append to the history. Raise an error if the item
+# does not exist.
 #
 body ::tycho::DataModel::itemconfigure {name args} {
     _verify $name
@@ -497,16 +544,23 @@ body ::tycho::DataModel::itemconfigure {name args} {
     # Invalidate cache
     @scope $scope set [set modelname].cachevalid 0
 
-    # Get the old data
-    set data [@scope $scope set [set modelname]($name)]
-
-    # Merge the new data
-    array set attrs $data
-    array set attrs $args
-    @scope $scope set [set modelname]($name) [array get attrs]
-
-    # Return the undo command
-    list assign $name $data
+    if { $args == "" } {
+        regexp {(.+):} [lindex $name end] _ type
+        array set attrs $_defaults($type)
+        array set attrs [@scope $scope set [set modelname]($name)]
+        array get attrs
+    } else {
+        # Append to the history
+        if { $recording } {
+            history append \
+                    "itemconfigure $name $args" \
+                    "assign $name [@scope $scope set [set modelname]($name)]"
+        }
+        # Merge the new data and return result
+        array set attrs [@scope $scope set [set modelname]($name)]
+        array set attrs $args
+        @scope $scope set [set modelname]($name) [array get attrs]
+    }
 }
 
 ########################################################################
@@ -556,19 +610,15 @@ body ::tycho::DataModel::names {{pattern *}} {
 # model. Each non-comment line must start with the name of a type
 # defined for this model. The item name follows, then attribute-value
 # pairs, and then nested items within curly braces. If any item
-# already exists, then an error is raised. _This method cannot
-# be recorded._
+# already exists, then an error is raised. Do no add anything to
+# the history.
 #
 body ::tycho::DataModel::parse {data} {
     global _current_ _context_ _object_
     set _current_ $modelname
     set _context_ {}
     set _object_ $this
-    
     $safeinterp eval [list @scope $scope $data]
-
-    # Can't record this method.
-    return ""
 }
 
 ########################################################################
@@ -700,7 +750,8 @@ body ::tycho::DataModel::search {mode args} {
 #
 # Sort the items in a given context. The items within _context_ are
 # sorted by name using the Tcl <b>lsort</b> procedure, with the
-# optional arguments passed to <b>lsort</b>.
+# optional arguments passed to <b>lsort</b>. This method does
+# not add anything to the history.
 #
 body ::tycho::DataModel::sort {type {context {}} args} {
     set children [@scope $scope set [set modelname]:[set type]($context)]
@@ -711,8 +762,8 @@ body ::tycho::DataModel::sort {type {context {}} args} {
 ########################################################################
 #### type
 #
-# Manipulate item types. This command has several forms, depending
-# on the _mode_ argument:
+# Manipulate item types. Nothing is added to the command history.
+# This command has several forms, depending on the _mode_ argument:
 #
 # <dl>
 # <dt><b>cget</b> _type_ ?_attribute_?
@@ -757,9 +808,9 @@ body ::tycho::DataModel::sort {type {context {}} args} {
 # <dt><b>:override</b> _bool_
 # <dd>
 # If true, items of this type will be parsed by calling a method
-# with the same name as _type_ on the target object. This can be
-# used if models need to do additional processing when items are
-# parsed.
+# named <b>_add</b>_type_, and printed by calling a method named
+# <b>_describe</b>_type_. This is used if models need to do
+# additional processing when items are or printed.
 #
 # </dl>
 #
@@ -783,6 +834,9 @@ body ::tycho::DataModel::type {mode {type {}} args} {
 	    }
 	}
 	"configure" {
+            if ![::info exists _defaults($type)] {
+                error "Unknown type: \"$type\""
+            }
 	    array set opts $args
             if { [array names opts :*] != "" } {
                 error "Reconfiguring type-control attribute not yet supported"
@@ -858,61 +912,63 @@ body ::tycho::DataModel::type {mode {type {}} args} {
 ####                     protected methods                       ####
 
 ########################################################################
-#### _describeitem
+#### _describe
 #
 # Return a string describing the item given by _name_
-# in the TIM format. This method performs no error-checking, so
-# the item must exist or an obscure Tcl error will be raised.
-# The _prefix_, if supplied, is prepended to each line.
-# Subclasses can override this method if they don't like the
-# way that items are printed.
+# in the TIM format. _prefix_, if supplied, is prepended to each line.
 #
-body ::tycho::DataModel::_describeitem {name {prefix {}}} {
+body ::tycho::DataModel::_describe {name {prefix {}}} {
     regexp {(.+):(.+)} [lindex $name end] _ type tail
-    set context [lreplace $name end end]
+
+    # If override is on for this type, call its method
+    if $_override($type) {
+        return [@scope $scope $this _describe$type $name $prefix]
+    }
 
     # Start string with type followed by local name
-    set string $prefix$type
-    lappend string $tail
+    set string "$prefix$type $tail"
 
-    # Get default attributes
-    array set dflt $_defaults($type)
-
-    # Print attributes that differ from the default (if any)
-    foreach {attr val} [@scope $scope set [set modelname]($name)] {
-        if { ! [::info exists dflt($attr)] || $dflt($attr) != $val } {
-            lappend string $attr $val
-            # Add line wrapping here?
-        }
-    }
+    # Print attributes
+    eval lappend string [@scope $scope set [set modelname]($name)]
 
     # Print children if I have any
     if !$_leafonly($type) {
-        set haschildren 0
-        foreach t $_types($scope) {
-            if [@scope $scope ::info exists [set modelname]:[set t]($name)] {
-                set haschildren 1
-                break
-            }
-        }
-
-        # If I have children, print enclosing braces and child items
-        if $haschildren {
-            set childprefix $prefix
-            append childprefix "    "
-            append string " \{\n"
-            foreach t $_types($scope) {
-                foreach child [listing $t $name] {
-                    append string \
-			    [_describeitem \
-			    [concat $name $t:$child] \
-			    $childprefix]
-                }
-            }
-            append string "$prefix\}"
+    	set cd [_describechildren $name "$prefix    "]
+    	if { $cd != "" } {
+            append string " \{\n$cd$prefix\}"
         }
     }
     return $string\n
+}
+
+########################################################################
+#### _describechildren
+#
+# Return a string describing the children of the item given by _name_
+# in the TIM format. The _prefix_, if supplied, is prepended to each line.
+# Enclosing braces are not printed.
+#
+body ::tycho::DataModel::_describechildren {name {prefix {}}} {
+    set string ""
+    foreach t $_types($scope) {
+        foreach child [listing $t $name] {
+            append string [_describe [concat $name $t:$child] $prefix]
+        }
+    }
+    return $string
+}
+
+########################################################################
+#### _describemodel
+#
+# Return an item of type <b>model</b>.
+#
+body ::tycho::DataModel::_describemodel {name {prefix {}}} {
+    if { [set m [itemcget $name -model]] != "" } {
+        list model $name -data [$m describe {} "        "]
+    } else {
+        list model $name -data [itemcget $name -data]
+    }
 }
 
 ########################################################################
@@ -950,11 +1006,10 @@ body ::tycho::DataModel::_update {} {
 #
 # Build an updated version of the cache. This method should
 # be overridden by subclasses that maintain internal data derived
-# from the loaded data. The overriding method should update its
-# cached data, then chain to this method.
+# from the loaded data.
 #
 body ::tycho::DataModel::_updatecache {} {
-    @scope $scope set [set modelname].cachevalid 1
+    ;# Does nothing    @scope $scope set [set modelname].cachevalid 1
 }
 
 ########################################################################
@@ -982,6 +1037,11 @@ body ::tycho::DataModel::_updatecache {} {
 # <dd>
 # If the cache data is valid, return true, otherwise false.
 #
+# <dt><b>validate</b>
+# <dd>
+# Declare that the cache data is valid. This option should be called
+# at the completion of the _updatecache method.
+#
 # </dl>
 #
 body ::tycho::DataModel::cache {mode args} {
@@ -1004,9 +1064,15 @@ body ::tycho::DataModel::cache {mode args} {
 	    }
 	    @scope $scope set [set modelname].cachevalid
 	}
+        "validate" {
+	    if { $args != "" } {
+		error "wrong # args: should be \"cache validate\""
+	    }
+	    @scope $scope set [set modelname].cachevalid 1
+        }
 	default {
 	    error "bad option \"$mode\": should be invalidate, \
-		    update, or valid"
+		    update, valid, or validate"
 	}
     }
 }
@@ -1040,7 +1106,7 @@ body ::tycho::DataModel::_mkparseproc {type} {
         append proc {
             global _object_
             global $_object_
-            eval $_object_ $type $args
+            eval $_object_ _add$type $args
         }
     } else {
         # Declare various data global
@@ -1084,12 +1150,12 @@ body ::tycho::DataModel::_mkparseproc {type} {
             set $_current_.cachevalid 0
         }
         # Parse contents if the item is not a leaf. Use the safe
-	# interpreter to ensure safety.
+		# interpreter to ensure safety.
         if !$_leafonly($type) {
             append proc {if { $contents != "" }}
             set t {
                 set saved $_context_
-                set _context_ [concat $_context_ $type:$name]
+                set _context_ [concat $_context_ $name]
             }
             append t "$safeinterp eval @scope $scope \$contents\n"
             append t {
