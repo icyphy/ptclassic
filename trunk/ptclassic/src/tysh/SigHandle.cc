@@ -234,13 +234,14 @@ void setDebugStrings(void)
     // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
     // file name, e.g., "/bin.sol2/itkwish"
     InfString itcl_path = "/bin.";
-    if (getenv("PTARCH") == 0)
+    const char* ptarch = getenv("PTARCH");
+    if (ptarch == 0)
     {
         itcl_path << PTARCH;
     }
     else
     {
-        itcl_path << getenv("PTARCH");
+        itcl_path << ptarch;
     }  
     itcl_path << "/";
     itcl_path << SH_ITCLTK_PROG;
