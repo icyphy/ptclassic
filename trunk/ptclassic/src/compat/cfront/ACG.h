@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // This works fine within Ptolemy.
 
 #if defined(hppa) || defined(SVR4) || defined(SYSV) || defined(__sgi)
-#ifndef __GNUG__
+#if !defined(__GNUG__) || defined(PT_EGCS)
 extern "C" {
   void srand48(long int);
   long int mrand48(void);
@@ -43,7 +43,7 @@ public:
 	ACG(unsigned seed = 1) {srand48(seed);}
 	asLong() {return (unsigned long)mrand48();}
 };
-#endif /* !__GNUG__ */
+#endif /* !__GNUG__ || PT_EGCS */
 #else /* hppa ...*/
 #ifdef PT_USE_RAND
 extern "C" {
