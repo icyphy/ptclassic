@@ -167,7 +167,7 @@ proc NodeDrag { w x y } {
     set startTime [expr int([lindex $inOutCoords 1])]
     set endTime [expr int([lindex $inOutCoords 3])]
 
-    puts "startTime: $startTime  endTime: $endTime"
+#    puts "startTime: $startTime  endTime: $endTime"
     set node $dot($nodeID,node)
     set dot($node,startTime) $startTime
     set dot($node,endTime) $endTime
@@ -816,14 +816,14 @@ proc allALAP {} {
 
 # Top-level script to set up and display the graph.
 button .asap -text ASAP -command "allASAP"
-pack .asap
 button .alap -text ALAP -command "allALAP"
-pack .alap
 button .setAll -text Times -command "setAllTimes"
-pack .setAll
 button .done -text Done -command "requestExit"
-pack .done
 ReadFile $GRAPH_FILE
 DisplayGraph
+pack .asap -side left
+pack .alap -side left
+pack .setAll -side left
+pack .done -side left
 
 # END
