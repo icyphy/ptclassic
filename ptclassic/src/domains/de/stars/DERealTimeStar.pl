@@ -1,6 +1,7 @@
 defstar
 {
     name { RealTimeStar }
+    derivedFrom { RepeatStar }
     domain { DE }
     descriptor { Synchronize the scheduler's clock with a real-time clock. }
     version { $Id$ }
@@ -29,19 +30,17 @@ defstar
 	Clock DERealTimeStar::clock;
     }
 
-    start
-    {
-	clock.reset();
-    }
-
     virtual method
     {
 	name { run }
 	access { public }
 	type { int }
 	code
-	{   // wait until the real time equals arrivalTime
-	    late = !clock.sleepUntil(arrivalTime * (double)timeScale);
+	{
+	    if (canGetFired())	// reset clock at time 0.0
+		clock.reset();
+	    else		// wait until the real time equals arrivalTime
+		late = !clock.sleepUntil(arrivalTime * (double)timeScale);
 	    return DEStar::run();
 	}
     }
