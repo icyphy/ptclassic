@@ -62,7 +62,7 @@ static jmp_buf err_state[MAX_CONTEXTS];
 #define X_StippleFill	54
 #endif
 
-int vemFail(name, filename, line)
+void vemFail(name, filename, line)
 char *name;
 char *filename;
 int line;
@@ -73,7 +73,7 @@ int line;
     /*NOTREACHED*/
 }
 
-int vemOctFail(filename, line)
+void vemOctFail(filename, line)
 char *filename;
 int line;
 /* Assertion failed */
