@@ -110,6 +110,9 @@ static char msg[1024];
 /* used to traverse design hierarchy which is a DAG (directed acyclic graph) */
 static DupSheet traverse;
 
+/* forward declarations */
+static boolean CompileGal ARGS((octObject *galFacetPtr));
+
 
 /***** Begin Error Select Set (Ess) routines */
 /* 8/20/89
@@ -894,23 +897,35 @@ octObject *galInstPtr, *parentFacetPtr;
 {
     const char* galDomain;
     octObject galFacet = {OCT_UNDEFINED_OBJECT, 0};
+    boolean result;
+
+    if (!VemLock())
+	return (FALSE);
 
     /* get the galaxy domain */
     if (!GOCDomainProp(galInstPtr, &galDomain, curDomainName())) {
         PrintErr(ErrGet());
+	VemUnlock();
         return (FALSE);
     }
     /* set outer domain */
     if (IsPalFacet(parentFacetPtr)) KcSetKBDomain(galDomain);
     else if (!setCurDomainF(parentFacetPtr)) {
 	PrintErr("Invalid domain found");
-	return FALSE;
+	VemUnlock();
+	return (FALSE);
     }
 
     /* now do the compile */
-    ERR_IF1(!MyOpenMaster(&galFacet, galInstPtr, "contents", "r"));
+    if (!MyOpenMaster(&galFacet, galInstPtr, "contents", "r")) {
+	VemUnlock();
+	return (FALSE);
+    }
+
     DupSheetClear(&traverse);
-    return CompileGal(&galFacet);
+    result = CompileGal(&galFacet);
+    VemUnlock();
+    return result;
 }
 
 /* standalone compilation of a galaxy, for icon-making.
@@ -923,18 +938,27 @@ CompileGalStandalone(galFacetPtr)
 octObject *galFacetPtr;
 {
     const char* galDomain;
+    boolean result;
+
+    if (!VemLock())
+	return (FALSE);
+
     /* get the galaxy domain */
     if (!GOCDomainProp(galFacetPtr, &galDomain, curDomainName())) {
         PrintErr(ErrGet());
+	VemUnlock();
         return (FALSE);
     }
     /* Call Kernel function to set KnownBlock current domain */
     if (! KcSetKBDomain(galDomain)) {
         PrintErr("Domain error in galaxy or wormhole.");
+	VemUnlock();
         return (FALSE);
     }
     DupSheetClear(&traverse);
-    return CompileGal(galFacetPtr);
+    result = CompileGal(galFacetPtr);
+    VemUnlock();
+    return result;
 }
 
 /*
@@ -947,7 +971,7 @@ static boolean recompileFlag;
 /* compile a galaxy. */
 /* this function will be called recursively if there's hierarchy */
 
-boolean
+static boolean
 CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
@@ -1146,20 +1170,27 @@ boolean
 CompileFacet(facetPtr)
 octObject *facetPtr;
 {
+    if (!VemLock())
+	return (FALSE);
+
     DupSheetClear(&traverse);
     ErrClear();
     if (IsGalFacet(facetPtr)) {
 	if (!CompileGal(facetPtr)) {
+	    VemUnlock();
 	    return (FALSE);
 	}
     } else if (IsPalFacet(facetPtr)) {
 	ErrAdd("CompileFacet: palette facets cannot be compiled");
+	VemUnlock();
 	return (FALSE);
     } else {
 	if (!CompileUniv(facetPtr)) {
+	    VemUnlock();
 	    return (FALSE);
 	}
     }
+    VemUnlock();
     return (TRUE);
 }
 

@@ -51,6 +51,7 @@ a Tcl interpreter.
 extern "C" {
 /* rpc.h and type.h define Pointer which conflict */
 #define Pointer screwed_Pointer
+#include "vemInterface.h"	  /* define VemLock, VemUnlock */
 #include "oct.h"		  /* define octObject data structure */
 #include "list.h"		  /* define lsList data structure */
 #include "rpc.h"		  /* define vemCommand & remote proc. calls */
@@ -250,15 +251,21 @@ int PVem::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
 	PVem* obj = findPVem(interp);
 	if (obj == 0) {
-		strcpy(interp->result,
-		       "Internal error in PVem::dispatcher!");
+		Tcl_SetResult(interp,
+		       "Internal error in PVem::dispatcher!", TCL_STATIC);
 		return TCL_ERROR;
 	}
-	int i = int(which);
+	if (!VemLock()) {
+		Tcl_SetResult(interp,
+		       "PVem::dispatcher could not lock Vem!", TCL_STATIC);
+		return TCL_ERROR;
+	}
 	// this code makes an effective stack of active Tcl interpreters.
 	Tcl_Interp* save = activeInterp;
 	activeInterp = interp;
+	int i = int(which);
 	int status = (obj->*(funcTable[i].func))(argc,argv);
 	activeInterp = save;
+	VemUnlock();
 	return status;
 }

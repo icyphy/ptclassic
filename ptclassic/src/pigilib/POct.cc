@@ -52,6 +52,7 @@ a Tcl interpreter.
 
 extern "C" {
 #define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "vemInterface.h"		/* define VemLock, VemUnlock */
 #include "local.h"
 #include "oct.h"			/* octObject data structure */
 #include <pwd.h>			/* used for Make Star */
@@ -412,6 +413,7 @@ int POct::ptkCompile (int aC, char** aV) {
     // Compile the facet
     int retval = TCL_OK;
     if ( ! CompileFacet(&facet) ) {
+        Tcl_ResetResult(interp);
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
 	retval = TCL_ERROR;
     }
@@ -1859,8 +1861,8 @@ int POct::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
 	POct* obj = findPOct(interp);
 	if (obj == 0) {
-		strcpy(interp->result,
-		       "Internal error in POct::dispatcher!");
+		Tcl_SetResult(interp,
+		       "Internal error in POct::dispatcher!", TCL_STATIC);
 		return TCL_ERROR;
 	}
 	// Make sure kernelCalls.cc will use the right PTcl object.
@@ -1870,14 +1872,20 @@ int POct::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 		       "POct::dispatcher could not find ptcl!",TCL_STATIC);
 		return TCL_ERROR;
 	}
-	int i = int(which);
+	if (!VemLock()) {
+		Tcl_SetResult(interp,
+		       "POct::dispatcher could not lock Vem!", TCL_STATIC);
+		return TCL_ERROR;
+	}
 	// this code makes an effective stack of active Tcl interpreters.
 	Tcl_Interp* save = activeInterp;
 	activeInterp = interp;
 	PTcl* saveptcl = ptcl;
 	ptcl = PTobj;
+	int i = int(which);
 	int status = (obj->*(funcTable[i].func))(argc,argv);
 	activeInterp = save;
 	ptcl = saveptcl;
+	VemUnlock();
 	return status;
 }
