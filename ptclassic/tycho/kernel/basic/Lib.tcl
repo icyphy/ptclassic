@@ -6,7 +6,7 @@
 #
 # @Version: $Id$
 #
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -39,67 +39,67 @@ namespace ::tycho {
     ############# text editors (alphabetical except the first one)
 
     ::tycho::File::registerExtensions {} \
-            {::tycho::view Edit {-file {%s}}} \
+            {::tycho::view Edit -file {%s}} \
             {Plain text editor} "text"
 
     ::tycho::File::registerExtensions {.sched .c .y} \
-            {::tycho::view EditC {-file {%s}}} \
+            {::tycho::view EditC -file {%s}} \
             {C editor} "text"
     ::tycho::File::registerExtensions {.C .cc .h .H} \
-            {::tycho::view EditCpp {-file {%s}}} \
+            {::tycho::view EditCpp -file {%s}} \
             {C++ editor} "text"
     ::tycho::File::registerExtensions {.strl} \
-            {::tycho::view EditEsterel {-file {%s}}} \
+            {::tycho::view EditEsterel -file {%s}} \
             {Esterel editor} "text"
     ::tycho::File::registerExtensions {.fst} \
-            {::tycho::view EditForest {-file {%s}}} \
+            {::tycho::view EditForest -file {%s}} \
             {Forest editor} "graphics"
     ::tycho::File::registerExtensions {} \
-            {::tycho::view EditHTML {-file {%s}}} \
+            {::tycho::view EditHTML -file {%s}} \
             {HTML editor} "text"
     ::tycho::File::registerExtensions {.html .htm .htl} \
-            {::tycho::view HTML {-file {%s}} Displayer {-toolbar 1}} \
+            {::tycho::view HTML -file {%s} -toolbar 1} \
             {}
     ::tycho::File::registerExtensions {.itcl .itk} \
-            {::tycho::view EditItcl {-file {%s}}} \
+            {::tycho::view EditItcl -file {%s}} \
             {Itcl editor} "text"
     ::tycho::File::registerExtensions {.java} \
-            {::tycho::view EditJava {-file {%s}}} \
+            {::tycho::view EditJava -file {%s}} \
             {Java editor} "text"
     ::tycho::File::registerExtensions {.mk .template} \
-            {::tycho::view EditMake {-file {%s}}} \
+            {::tycho::view EditMake -file {%s}} \
 	    {Makefile editor} "text"
     ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
-            {::tycho::view EditMake {-file {%s}}} \
+            {::tycho::view EditMake -file {%s}} \
 	    {} 
     ::tycho::File::registerExtensions {.pt .ptcl} \
-            {::tycho::view EditPtcl {-file {%s}}} \
+            {::tycho::view EditPtcl -file {%s}} \
             {Ptcl editor} "text"
     ::tycho::File::registerExtensions .pl \
-            {::tycho::view EditPtlang {-file {%s}}} \
+            {::tycho::view EditPtlang -file {%s}} \
             {Ptlang editor} "text"
     ::tycho::File::registerExtensions .tcl \
-            {::tycho::view EditTcl {-file {%s}}} \
+            {::tycho::view EditTcl -file {%s}} \
             {Tcl editor} "text"
 
     ########### graphical editors (alphabetical)
     ::tycho::File::registerExtensions {.dag} \
-            {::tycho::view EditDAG {-file {%s}}} \
+            {::tycho::view EditDAG -file {%s}} \
             {DAG editor} "graphics"
     # NOTE: Not useful on its own.
     # ::tycho::File::registerExtensions {.fsm} \
-    #       {::tycho::view EditFSM {-file {%s}}} \
+    #       {::tycho::view EditFSM -file {%s}} \
     #       {Finite state machine editor}
     if !$ptolemypresent {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
-                {::tycho::view EditPalette {-facet {%s}}} \
+                {::tycho::view EditPalette -facet {%s}} \
                 {Palette editor} "graphics"
     }
     # NOTE: Not ready for release
     # NOTE: Put back in after release 1.1.2 -- hjr
     ::tycho::File::registerExtensions {.std} \
-	    {::tycho::view EditSTD {-file {%s}}} \
+	    {::tycho::view EditSTD -file {%s}} \
 	    {State transition diagram editor} "graphics"
 
     ::tycho::File::registerExtensions {.idx} \
@@ -116,7 +116,7 @@ namespace ::tycho {
     ########### tools (alphabetical)
 
     #::tycho::File::registerExtensions {} \
-    #        {::tycho::view CommandShell  {-file {%s}}} \
+    #        {::tycho::view CommandShell -file {%s}} \
     #        {Command shell} "tools"
 
     if {$tcl_platform(platform) != "macintosh"} {
@@ -128,24 +128,24 @@ namespace ::tycho {
     }
 
     ::tycho::File::registerExtensions {.icl} \
-            {::tycho::view ItclClassList {-file {%s}} Displayer {-toolbar 1}} \
+            {::tycho::view ItclClassList -file {%s} Displayer {-toolbar 1}} \
             {Itcl Class List} "tools"
 
     if {[uplevel #0 info commands matlab] != {}} {
 	::tycho::File::registerExtensions {} \
-                {::tycho::view Matlab {-file {%s}}} \
+                {::tycho::view Matlab -file {%s}} \
                 {Matlab console} "tools"
     }
     if {[uplevel #0 info commands mathematica] != {}} {
 	::tycho::File::registerExtensions {} \
-                {::tycho::view Mathematica {-file {%s}}} \
+                {::tycho::view Mathematica -file {%s}} \
                 {Mathematica console} "tools"
     }
     ::tycho::File::registerExtensions {} \
-            {::tycho::view ProfileTcl {-file {%s}} Displayer {-toolbar 1}} \
+            {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
             {Tcl profiler} "tools"
     ::tycho::File::registerExtensions {} \
-            {::tycho::view TclShell  {-file {%s}}} \
+            {::tycho::view TclShell -file {%s}} \
             {Tcl shell} "tools"
 
     # If we open a shared object, try to load it
