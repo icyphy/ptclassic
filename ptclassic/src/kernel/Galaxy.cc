@@ -1,11 +1,26 @@
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+ 	3/19/90 - J. Buck
+	Add method BlockList::blockWithName
+	Use newConnection method in Galaxy::connect: we no longer have
+	to know at compile time whether an argument is a PortHole or
+	MultiPortHole.
+
+Methods for class Galaxy
+***************************************************************************/
 #include "Star.h"
 #include "StringList.h"
 #include "Galaxy.h"
 #include "Block.h"
 
-
-// SCCS version identification
-// @(#)Galaxy.cc	1.7	1/14/90
 
 	////////////////////////////////////
 	// connect
@@ -16,9 +31,11 @@
 Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 			int numberDelays = 0) {
 
-	// Resolve any aliases
-	PortHole& realSource = source.realPort();
-	PortHole& realDest = destination.realPort();
+	// Resolve any aliases and MultiPortHole stuff:
+	// newConnection is a virtual function that does the right
+	// thing for all types of PortHoles.
+	PortHole& realSource = source.newConnection();
+	PortHole& realDest = destination.newConnection();
 
 	Geodesic* geo = source.allocateGeodesic();
 	geo->originatingPort = &realSource;
@@ -70,4 +87,15 @@ Galaxy :: operator char* () {
 	for(i = numberBlocks(); i>0; i--)
 		out += nextBlock();
 	return out;
+}
+
+Block *
+BlockList::blockWithName (char *ident) {
+	Block *p;
+	for (int i = size();i>0;i--) {
+		p = (Block *)next();
+		if (strcmp(ident,p->readName()) == 0)
+			return p;
+	}
+	return NULL;
 }
