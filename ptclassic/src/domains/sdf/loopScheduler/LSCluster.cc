@@ -150,10 +150,13 @@ void LSCluster :: fixBufferSizes(int) {
 
 // indent by depth tabs.
 static const char* tab_2(int depth) {
-	// this fails for depth > 20, so:
-	if (depth > 20) depth = 20;
-	static const char *tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-	return (tabs + 20 - depth);
+    // this fails for depth > 20, so:
+    if (depth > 20) depth = 20;
+
+    // For more compact schedule displays, we use two spaces
+    // rather than tabs.
+    static const char *tabs = "                                        ";
+    return (tabs + 40 - depth*2);
 }
 
 // Display schedule
@@ -163,20 +166,16 @@ StringList LSCluster :: displaySchedule(int depth) {
 	SDFFiring* f = firing;
 	while (f) {
 		if (f->count > 1) {
-			sch += tab_2(depth);
-			sch += f->count;
-			sch += "*{\n";
-			depth++;
+                    sch << tab_2(depth) << "{ repeat " << f->count << " {\n";
+		    depth++;
 		}
-
 		
 		SDFBaseCluster* temp = (SDFBaseCluster*)(f->s);
 		sch += temp->displaySchedule(depth);
 
 		if (f->count > 1) {
 			depth--;
-			sch += tab_2(depth);
-			sch += "}\n";
+                        sch << tab_2(depth) << "} }\n";
 		}
 		f = f->next;
 	}

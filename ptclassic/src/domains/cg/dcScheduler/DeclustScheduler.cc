@@ -41,14 +41,15 @@ Date of last revision: 5/92
 
 // function to display the schedule
 StringList DeclustScheduler::displaySchedule() {
-	StringList out;
-	out << "G.C. Sih's Declustering Parallel Scheduler\n\n";
-	// bestSchedule may be NULL if there is manual assignment
-	if (assignManually())
-	    out += myProcs()->display(galaxy());
-	else
-	    out += bestSchedule->display(galaxy());
-	return out;
+    StringList out;
+    out << "{\n  { scheduler \"Sih's Declustering Parallel Scheduler\" }\n";
+    // bestSchedule may be NULL if there is manual assignment
+    if (assignManually())
+	out << myProcs()->display(galaxy());
+    else
+	out << bestSchedule->display(galaxy());
+    out << "}\n";
+    return out;
 }
 
 // set up processors

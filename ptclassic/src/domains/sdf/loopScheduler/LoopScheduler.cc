@@ -115,10 +115,11 @@ StringList LoopScheduler::displaySchedule() {
 	StringList sch;
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
-	sch << "S.S. Bhattacharyya's Loop SDF Scheduler\n\n";
+	sch << "{\n  { scheduler \"Bhattacharyya's Loop SDF Scheduler\" }\n";
 	while ((c = (SDFCluster*) next++) != 0) {
-		sch += ((SDFCluster*) c)->displaySchedule(0);
+		sch << ((SDFCluster*) c)->displaySchedule(0);
 	}
+	sch << "}\n";
 	return sch;
 }
 

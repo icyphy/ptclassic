@@ -120,12 +120,13 @@ int DLScheduler :: scheduleIt()
 
 StringList DLScheduler :: displaySchedule() {
 
-	Galaxy* galaxy = myGraph->myGalaxy();
+    Galaxy* galaxy = myGraph->myGalaxy();
 
-	StringList out;
-	out <<  "G.C. Sih's Dynamic-Level Parallel Scheduler\n\n"
-	    << parSched->display(galaxy);
+    StringList out;
+    out << "{\n  { scheduler \"Sih's Dynamic-Level Parallel Scheduler\" }\n"
+        << parSched->display(galaxy)
+	<< "}\n";
 
-	return out;
+    return out;
 }
 
