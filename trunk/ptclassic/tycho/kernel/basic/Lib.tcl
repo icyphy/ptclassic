@@ -60,6 +60,7 @@ uplevel #0 {
 }
 
 # Register the standard context-sensitive editors
+# Some of these are commented out because they are not ready for release.
 namespace ::tycho {
     tycho::File::registerEditor {} Edit {Plain text editor}
     tycho::File::registerEditor {.sched .c .y} EditC {C editor}
@@ -69,14 +70,18 @@ namespace ::tycho {
     tycho::File::registerEditor .tcl EditTcl {Tcl editor}
     tycho::File::registerEditor .pl EditPtlang {Ptlang editor}
     tycho::File::registerEditor {} Console {Tcl console}
-    tycho::File::registerEditor {} Matlab {Matlab console}
-    tycho::File::registerEditor {} Mathematica {Mathematica console}
+    if {[uplevel #0 info commands matlab] != {}} {
+	tycho::File::registerEditor {} Matlab {Matlab console}
+    }
+    if {[uplevel #0 info commands mathematica] != {}} {
+	tycho::File::registerEditor {} Mathematica {Mathematica console}
+    }
     tycho::File::registerEditor .html HTML {}
-    tycho::File::registerEditor {.cir .sp} EditSpice {Spice editor}
+    # tycho::File::registerEditor {.cir .sp} EditSpice {Spice editor}
     tycho::File::registerEditor {.mk .template} EditMake {Makefile editor} \
 	    {Makefile makefile GNUmakefile}
-    tycho::File::registerEditor {.vhdl .VHDL} EditVHDL {VHDL editor}
-    tycho::File::registerEditor {.fsm} EditFSM {Finite state machine editor}
-    tycho::File::registerEditor {.std} EditMoore {State transition diagram editor}
+    # tycho::File::registerEditor {.vhdl .VHDL} EditVHDL {VHDL editor}
+    # tycho::File::registerEditor {.fsm} EditFSM {Finite state machine editor}
+    # tycho::File::registerEditor {.std} EditMoore {State transition diagram editor}
     tycho::File::registerEditor {.idx} IndexBrowser {}
 }
