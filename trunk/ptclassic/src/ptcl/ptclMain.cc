@@ -74,6 +74,11 @@ char *tcl_RcFileName = NULL;	/* Name of a user-specific startup script
 				 * interactively (e.g. "~/.tclshrc").  Set
 				 * by Tcl_AppInit.  NULL means don't source
 				 * anything ever. */
+
+/* This defines the default domain for ptcl. */
+
+char DEFAULT_DOMAIN[] = "SDF";
+
 /*
  *----------------------------------------------------------------------
  *
