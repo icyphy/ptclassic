@@ -59,7 +59,7 @@
  ******************************/
 
 #include "Packet.h"
-
+#include <builtin.h>
 
 class BaseImage: public PacketData {
 protected:
