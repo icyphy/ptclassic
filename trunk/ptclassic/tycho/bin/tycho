@@ -308,6 +308,10 @@ if ( ! $?selectPtolemy && $?selectJava) then
 			setenv CLASSPATH ~/java/lib/classes.zip
 			echo "${0}: CLASSPATH is not set,"
 			echo "  setting it to $CLASSPATH"
+		else if ( -f /opt/jdk1.1/lib/classes.zip) then
+			setenv CLASSPATH /opt/jdk1.1/lib/classes.zip
+			echo "${0}: CLASSPATH is not set,"
+			echo "  setting it to $CLASSPATH"
 		else if ( -f /opt/SUNWjws/JDK/lib/classes.zip) then
 			setenv CLASSPATH /opt/SUNWjws/JDK/lib/classes.zip
 			echo "${0}: CLASSPATH is not set,"
