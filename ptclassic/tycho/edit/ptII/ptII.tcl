@@ -53,23 +53,28 @@ set env(CLASSPATH) $env(PTII)
 # Ahem
 puts -nonewline "Loading java"
 update
-set v [package require java]
-puts "JDK [java::call System getProperty java.version], Tcl Blend $v, "
+if [ catch {set v [package require java]} errMsg ] {
+    puts "Warning: 'package require java' failed.\n\
+	    The java package is only required for the interim Ptolemy II GUI\n\
+	    The error message was:\n$errMsg"
+} else { 
+    puts "JDK [java::call System getProperty java.version], Tcl Blend $v, "
 
-# Set up this stupid flag to deal with stupid casting change
-# in Tcl Blend 1.1
-if { $v >= 1.1 } {
-    set tcl_platform(javaCastNeeded) 1
-} else {
-    set tcl_platform(javaCastNeeded) 0
+    # Set up this stupid flag to deal with stupid casting change
+    # in Tcl Blend 1.1
+    if { $v >= 1.1 } {
+	set tcl_platform(javaCastNeeded) 1
+    } else {
+	set tcl_platform(javaCastNeeded) 0
+    } 
+
+    # Java is too stupid to understand environment variables
+    # We would like to do this but it doesn't work in 1.1:
+    # java::call System setProperty "PTII" $env(PTII)
+    #
+    # Instead, do this:
+    java::call ptolemy.schematic.DomainLibrary setPTIIRoot $env(PTII)
 } 
-
-# Java is too stupid to understand environment variables
-# We would like to do this but it doesn't work in 1.1:
-# java::call System setProperty "PTII" $env(PTII)
-#
-# Instead, do this:
-java::call ptolemy.schematic.DomainLibrary setPTIIRoot $env(PTII)
 
 # Load other stuff
 if [info exists tk_version] {
