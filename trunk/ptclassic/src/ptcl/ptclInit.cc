@@ -59,19 +59,10 @@ extern int		isatty _ANSI_ARGS_((int fd));
 // Load in the PTcl startup file ptcl.tcl.
 static int loadStartup(Tcl_Interp* interp) {
     char *pt = getenv("PTOLEMY");
-    int newmemory = FALSE;
-    if (!pt) {
-        pt = expandPathName("~ptolemy");
-	newmemory = TRUE;
-    }
-    StringList startup = pt;
-    if ( newmemory ) {
-	delete [] pt;
-    }
-
+    StringList startup = pt ? pt : "~ptolemy";
     startup << "/lib/tcl/ptcl.tcl";
     if (Tcl_EvalFile(interp, startup.chars()) != TCL_OK) {
-	fprintf(stderr, "ptcl: error in startup file '%s'.\n",
+	fprintf(stderr, "ptcl: error in sourcing startup file '%s'.\n",
                 interp->result);
 	return TCL_ERROR;
     } else
