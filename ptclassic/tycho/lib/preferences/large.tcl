@@ -2,8 +2,8 @@
 #
 # $Id$
 
-preference assign fonts textFont  9x15
-preference assign fonts entryFont 9x15
+preference assign fonts textFont  {Screen 14}
+preference assign fonts entryFont {Screen 14}
 
 preference assign layout textWidth 72
 preference assign layout textHeight 40
