@@ -49,6 +49,7 @@ Programmer: Jose Luis Pino
 
 /*virtual*/ StringList MultiScheduler::displaySchedule(){
     StringList schedule;
+    schedule << "Hierarchical Scheduler:  Top-level scheduler is - ";
     if (topCluster) schedule << topCluster->displaySchedule();
     return schedule;
 }   
