@@ -27,7 +27,7 @@ which modulates a complex exponential.
 .Ie "phase shift"
 .Ie "analytic signal"
 .Ie "Hilbert transform"
-.Ie "phaseShift"
+.Se phaseShift
 The input is assumed to be real, and the output
 produced is real.  The frequency shift produced by the phaseShift
 galaxy is the slope of the phase control input.  This input is

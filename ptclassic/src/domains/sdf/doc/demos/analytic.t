@@ -3,7 +3,7 @@
 .SD
 Analytic sample rate conversion.
 .DE
-.IE ComplexFIR
+.Se ComplexFIR
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"

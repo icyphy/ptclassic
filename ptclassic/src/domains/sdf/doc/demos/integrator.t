@@ -10,14 +10,14 @@ Demonstrate the features of the integrator star.
 This system shows the various features of the
 .c Integrator
 star.
-.Ie "Integrator"
+.Se Integrator
 The leftmost integrator has limits so that its output is a sawtooth.
 The
 .c Quantizer
 star resets the rightmost integrator when
 the sawtooth is at its peaks.  The rightmost integrator also has
 leakage, so its output signal is bowed.
-.Ie "Quantizer"
+.Se Quantizer
 Note that a
 .c FloatDC
 star is connected to the INT reset input

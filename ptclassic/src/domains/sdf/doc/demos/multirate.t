@@ -30,7 +30,7 @@ twice the output sample rate.  The low cutoff conservatively prevents
 aliasing due to the sample rate conversions.
 The filter was designed using the optfir program, which can be invoked
 through the pigi menu.
-.Ir "optfir"
+.Ir "optfir program"
 .SA
 optfir,
 interp,

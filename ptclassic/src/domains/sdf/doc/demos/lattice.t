@@ -24,14 +24,14 @@ Then, in parallel, it is implemented with a recursive lattice filter,
 using the
 .c RLattice
 star.
-.Ie "RLattice"
+.Se RLattice
 The transfer function of the lattice filter is also $H(z)$, so
 the outputs should be identical.
 The resulting AR process is then filtered
 using an FIR lattice (the
 .c Lattice
 star) with the same coefficients as in the recursive lattice.
-.Ie "Lattice"
+.Se Lattice
 This has transfer function $H sup -1 (z)$, which whitens the
 random process.  The power spectrum for each process is then
 estimated using the

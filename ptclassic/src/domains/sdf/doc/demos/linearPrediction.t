@@ -15,7 +15,7 @@ of three sinusoids in colored, Gaussian noise.
 The first (upper) method uses Burg's algorithm and second (lower)
 method uses an adaptive filter, with the LMS stochastic gradient
 adaptation algorithm.
-.Ie LMS
+.Se LMS
 .Ie "adaptive filter"
 .Ie "filter, adaptive"
 .Ie "filter, LMS adaptive"
@@ -27,7 +27,7 @@ Burg's method is a block method.
 The
 .c Burg
 star collects 128 input samples, from which it estimates the autoregressive
-.IE "Burg"
+.Se Burg
 (AR) parameters of the input process.  These parameters are then loaded
 into the
 .c BlockFIR
@@ -38,7 +38,7 @@ occurs because the tapped delay line of the
 .c BlockFIR
 needs to fill up with input samples before accurate predictions
 can be made.
-.Ie BlockFIR
+.Se BlockFIR
 If the system is run for two iterations (two blocks), there
 will be no transient at the start of the second block because
 the tapped delay line is full.

@@ -10,14 +10,14 @@ Demonstrate the DTFT star.
 .pp
 .Ie "spectral estimation"
 .Ie "discrete time Fourier transform"
-.Ie "DTFT"
+.Se DTFT
 .Ie "Fourier transform, discrete time"
 This demo compares the function of the
 .c DTFT
 star to that of the
 .c ComplexFFT
 star.
-.Ie "ComplexFFT"
+.Se ComplexFFT
 While both stars output samples of the discrete-time Fourier
 transform of a finite-length signal, the
 .c FFT
