@@ -29,6 +29,7 @@ all install clean sources realclean checkjunk sccsinfo:
 	    fi ; \
 	done
 
+.PHONY:	TAGS
 TAGS:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
