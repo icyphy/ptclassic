@@ -273,8 +273,9 @@ ifdef MDSDF
 endif
 
 ifdef CP
-	# The CP domain is only supported under sun4
-	ifneq (,$(filter sun%, $(PTARCH)))
+	# The CP domain is only supported under the Sun Operating System,
+	# matched by the sun% pattern
+	ifneq ("$(filter sun%, $(PTARCH))","")
 		CUSTOM_DIRS += $(CPDIR)/kernel $(CPDIR)/stars \
 			$(CPDIR)/infopad/kernel $(CPDIR)/infopad/stars
 		PALETTES += PTOLEMY/src/domains/cp/icons/cp.pal
@@ -299,7 +300,9 @@ ifdef PN
 	CUSTOM_DIRS += $(PNDIR)/kernel $(PNDIR)/stars 
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
-	ifneq (,$(filter sun% sol%,$(PTARCH)))
+        # PN is only supported under Sun and Solaris operating systems,
+	# matched by patterns sun% and sol%
+	ifneq ("$(filter sun% sol%,$(PTARCH))","")
 		STARS += $(LIBDIR)/pnstars.o
 		LIBS += -lpnstars -lpn
 		LIBFILES += $(LIBDIR)/libpnstars.$(LIBSUFFIX) \
@@ -367,8 +370,8 @@ endif
 
 # Networks Of Workstations Active Messages
 ifdef NOWAM
-     # NOWam only supported under sol2 and sol2.cfront
-     ifneq (,$(filter sol%,$(PTARCH)))
+     # NOWam only supported under sol2 and sol2.cfront, matched by pattern sol%
+     ifneq ("$(filter sol%,$(PTARCH))","")
 	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam \
 		$(ROOT)/src/domains/cgc/targets/NOWam/libudpam
 	CGC = 1
