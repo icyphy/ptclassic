@@ -68,7 +68,6 @@ bool pl_flag;
 
    numIn = 0; numOut = 0;
    topLevel = false;
-fprintf(stderr," 1 XXX \n");
 if( pl_flag && (Graph == Root) )
 {
    topLevel = true;
@@ -87,7 +86,6 @@ if( pl_flag && (Graph == Root) )
    { strcpy(outputList[numOut].name,outputName); numOut++; }
    numberOut = numOut;
 }
-fprintf(stderr," 2 XXX \n");
     indexlevel++;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
@@ -134,7 +132,6 @@ if(!pl_flag)
     fprintf(CFD, "{\n");
 }
 
-fprintf(stderr," 3 XXX \n");
 /* now is the special case where we generate the signal type
 along with the signalname in the function declaration,
 also in case of the pl_flag and the top level, we also need
@@ -158,7 +155,6 @@ to pass the data type to the signal */
     	ClearList(ListOfParams);
    } /* pl_flag */
 
-fprintf(stderr," 4 XXX \n");
    if(topLevel)
    {
 		if(mycomma == true) fprintf(CFD,",");
@@ -172,31 +168,23 @@ fprintf(stderr," 4 XXX \n");
    } /* topLevel */
 if(pl_flag) fprintf(CFD, ")\n{\n");
 
-fprintf(stderr," 5 XXX \n");
 /* Generate declarations for local delay variables used */
     GenDeclDelayVars(Graph);
 
-fprintf(stderr," 6 XXX \n");
 /* Generate declarations for local variables used, fixedtype and int */
     GenDeclLocalVars(Graph);
 
-fprintf(stderr," 7 XXX \n");
 /* Generate initializations for local delay variables */
 /* GenInitDelayVars(Graph);   */
 
-fprintf(stderr," 8 XXX \n");
 /* Remove DelayNodes and TopologicalOrder graph for GenStatements */
     RemoveDelaysInGraph(Graph);
-fprintf(stderr," 9 XXX \n");
     RemoveLpDelaysInGraph(Graph);
-fprintf(stderr," 10 XXX \n");
     TopologicalOrder(Graph);
 
 /* Generate the body of the function */
     fprintf(CFD, "\n/* statements of function body */\n");
-fprintf(stderr,"before entering GenFunc \n");
     GenStatements(Graph,pl_flag);
-fprintf(stderr,"after GenFunc \n");
 
 /* Generate statements to display requested signals */
     GenDisplays(Graph,Graph->EdgeList,pl_flag);

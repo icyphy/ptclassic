@@ -35,6 +35,8 @@ int castFlag = TRUE;
 static bool a_flag = false;  /*  write out AFL format */
 static bool l_flag = false;  /*  optimize local variable usage */
 static bool pl_flag = false;  /*  for generation of .pl file for Ptolemy*/
+static bool highlevel = false; /* include highlevel.h and stuff */
+static bool bittrue = false; /* include bittrue.h and stuff */
 
 /*
  * global functions 
@@ -46,7 +48,7 @@ extern char *getenv();
  * Definitions
  */
 
-#define WRONG_ARG {printmsg(NULL,"usage : Flow2C [-aldmfvp] file\n"); \
+#define WRONG_ARG {printmsg(NULL,"usage : Flow2C [-aldmfvphb] file\n"); \
            printmsg(NULL," -a : Work in AFL format\n"); \
            printmsg(NULL," -l : Minimize usage of local variables\n"); \
            printmsg(NULL," -d : Dumps library paths\n"); \
@@ -54,6 +56,8 @@ extern char *getenv();
            printmsg(NULL," -f : Include leaf cells when dumping graph\n"); \
            printmsg(NULL," -v : Verbose mode with -A flag\n"); \
            printmsg(NULL," -p : Generate .pl file for Ptolemy \n"); \
+           printmsg(NULL," -h : highlevel simulation for Ptolemy \n"); \
+           printmsg(NULL," -b : bittrue simulation for Ptolemy \n"); \
                    exit(1);}  
 
 main(argc, argv)
@@ -115,7 +119,7 @@ char *argv[];
 /*
  * Translate to C
  */
-   FlowToC(l_flag,pl_flag);
+   FlowToC(l_flag,pl_flag,highlevel,bittrue);
    GenMakefile (GraphName);
 
 /*
@@ -168,6 +172,14 @@ char **argv;
             case 'p' :
 	       pl_flag = true;
 	       fprintf(stderr,"setting pl_flag \n");
+	       break;
+            case 'h' :
+	       highlevel = true;
+	       fprintf(stderr,"highlevel simulation \n");
+	       break;
+            case 'b' :
+	       bittrue = true;
+	       fprintf(stderr,"bittrue simulation \n");
 	       break;
 	    default:
 	       WRONG_ARG;
