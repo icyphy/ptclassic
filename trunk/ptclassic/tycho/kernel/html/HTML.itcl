@@ -172,8 +172,11 @@ class ::tycho::HTML {
     # Return the reference directory.
     method lastDirectory {}
 
-    # Display the link destination in the status bar
-    method linkEnter {xpos ypos}
+    # Display the link destination in the status bar.
+    method linkEnter {xpos ypos {subwindow {}} }
+
+    # Process a subwindow link.
+    method linkHitSubWindow {subwindow} 
 
     # Open the source file using an HTML editor.
     method openSource {}
@@ -1031,16 +1034,32 @@ body ::tycho::HTML::lastDirectory {} {
 #####################################################################
 #### linkEnter
 # Display the link destination in the status bar for the link below
-# the specified mouse position.
+# the specified mouse position.  If the subwindow argument is present,
+# then ignore the xpos and ypos arguments and get the x,y coordinates
+# from the bbox of the subwindow.
 #
-body ::tycho::HTML::linkEnter {xpos ypos} {
-    set tags [$itk_component(text) tag names @$xpos,$ypos]
+body ::tycho::HTML::linkEnter {xpos ypos {subwindow {}} } {
+    if { $subwindow != {} } {
+        set bbox [$itk_component(text) bbox $subwindow]
+        set tags [$itk_component(text) tag names \
+                @[lindex $bbox 0],[lindex $bbox 1]]
+    } {
+        set tags [$itk_component(text) tag names @$xpos,$ypos]
+    }
     set link [lindex $tags [lsearch -glob $tags L:*]]
     # regsub -all {[^L]*L:([^ ]*).*}  $tags {\1} link
     regsub L: $link {} link
     statusbar puts $link
 }
 
+#####################################################################
+#### linkHitSubWindow
+# Process a link hit in a subwindow.
+#
+body ::tycho::HTML::linkHitSubWindow {subwindow} {
+    eval HMlink_hit $itk_component(text) \
+            [lrange [$itk_component(text) bbox $subwindow] 0 1]
+}
 #####################################################################
 #### openSource
 # Open the source file using an editor specialized for editing HTML.
@@ -2151,6 +2170,21 @@ proc HMtag_img {win param text} {
 	foreach tag $tags {
 		$win tag add $tag $item
 	}
+
+        # Get the name of the HTML widget.
+        set HTML [uplevel #0 winfo command [winfo megawidget $win]]
+        if { [$HTML isa ::tycho::View] == 1} {
+            # Add a binding for links to display the destination.
+            bind $label <Enter> "$HTML linkEnter {} {} %W"
+            
+            # If we don't have a <Motion> tag for the link, then if we
+            # have several links stacked on top of each other
+            # horizontally, the status bar
+            # is not updated as we move the mouse from link to link
+            bind $label <Motion> "$HTML linkEnter {} {} %W"
+            bind $label <Leave> "$HTML statusbar puts {}"
+            bind $label <1> "$HTML linkHitSubWindow %W"
+        }
 
 	# set imagemap callbacks
 	if {[HMextract_param $param ismap]} {
