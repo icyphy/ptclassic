@@ -94,13 +94,6 @@ giving the time at which the particle should be sent to the output.
 	    dataValid = 0;
 	}
 	go {
-	    // Ignore the time zero event that is automatically scheduled
-	    // by the base class, RepeatStar
-	    if (firstFiring) {
-		firstFiring = 0;
-		return;
-	    }
-
 	    if (dataValid) {
 		// Output the stored data
 		recData.put(arrivalTime) = *recdData;
