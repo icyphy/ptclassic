@@ -62,7 +62,8 @@ GNU_PREFIX=$(GNU_DEST)/common
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=2.8.0
+GCC_VERSION=egcs-2.90.27
+
 # If you are trying to build GNU for Linux, you may want to uncomment
 # the next line and comment out the following line
 #LIBGPLUSPLUS_VERSION=27.1.0
@@ -79,6 +80,12 @@ REL_GNU_BINDIR=../gnu/$(PTARCH)/bin
 # Location of Ptolemy bin dir.  We make links from here to the GNU stuff
 BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
+# Location of FSF GNU sources, objs
+FSF_SRC=$(PTOLEMY)/src/gnu/old
+FSF_OBJ=$(GNU_OBJ).fsf
+FSF_PREFIX=$(GNU_PREFIX).fsf
+FSF_EXEC_PREFIX=$(GNU_EXEC_PREFIX).fsf
+
 ############################################################
 # Build the GNU tools for non-HP machines
 all: configure bin install
@@ -90,23 +97,7 @@ SHAREDLIB_CONFIGURE_FLAGS = --enable-shared
 # gnu make and egcs
 configure: $(GNU_OBJ) configure_make configure_egcs 
 
-# gcc-2.x
-fsfconfigure: $(GNU_OBJ) configure_make
-	@echo "Now configure gcc"
-	-mkdir $(GNU_OBJ)/gcc
-	(cd $(GNU_OBJ)/gcc; \
-	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) \
-		$(MACH) )
-	@echo "Now configure libg++"
-	-mkdir $(GNU_OBJ)/libg++
-	(cd $(GNU_OBJ)/libg++; \
-	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-
-configure_make:
+configure_make: $(GNU_OBJ)
 	-mkdir $(GNU_OBJ)/make
 	(cd $(GNU_OBJ)/make; \
 	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
@@ -124,8 +115,6 @@ configure_make:
 #	 else echo make; fi`
 
 bin: bin_make bin_egcs
-
-bin_fsf: bin_make bin_gcc install_gcc install_gcc_links bin_libg++
 
 bin_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) )
@@ -160,13 +149,53 @@ bin_libg++:
 
 install: install_make install_egcs install_gcc_links
 
-install_fsf: $(BINDIR) 
-	(cd $(GNU_OBJ)/libg++; \
-		PATH=$(GNU_OBJ)/binutils/gas:$(GNU_OBJ)/gcc:$(PATH); \
+####################
+# FSF gcc-2.8.0 - Ptolemy 0.7.1 does not use this
+allfsf: fsfconfigure bin_fsf install_fsf
+
+# gcc-2.x
+fsfconfigure: $(FSF_OBJ) configure_make
+	@echo "Now configure gcc"
+	-mkdir $(FSF_OBJ)/gcc
+	(cd $(FSF_OBJ)/gcc; \
+	$(FSF_SRC)/gcc/configure --srcdir=$(FSF_SRC)/gcc \
+		--prefix=$(FSF_PREFIX) --exec-prefix=$(FSF_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) \
+		$(MACH) )
+	@echo "Now configure libg++"
+	-mkdir $(FSF_OBJ)/libg++
+	(cd $(FSF_OBJ)/libg++; \
+	$(FSF_SRC)/libg++/configure --srcdir=$(FSF_SRC)/libg++ \
+		--prefix=$(FSF_PREFIX) --exec-prefix=$(FSF_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+$(FSF_OBJ):
+	-mkdir $@
+
+bin_fsf: bin_make bin_fsf_gcc install_fsf_gcc bin_fsf_libg++
+
+bin_fsf_gcc:
+	(cd $(FSF_OBJ)/gcc; $(GNU_OBJ)/make/make CC=$(CC) bootstrap)
+
+install_fsf_gcc: $(BINDIR) install_make
+	(cd $(FSF_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+
+
+bin_fsf_libg++:
+	(cd $(FSF_OBJ)/libg++; \
+		PATH=$(GNU_OBJ)/binutils/gas:$(FSF_OBJ)/gcc:$(PATH); \
 		echo $$PATH; \
 		$(GNU_OBJ)/make/make \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ install)
+		CC=$(FSF_OBJ)/gcc/xgcc CFLAGS=-B$(FSF_OBJ)/gcc/ \
+		LDFLAGS=-B$(FSF_OBJ)/gcc/ )
+
+
+install_fsf: $(BINDIR) 
+	(cd $(FSF_OBJ)/libg++; \
+		PATH=$(FSF_OBJ)/binutils/gas:$(FSF_OBJ)/gcc:$(PATH); \
+		echo $$PATH; \
+		$(GNU_OBJ)/make/make \
+		CC=$(FSF_OBJ)/gcc/xgcc CFLAGS=-B$(FSF_OBJ)/gcc/ \
+		LDFLAGS=-B$(FSF_OBJ)/gcc/ install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 	-(cd $(BINDIR); \
 	  rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
@@ -182,16 +211,14 @@ install_fsf: $(BINDIR)
 	#	ln -s $(GNU_SRC)/libg++/libg++/*.info* .)
 	#-(cd $(GNU_OBJ)/libg++/libg++/gperf; \
 	#	ln -s $(GNU_SRC)/libg++/libg++/gperf/*.info* .)
-	-(cd $(GNU_OBJ)/libg++; $(GNU_OBJ)/make/make info install-info)
+	-(cd $(FSF_OBJ)/libg++; $(FSF_OBJ)/make/make info install-info)
 
 ############################################################
-# Build the GNU tools for HP machines
+# Build the GNU tools and egcs for HP machines
 #
 # See src/gnu/INSTALL for the details, but basically, we install a special
 # GNU assembler so the the -g flag will work.
 # Also, we need to install gcc before trying to build libg++
-
-
 
 hp_all: hp_configure hp_pregcc_install hp_bin hp_postgcc_install install hp_post_install
 
@@ -214,38 +241,34 @@ hp_configure: $(GNU_OBJ)
 	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-	@echo "Now configure gcc with -with-gnu-as"
-	-mkdir $(GNU_OBJ)/gcc
-	(cd $(GNU_OBJ)/gcc; \
-	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+	@echo "Now configure egcs with -with-gnu-as"
+	-mkdir $(GNU_OBJ)/egcs
+	(cd $(GNU_OBJ)/egcs; \
+	$(GNU_SRC)/egcs/configure --srcdir=$(GNU_SRC)/egcs \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) \
 		--with-gnu-as $(MACH) )
-	@echo "Now configure libg++"
-	-mkdir $(GNU_OBJ)/libg++
-	(cd $(GNU_OBJ)/libg++; \
-	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	if [ ! -d $(GNU_OBJ)/gas ]; then mkdir $(GNU_OBJ)/gas; fi
-	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
+	(cd $(GNU_OBJ)/egcs/gcc; $(MAKE) installdirs)
 	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/binutils/gas/as
-	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/gcc/as
+	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/egcs/gcc/as
 	-chmod a+x $(GNU_OBJ)/binutils/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
-hp_bin: bin_make hp_bin_binutils bin_gcc install_gcc hp_install_gas hp_bin_others bin_libg++
+hp_bin: bin_make hp_bin_binutils hp_install_gas bin_egcs hp_bin_flex
+
+hp_bin_bison:
+	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make)
 
 hp_bin_binutils:
-	(cd $(GNU_OBJ)/binutils; $(GNU_OBJ)/make/make)
+	(cd $(GNU_OBJ)/binutils; $(GNU_OBJ)/make/make BISON="$(GNU_OBJ)/bison/bison -y")
 
 hp_install_gas:
 	(cd $(GNU_OBJ)/binutils/gas; $(GNU_OBJ)/make/make install)
 
-hp_bin_others:
-	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make)
+hp_bin_flex:
 	# Reconfigure flex so as to avoid alloca problems
 	-mkdir $(GNU_OBJ)/flex
 	(cd $(GNU_OBJ)/flex; \
