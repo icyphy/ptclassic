@@ -461,9 +461,9 @@ ifdef SDF
 	endif
 	ifdef SDFMATLAB
 		CUSTOM_DIRS += $(SDFDIR)/matlab/stars
-		STARS += $(MATLABSTARS_DOT_O)
-		LIBS += $(MATLABSTAR_LIB)
-		LIBFILES += $(MATLABSTAR_LIBFILE)
+		STARS += $(LIBDIR)/sdfmatlabstars.o
+		LIBS += -lsdfmatlabstars
+		LIBFILES += $(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX)
 		EXTERNALTOOLSLIB = 1
 		MATLABENGINE = 1
 	endif
@@ -507,6 +507,7 @@ endif
 ifdef EXTERNALTOOLSLIB
 	LIBS += -lexttools
 	LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
+	MATLABENGINE = 1
 endif
 
 ifdef MATLABENGINE
