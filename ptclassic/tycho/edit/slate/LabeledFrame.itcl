@@ -38,9 +38,57 @@ namespace ::tycho {
 ##########################################################################
 ## LabelledFrame
 #
-# A rectangle with a label in it, and optional graphics.
+# <i>LabelledFrame</i> is a frame with a text label and graphics.
+# In all other respects, it can be treated like any other rectangle item.
 # At present, the graphics do not take account of the width
 # of the 3D border.
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+#
+# <dt><b>-anchor</b>
+# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+#
+# <dt><b>-borderwidth</b>
+# <dd>See <a href="Frame.html">Frame</a>
+#
+# <dt><b>-color</b>
+# <dd>See <a href="Frame.html">Frame</a>
+#
+# <dt><b>-graphics</b>
+# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+#
+# <dt><b>-relief</b>
+# <dd>See <a href="Frame.html">Frame</a>
+#
+# <dt><b>-text</b>
+# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Example</b>: Create a labelled rectangle:
+# <tcl quiet><pre>
+#  source $tycho/editors/slate/doc/internals/newslate.itcl
+#  $slate create LabelledFrame 40 40 100 80 -color green &#92
+#		-text Foo -tags moveable &#92
+#		-graphics "Frame 25 25 75 75 -color green -relief sunken"
+# </pre></tcl>
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
+#
 #
 # <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
 #

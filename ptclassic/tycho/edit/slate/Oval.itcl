@@ -30,7 +30,37 @@
 #######################################################################
 #### AsOval
 #
-# A shape for ovals.
+# The shape of ovals. Like rectangles, items with oval shape have
+# four coordinates, being the left, top, right, and bottom
+# coordinates. Items with this shape include <I>oval</I>
+# and <I>LabelledOval</I>.
+#
+#  <P><b>Primitive aspects</b>
+#
+# <ul>
+# <li><B>hradius</B>: The point at the right side of the oval; changing
+# this aspect changes the horizontal width of the oval.
+# <li><B>vradius</B>: The point at the top side of the oval; changing
+# this aspect changes the vertical height of the oval.
+# </ul>
+#
+# <p><b>Derived aspects</b>
+#
+# <ul>
+# <li><B>c</B> or <B>center</B>: The center of the oval.
+# <li><B>circumference-</B><I>x-y</I>: The point on the circumference that
+# intersects the vector (<I>x</I>, <I>y</I>) drawn from the center.
+# </ul>
+#
+# <p><b>Bugs</b>: Does not work at all.
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">Shape classes</a>.
+# </ul>
 #
 class ::tycho::AsOval {
     inherit ::tycho::Shape

@@ -87,6 +87,75 @@
 # being used for more than simple click-and-move and click-and-select
 # interactions.
 #
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-dragcommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-dragmode</b>
+# <dd>This can be <i>overlapping</i>, in which case an item 
+# is selected if the drag-selector interactor has dragged out a region 
+# that overlaps its bounding box, or <i>enclosed</i>, in which case an 
+# item is selected only if the drag-selector has dragged out a region 
+# that fully encloses its bounding box. The default is <i>overlapping</i>.
+#
+# <dt><b>-dragcolor</b>
+# <dd>The color of the box used to mark the current 
+# drag-selection region. The default color is "grey."
+#
+# <dt><b>-deselectcommand</b>
+# <dd>A function-script (see the 
+# <code>apply</code> procedure) that is called (if not null) when an item 
+# is deselected.  It is passed two arguments: this interactor, and the ID 
+# of the newly deselected item. The default is null.
+#
+# <dt><b>-exportselection</b>
+# <dd>If this flag is true, the Slate to which
+# the Selector belongs claims the X selection when an item is
+# selected. True by default.
+#
+# <dt><b>-highlightcolor</b>
+# <dd>The color of the highlight box drawn 
+# around selected items. The default color is "black."
+#
+# <dt><b>-highlightthickness</b>
+# <dd>The thickness in pixels of the highlight  box 
+# drawn around selected items. The default thickness is one pixel.
+#
+# <dt><b>-selectcommand</b>
+# <dd>A function-script that is called (if not 
+# null) when an item is selected.  It is passed two arguments: this 
+# interactor, and the ID of the newly selected item. The default is
+# null.
+#
+# <dt><b>-selecttag</b>
+# <dd>The tag with which selected items are tagged.
+# By default, it is "sel."
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+#
+# <ul>
+# <li><a href="../internals/selecting.html">More about the
+# graphical selection</a>.
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# </ul>
+#
 class ::tycho::Selector {
     inherit ::tycho::Interactor
 

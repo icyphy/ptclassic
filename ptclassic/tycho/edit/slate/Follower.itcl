@@ -38,11 +38,37 @@
 #
 # It seems like this class goes to a lot of trouble to perform a simple
 # function. However, its real power comes from inheritance, where
-# click-and-drag behavior can be customized for more sophistictaed
-# interaction -- see
-# <a href="Gridder.html"><i>Gridder</i></a>,
-# <a href="Bounder.html"><i>Bounder</i></a>, and
-# <a href="Alonger.html"><i>Alonger</i></a> for examples.
+# click-and-drag behavior can be customized for more sophisticated
+# interaction -- see the links below.
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-dragcommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# <li><a href="Stepper.html">Stepper</a>
+# <li><a href="Bounder.html">Bounder</a>
+# </ul>
 #
 class ::tycho::Follower {
     inherit ::tycho::Interactor

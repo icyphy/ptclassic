@@ -30,7 +30,33 @@
 #######################################################################
 #### AsLine
 #
-# A shape for lines.
+# The shape of lines. Items with
+# this shape include <I>line</I> and <I>SmartLine</I>.
+#
+#  <P><b>Primitive aspects</b>
+#
+# <ul>
+# <li><B>vertex-</B><I>n</I>: The <I>n</I>'th vertex of the line.
+# <li><B>start</B>: The start of the line.
+# <li><B>end</B>: The end of the line.
+# </ul>
+#
+# <p><b>Derived aspects</b>
+#
+# <ul>
+# <li><B>length</B>: The number of edges in the line (number of
+# vertices less one).
+# </ul>
+#
+# <p><b>Bugs</b>: (none).
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">Shape classes</a>.
+# </ul>
 #
 class ::tycho::AsLine {
     inherit ::tycho::AsPolygon

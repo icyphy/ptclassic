@@ -30,10 +30,44 @@
 #######################################################################
 #### AsRectangle
 #
-# A shape for rectangular items. Because the "rectangle" shape
+# The shape of rectangular items. An item with this shape has
+# four coordinates, being the left, top, right, and bottom
+# coordinates. Items with this shape include <I>rectangle</I>,
+# <I>Frame</I>, <I>LabelledRect</I>, and <I>LabelledFrame</I>.
+#
+# Note: Because the "rectangle" shape
 # may be applied to items that are not in fact rectangular,
 # this shape always uses the region{} method instead of the
 # coords{} method.
+#
+#  <P><b>Primitive aspects</b>
+#
+# <ul>
+# <li><B>n</B>: The center of the top edge.
+# <li><B>s</B>: The center of the bottom edge.
+# <li><B>e</B>: The center of the right edge.
+# <li><B>w</B>: The center of the left edge.
+# </ul>
+#
+# <p><b>Derived aspects</b>
+#
+# <ul>
+# <li><B>ne</B>: The top-right corner.
+# <li><B>nw</B>: The top-left corner.
+# <li><B>se</B>: The bottom-right corner.
+# <li><B>sw</B>: The bottom-left corner.
+# <li><B>c</B> or <B>center</B>: The center of the rectangle.
+# </ul>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">Shape classes</a>.
+# </ul>
 #
 class ::tycho::AsRectangle {
     inherit ::tycho::Shape

@@ -52,6 +52,43 @@
 # end up being given to a <a href="Picture.html"><i>Picture</i></a>
 # object, which then reacts according to its current "behavior."
 #
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>If not null, this is a function-script 
+# (see the documentation for the <code>apply</code> procedure) which is 
+# applied to four arguments when the interactor is activated: the 
+# interactor, the target, and the current <i>x</i> and <i>y</i> 
+# coordinates. This is used to customize the behavior of the interactor
+# depending on information that is not known until activation.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>If not null, this is a function-script 
+# which is applied to the same four arguments when the interactor is 
+# de-activated.
+#
+# <dt><b>-dragcommand</b>
+# <dd>If not null, this is a function-script 
+# which is applied to the same four arguments at the completion of the
+# interactor's <code>drag</code> method.
+#
+# </dl></dl>
+#
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# </ul>
+#
 class ::tycho::Interactor {
     inherit ::tycho::Object
 

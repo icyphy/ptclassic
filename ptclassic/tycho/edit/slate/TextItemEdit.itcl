@@ -34,12 +34,82 @@
 # needed for labels and short text fields. More complex editing
 # interactions can be built by cascading editors.
 #
-# The click, drag, and release methods are still used in this interactor,
-# for dragging out a region of text.
-# In addition, the method key{} is used to insert a character.
+# <p> The Tk canvas (and thus the Slate) provides no in-built editing
+# capabilities for text. The <i>Editor</i> interactor encapsulates the 
+# code needed by the Slate to support basic interactive editing on text 
+# items. Note that this is intended only for editing small
+# items like labels in diagrams.
 #
-# FIXME: Change the cursor to the insertion cursor while editing
-# an item.
+# <p> The <i>Editor</i> interactor adds no configuration options to
+# those inherited from the <a href="Interactor.html">Interactor</a>
+# superclass.
+#
+# <p> The interactor is attached to one or a set of Slate items with the 
+# <code>bind</code> command (as usual).  Once activated, the insertion 
+# cursor remains in the text item until the <code>stop</code> method is 
+# called.  How this method is called depends on the client -- it will 
+# usually be by the user clicking on a different object.  (The 
+# usual click-drag-release sequence <i>is</i> used in this interactor, but 
+# to drag-select text.)
+#
+# <p> An item which is the target of an editor interactor must respond to 
+# the following methods (see the documentation for the Tk canvas): 
+# <code>dchars</code>, <code>focus</code>, <code>icursor</code>, 
+# <code>index</code>, <code>insert</code>, and <code>select</code>.
+#
+# <p> While an item has the insertion cursor, the text can be edited as 
+# follows:
+#
+# <ul>
+# <li>Typing deletes the selection (if any) and inserts text;
+# <li>Left and right cursor keys move one character, control-left and
+# control-right move a word;
+# <li>Text can be drag-selected with the mouse; double-click and dragging
+# selects words at a time;
+# <li>Holding shift while pressing cursor keys extends the selection.
+# </ul>
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-dragcommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>
+#
+# The bindings used by this editor will interfere with
+# bindings to the Slate if they overlap.
+#
+# <p><b>Enhancements</b>
+#
+# <ol>
+# <li>This interactor should probably be renamed
+# <i>LineEditor</i>.
+# <li>Double-click and dragging does not quite work: 
+# the selection moves from the start of the first selected word, not 
+# from the farthest end.
+# <li>The up and down cursors should be made to 
+# work in multi-line items.
+# <li>The cursor should change to the insertion cursor while
+# over an item being edited.
+# </ol>
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# </ul>
 #
 class ::tycho::Editor {
     inherit ::tycho::Interactor

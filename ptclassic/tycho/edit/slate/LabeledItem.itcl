@@ -41,7 +41,45 @@ namespace ::tycho {
 # This class is the abstract superclass of the LabelledOval, 
 # LabelledRect, and LabelledFrame items.
 #
-# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-anchor</b>
+# <dd>The anchor position of the text label relative to the region
+# occupied by the item. The anchor can be any of the compass points --
+# <i>n</i>, <i>s</i>, <i>e</i>, <i>w</i>, <i>ne</i>, <i>se</i>,
+# <i>nw</i>, <i>sw</i> -- and <i>c</i> or <i>center</i>. If it is
+# <i>c</i> or <i>center</i> and there are graphics drawn on the item,
+# the label is drawn underneath the item (as though the anchor was
+# <i>s</i>).
+#
+# <dt><b>-graphics</b>
+# <dd>The graphics to draw on the item. This option consists of zero or
+# more item specs, where an item spec is the item type, coordinates, and
+# options. The coordinates are specified as a percentage of the item
+# size. Item specs are separates by newlines or semi-colons.
+#
+# <dt><b>-text</b>
+# <dd>The label of the item. If there are graphics also displayed, the
+# label is placed outside the item; if not, the label is displayed
+# outside the item.  By default, this option is "", which means that
+# nothing is displayed.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
 #
 class ::tycho::LabelledItem {
     inherit ::tycho::Picture
