@@ -26,16 +26,26 @@ $Id$
 
 **************************************************************************/
 
+const char* ComplexArrayState :: type() { return "ComplexArray";}
+
+ComplexArrayState :: ~ComplexArrayState () {
+	// ? no Complex destructor: do we want delete [] val, or delete val?
+	// g++ seems to want delete val
+	delete val;
+}
+
 void ComplexArrayState  :: initialize() {
 
 	Complex buf[MAXLEN];
-	char* specialChars = "*+-/()<,[]";
+	const char* specialChars = "*+-/()<,[]";
 	Tokenizer lexer(initValue,specialChars);
-	double realval;
-	double imagval;
+	double realval = 0;
+	double imagval = 0;
 	int numRepeats;
 
-	delete [nElements] val;
+	// ? no Complex destructor: do we want delete [] val, or delete val?
+	// g++ seems to want delete val
+	delete val;
 	val = 0;
 	nElements = 0;
 
@@ -92,6 +102,7 @@ void ComplexArrayState  :: initialize() {
 	val = new Complex [nElements];	
 	for(i = 0; i < nElements; i++)
 		val[i] = buf[i];
+	return;
 }
 
 ParseToken ComplexArrayState :: evalExpression(Tokenizer& lexer) {
