@@ -53,7 +53,7 @@ void <T>State  :: initialize() {
 
 ParseToken State :: eval<T>Expression(Tokenizer& lexer) {
 	ParseToken t1 = eval<T>Term(lexer);
-	if (t1.tok != T_<T>) return;
+	if (t1.tok != T_<T>) return t1;
 	while (1) {
 		ParseToken t2 = getParseToken(lexer, T_<T>);
 		if (t2.tok == '+' || t2.tok == '-') {
@@ -80,7 +80,7 @@ ParseToken State :: eval<T>Expression(Tokenizer& lexer) {
 
 ParseToken State :: eval<T>Term(Tokenizer& lexer) {
 	ParseToken t1 = eval<T>Factor(lexer);
-	if (t1.tok != T_<T>) return;
+	if (t1.tok != T_<T>) return t1;
 	while (1) {
 		ParseToken t2 = getParseToken(lexer, T_<T>);
 		if (t2.tok == '*' || t2.tok == '/') {
