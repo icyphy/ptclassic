@@ -252,7 +252,12 @@ body ::tycho::Layout::describe {{item {}} {prefix {}}} {
     if { $item == "" } {
 	# Update all coords
 	foreach i [array names _dirty] {
-	    attrset $i -coords [forward coords $i]
+	    set attrs [list -coords [forward coords $i]]
+	    foreach {opt _ _ _ val} [forward itemconfigure $i] {
+		lappend attrs $opt $val
+	    }
+	    eval attrset [list $i] $attrs
+ 	    # puts !$attrs
 	}
     } elseif [info exists _dirty($item)] {
 	attrset $item -coords [forward coords $item]
@@ -364,6 +369,7 @@ body ::tycho::Layout::moverelease {tag} {
 # command in the history if currently recording.
 #
 body ::tycho::Layout::reshape {item x y args} {
+    # puts "reshape $item $x $y $args"
     if ![exists $item] {
         error "Cannot reshape \"$item\""
     }
@@ -382,6 +388,7 @@ body ::tycho::Layout::reshape {item x y args} {
 # the history.
 #
 body ::tycho::Layout::reshapeclick {item x y args} {
+    # puts "reshapeclick $item $x $y $args"
     if ![exists $item] {
         error "Cannot reshape \"$item\""
     }
@@ -401,6 +408,7 @@ body ::tycho::Layout::reshapeclick {item x y args} {
 # the history.
 #
 body ::tycho::Layout::reshapedrag {item x y} {
+    # puts "reshapedrag $item $x $y"
     if ![exists $item] {
         error "Cannot reshape \"$item\""
     }
