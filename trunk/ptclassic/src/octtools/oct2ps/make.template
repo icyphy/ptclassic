@@ -101,11 +101,6 @@ sample-tmp:
 sample2-tmp:
 	cp -r $(VPATH)/sample2 $@
 
-$(BINARY): $(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) \
-		-o $@ \
-		$(LIBS) $(CSYSLIBS) 
-
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
 $(DEST): $(BINARY)
