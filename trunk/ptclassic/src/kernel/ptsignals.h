@@ -54,3 +54,6 @@ extern "C" SIG_PT ptSignal(int, SIG_PT);
 typedef void (*SIG_PT)(int);
 #endif 
 
+#if defined(PT_NT4VC)
+typedef void (*SIG_PT)(int);
+#endif
