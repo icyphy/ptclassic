@@ -189,7 +189,7 @@ class tycho::File {
     #### file variable
     # FIXME: This should be removed when we itk is fixed to understand
     # public variables.
-    protected variable file
+    protected variable file "NoName"
 
     ##########################################################################
     ####                  protected methods and procedures                ####
@@ -405,7 +405,7 @@ body tycho::File::constructor {args} {
     }
     
     $itk_component(helpMenu) add command \
-	    -label "About Ptolemy" \
+	    -label "About Tycho" \
 	    -underline 0 \
 	    -command "StartupMessage [autoName .startupMessage]"
     
@@ -440,6 +440,11 @@ body tycho::File::constructor {args} {
 
     # Identify the object for crash recovery
     set fileObjects($this) $prefix
+
+    # FIXME: Because of some itcl bogosity, filesOpen finds itself
+    # not settable as an array.  Here we force it to be an array
+    # and hope nobody uses the file name here.
+    set filesOpen(junktychofileforitclbogosity) junk
 }
 
 #####################################################################
@@ -486,7 +491,7 @@ body tycho::File::destructor {} {
 # should also call removeBackupFiles after successfully saving the
 # file, but only if the name argument is not given.  This is because the
 # auto-save mechanism uses this same procedure, but passes a name to
-# use to save the file.  Derived classes should also call "markUnModified".
+# use to save the file.  Derived classes should also call "markUnmodified".
 #
 body tycho::File::save {{name ""}} {
     # If the argument is present, this is probably a request to save
@@ -742,6 +747,7 @@ body tycho::File::openContext {filename} {
     if {[info exists filesOpen] && \
 	    [info exists filesOpen($filename)] && \
 	    [winfo exists $filesOpen($filename)]} {
+	wm deiconify $filesOpen($filename)
 	raise $filesOpen($filename)
 	return $filesOpen($filename)
     } {
