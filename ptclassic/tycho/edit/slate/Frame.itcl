@@ -88,6 +88,11 @@ class ::tycho::Frame {
     common surface
 
     common colorObject
+
+    #### Set option defaults
+    set optiondefault(-color)       background
+    set optiondefault(-borderwidth) 2
+    set optiondefault(-relief)      raised
 }
 
 
@@ -159,12 +164,8 @@ body ::tycho::Frame::color {id canvas co} {
 #
 body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
     # Initialize the options
-    if { ! [::info exists color($id)] } {
-	set defaultoptions {-color background -borderwidth 2 -relief raised}
-
-	foreach {option value} [concat $defaultoptions $args] {
-	    set [string trimleft $option -]($id) $value
-	}
+    foreach {option value} [concat [array get optiondefault] $args] {
+	set [string trimleft $option -]($id) $value
     }
 
     # This object is used to get the shades of color
