@@ -221,7 +221,7 @@ body ::tycho::TopLevel::constructor {args} {
     
     # Create a single common instance of the topLevelWindows list.
     if {![info exists topLevelWindows]} {
-	set topLevelWindows [CircularList #auto]
+	set topLevelWindows [::tycho::CircularList #auto]
     }
     
     # Support for switching the focus from one window to the next.
