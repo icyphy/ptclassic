@@ -24,6 +24,7 @@ Date of last revision:
 QSNode::QSNode(SDFStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
 {
 	assignedFlag = 0;
+	preferredProc = 0;
 }
 
 // Alternate constructor for idle nodes and communication nodes
@@ -31,7 +32,7 @@ QSNode::QSNode(SDFStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
 // If type = -1, it is a send node, type = -2 indicates a receive node
 
 QSNode::QSNode(int t) : ParNode(t) {
-	
 	assignedFlag = 0;
+	preferredProc = 0;
 }
 

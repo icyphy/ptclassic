@@ -8,7 +8,7 @@
 
 /*****************************************************************
 Version identification:
-$Id$	
+$Id$
 
 Copyright (c) 1991 The Regents of the University of California.
 			All Rights Reserved.
@@ -40,9 +40,15 @@ public:
 	void setAssignedFlag() { assignedFlag++; }
 	int alreadyAssigned() { return (assignedFlag > 0)? TRUE : FALSE; }
 
+	// get and set the preferredProc
+	int getPreferredProc() { return preferredProc; }
+	void setPreferredProc(int i) { preferredProc = i; }
+
 private:
 	// Indicate whether or not this node has been assigned.
 	int assignedFlag;
+	// preferred proc id.
+	int preferredProc;
 };
 
 #endif
