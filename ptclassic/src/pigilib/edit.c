@@ -407,20 +407,19 @@ long userOptionWord;
 
 /***** End of RpcOpenPalette routines */
 
-
 int 
 RpcEditComment(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Comment", 1, 80, NULL, NULL};
-    char *comment;
     octObject facet, obj;
     vemStatus status;
+    char facetHandle[16];
 
     ViInit("edit-comment");
     ErrClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
@@ -438,22 +437,17 @@ long userOptionWord;
 	*/
 	obj = facet;
     }
-
     /* At this point, obj is either an instance or the facet */
-    if (!GetCommentProp(&obj, &comment)) {
-	PrintErr(ErrGet());
-        ViDone();
-    }
-    item.value = (comment == NULL) ? "" : comment;
-    if (dmMultiText("Edit Comment", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-        ViDone();
-    }
-    if (!SetCommentProp(&obj, item.value)) {
-	PrintErr(ErrGet());
-        ViDone();
-    }
+    ptkOctObj2Handle(&obj,facetHandle);
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
+		   " \"Edit Comment\" ",
+                   " \"ptkSetComment ", facetHandle, " %s \" ",
+                   " \"Comment [ptkGetComment ", facetHandle, "]\" ",
+                   (char *)NULL) )
+
     ViDone();
+
 }
 
 int
