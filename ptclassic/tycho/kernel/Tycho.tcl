@@ -285,15 +285,17 @@ uplevel #0 {
     # Source the preference manager and the default preferences.
     # Might as well source needed files first
     source [file join $tychokernel Path.tcl]
-    source [file join $tychokernel Object.itcl]
-    source [file join $tychokernel Interchange.itcl]
-    source [file join $tychokernel OldModel.itcl]
-    source [file join $tychokernel WidgetPreferences.itcl]
-    ::tycho::_announce "Handled preferences"
 
-    # More files that we are going to need right away, so there
-    # is no point in deferring them to auto-loading.
     source [file join $tychokernel Uninstantiable.itcl]
+    source [file join $tychokernel Registry.itcl]
+
+    source [file join $tychokernel Object.itcl]
+    source [file join $tychokernel Model.itcl]
+    source [file join $tychokernel DataModel.itcl]
+    source [file join $tychokernel StyleSheet.itcl]
+    source [file join $tychokernel UserProfile.itcl]
+
+    ::tycho::_announce "Handled preferences"
 }
 if [info exists tk_version] {
     uplevel #0 {
@@ -404,8 +406,8 @@ if {![info exists TychoVersionInfo]} {
 # under the help button.
 #
 if { [info exists tk_version] && $tychoWelcomeWindow \
-    && [::tycho::preference get misc welcomeWindow] \
-    && ! [::tycho::preference get misc slowNetwork] } {
+    && [::tycho::stylesheet get interaction welcomeWindow] \
+    && ! [::tycho::stylesheet get system slowNetwork] } {
     ::tycho::_announce "About to create a welcome message"
     # Don't source ButtonBox here, tycho foo.html will fail
     # uplevel #0 {
@@ -427,7 +429,7 @@ if [info exists tk_version] {
 # FIXME: if the user starts with slowNetwork==1 and then sets it to 0
 # then we don't adjust the insertOffTime.  A fix might be to have
 # some sort of callback in the preference manager.
-if {[info exists tk_version] && [::tycho::preference get misc slowNetwork]} {
+if {[info exists tk_version] && [::tycho::stylesheet get system slowNetwork]} {
     option add *insertOffTime 0
 }
 
