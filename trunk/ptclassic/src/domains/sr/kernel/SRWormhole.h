@@ -46,9 +46,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
   @Description This wormhole makes other universes appear as strict SR
   stars (i.e., all of their inputs must be known before the go()
-  method is called).
+  method is called).  Moreover, go() is called exactly once in an instant. <P>
 
-  <P>
+  Present values send tokens, absent or unknown values send nothing.
+  Arriving tokens make a present value.  The absence of an arriving token
+  makes an absent value.  <P>
 
   Defining a wormhole amounts to defining three classes:
 
@@ -238,7 +240,10 @@ protected:
 
   Conversion from data in the SR domain to the Universal Event Horizon
 
-  @Description This can be on the inside or outside of a wormhole.
+  @Description This can be on the inside or outside of a wormhole. <P>
+
+  Only present particles are transferred.  When the SR channel is absent
+  or unknown, no particle is transferred.
 
 **********************************************************************/
 class SRtoUniversal : public ToEventHorizon, public InSRPort {
@@ -269,7 +274,10 @@ public:
 
   Conversion from data in a Universal Event Horizon to the SR domain
 
-  @Description This can be on the inside or outside of a wormhole.
+  @Description This can be on the inside or outside of a wormhole. <P>
+
+  When a token arrives, the port has that present particle.  When no
+  token has arrived, the port has absent.
 
 **********************************************************************/
 class SRfromUniversal : public FromEventHorizon, public OutSRPort {
