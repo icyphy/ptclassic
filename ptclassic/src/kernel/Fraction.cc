@@ -112,6 +112,8 @@ This is implemented as a constructor for GcdLcm.
 
 */
 
+inline int abs(int x) { return x >= 0 ? x : -x; }
+
 GcdLcm::GcdLcm(const Fraction& f)
 {
 	// initialize the matrix to the identity
