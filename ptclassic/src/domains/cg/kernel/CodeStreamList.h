@@ -58,6 +58,7 @@ public:
 
 class CodeStreamList : public BaseCodeStreamList {
 public:
+        CodeStreamList() {}
 	~CodeStreamList() { deleteStreams(); }
 
         // Remove a CodeStream from the list. "name" is not optional.
