@@ -1,4 +1,4 @@
->##########################################################################
+##########################################################################
 # Version: $Id$
 # Author: John Reekie
 #
@@ -87,7 +87,7 @@ class ::tycho::SlateView {
     method moverelease {tag x y}
 
     # Get or set the name of an item given its id
-    method  { {id {name {}}}
+    method name {id {name {}}}
 
     # Handle change notification from the layout model
     method notify {method args}
