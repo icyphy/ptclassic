@@ -39,7 +39,7 @@ static const char file_id[] = "$RCSfile$";
 #include "type.h"
 #include "compat.h"
 
-#if !defined(PTSOL2_4) && !defined(PTSOL2_5)
+#if !defined(PTSOL2_4) && !defined(PTSOL2_5) && !defined(PTHPUX10)
 extern "C" int gettimeofday(timeval *, struct timezone *);
 #endif
 
