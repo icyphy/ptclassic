@@ -20,12 +20,11 @@ $Id$
 #include "ProcMemory.h"
 #include "UserOutput.h"
 
-int AsmTarget::setup(Galaxy& g) {
+int AsmTarget::decideBufSize(Galaxy& g) {
 // clear the memory
 	if (mem == 0) return FALSE;
 	mem->reset();
-// initialize proc ptrs and create schedule
-	if (!Target::setup(g)) return FALSE;
+
 	GalStarIter nextStar(g);
 // request memory, using the Target, for all stars in the galaxy.
 // note that allocReq just posts requests; performAllocation processes
@@ -35,12 +34,18 @@ int AsmTarget::setup(Galaxy& g) {
 		if (!allocReq(*s)) return FALSE;
 	}
 	if (!mem->performAllocation()) return FALSE;
-// initialize the porthole offsets, and do all initCode methods.
-	nextStar.reset();
+	return TRUE;
+}
+
+int AsmTarget :: codeGenInit(Galaxy& g) {
+
+	// initialize the porthole offsets, and do all initCode methods.
+	GalStarIter nextStar(g);
+	AsmStar* s;
 	while ((s = (AsmStar*)nextStar++) != 0) {
-		AsmStarPortIter next(*s);
+		BlockPortIter next(*s);
 		AsmPortHole* p;
-		while ((p = next++) != 0) {
+		while ((p = (AsmPortHole*) next++) != 0) {
 			if (!p->initOffset()) return FALSE;
 		}
 		doInitialization(*s);

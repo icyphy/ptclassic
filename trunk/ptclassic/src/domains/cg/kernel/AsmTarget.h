@@ -28,6 +28,12 @@ private:
 protected:
 	ProcMemory* mem;
 
+	// redefine buffer assignment
+	int decideBufSize(Galaxy&);
+
+	// redefine init routine for code generation
+	int codeGenInit(Galaxy&);
+
 	// Request memory for all structures in a Star
 	int allocReq(AsmStar&);
 
@@ -39,10 +45,6 @@ public:
 		CGTarget(nam,stype,desc), mem(m) {}
 
 	Block* clone() const = 0;
-
-	// Initialize proc. pointers and create the schedule.
-	// Then allocate memory for all stars.
-	int setup(Galaxy&);
 
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
