@@ -20,14 +20,8 @@ Check to make sure we don't write past unallocated memory.
 	hinclude { "GrayImage.h", "Error.h" }
 
 // INPUT AND STATES.
-	input {
-		name { input }
-		type { packet }
-	}
-	output {
-		name { outData }
-		type { packet }
-	}
+	input { name { input } type { message } }
+	output { name { outData } type { message } }
 	defstate {
 		name { meanVal }
 		type { int }
@@ -86,12 +80,12 @@ Check to make sure we don't write past unallocated memory.
 
 	go {
 // Read input.
-		Packet inPkt;
-		(input%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt,"GrayImage");
+		Envelope inEnvp;
+		(input%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "GrayImage");
 
 // Do processing and send out.
-		GrayImage* inImage = (GrayImage*) inPkt.writableCopy();
+		GrayImage* inImage = (GrayImage*) inEnvp.writableCopy();
 		if (inImage->fragmented()) {
 			delete inImage;
 			Error::abortRun(*this,
@@ -99,7 +93,6 @@ Check to make sure we don't write past unallocated memory.
 			return;
 		}
 		invRunLen(inImage);
-		Packet outPkt(*inImage);
-		outData%0 << outPkt;
+		Envelope outEnvp(*inImage); outData%0 << outEnvp;
 	}
 } // end defstar { RunLenInv }

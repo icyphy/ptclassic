@@ -24,9 +24,9 @@ NOTE!! This differs from the SDFRunLen star in that this block
 processes DCTImages, not GrayImages.
 	}
 
-	input	{	name { inport }	type { packet } }
-	output	{	name { hiport }	type { packet } }
-	output	{	name { loport }	type { packet } }
+	input	{	name { inport }	type { message } }
+	output	{	name { hiport }	type { message } }
+	output	{	name { loport }	type { message } }
 	output	{	name { compr }	type { float } }
 
 	defstate {
@@ -142,12 +142,12 @@ processes DCTImages, not GrayImages.
 
 	go {
 // Read input.
-		Packet inPkt;
-		(inport%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt, "DCTImage");
+		Envelope inEnvp;
+		(inport%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "DCTImage");
 
 // Do processing and send out.
-		DCTImage* dcImage = (DCTImage*) inPkt.writableCopy();
+		DCTImage* dcImage = (DCTImage*) inEnvp.writableCopy();
 		if (dcImage->fragmented() || dcImage->processed()) {
 			LOG_DEL; delete dcImage;
 			Error::abortRun(*this,
@@ -163,7 +163,7 @@ processes DCTImages, not GrayImages.
 		comprRatio /= dcImage->fullHeight();
 		compr%0 << comprRatio;
 
-		Packet dcPkt(*dcImage); hiport%0 << dcPkt;
-		Packet acPkt(*acImage); loport%0 << acPkt;
+		Envelope dcEnvp(*dcImage); hiport%0 << dcEnvp;
+		Envelope acEnvp(*acImage); loport%0 << acEnvp;
 	} // end go{}
 } // end defstar { DctCode }

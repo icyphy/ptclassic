@@ -8,7 +8,7 @@ defstar {
 	location	{ SDF image library }
 	desc {
 Read a sequence of PGM-format images from different files and
-send them out in Packets (with data of type GrayImage).
+send them out in Envelopes (containing data of type GrayImage).
 
 If present, the character '#' in the 'fileName' state is replaced with
 the frame number to be read next. For example, if the 'frameId' state is
@@ -24,10 +24,7 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 	ccinclude { "GrayImage.h", <std.h>, <stdio.h> }
 
 //////// OUTPUTS AND STATES.
-	output {
-		name { output }
-		type { packet }
-	}
+	output { name { output } type { message } }
 
 	defstate {
 		name	{ fileName }
@@ -116,7 +113,6 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 		frameId = int(frameId) + 1; // increment frame id
 
 // Write the new frame to output...
-		Packet pkt(*imgData);
-		output%0 << pkt;
+		Envelope envp(*imgData); output%0 << envp;
 	} // end go{}
 } // end defstar{ ReadImage }

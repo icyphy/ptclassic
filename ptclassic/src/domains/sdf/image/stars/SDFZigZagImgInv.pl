@@ -10,8 +10,8 @@ This star inverse zig-zag scans a DCTImage.
 }
 	seealso { ZigZag }
 
-	input	{ name	{ inport }	type { packet } }
-	output	{ name	{ outport }	type { packet } }
+	input	{ name	{ inport }	type { message } }
+	output	{ name	{ outport }	type { message } }
 
 	hinclude { "DCTImage.h", "Error.h" }
 
@@ -107,10 +107,10 @@ This star inverse zig-zag scans a DCTImage.
 
 
 	go {
-		Packet inPkt;
-		(inport%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt, "DCTImage");
-		DCTImage* image = (DCTImage*) inPkt.writableCopy();
+		Envelope inEnvp;
+		(inport%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "DCTImage");
+		DCTImage* image = (DCTImage*) inEnvp.writableCopy();
 
 		if(image->fragmented() || image->processed()) {
 			LOG_DEL; delete image;
@@ -118,7 +118,6 @@ This star inverse zig-zag scans a DCTImage.
 			return;
 		}
 		invZigZag(*image);
-		Packet temp(*image);
-		outport%0 << temp;
+		Envelope temp(*image); outport%0 << temp;
 	}
 } // end defstar{ ZigZagInv }

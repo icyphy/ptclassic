@@ -7,7 +7,7 @@ defstar {
 	location	{ SDF image library }
 	desc {
 Accept three ColorImages (Red, Green, and Blue) from three input
-packets, and generate a PPM format color image file. Send the filename
+GrayImages and generate a PPM format color image file. Send the filename
 to a user-specified command (by default, "xv" is used).
 
 The user can set the root filename of the displayed image (which will
@@ -28,18 +28,9 @@ to produce the full filename of the displayed image.
 	}
 
 // INPUT AND STATES.
-	input {
-		name { rinput }
-		type { packet }
-	}
-	input {
-		name { ginput }
-		type { packet }
-	}
-	input {
-		name { binput }
-		type { packet }
-	}
+	input { name { rinput } type { message } }
+	input { name { ginput } type { message } }
+	input { name { binput } type { message } }
 
 	defstate {
 		name { command }
@@ -63,16 +54,16 @@ to produce the full filename of the displayed image.
 
 	go {
 // Read data from input.
-		Packet rpkt, gpkt, bpkt;
-		(rinput%0).getPacket(rpkt);
-		TYPE_CHECK(rpkt,"GrayImage");
-		(ginput%0).getPacket(gpkt);
-		TYPE_CHECK(gpkt,"GrayImage");
-		(binput%0).getPacket(bpkt);
-		TYPE_CHECK(bpkt,"GrayImage");
-		const GrayImage* imgR = (const GrayImage*) rpkt.myData();
-		const GrayImage* imgG = (const GrayImage*) gpkt.myData();
-		const GrayImage* imgB = (const GrayImage*) bpkt.myData();
+		Envelope renvp, genvp, benvp;
+		(rinput%0).getMessage(renvp);
+		TYPE_CHECK(renvp, "GrayImage");
+		(ginput%0).getMessage(genvp);
+		TYPE_CHECK(genvp, "GrayImage");
+		(binput%0).getMessage(benvp);
+		TYPE_CHECK(benvp, "GrayImage");
+		const GrayImage* imgR = (const GrayImage*) renvp.myData();
+		const GrayImage* imgG = (const GrayImage*) genvp.myData();
+		const GrayImage* imgB = (const GrayImage*) benvp.myData();
 		if (imgR->fragmented() || imgR->processed() ||
 				imgG->fragmented() || imgG->processed() ||
 				imgB->fragmented() || imgB->processed()) {
