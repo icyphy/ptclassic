@@ -86,7 +86,7 @@ body ::tycho::CTSimulation::startServer {} {
     $anotherFreakingDirector setSolverOrder 4
     $system setDirector $anotherFreakingDirector
 
-    set director [$system getExecutiveDirector]
+    set director [$system getDirector]
     setSystem $system
     setDirector $director
 }
