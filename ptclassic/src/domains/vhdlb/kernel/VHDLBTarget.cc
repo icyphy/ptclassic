@@ -611,6 +611,10 @@ extern int warnIfNotConnected (Galaxy&);
 void VHDLBTarget :: setup () {
 
   Galaxy* gal = galaxy();
+  if (! gal) {
+    Error::abortRun("The VHDLB target cannot find a galaxy.");
+    return;
+  }
   if (warnIfNotConnected(*gal)) return;
 
   codeGenInit();
