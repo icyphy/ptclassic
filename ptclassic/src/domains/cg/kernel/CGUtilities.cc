@@ -31,6 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Misc CG routines.
  
 *******************************************************************/
+#include <stdio.h>		// Pick up decl for pclose().
 #include "pt_fstream.h"
 #include "CGUtilities.h"
 #include "StringList.h"
