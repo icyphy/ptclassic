@@ -120,7 +120,7 @@ struct octPoint boxTranslates[] = {
 
 static octObject *facetPtr, wiringLayer;
 static octObject floatColorLayer, intColorLayer, complexColorLayer,
-		 anytypeColorLayer;
+		 anytypeColorLayer, packetColorLayer;
 
 /* MkTermInit 7/28/89 8/6/88 8/27/88
 Call this first.
@@ -134,6 +134,7 @@ octObject *CurrentFacetPtr;
     CK_OCT(ohGetOrCreateLayer(facetPtr, &intColorLayer, "intColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &complexColorLayer, "complexColor"));
     CK_OCT(ohGetOrCreateLayer(facetPtr, &anytypeColorLayer, "anytypeColor")); 
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &packetColorLayer, "packetColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
     return(TRUE);
 }
@@ -209,8 +210,12 @@ enum Position_e position;
 	layerPtr = &complexColorLayer;
     } else if (strcmp(type, "anytype") == 0 || strcmp(type, "ANYTYPE") == 0) {
 	layerPtr = &anytypeColorLayer;
+    } else if (strcmp(type, "packet") == 0 || strcmp(type, "PACKET") == 0) {
+	layerPtr = &packetColorLayer;
     } else {
-	/* print error message, unknown datatype */ ;
+	/* print error message, unknown datatype */
+	ErrAdd("Unknown datatype for terminal");
+	return FALSE;
     }
     ERR_IF1(!PutShape(layerPtr, &dummy, &pathShapes[(int) position],
 	&noTranslate));
@@ -221,9 +226,6 @@ enum Position_e position;
     ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, 
 	&boxTranslates[(int) position]));
     if (multiple) {
-/* this is obsolete now (eeg 8/27/89)
-	(void) ohCreatePropStr(&term, &dummy, "multiple", "");
-*/
 	if (input) {
 	    /* multiple input: add arrow to the right */
 	    arrowTranslate.x = boxTranslates[(int) position].x + (octCoord) 5;
@@ -233,10 +235,6 @@ enum Position_e position;
         }
         arrowTranslate.y = boxTranslates[(int) position].y;
         ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &arrowTranslate));
-    } else {
-/* this is obsolete now (eeg 8/27/89)
-	(void) ohCreatePropStr(&term, &dummy, "single", "");
-*/
     }
     if (input) {
 	(void) ohCreatePropStr(&term, &dummy, "input", "");
