@@ -30,10 +30,18 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+if ![info exists TYCHO] {
+    if [info exist env(PTOLEMY)] {
+	set TYCHO $env(PTOLEMY)/tycho
+    }
+    if [info exist env(TYCHO)] {
+	set TYCHO $env(TYCHO)
+    }
+}
 if {[string compare test [info procs test]] == 1} then { 
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
-source [file join $TYCHO kernel Path.tcl]
+source [file join $TYCHO kernel basic Path.tcl]
 
 
 test Path-1.1 { Check out files in the current dir vs. paths with env vars} {
@@ -168,16 +176,8 @@ test Path-4.1 {Test out relativePath} {
 	    [file join a b .. c]] \
 	    [file join a b .. c]]
 
-    # If this test fails, then it is probably because
-    # $TYCHO/editors/visedit/doc/codeDoc/EditForest.html does not exist.
-    set r11 [testEq [::tycho::relativePath \
-	    \$TYCHO/typt/editors/doc/codeDoc \
-	    \$TYCHO/editors/visedit/doc/codeDoc/EditForest.html] \
-	    [file join .. .. .. .. editors visedit doc codeDoc \
-	    EditForest.html]]
-
-    list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10 $r11
-} {1 1 . .. 1 e 1 1 1 1 1}
+    list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10
+} {1 1 . .. 1 e 1 1 1 1}
 
 test Path-5.1 {Test out pathEnvSearch} {
     set isexecutable [file executable [::tycho::pathEnvSearch itclsh]]
@@ -289,14 +289,15 @@ foreach {c t} {
 #### ::tycho::egrep
 #
 test Path-9.1 {Test out egrep -i and -nocase} {
-    set a [::tycho::egrep -i Author *.tcl makefile]
+    set a [::tycho::egrep -i Author *.itcl makefile]
     update
-    set b [::tycho::egrep -nocase Author *.tcl makefile]
+    set b [::tycho::egrep -nocase Author *.itcl makefile]
     update
-    set c [::tycho::egrep -nocase author *.tcl makefile]
+    set c [::tycho::egrep -nocase author *.itcl makefile]
     update
-    set d [::tycho::egrep Author *.tcl makefile]
-    list [expr {$a == $b}] [expr {$a == $c}] [expr {$a == $d}]
-} {1 1 0}
+    set d [::tycho::egrep author *.itcl makefile]
+    set e [::tycho::egrep author *.notafile makefile ]
+    list [expr {$a == $b}] [expr {$a == $c}] [expr {$a == $d}] $e
+} {1 1 0 {}}
 
 
