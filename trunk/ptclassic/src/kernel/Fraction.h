@@ -20,6 +20,9 @@
  assignment operators, and to work around some g++ bugs.
 
 */
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "StringList.h"
 
