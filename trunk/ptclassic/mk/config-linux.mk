@@ -32,59 +32,54 @@
 # 		Dirk Forchel (df2@inf.tu-dresden.de)
 #               Wolfgang Reimer (reimer@e-technik.tu-ilmenau.de)
 
-#
-# --------------------------------------------------------------------
-# |  Please note that Linux is moving to the ELF object file format, |
-# |  but only some new distributions support it as of May 8,1995     |
-# |  e.g.the Slackware distribution up to 2.2 does NOT support ELF   |
-# --------------------------------------------------------------------
-# Answer 'yes' if you have installed ELF tools (libc 5.0.x, binutils
-#	2.5.2l.xx, libg++-2.6.2.4, ELF gcc 2.6.3 or later), even if
-#	you compile in a.out format !
-#
-HAVE_ELF=yes
-#
-# We use ELF.
-#
-USE_ELF=yes
-#
-# We use a.out.
-#USE_ELF=no
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-include $(ROOT)/mk/config-g++.mk
+PT_GPP_V := $(shell g++ --version)
+ifeq ("$(findstring egcs,$(PT_GPP_V))","")
+    # This is GNU g++.
+    include $(ROOT)/mk/config-g++.mk
+else
+    # This is egcs.
+    include $(ROOT)/mk/config-egcs.mk
+    PT_EGCS = yes
+    # The current versions (1.0.2 and 1.0.3a) of egcs cannot compile
+    # the file DEWiNeS_Tcl_Animation.cc with -O2 or higher. So we can 
+    # check for this error in a makefile.
+    PT_EGCS_OPT_ERROR = yes
+endif
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
 ifndef BUILD_STATIC_BINARIES
-include $(ROOT)/mk/config-g++.shared.mk
+    include $(ROOT)/mk/config-g++.shared.mk
 endif
 
 #
 # Programs to use
 #
-RANLIB = 	ranlib
-# Use gcc everywhere including in octtools
-CC =		gcc
+RANLIB = ranlib
 
-#
-# Programs to use - override previous definitions
-#
-ifeq ($(HAVE_ELF),yes)
-ifeq ($(USE_ELF),yes)
-DLLIB	=	-ldl
-else
-AS	=	/usr/i486-linuxaout/bin/as
-LD	=	/usr/i486-linuxaout/bin/ld -m i386linux
-CC	=	gcc -b i486-linuxaout
-OCT_CC	=	gcc -b i486-linuxaout -fwritable-strings
-CPLUSPLUS = 	g++ -b i486-linuxaout
+# Use gcc everywhere including in octtools
+CC = gcc
+
+ifeq ($(PT_EGCS),yes)
+    PT_GCC_V := $(shell gcc --version)
+    ifneq ("$(PT_GPP_V)","$(PT_GCC_V)")
+        # We want to use the same compiler version (egcs) for c and c++
+	# files. RH5.1 comes with egcs-1.0.2 (named g++) as c++ compiler
+	# and two c compilers: the old gcc-2.7.2.3 (named gcc) end
+	# egcs-1.0.2 (named egcs). 
+	CC = egcs
+        OCT_CC = egcs -fwritable-strings
+    endif
 endif
-endif
+
+# for dynamic loading
+DLLIB = -ldl
 
 # where the Gnu library is
 # GNULIB = $(PTOLEMY)/gnu/$(PTARCH)/lib
@@ -94,16 +89,16 @@ GNULIB = /usr/lib
 LINKER = $(CPLUSPLUS)
 
 ifeq ($(USE_SHARED_LIBS),yes)
-# Use Position Independent Code to build shared libraries
-C_SHAREDFLAGS =         -fpic
-CC_SHAREDFLAGS =        -fpic
-RANLIB =		true
+    # Use Position Independent Code to build shared libraries
+    C_SHAREDFLAGS = -fpic
+    CC_SHAREDFLAGS = -fpic
+    RANLIB = true
 else
-SHARED_COMPILERDIR = $(GNULIB)
-SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
-INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
-SHARED_LIBRARY_PATH = $(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
-SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
+    SHARED_COMPILERDIR = $(GNULIB)
+    SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
+    INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
+    SHARED_LIBRARY_PATH = $(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+    SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
 endif
 
 # Command to build C++ shared libraries
@@ -136,20 +131,28 @@ BISONFLEXLIB =	-fl
 #	Don't use -pipe, it makes life worse on small-memory systems.
 #	Don't use -m486, it's the default, except for those with the
 #	Pentium optimized compiler; for them -m486 makes things worse.
-#OPTIMIZER =	-g #-m486 -pipe
-OPTIMIZER =	-g -O3 #-fomit-frame-pointer -malign-loops=4 -malign-jumps=4 -malign-functions=4 #-m486 -pipe
+#OPTIMIZER =	-m486 -pipe
+ifeq ($(PT_EGCS),yes)
+    OPTIMIZER =	-O3 -march=pentiumpro -fomit-frame-pointer# -pipe
+else
+    OPTIMIZER =	-O3 -fomit-frame-pointer# -pipe
+endif
 
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
-# you will need -DI_UNISTD for rman to find the declaration of getopt()
-# need _GNU_SOURCE for environ decl in glibc2
-ARCHFLAGS =	-Dlinux -DI_UNISTD -D_REENTRANT -D_PTHREAD_1003_1c
-# Comment out the -g below if you don't want debugging symbols 
-LOCALCCFLAGS =	-g
+WARNINGS =	-Wall -Wcast-align -Wsynth# -Wcast-qual 
+
+# need _REENTRANT to get thread aware code
+ARCHFLAGS =	-Dlinux -D_REENTRANT
+
+# need _PTHREAD_1003_1c for PosixThread.cc to conform with POSIX 1003.1c
+# need EXTRAOPTS for pigiLoader.cc to compile user stars with same optimization
+LOCALCCFLAGS =  -D_PTHREAD_1003_1c -DEXTRAOPTS="\"$(OPTIMIZER) -fpic\""
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
-LOCALCFLAGS = 
+
+# need -DI_UNISTD for rman to find the declaration of getopt()
+LOCALCFLAGS =   -DI_UNISTD
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
@@ -161,8 +164,9 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm $(DLLIB) #-lieee
 
 # system libraries (libraries from the environment)
-# This line may need to be commented out for egcs
-SYSLIBS=$(CSYSLIBS) -lg++
+# we don't need -lg++: old GNU g++ links with -lg++ automatically and
+# egcs does not need libg++ any longer.
+SYSLIBS=$(CSYSLIBS) #-lg++
 
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
@@ -223,26 +227,25 @@ MATARCH = lnx86
 # If you have MATLAB then you can set the environment variable MATLABDIR
 # to the MATLAB root directory.
 ifdef MATLABDIR
-# Check if MATLABDIR points to a MATLAB directory
-# MATLAB 4 has a static libmat.a whereas MATLAB 5 has a DLL libmat.so 
-INCLUDE_MATLAB := $(shell \
+    # Check if MATLABDIR points to a MATLAB directory
+    # MATLAB 4 has a static libmat.a whereas MATLAB 5 has a DLL libmat.so 
+    INCLUDE_MATLAB := $(shell \
 	if [ -r "$(MATLABDIR)/extern/lib/$(MATARCH)/libmat.a" -o -r "$(MATLABDIR)/extern/lib/$(MATARCH)/libmat.so" ]; \
 	then echo yes; else echo no; echo \
-+	'Warning: $$MATLABDIR is not a MATLAB root dir! Ignoring setting.' \
+	'Warning: $$MATLABDIR is not a MATLAB root dir! Ignoring setting.' \
 	>&2; fi)
 else
-INCLUDE_MATLAB = no
+    INCLUDE_MATLAB = no
 endif
 # Shared library option to search MATLAB's Linux DLLs
-MATLABEXTRAOPTS=-Wl,-R,$(MATLABDIR)/sys/$(MATARCH)
+MATLABEXTRAOPTS = -Wl,-R,$(MATLABDIR)/sys/$(MATARCH)
 
-# If you have Mathematica 2 then you can set the environment variable
-# MATHEMATICADIR to the Mathematica 2 root directory. Ptolemy won't link
-# with Mathematica 3 interface library
+# If you have Mathematica then you can set the environment variable
+# MATHEMATICADIR to the Mathematica root directory.
 ifdef MATHEMATICADIR
-# FIXME: One should check if MATHEMATICADIR points to a Mathematica 2 directory
-INCLUDE_MATHEMATICA = yes
+    # FIXME: One should check if MATHEMATICADIR points to the right location
+    INCLUDE_MATHEMATICA = yes
 else
-INCLUDE_MATHEMATICA = no
+    INCLUDE_MATHEMATICA = no
 endif
 INCLUDE_PN_DOMAIN = no
