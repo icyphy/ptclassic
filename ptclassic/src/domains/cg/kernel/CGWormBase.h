@@ -54,76 +54,18 @@ domain inside, further modification is required.
 
 class CGWormBase : public Wormhole {
 public:
-	void setup();
-
 	// Constructor
 	CGWormBase(Star& s, Galaxy& g, Target* t = 0);
-	~CGWormBase();
-
-	// display the schedules of the CGDDFWormholes.
-	StringList displaySchedule();
 
 	// return TRUE if inside domain is a code generation domain.
-    	int isCGinside() {
-	    return myTarget()->isA("CGTarget") &&
-		!myTarget()->isA("CGDDFTarget");
+    	int isCGinside() { 
+	    return myTarget()->isA("CGTarget");
 	}
-
-/*******  methods for parallel scheduler. ********/
-
-        // return the profile when "pNum" processors are assigned.
-        Profile* getProfile(int pNum); 
-
-	// setup the profile structure before scheduling
-	void setupProfile(int n);
-
-        // set the "numProcs" member and initialize Profiles.
-        void assignProcs(int num);
-
-        // compute the optimal profile with the given number of processors.
-        void computeProfile(int num, int resWork, IntArray* avail);
-
-	// return the profile after scheduling manually the inside domain
-	// The argument is the repetition number of the wormhole.
-	Profile* manualSchedule(int);
-
-	// final schedule of the inside domain of the wormhole.
-	int insideSchedule();
-
-	// down-load the code for the processor based on the invocation number
-	// and the profile index.
-	void downLoadCode(int, int);
-
-protected: 
-	// set outer target
-	void setOuterTarget(Target* tp) { outerTarget = tp; }
-
-	// profile
-	Profile* myProfile;
-
-	// execution time
-	int execTime;
-
-	// myself
-	CGWormBase* selfWorm;
-
-private:
-        // The total number of processors  in the system.
-        int numProcs;
-	int prevNum;
-
-	// The final optimal number of assigned processors to inside
-	// CG domain.
-	int optNum;
-
-	// multi target indicator
-	MultiTarget* mtarget;
-
-	// outer target
-	Target* outerTarget;
-
-	// Domains to be supported
-	StringList supportedDomains;
+protected:
+        // execution time
+        int execTime;
+        // myself
+        CGWormBase* selfWorm;
 };
 
 #endif
