@@ -73,8 +73,11 @@ protected:
 	int assignManually() { return mtarget->assignManually(); }
 	int overrideSchedule() { return mtarget->overrideSchedule(); }
 
-	// redefine "run once"
-	void runOnce();
+	// redefine "compileRun"
+	void compileRun();
+
+	// old version of runOnce();
+	void oldRun();
 
 	// use a modified critical path algorithm to schedule the graphs
 	// with given number of processors.
@@ -88,7 +91,7 @@ public:
   	ParScheduler(BaseMultiTarget* t, const char* log = 0) : mtarget(t),
 		logFile(log), exGraph(0) { inUniv = TRUE; }
 
-	virtual ~ParScheduler() {}
+	virtual ~ParScheduler();
 
 	// reset the flag; to be called inside a wormhole.
 	void ofWorm() { inUniv = FALSE; }
@@ -103,7 +106,7 @@ public:
 	ParProcessors* myProcs() { return parProcs; }
 
 	// create subGals for each processor
-	virtual void createSubGals();
+	virtual int createSubGals();
 
 	// set up processors
 	virtual void setUpProcs(int num);
