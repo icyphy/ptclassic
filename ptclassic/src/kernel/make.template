@@ -37,19 +37,24 @@ HELPDIR=~ptolemy/lib
 LIB=libptolemy.a
 
 # Library sources
-LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
+LIBCCSRCS=AutoForkNode.cc \
+ Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  Fraction.cc Galaxy.cc Domain.cc Linker.cc DataStruct.cc checkConnect.cc \
  InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc expandPath.cc Wormhole.cc WormConnect.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc Display.cc gnulib3a.c
+ KnownState.cc State.cc StringState.cc Display.cc Geodesic.cc
 
+LIBCSRCS=gnulib3a.c
+
+LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 # All sources.
 SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
-HDRS= Block.h CircularBuffer.h ComplexSubset.h Connect.h DataStruct.h \
+HDRS= AutoForkNode.h \
+ Block.h CircularBuffer.h ComplexSubset.h Connect.h DataStruct.h \
  Display.h Domain.h Fraction.h Galaxy.h Geodesic.h InterpGalaxy.h \
  Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h NamedObj.h \
  Output.h Particle.h ParticleStack.h Plasma.h PriorityQueue.h \
@@ -59,14 +64,7 @@ HDRS= Block.h CircularBuffer.h ComplexSubset.h Connect.h DataStruct.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h 
 
 # Library objects
-LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o \
- InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
- PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
- expandPath.o Wormhole.o WormConnect.o Domain.o Linker.o DataStruct.o \
- checkConnect.o gnulib3a.o \
- Display.o \
- FloatState.o IntState.o KnownState.o State.o StringState.o \
- FloatArrayState.o IntArrayState.o
+LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
 
 all:	makefile $(LIB) interpmain.o
 
