@@ -118,7 +118,7 @@ ddsData data;			/* Should be (dmComposite *)      */
 #endif /* FOCUS */
 	item->overallTable =
 	  XtCreateManagedWidget(DDS_OVERALL_NAME, tableWidgetClass,
-				item->top_info->top_shell, (ArgList *) 0, 0);
+				item->top_info->top_shell, (ArgList) 0, 0);
 	dds_add_cursor_widget(item->overallTable, XtNcursor);
 	return fill_composite(item, data);
     } else {
@@ -126,6 +126,7 @@ ddsData data;			/* Should be (dmComposite *)      */
 		 "The parent of DDS_TOP components must be of type DDS_INITIALIZE"); 
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -153,7 +154,7 @@ ddsData data;			/* Should be (dmComposite *)      */
 	pw = (*parent->base.class->_dds_parent_widget)(parent, same);
 	item->overallTable =
 	  XtCreateManagedWidget(DDS_OVERALL_NAME, tableWidgetClass, pw,
-				(ArgList *) 0, 0);
+				(ArgList) 0, 0);
 	(*parent->base.class->_dds_place)(parent, same, 1,
 					  &item->overallTable, 1);
 	dds_add_cursor_widget(item->overallTable, XtNcursor);
@@ -163,6 +164,7 @@ ddsData data;			/* Should be (dmComposite *)      */
 		 "The parent of DDS_COMPOSITE components must be of type DDS_TOP or DDS_COMPOSITE"); 
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -196,13 +198,13 @@ ddsData data;			/* (ddsComposite *)         */
     item->bodyTable =
       XtCreateManagedWidget(DDS_BODY_NAME, tableWidgetClass,
 			    item->overallTable,
-			    (ArgList *) 0, 0);
+			    (ArgList) 0, 0);
     XtTblPosition(item->bodyTable, 0, this_row);
     this_row++;
     item->controlTable =
       XtCreateManagedWidget(DDS_CONTROL_NAME, tableWidgetClass,
 			    item->overallTable,
-			    (ArgList *) 0, 0);
+			    (ArgList) 0, 0);
     XtTblConfig(item->controlTable, 0, this_row, 1, 1, TBL_SM_HEIGHT);
     item->cur_row = 0;
     item->cur_col = 0;
