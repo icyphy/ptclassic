@@ -1,7 +1,7 @@
 # Control the fonts in the Tycho system.
 #
 # @Author: Edward A. Lee, John Reekie
-# @Version: $Id$
+# @Version: $Id$%
 #
 # @Copyright Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -33,7 +33,7 @@
 #### font
 # Return a valid font given a font family and a set of additional
 # constraints. This procedure
-# is simply an interface to the class proc ::tycho::FontManager::get,
+# is simply an interface to the class proc ::tycho::FontManager::getFont,
 # and is provided for convenience.
 #
 proc ::tycho::font {family {size 12} {style roman} {shift 0}} {
@@ -56,23 +56,18 @@ proc ::tycho::xfont {family {size 12} {weight medium} {style r} {shift 0}} {
 
 #########################################################################
 #### FontManager
-# Manage font selection. This is a "non-instantiable" class that
+# This is a "non-instantiable" class that
 # manages selection of fonts. It simplifies the interface to the
-# available fonts in aa number of ways:
+# available fonts in a number of ways:
 # <ul>
-# <li>The "special" fonts like 8x13 and 9x15 are treated as members
-# of a font family called "Screen."
-# <li>If a font of the request family and weight are not found, it
+# <li>If a font of the request family and weight is not found, it
 # scans through a list of similar font families trying to find
 # something.
 # <li>If that fails, it trys different weights and sizes.
 # <li>As a last resort, it returns the "fixed" font.
+# <li>The "special" X window fonts like 8x13 and 9x15 are treated as members
+# of a font family called "Screen."
 # </ul>
-# <p>
-# Unfortunately, fonts are a major weak point in the X window system,
-# since there is only one font that is guaranteed to be installed on
-# all systems: "fixed". This font is the fallback font of the
-# <code>getFont</code> procedure, which always returns a valid font.
 #
 class ::tycho::FontManager {
     inherit ::tycho::Uninstantiable
@@ -155,10 +150,12 @@ class ::tycho::FontManager {
 	Lucida
     }
     private common constantwidthFamilies {
+        {Courier New}
 	Courier
-	Screen
+        {Lucida Console}
 	{Lucida Typewriter}
 	{ITC Avant Garde}
+	Screen
     }
 
     # Legal font sizes
@@ -167,7 +164,9 @@ class ::tycho::FontManager {
     # Alternate font family names
     private common alternateFamilyName
     set alternateFamilyName(lucidabright) {lucida bright}
+    set alternateFamilyName(couriernew) {courier new}
     set alternateFamilyName(lucidatypewriter) {lucida sans typewriter}
+    set alternateFamilyName(lucidaconsole) {lucida console}
     set alternateFamilyName(lucida) {lucida sans}
     set alternateFamilyName(newcenturyschoolbook) {new century schoolbook}
 
@@ -175,9 +174,18 @@ class ::tycho::FontManager {
     # family name
     private common relatedFamilies
 
-    set relatedFamilies(screen)           {lucidatypewriter courier}
-    set relatedFamilies(courier)          {lucidatypewriter screen}
-    set relatedFamilies(lucidatypewriter) {courier screen}
+    set relatedFamilies(screen) \
+            {couriernew lucidaconsole lucidatypewriter courier}
+    set relatedFamilies(courier) \
+            {couriernew lucidaconsole lucidatypewriter screen}
+    # By putting screen first below, we get screen fonts under X
+    # unless there is a Courier New font.
+    set relatedFamilies(couriernew) \
+            {screen courier lucidaconsole lucidatypewriter}
+    set relatedFamilies(lucidatypewriter) \
+            {lucidaconsole couriernew courier screen}
+    set relatedFamilies(lucidaconsole) \
+            {lucidatypewriter couriernew courier screen}
 
     set relatedFamilies(times)        {lucidabright palatino}
     set relatedFamilies(lucidabright) {times palatino}
@@ -269,7 +277,7 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 ########################################################################
 #### getFont
 # Find a font, given a partial specification of the font.  This procedure
-# always returns a legal X font name. The family name is compulsory,
+# always returns a legal font name. The family name is compulsory,
 # but everything else is optional.  A font specification consists of
 # three items, the family, point size, and style. Common
 # families are "Times", "Courier", and "Helvetica". Reasonable point
@@ -285,7 +293,8 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 # All arguments are case-insensitive.
 #
 # In addition to the real font families, there is the psuedo-family
-# "Screen," which is mapped to constant-width X screen fonts. Also, the
+# "Screen," which is mapped to constant-width screen fonts on the
+# X window system. Also, the
 # font family can be one of "Serif," "Sans-serif," or "Constant-width,"
 # in which case the preferred font of the specified type is chosen.
 #
@@ -401,9 +410,9 @@ body ::tycho::FontManager::getXFont {family {size 12} {weight medium} \
 
 ########################################################################
 #### parseFont
-# Given an X font name, parse it to return a symbolic font name. This
-# is useful for getting an initial font from an X font, changing the
-# size of a widget font without changing type, and so on.
+# Given a font name given in the X window style, and return a symbolic
+# font name. This is useful for getting an initial font and changing
+# the size without changing type, and so on.
 #
 body ::tycho::FontManager::parseFont {font} {
     # This expression may need to be changed to cope with
