@@ -21,11 +21,11 @@ $Id$
 #include "Error.h"
 
 #define SETFLAGS(p) \
-	if ((p->asLinearBuf == TRUE) && (maxBuf % p->numXfer() != 0)) \
-		p->asLinearBuf = FALSE; \
-	if (p->asLinearBuf == FALSE) p->hasStaticBuf = FALSE; \
-	else if (maxBuf != p->numXfer() * ((SDFStar*) p->parent())->reps()) \
-		p->hasStaticBuf = FALSE; 
+    if ((p->asLinearBuf == TRUE) && (maxBuf % p->numXfer() != 0)) \
+	p->asLinearBuf = FALSE; \
+    if (p->asLinearBuf == FALSE) p->hasStaticBuf = FALSE; \
+    else if ((p->numXfer() * ((SDFStar*) p->parent())->reps()) % maxBuf != 0) \
+	p->hasStaticBuf = FALSE; 
 
 		////////////////////////////////////////
 		// Buffer size determination routines
