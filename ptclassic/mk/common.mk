@@ -93,16 +93,22 @@ $(ISLANG_IN_OBJ):
 # .chdl files to .cc files.  'make sources' may need pepp
 PEPP_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/thor/pepp
 PEPP_IN_OBJ=$(PEPP_OBJ_DIR)/pepp
-PEPP_VPATH=../../src/domains/thor/pepp
+PEPP_VPATH=../../../../src/domains/thor/pepp
 
 # Use either the pepp binary in the obj directory or just use pepp
-PEPP= `if [ -f $(PEPP_IN_OBJ) ]; \
-	then echo $(PEPP_IN_OBJ) ; \
-	else echo pepp; fi`
+# I don't know why we can't use a rule like the ones for ptlang
+# but it just seems to be a bug in gmake.  So instead, we run
+# make by hand if necessary
+PEPP= `if [ ! -f $(PEPP_IN_OBJ) ]; \
+	then $(MAKE) $(PEPP_IN_OBJ) >/dev/null 2>&1; fi; \
+	if [ ! -f $(PEPP_IN_OBJ) ]; \
+	then echo pepp; \
+	else echo $(PEPP_IN_OBJ); fi`
+
 
 # Build the pepp binary if necessary
 $(PEPP_IN_OBJ):
-	(cd $(PEPP_OBJ_DIR); $(MAKE) VPATH=$(PEPP_VPATH))
+	(cd $(PEPP_OBJ_DIR); $(MAKE) VPATH=$(PEPP_VPATH) pepp)
 
 
 # Rule to build the ../doc/star directory
