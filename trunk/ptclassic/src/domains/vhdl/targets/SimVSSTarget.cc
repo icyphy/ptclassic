@@ -296,8 +296,6 @@ architecture CLI of C2Vinteger is
 	attribute CLI_CLOSE	of CLI	: architecture is \"c2vinteger_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 
 begin
 end;
@@ -331,7 +329,6 @@ architecture CLI of V2Cinteger is
 	attribute CLI_CLOSE	of CLI	: architecture is \"v2cinteger_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
 
 begin
@@ -366,8 +363,6 @@ architecture CLI of C2Vreal is
 	attribute CLI_CLOSE	of CLI	: architecture is \"c2vreal_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 
 begin
 end;
@@ -401,7 +396,6 @@ architecture CLI of V2Creal is
 	attribute CLI_CLOSE	of CLI	: architecture is \"v2creal_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
 
 begin
