@@ -61,16 +61,16 @@ public:
     /*virtual*/ int run();
 
     /*virtual*/ int flattenGalaxy(Galaxy* galaxy) {
-	return ! (int)galaxy.stateWithName("Scheduler");
+	return ! (int)galaxy->stateWithName("Scheduler");
     }
 
     /*virtual*/ void setMasterBlock(Block*,PortHole**);
 
     /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
     
-    /*virtual*/ Cluster* newCluster(Block* master,const char* domain) const;
+    /*virtual*/ Cluster* newCluster(Block* = NULL,const char* = NULL) const;
 
-    /*virtual*/ Block* makeNew() const { return &newCluster()->star(); }
+    /*virtual*/ Block* makeNew() const { return &newCluster()->star();}
 
     /*virtual*/ Block* clone() const { return cloneCluster(); }
     
