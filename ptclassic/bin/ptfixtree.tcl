@@ -9,12 +9,15 @@
 
 proc pftUsage { {msg} "Usage Information" } {
     puts stderr $msg
-    puts stderr {usage: ptfixtree [-v] [+R] [-within path] ... facets ...}
+    puts stderr {usage: ptfixtree [-list] [-v] [+R] [-within path] ... facets ...}
     puts stderr "\t-v\tturns on verbose message."
     puts stderr "\t+R\tturns off recursive traversal of heirarchy."
     puts stderr "\t-within\tspecifies a path which all facets must be within"
     puts stderr "\t\tmultiple -within options may be given.  Remember to"
-    puts stderr "\t\tquote paths containing $ and ~ terms."
+    puts stderr "\t\tsingle quote paths containing $ and ~ terms.  If no"
+    puts stderr "\t\t-within option is given, cells may be anywhere."
+    puts stderr "\t-list\tThe masters in each facet will be listed."
+    puts stderr "\t\tNo changes will be made to the facets."
 
     puts stderr "\nThe program will examine each facet, verifying the masters"
     puts stderr "in the facet.  If a master does not have a valid"
@@ -29,9 +32,10 @@ proc pftUsage { {msg} "Usage Information" } {
     puts stderr "\nAdditional (rarely used) options:"
     puts stderr "\t-octls path\tSpecifies location of octls binary"
     puts stderr "\t-octmvlib path\tSpecifies location of octmvlib binary"
+    puts stdout "\t\t\tCurrent version uses octfix, not octmvlib"
 
-    puts stderr "\nSend bug reports to kennard@ohm.  Please include *all*"
-    puts stderr "output from the program."
+    puts stderr "\nSend bug reports to kennard@ohm."
+    puts stderr "Please include *all* program output."
 
     exit 1
 }
@@ -77,10 +81,24 @@ proc pftOctMvLib { facet oldpat newpat } {
     }
 }
 
+
+proc pftGetUniqueList { oldlist } {
+    set oldlist [lsort $oldlist]
+    set newlist ""
+    set previtem ""
+    foreach item $oldlist {
+	if { "$item"!="$previtem" } {
+	    lappend newlist $item
+	    set previtem $item
+	}
+    }
+    return $newlist
+}
+
 proc pftOctLs { facet } {
     global path_octls
     set masterlines [exec $path_octls -f $facet]
-    return [split $masterlines "\n"]
+    return [pftGetUniqueList [split $masterlines "\n"]]
 }
 
 proc pftAddCheckCells { cells } {
@@ -146,6 +164,7 @@ proc pftIsWithinB { facet } {
     }
     set cell [lindex [split $facet :] 0]
     foreach path $within_paths {
+#puts stdout "WithinB: ``$cell'' ``$path''"
 	if { [string match "$path*" $cell] } {
 	    return 1
 	}
@@ -220,8 +239,9 @@ proc pftPromptAndReplace { facet master } {
 }
 
 
-proc pftCheckFacet { facet } {
-    global mapcells do_recur do_verbose
+
+proc pftFixFacet { facet } {
+    global mapcells do_recur do_verbose do_listonly
 
     if { ![pftIsFacetB $facet why expand] } {
 	puts stdout "\tCan't examine $facet:\n\t$why\n\tSkipping..."
@@ -255,20 +275,54 @@ proc pftCheckFacet { facet } {
     return "done"
 }
 
+proc pftListFacet { facet } {
+    global mapcells do_recur do_verbose do_listonly
+
+    if { ![pftIsFacetB $facet why expand] } {
+	puts stdout "\tCan't examine $facet:\n\t$why\n\tSkipping..."
+	return
+    }
+    set finfo [split $facet ":"]
+    set masters [pftOctLs $facet]
+    puts stdout "[lindex $finfo 0]:[lindex $finfo 1] contains" no
+    if { "$masters"=="" } {
+	puts stdout " no masters"
+	return
+    } else {
+	puts stdout ": "
+    }
+    foreach master $masters {
+	set minfo [split $master ":"]
+	set badstr ""
+	if { ![pftIsGoodFacetB $master why] } {
+	    set badstr "BAD($why)"
+	}
+	puts stdout "\t[lindex $minfo 0]:[lindex $minfo 1] $badstr"
+    }
+    if { $do_recur } {
+    	pftAddCheckCells $masters
+    }
+}
+
 proc pftMainLoop { } {
-    global checkcells
+    global checkcells do_listonly
     while 1 {
 	set facets [array names checkcells]
 	if { "$facets" == "" } {
 	    break
 	}
 	foreach facet $facets {
-    	    puts stdout "Examining $facet"
-	    while 1 {
-		set status [pftCheckFacet $facet]
-		if { "$status"!="redo" } {
-		    pftSetGoodFacet $facet $status
-		    break
+	    if { $do_listonly } {
+	        pftListFacet $facet
+		pftSetGoodFacet $facet "done"
+	    } else {
+		puts stdout "Examining $facet"
+		while 1 {
+		    set status [pftFixFacet $facet]
+		    if { "$status"!="redo" } {
+			pftSetGoodFacet $facet $status
+			break
+		    }
 		}
 	    }
 	}
@@ -276,17 +330,19 @@ proc pftMainLoop { } {
 }
 
 proc pftProcessArgs { } {
-    global argv env checkcells do_recur within_paths do_verbose
+    global argv env checkcells do_recur within_paths do_verbose do_listonly
     global path_octls path_octmvlib
     set within_paths ""
     set do_verbose 0
     set do_recur 1
+    set do_listonly 0
     set path_octmvlib ""
     set path_octls ""
 
     set argCells [topgetopt {
       {v do_verbose boolean} 
       {R do_recur boolean} 
+      {list do_listonly boolean} 
       {within within_paths append} 
       {octmvlib path_octmvlib} 
       {octls path_octls} 
@@ -294,6 +350,7 @@ proc pftProcessArgs { } {
     if [llength $argCells]==0 {
 	pftUsage "No cells specified."
     }
+#puts stdout "WithinPaths: ``$within_paths''"
     pftAddCheckCells $argCells
 
     if ![info exist env(PTOLEMY)] {
