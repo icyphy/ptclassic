@@ -55,8 +55,8 @@
 # Slider uses the following interactor classes:
 # <ul>
 # <li>
-# <a href="Alonger.html">
-# <i>Alonger</i></a>: moves the bar vertically
+# <a href="Bounder.html">
+# <i>Bounder</i></a>: moves the bar vertically
 # <li>
 # <a href="Stepper.html">
 # <i>Stepper</i></a>: moves the bar in discrete steps
@@ -149,7 +149,7 @@ class ::tycho::Slider {
 
     # The interactors that operate on the slider pictures
     private variable stepper
-    private variable alonger
+    private variable bounder
     private variable shifter
     private variable repeater
 
@@ -246,11 +246,11 @@ configbody ::tycho::Slider::resolution {
 		    * $itk_option(-length)]
 
 	    $stepper configure \
-		    -gridsize $stepsize \
+		    -stepsize $stepsize \
 		    -dragcommand [list @scope [info class] "$this updatevalue"]
 
 	    # The other interactors forward to the stepping interactor
-	    $alonger  cascade $stepper
+	    $bounder  cascade $stepper
 	    $repeater cascade $stepper
 	    $shifter  cascade $stepper
 
@@ -277,7 +277,7 @@ configbody ::tycho::Slider::resolution {
 	} else {
 	    # The resolution is zero, so remove the stepping interactor
 	    # from the interaction chain.
-	    $alonger  uncascade
+	    $bounder  uncascade
 	    $repeater uncascade
 	    $shifter  uncascade
 	}
@@ -335,17 +335,17 @@ body ::tycho::Slider::constructor {args} {
 
 
     # Create the interactors
-    ::set alonger [$itk_component(slate) interact create Alonger \
-	    -along y \
+    ::set bounder [$itk_component(slate) control interactor Bounder \
+	    -constrain y \
 	    -dragcommand [list @scope [info class] "$this updatevalue"]]
 
-    ::set repeater [$itk_component(slate) interact create Repeater]
+    ::set repeater [$itk_component(slate) control interactor Repeater]
 
-    ::set shifter [$itk_component(slate) interact create Alonger \
-	    -along y \
+    ::set shifter [$itk_component(slate) control interactor Bounder \
+	    -constrain y \
 	    -dragcommand [list @scope [info class] "$this updatevalue"]]
 
-    ::set stepper [$itk_component(slate) interact create Stepper]
+    ::set stepper [$itk_component(slate) control interactor Stepper]
 
     # Initialize options.
     eval itk_initialize $args
@@ -481,10 +481,10 @@ body ::tycho::Slider::redraw {} {
 	       + $interspace]
 
     # Configure the interactor that directly moves the bar
-    ::set bounds [list [expr $slidertop - $barheight/2] \
-	    [expr $sliderbottom + $barheight/2]]
-    $alonger configure -bounds $bounds
-    $alonger bind $bar -button 1
+    ::set bounds [list 0 [expr $slidertop - $barheight/2] \
+	    0 [expr $sliderbottom + $barheight/2]]
+    $bounder configure -bounds $bounds
+    $bounder bind $bar -button 1
 
     # Configure the interactor that "jumps" and moves the bar
     $shifter configure -activatecommand \
