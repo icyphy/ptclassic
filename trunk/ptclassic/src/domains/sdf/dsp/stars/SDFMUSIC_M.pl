@@ -15,31 +15,39 @@ The MUSIC algorithm is used, where MUSIC stands for
   }
   explanation {
 The MUSIC algorithm is a general-purpose algorithm for estimating the
-presence of sinusoids buried in white noise [1].
-MUSIC provides high-resolution spectral estimates [2] which
-can be used in source localization in spatial array processing [3].
-Several derivatives of MUSIC exist such as root-MUSIC [4].
+presence of sinusoids buried in white noise [1-2].
+MUSIC provides high-resolution spectral estimates [3-4] which
+can be used in source localization in spatial array processing [4-5].
+Several derivatives of MUSIC exist such as root-MUSIC [6].
+.Id "Dudgeon, D. E."
+.Id "Friedlander, B."
 .Id "Haykin, S."
+.Id "Johnson, D. H."
 .Id "Nehorai, A."
 .Id "Stoica, P."
 .Id "Soderstrom, B."
-.Id "Friedlander, B."
 .Id "Weiss, A. J."
 .UH REFERENCES
 .ip [1]
-S. Haykin, \fIAdaptive Filter Theory\fR,
-Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
+S. Haykin, ed., \fIAdvances in Spectrum Analysis and Array Processing\fR,
+vol. 2, Prentice-Hall: Englewood Cliffs, NJ, 1991.
 .ip [2]
+S. Haykin, \fIAdaptive Filter Theory\fR,
+Prentice-Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
+.ip [3]
 P. Stoica and A. Nehorai, ``MUSIC, Maximum Likelihood, and Cramer-Rao Bound:
 Further Results and Comparisons,''
 \fIIEEE Trans. on Acoustics, Speech, and Signal Processing\fR,
 vol. 38, pp. 2140-2150, Dec. 1990.
-.ip [3]
+.ip [4]
+D. H. Johnson and D. E. Dudgeon, \fIArray Signal Processing\fR,
+Prentice-Hall: Englewood Cliffs, NJ.  1993.
+.ip [5]
 P. Stoica and B. Soderstrom, ``Statistical Analysis of MUSIC and
 Subspace Rotation Estimates of Sinusoidal Frequencies,''
 \fIIEEE Trans. on Acoustics, Speech, and Signal Processing\fR,
 vol. 39, pp. 1122-1135, Aug. 1991.
-.ip [4]
+.ip [6]
 B. Friedlander and A. J. Weiss,
 ``Direction Finding Using Spatial Smoothing With Interpolated Arrays,''
 \fIIEEE Trans. on Aerospace and Electronic Systems\fR,
