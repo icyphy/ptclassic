@@ -19,7 +19,32 @@ This star is derived from DETclScript, and does little more than
 document the functionality of the script and specify the script file
 to be loaded.
 .pp
-# FIXME: variable descriptions go here !!
+The \fItitle\fR parameter specifies the title to be used for the plot.
+Keep in mind that the star name associated with the plot will be attached
+automatically to the given title.
+.pp
+The \fIsignalLabels\fR parameter specifies labels for each plot.
+It can take any of three forms.  If it is empty, or has just the single 
+string "default", then it uses the name of the porthole connected to the
+corresponding input.  Alternatively, it can specify one label for each 
+input, with the labels separated by spaces.
+.pp
+The \fITimeWindow\fR parameter specifies the amount of simulated time
+that can be viewed at one time in the window.  In other words, it is
+the time represented by the width of the plot window.
+.pp
+The \fIposition\fR parameter is a string which specifies the size and
+location of the window, in standard geometry flag format.  The format
+is \fIwidth\Rx\fIheight\fR[+-]\fIx-position\fR[+-]\fIy-position\fR.
+The default leaves out the size specification and simply indicates the
+initial position should be +0+0.
+.pp
+The \fIwidth_cm\fR parameter specifies the horizontal width of each plot 
+in cm.
+.pp
+The \fIheight_cm\fR parameter specifies the vertical height of each plot 
+in cm.
+.pp
 	}
 	location { DE tcltk library }
 	defstate {
