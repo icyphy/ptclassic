@@ -165,15 +165,16 @@ void ptkAction(Star* s, const char* tclCommand) {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-////                      onFiring support classes                       ////
+// onFiring support classes
 
+// Constructor out-of-line to save code (esp. with cfront).
+TclAction::TclAction() {
+    action = 0;
+    tclCommand = 0;
+    name = 0;
+}
 
-/////////////////////////////////////////////////////////////////////////////
-//// TclAction destructor
 // Destructor cancels an action and frees memory allocated for a TclAction.
-//
 TclAction::~TclAction() {
     // remove action and delete its memory
     SimControl::cancel(action);
@@ -183,10 +184,7 @@ TclAction::~TclAction() {
     delete [] name;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//// TclActionList constructor
-// constructor out-of-line to save code (esp. with cfront).
-//
+// Constructor out-of-line to save code (esp. with cfront).
 TclActionList::TclActionList() {}
 
 // ditto for these.

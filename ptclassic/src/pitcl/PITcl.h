@@ -96,28 +96,28 @@ public:
 	NamedObjListIter::reset;
 };
 
-/////////////////////////////////////////////////////////////////////
-//// TclAction 
+// TclAction 
+
 // A simple class that contains the relevant information
 // about an action that has been registered via Tcl.
-//
 class TclAction {
 public:
+	// Constructor was added to prevent cfront compiler warnings.
+	TclAction();
+
+	// Destructor cancels the action and
+	// frees the memory associated with the pointers below.
+	~TclAction();
+
 	char* name;
 	SimAction *action;
 	char* tclCommand;
-
-	// Destructor cancels the action and
-	// frees the memory associated with the above pointers.
-	~TclAction();
 };
 
-/////////////////////////////////////////////////////////////////////
-//// TclActionList
+// TclActionList
 // A list of pre or post actions that have been
 // registered via Tcl.  Each action has a name that can be used to
 // refer to it from Tcl.
-//
 class TclActionList : private SequentialList {
 	friend class TclActionListIter;
 public:
@@ -142,10 +142,8 @@ public:
 	int remove(TclAction* o) { return SequentialList::remove(o);}
 };
 
-/////////////////////////////////////////////////////////////////////
-//// TclActionListIter
+// TclActionListIter
 // An iterator for TclActionList.
-//
 class TclActionListIter : private ListIter {
 public:
         TclActionListIter(TclActionList& sl);
