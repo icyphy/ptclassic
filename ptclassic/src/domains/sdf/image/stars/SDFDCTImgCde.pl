@@ -77,7 +77,14 @@ output.
     int indxDc, indxAc;
   }
 
-  setup { thresh = float(fabs(double(Thresh))); }
+  constructor {
+    outDc = 0;
+    outAc = 0;
+  }
+
+  setup {
+    thresh = float(fabs(double(Thresh)));
+  }
 
   method { // Do the run-length coding.
     name { doRunLen }
@@ -91,21 +98,21 @@ output.
       const int blocks = size / (bSize*bSize);
 
       // Temporary storage for one block.
-      LOG_NEW; float* tmpPtr = new float[size];
-      int i;
-      for (i = 0; i < size; i++) {
+      float* tmpFloatPtr = new float[size];
+      float* tmpPtr = tmpFloatPtr;
+      for (int i = 0; i < size; i++) {
 	tmpPtr[i] = float(inImage.entry(i));
       }
 
       // The biggest runlen blowup we can have is the string "01010101...".
       // This gives a blowup of 50%, so with StartOfBlock and StartOfRun
       // markers, 1.70 should be ok.
-      LOG_NEW; outDc = new float[int(1.70*size + 1)];
-      LOG_NEW; outAc = new float[int(1.70*size + 1)];
-
+      delete [] outDc;
+      delete [] outAc;
+      outDc = new float[int(1.70*size + 1)];
+      outAc = new float[int(1.70*size + 1)];
       indxDc = 0; indxAc = 0;
-      int blk, zeroRunLen;
-      for(blk = 0; blk < blocks; blk++) {
+      for (int blk = 0; blk < blocks; blk++) {
 	// High priority coefficients.
 	for(i = 0; i < HiPri; i++) {
 	  outDc[indxDc++] = *tmpPtr++;
@@ -115,7 +122,7 @@ output.
 	outAc[indxAc++] = StartOfBlock;
 	outAc[indxAc++] = float(blk);
 	
-	zeroRunLen = 0;
+	int zeroRunLen = 0;
 	for(; i < bSize*bSize; i++) {
 	  if(zeroRunLen) {
 	    if (larger(*tmpPtr, thresh)) {
@@ -139,10 +146,11 @@ output.
 	if(zeroRunLen) {
 	  outAc[indxAc++] = float(zeroRunLen);
 	}
-      } // end for(each block)
-      
-      LOG_DEL; delete [] tmpPtr;
-    } // end { doRunLen }
+      }
+
+      // Delete tmpFloatPtr and not tmpPtr since tmpPtr has been incremented
+      delete [] tmpFloatPtr;
+    }
   }
 
 
@@ -170,18 +178,19 @@ output.
     doRunLen(inImage);
 
     // Copy the data to the output images.
-    LOG_NEW; FloatMatrix& dcImage = *(new FloatMatrix(1,indxDc));
-    int i;
-    for(i = 0; i < indxDc; i++) {
+    FloatMatrix& dcImage = *(new FloatMatrix(1,indxDc));
+    for(int i = 0; i < indxDc; i++) {
       dcImage.entry(i) = outDc[i];
     }
-    LOG_DEL; delete [] outDc;
+    delete [] outDc;
+    outDc = 0;
 
-    LOG_NEW; FloatMatrix& acImage = *(new FloatMatrix(1,indxAc));
-    for(i = 0; i < indxAc; i++) {
-      acImage.entry(i)  = outAc[i];
+    FloatMatrix& acImage = *(new FloatMatrix(1,indxAc));
+    for(int j = 0; j < indxAc; j++) {
+      acImage.entry(j) = outAc[j];
     }
-    LOG_DEL; delete [] outAc;
+    delete [] outAc;
+    outAc = 0;
 
     float comprRatio = dcImage.numRows() * dcImage.numCols() +
                        acImage.numRows() * acImage.numCols();
@@ -192,5 +201,10 @@ output.
     loport%0 << acImage;
     originalW%0 << inImage.numCols();
     originalH%0 << inImage.numRows();
-  } // end go{}
+  }
+
+  destructor {
+    delete [] outDc;
+    delete [] outAc;
+  }
 } // end defstar { DctImgCde }
