@@ -11,7 +11,17 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
-	desc { A finite impulse response (FIR) filter. }
+	desc { 
+A finite impulse response (FIR) filter.  In order to take advantage
+of the 4 by 4 vector multiplies, the VISFIR reformulates the filtering
+operation as a matrix operation (Ax=y).  The matrix A is first constructed 
+from the filter taps.  A row vector is filled out by copying the
+filter taps and zero-padding so that its length is a multiple of 4.  
+The row vector is then repeated four times, and each time it is
+shifted by one to build up the matrix A.  The 16-bit partitioned
+inputs are then grabbed and mutiplied with four of the filter taps.  
+The result is then accumulated to produce a 16-bit partitioned output.
+        }
 	input {
 	  name { signalIn }
 	  type { float }
@@ -52,12 +62,6 @@ limitation of liability, and disclaimer of warranty provisions.
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
         defstate {
-                name {tappadlength}
-                type {int}
-                default {0}
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-	}
-        defstate {
                 name {maxpast}
                 type {int}
                 default {0}
@@ -71,39 +75,43 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	  // determine tap length
 	  taplength = taps.size();
-	  
+
 	  // determine input buffer size
 	  if (taplength == 0)
 	    maxpast = 1;
 	  else if ((taplength-1)%NUMPACK==0)
-	    maxpast = (int)(taplength-1)/NUMPACK+1;
+	    maxpast = (int)((taplength-1)/NUMPACK+1);
 	  else
-	    maxpast = (int)(taplength-1)/NUMPACK+2;
-	  tappadlength = NUMPACK*maxpast;
+	    maxpast = (int)((taplength-1)/NUMPACK+2);
+
 	  signalIn.setSDFParams(NUMIN,maxpast-1);
 	}
 	codeblock(mainDecl) {
-	  short* $starSymbol(shift_taparray) =
-	    (short*)memalign(sizeof(double),sizeof(short)*4*$val(tappadlength));
-	  int $starSymbol(taprowindex), $starSymbol(tapcolindex),$starSymbol(numloop);
+	  /* allocate memory for tap matrix */
+	  vis_s16* $starSymbol(tapmatrix) =
+	    (vis_s16*) memalign(sizeof(double),sizeof(vis_s16)*16*$val(maxpast));
+	  int $starSymbol(taprowindex),$starSymbol(tapcolindex);
+          int $starSymbol(numloop),$starSymbol(taprowlength);
 	  short *$starSymbol(indexcount),$starSymbol(scaledown);
 	}
 	codeblock(initialize) {
-	  vis_write_gsr(($val(scalefactor)+1)<<3);	  
 	  $starSymbol(scaledown)=(short) 1<<$val(scalefactor);
 
-	  /* initialize shifted taparrays to zero*/
-	  $starSymbol(indexcount) = $starSymbol(shift_taparray);
+	  /* determine the length of each row of the tap matrix */
+	  $starSymbol(taprowlength) = 4*$val(maxpast);
+
+	  /* initialize tap matrix to zero*/
+	  $starSymbol(indexcount) = $starSymbol(tapmatrix);
 	  for($starSymbol(taprowindex)=0;$starSymbol(taprowindex)<4;$starSymbol(taprowindex)++){
-	    for($starSymbol(tapcolindex)=0;$starSymbol(tapcolindex)<$val(tappadlength);
+	    for($starSymbol(tapcolindex)=0;$starSymbol(tapcolindex)<$starSymbol(taprowlength);
 		$starSymbol(tapcolindex)++){
 	      *$starSymbol(indexcount)++ = 0;
 	    }
 	  }
-	  /* fill taparrays*/
+	  /* fill tap matrix with tap coefficients*/
 	  for($starSymbol(taprowindex)=0;$starSymbol(taprowindex)<4;$starSymbol(taprowindex)++){
-	    $starSymbol(indexcount) = $starSymbol(shift_taparray) +
-	      ($val(tappadlength)+1)*($starSymbol(taprowindex));
+	    $starSymbol(indexcount) = $starSymbol(tapmatrix) +
+	      ($starSymbol(taprowlength)+1)*($starSymbol(taprowindex));
 	    for($starSymbol(tapcolindex)=0;$starSymbol(tapcolindex)<$val(taplength);
 		$starSymbol(tapcolindex)++){
 	      /* scale and cast taps to short */
@@ -115,7 +123,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  if ($val(taplength) == 0)
 	    $starSymbol(numloop) = 0;	
 	  else		
-	    $starSymbol(numloop) = $val(maxpast);	
+	    $starSymbol(numloop) = $val(maxpast);
 	}
 	initCode {
 	  CGCVISBase::initCode();
@@ -134,14 +142,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int  	 outerloop;
 	}
 	codeblock(filter) {	  
+	  vis_write_gsr(($val(scalefactor)+1)<<3);	  
+
 	  accumpair0 = vis_fzero();
-	  tapptr0 = (double *) ($starSymbol(shift_taparray));
+	  tapptr0 = (double *) ($starSymbol(tapmatrix));
 	  accumpair1 = vis_fzero();
-	  tapptr1 = (double *) ($starSymbol(shift_taparray) + 4*$starSymbol(numloop));
+	  tapptr1 = (double *) ($starSymbol(tapmatrix) + 4 * $starSymbol(numloop));
 	  accumpair2 = vis_fzero();
-	  tapptr2 = (double *) ($starSymbol(shift_taparray) + 8 * $starSymbol(numloop));
+	  tapptr2 = (double *) ($starSymbol(tapmatrix) + 8 * $starSymbol(numloop));
 	  accumpair3 = vis_fzero();
-	  tapptr3 = (double *) ($starSymbol(shift_taparray) + 12 * $starSymbol(numloop));
+	  tapptr3 = (double *) ($starSymbol(tapmatrix) + 12 * $starSymbol(numloop));
 
 	  /* filter data */
 	  for (outerloop = 0; outerloop < $starSymbol(numloop); outerloop++) {
@@ -150,8 +160,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    datalo = vis_read_lo((double) $ref2(signalIn,outerloop));
 	    /* calculate four outputs */
 	    /*
-	     * 0: set up tap pairs for each
-	     * shifted taparray
+	     * 0: multiply first row of tap matrix
+	     * 
 	     */
 	    tapvalue = *tapptr0++;
 	    tappairhi = vis_read_hi(tapvalue);
@@ -167,8 +177,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair0 = vis_fpadd32(accumpair0,pair);
 	    /*
-	     * 1: set up tap pairs for each
-	     * shifted taparray
+	     * 1: multiply second row of tap matrix
+	     * 
 	     */
 	    tapvalue = *tapptr1++;
 	    tappairhi = vis_read_hi(tapvalue);
@@ -184,8 +194,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair1 = vis_fpadd32(accumpair1,pair);
 	    /*
-	     * 2: set up tap pairs for each
-	     * shifted taparray
+	     * 2: multiply third row of tap matrix
+	     * 
 	     */
 	    tapvalue = *tapptr2++;
 	    tappairhi = vis_read_hi(tapvalue);
@@ -201,8 +211,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair2 = vis_fpadd32(accumpair2,pair);
 	    /*
-	     * 3: set up tap pairs for each
-	     * shifted taparray
+	     * 3: multiply fourth row of tap matrix
+	     * 
 	     */
 	    tapvalue = *tapptr3++;
 	    tappairhi = vis_read_hi(tapvalue);
@@ -246,7 +256,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addCode(filter);
 	}
 	wrapup {
-	  addCode("free($starSymbol(shift_taparray));");
+	  addCode("free($starSymbol(tapmatrix));");
 	}
 }
 
