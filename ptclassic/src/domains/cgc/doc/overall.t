@@ -1,5 +1,6 @@
 .VR 0.$Revision$ "$Date$"
 .TI "CGC Domain"
+.ds DO "CGC
 .AU
 S. Ha
 .AE
