@@ -90,7 +90,7 @@ void CGWormStar :: initialize() {}
 
 // redefine go() method to generate code for the inside wormhole.
 void CGWormStar :: go() {
-	myWorm->downLoadCode(invocNum, profileIndex);
+	// myWorm->downLoadCode(invocNum, profileIndex);
 }
 
 int CGWormStar :: run() {

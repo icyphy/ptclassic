@@ -96,6 +96,8 @@ int DLScheduler :: scheduleIt()
 	   	int resWork = myGraph->sizeUnschedWork() - 
 			myGraph->workAfterMe(node);
 
+		// We do not support wormholes... we may support them
+		// in the future again
 		if (obj->isItWormhole()) {
 	   		CGWormBase* worm = obj->myWormhole();
 
@@ -103,7 +105,7 @@ int DLScheduler :: scheduleIt()
 			// processors by an iterative procedure.
 	   		// calculate the optimal number of processors taking 
 			// the "front-idle-time" into account.
-	   		worm->computeProfile(numProcs, resWork, &avail);
+	   		// worm->computeProfile(numProcs, resWork, &avail);
            		if (haltRequested()) return FALSE;
 
 		} else {
