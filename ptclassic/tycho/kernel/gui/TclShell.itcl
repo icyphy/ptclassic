@@ -36,15 +36,6 @@
 # - Control-e goes to the end of a line.  It should probably (for
 #   consistency) go the end of a command.
 
-#######################################################################
-#### options
-# TclShell uses its own preference set, which inherits from the
-# "textedit" set.
-preference add console textWidth  60
-preference add console textHeight 8
-preference add console answerForeground [ptkColor blue black]
-preference add console promptForeground [ptkColor firebrick black]
-
 
 #######################################################################
 #### TclShell
@@ -67,8 +58,18 @@ class ::tycho::TclShell {
     constructor {args} {}
     destructor {}
 
+    ##########################################################################
+    ####                             options                              ####
+
     # If non-zero, capture output generated with puts.
     itk_option define -stdout stdout StdOut 0
+
+    # Define the color of the result display
+    itk_option define -answerforeground answerForeground AnswerForeground "black"
+
+    # Define the color of the prompt
+    itk_option define -promptforeground promptForeground PromptForeground "black"
+
 
     ##########################################################################
     ####                         public methods                           ####
@@ -222,8 +223,10 @@ body ::tycho::TclShell::constructor {args} {
     # Subscribe to the preference set
     preference subscribe console $this \
 	    -textwidth textWidth \
-	    -textheight textHeight
-    
+	    -textheight textHeight \
+	    -answerforeground answerForeground \
+	    -promptforeground promptForeground
+
     # Modify Button-1 clicks so that the insertion cursor does not end up
     # before the prompt.  In all three cases below, the default Text binding
     # is copied into this binding.  It would be better to invoke that
@@ -532,8 +535,7 @@ body ::tycho::TclShell::displayResult {args} {
 	insertWithTags $result result
 	if !$nonewline {insertWithTags "\n" result}
 	$itk_component(text) tag config result \
-		-foreground \
-		[preference get console answerForeground]
+		-foreground $itk_option(-answerforeground)
     }
     $itk_component(text) mark set promptEnd "insert - 1 chars"
 }
@@ -615,8 +617,8 @@ body ::tycho::TclShell::printPrompt {{flag {}}} {
     } {
 	insertWithTags "> " prompt
     }
-    $itk_component(text) tag config prompt -foreground \
-	    [preference get console promptForeground]
+    $itk_component(text) tag config prompt \
+	    -foreground $itk_option(-promptforeground)
 
     insertWithTags { } space
     $itk_component(text) mark set promptEnd "insert - 1 chars"
