@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,40 +29,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Joseph Buck and Brian Evans
 
-*/
+       Functions for raised cosine and square-root rasised cosine
+       frequency response.
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspRaisedCosine.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Functions for raised cosine and square-root rasised
-                cosine frequency response ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include <math.h>
 #include "ptdspRaisedCosine.h"
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ A raised cosine frequency response ]
-  Description [ The code is written with integer arguments so that it
-                can reliably detect the 0/0 condition, avoiding
-		roundoff problems. ]
-  SideEffects []
-******************************************************************************/
+/* A raised cosine frequency response.
+   The code is written with integer arguments so that it can reliably
+   detect the 0/0 condition, avoiding roundoff problems. 
+*/
 double 
 Ptdsp_RaisedCosine(int t, int T, double excess) {
   const double DELTA = 1.0e-7;
@@ -76,13 +54,10 @@ Ptdsp_RaisedCosine(int t, int T, double excess) {
   return s * cos (M_PI * x) / den;
 }
 
-/**Function*******************************************************************
-  Synopsis    [ A square-root raised cosine frequency response ]
-  Description [ The code is written with integer arguments so that it
-                can reliably detect the 0/0 condition, avoiding
-		roundoff problems. ]
-  SideEffects []
-******************************************************************************/
+/* A square-root raised cosine frequency response.
+   The code is written with integer arguments so that it can reliably
+   detect the 0/0 condition, avoiding roundoff problems. 
+*/
 double
 Ptdsp_SqrtRaisedCosine(int t, int T, double excess) {
   double den, oneminus, oneplus, x;

@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,44 +29,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Biling Lee and Brian Evans
 
-*/
+       Function definition for Ptdsp_NearestNeighbor.
 
-
-/**CFile***********************************************************************
-
-  FileName    [ ptdspNearestNeighbor.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_NearestNeighbor ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspNearestNeighbor.h"
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
+/* Find nearest neighbor in codebook and return squared error.
+   Find the index of nearest neighbor in the codebook for the training
+   vector, and find the squared error (squared distance) between the
+   training vector and its nearest neighbor. 
 
-/**Function*******************************************************************
-  Synopsis    [ Find nearest neighbor in codebook and return squared error ]
-  Description [ Find the index of nearest neighbor in the codebook for
-		the training vector, and find the squared error (squared 
-		distance) between the training vector and its nearest
-		neighbor. </p>
-		Let X=input vector and Yi=i_th codeword.  Find the nearest
-		neighbor codeword Yi to maximize X'*Yi-Ai (' means transpose),
-		where Ai=||Yi||^2/2 and should have already been stored in
-		the array halfCodewordPower(numCodewords). ]
-  SideEffects [ Sets values at addresses theindex and thedistance. ]
-******************************************************************************/
+   Let X=input vector and Yi=i_th codeword.  
+   Find the nearest neighbor codeword Yi to maximize X'*Yi-Ai (' means
+   transpose), where Ai=||Yi||^2/2 and should have already been stored
+   in the array halfCodewordPower(numCodewords).
+
+   The values at addresses theindex and thedistance are set to the
+   index and the squared error respectively.
+*/
 void 
 Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
 		      const double* trnVector, const double* codebook,

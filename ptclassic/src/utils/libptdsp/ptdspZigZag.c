@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,39 +29,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Paul Haskell
 
-*/
+       Functions for forward/inverse zig-zag scan of a matrix. 
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspZigZag.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Functions for forward/inverse zig-zag scan of a matrix ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspZigZag.h"
 
-/*---------------------------------------------------------------------------*/	
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Zig-zag scans an image ]
-  Description [ This function zig-zag scans a matrix representing an
-                image stored in inImg and returns the result in outImg.
-		This is useful before quantizing a DCT transformed image. ]
-  SideEffects [ The double array outImg is modified. ]
-  SeeAlso     [ Ptdsp_ZigZagInverse ]
-******************************************************************************/
+/* This function zig-zag scans a matrix representing an image stored
+   in inImg and returns the result in outImg. This is useful before
+   quantizing a DCT transformed image.
+*/
 void 
 Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
 		  int height, int bSize) {
@@ -110,14 +87,9 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
   }
 }
 
-/**Function*******************************************************************
-  Synopsis    [ Inverts zig-zag scan ]
-  Description [ This function inverse zig-zag scans an image, stored
-                in inImg as a double array, and outputs the result in
-		outImg ]
-  SideEffects [ The double array outImg is modified. ]
-  SeeAlso     [ Ptdsp_ZigZagScan ]
-******************************************************************************/
+/* This function inverse zig-zag scans an image, stored in inImg as a
+   double array, and outputs the result in outImg.
+*/
 void
 Ptdsp_ZigZagInverse (const double * inImg, double * outImg,
 		     int width, int height,  int bSize) {    

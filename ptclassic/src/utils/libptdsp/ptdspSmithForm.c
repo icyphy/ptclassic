@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,32 +29,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Brian L. Evans
 
-*/
+       Functions for decompostion of matrices to their Smith forms. 
 
-/**CFile***********************************************************************
-
-  FileName    [ ptdspSmithForm.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Functions for decompostion of matrices to their Smith forms ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspSmithForm.h"
 #include "ptdspExtendedGCD.h"
 #include <malloc.h>
-
-/*---------------------------------------------------------------------------*/
-/* Macro declarations                                                        */
-/*---------------------------------------------------------------------------*/
 
 #define intmin(m,n)             ( ( (m) < (n) ) ? (m) : (n) )
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
@@ -62,15 +43,7 @@ limitation of liability, and disclaimer of warranty provisions. ]
 #define INT_IS_NOT_ZERO(x)      (x)
 #define INT_SWAP3(a,b,t)        { t = a; a = b; b = t; }
 
-/*---------------------------------------------------------------------------*/
-/* Definition of internal functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Swap two rows in a matrix the slow but safe way. ]
-  SideEffects [ The integer array mat is modified. ]
-  SeeAlso     [ intSwapCols ]
-******************************************************************************/
+/* Swap two rows in matrix mat the slow but safe way. */
 static void 
 intSwapRows(int *mat, int row1, int row2, int numRows, int numCols ) {
   if (row1 != row2) {
@@ -81,11 +54,7 @@ intSwapRows(int *mat, int row1, int row2, int numRows, int numCols ) {
   return;
 }
 
-/**Function*******************************************************************
-  Synopsis    [ Swap two columns in a matrix the slow but safe way. ]
-  SideEffects [ The integer array mat is modified. ]
-  SeeAlso     [ intSwapRows ]
-******************************************************************************/
+/* Swap two columns in matrix mat the slow but safe way. */
 static void 
 intSwapCols(int *mat, int col1, int col2, int numRows, int numCols) {
   if ( col1 != col2 ) {
@@ -98,15 +67,12 @@ intSwapCols(int *mat, int col1, int col2, int numRows, int numCols) {
 
 
 /* FIXME
-   The two functions below, identity and mul, may prove useful in the
-   future for other functions or more functions may be added for
-   manipulating a matrix. In that case, these two functions, together
-   with those new functions, should be placed in a file of their own. */
+   The two functions below, identity and mul, should be in a file of
+   their own, a file that provides functions for manipulating matrices
+   in the form of double arrays, when more functions are added. 
+*/
 
-/**Function*******************************************************************
-  Synopsis    [ Sets matrix to be an identity matrix ]
-  SideEffects [ The integer array mat is modified. ]
-******************************************************************************/
+/* Sets matrix mat to be an identity matrix. */
 static void 
 identity(int* mat, int numRows, int numCols) {
   int row;
@@ -118,7 +84,9 @@ identity(int* mat, int numRows, int numCols) {
   }
 }
 
-/* Multiply two matrices, true matrix multiply, this is a fairly fast
+/* Matrix multiplication.
+        outMatrix = src1 * src2
+   Multiply two matrices, true matrix multiply, this is a fairly fast
    algorithm, especially when optimized by the compiler.
          outMatrix = src1 * src2
    Returns 1 if error, ie nCols1 != nRows2 
@@ -126,20 +94,9 @@ identity(int* mat, int numRows, int numCols) {
    copying to the outMatrix if the outMatrix is equal to the
    source. Thus this allows
              X = X * Y
- */
 
-/**Function*******************************************************************
-  Synopsis    [ Matrix multiplcation ]
-  Description [         outMatrix = src1 * src2 <BR>
-                This is a fairly fast algorithm, especially when
-		optimized by the  compiler. <BR>
-		Returns 0 on error, ie nCols1 != nRows2. <BR>
-		This function writes the output to a separate vector
-		before copying to the outMatrix if the outMatrix is
-		equal to either of the  sources. Thus this allows <BR>
-		        X = X * Y ]
-  SideEffects [ The integer array outMatrix is modified. ]
-******************************************************************************/
+   The return result is stored in integer array outMatrix .
+*/
 static int 
 mul(int* outMatrix, const int* src1, const int nRows1, const int nCols1, 
     const int * src2, const int nRows2, const int nCols2) {
@@ -174,22 +131,16 @@ mul(int* outMatrix, const int* src1, const int nRows1, const int nCols1,
   return 1;
 }
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
+/* Decompose integer matrix inputMat into one of its Smith forms S = U D V,
+   where U, D, and V are simpler integer matrices. Here, D is
+   diagonal, and U and V have determinant of +1 or -1 (and are called
+   regular unimodular). The Smith form decomposition for integer
+   matrices is analogous to singular value decomposition for
+   floating-point matrices. 
 
-/**Function*******************************************************************
-  Synopsis    [ Decompose an integer matrix into one of its Smith forms ]
-  Description [ Decompose an integer matrix S into one of its Smith
-                forms S = U D V, where U, D, and V are simpler integer
-		matrices. Here, D is diagonal, and U and V have
-		determinant of +1 or -1 (and are called regular
-		unimodular). The Smith form decomposition for integer
-		matrices is analogous to singular value decomposition
-		for floating-point matrices. ]
-  SideEffects [ The d, u and v integer arrays are modified. ]
-  SeeAlso     [ Ptdsp_SmithCanonForm ]
-******************************************************************************/
+   U, D and V are stored in the integer arrays d, u and v
+   repsectively. 
+*/
 void 
 Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
 		const int m, const int n) {
@@ -300,22 +251,21 @@ Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
   free(nVector);
 }
   
-/**Function*******************************************************************
-  Synopsis    [ Put the Smith form into canonical form ]
-  Description [ This function takes the result of D, U, and V of a
-                SmithForm decomposition, and puts them into the
-		canonical form. The result is that D is now
-		unique. Note, however, that U and V are still not
-		unique. The processes carried out are : <BR>
-		(1) pulling out negative signs <BR>
-		(2) sorting diagonal entries <BR>
-		(3) shuffling factors along diagonal by iteratively finding
-		regular unimodular G and H such that
-		U D V = U (G^-1 G) D (H H^-1) V = (U G^-1) (G D H) (H^-1 V)
-		so that G and H move D closer to canonical form ]
-  SideEffects [ The d, u and v integer arrays are modified. ]
-  SeeAlso     [ Ptdsp_SmithForm ]
-******************************************************************************/
+/* Put the Smith form into canonical form.
+   This function takes the result of D, U, and V of a SmithForm
+   decomposition, and puts them into the canonical form. The result is
+   that D is now unique. Note, however, that U and V are still not
+   unique. 
+   The processes carried out are :
+   (1) pulling out negative signs 
+   (2) sorting diagonal entries 
+   (3) shuffling factors along diagonal by iteratively finding regular
+       unimodular G and H such that
+   U D V = U (G^-1 G) D (H H^-1) V = (U G^-1) (G D H) (H^-1 V)
+       so that G and H move D closer to canonical form.
+
+   Integer arrays d, u and v are modified into canonical form.
+*/
 void 
 Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
   

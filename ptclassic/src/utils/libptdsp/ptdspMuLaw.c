@@ -1,4 +1,4 @@
-/*
+/*******************************************************************
 Version identification:
 $Id$
 
@@ -29,36 +29,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Joseph T. Buck and Craig Reese
 
-*/
+       Functions for conversions from PCMMuLaw to Linear and back.
 
-/**CFile***********************************************************************
+       Provides functions for compression of 16-bit linear data to PCM
+       8-bit mu-law  data and back. The 8-bit mu-law format here is
+       8-bit PCM mu-law encoded audio. 
+       The 8 bits are: 1 bit for the sign, 3 bits for the exponent,
+       and 4 bits for the mantissa.
 
-  FileName    [ ptdspMuLaw.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Conversions from PCMMuLaw to Linear and back ]
-
-  Description [ Provides functions for compression of 16-bit linear
-                data to PCM 8-bit mu-law data and back. The 8-bit mu-law
-		format here is 8-bit PCM mu-law encoded audio. The 8
-		bits are: 1 bit for the sign, 3 bits for the exponent,
-		and 4 bits for the mantissa. ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions. ]
-
-******************************************************************************/
+********************************************************************/
 
 #include "ptdspMuLaw.h"
-
-/*---------------------------------------------------------------------------*/
-/* Definition of constants and statics                                       */
-/*---------------------------------------------------------------------------*/
 
 const int BIAS16 = 0x84;
 const int CLIP16 = 32635;		/* 2^15 - BIAS16 - 1 */
@@ -84,20 +65,13 @@ static int sample_to_exponent_table[256] =
 static int exponent_to_sample_table[8] =
 	{ 0, 132, 396, 924, 1980, 4092, 8316, 16764 };
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
-
-/**Function*******************************************************************
-  Synopsis    [ Compress 16-bit linear data to 8-bit PCM mu-law data ]
-  Description [ Converts a 16-bit linear data sample (a fixed-point format)
-		into an 8-bit pulse compression modulated mu-law data
-	 	sample (a floating-point format). ]
-  SideEffects []
-  SeeAlso     [ Ptdsp_PCMMuLawToLinear ]
-******************************************************************************/
-unsigned 
-char Ptdsp_LinearToPCMMuLaw(int sample) {
+/* Compress 16-bit linear data to 8-bit PCM mu-law data.
+   Converts a 16-bit linear data sample (a fixed-point format) into an
+   8-bit pulse compression modulated mu-law data sample (a
+   floating-point format). 
+*/
+unsigned char 
+Ptdsp_LinearToPCMMuLaw(int sample) {
   int exponent, mantissa, sign;
   unsigned char ulawbyte;
 
@@ -117,19 +91,16 @@ char Ptdsp_LinearToPCMMuLaw(int sample) {
   return ulawbyte;
 }
 
-/**Function*******************************************************************
-  Synopsis    [ Uncompress 8-bit PCM mu-law data to 16-bit linear data ]
-  Description [ Converts an 8-bit pulse compression modulated mu-law data
-	 	sample (a floating-point format) and into a 16-bit
-		linear data sample (a fixed-point format).  The conversion
-		routine, by Craig Reese at the IDA/Supercomputing Research
-		Center, obeys the CCITT Recommendation G.711 and follows
-		MIL-STD-188-113,"Interoperability and Performance Standards
-		for Analog-to_Digital Conversion Techniques," dated
-		17 February 1987. ]
-  SideEffects []
-  SeeAlso     [ Ptdsp_LinearToPCMMuLaw ]
-******************************************************************************/
+/* Uncompress 8-bit PCM mu-law data to 16-bit linear data.
+   Converts an 8-bit pulse compression modulated mu-law data sample (a
+   floating-point format) and into a 16-bit linear data sample (a
+   fixed-point format). 
+
+   The conversion routine, by Craig Reese at the IDA/Supercomputing
+   Research Center, obeys the CCITT Recommendation G.711 and follows
+   MIL-STD-188-113,"Interoperability and Performance Standards for
+   Analog-to_Digital Conversion Techniques," dated 17 February 1987. 
+*/
 int
 Ptdsp_PCMMuLawToLinear(unsigned char ulawbyte) {
   int sign, exponent, mantissa, sample;
