@@ -209,8 +209,36 @@ void XGraph :: terminate () {
 		strm[i] = NULL;
 	   }
         StringList cmd;
-    
-        cmd += "( xgraph ";
+
+        cmd += "( ";
+
+        if (sf != NULL && *sf != 0) {
+            const char* saveFileName = savestring (expandPathName(sf));
+
+            // Easiest way to check to see whether the file can be
+            // written is to call creat and then close the file.
+            // This has the side benefit of zeroing out the file if it exists.
+            int tempFileDesc;
+            if ((tempFileDesc = creat(saveFileName,0644)) == -1) {
+                // File is not writable
+		    Error::warn (*blockIamIn, "No write permission on file: ",
+				 saveFileName, ". Data not saved.");
+            } else {
+                // File is OK.  Close it, then write to it.
+                close(tempFileDesc);
+                for (i = 0; i<ng; i++) {
+                    cmd += "/bin/cat ";
+                    cmd += tmpFileNames[i];
+                    cmd += " >> ";
+                    cmd += saveFileName;
+                    cmd += "; /bin/echo \"\" >> ";
+                    cmd += saveFileName;
+                    cmd += "; ";
+                }
+                    }
+        }
+
+        cmd += " xgraph ";
 	if (!ascii)
 		cmd += "-binary ";
 
@@ -236,31 +264,6 @@ void XGraph :: terminate () {
         for (i = 0; i<ng; i++) {
             cmd += tmpFileNames[i];
             cmd += " ";
-        }
-
-        if (sf != NULL && *sf != 0) {
-            const char* saveFileName = savestring (expandPathName(sf));
-
-            // Easiest way to check to see whether the file can be
-            // written is to call creat and then close the file.
-            // This has the side benefit of zeroing out the file if it exists.
-            int tempFileDesc;
-            if ((tempFileDesc = creat(saveFileName,0644)) == -1) {
-                // File is not writable
-		    Error::warn (*blockIamIn, "No write permission on file: ",
-				 saveFileName, ". Data not saved.");
-            } else {
-                // File is OK.  Close it, then write to it.
-                close(tempFileDesc);
-                for (i = 0; i<ng; i++) {
-                    cmd += "; /bin/cat ";
-                    cmd += tmpFileNames[i];
-                    cmd += " >> ";
-                    cmd += saveFileName;
-                    cmd += "; /bin/echo \"\" >> ";
-                    cmd += saveFileName;
-                }
-                    }
         }
 
         // issue commands to remove temporary files
