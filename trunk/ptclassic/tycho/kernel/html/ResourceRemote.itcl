@@ -1,4 +1,4 @@
-# A Resource for accessing files on HTTP servers
+# A Resource for accessing files on FTP and HTTP servers
 # 
 # @Author: Kevin Chang
 #
@@ -37,7 +37,7 @@
 # The current status of an http get. This is a common array
 # so that tkwait can access it. Can be "header," "body,"
 # "abort," or "done".
-## DO NOT USE THIS VARIABLE DIRECTLY! Use method httpset instead.
+## DO NOT USE THIS VARIABLE DIRECTLY! Use method remotestatus instead.
 set _remotestatus(127.0.0.1) done
 
 ######################################################################
@@ -58,7 +58,7 @@ class ::tycho::ResourceRemote {
     ####                          options                            ####
 
     # Debugging flag
-    public variable debug 1
+    public variable debug 0
 
     ###################################################################
     ####                         public methods                    ####
@@ -101,38 +101,38 @@ class ::tycho::ResourceRemote {
     ####                      public procedures                    ####
 
     # Change the permissions of a resource
-    #proc chmod {permissions path} {error "Should be redefined"}
+    proc chmod {permissions path} {error "Should be redefined"}
 
     # Return the content type of the current file
-    #proc contenttype {path} {error "Should be redefined"}
+    proc contenttype {path} {error "Should be redefined"}
 
     # Delete a resource
-    #proc delete {path} {error "Should be redefined"}
+    proc delete {path} {error "Should be redefined"}
 
     # Return a directory listing
-    #proc dirlist {path} {error "Should be redefined"}
+    proc dirlist {path} {error "Should be redefined"}
 
     # Test if a given resource exists
-    #proc exists {path} {} {error "Should be redefined"}
+    proc exists {path} {error "Should be redefined"}
 
     # Get a file name, and forward automatically.
     proc forward {url}
 
     # reset all the internal variable such as _exists
-    # and _forwarding. NOTE: This exists ONLY in this class.
+    # and _forward. NOTE: This exists ONLY in this class.
     proc initialize {}
 
     # Create a new directory
-    #proc mkdir {path} {error "Should be redefined"}
+    proc mkdir {path} {error "Should be redefined"}
 
     # Create a new resource object
-    #proc new {path args} {error "Should be redefined"}
+    proc new {path args} {error "Should be redefined"}
 
     # Query properties of a file
-    #proc query {path option} {error "Should be redefined"}
+    proc query {path option} {error "Should be redefined"}
 
     # Get the status of a resource
-    #proc stat {path varName} {error "Should be redefined"}
+    proc stat {path varName} {error "Should be redefined"}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -155,7 +155,7 @@ class ::tycho::ResourceRemote {
     protected common _exists
 
     # A forwarding address associated with some URLs
-    protected common _forwarding
+    protected common _forward
 
     ###################################################################
     ####                        protected variables                ####
@@ -226,12 +226,12 @@ body ::tycho::ResourceRemote::cachefile {} {
 #### close
 body ::tycho::ResourceRemote::close {} {
     if !$fileIsOpen {
-	openerror "File \"$this\" is not open (close)"
+	error "File \"$this\" is not open (close)"
     }
     set fileIsOpen 0
-    if { $cachefileid != "" } {
+    if { $cachefileid > 0 } {
         ::close $cachefileid
-        set cachefileid ""
+        set cachefileid -1
     }
 }
 
@@ -251,20 +251,20 @@ body ::tycho::ResourceRemote::eof {} {
 # <tt>http://ptolemy/~eal   -->   http://ptolemy/~eal/</tt>
 #
 body ::tycho::ResourceRemote::forward {url} {
-    while {[::info exists _forwarding($url)] && $_forwarding($url)!=$url} {
-	set url $_forwarding($url)
+    while {[::info exists _forward($url)] && $_forward($url)!=$url} {
+	set url $_forward($url)
     }
     return $url
 }
 
 #####################################################################
 #### initialize
-# Reset all the internal variables such as _forwarding
+# Reset all the internal variables such as _forward
 # and _exists. Called during the initial setup, or during debugging.
 #
 body ::tycho::ResourceRemote::initialize {} {
     catch {unset _exists}
-    catch {unset _forwarding}
+    catch {unset _forward}
 }
 
 #####################################################################
