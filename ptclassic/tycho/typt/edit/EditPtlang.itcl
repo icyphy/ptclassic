@@ -69,6 +69,17 @@ class ::tycho::EditPtlang {
     # Run ptlang on filename, generate html documentation and display it.
     proc gendoc {filename}
 
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
+    ####                          private methods                  ####
+
+    # Initialize the menu bar.
+    private method initializeMenubar {menubar}
 }
 
 #######################################################################
@@ -110,28 +121,9 @@ configbody ::tycho::EditPtlang::star {
 ###################################################################
 #
 body ::tycho::EditPtlang::constructor {args} {
-    global PTOLEMY
     eval itk_initialize $args
-
-    # Stuff for the special menu
-    menubar add "Stars" Special -underline 0 \
-            -command "::tycho::File::openContext \
-	    [file join $PTOLEMY src domains starHTML.idx.fst]"
-
-    menubar add "Universes" Special -underline 0 \
-            -command "::tycho::File::openContext \
-	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
-
-    menubar add "Xref, stars/demos" Special -underline 0 \
-            -command "::tycho::File::openContext \
-            [file join $PTOLEMY doc star-demo-index index.html]"
-
-    menubar addSeparator Special
-
-    menubar add "Generate doc" Special -underline 0 \
-            -command "$this gendocBuffer"
-
 }
+
 ###################################################################
 ###################################################################
 ####                     public methods                        ####
@@ -217,3 +209,58 @@ body ::tycho::EditPtlang::gendoc {filename} {
             
 }
 
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditPtlang::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditPtlang::initializeMenubar $menubar
+    }
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditPtlang::initializeMenubar {menubar} {
+    global PTOLEMY
+
+    # Stuff for the special menu
+    $menubar addSeparator Special
+
+    $menubar add "Generate doc" Special -underline 0 \
+            -command "$this gendocBuffer"
+
+    # Stuff for the help menu
+    $menubar add "Ptolemy Universes" Help -underline 0 \
+            -command "::tycho::File::openContext \
+	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
+
+    $menubar add "Star/Demo Xref" Help -underline 11 \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY doc star-demo-index index.html]"
+
+    $menubar add "Ptolemy stars" Help -underline 0 \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY src domains starHTML.idx.fst]"
+}

@@ -85,6 +85,12 @@ class ::tycho::EditCpp {
     # Remove the leading "//" on lines touched by the selection.
     method uncommentSelection {}
 
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -100,19 +106,6 @@ body ::tycho::EditCpp::constructor {args} {
     
     # Set the fill prefix to be the comment character for C++.
     set fillPrefix "//"
-
-    menubar add "Body Template" Special -underline 0 \
-	    -command "$this bodyTemplate"
-
-    menubar add ".cc File Template" Special -underline 4 \
-	    -command "$this fileTemplate \
-            $itk_option(-filetemplate) \
-            \[$this getClassName\]"
-
-    menubar add ".h File Template" Special -underline 1 \
-	    -command "$this fileTemplate \
-            $itk_option(-hfiletemplate) \
-            \[$this getClassName\]"
 }
 
 #####################################################################
@@ -200,4 +193,37 @@ body ::tycho::EditCpp::parseNow {start stop} {
 #
 body ::tycho::EditCpp::uncommentSelection {} {
     EditProgram::uncommentSelection
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditCpp::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        $menubar add "Body Template" Special -underline 0 \
+                -command "$this bodyTemplate"
+        
+        $menubar add ".cc File Template" Special -underline 4 \
+                -command "$this fileTemplate \
+                $itk_option(-filetemplate) \
+                \[$this getClassName\]"
+
+        $menubar add ".h File Template" Special -underline 1 \
+                -command "$this fileTemplate \
+                $itk_option(-hfiletemplate) \
+                \[$this getClassName\]"
+    }
 }
