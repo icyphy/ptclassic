@@ -43,7 +43,7 @@ include $(CONFIG)
 include $(ROOT)/mk/topdomain.mk
 
 # Subdirectories with star directories in them
-SUBDOMAINDIRS = tcltk atm contrib java
+SUBDOMAINDIRS = tcltk atm contrib java sip
 
 DIRS = kernel stars $(SUBDOMAINDIRS)
 
