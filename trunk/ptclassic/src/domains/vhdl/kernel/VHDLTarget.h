@@ -209,7 +209,7 @@ protected:
 	StringList addConfigurationDeclarations(VHDLCompDeclList*, int=0);
 
 	// Return variable declarations based on variableList.
-	StringList addVariableDecls(VHDLVariableList*, int=0);
+	StringList addVariableDecls(VHDLVariableList*, int=0, int=0);
 
 	// Make this protected, not private, so it is still visible
 	// to derived targets that want to use it.
