@@ -2,8 +2,8 @@ defstar {
   name      { MatrixInt }
   domain    { SDF }
   desc      { 
-Produces a matrix with fixed-point entries. The entries are
-read from the array parameter "FixMatrixContents" in rasterized order:
+Produces a matrix with integer entries. The entries are
+read from the array parameter "IntMatrixContents" in rasterized order:
 i.e. for a MxN matrix, the first row is filled from left to right
 using the first N values from the array.
   }

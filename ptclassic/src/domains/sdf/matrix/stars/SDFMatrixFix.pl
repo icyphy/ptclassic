@@ -6,7 +6,8 @@ Produces a matrix with fixed-point entries. The entries are
 read from the array parameter "FixMatrixContents" in rasterized order:
 i.e. for a MxN matrix, the first row is filled from left to right
 using the first N values from the array. All entries have the
-same precision, as specifid by the parameter "FixPrecision". }
+same precision, as specifid by the parameter "FixPrecision".
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
