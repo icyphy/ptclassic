@@ -2,8 +2,8 @@ defstar {
 	name {MuLaw}
 	domain {SDF}
 	desc {
-This star encodes its input into an 8 bit representation
-using the non-linear companding Mu law. 
+This star encodes its input into an eight-bit representation
+using the non-linear companding according to a mu law definition. 
 	}
 	author { Asawaree Kalavade }
 	copyright {
@@ -18,8 +18,13 @@ limitation of liability, and disclaimer of warranty provisions.
 .Id "compression, Mu law"
 The conversion formula is
 .EQ
-| v sub 2 | ~=~ log (1+ mu | v sub 1 | ) / log( 1 ~+~ mu ) ~.
+y ~=~ log (1 + mu | x | ) / log( 1 ~+~ mu ) ~.
 .EN
+so this star always produces non-negative output.
+.UH REFERENCES
+.IP 1
+Simon Haykin, \fICommunication Systems\fR, John Wiley Sons,
+3rd ed., 1994, ISBN 0-471-57176-8, page 380.
 	}
 	input {
 		name{input}
@@ -31,38 +36,47 @@ The conversion formula is
 	}
 
 	defstate {
-		name{ compress}
-		type{ int}
-		default{ 1}
-		desc{ 0 to turn off compression, otherwises compresses with Mu law. }
+		name{compress}
+		type{int}
+		default{"YES"}
+		desc{
+NO, FALSE, or 0 turns off compression.
+YES, TRUE, or a non-zero integer enables compression.
 		}
+	}
 
 	defstate{
-		name{ mu }
+		name{mu}
 		type{int}
 		default{255}
-		desc{mu parameter}
-		}
+		desc{mu parameter, a positive integer}
+	}
 	
+	private {
+		double	denom;
+	}
+
 	ccinclude { <math.h> }
-	go {
 
-	float comp_value;
-	float f=1.0;
-	float pre_comp = input%0;
-
-	if(compress==0)
-	output%0 << pre_comp;
-	else
-		{
-	if(pre_comp < 0) {
-		pre_comp= pre_comp*(-1.0);
-		f= (-1.0);
-			}
-	float num = log(1+ (int) mu *pre_comp);
-	float den = log(1.0 + (int) mu);
-	comp_value= f*num/den;	
-		output%0 << comp_value;
+	setup {
+		if ( int(mu) < 0 ) {
+			Error::abortRun(*this,
+					"Value for mu must be non-negative");
+			return;
 		}
+		denom = log(1.0 + int(mu));
+	}
+
+	go {
+		double comp_value = double(input%0);
+
+		// Compute the mu-law definition
+		if (int(compress)) {
+			if (comp_value < 0) comp_value = -comp_value;
+			double numer = log(1.0 + int(mu) * comp_value);
+			comp_value = numer / denom;	
+		}
+
+		output%0 << comp_value;
 	}
 }
