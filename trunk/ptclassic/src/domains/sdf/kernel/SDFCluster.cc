@@ -82,9 +82,6 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 		out->initGeo();
 	}
 	LOG_DEL; delete ptable;
-	if (logstrm) {
-		*logstrm << "Initial galaxy:\n" << *this;
-	}
 }
 
 int SDFClusterGal::cluster() {
@@ -140,7 +137,13 @@ int SDFClusterGal::mergePass() {
 			changes = TRUE;
 			nextClust.reset();
 		}
+		// if no more merge candidates, try the slow merge
+		// note we must always reset the iterator after a
+		// merge since it might be invalid.
+		else if ((c2 = fullSearchMerge()) != 0)
+			nextClust.reset();
 	} while (c2);
+
 	if (logstrm) {
 		if (changes)
 			*logstrm << "After merge pass:\n" << *this;
@@ -149,7 +152,112 @@ int SDFClusterGal::mergePass() {
 	return changes;
 }
 
+// This function does a full search for possible clusters to merge.  If
+// it finds a candidate pair, it merges the pair and returns true.  If
+// not, if returns false.
+SDFCluster* SDFClusterGal::fullSearchMerge() {
+	if (logstrm)
+		*logstrm << "Starting fullSearchMerge\n";
+	SDFClusterGalIter nextClust(*this);
+	SDFCluster* c;
+	while ((c = nextClust++) != 0) {
+		SDFClustPortIter nextPort(*c);
+		SDFClustPort *p;
+		while ((p = nextPort++) != 0) {
+			// check requirement 1: same rate and no delay
+			if (p->numTokens() == 0 &&
+			    p->numIO() == p->far()->numIO()) {
+				SDFCluster *peer = p->far()->parentClust();
+				SDFCluster *src, *dest;
+				// sort them so src is the source.
+				if (p->isItOutput()) {
+					src = c;
+					dest = peer;
+				}
+				else {
+					src = peer;
+					dest = c;
+				}
+				// requirement 2: no indirect path.
+				// if met, do the merge and return the
+				// result.
+				if (!indirectPath(src,dest))
+					return merge(src,dest);
+			}
+		}
+	}
+	return 0;
+}
+
+// this function returns true if there exists an indirect path from the
+// src cluster to the dst cluster (one that passes through another
+// cluster), treating the ports as directed paths.
+
+int SDFClusterGal::indirectPath(SDFCluster* src, SDFCluster* dst) {
+	stopList.initialize();
+	stopList.put(src);
+	if (logstrm)
+		*logstrm << "indirectPath(" << src->readName()
+			<< "," << dst->readName() << ")\n";
+	SDFClustPortIter nextP(*src);
+	SDFClustPort* p;
+	while ((p = nextP++) != 0) {
+		SDFCluster* peer = p->far()->parentClust();
+		if (p->isItOutput() && peer != dst && findPath(peer,dst)) {
+			if (logstrm)
+				*logstrm << "indirectPath(" << src->readName()
+					<< "," << dst->readName()
+						<< ") = TRUE\n";
+			return TRUE;
+		}
+	}
+	if (logstrm)
+		*logstrm << "indirectPath(" << src->readName()
+			<< "," << dst->readName() << ") = FALSE\n";
+	return FALSE;
+}
+
+// this should be a part of the SequentialList class.
+// it returns true if the pointer argument is a member of the list.
+static int member(Pointer p,SequentialList& l) {
+	ListIter next(l);
+	Pointer q;
+	while ((q = next++) != 0) {
+		if (q == p) return TRUE;
+	}
+	return FALSE;
+}
+
+// This recursive function is used by indirectPath.  The member object
+// stopList prevents the same paths from being checked repeatedly.
+// TRUE is returned if we can reach dst from start without going through
+// any cluster on the stop list.  When indirectPath calls this it puts
+// src on the stop list to initialize it.
+
+int SDFClusterGal::findPath(SDFCluster* start, SDFCluster* dst) {
+	if (logstrm)
+		*logstrm << "findPath(" << start->readName()
+			<< "," << dst->readName() << ")\n";
+	stopList.put(start);
+	SDFClustPortIter nextP(*start);
+	SDFClustPort* p;
+	while ((p = nextP++) != 0) {
+		if (p->isItInput()) continue;
+		SDFCluster* peer = p->far()->parentClust();
+		if (peer == dst) return TRUE;
+		if (member(peer,stopList)) continue;
+		if (findPath(peer,dst)) return TRUE;
+	}
+	return FALSE;
+}
+
+// This is the loop pass.  It loops any cluster for which loopFactor
+// returns a value greater than 1.
+// This version does not loop non-integral rate conversions (e.g. 2->3
+// or 3->2).
 int SDFClusterGal::loopPass() {
+	if (logstrm)
+		*logstrm << "Starting loop pass\n";
 	if (numberClusts() <= 1) return FALSE;
 	int changes = 0;
 	SDFClusterGalIter nextClust(*this);
@@ -164,13 +272,14 @@ int SDFClusterGal::loopPass() {
 			changes = TRUE;
 		}
 	}
-	if (logstrm) {
-		if (changes) *logstrm << "After loop pass:\n" << *this;
-		else *logstrm << "Loop pass made no changes\n";
-	}
+	if (logstrm && !changes)
+		*logstrm << "Loop pass made no changes\n";
 	return changes;
 }
 
+// This function determines the loop factor for a cluster.
+// We attempt to find a factor to repeat the loop by that will make
+// it better match the sample rate of its neighbors.
 int SDFCluster::loopFactor() {
 	int retval = 0;
 	SDFClustPortIter nextPort(*this);
@@ -196,6 +305,7 @@ int SDFCluster::loopFactor() {
 	return retval;
 }
 
+// fn to print ports of a cluster.
 ostream& SDFCluster::printPorts(ostream& o) {
 	const char* prefix = "( ";
 	SDFClustPortIter next(*this);
@@ -215,11 +325,13 @@ ostream& SDFCluster::printPorts(ostream& o) {
 	return o << " )";
 }
 
+// loop a cluster.
 void SDFCluster::loopBy(int fac) {
 	pLoop *= fac;
 	repetitions.numerator /= fac;
 }
 
+// generate a name for a new bag
 const char* SDFClusterGal::genBagName() {
 	char buf[20];
 	sprintf (buf, "bag%d", bagNumber++);
@@ -260,6 +372,8 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 	return c1Bag;
 }
 
+// This function absorbs an atomic cluster into a bag.
+
 void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
 	if (gal.numberBlocks() == 0)
 		repetitions = c->repetitions;
@@ -298,6 +412,7 @@ void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
 	}
 }
 
+// this function merges two bags.
 void
 SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 	// get a list of all "bagports" that connect the two clusters.
@@ -332,6 +447,7 @@ SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 	LOG_DEL; delete b;    // zap the shell
 }
 
+// print a bag on a stream.
 ostream& SDFClusterBag::printOn(ostream& o) {
 	printBrief(o);
 	o << "= {";
@@ -341,6 +457,7 @@ ostream& SDFClusterBag::printOn(ostream& o) {
 		o << " ";
 		c->printBrief(o);
 	}
+	if (numberPorts() == 0) return o << " }\n";
 	o << " }\nports:\t";
 	return printPorts(o);
 }
@@ -354,6 +471,7 @@ int SDFClusterBag::genSched() {
 	return sched.setup(gal);
 }
 
+// return the bag's schedule.
 StringList SDFClusterBag::displaySchedule() {
 	StringList sch;
 	if (loop() > 1) {
@@ -372,6 +490,7 @@ void SDFClusterBag::go() {
 	exCount += loop();
 }
 
+// destroy the bag.
 SDFClusterBag::~SDFClusterBag() {
 	if (!owner) return;
 	// delete my ports
@@ -389,8 +508,11 @@ SDFClusterBag::~SDFClusterBag() {
 	}
 }
 
-SDFCluster* SDFCluster::mergeCandidate() {
 // find an attractive and compatible neighbor.
+// This is the "quick version" -- it assumes that if the source has
+// multiple outputs or the destination has multiple inputs, an alternate
+// path might occur.  fullSearchMerge is the "slow version".
+SDFCluster* SDFCluster::mergeCandidate() {
 	SDFCluster *src = 0, *dst = 0;
 	int multiSrc = 0, multiDst = 0;
 	SDFCluster* srcOK = 0, *dstOK = 0;
@@ -423,6 +545,7 @@ SDFCluster* SDFCluster::mergeCandidate() {
 	else return 0;
 }
 
+// function to create names for atomic clusters and portholes.
 static const char* mungeName(NamedObj& o) {
 	StringList name = o.readFullName();
 	const char* cname = strchr (name, '.');
@@ -440,7 +563,7 @@ static const char* mungeName(NamedObj& o) {
 	return hashstring(buf);
 }
 
-
+// create an atomic cluster to surround a single SDFStar.
 SDFAtomCluster::SDFAtomCluster(SDFStar& star,Galaxy* parent) : pStar(star)
 {
 	SDFStarPortIter nextPort(star);
@@ -455,6 +578,7 @@ SDFAtomCluster::SDFAtomCluster(SDFStar& star,Galaxy* parent) : pStar(star)
 	repetitions = pStar.repetitions;
 }
 
+// destroy an atomic cluster.  Main job: delete the SDFClustPorts.
 SDFAtomCluster::~SDFAtomCluster() {
 	BlockPortIter nextPort(*this);
 	PortHole* p;
@@ -465,6 +589,7 @@ SDFAtomCluster::~SDFAtomCluster() {
 	}
 }
 
+// print functions.
 ostream& SDFCluster::printBrief(ostream& o) {
 	if (pLoop > 1) {
 		o << pLoop << "*";
@@ -497,6 +622,8 @@ int SDFAtomCluster::myExecTime() {
 	return pLoop * pStar.myExecTime();
 }
 
+// constructor for SDFClustPort, port for use in cluster.
+// if bp is set it's a "bag port" belonging to an SDFClusterBag.
 SDFClustPort::SDFClustPort(SDFPortHole& port,SDFCluster* parent, int bp)
 : pPort(port), bagPortFlag(bp)
 {
@@ -532,24 +659,38 @@ int SDFClustPort::numIO() {
 	return n * parentClust()->loop();
 }
 
+// methods for SDFClustSched, the clustering scheduler.
+
 SDFClustSched::~SDFClustSched() { LOG_DEL; delete cgal;}
 
+// compute the schedule!
 int SDFClustSched::computeSchedule (Galaxy& gal) {
 	LOG_DEL; delete cgal;
+
+	// log file stuff.
 	const char* file = logFile;
 	ostream* logstrm = 0;
 	if (file && *file) {
-		int fd = creat(expandPathName(file), 0666);
-		if (fd < 0)
-			Error::warn(gal, "Can't open log file ",file);
-		else logstrm = new ofstream(fd);
+		if (strcmp(file,"cerr") == 0 ||
+		    strcmp(file,"stderr") == 0)
+			logstrm = &cerr;
+		else {
+			int fd = creat(expandPathName(file), 0666);
+			if (fd < 0)
+				Error::warn(gal, "Can't open log file ",file);
+			else logstrm = new ofstream(fd);
+		}
 	}
+
+	// do the clustering.
 	cgal = new SDFClusterGal(gal,logstrm);
 	cgal->cluster();
+
 // generate subschedules
 	if (!cgal->genSubScheds()) {
 		invalid = TRUE; return FALSE;
 	}
+
 // generate top-level schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm) {

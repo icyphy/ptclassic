@@ -54,8 +54,10 @@ class ostream;
 
 class SDFClusterGal : public DynamicGalaxy {
 private:
-	int bagNumber;
-	ostream* logstrm;
+	int bagNumber;		// number for generating bag names
+	ostream* logstrm;	// for logging errors
+	SequentialList stopList;// this list is used by fullSearchMerge.
+
 public:
 	// constructor creates flat galaxy of atomic clusters
 	SDFClusterGal(Galaxy&,ostream* log = 0);
@@ -66,7 +68,8 @@ public:
 	// how many?
 	int numberClusts() const { return numberBlocks();}
 
-	// this is it!  Return TRUE for success
+	// this is it!  The main clustering routine Returns TRUE
+	// if any clustering is performed.
 	int cluster();
 
 	// return TRUE if all member clusters have the same rate
@@ -77,6 +80,18 @@ public:
 
 	// do a merge pass.  Return TRUE if a change was made
 	int mergePass();
+
+	// function to do an "expensive merge" -- it does the full
+	// search for indirect paths.  If it finds a mergeable pair
+	// it merges it and returns the result; otherwise it returns 0.
+	SDFCluster* fullSearchMerge();
+
+	// return true if there is an indirect path between two
+	// member clusters
+	int indirectPath(SDFCluster* src,SDFCluster* dst);
+
+	// function used in finding paths by indirectPath.
+	int findPath(SDFCluster* src,SDFCluster* dst);
 
 	// merge two clusters, returning the result.
 	SDFCluster* merge(SDFCluster* c1,SDFCluster* c2);
