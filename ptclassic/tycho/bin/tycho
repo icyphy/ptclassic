@@ -65,7 +65,7 @@ while ($#argv)
 			set tychodebug
 			breaksw
 		case -ptiny:
-			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
+			if ( $?selectPtolemy || $?selectJava) then
 				echo $argError
 				exit 2
 			endif
@@ -73,7 +73,7 @@ while ($#argv)
 			set tychoptiny
 			breaksw
 		case -ptrim:
-			if ( $?selectPtolemy || $?selectJava || $?selectTty) then				
+			if ( $?selectPtolemy || $?selectJava) then				
 				echo $argError
 				exit 2
 			endif
@@ -81,7 +81,7 @@ while ($#argv)
 			set tychoptrim
 			breaksw
 		case -pigi:
-			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
+			if ( $?selectPtolemy || $?selectJava) then
 				echo $argError
 				exit 2
 			endif
@@ -89,14 +89,14 @@ while ($#argv)
 			set tychopigi
 			breaksw
 		case -tty:
-			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
+			if ( $?selectJava || $?selectTty) then
 				echo $argError
 				exit 2
 			endif
 			set selectTty
 			breaksw
 		case -bin:
-			if ( $?selectPtolemy || $?selectJava || $?selectTty) then
+			if ( $?selectPtolemy || $?selectJava) then
 				echo $argError
 				exit 2
 			endif
@@ -142,11 +142,6 @@ while ($#argv)
 	endsw
 	shift
 end
-
-if ( $?selectTty && $?filename ) then
-	echo "Usage: $0 : -tty and filename are not compatible."
-	exit 2	
-endif
 
 if ( ! $?TYCHO ) then
 	if ( $?PTOLEMY ) then
@@ -207,7 +202,7 @@ endif
 
 ##################################################################
 # itclsh - non graphical version
-if (! $?selectPtolemy && ! $?selectJava && $?selectTty) then
+if (! $?selectJava && $?selectTty) then
 	if ( $?tychodebug ) then
 		if ( $?PT_DEBUG) then
 			set debugger = $PT_DEBUG
@@ -221,7 +216,22 @@ if (! $?selectPtolemy && ! $?selectJava && $?selectTty) then
 
 		#set prog = (itclsh.purify $TYCHO/kernel/Tycho.tcl)
 	else
-		set prog = (itclsh \"\$TYCHO/kernel/Tycho.tcl\")
+		if ( $?prog) then
+			set prog = ($prog \"\$TYCHO/kernel/Tycho.tcl\")
+		else 
+			if ( ! $?selectPtolemy ) then
+				set prog = (itclsh \"\$TYCHO/kernel/Tycho.tcl\")
+			else
+				if ( $?tychoptiny) then
+					set prog = (pitcl.ptiny \"\$TYCHO/kernel/Tycho.tcl\")
+				else if ( $?tychoptrim) then
+					set prog = (pitcl.ptrim \"\$TYCHO/kernel/Tycho.tcl\")
+				else if ( $?tychopigi) then
+					set prog = (pitcl \"\$TYCHO/kernel/Tycho.tcl\")
+
+				endif
+			endif
+		endif
 	endif
 endif
 
@@ -417,7 +427,7 @@ endif
 
 # If selectPtolemy is set then we are just running itkwish
 # If the user has used -debug, then don't check, the user must be a god :-) 
-if ($?selectPtolemy && ! $?tychodebug) then
+if ($?selectPtolemy && ! $?tychodebug && ! $?selectTty) then
 	# Can't use && here, as since if we are running just 'tycho'
 	# then the program name will be 'itkwish' which is not necessarily
 	# executable.
