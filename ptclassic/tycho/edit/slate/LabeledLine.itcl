@@ -35,9 +35,9 @@ namespace ::tycho {
 }
 
 ##########################################################################
-## LabelledLine
+## LabeledLine
 #
-# <i>LabelledLine</i> is a line with a text label attached to it.
+# <i>LabeledLine</i> is a line with a text label attached to it.
 # The text label ia automatically placed near the center of the line,
 # and an optional offset can be used to allow manual repositioning
 # of the line. In all other respects. it behaves just like a regular
@@ -93,7 +93,7 @@ namespace ::tycho {
 #  <P>Create a labelled line and an object for moving it around:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   set l [$slate create LabelledLine 100 50 160 100 160 200 &#92
+#   set l [$slate create LabeledLine 100 50 160 100 160 200 &#92
 #               -arrow last -text FooBar]
 #   set d [$slate create Solid 150 210 160 200 170 210 160 220 150 210 &#92
 #   		-color green -tags moveable]
@@ -103,7 +103,7 @@ namespace ::tycho {
 #
 # Move the diamond around to see how the label moves.
 #
-class ::tycho::LabelledLine {
+class ::tycho::LabeledLine {
     inherit ::tycho::Picture
 
     # Create a new item
@@ -163,7 +163,7 @@ class ::tycho::LabelledLine {
     # Default values of this item's options
     common optiondefault
 
-    # LabelledLines are shaped like... lines
+    # LabeledLines are shaped like... lines
     common shape "line"
 
     ###################################################################
@@ -172,14 +172,14 @@ class ::tycho::LabelledLine {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
-    set methodtable(_anchor)   ::tycho::LabelledLine::_anchor
-    set methodtable(_arrow)    ::tycho::LabelledLine::_arrow
-    set methodtable(_fill)     ::tycho::LabelledLine::_fill
-    set methodtable(_smooth)   ::tycho::LabelledLine::_smooth
-    set methodtable(_text)     ::tycho::LabelledLine::_text
+    set methodtable(_anchor)   ::tycho::LabeledLine::_anchor
+    set methodtable(_arrow)    ::tycho::LabeledLine::_arrow
+    set methodtable(_fill)     ::tycho::LabeledLine::_fill
+    set methodtable(_smooth)   ::tycho::LabeledLine::_smooth
+    set methodtable(_text)     ::tycho::LabeledLine::_text
 
-    set methodtable(construct)  ::tycho::LabelledLine::construct
-    set methodtable(coords)     ::tycho::LabelledLine::coords
+    set methodtable(construct)  ::tycho::LabeledLine::construct
+    set methodtable(coords)     ::tycho::LabeledLine::coords
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Picture::optiondefault]
@@ -196,7 +196,7 @@ class ::tycho::LabelledLine {
 #
 # Move the item if necessary to avoid overlapping the line.
 #
-body ::tycho::LabelledLine::_anchor {id canvas slate anchor} {
+body ::tycho::LabeledLine::_anchor {id canvas slate anchor} {
     set _anchor($id) $anchor
     if { ! [::info exists textitem($id)] } {
 	return
@@ -228,7 +228,7 @@ body ::tycho::LabelledLine::_anchor {id canvas slate anchor} {
 ##########################################################################
 ## -arrow option configuration
 #
-body ::tycho::LabelledLine::_arrow {id canvas slate arrow} {
+body ::tycho::LabeledLine::_arrow {id canvas slate arrow} {
     set _arrow($id) $arrow
     $canvas itemconfigure $primary($id) -arrow $arrow
 }
@@ -236,7 +236,7 @@ body ::tycho::LabelledLine::_arrow {id canvas slate arrow} {
 ##########################################################################
 ## -fill option configuration
 #
-body ::tycho::LabelledLine::_fill {id canvas slate fill} {
+body ::tycho::LabeledLine::_fill {id canvas slate fill} {
     set _fill($id) $fill
     $canvas itemconfigure $primary($id) -fill $fill
 }
@@ -244,7 +244,7 @@ body ::tycho::LabelledLine::_fill {id canvas slate fill} {
 ##########################################################################
 ## -smooth option configuration
 #
-body ::tycho::LabelledLine::_smooth {id canvas slate smooth} {
+body ::tycho::LabeledLine::_smooth {id canvas slate smooth} {
     set _smooth($id) $smooth
     $canvas itemconfigure $primary($id) -smooth $smooth
 }
@@ -256,7 +256,7 @@ body ::tycho::LabelledLine::_smooth {id canvas slate smooth} {
 # line at the current *-anchor* position, and moved if necessary to
 # as not to collide with the line.
 #
-body ::tycho::LabelledLine::_text {id canvas slate text} {
+body ::tycho::LabeledLine::_text {id canvas slate text} {
     if { $text != "" } {
         if { ! [::info exists textitem($id)] } {
 	    # Create the item near the center of the line
@@ -278,7 +278,7 @@ body ::tycho::LabelledLine::_text {id canvas slate text} {
 ##########################################################################
 #### construct
 #
-body ::tycho::LabelledLine::construct {id canvas slate tags args} {
+body ::tycho::LabeledLine::construct {id canvas slate tags args} {
     getalloptions options args
 
     # Initialize the options
@@ -300,9 +300,9 @@ body ::tycho::LabelledLine::construct {id canvas slate tags args} {
 ##########################################################################
 #### coords
 #
-# Set or read the LabelledLine's coordinates
+# Set or read the LabeledLine's coordinates
 #
-body ::tycho::LabelledLine::coords {id canvas slate args} {
+body ::tycho::LabeledLine::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
 	return [$canvas coords $primary($id)]
