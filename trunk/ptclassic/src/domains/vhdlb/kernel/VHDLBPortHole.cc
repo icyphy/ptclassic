@@ -24,7 +24,7 @@ void VHDLBPortHole :: setupForkDests() {
 	SequentialList temp;
 	temp.initialize();
 
-	ForkDestIter next(this);
+	VHDLBForkDestIter next(this);
 	VHDLBPortHole *outp, *inp;
 	while ((outp = next++) != 0) {
 		inp = outp->realFarPort();
@@ -35,7 +35,7 @@ void VHDLBPortHole :: setupForkDests() {
 	while ((inp = (VHDLBPortHole*) nextPort++) != 0) {
 		inp->setupForkDests();
 		forkDests.remove(inp->far());
-		ForkDestIter realNext(inp);
+		VHDLBForkDestIter realNext(inp);
 		while ((outp = realNext++) != 0)
 			forkDests.put(outp);
 	}

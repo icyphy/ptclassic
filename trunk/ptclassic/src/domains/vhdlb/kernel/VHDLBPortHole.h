@@ -21,7 +21,7 @@ $Id$
 #include "VHDLBGeodesic.h"
 
 class VHDLBPortHole : public CGPortHole {
-friend class ForkDestIter;
+friend class VHDLBForkDestIter;
 public:
 	VHDLBPortHole() {}
 	~VHDLBPortHole() {}
@@ -97,9 +97,9 @@ public:
 	PortHole& newPort();
 };
 
-class ForkDestIter : private ListIter {
+class VHDLBForkDestIter : private ListIter {
 public:
-	ForkDestIter(VHDLBPortHole* p) : ListIter(p->myDest()) {}
+	VHDLBForkDestIter(VHDLBPortHole* p) : ListIter(p->myDest()) {}
 	VHDLBPortHole* next() { return (VHDLBPortHole*) ListIter::next(); }
 	VHDLBPortHole* operator++ () { return next(); }
 	ListIter::reset;
