@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee
+ Programmer: E. A. Lee, T. M. Parks
 
  This is the baseclass for stars that generate C language code
 
@@ -28,75 +28,77 @@ const char* CGCStar :: domain () const { return CGCdomainName;}
 
 ISA_FUNC(CGCStar, CGStar);
 
-StringList CGCStar::getRef(const char* name) {
-	registerState(name);
-	GenericPort *p = genPortWithName(name);
-	if(!p) { 
-		StringList s = ((CGCTarget*) myTarget())->correctName(*this);
-		s += ".";
-		s += name;
-		return s;
-	}
-		
-	if(p->isItMulti()) {
-		Error::abortRun(*this,
-		"Accessing MultiPortHole without identifying which port.");
-		return("ERROR");
-	}
+// Reference to State or PortHole.
+StringList CGCStar::expandRef(const char* name)
+{
+    StringList ref;
+    CGCPortHole* port;
+    StringList portName = expandPortName(name);
 
-	// if necessary, we add offset to this.
-	CGCPortHole* cp = (CGCPortHole*) p;
-	StringList out = cp->getGeoName();
-	if (cp->maxBufReq() > 1) {
-		out += "[";
-		out += ((CGCTarget*)myTarget())->offsetName(cp);
-		out += "]";
+    if (stateWithName(name) != NULL)
+    {
+	registerState(name);
+	ref << ((CGCTarget*)myTarget())->correctName(*this) << '.' << name;
+    }
+    else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
+    {
+	ref << port->getGeoName();
+	if (port->maxBufReq() > 1)
+	{
+	    ref << '[' << ((CGCTarget*)myTarget())->offsetName(port) << ']';
 	}
-	
-	return out;
+    }
+    else
+    {
+	codeblockError(name, " is not defined as a state or port");
+	ref.initialize();
+    }
+    return ref;
 }
 
-StringList CGCStar::getRef2(const char* name, const char* offset) {
-	StringList out;
-	registerState(name);
-	GenericPort *p = genPortWithName(name);
-	State* s = stateWithName(offset);
-	int offVal = 0;
-	if (s) {
-		if (!s->isA("IntState")) {
-                        codeblockError(offset, " is not the name of an IntState"
-);
-		}
-		IntState* is = (IntState*) s;
-		offVal = *is;
-	}
+// Reference to State or PortHole with offset.
+StringList CGCStar::expandRef(const char* name, const char* offset)
+{
+    StringList ref;
+    State* state;
+    CGCPortHole* port;
+    StringList stateVal;
+    StringList portName = expandPortName(name);
 
-	if(!p) {
-		out += CGStar::getRef(name);
-		out += "[";
-		if (s) out += offVal;
-		else out += offset;
-	} else {
-		// if necessary, we add offset to this.
-		CGCPortHole* cp = (CGCPortHole*) p;
-		out += cp->getGeoName();
-		if (cp->maxBufReq() > 1) {
-			out += "[(";
-			out += ((CGCTarget*)myTarget())->offsetName(cp);
-			out += " - (";
-			if (s) out += offVal;
-			else out += offset;
-			out += ") + ";
-			out += cp->maxBufReq();
-			out += ") % ";
-			out += cp->maxBufReq();
-		} else {
-			return out;
-		}
+    if ((state = stateWithName(offset)) != NULL)
+    {
+	// Note: currently only the value of a State can be used as an offset
+	if (state->isA("IntState"))
+	{
+	    stateVal = expandVal(offset);
+	    offset = stateVal;
 	}
+	else
+	{
+	    codeblockError(offset, " is not an IntState");
+	    ref.initialize();
+	    return ref;
+	}
+    }
 
-	out += "]";
-	return out;
+    if ((state = stateWithName(name)) != NULL)
+    {
+	ref = expandRef(name);
+	if (ref.size() == 0) return ref;	// error in getRef()
+	if (state->size() > 1) ref << '[' << offset << ']';
+    }
+    else if (port = (CGCPortHole*)genPortWithName(portName))
+    {
+	ref << port->getGeoName();
+	if (port->maxBufReq() > 1)
+	{
+	    ref << "[(" << ((CGCTarget*)myTarget())->offsetName(port);
+	    ref << " - (" << offset;
+	    ref << ") + " << port->maxBufReq() << ") % " << port->maxBufReq();
+	    ref << ']';
+	}
+    }
+    return ref;
 }
 
 void CGCStar :: initBufPointer() {
