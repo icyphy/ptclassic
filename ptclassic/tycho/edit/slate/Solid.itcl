@@ -268,10 +268,10 @@ body ::tycho::Solid::_relief {id canvas slate relief} {
 
 	    set coords [$canvas coords $primary($id)]
 
-	    assign inside junk1 junk2 \
+	    ::tycho::assign inside junk1 junk2 \
 		    [::tycho::Polygon::borders 45 -135 \
 		    $coords $_borderwidth($id)]
-	    assign inside notlitC notshadedC \
+	    ::tycho::assign inside notlitC notshadedC \
 		    [::tycho::Polygon::borders 45 -135 \
 		    $inside $_borderwidth($id)]
 
@@ -322,7 +322,7 @@ body ::tycho::Solid::_relief {id canvas slate relief} {
 
 	    if { [::info exists surface($id)] } {
 		set coords [$canvas coords $primary($id)]
-		assign inside junk1 junk2 \
+		::tycho::assign inside junk1 junk2 \
 			[::tycho::Polygon::borders 45 -135 \
 			$coords $_borderwidth($id)]
 		eval $canvas coords $surface($id) $inside
@@ -340,9 +340,9 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
 
     # Move the components to their new locations.
     set polys [set [set name]($id)]
-    set count [min [llength $polys] [llength $coords]]
-    set usepolys  [ltake $polys $count]
-    set usecoords [ltake $coords $count]
+    set count [::tycho::min [llength $polys] [llength $coords]]
+    set usepolys  [lrange $polys 0 [expr $count-1]]
+    set usecoords [lrange $coords 0 [expr $count-1]]
     foreach p $usepolys c $usecoords {
 	eval $canvas coords $p $c
     }
@@ -351,7 +351,7 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
     # new components to the same level as the primary component.
     if { [llength $coords] > $count } {
 	set tags [$canvas gettags $primary($id)]
-	set moreneeded [ldrop $coords $count]
+	set moreneeded [lrange $coords $count end]
 	foreach c $moreneeded {
 	    set p [eval $canvas create polygon $c \
 		    -fill $shade \
@@ -361,8 +361,8 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
 	}
     } elseif { [llength $coords] < $count } {
 	# If there were too many polygons, delete the leftovers
-	set leftovers [ldrop $polys $count]
-	set [set name]($id) [ltake $polys $count]
+	set leftovers [lrange $polys $count end]
+	set [set name]($id) [lrange $polys 0 [expr $count-1]]
 	# FIXME: replace with eval $canvas delete $leftovers and TEST
 	foreach p $leftovers {
 	    $canvas delete $p
@@ -374,7 +374,7 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
 ## construct
 #
 body ::tycho::Solid::construct {id canvas slate tags args} {
-    getalloptions options args
+    ::tycho::getalloptions options args
 
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $options] {
@@ -431,7 +431,7 @@ body ::tycho::Solid::coords {id canvas slate args} {
     eval $canvas coords $primary($id) $coords
 
     # Get the coordinates of the borders and the surface component
-    assign inside litC shadedC \
+    ::tycho::assign inside litC shadedC \
 	    [::tycho::Polygon::borders 45 -135 $coords $_borderwidth($id)]
 
     # Adjust the positions of the border polygons, creating and
@@ -442,7 +442,7 @@ body ::tycho::Solid::coords {id canvas slate args} {
     # If the relief is "groove" or "ridge," adjust the inner borders
     # as well. Note that _inside_ is over-written with new values.
     if { $_relief($id) == "ridge" || $_relief($id) == "groove" } {
-	assign inside notlitC notshadedC \
+	::tycho::assign inside notlitC notshadedC \
 		[::tycho::Polygon::borders 45 -135 \
 		$inside $_borderwidth($id)]
 

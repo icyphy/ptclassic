@@ -129,7 +129,7 @@ class ::tycho::Oval {
 # (_x_, _y_) is a vector from the center.
 #
 body ::tycho::Oval::_aspect {id canvas slate args} {
-    assign x0 y0 x1 y1 [$slate coords $id]
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     set result {}
 
     if { $args == "" } {
@@ -169,7 +169,7 @@ body ::tycho::Oval::_aspect {id canvas slate args} {
 #
 body ::tycho::Oval::_reshape {id canvas slate x y args} {
     # Get the current coordinates
-    assign x0 y0 x1 y1 [$slate coords $id]
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     
     # For each of the two possible aspects, see if it is present in
     # the aspects list, and if it is, alter the appropriate coordinates
@@ -190,7 +190,7 @@ body ::tycho::Oval::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
-    getflag ghost args
+    ::tycho::getflag ghost args
 
     # Remember how I am now.
     set scratch($id.aspects) $args
@@ -210,7 +210,7 @@ body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
 #
 body ::tycho::Oval::_reshapedrag {id canvas slate x y} {
     # Get the current coordinates
-    assign x0 y0 x1 y1 [$slate coords $id]
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     
    # Get delta coordinates
     set deltaX [expr $x - $scratch($id.prevX)]

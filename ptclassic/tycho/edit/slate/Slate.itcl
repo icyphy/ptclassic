@@ -315,7 +315,7 @@ body ::tycho::Slate::align {where args} {
 # this item.
 #
 body ::tycho::Slate::aspect {id args} {
-    getflag region args
+    ::tycho::getflag region args
 
     # Get the proc and call it
     return [eval [shape $id aspect $region] $id $canvas $this $args]
@@ -793,7 +793,7 @@ body ::tycho::Slate::propagate {id event args} {
  	if { [string match $pattern $event] } {
  	    # Apply the constraint script if a match
  	    if { [catch { \
- 		    uplevel #0 apply \
+ 		    uplevel #0 ::tycho::apply \
  		    [list $constraints($id,$pattern)] $id $args} msg]} {
  		# If there's an error, reset the visited items
  		# and reinvoke the error
@@ -835,15 +835,15 @@ body ::tycho::Slate::recreate {description args} {
     # and then move or tag it if there are options for doing so.
     # This could be made a fair bit more efficient by modifying the
     # description string _before_ applying it
-    set id [apply $description $this]
+    set id [::tycho::apply $description $this]
 
     # -move option
-    set move [readoption move args]
+    set move [::tycho::readoption move args]
     if { $move != "" } {
 	$this move $id [lindex $move 0] [lindex $move 1]
     } else {
 	# -at option
-	set at [readoption at args]
+	set at [::tycho::readoption at args]
 	if { $at != "" } {
 	    if { [llength $at] > 2 } {
 		set aspect [lindex $at 2]
@@ -853,7 +853,7 @@ body ::tycho::Slate::recreate {description args} {
 	    $this moveto $id [lindex $at 0] [lindex $at 1] $aspect
 	} else {
 	    # -coords option
-	    set coords [readoption coords args]
+	    set coords [::tycho::readoption coords args]
 	    if { $coords != "" } {
 		eval $this coords $id $coords
 	    }
@@ -861,10 +861,10 @@ body ::tycho::Slate::recreate {description args} {
     }
 
     # -in option
-    set in [readopt in args]
+    set in [::tycho::readopt in args]
     if { $in != "" } {
 	$this itemconfigure $id \
-		-tags [lunion [$this gettags $id] [$this gettags $in]]
+		-tags [::tycho::lunion [$this gettags $id] [$this gettags $in]]
     }
 
     return $id
@@ -929,8 +929,8 @@ body ::tycho::Slate::region {tag args} {
 	    eval coords $tag $args
 	} else {
 	    # Otherwise figure out the scaling factors and call scale{}
-	    assign x0 y0 x1 y1 $region
-	    assign a0 b0 a1 b1 $args
+	    ::tycho::assign x0 y0 x1 y1 $region
+	    ::tycho::assign a0 b0 a1 b1 $args
 
 	    set xscale [expr double($a1-$a0)/($x1-$x0)]
 	    set yscale [expr double($b1-$b0)/($y1-$y0)]
@@ -950,7 +950,7 @@ body ::tycho::Slate::region {tag args} {
 # FIXME: Allow first arg to be a tag.
 #
 body ::tycho::Slate::reshape {id x y args} {
-    getflag region args
+    ::tycho::getflag region args
 
     # First, propagate constraints and return if already visited
     if { ! [eval propagate $id reshape $x $y $args] } {
@@ -1070,7 +1070,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
     } elseif { [string match {[0-9]*} $id] } {
 	set shape [$canvas type $id]
         # Text, image, and bitmap items are treated as a "point"
-        if { [lmember {text bitmap image} $shape] } {
+        if { [::tycho::lmember {text bitmap image} $shape] } {
             set shape point
         }
     } else {

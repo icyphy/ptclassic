@@ -175,10 +175,10 @@ body ::tycho::Bounder::click {x y args} {
 	}
     }
     # Remember the bounds
-    assign x0 y0 x1 y1 $b
+    ::tycho::assign x0 y0 x1 y1 $b
 
     # Get the coordinates of the picture
-    assign a0 b0 a1 b1 [$slate region $target]
+    ::tycho::assign a0 b0 a1 b1 [$slate region $target]
 
     # Adjust the bounds for the size of the picture
     set x0 [expr $x0 + ($x - $a0)]

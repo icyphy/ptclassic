@@ -351,12 +351,12 @@ body ::tycho::Editor::icursor {mode} {
 	}
 	"/+word" {
 	    set str [$slate itemcget $target -text]
-	    $slate icursor $target [wordright $str \
+	    $slate icursor $target [::tycho::wordright $str \
 		    [$slate index $target insert]]
 	}
 	"/-word" {
 	    set str [$slate itemcget $target -text]
-	    $slate icursor $target [wordleft $str \
+	    $slate icursor $target [::tycho::wordleft $str \
 		    [$slate index $target insert]]
 	}
 	default {

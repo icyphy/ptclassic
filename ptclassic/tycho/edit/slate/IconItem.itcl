@@ -232,7 +232,7 @@ body ::tycho::Node::_icontype {id canvas slate icontype} {
 #
 body ::tycho::Node::_inputs {id canvas slate inputs} {
     # Set up coordinates
-    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set xscale [expr ($x1-$x0)/100.0]
     set yscale [expr ($y1-$y0)/100.0]
     set positions {}
@@ -311,7 +311,7 @@ body ::tycho::Node::_name {id canvas slate name} {
 #
 body ::tycho::Node::_outputs {id canvas slate outputs} {
     # Set up coordinates
-    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set xscale [expr ($x1-$x0)/100.0]
     set yscale [expr ($y1-$y0)/100.0]
     set positions {}
@@ -393,7 +393,7 @@ body ::tycho::Node::construct {id canvas slate tags x0 y0 x1 y1 args} {
 	    -tags [list $tags]]
 
     # Create the label (should it be underneath?)
-    set point [rectAspect [list $x0 $y0 $x1 $y1] "c"]
+    set point [::tycho::Rectangle::aspect $x0 $y0 $x1 $y1 "c"]
     set textitem($id) [eval $canvas create text $point \
 	    -text $_name($id) -font $_font($id) \
 	    -tags [list $tags]]
@@ -422,10 +422,10 @@ body ::tycho::Node::aspect {id canvas slate args} {
 
     # If there are no args, return a list of aspect names
     if { $args == "" } {
-	loop [llength $inports($id)] -counter n {
+	foreach n [interval 0 [expr [llength $inports($id)] - 1]] {
 	    lappend result input-$n
 	}
-	loop [llength $outports($id)] -counter n {
+	foreach n [interval 0 [expr [llength $$outports($id)] - 1]] {
 	    lappend result output-$n
 	}
 	return $result
@@ -501,7 +501,7 @@ body ::tycho::Node::coords {id canvas slate args} {
     update $id $canvas
 
     # Set up coordinates for moving inputs and outputs
-    assign x0 y0 x1 y1 $coords
+    ::tycho::assign x0 y0 x1 y1 $coords
 
     set xscale [expr ($x1-$x0)/100.0]
     set yscale [expr ($y1-$y0)/100.0]

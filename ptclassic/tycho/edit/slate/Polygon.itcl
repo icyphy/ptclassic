@@ -103,7 +103,7 @@ body ::tycho::Polygon::_aspect {id canvas slate args} {
 
     if { $args == "" } {
 	set result {length start end}
-	foreach n [interval 0 \
+	foreach n [::tycho::linterval 0 \
 		[expr [llength $coords] / 2 - 2]] {
 	    lappend result "vertex-$n"
 	}
@@ -125,7 +125,7 @@ body ::tycho::Polygon::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
-    getflag ghost args
+    ::tycho::getflag ghost args
 
     # Remember how I am now.
     set scratch($id.prevX) $x
@@ -151,7 +151,7 @@ body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
 
     # Figure out the vertices that will be changed
     foreach aspect $args {
-	assign a n [split $aspect "-"]
+	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "vertex" {
 		lappend scratch($id.vertices) $n
@@ -166,7 +166,7 @@ body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
     }
     
     # Make sure there are no duplicates
-    set scratch($id.vertices) [lnub scratch($id.vertices)]
+    set scratch($id.vertices) [::tycho::lnub scratch($id.vertices)]
 
     # If the -ghost flag is set, draw the ghost line.
     if { $ghost } {
@@ -223,7 +223,7 @@ body ::tycho::Polygon::aspect {coords args} {
 		lappend result [expr [llength $coords] / 2 - 1]
 	    }
 	    "center" {
-		assign x0 y0 x1 y1 $coords
+		::tycho::assign x0 y0 x1 y1 $coords
 		lappend result [expr ($x0+$x1)/ 2] [expr $y0+$y1)/2]
 	    }
 	    "vertex" {
@@ -267,7 +267,7 @@ body ::tycho::Polygon::reshape {coords x y args} {
 
     # Process all aspects to change coordinates
     foreach aspect $args {
-	assign a n [split $aspect "-"]
+	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "length" {
 		error "Cannot set the \"length\" aspect of a line"
@@ -316,8 +316,9 @@ body ::tycho::Polygon::stretch {coords distance {angles {}}} {
     set x0 [lindex $coords [expr [llength $coords] - 4]]
     set y0 [lindex $coords [expr [llength $coords] - 3]]
 
-    behead x1 coords
-    behead y1 coords
+    set x1 [lindex $coords 0]
+    set y1 [lindex $coords 1]
+    set coords [lreplace $coords 0 1]
 
     set beta [expr atan2($y0-$y1, $x0-$x1)]
 
@@ -393,13 +394,13 @@ body ::tycho::Polygon::borders {minAngle maxAngle coords borderWidth} {
 	}
 
 	lappend lit [concat \
-		[ltake $outer [expr $length + 2]] \
-		[reverse [ltake $inner [expr $length + 2]]] \
+		[lrange $outer 0 [expr $length+1]] \
+		[reverse [lrange $inner 0 [expr $length+1]]] \
 		[lindex $outer 0] \
 		[lindex $outer 1]]
 
-	set outer [ldrop $outer $length]
-	set inner [ldrop $inner $length]
+	set outer [lrange $outer $length end]
+	set inner [lrange $inner $length end]
     }
 
     while { [llength $angles] > 0 } {
@@ -414,8 +415,8 @@ body ::tycho::Polygon::borders {minAngle maxAngle coords borderWidth} {
  	}
 
 	lappend shaded [concat \
-		[ltake $outer [expr $length + 2]] \
-		[reverse [ltake $inner [expr $length + 2]]] \
+		[lrange $outer 0 [expr $length+1]] \
+		[reverse [lrange $inner 0 [expr $length+1]]] \
 		[lindex $outer 0] \
 		[lindex $outer 1]]
 
@@ -423,8 +424,8 @@ body ::tycho::Polygon::borders {minAngle maxAngle coords borderWidth} {
  	    break
  	}
 
- 	set outer [ldrop $outer $length]
- 	set inner [ldrop $inner $length]
+ 	set outer [lrange $outer $length end]
+ 	set inner [lrange $inner $length end]
 
  	set length 2
 	set angles [lrange $angles 1 end]
@@ -437,13 +438,13 @@ body ::tycho::Polygon::borders {minAngle maxAngle coords borderWidth} {
  	}
 
 	lappend lit [concat \
-		[ltake $outer [expr $length + 2]] \
-		[reverse [ltake $inner [expr $length + 2]]] \
+		[lrange $outer 0 [expr $length+1]] \
+		[reverse [lrange $inner 0 [expr $length+1]]] \
 		[lindex $outer 0] \
 		[lindex $outer 1]]
 
- 	set outer [ldrop $outer $length]
- 	set inner [ldrop $inner $length]
+ 	set outer [lrange $outer $length end]
+ 	set inner [lrange $inner $length end]
     }
 
     # Return the three-list of results

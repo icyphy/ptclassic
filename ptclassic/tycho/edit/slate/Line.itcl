@@ -114,7 +114,7 @@ body ::tycho::Line::_aspect {id canvas slate args} {
 
     if { $args == "" } {
 	set result {length start end}
-	foreach n [interval 0 \
+	foreach n [::tycho::linterval 0 \
 		[expr [llength $coords] / 2 - 1]] {
 	    lappend result "vertex-$n"
 	}
@@ -136,7 +136,7 @@ body ::tycho::Line::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
-    getflag ghost args
+    ::tycho::getflag ghost args
 
     # Remember how I am now.
     set scratch($id.prevX) $x
@@ -153,7 +153,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 
     # Figure out the vertices that will be changed
     foreach aspect $args {
-	assign a n [split $aspect "-"]
+	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "start" {
 		lappend scratch($id.vertices) 0
@@ -175,7 +175,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
     }
     
     # Make sure there are no duplicates
-    set scratch($id.vertices) [lnub scratch($id.vertices)]
+    set scratch($id.vertices) [::tycho::lnub scratch($id.vertices)]
 
     # If the -ghost flag is set, draw the ghost line.
     if { $ghost } {
@@ -326,7 +326,7 @@ body ::tycho::Line::reshape {coords x y args} {
 
     # Process all aspects to change coordinates
     foreach aspect $args {
-	assign a n [split $aspect "-"]
+	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "start" {
 		set _x(0) [expr $_x(0) + $x]

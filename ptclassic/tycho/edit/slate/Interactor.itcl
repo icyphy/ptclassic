@@ -103,7 +103,7 @@ class ::tycho::Interactor {
     # is typically used to set target parameters or to chain interactors.
     # As with all interactor scripts, this script takes four arguments:
     # this interactor, the target picture, and the _x_ and _y_
-    # co-ordinates. See the <a href="../../../../lib/util/syntax.tcl#apply">
+    # co-ordinates. See the <a href="../../../../kernel/Misc.tcl#apply">
     # <i>apply</i></a> procedure for the format of the script.
     public variable activatecommand {}
 
@@ -203,7 +203,7 @@ class ::tycho::Interactor {
 # call *deactivate* to remove the bindings.
 #
 body ::tycho::Interactor::activate {t x y args} {
-    abstractMethod Interactor activate
+    ::tycho::abstractMethod Interactor activate
 }
 
 #######################################################################
@@ -288,7 +288,7 @@ body ::tycho::Interactor::click {x y args} {
 # Make this interactor inactive. In other words, remove my bindings.
 #
 body ::tycho::Interactor::deactivate {args} {
-    abstractMethod Interactor deactivate
+    ::tycho::abstractMethod Interactor deactivate
 }
 
 #######################################################################
@@ -350,7 +350,8 @@ body ::tycho::Interactor::enable {} {
 #
 body ::tycho::Interactor::execute {script {x {}} {y {}} {options {}}} {
     if { $script != "" } {
-	uplevel \#0 apply [list $script] $this $target $x $y $options
+	uplevel \#0 ::tycho::apply \
+		[list $script] $this $target $x $y $options
     }
 }
 
@@ -463,9 +464,9 @@ body ::tycho::Interactor::event {type args} {
     set button {}
     set modifiers {}
 
-    getopt button args
-    getopt key args
-    getopt modifiers args
+    ::tycho::getopt button args
+    ::tycho::getopt key args
+    ::tycho::getopt modifiers args
 
     set i ""
     switch -exact [string tolower $type] {
@@ -542,7 +543,7 @@ body ::tycho::Interactor::event {type args} {
     }
 
     foreach m $modifiers {
-	set i [join [list [capitalize $m] $i] "-"]
+	set i [join [list [::tycho::capitalize $m] $i] "-"]
     }
 
     return <$i>

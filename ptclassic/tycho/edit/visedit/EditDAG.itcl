@@ -886,7 +886,7 @@ body ::tycho::EditDAG::configureContextMenu {} {
 
     set item [$slate find withtag current]
     if { $item != "" } {
-	if { [lmember [$slate gettags $item] node] } {
+	if { [::tycho::lmember [$slate gettags $item] node] } {
 	    set node $nametable($item)
 	    set contents [$mygraph contents $node]
 
@@ -1066,7 +1066,7 @@ body ::tycho::EditDAG::showCurrentNodeInfo {state {invert 0}} {
     putStatus ""
     set item [$slate find withtag current]
     if { $item != "" } {
-	if { [lmember [$slate gettags $item] node] } {
+	if { [::tycho::lmember [$slate gettags $item] node] } {
 	    set shift [expr ($state & 1) ^ $invert]
 	    set node $nametable($item)
 	    set contents [$mygraph contents $node]

@@ -196,7 +196,7 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
     }
 
     # Move and scale them to fit into this item
-    assign x0 y0 x1 y1 [$slate coords $id]
+    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     $slate move graphics.$id $x0 $y0
     $slate scale graphics.$id $x0 $y0 \
     		[expr ($x1-$x0)/100.0] \
@@ -214,7 +214,7 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
 body ::tycho::LabeledItem::_text {id canvas slate text} {
     if { $text != "" } {
         if { ! [::info exists textitem($id)] } {
-	    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+	    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
 	    set textitem($id) [$canvas create text \
                     [expr ($x0+$x1)/2] \
 		    [expr ($y0+$y1)/2] \

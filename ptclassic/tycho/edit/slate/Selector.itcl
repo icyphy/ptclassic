@@ -333,7 +333,7 @@ body ::tycho::Selector::_select {id} {
 #
 body ::tycho::Selector::activate {tag x y args} {
     # Process depending on whether this is toggle mode or not
-    getflag toggle args
+    ::tycho::getflag toggle args
     if { $toggle } {
     	set selectmode "toggle"
     } else {
@@ -376,11 +376,12 @@ body ::tycho::Selector::activateDelegates {id x y args} {
 	foreach index [array names delegates immediate,single,*] {
 	    # Activate the delegate interactor if that item is in the tags
 	    # or if it has a tag that is in the tags
-	    assign interactor tags options $delegates($index)
+	    ::tycho::assign interactor tags options $delegates($index)
 	    if { $selcount == 1 } {
 		if { $args == $options } {
-		    if { [lmember $tags $id] \
-			    || ! [ldisjoint $tags [$slate gettags $id]] } {
+		    if { [::tycho::lmember $tags $id] \
+			    || ! [::tycho::ldisjoint \
+			    $tags [$slate gettags $id]] } {
 			# Activate it; it will deactivate automatically
 			eval $interactor activate $id $options
 		    }
@@ -393,12 +394,13 @@ body ::tycho::Selector::activateDelegates {id x y args} {
 	# Activate a delegate interactor on the whole selection if
 	# every item is either in the interactor's tags or if it
 	# has a tag that is.
-	assign interactor tags options $delegates($index)
+	::tycho::assign interactor tags options $delegates($index)
 	if { $args == $options } {
 	    set ok 1
 	    foreach item $selection {
-		if { ! [lmember $tags $item] \
-			&& [ldisjoint $tags [$slate gettags $item]] } {
+		if { ! [::tycho::lmember $tags $item] \
+			&& [::tycho::ldisjoint \
+			$tags [$slate gettags $item]] } {
 		    set ok 0
 		    break
 		}
@@ -486,14 +488,14 @@ body ::tycho::Selector::bindDelegates {} {
 
     # Process interactors that operate on a single item only
     foreach index [array names delegates subsequent,single,*] {
-	assign interactor tags options $delegates($index)
+	::tycho::assign interactor tags options $delegates($index)
 
 	if { $selcount == 1 } {
 	    set id [lindex $selection 0]
 	    # If there is only one item and it's in that interactor's
 	    # tags or has a tag in that interactor's tags, bind it
-	    if { [lmember $tags $id] \
-		    || ! [ldisjoint $tags [$slate gettags $id]] } {
+	    if { [::tycho::lmember $tags $id] \
+		    || ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
 		# Bind it
 		eval $interactor bind $id $options
 		continue
@@ -511,11 +513,11 @@ body ::tycho::Selector::bindDelegates {} {
 	# Activate a delegate interactor on the whole selection if
 	# every item is either in the interactor's tags or if it
 	# has a tag that is.
-	assign interactor tags options $delegates($index)
+	::tycho::assign interactor tags options $delegates($index)
 	set ok 1
 	foreach item $selection {
-	    if { ! [lmember $tags $item] \
-		    && [ldisjoint $tags [$slate gettags $item]] } {
+	    if { ! [::tycho::lmember $tags $item] \
+		    && [::tycho::ldisjoint $tags [$slate gettags $item]] } {
 		set ok 0
 		break
 	    }
@@ -686,14 +688,16 @@ body ::tycho::Selector::drag {x y} {
 	# is selectable if its name is in the binding set, or if
 	# it has a tag that is in the binding set
 	foreach {o tags} $covered {
-	    if { [lmember $bindings $o] || ! [ldisjoint $bindings $tags] } {
+	    if { [::tycho::lmember $bindings $o] \
+		    || ! [::tycho::ldisjoint $bindings $tags] } {
 		# Select it
 		$this _select $o
 	    }
 	}
     	# Deselect selectable objects that are no longer covered
 	foreach {o tags} $uncovered {
-	    if { [lmember $bindings $o] || ! [ldisjoint $bindings $tags] } {
+	    if { [::tycho::lmember $bindings $o] \
+		    || ! [::tycho::ldisjoint $bindings $tags] } {
 		# Deselect it
 		$this _deselect $o
 	    }
@@ -703,7 +707,8 @@ body ::tycho::Selector::drag {x y} {
     	foreach {o tags} [concat $covered $uncovered] {
 	    # An object is selectable if its name is in the binding
 	    # set or if it has a tag in the binding set.
-	    if { [lmember $bindings $o] || ! [ldisjoint $bindings $tags] } {
+	    if { [::tycho::lmember $bindings $o] \
+		    || ! [::tycho::ldisjoint $bindings $tags] } {
 		# Test if already selected or not, and act accordingly
 		if { [selected $o] } {
 		    # Deselect it
@@ -733,7 +738,7 @@ body ::tycho::Selector::itemclick {tag x y args} {
     set current [$slate find withtag current]
 
     # Process depending on whether this is toggle mode or not
-    getflag toggle args
+    ::tycho::getflag toggle args
     if { ! $toggle } {
 	# Select it if it isn't already
 	if { ! [selected $current] } {
@@ -832,7 +837,7 @@ body ::tycho::Selector::select {id} {
 #### selected
 #
 body ::tycho::Selector::selected {id} {
-    return [lmember [$slate gettags $id] $selecttag]
+    return [::tycho::lmember [$slate gettags $id] $selecttag]
 }
 
 #######################################################################

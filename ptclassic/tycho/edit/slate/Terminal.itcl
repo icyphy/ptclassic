@@ -252,9 +252,9 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 
 	set coords [$canvas coords $primary($id)]
 	set blobitem($id) [eval $canvas create oval \
-		[rectStretch [list \
+		[::tycho::Rectangle::stretch \
 		[lindex $coords 2] [lindex $coords 3] \
-		[lindex $coords 2] [lindex $coords 3]] \
+		[lindex $coords 2] [lindex $coords 3] \
 		3] \
 		-fill $_fill($id) -outline $_fill($id) \
 		-tags [list [$canvas gettags $id]]]

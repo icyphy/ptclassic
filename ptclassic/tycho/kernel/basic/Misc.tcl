@@ -32,6 +32,15 @@
 
 
 ##########################################################################
+#### abstractMethod
+#
+# Complain about an abstract method being called.
+#
+proc ::tycho::abstractMethod {method} {
+    error "Method $method of class [uplevel {info context}] is abstract."
+}
+
+##########################################################################
 #### apply script arg ?arg?
 #
 # "Apply" a script to some arguments. This is a clumsy imitation
@@ -63,7 +72,7 @@
 # NOTE: Nested scripts do not work reliably (because the substitution
 # is simple-minded, and does not understand scope)
 #.
-proc apply {script args} {
+proc ::tycho::apply {script args} {
     applylkernel $script $args
 }
 
@@ -74,7 +83,7 @@ proc apply {script args} {
 # apply{}, except that the arguments are in a list -- this is more
 # convenient when working with a list of optional arguments and so on.
 #
-proc applyl {script actuals} {
+proc ::tycho::applyl {script actuals} {
     applylkernel $script $actuals
 }
 
@@ -84,7 +93,7 @@ proc applyl {script actuals} {
 # This is the "kernel" for apply and applyl. It's necessary to
 # ensure that the "uplevel" evaluation works correctly.
 #
-proc applylkernel {script actuals} {
+proc ::tycho::applylkernel {script actuals} {
     if { [lindex $script 0] == "lambda" } {
 	# This is the more complicated case. Get the names of the formals
 	# and the body of the script.
@@ -112,7 +121,8 @@ proc applylkernel {script actuals} {
     } else {
 	# This is the simpler case. Just substitute each argument
 	# for the corresponding %n symbol.
-	foreach actual $actuals n [interval 0 [expr [llength $actuals] - 1]] {
+	foreach actual $actuals n [::tycho::linterval \
+		0 [expr [llength $actuals] - 1]] {
 	    regsub -all %$n $script [list $actual] script
 	}
 	# .. and evaluate
@@ -138,32 +148,11 @@ proc applylkernel {script actuals} {
 # <pre>
 #    assign x y z $list
 # </pre>
-proc assign {args} {
+proc ::tycho::assign {args} {
     foreach var [lreplace $args end end] val [lindex $args end] {
 	upvar $var v
 	set v $val
     }
-}
-
-##########################################################################
-#### behead varname listname
-#
-# Assign the first element of a list to the specified variable,
-# and remove the head from that list. Note that the list is
-# passed by _name_, so that it is destructively altered in place.
-# For example, suppose that fred equal {1 2 3 4}. Then
-# <pre>
-#     behead x fred
-# </pre>
-#
-# <i>This proc will be deleted soon: do not use it.</i>
-#
-proc behead {varname listname} {
-    upvar $varname  v
-    upvar $listname l
-
-    set v [lindex   $l 0]      ;# lhead
-    set l [lreplace $l 0 0]    ;# ltail
 }
 
 ##########################################################################
@@ -177,7 +166,7 @@ proc behead {varname listname} {
 # a uniform way: co-ordinates are the example for which this
 # procedure was originally written.
 #
-proc getalloptions {varname listname} {
+proc ::tycho::getalloptions {varname listname} {
 
     upvar $listname l
     upvar $varname  v
@@ -197,7 +186,7 @@ proc getalloptions {varname listname} {
 ##########################################################################
 #### getopt option listname
 #
-# A handy proc for reading option arguments fram an argument
+# A handy proc ::tycho::for reading option arguments fram an argument
 # list. Sort of like configuration options but more controlled.
 #
 # The first argument is the name of the option, the second the NAME
@@ -219,7 +208,7 @@ proc getalloptions {varname listname} {
 # FIXME: Make listname an optional argument. By default, this proc
 # should use "args."
 #
-proc getopt {option listname} {
+proc ::tycho::getopt {option listname} {
 
     upvar $listname l
     upvar $option   v
@@ -245,7 +234,7 @@ proc getopt {option listname} {
 # FIXME: Make listname an optional argument. By default, this proc
 # should use "args."
 #
-proc getflag {option listname} {
+proc ::tycho::getflag {option listname} {
 
     upvar $listname l
     upvar $option   v
@@ -260,29 +249,6 @@ proc getflag {option listname} {
 	set v 0
 
 	return 0
-    }
-}
-
-##########################################################################
-#### loop n body
-#
-# Loop $n times. Called as "loop n body." The -counter option
-# introduces the name of a variable that ranges from 0 to $n-1.
-#
-# "body" cannot contain return commands. This could be fixed
-# if it ever becomes a problem --- see pg 123 of Ousterhout's
-# book.
-#
-proc loop {args} {
-    set v [readopt counter args]
-    if {$v != ""} {
-	upvar $v counter
-    }
-
-    set n    [lindex $args 0]
-    set body [lindex $args 1]
-    for {set counter 0} {$counter < $n} {incr counter} {
-	uplevel $body
     }
 }
 
@@ -304,7 +270,7 @@ proc loop {args} {
 # FIXME: Make listname an optional argument. By default, this proc
 # should use "args."
 #
-proc readopt {option listname} {
+proc ::tycho::readopt {option listname} {
 
     upvar $listname l
 
@@ -327,7 +293,7 @@ proc readopt {option listname} {
 # FIXME: Make listname an optional argument. By default, this proc
 # should use "args."
 #
-proc readoption {option listname} {
+proc ::tycho::readoption {option listname} {
 
     upvar $listname l
 

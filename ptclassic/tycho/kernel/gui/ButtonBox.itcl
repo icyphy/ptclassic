@@ -302,7 +302,7 @@ body ::tycho::ButtonBox::buttoncget {tag option} {
     }
 
     # Get the option locally
-    if { [lmember $localoptions $option] } {
+    if { [::tycho::lmember $localoptions $option] } {
 	return [set _[string range $opt 1 end]($tag)]
     }
 
@@ -345,7 +345,7 @@ body ::tycho::ButtonBox::buttonconfigure {tag {option {}} args} {
 	set column $_column($tag)
 	set move 0
 	foreach {opt val} [concat $option $args] {
-	    if { [lmember $localoptions $opt] } {
+	    if { [::tycho::lmember $localoptions $opt] } {
 		switch /$opt {
 		    "/-row" {
 			set row $val
