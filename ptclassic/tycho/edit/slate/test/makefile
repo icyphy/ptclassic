@@ -49,7 +49,8 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
-	sample.itcl
+	sample.itcl \
+	stars.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
