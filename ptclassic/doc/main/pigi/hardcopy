@@ -107,9 +107,36 @@ xwd | xpr -width 4 -portrait -device ps -gray 4 | lpr
 .IE xwd
 .IE xpr
 .IE postscript
-Other alternatives include a program called xgrabsc,
+Other alternatives include a program called xgrabsc.
 .IE xgrabsc
-and the document processing system FrameMaker, which can capture
+A simple use of this is to generate an encapsulated postscript
+image using the following command
+.(c
+xgrabsc -eps -page 4x2 -o mySchematic.ps
+.)c
+where mySchematic.ps is the name of the file into which you would
+like to store the EPS image.
+Then with the left mouse button, draw a box around the desired portion
+of the screen. This command will then save an encapsulated postscript
+file four inches by two inches called mySchematic.ps.
+This file can then be used an a wide variety of document processing
+systems.  For example,
+to include this postcript in a TeX document, include the command
+.IE TeX
+.(c
+\\\\include{psfig}
+.)c
+in the TeX file and use the commands
+.(c
+begin{figure}
+  \\\\centerline{
+  \\\\psfig{figure=mySchematic.ps,width=4in,height=2in}}
+  \\\\caption{Ptolemy Schematic}
+\\\\end{figure}
+.)c
+to display the postscript as a figure within a document.
+.pp
+The document processing system FrameMaker has built-in facilities to capture
 a region of the screen and import it into a document.
 .IE FrameMaker
 FrameMaker can also import and print ordinary color X window dumps.
