@@ -30,10 +30,12 @@ LIB=libptolemy.a
 
 # Library sources
 LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc SpaceWalk.cc \
-	Output.cc Fraction.cc StringList.cc Particle.cc Help.cc \
-	Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc \
-	NamedObj.cc State.cc KnownState.cc FloatState.cc IntState.cc \
-	StringState.cc SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFUniverse.cc
+ Output.cc Fraction.cc StringList.cc Particle.cc Help.cc \
+ Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc \
+ NamedObj.cc PriorityQueue.cc \
+ State.cc KnownState.cc FloatState.cc IntState.cc StringState.cc \
+ SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFUniverse.cc \
+ DEConnect.cc DEScheduler.cc DEStar.cc DEUniverse.cc
 
 # All sources
 SRCS=$(LIBSRCS) interpmain.cc 
@@ -42,15 +44,18 @@ SRCS=$(LIBSRCS) interpmain.cc
 HDRS=Block.h Command.h Connect.h DataStruct.h FloatState.h Fraction.h \
  Galaxy.h Help.h IntState.h InterpGalaxy.h Interpreter.h KnownBlock.h \
  KnownState.h NamedObj.h Output.h Particle.h Scheduler.h SpaceWalk.h Star.h \
- State.h StringList.h StringState.h Tokenizer.h Topology.h \
- type.h SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h
+ State.h StringList.h StringState.h Tokenizer.h Topology.h type.h \
+ PriorityQueue.h \
+ SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h \
+ DEConnect.h DEScheduler.h DEStar.h DEUniverse.h
 
 # Library objects
 LIBOBJS=Star.o Connect.o Block.o Galaxy.o SpaceWalk.o  Output.o \
-	Fraction.o StringList.o Particle.o Help.o Command.o \
+	Fraction.o StringList.o Particle.o Help.o Command.o PriorityQueue.o \
 	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o NamedObj.o \
 	State.o KnownState.o FloatState.o IntState.o StringState.o \
-	SDFConnect.o SDFScheduler.o SDFStar.o SDFUniverse.o
+	SDFConnect.o SDFScheduler.o SDFStar.o SDFUniverse.o \
+	DEConnect.o DEScheduler.o DEStar.o DEUniverse.o
 
 # Things to make
 TOMAKE=$(LIB) interpmain.o 
