@@ -162,7 +162,7 @@ char *CGCMakefileTarget :: expandMakefileVariables(const char *makefileLine)
 	if (c != 0 && tokbuf[1]) c = 0;
 	switch (c) {
 	case '~' : {
-	    // we only expand the first tilda
+	    // we only expand the first tilde
 	    if (expandedVars.numPieces() != 0) {
 		expandedVars << '~';
 		break;
@@ -215,20 +215,14 @@ char *CGCMakefileTarget :: expandMakefileVariables(const char *makefileLine)
     return savestring(expandedVars);
 }
 
-void CGCMakefileTarget :: writeCode()
-{
+void CGCMakefileTarget :: writeCode() {
     pt_ifstream input;
     char inBuf[BUFSIZ];
 
-				// Generate the C code.
-    writeFile(myCode,".c",displayFlag);
-    if (!onHostMachine(targetHost)) {
-	const char* header = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.h";
-	const char* source = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.c";
-	rcpCopyFile(targetHost, destDirectory, header);
-	rcpCopyFile(targetHost, destDirectory, source);
-    }
-				// Copy the makefile
+    // Generate the C code.
+    CGCTarget::writeCode();
+
+    // Copy the makefile
     StringList generatedMakefile;
     StringList makefileName;
     makefileName << filePrefix << ".mk";
@@ -256,7 +250,7 @@ void CGCMakefileTarget :: writeCode()
       }
       input.close();
 
-      /* Code duplication from CreateSDFStar - FIXME */
+      // FIXME: Code duplication from CreateSDFStar
       if (compileOptionsStream.numPieces()) {
 	  char* expandedCompileOptionsStream =
 	      expandMakefileVariables(compileOptionsStream);
@@ -264,8 +258,9 @@ void CGCMakefileTarget :: writeCode()
 	  generatedMakefile << expandedCompileOptionsStream << ' ';
 	  delete [] expandedCompileOptionsStream;
       }
-				// Now process the parent target compileOptions
-      if(strlen((const char*) compileOptions) > 0) {
+
+      // Now process the parent target compileOptions
+      if (! compileOptions.null() ) {
 	  char* expandedCompileOptions =
 	      expandMakefileVariables(compileOptions);
 				// If we have not printed OTHERCFLAGS yet,
@@ -277,15 +272,12 @@ void CGCMakefileTarget :: writeCode()
       }
       generatedMakefile << "\n";
 
+      // The GNU make info page says:
+      // "`N' is made automatically from `N.o' by running the linker (usually
+      // called `ld') via the C compiler. The precise command used is
+      // `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
 
-				// The GNU make info page says:
-				// "`N' is made automatically from
-      				//  `N.o' by running the linker 
-      				//  (usually called `ld') via the C
-      				//  compiler. The precise command
-      				//  used is
-      				//  `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
-      /* Code duplication from CreateSDFStar - FIXME */
+      // FIXME: Code duplication from CreateSDFStar
       if (linkOptionsStream.numPieces()) {
 	  char* expandedLinkOptionsStream =
 	      expandMakefileVariables(linkOptionsStream);
@@ -293,12 +285,12 @@ void CGCMakefileTarget :: writeCode()
 	  generatedMakefile << expandedLinkOptionsStream << ' ';
 	  delete [] expandedLinkOptionsStream;
       }     
-				// Now process the parent target linkOptions
-      if(strlen((const char*) linkOptions) > 0) {
+
+      // Now process the parent target linkOptions
+      if (! linkOptions.null() ) {
 	  char* expandedLinkOptions =
 	      expandMakefileVariables(linkOptions);
-				// If we have not printed LOADLIBES= yet,
-				// then do it now.
+	  // If we have not printed LOADLIBES= yet, then do it now.
 	  if (!linkOptionsStream.numPieces())
 	     generatedMakefile << "LOADLIBES= ";
 	  generatedMakefile << expandedLinkOptions;
@@ -306,24 +298,21 @@ void CGCMakefileTarget :: writeCode()
       }
       generatedMakefile << "\n";
       
-				// Append rules to the end of the makefile
+      // Append rules to the end of the makefile
       generatedMakefile << "all: " << (const char *) filePrefix << "\n"
-	       << filePrefix << ": " << filePrefix << ".o\n";
+			<< filePrefix << ": " << filePrefix << ".o\n";
       writeFile(generatedMakefile, ".mk");
       rcpWriteFile(targetHost, destDirectory, makefileName, generatedMakefile);
     } else {
-				// We are using a user provided makefile.
-				// Just copy it over.
-      rcpCopyFile(targetHost, destDirectory, skeletonMakefile, 1,
-		  makefileName); 
+      // We are using a user provided makefile.  Just copy it over.
+      rcpCopyFile(targetHost, destDirectory, skeletonMakefile,
+		  1, makefileName); 
     }
 }
 
-int CGCMakefileTarget :: compileCode()
-{
+int CGCMakefileTarget :: compileCode() {
     // Run make remotely
     StringList cmd, error;
-
     cmd << "make -f " << filePrefix << ".mk all";
     error << "Could not run ` " << cmd << "'";
     return (systemCall(cmd, error, targetHost) == 0);
@@ -335,4 +324,3 @@ static CGCMakefileTarget targ("Makefile_C","CGCStar",
 "A target for C code generation using Ptolemy makefiles");
 
 static KnownTarget entry(targ,"Makefile_C");
-
