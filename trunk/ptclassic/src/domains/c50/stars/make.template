@@ -70,6 +70,7 @@ PL_SRCS= \
  C50LinToCirc.pl \
  C50Limit.pl \
  C50LookupTbl.pl \
+ C50Log.pl \
  C50Logic.pl \
  C50MaxMin.pl \
  C50ModuloInt.pl \
@@ -89,6 +90,7 @@ PL_SRCS= \
  C50QuantIdx.pl \
  C50Ramp.pl \
  C50RampInt.pl \
+ C50Reciprocal.pl \
  C50ReadFile.pl \
  C50ReadFileInt.pl \
  C50Rect.pl \
