@@ -25,21 +25,6 @@ $Id$
 ********************************************************************/
 
 
-
-// Redefine method setting internal data in the Block
-// so that various SDF-specific initilizations can be performed.
-// If the parent pointer is not provied, it defaults to NULL
-Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
-	// First invoke the generic setBlock
-	Block::setBlock(s,parent);
-
-	// Then perform SDF-specific initializations
-	repetitions = 0;
-	noTimes = 0;
-
-	return *this;
-}
-
 // SDF-specific initialize
 void SDFStar :: prepareForScheduling() {
 	repetitions = 0;
