@@ -196,72 +196,23 @@ void CGCTarget :: frameCode () {
     initCodeStrings();
 }
 
-void CGCTarget :: writeCode(const char* name)
+void CGCTarget :: writeCode()
 {
-    if (name == NULL) name = filePrefix;
-    StringList fileName;
-    fileName << name << ".c";
-    HLLTarget::writeCode(fileName);
-}
-
-// check whether the targetHost is the same as my hostname.
-void CGCTarget :: checkHostMachine() {
-	localHost = FALSE;
-	FILE* fp = popen("/bin/hostname", "r");
-	if (fp == NULL) {
-		Error::warn("popen error");
-	} else {
-		char line[40];
-		if (fgets(line, 40, fp) != NULL) {
-			char* myHost = makeLower(line);
-			char* temp = makeLower((const char*) targetHost);
-			if (strncmp(myHost, temp, strlen(temp)) == 0) {
-				localHost = TRUE;
-		   	}
-			LOG_DEL; delete temp;
-			LOG_DEL; delete myHost;
-		}
-	}
-	pclose(fp);    
+    writeFile(myCode,".c",displayFlag);
 }
 
 // compile the code
 int CGCTarget :: compileCode() {
-	// check whether the targetHost is the same as my hostname.
-	checkHostMachine();
 
 	// Compile and run the code
 	StringList fname;
-	fname << galaxy()->name() << ".c";
-	char* tempName = writeFileName(fname);
-	const char* dirName = (const char*) destDirectory;
-	StringList tempCmd = compileLine(fname);
+	fname << filePrefix << ".c";
 
-	StringList cmd;
-	if (localHost == FALSE) {
-		// move the file first. Create destDirectory if necessary.
-		cmd << "/bin/cat " << tempName;
-		cmd << " | rsh " << (const char*) targetHost << " '";
-		cmd << "mkdir -p " << dirName << "; cd " << dirName;
-		cmd << "; /bin/cat - > " << fname << ".tmp ";
-		cmd << "; mv -f " << fname << ".tmp " << fname << "; ";
-	} else {
-		cmd << "cd " << (const char*)destDirectory << "; ";
-	}
+	StringList cmd = "";
 	// compile the file.
-	cmd << tempCmd << " -o " << galaxy()->name();
-	if (localHost == FALSE) cmd << "'";
-	if(system(cmd)) {
-		StringList err = " Can not compile ";
-		err << fname;
-		if (localHost == FALSE) {
-			err << " in machine: " << (const char*) targetHost;
-		}
-		Error::abortRun(err);
-		return FALSE;
-	}
-	LOG_DEL; delete tempName;
-	return TRUE;
+	cmd << compileLine(fname) << " -o " << filePrefix;
+
+	return !systemCall(cmd,"Could not compile",targetHost);
 }
 
 // return compile command

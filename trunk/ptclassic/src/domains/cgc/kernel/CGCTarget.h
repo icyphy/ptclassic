@@ -76,7 +76,7 @@ public:
 	const char* hostName() { return (const char*) targetHost; }
 
 	// redefine writeCode: default file is "code.c"
-	void writeCode(const char* name = NULL);
+	void writeCode();
 
 	// static buffering option can be set by parent target
 	void wantStaticBuffering() { staticBuffering = TRUE; }
@@ -189,12 +189,6 @@ private:
 	// setup forkDests list for all Fork input portholes
 	// This complete list is needed to decide the buffer size computation.
 	void setupForkDests(Galaxy&);
-
-	// check the hostMachine and set the localHost flag if the hostMachine
-	// is the same as the /bin/hostname.
-	void checkHostMachine();
-
-	int localHost;
 };
 
 #endif
