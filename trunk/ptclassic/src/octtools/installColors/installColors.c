@@ -84,7 +84,7 @@ char *argv[];
 		"~ptolemy/lib/colors");
     out_tech = "ptolemy";
     out_view = tech_spec;
-    if (disp_name = getenv("DISPLAY")) {
+    if ( (disp_name = getenv("DISPLAY")) ) {
         yes_no = prompt("Do you wish to specify an X host and display other\n than the one in your DISPLAY variable?", "no");
         if (strcmp(yes_no, "no") != 0) {
             disp_inp = prompt("X host and display", disp_name);
@@ -106,6 +106,7 @@ char *argv[];
     }
     process(pat_file, tech_spec, root_dir, out_tech, out_view, out_disp, chroma);
     cleantap("tap.views");
+    return 1;
 }
 
 
@@ -135,7 +136,7 @@ register char *a, *b;
  * This routine compares two strings disregarding case.
  */
 {
-    register int value;
+    register int value = 0;
 
     if ((a == (char *) 0) || (b == (char *) 0)) {
 	return a - b;
