@@ -297,9 +297,7 @@ PortHole :: setPlasma (Plasma* useType) {
 			if (typePort()) typePort()->setPlasma(useType);
 		}
 		else {
-			StringList msg = "Type conflict at ";
-			msg += readFullName();
-			Error::abortRun(msg);
+			Error::abortRun(*this, ": unresolvable type conflict");
 			return myPlasma;
 		}
 	}
@@ -354,9 +352,7 @@ void PortHole :: initialize()
 {
 	// set plasma if not set
 	if (!setPlasma ()) {
-		StringList msg = "Can't determine dataType of ";
-		msg += readFullName();
-		Error::abortRun (msg);
+		Error::abortRun (*this, ": can't determine dataType");
 		return;
 	}
 
@@ -388,9 +384,8 @@ Particle& PortHole ::  operator % (int delay)
 {
 	Pointer* p = myBuffer->previous(delay);
         if(*p == NULL) {
-		StringList msg = readFullName();
-		msg += "Attempt to access nonexistent input Particle";
-		Error::abortRun(msg);
+		Error::abortRun(*this,
+			  ": Attempt to access nonexistent input Particle");
 // kludge -- gotta get a particle somehow
 		return *myPlasma->get();
 	}
