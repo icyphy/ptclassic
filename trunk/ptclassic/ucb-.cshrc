@@ -2,6 +2,9 @@
 # $Id$
 
 if (-x /usr/bin/X11) set path = ($path /usr/bin/X11)
+# Make files group writable.  The .cshrc we distribute should not
+# have umask set to 2, it should be set to 22.
+umask 02
 
 # Get software warehouse in the path
 set path = ( $path /usr/sww/bin )
