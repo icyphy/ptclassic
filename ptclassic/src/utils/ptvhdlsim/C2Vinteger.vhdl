@@ -24,8 +24,6 @@ architecture CLI of C2VINTEGER is
 	attribute CLI_CLOSE	of CLI	: architecture is "c2vinteger_close";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 
 begin
 end;
