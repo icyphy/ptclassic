@@ -1,7 +1,7 @@
 defstar {
 	name		{ MedianImage }
 	domain		{ SDF }
-	derivedFrom	{ RankImage_M }
+	derivedFrom	{ RankImage }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	copyright {
@@ -42,7 +42,7 @@ Pixels at the image boundaries are copied and not median filtered.
 		RankOrder = (fwidth*fwidth - 1)/2;
 
 		// Initialize data members
-		SDFRankImage_M::setup();
+		SDFRankImage::setup();
 	}
 
 } // end defstar { MedianImage }
