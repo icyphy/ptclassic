@@ -22,11 +22,11 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
-# FIXME: Hardwired in the beta version of Tcl/Tk
+# FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
 #	   $PTOLEMY/tycho/kernel/Lib.tcl
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4/lib/tcl7.4
-setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0/lib/tk4.0
+setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4/lib/tcl7.4p1
+setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0/lib/tk4.0p1
 
 # Not all shells and platforms set $PWD, so we use our own
 setenv PTPWD `pwd`
