@@ -50,6 +50,7 @@ sources depend TAGS: obj.$(PTARCH)
 	cd lib/tcl; $(MAKE) $(MFLAGS) makefiles $@
 	cd lib/cgc; $(MAKE) $(MFLAGS) makefiles $@
 	cd tycho; $(MAKE) $(MFLAGS) makefiles $@
+	cd demo/whats_new/whats_new0.7; $(MAKE) $(MFLAGS) makefiles $@
 	cd doc; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
