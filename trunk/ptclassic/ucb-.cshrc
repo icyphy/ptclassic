@@ -85,13 +85,11 @@ set path = ($path $FMHOME/bin /usr/sww/urt/bin)
 setenv QUADRALAYHOME /usr/tools/tools2/www/quadralay
 set path = ($path $QUADRALAYHOME/bin)
 
-# Needed for s56x demos
+# Needed for s56x demos which are meant for Sun workstations
 setenv S56DSP /users/ptdesign/vendors/s56dsp
 setenv QCKMON qckMon5
 setenv VSDKHOME /opt/SUNWvsdk
 setenv INCASHOME /opt/SUNWincas
-if ( "$PTARCH" =~ hppa* ) then
-       setenv SHLIB_PATH ${SHLIB_PATH}:${S56DSP}/lib
-else
+if ( "$PTARCH" !~ hppa* ) then
        setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${S56DSP}/lib
 endif
