@@ -21,10 +21,10 @@ chapter%.dvi:
 	$(ROOT)/doc/tex/mkchap $(TEX) $(<:.tex=) null $*
 	$(ROOT)/doc/fmconvert/tex2mml chapter $* > $(<:.tex=.mml)
 
-chapter1.dvi:		cgc.tex
-cgc.dvi cgc.mml:	chapter1.dvi
+chapter14.dvi:		cgc.tex
+cgc.dvi cgc.mml:	chapter14.dvi
 	mv -f chapter.dvi cgc.dvi
 
-chapter2.dvi:		cp.tex
-cp.dvi cp.mml:		chapter2.dvi
-	mv -f chapter.dvi cgc.dvi
+chapter12.dvi:		cp.tex
+cp.dvi cp.mml:		chapter12.dvi
+	mv -f chapter.dvi cp.dvi
