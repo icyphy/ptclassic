@@ -16,12 +16,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  separated into four shorts and then each short is up cast 
 	  to a floating point number.}
 	input {
-		name { In }
+		name { in }
 		type { float }
 		desc { Input float type }
 	}
 	output {
-		name { Out }
+		name { out }
 		type { float }
        		desc { Output float type }
 	}
@@ -37,38 +37,34 @@ limitation of liability, and disclaimer of warranty provisions.
                 #define NumOut (4)
 	}
 	protected{
-	  short *packedin;
-      	  int allocflag;
+	  double *packedin;
 	}
 	constructor{
 	  packedin = 0;
-      	  allocflag = 0;
 	}
 	destructor{
 	  free(packedin);
-	  allocflag = 0;
        	}
 	setup {
-	  if (allocflag == 0){
-	    packedin = (short *)
-	      memalign(sizeof(double),sizeof(double));
-	    allocflag = 1;
-	  }
-	  Out.setSDFParams(NumOut,NumOut);
-        }
+	  out.setSDFParams(NumOut,NumOut-1);
+	}
+	begin {
+	  free(packedin);
+	  packedin = (double *) memalign(sizeof(double),sizeof(double));
+	}
 	go {
 	  
 	  int index;
 	  double outvalue;
-	  double invalue;
+	  short *invalue;
 	  
-	  invalue = double(In%0);
-	  packedin = (short *) &invalue;
+	  *packedin = double(in%0);
+	  invalue = (short *) packedin;
 	  
 	  //scale input and unpack output
 	      for (index=0;index<NumOut;index++){
-		outvalue = (double) scale* (double) packedin[index];
-		Out%(index) << outvalue;
+		outvalue = (double) scale* (double) invalue[index];
+		out%(index) << outvalue;
 	      }
       	}
 }
