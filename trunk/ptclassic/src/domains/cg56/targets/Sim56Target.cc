@@ -70,6 +70,10 @@ int Sim56Target::runCode() {
 	return MotorolaSimTarget::runCode();
 }
 
+void Sim56Target::writeCode() {
+	MotorolaSimTarget::writeCode();
+}
+
 void Sim56Target :: headerCode () {
 	CG56Target :: headerCode();
 	MotorolaSimTarget :: headerCode();

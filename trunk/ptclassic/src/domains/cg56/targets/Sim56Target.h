@@ -45,14 +45,15 @@ class Sim56Target :public CG56Target, public MotorolaSimTarget {
 private:
 	void initStates();
 protected:
-        void headerCode();
-        void trailerCode();
+        /*virtual*/ void headerCode();
+        /*virtual*/ void trailerCode();
 public:
 	Sim56Target(const char*,const char*);
 	Sim56Target(const Sim56Target&);
-	int compileCode();
-	int loadCode();
-	int runCode();
+	/*virtual*/ int compileCode();
+	/*virtual*/ int loadCode();
+	/*virtual*/ int runCode();
+	/*virtual*/ void writeCode();
 	Block* makeNew() const;
 	int isA(const char*) const;
 };
