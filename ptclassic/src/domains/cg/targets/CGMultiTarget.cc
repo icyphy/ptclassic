@@ -234,26 +234,28 @@ void CGMultiTarget :: flattenWorm() {
 	GalStarIter next(*myGalaxy);
 	CGStar* s;
 	CGStar* prev = 0;
+	Galaxy* prevG = myGalaxy;
 	int changeFlag = FALSE;
 	while ((s = (CGStar*) next++) != 0) {
 		if (prev) {
-			myGalaxy->removeBlock(*prev);
+			prevG->removeBlock(*prev);
 			LOG_DEL; delete prev;
 			prev = 0;
 		}
 		if (s->isItWormhole()) {
 			CGWormBase* w = s->myWormhole();
 			// if inside domain is a CG domain, explode wormhole.
+			prevG = (Galaxy*) s->parent();
 			if (w->isCGinside()) {
 				prev = s;
 				Galaxy* inG = w->explode();
-				myGalaxy->addBlock(*inG, inG->name());
+				prevG->addBlock(*inG, inG->name());
 				changeFlag = TRUE;
 			}
 		}
 	}
 	if (prev) {
-		myGalaxy->removeBlock(*prev);
+		prevG->removeBlock(*prev);
 		LOG_DEL; delete prev;
 	}
 
