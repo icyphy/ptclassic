@@ -63,8 +63,9 @@ done with g++ (type "long long"), but it isn't portable.
 	}
 	// "common" part of random number generation
 	codeblock(random) {
+	move	$addr(accum),r1
         move	#>10916575,y1
-        move    l:$addr(accum),x
+        move    l:(r1),x
         mpy   	x0,y1,a		#>12648789,y0
         mac  	+x1,y0,a	y1,b1
         asr   	a         	y0,b0
@@ -74,14 +75,14 @@ done with g++ (type "long long"), but it isn't portable.
 	// case where range=1: write state and output
 	codeblock(range1) {
         add	x1,a
-        move    a10,l:$addr(accum)
+        move    a10,l:(r1)
         move    a1,$ref(output)
 	}
 	// case where range < 1: write state and scale output
 	codeblock(rangeScale) {
 	add	x1,a		#>$val(scaledRange),x0
 	move	a1,y0
-	mpy	x0,y0,a		a10,l:$addr(accum)
+	mpy	x0,y0,a		a10,l:(r1)
 	move	a,$ref(output)
 	}
 }
