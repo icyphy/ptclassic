@@ -47,7 +47,7 @@ public:
 	GalStarIter(const Galaxy& g);
 	Star* next();
 	Star* operator++() { return next();}
-	GalAllBlockIter::reset();
+	GalAllBlockIter::reset;
 };
 
 #endif
