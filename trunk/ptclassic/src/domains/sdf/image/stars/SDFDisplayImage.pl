@@ -6,7 +6,7 @@ defstar {
 	copyright	{ 1991 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-Accept a black-and-white image from an input packet, and generate
+Accept a black-and-white input GrayImage and generate
 output in PGM format. Send the output to a user-specified command
 (by default, "xv" is used). Of course, the specified program must
 be in your PATH.
@@ -29,10 +29,7 @@ complete filename of the displayed image.
 
 // INPUT AND STATES.
 
-	input {
-		name { inData }
-		type { packet }
-	}
+	input { name { inData } type { message } }
 	defstate {
 		name { command }
 		type { string }
@@ -55,10 +52,10 @@ complete filename of the displayed image.
 // CODE.
 	go {
 // Read data from input.
-		Packet pkt;
-		(inData%0).getPacket(pkt);
-		TYPE_CHECK(pkt, "GrayImage");
-		const GrayImage* image = (const GrayImage*) pkt.myData();
+		Envelope envp;
+		(inData%0).getMessage(envp);
+		TYPE_CHECK(envp, "GrayImage");
+		const GrayImage* image = (const GrayImage*) envp.myData();
 		if (image->fragmented() || image->processed()) {
 			Error::abortRun(*this,
 					"Can't display fragmented or processed image.");

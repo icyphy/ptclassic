@@ -6,7 +6,7 @@ defstar {
 	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image palette }
 	desc {
-If the 'past' input is not a GrayImage (e.g. 'nullPacket'), copy
+If the 'past' input is not a GrayImage (e.g. 'dummyMessage'), copy
 the 'input' image unchanged to the 'diffOut' output and send a null
 field of motion vectors to the 'mvOut' output. This should usually
 happen only on the first firing of the star.
@@ -26,10 +26,10 @@ can be added or reduced-search motion compensation can be performed.
 	hinclude { "GrayImage.h", "MVImage.h", "Error.h" }
 
 //////// I/O AND STATES.
-	input {		name { input }		type { packet } }
-	input {		name { past }		type { packet } }
-	output {	name { diffOut }	type { packet } }
-	output {	name { mvOut }		type { packet } }
+	input {		name { input }		type { message } }
+	input {		name { past }		type { message } }
+	output {	name { diffOut }	type { message } }
+	output {	name { mvOut }		type { message } }
 
 	defstate {
 		name	{ BlockSize }
@@ -44,13 +44,13 @@ can be added or reduced-search motion compensation can be performed.
 	virtual method {
 		name { doSyncImage }
 		access { protected }
-		arglist { "(Packet & pkt)" }
-// pkt is a packet holding the image to send on diffOut
+		arglist { "(Envelope& envp)" }
 		type { "void" }
 		code {
+			diffOut%0 << envp;
+
 			LOG_NEW; MVImage* mv = new MVImage;
-			Packet empty(*mv);
-			diffOut%0 << pkt;
+			Envelope empty(*mv);
 			mvOut%0 << empty;
 	}	}
 
@@ -182,20 +182,21 @@ can be added or reduced-search motion compensation can be performed.
 
 	go {
 // Read inputs.
-		Packet pastPkt, curPkt;
-		(past%0).getPacket(pastPkt);
-		(input%0).getPacket(curPkt);
-		TYPE_CHECK(curPkt, "GrayImage");
+		Envelope pastEnvp, curEnvp;
+		(past%0).getMessage(pastEnvp);
+		(input%0).getMessage(curEnvp);
+		TYPE_CHECK(curEnvp, "GrayImage");
 		const GrayImage* inImage =
-				(const GrayImage*) curPkt.myData();
+				(const GrayImage*) curEnvp.myData();
 
 // Initialize if this is the first input image.
-		if (!pastPkt.typeCheck("GrayImage")) {
-			doSyncImage(curPkt);
+		if (!pastEnvp.typeCheck("GrayImage")) {
+			doSyncImage(curEnvp);
 			return;
 		}
 
-		const GrayImage* prvImage = (const GrayImage*) pastPkt.myData();
+		const GrayImage* prvImage =
+				(const GrayImage*) pastEnvp.myData();
 		if (!inputsOk(*inImage, *prvImage)) {
 			Error::abortRun(*this, "Problem with input images.");
 			return;
@@ -216,7 +217,7 @@ can be added or reduced-search motion compensation can be performed.
 				outImage->retHeight());
 
 // Send the outputs on their way.
-		Packet diffPkt(*outImage); diffOut%0 << diffPkt;
-		Packet mvPkt(*mvImage); mvOut%0 << mvPkt;
+		Envelope diffEnvp(*outImage); diffOut%0 << diffEnvp;
+		Envelope mvEnvp(*mvImage); mvOut%0 << mvEnvp;
 	} // end go{}
 } // end defstar { MotionCmp }

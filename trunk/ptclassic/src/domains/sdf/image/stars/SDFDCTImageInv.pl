@@ -17,14 +17,8 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 .Id "inverse DCT"
 }
 
-	input {
-		name { input }
-		type { packet }
-	}
-	output {
-		name { output }
-		type { packet }
-	}
+	input { name { input } type { message } }
+	output { name { output } type { message } }
 
 // CODE
 	hinclude { <math.h>, "GrayImage.h", "DCTImage.h", "Error.h" }
@@ -133,13 +127,13 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 
 	go {
 // Read input image.
-		Packet inPacket;
-		(input%0).getPacket(inPacket);
-		TYPE_CHECK(inPacket,"DCTImage");
+		Envelope inEnvp;
+		(input%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "DCTImage");
 
 // Need to call "writableCopy()" rather than "myData()" because the
 // doInvDCT function modifies "dctimage"!!
-		DCTImage* dctimage = (DCTImage*) inPacket.writableCopy();
+		DCTImage* dctimage = (DCTImage*) inEnvp.writableCopy();
 		if (dctimage->fragmented() || dctimage->processed()) {
 			LOG_DEL; delete dctimage;
 			Error::abortRun(*this,
@@ -157,7 +151,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 
 // Since we used writableCopy(), we own "dctimage".
 		LOG_DEL; delete dctimage;
-		Packet temp(*grayout);
+		Envelope temp(*grayout);
 		output%0 << temp;
 	}
 } // end defstar{ DctInv }

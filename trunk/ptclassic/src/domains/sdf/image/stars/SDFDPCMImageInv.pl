@@ -22,9 +22,9 @@ directly to the "output". Otherwise, add the "past" to the
 	hinclude { "GrayImage.h", "Error.h" }
 
 //////// I/O AND STATES.
-	input { name { diff } type { packet } }
-	input { name { past } type { packet } }
-	output { name { output } type { packet } }
+	input { name { diff } type { message } }
+	input { name { past } type { message } }
+	output { name { output } type { message } }
 
 	defstate {
 		name { alpha }
@@ -47,23 +47,23 @@ directly to the "output". Otherwise, add the "past" to the
 
 	go {
 // Read data from input.
-		Packet diffPkt, pastPkt;
-		(diff%0).getPacket(diffPkt);
-		(past%0).getPacket(pastPkt);
-		TYPE_CHECK(diffPkt, "GrayImage");
-		GrayImage* inImage = (GrayImage*) diffPkt.writableCopy();
+		Envelope diffEnvp, pastEnvp;
+		(diff%0).getMessage(diffEnvp);
+		(past%0).getMessage(pastEnvp);
+		TYPE_CHECK(diffEnvp, "GrayImage");
+		GrayImage* inImage = (GrayImage*) diffEnvp.writableCopy();
 
 // Resynchronize if 'past' of wrong type.
-		if(!pastPkt.typeCheck("GrayImage")) {
-			Packet tmp(*inImage); output%0 << tmp;
+		if(!pastEnvp.typeCheck("GrayImage")) {
+			Envelope tmp(*inImage); output%0 << tmp;
 			return;
 		}
 		const GrayImage* pastImage =
-				(const GrayImage*) pastPkt.myData();
+				(const GrayImage*) pastEnvp.myData();
 
 // Resynchronize because past.size() = 0
 		if (!pastImage->retSize()) {
-			Packet tmp(*inImage); output%0 << tmp;
+			Envelope tmp(*inImage); output%0 << tmp;
 			return;
 		}
 
@@ -75,6 +75,6 @@ directly to the "output". Otherwise, add the "past" to the
 		}
 
 // Send the outputs on their way.
-		Packet outPkt(*inImage); output%0 << outPkt;
+		Envelope outEnvp(*inImage); output%0 << outEnvp;
 	}
 } // end defstar { DpcmInv }

@@ -17,9 +17,9 @@ This one works on DCTImages, not GrayImages.
 	}
 	seealso { DctCode }
 
-	input	{ name	{ hiport }	type { packet } }
-	input	{ name	{ loport }	type { packet } }
-	output	{ name	{ output }	type { packet } }
+	input	{ name	{ hiport }	type { message } }
+	input	{ name	{ loport }	type { message } }
+	output	{ name	{ output }	type { message } }
 
 	defstate {
 		name	{ HiPri }
@@ -126,15 +126,15 @@ This one works on DCTImages, not GrayImages.
 
 	go {
 // Read input images.
-		Packet hiPacket;
-		(hiport%0).getPacket(hiPacket);
-		TYPE_CHECK(hiPacket, "DCTImage");
-		DCTImage* hiImage = (DCTImage*) hiPacket.writableCopy();
+		Envelope hiEnvp;
+		(hiport%0).getMessage(hiEnvp);
+		TYPE_CHECK(hiEnvp, "DCTImage");
+		DCTImage* hiImage = (DCTImage*) hiEnvp.writableCopy();
 
-		Packet loPacket;
-		(loport%0).getPacket(loPacket);
-		TYPE_CHECK(loPacket, "DCTImage");
-		const DCTImage* loImage = (const DCTImage*) loPacket.myData();
+		Envelope loEnvp;
+		(loport%0).getMessage(loEnvp);
+		TYPE_CHECK(loEnvp, "DCTImage");
+		const DCTImage* loImage = (const DCTImage*) loEnvp.myData();
 
 // Check some things.
 		if ((hiImage->retBS() != loImage->retBS()) ||
@@ -161,7 +161,7 @@ This one works on DCTImages, not GrayImages.
 		invRunLen(*hiImage, *loImage);
 
 // Send output.
-		Packet temp(*hiImage);
+		Envelope temp(*hiImage);
 		output%0 << temp;
 	}
 } // end defstar{ DctCodeInv }

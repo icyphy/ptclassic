@@ -21,9 +21,9 @@ directly to the "output".  Otherwise, subtract the "past" from the
 
 
 //////// I/O AND STATES.
-	input { name { input } type { packet } }
-	input { name { past } type { packet } }
-	output { name { output } type { packet } }
+	input { name { input } type { message } }
+	input { name { past } type { message } }
+	output { name { output } type { message } }
 
 	defstate {
 		name { alpha }
@@ -69,23 +69,23 @@ directly to the "output".  Otherwise, subtract the "past" from the
 
 	go {
 // Read data from input.
-		Packet curPkt, pastPkt;
-		(input%0).getPacket(curPkt);
-		(past%0).getPacket(pastPkt);
-		TYPE_CHECK(curPkt, "GrayImage");
-		GrayImage* inImage = (GrayImage*) curPkt.writableCopy();
+		Envelope curEnvp, pastEnvp;
+		(input%0).getMessage(curEnvp);
+		(past%0).getMessage(pastEnvp);
+		TYPE_CHECK(curEnvp, "GrayImage");
+		GrayImage* inImage = (GrayImage*) curEnvp.writableCopy();
 
 // Resynchronize because of non-GrayImage input.
-		if (!pastPkt.typeCheck("GrayImage")) {
-			Packet tmp(*inImage); output%0 << tmp;
+		if (!pastEnvp.typeCheck("GrayImage")) {
+			Envelope tmp(*inImage); output%0 << tmp;
 			return;
 		}
 		const GrayImage* pastImage =
-				(const GrayImage*) pastPkt.myData();
+				(const GrayImage*) pastEnvp.myData();
 
 // Resynchronize because of size=0 input.
 		if (!pastImage->retSize()) {
-			Packet tmp(*inImage); output%0 << tmp;
+			Envelope tmp(*inImage); output%0 << tmp;
 			return;
 		}
 
@@ -103,6 +103,6 @@ directly to the "output".  Otherwise, subtract the "past" from the
 			dif[travel] = quant(dif[travel], prv[travel]);
 		}
 
-		Packet outPkt(*inImage); output%0 << outPkt;
+		Envelope outEnvp(*inImage); output%0 << outEnvp;
 	}
 } // end defstar { Dpcm }

@@ -6,7 +6,7 @@ defstar {
 	copyright	{ 1991 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-Accept two black-and-white images from input packets, take
+Accept two black-and-white images from input GrayImages, take
 their absolute difference, scale the absolute difference,
 and pass the result to the output.
 	}
@@ -17,18 +17,9 @@ and pass the result to the output.
 	ccinclude { "GrayImage.h", "Error.h" }
 
 // INPUT AND STATES.
-	input {
-		name { input1 }
-		type { packet }
-	}
-	input {
-		name { input2 }
-		type { packet }
-	}
-	output {
-		name { outData }
-		type { packet }
-	}
+	input { name { input1 } type { message } }
+	input { name { input2 } type { message } }
+	output { name { outData } type { message } }
 	defstate {
 		name	{ Scale }
 		type	{ float }
@@ -39,13 +30,13 @@ and pass the result to the output.
 // CODE.
 	go {
 // Read inputs.
-		Packet inPkt1, inPkt2;
-		(input1%0).getPacket(inPkt1);
-		(input2%0).getPacket(inPkt2);
-		TYPE_CHECK(inPkt1, "GrayImage");
-		TYPE_CHECK(inPkt2, "GrayImage");
-		GrayImage* img1 = (GrayImage*) inPkt1.writableCopy();
-		const GrayImage* img2 = (const GrayImage*) inPkt2.myData();
+		Envelope inEnvp1, inEnvp2;
+		(input1%0).getMessage(inEnvp1);
+		(input2%0).getMessage(inEnvp2);
+		TYPE_CHECK(inEnvp1, "GrayImage");
+		TYPE_CHECK(inEnvp2, "GrayImage");
+		GrayImage* img1 = (GrayImage*) inEnvp1.writableCopy();
+		const GrayImage* img2 = (const GrayImage*) inEnvp2.myData();
 
 // Calc the difference.
 		int width, height;
@@ -76,7 +67,7 @@ and pass the result to the output.
 		}
 
 // Send the result.
-		Packet outPkt(*img1);
-		(outData%0) << outPkt;
+		Envelope outEnvp(*img1);
+		(outData%0) << outEnvp;
 	} // end go{}
 } // end defstar { DiffImage }

@@ -10,8 +10,8 @@ This star zig-zag scans a DCTImage and outputs the result.
 This is useful before quantization.
 	}
 
-	input	{ name { inport }	type { packet } }
-	output	{ name { outport }	type { packet } }
+	input	{ name { inport }	type { message } }
+	output	{ name { outport }	type { message } }
 
 	hinclude { "DCTImage.h", "Error.h" }
 
@@ -108,17 +108,17 @@ This is useful before quantization.
 
 
 	go {
-		Packet inPkt;
-		(inport%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt, "DCTImage");
+		Envelope inEnvp;
+		(inport%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "DCTImage");
 
-		DCTImage* image = (DCTImage*) inPkt.writableCopy();
+		DCTImage* image = (DCTImage*) inEnvp.writableCopy();
 		if (image->fragmented() || image->processed()) {
 			LOG_DEL; delete image;
 			Error::abortRun(*this, "Processed or fragmented.");
 			return;
 		}
 		doZigZag(*image);
-		Packet outPkt(*image); outport%0 << outPkt;
+		Envelope outEnvp(*image); outport%0 << outEnvp;
 	}
 } // end defstar { ZigZag }

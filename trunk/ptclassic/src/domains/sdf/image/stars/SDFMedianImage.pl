@@ -6,8 +6,8 @@ defstar {
 	copyright	{ 1991 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-Accept a black-and-white image from an input packet, median-filter the
-image, and send the result to the output.
+Accept an input GrayImage, median-filter the image, and send the result
+to the output.
 
 Filter widths of 1, 3, 5 work well. Any length longer than five will
 take a long time to run.
@@ -26,14 +26,8 @@ when displaying single frames from a moving sequence.
 	ccinclude { "GrayImage.h", <std.h> }
 
 // INPUT AND STATES.
-	input {
-		name { inData }
-		type { packet }
-	}
-	output {
-		name { outData }
-		type { packet }
-	}
+	input { name { inData } type { message } }
+	output { name { outData } type { message } }
 	defstate {
 		name	{ FilterWidth }
 		type	{ int }
@@ -93,10 +87,10 @@ when displaying single frames from a moving sequence.
 
 	go {
 // Read data from input and initialize.
-		Packet inPkt;
-		(inData%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt,"GrayImage");
-		const GrayImage* inImage = (const GrayImage*) inPkt.myData();
+		Envelope inEnvp;
+		(inData%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "GrayImage");
+		const GrayImage* inImage = (const GrayImage*) inEnvp.myData();
 		if (inImage->fragmented() || inImage->processed()) {
 			Error::abortRun(*this,
 					"Need a full-sized input image.");
@@ -118,7 +112,6 @@ when displaying single frames from a moving sequence.
 		}	}
 
 // Send the output on its way.
-		Packet outPkt(*outImage);
-		outData%0 << outPkt;
+		Envelope outEnvp(*outImage); outData%0 << outEnvp;
 	} // end go{}
 } // end defstar { MedianImage }

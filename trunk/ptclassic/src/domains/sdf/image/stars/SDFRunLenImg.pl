@@ -24,8 +24,8 @@ separate pieces.
 	hinclude { "GrayImage.h", "Error.h" }
 
 // INPUT AND STATES.
-	input { name { input } type { packet } }
-	output { name { outData } type { packet } }
+	input { name { input } type { message } }
+	output { name { outData } type { message } }
 	output { name { compression } type { float } }
 
 	defstate {
@@ -97,10 +97,10 @@ separate pieces.
 
 	go {
 // Read input.
-		Packet inPkt;
-		(input%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt, "GrayImage");
-		GrayImage* inImage = (GrayImage*) inPkt.writableCopy();
+		Envelope inEnvp;
+		(input%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "GrayImage");
+		GrayImage* inImage = (GrayImage*) inEnvp.writableCopy();
 		if (inImage->fragmented() || inImage->processed()) {
 			delete inImage;
 			Error::abortRun(*this,
@@ -114,7 +114,6 @@ separate pieces.
 				float(inImage->retWidth() * inImage->retHeight());
 		compression%0 << comprRatio;
 
-		Packet outPkt(*inImage);
-		outData%0 << outPkt;
+		Envelope outEnvp(*inImage); outData%0 << outEnvp;
 	}
 } // end defstar { RunLen }

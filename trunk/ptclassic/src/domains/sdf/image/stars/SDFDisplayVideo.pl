@@ -6,7 +6,7 @@ defstar {
 	copyright	{ 1992 The Regents of the University of California }
 	location	{ ~haskell/Ptolemy }
 	desc {
-Accept a stream of black-and-white images from input packets
+Accept a stream of black-and-white images from input GrayImages
 and generate output in URT-RLE format. Send the output to the command
 "getx11 -m". Of course, this program must be in your PATH, as well
 as the commands "rawtorle" and "rleflip". These commands are all
@@ -23,7 +23,7 @@ complete filename of the displayed images.
 
 // INPUT AND STATES.
 
-	input { name { inData } type { packet } }
+	input { name { inData } type { message } }
 
 	defstate {
 		name { ImageName }
@@ -85,10 +85,10 @@ complete filename of the displayed images.
 
 	go {
 // Read data from input.
-		Packet pkt;
-		(inData%0).getPacket(pkt);
-		TYPE_CHECK(pkt, "GrayImage");
-		const GrayImage* imD = (const GrayImage*) pkt.myData();
+		Envelope envp;
+		(inData%0).getMessage(envp);
+		TYPE_CHECK(envp, "GrayImage");
+		const GrayImage* imD = (const GrayImage*) envp.myData();
 		if (imD->fragmented() || imD->processed()) {
 			Error::abortRun(*this,
 					"Need unfragmented and unprocessed input images.");

@@ -20,10 +20,10 @@ write the result to 'output'.
 
 
 //////// I/O AND STATES.
-	input {		name { diffIn }	type { packet } }
-	input {		name { pastIn }	type { packet } }
-	input {		name { mvIn }	type { packet } }
-	output {	name { output }	type { packet } }
+	input {		name { diffIn }	type { message } }
+	input {		name { pastIn }	type { message } }
+	input {		name { mvIn }	type { message } }
+	output {	name { output }	type { message } }
 
 
 ////// CODE.
@@ -32,23 +32,23 @@ write the result to 'output'.
 	method {
 		// Return 1 if all inputs are read ok. Return 0 if this is an
 		// intraframe-coded input, i.e. size of mvImage is 0 OR
-		// pastImage is a NULL packet. Handle the ERROR if diffImage or
+		// pastImage is a NULL Message. Handle the ERROR if diffImage or
 		// mvImage is of incorrect type.
 		name { otherInputs }
 		type { "int" }
 		arglist { "(const GrayImage** pi, const MVImage** mi, 
-					Packet& pPkt, Packet& mPkt)" }
+					Envelope& pEnvp, Envelope& mEnvp)" }
 		access { private }
 		code {
-			(pastIn%0).getPacket(pPkt);
-			(mvIn%0).getPacket(mPkt);
+			(pastIn%0).getMessage(pEnvp);
+			(mvIn%0).getMessage(mEnvp);
 
-			if (badType(*this, mPkt, "MVImage")) { return 0; }
-			*mi = (const MVImage*) mPkt.myData();
+			if (badType(*this, mEnvp, "MVImage")) { return 0; }
+			*mi = (const MVImage*) mEnvp.myData();
 			if (!(**mi).retSize()) { return 0; }
 
-			if (pPkt.typeCheck("GrayImage")) {
-				*pi = (const GrayImage*) pPkt.myData();
+			if (pEnvp.typeCheck("GrayImage")) {
+				*pi = (const GrayImage*) pEnvp.myData();
 				return 1;
 			}
 			return 0;
@@ -175,18 +175,18 @@ write the result to 'output'.
 
 	go {
 // Read data from inputs and initialize if this is the a resync.
-		Packet difPkt, pastPkt, mvPkt; // go out of scope at end of go{}
+		Envelope difEnvp, pastEnvp, mvEnvp;
 		const GrayImage* diffImg;
 		const GrayImage* pastImg;
 		const MVImage* mvImg;
 
-		(diffIn%0).getPacket(difPkt);
-		TYPE_CHECK(difPkt, "GrayImage");
-		diffImg = (const GrayImage*) difPkt.myData();
+		(diffIn%0).getMessage(difEnvp);
+		TYPE_CHECK(difEnvp, "GrayImage");
+		diffImg = (const GrayImage*) difEnvp.myData();
 
 // Handle resynchronization inputs.
-		if (!otherInputs(&pastImg, &mvImg, pastPkt, mvPkt)) {
-			output%0 << difPkt;
+		if (!otherInputs(&pastImg, &mvImg, pastEnvp, mvEnvp)) {
+			output%0 << difEnvp;
 			return;
 		}
 
@@ -207,6 +207,6 @@ write the result to 'output'.
 				mvImg->constVert(), diffImg->retWidth(),
 				diffImg->retHeight(), mvImg->retBlockSize());
 
-		Packet outPkt(*outImage); output%0 << outPkt;
+		Envelope outEnvp(*outImage); output%0 << outEnvp;
 	} // end go{}
 } // end defstar { MotionCmpInv }

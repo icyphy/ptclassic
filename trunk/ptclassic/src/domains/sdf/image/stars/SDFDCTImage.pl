@@ -14,14 +14,8 @@ cosine transform (DCT) and outputs a DCTImage.
 .Id "image, discrete cosine transform"
 }
 
-	input {
-		name { input }
-		type { packet }
-	}
-	output {
-		name { output }
-		type { packet }
-	}
+	input { name { input } type { message } }
+	output { name { output } type { message } }
 
 	defstate {
 		name	{ BlockSize }
@@ -136,10 +130,10 @@ cosine transform (DCT) and outputs a DCTImage.
 
 	go {
 // Read input image.
-		Packet inPacket;
-		(input%0).getPacket(inPacket);
-		TYPE_CHECK(inPacket,"GrayImage");
-		const GrayImage* image = (const GrayImage*) inPacket.myData();
+		Envelope inEnvp;
+		(input%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp,"GrayImage");
+		const GrayImage* image = (const GrayImage*) inEnvp.myData();
 		if (image->fragmented() || image->processed()) {
 			Error::abortRun(*this,
 					"Can't DCT fragmented or processed image.");
@@ -153,7 +147,7 @@ cosine transform (DCT) and outputs a DCTImage.
 				image->retHeight());
 
 // Send output.
-		Packet outPacket(*DCT);
-		output%0 << outPacket;
+		Envelope outEnvp(*DCT);
+		output%0 << outEnvp;
 	}
 } // end defstar{ Dct }
