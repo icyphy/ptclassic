@@ -50,6 +50,15 @@ private:
   // Used by strict stars to ensure they fire at most once in an instant
   int hasFired;
 
+  // flag indicating whether the star is reactive--only producing
+  // present outputs when at least one input is present
+  int isReactive;
+
+protected:
+
+  // Mark this star as reactive--usually done within a star's setup() method
+  void reactive() { isReactive = 1; }
+
 public:
   // Class identification.
   /*virtual*/ int isA(const char*) const;
@@ -67,21 +76,15 @@ public:
   // Intra-instant time advancement
   /*virtual*/ int run();  
 
+  // Return the status of the reactive flag
+  int isItReactive() const { return isReactive; }
 
-  // Return the number of known outputs
+  // Return the count of known outputs
   int knownOutputs();
 
-};
+  // Initialize all default values
+  void initialize();
 
-class SRNonStrictStar : public SRStar {
-
-  // Class identification.
-  /*virtual*/ int isA(const char*) const;
-
-  // Domain identification.
-  /*virtual*/ const char* domain() const;
-
-  /*virtual*/ int run();
 };
 
 #endif
