@@ -87,9 +87,8 @@ ISA_FUNC(DEBaseSched,Scheduler);
 	////////////////////////////
 
 StringList DEScheduler :: displaySchedule () {
-	return "DE schedule is computed at run-time\n";
+    return "{ { scheduler \"Basic discrete-event run-time scheduler\" } }";
 }
-
 
 extern int warnIfNotConnected (Galaxy&);
 
@@ -169,6 +168,10 @@ int DEScheduler :: computeDepth() {
 int
 DEScheduler :: run () {
 
+        if (!galaxy()) {
+            Error::abortRun("No galaxy to run");
+            return FALSE;
+        }
 
 	if (haltRequested()) {
 		Error::abortRun(*galaxy(),

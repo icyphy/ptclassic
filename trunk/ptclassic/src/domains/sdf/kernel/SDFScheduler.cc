@@ -61,16 +61,14 @@ extern const char SDFdomainName[];
 	// printVerbose
 	////////////////////////////
 
-// Display a schedule
+// Return a description of the schedule
 
 StringList
 SDFSchedule :: printVerbose () const {
 	StringList out;
-	out = "SDF SCHEDULE:\n";
 	SDFSchedIter next(*this);
 	for (int i = size(); i>0; i--) {
-		out += (next++)->fullName();
-		out += "\n";
+		out << "  { fire " << (next++)->fullName() << " }\n";
 	}
 	return out;
 }
@@ -86,17 +84,18 @@ SDFSchedule :: printVerbose () const {
 
 // runs the number of times indicated by numIters.
 int SDFScheduler :: run () {
-	if (invalid) {
-		Error::abortRun(*galaxy(),
-				"Can't run because it is invalid, possibly ",
-				"because of an earlier setup or run-time ",
-				"error, or because halt was requested.");
-		return FALSE;
-	}
+        if (!galaxy()) {
+            Error::abortRun("No galaxy to run");
+            return FALSE;
+        }
 	if (haltRequested()) {
-		Error::abortRun(*galaxy(),
-				"Can't run after halt was requested.");
-		return FALSE;
+            Error::abortRun(*galaxy(), ": Can't continue after run-time error");
+	    return FALSE;
+	}
+	if (invalid) {
+	    if (galaxy()) Error::abortRun(*galaxy(),
+	            "Can't run because the setup is invalid");
+	    return FALSE;
 	}
 	while (numItersSoFar < numIters && !haltRequested()) {
 		runOnce();
@@ -496,7 +495,9 @@ const char* SDFScheduler::domain() const { return SDFdomainName;}
 
 StringList SDFScheduler::displaySchedule() {
     StringList out;
-    out << "E.A. Lee's SDF Scheduler\n\n" << mySchedule.printVerbose();
+    out << "{\n  { scheduler \"Simple SDF Scheduler\" }\n"
+	<< mySchedule.printVerbose()
+	<< "}\n";
     return out;
 }
 
