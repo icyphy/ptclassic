@@ -11,6 +11,7 @@ $Id$
  Misc CG routines.
  
 *******************************************************************/
+#include "pt_fstream.h"
 #include "CGUtilities.h"
 #include "Error.h"
 #include "miscFuncs.h"
@@ -31,19 +32,33 @@ char* makeLower(const char* name) {
 	return newp;
 }
 
-int rshSystem(const char* hname,const char* cmd,
-	      const char* dir) {
-	char* hostname = savestring(hname);
-	char* command = savestring(cmd);
-	char* directory = NULL;
-	if (dir != NULL) directory = savestring(dir);
-	StringList rshCommand = "";
-	if (strcmp(hostname,"localhost") != 0 ) 
-	    rshCommand << "xon " << hostname << " -debug 'export DISPLAY; "	              	       << command << "'"; 
-	if (directory != NULL) 
-	    rshCommand << "cd " << directory << "; " << command;
-	LOG_DEL; delete hostname;
-	LOG_DEL; delete command;
-	LOG_DEL; delete directory;
+int rshSystem(const char* hname, const char* cmd, const char* dir) {
+	StringList rshCommand = cmd;
+	if ( dir != NULL ) {
+	    StringList newCmd;
+	    newCmd << "cd " << dir << ";" << rshCommand;
+	    rshCommand = newCmd;
+	}
+	if (hname==NULL || *hname=='\0' || strcmp(hname,"localhost")==0 ) {
+	    ; // no work required
+	} else {
+	    StringList preCmd, postCmd;
+	    const char* cmdtext = rshCommand;
+	    if ( strchr(cmdtext,'\'')!=NULL ) {
+		// cmd has quotes.  put it in file and send through pipe.
+	        char *cmdfilename = tempnam( NULL, "pt");
+	        pt_ofstream cmdfile(cmdfilename);
+	        cmdfile << rshCommand;
+		cmdfile.close();
+		preCmd << "/bin/cat " << cmdfilename << " | ";
+		postCmd << " ; /bin/rm -f " << cmdfilename;
+	    } else {
+		preCmd << "echo '" << rshCommand << "' | ";
+	    }
+	    // -debug required to keep stdin open
+	    rshCommand = "";
+	    rshCommand << preCmd << "xon " << hname << " -debug sh" << postCmd;
+	}
+	cerr << "rshCommand: " << rshCommand << "\n";
 	return system(rshCommand);
 }
