@@ -48,6 +48,7 @@ HDRS	      = compile.h \
 		ptcl.h \
 		ptk.h \
 		poct.h \
+		pvem.h \
 		ptkRegisterCmds.h \
 		ptkTclIfc.h \
 		ptkNet.h \
