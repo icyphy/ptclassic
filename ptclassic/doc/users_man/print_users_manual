@@ -7,7 +7,7 @@ lpr -P$PRINTER references.ps
 lpr -P$PRINTER ptglossary.ps
 lpr -P$PRINTER filter.ps
 lpr -P$PRINTER x.ps
-lpr -P$PRINTER installation.ps
+lpr -P$PRINTER install.ps
 lpr -P$PRINTER xgraph.ps
 lpr -P$PRINTER vem.ps
 lpr -P$PRINTER documents.ps
