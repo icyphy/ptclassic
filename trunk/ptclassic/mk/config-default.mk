@@ -51,6 +51,8 @@ OCTLIBDIR = $(OCTTOOLS)/lib.$(ARCH)
 OCT_CC =	cc
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermlib
+# hppa.cfront has problems linking vem with -g, so we override this
+OCT_DEBUG_FLAGS = -g
 
 # If the X11 include directories are in /usr/include/X11, leave
 # the following symbol blank.  Otherwise define it as "-Idir" where

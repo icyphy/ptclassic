@@ -4,7 +4,7 @@
 # Copyright (c) 1994 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# Programmer:  Christopher Hylands
+# Programmers:   Sunil Samel (IMEC), Christopher Hylands
 #
 #
 include $(ROOT)/mk/config-default.mk
@@ -20,6 +20,8 @@ CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
 # about 70Mb each.
 GPPDEBUGFLAGS =
 CDEBUGFLAGS =
+# Used in octtools/vem/makefile
+OCT_DEBUG_FLAGS =
 
 # flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
 # is not needed for 3.0.
