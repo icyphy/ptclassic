@@ -145,8 +145,8 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 			for (int i = 0; i < taps.size() ; i++)
 				tapInit << "\tdc\t" << double(taps[i]) << '\n';
 		else
-			for (int i = 0; i < 64; i++)
-				for (int j = i; j < 128; j += 64)
+			for (int i = 0; i < interp; i++)
+				for (int j = i; j < taps.size(); j += interp)
 					tapInit << "\tdc\t"
 						<< double(taps[j]) << '\n';
 		tapInit << "\torg\tp:\n";
