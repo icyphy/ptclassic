@@ -7,26 +7,54 @@
 <h1><a name="revcontrol">User's Guide to the Tycho Revision Control</a></h1>
 
 <p>
-The RevControl class in Tycho provides a user friendly interface
-for revision control for RCS and SCCS.
+The Tycho Version Control provides a simple interface
+for files that have already been placed under RCS and SCCS.
+If the file is not under version control, then the user will 
+be prompted whether the current file should be placed under RCS or 
+SCCS.
 <p>
 The Edit class provides the following features:
+<hr>
+<font size=+1>Most Commonly Used Features</font>
 <ul>
-<li><em>Checkin/Checkout</em>These are the most commonly used commands.
-<li><em>Unedit</em>This is used to undo the file that has been checked out.
-<li><em>View History</em>This will open up all of the history associated
-	with the file, and provide hyperlinks to the older revisions.
-<li><em>Diff Checked Files</em>The user can check the different revisions
-	to compare using this command. A diff editor will pop up and
+<li><em>Checkout</em>-
+	Under RCS and SCCS, only one file can be checked out by a user.
+	Under SCCS, the status of checkin and checkout is determined by 
+	the invocation of <tt>sccs info</tt>. Under RCS, the status is
+	determined by the read/write permission of the file. When the 
+	file is checked out, the user will automatically gain write 
+	permission of the file. When the file is checked out, the user
+	will only have read permission of the file.
+<li><em>Checkin</em>- 
+	When a file is checked in, the version control will prompt for
+	description associated with the version. The file will be checked
+	in, the description and the version will be added to the history,
+	and the user will only have read permission of the latest version.
+<li><em>Unedit</em>- For a file that is currently checked out, discard 
+	any changes that have been made and revert to the version most 
+	recently checked in.
+</ul>
+<hr>
+<font size=+1>View History Panel</font>
+<ul>
+<li><em>View History</em>- This will open up all of the history associated
+	with the file, and provide hyperlinks (underlined text) to the 
+	older versions. When the hyperlinks are accessed by double click, 
+	the Tycho Version Control will retrieve the specified version,
+	store it in a temporary file, then display that temporary file
+	in an appropriate editor.
+<li><em>Diff Checked Files</em>- The user can check the different versions		to compare using this command. A diff editor will pop up and
 	color the differences between the files, while leaving the common
 	text in default color. When View History is first invoked, by
 	default, the two most current files will be checked.
-<li><em>Undo Last Checkin</em>When this is invoked, the most recent check-in
+<li><em>Undo Last Checkin</em>- When this is invoked, the most recent check-in
 	will be undo. In another word, the user will check out the most
 	recent file, and delete the log from history so that he/she can
 	continue editing. Beware that the combination of <em>Diff Checked 
 	Files</em> followed by an <em>Undo</em> implies erasing the most 
-	recent revision.
+	recent version.
+
+</ul>
 <p>
 <a href="../doc/index.html">Tycho Home Page</a><br>
 <p>
@@ -35,6 +63,6 @@ Copyright &#169 %Q%, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,
-comments to: kchang@eecs.berkeley.edu</author>
+comments to: eal@eecs.berkeley.edu</author>
 </body>
 </html>
