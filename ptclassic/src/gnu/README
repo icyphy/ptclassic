@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Wed May  1 14:58:19 1996 by cxh]-
+-*-Mode:text-*- -[Wed Sep  4 16:50:36 1996 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,14 +17,14 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	gcc-2.7.2
-	libg++-2.7.1
-	make-3.74
+	gcc-2.7.2.1
+	libg++-2.7.2
+	make-3.75
 
 If you obtained the hp GNU tar file, then you should also have:
-	binutils-2.6
-	bison-1.24
-	flex-2.5.2
+	binutils-2.7
+	bison-1.25
+	flex-2.5.3
 
 makeinfo, the GNU documentation program is not currently part of the
 Ptolemy GNU binary distribution.
