@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "Error.h"
 #include "SDFScheduler.h"
+#include "EventHorizon.h"
 #include "LoopScheduler.h"
 #include "SDFCluster.h"
 #include "CGDisplay.h"
@@ -138,6 +139,7 @@ void CGTarget::setup() {
 
 	// choose sizes for buffers and allocate memory, if needed
 	if (inWormHole() && (parent() == NULL)) {
+		adjustSampleRates();
 		generateCode();
 		wormLoadCode();
 	}
@@ -237,6 +239,18 @@ int CGTarget :: runCode() {
 
 int CGTarget::inWormHole() {
 	return int(galaxy()->parent());
+}
+
+// If a CG domain is inside a wormhole, we may need to change
+// the sample rate of event horizons after scheduling is performed.
+void CGTarget :: adjustSampleRates() {
+   BlockPortIter nextPort(*galaxy());
+   PortHole* p;
+   while ((p = nextPort++) != 0) {
+		DFPortHole* dp = (DFPortHole*) &p->newConnection();
+		int num = dp->numXfer() * dp->parentReps();
+		dp->far()->asEH()->setParams(num);
+	}
 }
 
 void CGTarget :: wormInputCode() {

@@ -213,6 +213,10 @@ protected:
     // and starts it executing.
     virtual int wormLoadCode();
 
+	 // If a CG domain is inside a wormhole, we may need to change
+	 // the sample rate of event horizons after scheduling is performed.
+	 void adjustSampleRates();
+
     // methods for sending and receiving data to a target when
     // run inside of a wormhole. Argument is the "real port" of the 
     // interior star that is attached to an event horizon.  If no argument 
