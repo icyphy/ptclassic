@@ -112,6 +112,9 @@ public:
 //	/*virtual*/ const char* portAssign() { return "<=" ; }
 
 protected:
+        // Command file code to generate report information.
+	CodeStream report_code;
+
 	// Members to support dependency graph construction.
 	VHDLFiringList masterFiringList;
 	VHDLFiringList newFiringList;
