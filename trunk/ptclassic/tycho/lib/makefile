@@ -31,13 +31,15 @@
 
 DIRS = html_library idx itclcov tydoc util widgets
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs extraclean:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
+# Root of Tycho directory
+ROOT =		..
+
+# True source directory
+VPATH =		$(ROOT)/lib
+
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
+include $(CONFIG)
+
+# Include rules for directories that contain only subdirectories.
+include $(ROOT)/tydir.mk
