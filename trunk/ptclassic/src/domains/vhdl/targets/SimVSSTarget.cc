@@ -62,6 +62,9 @@ VHDLTarget(name,starclass,desc) {
   cli_comps.initialize();
   cli_configs.initialize();
   
+  // Set the default to not display the code.
+  displayFlag.setInitValue("NO");
+
   // Use the process id to uniquely name the sockets.
   int pid = (int) getpid();
   // Because of the naming style we use and because the
