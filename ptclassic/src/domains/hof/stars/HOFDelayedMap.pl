@@ -3,11 +3,12 @@ defstar {
 	domain { HOF }
 	derivedFrom { Map }
 	desc {
-This is a special for the Map star for use with recursive systems.
+This is a special version of the Map star for use with recursive systems.
 It avoids the possibility of an unbounded recursion by separating
 the block substitution from the setup method.  The setup method
-of this star does nothing.  The go method flags an error.
-To accomplish the substitution, the public method "substitute()"
+of this star does nothing.  The go method flags an error, it is
+normally required that the substitution have occured prior to that
+point. To accomplish the substitution, the public method "substitute()"
 must be explicitly called.  This method is called, for one, by
 the IfThenElseGr star.
 	}
@@ -28,7 +29,7 @@ See the explanation for Map star, from which this is derived.
 	}
 	go {
 	  Error::abortRun(*this,
-			  "This star should be connected only to a star "
+			  "The DelayedMap star should be connected only to a star "
 			  "that knows how to deal with it, like IfThenElseGr.");
 	}
 	method {
@@ -37,7 +38,6 @@ See the explanation for Map star, from which this is derived.
 	  access { public }
 	  arglist { "()" }
 	  code {
-	    initialize();
 	    HOFMap::setup();
 	  }
 	}
