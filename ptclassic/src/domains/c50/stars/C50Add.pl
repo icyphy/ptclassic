@@ -22,27 +22,46 @@ The inputs are added and the result is written on the output.
 		name {output}
 		type {FIX}
 	}
+
+	state {
+		name { saturation }
+		type { int }
+		default { "YES" }
+		desc { If true, use saturation arithmetic }
+	}
+
+
+	codeblock(sat){
+	setc	ovm
+	}
+
 	codeblock (std) {
 	mar	*,AR5
 	lar	AR5,#$addr(input#2)	; address 2nd input -> AR5
 	lar	AR6,#$addr(input#1)	; address 1st input -> AR6
 	lar	AR7,#$addr(output)
-	lacc	*,15,AR5		; 2nd input -> ACC
+	lacc	*,16,AR5		; 2nd input -> ACC
 	}
 	codeblock (loop, "int i") {
 	lar	AR5,#$addr(input#@i)
-	add	*,15
+	add	*,16
 	}
-	codeblock (nosat) {
+	codeblock (end) {
 	mar	*,AR6
-	add	*,15,AR7		; add 1st input
-	sach	*,1			; result -> output
+	add	*,16,AR7		; add 1st input
+	sach	*,0			; result -> output
 	}
+
+	codeblock(clearSat){
+	clrc	ovm
+	}
+
 	codeblock (one) {
 	mar 	*,AR5
 	lar	AR5,#$addr(input#1)	; just move data from in to out
 	bldd	*,#$addr(output)
 	}
+
 	constructor {
 		noInternalState();
 	}
@@ -51,17 +70,20 @@ The inputs are added and the result is written on the output.
 			addCode(one);
 		}
 		else {
+			if (int(saturation)) addCode(sat);
 			addCode(std);
 			for (int i = 3; i <= input.numberPorts(); i++) {
 				addCode(loop(i));
 			}
-			// FIXME: No support for saturation arithmetic
-			// See the CG56 Add star
-	 		addCode(nosat);
+	 		addCode(end);
+			if (int(saturation)) addCode(clearSat);
 		}
 	}
 	exectime {
-		if (input.numberPorts() == 1) return 4;
-		else return input.numberPorts() + 6;
+		int time; 
+		if (input.numberPorts() == 1) time = 4;
+		else time = input.numberPorts() + 6;
+		if (int(saturation)) time += 2;
+		return time;
 	}
 }
