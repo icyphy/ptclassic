@@ -95,11 +95,6 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("mainInit", &mainInit);
 	addStream("commInit", &commInit);
 	addStream("mainClose", &mainClose);
-	mappings = new TextTable;
-}
-
-CGCTarget::~CGCTarget() {
-    delete mappings;
 }
 
 StringList CGCTarget::comment(const char* text, const char* b,
@@ -183,7 +178,7 @@ StringList CGCTarget::pragma(const char* parentname,
 			     const char* blockname) const {
     InfString compoundname;
     compoundname << parentname << "." << blockname;
-    const char* value = mappings->lookup(compoundname);
+    const char* value = mappings.lookup(compoundname);
     if (value) {
 	StringList ret = "state_name_mapping ";
 	ret += value;
@@ -200,7 +195,7 @@ StringList CGCTarget::pragma (const char* parentname,
   compoundname << parentname << "." << blockname;
   const char* c = "";
   if (strcmp(pragmaname,"state_name_mapping") != 0 ||
-      !(c = mappings->lookup(compoundname))) {
+      !(c = mappings.lookup(compoundname))) {
     c = "";
   }
   return c;
@@ -213,7 +208,7 @@ StringList CGCTarget::pragma (const char* parentname,
   InfString compoundname;
   compoundname << parentname << "." << blockname;
   if (strcmp(pragmaname,"state_name_mapping") == 0) {
-    mappings->insert(compoundname, value);
+    mappings.insert(compoundname, value);
   }
   return "";
 }
