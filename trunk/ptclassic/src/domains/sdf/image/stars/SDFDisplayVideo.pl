@@ -99,7 +99,7 @@ may have changed.
 		name { ImageName }
 		type { string }
 		default { "" }
-		desc { If non-null, name for RLE file. }
+		desc { If non-null, name for run-length encoded file. }
 	}
 	defstate {
 		name { Save }
@@ -114,64 +114,62 @@ may have changed.
 		desc { If true (YES), then inputs are interlaced fields. }
 	}
 
-	header { const int LINELEN = 100; }
-
 	protected {
-		unsigned char* tmpFrm;
+		unsigned char* tempFrame;
 		int width, height, fieldNum, firstTime;
-		char allFileNames[100*LINELEN],
-		     rootName[LINELEN],
-		     tmpFile[LINELEN];
+		StringList allFileNames, rootName, tmpFile;
 	}
 
 	constructor {
-		tmpFrm = 0;
+		tempFrame = 0;
 	}
 
 	setup {
 		fieldNum = 0;
-		firstTime = 1;
-		allFileNames[0] = '\000';
-		delete [] tmpFrm;
-		tmpFrm = 0;
+		firstTime = TRUE;
+		delete [] tempFrame;
+		tempFrame = 0;
 
 		const char* t = ImageName;
 		if (t && t[0]) {
-			strcpy(rootName, ImageName);
+			rootName = t;
 		}
 		else {
 			char *nm = tempFileName();
-			strcpy(rootName, nm);
+			rootName = nm;
 			delete [] nm;
 		}
 		char *nm = tempFileName();
-		strcpy(tmpFile, nm);
+		tmpFile = nm;
 		delete [] nm;
 	}
 
-	method { // Remove all appropriate files.
+	method {			// Remove all appropriate files.
 		name { CleanUp }
 		type { "void" }
 		access { private }
 		arglist { "()" }
 		code {
-			StringList cmd = "rm -f ";
-			cmd << tmpFile;
-			system(cmd);
-			if ((allFileNames[0]) && !int(Save)) {
-				cmd = "rm -f ";
+			if ( tmpFile.length() > 0 ) {
+				StringList cmd = "rm -f ";
+				cmd << tmpFile;
+				system(cmd);
+			}
+			tmpFile.initialize();
+			if ((allFileNames.length() > 0) && !int(Save)) {
+				StringList cmd = "rm -f ";
 				cmd << allFileNames;
 				system(cmd);
 			}
-			allFileNames[0] = '\000'; // Clear the file list.
-			LOG_DEL; delete [] tmpFrm;
-			tmpFrm = 0;
-	}	}
-
+			allFileNames.initialize();	// Clear the file list.
+			LOG_DEL; delete [] tempFrame;
+			tempFrame = 0;
+		}
+	}
 
 	wrapup {
 		// Display the video here.
-		if ( allFileNames[0] ) {
+		if ( allFileNames.length() > 0 ) {
 		  StringList cmd = "getx11 -m ";
 		  cmd << allFileNames;
 		  system(cmd);
@@ -191,10 +189,10 @@ may have changed.
 			height = img.retHeight();
 			if (ByFields) {
 				height *= 2;
-				LOG_DEL; delete [] tmpFrm;
-				LOG_NEW; tmpFrm = new unsigned char[width*height];
+				delete [] tempFrame;
+				tempFrame = new unsigned char[width*height];
 			}
-			firstTime = 0;
+			firstTime = FALSE;
 	}	}
 
 
@@ -220,7 +218,8 @@ may have changed.
 			// Open file, write data, close file.
 			FILE* fptr = fopen(tmpFile, "w");
 			if (fptr == (FILE*) NULL) {
-				Error::abortRun(*this, "can not create: ", tmpFile);
+				Error::abortRun(*this, "cannot create: ",
+						tmpFile);
 				return;
 			}
 
@@ -229,18 +228,18 @@ may have changed.
 			fclose(fptr);
 
 			// Translate data.
-			char name[LINELEN];
-			sprintf(name, "%s%d", rootName, id);
+			StringList fileName = rootName;
+			fileName << id;
 
-			char cmd[LINELEN];
-			sprintf(cmd,
-				"rawtorle -n 1 -w %d -h %d < %s | rleflip -v -o %s",
-				width, height, tmpFile, name);
+			StringList cmd = "rawtorle -n 1";
+			cmd << " -w " << width;
+			cmd << " -h " << height;
+			cmd << " < "  << tmpFile;
+			cmd << " | rleflip -v -o " << fileName;
 			system(cmd);
 
 			// Add file to list.
-			strcat(allFileNames, " ");
-			strcat(allFileNames, name);
+			allFileNames << " " << fileName;
 		}
 	} // end { DataToFile }
 
@@ -260,11 +259,14 @@ may have changed.
 		// Do size check.
 		if (firstTime) {
 			DoFirstTime(*imD);
-		} else {
+		}
+		else {
 			if (SizeCheck(*imD)) {
-				Error::abortRun(*this, "Different input image sizes.");
+				Error::abortRun(*this,
+						"Different input image sizes.");
 				return;
-		}	}
+			}
+		}
 
 		// Process the input data.
 		if (ByFields) {
@@ -273,7 +275,7 @@ may have changed.
 					const int t2 = i*width;
 					const int t1 = 2*t2 + width;
 					for(int j = 0; j < width; j++) {
-						tmpFrm[t1 + j] = (imD->constData())[t2 + j];
+						tempFrame[t1 + j] = (imD->constData())[t2 + j];
 				}	}
 				fieldNum = 1;
 			} else {
@@ -281,10 +283,10 @@ may have changed.
 					const int t2 = i*width;
 					const int t1 = 2*t2;
 					for(int j = 0; j < width; j++) {
-						tmpFrm[t1 + j] = (imD->constData())[t2 + j];
+						tempFrame[t1 + j] = (imD->constData())[t2 + j];
 				}	}
 				fieldNum = 0;
-				DataToFile(tmpFrm, imD->retId());
+				DataToFile(tempFrame, imD->retId());
 			}
 
 		} else { // Data is NOT by fields.
