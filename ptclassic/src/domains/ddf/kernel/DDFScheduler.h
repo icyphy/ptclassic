@@ -6,6 +6,8 @@
 #include "DDFStar.h"
 #include "DataStruct.h"
 #include "IntState.h"
+#include "RecurScheduler.h"
+
 
 /**************************************************************************
 Version identification:
@@ -16,11 +18,14 @@ $Id$
 
  Programmer:  Soonhoi Ha
  Date of creation: 8/9/90
+	 revision: 1/21/91  Detect special construct (case, for, dowhile,
+			    recursion) for efficient scheduling.
 
  Methods for the DDF Scheduler
 
 **************************************************************************/
 
+enum CanDom { UnKnown, Case, For, DoWhile, Recur, DDF};
 
 	////////////////////////////
 	// DDFScheduler
@@ -49,6 +54,32 @@ class DDFScheduler : public Scheduler {
 
 	// number of stars in the galaxy
 	int galSize;
+
+// Advanced features ......................
+	// candidate domain
+	CanDom canDom;
+
+	// scheduler for recursion construct
+	RecurScheduler recurSched;
+
+	// simplified galaxy
+	Galaxy* newGal;
+
+	// list of newly created wormholes of SDF domain.
+	SequentialList sdfWorms;
+
+	// cruft used for generating names for SDF galaxies.
+	static int nW;
+	const char* wormName();
+
+	// select scheduler
+	Scheduler* selectScheduler();
+
+	// modify the topology
+	void makeWormholes(Galaxy&);
+
+// End of Advanced features ..................
+
 public:
 	// my domain
 	const char* domain() const ;
