@@ -125,7 +125,7 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # <dd> Test if a resource exists and is writable.
 # <dt><b>write</d> _path_ _data_ ?_timeout_?
 # <dd> Write data to a resource. An error is signalled if the
-# resurce is not streamable. An error is also signalled if the resource
+# resource is not streamable. An error is also signalled if the resource
 # is remote and access times out on the optional _timeout_ argument.
 # </dl>
 #

@@ -288,7 +288,7 @@ body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
 #
 # _Abstract procedure._
 # Reshape the aspects previously specified by click{}
-# to the specified value. Aspects are modified by the relevent
+# to the specified value. Aspects are modified by the relevant
 # x or y coordinate only.
 # Drag assumes that click has already been called on the item,
 # and will function unpredictably if not.
