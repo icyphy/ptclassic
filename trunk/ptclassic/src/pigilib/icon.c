@@ -191,13 +191,12 @@ char *name, *domain, *dir, *palette;
 	ErrAdd(domain);
 	return FALSE;
     }
-    if (!KcIsKnown(name)) {
 
-/* if we don't know about the star we try to load it.  Get the
- * corresponding class name.
- */
+    /* If we don't know about the star, try to load it. */
+    /* Get the corresponding class name.  */
+    if (!KcIsKnown(name)) {
 	const char *base = callParseClass(name);
-	if(!base) return FALSE;
+	if (!base) return FALSE;
 	PrintDebug("Star not known, trying to load it");
 	if (!KcCompileAndLink (base, domain, dir, FALSE, NULL)) return FALSE;
 	PrintDebug("Load complete");
@@ -206,8 +205,9 @@ char *name, *domain, *dir, *palette;
 	    return FALSE;
         }
     }
+
     ERR_IF1(!CodeDirToIconDir(dir, &iconDir));
-    ERR_IF1(!MkStarIconInPal(name, iconDir, palette));
+    ERR_IF1(!MkStarIconInPal(name, iconDir, domain, palette));
     return (TRUE);
 }
 
