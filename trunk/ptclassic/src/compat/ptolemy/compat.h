@@ -33,15 +33,60 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern "C" {
 #endif
 
+/***************************************************************************/
+/* Define #defines for each Ptolemy architecture. (Alphabetical, please) */
+
+#if defined(hpux)
+/* HP PA, cfront or g++ */
+#define PTHPPA
+#endif
+
+#if defined(hpux) && ! defined(__GNUC__)
+/* HP PA, cfront only, not g++ */
+#define PTHPPA_CFRONT
+#endif
+
+#if defined(__sgi)
+/* SGI running IRIX5.x */
+#define PTIRIX5
+#endif
+
+#if defined(linux)
+#define PTLINUX
+#endif
+
 #if defined(__sparc) && defined(__svr4__)
+/* Sun SPARC running Solaris2.x, SunC++ or g++ */
 #define SOL2
+#define PTSOL2
+#endif
+
+#if defined(__sparc) && defined(__svr4__) && !defined(__GNUC__)
+/* Sun SPARC running Solaris2.x, with something other than gcc/g++ */
+#define PTSOL2_CFRONT
 #endif
 
 #if defined(__sparc) && !defined(__svr4__)
-/* Really, we mean sun4 running sunos4.1.x */
+/* Really, we mean sun4 running SunOs4.1.x, Sun C++ or g++ */
 #define SUN4
+#define PTSUN4
 #endif
 
+#if defined(__sparc) && !defined(__svr4__) && !defined(__GNUC__)
+/* Really, we mean sun4 running SunOs4.1.x with something other than gcc/g++ */
+#define SUN4
+#define PTSUN4_CFRONT
+#endif
+
+#if defined(ultrix)
+/* DEC MIPS running Ultrix4.x */
+#define PTULTRIX
+#endif
+
+/***************************************************************************/
+/* Used to keep function paramters straight.  Note that SunOS4.1.3 cc
+ *  is non ANSI, so we can't use function paramaters everywhere.
+ */
 #ifndef ARGS
 #if defined(__STDC__) || defined(__cplusplus)
 #define ARGS(args)	args
@@ -50,13 +95,13 @@ extern "C" {
 #endif
 #endif
 
-#ifndef linux
+#ifndef PTLINUX
 #if defined(USG) 
 extern int sprintf();
 #else
-#ifndef sgi
-#ifndef SOL2
-#ifndef ultrix
+#ifndef PTIRIX5
+#ifndef PTSOL2
+#ifndef PTULTRIX
 #if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
 #if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2)
 /* SunOS4.1.3 Sun Cfront */	
@@ -64,11 +109,11 @@ extern int sprintf();
 extern char *sprintf();
 #endif
 #endif /*sun && __GNUC__*/
-#endif /*ultrix*/
-#endif /*SOL2*/
-#endif /*sgi*/
+#endif /* PTULTRIX */
+#endif /* PTSOL2 */
+#endif /* PTIRIX5 */
 #endif
-#endif /*linux*/
+#endif /* PTLINUX */
 
 #ifdef __GNUC__
 
@@ -77,7 +122,7 @@ extern char *sprintf();
 #include <sys/types.h>			/* Need for bind(). */
 #include <sys/socket.h>			/* Need for bind(). */
 
-#ifdef SUN4
+#ifdef PTSUN4
 #include <sys/time.h>			/* For select() */
 /* Place all SunOS4.1.3 specific declarations here. (In alphabetical order). */
 
@@ -125,8 +170,11 @@ extern int vfprintf(FILE *, const char *, char *);
 #endif /* SUN4 */
 
 /* Alphabetical, please */
-				/* thor/kernel/rpc.c use bind(), listen(). */
+
+#ifndef PTIRIX5
+				/* thor/kernel/rpc.c use bind2(), listen(). */
 extern int bind(int, struct sockaddr *, int);
+#endif /* PTIRIX5 */
 
 extern void endpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
@@ -135,6 +183,11 @@ extern int fclose (FILE *);
 extern int fflush (FILE *);
 extern int fprintf (FILE *, const char *, ...);
 extern int fscanf (FILE *, const char *, ...);
+
+#ifdef PTSOL2
+extern double hypot(double, double); /* kernel/ComplexSubset.h */
+#endif
+
 extern int listen(int, int);
 extern int pclose(FILE *);
 extern void perror (const char *);
