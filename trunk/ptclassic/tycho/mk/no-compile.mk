@@ -221,8 +221,9 @@ extraclean:
 # This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
 # that includes this makefile.  tclIndex should depend on the makefile
 # in case we edit the makefile and move a tcl file to another location.
+# We print the errorInfo stack in case there is a missing close brace
+# in one of the tcl files.
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS) makefile
 	@echo "Updating tclIndex"
 	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCLSH)
-
+	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; if [catch {auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)} errMsg] {puts $$errorInfo}' | $(ITCLSH)
