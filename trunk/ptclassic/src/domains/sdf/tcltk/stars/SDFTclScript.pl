@@ -16,8 +16,6 @@ invoked every time the star fires. That procedure can read the star's
 inputs and update the value of the outputs.
 	}
 	htmldoc {
-<pre>
-</pre>
 The star reads a file containing Tcl commands.
 It can be used in a huge
 variety of ways, including using Tk to animate or control a simulation.
@@ -72,8 +70,6 @@ The procedure could,
 for example, grab input values and compute output values,
 although it can do anything the designer wishes, even ignoring the input
 and output values.
-<pre>
-</pre>
 	}
 	hinclude { "TclStarIfc.h" }
 	outmulti {
