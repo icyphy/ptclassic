@@ -96,11 +96,25 @@ void errPopHandler()
     }
     numHandlers--;
 }
+
+static void defaultHandler(pkgName, code, mesg)
+char *pkgName;
+int code;
+char *mesg;
+{
+    (void) fprintf(stderr,
+		"%s: fatal error detected by %s (code %d):\n\t%s\n",
+		errProgName, pkgName, code, mesg);
+    if (errCoreFlag) {
+	abort();
+    } else {
+	exit(1);
+    }
+}
 
 #if defined(lint)
 /*ARGSUSED*/
 /*VARARGS3*/
-
 void errRaise(pkg, code, fmt, va_alist)
 char *pkg;
 int code;
@@ -120,7 +134,6 @@ va_dcl
 #if !defined(HAS_STDARG)
     char *format;
 #endif
-    static void defaultHandler();
 
 #if defined(HAS_STDARG)
     errPkg = pkg;
@@ -144,21 +157,6 @@ va_dcl
     defaultHandler(errPkg, errCode, errMessage);
 }
 
-
-static void defaultHandler(pkgName, code, mesg)
-char *pkgName;
-int code;
-char *mesg;
-{
-    (void) fprintf(stderr,
-		"%s: fatal error detected by %s (code %d):\n\t%s\n",
-		errProgName, pkgName, code, mesg);
-    if (errCoreFlag) {
-	abort();
-    } else {
-	exit(1);
-    }
-}
 
 #ifdef lint
 /*ARGSUSED*/
@@ -183,7 +181,6 @@ va_dcl
     char *format;
 #endif
     static char tmpBuffer[ERR_BUF_SIZE];
-    static void defaultHandler();
 
 #if defined(HAS_STDARG)
     va_start(ap, format);
