@@ -55,6 +55,7 @@ extern "C" {
 #include "NamedObj.h"
 #include "PtGate.h"
 #include "ptk.h"
+#include "StringList.h"
 
 // the gate object ensures that messages come out in one piece even
 // with multi-threading.
@@ -65,18 +66,13 @@ typedef const char cc;
 
 static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
 	CriticalSection region(gate);
-	const char* status = warn ? "warning: " : "";
-	if (!m2) m2 = "";
-	if (!m3) m3 = "";
-	int l = strlen(status)+strlen(m1)+strlen(m2)+strlen(m3) + 1;
-	if (obj) l += strlen(obj) + 2;
-	LOG_NEW; char* buf = new char[l];
-	if (obj)
-		sprintf (buf, "%s%s: %s%s%s", status, obj, m1, m2, m3);
-	else
-		sprintf (buf, "%s%s%s%s", status, m1, m2, m3);
+	StringList buf;
+	if ( warn ) buf << "warning: ";
+	if ( obj ) buf << obj << ": ";
+	if ( m1 ) buf << m1;
+	if ( m2 ) buf << m2;
+	if ( m3 ) buf << m3;
 	PrintErr (buf);
-	LOG_NEW; delete [] buf;
 }
 
 void
@@ -125,18 +121,17 @@ extern "C" {
 
 static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 	CriticalSection region(gate);
-	if (!m2) m2 = "";
-	if (!m3) m3 = "";
-	int l = strlen(m1)+strlen(m2)+strlen(m3)+1;
-	if (obj) l += strlen(obj) + 2;
-	LOG_NEW; char* buf = new char[l];
-	if (obj)
-		sprintf (buf, "%s: %s%s%s", obj, m1, m2, m3);
-	else	sprintf (buf, "%s%s%s", m1, m2, m3);
-	if (ViGetErrWindows())
-		win_msg (buf);
-	else PrintCon (buf);
-	LOG_DEL; delete [] buf;
+	StringList buf;
+	if ( obj ) buf << obj << ": ";
+	if ( m1 ) buf << m1;
+	if ( m2 ) buf << m2;
+	if ( m3 ) buf << m3;
+	if (ViGetErrWindows()) {
+	  win_msg(buf);
+	}
+	else {
+	  PrintCon(buf);
+	}
 }
 
 void
