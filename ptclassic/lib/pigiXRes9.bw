@@ -86,3 +86,6 @@ Xedit*filename.translations: #override \
 				<Key>Return: end-of-line()
 Xedit*filename.baseTranslations: #override \
 				<Key>Return: end-of-line()
+! basic resources for xterm
+XTerm*ScrollBar:                on
+XTerm*saveLines:                256
