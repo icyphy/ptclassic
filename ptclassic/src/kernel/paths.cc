@@ -39,6 +39,7 @@ The pathSearch routine was formerly in Linker.cc.
 // path.  If path is omitted or null, the environment variable PATH
 // is used.
 #include <std.h>
+#include <unistd.h>	// access()
 #include "miscFuncs.h"
 #include "StringList.h"
 #include "Error.h"
