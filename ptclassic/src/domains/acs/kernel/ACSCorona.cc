@@ -37,7 +37,7 @@ extern const char CGCdomainName[];
 const char* ACSCorona :: domain () const { return ACSdomainName;}
 
 // isA
-ISA_FUNC(ACSStar, CGStar);
+ISA_FUNC(ACSCorona, CGStar);
 
 // select Core to be used
 int ACSCorona::setCore(const char *coreName)
