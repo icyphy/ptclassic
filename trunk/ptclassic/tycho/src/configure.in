@@ -112,8 +112,6 @@ else
 	AC_MSG_RESULT([Cannot find $TCL_SRC_DIR/tclInt.h, try --with-tclsr=DIR. tclInt.h is used in the profile command. ])
 fi
 
-
-
 #
 # User specified location of the tk include
 #
@@ -154,6 +152,25 @@ TK_XINCLUDES=$TK_XINCLUDES
 TK_LIBS=$TK_LIBS
 TK_LIB_SPEC=$TK_LIB_SPEC
 
+
+#
+# User specified location of the tk srcs.  The TkSteal code uses tkPort.h
+#
+# We must set this arg after sourcing tkConfig.sh, as Tk4.2 tkConfig.sh
+# sets TK_SRC_DIR.  However, if you are using the automounter, then 
+# tkConfig.sh will probably have the wrong value.
+AC_ARG_WITH(tk, [  --with-tksrc=DIR          use Tk srcs lib from DIR],
+        TK_SRC_DIR=$withval, TK_SRC_DIR=$TCL_SRC_DIR/../tk4.2)
+#if test ! -d $TK_SRC_DIR; then
+#    AC_MSG_ERROR(Tk directory $TK_SRC_DIR doesn't exist)
+#fi
+AC_MSG_CHECKING([for tkPort.h])
+if test -f $TK_SRC_DIR/generic/tkPort.h; then 
+	AC_MSG_RESULT($TK_SRC_DIR/generic/tkPort.h)
+else
+	AC_MSG_RESULT([Cannot find $TK_SRC_DIR/tkPort.h, try --with-tksrc=DIR. tkPort.h is used in the TkSteal xaccess command. ])
+fi
+
 #
 # User specified location of the Java Development Kit (JDK)
 #
@@ -193,28 +210,30 @@ fi
 AC_MSG_RESULT($TCL_SHLIB_LD)
 
 dnl Substitute the following variables in the Makefile (in alphabetical order)
+AC_SUBST(JAVAHOME)
 AC_SUBST(TCL_CC)
 AC_SUBST(TCL_CFLAGS)
 AC_SUBST(TCL_DL_LIBS)
-AC_SUBST(JAVAHOME)
+AC_SUBST(TCL_INCLUDE_DIR)
 AC_SUBST(TCL_LD_FLAGS)
 AC_SUBST(TCL_LD_SEARCH_FLAGS)
-AC_SUBST(TCL_SRC_DIR)
+AC_SUBST(TCL_LIB_DIR)
 AC_SUBST(TCL_LIB_SPEC)
-AC_SUBST(TK_LIB_SPEC)
 AC_SUBST(TCL_SHLIB_CFLAGS)
 AC_SUBST(TCL_SHLIB_LD)
 AC_SUBST(TCL_SHLIB_LD_LIBS)
 AC_SUBST(TCL_SHLIB_SUFFIX)
 AC_SUBST(TCL_SHLIB_VERSION)
-AC_SUBST(TCL_INCLUDE_DIR)
-AC_SUBST(TCL_LIB_DIR)
+AC_SUBST(TCL_SRC_DIR)
 AC_SUBST(TK_INCLUDE_DIR)
-AC_SUBST(TK_LIB_DIR)
-AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_LIBS)
+AC_SUBST(TK_LIB_DIR)
 AC_SUBST(TK_LIB_SPEC)
+AC_SUBST(TK_LIB_SPEC)
+AC_SUBST(TK_SRC_DIR)
+AC_SUBST(TK_XINCLUDES)
+
 
 AC_OUTPUT(makefile tcl.mk:../mk/tcl.mk.in java.mk:../mk/java.mk.in \
-	profile/makefile tyjava/makefile tyjava/tcljava/makefile \
-	tyjava/eprintf/makefile)
+	profile/makefile tksteal/makefile \
+	tyjava/makefile tyjava/tcljava/makefile tyjava/eprintf/makefile)
