@@ -240,7 +240,7 @@ class MultiPortHole: public GenericPort
 public:
 	MultiPortHole();
 
-	virtual void initialize();
+	void initialize();
 
 	// make a bus connection with another multiporthole
 	void busConnect (MultiPortHole&, int width, int delay = 0);
@@ -344,7 +344,7 @@ public:
 			  int n = 1);			// number xferred
 
 	// Initialize when starting a simulation
-	void initialize();
+	virtual void initialize();
 
 	// Remove a connection, and optionally attempt to delete
 	// the geodesic.  Arg is set to zero only when called from
