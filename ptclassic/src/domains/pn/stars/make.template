@@ -56,8 +56,10 @@ PL_SRCS= \
  PNDistributor.pl \
  PNEndCase.pl \
  PNFilter.pl \
+ PNIncrementInt.pl \
  PNLastOfN.pl \
  PNMerge.pl \
+ PNModuloInt.pl \
  PNSift.pl
 
 # The .cc files
