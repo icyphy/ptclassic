@@ -39,8 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "XXXPortHole.h"
 
 
-class XXXWormhole : public Wormhole, public XXXStar
-{
+class XXXWormhole : public Wormhole, public XXXStar {
 public:
 	// Constructor
 	XXXWormhole(Galaxy& g, Target* t=0);
@@ -51,7 +50,7 @@ public:
 	void begin() { Wormhole::begin(); }
 	void wrapup();
 
-	Scheduler* mySched() const { return myTarget()->scheduler(); }
+	Scheduler* scheduler() const { return myTarget()->scheduler(); }
 
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
@@ -79,8 +78,7 @@ protected:
 	void go();
 };
 
-class XXXtoUniversal : public ToEventHorizon, public InXXXPort
-{
+class XXXtoUniversal : public ToEventHorizon, public InXXXPort {
 public:
 	// constructor
 	XXXtoUniversal() : ToEventHorizon(this) {}
@@ -100,8 +98,7 @@ public:
 	{ return ToEventHorizon::allocateGeodesic(); }
 };
 
-class XXXfromUniversal : public FromEventHorizon, public OutXXXPort
-{
+class XXXfromUniversal : public FromEventHorizon, public OutXXXPort {
 public:
 	// constructor
 	XXXfromUniversal() : FromEventHorizon(this) {}
