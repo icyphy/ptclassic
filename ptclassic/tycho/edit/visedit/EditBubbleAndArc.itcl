@@ -1170,7 +1170,7 @@ body ::tycho::EditBubbleAndArc::find_close_node {x y} {
 #### help
 # Open a help window.
 #
-body ::tycho::EditForest::help {} {
+body ::tycho::EditBubbleAndArc::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO edit visedit doc usersGuides \
