@@ -95,7 +95,9 @@ while {[gets $ifd line] >= 0} {
                         if [string match {//// *} $line] {
                             set procname {}
                             scan $line {//// %s} procname
+                            puts $ofd "<a name=\"$procname pitcl command\">"
                             puts $ofd "<h2>$procname</h2>"
+                            puts $ofd "</a>"
                             set mmode procdoc
                         }
                     }
