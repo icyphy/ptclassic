@@ -41,6 +41,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLFiring :: VHDLFiring() {
+  starClassName = "UNINITIALIZED";
+  genericList = new VHDLGenericList;
+  portList = new VHDLPortList;
+  variableList = new VHDLVariableList;
+  // Leave action blank since it's optional.
+  action = "";
+  genericMapList = new VHDLGenericList;
+  portMapList = new VHDLPortList;
+  signalList = new VHDLSignalList;
+  // Leave decls blank since it's optional.
+  decls = "";
   noSensitivities = 0;
   noOutclocking = 0;
   VHDLObj::initialize();
