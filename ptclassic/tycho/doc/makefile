@@ -69,7 +69,13 @@ EXTRA_SRCS =	abbreviations.html \
 		tyunix.html
 
 
-MISC_FILES =		coding demo img img tychoClasses.dag
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
+MISC_FILES =		coding demo img itclhtml tychoClasses.dag
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tychoClasses.dag
@@ -77,9 +83,7 @@ REALCLEAN_STUFF =	tychoClasses.dag
 # Sub directories to run make in.
 DIRS =			coding demo
 
-# Sources that may or may not be present, but if they are present, we don't
-# want make checkjunk to barf on them.
-OPTIONAL_FILES = 	
+
 
 all: tychoClasses.dag
 
