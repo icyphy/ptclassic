@@ -85,6 +85,8 @@ Ptdsp_WindowNumber(const char* wn) {
     winType = PTDSP_WINDOW_TYPE_BLACKMAN;
   } else if ( strcasecmp(wn, "SteepBlackman")==0 ) {
     winType = PTDSP_WINDOW_TYPE_STEEPBLACKMAN;
+  } else if ( strcasecmp(wn, "Kaiser")==0 ) {
+    winType = PTDSP_WINDOW_TYPE_KAISER;
   }
   return winType;
 }	
