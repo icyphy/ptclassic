@@ -132,6 +132,30 @@ used for zeros.
 		default {YES}
 		desc { If offset > 0, specify whether to use previously read inputs (otherwise use zeros). }
 	}
+	protected {
+		int hiLim, inidx, loLim;
+	}
+        method {
+	    name { computeRange }
+	    type { "void" }
+	    arglist { "()" }
+	    access { protected }
+	    code {
+		// Compute the range of output indexes that come from inputs
+		// This method is called in the setup() method for the Chop
+		// star, and in the go method for ChopVarOffset because
+		// it resets the offset parameter
+		int hiLim = int(nwrite) - int(offset) - 1;
+		if (hiLim >= int(nwrite)) hiLim = int(nwrite) - 1;
+		else if (int(use_past_inputs)) hiLim = int(nwrite) - 1;
+
+		int loLim = int(nwrite) - int(nread) - int(offset);
+		if (loLim < 0) loLim = 0;
+
+		int inidx = int(nread) - int(nwrite) + int(offset);
+		if (inidx < 0) inidx = 0;
+	    }
+	}
 	setup {
 		if (int(nread) <= 0) {
 		    Error::abortRun(*this, "The number of samples to read ",
@@ -149,28 +173,18 @@ used for zeros.
 		else
 		    input.setSDFParams(int(nread),int(nread)-1);
 		output.setSDFParams(int(nwrite),int(nwrite)-1);
+
+		computeRange();
 	}
 	go {
-		// Compute the range of output indexes that come from inputs
-		// This must be in the go() method to support ChopVarOffset
-		// because ChopVarOffset reset the offset parameter
-		int hiLim = int(nwrite) - int(offset) - 1;
-		if (hiLim >= int(nwrite)) hiLim = int(nwrite) - 1;
-		else if (int(use_past_inputs)) hiLim = int(nwrite) - 1;
-
-		int loLim = int(nwrite) - int(nread) - int(offset);
-		if (loLim < 0) loLim = 0;
-
-		int inidx = int(nread) - int(nwrite) + int(offset);
-		if (inidx < 0) inidx = 0;
-
+		int inputIndex = inidx;
 		for (int i = 0; i < int(nwrite); i++) {
 		    if (i > hiLim || i < loLim) {
 			(output%i).initialize();
 		    }
 		    else {
-			output%i = input%inidx;
-			inidx++;
+			output%i = input%inputIndex;
+			inputIndex++;
 		    }
 		}
 	}
