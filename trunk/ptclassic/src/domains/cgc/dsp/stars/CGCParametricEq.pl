@@ -21,9 +21,9 @@ based on the procedure defined by Shpak.
 	}
 	defstate {
 		name {filtertype}
-		type { int }
-		default { "1" }
-		desc { choices are Lowpass=0,Bandpass=1,and Hipass=2 }
+		type { string }
+		default { "BAND" }
+		desc { choices are LOWpass=0,BANDpass=1,and HIpass=2 }
 		attributes { A_GLOBAL }
 	}
 	defstate {
@@ -248,41 +248,33 @@ typedef struct parametric_band {
   int gainflag;
 } parametric_t;
 
-#define LOW  (0)
-#define BAND (1)
-#define HI   (2)
 #define PI (M_PI)
 	}
 	codeblock(mainDecl){
 	parametric_t $starSymbol(parametric);
 	double $starSymbol(filtercoeff)[5];
 	}
-	codeblock(findparams){
-	  $sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));
-	  if ($ref(filtertype) == LOW){
-	    $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
-	  }
-	  else if ($ref(filtertype) == HI){
-	    $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
-	  }
-	  else if ($ref(filtertype) == BAND){
-	    $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
-          }
-	  /*else
-	    error;*/
-	  $sharedSymbol(CGCParamBiquad,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));
-	}
 	initCode {
 	  CGCBiquad::initCode();
 	  addGlobal(globalDecl, "global");
-          addGlobal(mainDecl);
+          addDeclaration(mainDecl);
 	  addProcedure(setparams, "CGCParamBiquad_setparams");
           addProcedure(constbw, "CGCParamBiquad_constbw");
 	  addProcedure(lowpass, "CGCParamBiquad_lowpass");
 	  addProcedure(hipass, "CGCParamBiquad_hipass");
 	  addProcedure(bandpass, "CGCParamBiquad_bandpass");
 	  addProcedure(setfiltertaps, "CGCParamBiquad_setfiltertaps");
-          addCode(findparams);
+	  addCode("$sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));");
+	  if (strcasecmp(filtertype, "LOW") == 0){
+	    addCode("$sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
+	  }
+	  else if (strcasecmp(filtertype, "HI") == 0){
+	    addCode("$sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
+	  }
+	  else if (strcasecmp(filtertype, "BAND") == 0){
+	    addCode("$sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
+          }
+	  addCode("$sharedSymbol(CGCParamBiquad,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));");
         }
 	go {
 	  CGCBiquad::go();
