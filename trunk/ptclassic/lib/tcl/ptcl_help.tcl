@@ -104,9 +104,8 @@ Return a list of known domains.
 add_to_help help {?<command>?} {
 If no arguments are given, you will see this message.  If a command name is
 given, a short description of the given command will be printed.  Help is
-only available for commands added by ptcl to Standard Tcl.
-
-For a list of commands that have documentation, type "help ?".
+only available for commands added by ptcl to Standard Tcl.  For a list of
+commands that have documentation, type "help ?".
 }
 
 add_to_help knownlist {?<domain>?} {
@@ -116,11 +115,10 @@ the current domain is used.
 
 add_to_help link {<objfile>} {
 Incrementally link <objfile> into the interpreter.  The object file must
-contain the definition for a single star or target.
-
-Code in the object file must not call any functions that are not either in
-the object file itself or statically linked in to the interpreter.  To get
-around this restriction, see "multilink" or "permlink".
+contain the definition for a single star or target.  Code in the object
+file must not call any functions that are not either in the object file
+itself or statically linked in to the interpreter.  To get around this
+restriction, use "multilink" or "permlink".
 }
 
 add_to_help matlab {<command> ?<arg> ...?} {
@@ -146,9 +144,10 @@ The "matlab status" command returns 0 if the Tcl/Matlab connection is
 open and Matlab is running, and non-zero otherwise.  A -1 indicates that
 the connection is not open, whereas 1 means that Matlab is not running.
 
-The "matlab start" command will lauch an interface to Matlab.  If the
-MATLAB_SERVER_HOSTNAME is set, then Matlab will be started on that machine.
-The <start_command> argument specifies how to start Matlab.
+The "matlab start" command will launch an interface to Matlab.  If the
+MATLAB_SERVER_HOSTNAME environment variable is set, then Matlab will
+be started on that machine.  The <start_command> argument specifies how
+to start Matlab.
 
 Note that Matlab syntax uses square brackets to denote vectors and matrices,
 which will cause errors if Tcl tries to evaluate a string containing them.
