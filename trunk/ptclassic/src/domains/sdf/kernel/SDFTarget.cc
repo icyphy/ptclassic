@@ -56,7 +56,7 @@ Target(nam,"SDFStar",desc,assocDomain)
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
 	addState(loopScheduler.setState
-		("loopScheduler",this,"ACYLOOP #choices: DEF, CLUST,ACYLOOP",
+		("loopScheduler",this,"DEF #choices: DEF, CLUST,ACYLOOP",
 		"SDF Schedulers:\n"
 		"\tDEF - The default SDF scheduler\n"
 		"\tCLUST - J. Buck's loop scheduler\n"
