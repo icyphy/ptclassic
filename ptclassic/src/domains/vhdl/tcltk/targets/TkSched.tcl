@@ -30,6 +30,7 @@
 # 
 # This is a Tcl/Tk helper app for the VHDL domain's TkSchedTarget.
 
+# Procedure to mark a node when it is selected.
 proc NodeMark { w x y } {
     global dot
 
@@ -52,6 +53,7 @@ proc NodeMark { w x y } {
     set dot($w,nodeName) $theText
 }
 
+# Procedure to drop a node when the button is released.
 proc NodeDrop { w x y } {
     global dot
 
@@ -143,6 +145,7 @@ proc NodeDrop { w x y } {
     set dot($w,textID) {}
 }
 
+# Procedure to drag a node to a new location.
 proc NodeDrag { w x y } {
     global dot
 
@@ -159,6 +162,7 @@ proc NodeDrag { w x y } {
     set dot($w,y) $y
 }
 
+# Procedure to return the input and output arc attachment coordinates.
 proc NodeInOutCoords { w nodeID } {
     global dot
 
@@ -200,6 +204,7 @@ proc NodeInOutCoords { w nodeID } {
     }
 }
 
+# Procedure to move the arcs attached to a given node.
 proc MoveArcs { w node x y } {
     global dot
 
@@ -240,6 +245,7 @@ proc MoveArcs { w node x y } {
     }
 }
 
+# Procedure to read in the graph information from a file.
 proc ReadFile { f } {
     global dot
 
@@ -321,6 +327,7 @@ proc ReadFile { f } {
     set dot(iterConnList) $iterConnList
 }
 
+# Procedure to test if a text line specifies a connection.
 proc isConn { line } {
     # Begins with the label "Conn"
     if { [lindex $line 0] == "Conn" } { return 1 }
@@ -329,6 +336,7 @@ proc isConn { line } {
     return $result
 }
 
+# Procedure to test if a text line specifies an iteration connection.
 proc isIterConn { line } {
     # Begins with the label "IterConn"
     if { [lindex $line 0] == "IterConn" } { return 1 }
@@ -336,6 +344,7 @@ proc isIterConn { line } {
     return $result
 }
 
+# Procedure to test if a text line specifies a firing node.
 proc isNode { line } {
     # Begins with the label "Node"
     if { [lindex $line 0] == "Node" } { return 1 }
@@ -347,6 +356,7 @@ proc isNode { line } {
     return $result
 }
 
+# Procedure to test if a text line specifies a top token.
 proc isTopToken { line } {
     # Begins with the label "TopToken"
     if { [lindex $line 0] == "TopToken" } { return 1 }
@@ -354,6 +364,7 @@ proc isTopToken { line } {
     return $result
 }
 
+# Procedure to test if a text line specifies a bottom token.
 proc isBottomToken { line } {
     # Begins with the label "BottomToken"
     if { [lindex $line 0] == "BottomToken" } { return 1 }
@@ -361,6 +372,7 @@ proc isBottomToken { line } {
     return $result
 }
 
+# Procedure to set up and display the graph.
 proc DisplayGraph {} {
     global dot
 
@@ -533,6 +545,7 @@ proc DisplayGraph {} {
     }
 }
 
+# Procedure to recursively determine the level of a node in the graph.
 proc Level { node } {
     global dot
 
@@ -558,6 +571,7 @@ proc Level { node } {
     return $level
 }
 
+# Procedure to create and draw a firing node.
 proc DrawNode { node x1 y1 x2 y2 } {
     global dot
 
@@ -578,6 +592,7 @@ proc DrawNode { node x1 y1 x2 y2 } {
     set dot($node,bottomNodeID) $nodeID
 }
 
+# Procedure to create and draw a token.
 proc DrawToken { token x y topOrBottom } {
     global dot
 
@@ -606,6 +621,7 @@ proc DrawToken { token x y topOrBottom } {
     }
 }
 
+# Procedure to create and draw a connection.
 proc CreateConn { conn } {
     global dot
 
@@ -633,6 +649,7 @@ proc CreateConn { conn } {
     set dot($conn,connID) $connID
 }
 
+# Procedure to create and draw an iteration connection.
 proc CreateIterConn { conn } {
     global dot
 
@@ -668,7 +685,10 @@ proc requestExit {} {
     handleExit
 }
 
+# Top-level script to set up and display the graph.
 button .quit -text Done -command "requestExit"
 pack .quit
 ReadFile $GRAPH_FILE
 DisplayGraph
+
+# END
