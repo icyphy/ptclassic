@@ -36,3 +36,8 @@ if ( $PTARCH =~ sol?* ) set path = ($path /usr/tools/bin)
 
 # Needed for SUN CC, may interfere with Synopsys
 setenv LM_LICENSE_FILE /opt/lm/lmgrd.key
+
+
+# Needed for s56x demos
+setenv S56DSP /users/ptdesign/vendors/s56dsp
+setenv QCKMON qckMon5
