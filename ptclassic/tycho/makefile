@@ -89,8 +89,15 @@ indices:
 
 # This rule should contains things that might take a little while
 # to run, so it is run nightly
-nightly: sources doc/tychoClasses.dag itcldocs indices 
+nightly: sources doc/tychoClasses.dag itcldocs indices glimpse
 
 FORCE: 
 doc/tychoClasses.dag: FORCE
 	(cd doc; $(MAKE) tychoClasses.dag)
+
+# Glimpse is a tool that prepares an index of a directory tree.
+# glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
+GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
+glimpse:
+	$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho
+	chmod a+x $(PTOLEMY)/tycho/.glimpse_index
