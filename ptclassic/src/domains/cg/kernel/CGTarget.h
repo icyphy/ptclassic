@@ -50,6 +50,9 @@ public:
 	// output a comment.  Default form uses C-style comments.
 	virtual void outputComment (const char*);
 
+	// Total Number of Labels generated.
+	int numLabels;
+
 	// destructor
 	~CGTarget();
 };

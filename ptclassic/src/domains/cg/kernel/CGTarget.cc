@@ -49,6 +49,9 @@ void CGTarget :: initialize() {
 }
 
 int CGTarget::setup(Galaxy& g) {
+	// reset the label counter
+	numLabels = 0 ;
+
 	if (!Target::setup(g)) return FALSE;
 
 	// BUG ALERT?
