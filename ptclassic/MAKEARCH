@@ -71,8 +71,9 @@ cd ..
 cd $PTOLEMY/obj.$PTARCH
 optlink ../src makefile
 
-dirs="domains ptcl pitcl kernel tysh pigiRpc pigilib ptlang ptklib \
-	octtools pigiExample"
+dirs="domains ptcl pitcl kernel thread thread/posix \
+	tysh pigiRpc pigilib ptlang ptklib \
+	octtools pigiExample "
 for x in $dirs
 do
 	optmkdir $x
@@ -122,23 +123,12 @@ do
 done
 cd $PTOLEMY/obj.$PTARCH
 
-# Make posix thread and PN directories.
-# Currently specific to SunOS, Solaris an HPUX, but we create the directories
-# anyway, so that make install_gthreads gives a good error message
-#if [$PTARCH =~ sun?* || $PTARCH =~ sol?* || $PTARCH =~ hppa?*  ]; then
-
-	mkarch thread thread/posix
-	mkarch domains/pn{,/kernel,/stars}
-#fi
-
-cd $PTOLEMY/obj.$PTARCH
-
 # EXPDOMAINS: experimental domains
 # EXPEXTRAS: non-standard sub-directories of experimental domains
 # EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
 # Experimental domains not included: capsim cgdsp3
 
-EXPDOMAINS="c50 cg56 cgc fsm acs vhdlb vhdl mdsdf hof sr srcgc"
+EXPDOMAINS="c50 cg56 cgc pn fsm acs vhdlb vhdl mdsdf hof sr srcgc"
 EXPEXTRAS="c50/targets cg56/targets"
 
 ALLDOMAINS="sdf ddf de bdf cg $EXPDOMAINS"
