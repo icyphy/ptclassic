@@ -1,5 +1,5 @@
 # Configuration makefile to make on an HPUX9 and HPUX10 machine
-# using GNU gcc and g++.  This file is setup for HPUX10, and would
+# using the egcs compiler.  This file is setup for HPUX10, and would
 # require some editing for HPUX9
 
 # $Id$
@@ -38,8 +38,17 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
-# Override what is in config-g++.mk
-CPLUSPLUS = g++
+CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
+
+# We must pase -DPT_EGCS so that make depend works properly.  Otherwise
+# we get messages like:
+# ../../src/compat/cfront/std.h:65: warning: No include path in which
+#	 to find sysent.h 
+CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
+
+# system libraries (libraries from the environment)
+# No need to include -lg++ under egcs
+SYSLIBS=$(CSYSLIBS)
 
 # The HPUX9/HPUX10 dependencies are below here
 
